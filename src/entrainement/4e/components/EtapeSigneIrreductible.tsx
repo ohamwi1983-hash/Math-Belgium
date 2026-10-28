@@ -5,6 +5,7 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   tentativesUtilisees: number;
@@ -12,6 +13,8 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   /** Bloc "état actuel" isolant ce facteur — absent/null par défaut : rien de rendu. */
   etatActuel?: string | null;
+  aideActivee: boolean;
+  onActiverAide: () => void;
   onValider: (reponse: SigneA) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -25,17 +28,18 @@ interface Props {
  * facteur irréductible présent (0 à 2), même mécanisme que EtapeSigneA (exercice "tableau de
  * signes") mais sans croquis (pas de parabole unique ici, ce n'est qu'un facteur parmi d'autres).
  *
- * Rappel toujours visible (pas de `BoutonAide`/pénalité, cette étape répète 0 à 2 fois par
- * exercice — un seul booléen "aide utilisée" ne distinguerait pas quelle occurrence l'a demandée,
- * contrairement aux autres étapes de ce générateur qui n'apparaissent qu'une fois) : audit du
- * chapitre 2, cet écran n'avait aucune explication du "pourquoi toujours le signe de a", alors
- * que le cours y consacre un callout `attention` dédié — même texte repris ici.
+ * Le rappel « il garde toujours le signe de son propre a » (même texte que le callout `attention`
+ * du cours) n'est montré qu'à l'activation du bouton Aide (×0,5) : affiché d'office, il donnait la
+ * réponse (audit gen5). L'aide est suivie par occurrence (`aideSigneIrreductibleCourante`,
+ * moteur/sessionSignesProduit.ts), cet écran pouvant se répéter 0 à 2 fois par exercice.
  */
 export function EtapeSigneIrreductible({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
   etatActuel,
+  aideActivee,
+  onActiverAide,
   onValider,
   validation,
 }: Props) {
@@ -46,10 +50,6 @@ export function EtapeSigneIrreductible({
       <RecapitulatifPanel entrees={recapitulatif} />
       <EtatActuelPanel latex={etatActuel ?? null} />
       <p className="prompt-text">Ce facteur est-il toujours positif ou toujours négatif ?</p>
-      <p className="prompt-fact">
-        Un facteur quadratique irréductible (Δ&lt;0) ne s'annule jamais : il garde toujours le signe de son propre a,
-        sur toute la droite réelle.
-      </p>
       <div className="options-grid">
         <button type="button" className={signe === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigne("+")}>
           Toujours positif
@@ -59,8 +59,17 @@ export function EtapeSigneIrreductible({
         </button>
       </div>
 
+      {aideActivee && (
+        <div className="triangle-quelconque-aide">
+          <p>
+            Un facteur quadratique irréductible (Δ&lt;0) ne s'annule jamais : il garde toujours le signe de son propre a,
+            sur toute la droite réelle.
+          </p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
         <button
           type="button"
           className="btn btn-primary"

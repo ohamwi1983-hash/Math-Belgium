@@ -8,7 +8,7 @@ import {
   formatExpressionIsoleeNiveau4Latex,
   formatExpressionIsoleeSansFacteurCommunLatex,
 } from "./formatInequationRationnelle";
-import { formatLineaireDeveloppe } from "./formatSignesProduit";
+import { formatLineaireDeveloppeExact } from "./formatInequationRationnelle";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./formatEquation";
 import { formatFractionSimplifiee, formatPolynome } from "./formatSimplification";
 import { libelleCategorie } from "./categorieLabels";
@@ -121,7 +121,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     entrees.push({
       libelle: "Numérateur combiné",
       estLatex: true,
-      valeur: formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p),
+      valeur: formatLineaireDeveloppeExact(exercice.numerateur.k, exercice.numerateur.p),
       revele: etat.combinerRevele,
     });
   }
@@ -136,7 +136,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     entrees.push({
       libelle: "Numérateur combiné",
       estLatex: true,
-      valeur: formatMembreGauche(exercice.numerateur.enonce),
+      valeur: formatMembreGauche(etat.numerateurCombineNonReduit ?? exercice.numerateur.enonce),
       revele: etat.combinerRevele,
     });
   }
@@ -147,8 +147,9 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       entrees.push({
         libelle: "Conditions d'existence (CE)",
         estLatex: true,
+        // Pas de `valeurs` (rendu en fragments juxtaposés, sans séparateur : « x≠2 x≠4 ») — la
+        // chaîne jointe par « et » est rendue telle quelle (audit du chapitre 4).
         valeur: valeurs.join(" \\text{ et } "),
-        valeurs,
         revele: etat.ceRevele,
       });
     } else {
@@ -378,5 +379,14 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     }
   }
 
-  return entrees;
+  return entrees.map(lisibleSurMobile);
+}
+
+/** Rendu inline d'une ligne à 13px (`.recap-item`) : sans `\\displaystyle`, KaTeX compresse chaque
+ * `\\frac` en taille « script » (~9px), illisible sur smartphone pour l'isolement ou les CE —
+ * même correctif que gen13 (`recapitulatifCaracteristiquesAlgebriques.ts`). Limité à ce
+ * générateur : le panneau partagé (`RecapitulatifPanel`) n'est pas modifié. */
+function lisibleSurMobile(entree: EntreeRecapitulatif): EntreeRecapitulatif {
+  if (entree.valeurs !== undefined) return { ...entree, valeurs: entree.valeurs.map((v) => `\\displaystyle ${v}`) };
+  return entree.estLatex ? { ...entree, valeur: `\\displaystyle ${entree.valeur}` } : entree;
 }

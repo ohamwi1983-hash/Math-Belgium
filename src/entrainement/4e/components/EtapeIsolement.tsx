@@ -61,6 +61,8 @@ interface Props {
    * dénominateurs" (conceptionaidescomposantspartageshistorique.md, point 2).
    */
   texteAide?: string;
+  /** Exemple de saisie affiché dans le champ vide — absent par défaut (comportement inchangé). */
+  placeholder?: string;
   onValider: (reponse: string) => void;
   validation?: ValidationEtapeProps | null;
 }
@@ -79,6 +81,7 @@ export function EtapeIsolement({
   aideActivee,
   onActiverAide,
   texteAide = "Rassemble tous les termes du même côté, pour obtenir 0 de l'autre côté.",
+  placeholder,
   onValider,
   validation,
 }: Props) {
@@ -125,7 +128,7 @@ export function EtapeIsolement({
             {label ?? "Équation sous forme générale"}
           </label>
         )}
-        <input id="isolement" className="text-input" value={reponse} onChange={(e) => setReponse(e.target.value)} />
+        <input id="isolement" className="text-input" value={reponse} placeholder={placeholder} onChange={(e) => setReponse(e.target.value)} />
       </div>
       {!validation && (
         <>

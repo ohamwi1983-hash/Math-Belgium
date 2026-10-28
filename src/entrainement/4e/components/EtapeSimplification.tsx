@@ -49,6 +49,9 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (numerateur: string, denominateur: string) => void;
+  /** Exemples de saisie [numérateur, dénominateur] — absents par défaut : comportement inchangé
+   * (gen6, audit). */
+  placeholders?: [string, string];
   validation?: ValidationEtapeProps | null;
 }
 
@@ -68,6 +71,7 @@ export function EtapeSimplification({
   aideActivee,
   onActiverAide,
   onValider,
+  placeholders,
   validation,
 }: Props) {
   const [numerateur, setNumerateur] = useState("");
@@ -138,6 +142,7 @@ export function EtapeSimplification({
         <input
           id="simplification-numerateur"
           className="text-input"
+          placeholder={placeholders?.[0]}
           value={numerateur}
           onChange={(e) => setNumerateur(e.target.value)}
         />
@@ -149,6 +154,7 @@ export function EtapeSimplification({
         <input
           id="simplification-denominateur"
           className="text-input"
+          placeholder={placeholders?.[1]}
           value={denominateur}
           onChange={(e) => setDenominateur(e.target.value)}
         />

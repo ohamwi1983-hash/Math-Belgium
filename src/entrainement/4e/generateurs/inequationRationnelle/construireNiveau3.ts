@@ -9,6 +9,7 @@ import { construireBinomeConjugue } from "../secondDegre/categories/binomeConjug
 import { construireCasGeneral } from "../secondDegre/categories/casGeneral";
 import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientNiveau3 } from "./construireGrilleQuotientNiveau3";
+import { tousLisibles } from "./bornesLisibilite";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
 
@@ -110,6 +111,12 @@ export function construireNiveau3(): ExerciceInequationRationnelleNiveau3 {
     const a = -(p1_3.k * p1_2.k);
     p2_1 = construireP2_1Impose(a, p1_2.p);
     numerateurAvantCombinaison = construireP1Combine(p2_1, p1_3, p1_2);
+    if (numerateurAvantCombinaison !== null) {
+      const n1 = numerateurAvantCombinaison;
+      const { a, b, c } = p2_1.enonce;
+      // Énoncé de départ (N1, D, P1_3, chacun développé kx - kp) + numérateur combiné P2_1.
+      if (!tousLisibles(n1.k, n1.k * n1.p, p1_2.k, p1_2.k * p1_2.p, p1_3.k, p1_3.k * p1_3.p, a, b, c)) numerateurAvantCombinaison = null;
+    }
   }
 
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];

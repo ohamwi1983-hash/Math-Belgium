@@ -1,125 +1,155 @@
-import type { FacteurQuadratiqueIrreductible, FacteurSignesProduit } from "../core/signesProduit.types";
-import type { EtatSessionSignesProduit } from "../moteur/typesSignesProduit";
+import type { FacteurSignesProduit } from "../core/signesProduit.types";
+import type { EtatSessionSignesProduit, PhaseSignesProduit } from "../moteur/typesSignesProduit";
 import { bonneReponseMethode } from "../moteur/verificationSignesProduit";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { libelleCategorie } from "./categorieLabels";
-import { formatFormeFactoriseeDepuisRacines } from "./formatEquation";
 import { formatPolynome } from "./formatSimplification";
+import { formatFormeFactoriseeSignesProduit } from "./formatSignesProduit";
 
-function facteurFactorisableDe(etat: EtatSessionSignesProduit) {
-  const facteur = etat.exerciceCourant.facteurs.find((f) => f.type === "quadratique_factorisable");
-  return facteur?.type === "quadratique_factorisable" ? facteur.exercice : undefined;
+/** Une entrée du récapitulatif, avec l'écran qui l'a produite — `phase` + position (0-based) du
+ * facteur concerné dans `exercice.facteurs`. Sert à retrouver EXACTEMENT l'entrée d'un écran qui
+ * vient de se clore (consultation des puces, réponse attendue après échec), jamais « la dernière
+ * ligne » (audit gen5 : le récap était trié par type, la dernière ligne n'était souvent pas celle
+ * de l'écran clos). */
+export interface EntreeRecapitulatifSignesProduit extends EntreeRecapitulatif {
+  phase: PhaseSignesProduit;
+  positionFacteur: number;
 }
 
-function facteursLineairesDe(etat: EtatSessionSignesProduit): Extract<FacteurSignesProduit, { type: "lineaire" }>[] {
-  return etat.exerciceCourant.facteurs.filter((f): f is Extract<FacteurSignesProduit, { type: "lineaire" }> => f.type === "lineaire");
-}
-
-function facteursQuadratiquesDe(etat: EtatSessionSignesProduit): Exclude<FacteurSignesProduit, { type: "lineaire" }>[] {
-  return etat.exerciceCourant.facteurs.filter(
-    (f): f is Exclude<FacteurSignesProduit, { type: "lineaire" }> => f.type !== "lineaire",
-  );
-}
-
-function facteursIrreductiblesDe(etat: EtatSessionSignesProduit): FacteurQuadratiqueIrreductible[] {
-  return etat.exerciceCourant.facteurs.filter((f): f is FacteurQuadratiqueIrreductible => f.type === "quadratique_irreductible");
+/** "facteur 2" — numéro du facteur dans l'énoncé (1-based), le même pour toutes ses étapes. */
+function nomFacteur(position: number): string {
+  return `facteur ${position + 1}`;
 }
 
 /**
- * Récapitulatif accumulé pour l'exercice "tableau de signes à plusieurs facteurs" — même principe
- * que recapitulatif.ts/recapitulatifInequation.ts (toujours la vraie valeur confirmée, jamais la
- * saisie de l'élève, rien pour une étape qui n'a pas eu lieu). Fichier séparé car typé pour
- * EtatSessionSignesProduit, un contrat différent.
- *
- * L'inéquation complète n'apparaît plus ici (promptgenerateur5signesProduit.md, point 1) : elle
- * est désormais épinglée en permanence dans son propre encadré violet, à part du récapitulatif
- * textuel — voir AppSignesProduit.tsx. Le récapitulatif ne porte donc plus que les étapes
- * PAR FACTEUR déjà closes, dans l'ordre de `exercice.facteurs` — une entrée "Racine (facteur
- * linéaire N)" par facteur linéaire déjà résolu, une entrée "Méthode (facteur N)" par facteur
- * quadratique déjà passé par l'étape méthode (suivie, pour le seul facteur qui s'avère réellement
- * factorisable, de ses propres entrées Δ/forme factorisée/racines déjà closes), une entrée
- * "Signe (facteur irréductible N)" par facteur irréductible déjà signé — le "N" n'est ajouté que
- * s'il y a plus d'une entrée de cette même famille (même convention que le reste du projet).
+ * Récapitulatif accumulé pour l'exercice "tableau de signes à plusieurs facteurs" — toujours la
+ * vraie valeur confirmée, jamais la saisie de l'élève, rien pour une étape qui n'a pas eu lieu.
+ * Émis dans l'ORDRE CHRONOLOGIQUE des écrans (facteur par facteur, dans l'ordre de l'énoncé, puis
+ * étape par étape pour chacun), chaque libellé nommant le facteur par sa position dans l'énoncé —
+ * jamais par un compteur propre à son type (« facteur irréductible 1 » pouvait désigner le 3e
+ * facteur affiché, audit gen5). L'inéquation complète n'apparaît pas ici : elle reste épinglée dans
+ * le bloc ÉNONCÉ (AppSignesProduit.tsx).
  */
-export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProduit): EntreeRecapitulatif[] {
-  const entrees: EntreeRecapitulatif[] = [];
-  const factorisable = facteurFactorisableDe(etat);
-  const facteursLineaires = facteursLineairesDe(etat);
-  const facteursQuadratiques = facteursQuadratiquesDe(etat);
-  const facteursIrreductibles = facteursIrreductiblesDe(etat);
+export function calculerEntreesRecapSignesProduit(etat: EtatSessionSignesProduit): EntreeRecapitulatifSignesProduit[] {
+  const entrees: EntreeRecapitulatifSignesProduit[] = [];
+  let indexLineaire = 0;
+  let indexQuadratique = 0;
+  let indexIrreductible = 0;
 
-  etat.scoresRacineLineaireExercice.forEach((_score, index) => {
-    const facteur = facteursLineaires[index];
-    entrees.push({
-      libelle: `Racine (facteur linéaire${facteursLineaires.length > 1 ? ` ${index + 1}` : ""})`,
-      estLatex: false,
-      valeur: String(facteur.polynome.p),
-      revele: etat.racineLineaireRevelees[index],
-    });
-  });
+  etat.exerciceCourant.facteurs.forEach((facteur: FacteurSignesProduit, position) => {
+    const nom = nomFacteur(position);
 
-  if (etat.scoreReductionFacteurExercice !== null && factorisable) {
-    entrees.push({
-      libelle: "Réduction (facteur à factoriser)",
-      estLatex: true,
-      valeur: formatPolynome(factorisable),
-      revele: etat.reductionFacteurRevele,
-    });
-  }
+    if (facteur.type === "lineaire") {
+      const index = indexLineaire++;
+      if (index < etat.scoresRacineLineaireExercice.length) {
+        entrees.push({
+          phase: "racineLineaire",
+          positionFacteur: position,
+          libelle: `Racine du ${nom}`,
+          estLatex: false,
+          valeur: String(facteur.polynome.p),
+          revele: etat.racineLineaireRevelees[index],
+        });
+      }
+      return;
+    }
 
-  etat.scoresMethodeExercice.forEach((_score, index) => {
-    const facteur = facteursQuadratiques[index];
-    entrees.push({
-      libelle: `Méthode${facteursQuadratiques.length > 1 ? ` (facteur ${index + 1})` : ""}`,
-      estLatex: false,
-      valeur: libelleCategorie(bonneReponseMethode(facteur)),
-      revele: etat.methodeRevelees[index],
-    });
-  });
+    const indexMethode = indexQuadratique++;
 
-  if (etat.scoreFactorisationChamp1Exercice !== null && factorisable) {
-    const revele = etat.factorisationChamp1Revele;
-    entrees.push(
-      factorisable.categorie === "cas_general"
-        ? { libelle: "Δ (facteur à factoriser)", estLatex: false, valeur: `Δ = ${factorisable.solution.delta}`, revele }
-        : {
-            libelle: "Forme factorisée (facteur à factoriser)",
-            estLatex: true,
-            valeur: `${factorisable.solution.formeFactorisee} = 0`,
-            revele,
-          },
-    );
-  }
+    if (facteur.type === "quadratique_factorisable") {
+      const factorisable = facteur.exercice;
+      if (etat.scoreReductionFacteurExercice !== null) {
+        const initial = etat.exerciceInitial.facteurs[position];
+        const diviseur =
+          initial?.type === "quadratique_factorisable" ? Math.abs(initial.exercice.enonce.a / factorisable.enonce.a) : 1;
+        entrees.push({
+          phase: "reductionFacteur",
+          positionFacteur: position,
+          libelle: `${nom[0].toUpperCase()}${nom.slice(1)} divisé par ${diviseur} (positif : même signe)`,
+          estLatex: true,
+          valeur: formatPolynome(factorisable),
+          revele: etat.reductionFacteurRevele,
+        });
+      }
+      if (indexMethode < etat.scoresMethodeExercice.length) {
+        entrees.push({
+          phase: "methodeFacteur",
+          positionFacteur: position,
+          libelle: `Méthode pour le ${nom}`,
+          estLatex: false,
+          valeur: libelleCategorie(bonneReponseMethode(facteur)),
+          revele: etat.methodeRevelees[indexMethode],
+        });
+      }
+      const formeFactorisee = `${formatFormeFactoriseeSignesProduit(factorisable.enonce, factorisable.solution.racines)} = 0`;
+      if (etat.scoreFactorisationChamp1Exercice !== null) {
+        const revele = etat.factorisationChamp1Revele;
+        entrees.push(
+          factorisable.categorie === "cas_general"
+            ? { phase: "factorisationChamp1", positionFacteur: position, libelle: `Δ du ${nom}`, estLatex: false, valeur: `Δ = ${factorisable.solution.delta}`, revele }
+            : { phase: "factorisationChamp1", positionFacteur: position, libelle: `Forme factorisée du ${nom}`, estLatex: true, valeur: formeFactorisee, revele },
+        );
+      }
+      if (etat.scoreFactorisationChamp2Exercice !== null) {
+        entrees.push({
+          phase: "factorisationChamp2",
+          positionFacteur: position,
+          libelle: `Racines du ${nom}`,
+          estLatex: false,
+          valeur: [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
+          revele: etat.factorisationChamp2Revele,
+        });
+      }
+      if (etat.scoreFactorisationFactorisationExercice !== null) {
+        entrees.push({
+          phase: "factorisationFactorisation",
+          positionFacteur: position,
+          libelle: `Forme factorisée du ${nom}`,
+          estLatex: true,
+          valeur: formeFactorisee,
+          revele: etat.factorisationFactorisationRevele,
+        });
+      }
+      return;
+    }
 
-  if (etat.scoreFactorisationChamp2Exercice !== null && factorisable) {
-    entrees.push({
-      libelle: "Racines (facteur à factoriser)",
-      estLatex: false,
-      valeur: [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
-      revele: etat.factorisationChamp2Revele,
-    });
-  }
-
-  if (etat.scoreFactorisationFactorisationExercice !== null && factorisable) {
-    entrees.push({
-      libelle: "Forme factorisée (facteur à factoriser)",
-      estLatex: true,
-      valeur: `${formatFormeFactoriseeDepuisRacines(factorisable.enonce, factorisable.solution.racines)} = 0`,
-      revele: etat.factorisationFactorisationRevele,
-    });
-  }
-
-  const plusieursIrreductibles = facteursIrreductibles.length > 1;
-  etat.scoresSigneIrreductibleExercice.forEach((_score, index) => {
-    const facteur = facteursIrreductibles[index];
-    const libelle = plusieursIrreductibles ? `Signe (facteur irréductible ${index + 1})` : "Signe (facteur irréductible)";
-    entrees.push({
-      libelle,
-      estLatex: false,
-      valeur: facteur.signe === "+" ? "toujours positif" : "toujours négatif",
-      revele: etat.signeIrreductibleRevelees[index],
-    });
+    // Facteur irréductible : méthode ("Non factorisable") puis signe.
+    const index = indexIrreductible++;
+    if (indexMethode < etat.scoresMethodeExercice.length) {
+      entrees.push({
+        phase: "methodeFacteur",
+        positionFacteur: position,
+        libelle: `Méthode pour le ${nom}`,
+        estLatex: false,
+        valeur: libelleCategorie(bonneReponseMethode(facteur)),
+        revele: etat.methodeRevelees[indexMethode],
+      });
+    }
+    if (index < etat.scoresSigneIrreductibleExercice.length) {
+      entrees.push({
+        phase: "signeIrreductible",
+        positionFacteur: position,
+        libelle: `Signe du ${nom}`,
+        estLatex: false,
+        valeur: facteur.signe === "+" ? "toujours positif" : "toujours négatif",
+        revele: etat.signeIrreductibleRevelees[index],
+      });
+    }
   });
 
   return entrees;
+}
+
+export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProduit): EntreeRecapitulatif[] {
+  return calculerEntreesRecapSignesProduit(etat).map(({ phase: _phase, positionFacteur: _position, ...entree }) => entree);
+}
+
+/** L'entrée produite par l'écran (`phase`, facteur à `positionFacteur`) — `undefined` si cet écran
+ * n'a pas (encore) d'entrée ("grille"/"intervalle" n'en ont jamais). */
+export function entreeRecapPourEcran(
+  etat: EtatSessionSignesProduit,
+  phase: PhaseSignesProduit,
+  positionFacteur: number,
+): EntreeRecapitulatifSignesProduit | undefined {
+  return calculerEntreesRecapSignesProduit(etat).find((e) => e.phase === phase && e.positionFacteur === positionFacteur);
 }

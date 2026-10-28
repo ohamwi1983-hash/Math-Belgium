@@ -86,6 +86,8 @@ const ETAT_TRANSITOIRE_VIERGE = {
   factorisationFactorisationRevele: false,
   scoresSigneIrreductibleExercice: [],
   signeIrreductibleRevelees: [],
+  aidesSigneIrreductibleExercice: [],
+  aideSigneIrreductibleCourante: false,
   scoreGrilleExercice: null,
   grilleRevelee: false,
   aideUtilisee: false,
@@ -106,6 +108,7 @@ export function demarrerSessionSignesProduit(
     generateur,
     indexExercice: 0,
     exerciceCourant,
+    exerciceInitial: exerciceCourant,
     phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_VIERGE,
@@ -115,6 +118,7 @@ export function demarrerSessionSignesProduit(
     methodeRevelees: [],
     scoresSigneIrreductibleExercice: [],
     signeIrreductibleRevelees: [],
+    aidesSigneIrreductibleExercice: [],
     resultats: [],
     terminee: false,
   };
@@ -381,8 +385,10 @@ export function soumettreReponseSigneIrreductible(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const scoresSigneIrreductibleExercice = [...etat.scoresSigneIrreductibleExercice, etapeCourante.score as number];
+  const score = etat.aideSigneIrreductibleCourante ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const scoresSigneIrreductibleExercice = [...etat.scoresSigneIrreductibleExercice, score];
   const signeIrreductibleRevelees = [...etat.signeIrreductibleRevelees, etapeCourante.revelee];
+  const aidesSigneIrreductibleExercice = [...etat.aidesSigneIrreductibleExercice, etat.aideSigneIrreductibleCourante];
   const indexFacteurExercice = etat.indexFacteurExercice + 1;
 
   return {
@@ -392,7 +398,17 @@ export function soumettreReponseSigneIrreductible(
     indexFacteurExercice,
     scoresSigneIrreductibleExercice,
     signeIrreductibleRevelees,
+    aidesSigneIrreductibleExercice,
+    aideSigneIrreductibleCourante: false,
   };
+}
+
+/** Active le bouton "Aide" de l'écran "signeIrreductible" en cours — la règle « un trinôme sans
+ * racine garde le signe de son a » n'est plus affichée d'office (audit gen5) ; ×0,5 sur le score
+ * de cet écran, remise à false pour le facteur irréductible suivant. */
+export function activerAideSigneIrreductible(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
+  garderPhase(etat, "signeIrreductible", "activerAideSigneIrreductible");
+  return { ...etat, aideSigneIrreductibleCourante: true };
 }
 
 /** Étape "grille" : toute la grille en une seule tentative (tout ou rien — section 3 de la spec). */
@@ -469,6 +485,7 @@ export function soumettreReponseIntervalle(
     aideFactorisationFactorisationUtilisee: etat.aideFactorisationFactorisationUtilisee,
     scoresSigneIrreductible: etat.scoresSigneIrreductibleExercice,
     signeIrreductibleRevelees: etat.signeIrreductibleRevelees,
+    aidesSigneIrreductible: etat.aidesSigneIrreductibleExercice,
     scoreGrille: etat.scoreGrilleExercice as number,
     grilleRevelee: etat.grilleRevelee,
     aideGrilleTableauUtilisee: etat.aideGrilleTableauUtilisee,
@@ -490,6 +507,7 @@ export function soumettreReponseIntervalle(
     resultats,
     indexExercice,
     exerciceCourant,
+    exerciceInitial: exerciceCourant,
     phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_VIERGE,
@@ -499,5 +517,6 @@ export function soumettreReponseIntervalle(
     methodeRevelees: [],
     scoresSigneIrreductibleExercice: [],
     signeIrreductibleRevelees: [],
+    aidesSigneIrreductibleExercice: [],
   };
 }

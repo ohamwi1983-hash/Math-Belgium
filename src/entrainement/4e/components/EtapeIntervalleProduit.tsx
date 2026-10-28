@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceSignesProduit, SolutionEnsembleProduit } from "../core/signesProduit.types";
 import { Katex } from "./Katex";
-import { formatEnonceSignesProduitFactoriseLatex } from "../ui/formatSignesProduit";
+import { formatTermesEnonceSignesProduitFactoriseLatex } from "../ui/formatSignesProduit";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
 import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
 import type { EtatListeMorceaux } from "../ui/listeMorceaux";
@@ -122,8 +122,12 @@ export function EtapeIntervalleProduit({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceSignesProduitFactoriseLatex(exercice)} block />
+      {/* Un fragment par facteur (retour à la ligne entre facteurs) : en un seul bloc, l'inéquation
+          factorisée était coupée sur smartphone (audit gen5) — même rendu que EtapeGrilleSignes. */}
+      <div className="equation-box equation-box-termes">
+        {formatTermesEnonceSignesProduitFactoriseLatex(exercice).map((terme, i) => (
+          <Katex key={i} expression={terme} />
+        ))}
       </div>
       <TableauSignesRecap exercice={exercice} highlight={highlight} />
       {termesApercu !== null && (

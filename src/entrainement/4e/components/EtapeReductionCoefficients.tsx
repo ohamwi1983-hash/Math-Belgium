@@ -66,6 +66,12 @@ interface Props {
    * ici. `EtatActuelPanel` reste affiché.
    */
   masquerBlocDonnees?: boolean;
+  /** Texte de l'aide, à la place du texte par défaut de la variante — absent par défaut :
+   * comportement inchangé. Fourni par gen5 (AppSignesProduit.tsx), où diviser par un nombre
+   * NÉGATIF changerait le signe du facteur, donc la réponse attendue (audit gen5). */
+  texteAide?: string;
+  /** Exemple de saisie du champ — absent par défaut : comportement inchangé (gen6, audit). */
+  placeholder?: string;
   validation?: ValidationEtapeProps | null;
 }
 
@@ -98,6 +104,8 @@ export function EtapeReductionCoefficients({
   variante = "reduction",
   prefixeExpression,
   masquerBlocDonnees = false,
+  texteAide,
+  placeholder,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
@@ -136,6 +144,7 @@ export function EtapeReductionCoefficients({
         <input
           id="reduction-coefficients"
           className="text-input"
+          placeholder={placeholder}
           value={reponse}
           onChange={(e) => setReponse(e.target.value)}
         />
@@ -146,7 +155,9 @@ export function EtapeReductionCoefficients({
             {aideActivee && (
               <div className="triangle-quelconque-aide">
                 <p>
-                  {variante === "miseEnEvidence"
+                  {texteAide !== undefined
+                    ? texteAide
+                    : variante === "miseEnEvidence"
                     ? "Cherche le plus grand diviseur commun aux trois coefficients, puis mets-le en évidence devant une parenthèse — ne divise jamais le polynôme par ce nombre, il doit rester visible en facteur."
                     : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
                 </p>

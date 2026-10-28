@@ -141,6 +141,24 @@ function diagnostiquerIsolementGenerique(
   reference: (x: number) => number,
   tolerance: number,
 ): StatutVerification {
+  const direct = diagnostiquerIsolementDansUnSens(expressionSaisie, symbole, reference, tolerance);
+  if (direct === "correct" || direct === "parse_error") return direct;
+  // Forme opposée, symbole retourné (ex. `k - P/Q ≥ 0` pour `P/Q - k ≤ 0`) : multiplier les deux
+  // membres par -1 inverse le sens, l'inéquation est strictement équivalente et respecte la
+  // consigne « 0 au membre de droite » (audit du chapitre 4, même principe que gen13 B). L'écran
+  // suivant affiche toujours la forme canonique : aucune propagation possible.
+  const oppose = diagnostiquerIsolementDansUnSens(expressionSaisie, SYMBOLE_OPPOSE[symbole], (x) => -reference(x), tolerance);
+  return oppose === "correct" ? "correct" : direct;
+}
+
+const SYMBOLE_OPPOSE: Record<Symbole, Symbole> = { "<": ">", ">": "<", "≤": "≥", "≥": "≤" };
+
+function diagnostiquerIsolementDansUnSens(
+  expressionSaisie: string,
+  symbole: Symbole,
+  reference: (x: number) => number,
+  tolerance: number,
+): StatutVerification {
   // Suffixe "◇ 0" absent/mauvais symbole : un manquement à la consigne d'isolement, pas
   // nécessairement une syntaxe illisible (voir diagnostiquerFormeCanonique, exercice 1, même
   // principe) — mais un texte réellement illisible (ex. "Jui", aucun symbole de comparaison nulle

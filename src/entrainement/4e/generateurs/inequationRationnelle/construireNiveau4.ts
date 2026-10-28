@@ -5,6 +5,7 @@ import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
 import { construireExerciceClassifie } from "../equationRationnelle/construireExerciceClassifie";
 import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientNiveau4 } from "./construireGrilleQuotientNiveau4";
+import { tousLisibles } from "./bornesLisibilite";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
 
@@ -64,12 +65,20 @@ function tirerParametres(plage: number): Parametres | null {
   const r2 = (-b + racineDelta) / deuxA;
   if (r1 === r2) return null;
   if (r1 === p2 || r1 === p4 || r2 === p2 || r2 === p4) return null;
+  if (Math.abs(r1) > RACINE_MAX || Math.abs(r2) > RACINE_MAX) return null;
+  if (!tousLisibles(a, b, c)) return null;
 
   return { k1, p1, k2, p2, k3, p3, k4, p4, r1, r2 };
 }
 
-const TENTATIVES_PAR_PLAGE = 500;
-const PLAGES = [6, 10, 15, 20];
+/** Plage unique des p_i : l'ancienne escalade `[6, 10, 15, 20]` (500 essais chacune) basculait
+ * vers 10/15/20 dans ~1 % des exercices (acceptation ≈ 1 % par tirage à plage 6), d'où des racines
+ * jusqu'à 67 et des numérateurs combinés jusqu'à 1 020 (audit du chapitre 4). Avec les bornes
+ * `RACINE_MAX`/`tousLisibles`, ≈ 0,3 % des tirages passent (≈ 300 tirages par exercice, coût
+ * négligeable) : 20 000 essais rendent l'échec pratiquement impossible (≈ e^-60). */
+const PLAGE = 6;
+const TENTATIVES = 20000;
+const RACINE_MAX = 10;
 
 /**
  * Construit un exercice de niveau 4 (section 1 de la spec) : P1_1/P1_2 ◇ P1_3/P1_4, quatre
@@ -80,39 +89,37 @@ const PLAGES = [6, 10, 15, 20];
  * réutilisée à l'identique.
  */
 export function construireNiveau4(): ExerciceInequationRationnelleNiveau4 {
-  for (const plage of PLAGES) {
-    for (let i = 0; i < TENTATIVES_PAR_PLAGE; i++) {
-      const resultat = tirerParametres(plage);
-      if (!resultat) continue;
+  for (let i = 0; i < TENTATIVES; i++) {
+    const resultat = tirerParametres(PLAGE);
+    if (!resultat) continue;
 
-      const { k1, p1, k2, p2, k3, p3, k4, p4, r1, r2 } = resultat;
-      const numerateurGaucheAvantCombinaison: PolynomeLineaire = { k: k1, p: p1 };
-      const denominateurGauche: PolynomeLineaire = { k: k2, p: p2 };
-      const numerateurDroitAvantCombinaison: PolynomeLineaire = { k: k3, p: p3 };
-      const denominateurDroit: PolynomeLineaire = { k: k4, p: p4 };
+    const { k1, p1, k2, p2, k3, p3, k4, p4, r1, r2 } = resultat;
+    const numerateurGaucheAvantCombinaison: PolynomeLineaire = { k: k1, p: p1 };
+    const denominateurGauche: PolynomeLineaire = { k: k2, p: p2 };
+    const numerateurDroitAvantCombinaison: PolynomeLineaire = { k: k3, p: p3 };
+    const denominateurDroit: PolynomeLineaire = { k: k4, p: p4 };
 
-      const a = k1 * k4 - k3 * k2;
-      const numerateur = construireExerciceClassifie(a, r1, r2);
+    const a = k1 * k4 - k3 * k2;
+    const numerateur = construireExerciceClassifie(a, r1, r2);
 
-      const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
-      const { racines, ce, grille } = construireGrilleQuotientNiveau4(numerateur, denominateurGauche, denominateurDroit);
-      const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-      const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+    const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
+    const { racines, ce, grille } = construireGrilleQuotientNiveau4(numerateur, denominateurGauche, denominateurDroit);
+    const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
+    const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
 
-      return {
-        niveau: "niveau4",
-        numerateur,
-        denominateurGauche,
-        denominateurDroit,
-        numerateurGaucheAvantCombinaison,
-        numerateurDroitAvantCombinaison,
-        symbole,
-        ce,
-        racines,
-        grille,
-        solution,
-      };
-    }
+    return {
+      niveau: "niveau4",
+      numerateur,
+      denominateurGauche,
+      denominateurDroit,
+      numerateurGaucheAvantCombinaison,
+      numerateurDroitAvantCombinaison,
+      symbole,
+      ce,
+      racines,
+      grille,
+      solution,
+    };
   }
 
   throw new Error("construireNiveau4 : aucune combinaison valide trouvée");

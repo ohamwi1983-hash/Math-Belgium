@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Enonce, Exercice } from "./core/generateur.types";
-import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, FacteurSignesProduit, SolutionEnsembleProduit } from "./core/signesProduit.types";
+import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, SolutionEnsembleProduit } from "./core/signesProduit.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideFactorisationChamp1,
@@ -10,6 +10,7 @@ import {
   activerAideGrilleSolution,
   activerAideGrilleTableau,
   activerAideReductionFacteur,
+  activerAideSigneIrreductible,
   demarrerSessionSignesProduit,
   soumettreChoixMethodeFacteur,
   soumettreReponseFactorisationChamp1,
@@ -39,7 +40,7 @@ import { EtapeRacineLineaire } from "./components/EtapeRacineLineaire";
 import { EtapeSigneIrreductible } from "./components/EtapeSigneIrreductible";
 import { EtapeGrilleSignes } from "./components/EtapeGrilleSignes";
 import { EtapeIntervalleProduit } from "./components/EtapeIntervalleProduit";
-import { calculerRecapitulatifSignesProduit } from "./ui/recapitulatifSignesProduit";
+import { calculerRecapitulatifSignesProduit, entreeRecapPourEcran } from "./ui/recapitulatifSignesProduit";
 import { calculerEtatActuelSignesProduit } from "./ui/etatActuelSignesProduit";
 import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
 import { necessiteSimplification } from "./moteur/simplificationEquation";
@@ -49,11 +50,15 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE, libelleCategorie } from "./ui/categorieLabels";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
-import { formatFormeFactoriseeDepuisRacines } from "./ui/formatEquation";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
-const CONSIGNE_GENERALE = "Étudie le signe de ce produit de facteurs.";
+const CONSIGNE_GENERALE = "Résous cette inéquation en étudiant le signe de chacun de ses facteurs.";
+
+/** Aide de l'écran "réduction" propre à ce générateur — le diviseur doit être POSITIF, sinon le
+ * signe du facteur (donc celui du produit) change (audit gen5). */
+const TEXTE_AIDE_REDUCTION =
+  "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le facteur par ce nombre pris positif : diviser par un nombre négatif changerait le signe du facteur, donc celui du produit.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -76,11 +81,6 @@ function facteurFactorisable(exercice: ExerciceSignesProduit): Exercice | undefi
 /** Les facteurs quadratiques irréductibles de l'exercice courant, dans l'ordre de exercice.facteurs. */
 function facteursIrreductibles(exercice: ExerciceSignesProduit): FacteurQuadratiqueIrreductible[] {
   return exercice.facteurs.filter((f): f is FacteurQuadratiqueIrreductible => f.type === "quadratique_irreductible");
-}
-
-/** Les facteurs linéaires de l'exercice courant, dans l'ordre de exercice.facteurs. */
-function facteursLineaires(exercice: ExerciceSignesProduit): Extract<FacteurSignesProduit, { type: "lineaire" }>[] {
-  return exercice.facteurs.filter((f): f is Extract<FacteurSignesProduit, { type: "lineaire" }> => f.type === "lineaire");
 }
 
 /**
@@ -184,10 +184,12 @@ function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPucePr
         segments.push("revele");
         return;
       }
-      // "methodeFacteur"/"signeIrreductible" (comme "racineLineaire" ci-dessus) n'ont aucun
-      // mécanisme d'aide (toujours "correcte", jamais "aide").
+      // "methodeFacteur" (comme "racineLineaire" ci-dessus) n'a aucun mécanisme d'aide (toujours
+      // "correcte", jamais "aide").
       const aideUtilisee =
-        sousPhase === "reductionFacteur"
+        sousPhase === "signeIrreductible"
+          ? (etat.aidesSigneIrreductibleExercice[indexIrreductible] ?? false)
+          : sousPhase === "reductionFacteur"
           ? etat.aideReductionFacteurUtilisee
           : sousPhase === "factorisationChamp1"
             ? etat.aideFactorisationChamp1Utilisee
@@ -240,23 +242,22 @@ export function AppSignesProduit() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
-   * `calculerRecapitulatifSignesProduit` pour la réponse ATTENDUE : couvre toutes les étapes SAUF
-   * "grille"/"intervalle" (jamais une entrée pour elles, voir son commentaire) — "grille" a sa
-   * propre fonction ci-dessous, "intervalle" (dernière phase) n'est jamais poussée dans
-   * l'historique (son appelant ne fournit pas de second argument, même principe que la dernière
-   * phase des autres générateurs). */
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — la réponse ATTENDUE vient de
+   * l'entrée du récapitulatif produite par l'écran qui se clôt, retrouvée EXPLICITEMENT par sa
+   * phase et la position de son facteur (`entreeRecapPourEcran`) — jamais « la dernière ligne du
+   * récap », qui n'était souvent pas celle de l'écran clos (audit gen5 : fiche d'un autre écran,
+   * parfois « ✓ Correct » pour un écran raté). "grille" a sa propre fonction ci-dessous,
+   * "intervalle" (dernière phase) n'est jamais poussée dans l'historique. */
   function ajouterHistoriqueDepuisRecap(votreReponse: ReactNode, nouvelEtat: EtatSessionSignesProduit) {
-    const recap = calculerRecapitulatifSignesProduit(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
+    const entree = entreeRecapPourEcran(nouvelEtat, etat.phase, etat.indexFacteurExercice);
+    if (!entree) return;
     setHistorique((h) => [
       ...h,
       {
-        titre: derniere.libelle,
+        titre: entree.libelle,
         votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+        correcte: !entree.revele,
+        reponseAttendue: entree.revele ? (entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur) : undefined,
       },
     ]);
   }
@@ -356,52 +357,35 @@ export function AppSignesProduit() {
 
   const recapitulatif = calculerRecapitulatifSignesProduit(etat);
   const etatActuel = calculerEtatActuelSignesProduit(etat);
-  const expressionEnonceTermes = formatTermesEnonceSignesProduitLatex(etat.exerciceCourant);
+  // Toujours l'énoncé tel que tiré : la réduction d'un facteur ne doit jamais modifier l'énoncé
+  // affiché (audit gen5) — elle apparaît dans le récapitulatif et l'état actuel du facteur.
+  const expressionEnonceTermes = formatTermesEnonceSignesProduitLatex(etat.exerciceInitial);
   const factorisable = facteurFactorisable(etat.exerciceCourant);
   const irreductibles = facteursIrreductibles(etat.exerciceCourant);
-  const lineaires = facteursLineaires(etat.exerciceCourant);
   const irreductibleCourant = irreductibles[etat.scoresSigneIrreductibleExercice.length];
   const facteurCourant = etat.exerciceCourant.facteurs[etat.indexFacteurExercice];
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        // Tous les écrans par facteur (dont réduction/méthode/Δ ou factorisation, sans réponse
+        // attendue avant l'audit gen5) : la même entrée que le récapitulatif, retrouvée par la phase
+        // et le facteur de l'écran qui se clôt — jamais une seconde source.
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
           switch (etat.phase) {
-            case "racineLineaire": {
-              const index = etat.scoresRacineLineaireExercice.length;
-              return (
-                <>
-                  Racine attendue (facteur linéaire{lineaires.length > 1 ? ` ${index + 1}` : ""}) : {lineaires[index]?.polynome.p}
-                </>
-              );
-            }
-            case "factorisationChamp2":
-              return factorisable ? (
-                <>Racines attendues (facteur à factoriser) : {[...factorisable.solution.racines].sort((a, b) => a - b).join(" ; ")}</>
-              ) : undefined;
-            case "factorisationFactorisation":
-              return factorisable ? (
-                <>
-                  Forme factorisée attendue (facteur à factoriser) :{" "}
-                  <Katex expression={`${formatFormeFactoriseeDepuisRacines(factorisable.enonce, factorisable.solution.racines)} = 0`} />
-                </>
-              ) : undefined;
-            case "signeIrreductible": {
-              const index = etat.scoresSigneIrreductibleExercice.length;
-              return (
-                <>
-                  Signe attendu (facteur irréductible{irreductibles.length > 1 ? ` ${index + 1}` : ""}) :{" "}
-                  {irreductibles[index]?.signe === "+" ? "toujours positif" : "toujours négatif"}
-                </>
-              );
-            }
             case "grille":
               return <>Tableau attendu : signe du produit = {etat.exerciceCourant.grille.produit.join(" ")}</>;
             case "intervalle":
-              return <>Réponse attendue : S = {formatSolutionEnsembleProduit(etat.exerciceCourant.solution)}</>;
-            default:
-              return undefined;
+              return <>S = {formatSolutionEnsembleProduit(etat.exerciceCourant.solution)}</>;
+            default: {
+              const entree = entreeRecapPourEcran(enAttente.etatSuivant, etat.phase, etat.indexFacteurExercice);
+              if (!entree) return undefined;
+              return (
+                <>
+                  {entree.libelle} : {entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur}
+                </>
+              );
+            }
           }
         })(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -453,6 +437,7 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(facteurCourant.exercice, v)}
               aideActivee={etat.aideReductionFacteurUtilisee}
+              texteAide={TEXTE_AIDE_REDUCTION}
               onActiverAide={() => setEtat(activerAideReductionFacteur(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse), reponse)}
               validation={validation}
@@ -480,6 +465,7 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               masquerBlocDonnees
               etatActuel={etatActuel}
+              labelFactorisation="Forme factorisée du facteur"
               diagnostiquer={(v) => diagnostiquerChampPrincipal(factorisable, v)}
               aideActivee={etat.aideFactorisationChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp1(etat))}
@@ -507,7 +493,13 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               aideActivee={etat.aideFactorisationChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp2(etat))}
-              onValider={(racines) => terminerEtape(soumettreReponseFactorisationChamp2(etat, racines), racines.join(" ; "))}
+              onValider={(racines) =>
+                terminerEtape(
+                  soumettreReponseFactorisationChamp2(etat, racines),
+                  // "Pas de racine" est transmis comme [NaN, NaN] : jamais « NaN ; NaN » dans la fiche.
+                  racines.every(Number.isFinite) ? racines.join(" ; ") : "Pas de racine",
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "factorisationFactorisation" && factorisable ? (
@@ -533,6 +525,8 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel}
+              aideActivee={etat.aideSigneIrreductibleCourante}
+              onActiverAide={() => setEtat(activerAideSigneIrreductible(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse), reponse === "+" ? "Toujours positif" : "Toujours négatif")}
               validation={validation}
             />

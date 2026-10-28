@@ -82,6 +82,8 @@ export interface ResultatExerciceSignesProduit {
   scoresSigneIrreductible: number[];
   /** même principe que `racineLineaireRevelees` ci-dessus, même index que `scoresSigneIrreductible`. */
   signeIrreductibleRevelees: boolean[];
+  /** aide de l'écran "signeIrreductible" utilisée (×0,5), même index que `scoresSigneIrreductible`. */
+  aidesSigneIrreductible: boolean[];
   scoreGrille: number;
   grilleRevelee: boolean;
   aideGrilleTableauUtilisee: boolean;
@@ -96,6 +98,10 @@ export interface EtatSessionSignesProduit {
   /** nombre d'exercices déjà clôturés (0 au début) */
   indexExercice: number;
   exerciceCourant: ExerciceSignesProduit;
+  /** L'exercice tel que tiré, jamais modifié — `exerciceCourant` voit son facteur factorisable
+   * remplacé par sa version réduite après "reductionFacteur" ; l'énoncé affiché, lui, ne doit jamais
+   * changer en cours d'exercice (audit gen5). */
+  exerciceInitial: ExerciceSignesProduit;
   phase: PhaseSignesProduit;
   etapeCourante: EtatEtapeTentatives;
   /** combien de facteurs (exercice.facteurs, dans l'ordre) sont déjà ENTIÈREMENT traités — voir le commentaire de PhaseSignesProduit. */
@@ -114,6 +120,10 @@ export interface EtatSessionSignesProduit {
   factorisationFactorisationRevele: boolean;
   scoresSigneIrreductibleExercice: number[];
   signeIrreductibleRevelees: boolean[];
+  /** une entrée par écran "signeIrreductible" déjà clos (même index que `scoresSigneIrreductibleExercice`). */
+  aidesSigneIrreductibleExercice: boolean[];
+  /** aide de l'écran "signeIrreductible" EN COURS — remise à false à sa clôture. */
+  aideSigneIrreductibleCourante: boolean;
   scoreGrilleExercice: number | null;
   grilleRevelee: boolean;
   /**

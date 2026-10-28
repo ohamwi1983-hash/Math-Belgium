@@ -128,7 +128,7 @@ import {
   formatExpressionIsoleeSansFacteurCommunLatex,
 } from "./ui/formatInequationRationnelle";
 import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee, formatPolynome } from "./ui/formatSimplification";
-import { formatLineaireDeveloppe } from "./ui/formatSignesProduit";
+import { formatLineaireDeveloppeExact } from "./ui/formatInequationRationnelle";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./ui/formatEquation";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "./ui/categorieLabels";
@@ -479,6 +479,12 @@ function formatCoupleSaisi(valeurs: [number, number], prefixe: string, libellePa
   return uniques.length === 0 ? libellePasDe : uniques.map((v) => `${prefixe} ${v}`).join(" et ");
 }
 
+/** Saisie de `EtapeCEDirecte` telle que rappelée dans la fiche de consultation — "aucune" (bouton
+ * « Pas de CE ») n'est pas une valeur : jamais « x ≠ aucune » (audit du chapitre 4). */
+function formatCESaisie(reponse: string): string {
+  return reponse === "aucune" ? "Pas de CE" : `x ≠ ${reponse}`;
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -609,7 +615,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       if (exercice.niveau === "niveau2") {
         return (
           <>
-            Numérateur combiné attendu : <Katex expression={formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p)} />
+            Numérateur combiné attendu : <Katex expression={formatLineaireDeveloppeExact(exercice.numerateur.k, exercice.numerateur.p)} />
           </>
         );
       }
@@ -626,13 +632,15 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         );
       }
       return null;
-    case "ce":
+    case "ce": {
+      const pluriel = Array.isArray(exercice.ce);
+      const valeurs = (Array.isArray(exercice.ce) ? exercice.ce : [exercice.ce]).map((v) => `x \\neq ${v}`);
       return (
         <>
-          Condition{Array.isArray(exercice.ce) ? "s" : ""} d'existence attendue{Array.isArray(exercice.ce) ? "s" : ""} :{" "}
-          {Array.isArray(exercice.ce) ? exercice.ce.join(" et ") : exercice.ce}
+          Condition{pluriel ? "s" : ""} d'existence attendue{pluriel ? "s" : ""} : <Katex expression={valeurs.join(" \\text{ et } ")} />
         </>
       );
+    }
     case "racineNumerateur":
       if (
         exercice.niveau !== "niveau3" &&
@@ -973,6 +981,7 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolementRationnelle(v, exerciceNiveau2)}
+              placeholder="ex : (2x+1)/(x-3) - 5 < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), reponse)}
@@ -990,6 +999,7 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolementRationnelleNiveau3(v, exerciceNiveau3)}
+              placeholder="ex : (2x+1)/(x-3) - (x+4) < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), reponse)}
@@ -1007,6 +1017,7 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolementRationnelleNiveau4(v, exerciceNiveau4)}
+              placeholder="ex : (x+1)/(x-2) - (3x-1)/(x+4) >= 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), reponse)}
@@ -1024,6 +1035,7 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolementDenominateurCarre(v, exerciceDenominateurCarre)}
+              placeholder="ex : 7/(x-1)^2 - 2 < 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), reponse)}
@@ -1041,6 +1053,7 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerIsolementSansFacteurCommun(v, exerciceSansFacteurCommun)}
+              placeholder="ex : (x^2+1)/(x^2-4) - 2 > 0"
               aideActivee={etat.aideIsolerUtilisee}
               onActiverAide={() => setEtat(activerAideIsoler(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseIsoler(etat, reponse), reponse)}
@@ -1051,13 +1064,15 @@ export function AppInequationRationnelle() {
               key="combiner"
               expressionAffichee={formatExpressionIsoleeLatex(exerciceNiveau2)}
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu ?"
-              label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppe(exerciceNiveau2.denominateur.k, exerciceNiveau2.denominateur.p)})`}
+              label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppeExact(exerciceNiveau2.denominateur.k, exerciceNiveau2.denominateur.p)})`}
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerCombiner(v, exerciceNiveau2.numerateur)}
+              placeholder="ex : -3x + 7"
+              texteAide="Mets au même dénominateur : la constante k s'écrit k·D(x)/D(x). Le numérateur devient N(x) − k·D(x) : développe puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), reponse)}
@@ -1068,13 +1083,15 @@ export function AppInequationRationnelle() {
               key="combiner"
               expressionAffichee={formatExpressionIsoleeNiveau3Latex(exerciceNiveau3)}
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
-              label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppe(exerciceNiveau3.denominateur.k, exerciceNiveau3.denominateur.p)})`}
+              label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppeExact(exerciceNiveau3.denominateur.k, exerciceNiveau3.denominateur.p)})`}
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerCombinerQuadratique(v, exerciceNiveau3.numerateur)}
+              placeholder="ex : 2x^2 - 5x + 3"
+              texteAide="Mets au même dénominateur : le terme du 1er degré P(x) s'écrit P(x)·D(x)/D(x). Le numérateur devient N(x) − P(x)·D(x) : développe le produit puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), reponse)}
@@ -1085,13 +1102,15 @@ export function AppInequationRationnelle() {
               key="combiner"
               expressionAffichee={formatExpressionIsoleeNiveau4Latex(exerciceNiveau4)}
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
-              label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppe(exerciceNiveau4.denominateurGauche.k, exerciceNiveau4.denominateurGauche.p)})(${formatLineaireDeveloppe(exerciceNiveau4.denominateurDroit.k, exerciceNiveau4.denominateurDroit.p)}))`}
+              label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppeExact(exerciceNiveau4.denominateurGauche.k, exerciceNiveau4.denominateurGauche.p)})(${formatLineaireDeveloppeExact(exerciceNiveau4.denominateurDroit.k, exerciceNiveau4.denominateurDroit.p)}))`}
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerCombinerQuadratique(v, exerciceNiveau4.numerateur)}
+              placeholder="ex : 2x^2 - 5x + 3"
+              texteAide="Mets au même dénominateur D₁(x)·D₂(x) : le numérateur devient N₁(x)·D₂(x) − N₂(x)·D₁(x). Développe chaque produit puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), reponse)}
@@ -1102,13 +1121,15 @@ export function AppInequationRationnelle() {
               key="combiner"
               expressionAffichee={formatExpressionIsoleeDenominateurCarreLatex(exerciceDenominateurCarre)}
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
-              label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppe(exerciceDenominateurCarre.denominateur.k, exerciceDenominateurCarre.denominateur.p)})²)`}
+              label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppeExact(exerciceDenominateurCarre.denominateur.k, exerciceDenominateurCarre.denominateur.p)})²)`}
               enonceFixe={enonceFixe}
               masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerCombinerQuadratique(v, exerciceDenominateurCarre.numerateur)}
+              placeholder="ex : 2x^2 - 5x + 3"
+              texteAide="Mets au même dénominateur D(x)², où D(x) est l'expression élevée au carré : la constante k s'écrit k·D(x)²/D(x)². Le numérateur devient A − k·D(x)² : développe le carré puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), reponse)}
@@ -1126,6 +1147,8 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerCombinerQuadratique(v, exerciceSansFacteurCommun.numerateur)}
+              placeholder="ex : 2x^2 - 5x + 3"
+              texteAide="Mets au même dénominateur : la constante k s'écrit k·D(x)/D(x). Le numérateur devient N(x) − k·D(x) : développe puis réduis."
               aideActivee={etat.aideCombinerUtilisee}
               onActiverAide={() => setEtat(activerAideCombiner(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseCombiner(etat, reponse), reponse)}
@@ -1133,6 +1156,7 @@ export function AppInequationRationnelle() {
             />
           ) : etat.phase === "denomReduction" && exerciceSansFacteurCommun ? (
             <EtapeReductionCoefficients
+              placeholder="ex : x^2 - 3x + 2"
               key="denomReduction"
               exercice={exerciceSansFacteurCommun.denominateur}
               nom="dénominateur"
@@ -1199,6 +1223,7 @@ export function AppInequationRationnelle() {
               exercice={exerciceSansFacteurCommun.denominateur}
               expressionAffichee={formatEnonceCombineSansFacteurCommunLatex(exerciceSansFacteurCommun)}
               labelChamp="Conditions d'existence (CE)"
+              question="Quelles sont les conditions d'existence ?"
               libellePasDe="Pas de CE"
               libelleAuMoins="Au moins une CE"
               placeholderPrefixe="CE"
@@ -1223,7 +1248,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), `x ≠ ${reponse}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
           ) : etat.phase === "miseEnEvidence" && exerciceCubique ? (
@@ -1239,6 +1264,7 @@ export function AppInequationRationnelle() {
               recapitulatif={recapitulatif}
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceCubique(v, exerciceCubique.numerateur.enonce)}
               texteAide="Sors le facteur x du numérateur."
+              placeholder="ex : x(2x^2 - 5x + 3)"
               aideActivee={etat.aideMiseEnEvidenceUtilisee}
               onActiverAide={() => setEtat(activerAideMiseEnEvidence(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseMiseEnEvidence(etat, reponse), reponse)}
@@ -1253,7 +1279,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), `x ≠ ${reponse}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
           ) : etat.phase === "ce" && exerciceDenominateurCarre ? (
@@ -1265,7 +1291,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), `x ≠ ${reponse}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
           ) : etat.phase === "ce" && exerciceNiveau4 ? (
@@ -1274,6 +1300,7 @@ export function AppInequationRationnelle() {
               exercice={exerciceNiveau4.numerateur}
               expressionAffichee={formatEnonceCombineNiveau4Latex(exerciceNiveau4)}
               labelChamp="Conditions d'existence (CE)"
+              question="Quelles sont les conditions d'existence ?"
               libellePasDe="Pas de CE"
               libelleAuMoins="Au moins une CE"
               placeholderPrefixe="CE"
@@ -1295,6 +1322,7 @@ export function AppInequationRationnelle() {
               exercice={denominateurFacteurCommun(exerciceFacteurCommun)}
               expressionAffichee={formatEnonceFacteurCommunLatex(exerciceFacteurCommun)}
               labelChamp="Conditions d'existence (CE)"
+              question="Quelles sont les conditions d'existence ?"
               libellePasDe="Pas de CE"
               libelleAuMoins="Au moins une CE"
               placeholderPrefixe="CE"
@@ -1312,6 +1340,7 @@ export function AppInequationRationnelle() {
             />
           ) : etat.phase === "simplifierDenomReduction" && exerciceFacteurCommun ? (
             <EtapeReductionCoefficients
+              placeholder="ex : 3(x^2 - 2x + 5)"
               key="simplifierDenomReduction"
               exercice={denominateurFacteurCommun(exerciceFacteurCommun)}
               nom="dénominateur"
@@ -1394,6 +1423,7 @@ export function AppInequationRationnelle() {
             />
           ) : etat.phase === "simplifierNumReduction" && exerciceFacteurCommun ? (
             <EtapeReductionCoefficients
+              placeholder="ex : 3(x^2 - 2x + 5)"
               key="simplifierNumReduction"
               exercice={numerateurFacteurCommun(exerciceFacteurCommun)}
               nom="numérateur"
@@ -1476,6 +1506,7 @@ export function AppInequationRationnelle() {
             />
           ) : etat.phase === "simplifierFraction" && exerciceFacteurCommun ? (
             <EtapeSimplification
+              placeholders={["ex : x + 2", "ex : x - 3"]}
               key="simplifierFraction"
               expressionAffichee={formatEnonceFacteurCommunLatex(exerciceFacteurCommun)}
               enonceFixe={enonceFixe}
@@ -1500,7 +1531,7 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), `x ≠ ${reponse}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatCESaisie(reponse))}
               validation={validation}
             />
           ) : etat.phase === "racineNumerateur" && exerciceNumerateurLineaire ? (
@@ -1521,6 +1552,7 @@ export function AppInequationRationnelle() {
             />
           ) : etat.phase === "reduction" && exerciceNumerateurQuadratique ? (
             <EtapeReductionCoefficients
+              placeholder="ex : x^2 - 3x + 2"
               key="reduction"
               exercice={exerciceNumerateurQuadratique.numerateur}
               nom="numérateur"

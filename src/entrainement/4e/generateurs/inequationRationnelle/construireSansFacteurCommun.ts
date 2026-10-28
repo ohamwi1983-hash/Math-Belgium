@@ -7,9 +7,12 @@ import { construireCasGeneral } from "../secondDegre/categories/casGeneral";
 import { construireMiseEnEvidence } from "../secondDegre/categories/miseEnEvidence";
 import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientSansFacteurCommun } from "./construireGrilleQuotientSansFacteurCommun";
+import { tousLisibles } from "./bornesLisibilite";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
 const TENTATIVES_MAX = 50;
+/** ≈ 63 % des tirages passent la borne de lisibilité (`bornesLisibilite.ts`) : 200 essais suffisent largement. */
+const TENTATIVES_LISIBLES = 200;
 
 /**
  * Une des 3 techniques (mise_en_evidence/binome_conjugue/cas_general) — produit_remarquable exclu
@@ -45,18 +48,33 @@ function construireQuadratiqueSansRacines(racinesExclues: number[]): Exercice {
  * ne s'annule pas entre les deux membres (rééchantillonné sinon — section 1, point 5 de la spec).
  */
 export function construireSansFacteurCommun(): ExerciceInequationRationnelleSansFacteurCommun {
-  const denominateur = construireQuadratiqueSansRacines([]);
-  const [s1, s2] = denominateur.solution.racines;
-  const numerateur = construireQuadratiqueSansRacines([s1, s2]);
+  for (let tentative = 0; tentative < TENTATIVES_LISIBLES; tentative++) {
+    const denominateur = construireQuadratiqueSansRacines([]);
+    const [s1, s2] = denominateur.solution.racines;
+    const numerateur = construireQuadratiqueSansRacines([s1, s2]);
 
-  const n = numerateur.enonce;
-  const d = denominateur.enonce;
+    const n = numerateur.enonce;
+    const d = denominateur.enonce;
 
-  let k = randomNonZeroInt(-4, 4);
-  while (n.a + k * d.a === 0) k = randomNonZeroInt(-4, 4);
+    let k = randomNonZeroInt(-4, 4);
+    while (n.a + k * d.a === 0) k = randomNonZeroInt(-4, 4);
 
-  const numerateurAvantCombinaison = { a: n.a + k * d.a, b: n.b + k * d.b, c: n.c + k * d.c };
+    const numerateurAvantCombinaison = { a: n.a + k * d.a, b: n.b + k * d.b, c: n.c + k * d.c };
+    const nac = numerateurAvantCombinaison;
+    // Énoncé de départ (N, D, k) + numérateur combiné — voir `bornesLisibilite.ts`.
+    if (!tousLisibles(nac.a, nac.b, nac.c, d.a, d.b, d.c, k, n.a, n.b, n.c)) continue;
 
+    return finaliser(numerateur, denominateur, numerateurAvantCombinaison, k);
+  }
+  throw new Error("construireSansFacteurCommun : aucune combinaison lisible trouvée");
+}
+
+function finaliser(
+  numerateur: Exercice,
+  denominateur: Exercice,
+  numerateurAvantCombinaison: ExerciceInequationRationnelleSansFacteurCommun["numerateurAvantCombinaison"],
+  k: number,
+): ExerciceInequationRationnelleSansFacteurCommun {
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, ce, grille } = construireGrilleQuotientSansFacteurCommun(numerateur, denominateur);
   const zones = extraireSignesZonesQuotient(grille.ligneQuotient);

@@ -24,7 +24,7 @@
  * score final de l'étape intervalle — même principe que activerAideIntervalle
  * (sessionInequation.ts) / activerAideGrilleSolution (sessionSignesProduit.ts).
  */
-import type { Categorie, Exercice } from "../core/generateur.types";
+import type { Categorie, Enonce, Exercice } from "../core/generateur.types";
 import type {
   ExerciceInequationRationnelle,
   GenerateurExerciceInequationRationnelle,
@@ -235,6 +235,11 @@ export interface EtatSessionInequationRationnelle {
   scoreReductionExercice: number | null;
   /** même principe que `denomReductionRevele` ci-dessus. */
   reductionRevele: boolean;
+  /** Numérateur combiné tel qu'il était AVANT l'étape "reduction" (qui remplace
+   * `exerciceCourant.numerateur` par sa version réduite) — conservé pour la ligne « Numérateur
+   * combiné » du récapitulatif, qui sinon affichait déjà la version réduite (audit du chapitre 4).
+   * `null` tant que l'étape "reduction" n'a pas eu lieu (ou n'existe pas pour cet exercice). */
+  numerateurCombineNonReduit: Enonce | null;
   scoreReconnaissanceExercice: number | null;
   reconnaissanceRevele: boolean;
   scoreChamp1Exercice: number | null;
@@ -330,6 +335,7 @@ const ETAT_TRANSITOIRE_VIERGE = {
   miseEnEvidenceRevele: false,
   scoreReductionExercice: null,
   reductionRevele: false,
+  numerateurCombineNonReduit: null,
   scoreReconnaissanceExercice: null,
   reconnaissanceRevele: false,
   scoreChamp1Exercice: null,
@@ -823,6 +829,7 @@ export function soumettreReponseReduction(etat: EtatSessionInequationRationnelle
     exerciceCourant: { ...exerciceCourant, numerateur: exerciceSimplifie(exerciceCourant.numerateur) },
     etapeCourante: demarrerEtapeTentatives(),
     phase: "reconnaissance",
+    numerateurCombineNonReduit: exerciceCourant.numerateur.enonce,
     scoreReductionExercice: etat.aideReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
     reductionRevele: etapeCourante.revelee,
   };

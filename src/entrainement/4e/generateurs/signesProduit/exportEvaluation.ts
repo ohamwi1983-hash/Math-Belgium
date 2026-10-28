@@ -2,8 +2,7 @@ import type { ExerciceSignesProduit, FacteurLineaire, FacteurSignesProduit, Vale
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { formatFormeFactoriseeDepuisRacines } from "../../ui/formatEquation";
-import { formatEnonceSignesProduitLatex, formatFacteurLatex, formatLineaireDeveloppe } from "../../ui/formatSignesProduit";
+import { formatEnonceSignesProduitLatex, formatFacteurLatex, formatFormeFactoriseeSignesProduit, formatLineaireDeveloppe } from "../../ui/formatSignesProduit";
 import { formatSolutionEnsembleProduit } from "../../ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { ordreLignesGrille } from "./grille";
@@ -145,7 +144,8 @@ function construireCorrectionSignesProduit(instance: ExerciceSignesProduit): Blo
     } else {
       const { categorie, enonce, solution } = facteur.exercice;
       const [r1, r2] = [...solution.racines].sort((a, b) => a - b);
-      const formeFactorisee = categorie === "cas_general" ? formatFormeFactoriseeDepuisRacines(enonce, solution.racines) : (solution.formeFactorisee as string);
+      // Même forme que l'application (-x(x + 5) plutôt que x(-x - 5), audit gen5).
+      const formeFactorisee = formatFormeFactoriseeSignesProduit(enonce, solution.racines);
       blocs.push({
         type: "paragraphe",
         fragments: [

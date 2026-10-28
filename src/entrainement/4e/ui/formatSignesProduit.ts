@@ -1,3 +1,4 @@
+import type { Enonce } from "../core/generateur.types";
 import type { ExerciceSignesProduit, FacteurSignesProduit } from "../core/signesProduit.types";
 import type { LigneRef } from "../generateurs/signesProduit/grille";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./formatEquation";
@@ -53,7 +54,45 @@ export function formatTermesEnonceSignesProduitLatex(exercice: ExerciceSignesPro
  */
 function formatFacteurFactoriseLatex(facteur: FacteurSignesProduit): string {
   if (facteur.type !== "quadratique_factorisable") return formatFacteurLatex(facteur);
-  return formatFormeFactoriseeDepuisRacines(facteur.exercice.enonce, facteur.exercice.solution.racines);
+  return formatFormeFactoriseeSignesProduit(facteur.exercice.enonce, facteur.exercice.solution.racines);
+}
+
+/**
+ * Forme factorisée d'un facteur factorisable, telle qu'affichée par ce générateur — identique à
+ * `formatFormeFactoriseeDepuisRacines` (ui/formatEquation.ts), sauf pour une mise en évidence à
+ * `a = -1` : `-x(x + 5)` plutôt que `x(-x - 5)` (audit gen5). Ce contournement partagé n'existait
+ * que parce que la vérification refusait un x précédé d'une négation, ce qu'elle accepte désormais
+ * (`estUnProduitAvecXExplicite`, moteur/expressionAlgebrique.ts) — gardé local à ce générateur pour
+ * ne changer l'affichage d'aucun autre.
+ */
+export function formatFormeFactoriseeSignesProduit(enonce: Enonce, racines: [number, number]): string {
+  const [r1, r2] = racines;
+  if (enonce.a === -1 && r1 !== r2 && (r1 === 0 || r2 === 0)) {
+    const r = r1 === 0 ? r2 : r1;
+    return `-x(${r > 0 ? `x - ${r}` : `x + ${-r}`})`;
+  }
+  return formatFormeFactoriseeDepuisRacines(enonce, racines);
+}
+
+/**
+ * Facteurs d'un produit déjà décomposé, chacun prêt à être juxtaposé au précédent — jamais de
+ * parenthèses autour d'un facteur qui est lui-même déjà un produit (`(x(x + 5))`, audit gen5) :
+ * - facteur linéaire/irréductible : `(…)`, comme dans l'énoncé ;
+ * - facteur factorisé commençant par x ou `(` : tel quel (`(x + 2)x(x + 5)`) ;
+ * - commençant par un coefficient : tel quel en tête, précédé de `\cdot` ailleurs (jamais
+ *   `(x + 2)2(x - 1)…`) ;
+ * - commençant par un signe − : tel quel en tête, entre grandes parenthèses ailleurs (jamais
+ *   `(x + 2)-x(x + 5)`, qui se lirait comme une soustraction).
+ */
+function facteursFactorisesJuxtaposables(exercice: ExerciceSignesProduit): string[] {
+  return exercice.facteurs.map((f, i) => {
+    if (f.type !== "quadratique_factorisable") return `(${formatFacteurLatex(f)})`;
+    const forme = formatFacteurFactoriseLatex(f);
+    if (i === 0) return forme;
+    if (forme.startsWith("-")) return `\\bigl(${forme}\\bigr)`;
+    if (/^\d/.test(forme)) return `\\cdot ${forme}`;
+    return forme;
+  });
 }
 
 /**
@@ -67,14 +106,14 @@ function formatFacteurFactoriseLatex(facteur: FacteurSignesProduit): string {
  * ui/etatActuelSignesProduit.ts).
  */
 export function formatEnonceSignesProduitFactoriseLatex(exercice: ExerciceSignesProduit): string {
-  const facteurs = exercice.facteurs.map((f) => `(${formatFacteurFactoriseLatex(f)})`).join("");
+  const facteurs = facteursFactorisesJuxtaposables(exercice).join("");
   return `${facteurs} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
 /** Version "bloc fitter" de `formatEnonceSignesProduitFactoriseLatex` — même principe que
  * `formatTermesEnonceSignesProduitLatex` ci-dessus, appliqué à la décomposition déjà factorisée. */
 export function formatTermesEnonceSignesProduitFactoriseLatex(exercice: ExerciceSignesProduit): string[] {
-  const facteurs = exercice.facteurs.map((f) => `(${formatFacteurFactoriseLatex(f)})`);
+  const facteurs = facteursFactorisesJuxtaposables(exercice);
   const dernier = facteurs.length - 1;
   return facteurs.map((f, i) => (i === dernier ? `${f} ${SYMBOLE_LATEX[exercice.symbole]} 0` : f));
 }

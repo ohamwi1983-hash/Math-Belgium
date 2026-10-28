@@ -25,7 +25,7 @@ import {
   formatExpressionIsoleeSansFacteurCommunLatex,
 } from "../../ui/formatInequationRationnelle";
 import { SYMBOLE_LATEX } from "../../ui/formatInequation";
-import { formatLineaireDeveloppe } from "../../ui/formatSignesProduit";
+import { formatLineaireDeveloppeExact } from "../../ui/formatInequationRationnelle";
 import { formatFractionSimplifiee } from "../../ui/formatSimplification";
 import { formatSolutionEnsembleProduit } from "../../ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "../../ui/categorieLabels";
@@ -90,16 +90,16 @@ function formeFactoriseeDeP2(p2: Exercice): string {
 }
 
 function labelLineaire(prefixe: string, poly: PolynomeLineaire): string {
-  return `${prefixe} : ${formatLineaireDeveloppe(poly.k, poly.p)}`;
+  return `${prefixe} : ${formatLineaireDeveloppeExact(poly.k, poly.p)}`;
 }
 
 function labelMonique(prefixe: string, racine: number): string {
-  return `${prefixe} : ${formatLineaireDeveloppe(1, racine)}`;
+  return `${prefixe} : ${formatLineaireDeveloppeExact(1, racine)}`;
 }
 
 /** "D : (x-p)^2" ou "D : x^2" — jamais développé, même convention que `formatLigneDenominateurCarreLabel`. */
 function labelDenominateurCarre(poly: PolynomeLineaire): string {
-  const lineaire = formatLineaireDeveloppe(poly.k, poly.p);
+  const lineaire = formatLineaireDeveloppeExact(poly.k, poly.p);
   return `D : ${poly.p === 0 ? `${lineaire}^2` : `(${lineaire})^2`}`;
 }
 

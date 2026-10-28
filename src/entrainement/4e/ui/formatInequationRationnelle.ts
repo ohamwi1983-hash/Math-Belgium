@@ -11,10 +11,24 @@ import type {
   ExerciceInequationRationnelleNumerateurLineaire,
   ExerciceInequationRationnelleSansFacteurCommun,
 } from "../core/inequationRationnelle.types";
-import { formatLineaireDeveloppe } from "./formatSignesProduit";
 import { formatFacteurRacine, formatFacteurSeul, formatFormeFactoriseeDepuisRacines, formatMembreGauche, formatSommeTermes } from "./formatEquation";
 import { formatFractionSimplifiee } from "./formatSimplification";
 import { SYMBOLE_LATEX } from "./formatInequation";
+
+/**
+ * kx - kp, développé — même rendu que `formatLineaireDeveloppe` (`formatSignesProduit.ts`), mais la
+ * constante `-k·p` est ramenée à l'entier le plus proche quand elle en est à moins de 1e-9 : au
+ * niveau 3, `p = -C/B` (numérateur combiné P1_1, `construireNiveau3.ts`) n'est pas entier dans ~60 %
+ * des tirages, et `-k·p` recalculé en flottant affichait `29.999999999999996` au lieu de `30` dans
+ * l'énoncé (audit du chapitre 4). Utilisée par TOUS les affichages de ce générateur.
+ */
+export function formatLineaireDeveloppeExact(k: number, p: number): string {
+  const kx = k === 1 ? "x" : k === -1 ? "-x" : `${k}x`;
+  const brute = -k * p;
+  const constante = Math.abs(brute - Math.round(brute)) < 1e-9 ? Math.round(brute) : brute;
+  if (constante === 0) return kx;
+  return `${kx} ${constante > 0 ? "+" : "-"} ${Math.abs(constante)}`;
+}
 
 /**
  * N(x)/D(x) ◇ 0 — les deux polynômes toujours développés (kx-kp), jamais "k(x-p)". `numerateur`
@@ -25,15 +39,15 @@ import { SYMBOLE_LATEX } from "./formatInequation";
  * le numérateur combiné est du 2nd degré) a sa propre fonction dédiée.
  */
 export function formatEnonceInequationRationnelleLatex(exercice: ExerciceInequationRationnelleNumerateurLineaire): string {
-  const numerateur = formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const numerateur = formatLineaireDeveloppeExact(exercice.numerateur.k, exercice.numerateur.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
 /** N1(x)/D(x) ◇ k — énoncé de DÉPART (niveau 2 uniquement), avant isolement/combinaison. */
 export function formatEnonceOriginalNiveau2Latex(exercice: ExerciceInequationRationnelleNiveau2): string {
-  const numerateur = formatLineaireDeveloppe(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const numerateur = formatLineaireDeveloppeExact(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} ${exercice.k}`;
 }
 
@@ -43,36 +57,36 @@ export function formatEnonceOriginalNiveau2Latex(exercice: ExerciceInequationRat
  * de révélation après échec de "isoler" (c'est exactement la réponse attendue).
  */
 export function formatExpressionIsoleeLatex(exercice: ExerciceInequationRationnelleNiveau2): string {
-  const numerateur = formatLineaireDeveloppe(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const numerateur = formatLineaireDeveloppeExact(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   const kAffiche = exercice.k > 0 ? `- ${exercice.k}` : `+ ${Math.abs(exercice.k)}`;
   return `\\frac{${numerateur}}{${denominateur}} ${kAffiche} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
 /** Libellé de la ligne "N" du tableau (section 3 de la spec) : "N : [expression de P1_1]". */
 export function formatLigneNumerateurLabel(numerateur: PolynomeLineaire): string {
-  return `\\text{N : } ${formatLineaireDeveloppe(numerateur.k, numerateur.p)}`;
+  return `\\text{N : } ${formatLineaireDeveloppeExact(numerateur.k, numerateur.p)}`;
 }
 
 /** Libellé de la ligne "D" du tableau : "D : [expression de P1_2]". */
 export function formatLigneDenominateurLabel(denominateur: PolynomeLineaire): string {
-  return `\\text{D : } ${formatLineaireDeveloppe(denominateur.k, denominateur.p)}`;
+  return `\\text{D : } ${formatLineaireDeveloppeExact(denominateur.k, denominateur.p)}`;
 }
 
 /**
  * Libellé d'une des 2 lignes "N" du tableau (niveau 3 uniquement) : une par racine de P2_1,
- * toujours moniques (a=1 imposé — voir construireNiveau3.ts) donc `formatLineaireDeveloppe(1, r)`
+ * toujours moniques (a=1 imposé — voir construireNiveau3.ts) donc `formatLineaireDeveloppeExact(1, r)`
  * suffit, jamais besoin du coefficient dominant réel de P2_1.
  */
 export function formatLigneNumerateurNiveau3Label(racine: number): string {
-  return `\\text{N : } ${formatLineaireDeveloppe(1, racine)}`;
+  return `\\text{N : } ${formatLineaireDeveloppeExact(1, racine)}`;
 }
 
 /** N1(x)/D(x) ◇ P1_3(x) — énoncé de DÉPART (niveau 3 uniquement), avant isolement/combinaison. */
 export function formatEnonceOriginalNiveau3Latex(exercice: ExerciceInequationRationnelleNiveau3): string {
-  const numerateur = formatLineaireDeveloppe(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
-  const p1_3 = formatLineaireDeveloppe(exercice.p1_3.k, exercice.p1_3.p);
+  const numerateur = formatLineaireDeveloppeExact(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
+  const p1_3 = formatLineaireDeveloppeExact(exercice.p1_3.k, exercice.p1_3.p);
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} ${p1_3}`;
 }
 
@@ -82,10 +96,10 @@ export function formatEnonceOriginalNiveau3Latex(exercice: ExerciceInequationRat
  * échec de "isoler".
  */
 export function formatExpressionIsoleeNiveau3Latex(exercice: ExerciceInequationRationnelleNiveau3): string {
-  const numerateur = formatLineaireDeveloppe(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const numerateur = formatLineaireDeveloppeExact(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   // -(P1_3(x)) développé — jamais "- -3x" ou une double négation (même principe que le reste du projet).
-  const oppose = formatLineaireDeveloppe(-exercice.p1_3.k, exercice.p1_3.p);
+  const oppose = formatLineaireDeveloppeExact(-exercice.p1_3.k, exercice.p1_3.p);
   const jonction = oppose.startsWith("-") ? oppose : `+ ${oppose}`;
   return `\\frac{${numerateur}}{${denominateur}} ${jonction} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
@@ -93,16 +107,16 @@ export function formatExpressionIsoleeNiveau3Latex(exercice: ExerciceInequationR
 /** P2_1(x)/D(x) ◇ 0 — énoncé COMBINÉ (niveau 3), affiché en persistant aux étapes CE/reconnaissance/factorisation/racines/grille/intervalle. */
 export function formatEnonceCombineNiveau3Latex(exercice: ExerciceInequationRationnelleNiveau3): string {
   const numerateur = formatMembreGauche(exercice.numerateur.enonce);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
 /** N1(x)/D2(x) ◇ N3(x)/D4(x) — énoncé de DÉPART (niveau 4 uniquement), avant isolement/combinaison : deux fractions, quatre polynômes du 1er degré. */
 export function formatEnonceOriginalNiveau4Latex(exercice: ExerciceInequationRationnelleNiveau4): string {
-  const n1 = formatLineaireDeveloppe(exercice.numerateurGaucheAvantCombinaison.k, exercice.numerateurGaucheAvantCombinaison.p);
-  const d2 = formatLineaireDeveloppe(exercice.denominateurGauche.k, exercice.denominateurGauche.p);
-  const n3 = formatLineaireDeveloppe(exercice.numerateurDroitAvantCombinaison.k, exercice.numerateurDroitAvantCombinaison.p);
-  const d4 = formatLineaireDeveloppe(exercice.denominateurDroit.k, exercice.denominateurDroit.p);
+  const n1 = formatLineaireDeveloppeExact(exercice.numerateurGaucheAvantCombinaison.k, exercice.numerateurGaucheAvantCombinaison.p);
+  const d2 = formatLineaireDeveloppeExact(exercice.denominateurGauche.k, exercice.denominateurGauche.p);
+  const n3 = formatLineaireDeveloppeExact(exercice.numerateurDroitAvantCombinaison.k, exercice.numerateurDroitAvantCombinaison.p);
+  const d4 = formatLineaireDeveloppeExact(exercice.denominateurDroit.k, exercice.denominateurDroit.p);
   return `\\frac{${n1}}{${d2}} ${SYMBOLE_LATEX[exercice.symbole]} \\frac{${n3}}{${d4}}`;
 }
 
@@ -112,10 +126,10 @@ export function formatEnonceOriginalNiveau4Latex(exercice: ExerciceInequationRat
  * échec de "isoler".
  */
 export function formatExpressionIsoleeNiveau4Latex(exercice: ExerciceInequationRationnelleNiveau4): string {
-  const n1 = formatLineaireDeveloppe(exercice.numerateurGaucheAvantCombinaison.k, exercice.numerateurGaucheAvantCombinaison.p);
-  const d2 = formatLineaireDeveloppe(exercice.denominateurGauche.k, exercice.denominateurGauche.p);
-  const n3 = formatLineaireDeveloppe(exercice.numerateurDroitAvantCombinaison.k, exercice.numerateurDroitAvantCombinaison.p);
-  const d4 = formatLineaireDeveloppe(exercice.denominateurDroit.k, exercice.denominateurDroit.p);
+  const n1 = formatLineaireDeveloppeExact(exercice.numerateurGaucheAvantCombinaison.k, exercice.numerateurGaucheAvantCombinaison.p);
+  const d2 = formatLineaireDeveloppeExact(exercice.denominateurGauche.k, exercice.denominateurGauche.p);
+  const n3 = formatLineaireDeveloppeExact(exercice.numerateurDroitAvantCombinaison.k, exercice.numerateurDroitAvantCombinaison.p);
+  const d4 = formatLineaireDeveloppeExact(exercice.denominateurDroit.k, exercice.denominateurDroit.p);
   return `\\frac{${n1}}{${d2}} - \\frac{${n3}}{${d4}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
@@ -131,7 +145,7 @@ export function formatExpressionIsoleeNiveau4Latex(exercice: ExerciceInequationR
  * autour de la variable nue "x", qui donnerait "(x)(...)" superflu (audit transversal,
  * `promptauditparenthesessuperflues.md`). */
 function formatFacteurLineaireGroupeLatex(k: number, p: number): string {
-  const lineaire = formatLineaireDeveloppe(k, p);
+  const lineaire = formatLineaireDeveloppeExact(k, p);
   return k === 1 && p === 0 ? lineaire : `(${lineaire})`;
 }
 
@@ -147,11 +161,11 @@ export function formatEnonceCombineNiveau4Latex(exercice: ExerciceInequationRati
  * générale "toujours développé" du reste du projet, voir spec-denominateurcarre.md section 2 :
  * la forme carrée ne cache aucune étape de factorisation, une seule CE immédiatement lisible).
  * `denominateur` est toujours monique (k=1, voir core/inequationRationnelle.types.ts) donc
- * formatLineaireDeveloppe(1, p) suffit ; racine nulle affichée "x^2" nu, jamais "(x-0)^2" (même
+ * formatLineaireDeveloppeExact(1, p) suffit ; racine nulle affichée "x^2" nu, jamais "(x-0)^2" (même
  * convention que formatLigneNumerateurNiveau3Label).
  */
 function formatDenominateurCarre(denominateur: PolynomeLineaire): string {
-  const lineaire = formatLineaireDeveloppe(denominateur.k, denominateur.p);
+  const lineaire = formatLineaireDeveloppeExact(denominateur.k, denominateur.p);
   return denominateur.p === 0 ? `${lineaire}^2` : `(${lineaire})^2`;
 }
 
@@ -258,7 +272,7 @@ export function formatEnonceCombineSansFacteurCommunLatex(exercice: ExerciceIneq
  * principe que formatLigneNumerateurNiveau3Label.
  */
 export function formatLigneDenominateurSansFacteurCommunLabel(racine: number): string {
-  return `\\text{D : } ${formatLineaireDeveloppe(1, racine)}`;
+  return `\\text{D : } ${formatLineaireDeveloppeExact(1, racine)}`;
 }
 
 /**
@@ -284,7 +298,7 @@ export function formatMembreGaucheCubique({ a, b, c }: Enonce): string {
  */
 export function formatEnonceCubiqueLatex(exercice: ExerciceInequationRationnelleCubique): string {
   const numerateur = formatMembreGaucheCubique(exercice.numerateur.enonce);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
@@ -319,12 +333,17 @@ export function formatEnonceCombineNiveau3FactoriseLatex(exercice: ExerciceInequ
   return `\\frac{${numerateur}}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
-/** P2_1(x)/(D2(x)D4(x)) ◇ 0, entièrement factorisé (niveau 4) — chaque facteur du dénominateur individuellement parenthésé. */
+/** P2_1(x)/(D2(x)D4(x)) ◇ 0, entièrement factorisé (niveau 4) — les coefficients des deux
+ * dénominateurs sont regroupés devant, puis un facteur (x - p) par dénominateur : `6(x + 2)(x + 6)`,
+ * jamais `(3(x + 2))(2(x + 6))` (parenthèses doublées, audit du chapitre 4) ; "x" nu reste en tête
+ * (`3x(x + 6)`), même convention que formatEnonceCubiqueFactoriseLatex. */
 export function formatEnonceCombineNiveau4FactoriseLatex(exercice: ExerciceInequationRationnelleNiveau4): string {
   const numerateur = formatFormeFactoriseeDepuisRacines(exercice.numerateur.enonce, exercice.numerateur.solution.racines);
-  const d2 = `(${formatPolynomeLineaireFactorise(exercice.denominateurGauche)})`;
-  const d4 = `(${formatPolynomeLineaireFactorise(exercice.denominateurDroit)})`;
-  return `\\frac{${numerateur}}{${d2}${d4}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
+  const { denominateurGauche: d2, denominateurDroit: d4 } = exercice;
+  const coefficient = d2.k * d4.k;
+  const prefixe = coefficient === 1 ? "" : coefficient === -1 ? "-" : String(coefficient);
+  const facteurs = [d2.p, d4.p].sort((p, q) => Number(q === 0) - Number(p === 0)).map(formatFacteurSeul).join("");
+  return `\\frac{${numerateur}}{${prefixe}${facteurs}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 
 /**
@@ -373,7 +392,7 @@ export function formatEnonceCubiqueFactoriseLatex(exercice: ExerciceInequationRa
  */
 export function formatEnonceCubiqueMiseEnEvidenceLatex(exercice: ExerciceInequationRationnelleCubique): string {
   const quadratique = formatMembreGauche(exercice.numerateur.enonce);
-  const denominateur = formatLineaireDeveloppe(exercice.denominateur.k, exercice.denominateur.p);
+  const denominateur = formatLineaireDeveloppeExact(exercice.denominateur.k, exercice.denominateur.p);
   return `\\frac{x(${quadratique})}{${denominateur}} ${SYMBOLE_LATEX[exercice.symbole]} 0`;
 }
 

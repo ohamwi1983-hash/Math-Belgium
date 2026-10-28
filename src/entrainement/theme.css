@@ -1746,6 +1746,78 @@
   font-weight: 700;
 }
 
+/* Tableau de signes sur smartphone (audit gen5/gen6) : à 390px, seules 4 colonnes sur 10 à 12
+ * étaient visibles. Cellules resserrées (la hauteur tactile de 44px des boutons est conservée,
+ * seule leur largeur passe à 36px), colonne des libellés plus étroite et collée à gauche pendant le
+ * défilement — l'élève voit toujours quelle ligne il remplit. */
+@media (max-width: 480px) {
+  .entrainement .grille-signes {
+    font-size: 12px;
+  }
+
+  .entrainement .grille-signes th,
+  .entrainement .grille-signes td {
+    padding: 6px 2px;
+  }
+
+  .entrainement .grille-signes .grille-signes-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    max-width: 96px;
+    padding-left: 3px;
+    padding-right: 6px;
+    white-space: normal;
+    background: var(--color-bg);
+    box-shadow: inset -1px 0 0 var(--color-border);
+  }
+
+  /* Le texte ("Signe du produit") peut passer à la ligne, jamais une formule (« 2x − » / « 6 »). */
+  .entrainement .grille-signes .grille-signes-label .katex {
+    white-space: nowrap;
+  }
+
+  .entrainement .grille-signes-zone {
+    min-width: 0;
+  }
+
+  .entrainement .grille-signes-point {
+    min-width: 26px;
+  }
+
+  .entrainement .grille-signes-borne {
+    min-width: 18px;
+  }
+
+  .entrainement .toggle-signe {
+    min-width: 36px;
+    padding: 6px 4px;
+  }
+}
+
+/* Indice de défilement : le bord droit du tableau s'estompe tant qu'il reste des colonnes à
+ * droite, et redevient net une fois tout à droite (ou si rien ne déborde : la timeline de
+ * défilement est alors inactive). Amélioration progressive — sans `animation-timeline`, rien ne
+ * change. */
+@supports (animation-timeline: scroll()) {
+  .entrainement .grille-signes-scroll {
+    animation: grille-signes-indice-defilement linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
+@keyframes grille-signes-indice-defilement {
+  0%,
+  97% {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  100% {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 .entrainement .grille-signe-variation-sommet-label {
   font-size: 11px;
   color: var(--color-text-muted);

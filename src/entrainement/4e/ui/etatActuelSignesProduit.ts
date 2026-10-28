@@ -1,6 +1,5 @@
 import type { EtatSessionSignesProduit } from "../moteur/typesSignesProduit";
-import { formatFacteurLatex } from "./formatSignesProduit";
-import { formatFormeFactoriseeDepuisRacines } from "./formatEquation";
+import { formatFacteurLatex, formatFormeFactoriseeSignesProduit } from "./formatSignesProduit";
 
 /**
  * Bloc "état actuel" (promptgenerateur5signesProduit.md, point 1) — pour ce générateur, contexte
@@ -36,7 +35,7 @@ export function calculerEtatActuelSignesProduit(etat: EtatSessionSignesProduit):
       : etat.scoreFactorisationChamp1Exercice !== null;
 
   if (factoriseeConnue) {
-    return `${formatFormeFactoriseeDepuisRacines(enonce, solution.racines)} = 0`;
+    return `${formatFormeFactoriseeSignesProduit(enonce, solution.racines)} = 0`;
   }
   return `${formatFacteurLatex(facteur)} = 0`;
 }

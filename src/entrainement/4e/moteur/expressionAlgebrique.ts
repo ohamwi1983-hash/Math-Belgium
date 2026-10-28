@@ -211,8 +211,15 @@ function collecterFacteurs(noeud: Noeud): Noeud[] {
   return [racine];
 }
 
+/** Dépouille parenthèses ET négations unaires en tête — "-x", "(-x)", "-(x)" désignent toujours x
+ * comme facteur explicite (le signe n'est porté que par le coefficient, pas par la structure). */
+function depouillerSigne(noeud: Noeud): Noeud {
+  const racine = depouiller(noeud);
+  return racine.type === "negation" ? depouillerSigne(racine.operande) : racine;
+}
+
 function estXExplicite(noeud: Noeud): boolean {
-  return depouiller(noeud).type === "x";
+  return depouillerSigne(noeud).type === "x";
 }
 
 type ClassificationFacteur =
@@ -293,9 +300,12 @@ function extraireRacinesDuProduit(noeud: Noeud): number[] | null {
  * true si l'expression est, au premier niveau, un produit d'un nombre quelconque de facteurs
  * (pas une somme/différence de termes) et que x apparaît explicitement comme l'un de ces facteurs —
  * ex: "2x(x-4)", "2·x·(x-4)", "x·2·(x-4)", "x(2x-8)" passent ; "2x^2-8x" (forme développée) échoue.
+ * Une négation en tête est transparente (audit gen5) : "-x(x-3)", "(-x)(x-3)", "-x*(x-3)" passent
+ * comme "-1x(x-3)" passait déjà ; "-(x^2-3x)" échoue toujours (sous la négation : une somme, x
+ * n'est pas mis en évidence).
  */
 function estUnProduitAvecXExplicite(noeud: Noeud): boolean {
-  const racine = depouiller(noeud);
+  const racine = depouillerSigne(noeud);
   if (racine.type === "somme") return false;
   return collecterFacteurs(racine).some(estXExplicite);
 }
