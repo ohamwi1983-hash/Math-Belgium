@@ -40,6 +40,8 @@
  * "≈" (un arrondi a réellement changé la valeur).
  */
 import type { ContexteBienaymeTchebychev, ExerciceBienaymeTchebychev, VarianteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
+import { aupresDesPopulationMajuscule, de } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export const LABEL_XBAR = "\\bar{x}";
 export const LABEL_SIGMA = "\\sigma";
@@ -53,17 +55,17 @@ export interface AideAvecFormule {
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 /** Notation décimale FRANÇAISE (virgule, `{,}`) pour toute valeur potentiellement décimale insérée
  * dans un bloc KaTeX — un entier reste affiché tel quel. */
 export function formatNombreLatex(valeur: number): string {
-  return String(valeur).replace(".", "{,}");
+  return virgulesLatex(String(valeur).replace(".", "{,}"));
 }
 
 /** Même notation décimale française que `formatNombreLatex`, mais pour du texte HTML brut (jamais
@@ -71,7 +73,7 @@ export function formatNombreLatex(valeur: number): string {
  * littéralement si insérée dans un `<p>`/`<div>` normal — piège rencontré et corrigé sur la
  * première version de ce générateur, voir CLAUDE.md). */
 export function formatNombreTexte(valeur: number): string {
-  return String(valeur).replace(".", ",");
+  return virgulesTexte(String(valeur).replace(".", ","));
 }
 
 const LIBELLES_VARIANTE: Record<VarianteBienaymeTchebychev, string> = {
@@ -86,7 +88,7 @@ const LIBELLES_VARIANTE: Record<VarianteBienaymeTchebychev, string> = {
 };
 
 export function libelleVarianteBienaymeTchebychev(variante: VarianteBienaymeTchebychev): string {
-  return LIBELLES_VARIANTE[variante];
+  return virgulesTexte(LIBELLES_VARIANTE[variante]);
 }
 
 // ============================================================================
@@ -103,7 +105,7 @@ export const PRECISION_UNITE = "arrondi à l'unité";
  * (intermédiaire, `arrondi2` standard à la 2e décimale) — seule la précision AFFICHÉE en dépend,
  * jamais la vérification elle-même (déjà capturée par la valeur de `pourcentAttendu`). */
 export function precisionPourcentFinal(variante: "intervalleVersPourcent" | "intervalleVersNombre"): string {
-  return variante === "intervalleVersPourcent" ? PRECISION_UNITE : PRECISION_POURCENT_INTERMEDIAIRE;
+  return virgulesTexte(variante === "intervalleVersPourcent" ? PRECISION_UNITE : PRECISION_POURCENT_INTERMEDIAIRE);
 }
 
 // ============================================================================
@@ -112,16 +114,16 @@ export function precisionPourcentFinal(variante: "intervalleVersPourcent" | "int
 // ============================================================================
 
 function phraseCesPopulation(contexte: ContexteBienaymeTchebychev): string {
-  return `ces ${contexte.population}`;
+  return virgulesTexte(`ces ${contexte.population}`);
 }
 
 function phraseCaractereComprisEntre(contexte: ContexteBienaymeTchebychev, borneInf: number, borneSup: number): string {
-  return `${contexte.caractereIndefini} ${contexte.comprisAccord} entre ${borneInf} et ${borneSup} ${contexte.unite}`;
+  return virgulesTexte(`${contexte.caractereIndefini} ${contexte.comprisAccord} entre ${borneInf} et ${borneSup} ${contexte.unite}`);
 }
 
 function segmentsBaseComplete(contexte: ContexteBienaymeTchebychev, xBar: number, sigma: number): SegmentTexte[] {
   return [
-    T(`Chez les ${contexte.population}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
+    T(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
     Kx(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`),
     T(", avec un écart-type "),
     Kx(`${LABEL_SIGMA} = ${sigma}\\text{ ${contexte.unite}}`),
@@ -130,11 +132,11 @@ function segmentsBaseComplete(contexte: ContexteBienaymeTchebychev, xBar: number
 }
 
 function segmentsBaseXBarSeul(contexte: ContexteBienaymeTchebychev, xBar: number): SegmentTexte[] {
-  return [T(`Chez les ${contexte.population}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `), Kx(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`), T(".")];
+  return [T(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `), Kx(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`), T(".")];
 }
 
 function segmentsBaseSigmaSeul(contexte: ContexteBienaymeTchebychev, sigma: number): SegmentTexte[] {
-  return [T(`Chez les ${contexte.population}, ${contexte.caractereDefini} a un écart-type `), Kx(`${LABEL_SIGMA} = ${sigma}\\text{ ${contexte.unite}}`), T(".")];
+  return [T(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} a un écart-type `), Kx(`${LABEL_SIGMA} = ${sigma}\\text{ ${contexte.unite}}`), T(".")];
 }
 
 function segmentsQuestionV1(contexte: ContexteBienaymeTchebychev, borneInf: number, borneSup: number): SegmentTexte[] {
@@ -144,7 +146,7 @@ function segmentsQuestionV1(contexte: ContexteBienaymeTchebychev, borneInf: numb
 function segmentsQuestionV2(contexte: ContexteBienaymeTchebychev, pourcentDonne: number): SegmentTexte[] {
   return [
     T(
-      `Dans quel intervalle de ${contexte.caractereComplement} centré autour de la moyenne peut-on trouver au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ?`,
+      `Dans quel intervalle ${de(contexte.caractereComplement)} centré autour de la moyenne peut-on trouver au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ?`,
     ),
   ];
 }
@@ -156,7 +158,7 @@ function segmentsQuestionV3(contexte: ContexteBienaymeTchebychev, n: number, bor
 function segmentsQuestionV4(contexte: ContexteBienaymeTchebychev, n: number, nombreMinDonne: number): SegmentTexte[] {
   return [
     T(
-      `Sur un échantillon de ${n} ${contexte.population}, dans quel intervalle de ${contexte.caractereComplement} centré autour de la moyenne peut-on trouver au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ?`,
+      `Sur un échantillon de ${n} ${contexte.population}, dans quel intervalle ${de(contexte.caractereComplement)} centré autour de la moyenne peut-on trouver au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ?`,
     ),
   ];
 }
@@ -244,7 +246,7 @@ export function formatEnonceSegments(exercice: ExerciceBienaymeTchebychev): Segm
 /** Concatène les segments en une seule chaîne — utilisée par les tests (assertions de contenu),
  * jamais par le rendu réel (qui doit distinguer texte/KaTeX, voir `EnonceBienaymeTchebychev.tsx`). */
 export function segmentsVersTexte(segments: SegmentTexte[]): string {
-  return segments.map((s) => s.valeur).join("");
+  return virgulesTexte(segments.map((s) => s.valeur).join(""));
 }
 
 // ============================================================================
@@ -319,11 +321,11 @@ function borneSupValeurExacte(exercice: { xBar: number; kAttendu: number; sigma:
 // ============================================================================
 
 export function formatEtatActuelKLatex(v: ValeurEtatActuel): string {
-  return `${LABEL_K} ${v.exact ? "=" : "\\approx"} ${formatNombreLatex(v.valeur)}`;
+  return virgulesLatex(`${LABEL_K} ${v.exact ? "=" : "\\approx"} ${formatNombreLatex(v.valeur)}`);
 }
 
 export function formatEtatActuelPourcentLatex(v: ValeurEtatActuel): string {
-  return `\\text{\\% minimal} ${v.exact ? "=" : "\\approx"} ${formatNombreLatex(v.valeur)}\\,\\%`;
+  return virgulesLatex(`\\text{\\% minimal} ${v.exact ? "=" : "\\approx"} ${formatNombreLatex(v.valeur)}\\,\\%`);
 }
 
 // ============================================================================
@@ -442,17 +444,17 @@ export function texteAideXBarNiveau2(exercice: { borneSup: number; sigma: number
 
 export function formatKAttenduTexte(exercice: ExerciceBienaymeTchebychev): string {
   const v = kEtatActuel(exercice);
-  return `k ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`;
+  return virgulesTexte(`k ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`);
 }
 
 export function formatPourcentAttenduTexte(exercice: { kAttendu: number; pourcentAttendu: number }): string {
   const v = pourcentAttenduEtatActuel(exercice);
-  return `${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)} %`;
+  return virgulesTexte(`${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)} %`);
 }
 
 export function formatPourcentDepuisNombreAttenduTexte(exercice: { n: number; nombreMinDonne: number; pourcentAttendu0: number }): string {
   const v = pourcentAttendu0EtatActuel(exercice);
-  return `${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)} %`;
+  return virgulesTexte(`${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)} %`);
 }
 
 export function formatIntervalleAttenduTexte(exercice: {
@@ -465,19 +467,19 @@ export function formatIntervalleAttenduTexte(exercice: {
   const exactInf = estArrondiExact(borneInfValeurExacte(exercice), exercice.borneInfAttendue);
   const exactSup = estArrondiExact(borneSupValeurExacte(exercice), exercice.borneSupAttendue);
   const signe = exactInf && exactSup ? "=" : "≈";
-  return `${signe} [${formatNombreTexte(exercice.borneInfAttendue)} ; ${formatNombreTexte(exercice.borneSupAttendue)}]`;
+  return virgulesTexte(`${signe} [${formatNombreTexte(exercice.borneInfAttendue)} ; ${formatNombreTexte(exercice.borneSupAttendue)}]`);
 }
 
 export function formatNombreAttenduTexte(nMinAttendu: number): string {
-  return `${nMinAttendu} individus`;
+  return virgulesTexte(`${nMinAttendu} individus`);
 }
 
 export function formatSigmaAttenduTexte(exercice: { borneSup: number; xBar: number; kAttendu: number; sigmaAttendu: number }): string {
   const exact = estArrondiExact(sigmaValeurExacte(exercice), exercice.sigmaAttendu);
-  return `σ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.sigmaAttendu)}`;
+  return virgulesTexte(`σ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.sigmaAttendu)}`);
 }
 
 export function formatXBarAttenduTexte(exercice: { borneSup: number; sigma: number; kAttendu: number; xBarAttendu: number }): string {
   const exact = estArrondiExact(xBarValeurExacte(exercice), exercice.xBarAttendu);
-  return `x̄ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.xBarAttendu)}`;
+  return virgulesTexte(`x̄ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.xBarAttendu)}`);
 }

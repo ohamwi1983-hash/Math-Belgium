@@ -3,6 +3,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { texte } from "../../../export/fragmentsDocx";
 import { formatEnonceTexte } from "../../ui/formatTableauFrequences";
 import { genererExerciceTableauFrequences } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTableauFrequences>` pour gen30 (Tableau de
@@ -85,7 +86,7 @@ function construireCorrectionTableauFrequences(instance: ExerciceTableauFrequenc
   ];
 }
 
-export const adaptateurEvaluationTableauFrequences: AdaptateurFeuilleExercices<ExerciceTableauFrequences> = {
+const adaptateurEvaluationTableauFrequencesBrut: AdaptateurFeuilleExercices<ExerciceTableauFrequences> = {
   titreDocument: "Tableau de fréquences — Évaluation",
   nomFichierBase: "tableau-frequences",
   genererInstance: genererExerciceTableauFrequences,
@@ -93,3 +94,6 @@ export const adaptateurEvaluationTableauFrequences: AdaptateurFeuilleExercices<E
   construireCorrection: construireCorrectionTableauFrequences,
   regroupable: true,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationTableauFrequences: AdaptateurFeuilleExercices<ExerciceTableauFrequences> = avecVirgulesBelges(adaptateurEvaluationTableauFrequencesBrut);

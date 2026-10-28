@@ -11,15 +11,16 @@
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceHistogramme } from "../core/histogramme.types";
 import { valeurHauteur } from "./histogrammeGraph";
+import { phraseRepartition } from "./phrasesContexteStatistique";
+import { virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les 3 écrans — même template que "Tableau de fréquences". */
 export function formatEnonceTexte(exercice: ExerciceHistogramme): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(exercice.contexte));
 }
 
 export function consigneClassement(exercice: ExerciceHistogramme): string {
-  return `À partir de la liste de données brutes ci-dessus (en ${exercice.contexte.unite}), détermine l'effectif de chaque classe (bornes déjà données).`;
+  return virgulesTexte(`À partir de la liste de données brutes ci-dessus (en ${exercice.contexte.unite}), détermine l'effectif de chaque classe (bornes déjà données).`);
 }
 export const CONSIGNE_FREQUENCES = "Calcule la fréquence (%) de chaque classe.";
 export const CONSIGNE_TRACE = "Fais glisser chaque barre verticalement pour lui donner la bonne hauteur.";
@@ -48,7 +49,7 @@ export function estDerniereClasse(exercice: ExerciceHistogramme, index: number):
  * à gauche, `[` ouvert/exclu à droite (`]` fermé/inclus, réservé à la toute dernière classe). */
 export function formatClasseTexte(exercice: ExerciceHistogramme, index: number): string {
   const classe = exercice.classes[index];
-  return `[${classe.borneInf} ; ${classe.borneSup}${estDerniereClasse(exercice, index) ? "]" : "["}`;
+  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${estDerniereClasse(exercice, index) ? "]" : "["}`);
 }
 
 /**
@@ -77,12 +78,12 @@ export function texteAideClassementNiveau1(exercice: ExerciceHistogramme): strin
   const { valeur, classeIndex } = exercice.donneeFrontiere;
   const classe = exercice.classes[classeIndex];
   const classeSuivante = exercice.classes[classeIndex + 1];
-  return (
+  return virgulesTexte((
     `La donnée ${valeur} est proche de la frontière ${classe.borneSup} : la borne supérieure d'une classe est TOUJOURS ` +
     `exclue de celle-ci (sauf pour la toute dernière classe de la série) — donc ${valeur} < ${classe.borneSup} appartient ` +
     `bien à la classe ${formatClasseTexte(exercice, classeIndex)}, jamais à la classe suivante ${formatClasseTexte(exercice, classeIndex + 1)}, ` +
     `qui commence tout juste à ${classeSuivante.borneInf}.`
-  );
+  ));
 }
 
 /** Aide 2 : révèle l'effectif attendu d'une classe AUTRE que celle où l'élève s'est trompé, si
@@ -92,10 +93,10 @@ export function texteAideClassementNiveau2(exercice: ExerciceHistogramme, evalua
   const estCorrect = evaluation ? evaluation.map((s) => s === "correct") : null;
   const index = indexClasseARevelerAide(estCorrect);
   if (index === null) {
-    return `Rappel de contrôle : la somme de tous les effectifs doit être égale à n = ${exercice.n}.`;
+    return virgulesTexte(`Rappel de contrôle : la somme de tous les effectifs doit être égale à n = ${exercice.n}.`);
   }
   const classe = exercice.classes[index];
-  return `Pour vérifier ta méthode : la classe ${formatClasseTexte(exercice, index)} a un effectif de ${classe.effectif}.`;
+  return virgulesTexte(`Pour vérifier ta méthode : la classe ${formatClasseTexte(exercice, index)} a un effectif de ${classe.effectif}.`);
 }
 
 // ============================================================================
@@ -103,12 +104,12 @@ export function texteAideClassementNiveau2(exercice: ExerciceHistogramme, evalua
 // ============================================================================
 
 export function texteAideFrequencesNiveau1(exercice: ExerciceHistogramme): string {
-  return `Fréquence (%) = effectif / n × 100, où n est la taille totale de l'échantillon (ici n = ${exercice.n}).`;
+  return virgulesTexte(`Fréquence (%) = effectif / n × 100, où n est la taille totale de l'échantillon (ici n = ${exercice.n}).`);
 }
 
 export function texteAideFrequencesNiveau2(exercice: ExerciceHistogramme): string {
   const classe = exercice.classes[0];
-  return `Pour la classe ${formatClasseTexte(exercice, 0)} : fréquence = ${classe.effectif}/${exercice.n} × 100 = ${classe.frequencePourcent} %.`;
+  return virgulesTexte(`Pour la classe ${formatClasseTexte(exercice, 0)} : fréquence = ${classe.effectif}/${exercice.n} × 100 = ${classe.frequencePourcent} %.`);
 }
 
 // ============================================================================
@@ -122,7 +123,7 @@ export function texteAideTraceNiveau1(exercice: ExerciceHistogramme, evaluationT
   const index = indexClasseARevelerAide(evaluationTrace) ?? 0;
   const valeur = valeurHauteur(exercice, index);
   const unite = exercice.variante === "frequence" ? " %" : "";
-  return `Pour la classe ${formatClasseTexte(exercice, index)}, la hauteur attendue est ${valeur}${unite}.`;
+  return virgulesTexte(`Pour la classe ${formatClasseTexte(exercice, index)}, la hauteur attendue est ${valeur}${unite}.`);
 }
 
 // ============================================================================
@@ -131,14 +132,14 @@ export function texteAideTraceNiveau1(exercice: ExerciceHistogramme, evaluationT
 // ============================================================================
 
 export function formatClassementAttenduTexte(exercice: ExerciceHistogramme): string {
-  return exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.effectif}`).join(", ");
+  return virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.effectif}`).join(", "));
 }
 
 export function formatFrequencesAttenduesTexte(exercice: ExerciceHistogramme): string {
-  return exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.frequencePourcent} %`).join(", ");
+  return virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.frequencePourcent} %`).join(", "));
 }
 
 export function formatTraceAttendueTexte(exercice: ExerciceHistogramme): string {
   const unite = exercice.variante === "frequence" ? " %" : "";
-  return exercice.classes.map((_, i) => `${formatClasseTexte(exercice, i)} → ${valeurHauteur(exercice, i)}${unite}`).join(", ");
+  return virgulesTexte(exercice.classes.map((_, i) => `${formatClasseTexte(exercice, i)} → ${valeurHauteur(exercice, i)}${unite}`).join(", "));
 }

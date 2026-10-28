@@ -17,6 +17,8 @@
  */
 import type { ContexteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
 import type { ExerciceDispersion } from "../core/dispersion.types";
+import { aupresDesPopulationMajuscule } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export const LABEL_XBAR = "\\bar{x}";
 export const LABEL_VALEUR_XI = "x_i";
@@ -58,12 +60,12 @@ export interface AideDeuxLignes {
 
 /** Notation décimale FRANÇAISE (virgule, `{,}`) pour une valeur insérée dans un bloc KaTeX. */
 export function formatNombreLatex(valeur: number): string {
-  return String(valeur).replace(".", "{,}");
+  return virgulesLatex(String(valeur).replace(".", "{,}"));
 }
 
 /** Même notation française, pour du texte HTML brut (jamais passé par KaTeX). */
 export function formatNombreTexte(valeur: number): string {
-  return String(valeur).replace(".", ",");
+  return virgulesTexte(String(valeur).replace(".", ","));
 }
 
 // ============================================================================
@@ -74,24 +76,24 @@ export function formatNombreTexte(valeur: number): string {
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 export function formatEnonceSegments(exercice: ExerciceDispersion): SegmentTexte[] {
   const { contexte, xBar } = exercice;
   return [
-    T(`Chez les ${contexte.population}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
+    T(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
     Kx(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`),
     T("."),
   ];
 }
 
 export function segmentsVersTexte(segments: SegmentTexte[]): string {
-  return segments.map((s) => s.valeur).join("");
+  return virgulesTexte(segments.map((s) => s.valeur).join(""));
 }
 
 // ============================================================================
@@ -99,7 +101,7 @@ export function segmentsVersTexte(segments: SegmentTexte[]): string {
 // ============================================================================
 
 export function consigneTableau(): string {
-  return "Complète le tableau ci-dessous, ainsi que les deux sommes nécessaires au calcul de la variance.";
+  return virgulesTexte("Complète le tableau ci-dessous, ainsi que les deux sommes nécessaires au calcul de la variance.");
 }
 
 /** Convertie en `SegmentTexte[]` — `promptinvestigationpoint3latexmobile.md`, occurrence gen34 :
@@ -168,7 +170,7 @@ export function texteAideVarianceEcartTypeNiveau2(exercice: ExerciceDispersion):
  * elles, même principe que "Moyenne pondérée"). Sur 2 lignes séparées (`\begin{gathered}`, jamais
  * côte à côte — précaution anti-débordement mobile déjà établie ailleurs dans le projet). */
 export function formatEtatActuelTableauLatex(exercice: ExerciceDispersion): string {
-  return `\\begin{gathered} ${LABEL_SOMME_PRODUIT} = ${exercice.sommeProduits} \\\\ ${LABEL_SOMME_N} = ${exercice.n} \\end{gathered}`;
+  return virgulesLatex(`\\begin{gathered} ${LABEL_SOMME_PRODUIT} = ${exercice.sommeProduits} \\\\ ${LABEL_SOMME_N} = ${exercice.n} \\end{gathered}`);
 }
 
 // ============================================================================
@@ -220,10 +222,10 @@ export function formatTableauAttenduTexte(exercice: ExerciceDispersion): Segment
 
 export function formatVarianceAttendueTexte(exercice: ExerciceDispersion): string {
   const v = varianceEtatActuel(exercice);
-  return `V ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`;
+  return virgulesTexte(`V ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`);
 }
 
 export function formatEcartTypeAttendueTexte(exercice: ExerciceDispersion): string {
   const v = ecartTypeEtatActuel(exercice);
-  return `σ ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`;
+  return virgulesTexte(`σ ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`);
 }

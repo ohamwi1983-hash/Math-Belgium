@@ -10,6 +10,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { arrondirAuPas } from "../generateurs/bienaymeTchebychev/echelleContexte";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesConstruction;
@@ -30,16 +31,18 @@ interface Props {
 }
 
 /** Position de départ des 5 marqueurs — répartis uniformément sur la plage, jamais superposés au
- * démarrage (l'élève doit toujours pouvoir attraper chacun indépendamment dès l'affichage). */
-function positionsDepart(bornePlage: { min: number; max: number }): CinqNombres {
+ * démarrage (l'élève doit toujours pouvoir attraper chacun indépendamment dès l'affichage), calés
+ * sur le cran du glissement (`pas`, 1 par défaut). */
+function positionsDepart(bornePlage: { min: number; max: number }, pas = 1): CinqNombres {
   const span = bornePlage.max - bornePlage.min;
-  const pas = span / 6;
+  const ecart = span / 6;
+  const caler = (x: number) => arrondirAuPas(x, pas);
   return {
-    min: Math.round(bornePlage.min + pas),
-    q1: Math.round(bornePlage.min + 2 * pas),
-    mediane: Math.round(bornePlage.min + 3 * pas),
-    q3: Math.round(bornePlage.min + 4 * pas),
-    max: Math.round(bornePlage.min + 5 * pas),
+    min: caler(bornePlage.min + ecart),
+    q1: caler(bornePlage.min + 2 * ecart),
+    mediane: caler(bornePlage.min + 3 * ecart),
+    q3: caler(bornePlage.min + 4 * ecart),
+    max: caler(bornePlage.min + 5 * ecart),
   };
 }
 
@@ -50,7 +53,7 @@ function positionsDepart(bornePlage: { min: number; max: number }): CinqNombres 
  * et histogramme"). Toujours terminal.
  */
 export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, pas, validation}: Props) {
-  const [valeurs, setValeurs] = useState<CinqNombres>(() => positionsDepart(exercice.bornePlage));
+  const [valeurs, setValeurs] = useState<CinqNombres>(() => positionsDepart(exercice.bornePlage, pas));
   const maxAide = niveauAideMaxPourPhase("construction");
 
   const apresEchec = tentativesUtilisees > 0;

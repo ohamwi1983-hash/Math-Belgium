@@ -21,6 +21,7 @@ import {
 import { LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN, formatEnonceTexte, formatTermesCinqNombresLatex } from "../../ui/formatBoiteMoustaches";
 import { calculerPasGrille, etendreLargeurXPourEtiquettes } from "../../ui/mafsTransformation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBoiteMoustaches } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBoiteMoustaches>` pour gen36 (Boîte à moustaches,
@@ -367,7 +368,7 @@ function construireCorrectionBoiteMoustaches(exercice: ExerciceBoiteMoustaches):
   return construireCorrectionComparaison(exercice);
 }
 
-export const adaptateurEvaluationBoiteMoustaches: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = {
+const adaptateurEvaluationBoiteMoustachesBrut: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = {
   titreDocument: "Boîte à moustaches — Évaluation",
   nomFichierBase: "boite-moustaches",
   genererInstance: genererExerciceBoiteMoustaches,
@@ -378,3 +379,6 @@ export const adaptateurEvaluationBoiteMoustaches: AdaptateurFeuilleExercices<Exe
   // PAS regroupable : chaque variante a un enteteHtml (graphique), et "comparaison" a en plus 2
   // questions par instance — voir le commentaire de tête de fichier.
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationBoiteMoustaches: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = avecVirgulesBelges(adaptateurEvaluationBoiteMoustachesBrut);

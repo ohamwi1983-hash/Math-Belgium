@@ -9,6 +9,7 @@ import { PolygoneEffectifsGraph } from "./PolygoneEffectifsGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { arrondirAuPas, pasCommun } from "../generateurs/bienaymeTchebychev/echelleContexte";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -26,12 +27,18 @@ interface Props {
 /** Positions de départ des points mobiles — répartis uniformément sur le domaine x, tous à y=0
  * (jamais déjà corrects, même principe que `positionsDepart` de "Boîte à moustaches" : les
  * coordonnées à trouver ne sont jamais pré-remplies). */
+/** Cran du glissement horizontal : plus grand pas commun des bornes de classes. */
+function cranBornes(exercice: ExerciceMedianeClasses): number {
+  return pasCommun(exercice.classes.flatMap((c) => [c.borneInf, c.borneSup]));
+}
+
 function positionsDepart(exercice: ExerciceMedianeClasses): PointPolygone[] {
   const xMin = exercice.classes[0].borneInf;
   const xMax = exercice.classes[exercice.classes.length - 1].borneSup;
   const n = exercice.classes.length;
   const pas = (xMax - xMin) / (n + 1);
-  return exercice.classes.map((_, i) => ({ x: Math.round(xMin + (i + 1) * pas), y: 0 }));
+  const cran = cranBornes(exercice);
+  return exercice.classes.map((_, i) => ({ x: arrondirAuPas(xMin + (i + 1) * pas, cran), y: 0 }));
 }
 
 /**
@@ -64,7 +71,7 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
     <div>
       <p className="prompt-text">{CONSIGNE_POLYGONE}</p>
 
-      <PolygoneEffectifsGraph pointFixe={pointFixe} points={points} erronees={erronees} onDeplacerPoint={deplacerPoint} />
+      <PolygoneEffectifsGraph pointFixe={pointFixe} points={points} erronees={erronees} onDeplacerPoint={deplacerPoint} pasX={cranBornes(exercice)} />
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">

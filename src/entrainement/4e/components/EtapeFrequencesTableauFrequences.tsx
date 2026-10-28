@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -74,7 +75,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
               const erronee = evaluation !== null && evaluation[index] !== "correct";
               return (
                 <tr key={ligne.valeur}>
-                  <td>{ligne.valeur}</td>
+                  <td>{nombreFr(ligne.valeur)}</td>
                   <td>{ligne.effectif}</td>
                   <td>
                     <input
@@ -83,7 +84,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
                       value={valeurs[index]}
                       onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
                       onKeyDown={gererKeyDownNumerique}
-                      aria-label={`Fréquence de la valeur ${ligne.valeur}`}
+                      aria-label={`Fréquence de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>
                 </tr>

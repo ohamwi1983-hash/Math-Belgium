@@ -14,6 +14,7 @@ import type {
 } from "../../core/moyennePonderee.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
 
 /**
@@ -30,29 +31,15 @@ const MAX_TENTATIVES_ARRONDI = 300;
 const NOMBRE_VALEURS_MIN = 4;
 const NOMBRE_VALEURS_MAX = 6;
 
-/** Largeur minimale garantie de la plage de tirage des valeurs discrètes — même principe et même
- * étendue historique que "Tableau de fréquences" (dupliqué, pas importé) : certains contextes de la
- * banque ont un `plageXBar` trop étroit pour y tirer 4 à 6 entiers distincts. */
-const LARGEUR_MIN_PLAGE = 14;
-
-/** Élargit `[min,max]` symétriquement autour de son centre jusqu'à `largeurMin`, jamais en dessous
- * de 0 — dupliqué (pas importé) dans chaque générateur qui en a besoin. */
-function elargirPlage(min: number, max: number, largeurMin: number): [number, number] {
-  const largeur = max - min;
-  if (largeur >= largeurMin) return [min, max];
-  const centre = (min + max) / 2;
-  const nouveauMin = Math.max(0, Math.round(centre - largeurMin / 2));
-  return [nouveauMin, nouveauMin + largeurMin];
-}
+/** Grille de tirage des valeurs discrètes (0..LARGEUR_UNITES unités), mise à l'échelle du contexte
+ * par `tirerEchelle` (audit chapitre 4). */
+const LARGEUR_UNITES = 14;
 
 const NOMBRE_CLASSES_MIN = 4;
 const NOMBRE_CLASSES_MAX = 5;
 const AMPLITUDE_MIN = 2;
 const AMPLITUDE_MAX = 5;
 
-/** Jitter (unités entières) autour du centre de `contexte.plageXBar` pour la borne de départ des
- * classes — même principe que "Regroupement en classes et histogramme" (dupliqué, pas importé). */
-const JITTER_BORNE_DEPART = 3;
 
 /** Tire une amplitude PAR CLASSE (`promptgen32gen33corrections.md`, point 1 — remplace l'ancienne
  * amplitude unique commune à toutes les classes) — retire tant que toutes les amplitudes tirées
@@ -118,23 +105,26 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceMoyen
   let sommeXN = 0;
   let moyenne = 0;
   let tentative = 0;
-  const [min, max] = elargirPlage(contexte.plageXBar[0], contexte.plageXBar[1], LARGEUR_MIN_PLAGE);
 
   do {
     tentative++;
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
     const k = randomInt(NOMBRE_VALEURS_MIN, NOMBRE_VALEURS_MAX);
-    const valeurs = tirerValeursDistinctes(k, min, max);
+    const valeurs = tirerValeursDistinctes(k, 0, LARGEUR_UNITES).map((j) => valeurEchelle(echelle, j));
+    if (!valeursRealistes(contexte, valeurs)) continue;
     n = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
     const effectifs = tirerEffectifs(n, k);
     lignes = valeurs.map((valeur, i) => ({ valeur, effectif: effectifs[i] }));
     sommeXN = lignes.reduce((acc, ligne) => acc + ligne.valeur * ligne.effectif, 0);
     moyenne = sommeXN / n;
-  } while (!arrondiPropre(moyenne) && tentative < MAX_TENTATIVES_ARRONDI);
+  } while ((lignes.length === 0 || !arrondiPropre(moyenne)) && tentative < MAX_TENTATIVES_ARRONDI);
 
   return { contexte, variante: "discrete", n, sommeXN, moyenne: arrondir2(moyenne), lignes };
 }
 
-function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceMoyennePondereeClasses {
+function construireClasses(contexteImpose?: ContexteBienaymeTchebychev): ExerciceMoyennePondereeClasses {
+  let contexte = contexteImpose ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
   let classes: ClasseMoyennePonderee[] = [];
   let n = CANDIDATS_N[0];
   let sommeXN = 0;
@@ -146,26 +136,28 @@ function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceMoyenn
     const nombreClasses = randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
     // Amplitude PROPRE à chaque classe (`promptgen32gen33corrections.md`, point 1 — remplace
     // l'ancienne amplitude unique commune à toutes) — `tirerAmplitudes` garantit déjà au moins deux
-    // valeurs distinctes, jamais un tableau uniforme.
+    // valeurs distinctes, jamais un tableau uniforme. Amplitudes en unités de l'échelle du contexte
+    // (`tirerEchelle`, unité ≥ 1 : bornes entières) ; un contexte trop étroit pour 4-5 classes
+    // (sommeil, 100 m...) est remplacé par un autre, sauf s'il est imposé.
     const amplitudes = tirerAmplitudes(nombreClasses);
-    // Bornes centrées sur le milieu de la plage réaliste du contexte (jamais en dessous de 0),
-    // avec un léger jitter pour ne pas figer systématiquement le même point de départ — même
-    // principe que "Regroupement en classes et histogramme".
-    const centre = (contexte.plageXBar[0] + contexte.plageXBar[1]) / 2;
-    const etendueTotale = amplitudes.reduce((acc, a) => acc + a, 0);
-    const borneDepart = Math.max(0, Math.round(centre - etendueTotale / 2) + randomInt(-JITTER_BORNE_DEPART, JITTER_BORNE_DEPART));
+    const etendueUnites = amplitudes.reduce((acc, a) => acc + a, 0);
+    const echelle = tirerEchelle(contexte, etendueUnites, { uniteMin: 1 });
+    if (echelle === null) {
+      if (contexteImpose === undefined) contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+      continue;
+    }
     n = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
     const effectifs = tirerEffectifs(n, nombreClasses);
-    let borneCourante = borneDepart;
+    let borneCourante = 0;
     classes = amplitudes.map((amplitude, i) => {
-      const borneInf = borneCourante;
-      const borneSup = borneInf + amplitude;
-      borneCourante = borneSup;
+      const borneInf = valeurEchelle(echelle, borneCourante);
+      borneCourante += amplitude;
+      const borneSup = valeurEchelle(echelle, borneCourante);
       return { borneInf, borneSup, effectif: effectifs[i], centre: (borneInf + borneSup) / 2 };
     });
     sommeXN = classes.reduce((acc, classe) => acc + classe.centre * classe.effectif, 0);
     moyenne = sommeXN / n;
-  } while (!arrondiPropre(moyenne) && tentative < MAX_TENTATIVES_ARRONDI);
+  } while ((classes.length === 0 || !arrondiPropre(moyenne)) && tentative < MAX_TENTATIVES_ARRONDI);
 
   return { contexte, variante: "classes", n, sommeXN, moyenne: arrondir2(moyenne), classes };
 }
@@ -180,8 +172,8 @@ export function construireAvecVarianteId(
   varianteId: VarianteMoyennePonderee,
   overrides?: { contexte?: ContexteBienaymeTchebychev },
 ): ExerciceMoyennePonderee {
-  const contexte = overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
-  return varianteId === "discrete" ? construireDiscrete(contexte) : construireClasses(contexte);
+  if (varianteId === "classes") return construireClasses(overrides?.contexte);
+  return construireDiscrete(overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)]);
 }
 
 export function genererExerciceMoyennePonderee(): ExerciceMoyennePonderee {

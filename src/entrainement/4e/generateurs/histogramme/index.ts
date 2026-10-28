@@ -7,6 +7,7 @@
 import type { ClasseHistogramme, ExerciceHistogramme, VarianteHistogramme } from "../../core/histogramme.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { type EchelleContexte, tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt, trierAleatoirement } from "./aleatoire";
 
 /**
@@ -22,20 +23,15 @@ const NOMBRE_CLASSES_MAX = 5;
 const AMPLITUDE_MIN = 2;
 const AMPLITUDE_MAX = 5;
 
-/** Jitter (en unités entières) appliqué autour du centre de `contexte.plageXBar` pour la borne de
- * départ — conserve une part de variété d'un exercice à l'autre au sein d'un même contexte, jamais
- * une position figée uniquement dérivée du centre. */
-const JITTER_BORNE_DEPART = 3;
+/** Tentatives de tirage (contexte + échelle) avant d'abandonner — les contextes dont la bande
+ * réaliste est trop étroite pour 4 à 5 classes (sommeil, 100 m, consommation...) renvoient une
+ * échelle `null` et sont simplement retirés (audit chapitre 4). */
+const MAX_TENTATIVES = 500;
 
 export const CATALOGUE_VARIANTES: { id: VarianteHistogramme; label: string }[] = [
   { id: "effectif", label: "Hauteur = effectif" },
   { id: "frequence", label: "Hauteur = fréquence (%)" },
 ];
-
-/** Arrondit à 1 décimale — évite le bruit de virgule flottante résiduel (`2.3000000000000003`). */
-function round1(x: number): number {
-  return Math.round(x * 10) / 10;
-}
 
 function construireBornesClasses(nombreClasses: number, amplitude: number, borneDepart: number): { borneInf: number; borneSup: number }[] {
   return Array.from({ length: nombreClasses }, (_, i) => {
@@ -57,18 +53,24 @@ function tirerEffectifs(n: number, nombreClasses: number): number[] {
 }
 
 /**
- * Génère les `effectif` données brutes d'une classe — chacune une décimale à 1 chiffre strictement
- * à l'intérieur de `]borneInf, borneSup[` (jamais sur une frontière, voir le contrat). Si
- * `forcerFrontiere` est vrai, la toute première valeur générée vaut exactement `borneSup - 0,1` —
- * volontairement proche de la frontière partagée avec la classe suivante, support de l'Aide 1 de
- * l'écran "Classement" (`donneeFrontiere`).
+ * Génère les `effectif` données brutes d'une classe (bornes en unités de l'échelle) — chacune sur la
+ * grille du pas des données, strictement à l'intérieur de `]borneInf, borneSup[` (jamais sur une
+ * frontière, voir le contrat). Si `forcerFrontiere` est vrai, la toute première valeur générée vaut
+ * exactement `borneSup − pasDonnee` — volontairement proche de la frontière partagée avec la classe
+ * suivante, support de l'Aide 1 de l'écran "Classement" (`donneeFrontiere`).
  */
-function construireDonneesClasse(borne: { borneInf: number; borneSup: number }, effectif: number, forcerFrontiere: boolean): number[] {
-  const maxDecimales = (borne.borneSup - borne.borneInf) * 10 - 1;
+function construireDonneesClasse(
+  borne: { borneInf: number; borneSup: number },
+  effectif: number,
+  forcerFrontiere: boolean,
+  echelle: EchelleContexte,
+  pasDonnee: number,
+): number[] {
+  const crans = Math.round(((borne.borneSup - borne.borneInf) * echelle.unite) / pasDonnee);
   const valeurs: number[] = [];
   for (let i = 0; i < effectif; i++) {
-    const decimales = forcerFrontiere && i === 0 ? maxDecimales : randomInt(1, maxDecimales);
-    valeurs.push(round1(borne.borneInf + decimales / 10));
+    const cran = forcerFrontiere && i === 0 ? crans - 1 : randomInt(1, crans - 1);
+    valeurs.push(valeurEchelle(echelle, borne.borneInf + (cran * pasDonnee) / echelle.unite));
   }
   return valeurs;
 }
@@ -82,23 +84,32 @@ export function construireAvecVarianteId(
   varianteId: VarianteHistogramme,
   overrides?: { n?: number; amplitude?: number; nombreClasses?: number; contexte?: ContexteBienaymeTchebychev },
 ): ExerciceHistogramme {
-  const contexte = overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
   const n = overrides?.n ?? CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
-  const nombreClasses = overrides?.nombreClasses ?? randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
-  const amplitude = overrides?.amplitude ?? randomInt(AMPLITUDE_MIN, AMPLITUDE_MAX);
-  // Bornes de classes centrées sur le milieu de la plage réaliste du contexte (jamais en dessous de
-  // 0 — une donnée individuelle n'est jamais réaliste négative pour aucun contexte de la banque),
-  // avec un léger jitter pour ne pas figer systématiquement le même point de départ.
-  const centre = (contexte.plageXBar[0] + contexte.plageXBar[1]) / 2;
-  const etendueTotale = nombreClasses * amplitude;
-  const borneDepart = Math.max(0, Math.round(centre - etendueTotale / 2) + randomInt(-JITTER_BORNE_DEPART, JITTER_BORNE_DEPART));
-
-  const bornes = construireBornesClasses(nombreClasses, amplitude, borneDepart);
+  let contexte = overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+  let nombreClasses = overrides?.nombreClasses ?? randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
+  let amplitudeUnites = randomInt(AMPLITUDE_MIN, AMPLITUDE_MAX);
+  let echelle: EchelleContexte = { origine: 0, unite: 1 };
+  for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
+    contexte = overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+    nombreClasses = overrides?.nombreClasses ?? randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
+    amplitudeUnites = randomInt(AMPLITUDE_MIN, AMPLITUDE_MAX);
+    // Unité ≥ 1 : bornes de classes toujours entières, amplitude « ronde » (A × unité).
+    const tirage = tirerEchelle(contexte, nombreClasses * amplitudeUnites, { uniteMin: 1 });
+    if (tirage === null) continue;
+    echelle = tirage;
+    if (valeursRealistes(contexte, [valeurEchelle(echelle, 0), valeurEchelle(echelle, nombreClasses * amplitudeUnites)])) break;
+  }
+  const amplitude = overrides?.amplitude ?? amplitudeUnites * echelle.unite;
+  // Pas des données brutes : un dixième d'unité, jamais plus fin que le pas naturel du contexte
+  // (entiers pour les grandeurs comptées).
+  const pasDonnee = Math.max(contexte.pas, contexte.entier ? 1 : 0, echelle.unite / 10);
+  const bornesUnites = construireBornesClasses(nombreClasses, amplitude / echelle.unite, 0);
+  const bornes = bornesUnites.map((b) => ({ borneInf: valeurEchelle(echelle, b.borneInf), borneSup: valeurEchelle(echelle, b.borneSup) }));
   const effectifs = tirerEffectifs(n, nombreClasses);
   // Jamais la dernière classe — il faut une classe suivante avec laquelle partager la frontière.
   const classeIndexFrontiere = randomInt(0, nombreClasses - 2);
 
-  const donneesParClasse = bornes.map((borne, i) => construireDonneesClasse(borne, effectifs[i], i === classeIndexFrontiere));
+  const donneesParClasse = bornesUnites.map((borne, i) => construireDonneesClasse(borne, effectifs[i], i === classeIndexFrontiere, echelle, pasDonnee));
 
   const classes: ClasseHistogramme[] = bornes.map((borne, i) => ({
     borneInf: borne.borneInf,

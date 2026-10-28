@@ -7,6 +7,7 @@ import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee } from "../ui/com
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
+import { nombreFr, virgulesTexte } from "../ui/nombreFr";
 
 const COULEUR_A = "#1971c2";
 const COULEUR_B = "#f08c00";
@@ -86,7 +87,7 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} />
         {courbes.map((courbe) => (
           <g key={courbe.label}>
             {courbe.points.slice(0, -1).map((sommet, i) => (
@@ -115,7 +116,7 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
           </g>
         ))}
       </Mafs>
-      {pas && <p className="mafs-graph-pas">{formatIndicateurPasGrille(pas.x, pas.y)}</p>}
+      {pas && <p className="mafs-graph-pas">{virgulesTexte(formatIndicateurPasGrille(pas.x, pas.y))}</p>}
       <div className="mafs-graph-legende">
         <span className="mafs-graph-legende-item">
           <span className="mafs-graph-swatch mafs-graph-swatch-serie-a" /> Série A

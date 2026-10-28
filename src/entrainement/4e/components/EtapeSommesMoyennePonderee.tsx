@@ -11,6 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceMoyennePonderee;
@@ -93,7 +94,7 @@ export function EtapeSommesMoyennePonderee({ exercice, tentativesUtilisees, tent
               const erronee = evaluation !== null && evaluation.produits[index] !== "correct";
               return (
                 <tr key={index}>
-                  <td className={estExemple ? "is-surlignee" : undefined}>{x}</td>
+                  <td className={estExemple ? "is-surlignee" : undefined}>{nombreFr(x)}</td>
                   <td className={estExemple ? "is-surlignee" : undefined}>{n}</td>
                   <td>
                     <input

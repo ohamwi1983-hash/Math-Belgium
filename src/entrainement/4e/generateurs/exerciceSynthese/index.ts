@@ -67,6 +67,7 @@ import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.t
 import type { PlageAxe } from "../../core/boiteMoustaches.types";
 import { arrondi2 } from "../bienaymeTchebychev/arrondis";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { borneRealiste, tirerEchelle, tirerEchelleCentree, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { calculerParametreDePosition } from "../mediane/parametreDePosition";
 import { randomInt } from "./aleatoire";
 
@@ -97,7 +98,6 @@ const NOMBRE_CLASSES_MIN = 4;
 const NOMBRE_CLASSES_MAX = 5;
 const AMPLITUDE_MIN = 2;
 const AMPLITUDE_MAX = 5;
-const JITTER_BORNE_DEPART = 3;
 /** Bornée plus haut que "Moyenne pondérée" seul (300) : cette construction combine DEUX conditions
  * de rejet simultanées (moyenne arrondie proprement ET classe modale unique) dans la même boucle,
  * réduisant le taux de succès par tentative. */
@@ -106,12 +106,18 @@ const MAX_TENTATIVES_CLASSES = 4000;
 /** k fixé (jamais résolu) pour l'étape Bienaymé-Tchebychev — voir en-tête du fichier. */
 const K_BT = 2;
 
-/** Marge fixe de chaque côté des données réelles pour le cadrage de la boîte à moustaches —
- * dupliquée depuis "Boîte à moustaches" (`MARGE_AXE`). */
+/** Marge de chaque côté des données réelles pour le cadrage de la boîte à moustaches, en unités de
+ * l'échelle du contexte — dupliquée depuis "Boîte à moustaches" (`MARGE_AXE`). */
 const MARGE_AXE_BOITE = 2;
 
-function calculerBornePlage(minReel: number, maxReel: number): PlageAxe {
-  return { min: Math.max(0, minReel - MARGE_AXE_BOITE), max: maxReel + MARGE_AXE_BOITE };
+/** Mise à l'échelle (audit chapitre 4) : unité ≥ 1 (produits (x_i − x̄)²·n_i entiers) et ≤
+ * UNITE_MAX (au-delà, le tableau ne se calcule plus raisonnablement à la main : contexte écarté). */
+const UNITE_MAX = 100;
+
+/** L'axe ne descend jamais sous 0, sauf si les données elles-mêmes sont négatives (température). */
+function calculerBornePlage(minReel: number, maxReel: number, unite: number): PlageAxe {
+  const marge = MARGE_AXE_BOITE * unite;
+  return { min: Math.max(Math.min(0, minReel), minReel - marge), max: maxReel + marge };
 }
 
 /** Palier de précision de lecture selon l'amplitude du caractère — dupliqué depuis
@@ -127,7 +133,10 @@ function precisionLecture(amplitude: number): number {
   if (amplitude <= 20) return 0.1;
   if (amplitude <= 100) return 1;
   if (amplitude <= 1000) return 5;
-  return 20;
+  // Paliers des grandes échelles (audit chapitre 4 : salaires, prix, kilométrages réalistes).
+  if (amplitude <= 10000) return 50;
+  if (amplitude <= 100000) return 500;
+  return 5000;
 }
 
 /** Arrondit au pas de précision du palier applicable (`promptgen33gen35precisionlecture.md`) —
@@ -183,13 +192,15 @@ function tirerOffsetsDistincts(count: number, min: number, max: number): number[
   return offsets.size === count ? [...offsets] : null;
 }
 
-function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceSyntheseDiscrete {
+function construireDiscrete(contexteImpose?: ContexteBienaymeTchebychev): ExerciceSyntheseDiscrete {
   for (let tentative = 0; tentative < MAX_TENTATIVES_DISCRETE; tentative++) {
-    const [plageMin, plageMax] = contexte.plageXBar;
-    const xBar = Math.round(plageMin + Math.random() * (plageMax - plageMin));
+    const contexte = contexteImpose ?? tirerContexte();
+    const echelle = tirerEchelleCentree(contexte, OFFSET_MAX, { uniteMin: 1, uniteMax: UNITE_MAX });
+    if (echelle === null) continue;
+    const { xBar, unite } = echelle;
     const k = randomInt(K_LIGNES_MIN, K_LIGNES_MAX);
 
-    const offsetMin = Math.max(-OFFSET_MAX, -xBar);
+    const offsetMin = -OFFSET_MAX;
     const offsetMax = OFFSET_MAX;
 
     const offsetsLibres = tirerOffsetsDistincts(k - 1, offsetMin, offsetMax);
@@ -218,8 +229,10 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceSynth
     if (new Set(tousEffectifs).size === 1) continue;
 
     const paires = tousOffsets
-      .map((d, i) => ({ valeur: xBar + d, effectif: tousEffectifs[i] }))
+      .map((d, i) => ({ valeur: xBar + d * unite, effectif: tousEffectifs[i] }))
       .sort((a, b) => a.valeur - b.valeur);
+
+    if (!valeursRealistes(contexte, paires.map((p) => p.valeur))) continue;
 
     const n = paires.reduce((acc, p) => acc + p.effectif, 0);
     const cumules = cumuler(paires.map((p) => p.effectif));
@@ -249,6 +262,7 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceSynth
 
     const borneInfBT = arrondi2(xBar - K_BT * ecartTypeAttendu);
     const borneSupBT = arrondi2(xBar + K_BT * ecartTypeAttendu);
+    if (!borneRealiste(contexte, borneInfBT)) continue;
     const pourcentAttenduBT = arrondi2(100 * (1 - 1 / K_BT ** 2));
 
     return {
@@ -263,7 +277,7 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceSynth
       mediane,
       q1,
       q3,
-      bornePlage: calculerBornePlage(min, max),
+      bornePlage: calculerBornePlage(min, max, unite),
       sommeProduits,
       varianceAttendue,
       ecartTypeAttendu,
@@ -325,13 +339,15 @@ function indexUniqueMax(effectifs: number[]): number | null {
   return indices.length === 1 ? indices[0] : null;
 }
 
-function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceSyntheseClasses {
+function construireClasses(contexteImpose?: ContexteBienaymeTchebychev): ExerciceSyntheseClasses {
   for (let tentative = 0; tentative < MAX_TENTATIVES_CLASSES; tentative++) {
+    const contexte = contexteImpose ?? tirerContexte();
     const nombreClasses = randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
     const amplitudes = tirerAmplitudes(nombreClasses);
-    const centre = (contexte.plageXBar[0] + contexte.plageXBar[1]) / 2;
-    const etendueTotale = amplitudes.reduce((acc, a) => acc + a, 0);
-    const borneDepart = Math.max(0, Math.round(centre - etendueTotale / 2) + randomInt(-JITTER_BORNE_DEPART, JITTER_BORNE_DEPART));
+    // Amplitudes en unités de l'échelle du contexte (`tirerEchelle`, unité ≥ 1 : bornes entières) —
+    // un contexte trop étroit pour 4-5 classes est écarté (audit chapitre 4).
+    const echelle = tirerEchelle(contexte, amplitudes.reduce((acc, a) => acc + a, 0), { uniteMin: 1 });
+    if (echelle === null) continue;
     const n = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
     const effectifs = tirerEffectifs(n, nombreClasses);
 
@@ -339,11 +355,11 @@ function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceSynthe
     if (indexClasseModale === null) continue;
 
     const cumules = cumuler(effectifs);
-    let borneCourante = borneDepart;
+    let borneCourante = 0;
     const classes: ClasseSynthese[] = amplitudes.map((amplitude, i) => {
-      const borneInf = borneCourante;
-      const borneSup = borneInf + amplitude;
-      borneCourante = borneSup;
+      const borneInf = valeurEchelle(echelle, borneCourante);
+      borneCourante += amplitude;
+      const borneSup = valeurEchelle(echelle, borneCourante);
       return { borneInf, borneSup, effectif: effectifs[i], centre: (borneInf + borneSup) / 2, effectifCumule: cumules[i] };
     });
 
@@ -376,6 +392,7 @@ function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceSynthe
 
     const borneInfBT = arrondi2(xBar - K_BT * ecartTypeAttendu);
     const borneSupBT = arrondi2(xBar + K_BT * ecartTypeAttendu);
+    if (!borneRealiste(contexte, borneInfBT)) continue;
     const pourcentAttenduBT = arrondi2(100 * (1 - 1 / K_BT ** 2));
 
     return {
@@ -390,7 +407,7 @@ function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceSynthe
       mediane,
       q1,
       q3,
-      bornePlage: calculerBornePlage(xMin, xMax),
+      bornePlage: calculerBornePlage(xMin, xMax, echelle.unite),
       sommeProduits,
       varianceAttendue,
       ecartTypeAttendu,
@@ -426,8 +443,7 @@ export function construireAvecVarianteId(
   varianteId: VarianteExerciceSynthese,
   overrides?: { contexte?: ContexteBienaymeTchebychev },
 ): ExerciceSynthese {
-  const contexte = overrides?.contexte ?? tirerContexte();
-  return varianteId === "discrete" ? construireDiscrete(contexte) : construireClasses(contexte);
+  return varianteId === "discrete" ? construireDiscrete(overrides?.contexte) : construireClasses(overrides?.contexte);
 }
 
 export function genererExerciceSynthese(): ExerciceSynthese {

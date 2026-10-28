@@ -22,6 +22,7 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { calculerRecapitulatifMoyennePonderee } from "./ui/recapitulatifMoyennePonderee";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { nombreFr } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -110,7 +111,7 @@ export function AppMoyennePonderee() {
         Sommes attendues : <SegmentsInline segments={formatSommesAttenduesTexte(exercice)} />
       </>
     ) : (
-      <>Moyenne pondérée attendue : {exercice.moyenne}</>
+      <>Moyenne pondérée attendue : {nombreFr(exercice.moyenne)}</>
     );
 
   const validation = enAttente
@@ -127,7 +128,7 @@ export function AppMoyennePonderee() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Moyenne pondérée</h1>
-        <p className="app-subtitle">Chapitre 5</p>
+        <p className="app-subtitle">Chapitre 4</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>

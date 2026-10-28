@@ -15,6 +15,8 @@ import {
   formatVarianceAttendueTexte,
 } from "../../ui/formatDispersion";
 import { genererExerciceDispersion } from "./index";
+import { aupresDesPopulationMajuscule } from "../../ui/phrasesContexteStatistique";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDispersion>` pour gen34 (Paramètres de dispersion —
@@ -108,7 +110,7 @@ function construireEnonceDispersion(instance: ExerciceDispersion): SectionExerci
 
   return {
     enteteFragments: [
-      texte(`Chez les ${contexte.population}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
+      texte(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
       latex(`${LABEL_XBAR} = ${xBar}\\text{ ${contexte.unite}}`),
       texte(`. Voici les données (valeur observée x, effectif n) : ${listeDonnees}.`),
     ],
@@ -147,7 +149,7 @@ function construireCorrectionDispersion(instance: ExerciceDispersion): BlocCorre
   ];
 }
 
-export const adaptateurEvaluationDispersion: AdaptateurFeuilleExercices<ExerciceDispersion> = {
+const adaptateurEvaluationDispersionBrut: AdaptateurFeuilleExercices<ExerciceDispersion> = {
   titreDocument: "Paramètres de dispersion (variance, écart-type) — Évaluation",
   nomFichierBase: "parametres-dispersion",
   genererInstance: genererExerciceDispersion,
@@ -157,3 +159,6 @@ export const adaptateurEvaluationDispersion: AdaptateurFeuilleExercices<Exercice
   // de b) dépendante de `contexte.unite` — jamais un unique écran générique : voir le commentaire de
   // tête.
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationDispersion: AdaptateurFeuilleExercices<ExerciceDispersion> = avecVirgulesBelges(adaptateurEvaluationDispersionBrut);

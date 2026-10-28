@@ -10,6 +10,7 @@
  */
 import { randomInt } from "./aleatoire";
 import { CONTEXTES } from "./contextes";
+import { borneRealiste } from "./echelleContexte";
 import { arrondi2, arrondiUnite, arrondiVersLeBas, arrondiVersLeHaut } from "./arrondis";
 import type {
   ContexteBienaymeTchebychev,
@@ -194,7 +195,7 @@ export function construireNombreVersXBar(): ExerciceBienaymeTchebychevNombreVers
   return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, pourcentAttendu0, kAttendu, xBarAttendu };
 }
 
-export function construireAvecVarianteId(varianteId: VarianteBienaymeTchebychev): ExerciceBienaymeTchebychev {
+function construireUneFois(varianteId: VarianteBienaymeTchebychev): ExerciceBienaymeTchebychev {
   switch (varianteId) {
     case "intervalleVersPourcent":
       return construireIntervalleVersPourcent();
@@ -213,6 +214,29 @@ export function construireAvecVarianteId(varianteId: VarianteBienaymeTchebychev)
     case "nombreVersXBar":
       return construireNombreVersXBar();
   }
+}
+
+/** Borne inférieure de l'intervalle de l'énoncé (donné ou attendu). */
+function borneInferieure(exercice: ExerciceBienaymeTchebychev): number {
+  return exercice.variante === "pourcentVersIntervalle" || exercice.variante === "nombreVersIntervalle"
+    ? exercice.borneInfAttendue
+    : exercice.borneInf;
+}
+
+/** Tentatives avant d'accepter un tirage malgré tout (jamais atteint en pratique). */
+const MAX_TENTATIVES_REALISME = 200;
+
+/**
+ * Construit un exercice pour une variante forcée. Un tirage dont l'intervalle descend sous le
+ * plancher d'une grandeur positive (« âge entre −3 et 21 ans », « hauteur entre −8 et 58 cm ») est
+ * rejeté et retiré (audit chapitre 4) — σ trop grand devant x̄ pour le k tiré.
+ */
+export function construireAvecVarianteId(varianteId: VarianteBienaymeTchebychev): ExerciceBienaymeTchebychev {
+  let exercice = construireUneFois(varianteId);
+  for (let tentative = 0; tentative < MAX_TENTATIVES_REALISME && !borneRealiste(exercice.contexte, borneInferieure(exercice)); tentative++) {
+    exercice = construireUneFois(varianteId);
+  }
+  return exercice;
 }
 
 export const genererExerciceBienaymeTchebychev: GenerateurExerciceBienaymeTchebychev = () => {

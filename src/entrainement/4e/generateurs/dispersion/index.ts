@@ -5,8 +5,8 @@
  * import générateur→générateur, explicitement autorisé par l'architecture du projet — voir CLAUDE.md).
  *
  * **Construction "offsets à somme pondérée nulle", jamais un tirage-puis-vérification indépendant
- * ligne par ligne.** Pour que `xBar` (toujours un entier DONNÉ) soit exactement la vraie moyenne du
- * tableau x_i/n_i (Σ(x_i·n_i)/n = xBar), chaque valeur est construite comme `x_i = xBar + d_i` (un
+ * ligne par ligne.** Pour que `xBar` (toujours un multiple DONNÉ de l'unité d'échelle) soit exactement la vraie moyenne du
+ * tableau x_i/n_i (Σ(x_i·n_i)/n = xBar), chaque valeur est construite comme `x_i = xBar + d_i·unité` (un
  * écart entier signé) — `k-1` écarts et leurs effectifs sont tirés librement, puis le DERNIER écart
  * est dérivé pour annuler exactement Σ(d_i·n_i) sur l'ensemble des k lignes :
  * - si la somme partielle S des k-1 premiers termes est nulle, le dernier écart est simplement 0
@@ -25,6 +25,7 @@
  */
 import type { ExerciceDispersion, LigneDispersion } from "../../core/dispersion.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { tirerEchelleCentree, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
 
 const K_MIN = 4;
@@ -33,6 +34,13 @@ const OFFSET_MAX = 6;
 const EFFECTIF_MIN = 2;
 const EFFECTIF_MAX = 8;
 const MAX_TENTATIVES = 2000;
+
+/** Mise à l'échelle (audit chapitre 4) : les écarts entiers ±OFFSET_MAX sont multipliés par une
+ * unité ronde (`tirerEchelleCentree`), pour couvrir au plus ±2σ d'un x̄ réaliste du contexte — plus
+ * jamais des kilométrages à quelques km près. Unité ≥ 1 (produits (x_i − x̄)²·n_i toujours entiers)
+ * et ≤ UNITE_MAX (au-delà, le tableau ne se calcule plus raisonnablement à la main : le contexte est
+ * écarté, ex. kilométrages). */
+const UNITE_MAX = 100;
 
 function arrondir2(x: number): number {
   return Math.round(x * 100) / 100;
@@ -54,11 +62,12 @@ function tirerOffsetsDistincts(count: number, min: number, max: number): number[
 export function genererExerciceDispersion(): ExerciceDispersion {
   for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
     const contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
-    const [plageMin, plageMax] = contexte.plageXBar;
-    const xBar = Math.round(plageMin + Math.random() * (plageMax - plageMin));
+    const echelle = tirerEchelleCentree(contexte, OFFSET_MAX, { uniteMin: 1, uniteMax: UNITE_MAX });
+    if (echelle === null) continue;
+    const { xBar, unite } = echelle;
     const k = randomInt(K_MIN, K_MAX);
 
-    const offsetMin = Math.max(-OFFSET_MAX, -xBar);
+    const offsetMin = -OFFSET_MAX;
     const offsetMax = OFFSET_MAX;
 
     const offsetsLibres = tirerOffsetsDistincts(k - 1, offsetMin, offsetMax);
@@ -83,8 +92,10 @@ export function genererExerciceDispersion(): ExerciceDispersion {
     const tousEffectifs = [...effectifsLibres, dernierEffectif];
 
     const paires = tousOffsets
-      .map((d, i) => ({ valeur: xBar + d, effectif: tousEffectifs[i] }))
+      .map((d, i) => ({ valeur: xBar + d * unite, effectif: tousEffectifs[i] }))
       .sort((a, b) => a.valeur - b.valeur);
+
+    if (!valeursRealistes(contexte, paires.map((p) => p.valeur))) continue;
 
     const n = paires.reduce((acc, p) => acc + p.effectif, 0);
     const lignes: LigneDispersion[] = paires.map((p) => ({

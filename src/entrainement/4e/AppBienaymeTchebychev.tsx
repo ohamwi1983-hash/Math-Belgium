@@ -217,7 +217,7 @@ export function AppBienaymeTchebychev() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Inégalité de Bienaymé-Tchebychev</h1>
-        <p className="app-subtitle">Chapitre 5 — Statistiques</p>
+        <p className="app-subtitle">Chapitre 4 — Statistiques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>

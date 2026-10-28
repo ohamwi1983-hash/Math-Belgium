@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -88,8 +89,8 @@ export function EtapeFrequencesCumuleesTableauFrequences({
               const erronee = evaluation !== null && evaluation[index] !== "correct";
               return (
                 <tr key={ligne.valeur}>
-                  <td>{ligne.valeur}</td>
-                  <td>{ligne.frequencePourcent}</td>
+                  <td>{nombreFr(ligne.valeur)}</td>
+                  <td>{nombreFr(ligne.frequencePourcent)}</td>
                   <td>
                     <input
                       className={`text-input${erronee ? " is-erronee" : ""}`}
@@ -97,7 +98,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
                       value={valeurs[index]}
                       onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
                       onKeyDown={gererKeyDownNumerique}
-                      aria-label={`Fréquence cumulée de la valeur ${ligne.valeur}`}
+                      aria-label={`Fréquence cumulée de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>
                 </tr>
@@ -112,7 +113,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
           <p>{texteAideFrequencesCumuleesNiveau1(exercice)}</p>
           {niveauAide >= 2 && (
             <p>
-              Fréquences cumulées déjà connues : {reveles.map((r) => `${r.valeur} → ${r.frequenceCumulee} %`).join(", ")}. Reste à
+              Fréquences cumulées déjà connues : {reveles.map((r) => `${nombreFr(r.valeur)} → ${nombreFr(r.frequenceCumulee)} %`).join(", ")}. Reste à
               trouver celle de la dernière ligne — souviens-toi de ce qu'elle doit valoir.
             </p>
           )}

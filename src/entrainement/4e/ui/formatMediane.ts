@@ -44,11 +44,12 @@ import type { ExerciceMediane, ExerciceMedianeClasses, ExerciceMedianeDiscrete }
 import { type ParametreLecture, precisionLecture, seuilLecture } from "../moteur/verificationMediane";
 import { pointsEncadrementSeuil } from "./lectureQuartileGraph";
 import type { PointPolygoneXY } from "./lectureQuartileGraph";
+import { phraseRepartition } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les 7 écrans possibles de ce générateur. */
 export function formatEnonceTexte(exercice: ExerciceMediane): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(exercice.contexte));
 }
 
 export const LABEL_VALEUR_XI = "x_i";
@@ -73,11 +74,11 @@ export const LABEL_X_MAX = "x_{max}";
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 export const PLACEHOLDER_SEUIL = "ex : 10";
@@ -101,7 +102,7 @@ export function estDerniereClasse(exercice: ExerciceMedianeClasses, index: numbe
 export function formatClasseTexte(exercice: ExerciceMedianeClasses, index: number): string {
   const classe = exercice.classes[index];
   const fermante = estDerniereClasse(exercice, index) ? "]" : "[";
-  return `[${classe.borneInf} ; ${classe.borneSup}${fermante}`;
+  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${fermante}`);
 }
 
 /** Le polygone COMPLET des effectifs cumulés (point fixe + un point par classe) — toujours dérivé
@@ -136,7 +137,7 @@ export function surlignageSeuilTable(exercice: ExerciceMedianeDiscrete, seuil: n
 // ============================================================================
 
 export function consigneMedianeDiscrete(exercice: ExerciceMedianeDiscrete): string {
-  return `Calcule le seuil n/2, puis détermine la médiane (en ${exercice.contexte.unite}) à partir du tableau.`;
+  return virgulesTexte(`Calcule le seuil n/2, puis détermine la médiane (en ${exercice.contexte.unite}) à partir du tableau.`);
 }
 
 /** Rendu KaTeX (`promptinvestigationpoint3latexmobile.md`) — un simple symbole court inséré dans
@@ -150,7 +151,7 @@ export function texteAideMedianeNiveau1(): SegmentTexte[] {
 }
 
 export function texteAideMedianeNiveau2(exercice: ExerciceMedianeDiscrete): string {
-  return `Le seuil n/2 vaut ${exercice.seuil}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`;
+  return virgulesTexte(`Le seuil n/2 vaut ${exercice.seuil}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
 }
 
 // ============================================================================
@@ -160,7 +161,7 @@ export function texteAideMedianeNiveau2(exercice: ExerciceMedianeDiscrete): stri
 // ============================================================================
 
 export function consigneQ1(exercice: ExerciceMedianeDiscrete): string {
-  return `Calcule le seuil n/4, puis détermine le premier quartile Q1 (en ${exercice.contexte.unite}) à partir du tableau complet.`;
+  return virgulesTexte(`Calcule le seuil n/4, puis détermine le premier quartile Q1 (en ${exercice.contexte.unite}) à partir du tableau complet.`);
 }
 
 export function texteAideQ1Niveau1(): SegmentTexte[] {
@@ -174,7 +175,7 @@ export function texteAideQ1Niveau1(): SegmentTexte[] {
 }
 
 export function texteAideQ1Niveau2(exercice: ExerciceMedianeDiscrete): string {
-  return `Le seuil n/4 vaut ${exercice.seuilQ1}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`;
+  return virgulesTexte(`Le seuil n/4 vaut ${exercice.seuilQ1}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
 }
 
 // ============================================================================
@@ -182,7 +183,7 @@ export function texteAideQ1Niveau2(exercice: ExerciceMedianeDiscrete): string {
 // ============================================================================
 
 export function consigneQ3(exercice: ExerciceMedianeDiscrete): string {
-  return `Calcule le seuil 3n/4, puis détermine le troisième quartile Q3 (en ${exercice.contexte.unite}) à partir du tableau complet.`;
+  return virgulesTexte(`Calcule le seuil 3n/4, puis détermine le troisième quartile Q3 (en ${exercice.contexte.unite}) à partir du tableau complet.`);
 }
 
 export function texteAideQ3Niveau1(): SegmentTexte[] {
@@ -196,7 +197,7 @@ export function texteAideQ3Niveau1(): SegmentTexte[] {
 }
 
 export function texteAideQ3Niveau2(exercice: ExerciceMedianeDiscrete): string {
-  return `Le seuil 3n/4 vaut ${exercice.seuilQ3}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`;
+  return virgulesTexte(`Le seuil 3n/4 vaut ${exercice.seuilQ3}. Il reste à chercher, dans le tableau, la première valeur dont l'effectif cumulé dépasse ce seuil.`);
 }
 
 // ============================================================================
@@ -205,7 +206,7 @@ export function texteAideQ3Niveau2(exercice: ExerciceMedianeDiscrete): string {
 // ============================================================================
 
 export function consigneMinMaxMode(exercice: ExerciceMedianeDiscrete): string {
-  return `Détermine le minimum, le maximum et le(s) mode(s) (en ${exercice.contexte.unite}) de cette série.`;
+  return virgulesTexte(`Détermine le minimum, le maximum et le(s) mode(s) (en ${exercice.contexte.unite}) de cette série.`);
 }
 
 export function texteAideMinMaxModeNiveau1(): SegmentTexte[] {
@@ -241,7 +242,7 @@ export function texteAideMinMaxModeNiveau2(exercice: ExerciceMedianeDiscrete): S
 export const CONSIGNE_POLYGONE = "Sur base des données du tableau, construis le polygone des effectifs cumulés.";
 
 export function texteAidePolygoneNiveau1(): string {
-  return "Rappel : le premier point est fixe, en (borne inférieure de la première classe ; 0). Pour chaque classe suivante, place un point en (borne supérieure de la classe ; effectif cumulé de cette classe), puis relie-le au point précédent par un segment.";
+  return virgulesTexte("Rappel : le premier point est fixe, en (borne inférieure de la première classe ; 0). Pour chaque classe suivante, place un point en (borne supérieure de la classe ; effectif cumulé de cette classe), puis relie-le au point précédent par un segment.");
 }
 
 // ============================================================================
@@ -264,15 +265,15 @@ const CONSIGNE_LECTURE_DEBUT: Record<ParametreLecture, string> = {
  * `formatDispersion.ts::PRECISION_2_DECIMALES`), avec un repli générique "arrondi au multiple de X
  * le plus proche" pour les paliers 5/20, qui n'ont pas de nom français court usuel. */
 export function libellePrecisionLecture(precision: number): string {
-  if (precision === 0.1) return "arrondi au dixième";
-  if (precision === 1) return "arrondi à l'unité";
-  return `arrondi au multiple de ${precision} le plus proche`;
+  if (precision === 0.1) return virgulesTexte("arrondi au dixième");
+  if (precision === 1) return virgulesTexte("arrondi à l'unité");
+  return virgulesTexte(`arrondi au multiple de ${precision} le plus proche`);
 }
 
 /** Notation française du pas de précision (virgule pour 0,1, entier nu pour 1/5/20 — jamais de
  * point décimal affiché à l'élève). */
 function formatPrecisionTexte(precision: number): string {
-  return precision === 0.1 ? "0,1" : String(precision);
+  return virgulesTexte(precision === 0.1 ? "0,1" : String(precision));
 }
 
 /** Consigne DYNAMIQUE — reflète le palier de précision RÉELLEMENT applicable à l'instance générée
@@ -284,27 +285,27 @@ function formatPrecisionTexte(precision: number): string {
 export function consigneLecture(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
   const precision = precisionLecture(exercice.etendue);
   const texte = formatPrecisionTexte(precision);
-  return `${CONSIGNE_LECTURE_DEBUT[parametre]} (en ${exercice.contexte.unite}, ${libellePrecisionLecture(precision)}, réponse acceptée à ±${texte} près).`;
+  return virgulesTexte(`${CONSIGNE_LECTURE_DEBUT[parametre]} (en ${exercice.contexte.unite}, ${libellePrecisionLecture(precision)}, réponse acceptée à ±${texte} près).`);
 }
 
 const FORMULE_SEUIL: Record<ParametreLecture, string> = { q1: "n/4", mediane: "n/2", q3: "3n/4" };
 const LABEL_LECTURE: Record<ParametreLecture, string> = { q1: "Q_1", mediane: "Q_2", q3: "Q_3" };
 
 export function labelChampLecture(parametre: ParametreLecture): string {
-  return LABEL_LECTURE[parametre];
+  return virgulesTexte(LABEL_LECTURE[parametre]);
 }
 
 /** Aide 1 — rappel de la MÉTHODE (jamais les valeurs de l'exercice) : calculer le seuil, placer la
  * barre, lire l'intersection avec la courbe puis l'abscisse correspondante. */
 export function texteAideLectureNiveau1(parametre: ParametreLecture): string {
-  return `Rappel : calcule d'abord le seuil ${FORMULE_SEUIL[parametre]}, place la barre orange à cette hauteur sur le graphe — les pointillés et la croix se tracent automatiquement jusqu'à la courbe puis jusqu'à l'axe des x, où tu peux lire l'abscisse correspondante.`;
+  return virgulesTexte(`Rappel : calcule d'abord le seuil ${FORMULE_SEUIL[parametre]}, place la barre orange à cette hauteur sur le graphe — les pointillés et la croix se tracent automatiquement jusqu'à la courbe puis jusqu'à l'axe des x, où tu peux lire l'abscisse correspondante.`);
 }
 
 /** Aide 2 — révèle le SEUIL déjà calculé pour cet exercice précis, jamais la valeur finale
  * elle-même (l'élève doit encore positionner la barre et lire l'abscisse). */
 export function texteAideLectureNiveau2(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
   const seuil = parametre === "q1" ? exercice.seuilQ1 : parametre === "q3" ? exercice.seuilQ3 : exercice.seuil;
-  return `Le seuil ${FORMULE_SEUIL[parametre]} vaut ${seuil}. Positionne la barre à cette hauteur, puis lis l'abscisse où le pointillé vertical croise l'axe des x.`;
+  return virgulesTexte(`Le seuil ${FORMULE_SEUIL[parametre]} vaut ${seuil}. Positionne la barre à cette hauteur, puis lis l'abscisse où le pointillé vertical croise l'axe des x.`);
 }
 
 /** Les 2 sommets du polygone (déjà confirmé, `polygonePoints`) qui encadrent le seuil du paramètre
@@ -343,7 +344,7 @@ const FORMULE_SEUIL_LATEX: Record<ParametreLecture, string> = {
  * introduite ailleurs sur cet écran). Identique en structure sur les 3 écrans, seuls le seuil
  * ($n/4$/$n/2$/$3n/4$) et le quartile ($Q_1$/$Q_2$/$Q_3$) changent. */
 export function formatFormuleInterpolationLatex(parametre: ParametreLecture): string {
-  return `${LABEL_LECTURE[parametre]} = x_{inf} + \\dfrac{x_{sup}-x_{inf}}{v_{sup}-v_{inf}}\\left(${FORMULE_SEUIL_LATEX[parametre]}-v_{inf}\\right)`;
+  return virgulesLatex(`${LABEL_LECTURE[parametre]} = x_{inf} + \\dfrac{x_{sup}-x_{inf}}{v_{sup}-v_{inf}}\\left(${FORMULE_SEUIL_LATEX[parametre]}-v_{inf}\\right)`);
 }
 
 // ============================================================================
@@ -353,7 +354,7 @@ export function formatFormuleInterpolationLatex(parametre: ParametreLecture): st
 // ============================================================================
 
 export function consigneSynthese(exercice: ExerciceMedianeClasses): string {
-  return `À partir du tableau ci-dessous (en ${exercice.contexte.unite}), détermine les paramètres suivants.`;
+  return virgulesTexte(`À partir du tableau ci-dessous (en ${exercice.contexte.unite}), détermine les paramètres suivants.`);
 }
 
 /** Aide 1 (`promptgen33modifications2.md`) — décomposée en fragments texte/LaTeX
@@ -372,7 +373,7 @@ export function effectifMaximalSynthese(exercice: ExerciceMedianeClasses): numbe
 }
 
 export function texteAideSyntheseNiveau2(exercice: ExerciceMedianeClasses): string {
-  return `L'effectif maximal du tableau vaut ${effectifMaximalSynthese(exercice)}. Il reste à identifier la classe qui l'atteint, puis à calculer son centre.`;
+  return virgulesTexte(`L'effectif maximal du tableau vaut ${effectifMaximalSynthese(exercice)}. Il reste à identifier la classe qui l'atteint, puis à calculer son centre.`);
 }
 
 // ============================================================================
@@ -380,24 +381,24 @@ export function texteAideSyntheseNiveau2(exercice: ExerciceMedianeClasses): stri
 // ============================================================================
 
 export function formatMedianeAttendueTexte(exercice: { seuil: number; mediane: number }): string {
-  return `seuil = ${exercice.seuil}, médiane = ${exercice.mediane}`;
+  return virgulesTexte(`seuil = ${exercice.seuil}, médiane = ${exercice.mediane}`);
 }
 
 export function formatQ1AttendueTexte(exercice: ExerciceMedianeDiscrete): string {
-  return `seuil = ${exercice.seuilQ1}, Q1 = ${exercice.q1}`;
+  return virgulesTexte(`seuil = ${exercice.seuilQ1}, Q1 = ${exercice.q1}`);
 }
 
 export function formatQ3AttendueTexte(exercice: ExerciceMedianeDiscrete): string {
-  return `seuil = ${exercice.seuilQ3}, Q3 = ${exercice.q3}`;
+  return virgulesTexte(`seuil = ${exercice.seuilQ3}, Q3 = ${exercice.q3}`);
 }
 
 export function formatMinMaxModeAttendueTexte(exercice: ExerciceMedianeDiscrete): string {
   const modes = exercice.modes.join(", ");
-  return `min = ${exercice.min}, max = ${exercice.max}, mode(s) = ${modes}`;
+  return virgulesTexte(`min = ${exercice.min}, max = ${exercice.max}, mode(s) = ${modes}`);
 }
 
 export function formatPolygoneAttenduTexte(exercice: ExerciceMedianeClasses): string {
-  return exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → (${c.borneSup} ; ${c.effectifCumule})`).join(", ");
+  return virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → (${c.borneSup} ; ${c.effectifCumule})`).join(", "));
 }
 
 /** `≈` plutôt que `=` — révélation d'un écran à tolérance non nulle (le pas du palier de précision
@@ -405,7 +406,7 @@ export function formatPolygoneAttenduTexte(exercice: ExerciceMedianeClasses): st
  * que soit le palier réellement en jeu. */
 export function formatLectureAttendueTexte(exercice: ExerciceMedianeClasses, parametre: ParametreLecture): string {
   const valeur = parametre === "q1" ? exercice.q1 : parametre === "q3" ? exercice.q3 : exercice.mediane;
-  return `${labelChampLecture(parametre).replace("_", "")} ≈ ${valeur}`;
+  return virgulesTexte(`${labelChampLecture(parametre).replace("_", "")} ≈ ${valeur}`);
 }
 
 /** Ne couvre plus que la portion sans `x_{min}`/`x_{max}` (`promptgen33ajustements.md`, point 3) —
@@ -413,5 +414,5 @@ export function formatLectureAttendueTexte(exercice: ExerciceMedianeClasses, par
  * notation indicielle réelle (`LABEL_X_MIN`/`LABEL_X_MAX`), jamais un tiret bas littéral. */
 export function formatSyntheseAttendueTexte(exercice: ExerciceMedianeClasses): string {
   const classeModale = formatClasseTexte(exercice, exercice.indexClasseModale);
-  return `étendue = ${exercice.etendue}, classe modale = ${classeModale}, mode = ${exercice.modeCentreClasseModale}`;
+  return virgulesTexte(`étendue = ${exercice.etendue}, classe modale = ${classeModale}, mode = ${exercice.modeCentreClasseModale}`);
 }

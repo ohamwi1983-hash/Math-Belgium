@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -72,7 +73,7 @@ export function EtapeClassementHistogramme({ exercice, tentativesUtilisees, tent
             className={`histogramme-liste-brute-item${indicesCoches.has(i) ? " is-cochee" : ""}`}
             onClick={() => basculerCoche(i)}
           >
-            {v}
+            {nombreFr(v)}
           </button>
         ))}
       </div>

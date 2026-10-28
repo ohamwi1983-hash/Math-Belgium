@@ -43,6 +43,7 @@ import {
 } from "./ui/formatMediane";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { nombreFr } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -207,7 +208,7 @@ export function AppMediane() {
       <>Q3 attendu (lecture) : {formatLectureAttendueTexte(exercice, "q3")}</>
     ) : exercice.variante === "classes" ? (
       <>
-        Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {exercice.xMin}, <Katex expression={LABEL_X_MAX} /> = {exercice.xMax},{" "}
+        Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {nombreFr(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFr(exercice.xMax)},{" "}
         {formatSyntheseAttendueTexte(exercice)}
       </>
     ) : null;
@@ -226,7 +227,7 @@ export function AppMediane() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Paramètres de position</h1>
-        <p className="app-subtitle">Chapitre 5</p>
+        <p className="app-subtitle">Chapitre 4</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 

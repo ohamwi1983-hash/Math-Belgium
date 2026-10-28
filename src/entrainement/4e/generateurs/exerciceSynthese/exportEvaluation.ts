@@ -33,6 +33,7 @@ import { formatEcartTypeAttendueTexte, formatTableauAttenduTexte, formatVariance
 import type { SegmentTexte } from "../../ui/formatDispersion";
 import { formatCinqNombresLatex, LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN } from "../../ui/formatBoiteMoustaches";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSynthese } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSynthese>` pour gen35 ("Exercice de synthèse",
@@ -369,7 +370,7 @@ function construireCorrectionExerciceSynthese(exercice: ExerciceSynthese): BlocC
   return etapes.flatMap((construire, i) => construire(exercice, LETTRES[i] ?? String(i + 1)));
 }
 
-export const adaptateurEvaluationExerciceSynthese: AdaptateurFeuilleExercices<ExerciceSynthese> = {
+const adaptateurEvaluationExerciceSyntheseBrut: AdaptateurFeuilleExercices<ExerciceSynthese> = {
   titreDocument: "Exercice de synthèse — Statistique descriptive — Évaluation",
   nomFichierBase: "exercice-synthese-statistique-descriptive",
   genererInstance: genererExerciceSynthese,
@@ -378,3 +379,6 @@ export const adaptateurEvaluationExerciceSynthese: AdaptateurFeuilleExercices<Ex
   construireEnonce: construireEnonceExerciceSynthese,
   construireCorrection: construireCorrectionExerciceSynthese,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationExerciceSynthese: AdaptateurFeuilleExercices<ExerciceSynthese> = avecVirgulesBelges(adaptateurEvaluationExerciceSyntheseBrut);

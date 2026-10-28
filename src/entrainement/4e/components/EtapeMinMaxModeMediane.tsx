@@ -11,6 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceMedianeDiscrete;
@@ -75,7 +76,7 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
           <tbody>
             {exercice.lignes.map((ligne, index) => (
               <tr key={index}>
-                <td>{ligne.valeur}</td>
+                <td>{nombreFr(ligne.valeur)}</td>
                 <td>{ligne.effectif}</td>
               </tr>
             ))}

@@ -40,6 +40,7 @@ import {
   type SegmentTexte,
 } from "../../ui/formatBienaymeTchebychev";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev>` pour gen37 (Inégalité de
@@ -339,7 +340,7 @@ function construireCorrectionBienaymeTchebychev(instance: ExerciceBienaymeTcheby
   }
 }
 
-export const adaptateurEvaluationBienaymeTchebychev: AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev> = {
+const adaptateurEvaluationBienaymeTchebychevBrut: AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev> = {
   titreDocument: "Inégalité de Bienaymé-Tchebychev — Évaluation",
   nomFichierBase: "bienayme-tchebychev",
   genererInstance: genererExerciceBienaymeTchebychev,
@@ -351,3 +352,6 @@ export const adaptateurEvaluationBienaymeTchebychev: AdaptateurFeuilleExercices<
   // l'instance à chaque fois qu'une étape "sans aide" doit être réexpliquée — jamais une consigne
   // générique : voir le commentaire de tête.
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationBienaymeTchebychev: AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev> = avecVirgulesBelges(adaptateurEvaluationBienaymeTchebychevBrut);

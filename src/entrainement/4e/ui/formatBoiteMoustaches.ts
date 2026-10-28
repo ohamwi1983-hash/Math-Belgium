@@ -26,15 +26,17 @@ import type {
   ExerciceBoiteMoustachesLecture,
   VarianteBoiteMoustaches,
 } from "../core/boiteMoustaches.types";
+import { phraseRepartition, phraseRepartitionDeuxGroupes } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 export const LABEL_X_MIN = "x_{min}";
@@ -50,7 +52,7 @@ const LIBELLES_VARIANTE: Record<VarianteBoiteMoustaches, string> = {
 };
 
 export function libelleVarianteBoiteMoustaches(variante: VarianteBoiteMoustaches): string {
-  return LIBELLES_VARIANTE[variante];
+  return virgulesTexte(LIBELLES_VARIANTE[variante]);
 }
 
 // ============================================================================
@@ -61,18 +63,15 @@ export function libelleVarianteBoiteMoustaches(variante: VarianteBoiteMoustaches
  * partagée commencent par une voyelle ("étudiants", "athlètes", "animaux d'un zoo"...), la
  * consigne "comparaison" ci-dessous ne peut donc jamais écrire "de" tel quel sans risquer "chez
  * deux groupes de arbres d'une forêt", grammaticalement incorrect. */
-function articleDe(mot: string): string {
-  return /^[aeiouyàâäéèêëîïôöùûüh]/i.test(mot) ? "d'" : "de ";
-}
 
 /** Même gabarit que les 4 autres générateurs du chapitre — étendu d'une variante propre à
  * "comparaison" (2 séries, TOUJOURS le même contexte, jamais deux contextes indépendants). */
 export function formatEnonceTexte(exercice: ExerciceBoiteMoustaches): string {
   const { contexte } = exercice;
   if (exercice.variante === "comparaison") {
-    return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez deux groupes ${articleDe(contexte.population)}${contexte.population} — série A et série B :`;
+    return virgulesTexte(phraseRepartitionDeuxGroupes(contexte));
   }
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(contexte));
 }
 
 // ============================================================================
@@ -105,7 +104,7 @@ export function segmentsConsigneConstruction(exercice: ExerciceBoiteMoustachesCo
  * jamais que le minimum et le maximum). Rendue en une seule expression KaTeX, réutilisée aussi par
  * la révélation du panneau de résultat (contexte différent, même contenu). */
 export function formatCinqNombresLatex(valeurs: CinqNombres): string {
-  return formatTermesCinqNombresLatex(valeurs).join(",\\ ");
+  return virgulesLatex(formatTermesCinqNombresLatex(valeurs).join(",\\ "));
 }
 
 /** Version "bloc fitter" de `formatCinqNombresLatex` (`promptblocfittertousgenerateurs.md`) — un
@@ -113,13 +112,13 @@ export function formatCinqNombresLatex(valeurs: CinqNombres): string {
  * ce point) plutôt qu'une seule chaîne jointe par des virgules, pour un retour à la ligne propre
  * entre valeurs sur mobile étroit. */
 export function formatTermesCinqNombresLatex(valeurs: CinqNombres): string[] {
-  return [
+  return ([
     `${LABEL_X_MIN}=${valeurs.min}`,
     `${LABEL_Q1}=${valeurs.q1}`,
     `${LABEL_Q2}=${valeurs.mediane}`,
     `${LABEL_Q3}=${valeurs.q3}`,
     `${LABEL_X_MAX}=${valeurs.max}`,
-  ];
+  ]).map(virgulesLatex);
 }
 
 export function segmentsAideConstructionNiveau1(): SegmentTexte[] {

@@ -13,6 +13,7 @@ import {
 } from "../ui/formatComparaisonSeries";
 import { Katex } from "./Katex";
 import { ComparaisonSeriesGraph } from "./ComparaisonSeriesGraph";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceComparaisonSeries;
@@ -39,7 +40,7 @@ function TableauBrut({ serie, label }: { serie: SerieComparaison; label: string 
         <tbody>
           {serie.lignes.map((ligne, index) => (
             <tr key={index}>
-              <td>{ligne.valeur}</td>
+              <td>{nombreFr(ligne.valeur)}</td>
               <td>{ligne.effectif}</td>
               <td>{ligne.effectifCumule}</td>
             </tr>
@@ -71,7 +72,7 @@ function TableauRecap({ serie, label }: { serie: SerieComparaison; label: string
               <td>
                 <Katex expression={ligne.latex} />
               </td>
-              <td>{ligne.valeur}</td>
+              <td>{nombreFr(ligne.valeur)}</td>
             </tr>
           ))}
         </tbody>

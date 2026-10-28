@@ -14,6 +14,7 @@ import type {
 } from "../../core/boiteMoustaches.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { type EchelleContexte, tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
 
 const ECART_MIN = 1;
@@ -39,22 +40,10 @@ const MAX_TENTATIVES = 500;
  */
 const FENETRE_MIN_COMPARAISON = 10;
 
-/** Largeur minimale garantie de la plage de tirage de `min` — même principe et même étendue
- * historique que "Tableau de fréquences"/"Moyenne pondérée"/"Médiane" (dupliqué, pas importé) :
- * certains contextes de la banque ont un `plageXBar` trop étroit pour y loger les 4 écarts (jusqu'à
- * 16 au total) ET une variation réelle de `min`. 20 suffit toujours : `hautPlage - etendueTotale`
- * reste alors au moins `basPlage + 4`, jamais en dessous de `basPlage`. */
-const LARGEUR_MIN_PLAGE = 20;
-
-/** Élargit `[min,max]` symétriquement autour de son centre jusqu'à `largeurMin`, jamais en dessous
- * de 0 — dupliqué (pas importé) dans chaque générateur qui en a besoin. */
-function elargirPlage(min: number, max: number, largeurMin: number): [number, number] {
-  const largeur = max - min;
-  if (largeur >= largeurMin) return [min, max];
-  const centre = (min + max) / 2;
-  const nouveauMin = Math.max(0, Math.round(centre - largeurMin / 2));
-  return [nouveauMin, nouveauMin + largeurMin];
-}
+/** Largeur (en unités de l'échelle du contexte) de la grille où se placent les 5 nombres — mise à
+ * l'échelle par `tirerEchelle` (audit chapitre 4 : plus jamais une boîte de 24 € de large pour des
+ * salaires, ni une borne d'axe négative). */
+const LARGEUR_UNITES = 16;
 
 /**
  * `ancreMin?` (`promptgen36fixmafsechelle.md`) — borne le tirage de `min` à une fenêtre
@@ -64,26 +53,38 @@ function elargirPlage(min: number, max: number, largeurMin: number): [number, nu
  * historique inchangé ; fourni uniquement pour la SECONDE série de `comparaison`, ancrée sur le
  * minimum déjà tiré de la première (voir `construireComparaison`).
  */
-function construireCinqNombres(contexte: ContexteBienaymeTchebychev, ancreMin?: number): CinqNombres {
-  const [basPlage, hautPlage] = elargirPlage(contexte.plageXBar[0], contexte.plageXBar[1], LARGEUR_MIN_PLAGE);
+function construireCinqNombres(echelle: EchelleContexte, ancreMinUnites?: number): { valeurs: CinqNombres; minUnites: number } {
   const g1 = randomInt(ECART_MIN, ECART_MAX);
   const g2 = randomInt(ECART_MIN, ECART_MAX);
   const g3 = randomInt(ECART_MIN, ECART_MAX);
   const g4 = randomInt(ECART_MIN, ECART_MAX);
   const etendueTotale = g1 + g2 + g3 + g4;
-  const minMaxAtteignable = Math.max(basPlage, hautPlage - etendueTotale);
-  const minBorneBasse = ancreMin === undefined ? basPlage : Math.max(basPlage, ancreMin - FENETRE_MIN_COMPARAISON);
-  const minBorneHaute = ancreMin === undefined ? minMaxAtteignable : Math.min(minMaxAtteignable, ancreMin + FENETRE_MIN_COMPARAISON);
-  const min = randomInt(minBorneBasse, Math.max(minBorneBasse, minBorneHaute));
-  const q1 = min + g1;
-  const mediane = q1 + g2;
-  const q3 = mediane + g3;
-  const max = q3 + g4;
-  return { min, q1, mediane, q3, max };
+  const minMaxAtteignable = LARGEUR_UNITES - etendueTotale;
+  const minBorneBasse = ancreMinUnites === undefined ? 0 : Math.max(0, ancreMinUnites - FENETRE_MIN_COMPARAISON);
+  const minBorneHaute = ancreMinUnites === undefined ? minMaxAtteignable : Math.min(minMaxAtteignable, ancreMinUnites + FENETRE_MIN_COMPARAISON);
+  const minUnites = randomInt(minBorneBasse, Math.max(minBorneBasse, minBorneHaute));
+  const positions = [minUnites, minUnites + g1, minUnites + g1 + g2, minUnites + g1 + g2 + g3, etendueTotale + minUnites];
+  const [min, q1, mediane, q3, max] = positions.map((j) => valeurEchelle(echelle, j));
+  return { valeurs: { min, q1, mediane, q3, max }, minUnites };
+}
+
+/** Échelle du contexte + cinq nombres réalistes (voir `valeursRealistes`) — un autre tirage est fait
+ * tant que la série est trop resserrée pour son contexte. */
+function tirerCinqNombresRealistes(contexte: ContexteBienaymeTchebychev): { valeurs: CinqNombres; echelle: EchelleContexte } {
+  let dernier: { valeurs: CinqNombres; echelle: EchelleContexte } | null = null;
+  for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
+    const { valeurs } = construireCinqNombres(echelle);
+    dernier = { valeurs, echelle };
+    if (valeursRealistes(contexte, Object.values(valeurs))) return dernier;
+  }
+  if (dernier === null) throw new Error("tirerCinqNombresRealistes : aucune échelle possible pour ce contexte");
+  return dernier;
 }
 
 function ecartInterquartile(valeurs: CinqNombres): number {
-  return valeurs.q3 - valeurs.q1;
+  return Number((valeurs.q3 - valeurs.q1).toFixed(6));
 }
 
 /**
@@ -101,8 +102,11 @@ function ecartInterquartile(valeurs: CinqNombres): number {
  * (temps/tailles/prix/distances), mais rien n'empêche mathématiquement `minReel-MARGE_AXE` de
  * descendre sous 0 pour une série dont le minimum est déjà proche de 0.
  */
-function calculerBornePlage(minReel: number, maxReel: number): { min: number; max: number } {
-  return { min: Math.max(0, minReel - MARGE_AXE), max: maxReel + MARGE_AXE };
+/** Marge de `MARGE_AXE` unités de l'échelle de chaque côté ; l'axe ne descend jamais sous 0, sauf
+ * si les données elles-mêmes sont négatives (température). */
+function calculerBornePlage(minReel: number, maxReel: number, unite: number): { min: number; max: number } {
+  const marge = MARGE_AXE * unite;
+  return { min: Math.max(Math.min(0, minReel), minReel - marge), max: maxReel + marge };
 }
 
 function tirerContexte(): ContexteBienaymeTchebychev {
@@ -110,13 +114,13 @@ function tirerContexte(): ContexteBienaymeTchebychev {
 }
 
 function construireConstruction(contexte: ContexteBienaymeTchebychev): ExerciceBoiteMoustachesConstruction {
-  const valeurs = construireCinqNombres(contexte);
-  return { variante: "construction", contexte, valeurs, bornePlage: calculerBornePlage(valeurs.min, valeurs.max) };
+  const { valeurs, echelle } = tirerCinqNombresRealistes(contexte);
+  return { variante: "construction", contexte, valeurs, bornePlage: calculerBornePlage(valeurs.min, valeurs.max, echelle.unite) };
 }
 
 function construireLecture(contexte: ContexteBienaymeTchebychev): ExerciceBoiteMoustachesLecture {
-  const valeurs = construireCinqNombres(contexte);
-  return { variante: "lecture", contexte, valeurs, bornePlage: calculerBornePlage(valeurs.min, valeurs.max) };
+  const { valeurs, echelle } = tirerCinqNombresRealistes(contexte);
+  return { variante: "lecture", contexte, valeurs, bornePlage: calculerBornePlage(valeurs.min, valeurs.max, echelle.unite) };
 }
 
 /**
@@ -135,8 +139,11 @@ function construireLecture(contexte: ContexteBienaymeTchebychev): ExerciceBoiteM
  */
 function construireComparaison(contexte: ContexteBienaymeTchebychev): ExerciceBoiteMoustachesComparaison {
   for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
-    const serieA = construireCinqNombres(contexte);
-    const serieB = construireCinqNombres(contexte, serieA.min);
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
+    const { valeurs: serieA, minUnites: minA } = construireCinqNombres(echelle);
+    const { valeurs: serieB } = construireCinqNombres(echelle, minA);
+    if (!valeursRealistes(contexte, Object.values(serieA)) || !valeursRealistes(contexte, Object.values(serieB))) continue;
     if (serieA.mediane === serieB.mediane) continue;
     if (ecartInterquartile(serieA) === ecartInterquartile(serieB)) continue;
     return {
@@ -144,7 +151,7 @@ function construireComparaison(contexte: ContexteBienaymeTchebychev): ExerciceBo
       contexte,
       serieA,
       serieB,
-      bornePlage: calculerBornePlage(Math.min(serieA.min, serieB.min), Math.max(serieA.max, serieB.max)),
+      bornePlage: calculerBornePlage(Math.min(serieA.min, serieB.min), Math.max(serieA.max, serieB.max), echelle.unite),
       medianePlusGrande: serieA.mediane > serieB.mediane ? "A" : "B",
       ecartInterquartilePlusGrand: ecartInterquartile(serieA) > ecartInterquartile(serieB) ? "A" : "B",
     };

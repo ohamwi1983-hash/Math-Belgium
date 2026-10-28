@@ -21,6 +21,7 @@ import {
 } from "../../ui/formatMediane";
 import { precisionLecture, seuilLecture, valeurCibleLecture, type ParametreLecture } from "../../moteur/verificationMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceMediane>` pour gen33 (« Médiane, quartiles et
@@ -303,7 +304,7 @@ function construireCorrectionMediane(instance: ExerciceMediane): BlocCorrection[
   return instance.variante === "discrete" ? construireCorrectionDiscrete(instance) : construireCorrectionClasses(instance);
 }
 
-export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMediane> = {
+const adaptateurEvaluationMedianeBrut: AdaptateurFeuilleExercices<ExerciceMediane> = {
   titreDocument: "Médiane, quartiles et mode — Évaluation",
   nomFichierBase: "mediane-quartiles-mode",
   genererInstance: genererExerciceMediane,
@@ -312,3 +313,6 @@ export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMed
   construireEnonce: construireEnonceMediane,
   construireCorrection: construireCorrectionMediane,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMediane> = avecVirgulesBelges(adaptateurEvaluationMedianeBrut);

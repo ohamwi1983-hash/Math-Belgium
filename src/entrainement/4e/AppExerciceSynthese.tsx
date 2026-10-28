@@ -73,6 +73,8 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
+import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
+import { nombreFr } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -81,10 +83,6 @@ const REGLAGES_DEMO: ReglagesSession = {
   affichageExplication: true,
 };
 
-/** Pas de crantage du glissement des 5 marqueurs de la boîte à moustaches, variante "classes" —
- * médiane/Q1/Q3 y sont arrondis à 1 décimale (`arrondi1`, `generateurs/exerciceSynthese/index.ts`),
- * contrairement à la variante "discrete" (toujours des entiers exacts, pas par défaut). */
-const PAS_BOXPLOT_CLASSES = 0.1;
 
 function nouvelleSession(): EtatSessionExerciceSynthese {
   return demarrerSessionExerciceSynthese(REGLAGES_DEMO, genererExerciceSynthese);
@@ -132,7 +130,7 @@ function reponseAttenduePhase(phase: PhaseExerciceSynthese, exercice: ExerciceSy
         </>
       );
     case "quotient":
-      return <>Moyenne pondérée attendue : {exercice.xBar}</>;
+      return <>Moyenne pondérée attendue : {nombreFr(exercice.xBar)}</>;
     case "mediane": {
       if (exercice.variante !== "discrete") return null;
       return <>Médiane attendue : {formatMedianeAttendueTexte(versMedianeDiscrete(exercice))}</>;
@@ -169,7 +167,7 @@ function reponseAttenduePhase(phase: PhaseExerciceSynthese, exercice: ExerciceSy
       if (exercice.variante !== "classes") return null;
       return (
         <>
-          Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {exercice.xMin}, <Katex expression={LABEL_X_MAX} /> = {exercice.xMax},{" "}
+          Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {nombreFr(exercice.xMin)}, <Katex expression={LABEL_X_MAX} /> = {nombreFr(exercice.xMax)},{" "}
           {formatSyntheseAttendueTexte(versMedianeClasses(exercice))}
         </>
       );
@@ -214,7 +212,7 @@ interface TransitionEnAttente {
 }
 
 /**
- * "Exercice de synthèse" (chapitre 5, remplace "Étendue et écart interquartile" à la même
+ * "Exercice de synthèse" (chapitre 4, remplace "Étendue et écart interquartile" à la même
  * position, gen35 — `promptgen35synthese.md`) — UN SEUL dataset (contexte + table x_i/n_i ou
  * classes/effectifs), généré une fois pour toutes, suivi de bout en bout à travers 11 (variante
  * "discrete") ou 13 (variante "classes") écrans REPRIS des générateurs sources (gen32/33/34/36),
@@ -293,7 +291,7 @@ export function AppExerciceSynthese() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Synthèse — Statistique descriptive complète</h1>
-        <p className="app-subtitle">Chapitre 5 — Statistiques</p>
+        <p className="app-subtitle">Chapitre 4 — Statistiques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
@@ -448,7 +446,9 @@ export function AppExerciceSynthese() {
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseBoxplot(etat, reponse))}
-              pas={exercice.variante === "classes" ? PAS_BOXPLOT_CLASSES : undefined}
+              // Cran du glissement = plus grand pas commun des 5 valeurs attendues (entiers, multiples de
+              // l'unité d'échelle du contexte, ou quartiles arrondis au palier de lecture).
+              pas={pasCommun(Object.values(versBoiteMoustaches(exercice).valeurs))}
               validation={validation}
             />
           ) : phase === "tableau" ? (

@@ -17,6 +17,7 @@ import {
   formatEnonceTexte,
 } from "../../ui/formatMoyennePonderee";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMoyennePonderee } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceMoyennePonderee>` pour gen32 (Moyenne pondérée,
@@ -166,7 +167,7 @@ function construireCorrectionMoyennePonderee(instance: ExerciceMoyennePonderee):
   return blocs;
 }
 
-export const adaptateurEvaluationMoyennePonderee: AdaptateurFeuilleExercices<ExerciceMoyennePonderee> = {
+const adaptateurEvaluationMoyennePondereeBrut: AdaptateurFeuilleExercices<ExerciceMoyennePonderee> = {
   titreDocument: "Moyenne pondérée — Évaluation",
   nomFichierBase: "moyenne-ponderee",
   genererInstance: genererExerciceMoyennePonderee,
@@ -175,3 +176,6 @@ export const adaptateurEvaluationMoyennePonderee: AdaptateurFeuilleExercices<Exe
   construireEnonce: construireEnonceMoyennePonderee,
   construireCorrection: construireCorrectionMoyennePonderee,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationMoyennePonderee: AdaptateurFeuilleExercices<ExerciceMoyennePonderee> = avecVirgulesBelges(adaptateurEvaluationMoyennePondereeBrut);

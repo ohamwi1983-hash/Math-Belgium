@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -93,7 +94,7 @@ export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentative
               {exercice.classes.map((classe, index) => (
                 <tr key={index}>
                   <td>{formatClasseTexte(exercice, index)}</td>
-                  <td>{exercice.variante === "frequence" ? `${classe.frequencePourcent} %` : classe.effectif}</td>
+                  <td>{exercice.variante === "frequence" ? `${nombreFr(classe.frequencePourcent)} %` : classe.effectif}</td>
                 </tr>
               ))}
             </tbody>

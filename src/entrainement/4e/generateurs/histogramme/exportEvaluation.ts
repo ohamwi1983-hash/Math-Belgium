@@ -11,6 +11,7 @@ import {
   formatTraceAttendueTexte,
 } from "../../ui/formatHistogramme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHistogramme } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceHistogramme>` pour gen31 (Regroupement en classes
@@ -105,7 +106,7 @@ function construireCorrectionHistogramme(instance: ExerciceHistogramme): BlocCor
   return blocs;
 }
 
-export const adaptateurEvaluationHistogramme: AdaptateurFeuilleExercices<ExerciceHistogramme> = {
+const adaptateurEvaluationHistogrammeBrut: AdaptateurFeuilleExercices<ExerciceHistogramme> = {
   titreDocument: "Regroupement en classes et histogramme — Évaluation",
   nomFichierBase: "histogramme",
   genererInstance: genererExerciceHistogramme,
@@ -114,3 +115,6 @@ export const adaptateurEvaluationHistogramme: AdaptateurFeuilleExercices<Exercic
   construireEnonce: construireEnonceHistogramme,
   construireCorrection: construireCorrectionHistogramme,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationHistogramme: AdaptateurFeuilleExercices<ExerciceHistogramme> = avecVirgulesBelges(adaptateurEvaluationHistogrammeBrut);

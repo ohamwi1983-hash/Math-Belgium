@@ -17,6 +17,7 @@ import {
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
+import { nombreFr, virgulesTexte } from "../ui/nombreFr";
 
 const CLES: (keyof CinqNombres)[] = ["min", "q1", "mediane", "q3", "max"];
 
@@ -97,6 +98,7 @@ export function BoiteMoustachesGraph({ bornePlage, lignes }: Props) {
           cibleNombreLignesY={CIBLE_NOMBRE_LIGNES_Y_BOITE}
           mantissesPersonnalisees={MANTISSES_GRILLE_BOITE}
           masquerEtiquettesY
+          formatEtiquette={nombreFr}
         />
         {lignes.map((ligne, index) => {
           const y = yLigne(index, nombreLignes);
@@ -157,7 +159,7 @@ export function BoiteMoustachesGraph({ bornePlage, lignes }: Props) {
                         color={couleur}
                         size={14}
                       >
-                        {xParCle[cle]}
+                        {nombreFr(xParCle[cle])}
                       </Text>
                     </g>
                   );
@@ -166,7 +168,7 @@ export function BoiteMoustachesGraph({ bornePlage, lignes }: Props) {
           );
         })}
       </Mafs>
-      {pas && <p className="mafs-graph-pas">{formatIndicateurPasGrille(pas.x, pas.y)}</p>}
+      {pas && <p className="mafs-graph-pas">{virgulesTexte(formatIndicateurPasGrille(pas.x, pas.y))}</p>}
     </div>
   );
 }

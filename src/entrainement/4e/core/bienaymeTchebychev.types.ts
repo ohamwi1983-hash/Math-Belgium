@@ -60,6 +60,21 @@ export interface ContexteBienaymeTchebychev {
   unite: string;
   plageXBar: [number, number];
   plageSigma: [number, number];
+  /** `true` pour des personnes ou des animaux (« chez les étudiants »), `false` pour des objets,
+   * des lieux ou des végétaux (« pour les véhicules ») — voir `ui/phrasesContexteStatistique.ts`. */
+  populationAnimee: boolean;
+  /** Pas naturel d'une donnée individuelle (1 pour des entiers, 0,1 pour une mesure au dixième...) —
+   * toute valeur tirée par les générateurs du chapitre est un multiple de ce pas (voir
+   * `generateurs/bienaymeTchebychev/echelleContexte.ts`). */
+  pas: number;
+  /** Plus petite valeur individuelle réaliste (ex. 2 h de sommeil, 0 € jamais atteint) — aucune
+   * donnée tirée, aucune borne d'intervalle ne descend en dessous, sauf `peutEtreNegatif`. */
+  plancher: number;
+  /** Grandeur comptée (trajets, battements, années révolues...) : jamais de décimale. */
+  entier?: boolean;
+  /** Grandeur pouvant être négative (température) : son plancher est négatif, et l'axe d'une boîte
+   * à moustaches peut alors descendre sous 0. */
+  peutEtreNegatif?: boolean;
 }
 
 export type VarianteBienaymeTchebychev =

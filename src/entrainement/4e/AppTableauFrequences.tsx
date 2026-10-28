@@ -118,7 +118,7 @@ export function AppTableauFrequences() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Tableau de fréquences</h1>
-        <p className="app-subtitle">Chapitre 5</p>
+        <p className="app-subtitle">Chapitre 4</p>
       </header>
 
       <main className="card">

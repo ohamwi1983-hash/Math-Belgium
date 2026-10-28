@@ -812,11 +812,18 @@
 .entrainement .aide-5e p,
 .entrainement .triangle-quelconque-aide p {
   margin: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Paragraphe en bloc normal (audit chapitre 4) : l'ancien `display: flex` faisait de chaque nœud
+ * texte et de chaque fragment KaTeX une colonne (« Rap / pel : / les mo… »). L'icône du premier
+ * paragraphe est désormais posée en absolu dans une marge gauche réservée — toutes ses lignes
+ * restent alignées à droite de l'icône, comme avant, sans jamais découper le texte. */
+.entrainement .aide-5e p:first-child,
+.entrainement .triangle-quelconque-aide p:first-child {
+  position: relative;
+  padding-left: 24px;
 }
 
 .entrainement .aide-5e p > *,
@@ -833,10 +840,11 @@
 .entrainement .aide-5e p:first-child::before,
 .entrainement .triangle-quelconque-aide p:first-child::before {
   content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
   width: 16px;
   height: 16px;
-  flex: none;
-  margin-top: 1px;
   background-color: var(--color-tip);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle fill='%23fff' cx='12' cy='10' r='6.5'/%3E%3Crect fill='%23fff' x='9' y='17' width='6' height='2' rx='1'/%3E%3Crect fill='%23fff' x='9.5' y='20' width='5' height='1.6' rx='0.8'/%3E%3C/svg%3E") no-repeat center / contain;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle fill='%23fff' cx='12' cy='10' r='6.5'/%3E%3Crect fill='%23fff' x='9' y='17' width='6' height='2' rx='1'/%3E%3Crect fill='%23fff' x='9.5' y='20' width='5' height='1.6' rx='0.8'/%3E%3C/svg%3E") no-repeat center / contain;
@@ -1713,6 +1721,56 @@
 
 .entrainement .summary-table-scroll .summary-table {
   margin-bottom: 0;
+}
+
+/* Résumé de fin de thème du quiz gen59 (opt-in `summary-table-cartes`) : sur mobile, chaque ligne
+ * devient une carte — l'affirmation prend toute la largeur au lieu d'une colonne d'environ 80 px,
+ * les autres cellules s'affichent avec leur libellé (`data-label`). Inchangé sur PC. */
+@media (max-width: 480px) {
+  .entrainement .summary-table-cartes thead {
+    display: none;
+  }
+
+  .entrainement .summary-table-cartes,
+  .entrainement .summary-table-cartes tbody,
+  .entrainement .summary-table-cartes tr,
+  .entrainement .summary-table-cartes td {
+    display: block;
+    width: 100%;
+  }
+
+  .entrainement .summary-table-cartes tr {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .entrainement .summary-table-cartes tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .entrainement .summary-table-cartes td,
+  .entrainement .summary-table-cartes tbody tr:last-child td {
+    border-bottom: none;
+    padding: 2px 0;
+  }
+
+  .entrainement .summary-table-cartes td[data-label="#"] {
+    display: none;
+  }
+
+  .entrainement .summary-table-cartes td[data-label="Ta réponse"],
+  .entrainement .summary-table-cartes td[data-label="Correcte"] {
+    display: inline-block;
+    width: auto;
+    margin-right: 16px;
+    color: var(--color-text-muted);
+  }
+
+  .entrainement .summary-table-cartes td[data-label="Ta réponse"]::before,
+  .entrainement .summary-table-cartes td[data-label="Correcte"]::before {
+    content: attr(data-label) " : ";
+    font-weight: 600;
+  }
 }
 
 .entrainement .grille-signes-scroll {
@@ -3113,6 +3171,52 @@
 
 .entrainement .calculatrice-bouton-flottant:hover {
   background: var(--accent-ink);
+}
+
+/* Smartphone (audit chapitre 4, point 23) : la pilule « Calculatrice » recouvrait un champ, le
+ * bouton Aide ou Valider selon le défilement. Elle devient une pastille ronde de 44 px (cible
+ * tactile conservée, libellé gardé pour les lecteurs d'écran via `aria-label`), la page réserve
+ * de quoi faire défiler le dernier contrôle au-dessus d'elle, et elle s'efface tant qu'un champ a
+ * le focus (clavier ouvert : c'est là qu'elle masquait la saisie). */
+@media (max-width: 600px) {
+  .entrainement .calculatrice-bouton-flottant {
+    right: 12px;
+    bottom: 12px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s ease;
+  }
+
+  .entrainement .calculatrice-bouton-flottant::before {
+    content: "";
+    width: 22px;
+    height: 22px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2.5' width='14' height='19' rx='2.5' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Crect x='8' y='5.5' width='8' height='3.5' rx='0.8' fill='%23fff'/%3E%3Ccircle cx='9' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='9' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='17' r='1.2' fill='%23fff'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2.5' width='14' height='19' rx='2.5' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Crect x='8' y='5.5' width='8' height='3.5' rx='0.8' fill='%23fff'/%3E%3Ccircle cx='9' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='9' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='17' r='1.2' fill='%23fff'/%3E%3C/svg%3E") no-repeat center / contain;
+  }
+
+  .entrainement .calculatrice-bouton-libelle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .entrainement:has(.calculatrice-bouton-flottant) {
+    padding-bottom: 64px;
+  }
+
+  .entrainement:has(input:focus, textarea:focus, select:focus) .calculatrice-bouton-flottant {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .entrainement .calculatrice-overlay {

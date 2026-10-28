@@ -28,11 +28,12 @@
  * simple pour cette raison précise).
  */
 import type { ExerciceMoyennePonderee, ExerciceMoyennePondereeClasses } from "../core/moyennePonderee.types";
+import { phraseRepartition } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les écrans de ce générateur. */
 export function formatEnonceTexte(exercice: ExerciceMoyennePonderee): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(exercice.contexte));
 }
 
 export const LABEL_VALEUR_XI = "x_i";
@@ -79,18 +80,18 @@ export interface ConsigneSegmentee {
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 /** Convertit un nombre en une représentation directement intégrable dans une chaîne LaTeX, en
  * notation décimale FRANÇAISE (virgule, `{,}` pour éviter tout espacement LaTeX parasite autour du
  * séparateur) — un entier reste affiché tel quel. */
 function formatNombreLatex(valeur: number): string {
-  return String(valeur).replace(".", "{,}");
+  return virgulesLatex(String(valeur).replace(".", "{,}"));
 }
 
 // ============================================================================
@@ -104,7 +105,7 @@ export function estDerniereClasse(exercice: ExerciceMoyennePondereeClasses, inde
 export function formatClasseTexte(exercice: ExerciceMoyennePondereeClasses, index: number): string {
   const classe = exercice.classes[index];
   const fermante = estDerniereClasse(exercice, index) ? "]" : "[";
-  return `[${classe.borneInf} ; ${classe.borneSup}${fermante}`;
+  return virgulesTexte(`[${classe.borneInf} ; ${classe.borneSup}${fermante}`);
 }
 
 // ============================================================================
@@ -112,7 +113,7 @@ export function formatClasseTexte(exercice: ExerciceMoyennePondereeClasses, inde
 // ============================================================================
 
 export function consigneCentres(exercice: ExerciceMoyennePondereeClasses): string {
-  return `Calcule le centre de chaque classe (en ${exercice.contexte.unite}).`;
+  return virgulesTexte(`Calcule le centre de chaque classe (en ${exercice.contexte.unite}).`);
 }
 
 /** Classe "exemple" utilisée par l'Aide 2 — toujours la première (`INDEX_LIGNE_EXEMPLE`), un choix
@@ -211,7 +212,7 @@ export function texteAideQuotientNiveau1(): AideDeuxLignes {
  * l'élève), affiché en rappel persistant sur l'écran "quotient" — sur 2 lignes séparées
  * (`\begin{gathered}`, jamais côte à côte, `promptgen32modifications.md` point 4). */
 export function formatEtatActuelSommesLatex(exercice: ExerciceMoyennePonderee): string {
-  return `\\begin{gathered} ${LABEL_SOMME_XN} = ${exercice.sommeXN} \\\\ ${LABEL_SOMME_N} = ${exercice.n} \\end{gathered}`;
+  return virgulesLatex(`\\begin{gathered} ${LABEL_SOMME_XN} = ${exercice.sommeXN} \\\\ ${LABEL_SOMME_N} = ${exercice.n} \\end{gathered}`);
 }
 
 // ============================================================================
@@ -220,7 +221,7 @@ export function formatEtatActuelSommesLatex(exercice: ExerciceMoyennePonderee): 
 // ============================================================================
 
 export function formatCentresAttendusTexte(exercice: ExerciceMoyennePondereeClasses): string {
-  return exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.centre}`).join(", ");
+  return virgulesTexte(exercice.classes.map((c, i) => `${formatClasseTexte(exercice, i)} → ${c.centre}`).join(", "));
 }
 
 export function formatSommesAttenduesTexte(exercice: ExerciceMoyennePonderee): SegmentTexte[] {

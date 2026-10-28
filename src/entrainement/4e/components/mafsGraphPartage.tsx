@@ -87,6 +87,7 @@ export function GrilleAdaptative({
   mantissesPersonnalisees,
   masquerAxes,
   masquerEtiquettesY,
+  formatEtiquette,
 }: {
   largeur: number;
   hauteur: number;
@@ -107,6 +108,10 @@ export function GrilleAdaptative({
    */
   masquerAxes?: boolean;
   masquerEtiquettesY?: boolean;
+  /** Formatage des nombres de graduation — absent par défaut (`formatEtiquetteGrille`, point
+   * décimal, comportement inchangé). Fourni par les graphes du chapitre « Statistique descriptive »
+   * (`nombreFr`, virgule décimale belge — audit chapitre 4). */
+  formatEtiquette?: (valeur: number) => string;
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -123,7 +128,7 @@ export function GrilleAdaptative({
   return (
     <Fragment>
       <Coordinates.Cartesian xAxis={{ lines: pasX, axis: !masquerAxes, labels: undefined }} yAxis={{ lines: pasY, axis: !masquerAxes, labels: undefined }} />
-      {!masquerAxes && <GraduationsFlottantes largeur={largeur} hauteur={hauteur} pasX={pasX} pasY={pasY} masquerEtiquettesY={masquerEtiquettesY} />}
+      {!masquerAxes && <GraduationsFlottantes largeur={largeur} hauteur={hauteur} pasX={pasX} pasY={pasY} masquerEtiquettesY={masquerEtiquettesY} formatEtiquette={formatEtiquette} />}
     </Fragment>
   );
 }
@@ -171,11 +176,13 @@ function GraduationsFlottantes({
   pasX,
   pasY,
   masquerEtiquettesY,
+  formatEtiquette = formatEtiquetteGrille,
 }: {
   largeur: number;
   hauteur: number;
   pasX: number;
   pasY: number;
+  formatEtiquette?: (valeur: number) => string;
   /** Masque UNIQUEMENT les graduations flottantes de l'axe Y (jamais celles de l'axe X) — même
    * convention et même appelant que `masquerEtiquettesY` de `GrilleAdaptative` ci-dessus
    * (`BoiteMoustachesGraph.tsx` : axe Y jamais une vraie grandeur, juste un séparateur de ligne).
@@ -206,12 +213,12 @@ function GraduationsFlottantes({
     <g ref={groupRef} className="mafs-shadow">
       {ticksX.map((x) => (
         <text key={`x${x}`} x={vec.transform([x, 0], matrice)[0]} y={yNombresX} textAnchor="middle" dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
-          {formatEtiquetteGrille(x)}
+          {formatEtiquette(x)}
         </text>
       ))}
       {ticksY.map((y) => (
         <text key={`y${y}`} x={xNombresY} y={vec.transform([0, y], matrice)[1]} textAnchor={ancrageNombresY} dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
-          {formatEtiquetteGrille(y)}
+          {formatEtiquette(y)}
         </text>
       ))}
     </g>

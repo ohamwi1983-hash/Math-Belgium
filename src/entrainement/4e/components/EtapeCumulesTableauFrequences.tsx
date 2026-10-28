@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -74,7 +75,7 @@ export function EtapeCumulesTableauFrequences({ exercice, tentativesUtilisees, t
               const erronee = evaluation !== null && evaluation[index] !== "correct";
               return (
                 <tr key={ligne.valeur}>
-                  <td>{ligne.valeur}</td>
+                  <td>{nombreFr(ligne.valeur)}</td>
                   <td>{ligne.effectif}</td>
                   <td>
                     <input
@@ -83,7 +84,7 @@ export function EtapeCumulesTableauFrequences({ exercice, tentativesUtilisees, t
                       value={valeurs[index]}
                       onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
                       onKeyDown={gererKeyDownNumerique}
-                      aria-label={`Effectif cumulé de la valeur ${ligne.valeur}`}
+                      aria-label={`Effectif cumulé de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>
                 </tr>
@@ -98,7 +99,7 @@ export function EtapeCumulesTableauFrequences({ exercice, tentativesUtilisees, t
           <p>{texteAideCumulesNiveau1(exercice)}</p>
           {niveauAide >= 2 && (
             <p>
-              Effectifs cumulés déjà connus : {reveles.map((r) => `${r.valeur} → ${r.effectifCumule}`).join(", ")}. Reste à trouver
+              Effectifs cumulés déjà connus : {reveles.map((r) => `${nombreFr(r.valeur)} → ${r.effectifCumule}`).join(", ")}. Reste à trouver
               celui de la dernière ligne — souviens-toi de ce qu'il doit valoir.
             </p>
           )}

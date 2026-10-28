@@ -23,6 +23,7 @@ import {
 } from "../../ui/formatComparaisonSeries";
 import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee, type PointCourbeCumulee } from "../../ui/comparaisonSeriesGraph";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonSeries } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceComparaisonSeries>` pour gen38 (Comparaison de
@@ -402,7 +403,7 @@ function construireCorrectionComparaisonSeries(instance: ExerciceComparaisonSeri
   return blocs;
 }
 
-export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = {
+const adaptateurEvaluationComparaisonSeriesBrut: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = {
   titreDocument: "Comparaison de deux séries statistiques — Évaluation",
   nomFichierBase: "comparaison-series-statistiques",
   genererInstance: genererExerciceComparaisonSeries,
@@ -411,3 +412,6 @@ export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<E
   construireEnonce: construireEnonceComparaisonSeries,
   construireCorrection: construireCorrectionComparaisonSeries,
 };
+
+/** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
+export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = avecVirgulesBelges(adaptateurEvaluationComparaisonSeriesBrut);

@@ -13,7 +13,7 @@
  * "minMaxMode" de la variante "discrete", écran "Synthèse" de la variante "classes") ;
  * `precisionLecture(amplitude)` (`promptgen33gen35precisionlecture.md`, VOLONTAIRE et scopée aux 3
  * SEULS écrans de lecture graphique de la variante "classes" — jamais étendue ailleurs) — une
- * tolérance PAR PALIER D'AMPLITUDE du caractère (0,1/1/5/20 selon $x_{max}-x_{min}$), plus jamais un
+ * tolérance PAR PALIER D'AMPLITUDE du caractère (0,1/1/5/50/500/5000 selon $x_{max}-x_{min}$), plus jamais un
  * ±0,1 fixe quelle que soit l'échelle physique réelle des données : une lecture graphique par
  * interpolation continue n'a de toute façon pas la précision d'un calcul exact, et encore moins à
  * l'échelle d'un kilométrage ou d'un salaire qu'à celle d'une heure de sommeil.
@@ -235,7 +235,10 @@ export function precisionLecture(amplitude: number): number {
   if (amplitude <= 20) return 0.1;
   if (amplitude <= 100) return 1;
   if (amplitude <= 1000) return 5;
-  return 20;
+  // Paliers des grandes échelles (audit chapitre 4 : salaires, prix, kilométrages réalistes).
+  if (amplitude <= 10000) return 50;
+  if (amplitude <= 100000) return 500;
+  return 5000;
 }
 
 /** Tolérance de vérification — choisie ÉGALE au pas de précision du palier lui-même (jamais sa

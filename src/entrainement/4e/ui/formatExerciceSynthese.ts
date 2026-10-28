@@ -22,10 +22,11 @@
 import type { ExerciceSynthese, VarianteExerciceSynthese } from "../core/exerciceSynthese.types";
 import { versDispersion } from "../moteur/verificationExerciceSynthese";
 import { ecartTypeEtatActuel } from "./formatDispersion";
+import { phraseRepartition } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export function formatEnonceTexte(exercice: ExerciceSynthese): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(exercice.contexte));
 }
 
 const LIBELLES_VARIANTE: Record<VarianteExerciceSynthese, string> = {
@@ -34,7 +35,7 @@ const LIBELLES_VARIANTE: Record<VarianteExerciceSynthese, string> = {
 };
 
 export function libelleVarianteExerciceSynthese(variante: VarianteExerciceSynthese): string {
-  return LIBELLES_VARIANTE[variante];
+  return virgulesTexte(LIBELLES_VARIANTE[variante]);
 }
 
 export const LABEL_XBAR = "\\bar{x}";
@@ -44,12 +45,12 @@ export const LABEL_SIGMA = "\\sigma";
  * dans un bloc KaTeX — un entier reste affiché tel quel. Dupliquée depuis
  * `formatBienaymeTchebychev.ts`/`formatDispersion.ts`, jamais importée. */
 function formatNombreLatex(valeur: number): string {
-  return String(valeur).replace(".", "{,}");
+  return virgulesLatex(String(valeur).replace(".", "{,}"));
 }
 
 /** Même notation, pour du texte HTML brut (jamais passé par KaTeX). */
 function formatNombreTexte(valeur: number): string {
-  return String(valeur).replace(".", ",");
+  return virgulesTexte(String(valeur).replace(".", ","));
 }
 
 // ============================================================================
@@ -60,7 +61,7 @@ function formatNombreTexte(valeur: number): string {
  * anti-débordement mobile déjà établie ailleurs dans le projet). */
 export function formatEtatActuelXBarSigmaLatex(exercice: ExerciceSynthese): string {
   const sigma = ecartTypeEtatActuel(versDispersion(exercice));
-  return `\\begin{gathered} ${LABEL_XBAR} = ${formatNombreLatex(exercice.xBar)} \\\\ ${LABEL_SIGMA} ${sigma.exact ? "=" : "\\approx"} ${formatNombreLatex(sigma.valeur)} \\end{gathered}`;
+  return virgulesLatex(`\\begin{gathered} ${LABEL_XBAR} = ${formatNombreLatex(exercice.xBar)} \\\\ ${LABEL_SIGMA} ${sigma.exact ? "=" : "\\approx"} ${formatNombreLatex(sigma.valeur)} \\end{gathered}`);
 }
 
 // ============================================================================
@@ -100,7 +101,7 @@ export function borneSupBTEtatActuel(exercice: ExerciceSynthese): ValeurEtatActu
 // ============================================================================
 
 export function consigneBtIntervalle(exercice: ExerciceSynthese): string {
-  return `Avec k = ${exercice.kBT}, quel est l'intervalle garanti par l'inégalité de Bienaymé-Tchebychev (en ${exercice.contexte.unite}) ? (arrondi à 2 décimales)`;
+  return virgulesTexte(`Avec k = ${exercice.kBT}, quel est l'intervalle garanti par l'inégalité de Bienaymé-Tchebychev (en ${exercice.contexte.unite}) ? (arrondi à 2 décimales)`);
 }
 
 export interface AideDeuxLignes {
@@ -129,7 +130,7 @@ export function formatBtIntervalleAttenduTexte(exercice: ExerciceSynthese): stri
   const inf = borneInfBTEtatActuel(exercice);
   const sup = borneSupBTEtatActuel(exercice);
   const signe = inf.exact && sup.exact ? "=" : "≈";
-  return `${signe} [${formatNombreTexte(inf.valeur)} ; ${formatNombreTexte(sup.valeur)}]`;
+  return virgulesTexte(`${signe} [${formatNombreTexte(inf.valeur)} ; ${formatNombreTexte(sup.valeur)}]`);
 }
 
 // ============================================================================
@@ -141,11 +142,11 @@ export function formatEtatActuelIntervalleBTLatex(exercice: ExerciceSynthese): s
   const inf = borneInfBTEtatActuel(exercice);
   const sup = borneSupBTEtatActuel(exercice);
   const signe = inf.exact && sup.exact ? "=" : "\\approx";
-  return `I ${signe} [${formatNombreLatex(inf.valeur)}\\,;\\,${formatNombreLatex(sup.valeur)}]`;
+  return virgulesLatex(`I ${signe} [${formatNombreLatex(inf.valeur)}\\,;\\,${formatNombreLatex(sup.valeur)}]`);
 }
 
 export function consigneBtPourcent(): string {
-  return "Quel est le pourcentage minimal d'effectif garanti dans cet intervalle ?";
+  return virgulesTexte("Quel est le pourcentage minimal d'effectif garanti dans cet intervalle ?");
 }
 
 export function texteAideBtPourcentNiveau1(exercice: ExerciceSynthese): AideDeuxLignes {
@@ -157,5 +158,5 @@ export function texteAideBtPourcentNiveau1(exercice: ExerciceSynthese): AideDeux
 
 /** `pourcentAttenduBT` est toujours exactement 75 pour kBT=2 (aucun arrondi) — jamais de "≈". */
 export function formatBtPourcentAttenduTexte(exercice: ExerciceSynthese): string {
-  return `= ${formatNombreTexte(exercice.pourcentAttenduBT)} %`;
+  return virgulesTexte(`= ${formatNombreTexte(exercice.pourcentAttenduBT)} %`);
 }

@@ -11,7 +11,7 @@
  * du projet), rendu par le composant partagé `SegmentsInline.tsx`.
  *
  * **Contexte narratif** — réutilise `formatEnonceTexte` sur le même gabarit "comparaison" déjà
- * établi par "Boîte à moustaches" (toujours 2 séries, jamais un contexte par série), `articleDe`
+ * établi par "Boîte à moustaches" (toujours 2 séries, jamais un contexte par série), `phraseRepartitionDeuxGroupes`
  * dupliquée à l'identique (élision devant une voyelle).
  *
  * **Gender agreement** — les phrases d'interprétation évitent délibérément l'accord de genre du
@@ -30,15 +30,17 @@ import type {
   VarianteComparaisonSeries,
 } from "../core/comparaisonSeries.types";
 import type { ArgumentDispersionOption } from "../moteur/verificationComparaisonSeries";
+import { phraseRepartitionDeuxGroupes } from "./phrasesContexteStatistique";
+import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
 function T(valeur: string): SegmentTexte {
-  return { type: "texte", valeur };
+  return { type: "texte", valeur: virgulesTexte(valeur) };
 }
 
 function Kx(valeur: string): SegmentTexte {
-  return { type: "katex", valeur };
+  return { type: "katex", valeur: virgulesLatex(valeur) };
 }
 
 export const LABEL_X_BAR = "\\bar{x}";
@@ -59,7 +61,7 @@ const LIBELLES_VARIANTE: Record<VarianteComparaisonSeries, string> = {
 };
 
 export function libelleVarianteComparaisonSeries(variante: VarianteComparaisonSeries): string {
-  return LIBELLES_VARIANTE[variante];
+  return virgulesTexte(LIBELLES_VARIANTE[variante]);
 }
 
 const LIBELLES_TYPE_QUESTION: Record<TypeQuestionComparaisonSeries, string> = {
@@ -70,20 +72,16 @@ const LIBELLES_TYPE_QUESTION: Record<TypeQuestionComparaisonSeries, string> = {
 };
 
 export function libelleTypeQuestion(type: TypeQuestionComparaisonSeries): string {
-  return LIBELLES_TYPE_QUESTION[type];
+  return virgulesTexte(LIBELLES_TYPE_QUESTION[type]);
 }
 
 /** Élision de "de" devant une voyelle (ou un h muet) — dupliquée depuis
  * `formatBoiteMoustaches.ts` (contrats indépendants entre générateurs du même chapitre). */
-function articleDe(mot: string): string {
-  return /^[aeiouyàâäéèêëîïôöùûüh]/i.test(mot) ? "d'" : "de ";
-}
 
 /** Même gabarit "comparaison" que "Boîte à moustaches" — toujours 2 séries, TOUJOURS le même
  * contexte (jamais deux contextes indépendants pour A et B). */
 export function formatEnonceTexte(exercice: ExerciceComparaisonSeries): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez deux groupes ${articleDe(contexte.population)}${contexte.population} — série A et série B :`;
+  return virgulesTexte(phraseRepartitionDeuxGroupes(exercice.contexte));
 }
 
 // ============================================================================
@@ -212,7 +210,7 @@ export function segmentsSeuilAttendu(question: QuestionSeuil): SegmentTexte[] {
 /** Accord de "élevé"/"élevée" — dérivé de `comprisAccord` (déjà porté par la banque de contextes
  * partagée), jamais un nouveau champ de genre. */
 function accordEleve(compris: "compris" | "comprise"): string {
-  return compris === "comprise" ? "élevée" : "élevé";
+  return virgulesTexte(compris === "comprise" ? "élevée" : "élevé");
 }
 
 /** Décrit le profil de la série `serie` — dérivé de sa médiane/dispersion RELATIVES à l'autre
@@ -226,7 +224,7 @@ export function texteProfilSerie(exercice: ExerciceComparaisonSeries, serie: "A"
   const homogene = cible.sigma < autre.sigma;
   const niveauTexte = niveauBas ? "plutôt faible" : `plutôt ${accordEleve(contexte.comprisAccord)}`;
   const dispersionTexte = homogene ? "peu variée d'un individu à l'autre" : "très variée d'un individu à l'autre";
-  return `une population où ${contexte.caractereDefini} est ${niveauTexte} et ${dispersionTexte}`;
+  return virgulesTexte(`une population où ${contexte.caractereDefini} est ${niveauTexte} et ${dispersionTexte}`);
 }
 
 export function segmentsConsigneInterpretation(question: QuestionInterpretation, exercice: ExerciceComparaisonSeries): SegmentTexte[] {

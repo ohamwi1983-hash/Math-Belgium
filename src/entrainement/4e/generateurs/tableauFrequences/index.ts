@@ -5,6 +5,7 @@
  */
 import type { ExerciceTableauFrequences, LigneFrequence } from "../../core/tableauFrequences.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt, trierAleatoirement } from "./aleatoire";
 
 /**
@@ -17,24 +18,10 @@ export const CANDIDATS_N: readonly number[] = [10, 16, 20, 25];
 const NOMBRE_VALEURS_MIN = 4;
 const NOMBRE_VALEURS_MAX = 6;
 
-/** Largeur minimale garantie de la plage de tirage des valeurs — la plage naturelle de certains
- * contextes de la banque (ex. "heures de sommeil" [6,8]) est trop étroite pour y tirer 4 à 6
- * entiers distincts ; élargie si besoin, centrée sur le milieu de `plageXBar`, jamais en dessous de
- * 0 (nécessaire pour au moins un contexte, "temps sur 1500 m" [4,6], qui élargirait sinon vers une
- * borne négative — jamais réaliste pour une durée). Reprend l'étendue historique (14) quand la
- * plage du contexte est déjà assez large. */
-const LARGEUR_MIN_PLAGE = 14;
-
-/** Élargit `[min,max]` symétriquement autour de son centre jusqu'à `largeurMin`, jamais en dessous
- * de 0 — dupliqué (pas importé) dans chaque générateur qui en a besoin, même principe que le reste
- * du projet ("Catalogue de variantes...", CLAUDE.md). */
-function elargirPlage(min: number, max: number, largeurMin: number): [number, number] {
-  const largeur = max - min;
-  if (largeur >= largeurMin) return [min, max];
-  const centre = (min + max) / 2;
-  const nouveauMin = Math.max(0, Math.round(centre - largeurMin / 2));
-  return [nouveauMin, nouveauMin + largeurMin];
-}
+/** Nombre d'unités de la grille de tirage des valeurs (0..LARGEUR_UNITES) — mise à l'échelle du
+ * contexte par `tirerEchelle` (audit chapitre 4 : plus jamais 100 m en 6 s ni 0 h de sommeil). */
+const LARGEUR_UNITES = 14;
+const MAX_TENTATIVES = 500;
 
 /** Tire `k` valeurs distinctes, triées croissant, dans `[min,max]` — jamais un tirage-puis-filtrage
  * a posteriori du nombre réel de distinctes, `k` est fixé d'abord et le tirage réessaie jusqu'à
@@ -87,11 +74,18 @@ function construireDonneesBrutes(lignes: LigneFrequence[]): number[] {
 }
 
 export function genererExerciceTableauFrequences(): ExerciceTableauFrequences {
-  const contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
-  const [min, max] = elargirPlage(contexte.plageXBar[0], contexte.plageXBar[1], LARGEUR_MIN_PLAGE);
+  let contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+  let valeurs: number[] = [];
+  for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
+    contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
+    const k = randomInt(NOMBRE_VALEURS_MIN, NOMBRE_VALEURS_MAX);
+    valeurs = tirerValeursDistinctes(k, 0, LARGEUR_UNITES).map((j) => valeurEchelle(echelle, j));
+    if (valeursRealistes(contexte, valeurs)) break;
+  }
   const n = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
-  const k = randomInt(NOMBRE_VALEURS_MIN, NOMBRE_VALEURS_MAX);
-  const valeurs = tirerValeursDistinctes(k, min, max);
+  const k = valeurs.length;
   const effectifs = tirerEffectifs(n, k);
   const lignes = construireLignes(valeurs, effectifs, n);
   const donneesBrutes = construireDonneesBrutes(lignes);

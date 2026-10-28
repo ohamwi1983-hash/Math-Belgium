@@ -11,14 +11,15 @@
  * `consigneIdentification` est la seule consigne à mentionner explicitement l'unité.
  */
 import type { ExerciceTableauFrequences } from "../core/tableauFrequences.types";
+import { phraseRepartition } from "./phrasesContexteStatistique";
+import { virgulesTexte } from "./nombreFr";
 
 /** Phrase d'intro, persistante sur les 4 écrans — même template que "Inégalité de
  * Bienaymé-Tchebychev" pour la construction `de {caractereComplement}` (`caractereComplement`
  * jamais précédé d'un article, déjà accepté tel quel dans ce module partagé), et `chez les
  * {population}` pour éviter toute élision devant un nom commençant par une voyelle. */
 export function formatEnonceTexte(exercice: ExerciceTableauFrequences): string {
-  const { contexte } = exercice;
-  return `Voici la répartition de ${contexte.caractereComplement} (en ${contexte.unite}) chez les ${contexte.population} :`;
+  return virgulesTexte(phraseRepartition(exercice.contexte));
 }
 
 export const PLACEHOLDER_VALEUR = "ex : 5";
@@ -53,16 +54,16 @@ export function ligneExemple(exercice: ExerciceTableauFrequences) {
 // ============================================================================
 
 export function consigneIdentification(exercice: ExerciceTableauFrequences): string {
-  return `À partir de la liste brute ci-dessus (en ${exercice.contexte.unite}), identifie chaque valeur distincte (dans l'ordre croissant) et son effectif (nombre d'occurrences).`;
+  return virgulesTexte(`À partir de la liste brute ci-dessus (en ${exercice.contexte.unite}), identifie chaque valeur distincte (dans l'ordre croissant) et son effectif (nombre d'occurrences).`);
 }
 
 export function texteAideIdentificationNiveau1(exercice: ExerciceTableauFrequences): string {
   const ligne = ligneExemple(exercice);
-  return `Compte les occurrences de la valeur ${ligne.valeur} (surlignées ci-dessus dans la liste) : il y en a ${ligne.effectif}.`;
+  return virgulesTexte(`Compte les occurrences de la valeur ${ligne.valeur} (surlignées ci-dessus dans la liste) : il y en a ${ligne.effectif}.`);
 }
 
 export function texteAideIdentificationNiveau2(exercice: ExerciceTableauFrequences): string {
-  return `Il y a exactement ${exercice.lignes.length} valeurs distinctes dans cette liste — vérifie que tu n'en as pas oublié.`;
+  return virgulesTexte(`Il y a exactement ${exercice.lignes.length} valeurs distinctes dans cette liste — vérifie que tu n'en as pas oublié.`);
 }
 
 // ============================================================================
@@ -72,12 +73,12 @@ export function texteAideIdentificationNiveau2(exercice: ExerciceTableauFrequenc
 export const CONSIGNE_FREQUENCES = "Calcule la fréquence (%) de chaque valeur.";
 
 export function texteAideFrequencesNiveau1(exercice: ExerciceTableauFrequences): string {
-  return `Fréquence (%) = effectif / n × 100, où n est le nombre total de valeurs de la liste (ici n = ${exercice.n}).`;
+  return virgulesTexte(`Fréquence (%) = effectif / n × 100, où n est le nombre total de valeurs de la liste (ici n = ${exercice.n}).`);
 }
 
 export function texteAideFrequencesNiveau2(exercice: ExerciceTableauFrequences): string {
   const ligne = ligneExemple(exercice);
-  return `Pour la valeur ${ligne.valeur} : fréquence = ${ligne.effectif}/${exercice.n} × 100 = ${ligne.frequencePourcent} %.`;
+  return virgulesTexte(`Pour la valeur ${ligne.valeur} : fréquence = ${ligne.effectif}/${exercice.n} × 100 = ${ligne.frequencePourcent} %.`);
 }
 
 // ============================================================================
@@ -88,7 +89,7 @@ export const CONSIGNE_CUMULES = "Calcule l'effectif cumulé de chaque ligne.";
 
 export function texteAideCumulesNiveau1(exercice: ExerciceTableauFrequences): string {
   const premiere = exercice.lignes[0];
-  return `Méthode : effectif cumulé d'une ligne = effectif cumulé de la ligne précédente + effectif de cette ligne. Pour la première valeur (${premiere.valeur}), il n'y a pas de ligne précédente : son effectif cumulé est simplement son propre effectif (${premiere.effectif}).`;
+  return virgulesTexte(`Méthode : effectif cumulé d'une ligne = effectif cumulé de la ligne précédente + effectif de cette ligne. Pour la première valeur (${premiere.valeur}), il n'y a pas de ligne précédente : son effectif cumulé est simplement son propre effectif (${premiere.effectif}).`);
 }
 
 /** Révèle tous les effectifs cumulés SAUF le dernier — l'élève doit reconnaître lui-même que la
@@ -105,7 +106,7 @@ export const CONSIGNE_FREQUENCES_CUMULEES = "Calcule la fréquence cumulée de c
 
 export function texteAideFrequencesCumuleesNiveau1(exercice: ExerciceTableauFrequences): string {
   const premiere = exercice.lignes[0];
-  return `Méthode : fréquence cumulée d'une ligne = fréquence cumulée de la ligne précédente + fréquence de cette ligne. Pour la première valeur (${premiere.valeur}), il n'y a pas de ligne précédente : sa fréquence cumulée est simplement sa propre fréquence (${premiere.frequencePourcent} %).`;
+  return virgulesTexte(`Méthode : fréquence cumulée d'une ligne = fréquence cumulée de la ligne précédente + fréquence de cette ligne. Pour la première valeur (${premiere.valeur}), il n'y a pas de ligne précédente : sa fréquence cumulée est simplement sa propre fréquence (${premiere.frequencePourcent} %).`);
 }
 
 /** Révèle toutes les fréquences cumulées SAUF la dernière — l'élève doit reconnaître lui-même que
@@ -121,17 +122,17 @@ export function frequencesCumuleesRevelees(exercice: ExerciceTableauFrequences):
 // ============================================================================
 
 export function formatTableIdentificationTexte(exercice: ExerciceTableauFrequences): string {
-  return exercice.lignes.map((l) => `${l.valeur} → ${l.effectif}`).join(", ");
+  return virgulesTexte(exercice.lignes.map((l) => `${l.valeur} → ${l.effectif}`).join(", "));
 }
 
 export function formatTableFrequencesTexte(exercice: ExerciceTableauFrequences): string {
-  return exercice.lignes.map((l) => `${l.valeur} → ${l.frequencePourcent} %`).join(", ");
+  return virgulesTexte(exercice.lignes.map((l) => `${l.valeur} → ${l.frequencePourcent} %`).join(", "));
 }
 
 export function formatTableCumulesTexte(exercice: ExerciceTableauFrequences): string {
-  return exercice.lignes.map((l) => `${l.valeur} → ${l.effectifCumule}`).join(", ");
+  return virgulesTexte(exercice.lignes.map((l) => `${l.valeur} → ${l.effectifCumule}`).join(", "));
 }
 
 export function formatTableFrequencesCumuleesTexte(exercice: ExerciceTableauFrequences): string {
-  return exercice.lignes.map((l) => `${l.valeur} → ${l.frequenceCumulee} %`).join(", ");
+  return virgulesTexte(exercice.lignes.map((l) => `${l.valeur} → ${l.frequenceCumulee} %`).join(", "));
 }

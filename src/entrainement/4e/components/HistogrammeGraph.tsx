@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { ExerciceHistogramme } from "../core/histogramme.types";
 import { calculerGeometrie, cranterHauteur, pixelVersY, valeursGrilleHorizontale, xVersPixel, yVersPixel } from "../ui/histogrammeGraph";
+import { nombreFr } from "../ui/nombreFr";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -78,7 +79,7 @@ export function HistogrammeGraph({ exercice, hauteurs, erronees, onChangerHauteu
             className="histogramme-grille-ligne"
           />
           <text x={geom.margeGauche - 6} y={yVersPixel(geom, v)} textAnchor="end" dominantBaseline="middle" className="histogramme-axe-label">
-            {v}
+            {nombreFr(v)}
           </text>
         </g>
       ))}
@@ -88,7 +89,7 @@ export function HistogrammeGraph({ exercice, hauteurs, erronees, onChangerHauteu
 
       {bornesAxe.map((b) => (
         <text key={`borne-${b}`} x={xVersPixel(geom, b)} y={yBase + 16} textAnchor="middle" className="histogramme-axe-label">
-          {b}
+          {nombreFr(b)}
         </text>
       ))}
 
@@ -107,7 +108,7 @@ export function HistogrammeGraph({ exercice, hauteurs, erronees, onChangerHauteu
               className={`histogramme-barre${erronees[index] ? " is-erronee" : ""}`}
             />
             <text x={(xGauche + xDroite) / 2} y={yHaut - 6} textAnchor="middle" className="histogramme-hauteur-label">
-              {hauteur}
+              {nombreFr(hauteur)}
             </text>
             <rect
               x={xGauche}

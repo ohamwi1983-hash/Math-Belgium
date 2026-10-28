@@ -6,6 +6,8 @@ import { calculerViewBoxPolygoneEffectifs } from "../ui/lectureQuartileGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
+import { arrondirAuPas } from "../generateurs/bienaymeTchebychev/echelleContexte";
+import { nombreFr, virgulesTexte } from "../ui/nombreFr";
 
 interface PointXY {
   x: number;
@@ -21,6 +23,10 @@ interface Props {
    * dès que l'élève le déplace vers la bonne position, avant toute nouvelle validation). */
   erronees: boolean[] | null;
   onDeplacerPoint: (index: number, point: PointXY) => void;
+  /** Cran horizontal du glissement — plus grand pas commun des bornes de classes (1 par défaut).
+   * À grande échelle (kilométrages, salaires), les bornes sont des multiples de 100, 1000... : un
+   * cran de 1 rendrait la borne exacte impossible à atteindre au doigt (audit chapitre 4). */
+  pasX?: number;
 }
 
 const COULEUR_FIXE = "#212529";
@@ -32,10 +38,10 @@ const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
 
-/** Magnétisme grille entier sur les 2 axes — bornes/effectifs cumulés toujours des entiers par
- * construction, même principe que `EtapeConstructionVectorielle.tsx` (chapitre 4). */
-function snapEntier([x, y]: [number, number]): [number, number] {
-  return [Math.round(x), Math.round(y)];
+/** Magnétisme grille sur les 2 axes — X sur le cran des bornes de classes (`pasX`), Y entier
+ * (effectifs cumulés), même principe que `EtapeConstructionVectorielle.tsx` (chapitre 4). */
+function snapGrille(pasX: number) {
+  return ([x, y]: [number, number]): [number, number] => [arrondirAuPas(x, pasX), Math.round(y)];
 }
 
 /**
@@ -73,7 +79,7 @@ function snapEntier([x, y]: [number, number]): [number, number] {
  * glissement (`constrain`, en coordonnées DONNÉES) n'est jamais affecté par ce découplage — seule
  * la conversion donnée→pixel change, jamais la logique de magnétisme elle-même.
  */
-export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacerPoint }: Props) {
+export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacerPoint, pasX = 1 }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
   const hauteur = largeur / RATIO_GRAPHE;
@@ -87,7 +93,7 @@ export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacer
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} />
         {sommets.slice(0, -1).map((sommet, i) => (
           <Line.Segment key={`segment-${i}`} point1={[sommet.x, sommet.y]} point2={[sommets[i + 1].x, sommets[i + 1].y]} color={COULEUR_SEGMENT} weight={EPAISSEUR_TRAIT_STANDARD} />
         ))}
@@ -96,7 +102,7 @@ export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacer
           <MovablePoint
             key={i}
             point={[p.x, p.y]}
-            constrain={snapEntier}
+            constrain={snapGrille(pasX)}
             onMove={([x, y]) => {
               onDeplacerPoint(i, { x, y });
               setSelectionne(i);
@@ -105,10 +111,10 @@ export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacer
           />
         ))}
       </Mafs>
-      {pas && <p className="mafs-graph-pas">{formatIndicateurPasGrille(pas.x, pas.y)}</p>}
+      {pas && <p className="mafs-graph-pas">{virgulesTexte(formatIndicateurPasGrille(pas.x, pas.y))}</p>}
       <div className="mafs-graph-legende">
         <span className="mafs-graph-legende-item">
-          Point sélectionné : {selectionne !== null ? `(${points[selectionne].x} ; ${points[selectionne].y})` : "—"}
+          Point sélectionné : {selectionne !== null ? `(${nombreFr(points[selectionne].x)} ; ${nombreFr(points[selectionne].y)})` : "—"}
         </span>
       </div>
     </div>

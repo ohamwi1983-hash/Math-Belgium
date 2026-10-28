@@ -14,6 +14,7 @@ import type {
 } from "../../core/mediane.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
 import { calculerParametreDePosition } from "./parametreDePosition";
 
@@ -27,30 +28,14 @@ const NOMBRE_VALEURS_MAX = 6;
 const EFFECTIF_MIN = 2;
 const EFFECTIF_MAX = 9;
 
-/** Largeur minimale garantie de la plage de tirage des valeurs discrètes — même principe et même
- * étendue historique que "Tableau de fréquences"/"Moyenne pondérée" (dupliqué, pas importé) :
- * certains contextes de la banque ont un `plageXBar` trop étroit pour y tirer 4 à 6 entiers
- * distincts. */
-const LARGEUR_MIN_PLAGE = 14;
-
-/** Élargit `[min,max]` symétriquement autour de son centre jusqu'à `largeurMin`, jamais en dessous
- * de 0 — dupliqué (pas importé) dans chaque générateur qui en a besoin. */
-function elargirPlage(min: number, max: number, largeurMin: number): [number, number] {
-  const largeur = max - min;
-  if (largeur >= largeurMin) return [min, max];
-  const centre = (min + max) / 2;
-  const nouveauMin = Math.max(0, Math.round(centre - largeurMin / 2));
-  return [nouveauMin, nouveauMin + largeurMin];
-}
+/** Grille de tirage des valeurs discrètes (0..LARGEUR_UNITES unités), mise à l'échelle du contexte
+ * par `tirerEchelle` (audit chapitre 4). */
+const LARGEUR_UNITES = 14;
 
 const NOMBRE_CLASSES_MIN = 4;
 const NOMBRE_CLASSES_MAX = 5;
 const AMPLITUDE_MIN = 2;
 const AMPLITUDE_MAX = 5;
-/** Jitter (unités entières) autour du centre de `contexte.plageXBar` pour la borne de départ des
- * classes — même principe que "Regroupement en classes et histogramme"/"Moyenne pondérée"
- * (dupliqué, pas importé). */
-const JITTER_BORNE_DEPART = 3;
 
 /** Tire une amplitude PAR CLASSE (`promptgen32gen33corrections.md`, point 1 — remplace l'ancienne
  * amplitude unique commune à toutes les classes, même principe et même duplication que "Moyenne
@@ -94,7 +79,10 @@ function precisionLecture(amplitude: number): number {
   if (amplitude <= 20) return 0.1;
   if (amplitude <= 100) return 1;
   if (amplitude <= 1000) return 5;
-  return 20;
+  // Paliers des grandes échelles (audit chapitre 4 : salaires, prix, kilométrages réalistes).
+  if (amplitude <= 10000) return 50;
+  if (amplitude <= 100000) return 500;
+  return 5000;
 }
 
 /** Arrondit au pas de précision du palier applicable (`promptgen33gen35precisionlecture.md`) —
@@ -145,16 +133,18 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceMedia
   let valeurs: number[] = [];
   let effectifs: number[] = [];
   let tentative = 0;
-  const [min, max] = elargirPlage(contexte.plageXBar[0], contexte.plageXBar[1], LARGEUR_MIN_PLAGE);
-
   // Retire tant que tous les effectifs sont égaux (`promptgen33modifications.md`, contrainte de
   // génération de l'écran "Min, max et mode(s)" — garantit qu'au moins une valeur se distingue).
   do {
     tentative++;
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
     const k = randomInt(NOMBRE_VALEURS_MIN, NOMBRE_VALEURS_MAX);
-    valeurs = tirerValeursDistinctes(k, min, max);
+    const candidates = tirerValeursDistinctes(k, 0, LARGEUR_UNITES).map((j) => valeurEchelle(echelle, j));
+    if (!valeursRealistes(contexte, candidates)) continue;
+    valeurs = candidates;
     effectifs = tirerEffectifsLibres(k);
-  } while (new Set(effectifs).size === 1 && tentative < MAX_TENTATIVES_MODE);
+  } while ((valeurs.length === 0 || new Set(effectifs).size === 1) && tentative < MAX_TENTATIVES_MODE * 10);
 
   const cumules = cumuler(effectifs);
   const n = cumules[cumules.length - 1];
@@ -192,18 +182,24 @@ function construireDiscrete(contexte: ContexteBienaymeTchebychev): ExerciceMedia
   };
 }
 
-function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceMedianeClasses {
-  const nombreClasses = randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
+function construireClasses(contexteImpose?: ContexteBienaymeTchebychev): ExerciceMedianeClasses {
   // Amplitude PROPRE à chaque classe (`promptgen32gen33corrections.md`, point 1 — remplace
   // l'ancienne amplitude unique commune à toutes) — `tirerAmplitudes` garantit déjà au moins deux
-  // valeurs distinctes, jamais un tableau uniforme.
-  const amplitudes = tirerAmplitudes(nombreClasses);
-  // Bornes centrées sur le milieu de la plage réaliste du contexte (jamais en dessous de 0), avec
-  // un léger jitter pour ne pas figer systématiquement le même point de départ — même principe que
-  // "Regroupement en classes et histogramme"/"Moyenne pondérée".
-  const centre = (contexte.plageXBar[0] + contexte.plageXBar[1]) / 2;
-  const etendueTotale = amplitudes.reduce((acc, a) => acc + a, 0);
-  const borneDepart = Math.max(0, Math.round(centre - etendueTotale / 2) + randomInt(-JITTER_BORNE_DEPART, JITTER_BORNE_DEPART));
+  // valeurs distinctes, jamais un tableau uniforme. Amplitudes en unités de l'échelle du contexte
+  // (`tirerEchelle`, unité ≥ 1 : bornes entières, polygone construit sur une grille entière) ; un
+  // contexte trop étroit pour 4-5 classes (sommeil, 100 m...) est remplacé par un autre, sauf s'il
+  // est imposé (audit chapitre 4).
+  let contexte = contexteImpose ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+  let nombreClasses = randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
+  let amplitudes = tirerAmplitudes(nombreClasses);
+  let echelle = tirerEchelle(contexte, amplitudes.reduce((acc, a) => acc + a, 0), { uniteMin: 1 });
+  for (let tentative = 0; echelle === null && tentative < MAX_TENTATIVES_MODE * 10; tentative++) {
+    if (contexteImpose === undefined) contexte = CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
+    nombreClasses = randomInt(NOMBRE_CLASSES_MIN, NOMBRE_CLASSES_MAX);
+    amplitudes = tirerAmplitudes(nombreClasses);
+    echelle = tirerEchelle(contexte, amplitudes.reduce((acc, a) => acc + a, 0), { uniteMin: 1 });
+  }
+  const echelleClasses = echelle ?? { origine: Math.max(0, contexte.plageXBar[0]), unite: 1 };
 
   // Classe modale forcée unique, sans ex-aequo — même principe que "Mode et classe modale" (gen34,
   // variante D) : un index tiré au hasard, son effectif forcé strictement au-dessus du maximum des
@@ -232,11 +228,11 @@ function construireClasses(contexte: ContexteBienaymeTchebychev): ExerciceMedian
   const seuilQ1 = n / 4;
   const seuilQ3 = (3 * n) / 4;
 
-  let borneCourante = borneDepart;
+  let borneCourante = 0;
   const classes: ClasseMediane[] = amplitudes.map((amplitude, i) => {
-    const borneInf = borneCourante;
-    const borneSup = borneInf + amplitude;
-    borneCourante = borneSup;
+    const borneInf = valeurEchelle(echelleClasses, borneCourante);
+    borneCourante += amplitude;
+    const borneSup = valeurEchelle(echelleClasses, borneCourante);
     return { borneInf, borneSup, effectif: effectifs[i], effectifCumule: cumules[i] };
   });
 
@@ -277,8 +273,8 @@ export function construireAvecVarianteId(
   varianteId: VarianteMediane,
   overrides?: { contexte?: ContexteBienaymeTchebychev },
 ): ExerciceMediane {
-  const contexte = overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)];
-  return varianteId === "discrete" ? construireDiscrete(contexte) : construireClasses(contexte);
+  if (varianteId === "classes") return construireClasses(overrides?.contexte);
+  return construireDiscrete(overrides?.contexte ?? CONTEXTES[randomInt(0, CONTEXTES.length - 1)]);
 }
 
 export function genererExerciceMediane(): ExerciceMediane {

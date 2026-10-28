@@ -28,6 +28,7 @@ import {
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -131,7 +132,7 @@ export function AppBoiteMoustaches() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Boîte à moustaches</h1>
-        <p className="app-subtitle">Chapitre 5</p>
+        <p className="app-subtitle">Chapitre 4</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
@@ -161,6 +162,7 @@ export function AppBoiteMoustaches() {
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+              pas={pasCommun(Object.values(exercice.valeurs))}
               validation={validation}
             />
           ) : exercice.variante === "lecture" ? (

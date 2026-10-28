@@ -39,6 +39,7 @@ import type {
 } from "../../core/comparaisonSeries.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
+import { type EchelleContexte, tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
 
 /** `n` toujours un DIVISEUR EXACT de 100 — même pool que "Tableau de fréquences"/"Médiane"
@@ -49,27 +50,19 @@ export const CANDIDATS_N: readonly number[] = [10, 20, 25];
 const K_MIN = 4;
 const K_MAX = 6;
 
-/** Largeur minimale garantie de la fenêtre `[min,max]` PARTAGÉE par les 2 séries — même principe
- * que "Moyenne pondérée"/"Médiane" (dupliqué), élargie de 14 à 16 pour laisser un peu plus de place
- * à 2 tirages indépendants de 4 à 6 valeurs chacun dans la même fenêtre sans les forcer à se
- * chevaucher exactement. */
-const LARGEUR_MIN_PLAGE = 16;
+/** Largeur (en unités de l'échelle du contexte) de la grille de tirage des valeurs des deux séries —
+ * mise à l'échelle par `tirerEchelle` (audit chapitre 4 : plus jamais 0 L/100 km ni des valeurs
+ * tirées au hasard sur toute la plage des moyennes). */
+const LARGEUR_UNITES = 16;
 
 const MAX_TENTATIVES = 500;
 
+/** Arrondi au centième, ,xx5 vers le haut malgré le bruit flottant (8,325 est stocké 8,32499…) —
+ * même epsilon que `bienaymeTchebychev/arrondis.ts`. */
 function arrondir2(x: number): number {
-  return Math.round(x * 100) / 100;
+  return Math.round((x + 1e-9) * 100) / 100;
 }
 
-/** Élargit `[min,max]` symétriquement autour de son centre jusqu'à `largeurMin`, jamais en dessous
- * de 0 — dupliqué (pas importé) dans chaque générateur qui en a besoin. */
-function elargirPlage(min: number, max: number, largeurMin: number): [number, number] {
-  const largeur = max - min;
-  if (largeur >= largeurMin) return [min, max];
-  const centre = (min + max) / 2;
-  const nouveauMin = Math.max(0, Math.round(centre - largeurMin / 2));
-  return [nouveauMin, nouveauMin + largeurMin];
-}
 
 function tirerValeursDistinctes(k: number, min: number, max: number): number[] {
   const valeurs = new Set<number>();
@@ -97,8 +90,8 @@ function indexMedianeDepuisCumules(lignes: LigneComparaisonSeries[], n: number):
 
 /** Construit une série complète (table + résumé) — `null` si le tirage est dégénéré (médiane à une
  * extrémité du tableau, ou écart interquartile nul), à retirer côté appelant. */
-function construireSerieUneFois(min: number, max: number, n: number, k: number): SerieComparaison | null {
-  const valeurs = tirerValeursDistinctes(k, min, max);
+function construireSerieUneFois(echelle: EchelleContexte, n: number, k: number): SerieComparaison | null {
+  const valeurs = tirerValeursDistinctes(k, 0, LARGEUR_UNITES).map((j) => valeurEchelle(echelle, j));
   const effectifs = tirerEffectifs(n, k);
 
   let cumule = 0;
@@ -122,7 +115,7 @@ function construireSerieUneFois(min: number, max: number, n: number, k: number):
 
   const q1 = lignes[indexQ1].valeur;
   const q3 = lignes[indexQ3].valeur;
-  const ecartInterquartile = q3 - q1;
+  const ecartInterquartile = arrondir2(q3 - q1);
   if (ecartInterquartile <= 0) return null;
 
   const sommeXN = lignes.reduce((acc, ligne) => acc + ligne.valeur * ligne.effectif, 0);
@@ -153,14 +146,15 @@ function construireSerieUneFois(min: number, max: number, n: number, k: number):
  * explicitement hors périmètre de cette version, voir le prompt de création).
  */
 function construireSeriePaire(contexte: ContexteBienaymeTchebychev): { serieA: SerieComparaison; serieB: SerieComparaison } {
-  const [min, max] = elargirPlage(contexte.plageXBar[0], contexte.plageXBar[1], LARGEUR_MIN_PLAGE);
-
   for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
+    const echelle = tirerEchelle(contexte, LARGEUR_UNITES);
+    if (echelle === null) continue;
     const nA = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
     const nB = CANDIDATS_N[randomInt(0, CANDIDATS_N.length - 1)];
-    const serieA = construireSerieUneFois(min, max, nA, randomInt(K_MIN, K_MAX));
-    const serieB = construireSerieUneFois(min, max, nB, randomInt(K_MIN, K_MAX));
+    const serieA = construireSerieUneFois(echelle, nA, randomInt(K_MIN, K_MAX));
+    const serieB = construireSerieUneFois(echelle, nB, randomInt(K_MIN, K_MAX));
     if (serieA === null || serieB === null) continue;
+    if (!valeursRealistes(contexte, serieA.lignes.map((l) => l.valeur)) || !valeursRealistes(contexte, serieB.lignes.map((l) => l.valeur))) continue;
 
     if (serieA.mediane === serieB.mediane) continue;
     if (serieA.sigma === serieB.sigma || serieA.ecartInterquartile === serieB.ecartInterquartile) continue;

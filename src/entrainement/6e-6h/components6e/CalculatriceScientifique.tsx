@@ -128,8 +128,8 @@ export function CalculatriceScientifique({ modeInitial = "RAD" }: Props = {}) {
 
   return (
     <>
-      <button type="button" className="calculatrice-bouton-flottant" onClick={() => setOuverte(true)}>
-        Calculatrice
+      <button type="button" className="calculatrice-bouton-flottant" aria-label="Calculatrice" onClick={() => setOuverte(true)}>
+        <span className="calculatrice-bouton-libelle">Calculatrice</span>
       </button>
       {ouverte && (
         <CalculatriceModale
