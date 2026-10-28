@@ -46,8 +46,8 @@ export interface ExerciceUnSansLautre {
   /**
    * Réponse attendue de l'écran "Carré" : `carreCibleNum/carreCibleDen` = (q²-p²)/q² — toujours
    * DÉJÀ irréductible par construction (gcd(p,q)=1 ⟹ gcd(q²-p²,q²)=1, propriété vérifiée par
-   * test) — l'élève peut néanmoins soumettre une forme équivalente non réduite (pénalité de
-   * simplification, jamais un statut incorrect).
+   * test) — l'élève peut néanmoins soumettre une forme équivalente non réduite, acceptée
+   * telle quelle (jamais un statut incorrect).
    */
   carreCibleNum: number;
   carreCibleDen: number;

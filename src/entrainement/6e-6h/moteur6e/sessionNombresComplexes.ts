@@ -15,7 +15,6 @@ import { verifierEcran } from "./verificationNombresComplexes";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient (spec : écran 2 du sous-type cube pour B,
  * écran 1 de C, écran 1 de D, écran 1 de E, écran 1 de F, écran 1 de G — `max=0` ailleurs, voir
@@ -41,7 +40,7 @@ export function demarrerSessionNombresComplexes(reglages: ReglagesSession6e, gen
 }
 
 function reglagesEtape(etat: EtatSessionNombresComplexes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionNombresComplexes): EtatSessionNombresComplexes {
@@ -72,7 +71,7 @@ export function soumettreReponseEcran(etat: EtatSessionNombresComplexes, valeurs
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseNombresComplexes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseNombresComplexes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

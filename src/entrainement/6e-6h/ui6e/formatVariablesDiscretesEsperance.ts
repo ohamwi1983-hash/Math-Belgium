@@ -1,6 +1,5 @@
 import type { EvenementLoiA, ExerciceEsperanceA, ExerciceEsperanceB, ExerciceEsperanceC, ExerciceVariablesDiscretesEsperance } from "../core6e/variablesDiscretesEsperance.types";
-import type { PhaseVariablesDiscretesEsperance, ResultatExerciceVariablesDiscretesEsperance } from "../moteur6e/typesVariablesDiscretesEsperance";
-import { phasesPourExercice } from "../moteur6e/typesVariablesDiscretesEsperance";
+import type { PhaseVariablesDiscretesEsperance } from "../moteur6e/typesVariablesDiscretesEsperance";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen49`. Dispatch sur
@@ -473,10 +472,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceVariablesDiscr
   return [nombreLatex(exercice.mSolution)];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsVariablesDiscretesEsperance(resultat: ResultatExerciceVariablesDiscretesEsperance): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

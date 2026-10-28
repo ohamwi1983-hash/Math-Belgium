@@ -13,10 +13,7 @@
  * niveau 2 — jargon "assignation côté/angle opposé" — est retiré, le croquis suffit déjà à montrer
  * la correspondance côté/angle opposé via les connecteurs de paire), chacun un cran de plus que le
  * précédent (`activerAideSuivante`) — jamais accessible au-delà de son maximum ni hors de la phase
- * à laquelle il appartient. Pénalité ADDITIVE (-20 points par niveau atteint, même principe que
- * "L'un sans l'autre" mais étendu à plusieurs niveaux cumulables au lieu d'un seul flag) appliquée
- * au niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement si un niveau
- * supplémentaire est activé après coup (impossible ici de toute façon, l'écran étant déjà clos).
+ * à laquelle il appartient.
  *
  * **Système d'unités** (même prompt) : `soumettreReponseDonneeManquante`/`soumettreReponseAire`
  * acceptent désormais une unité en plus de la valeur numérique — `null` pour la donnée manquante
@@ -33,7 +30,6 @@ import { verifierAire, verifierDonneeManquante } from "./verificationTriangleQue
 import type { EtatSessionTriangleQuelconque, ResultatExerciceTriangleQuelconque } from "./typesTriangleQuelconque";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_DONNEE_MANQUANTE = 2;
 export const NIVEAU_AIDE_MAX_AIRE = 2;
 
@@ -61,13 +57,7 @@ function reglagesEtape(etat: EtatSessionTriangleQuelconque): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -132,7 +122,7 @@ export function soumettreReponseDonneeManquante(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDonneeManquante);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -159,7 +149,7 @@ export function soumettreReponseAire(etat: EtatSessionTriangleQuelconque, valeur
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideAire);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     configuration: etat.exerciceCourant.configuration,

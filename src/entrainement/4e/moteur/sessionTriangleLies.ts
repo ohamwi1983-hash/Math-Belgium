@@ -18,7 +18,6 @@ import { verifierAngles, verifierCible, verifierInterpretation, verifierPont, ve
 import type { EtatSessionTriangleLies, PhaseTriangleLies, ResultatExerciceTriangleLies } from "./typesTriangleLies";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_PONT = 2;
 export const NIVEAU_AIDE_MAX_ANGLES = 3;
 export const NIVEAU_AIDE_MAX_SOUSTRACTION = 2;
@@ -88,12 +87,7 @@ function reglagesEtape(etat: EtatSessionTriangleLies): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionTriangleLies): EtatSessionTriangleLies {
@@ -172,7 +166,7 @@ export function soumettreReponsePont(etat: EtatSessionTriangleLies, valeur: numb
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePont);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -205,7 +199,7 @@ export function soumettreReponsePontSommetPartage(etat: EtatSessionTriangleLies,
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePont);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -236,7 +230,7 @@ export function soumettreReponseSoustraction(etat: EtatSessionTriangleLies, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSoustraction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -267,7 +261,7 @@ export function soumettreReponseAngles(etat: EtatSessionTriangleLies, reponse: R
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideAngles);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -295,7 +289,7 @@ export function soumettreReponseCible(etat: EtatSessionTriangleLies, valeur: num
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCible);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -323,7 +317,7 @@ export function soumettreReponseInterpretation(etat: EtatSessionTriangleLies, in
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideInterpretation);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exerciceCourant.variante,

@@ -5,8 +5,7 @@
  * sessionFormeCanoniqueTransformations.ts, aucun saut conditionnel. N'importe jamais rien de
  * src/generateurs (voir sessionCaracteristiquesFonction.test.ts, générateur factice local).
  *
- * Aucun bouton "Aide" demandé par la spec — aucun mécanisme de révélation à sens unique avec
- * facteur ×0,5 ici, comme "Forme canonique et transformations".
+ * Aucun bouton "Aide" demandé par la spec — aucun mécanisme de révélation à sens unique ici, comme "Forme canonique et transformations".
  */
 import type {
   GenerateurExerciceCaracteristiquesFonction,
@@ -66,7 +65,6 @@ function reglagesEtape(etat: EtatSessionCaracteristiquesFonction): ReglagesEtape
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 

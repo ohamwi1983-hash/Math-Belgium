@@ -8,9 +8,7 @@
  * "Équation d'une droite").
  *
  * Aide PROGRESSIVE par écran (même principe que "Colinéarité"/"Orthogonalité"/"Équation d'une
- * droite") : 1 seul niveau sur "extraction", 2 niveaux sur "construction" et "equation" — pénalité
- * ADDITIVE (-20 points/niveau) appliquée au moment précis où l'écran se clôt, jamais
- * rétroactivement.
+ * droite") : 1 seul niveau sur "extraction", 2 niveaux sur "construction" et "equation".
  */
 import type { ExerciceRelationsDroites, GenerateurExerciceRelationsDroites } from "../core/relationsDroites.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -21,7 +19,6 @@ import { verifierConstruction, verifierEquationCartesienne, verifierEquationPara
 import type { ReponseVecteur } from "./verificationRelationsDroites";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_EXTRACTION = 1;
 export const NIVEAU_AIDE_MAX_CONSTRUCTION = 2;
@@ -69,12 +66,7 @@ function reglagesEtape(etat: EtatSessionRelationsDroites): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionRelationsDroites): EtatSessionRelationsDroites {
@@ -126,7 +118,7 @@ export function soumettreReponseExtraction(etat: EtatSessionRelationsDroites, re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideExtraction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -154,7 +146,7 @@ export function soumettreReponseConstruction(etat: EtatSessionRelationsDroites, 
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideConstruction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -186,7 +178,7 @@ export function soumettreReponseEquation(etat: EtatSessionRelationsDroites, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideEquation);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

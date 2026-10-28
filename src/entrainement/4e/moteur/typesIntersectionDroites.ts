@@ -32,8 +32,7 @@ export interface EtatSessionIntersectionDroites {
   phase: PhaseIntersectionDroites;
   etapeCourante: EtatEtapeTentatives;
   /** Aide PROGRESSIVE par écran (même mécanique que "Position d'une droite par rapport à un
-   * plan"/"Colinéarité"/"Orthogonalité") — pénalité ADDITIVE, appliquée au moment précis où l'écran
-   * se clôt, jamais rétroactivement. */
+   * plan"/"Colinéarité"/"Orthogonalité"). */
   niveauAideDiagnostic: number;
   niveauAidePoint: number;
   scoreDiagnosticExercice: number | null;

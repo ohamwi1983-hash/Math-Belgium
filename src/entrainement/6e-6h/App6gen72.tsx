@@ -15,7 +15,6 @@ import { ResumeSessionQuizLieuxGeometriques } from "./components6e/ResumeSession
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 /** Le chapitre "Lieux géométriques" n'a JAMAIS porté de numéro dans ce dépôt (contrairement aux

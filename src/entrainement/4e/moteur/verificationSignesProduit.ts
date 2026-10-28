@@ -52,56 +52,120 @@ export function verifierGrille(saisie: Grille, attendu: Grille): boolean {
   return lignesEgales && produitEgal;
 }
 
-function borneEgale(a: Borne, b: Borne): boolean {
-  return a === b;
+/** Un morceau d'ensemble sous forme numérique : bornes ±Infinity pour ±∞, `gFerme`/`dFerme` = crochet fermé. */
+interface Plage {
+  g: number;
+  gFerme: boolean;
+  d: number;
+  dFerme: boolean;
 }
 
-function morceauEgal(a: Morceau, b: Morceau): boolean {
-  return (
-    a.crochetGauche === b.crochetGauche &&
-    a.crochetDroit === b.crochetDroit &&
-    borneEgale(a.borneGauche, b.borneGauche) &&
-    borneEgale(a.borneDroite, b.borneDroite)
-  );
-}
+const TOLERANCE = 1e-9;
 
-/** Clé de tri d'un morceau par sa borne gauche (-∞ toujours en premier, +∞ toujours en dernier). */
-function cleTriBorne(borne: Borne): number {
+function valeurBorne(borne: Borne): number {
   if (borne === "-inf") return -Infinity;
   if (borne === "+inf") return Infinity;
   return borne;
 }
 
-/**
- * Étape "intervalle" : compare la structure saisie par l'élève à la solution calculée
- * (SolutionEnsembleProduit, prompt-corrections-tableau-signes-3points.md point 2) — même principe
- * que verifierSolutionInequation (exercice "tableau de signes"), mais généralisé à un nombre
- * variable de morceaux ("union") et de valeurs exclues ("reel_sauf_points"), comparés
- * indépendamment de l'ordre de saisie (triés par borne gauche / valeur croissante avant
- * comparaison terme à terme).
- */
-export function verifierSolutionSignesProduit(saisie: SolutionEnsembleProduit, attendu: SolutionEnsembleProduit): boolean {
-  if (saisie.forme !== attendu.forme) return false;
+/** null si le morceau est mal formé (bornes inversées, ∞ fermé, [a ; a[ …) — jamais accepté. */
+function plageDepuisMorceau(m: Morceau): Plage | null {
+  const g = valeurBorne(m.borneGauche);
+  const d = valeurBorne(m.borneDroite);
+  const gFerme = m.crochetGauche === "[";
+  const dFerme = m.crochetDroit === "]";
+  if (!Number.isFinite(g) && gFerme) return null;
+  if (!Number.isFinite(d) && dFerme) return null;
+  if (g === Infinity || d === -Infinity) return null;
+  if (g > d + TOLERANCE) return null;
+  if (Math.abs(g - d) <= TOLERANCE && !(gFerme && dFerme)) return null;
+  return { g, gFerme, d, dFerme };
+}
 
-  switch (saisie.forme) {
+function plagePoint(v: number): Plage {
+  return { g: v, gFerme: true, d: v, dFerme: true };
+}
+
+/**
+ * Forme canonique d'un ensemble-solution : plages triées, disjointes et non contiguës (deux plages
+ * qui se touchent en un point inclus d'un côté au moins sont fusionnées) — un point isolé est une
+ * plage [v ; v]. Deux écritures du même ensemble donnent la même forme canonique ; null si une partie
+ * de la saisie est mal formée.
+ */
+export function formeCanoniqueEnsemble(solution: SolutionEnsembleProduit): Plage[] | null {
+  let plages: (Plage | null)[];
+  switch (solution.forme) {
     case "vide":
+      plages = [];
+      break;
     case "reel":
-      return true;
+      plages = [{ g: -Infinity, gFerme: false, d: Infinity, dFerme: false }];
+      break;
     case "point":
-      return saisie.valeur === (attendu as typeof saisie).valeur;
+      plages = [plagePoint(solution.valeur)];
+      break;
     case "reel_sauf_points": {
-      const a = [...saisie.valeurs].sort((x, y) => x - y);
-      const b = [...(attendu as typeof saisie).valeurs].sort((x, y) => x - y);
-      return a.length === b.length && a.every((v, i) => v === b[i]);
+      const valeurs = [...new Set(solution.valeurs)].sort((a, b) => a - b);
+      if (valeurs.length === 0) return null;
+      const bornes = [-Infinity, ...valeurs, Infinity];
+      plages = bornes.slice(0, -1).map((g, i) => ({ g, gFerme: false, d: bornes[i + 1], dFerme: false }));
+      break;
     }
     case "intervalle":
-      return morceauEgal(saisie.morceau, (attendu as typeof saisie).morceau);
-    case "union": {
-      const morceauxAttendus = (attendu as typeof saisie).morceaux;
-      if (saisie.morceaux.length !== morceauxAttendus.length) return false;
-      const s = [...saisie.morceaux].sort((x, y) => cleTriBorne(x.borneGauche) - cleTriBorne(y.borneGauche));
-      const t = [...morceauxAttendus].sort((x, y) => cleTriBorne(x.borneGauche) - cleTriBorne(y.borneGauche));
-      return s.every((m, i) => morceauEgal(m, t[i]));
+      plages = [plageDepuisMorceau(solution.morceau)];
+      break;
+    case "union":
+      plages = solution.morceaux.map(plageDepuisMorceau);
+      break;
+    case "mixte":
+      plages = [...solution.morceaux.map(plageDepuisMorceau), ...solution.points.map(plagePoint)];
+      break;
+  }
+  if (plages.some((p) => p === null || Number.isNaN(p.g) || Number.isNaN(p.d))) return null;
+
+  const triees = (plages as Plage[]).sort((a, b) => a.g - b.g || Number(b.gFerme) - Number(a.gFerme));
+  const fusion: Plage[] = [];
+  for (const p of triees) {
+    const derniere = fusion[fusion.length - 1];
+    const touche =
+      derniere !== undefined &&
+      (p.g < derniere.d - TOLERANCE || (Math.abs(p.g - derniere.d) <= TOLERANCE && (derniere.dFerme || p.gFerme)));
+    if (!derniere || !touche) {
+      fusion.push({ ...p });
+      continue;
+    }
+    if (Math.abs(p.g - derniere.g) <= TOLERANCE) derniere.gFerme = derniere.gFerme || p.gFerme;
+    if (p.d > derniere.d + TOLERANCE) {
+      derniere.d = p.d;
+      derniere.dFerme = p.dFerme;
+    } else if (Math.abs(p.d - derniere.d) <= TOLERANCE) {
+      derniere.dFerme = derniere.dFerme || p.dFerme;
     }
   }
+  return fusion;
+}
+
+function memeNombre(a: number, b: number): boolean {
+  return a === b || Math.abs(a - b) <= TOLERANCE;
+}
+
+/** Égalité d'ENSEMBLES (forme canonique), jamais d'écriture : ordre libre, ]−∞;2[ ∪ ]2;+∞[ = ℝ∖{2}, etc. */
+export function ensemblesSolutionEgaux(a: SolutionEnsembleProduit, b: SolutionEnsembleProduit): boolean {
+  const ca = formeCanoniqueEnsemble(a);
+  const cb = formeCanoniqueEnsemble(b);
+  if (ca === null || cb === null || ca.length !== cb.length) return false;
+  return ca.every(
+    (p, i) => memeNombre(p.g, cb[i].g) && memeNombre(p.d, cb[i].d) && p.gFerme === cb[i].gFerme && p.dFerme === cb[i].dFerme,
+  );
+}
+
+/**
+ * Étape "intervalle" : compare l'ENSEMBLE saisi par l'élève à la solution calculée (audit gen5/gen6,
+ * racines doubles) — par forme canonique (`ensemblesSolutionEgaux`), donc indépendamment de l'ordre
+ * de saisie et de l'écriture choisie (une solution "mixte" ]−∞ ; 1] ∪ {3} saisie dans n'importe quel
+ * ordre est acceptée ; un point isolé oublié ou ajouté à tort, un crochet fermé sur une valeur
+ * interdite, un trou oublié sont refusés).
+ */
+export function verifierSolutionSignesProduit(saisie: SolutionEnsembleProduit, attendu: SolutionEnsembleProduit): boolean {
+  return ensemblesSolutionEgaux(saisie, attendu);
 }

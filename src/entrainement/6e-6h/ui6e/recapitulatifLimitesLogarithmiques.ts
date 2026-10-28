@@ -12,8 +12,7 @@ import { formatCategorieLabel, formatCibleTexte } from "./formatLimitesLogarithm
  *
  * `revele` déduit de `detailsPartiels[phase].revele` — jamais `scoresPartiels[phase] === 0`, non
  * fiable ici (voir le commentaire de `DetailPhaseLimiteLogarithmique`,
- * `typesLimitesLogarithmiques.ts` : même piège que `6gen7`/`6gen16`, une pénalité d'aide peut à
- * elle seule ramener le score à 0 sans révélation).
+ * `typesLimitesLogarithmiques.ts` : même piège que `6gen7`/`6gen16`, une pénalité d'aide (supprimée depuis) pouvait à elle seule ramener le score à 0 sans révélation).
  */
 
 const LIBELLE_PHASE: Record<PhaseLimiteLogarithmique, string> = {

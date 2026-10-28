@@ -24,7 +24,7 @@ import { FonctionRicheAssociationGraph } from "./components5e/FonctionRicheAssoc
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 

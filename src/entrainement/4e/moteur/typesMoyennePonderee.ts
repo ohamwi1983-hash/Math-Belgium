@@ -36,9 +36,7 @@ export interface EtatSessionMoyennePonderee {
   /**
    * Aide PROGRESSIVE par écran (comme "Tableau de fréquences"/"Regroupement en classes et
    * histogramme"/"Triangle quelconque"/"Colinéarité") — 2 niveaux sur "centres", 2 niveaux sur
-   * "sommes", 1 seul niveau sur "quotient" (spec). Pénalité ADDITIVE (-20 points par niveau
-   * atteint) appliquée au niveau atteint au moment précis où l'écran se clôt — jamais
-   * rétroactivement.
+   * "sommes", 1 seul niveau sur "quotient" (spec).
    */
   niveauAideCentres: number;
   niveauAideSommes: number;

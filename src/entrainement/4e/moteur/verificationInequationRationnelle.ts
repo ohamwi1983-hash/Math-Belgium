@@ -48,8 +48,9 @@ export function verifierGrilleQuotientNiveau3(saisie: GrilleQuotientNiveau3, att
       : saisie.ligneCoefficient !== undefined && ligneEgale(saisie.ligneCoefficient, attendu.ligneCoefficient);
   return (
     coefficientOk &&
-    ligneEgale(saisie.lignesNumerateur[0], attendu.lignesNumerateur[0]) &&
-    ligneEgale(saisie.lignesNumerateur[1], attendu.lignesNumerateur[1]) &&
+    // 2 lignes N, ou 1 seule ligne « (x − r)² » pour une racine double (même nombre exigé).
+    saisie.lignesNumerateur.length === attendu.lignesNumerateur.length &&
+    attendu.lignesNumerateur.every((ligne, i) => ligneEgale(saisie.lignesNumerateur[i], ligne)) &&
     ligneEgale(saisie.ligneDenominateur, attendu.ligneDenominateur) &&
     ligneEgale(saisie.ligneQuotient, attendu.ligneQuotient)
   );

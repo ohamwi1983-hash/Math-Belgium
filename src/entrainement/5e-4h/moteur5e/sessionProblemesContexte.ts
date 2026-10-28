@@ -53,7 +53,6 @@ import {
 } from "./verificationProblemesContexte";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** B.3 (`promptcorrectionsround2.md`) — 9 des 14 écrans déclaraient `2` alors qu'un seul texte
  * d'aide (`TEXTE_AIDE_XXX_1`, `ui5e/formatProblemesContexte.ts`) existe réellement pour chacun :
@@ -172,12 +171,9 @@ export function demarrerSessionProblemeContexte(reglages: ReglagesSession5e, gen
 }
 
 function reglagesEtape(etat: EtatSessionProblemeContexte): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 export function activerAideSuivante(etat: EtatSessionProblemeContexte): EtatSessionProblemeContexte {
   if (etat.terminee) throw new Error("activerAideSuivante : la session est déjà terminée");
@@ -216,7 +212,7 @@ export function soumettreReponseTableauA(etat: EtatSessionProblemeContexte, repo
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -239,7 +235,7 @@ export function soumettreReponseGeneralisationA(etat: EtatSessionProblemeContext
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -262,7 +258,7 @@ export function soumettreReponseEgaliteAiresA(etat: EtatSessionProblemeContexte,
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -286,7 +282,7 @@ export function soumettreReponseGraphiqueA(etat: EtatSessionProblemeContexte, re
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   // Continuité : retient la réponse élève SI la toute dernière tentative était correcte, sinon la
   // valeur canonique (révélation) — jamais la dernière saisie erronée.
   const xOptimalRetenu = reussie ? reponse : exercice.xOptimal;
@@ -314,7 +310,7 @@ export function soumettreReponseJustificationA(etat: EtatSessionProblemeContexte
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     scenario: "A",
     combo: "kInverseXAxCarre",
@@ -351,7 +347,7 @@ export function soumettreReponseGeneralisationSimpleA(etat: EtatSessionProblemeC
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -374,7 +370,7 @@ export function soumettreReponseIntersectionSimpleA(etat: EtatSessionProblemeCon
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -397,7 +393,7 @@ export function soumettreReponseExtremumSimpleA(etat: EtatSessionProblemeContext
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     scenario: "A",
     combo: exercice.combo,
@@ -427,7 +423,7 @@ export function soumettreReponseSystemeB(etat: EtatSessionProblemeContexte, repo
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -451,7 +447,7 @@ export function soumettreReponseResolutionB(etat: EtatSessionProblemeContexte, r
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const aRetenu = reussie ? reponse.a : exercice.aArrondiAttendu;
   const bRetenu = reussie ? reponse.b : exercice.bArrondiAttendu;
   return {
@@ -480,7 +476,7 @@ export function soumettreReponseFormuleB(etat: EtatSessionProblemeContexte, repo
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -505,7 +501,7 @@ export function soumettreReponseEvaluationB(etat: EtatSessionProblemeContexte, r
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     scenario: "B",
     exercice,
@@ -538,7 +534,7 @@ export function soumettreReponseLectureC(etat: EtatSessionProblemeContexte, repo
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -561,7 +557,7 @@ export function soumettreReponseCoutMoyenC(etat: EtatSessionProblemeContexte, re
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -584,7 +580,7 @@ export function soumettreReponseReconnaissanceC(etat: EtatSessionProblemeContext
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -607,7 +603,7 @@ export function soumettreReponseBeneficeC(etat: EtatSessionProblemeContexte, rep
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -630,7 +626,7 @@ export function soumettreReponseSeuilC(etat: EtatSessionProblemeContexte, repons
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     scenario: "C",
     exercice,

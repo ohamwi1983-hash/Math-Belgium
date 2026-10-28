@@ -129,7 +129,7 @@ export interface EtatSessionSimplification {
   /** même principe que `denomReductionRevele` ci-dessus. */
   numFactorisationRevele: boolean;
   /**
-   * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —
+   * Aides à sens unique (1 seul niveau —
    * conceptionaidescomposantspartageshistorique.md) — remises à false au passage à l'exercice
    * suivant, comme les autres champs "transitoires" ci-dessus.
    */

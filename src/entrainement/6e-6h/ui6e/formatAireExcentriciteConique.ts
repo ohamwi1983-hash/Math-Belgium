@@ -1,6 +1,5 @@
 import type { ExerciceAireExcentriciteConique, ExerciceFamilleA, ExerciceFamilleB, FractionExacte } from "../core6e/aireExcentriciteConique.types";
-import type { PhaseAireExcentriciteConique, ResultatExerciceAireExcentriciteConique } from "../moteur6e/typesAireExcentriciteConique";
-import { phasesPourExercice } from "../moteur6e/typesAireExcentriciteConique";
+import type { PhaseAireExcentriciteConique } from "../moteur6e/typesAireExcentriciteConique";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen60`. Dispatch sur
@@ -301,10 +300,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceAireExcentrici
   return [formatExcentriciteLatex(exercice)];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsAireExcentriciteConique(resultat: ResultatExerciceAireExcentriciteConique): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

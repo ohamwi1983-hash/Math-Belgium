@@ -1,6 +1,5 @@
 import type { DonneesGeneratrices, ExerciceMethodeGeneratrices, StatutMorceauLieu } from "../core6e/methodeGeneratrices.types";
-import type { PhaseMethodeGeneratrices, ResultatExerciceMethodeGeneratrices } from "../moteur6e/typesMethodeGeneratrices";
-import { phasesPourExercice } from "../moteur6e/typesMethodeGeneratrices";
+import type { PhaseMethodeGeneratrices } from "../moteur6e/typesMethodeGeneratrices";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage pour `6gen57`. DÉCISION DE CONCEPTION : les 5
@@ -346,10 +345,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceMethodeGenerat
   }
 }
 
-/** Total points du récapitulatif final — toujours 5×100 (les 5 écrans sont fixes, contrairement à
- * la plupart des autres générateurs 6e — voir en-tête `moteur6e/typesMethodeGeneratrices.ts`). */
-export function calculerTotalPointsMethodeGeneratrices(resultat: ResultatExerciceMethodeGeneratrices): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

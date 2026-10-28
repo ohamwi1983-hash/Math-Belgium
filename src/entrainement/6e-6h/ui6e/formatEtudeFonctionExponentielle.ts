@@ -8,7 +8,7 @@ import type {
   ExerciceEtudeFonctionExponentielle,
 } from "../core6e/etudeFonctionExponentielle.types";
 import type { CibleLimite } from "../core6e/limitesExponentielles.types";
-import type { PhaseEtudeFonctionExponentielle, ResultatExerciceEtudeFonctionExponentielle } from "../moteur6e/typesEtudeFonctionExponentielle";
+import type { PhaseEtudeFonctionExponentielle } from "../moteur6e/typesEtudeFonctionExponentielle";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
@@ -603,25 +603,3 @@ export function etatActuel(exercice: ExerciceEtudeFonctionExponentielle, phase: 
   return ORDRE_PHASES_ETAT.slice(0, index).map((p) => ligneEtatPhase(exercice, p));
 }
 
-// ============================================================================
-// Total de points du récapitulatif — décision utilisateur explicite (commissionné séparément de
-// `LigneRecap`/`statutRecap`, qui reste EXCLUSIVEMENT couleur, jamais un score) : réutilise TEL
-// QUEL le score RÉEL déjà calculé par `moteur/etapeTentatives.ts` + la pénalité d'aide de
-// `moteur6e/sessionEtudeFonctionExponentielle.ts` (100 de base, moins `pointsDeBase/tentativesMax`
-// par tentative ratée, moins 20 par niveau d'aide, clampé à 0, forcé à exactement 0 en cas de
-// révélation) — JAMAIS une formule simplifiée à 3 paliers. Conséquence assumée : un écran VERT (2e
-// tentative correcte, aucune aide) peut contribuer p.ex. 67/100 plutôt que 100/100 au total — pas
-// un bug, voir le commentaire équivalent sur `statutRecap` (`components6e/LigneRecap.tsx`).
-// ============================================================================
-
-export interface TotalRecap {
-  total: number;
-  maximum: number;
-}
-
-/** Somme des 6 scores fixes (séquence TOUJOURS complète pour les 4 familles, voir
- * `moteur6e/typesEtudeFonctionExponentielle.ts`) — `maximum` toujours `600`. */
-export function totalPointsRecap(resultat: ResultatExerciceEtudeFonctionExponentielle): TotalRecap {
-  const total = resultat.scoreDomaine + resultat.scoreLimites + resultat.scoreAsymptotes + resultat.scoreCroissance + resultat.scoreConcavite + resultat.scoreGraphique;
-  return { total, maximum: 600 };
-}

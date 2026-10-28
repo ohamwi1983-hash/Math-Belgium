@@ -8,9 +8,7 @@
  * **Aide PROGRESSIVE par écran** (même principe exact que "Triangle quelconque",
  * `sessionTriangleQuelconque.ts`) — 3 niveaux pour l'écran "simplification", 2 pour l'écran
  * "composantes" (`activerAideSuivante`), chacun un cran de plus que le précédent, jamais
- * accessible au-delà de son maximum ni hors de la phase à laquelle il appartient. Pénalité
- * ADDITIVE (-20 points par niveau atteint) appliquée au niveau atteint au moment précis où l'écran
- * se clôt — jamais rétroactivement.
+ * accessible au-delà de son maximum ni hors de la phase à laquelle il appartient.
  */
 import type { GenerateurExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -20,7 +18,6 @@ import { verifierComposantes, verifierSimplification } from "./verificationCombi
 import type { EtatSessionCombinaisonVecteurs, ResultatExerciceCombinaisonVecteurs } from "./typesCombinaisonVecteurs";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_SIMPLIFICATION = 3;
 export const NIVEAU_AIDE_MAX_COMPOSANTES = 2;
 
@@ -48,13 +45,7 @@ function reglagesEtape(etat: EtatSessionCombinaisonVecteurs): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -115,7 +106,7 @@ export function soumettreReponseSimplification(etat: EtatSessionCombinaisonVecte
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSimplification);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -145,7 +136,7 @@ export function soumettreReponseComposantes(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideComposantes);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,

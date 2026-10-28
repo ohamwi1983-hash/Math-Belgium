@@ -24,7 +24,7 @@ export interface EtatSessionQuelAngle {
   exerciceCourant: ExerciceQuelAngle;
   etapeCourante: EtatEtapeTentatives;
   /** Bouton "Aide" unique (`promptcorrectionsgenerateur18aideunique.md`, remplace les 3 niveaux
-   * d'origine) — révélation à sens unique, facteur ×0,5 sur le score final, même mécanique que la
+   * d'origine) — révélation à sens unique, même mécanique que la
    * plupart des générateurs du projet (ex. "Valeurs remarquables"). */
   aideUtilisee: boolean;
   resultats: ResultatExerciceQuelAngle[];

@@ -30,8 +30,7 @@ export interface EtatSessionLieuxGeometriques {
   exerciceCourant: ExerciceLieuxGeometriques;
   phase: PhaseLieuxGeometriques;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide PROGRESSIVE par écran — pénalité ADDITIVE, appliquée au moment précis où l'écran se
-   * clôt, jamais rétroactivement (même mécanique que le reste de la plateforme). */
+  /** Aide PROGRESSIVE par écran (même mécanique que le reste de la plateforme). */
   niveauAideIdentification: number;
   niveauAideEquations: number;
   niveauAideResolution: number;

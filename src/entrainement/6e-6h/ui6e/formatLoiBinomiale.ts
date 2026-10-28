@@ -1,8 +1,7 @@
 import type { ExerciceLoiBinomiale, ExerciceLoiBinomialeA, ExerciceLoiBinomialeB, ExerciceLoiBinomialeC, FamilleLoiBinomiale } from "../core6e/loiBinomiale.types";
 import type { StrategieBinomialeA } from "../core6e/binomialeSequenceOrdonnee.types";
 import { coefficientBinomial } from "../generateurs6e/combinatoire";
-import type { PhaseLoiBinomiale, ResultatExerciceLoiBinomiale } from "../moteur6e/typesLoiBinomiale";
-import { phasesPourExercice } from "../moteur6e/typesLoiBinomiale";
+import type { PhaseLoiBinomiale } from "../moteur6e/typesLoiBinomiale";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen50`. Dispatch sur
@@ -551,14 +550,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiBinomiale, 
   if (phase === "cEcran1") return [formatInequationPoseeC(exercice)];
   if (phase === "cEcran2") return [formatInequationIsoleeC(exercice)];
   return [`n=${exercice.valeurN}`];
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsLoiBinomiale(resultat: ResultatExerciceLoiBinomiale): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export type { ExerciceLoiBinomialeA, ExerciceLoiBinomialeB, ExerciceLoiBinomialeC };

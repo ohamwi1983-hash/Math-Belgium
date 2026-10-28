@@ -17,7 +17,6 @@ const CONSIGNE_GENERALE = "Compare visuellement ces vecteurs sur la figure.";
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

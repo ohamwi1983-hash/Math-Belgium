@@ -1,6 +1,5 @@
 import type { ExerciceAffixesRacines, IdRelationParallelogramme, IdSystemeRacine } from "../core6e/affixesRacines.types";
-import type { PhaseAffixesRacines, ResultatExerciceAffixesRacines } from "../moteur6e/typesAffixesRacines";
-import { phasesPourExercice } from "../moteur6e/typesAffixesRacines";
+import type { PhaseAffixesRacines } from "../moteur6e/typesAffixesRacines";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen35`. Dispatch sur
@@ -371,10 +370,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceAffixesRacines
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 1 pour A, 2 pour B, 3 pour C). */
-export function calculerTotalPointsAffixesRacines(resultat: ResultatExerciceAffixesRacines): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

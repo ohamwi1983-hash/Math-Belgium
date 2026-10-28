@@ -3,7 +3,7 @@ import type { PolynomeLineaire } from "../../core/simplification.types";
 import type { ExerciceInequationRationnelleDenominateurCarre } from "../../core/inequationRationnelle.types";
 import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
 import { construireExerciceClassifie } from "../equationRationnelle/construireExerciceClassifie";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientDenominateurCarre } from "./construireGrilleQuotientDenominateurCarre";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
@@ -38,8 +38,7 @@ export function construireDenominateurCarreAvecParametres(
   const denominateur: PolynomeLineaire = { k: 1, p };
 
   const { racines, ce, grille } = construireGrilleQuotientDenominateurCarre(numerateur, denominateur);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return {
     niveau: "denominateurCarre",

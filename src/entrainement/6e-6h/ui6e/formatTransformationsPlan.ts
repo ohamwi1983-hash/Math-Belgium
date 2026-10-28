@@ -1,6 +1,5 @@
 import type { AffixeEntiere, ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransformationsPlan, ParametresTransfoA, SousTypeTransfoA } from "../core6e/transformationsPlan.types";
-import type { PhaseTransformationsPlan, ResultatExerciceTransformationsPlan } from "../moteur6e/typesTransformationsPlan";
-import { phasesPourExercice } from "../moteur6e/typesTransformationsPlan";
+import type { PhaseTransformationsPlan } from "../moteur6e/typesTransformationsPlan";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen40`. Dispatch sur
@@ -457,14 +456,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceTransformation
       if (phase === "cEcran2") return [`\\theta=${exercice.angleRotation.latex}`];
       return exercice.imagesAutresPoints.map((img, i) => `z_{${nomPoint(i)}'}=${affixeLatex(img)}`);
   }
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 2 pour A/B, 3 pour C). */
-export function calculerTotalPointsTransformationsPlan(resultat: ResultatExerciceTransformationsPlan): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export type { ParametresTransfoA };

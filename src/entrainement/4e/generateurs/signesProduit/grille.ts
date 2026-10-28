@@ -5,7 +5,6 @@ import type {
   FacteurQuadratiqueIrreductible,
   FacteurSignesProduit,
   Grille,
-  Signe,
   SolutionEnsembleProduit,
   ValeurCellule,
 } from "../../core/signesProduit.types";
@@ -23,11 +22,15 @@ import type {
  *   ui/formatSignesProduit.ts::formatLigneLabel), soit l'une des 2 racines d'un facteur
  *   factorisable (toujours monique, racineIndex 0 = la plus petite, 1 = la plus grande).
  * - "p2" : un facteur irréductible (Δ<0), signe constant, jamais de racine.
+ * - "carre" : un facteur au carré a(x−r)² (catégorie produit_remarquable, racine double) — une seule
+ *   ligne « (x−r)² », « + » partout sauf « 0 » en r : un carré n'est jamais négatif (plus lisible que
+ *   deux lignes « x−r » identiques). Son coefficient dominant négatif a sa ligne "p0" comme les autres.
  */
 export type LigneRef =
   | { kind: "p0"; facteurIndex: number }
   | { kind: "p1"; facteurIndex: number; racineIndex?: 0 | 1 }
-  | { kind: "p2"; facteurIndex: number };
+  | { kind: "p2"; facteurIndex: number }
+  | { kind: "carre"; facteurIndex: number };
 
 /**
  * Ordre canonique des lignes du tableau : dans l'ordre des facteurs tels qu'affichés dans l'énoncé
@@ -52,8 +55,12 @@ export function ordreLignesGrille(facteurs: FacteurSignesProduit[]): LigneRef[] 
       lignes.push({ kind: "p1", facteurIndex });
     } else if (facteur.type === "quadratique_factorisable") {
       if (facteur.exercice.enonce.a < 0) lignes.push({ kind: "p0", facteurIndex });
-      lignes.push({ kind: "p1", facteurIndex, racineIndex: 0 });
-      lignes.push({ kind: "p1", facteurIndex, racineIndex: 1 });
+      if (facteur.exercice.categorie === "produit_remarquable") {
+        lignes.push({ kind: "carre", facteurIndex });
+      } else {
+        lignes.push({ kind: "p1", facteurIndex, racineIndex: 0 });
+        lignes.push({ kind: "p1", facteurIndex, racineIndex: 1 });
+      }
     } else {
       lignes.push({ kind: "p2", facteurIndex });
     }
@@ -63,6 +70,10 @@ export function ordreLignesGrille(facteurs: FacteurSignesProduit[]): LigneRef[] 
 
 /** Racine portée par une ligne "p1" — undefined pour "p0"/"p2" (aucune racine réelle). */
 function racineDeLigne(facteurs: FacteurSignesProduit[], ref: LigneRef): number | undefined {
+  if (ref.kind === "carre") {
+    const facteur = facteurs[ref.facteurIndex];
+    return facteur.type === "quadratique_factorisable" ? facteur.exercice.solution.racines[0] : undefined;
+  }
   if (ref.kind !== "p1") return undefined;
   const facteur = facteurs[ref.facteurIndex];
   if (facteur.type === "lineaire") return facteur.polynome.p;
@@ -96,6 +107,7 @@ function valeurLigne(facteurs: FacteurSignesProduit[], ref: LigneRef, x: number)
   }
   const racine = racineDeLigne(facteurs, ref) as number;
   if (x === racine) return "0";
+  if (ref.kind === "carre") return "+";
   return x > racine ? "+" : "-";
 }
 
@@ -110,10 +122,10 @@ function valeurLigne(facteurs: FacteurSignesProduit[], ref: LigneRef, x: number)
  */
 export function construireGrille(facteurs: FacteurSignesProduit[]): { racines: number[]; grille: Grille } {
   const refs = ordreLignesGrille(facteurs);
-  const racines = refs
-    .map((ref) => racineDeLigne(facteurs, ref))
-    .filter((r): r is number => r !== undefined)
-    .sort((a, b) => a - b);
+  // Dédoublonnées : une racine double (ligne "carre") n'occupe qu'UNE colonne.
+  const racines = [...new Set(refs.map((ref) => racineDeLigne(facteurs, ref)).filter((r): r is number => r !== undefined))].sort(
+    (a, b) => a - b,
+  );
   const nbColonnes = 2 * racines.length + 1;
 
   const lignes: ValeurCellule[][] = refs.map((ref) =>
@@ -132,45 +144,60 @@ export function construireGrille(facteurs: FacteurSignesProduit[]): { racines: n
   return { racines, grille: { lignes, produit } };
 }
 
-/** Sous-ensemble des colonnes "zone" (indices pairs) d'une ligne produit — jamais "0" par construction (voir construireGrille). */
-export function extraireSignesZones(produit: ValeurCellule[]): Signe[] {
-  return produit.filter((_, colonne) => colonne % 2 === 0) as Signe[];
-}
-
-/** Notation francophone (voir core/inequation.types.ts) : gauche fermé="[" /ouvert="]", droite fermé="]" /ouvert="[". */
-function construireMorceauZone(zone: number, racines: number[], inclureBornes: boolean): Morceau {
-  const n = racines.length;
-  const borneGauche: Borne = zone === 0 ? "-inf" : racines[zone - 1];
-  const borneDroite: Borne = zone === n ? "+inf" : racines[zone];
-  const crochetGauche: Crochet = zone === 0 ? "]" : inclureBornes ? "[" : "]";
-  const crochetDroit: Crochet = zone === n ? "[" : inclureBornes ? "]" : "[";
-  return { crochetGauche, borneGauche, crochetDroit, borneDroite };
-}
-
 /**
- * Ensemble-solution à partir des signes de zone déjà extraits (extraireSignesZones) — jamais
- * redérivée d'une nouvelle évaluation, pour rester cohérente avec la grille affichée à l'élève.
- * Utilise `SolutionEnsembleProduit` (morceaux en liste, extensible — voir core/signesProduit.types.ts)
- * plutôt que le `SolutionEnsemble` de l'exercice "tableau de signes" (limité à 2 morceaux fixes).
- * En pratique, comme tous les facteurs sont simples (racines toutes distinctes), le signe du
- * produit alterne strictement d'une zone à l'autre, donc au plus 2 morceaux sont jamais produits
- * ici (y compris pour 3 racines / 4 zones) — mais rien dans cette fonction ne suppose cette borne,
- * elle construit simplement une entrée par zone satisfaisante.
+ * Ensemble-solution à partir des colonnes satisfaites du tableau (2n+1 colonnes alternées
+ * zone/point, n racines distinctes triées) — générique gen5/gen6 (audit, racines doubles) : les
+ * colonnes satisfaites consécutives forment des morceaux maximaux ; une colonne point isolée (zones
+ * voisines non satisfaites — racine double avec ≤/≥) devient un point isolé. Bornes : une colonne
+ * point satisfaite en extrémité de morceau donne un crochet fermé, une zone en extrémité un crochet
+ * ouvert sur la racine voisine (qui n'est donc pas solution : « 0 » avec un symbole strict, ou « ∄ »).
+ * Formes : "vide", "reel", "reel_sauf_points" (toutes les zones, seules des colonnes point manquent),
+ * "point", "intervalle", "union", "mixte" (morceau(x) + point(s) isolé(s)). Avec des racines toutes
+ * simples (signe alterné), le résultat est identique à l'ancienne construction zone par zone.
  */
-export function classifierSolutionProduit(racines: number[], zonesProduit: Signe[], symbole: Symbole): SolutionEnsembleProduit {
-  const inclureBornes = symbole === "≤" || symbole === "≥";
-  const satisfaitPositif = symbole === ">" || symbole === "≥";
-  const zonesSatisfaisantes = zonesProduit
-    .map((signe, zone) => ({ signe, zone }))
-    .filter(({ signe }) => (satisfaitPositif ? signe === "+" : signe === "-"))
-    .map(({ zone }) => zone);
+export function classifierSolutionParColonnes(racines: number[], colonnesSatisfaites: boolean[]): SolutionEnsembleProduit {
+  const nbColonnes = colonnesSatisfaites.length;
+  if (colonnesSatisfaites.every((c) => !c)) return { forme: "vide" };
+  if (colonnesSatisfaites.every((c) => c)) return { forme: "reel" };
+  const toutesZones = colonnesSatisfaites.every((c, colonne) => colonne % 2 === 1 || c);
+  if (toutesZones) {
+    return {
+      forme: "reel_sauf_points",
+      valeurs: racines.filter((_, j) => !colonnesSatisfaites[2 * j + 1]),
+    };
+  }
 
-  if (zonesSatisfaisantes.length === 0) return { forme: "vide" };
-  if (zonesSatisfaisantes.length === zonesProduit.length) return { forme: "reel" };
+  const morceaux: Morceau[] = [];
+  const points: number[] = [];
+  let colonne = 0;
+  while (colonne < nbColonnes) {
+    if (!colonnesSatisfaites[colonne]) {
+      colonne++;
+      continue;
+    }
+    const debut = colonne;
+    while (colonne + 1 < nbColonnes && colonnesSatisfaites[colonne + 1]) colonne++;
+    const fin = colonne;
+    colonne++;
+    if (debut === fin && debut % 2 === 1) {
+      points.push(racines[(debut - 1) / 2]);
+      continue;
+    }
+    const borneGauche: Borne = debut === 0 ? "-inf" : debut % 2 === 1 ? racines[(debut - 1) / 2] : racines[debut / 2 - 1];
+    const crochetGauche: Crochet = debut % 2 === 1 ? "[" : "]";
+    const borneDroite: Borne = fin === nbColonnes - 1 ? "+inf" : fin % 2 === 1 ? racines[(fin - 1) / 2] : racines[fin / 2];
+    const crochetDroit: Crochet = fin % 2 === 1 ? "]" : "[";
+    morceaux.push({ crochetGauche, borneGauche, crochetDroit, borneDroite });
+  }
 
-  const morceaux = zonesSatisfaisantes.map((zone) => construireMorceauZone(zone, racines, inclureBornes));
-  if (morceaux.length === 1) return { forme: "intervalle", morceau: morceaux[0] };
-  return { forme: "union", morceaux };
+  if (morceaux.length === 0) return points.length === 1 ? { forme: "point", valeur: points[0] } : { forme: "mixte", morceaux, points };
+  if (points.length > 0) return { forme: "mixte", morceaux, points };
+  return morceaux.length === 1 ? { forme: "intervalle", morceau: morceaux[0] } : { forme: "union", morceaux };
+}
+
+/** Ensemble-solution du produit, depuis la ligne produit complète (zones ET points) — voir classifierSolutionParColonnes. */
+export function classifierSolutionProduit(racines: number[], produit: ValeurCellule[], symbole: Symbole): SolutionEnsembleProduit {
+  return classifierSolutionParColonnes(racines, produit.map((valeur) => colonneSatisfait(valeur, symbole)));
 }
 
 /** Une colonne (zone ou point) satisfait l'inégalité si son signe correspond au symbole ; une colonne à "0" ne satisfait que les symboles larges (≤/≥). */

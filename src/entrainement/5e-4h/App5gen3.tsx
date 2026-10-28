@@ -47,7 +47,7 @@ import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionComposerFonctions {
   return demarrerSessionComposerFonctions(REGLAGES_DEMO, genererExerciceComposerFonctions);

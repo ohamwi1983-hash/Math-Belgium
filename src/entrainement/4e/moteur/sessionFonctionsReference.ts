@@ -46,7 +46,6 @@ function reglagesEtape(etat: EtatSessionFonctionReference) {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -152,7 +151,7 @@ export function soumettreReponse(
     if (etapeEquation.terminee) {
       const score = etapeEquation.score as number;
       equationAideAppliquee = etat.aideUtilisee;
-      scoreEquationExercice = equationAideAppliquee ? score * 0.5 : score;
+      scoreEquationExercice = score;
     }
   }
 
@@ -168,7 +167,7 @@ export function soumettreReponse(
     if (etapeCurseurs.terminee) {
       const score = etapeCurseurs.score as number;
       curseursAideAppliquee = etat.aideUtilisee;
-      scoreCurseursExercice = curseursAideAppliquee ? score * 0.5 : score;
+      scoreCurseursExercice = score;
     }
   }
 

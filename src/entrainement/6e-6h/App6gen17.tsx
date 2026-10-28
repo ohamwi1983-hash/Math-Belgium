@@ -92,7 +92,7 @@ function formatReponseLimiteLogCourt(r: ReponseLimiteLog): string {
   }
 }
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionLimiteLogarithmique {
   return demarrerSessionLimiteLogarithmique(REGLAGES_DEMO, genererExerciceLimiteLogarithmique);

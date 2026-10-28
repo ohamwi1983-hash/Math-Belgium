@@ -4,8 +4,7 @@
  * pour la preuve avec des générateurs factices, même principe que les 36 autres moteurs.
  *
  * Chaque variante traverse une SÉQUENCE FIXE et disjointe des autres (`SEQUENCES`,
- * `typesBienaymeTchebychev.ts`) — `soumettrePhase` (privée) factorise le motif commun (tentatives,
- * pénalité additive par niveau d'aide, transition vers l'écran suivant ou clôture de l'exercice) ;
+ * `typesBienaymeTchebychev.ts`) — `soumettrePhase` (privée) factorise le motif commun (tentatives, transition vers l'écran suivant ou clôture de l'exercice) ;
  * chaque `soumettreReponseXxx` exporté n'est qu'un thin wrapper typé par écran (même patron que
  * "Orthogonalité et théorème de Pythagore généralisé").
  */
@@ -27,7 +26,6 @@ import { NIVEAU_AIDE_MAX, SEQUENCES } from "./typesBienaymeTchebychev";
 import type { EtatSessionBienaymeTchebychev, PhaseBienaymeTchebychev, ResultatExerciceBienaymeTchebychev, ScoreEcran } from "./typesBienaymeTchebychev";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 function phaseInitiale(exercice: ExerciceBienaymeTchebychev): PhaseBienaymeTchebychev {
   return SEQUENCES[exercice.variante][0];
@@ -69,13 +67,7 @@ function reglagesEtape(etat: EtatSessionBienaymeTchebychev): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -204,7 +196,7 @@ function cloturerExerciceOuSuivant(etat: EtatSessionBienaymeTchebychev, resultat
   };
 }
 
-/** Factorise le motif commun à tous les écrans : tentatives, pénalité additive par niveau d'aide,
+/** Factorise le motif commun à tous les écrans : tentatives,
  * transition vers l'écran suivant de la séquence de la variante, ou clôture de l'exercice si
  * `phaseAttendue` est la dernière de sa séquence. */
 function soumettrePhase<R>(etat: EtatSessionBienaymeTchebychev, phaseAttendue: PhaseBienaymeTchebychev, reponse: R, verifier: (reponse: R) => boolean): EtatSessionBienaymeTchebychev {
@@ -222,7 +214,7 @@ function soumettrePhase<R>(etat: EtatSessionBienaymeTchebychev, phaseAttendue: P
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules: Partial<Record<PhaseBienaymeTchebychev, ScoreEcran>> = {
     ...etat.scoresAccumules,
     [phaseAttendue]: { score, revele: etapeCourante.revelee, niveauAide: etat.niveauAide },

@@ -18,7 +18,6 @@ function reglagesPourTheme(theme: VarianteQuizFonctionSecondDegre): ReglagesSess
   return {
     nombreExercices: nombreQuestions(theme),
     tentativesMax: 1,
-    penaliteActivee: true,
     affichageReponseApresEchec: true,
     affichageExplication: true,
   };

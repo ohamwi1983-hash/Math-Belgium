@@ -26,9 +26,7 @@ export interface EtatSessionCombinaisonVecteurs {
   /**
    * Aide PROGRESSIVE par écran (même principe que "Triangle quelconque") — 0 à 3 niveaux pour
    * l'écran "simplification", 0 à 2 pour l'écran "composantes" (`activerAideSuivante`,
-   * `sessionCombinaisonVecteurs.ts`), chacun révélant strictement plus que le précédent. Pénalité
-   * ADDITIVE (-20 points par niveau atteint), appliquée au niveau atteint au moment précis où
-   * l'écran se clôt — jamais rétroactivement.
+   * `sessionCombinaisonVecteurs.ts`), chacun révélant strictement plus que le précédent.
    */
   niveauAideSimplification: number;
   niveauAideComposantes: number;

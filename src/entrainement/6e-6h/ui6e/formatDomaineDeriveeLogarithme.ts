@@ -8,7 +8,7 @@ import type {
   ExerciceDomaineDeriveeLogG,
   ExerciceDomaineDeriveeLogarithme,
 } from "../core6e/domaineDeriveeLogarithme.types";
-import type { PhaseDomaineDeriveeLogarithme, ResultatExerciceDomaineDeriveeLogarithme } from "../moteur6e/typesDomaineDeriveeLogarithme";
+import type { PhaseDomaineDeriveeLogarithme } from "../moteur6e/typesDomaineDeriveeLogarithme";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen16`. Toute aide qui embarque un symbole
@@ -596,30 +596,3 @@ export function labelsDeuxChamps(exercice: ExerciceDomaineDeriveeLogarithme): { 
   return { a: "N'(x) =", b: "D'(x) =" };
 }
 
-export interface TotalPointsRecap {
-  points: number;
-  maximum: number;
-}
-
-/**
- * Total de points du récapitulatif final — SOMME des scores déjà pénalisés (tentatives + aide) sur
- * chaque écran RÉELLEMENT traversé (2 ou 3 selon la famille), affiché EN COMPLÉMENT de la liste
- * colorée `LigneRecap`/`statutRecap` (jamais à sa place — convention CLAUDE.md, "récapitulatif final
- * à plat, coloré" + total). Même principe que `totalPointsDomaineDeriveeExponentielle` (`6gen7`).
- */
-export function totalPointsDomaineDeriveeLogarithme(resultat: ResultatExerciceDomaineDeriveeLogarithme): TotalPointsRecap {
-  switch (resultat.famille) {
-    case "A":
-    case "B":
-    case "F":
-      return { points: resultat.scoreDomaine + resultat.scoreDerivee, maximum: 200 };
-    case "C":
-      return { points: resultat.scoreDomaine + resultat.scoreFacteurs + resultat.scoreAssemblage, maximum: 300 };
-    case "D":
-      return { points: resultat.scoreDomaine + resultat.scoreND + resultat.scoreAssemblage, maximum: 300 };
-    case "E":
-      return { points: resultat.scoreDomaine + resultat.scoreSimplifier + resultat.scoreDerivee, maximum: 300 };
-    case "G":
-      return { points: resultat.scoreIdentifier + resultat.scoreFPrimeSurF + resultat.scoreIsoler, maximum: 300 };
-  }
-}

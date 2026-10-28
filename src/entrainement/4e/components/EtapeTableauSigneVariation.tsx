@@ -42,7 +42,7 @@ interface Props {
  * états uniformes sur toutes les colonnes, x_S comprise, sans retour à "?"
  * (prompt-4-modifications-analyse-fonction.md, point 4) — c'est à l'élève de repérer lui-même que
  * seule la colonne x_S doit recevoir un symbole de sommet. Validée en un seul essai global, tout
- * ou rien. Bouton "Aide" (révélation à sens unique, ×0,5) : croquis Ox/Oy avec surlignage vert et
+ * ou rien. Bouton "Aide" (révélation à sens unique) : croquis Ox/Oy avec surlignage vert et
  * racines/x_S marqués sur Ox.
  */
 export function EtapeTableauSigneVariation({

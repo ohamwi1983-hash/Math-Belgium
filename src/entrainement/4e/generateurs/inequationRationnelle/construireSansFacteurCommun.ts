@@ -5,7 +5,7 @@ import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
 import { construireBinomeConjugue } from "../secondDegre/categories/binomeConjugue";
 import { construireCasGeneral } from "../secondDegre/categories/casGeneral";
 import { construireMiseEnEvidence } from "../secondDegre/categories/miseEnEvidence";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientSansFacteurCommun } from "./construireGrilleQuotientSansFacteurCommun";
 import { tousLisibles } from "./bornesLisibilite";
 
@@ -77,8 +77,7 @@ function finaliser(
 ): ExerciceInequationRationnelleSansFacteurCommun {
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, ce, grille } = construireGrilleQuotientSansFacteurCommun(numerateur, denominateur);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return {
     niveau: "sansFacteurCommun",

@@ -69,8 +69,7 @@ export interface EtatSessionOptimisation {
   exerciceCourant: ExerciceOptimisation;
   phase: PhaseOptimisation;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide PROGRESSIVE par écran (pénalité ADDITIVE -20 points par niveau atteint, appliquée au
-   * niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement). */
+  /** Aide PROGRESSIVE par écran. */
   niveauAideIdentification: number;
   niveauAideContrainteEtGrandeur: number;
   niveauAideSysteme: number;

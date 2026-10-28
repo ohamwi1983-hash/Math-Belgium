@@ -5,8 +5,7 @@
  * les autres moteurs du projet.
  *
  * 2 phases fixes, toujours dans le même ordre : classification → justification. Aide PROGRESSIVE
- * par écran (2 niveaux sur "classification", 1 sur "justification"), pénalité ADDITIVE (-20 points
- * par niveau atteint) appliquée à la clôture de l'écran concerné — voir `typesPositionDroitePlan.ts`.
+ * par écran (2 niveaux sur "classification", 1 sur "justification") — voir `typesPositionDroitePlan.ts`.
  */
 import type { ConclusionPositionDroitePlan, GenerateurExercicePositionDroitePlan, ReponseJustificationPositionDroitePlan } from "../core/positionDroitePlan.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -16,7 +15,6 @@ import { verifierClassification, verifierJustification } from "./verificationPos
 import type { EtatSessionPositionDroitePlan, ResultatExercicePositionDroitePlan } from "./typesPositionDroitePlan";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_CLASSIFICATION = 2;
 export const NIVEAU_AIDE_MAX_JUSTIFICATION = 1;
 
@@ -44,12 +42,7 @@ function reglagesEtape(etat: EtatSessionPositionDroitePlan): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -113,7 +106,7 @@ export function soumettreReponseClassification(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideClassification);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -143,7 +136,7 @@ export function soumettreReponseJustification(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideJustification);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     classification: etat.exerciceCourant.classification,

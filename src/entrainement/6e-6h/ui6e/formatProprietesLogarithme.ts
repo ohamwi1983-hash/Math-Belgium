@@ -1,7 +1,7 @@
 import { arbreVersLatexLogA, calculerEtatsArgument, etatVersLatex, etatVersLatexAvecLogPendant, etatVersTexte, resteVersLatexLogA } from "../core6e/decompositionLogarithme";
 import type { Noeud } from "../core6e/decompositionLogarithme";
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
-import type { PhaseProprietesLogarithme, ResultatExerciceProprietesLogarithme } from "../moteur6e/typesProprietesLogarithme";
+import type { PhaseProprietesLogarithme } from "../moteur6e/typesProprietesLogarithme";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen13`, REFONTE TOTALE : tout
@@ -177,10 +177,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceProprieteLogar
   return [etatVersTexte(etats[phase + 1])];
 }
 
-/** Total points du récapitulatif final — COMPLÉMENT de `LigneRecap`/`statutRecap`, jamais un
- * remplacement (CLAUDE.md). Maximum VARIABLE selon le nombre d'écrans de l'exercice (3 ou 4
- * caractéristiques), contrairement à l'ancienne version (toujours 200). */
-export function calculerTotalPointsProprietesLogarithme(resultat: ResultatExerciceProprietesLogarithme): { total: number; maximum: number } {
-  const total = resultat.scores.reduce((s, v) => s + v, 0);
-  return { total, maximum: resultat.scores.length * 100 };
-}

@@ -18,7 +18,6 @@ import type { EtatSessionExtremumsSinusoide, PhaseExtremumsSinusoide, ResultatEx
 import { diagnostiquerIsolerXExtremum, diagnostiquerPoserEquationExtremum, diagnostiquerSolutionsExtremum } from "./verificationExtremumsSinusoide";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Plafond HISTORIQUE (2 niveaux), toujours le plafond de l'écran "solutions" — plus jamais utilisé
  * nu ailleurs, voir `niveauAideMaxExtremums`. */
@@ -58,7 +57,7 @@ export function demarrerSessionExtremumsSinusoide(reglages: ReglagesSession5e, g
 }
 
 function reglagesEtape(etat: EtatSessionExtremumsSinusoide): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionExtremumsSinusoide): EtatSessionExtremumsSinusoide {
@@ -89,7 +88,7 @@ function soumettreEcran<T>(etat: EtatSessionExtremumsSinusoide, phaseAttendue: P
   // A.1 : capturer `revele` sur cette variable locale FRAÎCHE, AVANT toute transition — jamais lu
   // plus tard sur `etat.etapeCourante` (pré-soumission, structurellement toujours `false`).
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres(phaseAttendue);
 
   if (phaseSuivante === "termine") {

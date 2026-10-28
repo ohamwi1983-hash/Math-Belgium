@@ -83,7 +83,10 @@ export interface GrilleQuotient {
  */
 export interface GrilleQuotientNiveau3 {
   ligneCoefficient?: ValeurCellule[];
-  lignesNumerateur: [ValeurCellule[], ValeurCellule[]];
+  /** Deux lignes « x − r₁ », « x − r₂ » — ou UNE seule ligne « (x − r)² » (« + » partout, « 0 » en r)
+   * quand le numérateur combiné du niveau 3 a une racine double (variante niveau3RacineDouble,
+   * audit gen6) : même convention que le facteur carré de gen5 (ligne "carre", grille.ts). */
+  lignesNumerateur: ValeurCellule[][];
   ligneDenominateur: ValeurCellule[];
   ligneQuotient: ValeurCelluleQuotient[];
 }

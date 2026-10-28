@@ -1,5 +1,5 @@
 import type { ExerciceEqLogA, ExerciceEqLogB, ExerciceEqLogC, ExerciceEqLogD, ExerciceEqLogE, ExerciceEqLogF, ExerciceEqLogG, ExerciceEquationsExpLog, IssueSimplificationG } from "../core6e/equationsExpLog.types";
-import type { PhaseEquationsExpLog, ResultatExerciceEquationsExpLog } from "../moteur6e/typesEquationsExpLog";
+import type { PhaseEquationsExpLog } from "../moteur6e/typesEquationsExpLog";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen14`. Consigne générale FIXE
@@ -553,35 +553,5 @@ export const PHASES_PAR_FAMILLE: Record<ExerciceEquationsExpLog["famille"], Phas
   F: ["fEcran1", "fEcran2", "fEcran3"],
   G: ["gEcran1", "gEcran2"],
 };
-
-/** Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place, voir CLAUDE.md). Somme les scores DÉJÀ calculés par
- * `sessionEquationsExpLog.ts` — le nombre d'écrans varie PAR FAMILLE (`maximum = 100 × nombre
- * d'écrans`). */
-export function calculerTotalPointsEquationsExpLog(resultat: ResultatExerciceEquationsExpLog): { total: number; maximum: number } {
-  const phases = PHASES_PAR_FAMILLE[resultat.famille];
-  const scores = resultat as unknown as Record<string, number>;
-  const cles: Record<PhaseEquationsExpLog, string> = {
-    aEcran1: "scoreEcran1",
-    aEcran2: "scoreEcran2",
-    bEcran1: "scoreEcran1",
-    bEcran2: "scoreEcran2",
-    cEcran1: "scoreEcran1",
-    cEcran2: "scoreEcran2",
-    cEcran3: "scoreEcran3",
-    dEcran1: "scoreEcran1",
-    dEcran2: "scoreEcran2",
-    eEcran1: "scoreEcran1",
-    eEcran2: "scoreEcran2",
-    eEcran3: "scoreEcran3",
-    fEcran1: "scoreEcran1",
-    fEcran2: "scoreEcran2",
-    fEcran3: "scoreEcran3",
-    gEcran1: "scoreEcran1",
-    gEcran2: "scoreEcran2",
-  };
-  const total = phases.reduce((s, p) => s + (scores[cles[p]] ?? 0), 0);
-  return { total, maximum: 100 * phases.length };
-}
 
 export type { IssueSimplificationG };

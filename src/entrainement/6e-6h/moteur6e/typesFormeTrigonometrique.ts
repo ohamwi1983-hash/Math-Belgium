@@ -85,7 +85,7 @@ export interface EtatSessionFormeTrigonometrique {
   scoresPartiels: Partial<Record<PhaseFormeTrigonometrique, number>>;
   /** Vrai signal "révélé" par phase déjà close, peuplé depuis `etapeCourante.revelee` à la clôture
    * — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, non fiable
-   * ici : la pénalité d'aide est soustraite APRÈS le score (`Math.max(0, score -
+   * ici : l'ancienne pénalité d'aide (supprimée) était soustraite APRÈS le score (`Math.max(0, score -
    * niveauAide*PENALITE)`), donc une RÉUSSITE fortement aidée pouvait tomber à 0 et s'afficher à
    * tort comme "révélée". Champ explicite ajouté pendant le balayage générique (point A). */
   revelesPartiels: Partial<Record<PhaseFormeTrigonometrique, boolean>>;

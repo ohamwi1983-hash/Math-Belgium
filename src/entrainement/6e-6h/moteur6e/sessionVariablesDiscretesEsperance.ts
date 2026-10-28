@@ -16,7 +16,6 @@ import { verifierEcran } from "./verificationVariablesDiscretesEsperance";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatVariablesDiscretesEsperance.ts`, `niveauAideMaxEcran`). */
@@ -58,7 +57,7 @@ export function demarrerSessionVariablesDiscretesEsperance(reglages: ReglagesSes
 }
 
 function reglagesEtape(etat: EtatSessionVariablesDiscretesEsperance): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionVariablesDiscretesEsperance): EtatSessionVariablesDiscretesEsperance {
@@ -89,7 +88,7 @@ export function soumettreReponseEcran(etat: EtatSessionVariablesDiscretesEsperan
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseVariablesDiscretesEsperance, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseVariablesDiscretesEsperance, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseVariablesDiscretesEsperance, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

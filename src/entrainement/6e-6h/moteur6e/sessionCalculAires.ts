@@ -19,7 +19,6 @@ import { verifierEcran } from "./verificationCalculAires";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur les écrans qui en prévoient (spec explicite : écran 1 famille B, écran 4
  * famille C, écran 2 famille D — les autres écrans n'en ont pas prévu). `NIVEAU_AIDE_MAX` reste
@@ -48,7 +47,7 @@ export function demarrerSessionCalculAires(reglages: ReglagesSession6e, generate
 }
 
 function reglagesEtape(etat: EtatSessionCalculAires): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionCalculAires): EtatSessionCalculAires {
@@ -79,7 +78,7 @@ export function soumettreReponseEcran(etat: EtatSessionCalculAires, valeurs: str
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseCalculAires, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseCalculAires, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseCalculAires, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

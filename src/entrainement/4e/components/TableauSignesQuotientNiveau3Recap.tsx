@@ -1,7 +1,8 @@
+import { Fragment } from "react";
 import type { ExerciceInequationRationnelleNiveau3 } from "../core/inequationRationnelle.types";
 import { Katex } from "./Katex";
 import { formatEnTeteInterieur } from "../ui/formatSignesProduit";
-import { formatLigneDenominateurLabel, formatLigneNumerateurNiveau3Label } from "../ui/formatInequationRationnelle";
+import { formatLigneDenominateurLabel, libellesLignesNumerateurNiveau3 } from "../ui/formatInequationRationnelle";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
  */
 export function TableauSignesQuotientNiveau3Recap({ exercice, highlight }: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
-  const [racineN1, racineN2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
+  const libellesN = libellesLignesNumerateurNiveau3(exercice.numerateur.solution.racines);
   // Convention transversale "aide de lecture" (docs/conventions-transversales.md) : run de
   // colonnes surlignées consécutives fusionné en un rectangle continu (positionRunAide.ts) + ligne
   // pointillée verte permanente sur toute colonne "point" (racine) dès que l'aide est activée.
@@ -69,8 +70,9 @@ export function TableauSignesQuotientNiveau3Recap({ exercice, highlight }: Props
           </tr>
         </thead>
         <tbody>
-          {ligne(formatLigneNumerateurNiveau3Label(racineN1), exercice.grille.lignesNumerateur[0])}
-          {ligne(formatLigneNumerateurNiveau3Label(racineN2), exercice.grille.lignesNumerateur[1])}
+          {libellesN.map((libelle, i) => (
+            <Fragment key={libelle}>{ligne(libelle, exercice.grille.lignesNumerateur[i])}</Fragment>
+          ))}
           {ligne(formatLigneDenominateurLabel(exercice.denominateur), exercice.grille.ligneDenominateur)}
           <tr>
             <td className="grille-signes-label">Signe du quotient</td>

@@ -20,7 +20,6 @@ import type { ReponseCondition } from "./verificationComposerFonctions";
 import { verifierC1Direction, verifierC2Direction, verifierConditionsDirection, verifierDomaineDirection, verifierFormuleDirectionSimplifiee } from "./verificationComposerFonctions";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Plafond d'aide UNIFORME sur les 5 formes d'écran possibles (formule/conditions/c1/c2/domaine) —
  * la séquence étant désormais dynamique (2 à 10 écrans selon `sens`/richesse de chaque direction),
@@ -55,12 +54,9 @@ export function demarrerSessionComposerFonctions(reglages: ReglagesSession5e, ge
 }
 
 function reglagesEtape(etat: EtatSessionComposerFonctions): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 export function activerAideSuivante(etat: EtatSessionComposerFonctions): EtatSessionComposerFonctions {
   if (etat.terminee) throw new Error("activerAideSuivante : la session est déjà terminée");
@@ -104,7 +100,7 @@ function soumettreGenerique<T>(etat: EtatSessionComposerFonctions, prefixeAttend
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return apresPhase({ ...etat, etapeCourante }, score, etapeCourante.revelee);
 }
 

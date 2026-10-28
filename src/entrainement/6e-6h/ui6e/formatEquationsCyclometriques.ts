@@ -288,35 +288,3 @@ export function formatCandidatLatex(x: number): string {
   return `x = ${fx(x)}`;
 }
 
-// ============================================================================
-// Total de points du récapitulatif — SOMME des scores réellement calculés par le moteur (voir
-// `sessionEquationsCyclometriques.ts`), affiché EN PLUS de `LigneRecap`, jamais à sa place.
-// `maximum` = 100 × nombre d'écrans réellement traversés (3 à 5 selon que "condition"/"acceptRejet"
-// ont été traversés ou sautés, voir `phaseApres`) — "condition" n'existe que pour la variante 4 (et
-// y est alors TOUJOURS traversé, aucun sous-cas ne produisant jamais 0 candidat).
-// ============================================================================
-
-export interface TotalPoints {
-  points: number;
-  maximum: number;
-}
-
-export function calculerTotalPointsEquationsCyclometriques(resultat: {
-  scoreCE: number;
-  scoreCondition: number | null;
-  scoreEquation: number;
-  scoreSolutions: number;
-  scoreAcceptRejet: number | null;
-}): TotalPoints {
-  let points = resultat.scoreCE + resultat.scoreEquation + resultat.scoreSolutions;
-  let maximum = 300;
-  if (resultat.scoreCondition !== null) {
-    points += resultat.scoreCondition;
-    maximum += 100;
-  }
-  if (resultat.scoreAcceptRejet !== null) {
-    points += resultat.scoreAcceptRejet;
-    maximum += 100;
-  }
-  return { points, maximum };
-}

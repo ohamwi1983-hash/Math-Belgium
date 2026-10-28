@@ -37,7 +37,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionGraphiqueDeriveeExponentielle {
   return demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeExponentielle);
@@ -59,7 +59,7 @@ export function App6gen8() {
   const [historiqueDerivee, setHistoriqueDerivee] = useState<EntreeHistoriqueEtape | null>(null);
   const [ficheOuverte, setFicheOuverte] = useState(false);
   /** Vrai si l'écran "derivee" a été clos avec `niveauAide>0` — capturé ICI au moment précis de la
-   * clôture (`scoreDeriveePartiel` ne retient que le score déjà pénalisé, qui ne permet pas de
+   * clôture (`scoreDeriveePartiel` ne retient que le score (anciennement pénalisé), qui ne permet pas de
    * distinguer "pénalité d'aide" de "pénalité de tentatives" une fois l'écran clos). */
   const [aideDeriveeUtilisee, setAideDeriveeUtilisee] = useState(false);
 

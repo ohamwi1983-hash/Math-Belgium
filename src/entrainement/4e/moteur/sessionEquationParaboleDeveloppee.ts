@@ -8,8 +8,7 @@
  * principe que "Centre et rayon d'un cercle depuis l'équation développée"). "caracteristiques"
  * combine S, F, p ET directrice dans un seul écran, une seule étape de tentatives.
  *
- * Aide PROGRESSIVE par écran — pénalité ADDITIVE (-20 points/niveau) appliquée au moment précis où
- * l'écran se clôt, jamais rétroactivement.
+ * Aide PROGRESSIVE par écran.
  */
 import type { ExerciceEquationParaboleDeveloppee, GenerateurExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -19,7 +18,6 @@ import type { EtatSessionEquationParaboleDeveloppee, ReponseEcranCaracteristique
 import { verifierCaracteristiques, verifierCompletionCarre, verifierRegroupement } from "./verificationEquationParaboleDeveloppee";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_REGROUPEMENT = 2;
 export const NIVEAU_AIDE_MAX_COMPLETION = 2;
@@ -76,12 +74,7 @@ function reglagesEtape(etat: EtatSessionEquationParaboleDeveloppee): ReglagesEta
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationParaboleDeveloppee): EtatSessionEquationParaboleDeveloppee {
@@ -136,7 +129,7 @@ export function soumettreReponseRegroupement(etat: EtatSessionEquationParaboleDe
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideRegroupement);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -165,7 +158,7 @@ export function soumettreReponseCompletion(etat: EtatSessionEquationParaboleDeve
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCompletion);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -194,7 +187,7 @@ export function soumettreReponseCaracteristiques(etat: EtatSessionEquationParabo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCaracteristiques);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

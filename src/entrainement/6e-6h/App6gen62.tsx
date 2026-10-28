@@ -30,7 +30,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `ResumeSessionTangentesConique` séparés.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionTangentesConique {
   return demarrerSessionTangentesConique(REGLAGES_DEMO, genererExerciceTangentesConique);

@@ -34,9 +34,9 @@ export interface EtatSessionValeursRemarquables {
   /**
    * Bouton "Aide" — un bouton par écran (les 3 en ont un, contrairement au premier générateur du
    * chapitre où l'écran "Quadrant" n'en a pas), chacun avec son propre état de révélation à sens
-   * unique et sa propre pénalité ×0,5, strictement indépendants entre eux — même principe que le
+   * unique, strictement indépendants entre eux — même principe que le
    * premier générateur post-correctif (`promptcorrectionsgenerateur14lot2.md`, section 1) :
-   * `activerAide` route sur `etat.phase`, jamais un flag partagé qui pénaliserait les 3 écrans à la
+   * `activerAide` route sur `etat.phase`, jamais un flag partagé qui activerait l'aide sur les 3 écrans à la
    * fois.
    */
   aideQuadrantUtilisee: boolean;

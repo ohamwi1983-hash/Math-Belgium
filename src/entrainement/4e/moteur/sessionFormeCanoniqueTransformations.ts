@@ -7,8 +7,7 @@
  *
  * Contrairement à "Transformations graphiques" (deux notes indépendantes sur un seul écran), la
  * spec organise ce générateur en une séquence de 4 écrans distincts — aucun bouton "Aide" n'est
- * demandé ici (absent de la spec), donc aucun mécanisme de révélation à sens unique avec facteur
- * ×0,5 n'est nécessaire, contrairement aux exercices 2/5/6/"Analyse d'une fonction".
+ * demandé ici (absent de la spec), donc aucun mécanisme de révélation à sens unique n'est nécessaire, contrairement aux exercices 2/5/6/"Analyse d'une fonction".
  */
 import type {
   GenerateurExerciceFormeCanoniqueTransformation,
@@ -59,7 +58,6 @@ function reglagesEtape(etat: EtatSessionFormeCanoniqueTransformation): ReglagesE
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 

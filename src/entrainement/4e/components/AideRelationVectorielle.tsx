@@ -10,7 +10,7 @@ interface Props {
 }
 
 /**
- * Aide UNIQUE, pénalisante (×0,5, `sessionRelationVectorielle.ts`) — même patron bouton+révélation
+ * Aide UNIQUE (`sessionRelationVectorielle.ts`) — même patron bouton+révélation
  * que le reste du projet (ex. `AideQuelAngle.tsx`) : le graphe révélé précède le bouton, qui reste
  * toujours affiché (désactivé + relabellisé "Aide utilisée" une fois activé). Contrairement au
  * générateur homonyme en position 21, le graphe n'est JAMAIS affiché par défaut ici — seulement

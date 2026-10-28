@@ -1,6 +1,5 @@
 import type { DonneesTriangleInscrit, DroiteAffine, ExerciceCercles, Point } from "../core6e/cercles.types";
-import type { PhaseCercles, ResultatExerciceCercles } from "../moteur6e/typesCercles";
-import { phasesPourExercice } from "../moteur6e/typesCercles";
+import type { PhaseCercles } from "../moteur6e/typesCercles";
 
 /** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
  * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
@@ -743,10 +742,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceCercles, phase
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 3 pour A-F, 4 pour G). */
-export function calculerTotalPointsCercles(resultat: ResultatExerciceCercles): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

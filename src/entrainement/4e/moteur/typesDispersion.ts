@@ -24,8 +24,7 @@ export interface EtatSessionDispersion {
   phase: PhaseDispersion;
   etapeCourante: EtatEtapeTentatives;
   /** Aide PROGRESSIVE par écran (comme "Moyenne pondérée"/"Tableau de fréquences"...) — 2 niveaux
-   * sur chacun des 2 écrans (spec). Pénalité ADDITIVE (-20 points par niveau atteint) appliquée au
-   * niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement. */
+   * sur chacun des 2 écrans (spec). */
   niveauAideTableau: number;
   niveauAideVarianceEcartType: number;
   /** Score/révélation de l'écran "tableau", conservés jusqu'à la clôture finale de l'exercice

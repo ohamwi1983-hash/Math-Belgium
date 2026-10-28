@@ -11,7 +11,6 @@ import type { EtatSessionAsymptoteOblique, PhaseAsymptoteOblique, ResultatExerci
 import { diagnostiquerFormeDeveloppee, diagnostiquerNombre, diagnostiquerQuotient } from "./verificationAsymptoteOblique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran), comme 5gen20. */
 export const NIVEAU_AIDE_MAX_ASYMPTOTE_OBLIQUE = 2;
@@ -31,7 +30,7 @@ export function demarrerSessionAsymptoteOblique(reglages: ReglagesSession5e, gen
 }
 
 function reglagesEtape(etat: EtatSessionAsymptoteOblique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionAsymptoteOblique): EtatSessionAsymptoteOblique {
@@ -60,7 +59,7 @@ function soumettreEcran<T>(etat: EtatSessionAsymptoteOblique, phaseAttendue: Pha
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);

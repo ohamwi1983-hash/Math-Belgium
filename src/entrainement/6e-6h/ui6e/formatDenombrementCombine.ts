@@ -7,8 +7,7 @@ import type {
   SousTypeDenombCombB,
   TypeContrainteD,
 } from "../core6e/denombrementCombine.types";
-import type { PhaseDenombrementCombine, ResultatExerciceDenombrementCombine } from "../moteur6e/typesDenombrementCombine";
-import { phasesPourExercice } from "../moteur6e/typesDenombrementCombine";
+import type { PhaseDenombrementCombine } from "../moteur6e/typesDenombrementCombine";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen44`. Dispatch sur
@@ -496,10 +495,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceDenombrementCo
   return [`${exercice.resultatFinal}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 2 pour A/B/C, 3 pour D). */
-export function calculerTotalPointsDenombrementCombine(resultat: ResultatExerciceDenombrementCombine): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

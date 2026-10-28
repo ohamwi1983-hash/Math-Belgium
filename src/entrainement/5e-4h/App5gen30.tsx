@@ -42,7 +42,7 @@ import {
   precisionAnnonceeInflexion,
 } from "./ui5e/formatLectureGraphiqueDerivees";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionLectureGraphiqueDerivees {
   return demarrerSessionLectureGraphiqueDerivees(REGLAGES_DEMO, genererExerciceLectureGraphiqueDerivees);
@@ -81,7 +81,7 @@ interface TransitionEnAttente {
  * pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de
  * chaque écran (`sessionLectureGraphiqueDerivees.ts::soumettreEcran`) — jamais
  * `scoresPartiels[ecran] === 0` (point A, balayage générique) : la pénalité d'aide de ce
- * générateur est soustraite APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
+ * générateur était soustraite (avant le retrait des pénalités) APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
  * fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée". */
 function calculerSegmentsProgression(
   etat: EtatSessionLectureGraphiqueDerivees,

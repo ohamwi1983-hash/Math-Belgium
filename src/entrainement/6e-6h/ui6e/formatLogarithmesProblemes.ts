@@ -10,7 +10,7 @@ import {
   CONTEXTES_F,
   CONTEXTES_G,
 } from "../generateurs6e/logarithmesProblemes/contextes";
-import type { PhaseLogarithmesProblemes, ResultatExerciceLogarithmesProblemes } from "../moteur6e/typesLogarithmesProblemes";
+import type { PhaseLogarithmesProblemes } from "../moteur6e/typesLogarithmesProblemes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen22`. `src/ui6e/` peut
@@ -721,42 +721,3 @@ export function phasesPourExercice(exercice: ExerciceLogarithmesProblemes): Phas
   }
 }
 
-/** Clé de score, dans `ResultatExerciceLogarithmesProblemes`, correspondant à chaque phase. */
-const CLE_SCORE: Record<PhaseLogarithmesProblemes, string> = {
-  aEcran1: "scoreEcran1",
-  aEcran2: "scoreEcran2",
-  aEcran3: "scoreEcran3",
-  bEcran1: "scoreEcran1",
-  bEcran2: "scoreEcran2",
-  bEcran3: "scoreEcran3",
-  bEcran4: "scoreEcran4",
-  cEcran1: "scoreEcran1",
-  cEcran2: "scoreEcran2",
-  cEcran3: "scoreEcran3",
-  dEcran1: "scoreEcran1",
-  dEcran2: "scoreEcran2",
-  eEcran1: "scoreEcran1",
-  eEcran2: "scoreEcran2",
-  eEcran3: "scoreEcran3",
-  eEcran4: "scoreEcran4",
-  fEcran1: "scoreEcran1",
-  fEcran2: "scoreEcran2",
-  fEcran3: "scoreEcran3",
-  gEcran1: "scoreEcran1",
-  gEcran2: "scoreEcran2",
-  gEcran3: "scoreEcran3",
-  gEcran4: "scoreEcran4",
-};
-
-/**
- * Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place, voir CLAUDE.md). Somme les scores DÉJÀ calculés par
- * `sessionLogarithmesProblemes.ts`, pilotée par `phasesPourExercice` (variable PAR INSTANCE pour la
- * famille E, jamais seulement par famille).
- */
-export function calculerTotalPointsLogarithmesProblemes(resultat: ResultatExerciceLogarithmesProblemes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const scores = resultat as unknown as Record<string, number | null>;
-  const total = phases.reduce((s, p) => s + (scores[CLE_SCORE[p]] ?? 0), 0);
-  return { total, maximum: 100 * phases.length };
-}

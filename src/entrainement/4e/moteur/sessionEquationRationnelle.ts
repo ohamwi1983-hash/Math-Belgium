@@ -140,7 +140,6 @@ function reglagesEtape(etat: EtatSessionEquationRationnelle): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -174,14 +173,14 @@ export function soumettreReponseCE(etat: EtatSessionEquationRationnelle, reponse
       : necessiteSimplification(etat.exerciceCourant)
         ? "simplifier"
         : "isolement",
-    scoreCEExercice: etat.aideCeUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreCEExercice: etapeCourante.score,
     ceRevele: etapeCourante.revelee,
   };
 }
 
 /**
  * Active le bouton "Aide" de l'étape "ce" — ne concerne que la variante `EtapeRacinesFlexibles`
- * (plusieurs CE) ; révélation à sens unique, ×0,5 sur le score.
+ * (plusieurs CE) ; révélation à sens unique.
  */
 export function activerAideCe(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "ce", "activerAideCe");
@@ -216,14 +215,12 @@ export function soumettreReponseSimplifierReduction(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplifierReconnaissance",
-    scoreSimplifierReductionExercice: etat.aideSimplifierReductionUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplifierReductionExercice: etapeCourante.score,
     simplifierReductionRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplifierReduction" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplifierReduction" — révélation à sens unique. */
 export function activerAideSimplifierReduction(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "simplifierReduction", "activerAideSimplifierReduction");
   return { ...etat, aideSimplifierReductionUtilisee: true };
@@ -270,14 +267,12 @@ export function soumettreReponseSimplifierChamp1(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplifierChamp2",
-    scoreSimplifierChamp1Exercice: etat.aideSimplifierChamp1Utilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplifierChamp1Exercice: etapeCourante.score,
     simplifierChamp1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplifierChamp1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplifierChamp1" — révélation à sens unique. */
 export function activerAideSimplifierChamp1(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "simplifierChamp1", "activerAideSimplifierChamp1");
   return { ...etat, aideSimplifierChamp1Utilisee: true };
@@ -301,14 +296,12 @@ export function soumettreReponseSimplifierChamp2(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: p2DeFractionGauche(etat.exerciceCourant).categorie === "cas_general" ? "simplifierFactorisation" : "simplifierFraction",
-    scoreSimplifierChamp2Exercice: etat.aideSimplifierChamp2Utilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplifierChamp2Exercice: etapeCourante.score,
     simplifierChamp2Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplifierChamp2" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplifierChamp2" — révélation à sens unique. */
 export function activerAideSimplifierChamp2(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "simplifierChamp2", "activerAideSimplifierChamp2");
   return { ...etat, aideSimplifierChamp2Utilisee: true };
@@ -337,14 +330,12 @@ export function soumettreReponseSimplifierFactorisation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplifierFraction",
-    scoreSimplifierFactorisationExercice: etat.aideSimplifierFactorisationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplifierFactorisationExercice: etapeCourante.score,
     simplifierFactorisationRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplifierFactorisation" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplifierFactorisation" — révélation à sens unique. */
 export function activerAideSimplifierFactorisation(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "simplifierFactorisation", "activerAideSimplifierFactorisation");
   return { ...etat, aideSimplifierFactorisationUtilisee: true };
@@ -377,14 +368,12 @@ export function soumettreReponseSimplifierFraction(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "isolement",
-    scoreSimplifierFractionExercice: etat.aideSimplifierFractionUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplifierFractionExercice: etapeCourante.score,
     simplifierFractionRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplifierFraction" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplifierFraction" — révélation à sens unique. */
 export function activerAideSimplifierFraction(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "simplifierFraction", "activerAideSimplifierFraction");
   return { ...etat, aideSimplifierFractionUtilisee: true };
@@ -448,12 +437,12 @@ export function soumettreReponseIsolement(
       : necessiteReconnaissance(etat.exerciceCourant)
         ? "reconnaissance"
         : "champ1",
-    scoreIsolementExercice: etat.aideIsolementUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreIsolementExercice: etapeCourante.score,
     isolementRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "isolement" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "isolement" — révélation à sens unique. */
 export function activerAideIsolement(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "isolement", "activerAideIsolement");
   return { ...etat, aideIsolementUtilisee: true };
@@ -500,12 +489,12 @@ export function soumettreReponseChamp1(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "champ2",
-    scoreChampPrincipalExercice: etat.aideChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreChampPrincipalExercice: etapeCourante.score,
     champPrincipalRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "champ1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "champ1" — révélation à sens unique. */
 export function activerAideChamp1(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "champ1", "activerAideChamp1");
   return { ...etat, aideChamp1Utilisee: true };
@@ -537,19 +526,18 @@ export function soumettreReponseChamp2(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "racinesEtrangeres",
-    scoreRacinesExercice: etat.aideChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreRacinesExercice: etapeCourante.score,
     racinesRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "champ2" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "champ2" — révélation à sens unique. */
 export function activerAideChamp2(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "champ2", "activerAideChamp2");
   return { ...etat, aideChamp2Utilisee: true };
 }
 
-/** Active le bouton "Aide" de l'étape "racinesEtrangeres" — révélation à sens unique, ×0,5 sur le
- * score (audit du chapitre 2 : cette étape terminale n'avait jusqu'ici AUCUN mécanisme d'aide,
+/** Active le bouton "Aide" de l'étape "racinesEtrangeres" — révélation à sens unique (audit du chapitre 2 : cette étape terminale n'avait jusqu'ici AUCUN mécanisme d'aide,
  * contrairement à toutes les autres étapes de ce générateur — voir `EtapeRacinesEtrangeres.tsx`). */
 export function activerAideRacinesEtrangeres(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
   garderPhase(etat, "racinesEtrangeres", "activerAideRacinesEtrangeres");
@@ -605,7 +593,7 @@ export function soumettreReponseRacinesEtrangeres(
     aideChamp1Utilisee: etat.aideChamp1Utilisee,
     scoreRacines: etat.scoreRacinesExercice as number,
     aideChamp2Utilisee: etat.aideChamp2Utilisee,
-    scoreRacinesEtrangeres: etat.aideRacinesEtrangeresUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number),
+    scoreRacinesEtrangeres: (etapeCourante.score as number),
     aideRacinesEtrangeresUtilisee: etat.aideRacinesEtrangeresUtilisee,
     racinesEtrangeresRevele: etapeCourante.revelee,
   };

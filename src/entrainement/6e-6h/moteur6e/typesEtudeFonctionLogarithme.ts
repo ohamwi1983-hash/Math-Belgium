@@ -52,9 +52,8 @@ export interface DetailPhaseEtudeFonctionLogarithme {
 }
 
 /**
- * Scores partiels — champs `| null` plutôt qu'un union discriminée stricte par famille (voir
- * CLAUDE.md, "Total-points summary convention" : maximum variable par famille, 600 pour A-D, 200
- * pour E). `null` signifie "écran non applicable à cette famille", jamais "non encore atteint" (un
+ * Scores partiels — champs `| null` plutôt qu'un union discriminée stricte par famille (6 écrans
+ * pour A-D, 2 pour E). `null` signifie "écran non applicable à cette famille", jamais "non encore atteint" (un
  * écran non encore atteint n'apparaît simplement pas dans `ResultatExerciceEtudeFonctionLogarithme`
  * tant que l'exercice n'est pas clos — ce type ne décrit que l'état FINAL, une fois l'exercice
  * entièrement résolu).
@@ -85,9 +84,3 @@ export interface EtatSessionEtudeFonctionLogarithme {
   terminee: boolean;
 }
 
-/** Nombre d'écrans TOTAL pour une famille donnée — 6 pour A-D, 2 pour E. Utilisé par
- * `ui6e/formatEtudeFonctionLogarithme.ts::totalPointsRecap` pour le `maximum` variable (voir
- * CLAUDE.md, "Total-points summary convention"). */
-export function nombreEcrans(famille: FamilleEtudeFonctionLogarithme): number {
-  return famille === "E" ? 2 : 6;
-}

@@ -16,7 +16,6 @@ import { verifierEcran } from "./verificationLieuxGeometriquesParametres";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatLieuxGeometriquesParametres.ts`, `niveauAideMaxEcran`). */
@@ -45,7 +44,7 @@ export function demarrerSessionLieuxGeometriquesParametres(reglages: ReglagesSes
 }
 
 function reglagesEtape(etat: EtatSessionLieuxGeometriquesParametres): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionLieuxGeometriquesParametres): EtatSessionLieuxGeometriquesParametres {
@@ -76,7 +75,7 @@ export function soumettreReponseEcran(etat: EtatSessionLieuxGeometriquesParametr
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseLieuxGeometriquesParametres, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseLieuxGeometriquesParametres, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseLieuxGeometriquesParametres, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

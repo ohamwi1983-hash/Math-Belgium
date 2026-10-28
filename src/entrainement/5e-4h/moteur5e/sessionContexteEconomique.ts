@@ -35,7 +35,6 @@ import {
 } from "./verificationContexteEconomique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran). */
 export const NIVEAU_AIDE_MAX_CONTEXTE_ECONOMIQUE = 2;
@@ -55,7 +54,7 @@ export function demarrerSessionContexteEconomique(reglages: ReglagesSession5e, g
 }
 
 function reglagesEtape(etat: EtatSessionContexteEconomique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionContexteEconomique): EtatSessionContexteEconomique {
@@ -84,7 +83,7 @@ function soumettreEcran<T>(etat: EtatSessionContexteEconomique, ecranAttendu: Ec
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const ecranSuivant = ecranApres(etat.exerciceCourant, etat.phase);

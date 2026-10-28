@@ -18,7 +18,7 @@ interface Props {
  * Étape 0 (spec section 3) : le graphe affiche uniquement la courbe cible transformée, sans
  * indication de famille — l'élève choisit parmi les 6. Aucun curseur ici (contrairement à l'écran
  * "exercice") : seule la reconnaissance de la forme est en jeu, notée avec le mécanisme habituel de
- * tentatives/pénalité (même principe que EtapeReconnaissance.tsx, exercice 1). Le graphe (identique
+ * tentatives (même principe que EtapeReconnaissance.tsx, exercice 1). Le graphe (identique
  * sur les 2 écrans de l'exercice) est centralisé dans `blocDonnees` (`EnTeteExercice`, voir
  * `AppFonctionsReference`) — plus rendu ici.
  */

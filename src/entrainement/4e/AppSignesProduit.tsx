@@ -49,7 +49,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE, libelleCategorie } from "./ui/categorieLabels";
-import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
+import { formatSolutionEnsembleProduitLatex } from "./ui/formatSolutionEnsembleProduit";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
@@ -63,7 +63,6 @@ const TEXTE_AIDE_REDUCTION =
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };
@@ -376,7 +375,7 @@ export function AppSignesProduit() {
             case "grille":
               return <>Tableau attendu : signe du produit = {etat.exerciceCourant.grille.produit.join(" ")}</>;
             case "intervalle":
-              return <>S = {formatSolutionEnsembleProduit(etat.exerciceCourant.solution)}</>;
+              return <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(etat.exerciceCourant.solution)}`} />;
             default: {
               const entree = entreeRecapPourEcran(enAttente.etatSuivant, etat.phase, etat.indexFacteurExercice);
               if (!entree) return undefined;

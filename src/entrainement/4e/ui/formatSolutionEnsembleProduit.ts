@@ -31,5 +31,51 @@ export function formatSolutionEnsembleProduit(solution: SolutionEnsembleProduit)
       return formatMorceau(solution.morceau);
     case "union":
       return solution.morceaux.map(formatMorceau).join(" ∪ ");
+    case "mixte":
+      return partiesTriees(solution.morceaux, solution.points, formatMorceau, (v) => `{${v}}`).join(" ∪ ");
+  }
+}
+
+function cleMorceau(morceau: Morceau): number {
+  return morceau.borneGauche === "-inf" ? -Infinity : morceau.borneGauche === "+inf" ? Infinity : morceau.borneGauche;
+}
+
+/** Morceaux et points isolés d'une solution "mixte", dans l'ordre de la droite réelle. */
+function partiesTriees(morceaux: Morceau[], points: number[], fMorceau: (m: Morceau) => string, fPoint: (v: number) => string): string[] {
+  return [
+    ...morceaux.map((m) => ({ cle: cleMorceau(m), texte: fMorceau(m) })),
+    ...points.map((v) => ({ cle: v, texte: fPoint(v) })),
+  ]
+    .sort((a, b) => a.cle - b.cle)
+    .map((p) => p.texte);
+}
+
+function formatBorneLatex(borne: Borne): string {
+  if (borne === "-inf") return "-\\infty";
+  if (borne === "+inf") return "+\\infty";
+  return String(borne);
+}
+
+function formatMorceauLatex(morceau: Morceau): string {
+  return `${morceau.crochetGauche}${formatBorneLatex(morceau.borneGauche)} \\,;\\, ${formatBorneLatex(morceau.borneDroite)}${morceau.crochetDroit}`;
+}
+
+/** Même ensemble que `formatSolutionEnsembleProduit`, en LaTeX (KaTeX) — accolades d'ensemble échappées. */
+export function formatSolutionEnsembleProduitLatex(solution: SolutionEnsembleProduit): string {
+  switch (solution.forme) {
+    case "vide":
+      return "\\varnothing";
+    case "reel":
+      return "\\mathbb{R}";
+    case "point":
+      return `\\{${solution.valeur}\\}`;
+    case "reel_sauf_points":
+      return `\\mathbb{R} \\setminus \\{${solution.valeurs.join(" \\,;\\, ")}\\}`;
+    case "intervalle":
+      return formatMorceauLatex(solution.morceau);
+    case "union":
+      return solution.morceaux.map(formatMorceauLatex).join(" \\cup ");
+    case "mixte":
+      return partiesTriees(solution.morceaux, solution.points, formatMorceauLatex, (v) => `\\{${v}\\}`).join(" \\cup ");
   }
 }

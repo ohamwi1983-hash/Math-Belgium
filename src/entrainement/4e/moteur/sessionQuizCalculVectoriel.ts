@@ -18,11 +18,10 @@ import type { EtatSessionQuizCalculVectoriel, ResultatExerciceQuizCalculVectorie
 const POINTS_DE_BASE = 100;
 const TENTATIVES_MAX_VRAI_FAUX = 1;
 
-function reglagesEtape(etat: EtatSessionQuizCalculVectoriel): ReglagesEtape {
+function reglagesEtape(): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: TENTATIVES_MAX_VRAI_FAUX,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -71,7 +70,7 @@ export function soumettreReponseQuizCalculVectoriel(
   const { question, variante } = etat.exerciceCourant as ExerciceQuizCalculVectoriel;
 
   const etapeCourante = soumettreEtapeTentatives<boolean>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglagesEtape(),
     verifier: (r) => verifierReponseVraiFaux(question, r),
     revelerReponse: () => {},
   });

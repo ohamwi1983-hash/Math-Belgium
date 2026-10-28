@@ -119,8 +119,8 @@ export interface EtatSessionDeriveesCyclometriques {
   /** Vrai signal "révélé" par phase, même index que `scoresPartiels`, peuplé depuis
    * `etapeCourante.revelee` à la clôture — jusqu'au 2025-10, le récapitulatif le déduisait de
    * `scoresPartiels[phase] === 0`, une heuristique corrigée pendant le balayage générique
-   * (point A) car non fiable ici : la pénalité d'aide (`Math.max(0, score - niveauAide*20)`, voir
-   * sessionDeriveesCyclometriques.ts) est soustraite APRÈS le score de tentatives, donc une
+   * (point A) car non fiable ici : l'ancienne pénalité d'aide (supprimée) (`Math.max(0, score - niveauAide*20)`, voir
+   * sessionDeriveesCyclometriques.ts) était soustraite APRÈS le score de tentatives, donc une
    * RÉUSSITE fortement aidée pouvait tomber à exactement 0 et s'afficher à tort comme "révélée". */
   revelesPartiels: Partial<Record<PhaseDeriveesCyclometriques, boolean>>;
   /** Dernier écran fermé (phase + aide/révélation) — `null` avant la toute première fermeture

@@ -128,7 +128,6 @@ function reglagesEtape(etat: EtatSessionSignesProduit): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -198,12 +197,12 @@ export function soumettreReponseReductionFacteur(etat: EtatSessionSignesProduit,
     exerciceCourant: { ...etat.exerciceCourant, facteurs },
     etapeCourante: demarrerEtapeTentatives(),
     phase: "methodeFacteur",
-    scoreReductionFacteurExercice: etat.aideReductionFacteurUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreReductionFacteurExercice: etapeCourante.score,
     reductionFacteurRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "reductionFacteur" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "reductionFacteur" — révélation à sens unique. */
 export function activerAideReductionFacteur(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "reductionFacteur", "activerAideReductionFacteur");
   return { ...etat, aideReductionFacteurUtilisee: true };
@@ -263,14 +262,12 @@ export function soumettreReponseFactorisationChamp1(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "factorisationChamp2",
-    scoreFactorisationChamp1Exercice: etat.aideFactorisationChamp1Utilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreFactorisationChamp1Exercice: etapeCourante.score,
     factorisationChamp1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "factorisationChamp1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "factorisationChamp1" — révélation à sens unique. */
 export function activerAideFactorisationChamp1(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "factorisationChamp1", "activerAideFactorisationChamp1");
   return { ...etat, aideFactorisationChamp1Utilisee: true };
@@ -292,9 +289,7 @@ export function soumettreReponseFactorisationChamp2(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const scoreFactorisationChamp2Exercice = etat.aideFactorisationChamp2Utilisee
-    ? (etapeCourante.score as number) * 0.5
-    : etapeCourante.score;
+  const scoreFactorisationChamp2Exercice = etapeCourante.score;
 
   if (facteur.categorie === "cas_general") {
     return {
@@ -317,7 +312,7 @@ export function soumettreReponseFactorisationChamp2(
   };
 }
 
-/** Active le bouton "Aide" de l'étape "factorisationChamp2" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "factorisationChamp2" — révélation à sens unique. */
 export function activerAideFactorisationChamp2(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "factorisationChamp2", "activerAideFactorisationChamp2");
   return { ...etat, aideFactorisationChamp2Utilisee: true };
@@ -349,14 +344,12 @@ export function soumettreReponseFactorisationFactorisation(
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresFacteur(etat.exerciceCourant, indexFacteurExercice),
     indexFacteurExercice,
-    scoreFactorisationFactorisationExercice: etat.aideFactorisationFactorisationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreFactorisationFactorisationExercice: etapeCourante.score,
     factorisationFactorisationRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "factorisationFactorisation" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "factorisationFactorisation" — révélation à sens unique. */
 export function activerAideFactorisationFactorisation(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "factorisationFactorisation", "activerAideFactorisationFactorisation");
   return { ...etat, aideFactorisationFactorisationUtilisee: true };
@@ -385,7 +378,7 @@ export function soumettreReponseSigneIrreductible(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = etat.aideSigneIrreductibleCourante ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const score = (etapeCourante.score as number);
   const scoresSigneIrreductibleExercice = [...etat.scoresSigneIrreductibleExercice, score];
   const signeIrreductibleRevelees = [...etat.signeIrreductibleRevelees, etapeCourante.revelee];
   const aidesSigneIrreductibleExercice = [...etat.aidesSigneIrreductibleExercice, etat.aideSigneIrreductibleCourante];
@@ -404,8 +397,7 @@ export function soumettreReponseSigneIrreductible(
 }
 
 /** Active le bouton "Aide" de l'écran "signeIrreductible" en cours — la règle « un trinôme sans
- * racine garde le signe de son a » n'est plus affichée d'office (audit gen5) ; ×0,5 sur le score
- * de cet écran, remise à false pour le facteur irréductible suivant. */
+ * racine garde le signe de son a » n'est plus affichée d'office (audit gen5) ; remise à false pour le facteur irréductible suivant. */
 export function activerAideSigneIrreductible(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "signeIrreductible", "activerAideSigneIrreductible");
   return { ...etat, aideSigneIrreductibleCourante: true };
@@ -426,12 +418,12 @@ export function soumettreReponseGrille(etat: EtatSessionSignesProduit, reponse: 
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "intervalle",
-    scoreGrilleExercice: etat.aideGrilleTableauUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreGrilleExercice: etapeCourante.score,
     grilleRevelee: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "grille" (tableau de signes) — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "grille" (tableau de signes) — révélation à sens unique. */
 export function activerAideGrilleTableau(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   garderPhase(etat, "grille", "activerAideGrilleTableau");
   return { ...etat, aideGrilleTableauUtilisee: true };
@@ -439,9 +431,7 @@ export function activerAideGrilleTableau(etat: EtatSessionSignesProduit): EtatSe
 
 /**
  * Active le bouton "Aide" pour l'étape intervalle en cours (prompt-refonte-tableau-signes.md,
- * section 6) : révélation à sens unique (jamais de retour à false pour cet exercice), applique
- * ×0,5 au score final de cette étape dans soumettreReponseIntervalle, quel que soit le nombre de
- * tentatives déjà utilisées ou à venir — même principe que activerAideIntervalle (sessionInequation.ts).
+ * section 6) : révélation à sens unique (jamais de retour à false pour cet exercice) — même principe que activerAideIntervalle (sessionInequation.ts).
  */
 export function activerAideGrilleSolution(etat: EtatSessionSignesProduit): EtatSessionSignesProduit {
   if (etat.terminee || etat.phase !== "intervalle") {
@@ -464,7 +454,7 @@ export function soumettreReponseIntervalle(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const scoreIntervalle = etat.aideUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const scoreIntervalle = (etapeCourante.score as number);
 
   const resultat: ResultatExerciceSignesProduit = {
     scoresRacineLineaire: etat.scoresRacineLineaireExercice,

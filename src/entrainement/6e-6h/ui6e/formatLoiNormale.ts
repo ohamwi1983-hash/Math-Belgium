@@ -5,8 +5,7 @@ import { valeurCibleTableC, valeurTC } from "../generateurs6e/loiNormale/famille
 import { destandardiserD, valeurCibleTableD, valeurZD } from "../generateurs6e/loiNormale/familleD";
 import { bornesE, effectifEstimeE, muDepuisBornes, POURCENTAGE_PAR_K, probabiliteFinaleE, sigmaDepuisBornes } from "../generateurs6e/loiNormale/familleE";
 import { Phi } from "../generateurs6e/loiNormale/tableNormale";
-import type { CalculerReferenceLoiNormale, PhaseLoiNormale, ResultatExerciceLoiNormale } from "../moteur6e/typesLoiNormale";
-import { phasesPourExercice } from "../moteur6e/typesLoiNormale";
+import type { CalculerReferenceLoiNormale, PhaseLoiNormale } from "../moteur6e/typesLoiNormale";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen51`. Dispatch sur
@@ -635,10 +634,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiNormale, ph
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice — 2 à 3 selon la famille/le contexte). */
-export function calculerTotalPointsLoiNormale(resultat: ResultatExerciceLoiNormale): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

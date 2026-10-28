@@ -12,7 +12,7 @@ import { LIBELLE_PHASE, formatReponseAttenduePhaseLatex } from "./formatPointsDr
  *
  * `revele` vient de `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la
  * clôture de chaque écran — jusqu'au 2025-10, déduit de `scoresPartiels[phase] === 0`,
- * heuristique non fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives,
+ * heuristique non fiable ici : l'ancienne pénalité d'aide (supprimée), soustraite APRÈS le score de tentatives,
  * pouvait amener une RÉUSSITE fortement aidée à exactement 0 (faux "révélé") — corrigé pendant le
  * balayage générique (point A).
  */

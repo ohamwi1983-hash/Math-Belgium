@@ -1,6 +1,5 @@
 import type { ExerciceTrianglesA, ExerciceTrianglesB, ExerciceTrianglesC, ExerciceTrianglesD, ExerciceTrianglesComplexes, StatutSommet } from "../core6e/trianglesComplexes.types";
-import type { PhaseTrianglesComplexes, ResultatExerciceTrianglesComplexes } from "../moteur6e/typesTrianglesComplexes";
-import { phasesPourExercice } from "../moteur6e/typesTrianglesComplexes";
+import type { PhaseTrianglesComplexes } from "../moteur6e/typesTrianglesComplexes";
 import { pointEntierLatex } from "../generateurs6e/trianglesComplexes/construction";
 
 /**
@@ -432,10 +431,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceTrianglesCompl
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 3 pour A/D, 4 pour B, 2 pour C). */
-export function calculerTotalPointsTrianglesComplexes(resultat: ResultatExerciceTrianglesComplexes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

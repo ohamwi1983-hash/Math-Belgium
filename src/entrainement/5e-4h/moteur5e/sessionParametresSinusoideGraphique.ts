@@ -13,7 +13,6 @@ import type { EtatSessionParametresSinusoideGraphique, PhaseParametresSinusoideG
 import { cibleAmplitude, cibleAscendantPrincipal, cibleDecalage, cibleFrequence, ciblePeriode, verifierPhiModuloT, verifierValeurSinusoide } from "./verificationParametresSinusoideGraphique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Chaque écran a exactement 2 niveaux d'aide — spec explicite. */
 export const NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE = 2;
@@ -71,7 +70,7 @@ export function demarrerSessionParametresSinusoideGraphique(reglages: ReglagesSe
 }
 
 function reglagesEtape(etat: EtatSessionParametresSinusoideGraphique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionParametresSinusoideGraphique): EtatSessionParametresSinusoideGraphique {
@@ -102,7 +101,7 @@ export function soumettreReponseParametresSinusoideGraphique(etat: EtatSessionPa
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres(phase);
 
   if (phaseSuivante === "termine") {

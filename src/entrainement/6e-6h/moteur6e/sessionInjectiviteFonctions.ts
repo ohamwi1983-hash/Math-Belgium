@@ -16,7 +16,6 @@ import { detecterCoteBranche, verifierBijection, verifierDomaine, verifierImage,
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur chaque écran, SAUF "bijection" qui n'en garde qu'un seul (complément
  * ciblé — voir historique-6e.md : la 2e aide de cet écran, redondante avec celle de l'écran
@@ -69,7 +68,7 @@ export function demarrerSessionInjectiviteFonctions(reglages: ReglagesSession6e,
 }
 
 function reglagesEtape(etat: EtatSessionInjectiviteFonctions): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionInjectiviteFonctions): EtatSessionInjectiviteFonctions {
@@ -77,10 +76,6 @@ export function activerAideSuivante(etat: EtatSessionInjectiviteFonctions): Etat
   const max = NIVEAU_AIDE_MAX[etat.phase];
   if (etat.niveauAide >= max) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
   return { ...etat, niveauAide: etat.niveauAide + 1 };
-}
-
-function scoreApresPenalite(etat: EtatSessionInjectiviteFonctions, scoreBrut: number): number {
-  return Math.max(0, scoreBrut - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 function cloturerExerciceOuSuivant(etat: EtatSessionInjectiviteFonctions, resultat: ResultatExerciceInjectiviteFonctions): EtatSessionInjectiviteFonctions {
@@ -115,7 +110,7 @@ function avancerPhase<TReponse>(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = scoreApresPenalite(etat, etapeCourante.score as number);
+  const score = etapeCourante.score as number;
   const revele = etapeCourante.revelee;
   const effetsSupplementaires = apresTerminee ? apresTerminee(etat, reponse) : {};
   const phaseSuivante = phaseApres(etat.phase);

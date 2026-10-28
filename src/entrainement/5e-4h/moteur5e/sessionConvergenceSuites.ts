@@ -12,7 +12,6 @@ import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque, veri
 import type { ReponseClassifierQuelconque } from "./verificationConvergenceSuites";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_CONVERGENCE_SUITE = 2;
 
@@ -27,7 +26,7 @@ export function demarrerSessionConvergenceSuite(reglages: ReglagesSession5e, gen
 }
 
 function reglagesEtape(etat: EtatSessionConvergenceSuite): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** Plafond d'aide PAR PHASE/INSTANCE (B.3, `promptcorrectionsround2.md`) — remplace l'usage nu de
@@ -70,7 +69,7 @@ function soumettreEcran<T>(etat: EtatSessionConvergenceSuite, phaseAttendue: Pha
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);

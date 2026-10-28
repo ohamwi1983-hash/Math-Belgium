@@ -12,7 +12,6 @@ import { diagnostiquerConclusion, diagnostiquerTableau } from "./verificationCom
 import type { ReponseConclusion } from "./verificationComparaisonSuites";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_COMPARAISON_SUITES = 2;
 
@@ -25,7 +24,7 @@ export function demarrerSessionComparaisonSuites(reglages: ReglagesSession5e, ge
 }
 
 function reglagesEtape(etat: EtatSessionComparaisonSuites): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionComparaisonSuites): EtatSessionComparaisonSuites {
@@ -54,7 +53,7 @@ export function soumettreReponseTableau(etat: EtatSessionComparaisonSuites, text
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: "conclusion", scoreTableauPartiel: score, derniereEtapeRevelee: revele };
 }
 
@@ -70,7 +69,7 @@ export function soumettreReponseConclusion(etat: EtatSessionComparaisonSuites, r
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres("conclusion");
   if (phaseSuivante !== "termine") throw new Error("soumettreReponseConclusion : séquence inattendue après 'conclusion'");
 

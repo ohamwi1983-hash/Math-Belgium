@@ -96,7 +96,11 @@ export function calculerEntreesRecapSignesProduit(etat: EtatSessionSignesProduit
           positionFacteur: position,
           libelle: `Racines du ${nom}`,
           estLatex: false,
-          valeur: [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
+          // Racine double (facteur carré) : une seule valeur, dite double — jamais « 3 ; 3 ».
+          valeur:
+            factorisable.solution.racines[0] === factorisable.solution.racines[1]
+              ? `${factorisable.solution.racines[0]} (racine double)`
+              : [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
           revele: etat.factorisationChamp2Revele,
         });
       }

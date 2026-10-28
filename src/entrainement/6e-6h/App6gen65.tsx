@@ -21,7 +21,6 @@ import { ResumeSessionQuizFonctionsExponentielles } from "./components6e/ResumeS
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizFonctionsExponentielles): EtatSessionQuizFonctionsExponentielles {

@@ -14,7 +14,6 @@ import type { ReponseTableauEtudeLocale } from "./verificationEtudeLocale";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu, verifierEnsembleValeurs, verifierTableauEtudeLocale, diagnostiquerValeurExtremum, diagnostiquerPositionInflexion } from "./verificationLectureGraphiqueDerivees";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Aide VISUELLE uniquement (surlignage du graphique), même esprit que 5gen22 — 1 seul niveau. */
 export const NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE_DERIVEES = 1;
@@ -41,7 +40,7 @@ export function demarrerSessionLectureGraphiqueDerivees(reglages: ReglagesSessio
 }
 
 function reglagesEtape(etat: EtatSessionLectureGraphiqueDerivees): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionLectureGraphiqueDerivees): EtatSessionLectureGraphiqueDerivees {
@@ -70,7 +69,7 @@ function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueDerivees, ecranAtten
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const ecranSuivant = ecranApres(etat.exerciceCourant, etat.phase);

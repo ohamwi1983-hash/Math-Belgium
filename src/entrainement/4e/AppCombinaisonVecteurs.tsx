@@ -22,7 +22,6 @@ const CONSIGNE_GENERALE = "Calcule les composantes de cette combinaison linéair
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

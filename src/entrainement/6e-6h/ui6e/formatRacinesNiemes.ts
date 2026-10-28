@@ -2,8 +2,7 @@ import type { ValeurExacte } from "../core6e/cyclometrique.types";
 import type { ExerciceRacinesA, ExerciceRacinesB, ExerciceRacinesC, ExerciceRacinesNiemes, RacineExacte } from "../core6e/racinesNiemes.types";
 import type { IdRelationRacineUnite } from "../moteur6e/verificationRacinesNiemes";
 import { OPTIONS_RELATION_C } from "../moteur6e/verificationRacinesNiemes";
-import type { PhaseRacinesNiemes, ResultatExerciceRacinesNiemes } from "../moteur6e/typesRacinesNiemes";
-import { phasesPourExercice } from "../moteur6e/typesRacinesNiemes";
+import type { PhaseRacinesNiemes } from "../moteur6e/typesRacinesNiemes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen39`. Dispatch sur
@@ -366,10 +365,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceRacinesNiemes,
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 3 pour A/C, 2 pour B). */
-export function calculerTotalPointsRacinesNiemes(resultat: ResultatExerciceRacinesNiemes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

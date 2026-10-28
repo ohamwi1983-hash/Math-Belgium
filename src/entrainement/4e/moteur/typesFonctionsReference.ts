@@ -18,7 +18,7 @@ export type PhaseFonctionReference = "reconnaissance" | "exercice";
  * note, voir `soumettreReponse`) — une note close AVANT l'activation de l'aide reste `false` même
  * si l'aide est activée plus tard dans le même exercice. Nécessaire pour `statutRecap`
  * (`components/LigneRecap.tsx`, `promptuniformisationrecap4e.md`) — le flag partagé seul aurait
- * classé à tort une note non pénalisée comme "orange" (même piège déjà corrigé pour
+ * classé à tort une note sans aide comme "orange" (même piège déjà corrigé pour
  * `ResultatExerciceTransformationGraphique`, chapitre 1).
  */
 export interface ResultatExerciceFonctionReference {
@@ -42,10 +42,9 @@ export interface EtatSessionFonctionReference {
   etapeEquation: EtatEtapeTentatives;
   etapeCurseurs: EtatEtapeTentatives;
   /** Bouton "Aide" : usable uniquement en phase "exercice" (section 2-3 de la spec, comme le
-   * chapitre 1) — jamais pendant la reconnaissance, et jamais de pénalité sur la note
+   * chapitre 1) — jamais pendant la reconnaissance, et jamais d'effet sur la note
    * "reconnaissance", qui est toujours close avant que l'aide ne devienne accessible. Révélation à
-   * sens unique, ×0,5 sur les DEUX notes de l'écran "exercice", appliqué à chacune au moment précis
-   * de sa propre clôture. */
+   * sens unique, couvrant les DEUX notes de l'écran "exercice". */
   aideUtilisee: boolean;
   /** Fixé (jamais affecté par l'aide) dès que etapeReconnaissance se clôt ; `null` avant. */
   scoreReconnaissanceExercice: number | null;

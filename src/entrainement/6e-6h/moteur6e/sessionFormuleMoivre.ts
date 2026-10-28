@@ -14,7 +14,6 @@ import { verifierEcran } from "./verificationFormuleMoivre";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max — écrans 2 et 3 (`max=0` sur écran 1, voir `ui6e/formatFormuleMoivre.ts`). */
 export const NIVEAU_AIDE_MAX = 2;
@@ -38,7 +37,7 @@ export function demarrerSessionFormuleMoivre(reglages: ReglagesSession6e, genera
 }
 
 function reglagesEtape(etat: EtatSessionFormuleMoivre): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionFormuleMoivre): EtatSessionFormuleMoivre {
@@ -69,7 +68,7 @@ export function soumettreReponseEcran(etat: EtatSessionFormuleMoivre, valeurs: s
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseFormuleMoivre, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseFormuleMoivre, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

@@ -1,6 +1,5 @@
 import type { ExerciceLieuxA, ExerciceLieuxB, ExerciceLieuxC, ExerciceLieuxD, ExerciceLieuxE, ExerciceLieuxGeometriquesParametres, FamilleLieuxGeometriquesParametres, TypeStatutLieu } from "../core6e/lieuxGeometriquesParametres.types";
-import type { PhaseLieuxGeometriquesParametres, ResultatExerciceLieuxGeometriquesParametres } from "../moteur6e/typesLieuxGeometriquesParametres";
-import { phasesPourExercice } from "../moteur6e/typesLieuxGeometriquesParametres";
+import type { PhaseLieuxGeometriquesParametres } from "../moteur6e/typesLieuxGeometriquesParametres";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen56`. Dispatch sur
@@ -859,8 +858,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLieuxGeometriq
   return exercice.regime === "bandePleine" ? [`${2 * exercice.c}`] : [`${exercice.m}`];
 }
 
-export function calculerTotalPointsLieuxGeometriquesParametres(resultat: ResultatExerciceLieuxGeometriquesParametres): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

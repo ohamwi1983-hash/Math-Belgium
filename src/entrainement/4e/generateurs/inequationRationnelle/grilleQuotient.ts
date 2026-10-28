@@ -1,6 +1,7 @@
 import type { PolynomeLineaire } from "../../core/simplification.types";
-import type { Borne, Crochet, Morceau, Symbole } from "../../core/inequation.types";
-import type { Signe, SolutionEnsembleProduit, ValeurCellule } from "../../core/signesProduit.types";
+import type { Symbole } from "../../core/inequation.types";
+import type { SolutionEnsembleProduit, ValeurCellule } from "../../core/signesProduit.types";
+import { classifierSolutionParColonnes } from "../signesProduit/grille";
 import type { GrilleQuotient, ValeurCelluleQuotient } from "../../core/inequationRationnelle.types";
 
 /**
@@ -64,78 +65,28 @@ export function construireGrilleQuotient(
 }
 
 /**
- * Sous-ensemble des colonnes "zone" (indices pairs) de la ligne quotient — jamais "0" ni "∄" par
- * construction (les racines ne tombent jamais sur une colonne zone, voir valeurRepresentative).
- */
-export function extraireSignesZonesQuotient(ligneQuotient: ValeurCelluleQuotient[]): Signe[] {
-  return ligneQuotient.filter((_, colonne) => colonne % 2 === 0) as Signe[];
-}
-
-function crochet(side: "gauche" | "droite", ferme: boolean): Crochet {
-  if (side === "gauche") return ferme ? "[" : "]";
-  return ferme ? "]" : "[";
-}
-
-/**
- * Morceau d'une zone satisfaisante, avec une nuance absente du tableau de signes produit
- * (attention particulière demandée par la spec, section 3) : une borne à la racine du
- * dénominateur (CE) reste TOUJOURS ouverte, même pour un symbole large (≤/≥) — le quotient n'y
- * est pas défini, il ne peut jamais être "inclus". Seule la borne à la racine du numérateur suit
- * la règle habituelle (fermée seulement si le symbole est large).
- */
-function construireMorceauZoneQuotient(zone: number, racines: number[], ce: number | number[], inclureBornes: boolean): Morceau {
-  const ceListe = Array.isArray(ce) ? ce : [ce];
-  const n = racines.length;
-  const borneGauche: Borne = zone === 0 ? "-inf" : racines[zone - 1];
-  const borneDroite: Borne = zone === n ? "+inf" : racines[zone];
-  const fermeGauche = zone !== 0 && !ceListe.includes(racines[zone - 1]) && inclureBornes;
-  const fermeDroit = zone !== n && !ceListe.includes(racines[zone]) && inclureBornes;
-  return {
-    crochetGauche: zone === 0 ? "]" : crochet("gauche", fermeGauche),
-    borneGauche,
-    crochetDroit: zone === n ? "[" : crochet("droite", fermeDroit),
-    borneDroite,
-  };
-}
-
-/**
- * Ensemble-solution à partir des signes de zone déjà extraits — même principe que
- * classifierSolutionProduit (signesProduit), mais chaque borne à la CE reste toujours ouverte
- * (voir construireMorceauZoneQuotient). En niveau 1 (2 racines simples et distinctes), le signe du
- * quotient alterne strictement d'une zone à l'autre (chaque racine, numérateur ou dénominateur,
- * inverse le signe exactement une fois) : les 3 zones valent donc toujours 2 fois un signe et 1
- * fois l'autre, jamais les 3 identiques ni 0 zone satisfaisante — seules "intervalle" (1 zone) et
- * "union" (2 zones) sont donc jamais atteintes ici ("vide"/"reel"/"reel_sauf_points" resteraient
- * pertinents pour un niveau futur où cette alternance stricte ne tiendrait plus, ex. dénominateur
- * au carré — hors périmètre de cette itération, voir spec section 0). `ce` accepte soit une seule
- * valeur (niveaux 1-3, un seul dénominateur) soit un tableau (niveau 4, deux dénominateurs P1_2 et
- * P1_4) — toutes les bornes CE, quel que soit leur nombre, restent toujours ouvertes.
+ * Ensemble-solution à partir de la ligne quotient COMPLÈTE (zones ET points) — même algorithme que
+ * le produit (`classifierSolutionParColonnes`, generateurs/signesProduit/grille.ts) : une colonne est
+ * satisfaite selon `colonneSatisfaitQuotient` ("∄" jamais), et une colonne point dont la racine est
+ * une CE ne l'est jamais non plus (garde-fou : toute borne CE reste ouverte, quel que soit le
+ * symbole). Racines simples : résultat identique à l'ancienne construction zone par zone. Racine
+ * double au numérateur (niveau 3, audit gen6) : point isolé (≤/≥) ou trou (</>) en cette racine.
+ * `ce` : une seule valeur (niveaux 1-3) ou un tableau (deux dénominateurs).
  */
 export function classifierSolutionQuotient(
   racines: number[],
   ce: number | number[],
-  zonesSignes: Signe[],
+  ligneQuotient: ValeurCelluleQuotient[],
   symbole: Symbole,
 ): SolutionEnsembleProduit {
-  const inclureBornes = symbole === "≤" || symbole === "≥";
-  const satisfaitPositif = symbole === ">" || symbole === "≥";
-  const zonesSatisfaisantes = zonesSignes
-    .map((signe, zone) => ({ signe, zone }))
-    .filter(({ signe }) => (satisfaitPositif ? signe === "+" : signe === "-"))
-    .map(({ zone }) => zone);
-
-  const morceaux = zonesSatisfaisantes.map((zone) => construireMorceauZoneQuotient(zone, racines, ce, inclureBornes));
-  if (morceaux.length === 1) return { forme: "intervalle", morceau: morceaux[0] };
-  return { forme: "union", morceaux };
+  const ceListe = Array.isArray(ce) ? ce : [ce];
+  const colonnes = ligneQuotient.map((valeur, colonne) => {
+    if (colonne % 2 === 1 && ceListe.includes(racines[(colonne - 1) / 2])) return false;
+    return colonneSatisfaitQuotient(valeur, symbole);
+  });
+  return classifierSolutionParColonnes(racines, colonnes);
 }
 
-/**
- * Une colonne satisfait l'inégalité si son signe correspond au symbole ; une colonne à "0" ne
- * satisfait que les symboles larges (≤/≥) — même principe que colonneSatisfait (signesProduit,
- * exercice "tableau de signes à plusieurs facteurs"). Différence propre à ce générateur (section
- * 3 du prompt de corrections) : une colonne "∄" ne satisfait JAMAIS, quel que soit le symbole —
- * le quotient n'y est pas défini, elle est de toute façon exclue par la CE.
- */
 export function colonneSatisfaitQuotient(valeur: ValeurCelluleQuotient, symbole: Symbole): boolean {
   if (valeur === "∄") return false;
   if (valeur === "0") return symbole === "≤" || symbole === "≥";

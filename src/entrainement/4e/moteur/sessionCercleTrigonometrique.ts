@@ -56,12 +56,7 @@ function reglagesEtape(etat: EtatSessionCercleTrigonometrique): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteAide(score: number, aideUtilisee: boolean): number {
-  return aideUtilisee ? score * 0.5 : score;
 }
 
 /**
@@ -133,7 +128,7 @@ export function soumettreReponseReduction(etat: EtatSessionCercleTrigonometrique
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideReductionUtilisee);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -160,7 +155,7 @@ export function soumettreReponseQuadrant(etat: EtatSessionCercleTrigonometrique,
   }
 
   // Aucun bouton "Aide" sur cet écran (section 1, promptcorrectionsgenerateurcercletrigo1.md,
-  // correction 3) : le score n'est donc jamais pénalisé ici.
+  // correction 3).
   const score = etapeCourante.score as number;
   return {
     ...etat,
@@ -190,7 +185,7 @@ export function soumettreReponseAnglePremierQuadrant(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideAnglePremierQuadrantUtilisee);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -216,7 +211,7 @@ export function soumettreReponseSignes(etat: EtatSessionCercleTrigonometrique, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideSignesUtilisee);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,
     scoreReduction: etat.scoreReductionExercice,

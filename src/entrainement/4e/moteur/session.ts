@@ -114,7 +114,6 @@ function reglagesEtape(etat: EtatSession): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -147,17 +146,14 @@ export function soumettreReponseSimplification(etat: EtatSession, reponse: strin
     exerciceCourant,
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresSimplification(exerciceCourant),
-    scoreSimplificationExercice: etat.aideSimplificationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplificationExercice: etapeCourante.score,
     simplificationRevele: etapeCourante.revelee,
   };
 }
 
 /**
  * Active le bouton "Aide" de l'étape "simplification" — révélation à sens unique (jamais de
- * retour à false pour cet exercice), applique ×0,5 au score final de cette étape dans
- * soumettreReponseSimplification, quel que soit le nombre de tentatives déjà utilisées ou à venir
+ * retour à false pour cet exercice)
  * (même principe que activerAideGrilleSolution, sessionSignesProduit.ts).
  */
 export function activerAideSimplification(etat: EtatSession): EtatSession {
@@ -190,7 +186,7 @@ export function soumettreReponseIsolement(etat: EtatSession, reponse: string): E
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: necessiteDeveloppement(etat.exerciceCourant) ? "developper" : phaseApresIsolement(etat.exerciceCourant),
-    scoreIsolementExercice: etat.aideIsolementUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreIsolementExercice: etapeCourante.score,
     isolementRevele: etapeCourante.revelee,
   };
 }
@@ -231,7 +227,7 @@ export function soumettreReponseDevelopper(etat: EtatSession, reponse: string): 
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresIsolement(etat.exerciceCourant),
-    scoreDevelopperExercice: etat.aideDevelopperUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreDevelopperExercice: etapeCourante.score,
     developperRevele: etapeCourante.revelee,
   };
 }
@@ -292,7 +288,7 @@ export function soumettreReponseChamp1(etat: EtatSession, reponse: string): Etat
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "champ2",
-    scoreChampPrincipalExercice: etat.aideChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreChampPrincipalExercice: etapeCourante.score,
     champPrincipalRevele: etapeCourante.revelee,
   };
 }
@@ -377,7 +373,7 @@ export function soumettreReponseChamp2(etat: EtatSession, reponse: ReponseZeros)
     scoreDevelopper: etat.scoreDevelopperExercice,
     scoreReconnaissance: etat.scoreReconnaissanceExercice,
     scoreChampPrincipal: etat.scoreChampPrincipalExercice as number,
-    scoreZeros: etat.aideZerosUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number),
+    scoreZeros: (etapeCourante.score as number),
     zerosRevele: etapeCourante.revelee,
     categorieRevelee: etat.categorieRevelee,
   };

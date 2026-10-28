@@ -1,6 +1,5 @@
 import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceProbabilitesEnsembles } from "../core6e/probabilitesEnsembles.types";
-import type { PhaseProbabilitesEnsembles, ResultatExerciceProbabilitesEnsembles } from "../moteur6e/typesProbabilitesEnsembles";
-import { phasesPourExercice } from "../moteur6e/typesProbabilitesEnsembles";
+import type { PhaseProbabilitesEnsembles } from "../moteur6e/typesProbabilitesEnsembles";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen30`. Dispatch sur
@@ -339,10 +338,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceProbabilitesEn
   return [Math.abs(pAetB - pA * pB) <= 0.01 ? "\\text{Indépendants}" : "\\text{Non indépendants}"];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (300 pour la famille A, 400 pour la
- * famille B). */
-export function calculerTotalPointsProbabilitesEnsembles(resultat: ResultatExerciceProbabilitesEnsembles): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

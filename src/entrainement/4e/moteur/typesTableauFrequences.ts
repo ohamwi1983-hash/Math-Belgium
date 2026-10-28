@@ -35,8 +35,7 @@ export interface EtatSessionTableauFrequences {
    * Aide PROGRESSIVE par écran (comme "Triangle quelconque"/"Colinéarité"/"Orthogonalité"/"Norme
    * d'un vecteur et distance entre 2 points") — 2 niveaux par écran (spec : "Aide 1"/"Aide 2"),
    * chacun révélant strictement plus que le précédent (`activerAideSuivante`,
-   * `sessionTableauFrequences.ts`). Pénalité ADDITIVE (-20 points par niveau atteint) appliquée au
-   * niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement.
+   * `sessionTableauFrequences.ts`).
    */
   niveauAideIdentification: number;
   niveauAideFrequences: number;

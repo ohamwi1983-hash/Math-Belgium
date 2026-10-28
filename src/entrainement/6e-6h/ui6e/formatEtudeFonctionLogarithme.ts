@@ -10,8 +10,7 @@ import type {
   ExerciceEtudeLogNonE,
 } from "../core6e/etudeFonctionLogarithme.types";
 import type { CibleLimite } from "../core6e/limitesExponentielles.types";
-import type { DetailPhaseEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme, ResultatExerciceEtudeFonctionLogarithme } from "../moteur6e/typesEtudeFonctionLogarithme";
-import { nombreEcrans } from "../moteur6e/typesEtudeFonctionLogarithme";
+import type { DetailPhaseEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme } from "../moteur6e/typesEtudeFonctionLogarithme";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
@@ -429,8 +428,7 @@ export function aideComportementInfiniNiveau2(exercice: ExerciceEtudeLogE): Aide
 
 // ============================================================================
 // Récapitulatif final — un libellé + un contenu par écran RÉELLEMENT visité par la famille de
-// l'exercice (voir `moteur6e/typesEtudeFonctionLogarithme.ts::nombreEcrans` pour le maximum
-// variable, 600 pour A-D, 200 pour E).
+// l'exercice (6 écrans pour A-D, 2 pour E).
 // ============================================================================
 
 export const LIBELLE_PHASE_ETUDE_LOG: Record<PhaseEtudeFonctionLogarithme, string> = {
@@ -565,31 +563,6 @@ export function etatActuel(phase: PhaseEtudeFonctionLogarithme, exercice: Exerci
     default:
       return null;
   }
-}
-
-// ============================================================================
-// Total de points — maximum VARIABLE selon la famille (600 pour A-D, 200 pour E), même principe
-// que `6gen14`/`6gen16` (voir CLAUDE.md, "Total-points summary convention") : somme des scores
-// RÉELLEMENT applicables (`!== null`), jamais une formule à 3 paliers simplifiée.
-// ============================================================================
-
-export interface TotalRecap {
-  total: number;
-  maximum: number;
-}
-
-export function totalPointsRecap(resultat: ResultatExerciceEtudeFonctionLogarithme): TotalRecap {
-  const scores = [
-    resultat.scoreDomaine,
-    resultat.scoreLimites,
-    resultat.scoreAsymptotes,
-    resultat.scoreCroissance,
-    resultat.scoreConcavite,
-    resultat.scoreGraphique,
-    resultat.scoreComportementInfini,
-  ].filter((s): s is number => s !== null);
-  const total = scores.reduce((a, s) => a + s, 0);
-  return { total, maximum: nombreEcrans(resultat.exercice.famille) * 100 };
 }
 
 export function detailPourPhase(details: Partial<Record<PhaseEtudeFonctionLogarithme, DetailPhaseEtudeFonctionLogarithme>>, phase: PhaseEtudeFonctionLogarithme): DetailPhaseEtudeFonctionLogarithme | undefined {

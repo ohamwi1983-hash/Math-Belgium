@@ -8,8 +8,7 @@
  * "distancePQ" est toujours la phase terminale.
  *
  * Aide PROGRESSIVE par écran (même principe que "Colinéarité"/"Orthogonalité"/"Relations entre
- * droites") : 1 seul niveau sur "choixPoint", 2 niveaux sur les 3 autres écrans — pénalité ADDITIVE
- * (-20 points/niveau) appliquée au moment précis où l'écran se clôt, jamais rétroactivement.
+ * droites") : 1 seul niveau sur "choixPoint", 2 niveaux sur les 3 autres écrans.
  */
 import type { ExerciceDistanceDroite, ExerciceDistanceParalleles } from "../core/distanceDroite.types";
 import type { GenerateurExerciceDistanceDroite } from "../core/distanceDroite.types";
@@ -30,7 +29,6 @@ import {
 import type { ReponseIntersection } from "./verificationDistanceDroite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_CHOIX_POINT = 1;
 export const NIVEAU_AIDE_MAX_EQUATION_B = 2;
@@ -113,12 +111,7 @@ function reglagesEtape(etat: EtatSessionDistanceDroite): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionDistanceDroite): EtatSessionDistanceDroite {
@@ -185,7 +178,7 @@ export function soumettreReponseChoixPoint(etat: EtatSessionDistanceDroite, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideChoixPoint);
+  const score = etapeCourante.score as number;
 
   const point: Point = etapeCourante.reussie ? reponse : pointEntierAleatoireImpliciteDroite(droiteSourceDeExercice(exerciceParalleles));
   const bAttendue = impliciteDepuisPointVecteurDroite(point, exerciceParalleles.vecteurNormal);
@@ -224,7 +217,7 @@ export function soumettreReponseEquationB(etat: EtatSessionDistanceDroite, repon
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideEquationB);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -252,7 +245,7 @@ export function soumettreReponseIntersectionQ(etat: EtatSessionDistanceDroite, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIntersectionQ);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -284,7 +277,7 @@ export function soumettreReponseDistancePQ(etat: EtatSessionDistanceDroite, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDistancePQ);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

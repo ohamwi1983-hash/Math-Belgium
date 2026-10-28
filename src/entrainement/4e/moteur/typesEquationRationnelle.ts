@@ -109,9 +109,7 @@ export interface EtatSessionEquationRationnelle {
   etapeCourante: EtatEtapeTentatives;
   scoreCEExercice: number | null;
   /** true si l'étape "ce" a dû être révélée — jusqu'au 2025-10, déduit de `scoreCEExercice === 0`
-   * (heuristique documentée comme sûre ici : la pénalité d'aide de ce générateur reste ×0,5 sur le
-   * score de tentatives, `aide ? score*0.5 : score`, jamais soustractive — un succès ne peut jamais
-   * tomber exactement à 0, voir `etapeTentatives.ts`). Champ explicite ajouté pendant le balayage
+   * (heuristique sûre : un succès ne peut jamais tomber exactement à 0, voir `etapeTentatives.ts`). Champ explicite ajouté pendant le balayage
    * générique (point A) pour ne plus dépendre de cette équivalence implicite ; même principe pour
    * les 9 autres champs `xxxRevele` ci-dessous. */
   ceRevele: boolean;
@@ -138,7 +136,7 @@ export interface EtatSessionEquationRationnelle {
   scoreRacinesExercice: number | null;
   racinesRevele: boolean;
   /**
-   * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —
+   * Aides à sens unique (1 seul niveau —
    * conceptionaidescomposantspartageshistorique.md) — remises à false au passage à l'exercice
    * suivant, comme les autres champs "transitoires" ci-dessus. `aideCeUtilisee` ne concerne que la
    * variante `EtapeRacinesFlexibles` de la phase "ce" (plusieurs CE) — `EtapeCEDirecte` (une seule

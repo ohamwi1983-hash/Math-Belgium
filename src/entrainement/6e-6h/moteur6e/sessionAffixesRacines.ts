@@ -17,7 +17,6 @@ import { verifierEcran } from "./verificationAffixesRacines";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur tous les écrans qui en prévoient (spec : écran unique de A, écran 1 de
  * B, écrans 2 et 3 de C — `max=0` pour bEcran2 et cEcran1, voir `ui6e/formatAffixesRacines.ts`). */
@@ -42,7 +41,7 @@ export function demarrerSessionAffixesRacines(reglages: ReglagesSession6e, gener
 }
 
 function reglagesEtape(etat: EtatSessionAffixesRacines): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionAffixesRacines): EtatSessionAffixesRacines {
@@ -73,7 +72,7 @@ export function soumettreReponseEcran(etat: EtatSessionAffixesRacines, valeurs: 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseAffixesRacines, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseAffixesRacines, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

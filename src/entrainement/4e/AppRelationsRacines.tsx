@@ -30,7 +30,6 @@ const CONSIGNE_GENERALE = "Exploite les relations entre les racines et les coeff
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

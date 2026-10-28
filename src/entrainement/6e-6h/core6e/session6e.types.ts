@@ -7,5 +7,4 @@
 export interface ReglagesSession6e {
   nombreExercices: number;
   tentativesMax: number;
-  penaliteActivee: boolean;
 }

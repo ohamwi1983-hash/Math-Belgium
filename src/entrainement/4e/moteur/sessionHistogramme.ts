@@ -9,9 +9,7 @@
  * terminale, quelle que soit la variante.
  *
  * **Aide PROGRESSIVE par écran** (comme "Tableau de fréquences"/"Triangle quelconque"/
- * "Colinéarité"/"Orthogonalité"/"Norme d'un vecteur et distance entre 2 points") — pénalité
- * ADDITIVE (-20 points par niveau atteint) appliquée au moment précis où l'écran se clôt, jamais
- * rétroactivement.
+ * "Colinéarité"/"Orthogonalité"/"Norme d'un vecteur et distance entre 2 points").
  */
 import type { ExerciceHistogramme, GenerateurExerciceHistogramme } from "../core/histogramme.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -22,7 +20,6 @@ import { verifierClassement, verifierFrequencesHistogramme, verifierTrace } from
 import type { EtatSessionHistogramme, PhaseHistogramme, ResultatExerciceHistogramme } from "./typesHistogramme";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_CLASSEMENT = 2;
 export const NIVEAU_AIDE_MAX_FREQUENCES = 2;
 export const NIVEAU_AIDE_MAX_TRACE = 1;
@@ -57,13 +54,7 @@ function reglagesEtape(etat: EtatSessionHistogramme): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -130,7 +121,7 @@ export function soumettreReponseClassement(etat: EtatSessionHistogramme, reponse
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideClassement);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -156,7 +147,7 @@ export function soumettreReponseFrequences(etat: EtatSessionHistogramme, reponse
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideFrequences);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -183,7 +174,7 @@ export function soumettreReponseTrace(etat: EtatSessionHistogramme, reponse: Rep
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideTrace);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,

@@ -3,7 +3,7 @@ import type { PolynomeLineaire } from "../../core/simplification.types";
 import type { ExerciceInequationRationnelleNiveau4 } from "../../core/inequationRationnelle.types";
 import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
 import { construireExerciceClassifie } from "../equationRationnelle/construireExerciceClassifie";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientNiveau4 } from "./construireGrilleQuotientNiveau4";
 import { tousLisibles } from "./bornesLisibilite";
 
@@ -104,8 +104,7 @@ export function construireNiveau4(): ExerciceInequationRationnelleNiveau4 {
 
     const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
     const { racines, ce, grille } = construireGrilleQuotientNiveau4(numerateur, denominateurGauche, denominateurDroit);
-    const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-    const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+    const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
     return {
       niveau: "niveau4",

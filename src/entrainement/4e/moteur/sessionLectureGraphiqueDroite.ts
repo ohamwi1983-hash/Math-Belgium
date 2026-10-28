@@ -9,9 +9,8 @@
  * directement l'exercice dès que l'étape se termine.
  *
  * Aide PROGRESSIVE à 2 niveaux (même principe que "Équation d'une droite"/"Colinéarité"/
- * "Orthogonalité", pas le mécanisme "aide unique ×0,5" de "Quel angle ?" — la spec décrit
- * explicitement 2 aides séquentielles distinctes) : pénalité ADDITIVE (-20 points/niveau) appliquée
- * au moment précis où l'exercice se clôt, jamais rétroactivement.
+ * "Orthogonalité", pas le mécanisme "aide unique" de "Quel angle ?" — la spec décrit
+ * explicitement 2 aides séquentielles distinctes)).
  */
 import type { ExerciceLectureGraphiqueDroite, GenerateurExerciceLectureGraphiqueDroite } from "../core/lectureGraphiqueDroite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -22,7 +21,6 @@ import type { ReponseParametriqueLecture } from "./verificationLectureGraphiqueD
 import { verifierCartesienne, verifierParametriqueLecture } from "./verificationLectureGraphiqueDroite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX = 2;
 
@@ -54,12 +52,7 @@ function reglagesEtape(etat: EtatSessionLectureGraphiqueDroite): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionLectureGraphiqueDroite): EtatSessionLectureGraphiqueDroite {
@@ -111,7 +104,7 @@ export function soumettreReponseCartesienne(etat: EtatSessionLectureGraphiqueDro
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,
@@ -144,7 +137,7 @@ export function soumettreReponseParametrique(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

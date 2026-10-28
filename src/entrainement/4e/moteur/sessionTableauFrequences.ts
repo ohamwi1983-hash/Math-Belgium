@@ -10,8 +10,7 @@
  * la phase terminale.
  *
  * **Aide PROGRESSIVE par écran** (comme "Triangle quelconque"/"Colinéarité"/"Orthogonalité"/"Norme
- * d'un vecteur et distance entre 2 points"), 2 niveaux par écran — pénalité ADDITIVE (-20 points
- * par niveau atteint) appliquée au moment précis où l'écran se clôt, jamais rétroactivement.
+ * d'un vecteur et distance entre 2 points"), 2 niveaux par écran.
  */
 import type { GenerateurExerciceTableauFrequences } from "../core/tableauFrequences.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -32,7 +31,6 @@ import {
 import type { EtatSessionTableauFrequences, ResultatExerciceTableauFrequences } from "./typesTableauFrequences";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_IDENTIFICATION = 2;
 export const NIVEAU_AIDE_MAX_FREQUENCES = 2;
 export const NIVEAU_AIDE_MAX_CUMULES = 2;
@@ -68,13 +66,7 @@ function reglagesEtape(etat: EtatSessionTableauFrequences): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -153,7 +145,7 @@ export function soumettreReponseIdentification(etat: EtatSessionTableauFrequence
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIdentification);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -179,7 +171,7 @@ export function soumettreReponseFrequences(etat: EtatSessionTableauFrequences, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideFrequences);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -205,7 +197,7 @@ export function soumettreReponseCumules(etat: EtatSessionTableauFrequences, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCumules);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -235,7 +227,7 @@ export function soumettreReponseFrequencesCumulees(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideFrequencesCumulees);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     scoreIdentification: etat.scoreIdentificationExercice as number,

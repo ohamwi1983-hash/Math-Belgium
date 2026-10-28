@@ -9,8 +9,7 @@
  * le même principe de branchement que "Analyse d'une fonction du second degré"/`irreductible`
  * (jamais un écran affiché "pour rien" quand la vérité géométrique n'en a pas besoin).
  *
- * Aide PROGRESSIVE par écran (2 niveaux chacun), pénalité ADDITIVE (-20 points par niveau atteint)
- * appliquée à la clôture de l'écran concerné — voir `typesIntersectionDroites.ts`.
+ * Aide PROGRESSIVE par écran (2 niveaux chacun) — voir `typesIntersectionDroites.ts`.
  */
 import type { ConclusionIntersectionDroites, GenerateurExerciceIntersectionDroites } from "../core/intersectionDroites.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -20,7 +19,6 @@ import { verifierDiagnostic, verifierPoint, type ReponsePoint } from "./verifica
 import type { EtatSessionIntersectionDroites, ResultatExerciceIntersectionDroites } from "./typesIntersectionDroites";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_DIAGNOSTIC = 2;
 export const NIVEAU_AIDE_MAX_POINT = 2;
 
@@ -48,12 +46,7 @@ function reglagesEtape(etat: EtatSessionIntersectionDroites): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -117,7 +110,7 @@ export function soumettreReponseDiagnostic(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDiagnostic);
+  const score = etapeCourante.score as number;
   const revele = etapeCourante.revelee;
 
   // Divergence par rapport à "Position d'une droite par rapport à un plan" : ici, seul le cas
@@ -160,7 +153,7 @@ export function soumettreReponsePoint(etat: EtatSessionIntersectionDroites, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePoint);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,

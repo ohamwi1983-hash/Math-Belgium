@@ -12,8 +12,7 @@ import type {
   IdSystemeA,
   ValeurComplexe,
 } from "../core6e/equationsComplexes.types";
-import type { PhaseEquationsComplexes, ResultatExerciceEquationsComplexes } from "../moteur6e/typesEquationsComplexes";
-import { phasesPourExercice } from "../moteur6e/typesEquationsComplexes";
+import type { PhaseEquationsComplexes } from "../moteur6e/typesEquationsComplexes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen36`. Dispatch sur
@@ -697,10 +696,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationsCompl
   return [exercice.racines.map((r) => entierComplexeLatex(r.re, r.im)).join("\\text{, }")];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsEquationsComplexes(resultat: ResultatExerciceEquationsComplexes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

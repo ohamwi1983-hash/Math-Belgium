@@ -11,6 +11,7 @@ import {
   formatEnonceInequationRationnelleLatex,
 } from "../ui/formatInequationRationnelle";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
+import { ListePointsIsolesInput, construirePointsIsoles } from "./ListePointsIsolesInput";
 import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
 import type { EtatListeMorceaux } from "../ui/listeMorceaux";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
@@ -34,7 +35,7 @@ const OPTIONS_FORME: { valeur: Forme; libelle: string }[] = [
   { valeur: "vide", libelle: "∅" },
   { valeur: "reel", libelle: "ℝ" },
   { valeur: "point", libelle: "Un point" },
-  { valeur: "reel_sauf_points", libelle: "Tous les réels sauf plusieurs points" },
+  { valeur: "reel_sauf_points", libelle: "Tous les réels sauf un ou plusieurs points" },
   { valeur: "intervalle", libelle: "Au moins un intervalle" },
 ];
 
@@ -59,7 +60,7 @@ interface Props {
  * généralisée (SolutionEnsembleProduit, plusieurs morceaux, notation francophone), même mécanisme
  * que EtapeIntervalleProduit.tsx (exercice "tableau de signes à plusieurs facteurs"). Affiche en
  * rappel la grille de signes correctement remplie (TableauSignesQuotientRecap) et un bouton "Aide"
- * (×0,5, activation à sens unique, prompt de corrections) — même principe que
+ * (activation à sens unique, prompt de corrections) — même principe que
  * EtapeIntervalleProduit.tsx, en tenant compte du symbole "∄" (jamais encadré, voir
  * calculerAideGrilleQuotient). Aucune vérification spéciale sur l'inclusion accidentelle de la CE :
  * une erreur sur ce point est traitée comme n'importe quelle autre réponse incorrecte.
@@ -78,12 +79,14 @@ export function EtapeIntervalleQuotient({
   const [valeurPoint, setValeurPoint] = useState("");
   const [valeursExclues, setValeursExclues] = useState<string[]>([]);
   const [liste, setListe] = useState<EtatListeMorceaux>(etatListeInitiale());
+  const [pointsIsoles, setPointsIsoles] = useState<string[]>([]);
 
   function choisirForme(nouvelleForme: Forme) {
     setForme(nouvelleForme);
     setValeurPoint("");
     setValeursExclues(nouvelleForme === "reel_sauf_points" ? Array(MIN_VALEURS_EXCLUES).fill("") : []);
     setListe(etatListeInitiale());
+    setPointsIsoles([]);
   }
 
   function ajouterValeurExclue() {
@@ -114,12 +117,14 @@ export function EtapeIntervalleQuotient({
       return toutesValides ? { forme, valeurs } : null;
     }
     const morceaux = construireListe(liste);
-    if (morceaux === null) return null;
+    const points = construirePointsIsoles(pointsIsoles);
+    if (morceaux === null || points === null) return null;
+    if (points.length > 0) return { forme: "mixte", morceaux, points };
     return morceaux.length === 1 ? { forme: "intervalle", morceau: morceaux[0] } : { forme: "union", morceaux };
   }
 
   const reponse = construireReponse();
-  const termesApercu = formatTermesApercuSolutionProduit(forme, valeurPoint, valeursExclues, liste);
+  const termesApercu = formatTermesApercuSolutionProduit(forme, valeurPoint, valeursExclues, liste, pointsIsoles);
   const highlight = aideActivee ? calculerAideGrilleQuotient(exercice) : undefined;
 
   return (
@@ -223,7 +228,12 @@ export function EtapeIntervalleQuotient({
         </div>
       )}
 
-      {forme === "intervalle" && <ListeMorceauxInput etat={liste} onChange={setListe} />}
+      {forme === "intervalle" && (
+        <>
+          <ListeMorceauxInput etat={liste} onChange={setListe} />
+          <ListePointsIsolesInput valeurs={pointsIsoles} onChange={setPointsIsoles} />
+        </>
+      )}
 
       {!validation && (
         <>

@@ -29,7 +29,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * 2 racines : cEcran3 uniquement).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionAffixesRacines {
   return demarrerSessionAffixesRacines(REGLAGES_DEMO, genererExerciceAffixesRacines);

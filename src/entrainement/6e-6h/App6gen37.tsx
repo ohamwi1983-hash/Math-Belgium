@@ -28,7 +28,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `EtapeChoixCongruenceFormeTrigonometrique` plutôt que le composant générique à champs texte.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionFormeTrigonometrique {
   return demarrerSessionFormeTrigonometrique(REGLAGES_DEMO, genererExerciceFormeTrigonometrique);

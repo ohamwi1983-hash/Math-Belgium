@@ -16,11 +16,6 @@ import { niveauAideMax, verifierValeurFinale } from "./verificationAnglesAssocie
 import type { EtatSessionAnglesAssocies, ResultatExerciceAnglesAssocies } from "./typesAnglesAssocies";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 export function demarrerSessionAnglesAssocies(
   reglages: ReglagesSession,
@@ -52,7 +47,6 @@ function reglagesEtape(etat: EtatSessionAnglesAssocies): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -71,7 +65,7 @@ export function soumettreReponse(etat: EtatSessionAnglesAssocies, valeur: number
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const resultat: ResultatExerciceAnglesAssocies = {
     variante: etat.exerciceCourant.variante,
     relation: etat.exerciceCourant.relation,

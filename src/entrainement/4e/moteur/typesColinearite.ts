@@ -40,8 +40,7 @@ export interface EtatSessionColinearite {
   phase: PhaseColinearite;
   etapeCourante: EtatEtapeTentatives;
   /** Aide PROGRESSIVE par écran (même principe que "Triangle quelconque"/"Calcul de composantes
-   * de combinaisons linéaires") — 0 à `NIVEAU_AIDE_MAX_XXX` (`sessionColinearite.ts`), pénalité
-   * ADDITIVE (-20 points/niveau) appliquée au moment précis où l'écran se clôt. */
+   * de combinaisons linéaires") — 0 à `NIVEAU_AIDE_MAX_XXX` (`sessionColinearite.ts`). */
   niveauAideConstruction: number;
   niveauAideReduction: number;
   niveauAideResolution: number;

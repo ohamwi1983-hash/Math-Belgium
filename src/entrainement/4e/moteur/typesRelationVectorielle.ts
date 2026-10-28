@@ -31,11 +31,9 @@ export interface EtatSessionRelationVectorielle {
   phase: PhaseRelationVectorielle;
   etapeCourante: EtatEtapeTentatives;
   /**
-   * Bouton "Aide" — UNE seule aide pénalisante par exercice (spec), jamais réinitialisée entre les
+   * Bouton "Aide" — UNE seule aide par exercice (spec), jamais réinitialisée entre les
    * deux phases d'un même exercice `relationGenerale` (même graphe aide les deux étapes) ; remise à
-   * `false` au passage à l'exercice suivant. Révélation à sens unique, facteur ×0,5 appliqué à
-   * CHAQUE note qui se clôt après son activation — jamais rétroactivement à une note déjà close
-   * avant (même principe exact que "Transformations graphiques", ses deux notes indépendantes).
+   * `false` au passage à l'exercice suivant. Révélation à sens unique (même principe exact que "Transformations graphiques", ses deux notes indépendantes).
    */
   aideUtilisee: boolean;
   /** Score/révélation de la phase "traduction", conservés jusqu'à la clôture de l'exercice (qui

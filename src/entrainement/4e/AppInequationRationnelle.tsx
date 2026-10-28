@@ -69,8 +69,7 @@ import {
   soumettreReponseSimplifierNumReduction,
 } from "./moteur/sessionInequationRationnelle";
 import type { EtatSessionInequationRationnelle, PhaseInequationRationnelle } from "./moteur/sessionInequationRationnelle";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurInequationRationnelle } from "./generateurs/inequationRationnelle";
-import type { NiveauInequationRationnelle } from "./core/inequationRationnelle.types";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurInequationRationnelle, type VarianteInequationRationnelleId } from "./generateurs/inequationRationnelle";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral } from "./moteur/verification";
 import {
@@ -130,7 +129,7 @@ import {
 import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee, formatPolynome } from "./ui/formatSimplification";
 import { formatLineaireDeveloppeExact } from "./ui/formatInequationRationnelle";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./ui/formatEquation";
-import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
+import { formatSolutionEnsembleProduitLatex } from "./ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "./ui/categorieLabels";
 import { enonceSimplifie, facteurCommun, necessiteSimplification } from "./moteur/simplificationEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -189,7 +188,6 @@ const CONSIGNE_GENERALE = "Résous cette inéquation rationnelle.";
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };
@@ -499,7 +497,7 @@ interface TransitionEnAttente {
  * Chaque phase lit un booléen `xxxRevele` dédié sur `nouvelEtat` (point A du balayage générique,
  * 2025-10 : les derniers champs qui n'en avaient pas — "denomReduction", "reduction", et le groupe
  * "simplifierXxx*" — en ont désormais un, plutôt que l'ancienne heuristique `scoreXxx === 0`,
- * approximative en présence d'une pénalité d'aide). "intervalle" clôture TOUJOURS l'exercice : son
+ * moins explicite). "intervalle" clôture TOUJOURS l'exercice : son
  * booléen `intervalleRevele` (un vrai booléen, pas un score) n'existe que sur le dernier
  * `resultats[...]` de `nouvelEtat`, jamais sur un champ top-level. */
 function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: EtatSessionInequationRationnelle): boolean {
@@ -820,7 +818,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
     case "grille":
       return <>Tableau attendu : signe du quotient = {exercice.grille.ligneQuotient.join(" ")}</>;
     case "intervalle":
-      return <>Réponse attendue : S = {formatSolutionEnsembleProduit(exercice.solution)}</>;
+      return <>Réponse attendue : <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(exercice.solution)}`} /></>;
   }
 }
 
@@ -883,7 +881,7 @@ export function AppInequationRationnelle() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
-    setEtat(demarrerSessionInequationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as NiveauInequationRationnelle)));
+    setEtat(demarrerSessionInequationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationRationnelleId)));
   }
 
   const recapitulatif = calculerRecapitulatifInequationRationnelle(etat);

@@ -15,7 +15,6 @@ import { ResumeSessionQuizGeometrieAnalytique } from "./components/ResumeSession
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

@@ -1,6 +1,5 @@
 import type { ExerciceLongueurArc, ExerciceLongueurArcA, ExerciceLongueurArcB, ExerciceLongueurArcC } from "../core6e/longueurArc.types";
-import type { PhaseLongueurArc, ResultatExerciceLongueurArc } from "../moteur6e/typesLongueurArc";
-import { phasesPourExercice } from "../moteur6e/typesLongueurArc";
+import type { PhaseLongueurArc } from "../moteur6e/typesLongueurArc";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen28`. Dispatch sur
@@ -400,10 +399,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLongueurArc, p
   return [`L${nombreLatex(longueur)}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 3 pour A/C, 4 pour B). */
-export function calculerTotalPointsLongueurArc(resultat: ResultatExerciceLongueurArc): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

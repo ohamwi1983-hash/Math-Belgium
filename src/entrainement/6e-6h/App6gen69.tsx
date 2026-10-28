@@ -15,7 +15,6 @@ import { ResumeSessionQuizProbabilites } from "./components6e/ResumeSessionQuizP
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizProbabilites): EtatSessionQuizProbabilites {

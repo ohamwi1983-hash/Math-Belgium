@@ -76,7 +76,7 @@ export interface EtatSessionLongueurArc {
   scoresPartiels: Partial<Record<PhaseLongueurArc, number>>;
   /** Vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture — jusqu'au
    * 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, heuristique non
-   * fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives, pouvait amener une
+   * fiable ici : l'ancienne pénalité d'aide (supprimée), soustraite APRÈS le score de tentatives, pouvait amener une
    * RÉUSSITE fortement aidée à exactement 0 (faux "révélé") — corrigé pendant le balayage
    * générique (point A). */
   revelesPartiels: Partial<Record<PhaseLongueurArc, boolean>>;

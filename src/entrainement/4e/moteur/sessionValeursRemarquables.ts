@@ -43,12 +43,7 @@ function reglagesEtape(etat: EtatSessionValeursRemarquables): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteAide(score: number, aideUtilisee: boolean): number {
-  return aideUtilisee ? score * 0.5 : score;
 }
 
 /**
@@ -113,7 +108,7 @@ export function soumettreReponseQuadrant(etat: EtatSessionValeursRemarquables, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideQuadrantUtilisee);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -141,7 +136,7 @@ export function soumettreReponseAnglePremierQuadrant(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideAnglePremierQuadrantUtilisee);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -170,7 +165,7 @@ export function soumettreReponseValeursExactes(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideValeursExactesUtilisee);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, {
     anglePremierQuadrant: etat.exerciceCourant.anglePremierQuadrant,
     scoreQuadrant: etat.scoreQuadrantExercice as number,

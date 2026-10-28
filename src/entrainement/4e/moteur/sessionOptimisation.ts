@@ -45,7 +45,6 @@ import {
 import type { EtatSessionOptimisation, PhaseOptimisation, ResultatExerciceOptimisation } from "./typesOptimisation";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_IDENTIFICATION = 0;
 export const NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR = 2;
 export const NIVEAU_AIDE_MAX_SYSTEME = 3;
@@ -100,12 +99,7 @@ function reglagesEtape(etat: EtatSessionOptimisation): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionOptimisation): EtatSessionOptimisation {
@@ -172,7 +166,7 @@ function cloturerExerciceOuSuivant(etat: EtatSessionOptimisation, resultat: Resu
 }
 
 /** Première étape de la variante `modelisation`, quand `identificationXY` est défini — mène
- * toujours à "contrainteEtGrandeur". Pas de pénalité d'aide (`NIVEAU_AIDE_MAX_IDENTIFICATION=0`) :
+ * toujours à "contrainteEtGrandeur". Pas d'aide (`NIVEAU_AIDE_MAX_IDENTIFICATION=0`) :
  * vérification par sélection, aucun texte d'aide prévu pour ce type d'écran (même convention que
  * l'écran "interpretation"). */
 export function soumettreReponseIdentification(etat: EtatSessionOptimisation, reponse: ReponseIdentification): EtatSessionOptimisation {
@@ -197,7 +191,7 @@ export function soumettreReponseIdentification(etat: EtatSessionOptimisation, re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIdentification);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -228,7 +222,7 @@ export function soumettreReponseContrainteEtGrandeur(etat: EtatSessionOptimisati
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideContrainteEtGrandeur);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -259,7 +253,7 @@ export function soumettreReponseSysteme(etat: EtatSessionOptimisation, texte: st
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSysteme);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -289,7 +283,7 @@ export function soumettreReponseDomaine(etat: EtatSessionOptimisation, reponse: 
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDomaine);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -317,7 +311,7 @@ export function soumettreReponseSommet(etat: EtatSessionOptimisation, reponse: R
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSommet);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -345,7 +339,7 @@ export function soumettreReponseDecision(etat: EtatSessionOptimisation, reponse:
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDecision);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -374,7 +368,7 @@ export function soumettreReponseInterpretation(etat: EtatSessionOptimisation, in
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideInterpretation);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exerciceCourant.variante,

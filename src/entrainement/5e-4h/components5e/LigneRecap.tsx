@@ -39,14 +39,12 @@ export function LigneRecap({ label, statut, children }: LigneRecapProps) {
 }
 
 /**
- * Points d'un écran individuel pour le résumé chiffré du récapitulatif — 100 points de base si
- * correct sans jamais avoir utilisé l'aide, -20 points par niveau d'aide effectivement consommé
- * avant la validation correcte, 0 si la réponse a été révélée. Dérivé des MÊMES champs
- * (`revele`/`niveauAide`) que `statutRecap` ci-dessus — jamais une capture séparée.
+ * Points d'un écran individuel pour le résumé chiffré du récapitulatif — 100 si l'écran a été
+ * réussi (aide utilisée ou non : aucune pénalité d'aide), 0 si la réponse a été révélée. Dérivé
+ * du MÊME champ `revele` que `statutRecap` ci-dessus — jamais une capture séparée.
  */
-export function pointsEcran(revele: boolean, niveauAide: number | null): number {
-  if (revele) return 0;
-  return Math.max(0, 100 - 20 * (niveauAide ?? 0));
+export function pointsEcran(revele: boolean): number {
+  return revele ? 0 : 100;
 }
 
 /**
@@ -59,7 +57,7 @@ export function pointsEcran(revele: boolean, niveauAide: number | null): number 
  */
 export function totalPointsRecap(ecrans: { revele: boolean; niveauAide: number | null }[]): { points: number; pointsMax: number } {
   return {
-    points: ecrans.reduce((somme, e) => somme + pointsEcran(e.revele, e.niveauAide), 0),
+    points: ecrans.reduce((somme, e) => somme + pointsEcran(e.revele), 0),
     pointsMax: ecrans.length * 100,
   };
 }

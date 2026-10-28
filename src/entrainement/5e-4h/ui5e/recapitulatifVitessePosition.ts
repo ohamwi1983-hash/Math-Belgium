@@ -7,7 +7,7 @@ import { formatReponseAttenduePhaseLatex, LIBELLE_ECRAN } from "./formatVitesseP
  * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen35). Icône (✓/✗)
  * pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de
  * chaque écran (`sessionVitessePosition.ts`) — jamais `scoresPartiels[ecran] === 0` (point A,
- * balayage générique) : la pénalité d'aide multi-niveaux de ce générateur est soustraite APRÈS le
+ * balayage générique) : la pénalité d'aide multi-niveaux de ce générateur était soustraite (avant le retrait des pénalités) APRÈS le
  * score de tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait légitimement
  * tomber à 0 et s'afficher à tort comme "révélée". `ordreEcransVitessePosition(exercice)` donne la
  * séquence RÉELLE (5 écrans pour la variante "A", 6 pour "B" — fixée dès le tirage, voir

@@ -44,8 +44,7 @@ export interface EtatSessionTriangleLies {
   exerciceCourant: ExerciceTriangleLies;
   phase: PhaseTriangleLies;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide PROGRESSIVE par écran (pénalité ADDITIVE -20 points par niveau atteint, appliquée au
-   * niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement). */
+  /** Aide PROGRESSIVE par écran. */
   niveauAidePont: number;
   niveauAideAngles: number;
   niveauAideSoustraction: number;

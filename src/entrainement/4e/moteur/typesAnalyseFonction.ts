@@ -64,8 +64,7 @@ export interface EtatSessionAnalyseFonction {
   exerciceCourant: ExerciceAnalyseFonction;
   phase: PhaseAnalyseFonction;
   etapeCourante: EtatEtapeTentatives;
-  /** Boutons "Aide" — révélation à sens unique par étape, ×0,5 au score final de l'étape concernée
-   * (même mécanisme partout, prompt-4-modifications-analyse-fonction.md). */
+  /** Boutons "Aide" — révélation à sens unique par étape (même mécanisme partout, prompt-4-modifications-analyse-fonction.md). */
   aideCoefficientsUtilisee: boolean;
   aideAxeSommetUtilisee: boolean;
   aideDomaineImageUtilisee: boolean;

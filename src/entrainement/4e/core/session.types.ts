@@ -9,12 +9,6 @@ export interface ReglagesSession {
   nombreExercices: number;
   /** nombre d'essais autorisés, partagé par les 3 étapes (reconnaissance, champ 1, champ 2) */
   tentativesMax: number;
-  /**
-   * Si activé, chaque tentative ratée retire pointsDeBase/tentativesMax points au score de
-   * l'étape en cours (voir src/moteur/etapeTentatives.ts). Si désactivé, aucune pénalité par
-   * tentative, mais tentativesMax continue de limiter le nombre d'essais avant révélation.
-   */
-  penaliteActivee: boolean;
   affichageReponseApresEchec: boolean;
   affichageExplication: boolean;
 }

@@ -1,7 +1,6 @@
 import type { ExerciceAireA, ExerciceAireB, ExerciceAireC, ExerciceAireD, ExerciceAireD_Parametre, ExerciceCalculAires, SigneFonction } from "../core6e/calculAires.types";
 import type { TermeA } from "../core6e/calculPrimitives.types";
-import type { PhaseCalculAires, ResultatExerciceCalculAires } from "../moteur6e/typesCalculAires";
-import { phasesPourExercice } from "../moteur6e/typesCalculAires";
+import type { PhaseCalculAires } from "../moteur6e/typesCalculAires";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen26`. Dispatch sur
@@ -518,10 +517,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceCalculAires, p
   return [`\\text{${LIBELLE_PHASE[phase]}}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsCalculAires(resultat: ResultatExerciceCalculAires): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

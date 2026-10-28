@@ -32,7 +32,6 @@ function reglagesEtape(etat: EtatSessionReductionVectorielle): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 

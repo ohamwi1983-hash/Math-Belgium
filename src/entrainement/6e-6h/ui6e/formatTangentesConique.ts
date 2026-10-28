@@ -1,8 +1,7 @@
 import type { ConiqueCentree, ConiqueParabole, ExerciceTangenteA, ExerciceTangenteB, ExerciceTangenteC, ExerciceTangenteD, ExerciceTangenteE, ExerciceTangentesConique } from "../core6e/tangentesConique.types";
 import type { Point } from "../core6e/identificationConiques.types";
 import { coefficientsEquationEnM, discriminantParalleles } from "../generateurs6e/tangentesConique/algebreTangente";
-import type { PhaseTangentesConique, ResultatExerciceTangentesConique } from "../moteur6e/typesTangentesConique";
-import { phasesPourExercice } from "../moteur6e/typesTangentesConique";
+import type { PhaseTangentesConique } from "../moteur6e/typesTangentesConique";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen62`. Dispatch sur
@@ -664,10 +663,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceTangentesConiq
   return [`\\text{Point }${exercice.indexPlusProche + 1}\\text{, distance }=${formaterDecimal(exercice.distances[exercice.indexPlusProche])}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice, familles B/C/E n'ayant pas toutes le même nombre selon `aSolution`). */
-export function calculerTotalPointsTangentesConique(resultat: ResultatExerciceTangentesConique): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

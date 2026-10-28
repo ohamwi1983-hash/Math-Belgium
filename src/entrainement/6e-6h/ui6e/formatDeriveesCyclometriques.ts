@@ -8,7 +8,6 @@ import type {
   ExerciceDeriveeF,
   ExerciceDeriveeG,
 } from "../core6e/deriveesCyclometriques.types";
-import type { ResultatExerciceDeriveesCyclometriques } from "../moteur6e/typesDeriveesCyclometriques";
 
 /**
  * Couche présentation (6e) — formatage LaTeX + textes de consigne/aide pour `6gen4`. Consigne
@@ -399,36 +398,3 @@ export function texteAideGDeriveeFinaleNiveau2(e: ExerciceDeriveeG): AideAvecLat
   return { texte: "u et u' déjà substitués (non résolu) :", latex: `f'(x) = \\left[${deriveeBase}\\right]\\cdot\\left(${uPrimeLatex}\\right)` };
 }
 
-// ============================================================================
-// Total de points du récapitulatif — SOMME des scores réellement calculés par le moteur
-// (`moteur/etapeTentatives.ts` + pénalité d'aide, voir `sessionDeriveesCyclometriques.ts`), jamais
-// une formule reconstruite ici : un écran vert (correct, mais avec une tentative ratée en cours de
-// route) peut légitimement contribuer moins que 100/100 — affiché EN PLUS de `LigneRecap`, jamais à
-// sa place (voir `ResultatPanelDeriveesCyclometriques.tsx`). `maximum` = 100 × nombre d'écrans
-// réellement traversés pour la famille tirée (2 à 4 selon la famille — voir `typesDeriveesCyclometriques.ts`,
-// la famille D étant la plus étoffée avec 4 écrans).
-// ============================================================================
-
-export interface TotalPoints {
-  points: number;
-  maximum: number;
-}
-
-export function calculerTotalPointsDeriveesCyclometriques(resultat: ResultatExerciceDeriveesCyclometriques): TotalPoints {
-  switch (resultat.famille) {
-    case "A":
-      return { points: resultat.scoreDeriveeU + resultat.scoreDeriveeFinale, maximum: 200 };
-    case "B":
-      return { points: resultat.scoreDeriveeU + resultat.scoreDeriveeArc + resultat.scoreDeriveeFinale, maximum: 300 };
-    case "C":
-      return { points: resultat.scoreNumerateur + resultat.scoreDenominateur + resultat.scoreDeriveeFinale, maximum: 300 };
-    case "D":
-      return { points: resultat.scoreNumerateur + resultat.scoreDenominateur + resultat.scoreBrut + resultat.scoreSimplifiee, maximum: 400 };
-    case "E":
-      return { points: resultat.scoreDeriveeInterne + resultat.scoreDeriveeFinale, maximum: 200 };
-    case "F":
-      return { points: resultat.scoreBrute + resultat.scoreSimplifiee, maximum: 200 };
-    case "G":
-      return { points: resultat.scoreDeriveeInterne + resultat.scoreDeriveeFinale, maximum: 200 };
-  }
-}

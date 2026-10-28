@@ -1,12 +1,13 @@
 import type { Symbole } from "../../core/inequation.types";
 import type { FacteurSignesProduit, GenerateurExerciceSignesProduit } from "../../core/signesProduit.types";
 import { randomInt } from "../secondDegre/aleatoire";
+import { construireFacteurCarre } from "./construireFacteurCarre";
 import { construireFacteurFactorisable } from "./construireFacteurFactorisable";
 import { construireFacteurIrreductible } from "./construireFacteurIrreductible";
 import { construireFacteurLineaire } from "./construireFacteurLineaire";
-import { classifierSolutionProduit, construireGrille, extraireSignesZones } from "./grille";
+import { classifierSolutionProduit, construireGrille } from "./grille";
 
-type TypeFacteur = "lineaire" | "quadratique_irreductible" | "quadratique_factorisable";
+type TypeFacteur = "lineaire" | "quadratique_irreductible" | "quadratique_factorisable" | "carre";
 
 /**
  * Multisets de types valides, construits pour respecter deux contraintes structurelles (section 1
@@ -17,7 +18,11 @@ type TypeFacteur = "lineaire" | "quadratique_irreductible" | "quadratique_factor
  *   4 zones") ;
  * - au moins 1 racine au total : exclut le triplet 100% irréductible (produit de signe constant,
  *   aucun travail de tableau de signes, exercice dégénéré).
- * 9 patterns au total (4 à 2 facteurs, 5 à 3 facteurs), tirés uniformément.
+ * 9 patterns historiques (4 à 2 facteurs, 5 à 3 facteurs) + 3 patterns à racine double (audit
+ * gen5) : un facteur « carré » a(x−r)² (`construireFacteurCarre`, compte comme LE facteur
+ * factorisable de l'exercice) avec un irréductible (→ ∅, ℝ, {r} ou ℝ∖{r} selon le symbole et le
+ * signe), un linéaire (→ point isolé ]−∞ ; p] ∪ {r}, ou trou ]p ; r[ ∪ ]r ; +∞[) ou deux linéaires.
+ * Tirage uniforme sur les 12 : les variantes historiques restent majoritaires (9/12).
  */
 const PATTERNS: TypeFacteur[][] = [
   ["lineaire", "lineaire"],
@@ -29,6 +34,9 @@ const PATTERNS: TypeFacteur[][] = [
   ["lineaire", "quadratique_irreductible", "quadratique_irreductible"],
   ["lineaire", "quadratique_irreductible", "quadratique_factorisable"],
   ["quadratique_irreductible", "quadratique_irreductible", "quadratique_factorisable"],
+  ["quadratique_irreductible", "carre"],
+  ["lineaire", "carre"],
+  ["lineaire", "lineaire", "carre"],
 ];
 
 /**
@@ -47,7 +55,10 @@ export type VarianteSignesProduitId =
   | "deux_lineaires_irreductible"
   | "lineaire_deux_irreductibles"
   | "lineaire_irreductible_factorisable"
-  | "deux_irreductibles_factorisable";
+  | "deux_irreductibles_factorisable"
+  | "irreductible_carre"
+  | "lineaire_carre"
+  | "deux_lineaires_carre";
 
 export interface VarianteSignesProduit {
   id: VarianteSignesProduitId;
@@ -64,6 +75,9 @@ export const CATALOGUE_VARIANTES: VarianteSignesProduit[] = [
   { id: "lineaire_deux_irreductibles", label: "1 facteur linéaire + 2 facteurs irréductibles (1L-2QI)" },
   { id: "lineaire_irreductible_factorisable", label: "1 facteur linéaire + 1 facteur irréductible + 1 facteur factorisable (1L-1QI-1QF)" },
   { id: "deux_irreductibles_factorisable", label: "2 facteurs irréductibles + 1 facteur factorisable (2QI-1QF)" },
+  { id: "irreductible_carre", label: "1 facteur irréductible + 1 carré (racine double) (1QI-1C)" },
+  { id: "lineaire_carre", label: "1 facteur linéaire + 1 carré (racine double) (1L-1C)" },
+  { id: "deux_lineaires_carre", label: "2 facteurs linéaires + 1 carré (racine double) (2L-1C)" },
 ];
 
 const PATTERN_PAR_ID: Record<VarianteSignesProduitId, TypeFacteur[]> = {
@@ -76,6 +90,9 @@ const PATTERN_PAR_ID: Record<VarianteSignesProduitId, TypeFacteur[]> = {
   lineaire_deux_irreductibles: PATTERNS[6],
   lineaire_irreductible_factorisable: PATTERNS[7],
   deux_irreductibles_factorisable: PATTERNS[8],
+  irreductible_carre: PATTERNS[9],
+  lineaire_carre: PATTERNS[10],
+  deux_lineaires_carre: PATTERNS[11],
 };
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
@@ -100,6 +117,10 @@ function construireDepuisPattern(pattern: TypeFacteur[]): ReturnType<GenerateurE
       racinesUtilisees = [...racinesUtilisees, racine];
     } else if (type === "quadratique_irreductible") {
       facteurs.push(construireFacteurIrreductible());
+    } else if (type === "carre") {
+      const { facteur, racine } = construireFacteurCarre(racinesUtilisees);
+      facteurs.push(facteur);
+      racinesUtilisees = [...racinesUtilisees, racine];
     } else {
       const { facteur, racines } = construireFacteurFactorisable(racinesUtilisees);
       facteurs.push(facteur);
@@ -109,7 +130,7 @@ function construireDepuisPattern(pattern: TypeFacteur[]): ReturnType<GenerateurE
 
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, grille } = construireGrille(facteurs);
-  const solution = classifierSolutionProduit(racines, extraireSignesZones(grille.produit), symbole);
+  const solution = classifierSolutionProduit(racines, grille.produit, symbole);
 
   return { facteurs, symbole, racines, grille, solution };
 }

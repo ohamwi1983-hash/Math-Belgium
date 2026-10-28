@@ -1,7 +1,7 @@
 /**
  * Couche A — contrat du générateur (section 1 de la spec).
  * Ce module ne doit jamais importer quoi que ce soit de src/moteur : le générateur ignore tout
- * des tentatives, pénalités, ou des réglages d'affichage de la session (Couche B — voir
+ * des tentatives ou des réglages d'affichage de la session (Couche B — voir
  * ReglagesSession.affichageReponseApresEchec/affichageExplication). La forme d'affichage
  * ci-dessous est différente : c'est la présentation typographique de l'énoncé lui-même, une
  * propriété de l'exercice généré au même titre que la catégorie, pas un réglage de session.

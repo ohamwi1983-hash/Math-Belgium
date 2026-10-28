@@ -1,5 +1,5 @@
 import type { ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogD, ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmiques.types";
-import type { PhaseLimiteLogarithmique, ResultatExerciceLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
+import type { PhaseLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen17`. Toute aide qui embarque un symbole
@@ -408,28 +408,3 @@ export function etatActuel(phase: PhaseLimiteLogarithmique, exercice: ExerciceLi
   }
 }
 
-export interface TotalPointsRecap {
-  points: number;
-  maximum: number;
-}
-
-/**
- * Total de points du récapitulatif final — SOMME des scores déjà pénalisés (tentatives + aide) sur
- * chaque écran RÉELLEMENT traversé (2 ou 3 selon la famille), affiché EN COMPLÉMENT de la liste
- * colorée `LigneRecap`/`statutRecap` (jamais à sa place). Même patron que
- * `totalPointsLimiteExponentielle` (6gen6).
- */
-export function totalPointsLimiteLogarithmique(resultat: ResultatExerciceLimiteLogarithmique): TotalPointsRecap {
-  switch (resultat.famille) {
-    case "A":
-      return { points: resultat.scoreDominance + resultat.scoreConclure, maximum: 200 };
-    case "B":
-      return { points: resultat.scoreReformuler + resultat.scoreConclure, maximum: 200 };
-    case "C":
-      return { points: resultat.scoreDiagnostic + resultat.scoreConclure, maximum: 200 };
-    case "D":
-      return { points: resultat.scoreExposant + resultat.scoreLimiteExposant + resultat.scoreConclure, maximum: 300 };
-    case "E":
-      return { points: resultat.scoreDevelopper + resultat.scoreSimplifier + resultat.scoreConclure, maximum: 300 };
-  }
-}

@@ -1,6 +1,5 @@
 import type { AffixeSimple, ExerciceComplexesA, ExerciceComplexesAvances, ExerciceComplexesB, ExerciceComplexesC, ExerciceComplexesD, ExerciceComplexesE, NatureLieu, ParamsLocus } from "../core6e/complexesAvances.types";
-import type { PhaseComplexesAvances, ResultatExerciceComplexesAvances } from "../moteur6e/typesComplexesAvances";
-import { phasesPourExercice } from "../moteur6e/typesComplexesAvances";
+import type { PhaseComplexesAvances } from "../moteur6e/typesComplexesAvances";
 import { calculerArgument } from "../generateurs6e/formeTrigonometrique/familleA";
 import { racineRationnelleLatex } from "../generateurs6e/complexesAvances/racineRationnelle";
 import { pgcd } from "../generateurs6e/calculPrimitives/aleatoire";
@@ -796,10 +795,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceComplexesAvanc
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE selon le nombre d'écrans réellement
- * traversés par CET exercice (2 à 4 selon famille/sous-type). */
-export function calculerTotalPointsComplexesAvances(resultat: ResultatExerciceComplexesAvances): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

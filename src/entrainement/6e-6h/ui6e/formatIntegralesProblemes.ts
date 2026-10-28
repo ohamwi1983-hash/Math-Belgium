@@ -1,7 +1,6 @@
 import type { TermeA } from "../core6e/calculPrimitives.types";
 import type { ExerciceFamilleA_Problemes, ExerciceFamilleB_Problemes, ExerciceFamilleC_Problemes, ExerciceFamilleD_Problemes, ExerciceFamilleE_Problemes, ExerciceFamilleF_Problemes, ExerciceFamilleG_Problemes, ExerciceIntegralesProblemes } from "../core6e/integralesProblemes.types";
-import type { PhaseIntegralesProblemes, ResultatExerciceIntegralesProblemes } from "../moteur6e/typesIntegralesProblemes";
-import { phasesPourExercice } from "../moteur6e/typesIntegralesProblemes";
+import type { PhaseIntegralesProblemes } from "../moteur6e/typesIntegralesProblemes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen29`. Dispatch sur
@@ -876,10 +875,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesProb
   return [approxLatex(Math.PI * (F(exercice.hDemande) - F(0)))];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsIntegralesProblemes(resultat: ResultatExerciceIntegralesProblemes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

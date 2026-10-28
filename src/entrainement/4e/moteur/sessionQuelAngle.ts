@@ -9,11 +9,9 @@
  * autre note.
  *
  * **Bouton "Aide" unique** (`promptcorrectionsgenerateur18aideunique.md`, remplace le système à 3
- * aides progressives à pénalité additive d'origine) — révélation à sens unique, facteur ×0,5
- * appliqué au score final, même mécanique standard que la plupart des générateurs du projet (ex.
- * "Valeurs remarquables", `appliquerPenaliteAide`) plutôt que la pénalité additive spécifique à
- * "L'un sans l'autre" : simplification voulue, une seule aide combinée ne justifie plus un
- * mécanisme de pénalité à plusieurs niveaux.
+ * aides progressives d'origine) — révélation à sens unique, même mécanique standard que la
+ * plupart des générateurs du projet (ex. "Valeurs remarquables") : simplification voulue, une
+ * seule aide combinée ne justifie plus plusieurs niveaux.
  */
 import type { GenerateurExerciceQuelAngle } from "../core/quelAngle.types";
 import type { ReponseQuelAngle } from "../core/quelAngle.types";
@@ -42,12 +40,7 @@ function reglagesEtape(etat: EtatSessionQuelAngle): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteAide(score: number, aideUtilisee: boolean): number {
-  return aideUtilisee ? score * 0.5 : score;
 }
 
 /** Bouton "Aide" — révélation à sens unique, lève si la session est déjà terminée. */
@@ -92,7 +85,7 @@ export function soumettreReponse(etat: EtatSessionQuelAngle, reponse: ReponseQue
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideUtilisee);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     fonction: etat.exerciceCourant.fonction,

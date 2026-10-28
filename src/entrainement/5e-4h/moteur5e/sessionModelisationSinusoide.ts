@@ -35,7 +35,6 @@ import {
 import type { ReponseArgumentResoudre } from "./verificationModelisationSinusoide";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide, uniformes sur tous les écrans (même convention que la majorité du chantier 5e). */
 export const NIVEAU_AIDE_MAX_MODELISATION = 2;
@@ -49,7 +48,7 @@ export function demarrerSessionModelisationSinusoide(reglages: ReglagesSession5e
 }
 
 function reglagesEtape(etat: EtatSessionModelisationSinusoide): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** Écrans "amplitude"/"decalage" (B1 A=R/b=R+h_sol, B2 A/b, phases PARTAGÉES entre les 2
@@ -111,7 +110,7 @@ function soumettreEcran<T>(etat: EtatSessionModelisationSinusoide, phaseAttendue
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 

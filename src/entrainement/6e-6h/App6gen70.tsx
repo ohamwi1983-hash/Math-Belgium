@@ -15,7 +15,6 @@ import { ResumeSessionQuizCombinatoire } from "./components6e/ResumeSessionQuizC
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizCombinatoire): EtatSessionQuizCombinatoire {

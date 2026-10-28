@@ -1,7 +1,6 @@
 import type { Frac } from "../core6e/intersectionsConiques.types";
 import type { ExerciceProprietesOptiquesConiques } from "../core6e/proprietesOptiquesConiques.types";
-import type { PhaseProprietesOptiquesConiques, ResultatExerciceProprietesOptiquesConiques } from "../moteur6e/typesProprietesOptiquesConiques";
-import { TOUTES_LES_PHASES } from "../moteur6e/typesProprietesOptiquesConiques";
+import type { PhaseProprietesOptiquesConiques } from "../moteur6e/typesProprietesOptiquesConiques";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen63`. Dispatch sur `phase`
@@ -222,9 +221,3 @@ export function formatReponseAttenduePhaseLatex(e: ExerciceProprietesOptiquesCon
   return [afficherDroiteLatex(e.droiteReflechie.m, e.droiteReflechie.c)];
 }
 
-/** Total points du récapitulatif final — TOUJOURS 4 écrans (jamais de longueur variable,
- * contrairement à `6gen61`/`6gen62`). */
-export function calculerTotalPointsProprietesOptiquesConiques(resultat: ResultatExerciceProprietesOptiquesConiques): { total: number; maximum: number } {
-  const total = TOUTES_LES_PHASES.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: TOUTES_LES_PHASES.length * 100 };
-}

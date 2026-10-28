@@ -19,11 +19,10 @@ import type { EtatSessionQuizFonctionSecondDegre, ResultatExerciceQuizFonctionSe
 const POINTS_DE_BASE = 100;
 const TENTATIVES_MAX_VRAI_FAUX = 1;
 
-function reglagesEtape(etat: EtatSessionQuizFonctionSecondDegre): ReglagesEtape {
+function reglagesEtape(): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: TENTATIVES_MAX_VRAI_FAUX,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -72,7 +71,7 @@ export function soumettreReponseQuizFonctionSecondDegre(
   const { question, variante } = etat.exerciceCourant as ExerciceQuizFonctionSecondDegre;
 
   const etapeCourante = soumettreEtapeTentatives<boolean>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglagesEtape(),
     verifier: (r) => verifierReponseVraiFaux(question, r),
     revelerReponse: () => {},
   });

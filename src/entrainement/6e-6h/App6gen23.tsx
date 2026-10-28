@@ -27,7 +27,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * EXPRESSION symbolique (jamais une valeur décimale calculée à la main), contrairement à 6gen16/18.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionCalculPrimitives {
   return demarrerSessionCalculPrimitives(REGLAGES_DEMO, genererExerciceCalculPrimitives);

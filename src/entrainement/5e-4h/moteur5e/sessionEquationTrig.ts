@@ -43,7 +43,6 @@ import {
 import type { ReponseArgument, ReponseDeuxFacteursArgument, ReponseDeuxFacteursLignes, ReponseRacinesPythagoricienne } from "./verificationEquationTrig";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur chaque écran — spec explicite, jamais dynamique (contrairement à
  * gen17/gen58, 4e). */
@@ -84,12 +83,9 @@ export function demarrerSessionEquationTrig(reglages: ReglagesSession5e, generat
 }
 
 function reglagesEtape(etat: EtatSessionEquationTrigonometrique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 /** Plafond d'aide PAR PHASE (B.3, `promptcorrectionsround2.md`, revu par la correction D/E/F/G) —
  * remplace l'usage nu de `NIVEAU_AIDE_MAX_EQUATION_TRIG` (toujours 2), qui laissait le bouton "Aide
@@ -171,8 +167,8 @@ function construireResultat(exercice: ExerciceEquationTrigonometrique, scores: P
   }
 }
 
-/** Soumission générique — factorise le motif commun aux 16 écrans (score par tentatives, pénalité
- * d'aide, transition de phase, clôture si terminal) derrière un seul point d'implémentation. */
+/** Soumission générique — factorise le motif commun aux 16 écrans (score par tentatives, transition
+ * de phase, clôture si terminal) derrière un seul point d'implémentation. */
 function soumettreEcran<T>(etat: EtatSessionEquationTrigonometrique, phaseAttendue: PhaseEquationTrigonometrique, reponse: T, verifier: (r: T) => boolean): EtatSessionEquationTrigonometrique {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
@@ -185,7 +181,7 @@ function soumettreEcran<T>(etat: EtatSessionEquationTrigonometrique, phaseAttend
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 

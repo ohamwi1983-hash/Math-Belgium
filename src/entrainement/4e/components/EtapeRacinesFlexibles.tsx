@@ -65,7 +65,7 @@ interface Props {
    */
   masquerBlocDonnees?: boolean;
   /**
-   * Aide à sens unique (1 seul niveau, ×0,5 sur le score) — absente par défaut : aucun bouton
+   * Aide à sens unique (1 seul niveau) — absente par défaut : aucun bouton
    * rendu (comportement historique inchangé pour les appelants qui ne fournissent pas
    * `onActiverAide`, ex. le générateur "Analyse d'une fonction du second degré" qui réutilise ce
    * composant hors du périmètre de conceptionaidescomposantspartageshistorique.md).

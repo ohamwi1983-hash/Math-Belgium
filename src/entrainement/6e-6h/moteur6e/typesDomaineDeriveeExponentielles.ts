@@ -82,7 +82,7 @@ export function phaseApres(phase: PhaseDomaineDeriveeExponentielle): PhaseDomain
 
 /** Détail de clôture d'un écran (`revele`/`niveauAide` AU MOMENT PRÉCIS de la clôture, avant que la
  * transition de phase suivante ne remette `niveauAide` à zéro) — jamais dérivé du score, même
- * principe que `typesLimitesExponentielles.ts` (`6gen6`) : une pénalité d'aide peut à elle seule
+ * principe que `typesLimitesExponentielles.ts` (`6gen6`) : une pénalité d'aide (supprimée depuis) pouvait à elle seule
  * faire tomber le score à 0 sans que la réponse ait été révélée, `score===0` n'est donc PAS un
  * proxy fiable de `revele`. Consommé par `statutRecap` (`components6e/LigneRecap.tsx`). */
 export interface DetailPhaseDomaineDeriveeExponentielle {

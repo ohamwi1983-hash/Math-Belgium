@@ -1,6 +1,5 @@
 import type { ExerciceVolumeA, ExerciceVolumeB, ExerciceVolumeC, ExerciceVolumeD, ExerciceVolumesRevolution, TermeDeveloppe } from "../core6e/volumesRevolution.types";
-import type { PhaseVolumesRevolution, ResultatExerciceVolumesRevolution } from "../moteur6e/typesVolumesRevolution";
-import { phasesPourExercice } from "../moteur6e/typesVolumesRevolution";
+import type { PhaseVolumesRevolution } from "../moteur6e/typesVolumesRevolution";
 import { carreTermes } from "../generateurs6e/volumesRevolution/polynome";
 
 /**
@@ -569,10 +568,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceVolumesRevolut
   return ["\\dfrac{1}{2}"];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsVolumesRevolution(resultat: ResultatExerciceVolumesRevolution): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

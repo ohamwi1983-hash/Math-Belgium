@@ -1,6 +1,5 @@
 import type { ExerciceHypergeoA, ExerciceHypergeoB, ExerciceHypergeoC, ExerciceProbabiliteHypergeometrique } from "../core6e/probabiliteHypergeometrique.types";
-import type { PhaseProbabiliteHypergeometrique, ResultatExerciceProbabiliteHypergeometrique } from "../moteur6e/typesProbabiliteHypergeometrique";
-import { phasesPourExercice } from "../moteur6e/typesProbabiliteHypergeometrique";
+import type { PhaseProbabiliteHypergeometrique } from "../moteur6e/typesProbabiliteHypergeometrique";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen47`. Dispatch sur
@@ -393,10 +392,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceProbabiliteHyp
   return [formatFractionLatex(exercice.numerateurCombine, exercice.denominateurCombine)];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice) — mirroir `calculerTotalPointsDenombrementFondamental` (6gen43). */
-export function calculerTotalPointsProbabiliteHypergeometrique(resultat: ResultatExerciceProbabiliteHypergeometrique): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

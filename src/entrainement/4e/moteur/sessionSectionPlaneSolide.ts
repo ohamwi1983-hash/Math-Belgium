@@ -10,8 +10,7 @@
  * pertinente, sans jamais énumérer les itérations à l'avance.
  *
  * Aide PROGRESSIVE (2 niveaux max sur "segmentDirect", 2 niveaux max PARTAGÉS sur le flux
- * "auxiliaireLignes"→"auxiliaireFace", aucune aide sur "conclusion"), pénalité ADDITIVE (-20 points
- * par niveau atteint) appliquée à la clôture de l'étape concernée — même mécanique que le reste du
+ * "auxiliaireLignes"→"auxiliaireFace", aucune aide sur "conclusion") — même mécanique que le reste du
  * projet.
  */
 import type { GenerateurExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
@@ -30,7 +29,6 @@ import {
 import type { EtatSessionSectionPlaneSolide, ResultatExerciceSectionPlaneSolide } from "./typesSectionPlaneSolide";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_SEGMENT = 2;
 export const NIVEAU_AIDE_MAX_AUXILIAIRE = 2;
 
@@ -73,12 +71,7 @@ function reglagesEtape(etat: EtatSessionSectionPlaneSolide): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'unité pédagogique courante — lève si la session est
@@ -155,7 +148,7 @@ export function soumettreReponseSegmentDirect(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
@@ -206,7 +199,7 @@ export function soumettreReponseAuxiliaireLignes(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
@@ -277,7 +270,7 @@ export function soumettreReponseAuxiliaireFace(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];

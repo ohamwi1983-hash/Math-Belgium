@@ -1,6 +1,5 @@
 import type { ExerciceBinomeA, ExerciceBinomeB, ExerciceBinomeC, ExerciceBinomeNewton, FamilleBinomeNewton } from "../core6e/binomeNewton.types";
-import type { PhaseBinomeNewton, ResultatExerciceBinomeNewton } from "../moteur6e/typesBinomeNewton";
-import { phasesPourExercice } from "../moteur6e/typesBinomeNewton";
+import type { PhaseBinomeNewton } from "../moteur6e/typesBinomeNewton";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen45`. Dispatch sur
@@ -487,10 +486,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceBinomeNewton, 
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsBinomeNewton(resultat: ResultatExerciceBinomeNewton): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

@@ -33,7 +33,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * PAS de JSX par famille/écran — un SEUL composant écran (`EtapeChampsBinomeNewton`).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionBinomeNewton {
   return demarrerSessionBinomeNewton(REGLAGES_DEMO, genererExerciceBinomeNewton);

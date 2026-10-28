@@ -15,7 +15,6 @@ import { verifierEcran } from "./verificationLoiPoisson";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatLoiPoisson.ts`, `niveauAideMaxEcran`). */
@@ -51,7 +50,7 @@ export function demarrerSessionLoiPoisson(reglages: ReglagesSession6e, generateu
 }
 
 function reglagesEtape(etat: EtatSessionLoiPoisson): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionLoiPoisson): EtatSessionLoiPoisson {
@@ -82,7 +81,7 @@ export function soumettreReponseEcran(etat: EtatSessionLoiPoisson, valeurs: stri
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseLoiPoisson, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseLoiPoisson, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseLoiPoisson, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

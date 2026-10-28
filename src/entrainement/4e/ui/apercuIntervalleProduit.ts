@@ -47,6 +47,7 @@ export function formatApercuSolutionProduit(
   valeurPoint: string,
   valeursExclues: string[],
   morceaux: EtatMorceau[],
+  pointsIsoles: string[] = [],
 ): string | null {
   switch (forme) {
     case null:
@@ -61,7 +62,8 @@ export function formatApercuSolutionProduit(
       return `\\mathbb{R} \\setminus \\{${valeursExclues.map(formatValeurBrute).join(", ")}\\}`;
     case "intervalle":
     case "union":
-      return morceaux.map(formatMorceau).join(" \\cup ");
+    case "mixte":
+      return [...morceaux.map(formatMorceau), ...pointsIsoles.map(formatPointIsole)].join(" \\cup ");
   }
 }
 
@@ -79,10 +81,17 @@ export function formatTermesApercuSolutionProduit(
   valeurPoint: string,
   valeursExclues: string[],
   morceaux: EtatMorceau[],
+  pointsIsoles: string[] = [],
 ): string[] | null {
   if (forme === null) return null;
-  if (forme !== "intervalle" && forme !== "union") {
+  if (forme !== "intervalle" && forme !== "union" && forme !== "mixte") {
     return [`S = ${formatApercuSolutionProduit(forme, valeurPoint, valeursExclues, morceaux)}`];
   }
-  return morceaux.map((morceau, i) => (i === 0 ? `S = ${formatMorceau(morceau)}` : `\\cup ${formatMorceau(morceau)}`));
+  const parties = [...morceaux.map(formatMorceau), ...pointsIsoles.map(formatPointIsole)];
+  return parties.map((partie, i) => (i === 0 ? `S = ${partie}` : `\\cup ${partie}`));
+}
+
+/** Point isolé ajouté à une construction par intervalles (racine double avec ≤/≥) : « {3} ». */
+function formatPointIsole(valeur: string): string {
+  return `\\{${formatValeurBrute(valeur)}\\}`;
 }

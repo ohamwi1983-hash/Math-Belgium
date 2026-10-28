@@ -30,7 +30,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * rempli par `blocDonnees`, réaffiché identique sur chaque écran).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionLoiPoisson {
   return demarrerSessionLoiPoisson(REGLAGES_DEMO, genererExerciceLoiPoisson);

@@ -34,8 +34,7 @@ export const SEQUENCES: Record<VarianteOrthogonalite, PhaseOrthogonalite[]> = {
 };
 
 /** Niveau d'aide maximal par écran (voir `promptcreationgenerateur25orthogonalitepythagore.md`,
- * section par variante, puis `promptcorrectionsgenerateur25complet.md`) — pénalité ADDITIVE
- * `-20 points/niveau`, même mécanique que "Colinéarité et alignement de points"/"Triangle
+ * section par variante, puis `promptcorrectionsgenerateur25complet.md`) — même mécanique que "Colinéarité et alignement de points"/"Triangle
  * quelconque". `constructionAvecX` réduit de 2 à 1 niveau (point 2 : aide simplifiée à la formule
  * seule, plus de niveau 2 "exemple substitué" — même convention que le champ symbolique équivalent
  * de "Colinéarité", `NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X`). `resolutionParametre` passe de 1 à 0

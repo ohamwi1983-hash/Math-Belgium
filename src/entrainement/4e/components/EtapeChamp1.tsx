@@ -61,7 +61,7 @@ interface Props {
    */
   diagnostiquer?: (valeur: string) => StatutVerification;
   /**
-   * Aide à sens unique (1 seul niveau, ×0,5 sur le score) — absente par défaut : aucun bouton
+   * Aide à sens unique (1 seul niveau) — absente par défaut : aucun bouton
    * rendu (comportement historique inchangé pour les appelants qui ne fournissent pas
    * `onActiverAide`, ex. le générateur "Analyse d'une fonction du second degré" qui réutilise ce
    * composant hors du périmètre de conceptionaidescomposantspartageshistorique.md).
@@ -73,7 +73,7 @@ interface Props {
 }
 
 /**
- * Rappel de méthode pour l'aide (1 seul niveau, ×0,5 sur le score) — calculé depuis
+ * Rappel de méthode pour l'aide (1 seul niveau) — calculé depuis
  * `exercice.categorie`, jamais fourni par l'appelant : le même rappel s'applique partout où
  * `EtapeChamp1` est réutilisé (conceptionaidescomposantspartageshistorique.md, point 4).
  */

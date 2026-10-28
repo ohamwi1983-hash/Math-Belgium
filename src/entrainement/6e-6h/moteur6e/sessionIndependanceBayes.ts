@@ -16,7 +16,6 @@ import { verifierEcran } from "./verificationIndependanceBayes";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur tous les écrans (spec explicite pour chaque écran documenté). */
 export const NIVEAU_AIDE_MAX = 2;
@@ -40,7 +39,7 @@ export function demarrerSessionIndependanceBayes(reglages: ReglagesSession6e, ge
 }
 
 function reglagesEtape(etat: EtatSessionIndependanceBayes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionIndependanceBayes): EtatSessionIndependanceBayes {
@@ -71,7 +70,7 @@ export function soumettreReponseEcran(etat: EtatSessionIndependanceBayes, valeur
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres(phaseCourante);
   const scoresPartiels: Partial<Record<PhaseIndependanceBayes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseIndependanceBayes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };

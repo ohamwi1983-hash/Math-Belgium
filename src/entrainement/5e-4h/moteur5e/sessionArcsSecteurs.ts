@@ -17,7 +17,6 @@ import type { EtatSessionArcSecteur, PhaseArcSecteur, ResultatExerciceArcSecteur
 import { verifierValeurArcSecteur } from "./verificationArcsSecteurs";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Chaque écran (des 2 modes) a exactement 2 niveaux d'aide — spec explicite pour les 2 modes. */
 export const NIVEAU_AIDE_MAX_ARC_SECTEUR = 2;
@@ -43,7 +42,7 @@ export function demarrerSessionArcSecteur(reglages: ReglagesSession5e, generateu
 }
 
 function reglagesEtape(etat: EtatSessionArcSecteur): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionArcSecteur): EtatSessionArcSecteur {
@@ -73,7 +72,7 @@ export function soumettreReponseArcSecteur(etat: EtatSessionArcSecteur, texte: s
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
 
   if (exercice.mode === "conversion") {
     return cloturerExerciceOuSuivant(etat, { mode: "conversion", exercice, score, revele: etapeCourante.revelee });

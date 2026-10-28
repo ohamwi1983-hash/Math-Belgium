@@ -159,7 +159,6 @@ function reglagesEtape(etat: EtatSessionSimplification): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -194,12 +193,12 @@ export function soumettreReponseDenomReduction(etat: EtatSessionSimplification, 
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "denomReconnaissance",
-    scoreDenomReductionExercice: etat.aideDenomReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreDenomReductionExercice: etapeCourante.score,
     denomReductionRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "denomReduction" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "denomReduction" — révélation à sens unique. */
 export function activerAideDenomReduction(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "denomReduction", "activerAideDenomReduction");
   return { ...etat, aideDenomReductionUtilisee: true };
@@ -226,12 +225,12 @@ export function soumettreReponseDenomReductionP1(etat: EtatSessionSimplification
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "ceDirecte",
-    scoreDenomReductionP1Exercice: etat.aideDenomReductionP1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreDenomReductionP1Exercice: etapeCourante.score,
     denomReductionP1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "denomReductionP1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "denomReductionP1" — révélation à sens unique. */
 export function activerAideDenomReductionP1(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "denomReductionP1", "activerAideDenomReductionP1");
   return { ...etat, aideDenomReductionP1Utilisee: true };
@@ -272,12 +271,12 @@ export function soumettreReponseDenomChamp1(etat: EtatSessionSimplification, rep
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "denomChamp2",
-    scoreDenomChamp1Exercice: etat.aideDenomChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreDenomChamp1Exercice: etapeCourante.score,
     denomChamp1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "denomChamp1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "denomChamp1" — révélation à sens unique. */
 export function activerAideDenomChamp1(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "denomChamp1", "activerAideDenomChamp1");
   return { ...etat, aideDenomChamp1Utilisee: true };
@@ -309,12 +308,12 @@ export function soumettreReponseDenomChamp2(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: prochainePhase,
-    scoreDenomChamp2Exercice: etat.aideDenomChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreDenomChamp2Exercice: etapeCourante.score,
     denomChamp2Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "denomChamp2" (CE) — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "denomChamp2" (CE) — révélation à sens unique. */
 export function activerAideDenomChamp2(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "denomChamp2", "activerAideDenomChamp2");
   return { ...etat, aideDenomChamp2Utilisee: true };
@@ -342,14 +341,12 @@ export function soumettreReponseDenomFactorisation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: prochainePhaseApresDenom(etat.exerciceCourant),
-    scoreDenomFactorisationExercice: etat.aideDenomFactorisationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreDenomFactorisationExercice: etapeCourante.score,
     denomFactorisationRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "denomFactorisation" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "denomFactorisation" — révélation à sens unique. */
 export function activerAideDenomFactorisation(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "denomFactorisation", "activerAideDenomFactorisation");
   return { ...etat, aideDenomFactorisationUtilisee: true };
@@ -395,12 +392,12 @@ export function soumettreReponseNumReduction(etat: EtatSessionSimplification, re
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "numReconnaissance",
-    scoreNumReductionExercice: etat.aideNumReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreNumReductionExercice: etapeCourante.score,
     numReductionRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "numReduction" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "numReduction" — révélation à sens unique. */
 export function activerAideNumReduction(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "numReduction", "activerAideNumReduction");
   return { ...etat, aideNumReductionUtilisee: true };
@@ -426,12 +423,12 @@ export function soumettreReponseNumReductionP1(etat: EtatSessionSimplification, 
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplification",
-    scoreNumReductionP1Exercice: etat.aideNumReductionP1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreNumReductionP1Exercice: etapeCourante.score,
     numReductionP1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "numReductionP1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "numReductionP1" — révélation à sens unique. */
 export function activerAideNumReductionP1(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "numReductionP1", "activerAideNumReductionP1");
   return { ...etat, aideNumReductionP1Utilisee: true };
@@ -480,12 +477,12 @@ export function soumettreReponseNumChamp1(etat: EtatSessionSimplification, repon
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: numerateurP2(etat.exerciceCourant).categorie === "cas_general" ? "numChamp2" : "simplification",
-    scoreNumChamp1Exercice: etat.aideNumChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreNumChamp1Exercice: etapeCourante.score,
     numChamp1Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "numChamp1" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "numChamp1" — révélation à sens unique. */
 export function activerAideNumChamp1(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "numChamp1", "activerAideNumChamp1");
   return { ...etat, aideNumChamp1Utilisee: true };
@@ -509,12 +506,12 @@ export function soumettreReponseNumChamp2(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: numerateurP2(etat.exerciceCourant).categorie === "cas_general" ? "numFactorisation" : "simplification",
-    scoreNumChamp2Exercice: etat.aideNumChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreNumChamp2Exercice: etapeCourante.score,
     numChamp2Revele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "numChamp2" (racines) — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "numChamp2" (racines) — révélation à sens unique. */
 export function activerAideNumChamp2(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "numChamp2", "activerAideNumChamp2");
   return { ...etat, aideNumChamp2Utilisee: true };
@@ -541,14 +538,12 @@ export function soumettreReponseNumFactorisation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplification",
-    scoreNumFactorisationExercice: etat.aideNumFactorisationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreNumFactorisationExercice: etapeCourante.score,
     numFactorisationRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "numFactorisation" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "numFactorisation" — révélation à sens unique. */
 export function activerAideNumFactorisation(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "numFactorisation", "activerAideNumFactorisation");
   return { ...etat, aideNumFactorisationUtilisee: true };
@@ -600,9 +595,7 @@ export function soumettreReponseSimplification(
     aideNumChamp2Utilisee: etat.aideNumChamp2Utilisee,
     scoreNumFactorisation: etat.scoreNumFactorisationExercice,
     aideNumFactorisationUtilisee: etat.aideNumFactorisationUtilisee,
-    scoreSimplification: etat.aideSimplificationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : (etapeCourante.score as number),
+    scoreSimplification: (etapeCourante.score as number),
     simplificationRevele: etapeCourante.revelee,
     aideSimplificationUtilisee: etat.aideSimplificationUtilisee,
   };
@@ -627,7 +620,7 @@ export function soumettreReponseSimplification(
   };
 }
 
-/** Active le bouton "Aide" de l'étape "simplification" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "simplification" — révélation à sens unique. */
 export function activerAideSimplification(etat: EtatSessionSimplification): EtatSessionSimplification {
   garderPhase(etat, "simplification", "activerAideSimplification");
   return { ...etat, aideSimplificationUtilisee: true };

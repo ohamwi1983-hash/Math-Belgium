@@ -48,7 +48,7 @@ import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { ReponseResoudre } from "./moteur5e/verificationVitessePosition";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionVitessePosition {
   return demarrerSessionVitessePosition(REGLAGES_DEMO, genererExerciceVitessePosition);

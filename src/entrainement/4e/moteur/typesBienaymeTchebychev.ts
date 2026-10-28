@@ -49,8 +49,7 @@ export const SEQUENCES: Record<VarianteBienaymeTchebychev, PhaseBienaymeTchebych
   nombreVersXBar: ["v8Pourcent0", "v8K", "v8XBar"],
 };
 
-/** Niveau d'aide maximal par écran, voir `promptgen37refonte.md` (section par variante) — pénalité
- * ADDITIVE `-20 points/niveau`, même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle
+/** Niveau d'aide maximal par écran, voir `promptgen37refonte.md` (section par variante) — même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle
  * quelconque". Un écran à `max=0` (`v3Nombre`, `v4Pourcent0`/`v7Pourcent0`/`v8Pourcent0`) n'affiche
  * aucun bouton "Aide" côté composant, jamais un bouton perpétuellement désactivé. */
 export const NIVEAU_AIDE_MAX: Record<PhaseBienaymeTchebychev, number> = {

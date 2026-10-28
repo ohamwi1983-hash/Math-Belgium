@@ -2,7 +2,7 @@ import type { Symbole } from "../../core/inequation.types";
 import type { ExerciceInequationRationnelleNiveau1 } from "../../core/inequationRationnelle.types";
 import { randomInt } from "../secondDegre/aleatoire";
 import { construireFacteurLineaire } from "../signesProduit/construireFacteurLineaire";
-import { classifierSolutionQuotient, construireGrilleQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient, construireGrilleQuotient } from "./grilleQuotient";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
 
@@ -20,8 +20,7 @@ export function construireNiveau1(): ExerciceInequationRationnelleNiveau1 {
 
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, ce, grille } = construireGrilleQuotient(numerateur, denominateur);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return { niveau: "niveau1", numerateur, denominateur, symbole, ce, racines, grille, solution };
 }

@@ -140,8 +140,7 @@ export function phaseApres(phase: PhaseLimiteExponentielle): PhaseLimiteExponent
 
 /** Détail de clôture d'un écran (`revele`/`niveauAide` AU MOMENT PRÉCIS de la clôture, avant que la
  * transition de phase suivante ne remette `niveauAide` à zéro) — jamais dérivé du score, piège
- * documenté dans CLAUDE.md ("Récapitulatif final à plat, coloré") : une pénalité d'aide peut à elle
- * seule faire tomber le score à 0 sans que la réponse ait été révélée, `score===0` n'est donc PAS
+ * documenté dans CLAUDE.md ("Récapitulatif final à plat, coloré") : une pénalité d'aide (supprimée depuis) pouvait à elle seule faire tomber le score à 0 sans que la réponse ait été révélée, `score===0` n'est donc PAS
  * un proxy fiable de `revele`. Consommé par `statutRecap` (`components6e/LigneRecap.tsx`) côté
  * présentation, indexé par nom de phase (`Partial<Record<...>>`, même principe que
  * `scoresPartiels`). */

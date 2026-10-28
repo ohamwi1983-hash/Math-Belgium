@@ -108,7 +108,6 @@ function reglagesEtape(etat: EtatSessionAnalyseFonction): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -216,12 +215,12 @@ export function soumettreReponseCoefficients(
     return { ...etat, etapeCourante };
   }
 
-  const score = etat.aideCoefficientsUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const score = (etapeCourante.score as number);
   const etatFerme = { ...etat, scoreCoefficientsExercice: score, coefficientsRevele: etapeCourante.revelee };
   return avancerApres(etatFerme, "coefficients", resultatPartielCourant(etatFerme));
 }
 
-/** Bouton "Aide" de l'étape coefficients : révélation à sens unique, ×0,5 au score final. */
+/** Bouton "Aide" de l'étape coefficients : révélation à sens unique. */
 export function activerAideCoefficients(etat: EtatSessionAnalyseFonction): EtatSessionAnalyseFonction {
   if (etat.terminee || etat.phase !== "coefficients") {
     throw new Error("activerAideCoefficients : la session n'est pas à l'étape coefficients");
@@ -249,7 +248,7 @@ export function soumettreReponseAllure(etat: EtatSessionAnalyseFonction, reponse
   return avancerApres(etatFerme, "allure", resultatPartielCourant(etatFerme));
 }
 
-/** Bouton "Aide" de l'étape axeSommet : révélation à sens unique, ×0,5 au score final. */
+/** Bouton "Aide" de l'étape axeSommet : révélation à sens unique. */
 export function activerAideAxeSommet(etat: EtatSessionAnalyseFonction): EtatSessionAnalyseFonction {
   if (etat.terminee || etat.phase !== "axeSommet") {
     throw new Error("activerAideAxeSommet : la session n'est pas à l'étape axeSommet");
@@ -276,12 +275,12 @@ export function soumettreReponseAxeSommet(
     return { ...etat, etapeCourante };
   }
 
-  const score = etat.aideAxeSommetUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const score = (etapeCourante.score as number);
   const etatFerme = { ...etat, scoreAxeSommetExercice: score, axeSommetRevele: etapeCourante.revelee };
   return avancerApres(etatFerme, "axeSommet", resultatPartielCourant(etatFerme));
 }
 
-/** Bouton "Aide" de l'étape domaineImage : révélation à sens unique, ×0,5 au score final. */
+/** Bouton "Aide" de l'étape domaineImage : révélation à sens unique. */
 export function activerAideDomaineImage(etat: EtatSessionAnalyseFonction): EtatSessionAnalyseFonction {
   if (etat.terminee || etat.phase !== "domaineImage") {
     throw new Error("activerAideDomaineImage : la session n'est pas à l'étape domaineImage");
@@ -305,7 +304,7 @@ export function soumettreReponseImage(etat: EtatSessionAnalyseFonction, reponse:
     return { ...etat, etapeCourante };
   }
 
-  const score = etat.aideDomaineImageUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const score = (etapeCourante.score as number);
   const etatFerme = { ...etat, scoreDomaineImageExercice: score, domaineImageRevele: etapeCourante.revelee };
   return avancerApres(etatFerme, "domaineImage", resultatPartielCourant(etatFerme));
 }
@@ -418,7 +417,7 @@ export function soumettreReponseTableauSigneVariation(
     return { ...etat, etapeCourante };
   }
 
-  const score = etat.aideTableauSignesUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const score = (etapeCourante.score as number);
   return cloturerExerciceOuSuivant(etat, {
     ...resultatPartielCourant(etat),
     scoreTableauSignes: score,
@@ -427,7 +426,7 @@ export function soumettreReponseTableauSigneVariation(
   });
 }
 
-/** Bouton "Aide" de l'étape tableauSignes : révélation à sens unique, ×0,5 au score final. */
+/** Bouton "Aide" de l'étape tableauSignes : révélation à sens unique. */
 export function activerAideTableauSignes(etat: EtatSessionAnalyseFonction): EtatSessionAnalyseFonction {
   if (etat.terminee || etat.phase !== "tableauSignes") {
     throw new Error("activerAideTableauSignes : la session n'est pas à l'étape tableauSignes");

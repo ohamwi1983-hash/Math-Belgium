@@ -43,7 +43,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * l'ancienne taille.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionVariablesDiscretesEsperance {
   return demarrerSessionVariablesDiscretesEsperance(REGLAGES_DEMO, genererExerciceVariablesDiscretesEsperance);

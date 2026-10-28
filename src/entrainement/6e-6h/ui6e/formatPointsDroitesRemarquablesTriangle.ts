@@ -1,7 +1,6 @@
 import type { Droite, ExercicePDRT_A, ExercicePDRT_B, ExercicePDRT_C, ExercicePDRT_D, ExercicePDRT_E, ExercicePDRT_F, ExercicePDRT_G, ExercicePDRT_H, ExercicePointsDroitesRemarquablesTriangle, Fraction, Point } from "../core6e/pointsDroitesRemarquablesTriangle.types";
 import { formatFractionLatex } from "../generateurs6e/pointsDroitesRemarquablesTriangle/fraction";
-import type { PhasePointsDroitesRemarquablesTriangle, ResultatExercicePointsDroitesRemarquablesTriangle } from "../moteur6e/typesPointsDroitesRemarquablesTriangle";
-import { phasesPourExercice } from "../moteur6e/typesPointsDroitesRemarquablesTriangle";
+import type { PhasePointsDroitesRemarquablesTriangle } from "../moteur6e/typesPointsDroitesRemarquablesTriangle";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen54`. Dispatch sur
@@ -739,10 +738,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExercicePointsDroitesR
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice), mirroir `calculerTotalPointsDenombrementFondamental`. */
-export function calculerTotalPointsPointsDroitesRemarquablesTriangle(resultat: ResultatExercicePointsDroitesRemarquablesTriangle): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

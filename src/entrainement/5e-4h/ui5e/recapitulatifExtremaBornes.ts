@@ -28,7 +28,7 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * comportement que l'ancien bloc. Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé
  * depuis `etapeCourante.revelee` à la clôture de chaque écran
  * (`sessionExtremaBornes.ts::soumettreEcran`) — jamais `scoresPartiels[phase] === 0` (point A,
- * balayage générique) : la pénalité d'aide de ce générateur est soustraite APRÈS le score de
+ * balayage générique) : la pénalité d'aide de ce générateur était soustraite (avant le retrait des pénalités) APRÈS le score de
  * tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait légitimement tomber à
  * 0 et s'afficher à tort comme "révélée".
  */

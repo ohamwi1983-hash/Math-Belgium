@@ -1,6 +1,6 @@
 import type { BaseExpo, ExerciceEqExpoA, ExerciceEqExpoB, ExerciceEqExpoC, ExerciceEqExpoD, ExerciceEquationExponentielle, ValeurExacteExpo } from "../core6e/equationsExponentielles.types";
 import { baseValeur } from "../generateurs6e/equationsExponentielles/rationnel";
-import type { PhaseEquationExponentielle, ResultatExerciceEquationExponentielle } from "../moteur6e/typesEquationsExponentielles";
+import type { PhaseEquationExponentielle } from "../moteur6e/typesEquationsExponentielles";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen9`. `src/ui6e/` peut dépendre de
@@ -355,28 +355,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationExpone
     }
     case "D":
       return ["\\varnothing"];
-  }
-}
-
-/**
- * Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place, voir `ResultatPanelEquationExponentielle.tsx`). Somme les scores DÉJÀ calculés
- * par `sessionEquationsExponentielles.ts` (pénalité par tentative + par niveau d'aide déjà
- * appliquée, forcé à 0 sur révélation) pour les seuls écrans du résultat — le nombre d'écrans varie
- * PAR FAMILLE (`maximum = 100 × nombre d'écrans` : 200 pour A/B, 300 pour C, 100 pour D). Volontairement
- * PAS aligné sur le statut vert/orange/rouge de `LigneRecap` : un écran vert (résolu sans aide,
- * éventuellement après un essai raté) peut très bien contribuer moins que 100/100 — décision
- * explicite de l'utilisateur, voir `docs/historique-6e.md`.
- */
-export function calculerTotalRecapEquationExponentielle(resultat: ResultatExerciceEquationExponentielle): { total: number; maximum: number } {
-  switch (resultat.famille) {
-    case "A":
-    case "B":
-      return { total: resultat.scoreEcran1 + resultat.scoreEcran2, maximum: 200 };
-    case "C":
-      return { total: resultat.scoreEcran1 + resultat.scoreEcran2 + resultat.scoreEcran3, maximum: 300 };
-    case "D":
-      return { total: resultat.score, maximum: 100 };
   }
 }
 

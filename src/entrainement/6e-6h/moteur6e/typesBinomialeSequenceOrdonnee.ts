@@ -87,8 +87,8 @@ export interface EtatSessionBinomialeSequenceOrdonnee {
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, number>>;
   /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
-   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
-   * (`Math.max(0, score - niveauAide*20)` dans `sessionBinomialeSequenceOrdonnee.ts`) peut ramener
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionBinomialeSequenceOrdonnee.ts`) pouvait ramener
    * une RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
    * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
   revelesPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>>;

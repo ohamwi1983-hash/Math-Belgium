@@ -8,8 +8,7 @@
  * "Équation d'un cercle... à partir d'un graphe"). "centreRayon" combine 2 champs numériques
  * (centre) + 1 champ texte libre (rayon) dans un seul écran, une seule étape de tentatives.
  *
- * Aide PROGRESSIVE par écran — pénalité ADDITIVE (-20 points/niveau) appliquée au moment précis où
- * l'écran se clôt, jamais rétroactivement.
+ * Aide PROGRESSIVE par écran.
  */
 import type { ExerciceEquationCercleDeveloppee, GenerateurExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -19,7 +18,6 @@ import type { EtatSessionEquationCercleDeveloppee, ReponseEcranCentreRayon, Resu
 import { verifierCentreRayon, verifierCompletionCarre, verifierRegroupement } from "./verificationEquationCercleDeveloppee";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_REGROUPEMENT = 2;
 export const NIVEAU_AIDE_MAX_COMPLETION = 2;
@@ -76,12 +74,7 @@ function reglagesEtape(etat: EtatSessionEquationCercleDeveloppee): ReglagesEtape
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationCercleDeveloppee): EtatSessionEquationCercleDeveloppee {
@@ -136,7 +129,7 @@ export function soumettreReponseRegroupement(etat: EtatSessionEquationCercleDeve
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideRegroupement);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -165,7 +158,7 @@ export function soumettreReponseCompletion(etat: EtatSessionEquationCercleDevelo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCompletion);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -194,7 +187,7 @@ export function soumettreReponseCentreRayon(etat: EtatSessionEquationCercleDevel
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCentreRayon);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

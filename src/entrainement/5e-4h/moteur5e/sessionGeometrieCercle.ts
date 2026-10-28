@@ -18,7 +18,6 @@ import type { EtatSessionGeometrieCercle, PhaseGeometrieCercle, ResultatExercice
 import { diagnostiquerChamp } from "./verificationGeometrieCercle";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide, PLAFOND UNIFORME par défaut (même convention que la majorité des générateurs
  * récents du chantier 5e) — quelques écrans dérogent à ce plafond via `niveauAideMaxGeometrieCercle`
@@ -46,7 +45,7 @@ export function demarrerSessionGeometrieCercle(reglages: ReglagesSession5e, gene
 }
 
 function reglagesEtape(etat: EtatSessionGeometrieCercle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionGeometrieCercle): EtatSessionGeometrieCercle {
@@ -107,7 +106,7 @@ export function soumettreReponse(etat: EtatSessionGeometrieCercle, texte: string
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [phase]: revele };
   const phaseSuivante = phaseApres(exercice, phase);

@@ -32,9 +32,7 @@ export interface EtatSessionTriangleQuelconque {
    * pour chacun des deux écrans (`promptcorrectionsgenerateur19unitesnotation.md` réduit l'écran 1
    * de 3 à 2 niveaux — retrait de l'étape "assignation côté/angle opposé", jargon jamais nécessaire
    * grâce au croquis), chacun révélant strictement plus que le précédent (`activerAideSuivante`,
-   * `sessionTriangleQuelconque.ts`). Pénalité ADDITIVE (-20 points par niveau atteint, même principe
-   * que "L'un sans l'autre" mais étendu à plusieurs niveaux cumulables plutôt qu'un seul flag
-   * binaire), appliquée au niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement.
+   * `sessionTriangleQuelconque.ts`).
    */
   niveauAideDonneeManquante: number;
   niveauAideAire: number;

@@ -15,7 +15,6 @@ import { verifierEcran } from "./verificationIntegralesProblemes";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX = 2;
 
@@ -42,7 +41,7 @@ export function demarrerSessionIntegralesProblemes(reglages: ReglagesSession6e, 
 }
 
 function reglagesEtape(etat: EtatSessionIntegralesProblemes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionIntegralesProblemes): EtatSessionIntegralesProblemes {
@@ -73,7 +72,7 @@ export function soumettreReponseEcran(etat: EtatSessionIntegralesProblemes, vale
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseIntegralesProblemes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseIntegralesProblemes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseIntegralesProblemes, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

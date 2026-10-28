@@ -1,6 +1,6 @@
 import type { AffineLog, BaseLog, Comparateur, ExerciceInequationLogarithmique, ExerciceLogA, ExerciceLogB, ExerciceLogC, ExerciceLogD, ExerciceLogE, ExerciceLogF } from "../core6e/inequationsLogarithmiques.types";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
-import type { PhaseInequationLogarithmique, ResultatExerciceInequationLogarithmique } from "../moteur6e/typesInequationsLogarithmiques";
+import type { PhaseInequationLogarithmique } from "../moteur6e/typesInequationsLogarithmiques";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 
 /**
@@ -492,33 +492,6 @@ export function contenuRecapPhase(exercice: ExerciceInequationLogarithmique, pha
         texte: null,
         latex: `a>1 : ${formatCasBaseLogLatex(exercice.casVideEstSuperieurA1, exercice.ensembleSansR)} \\qquad 0<a<1 : ${formatCasBaseLogLatex(!exercice.casVideEstSuperieurA1, exercice.ensembleSansR)}`,
       };
-  }
-}
-
-// ============================================================================
-// Total de points du récapitulatif — réutilise TEL QUEL le score RÉEL déjà calculé par
-// `moteur/etapeTentatives.ts` + la pénalité d'aide de `sessionInequationsLogarithmiques.ts`.
-// ============================================================================
-
-export interface TotalRecap {
-  total: number;
-  maximum: number;
-}
-
-export function totalPointsRecap(resultat: ResultatExerciceInequationLogarithmique): TotalRecap {
-  switch (resultat.famille) {
-    case "A":
-      return { total: resultat.scoreCE + resultat.scoreResoudre, maximum: 200 };
-    case "B":
-      return { total: resultat.scoreCE + resultat.scoreResoudre, maximum: 200 };
-    case "C":
-      return { total: resultat.scoreCE + resultat.scoreCombiner + resultat.scoreComparer, maximum: 300 };
-    case "D":
-      return { total: resultat.scoreCE + resultat.scoreReecrire + resultat.scoreResoudreY + resultat.scoreConvertirX, maximum: 400 };
-    case "E":
-      return { total: resultat.score, maximum: 100 };
-    case "F":
-      return { total: resultat.scoreCE + resultat.scoreSimplifier + resultat.scoreConclure, maximum: 300 };
   }
 }
 

@@ -9,11 +9,9 @@
  * quelle que soit la réponse (correcte ou tentatives épuisées — le flux avance toujours, seul le
  * score diffère, même principe que le reste du projet).
  *
- * **Une seule aide pénalisante par exercice** (`aideUtilisee`, jamais réinitialisée entre les deux
- * phases d'un même exercice `relationGenerale` — le même graphe aide les deux étapes) : le facteur
- * ×0,5 est appliqué à CHAQUE note (traduction, coordonnées) au moment précis où elle se clôt, jamais
- * rétroactivement à une note déjà close avant l'activation — même principe exact que
- * "Transformations graphiques" (ses deux notes indépendantes équation/curseurs).
+ * **Une seule aide par exercice** (`aideUtilisee`, jamais réinitialisée entre les deux phases
+ * d'un même exercice `relationGenerale` — le même graphe aide les deux étapes) — même principe
+ * exact que "Transformations graphiques" (ses deux notes indépendantes équation/curseurs).
  */
 import type { ExerciceRelationGeneraleRV, GenerateurExerciceRelationVectorielle } from "../core/relationVectorielle.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -53,14 +51,7 @@ function reglagesEtape(etat: EtatSessionRelationVectorielle): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité multiplicative, appliquée une seule fois à la clôture de chaque note — jamais une
- * pénalité par tentative (déjà gérée par `etapeTentatives.ts`). */
-function appliquerPenaliteAide(score: number, aideUtilisee: boolean): number {
-  return aideUtilisee ? score * 0.5 : score;
 }
 
 /** Révélation à sens unique — lève si la session est déjà terminée. */
@@ -115,7 +106,7 @@ export function soumettreReponseTraduction(etat: EtatSessionRelationVectorielle,
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideUtilisee);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -147,7 +138,7 @@ export function soumettreReponseCoordonnees(etat: EtatSessionRelationVectorielle
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteAide(etapeCourante.score as number, etat.aideUtilisee);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,

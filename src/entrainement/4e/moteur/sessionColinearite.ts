@@ -11,9 +11,7 @@
  * TOUJOURS les dernières, quelle que soit la variante — c'est là que l'exercice se clôt.
  *
  * **Aide PROGRESSIVE par écran** (même principe exact que "Triangle quelconque"/"Calcul de
- * composantes de combinaisons linéaires") — 1 ou 2 niveaux selon l'écran (`NIVEAU_AIDE_MAX_XXX`),
- * pénalité ADDITIVE (-20 points/niveau) appliquée au moment précis où l'écran se clôt, jamais
- * rétroactivement.
+ * composantes de combinaisons linéaires") — 1 ou 2 niveaux selon l'écran (`NIVEAU_AIDE_MAX_XXX`).
  */
 import type { ExerciceColinearPoints, ExerciceColinearVecteurs, ExerciceColinearite, GenerateurExerciceColinearite } from "../core/colinearite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -24,7 +22,6 @@ import type { ReponseConstructionAvecX, ReponseConstructionVecteurs, ReponseTest
 import type { EtatSessionColinearite, PhaseColinearite, ResultatExerciceColinearite } from "./typesColinearite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_TEST = 2;
 export const NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS = 1;
 export const NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X = 1;
@@ -94,13 +91,7 @@ function reglagesEtape(etat: EtatSessionColinearite): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -169,7 +160,7 @@ export function soumettreReponseConstructionVecteurs(etat: EtatSessionColinearit
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideConstruction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -198,7 +189,7 @@ export function soumettreReponseConstructionAvecX(etat: EtatSessionColinearite, 
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideConstruction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -231,7 +222,7 @@ export function soumettreReponseReduction(etat: EtatSessionColinearite, texte: s
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideReduction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -262,7 +253,7 @@ export function soumettreReponseResolution(etat: EtatSessionColinearite, valeur:
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideResolution);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,
@@ -300,7 +291,7 @@ export function soumettreReponseReductionAvecX(etat: EtatSessionColinearite, tex
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideReduction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -330,7 +321,7 @@ export function soumettreReponseResolutionAvecX(etat: EtatSessionColinearite, va
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideResolution);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,
@@ -366,7 +357,7 @@ export function soumettreReponseTest(etat: EtatSessionColinearite, reponse: Repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideTest);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

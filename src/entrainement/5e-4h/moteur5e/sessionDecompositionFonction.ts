@@ -11,7 +11,6 @@ import type { EtatSessionDecompositionFonction, ResultatExerciceDecompositionFon
 import { verifierDecomposition } from "./verificationDecompositionFonction";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Plafond d'aide DYNAMIQUE par exercice (même principe que gen17, 4e) : le niveau 3 ("cette
  * couche finale s'applique au résultat précédent, pas à x") n'a de sens que si la couche finale
@@ -29,7 +28,7 @@ export function demarrerSessionDecompositionFonction(reglages: ReglagesSession5e
 }
 
 function reglagesEtape(etat: EtatSessionDecompositionFonction): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionDecompositionFonction): EtatSessionDecompositionFonction {
@@ -50,7 +49,7 @@ export function soumettreReponseDecomposition(etat: EtatSessionDecompositionFonc
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const resultat: ResultatExerciceDecompositionFonction = { exercice, score, revele: etapeCourante.revelee };
   const resultats = [...etat.resultats, resultat];
   const indexExercice = etat.indexExercice + 1;

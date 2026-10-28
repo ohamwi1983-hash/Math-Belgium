@@ -8,7 +8,7 @@ import type {
   ExerciceDomaineDeriveeF,
   FormeGA,
 } from "../core6e/domaineDeriveeExponentielles.types";
-import type { PhaseDomaineDeriveeExponentielle, ResultatExerciceDomaineDeriveeExponentielle } from "../moteur6e/typesDomaineDeriveeExponentielles";
+import type { PhaseDomaineDeriveeExponentielle } from "../moteur6e/typesDomaineDeriveeExponentielles";
 
 /**
  * Textes de consigne/aide + formatage LaTeX pour `6gen7`. Toute aide qui embarque un symbole LaTeX
@@ -500,35 +500,3 @@ export function labelsDeuxChamps(exercice: ExerciceDomaineDeriveeExponentielle):
   return { a: "N'(x) =", b: "D'(x) =" };
 }
 
-export interface TotalPointsRecap {
-  points: number;
-  maximum: number;
-}
-
-/**
- * Total de points du récapitulatif final — SOMME des scores déjà pénalisés (tentatives + aide) sur
- * chaque écran RÉELLEMENT traversé (2 ou 3 selon la famille), affiché EN COMPLÉMENT de la liste
- * colorée `LigneRecap`/`statutRecap` (jamais à sa place, voir CLAUDE.md "récapitulatif final à plat,
- * coloré"). Même principe et même formule RÉELLE que `totalPointsLimiteExponentielle` (`6gen6`,
- * `formatLimitesExponentielles.ts`) — dupliqué ici plutôt que partagé (chaque générateur garde son
- * propre moteur/session, voir CLAUDE.md "architecture") : un écran correct au 2e essai sans aide
- * peut valoir 67/100 (VERT) plutôt que 100/100, intentionnel. Ne consulte JAMAIS
- * `details`/`revele`/`niveauAide` : deux informations INDÉPENDANTES du même écran (couleur vs
- * points, voir `DetailPhaseDomaineDeriveeExponentielle`) — un écran ORANGE (aidé, jamais révélé)
- * peut valoir exactement 0 point, tout comme un écran ROUGE (révélé) ; la somme reste correcte sans
- * distinction de cas.
- */
-export function totalPointsDomaineDeriveeExponentielle(resultat: ResultatExerciceDomaineDeriveeExponentielle): TotalPointsRecap {
-  switch (resultat.famille) {
-    case "A":
-    case "B":
-    case "F":
-      return { points: resultat.scoreDomaine + resultat.scoreDerivee, maximum: 200 };
-    case "C":
-      return { points: resultat.scoreDomaine + resultat.scoreFacteurs + resultat.scoreAssemblage, maximum: 300 };
-    case "D":
-      return { points: resultat.scoreDomaine + resultat.scoreND + resultat.scoreAssemblage, maximum: 300 };
-    case "E":
-      return { points: resultat.scoreDomaine + resultat.scoreSimplifier + resultat.scoreDerivee, maximum: 300 };
-  }
-}

@@ -82,6 +82,17 @@ export function formatLigneNumerateurNiveau3Label(racine: number): string {
   return `\\text{N : } ${formatLineaireDeveloppeExact(1, racine)}`;
 }
 
+/** Ligne unique « N : (x − r)² » d'un numérateur à racine double (niveau 3, audit gen6). */
+export function formatLigneNumerateurCarreLabel(racine: number): string {
+  return racine === 0 ? "\\text{N : } x^2" : `\\text{N : } (${formatLineaireDeveloppeExact(1, racine)})^2`;
+}
+
+/** Libellés des lignes N du niveau 3 : une par racine, ou une seule « (x − r)² » pour une racine double. */
+export function libellesLignesNumerateurNiveau3(racines: [number, number]): string[] {
+  const [r1, r2] = [...racines].sort((a, b) => a - b);
+  return r1 === r2 ? [formatLigneNumerateurCarreLabel(r1)] : [formatLigneNumerateurNiveau3Label(r1), formatLigneNumerateurNiveau3Label(r2)];
+}
+
 /** N1(x)/D(x) ◇ P1_3(x) — énoncé de DÉPART (niveau 3 uniquement), avant isolement/combinaison. */
 export function formatEnonceOriginalNiveau3Latex(exercice: ExerciceInequationRationnelleNiveau3): string {
   const numerateur = formatLineaireDeveloppeExact(exercice.numerateurAvantCombinaison.k, exercice.numerateurAvantCombinaison.p);

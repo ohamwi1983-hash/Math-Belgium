@@ -18,7 +18,6 @@ import type { ReponseQuestionComposeeGraphique } from "./verificationComposeeGra
 import { verifierReponseQuestion } from "./verificationComposeeGraphique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Plafond d'aide FIXE à 2 (E.7, `promptcorrectionsregroupees.md`) : l'aide ne porte QUE sur
  * l'étape g(8) (lire la valeur intermédiaire b) — palier 1 un rappel textuel, palier 2 le point
@@ -43,7 +42,7 @@ export function demarrerSessionComposeeGraphique(reglages: ReglagesSession5e, ge
 }
 
 function reglagesEtape(etat: EtatSessionComposeeGraphique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionComposeeGraphique): EtatSessionComposeeGraphique {
@@ -75,7 +74,7 @@ export function soumettreReponseQuestion(etat: EtatSessionComposeeGraphique, rep
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const resultatQuestion: ResultatQuestionComposeeGraphique = {
     question,
     score,

@@ -101,7 +101,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 const PHASES_CHAMP_SIMPLE = new Set(["amplitude", "decalage", "pulsation", "phi", "fonctionFinale", "poserExtremum", "isolerTExtremum"]);
 const PHASES_LIGNES = new Set(["isolerTResoudre", "solutionsResoudre", "solutionsExtremum"]);

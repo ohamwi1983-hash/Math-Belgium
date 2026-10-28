@@ -46,7 +46,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * ("mirror this exact file layout/naming pattern").
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDenombrementCombinatoirePur {
   return demarrerSessionDenombrementCombinatoirePur(REGLAGES_DEMO, genererExerciceDenombrementCombinatoirePur);

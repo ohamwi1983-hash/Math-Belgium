@@ -40,7 +40,7 @@ import {
  * `revele` vient de `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la
  * clôture (`sessionDeriveesCyclometriques.ts`) — jusqu'au 2025-10, déduit de
  * `scoresPartiels[phase] === 0`, corrigé pendant le balayage générique (point A) car non fiable
- * ici : la pénalité d'aide est soustraite APRÈS le score de tentatives, donc une réussite
+ * ici : l'ancienne pénalité d'aide (supprimée) était soustraite APRÈS le score de tentatives, donc une réussite
  * fortement aidée pouvait tomber à exactement 0 (faux "révélé").
  */
 

@@ -1,5 +1,5 @@
 import type { ExerciceLimiteA, ExerciceLimiteB, ExerciceLimiteC, ExerciceLimiteExponentielle, ExerciceLimiteH, ExerciceLimiteI, ExerciceLimiteJ, ExerciceLimiteK, ExerciceLimiteL, ExerciceLimiteN } from "../core6e/limitesExponentielles.types";
-import type { PhaseLimiteExponentielle, ResultatExerciceLimiteExponentielle } from "../moteur6e/typesLimitesExponentielles";
+import type { PhaseLimiteExponentielle } from "../moteur6e/typesLimitesExponentielles";
 import { fusionnerOperateurSigne } from "./formatOperateurSigne";
 
 /**
@@ -884,49 +884,3 @@ export function aideNiveau2(phase: PhaseLimiteExponentielle, exercice: ExerciceL
   }
 }
 
-export interface TotalPointsRecap {
-  points: number;
-  maximum: number;
-}
-
-/**
- * Total de points du récapitulatif final — SOMME des scores déjà pénalisés (tentatives + aide) sur
- * chaque écran RÉELLEMENT traversé (2 ou 3 selon la famille), affiché EN COMPLÉMENT de la liste
- * colorée `LigneRecap`/`statutRecap` (jamais à sa place, voir CLAUDE.md "récapitulatif final à plat,
- * coloré"). Utilise la formule RÉELLE déjà calculée par `avancerPhase`
- * (`moteur6e/sessionLimitesExponentielles.ts`, 100 de base − pénalité/tentative − 20 pts/niveau
- * d'aide, clampée à 0, forcée à 0 exactement sur révélation) — jamais une formule à 3 paliers
- * simplifiée : un écran correct au 2e essai sans aide peut donc valoir 67/100 (VERT au
- * récapitulatif) plutôt que 100/100, intentionnel (voir décision utilisateur). Ne consulte JAMAIS
- * `details`/`revele`/`niveauAide` : ce sont deux informations INDÉPENDANTES du même écran (couleur
- * vs points), piège documenté dans `typesLimitesExponentielles.ts` (`DetailPhaseLimiteExponentielle`)
- * — un écran affiché ORANGE (aidé, jamais révélé) peut valoir exactement 0 point, tout comme un
- * écran ROUGE (révélé) ; la somme reste correcte dans les deux cas sans distinction de cas.
- */
-export function totalPointsLimiteExponentielle(resultat: ResultatExerciceLimiteExponentielle): TotalPointsRecap {
-  switch (resultat.famille) {
-    case "A":
-      return { points: resultat.scoreExposant + resultat.scoreGlobale, maximum: 200 };
-    case "B":
-      return { points: resultat.scoreExponentielle + resultat.scorePolynomiale + resultat.scoreGlobale, maximum: 300 };
-    case "C":
-      return { points: resultat.scoreFacteurs + resultat.scoreGlobale, maximum: 200 };
-    case "G":
-      return { points: resultat.scoreCombiner + resultat.scoreOrdre1 + resultat.scoreConclure, maximum: 300 };
-    case "H":
-      return { points: resultat.scoreForme + resultat.scoreNumerateur + resultat.scoreDenominateur + resultat.scoreConclure, maximum: 400 };
-    case "I":
-      return { points: resultat.scoreForme + resultat.scoreNumerateur + resultat.scoreDenominateur + resultat.scoreConclure, maximum: 400 };
-    case "J":
-      return { points: resultat.scoreForme + resultat.scoreNumerateur + resultat.scoreDenominateur + resultat.scoreConclure, maximum: 400 };
-    case "K":
-      return {
-        points: resultat.scoreForme + resultat.scoreNumerateur1 + resultat.scoreDenominateur1 + resultat.scoreNumerateur2 + resultat.scoreDenominateur2 + resultat.scoreConclure,
-        maximum: 600,
-      };
-    case "L":
-      return { points: resultat.scoreReformuler + resultat.scoreConclure, maximum: 200 };
-    case "N":
-      return { points: resultat.scoreCombiner + resultat.scoreConclure, maximum: 200 };
-  }
-}

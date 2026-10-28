@@ -21,7 +21,6 @@ import { verifierLecture, verifierMediane, verifierMinMaxMode, verifierPolygone,
 import type { EtatSessionMediane, PhaseMediane, ResultatExerciceMediane } from "./typesMediane";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_MEDIANE = 2;
 export const NIVEAU_AIDE_MAX_Q1 = 2;
 export const NIVEAU_AIDE_MAX_Q3 = 2;
@@ -29,8 +28,7 @@ export const NIVEAU_AIDE_MAX_MIN_MAX_MODE = 2;
 export const NIVEAU_AIDE_MAX_POLYGONE = 1;
 /** 4 (au lieu de 2) depuis `promptgen33gen35aidesinterpolation.md` — aide 3 (les 2 points
  * d'encadrement surlignés en orange sur le graphe) et aide 4 (la formule d'interpolation elle-même),
- * ajoutées SANS toucher aux aides 1/2 existantes. Pénalité additive `-20 pts/niveau` inchangée
- * (`PENALITE_PAR_NIVEAU_AIDE`, générique — aucune autre modification nécessaire dans ce fichier). */
+ * ajoutées SANS toucher aux aides 1/2 existantes. */
 export const NIVEAU_AIDE_MAX_LECTURE_Q1 = 4;
 export const NIVEAU_AIDE_MAX_LECTURE_MEDIANE = 4;
 export const NIVEAU_AIDE_MAX_LECTURE_Q3 = 4;
@@ -85,12 +83,7 @@ function reglagesEtape(etat: EtatSessionMediane): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée ou si le
@@ -191,7 +184,7 @@ export function soumettreReponseMediane(etat: EtatSessionMediane, reponse: Repon
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideMediane);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -221,7 +214,7 @@ export function soumettreReponseQ1(etat: EtatSessionMediane, reponse: ReponseQ1)
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideQ1);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -251,7 +244,7 @@ export function soumettreReponseQ3(etat: EtatSessionMediane, reponse: ReponseQ3)
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideQ3);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -282,7 +275,7 @@ export function soumettreReponseMinMaxMode(etat: EtatSessionMediane, reponse: Re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideMinMaxMode);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: "discrete",
@@ -338,7 +331,7 @@ export function soumettreReponsePolygone(etat: EtatSessionMediane, points: Point
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePolygone);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -356,7 +349,7 @@ function soumettreReponseLecture(
   phaseAttendue: "lectureQ1" | "lectureMediane" | "lectureQ3",
   parametre: ParametreLecture,
   texte: string,
-): { etapeCourante: EtatEtapeTentatives; niveauAide: number } {
+): { etapeCourante: EtatEtapeTentatives } {
   if (etat.terminee || etat.phase !== phaseAttendue) {
     throw new Error(`soumettreReponseLecture : la session n'est pas à l'étape ${phaseAttendue}`);
   }
@@ -365,24 +358,22 @@ function soumettreReponseLecture(
     throw new Error(`soumettreReponseLecture : l'écran ${phaseAttendue} n'existe que pour la variante classes`);
   }
 
-  const niveauAide = phaseAttendue === "lectureQ1" ? etat.niveauAideLectureQ1 : phaseAttendue === "lectureMediane" ? etat.niveauAideLectureMediane : etat.niveauAideLectureQ3;
-
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),
     verifier: (r) => verifierLecture(exerciceCourant, parametre, r),
     revelerReponse: () => {},
   });
 
-  return { etapeCourante, niveauAide };
+  return { etapeCourante };
 }
 
 /** `promptgen33ajustements.md`, point 1 — Q2/médiane lue en premier (jamais Q1). */
 export function soumettreReponseLectureMediane(etat: EtatSessionMediane, texte: string): EtatSessionMediane {
-  const { etapeCourante, niveauAide } = soumettreReponseLecture(etat, "lectureMediane", "mediane", texte);
+  const { etapeCourante } = soumettreReponseLecture(etat, "lectureMediane", "mediane", texte);
   if (!etapeCourante.terminee) {
     return { ...etat, etapeCourante };
   }
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -393,11 +384,11 @@ export function soumettreReponseLectureMediane(etat: EtatSessionMediane, texte: 
 }
 
 export function soumettreReponseLectureQ1(etat: EtatSessionMediane, texte: string): EtatSessionMediane {
-  const { etapeCourante, niveauAide } = soumettreReponseLecture(etat, "lectureQ1", "q1", texte);
+  const { etapeCourante } = soumettreReponseLecture(etat, "lectureQ1", "q1", texte);
   if (!etapeCourante.terminee) {
     return { ...etat, etapeCourante };
   }
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -408,11 +399,11 @@ export function soumettreReponseLectureQ1(etat: EtatSessionMediane, texte: strin
 }
 
 export function soumettreReponseLectureQ3(etat: EtatSessionMediane, texte: string): EtatSessionMediane {
-  const { etapeCourante, niveauAide } = soumettreReponseLecture(etat, "lectureQ3", "q3", texte);
+  const { etapeCourante } = soumettreReponseLecture(etat, "lectureQ3", "q3", texte);
   if (!etapeCourante.terminee) {
     return { ...etat, etapeCourante };
   }
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, niveauAide);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -442,7 +433,7 @@ export function soumettreReponseSynthese(etat: EtatSessionMediane, reponse: Repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSynthese);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: "classes",

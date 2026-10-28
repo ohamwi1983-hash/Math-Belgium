@@ -5,7 +5,7 @@ import type {
   CandidatDeriveeD,
   ExerciceGraphiqueDeriveeExponentielle,
 } from "../core6e/graphiquesDeriveeExponentielles.types";
-import type { PhaseGraphiqueDeriveeExponentielle, ResultatExerciceGraphiqueDeriveeExponentielle } from "../moteur6e/typesGraphiquesDeriveeExponentielles";
+import type { PhaseGraphiqueDeriveeExponentielle } from "../moteur6e/typesGraphiquesDeriveeExponentielles";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
 /**
@@ -346,23 +346,6 @@ export function etatActuel(exercice: ExerciceGraphiqueDeriveeExponentielle, phas
   const derivee = formatDeriveeCorrecteLatex(exercice);
   if (derivee === null) return null;
   return [`\\text{Dérivée confirmée : } ${derivee}`];
-}
-
-/**
- * Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place, voir `ResultatPanelGraphiqueDeriveeExponentielle.tsx`). Somme les scores DÉJÀ
- * calculés par `sessionGraphiquesDeriveeExponentielles.ts` (pénalité par tentative + par niveau
- * d'aide déjà appliquée, forcé à 0 sur révélation) pour les seuls écrans RÉELLEMENT traversés —
- * `scoreDerivee===null` pour les familles A/C (pas d'écran "derivee"), donc `maximum=100` pour
- * elles contre `200` pour B/D (2 écrans). Volontairement PAS aligné sur le statut vert/orange/rouge
- * de `LigneRecap` : un écran vert (résolu sans aide, éventuellement après un essai raté) peut très
- * bien contribuer moins que 100/100 — décision explicite de l'utilisateur, voir `docs/historique-6e.md`.
- */
-export function calculerTotalRecapGraphiqueDeriveeExponentielle(resultat: ResultatExerciceGraphiqueDeriveeExponentielle): { total: number; maximum: number } {
-  if (resultat.scoreDerivee === null) {
-    return { total: resultat.scoreSelection, maximum: 100 };
-  }
-  return { total: resultat.scoreDerivee + resultat.scoreSelection, maximum: 200 };
 }
 
 export function aideSelectionNiveau1(exercice: ExerciceGraphiqueDeriveeExponentielle): AideAvecLatex {

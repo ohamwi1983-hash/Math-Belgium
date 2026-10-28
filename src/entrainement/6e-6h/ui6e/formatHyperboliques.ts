@@ -5,7 +5,7 @@ import type {
   ExerciceHyperboliquesD,
   ExerciceHyperboliques,
 } from "../core6e/hyperboliques.types";
-import type { PhaseHyperboliques, ResultatExerciceHyperboliques } from "../moteur6e/typesHyperboliques";
+import type { PhaseHyperboliques } from "../moteur6e/typesHyperboliques";
 import { fusionnerOperateurSigne } from "./formatOperateurSigne";
 
 /**
@@ -349,26 +349,3 @@ export function aideNiveau2(exercice: ExerciceHyperboliques, phase: PhaseHyperbo
   }
 }
 
-export interface TotalPointsRecap {
-  points: number;
-  maximum: number;
-}
-
-/**
- * Total de points du récapitulatif final — SOMME des scores déjà pénalisés (tentatives + aide) sur
- * chaque écran RÉELLEMENT traversé (1 à 3 selon la famille), affiché EN COMPLÉMENT de la liste
- * colorée `LigneRecap`/`statutRecap` (jamais à sa place — convention CLAUDE.md). Même principe que
- * `totalPointsDomaineDeriveeLogarithme` (`6gen16`).
- */
-export function totalPointsHyperboliques(resultat: ResultatExerciceHyperboliques): TotalPointsRecap {
-  switch (resultat.famille) {
-    case "A":
-      return { points: resultat.scoreParite, maximum: 100 };
-    case "B":
-      return { points: resultat.scoreIsoler + resultat.scoreValeurs, maximum: 200 };
-    case "C":
-      return { points: resultat.scoreDerivee + resultat.scoreDeriveeSeconde + resultat.scoreRelation, maximum: 300 };
-    case "D":
-      return { points: resultat.scoreReecriture + resultat.scoreLimites, maximum: 200 };
-  }
-}

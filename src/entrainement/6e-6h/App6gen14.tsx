@@ -61,7 +61,7 @@ const LIBELLE_ISSUE_G: Record<IssueSimplificationG, string> = {
   vrai_partout: "Vrai sur tout le domaine (= la CE)",
 };
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionEquationsExpLog {
   return demarrerSessionEquationsExpLog(REGLAGES_DEMO, genererExerciceEquationsExpLog);

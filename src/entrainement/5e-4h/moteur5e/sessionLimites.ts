@@ -14,7 +14,6 @@ import { diagnostiquerFacteurs, diagnostiquerNombre, diagnostiquerRatioDominant,
 export type ReponseConclureLimite = 1 | -1 | "nexistepas";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran) — contrairement à
  * l'exception à 1 niveau retenue pour 5gen14 (`prompt5gen14corrections.md`), explicitement écartée
@@ -34,7 +33,7 @@ export function demarrerSessionLimite(reglages: ReglagesSession5e, generateur: (
 }
 
 function reglagesEtape(etat: EtatSessionLimite): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionLimite): EtatSessionLimite {
@@ -63,7 +62,7 @@ function soumettreEcran<T>(etat: EtatSessionLimite, phaseAttendue: PhaseLimite, 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 

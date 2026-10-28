@@ -35,7 +35,6 @@ import {
 } from "./verificationEtudierFonction";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide) pour les écrans 1-7. L'écran 8 a sa
  * propre échelle d'aide (1 niveau, gérée par `PlacementPointsGraphique` — voir la tête de fichier
@@ -65,7 +64,7 @@ export function demarrerSessionEtudierFonction(reglages: ReglagesSession5e, gene
 }
 
 function reglagesEtape(etat: EtatSessionEtudierFonction): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionEtudierFonction): EtatSessionEtudierFonction {
@@ -95,7 +94,7 @@ function soumettreEcran<T>(etat: EtatSessionEtudierFonction, ecranAttendu: Ecran
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [ecranAttendu]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [ecranAttendu]: revele };
   const ecranSuivant = ecranApres(etat.exerciceCourant, ecranAttendu);
@@ -172,7 +171,7 @@ export interface ResumePlacementPoints {
 export function soumettreReponseGraphique(etat: EtatSessionEtudierFonction, resume: ResumePlacementPoints): EtatSessionEtudierFonction {
   if (etat.terminee || etat.phase !== "graphique") throw new Error('soumettreReponseGraphique : la session n\'est pas à l\'écran "graphique"');
   const brut = resume.pointsTotal > 0 ? Math.round((POINTS_DE_BASE * resume.pointsReussis) / resume.pointsTotal) : POINTS_DE_BASE;
-  const score = Math.max(0, brut - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = brut;
   const scoresPartiels = { ...etat.scoresPartiels, graphique: score };
   const revelesPartiels = { ...etat.revelesPartiels, graphique: resume.revele };
   return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, resume.revele);

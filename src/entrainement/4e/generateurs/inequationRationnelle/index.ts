@@ -22,7 +22,7 @@ import { construireCubique } from "./construireCubique";
 const CONSTRUCTEURS: Record<NiveauInequationRationnelle, () => ExerciceInequationRationnelle> = {
   niveau1: construireNiveau1,
   niveau2: construireNiveau2,
-  niveau3: construireNiveau3,
+  niveau3: () => construireNiveau3(),
   niveau4: construireNiveau4,
   denominateurCarre: construireDenominateurCarre,
   facteurCommun: construireFacteurCommun,
@@ -38,8 +38,11 @@ const CONSTRUCTEURS: Record<NiveauInequationRationnelle, () => ExerciceInequatio
  * AUDIT-variantes-generateurs.md, section 3a, sur ce point déjà le plus robuste des 13
  * générateurs).
  */
+/** Un niveau, ou une variante qui force une forme particulière d'un niveau (racine double au niveau 3). */
+export type VarianteInequationRationnelleId = NiveauInequationRationnelle | "niveau3RacineDouble";
+
 export interface VarianteInequationRationnelle {
-  id: NiveauInequationRationnelle;
+  id: VarianteInequationRationnelleId;
   label: string;
 }
 
@@ -47,6 +50,7 @@ export const CATALOGUE_VARIANTES: VarianteInequationRationnelle[] = [
   { id: "niveau1", label: "Niveau 1 — quotient de deux polynômes du 1er degré" },
   { id: "niveau2", label: "Niveau 2 — quotient égal à une constante" },
   { id: "niveau3", label: "Niveau 3 — quotient égal à un polynôme du 1er degré" },
+  { id: "niveau3RacineDouble", label: "Niveau 3 — numérateur combiné avec une racine double" },
   { id: "niveau4", label: "Niveau 4 — quotient de deux fractions du 1er degré" },
   { id: "denominateurCarre", label: "Dénominateur au carré" },
   { id: "facteurCommun", label: "Facteur commun à simplifier" },
@@ -61,7 +65,8 @@ export const CATALOGUE_VARIANTES: VarianteInequationRationnelle[] = [
  * `th`/`tv` peuvent être forcés) : pas de second paramètre `overrides?` ici, il n'y a rien à
  * surcharger.
  */
-export function construireAvecVarianteId(varianteId: NiveauInequationRationnelle): ExerciceInequationRationnelle {
+export function construireAvecVarianteId(varianteId: VarianteInequationRationnelleId): ExerciceInequationRationnelle {
+  if (varianteId === "niveau3RacineDouble") return construireNiveau3({ racineDouble: true });
   return CONSTRUCTEURS[varianteId]();
 }
 

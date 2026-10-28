@@ -31,7 +31,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `ResumeSessionIdentificationConiques` séparés.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionIdentificationConiques {
   return demarrerSessionIdentificationConiques(REGLAGES_DEMO, genererExerciceIdentificationConiques);
@@ -69,8 +69,7 @@ export function App6gen58() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   /** Un écran "aide" s'il a été clos avec `niveauAide>0` — ce générateur ne garde `niveauAide` que
-   * pour l'écran COURANT (`EtatSessionIdentificationConiques.scoresPartiels` ne retient que le score
-   * déjà pénalisé, qui ne permet pas de distinguer "pénalité d'aide" de "pénalité de tentatives" une
+   * pour l'écran COURANT (`EtatSessionIdentificationConiques.scoresPartiels` ne retient que le score (anciennement pénalisé), qui ne permet pas de distinguer "pénalité d'aide" de "pénalité de tentatives" une
    * fois l'écran clos) : capturé ICI au moment précis de la clôture, jamais recalculé depuis le
    * score. */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseIdentificationConiques, boolean>>>({});

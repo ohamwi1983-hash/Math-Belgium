@@ -32,7 +32,7 @@ export interface EtatSessionApplicationPhysique {
   exerciceCourant: ExerciceApplicationPhysique;
   phase: PhaseApplicationPhysique;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide progressive (2 niveaux, pénalité additive -20 pts/niveau) — uniquement sur l'écran
+  /** Aide progressive (2 niveaux) — uniquement sur l'écran
    * "norme" (`promptgen29modificationscompletes.md`, point 4.3), seul écran de ce générateur à en
    * avoir une. Remis à 0 à chaque nouvel exercice, jamais rétroactif sur un exercice déjà clos. */
   niveauAideNorme: number;

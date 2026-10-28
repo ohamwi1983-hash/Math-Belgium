@@ -35,7 +35,7 @@ const OPTIONS: { id: ReponseParite; label: string }[] = [
  *
  * Seule aide de ce générateur (demande explicite de l'utilisateur : "c'est que lorsqu'on active
  * l'aide qu'on a ce message") — le rappel de méthode n'est donc plus affiché en permanence, mais
- * derrière `BoutonAide` (1 seul niveau, `NIVEAU_AIDE_MAX_PARITE`), avec sa pénalité habituelle. */
+ * derrière `BoutonAide` (1 seul niveau, `NIVEAU_AIDE_MAX_PARITE`). */
 export function EtapeParite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<ReponseParite | null>(null);
   const erronee = tentativesUtilisees > 0;

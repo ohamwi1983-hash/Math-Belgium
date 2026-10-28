@@ -9,8 +9,7 @@
  * un saut conditionnel comme "Équation d'une droite").
  *
  * Aide PROGRESSIVE par écran (même principe que "Relations entre droites"/"Colinéarité"/
- * "Orthogonalité") : 2 niveaux sur chacun des 2 écrans — pénalité ADDITIVE (-20 points/niveau)
- * appliquée au moment précis où l'écran se clôt, jamais rétroactivement.
+ * "Orthogonalité") : 2 niveaux sur chacun des 2 écrans.
  */
 import type { ExerciceCaracteristiquesDroite, GenerateurExerciceCaracteristiquesDroite } from "../core/caracteristiquesDroite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -20,7 +19,6 @@ import type { ReponseCaracteristiques, ReponseExtraction } from "./verificationC
 import { verifierCaracteristiques, verifierExtraction } from "./verificationCaracteristiquesDroite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_EXTRACTION = 2;
 export const NIVEAU_AIDE_MAX_CARACTERISTIQUES = 2;
@@ -58,12 +56,7 @@ function reglagesEtape(etat: EtatSessionCaracteristiquesDroite) {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionCaracteristiquesDroite): EtatSessionCaracteristiquesDroite {
@@ -111,7 +104,7 @@ export function soumettreReponseExtraction(etat: EtatSessionCaracteristiquesDroi
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideExtraction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -139,7 +132,7 @@ export function soumettreReponseCaracteristiques(etat: EtatSessionCaracteristiqu
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCaracteristiques);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

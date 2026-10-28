@@ -17,7 +17,7 @@ import type {
   ValeurExacteIneq,
 } from "../core6e/inequationsExponentielles.types";
 import { inverserComparateur } from "../generateurs6e/inequationsExponentielles/comparateur";
-import type { PhaseInequationExponentielle, ResultatExerciceInequationExponentielle } from "../moteur6e/typesInequationsExponentielles";
+import type { PhaseInequationExponentielle } from "../moteur6e/typesInequationsExponentielles";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 
 /**
@@ -630,40 +630,3 @@ export function contenuRecapPhase(exercice: ExerciceInequationExponentielle, pha
   }
 }
 
-// ============================================================================
-// Total de points du récapitulatif — décision utilisateur explicite (commissionné séparément de
-// `LigneRecap`/`statutRecap`, qui reste EXCLUSIVEMENT couleur, jamais un score) : réutilise TEL
-// QUEL le score RÉEL déjà calculé par `moteur/etapeTentatives.ts` + la pénalité d'aide de
-// `moteur6e/sessionInequationsExponentielles.ts` (100 de base, moins `pointsDeBase/tentativesMax`
-// par tentative ratée, moins 20 par niveau d'aide, clampé à 0, forcé à exactement 0 en cas de
-// révélation) — JAMAIS une formule simplifiée à 3 paliers. Conséquence assumée : un écran VERT
-// (2e tentative correcte, aucune aide) peut contribuer p.ex. 67/100 plutôt que 100/100 au total —
-// ce n'est pas un bug, voir le commentaire équivalent sur `statutRecap`
-// (`components6e/LigneRecap.tsx`) pour le principe symétrique côté couleur.
-// ============================================================================
-
-export interface TotalRecap {
-  total: number;
-  maximum: number;
-}
-
-/** Somme des scores des écrans RÉELLEMENT traversés par cette instance (1 à 3 selon la famille/le
- * sous-type, voir `moteur6e/typesInequationsExponentielles.ts`) — jamais recalculée depuis
- * `niveauAide`/`revele`, ces champs déjà consommés par `statutRecap`. `maximum = 100 × nombre
- * d'écrans`. */
-export function totalPointsRecap(resultat: ResultatExerciceInequationExponentielle): TotalRecap {
-  switch (resultat.famille) {
-    case "A":
-      return { total: resultat.scoreReconnaitre + resultat.scoreResoudre, maximum: 200 };
-    case "B":
-      return { total: resultat.score, maximum: 100 };
-    case "C":
-      if (resultat.sousType === "f") return { total: resultat.score, maximum: 100 };
-      return { total: resultat.scoreRegrouper + resultat.scoreConclure, maximum: 200 };
-    case "D":
-      if (resultat.sousType === "constant") return { total: resultat.scoreSigne + resultat.scoreResoudre, maximum: 200 };
-      return { total: resultat.scoreSigne1 + resultat.scoreSigne2 + resultat.scoreTableau, maximum: 300 };
-    case "E":
-      return { total: resultat.scoreRegrouper + resultat.scoreResoudre, maximum: 200 };
-  }
-}

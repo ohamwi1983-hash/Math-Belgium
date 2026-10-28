@@ -35,8 +35,6 @@ export interface EtatSessionHistogramme {
   /**
    * Aide PROGRESSIVE par écran (comme "Tableau de fréquences"/"Triangle quelconque"/"Colinéarité") —
    * 2 niveaux sur "classement", 2 niveaux sur "frequences", 1 seul niveau sur "trace" (spec).
-   * Pénalité ADDITIVE (-20 points par niveau atteint) appliquée au niveau atteint au moment précis
-   * où l'écran se clôt — jamais rétroactivement.
    */
   niveauAideClassement: number;
   niveauAideFrequences: number;

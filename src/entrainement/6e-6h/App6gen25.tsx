@@ -27,7 +27,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * composant dédié. Aucune calculatrice scientifique — mêmes raisons que 6gen23.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionIntegralesDefinies {
   return demarrerSessionIntegralesDefinies(REGLAGES_DEMO, genererExerciceIntegralesDefinies);

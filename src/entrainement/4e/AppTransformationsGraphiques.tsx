@@ -13,7 +13,6 @@ const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parab
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

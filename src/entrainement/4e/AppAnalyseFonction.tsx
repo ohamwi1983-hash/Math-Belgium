@@ -51,7 +51,6 @@ const CONSIGNE_GENERALE = "Étudie cette fonction du second degré.";
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

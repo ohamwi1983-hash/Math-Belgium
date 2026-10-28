@@ -12,9 +12,8 @@ import { LIBELLE_FAMILLE_LIMITE, LIBELLE_PHASE_LIMITE, formatReponseAttenduePhas
  * que `derniereEtapeRevelee` (générique, pas un booléen par phase) — on retrouve donc le verdict
  * par phase via l'heuristique `scoresPartiels[phase] === 0 ⟺ révélée` (seul cas où
  * `soumettreEtapeTentatives` renvoie exactement 0, voir `moteur/etapeTentatives.ts` ;
- * `soumettreEcran` y soustrait ensuite la pénalité d'aide avant stockage, donc ce 0 peut aussi
- * provenir d'une réussite tardive fortement pénalisée par l'aide — même heuristique qu'ailleurs
- * sur la plateforme, pas une garantie absolue).
+ * aucune pénalité d'aide n'étant plus appliquée, une réussite vaut toujours
+ * `pointsDeBase` : l'équivalence est exacte).
  *
  * "reconnaissance" affiche le libellé de la VRAIE famille (jamais la réponse de l'élève — même
  * convention que `reponseAttendueLimite` dans `App5gen20.tsx`), les phases suivantes réutilisent

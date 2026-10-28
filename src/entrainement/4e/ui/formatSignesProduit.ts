@@ -146,6 +146,7 @@ function racineDeLigneP1(facteurs: FacteurSignesProduit[], ref: Extract<LigneRef
  *   le simplifier silencieusement sans jamais l'expliquer à l'élève
  *   (promptgenerateur5signesProduit.md, point 3) — cohérence stricte avec l'énoncé/état actuel.
  * - "p2" : expression complète du facteur irréductible (même rendu que dans l'énoncé).
+ * - "carre" : « (x − r)² » (forme monique, le coefficient dominant négatif ayant sa ligne "p0").
  */
 export function formatLigneLabel(facteurs: FacteurSignesProduit[], ref: LigneRef): string {
   if (ref.kind === "p0") {
@@ -154,6 +155,11 @@ export function formatLigneLabel(facteurs: FacteurSignesProduit[], ref: LigneRef
   }
   if (ref.kind === "p2") {
     return formatFacteurLatex(facteurs[ref.facteurIndex]);
+  }
+  if (ref.kind === "carre") {
+    const facteurCarre = facteurs[ref.facteurIndex] as Extract<FacteurSignesProduit, { type: "quadratique_factorisable" }>;
+    const r = facteurCarre.exercice.solution.racines[0];
+    return r === 0 ? "x^2" : `(${formatFacteurRacineMonique(r)})^2`;
   }
   const facteur = facteurs[ref.facteurIndex];
   if (facteur.type === "lineaire" && facteur.polynome.k > 0 && facteur.polynome.k !== 1) {

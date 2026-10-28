@@ -139,7 +139,7 @@ import type {
   ReponseTableauA,
 } from "./moteur5e/verificationProblemesContexte";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionProblemeContexte {
   return demarrerSessionProblemeContexte(REGLAGES_DEMO, genererExerciceProblemeContexte);

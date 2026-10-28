@@ -11,8 +11,8 @@ export type StatutRecap = "verte" | "orange" | "rouge";
  * générateurs 6e — jamais dupliqué localement dans chaque `ResultatPanelXxx.tsx`.
  *
  * ⚠️ **Piège explicite** : ne jamais déduire ce statut depuis le SCORE final d'un écran
- * (`score===100→verte`, sinon orange/rouge) — un score imparfait peut résulter d'une simple
- * tentative ratée SANS jamais avoir utilisé l'aide (pénalité par tentative, pas par aide) ; un tel
+ * (`score===100→verte`, sinon orange/rouge) — un score imparfait pouvait résulter d'une simple
+ * tentative ratée SANS jamais avoir utilisé l'aide (ancienne pénalité par tentative, pas par aide) ; un tel
  * écran doit rester VERT, jamais orange. `revele`/`niveauAide` doivent être capturés au moment
  * précis où chaque écran se ferme, AVANT que la transition de phase suivante ne remette
  * `niveauAide` à zéro (voir le patron `terminerEtape`/`aideParPhase` à répliquer dans chaque

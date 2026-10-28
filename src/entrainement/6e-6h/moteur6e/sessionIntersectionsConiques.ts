@@ -14,7 +14,6 @@ import { verifierEcran } from "./verificationIntersectionsConiques";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatIntersectionsConiques.ts`, `niveauAideMaxEcran`). */
@@ -39,7 +38,7 @@ export function demarrerSessionIntersectionsConiques(reglages: ReglagesSession6e
 }
 
 function reglagesEtape(etat: EtatSessionIntersectionsConiques): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionIntersectionsConiques): EtatSessionIntersectionsConiques {
@@ -70,7 +69,7 @@ export function soumettreReponseEcran(etat: EtatSessionIntersectionsConiques, va
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseIntersectionsConiques, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseIntersectionsConiques, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

@@ -1,7 +1,6 @@
 import type { ExerciceBinomialeA, ExerciceBinomialeB, ExerciceBinomialeSequenceOrdonnee, StrategieBinomialeA } from "../core6e/binomialeSequenceOrdonnee.types";
 import { coefficientBinomial } from "../generateurs6e/combinatoire";
-import type { PhaseBinomialeSequenceOrdonnee, ResultatExerciceBinomialeSequenceOrdonnee } from "../moteur6e/typesBinomialeSequenceOrdonnee";
-import { phasesPourExercice } from "../moteur6e/typesBinomialeSequenceOrdonnee";
+import type { PhaseBinomialeSequenceOrdonnee } from "../moteur6e/typesBinomialeSequenceOrdonnee";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen48`. Dispatch sur
@@ -385,10 +384,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceBinomialeSeque
   return [`\\dfrac{1}{${produit}}\\approx ${formatDecimalExact(exercice.produitFinal)}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsBinomialeSequenceOrdonnee(resultat: ResultatExerciceBinomialeSequenceOrdonnee): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

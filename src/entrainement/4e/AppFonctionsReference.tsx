@@ -31,7 +31,6 @@ const CURSEURS_INITIAUX: ReponseCurseursFonctionReference = { th: 0, tv: 0, ch: 
 
 const REGLAGES_BASE = {
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 } as const;

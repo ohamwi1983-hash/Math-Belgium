@@ -15,7 +15,6 @@ import { ResumeSessionQuizIntegralesPrimitives } from "./components6e/ResumeSess
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizIntegralesPrimitives): EtatSessionQuizIntegralesPrimitives {

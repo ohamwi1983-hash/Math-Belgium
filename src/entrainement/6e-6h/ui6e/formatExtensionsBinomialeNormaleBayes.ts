@@ -1,7 +1,6 @@
 import type { ExerciceExtA, ExerciceExtB, ExerciceExtC, ExerciceExtD, ExerciceExtE, ExerciceExtF, ExerciceExtensionsBinomialeNormaleBayes } from "../core6e/extensionsBinomialeNormaleBayes.types";
 import { destandardiserD, valeurCibleTableD, valeurZD } from "../generateurs6e/loiNormale/familleD";
-import type { CalculerReferenceExtensionsBinomialeNormaleBayes, PhaseExtensionsBinomialeNormaleBayes, ResultatExerciceExtensionsBinomialeNormaleBayes } from "../moteur6e/typesExtensionsBinomialeNormaleBayes";
-import { phasesPourExercice } from "../moteur6e/typesExtensionsBinomialeNormaleBayes";
+import type { CalculerReferenceExtensionsBinomialeNormaleBayes, PhaseExtensionsBinomialeNormaleBayes } from "../moteur6e/typesExtensionsBinomialeNormaleBayes";
 import { esperanceF, jointCategorie3D, probabilitesF, probabiliteUniformeE, r3DeduitD } from "../moteur6e/verificationExtensionsBinomialeNormaleBayes";
 
 /**
@@ -760,10 +759,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceExtensionsBino
   return [`${Math.round(esperanceF(exercice) * exercice.population)}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsExtensionsBinomialeNormaleBayes(resultat: ResultatExerciceExtensionsBinomialeNormaleBayes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

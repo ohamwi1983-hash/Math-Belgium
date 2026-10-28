@@ -8,7 +8,7 @@
  * interpretation. "modelisation" utilise la même brique générique de notation par tentatives que
  * les 3 autres phases (`etapeTentatives.ts`) — un mauvais choix ne fait donc avancer qu'une fois
  * les tentatives épuisées, comme n'importe quelle autre étape, jamais après une seule tentative
- * fausse. Aide progressive (2 niveaux, pénalité additive -20 pts/niveau, même principe que
+ * fausse. Aide progressive (2 niveaux, même principe que
  * "Colinéarité"/"Orthogonalité"/"Distance point-droite") sur le SEUL écran "norme"
  * (`promptgen29modificationscompletes.md`, point 4.3) — les 3 autres écrans restent sans aide.
  */
@@ -25,12 +25,7 @@ import {
 import type { EtatSessionApplicationPhysique, ResultatExerciceApplicationPhysique } from "./typesApplicationPhysique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_NORME = 2;
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 export function demarrerSessionApplicationPhysique(
   reglages: ReglagesSession,
@@ -73,7 +68,6 @@ function reglagesEtape(etat: EtatSessionApplicationPhysique): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -148,7 +142,7 @@ export function soumettreReponseNorme(etat: EtatSessionApplicationPhysique, vale
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideNorme);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,

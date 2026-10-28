@@ -7,7 +7,8 @@ import { construireFacteurLineaire } from "../signesProduit/construireFacteurLin
 import { construireMiseEnEvidence } from "../secondDegre/categories/miseEnEvidence";
 import { construireBinomeConjugue } from "../secondDegre/categories/binomeConjugue";
 import { construireCasGeneral } from "../secondDegre/categories/casGeneral";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { construireProduitRemarquable } from "../secondDegre/categories/produitRemarquable";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientNiveau3 } from "./construireGrilleQuotientNiveau3";
 import { tousLisibles } from "./bornesLisibilite";
 
@@ -39,10 +40,11 @@ function construireTechnique(technique: (typeof TECHNIQUES)[number], a: number):
  * retire un autre triplet technique/racines en cas de collision, même principe que
  * construireFacteurFactorisable (signesProduit).
  */
-function construireP2_1Impose(a: number, racineExclue: number): Exercice {
+function construireP2_1Impose(a: number, racineExclue: number, racineDouble: boolean): Exercice {
   for (let tentative = 0; tentative < 50; tentative++) {
-    const technique = TECHNIQUES[randomInt(0, TECHNIQUES.length - 1)];
-    const partiel = construireTechnique(technique, a);
+    const partiel = racineDouble
+      ? construireProduitRemarquable({ aImpose: a })
+      : construireTechnique(TECHNIQUES[randomInt(0, TECHNIQUES.length - 1)], a);
     if (!partiel.solution.racines.includes(racineExclue)) {
       return { ...partiel, formeAffichage: "canonique" };
     }
@@ -97,8 +99,13 @@ function construireP1Combine(p2_1: Exercice, p1_3: PolynomeLineaire, p1_2: Polyn
  * polynôme du 1er degré (pas une constante — le niveau 2 couvre déjà ce cas). Construction "à
  * l'envers" comme le reste du projet : P1_2/P1_3 choisis d'abord, `a` imposé à P2_1 en découle,
  * P1_1 déduit par expansion — jamais a,b,c tirés au hasard puis vérifiés après coup.
+ *
+ * `racineDouble` (audit gen6, variante niveau3RacineDouble) : P2_1 = a(x − r)² (produit
+ * remarquable, a > 0) — r est alors un point isolé de la solution avec ≤/≥, un trou avec </>. Sans
+ * option, tirée une fois sur trois pour que ces formes apparaissent aussi au tirage aléatoire.
  */
-export function construireNiveau3(): ExerciceInequationRationnelleNiveau3 {
+export function construireNiveau3(options?: { racineDouble?: boolean }): ExerciceInequationRationnelleNiveau3 {
+  const racineDouble = options?.racineDouble ?? randomInt(0, 2) === 0;
   let numerateurAvantCombinaison: PolynomeLineaire | null = null;
   let p1_2: PolynomeLineaire = { k: 1, p: 0 };
   let p1_3: PolynomeLineaire = { k: 1, p: 0 };
@@ -109,7 +116,7 @@ export function construireNiveau3(): ExerciceInequationRationnelleNiveau3 {
     p1_2 = facteurP1_2.polynome;
     p1_3 = { k: tirerKOppose(p1_2.k), p: randomInt(-6, 6) };
     const a = -(p1_3.k * p1_2.k);
-    p2_1 = construireP2_1Impose(a, p1_2.p);
+    p2_1 = construireP2_1Impose(a, p1_2.p, racineDouble);
     numerateurAvantCombinaison = construireP1Combine(p2_1, p1_3, p1_2);
     if (numerateurAvantCombinaison !== null) {
       const n1 = numerateurAvantCombinaison;
@@ -121,8 +128,7 @@ export function construireNiveau3(): ExerciceInequationRationnelleNiveau3 {
 
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, ce, grille } = construireGrilleQuotientNiveau3(p2_1, p1_2);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return {
     niveau: "niveau3",

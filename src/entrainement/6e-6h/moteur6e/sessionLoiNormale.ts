@@ -16,7 +16,6 @@ import { verifierEcran } from "./verificationLoiNormale";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatLoiNormale.ts`, `niveauAideMaxEcran`). */
@@ -45,7 +44,7 @@ export function demarrerSessionLoiNormale(reglages: ReglagesSession6e, generateu
 }
 
 function reglagesEtape(etat: EtatSessionLoiNormale): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionLoiNormale): EtatSessionLoiNormale {
@@ -77,7 +76,7 @@ export function soumettreReponseEcran(etat: EtatSessionLoiNormale, valeurs: stri
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseLoiNormale, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseLoiNormale, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseLoiNormale, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

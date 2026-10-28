@@ -28,7 +28,6 @@ const CONSIGNE_GENERALE = "Détermine l'ombre de cet objet au soleil.";
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

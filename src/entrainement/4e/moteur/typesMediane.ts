@@ -70,8 +70,7 @@ export interface EtatSessionMediane {
    * partie mode(s), min/max n'ont pas d'aide dédiée), 1 seul niveau sur "polygone" (rappel générique
    * du principe, jamais les coordonnées de l'exercice), 2 niveaux sur "lectureQ1"/"lectureMediane"/
    * "lectureQ3" (rappel de méthode, puis révélation du seuil calculé — jamais la valeur finale
-   * elle-même) et 2 niveaux sur "synthese". Pénalité ADDITIVE (-20 points par niveau atteint)
-   * appliquée au niveau atteint au moment précis où l'écran se clôt — jamais rétroactivement.
+   * elle-même) et 2 niveaux sur "synthese".
    */
   niveauAideMediane: number;
   niveauAideQ1: number;

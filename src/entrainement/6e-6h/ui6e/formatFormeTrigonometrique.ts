@@ -1,8 +1,7 @@
 import type { ValeurExacte } from "../core6e/cyclometrique.types";
 import type { ConditionD, ExerciceFormeTrigA, ExerciceFormeTrigB, ExerciceFormeTrigC, ExerciceFormeTrigD, ExerciceFormeTrigE, ExerciceFormeTrigonometrique, FacteurComplexe } from "../core6e/formeTrigonometrique.types";
 import { pgcd } from "../generateurs6e/calculPrimitives/aleatoire";
-import type { PhaseFormeTrigonometrique, ResultatExerciceFormeTrigonometrique } from "../moteur6e/typesFormeTrigonometrique";
-import { phasesPourExercice } from "../moteur6e/typesFormeTrigonometrique";
+import type { PhaseFormeTrigonometrique } from "../moteur6e/typesFormeTrigonometrique";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen37`. Dispatch sur
@@ -548,10 +547,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormeTrigonome
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 2 pour A/B, 3 pour C/D/E). */
-export function calculerTotalPointsFormeTrigonometrique(resultat: ResultatExerciceFormeTrigonometrique): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

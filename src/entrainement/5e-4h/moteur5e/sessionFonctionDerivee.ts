@@ -15,7 +15,6 @@ import type { EcranFonctionDerivee, EtatSessionFonctionDerivee, ResultatExercice
 import { diagnostiquerCalculerDerivee, verifierDecompositionComposee, verifierDecompositionUV } from "./verificationFonctionDerivee";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran). */
 export const NIVEAU_AIDE_MAX_FONCTION_DERIVEE = 2;
@@ -43,7 +42,7 @@ export function demarrerSessionFonctionDerivee(reglages: ReglagesSession5e, gene
 }
 
 function reglagesEtape(etat: EtatSessionFonctionDerivee): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionFonctionDerivee): EtatSessionFonctionDerivee {
@@ -61,7 +60,7 @@ function cloturerExerciceOuSuivant(etat: EtatSessionFonctionDerivee, resultat: R
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-/** Termine l'écran courant (score, pénalité d'aide) puis avance vers `phaseSuivante` — clôture
+/** Termine l'écran courant (score) puis avance vers `phaseSuivante` — clôture
  * l'exercice si `phaseSuivante==="termine"`. `extra` permet à l'appelant d'injecter un champ
  * supplémentaire dans le nouvel état (ex. `typeRetenu`, décidé UNIQUEMENT à la sortie de
  * "reconnaissance"). */
@@ -73,7 +72,7 @@ function terminerEcranEtAvancer(
   extra: Partial<EtatSessionFonctionDerivee> = {},
 ): EtatSessionFonctionDerivee {
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [ecranAttendu]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [ecranAttendu]: revele };
 

@@ -1,7 +1,7 @@
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
 import { formatAffineLatex, formatPuissanceMonomeLatex } from "../generateurs6e/injectiviteFonctions/formatFLatex";
-import type { CoteBranche, ResultatExerciceInjectiviteFonctions } from "../moteur6e/typesInjectiviteFonctions";
+import type { CoteBranche } from "../moteur6e/typesInjectiviteFonctions";
 import { approxFractionLatex } from "./formatFraction";
 
 // ============================================================================
@@ -338,14 +338,3 @@ export function aideImageNiveau2(exercice: ExerciceInjectiviteFonctions): AideAv
 
 export const TEXTE_AIDE_BIJECTION_NIVEAU1 = "Rappel : X doit être EXACTEMENT l'intervalle trouvé à l'étape 2 et Y celui trouvé à l'étape 4 — jamais recalculés indépendamment à ce stade.";
 
-// ============================================================================
-// Total points du récapitulatif final — COMPLÉMENT de `LigneRecap`/`statutRecap`, jamais un
-// remplacement (voir CLAUDE.md). Réutilise la formule RÉELLE déjà calculée par
-// `moteur/etapeTentatives.ts` (pénalité par tentative + par aide, forcée à 0 sur révélation).
-// ============================================================================
-
-/** Séquence FIXE à 5 écrans : maximum toujours 500. */
-export function calculerTotalPointsInjectiviteFonctions(resultat: ResultatExerciceInjectiviteFonctions): { points: number; maximum: number } {
-  const points = resultat.scoreDomaine + resultat.scoreInjective + resultat.scoreReciproque + resultat.scoreImage + resultat.scoreBijection;
-  return { points, maximum: 500 };
-}

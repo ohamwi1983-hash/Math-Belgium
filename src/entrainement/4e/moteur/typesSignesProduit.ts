@@ -82,7 +82,7 @@ export interface ResultatExerciceSignesProduit {
   scoresSigneIrreductible: number[];
   /** même principe que `racineLineaireRevelees` ci-dessus, même index que `scoresSigneIrreductible`. */
   signeIrreductibleRevelees: boolean[];
-  /** aide de l'écran "signeIrreductible" utilisée (×0,5), même index que `scoresSigneIrreductible`. */
+  /** aide de l'écran "signeIrreductible" utilisée, même index que `scoresSigneIrreductible`. */
   aidesSigneIrreductible: boolean[];
   scoreGrille: number;
   grilleRevelee: boolean;
@@ -127,7 +127,7 @@ export interface EtatSessionSignesProduit {
   scoreGrilleExercice: number | null;
   grilleRevelee: boolean;
   /**
-   * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —
+   * Aides à sens unique (1 seul niveau —
    * conceptionaidescomposantspartageshistorique.md), distinctes de `aideUtilisee` ci-dessous (qui
    * ne concerne que l'étape "intervalle") — remises à false au passage à l'exercice suivant.
    */
@@ -139,8 +139,7 @@ export interface EtatSessionSignesProduit {
   /** Bouton "Aide" de l'étape intervalle (prompt-refonte-tableau-signes.md, section 6) : révélation
    * à sens unique (jamais de retour à false pour cet exercice une fois activée — même principe que
    * activerAideIntervalle, sessionInequation.ts), réinitialisée à false au passage à l'exercice
-   * suivant. Applique ×0,5 au score final de l'étape intervalle, quel que soit le nombre de
-   * tentatives avant/après l'activation. */
+   * suivant. */
   aideUtilisee: boolean;
   resultats: ResultatExerciceSignesProduit[];
   terminee: boolean;

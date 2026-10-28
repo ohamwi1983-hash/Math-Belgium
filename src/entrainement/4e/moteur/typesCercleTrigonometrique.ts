@@ -43,10 +43,9 @@ export interface EtatSessionCercleTrigonometrique {
   etapeCourante: EtatEtapeTentatives;
   /**
    * Bouton "Aide" — un bouton par écran (Réduction/Angle du premier quadrant/Signes ; l'écran
-   * Quadrant n'en a pas), chacun avec son propre état de révélation à sens unique et sa propre
-   * pénalité ×0,5, strictement indépendants entre eux (promptcorrectionsgenerateur14lot2.md,
+   * Quadrant n'en a pas), chacun avec son propre état de révélation à sens unique, strictement indépendants entre eux (promptcorrectionsgenerateur14lot2.md,
    * section 1 — corrige un bug où un seul flag partagé faisait qu'activer l'aide sur un écran
-   * l'activait, et pénalisait, tous les autres écrans de l'exercice, y compris l'écran Quadrant qui
+   * l'activait sur tous les autres écrans de l'exercice, y compris l'écran Quadrant qui
    * n'a pourtant aucun bouton Aide).
    */
   aideReductionUtilisee: boolean;

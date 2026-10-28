@@ -15,7 +15,6 @@ import { ResumeSessionQuizConiques } from "./components6e/ResumeSessionQuizConiq
 const REGLAGES_DEMO: ReglagesSession6e = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 /** Le chapitre "Les coniques" n'a JAMAIS porté de numéro dans ce dépôt (contrairement aux chapitres

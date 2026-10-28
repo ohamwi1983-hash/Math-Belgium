@@ -53,8 +53,7 @@ export interface EtatSessionProprietesLogarithme {
    * l'écran en cours, qui n'a pas encore de score définitif. */
   scoresPartiels: number[];
   /** Un booléen "révélé" par écran déjà clos, même index que `scoresPartiels` — jusqu'au 2025-10,
-   * déduit indirectement de `scoresPartiels[i] === 0` (un succès ne vaut jamais exactement 0, la
-   * pénalité par tentative garantissant un score strictement positif même à la dernière tentative
+   * déduit indirectement de `scoresPartiels[i] === 0` (un succès ne vaut jamais exactement 0, l'ancienne pénalité par tentative garantissant un score strictement positif même à la dernière tentative
    * autorisée) ; tableau explicite ajouté pendant le balayage générique (point A). */
   revelesPartiels: boolean[];
   indexExercice: number;

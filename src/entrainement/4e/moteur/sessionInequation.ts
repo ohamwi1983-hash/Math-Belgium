@@ -60,11 +60,10 @@ export interface EtatSessionInequation {
   signeARevele: boolean;
   /** Bouton "Aide" de l'étape simplification : révélation à sens unique, jamais remise à false
    * pour cet exercice une fois activée (même principe qu'aideUtilisee ci-dessous, moteur/session.ts
-   * activerAideSimplification). Applique ×0,5 au score final de l'étape simplification. */
+   * activerAideSimplification). */
   aideSimplificationUtilisee: boolean;
   /** Bouton "Aide" de l'étape intervalle : révélation à sens unique, jamais remise à false pour
-   * cet exercice une fois activée (voir activerAideIntervalle). Applique ×0,5 au score final de
-   * l'étape intervalle, quel que soit le nombre de tentatives avant/après l'activation. */
+   * cet exercice une fois activée (voir activerAideIntervalle). */
   aideUtilisee: boolean;
   resultats: ResultatExerciceInequation[];
   terminee: boolean;
@@ -99,7 +98,6 @@ function reglagesEtape(etat: EtatSessionInequation): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -132,17 +130,14 @@ export function soumettreReponseSimplification(etat: EtatSessionInequation, repo
     exerciceCourant,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "racines",
-    scoreSimplificationExercice: etat.aideSimplificationUtilisee
-      ? (etapeCourante.score as number) * 0.5
-      : etapeCourante.score,
+    scoreSimplificationExercice: etapeCourante.score,
     simplificationRevele: etapeCourante.revelee,
   };
 }
 
 /**
  * Active le bouton "Aide" de l'étape "simplification" — révélation à sens unique (jamais de
- * retour à false pour cet exercice), applique ×0,5 au score final de cette étape dans
- * soumettreReponseSimplification, quel que soit le nombre de tentatives déjà utilisées ou à venir.
+ * retour à false pour cet exercice).
  */
 export function activerAideSimplification(etat: EtatSessionInequation): EtatSessionInequation {
   if (etat.terminee || etat.phase !== "simplification") {
@@ -203,8 +198,7 @@ export function soumettreReponseSigneA(etat: EtatSessionInequation, reponse: Sig
 
 /**
  * Active le bouton "Aide" pour l'étape intervalle en cours : révélation à sens unique (jamais de
- * retour à false pour cet exercice), applique ×0,5 au score final de cette étape dans
- * soumettreReponseIntervalle, quel que soit le nombre de tentatives déjà utilisées ou à venir.
+ * retour à false pour cet exercice).
  */
 export function activerAideIntervalle(etat: EtatSessionInequation): EtatSessionInequation {
   if (etat.terminee || etat.phase !== "intervalle") {
@@ -232,7 +226,7 @@ export function soumettreReponseIntervalle(
     return { ...etat, etapeCourante };
   }
 
-  const scoreIntervalle = etat.aideUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number);
+  const scoreIntervalle = (etapeCourante.score as number);
 
   const resultat: ResultatExerciceInequation = {
     scoreSimplification: etat.scoreSimplificationExercice,

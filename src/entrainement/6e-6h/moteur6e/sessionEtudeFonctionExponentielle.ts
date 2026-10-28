@@ -16,7 +16,6 @@ import { verifierEcranAsymptotes, verifierEcranConcavite, verifierEcranCroissanc
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur les 6 écrans (spec : "aide progressive à paliers, 2 niveaux/écran"). */
 export const NIVEAU_AIDE_MAX = 2;
@@ -42,7 +41,7 @@ export function demarrerSessionEtudeFonctionExponentielle(
 }
 
 function reglagesEtape(etat: EtatSessionEtudeFonctionExponentielle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionEtudeFonctionExponentielle): EtatSessionEtudeFonctionExponentielle {
@@ -93,7 +92,7 @@ function avancerPhase<TReponse>(
   // cette fonction retourne, l'écran a déjà changé de phase (ou l'exercice est déjà clos) et
   // `etapeCourante` est réinitialisé pour la suite — voir la doc de `EtatSessionEtudeFonctionExponentielle.derniereRevelee`.
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const phaseSuivante = phaseApres(etat.phase);

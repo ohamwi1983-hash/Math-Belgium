@@ -58,7 +58,7 @@
  * chapitre 3) fait exception, demande explicite de l'utilisateur ("c'est que lorsqu'on active
  * l'aide qu'on a ce message") : le rappel de méthode, d'abord affiché en permanence, n'apparaît
  * plus que derrière `BoutonAide` (1 seul niveau, `NIVEAU_AIDE_MAX_PARITE`), même mécanisme
- * (`activerAideSuivante`/pénalité additive `-20`/exercice) que les autres générateurs à aide de ce
+ * (`activerAideSuivante`) que les autres générateurs à aide de ce
  * chantier (ex. `sessionDistanceDroite.ts`, `sessionColinearite.ts`).
  */
 import type {
@@ -105,7 +105,6 @@ import {
 import type { EtatSessionCaracteristiquesAlgebriques, ResultatExerciceCaracteristiquesAlgebriques } from "./typesCaracteristiquesAlgebriques";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Aides — 1 niveau unique par écran (un rappel de méthode, rien à graduer) : "parite" (audit du
  * chapitre 3), puis CE/isolement/séparation/débarrasser/zéros (audit gen13). Les écrans propres au
@@ -135,12 +134,6 @@ const AIDE_PAR_PHASE: Partial<Record<PhaseCaracteristiquesAlgebriques, { champ: 
   debarrasser: { champ: "niveauAideDebarrasser", max: NIVEAU_AIDE_MAX_DEBARRASSER },
   zeros: { champ: "niveauAideZeros", max: NIVEAU_AIDE_MAX_ZEROS },
 };
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires.
- * Même formule que les autres générateurs à aide de ce chantier (`sessionDistanceDroite.ts`...). */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 function etatInitialTransitoire(): Pick<
   EtatSessionCaracteristiquesAlgebriques,
@@ -225,7 +218,6 @@ function reglagesEtape(etat: EtatSessionCaracteristiquesAlgebriques): ReglagesEt
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -334,7 +326,7 @@ export function soumettreReponseCE(etat: EtatSessionCaracteristiquesAlgebriques,
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "domaine",
-    scoreCEExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCE),
+    scoreCEExercice: etapeCourante.score as number,
     ceRevele: etapeCourante.revelee,
   };
 }
@@ -387,7 +379,7 @@ export function soumettreReponseParite(
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideParite);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -465,7 +457,7 @@ export function soumettreReponseIsolement(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresIsolement(etat.exerciceCourant),
-    scoreIsolementExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIsolement),
+    scoreIsolementExercice: etapeCourante.score as number,
     isolementRevele: etapeCourante.revelee,
   };
 }
@@ -495,7 +487,7 @@ export function soumettreReponseSeparation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "zeros",
-    scoreSeparationExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSeparation),
+    scoreSeparationExercice: etapeCourante.score as number,
     separationRevele: etapeCourante.revelee,
   };
 }
@@ -527,7 +519,7 @@ export function soumettreReponseDebarrasser(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "zeros",
-    scoreDebarrasserExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDebarrasser),
+    scoreDebarrasserExercice: etapeCourante.score as number,
     debarrasserRevele: etapeCourante.revelee,
   };
 }
@@ -730,7 +722,7 @@ export function soumettreReponseZeros(
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const scoreZeros = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideZeros);
+  const scoreZeros = etapeCourante.score as number;
 
   if (candidatsAvantValidation) {
     return {

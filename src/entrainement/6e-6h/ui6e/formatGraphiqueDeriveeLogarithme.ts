@@ -1,5 +1,4 @@
 import type { CandidatDeriveeLogA, CandidatDeriveeLogB, CandidatDeriveeLogC, ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeriveeLogarithme.types";
-import type { ResultatExerciceGraphiqueDeriveeLogarithme } from "../moteur6e/typesGraphiqueDeriveeLogarithme";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
 /**
@@ -303,13 +302,3 @@ export function aideSelectionNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithm
   }
 }
 
-/**
- * Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place). Somme les scores DÉJÀ calculés par `sessionGraphiqueDeriveeLogarithme.ts`
- * (pénalité par tentative + par niveau d'aide déjà appliquée, forcé à 0 sur révélation) — les 3
- * familles traversent TOUJOURS les 2 écrans (contrairement à `6gen8`), `maximum` vaut donc toujours
- * `200`.
- */
-export function calculerTotalRecapGraphiqueDeriveeLogarithme(resultat: ResultatExerciceGraphiqueDeriveeLogarithme): { total: number; maximum: number } {
-  return { total: resultat.scoreDerivee + resultat.scoreSelection, maximum: 200 };
-}

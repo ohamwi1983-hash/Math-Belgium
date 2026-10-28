@@ -11,9 +11,7 @@
  * fusionné terminal).
  *
  * Aide PROGRESSIVE par écran (même principe que "Colinéarité"/"Orthogonalité") : 2 niveaux sur
- * "extraction", "coefficients" et "possibiliteCoefficients", 1 seul sur "possibilite" — pénalité
- * ADDITIVE (-20 points/niveau) appliquée au moment précis où l'écran se clôt, jamais
- * rétroactivement.
+ * "extraction", "coefficients" et "possibiliteCoefficients", 1 seul sur "possibilite".
  */
 import type { ExerciceEquationDroite, GenerateurExerciceEquationDroite } from "../core/equationDroite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -32,7 +30,6 @@ import {
 import type { ReponseExtraction } from "./verificationEquationDroite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_EXTRACTION = 2;
 /** Écran "possibilite" sans aide (`promptgen42modifications.md`, point 3) : l'aide révélait
@@ -96,12 +93,7 @@ function reglagesEtape(etat: EtatSessionEquationDroite): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationDroite): EtatSessionEquationDroite {
@@ -158,7 +150,7 @@ export function soumettreReponseExtraction(etat: EtatSessionEquationDroite, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideExtraction);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -187,7 +179,7 @@ export function soumettreReponsePossibilite(etat: EtatSessionEquationDroite, rep
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePossibilite);
+  const score = etapeCourante.score as number;
 
   if (!exercice.possible) {
     return cloturerExerciceOuSuivant(etat, {
@@ -250,7 +242,7 @@ export function soumettreReponseCoefficients(etat: EtatSessionEquationDroite, re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCoefficients);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     typeDonnee: exercice.donnees.type,
@@ -288,7 +280,7 @@ export function soumettreReponsePossibiliteCoefficients(etat: EtatSessionEquatio
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePossibiliteCoefficients);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     typeDonnee: exercice.donnees.type,

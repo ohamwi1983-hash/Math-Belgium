@@ -109,7 +109,6 @@ function formatMiseEnEvidenceLatex(poly: Exercice): string {
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };
@@ -414,8 +413,7 @@ function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
  * valeur recalculée) — jusqu'au 2025-10, dérivé post-hoc comme `scoreXxx === 0`
  * (`ResultatPanelEquationRationnelle.tsx` à l'origine). Contrairement à d'autres générateurs
  * corrigés dans le même balayage générique (point A), cette heuristique était ici mathématiquement
- * sûre (pénalité d'aide ×0,5 sur le score de tentatives, jamais soustractive — un succès ne peut
- * jamais tomber exactement à 0, voir `etapeTentatives.ts`) : champ explicite ajouté pour la clarté
+ * sûre (un succès ne peut jamais tomber exactement à 0, voir `etapeTentatives.ts`) : champ explicite ajouté pour la clarté
  * du code, pas pour corriger un bug visible. "racinesEtrangeres" clôture TOUJOURS l'exercice : son
  * signal n'existe que sur le dernier `resultats[...]` de `nouvelEtat`, jamais sur un champ
  * `xxxRevele` top-level. */

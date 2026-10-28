@@ -11,10 +11,8 @@ import { estPhaseQCM, formatReponseAttendueTexte, formatReponseAttenduePhaseLate
  * l'ordre. Le moteur ne trackait, à l'origine, que `derniereEtapeRevelee` (générique, pas un
  * booléen par phase) — on retrouve donc le verdict par phase via l'heuristique
  * `scoresPartiels[phase] === 0 ⟺ révélée` (seul cas où `soumettreEtapeTentatives` renvoie
- * exactement 0, voir `moteur/etapeTentatives.ts` ; `soumettreEcran` y soustrait ensuite la
- * pénalité d'aide avant stockage, donc ce 0 peut aussi provenir d'une réussite tardive fortement
- * pénalisée par l'aide — même heuristique qu'ailleurs sur la plateforme, pas une garantie
- * absolue).
+ * exactement 0, voir `moteur/etapeTentatives.ts` ; aucune pénalité d'aide n'étant plus appliquée, une réussite vaut toujours
+ * `pointsDeBase` : l'équivalence est exacte).
  *
  * Même distinction QCM/LaTeX que `reponseAttendueLimitesContexte` dans `App5gen23.tsx` :
  * "interpreter"/"vaSens" (`estPhaseQCM`) affichent le texte de l'option correcte

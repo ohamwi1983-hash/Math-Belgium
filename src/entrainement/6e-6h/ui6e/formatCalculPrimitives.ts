@@ -10,8 +10,7 @@ import type {
   TermeA,
   TypeGFamilleB,
 } from "../core6e/calculPrimitives.types";
-import type { PhaseCalculPrimitives, ResultatExerciceCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
-import { phasesPourExercice } from "../moteur6e/typesCalculPrimitives";
+import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen23`. Dispatch sur
@@ -900,14 +899,6 @@ function primitiveLatex(exercice: ExerciceCalculPrimitives): string {
     case "G":
       return primitiveLatexG(exercice);
   }
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice, de 100 à 400 selon la famille/le sous-type). */
-export function calculerTotalPointsCalculPrimitives(resultat: ResultatExerciceCalculPrimitives): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export const LIBELLE_FAMILLE: Record<ExerciceCalculPrimitives["famille"], string> = {

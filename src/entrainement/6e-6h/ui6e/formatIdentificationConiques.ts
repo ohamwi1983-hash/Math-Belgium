@@ -1,7 +1,6 @@
 import type { ExerciceConiqueA1, ExerciceConiqueA2, ExerciceConiqueB, ExerciceConiqueC, ExerciceIdentificationConiques, NatureConique } from "../core6e/identificationConiques.types";
 import { LIBELLE_NATURE, categorieProbable, natureVersId } from "../generateurs6e/identificationConiques/classification";
-import type { PhaseIdentificationConiques, ResultatExerciceIdentificationConiques } from "../moteur6e/typesIdentificationConiques";
-import { phasesPourExercice } from "../moteur6e/typesIdentificationConiques";
+import type { PhaseIdentificationConiques } from "../moteur6e/typesIdentificationConiques";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen58`. Dispatch sur
@@ -584,10 +583,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIdentification
   return formatElementsLatex(exercice.nature, exercice.elements);
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsIdentificationConiques(resultat: ResultatExerciceIdentificationConiques): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

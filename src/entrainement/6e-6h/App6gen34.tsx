@@ -27,7 +27,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `EtapeChampsLongueurArc.tsx`) suffit.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionNombresComplexes {
   return demarrerSessionNombresComplexes(REGLAGES_DEMO, genererExerciceNombresComplexes);

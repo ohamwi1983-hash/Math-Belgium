@@ -1,6 +1,5 @@
 import type { ExerciceIntersectionsConiques, ExerciceIntersectionsConiquesA, ExerciceIntersectionsConiquesB, Frac } from "../core6e/intersectionsConiques.types";
-import type { PhaseIntersectionsConiques, ResultatExerciceIntersectionsConiques } from "../moteur6e/typesIntersectionsConiques";
-import { phasesPourExercice } from "../moteur6e/typesIntersectionsConiques";
+import type { PhaseIntersectionsConiques } from "../moteur6e/typesIntersectionsConiques";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen61`. Dispatch sur
@@ -357,10 +356,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntersectionsC
   return [`\\text{Centre : }(${exercice.centre.x};${exercice.centre.y})\\text{, rayon}=${exercice.rayon}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice, famille A avec conique directe en ayant 1 de moins). */
-export function calculerTotalPointsIntersectionsConiques(resultat: ResultatExerciceIntersectionsConiques): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

@@ -57,7 +57,7 @@ export interface EtatSessionLectureGraphiqueDerivees {
   scoresPartiels: Partial<Record<EcranLectureGraphiqueDerivees, number>>;
   /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (jamais
    * recalculé) — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`,
-   * une heuristique fausse ici : la pénalité d'aide (`niveauAide * PENALITE`) est soustraite APRÈS
+   * une heuristique fausse ici : la pénalité d'aide (`niveauAide * PENALITE`) était soustraite (avant le retrait des pénalités) APRÈS
    * le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une réussite fortement
    * aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée" (point A, balayage
    * générique). */

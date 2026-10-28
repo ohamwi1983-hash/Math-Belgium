@@ -7,8 +7,7 @@
  * (contrairement à "Équation d'une droite", ce générateur n'a jamais de cas "forme impossible").
  *
  * Aide PROGRESSIVE par écran (même principe que "Colinéarité"/"Orthogonalité"/"Équation d'une
- * droite") : 2 niveaux sur "points", 1 seul sur "trace" — pénalité ADDITIVE (-20 points/niveau)
- * appliquée au moment précis où l'écran se clôt, jamais rétroactivement.
+ * droite") : 2 niveaux sur "points", 1 seul sur "trace".
  */
 import type { ExerciceConstructionDroite, GenerateurExerciceConstructionDroite } from "../core/constructionDroite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -20,7 +19,6 @@ import { verifierPoints, verifierTrace } from "./verificationConstructionDroite"
 import type { ReponsePoints } from "./verificationConstructionDroite";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_POINTS = 2;
 export const NIVEAU_AIDE_MAX_TRACE = 1;
@@ -72,12 +70,7 @@ function reglagesEtape(etat: EtatSessionConstructionDroite): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionConstructionDroite): EtatSessionConstructionDroite {
@@ -127,7 +120,7 @@ export function soumettreReponsePoints(etat: EtatSessionConstructionDroite, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePoints);
+  const score = etapeCourante.score as number;
 
   const cible1: Point = etapeCourante.reussie ? { x: reponse.x1, y: reponse.y1 } : exercice.point;
   const cible2: Point = etapeCourante.reussie ? { x: reponse.x2, y: reponse.y2 } : pointCanoniqueSecond(exercice);
@@ -167,7 +160,7 @@ export function soumettreReponseTrace(etat: EtatSessionConstructionDroite, repon
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideTrace);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

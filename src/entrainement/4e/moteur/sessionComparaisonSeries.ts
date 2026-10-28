@@ -8,8 +8,7 @@
  * exercice, tirée à la génération (`exercice.question.type`) : 4 fonctions de soumission
  * exportées, une par forme de réponse, chacune toujours terminale dès sa clôture. Aide PROGRESSIVE
  * additive (même mécanique que "Boîte à moustaches"/"Étendue et écart interquartile"/"Triangle
- * quelconque"), 2 niveaux pour les 4 types de question — pénalité appliquée au moment précis où la
- * question se clôt.
+ * quelconque"), 2 niveaux pour les 4 types de question.
  */
 import type { ExerciceComparaisonSeries, GenerateurExerciceComparaisonSeries } from "../core/comparaisonSeries.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -20,7 +19,6 @@ import type { ReponseDispersion } from "./verificationComparaisonSeries";
 import type { EtatSessionComparaisonSeries, ResultatExerciceComparaisonSeries } from "./typesComparaisonSeries";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 const NIVEAU_AIDE_MAX = 2;
 
 export function niveauAideMax(): number {
@@ -47,12 +45,7 @@ function reglagesEtape(etat: EtatSessionComparaisonSeries): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de la question courante — lève si la session est terminée ou si
@@ -116,7 +109,7 @@ export function soumettreReponseCentrage(etat: EtatSessionComparaisonSeries, cho
   });
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, construireResultat(etat, score, etapeCourante.revelee));
 }
 
@@ -132,7 +125,7 @@ export function soumettreReponseInterpretation(etat: EtatSessionComparaisonSerie
   });
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, construireResultat(etat, score, etapeCourante.revelee));
 }
 
@@ -148,7 +141,7 @@ export function soumettreReponseSeuil(etat: EtatSessionComparaisonSeries, texte:
   });
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, construireResultat(etat, score, etapeCourante.revelee));
 }
 
@@ -164,6 +157,6 @@ export function soumettreReponseDispersion(etat: EtatSessionComparaisonSeries, r
   });
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   return cloturerExerciceOuSuivant(etat, construireResultat(etat, score, etapeCourante.revelee));
 }

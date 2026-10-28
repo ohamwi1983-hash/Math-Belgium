@@ -16,7 +16,6 @@ import { verifierEcran } from "./verificationMethodeGeneratrices";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur chaque écran — `max=0` jamais (contrairement à `6gen43`, chaque écran
  * de ce générateur propose une aide, voir `ui6e/formatMethodeGeneratrices.ts`). */
@@ -45,7 +44,7 @@ export function demarrerSessionMethodeGeneratrices(reglages: ReglagesSession6e, 
 }
 
 function reglagesEtape(etat: EtatSessionMethodeGeneratrices): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionMethodeGeneratrices): EtatSessionMethodeGeneratrices {
@@ -76,7 +75,7 @@ export function soumettreReponseEcran(etat: EtatSessionMethodeGeneratrices, vale
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseMethodeGeneratrices, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseMethodeGeneratrices, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseMethodeGeneratrices, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

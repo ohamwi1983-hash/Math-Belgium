@@ -1,7 +1,6 @@
 import type { ExerciceCalculPrimitives } from "../core6e/calculPrimitives.types";
 import type { ExerciceIntegraleMoyenne, ExerciceIntegraleParametre, ExerciceIntegraleSimple, ExerciceIntegralesDefinies } from "../core6e/integralesDefinies.types";
-import type { PhaseIntegralesDefinies, ResultatExerciceIntegralesDefinies } from "../moteur6e/typesIntegralesDefinies";
-import { phasesPourExercice } from "../moteur6e/typesIntegralesDefinies";
+import type { PhaseIntegralesDefinies } from "../moteur6e/typesIntegralesDefinies";
 import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExercicePrimitive } from "../moteur6e/typesCalculPrimitives";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
@@ -214,14 +213,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesDefi
   const exerciceP = exercice as ExerciceIntegraleParametre;
   if (phase === "poserEquationM") return [`\\text{${LIBELLE_PHASE.poserEquationM}}`];
   return [exerciceP.solutionsM.map((m) => `m=${Math.round(m * 1000) / 1000}`).join(" \\text{ ou } ")];
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice, écrans empruntés + écrans propres). */
-export function calculerTotalPointsIntegralesDefinies(resultat: ResultatExerciceIntegralesDefinies): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export const LIBELLE_SCENARIO: Record<ExerciceIntegralesDefinies["scenario"], string> = {

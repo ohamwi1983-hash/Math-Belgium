@@ -56,7 +56,7 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   /**
-   * Texte de l'aide (1 seul niveau, ×0,5 sur le score de l'étape) — par défaut la consigne pour
+   * Texte de l'aide (1 seul niveau) — par défaut la consigne pour
    * regrouper les termes (gen1) ; gen4/gen6 le remplacent par la consigne "élimine les
    * dénominateurs" (conceptionaidescomposantspartageshistorique.md, point 2).
    */

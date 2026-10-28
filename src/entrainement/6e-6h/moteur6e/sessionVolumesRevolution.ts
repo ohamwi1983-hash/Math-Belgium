@@ -19,7 +19,6 @@ import { verifierEcran } from "./verificationVolumesRevolution";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur les 3 écrans qui en prévoient (spec explicite : aEcran1/bEcran2 — écran
  * "développer f(x)²" identique entre A et B —, cEcran3, dEcran3 — les autres écrans n'en ont pas
@@ -49,7 +48,7 @@ export function demarrerSessionVolumesRevolution(reglages: ReglagesSession6e, ge
 }
 
 function reglagesEtape(etat: EtatSessionVolumesRevolution): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionVolumesRevolution): EtatSessionVolumesRevolution {
@@ -80,7 +79,7 @@ export function soumettreReponseEcran(etat: EtatSessionVolumesRevolution, valeur
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseVolumesRevolution, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseVolumesRevolution, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseVolumesRevolution, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };

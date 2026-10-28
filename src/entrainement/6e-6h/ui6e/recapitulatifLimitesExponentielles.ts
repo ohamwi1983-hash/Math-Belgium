@@ -165,7 +165,7 @@ function valeurPhase(exercice: ExerciceLimiteExponentielle, phase: PhaseLimiteEx
  * RÉELLE de phases via `phaseInitiale`/`phaseApres` (jamais une séquence supposée à l'avance), et
  * réutilise `valeurPhase` (donc EXACTEMENT le même format que le panneau de validation inline de
  * `App6gen6.tsx`) pour la valeur de chaque entrée. `revele` vient de `detailsPartiels[phase].revele`
- * — JAMAIS de `scoresPartiels[phase] === 0` : un score peut tomber à 0 par pénalité d'aide seule,
+ * — JAMAIS de `scoresPartiels[phase] === 0` : un score pouvait tomber à 0 par pénalité d'aide seule (supprimée depuis),
  * sans que la réponse ait été révélée (piège documenté dans `typesLimitesExponentielles.ts`,
  * `DetailPhaseLimiteExponentielle`).
  */

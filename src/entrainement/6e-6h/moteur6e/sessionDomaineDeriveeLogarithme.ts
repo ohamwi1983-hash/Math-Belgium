@@ -31,7 +31,6 @@ import {
 } from "./verificationDomaineDeriveeLogarithme";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur tous les écrans (même convention que `6gen7`). */
 export const NIVEAU_AIDE_MAX = 2;
@@ -47,7 +46,7 @@ export function demarrerSessionDomaineDeriveeLogarithme(reglages: ReglagesSessio
 }
 
 function reglagesEtape(etat: EtatSessionDomaineDeriveeLogarithme): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionDomaineDeriveeLogarithme): EtatSessionDomaineDeriveeLogarithme {
@@ -105,7 +104,7 @@ function avancerPhase<TReponse>(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const detail: DetailPhaseDomaineDeriveeLogarithme = { revele: etapeCourante.revelee, niveauAide: etat.niveauAide };
   const detailsPartiels = { ...etat.detailsPartiels, [etat.phase]: detail };

@@ -1,6 +1,5 @@
 import type { ExerciceFamilleAPannes, ExerciceFamilleAUnion, ExerciceFamilleBHistogramme, ExerciceFamilleBReconstruire, ExerciceFamilleBTableauDonne, ExerciceFamilleC, ExerciceIndependanceBayes, TypeQuestionTable } from "../core6e/independanceBayes.types";
-import type { PhaseIndependanceBayes, ResultatExerciceIndependanceBayes } from "../moteur6e/typesIndependanceBayes";
-import { phasesPourExercice } from "../moteur6e/typesIndependanceBayes";
+import type { PhaseIndependanceBayes } from "../moteur6e/typesIndependanceBayes";
 import { bayesEcran3C, branchesArbreC, cellule00Reconstruire, cellule10Reconstruire, cellule20Reconstruire, pBDeduitUnion, probabiliteDepuisTable, probabiliteEffetC, proportionHistogramme, tableCompleteReconstruire, totauxLigneReconstruire, valeurEcran2Histogramme, valeurEcran2Pannes } from "../moteur6e/verificationIndependanceBayes";
 
 /**
@@ -628,10 +627,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIndependanceBa
   return [`${libelleBayes}=${formatDecimalVirgule(bayesEcran3C(exercice))}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE selon la famille/sous-type
- * (2 à 3 écrans × 100). */
-export function calculerTotalPointsIndependanceBayes(resultat: ResultatExerciceIndependanceBayes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

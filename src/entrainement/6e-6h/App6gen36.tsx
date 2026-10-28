@@ -29,7 +29,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * valeurs VARIABLE selon l'écran — voir `nombreCibleEnsemble`).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionEquationsComplexes {
   return demarrerSessionEquationsComplexes(REGLAGES_DEMO, genererExerciceEquationsComplexes);

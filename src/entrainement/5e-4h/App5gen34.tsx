@@ -53,7 +53,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionExtremaBornes {
   return demarrerSessionExtremaBornes(REGLAGES_DEMO, genererExerciceExtremaBornes);
@@ -91,7 +91,7 @@ interface TransitionEnAttente {
  * générateur (contrairement à 5gen29/30/31). Icône "revele" pilotée par
  * `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
  * écran (`sessionExtremaBornes.ts::soumettreEcran`) — jamais `scoresPartiels[ecran] === 0` (point
- * A, balayage générique) : la pénalité d'aide de ce générateur est soustraite APRÈS le score de
+ * A, balayage générique) : la pénalité d'aide de ce générateur était soustraite (avant le retrait des pénalités) APRÈS le score de
  * tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait légitimement tomber à
  * 0 et s'afficher à tort comme "révélée". */
 function calculerSegmentsProgression(

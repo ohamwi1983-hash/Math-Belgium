@@ -49,7 +49,7 @@ export interface EtatSessionAsymptoteOblique {
   /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
    * écran (`sessionAsymptoteOblique.ts::soumettreEcran`) — jusqu'au 2025-10, le récapitulatif
    * déduisait ce signal de `scoresPartiels[phase] === 0`, une heuristique explicitement documentée
-   * comme non fiable ici (la pénalité d'aide, soustraite APRÈS le score de tentatives, peut aussi
+   * comme non fiable ici (la pénalité d'aide, soustraite APRÈS le score de tentatives avant le retrait des pénalités, pouvait aussi
    * amener une RÉUSSITE tardive fortement pénalisée à exactement 0) ; champ explicite ajouté
    * pendant le balayage générique (point A) pour corriger ce faux "révélé" potentiel. */
   revelesPartiels: Partial<Record<PhaseAsymptoteOblique, boolean>>;

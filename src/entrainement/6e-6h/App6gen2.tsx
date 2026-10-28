@@ -12,7 +12,7 @@ import { Katex } from "./components/Katex";
 import { EtapeFonctionsCyclometriques } from "./components6e/EtapeFonctionsCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionFonctionsCyclometriques {
   return demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, genererExerciceFonctionsCyclometriques);

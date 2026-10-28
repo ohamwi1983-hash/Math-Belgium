@@ -3,7 +3,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceSignesProduitLatex, formatFacteurLatex, formatFormeFactoriseeSignesProduit, formatLineaireDeveloppe } from "../../ui/formatSignesProduit";
-import { formatSolutionEnsembleProduit } from "../../ui/formatSolutionEnsembleProduit";
+import { formatSolutionEnsembleProduitLatex } from "../../ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { ordreLignesGrille } from "./grille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSignesProduit, type VarianteSignesProduitId } from "./index";
@@ -153,7 +153,11 @@ function construireCorrectionSignesProduit(instance: ExerciceSignesProduit): Blo
           latex(formatFacteurLatex(facteur)),
           texte(`, on utilise la méthode « ${libelleCategorie(categorie)} » : `),
           latex(`= ${formeFactorisee}`),
-          texte(`, ce qui donne les racines x = ${formatNombre(r1)} et x = ${formatNombre(r2)}.`),
+          texte(
+            r1 === r2
+              ? `, ce qui donne la racine double x = ${formatNombre(r1)} : un carré n'est jamais négatif, ce facteur est nul en x = ${formatNombre(r1)} et du signe de son coefficient dominant ailleurs.`
+              : `, ce qui donne les racines x = ${formatNombre(r1)} et x = ${formatNombre(r2)}.`,
+          ),
         ],
       });
     }
@@ -180,7 +184,7 @@ function construireCorrectionSignesProduit(instance: ExerciceSignesProduit): Blo
     type: "paragraphe",
     fragments: [
       texte("Le tableau donne directement l'ensemble des solutions de l'inéquation : "),
-      latex(`S = ${formatSolutionEnsembleProduit(instance.solution)}`),
+      latex(`S = ${formatSolutionEnsembleProduitLatex(instance.solution)}`),
       texte("."),
     ],
   });

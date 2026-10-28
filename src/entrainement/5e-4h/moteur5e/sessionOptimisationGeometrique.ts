@@ -16,7 +16,6 @@ import { ecranApres, ecranInitial } from "./typesOptimisationGeometrique";
 import type { EcranOptimisation, EtatSessionOptimisation, ResultatExerciceOptimisation } from "./typesOptimisationGeometrique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran). */
 export const NIVEAU_AIDE_MAX_OPTIMISATION = 2;
@@ -47,7 +46,7 @@ export function demarrerSessionOptimisation(reglages: ReglagesSession5e, generat
 }
 
 function reglagesEtape(etat: EtatSessionOptimisation): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionOptimisation): EtatSessionOptimisation {
@@ -82,7 +81,7 @@ export function soumettreReponseEcran(etat: EtatSessionOptimisation, reponses: R
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, dernieresReponsesParEcran };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const ecranSuivant = ecranApres(exercice, phaseCourante);

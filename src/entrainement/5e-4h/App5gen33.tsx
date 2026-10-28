@@ -62,7 +62,7 @@ import { EtapeTableauSigneBenefice } from "./components5e/EtapeTableauSigneBenef
 import { EtapeConfirmationCoherence } from "./components5e/EtapeConfirmationCoherence";
 import { EtapeIterationDichotomie } from "./components5e/EtapeIterationDichotomie";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionContexteEconomique {
   return demarrerSessionContexteEconomique(REGLAGES_DEMO, genererExerciceContexteEconomique);

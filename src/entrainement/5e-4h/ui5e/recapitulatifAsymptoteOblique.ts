@@ -12,7 +12,7 @@ import { LIBELLE_PHASE_ASYMPTOTE_OBLIQUE, formatReponseAttenduePhaseLatex } from
  * directement depuis `etapeCourante.revelee` à la clôture de chaque écran
  * (`sessionAsymptoteOblique.ts::soumettreEcran`) — jusqu'au 2025-10, ce récapitulatif le déduisait
  * de `scoresPartiels[phase] === 0`, une heuristique corrigée pendant le balayage générique
- * (point A) car non fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives,
+ * (point A) car non fiable ici : la pénalité d'aide (retirée depuis), soustraite APRÈS le score de tentatives,
  * pouvait amener une RÉUSSITE tardive fortement pénalisée à exactement 0 (faux "révélé").
  *
  * Chaque phase réutilise `formatReponseAttenduePhaseLatex` (même source que la validation inline

@@ -10,8 +10,7 @@ import type {
   ExerciceDenombrementE,
   ExerciceDenombrementFondamental,
 } from "../core6e/denombrementFondamental.types";
-import type { PhaseDenombrementFondamental, ResultatExerciceDenombrementFondamental } from "../moteur6e/typesDenombrementFondamental";
-import { phasesPourExercice } from "../moteur6e/typesDenombrementFondamental";
+import type { PhaseDenombrementFondamental } from "../moteur6e/typesDenombrementFondamental";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen43`. Dispatch sur
@@ -660,10 +659,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceDenombrementFo
   return [`${exercice.resultat}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsDenombrementFondamental(resultat: ResultatExerciceDenombrementFondamental): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

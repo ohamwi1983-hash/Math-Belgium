@@ -5,8 +5,7 @@
  * autres moteurs.
  *
  * 2 phases FIXES, toujours dans le même ordre — `tableau → varianceEcartType`, cette dernière
- * toujours terminale. **Aide PROGRESSIVE par écran** — pénalité ADDITIVE (-20 points par niveau
- * atteint) appliquée au moment précis où l'écran se clôt, jamais rétroactivement (même mécanique
+ * toujours terminale. **Aide PROGRESSIVE par écran** (même mécanique
  * exacte que "Moyenne pondérée"/"Tableau de fréquences"/"Triangle quelconque"/"Colinéarité"/
  * "Orthogonalité").
  */
@@ -19,7 +18,6 @@ import { verifierTableauDispersion, verifierVarianceEcartType } from "./verifica
 import type { EtatSessionDispersion, ResultatExerciceDispersion } from "./typesDispersion";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_TABLEAU = 2;
 export const NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE = 2;
 
@@ -44,13 +42,7 @@ function reglagesEtape(etat: EtatSessionDispersion): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -109,7 +101,7 @@ export function soumettreReponseTableau(etat: EtatSessionDispersion, reponse: Re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideTableau);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -137,7 +129,7 @@ export function soumettreReponseVarianceEcartType(etat: EtatSessionDispersion, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideVarianceEcartType);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     scoreTableau: etat.scoreTableauExercice as number,

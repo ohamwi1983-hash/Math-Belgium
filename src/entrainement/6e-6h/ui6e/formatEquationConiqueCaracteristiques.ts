@@ -1,6 +1,5 @@
 import type { DonneeConiqueC, ExerciceEquationConiqueCaracteristiques, ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, FractionExacte } from "../core6e/equationConiqueCaracteristiques.types";
-import type { PhaseEquationConiqueCaracteristiques, ResultatExerciceEquationConiqueCaracteristiques } from "../moteur6e/typesEquationConiqueCaracteristiques";
-import { phasesPourExercice } from "../moteur6e/typesEquationConiqueCaracteristiques";
+import type { PhaseEquationConiqueCaracteristiques } from "../moteur6e/typesEquationConiqueCaracteristiques";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen59`. Dispatch sur
@@ -678,10 +677,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationConiqu
   return [formatEquationFinaleLatex(exercice)];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsEquationConiqueCaracteristiques(resultat: ResultatExerciceEquationConiqueCaracteristiques): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

@@ -40,7 +40,6 @@ import {
 import type { ReponseSommeInfinie } from "./verificationSuiteGeometrique";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_SUITE_GEOMETRIQUE = 2;
 
@@ -65,7 +64,7 @@ export function demarrerSessionSuiteGeometrique(reglages: ReglagesSession5e, gen
 }
 
 function reglagesEtape(etat: EtatSessionSuiteGeometrique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** Plafond d'aide PAR PHASE — phases sans aide DU TOUT (0, décision explicite de la refonte des 3
@@ -107,7 +106,7 @@ function soumettreEcran<T>(etat: EtatSessionSuiteGeometrique, phaseAttendue: Pha
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);

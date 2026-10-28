@@ -1,6 +1,5 @@
 import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, ExerciceFamilleEMixte, ExerciceFamilleEParametrique, ExerciceFamilleF, ExerciceFamilleGDerangements, ExerciceFamilleGFinancier, ExerciceFamilleGMelange, ExerciceProbabilitesProblemes } from "../core6e/probabilitesProblemes.types";
-import type { PhaseProbabilitesProblemes, ResultatExerciceProbabilitesProblemes } from "../moteur6e/typesProbabilitesProblemes";
-import { phasesPourExercice } from "../moteur6e/typesProbabilitesProblemes";
+import type { PhaseProbabilitesProblemes } from "../moteur6e/typesProbabilitesProblemes";
 import { bayesEcran3C, branchesArbreC, probabiliteEffetC } from "../moteur6e/verificationIndependanceBayes";
 import { coeffAireTotale, coeffAireZone, configurationsExactementK, probToutesDifferentes, probabiliteConfiguration, probabiliteExactementKFamilleC, probabiliteGlobaleFinancier, probabiliteObjet1, probabiliteTotaleMelange, probabiliteZoneCible, probExactementKBinomiale, produitsCategoriesFinancier, resoudreInequationParametrique, resultatFinancier, valeurConfigurationF, valeurEcran3Binomiale } from "../moteur6e/verificationProbabilitesProblemes";
 
@@ -874,10 +873,3 @@ function facteursEcran1Local(n: number): number[] {
   return facteurs;
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE selon la famille/sous-type (2 à 4 écrans
- * × 100). */
-export function calculerTotalPointsProbabilitesProblemes(resultat: ResultatExerciceProbabilitesProblemes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

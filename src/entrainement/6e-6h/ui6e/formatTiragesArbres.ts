@@ -1,6 +1,5 @@
 import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceTiragesArbres, FractionExacte } from "../core6e/tiragesArbres.types";
-import type { PhaseTiragesArbres, ResultatExerciceTiragesArbres } from "../moteur6e/typesTiragesArbres";
-import { phasesPourExercice } from "../moteur6e/typesTiragesArbres";
+import type { PhaseTiragesArbres } from "../moteur6e/typesTiragesArbres";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen31`. Dispatch sur
@@ -444,9 +443,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceTiragesArbres,
   return [`P(\\text{sous-ensemble})=${formatDecimalCourt(cible)}`];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (300 pour A/C, 400 pour B). */
-export function calculerTotalPointsTiragesArbres(resultat: ResultatExerciceTiragesArbres): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

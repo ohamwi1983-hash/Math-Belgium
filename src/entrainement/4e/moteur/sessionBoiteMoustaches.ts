@@ -18,7 +18,6 @@ import type { ReponseLecture } from "./verificationBoiteMoustaches";
 import type { EtatSessionBoiteMoustaches, PhaseBoiteMoustaches, ResultatExerciceBoiteMoustaches } from "./typesBoiteMoustaches";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 const NIVEAU_AIDE_MAX_PAR_PHASE: Record<PhaseBoiteMoustaches, number> = {
   construction: 2,
@@ -59,12 +58,7 @@ function reglagesEtape(etat: EtatSessionBoiteMoustaches): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée ou si le
@@ -138,7 +132,7 @@ export function soumettreReponseConstruction(etat: EtatSessionBoiteMoustaches, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     ...resultatVide("construction"),
@@ -164,7 +158,7 @@ export function soumettreReponseLecture(etat: EtatSessionBoiteMoustaches, repons
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     ...resultatVide("lecture"),
@@ -190,7 +184,7 @@ export function soumettreReponseComparaisonMedianes(etat: EtatSessionBoiteMousta
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -219,7 +213,7 @@ export function soumettreReponseComparaisonDispersions(etat: EtatSessionBoiteMou
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: "comparaison",

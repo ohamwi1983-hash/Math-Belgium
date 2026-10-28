@@ -15,7 +15,6 @@ import { verifierEcran } from "./verificationEquationsComplexes";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur tous les écrans qui en prévoient (`max=0` sur les écrans QCM et les
  * écrans purement mécaniques sans aide dédiée — voir `ui6e/formatEquationsComplexes.ts`). */
@@ -43,7 +42,7 @@ export function demarrerSessionEquationsComplexes(reglages: ReglagesSession6e, g
 }
 
 function reglagesEtape(etat: EtatSessionEquationsComplexes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationsComplexes): EtatSessionEquationsComplexes {
@@ -74,7 +73,7 @@ export function soumettreReponseEcran(etat: EtatSessionEquationsComplexes, valeu
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseEquationsComplexes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseEquationsComplexes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

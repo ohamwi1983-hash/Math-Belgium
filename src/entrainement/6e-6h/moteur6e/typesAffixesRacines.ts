@@ -67,9 +67,7 @@ export interface EtatSessionAffixesRacines {
   /** Accumule au fil des écrans de l'exercice COURANT — remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseAffixesRacines, number>>;
   /** Vrai signal "révélé" par écran déjà clos, même index que `scoresPartiels` — jusqu'au 2025-10,
-   * le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, une heuristique fausse ici : la
-   * pénalité d'aide (`Math.max(0, score - niveauAide*20)` dans `sessionAffixesRacines.ts`) peut
-   * ramener une RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ
+   * le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, une heuristique fausse ici : l'ancienne pénalité d'aide (supprimée) (`Math.max(0, score - niveauAide*20)` dans `sessionAffixesRacines.ts`) pouvait ramener une RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ
    * explicite ajouté pendant le balayage générique (point A), peuplé depuis
    * `etapeCourante.revelee`. */
   revelesPartiels: Partial<Record<PhaseAffixesRacines, boolean>>;

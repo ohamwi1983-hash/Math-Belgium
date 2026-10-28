@@ -1,8 +1,7 @@
 import type { ExerciceNombresComplexes, ValeurComplexe } from "../core6e/nombresComplexes.types";
 import type { FractionEntiere } from "../generateurs6e/nombresComplexes/fractionComplexe";
 import { additionnerFractions, diviserComplexeExact } from "../generateurs6e/nombresComplexes/fractionComplexe";
-import type { PhaseNombresComplexes, ResultatExerciceNombresComplexes } from "../moteur6e/typesNombresComplexes";
-import { phasesPourExercice } from "../moteur6e/typesNombresComplexes";
+import type { PhaseNombresComplexes } from "../moteur6e/typesNombresComplexes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen34`. Dispatch sur
@@ -581,10 +580,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceNombresComplex
   }
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice : 1 pour A/D/B-produit/B-carré, 2 pour B-cube/C/E/F/G). */
-export function calculerTotalPointsNombresComplexes(resultat: ResultatExerciceNombresComplexes): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

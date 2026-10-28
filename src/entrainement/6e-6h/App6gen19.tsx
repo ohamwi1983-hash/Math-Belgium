@@ -64,7 +64,7 @@ function sequenceReelle(exercice: Parameters<typeof phaseInitiale>[0]): PhaseHyp
   return sequence;
 }
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionHyperboliques {
   return demarrerSessionHyperboliques(REGLAGES_DEMO, genererExerciceHyperboliques);

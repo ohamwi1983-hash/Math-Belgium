@@ -95,7 +95,6 @@ const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
 const REGLAGES_BASE = {
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 } as const;

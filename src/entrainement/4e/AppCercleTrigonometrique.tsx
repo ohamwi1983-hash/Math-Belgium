@@ -32,7 +32,6 @@ const CONSIGNE_GENERALE = "Place et lis des valeurs sur le cercle trigonométriq
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

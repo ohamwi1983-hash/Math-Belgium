@@ -15,7 +15,6 @@ import { ResumeSessionQuizStatistiqueDescriptive } from "./components/ResumeSess
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 35,
   tentativesMax: 1,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

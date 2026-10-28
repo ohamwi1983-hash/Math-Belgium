@@ -1,6 +1,6 @@
 import type { ExerciceExpoProbA, ExerciceExpoProbB, ExerciceExpoProbC, ExerciceExpoProbD, ExerciceExpoProbE, ExerciceExpoProbF, ExerciceExpoProbG, ExerciceExponentiellesProblemes } from "../core6e/exponentiellesProblemes.types";
 import { CONTEXTES_A_DOUBLEMENT, CONTEXTES_A_EVALUER, CONTEXTES_B, CONTEXTES_C, CONTEXTES_D, CONTEXTES_E, CONTEXTES_F, CONTEXTES_G } from "../generateurs6e/exponentiellesProblemes/contextes";
-import type { PhaseExponentiellesProblemes, ResultatExerciceExponentiellesProblemes } from "../moteur6e/typesExponentiellesProblemes";
+import type { PhaseExponentiellesProblemes } from "../moteur6e/typesExponentiellesProblemes";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen12`. `src/ui6e/` peut
@@ -740,40 +740,3 @@ export const PHASES_PAR_FAMILLE: Record<ExerciceExponentiellesProblemes["famille
   G: ["gEcran1", "gEcran2", "gEcran3"],
 };
 
-/**
- * Total points du récapitulatif final — complément AJOUTÉ à côté de la liste `LigneRecap` colorée
- * (jamais à sa place, voir CLAUDE.md/`docs/conventions-transversales.md`). Somme les scores DÉJÀ
- * calculés par `sessionExponentiellesProblemes.ts` — le nombre d'écrans varie PAR FAMILLE
- * (`maximum = 100 × nombre d'écrans` : 200 pour A/E/C... voir `PHASES_PAR_FAMILLE`).
- */
-export function calculerTotalPointsExponentiellesProblemes(resultat: ResultatExerciceExponentiellesProblemes): { total: number; maximum: number } {
-  const phases = PHASES_PAR_FAMILLE[resultat.famille];
-  const scores = resultat as unknown as Record<string, number>;
-  const cles: Record<PhaseExponentiellesProblemes, string> = {
-    aEcran1: "scoreEcran1",
-    aEcran2: "scoreEcran2",
-    bEcran1: "scoreEcran1",
-    bEcran2: "scoreEcran2",
-    bEcran3: "scoreEcran3",
-    bEcran4: "scoreEcran4",
-    cEcran1: "scoreEcran1",
-    cEcran2: "scoreEcran2",
-    cEcran3: "scoreEcran3",
-    dEcran1: "scoreEcran1",
-    dEcran2: "scoreEcran2",
-    dEcran3: "scoreEcran3",
-    dEcran4: "scoreEcran4",
-    eEcran1: "scoreEcran1",
-    eEcran2: "scoreEcran2",
-    eEcran3: "scoreEcran3",
-    fEcran1: "scoreEcran1",
-    fEcran2: "scoreEcran2",
-    fEcran3: "scoreEcran3",
-    fEcran4: "scoreEcran4",
-    gEcran1: "scoreEcran1",
-    gEcran2: "scoreEcran2",
-    gEcran3: "scoreEcran3",
-  };
-  const total = phases.reduce((s, p) => s + (scores[cles[p]] ?? 0), 0);
-  return { total, maximum: 100 * phases.length };
-}

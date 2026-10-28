@@ -39,7 +39,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * suffit pour les 4 familles (contrairement à 6gen37, qui avait un écran de choix séparé).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionTrianglesComplexes {
   return demarrerSessionTrianglesComplexes(REGLAGES_DEMO, genererExerciceTrianglesComplexes);

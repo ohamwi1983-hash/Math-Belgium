@@ -39,7 +39,7 @@ export interface EtatSessionRelationsRacines {
   sommeProduitRevele: boolean;
   scoreFactorisationExercice: number | null;
   factorisationRevele: boolean;
-  /** Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture) —
+  /** Aides à sens unique (1 seul niveau) —
    * remises à false au passage à l'exercice suivant, même principe que sessionInequation.ts. */
   aideSommeProduitUtilisee: boolean;
   aideFactorisationUtilisee: boolean;
@@ -75,7 +75,6 @@ function reglagesEtape(etat: EtatSessionRelationsRacines): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -99,12 +98,12 @@ export function soumettreReponseSommeProduit(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "factorisation",
-    scoreSommeProduitExercice: etat.aideSommeProduitUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreSommeProduitExercice: etapeCourante.score,
     sommeProduitRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "sommeProduit" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "sommeProduit" — révélation à sens unique. */
 export function activerAideSommeProduit(etat: EtatSessionRelationsRacines): EtatSessionRelationsRacines {
   if (etat.terminee || etat.phase !== "sommeProduit") {
     throw new Error("activerAideSommeProduit : la session n'est pas à l'étape somme et produit");
@@ -129,12 +128,12 @@ export function soumettreReponseFactorisation(etat: EtatSessionRelationsRacines,
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "equationDepuisRacines",
-    scoreFactorisationExercice: etat.aideFactorisationUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    scoreFactorisationExercice: etapeCourante.score,
     factorisationRevele: etapeCourante.revelee,
   };
 }
 
-/** Active le bouton "Aide" de l'étape "factorisation" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "factorisation" — révélation à sens unique. */
 export function activerAideFactorisation(etat: EtatSessionRelationsRacines): EtatSessionRelationsRacines {
   if (etat.terminee || etat.phase !== "factorisation") {
     throw new Error("activerAideFactorisation : la session n'est pas à l'étape factorisation");
@@ -166,7 +165,7 @@ export function soumettreReponseEquationDepuisRacines(
     scoreFactorisation: etat.scoreFactorisationExercice as number,
     aideFactorisationUtilisee: etat.aideFactorisationUtilisee,
     factorisationRevele: etat.factorisationRevele,
-    scoreEquationDepuisRacines: etat.aideEquationDepuisRacinesUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number),
+    scoreEquationDepuisRacines: (etapeCourante.score as number),
     aideEquationDepuisRacinesUtilisee: etat.aideEquationDepuisRacinesUtilisee,
     equationDepuisRacinesRevele: etapeCourante.revelee,
   };
@@ -195,7 +194,7 @@ export function soumettreReponseEquationDepuisRacines(
   };
 }
 
-/** Active le bouton "Aide" de l'étape "equationDepuisRacines" — révélation à sens unique, ×0,5 sur le score. */
+/** Active le bouton "Aide" de l'étape "equationDepuisRacines" — révélation à sens unique. */
 export function activerAideEquationDepuisRacines(etat: EtatSessionRelationsRacines): EtatSessionRelationsRacines {
   if (etat.terminee || etat.phase !== "equationDepuisRacines") {
     throw new Error("activerAideEquationDepuisRacines : la session n'est pas à l'étape équation depuis les racines");

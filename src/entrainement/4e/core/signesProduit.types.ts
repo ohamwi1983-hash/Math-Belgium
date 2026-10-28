@@ -30,10 +30,11 @@ export interface FacteurLineaire {
 
 /**
  * Facteur quadratique à factoriser — réutilise directement `Exercice` (mécanisme de
- * reconnaissance+factorisation+racines de l'exercice "méthode la plus rapide"). `categorie` n'est
- * jamais "produit_remarquable" (racine double — violerait la contrainte "toutes les racines
- * distinctes", voir construireFacteurFactorisable.ts) ni "mise_en_evidence_generalisee" (famille 5,
- * hors périmètre de ce générateur).
+ * reconnaissance+factorisation+racines de l'exercice "méthode la plus rapide"). `categorie` vaut
+ * "produit_remarquable" (a(x−r)², racine double) uniquement pour un facteur « carré » des variantes
+ * à racine double (`construireFacteurCarre.ts`) — une seule ligne « (x−r)² » dans le tableau
+ * (`ordreLignesGrille`, kind "carre"), une seule colonne pour r. Jamais "mise_en_evidence_generalisee"
+ * (famille 5, hors périmètre de ce générateur).
  */
 export interface FacteurQuadratiqueFactorisable {
   type: "quadratique_factorisable";
@@ -72,11 +73,12 @@ export interface Grille {
  * Ensemble-solution final, extensible en nombre de morceaux/valeurs (prompt-corrections-tableau-
  * signes-3points.md, point 2) — contrairement à `SolutionEnsemble` (exercice "tableau de signes"),
  * "union" porte une liste `morceaux` (toujours ≥2, sinon ce serait "intervalle") et
- * "reel_sauf_points" une liste `valeurs` (toujours ≥1). En pratique, ce générateur ne construit
- * jamais plus de 2 morceaux pour "union" (au plus 3 racines, signe strictement alterné — voir
- * classifierSolutionProduit) ni "point"/"reel_sauf_points" (aucune racine double n'est jamais
- * générée) ; le type reste néanmoins extensible pour que l'élève puisse construire sa réponse avec
- * un nombre arbitraire de morceaux/valeurs via "+ Ajouter", sans limite artificielle côté saisie.
+ * "reel_sauf_points" une liste `valeurs` (toujours ≥1). "mixte" (racines doubles, audit gen5/gen6) :
+ * au moins un morceau ET au moins un point isolé, ex. (x−1)(x−3)² ≤ 0 → ]−∞ ; 1] ∪ {3}. Les formes
+ * "vide"/"reel"/"point"/"reel_sauf_points" deviennent de vraies réponses avec un facteur au carré
+ * (voir `classifierSolutionParColonnes`, generateurs/signesProduit/grille.ts). La vérification compare
+ * des ENSEMBLES (forme canonique, `ensemblesSolutionEgaux`), jamais l'écriture choisie : le type reste
+ * extensible pour que l'élève construise sa réponse avec un nombre arbitraire de morceaux/valeurs/points.
  */
 export type SolutionEnsembleProduit =
   | { forme: "vide" }
@@ -84,7 +86,8 @@ export type SolutionEnsembleProduit =
   | { forme: "point"; valeur: number }
   | { forme: "reel_sauf_points"; valeurs: number[] }
   | { forme: "intervalle"; morceau: Morceau }
-  | { forme: "union"; morceaux: Morceau[] };
+  | { forme: "union"; morceaux: Morceau[] }
+  | { forme: "mixte"; morceaux: Morceau[]; points: number[] };
 
 export interface ExerciceSignesProduit {
   /** 2 ou 3 facteurs, dans l'ordre d'affichage de l'énoncé (mélangé aléatoirement à la génération). */

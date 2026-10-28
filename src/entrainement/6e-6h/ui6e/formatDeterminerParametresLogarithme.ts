@@ -1,5 +1,5 @@
 import type { ExerciceDetermParamA, ExerciceDetermParamB, ExerciceDetermParamC, ExerciceDeterminerParametresLogarithme } from "../core6e/determinerParametresLogarithme.types";
-import type { PhaseDeterminerParametresLogarithme, ResultatExerciceDeterminerParametresLogarithme } from "../moteur6e/typesDeterminerParametresLogarithme";
+import type { PhaseDeterminerParametresLogarithme } from "../moteur6e/typesDeterminerParametresLogarithme";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen18`. 3 familles
@@ -396,22 +396,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceDeterminerPara
   }
 }
 
-/** Total points du récapitulatif final — COMPLÉMENT de `LigneRecap`/`statutRecap`, jamais un
- * remplacement (CLAUDE.md). Le nombre d'écrans varie PAR FAMILLE (`maximum = 100 × nombre
- * d'écrans` : 200 pour A, 300 pour B/C). */
-export function calculerTotalPointsDeterminerParametresLogarithme(resultat: ResultatExerciceDeterminerParametresLogarithme): { total: number; maximum: number } {
-  const phases = PHASES_PAR_FAMILLE[resultat.famille];
-  const scores = resultat as unknown as Record<string, number>;
-  const cles: Record<PhaseDeterminerParametresLogarithme, string> = {
-    aEcran1: "scoreEcran1",
-    aEcran2: "scoreEcran2",
-    bEcran1: "scoreEcran1",
-    bEcran2: "scoreEcran2",
-    bEcran3: "scoreEcran3",
-    cEcran1: "scoreEcran1",
-    cEcran2: "scoreEcran2",
-    cEcran3: "scoreEcran3",
-  };
-  const total = phases.reduce((acc, phase) => acc + (scores[cles[phase]] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

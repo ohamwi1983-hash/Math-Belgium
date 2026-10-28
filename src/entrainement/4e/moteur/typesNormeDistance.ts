@@ -38,8 +38,7 @@ export const SEQUENCES: Record<VarianteNormeDistance, PhaseNormeDistance[]> = {
 
 /**
  * Niveau d'aide maximal par écran (voir `promptcreationgenerateur26normedistance.md` puis
- * `promptgen26refontecomplete.md`, section par variante) — pénalité ADDITIVE `-20 points/niveau`,
- * même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle quelconque". Un écran à `max=0`
+ * `promptgen26refontecomplete.md`, section par variante) — même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle quelconque". Un écran à `max=0`
  * n'affiche AUCUN bouton "Aide" (jamais un bouton perpétuellement désactivé) — plus aucun écran de
  * ce générateur n'est dans ce cas depuis la refonte complète (chaque écran a désormais au moins une
  * aide prévue par la spec).

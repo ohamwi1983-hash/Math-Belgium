@@ -22,7 +22,7 @@ import { EnTeteExercice } from "./components5e/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Décompose cette fonction composée.";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDecompositionFonction {
   return demarrerSessionDecompositionFonction(REGLAGES_DEMO, genererExerciceDecompositionFonction);

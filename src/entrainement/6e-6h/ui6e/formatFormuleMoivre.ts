@@ -1,5 +1,5 @@
 import type { ExerciceFormuleMoivre, TermeDeveloppementMoivre } from "../core6e/formuleMoivre.types";
-import type { PhaseFormuleMoivre, ResultatExerciceFormuleMoivre } from "../moteur6e/typesFormuleMoivre";
+import type { PhaseFormuleMoivre } from "../moteur6e/typesFormuleMoivre";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen38` ("Formule de Moivre :
@@ -304,10 +304,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormuleMoivre,
   }
 }
 
-/** Total points du récapitulatif final — maximum TOUJOURS 300 (3 écrans fixes, contrairement à
- * `calculerTotalPointsNombresComplexes` de 6gen34 dont le maximum varie par famille). */
-export function calculerTotalPointsFormuleMoivre(resultat: ResultatExerciceFormuleMoivre): { total: number; maximum: number } {
-  const phases: PhaseFormuleMoivre[] = ["ecran1", "ecran2", "ecran3"];
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

@@ -5,8 +5,7 @@
  *
  * Aide PROGRESSIVE (2 niveaux max sur "pointSimple", 2 niveaux max sur "directionInconnue", 2
  * niveaux max PARTAGÉS sur le flux "direction"→"point" d'un même piquet, aucune aide sur
- * "conclusion"), pénalité ADDITIVE (-20 points par niveau atteint) appliquée à la clôture de
- * l'étape concernée — même mécanique que le reste du projet.
+ * "conclusion") — même mécanique que le reste du projet.
  */
 import type { ExerciceOmbreSoleil, GenerateurExerciceOmbreSoleil, PiquetAResoudre } from "../core/ombreSoleil.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -16,7 +15,6 @@ import { sommetPiquet, verifierDirection, verifierPointObstacle, verifierPointOm
 import type { EtatSessionOmbreSoleil, PhaseOmbreSoleil, ResultatExerciceOmbreSoleil } from "./typesOmbreSoleil";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_POINT_SIMPLE = 2;
 export const NIVEAU_AIDE_MAX_DIRECTION_INCONNUE = 2;
 export const NIVEAU_AIDE_MAX_LOOP = 2;
@@ -72,12 +70,7 @@ function reglagesEtape(etat: EtatSessionOmbreSoleil): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'unité pédagogique courante — lève si la session est
@@ -158,7 +151,7 @@ export function soumettreReponsePointSimple(etat: EtatSessionOmbreSoleil, id: st
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
@@ -186,7 +179,7 @@ export function soumettreReponseDirectionInconnue(etat: EtatSessionOmbreSoleil, 
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
@@ -216,7 +209,7 @@ export function soumettreReponseDirection(etat: EtatSessionOmbreSoleil, id: stri
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
@@ -277,7 +270,7 @@ export function soumettreReponsePoint(etat: EtatSessionOmbreSoleil, id: string):
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules = [...etat.scoresAccumules, score];
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];

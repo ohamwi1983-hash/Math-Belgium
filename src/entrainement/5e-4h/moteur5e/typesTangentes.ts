@@ -51,7 +51,7 @@ export interface EtatSessionTangente {
   scoresPartiels: Partial<Record<EcranTangente, number>>;
   /** true par écran déjà clos ssi révélé (tentatives épuisées) — jusqu'au 2025-10,
    * `scoresPartiels[ecran] === 0` en tenait lieu, une heuristique FAUSSE ici : la pénalité d'aide
-   * multi-niveaux (`sessionTangentes.ts`) est soustraite APRÈS le score de tentatives puis
+   * multi-niveaux (`sessionTangentes.ts`) était soustraite (avant le retrait des pénalités) APRÈS le score de tentatives puis
    * plafonnée à 0, donc une réussite fortement aidée pouvait légitimement tomber à 0 et s'afficher
    * à tort comme "révélée" (point A, balayage générique). Peuplé depuis `etapeCourante.revelee`. */
   revelesPartiels: Partial<Record<EcranTangente, boolean>>;

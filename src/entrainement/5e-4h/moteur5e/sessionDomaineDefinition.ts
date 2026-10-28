@@ -21,7 +21,6 @@ import { verifierCE, verifierEnsembleReelGuide, verifierGrilleDomf, verifierReso
 import type { ReponseCE, ReponseResolutionRacineSurFraction } from "./verificationDomaineDefinition";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export { niveauAideMaxCE, niveauAideMaxDomf, niveauAideMaxResolution };
 
@@ -59,12 +58,9 @@ export function demarrerSessionDomaineDefinition(reglages: ReglagesSession5e, ge
 }
 
 function reglagesEtape(etat: EtatSessionDomaineDefinition): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-}
 
 export function activerAideSuivante(etat: EtatSessionDomaineDefinition): EtatSessionDomaineDefinition {
   if (etat.terminee) throw new Error("activerAideSuivante : la session est déjà terminée");
@@ -103,7 +99,7 @@ export function soumettreReponseCE(etat: EtatSessionDomaineDefinition, reponse: 
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApresCE(exercice);
 
   if (phaseSuivante === "domf") {
@@ -154,7 +150,7 @@ export function soumettreReponseResolution(etat: EtatSessionDomaineDefinition, r
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideResolution);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -178,7 +174,7 @@ export function soumettreReponseDomf(etat: EtatSessionDomaineDefinition, reponse
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDomf);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     exercice,

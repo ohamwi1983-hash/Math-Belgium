@@ -6,7 +6,7 @@ import {
   formatEnonceCombineNiveau3FactoriseLatex,
   formatEnonceCombineNiveau3Latex,
   formatLigneDenominateurLabel,
-  formatLigneNumerateurNiveau3Label,
+  libellesLignesNumerateurNiveau3,
 } from "../ui/formatInequationRationnelle";
 import { formatEnTeteInterieur } from "../ui/formatSignesProduit";
 import { celluleEstErronee, cyclerValeurCellule } from "../ui/cycleValeurCellule";
@@ -37,7 +37,9 @@ interface Props {
 export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
-  const [racineN1, racineN2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
+  // 2 lignes N (x − r₁, x − r₂), ou une seule « (x − r)² » pour une racine double (audit gen6).
+  const libellesN = libellesLignesNumerateurNiveau3(exercice.numerateur.solution.racines);
+  const racineDouble = libellesN.length === 1;
 
   const [ligneN1, setLigneN1] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
   const [ligneN2, setLigneN2] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
@@ -58,7 +60,7 @@ export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tent
   }
 
   const complet =
-    grilleQuotientEstComplete(ligneN1, ligneD, ligneQ) && ligneN2.every((v) => v !== null);
+    grilleQuotientEstComplete(ligneN1, ligneD, ligneQ) && (racineDouble || ligneN2.every((v) => v !== null));
   const montrerErreurs = tentativesUtilisees > 0;
 
   function classeN(saisie: ValeurCellule | null, attendu: ValeurCellule): string {
@@ -71,7 +73,7 @@ export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tent
   function valider() {
     if (!complet) return;
     onValider({
-      lignesNumerateur: [ligneN1 as ValeurCellule[], ligneN2 as ValeurCellule[]],
+      lignesNumerateur: racineDouble ? [ligneN1 as ValeurCellule[]] : [ligneN1 as ValeurCellule[], ligneN2 as ValeurCellule[]],
       ligneDenominateur: ligneD as ValeurCellule[],
       ligneQuotient: ligneQ as ValeurCelluleQuotient[],
     });
@@ -135,8 +137,8 @@ export function EtapeGrilleQuotientNiveau3({ exercice, tentativesUtilisees, tent
             </tr>
           </thead>
           <tbody>
-            {ligneInteractive(formatLigneNumerateurNiveau3Label(racineN1), ligneN1, exercice.grille.lignesNumerateur[0], cyclerN1)}
-            {ligneInteractive(formatLigneNumerateurNiveau3Label(racineN2), ligneN2, exercice.grille.lignesNumerateur[1], cyclerN2)}
+            {ligneInteractive(libellesN[0], ligneN1, exercice.grille.lignesNumerateur[0], cyclerN1)}
+            {!racineDouble && ligneInteractive(libellesN[1], ligneN2, exercice.grille.lignesNumerateur[1], cyclerN2)}
             {ligneInteractive(formatLigneDenominateurLabel(exercice.denominateur), ligneD, exercice.grille.ligneDenominateur, cyclerD)}
             <tr>
               <td className="grille-signes-label">Signe du quotient</td>

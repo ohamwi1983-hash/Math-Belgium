@@ -19,6 +19,7 @@ export function construireGrilleQuotientNiveau3(
   p1_2: PolynomeLineaire,
 ): { racines: number[]; ce: number; grille: GrilleQuotientNiveau3 } {
   const [r1, r2] = [...p2_1.solution.racines].sort((a, b) => a - b);
+  if (r1 === r2) return construireGrilleRacineDouble(r1, p1_2);
   const racines = [r1, r2, p1_2.p].sort((a, b) => a - b);
   const nbColonnes = 2 * racines.length + 1;
   const points = Array.from({ length: nbColonnes }, (_, colonne) => valeurRepresentative(racines, colonne));
@@ -39,4 +40,21 @@ export function construireGrilleQuotientNiveau3(
     ce: p1_2.p,
     grille: { lignesNumerateur: [ligneN1, ligneN2], ligneDenominateur, ligneQuotient },
   };
+}
+
+/**
+ * Numérateur a(x − r)² (a > 0 par construction au niveau 3) : une seule ligne « (x − r)² » —
+ * « + » partout sauf « 0 » en r — et une seule colonne pour r (racine double, audit gen6). Le
+ * quotient garde donc le signe du dénominateur de part et d'autre de r.
+ */
+function construireGrilleRacineDouble(
+  r: number,
+  p1_2: PolynomeLineaire,
+): { racines: number[]; ce: number; grille: GrilleQuotientNiveau3 } {
+  const racines = [r, p1_2.p].sort((a, b) => a - b);
+  const points = Array.from({ length: 2 * racines.length + 1 }, (_, colonne) => valeurRepresentative(racines, colonne));
+  const ligneCarre: ValeurCellule[] = points.map((x) => (x === r ? "0" : "+"));
+  const ligneDenominateur = points.map((x) => signeLineaire(p1_2, x));
+  const ligneQuotient = points.map((_, i) => signeQuotient(ligneCarre[i], ligneDenominateur[i]));
+  return { racines, ce: p1_2.p, grille: { lignesNumerateur: [ligneCarre], ligneDenominateur, ligneQuotient } };
 }

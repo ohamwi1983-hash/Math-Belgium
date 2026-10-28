@@ -48,7 +48,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * dRatioEcran1, dReellesEcran3, dModulesEcran2).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionComplexesAvances {
   return demarrerSessionComplexesAvances(REGLAGES_DEMO, genererExerciceComplexesAvances);

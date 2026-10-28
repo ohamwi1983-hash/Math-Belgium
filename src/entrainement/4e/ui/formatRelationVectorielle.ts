@@ -5,8 +5,8 @@
  * sinon (aucun import croisé entre les deux, voir `core/relationVectorielle.types.ts`).
  *
  * **Le graphe est ici gagné par l'aide, jamais affiché par défaut** — contrairement au générateur
- * en position 21, qui affiche son graphe en permanence sur son unique écran, sans pénalité. Cette
- * version guidée cache le graphe derrière un bouton "Aide" pénalisant (×0,5, une seule aide par
+ * en position 21, qui affiche son graphe en permanence sur son unique écran. Cette
+ * version guidée cache le graphe derrière un bouton "Aide" (une seule aide par
  * exercice — voir `sessionRelationVectorielle.ts`) : `valeursGrapheAide` retourne le contenu à
  * afficher UNE FOIS l'aide activée, jamais avant.
  */

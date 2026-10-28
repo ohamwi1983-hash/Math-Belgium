@@ -117,8 +117,8 @@ export interface EtatSessionEquationsComplexes {
   scoresPartiels: Partial<Record<PhaseEquationsComplexes, number>>;
   /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture — jusqu'au
    * 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, corrigé pendant le
-   * balayage générique (point A) car non fiable ici : la pénalité d'aide
-   * (`Math.max(0, score - niveauAide*20)`) est soustraite APRÈS le score de tentatives, donc une
+   * balayage générique (point A) car non fiable ici : l'ancienne pénalité d'aide (supprimée)
+   * (`Math.max(0, score - niveauAide*20)`) était soustraite APRÈS le score de tentatives, donc une
    * réussite fortement aidée pouvait tomber à exactement 0 et s'afficher à tort comme "révélée". */
   revelesPartiels: Partial<Record<PhaseEquationsComplexes, boolean>>;
   indexExercice: number;

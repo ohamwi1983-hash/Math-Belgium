@@ -12,7 +12,6 @@ import type { EtatSessionGraphiqueDeriveeExponentielle, PhaseGraphiqueDeriveeExp
 import { verifierEcranDerivee, verifierEcranSelection } from "./verificationGraphiquesDeriveeExponentielles";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur les 2 écrans possibles (spec : "Aides (2 niveaux)" pour chaque écran de
  * chaque famille). */
@@ -43,7 +42,7 @@ export function demarrerSessionGraphiqueDeriveeExponentielle(
 }
 
 function reglagesEtape(etat: EtatSessionGraphiqueDeriveeExponentielle): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionGraphiqueDeriveeExponentielle): EtatSessionGraphiqueDeriveeExponentielle {
@@ -79,7 +78,7 @@ function avancerPhase<TReponse>(
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres(etat.phase);
 
   if (phaseSuivante === "termine") {

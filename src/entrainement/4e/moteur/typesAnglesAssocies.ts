@@ -26,7 +26,7 @@ export interface EtatSessionAnglesAssocies {
   indexExercice: number;
   exerciceCourant: ExerciceAnglesAssocies;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide progressive additive (pénalité -20 pts/niveau, même principe que "Applications physiques"
+  /** Aide progressive (même principe que "Applications physiques"
    * — écran "norme" — ou "Distance point-droite") — remis à 0 à chaque nouvel exercice. */
   niveauAide: number;
   resultats: ResultatExerciceAnglesAssocies[];

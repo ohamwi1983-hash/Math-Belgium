@@ -15,7 +15,6 @@ import { ResumeSessionQuizTrigonometrie5e } from "./components5e/ResumeSessionQu
 const REGLAGES_DEMO: ReglagesSession5e = {
   nombreExercices: 20,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizTrigonometrie5e): EtatSessionQuizTrigonometrie5e {

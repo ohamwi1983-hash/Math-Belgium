@@ -90,8 +90,8 @@ export interface EtatSessionCalculAires {
   /** Accumule au fil des écrans de l'exercice COURANT — remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseCalculAires, number>>;
   /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
-   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
-   * (`Math.max(0, score - niveauAide*20)` dans `sessionCalculAires.ts`) peut ramener une RÉUSSITE
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionCalculAires.ts`) pouvait ramener une RÉUSSITE
    * fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite ajouté
    * pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
   revelesPartiels: Partial<Record<PhaseCalculAires, boolean>>;

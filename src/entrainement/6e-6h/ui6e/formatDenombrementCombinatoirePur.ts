@@ -7,8 +7,7 @@ import type {
   ExerciceDenombrementCombinatoirePur,
   SousTypeDenombCombPurA,
 } from "../core6e/denombrementCombinatoirePur.types";
-import type { PhaseDenombrementCombinatoirePur, ResultatExerciceDenombrementCombinatoirePur } from "../moteur6e/typesDenombrementCombinatoirePur";
-import { phasesPourExercice } from "../moteur6e/typesDenombrementCombinatoirePur";
+import type { PhaseDenombrementCombinatoirePur } from "../moteur6e/typesDenombrementCombinatoirePur";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen46`. Dispatch sur
@@ -454,10 +453,3 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceDenombrementCo
   return [`S_1=${exercice.totalS1}\\text{, }S_2=${exercice.totalS2}`, libelleComparaison];
 }
 
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsDenombrementCombinatoirePur(resultat: ResultatExerciceDenombrementCombinatoirePur): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
-}

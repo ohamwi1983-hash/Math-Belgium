@@ -14,7 +14,6 @@ import { verifierEcran } from "./verificationTangentesConique";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient — `max=0` ailleurs (voir
  * `ui6e/formatTangentesConique.ts`, `niveauAideMaxEcran`). */
@@ -39,7 +38,7 @@ export function demarrerSessionTangentesConique(reglages: ReglagesSession6e, gen
 }
 
 function reglagesEtape(etat: EtatSessionTangentesConique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionTangentesConique): EtatSessionTangentesConique {
@@ -70,7 +69,7 @@ export function soumettreReponseEcran(etat: EtatSessionTangentesConique, valeurs
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseTangentesConique, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseTangentesConique, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante, exercice);

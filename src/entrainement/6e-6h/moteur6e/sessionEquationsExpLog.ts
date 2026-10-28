@@ -31,7 +31,6 @@ import {
 } from "./verificationEquationsExpLog";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 function etatInitial(
   exercice: ExerciceEquationsExpLog,
@@ -55,7 +54,7 @@ export function demarrerSessionEquationsExpLog(reglages: ReglagesSession6e, gene
 }
 
 function reglagesEtape(etat: EtatSessionEquationsExpLog): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** Plafond du niveau d'aide de la phase COURANTE — voir `NIVEAU_AIDE_MAX_PAR_PHASE`
@@ -117,7 +116,7 @@ function avancerPhase<TReponse>(
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const phaseSuivante = phaseApres(etat.phase);

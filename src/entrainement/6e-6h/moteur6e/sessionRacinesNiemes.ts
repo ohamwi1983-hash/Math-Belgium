@@ -15,7 +15,6 @@ import { verifierEcran } from "./verificationRacinesNiemes";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide max sur les écrans qui en prévoient (aEcran2, bEcran2, cEcran1 — voir
  * `ui6e/formatRacinesNiemes.ts`, `niveauAideMaxEcran`) — `max=0` ailleurs. */
@@ -40,7 +39,7 @@ export function demarrerSessionRacinesNiemes(reglages: ReglagesSession6e, genera
 }
 
 function reglagesEtape(etat: EtatSessionRacinesNiemes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionRacinesNiemes): EtatSessionRacinesNiemes {
@@ -71,7 +70,7 @@ export function soumettreReponseEcran(etat: EtatSessionRacinesNiemes, valeurs: s
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseRacinesNiemes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseRacinesNiemes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

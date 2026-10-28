@@ -150,6 +150,9 @@ export function EtapeGrilleSignes({
                   Rappel : dans chaque colonne, un nombre pair de facteurs négatifs donne un produit positif ; un
                   nombre impair donne un produit négatif.
                 </p>
+                {refs.some((ref) => ref.kind === "carre") && (
+                  <p>Un carré n'est jamais négatif : il vaut 0 en sa racine et il est positif partout ailleurs.</p>
+                )}
               </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />

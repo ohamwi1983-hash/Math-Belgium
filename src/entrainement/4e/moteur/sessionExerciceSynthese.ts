@@ -6,7 +6,7 @@
  *
  * Chaque variante traverse une SÉQUENCE FIXE (`SEQUENCES`, `typesExerciceSynthese.ts`) — même
  * patron exact que "Orthogonalité et théorème de Pythagore généralisé" : `soumettrePhase` (privée)
- * factorise le motif commun (tentatives, pénalité additive par niveau d'aide, transition vers
+ * factorise le motif commun (tentatives, transition vers
  * l'écran suivant ou clôture de l'exercice) ; chaque `soumettreReponseXxx` exporté n'est qu'un thin
  * wrapper typé par écran, qui délègue TOUJOURS à une fonction `verifierXxx`/`diagnostiquerXxx`
  * RÉELLE des 5 modules sources (via les mappers de `verificationExerciceSynthese.ts`) — jamais une
@@ -30,7 +30,6 @@ import { verifierBtIntervalle, verifierBtPourcent, versDispersion, versMediane, 
 import type { ReponseIntervalle } from "./verificationBienaymeTchebychev";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 function phaseInitiale(exercice: ExerciceSynthese): PhaseExerciceSynthese {
   return SEQUENCES[exercice.variante][0];
@@ -69,13 +68,7 @@ function reglagesEtape(etat: EtatSessionExerciceSynthese): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -193,7 +186,7 @@ function cloturerExerciceOuSuivant(etat: EtatSessionExerciceSynthese, resultat: 
   };
 }
 
-/** Factorise le motif commun à tous les écrans : tentatives, pénalité additive par niveau d'aide,
+/** Factorise le motif commun à tous les écrans : tentatives,
  * transition vers l'écran suivant de la séquence de la variante, ou clôture de l'exercice si
  * `phaseAttendue` est la dernière de sa séquence. */
 function soumettrePhase<R>(
@@ -216,7 +209,7 @@ function soumettrePhase<R>(
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAide);
+  const score = etapeCourante.score as number;
   const scoresAccumules: Partial<Record<PhaseExerciceSynthese, ScoreEcran>> = {
     ...etat.scoresAccumules,
     [phaseAttendue]: { score, revele: etapeCourante.revelee, niveauAide: etat.niveauAide },

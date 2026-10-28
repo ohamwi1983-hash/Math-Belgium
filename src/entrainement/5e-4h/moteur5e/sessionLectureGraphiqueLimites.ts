@@ -23,7 +23,7 @@ export function demarrerSessionLectureGraphiqueLimites(reglages: ReglagesSession
 }
 
 function reglagesEtape(etat: EtatSessionLectureGraphiqueLimites): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 function cloturerExerciceOuSuivant(etat: EtatSessionLectureGraphiqueLimites, resultat: ResultatExerciceLectureGraphiqueLimites, revele: boolean): EtatSessionLectureGraphiqueLimites {

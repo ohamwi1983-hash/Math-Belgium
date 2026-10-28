@@ -10,8 +10,7 @@
  * même principe de séquence fixe que "Équation d'un cercle depuis un graphe"
  * (`sessionEquationCercle.ts`).
  *
- * Aide PROGRESSIVE par écran (2 niveaux chacun), pénalité ADDITIVE (-20 points/niveau) appliquée à
- * la clôture de l'écran concerné.
+ * Aide PROGRESSIVE par écran (2 niveaux chacun).
  */
 import type { GenerateurExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -28,7 +27,6 @@ import {
 } from "./verificationLieuxGeometriques";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_IDENTIFICATION = 2;
 export const NIVEAU_AIDE_MAX_EQUATIONS = 2;
 export const NIVEAU_AIDE_MAX_RESOLUTION = 2;
@@ -80,12 +78,7 @@ function reglagesEtape(etat: EtatSessionLieuxGeometriques): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionLieuxGeometriques): EtatSessionLieuxGeometriques {
@@ -137,7 +130,7 @@ export function soumettreReponseIdentification(etat: EtatSessionLieuxGeometrique
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIdentification);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -165,7 +158,7 @@ export function soumettreReponseEquations(etat: EtatSessionLieuxGeometriques, re
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideEquations);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -194,7 +187,7 @@ export function soumettreReponseResolution(etat: EtatSessionLieuxGeometriques, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideResolution);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     paire: exercice.paire,

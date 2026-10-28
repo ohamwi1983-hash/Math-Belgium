@@ -29,7 +29,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * nature (convention CLAUDE.md "add-as-needed") même si CE générateur en a toujours exactement 2.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionVolumesRevolution {
   return demarrerSessionVolumesRevolution(REGLAGES_DEMO, genererExerciceVolumesRevolution);

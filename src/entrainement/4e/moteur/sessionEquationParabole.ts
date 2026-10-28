@@ -7,8 +7,7 @@
  * les deux variantes traversant exactement la même séquence (même principe que "Équation d'un
  * cercle... à partir d'un graphe").
  *
- * Aide PROGRESSIVE par écran — pénalité ADDITIVE (-20 points/niveau) appliquée au moment précis où
- * l'écran se clôt, jamais rétroactivement.
+ * Aide PROGRESSIVE par écran.
  */
 import type { ExerciceEquationParabole, GenerateurExerciceEquationParabole } from "../core/equationParabole.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -19,7 +18,6 @@ import { verifierEquation, verifierSommetFoyer } from "./verificationEquationPar
 import type { ReponseSommetFoyer } from "./verificationEquationParabole";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_SOMMET_FOYER = 2;
 export const NIVEAU_AIDE_MAX_EQUATION = 2;
@@ -57,12 +55,7 @@ function reglagesEtape(etat: EtatSessionEquationParabole): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationParabole): EtatSessionEquationParabole {
@@ -110,7 +103,7 @@ export function soumettreReponseSommetFoyer(etat: EtatSessionEquationParabole, r
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSommetFoyer);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -139,7 +132,7 @@ export function soumettreReponseEquation(etat: EtatSessionEquationParabole, repo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideEquation);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exercice.variante,

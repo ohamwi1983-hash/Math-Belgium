@@ -53,7 +53,7 @@ export const SEQUENCES: Record<VarianteExerciceSynthese, PhaseExerciceSynthese[]
   ],
 };
 
-/** Niveau d'aide maximal par écran — pénalité ADDITIVE `-20 points/niveau`, même mécanique que les
+/** Niveau d'aide maximal par écran — même mécanique que les
  * 5 générateurs sources. Chaque valeur reprise EXACTEMENT du `NIVEAU_AIDE_MAX`/`niveauAideMaxPourPhase`
  * du composant/session source réutilisé littéralement (voir la revue de code menée avant l'écriture
  * de ce fichier) — jamais réinventée, pour que le bouton "Aide" du composant repris (qui lit sa

@@ -2,8 +2,6 @@ import type { ExerciceBaseQuellePrimitive, ExerciceQuellePrimitive } from "../co
 import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExerciceBase } from "../moteur6e/typesCalculPrimitives";
 import type { PhaseQuellePrimitive } from "../moteur6e/typesQuellePrimitive";
-import { phasesPourExercice } from "../moteur6e/typesQuellePrimitive";
-import type { ResultatExerciceQuellePrimitive } from "../moteur6e/typesQuellePrimitive";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
 import {
   LIBELLE_FAMILLE,
@@ -180,14 +178,6 @@ export function formatReponseAttenduePhaseLatexQuellePrimitive(exercice: Exercic
     return [`C \\approx ${formatDecimal(cExact)}`, `F(x)=${primitiveLatexBase(exercice.exerciceBase)}${termeAdditifDecimal(cExact)}`];
   }
   return formatReponseAttenduePhaseLatexBase(exercice.exerciceBase, phase);
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés, écran final INCLUS — de 200 à 500 selon la famille/le sous-type emprunté). */
-export function calculerTotalPointsQuellePrimitive(resultat: ResultatExerciceQuellePrimitive): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export { LIBELLE_FAMILLE };

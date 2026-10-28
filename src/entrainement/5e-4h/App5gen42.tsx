@@ -15,7 +15,6 @@ import { ResumeSessionQuizLimites5e } from "./components5e/ResumeSessionQuizLimi
 const REGLAGES_DEMO: ReglagesSession5e = {
   nombreExercices: 20,
   tentativesMax: 1,
-  penaliteActivee: true,
 };
 
 function nouvelleSession(theme: VarianteQuizLimites5e): EtatSessionQuizLimites5e {

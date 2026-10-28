@@ -13,7 +13,6 @@ import { verifierCercleEntier, verifierEcranUnChamp } from "./verificationPolygo
 import type { ReponseCercleEntier } from "./verificationPolygonesArcsSecteurs";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 function etatInitial(
   exercice: ExercicePolygonesArcsSecteurs,
@@ -42,7 +41,7 @@ export function demarrerSessionPolygonesArcsSecteurs(reglages: ReglagesSession5e
 }
 
 function reglagesEtape(etat: EtatSessionPolygonesArcsSecteurs): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** 2 niveaux d'aide pour "cercleEntier"/"arcElementaire"/"secteurElementaire", 3 pour les écrans
@@ -120,7 +119,7 @@ export function soumettreReponseCercleEntier(etat: EtatSessionPolygonesArcsSecte
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   return transitionApresEcran(etat, score, etapeCourante.revelee);
 }
 
@@ -136,6 +135,6 @@ export function soumettreReponseEcranUnChamp(etat: EtatSessionPolygonesArcsSecte
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   return transitionApresEcran(etat, score, etapeCourante.revelee);
 }

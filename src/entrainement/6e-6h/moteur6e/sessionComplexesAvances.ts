@@ -14,7 +14,6 @@ import { verifierEcran } from "./verificationComplexesAvances";
  */
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX = 2;
 
@@ -37,7 +36,7 @@ export function demarrerSessionComplexesAvances(reglages: ReglagesSession6e, gen
 }
 
 function reglagesEtape(etat: EtatSessionComplexesAvances): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionComplexesAvances): EtatSessionComplexesAvances {
@@ -68,7 +67,7 @@ export function soumettreReponseEcran(etat: EtatSessionComplexesAvances, valeurs
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseComplexesAvances, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseComplexesAvances, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);

@@ -101,8 +101,8 @@ export interface EtatSessionTangentesConique {
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseTangentesConique, number>>;
   /** Un booléen "révélé" par écran déjà clos, même principe que `scoresPartiels` — jusqu'au 2025-10,
-   * déduit de `scoresPartiels[phase] === 0`, heuristique fausse ici : la pénalité d'aide
-   * (`Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE)`) peut faire tomber une RÉUSSITE
+   * déduit de `scoresPartiels[phase] === 0`, heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
+   * (`Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE)`) pouvait faire tomber une RÉUSSITE
    * fortement aidée à exactement 0, affichée alors à tort comme "révélée". Champ explicite ajouté
    * pendant le balayage générique (point A). */
   revelesPartiels: Partial<Record<PhaseTangentesConique, boolean>>;

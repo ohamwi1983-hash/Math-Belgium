@@ -3,6 +3,7 @@ import type { ExerciceSignesProduit, SolutionEnsembleProduit } from "../core/sig
 import { Katex } from "./Katex";
 import { formatTermesEnonceSignesProduitFactoriseLatex } from "../ui/formatSignesProduit";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
+import { ListePointsIsolesInput, construirePointsIsoles } from "./ListePointsIsolesInput";
 import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
 import type { EtatListeMorceaux } from "../ui/listeMorceaux";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
@@ -20,7 +21,7 @@ const OPTIONS_FORME: { valeur: Forme; libelle: string }[] = [
   { valeur: "vide", libelle: "∅" },
   { valeur: "reel", libelle: "ℝ" },
   { valeur: "point", libelle: "Un point" },
-  { valeur: "reel_sauf_points", libelle: "Tous les réels sauf plusieurs points" },
+  { valeur: "reel_sauf_points", libelle: "Tous les réels sauf un ou plusieurs points" },
   { valeur: "intervalle", libelle: "Au moins un intervalle" },
 ];
 
@@ -53,9 +54,10 @@ interface Props {
  * limite fixe) : `construireListe` retourne directement `Morceau[]`, converti en
  * `{forme:"intervalle", morceau}` si un seul morceau ou `{forme:"union", morceaux}` sinon — le
  * contrat SolutionEnsembleProduit/verifierSolutionSignesProduit reste inchangé, seule l'INTERFACE
- * DE SAISIE est unifiée. Les autres options (∅, ℝ, un point, tous les réels sauf plusieurs points)
+ * DE SAISIE est unifiée — et `{forme:"mixte", morceaux, points}` dès qu'un point isolé est ajouté
+ * (ListePointsIsolesInput, racine double avec ≤/≥, audit gen5). Les autres options (∅, ℝ, un point, tous les réels sauf un ou plusieurs points)
  * restent inchangées. Affiche en rappel le tableau de signes correctement rempli
- * (TableauSignesRecap) et un bouton "Aide" (×0,5, activation à sens unique, même principe que
+ * (TableauSignesRecap) et un bouton "Aide" (activation à sens unique, même principe que
  * l'exercice "tableau de signes" simple). L'inéquation affichée en rappel montre la décomposition
  * complète en facteurs (formatEnonceSignesProduitFactoriseLatex, point 8), et l'aperçu en temps
  * réel comme la réponse en cours de construction porte désormais le préfixe "S = "
@@ -75,12 +77,14 @@ export function EtapeIntervalleProduit({
   const [valeurPoint, setValeurPoint] = useState("");
   const [valeursExclues, setValeursExclues] = useState<string[]>([]);
   const [liste, setListe] = useState<EtatListeMorceaux>(etatListeInitiale());
+  const [pointsIsoles, setPointsIsoles] = useState<string[]>([]);
 
   function choisirForme(nouvelleForme: Forme) {
     setForme(nouvelleForme);
     setValeurPoint("");
     setValeursExclues(nouvelleForme === "reel_sauf_points" ? Array(MIN_VALEURS_EXCLUES).fill("") : []);
     setListe(etatListeInitiale());
+    setPointsIsoles([]);
   }
 
   function ajouterValeurExclue() {
@@ -111,12 +115,14 @@ export function EtapeIntervalleProduit({
       return toutesValides ? { forme, valeurs } : null;
     }
     const morceaux = construireListe(liste);
-    if (morceaux === null) return null;
+    const points = construirePointsIsoles(pointsIsoles);
+    if (morceaux === null || points === null) return null;
+    if (points.length > 0) return { forme: "mixte", morceaux, points };
     return morceaux.length === 1 ? { forme: "intervalle", morceau: morceaux[0] } : { forme: "union", morceaux };
   }
 
   const reponse = construireReponse();
-  const termesApercu = formatTermesApercuSolutionProduit(forme, valeurPoint, valeursExclues, liste);
+  const termesApercu = formatTermesApercuSolutionProduit(forme, valeurPoint, valeursExclues, liste, pointsIsoles);
   const highlight = aideActivee ? calculerAideGrille(exercice) : undefined;
 
   return (
@@ -194,10 +200,10 @@ export function EtapeIntervalleProduit({
       )}
 
       {forme === "intervalle" && (
-        <ListeMorceauxInput
-          etat={liste}
-          onChange={setListe}
-        />
+        <>
+          <ListeMorceauxInput etat={liste} onChange={setListe} />
+          <ListePointsIsolesInput valeurs={pointsIsoles} onChange={setPointsIsoles} />
+        </>
       )}
 
       {!validation && (

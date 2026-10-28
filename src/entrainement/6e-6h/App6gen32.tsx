@@ -27,7 +27,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * (`EtapeChampsIndependanceBayes`), jamais de dispatch choix/champs comme `App6gen30.tsx`.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionIndependanceBayes {
   return demarrerSessionIndependanceBayes(REGLAGES_DEMO, genererExerciceIndependanceBayes);

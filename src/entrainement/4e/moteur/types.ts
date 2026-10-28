@@ -87,7 +87,7 @@ export interface EtatSession {
   champPrincipalRevele: boolean;
   categorieRevelee: boolean;
   /**
-   * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —
+   * Aides à sens unique (1 seul niveau —
    * conceptionaidescomposantspartageshistorique.md) — chacune remise à false au passage à
    * l'exercice suivant, comme `categorieRevelee`.
    */

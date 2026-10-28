@@ -88,7 +88,7 @@ function sequenceReelle(exercice: Parameters<typeof phaseInitiale>[0]): PhaseDom
   return sequence;
 }
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDomaineDeriveeLogarithme {
   return demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, genererExerciceDomaineDeriveeLogarithme);

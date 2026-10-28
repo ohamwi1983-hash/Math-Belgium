@@ -23,7 +23,6 @@ import {
 import type { EtatSessionEquationInequationSecondDegre, PhaseEquationInequationSecondDegre, ResultatExerciceEquationInequationSecondDegre } from "./typesEquationInequationSecondDegre";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_POSER_SYSTEME = 2;
 export const NIVEAU_AIDE_MAX_ISOLER_SUBSTITUER = 2;
 export const NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION = 2;
@@ -76,12 +75,7 @@ function reglagesEtape(etat: EtatSessionEquationInequationSecondDegre): Reglages
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationInequationSecondDegre): EtatSessionEquationInequationSecondDegre {
@@ -148,7 +142,7 @@ export function soumettreReponsePoserSysteme(etat: EtatSessionEquationInequation
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePoserSysteme);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -170,7 +164,7 @@ export function soumettreReponseIsolerSubstituer(etat: EtatSessionEquationInequa
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIsolerSubstituer);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -193,7 +187,7 @@ export function soumettreReponsePoserEquationInequation(etat: EtatSessionEquatio
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePoserEquationInequation);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -215,7 +209,7 @@ export function soumettreReponseResoudre(etat: EtatSessionEquationInequationSeco
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideResoudre);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -237,7 +231,7 @@ export function soumettreReponseValidationEquation(etat: EtatSessionEquationIneq
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideValidation);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -259,7 +253,7 @@ export function soumettreReponseValidationInequation(etat: EtatSessionEquationIn
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideValidation);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -281,7 +275,7 @@ export function soumettreReponseInterpretation(etat: EtatSessionEquationInequati
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideInterpretation);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: exerciceCourant.variante,

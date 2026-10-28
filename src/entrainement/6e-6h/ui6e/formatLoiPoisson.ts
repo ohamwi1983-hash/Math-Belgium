@@ -1,6 +1,5 @@
 import type { ExerciceLoiPoisson, ExerciceLoiPoissonA, ExerciceLoiPoissonB, FamilleLoiPoisson, StrategiePoissonB } from "../core6e/loiPoisson.types";
-import type { PhaseLoiPoisson, ResultatExerciceLoiPoisson } from "../moteur6e/typesLoiPoisson";
-import { phasesPourExercice } from "../moteur6e/typesLoiPoisson";
+import type { PhaseLoiPoisson } from "../moteur6e/typesLoiPoisson";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen53`. Dispatch sur
@@ -405,14 +404,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiPoisson, ph
     return [...decouperEnFragmentsTexte(LIBELLE_STRATEGIE[exercice.strategie]), termes];
   }
   return [formatDecimalExact(exercice.resultatFinal)];
-}
-
-/** Total points du récapitulatif final — maximum VARIABLE (100 × nombre d'écrans réellement
- * traversés par CET exercice). */
-export function calculerTotalPointsLoiPoisson(resultat: ResultatExerciceLoiPoisson): { total: number; maximum: number } {
-  const phases = phasesPourExercice(resultat.exercice);
-  const total = phases.reduce((acc, phase) => acc + (resultat.scores[phase] ?? 0), 0);
-  return { total, maximum: phases.length * 100 };
 }
 
 export type { ExerciceLoiPoissonA, ExerciceLoiPoissonB };

@@ -31,7 +31,6 @@ import { phaseApres, phaseInitiale } from "./typesDeriveesCyclometriques";
 import type { EtatSessionDeriveesCyclometriques, PhaseDeriveesCyclometriques, ResultatExerciceDeriveesCyclometriques } from "./typesDeriveesCyclometriques";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 /** 2 niveaux d'aide sur tous les écrans (spec explicite pour chaque famille). */
 export const NIVEAU_AIDE_MAX = 2;
@@ -57,7 +56,7 @@ export function demarrerSessionDeriveesCyclometriques(
 }
 
 function reglagesEtape(etat: EtatSessionDeriveesCyclometriques): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 export function activerAideSuivante(etat: EtatSessionDeriveesCyclometriques): EtatSessionDeriveesCyclometriques {
@@ -124,7 +123,7 @@ function avancerPhase(
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: etapeCourante.revelee };
   const derniereCloture = { phase: etat.phase, info: { niveauAide: etat.niveauAide, revele: etapeCourante.revelee } };

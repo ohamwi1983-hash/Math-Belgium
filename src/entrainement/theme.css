@@ -1692,6 +1692,20 @@
   margin-top: 4px;
 }
 
+/* Point isolé (ListePointsIsolesInput, racines doubles) : « ∪ { 3 } » — les accolades encadrent le
+ * champ, qui prend la place restante (jamais plus étroit que le doigt sur smartphone). */
+.entrainement .liste-points-isoles .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.entrainement .liste-points-accolade {
+  flex: none;
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+
 .entrainement .summary-table-scroll {
   overflow-x: auto;
   margin-bottom: 22px;

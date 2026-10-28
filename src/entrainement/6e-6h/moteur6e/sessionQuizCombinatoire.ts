@@ -19,11 +19,10 @@ import type { EtatSessionQuizCombinatoire, ResultatExerciceQuizCombinatoire } fr
 const POINTS_DE_BASE = 100;
 const TENTATIVES_MAX_VRAI_FAUX = 1;
 
-function reglagesEtape(etat: EtatSessionQuizCombinatoire): ReglagesEtape {
+function reglagesEtape(): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: TENTATIVES_MAX_VRAI_FAUX,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -72,7 +71,7 @@ export function soumettreReponseQuizCombinatoire(
   const { question, variante } = etat.exerciceCourant as ExerciceQuizCombinatoire;
 
   const etapeCourante = soumettreEtapeTentatives<boolean>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglagesEtape(),
     verifier: (r) => verifierReponseVraiFaux(question, r),
     revelerReponse: () => {},
   });

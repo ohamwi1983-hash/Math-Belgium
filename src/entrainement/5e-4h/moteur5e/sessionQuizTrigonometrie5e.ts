@@ -23,11 +23,10 @@ import type { EtatSessionQuizTrigonometrie5e, ResultatExerciceQuizTrigonometrie5
 const POINTS_DE_BASE = 100;
 const TENTATIVES_MAX_VRAI_FAUX = 1;
 
-function reglagesEtape(etat: EtatSessionQuizTrigonometrie5e): ReglagesEtape {
+function reglagesEtape(): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: TENTATIVES_MAX_VRAI_FAUX,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
 }
 
@@ -76,7 +75,7 @@ export function soumettreReponseQuizTrigonometrie5e(
   const { question, variante } = etat.exerciceCourant as ExerciceQuizTrigonometrie5e;
 
   const etapeCourante = soumettreEtapeTentatives<boolean>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglagesEtape(),
     verifier: (r) => verifierReponseVraiFaux5e(question, r),
     revelerReponse: () => {},
   });

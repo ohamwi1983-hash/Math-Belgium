@@ -35,7 +35,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * entièrement par `champs: ChampDef[]`.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionProbabiliteHypergeometrique {
   return demarrerSessionProbabiliteHypergeometrique(REGLAGES_DEMO, genererExerciceProbabiliteHypergeometrique);

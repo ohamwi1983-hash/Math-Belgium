@@ -20,7 +20,6 @@ const CONSIGNE_GENERALE = "Détermine les caractéristiques de cette droite.";
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

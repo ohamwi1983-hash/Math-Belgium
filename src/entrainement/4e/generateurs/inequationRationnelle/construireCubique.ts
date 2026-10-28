@@ -5,7 +5,7 @@ import type { ExerciceInequationRationnelleCubique } from "../../core/inequation
 import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
 import { construireBinomeConjugue } from "../secondDegre/categories/binomeConjugue";
 import { construireCasGeneral } from "../secondDegre/categories/casGeneral";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleQuotientCubique } from "./construireGrilleQuotientCubique";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
@@ -38,8 +38,7 @@ export function construireCubique(): ExerciceInequationRationnelleCubique {
 
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
   const { racines, ce, grille } = construireGrilleQuotientCubique(quadratique, denominateur);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return {
     niveau: "cubique",

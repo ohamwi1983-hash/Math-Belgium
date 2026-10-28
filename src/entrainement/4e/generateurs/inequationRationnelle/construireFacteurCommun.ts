@@ -5,7 +5,7 @@ import { randomInt } from "../secondDegre/aleatoire";
 import { tirerRacineCommune } from "../simplification/aleatoire";
 import { construireP2Impose } from "../simplification/construireP2Impose";
 import { secondeRacine, techniqueASecondeRacineFixe } from "../simplification";
-import { classifierSolutionQuotient, extraireSignesZonesQuotient } from "./grilleQuotient";
+import { classifierSolutionQuotient } from "./grilleQuotient";
 import { construireGrilleFacteurCommun } from "./construireGrilleFacteurCommun";
 
 const SYMBOLES: Symbole[] = ["<", ">", "≤", "≥"];
@@ -35,8 +35,7 @@ export function construireFacteurCommun(): ExerciceInequationRationnelleFacteurC
   const symbole = SYMBOLES[randomInt(0, SYMBOLES.length - 1)];
 
   const { racines, ce, numerateurSimplifie, denominateurSimplifie, grille } = construireGrilleFacteurCommun(fraction);
-  const zones = extraireSignesZonesQuotient(grille.ligneQuotient);
-  const solution = classifierSolutionQuotient(racines, ce, zones, symbole);
+  const solution = classifierSolutionQuotient(racines, ce, grille.ligneQuotient, symbole);
 
   return {
     niveau: "facteurCommun",

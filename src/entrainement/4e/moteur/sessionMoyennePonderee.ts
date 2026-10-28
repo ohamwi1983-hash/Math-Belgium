@@ -10,8 +10,7 @@
  * "classes" se termine donc à "quotient" comme "discrete").
  *
  * **Aide PROGRESSIVE par écran** (comme "Tableau de fréquences"/"Regroupement en classes et
- * histogramme"/"Triangle quelconque"/"Colinéarité"/"Orthogonalité") — pénalité ADDITIVE (-20 points
- * par niveau atteint) appliquée au moment précis où l'écran se clôt, jamais rétroactivement.
+ * histogramme"/"Triangle quelconque"/"Colinéarité"/"Orthogonalité").
  */
 import type { ExerciceMoyennePonderee, GenerateurExerciceMoyennePonderee } from "../core/moyennePonderee.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -22,7 +21,6 @@ import { verifierCentres, verifierQuotient, verifierSommes } from "./verificatio
 import type { EtatSessionMoyennePonderee, PhaseMoyennePonderee, ResultatExerciceMoyennePonderee } from "./typesMoyennePonderee";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NIVEAU_AIDE_MAX_CENTRES = 2;
 export const NIVEAU_AIDE_MAX_SOMMES = 2;
 export const NIVEAU_AIDE_MAX_QUOTIENT = 1;
@@ -63,13 +61,7 @@ function reglagesEtape(etat: EtatSessionMoyennePonderee): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires. */
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 /** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, ou si le
@@ -143,7 +135,7 @@ export function soumettreReponseCentres(etat: EtatSessionMoyennePonderee, repons
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCentres);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -169,7 +161,7 @@ export function soumettreReponseSommes(etat: EtatSessionMoyennePonderee, reponse
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSommes);
+  const score = etapeCourante.score as number;
 
   return {
     ...etat,
@@ -196,7 +188,7 @@ export function soumettreReponseQuotient(etat: EtatSessionMoyennePonderee, repon
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideQuotient);
+  const score = etapeCourante.score as number;
 
   return cloturerExerciceOuSuivant(etat, {
     variante: etat.exerciceCourant.variante,

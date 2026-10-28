@@ -6,5 +6,4 @@
 export interface ReglagesSession5e {
   nombreExercices: number;
   tentativesMax: number;
-  penaliteActivee: boolean;
 }

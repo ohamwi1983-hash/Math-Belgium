@@ -1,7 +1,6 @@
 import type { Enonce, Exercice } from "../../core/generateur.types";
 import type {
   ExerciceInequationRationnelle,
-  NiveauInequationRationnelle,
   ReglagesInequationRationnelle,
   ValeurCelluleQuotient,
 } from "../../core/inequationRationnelle.types";
@@ -29,7 +28,7 @@ import { formatLineaireDeveloppeExact } from "../../ui/formatInequationRationnel
 import { formatFractionSimplifiee } from "../../ui/formatSimplification";
 import { formatSolutionEnsembleProduit } from "../../ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "../../ui/categorieLabels";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurInequationRationnelle } from "./index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurInequationRationnelle, type VarianteInequationRationnelleId } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceInequationRationnelle>` pour gen6 (Inéquations
@@ -97,6 +96,12 @@ function labelMonique(prefixe: string, racine: number): string {
   return `${prefixe} : ${formatLineaireDeveloppeExact(1, racine)}`;
 }
 
+/** "N : (x-r)^2" (racine double) — même convention que `labelDenominateurCarre`. */
+function labelCarre(prefixe: string, racine: number): string {
+  const lineaire = formatLineaireDeveloppeExact(1, racine);
+  return `${prefixe} : ${racine === 0 ? `${lineaire}^2` : `(${lineaire})^2`}`;
+}
+
 /** "D : (x-p)^2" ou "D : x^2" — jamais développé, même convention que `formatLigneDenominateurCarreLabel`. */
 function labelDenominateurCarre(poly: PolynomeLineaire): string {
   const lineaire = formatLineaireDeveloppeExact(poly.k, poly.p);
@@ -128,9 +133,16 @@ function lignesGrille(exercice: ExerciceInequationRationnelle): LigneGrille[] {
       if (exercice.grille.ligneCoefficient) {
         lignes.push({ label: String(exercice.numerateur.enonce.a), valeurs: exercice.grille.ligneCoefficient });
       }
+      // Racine double (audit gen6) : une seule ligne « N : (x − r)² ».
+      const lignesN: LigneGrille[] =
+        r1 === r2
+          ? [{ label: labelCarre("N", r1), valeurs: exercice.grille.lignesNumerateur[0] }]
+          : [
+              { label: labelMonique("N", r1), valeurs: exercice.grille.lignesNumerateur[0] },
+              { label: labelMonique("N", r2), valeurs: exercice.grille.lignesNumerateur[1] },
+            ];
       lignes.push(
-        { label: labelMonique("N", r1), valeurs: exercice.grille.lignesNumerateur[0] },
-        { label: labelMonique("N", r2), valeurs: exercice.grille.lignesNumerateur[1] },
+        ...lignesN,
         { label: labelLineaire("D", exercice.denominateur), valeurs: exercice.grille.ligneDenominateur },
         { label: "Signe du quotient", valeurs: exercice.grille.ligneQuotient },
       );
@@ -525,7 +537,7 @@ export const adaptateurEvaluationInequationRationnelle: AdaptateurFeuilleExercic
   nomFichierBase: "inequations-rationnelles",
   genererInstance,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as NiveauInequationRationnelle),
+  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteInequationRationnelleId),
   construireEnonce: construireEnonceInequationRationnelle,
   construireCorrection: construireCorrectionInequationRationnelle,
 };

@@ -12,7 +12,6 @@ import { diagnostiquerPoserRecurrence, diagnostiquerRegimePermanent, diagnostiqu
 import type { ReponseRegimePermanent } from "./verificationSuiteRecurrenteAffine";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 export const NIVEAU_AIDE_MAX_SUITE_RECURRENTE_AFFINE = 2;
 
@@ -39,7 +38,7 @@ export function demarrerSessionSuiteRecurrenteAffine(reglages: ReglagesSession5e
 }
 
 function reglagesEtape(etat: EtatSessionSuiteRecurrenteAffine): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax, penaliteActivee: etat.reglages.penaliteActivee };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
 /** Plafond d'aide PAR PHASE (B.3, `promptcorrectionsround2.md`) — remplace l'usage nu de
@@ -79,7 +78,7 @@ export function soumettreReponsePoserRecurrence(etat: EtatSessionSuiteRecurrente
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -102,7 +101,7 @@ export function soumettreReponseRegimePermanent(etat: EtatSessionSuiteRecurrente
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
@@ -128,7 +127,7 @@ export function soumettreReponseTermesSuccessifs(etat: EtatSessionSuiteRecurrent
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const revele = etapeCourante.revelee;
-  const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+  const score = etapeCourante.score as number;
   const phaseSuivante = phaseApres("termesSuccessifs");
   if (phaseSuivante !== "termine") throw new Error("soumettreReponseTermesSuccessifs : séquence inattendue après 'termesSuccessifs'");
 

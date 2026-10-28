@@ -32,7 +32,6 @@ const CONSIGNE_GENERALE = "Détermine l'intersection de ces lieux géométriques
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
-  penaliteActivee: true,
   affichageReponseApresEchec: true,
   affichageExplication: true,
 };

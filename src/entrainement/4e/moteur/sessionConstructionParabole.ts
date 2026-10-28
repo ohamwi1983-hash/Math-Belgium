@@ -9,8 +9,7 @@
  * les points d'intersection étant désormais calculés automatiquement — voir
  * `verificationConstructionParabole.ts`).
  *
- * Aide PROGRESSIVE par itération — pénalité ADDITIVE (-20 points/niveau) appliquée au moment précis
- * où l'itération se clôt, jamais rétroactivement, et remise à zéro à chaque nouvelle itération
+ * Aide PROGRESSIVE par itération, et remise à zéro à chaque nouvelle itération
  * (même principe que le reste de la plateforme).
  */
 import type { ExerciceConstructionParabole, GenerateurExerciceConstructionParabole } from "../core/constructionParabole.types";
@@ -23,7 +22,6 @@ import type { ReponseConstructionParabole } from "./verificationConstructionPara
 import { pointsCiblesIteration, rCanoniqueDisponible, rEstValide, verifierConstruction, verifierOrdreSelection } from "./verificationConstructionParabole";
 
 const POINTS_DE_BASE = 100;
-const PENALITE_PAR_NIVEAU_AIDE = 20;
 export const NOMBRE_ITERATIONS_CONSTRUCTION_PARABOLE = 3;
 export const NIVEAU_AIDE_MAX_CONSTRUCTION = 2;
 
@@ -58,12 +56,7 @@ function reglagesEtape(etat: EtatSessionConstructionParabole): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
     tentativesMax: etat.reglages.tentativesMax,
-    penaliteActivee: etat.reglages.penaliteActivee,
   };
-}
-
-function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
-  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
 }
 
 export function activerAideSuivante(etat: EtatSessionConstructionParabole): EtatSessionConstructionParabole {
@@ -117,7 +110,7 @@ export function soumettreReponseConstruction(etat: EtatSessionConstructionParabo
     return { ...etat, etapeCourante };
   }
 
-  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideConstruction);
+  const score = etapeCourante.score as number;
   // Repli défensif sur épuisement des tentatives : la dernière soumission de l'élève peut être un r
   // invalide (jamais garanti valide contrairement à une réponse correcte) — ne jamais le stocker tel
   // quel, sous peine de points cibles dégénérés/NaN pour le tracé final (voir `pointsCiblesIteration`,

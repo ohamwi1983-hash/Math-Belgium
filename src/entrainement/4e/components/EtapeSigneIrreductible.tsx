@@ -29,7 +29,7 @@ interface Props {
  * signes") mais sans croquis (pas de parabole unique ici, ce n'est qu'un facteur parmi d'autres).
  *
  * Le rappel « il garde toujours le signe de son propre a » (même texte que le callout `attention`
- * du cours) n'est montré qu'à l'activation du bouton Aide (×0,5) : affiché d'office, il donnait la
+ * du cours) n'est montré qu'à l'activation du bouton Aide : affiché d'office, il donnait la
  * réponse (audit gen5). L'aide est suivie par occurrence (`aideSigneIrreductibleCourante`,
  * moteur/sessionSignesProduit.ts), cet écran pouvant se répéter 0 à 2 fois par exercice.
  */

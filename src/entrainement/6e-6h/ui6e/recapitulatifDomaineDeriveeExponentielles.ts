@@ -17,7 +17,7 @@ import { formatEnsembleReelLatex } from "./formatEnsembleReel";
  *
  * `revele` — contrairement à 6gen3/6gen4/6gen14, `scoresPartiels[phase] === 0` N'EST PAS un proxy
  * fiable ici (voir le commentaire de `DetailPhaseDomaineDeriveeExponentielle`,
- * `typesDomaineDeriveeExponentielles.ts` : une pénalité d'aide peut par elle-même ramener le score
+ * `typesDomaineDeriveeExponentielles.ts` : une pénalité d'aide (supprimée depuis) pouvait par elle-même ramener le score
  * à 0 sans révélation). On utilise donc `detailsPartiels[phase].revele`, la source dédiée.
  */
 
