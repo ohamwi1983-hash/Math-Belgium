@@ -1,9 +1,9 @@
 /**
  * Contrat — "Statistique descriptive à une variable" (quiz vrai/faux), cinquante-neuvième
- * générateur du projet, dixième du chapitre 5 ("Statistiques") — voir CLAUDE.md, section
+ * générateur du projet, dixième du chapitre 4 ("Statistiques") — voir CLAUDE.md, section
  * "Création — cinquante-neuvième exercice".
  *
- * Contrairement aux 9 autres générateurs du chapitre 5 (gen30-38), qui posent chacun un problème
+ * Contrairement aux 9 autres générateurs du chapitre 4 (gen30-38), qui posent chacun un problème
  * élaboré à construire/calculer, celui-ci est une banque de RAPPEL : 200 affirmations vrai/faux
  * PRÉ-ÉCRITES (jamais générées procéduralement), couvrant l'intégralité du chapitre en 10 thèmes de
  * 20 questions chacun. Chaque thème correspond à une `VarianteQuizStatistiqueDescriptive` — ici le

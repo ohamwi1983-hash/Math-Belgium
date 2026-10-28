@@ -1,5 +1,5 @@
 import type { ResultatExerciceQuizStatistiqueDescriptive } from "../moteur/typesQuizStatistiqueDescriptive";
-import { LigneRecap, TotalPointsRecap, libelleStatutRecap, statutRecap } from "./LigneRecap";
+import { LigneRecap, statutRecap } from "./LigneRecap";
 
 interface Props {
   resultat: ResultatExerciceQuizStatistiqueDescriptive;
@@ -19,7 +19,8 @@ function libelleVraiFaux(reponse: boolean): string {
  * valeur de vérité de l'AFFIRMATION, les réutiliser pour qualifier la performance de l'élève
  * créerait une collision de sens (même choix que "Cercle trigonométrique & triangles
  * quelconques"). Récapitulatif uniformisé (`LigneRecap`/`statutRecap`, point 10 de l'audit
- * chapitre 5 — jamais un score `X/100` isolé) ; jamais d'orange ici, une seule tentative sans aide
+ * chapitre 4 — jamais un score `X/100` isolé, et plus aucun total de points depuis le retrait du
+ * comptage des points sur le site : « Correct »/« Incorrect » seulement) ; jamais d'orange ici, une seule tentative sans aide
  * progressive (`sessionQuizStatistiqueDescriptive.ts`) donc `statutRecap(revele, null)` ne peut
  * produire que vert/rouge. */
 export function ResultatPanelQuizStatistiqueDescriptive({ resultat, labelBouton, onContinuer }: Props) {
@@ -34,9 +35,8 @@ export function ResultatPanelQuizStatistiqueDescriptive({ resultat, labelBouton,
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
       </p>
       <LigneRecap label="Résultat" statut={statut}>
-        {libelleStatutRecap(statut)}
+        {correct ? "Correct" : "Incorrect"}
       </LigneRecap>
-      <TotalPointsRecap points={resultat.score} maxPoints={100} />
       <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}

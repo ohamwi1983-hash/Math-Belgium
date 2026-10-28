@@ -10,9 +10,12 @@ function libelleVraiFaux(reponse: boolean): string {
   return reponse ? "Vrai" : "Faux";
 }
 
+/** Résumé de fin de thème — seulement le nombre de bonnes réponses (plus aucun score « /100 »
+ * depuis le retrait du comptage des points). Le tableau passe en cartes sur mobile
+ * (`summary-table-cartes`, `theme.css`) : à 390 px, quatre colonnes laissaient environ 80 px à
+ * l'affirmation et faisaient monter la page au-delà de 7 000 px. */
 export function ResumeSessionQuizStatistiqueDescriptive({ resultats, onRecommencer, onChangerTheme }: Props) {
   const nombreCorrectes = resultats.filter((r) => r.score === 100).length;
-  const moyenne = resultats.reduce((somme, r) => somme + r.score, 0) / resultats.length;
 
   return (
     <div>
@@ -20,12 +23,8 @@ export function ResumeSessionQuizStatistiqueDescriptive({ resultats, onRecommenc
       <p className="result-subtitle">
         {nombreCorrectes} / {resultats.length} bonnes réponses
       </p>
-      <div className="score-hero">
-        <div className="score-hero-value">{moyenne.toFixed(0)}/100</div>
-        <div className="score-hero-label">score moyen</div>
-      </div>
       <div className="summary-table-scroll">
-        <table className="summary-table">
+        <table className="summary-table summary-table-cartes">
           <thead>
             <tr>
               <th>#</th>
@@ -37,10 +36,10 @@ export function ResumeSessionQuizStatistiqueDescriptive({ resultats, onRecommenc
           <tbody>
             {resultats.map((resultat, index) => (
               <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{resultat.question.enonce}</td>
-                <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
-                <td>{resultat.score === 100 ? "✓" : "✗"}</td>
+                <td data-label="#">{index + 1}</td>
+                <td data-label="Affirmation">{resultat.question.enonce}</td>
+                <td data-label="Ta réponse">{libelleVraiFaux(resultat.reponseChoisie)}</td>
+                <td data-label="Correcte">{resultat.score === 100 ? "✓" : "✗"}</td>
               </tr>
             ))}
           </tbody>

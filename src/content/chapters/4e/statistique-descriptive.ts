@@ -102,7 +102,7 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'liste brute, n = 20',
-          formula: 'Série brute (taille, en cm, de 20 athlètes) : 3, 5, 3, 7, 5, 12, 5, 3, 7, 5, 3, 12, 7, 5, 3, 7, 5, 12, 3, 5',
+          formula: 'Série brute (nombre de livres lus en un an par 20 élèves) : 3, 5, 3, 7, 5, 12, 5, 3, 7, 5, 3, 12, 7, 5, 3, 7, 5, 12, 3, 5',
           steps: [
             { tag: '1 — valeurs distinctes, ordre croissant', text: '3, 5, 7, 12' },
             { tag: '2 — compter chaque valeur', text: '3 apparaît 6 fois, 5 apparaît 7 fois, 7 apparaît 4 fois, 12 apparaît 3 fois (total 6+7+4+3 = 20 ✓)' },
@@ -168,8 +168,9 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'para',
           text:
             'Un caractère **continu** (ou discret avec trop de valeurs distinctes) : on regroupe ' +
-            'ses données en **classes**. Ce sont des intervalles consécutifs, tous de même ' +
-            '**amplitude**. On les représente ensuite par un **histogramme** : des barres ' +
+            'ses données en **classes**, des intervalles consécutifs. L\'**amplitude** d\'une ' +
+            'classe, c\'est sa longueur : borne supérieure − borne inférieure. Pour construire un ' +
+            '**histogramme**, on choisit ici des classes de **même amplitude** : des barres ' +
             'accolées, dont la **hauteur** vaut l\'effectif (ou la fréquence) de chaque classe.',
         },
         {
@@ -185,8 +186,23 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'exemple',
           badge: '4 classes, amplitude 2',
-          formula: 'n = 20 données, classes imposées d\'amplitude 2 :',
-          steps: [],
+          formula:
+            'Temps d\'écran quotidien (en h) de 20 élèves : 1 ; 2 ; 3,5 ; 0,5 ; 6 ; 4 ; 1,5 ; ' +
+            '2,5 ; 5 ; 8 ; 0,5 ; 3 ; 1,8 ; 2,2 ; 4,5 ; 7 ; 1,2 ; 3,8 ; 5,5 ; 2,7 — classes ' +
+            'imposées d\'amplitude 2 :',
+          steps: [
+            {
+              tag: 'données sur une frontière',
+              text:
+                '2 va dans [2 ; 4[, 4 dans [4 ; 6[ et 6 dans [6 ; 8] — jamais dans la classe qui se ' +
+                'termine par cette valeur.',
+            },
+            {
+              tag: '8, la toute dernière borne',
+              text: '8 est la borne supérieure de la dernière classe : exception, [6 ; 8] l\'inclut.',
+            },
+            { tag: 'compter', text: '6 + 7 + 4 + 3 = 20 données ✓' },
+          ],
           result: { tag: 'tableau + histogramme', text: 'voir ci-dessous' },
         },
         {
@@ -217,21 +233,24 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Sur cette plateforme, l\'effectif total n est toujours choisi pour que chaque ' +
-            'fréquence tombe sur un **pourcentage entier**. C\'est un bon moyen de te relire : ' +
-            'une fréquence à virgule signale presque toujours une erreur de comptage !',
+            'Dans l\'entraînement de cette section, l\'effectif total vaut toujours n = 10, 20 ou ' +
+            '25 : chaque fréquence y tombe sur un **pourcentage entier**, un bon moyen de te ' +
+            'relire. Ce n\'est pas une règle générale ! Avec n = 16 (possible dans le tableau de ' +
+            'fréquences de la section 1), une seule donnée vaut 1/16 = 6,25 % : une fréquence à ' +
+            'virgule y est parfaitement exacte.',
         },
         {
           kind: 'rappel',
-          label: 'Pour aller plus loin — amplitudes inégales',
+          label: 'Classes de même amplitude… seulement pour l\'histogramme',
           items: [
-            'Sur cette plateforme, les classes ont toujours la **même amplitude** : hauteur et ' +
-              'effectif se confondent alors. Mais dans un manuel, tu peux tomber sur des ' +
-              'classes d\'amplitudes **différentes** (une dernière classe plus large, par ' +
-              'exemple). Dans ce cas, la règle change : c\'est l\'**aire** de chaque rectangle ' +
-              'qui doit rester proportionnelle à l\'effectif — pas sa hauteur ! Sinon, la classe ' +
-              'la plus large paraît visuellement plus peuplée qu\'elle ne l\'est vraiment. Un ' +
-              'piège classique à connaître, même s\'il ne se présente jamais ici.',
+            'Pour **construire un histogramme**, les classes sont ici toujours de même ' +
+              'amplitude : la hauteur de chaque barre se lit alors directement comme ' +
+              'l\'effectif de la classe.',
+            'Dans les autres exercices du chapitre (moyenne pondérée, médiane, synthèse), les ' +
+              'classes peuvent avoir des amplitudes **différentes**. Ça ne change rien aux ' +
+              'calculs : la moyenne utilise le **centre** de chaque classe, la médiane ' +
+              's\'obtient par **interpolation** dans la classe du seuil, et le mode reste la ' +
+              'classe de **plus grand effectif**.',
           ],
         },
         {
@@ -344,7 +363,7 @@ export const statistiqueDescriptive: ChapterContent = {
             "une idée audacieuse : appliquer la moyenne pondérée — jusque-là réservée aux " +
             "mesures physiques en astronomie — aux mesures humaines. En compilant des " +
             "milliers de mesures de taille, de poids et même de comportements, il construit " +
-            'le concept de « l\'homme moyen » (l\'homme moyen), un individu théorique qui ' +
+            'le concept de « l\'homme moyen », un individu théorique qui ' +
             "résumerait toute une population par ses valeurs moyennes. L'idée fait scandale " +
             "autant qu'elle fascine : peut-on vraiment réduire une société entière à quelques " +
             'nombres ? Quetelet invente au passage l\'**indice de masse corporelle** (encore ' +
@@ -412,10 +431,10 @@ export const statistiqueDescriptive: ChapterContent = {
           text:
             'C\'est l\'erreur la plus fréquente ! Si l\'effectif cumulé est **exactement** égal ' +
             'au seuil, ce n\'est **pas encore** la bonne valeur. Il faut prendre la ' +
-            '**suivante**. Preuve sur l\'exemple ci-dessous : le seuil médiane vaut 10. ' +
-            'L\'effectif cumulé de x=2 vaut 5 — trop petit. Celui de x=6 vaut 13, et 13 > 10 : ' +
-            'c\'est elle ! Jamais x=2, même si tu es tenté de t\'arrêter dès que le cumulé « ' +
-            'approche » le seuil.',
+            '**suivante**. Preuve sur l\'exemple ci-dessous, avec Q1 : le seuil vaut n/4 = 5, ' +
+            'et l\'effectif cumulé de x=2 vaut **exactement** 5 — égal au seuil, donc pas encore. ' +
+            'Le premier cumulé strictement supérieur à 5 est 13, à x=6 : Q1 = 6. Jamais x=2, ' +
+            'même si tu es tenté de t\'arrêter dès que le cumulé « atteint » le seuil.',
         },
         {
           kind: 'exempleLibre',
@@ -504,11 +523,12 @@ export const statistiqueDescriptive: ChapterContent = {
                 { x: 5, y: 19, label: '', tone: 'accent' },
                 { x: 6, y: 17, label: '', tone: 'accent' },
                 { x: 7, y: 21, label: '', tone: 'accent' },
-                { x: 8, y: 50, label: 'match exceptionnel', tone: 'bad', labelPos: 'above' },
+                { x: 8, y: 50, label: 'match exceptionnel', tone: 'bad', labelPos: 'left' },
               ],
-              horizontalAsymptotes: [
-                { y: 22.75, label: 'moyenne ≈ 22,75' },
-                { y: 19.5, label: 'médiane = 19,5' },
+              horizontalAsymptotes: [{ y: 22.75 }, { y: 20 }],
+              textLabels: [
+                { x: 8.45, y: 24.6, text: 'moyenne ≈ 22,75', tone: 'ink', anchor: 'end' },
+                { x: 8.45, y: 15.6, text: 'médiane = 20', tone: 'ink', anchor: 'end' },
               ],
               xMin: 0.5,
               xMax: 8.5,
@@ -518,8 +538,9 @@ export const statistiqueDescriptive: ChapterContent = {
               yAxisLabel: 'points marqués',
               caption:
                 '8 matchs d\'un basketteur, dont un exceptionnel à 50 points. La moyenne ' +
-                '(22,75) est tirée vers le haut par ce seul match ; la médiane (19,5) reste ' +
-                'proche du niveau typique des 7 autres matchs.',
+                '(22,75) est tirée vers le haut par ce seul match ; la médiane (20 — règle du ' +
+                'seuil : n/2 = 4, et la 5e valeur dans l\'ordre croissant est 20) reste proche du ' +
+                'niveau typique des 7 autres matchs.',
             },
           ],
           text:
@@ -603,9 +624,10 @@ export const statistiqueDescriptive: ChapterContent = {
               { label: 'B', min: 1, q1: 4, median: 6, q3: 9, max: 11, tone: 'good', iqrLabel: 'IQR = 5' },
             ],
             xAxisLabel: 'x',
+            ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16],
             caption:
-              'Série A : min2/Q1 5/méd8/Q3 12/max15 (IQR=7) — Série B : min1/Q1 4/méd6/Q3 9/max11 ' +
-              '(IQR=5) — A a la médiane la plus grande ET la boîte la plus large',
+              'Série A : min 2 / Q1 5 / méd. 8 / Q3 12 / max 15 (IQR = 7) — Série B : min 1 / Q1 4 / ' +
+              'méd. 6 / Q3 9 / max 11 (IQR = 5) — A a la médiane la plus grande ET la boîte la plus large',
           },
         },
         {
@@ -661,7 +683,7 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le plus simple des trois : $\\text{étendue} = max - min$. Rapide à calculer. Mais ' +
+            'Le plus simple des trois : $\\text{étendue} = \\max - \\min$. Rapide à calculer. Mais ' +
             'il ne tient compte que des deux valeurs extrêmes — insensible à tout ce qui se ' +
             'passe entre les deux.',
         },
@@ -807,7 +829,7 @@ export const statistiqueDescriptive: ChapterContent = {
         },
         {
           kind: 'definition',
-          items: ['au moins $1 - \\dfrac{1}{k^2}$ (soit 100 % de cette fraction) des valeurs sont dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$'],
+          items: ['au moins une proportion $1 - \\dfrac{1}{k^2}$ des valeurs — soit $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ — se trouve dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$'],
         },
         {
           kind: 'illustration',
@@ -823,6 +845,7 @@ export const statistiqueDescriptive: ChapterContent = {
             extraTicks: [{ value: 2, label: 'x̄' }],
             rangeAnnotations: [{ from: 0.5, to: 3.5, label: 'au moins 75 % des valeurs (k=2)' }],
             axisLabel: 'x',
+            axisLabelAtEnd: true,
             caption: 'zone centrale [x̄−kσ ; x̄+kσ] — pour k=2, elle contient au moins 1−1/4 = 75 % des valeurs',
           },
         },
@@ -850,6 +873,17 @@ export const statistiqueDescriptive: ChapterContent = {
             { tag: 'k strictement positif', text: '$k = \\sqrt{20}$' },
           ],
           result: { tag: 'résultat', text: 'c\'est dans l\'intervalle $[\\bar{x}-\\sqrt{20}\\sigma\\,;\\,\\bar{x}+\\sqrt{20}\\sigma]$ qu\'il y a au moins 95 % des valeurs' },
+        },
+        {
+          kind: 'piege',
+          label: 'Arrondir sans perdre la garantie',
+          text:
+            'Bienaymé-Tchebychev donne une **garantie** (« au moins… ») : quand tu arrondis, fais-' +
+            'le toujours dans le sens qui la conserve. Un pourcentage minimal ou un nombre minimal ' +
+            'd\'individus s\'arrondit **vers le bas**. Les bornes d\'un intervalle s\'arrondissent ' +
+            '**vers l\'extérieur** : la borne inférieure vers le bas, la borne supérieure vers le ' +
+            'haut. Et k s\'arrondit lui aussi dans le sens qui garde la garantie vraie : vers le ' +
+            'bas si tu en déduis un pourcentage, vers le haut si tu en déduis un intervalle.',
         },
         {
           kind: 'entrainement',
@@ -930,9 +964,9 @@ export const statistiqueDescriptive: ChapterContent = {
               kind: 'curvePlot',
               curves: [],
               points: [
-                { x: 5, y: 1, label: 'Traitement', tone: 'good', labelPos: 'above' },
+                { x: 5, y: 1, label: 'Traitement', tone: 'good', labelPos: 'below' },
                 { x: 6, y: 1, label: '', tone: 'good' },
-                { x: 6, y: 1, label: '', tone: 'good' },
+                { x: 6, y: 1.28, label: '', tone: 'good' },
                 { x: 8, y: 1, label: '', tone: 'good' },
                 { x: 12, y: 1, label: '', tone: 'good' },
                 { x: 8, y: 2, label: 'Placebo', tone: 'bad', labelPos: 'below' },
@@ -950,7 +984,8 @@ export const statistiqueDescriptive: ChapterContent = {
               yAxisLabel: 'groupe',
               caption:
                 'Le groupe Traitement (vert) guérit en général plus vite ET de façon plus ' +
-                'homogène (points resserrés entre 5 et 12 jours) que le groupe Placebo (rouge, ' +
+                'homogène (points resserrés entre 5 et 12 jours ; deux patients guéris en 6 jours, ' +
+                'leurs points sont empilés) que le groupe Placebo (rouge, ' +
                 'étalé de 8 à 18 jours) — mais les deux séries se chevauchent encore entre 8 et ' +
                 '12 jours : la différence est nette, sans être totale.',
             },
@@ -992,7 +1027,7 @@ export const statistiqueDescriptive: ChapterContent = {
       id: 'revision',
       number: 9,
       title: 'Révision — synthèse et vrai/faux',
-      kicker: 'tout le chapitre sur un seul jeu de données, puis 200 affirmations en 10 thèmes',
+      kicker: 'tout le chapitre sur un seul jeu de données, puis 350 affirmations en 10 thèmes',
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'AN_L26bmYLg' },
         {
@@ -1017,15 +1052,16 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Le thème « paramètres de position » du quiz revient explicitement sur le piège du ' +
-            'seuil strict, vu à la section 4. Utile pour vérifier que le réflexe est bien acquis !',
+            'Le thème « Médiane et quartiles » du quiz revient explicitement sur le piège du ' +
+            'seuil strict (cumulé exactement égal au seuil), vu à la section 4. Utile pour ' +
+            'vérifier que le réflexe est bien acquis !',
         },
         {
           kind: 'entrainement',
           title: 'Statistique descriptive à une variable — quiz vrai/faux',
           generatorId: 'gen59',
           description: [
-            '200 affirmations pré-écrites, réparties en 10 thèmes qui reprennent tout ce ' +
+            '350 affirmations pré-écrites, réparties en 10 thèmes qui reprennent tout ce ' +
               'chapitre. Un seul essai par question. La justification est toujours révélée.',
           ],
           chantier: '4e',
@@ -1103,9 +1139,10 @@ export const statistiqueDescriptive: ChapterContent = {
     items: [
       '**Vocabulaire** — population, individu, caractère (discret ou continu), effectif nᵢ, ' +
         'effectif total n, fréquence fᵢ = nᵢ/n.',
-      '**Regroupement** — tableau de fréquences pour une liste discrète. Classes d\'amplitude ' +
-        'constante et convention [inf;sup[ pour un caractère continu (sauf la dernière classe, ' +
-        'fermée des deux côtés).',
+      '**Regroupement** — tableau de fréquences pour une liste discrète. Convention [inf;sup[ ' +
+        'pour un caractère continu (sauf la dernière classe, fermée des deux côtés). Classes de ' +
+        'même amplitude pour construire un histogramme ; ailleurs, les amplitudes peuvent ' +
+        'différer.',
       '**Moyenne** — $\\bar{x} = \\Sigma(x_i \\cdot n_i)/\\Sigma n_i$, jamais la moyenne des ' +
         'valeurs distinctes seules.',
       '**Position** — médiane/Q1/Q3 = première valeur dont l\'effectif cumulé dépasse ' +

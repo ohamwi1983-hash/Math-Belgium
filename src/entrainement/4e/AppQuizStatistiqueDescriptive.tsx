@@ -3,24 +3,29 @@ import type { VarianteQuizStatistiqueDescriptive } from "./core/quizStatistiqueD
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizStatistiqueDescriptive, soumettreReponseQuizStatistiqueDescriptive } from "./moteur/sessionQuizStatistiqueDescriptive";
 import type { EtatSessionQuizStatistiqueDescriptive, ResultatExerciceQuizStatistiqueDescriptive } from "./moteur/typesQuizStatistiqueDescriptive";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizStatistiqueDescriptive";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs/quizStatistiqueDescriptive";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizStatistiqueDescriptive } from "./components/EtapeQuestionQuizStatistiqueDescriptive";
 import { ResultatPanelQuizStatistiqueDescriptive } from "./components/ResultatPanelQuizStatistiqueDescriptive";
 import { ResumeSessionQuizStatistiqueDescriptive } from "./components/ResumeSessionQuizStatistiqueDescriptive";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizStatistiqueDescriptive/banque.ts`) : couplé à `creerGenerateurSansRepetition`,
- * une session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs/quizStatistiqueDescriptive/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizStatistiqueDescriptive): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizStatistiqueDescriptive): EtatSessionQuizStatistiqueDescriptive {
-  return demarrerSessionQuizStatistiqueDescriptive(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizStatistiqueDescriptive(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -49,7 +54,7 @@ export function AppQuizStatistiqueDescriptive() {
     const theme = varianteId as VarianteQuizStatistiqueDescriptive;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizStatistiqueDescriptive(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizStatistiqueDescriptive(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -59,7 +64,7 @@ export function AppQuizStatistiqueDescriptive() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Statistique descriptive à une variable — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 5{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-subtitle">Chapitre 4{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">
@@ -80,7 +85,13 @@ export function AppQuizStatistiqueDescriptive() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">10 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

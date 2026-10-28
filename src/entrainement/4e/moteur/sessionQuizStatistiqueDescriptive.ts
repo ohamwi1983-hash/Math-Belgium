@@ -1,6 +1,6 @@
 /**
  * Couche B — moteur de session pour "Statistique descriptive à une variable" (quiz vrai/faux,
- * chapitre 5, dixième générateur du chapitre). N'importe jamais rien de `src/generateurs/` —
+ * chapitre 4, dixième générateur du chapitre). N'importe jamais rien de `src/generateurs/` —
  * voir `sessionQuizStatistiqueDescriptive.test.ts` pour la preuve avec un générateur factice,
  * même principe que les 38 autres moteurs.
  *

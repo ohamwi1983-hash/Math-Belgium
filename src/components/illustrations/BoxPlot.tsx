@@ -13,15 +13,15 @@ const TONE_CLASS: Record<'accent' | 'good', { box: string; median: string }> = {
 }
 
 /** Boîte à moustaches — une ou plusieurs séries empilées, chacune résumée en 5 nombres. */
-export function BoxPlot({ series, xAxisLabel }: Props) {
-  const allVals = series.flatMap((s) => [s.min, s.max])
+export function BoxPlot({ series, xAxisLabel, ticks }: Props) {
+  const allVals = [...series.flatMap((s) => [s.min, s.max]), ...(ticks ?? [])]
   const vMin = Math.min(...allVals)
   const vMax = Math.max(...allVals)
   const pad = (vMax - vMin) * 0.08 || 1
   const xScale = (v: number) => X_LEFT + ((v - (vMin - pad)) / (vMax - vMin + 2 * pad)) * (X_RIGHT - X_LEFT)
 
   const single = series.length === 1
-  const height = series.length * ROW_HEIGHT + (single ? 45 : 35)
+  const height = series.length * ROW_HEIGHT + (single ? 45 : ticks ? 40 : 35)
   const axisY = series.length * ROW_HEIGHT + 8
 
   return (
@@ -77,6 +77,14 @@ export function BoxPlot({ series, xAxisLabel }: Props) {
       {!single && (
         <>
           <line x1={X_LEFT - 10} y1={axisY} x2={X_RIGHT + 10} y2={axisY} className="svg-line" strokeWidth="1.4" />
+          {ticks?.map((t) => (
+            <g key={t}>
+              <line x1={xScale(t)} y1={axisY - 4} x2={xScale(t)} y2={axisY + 4} className="svg-line" strokeWidth="1.2" />
+              <text x={xScale(t)} y={axisY + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                {t}
+              </text>
+            </g>
+          ))}
           <text x={X_RIGHT + 16} y={axisY + 4} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
             {xAxisLabel}
           </text>

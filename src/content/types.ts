@@ -89,6 +89,10 @@ export type IllustrationSpec =
        * sens accepté/exclu, pas une simple portée annotée. */
       rangeAnnotations?: { from: number; to: number; label: string }[]
       axisLabel: string
+      /** Place `axisLabel` au bout de la flèche (à droite) plutôt qu'au centre au-dessus de
+       * l'axe — utile quand une graduation/une annotation occupe déjà le centre (ex. « x̄ » sous
+       * l'axe, figure Bienaymé-Tchebychev). Absent = rendu historique inchangé. */
+      axisLabelAtEnd?: boolean
       caption: string
     }
   | { kind: 'compositionIntro' }
@@ -496,6 +500,10 @@ export type IllustrationSpec =
       kind: 'boxPlot'
       series: { label?: string; min: number; q1: number; median: number; q3: number; max: number; tone?: 'accent' | 'good'; iqrLabel?: string }[]
       xAxisLabel: string
+      /** Graduations numérotées sous l'axe (mode à plusieurs séries) — sans elles, on ne peut lire
+       * aucune valeur sur une comparaison de boîtes. L'échelle couvre alors aussi ces graduations.
+       * Absent = rendu historique inchangé. */
+      ticks?: number[]
       caption: string
     }
   | {

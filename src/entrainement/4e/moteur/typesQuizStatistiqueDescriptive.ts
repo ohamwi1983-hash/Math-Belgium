@@ -1,6 +1,6 @@
 /**
  * Couche B — types de session pour "Statistique descriptive à une variable" (quiz vrai/faux,
- * chapitre 5, dixième générateur du chapitre). **Mono-écran, une seule tentative** (jamais de
+ * chapitre 4, dixième générateur du chapitre). **Mono-écran, une seule tentative** (jamais de
  * `niveauAide` : avec 2 réponses possibles, aucune aide progressive n'a de sens ici — CLAUDE.md,
  * "Aide progressive additive... max=0 → pas de bouton") — voir
  * `moteur/sessionQuizStatistiqueDescriptive.ts`.

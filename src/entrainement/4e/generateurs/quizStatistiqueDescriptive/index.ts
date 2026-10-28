@@ -1,6 +1,6 @@
 /**
  * Couche A — "Statistique descriptive à une variable" (quiz vrai/faux), cinquante-neuvième
- * générateur, dixième du chapitre 5. Tire une question dans la banque pré-écrite (`banque.ts`)
+ * générateur, dixième du chapitre 4. Tire une question dans la banque pré-écrite (`banque.ts`)
  * du thème (variante) actif — jamais de génération procédurale, voir `core/quizStatistiqueDescriptive.types.ts`.
  */
 import type { ExerciceQuizStatistiqueDescriptive, GenerateurExerciceQuizStatistiqueDescriptive, QuestionVraiFaux, VarianteQuizStatistiqueDescriptive } from "../../core/quizStatistiqueDescriptive.types";
@@ -40,6 +40,20 @@ export function genererExerciceQuizStatistiqueDescriptive(): ExerciceQuizStatist
   return construireAvecVarianteId(varianteId);
 }
 
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 10 thèmes) — jamais une
+ * constante fixe : `AppQuizStatistiqueDescriptive.tsx` l'utilise pour fixer `nombreExercices`,
+ * seule façon pour `creerGenerateurSansRepetition` ci-dessous de garder sa garantie « jamais de
+ * répétition dans une session » si un thème venait à perdre ou gagner des affirmations. */
+export function nombreQuestions(varianteId: VarianteQuizStatistiqueDescriptive): number {
+  return BANQUE_QUIZ_STATISTIQUE_DESCRIPTIVE[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
+
 function melanger<T>(items: readonly T[]): T[] {
   const copie = [...items];
   for (let i = copie.length - 1; i > 0; i--) {
@@ -51,9 +65,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizStatistiqueDescriptive`)
- * pourrait répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée,
+ * pourrait répéter une question avant d'avoir couvert toutes les autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de
  * cette fonction — voir `AppQuizStatistiqueDescriptive.tsx`, qui en crée une par session démarrée.
  */
