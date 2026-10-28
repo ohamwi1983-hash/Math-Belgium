@@ -124,6 +124,10 @@ export function EtapeGrilleQuotientSansFacteurCommun({ exercice, tentativesUtili
         <Katex expression={formatEnonceCombineSansFacteurCommunFactoriseLatex(exercice)} block />
       </div>
       <p className="prompt-text">Complète le tableau de signes.</p>
+      <p className="prompt-fact">
+        Une valeur qui annule le dénominateur rend le quotient non défini (∄) — jamais positif, négatif ou nul.
+        Cette marque est prioritaire sur tout le reste, même avec un symbole large (≤/≥).
+      </p>
 
       <div className="grille-signes-scroll">
         <table className="grille-signes">

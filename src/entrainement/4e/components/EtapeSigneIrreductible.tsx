@@ -24,6 +24,12 @@ interface Props {
  * toujours positif/toujours négatif pour un facteur quadratique à Δ<0 — répétée une fois par
  * facteur irréductible présent (0 à 2), même mécanisme que EtapeSigneA (exercice "tableau de
  * signes") mais sans croquis (pas de parabole unique ici, ce n'est qu'un facteur parmi d'autres).
+ *
+ * Rappel toujours visible (pas de `BoutonAide`/pénalité, cette étape répète 0 à 2 fois par
+ * exercice — un seul booléen "aide utilisée" ne distinguerait pas quelle occurrence l'a demandée,
+ * contrairement aux autres étapes de ce générateur qui n'apparaissent qu'une fois) : audit du
+ * chapitre 2, cet écran n'avait aucune explication du "pourquoi toujours le signe de a", alors
+ * que le cours y consacre un callout `attention` dédié — même texte repris ici.
  */
 export function EtapeSigneIrreductible({
   tentativesUtilisees,
@@ -40,6 +46,10 @@ export function EtapeSigneIrreductible({
       <RecapitulatifPanel entrees={recapitulatif} />
       <EtatActuelPanel latex={etatActuel ?? null} />
       <p className="prompt-text">Ce facteur est-il toujours positif ou toujours négatif ?</p>
+      <p className="prompt-fact">
+        Un facteur quadratique irréductible (Δ&lt;0) ne s'annule jamais : il garde toujours le signe de son propre a,
+        sur toute la droite réelle.
+      </p>
       <div className="options-grid">
         <button type="button" className={signe === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigne("+")}>
           Toujours positif

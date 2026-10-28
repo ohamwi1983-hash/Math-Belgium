@@ -5,12 +5,15 @@ import { racinesDistinctes } from "../moteur/verificationEquationRationnelle";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationRationnelle;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
+  aideActivee: boolean;
+  onActiverAide: () => void;
   onValider: (reponses: boolean[]) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -33,6 +36,8 @@ export function EtapeRacinesEtrangeres({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
+  aideActivee,
+  onActiverAide,
   onValider,
   validation,
 }: Props) {
@@ -75,6 +80,18 @@ export function EtapeRacinesEtrangeres({
       ))}
       {!validation && (
         <>
+        <div>
+          {aideActivee && (
+            <div className="triangle-quelconque-aide">
+              <p>
+                Multiplier en croix revient à résoudre une équation plus large que celle de départ. Si une des
+                expressions multipliées peut valoir 0 pour cette valeur de x, l'équation obtenue accepte alors des
+                solutions que l'équation d'origine refusait : ce sont des racines étrangères, à rejeter.
+              </p>
+            </div>
+          )}
+          <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+        </div>
         <button
           type="button"
           className="btn btn-primary"

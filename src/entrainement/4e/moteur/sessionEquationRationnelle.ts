@@ -116,6 +116,7 @@ const ETAT_TRANSITOIRE_VIERGE = {
   aideIsolementUtilisee: false,
   aideChamp1Utilisee: false,
   aideChamp2Utilisee: false,
+  aideRacinesEtrangeresUtilisee: false,
 } as const;
 
 export function demarrerSessionEquationRationnelle(
@@ -547,6 +548,14 @@ export function activerAideChamp2(etat: EtatSessionEquationRationnelle): EtatSes
   return { ...etat, aideChamp2Utilisee: true };
 }
 
+/** Active le bouton "Aide" de l'étape "racinesEtrangeres" — révélation à sens unique, ×0,5 sur le
+ * score (audit du chapitre 2 : cette étape terminale n'avait jusqu'ici AUCUN mécanisme d'aide,
+ * contrairement à toutes les autres étapes de ce générateur — voir `EtapeRacinesEtrangeres.tsx`). */
+export function activerAideRacinesEtrangeres(etat: EtatSessionEquationRationnelle): EtatSessionEquationRationnelle {
+  garderPhase(etat, "racinesEtrangeres", "activerAideRacinesEtrangeres");
+  return { ...etat, aideRacinesEtrangeresUtilisee: true };
+}
+
 /**
  * Étape "racinesEtrangeres" : finale, clôture l'exercice. Générique sur `exercice.ce` — pour la
  * construction un_denominateur, aucune racine ne viole jamais la CE (les deux sont toujours
@@ -596,7 +605,8 @@ export function soumettreReponseRacinesEtrangeres(
     aideChamp1Utilisee: etat.aideChamp1Utilisee,
     scoreRacines: etat.scoreRacinesExercice as number,
     aideChamp2Utilisee: etat.aideChamp2Utilisee,
-    scoreRacinesEtrangeres: etapeCourante.score as number,
+    scoreRacinesEtrangeres: etat.aideRacinesEtrangeresUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number),
+    aideRacinesEtrangeresUtilisee: etat.aideRacinesEtrangeresUtilisee,
     racinesEtrangeresRevele: etapeCourante.revelee,
   };
 

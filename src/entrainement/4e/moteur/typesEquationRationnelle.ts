@@ -93,6 +93,7 @@ export interface ResultatExerciceEquationRationnelle {
   scoreRacines: number;
   aideChamp2Utilisee: boolean;
   scoreRacinesEtrangeres: number;
+  aideRacinesEtrangeresUtilisee: boolean;
   /** même principe que `EtatSessionEquationRationnelle.ceRevele` (voir son commentaire) — phase
    * terminale, jamais présente sur l'état top-level, seulement sur ce résultat d'exercice. */
   racinesEtrangeresRevele: boolean;
@@ -152,6 +153,7 @@ export interface EtatSessionEquationRationnelle {
   aideIsolementUtilisee: boolean;
   aideChamp1Utilisee: boolean;
   aideChamp2Utilisee: boolean;
+  aideRacinesEtrangeresUtilisee: boolean;
   resultats: ResultatExerciceEquationRationnelle[];
   terminee: boolean;
 }

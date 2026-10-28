@@ -8,6 +8,7 @@ import {
   activerAideCe,
   activerAideChamp1,
   activerAideChamp2,
+  activerAideRacinesEtrangeres,
   activerAideIsolement,
   activerAideSimplifierChamp1,
   activerAideSimplifierChamp2,
@@ -738,6 +739,8 @@ export function AppEquationRationnelle() {
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
+              aideActivee={etat.aideRacinesEtrangeresUtilisee}
+              onActiverAide={() => setEtat(activerAideRacinesEtrangeres(etat))}
               onValider={(reponses) => terminerEtape(soumettreReponseRacinesEtrangeres(etat, reponses))}
               validation={validation}
             />
