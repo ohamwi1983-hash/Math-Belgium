@@ -38,6 +38,15 @@ export function genererExerciceQuizFonctionSecondDegre(): ExerciceQuizFonctionSe
   return construireAvecVarianteId(varianteId);
 }
 
+/** Taille réelle de la banque d'un thème — 33 à 35 selon le thème depuis le retrait de 5
+ * affirmations demandant un vrai calcul à plusieurs étapes (audit du chapitre 1), jamais une
+ * constante 35 fixe. `AppQuizFonctionSecondDegre.tsx` l'utilise pour fixer `nombreExercices`,
+ * seule façon pour `creerGenerateurSansRepetition` ci-dessous de garder sa garantie "jamais de
+ * répétition dans une session" quel que soit le thème choisi. */
+export function nombreQuestions(varianteId: VarianteQuizFonctionSecondDegre): number {
+  return BANQUE_QUIZ_FONCTION_SECOND_DEGRE[varianteId].length;
+}
+
 function melanger<T>(items: readonly T[]): T[] {
   const copie = [...items];
   for (let i = copie.length - 1; i > 0; i--) {

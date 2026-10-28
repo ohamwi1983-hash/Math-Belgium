@@ -3,25 +3,29 @@ import type { VarianteQuizFonctionSecondDegre } from "./core/quizFonctionSecondD
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizFonctionSecondDegre, soumettreReponseQuizFonctionSecondDegre } from "./moteur/sessionQuizFonctionSecondDegre";
 import type { EtatSessionQuizFonctionSecondDegre, ResultatExerciceQuizFonctionSecondDegre } from "./moteur/typesQuizFonctionSecondDegre";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizFonctionSecondDegre";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, nombreQuestions } from "./generateurs/quizFonctionSecondDegre";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionSecondDegre } from "./components/EtapeQuestionQuizFonctionSecondDegre";
 import { ResultatPanelQuizFonctionSecondDegre } from "./components/ResultatPanelQuizFonctionSecondDegre";
 import { ResumeSessionQuizFonctionSecondDegre } from "./components/ResumeSessionQuizFonctionSecondDegre";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizFonctionSecondDegre/banque.ts`) : couplé à `creerGenerateurSansRepetition`,
- * une session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  penaliteActivee: true,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` est calculé depuis la taille RÉELLE de la banque du thème choisi
+ * (`nombreQuestions`, `generateurs/quizFonctionSecondDegre/index.ts`) — jamais une constante fixe
+ * (33 à 35 selon le thème depuis le retrait de 5 affirmations demandant un vrai calcul, voir
+ * `banque.ts`) : couplé à `creerGenerateurSansRepetition`, une session parcourt ainsi toujours
+ * EXACTEMENT les questions du thème choisi, quel que soit leur nombre, sans jamais en répéter une. */
+function reglagesPourTheme(theme: VarianteQuizFonctionSecondDegre): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    penaliteActivee: true,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
 
 function nouvelleSession(theme: VarianteQuizFonctionSecondDegre): EtatSessionQuizFonctionSecondDegre {
-  return demarrerSessionQuizFonctionSecondDegre(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizFonctionSecondDegre(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -50,7 +54,7 @@ export function AppQuizFonctionSecondDegre() {
     const theme = varianteId as VarianteQuizFonctionSecondDegre;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizFonctionSecondDegre(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizFonctionSecondDegre(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -81,7 +85,7 @@ export function AppQuizFonctionSecondDegre() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre, sans discriminant.</p>
+              <p className="result-subtitle">7 thèmes, 33 à 35 affirmations vrai/faux chacun — révision complète du chapitre, sans discriminant.</p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

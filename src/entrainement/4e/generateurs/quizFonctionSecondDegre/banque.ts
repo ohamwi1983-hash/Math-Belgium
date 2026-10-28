@@ -1,23 +1,27 @@
 /**
  * Couche A — banque de contenu pour "La fonction du second degré" (quiz vrai/faux), soixantième
- * générateur, ajout ultérieur au chapitre 1. 245 affirmations PRÉ-ÉCRITES (35 par thème), chacune
- * vérifiée mathématiquement à la rédaction — jamais générées procéduralement, voir
- * `core/quizFonctionSecondDegre.types.ts`.
+ * générateur, ajout ultérieur au chapitre 1. 240 affirmations PRÉ-ÉCRITES (33 à 35 par thème,
+ * voir plus bas), chacune vérifiée mathématiquement à la rédaction — jamais générées
+ * procéduralement, voir `core/quizFonctionSecondDegre.types.ts`.
  *
  * **Aucune affirmation ne suppose le discriminant Δ** : les racines s'obtiennent uniquement par
  * factorisation (mise en évidence, binôme conjugué, produit remarquable) ou par un raisonnement
- * graphique sur la position du sommet (deux affirmations, 54 et 102 de la révision d'origine,
- * testent explicitement ce point). Le mot « discriminant » n'apparaît que 3 fois dans les énoncés
- * sur l'ensemble des 245, toujours pour affirmer qu'il est évitable — vérifié par test dédié
- * (`index.test.ts`).
+ * graphique sur la position du sommet. Le mot « discriminant » n'apparaît que pour affirmer qu'il
+ * est évitable.
  *
- * Les 15 premières affirmations de chaque thème (reprises telles quelles d'une révision
- * initialement publiée en artefact) ont été complétées par 5 nouvelles pour atteindre 20 par
- * thème (140 au total), puis par 15 affirmations supplémentaires par thème (105 au total) pour
- * atteindre 35 par thème (245 au total) — même contrainte zéro-discriminant, mêmes techniques de
- * factorisation, nouveaux scénarios/nombres pour éviter tout doublon avec les 20 premières de
- * chaque thème. Équilibre vrai/faux global proche de 50/50 (128 vrai / 117 faux sur l'ensemble,
- * vérifié par thème également).
+ * À l'origine 245 affirmations (35 par thème : 15 reprises d'une révision initialement publiée
+ * en artefact, +5 pour atteindre 20, +15 pour atteindre 35) — **5 affirmations retirées après
+ * audit** (demandaient un vrai calcul à plusieurs étapes — résolution complète d'équation,
+ * développement d'un produit, calcul du sommet xS PUIS évaluation yS=f(xS) — plutôt qu'une
+ * vérification rapide : un quiz vrai/faux teste la compréhension, pas le calcul, déjà couvert par
+ * les 6 autres générateurs du chapitre) : coefficientsAllure (-1, développement d'un produit),
+ * formeCanoniqueSommet (-2, sommet calculé puis évalué), racinesFactorisation (-1, idem),
+ * equationsContexte (-1, chaîne de résolution complète). D'où le décompte variable par thème :
+ * transformationsGraphiques/domaineImageTableaux/optimisation à 35, coefficientsAllure/
+ * racinesFactorisation/equationsContexte à 34, formeCanoniqueSommet à 33 — `nombreExercices` est
+ * calculé dynamiquement depuis la taille réelle du thème choisi (`AppQuizFonctionSecondDegre.tsx`),
+ * jamais une constante 35 fixe, pour que `creerGenerateurSansRepetition` ci-dessous garde sa
+ * garantie "jamais de répétition dans une session" quel que soit le thème.
  */
 import type { QuestionVraiFaux, VarianteQuizFonctionSecondDegre } from "../../core/quizFonctionSecondDegre.types";
 
@@ -44,7 +48,6 @@ export const BANQUE_QUIZ_FONCTION_SECOND_DEGRE: Record<VarianteQuizFonctionSecon
     { enonce: "L'allure (la « largeur ») d'une parabole dépend à la fois de a, b et c.", reponse: false, justification: "L'allure (la largeur/le resserrement) ne dépend que de |a| ; b et c ne font que déplacer la position de la courbe." },
     { enonce: "Une fonction du second degré et sa translation verticale (par exemple f(x)+5) ont la même valeur de a, mais des coefficients c différents.", reponse: true, justification: "f(x)+5=ax²+bx+(c+5) : a et b restent identiques, seul c change (de c à c+5)." },
     { enonce: "Dans f(x)=-3x²+2x-1, le coefficient a vaut -3.", reponse: true, justification: "Le coefficient a est celui qui multiplie x² ; dans cette écriture, il vaut directement -3." },
-    { enonce: "Après développement de f(x)=(2x-1)(x+3), le coefficient a obtenu vaut 3.", reponse: false, justification: "En développant, (2x-1)(x+3)=2x²+5x-3 : le coefficient dominant vaut 2, pas 3." },
     { enonce: "Une fois réordonnée sous la forme ax²+bx+c, la fonction f(x)=5-4x+2x² a pour coefficient c la valeur 5.", reponse: true, justification: "Réordonnée, f(x)=2x²-4x+5 : le terme constant, indépendant de x, vaut bien 5." },
     { enonce: "La fonction constante f(x)=7 peut être vue comme une fonction du second degré avec a=0.", reponse: false, justification: "a=0 est exclu de la définition d'une fonction du second degré ; f(x)=7 est une fonction constante, de degré 0." },
     { enonce: "Le coefficient a peut être un nombre décimal, par exemple a=0,5, sans que la fonction cesse d'être du second degré.", reponse: true, justification: "Seule la condition a≠0 est imposée par la définition ; a peut être n'importe quel réel non nul, décimal compris." },
@@ -82,8 +85,6 @@ export const BANQUE_QUIZ_FONCTION_SECOND_DEGRE: Record<VarianteQuizFonctionSecon
     { enonce: "La forme canonique ne permet pas de savoir si une fonction admet un minimum ou un maximum ; il faut nécessairement passer par la forme développée.", reponse: false, justification: "C'est l'inverse : la forme canonique permet de le lire immédiatement via le signe de a, sans aucun calcul supplémentaire." },
     { enonce: "Pour f(x)=2(x-3)²+4, les coordonnées du sommet sont (-3,4).", reponse: false, justification: "Dans a(x-p)²+q, on lit p en écrivant x-p ; ici x-3 donne p=3 (pas -3), donc le sommet est (3,4)." },
     { enonce: "Pour f(x)=-(x+1)²-2, les coordonnées du sommet sont (-1,-2).", reponse: true, justification: "x+1 s'écrit x-(-1), donc p=-1 ; le sommet est bien (-1,-2)." },
-    { enonce: "Pour f(x)=x²-6x+5, l'abscisse du sommet vaut xS=3.", reponse: true, justification: "xS=-b/2a=-(-6)/(2×1)=3." },
-    { enonce: "Pour f(x)=x²-6x+5, l'ordonnée du sommet vaut yS=5.", reponse: false, justification: "yS=f(3)=9-18+5=-4, pas 5 ; seule f(0) (et non f(xS)) vaut le coefficient c=5 en général." },
     { enonce: "Deux fonctions ayant le même p mais des valeurs de q différentes ont le même axe de symétrie.", reponse: true, justification: "L'axe de symétrie a pour équation x=p ; si p est identique, l'axe l'est aussi, quelle que soit la valeur de q." },
     { enonce: "Deux fonctions ayant le même q mais des valeurs de p différentes ont le même axe de symétrie.", reponse: false, justification: "L'axe de symétrie dépend uniquement de p (x=p) ; des valeurs de p différentes donnent des axes différents, même avec le même q." },
     { enonce: "Si le sommet d'une fonction est (5,0) et a<0, alors f(x)≤0 pour tout réel x.", reponse: true, justification: "Avec a<0, le sommet est un maximum ; sa valeur (0) est donc la plus grande valeur atteinte par f, ce qui donne f(x)≤0 partout." },
@@ -163,7 +164,6 @@ export const BANQUE_QUIZ_FONCTION_SECOND_DEGRE: Record<VarianteQuizFonctionSecon
     { enonce: "Une fonction telle que f(x)=2(x-1)(x+3) a pour racines x=1 et x=-3.", reponse: true, justification: "Le facteur multiplicatif 2 ne change pas les racines : elles s'obtiennent en annulant (x-1) ou (x+3), soit x=1 et x=-3." },
     { enonce: "Une fonction telle que f(x)=-2(x-1)(x+3) a pour racines x=-1 et x=3.", reponse: false, justification: "Le facteur -2 devant les parenthèses ne modifie pas les racines : elles restent x=1 et x=-3, obtenues en annulant (x-1) ou (x+3)." },
     { enonce: "Si une fonction du second degré s'écrit f(x)=a(x-r)² avec r réel, alors r est une racine double de f, et le sommet de la parabole a pour abscisse r.", reponse: true, justification: "a(x-r)² est déjà une forme canonique de sommet (r,0) : r est donc à la fois l'abscisse du sommet et l'unique racine (double) de f." },
-    { enonce: "Il est impossible qu'une fonction telle que f(x)=x²-10x+1 (a=1>0, c=1>0) possède deux racines réelles distinctes.", reponse: false, justification: "Son sommet est en xS=5, d'ordonnée yS=25-50+1=-24<0 ; comme a>0 et le sommet est sous Ox, la fonction possède bien deux racines réelles distinctes, malgré a et c tous deux positifs." },
     { enonce: "L'équation x²=49 admet exactement deux solutions réelles : x=7 et x=-7.", reponse: true, justification: "7²=49 et (-7)²=49 : les deux valeurs opposées vérifient bien l'équation." },
     { enonce: "L'équation x²=-16 admet deux solutions réelles opposées, x=4 et x=-4.", reponse: false, justification: "x²=-16 n'a aucune solution réelle, car un carré ne peut jamais être négatif (et de plus, 4²=16, pas -16)." },
     { enonce: "Pour résoudre x²+7x=0, factoriser en x(x+7)=0 donne les racines x=0 et x=-7.", reponse: true, justification: "x²+7x=x(x+7) : le produit est nul si x=0 ou si x+7=0, c'est-à-dire x=-7." },
@@ -269,7 +269,6 @@ export const BANQUE_QUIZ_FONCTION_SECOND_DEGRE: Record<VarianteQuizFonctionSecon
     { enonce: "Dans ce même problème, on cherche à savoir quand l'objet dépasse une hauteur de 15 mètres : cela se traduit par l'équation -5t²+20t+2=15.", reponse: false, justification: "« Dépasser » un seuil se traduit par une inéquation stricte (-5t²+20t+2>15), pas par une égalité : une équation ne donnerait que l'instant précis où la hauteur vaut exactement 15 m." },
     { enonce: "Pour une entreprise dont le bénéfice (en milliers d'euros) est modélisé par B(x)=-2x²+40x-150 (x = nombre de produits vendus, en centaines), l'équation permettant de trouver les quantités pour lesquelles l'entreprise ne fait ni bénéfice ni perte est -2x²+40x-150=0.", reponse: true, justification: "« Ni bénéfice ni perte » signifie que le bénéfice est nul, soit B(x)=0 : c'est exactement l'équation à résoudre." },
     { enonce: "Pour cette même entreprise, on cherche les quantités qui donnent un bénéfice d'au moins 50 (milliers d'euros) : cela se traduit par l'inéquation -2x²+40x-150<50.", reponse: false, justification: "« Au moins 50 » signifie B(x)≥50, pas B(x)<50 : l'inéquation posée a le mauvais sens et la mauvaise limite." },
-    { enonce: "Résoudre -2x²+40x-150=0 (le seuil de rentabilité) revient à résoudre -2(x²-20x+75)=0, soit x²-20x+75=0, qui se factorise en (x-5)(x-15)=0, donnant x=5 et x=15 (centaines de produits).", reponse: true, justification: "(x-5)(x-15)=x²-20x+75 : les racines de x²-20x+75=0 sont bien x=5 et x=15." },
     { enonce: "Pour ce problème d'entreprise, x=5 et x=15 (centaines de produits) sont automatiquement les deux seules réponses valables, sans qu'il soit nécessaire de vérifier leur cohérence avec le contexte (par exemple x≥0).", reponse: false, justification: "Une vérification de cohérence avec le contexte reste toujours nécessaire en principe, même si dans ce cas précis les deux valeurs se révèlent effectivement positives et donc valables." },
     { enonce: "La phrase-réponse finale d'un problème en contexte doit être cohérente avec les unités utilisées dans l'énoncé (secondes, euros, mètres...), et pas seulement avec la valeur numérique brute.", reponse: true, justification: "Interpréter le résultat, c'est aussi lui redonner son unité concrète (par exemple « au bout de 4 secondes »), pas seulement énoncer un nombre." },
     { enonce: "Résoudre l'inéquation R(x)≥2000 revient uniquement à résoudre l'équation R(x)=2000, sans devoir étudier le signe de R(x)-2000 ailleurs.", reponse: false, justification: "Résoudre l'équation ne donne que les bornes de l'ensemble-solution ; il faut ensuite étudier le signe de R(x)-2000 sur les intervalles délimités par ces bornes pour connaître la solution complète de l'inéquation." },
