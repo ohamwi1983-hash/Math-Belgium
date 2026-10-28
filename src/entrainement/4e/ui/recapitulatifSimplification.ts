@@ -64,12 +64,9 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
   }
   if (etat.scoreDenomChamp2Exercice !== null) {
     const denom = exercice.denominateur as Exercice;
-    entrees.push({
-      libelle: "Conditions d'existence (CE)",
-      estLatex: false,
-      valeur: denom.solution.racines.map((r) => `x≠${r}`).join(" ; "),
-      revele: etat.denomChamp2Revele,
-    });
+    const [r1, r2] = denom.solution.racines;
+    const valeur = r1 === r2 ? `x≠${r1}` : denom.solution.racines.map((r) => `x≠${r}`).join(" ; ");
+    entrees.push({ libelle: "Conditions d'existence (CE)", estLatex: false, valeur, revele: etat.denomChamp2Revele });
   }
   if (etat.scoreDenomFactorisationExercice !== null) {
     const denom = exercice.denominateur as Exercice;
@@ -126,12 +123,9 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
   }
   if (etat.scoreNumChamp2Exercice !== null) {
     const num = exercice.numerateur as Exercice;
-    entrees.push({
-      libelle: "Racines (numérateur)",
-      estLatex: false,
-      valeur: num.solution.racines.join(" ; "),
-      revele: etat.numChamp2Revele,
-    });
+    const [r1, r2] = num.solution.racines;
+    const valeur = r1 === r2 ? String(r1) : num.solution.racines.join(" ; ");
+    entrees.push({ libelle: "Racines (numérateur)", estLatex: false, valeur, revele: etat.numChamp2Revele });
   }
   if (etat.scoreNumFactorisationExercice !== null) {
     const num = exercice.numerateur as Exercice;

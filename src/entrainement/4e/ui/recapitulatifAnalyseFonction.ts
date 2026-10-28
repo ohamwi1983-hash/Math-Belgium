@@ -62,7 +62,9 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
   }
 
   if (etat.scoreRacinesChamp2Exercice !== null) {
-    entrees.push({ libelle: "Racines", estLatex: false, valeur: exercice.solution.racines.join(" ; "), revele: etat.racinesChamp2Revele });
+    const [r1, r2] = exercice.solution.racines;
+    const valeur = r1 === r2 ? String(r1) : exercice.solution.racines.join(" ; ");
+    entrees.push({ libelle: "Racines", estLatex: false, valeur, revele: etat.racinesChamp2Revele });
   }
 
   return entrees;

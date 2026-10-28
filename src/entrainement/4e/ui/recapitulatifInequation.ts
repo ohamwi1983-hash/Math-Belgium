@@ -24,7 +24,12 @@ export function calculerRecapitulatifInequation(etat: EtatSessionInequation): En
   }
 
   if (etat.scoreRacinesExercice !== null) {
-    const valeur = exercice.racines === undefined ? "∅" : exercice.racines.join(" ; ");
+    const valeur =
+      exercice.racines === undefined
+        ? "∅"
+        : exercice.racines[0] === exercice.racines[1]
+          ? String(exercice.racines[0])
+          : exercice.racines.join(" ; ");
     entrees.push({ libelle: "Racines", estLatex: false, valeur, revele: etat.racinesRevele });
   }
 

@@ -161,6 +161,16 @@ function formatMiseEnEvidenceLatex(poly: Exercice): string {
   return `${facteurCommun(poly.enonce)}(${formatMembreGauche(enonceSimplifie(poly.enonce))})`;
 }
 
+/** Racines triées, dédoublonnées si racine double (Δ=0) — jamais "6 ; 6" — même formule que
+ * `ui/recapitulatifInequationRationnelle.ts::formatRacinesTriees`, dupliquée ici car cette
+ * fonction n'est pas exportée (bug trouvé lors du balayage sitewide suite à l'audit du
+ * chapitre 2 : les 4 occurrences de `reponseAttenduePhase` ci-dessous triaient déjà par ordre
+ * croissant mais ne dédoublonnaient jamais). */
+function formatRacinesTriees(racines: readonly [number, number]): string {
+  const triees = [...racines].sort((a, b) => a - b);
+  return triees[0] === triees[1] ? String(triees[0]) : triees.join(" ; ");
+}
+
 /** "Δ = ..." ou forme factorisée (KaTeX) pour un P2 dont le champ1 vient d'être confirmé — même
  * disjonction que `ui/recapitulatifInequationRationnelle.ts::entreeChamp1`, réutilisée pour TOUTES
  * les occurrences de ce motif dans `reponseAttenduePhase` (bug corrigé : plusieurs d'entre elles
@@ -700,10 +710,10 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         exercice.niveau === "denominateurCarre" ||
         exercice.niveau === "sansFacteurCommun"
       ) {
-        return <>Racines attendues (numérateur combiné) : {[...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; ")}</>;
+        return <>Racines attendues (numérateur combiné) : {formatRacinesTriees(exercice.numerateur.solution.racines)}</>;
       }
       if (exercice.niveau === "cubique") {
-        return <>Racines attendues (facteur quadratique) : {[...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; ")}</>;
+        return <>Racines attendues (facteur quadratique) : {formatRacinesTriees(exercice.numerateur.solution.racines)}</>;
       }
       return null;
     case "factorisation":
@@ -743,7 +753,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       return null;
     case "simplifierDenomChamp2":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.denominateur) {
-        return <>Racines attendues (dénominateur) : {[...exercice.fraction.denominateur.solution.racines].sort((a, b) => a - b).join(" ; ")}</>;
+        return <>Racines attendues (dénominateur) : {formatRacinesTriees(exercice.fraction.denominateur.solution.racines)}</>;
       }
       return null;
     case "simplifierDenomFactorisation":
@@ -777,7 +787,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       return null;
     case "simplifierNumChamp2":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.numerateur) {
-        return <>Racines attendues (numérateur) : {[...exercice.fraction.numerateur.solution.racines].sort((a, b) => a - b).join(" ; ")}</>;
+        return <>Racines attendues (numérateur) : {formatRacinesTriees(exercice.fraction.numerateur.solution.racines)}</>;
       }
       return null;
     case "simplifierNumFactorisation":

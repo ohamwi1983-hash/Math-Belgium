@@ -14,6 +14,15 @@ import { formatFractionSimplifiee, formatPolynome } from "./formatSimplification
 import { libelleCategorie } from "./categorieLabels";
 import { enonceSimplifie, facteurCommun } from "../moteur/simplificationEquation";
 
+/** Racines triées, dédoublonnées si racine double (Δ=0) — jamais "6 ; 6", même principe que
+ * `formatZerosAttendusLatex`/`formatTermesZerosAttendusLatex` (`ui/formatEquation.ts`). Les 4
+ * entrées "Racines (...)" de ce récapitulatif triaient déjà par ordre croissant mais ne
+ * dédoublonnaient jamais (bug trouvé lors du balayage sitewide suite à l'audit du chapitre 2). */
+function formatRacinesTriees(racines: readonly [number, number]): string {
+  const triees = [...racines].sort((a, b) => a - b);
+  return triees[0] === triees[1] ? String(triees[0]) : triees.join(" ; ");
+}
+
 /**
  * Reconstruit la mise en évidence confirmée par l'élève ("k(...)") pour un P2 de la variante
  * facteurCommun (D ou N) — jamais la forme divisée par k, qui changerait la valeur de la fraction
@@ -209,7 +218,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     entrees.push({
       libelle: "Racines (numérateur combiné)",
       estLatex: false,
-      valeur: [...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; "),
+      valeur: formatRacinesTriees(exercice.numerateur.solution.racines),
       revele: etat.champ2Revele,
     });
   }
@@ -285,7 +294,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     entrees.push({
       libelle: "Racines (facteur quadratique)",
       estLatex: false,
-      valeur: [...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; "),
+      valeur: formatRacinesTriees(exercice.numerateur.solution.racines),
       revele: etat.champ2Revele,
     });
   }
@@ -322,7 +331,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       entrees.push({
         libelle: "Racines (dénominateur)",
         estLatex: false,
-        valeur: [...D.solution.racines].sort((a, b) => a - b).join(" ; "),
+        valeur: formatRacinesTriees(D.solution.racines),
         revele: etat.simplifierDenomChamp2Revele,
       });
     }
@@ -352,7 +361,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       entrees.push({
         libelle: "Racines (numérateur)",
         estLatex: false,
-        valeur: [...N.solution.racines].sort((a, b) => a - b).join(" ; "),
+        valeur: formatRacinesTriees(N.solution.racines),
         revele: etat.simplifierNumChamp2Revele,
       });
     }
