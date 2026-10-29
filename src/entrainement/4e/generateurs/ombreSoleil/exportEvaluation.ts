@@ -98,13 +98,13 @@ const METHODE =
 
 function consigneOmbreSoleil(exercice: ExerciceOmbreSoleil): string {
   if (exercice.variante === "simple") {
-    return `Le soleil éclaire le bâton A comme le bâton E (rayon pointillé, ombre au sol). Construis l'ombre du bâton A : ${METHODE}.`;
+    return `Le soleil éclaire le bâton A comme le bâton E (rayon pointillé, ombre au sol jusqu'à E′). Construis l'ombre du bâton A : ${METHODE}.`;
   }
   if (exercice.variante === "obstacle") {
-    return `Le soleil éclaire le bâton A comme le bâton E (rayon pointillé, ombre au sol). Construis l'ombre du sommet de A (${METHODE}), puis indique où elle s'arrête réellement : sur le sol, ou sur l'un des obstacles — lequel ?`;
+    return `Le soleil éclaire le bâton A comme le bâton E (rayon pointillé, ombre au sol jusqu'à E′). Construis l'ombre A′ du sommet de A (${METHODE}), puis indique où elle s'arrête réellement : sur le sol, ou sur l'un des obstacles — lequel ?`;
   }
   const ids = exercice.piquets.map((p) => p.piquet.id).join(", ");
-  return `Le trait pointillé relie le sommet ${exercice.piquetConnu.id} du campanile à son ombre connue : il donne la direction de la lumière. Construis l'ombre des sommets ${ids} (${METHODE}), puis le contour de l'ombre portée du campanile sur le sol.`;
+  return `Le trait pointillé relie le sommet ${exercice.piquetConnu.id} du campanile à son ombre connue ${exercice.piquetConnu.id}′ : il donne la direction de la lumière. Construis l'ombre des sommets ${ids} (${METHODE}), puis le contour de l'ombre portée du campanile sur le sol.`;
 }
 
 // --- Énoncé / correction ---

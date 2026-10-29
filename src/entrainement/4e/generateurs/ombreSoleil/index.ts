@@ -90,47 +90,61 @@ interface CandidatBrut {
   erreur: ErreurPointOmbre;
 }
 
-/** Familles de distracteurs « au sol » : trace au sol de mauvaise longueur, point sur l'image du
- * rayon sans être sur la trace, sens opposé, composantes permutées. */
-function famillesSol(piquet: Piquet, direction: Point3D, ombre: Point3D): CandidatBrut[][] {
+/** Distracteurs « au sol » : trace au sol de mauvaise longueur, point sur l'image du rayon sans être
+ * sur la trace, sens opposé, composantes permutées. */
+function distracteursSol(piquet: Piquet, direction: Point3D, ombre: Point3D): CandidatBrut[] {
   const base = piquet.base;
   const sommet = sommetPiquet(piquet);
   const trace = soustraire3D(ombre, base);
   const tSol = -sommet.z / direction.z;
   const permutee = intersectionAvecSol(sommet, { x: direction.y, y: direction.x, z: direction.z });
   return [
-    [
-      { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(0.45, 0.6, 0.05))), erreur: "traceTropCourte" },
-      { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(1.45, 1.75, 0.05))), erreur: "traceTropLongue" },
-    ],
-    [
-      { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(0.55, 0.7, 0.05)), erreur: "surRayonSansTrace" },
-      { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(1.3, 1.5, 0.05)), erreur: "surRayonSansTrace" },
-    ],
-    [
-      { position: soustraire3D(base, trace), erreur: "sensOppose" },
-      { position: permutee, erreur: "composantesPermutees" },
-    ],
+    { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(0.45, 0.6, 0.05))), erreur: "traceTropCourte" },
+    { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(1.45, 1.75, 0.05))), erreur: "traceTropLongue" },
+    { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(0.55, 0.7, 0.05)), erreur: "surRayonSansTrace" },
+    { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(1.3, 1.5, 0.05)), erreur: "surRayonSansTrace" },
+    { position: soustraire3D(base, trace), erreur: "sensOppose" },
+    { position: permutee, erreur: "composantesPermutees" },
   ];
 }
 
-/** Tire 3 distracteurs, un par famille (puis complète avec les familles restantes), qui respectent
- * `valide`. */
-function choisirDistracteurs(familles: CandidatBrut[][], valide: (c: CandidatBrut) => boolean): CandidatBrut[] | null {
-  const retenus: CandidatBrut[] = [];
-  const restants: CandidatBrut[] = [];
-  for (const famille of familles) {
-    const valides = famille.filter(valide);
-    if (valides.length === 0) continue;
-    const i = randomInt(0, valides.length - 1);
-    if (retenus.length < 3) retenus.push(valides[i]);
-    restants.push(...valides.filter((_, j) => j !== i));
+function melanger<T>(tableau: readonly T[]): T[] {
+  const copie = [...tableau];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = randomInt(0, i);
+    [copie[i], copie[j]] = [copie[j], copie[i]];
   }
-  for (const c of restants) {
-    if (retenus.length >= 3) break;
-    retenus.push(c);
+  return copie;
+}
+
+/**
+ * Tire 3 distracteurs qui respectent `valide` en ÉQUILIBRANT le rang de la bonne réponse : le
+ * nombre de distracteurs plus proches du pied que la bonne réponse (sur le dessin) est tiré entre
+ * 0 et 3. Sans cela, « l'ombre est le deuxième point le plus proche du pied » suffisait à répondre.
+ * `exigence` impose une contrainte supplémentaire au trio (ex. un point posé sur un obstacle).
+ */
+function choisirDistracteurs(
+  pool: CandidatBrut[],
+  vrai: Point3D,
+  pied: Point3D,
+  valide: (c: CandidatBrut) => boolean,
+  exigence: (trio: CandidatBrut[]) => boolean = () => true,
+): CandidatBrut[] | null {
+  const distance = (p: Point3D) => {
+    const a = projeter2D(p);
+    const b = projeter2D(pied);
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
+  const dVrai = distance(vrai);
+  const valides = melanger(pool.filter((c) => valide(c) && distance3D(c.position, vrai) > 0.3));
+  const proches = valides.filter((c) => distance(c.position) < dVrai - 0.05);
+  const loins = valides.filter((c) => distance(c.position) >= dVrai - 0.05);
+  for (const k of melanger([0, 1, 2, 3])) {
+    if (proches.length < k || loins.length < 3 - k) continue;
+    const trio = [...proches.slice(0, k), ...loins.slice(0, 3 - k)];
+    if (exigence(trio)) return trio;
   }
-  return retenus.length === 3 ? retenus : null;
+  return null;
 }
 
 function versCandidats(vrai: Point3D, distracteurs: CandidatBrut[]): PointCandidat[] {
@@ -182,7 +196,7 @@ function apercusLisibles(directions: readonly DirectionCandidate[], echelle: num
   return true;
 }
 
-const MAX_TENTATIVES_INSTANCE = 6000;
+const MAX_TENTATIVES_INSTANCE = 20000;
 
 /** Directions candidates dont les aperçus mesurent ~80 px à l'écran : la longueur dépend de
  * l'échelle finale, qui dépend elle-même des extrémités des aperçus (inclus dans le cadrage) —
@@ -210,7 +224,7 @@ function construireSimple(): ExerciceOmbreSoleilSimple {
     const ombreExemple = intersectionAvecSol(sommetPiquet(piquetExemple), direction);
     const ombre = intersectionAvecSol(sommetPiquet(piquetA), direction);
 
-    const distracteurs = choisirDistracteurs(famillesSol(piquetA, direction, ombre), () => true);
+    const distracteurs = choisirDistracteurs(distracteursSol(piquetA, direction, ombre), ombre, piquetA.base, () => true);
     if (!distracteurs) continue;
     const pointsCandidats = versCandidats(ombre, distracteurs);
 
@@ -321,17 +335,19 @@ function masqueBaton(obstacle: ObstacleOmbreSoleil, piquet: Piquet): boolean {
   return pied.x > xMin - marge && pied.x < xMax + marge && Math.max(pied.y, tete.y) > yMin - marge && Math.min(pied.y, tete.y) < yMax + marge;
 }
 
-/** Le point tombe dans le rectangle englobant le dessin de l'obstacle. */
-function dansDessinObstacle(p: Point3D, obstacle: ObstacleOmbreSoleil): boolean {
-  const sommets = Object.values(obstacle.solide.sommets).map(projeter2D);
+/** Le point tombe dans le dessin de l'obstacle (enveloppe convexe de ses sommets projetés, élargie
+ * de `marge` unité). */
+function dansDessinObstacle(p: Point3D, obstacle: ObstacleOmbreSoleil, marge = 0.3): boolean {
+  const enveloppe = enveloppeConvexe(Object.values(obstacle.solide.sommets).map((s) => ({ ...projeter2D(s), z: 0 })));
   const q = projeter2D(p);
-  const marge = 0.4;
-  return (
-    q.x > Math.min(...sommets.map((s) => s.x)) - marge &&
-    q.x < Math.max(...sommets.map((s) => s.x)) + marge &&
-    q.y > Math.min(...sommets.map((s) => s.y)) - marge &&
-    q.y < Math.max(...sommets.map((s) => s.y)) + marge
-  );
+  for (let i = 0; i < enveloppe.length; i++) {
+    const a = enveloppe[i];
+    const b = enveloppe[(i + 1) % enveloppe.length];
+    const longueur = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    // Sens trigonométrique : un point extérieur est strictement à droite d'au moins une arête.
+    if (((b.x - a.x) * (q.y - a.y) - (b.y - a.y) * (q.x - a.x)) / longueur < -marge) return false;
+  }
+  return true;
 }
 
 /** Distance (en pixels) d'un point au segment [a, b], sur le dessin. */
@@ -344,6 +360,58 @@ function distancePixelSegment(p: Point3D, a: Point3D, b: Point3D, echelle: numbe
   const longueurCarree = dx * dx + dy * dy || 1;
   const t = Math.max(0, Math.min(1, ((P.x - A.x) * dx + (P.y - A.y) * dy) / longueurCarree));
   return Math.hypot(P.x - (A.x + t * dx), P.y - (A.y + t * dy)) * echelle;
+}
+
+function boitesModifiees(obstacles: readonly ObstacleOmbreSoleil[], marge: number): ObstacleOmbreSoleil[] {
+  return obstacles.map((o) => ({
+    ...o,
+    boites: o.boites.map((b) => ({
+      min: { x: b.min.x - marge, y: b.min.y - marge, z: 0 },
+      max: { x: b.max.x + marge, y: b.max.y + marge, z: b.max.z + marge },
+    })),
+  }));
+}
+
+/** Rejette les rayons qui frôlent une arête : l'issue (obstacle touché ou sol, point d'impact) doit
+ * rester la même si l'on grossit ou amincit les obstacles de 0,1 — sinon le dessin ne permettrait
+ * pas de trancher. */
+function impactNet(origine: Point3D, direction: Point3D, obstacles: readonly ObstacleOmbreSoleil[], point: Point3D, index: number | null): boolean {
+  return [0.1, -0.1].every((marge) => {
+    const i = impactScene(origine, direction, boitesModifiees(obstacles, marge));
+    return i.indexObstacle === index && distance3D(i.point, point) < 0.6;
+  });
+}
+
+/** Points de l'obstacle touché où l'on pourrait à tort placer l'ombre : sur le dessus, au-dessus de
+ * la trace au sol, et sur la face par laquelle la trace entre dans l'obstacle, à mi-hauteur — sans
+ * eux, le seul point posé sur un obstacle serait presque toujours la réponse. */
+function pointsSurObstacleTouche(base: Point3D, ombre: Point3D, obstacle: ObstacleOmbreSoleil, impact: Point3D): Point3D[] {
+  const resultat: Point3D[] = [];
+  const dessus = pointSurObstacleSurvole(base, ombre, obstacle);
+  if (dessus) resultat.push(dessus);
+  // Entrée exacte de la trace au sol dans chaque boîte (méthode des dalles, dans le plan du sol).
+  const trace = soustraire3D(ombre, base);
+  let entree: { s: number; boite: Boite3D } | null = null;
+  for (const boite of obstacle.boites) {
+    let sMin = 0;
+    let sMax = Infinity;
+    for (const axe of ["x", "y"] as const) {
+      if (Math.abs(trace[axe]) < 1e-12) {
+        if (base[axe] < boite.min[axe] || base[axe] > boite.max[axe]) sMin = Infinity;
+        continue;
+      }
+      const s1 = (boite.min[axe] - base[axe]) / trace[axe];
+      const s2 = (boite.max[axe] - base[axe]) / trace[axe];
+      sMin = Math.max(sMin, Math.min(s1, s2));
+      sMax = Math.min(sMax, Math.max(s1, s2));
+    }
+    if (sMin <= sMax && sMin > 0 && (entree === null || sMin < entree.s)) entree = { s: sMin, boite };
+  }
+  if (entree) {
+    const p = additionner3D(base, multiplierScalaire3D(trace, entree.s));
+    resultat.push({ x: p.x, y: p.y, z: entree.boite.max.z * randomReel(0.3, 0.7, 0.05) });
+  }
+  return resultat.filter((p) => distance3D(p, impact) > 0.5);
 }
 
 const PROBABILITE_OMBRE_AU_SOL = 0.3;
@@ -414,35 +482,47 @@ function construireObstacle(): ExerciceOmbreSoleilObstacle {
 
     const impact = impactScene(sommet, direction, obstacles);
     if (cibleSol !== (impact.indexObstacle === null)) continue;
+    if (!impactNet(sommet, direction, obstacles, impact.point, impact.indexObstacle)) continue;
     if (impact.indexObstacle === null && obstacles.some((o) => dansEmpriseObstacle(ombreSansObstacle, o, 0.3))) continue;
 
-    // Distracteurs propres aux obstacles, prioritaires.
+    // Distracteurs : erreurs propres aux obstacles (rayon qui « traverse », obstacle suivant, mauvais
+    // endroit sur l'obstacle touché, obstacle survolé) et erreurs de construction générales.
     const auSolValide = (p: Point3D) => p.z !== 0 || !obstacles.some((o) => dansEmpriseObstacle(p, o, 0.2));
-    const familles: CandidatBrut[][] = [];
+    const pool: CandidatBrut[] = [];
     if (impact.indexObstacle !== null) {
-      familles.push([{ position: ombreSansObstacle, erreur: "traverseObstacle" }]);
+      pool.push({ position: ombreSansObstacle, erreur: "traverseObstacle" });
       const suivants = impactsObstacles(sommet, direction, obstacles).filter((i) => i.indexObstacle !== impact.indexObstacle);
-      familles.push(suivants.map((i) => ({ position: i.point, erreur: "obstacleSuivant" as const })));
+      pool.push(...suivants.map((i) => ({ position: i.point, erreur: "obstacleSuivant" as const })));
+      const touche = obstacles[impact.indexObstacle];
+      pool.push(...pointsSurObstacleTouche(baton.base, ombreSansObstacle, touche, impact.point).map((p) => ({ position: p, erreur: "surObstacleMauvaiseFace" as const })));
     } else {
       const survoles = obstacles
         .map((o) => pointSurObstacleSurvole(baton.base, ombreSansObstacle, o))
         .filter((p): p is Point3D => p !== null)
         .map((p) => ({ position: p, erreur: "surObstacleSurvole" as const }));
       if (survoles.length === 0) continue; // le rayon doit passer au-dessus d'au moins un obstacle
-      familles.push(survoles);
+      pool.push(...survoles);
     }
-    const sol = famillesSol(baton, direction, ombreSansObstacle);
     const permutee = impactScene(sommet, { x: direction.y, y: direction.x, z: direction.z }, obstacles).point;
-    familles.push([...sol[0], ...sol[1], { position: soustraire3D(baton.base, trace), erreur: "sensOppose" }, { position: permutee, erreur: "composantesPermutees" }]);
+    // Ombre trop courte : au sol, entre le pied du bâton et le vrai point d'impact.
+    const piedImpact: Point3D = { x: impact.point.x, y: impact.point.y, z: 0 };
+    pool.push(
+      { position: additionner3D(baton.base, multiplierScalaire3D(soustraire3D(piedImpact, baton.base), randomReel(0.35, 0.65, 0.05))), erreur: "traceTropCourte" },
+      { position: soustraire3D(baton.base, trace), erreur: "sensOppose" },
+      { position: permutee, erreur: "composantesPermutees" },
+      ...distracteursSol(baton, direction, ombreSansObstacle).filter((c) => c.erreur === "traceTropLongue" || c.erreur === "surRayonSansTrace"),
+    );
 
     // Un distracteur posé au sol ne doit pas tomber dans le dessin d'un obstacle (il semblerait posé
-    // dessus).
+    // dessus) ; au moins un distracteur est posé sur un obstacle et un autre au sol, pour que « le
+    // point posé sur un obstacle » ou « le point au sol » ne désignent jamais la réponse à coup sûr.
+    const surObstacle = (c: CandidatBrut) => c.position.z > 1e-9;
     const distracteurs = choisirDistracteurs(
-      familles,
-      (c) =>
-        auSolValide(c.position) &&
-        distance3D(c.position, impact.point) > 0.3 &&
-        !(c.position.z === 0 && obstacles.some((o) => dansDessinObstacle(c.position, o))),
+      pool,
+      impact.point,
+      baton.base,
+      (c) => auSolValide(c.position) && !(c.position.z === 0 && obstacles.some((o) => dansDessinObstacle(c.position, o))),
+      (trio) => trio.some(surObstacle) && trio.some((c) => !surObstacle(c)),
     );
     if (!distracteurs) continue;
     const pointsCandidats = versCandidats(impact.point, distracteurs);
@@ -565,7 +645,7 @@ function construireDirectionInconnue(): ExerciceOmbreSoleilDirectionInconnue {
     let echec = false;
     for (const s of aProjeter) {
       const piquet = piquetDepuisSommet(s.id, s.sommet);
-      const distracteurs = choisirDistracteurs(famillesSol(piquet, direction, s.ombre), (c) => horsEmprise(c.position) && !dansDessinCampanile(c.position));
+      const distracteurs = choisirDistracteurs(distracteursSol(piquet, direction, s.ombre), s.ombre, piquet.base, (c) => horsEmprise(c.position) && !dansDessinCampanile(c.position));
       if (!distracteurs) {
         echec = true;
         break;

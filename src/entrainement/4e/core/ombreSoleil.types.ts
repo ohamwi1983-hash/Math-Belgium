@@ -57,7 +57,8 @@ export type ErreurPointOmbre =
   | "composantesPermutees"
   | "traverseObstacle"
   | "obstacleSuivant"
-  | "surObstacleSurvole";
+  | "surObstacleSurvole"
+  | "surObstacleMauvaiseFace";
 
 export interface PointCandidat {
   id: string;

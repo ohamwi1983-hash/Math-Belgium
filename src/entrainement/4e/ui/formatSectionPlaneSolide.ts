@@ -38,6 +38,12 @@ export function libellePoint(connus: readonly number[], id: number): string {
   return LETTRES_POINTS[index];
 }
 
+/** Nom d'un segment de section, lettres dans l'ordre de découverte (« [PQ] », jamais « [QP] »). */
+export function nomSegment(connus: readonly number[], a: number, b: number): string {
+  const [x, y] = connus.indexOf(a) <= connus.indexOf(b) ? [a, b] : [b, a];
+  return `[${libellePoint(connus, x)}${libellePoint(connus, y)}]`;
+}
+
 /** Lettre que recevra le PROCHAIN point de section découvert. */
 export function lettreProchainPoint(connus: readonly number[]): string {
   return LETTRES_POINTS[connus.length] ?? `#${connus.length}`;
@@ -61,7 +67,7 @@ export function libelleLigne(exercice: ExerciceSectionPlaneSolide, connus: reado
   if (statique) return statique.label;
   if (cle.startsWith("segment:")) {
     const [a, b] = cle.slice("segment:".length).split("-").map(Number);
-    return `segment [${libellePoint(connus, a)}${libellePoint(connus, b)}]`;
+    return `segment ${nomSegment(connus, a, b)}`;
   }
   return cle;
 }
@@ -201,7 +207,7 @@ export function calculerRecapitulatifSectionPlaneSolide(
   const segments = segmentsTraces
     .map((cle) => {
       const [a, b] = cle.split("-").map(Number);
-      return `[${libellePoint(connus, a)}${libellePoint(connus, b)}]`;
+      return nomSegment(connus, a, b);
     })
     .join(", ");
   return [
@@ -242,7 +248,7 @@ export function texteAideSegmentNiveau2(exercice: ExerciceSectionPlaneSolide, co
 /** Réponse révélée de l'écran A — la face confirmée et le segment tracé. */
 export function texteReponseSegmentDirect(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], face: number): string {
   const pret = facesPretesPourSegment(exercice, new Set(connus), new Set()).find((f) => f.face === face);
-  const segment = pret ? ` : on y trace le segment [${libellePoint(connus, pret.pointA)}${libellePoint(connus, pret.pointB)}]` : "";
+  const segment = pret ? ` : on y trace le segment ${nomSegment(connus, pret.pointA, pret.pointB)}` : "";
   return `Face ${libelleFace(exercice, face)}${segment}.`;
 }
 
@@ -336,7 +342,7 @@ export function texteConclusion(exercice: ExerciceSectionPlaneSolide, connus: re
   const lignes = [`Le polygone de section est fermé : c'est le ${nomPolygoneSection(ordre.length)} ${ordre.map((id) => libellePoint(connus, id)).join("")}.`];
   if (segmentAutomatique) {
     const [a, b] = segmentAutomatique.split("-").map(Number);
-    lignes.unshift(`Ses 2 points étant connus, le dernier segment [${libellePoint(connus, a)}${libellePoint(connus, b)}] se trace directement et referme la section.`);
+    lignes.unshift(`Ses 2 points étant connus, le dernier segment ${nomSegment(connus, a, b)} se trace directement et referme la section.`);
   }
   return lignes;
 }

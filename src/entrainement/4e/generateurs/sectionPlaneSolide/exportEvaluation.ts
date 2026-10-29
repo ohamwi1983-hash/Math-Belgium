@@ -307,7 +307,8 @@ function textesEtapes(exercice: ExerciceSectionPlaneSolide): string[] {
   const textes: string[] = [];
   for (const etape of exercice.resolutionReference) {
     if (etape.type === "segment") {
-      textes.push(`Dans la face ${libelleFace(exercice, etape.face)}, ${lettre(etape.pointA)} et ${lettre(etape.pointB)} sont connus : on trace le segment [${lettre(etape.pointA)}${lettre(etape.pointB)}].`);
+      const [a, b] = ordreLabels.indexOf(etape.pointA) <= ordreLabels.indexOf(etape.pointB) ? [etape.pointA, etape.pointB] : [etape.pointB, etape.pointA];
+      textes.push(`Dans la face ${libelleFace(exercice, etape.face)}, ${lettre(a)} et ${lettre(b)} sont connus : on trace le segment [${lettre(a)}${lettre(b)}].`);
       continue;
     }
     const connusAvant = ordreLabels.slice(0, ordreLabels.indexOf(etape.pointCible));
