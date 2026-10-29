@@ -11,11 +11,18 @@ import type { ExerciceAnglesAssocies, RelationAnglesAssocies } from "../core/ang
 export function formatBlocBaseLatex(exercice: ExerciceAnglesAssocies): string[] {
   if (exercice.variante === "sinCos") {
     return [
-      `\\sin(${exercice.alpha}^\\circ) \\approx ${exercice.sinAlpha}`,
-      `\\cos(${exercice.alpha}^\\circ) \\approx ${exercice.cosAlpha}`,
+      `\\sin(${exercice.alpha}^\\circ) \\approx ${decimal3Latex(exercice.sinAlpha)}`,
+      `\\cos(${exercice.alpha}^\\circ) \\approx ${decimal3Latex(exercice.cosAlpha)}`,
     ];
   }
-  return [`\\tan(${exercice.alpha}^\\circ) \\approx ${exercice.tanAlpha}`];
+  return [`\\tan(${exercice.alpha}^\\circ) \\approx ${decimal3Latex(exercice.tanAlpha)}`];
+}
+
+/** Valeur approchée à 3 décimales CONSTANTES et virgule décimale belge (audit du chapitre 5 :
+ * « 0.94 » affiché pour 0,940, à côté de « 0.342 ») — `{,}` évite l'espace que LaTeX ajoute après
+ * une virgule. Présentation seulement : les valeurs stockées et la vérification sont inchangées. */
+export function decimal3Latex(valeur: number): string {
+  return valeur.toFixed(3).replace(".", "{,}");
 }
 
 /** `\sin(287^\circ)`/`\cos(287^\circ)`/`\tan(252^\circ)` selon la variante — l'expression demandée,
@@ -29,7 +36,7 @@ const LIBELLES_RELATION: Record<RelationAnglesAssocies, string> = {
   complementaireDirecte: "Complémentaire",
   supplementaire: "Supplémentaire",
   antiSupplementaire: "Anti-supplémentaire",
-  oppose: "Négatif équivalent",
+  oppose: "Opposé",
 };
 
 /** Utilisé uniquement pour le libellé du récapitulatif final (résumé de session). */
@@ -47,7 +54,7 @@ const PHRASES_AIDE2: Record<RelationAnglesAssocies, (theta: number, xReference: 
   complementaireDirecte: (theta, xReference) => `${theta}° est le complémentaire de ${xReference}°.`,
   supplementaire: (theta, xReference) => `${theta}° est le supplémentaire de ${xReference}°.`,
   antiSupplementaire: (theta, xReference) => `${theta}° est l'anti-supplémentaire de ${xReference}°.`,
-  oppose: (theta, xReference) => `${theta}° est l'angle négatif équivalent à ${xReference}°.`,
+  oppose: (theta, xReference) => `${theta}° = 360° − ${xReference}° : c'est le même point que −${xReference}°, l'opposé de ${xReference}°.`,
 };
 
 export function texteAide2(exercice: ExerciceAnglesAssocies): string {

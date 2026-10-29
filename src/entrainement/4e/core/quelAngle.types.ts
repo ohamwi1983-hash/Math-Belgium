@@ -15,29 +15,30 @@ export type FonctionTrig = "sin" | "cos" | "tan";
  * `angleReference` (`réf`, tel que `|fonction(réf)| = |k|`) et `signeK` déterminent entièrement `k`
  * — jamais stocké comme un flottant à part, toujours recomposé à l'affichage depuis ces deux champs
  * exacts (`ui/formatQuelAngle.ts`, réutilise les tables LaTeX exactes de `valeursRemarquables`).
- * `réf=0` est EXCLU pour `sin`/`tan` et `réf=90` est EXCLU pour `cos`/`tan` (voir
- * `generateurs/quelAngle/index.ts`) : ces valeurs donneraient `k=0`, un cas dégénéré où "le signe de
- * k" ne détermine plus aucun quadrant (toute la chaîne de raisonnement pédagogique de cet exercice
- * repose sur le signe de `k`) — jamais généré, contrairement à `valeursRemarquables` qui couvre les
- * 5 angles remarquables sans restriction.
  *
- * `solutions` est déjà dédupliquée et triée croissant à la génération : 1 seule valeur quand
- * `réf=90` (sin, `k=±1`) ou `réf=0` (cos, `k=±1`) — les deux candidats bruts coïncident alors
- * exactement, aucun cas spécial n'est nécessaire dans le code de construction, la déduplication
- * suffit — toujours 2 valeurs distinctes sinon (jamais 0, `|k|` est toujours `≤1` par construction).
- * Pour `tan`, `réf` ne vaut jamais 0 ni 90 : toujours exactement 2 solutions, jamais de collapse
- * possible (les deux candidats sont toujours espacés d'exactement 180°, jamais confondus).
+ * Trois familles de cas (audit du chapitre 5 : 22 exercices distincts seulement, et « Pas de
+ * solution » jamais la bonne réponse) :
+ * - cas courant, `|k|` remarquable non nul : 2 solutions (1 seule quand `k = ±1` pour sin/cos, les
+ *   deux candidats coïncidant alors sur un axe) ;
+ * - `k = 0` (`réf = 0` pour sin/tan, `réf = 90` pour cos, toujours `signeK = 1`) : 2 solutions sur
+ *   un axe ;
+ * - `|k| > 1` (sin/cos uniquement, `angleReference = null`) : AUCUNE solution, `solutions = []`.
+ *
+ * `solutions` est déjà dédupliquée et triée croissant à la génération.
  */
 export interface ExerciceQuelAngle {
   fonction: FonctionTrig;
-  angleReference: AngleRemarquable;
+  /** `null` ⟺ `|k| > 1` (sin/cos uniquement) : aucune solution, `k` est alors décrit par
+   * `magnitudeHorsDomaineLatex`. */
+  angleReference: AngleRemarquable | null;
+  /** LaTeX de `|k|` quand `|k| > 1` (ex. `\\frac{3}{2}`, `\\sqrt{2}`), sinon `null`. */
+  magnitudeHorsDomaineLatex: string | null;
   signeK: 1 | -1;
   solutions: number[];
 }
 
 /** Réponse "add-as-needed" (pattern déjà en place, ex. `EtapeZerosCaracteristiques.tsx`) : `aucune`
- * est structurellement sélectionnable mais n'est, en pratique, jamais la bonne réponse — `|k|>1`
- * (le seul cas à 0 solution) n'est jamais généré. */
+ * est la bonne réponse quand `|k| > 1` (`solutions = []`). */
 export interface ReponseQuelAngle {
   aucune: boolean;
   valeurs: number[];

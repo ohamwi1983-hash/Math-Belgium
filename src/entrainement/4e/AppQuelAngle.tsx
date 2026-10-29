@@ -10,7 +10,7 @@ import { Katex } from "./components/Katex";
 import { formatTermesSolutionsLatex } from "./ui/formatQuelAngle";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
-const CONSIGNE_GENERALE = "Trouve la mesure de cet angle.";
+const CONSIGNE_GENERALE = "Résous cette équation trigonométrique.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -37,6 +37,9 @@ interface TransitionEnAttente {
 export function AppQuelAngle() {
   const [etat, setEtat] = useState<EtatSessionQuelAngle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») — `key` de l'écran,
+   * pour qu'il reparte sans choix ni valeur saisie (audit du chapitre 5). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionQuelAngle) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
@@ -52,6 +55,7 @@ export function AppQuelAngle() {
     if (!enAttente) return;
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
   }
 
   const exercice = etat.exerciceCourant;
@@ -59,6 +63,7 @@ export function AppQuelAngle() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionQuelAngle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionTrig)));
+    setNumeroExercice((n) => n + 1);
   }
 
   const validation = enAttente
@@ -81,7 +86,7 @@ export function AppQuelAngle() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Trouver l'angle connaissant sin, cos ou tan</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
@@ -89,6 +94,7 @@ export function AppQuelAngle() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeQuelAngle
+            key={numeroExercice}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

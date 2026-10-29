@@ -57,13 +57,27 @@ export function calculerAideQuadrants(solutions: number[]): AideQuadrantsQuelAng
   return { cheminsQuadrants, rayonsAxes };
 }
 
-/** Libellé court d'un quadrant, pour le texte de l'aide (ex. "quadrants II et III", "l'axe Ox"). */
-export function libelleQuadrants(solutions: number[]): string {
-  const quadrants = [...new Set(solutions.map(calculerQuadrant))];
-  const libelleUn = (q: Quadrant) => (q === "axeOx" ? "l'axe Ox" : q === "axeOy" ? "l'axe Oy" : `le quadrant ${q}`);
-  if (quadrants.length === 1) return libelleUn(quadrants[0]);
-  const libellesPluriel = quadrants.map((q) => (q === "axeOx" || q === "axeOy" ? libelleUn(q) : q));
-  return `les quadrants ${libellesPluriel.join(" et ")}`;
+/** Demi-axe sur lequel tombe une solution multiple de 90° (`0°` → Ox positif, `90°` → Oy positif,
+ * `180°` → Ox négatif, `270°` → Oy négatif) — l'aide distingue ainsi `sin α = 1` (90°) de
+ * `sin α = −1` (270°), qui partageaient avant le même texte « dans l'axe Oy » (audit du chapitre 5). */
+const DEMI_AXES: Record<number, string> = { 0: "Ox positif", 90: "Oy positif", 180: "Ox négatif", 270: "Oy négatif" };
+
+/**
+ * Phrase de l'aide qui situe les solutions — accord au singulier/pluriel, « dans » un quadrant mais
+ * « sur » un demi-axe (ex. « La solution se trouve sur le demi-axe Oy négatif. », « Les solutions se
+ * trouvent dans les quadrants II et III. », « Les solutions se trouvent sur les demi-axes Ox positif
+ * et Ox négatif. »). `solutions` est non vide.
+ */
+export function phraseLocalisationSolutions(solutions: number[]): string {
+  const quadrants = [...new Set(solutions.map(calculerQuadrant))].filter((q): q is Exclude<Quadrant, "axeOx" | "axeOy"> => q !== "axeOx" && q !== "axeOy");
+  const demiAxes = solutions.filter((s) => s % 90 === 0).map((s) => DEMI_AXES[s]);
+  const morceaux: string[] = [];
+  if (quadrants.length === 1) morceaux.push(`dans le quadrant ${quadrants[0]}`);
+  if (quadrants.length > 1) morceaux.push(`dans les quadrants ${quadrants.join(" et ")}`);
+  if (demiAxes.length === 1) morceaux.push(`sur le demi-axe ${demiAxes[0]}`);
+  if (demiAxes.length > 1) morceaux.push(`sur les demi-axes ${demiAxes.join(" et ")}`);
+  const sujet = solutions.length === 1 ? "La solution se trouve" : "Les solutions se trouvent";
+  return `${sujet} ${morceaux.join(" et ")}.`;
 }
 
 /**

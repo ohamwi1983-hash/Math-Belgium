@@ -61,7 +61,10 @@ function arrondir3(valeur: number): number {
  * (`ANGLE_SYMETRIQUE_MAX_TANGENTE`), qui borne `alpha` par le haut plutôt que par une marge.
  */
 const MARGE_MULTIPLE_90 = 20;
-const MARGE_MULTIPLE_45 = 20;
+/** 10° (et non 20°, audit du chapitre 5) : avec 20°, les quadrants II à IV en sin/cos n'avaient que
+ * 12 valeurs d'`alpha` possibles (20–25° et 65–70°) ; à 10°, 30 valeurs (20–35° et 55–70°, hors 30°
+ * et 60°), et `xReference`/`alpha` restent toujours distincts d'au moins 20° (aide 3 lisible). */
+const MARGE_MULTIPLE_45 = 10;
 /** Contrainte 3 — variantes tangente uniquement : l'angle du 1er quadrant obtenu par symétrie
  * (`xReference`, qui vaut toujours `alpha` pour tangente) doit rester ≤ 50°, pour garantir
  * `tan(xReference) ≤ tan(50°) ≈ 1,19` — évite la divergence vers l'infini près de 90° qui rendrait le

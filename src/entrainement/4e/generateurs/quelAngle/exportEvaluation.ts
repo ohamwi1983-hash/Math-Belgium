@@ -67,7 +67,10 @@ function construireCorrectionQuelAngle(exercice: ExerciceQuelAngle): BlocCorrect
     { type: "paragraphe", fragments: [texte(texteAideQuadrants(exercice))] },
     {
       type: "paragraphe",
-      fragments: [texte(termesSolutions.length > 1 ? "Solutions : " : "Solution : "), ...termesSolutions.map((terme) => latex(terme))],
+      fragments:
+        exercice.solutions.length === 0
+          ? [texte(`Pas de solution : ${exercice.fonction} α est toujours compris entre −1 et 1, et ici |k| > 1.`)]
+          : [texte(termesSolutions.length > 1 ? "Solutions : " : "Solution : "), ...termesSolutions.map((terme) => latex(terme))],
       bloc: true,
     },
   ];

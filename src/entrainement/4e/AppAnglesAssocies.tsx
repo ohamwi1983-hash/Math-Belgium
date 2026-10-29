@@ -8,6 +8,8 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeAnglesAssocies } from "./components/EtapeAnglesAssocies";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { BlocEnonceAnglesAssocies } from "./components/BlocEnonceAnglesAssocies";
+import { Katex } from "./components/Katex";
+import { decimal3Latex } from "./ui/formatAnglesAssocies";
 
 const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
@@ -36,6 +38,10 @@ interface TransitionEnAttente {
 export function AppAnglesAssocies() {
   const [etat, setEtat] = useState<EtatSessionAnglesAssocies>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») — sert de `key` à
+   * l'écran pour qu'il reparte d'un champ vide (audit du chapitre 5 : la saisie précédente restait
+   * affichée sous le nouvel énoncé). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionAnglesAssocies) {
     const transitionDEcran = nouvelEtat.resultats.length !== etat.resultats.length;
@@ -50,11 +56,13 @@ export function AppAnglesAssocies() {
     if (!enAttente) return;
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
     setEtat(demarrerSessionAnglesAssocies(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteAnglesAssocies)));
+    setNumeroExercice((n) => n + 1);
   }
 
   const exercice = etat.exerciceCourant;
@@ -62,7 +70,7 @@ export function AppAnglesAssocies() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: etat.reglages.affichageReponseApresEchec ? <span>{exercice.valeurCible}</span> : undefined,
+        reponseAttendue: etat.reglages.affichageReponseApresEchec ? <Katex expression={decimal3Latex(exercice.valeurCible)} /> : undefined,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -73,7 +81,7 @@ export function AppAnglesAssocies() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Angles associés</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
@@ -81,6 +89,7 @@ export function AppAnglesAssocies() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<BlocEnonceAnglesAssocies exercice={exercice} />} />
           <EtapeAnglesAssocies
+            key={numeroExercice}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

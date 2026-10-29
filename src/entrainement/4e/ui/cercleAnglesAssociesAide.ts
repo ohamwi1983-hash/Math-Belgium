@@ -286,6 +286,11 @@ const DISTANCE_MIN_ENTRE_LABELS_PX = 32;
  * horizontalement (jamais son ancrage changé, ni sa largeur réduite) juste assez pour que
  * l'intégralité du texte, à sa largeur estimée, reste dans le cadre visible `[MARGE,LARGEUR-MARGE]`.
  */
+/** Distance verticale (px) en deçà de laquelle un texte de question est considéré « posé sur »
+ * l'axe X, et décalage appliqué alors pour le placer sous l'axe (police 12 px). */
+const DEMI_HAUTEUR_TEXTE_AXE = 12;
+const DECALAGE_SOUS_AXE_X = 16;
+
 export function positionLabelQuestion(
   pointBrut: PointCroquisCercleTrig,
   texte: string,
@@ -294,7 +299,12 @@ export function positionLabelQuestion(
   const pointEcarteDuCentre = decalerVersExterieur(pointBrut, RAYON_ARC + 16);
   // y fixé et borné AVANT d'écarter des autres labels — sinon une poussée diagonale (`pousserLoinDe`)
   // est aussitôt annulée par le clamp vertical qui suivrait (voir `separerHorizontalement`).
-  const y = Math.min(HAUTEUR_CERCLE_TRIG - MARGE_BORD_CADRE, Math.max(MARGE_BORD_CADRE, pointEcarteDuCentre.y));
+  const yBrut = Math.min(HAUTEUR_CERCLE_TRIG - MARGE_BORD_CADRE, Math.max(MARGE_BORD_CADRE, pointEcarteDuCentre.y));
+  // Projection sur l'axe X (variante cos) : le point écarté du centre reste SUR l'axe, et le texte
+  // y était posé à cheval sur la ligne de l'axe, collé au libellé « X » et à sa flèche (audit du
+  // chapitre 5). On le place juste SOUS l'axe (ligne de base 16 px plus bas) : le libellé « X »,
+  // lui, est au-dessus de l'axe (`cercleQuadrantSelecteur.ts`, `labelOx`).
+  const y = Math.abs(yBrut - CENTRE_CERCLE_TRIG.y) < DEMI_HAUTEUR_TEXTE_AXE ? CENTRE_CERCLE_TRIG.y + DECALAGE_SOUS_AXE_X : yBrut;
 
   const largeur = texte.length * TAILLE_FONTE_QUESTION * RATIO_LARGEUR_CARACTERE;
 

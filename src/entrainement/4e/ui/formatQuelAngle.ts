@@ -7,7 +7,7 @@
  */
 import type { ExerciceQuelAngle, FonctionTrig } from "../core/quelAngle.types";
 import { LATEX_COS, LATEX_SIN, LATEX_TAN } from "../generateurs/valeursRemarquables/tables";
-import { libelleQuadrants } from "./quelAngleAide";
+import { phraseLocalisationSolutions } from "./quelAngleAide";
 
 const NOM_FONCTION_LATEX: Record<FonctionTrig, string> = { sin: "\\sin", cos: "\\cos", tan: "\\tan" };
 
@@ -22,8 +22,12 @@ export const DOMAINE_LATEX = "\\left[0^\\circ,\\ 360^\\circ\\right[";
 /** Bloc énoncé fixe — `sin α = k` (valeur exacte, signée) — jamais recalculé depuis `Math.sin`/
  * `cos`/`tan`, toujours composé depuis les tables exactes de "Valeurs remarquables". */
 export function formatEnonceLatex(exercice: ExerciceQuelAngle): string {
-  const magnitude = TABLE_LATEX_MAGNITUDE[exercice.fonction][exercice.angleReference];
-  const valeur = exercice.signeK === 1 ? magnitude : `-${magnitude}`;
+  const magnitude =
+    exercice.angleReference === null
+      ? (exercice.magnitudeHorsDomaineLatex as string)
+      : TABLE_LATEX_MAGNITUDE[exercice.fonction][exercice.angleReference];
+  // k = 0 n'a jamais de signe : jamais « -0 ».
+  const valeur = exercice.signeK === 1 || magnitude === "0" ? magnitude : `-${magnitude}`;
   return `${NOM_FONCTION_LATEX[exercice.fonction]}\\alpha = ${valeur}`;
 }
 
@@ -39,14 +43,21 @@ export function formatEnonceLatex(exercice: ExerciceQuelAngle): string {
  * nombre de quadrants surlignés).
  */
 export function texteAideQuadrants(exercice: ExerciceQuelAngle): string {
-  const base = `Les solutions se trouvent dans ${libelleQuadrants(exercice.solutions)}.`;
+  if (exercice.solutions.length === 0) {
+    return `Pour tout angle α, ${exercice.fonction} α est compris entre −1 et 1.`;
+  }
+  const base = phraseLocalisationSolutions(exercice.solutions);
   if (exercice.fonction !== "tan") return base;
-  return `${base} La tangente a une période de 180° : chaque quadrant concerné contient exactement une solution.`;
+  const surAxes = exercice.solutions.every((s) => s % 90 === 0);
+  return surAxes
+    ? `${base} La tangente a une période de 180° : les solutions sont espacées de 180°.`
+    : `${base} La tangente a une période de 180° : chaque quadrant concerné contient exactement une solution.`;
 }
 
 /** Révélation finale — `α = 60°` ou `α = 60°` ou `α = 240°` (jointure "ou", toujours au moins une
  * solution par construction). */
 export function formatSolutionsLatex(exercice: ExerciceQuelAngle): string {
+  if (exercice.solutions.length === 0) return "\\text{Pas de solution}";
   return exercice.solutions.map((s) => `\\alpha = ${s}^\\circ`).join("\\text{ ou }");
 }
 
@@ -54,5 +65,6 @@ export function formatSolutionsLatex(exercice: ExerciceQuelAngle): string {
  * fragment KaTeX par solution (toujours 2, "ou" en préfixe du second) plutôt qu'une seule chaîne
  * `\text{ ou }`-jointe. */
 export function formatTermesSolutionsLatex(exercice: ExerciceQuelAngle): string[] {
+  if (exercice.solutions.length === 0) return ["\\text{Pas de solution}"];
   return exercice.solutions.map((s, i) => (i === 0 ? `\\alpha = ${s}^\\circ` : `\\text{ ou } \\alpha = ${s}^\\circ`));
 }

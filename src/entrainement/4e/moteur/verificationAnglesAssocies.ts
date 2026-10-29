@@ -2,6 +2,9 @@ import type { ExerciceAnglesAssocies } from "../core/anglesAssocies.types";
 import type { StatutVerification } from "./statutVerification";
 
 const TOLERANCE_VALEUR = 0.005;
+/** Marge d'arrondi flottant : |−0,67 − (−0,675)| vaut 0,005000000000000004 en binaire, une réponse
+ * arrondie au centième (explicitement acceptée par la consigne) serait sinon refusée à tort. */
+const MARGE_FLOTTANTE = 1e-9;
 
 /** Champ libre numérique (valeur approchée de sin/cos/tan), SEUL champ de réponse de ce générateur
  * depuis la refonte à écran unique (`promptgen17refontecomplete.md`) — inchangé par rapport à la
@@ -9,7 +12,7 @@ const TOLERANCE_VALEUR = 0.005;
  * `NaN`/non fini est toujours un `parse_error`, tolérance `0,005` sinon. */
 export function diagnostiquerValeurFinale(exercice: ExerciceAnglesAssocies, valeur: number): StatutVerification {
   if (!Number.isFinite(valeur)) return "parse_error";
-  return Math.abs(valeur - exercice.valeurCible) <= TOLERANCE_VALEUR ? "correct" : "not_equivalent";
+  return Math.abs(valeur - exercice.valeurCible) <= TOLERANCE_VALEUR + MARGE_FLOTTANTE ? "correct" : "not_equivalent";
 }
 
 export function verifierValeurFinale(exercice: ExerciceAnglesAssocies, valeur: number): boolean {

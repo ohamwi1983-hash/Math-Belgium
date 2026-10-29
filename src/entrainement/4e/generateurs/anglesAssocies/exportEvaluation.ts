@@ -9,7 +9,7 @@ import type {
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
-import { formatBlocBaseLatex, formatBlocDemandeLatex, texteAide2, texteAide3Intro } from "../../ui/formatAnglesAssocies";
+import { decimal3Latex, formatBlocBaseLatex, formatBlocDemandeLatex, texteAide2, texteAide3Intro } from "../../ui/formatAnglesAssocies";
 import { necessiteAide3 } from "../../moteur/verificationAnglesAssocies";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnglesAssocies } from "./index";
 
@@ -133,7 +133,7 @@ function construireCorrectionQuadrantI(instance: ExerciceAnglesAssociesSinCos): 
         texte("On utilise la co-fonction "),
         latex(`\\${fonctionCible}(90^\\circ - x) = \\${cf}(x)`),
         texte(" : "),
-        latex(`\\${fonctionCible}(${theta}^\\circ) = \\${cf}(${alpha}^\\circ) \\approx ${valeurCible}.`),
+        latex(`\\${fonctionCible}(${theta}^\\circ) = \\${cf}(${alpha}^\\circ) \\approx ${decimal3Latex(valeurCible)}.`),
       ],
     },
   ];
@@ -164,8 +164,8 @@ function construireCorrectionQuadrantsIIaIV(instance: ExerciceAnglesAssociesSinC
       : cosAlpha;
 
   const fragmentsValeurReference: FragmentConsigne[] = coFonctionUtilisee
-    ? [latex(`\\${fonctionCible}(${xReference}^\\circ) = \\${cofonction(fonctionCible)}(${alpha}^\\circ) \\approx ${valeurEnXReference}`)]
-    : [latex(`\\${fonctionCible}(${xReference}^\\circ) = \\${fonctionCible}(${alpha}^\\circ) \\approx ${valeurEnXReference}`)];
+    ? [latex(`\\${fonctionCible}(${xReference}^\\circ) = \\${cofonction(fonctionCible)}(${alpha}^\\circ) \\approx ${decimal3Latex(valeurEnXReference)}`)]
+    : [latex(`\\${fonctionCible}(${xReference}^\\circ) = \\${fonctionCible}(${alpha}^\\circ) \\approx ${decimal3Latex(valeurEnXReference)}`)];
 
   blocs.push({ type: "paragraphe", fragments: [texte(`Valeur en ${xReference}° : `), ...fragmentsValeurReference, texte(".")] });
 
@@ -175,7 +175,7 @@ function construireCorrectionQuadrantsIIaIV(instance: ExerciceAnglesAssociesSinC
     type: "paragraphe",
     fragments: [
       texte(`${theta}° appartient au quadrant ${quadrant}, où ${nomFonctionLettres} est ${signe}. Donc `),
-      latex(`\\${fonctionCible}(${theta}^\\circ) \\approx ${valeurCible}.`),
+      latex(`\\${fonctionCible}(${theta}^\\circ) \\approx ${decimal3Latex(valeurCible)}.`),
     ],
   });
 
@@ -201,7 +201,7 @@ function construireCorrectionTangente(instance: ExerciceAnglesAssociesTangente):
       type: "paragraphe",
       fragments: [
         texte(`${theta}° appartient au quadrant ${quadrant}, où la tangente est ${signe}. Donc `),
-        latex(`\\tan(${theta}^\\circ) = ${signe === "négatif" ? "-" : ""}\\tan(${alpha}^\\circ) \\approx ${valeurCible}.`),
+        latex(`\\tan(${theta}^\\circ) = ${signe === "négatif" ? "-" : ""}\\tan(${alpha}^\\circ) \\approx ${decimal3Latex(valeurCible)}.`),
       ],
     },
   ];

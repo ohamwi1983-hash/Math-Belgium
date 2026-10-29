@@ -520,6 +520,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'sin 145° ≈ 0,574 — cos 215° ≈ −0,819' },
         },
         {
+          kind: 'exemple',
+          badge: 'enchaîner deux familles — à partir de sin 67° ≈ 0,921, cos 67° ≈ 0,391',
+          steps: [
+            { tag: '1re famille', text: '157° = 180° − 23° → famille supplémentaire → sin 157° = sin 23°' },
+            { tag: '2e famille', text: '23° = 90° − 67° → famille complémentaire, sin et cos s\'échangent → sin 23° = cos 67° ≈ 0,391' },
+          ],
+          result: { tag: 'résultat', text: 'sin 157° = sin 23° = cos 67° ≈ 0,391' },
+        },
+        {
           kind: 'entrainement',
           title: 'Angles associés',
           generatorId: 'gen17',
@@ -582,19 +591,23 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Déduis-en les 2 solutions, par la symétrie adaptée. Pour sin α = k : α₀ et ' +
               '180° − α₀ si k > 0 (ou 180° + α₀ et 360° − α₀ si k < 0). Pour cos α = k : α₀ et ' +
               '360° − α₀ si k > 0 (ou 180° − α₀ et 180° + α₀ si k < 0).',
-            'Pour tan α = k, c\'est plus simple : les 2 solutions sont toujours α₀ et ' +
-              'α₀ + 180°, quel que soit le signe de k. La tangente a une période de 180°.',
+            'Pour tan α = k : α₀ et 180° + α₀ si k > 0 (quadrants I et III), ou 180° − α₀ et ' +
+              '360° − α₀ si k < 0 (quadrants II et IV). Les 2 solutions sont toujours espacées ' +
+              'de 180° : la tangente a une période de 180°.',
           ],
         },
         {
           kind: 'attention',
-          label: 'Cas limites — parfois une seule solution',
+          label: 'Cas limites — une seule solution, ou aucune',
           text:
             'Quand k vaut exactement 1 ou −1 pour sin ou cos, les 2 solutions se confondent en ' +
             '**une seule** ! sin α = 1 → une seule solution (90°) ; cos α = −1 → une seule ' +
             'solution (180°). La tangente, elle, garde toujours **exactement 2** solutions sur ' +
             '[0°;360°[, quelle que soit la valeur de k : l\'intervalle couvre exactement 2 fois ' +
-            'sa période de 180°.',
+            'sa période de 180°. Pour k = 0, les 2 solutions tombent sur un axe : sin α = 0 → ' +
+            '0° et 180° ; cos α = 0 → 90° et 270° ; tan α = 0 → 0° et 180°. Et si |k| > 1 pour ' +
+            'sin ou cos, il n\'y a **aucune** solution : sin α et cos α restent toujours entre ' +
+            '−1 et 1 (la droite ne coupe plus le cercle).',
         },
         {
           kind: 'exemple',
@@ -1075,8 +1088,8 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           generatorId: 'gen58',
           description: [
             'Résous un triangle pont (rectangle ou quelconque). Transfère un côté ou un angle ' +
-              'vers un triangle cible, dans 4 contextes différents (terrain, hauteur ' +
-              'inaccessible, distance entre deux points inaccessibles). Puis interprète le résultat.',
+              'vers un triangle cible, dans 11 contextes différents (terrains, hauteurs ' +
+              'inaccessibles, câble, falaise, navires, randonneurs, avions...). Puis interprète le résultat.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 58. Triangles liés »',
@@ -1087,7 +1100,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       id: 'revision',
       number: 8,
       title: 'Révision — quiz vrai/faux',
-      kicker: '140 affirmations en 7 thèmes, tout le chapitre',
+      kicker: '245 affirmations en 7 thèmes, tout le chapitre',
       blocks: [
         { kind: 'video', title: 'Cercle trigonométrique et triangles quelconques — synthèse et points à vérifier', youtubeId: 'YjmwkQmAxsc' },
         {
@@ -1101,7 +1114,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           title: 'Cercle trigonométrique & triangles quelconques — quiz vrai/faux',
           generatorId: 'gen63',
           description: [
-            '140 affirmations pré-écrites, réparties en 7 thèmes (20 par thème), qui reprennent ' +
+            '245 affirmations pré-écrites, réparties en 7 thèmes (35 par thème), qui reprennent ' +
               'tout ce chapitre. Un seul essai par question. La justification est toujours révélée.',
           ],
           chantier: '4e',
