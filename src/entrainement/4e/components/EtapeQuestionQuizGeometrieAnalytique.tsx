@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core/quizGeometrieAnalytique.types";
+import { RenduFragments } from "./RenduFragments";
+import { fragmentsTexteGeometrieAnalytique } from "../ui/formatQuizGeometrieAnalytique";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -14,7 +16,9 @@ export function EtapeQuestionQuizGeometrieAnalytique({ question, onValider }: Pr
 
   return (
     <div>
-      <p className="prompt-text">{question.enonce}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={fragmentsTexteGeometrieAnalytique(question.enonce)} />
+      </p>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === true ? " toggle-active" : ""}`} onClick={() => setChoix(true)}>

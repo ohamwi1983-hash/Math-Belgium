@@ -131,7 +131,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             ['Deux points A, B', '$\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$'],
             ['Un point et un vecteur', 'le vecteur donné, tel quel'],
             ['Un point et un angle avec Ox', '$(\\cos\\theta ; \\sin\\theta)$, ramené à des coordonnées exactes pour un angle remarquable'],
-            ['Un point et un angle avec Oy', 'même principe, angle mesuré depuis l\'axe vertical'],
+            ['Un point et un angle α avec Oy', '$(\\sin\\alpha ; \\cos\\alpha)$ — même principe, l\'angle avec Ox valant alors 90° − α'],
             ['Un point et une pente m', '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$'],
           ],
         },
@@ -443,7 +443,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           items: [
             '**Pente** — $m = \\frac{\\Delta y}{\\Delta x}$. C\'est le rapport des composantes du vecteur directeur. Elle **n\'existe pas** pour une verticale.',
             '**Angle avec Ox** — $m = \\tan\\theta$, avec θ dans $[0°;180°[$. Pour une verticale, θ = 90° : la pente n\'existe pas, mais l\'angle si.',
-            '**Angle avec Oy** — c\'est l\'angle complémentaire du précédent : $\\theta_{Oy} = 90° - \\theta_{Ox}$ (ramené dans $[0°;180°[$ si négatif).',
+            '**Angle avec Oy** — $\\theta_{Oy} = 90° - \\theta_{Ox}$, ramené dans $[0°;180°[$ : si le résultat est négatif, ajoute 180°. Une verticale fait donc 0° avec Oy, une horizontale 90°, et une droite à 135° avec Ox fait 135° avec Oy.',
             "**Ordonnée à l'origine** — p, c'est la valeur de y quand x = 0. C'est le point où la droite coupe Oy. Elle n'existe pas pour une verticale.",
           ],
         },
@@ -1383,9 +1383,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           items: [
             '**Identifie** le type de chacun des deux lieux, puis extrais-en les paramètres.',
             '**Écris** l\'équation de chaque lieu.',
-            '**Résous** le système par substitution — ça mène toujours à une équation **quadratique** à une seule inconnue.',
+            '**Résous** le système par substitution — avec une droite et un cercle (ou une parabole), ça mène à une équation **du second degré au plus**, à une seule inconnue.',
             '**Dénombre** les solutions (0, 1 ou 2), puis remonte aux coordonnées de chaque point d\'intersection.',
           ],
+        },
+        {
+          kind: 'attention',
+          label: 'Pas toujours une équation du second degré',
+          text:
+            'La règle « au plus du second degré, donc 0, 1 ou 2 points » vaut quand l\'un des deux lieux ' +
+            'est une **droite**. Entre un cercle et une parabole, la substitution mène en général ' +
+            'à une équation de degré 4, qui peut avoir jusqu\'à 4 solutions — un cas qui sort du ' +
+            'cadre de ce chapitre.',
         },
         {
           kind: 'illustrationGroup',
@@ -1476,7 +1485,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       id: 'revision',
       number: 11,
       title: 'Révision — quiz vrai/faux',
-      kicker: '260 affirmations en 13 thèmes',
+      kicker: '455 affirmations en 13 thèmes',
       blocks: [
         {
           kind: 'para',
@@ -1507,7 +1516,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         title: 'Pente et angles',
         formulas: [
           { text: '$m = \\tan\\theta$', condition: '$\\theta \\in [0°;180°[$' },
-          { text: '$\\theta_{Oy} = 90° - \\theta_{Ox}$' },
+          { text: '$\\theta_{Oy} = 90° - \\theta_{Ox}$', condition: 'ramené dans $[0°;180°[$ (+180° si négatif)' },
         ],
       },
       {
@@ -1552,7 +1561,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         'équivalentes (implicite, explicite en y, explicite en x, paramétrique) ; les deux ' +
         'formes explicites sont parfois impossibles (verticale/horizontale).',
       'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0°;180°[$. Angle avec Oy = 90° − angle ' +
-        'avec Ox. Ni la pente ni l\'angle avec Oy ne se calculent négativement.',
+        'avec Ox, ramené dans $[0°;180°[$. La pente peut être négative (droite qui descend), mais un ' +
+        'angle ne l\'est jamais : une pente négative donne un angle avec Ox obtus.',
       'Parallèles / perpendiculaires — déterminant nul ↔ colinéaires ; produit scalaire nul ↔ ' +
         'orthogonaux. En pentes : $m=m\'$ ou $m \\cdot m\'=-1$.',
       "Intersection — compare d'abord les vecteurs directeurs (sécantes ou colinéaires), avant tout calcul de système.",
@@ -1561,7 +1571,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         'être **identique**, puis tu complètes le carré pour retrouver centre et rayon.',
       'Parabole — PF = distance(P, directrice). p est **signé**, le sommet est à mi-chemin entre ' +
         'foyer et directrice, et il y a 2 orientations symétriques.',
-      'Lieux géométriques — traduis la phrase en équation, résous le système (toujours une quadratique), dénombre 0, 1 ou 2 solutions.',
+      'Lieux géométriques — traduis la phrase en équation, résous le système par substitution (au plus du second degré quand l\'un des deux lieux est une droite), dénombre 0, 1 ou 2 solutions.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -1579,7 +1589,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       kind: 'entrainement',
       title: 'Géométrie analytique plane — quiz vrai/faux',
       generatorId: 'gen65',
-      description: ['260 affirmations pré-écrites réparties en 13 thèmes (20 par thème), qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
+      description: ['455 affirmations pré-écrites réparties en 13 thèmes (35 par thème), qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
       chantier: '4e',
       whereLabel: '4e → « 65. Géométrie analytique plane — quiz vrai/faux »',
     },
