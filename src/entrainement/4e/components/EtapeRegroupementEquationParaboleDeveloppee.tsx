@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationParaboleDeveloppee";
-import { diagnostiquerRegroupement } from "../moteur/verificationEquationParaboleDeveloppee";
-import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatEquationDeveloppeeLatex, segmentsConsigneRegroupement, texteAideRegroupementNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
+import { diagnostiquerRegroupement, estEquivalenteEquationDepart } from "../moteur/verificationEquationParaboleDeveloppee";
+import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatEquationDeveloppeeLatex, messageFormeNonAtteinte, placeholderRegroupement, segmentsConsigneRegroupement, texteAideRegroupementNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
@@ -38,6 +38,7 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerRegroupement(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
+  const formeNonAtteinte = statut === "not_equivalent" && estEquivalenteEquationDepart(exercice, texte);
 
   return (
     <div>
@@ -56,12 +57,12 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <label className="field-label" htmlFor="equation-parabole-developpee-regroupement">
-          Équation factorisée :
+          Équation :
         </label>
         <input
           id="equation-parabole-developpee-regroupement"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="ex : 2(x^2-2x)=32y+62"
+          placeholder={placeholderRegroupement(exercice)}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />
@@ -82,7 +83,7 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
         </button>
         {tentativesUtilisees > 0 && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {formeNonAtteinte ? messageFormeNonAtteinte(tentativesUtilisees, tentativesMax) : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
           </p>
         )}
         </>

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationParaboleDeveloppee";
-import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationParaboleDeveloppee";
-import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, segmentsAideCompletionNiveau1, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
+import { diagnostiquerCompletionCarre, estEquivalenteEquationDepart } from "../moteur/verificationEquationParaboleDeveloppee";
+import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, messageFormeNonAtteinte, placeholderCompletion, segmentsAideCompletionNiveau1, segmentsConsigneCompletion, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
@@ -40,6 +40,7 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerCompletionCarre(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
+  const formeNonAtteinte = statut === "not_equivalent" && estEquivalenteEquationDepart(exercice, texte);
 
   return (
     <div>
@@ -51,7 +52,9 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_COMPLETION}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={segmentsConsigneCompletion(exercice)} />
+      </p>
 
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
@@ -61,7 +64,7 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
         <input
           id="equation-parabole-developpee-completion"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="ex : (x-1)^2=16(y+2)"
+          placeholder={placeholderCompletion(exercice)}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />
@@ -88,7 +91,7 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
         </button>
         {tentativesUtilisees > 0 && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {formeNonAtteinte ? messageFormeNonAtteinte(tentativesUtilisees, tentativesMax) : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
           </p>
         )}
         </>

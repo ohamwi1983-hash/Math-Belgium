@@ -18,8 +18,11 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
+/** Consigne exacte du comportement réel (audit chapitre 7) : n'importe quelle extrémité, puis les
+ * points voisins le long de la courbe ; la vraie parabole se dessine au fur et à mesure, et cesse de
+ * s'étendre dès qu'un point est sauté (`longueurPrefixeCorrect`, `ui/traceParaboleGraph.ts`). */
 export const CONSIGNE_TRACE =
-  "Clique les 6 points construits dans l'ordre, de gauche à droite, pour tracer la parabole — la courbe reliera les points dans l'ordre où tu les sélectionnes, donc un mauvais ordre donnerait une courbe qui ne ressemble pas à une parabole.";
+  "Clique les 6 points construits l'un après l'autre, d'une extrémité à l'autre, le long de la courbe : la parabole se dessine au fur et à mesure. Si tu sautes un point, le tracé s'arrête — recommence alors ta sélection.";
 
 /**
  * Écran "trace" (dernier, toujours terminal) — aucun tracé libre : l'élève clique les 6 points déjà
@@ -56,17 +59,24 @@ export function EtapeTraceParabole({ exercice, cibles, tentativesUtilisees, tent
     <div>
       <p className="prompt-text">{CONSIGNE_TRACE}</p>
 
-      <TraceParaboleGraph exercice={exercice} cibles={cibles} selectionnesIndices={selectionnesIndices} onClicPoint={ajouterPoint} />
+      <TraceParaboleGraph
+        exercice={exercice}
+        cibles={cibles}
+        selectionnesIndices={selectionnesIndices}
+        onClicPoint={ajouterPoint}
+        afficherCourbeComplete={validation?.revele === true}
+        verrouille={!!validation}
+      />
       <p className="mafs-graph-pas">
         {selectionnesIndices.length} / {cibles.length} points sélectionnés
       </p>
 
-      <button type="button" className="btn btn-aide" disabled={selectionnesIndices.length === 0} onClick={recommencer}>
-        Recommencer
-      </button>
-
       {!validation && (
         <>
+        <button type="button" className="btn btn-aide" disabled={selectionnesIndices.length === 0} onClick={recommencer}>
+          Recommencer
+        </button>
+
         <button
           type="button"
           className="btn btn-primary"

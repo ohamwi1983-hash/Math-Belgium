@@ -36,7 +36,7 @@ import { genererExerciceConstructionParabole } from "./index";
  * bien distinctes (`moteur/sessionConstructionParabole.ts`) : 3 itérations "construction" (choisir un
  * rayon r au compas centré en F, tracer la parallèle à d à distance r du côté de F, ce qui donne 2
  * points de la parabole par itération — `verificationConstructionParabole.ts::pointsCiblesIteration`),
- * puis un écran "trace" terminal (relier les 6 points obtenus, dans l'ordre gauche→droite, pour
+ * puis un écran "trace" terminal (relier les 6 points obtenus, d'une extrémité à l'autre de la courbe, pour
  * former la courbe). Sur papier, ces 2 phases deviennent UNE SEULE question qui décrit la méthode
  * complète (répéter la construction cercle/parallèle 3 fois avec des rayons différents, puis relier
  * les 6 points) — jamais 4 questions séparées : contrairement à `simplification`/`analyseFonction`,
@@ -301,8 +301,8 @@ const CONSIGNE_PAPIER =
   "choisis un premier rayon (strictement supérieur à la moitié de la distance de F à d), trace au compas le cercle de " +
   "centre F et ce rayon, puis à l'équerre la droite parallèle à d, à cette même distance, du côté de F — les 2 points " +
   "d'intersection appartiennent à la parabole. Répète cette construction pour 2 autres rayons, tous différents du " +
-  "premier (6 points en tout), puis relie les 6 points par une courbe régulière, de gauche à droite, pour tracer la " +
-  "parabole.";
+  "premier (6 points en tout), puis relie les 6 points par une courbe régulière, d'une extrémité à l'autre, le long " +
+  "de la courbe, pour tracer la parabole.";
 
 function construireEnonceConstructionParabole(exercice: ExerciceConstructionParabole): SectionExercice {
   return {
@@ -331,7 +331,7 @@ function construireCorrectionConstructionParabole(exercice: ExerciceConstruction
       type: "paragraphe",
       fragments: [
         texte(
-          "En reliant les points obtenus pour plusieurs rayons, de gauche à droite, on fait apparaître la courbe " +
+          "En reliant les points obtenus pour plusieurs rayons, d'une extrémité à l'autre le long de la courbe, on fait apparaître la courbe " +
             "complète (en vert). Le sommet de la parabole est le point de la courbe le plus proche de la directrice — il " +
             "se trouve exactement à mi-chemin entre F et d, sur la perpendiculaire à d passant par F, et la parabole " +
             "s'ouvre du côté du foyer, en s'écartant de la directrice.",

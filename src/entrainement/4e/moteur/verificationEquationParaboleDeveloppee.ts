@@ -21,12 +21,14 @@
  * seul groupe structuré (celui de la variable au carré), l'autre membre restant un développé linéaire
  * simple dans l'autre variable (voir `formatRegroupementLatex`/`formatCompletionLatex`,
  * `ui/formatEquationParaboleDeveloppee.ts`) — jamais 2 groupes symétriques comme pour le cercle.
- * `estStructureRegroupementValide`/`estStructureCompletionValide` (ci-dessous) exigent donc qu'AU
- * MOINS UN des deux membres de l'équation soit un terme UNIQUE (`flattenAdditif(...).length === 1`)
- * qui se classe comme le groupe/carré parfait de la variable au carré de l'exercice (`x` si
- * `variante==="vertical"`, `y` sinon) — l'autre membre n'est volontairement soumis à AUCUNE
- * contrainte structurelle (il peut être développé, réordonné, etc. sans que cela ne fasse échouer la
- * garde, cohérent avec la consigne de leniency du prompt correctif). Primitives d'analyse d'arbre
+ * `estStructureCompletionValide` (ci-dessous) exige donc qu'AU MOINS UN des deux membres de
+ * l'équation soit un terme UNIQUE (`flattenAdditif(...).length === 1`) qui se classe comme le carré
+ * parfait de la variable au carré de l'exercice (`x` si `variante==="vertical"`, `y` sinon) —
+ * l'autre membre n'est volontairement soumis à AUCUNE contrainte structurelle.
+ * `estStructureRegroupementValide` (écran 1, audit chapitre 7) est plus souple : un membre composé
+ * UNIQUEMENT des termes de la variable au carré (son carré présent, avec ou sans mise en évidence du
+ * coefficient — `y²-6y = 4x-5`, l'étape même du cours, autant que `2(x²-2x) = 32y+62`), l'autre
+ * membre ne contenant plus cette variable. Primitives d'analyse d'arbre
  * (`flattenAdditif`, `classifierGroupeRegroupementXY`, `classifierCarreParfaitXY`...) exportées par
  * `verificationEquationCercle.ts` (moteur→moteur, partagées à l'identique par
  * `verificationEquationCercleDeveloppee.ts`) — voir son en-tête pour la justification complète.
@@ -63,18 +65,87 @@ function variableCarree(exercice: ExerciceEquationParaboleDeveloppee): "x" | "y"
   return exercice.variante === "vertical" ? "x" : "y";
 }
 
-/** Vrai si `cote` (un des deux membres de l'équation) est un terme UNIQUE `coefficient·(...)`
- * couvrant la variable au carré de l'exercice, avec son carré explicitement présent (pas encore
- * complété) — l'autre membre n'est jamais inspecté ici (composition asymétrique, voir en-tête). */
-function estStructureRegroupementValide(cote: NoeudXY, variable: "x" | "y"): boolean {
-  const termes = flattenAdditif(cote);
-  if (termes.length !== 1) return false;
-  return classifierGroupeRegroupementXY(termes[0]!.terme) === variable;
+/** Vrai si `variable` apparaît N'IMPORTE OÙ dans `noeud` — dupliqué (jamais importé) depuis
+ * `verificationEquationCercle.ts`, qui ne l'exporte pas : ce module reste autonome. */
+function contientVariable(noeud: NoeudXY, variable: "x" | "y"): boolean {
+  switch (noeud.type) {
+    case "x":
+    case "y":
+      return noeud.type === variable;
+    case "nombre":
+      return false;
+    case "negation":
+      return contientVariable(noeud.operande, variable);
+    case "groupe":
+      return contientVariable(noeud.interieur, variable);
+    case "puissance":
+      return contientVariable(noeud.base, variable) || contientVariable(noeud.exposant, variable);
+    case "somme":
+    case "produit":
+      return contientVariable(noeud.gauche, variable) || contientVariable(noeud.droite, variable);
+  }
+}
+
+function estConstante(noeud: NoeudXY): boolean {
+  return !contientVariable(noeud, "x") && !contientVariable(noeud, "y");
+}
+
+function sansGroupes(noeud: NoeudXY): NoeudXY {
+  return noeud.type === "groupe" ? sansGroupes(noeud.interieur) : noeud;
+}
+
+/** `variable` nue ou `variable²` (exposant littéral 2) — jamais un binôme au carré `(x-1)²`, qui
+ * appartient déjà à l'écran suivant (complétion). */
+function estPuissanceVariable(noeud: NoeudXY, variable: "x" | "y"): "carre" | "lineaire" | null {
+  const n = sansGroupes(noeud);
+  if (n.type === variable) return "lineaire";
+  if (n.type === "puissance" && n.exposant.type === "nombre" && n.exposant.valeur === 2 && sansGroupes(n.base).type === variable) return "carre";
+  return null;
+}
+
+/** Monôme `k·variable²`, `k·variable`, `variable²·k`, `variable²/k`… (k constant, éventuellement
+ * omis) — renvoie son degré, `null` si ce n'est pas un monôme de cette seule variable. */
+function degreMonome(terme: NoeudXY, variable: "x" | "y"): "carre" | "lineaire" | null {
+  const n = sansGroupes(terme);
+  const direct = estPuissanceVariable(n, variable);
+  if (direct) return direct;
+  if (n.type === "negation") return degreMonome(n.operande, variable);
+  if (n.type === "produit") {
+    if (estConstante(n.gauche)) return n.operateur === "*" ? degreMonome(n.droite, variable) : null;
+    if (estConstante(n.droite)) return degreMonome(n.gauche, variable);
+  }
+  return null;
+}
+
+/**
+ * Écran 1 — vrai si `cote` contient UNIQUEMENT des termes de la variable au carré, avec son carré
+ * explicitement présent (pas encore complété), et si `autreCote` ne contient PLUS cette variable :
+ * c'est l'étape « isoler le carré » du cours (`y²-6y = 4x-5`), avec ou sans mise en évidence du
+ * coefficient de la variable au carré (`2(x²-2x) = …`, `2x²-4x = …`, `x²-2x = …` après division —
+ * l'équivalence à un facteur près est déjà garantie par `diagnostiquerEquivalenceQuadratiqueXY`).
+ * Chaque terme de haut niveau de `cote` est soit un monôme de la variable (`degreMonome`), soit un
+ * groupe `coefficient·(…)` de cette seule variable contenant son carré (`classifierGroupeRegroupementXY`).
+ * Jamais de constante dans `cote` : « 4x-5 » doit être passé de l'autre côté.
+ */
+function estStructureRegroupementValide(cote: NoeudXY, autreCote: NoeudXY, variable: "x" | "y"): boolean {
+  const autre = variable === "x" ? "y" : "x";
+  if (contientVariable(autreCote, variable) || contientVariable(cote, autre)) return false;
+  let carrePresent = false;
+  for (const { terme } of flattenAdditif(cote)) {
+    if (classifierGroupeRegroupementXY(terme) === variable) {
+      carrePresent = true;
+      continue;
+    }
+    const degre = degreMonome(terme, variable);
+    if (degre === null) return false;
+    if (degre === "carre") carrePresent = true;
+  }
+  return carrePresent;
 }
 
 /** Même principe que `estStructureRegroupementValide`, mais exige un carré parfait explicite
  * `coefficient·(variable±p)²` plutôt qu'un groupe non encore complété. */
-function estStructureCompletionValide(cote: NoeudXY, variable: "x" | "y"): boolean {
+function estStructureCompletionValide(cote: NoeudXY, _autreCote: NoeudXY, variable: "x" | "y"): boolean {
   const termes = flattenAdditif(cote);
   if (termes.length !== 1) return false;
   return classifierCarreParfaitXY(termes[0]!.terme) === variable;
@@ -84,10 +155,23 @@ function estStructureCompletionValide(cote: NoeudXY, variable: "x" | "y"): boole
  * n'est même pas parseable comme équation à 2 variables (ne devrait jamais arriver ici : appelé
  * uniquement après que `diagnostiquerEquivalenceQuadratiqueXY` a déjà confirmé "correct", qui
  * implique un parsing réussi — défense en profondeur, jamais atteint en usage normal). */
-function uneStructureValide(texte: string, variable: "x" | "y", verifieStructure: (cote: NoeudXY, v: "x" | "y") => boolean): boolean {
+function uneStructureValide(
+  texte: string,
+  variable: "x" | "y",
+  verifieStructure: (cote: NoeudXY, autreCote: NoeudXY, v: "x" | "y") => boolean,
+): boolean {
   const equation = parserEquationXY(texte);
   if (!equation) return false;
-  return verifieStructure(equation.gauche, variable) || verifieStructure(equation.droite, variable);
+  return verifieStructure(equation.gauche, equation.droite, variable) || verifieStructure(equation.droite, equation.gauche, variable);
+}
+
+/** Vrai si `texte` est algébriquement équivalent à l'équation de départ, quelle que soit sa forme —
+ * permet aux écrans 1-2 de distinguer « juste mais forme demandée pas encore atteinte » (ex. l'étape
+ * intermédiaire du cours `(y-3)²-9 = 4x-5`) d'une équation fausse, sans changer le statut à 3
+ * valeurs (`not_equivalent` dans les deux cas, même score). */
+export function estEquivalenteEquationDepart(exercice: ExerciceEquationParaboleDeveloppee, texte: string): boolean {
+  const { x: x0, y: y0 } = exercice.sommet;
+  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, (x, y) => cibleDeveloppee(x, y, exercice)) === "correct";
 }
 
 export function diagnostiquerRegroupement(exercice: ExerciceEquationParaboleDeveloppee, texte: string): StatutVerification {
@@ -165,7 +249,13 @@ export function verifierP(exercice: ExerciceEquationParaboleDeveloppee, valeur: 
 export function diagnostiquerDirectrice(exercice: ExerciceEquationParaboleDeveloppee, texte: string): StatutVerification {
   const { x: x0, y: y0 } = exercice.sommet;
   const cible = exercice.variante === "vertical" ? (_x: number, y: number) => y - exercice.directrice : (x: number, _y: number) => x - exercice.directrice;
-  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, cible);
+  return diagnostiquerEquivalenceQuadratiqueXY(retirerNomDroite(texte), x0, y0, cible);
+}
+
+/** Retire un nom de droite en tête (« d : », « d ≡ », « d: ») — la notation même de l'aide 2
+ * (`d \equiv y=y_S-p/2`), jamais une erreur de syntaxe pour l'élève qui la recopie. */
+function retirerNomDroite(texte: string): string {
+  return texte.replace(/^\s*d\s*(?::|≡)\s*/, "");
 }
 
 export function verifierDirectrice(exercice: ExerciceEquationParaboleDeveloppee, texte: string): boolean {

@@ -107,8 +107,10 @@ export function pointsCiblesIteration(exercice: ExerciceConstructionParabole, r:
 }
 
 /** Ordre géométriquement correct pour relier les points construits en une parabole reconnaissable —
- * gauche→droite le long de la directrice, i.e. abscisse locale croissante (jamais un ordre lié aux
- * itérations, qui produirait un tracé en zigzag). */
+ * le long de la courbe, d'une extrémité à l'autre, i.e. abscisse locale croissante (jamais un ordre
+ * lié aux itérations, qui produirait un tracé en zigzag). Le sens inverse est tout aussi correct
+ * (`verifierOrdreSelection`) : la figure étant tournée d'un angle θ aléatoire, « de gauche à droite »
+ * à l'écran ne correspond à aucun sens fixe dans le repère local (audit chapitre 7). */
 export function ordreCorrect(cibles: Point[]): Point[] {
   return [...cibles].sort((a, b) => a.x - b.x);
 }
@@ -117,8 +119,10 @@ function pointsEgaux(a: Point, b: Point): boolean {
   return Math.abs(a.x - b.x) <= TOLERANCE && Math.abs(a.y - b.y) <= TOLERANCE;
 }
 
+/** Vrai si les clics suivent la courbe d'une extrémité à l'autre, dans un sens OU dans l'autre. */
 export function verifierOrdreSelection(cibles: Point[], clics: Point[]): boolean {
   if (clics.length !== cibles.length) return false;
   const correct = ordreCorrect(cibles);
-  return clics.every((p, i) => pointsEgaux(p, correct[i]!));
+  const inverse = [...correct].reverse();
+  return clics.every((p, i) => pointsEgaux(p, correct[i]!)) || clics.every((p, i) => pointsEgaux(p, inverse[i]!));
 }

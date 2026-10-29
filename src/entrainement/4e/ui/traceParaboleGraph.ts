@@ -12,10 +12,9 @@
  * ordre réel — mais cette version ne montrait plus jamais la vraie courbe de la parabole.
  * **Seconde correction** (`promptgen53gen54corrections.md` A.1) : la vraie courbe ANALYTIQUE
  * (`evaluerParaboleLocale`) est révélée PROGRESSIVEMENT. Le domaine révélé (`domaineRevele`) ne
- * s'étend que tant que la sélection RÉELLE suit l'ordre correct (gauche→droite) — un clic
- * hors-séquence fige la révélation sans la faire régresser ni la "réparer" : comportement dégradé
- * VOLONTAIRE, cohérent avec la consigne ("un mauvais ordre donnerait une courbe qui ne ressemble
- * pas à une parabole").
+ * s'étend que tant que la sélection RÉELLE suit la courbe, d'une extrémité à l'autre (dans un sens
+ * ou dans l'autre) — un point sauté fige la révélation sans la faire régresser ni la "réparer",
+ * exactement ce que dit la consigne (`CONSIGNE_TRACE`, `EtapeTraceParabole.tsx`).
  *
  * **Bug trouvé sur la PREMIÈRE tentative de cette seconde correction** (confirmé visuellement par
  * l'utilisateur : la courbe rendue ne passait par AUCUN des points sélectionnés, même 6/6 avec un
@@ -50,27 +49,30 @@ export function evaluerParaboleLocale(exercice: ExerciceConstructionParabole, x:
   return ((x - foyer.x) ** 2 + foyer.y ** 2) / (2 * foyer.y);
 }
 
-/** Ordre correct des INDICES dans `cibles` (gauche→droite selon l'abscisse locale) — même critère
- * que `ordreCorrect`/`verifierOrdreSelection` (`moteur/verificationConstructionParabole.ts`),
- * exprimé ici en indices pour comparaison directe à `selectionnesIndices`
- * (`EtapeTraceParabole.tsx`, qui suit déjà la sélection par index, jamais par valeur). Les 6
- * abscisses locales sont TOUJOURS deux à deux distinctes par construction (2 solutions symétriques
- * `foyer.x±d` par itération, `d` strictement croissant avec `r` — voir `pointsCiblesIteration`),
- * donc ce tri est toujours un ordre total, jamais de cas d'égalité à départager. */
+/** Ordre correct des INDICES dans `cibles` (abscisse locale croissante) — même critère que
+ * `ordreCorrect`/`verifierOrdreSelection` (`moteur/verificationConstructionParabole.ts`), exprimé
+ * ici en indices pour comparaison directe à `selectionnesIndices` (`EtapeTraceParabole.tsx`, qui
+ * suit déjà la sélection par index, jamais par valeur de point). Les 6 abscisses locales sont
+ * TOUJOURS deux à deux distinctes par construction (2 solutions symétriques `foyer.x±d` par
+ * itération, `d` strictement croissant avec `r` — voir `pointsCiblesIteration`), donc ce tri est
+ * toujours un ordre total, jamais de cas d'égalité à départager. */
 function indicesOrdreCorrect(cibles: Point[]): number[] {
   return cibles.map((_, i) => i).sort((a, b) => cibles[a]!.x - cibles[b]!.x);
 }
 
 /** Nombre de points, dans l'ordre RÉEL de sélection (`selectionnesIndices`), qui forment un
- * préfixe EXACT de l'ordre correct (gauche→droite) — détermine jusqu'où la vraie courbe est
- * révélée (`domaineRevele` ci-dessous). Une sélection dans le mauvais ordre casse le préfixe dès le
- * premier index hors-séquence : les clics suivants n'étendent alors plus le domaine révélé, même si
- * l'élève continue de cliquer — comportement dégradé VOLONTAIRE (voir l'en-tête de fichier). */
+ * préfixe EXACT de l'ordre le long de la courbe — dans un sens OU dans l'autre, le sens étant fixé
+ * par le premier point cliqué (les 2 sens sont acceptés par `verifierOrdreSelection`). Détermine
+ * jusqu'où la vraie courbe est révélée (`domaineRevele` ci-dessous) : un point sauté casse le
+ * préfixe, les clics suivants n'étendent alors plus la courbe (voir l'en-tête de fichier). */
 export function longueurPrefixeCorrect(cibles: Point[], selectionnesIndices: number[]): number {
-  const correct = indicesOrdreCorrect(cibles);
-  let k = 0;
-  while (k < selectionnesIndices.length && k < correct.length && selectionnesIndices[k] === correct[k]) k++;
-  return k;
+  const croissant = indicesOrdreCorrect(cibles);
+  const prefixe = (ordre: number[]) => {
+    let k = 0;
+    while (k < selectionnesIndices.length && k < ordre.length && selectionnesIndices[k] === ordre[k]) k++;
+    return k;
+  };
+  return Math.max(prefixe(croissant), prefixe([...croissant].reverse()));
 }
 
 /** Domaine (bornes en abscisse LOCALE) de la vraie courbe révélée — `null` tant qu'aucun point n'a
@@ -78,9 +80,15 @@ export function longueurPrefixeCorrect(cibles: Point[], selectionnesIndices: num
 export function domaineRevele(cibles: Point[], selectionnesIndices: number[]): { xMin: number; xMax: number } | null {
   const k = longueurPrefixeCorrect(cibles, selectionnesIndices);
   if (k === 0) return null;
-  const abscisses = indicesOrdreCorrect(cibles)
-    .slice(0, k)
-    .map((i) => cibles[i]!.x);
+  const abscisses = selectionnesIndices.slice(0, k).map((i) => cibles[i]!.x);
+  return { xMin: Math.min(...abscisses), xMax: Math.max(...abscisses) };
+}
+
+/** Domaine de la courbe COMPLÈTE (du premier au dernier point construit) — réponse révélée de
+ * l'écran "trace" après épuisement des tentatives. */
+export function domaineComplet(cibles: Point[]): { xMin: number; xMax: number } | null {
+  if (cibles.length === 0) return null;
+  const abscisses = cibles.map((c) => c.x);
   return { xMin: Math.min(...abscisses), xMax: Math.max(...abscisses) };
 }
 
@@ -92,8 +100,8 @@ const PAS_ECHANTILLONNAGE_COURBE = 60;
  * courbe (`evaluerParaboleLocale`) — reliés par `Line.Segment` (jamais `Plot.*`, voir l'en-tête de
  * fichier) pour former une polyline dense qui compose correctement avec `<Transform rotate={theta}>`.
  * `[]` tant qu'aucun point n'a encore été sélectionné dans le bon ordre. */
-export function pointsCourbeRevelee(exercice: ExerciceConstructionParabole, cibles: Point[], selectionnesIndices: number[]): Point[] {
-  const domaine = domaineRevele(cibles, selectionnesIndices);
+export function pointsCourbeRevelee(exercice: ExerciceConstructionParabole, cibles: Point[], selectionnesIndices: number[], complete = false): Point[] {
+  const domaine = complete ? domaineComplet(cibles) : domaineRevele(cibles, selectionnesIndices);
   if (domaine === null) return [];
   const points: Point[] = [];
   for (let i = 0; i <= PAS_ECHANTILLONNAGE_COURBE; i++) {
