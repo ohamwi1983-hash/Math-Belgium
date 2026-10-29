@@ -11,7 +11,7 @@
  * est colinéaire à `vecteurReference`, donc aussi à `vecteurCherche`, qui vaut lui-même
  * `vecteurReference` ou son perpendiculaire).
  */
-import type { ExerciceRelationsDroites } from "../core/relationsDroites.types";
+import type { ExerciceRelationsDroites, RelationReconnue } from "../core/relationsDroites.types";
 import { diagnostiquerEquationDroiteLibre, diagnostiquerPointVecteurParametrique, statutVecteurColineaire, statutVecteurOrthogonal } from "./verificationDroite";
 import type { StatutVerification } from "./statutVerification";
 
@@ -59,3 +59,23 @@ export function diagnostiquerEquationParametrique(exercice: ExerciceRelationsDro
 export function verifierEquationParametrique(exercice: ExerciceRelationsDroites, reponse: ReponseParametrique): boolean {
   return diagnostiquerEquationParametrique(exercice, reponse) === "correct";
 }
+
+// ============================================================================
+// Famille `reconnaissance` — vecteur directeur de d₂ puis relation entre d₁ et d₂.
+// ============================================================================
+
+export function diagnostiquerExtraction2(exercice: ExerciceRelationsDroites, reponse: ReponseVecteur): StatutVerification {
+  return statutVecteurColineaire({ x: reponse.x, y: reponse.y }, exercice.droite2!.vecteur);
+}
+
+export function verifierExtraction2(exercice: ExerciceRelationsDroites, reponse: ReponseVecteur): boolean {
+  return diagnostiquerExtraction2(exercice, reponse) === "correct";
+}
+
+/** Choix parmi 3 relations — vérifié en UNE seule tentative (sinon 3 essais pour 3 choix se
+ * gagnent par élimination, même décision que le diagnostic de "Intersection entre deux droites"). */
+export function verifierRelation(exercice: ExerciceRelationsDroites, reponse: RelationReconnue): boolean {
+  return reponse === exercice.relation;
+}
+
+export const TENTATIVES_MAX_RELATION = 1;

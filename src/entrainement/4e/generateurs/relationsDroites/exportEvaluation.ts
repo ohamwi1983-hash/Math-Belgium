@@ -1,18 +1,24 @@
 import type { ExerciceRelationsDroites } from "../../core/relationsDroites.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatEquationImpliciteLatex, type FragmentConsigne } from "../../ui/formatEquationDroite";
+import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   consigneConstruction,
   consigneEquation,
   consigneExtraction,
+  consigneExtraction2,
   formatAideConstructionNiveau2Latex,
   formatAideEquationNiveau2Latex,
+  formatAideRelationNiveau2Latex,
   formatDonneesRechercheeLatex,
   formatEnonceLatex,
+  formatEquationCartesienneAttendueLatex,
+  formatRelationAttendueLatex,
   formatVecteurLatex,
   segmentsAideConstructionNiveau1,
+  segmentsAideExtraction2Niveau1,
   segmentsAideExtractionNiveau1,
+  segmentsAideRelationNiveau1,
   segmentsConsigneGeneraleRelationsDroites,
 } from "../../ui/formatRelationsDroites";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationsDroites } from "./index";
@@ -69,11 +75,14 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelations
  * tirée (`vecteurReference`/`vecteurCherche`/`referenceImpliciteSortie`), jamais seulement la
  * formule générale — un correcteur doit voir le résultat concret, pas seulement la méthode.
  * `formatAideEquationNiveau2Latex` donne déjà, non simplifiée, la substitution point+vecteur dans le
- * gabarit (`a = ..., b = ..., c = -(...)` pour la forme cartésienne, la représentation paramétrique
- * complète et déjà simplifiée pour la forme paramétrique) — la question c) l'affiche donc telle
- * quelle pour "parametrique", et la fait suivre du résultat simplifié
- * (`formatEquationImpliciteLatex` sur `referenceImpliciteSortie.a/b/c`, seule vérité canonique de
- * l'écran 3 selon `moteur/verificationRelationsDroites.ts`) pour "cartesienne".
+ * gabarit (`y_v·(x−x_A) − x_v·(y−y_A) = 0` pour la forme cartésienne, négatifs entre parenthèses ;
+ * la représentation paramétrique complète et déjà simplifiée pour la forme paramétrique) — la
+ * question c) l'affiche donc telle quelle pour "parametrique", et la fait suivre du résultat
+ * développé et simplifié (`formatEquationCartesienneAttendueLatex`, proportionnel à
+ * `referenceImpliciteSortie`, seule vérité canonique de l'écran 3) pour "cartesienne".
+ *
+ * Famille `reconnaissance` : 3 questions FIXES aussi (vecteur de d₁, vecteur de d₂, relation
+ * justifiée par les deux critères), voir `construireEnonceReconnaissance`.
  */
 
 /** `a) `/`b) `/`c) ` + fragments — même petit helper que `orthogonalite/exportEvaluation.ts`. */
@@ -81,7 +90,48 @@ function paragraphe(lettre: string, fragments: FragmentConsigne[]): BlocCorrecti
   return { type: "paragraphe", fragments: [texte(`${lettre}) `), ...fragments] };
 }
 
+/** Famille `reconnaissance` (audit chapitre 7, gen45 point 23) — mêmes 3 questions que les 3
+ * écrans : a) vecteur de d₁, b) vecteur de d₂, c) relation (sans consigne « une seule tentative »,
+ * propre à l'écran). Consigne générale + d₁ + d₂ en ligne dans la question a), même raison que la
+ * famille `construction` ci-dessous. */
+function construireEnonceReconnaissance(exercice: ExerciceRelationsDroites): SectionExercice {
+  return {
+    questions: [
+      {
+        consigne: [
+          ...segmentsConsigneGeneraleRelationsDroites(exercice),
+          texte(" "),
+          latex(formatEnonceLatex(exercice)),
+          texte(", "),
+          latex(formatDonneesRechercheeLatex(exercice)),
+          texte(". "),
+          texte(consigneExtraction(exercice)),
+        ],
+        reponse: { type: "lignes", nombre: 0 },
+      },
+      { consigne: [texte(consigneExtraction2(exercice))], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte("Les droites d₁ et d₂ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie.")], reponse: { type: "lignes", nombre: 0 } },
+    ],
+  };
+}
+
+function construireCorrectionReconnaissance(exercice: ExerciceRelationsDroites): BlocCorrection[] {
+  return [
+    paragraphe("a", [...segmentsAideExtractionNiveau1(exercice), texte(" On peut donc choisir "), latex(`\\vec{u} = ${formatVecteurLatex(exercice.vecteurReference)}`), texte(".")]),
+    paragraphe("b", [...segmentsAideExtraction2Niveau1(exercice), texte(" On peut donc choisir "), latex(`\\vec{v} = ${formatVecteurLatex(exercice.droite2!.vecteur)}`), texte(".")]),
+    paragraphe("c", [
+      ...segmentsAideRelationNiveau1(),
+      texte(" Ici : "),
+      latex(formatAideRelationNiveau2Latex(exercice)),
+      texte(", donc "),
+      latex(formatRelationAttendueLatex(exercice)),
+      texte("."),
+    ]),
+  ];
+}
+
 function construireEnonceRelationsDroites(exercice: ExerciceRelationsDroites): SectionExercice {
+  if (exercice.famille === "reconnaissance") return construireEnonceReconnaissance(exercice);
   // `enteteFragments` est toujours rendu en mode KaTeX "bloc" (`assemblerEvaluationHtml.ts`) : la
   // consigne générale (`segmentsConsigneGeneraleRelationsDroites`, des segments texte/latex courts
   // pensés pour un rendu EN LIGNE) s'y casserait en blocs KaTeX "display" disjoints. Elle se termine
@@ -111,7 +161,8 @@ function construireEnonceRelationsDroites(exercice: ExerciceRelationsDroites): S
 }
 
 function construireCorrectionRelationsDroites(exercice: ExerciceRelationsDroites): BlocCorrection[] {
-  const { vecteurCherche, referenceImpliciteSortie } = exercice;
+  if (exercice.famille === "reconnaissance") return construireCorrectionReconnaissance(exercice);
+  const { vecteurCherche } = exercice;
 
   const blocs: BlocCorrection[] = [
     paragraphe("a", [
@@ -138,11 +189,11 @@ function construireCorrectionRelationsDroites(exercice: ExerciceRelationsDroites
         texte(" et le vecteur "),
         latex("\\vec{v}"),
         texte(" confirmés ci-dessus dans le gabarit "),
-        latex("a = y_{\\vec v}, \\; b = -x_{\\vec v}, \\; c = -(a\\cdot x_A + b\\cdot y_A)"),
+        latex("y_{\\vec v}\\cdot(x-x_A) - x_{\\vec v}\\cdot(y-y_A) = 0"),
         texte(", on obtient "),
         latex(formatAideEquationNiveau2Latex(exercice)),
-        texte(", soit, une fois simplifié : "),
-        latex(formatEquationImpliciteLatex(referenceImpliciteSortie.a, referenceImpliciteSortie.b, referenceImpliciteSortie.c)),
+        texte(", soit, une fois développé et simplifié : "),
+        latex(formatEquationCartesienneAttendueLatex(exercice)),
         texte("."),
       ]),
     );
