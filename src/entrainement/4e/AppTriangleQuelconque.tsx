@@ -15,7 +15,7 @@ import { CalculatriceScientifique } from "./components/CalculatriceScientifique"
 import { EtapeDonneeManquante } from "./components/EtapeDonneeManquante";
 import { EtapeAireTriangleQuelconque } from "./components/EtapeAireTriangleQuelconque";
 import { calculerRecapitulatifTriangleQuelconque } from "./ui/recapitulatifTriangleQuelconque";
-import { libelleDonneeManquante, valeurAffichageDonneeManquante } from "./ui/formatTriangleQuelconque";
+import { formatAire, formatSaisieDonneeManquante, notationDonneeManquante, valeurAffichageDonneeManquante } from "./ui/formatTriangleQuelconque";
 import { valeurAire } from "./moteur/verificationTriangleQuelconque";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -72,6 +72,10 @@ export function AppTriangleQuelconque() {
    * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») et inclus dans la `key`
+   * des écrans : sinon React réutilise le composant de la même phase et la saisie de l'exercice
+   * précédent reste dans le champ. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const recapitulatif = calculerRecapitulatifTriangleQuelconque(etat);
 
   /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
@@ -108,6 +112,7 @@ export function AppTriangleQuelconque() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -117,6 +122,7 @@ export function AppTriangleQuelconque() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionTriangleQuelconque(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as ConfigurationTriangleQuelconque)));
   }
 
@@ -125,12 +131,10 @@ export function AppTriangleQuelconque() {
   const reponseAttendue =
     etat.phase === "donneeManquante" ? (
       <>
-        {libelleDonneeManquante(exercice)} attendu(e) : {valeurAffichageDonneeManquante(exercice)}
+        {notationDonneeManquante(exercice)} ≈ {valeurAffichageDonneeManquante(exercice)}
       </>
     ) : (
-      <>
-        Aire attendue : {Math.round(valeurAire(exercice) * 100) / 100} {exercice.unite}²
-      </>
+      <>Aire ≈ {formatAire(exercice, valeurAire(exercice))}</>
     );
 
   const validation = enAttente
@@ -147,7 +151,7 @@ export function AppTriangleQuelconque() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Triangle quelconque</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -158,16 +162,18 @@ export function AppTriangleQuelconque() {
           <CalculatriceScientifique />
           {etat.phase === "donneeManquante" ? (
             <EtapeDonneeManquante
+              key={`${numeroExercice}-donneeManquante`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDonneeManquante}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(valeur, unite) => terminerEtape(soumettreReponseDonneeManquante(etat, valeur, unite), `${valeur} ${unite}`)}
+              onValider={(valeur, unite) => terminerEtape(soumettreReponseDonneeManquante(etat, valeur, unite), formatSaisieDonneeManquante(valeur, unite))}
               validation={validation}
             />
           ) : (
             <EtapeAireTriangleQuelconque
+              key={`${numeroExercice}-aire`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

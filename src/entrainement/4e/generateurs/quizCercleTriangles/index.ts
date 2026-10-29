@@ -18,6 +18,20 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizCercleTriangles; label: stri
   { id: "trianglesLies", label: "Triangles liés — triangulation et applications concrètes" },
 ];
 
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 7 thèmes) — jamais une
+ * constante fixe : `AppQuizCercleTriangles.tsx` l'utilise pour fixer `nombreExercices`, seule façon
+ * pour `creerGenerateurSansRepetition` de garder sa garantie « jamais de répétition dans une
+ * session » si un thème venait à perdre ou gagner des affirmations. */
+export function nombreQuestions(varianteId: VarianteQuizCercleTriangles): number {
+  return BANQUE_QUIZ_CERCLE_TRIANGLES[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
+
 function tirerQuestion(varianteId: VarianteQuizCercleTriangles): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_CERCLE_TRIANGLES[varianteId];
   return banque[randomInt(0, banque.length - 1)];

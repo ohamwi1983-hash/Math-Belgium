@@ -5,6 +5,7 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   consigneAire,
   consigneDonneeManquante,
+  formatAire,
   libelleConfiguration,
   texteAide2Aire,
   texteAide2DonneeManquante,
@@ -14,6 +15,7 @@ import {
 import type { TriangleSketchGeometrie } from "../../ui/triangleSketch";
 import { calculerTriangleSketch } from "../../ui/triangleSketch";
 import { aireTriangle } from "../triangle/resoudreTriangle";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTriangleQuelconque } from "./index";
 
 /**
@@ -106,9 +108,14 @@ function echapperAttribut(valeur: string): string {
   return valeur.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
-function texteSvg(x: number, y: number, contenu: string, options: { taille: number; gras?: boolean; couleur: string }): string {
+function texteSvg(
+  x: number,
+  y: number,
+  contenu: string,
+  options: { taille: number; gras?: boolean; couleur: string; ancre?: "start" | "middle" | "end" },
+): string {
   const poids = options.gras ? ' font-weight="bold"' : "";
-  return `<text x="${x}" y="${y}" font-size="${options.taille}"${poids} text-anchor="middle" dominant-baseline="middle" fill="${options.couleur}">${echapperAttribut(contenu)}</text>`;
+  return `<text x="${x}" y="${y}" font-size="${options.taille}"${poids} text-anchor="${options.ancre ?? "middle"}" dominant-baseline="middle" fill="${options.couleur}">${echapperAttribut(contenu)}</text>`;
 }
 
 /** Croquis SCHÉMATIQUE imprimé — mêmes coordonnées pixel fixes et le même texte de valeur que
@@ -126,24 +133,27 @@ function construireSvgTriangle(geometrie: TriangleSketchGeometrie): string {
 
   const labelsValeurs = [
     valeurs.a != null ? texteSvg(labelCote.a.x, labelCote.a.y, valeurs.a, { taille: 12, couleur: COULEUR_VALEUR }) : "",
-    valeurs.b != null ? texteSvg(labelCote.b.x, labelCote.b.y, valeurs.b, { taille: 12, couleur: COULEUR_VALEUR }) : "",
-    valeurs.c != null ? texteSvg(labelCote.c.x, labelCote.c.y, valeurs.c, { taille: 12, couleur: COULEUR_VALEUR }) : "",
+    // Côtés obliques : texte ancré vers l'extérieur, pour qu'une valeur longue (« 17,94 mm ») ne
+    // chevauche pas le côté qu'elle nomme (même ancrage que `TriangleQuelconqueSketch.tsx`).
+    valeurs.b != null ? texteSvg(labelCote.b.x, labelCote.b.y, valeurs.b, { taille: 12, couleur: COULEUR_VALEUR, ancre: "start" }) : "",
+    valeurs.c != null ? texteSvg(labelCote.c.x, labelCote.c.y, valeurs.c, { taille: 12, couleur: COULEUR_VALEUR, ancre: "end" }) : "",
     valeurs.angA != null ? texteSvg(labelAngle.A.x, labelAngle.A.y, valeurs.angA, { taille: 12, couleur: COULEUR_VALEUR }) : "",
     valeurs.angB != null ? texteSvg(labelAngle.B.x, labelAngle.B.y, valeurs.angB, { taille: 12, couleur: COULEUR_VALEUR }) : "",
     valeurs.angC != null ? texteSvg(labelAngle.C.x, labelAngle.C.y, valeurs.angC, { taille: 12, couleur: COULEUR_VALEUR }) : "",
   ].join("");
 
-  const svg = `<svg width="${largeur}" height="${hauteur}" viewBox="0 0 ${largeur} ${hauteur}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Croquis du triangle avec les données connues">
-<rect x="0" y="0" width="${largeur}" height="${hauteur}" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+  const svg = `<svg width="${largeur}" height="${hauteur + 4}" viewBox="0 -4 ${largeur} ${hauteur + 4}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Croquis du triangle avec les données connues">
+<rect x="0" y="-4" width="${largeur}" height="${hauteur + 4}" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
 ${polygone}
 ${labelsSommets}
 ${labelsValeurs}
 </svg>`;
+  const legende = `<div style="font-size:0.85em;color:#57606a;">Croquis non à l'échelle</div>`;
 
   // `page-break-inside`/`break-inside` évitent qu'une impression coupe la figure entre deux pages
   // (même préoccupation que `.grille-graphes-cyclo` de `assemblerEvaluationHtml.ts::STYLE_EVALUATION`,
   // repris ici en style inline puisque ce fichier ne peut pas toucher cette feuille de style globale).
-  return `<div style="text-align:center;margin:0.6em 0;page-break-inside:avoid;break-inside:avoid;">${svg}</div>`;
+  return `<div style="text-align:center;margin:0.6em 0;page-break-inside:avoid;break-inside:avoid;">${svg}${legende}</div>`;
 }
 
 // --- Aire recalculée localement (voir le commentaire de tête — jamais un import de src/moteur/) ---
@@ -161,9 +171,6 @@ const DONNEES_FORMULE_AIRE: Record<ExerciceTriangleQuelconque["configuration"], 
   alKashi: { cote1: "b", cote2: "c", angleCompris: "A" },
 };
 
-function arrondi1(valeur: number): number {
-  return Math.round(valeur * 10) / 10;
-}
 
 /** Valeur numérique de l'aire de l'instance — invariante quel que soit le couple choisi dans
  * `DONNEES_FORMULE_AIRE` (½ab·sinC = ½bc·sinA = ½ac·sinB), voir le commentaire de tête. */
@@ -173,11 +180,9 @@ function aireInstance(instance: ExerciceTriangleQuelconque): number {
   return aireTriangle(triangle[cote1], triangle[cote2], triangle[angleCompris]);
 }
 
-/** Même convention d'affichage (arrondi à 1 décimale, unité suffixée) que
- * `ui/formatTriangleQuelconque.ts::formatValeurLettre` pour un côté — l'aire n'a pas de formateur
- * exporté équivalent (voir le commentaire de tête), dupliquée ici à l'identique. */
+/** Aire au centième, virgule décimale — même formateur que l'écran (`formatAire`). */
 function formatAireAffichage(instance: ExerciceTriangleQuelconque): string {
-  return `${arrondi1(aireInstance(instance))} ${instance.unite}²`;
+  return formatAire(instance, aireInstance(instance));
 }
 
 // --- Énoncé / correction ---
@@ -209,7 +214,7 @@ function construireCorrectionTriangleQuelconque(instance: ExerciceTriangleQuelco
   ];
 }
 
-export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<ExerciceTriangleQuelconque> = {
+export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<ExerciceTriangleQuelconque> = avecVirgulesBelges({
   titreDocument: "Triangle quelconque — Évaluation",
   nomFichierBase: "triangle-quelconque",
   genererInstance: genererExerciceTriangleQuelconque,
@@ -219,4 +224,4 @@ export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<
   construireCorrection: construireCorrectionTriangleQuelconque,
   // 2 questions par instance, consigne de (a) dépendante de l'instance, `enteteHtml` (croquis SVG) :
   // 3 raisons indépendantes déjà suffisantes chacune — voir le commentaire de tête.
-};
+});

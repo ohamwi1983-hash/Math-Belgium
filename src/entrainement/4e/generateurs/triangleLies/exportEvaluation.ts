@@ -11,8 +11,13 @@ import {
   formatDistancesParcouruesTexte,
   formatDonneesCibleEnonceTexte,
   formatDonneesPontTexte,
+  formatNombre as formatNombreEcran,
+  formatValeurUnite,
+  libellesSommetPartage,
+  uniteLongueurPont,
 } from "../../ui/formatTriangleLies";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceTriangleLies } from "./index";
+import { avecVirgulesBelges } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTriangleLies>` pour gen58 ("Triangles liés —
@@ -101,13 +106,11 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceTriangleLie
 
 const LARGEUR_SVG = 260;
 
+/** Nombre au centième, virgule décimale (même formateur que l'écran). */
 function formatNombre(valeur: number): string {
-  return Number(valeur.toFixed(2)).toString();
+  return formatNombreEcran(valeur);
 }
 
-function formatValeurUnite(valeur: number, unite: string): string {
-  return `${formatNombre(valeur)}${unite === "°" ? "°" : ` ${unite}`}`;
-}
 
 const TOLERANCE_ABSOLUE_MIN = 0.05;
 const TOLERANCE_RELATIVE = 0.01;
@@ -250,12 +253,14 @@ function construireCorrectionTriangleLies(instance: ExerciceTriangleLies): BlocC
   const blocs: BlocCorrection[] = [];
 
   if (instance.variante === "sommetPartage") {
+    const libelles = libellesSommetPartage(instance);
+    const unite = uniteLongueurPont(instance);
     blocs.push({
       type: "paragraphe",
       fragments: [
         texte(
-          `a) Triangle pont résolu : angle au sommet commun = ${formatNombre(trianglePont.A)}°, ` +
-            `côté 1 = ${formatNombre(trianglePont.b)}, côté 2 = ${formatNombre(trianglePont.c)}.`,
+          `a) Triangle pont résolu : ${libelles.angle} = ${formatNombre(trianglePont.A)}°, ` +
+            `${libelles.cote1} = ${formatValeurUnite(trianglePont.b, unite)}, ${libelles.cote2} = ${formatValeurUnite(trianglePont.c, unite)}.`,
         ),
       ],
     });
@@ -265,8 +270,8 @@ function construireCorrectionTriangleLies(instance: ExerciceTriangleLies): BlocC
       fragments: [
         texte(
           `b) Côtés du triangle cible = côté du pont − distance déjà parcourue : ` +
-            `côté 1 = ${formatNombre(trianglePont.b)} − ${d1 ? formatNombre(d1.valeur) : "?"} = ${formatNombre(triangleCible.b)} ; ` +
-            `côté 2 = ${formatNombre(trianglePont.c)} − ${d2 ? formatNombre(d2.valeur) : "?"} = ${formatNombre(triangleCible.c)}.`,
+            `${libelles.coteCible1} = ${formatNombre(trianglePont.b)} − ${d1 ? formatNombre(d1.valeur) : "?"} = ${formatValeurUnite(triangleCible.b, unite)} ; ` +
+            `${libelles.coteCible2} = ${formatNombre(trianglePont.c)} − ${d2 ? formatNombre(d2.valeur) : "?"} = ${formatValeurUnite(triangleCible.c, unite)}.`,
         ),
       ],
     });
@@ -340,7 +345,7 @@ function formatUniteTransferee(instance: ExerciceTriangleLies): string {
   return uniteExemple ? ` ${uniteExemple}` : "";
 }
 
-export const adaptateurEvaluationTriangleLies: AdaptateurFeuilleExercices<ExerciceTriangleLies> = {
+export const adaptateurEvaluationTriangleLies: AdaptateurFeuilleExercices<ExerciceTriangleLies> = avecVirgulesBelges({
   titreDocument: "Triangles liés (triangulation) — Évaluation",
   nomFichierBase: "triangles-lies-triangulation",
   genererInstance: genererExerciceTriangleLies,
@@ -350,4 +355,4 @@ export const adaptateurEvaluationTriangleLies: AdaptateurFeuilleExercices<Exerci
   construireCorrection: construireCorrectionTriangleLies,
   // PAS regroupable — 11 contextes narratifs distincts, 2 à 3 questions par instance, `enteteHtml`
   // (croquis) présent : voir le commentaire de tête pour le détail des 3 conditions violées.
-};
+});

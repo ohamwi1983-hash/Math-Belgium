@@ -2,12 +2,8 @@
  * Présentation — "Triangle quelconque" (chapitre 3, remplace "Aire d'un triangle quelconque" à la
  * position 19, `promptcreationgenerateur19trianglequelconque.md`, corrigé depuis par
  * `promptcorrectionsgenerateur19unitesnotation.md` — voir les 3 points ci-dessous). Réutilise
- * `TriangleSketchValeurs` (`triangleSketch.ts`) et l'arrondi transversal déjà établi par les 3
- * autres générateurs "triangle" de ce chapitre — `arrondi1` (1 décimale, côtés) / `Math.round`
- * (entier, angles en degrés), même convention exacte que `formatAire.ts`/`formatLoiSinus.ts`/
- * `formatLoiCosinus.ts` (confirmée transversale par lecture directe du code avant implémentation —
- * "point à clarifier" du prompt de création, jamais redemandé à l'utilisateur puisqu'une convention
- * claire existait déjà).
+ * `TriangleSketchValeurs` (`triangleSketch.ts`). Valeurs affichées à la précision du cours (côtés
+ * au centième, angles au dixième, `arrondiCote`/`arrondiAngle`), virgule décimale (`nombreFr`).
  *
  * **Notation des côtés en segments** (point 2 du prompt de correction) : `a`/`b`/`c` (jamais
  * affichés sur le croquis) sont désormais toujours rendus sous la notation du segment correspondant
@@ -28,8 +24,16 @@ import type { ConfigurationTriangleQuelconque, ExerciceTriangleQuelconque, Lettr
 import type { TriangleSketchValeurs } from "./triangleSketch";
 import type { TriangleQuelconqueSketchOptions } from "./triangleQuelconqueSketch";
 import { donneesFormuleAire } from "../moteur/verificationTriangleQuelconque";
+import { nombreFr } from "./nombreFr";
 
-function arrondi1(valeur: number): number {
+/** Précision d'affichage du cours (section « Arrondis ») : côtés au centième, angles au dixième —
+ * la même que celle que l'élève utilise. Avant l'audit du chapitre 5, côtés au dixième et angles à
+ * l'unité : une aire calculée depuis ces valeurs affichées (aide 2) pouvait sortir des 1 % tolérés. */
+export function arrondiCote(valeur: number): number {
+  return Math.round(valeur * 100) / 100;
+}
+
+export function arrondiAngle(valeur: number): number {
   return Math.round(valeur * 10) / 10;
 }
 
@@ -55,11 +59,29 @@ function libelleLettre(lettre: LettreTriangle): string {
   return estCote(lettre) ? libelleCote(lettre) : libelleAngle(lettre);
 }
 
-/** Un côté (segment, unité tirée, 1 décimale) ou un angle (degrés, entier) formaté pour l'affichage —
- * ex. `"9,4 cm"` ou `"57°"`. */
+/** Un côté (segment, unité tirée, au centième) ou un angle (degrés, au dixième) formaté pour
+ * l'affichage, virgule décimale — ex. `"9,47 cm"` ou `"57,3°"`. */
 function formatValeurLettre(exercice: ExerciceTriangleQuelconque, lettre: LettreTriangle): string {
   const valeur = exercice.triangle[lettre];
-  return estCote(lettre) ? `${arrondi1(valeur)} ${exercice.unite}` : `${Math.round(valeur)}°`;
+  return estCote(lettre) ? `${nombreFr(arrondiCote(valeur))} ${exercice.unite}` : `${nombreFr(arrondiAngle(valeur))}°`;
+}
+
+/** Valeur numérique exactement telle qu'affichée (croquis, aides, récap) — sert à accepter une aire
+ * calculée depuis ces valeurs arrondies (`diagnostiquerAire`). */
+export function valeurAffichee(exercice: ExerciceTriangleQuelconque, lettre: LettreTriangle): number {
+  const valeur = exercice.triangle[lettre];
+  return estCote(lettre) ? arrondiCote(valeur) : arrondiAngle(valeur);
+}
+
+/** Aire formatée au centième, virgule décimale, unité au carré — ex. `"59,22 cm²"`. */
+export function formatAire(exercice: ExerciceTriangleQuelconque, aire: number): string {
+  return `${nombreFr(Math.round(aire * 100) / 100)} ${exercice.unite}²`;
+}
+
+/** Saisie de l'élève telle que relue dans la fiche de consultation — jamais « null » pour un angle
+ * (sans unité de longueur), virgule décimale. */
+export function formatSaisieDonneeManquante(valeur: number, unite: UniteLongueur | null): string {
+  return unite === null ? `${nombreFr(valeur)}°` : `${nombreFr(valeur)} ${unite}`;
 }
 
 /** Valeur affichée (arrondie, avec unité) de la donnée manquante — pour le récapitulatif de
@@ -122,6 +144,13 @@ export function valeursTriangleSketchAire(exercice: ExerciceTriangleQuelconque):
 
 export function libelleDonneeManquante(exercice: ExerciceTriangleQuelconque): string {
   return libelleLettre(exercice.donneeManquante);
+}
+
+/** Notation courte de la donnée manquante pour la réponse attendue — `AC` pour un côté, `angle A`
+ * pour un angle (ex. « AC ≈ 17,94 mm », « angle A ≈ 37,2° »). */
+export function notationDonneeManquante(exercice: ExerciceTriangleQuelconque): string {
+  const lettre = exercice.donneeManquante;
+  return estCote(lettre) ? SEGMENT_COTE[lettre] : `angle ${lettre}`;
 }
 
 const LIBELLE_CONFIGURATION: Record<ConfigurationTriangleQuelconque, string> = {

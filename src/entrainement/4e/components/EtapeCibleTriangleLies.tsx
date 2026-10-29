@@ -2,7 +2,9 @@ import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerCible } from "../moteur/verificationTriangleLies";
 import { niveauAideMaxCible } from "../moteur/sessionTriangleLies";
-import { consigneCible, formatDonneesCibleEnonceTexte, formatEtatActuelAnglesConfirmes, formatEtatActuelPontConfirme, formatEtatActuelSoustractionConfirme, texteAideCibleNiveau1, texteAideCibleNiveau2, texteAideCibleNiveau3 } from "../ui/formatTriangleLies";
+import { consigneCible, formatDonneesCibleEnonceTexte, texteAideCibleNiveau1, texteAideCibleNiveau2, texteAideCibleNiveau3 } from "../ui/formatTriangleLies";
+import type { EntreeRecapitulatif } from "../ui/recapitulatif";
+import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
@@ -19,6 +21,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
+  /** Récap « Ce qu'on sait déjà » des écrans déjà clos (`calculerRecapitulatifTriangleLies`). */
+  recapitulatif: EntreeRecapitulatif[];
   onValider: (valeur: number) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -29,21 +33,13 @@ interface Props {
 /** Écran commun aux 2 variantes, toujours suivi de "interpretation" — résoudre le triangle cible
  * pour la grandeur demandée (côté/angle/aire). Plafond d'aide DYNAMIQUE
  * (`niveauAideMaxCible`, 3 niveaux si aire — terrain pédagogique neuf — 2 sinon). */
-export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const valeur = Number(texte.replace(",", "."));
   const statut = complet ? diagnostiquerCible(exercice, valeur) : undefined;
   const apresEchec = tentativesUtilisees > 0;
   const niveauAideMax = niveauAideMaxCible(exercice);
-
-  const etatActuel = [formatEtatActuelPontConfirme(exercice)];
-  if (exercice.variante === "anglePartage") {
-    etatActuel.push(formatEtatActuelAnglesConfirmes(exercice));
-  }
-  if (exercice.variante === "sommetPartage") {
-    etatActuel.push(formatEtatActuelSoustractionConfirme(exercice));
-  }
 
   return (
     <div>
@@ -56,7 +52,7 @@ export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativ
           </>
         }
       />
-      <BlocDonneesTriangleLies titre="État actuel" lignes={etatActuel} />
+      <RecapitulatifPanel entrees={recapitulatif} />
       {exercice.variante === "cotePartage" && <BlocDonneesTriangleLies titre="Données" lignes={formatDonneesCibleEnonceTexte(exercice)} />}
       <p className="prompt-text">{consigneCible(exercice)}</p>
       <div className="field">

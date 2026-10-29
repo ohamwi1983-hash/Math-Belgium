@@ -89,10 +89,26 @@ export function valeurAire(exercice: ExerciceTriangleQuelconque): number {
   return aireDepuisPaire(exercice);
 }
 
+/** Aire recalculée depuis les valeurs exactement telles qu'affichées à l'écran 2 (côtés au
+ * centième, angle au dixième — même précision que `ui/formatTriangleQuelconque.ts`, dupliquée ici
+ * car `src/moteur/` n'importe jamais la couche de présentation). Un élève qui suit l'aide 2 à la
+ * lettre part de ces valeurs : sa réponse doit être acceptée même si l'arrondi la décale. */
+function aireDepuisValeursAffichees(exercice: ExerciceTriangleQuelconque): number {
+  const { cote1, cote2, angleCompris } = donneesFormuleAire(exercice);
+  const { triangle } = exercice;
+  const cote = (v: number) => Math.round(v * 100) / 100;
+  const angle = Math.round(triangle[angleCompris] * 10) / 10;
+  return 0.5 * cote(triangle[cote1]) * cote(triangle[cote2]) * Math.sin((angle * Math.PI) / 180);
+}
+
 /** `unite` toujours exigée (jamais `null`) — l'aire est toujours présente, quelle que soit la
- * configuration, contrairement à la donnée manquante qui peut être un angle sans unité. */
+ * configuration, contrairement à la donnée manquante qui peut être un angle sans unité. Acceptée si
+ * proche de l'aire exacte OU de l'aire recalculée depuis les valeurs affichées. */
 export function diagnostiquerAire(exercice: ExerciceTriangleQuelconque, valeur: number, unite: UniteLongueur): StatutVerification {
-  const statut = diagnostiquerCalculNumeriqueTriangle(valeur, valeurAire(exercice));
+  let statut = diagnostiquerCalculNumeriqueTriangle(valeur, valeurAire(exercice));
+  if (statut === "not_equivalent" && diagnostiquerCalculNumeriqueTriangle(valeur, aireDepuisValeursAffichees(exercice)) === "correct") {
+    statut = "correct";
+  }
   if (statut !== "correct") return statut;
   return unite === exercice.unite ? "correct" : "not_equivalent";
 }

@@ -3,24 +3,29 @@ import type { VarianteQuizCercleTriangles } from "./core/quizCercleTriangles.typ
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizCercleTriangles, soumettreReponseQuizCercleTriangles } from "./moteur/sessionQuizCercleTriangles";
 import type { EtatSessionQuizCercleTriangles, ResultatExerciceQuizCercleTriangles } from "./moteur/typesQuizCercleTriangles";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizCercleTriangles";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs/quizCercleTriangles";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizCercleTriangles } from "./components/EtapeQuestionQuizCercleTriangles";
 import { ResultatPanelQuizCercleTriangles } from "./components/ResultatPanelQuizCercleTriangles";
 import { ResumeSessionQuizCercleTriangles } from "./components/ResumeSessionQuizCercleTriangles";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizCercleTriangles/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs/quizCercleTriangles/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizCercleTriangles): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizCercleTriangles): EtatSessionQuizCercleTriangles {
-  return demarrerSessionQuizCercleTriangles(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizCercleTriangles(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -51,17 +56,17 @@ export function AppQuizCercleTriangles() {
     const theme = varianteId as VarianteQuizCercleTriangles;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizCercleTriangles(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizCercleTriangles(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell app-shell--haut">
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Cercle trigonométrique &amp; triangles quelconques — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 3{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-subtitle">Chapitre 5{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">
@@ -82,7 +87,13 @@ export function AppQuizCercleTriangles() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

@@ -47,7 +47,13 @@ export function construireAvionsConvergents(): ExerciceTriangleLies {
 
   const sansSoustraction = resoudreSAS(trianglePont.b, trianglePont.c, trianglePont.A);
   const aireSansSoustraction = aireTriangle(sansSoustraction.b, sansSoustraction.c, sansSoustraction.A);
-  const soustractionInversee = resoudreSAS(trianglePont.b - d2, trianglePont.c - d1, trianglePont.A);
+  // Piège « soustractions inversées » (d2 retiré de SA, d1 de SB) — seulement si les 2 côtés obtenus
+  // restent positifs : SB peut dépasser largement SA, et d2 > SA donnait un côté négatif, donc une
+  // option « vaut NaN km² » à l'écran. Sinon, piège « une seule soustraction faite » (SB non réduit).
+  const inversionPossible = trianglePont.b - d2 > 0 && trianglePont.c - d1 > 0;
+  const soustractionInversee = inversionPossible
+    ? resoudreSAS(trianglePont.b - d2, trianglePont.c - d1, trianglePont.A)
+    : resoudreSAS(trianglePont.b - d1, trianglePont.c, trianglePont.A);
   const aireSoustractionInversee = aireTriangle(soustractionInversee.b, soustractionInversee.c, soustractionInversee.A);
 
   return {

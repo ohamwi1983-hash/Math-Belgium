@@ -3,7 +3,9 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerSoustraction } from "../moteur/verificationTriangleLies";
 import type { ReponseSoustractionTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_SOUSTRACTION } from "../moteur/sessionTriangleLies";
-import { consigneSoustraction, formatDistancesParcouruesTexte, formatEtatActuelPontConfirme, texteAideSoustractionNiveau1, texteAideSoustractionNiveau2 } from "../ui/formatTriangleLies";
+import { consigneSoustraction, formatDistancesParcouruesTexte, libellesSommetPartage, texteAideSoustractionNiveau1, texteAideSoustractionNiveau2, uniteLongueurPont } from "../ui/formatTriangleLies";
+import type { EntreeRecapitulatif } from "../ui/recapitulatif";
+import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
@@ -20,6 +22,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
+  /** Récap « Ce qu'on sait déjà » des écrans déjà clos (`calculerRecapitulatifTriangleLies`). */
+  recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: ReponseSoustractionTriangleLies) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -29,14 +33,15 @@ interface Props {
 
 /** Écran 2, `sommetPartage` uniquement — les 2 côtés du triangle cible, chacun obtenu en
  * soustrayant la distance déjà parcourue au côté correspondant du triangle pont. */
-export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [cote1, setCote1] = useState("");
   const [cote2, setCote2] = useState("");
   const complet = cote1.trim() !== "" && cote2.trim() !== "";
   const reponse: ReponseSoustractionTriangleLies = { cote1: Number(cote1.replace(",", ".")), cote2: Number(cote2.replace(",", ".")) };
   const statut = complet ? diagnostiquerSoustraction(exercice, reponse) : undefined;
   const apresEchec = tentativesUtilisees > 0;
-  const uniteCote = exercice.donneesPont[0]?.unite ?? "";
+  const uniteCote = uniteLongueurPont(exercice);
+  const libelles = libellesSommetPartage(exercice);
 
   return (
     <div>
@@ -49,13 +54,13 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
           </>
         }
       />
-      <BlocDonneesTriangleLies titre="État actuel" lignes={[formatEtatActuelPontConfirme(exercice)]} />
+      <RecapitulatifPanel entrees={recapitulatif} />
       <BlocDonneesTriangleLies titre="Distances déjà parcourues" lignes={formatDistancesParcouruesTexte(exercice)} />
       <p className="prompt-text">{consigneSoustraction()}</p>
       <div className="field-row">
         <div className="field">
           <label className="field-label" htmlFor="triangle-lies-soustraction-cote1">
-            Côté 1
+            {libelles.coteCible1}
           </label>
           <div className="champ-avec-unite">
             <input
@@ -70,7 +75,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
         </div>
         <div className="field">
           <label className="field-label" htmlFor="triangle-lies-soustraction-cote2">
-            Côté 2
+            {libelles.coteCible2}
           </label>
           <div className="champ-avec-unite">
             <input

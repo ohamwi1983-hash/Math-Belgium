@@ -3,7 +3,9 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerAngles } from "../moteur/verificationTriangleLies";
 import type { ReponseAnglesTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_ANGLES } from "../moteur/sessionTriangleLies";
-import { consigneAngles, formatAnglesBrutsViseeTexte, formatEtatActuelPontConfirme, texteAideAnglesNiveau1, texteAideAnglesNiveau2, texteAideAnglesNiveau3 } from "../ui/formatTriangleLies";
+import { consigneAngles, formatAnglesBrutsViseeTexte, texteAideAnglesNiveau1, texteAideAnglesNiveau2, texteAideAnglesNiveau3 } from "../ui/formatTriangleLies";
+import type { EntreeRecapitulatif } from "../ui/recapitulatif";
+import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
@@ -20,6 +22,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
+  /** Récap « Ce qu'on sait déjà » des écrans déjà clos (`calculerRecapitulatifTriangleLies`). */
+  recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: ReponseAnglesTriangleLies) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -29,7 +33,7 @@ interface Props {
 
 /** Écran 2, `anglePartage` uniquement — l'angle utile (différence des 2 visées) et l'angle déduit
  * de l'hypothèse annexe, les 2 angles qui ferment le triangle cible. */
-export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [utile, setUtile] = useState("");
   const [hypothese, setHypothese] = useState("");
   const complet = utile.trim() !== "" && hypothese.trim() !== "";
@@ -48,7 +52,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
           </>
         }
       />
-      <BlocDonneesTriangleLies titre="État actuel" lignes={[formatEtatActuelPontConfirme(exercice)]} />
+      <RecapitulatifPanel entrees={recapitulatif} />
       <BlocDonneesTriangleLies titre="Visées depuis le point d'observation" lignes={formatAnglesBrutsViseeTexte(exercice)} />
       <p className="prompt-text">{consigneAngles()}</p>
       <div className="field-row">

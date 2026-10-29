@@ -2,9 +2,10 @@ import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { verifierInterpretation } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionTriangleLies";
-import { consigneInterpretation, formatEtatActuelAnglesConfirmes, formatEtatActuelCibleConfirme, formatEtatActuelPontConfirme, formatEtatActuelSoustractionConfirme, texteAideInterpretationNiveau1 } from "../ui/formatTriangleLies";
+import { consigneInterpretation, texteAideInterpretationNiveau1 } from "../ui/formatTriangleLies";
+import type { EntreeRecapitulatif } from "../ui/recapitulatif";
+import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { QuestionFinale } from "./QuestionFinale";
 import { TriangleLiesSketch } from "./TriangleLiesSketch";
@@ -18,6 +19,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
+  /** Récap « Ce qu'on sait déjà » des écrans déjà clos (`calculerRecapitulatifTriangleLies`). */
+  recapitulatif: EntreeRecapitulatif[];
   onValider: (indexChoisi: number | null) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -27,19 +30,10 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, recapitulatif, onValider, validation }: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
-
-  const etatActuel = [formatEtatActuelPontConfirme(exercice)];
-  if (exercice.variante === "anglePartage") {
-    etatActuel.push(formatEtatActuelAnglesConfirmes(exercice));
-  }
-  if (exercice.variante === "sommetPartage") {
-    etatActuel.push(formatEtatActuelSoustractionConfirme(exercice));
-  }
-  etatActuel.push(formatEtatActuelCibleConfirme(exercice));
 
   return (
     <div>
@@ -52,7 +46,7 @@ export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees,
           </>
         }
       />
-      <BlocDonneesTriangleLies titre="État actuel" lignes={etatActuel} />
+      <RecapitulatifPanel entrees={recapitulatif} />
       <p className="prompt-text">{consigneInterpretation()}</p>
 
       <div className="options-grid">

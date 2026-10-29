@@ -3,7 +3,7 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerPont, diagnostiquerPontSommetPartage } from "../moteur/verificationTriangleLies";
 import type { ReponsePontSommetPartage } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_PONT } from "../moteur/sessionTriangleLies";
-import { consignePont, formatDonneesPontTexte, texteAidePontNiveau1, texteAidePontNiveau2 } from "../ui/formatTriangleLies";
+import { consignePont, formatDonneesPontTexte, libellesSommetPartage, texteAidePontNiveau1, texteAidePontNiveau2, uniteLongueurPont } from "../ui/formatTriangleLies";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
@@ -44,7 +44,8 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
       cote2: Number(texteCote2.replace(",", ".")),
     };
     const statut = complet ? diagnostiquerPontSommetPartage(exercice, reponse) : undefined;
-    const uniteCote = exercice.donneesPont[0]?.unite ?? "";
+    const uniteCote = uniteLongueurPont(exercice);
+    const libelles = libellesSommetPartage(exercice);
 
     return (
       <div>
@@ -61,7 +62,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
         <p className="prompt-text">{consignePont(exercice)}</p>
         <div className="field field-inline">
           <label className="field-label" htmlFor="triangle-lies-pont-angle">
-            Angle =
+            {libelles.angle} =
           </label>
           <div className="champ-avec-unite">
             <input
@@ -77,7 +78,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
         <div className="field-row">
           <div className="field field-inline">
             <label className="field-label" htmlFor="triangle-lies-pont-cote1">
-              Côté 1 =
+              {libelles.cote1} =
             </label>
             <div className="champ-avec-unite">
               <input
@@ -92,7 +93,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
           </div>
           <div className="field field-inline">
             <label className="field-label" htmlFor="triangle-lies-pont-cote2">
-              Côté 2 =
+              {libelles.cote2} =
             </label>
             <div className="champ-avec-unite">
               <input
@@ -161,7 +162,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
             onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
             onKeyDown={gererKeyDownNumerique}
           />
-          <span className="champ-avec-unite-suffixe">m</span>
+          <span className="champ-avec-unite-suffixe">{uniteLongueurPont(exercice)}</span>
         </div>
       </div>
 

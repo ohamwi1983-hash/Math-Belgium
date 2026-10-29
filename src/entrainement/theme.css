@@ -77,6 +77,14 @@
   padding: 48px 10px 64px;
 }
 
+/* Variante alignée en haut (quiz vrai/faux gen63) : un écran de question/correction court y
+ * laissait, avec le centrage vertical ci-dessus, une bande vide de ~150px entre « Retour » et
+ * l'en-tête, et l'en-tête sautait verticalement d'un écran à l'autre (hauteur de carte variable).
+ * Scopé à une classe modificatrice : le centrage des autres générateurs reste inchangé. */
+.entrainement .app-shell.app-shell--haut {
+  justify-content: flex-start;
+}
+
 .entrainement .app-header {
   width: 100%;
   max-width: 560px;
@@ -1279,6 +1287,25 @@
 
 .entrainement .champ-avec-unite .text-input {
   flex: 1;
+}
+
+/* Champ suivi d'une unité fixe (« ° », « km »…) : sans règle de base, le `<div>` restait un bloc et
+ * l'input à `width:100%` renvoyait l'unité à la ligne sur mobile (gen58, audit du chapitre 5). Limité
+ * aux champs qui ont réellement ce suffixe : ceux à menu d'unité (gen19) gardent leur disposition. */
+.entrainement .champ-avec-unite:has(> .champ-avec-unite-suffixe) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.entrainement .champ-avec-unite:has(> .champ-avec-unite-suffixe) .text-input {
+  min-width: 0;
+}
+
+.entrainement .champ-avec-unite-suffixe {
+  flex: none;
+  white-space: nowrap;
 }
 
 .entrainement .text-input {
@@ -3228,6 +3255,22 @@
 
 .entrainement .triangle-quelconque-sketch {
   max-width: 280px;
+}
+
+/* gen19 : croquis + mention « non à l'échelle » (le `<figure>` n'apporte aucune marge propre). */
+.entrainement .triangle-quelconque-figure {
+  margin: 0 0 18px;
+}
+
+.entrainement .triangle-quelconque-figure .triangle-quelconque-sketch {
+  margin-bottom: 4px;
+}
+
+.entrainement .triangle-quelconque-legende {
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-muted);
 }
 
 .entrainement .triangle-quelconque-cote-surligne {

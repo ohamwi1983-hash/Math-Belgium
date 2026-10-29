@@ -26,8 +26,11 @@ function arrondi(valeur: number): number {
   return Math.round(valeur * 100) / 100;
 }
 
+/** Texte affiché à l'élève : virgule décimale belge (jamais `13.83`), et `°` collé à la valeur
+ * (`19,53°`, jamais `19,53 °`) comme partout ailleurs sur ce générateur. */
 function phrase(labelGrandeur: string, valeur: number, unite: string): string {
-  return `${labelGrandeur} vaut ${arrondi(valeur)} ${unite}.`;
+  const nombre = String(arrondi(valeur)).replace(".", ",");
+  return `${labelGrandeur} vaut ${nombre}${unite === "°" ? "°" : ` ${unite}`}.`;
 }
 
 export function construireOptionsInterpretationTriangleLies(p: ParametresInterpretationTriangleLies): OptionInterpretationTriangleLies[] {

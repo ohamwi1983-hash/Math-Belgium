@@ -1,6 +1,6 @@
 /**
  * Couche A — banque de questions vrai/faux pour "Cercle trigonométrique & triangles quelconques"
- * (chapitre 3 dans la nomenclature du projet). 245 affirmations pré-écrites (jamais générées
+ * (chapitre 5). 245 affirmations pré-écrites (jamais générées
  * procéduralement), 7 thèmes de 35 questions chacun, chaque affirmation vérifiée mathématiquement à
  * la rédaction.
  */
@@ -47,7 +47,7 @@ export const BANQUE_QUIZ_CERCLE_TRIANGLES: Record<VarianteQuizCercleTriangles, Q
   valeursRemarquables: [
     { enonce: "sin(30°) vaut 1/2.", reponse: true, justification: "C'est une valeur remarquable à connaître par cœur." },
     { enonce: "cos(30°) vaut 1/2.", reponse: false, justification: "Faux : cos(30°) vaut √3/2 ; c'est sin(30°) qui vaut 1/2." },
-    { enonce: "cos(45°) et sin(45°) sont égaux, tous deux égaux à √2/2.", reponse: true, justification: "45° est le seul angle remarquable où sinus et cosinus coïncident." },
+    { enonce: "cos(45°) et sin(45°) sont égaux, tous deux égaux à √2/2.", reponse: true, justification: "Sur [0°;90°], 45° est le seul angle où sinus et cosinus coïncident ; sur [0°;360°[, ils sont aussi égaux en 225° (tous deux valant −√2/2)." },
     { enonce: "tan(45°) vaut √2/2.", reponse: false, justification: "Faux : tan(45°) vaut 1, puisque sin(45°)=cos(45°)." },
     { enonce: "sin(60°) vaut √3/2.", reponse: true, justification: "C'est une valeur remarquable à connaître par cœur." },
     { enonce: "cos(60°) vaut √3/2.", reponse: false, justification: "Faux : cos(60°) vaut 1/2 ; c'est sin(60°) qui vaut √3/2." },
@@ -114,7 +114,7 @@ export const BANQUE_QUIZ_CERCLE_TRIANGLES: Record<VarianteQuizCercleTriangles, Q
     { enonce: "Si sin(θ) = cos(θ), alors nécessairement θ = 45°.", reponse: false, justification: "Faux : θ=225° convient aussi, puisque sin(225°)=cos(225°)=−√2/2." },
     { enonce: "Si cos(θ) = −1, alors sin(θ) = 0.", reponse: true, justification: "sin²(θ)=1−cos²(θ)=1−1=0, donc sin(θ)=0." },
     { enonce: "cos(θ) et sin(θ) peuvent être tous les deux négatifs sans que cos²(θ)+sin²(θ) vaille 1.", reponse: false, justification: "Faux : l'identité cos²(θ)+sin²(θ)=1 reste vraie quels que soient les signes de cos(θ) et sin(θ), puisqu'elle porte sur leurs carrés." },
-    { enonce: "Connaître le signe de cos(θ) et le signe de sin(θ) permet de déterminer dans quel quadrant se situe θ.", reponse: true, justification: "Chaque combinaison de signes correspond à un unique quadrant." },
+    { enonce: "Si cos(θ) et sin(θ) sont tous deux non nuls, connaître leurs signes permet de déterminer dans quel quadrant se situe θ.", reponse: true, justification: "Chaque combinaison de signes (+;+), (−;+), (−;−), (+;−) correspond à un unique quadrant. Si l'un des deux est nul, θ est sur un axe et n'appartient à aucun quadrant." },
     { enonce: "sin(θ) − cos(θ) vaut toujours 0, quel que soit θ.", reponse: false, justification: "Faux : ce n'est le cas que pour certains angles particuliers (comme 45° ou 225°), pas pour tout θ." },
     { enonce: "Si sin(θ) = 12/13 et que θ appartient au premier quadrant, alors cos(θ) = 5/13.", reponse: true, justification: "cos²(θ)=1−144/169=25/169, donc |cos(θ)|=5/13 ; dans le premier quadrant le cosinus est positif, donc cos(θ)=5/13." },
   ],
@@ -168,7 +168,7 @@ export const BANQUE_QUIZ_CERCLE_TRIANGLES: Record<VarianteQuizCercleTriangles, Q
     { enonce: "L'équation sin(α) = 2 admet une solution dans [0°;360°[.", reponse: false, justification: "Faux : le sinus est toujours compris entre −1 et 1, donc sin(α)=2 n'a aucune solution." },
     { enonce: "L'équation cos(α) = −1 admet une seule solution dans [0°;360°[, qui est 180°.", reponse: true, justification: "Le cosinus ne vaut −1 qu'en 180° sur cet intervalle." },
     { enonce: "L'équation cos(α) = 0 admet une seule solution dans [0°;360°[.", reponse: false, justification: "Faux : elle en admet deux, 90° et 270°." },
-    { enonce: "Pour résoudre tan(α) = k, on cherche d'abord un angle remarquable dont la tangente vaut k, puis on ajoute 180° pour obtenir la seconde solution.", reponse: true, justification: "C'est la méthode standard, exploitant la période 180° de la tangente." },
+    { enonce: "Pour résoudre tan(α) = k, avec k une valeur remarquable, on cherche d'abord l'angle remarquable dont la tangente vaut k, puis on ajoute 180° pour obtenir la seconde solution.", reponse: true, justification: "C'est la méthode standard, exploitant la période 180° de la tangente. Si k n'est pas une valeur remarquable, le premier angle s'obtient à la calculatrice (touche tan⁻¹), la suite est identique." },
     { enonce: "Pour résoudre sin(α) = k avec k négatif, les deux solutions se trouvent dans le premier et le deuxième quadrant.", reponse: false, justification: "Faux : le sinus est négatif dans le troisième et le quatrième quadrant, c'est là que se trouvent les solutions." },
     { enonce: "L'équation cos(α) = k avec −1 < k < 0 admet deux solutions, situées dans le deuxième et le troisième quadrant.", reponse: true, justification: "Le cosinus est négatif exactement dans ces deux quadrants." },
     { enonce: "Résoudre sin(α)=k et résoudre cos(α)=k, pour un même k, donne toujours exactement les deux mêmes solutions.", reponse: false, justification: "Faux : les formules de symétrie diffèrent (par rapport à 90° pour le sinus, par rapport à 0°/360° pour le cosinus), les solutions sont donc en général différentes." },
@@ -219,7 +219,7 @@ export const BANQUE_QUIZ_CERCLE_TRIANGLES: Record<VarianteQuizCercleTriangles, Q
     { enonce: "Dans un triangle, le plus petit côté est toujours opposé à l'angle le plus grand.", reponse: false, justification: "Faux : c'est l'inverse — le plus petit côté est opposé au plus petit angle." },
     { enonce: "La somme de deux angles quelconques d'un triangle est toujours strictement inférieure à 180°.", reponse: true, justification: "Le troisième angle est toujours strictement positif, donc la somme des deux autres est strictement inférieure à 180°." },
     { enonce: "Si l'on connaît un seul côté et un seul angle d'un triangle, on peut toujours le résoudre entièrement.", reponse: false, justification: "Faux : un côté et un angle isolés ne suffisent pas, une infinité de triangles différents partagent ce côté et cet angle ; il faut au moins 3 informations indépendantes (SSS, SAS, ASA/AAS ou SSA)." },
-    { enonce: "Dans le cas SSS, la loi des cosinus permet de trouver un premier angle, puis la loi des sinus permet de trouver les angles restants.", reponse: true, justification: "C'est la méthode standard pour résoudre le cas SSS." },
+    { enonce: "Dans le cas SSS, après avoir calculé deux angles avec la loi des cosinus, on obtient le troisième grâce à la somme des angles d'un triangle (180°).", reponse: true, justification: "Al-Kashi, résolue en cosinus, donne chaque angle sans ambiguïté sur ]0°;180°[ ; le troisième vaut 180° moins les deux autres. Repasser par la loi des sinus est à éviter : arcsin renvoie deux angles possibles (un aigu, un obtus)." },
     { enonce: "La formule ½·a·b·sin(C) ne peut pas être utilisée pour calculer l'aire d'un triangle rectangle.", reponse: false, justification: "Faux : la formule reste valable pour tout triangle, y compris rectangle ; si C=90°, elle se réduit à ½·a·b, comme la formule base×hauteur habituelle." },
     { enonce: "Un triangle ayant un angle de 90° et un angle de 45° est nécessairement isocèle.", reponse: true, justification: "Le troisième angle vaut 180°−90°−45°=45° : deux angles égaux, donc deux côtés opposés égaux." },
     { enonce: "La loi des cosinus a² = b² + c² − 2bc·cos(A) ne peut pas être adaptée pour calculer b² ou c².", reponse: false, justification: "Faux : la même loi s'écrit aussi b²=a²+c²−2ac·cos(B) et c²=a²+b²−2ab·cos(C), en permutant les rôles des côtés et de l'angle compris." },
