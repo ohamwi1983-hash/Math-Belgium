@@ -26,6 +26,7 @@ import type {
   VarianteApplicationPhysique,
 } from "../../core/applicationPhysique.types";
 import { randomInt } from "./aleatoire";
+import { deviationsAcceptables, TOLERANCE_DEVIATION } from "../../moteur/verificationApplicationPhysique";
 
 interface DonneesContexte {
   labelV1: string;
@@ -78,10 +79,51 @@ interface OverridesApplicationPhysique {
  * contexte` permet en plus de forcer le contexte narratif (avion/hélicoptère/forces), sans quoi il
  * reste tiré aléatoirement comme avant (comportement historique inchangé pour tout appelant qui
  * l'omet). */
+/** Déviation trop proche de 90° (audit chapitre 6, point 3) : la résultante est presque plein
+ * Est/Ouest — aucune des quatre directions proposées n'est franchement correcte — et la loi des
+ * sinus y devient instable (un arrondi de la norme déplace la déviation de plusieurs degrés). */
+const ECART_MIN_DEVIATION_ANGLE_DROIT = 10;
+
+/** Marge entre une erreur plausible et toute déviation acceptée : l'erreur, même arrondie à
+ * l'unité (±0,5°), doit rester hors de la fenêtre `TOLERANCE_DEVIATION`. */
+const MARGE_ERREUR_PLAUSIBLE = TOLERANCE_DEVIATION + 0.5;
+
+/** Déviations obtenues par les erreurs les plus probables à l'écran « déviation » : l'autre angle
+ * du triangle vectoriel (entre v₂ et la résultante), le complément à 90°, l'angle θ de l'énoncé
+ * lui-même. Pas la norme fausse (le récapitulatif affiche déjà la vraie norme à cet écran), ni la
+ * tangente du triangle rectangle appliquée à un angle quelconque : pour un vent faible devant la
+ * vitesse propre, elle tombe à moins d'un degré de la vraie déviation, et l'écarter ferait
+ * disparaître presque tous les angles de 105° et 120° des contextes avion/hélicoptère. */
+export function erreursPlausiblesDeviation(exercice: ExerciceApplicationPhysique): number[] {
+  const { angleEntreVecteurs: theta, triangle } = exercice;
+  return [theta - triangle.C, 90 - triangle.C, theta];
+}
+
+/** Écart maximal toléré entre la vraie déviation et celle obtenue avec la norme arrondie : au-delà,
+ * la loi des sinus est trop instable (petite résultante, déviation proche de 90°) — un sinus arrondi
+ * en cours de calcul suffirait alors à faire refuser un élève qui suit la consigne. */
+const ECART_MAX_DEVIATION_NORME_ARRONDIE = 2;
+
+function exerciceExploitable(exercice: ExerciceApplicationPhysique): boolean {
+  if (Math.abs(exercice.triangle.C - 90) < ECART_MIN_DEVIATION_ANGLE_DROIT) return false;
+  const acceptees = deviationsAcceptables(exercice);
+  // 1 valeur exacte + 3 arrondis de la norme : moins de 4 ⟺ un sinus calculé dépasse 1.
+  if (acceptees.length < 4) return false;
+  if (acceptees.some((d) => Math.abs(d - exercice.triangle.C) > ECART_MAX_DEVIATION_NORME_ARRONDIE)) return false;
+  return erreursPlausiblesDeviation(exercice).every((erreur) => acceptees.every((d) => Math.abs(erreur - d) > MARGE_ERREUR_PLAUSIBLE));
+}
+
 export function construireAvecVarianteId(
   varianteId: VarianteApplicationPhysique,
   overrides?: OverridesApplicationPhysique,
 ): ExerciceApplicationPhysique {
+  for (;;) {
+    const exercice = tirerExercice(varianteId, overrides);
+    if (exerciceExploitable(exercice)) return exercice;
+  }
+}
+
+function tirerExercice(varianteId: VarianteApplicationPhysique, overrides?: OverridesApplicationPhysique): ExerciceApplicationPhysique {
   const contexte = overrides?.contexte ?? CONTEXTE_IDS[randomInt(0, CONTEXTE_IDS.length - 1)];
   const donnees = CONTEXTES[contexte];
 

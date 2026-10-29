@@ -3,7 +3,8 @@ import type { ExerciceRelationGeneraleRV } from "../core/relationVectorielle.typ
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationRelationVectorielle";
 import { formatLabelXLatex, formatLabelYLatex } from "../ui/formatRelationVectorielle";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
 import { Katex } from "./Katex";
@@ -44,8 +45,8 @@ export function EtapeCoordonneesRelationVectorielle({
   const [texteY, setTexteY] = useState("");
 
   const complet = texteX.trim() !== "" && texteY.trim() !== "";
-  const x = Number(texteX.replace(",", "."));
-  const y = Number(texteY.replace(",", "."));
+  const x = (parserNombreOuFraction(texteX) ?? Number.NaN);
+  const y = (parserNombreOuFraction(texteY) ?? Number.NaN);
   const statut = complet ? diagnostiquerCoordonnees(exercice, x, y) : undefined;
 
   const apresEchec = tentativesUtilisees > 0;
@@ -67,8 +68,8 @@ export function EtapeCoordonneesRelationVectorielle({
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             placeholder="ex : 3"
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -80,8 +81,8 @@ export function EtapeCoordonneesRelationVectorielle({
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             placeholder="ex : -2"
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>

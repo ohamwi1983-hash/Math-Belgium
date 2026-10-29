@@ -1,6 +1,8 @@
 import type { ExercicePointVectoriel, VariantePointVectoriel } from "../core/pointVectoriel.types";
 import type { PointAffiche, VecteurAffiche } from "./vecteurGraph";
 import { calculerViewBoxVecteurs, positionEtiquettePoint } from "./vecteurGraph";
+import { formatFractionIrreductible } from "./formatFraction";
+import { nombreFrLatex } from "./nombreFr";
 
 const LIBELLES_VARIANTE: Record<VariantePointVectoriel, string> = {
   translation: "Image par une translation",
@@ -12,9 +14,39 @@ export function libelleVariantePointVectoriel(variante: VariantePointVectoriel):
   return LIBELLES_VARIANTE[variante];
 }
 
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+/** Nombre affiché en LaTeX : entier, ou décimal exact à la virgule (`1{,}5`) — coordonnées et
+ * réponses (toujours entières ou demi-entières par construction). Jamais un arrondi. */
+export function formatNombreLatex(valeur: number): string {
+  return nombreFrLatex(valeur);
 }
+
+/** Même nombre, entre parenthèses s'il est négatif — pour un terme de calcul (`3 + (−2)`). */
+export function formatTermeLatex(valeur: number): string {
+  return valeur < 0 ? `(${formatNombreLatex(valeur)})` : formatNombreLatex(valeur);
+}
+
+/**
+ * Coefficient k d'une relation (±1/2, ±1/3, entiers) en valeur EXACTE : `-\tfrac{1}{3}`, jamais
+ * l'arrondi `-0.33` (audit chapitre 6, point 2 : un élève qui appliquait −0,33 tel qu'affiché était
+ * refusé dans 95 % des cas). `""`/`"-"` pour ±1 (coefficient implicite).
+ */
+export function formatCoefficientLatex(coef: number): string {
+  if (coef === 1) return "";
+  if (coef === -1) return "-";
+  if (Number.isInteger(coef)) return String(coef);
+  const [num, den] = formatFractionIrreductible(Math.abs(coef)).split("/");
+  return `${coef < 0 ? "-" : ""}\\tfrac{${num}}{${den}}`;
+}
+
+/** Coefficient en facteur d'un produit (`\tfrac{1}{3} \times 9`, `(-2) \times 9`). */
+export function formatFacteurLatex(coef: number): string {
+  if (Number.isInteger(coef)) return formatTermeLatex(coef);
+  const [num, den] = formatFractionIrreductible(Math.abs(coef)).split("/");
+  const frac = `\\tfrac{${num}}{${den}}`;
+  return coef < 0 ? `\\left(-${frac}\\right)` : frac;
+}
+
+const formatNombre = formatNombreLatex;
 
 /** Notation matricielle colonne (2×1) — jamais la notation en ligne d'un point (correction
  * transversale : un vecteur ne doit jamais être visuellement indiscernable d'un point). */
@@ -54,18 +86,16 @@ export function consignePointVectoriel(exercice: ExercicePointVectoriel): Consig
     };
   }
   if (exercice.forme === "pointAPoint") {
-    const coef = exercice.coefficient;
-    const coefTexte = coef === 1 ? "" : coef === -1 ? "-" : formatNombre(coef);
+    const coefTexte = formatCoefficientLatex(exercice.coefficient);
     return {
       avant: "Sachant que ",
       latex: `\\vec{${exercice.labelOrigine}${exercice.pointCherche}} = ${coefTexte}\\vec{${exercice.labelOrigine}${exercice.labelConnu}}`,
       apres: `, détermine les coordonnées de ${exercice.pointCherche}.`,
     };
   }
-  const coefUTexte = exercice.coefU === 1 ? "" : exercice.coefU === -1 ? "-" : formatNombre(exercice.coefU);
+  const coefUTexte = formatCoefficientLatex(exercice.coefU);
   const signeV = exercice.coefV >= 0 ? "+" : "-";
-  const coefVAbs = Math.abs(exercice.coefV);
-  const coefVTexte = coefVAbs === 1 ? "" : formatNombre(coefVAbs);
+  const coefVTexte = formatCoefficientLatex(Math.abs(exercice.coefV));
   return {
     avant: "Sachant que ",
     latex: `\\vec{${exercice.labelDepart}${exercice.pointCherche}} = ${coefUTexte}\\vec{${exercice.labelU}} ${signeV} ${coefVTexte}\\vec{${exercice.labelV}}`,
@@ -127,20 +157,17 @@ export function formatLabelYLatex(exercice: ExercicePointVectoriel): string {
 /**
  * Contenu du graphe affiché sur l'écran — jamais le point cherché lui-même (révélerait la
  * réponse par simple lecture graphique) :
- * - "translation" : le point connu, PLUS le vecteur de translation lui-même (`promptcorrectionsgen17gen12gen21.md`,
- *   point 6) — flèche seule, SANS label (la consigne l'affiche déjà en KaTeX), origine FIXÉE en
- *   (0;0) et extrémité en (dx;dy) (les composantes de la translation), JAMAIS ancré au point connu
- *   — un vecteur ancré là révélerait visuellement l'extrémité comme le point cherché sur un graphe
- *   à l'échelle réelle, exactement ce que l'ancien commentaire de cette fonction mettait en garde.
+ * - "translation" : le point connu seul. Le vecteur de translation est un vecteur LIBRE : il n'est
+ *   jamais dessiné à une position propre (audit chapitre 6, point 18 — l'ancien tracé depuis
+ *   l'origine suggérait à tort qu'un vecteur a une position) ; ses composantes sont dans la
+ *   consigne, et l'ancrer au point connu révélerait le point cherché.
  * - "milieu" : les deux points A/B, PLUS le segment [AB] tracé entre eux (point 5) — un simple
  *   segment (`sansFleche: true`, jamais une flèche : ce n'est pas un vecteur), sans label (les 2
  *   points portent déjà leur propre lettre).
  * - "pointAPoint" : le vecteur B→E réellement tracé (B et E sont tous deux DÉJÀ connus, aucune
  *   fuite de F) — hors du périmètre de ce correctif (non mentionné par le prompt), inchangé.
- * - "combinaisonVecteurs" : le point A, plus u/v tracés comme vecteurs libres à l'origine — jamais
- *   ancrés en A, ce qui révélerait visuellement E comme leur somme — labellisés en notation
- *   vectorielle réelle (`labelFleche`, point 7) plutôt qu'en texte brut ("u"/"v"), cohérent avec la
- *   consigne qui les affiche déjà en KaTeX ($\vec u$/$\vec v$).
+ * - "combinaisonVecteurs" : le point A seul. u et v sont des vecteurs libres (même raison que la
+ *   translation) : leurs composantes sont données en colonne dans le bloc énoncé.
  *
  * Chaque point reçoit un `labelPosition` calculé via `positionEtiquettePoint`
  * (`promptmodificationsgenerateurs20et21.md` B.1) — la position par défaut de Mafs (`attach="s"`)
@@ -156,7 +183,7 @@ export function formatLabelYLatex(exercice: ExercicePointVectoriel): string {
 export function valeursGraphePointVectoriel(exercice: ExercicePointVectoriel): { points: PointAffiche[]; vecteurs: VecteurAffiche[] } {
   if (exercice.variante === "translation") {
     const points: PointAffiche[] = [{ point: exercice.point, label: exercice.labelPoint }];
-    const vecteurs: VecteurAffiche[] = [{ origine: { x: 0, y: 0 }, vecteur: exercice.translation }];
+    const vecteurs: VecteurAffiche[] = [];
     const viewBox = calculerViewBoxVecteurs(points, vecteurs);
     points[0] = { ...points[0], labelPosition: positionEtiquettePoint(exercice.point, { x: 0, y: 0 }, viewBox) };
     return { points, vecteurs };
@@ -186,10 +213,7 @@ export function valeursGraphePointVectoriel(exercice: ExercicePointVectoriel): {
     return { points, vecteurs };
   }
   const points: PointAffiche[] = [{ point: exercice.pointDepart, label: exercice.labelDepart }];
-  const vecteurs: VecteurAffiche[] = [
-    { origine: { x: 0, y: 0 }, vecteur: exercice.vecteurU, labelFleche: { base: exercice.labelU } },
-    { origine: { x: 0, y: 0 }, vecteur: exercice.vecteurV, labelFleche: { base: exercice.labelV } },
-  ];
+  const vecteurs: VecteurAffiche[] = [];
   const viewBox = calculerViewBoxVecteurs(points, vecteurs);
   points[0] = { ...points[0], labelPosition: positionEtiquettePoint(exercice.pointDepart, { x: 0, y: 0 }, viewBox) };
   return { points, vecteurs };

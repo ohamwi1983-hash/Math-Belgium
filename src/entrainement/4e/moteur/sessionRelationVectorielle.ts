@@ -9,9 +9,10 @@
  * quelle que soit la réponse (correcte ou tentatives épuisées — le flux avance toujours, seul le
  * score diffère, même principe que le reste du projet).
  *
- * **Une seule aide par exercice** (`aideUtilisee`, jamais réinitialisée entre les deux phases
- * d'un même exercice `relationGenerale` — le même graphe aide les deux étapes) — même principe
- * exact que "Transformations graphiques" (ses deux notes indépendantes équation/curseurs).
+ * **Une aide par écran** (`aideUtilisee`, remise à `false` au passage de la traduction aux
+ * coordonnées — audit chapitre 6, point 20 : l'aide de la traduction ne s'ouvre plus d'office sur
+ * l'écran suivant ; `traductionAideUtiliseeExercice`/`coordonneesAideUtilisee` gardent la trace de
+ * chaque écran pour la puce jaune).
  */
 import type { ExerciceRelationGeneraleRV, GenerateurExerciceRelationVectorielle } from "../core/relationVectorielle.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -115,6 +116,9 @@ export function soumettreReponseTraduction(etat: EtatSessionRelationVectorielle,
     scoreTraductionExercice: score,
     traductionRevele: etapeCourante.revelee,
     traductionAideUtiliseeExercice: etat.aideUtilisee,
+    // L'aide est propre à chaque écran (audit chapitre 6, point 20) : celle de la traduction ne
+    // s'ouvre plus d'office sur l'écran des coordonnées.
+    aideUtilisee: false,
   };
 }
 

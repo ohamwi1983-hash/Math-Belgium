@@ -10,7 +10,8 @@ import {
   valeursGraphePointVectoriel,
 } from "../ui/formatPointVectoriel";
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationPointVectoriel";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -35,8 +36,9 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
 
-  const x = Number(texteX.replace(",", "."));
-  const y = Number(texteY.replace(",", "."));
+  // Entier, décimal (point ou virgule) ou fraction p/q (« 1/2 ») ; NaN si illisible → parse_error.
+  const x = parserNombreOuFraction(texteX) ?? Number.NaN;
+  const y = parserNombreOuFraction(texteY) ?? Number.NaN;
   const complet = texteX.trim() !== "" && texteY.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerCoordonnees(exercice, x, y) : undefined;
   const { points, vecteurs } = valeursGraphePointVectoriel(exercice);
@@ -69,8 +71,8 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-x"
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -81,8 +83,8 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-y"
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>

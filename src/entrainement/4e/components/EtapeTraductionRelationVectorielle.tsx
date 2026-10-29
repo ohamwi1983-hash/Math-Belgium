@@ -59,12 +59,12 @@ export function EtapeTraductionRelationVectorielle({
 
       <div className="field">
         <label className="field-label" htmlFor="relation-vectorielle-traduction">
-          Traduis la relation en équation de coordonnées
+          Traduis la relation en égalité entre différences de points
         </label>
         <input
           id="relation-vectorielle-traduction"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={placeholderTraduction(exercice)}
+          placeholder={placeholderTraduction()}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />

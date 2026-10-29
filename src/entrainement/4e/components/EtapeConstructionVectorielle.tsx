@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MovablePoint } from "mafs";
 import type { ExerciceConstructionVectorielle } from "../core/constructionVectorielle.types";
 import type { Point } from "../core/vecteur.types";
 import { Katex } from "./Katex";
 import { VecteurGraph } from "./VecteurGraph";
-import { consigneConstructionVectorielle, formatTermesDonneesConnuesConstructionLatex } from "../ui/formatConstructionVectorielle";
+import {
+  consigneConstructionVectorielle,
+  contraindreAuNoeudDeFenetre,
+  fenetreConstructionVectorielle,
+  fenetreRevelationConstruction,
+  formatTermesDonneesConnuesConstructionLatex,
+  traceInitialConstruction,
+} from "../ui/formatConstructionVectorielle";
 import { diagnostiquerConstruction } from "../moteur/verificationConstructionVectorielle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -23,12 +30,9 @@ interface Props {
 
 /** Magnétisme grille : chaque point s'accroche à la coordonnée entière la plus proche pendant le
  * glisser-déposer — jamais de position flottante non alignée sur la grille. */
-function snapEntier([x, y]: [number, number]): [number, number] {
-  return [Math.round(x), Math.round(y)];
-}
-
-const DEPART_INITIAL: [number, number] = [0, 0];
-const ARRIVEE_INITIALE: [number, number] = [1, 0];
+const COULEUR_TRACE_ELEVE = "#e8590c";
+/** Vecteur attendu, tracé depuis l'ancre de l'élève à la révélation (signalement chapitre 6, point 26). */
+const COULEUR_VECTEUR_ATTENDU = "#2f9e44";
 
 /**
  * Unique écran de l'exercice : bloc énoncé fixe (A, B et le vecteur \vec{AB} connu, en texte et
@@ -46,13 +50,24 @@ const ARRIVEE_INITIALE: [number, number] = [1, 0];
  * à la cible, jamais la position absolue du départ.
  */
 export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
-  const [depart, setDepart] = useState<[number, number]>(DEPART_INITIAL);
-  const [arrivee, setArrivee] = useState<[number, number]>(ARRIVEE_INITIALE);
+  // Monté avec une `key` propre à chaque exercice (`AppConstructionVectorielle`) : le tracé repart
+  // de la position initiale du nouvel exercice, jamais de celle laissée par le précédent.
+  const fenetre = useMemo(() => fenetreConstructionVectorielle(exercice), [exercice]);
+  const [depart, setDepart] = useState<[number, number]>(() => {
+    const { depart: d } = traceInitialConstruction(exercice);
+    return [d.x, d.y];
+  });
+  const [arrivee, setArrivee] = useState<[number, number]>(() => {
+    const { arrivee: a } = traceInitialConstruction(exercice);
+    return [a.x, a.y];
+  });
+  const contraindre = (p: [number, number]) => contraindreAuNoeudDeFenetre(p, fenetre);
 
   const departPoint: Point = { x: depart[0], y: depart[1] };
   const arriveePoint: Point = { x: arrivee[0], y: arrivee[1] };
   const statut = tentativesUtilisees > 0 ? diagnostiquerConstruction(exercice, departPoint, arriveePoint) : undefined;
   const consigne = consigneConstructionVectorielle(exercice);
+  const revele = validation?.revele === true;
 
   return (
     <div>
@@ -81,13 +96,25 @@ export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, te
           {
             origine: departPoint,
             vecteur: { x: arriveePoint.x - departPoint.x, y: arriveePoint.y - departPoint.y },
-            couleur: "#e8590c",
+            couleur: COULEUR_TRACE_ELEVE,
           },
+          ...(revele ? [{ origine: departPoint, vecteur: exercice.cibleComposantes, couleur: COULEUR_VECTEUR_ATTENDU }] : []),
         ]}
+        viewBoxFixe={revele ? fenetreRevelationConstruction(fenetre, departPoint, exercice.cibleComposantes) : fenetre}
+        pan={false}
       >
-        <MovablePoint point={depart} onMove={(p) => setDepart(snapEntier(p))} constrain={snapEntier} color="#e8590c" />
-        <MovablePoint point={arrivee} onMove={(p) => setArrivee(snapEntier(p))} constrain={snapEntier} color="#e8590c" />
+        {!validation && (
+          <>
+            <MovablePoint point={depart} onMove={(p) => setDepart(contraindre(p))} constrain={contraindre} color={COULEUR_TRACE_ELEVE} />
+            <MovablePoint point={arrivee} onMove={(p) => setArrivee(contraindre(p))} constrain={contraindre} color={COULEUR_TRACE_ELEVE} />
+          </>
+        )}
       </VecteurGraph>
+      {revele && (
+        <p className="prompt-text">
+          En vert : le vecteur attendu, tracé depuis ton point de départ.
+        </p>
+      )}
 
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 

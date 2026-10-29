@@ -90,6 +90,7 @@ export function GrilleAdaptative({
   formatEtiquette,
   etiquettesAuxBords,
   uneEtiquetteXSurDeux,
+  pasFixe,
 }: {
   largeur: number;
   hauteur: number;
@@ -122,12 +123,16 @@ export function GrilleAdaptative({
   /** N'affiche qu'un nombre X sur deux (le quadrillage reste complet) — pour les valeurs à 3 chiffres
    * ou plus sur un graphe étroit (mobile). Absent/`false` par défaut. */
   uneEtiquetteXSurDeux?: boolean;
+  /** Même pas imposé sur les deux axes (ex. 1) — absent par défaut (pas adaptatif par axe,
+   * comportement inchangé). Fourni par gen28 (audit chapitre 6) : comparer des longueurs exige
+   * des carrés réels, jamais « horizontal 5 unités, vertical 2 unités ». */
+  pasFixe?: number;
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
   const ySpan = hauteur / Math.abs(viewTransform[4]);
-  const pasX = calculerPasGrille(xSpan, cibleNombreLignes, mantissesPersonnalisees);
-  const pasY = calculerPasGrille(ySpan, cibleNombreLignesY ?? cibleNombreLignes);
+  const pasX = pasFixe ?? calculerPasGrille(xSpan, cibleNombreLignes, mantissesPersonnalisees);
+  const pasY = pasFixe ?? calculerPasGrille(ySpan, cibleNombreLignesY ?? cibleNombreLignes);
   const onPasChangeRef = useRef(onPasChange);
   useLayoutEffect(() => {
     onPasChangeRef.current = onPasChange;

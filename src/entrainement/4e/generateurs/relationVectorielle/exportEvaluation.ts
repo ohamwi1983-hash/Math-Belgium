@@ -4,7 +4,8 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
-import { consigneRelationVectorielle, formatDonneesConnuesLatex, formatTraductionAttendueLatex, placeholderTraduction } from "../../ui/formatRelationVectorielle";
+import { consigneRelationVectorielle, formatDonneesConnuesLatex, formatTraductionAttendueLatex, formeTraductionLatex } from "../../ui/formatRelationVectorielle";
+import { nombreFrLatex } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationVectorielle } from "./index";
 
 /**
@@ -58,8 +59,14 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationV
  * d'`AdaptateurFeuilleExercices` (`genererFeuilleExercices.ts::construireZoneReponse`) suffit.
  */
 
+/** Virgule décimale, valeurs exactes (audit chapitre 6, point 14). */
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  return nombreFrLatex(valeur);
+}
+
+/** Terme d'une somme : négatif entre parenthèses (« 6 + (−4) », jamais « 6 + -4 »). */
+function formatTerme(valeur: number): string {
+  return valeur < 0 ? `(${formatNombre(valeur)})` : formatNombre(valeur);
 }
 
 /** `{avant, latex, apres}` → `FragmentConsigne[]` — `latex` vaut toujours une chaîne non vide pour
@@ -95,7 +102,7 @@ function construireEnonceRelationVectorielle(instance: ExerciceRelationVectoriel
       {
         consigne: [
           texte("Traduis cette relation vectorielle en une égalité entre différences de points, de la forme "),
-          latex(placeholderTraduction(instance)),
+          latex(formeTraductionLatex(instance)),
           texte(" (remplace k par la valeur exacte du coefficient)."),
         ],
       },
@@ -114,7 +121,7 @@ function construireCorrectionRelationVectorielle(instance: ExerciceRelationVecto
           texte(`${pointCherche} = ${labelPoint} + `),
           latex(`\\begin{pmatrix} ${formatNombre(translation.x)} \\\\ ${formatNombre(translation.y)} \\end{pmatrix}`),
           texte(
-            ` = (${formatNombre(point.x)} + ${formatNombre(translation.x)} ; ${formatNombre(point.y)} + ${formatNombre(translation.y)}) ` +
+            ` = (${formatNombre(point.x)} + ${formatTerme(translation.x)} ; ${formatNombre(point.y)} + ${formatTerme(translation.y)}) ` +
               `= (${formatNombre(reponse.x)} ; ${formatNombre(reponse.y)}).`,
           ),
         ],

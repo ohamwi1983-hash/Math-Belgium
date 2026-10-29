@@ -3,7 +3,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { consigneSelection, vecteursAffichesComparaison } from "../../ui/formatComparaisonVecteurs";
-import { calculerPasGrille, RATIO_GRAPHE } from "../../ui/mafsTransformation";
+import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import { calculerViewBoxVecteurs } from "../../ui/vecteurGraph";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonVecteurs } from "./index";
 
@@ -41,9 +41,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparais
  * PURE que `EtapeSelectionComparaison.tsx`/`EtapeEgaliteComparaison.tsx` à l'écran — couleurs
  * rouge/orange de référence/sélection, ET positions d'étiquettes sans chevauchement déjà résolues
  * par `ui/vecteurGraph.ts::calculerPositionsEtiquettesSansChevauchement`), `ui/vecteurGraph.ts::
- * calculerViewBoxVecteurs` (même viewBox pur que Mafs) et `ui/mafsTransformation.ts::calculerPasGrille`/
- * `RATIO_GRAPHE` (même pas de grille "nombre rond" et même ratio d'aspect que tous les autres
- * graphes Mafs du projet). Seule la RASTÉRISATION en primitives `<svg>` (ligne+tête de flèche pour
+ * calculerViewBoxVecteurs` (même viewBox pur que Mafs) et `ui/mafsTransformation.ts::RATIO_GRAPHE`
+ * (même ratio d'aspect que tous les autres graphes Mafs du projet) ; pas de grille FIXÉ à 1 sur les
+ * deux axes, comme à l'écran (`VecteurGraph pasGrille={1}`, audit chapitre 6). Seule la RASTÉRISATION en primitives `<svg>` (ligne+tête de flèche pour
  * chaque vecteur, `<text>`+petite flèche au-dessus pour chaque étiquette — reproduction fidèle, en
  * géométrie SVG inline, de `VecteurGraph.tsx::LabelVecteurFleche`, jamais un caractère Unicode, même
  * raisonnement que documenté en tête de ce composant) est écrite ici, jamais dans `ui/`. Grille
@@ -163,8 +163,10 @@ function construireSvgComparaison(exercice: ExerciceComparaisonVecteurs, labelsS
   const sx = (x: number) => MARGE_SVG + ((x - xMin) / (xMax - xMin)) * zoneX;
   const sy = (y: number) => MARGE_SVG + ((yMax - y) / (yMax - yMin)) * zoneY;
 
-  const pasX = calculerPasGrille(xMax - xMin);
-  const pasY = calculerPasGrille(yMax - yMin);
+  // Même pas (1) sur les deux axes, comme la figure à l'écran (`VecteurGraph pasGrille={1}`) :
+  // un carreau a la même taille dans les deux sens, les longueurs se comparent à l'œil.
+  const pasX = 1;
+  const pasY = 1;
   const grille: string[] = [];
   for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
     const px = sx(v);

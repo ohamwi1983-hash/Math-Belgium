@@ -87,8 +87,10 @@ export function construireMilieuCommeRelation(): ExerciceRelationVectorielle {
   return construireRelation(0.5, "milieu", "M");
 }
 
+/** Milieu dans 1 relation sur 4 (au lieu de 1 sur 2) : k = 1/2 tombait dans 28 % des tirages,
+ * en double emploi avec le milieu (audit chapitre 6, point 20). Il reste ~17 %. */
 function construireRelationGenerale(): ExerciceRelationVectorielle {
-  return Math.random() < 0.5 ? construireRelationPointAPoint() : construireMilieuCommeRelation();
+  return Math.random() < 0.75 ? construireRelationPointAPoint() : construireMilieuCommeRelation();
 }
 
 export const CATALOGUE_VARIANTES: { id: VarianteRelationVectorielle; label: string }[] = [

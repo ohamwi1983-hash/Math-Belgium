@@ -24,18 +24,50 @@ import type { KeyboardEvent } from "react";
  *   du mode de saisie utilisé.
  */
 const CARACTERE_NUMERIQUE_AUTORISE = /^[0-9\-.,]$/;
+const CARACTERE_FRACTION_AUTORISE = /^[0-9\-.,/]$/;
 
-export function gererKeyDownNumerique(e: KeyboardEvent<HTMLInputElement>): void {
+/** Signes moins typographiques (« − » U+2212, « – » U+2013, « — » U+2014) : un clavier mobile ou un
+ * copier-coller en produit souvent. Ils sont CONVERTIS en « - » au lieu d'être retirés — audit
+ * chapitre 6, point 6 : l'ancien filtre les supprimait sans prévenir, « −3 » devenait « 3 » (le
+ * signe disparaissait et la réponse devenait fausse). */
+const SIGNES_MOINS = /[\u2212\u2013\u2014]/g;
+
+function estSigneMoinsTypographique(caractere: string): boolean {
+  return caractere === "\u2212" || caractere === "\u2013" || caractere === "\u2014";
+}
+
+function gererKeyDown(e: KeyboardEvent<HTMLInputElement>, autorise: RegExp): void {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key.length > 1) return;
-  if (!CARACTERE_NUMERIQUE_AUTORISE.test(e.key)) {
+  if (estSigneMoinsTypographique(e.key)) return; // converti par le filtre onChange
+  if (!autorise.test(e.key)) {
     e.preventDefault();
   }
 }
 
-export function filtrerSaisieNumerique(valeur: string): string {
+function filtrer(valeur: string, autorise: RegExp): string {
   return valeur
+    .replace(SIGNES_MOINS, "-")
     .split("")
-    .filter((caractere) => CARACTERE_NUMERIQUE_AUTORISE.test(caractere))
+    .filter((caractere) => autorise.test(caractere))
     .join("");
+}
+
+export function gererKeyDownNumerique(e: KeyboardEvent<HTMLInputElement>): void {
+  gererKeyDown(e, CARACTERE_NUMERIQUE_AUTORISE);
+}
+
+export function filtrerSaisieNumerique(valeur: string): string {
+  return filtrer(valeur, CARACTERE_NUMERIQUE_AUTORISE);
+}
+
+/** Variante qui laisse aussi passer « / » — UNIQUEMENT pour un champ dont la lecture accepte une
+ * fraction p/q (`parserNombreOuFraction`, `verificationAnalyseFonction.ts`) : ailleurs « / » reste
+ * refusé, un champ qui lirait « 1/2 » avec `Number()` le jugerait illisible. */
+export function gererKeyDownNumeriqueFraction(e: KeyboardEvent<HTMLInputElement>): void {
+  gererKeyDown(e, CARACTERE_FRACTION_AUTORISE);
+}
+
+export function filtrerSaisieNumeriqueFraction(valeur: string): string {
+  return filtrer(valeur, CARACTERE_FRACTION_AUTORISE);
 }

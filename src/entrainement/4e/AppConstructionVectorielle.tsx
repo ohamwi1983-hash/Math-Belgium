@@ -6,6 +6,7 @@ import { genererExerciceConstructionVectorielle } from "./generateurs/constructi
 import { EtapeConstructionVectorielle } from "./components/EtapeConstructionVectorielle";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { consigneConstructionVectorielle } from "./ui/formatConstructionVectorielle";
 
 const CONSIGNE_GENERALE = "Construis ce vecteur sur la figure.";
 
@@ -26,6 +27,11 @@ function formatVecteurColonneLatex(v: { x: number; y: number }): string {
   return `\\begin{pmatrix} ${v.x} \\\\ ${v.y} \\end{pmatrix}`;
 }
 
+/** Vecteur demandé (`k\vec{AB}`), même écriture que la consigne. */
+function formatVecteurLatex(exercice: EtatSessionConstructionVectorielle["exerciceCourant"]): string {
+  return consigneConstructionVectorielle(exercice).latex;
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -38,6 +44,9 @@ interface TransitionEnAttente {
 export function AppConstructionVectorielle() {
   const [etat, setEtat] = useState<EtatSessionConstructionVectorielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur d'exercices — `key` de l'étape : un nouvel exercice remonte le composant, donc
+   * repart du tracé initial au lieu de garder celui de l'exercice précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionConstructionVectorielle) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -50,6 +59,7 @@ export function AppConstructionVectorielle() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -60,9 +70,7 @@ export function AppConstructionVectorielle() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (
-          <>
-            Vecteur attendu : <Katex expression={formatVecteurColonneLatex(exercice.cibleComposantes)} />, depuis n'importe quel point d'ancrage.
-          </>
+          <Katex expression={`${formatVecteurLatex(exercice)} = ${formatVecteurColonneLatex(exercice.cibleComposantes)}`} />
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -74,13 +82,14 @@ export function AppConstructionVectorielle() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Construction graphique de vecteurs</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
       </header>
 
       <main className="card">
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeConstructionVectorielle
+            key={numeroExercice}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

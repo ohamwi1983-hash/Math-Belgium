@@ -90,7 +90,8 @@ interface TraductionParsee {
 // Un membre parenthésé — "k(E-B)" ou "k*(E-B)" — le coefficient ne contient jamais de parenthèse ni
 // de "*". Le coefficient PEUT être vide (`*` suffit à zéro caractère) : voir `analyserCoefficient`
 // ci-dessous, qui donne son sens à ce cas (coefficient implicite ±1).
-const REGEX_TERME_PARENTHESE = /^([^()*]*)\*?\(([A-Za-z])-([A-Za-z])\)$/;
+// Le coefficient peut aussi être entre parenthèses — "(-1/3)(E-B)" (audit chapitre 6, point 10).
+const REGEX_TERME_PARENTHESE = /^(\([^()]*\)|[^()*]*)\*?\(([A-Za-z])-([A-Za-z])\)$/;
 // Un membre "bare" — "F-B", jamais de coefficient explicite (implicitement 1, voir `analyserTerme`).
 const REGEX_TERME_BARE = /^([A-Za-z])-([A-Za-z])$/;
 
@@ -106,9 +107,11 @@ const REGEX_TERME_BARE = /^([A-Za-z])-([A-Za-z])$/;
  * l'élève peut donc légitimement écrire `"F-B=-(E-B)"` pour `k=-1`, exactement la notation que
  * l'énoncé lui montre.
  */
-function analyserCoefficient(texte: string): number | null {
-  if (texte === "") return 1;
-  if (texte === "-") return -1;
+function analyserCoefficient(texteBrut: string): number | null {
+  const entreParentheses = /^\((.*)\)$/.exec(texteBrut);
+  const texte = entreParentheses ? entreParentheses[1] : texteBrut;
+  if (texte === "" && !entreParentheses) return 1;
+  if (texte === "-" && !entreParentheses) return -1;
   return parserNombreOuFraction(texte);
 }
 
@@ -136,17 +139,45 @@ function analyserTerme(texte: string): Terme | null {
  * (parse_error, jamais confondu avec une lettre incorrecte, qui elle reste structurellement
  * valide). */
 function analyserTraduction(texteBrut: string): TraductionParsee | null {
-  const texte = texteBrut.replace(/\s+/g, "");
+  // Espaces retirés, signes moins typographiques (« − », « – ») ramenés à « - », lettres en
+  // majuscules (les points sont toujours nommés en majuscules) — audit chapitre 6, point 10.
+  const texte = texteBrut.replace(/\s+/g, "").replace(/[\u2212\u2013\u2014]/g, "-").toUpperCase();
   if (texte === "") return null;
 
   const parties = texte.split("=");
   if (parties.length !== 2) return null;
 
-  const termeGauche = analyserTerme(parties[0]);
-  const termeDroit = analyserTerme(parties[1]);
-  if (!termeGauche || !termeDroit) return null;
+  const directe = analyserMembres(parties[0], parties[1]);
+  if (directe) return directe;
+  // Forme « point = point + k(…) » du cours (« F = B + k(E−B) »), dans un sens ou dans l'autre.
+  return analyserFormePoint(parties[0], parties[1]) ?? analyserFormePoint(parties[1], parties[0]);
+}
 
+function analyserMembres(gauche: string, droite: string): TraductionParsee | null {
+  const termeGauche = analyserTerme(gauche);
+  const termeDroit = analyserTerme(droite);
+  if (!termeGauche || !termeDroit) return null;
   return { termeGauche, termeDroit };
+}
+
+/** « P = Q + k(Y−Z) » (ou « P = Q − k(Y−Z) », ou « P = k(Y−Z) + Q ») ⟺ « P − Q = ±k(Y−Z) ». Réécrit
+ * exactement en la forme membre = membre, puis vérifié par les mêmes règles (lettres et rapport). */
+function analyserFormePoint(cotePoint: string, coteSomme: string): TraductionParsee | null {
+  if (!/^[A-Z]$/.test(cotePoint)) return null;
+  const pointEnTete = /^([A-Z])([+-])(.+)$/.exec(coteSomme);
+  if (pointEnTete) {
+    const terme = analyserTerme(pointEnTete[3]);
+    if (terme) {
+      const coefficient = pointEnTete[2] === "-" ? -terme.coefficient : terme.coefficient;
+      return { termeGauche: { coefficient: 1, lettre1: cotePoint, lettre2: pointEnTete[1] }, termeDroit: { ...terme, coefficient } };
+    }
+  }
+  const pointEnQueue = /^(.+)\+([A-Z])$/.exec(coteSomme);
+  if (pointEnQueue) {
+    const terme = analyserTerme(pointEnQueue[1]);
+    if (terme) return { termeGauche: { coefficient: 1, lettre1: cotePoint, lettre2: pointEnQueue[2] }, termeDroit: terme };
+  }
+  return null;
 }
 
 /** Normalise un membre parsé vers une paire de lettres CIBLE (`cible.lettre1 - cible.lettre2`) —

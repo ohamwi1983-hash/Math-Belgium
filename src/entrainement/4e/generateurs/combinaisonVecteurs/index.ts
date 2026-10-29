@@ -53,7 +53,7 @@ function coefSigne(magnitudes: number[]): number {
 function vecteurAleatoire(): Composantes {
   let v = { x: 0, y: 0 };
   while (v.x === 0 && v.y === 0) {
-    v = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
+    v = { x: randomInt(-3, 3), y: randomInt(-3, 3) };
   }
   return v;
 }
@@ -61,7 +61,7 @@ function vecteurAleatoire(): Composantes {
 function pointAleatoire(exclus: Point[]): Point {
   let p: Point;
   do {
-    p = { x: randomInt(-6, 6), y: randomInt(-6, 6) };
+    p = { x: randomInt(-4, 4), y: randomInt(-4, 4) };
   } while (exclus.some((e) => e.x === p.x && e.y === p.y));
   return p;
 }
@@ -166,17 +166,22 @@ interface Partiel {
 function assembler(variante: VarianteCombinaisonVecteurs, fabriquerPartiel: () => Partiel): ExerciceCombinaisonVecteurs {
   let partiel: Partiel;
   let coefficientsReduits: Record<string, number>;
+  let reponse: Composantes;
   do {
     partiel = fabriquerPartiel();
     coefficientsReduits = calculerCoefficientsReduits(partiel.groupes, partiel.operateurs, partiel.baseCanonique);
-  } while (Object.values(coefficientsReduits).every((v) => v === 0));
+    reponse = calculerReponse(coefficientsReduits, partiel.baseCanonique, partiel.vecteursLibres, partiel.points);
+    // Calculs à la main raisonnables (audit chapitre 6, point 17 : composantes jusqu'à 408).
+  } while (Object.values(coefficientsReduits).every((v) => v === 0) || Math.abs(reponse.x) > COMPOSANTE_MAX || Math.abs(reponse.y) > COMPOSANTE_MAX);
 
-  const reponse = calculerReponse(coefficientsReduits, partiel.baseCanonique, partiel.vecteursLibres, partiel.points);
   return { variante, resultatNom: RESULTAT_NOM, ...partiel, coefficientsReduits, reponse };
 }
 
+/** Plafond des composantes de la réponse. */
+const COMPOSANTE_MAX = 40;
+
 const MAGNITUDES_INTERNES = [1, 2, 3];
-const MAGNITUDES_EXTERNES = [2, 3, 4];
+const MAGNITUDES_EXTERNES = [2, 3];
 const MAGNITUDES_PLATE = [1, 2, 3, 4, 5];
 
 /** Variante `plate` — un seul niveau, jamais de parenthèses : `t = k1·Vx ± k2·Vy` (2 groupes à un

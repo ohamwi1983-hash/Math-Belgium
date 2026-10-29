@@ -29,7 +29,7 @@ interface Props {
 export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [selection, setSelection] = useState<string[]>([]);
   const consigne = consigneSelection(exercice);
-  const { points, vecteurs } = vecteursAffichesComparaison(exercice, selection);
+  const { points, vecteurs, viewBox } = vecteursAffichesComparaison(exercice, selection);
 
   function basculer(label: string) {
     setSelection((s) => (s.includes(label) ? s.filter((l) => l !== label) : [...s, label]));
@@ -37,7 +37,7 @@ export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes />
+      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes pasGrille={1} viewBoxFixe={viewBox} />
       <p className="prompt-text">
         {consigne.avant}
         <Katex expression={consigne.latex} />
@@ -52,6 +52,7 @@ export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tenta
               key={v.label}
               type="button"
               className={selection.includes(v.label) ? "btn toggle-active" : "btn"}
+              disabled={Boolean(validation)}
               onClick={() => basculer(v.label)}
             >
               <Katex expression={`\\vec{${v.label}}`} />

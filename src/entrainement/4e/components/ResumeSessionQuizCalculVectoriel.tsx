@@ -1,4 +1,6 @@
 import type { ResultatExerciceQuizCalculVectoriel } from "../moteur/typesQuizCalculVectoriel";
+import { RenduFragments } from "./RenduFragments";
+import { fragmentsTexteVectoriel } from "../ui/formatQuizCalculVectoriel";
 
 interface Props {
   resultats: ResultatExerciceQuizCalculVectoriel[];
@@ -33,7 +35,9 @@ export function ResumeSessionQuizCalculVectoriel({ resultats, onRecommencer, onC
             {resultats.map((resultat, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{resultat.question.enonce}</td>
+                <td>
+                  <RenduFragments fragments={fragmentsTexteVectoriel(resultat.question.enonce)} />
+                </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>
               </tr>

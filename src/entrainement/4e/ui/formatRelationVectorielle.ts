@@ -18,6 +18,7 @@ import type {
 import type { PointAffiche, VecteurAffiche } from "./vecteurGraph";
 import { calculerViewBoxVecteurs, positionEtiquettePoint } from "./vecteurGraph";
 import { formatFractionIrreductible } from "./formatFraction";
+import { nombreFrLatex } from "./nombreFr";
 
 const LIBELLES_VARIANTE: Record<VarianteRelationVectorielle, string> = {
   translation: "Translation par un vecteur",
@@ -28,8 +29,9 @@ export function libelleVarianteRelationVectorielle(variante: VarianteRelationVec
   return LIBELLES_VARIANTE[variante];
 }
 
+/** Coordonnées et composantes en LaTeX, virgule décimale (audit chapitre 6, point 14). */
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  return nombreFrLatex(valeur);
 }
 
 /** Notation matricielle colonne (2×1) — jamais la notation en ligne d'un point (correction
@@ -56,6 +58,17 @@ function formatCoefficientTraduction(coef: number): string {
   return formatFractionIrreductible(coef);
 }
 
+/** Coefficient de l'énoncé en LaTeX, fraction exacte en `\\tfrac` (`-\\tfrac{1}{3}`), jamais la
+ * barre en ligne « -1/3 » (audit chapitre 6) ; implicite pour ±1. La forme à TAPER reste « 1/3 »
+ * (`formatCoefficientTraduction`). */
+function formatCoefficientConsigneLatex(coef: number): string {
+  if (coef === 1) return "";
+  if (coef === -1) return "-";
+  if (Number.isInteger(coef)) return String(coef);
+  const [num, den] = formatFractionIrreductible(Math.abs(coef)).split("/");
+  return `${coef < 0 ? "-" : ""}\\tfrac{${num}}{${den}}`;
+}
+
 /** Voir `formatPointVectoriel.ts::ConsignePointVectoriel` — même patron exact (prose + court
  * fragment KaTeX inline, jamais la phrase entière passée à KaTeX). */
 export interface ConsigneRelationVectorielle {
@@ -72,7 +85,15 @@ export function consigneRelationVectorielle(exercice: ExerciceRelationVectoriell
       apres: `. Détermine les coordonnées de ${exercice.pointCherche}.`,
     };
   }
-  const coefTexte = formatCoefficientTraduction(exercice.coefficient);
+  const coefTexte = formatCoefficientConsigneLatex(exercice.coefficient);
+  if (exercice.forme === "milieu") {
+    // Le mot « milieu » est dit (audit chapitre 6, point 20), puis la relation qui le traduit.
+    return {
+      avant: `${exercice.pointCherche} est le milieu du segment [${exercice.labelOrigine}${exercice.labelConnu}], c'est-à-dire `,
+      latex: `\\vec{${exercice.labelOrigine}${exercice.pointCherche}} = ${coefTexte}\\vec{${exercice.labelOrigine}${exercice.labelConnu}}`,
+      apres: `. Détermine les coordonnées de ${exercice.pointCherche}.`,
+    };
+  }
   return {
     avant: "Sachant que ",
     latex: `\\vec{${exercice.labelOrigine}${exercice.pointCherche}} = ${coefTexte}\\vec{${exercice.labelOrigine}${exercice.labelConnu}}`,
@@ -142,11 +163,17 @@ export function valeursGrapheAide(exercice: ExerciceRelationVectorielle): { poin
   return { points, vecteurs };
 }
 
-/** Placeholder du champ "traduction" — la STRUCTURE attendue avec les vraies lettres de l'exercice
- * (fixes par construction : F/M, B, E), mais un coefficient toujours générique `"k"`, jamais la
- * vraie valeur numérique — ne révèle donc jamais la réponse, seulement la syntaxe attendue. */
-export function placeholderTraduction(exercice: ExerciceRelationGeneraleRV): string {
-  return `ex : ${exercice.pointCherche}-${exercice.labelOrigine}=k(${exercice.labelConnu}-${exercice.labelOrigine})`;
+/** Placeholder du champ "traduction" — un exemple NEUTRE, avec d'autres lettres et un autre
+ * coefficient que ceux de l'exercice (audit chapitre 6, point 20 : l'ancien exemple reprenait les
+ * vraies lettres, donc la forme attendue presque complète). Montre seulement la syntaxe. */
+export function placeholderTraduction(): string {
+  return "ex : Q-P=2(R-P)";
+}
+
+/** Forme générale attendue, en LaTeX, pour la consigne imprimée (export) : vraies lettres,
+ * coefficient générique k — sur papier, la question doit dire quelle égalité écrire. */
+export function formeTraductionLatex(exercice: ExerciceRelationGeneraleRV): string {
+  return `${exercice.pointCherche} - ${exercice.labelOrigine} = k\\,(${exercice.labelConnu} - ${exercice.labelOrigine})`;
 }
 
 /** La vraie relation traduite en coordonnées, en LaTeX — source unique consommée à la fois par le

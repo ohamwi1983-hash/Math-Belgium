@@ -7,6 +7,8 @@ import type { VariantePointVectoriel } from "./core/pointVectoriel.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapePointVectoriel } from "./components/EtapePointVectoriel";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { Katex } from "./components/Katex";
+import { formatNombreLatex } from "./ui/formatPointVectoriel";
 
 const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
 
@@ -34,6 +36,9 @@ interface TransitionEnAttente {
 export function AppPointVectoriel() {
   const [etat, setEtat] = useState<EtatSessionPointVectoriel>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : sert de `key` à
+   * l'écran, pour que ses champs repartent vides au lieu de garder la saisie précédente. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionPointVectoriel) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
@@ -47,6 +52,7 @@ export function AppPointVectoriel() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -55,6 +61,7 @@ export function AppPointVectoriel() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionPointVectoriel(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VariantePointVectoriel)));
   }
 
@@ -62,9 +69,9 @@ export function AppPointVectoriel() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: (
-          <>
-            {exercice.pointCherche} attendu : ({exercice.reponse.x} ; {exercice.reponse.y})
-          </>
+          <Katex
+            expression={`${exercice.pointCherche}(${formatNombreLatex(exercice.reponse.x)} \\,;\\, ${formatNombreLatex(exercice.reponse.y)})`}
+          />
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -76,7 +83,7 @@ export function AppPointVectoriel() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Point à partir d'une relation vectorielle (libre)</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
@@ -84,6 +91,7 @@ export function AppPointVectoriel() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapePointVectoriel
+            key={numeroExercice}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

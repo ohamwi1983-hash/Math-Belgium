@@ -3,7 +3,7 @@ import { Line, Mafs, Point as MafsPoint, Text, useTransformContext, vec, Vector 
 import "mafs/core.css";
 import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
 import { calculerViewBoxVecteurs } from "../ui/vecteurGraph";
-import type { LabelVecteurAvecFleche, PointAffiche, VecteurAffiche } from "../ui/vecteurGraph";
+import type { LabelVecteurAvecFleche, PointAffiche, VecteurAffiche, ViewBoxTransformation } from "../ui/vecteurGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -26,6 +26,17 @@ interface Props {
    * coordonnées cartésiennes — les 2 axes et leurs nombres n'ont aucun sens à y afficher, mais le
    * quadrillage reste utile pour percevoir les proportions relatives des longueurs. */
   masquerAxes?: boolean;
+  /** Même pas de quadrillage imposé sur les deux axes (voir `GrilleAdaptative.pasFixe`) — absent
+   * par défaut, comportement inchangé. Fourni par gen28 (comparaison de longueurs). */
+  pasGrille?: number;
+  /** Fenêtre imposée (coordonnées réelles) à la place de celle recalculée à chaque rendu depuis
+   * `points`/`vecteurs` — absente par défaut, comportement inchangé. Fournie par gen23
+   * (construction) : son vecteur élève change à chaque glisser, la fenêtre recalculée bougeait donc
+   * sous le doigt (signalement chapitre 6, point 8). */
+  viewBoxFixe?: ViewBoxTransformation;
+  /** Déplacement du fond au glisser — `true` par défaut (comportement inchangé) ; `false` pour gen23,
+   * où un glisser manqué sur une poignée déplaçait toute la figure (point 26). */
+  pan?: boolean;
 }
 
 const COULEUR_POINT_DEFAUT = "#495057";
@@ -108,11 +119,11 @@ function LabelVecteurFleche({ x, y, label, couleur }: { x: number; y: number; la
  * superposer ses propres éléments Mafs (`MovablePoint`...) sans dupliquer le calcul de viewBox/
  * grille/largeur — voir leurs sections dédiées.
  */
-export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false }: Props) {
+export function VecteurGraph({ points = [], vecteurs = [], children, onClic, masquerAxes = false, pasGrille, viewBoxFixe, pan = true }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
   const hauteur = largeur / RATIO_GRAPHE;
-  const viewBox = calculerViewBoxVecteurs(points, vecteurs);
+  const viewBox = viewBoxFixe ?? calculerViewBoxVecteurs(points, vecteurs);
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
 
   return (
@@ -121,11 +132,11 @@ export function VecteurGraph({ points = [], vecteurs = [], children, onClic, mas
         width={largeur}
         height={hauteur}
         viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }}
-        pan={true}
+        pan={pan}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
         onClick={onClic ? (p) => onClic({ x: p[0], y: p[1] }) : undefined}
       >
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} masquerAxes={masquerAxes} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} masquerAxes={masquerAxes} pasFixe={pasGrille} />
         {vecteurs.map((v, i) => {
           const couleur = v.couleur ?? COULEUR_VECTEUR_DEFAUT;
           const tip: [number, number] = [v.origine.x + v.vecteur.x, v.origine.y + v.vecteur.y];

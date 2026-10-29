@@ -12,14 +12,18 @@ import {
 import type { EtatSessionApplicationPhysique, PhaseApplicationPhysique } from "./moteur/typesApplicationPhysique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./generateurs/applicationPhysique";
 import type { VarianteApplicationPhysique } from "./core/applicationPhysique.types";
-import { calculerRecapitulatifApplicationPhysique, notationVecteursApplicationPhysique } from "./ui/formatApplicationPhysique";
+import {
+  calculerRecapitulatifApplicationPhysique,
+  formatValeurApplicationPhysique,
+  libelleVarianteApplicationPhysique,
+} from "./ui/formatApplicationPhysique";
+import { nombreFr } from "./ui/nombreFr";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { CalculatriceScientifique } from "./components/CalculatriceScientifique";
 import { EtapeModelisationApplicationPhysique } from "./components/EtapeModelisationApplicationPhysique";
 import { EtapeNormeApplicationPhysique } from "./components/EtapeNormeApplicationPhysique";
 import { EtapeDeviationApplicationPhysique } from "./components/EtapeDeviationApplicationPhysique";
 import { EtapeInterpretationApplicationPhysique } from "./components/EtapeInterpretationApplicationPhysique";
-import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -88,6 +92,9 @@ export function AppApplicationPhysique() {
    * comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : inclus dans la `key`
+   * des écrans, pour qu'une saisie de l'exercice précédent ne survive pas (audit chapitre 6, point 5). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
    * réutilise `calculerRecapitulatifApplicationPhysique` pour la réponse ATTENDUE (l'entrée qui
@@ -140,6 +147,7 @@ export function AppApplicationPhysique() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -149,28 +157,27 @@ export function AppApplicationPhysique() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionApplicationPhysique(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteApplicationPhysique)));
   }
 
   const exercice = etat.exerciceCourant;
-  const { v1, resultante, normeResultante } = notationVecteursApplicationPhysique(exercice.contexte);
+  const cleEcran = `${numeroExercice}-${etat.phase}`;
 
+  // Valeur seule (audit chapitre 6, point 7) : `ValidationEcran` affiche déjà son propre libellé
+  // « Réponse attendue » — plus de « Norme attendue (…) : » en doublon. Virgule décimale (point 14).
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue:
-          !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "norme" ? (
-            <>
-              Norme attendue (<Katex expression={normeResultante} />) : {Math.round(exercice.triangle.a * 100) / 100} {exercice.unite}
-            </>
-          ) : etat.phase === "deviation" ? (
-            <>
-              Déviation attendue (angle entre <Katex expression={v1} /> et <Katex expression={resultante} />) :{" "}
-              {Math.round(exercice.triangle.C * 100) / 100}°
-            </>
-          ) : etat.phase === "interpretation" ? (
-            <>Direction attendue : {exercice.directionCorrecte}</>
-          ) : undefined,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec
+          ? undefined
+          : etat.phase === "modelisation"
+            ? libelleVarianteApplicationPhysique(exercice.variante)
+            : etat.phase === "norme"
+              ? `${formatValeurApplicationPhysique(exercice.triangle.a)} ${exercice.unite}`
+              : etat.phase === "deviation"
+                ? `${formatValeurApplicationPhysique(exercice.triangle.C)}°`
+                : exercice.directionCorrecte,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -181,7 +188,7 @@ export function AppApplicationPhysique() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Applications physiques (résultante de vecteurs)</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -191,36 +198,40 @@ export function AppApplicationPhysique() {
         {PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
         {etat.phase === "modelisation" ? (
           <EtapeModelisationApplicationPhysique
+            key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onChoisir={(choix) =>
-              terminerEtape(soumettreReponseModelisation(etat, choix), choix === "angleDroit" ? "Angle droit" : "Angle quelconque")
+              terminerEtape(soumettreReponseModelisation(etat, choix), libelleVarianteApplicationPhysique(choix))
             }
             validation={validation}
           />
         ) : etat.phase === "norme" ? (
           <EtapeNormeApplicationPhysique
+            key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideNorme}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
             onActiverAide={() => setEtat(activerAideNorme(etat))}
-            onValider={(valeur) => terminerEtape(soumettreReponseNorme(etat, valeur), `${valeur} ${exercice.unite}`)}
+            onValider={(valeur) => terminerEtape(soumettreReponseNorme(etat, valeur), `${nombreFr(valeur)} ${exercice.unite}`)}
             validation={validation}
           />
         ) : etat.phase === "deviation" ? (
           <EtapeDeviationApplicationPhysique
+            key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
-            onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur), `${valeur}°`)}
+            onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur), `${nombreFr(valeur)}°`)}
             validation={validation}
           />
         ) : (
           <EtapeInterpretationApplicationPhysique
+            key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

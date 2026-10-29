@@ -72,6 +72,9 @@ export function AppCombinaisonVecteurs() {
    * chaque nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : avec la phase, il
+   * sert de `key` aux écrans, pour que leurs champs repartent vides. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
    * réutilise `calculerRecapitulatifCombinaisonVecteurs` pour la réponse ATTENDUE (l'entrée qui
@@ -116,6 +119,7 @@ export function AppCombinaisonVecteurs() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -128,6 +132,7 @@ export function AppCombinaisonVecteurs() {
   function forcerVariante(id: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteCombinaisonVecteurs)));
   }
 
@@ -137,10 +142,7 @@ export function AppCombinaisonVecteurs() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "simplification" ? (
           <Katex expression={formatEquationReduiteLatex(exercice)} />
         ) : (
-          <>
-            <Katex expression={formatResultatLatex(exercice)} /> attendu{" "}
-            <Katex expression={`= ${formatVecteurColonneLatex(exercice.reponse)}`} />
-          </>
+          <Katex expression={`${formatResultatLatex(exercice)} = ${formatVecteurColonneLatex(exercice.reponse)}`} />
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -152,7 +154,7 @@ export function AppCombinaisonVecteurs() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Calcul de composantes de combinaisons linéaires</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -171,6 +173,7 @@ export function AppCombinaisonVecteurs() {
         />
         {etat.phase === "simplification" ? (
           <EtapeSimplificationCombinaisonVecteurs
+            key={`${numeroExercice}-simplification`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -181,6 +184,7 @@ export function AppCombinaisonVecteurs() {
           />
         ) : (
           <EtapeComposantesCombinaisonVecteurs
+            key={`${numeroExercice}-composantes`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

@@ -5,6 +5,7 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   calculerVecteursSchema,
   formatEnonceApplicationPhysique,
+  formatValeurApplicationPhysique,
   labelsGrapheApplicationPhysique,
   notationVecteursApplicationPhysique,
   OPTIONS_DIRECTION,
@@ -13,6 +14,7 @@ import {
   segmentsConsigneNorme,
 } from "../../ui/formatApplicationPhysique";
 import type { LabelGrapheVecteur } from "../../ui/formatApplicationPhysique";
+import { nombreFrLatex } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./index";
 
 /**
@@ -212,8 +214,9 @@ ${labelVecteurSvg(labelResultantePos.x, labelResultantePos.y, labels.resultante,
 // --- Correction resynthétisée (voir le commentaire de tête — pourquoi pas un simple copier-coller
 // des aides existantes pour "deviation", qui n'en a aucune côté écran) ---
 
-function arrondiDeux(valeur: number): number {
-  return Math.round(valeur * 100) / 100;
+/** Arrondi 2 décimales, virgule décimale `{,}` (audit chapitre 6, point 14). */
+function valeurLatex(valeur: number): string {
+  return nombreFrLatex(Math.round(valeur * 100) / 100);
 }
 
 function paragraphe(lettre: string, fragments: FragmentConsigne[]): BlocCorrection {
@@ -238,7 +241,8 @@ function correctionConfiguration(instance: ExerciceApplicationPhysique): BlocCor
 
 /** Correction (b) — norme de la résultante : réutilise exactement les mêmes formules (non
  * substituée puis substituée) que l'aide 2 niveaux de l'écran "norme" (seul écran à en avoir une),
- * cf. `ui/formatApplicationPhysique.ts::segmentsAideNormeNiveau1`/`formatAideNormeNiveau2Latex`. */
+ * cf. `ui/formatApplicationPhysique.ts::segmentsAideNormeNiveau1`/`formatAideNormeNiveau2Latex` —
+ * formule du cours, θ = angle de l'énoncé entre les deux vecteurs (audit chapitre 6, point 19). */
 function correctionNorme(instance: ExerciceApplicationPhysique): BlocCorrection {
   const { v1, v2, resultante, normeResultante } = notationVecteursApplicationPhysique(instance.contexte);
   const estDroit = instance.variante === "angleDroit";
@@ -247,23 +251,20 @@ function correctionNorme(instance: ExerciceApplicationPhysique): BlocCorrection 
         texte("Théorème de Pythagore : "),
         latex(`\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2 = ${instance.v1}^2 + ${instance.v2}^2`),
       ]
-    : (() => {
-        const alpha = 180 - instance.angleEntreVecteurs;
-        return [
-          texte("Loi des cosinus (α = angle du triangle vectoriel opposé à la résultante) : "),
-          latex(
-            `\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2 - 2\\|${v1}\\|\\|${v2}\\|\\cos(\\alpha) = ${instance.v1}^2 + ${instance.v2}^2 - 2\\cdot ${instance.v1}\\cdot ${instance.v2}\\cdot\\cos(${alpha}°)`,
-          ),
-        ];
-      })();
-  fragments.push(texte(`, donc `), latex(`${normeResultante} \\approx ${arrondiDeux(instance.triangle.a)} \\text{ ${instance.unite}}`), texte("."));
+    : [
+        texte(`Formule de la résultante (loi des cosinus, θ = ${instance.angleEntreVecteurs}° entre les deux vecteurs) : `),
+        latex(
+          `\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2 + 2\\|${v1}\\|\\|${v2}\\|\\cos\\theta = ${instance.v1}^2 + ${instance.v2}^2 + 2\\cdot ${instance.v1}\\cdot ${instance.v2}\\cdot\\cos(${instance.angleEntreVecteurs}°)`,
+        ),
+      ];
+  fragments.push(texte(`, donc `), latex(`${normeResultante} \\approx ${valeurLatex(instance.triangle.a)} \\text{ ${instance.unite}}`), texte("."));
   return paragraphe("b", fragments);
 }
 
 /** Correction (c) — angle de déviation : PAS d'aide existante à réutiliser (voir le commentaire de
  * tête) — resynthétisée en restant sur le même choix de méthode que (b) : trigonométrie du triangle
- * rectangle pour angleDroit, loi des sinus pour angleQuelconque (l'angle intérieur et le côté
- * "résultante" opposé étant déjà connus à ce stade). */
+ * rectangle pour angleDroit, loi des sinus du cours pour angleQuelconque
+ * (`sin(déviation)/‖v₂‖ = sin θ/‖v_R‖`, θ = angle de l'énoncé). */
 function correctionDeviation(instance: ExerciceApplicationPhysique): BlocCorrection {
   const { v1, v2, resultante } = notationVecteursApplicationPhysique(instance.contexte);
   const estDroit = instance.variante === "angleDroit";
@@ -272,16 +273,13 @@ function correctionDeviation(instance: ExerciceApplicationPhysique): BlocCorrect
         texte("Dans le triangle rectangle formé par les vecteurs composants, la résultante est l'hypoténuse : "),
         latex(`\\tan(\\text{déviation}) = \\dfrac{\\|${v2}\\|}{\\|${v1}\\|} = \\dfrac{${instance.v2}}{${instance.v1}}`),
       ]
-    : (() => {
-        const alpha = 180 - instance.angleEntreVecteurs;
-        return [
-          texte("Loi des sinus, avec l'angle intérieur α et le côté résultante déjà connus : "),
-          latex(
-            `\\dfrac{\\sin(\\text{déviation})}{\\|${v2}\\|} = \\dfrac{\\sin(\\alpha)}{\\|${resultante}\\|} \\;\\Rightarrow\\; \\sin(\\text{déviation}) = \\dfrac{${instance.v2}\\cdot\\sin(${alpha}°)}{${arrondiDeux(instance.triangle.a)}}`,
-          ),
-        ];
-      })();
-  fragments.push(texte(", donc déviation ≈ "), latex(`${arrondiDeux(instance.triangle.C)}°`), texte("."));
+    : [
+        texte("Loi des sinus, avec θ et la norme de la résultante déjà connus : "),
+        latex(
+          `\\dfrac{\\sin(\\text{déviation})}{\\|${v2}\\|} = \\dfrac{\\sin\\theta}{\\|${resultante}\\|} \\;\\Rightarrow\\; \\sin(\\text{déviation}) = \\dfrac{${instance.v2}\\cdot\\sin(${instance.angleEntreVecteurs}°)}{${valeurLatex(instance.triangle.a)}}`,
+        ),
+      ];
+  fragments.push(texte(", donc déviation ≈ "), latex(`${valeurLatex(instance.triangle.C)}°`), texte("."));
   return paragraphe("c", fragments);
 }
 
@@ -293,7 +291,7 @@ function correctionInterpretation(instance: ExerciceApplicationPhysique): BlocCo
   const cotePrincipal = instance.triangle.C < 90 ? "Nord" : "Sud";
   return paragraphe("d", [
     texte(
-      `La résultante dévie vers ${coteTexte} par rapport au premier vecteur (donnée de l'énoncé). L'angle de déviation trouvé en (c) vaut ${arrondiDeux(instance.triangle.C)}°, ${instance.triangle.C < 90 ? "inférieur" : "supérieur"} à 90° : la résultante reste donc du côté ${cotePrincipal}. Direction : ${instance.directionCorrecte}.`,
+      `La résultante dévie vers ${coteTexte} par rapport au premier vecteur (donnée de l'énoncé). L'angle de déviation trouvé en (c) vaut ${formatValeurApplicationPhysique(instance.triangle.C)}°, ${instance.triangle.C < 90 ? "inférieur" : "supérieur"} à 90° : la résultante reste donc du côté ${cotePrincipal}. Direction : ${instance.directionCorrecte}.`,
     ),
   ]);
 }

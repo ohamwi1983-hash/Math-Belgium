@@ -38,8 +38,49 @@ export function verifierNorme(exercice: ExerciceApplicationPhysique, valeur: num
   return diagnostiquerNorme(exercice, valeur) === "correct";
 }
 
+/** Précisions auxquelles l'élève a pu arrondir la norme avant de la réutiliser : l'unité (ce que
+ * la consigne de l'écran « norme » autorise), le dixième, le centième. */
+const DECIMALES_NORME_REUTILISEE = [0, 1, 2];
+
+function arrondir(valeur: number, decimales: number): number {
+  const facteur = 10 ** decimales;
+  return Math.round(valeur * facteur) / facteur;
+}
+
+/**
+ * Déviations acceptées (audit chapitre 6, point 3) — la valeur exacte `triangle.C`, plus celle que
+ * trouve un élève qui suit la consigne : il arrondit la norme (à l'unité, au dixième ou au
+ * centième), puis la réinjecte dans la loi des sinus du cours,
+ * `sin(déviation) / ‖v₂‖ = sin θ / ‖v_R‖`. Avec une norme arrondie à l'unité, l'écart dépassait
+ * ±0,5° pour environ un quart des exercices « forces » (petites normes), et l'élève était refusé
+ * alors qu'il avait tout bien fait. Même branche que `triangle.C` (aiguë ou obtuse) : le traitement
+ * d'une déviation supérieure à 90° n'est pas modifié ici.
+ */
+export function deviationsAcceptables(exercice: ExerciceApplicationPhysique): number[] {
+  const deviation = exercice.triangle.C;
+  const sinTheta = Math.sin((exercice.angleEntreVecteurs * Math.PI) / 180);
+  const valeurs = [deviation];
+  for (const decimales of DECIMALES_NORME_REUTILISEE) {
+    const sinDeviation = (exercice.v2 * sinTheta) / arrondir(exercice.triangle.a, decimales);
+    if (sinDeviation > 1) continue;
+    const aigu = (Math.asin(sinDeviation) * 180) / Math.PI;
+    valeurs.push(deviation < 90 ? aigu : 180 - aigu);
+  }
+  return valeurs;
+}
+
+/** ±1° autour de chaque déviation acceptée : couvre en plus un sinus arrondi en cours de calcul
+ * (ex. « ≈ 0,371 », comme l'exemple du cours) suivi de l'arrondi final à l'unité — deux arrondis
+ * successifs qui, à ±0,5°, refusaient encore environ 4 % des élèves qui suivaient la consigne. Les
+ * erreurs plausibles qui tomberaient dans cette fenêtre sont écartées dès le tirage
+ * (`generateurs/applicationPhysique/index.ts::erreursPlausiblesDeviation`). */
+export const TOLERANCE_DEVIATION = 1;
+
 export function diagnostiquerDeviation(exercice: ExerciceApplicationPhysique, valeur: number): StatutVerification {
-  return diagnostiquerCalculArrondi(valeur, exercice.triangle.C);
+  if (!Number.isFinite(valeur)) return "parse_error";
+  return deviationsAcceptables(exercice).some((attendu) => Math.abs(valeur - attendu) <= TOLERANCE_DEVIATION)
+    ? "correct"
+    : "not_equivalent";
 }
 
 export function verifierDeviation(exercice: ExerciceApplicationPhysique, valeur: number): boolean {

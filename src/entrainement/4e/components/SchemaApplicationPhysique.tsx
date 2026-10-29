@@ -1,5 +1,7 @@
 import type { ExerciceApplicationPhysique } from "../core/applicationPhysique.types";
-import { calculerVecteursSchema, labelsGrapheApplicationPhysique } from "../ui/formatApplicationPhysique";
+import { calculerVecteursSchema, labelsGrapheApplicationPhysique, positionsEtiquettesSchema } from "../ui/formatApplicationPhysique";
+import { calculerViewBoxVecteurs } from "../ui/vecteurGraph";
+import { calculerPasGrille } from "../ui/mafsTransformation";
 import { VecteurGraph } from "./VecteurGraph";
 
 interface Props {
@@ -21,14 +23,23 @@ export function SchemaApplicationPhysique({ exercice }: Props) {
   const labels = labelsGrapheApplicationPhysique(exercice.contexte);
   const origine = { x: 0, y: 0 };
   const extremiteV1 = { x: v1.x, y: v1.y };
+  // Étiquettes à l'extérieur du triangle et fenêtre avec marge proportionnelle (audit chapitre 6,
+  // point 26 : v₁/v_R superposées à 390 px, v₂ coupée à 1280 px).
+  const positions = positionsEtiquettesSchema(exercice);
+  const viewBox = calculerViewBoxVecteurs(positions.coins.map((point) => ({ point, label: "" })));
+  // Même pas de quadrillage sur les deux axes (le pas adaptatif donnait « 1 carré = 50 » à
+  // l'horizontale et « = 20 » à la verticale) : les longueurs se comparent alors à l'œil.
+  const pas = calculerPasGrille(viewBox.x[1] - viewBox.x[0]);
 
   return (
     <VecteurGraph
       masquerAxes
+      viewBoxFixe={viewBox}
+      pasGrille={pas}
       vecteurs={[
-        { origine, vecteur: v1, labelFleche: labels.v1 },
-        { origine: extremiteV1, vecteur: v2, labelFleche: labels.v2 },
-        { origine, vecteur: resultante, labelFleche: labels.resultante, couleur: "#e8590c" },
+        { origine, vecteur: v1, labelFleche: labels.v1, labelPosition: positions.v1 },
+        { origine: extremiteV1, vecteur: v2, labelFleche: labels.v2, labelPosition: positions.v2 },
+        { origine, vecteur: resultante, labelFleche: labels.resultante, labelPosition: positions.resultante, couleur: "#e8590c" },
       ]}
     />
   );

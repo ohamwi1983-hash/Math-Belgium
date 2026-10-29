@@ -25,11 +25,11 @@ export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentati
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerEgalite(exercice, texte) : undefined;
   const erronee = statut !== undefined && statut !== "correct";
-  const { points, vecteurs } = vecteursAffichesComparaison(exercice, [exercice.cibleEgalite]);
+  const { points, vecteurs, viewBox } = vecteursAffichesComparaison(exercice, [exercice.cibleEgalite]);
 
   return (
     <div>
-      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes />
+      <VecteurGraph points={points} vecteurs={vecteurs} masquerAxes pasGrille={1} viewBoxFixe={viewBox} />
       <p className="prompt-text">
         Écris l'égalité reliant <Katex expression={`\\vec{${exercice.cibleEgalite}}`} /> à{" "}
         <Katex expression={`\\vec{${exercice.labelReference}}`} />.
@@ -37,12 +37,13 @@ export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentati
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="comparaison-egalite">
-          Égalité =
+          Ton égalité
         </label>
         <input
           id="comparaison-egalite"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder={`ex : ${exercice.cibleEgalite} = 2${exercice.labelReference}`}
+          placeholder="ex : u = 3v"
+          readOnly={Boolean(validation)}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />

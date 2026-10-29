@@ -34,7 +34,8 @@ const REGEX_TERME = /([+-]?)(?:([a-zA-Z]+)[*×](\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)
  * `not_equivalent` (voir `diagnostiquerCombinaisonVecteurs`).
  */
 export function parserCombinaisonVecteurs(texte: string, nomsValides: string[]): CoefficientsVecteurs | null {
-  const nettoye = texte.replace(/\s+/g, "");
+  // Signes moins typographiques (« − », « – ») ramenés à « - » (audit chapitre 6, point 6).
+  const nettoye = texte.replace(/\s+/g, "").replace(/[\u2212\u2013\u2014]/g, "-");
   if (nettoye === "") return null;
 
   const coefficients: CoefficientsVecteurs = {};

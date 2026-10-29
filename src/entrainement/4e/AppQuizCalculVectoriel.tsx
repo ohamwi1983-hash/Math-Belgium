@@ -3,24 +3,29 @@ import type { VarianteQuizCalculVectoriel } from "./core/quizCalculVectoriel.typ
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizCalculVectoriel, soumettreReponseQuizCalculVectoriel } from "./moteur/sessionQuizCalculVectoriel";
 import type { EtatSessionQuizCalculVectoriel, ResultatExerciceQuizCalculVectoriel } from "./moteur/typesQuizCalculVectoriel";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizCalculVectoriel";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs/quizCalculVectoriel";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizCalculVectoriel } from "./components/EtapeQuestionQuizCalculVectoriel";
 import { ResultatPanelQuizCalculVectoriel } from "./components/ResultatPanelQuizCalculVectoriel";
 import { ResumeSessionQuizCalculVectoriel } from "./components/ResumeSessionQuizCalculVectoriel";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizCalculVectoriel/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs/quizCalculVectoriel/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizCalculVectoriel): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizCalculVectoriel): EtatSessionQuizCalculVectoriel {
-  return demarrerSessionQuizCalculVectoriel(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizCalculVectoriel(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -49,7 +54,7 @@ export function AppQuizCalculVectoriel() {
     const theme = varianteId as VarianteQuizCalculVectoriel;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizCalculVectoriel(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizCalculVectoriel(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -59,7 +64,7 @@ export function AppQuizCalculVectoriel() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Calcul vectoriel — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 4{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-subtitle">Chapitre 6{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="card-progress">
@@ -80,7 +85,13 @@ export function AppQuizCalculVectoriel() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">9 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                ? `${ETENDUE_QUESTIONS.max} affirmations`
+                : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+              vrai/faux chacun — révision complète du chapitre.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

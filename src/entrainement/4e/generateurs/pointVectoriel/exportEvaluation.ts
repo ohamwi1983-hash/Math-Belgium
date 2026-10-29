@@ -1,7 +1,14 @@
 import type { ExercicePointVectoriel } from "../../core/pointVectoriel.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consignePointVectoriel, formatDonneesConnuesLatex } from "../../ui/formatPointVectoriel";
+import {
+  consignePointVectoriel,
+  formatCoefficientLatex,
+  formatDonneesConnuesLatex,
+  formatFacteurLatex,
+  formatNombreLatex,
+  formatTermeLatex,
+} from "../../ui/formatPointVectoriel";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVectoriel } from "./index";
 
 /**
@@ -51,12 +58,17 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVect
  * sous-formes ayant chacune une arithmétique propre).
  */
 
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-}
+/** Nombres à la virgule, valeurs exactes (audit chapitre 6, points 2 et 14 : l'ancien corrigé
+ * écrivait « + -0.33 × 9 », un calcul faux et mal parenthésé). */
+const formatNombre = formatNombreLatex;
 
 function formatPointLatex(label: string, point: { x: number; y: number }): string {
   return `${label}(${formatNombre(point.x)} \\text{ ; } ${formatNombre(point.y)})`;
+}
+
+/** « a + b » avec b négatif entre parenthèses : « 3 + (−2) ». */
+function somme(...termes: number[]): string {
+  return termes.map((t, i) => (i === 0 ? formatNombre(t) : formatTermeLatex(t))).join(" + ");
 }
 
 function construireEnoncePointVectoriel(instance: ExercicePointVectoriel): SectionExercice {
@@ -79,7 +91,7 @@ function correctionTranslation(instance: Extract<ExercicePointVectoriel, { varia
         latex(`\\vec{${labelPoint}${pointCherche}} = \\begin{pmatrix} ${formatNombre(translation.x)} \\\\ ${formatNombre(translation.y)} \\end{pmatrix}`),
         texte(" donc "),
         latex(
-          `${pointCherche}(${formatNombre(point.x)} + ${formatNombre(translation.x)} \\text{ ; } ${formatNombre(point.y)} + ${formatNombre(translation.y)}) = ${formatPointLatex(pointCherche, reponse)}`,
+          `${pointCherche}(${somme(point.x, translation.x)} \\text{ ; } ${somme(point.y, translation.y)}) = ${formatPointLatex(pointCherche, reponse)}`,
         ),
         texte("."),
       ],
@@ -96,7 +108,7 @@ function correctionMilieu(instance: Extract<ExercicePointVectoriel, { variante: 
       fragments: [
         latex(
           `${pointCherche} = \\left( \\dfrac{x_{${labelA}} + x_{${labelB}}}{2} \\text{ ; } \\dfrac{y_{${labelA}} + y_{${labelB}}}{2} \\right) = ` +
-            `\\left( \\dfrac{${formatNombre(pointA.x)} + ${formatNombre(pointB.x)}}{2} \\text{ ; } \\dfrac{${formatNombre(pointA.y)} + ${formatNombre(pointB.y)}}{2} \\right) = ${formatPointLatex(pointCherche, reponse)}`,
+            `\\left( \\dfrac{${somme(pointA.x, pointB.x)}}{2} \\text{ ; } \\dfrac{${somme(pointA.y, pointB.y)}}{2} \\right) = ${formatPointLatex(pointCherche, reponse)}`,
         ),
         texte("."),
       ],
@@ -109,7 +121,8 @@ function correctionRelationPointAPoint(instance: Extract<ExercicePointVectoriel,
   const { pointOrigine, labelOrigine, pointConnu, labelConnu, coefficient, pointCherche, reponse } = instance;
   const dx = pointConnu.x - pointOrigine.x;
   const dy = pointConnu.y - pointOrigine.y;
-  const k = formatNombre(coefficient);
+  const kRelation = formatCoefficientLatex(Math.abs(coefficient));
+  const kFacteur = formatFacteurLatex(coefficient);
   return [
     {
       type: "paragraphe",
@@ -117,7 +130,7 @@ function correctionRelationPointAPoint(instance: Extract<ExercicePointVectoriel,
         latex(`\\vec{${labelOrigine}${labelConnu}} = \\begin{pmatrix} ${formatNombre(dx)} \\\\ ${formatNombre(dy)} \\end{pmatrix}`),
         texte(", donc "),
         latex(
-          `${pointCherche} = ${labelOrigine} + ${k}\\vec{${labelOrigine}${labelConnu}} = (${formatNombre(pointOrigine.x)} + ${k} \\times ${formatNombre(dx)} \\text{ ; } ${formatNombre(pointOrigine.y)} + ${k} \\times ${formatNombre(dy)}) = ${formatPointLatex(pointCherche, reponse)}`,
+          `${pointCherche} = ${labelOrigine} ${coefficient < 0 ? "-" : "+"} ${kRelation}\\vec{${labelOrigine}${labelConnu}} = (${formatNombre(pointOrigine.x)} + ${kFacteur} \\times ${formatTermeLatex(dx)} \\text{ ; } ${formatNombre(pointOrigine.y)} + ${kFacteur} \\times ${formatTermeLatex(dy)}) = ${formatPointLatex(pointCherche, reponse)}`,
         ),
         texte("."),
       ],
@@ -130,16 +143,17 @@ function correctionRelationCombinaison(
   instance: Extract<ExercicePointVectoriel, { variante: "relationGenerale"; forme: "combinaisonVecteurs" }>,
 ): BlocCorrection[] {
   const { pointDepart, labelDepart, vecteurU, labelU, vecteurV, labelV, coefU, coefV, pointCherche, reponse } = instance;
-  const c1 = formatNombre(coefU);
-  const c2 = formatNombre(coefV);
+  const c1 = formatFacteurLatex(coefU);
+  const c2 = formatFacteurLatex(coefV);
+  const signeV = coefV < 0 ? "-" : "+";
   return [
     {
       type: "paragraphe",
       fragments: [
         latex(
-          `${pointCherche} = ${labelDepart} + ${c1}\\vec{${labelU}} + ${c2}\\vec{${labelV}} = ` +
-            `(${formatNombre(pointDepart.x)} + ${c1} \\times ${formatNombre(vecteurU.x)} + ${c2} \\times ${formatNombre(vecteurV.x)} \\text{ ; } ` +
-            `${formatNombre(pointDepart.y)} + ${c1} \\times ${formatNombre(vecteurU.y)} + ${c2} \\times ${formatNombre(vecteurV.y)}) = ${formatPointLatex(pointCherche, reponse)}`,
+          `${pointCherche} = ${labelDepart} ${coefU < 0 ? "-" : "+"} ${formatCoefficientLatex(Math.abs(coefU))}\\vec{${labelU}} ${signeV} ${formatCoefficientLatex(Math.abs(coefV))}\\vec{${labelV}} = ` +
+            `(${formatNombre(pointDepart.x)} + ${c1} \\times ${formatTermeLatex(vecteurU.x)} + ${c2} \\times ${formatTermeLatex(vecteurV.x)} \\text{ ; } ` +
+            `${formatNombre(pointDepart.y)} + ${c1} \\times ${formatTermeLatex(vecteurU.y)} + ${c2} \\times ${formatTermeLatex(vecteurV.y)}) = ${formatPointLatex(pointCherche, reponse)}`,
         ),
         texte("."),
       ],

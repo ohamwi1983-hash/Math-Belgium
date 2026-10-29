@@ -3,10 +3,11 @@
  * vectoriel", huitième générateur).
  */
 import type { ContexteApplicationPhysique, ExerciceApplicationPhysique, VarianteApplicationPhysique } from "../core/applicationPhysique.types";
-import type { Composantes } from "../core/vecteur.types";
+import type { Composantes, Point } from "../core/vecteur.types";
 import type { EtatSessionApplicationPhysique } from "../moteur/typesApplicationPhysique";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import type { EntreeRecapitulatif } from "./recapitulatif";
+import { nombreFr } from "./nombreFr";
 
 export type { FragmentConsigne };
 
@@ -44,6 +45,63 @@ export function calculerVecteursSchema(exercice: ExerciceApplicationPhysique): V
   const v1: Composantes = { x: exercice.v1 * Math.cos(radV1), y: exercice.v1 * Math.sin(radV1) };
   const v2: Composantes = { x: exercice.v2 * Math.cos(radV2), y: exercice.v2 * Math.sin(radV2) };
   return { v1, v2, resultante: { x: v1.x + v2.x, y: v1.y + v2.y } };
+}
+
+/** Fraction du plus grand côté du schéma : décalage d'une étiquette par rapport à son vecteur, et
+ * marge ajoutée autour de la figure (étiquettes comprises). */
+const FRACTION_DECALAGE_ETIQUETTE_SCHEMA = 0.1;
+const FRACTION_MARGE_SCHEMA = 0.1;
+/** Hauteur d'une étiquette (lettre + flèche, dessinées AU-DESSUS de son point d'ancrage), en
+ * fraction du plus grand côté : décalage supplémentaire d'une étiquette placée sous son vecteur, et
+ * marge supplémentaire en haut de la figure. */
+const FRACTION_HAUTEUR_ETIQUETTE_SCHEMA = 0.1;
+
+export interface PositionsEtiquettesSchema {
+  v1: Point;
+  v2: Point;
+  resultante: Point;
+  /** Coins de la zone à afficher (figure + étiquettes + marge), pour `VecteurGraph.viewBoxFixe`. */
+  coins: [Point, Point];
+}
+
+/**
+ * Étiquettes du schéma (audit chapitre 6, point 26) — chacune placée du côté EXTÉRIEUR du triangle
+ * vectoriel (à l'opposé de son centre de gravité), et à des hauteurs différentes le long des deux
+ * vecteurs issus de l'origine (40 % pour v₁, 60 % pour la résultante). Le placement au milieu, du
+ * même côté pour tous, superposait v₁ et v_R dès que le triangle était mince (vent faible devant la
+ * vitesse propre) ; et sans marge proportionnelle (`calculerViewBoxVecteurs` n'ajoute que 1,5 unité,
+ * rien face à des vitesses de 300 km/h) l'étiquette de v₂ sortait du cadre.
+ */
+export function positionsEtiquettesSchema(exercice: ExerciceApplicationPhysique): PositionsEtiquettesSchema {
+  const { v1, v2, resultante } = calculerVecteursSchema(exercice);
+  const sommets: Point[] = [{ x: 0, y: 0 }, v1, resultante];
+  const centre = { x: (v1.x + resultante.x) / 3, y: (v1.y + resultante.y) / 3 };
+  const xs = sommets.map((p) => p.x);
+  const ys = sommets.map((p) => p.y);
+  const taille = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const decalage = taille * FRACTION_DECALAGE_ETIQUETTE_SCHEMA;
+
+  function placer(origine: Point, vecteur: Composantes, fraction: number): Point {
+    const point = { x: origine.x + vecteur.x * fraction, y: origine.y + vecteur.y * fraction };
+    const longueur = Math.hypot(vecteur.x, vecteur.y) || 1;
+    let perp = { x: -vecteur.y / longueur, y: vecteur.x / longueur };
+    if (perp.x * (centre.x - point.x) + perp.y * (centre.y - point.y) > 0) perp = { x: -perp.x, y: -perp.y };
+    const sousLeVecteur = perp.y < -0.3 ? taille * FRACTION_HAUTEUR_ETIQUETTE_SCHEMA * -perp.y : 0;
+    return { x: point.x + perp.x * decalage, y: point.y + perp.y * decalage - sousLeVecteur };
+  }
+
+  const positions = {
+    v1: placer({ x: 0, y: 0 }, v1, 0.4),
+    v2: placer(v1, v2, 0.5),
+    resultante: placer({ x: 0, y: 0 }, resultante, 0.6),
+  };
+  const tous = [...sommets, positions.v1, positions.v2, positions.resultante];
+  const marge = taille * FRACTION_MARGE_SCHEMA;
+  const coins: [Point, Point] = [
+    { x: Math.min(...tous.map((p) => p.x)) - marge, y: Math.min(...tous.map((p) => p.y)) - marge },
+    { x: Math.max(...tous.map((p) => p.x)) + marge, y: Math.max(...tous.map((p) => p.y)) + marge + taille * FRACTION_HAUTEUR_ETIQUETTE_SCHEMA },
+  ];
+  return { ...positions, coins };
 }
 
 const LIBELLES_CONTEXTE: Record<ContexteApplicationPhysique, string> = {
@@ -158,9 +216,9 @@ export function segmentsConsigneConfiguration(exercice: ExerciceApplicationPhysi
   return [texte(`Quel type d'angle entre les ${grandeur} `), latex(v1), texte(" et "), latex(v2), texte(" ?")];
 }
 
-/** Tolérance réellement vérifiée = `TOLERANCE_ARRONDI = 0.5` (`diagnostiquerCalculArrondi`,
- * `verificationApplicationPhysique.ts`) — soit un arrondi à l'unité, jamais annoncé jusqu'ici (voir
- * l'audit de traçabilité de précision). */
+/** Tolérance réellement vérifiée = `TOLERANCE_ARRONDI = 0.5` pour la norme (`diagnostiquerCalculArrondi`,
+ * `verificationApplicationPhysique.ts`) — soit un arrondi à l'unité ; pour la déviation, ±1° autour
+ * de la valeur recalculée avec la norme arrondie (`deviationsAcceptables`, audit chapitre 6). */
 const NOTE_PRECISION_ARRONDI_UNITE = " (arrondi à l'unité accepté si besoin)";
 
 /** Consigne de l'écran "norme" (point 4.1). */
@@ -183,11 +241,12 @@ export function segmentsConsigneDeviation(exercice: ExerciceApplicationPhysique)
 }
 
 /**
- * Aide niveau 1 de l'écran "norme" (point 4.3) — rappel de la MÉTHODE pertinente uniquement (loi
- * des cosinus pour angleQuelconque, Pythagore pour angleDroit, jamais les deux à la fois), formule
- * NON substituée : α désigne l'angle du triangle vectoriel opposé à la résultante (`triangle.A`),
- * jamais explicitement distingué de l'angle donné dans l'énoncé entre les vecteurs composants —
- * laissé à la découverte de l'élève.
+ * Aide niveau 1 de l'écran "norme" (point 4.3) — rappel de la MÉTHODE pertinente uniquement
+ * (Pythagore pour angleDroit, formule de la résultante pour angleQuelconque, jamais les deux à la
+ * fois), formule NON substituée. Audit chapitre 6, point 19 : même formule que le cours
+ * (`R² = F₁² + F₂² + 2·F₁·F₂·cos θ`, θ = angle ENTRE les deux vecteurs, celui de l'énoncé) —
+ * l'ancienne version `… − 2…cos(α)`, α = angle du triangle vectoriel, était juste mais n'était pas
+ * celle du cours, et l'élève y injectait naturellement l'angle de l'énoncé avec le signe −.
  */
 export function segmentsAideNormeNiveau1(exercice: ExerciceApplicationPhysique): FragmentConsigne[] {
   const { v1, v2, resultante } = notationVecteursApplicationPhysique(exercice.contexte);
@@ -195,22 +254,25 @@ export function segmentsAideNormeNiveau1(exercice: ExerciceApplicationPhysique):
     return [texte("Utilise le théorème de Pythagore : "), latex(`\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2`), texte(".")];
   }
   return [
-    texte("Utilise la loi des cosinus : "),
-    latex(`\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2 - 2\\|${v1}\\|\\|${v2}\\|\\cos(\\alpha)`),
-    texte(", où α est l'angle du triangle vectoriel opposé à la résultante."),
+    texte("Utilise la formule de la résultante (loi des cosinus) : "),
+    latex(`\\|${resultante}\\|^2 = \\|${v1}\\|^2 + \\|${v2}\\|^2 + 2\\|${v1}\\|\\|${v2}\\|\\cos\\theta`),
+    texte(", où θ est l'angle entre "),
+    latex(v1),
+    texte(" et "),
+    latex(v2),
+    texte(" donné dans l'énoncé."),
   ];
 }
 
 /** Aide niveau 2 de l'écran "norme" (point 4.3) — formule SUBSTITUÉE avec les valeurs réelles de
- * l'instance (v1, v2, et le VRAI angle α = triangle.A, jamais l'angle donné dans l'énoncé entre
- * les vecteurs composants), jamais calculée (le résultat final reste à trouver par l'élève). */
+ * l'instance (v1, v2 et θ, l'angle de l'énoncé — même formule que le cours, voir le niveau 1),
+ * jamais calculée (le résultat final reste à trouver par l'élève). */
 export function formatAideNormeNiveau2Latex(exercice: ExerciceApplicationPhysique): string {
   const { resultante } = notationVecteursApplicationPhysique(exercice.contexte);
   if (exercice.variante === "angleDroit") {
     return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2`;
   }
-  const alpha = 180 - exercice.angleEntreVecteurs;
-  return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2 - 2\\cdot ${exercice.v1}\\cdot ${exercice.v2}\\cdot\\cos(${alpha}°)`;
+  return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2 + 2\\cdot ${exercice.v1}\\cdot ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}°)`;
 }
 
 const LIBELLES_VARIANTE: Record<VarianteApplicationPhysique, string> = {
@@ -218,10 +280,14 @@ const LIBELLES_VARIANTE: Record<VarianteApplicationPhysique, string> = {
   angleQuelconque: "Angle quelconque",
 };
 
-/** Arrondi 2 décimales — même convention que le panneau de résultat (`ResultatPanelApplicationPhysique`,
- * "answer-reveal"), jamais un décimal brut non arrondi. */
-function arrondiDeux(valeur: number): number {
-  return Math.round(valeur * 100) / 100;
+export function libelleVarianteApplicationPhysique(variante: VarianteApplicationPhysique): string {
+  return LIBELLES_VARIANTE[variante];
+}
+
+/** Arrondi 2 décimales, virgule décimale (audit chapitre 6, point 14) — même convention que la
+ * réponse révélée (`AppApplicationPhysique.tsx`), jamais un décimal brut non arrondi. */
+export function formatValeurApplicationPhysique(valeur: number): string {
+  return nombreFr(Math.round(valeur * 100) / 100);
 }
 
 /**
@@ -249,7 +315,7 @@ export function calculerRecapitulatifApplicationPhysique(etat: EtatSessionApplic
     entrees.push({
       libelle: "Norme de la résultante",
       estLatex: false,
-      valeur: `${arrondiDeux(exercice.triangle.a)} ${exercice.unite}`,
+      valeur: `${formatValeurApplicationPhysique(exercice.triangle.a)} ${exercice.unite}`,
       revele: etat.normeReveleExercice,
     });
   }
@@ -258,7 +324,7 @@ export function calculerRecapitulatifApplicationPhysique(etat: EtatSessionApplic
     entrees.push({
       libelle: "Angle de déviation",
       estLatex: false,
-      valeur: `${arrondiDeux(exercice.triangle.C)}°`,
+      valeur: `${formatValeurApplicationPhysique(exercice.triangle.C)}°`,
       revele: etat.deviationReveleExercice,
     });
   }

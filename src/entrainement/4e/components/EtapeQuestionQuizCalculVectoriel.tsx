@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core/quizCalculVectoriel.types";
+import { RenduFragments } from "./RenduFragments";
+import { fragmentsTexteVectoriel } from "../ui/formatQuizCalculVectoriel";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -14,7 +16,9 @@ export function EtapeQuestionQuizCalculVectoriel({ question, onValider }: Props)
 
   return (
     <div>
-      <p className="prompt-text">{question.enonce}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={fragmentsTexteVectoriel(question.enonce)} />
+      </p>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === true ? " toggle-active" : ""}`} onClick={() => setChoix(true)}>

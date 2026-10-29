@@ -1,14 +1,12 @@
 import type { Composantes, Point } from "./vecteur.types";
 
 /**
- * Portée délibérément restreinte de "même longueur" (voir CLAUDE.md) : chaque vecteur affiché est
- * une transformation (translation ou multiple scalaire) d'un des 2-3 vecteurs de base, jamais
- * construit indépendamment — deux vecteurs issus de bases DIFFÉRENTES n'ont donc aucune garantie
- * de norme égale par construction. "même longueur" est donc testée UNIQUEMENT parmi les
- * transformations du MÊME vecteur de base que la référence, restreintes à un coefficient effectif
- * ±1 (translation ou opposé exact) — ce qui garantit que tout vecteur "de même longueur" trouvé
- * est aussi automatiquement colinéaire à la référence, rendant l'étape "égalité" (screen 3,
- * toujours une équation `cible = k·référence`) valide uniformément pour les 3 propriétés.
+ * Les bonnes réponses (`labelsCorrects`) sont calculées à partir des COMPOSANTES réelles de chaque
+ * vecteur affiché (audit chapitre 6) : même norme pour « longueur » (y compris un vecteur d'une
+ * autre direction), produit en croix nul pour « direction », produit en croix nul et produit
+ * scalaire positif pour « sens ». Les vecteurs de base sont deux à deux non colinéaires : seuls les
+ * vecteurs issus de la base 0 sont colinéaires à la référence, ce qui garantit un coefficient entier
+ * pour l'étape « égalité » (`cibleEgalite`, toujours choisi parmi les bonnes réponses colinéaires).
  */
 export type ProprieteComparaison = "longueur" | "direction" | "sens";
 

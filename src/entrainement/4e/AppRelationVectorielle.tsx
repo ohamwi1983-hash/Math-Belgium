@@ -11,6 +11,7 @@ import { EtapeTranslationVectorielle } from "./components/EtapeTranslationVector
 import { EtapeTraductionRelationVectorielle } from "./components/EtapeTraductionRelationVectorielle";
 import { EtapeCoordonneesRelationVectorielle } from "./components/EtapeCoordonneesRelationVectorielle";
 import { formatTraductionAttendueLatex } from "./ui/formatRelationVectorielle";
+import { nombreFrLatex } from "./ui/nombreFr";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -80,6 +81,9 @@ export function AppRelationVectorielle() {
    * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : avec la phase, il
+   * sert de `key` aux écrans, pour que leurs champs repartent vides. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
    * `calculerRecapitulatifRelationVectorielle` pour la réponse ATTENDUE ; cette fonction ne produit
@@ -122,6 +126,7 @@ export function AppRelationVectorielle() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -131,6 +136,7 @@ export function AppRelationVectorielle() {
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionRelationVectorielle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteRelationVectorielle)));
   }
 
@@ -143,9 +149,7 @@ export function AppRelationVectorielle() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "traduction" ? (
           <Katex expression={formatTraductionAttendueLatex(exercice as ExerciceRelationGeneraleRV)} />
         ) : (
-          <>
-            {exercice.pointCherche} attendu : ({exercice.reponse.x} ; {exercice.reponse.y})
-          </>
+          <Katex expression={`${exercice.pointCherche}(${nombreFrLatex(exercice.reponse.x)} \\,;\\, ${nombreFrLatex(exercice.reponse.y)})`} />
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -157,7 +161,7 @@ export function AppRelationVectorielle() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Point à partir d'une relation vectorielle</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel (version guidée)</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel (version guidée)</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -167,6 +171,7 @@ export function AppRelationVectorielle() {
         <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {exercice.variante === "translation" ? (
           <EtapeTranslationVectorielle
+            key={`${numeroExercice}-translation`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -177,6 +182,7 @@ export function AppRelationVectorielle() {
           />
         ) : etat.phase === "traduction" ? (
           <EtapeTraductionRelationVectorielle
+            key={`${numeroExercice}-traduction`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -187,6 +193,7 @@ export function AppRelationVectorielle() {
           />
         ) : (
           <EtapeCoordonneesRelationVectorielle
+            key={`${numeroExercice}-coordonnees`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

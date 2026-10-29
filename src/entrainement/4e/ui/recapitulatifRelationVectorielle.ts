@@ -18,7 +18,7 @@ export function calculerRecapitulatifRelationVectorielle(etat: EtatSessionRelati
 
   return [
     {
-      libelle: "Traduction en coordonnées",
+      libelle: "Égalité entre différences de points",
       estLatex: true,
       valeur: formatTraductionAttendueLatex(exercice),
       revele: etat.traductionRevele,

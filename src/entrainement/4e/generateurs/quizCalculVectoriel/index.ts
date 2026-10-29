@@ -20,6 +20,20 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizCalculVectoriel; label: stri
   { id: "applicationsPhysiques", label: "Applications physiques — résultante de deux vecteurs" },
 ];
 
+/** Taille réelle de la banque d'un thème (35 aujourd'hui pour chacun des 9 thèmes) — jamais une
+ * constante fixe : `AppQuizCalculVectoriel.tsx` l'utilise pour fixer `nombreExercices`, seule façon
+ * pour `creerGenerateurSansRepetition` de garder sa garantie « jamais de répétition dans une
+ * session » si un thème venait à perdre ou gagner des affirmations (`.claude/rules/quiz-generators.md`). */
+export function nombreQuestions(varianteId: VarianteQuizCalculVectoriel): number {
+  return BANQUE_QUIZ_CALCUL_VECTORIEL[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
+
 function tirerQuestion(varianteId: VarianteQuizCalculVectoriel): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_CALCUL_VECTORIEL[varianteId];
   return banque[randomInt(0, banque.length - 1)];
@@ -51,9 +65,10 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizCalculVectoriel`) pourrait
- * répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée, ré-mélangée
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème
+ * (`nombreQuestions`) : sans cette précaution, le tirage indépendant habituel
+ * (`genererExerciceQuizCalculVectoriel`) pourrait répéter une question avant d'avoir couvert les
+ * autres. État interne (file mélangée, ré-mélangée
  * à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette fonction
  * — voir `AppQuizCalculVectoriel.tsx`, qui en crée une par session démarrée.
  */
