@@ -1,6 +1,6 @@
 import type { ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { AIDE_DIRECTION_INCONNUE, avecId, CONSIGNE_DIRECTION_INCONNUE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, origineApercusDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { AIDE_DIRECTION_INCONNUE, avecId, COULEURS_OMBRE, fusionner, CONSIGNE_DIRECTION_INCONNUE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, origineApercusDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
 import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
 import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -26,12 +26,15 @@ export function EtapeDirectionInconnue({ exercice, ...reste }: Props) {
     <ChoixCandidatsOmbre
       {...reste}
       solide={solidePourAffichage(exercice)}
-      fond={elementsScene(exercice)}
-      consigne={avecId(CONSIGNE_DIRECTION_INCONNUE, origine.id)}
+      fond={fusionner(elementsScene(exercice), { points: [{ position: sommet, label: origine.id, couleur: COULEURS_OMBRE.baton }], segments: [] })}
+      consigne={avecId(CONSIGNE_DIRECTION_INCONNUE, origine.id, exercice.piquetConnu.id)}
       candidats={exercice.directionsCandidates.map((d) => ({ id: d.id, dessin: (numero, etat) => dessinDirection(sommet, d, numero, etat) }))}
       idCorrect={directionCorrecte(exercice).id}
       libelle={libelleDirection}
-      aides={[{ texte: AIDE_DIRECTION_INCONNUE[0] }, { texte: avecId(AIDE_DIRECTION_INCONNUE[1], origine.id), dessin: { points: [], segments: [copie] } }]}
+      aides={[
+        { texte: avecId(AIDE_DIRECTION_INCONNUE[0], origine.id, exercice.piquetConnu.id) },
+        { texte: avecId(AIDE_DIRECTION_INCONNUE[1], origine.id, exercice.piquetConnu.id), dessin: { points: [], segments: [copie] } },
+      ]}
     />
   );
 }

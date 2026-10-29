@@ -126,7 +126,7 @@ export function elementsBaton(piquet: Piquet, couleur: string = COULEURS_OMBRE.b
 export function elementsExemple(piquet: Piquet, ombre: Point3D): ElementsCroquis {
   const baton = elementsBaton(piquet, COULEURS_OMBRE.exemple);
   return {
-    points: [...baton.points, { position: ombre, label: "Ombre de E", couleur: COULEURS_OMBRE.exemple }],
+    points: [...baton.points, { position: ombre, label: "E′", couleur: COULEURS_OMBRE.exemple }],
     segments: [
       ...baton.segments,
       { a: sommetPiquet(piquet), b: ombre, couleur: COULEURS_OMBRE.exemple, pointille: true },
@@ -142,7 +142,7 @@ export function elementsPaireConnue(exercice: ExerciceOmbreSoleilDirectionInconn
   return {
     points: [
       { position: sommet, label: exercice.piquetConnu.id, couleur: COULEURS_OMBRE.exemple },
-      { position: exercice.ombreConnue, label: "Ombre connue", couleur: COULEURS_OMBRE.exemple },
+      { position: exercice.ombreConnue, label: `${exercice.piquetConnu.id}′`, couleur: COULEURS_OMBRE.exemple },
     ],
     segments: [
       { a: sommet, b: exercice.ombreConnue, couleur: COULEURS_OMBRE.exemple, pointille: true },
@@ -227,7 +227,7 @@ export function copieRayonDepuisPied(pied: Point3D, sommetReference: Point3D, om
 // --- Textes -----------------------------------------------------------------------------------------
 
 export const CONSIGNE_POINT_SIMPLE =
-  "Le soleil éclaire le bâton A comme le bâton E de l'exemple (rayon pointillé, ombre au sol). Choisis le point où tombe l'ombre du sommet de A.";
+  "Le soleil éclaire le bâton A comme le bâton E de l'exemple (rayon pointillé, ombre au sol jusqu'à E′). Choisis le point A′ où tombe l'ombre du sommet de A.";
 
 export const AIDE_POINT_SIMPLE = [
   "Méthode : l'ombre du sommet est à l'intersection de deux droites — le rayon issu du sommet de A, parallèle au rayon de l'exemple, et la trace au sol issue du pied de A, parallèle à l'ombre de E (du pied de E à son ombre).",
@@ -235,7 +235,7 @@ export const AIDE_POINT_SIMPLE = [
 ];
 
 export const CONSIGNE_DIRECTION_OBSTACLE =
-  "Tous les rayons du soleil sont parallèles. Choisis le rayon qui part du sommet du bâton A dans la même direction que le rayon de l'exemple E.";
+  "Tous les rayons du soleil sont parallèles. Choisis le rayon qui part du sommet du bâton A dans la même direction que le rayon de l'exemple (du sommet de E à son ombre E′).";
 
 export const AIDE_DIRECTION_OBSTACLE = [
   "Méthode : des droites parallèles restent parallèles sur le dessin. Le bon rayon a exactement la même inclinaison que le rayon pointillé de l'exemple, et part du même côté.",
@@ -243,7 +243,7 @@ export const AIDE_DIRECTION_OBSTACLE = [
 ];
 
 export const CONSIGNE_POINT_OBSTACLE =
-  "Le rayon issu du sommet du bâton A est tracé. Choisis le point où l'ombre du sommet de A s'arrête réellement : sur un obstacle, ou sur le sol.";
+  "Le début du rayon issu du sommet du bâton A est tracé. Choisis le point A′ où l'ombre du sommet de A s'arrête réellement : sur un obstacle, ou sur le sol.";
 
 export const AIDE_POINT_OBSTACLE = [
   "Méthode : suis la trace au sol issue du pied de A (parallèle à l'ombre de E). Pour chaque obstacle qu'elle traverse, regarde si le rayon passe au-dessus ou s'il le heurte. L'ombre s'arrête sur la PREMIÈRE surface que le rayon touche.",
@@ -251,22 +251,22 @@ export const AIDE_POINT_OBSTACLE = [
 ];
 
 export const CONSIGNE_DIRECTION_INCONNUE =
-  "La lumière est inconnue, mais l'ombre d'un sommet du campanile est donnée (trait pointillé). Choisis le rayon qui part du sommet {id} dans la même direction que la lumière.";
+  "La direction de la lumière est inconnue, mais l'ombre {connu}′ du sommet {connu} du campanile est donnée (trait pointillé). Choisis le rayon qui part du sommet {id} dans la même direction que la lumière.";
 
 export const AIDE_DIRECTION_INCONNUE = [
-  "Méthode : la lumière va du sommet connu vers son ombre. Le bon rayon est parallèle au trait pointillé qui les relie : même inclinaison sur le dessin, et même sens (vers le bas, du côté de l'ombre).",
-  "Le trait pointillé a été recopié en violet, parallèlement, depuis le pied du sommet {id} : compare-lui l'inclinaison et le sens de chaque candidat.",
+  "Méthode : la lumière va du sommet {connu} vers son ombre {connu}′. Le bon rayon est parallèle au trait pointillé qui les relie : même inclinaison sur le dessin, et même sens (vers le bas, du côté de l'ombre).",
+  "Le trait pointillé a été recopié en violet, parallèlement, depuis le pied du sommet {id} (le point du sol à sa verticale) : compare-lui l'inclinaison et le sens de chaque candidat.",
 ];
 
-export const CONSIGNE_POINT_SOMMET = "Choisis le point où tombe l'ombre du sommet {id} du campanile.";
+export const CONSIGNE_POINT_SOMMET = "Choisis le point {id}′ où tombe l'ombre du sommet {id} du campanile.";
 
 export const AIDE_POINT_SOMMET = [
-  "Méthode : l'ombre de {id} est à l'intersection du rayon issu de {id} (parallèle au trait pointillé de l'ombre connue) et de la trace au sol issue du pied de {id} (le point du sol à sa verticale), parallèle à la trace de l'ombre connue.",
+  "Méthode : l'ombre de {id} est à l'intersection du rayon issu de {id} (parallèle au trait pointillé {connu} → {connu}′) et de la trace au sol issue du pied de {id} (le point du sol à sa verticale), parallèle à la trace au sol qui mène à {connu}′.",
   "Le rayon issu de {id} est tracé en violet. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de {id}.",
 ];
 
-export function avecId(texte: string, id: string): string {
-  return texte.split("{id}").join(id);
+export function avecId(texte: string, id: string, connu = ""): string {
+  return texte.split("{id}").join(id).split("{connu}").join(connu);
 }
 
 export function libelleDirection(numero: number): string {
@@ -312,7 +312,7 @@ export function ombresDejaTrouvees(exercice: ExerciceOmbreSoleilDirectionInconnu
 export function elementsConclusion(exercice: ExerciceOmbreSoleil): ElementsCroquis {
   if (exercice.variante === "simple") {
     const p: PiquetAResoudre = exercice.piquet;
-    return fusionner(elementsScene(exercice), elementsOmbreSommet(sommetPiquet(p.piquet), p.ombre, "Ombre de A"), {
+    return fusionner(elementsScene(exercice), elementsOmbreSommet(sommetPiquet(p.piquet), p.ombre, "A′"), {
       points: [],
       segments: [{ a: p.piquet.base, b: p.ombre, couleur: COULEURS_OMBRE.correct }],
     });
@@ -321,7 +321,7 @@ export function elementsConclusion(exercice: ExerciceOmbreSoleil): ElementsCroqu
     const auSol = exercice.indexObstacleTouche === null;
     return fusionner(
       elementsScene(exercice, exercice.indexObstacleTouche),
-      elementsOmbreSommet(sommetPiquet(exercice.baton), exercice.ombre, "Ombre de A"),
+      elementsOmbreSommet(sommetPiquet(exercice.baton), exercice.ombre, "A′"),
       { points: [], segments: auSol ? [{ a: exercice.baton.base, b: exercice.ombre, couleur: COULEURS_OMBRE.correct }] : [] },
     );
   }

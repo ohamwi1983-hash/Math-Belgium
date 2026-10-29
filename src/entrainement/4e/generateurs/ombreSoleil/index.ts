@@ -435,7 +435,15 @@ function construireObstacle(): ExerciceOmbreSoleilObstacle {
     const permutee = impactScene(sommet, { x: direction.y, y: direction.x, z: direction.z }, obstacles).point;
     familles.push([...sol[0], ...sol[1], { position: soustraire3D(baton.base, trace), erreur: "sensOppose" }, { position: permutee, erreur: "composantesPermutees" }]);
 
-    const distracteurs = choisirDistracteurs(familles, (c) => auSolValide(c.position) && distance3D(c.position, impact.point) > 0.3);
+    // Un distracteur posé au sol ne doit pas tomber dans le dessin d'un obstacle (il semblerait posé
+    // dessus).
+    const distracteurs = choisirDistracteurs(
+      familles,
+      (c) =>
+        auSolValide(c.position) &&
+        distance3D(c.position, impact.point) > 0.3 &&
+        !(c.position.z === 0 && obstacles.some((o) => dansDessinObstacle(c.position, o))),
+    );
     if (!distracteurs) continue;
     const pointsCandidats = versCandidats(impact.point, distracteurs);
 
@@ -530,6 +538,11 @@ function construireDirectionInconnue(): ExerciceOmbreSoleilDirectionInconnue {
     const xMax = Math.max(...base.map((p) => p.x));
     const yMin = Math.min(...base.map((p) => p.y));
     const yMax = Math.max(...base.map((p) => p.y));
+    const dessin = Object.values(solide.sommets).map(projeter2D);
+    const dansDessinCampanile = (p: Point3D) => {
+      const q = projeter2D(p);
+      return q.x > Math.min(...dessin.map((d) => d.x)) && q.x < Math.max(...dessin.map((d) => d.x)) && q.y > Math.min(...dessin.map((d) => d.y)) && q.y < Math.max(...dessin.map((d) => d.y));
+    };
     const horsEmprise = (p: Point3D) =>
       p.x < xMin - MARGE_EMPRISE_CAMPANILE || p.x > xMax + MARGE_EMPRISE_CAMPANILE || p.y < yMin - MARGE_EMPRISE_CAMPANILE || p.y > yMax + MARGE_EMPRISE_CAMPANILE;
 
@@ -552,7 +565,7 @@ function construireDirectionInconnue(): ExerciceOmbreSoleilDirectionInconnue {
     let echec = false;
     for (const s of aProjeter) {
       const piquet = piquetDepuisSommet(s.id, s.sommet);
-      const distracteurs = choisirDistracteurs(famillesSol(piquet, direction, s.ombre), (c) => horsEmprise(c.position));
+      const distracteurs = choisirDistracteurs(famillesSol(piquet, direction, s.ombre), (c) => horsEmprise(c.position) && !dansDessinCampanile(c.position));
       if (!distracteurs) {
         echec = true;
         break;

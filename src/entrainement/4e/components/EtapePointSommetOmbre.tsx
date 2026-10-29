@@ -27,14 +27,14 @@ export function EtapePointSommetOmbre({ exercice, index, ...reste }: Props) {
       {...reste}
       solide={solidePourAffichage(exercice)}
       fond={fusionner(elementsScene(exercice), ombresDejaTrouvees(exercice, index), repere)}
-      consigne={avecId(CONSIGNE_POINT_SOMMET, p.piquet.id)}
+      consigne={avecId(CONSIGNE_POINT_SOMMET, p.piquet.id, exercice.piquetConnu.id)}
       information={`Sommet ${index + 1}/${exercice.piquets.length}`}
       candidats={p.pointsCandidats.map((c) => ({ id: c.id, dessin: (numero, etat) => dessinPoint(c.position, numero, etat) }))}
       idCorrect={p.pointsCandidats.find((c) => c.erreur === "aucune")!.id}
       libelle={libellePoint}
       aides={[
-        { texte: avecId(AIDE_POINT_SOMMET[0], p.piquet.id) },
-        { texte: avecId(AIDE_POINT_SOMMET[1], p.piquet.id), dessin: { points: [], segments: [rayonProlonge(sommet, exercice.direction)] } },
+        { texte: avecId(AIDE_POINT_SOMMET[0], p.piquet.id, exercice.piquetConnu.id) },
+        { texte: avecId(AIDE_POINT_SOMMET[1], p.piquet.id, exercice.piquetConnu.id), dessin: { points: [], segments: [rayonProlonge(sommet, exercice.direction)] } },
       ]}
     />
   );
