@@ -2,7 +2,7 @@
  * Couche core — "Lieux géométriques : intersection" (position 54). REFONTE COMPLÈTE
  * (`promptgen54refontecomplete.md`) — remplace entièrement l'architecture précédente (diagnostic
  * catégoriel 0/1/2 points puis résolution fixe p1/p2). Nouvelle architecture à 3 écrans, communs
- * aux 3 grandes variantes (`paire`) :
+ * aux 2 grandes variantes (`paire`) :
  * 1. Identification — l'élève reconnaît lui-même le TYPE de chacun des 2 lieux (droite/cercle/
  *    parabole) à partir d'une description purement VERBALE (aucune équation, aucun terme technique
  *    révélateur — voir la convention d'énoncé ci-dessous), puis en extrait les paramètres.
@@ -11,7 +11,7 @@
  *
  * ## ⚠️ Convention d'énoncé propre à ce générateur — divergence ASSUMÉE, ne jamais "corriger"
  *
- * Contrairement à la convention standard du chapitre 6 (droite toujours réduite à `\equiv
+ * Contrairement à la convention standard du chapitre (droite toujours réduite à `\equiv
  * ax+by+c=0`), ce générateur ne montre JAMAIS d'équation dans l'énoncé — chaque lieu est décrit par
  * une formulation VERBALE de sa définition mathématique (ex. "les points dont les ordonnées sont
  * les triples de leurs abscisses" pour une droite `y=3x` ; "les points situés à une distance de 5
@@ -33,10 +33,13 @@ import type { Point } from "./vecteur.types";
 
 export type TypeLieu = "droite" | "cercle" | "parabole";
 
-/** Les 3 grandes variantes selon la paire de types de lieux réellement générée — les 6 autres
- * combinaisons théoriques (droite-droite, cercle-parabole, parabole-parabole) sont hors périmètre du
- * générateur, jamais tirées. */
-export type PaireLieux = "cercleDroite" | "cercleCercle" | "droiteParabole";
+/** Les 2 grandes variantes selon la paire de types de lieux réellement générée — les autres
+ * combinaisons théoriques sont hors périmètre du générateur, jamais tirées. La paire cercle-cercle a
+ * été retirée (audit chapitre 7, point 57) : sa résolution passe par l'« axe radical », méthode que
+ * le cours n'enseigne pas. Les 2 lieux d'un exercice sont donc toujours de TYPES DIFFÉRENTS (un
+ * cercle ou une parabole, et une droite) — les écrans s'appuient sur ce fait pour nommer chaque
+ * lieu par son type (« Équation du cercle »), sans jamais de rang « premier »/« second ». */
+export type PaireLieux = "cercleDroite" | "droiteParabole";
 
 /** 0, 1 (tangence) ou 2 points d'intersection. */
 export type NombrePointsIntersection = 0 | 1 | 2;
@@ -77,8 +80,8 @@ export interface LieuParabole {
 
 export type Lieu = LieuDroite | LieuCercle | LieuParabole;
 
-/** Coefficients `A·t²+B·t+C=0` de la substitution de la droite (ou, pour la paire cercle-cercle,
- * l'axe radical) dans l'équation de l'autre lieu (paramétrage point+direction de la droite) —
+/** Coefficients `A·t²+B·t+C=0` de la substitution de la droite dans l'équation de l'autre lieu
+ * (paramétrage point+direction de la droite) —
  * précalculés à la génération pour que l'aide niveau 2 de l'écran "résolution" puisse afficher
  * "l'équation quadratique est déjà posée" sans dupliquer ce calcul côté présentation. */
 export interface CoefficientsQuadratiqueT {

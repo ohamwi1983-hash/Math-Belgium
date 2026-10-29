@@ -25,10 +25,10 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLieuxGeom
  * deux lieux géométriques — chapitre "Géométrie analytique plane" (4e), `AppLieuxGeometriques.tsx`)
  * — voir `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence.
  *
- * **Écran → question, IDENTIQUE pour les 9 variantes** (`moteur/typesLieuxGeometriques.ts` :
+ * **Écran → question, IDENTIQUE pour les 6 variantes** (`moteur/typesLieuxGeometriques.ts` :
  * `PhaseLieuxGeometriques = "identification" | "equations" | "resolution"`, 3 phases fixes,
- * toujours dans le même ordre, jamais de saut conditionnel — voir son commentaire de tête). Les 3
- * grandes variantes (`paire` : cercle-droite, cercle-cercle, droite-parabole) × les 3 sous-cas
+ * toujours dans le même ordre, jamais de saut conditionnel — voir son commentaire de tête). Les 2
+ * grandes variantes (`paire` : cercle-droite, droite-parabole) × les 3 sous-cas
  * (`nombrePoints` : 0, 1 tangence, 2) partagent donc EXACTEMENT la même structure papier, jamais de
  * dispatch par variante contrairement à `orthogonalite/exportEvaluation.ts` :
  * - **Écran "identification"** (`EtapeIdentificationLieuxGeometriques.tsx`,
@@ -72,13 +72,15 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLieuxGeom
  * résolue à l'écran) en énonçant aussi ses solutions, extraites directement de `instance.points`
  * (jamais recalculées via le discriminant : la variable réellement éliminée par la méthode décrite
  * — `x` ou `y`, donnée par `substitutionResolution(instance).variable` — est une fonction injective
- * des points d'intersection ici (droite/axe radical toujours résolubles en l'autre variable), donc
+ * des points d'intersection ici (droite toujours résoluble en l'autre variable), donc
  * trier `instance.points` selon cette variable EST trier les racines de l'équation quadratique,
  * sans jamais raisoner indépendamment sur `instance.quadratique`/discriminant).
  */
 
+/** Virgule décimale, jamais de point (racines toujours entières par construction, filet de
+ * sécurité seulement). */
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
 }
 
 /** Points triés selon la composante `variable` — pour 1 ou 2 points, cette composante EST la (les)
@@ -128,7 +130,7 @@ function fragmentsCorrectionEquations(lieu1: Lieu, lieu2: Lieu): FragmentConsign
   ];
 }
 
-/** c) Système → méthode (différenciée par `paire`, piège cercle-cercle inclus) → équation du second
+/** c) Système → méthode (différenciée par `paire`) → équation du second
  * degré réellement obtenue → ses solutions (extraites de `instance.points`, voir le commentaire de
  * tête) → conclusion (`texteNombrePointsAttendu`). */
 function fragmentsCorrectionResolution(instance: ExerciceLieuxGeometriques): FragmentConsigne[] {
