@@ -42,8 +42,8 @@ export function ResultatPanelQuizNombresComplexes({ resultat, labelBouton, onCon
           <span>{libelleVraiFaux(resultat.question.reponse)}</span>
         </li>
         <li className="score-item">
-          <span>Score</span>
-          <span className={classeScore(resultat.score)}>{resultat.score}/100</span>
+          <span>Résultat</span>
+          <span className={classeScore(resultat.score)}>{resultat.score === 100 ? "Correct" : "Incorrect"}</span>
         </li>
       </ul>
       <div className="triangle-quelconque-aide">

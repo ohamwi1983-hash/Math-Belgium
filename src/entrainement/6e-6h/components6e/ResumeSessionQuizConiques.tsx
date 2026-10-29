@@ -13,7 +13,6 @@ function libelleVraiFaux(reponse: boolean): string {
 
 export function ResumeSessionQuizConiques({ resultats, onRecommencer, onChangerTheme }: Props) {
   const nombreCorrectes = resultats.filter((r) => r.score === 100).length;
-  const moyenne = resultats.reduce((somme, r) => somme + r.score, 0) / resultats.length;
 
   return (
     <div>
@@ -21,10 +20,6 @@ export function ResumeSessionQuizConiques({ resultats, onRecommencer, onChangerT
       <p className="result-subtitle">
         {nombreCorrectes} / {resultats.length} bonnes réponses
       </p>
-      <div className="score-hero">
-        <div className="score-hero-value">{moyenne.toFixed(0)}/100</div>
-        <div className="score-hero-label">score moyen</div>
-      </div>
       <div className="summary-table-scroll">
         <table className="summary-table">
           <thead>
