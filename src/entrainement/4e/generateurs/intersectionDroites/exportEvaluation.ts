@@ -8,12 +8,12 @@ import {
   formatAidePointNiveau2Latex,
   formatEnonceLatex,
   formatPointLatex,
+  formatReponsePointAttendueLatex,
   formatVecteurLatex,
   segmentsConsigneDiagnostic,
   segmentsConsignePoint,
   texteAidePointNiveau1,
   texteConclusionAttendue,
-  texteReponsePointAttendue,
 } from "../../ui/formatIntersectionDroites";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionDroites } from "./index";
 
@@ -48,7 +48,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersect
  *
  * Correction RESYNTHÉTISÉE depuis les valeurs déjà connues et correctes de l'instance tirée, en
  * réutilisant directement les fonctions déjà utilisées côté écran interactif
- * (`ui/formatIntersectionDroites.ts` — `texteConclusionAttendue`, `texteReponsePointAttendue`,
+ * (`ui/formatIntersectionDroites.ts` — `texteConclusionAttendue`, `formatReponsePointAttendueLatex`,
  * `texteAidePointNiveau1`, `formatAidePointNiveau2Latex`, `segmentsConsigneDiagnostic`/
  * `segmentsConsignePoint`) plutôt que d'en reconstruire de nouvelles. Différence assumée avec les
  * AIDES progressives de l'écran diagnostic (`segmentsAideDiagnosticNiveau1`/
@@ -85,6 +85,17 @@ function formatMagnitudeFractionLatex(abs: number): string {
 
 function formatValeurFractionLatex(valeur: number): string {
   return valeur < 0 ? `-${formatMagnitudeFractionLatex(-valeur)}` : formatMagnitudeFractionLatex(valeur);
+}
+
+/** Facteur d'un produit : parenthèses seulement autour d'un nombre négatif (audit chapitre 7,
+ * point 7) — `2\cdot(-3)`, jamais `(2)\cdot(3)` ni `2\cdot-3`. */
+function facteurLatex(valeur: number): string {
+  return valeur < 0 ? `(${valeur})` : String(valeur);
+}
+
+/** Terme ajouté à une somme : `+ 3`, `- 3` (jamais `+ (-3)`). */
+function termeLatex(valeur: number): string {
+  return valeur < 0 ? `- ${-valeur}` : `+ ${valeur}`;
 }
 
 /** Pente d'une droite depuis son vecteur directeur — toujours finie ici (composantes toujours non
@@ -138,7 +149,7 @@ function fragmentsCalculColinearite(instance: ExerciceIntersectionDroites): Frag
       texte(" et "),
       latex(`\\vec{u_2}${formatVecteurLatex(u2)}`),
       texte(" — critère de colinéarité "),
-      latex(`(${u1.x})\\cdot(${u2.y}) - (${u1.y})\\cdot(${u2.x}) = ${critere}`),
+      latex(`${facteurLatex(u1.x)}\\cdot${facteurLatex(u2.y)} - ${facteurLatex(u1.y)}\\cdot${facteurLatex(u2.x)} = ${critere}`),
       texte(colineaires ? ", nul." : ", non nul."),
     ];
   }
@@ -174,7 +185,7 @@ function fragmentsTestAppartenance(instance: ExerciceIntersectionDroites): Fragm
     texte(", appartient-il à "),
     latex("d_2"),
     texte(" ? "),
-    latex(`(${a})\\cdot(${p1.x}) + (${b})\\cdot(${p1.y}) + (${c}) = ${evaluation}`),
+    latex(`${facteurLatex(a)}\\cdot${facteurLatex(p1.x)} ${termeLatex(b)}\\cdot${facteurLatex(p1.y)} ${termeLatex(c)} = ${evaluation}`),
     texte(appartient ? " — nul : ce point appartient aussi à d₂." : " — non nul : ce point n'appartient pas à d₂."),
   ];
 }
@@ -199,9 +210,9 @@ function fragmentsCorrectionDiagnostic(instance: ExerciceIntersectionDroites): F
 function fragmentsCorrectionPoint(instance: ExerciceIntersectionDroites): FragmentConsigne[] {
   // Non-null : appelée uniquement quand `conclusion === "secantes"` (voir
   // `construireCorrectionIntersectionDroites`), la seule condition sous laquelle
-  // `texteReponsePointAttendue` renvoie autre chose que `null`.
-  const reponse = texteReponsePointAttendue(instance)!;
-  return [texte(`b) ${texteAidePointNiveau1(instance)} `), latex(formatAidePointNiveau2Latex(instance)), texte(`. En résolvant : ${reponse}.`)];
+  // `formatReponsePointAttendueLatex` renvoie autre chose que `null`.
+  const reponse = formatReponsePointAttendueLatex(instance)!;
+  return [texte(`b) ${texteAidePointNiveau1(instance)} `), latex(formatAidePointNiveau2Latex(instance)), texte(". En résolvant : "), latex(reponse), texte(".")];
 }
 
 // ============================================================================

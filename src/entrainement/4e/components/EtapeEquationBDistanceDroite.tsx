@@ -4,7 +4,7 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_EQUATION_B } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerEquationB } from "../moteur/verificationDistanceDroite";
-import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, formatAideEquationBNiveau2Latex, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, formatAideEquationBNiveau2Latex, nomDroiteCible, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -22,6 +22,9 @@ interface Props {
   point: Point;
   droiteCible: DroiteImplicite;
   bAttendue: DroiteImplicite;
+  /** Pied de la perpendiculaire — jamais affiché ici, seulement pour fixer le cadre du graphe
+   * (identique sur les 3 derniers écrans, il ne bouge plus quand l'aide fait apparaître b). */
+  qAttendu: Point;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -41,7 +44,7 @@ interface Props {
  * équation d'une droite". `b` n'apparaît sur le graphe illustratif QUE via l'aide niveau 1
  * (`promptgen47modifications.md`, point 7) — jamais avant, pour ne pas donner la réponse.
  */
-export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAttendue, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
 
@@ -56,6 +59,7 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
           { droite: exercice.d2, label: "d₂", couleur: COULEUR_D },
         ]
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
+  const cadrage = { droites: lignes.map((l) => l.droite), points: [point, qAttendu] };
   if (niveauAide >= 1) lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
 
   return (
@@ -65,16 +69,16 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
         blocDonnees={
           <>
             <DonneesDistanceDroite exercice={exercice} />
-            <DistanceDroiteGraph lignes={lignes} points={[{ point, label: "P", couleur: COULEUR_P }]} />
+            <DistanceDroiteGraph lignes={lignes} points={[{ point, label: "P", couleur: COULEUR_P }]} cadrage={cadrage} />
           </>
         }
       />
       <p className="prompt-text">
-        <RenduFragments fragments={segmentsConsigneEquationB()} />
+        <RenduFragments fragments={segmentsConsigneEquationB(exercice)} />
       </p>
 
       <div className="field">
-        <label className="field-label" htmlFor="distance-droite-equation-b">
+        <label className="field-label field-label-minuscule" htmlFor="distance-droite-equation-b">
           {LABEL_CHAMP_EQUATION_B}
         </label>
         <input
@@ -89,11 +93,11 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>
-            <RenduFragments fragments={segmentsAideEquationBNiveau1()} />
+            <RenduFragments fragments={segmentsAideEquationBNiveau1(exercice)} />
           </p>
           {niveauAide >= 2 && (
             <p>
-              <Katex expression={formatAideEquationBNiveau2Latex(droiteCible)} />
+              <Katex expression={formatAideEquationBNiveau2Latex(droiteCible, nomDroiteCible(exercice).latex)} />
             </p>
           )}
         </div>

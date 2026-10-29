@@ -4,7 +4,7 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_DISTANCE_PQ } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerDistance } from "../moteur/verificationDistanceDroite";
-import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, formatAideDistancePQNiveau2Latex } from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, formatAideDistancePQNiveau2Latex, nomDroiteCible, texteRaccourciDistanceAxiale } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -57,6 +57,8 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
         ]
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
   lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
+  const cadrage = { droites: lignes.map((l) => l.droite), points: [point, qAttendu] };
+  const raccourci = texteRaccourciDistanceAxiale(droiteCible, nomDroiteCible(exercice).texte);
 
   return (
     <div>
@@ -71,6 +73,7 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
                 { point, label: "P", couleur: COULEUR_P },
                 { point: qAttendu, label: "Q", couleur: COULEUR_Q },
               ]}
+              cadrage={cadrage}
             />
           </>
         }
@@ -78,7 +81,7 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
       <p className="prompt-text">{CONSIGNE_DISTANCE_PQ}</p>
 
       <div className="field field-inline">
-        <label className="field-label" htmlFor="distance-droite-distance-pq">
+        <label className="field-label field-label-minuscule" htmlFor="distance-droite-distance-pq">
           {LABEL_DISTANCE_PQ}
         </label>
         <input
@@ -95,6 +98,7 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
           <p>
             Rappel : <Katex expression={FORMULE_GENERALE_DISTANCE_PQ_LATEX} />
           </p>
+          {raccourci && <p>{raccourci}</p>}
           {niveauAide >= 2 && (
             <p>
               Formule substituée : <Katex expression={formatAideDistancePQNiveau2Latex(point, qAttendu)} />

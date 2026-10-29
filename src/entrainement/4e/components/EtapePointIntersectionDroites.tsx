@@ -2,9 +2,17 @@ import { useState } from "react";
 import type { ExerciceIntersectionDroites } from "../core/intersectionDroites.types";
 import { NIVEAU_AIDE_MAX_POINT } from "../moteur/sessionIntersectionDroites";
 import { diagnostiquerPoint, type ReponsePoint } from "../moteur/verificationIntersectionDroites";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_INTERSECTION, formatAidePointNiveau2Latex, formatLignesEnonce, segmentsConsignePoint, texteAidePointNiveau1 } from "../ui/formatIntersectionDroites";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import {
+  CONSIGNE_GENERALE_INTERSECTION,
+  PLACEHOLDER_COORDONNEE_INTERSECTION,
+  PLACEHOLDER_PARAMETRE_INTERSECTION,
+  formatAidePointNiveau2Latex,
+  formatLignesEnonce,
+  segmentsConsignePoint,
+  texteAidePointNiveau1,
+} from "../ui/formatIntersectionDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -19,7 +27,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (reponse: ReponsePoint) => void;
+  /** `saisie` : les champs tels que tapés, pour la fiche de consultation (puces cliquables). */
+  onValider: (reponse: ReponsePoint, saisie: { t: string; s: string; x: string; y: string }) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -44,11 +53,17 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
 
   const complet = (!besoinT || t.trim() !== "") && (!besoinS || s.trim() !== "") && x.trim() !== "" && y.trim() !== "";
 
+  /** Fraction `p/q` acceptée (audit chapitre 7, point 40 : le point d'intersection peut désormais
+   * être fractionnaire) — `NaN` pour un champ illisible (`parse_error`). */
+  function lire(texte: string): number {
+    return parserNombreOuFraction(texte) ?? Number.NaN;
+  }
+
   function construireReponse(): ReponsePoint {
     return {
-      t: besoinT ? Number(t.replace(",", ".")) : null,
-      s: besoinS ? Number(s.replace(",", ".")) : null,
-      point: { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")) },
+      t: besoinT ? lire(t) : null,
+      s: besoinS ? lire(s) : null,
+      point: { x: lire(x), y: lire(y) },
     };
   }
 
@@ -80,10 +95,10 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
           <input
             id="intersection-droites-t"
             className={`text-input${apresEchec && statut?.t && statut.t !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
+            placeholder={PLACEHOLDER_PARAMETRE_INTERSECTION}
             value={t}
-            onChange={(e) => setT(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setT(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       )}
@@ -95,10 +110,10 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
           <input
             id="intersection-droites-s"
             className={`text-input${apresEchec && statut?.s && statut.s !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
+            placeholder={PLACEHOLDER_PARAMETRE_INTERSECTION}
             value={s}
-            onChange={(e) => setS(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setS(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       )}
@@ -110,10 +125,10 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
           <input
             id="intersection-droites-x"
             className={`text-input${apresEchec && statut && statut.point !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COORDONNEE}
+            placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -123,10 +138,10 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
           <input
             id="intersection-droites-y"
             className={`text-input${apresEchec && statut && statut.point !== "correct" ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COORDONNEE}
+            placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>
@@ -145,7 +160,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POINT} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { t, s, x, y })}>
           Valider
         </button>
         {tentativesUtilisees > 0 && (

@@ -37,13 +37,18 @@
 import type { ExerciceDistanceDroite, ExerciceDistanceParalleles, VarianteDistanceDroite } from "../core/distanceDroite.types";
 import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
-import { formatEquationImpliciteLatex, formatPointLatex } from "./formatEquationDroite";
+import { formatEquationImpliciteLatex, formatPointLatex, formatSommeTermesGeneree } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
+import { formatLongueurIrreductibleLatex } from "./formatNormeDistance";
 import type { FragmentConsigne } from "./formatRelationsDroites";
-import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION } from "./formatRelationsDroites";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE } from "./formatRelationsDroites";
 
-export { formatPointLatex, PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION };
+export { formatPointLatex, PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE };
 export type { FragmentConsigne };
+
+/** Hors de l'espace des tirages (audit chapitre 7, point 10) : b a toujours des coefficients de x et
+ * de y dans [-4 ; 4] (composantes du vecteur directeur de la droite cible), jamais 7. */
+export const PLACEHOLDER_EQUATION = "ex : 7x+2y=9";
 
 function texte(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };
@@ -84,10 +89,31 @@ export const LIBELLE_VARIANTE: Record<VarianteDistanceDroite, string> = {
   paralleles: "Distance entre deux droites ∥",
 };
 
+/** Premier coefficient non nul positif (`-5x-12y+14=0` → `5x+12y-14=0`) — même droite, écriture
+ * plus lisible ; `b` reconstruite par le moteur à partir du point choisi n'est pas normalisée. */
+export function normaliserSigneAffichage(d: DroiteImplicite): DroiteImplicite {
+  const oppose = (v: number) => (v === 0 ? 0 : -v);
+  return d.a < 0 || (d.a === 0 && d.b < 0) ? { a: oppose(d.a), b: oppose(d.b), c: oppose(d.c) } : d;
+}
+
+/** `ax+by+c=0`, signe normalisé (`normaliserSigneAffichage`). */
+export function formatEquationDroiteLatex(d: DroiteImplicite): string {
+  const n = normaliserSigneAffichage(d);
+  return formatEquationImpliciteLatex(n.a, n.b, n.c);
+}
+
 /** `d \equiv ax+by+c=0` — notation `\equiv` (jamais `:`) pour nommer une droite, signes/coefficients
  * toujours simplifiés (correction transversale chapitre 6, points 1 et 2). */
-function formatDroiteLatex(label: string, d: DroiteImplicite): string {
-  return `${label} \\equiv ${formatEquationImpliciteLatex(d.a, d.b, d.c)}`;
+export function formatDroiteLatex(label: string, d: DroiteImplicite): string {
+  return `${label} \\equiv ${formatEquationDroiteLatex(d)}`;
+}
+
+/** Nom de la droite CIBLE (celle sur laquelle on projette P) — audit chapitre 7, point 31 : la
+ * variante « droites parallèles » parlait de « d », une droite que son énoncé ne nomme jamais (il
+ * ne connaît que d₁ et d₂). `latex` pour KaTeX, `texte` pour le graphe et les phrases. */
+export function nomDroiteCible(exercice: ExerciceDistanceDroite): { latex: string; texte: string } {
+  if (exercice.variante === "point") return { latex: "d", texte: "d" };
+  return exercice.droiteSource === "d1" ? { latex: "d_2", texte: "d₂" } : { latex: "d_1", texte: "d₁" };
 }
 
 // ============================================================================
@@ -129,6 +155,8 @@ export function formatEnonceLatex(exercice: ExerciceDistanceDroite): string {
 
 interface ParamsEtatActuelDistanceDroite {
   variante: VarianteDistanceDroite;
+  /** Nom LaTeX de la droite cible (`nomDroiteCible`). */
+  nomCible: string;
   point: Point | null;
   droiteCible: DroiteImplicite | null;
   bAttendue: DroiteImplicite | null;
@@ -141,7 +169,7 @@ export function calculerEtatActuelDistanceDroite(params: ParamsEtatActuelDistanc
     lignes.push(`P${formatPointLatex(params.point)}`);
   }
   if (params.bAttendue && params.droiteCible) {
-    lignes.push(`\\begin{cases} ${formatDroiteLatex("b", params.bAttendue)} \\\\ ${formatDroiteLatex("d", params.droiteCible)} \\end{cases}`);
+    lignes.push(`\\begin{cases} ${formatDroiteLatex("b", params.bAttendue)} \\\\ ${formatDroiteLatex(params.nomCible, params.droiteCible)} \\end{cases}`);
   }
   if (params.qAttendu) {
     lignes.push(`Q${formatPointLatex(params.qAttendu)}`);
@@ -173,41 +201,38 @@ export const TEXTE_AIDE_CHOIX_POINT_NIVEAU1 =
 // Écran 1 — équation cartésienne de b (perpendiculaire à la droite cible, passant par le point).
 // Explication PAR LES PENTES (point 8, `promptgen47modifications.md`) — remplace l'ancienne
 // explication vectorielle (vecteur `(-b;a)`, critère d'orthogonalité), jamais utilisée par ce
-// générateur : `b ⊥ d ⟺ m_b=-1/m_d`. Cas particulier `d` verticale/horizontale : mentionné dans le
-// texte d'aide par complétude pédagogique, mais jamais exercé en pratique — `tirerVecteurD`
-// (`generateurs/distanceDroite/index.ts`) tire toujours un vecteur directeur aux deux composantes
-// non nulles (triplets pythagoriciens 3-4-5/6-8-10/5-12-13, jamais de composante nulle), `d` n'est
-// donc jamais verticale ni horizontale dans ce générateur — vérifié en lisant le générateur, pas
-// besoin d'une contrainte supplémentaire.
+// générateur : `b ⊥ d ⟺ m_b=-1/m_d`. Cas particulier `d` verticale/horizontale : tiré environ une
+// fois sur cinq depuis l'audit du chapitre 7 (point 34, raccourcis du cours), l'aide le traite.
 // ============================================================================
 
-export function segmentsConsigneEquationB(): FragmentConsigne[] {
-  return [texte("Construis l'équation cartésienne de la droite "), latex("b \\perp d"), texte(" passant par "), latex("P"), texte(".")];
+export function segmentsConsigneEquationB(exercice: ExerciceDistanceDroite): FragmentConsigne[] {
+  return [texte("Construis l'équation cartésienne de la droite "), latex(`b \\perp ${nomDroiteCible(exercice).latex}`), texte(" passant par "), latex("P"), texte(".")];
 }
 
 export const LABEL_CHAMP_EQUATION_B = "Équation cartésienne de b :";
 
 /** Piège central du générateur (spec) : confondre b avec la droite ∥ à d, jamais la ⊥. */
-export function segmentsAideEquationBNiveau1(): FragmentConsigne[] {
+export function segmentsAideEquationBNiveau1(exercice: ExerciceDistanceDroite): FragmentConsigne[] {
+  const d = nomDroiteCible(exercice).latex;
   return [
     texte("b doit vérifier "),
-    latex("b \\perp d"),
+    latex(`b \\perp ${d}`),
     texte(", jamais "),
-    latex("b \\parallel d"),
+    latex(`b \\parallel ${d}`),
     texte(" — la pente de "),
     latex("b"),
     texte(" est l'opposé de l'inverse de la pente de "),
-    latex("d"),
+    latex(d),
     texte(" : "),
-    latex("m_b = -\\dfrac{1}{m_d}"),
+    latex(`m_b = -\\dfrac{1}{m_{${d}}}`),
     texte(" (si "),
-    latex("d"),
+    latex(d),
     texte(" est verticale — pente non définie — alors "),
     latex("b"),
     texte(" est horizontale, pente "),
     latex("0"),
     texte(", et inversement). Attention à ne pas construire par erreur la droite "),
-    latex("b \\parallel d"),
+    latex(`b \\parallel ${d}`),
     texte(" passant par "),
     latex("P"),
     texte("."),
@@ -216,15 +241,14 @@ export function segmentsAideEquationBNiveau1(): FragmentConsigne[] {
 
 /** Substitue les vraies pentes de l'exercice (fraction irréductible si non entières — correction
  * transversale chapitre 6, C.2), jamais le résultat final (l'équation de `b` elle-même). Cas
- * verticale/horizontale géré pour robustesse générale bien que jamais atteint par ce générateur
- * (voir note ci-dessus). */
-export function formatAideEquationBNiveau2Latex(droiteCible: DroiteImplicite): string {
+ * verticale/horizontale traité à part (pente non définie). `nomCible` : nom réel de la droite cible
+ * (`d`, `d_1` ou `d_2`). */
+export function formatAideEquationBNiveau2Latex(droiteCible: DroiteImplicite, nomCible = "d"): string {
   const { a, b } = droiteCible;
-  if (b === 0) return `m_d \\text{ non définie (verticale)} \\quad m_b = 0`;
-  if (a === 0) return `m_d = 0 \\quad m_b \\text{ non définie (verticale)}`;
-  const mD = -a / b;
-  const mB = b / a;
-  return `m_d = ${formatValeurFractionLatex(mD)} \\quad m_b = -\\dfrac{1}{m_d} = ${formatValeurFractionLatex(mB)}`;
+  const mD = `m_{${nomCible}}`;
+  if (b === 0) return `${mD} \\text{ non définie (verticale)} \\quad m_b = 0`;
+  if (a === 0) return `${mD} = 0 \\quad m_b \\text{ non définie (verticale)}`;
+  return `${mD} = ${formatValeurFractionLatex(-a / b)} \\quad m_b = -\\dfrac{1}{${mD}} = ${formatValeurFractionLatex(b / a)}`;
 }
 
 // ============================================================================
@@ -235,8 +259,10 @@ export function formatAideEquationBNiveau2Latex(droiteCible: DroiteImplicite): s
 // "état actuel" (`calculerEtatActuelDistanceDroite`, point 12).
 // ============================================================================
 
-export const CONSIGNE_INTERSECTION_Q =
-  "Résous le système {b ; d} pour trouver les coordonnées de Q = b ∩ d (arrondi au centième accepté si besoin).";
+export function consigneIntersectionQ(exercice: ExerciceDistanceDroite): string {
+  const d = nomDroiteCible(exercice).texte;
+  return `Résous le système {b ; ${d}} pour trouver les coordonnées de Q = b ∩ ${d} (fraction acceptée, par exemple 7/2).`;
+}
 
 export const TEXTE_AIDE_INTERSECTION_Q_NIVEAU1 =
   "Résous le système formé par les deux équations, par substitution ou par combinaison linéaire (élimine une inconnue).";
@@ -246,16 +272,31 @@ export const TEXTE_AIDE_INTERSECTION_Q_NIVEAU1 =
  * entiers par construction (combinaison entière de coefficients entiers), aucune fraction possible
  * ici. */
 export function formatAideIntersectionQNiveau2Latex(bAttendue: DroiteImplicite, droiteCible: DroiteImplicite): string {
-  const coefX = bAttendue.a * droiteCible.b - droiteCible.a * bAttendue.b;
-  const constante = bAttendue.c * droiteCible.b - droiteCible.c * bAttendue.b;
-  return `(${coefX})\\,x + (${constante}) = 0`;
+  const b = normaliserSigneAffichage(bAttendue);
+  const d = normaliserSigneAffichage(droiteCible);
+  // Droite cible horizontale : y est connu tout de suite, il reste une équation en x. Sinon on
+  // élimine y (b et la cible ne sont jamais parallèles : le coefficient de x restant n'est jamais nul).
+  if (d.a === 0) {
+    const y = -d.c / d.b;
+    return `y = ${formatValeurFractionLatex(y)} \\;\\Rightarrow\\; ${formatSommeTermesGeneree([
+      { valeur: b.a, suffixe: "x" },
+      { valeur: b.b * y + b.c, suffixe: "" },
+    ])} = 0`;
+  }
+  const coefX = b.a * d.b - d.a * b.b;
+  const constante = b.c * d.b - d.c * b.b;
+  return `${formatSommeTermesGeneree([
+    { valeur: coefX, suffixe: "x" },
+    { valeur: constante, suffixe: "" },
+  ])} = 0`;
 }
 
 export const LABEL_X_Q = "x_Q=";
 export const LABEL_Y_Q = "y_Q=";
 /** Champ libre (fraction/décimal acceptés, `parserNombreOuFraction`) — placeholder qui l'indique
- * explicitement, contrairement à `PLACEHOLDER_COORDONNEE` (entier uniquement). */
-export const PLACEHOLDER_COORDONNEE_FRACTION = "ex : 3 ou 7/2";
+ * explicitement, contrairement à `PLACEHOLDER_COORDONNEE` (entier uniquement). Dénominateur 4 :
+ * jamais atteint (celui de Q divise n² = a² + b², jamais multiple de 4 pour un vecteur primitif). */
+export const PLACEHOLDER_COORDONNEE_FRACTION = "ex : 15/4";
 
 // ============================================================================
 // Écran 3 — distance PQ. Notation P/Q cohérente (point 16) — jamais la formule générique A/B
@@ -264,13 +305,22 @@ export const PLACEHOLDER_COORDONNEE_FRACTION = "ex : 3 ou 7/2";
 // qui arrondit en décimal (`toFixed(2)`), pas en fraction.
 // ============================================================================
 
-/** Tolérance réellement vérifiée = `0.01` — la forme exacte (fraction, `sqrt(...)`) ET une valeur
- * décimale approchée (arrondie au centième) sont TOUTES DEUX acceptées, mais `PLACEHOLDER_DISTANCE_PQ`
- * ne montre que la forme exacte : annoncé explicitement ici (audit de traçabilité de précision). */
-export const CONSIGNE_DISTANCE_PQ = "Calcule la distance PQ (forme exacte ou décimale arrondie au centième).";
+/** Valeur EXACTE seulement (audit chapitre 7, point 33 — même règle que gen26 « Norme d'un vecteur
+ * et distance entre 2 points ») : `√29`, `2√5`, `5` acceptés, une approximation `5,39` refusée. */
+export const CONSIGNE_DISTANCE_PQ = "Calcule la distance PQ (valeur exacte, par exemple 2√5).";
 export const LABEL_DISTANCE_PQ = "dist(PQ) =";
 export const FORMULE_GENERALE_DISTANCE_PQ_LATEX = "\\|\\vec{PQ}\\| = \\sqrt{(x_Q-x_P)^2+(y_Q-y_P)^2}";
-export const PLACEHOLDER_DISTANCE_PQ = "ex : 5 ou 13/2 ou sqrt(13)";
+/** Même format que gen26 ; 3√11 n'est jamais une distance de ce générateur (11 n'est pas une somme
+ * de deux carrés). */
+export const PLACEHOLDER_DISTANCE_PQ = "ex : 3√11";
+
+/** Raccourci du cours pour une droite cible verticale/horizontale (`|x_P − k|`, `|y_P − k|`) —
+ * `null` dans le cas général (audit chapitre 7, point 34). */
+export function texteRaccourciDistanceAxiale(droiteCible: DroiteImplicite, nomCible: string): string | null {
+  if (droiteCible.b === 0) return `Raccourci du cours : ${nomCible} est verticale (x = k), la distance vaut simplement l'écart des abscisses |x_P − k|.`;
+  if (droiteCible.a === 0) return `Raccourci du cours : ${nomCible} est horizontale (y = k), la distance vaut simplement l'écart des ordonnées |y_P − k|.`;
+  return null;
+}
 
 /** Parenthèse une valeur négative avant de l'élever au carré (`(-3)^2`, jamais `-3^2`) — jamais
  * nécessaire pour une valeur positive. */
@@ -286,10 +336,8 @@ export function formatAideDistancePQNiveau2Latex(point: Point, qAttendu: Point):
   return `\\sqrt{${formatFacteurCarreFractionLatex(dx)}^2+${formatFacteurCarreFractionLatex(dy)}^2}`;
 }
 
-/** Valeur de révélation ("Distance attendue") — toujours entière par construction dans ce
- * générateur (voir `core/distanceDroite.types.ts`), mais formatée en fraction irréductible par
- * robustesse générale plutôt que via `formatScore` (sémantiquement réservé aux scores /100,
- * réutilisé par erreur ici avant ce correctif — point 11). */
-export function formatDistanceAttendueLatex(distance: number): string {
-  return formatValeurFractionLatex(distance);
+/** Valeur de révélation — forme exacte `m√k` à partir de `distanceCarree` (entier, voir
+ * `core/distanceDroite.types.ts`), jamais une valeur décimale. */
+export function formatDistanceAttendueLatex(distanceCarree: number): string {
+  return formatLongueurIrreductibleLatex(distanceCarree);
 }

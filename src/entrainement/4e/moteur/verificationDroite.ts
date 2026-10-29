@@ -200,7 +200,7 @@ export interface CoefficientsAffineT {
  * éventuel préfixe "x=" / "y=" / "<lettre>=" est retiré (espaces tolérés) ; en son absence,
  * l'expression entière est prise comme membre de droite. */
 export function parserExpressionAffineT(expressionSaisie: string): CoefficientsAffineT | null {
-  const membreDroite = expressionSaisie.replace(/^\s*[a-zA-Z]\s*=\s*/, "");
+  const membreDroite = expressionSaisie.replace(SIGNES_MOINS, "-").replace(/^\s*[a-zA-Z]\s*=\s*/, "");
   const expressionSubstituee = membreDroite.replace(/t/gi, "x");
   try {
     const constante = evaluerExpressionGenerale(expressionSubstituee, 0);
@@ -264,10 +264,44 @@ function analyserCoefficient(texte: string): number {
   return Number(texte.replace(",", "."));
 }
 
+/** Signes moins typographiques (« − » U+2212, « – » U+2013, « — » U+2014) — un clavier mobile ou
+ * un copier-coller en produit souvent ; convertis en « - » avant toute analyse (audit chapitre 7,
+ * point 4 : « −5x − 12y + 14 = 0 » était refusé comme illisible). */
+const SIGNES_MOINS = /[\u2212\u2013\u2014]/g;
+
+const NOMBRE_OU_FRACTION = "\\d+(?:[.,]\\d+)?(?:\\/\\d+(?:[.,]\\d+)?)?";
+
+/** Coefficient entre parenthèses précédé d'un signe (ou en tête de membre) : `(3/2)x`, `-(−1/2)x`,
+ * `x-(-1)` — audit chapitre 7, point 59. Les deux signes sont combinés en un seul. */
+const COEFFICIENT_PARENTHESE_SIGNE = new RegExp(`([+-]?)\\(([+-]?)(${NOMBRE_OU_FRACTION})\\)`, "g");
+
+/** Coefficient entre parenthèses après un `*`/`×` (`x*(1/2)`) — seulement s'il est positif : un
+ * signe à l'intérieur changerait celui du terme entier, non géré (la saisie reste alors illisible). */
+const COEFFICIENT_PARENTHESE_PRODUIT = new RegExp(`([*×])\\(\\+?(${NOMBRE_OU_FRACTION})\\)`, "g");
+
+/** Variable divisée par un nombre (`3x/2`, `-x/5`, `2*y/3`) — réécrite en coefficient fractionnaire
+ * (`3/2x`, `-1/5x`) ; même lot que le point 59 (droite saisie par l'élève dans gen54). */
+const VARIABLE_DIVISEE = /(\d+(?:[.,]\d+)?)?[*×]?([xXyY])\/(\d+(?:[.,]\d+)?)/g;
+
+/** Normalise la saisie avant découpage : espaces retirés, signes moins typographiques convertis,
+ * coefficients numériques entre parenthèses développés (`(3/2)x` → `+3/2x`), variable divisée
+ * réécrite (`3x/2` → `3/2x`). Une parenthèse qui contient autre chose qu'un nombre (`2(x-1)`) est
+ * laissée telle quelle et rend le terme illisible. */
+function normaliserExpressionLineaire(texte: string): string {
+  return texte
+    .replace(SIGNES_MOINS, "-")
+    .replace(/\s+/g, "")
+    .replace(VARIABLE_DIVISEE, (_tout, coefficient: string | undefined, variable: string, denominateur: string) => `${coefficient ?? "1"}/${denominateur}${variable}`)
+    .replace(COEFFICIENT_PARENTHESE_PRODUIT, "$1$2")
+    .replace(COEFFICIENT_PARENTHESE_SIGNE, (_tout, signeExterieur: string, signeInterieur: string, nombre: string) =>
+      `${(signeExterieur === "-") !== (signeInterieur === "-") ? "-" : "+"}${nombre}`,
+    );
+}
+
 /** Découpe une expression en termes signés (`"2x-3y+1"` → `["+2x","-3y","+1"]`), robuste à un
  * signe initial absent. */
 function decouperTermes(texte: string): string[] {
-  const normalise = texte.trim().replace(/\s+/g, "");
+  const normalise = normaliserExpressionLineaire(texte.trim());
   if (normalise === "") return [];
   const avecSigne = /^[+-]/.test(normalise) ? normalise : `+${normalise}`;
   return avecSigne.split(/(?=[+-])/);
@@ -283,6 +317,8 @@ export function parserExpressionLineaireXY(texte: string): ExpressionLineaireXY 
   let constante = 0;
 
   for (const terme of termes) {
+    // Un signe seul (`"y=2x+"`, `"2x++3"`) n'est pas un terme : il était compté comme « ±1 ».
+    if (/^[+-]$/.test(terme)) return null;
     const correspondance = TERME_XY.exec(terme);
     if (!correspondance) return null;
     const [, signeTexte, variableAvantCoef, coefApresVariable, coefAvantVariable, variableApresCoefOuSeule] = correspondance;
@@ -438,7 +474,9 @@ function pgcdEtendu(a: number, b: number): { g: number; x: number; y: number } {
  */
 export function pointEntierAleatoireImpliciteDroite(d: DroiteImplicite): Point {
   const { a, b, c } = d;
-  const decalage = Math.floor(Math.random() * 11) - 5; // entier aléatoire dans [-5, 5]
+  // Entier aléatoire dans [-2, 2] — audit chapitre 7, point 29 : jusqu'à ±5 fois le vecteur
+  // directeur, le point de repli partait à 20 unités et étirait tout le graphe.
+  const decalage = Math.floor(Math.random() * 5) - 2;
   if (a === 0) return { x: decalage, y: -c / b };
   if (b === 0) return { x: -c / a, y: decalage };
   const { g, x: x0, y: y0 } = pgcdEtendu(a, b);

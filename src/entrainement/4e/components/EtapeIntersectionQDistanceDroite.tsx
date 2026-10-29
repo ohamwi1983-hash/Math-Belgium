@@ -6,7 +6,7 @@ import { diagnostiquerIntersection } from "../moteur/verificationDroite";
 import { NIVEAU_AIDE_MAX_INTERSECTION_Q } from "../moteur/sessionDistanceDroite";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import type { ReponseIntersection } from "../moteur/verificationDistanceDroite";
-import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_INTERSECTION_Q, LABEL_X_Q, LABEL_Y_Q, PLACEHOLDER_COORDONNEE_FRACTION, TEXTE_AIDE_INTERSECTION_Q_NIVEAU1, formatAideIntersectionQNiveau2Latex } from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, LABEL_X_Q, LABEL_Y_Q, PLACEHOLDER_COORDONNEE_FRACTION, TEXTE_AIDE_INTERSECTION_Q_NIVEAU1, consigneIntersectionQ, formatAideIntersectionQNiveau2Latex } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -28,7 +28,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (reponse: ReponseIntersection) => void;
+  /** `saisie` : les deux champs tels que tapés, pour la fiche de consultation (puces cliquables). */
+  onValider: (reponse: ReponseIntersection, saisie: { x: string; y: string }) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -67,6 +68,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
         ]
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
   lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
+  const cadrage = { droites: lignes.map((l) => l.droite), points: [point, qAttendu] };
   const points = [{ point, label: "P", couleur: COULEUR_P }];
   if (niveauAide >= 1) points.push({ point: qAttendu, label: "Q", couleur: COULEUR_Q });
 
@@ -77,11 +79,11 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
         blocDonnees={
           <>
             <DonneesDistanceDroite exercice={exercice} />
-            <DistanceDroiteGraph lignes={lignes} points={points} />
+            <DistanceDroiteGraph lignes={lignes} points={points} cadrage={cadrage} />
           </>
         }
       />
-      <p className="prompt-text">{CONSIGNE_INTERSECTION_Q}</p>
+      <p className="prompt-text">{consigneIntersectionQ(exercice)}</p>
 
       <div className="field-row">
         <div className="field field-inline">
@@ -124,7 +126,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERSECTION_Q} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { x, y })}>
           Valider
         </button>
         {tentativesUtilisees > 0 && (

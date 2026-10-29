@@ -1,7 +1,7 @@
 /**
  * Couche B — vérification propre à "Distance point-droite et droite-droite (méthode de synthèse,
  * sans formule)". ⚠️ Réutilise directement les primitives déjà partagées par le groupe "droites" —
- * `pointAppartientImplicite`/`diagnostiquerEquationDroiteLibre`/`statutNumerique`/`combinerStatuts`
+ * `pointAppartientImplicite`/`diagnostiquerEquationDroiteLibre`/`combinerStatuts`
  * (`verificationDroite.ts`) — jamais une seconde logique de comparaison réécrite. `diagnostiquerIntersection`/
  * `verifierIntersection`/`ReponseIntersection` (écran "Coordonnées de Q") sont déjà exportées telles
  * quelles par `verificationDroite.ts` (ajoutées lors de la Task 15, anticipant précisément cet
@@ -18,7 +18,6 @@ import {
   diagnostiquerEquationDroiteLibre,
   diagnostiquerIntersection,
   pointAppartientImplicite,
-  statutNumerique,
   verifierIntersection,
 } from "./verificationDroite";
 
@@ -67,24 +66,34 @@ export function verifierEquationB(texte: string, bAttendue: DroiteImplicite): bo
 }
 
 // ============================================================================
-// Écran 3 — distance PQ, un seul champ TEXTE LIBRE : entier, fraction irréductible, valeur
-// irrationnelle sous forme `sqrt(...)`/`√...`, ou décimale (`promptgen47modifications.md`, point
+// Écran 3 — distance PQ, un seul champ TEXTE LIBRE : entier, fraction irréductible ou valeur
+// irrationnelle sous forme `sqrt(...)`/`√...` — valeur exacte seulement depuis l'audit du
+// chapitre 7 (point 33), une décimale approchée est refusée (`promptgen47modifications.md`, point
 // 15) — jamais restreint aux seuls chiffres/`-`/`.`/`,`. Parsé symboliquement via
 // `evaluerExpressionGenerale` (module frère, déjà réutilisé ailleurs sur le chapitre 6 pour ce
 // même besoin, ex. `verificationEquationCercleDeveloppee.ts::diagnostiquerRayon`) — jamais un
 // second évaluateur dédié. `√` (caractère unicode que l'évaluateur ne tokenise pas nativement,
 // seul `sqrt(...)` l'est) est translittéré en `sqrt(...)` avant évaluation, seule adaptation
-// nécessaire ici. Réutilise `statutNumerique` (déjà exportée par `verificationDroite.ts`) plutôt
-// que `diagnostiquerCalculDistance` (`verificationNormeDistance.ts`, trop couplée au contrat
-// `ExerciceDistance` de "Norme d'un vecteur et distance entre 2 points", sans rapport de type ici)
-// — même tolérance (0,01), même comportement `parse_error` sur une valeur non finie.
+// nécessaire ici. Tolérance propre (`TOLERANCE_DISTANCE_EXACTE`), jamais `statutNumerique` (0,01, qui
+// accepterait une approximation) ni `diagnostiquerCalculDistance` (`verificationNormeDistance.ts`,
+// trop couplée au contrat `ExerciceDistance` de "Norme d'un vecteur et distance entre 2 points").
 // ============================================================================
 
 /** `√(...)` ou `√369` (sans parenthèses) → `sqrt(...)`/`sqrt(369)` — seule adaptation nécessaire
- * avant `evaluerExpressionGenerale`, qui ne tokenise que la forme fonction `sqrt(...)`. */
+ * avant `evaluerExpressionGenerale`, qui ne tokenise que la forme fonction `sqrt(...)`. Les signes
+ * moins typographiques (« − », « – », « — ») sont convertis au passage (audit chapitre 7, point 4 :
+ * « −10 » était jugé illisible au lieu d'être simplement faux). */
 function remplacerRacineUnicode(texte: string): string {
-  return texte.replace(/√\(/g, "sqrt(").replace(/√\s*(\d+(?:[.,]\d+)?)/g, "sqrt($1)");
+  return texte
+    .replace(/[−–—]/g, "-")
+    .replace(/√\(/g, "sqrt(")
+    .replace(/√\s*(\d+(?:[.,]\d+)?)/g, "sqrt($1)");
 }
+
+/** Quasi nulle — valeur EXACTE exigée (audit chapitre 7, point 33, même règle que gen26 « Norme
+ * d'un vecteur et distance entre 2 points ») : `2√5` ou `sqrt(20)` tombent à moins de 1e-6 de la
+ * distance réelle, une approximation décimale `4,47` jamais. */
+const TOLERANCE_DISTANCE_EXACTE = 1e-6;
 
 export function diagnostiquerDistance(exercice: ExerciceDistanceDroite, texte: string): StatutVerification {
   let valeur: number;
@@ -93,7 +102,8 @@ export function diagnostiquerDistance(exercice: ExerciceDistanceDroite, texte: s
   } catch {
     return "parse_error";
   }
-  return statutNumerique(valeur, exercice.distance);
+  if (!Number.isFinite(valeur)) return "parse_error";
+  return Math.abs(valeur - exercice.distance) <= TOLERANCE_DISTANCE_EXACTE ? "correct" : "not_equivalent";
 }
 
 export function verifierDistance(exercice: ExerciceDistanceDroite, texte: string): boolean {
