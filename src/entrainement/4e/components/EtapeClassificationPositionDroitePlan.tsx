@@ -27,11 +27,21 @@ const OPTIONS: ConclusionPositionDroitePlan[] = ["incluse", "parallele", "secant
  * (jamais la seule couleur du plan) : c'est précisément la RELATION entre les deux que l'élève doit
  * reconnaître, masquer la droite reviendrait à cacher une donnée de l'énoncé, pas à éviter de
  * révéler la réponse (la couleur ne dit rien de incluse/parallèle/sécante en elle-même).
+ *
+ * Seul le choix SOUMIS et refusé passe en rouge (`soumis`) — jamais un nouveau choix pas encore
+ * validé. Une seule tentative sur cet écran (`tentativesMaxEcran`, décision H2a).
  */
-export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<ConclusionPositionDroitePlan | null>(null);
+  const [soumis, setSoumis] = useState<ConclusionPositionDroitePlan | null>(null);
   const max = NIVEAU_AIDE_MAX_CLASSIFICATION;
-  const erronee = tentativesUtilisees > 0;
+  const refuse = (tentativesUtilisees > 0 || validation?.revele === true) && soumis !== null;
+
+  function valider() {
+    if (choix === null) return;
+    setSoumis(choix);
+    onValider(choix);
+  }
 
   return (
     <div>
@@ -41,8 +51,9 @@ export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtil
           <button
             key={option}
             type="button"
-            className={`btn${choix === option ? " toggle-active" : ""}${erronee && choix === option ? " is-erronee" : ""}`}
-            onClick={() => setChoix(option)}
+            className={`btn${choix === option ? " toggle-active" : ""}${refuse && soumis === option && choix === option ? " is-erronee" : ""}`}
+            onClick={() => !validation && setChoix(option)}
+            disabled={Boolean(validation) && choix !== option}
           >
             {LIBELLE_CLASSIFICATION[option]}
           </button>
@@ -57,16 +68,16 @@ export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtil
       )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
+          <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

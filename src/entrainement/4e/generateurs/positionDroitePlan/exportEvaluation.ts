@@ -2,15 +2,24 @@ import type { ExercicePositionDroitePlan } from "../../core/positionDroitePlan.t
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
 import {
-  consigneJustification,
-  libelleClassification,
   libelleDroite,
   libellePlan,
-  texteAideClassificationNiveau2,
+  phrasePosition,
   texteAideJustification,
+  texteFaitsAppartenance,
+  textePointsNommes,
   texteReponseJustificationAttendue,
 } from "../../ui/formatPositionDroitePlan";
-import { calculerGeometrieSolide3D, calculerPolygonePlan, HAUTEUR_SVG, LARGEUR_SVG } from "../../ui/solide3DSketch";
+import {
+  calculerEchelleProjection,
+  calculerGeometrieSolide3D,
+  calculerPolygonePlan,
+  calculerSegmentsDroite,
+  HAUTEUR_SVG,
+  LARGEUR_SVG,
+  positionLabelExterieur,
+  projeter3DVersPixel,
+} from "../../ui/solide3DSketch";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionDroitePlan } from "./index";
 
 /**
@@ -34,25 +43,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionD
  *
  * **Écran → question, dans le même ordre** (`AppPositionDroitePlan.tsx`, phases `classification` →
  * `justification`) :
- * - Écran 1 "classification" (`EtapeClassificationPositionDroitePlan.tsx`) → question a) : la
- *   consigne "Que peux-tu dire de cette droite par rapport à ce plan ?" est reprise TELLE QUELLE
- *   (jamais reformulée) ; l'élève écrit sa réponse (incluse/parallèle/sécante) sur feuille à part —
- *   aucune zone de réponse vierge (`reponse: { type: "lignes", nombre: 0 }`), même décision
- *   documentée que `generateurs/orthogonalite/exportEvaluation.ts`/`generateurs/triangleQuelconque/
- *   exportEvaluation.ts`.
- * - Écran 2 "justification" (`EtapeJustificationPositionDroitePlan.tsx`) → question b) :
- *   `ui/formatPositionDroitePlan.ts::consigneJustification(exercice.classification)` réutilisée TELLE
- *   QUELLE (déjà adaptée à la catégorie réellement tirée — sélection de 2 sommets pour "incluse",
- *   d'un segment candidat pour "parallele", d'un sommet/arête pour "secante" — jamais un texte
- *   générique unique). Contrairement à l'écran, jamais de liste de boutons candidats imprimée : sur
- *   le croquis, TOUS les sommets sont déjà nommés (labels toujours affichés,
- *   `Solide3DSketch`/`labelsSommets` par défaut `true`), donc l'élève peut désigner lui-même un
- *   segment/sommet par ses lettres sans qu'une liste fermée de distracteurs soit nécessaire sur
- *   copie (cette liste n'existe côté écran QUE pour permettre une vérification automatique par
- *   sélection, jamais parce que la question serait autrement insoluble) — même principe que
- *   `distanceDroite`/`orthogonalite` : une interaction "sélection parmi des boutons" redevient une
- *   question ouverte sur papier, corrigée à la main. Aucune zone de réponse vierge non plus, même
- *   raison qu'a).
+ * - Écran 1 "classification" → question a) : la consigne "Que peux-tu dire de cette droite par
+ *   rapport à ce plan ?" reprise telle quelle, 1 ligne de réponse.
+ * - Écran 2 "justification" → question b) : consigne NEUTRE (`CONSIGNE_JUSTIFICATION_PAPIER`, audit
+ *   chapitre 8) — jamais la consigne d'écran propre à la catégorie, qui révélait la réponse à a) ;
+ *   3 lignes de réponse. Pas de liste de candidats imprimée : tous les sommets et points nommés sont
+ *   déjà étiquetés sur le croquis, l'élève les cite par leurs lettres.
  *
  * **Diagramme SVG** (`construireSvgPositionDroitePlan`) : réutilise EXCLUSIVEMENT les fonctions pures
  * déjà partagées par le rendu écran (`ui/solide3DSketch.ts`, lu entièrement avant d'écrire ce
@@ -87,9 +83,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionD
  *
  * **Correction RESYNTHÉTISÉE**, jamais recalculée indépendamment — réutilise directement les
  * formateurs déjà utilisés côté écran (`ui/formatPositionDroitePlan.ts`) :
- * - a) `texteAideClassificationNiveau2(exercice)` (déjà l'aide de niveau 2 substituée avec les vrais
- *   noms de points — appartenance de chacun des 2 points de la droite au plan), suivi de la
- *   conclusion via `libelleClassification` (ex. "la droite (AB) est incluse dans le plan (ABC).").
+ * - a) `texteFaitsAppartenance(exercice)` (appartenance de chacun des 2 points de la droite au
+ *   plan — plus jamais affichée comme aide à l'écran), suivie de la conclusion.
  * - b) `texteAideJustification(classification)` (rappel de règle déjà utilisé comme aide côté écran 2)
  *   suivi de la réponse concrète `texteReponseJustificationAttendue(exercice)` — cette dernière
  *   retrouve déjà, EN INTERNE à `ui/formatPositionDroitePlan.ts`, le candidat réellement correct via
@@ -148,10 +143,25 @@ function construireSvgPositionDroitePlan(exercice: ExercicePositionDroitePlan): 
       ? `<polygon points="${polygonePlan.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}" fill="${COULEUR_PLAN}" fill-opacity="0.28" stroke="${COULEUR_PLAN}" stroke-width="2" stroke-linejoin="round"/>`
       : "";
 
-  const [d1, d2] = droite;
-  const pd1 = geometrie.sommetsPixel[d1];
-  const pd2 = geometrie.sommetsPixel[d2];
-  const droiteHtml = `<line x1="${pd1.x.toFixed(1)}" y1="${pd1.y.toFixed(1)}" x2="${pd2.x.toFixed(1)}" y2="${pd2.y.toFixed(1)}" stroke="${COULEUR_DROITE}" stroke-width="3" stroke-linecap="round"/>`;
+  // Droite prolongée au-delà de ses 2 points, partie cachée par le solide en pointillé — même
+  // découpage que l'écran (`calculerSegmentsDroite`, audit chapitre 8).
+  const position = (nom: string) => solide.sommets[nom] ?? exercice.pointsNommes.find((p) => p.nom === nom)!.position;
+  const droiteHtml = calculerSegmentsDroite(solide, position(droite[0]), position(droite[1]))
+    .map(
+      (seg) =>
+        `<line x1="${seg.x1.toFixed(1)}" y1="${seg.y1.toFixed(1)}" x2="${seg.x2.toFixed(1)}" y2="${seg.y2.toFixed(1)}" stroke="${COULEUR_DROITE}" stroke-width="${seg.cache ? 2.25 : 3}"${seg.cache ? ' stroke-dasharray="6 5"' : ' stroke-linecap="round"'}/>`,
+    )
+    .join("");
+
+  // Milieux nommés (I, J) — étiquette décalée vers l'extérieur du solide.
+  const echelle = calculerEchelleProjection(solide);
+  const pointsNommesHtml = exercice.pointsNommes
+    .map((p) => {
+      const pixel = projeter3DVersPixel(p.position, echelle);
+      const label = positionLabelExterieur(solide, p.position);
+      return `<circle cx="${pixel.x.toFixed(1)}" cy="${pixel.y.toFixed(1)}" r="3.5" fill="${COULEUR_TRAIT}"/><text x="${label.x.toFixed(1)}" y="${label.y.toFixed(1)}" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${COULEUR_TRAIT}">${p.nom}</text>`;
+    })
+    .join("");
 
   const labelsHtml = Object.entries(geometrie.sommetsPixel)
     .map(([nom, p]) => {
@@ -167,6 +177,7 @@ ${planHtml}
 ${aretesVisiblesHtml}
 ${droiteHtml}
 ${labelsHtml}
+${pointsNommesHtml}
 </svg>`;
 }
 
@@ -174,13 +185,19 @@ ${labelsHtml}
 // Énoncé / correction.
 // ============================================================================
 
+/** Consigne papier de la question b) — NEUTRE (audit chapitre 8) : l'ancienne reprenait la consigne
+ * d'écran propre à la catégorie (« …à laquelle la droite est parallèle », « …où la droite perce le
+ * plan ») et trahissait donc la réponse à a), avec un « Sélectionne » sans liste imprimée. */
+const CONSIGNE_JUSTIFICATION_PAPIER = "Justifie ta réponse en citant les sommets, points, arêtes ou diagonales utiles (point de percée si la droite est sécante).";
+
 function construireEnoncePositionDroitePlan(exercice: ExercicePositionDroitePlan): SectionExercice {
+  const definitions = textePointsNommes(exercice);
   return {
-    enteteFragments: [texte(`Étudie la position de la droite ${libelleDroite(exercice)} par rapport au plan ${libellePlan(exercice)}.`)],
+    enteteFragments: [texte(`Étudie la position de la droite ${libelleDroite(exercice)} par rapport au plan ${libellePlan(exercice)}.${definitions ? ` ${definitions}` : ""}`)],
     enteteHtml: construireSvgPositionDroitePlan(exercice),
     questions: [
-      { consigne: [texte("Que peux-tu dire de cette droite par rapport à ce plan ?")], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(consigneJustification(exercice.classification))], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte("Que peux-tu dire de cette droite par rapport à ce plan ?")], reponse: { type: "lignes", nombre: 1 } },
+      { consigne: [texte(CONSIGNE_JUSTIFICATION_PAPIER)], reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -191,14 +208,17 @@ function paragraphe(lettre: string, contenu: string): BlocCorrection {
 
 function construireCorrectionPositionDroitePlan(exercice: ExercicePositionDroitePlan): BlocCorrection[] {
   const { classification } = exercice;
+  const conclusionClassification = `Conclusion : ${phrasePosition(exercice)}.`;
 
-  const faitsAppartenance = texteAideClassificationNiveau2(exercice);
-  const conclusionClassification = `Conclusion : la droite ${libelleDroite(exercice)} est ${libelleClassification(classification).toLowerCase()} ${libellePlan(exercice)}.`;
+  const reponse = texteReponseJustificationAttendue(exercice);
+  const ici =
+    classification === "incluse"
+      ? `Points de la figure dans le plan ${libellePlan(exercice)} : ${reponse} — ${exercice.droite[0]} et ${exercice.droite[1]} en font partie.`
+      : classification === "parallele"
+        ? `Ici, la droite ${libelleDroite(exercice)} a la même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}, qui est dans le plan ${libellePlan(exercice)}.`
+        : `Ici, la droite ${libelleDroite(exercice)} perce le plan en ${reponse}.`;
 
-  const reponseJustification = texteReponseJustificationAttendue(exercice);
-  const justification = `${texteAideJustification(classification)} Ici : ${reponseJustification}.`;
-
-  return [paragraphe("a", `${faitsAppartenance} ${conclusionClassification}`), paragraphe("b", justification)];
+  return [paragraphe("a", `${texteFaitsAppartenance(exercice)} ${conclusionClassification}`), paragraphe("b", `${texteAideJustification(classification)} ${ici}`)];
 }
 
 export const adaptateurEvaluationPositionDroitePlan: AdaptateurFeuilleExercices<ExercicePositionDroitePlan> = {

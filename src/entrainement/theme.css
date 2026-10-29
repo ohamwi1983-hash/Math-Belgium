@@ -3859,3 +3859,105 @@
   border: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
+
+/* Croquis 3D en perspective cavalière (`4e/components/Solide3DSketch.tsx`) — chapitre "Géométrie
+ * dans l'espace" (gen39, gen40, gen41). Ces classes n'avaient jamais été reprises de plateforme-maths :
+ * sans elles, les arêtes n'avaient aucun trait et le plan sortait en polygone noir plein. Mêmes
+ * couleurs que les SVG autonomes des exports (`generateurs/positionDroitePlan/exportEvaluation.ts` :
+ * trait encre, plan violet translucide, droite orange), en jetons pour suivre le mode sombre. Largeur
+ * plafonnée : à 1280 px la figure occupait ~900 × 700 px et repoussait la question et les boutons
+ * sous la ligne de flottaison. */
+.entrainement {
+  --solide3d-trait: var(--ink);
+  --solide3d-trait-cache: var(--ink-soft);
+  --solide3d-plan: #6d28d9;
+  --solide3d-plan-opacite: 0.22;
+  --solide3d-droite: #e8590c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .entrainement {
+    --solide3d-plan: #a78bfa;
+    --solide3d-plan-opacite: 0.26;
+    --solide3d-droite: #ff8f4d;
+  }
+}
+
+.entrainement .solide3d-sketch {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.entrainement .solide3d-arete {
+  stroke: var(--solide3d-trait);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.entrainement .solide3d-arete.solide3d-arete-cachee {
+  stroke: var(--solide3d-trait-cache);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+}
+
+.entrainement .solide3d-plan {
+  fill: var(--solide3d-plan);
+  fill-opacity: var(--solide3d-plan-opacite);
+  stroke: var(--solide3d-plan);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .solide3d-droite {
+  stroke: var(--solide3d-droite);
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.entrainement .solide3d-droite.is-cachee {
+  stroke-width: 2.25;
+  stroke-dasharray: 6 5;
+  stroke-linecap: butt;
+}
+
+.entrainement .solide3d-segment-extra {
+  stroke: var(--solide3d-trait);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.entrainement .solide3d-segment-extra.is-pointille {
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: butt;
+}
+
+.entrainement .solide3d-sommet-point {
+  fill: var(--solide3d-trait);
+}
+
+.entrainement .solide3d-sommet-label,
+.entrainement .solide3d-point-extra-label {
+  fill: var(--solide3d-trait);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.entrainement .solide3d-point-extra {
+  fill: var(--solide3d-trait);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
