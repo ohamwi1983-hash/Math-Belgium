@@ -71,11 +71,20 @@ export function indexClasseARevelerAide(estCorrect: boolean[] | null): number | 
 // Écran 1 — classement
 // ============================================================================
 
-/** Aide 1 : montre, pour LA donnée proche d'une frontière (`exercice.donneeFrontiere`), comment
+/** Aide 1 : montre, pour LA donnée piège de frontière (`exercice.donneeFrontiere`), comment
  * appliquer la convention d'inclusion/exclusion — modélise le cas piège sans le résoudre pour les
- * autres frontières de l'exercice. */
+ * autres frontières de l'exercice. Deux textes : donnée exactement SUR la frontière (elle appartient
+ * à la classe qui commence là), ou juste EN DESSOUS (elle reste dans la classe qui finit là). */
 export function texteAideClassementNiveau1(exercice: ExerciceHistogramme): string {
-  const { valeur, classeIndex } = exercice.donneeFrontiere;
+  const { valeur, classeIndex, surFrontiere } = exercice.donneeFrontiere;
+  if (surFrontiere) {
+    return virgulesTexte((
+      `La donnée ${valeur} tombe exactement sur une frontière : la borne supérieure d'une classe est TOUJOURS ` +
+      `exclue de celle-ci (sauf pour la toute dernière classe de la série), sa borne inférieure est incluse — donc ` +
+      `${valeur} n'appartient pas à la classe ${formatClasseTexte(exercice, classeIndex - 1)}, mais à la classe ` +
+      `suivante ${formatClasseTexte(exercice, classeIndex)}.`
+    ));
+  }
   const classe = exercice.classes[classeIndex];
   const classeSuivante = exercice.classes[classeIndex + 1];
   return virgulesTexte((

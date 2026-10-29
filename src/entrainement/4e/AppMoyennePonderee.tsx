@@ -72,6 +72,10 @@ interface TransitionEnAttente {
 export function AppMoyennePonderee() {
   const [etat, setEtat] = useState<EtatSessionMoyennePonderee>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (dont « Générer ») : entre dans la `key` des écrans pour
+   * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de
+   * l'exercice précédent et « Valider » restait désactivé. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionMoyennePonderee) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -90,6 +94,7 @@ export function AppMoyennePonderee() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -100,6 +105,7 @@ export function AppMoyennePonderee() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionMoyennePonderee(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteMoyennePonderee)));
   }
 
@@ -140,7 +146,7 @@ export function AppMoyennePonderee() {
           {phase === "quotient" && !enAttente && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (
             <EtapeCentresMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -151,7 +157,7 @@ export function AppMoyennePonderee() {
             />
           ) : phase === "sommes" ? (
             <EtapeSommesMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -162,7 +168,7 @@ export function AppMoyennePonderee() {
             />
           ) : phase === "quotient" ? (
             <EtapeQuotientMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

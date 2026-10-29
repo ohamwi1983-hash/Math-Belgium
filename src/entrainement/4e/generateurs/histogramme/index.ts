@@ -52,24 +52,35 @@ function tirerEffectifs(n: number, nombreClasses: number): number[] {
   return effectifs;
 }
 
+/** Proportion d'exercices dont la donnée piège tombe EXACTEMENT sur une frontière intérieure (sinon
+ * juste en dessous), et proportion d'exercices avec une donnée exactement sur la borne supérieure de
+ * la dernière classe (fermée à droite) — audit chapitre 4, point 19. */
+const PROBA_DONNEE_SUR_FRONTIERE = 2 / 3;
+const PROBA_DONNEE_SUR_BORNE_FINALE = 1 / 3;
+
+type PositionForcee = "aucune" | "sousFrontiere" | "surBorneInf" | "surBorneSup";
+
 /**
  * Génère les `effectif` données brutes d'une classe (bornes en unités de l'échelle) — chacune sur la
- * grille du pas des données, strictement à l'intérieur de `]borneInf, borneSup[` (jamais sur une
- * frontière, voir le contrat). Si `forcerFrontiere` est vrai, la toute première valeur générée vaut
- * exactement `borneSup − pasDonnee` — volontairement proche de la frontière partagée avec la classe
- * suivante, support de l'Aide 1 de l'écran "Classement" (`donneeFrontiere`).
+ * grille du pas des données, strictement à l'intérieur de `]borneInf, borneSup[`, sauf la première
+ * valeur quand `positionPremiere` l'impose : `sousFrontiere` = `borneSup − pasDonnee` (piège juste
+ * sous la frontière), `surBorneInf` = exactement la borne inférieure (frontière intérieure, incluse
+ * dans cette classe), `surBorneSup` = exactement la borne supérieure (dernière classe uniquement).
  */
 function construireDonneesClasse(
   borne: { borneInf: number; borneSup: number },
   effectif: number,
-  forcerFrontiere: boolean,
+  positionPremiere: PositionForcee,
   echelle: EchelleContexte,
   pasDonnee: number,
 ): number[] {
   const crans = Math.round(((borne.borneSup - borne.borneInf) * echelle.unite) / pasDonnee);
   const valeurs: number[] = [];
   for (let i = 0; i < effectif; i++) {
-    const cran = forcerFrontiere && i === 0 ? crans - 1 : randomInt(1, crans - 1);
+    let cran = randomInt(1, crans - 1);
+    if (i === 0 && positionPremiere === "sousFrontiere") cran = crans - 1;
+    if (i === 0 && positionPremiere === "surBorneInf") cran = 0;
+    if (i === 0 && positionPremiere === "surBorneSup") cran = crans;
     valeurs.push(valeurEchelle(echelle, borne.borneInf + (cran * pasDonnee) / echelle.unite));
   }
   return valeurs;
@@ -106,10 +117,25 @@ export function construireAvecVarianteId(
   const bornesUnites = construireBornesClasses(nombreClasses, amplitude / echelle.unite, 0);
   const bornes = bornesUnites.map((b) => ({ borneInf: valeurEchelle(echelle, b.borneInf), borneSup: valeurEchelle(echelle, b.borneSup) }));
   const effectifs = tirerEffectifs(n, nombreClasses);
-  // Jamais la dernière classe — il faut une classe suivante avec laquelle partager la frontière.
-  const classeIndexFrontiere = randomInt(0, nombreClasses - 2);
+  // Frontière piège entre la classe `k` et la classe `k + 1` : la donnée est soit exactement sur la
+  // frontière (elle appartient alors à la classe `k + 1`), soit juste en dessous (classe `k`).
+  const k = randomInt(0, nombreClasses - 2);
+  const surFrontiere = Math.random() < PROBA_DONNEE_SUR_FRONTIERE;
+  const classeIndexFrontiere = surFrontiere ? k + 1 : k;
+  const derniere = nombreClasses - 1;
+  // La première donnée de la dernière classe est déjà prise par le piège si celui-ci y tombe : la
+  // borne finale n'est alors forcée que si cette classe a une autre donnée à placer.
+  const surBorneFinale = Math.random() < PROBA_DONNEE_SUR_BORNE_FINALE && (classeIndexFrontiere !== derniere || effectifs[derniere] >= 2);
 
-  const donneesParClasse = bornesUnites.map((borne, i) => construireDonneesClasse(borne, effectifs[i], i === classeIndexFrontiere, echelle, pasDonnee));
+  const donneesParClasse = bornesUnites.map((borne, i) => {
+    const premiere: PositionForcee = i === classeIndexFrontiere ? (surFrontiere ? "surBorneInf" : "sousFrontiere") : "aucune";
+    const valeurs = construireDonneesClasse(borne, effectifs[i], premiere, echelle, pasDonnee);
+    if (i === derniere && surBorneFinale) {
+      const indexLibre = premiere === "aucune" ? 0 : 1;
+      valeurs[indexLibre] = valeurEchelle(echelle, borne.borneSup);
+    }
+    return valeurs;
+  });
 
   const classes: ClasseHistogramme[] = bornes.map((borne, i) => ({
     borneInf: borne.borneInf,
@@ -127,7 +153,7 @@ export function construireAvecVarianteId(
     amplitude,
     classes,
     donneesBrutes,
-    donneeFrontiere: { valeur: donneesParClasse[classeIndexFrontiere][0], classeIndex: classeIndexFrontiere },
+    donneeFrontiere: { valeur: donneesParClasse[classeIndexFrontiere][0], classeIndex: classeIndexFrontiere, surFrontiere },
   };
 }
 

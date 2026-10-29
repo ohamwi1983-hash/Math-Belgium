@@ -2108,9 +2108,116 @@
   text-align: center;
 }
 
+/* Histogramme à tracer (gen31, `HistogrammeGraph.tsx`) — sans ces règles, les `rect` SVG prenaient le
+ * remplissage noir par défaut (zone de glisser comprise) : écran illisible (audit chapitre 4). */
+.entrainement .histogramme-graph {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  margin: 0 auto 16px;
+}
+
+.entrainement .histogramme-grille-ligne {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.entrainement .histogramme-axe {
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.entrainement .histogramme-axe-label,
+.entrainement .histogramme-hauteur-label {
+  fill: var(--color-text-muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.entrainement .histogramme-hauteur-label {
+  fill: var(--color-text);
+  font-weight: 600;
+}
+
+.entrainement .histogramme-barre {
+  fill: var(--color-primary-bg);
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.entrainement .histogramme-zone-drag {
+  fill: transparent;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.entrainement .histogramme-zone-drag:hover {
+  fill: var(--color-primary);
+  fill-opacity: 0.08;
+}
+
 .entrainement .histogramme-barre.is-erronee {
   fill: var(--color-error-bg);
   stroke: var(--color-error);
+}
+
+/* Liste des données brutes (gen30 `EtapeIdentificationTableauFrequences`, gen31
+ * `EtapeClassementHistogramme`) — pastilles cochables ; `.is-cochee` (donnée déjà comptée par
+ * l'élève) et `.is-surlignee` (aide de gen30) n'avaient aucun style, donc aucun effet visible. */
+.entrainement .tf-liste-brute,
+.entrainement .histogramme-liste-brute {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+
+.entrainement .tf-liste-brute-item,
+.entrainement .histogramme-liste-brute-item {
+  min-width: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.entrainement .tf-liste-brute-item.is-surlignee,
+.entrainement .histogramme-liste-brute-item.is-surlignee {
+  background: var(--color-success-bg);
+  border-color: var(--color-success);
+}
+
+.entrainement .tf-liste-brute-item.is-cochee,
+.entrainement .histogramme-liste-brute-item.is-cochee {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+  font-weight: 700;
+}
+
+.entrainement .tf-liste-brute-item.is-cochee.is-surlignee,
+.entrainement .histogramme-liste-brute-item.is-cochee.is-surlignee {
+  background: var(--color-success-bg);
+}
+
+.entrainement .tf-liste-brute-item:focus-visible,
+.entrainement .histogramme-liste-brute-item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .entrainement .tf-liste-brute-item,
+  .entrainement .histogramme-liste-brute-item {
+    min-height: 44px;
+  }
 }
 
 .entrainement .boite-zone-drag.is-erronee .boite-marqueur {

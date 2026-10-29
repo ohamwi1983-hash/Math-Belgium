@@ -63,6 +63,10 @@ interface TransitionEnAttente {
 export function AppHistogramme() {
   const [etat, setEtat] = useState<EtatSessionHistogramme>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (dont « Générer ») : entre dans la `key` des écrans pour
+   * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de
+   * l'exercice précédent et « Valider » restait désactivé. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionHistogramme) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -85,11 +89,13 @@ export function AppHistogramme() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionHistogramme(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteHistogramme)));
   }
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -128,7 +134,7 @@ export function AppHistogramme() {
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           {phase === "classement" ? (
             <EtapeClassementHistogramme
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -139,7 +145,7 @@ export function AppHistogramme() {
             />
           ) : phase === "frequences" ? (
             <EtapeFrequencesHistogramme
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -150,7 +156,7 @@ export function AppHistogramme() {
             />
           ) : (
             <EtapeTraceHistogramme
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
