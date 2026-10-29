@@ -5,10 +5,12 @@
  * `rayon_indirect` (le point marqué est décalé en diagonale — rayon retrouvé par la formule de
  * distance, jamais lisible directement sur la grille).
  *
- * Exactitude par construction — triplet pythagoricien (même principe que "Norme d'un vecteur et
- * distance entre 2 points"/"Distance point-droite et droite-droite") : pour `rayon_indirect`, le
- * décalage (dx,dy) est toujours l'une des jambes d'un triplet pythagoricien exact, garantissant un
- * rayon toujours entier — jamais une tolérance sur une distance irrationnelle.
+ * Cadrage lisible (audit chapitre 7, points 41 et 43) : centre dans [−4 ; 4]², rayon ≤ 5 pour
+ * `rayon_direct`, écarts |dx|, |dy| ≤ 4 pour `rayon_indirect` (R ≤ 4√2) — la figure tient dans
+ * une douzaine d'unités de haut, ce qui permet un quadrillage de pas 1 lisible même sur téléphone
+ * (chaque coordonnée entière se lit sur un nœud).
+ * Pour `rayon_indirect`, R² = dx² + dy² est toujours entier mais R est le plus souvent irrationnel
+ * (√13, √20…) : c'est R² qui entre dans l'équation, exactement comme dans le cours.
  */
 import type { ExerciceEquationCercle, VarianteEquationCercle } from "../../core/equationCercle.types";
 import type { Point } from "../../core/vecteur.types";
@@ -17,19 +19,14 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Triplets pythagoriciens "propres" — même liste que "Norme d'un vecteur et distance entre 2
- * points"/"Distance point-droite et droite-droite", dupliquée ici (contrats indépendants entre
- * générateurs, même principe de duplication assumée qu'ailleurs dans le projet). */
-const TRIPLETS_PYTHAGORICIENS: readonly [number, number, number][] = [
-  [3, 4, 5],
-  [4, 3, 5],
-  [6, 8, 10],
-  [8, 6, 10],
-  [5, 12, 13],
-  [12, 5, 13],
-];
+function signeAleatoire(): 1 | -1 {
+  return Math.random() < 0.5 ? -1 : 1;
+}
 
 const BORNE_CENTRE = 4;
+const RAYON_DIRECT_MIN = 2;
+const RAYON_DIRECT_MAX = 5;
+const ECART_INDIRECT_MAX = 4;
 
 function tirerCentre(): Point {
   return { x: randomInt(-BORNE_CENTRE, BORNE_CENTRE), y: randomInt(-BORNE_CENTRE, BORNE_CENTRE) };
@@ -37,7 +34,7 @@ function tirerCentre(): Point {
 
 interface DonneesCercle {
   centre: Point;
-  rayon: number;
+  rayonCarre: number;
   pointMarque: Point;
 }
 
@@ -45,42 +42,33 @@ interface DonneesCercle {
  * directement en comptant les carreaux, sans aucun calcul. */
 function construireRayonDirect(): DonneesCercle {
   const centre = tirerCentre();
-  const rayon = randomInt(2, 8);
+  const rayon = randomInt(RAYON_DIRECT_MIN, RAYON_DIRECT_MAX);
   const horizontal = Math.random() < 0.5;
-  const signe = Math.random() < 0.5 ? -1 : 1;
+  const signe = signeAleatoire();
   const pointMarque: Point = horizontal ? { x: centre.x + signe * rayon, y: centre.y } : { x: centre.x, y: centre.y + signe * rayon };
-  return { centre, rayon, pointMarque };
+  return { centre, rayonCarre: rayon * rayon, pointMarque };
 }
 
-/** Le point marqué est décalé simultanément en x ET en y — jamais alignable directement sur la
- * grille, le rayon doit être retrouvé par la distance centre↔point (triplet pythagoricien exact).
- * Contrainte vérifiée (`promptgen49gen50modifications.md`, partie A.2) : `pointMarque.x !== centre.x`
- * ET `pointMarque.y !== centre.y` pour toute instance — déjà garanti mathématiquement ici, jamais
- * seulement probable, puisque `a`/`b` (les jambes du triplet pythagoricien) sont toujours des
- * entiers strictement positifs dans `TRIPLETS_PYTHAGORICIENS` (jamais 0) : `dx = signeX·a` et
- * `dy = signeY·b` ne peuvent donc jamais s'annuler, quel que soit le signe tiré. Déjà verrouillé par
- * `index.test.ts` (`pointMarque.x`/`.y` explicitement différents de `centre.x`/`.y`, 500 tirages) —
- * aucun changement de génération nécessaire pour cette variante. Ne concerne QUE `rayon_indirect` :
- * `rayon_direct` reste, par construction, TOUJOURS aligné sur un axe (voir `construireRayonDirect`
- * ci-dessus) — c'est précisément ce qui distingue les deux variantes, jamais touché par cette
- * contrainte. */
+/** Le point marqué est décalé simultanément en x ET en y (écarts entiers, jamais nuls — contrainte
+ * `promptgen49gen50modifications.md`, partie A.2 : `pointMarque.x !== centre.x` ET
+ * `pointMarque.y !== centre.y`) : jamais alignable directement sur la grille, le rayon se retrouve
+ * par la distance centre↔point, R² = dx² + dy². */
 function construireRayonIndirect(): DonneesCercle {
   const centre = tirerCentre();
-  const [a, b, rayon] = TRIPLETS_PYTHAGORICIENS[randomInt(0, TRIPLETS_PYTHAGORICIENS.length - 1)]!;
-  const signeX = Math.random() < 0.5 ? -1 : 1;
-  const signeY = Math.random() < 0.5 ? -1 : 1;
-  const pointMarque: Point = { x: centre.x + signeX * a, y: centre.y + signeY * b };
-  return { centre, rayon, pointMarque };
+  const dx = signeAleatoire() * randomInt(1, ECART_INDIRECT_MAX);
+  const dy = signeAleatoire() * randomInt(1, ECART_INDIRECT_MAX);
+  const pointMarque: Point = { x: centre.x + dx, y: centre.y + dy };
+  return { centre, rayonCarre: dx * dx + dy * dy, pointMarque };
 }
 
 export function construireExercice(variante: VarianteEquationCercle): ExerciceEquationCercle {
-  const donnees = variante === "rayon_direct" ? construireRayonDirect() : construireRayonIndirect();
-  return { variante, ...donnees };
+  const { centre, rayonCarre, pointMarque } = variante === "rayon_direct" ? construireRayonDirect() : construireRayonIndirect();
+  return { variante, centre, rayonCarre, rayon: Math.sqrt(rayonCarre), pointMarque };
 }
 
 export const CATALOGUE_VARIANTES: { id: VarianteEquationCercle; label: string }[] = [
   { id: "rayon_direct", label: "Rayon lu directement sur la grille" },
-  { id: "rayon_indirect", label: "Rayon retrouvé par la distance (triplet pythagoricien)" },
+  { id: "rayon_indirect", label: "Rayon retrouvé par la distance (Pythagore)" },
 ];
 
 export function construireAvecVarianteId(varianteId: VarianteEquationCercle): ExerciceEquationCercle {

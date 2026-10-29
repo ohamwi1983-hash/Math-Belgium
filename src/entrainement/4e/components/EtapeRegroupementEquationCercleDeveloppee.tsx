@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerRegroupement } from "../moteur/verificationEquationCercleDeveloppee";
-import { CONSIGNE_GENERALE_CENTRE_RAYON, CONSIGNE_REGROUPEMENT, PLACEHOLDER_EQUATION, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatAideRegroupementNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_EQUATION, consigneRegroupement, formatAideRegroupementNiveau2Latex, texteAideRegroupementNiveau1, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -47,7 +47,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_REGROUPEMENT}</p>
+      <p className="prompt-text">{consigneRegroupement(exercice)}</p>
 
       <div className="field">
         <label className="field-label" htmlFor="equation-cercle-developpee-regroupement">
@@ -64,7 +64,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_REGROUPEMENT_NIVEAU1}</p>
+          <p>{texteAideRegroupementNiveau1(exercice)}</p>
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatAideRegroupementNiveau2Latex(exercice)} />

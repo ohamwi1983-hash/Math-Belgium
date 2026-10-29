@@ -3,7 +3,9 @@ import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDev
 import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -41,12 +43,18 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
 
   const complet = [x, y, rayon].every((v) => v.trim() !== "");
 
+  /** Coordonnée lue comme entier, décimal ou fraction (« 1/2 », « -5/2 ») — le centre est souvent
+   * demi-entier et la réponse affichée l'écrit en fraction (audit chapitre 7, point 9). */
+  function lireCoordonnee(texte: string): number {
+    return parserNombreOuFraction(texte) ?? Number.NaN;
+  }
+
   function construireReponse(): ReponseEcranCentreRayon {
-    return { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")), rayon };
+    return { x: lireCoordonnee(x), y: lireCoordonnee(y), rayon };
   }
 
   const apresEchec = tentativesUtilisees > 0;
-  const statut = apresEchec ? diagnostiquerCentreRayon(exercice, { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")) }, rayon) : undefined;
+  const statut = apresEchec ? diagnostiquerCentreRayon(exercice, { x: lireCoordonnee(x), y: lireCoordonnee(y) }, rayon) : undefined;
   const centreErronee = apresEchec && statut!.centre !== "correct";
   const rayonErronee = apresEchec && statut!.rayon !== "correct";
 
@@ -74,8 +82,8 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
             className={`text-input${centreErronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -87,8 +95,8 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
             className={`text-input${centreErronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>
@@ -101,7 +109,8 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           className={`text-input${rayonErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_RAYON}
           value={rayon}
-          onChange={(e) => setRayon(e.target.value)}
+          onChange={(e) => setRayon(filtrerSaisieNumeriqueRacine(e.target.value))}
+          onKeyDown={gererKeyDownNumeriqueRacine}
         />
       </div>
 

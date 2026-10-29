@@ -2,17 +2,17 @@ import type { ExerciceEquationCercle } from "../../core/equationCercle.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
-import { viewBoxEquationCercle } from "../../ui/equationCercleGraph";
+import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../../ui/equationCercleGraph";
 import {
   CONSIGNE_CENTRE,
   CONSIGNE_EQUATION,
   CONSIGNE_GENERALE_EQUATION_CERCLE,
-  CONSIGNE_RAYON,
+  consigneRayon,
   formatAideRayonNiveau2Latex,
   formatEquationAttendueLatex,
   formatEtatActuelCentreLatex,
+  formatRayonLatex,
 } from "../../ui/formatEquationCercle";
-import { RATIO_GRAPHE, calculerPasGrille, etendreViewBoxPourEtiquettes } from "../../ui/mafsTransformation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercle } from "./index";
 
 /**
@@ -52,10 +52,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationC
  * `boiteMoustaches/exportEvaluation.ts`), mais réutilise autant que possible la géométrie déjà pure
  * et testée du reste du projet plutôt que d'en reconstruire une nouvelle — `viewBoxEquationCercle`
  * (`ui/equationCercleGraph.ts`, cadrage dérivé des 4 points cardinaux du cercle + le point marqué,
- * déjà utilisé côté écran), `etendreViewBoxPourEtiquettes`/`calculerPasGrille`/`RATIO_GRAPHE`
- * (`ui/mafsTransformation.ts`, même calcul de pas de grille "nombre rond" et de marge de clairance
- * que le reste du projet). Seul le rendu `<svg>` lui-même (grille, axes, ellipse représentant le
- * cercle, point, croix du centre, segment du rayon) est propre à ce fichier, aucun équivalent
+ * déjà utilisé côté écran, avec le même rapport `RATIO_GRAPHE_CERCLE`). Seul le rendu `<svg>`
+ * lui-même (grille de pas 1, axes, cercle, point, croix du centre, segment du rayon) est propre à ce fichier, aucun équivalent
  * générique n'existant à réutiliser.
  *
  * **PAS `regroupable`** : `AdaptateurFeuilleExercices.regroupable` exige à la fois une seule
@@ -81,10 +79,6 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationC
  * chaque réponse attendue est une donnée courte (une paire de coordonnées, un nombre, une équation),
  * jamais un calcul à dérouler sur plusieurs lignes.
  */
-
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-}
 
 // ============================================================================
 // Moteur de tracé SVG statique — cercle sur grille (aucun équivalent existant, voir commentaire de
@@ -121,49 +115,62 @@ interface OptionsSvgEquationCercle {
 }
 
 /**
- * `<svg>` autonome du graphe de gen49 — grille + axes gradués, cercle tracé (`<ellipse>`, jamais un
- * `<circle>` seul : `sx`/`sy` peuvent différer légèrement, voir ci-dessous), point marqué ; le centre
- * (croix) et le segment du rayon ne sont ajoutés que si demandé (`options`, correction uniquement).
- * Cadrage identique à l'écran (`viewBoxEquationCercle` + `etendreViewBoxPourEtiquettes`, même
- * fonctions pures que `EquationCercleGraph.tsx`) : `xMax-xMin` et `yMax-yMin` respectent alors
- * exactement `RATIO_GRAPHE`, donc `sx`/`sy` restent quasi identiques malgré la marge fixe `MARGE_SVG`
- * commune aux 2 axes (même compromis assumé que `export/svgGraph.ts::construireSvgFonction`) — le
- * cercle reste visuellement rond, jamais une ellipse perceptible.
+ * `<svg>` autonome du graphe de gen49 — grille de pas 1 + axes gradués, cercle tracé, point
+ * marqué ; le centre (croix) et le segment du rayon ne sont ajoutés que si demandé (`options`,
+ * correction uniquement). Cadrage identique à l'écran (`viewBoxEquationCercle`, même
+ * fonction pure que `EquationCercleGraph.tsx`), avec UNE
+ * seule échelle sur les deux axes : le cercle est un vrai `<circle>`, jamais une ellipse.
  */
 function construireSvgEquationCercle(exercice: ExerciceEquationCercle, options: OptionsSvgEquationCercle = {}): string {
-  const viewBox = etendreViewBoxPourEtiquettes(viewBoxEquationCercle(exercice));
+  const viewBox = viewBoxEquationCercle(exercice);
   const largeur = LARGEUR_SVG;
-  const hauteur = Math.round(largeur / RATIO_GRAPHE);
+  const hauteur = Math.round(largeur / RATIO_GRAPHE_CERCLE);
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
-  const zoneX = largeur - 2 * MARGE_SVG;
-  const zoneY = hauteur - 2 * MARGE_SVG;
-  const sx = (x: number) => MARGE_SVG + ((x - xMin) / (xMax - xMin)) * zoneX;
-  const sy = (y: number) => MARGE_SVG + ((yMax - y) / (yMax - yMin)) * zoneY;
+  // UNE seule échelle pour les deux axes (audit chapitre 7, point 41) : deux échelles
+  // indépendantes déformaient le cercle en ellipse (jusqu'à 5 %) — la zone la plus contraignante
+  // fixe l'échelle, l'autre axe est centré.
+  const echelle = Math.min((largeur - 2 * MARGE_SVG) / (xMax - xMin), (hauteur - 2 * MARGE_SVG) / (yMax - yMin));
+  const decalageX = (largeur - echelle * (xMax - xMin)) / 2;
+  const decalageY = (hauteur - echelle * (yMax - yMin)) / 2;
+  const sx = (x: number) => decalageX + (x - xMin) * echelle;
+  const sy = (y: number) => decalageY + (yMax - y) * echelle;
 
-  const pasX = calculerPasGrille(xMax - xMin);
-  const pasY = calculerPasGrille(yMax - yMin);
+  // Quadrillage de pas 1 (coordonnées entières sur les nœuds, comme à l'écran) ; un nombre sur
+  // deux seulement quand une unité est trop étroite pour y écrire « −10 ».
+  const pasX = 1;
+  const pasY = 1;
+  const pasEtiquettes = echelle < 16 ? 2 : 1;
+
+  // Bords de la zone tracée et position des axes — un axe hors cadre n'est pas tracé, mais ses
+  // nombres restent épinglés au bord le plus proche (même principe que les graduations flottantes
+  // de l'écran, `GraduationsFlottantes`) : jamais une figure sans aucune coordonnée lisible.
+  const gauche = sx(xMin);
+  const droite = sx(xMax);
+  const haut = sy(yMax);
+  const bas = sy(yMin);
+  const borner = (valeur: number, min: number, max: number) => Math.min(max, Math.max(min, valeur));
+  const ligneNombresX = borner(sy(0), haut, bas - 12);
+  const colonneNombresY = borner(sx(0), gauche + 16, droite);
 
   const grille: string[] = [];
   const labels: string[] = [];
   for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
     const px = sx(v);
-    grille.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_SVG}" x2="${px.toFixed(1)}" y2="${hauteur - MARGE_SVG}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) labels.push(texteSvg(px, sy(0) + 11, COULEUR_AXE, formatNombreGraphique(v), "middle"));
+    grille.push(`<line x1="${px.toFixed(1)}" y1="${haut.toFixed(1)}" x2="${px.toFixed(1)}" y2="${bas.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(px, ligneNombresX + 11, COULEUR_AXE, formatNombreGraphique(v), "middle"));
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = sy(v);
-    grille.push(`<line x1="${MARGE_SVG}" y1="${py.toFixed(1)}" x2="${largeur - MARGE_SVG}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) labels.push(texteSvg(sx(0) - 4, py + 3, COULEUR_AXE, formatNombreGraphique(v), "end"));
+    grille.push(`<line x1="${gauche.toFixed(1)}" y1="${py.toFixed(1)}" x2="${droite.toFixed(1)}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
+    if (Math.abs(v) > 1e-9 && Math.round(v) % pasEtiquettes === 0) labels.push(texteSvg(colonneNombresY - 4, py + 3, COULEUR_AXE, formatNombreGraphique(v), "end"));
   }
 
-  const axeX = ligneSvg(MARGE_SVG, sy(0), largeur - MARGE_SVG, sy(0), COULEUR_AXE, 1.4);
-  const axeY = ligneSvg(sx(0), MARGE_SVG, sx(0), hauteur - MARGE_SVG, COULEUR_AXE, 1.4);
+  const axeX = yMin <= 0 && 0 <= yMax ? ligneSvg(gauche, sy(0), droite, sy(0), COULEUR_AXE, 1.4) : "";
+  const axeY = xMin <= 0 && 0 <= xMax ? ligneSvg(sx(0), haut, sx(0), bas, COULEUR_AXE, 1.4) : "";
 
   const { centre, rayon, pointMarque } = exercice;
-  const rx = sx(centre.x + rayon) - sx(centre.x);
-  const ry = sy(centre.y) - sy(centre.y + rayon);
-  const cercle = `<ellipse cx="${sx(centre.x).toFixed(1)}" cy="${sy(centre.y).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="${COULEUR_CERCLE}" stroke-width="${EPAISSEUR_CERCLE}"/>`;
+  const cercle = `<circle cx="${sx(centre.x).toFixed(1)}" cy="${sy(centre.y).toFixed(1)}" r="${(rayon * echelle).toFixed(1)}" fill="none" stroke="${COULEUR_CERCLE}" stroke-width="${EPAISSEUR_CERCLE}"/>`;
   const point = `<circle cx="${sx(pointMarque.x).toFixed(1)}" cy="${sy(pointMarque.y).toFixed(1)}" r="3.2" fill="${COULEUR_POINT}"/>`;
 
   const segmentRayon = options.avecRayon ? ligneSvg(sx(centre.x), sy(centre.y), sx(pointMarque.x), sy(pointMarque.y), COULEUR_POINT, EPAISSEUR_SEGMENT, "dashed") : "";
@@ -202,21 +209,21 @@ function construireEnonceEquationCercle(exercice: ExerciceEquationCercle): Secti
     enteteHtml: construireSvgEquationCercle(exercice),
     questions: [
       { consigne: [texte(CONSIGNE_CENTRE)], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(CONSIGNE_RAYON)], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte(consigneRayon(exercice))], reponse: { type: "lignes", nombre: 0 } },
       { consigne: [texte(CONSIGNE_EQUATION)], reponse: { type: "lignes", nombre: 0 } },
     ],
   };
 }
 
 function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): BlocCorrection[] {
-  const { rayon, variante } = exercice;
+  const { variante } = exercice;
   const blocs: BlocCorrection[] = [{ type: "html", html: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }) }];
 
   blocs.push({
     type: "paragraphe",
     fragments: [
       texte("a) Le centre est le point équidistant de tous les points du cercle — marqué en vert sur le graphique ci-dessus : "),
-      latex(formatEtatActuelCentreLatex(exercice)),
+      latex(`C${formatEtatActuelCentreLatex(exercice)}`),
       texte("."),
     ],
   });
@@ -226,7 +233,7 @@ function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): B
       type: "paragraphe",
       fragments: [
         texte(
-          `b) Le point marqué est aligné avec le centre sur la grille (segment orange ci-dessus) : il suffit de compter le nombre de cases qui les séparent — R = ${formatNombre(rayon)}.`,
+          `b) Le point marqué est aligné avec le centre sur la grille (segment orange ci-dessus) : il suffit de compter le nombre de cases qui les séparent — R = ${formatRayonLatex(exercice)}.`,
         ),
       ],
     });
@@ -238,7 +245,7 @@ function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): B
         texte(
           "b) Le point marqué n'est pas aligné avec le centre : le rayon se retrouve par le théorème de Pythagore, à partir des écarts horizontal et vertical entre le centre et ce point (segment orange ci-dessus) : ",
         ),
-        latex(`${formuleRayon} = ${formatNombre(rayon)}`),
+        latex(`${formuleRayon} = ${formatRayonLatex(exercice)}`),
         texte("."),
       ],
     });

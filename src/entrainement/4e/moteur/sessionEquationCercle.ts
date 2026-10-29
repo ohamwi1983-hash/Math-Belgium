@@ -136,13 +136,13 @@ export function soumettreReponseCentre(etat: EtatSessionEquationCercle, reponse:
 }
 
 /** Écran "rayon" — mène toujours à "equation". */
-export function soumettreReponseRayon(etat: EtatSessionEquationCercle, reponse: number): EtatSessionEquationCercle {
+export function soumettreReponseRayon(etat: EtatSessionEquationCercle, reponse: string): EtatSessionEquationCercle {
   if (etat.terminee || etat.phase !== "rayon") {
     throw new Error("soumettreReponseRayon : la session n'est pas à l'étape rayon");
   }
   const exercice = etat.exerciceCourant;
 
-  const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, reponse, {
+  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
     verifier: (r) => verifierRayon(exercice, r),
     revelerReponse: () => {},
