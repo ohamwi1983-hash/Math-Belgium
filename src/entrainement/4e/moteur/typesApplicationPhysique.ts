@@ -9,10 +9,11 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * schéma sont affichés dès l'écran "modelisation", qui porte aussi la question. */
 export type PhaseApplicationPhysique = "modelisation" | "norme" | "deviation" | "interpretation";
 
-/** `xxxRevele`/`normeAideUtilisee` capturés au moment précis où chaque écran se clôt (jamais après
+/** `xxxRevele`/`xxxAideUtilisee` capturés au moment précis où chaque écran se clôt (jamais après
  * coup) — convention transversale CLAUDE.md, "Récapitulatif final" : une tentative ratée sans aide
  * reste verte, seule une réponse révélée après épuisement des tentatives (ou une aide utilisée sur
- * l'écran "norme", seul écran de ce générateur qui en a une) colore la ligne correspondante. */
+ * l'écran "norme" ou "deviation", les deux écrans de ce générateur qui en ont une) colore la ligne
+ * correspondante. */
 export interface ResultatExerciceApplicationPhysique {
   scoreModelisation: number;
   modelisationRevele: boolean;
@@ -21,6 +22,7 @@ export interface ResultatExerciceApplicationPhysique {
   normeAideUtilisee: boolean;
   scoreDeviation: number;
   deviationRevele: boolean;
+  deviationAideUtilisee: boolean;
   scoreInterpretation: number;
   interpretationRevele: boolean;
 }
@@ -32,10 +34,11 @@ export interface EtatSessionApplicationPhysique {
   exerciceCourant: ExerciceApplicationPhysique;
   phase: PhaseApplicationPhysique;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide progressive (2 niveaux) — uniquement sur l'écran
-   * "norme" (`promptgen29modificationscompletes.md`, point 4.3), seul écran de ce générateur à en
-   * avoir une. Remis à 0 à chaque nouvel exercice, jamais rétroactif sur un exercice déjà clos. */
+  /** Aide progressive (2 niveaux) de l'écran "norme" (`promptgen29modificationscompletes.md`,
+   * point 4.3). Remis à 0 à chaque nouvel exercice, jamais rétroactif sur un exercice déjà clos. */
   niveauAideNorme: number;
+  /** Même principe sur l'écran "deviation" (F2, option b). */
+  niveauAideDeviation: number;
   /** `null` tant que la phase correspondante n'est pas encore close pour l'exercice courant —
    * jamais un score sautable ici (les 4 phases ont toujours lieu), seulement transitoire. */
   scoreModelisationExercice: number | null;
@@ -47,6 +50,8 @@ export interface EtatSessionApplicationPhysique {
   normeAideUtiliseeExercice: boolean;
   scoreDeviationExercice: number | null;
   deviationReveleExercice: boolean;
+  /** Même capture que `normeAideUtiliseeExercice`, à la clôture de l'écran "deviation". */
+  deviationAideUtiliseeExercice: boolean;
   resultats: ResultatExerciceApplicationPhysique[];
   terminee: boolean;
 }

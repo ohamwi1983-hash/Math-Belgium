@@ -17,6 +17,7 @@ import {
 import type { LabelGrapheVecteur } from "../../ui/formatApplicationPhysique";
 import { nombreFrLatex } from "../../ui/nombreFr";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./index";
+import { resultantePencheEnArriere } from "../../moteur/verificationApplicationPhysique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceApplicationPhysique>` pour gen29 (Applications
@@ -267,9 +268,11 @@ function correctionNorme(instance: ExerciceApplicationPhysique): BlocCorrection 
  * tête) — resynthétisée en restant sur le même choix de méthode que (b) : pour angleDroit, le
  * parallélogramme est un rectangle et la résultante (sa diagonale) l'hypoténuse du triangle formé
  * par v1 et le côté parallèle à v2 (tangente) ; loi des sinus du cours pour angleQuelconque
- * (`sin(déviation)/‖v₂‖ = sin θ/‖v_R‖`, θ = angle de l'énoncé). */
+ * (`sin(déviation)/‖v₂‖ = sin θ/‖v_R‖`, θ = angle de l'énoncé), puis le piège du cours (F2,
+ * option b) : l'arcsin donne l'angle aigu α₀, et le signe de `v₁ + v₂·cos θ` décide entre α₀ et
+ * 180° − α₀ — jamais une déviation obtuse affichée sans cette justification. */
 function correctionDeviation(instance: ExerciceApplicationPhysique): BlocCorrection {
-  const { v1, v2, resultante } = notationVecteursApplicationPhysique(instance.contexte);
+  const { v1, v2 } = notationVecteursApplicationPhysique(instance.contexte);
   const estDroit = instance.variante === "angleDroit";
   const fragments: FragmentConsigne[] = estDroit
     ? [
@@ -280,14 +283,45 @@ function correctionDeviation(instance: ExerciceApplicationPhysique): BlocCorrect
         texte(" : "),
         latex(`\\tan(\\text{déviation}) = \\dfrac{\\|${v2}\\|}{\\|${v1}\\|} = \\dfrac{${instance.v2}}{${instance.v1}}`),
       ]
-    : [
-        texte("Loi des sinus, avec θ et la norme de la résultante déjà connus : "),
-        latex(
-          `\\dfrac{\\sin(\\text{déviation})}{\\|${v2}\\|} = \\dfrac{\\sin\\theta}{\\|${resultante}\\|} \\;\\Rightarrow\\; \\sin(\\text{déviation}) = \\dfrac{${instance.v2}\\cdot\\sin(${instance.angleEntreVecteurs}°)}{${valeurLatex(instance.triangle.a)}}`,
-        ),
-      ];
-  fragments.push(texte(", donc déviation ≈ "), latex(`${valeurLatex(instance.triangle.C)}°`), texte("."));
+    : correctionDeviationLoiDesSinus(instance);
+  if (estDroit) fragments.push(texte(", donc déviation ≈ "), latex(`${valeurLatex(instance.triangle.C)}°`), texte("."));
   return paragraphe("c", fragments);
+}
+
+function correctionDeviationLoiDesSinus(instance: ExerciceApplicationPhysique): FragmentConsigne[] {
+  const { v1, v2, resultante } = notationVecteursApplicationPhysique(instance.contexte);
+  const theta = instance.angleEntreVecteurs;
+  const sinDeviation = (instance.v2 * Math.sin((theta * Math.PI) / 180)) / instance.triangle.a;
+  const aigu = (Math.asin(sinDeviation) * 180) / Math.PI;
+  const composante = instance.v1 + instance.v2 * Math.cos((theta * Math.PI) / 180);
+  const fragments: FragmentConsigne[] = [
+    texte("Loi des sinus, avec θ et la norme de la résultante déjà connus : "),
+    latex(
+      `\\dfrac{\\sin(\\text{déviation})}{\\|${v2}\\|} = \\dfrac{\\sin\\theta}{\\|${resultante}\\|} \\;\\Rightarrow\\; \\sin(\\text{déviation}) = \\dfrac{${instance.v2}\\cdot\\sin(${theta}°)}{${valeurLatex(instance.triangle.a)}} \\approx ${nombreFrLatex(Math.round(sinDeviation * 1000) / 1000)}`,
+    ),
+    texte(". La calculatrice (arcsin) donne toujours l'angle aigu "),
+    latex(`\\alpha_0 \\approx ${valeurLatex(aigu)}°`),
+    texte(". Vérification du sens : "),
+    latex(
+      `\\|${v1}\\| + \\|${v2}\\|\\cos\\theta = ${instance.v1} + ${instance.v2}\\cdot\\cos(${theta}°) ${Number.isInteger(Number(composante.toFixed(10))) ? "=" : "\\approx"} ${valeurLatex(composante)}`,
+    ),
+  ];
+  if (resultantePencheEnArriere(instance)) {
+    fragments.push(
+      texte(" < 0 : la résultante penche vers l'arrière par rapport à "),
+      latex(v1),
+      texte(", la déviation est obtuse, donc "),
+      latex(`\\text{déviation} = 180° - \\alpha_0 \\approx ${valeurLatex(instance.triangle.C)}°`),
+      texte("."),
+    );
+  } else {
+    fragments.push(
+      texte(" > 0 : la résultante ne penche pas vers l'arrière, donc "),
+      latex(`\\text{déviation} = \\alpha_0 \\approx ${valeurLatex(instance.triangle.C)}°`),
+      texte("."),
+    );
+  }
+  return fragments;
 }
 
 /** Correction (d) — direction cardinale : dérivée de la géométrie RÉELLE (`triangle.C` face à 90°,

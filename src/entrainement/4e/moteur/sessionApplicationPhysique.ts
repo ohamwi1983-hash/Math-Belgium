@@ -9,8 +9,10 @@
  * les 3 autres phases (`etapeTentatives.ts`) — un mauvais choix ne fait donc avancer qu'une fois
  * les tentatives épuisées, comme n'importe quelle autre étape, jamais après une seule tentative
  * fausse. Aide progressive (2 niveaux, même principe que
- * "Colinéarité"/"Orthogonalité"/"Distance point-droite") sur le SEUL écran "norme"
- * (`promptgen29modificationscompletes.md`, point 4.3) — les 3 autres écrans restent sans aide.
+ * "Colinéarité"/"Orthogonalité"/"Distance point-droite") sur l'écran "norme"
+ * (`promptgen29modificationscompletes.md`, point 4.3) et, depuis F2 option b, sur l'écran
+ * "deviation" (méthode, puis formule substituée + piège de la déviation obtuse) — "modelisation"
+ * et "interpretation" restent sans aide.
  */
 import type { GenerateurExerciceApplicationPhysique, VarianteApplicationPhysique } from "../core/applicationPhysique.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -26,6 +28,7 @@ import type { EtatSessionApplicationPhysique, ResultatExerciceApplicationPhysiqu
 
 const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_NORME = 2;
+export const NIVEAU_AIDE_MAX_DEVIATION = 2;
 
 export function demarrerSessionApplicationPhysique(
   reglages: ReglagesSession,
@@ -39,6 +42,7 @@ export function demarrerSessionApplicationPhysique(
     phase: "modelisation",
     etapeCourante: demarrerEtapeTentatives(),
     niveauAideNorme: 0,
+    niveauAideDeviation: 0,
     scoreModelisationExercice: null,
     modelisationReveleExercice: false,
     scoreNormeExercice: null,
@@ -46,6 +50,7 @@ export function demarrerSessionApplicationPhysique(
     normeAideUtiliseeExercice: false,
     scoreDeviationExercice: null,
     deviationReveleExercice: false,
+    deviationAideUtiliseeExercice: false,
     resultats: [],
     terminee: false,
   };
@@ -62,6 +67,19 @@ export function activerAideNorme(etat: EtatSessionApplicationPhysique): EtatSess
     throw new Error("activerAideNorme : niveau d'aide maximal déjà atteint");
   }
   return { ...etat, niveauAideNorme: etat.niveauAideNorme + 1 };
+}
+
+export function activerAideDeviation(etat: EtatSessionApplicationPhysique): EtatSessionApplicationPhysique {
+  if (etat.terminee) {
+    throw new Error("activerAideDeviation : la session est déjà terminée");
+  }
+  if (etat.phase !== "deviation") {
+    throw new Error("activerAideDeviation : la session n'est pas à l'étape deviation");
+  }
+  if (etat.niveauAideDeviation >= NIVEAU_AIDE_MAX_DEVIATION) {
+    throw new Error("activerAideDeviation : niveau d'aide maximal déjà atteint");
+  }
+  return { ...etat, niveauAideDeviation: etat.niveauAideDeviation + 1 };
 }
 
 function reglagesEtape(etat: EtatSessionApplicationPhysique): ReglagesEtape {
@@ -90,6 +108,7 @@ function cloturerExerciceOuSuivant(
     phase: "modelisation",
     etapeCourante: demarrerEtapeTentatives(),
     niveauAideNorme: 0,
+    niveauAideDeviation: 0,
     scoreModelisationExercice: null,
     modelisationReveleExercice: false,
     scoreNormeExercice: null,
@@ -97,6 +116,7 @@ function cloturerExerciceOuSuivant(
     normeAideUtiliseeExercice: false,
     scoreDeviationExercice: null,
     deviationReveleExercice: false,
+    deviationAideUtiliseeExercice: false,
   };
 }
 
@@ -175,6 +195,7 @@ export function soumettreReponseDeviation(etat: EtatSessionApplicationPhysique, 
     phase: "interpretation",
     scoreDeviationExercice: etapeCourante.score as number,
     deviationReveleExercice: etapeCourante.revelee,
+    deviationAideUtiliseeExercice: etat.niveauAideDeviation > 0,
   };
 }
 
@@ -202,6 +223,7 @@ export function soumettreReponseInterpretation(etat: EtatSessionApplicationPhysi
     normeAideUtilisee: etat.normeAideUtiliseeExercice,
     scoreDeviation: etat.scoreDeviationExercice as number,
     deviationRevele: etat.deviationReveleExercice,
+    deviationAideUtilisee: etat.deviationAideUtiliseeExercice,
     scoreInterpretation: etapeCourante.score as number,
     interpretationRevele: etapeCourante.revelee,
   });

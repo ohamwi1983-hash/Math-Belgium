@@ -26,7 +26,7 @@ import type {
   VarianteApplicationPhysique,
 } from "../../core/applicationPhysique.types";
 import { randomInt } from "./aleatoire";
-import { deviationsAcceptables, TOLERANCE_DEVIATION } from "../../moteur/verificationApplicationPhysique";
+import { deviationsAcceptables, resultantePencheEnArriere, TOLERANCE_DEVIATION } from "../../moteur/verificationApplicationPhysique";
 
 interface DonneesContexte {
   labelV1: string;
@@ -113,13 +113,40 @@ function exerciceExploitable(exercice: ExerciceApplicationPhysique): boolean {
   return erreursPlausiblesDeviation(exercice).every((erreur) => acceptees.every((d) => Math.abs(erreur - d) > MARGE_ERREUR_PLAUSIBLE));
 }
 
+/** Part visée d'exercices « forces, angle quelconque » dont la résultante penche vers l'arrière
+ * (déviation > 90°, F2 option b — piège du cours, section « Applications physiques ») : le tirage
+ * uniforme n'en produisait que ~0,7 %, presque jamais vus. Avec cette probabilité de remplacement,
+ * la part atteint ~17,5 % (0,007 + 0,993 × 0,17). Avion/hélicoptère et angle droit inchangés : le
+ * piège y est géométriquement impossible (vent faible devant la vitesse propre, cos 90° = 0). */
+const PROBABILITE_PIEGE_DEVIATION_OBTUSE = 0.17;
+
+/** Même tirage et mêmes filtres que d'habitude (`exerciceExploitable`), restreint aux exercices
+ * dont la résultante penche vers l'arrière — en pratique θ = 135° ou 150° avec F₂ grande devant F₁. */
+function tirerPiegeDeviationObtuse(): ExerciceApplicationPhysique {
+  for (;;) {
+    const exercice = tirerExercice("angleQuelconque", { contexte: "forces" });
+    if (resultantePencheEnArriere(exercice) && exerciceExploitable(exercice)) return exercice;
+  }
+}
+
 export function construireAvecVarianteId(
   varianteId: VarianteApplicationPhysique,
   overrides?: OverridesApplicationPhysique,
 ): ExerciceApplicationPhysique {
   for (;;) {
     const exercice = tirerExercice(varianteId, overrides);
-    if (exerciceExploitable(exercice)) return exercice;
+    if (!exerciceExploitable(exercice)) continue;
+    // Remplacement APRÈS le tirage du contexte : la répartition avion/hélicoptère/forces reste
+    // exactement celle d'avant, seule la composition des exercices « forces » change.
+    if (
+      exercice.contexte === "forces" &&
+      exercice.variante === "angleQuelconque" &&
+      !resultantePencheEnArriere(exercice) &&
+      Math.random() < PROBABILITE_PIEGE_DEVIATION_OBTUSE
+    ) {
+      return tirerPiegeDeviationObtuse();
+    }
+    return exercice;
   }
 }
 

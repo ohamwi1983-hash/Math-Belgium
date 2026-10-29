@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
+  activerAideDeviation,
   activerAideNorme,
   demarrerSessionApplicationPhysique,
   soumettreReponseDeviation,
@@ -69,8 +70,10 @@ function calculerSegmentsProgression(etat: EtatSessionApplicationPhysique): Etat
     const revele =
       phase === "modelisation" ? etat.modelisationReveleExercice : phase === "norme" ? etat.normeReveleExercice : etat.deviationReveleExercice;
     if (revele) return "revele";
-    // "modelisation"/"deviation" n'ont aucun mécanisme d'aide (toujours "correcte", jamais "aide").
-    return phase === "norme" && etat.normeAideUtiliseeExercice ? "aide" : "correcte";
+    // "modelisation" n'a aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    const aideUtilisee =
+      phase === "norme" ? etat.normeAideUtiliseeExercice : phase === "deviation" ? etat.deviationAideUtiliseeExercice : false;
+    return aideUtilisee ? "aide" : "correcte";
   });
 }
 
@@ -225,7 +228,9 @@ export function AppApplicationPhysique() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            niveauAide={etat.niveauAideDeviation}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
+            onActiverAide={() => setEtat(activerAideDeviation(etat))}
             onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur), `${nombreFr(valeur)}°`)}
             validation={validation}
           />

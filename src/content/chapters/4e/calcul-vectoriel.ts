@@ -1326,6 +1326,21 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: 'R = 70 N, déviation ≈ 21,8° par rapport à F₁' },
         },
         {
+          kind: 'piege',
+          label: 'Piège — une déviation de plus de 90°',
+          text:
+            'La calculatrice (arcsin) renvoie toujours un angle **aigu** α₀, alors que ' +
+            '$\\sin(180° - \\alpha_0) = \\sin\\alpha_0$ : c\'est l\'ambiguïté de la loi des sinus ' +
+            'vue au chapitre 5 (sections 4 et 6). Vérifie donc le signe de ' +
+            '$F_1 + F_2 \\cos\\theta$, la composante de la résultante le long de $\\vec{F_1}$ : ' +
+            's\'il est **négatif**, la résultante penche vers l\'arrière, la déviation est ' +
+            'obtuse et vaut $180° - \\alpha_0$ (et non α₀). ' +
+            'Exemple : $F_1 = 20$ N, $F_2 = 40$ N et $\\theta = 135°$ donnent ' +
+            '$R \\approx 29{,}47$ N, puis $\\sin(\\text{déviation}) = 40 \\times \\sin 135°/29{,}47$ ' +
+            '≈ 0,960. La calculatrice affiche 73,7°, mais $20 + 40 \\cos 135° \\approx -8{,}28$ ' +
+            'est négatif : la déviation vaut $180° - 73{,}7°$ = 106,3°.',
+        },
+        {
           kind: 'atelier',
           tag: 'resultante-vecteurs-widget',
           label: 'Manipule toi-même : la règle du parallélogramme',

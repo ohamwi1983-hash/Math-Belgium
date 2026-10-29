@@ -53,8 +53,9 @@ function arrondir(valeur: number, decimales: number): number {
  * centième), puis la réinjecte dans la loi des sinus du cours,
  * `sin(déviation) / ‖v₂‖ = sin θ / ‖v_R‖`. Avec une norme arrondie à l'unité, l'écart dépassait
  * ±0,5° pour environ un quart des exercices « forces » (petites normes), et l'élève était refusé
- * alors qu'il avait tout bien fait. Même branche que `triangle.C` (aiguë ou obtuse) : le traitement
- * d'une déviation supérieure à 90° n'est pas modifié ici.
+ * alors qu'il avait tout bien fait. Même branche que `triangle.C` (aiguë ou obtuse) : pour une
+ * déviation obtuse (`resultantePencheEnArriere`), l'élève qui suit le piège du cours prend
+ * 180° − α₀ ; l'angle aigu α₀ seul, celui de la calculatrice, n'est jamais accepté.
  */
 export function deviationsAcceptables(exercice: ExerciceApplicationPhysique): number[] {
   const deviation = exercice.triangle.C;
@@ -67,6 +68,13 @@ export function deviationsAcceptables(exercice: ExerciceApplicationPhysique): nu
     valeurs.push(deviation < 90 ? aigu : 180 - aigu);
   }
   return valeurs;
+}
+
+/** Résultante qui « penche vers l'arrière » par rapport à v₁ (F2, option b) : sa composante le long
+ * de v₁, `v₁ + v₂·cos θ`, est négative — la déviation dépasse alors 90°, alors que l'arcsin de la
+ * calculatrice renvoie toujours l'angle aigu α₀ ; la vraie déviation vaut 180° − α₀. */
+export function resultantePencheEnArriere(exercice: ExerciceApplicationPhysique): boolean {
+  return exercice.v1 + exercice.v2 * Math.cos((exercice.angleEntreVecteurs * Math.PI) / 180) < 0;
 }
 
 /** ±1° autour de chaque déviation acceptée : couvre en plus un sinus arrondi en cours de calcul

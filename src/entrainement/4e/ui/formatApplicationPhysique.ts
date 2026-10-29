@@ -7,7 +7,7 @@ import type { Composantes, Point } from "../core/vecteur.types";
 import type { EtatSessionApplicationPhysique } from "../moteur/typesApplicationPhysique";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { nombreFr } from "./nombreFr";
+import { nombreFr, nombreFrLatex } from "./nombreFr";
 import { calculerViewBoxVecteurs } from "./vecteurGraph";
 
 export type { FragmentConsigne };
@@ -526,6 +526,63 @@ export function formatAideNormeNiveau2Latex(exercice: ExerciceApplicationPhysiqu
     return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2`;
   }
   return `\\|${resultante}\\|^2 = ${exercice.v1}^2 + ${exercice.v2}^2 + 2\\cdot ${exercice.v1}\\cdot ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}°)`;
+}
+
+/**
+ * Aide niveau 1 de l'écran "deviation" (F2, option b) — même principe que l'aide "norme" : la
+ * MÉTHODE du cours seulement, formule non substituée (tangente du rectangle pour angleDroit, loi
+ * des sinus pour angleQuelconque, jamais les deux). Proposée sur TOUS les exercices, jamais
+ * seulement sur ceux dont la déviation dépasse 90° : un bouton qui n'apparaîtrait que sur ces
+ * exercices trahirait le piège avant même que l'élève demande de l'aide.
+ */
+export function segmentsAideDeviationNiveau1(exercice: ExerciceApplicationPhysique): FragmentConsigne[] {
+  const { v1, v2, resultante } = notationVecteursApplicationPhysique(exercice.contexte);
+  if (exercice.variante === "angleDroit") {
+    return [
+      texte("Le parallélogramme est un rectangle : dans le triangle rectangle formé par "),
+      latex(v1),
+      texte(" et le côté parallèle à "),
+      latex(v2),
+      texte(", "),
+      latex(`\\tan(\\text{déviation}) = \\dfrac{\\|${v2}\\|}{\\|${v1}\\|}`),
+      texte(" (côté opposé / côté adjacent)."),
+    ];
+  }
+  return [
+    texte("Utilise la loi des sinus : "),
+    latex(`\\dfrac{\\sin(\\text{déviation})}{\\|${v2}\\|} = \\dfrac{\\sin\\theta}{\\|${resultante}\\|}`),
+    texte(", où θ est l'angle de l'énoncé et "),
+    latex(`\\|${resultante}\\|`),
+    texte(" la norme trouvée à l'écran précédent."),
+  ];
+}
+
+/** Aide niveau 2 de l'écran "deviation" — formule SUBSTITUÉE (norme de la résultante telle que le
+ * récapitulatif l'affiche), jamais calculée : ni le sinus, ni l'angle ne sont donnés. */
+export function formatAideDeviationNiveau2Latex(exercice: ExerciceApplicationPhysique): string {
+  if (exercice.variante === "angleDroit") {
+    return `\\tan(\\text{déviation}) = \\dfrac{${exercice.v2}}{${exercice.v1}}`;
+  }
+  const norme = nombreFrLatex(Math.round(exercice.triangle.a * 100) / 100);
+  return `\\sin(\\text{déviation}) = \\dfrac{${exercice.v2}\\cdot\\sin(${exercice.angleEntreVecteurs}°)}{${norme}}`;
+}
+
+/**
+ * Aide niveau 2, suite — le piège du cours (F2, option b) : l'arcsin de la calculatrice renvoie
+ * toujours l'angle aigu, alors que la déviation dépasse 90° dès que la résultante penche vers
+ * l'arrière (`v₁ + v₂·cos θ < 0`, `resultantePencheEnArriere`). Même texte pour tous les exercices
+ * « angle quelconque », la somme est substituée mais jamais calculée : c'est à l'élève d'en trouver
+ * le signe, et ce texte ne dit donc jamais si l'exercice courant est concerné. `null` pour
+ * angleDroit (tangente d'un angle aigu, aucune ambiguïté).
+ */
+export function segmentsAideDeviationSens(exercice: ExerciceApplicationPhysique): FragmentConsigne[] | null {
+  if (exercice.variante === "angleDroit") return null;
+  const { v1, v2 } = notationVecteursApplicationPhysique(exercice.contexte);
+  return [
+    texte("Attention, la calculatrice (arcsin) donne toujours un angle aigu. Calcule "),
+    latex(`\\|${v1}\\| + \\|${v2}\\|\\cos\\theta = ${exercice.v1} + ${exercice.v2}\\cdot\\cos(${exercice.angleEntreVecteurs}°)`),
+    texte(" : s'il est négatif, la résultante penche vers l'arrière et la déviation vaut 180° moins l'angle de la calculatrice ; sinon, c'est l'angle de la calculatrice."),
+  ];
 }
 
 const LIBELLES_VARIANTE: Record<VarianteApplicationPhysique, string> = {
