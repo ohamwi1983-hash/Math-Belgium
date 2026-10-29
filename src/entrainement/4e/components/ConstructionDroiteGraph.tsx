@@ -30,6 +30,8 @@ const COULEUR_DROITE = "#1971c2";
 const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
+/** Largeur (px) en dessous de laquelle deux nombres consécutifs de l'axe X se chevaucheraient. */
+const LARGEUR_MIN_PAR_ETIQUETTE = 24;
 
 /**
  * Graphe Mafs de l'écran "trace" — deux `MovablePoint` avec magnétisme grille (même patron que
@@ -64,6 +66,8 @@ export function ConstructionDroiteGraph({
   const viewBox = useMemo(() => viewBoxConstructionDroite(cible1, cible2, marqueursInitiaux), [cible1, cible2, marqueursInitiaux]);
   const viewBoxEtendu = etendreViewBoxPourEtiquettes(viewBox);
   const pasGrille = pasGrilleConstructionDroite(viewBox);
+  // Pas de 1 sur un graphe étroit (téléphone) : un nombre X sur deux, sinon ils se chevauchent.
+  const etiquettesSerrees = pasGrille !== undefined && largeur / (viewBoxEtendu.x[1] - viewBoxEtendu.x[0]) < LARGEUR_MIN_PAR_ETIQUETTE;
   const contraindre = ([x, y]: [number, number]): [number, number] => {
     const borne = bornerAuViewBox({ x: Math.round(x), y: Math.round(y) }, viewBox);
     return [borne.x, borne.y];
@@ -73,8 +77,11 @@ export function ConstructionDroiteGraph({
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} pasFixe={pasGrille} />
-        <Line.ThroughPoints point1={[marqueur1.x, marqueur1.y]} point2={[marqueur2.x, marqueur2.y]} color={COULEUR_DROITE} weight={EPAISSEUR_TRAIT_STANDARD} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} pasFixe={pasGrille} uneEtiquetteXSurDeux={etiquettesSerrees} />
+        {/* Deux marqueurs confondus ne définissent aucune droite (tracé NaN) : rien à relier. */}
+        {(marqueur1.x !== marqueur2.x || marqueur1.y !== marqueur2.y) && (
+          <Line.ThroughPoints point1={[marqueur1.x, marqueur1.y]} point2={[marqueur2.x, marqueur2.y]} color={COULEUR_DROITE} weight={EPAISSEUR_TRAIT_STANDARD} />
+        )}
         <MovablePoint
           point={[marqueur1.x, marqueur1.y]}
           onMove={(p) => {

@@ -278,7 +278,7 @@ export function formatAideIntersectionQNiveau2Latex(bAttendue: DroiteImplicite, 
   // élimine y (b et la cible ne sont jamais parallèles : le coefficient de x restant n'est jamais nul).
   if (d.a === 0) {
     const y = -d.c / d.b;
-    return `y = ${formatValeurFractionLatex(y)} \;\\Rightarrow\; ${formatSommeTermesGeneree([
+    return `y = ${formatValeurFractionLatex(y)} \\;\\Rightarrow\\; ${formatSommeTermesGeneree([
       { valeur: b.a, suffixe: "x" },
       { valeur: b.b * y + b.c, suffixe: "" },
     ])} = 0`;

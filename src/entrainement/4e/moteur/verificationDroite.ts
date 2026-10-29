@@ -279,13 +279,19 @@ const COEFFICIENT_PARENTHESE_SIGNE = new RegExp(`([+-]?)\\(([+-]?)(${NOMBRE_OU_F
  * signe à l'intérieur changerait celui du terme entier, non géré (la saisie reste alors illisible). */
 const COEFFICIENT_PARENTHESE_PRODUIT = new RegExp(`([*×])\\(\\+?(${NOMBRE_OU_FRACTION})\\)`, "g");
 
+/** Variable divisée par un nombre (`3x/2`, `-x/5`, `2*y/3`) — réécrite en coefficient fractionnaire
+ * (`3/2x`, `-1/5x`) ; même lot que le point 59 (droite saisie par l'élève dans gen54). */
+const VARIABLE_DIVISEE = /(\d+(?:[.,]\d+)?)?[*×]?([xXyY])\/(\d+(?:[.,]\d+)?)/g;
+
 /** Normalise la saisie avant découpage : espaces retirés, signes moins typographiques convertis,
- * coefficients numériques entre parenthèses développés (`(3/2)x` → `+3/2x`). Une parenthèse qui
- * contient autre chose qu'un nombre (`2(x-1)`) est laissée telle quelle et rend le terme illisible. */
+ * coefficients numériques entre parenthèses développés (`(3/2)x` → `+3/2x`), variable divisée
+ * réécrite (`3x/2` → `3/2x`). Une parenthèse qui contient autre chose qu'un nombre (`2(x-1)`) est
+ * laissée telle quelle et rend le terme illisible. */
 function normaliserExpressionLineaire(texte: string): string {
   return texte
     .replace(SIGNES_MOINS, "-")
     .replace(/\s+/g, "")
+    .replace(VARIABLE_DIVISEE, (_tout, coefficient: string | undefined, variable: string, denominateur: string) => `${coefficient ?? "1"}/${denominateur}${variable}`)
     .replace(COEFFICIENT_PARENTHESE_PRODUIT, "$1$2")
     .replace(COEFFICIENT_PARENTHESE_SIGNE, (_tout, signeExterieur: string, signeInterieur: string, nombre: string) =>
       `${(signeExterieur === "-") !== (signeInterieur === "-") ? "-" : "+"}${nombre}`,

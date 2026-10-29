@@ -86,7 +86,7 @@ function formatVecteurSaisiLatex(nom: string, v: ReponseVecteur): string {
   return `\\vec{${nom}}\\begin{pmatrix} ${formatSaisieLatex(v.x)} \\\\ ${formatSaisieLatex(v.y)} \\end{pmatrix}`;
 }
 
-function formatEquationSaisie(exercice: ExerciceRelationsDroites, reponse: ReponseEquation): ReactNode {
+function formatEquationSaisie(reponse: ReponseEquation): ReactNode {
   if (typeof reponse === "string") return reponse.trim() === "" ? "—" : reponse;
   return <Katex expression={formatRepresentationParametriqueLatex(reponse.x0, reponse.a, reponse.y0, reponse.b)} />;
 }
@@ -181,8 +181,8 @@ export function AppRelationsDroites() {
       }
     : null;
 
+  const cle = `${numeroExercice}-${phase}`;
   const commun = {
-    key: `${numeroExercice}-${phase}`,
     exercice,
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
@@ -196,7 +196,7 @@ export function AppRelationsDroites() {
         return (
           <EtapeExtractionRelationsDroites
             {...commun}
-            key={commun.key}
+            key={cle}
             niveauAide={etat.niveauAideExtraction}
             onValider={(reponse) => terminerEtape(soumettreReponseExtraction(etat, reponse), <Katex expression={formatVecteurSaisiLatex("u", reponse)} />)}
           />
@@ -205,7 +205,7 @@ export function AppRelationsDroites() {
         return (
           <EtapeExtractionRelationsDroites
             {...commun}
-            key={commun.key}
+            key={cle}
             seconde
             niveauAide={etat.niveauAideConstruction}
             onValider={(reponse) => terminerEtape(soumettreReponseExtraction2(etat, reponse), <Katex expression={formatVecteurSaisiLatex("v", reponse)} />)}
@@ -215,7 +215,7 @@ export function AppRelationsDroites() {
         return (
           <EtapeConstructionRelationsDroites
             {...commun}
-            key={commun.key}
+            key={cle}
             niveauAide={etat.niveauAideConstruction}
             onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse), <Katex expression={formatVecteurSaisiLatex("v", reponse)} />)}
           />
@@ -224,15 +224,15 @@ export function AppRelationsDroites() {
         return (
           <EtapeEquationRelationsDroites
             {...commun}
-            key={commun.key}
+            key={cle}
             niveauAide={etat.niveauAideEquation}
-            onValider={(reponse) => terminerEtape(soumettreReponseEquation(etat, reponse), formatEquationSaisie(exercice, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseEquation(etat, reponse), formatEquationSaisie(reponse))}
           />
         );
       case "relation":
         return (
           <EtapeRelationRelationsDroites
-            key={commun.key}
+            key={cle}
             exercice={exercice}
             niveauAide={etat.niveauAideEquation}
             onActiverAide={commun.onActiverAide}
