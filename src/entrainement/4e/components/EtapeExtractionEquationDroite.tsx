@@ -3,7 +3,8 @@ import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionEquationDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationEquationDroite";
 import type { ReponseExtraction } from "../moteur/verificationEquationDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, consigneExtraction, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
@@ -40,13 +41,14 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
 
   const complet = [x0, y0, a, b].every((v) => v.trim() !== "");
 
+  /** Fraction « p/q » acceptée (un vecteur directeur colinéaire peut avoir des composantes
+   * fractionnaires, ex. (1 ; 1/2)) — illisible → NaN, donc `parse_error` côté vérification. */
+  function nombre(texte: string): number {
+    return parserNombreOuFraction(texte) ?? Number.NaN;
+  }
+
   function construireReponse(): ReponseExtraction {
-    return {
-      x0: Number(x0.replace(",", ".")),
-      y0: Number(y0.replace(",", ".")),
-      a: Number(a.replace(",", ".")),
-      b: Number(b.replace(",", ".")),
-    };
+    return { x0: nombre(x0), y0: nombre(y0), a: nombre(a), b: nombre(b) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -75,8 +77,8 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x0}
-            onChange={(e) => setX0(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX0(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -88,8 +90,8 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y0}
-            onChange={(e) => setY0(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY0(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>
@@ -103,8 +105,8 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={a}
-            onChange={(e) => setA(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setA(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -116,8 +118,8 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={b}
-            onChange={(e) => setB(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setB(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>

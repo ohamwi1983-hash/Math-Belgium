@@ -31,6 +31,19 @@ import {
 const TYPES_DONNEE: TypeDonneeEntree[] = ["deux_points", "point_vecteur", "angle_ox", "angle_oy", "pente"];
 const FORMES_SORTIE: FormeSortieDroite[] = ["parametrique", "implicite", "explicite_y", "explicite_x"];
 
+/** Formes cibles tirables pour un type de donnée. Une droite donnée par sa pente n'est jamais
+ * verticale : « y = mx + p ? » y serait toujours « Possible », réponse devinable à 100 % (audit
+ * chapitre 7, point 12) — la pente se combine donc seulement avec les 3 autres formes (dont
+ * x = ny + q, impossible quand m = 0). */
+function formesPourType(typeDonnee: TypeDonneeEntree): FormeSortieDroite[] {
+  return typeDonnee === "pente" ? FORMES_SORTIE.filter((forme) => forme !== "explicite_y") : FORMES_SORTIE;
+}
+
+function tirerForme(typeDonnee: TypeDonneeEntree): FormeSortieDroite {
+  const formes = formesPourType(typeDonnee);
+  return formes[randomInt(0, formes.length - 1)];
+}
+
 function randomInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
@@ -154,12 +167,11 @@ export function construireAvecVarianteId(
   varianteId: TypeDonneeEntree,
   overrides?: { formeCible?: FormeSortieDroite },
 ): ExerciceEquationDroite {
-  const formeCible = overrides?.formeCible ?? FORMES_SORTIE[randomInt(0, FORMES_SORTIE.length - 1)];
+  const formeCible = overrides?.formeCible ?? tirerForme(varianteId);
   return construireExercice(varianteId, formeCible);
 }
 
 export function genererExerciceEquationDroite(): ExerciceEquationDroite {
   const typeDonnee = TYPES_DONNEE[randomInt(0, TYPES_DONNEE.length - 1)];
-  const formeCible = FORMES_SORTIE[randomInt(0, FORMES_SORTIE.length - 1)];
-  return construireExercice(typeDonnee, formeCible);
+  return construireExercice(typeDonnee, tirerForme(typeDonnee));
 }

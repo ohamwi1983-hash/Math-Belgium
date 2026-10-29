@@ -14,11 +14,17 @@ import type { Point } from "../core/vecteur.types";
 import { calculerViewBoxVecteurs } from "./vecteurGraph";
 import type { PointAffiche } from "./vecteurGraph";
 
-/** 4 pas entiers autour du point de référence — suffisant pour garantir au moins 2 points visibles
- * dans un cadrage raisonnable, quelle que soit la primitivité du vecteur (toujours ≤4 en valeur
- * absolue par construction). */
+/** 3 points entiers (k = −1, 0, 1) autour du point de référence — assez pour l'aide (2 points-exemple
+ * distincts du couple canonique) et un cadrage serré (vecteur ≤ 3 en valeur absolue par
+ * construction) : avec un quadrillage de pas 1 (`PAS_GRILLE_LECTURE`), chaque point tombe sur un
+ * nœud lisible (audit chapitre 7, point 15 — l'ancienne fenêtre de 4 pas imposait un pas de 2
+ * ou 5, les points tombaient entre les lignes). */
 const K_MIN = -1;
-const K_MAX = 2;
+const K_MAX = 1;
+
+/** Pas du quadrillage, à l'écran comme à l'export : toujours 1 unité, pour que les coordonnées
+ * entières des points marqués se lisent directement. */
+export const PAS_GRILLE_LECTURE = 1;
 
 /** Points à coordonnées entières réellement présents sur la droite, dans l'ordre croissant de k. */
 export function pointsEntiersVisibles(exercice: ExerciceLectureGraphiqueDroite): Point[] {

@@ -24,16 +24,20 @@ function pgcd(a: number, b: number): number {
   return x;
 }
 
-/** Vecteur directeur entier PRIMITIF — composantes tirées dans [-4,4] (jamais toutes deux nulles),
+/** Bornes des composantes tirées : ±3 (au lieu de ±4) garde une fenêtre assez serrée pour un
+ * quadrillage de pas 1 lisible au téléphone (audit chapitre 7, point 15). */
+const COMPOSANTE_MAX = 3;
+
+/** Vecteur directeur entier PRIMITIF — composantes tirées dans [-3,3] (jamais toutes deux nulles),
  * réduites par leur pgcd. Couvre nativement les cas particuliers horizontale (`dy=0` → `(±1,0)`) et
  * verticale (`dx=0` → `(0,±1)`), sans branchement spécial : le pgcd d'un couple `(n,0)` vaut `|n|`,
  * la réduction retombe donc directement sur `(±1,0)`. */
 function tirerVecteurPrimitif(): Composantes {
-  let dx = randomInt(-4, 4);
-  let dy = randomInt(-4, 4);
+  let dx = randomInt(-COMPOSANTE_MAX, COMPOSANTE_MAX);
+  let dy = randomInt(-COMPOSANTE_MAX, COMPOSANTE_MAX);
   while (dx === 0 && dy === 0) {
-    dx = randomInt(-4, 4);
-    dy = randomInt(-4, 4);
+    dx = randomInt(-COMPOSANTE_MAX, COMPOSANTE_MAX);
+    dy = randomInt(-COMPOSANTE_MAX, COMPOSANTE_MAX);
   }
   const g = pgcd(dx, dy);
   return { x: dx / g, y: dy / g };

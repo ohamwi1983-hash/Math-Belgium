@@ -29,6 +29,7 @@ interface Props {
 
 const MARQUEUR1_INITIAL: [number, number] = [0, 0];
 const MARQUEUR2_INITIAL: [number, number] = [1, 0];
+const MARQUEURS_INITIAUX: Point[] = [MARQUEUR1_INITIAL, MARQUEUR2_INITIAL].map(([x, y]) => ({ x, y }));
 
 /**
  * Écran 2 — placement, par glissement CRANTÉ, des 2 points confirmés (ou révélés) à l'écran 1.
@@ -64,6 +65,7 @@ export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentati
       <ConstructionDroiteGraph
         cible1={cible1}
         cible2={cible2}
+        marqueursInitiaux={MARQUEURS_INITIAUX}
         marqueur1={p1}
         marqueur2={p2}
         onDeplacerMarqueur1={(point) => setMarqueur1([point.x, point.y])}

@@ -4,6 +4,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import { calculerPasGrille } from "../../ui/mafsTransformation";
+import { pasGrilleConstructionDroite } from "../../ui/constructionDroiteGraph";
 import { calculerViewBoxVecteurs } from "../../ui/vecteurGraph";
 import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
 import { formatPointLatex } from "../../ui/formatEquationDroite";
@@ -127,8 +128,11 @@ function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
 function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Echelle): string {
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
-  const pasX = calculerPasGrille(xMax - xMin);
-  const pasY = calculerPasGrille(yMax - yMin);
+  // Pas de 1 comme à l'écran (`pasGrilleConstructionDroite`), adaptatif seulement pour un cadre très
+  // large.
+  const pasFixe = pasGrilleConstructionDroite(viewBox);
+  const pasX = pasFixe ?? calculerPasGrille(xMax - xMin);
+  const pasY = pasFixe ?? calculerPasGrille(yMax - yMin);
 
   const lignes: string[] = [];
   const labels: string[] = [];

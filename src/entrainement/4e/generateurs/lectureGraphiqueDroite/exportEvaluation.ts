@@ -3,11 +3,11 @@ import type { Point } from "../../core/vecteur.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
-import { calculerPasGrille, RATIO_GRAPHE } from "../../ui/mafsTransformation";
+import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
 import { consigneGeneraleLecture, consigneLecture, formatReponseAttendueLatex } from "../../ui/formatLectureGraphiqueDroite";
 import { formatPointLatex, formatVecteurLatex } from "../../ui/formatEquationDroite";
-import { pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../../ui/lectureGraphiqueDroiteGraph";
+import { PAS_GRILLE_LECTURE, pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../../ui/lectureGraphiqueDroiteGraph";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLectureGraphiqueDroite } from "./index";
 
 /**
@@ -98,14 +98,15 @@ function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
   };
 }
 
-/** Grille "nombre rond" (`calculerPasGrille`, même fonction que l'écran) + axes x=0/y=0 — même
+/** Grille de pas 1 (`PAS_GRILLE_LECTURE`, même pas que l'écran) + axes x=0/y=0 — même
  * patron que `constructionVectorielle/exportEvaluation.ts::construireGrilleEtAxesHtml` (document
  * HTML d'évaluation autonome, sans dépendance à `App.css`). */
 function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Echelle): string {
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
-  const pasX = calculerPasGrille(xMax - xMin);
-  const pasY = calculerPasGrille(yMax - yMin);
+  // Même pas fixe qu'à l'écran (`PAS_GRILLE_LECTURE`) : les points marqués tombent sur les nœuds.
+  const pasX = PAS_GRILLE_LECTURE;
+  const pasY = PAS_GRILLE_LECTURE;
 
   const lignes: string[] = [];
   const labels: string[] = [];

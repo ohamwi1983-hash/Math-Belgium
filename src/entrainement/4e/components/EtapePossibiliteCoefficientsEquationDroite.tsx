@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import type { ReponsePossibiliteCoefficients } from "../moteur/typesEquationDroite";
-import { diagnostiquerPossibiliteCoefficients } from "../moteur/verificationEquationDroite";
+import { diagnostiquerPossibiliteCoefficients, estBonneDroiteMauvaiseForme } from "../moteur/verificationEquationDroite";
 import { NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS } from "../moteur/sessionEquationDroite";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatAideNiveau2PossibiliteCoefficientsLatex, formatEnonceLatex, latexGabaritPossibiliteCoefficients, segmentsConsignePossibiliteCoefficients } from "../ui/formatEquationDroite";
@@ -28,10 +28,17 @@ interface Props {
 }
 
 /** Placeholder du champ texte — adapté au choix ET à la forme testée (`exercice.formeCible`,
- * explicite_y/explicite_x uniquement pour cet écran). */
+ * explicite_y/explicite_x uniquement pour cet écran). Exemples HORS de l'espace des tirages (pente
+ * 0,4 avec ordonnée 1,7, jamais atteinte — dénominateur 5 pour m, 10 pour p ; triplet 7/−9
+ * irréalisable avec des composantes ≤ 5) : jamais la réponse (audit chapitre 7, point 10). */
 function placeholderEquation(exercice: ExerciceEquationDroite, choix: "possible" | "impossible"): string {
-  if (choix === "impossible") return "ex : 2x-3y+5=0";
-  return exercice.formeCible === "explicite_y" ? "ex : y=2x+3" : "ex : x=2y+3";
+  if (choix === "impossible") return "ex : 7x-9y+1=0";
+  return exercice.formeCible === "explicite_y" ? "ex : y=0,4x+1,7" : "ex : x=0,4y+1,7";
+}
+
+/** Libellé KaTeX de la forme testée, pour le message « bonne droite, mauvaise forme ». */
+function latexFormeTestee(exercice: ExerciceEquationDroite): string {
+  return exercice.formeCible === "explicite_y" ? "y = mx + p" : "x = ny + q";
 }
 
 /**
@@ -117,7 +124,14 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
         </button>
         {tentativesUtilisees > 0 && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {choix !== null && estBonneDroiteMauvaiseForme(exercice, { choix, texte }) ? (
+              <>
+                Ton équation décrit bien cette droite, mais elle n'est pas écrite sous la forme <Katex expression={latexFormeTestee(exercice)} /> — tentative{" "}
+                {tentativesUtilisees}/{tentativesMax}, réessaie.
+              </>
+            ) : (
+              formatMessageErreur(tentativesUtilisees, tentativesMax, statut)
+            )}
           </p>
         )}
         </>
