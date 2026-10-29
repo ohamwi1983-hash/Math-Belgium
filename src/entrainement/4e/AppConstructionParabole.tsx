@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { genererExerciceConstructionParabole } from "./generateurs/constructionParabole";
 import {
@@ -13,8 +13,12 @@ import type { EtatSessionConstructionParabole } from "./moteur/typesConstruction
 import { EtapeConstructionParabole } from "./components/EtapeConstructionParabole";
 import { EtapeTraceParabole } from "./components/EtapeTraceParabole";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { ReponseConstructionParabole } from "./moteur/verificationConstructionParabole";
+import { TEXTE_TRACE_ATTENDU, texteConstructionAttendue } from "./ui/formatConstructionParabole";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 
 const CONSIGNE_GENERALE = "Construis cette parabole au compas et à l'équerre.";
 
@@ -55,11 +59,25 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Ce que l'élève a construit (rayon + position de la droite), pour la fiche de consultation. */
+function constructionSaisie(reponse: ReponseConstructionParabole): ReactNode {
+  const cote = reponse.ligneY > 0 ? "du côté de F" : reponse.ligneY < 0 ? "du côté opposé à F" : "confondue avec la directrice";
+  return reponse.ligneY === 0 ? `r = ${reponse.r} ; droite ${cote}` : `r = ${reponse.r} ; droite à la distance ${Math.abs(reponse.ligneY)}, ${cote}`;
+}
+
 export function AppConstructionParabole() {
   const [etat, setEtat] = useState<EtatSessionConstructionParabole>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des itérations closes (puces cliquables) — tenue ici, jamais dans
+   * le moteur ; une itération close = une entrée, même index que sa puce. L'écran "trace", dernier,
+   * n'est jamais consulté comme écran passé. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` des écrans pour qu'aucun geste de
+   * l'exercice précédent ne survive à « Nouvel exercice ». */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionConstructionParabole) {
+  function terminerEtape(nouvelEtat: EtatSessionConstructionParabole, votreReponse: ReactNode) {
     const transitionDEcran =
       nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || nouvelEtat.iterationCourante !== etat.iterationCourante;
     if (transitionDEcran) {
@@ -68,6 +86,13 @@ export function AppConstructionParabole() {
           ? nouvelEtat.iterationsCompletes[nouvelEtat.iterationsCompletes.length - 1]!.constructionRevele
           : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.traceRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
+      if (etat.phase === "construction") {
+        const rRetenu = nouvelEtat.iterationsCompletes[nouvelEtat.iterationsCompletes.length - 1]!.r;
+        setHistorique((h) => [
+          ...h,
+          { titre: `Construction ${etat.iterationCourante + 1}`, votreReponse, correcte: !revele, reponseAttendue: texteConstructionAttendue(rRetenu) },
+        ]);
+      }
       return;
     }
     setEtat(nouvelEtat);
@@ -75,25 +100,30 @@ export function AppConstructionParabole() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   const exercice = etat.exerciceCourant;
 
+  /** Rayon de repli réellement retenu par le moteur pour l'itération qui vient de se clore — sa
+   * construction est dessinée et décrite comme réponse attendue (jamais une phrase générique). */
+  const rRetenu =
+    enAttente && etat.phase === "construction" ? enAttente.etatSuivant.iterationsCompletes[enAttente.etatSuivant.iterationsCompletes.length - 1]!.r : null;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec
           ? undefined
-          : etat.phase === "construction" ? (
-              <>
-                Sur une itération ratée : le rayon choisi ne respectait pas la contrainte (strictement supérieur à la moitié de la distance entre le
-                foyer et la directrice), ou la droite construite n'était pas exactement à cette même distance, du côté du foyer.
-              </>
-            ) : (
-              <>Les 6 points doivent être sélectionnés dans l'ordre, du côté gauche vers le côté droit.</>
-            ),
+          : etat.phase === "construction" && rRetenu !== null
+            ? texteConstructionAttendue(rRetenu)
+            : TEXTE_TRACE_ATTENDU,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -104,8 +134,8 @@ export function AppConstructionParabole() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Construction de la parabole au compas et à l'équerre</h1>
-        <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <p className="app-subtitle">Chapitre 7 — Géométrie analytique plane</p>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -113,7 +143,8 @@ export function AppConstructionParabole() {
         <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {etat.phase === "construction" ? (
           <EtapeConstructionParabole
-            key={etat.iterationCourante}
+            key={`${numeroExercice}-${etat.iterationCourante}`}
+            rRevele={enAttente?.revele ? rRetenu : null}
             exercice={exercice}
             numeroIteration={etat.iterationCourante + 1}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -121,21 +152,25 @@ export function AppConstructionParabole() {
             niveauAide={etat.niveauAideConstruction}
             rDejaUtilises={etat.iterationsCompletes.map((iteration) => iteration.r)}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse), constructionSaisie(reponse))}
             validation={validation}
           />
         ) : (
           <EtapeTraceParabole
+            key={`${numeroExercice}-trace`}
             exercice={exercice}
             cibles={ciblesTraceConstructionParabole(etat)}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(selectionnes) => terminerEtape(soumettreReponseTrace(etat, selectionnes))}
+            onValider={(selectionnes) => terminerEtape(soumettreReponseTrace(etat, selectionnes), null)}
             validation={validation}
           />
         )}
         </div>
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

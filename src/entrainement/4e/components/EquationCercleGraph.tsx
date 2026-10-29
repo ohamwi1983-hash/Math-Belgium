@@ -24,6 +24,14 @@ const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
 
+/** Quadrillage de pas 1 sur les deux axes (audit chapitre 7, point 41) : le centre et le point
+ * marqué ont des coordonnées entières, chacune doit tomber sur un nœud — jamais « 1 carré =
+ * 5/2 unités ». */
+const PAS_GRILLE = 1;
+/** En deçà de cette largeur (px) par unité, un nombre de l'axe X sur deux seulement est écrit
+ * (« −10 » déborderait sur ses voisins). */
+const LARGEUR_MIN_ETIQUETTE_PAR_UNITE = 22;
+
 /**
  * Graphe Mafs de "Équation d'un cercle (non développée) à partir d'un graphe" — trace le cercle
  * (jamais son centre/rayon sous forme numérique, c'est justement ce que l'élève doit déterminer) et
@@ -41,7 +49,13 @@ export function EquationCercleGraph({ exercice, afficherRayon = false, afficherC
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative
+          largeur={largeur}
+          hauteur={hauteur}
+          onPasChange={(x, y) => setPas({ x, y })}
+          pasFixe={PAS_GRILLE}
+          uneEtiquetteXSurDeux={largeur / (viewBoxEtendu.x[1] - viewBoxEtendu.x[0]) < LARGEUR_MIN_ETIQUETTE_PAR_UNITE}
+        />
         <Circle center={[exercice.centre.x, exercice.centre.y]} radius={exercice.rayon} color={COULEUR_CERCLE} weight={EPAISSEUR_TRAIT_ACCENTUE} fillOpacity={0} />
         {afficherCentre && <PointCroix x={exercice.centre.x} y={exercice.centre.y} color={COULEUR_CENTRE} />}
         {afficherRayon && (

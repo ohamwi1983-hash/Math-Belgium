@@ -3,8 +3,8 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   type FragmentConsigne,
-  formatAideCaracteristiquesNiveau2Latex,
   formatCaracteristiquesAttenduesLatex,
+  formatCorrectionCaracteristiquesLatex,
   formatDroiteEntreeLatex,
   formatPointLatex,
   formatVecteurLatex,
@@ -47,8 +47,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCaracteri
  * (`exercice.point`/`vecteur`/`pente`/`angleDeg`/`angleOyDeg`/`ordonneeOrigine`), en réutilisant
  * directement les formateurs déjà utilisés côté écran interactif plutôt que d'en reconstruire de
  * nouveaux : `segmentsAideExtractionNiveau1` (texte de méthode, question a), `formatPointLatex`/
- * `formatVecteurLatex` (valeurs finales, question a), `formatAideCaracteristiquesNiveau2Latex`
- * (formule substituée, question b — gère déjà elle-même le cas vertical) et
+ * `formatVecteurLatex` (valeurs finales, question a), `formatCorrectionCaracteristiquesLatex`
+ * (chaîne de calcul complète, question b — gère elle-même le cas vertical) et
  * `formatCaracteristiquesAttenduesLatex` (valeurs finales, question b — idem). Pour la variante
  * `parametrique`, l'écran 1 n'a rien à extraire (point/vecteur déjà donnés tels quels) : la
  * correction a) le rappelle simplement plutôt que de dérouler une méthode qui n'existe pas.
@@ -64,7 +64,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCaracteri
 function segmentsConsigneCaracteristiquesPapier(exercice: ExerciceCaracteristiquesDroite): FragmentConsigne[] {
   const prefixe = exercice.caracteristiqueDemandee === "pente" ? "Quelle est " : "Quel est ";
   const libelle = LIBELLE_CARACTERISTIQUE[exercice.caracteristiqueDemandee];
-  return [texte(`${prefixe}${libelle} et l'ordonnée à l'origine de cette droite ?`)];
+  const precision = exercice.caracteristiqueDemandee === "pente" ? "" : " (en degrés, arrondi à l'unité)";
+  return [texte(`${prefixe}${libelle}${precision} et l'ordonnée à l'origine de cette droite ?`)];
 }
 
 function construireEnonceCaracteristiquesDroite(exercice: ExerciceCaracteristiquesDroite): SectionExercice {
@@ -112,30 +113,24 @@ function construireCorrectionExtraction(exercice: ExerciceCaracteristiquesDroite
   };
 }
 
-/** Question b) — formule substituée avec le point/vecteur de la question a), puis les valeurs
- * finales attendues. Cas vertical à part : `formatAideCaracteristiquesNiveau2Latex` et
- * `formatCaracteristiquesAttenduesLatex` énoncent alors TOUS LES DEUX, intégralement, la même
- * conclusion ("m et p n'existent pas, α=90°") — les combiner comme dans le cas général répéterait
- * donc deux fois la même phrase ; une seule des deux suffit ici. */
+/** Question b) — chaîne de calcul complète depuis le point et le vecteur de la question a)
+ * (`formatCorrectionCaracteristiquesLatex` : pente substituée puis simplifiée, angle avec la
+ * correction « +180° » d'un arctan négatif, ordonnée à l'origine avec facteurs entre parenthèses),
+ * puis les valeurs finales attendues. Cas vertical : la conclusion seule (pente et ordonnée
+ * n'existent pas ; angle 90° avec Ox, 0° avec Oy). */
 function construireCorrectionCaracteristiques(exercice: ExerciceCaracteristiquesDroite): BlocCorrection {
   if (exercice.verticale) {
     return {
       type: "paragraphe",
-      fragments: [
-        texte("b) Vecteur directeur "),
-        latex(`\\vec{u}${formatVecteurLatex(exercice.vecteur)}`),
-        texte(" : "),
-        latex(formatCaracteristiquesAttenduesLatex(exercice)),
-        texte("."),
-      ],
+      fragments: [texte("b) "), latex(formatCorrectionCaracteristiquesLatex(exercice)), texte(".")],
     };
   }
   return {
     type: "paragraphe",
     fragments: [
       texte("b) En reprenant le point et le vecteur directeur de la question a) : "),
-      latex(formatAideCaracteristiquesNiveau2Latex(exercice)),
-      texte(", donc "),
+      latex(formatCorrectionCaracteristiquesLatex(exercice)),
+      texte(". Réponse : "),
       latex(formatCaracteristiquesAttenduesLatex(exercice)),
       texte("."),
     ],

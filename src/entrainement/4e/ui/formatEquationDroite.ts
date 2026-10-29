@@ -35,8 +35,15 @@ function formatMagnitudeGenereeLatex(abs: number): string {
 
 /** Valeur signée autonome (ex. une coordonnée de point/vecteur affichée seule) — jamais un double
  * signe, jamais de décimal. */
-function formatValeurGenereeLatex(valeur: number): string {
+export function formatValeurGenereeLatex(valeur: number): string {
   return valeur < 0 ? `-${formatMagnitudeGenereeLatex(-valeur)}` : formatMagnitudeGenereeLatex(valeur);
+}
+
+/** Valeur substituée dans un calcul (« m·(−4) », « −(−3) ») — entre parenthèses si négative, pour
+ * ne jamais afficher deux signes côte à côte comme « m·−4 » (audit chapitre 7, point 7). */
+function formatFacteurLatex(valeur: number): string {
+  const texteValeur = formatValeurGenereeLatex(valeur);
+  return valeur < 0 ? `(${texteValeur})` : texteValeur;
 }
 
 /** Même principe que `formatSommeTermes` (`ui/formatEquation.ts`, partagée par les exercices 1-6,
@@ -240,7 +247,7 @@ export function consigneExtraction(exercice: ExerciceEquationDroite): string {
     case "angle_ox":
       return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Ox.";
     case "angle_oy":
-      return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Oy.";
+      return "Détermine un point et un vecteur directeur de cette droite à partir de l'angle donné avec Oy (rappel : angle avec Ox = 90° − angle avec Oy, à ramener entre 0° et 180°).";
     case "pente":
       return "Détermine un point et un vecteur directeur de cette droite à partir de sa pente.";
   }
@@ -283,11 +290,17 @@ export function segmentsAideExtractionNiveau1(exercice: ExerciceEquationDroite):
       ];
     case "angle_oy":
       return [
-        texte("Le vecteur directeur d'une droite faisant un angle "),
+        texte("L'angle avec "),
+        latex("Oy"),
+        texte(" et l'angle avec "),
+        latex("Ox"),
+        texte(" sont complémentaires : "),
+        latex("\\theta_{Ox} = 90^\\circ - \\theta_{Oy}"),
+        texte(" (ajoute 180° si le résultat est négatif). Le vecteur directeur d'une droite faisant un angle "),
         latex("\\alpha"),
         texte(" avec "),
         latex("Oy"),
-        texte(" a pour composantes "),
+        texte(" a donc pour composantes "),
         latex("x_{\\vec{u}} = \\tan\\alpha"),
         texte(" et "),
         latex("y_{\\vec{u}} = 1"),
@@ -317,7 +330,7 @@ export function formatAideExtractionNiveau2Latex(exercice: ExerciceEquationDroit
   const d = exercice.donnees;
   switch (d.type) {
     case "deux_points":
-      return `\\vec{u} = \\begin{pmatrix} ${d.pointB.x} - (${d.pointA.x}) \\\\ ${d.pointB.y} - (${d.pointA.y}) \\end{pmatrix}`;
+      return `\\vec{u} = \\begin{pmatrix} ${d.pointB.x} - ${formatFacteurLatex(d.pointA.x)} \\\\ ${d.pointB.y} - ${formatFacteurLatex(d.pointA.y)} \\end{pmatrix}`;
     case "point_vecteur":
       return `A${formatPointLatex(d.point)} \\quad \\vec{u}${formatVecteurLatex(d.vecteur)}`;
     case "angle_ox":
@@ -327,14 +340,6 @@ export function formatAideExtractionNiveau2Latex(exercice: ExerciceEquationDroit
     case "pente":
       return `\\vec{u} = \\begin{pmatrix} 1 \\\\ ${d.pente} \\end{pmatrix}`;
   }
-}
-
-// ============================================================================
-// Écran 2 — possibilité de la forme cible.
-// ============================================================================
-
-export function consignePossibilite(exercice: ExerciceEquationDroite): string {
-  return `Cette droite peut-elle s'écrire sous forme ${LIBELLE_FORME[exercice.formeCible]} ?`;
 }
 
 // ============================================================================
@@ -363,7 +368,7 @@ export function consigneCoefficients(exercice: ExerciceEquationDroite): string {
  * branche "impossible", `promptgen42modificationsv2.md` partie A — la forme implicite de secours
  * y est demandée quelle que soit `exercice.formeCible` réelle, toujours explicite_y/explicite_x). */
 function formatAideCoefficientsImpliciteLatex(point: Point, vecteur: Composantes): string {
-  return `a = ${vecteur.y}, \\quad b = -(${vecteur.x}), \\quad c = -\\big(a\\cdot ${point.x} + b\\cdot ${point.y}\\big)`;
+  return `a = ${vecteur.y}, \\quad b = -${formatFacteurLatex(vecteur.x)}, \\quad c = -\\big(a\\cdot ${formatFacteurLatex(point.x)} + b\\cdot ${formatFacteurLatex(point.y)}\\big)`;
 }
 
 /** Aide niveau 2 — formule substituée avec le point/vecteur CONFIRMÉS, jamais calculée. */
@@ -375,9 +380,9 @@ export function formatAideCoefficientsNiveau2Latex(exercice: ExerciceEquationDro
     case "implicite":
       return formatAideCoefficientsImpliciteLatex(point, vecteur);
     case "explicite_y":
-      return `m = \\dfrac{${vecteur.y}}{${vecteur.x}}, \\quad p = ${point.y} - m\\cdot ${point.x}`;
+      return `m = \\dfrac{${vecteur.y}}{${vecteur.x}}, \\quad p = ${point.y} - m\\cdot ${formatFacteurLatex(point.x)}`;
     case "explicite_x":
-      return `n = \\dfrac{${vecteur.x}}{${vecteur.y}}, \\quad q = ${point.x} - n\\cdot ${point.y}`;
+      return `n = \\dfrac{${vecteur.x}}{${vecteur.y}}, \\quad q = ${point.x} - n\\cdot ${formatFacteurLatex(point.y)}`;
   }
 }
 
@@ -413,5 +418,7 @@ export function formatAideNiveau2PossibiliteCoefficientsLatex(exercice: Exercice
   return formatAideCoefficientsImpliciteLatex(exercice.point, exercice.vecteur);
 }
 
-export const PLACEHOLDER_COORDONNEE = "ex : 3";
-export const PLACEHOLDER_COMPOSANTE = "ex : -2";
+/** Placeholders HORS de l'espace des tirages (points entiers, composantes entières ou ±1) : un
+ * exemple ne doit jamais pouvoir coïncider avec la réponse (audit chapitre 7, point 10). */
+export const PLACEHOLDER_COORDONNEE = "ex : 1,5";
+export const PLACEHOLDER_COMPOSANTE = "ex : −0,5";

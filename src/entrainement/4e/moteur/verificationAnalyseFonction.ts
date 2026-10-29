@@ -59,7 +59,9 @@ const REGEX_FRACTION = /^(-?\d+)\s*\/\s*(-?\d+)$/;
  * existante. Utilisé à la fois par analyserAxeSymetrie et par les champs x_S/y_S (composant).
  */
 export function parserNombreOuFraction(texte: string): number | null {
-  const t = texte.trim();
+  // Signes moins typographiques (« − », « – », « — ») convertis en « - » — audit chapitre 7,
+  // point 4 : « −2 » était jugé illisible au lieu d'être lu comme -2.
+  const t = texte.trim().replace(/[\u2212\u2013\u2014]/g, "-");
   const fraction = REGEX_FRACTION.exec(t);
   if (fraction) {
     const numerateur = Number(fraction[1]);

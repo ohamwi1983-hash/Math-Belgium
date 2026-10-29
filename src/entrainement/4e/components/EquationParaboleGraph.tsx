@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Line, Mafs, Plot, Point as MafsPoint, Vector } from "mafs";
 import "mafs/core.css";
 import type { ExerciceEquationParabole } from "../core/equationParabole.types";
-import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
-import { directriceEquationParabole, pointDirectriceProcheFoyer, viewBoxEquationParabole } from "../ui/equationParaboleGraph";
+import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX } from "../ui/mafsTransformation";
+import { PAS_GRILLE_EQUATION_PARABOLE, directriceEquationParabole, pointDirectriceProcheFoyer, viewBoxEquationParabole } from "../ui/equationParaboleGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { DomaineTraceX, DomaineTraceY, GrilleAdaptative, PointCroix } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -21,6 +21,12 @@ const COULEUR_COURBE = "#1971c2";
 const COULEUR_FOYER = "#f08c00";
 const COULEUR_VECTEUR_P = "#e03131";
 
+/** Dézoom limité à ×2 : avec un pas de grille fixe d'1 unité, un dézoom libre (`ZOOM_MIN`)
+ * multiplierait les lignes de quadrillage sans rien apporter à la lecture de S et F. */
+const ZOOM_MIN_EQUATION_PARABOLE = 0.5;
+/** En dessous de cette largeur, un nombre X sur deux seulement (le quadrillage reste complet). */
+const LARGEUR_UNE_ETIQUETTE_SUR_DEUX = 420;
+
 const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
@@ -33,6 +39,10 @@ const LARGEUR_MAX = 480;
  * une branche verticale — même précaution que `MafsGraphFonctionsReference.tsx` pour ses courbes
  * non fonctionnelles de x). Cadrage dérivé de S/F/latus rectum/directrice
  * (`viewBoxEquationParabole`, `ui/equationParaboleGraph.ts`).
+ *
+ * Quadrillage à pas FIXE d'1 unité et nombres épinglés aux bords du cadre (`etiquettesAuxBords`) :
+ * S et F, toujours entiers, tombent sur un nœud du quadrillage, et un sommet posé sur un axe ne
+ * masque jamais ses graduations (audit chapitre 7).
  *
  * Code couleur (`promptgen51modificationscompletes.md`, partie B.2) : sommet S de la MÊME couleur
  * que la courbe (jamais une couleur distincte — contrairement à l'ancienne convention verte) ;
@@ -52,8 +62,15 @@ export function EquationParaboleGraph({ exercice, afficherSommet = false, affich
 
   return (
     <div className="mafs-graph" ref={wrapperRef}>
-      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN_EQUATION_PARABOLE, max: ZOOM_MAX }}>
+        <GrilleAdaptative
+          largeur={largeur}
+          hauteur={hauteur}
+          onPasChange={(x, y) => setPas({ x, y })}
+          pasFixe={PAS_GRILLE_EQUATION_PARABOLE}
+          etiquettesAuxBords
+          uneEtiquetteXSurDeux={largeur < LARGEUR_UNE_ETIQUETTE_SUR_DEUX}
+        />
         {exercice.variante === "vertical" ? (
           <DomaineTraceX largeur={largeur}>
             {(domaine) => <Plot.OfX y={(x) => sommet.y + (x - sommet.x) ** 2 / (2 * p)} domain={domaine} color={COULEUR_COURBE} weight={EPAISSEUR_TRAIT_ACCENTUE} />}

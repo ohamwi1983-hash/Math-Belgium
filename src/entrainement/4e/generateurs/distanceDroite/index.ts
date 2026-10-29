@@ -7,12 +7,20 @@
  * gen35, "Exercice de synthèse" du chapitre Statistique) : toute évolution future de ces deux
  * sources devra être répercutée ici.
  *
- * Exactitude par construction — triplet pythagoricien (même principe que "Norme d'un vecteur et
- * distance entre 2 points") : le vecteur directeur `vecteurD` de la droite de référence est choisi
- * comme un triplet pythagoricien clean (norme entière exacte `n`) ; `vecteurNormal =
- * perpendiculaire(vecteurD)` a alors AUTOMATIQUEMENT la même norme `n` (une rotation préserve la
- * longueur) — aucune contrainte supplémentaire n'est donc nécessaire pour garantir que `b`
- * (perpendiculaire à `d`) ait, elle aussi, un vecteur directeur de norme entière exacte.
+ * Exactitude par construction : le vecteur directeur `vecteurD` de la droite de référence est
+ * PRIMITIF (composantes entières premières entre elles — équation toujours réduite, audit chapitre 7,
+ * point 34) ; `vecteurNormal = perpendiculaire(vecteurD)` a la même norme `n = √(n²)` (une rotation
+ * préserve la longueur). La distance vaut `|k|·n` : entière pour un vecteur 3-4-5 ou une droite
+ * verticale/horizontale, sinon irrationnelle (`2√5`, `3√2`…) — audit chapitre 7, point 30 : les
+ * seuls triplets pythagoriciens ne donnaient que 8 distances possibles. La valeur exacte est
+ * portée par `distanceCarree = k²·n²` (entier).
+ *
+ * Droites verticales/horizontales (environ 1 exercice sur 5) — entraînent les deux raccourcis du
+ * cours (« distance de P à x = k : |x_P − k| », point 34).
+ *
+ * Nombres bornés (point 29) : les deux points de construction sont centrés autour d'un petit point
+ * `r` proche de l'origine (jamais `q0` tiré puis décalé de `k·n` d'un seul côté), et le tirage est
+ * recommencé tant qu'un coefficient constant dépasse `C_MAX`.
  */
 import type {
   ExerciceDistanceDroite,
@@ -20,6 +28,7 @@ import type {
   ExerciceDistancePoint,
   VarianteDistanceDroite,
 } from "../../core/distanceDroite.types";
+import type { DroiteImplicite } from "../../core/droite.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
 import { implicteDepuisPointVecteur, intersectionDeuxDroites } from "../droite/geometrieDroite";
 import { perpendiculaire } from "../relationsDroites";
@@ -28,33 +37,63 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Triplets pythagoriciens "propres" (3-4-5 et ses variantes de signe/ordre) — bornés à une
- * magnitude raisonnable pour rester lisible sur un graphe/dans un énoncé, même principe que "Norme
- * d'un vecteur et distance entre 2 points". */
-const TRIPLETS_PYTHAGORICIENS: readonly [number, number, number][] = [
-  [3, 4, 5],
-  [4, 3, 5],
-  [6, 8, 10],
-  [8, 6, 10],
-  [5, 12, 13],
-  [12, 5, 13],
-];
-
-function tirerVecteurD(): { vecteur: Composantes; n: number } {
-  const [a, b, n] = TRIPLETS_PYTHAGORICIENS[randomInt(0, TRIPLETS_PYTHAGORICIENS.length - 1)]!;
-  const signeX = Math.random() < 0.5 ? -1 : 1;
-  const signeY = Math.random() < 0.5 ? -1 : 1;
-  return { vecteur: { x: a * signeX, y: b * signeY }, n };
+function randomSigne(): 1 | -1 {
+  return Math.random() < 0.5 ? 1 : -1;
 }
 
-function tirerPoint(): Point {
-  return { x: randomInt(-6, 6), y: randomInt(-6, 6) };
+function pgcd(a: number, b: number): number {
+  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
 }
 
-/** Magnitude bornée à `[1,3]` — un `k` plus grand éloignerait `point`/la droite parallèle au point
- * de rendre le graphe/l'énoncé difficile à lire, sans bénéfice pédagogique supplémentaire. */
-function tirerK(): number {
-  return randomInt(1, 3) * (Math.random() < 0.5 ? -1 : 1);
+/** Proportion de droites verticales/horizontales (raccourcis du cours). */
+const PROBABILITE_DROITE_AXIALE = 0.2;
+/** Plus grand |c| accepté dans une équation affichée (d, d₁, d₂, b) — point 29. */
+const C_MAX = 30;
+/** Plus grande |coordonnée| d'un point de construction (P, Q). */
+const COORDONNEE_MAX = 10;
+
+/** Vecteur directeur primitif — composantes dans [-4 ; 4], premières entre elles ; `(1;0)` ou
+ * `(0;1)` pour une droite horizontale/verticale. */
+function tirerVecteurD(): Composantes {
+  if (Math.random() < PROBABILITE_DROITE_AXIALE) return Math.random() < 0.5 ? { x: 1, y: 0 } : { x: 0, y: 1 };
+  for (;;) {
+    const x = randomInt(1, 4);
+    const y = randomInt(1, 4);
+    if (pgcd(x, y) === 1) return { x: x * randomSigne(), y: y * randomSigne() };
+  }
+}
+
+/** Premier coefficient non nul positif — `-5x-12y+14=0` s'affiche `5x+12y-14=0`. */
+export function normaliserSigneDroite(d: DroiteImplicite): DroiteImplicite {
+  const negatif = d.a < 0 || (d.a === 0 && d.b < 0);
+  const oppose = (v: number) => (v === 0 ? 0 : -v);
+  return negatif ? { a: oppose(d.a), b: oppose(d.b), c: oppose(d.c) } : d;
+}
+
+/** Décalage `k` le long de la normale — plus grand pour une droite axiale (`n = 1`), sinon la
+ * distance ne vaudrait que 1, 2 ou 3. */
+function tirerK(vecteurD: Composantes): number {
+  const axiale = vecteurD.x === 0 || vecteurD.y === 0;
+  return (axiale ? randomInt(2, 6) : randomInt(1, 3)) * randomSigne();
+}
+
+function normeCarree(v: Composantes): number {
+  return v.x * v.x + v.y * v.y;
+}
+
+function ajouter(p: Point, v: Composantes, facteur: number): Point {
+  return { x: p.x + facteur * v.x, y: p.y + facteur * v.y };
+}
+
+/** Les deux extrémités `q0` et `q0 + k·normal` encadrent un petit point `r` proche de l'origine. */
+function pointsCentres(vecteurNormal: Composantes, k: number): { q0: Point; q1: Point } {
+  const r = { x: randomInt(-3, 3), y: randomInt(-3, 3) };
+  const avant = Math.round(k / 2);
+  return { q0: ajouter(r, vecteurNormal, -avant), q1: ajouter(r, vecteurNormal, k - avant) };
+}
+
+function dansLesBornes(points: Point[], droites: DroiteImplicite[]): boolean {
+  return points.every((p) => Math.abs(p.x) <= COORDONNEE_MAX && Math.abs(p.y) <= COORDONNEE_MAX) && droites.every((d) => Math.abs(d.c) <= C_MAX);
 }
 
 /**
@@ -64,27 +103,29 @@ function tirerK(): number {
  * `q0` en est exactement le pied de la perpendiculaire — jamais un tirage-puis-vérification.
  */
 function construirePoint(): ExerciceDistancePoint {
-  const { vecteur: vecteurD, n } = tirerVecteurD();
-  const vecteurNormal = perpendiculaire(vecteurD);
-  const q0 = tirerPoint();
-  const d = implicteDepuisPointVecteur(q0, vecteurD);
-  const k = tirerK();
-  const point: Point = { x: q0.x + k * vecteurNormal.x, y: q0.y + k * vecteurNormal.y };
-  const bAttendue = implicteDepuisPointVecteur(point, vecteurNormal);
-  // b est toujours sécante à d (elle lui est perpendiculaire — deux droites perpendiculaires ne
-  // sont jamais parallèles), l'intersection existe donc toujours ; `!` documente cette garantie
-  // géométrique plutôt que de masquer une erreur.
-  const q = intersectionDeuxDroites(bAttendue, d)!;
-  return {
-    variante: "point",
-    d,
-    point,
-    n,
-    vecteurNormal,
-    bAttendue,
-    q,
-    distance: Math.abs(k) * n,
-  };
+  for (;;) {
+    const vecteurD = tirerVecteurD();
+    const vecteurNormal = perpendiculaire(vecteurD);
+    const k = tirerK(vecteurD);
+    const { q0, q1: point } = pointsCentres(vecteurNormal, k);
+    const d = normaliserSigneDroite(implicteDepuisPointVecteur(q0, vecteurD));
+    const bAttendue = normaliserSigneDroite(implicteDepuisPointVecteur(point, vecteurNormal));
+    if (!dansLesBornes([q0, point], [d, bAttendue])) continue;
+    // b est toujours sécante à d (elle lui est perpendiculaire) : l'intersection existe toujours.
+    const q = intersectionDeuxDroites(bAttendue, d)!;
+    const distanceCarree = k * k * normeCarree(vecteurNormal);
+    return {
+      variante: "point",
+      d,
+      point,
+      n: Math.sqrt(normeCarree(vecteurNormal)),
+      vecteurNormal,
+      bAttendue,
+      q,
+      distance: Math.sqrt(distanceCarree),
+      distanceCarree,
+    };
+  }
 }
 
 /**
@@ -95,23 +136,27 @@ function construirePoint(): ExerciceDistancePoint {
  * ne change jamais l'écart perpendiculaire entre les deux droites).
  */
 function construireParalleles(): ExerciceDistanceParalleles {
-  const { vecteur: vecteurD, n } = tirerVecteurD();
-  const vecteurNormal = perpendiculaire(vecteurD);
-  const q0 = tirerPoint();
-  const d1 = implicteDepuisPointVecteur(q0, vecteurD);
-  const k = tirerK();
-  const q1: Point = { x: q0.x + k * vecteurNormal.x, y: q0.y + k * vecteurNormal.y };
-  const d2 = implicteDepuisPointVecteur(q1, vecteurD);
-  const droiteSource: "d1" | "d2" = Math.random() < 0.5 ? "d1" : "d2";
-  return {
-    variante: "paralleles",
-    d1,
-    d2,
-    droiteSource,
-    n,
-    vecteurNormal,
-    distance: Math.abs(k) * n,
-  };
+  for (;;) {
+    const vecteurD = tirerVecteurD();
+    const vecteurNormal = perpendiculaire(vecteurD);
+    const k = tirerK(vecteurD);
+    const { q0, q1 } = pointsCentres(vecteurNormal, k);
+    const d1 = normaliserSigneDroite(implicteDepuisPointVecteur(q0, vecteurD));
+    const d2 = normaliserSigneDroite(implicteDepuisPointVecteur(q1, vecteurD));
+    if (!dansLesBornes([q0, q1], [d1, d2])) continue;
+    const droiteSource: "d1" | "d2" = Math.random() < 0.5 ? "d1" : "d2";
+    const distanceCarree = k * k * normeCarree(vecteurNormal);
+    return {
+      variante: "paralleles",
+      d1,
+      d2,
+      droiteSource,
+      n: Math.sqrt(normeCarree(vecteurNormal)),
+      vecteurNormal,
+      distance: Math.sqrt(distanceCarree),
+      distanceCarree,
+    };
+  }
 }
 
 export const CATALOGUE_VARIANTES: { id: VarianteDistanceDroite; label: string }[] = [

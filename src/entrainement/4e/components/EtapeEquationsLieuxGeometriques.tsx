@@ -2,12 +2,10 @@ import { useState } from "react";
 import type { ExerciceLieuxGeometriques, Lieu } from "../core/lieuxGeometriques.types";
 import { diagnostiquerEquationLieu } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseEquations } from "../moteur/verificationLieuxGeometriques";
-import { PLACEHOLDER_EQUATION } from "../ui/formatEquationCercle";
-import { CONSIGNE_GENERALE_EQUATIONS, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, segmentsDescriptionLieu } from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_EQUATIONS, LIBELLE_TYPE_LIEU, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, placeholderEquation } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "./Katex";
-import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -33,15 +31,14 @@ interface BlocEquationLieuProps {
   statut: StatutVerification | undefined;
 }
 
-/** Un bloc PAR LIEU — caractéristiques, immédiatement suivies de son propre champ de texte libre,
- * labellisé par le TYPE réel du lieu (`promptgen53gen54corrections.md`, B.5 : remplace l'ancien bloc
- * "état actuel" unique combinant les 2 lieux). */
+/** Un champ de texte libre PAR LIEU, labellisé par le TYPE réel du lieu (les 2 lieux sont toujours
+ * de types différents) — ses caractéristiques confirmées sont rappelées dans le récapitulatif "Ce
+ * qu'on sait déjà" en haut de l'écran (`recapitulatifLieuxGeometriques.ts`), plus répétées ici.
+ * Marquage rouge PAR CHAMP cohérent avec la vérification, elle aussi lieu par lieu
+ * (`diagnostiquerEquations`). */
 function BlocEquationLieu({ lieu, id, texte, onChange, statut }: BlocEquationLieuProps) {
   return (
-    <div className="equation-box">
-      <p>
-        <RenduFragments fragments={segmentsDescriptionLieu(lieu)} />
-      </p>
+    <div>
       <div className="field">
         <label className="field-label" htmlFor={id}>
           {libelleChampEquation(lieu)}
@@ -49,7 +46,7 @@ function BlocEquationLieu({ lieu, id, texte, onChange, statut }: BlocEquationLie
         <input
           id={id}
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_EQUATION}
+          placeholder={placeholderEquation(lieu)}
           value={texte}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -87,13 +84,15 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>
-            Formule générale — premier lieu : <Katex expression={latexGabaritGenerique(exercice.lieu1.type, exercice.lieu1.type === "parabole" ? exercice.lieu1.orientation : undefined)} />
-            {" "}; second lieu : <Katex expression={latexGabaritGenerique(exercice.lieu2.type, exercice.lieu2.type === "parabole" ? exercice.lieu2.orientation : undefined)} />
+            Formule générale — {LIBELLE_TYPE_LIEU[exercice.lieu1.type].toLowerCase()} :{" "}
+            <Katex expression={latexGabaritGenerique(exercice.lieu1.type, exercice.lieu1.type === "parabole" ? exercice.lieu1.orientation : undefined)} /> ;{" "}
+            {LIBELLE_TYPE_LIEU[exercice.lieu2.type].toLowerCase()} :{" "}
+            <Katex expression={latexGabaritGenerique(exercice.lieu2.type, exercice.lieu2.type === "parabole" ? exercice.lieu2.orientation : undefined)} />
           </p>
           {niveauAide >= 2 && (
             <p>
-              Formule substituée (non résolue) — premier lieu : <Katex expression={formatEquationLieuLatex(exercice.lieu1)} />
-              {" "}; second lieu : <Katex expression={formatEquationLieuLatex(exercice.lieu2)} />
+              Formule substituée (non résolue) — {LIBELLE_TYPE_LIEU[exercice.lieu1.type].toLowerCase()} : <Katex expression={formatEquationLieuLatex(exercice.lieu1)} /> ;{" "}
+              {LIBELLE_TYPE_LIEU[exercice.lieu2.type].toLowerCase()} : <Katex expression={formatEquationLieuLatex(exercice.lieu2)} />
             </p>
           )}
         </div>

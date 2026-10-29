@@ -25,29 +25,21 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationD
  *
  * Écran → question papier : l'écran interactif enchaîne TOUJOURS "extraction" (point + vecteur
  * directeur) en premier, puis diverge selon `formeCible` sur exactement 1 écran supplémentaire
- * (`moteur/typesEquationDroite.ts::PhaseEquationDroite` — 3 chemins disjoints) :
- * - "implicite" : `extraction → possibilite → coefficients`, mais l'écran "possibilite" y est
- *   TRIVIAL (`exercice.possible` toujours vrai pour cette forme, `construireExercice` dans
- *   `index.ts`) — jamais une vraie question pour l'élève. Fusionné ici avec "coefficients" en une
- *   seule question b) qui demande directement l'équation cartésienne, jamais un "peut-elle
- *   s'écrire sous cette forme ?" sans enjeu.
- * - "parametrique" : `extraction → coefficients` (écran "possibilite" déjà supprimé côté écran,
- *   toute droite admettant toujours une représentation paramétrique) → question b) demande
- *   directement les équations paramétriques.
+ * (`moteur/typesEquationDroite.ts::PhaseEquationDroite` — 2 chemins disjoints) :
+ * - "implicite"/"parametrique" : `extraction → coefficients` (toute droite admet ces deux formes,
+ *   aucun écran "est-ce possible ?" côté écran non plus) → question b) demande directement
+ *   l'équation cartésienne ou les équations paramétriques.
  * - "explicite_y"/"explicite_x" : `extraction → possibiliteCoefficients` (écran fusionné,
  *   `promptgen42modificationsv2.md` partie A) → question b) reprend exactement cette même
  *   consigne fusionnée (`segmentsConsignePossibiliteCoefficients`) : "Cette droite peut-elle
  *   s'écrire sous forme y=mx+p (ou x=ny+q) ?", suivie en correction du choix possible/impossible
  *   ET de l'équation qui en découle (forme testée si possible, forme implicite de secours sinon) —
- *   c'est la SEULE des 3 formes où la question a un enjeu réel (`possible` peut être faux, droite
+ *   ce sont les SEULES formes où la question a un enjeu réel (`possible` peut être faux, droite
  *   verticale/horizontale, tirée avec une fréquence délibérée par `PROBABILITE_PIEGE` dans
  *   `index.ts`).
  *
- * Donc toujours exactement 2 questions par instance (a) extraction, b) forme cible), jamais 3 —
- * l'écran "possibilite" séparé n'existe qu'à l'écran interactif pour rythmer la progression/les
- * tentatives, il n'apporte rien à re-poser séparément sur une feuille imprimée pour la forme
- * "implicite" (toujours vrai) ; pour "explicite_y"/"explicite_x" il est de toute façon déjà fusionné
- * côté écran, donc directement réutilisable tel quel ici.
+ * Donc toujours exactement 2 questions par instance (a) extraction, b) forme cible), comme à
+ * l'écran.
  *
  * Correction RESYNTHÉTISÉE depuis les valeurs déjà connues et correctes de l'instance tirée
  * (`referenceImplicite`/`refExpliciteY`/`refExpliciteX`/`point`/`vecteur`), jamais recalculée

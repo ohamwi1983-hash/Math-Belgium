@@ -18,14 +18,13 @@ import type { Composantes, Point } from "./vecteur.types";
 export type VarianteDistanceDroite = "point" | "paralleles";
 
 /**
- * Exactitude par construction — triplet pythagoricien, jamais de tolérance sur une distance
- * irrationnelle (même principe que "Norme d'un vecteur et distance entre 2 points") :
- * - `vecteurNormal` (perpendiculaire à `d`, direction de `b`) a pour norme EXACTE `n` (triplet
- *   pythagoricien) — voir `generateurs/distanceDroite/index.ts` pour la dérivation complète.
+ * Exactitude par construction (même principe que "Norme d'un vecteur et distance entre 2 points") :
+ * - `vecteurNormal` (perpendiculaire à `d`, direction de `b`) a pour norme EXACTE `n = √(n²)`,
+ *   `n²` entier — voir `generateurs/distanceDroite/index.ts` pour la dérivation complète.
  * - `point` est construit comme `q + k·vecteurNormal` (k entier non nul) : `q` appartient donc à
  *   la fois à `d` (par construction) et à la perpendiculaire à `d` passant par `point` (même
  *   direction) — `q` est ainsi EXACTEMENT le pied de la perpendiculaire, `distance = |k|·n`
- *   toujours un entier exact.
+ *   (`distanceCarree = k²·n²` entier).
  */
 export interface ExerciceDistancePoint {
   variante: "point";
@@ -42,14 +41,17 @@ export interface ExerciceDistancePoint {
   bAttendue: DroiteImplicite;
   /** Le pied de la perpendiculaire = `b ∩ d` — cible de l'écran 2. */
   q: Point;
-  /** `|k|·n`, toujours un entier exact — cible de l'écran 3. */
+  /** `|k|·n` — cible de l'écran 3. Entière quand `n` l'est (vecteur 3-4-5, droite verticale ou
+   * horizontale), sinon irrationnelle (`2√5`) : la valeur exacte est portée par `distanceCarree`. */
   distance: number;
+  /** `k²·n²`, toujours un entier — seule forme exacte de la distance (affichage `m√k`). */
+  distanceCarree: number;
 }
 
 /**
  * `d1`/`d2` toujours PARALLÈLES (même vecteur directeur, jamais sécantes) — construites via le
  * même mécanisme "triplet pythagoricien" que `ExerciceDistancePoint`, garantissant que la distance
- * entre les deux reste `|k|·n` (un entier exact) INDÉPENDAMMENT du point que l'élève choisit à
+ * entre les deux reste `|k|·n` INDÉPENDAMMENT du point que l'élève choisit à
  * l'écran 0 sur la droite désignée (propriété géométrique des parallèles — voir le générateur pour
  * la preuve). `point`/`bAttendue`/`q` ne sont donc jamais fixés à la génération : ils sont
  * recalculés dynamiquement en Couche B (`sessionDistanceDroite.ts`) à partir du point RÉELLEMENT
@@ -66,6 +68,8 @@ export interface ExerciceDistanceParalleles {
   n: number;
   vecteurNormal: Composantes;
   distance: number;
+  /** `k²·n²`, toujours un entier — voir `ExerciceDistancePoint.distanceCarree`. */
+  distanceCarree: number;
 }
 
 export type ExerciceDistanceDroite = ExerciceDistancePoint | ExerciceDistanceParalleles;

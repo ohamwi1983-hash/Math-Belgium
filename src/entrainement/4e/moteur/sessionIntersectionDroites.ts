@@ -21,6 +21,9 @@ import type { EtatSessionIntersectionDroites, ResultatExerciceIntersectionDroite
 const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_DIAGNOSTIC = 2;
 export const NIVEAU_AIDE_MAX_POINT = 2;
+/** Une seule tentative sur le diagnostic (audit chapitre 7, point 36) : avec 3 choix et 3
+ * tentatives, cliquer au hasard sans répéter un choix menait toujours à la puce verte. */
+export const TENTATIVES_MAX_DIAGNOSTIC = 1;
 
 export function demarrerSessionIntersectionDroites(
   reglages: ReglagesSession,
@@ -102,6 +105,7 @@ export function soumettreReponseDiagnostic(
 
   const etapeCourante = soumettreEtapeTentatives<ConclusionIntersectionDroites>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_MAX_DIAGNOSTIC,
     verifier: (r) => verifierDiagnostic(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });

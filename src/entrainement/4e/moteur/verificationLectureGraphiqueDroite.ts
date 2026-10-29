@@ -11,11 +11,12 @@
 import type { ExerciceLectureGraphiqueDroite } from "../core/lectureGraphiqueDroite.types";
 import type { StatutVerification } from "./statutVerification";
 import { diagnostiquerEquationDroiteLibre, diagnostiquerRepresentationParametriqueTexte } from "./verificationDroite";
+import { normaliserSaisieEquation } from "./verificationEquationDroite";
 
 /** Variante A — champ de texte libre, forme cartésienne au choix de l'élève (explicite dans un sens
  * ou l'autre, ou implicite). */
 export function diagnostiquerCartesienne(exercice: ExerciceLectureGraphiqueDroite, texte: string): StatutVerification {
-  return diagnostiquerEquationDroiteLibre(texte, exercice.referenceImplicite);
+  return diagnostiquerEquationDroiteLibre(normaliserSaisieEquation(texte), exercice.referenceImplicite);
 }
 
 export function verifierCartesienne(exercice: ExerciceLectureGraphiqueDroite, texte: string): boolean {
@@ -33,7 +34,12 @@ export function diagnostiquerParametriqueLecture(
   exercice: ExerciceLectureGraphiqueDroite,
   reponse: ReponseParametriqueLecture,
 ): StatutVerification {
-  return diagnostiquerRepresentationParametriqueTexte(reponse.texteX, reponse.texteY, exercice.referenceImplicite, exercice.vecteur);
+  return diagnostiquerRepresentationParametriqueTexte(
+    normaliserSaisieEquation(reponse.texteX),
+    normaliserSaisieEquation(reponse.texteY),
+    exercice.referenceImplicite,
+    exercice.vecteur,
+  );
 }
 
 export function verifierParametriqueLecture(exercice: ExerciceLectureGraphiqueDroite, reponse: ReponseParametriqueLecture): boolean {

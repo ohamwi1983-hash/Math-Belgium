@@ -3,17 +3,18 @@ import type { DroiteImplicite } from "../../core/droite.types";
 import type { Point } from "../../core/vecteur.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatEquationImpliciteLatex } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_DISTANCE_PQ,
-  CONSIGNE_INTERSECTION_Q,
   consigneChoixPoint,
+  consigneIntersectionQ,
   formatAideDistancePQNiveau2Latex,
   formatAideEquationBNiveau2Latex,
   formatAideIntersectionQNiveau2Latex,
   formatDistanceAttendueLatex,
+  formatDroiteLatex,
   formatEnonceLatex,
   formatPointLatex,
+  nomDroiteCible,
   segmentsConsigneEquationB,
   segmentsConsigneGeneraleDistanceDroite,
 } from "../../ui/formatDistanceDroite";
@@ -118,9 +119,17 @@ function pointEntierSurDroite(d: DroiteImplicite): Point {
 // générale (`segmentsConsigneGeneraleDistanceDroite`), puis les questions écran par écran.
 // ============================================================================
 
-const QUESTION_EQUATION_B = { consigne: segmentsConsigneEquationB(), reponse: { type: "lignes", nombre: 3 } as const };
-const QUESTION_INTERSECTION_Q = { consigne: [texte(CONSIGNE_INTERSECTION_Q)], reponse: { type: "lignes", nombre: 3 } as const };
 const QUESTION_DISTANCE_PQ = { consigne: [texte(CONSIGNE_DISTANCE_PQ)], reponse: { type: "lignes", nombre: 2 } as const };
+
+/** La droite cible porte son vrai nom (`d`, ou `d₁`/`d₂` pour la variante « parallèles » — audit
+ * chapitre 7, point 31). */
+function questionEquationB(instance: ExerciceDistanceDroite) {
+  return { consigne: segmentsConsigneEquationB(instance), reponse: { type: "lignes", nombre: 3 } as const };
+}
+
+function questionIntersectionQ(instance: ExerciceDistanceDroite) {
+  return { consigne: [texte(consigneIntersectionQ(instance))], reponse: { type: "lignes", nombre: 3 } as const };
+}
 
 function construireEnonceDistanceDroite(instance: ExerciceDistanceDroite): SectionExercice {
   // `enteteFragments` est toujours rendu en mode KaTeX "bloc" (`assemblerEvaluationHtml.ts`) : n'y
@@ -130,16 +139,17 @@ function construireEnonceDistanceDroite(instance: ExerciceDistanceDroite): Secti
   const enteteFragments = [latex(formatEnonceLatex(instance))];
   const consigneGenerale = segmentsConsigneGeneraleDistanceDroite(instance);
 
+  const questionB = questionEquationB(instance);
   if (estVariantePoint(instance)) {
-    const premiereQuestion = { consigne: [...consigneGenerale, texte(" "), ...QUESTION_EQUATION_B.consigne], reponse: QUESTION_EQUATION_B.reponse };
-    return { enteteFragments, questions: [premiereQuestion, QUESTION_INTERSECTION_Q, QUESTION_DISTANCE_PQ] };
+    const premiereQuestion = { consigne: [...consigneGenerale, texte(" "), ...questionB.consigne], reponse: questionB.reponse };
+    return { enteteFragments, questions: [premiereQuestion, questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
   }
 
   const questionChoixPoint = {
     consigne: [...consigneGenerale, texte(" "), texte(consigneChoixPoint(instance))],
     reponse: { type: "lignes", nombre: 1 } as const,
   };
-  return { enteteFragments, questions: [questionChoixPoint, QUESTION_EQUATION_B, QUESTION_INTERSECTION_Q, QUESTION_DISTANCE_PQ] };
+  return { enteteFragments, questions: [questionChoixPoint, questionB, questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
 }
 
 // ============================================================================
@@ -148,17 +158,25 @@ function construireEnonceDistanceDroite(instance: ExerciceDistanceDroite): Secti
 // "paralleles", 3 pour "point" — jamais de lettre codée en dur dans `blocsSynthese`).
 // ============================================================================
 
-function blocsSynthese(point: Point, droiteCible: DroiteImplicite, bAttendue: DroiteImplicite, q: Point, distance: number, lettres: [string, string, string]): BlocCorrection[] {
+function blocsSynthese(
+  point: Point,
+  droiteCible: DroiteImplicite,
+  nomCible: string,
+  bAttendue: DroiteImplicite,
+  q: Point,
+  distanceCarree: number,
+  lettres: [string, string, string],
+): BlocCorrection[] {
   const [lettreEquationB, lettreIntersection, lettreDistance] = lettres;
-  const equationBLatex = `b \\equiv ${formatEquationImpliciteLatex(bAttendue.a, bAttendue.b, bAttendue.c)}`;
-  const equationCibleLatex = `d \\equiv ${formatEquationImpliciteLatex(droiteCible.a, droiteCible.b, droiteCible.c)}`;
+  const equationBLatex = formatDroiteLatex("b", bAttendue);
+  const equationCibleLatex = formatDroiteLatex(nomCible, droiteCible);
 
   return [
     {
       type: "paragraphe",
       fragments: [
         texte(`${lettreEquationB}) `),
-        latex(formatAideEquationBNiveau2Latex(droiteCible)),
+        latex(formatAideEquationBNiveau2Latex(droiteCible, nomCible)),
         texte(" — donc "),
         latex(equationBLatex),
         texte("."),
@@ -178,13 +196,13 @@ function blocsSynthese(point: Point, droiteCible: DroiteImplicite, bAttendue: Dr
     },
     {
       type: "paragraphe",
-      fragments: [texte(`${lettreDistance}) `), latex(`PQ = ${formatAideDistancePQNiveau2Latex(point, q)} = ${formatDistanceAttendueLatex(distance)}`), texte(".")],
+      fragments: [texte(`${lettreDistance}) `), latex(`PQ = ${formatAideDistancePQNiveau2Latex(point, q)} = ${formatDistanceAttendueLatex(distanceCarree)}`), texte(".")],
     },
   ];
 }
 
 function construireCorrectionPoint(instance: ExerciceDistancePoint): BlocCorrection[] {
-  return blocsSynthese(instance.point, instance.d, instance.bAttendue, instance.q, instance.distance, ["a", "b", "c"]);
+  return blocsSynthese(instance.point, instance.d, "d", instance.bAttendue, instance.q, instance.distanceCarree, ["a", "b", "c"]);
 }
 
 function construireCorrectionParalleles(instance: ExerciceDistanceParalleles): BlocCorrection[] {
@@ -210,7 +228,7 @@ function construireCorrectionParalleles(instance: ExerciceDistanceParalleles): B
     ],
   };
 
-  return [blocChoixPoint, ...blocsSynthese(point, droiteCible, bAttendue, q, instance.distance, ["b", "c", "d"])];
+  return [blocChoixPoint, ...blocsSynthese(point, droiteCible, nomDroiteCible(instance).latex, bAttendue, q, instance.distanceCarree, ["b", "c", "d"])];
 }
 
 function construireCorrectionDistanceDroite(instance: ExerciceDistanceDroite): BlocCorrection[] {

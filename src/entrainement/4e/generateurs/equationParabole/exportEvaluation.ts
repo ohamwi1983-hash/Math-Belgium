@@ -2,9 +2,9 @@ import type { ExerciceEquationParabole } from "../../core/equationParabole.types
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
-import { directriceEquationParabole, viewBoxEquationParabole } from "../../ui/equationParaboleGraph";
-import { CONSIGNE_EQUATION, CONSIGNE_SOMMET_FOYER, formatEquationAttendueLatex, formatFoyerLatex, formatSommetLatex } from "../../ui/formatEquationParabole";
-import { calculerPasGrille, RATIO_GRAPHE } from "../../ui/mafsTransformation";
+import { PAS_GRILLE_EQUATION_PARABOLE, directriceEquationParabole, viewBoxEquationParabole } from "../../ui/equationParaboleGraph";
+import { CONSIGNE_EQUATION, CONSIGNE_SOMMET_FOYER, formatAideEquationNiveau2Latex, formatEquationAttendueLatex, formatFoyerLatex, formatSommetLatex } from "../../ui/formatEquationParabole";
+import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationParabole } from "./index";
 
 /**
@@ -151,15 +151,17 @@ function construireSvgParabole(exercice: ExerciceEquationParabole, avecCorrectio
   const sx = (x: number) => MARGE_SVG + ((x - xMin) / (xMax - xMin)) * zoneX;
   const sy = (y: number) => MARGE_SVG + ((yMax - y) / (yMax - yMin)) * zoneY;
 
-  const pasX = calculerPasGrille(xMax - xMin);
-  const pasY = calculerPasGrille(yMax - yMin);
+  // Pas FIXE d'1 unité, comme à l'écran (`PAS_GRILLE_EQUATION_PARABOLE`) : S et F entiers sur un
+  // nœud du quadrillage. Un nombre X sur deux seulement (SVG étroit, nombres négatifs à 2 chiffres).
+  const pasX = PAS_GRILLE_EQUATION_PARABOLE;
+  const pasY = PAS_GRILLE_EQUATION_PARABOLE;
   const grille: string[] = [];
   const labelsX: string[] = [];
   const labelsY: string[] = [];
   for (let v = Math.ceil(xMin / pasX) * pasX; v <= xMax + 1e-9; v += pasX) {
     const px = sx(v);
     grille.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_SVG}" x2="${px.toFixed(1)}" y2="${(hauteur - MARGE_SVG).toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (Math.abs(v) > 1e-9) {
+    if (Math.abs(v) > 1e-9 && Math.round(v) % 2 === 0) {
       labelsX.push(`<text x="${px.toFixed(1)}" y="${(sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
     }
   }
@@ -222,7 +224,7 @@ function construireEnonceEquationParabole(instance: ExerciceEquationParabole): S
 }
 
 function construireCorrectionEquationParabole(instance: ExerciceEquationParabole): BlocCorrection[] {
-  const { sommet, foyer, p } = instance;
+  const { sommet, foyer } = instance;
 
   return [
     { type: "html", html: construireSvgParabole(instance, true) },
@@ -240,8 +242,8 @@ function construireCorrectionEquationParabole(instance: ExerciceEquationParabole
       type: "paragraphe",
       fragments: [
         texte("b) "),
-        latex(`p = ${p}`),
-        texte(" (distance signée entre la directrice et le foyer, dans le sens de l'axe de la parabole), donc l'équation de la parabole est "),
+        latex(formatAideEquationNiveau2Latex(instance)),
+        texte(" (p est signé : c'est aussi la distance de la directrice au foyer, dans le sens de l'axe de la parabole), donc l'équation de la parabole est "),
         latex(formatEquationAttendueLatex(instance)),
         texte("."),
       ],

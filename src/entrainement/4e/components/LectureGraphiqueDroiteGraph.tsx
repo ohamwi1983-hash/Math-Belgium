@@ -4,7 +4,7 @@ import "mafs/core.css";
 import type { ExerciceLectureGraphiqueDroite } from "../core/lectureGraphiqueDroite.types";
 import type { Point } from "../core/vecteur.types";
 import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
-import { pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../ui/lectureGraphiqueDroiteGraph";
+import { PAS_GRILLE_LECTURE, pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../ui/lectureGraphiqueDroiteGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -45,7 +45,7 @@ export function LectureGraphiqueDroiteGraph({ exercice, pointsSurlignes = [] }: 
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} pasFixe={PAS_GRILLE_LECTURE} />
         <Line.PointAngle point={[exercice.point.x, exercice.point.y]} angle={angle} color={COULEUR_DROITE} weight={EPAISSEUR_TRAIT_ACCENTUE} />
         {points.map((p, i) => (
           <MafsPoint key={`point-${i}`} x={p.x} y={p.y} color={estSurligne(p) ? COULEUR_SURLIGNAGE : COULEUR_POINT} />

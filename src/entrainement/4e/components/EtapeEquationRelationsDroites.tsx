@@ -4,7 +4,8 @@ import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionRelationsDroites";
 import type { ReponseEquation } from "../moteur/typesRelationsDroites";
 import { diagnostiquerEquationCartesienne, diagnostiquerEquationParametrique } from "../moteur/verificationRelationsDroites";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
@@ -14,6 +15,15 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+
+/** Signes moins typographiques (« − », « – », « — », clavier mobile ou copier-coller) convertis en
+ * « - » dans le champ texte libre — sinon « Expression non reconnue » (audit chapitre 7, point 4). */
+const SIGNES_MOINS = /[\u2212\u2013\u2014]/g;
+
+/** Entier, décimal (virgule ou point) ou fraction « p/q » — NaN si illisible (`parse_error`). */
+function lire(texte: string): number {
+  return parserNombreOuFraction(texte) ?? Number.NaN;
+}
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -29,8 +39,8 @@ interface Props {
 }
 
 /**
- * Écran 3 (dernier, toujours atteint — ce générateur n'a structurellement aucun cas "impossible") —
- * l'équation de la droite CHERCHÉE (point + vecteur confirmés à l'écran 2), dans la forme demandée
+ * Écran 3 (dernier de la famille `construction`) — l'équation de la droite CHERCHÉE d′ (point A
+ * de l'énoncé + vecteur confirmé à l'écran 2), dans la forme demandée
  * par `exercice.formeSortie` : champ texte libre pour "cartesienne" (même style qu'"Lecture
  * graphique — équation d'une droite"), 4 champs numériques bloqués pour "parametrique".
  */
@@ -48,10 +58,10 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
   function construireReponse(): ReponseEquation {
     if (cartesienne) return texte;
     return {
-      x0: Number(x0.replace(",", ".")),
-      y0: Number(y0.replace(",", ".")),
-      a: Number(a.replace(",", ".")),
-      b: Number(b.replace(",", ".")),
+      x0: lire(x0),
+      y0: lire(y0),
+      a: lire(a),
+      b: lire(b),
     };
   }
 
@@ -88,7 +98,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_EQUATION}
             value={texte}
-            onChange={(e) => setTexte(e.target.value)}
+            onChange={(e) => setTexte(e.target.value.replace(SIGNES_MOINS, "-"))}
           />
         </div>
       ) : (
@@ -96,28 +106,28 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
           <div className="field-row">
             <div className="field field-inline">
               <label className="field-label field-label-minuscule" htmlFor="relations-droites-equation-x0">
-                x₀ =
+                <Katex expression="x_A=" />
               </label>
               <input
                 id="relations-droites-equation-x0"
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COORDONNEE}
                 value={x0}
-                onChange={(e) => setX0(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setX0(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
             <div className="field field-inline">
               <label className="field-label field-label-minuscule" htmlFor="relations-droites-equation-y0">
-                y₀ =
+                <Katex expression="y_A=" />
               </label>
               <input
                 id="relations-droites-equation-y0"
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COORDONNEE}
                 value={y0}
-                onChange={(e) => setY0(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setY0(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           </div>
@@ -131,8 +141,8 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COMPOSANTE}
                 value={a}
-                onChange={(e) => setA(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setA(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
             <div className="field field-inline">
@@ -144,8 +154,8 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COMPOSANTE}
                 value={b}
-                onChange={(e) => setB(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setB(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           </div>

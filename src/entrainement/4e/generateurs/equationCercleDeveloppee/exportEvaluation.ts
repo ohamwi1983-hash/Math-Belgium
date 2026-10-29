@@ -5,11 +5,12 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   CONSIGNE_COMPLETION,
   CONSIGNE_GENERALE_CENTRE_RAYON,
-  CONSIGNE_REGROUPEMENT,
+  consigneRegroupement,
   formatCentreAttenduLatex,
   formatCompletionLatex,
   formatEquationDeveloppeeLatex,
   formatEquationReduiteLatex,
+  formatRayonApprocheTexte,
   formatRayonAttenduLatex,
   formatRegroupementLatex,
   segmentsConsigneCentreRayon,
@@ -75,7 +76,7 @@ function construireEnonceEquationCercleDeveloppee(instance: ExerciceEquationCerc
   return {
     enteteFragments: [texte(`${CONSIGNE_GENERALE_CENTRE_RAYON} `), latex(formatEquationDeveloppeeLatex(instance))],
     questions: [
-      { consigne: [texte(CONSIGNE_REGROUPEMENT)], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte(consigneRegroupement(instance))], reponse: { type: "lignes", nombre: 0 } },
       { consigne: [texte(CONSIGNE_COMPLETION)], reponse: { type: "lignes", nombre: 0 } },
       { consigne: segmentsConsigneCentreRayon(instance), reponse: { type: "lignes", nombre: 0 } },
     ],
@@ -87,7 +88,10 @@ function construireCorrectionEquationCercleDeveloppee(instance: ExerciceEquation
 
   blocs.push({
     type: "paragraphe",
-    fragments: [texte("a) Regroupement et factorisation du coefficient commun : "), latex(formatRegroupementLatex(instance))],
+    fragments: [
+      texte(instance.k === 1 ? "a) Regroupement des termes en x et des termes en y : " : `a) Division des deux membres par ${instance.k}, puis regroupement des termes en x et des termes en y : `),
+      latex(formatRegroupementLatex(instance)),
+    ],
   });
 
   blocs.push({
@@ -96,15 +100,17 @@ function construireCorrectionEquationCercleDeveloppee(instance: ExerciceEquation
   });
 
   const fragmentsCentreRayon: FragmentConsigne[] = [
-    texte("c) En divisant chaque membre par le coefficient commun : "),
+    texte("c) On compare "),
     latex(formatEquationReduiteLatex(instance)),
-    texte(" — donc centre "),
-    latex(`o${formatCentreAttenduLatex(instance)}`),
+    texte(" avec "),
+    latex("(x-x_0)^2+(y-y_0)^2=R^2"),
+    texte(" : centre "),
+    latex(formatCentreAttenduLatex(instance)),
     texte(" et rayon "),
     latex(`R = ${formatRayonAttenduLatex(instance)}`),
   ];
   if (instance.variante === "irrationnel") {
-    fragmentsCentreRayon.push(texte(` (≈ ${instance.rayon.toFixed(2)}).`));
+    fragmentsCentreRayon.push(texte(` (≈ ${formatRayonApprocheTexte(instance)}).`));
   } else {
     fragmentsCentreRayon.push(texte("."));
   }

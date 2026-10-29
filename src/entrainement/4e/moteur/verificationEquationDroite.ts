@@ -11,9 +11,17 @@ import {
   diagnostiquerEquationDroiteLibre,
   diagnostiquerPointVecteurParametrique,
   diagnostiquerRepresentationParametriqueTexte,
+  parserExpressionLineaireXY,
   statutNumerique,
   statutTripletProportionnel,
 } from "./verificationDroite";
+
+/** Signes moins typographiques (« − », « – », « — », produits par un clavier mobile ou un
+ * copier-coller du cours) et point médian « · » de multiplication : ramenés à « - » et « * » avant
+ * toute lecture — sinon « y = −2x + 1 » était jugé illisible (audit chapitre 7, point 4). */
+export function normaliserSaisieEquation(texte: string): string {
+  return texte.replace(/[\u2212\u2013\u2014]/g, "-").replace(/\u00b7/g, "*");
+}
 
 // ============================================================================
 // Écran 1 — extraction commune (point + vecteur directeur).
@@ -37,24 +45,32 @@ export function verifierExtraction(exercice: ExerciceEquationDroite, reponse: Re
 }
 
 // ============================================================================
-// Écran 2 — possibilité de la forme cible.
-// ============================================================================
-
-export function verifierPossibilite(exercice: ExerciceEquationDroite, reponse: "possible" | "impossible"): boolean {
-  return (reponse === "possible") === exercice.possible;
-}
-
-// ============================================================================
 // Écran fusionné "possibilité + équation" — formes explicite_y/explicite_x uniquement
 // (`promptgen42modificationsv2.md`, partie A) : remplace l'ancien couple "possibilite" +
 // "coefficients" séparés par un seul écran. Le champ texte libre est vérifié par
 // `diagnostiquerEquationDroiteLibre` (module frère, déjà réutilisé par "Lecture graphique —
 // équation d'une droite"/"Relations entre droites"/"Distance point-droite et droite-droite") — il
-// accepte N'IMPORTE QUELLE forme valide, donc le même critère sert indifféremment que l'élève ait
-// répondu "possible" (équation attendue dans la forme testée) ou "impossible" (équation attendue
-// sous forme implicite de secours) : les deux décrivent en réalité la MÊME droite de référence
-// (`referenceImplicite`), jamais deux critères distincts.
+// accepte N'IMPORTE QUELLE forme valide de la droite. Si l'élève répond "possible", la forme testée
+// est en plus EXIGÉE (`formeExpliciteRespectee` — audit chapitre 7, point 11 : « 4x−3y+13=0 » était
+// accepté alors que y = mx + p était demandé). Si l'élève répond "impossible", toute équation de la
+// droite reste acceptée (la forme implicite de secours, ou x = k / y = k).
 // ============================================================================
+
+/** Vrai si `texte` (équation déjà lisible) est écrit sous la forme explicite demandée : un membre
+ * réduit à la variable isolée (`y` pour explicite_y, `x` pour explicite_x, coefficient 1, sans
+ * constante), l'autre membre sans cette variable. Les deux sens d'écriture sont admis
+ * (« y = 2x + 1 » comme « 2x + 1 = y »). */
+export function formeExpliciteRespectee(texte: string, forme: "explicite_y" | "explicite_x"): boolean {
+  const cotes = normaliserSaisieEquation(texte).split("=");
+  if (cotes.length !== 2) return false;
+  const membres = cotes.map((cote) => parserExpressionLineaireXY(cote));
+  if (membres[0] === null || membres[1] === null) return false;
+  const coefIsole = (m: { coefX: number; coefY: number }) => (forme === "explicite_y" ? m.coefY : m.coefX);
+  const coefAutre = (m: { coefX: number; coefY: number }) => (forme === "explicite_y" ? m.coefX : m.coefY);
+  const estVariableSeule = (m: { coefX: number; coefY: number; constante: number }) => coefIsole(m) === 1 && coefAutre(m) === 0 && m.constante === 0;
+  const [gauche, droite] = membres;
+  return (estVariableSeule(gauche) && coefIsole(droite) === 0) || (estVariableSeule(droite) && coefIsole(gauche) === 0);
+}
 
 export interface ReponsePossibiliteCoefficients {
   choix: "possible" | "impossible";
@@ -62,10 +78,22 @@ export interface ReponsePossibiliteCoefficients {
 }
 
 export function diagnostiquerPossibiliteCoefficients(exercice: ExerciceEquationDroite, reponse: ReponsePossibiliteCoefficients): StatutVerification {
-  const statutTexte = diagnostiquerEquationDroiteLibre(reponse.texte, exercice.referenceImplicite);
+  const statutTexte = diagnostiquerEquationDroiteLibre(normaliserSaisieEquation(reponse.texte), exercice.referenceImplicite);
   if (statutTexte === "parse_error") return "parse_error";
   const choixCorrect = (reponse.choix === "possible") === exercice.possible;
-  return choixCorrect && statutTexte === "correct" ? "correct" : "not_equivalent";
+  if (!choixCorrect || statutTexte !== "correct") return "not_equivalent";
+  if (reponse.choix === "possible" && (exercice.formeCible === "explicite_y" || exercice.formeCible === "explicite_x")) {
+    return formeExpliciteRespectee(reponse.texte, exercice.formeCible) ? "correct" : "not_equivalent";
+  }
+  return "correct";
+}
+
+/** Bonne droite, bon choix « Possible », mais pas écrite sous la forme demandée — sert uniquement à
+ * un message d'erreur plus précis à l'écran (`EtapePossibiliteCoefficientsEquationDroite.tsx`). */
+export function estBonneDroiteMauvaiseForme(exercice: ExerciceEquationDroite, reponse: ReponsePossibiliteCoefficients): boolean {
+  if (reponse.choix !== "possible" || !exercice.possible) return false;
+  if (exercice.formeCible !== "explicite_y" && exercice.formeCible !== "explicite_x") return false;
+  return diagnostiquerEquationDroiteLibre(normaliserSaisieEquation(reponse.texte), exercice.referenceImplicite) === "correct" && !formeExpliciteRespectee(reponse.texte, exercice.formeCible);
 }
 
 export function verifierPossibiliteCoefficients(exercice: ExerciceEquationDroite, reponse: ReponsePossibiliteCoefficients): boolean {
@@ -99,7 +127,7 @@ export interface ReponseExpliciteX {
 }
 
 export function diagnostiquerParametrique(exercice: ExerciceEquationDroite, reponse: ReponseParametrique): StatutVerification {
-  return diagnostiquerRepresentationParametriqueTexte(reponse.texteX, reponse.texteY, exercice.referenceImplicite, exercice.vecteur);
+  return diagnostiquerRepresentationParametriqueTexte(normaliserSaisieEquation(reponse.texteX), normaliserSaisieEquation(reponse.texteY), exercice.referenceImplicite, exercice.vecteur);
 }
 
 export function diagnostiquerImplicite(exercice: ExerciceEquationDroite, reponse: ReponseImplicite): StatutVerification {

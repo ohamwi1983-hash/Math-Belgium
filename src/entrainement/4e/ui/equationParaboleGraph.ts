@@ -1,7 +1,6 @@
 /**
  * Géométrie pure du graphe Mafs de "Équation d'une parabole depuis un graphe" — cadrage dérivé de
- * S, F et des 2 points du "latus rectum" (la corde focale, perpendiculaire à l'axe, passant par le
- * foyer — toujours à distance exacte `|p|` de l'axe), jamais un domaine fixe indépendant de la
+ * S, F et de la directrice (`viewBoxEquationParabole`), jamais un domaine fixe indépendant de la
  * parabole réellement tracée. Réutilise `calculerViewBoxVecteurs` (`ui/vecteurGraph.ts`, module
  * frère déjà partagé par le chapitre "Calcul vectoriel" et par "Équation d'un cercle... à partir
  * d'un graphe") — X et Y homogènes (même échelle spatiale), jamais besoin de
@@ -12,26 +11,10 @@ import type { Point } from "../core/vecteur.types";
 import { calculerViewBoxVecteurs } from "./vecteurGraph";
 import type { PointAffiche } from "./vecteurGraph";
 
-/** Les 2 points du latus rectum (corde focale) — jamais stockés sur le contrat, une pure
- * dérivation présentationnelle pour le cadrage du graphe : au niveau du foyer, décalés de ±p le
- * long de l'axe perpendiculaire à l'axe de la parabole. */
-export function pointsLatusRectum(exercice: ExerciceEquationParabole): Point[] {
-  const { foyer, p } = exercice;
-  return exercice.variante === "vertical"
-    ? [
-        { x: foyer.x + p, y: foyer.y },
-        { x: foyer.x - p, y: foyer.y },
-      ]
-    : [
-        { x: foyer.x, y: foyer.y + p },
-        { x: foyer.x, y: foyer.y - p },
-      ];
-}
-
 /** Valeur constante de la directrice — droite horizontale `y=...` (axe vertical) ou verticale
  * `x=...` (axe horizontal), symétrique du foyer F par rapport au sommet S le long de l'axe. Jamais
- * stockée sur le contrat (pure dérivation présentationnelle, même principe que `pointsLatusRectum`
- * ci-dessus) — même formule que `directrice` du générateur symétrique en sens inverse
+ * stockée sur le contrat (pure dérivation présentationnelle) — même formule que `directrice` du
+ * générateur symétrique en sens inverse
  * (`core/equationParaboleDeveloppee.types.ts`), `promptgen51modificationscompletes.md`, partie B.1. */
 export function directriceEquationParabole(exercice: ExerciceEquationParabole): number {
   const { sommet, foyer, variante } = exercice;
@@ -48,13 +31,21 @@ export function pointDirectriceProcheFoyer(exercice: ExerciceEquationParabole): 
   return variante === "vertical" ? { x: foyer.x, y: d } : { x: d, y: foyer.y };
 }
 
-/** Cadrage du graphe — couvre S, F, les 2 points du latus rectum ET le point de la directrice le
- * plus proche du foyer (sans lequel la directrice, symétrique de F par rapport à S, tomberait hors
- * cadre — S et F seuls ne suffisent pas à la garantir visible). */
+/** Cadrage du graphe — couvre S, F et le point de la directrice le plus proche du foyer (sans
+ * lequel la directrice, symétrique de F par rapport à S, tomberait hors cadre), jamais les 2 points
+ * du latus rectum (corde focale, à ±p de l'axe) : les inclure élargissait le cadre jusqu'à ~28 unités, d'où
+ * un quadrillage de 2 ou 5 unités où S et F d'abscisse impaire tombaient entre deux lignes (audit
+ * chapitre 7). Sans eux, le cadre reste ≤ ~17 unités de large, lisible avec un pas fixe de 1
+ * (`EquationParaboleGraph`, `PAS_GRILLE_EQUATION_PARABOLE`) ; la courbe est de toute façon tracée
+ * sur toute la fenêtre visible. */
 export function viewBoxEquationParabole(exercice: ExerciceEquationParabole): ReturnType<typeof calculerViewBoxVecteurs> {
-  const affiches: PointAffiche[] = [exercice.sommet, exercice.foyer, ...pointsLatusRectum(exercice), pointDirectriceProcheFoyer(exercice)].map((point) => ({
+  const affiches: PointAffiche[] = [exercice.sommet, exercice.foyer, pointDirectriceProcheFoyer(exercice)].map((point) => ({
     point,
     label: "",
   }));
   return calculerViewBoxVecteurs(affiches);
 }
+
+/** Pas de quadrillage FIXE (écran ET export) — S et F sont toujours à coordonnées entières, lues
+ * sur le quadrillage : jamais un pas adaptatif de 2 ou 5 unités. */
+export const PAS_GRILLE_EQUATION_PARABOLE = 1;

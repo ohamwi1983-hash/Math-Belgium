@@ -14,11 +14,11 @@ export function calculerRecapitulatifEquationCercleDeveloppee(etat: EtatSessionE
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scoreRegroupementExercice !== null) {
-    entrees.push({ libelle: "Regroupement", estLatex: true, valeur: formatEtatActuelRegroupementLatex(exercice), revele: etat.regroupementRevele });
+    entrees.push({ libelle: "Regroupement", estLatex: true, valeur: `\\displaystyle ${formatEtatActuelRegroupementLatex(exercice)}`, revele: etat.regroupementRevele });
   }
 
   if (etat.scoreCompletionExercice !== null) {
-    entrees.push({ libelle: "Complétion du carré", estLatex: true, valeur: formatEtatActuelCompletionLatex(exercice), revele: etat.completionRevele });
+    entrees.push({ libelle: "Complétion du carré", estLatex: true, valeur: `\\displaystyle ${formatEtatActuelCompletionLatex(exercice)}`, revele: etat.completionRevele });
   }
 
   return entrees;

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDroite.types";
 import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionCaracteristiquesDroite";
-import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp } from "../moteur/verificationCaracteristiquesDroite";
+import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp, toleranceChampPrincipal } from "../moteur/verificationCaracteristiquesDroite";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import type { ReponseCaracteristiques, ReponseChamp } from "../moteur/verificationCaracteristiquesDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiquesDroiteEcran2";
@@ -28,16 +29,17 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
+/** Valeur saisie — entier, décimal (virgule ou point) ou fraction « p/q » (pente et ordonnée à
+ * l'origine rationnelles, ex. −1/3, 5/3) ; `null` tant que le champ est vide ou incomplet. */
+function lireValeur(valeur: string): ReponseChamp | null {
+  const nombre = parserNombreOuFraction(valeur);
+  return nombre !== null && Number.isFinite(nombre) ? { existe: true, valeur: nombre } : null;
+}
+
 function champDepuisSaisie(choix: Choix | null, valeur: string, toggleDisponible: boolean): ReponseChamp | null {
-  if (!toggleDisponible) {
-    const nombre = Number(valeur.trim().replace(",", "."));
-    return valeur.trim() !== "" && Number.isFinite(nombre) ? { existe: true, valeur: nombre } : null;
-  }
+  if (!toggleDisponible) return lireValeur(valeur);
   if (choix === "nExistePas") return { existe: false };
-  if (choix === "existe") {
-    const nombre = Number(valeur.trim().replace(",", "."));
-    return valeur.trim() !== "" && Number.isFinite(nombre) ? { existe: true, valeur: nombre } : null;
-  }
+  if (choix === "existe") return lireValeur(valeur);
   return null;
 }
 
@@ -66,7 +68,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
   const complet = reponsePrincipale !== null && reponseOrdonnee !== null;
 
   const apresEchec = tentativesUtilisees > 0;
-  const statutPrincipal = apresEchec && reponsePrincipale !== null ? diagnostiquerChamp(reponsePrincipale, cibleChampPrincipal(exercice)) : undefined;
+  const statutPrincipal = apresEchec && reponsePrincipale !== null ? diagnostiquerChamp(reponsePrincipale, cibleChampPrincipal(exercice), toleranceChampPrincipal(exercice)) : undefined;
   const statutOrdonnee = apresEchec && reponseOrdonnee !== null ? diagnostiquerChamp(reponseOrdonnee, exercice.ordonneeOrigine) : undefined;
   const erroneePrincipal = statutPrincipal !== undefined && statutPrincipal !== "correct";
   const erroneeOrdonnee = statutOrdonnee !== undefined && statutOrdonnee !== "correct";
@@ -88,15 +90,15 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
       {estAngle ? (
         <div className="field">
           <label className="field-label field-label-minuscule" htmlFor="caracteristiques-droite-principal">
-            Angle α (en degrés) =
+            Angle α (en degrés, arrondi à l'unité) =
           </label>
           <input
             id="caracteristiques-droite-principal"
             className={`text-input${erroneePrincipal ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_ANGLE}
             value={valeurPrincipal}
-            onChange={(e) => setValeurPrincipal(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setValeurPrincipal(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       ) : (
@@ -120,8 +122,8 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
                 className={`text-input${erroneePrincipal ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_PENTE}
                 value={valeurPrincipal}
-                onChange={(e) => setValeurPrincipal(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setValeurPrincipal(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           )}
@@ -148,8 +150,8 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
               className={`text-input${erroneeOrdonnee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_ORDONNEE}
               value={valeurOrdonnee}
-              onChange={(e) => setValeurOrdonnee(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setValeurOrdonnee(filtrerSaisieNumeriqueFraction(e.target.value))}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
         )}
@@ -158,7 +160,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>
-            <RenduFragments fragments={segmentsAideCaracteristiquesNiveau1()} />
+            <RenduFragments fragments={segmentsAideCaracteristiquesNiveau1(exercice)} />
           </p>
           {niveauAide >= 2 && (
             <p>

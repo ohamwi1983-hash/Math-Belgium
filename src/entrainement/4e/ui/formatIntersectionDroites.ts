@@ -150,6 +150,22 @@ export function segmentsConsigneDiagnostic(): FragmentConsigne[] {
  * nulles par construction) — mentionné par complétude pédagogique, même principe déjà établi pour
  * "Distance point-droite et droite-droite" (`CLAUDE.md`, section gen47). */
 export function segmentsAideDiagnosticNiveau1(exercice: ExerciceIntersectionDroites): FragmentConsigne[] {
+  return [...segmentsAideDiagnosticEtape1(exercice), ...segmentsAideDiagnosticEtape2()];
+}
+
+/** Étape 2 de la méthode du cours (audit chapitre 7, point 39) — la seule qui sépare parallèles
+ * distinctes et confondues, absente de l'aide jusque-là. */
+function segmentsAideDiagnosticEtape2(): FragmentConsigne[] {
+  return [
+    texte(" Si elles sont parallèles, vérifie si un point de "),
+    latex("d_1"),
+    texte(" appartient à "),
+    latex("d_2"),
+    texte(" : oui → confondues, non → parallèles distinctes."),
+  ];
+}
+
+function segmentsAideDiagnosticEtape1(exercice: ExerciceIntersectionDroites): FragmentConsigne[] {
   if (exercice.variante === "cart_cart") {
     return [texte("Compare les pentes "), latex("m_1"), texte(" et "), latex("m_2"), texte(" des deux droites — sont-elles égales ou non ?")];
   }
@@ -184,6 +200,12 @@ export function segmentsAideDiagnosticNiveau1(exercice: ExerciceIntersectionDroi
  * composantes de `\vec{u_1}` (param_param), ou les composantes du vecteur directeur de la droite
  * réellement paramétrique de l'instance (mixte, indices adaptés comme pour l'aide niveau 1). */
 export function formatAideDiagnosticNiveau2Latex(exercice: ExerciceIntersectionDroites): string {
+  return `\\displaystyle ${formatAideDiagnosticDonneeLatex(exercice)} \\qquad ${formatPointLatex(exercice.d1.point)} \\in d_1`;
+}
+
+/** La donnée brute de l'étape 1 (`m_1` ou un vecteur directeur), suivie d'un point de `d_1` pour
+ * l'étape 2 (`formatAideDiagnosticNiveau2Latex`). */
+function formatAideDiagnosticDonneeLatex(exercice: ExerciceIntersectionDroites): string {
   if (exercice.variante === "cart_cart") {
     return `m_1 = ${formatValeurFractionLatex(penteDeLigne(exercice.d1))}`;
   }
@@ -205,11 +227,11 @@ export function formatAideDiagnosticNiveau2Latex(exercice: ExerciceIntersectionD
 export function segmentsConsignePoint(exercice: ExerciceIntersectionDroites): FragmentConsigne[] {
   switch (exercice.variante) {
     case "cart_cart":
-      return [texte("Résous le système {d₁ ; d₂} pour trouver les coordonnées du point d'intersection.")];
+      return [texte("Résous le système {d₁ ; d₂} pour trouver les coordonnées du point d'intersection (fraction acceptée, par exemple 7/2).")];
     case "param_cart":
-      return [texte("Résous le système d'équations "), latex("d_1\\cap d_2"), texte(".")];
+      return [texte("Résous le système d'équations "), latex("d_1\\cap d_2"), texte(" (fraction acceptée, par exemple 7/2).")];
     case "param_param":
-      return [texte("Égale les 2 représentations paramétriques composante par composante pour former un système à 2 équations et 2 inconnues (t et s), puis calcule les coordonnées du point d'intersection.")];
+      return [texte("Égale les 2 représentations paramétriques composante par composante pour former un système à 2 équations et 2 inconnues (t et s), puis calcule les coordonnées du point d'intersection (fraction acceptée, par exemple 7/2).")];
   }
 }
 
@@ -231,14 +253,20 @@ export function formatAidePointNiveau2Latex(exercice: ExerciceIntersectionDroite
   if (exercice.variante === "cart_cart") {
     const coefX = d1.implicite.a * d2.implicite.b - d2.implicite.a * d1.implicite.b;
     const constante = d1.implicite.c * d2.implicite.b - d2.implicite.c * d1.implicite.b;
-    return `(${coefX})\\,x + (${constante}) = 0`;
+    return `${formatSommeTermesGeneree([
+      { valeur: coefX, suffixe: "x" },
+      { valeur: constante, suffixe: "" },
+    ])} = 0`;
   }
   if (exercice.variante === "param_cart") {
     const p = d1.parametriqueAffichee!;
     const d = d2.implicite;
     const coefT = d.a * p.a + d.b * p.b;
     const constante = d.a * p.x0 + d.b * p.y0 + d.c;
-    return `(${coefT})\\,t + (${constante}) = 0`;
+    return `${formatSommeTermesGeneree([
+      { valeur: coefT, suffixe: "t" },
+      { valeur: constante, suffixe: "" },
+    ])} = 0`;
   }
   const p1 = d1.parametriqueAffichee!;
   const p2 = d2.parametriqueAffichee!;
@@ -250,7 +278,7 @@ export function formatAidePointNiveau2Latex(exercice: ExerciceIntersectionDroite
     { valeur: p1.b, suffixe: "t" },
     { valeur: -p2.b, suffixe: "s" },
   ])} = ${p2.y0 - p1.y0}`;
-  return `\\begin{cases} ${ligne1} \\\\ ${ligne2} \\end{cases}`;
+  return `\\displaystyle \\begin{cases} ${ligne1} \\\\ ${ligne2} \\end{cases}`;
 }
 
 // ============================================================================
@@ -262,12 +290,21 @@ export function texteConclusionAttendue(exercice: ExerciceIntersectionDroites): 
   return `Les droites d₁ et d₂ sont ${LIBELLE_CONCLUSION[exercice.conclusion].toLowerCase()}.`;
 }
 
-/** `null` ssi `conclusion !== "secantes"` — rien à révéler pour cet écran, jamais atteint. */
-export function texteReponsePointAttendue(exercice: ExerciceIntersectionDroites): string | null {
+/** `null` ssi `conclusion !== "secantes"` — rien à révéler pour cet écran, jamais atteint. Rendu
+ * KaTeX (audit chapitre 7, point 35 : l'ancien texte brut affichait des tirets ASCII et des
+ * décimaux), fractions irréductibles. */
+export function formatReponsePointAttendueLatex(exercice: ExerciceIntersectionDroites): string | null {
   if (exercice.conclusion !== "secantes" || !exercice.point) return null;
   const partiel: string[] = [];
-  if (exercice.tAttendu !== null) partiel.push(`t = ${exercice.tAttendu}`);
-  if (exercice.sAttendu !== null) partiel.push(`s = ${exercice.sAttendu}`);
-  const prefixe = partiel.length > 0 ? `${partiel.join(", ")}, ` : "";
-  return `${prefixe}point d'intersection : (${exercice.point.x} ; ${exercice.point.y})`;
+  if (exercice.tAttendu !== null) partiel.push(`t = ${formatValeurFractionLatex(exercice.tAttendu)}`);
+  if (exercice.sAttendu !== null) partiel.push(`s = ${formatValeurFractionLatex(exercice.sAttendu)}`);
+  partiel.push(`d_1 \\cap d_2 = \\left\\{ ${formatPointLatex(exercice.point)} \\right\\}`);
+  return partiel.join(", \\quad ");
 }
+
+/** Placeholders hors de l'espace des tirages (audit chapitre 7, point 10 : « ex : −2 » valait t une
+ * fois sur six) — dénominateur 13, jamais atteint : celui d'une coordonnée divise le déterminant des
+ * vecteurs directeurs (|det| ≤ 12), celui d'un paramètre divise det × une composante (≤ 4), et 13
+ * est premier. */
+export const PLACEHOLDER_PARAMETRE_INTERSECTION = "ex : 14/13";
+export const PLACEHOLDER_COORDONNEE_INTERSECTION = "ex : 15/13";

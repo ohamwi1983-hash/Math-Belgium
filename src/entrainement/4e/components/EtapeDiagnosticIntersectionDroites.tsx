@@ -32,8 +32,12 @@ const OPTIONS: ConclusionIntersectionDroites[] = ["secantes", "paralleles_distin
  */
 export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConclusionIntersectionDroites | null>(null);
+  /** Dernier choix SOUMIS — seul lui peut être marqué en rouge (audit chapitre 7, point 37 : le
+   * choix suivant, pas encore validé et peut-être juste, était déjà rouge). */
+  const [dernierSoumis, setDernierSoumis] = useState<ConclusionIntersectionDroites | null>(null);
   const max = NIVEAU_AIDE_MAX_DIAGNOSTIC;
-  const erronee = tentativesUtilisees > 0;
+  const soumisCorrect = validation != null && !validation.revele;
+  const estRejete = (option: ConclusionIntersectionDroites) => tentativesUtilisees > 0 && !soumisCorrect && option === dernierSoumis;
   const [ligneD1, ligneD2] = formatLignesEnonce(exercice);
 
   return (
@@ -56,8 +60,9 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilise
           <button
             key={option}
             type="button"
-            className={`btn${choix === option ? " toggle-active" : ""}${erronee && choix === option ? " is-erronee" : ""}`}
+            className={`btn${choix === option ? " toggle-active" : ""}${estRejete(option) ? " is-erronee" : ""}`}
             onClick={() => setChoix(option)}
+            disabled={Boolean(validation)}
           >
             {LIBELLE_CONCLUSION[option]}
           </button>
@@ -80,7 +85,16 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilise
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={choix === null}
+          onClick={() => {
+            if (choix === null) return;
+            setDernierSoumis(choix);
+            onValider(choix);
+          }}
+        >
           Valider
         </button>
         {tentativesUtilisees > 0 && (

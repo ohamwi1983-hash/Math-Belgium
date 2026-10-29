@@ -34,6 +34,11 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Rayon de la construction attendue, une fois l'écran clos sur une révélation (tentatives
+   * épuisées) — le rayon de repli réellement retenu par le moteur (`rCanoniqueDisponible`) : le
+   * cercle et la droite attendus sont alors DESSINÉS à la place de ceux de l'élève, et ce sont bien
+   * leurs 2 points d'intersection qui apparaîtront en vert à l'itération suivante. */
+  rRevele?: number | null;
 }
 
 const R_INITIAL = 1;
@@ -69,15 +74,27 @@ export function EtapeConstructionParabole({
   onActiverAide,
   onValider,
   validation,
+  rRevele = null,
 }: Props) {
-  const [r, setR] = useState(R_INITIAL);
-  const [ligneY, setLigneY] = useState(LIGNE_Y_INITIALE);
+  const [rSaisi, setR] = useState(R_INITIAL);
+  const [ligneSaisie, setLigneY] = useState(LIGNE_Y_INITIALE);
+  /** Le compas a-t-il déjà été manipulé ? Le rayon initial (1) est toujours ≤ au rayon minimal :
+   * l'avertissement « rayon trop petit » n'a de sens qu'après un geste de l'élève, jamais dès le
+   * chargement de l'écran (audit chapitre 7). */
+  const [compasManipule, setCompasManipule] = useState(false);
+  const r = rRevele ?? rSaisi;
+  const ligneY = rRevele ?? ligneSaisie;
+
+  function changerR(valeur: number) {
+    setCompasManipule(true);
+    setR(valeur);
+  }
 
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerConstruction(exercice, { r, ligneY }, rDejaUtilises) : undefined;
-  const rErronee = apresEchec && statut !== undefined && !statut.rValide;
-  const ligneErronee = apresEchec && statut !== undefined && !statut.ligneValide;
-  const avertissementRayon = messageRayonInvalide(exercice, r);
+  const rErronee = rRevele === null && apresEchec && statut !== undefined && !statut.rValide;
+  const ligneErronee = rRevele === null && apresEchec && statut !== undefined && !statut.ligneValide;
+  const avertissementRayon = compasManipule && !validation ? messageRayonInvalide(exercice, r) : null;
   const rDejaUtiliseActuellement = rEstDejaUtilise(r, rDejaUtilises);
   const messageDejaUtilise = messageRayonDejaUtilise(r, rDejaUtilises);
   const pointsConfirmes = rDejaUtilises.flatMap((rConfirme) => pointsCiblesIteration(exercice, rConfirme));
@@ -92,8 +109,9 @@ export function EtapeConstructionParabole({
         exercice={exercice}
         r={r}
         ligneY={ligneY}
-        onChangeR={setR}
+        onChangeR={changerR}
         onChangeLigneY={setLigneY}
+        verrouille={!!validation}
         afficherCercleReference={niveauAide >= 2}
         rErronee={rErronee}
         ligneErronee={ligneErronee}

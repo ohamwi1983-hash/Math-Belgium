@@ -16,11 +16,14 @@ export type CaracteristiqueDemandee = "pente" | "angleOx" | "angleOy";
 export type VarianteCaracteristiquesDroite = FormeSortieDroite;
 
 /**
- * L'angle (et donc la pente, qui en dérive) est TOUJOURS construit à partir d'un angle remarquable
- * choisi en amont (`angleDeg`), jamais l'inverse — garantit une pente et un angle exacts, vérification
- * sans tolérance, cohérent avec "Angles associés" / "Quel angle ?". Les droites verticales sont
- * incluses (`verticale=true` ssi `angleDeg=90`) : `pente`/`ordonneeOrigine` valent alors `null`
- * ("n'existe pas"), jamais une valeur numérique — `angleDeg` reste toujours défini (jamais `null`).
+ * La direction est TOUJOURS choisie en amont, jamais déduite d'un tirage de coefficients : soit un
+ * angle remarquable (0°, 45°, 90°, 135° — pente exacte 0, 1, indéfinie, −1), soit un vecteur
+ * directeur entier de pente rationnelle quelconque (ex. 2, −1/3 — audit chapitre 7, gen46 point 7).
+ * La pente (rationnelle) et l'ordonnée à l'origine (rationnelle) restent exactes ; l'angle d'une
+ * pente quelconque n'est pas remarquable et se demande arrondi à l'unité (tolérance de la
+ * vérification). Les droites verticales sont incluses (`verticale=true` ssi le vecteur directeur
+ * est vertical, `angleDeg=90`) : `pente`/`ordonneeOrigine` valent alors `null` ("n'existe pas"),
+ * jamais une valeur numérique — `angleDeg` reste toujours défini (jamais `null`).
  *
  * **Exclusion de génération** (garantie par construction, jamais vérifiée après coup) : une
  * verticale ne coïncide jamais exactement avec l'axe Oy (`point.x≠0` quand `verticale`) — ce cas
@@ -40,9 +43,11 @@ export interface ExerciceCaracteristiquesDroite {
   point: Point;
   /** Vecteur directeur canonique — n'importe quel multiple non nul reste accepté à l'écran 1. */
   vecteur: Composantes;
-  /** Angle avec l'axe Ox — TOUJOURS défini (jamais `null`), y compris pour une verticale (90°). */
+  /** Angle avec l'axe Ox, dans `[0° ; 180°[` — TOUJOURS défini (jamais `null`), y compris pour une
+   * verticale (90°). Valeur exacte (non arrondie) : seul l'affichage l'arrondit. */
   angleDeg: number;
-  /** Angle avec l'axe Oy — dérivé de `angleDeg` (`90-angleDeg`, ramené dans `[0°,180°[`), calculé
+  /** Angle avec l'axe Oy — dérivé de `angleDeg` (`90-angleDeg`, ramené dans `[0°,180°[` : verticale
+   * → 0°, horizontale → 90°), calculé
    * une seule fois à la génération, jamais recalculé différemment côté vérification/présentation —
    * TOUJOURS défini, même principe que `angleDeg` (`promptgen46modifications.md`, point 2). */
   angleOyDeg: number;

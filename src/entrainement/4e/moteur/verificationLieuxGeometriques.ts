@@ -1,6 +1,6 @@
 /**
  * Couche B — vérification de "Lieux géométriques : intersection", REFONTE COMPLÈTE
- * (`promptgen54refontecomplete.md`) sur 3 écrans communs aux 3 grandes variantes.
+ * (`promptgen54refontecomplete.md`) sur 3 écrans communs aux 2 grandes variantes.
  *
  * **Écran 1 — Identification** : pour chacun des 2 lieux, un choix catégoriel (droite/cercle/
  * parabole) PUIS des champs numériques adaptés au choix — jamais de saisie libre, donc jamais de
@@ -83,6 +83,41 @@ export function diagnostiquerIdentification(exercice: ExerciceLieuxGeometriques,
   return "not_equivalent";
 }
 
+/** Lieu de l'exercice auquel chaque bloc de saisie est COMPARÉ — le même appariement que celui que
+ * retient `diagnostiquerIdentification` (direct ou échangé), pour que le marquage rouge bloc par bloc
+ * ne contredise jamais la vérification par ensemble (audit chapitre 7, point 60 : l'élève qui
+ * décrivait la droite dans le bloc 1 alors que l'énoncé la citait en second voyait son bloc juste
+ * marqué en rouge). Un bloc encore incomplet (`null`) ne compte pour aucun appariement.
+ *
+ * Choix : l'appariement qui valide le plus de blocs, puis celui qui respecte le plus de TYPES
+ * choisis (les 2 lieux sont toujours de types différents), puis l'ordre direct. */
+export function lieuxComparesIdentification(
+  exercice: ExerciceLieuxGeometriques,
+  reponse1: ReponseIdentificationLieu | null,
+  reponse2: ReponseIdentificationLieu | null,
+): [Lieu, Lieu] {
+  const direct: [Lieu, Lieu] = [exercice.lieu1, exercice.lieu2];
+  const echange: [Lieu, Lieu] = [exercice.lieu2, exercice.lieu1];
+  const evaluer = ([l1, l2]: [Lieu, Lieu]): [number, number] => {
+    const reponses: [ReponseIdentificationLieu | null, Lieu][] = [
+      [reponse1, l1],
+      [reponse2, l2],
+    ];
+    let correctes = 0;
+    let typesRespectes = 0;
+    for (const [reponse, lieu] of reponses) {
+      if (reponse === null) continue;
+      if (reponse.type === lieu.type) typesRespectes++;
+      if (diagnostiquerIdentificationLieu(lieu, reponse) === "correct") correctes++;
+    }
+    return [correctes, typesRespectes];
+  };
+  const [correctesDirect, typesDirect] = evaluer(direct);
+  const [correctesEchange, typesEchange] = evaluer(echange);
+  if (correctesEchange !== correctesDirect) return correctesEchange > correctesDirect ? echange : direct;
+  return typesEchange > typesDirect ? echange : direct;
+}
+
 export function verifierIdentification(exercice: ExerciceLieuxGeometriques, reponse: ReponseIdentification): boolean {
   return diagnostiquerIdentification(exercice, reponse) === "correct";
 }
@@ -112,7 +147,12 @@ function exerciceEquationParaboleDepuisLieu(parabole: LieuParabole): ExerciceEqu
   return { variante: parabole.orientation, sommet, foyer: parabole.foyer, p: parabole.p };
 }
 
-export function diagnostiquerEquationLieu(lieu: Lieu, texte: string): StatutVerification {
+/** Signes moins typographiques (« − », « – », « — ») d'un clavier mobile ou d'un copier-coller —
+ * convertis en « - » avant toute lecture (audit chapitre 7, point 4). */
+const SIGNES_MOINS = /[\u2212\u2013\u2014]/g;
+
+export function diagnostiquerEquationLieu(lieu: Lieu, texteBrut: string): StatutVerification {
+  const texte = texteBrut.replace(SIGNES_MOINS, "-");
   switch (lieu.type) {
     case "droite":
       return diagnostiquerEquationDroiteLibre(texte, impliciteDepuisLieuDroiteMoteur(lieu));

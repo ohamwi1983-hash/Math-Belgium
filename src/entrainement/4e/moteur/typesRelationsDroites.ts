@@ -1,4 +1,4 @@
-import type { CritereRelation, ExerciceRelationsDroites, FormeEntreeRelation, FormeSortieRelation, GenerateurExerciceRelationsDroites } from "../core/relationsDroites.types";
+import type { CritereRelation, ExerciceRelationsDroites, FamilleRelationsDroites, FormeEntreeRelation, FormeSortieRelation, GenerateurExerciceRelationsDroites } from "../core/relationsDroites.types";
 import type { ReglagesSession } from "../core/session.types";
 import type { EtatEtapeTentatives } from "./etapeTentatives";
 import type { ReponseParametrique } from "./verificationRelationsDroites";
@@ -8,13 +8,21 @@ import type { ReponseParametrique } from "./verificationRelationsDroites";
  * (`exercice.formeSortie`), jamais un dispatch supplémentaire côté réponse. */
 export type ReponseEquation = string | ReponseParametrique;
 
-/** 3 phases FIXES, toujours dans le même ordre — aucun saut conditionnel (contrairement à
- * "Équation d'une droite", ce générateur n'a structurellement aucun cas "impossible" : le vecteur
- * de référence a toujours ses deux composantes non nulles, voir Couche A). */
-export type PhaseRelationsDroites = "extraction" | "construction" | "equation";
+/** 3 phases par exercice, séquence fixée par la famille, jamais un saut conditionnel :
+ * - `construction` : `extraction → construction → equation` ;
+ * - `reconnaissance` : `extraction → extraction2 → relation`.
+ * Aucun cas "impossible" (contrairement à "Équation d'une droite") : les formes d'entrée sont
+ * toujours choisies parmi celles qui existent pour le vecteur tiré (voir Couche A). */
+export type PhaseRelationsDroites = "extraction" | "construction" | "equation" | "extraction2" | "relation";
+
+export const SEQUENCES_RELATIONS_DROITES: Record<FamilleRelationsDroites, PhaseRelationsDroites[]> = {
+  construction: ["extraction", "construction", "equation"],
+  reconnaissance: ["extraction", "extraction2", "relation"],
+};
 
 export interface ResultatExerciceRelationsDroites {
   variante: string;
+  famille: FamilleRelationsDroites;
   formeEntree: FormeEntreeRelation;
   formeSortie: FormeSortieRelation;
   critere: CritereRelation;
@@ -24,13 +32,16 @@ export interface ResultatExerciceRelationsDroites {
    * pour le récapitulatif final uniformisé (`LigneRecap`/`statutRecap`), qui distingue "correct sans
    * aide" (vert) de "correct avec aide" (orange). */
   extractionAideUtilisee: boolean;
+  /** Écran 2 — "construction" (famille `construction`) ou "extraction2" (famille
+   * `reconnaissance`). */
   scoreConstruction: number;
   constructionRevele: boolean;
-  /** Même principe que `extractionAideUtilisee`, pour l'écran "construction". */
+  /** Même principe que `extractionAideUtilisee`, pour l'écran 2. */
   constructionAideUtilisee: boolean;
+  /** Écran 3 — "equation" ou "relation". */
   scoreEquation: number;
   equationRevele: boolean;
-  /** Même principe que `extractionAideUtilisee`, pour l'écran "equation". */
+  /** Même principe que `extractionAideUtilisee`, pour l'écran 3. */
   equationAideUtilisee: boolean;
 }
 
@@ -42,13 +53,16 @@ export interface EtatSessionRelationsDroites {
   phase: PhaseRelationsDroites;
   etapeCourante: EtatEtapeTentatives;
   niveauAideExtraction: number;
+  /** Écran 2 — "construction" ou "extraction2" (une seule des deux phases par exercice). */
   niveauAideConstruction: number;
+  /** Écran 3 — "equation" ou "relation". */
   niveauAideEquation: number;
   /** Scores des écrans déjà clos de cet exercice, conservés jusqu'à la clôture de l'exercice
    * entier (même principe que `scoreExtractionExercice`/`scorePossibiliteExercice`,
    * `typesEquationDroite.ts`). */
   scoreExtractionExercice: number | null;
   extractionRevele: boolean;
+  /** Écran 2 — "construction" ou "extraction2". */
   scoreConstructionExercice: number | null;
   constructionRevele: boolean;
   resultats: ResultatExerciceRelationsDroites[];

@@ -79,6 +79,8 @@ function sommetAutre(exercice: ExerciceEquationParaboleDeveloppee): number {
 // Énoncé fixe — toujours affiché, sur les 3 écrans.
 // ============================================================================
 
+/** Forme « … = 0 » du cours (`y^2-6y-4x+5=0`), jamais « … = c » : la constante fait partie des
+ * termes à passer de l'autre côté à l'écran 1. */
 export function formatEquationDeveloppeeLatex(exercice: ExerciceEquationParaboleDeveloppee): string {
   const { a, bCarre, bAutre, c } = exercice;
   const carre = variableCarree(exercice);
@@ -87,8 +89,9 @@ export function formatEquationDeveloppeeLatex(exercice: ExerciceEquationParabole
     { valeur: a, suffixe: `${carre}^2` },
     { valeur: bCarre, suffixe: carre },
     { valeur: bAutre, suffixe: autre },
+    { valeur: -c, suffixe: "" },
   ]);
-  return `${gauche} = ${c}`;
+  return `${gauche} = 0`;
 }
 
 // ============================================================================
@@ -96,68 +99,84 @@ export function formatEquationDeveloppeeLatex(exercice: ExerciceEquationParabole
 // ============================================================================
 
 /** Consigne de l'écran 1 — ADAPTATIVE selon l'orientation réelle de l'instance, jamais figée sur
- * une seule variable (`promptgen52modificationscompletes.md`, partie C.1). */
+ * une seule variable (`promptgen52modificationscompletes.md`, partie C.1) : l'étape « isoler le
+ * carré » du cours (`y^2-6y = 4x-5`). La mise en évidence du coefficient de la variable au carré
+ * n'est proposée que s'il vaut autre chose que 1 — jamais celle du coefficient de l'autre variable,
+ * que ni la réponse attendue ni le cours ne font (audit chapitre 7). */
 export function segmentsConsigneRegroupement(exercice: ExerciceEquationParaboleDeveloppee): FragmentConsigne[] {
   const carre = variableCarree(exercice);
-  const autre = variableAutre(exercice);
-  return [
-    texte(`Sépare les termes en ${carre} des autres termes et mets en évidence les coefficients de `),
+  const fragments: FragmentConsigne[] = [
+    texte("Isole dans un membre les termes en "),
+    latex(carre),
+    texte(" ("),
     latex(`${carre}^2`),
-    texte(` et de ${autre} dans chacun des membres de l'équation.`),
+    texte(` et ${carre}), et passe tous les autres termes dans l'autre membre.`),
   ];
+  if (exercice.a !== 1) {
+    fragments.push(texte(" Mets ensuite en évidence le coefficient "), latex(String(exercice.a)), texte(" de "), latex(`${carre}^2`), texte("."));
+  }
+  return fragments;
 }
 
-export const TEXTE_AIDE_REGROUPEMENT_NIVEAU1 = "La variable seule au carré détermine la direction de la concavité de la parabole.";
+/** Aide 1 — repérer la variable au carré, la seule dont les termes restent dans le premier membre. */
+export const TEXTE_AIDE_REGROUPEMENT_NIVEAU1 =
+  "Une seule des deux variables est au carré : garde tous ses termes (son carré et son terme du premier degré) dans un membre, et passe le reste (l'autre variable et la constante) dans l'autre membre, en changeant leur signe.";
 
-/** Réponse de référence de l'écran 1 — a([carré]²+(bCarre/a)[carré]) = -bAutre·[autre]+c. */
+/** Réponse de référence de l'écran 1 — `a([carré]²+(bCarre/a)[carré]) = -bAutre·[autre]+c`, sans
+ * parenthèses superflues : `x^2-2x = 16y+31` quand a=1, `2x^2 = …` quand le terme du premier degré
+ * est absent (jamais `(x^2-2x)`, `(x^2)` ni `2(x^2)`). */
 export function formatRegroupementLatex(exercice: ExerciceEquationParaboleDeveloppee): string {
   const { a, bCarre, bAutre, c } = exercice;
   const carre = variableCarree(exercice);
   const autre = variableAutre(exercice);
-  const prefixe = prefixeCoefficient(a);
-  const interieur = formatSommeTermes([
-    { valeur: 1, suffixe: `${carre}^2` },
-    { valeur: bCarre / a, suffixe: carre },
-  ]);
   const droite = formatSommeTermes([
     { valeur: -bAutre, suffixe: autre },
     { valeur: c, suffixe: "" },
   ]);
-  return `${prefixe}(${interieur}) = ${droite}`;
+  if (bCarre === 0) return `${prefixeCoefficient(a)}${carre}^2 = ${droite}`;
+  const interieur = formatSommeTermes([
+    { valeur: 1, suffixe: `${carre}^2` },
+    { valeur: bCarre / a, suffixe: carre },
+  ]);
+  return a === 1 ? `${interieur} = ${droite}` : `${a}(${interieur}) = ${droite}`;
 }
 
-/** Aide niveau 2 — ADAPTATIVE, annonce la concavité déduite de la variable au carré
- * (`promptgen52modificationscompletes.md`, partie C.3). */
+/** Aide niveau 2 — ADAPTATIVE : la variable au carré, l'axe de la parabole qui s'en déduit
+ * (vocabulaire du cours : axe vertical/horizontal, jamais « concavité ») et les termes à déplacer. */
 export function texteAideRegroupementNiveau2(exercice: ExerciceEquationParaboleDeveloppee): string {
   const carre = variableCarree(exercice);
-  const concavite = exercice.variante === "vertical" ? "verticale" : "horizontale";
-  return `C'est ${carre} qui est au carré, donc la parabole a une concavité ${concavite}`;
+  const autre = variableAutre(exercice);
+  const axe = exercice.variante === "vertical" ? "vertical" : "horizontal";
+  return `C'est ${carre} qui est au carré, donc la parabole a un axe ${axe} : garde ${carre}² et ${carre} dans le premier membre, passe le terme en ${autre} et la constante dans le second.`;
 }
 
 // ============================================================================
 // Écran 2 — complétion du carré.
 // ============================================================================
 
-export const CONSIGNE_COMPLETION = "Complète le carré pour obtenir la forme (variable-sommet)² = 2p(autre variable-sommet).";
+/** Consigne de l'écran 2 — ADAPTATIVE selon l'orientation (forme du tableau du cours). */
+export function segmentsConsigneCompletion(exercice: ExerciceEquationParaboleDeveloppee): FragmentConsigne[] {
+  const forme = exercice.variante === "vertical" ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)";
+  return [texte("Complète le carré pour obtenir la forme "), latex(forme), texte(".")];
+}
 
 /** Aide 1 — ADAPTATIVE selon l'orientation réelle de l'instance (`promptgen52modificationscompletes.md`,
- * partie D.2) : réutilise désormais explicitement la lettre "p" (le coefficient linéaire déjà
- * factorisé à l'écran précédent) — remplace l'ancienne formulation générique "[variable]²+
- * (coefficient)[variable]" qui évitait "p" par prudence (`promptgen46etcorrectionstransversaleschapitre6.md`,
- * point B.4, alors motivée par un risque de conflit avec le "p" de l'écran 3 — ce nouveau prompt
- * demande explicitement cette formulation malgré ce risque, la portée du point B.4 étant limitée à
- * l'ancienne formulation qu'il corrigeait). */
+ * partie D.2). Le coefficient du premier degré est noté b, JAMAIS p : sur ce même écran, l'aide 2
+ * donne « 2p = … », où p est le paramètre de la parabole (audit chapitre 7 — deux « p » de sens
+ * différent sur le même écran). La remarque sur le coefficient commun n'apparaît que si a ≠ 1. */
 export function segmentsAideCompletionNiveau1(exercice: ExerciceEquationParaboleDeveloppee): FragmentConsigne[] {
   const carre = variableCarree(exercice);
-  return [
-    texte("Dans la parenthèse "),
-    latex(`${carre}^2+p${carre}`),
-    texte(" (p étant le coefficient linéaire déjà factorisé à l'écran précédent), ajoute et retranche "),
-    latex("(p/2)^2"),
-    texte(" pour obtenir "),
-    latex(`(${carre}+p/2)^2`),
-    texte(" — attention à multiplier ce terme par le coefficient commun avant de le déplacer de l'autre côté."),
+  const fragments: FragmentConsigne[] = [
+    texte("Écris "),
+    latex(`${carre}^2+b${carre}`),
+    texte(` (b : le coefficient de ${carre}) sous la forme `),
+    latex(`(${carre}+\\tfrac{b}{2})^2-(\\tfrac{b}{2})^2`),
+    texte(", puis passe la constante dans l'autre membre et mets en évidence le coefficient de l'autre variable."),
   ];
+  if (exercice.a !== 1) {
+    fragments.push(texte(` Attention : la parenthèse est multipliée par ${exercice.a} — multiplie aussi `), latex("(\\tfrac{b}{2})^2"), texte(" par ce coefficient."));
+  }
+  return fragments;
 }
 
 /** Forme de référence — TOUJOURS coefficient-free (a=1 implicite), conformément au prompt ; la
@@ -204,7 +223,28 @@ export function formatDirectriceLatex(exercice: ExerciceEquationParaboleDevelopp
   return `${variable} = ${exercice.directrice}`;
 }
 
-export const PLACEHOLDER_COORDONNEE = "ex : 3";
-export const PLACEHOLDER_P = "ex : -8";
-export const PLACEHOLDER_DIRECTRICE_VERTICAL = "ex : y=-6";
-export const PLACEHOLDER_DIRECTRICE_HORIZONTAL = "ex : x=-5";
+/** Écrans 1-2 — équation juste (équivalente à celle de départ) mais forme demandée pas encore
+ * atteinte : jamais un simple « Incorrect », qui ferait croire à une erreur de calcul (ex. l'étape
+ * intermédiaire du cours `(y-3)^2-9 = 4x-5`). */
+export function messageFormeNonAtteinte(tentativesUtilisees: number, tentativesMax: number): string {
+  return `Ton équation est juste, mais elle n'a pas encore la forme demandée — tentative ${tentativesUtilisees}/${tentativesMax}, poursuis la transformation.`;
+}
+
+/** Placeholders HORS de l'espace des tirages (`generateurs/equationParaboleDeveloppee`) — jamais
+ * une réponse possible : S et F dans [−7 ; 7], p toujours pair, directrice dans [−7 ; 7], coefficient
+ * intérieur du regroupement toujours pair, 2p toujours multiple de 4. */
+export const PLACEHOLDER_COORDONNEE = "ex : 8";
+export const PLACEHOLDER_P = "ex : 5";
+
+export function placeholderDirectrice(exercice: ExerciceEquationParaboleDeveloppee): string {
+  return `ex : ${variableAutre(exercice)}=-9`;
+}
+
+export function placeholderRegroupement(exercice: ExerciceEquationParaboleDeveloppee): string {
+  const carre = variableCarree(exercice);
+  return `ex : 2(${carre}^2-3${carre})=32${variableAutre(exercice)}+62`;
+}
+
+export function placeholderCompletion(exercice: ExerciceEquationParaboleDeveloppee): string {
+  return `ex : (${variableCarree(exercice)}-1)^2=6(${variableAutre(exercice)}+2)`;
+}

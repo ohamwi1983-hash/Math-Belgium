@@ -1,7 +1,10 @@
 /**
  * Géométrie présentationnelle pure de l'écran "construction" — "Construction graphique de la
- * parabole" (position 53). Dérive uniquement les points à couvrir par la viewBox/la grille tournée
- * (`ui/grilleTourneeGraph.ts`) depuis l'état LIVE des 2 poignées (rayon, ligne) — jamais recalculé
+ * parabole" (position 53). Cadre FIXE par exercice (audit chapitre 7) : il ne dépend que de
+ * l'exercice, jamais de la position LIVE des 2 poignées — l'ancien cadrage, recalculé à chaque
+ * mouvement depuis r et la droite, faisait bouger la figure pendant le glisser et s'emballait
+ * (un seul geste a produit r = 541). Les 2 poignées sont plafonnées (`rMaximal`,
+ * `bornesLigneConstruction`) à ce que ce cadre montre, jamais au-delà — jamais recalculé
  * différemment côté vérification (`moteur/verificationConstructionParabole.ts`).
  */
 import type { ExerciceConstructionParabole } from "../core/constructionParabole.types";
@@ -11,28 +14,36 @@ import type { Point } from "../core/vecteur.types";
  * visuel, pour ne jamais superposer le bras du compas et la droite construite à l'écran. */
 export const DECALAGE_POIGNEE_LIGNE = 3;
 
-/** Plancher d'étendue toujours couvert (même avant toute manipulation, et des deux côtés de la
- * directrice — y compris le côté "piège", pour que le geste invalide reste visible dans le cadre
- * dès le départ plutôt que de forcer l'élève à dézoomer pour le découvrir). */
-function plancherEtendue(exercice: ExerciceConstructionParabole): number {
-  return exercice.foyer.y * 3;
+/** Plus grand rayon accessible au compas — `foyer.y + 3` laisse toujours au moins 4 rayons valides
+ * (strictement supérieurs à `foyer.y/2`) pour les 3 itérations, dont le rayon de repli
+ * (`rCanoniqueDisponible`, au plus `foyer.y/2 + 3`), tout en gardant une figure lisible. */
+export function rMaximal(exercice: ExerciceConstructionParabole): number {
+  return exercice.foyer.y + 3;
 }
 
-/** Points à couvrir par la viewBox/la grille — foyer, directrice, poignée rayon (et son plancher),
- * poignée ligne (et son plancher des deux côtés), plus les points d'intersection déjà confirmés aux
- * itérations précédentes (`pointsConfirmes`, vide par défaut — `promptgen53corrections.md`, A.2) :
- * la viewBox doit rester assez large pour les garder tous visibles au fil des itérations. */
-export function pointsAffichesConstruction(exercice: ExerciceConstructionParabole, r: number, ligneY: number, pointsConfirmes: Point[] = []): Point[] {
+/** Plage (ordonnée LOCALE) de la poignée "ligne" — symétrique de part et d'autre de la directrice :
+ * le piège « mauvais côté » (droite à −r) reste constructible pour tout r accessible. */
+export function bornesLigneConstruction(exercice: ExerciceConstructionParabole): [number, number] {
+  const r = rMaximal(exercice);
+  return [-r, r];
+}
+
+/** Points à couvrir par la viewBox/la grille — l'enveloppe de tout ce que les poignées plafonnées
+ * peuvent atteindre : cercle de rayon maximal autour de F, poignée "ligne" à ses 2 bornes, et donc
+ * tous les points d'intersection possibles (toujours à l'intérieur du cercle de rayon maximal). */
+export function pointsCadreConstruction(exercice: ExerciceConstructionParabole): Point[] {
   const { foyer } = exercice;
+  const r = rMaximal(exercice);
   const refX = foyer.x + DECALAGE_POIGNEE_LIGNE;
-  const plancher = plancherEtendue(exercice);
+  const [ligneMin, ligneMax] = bornesLigneConstruction(exercice);
   return [
     foyer,
     { x: foyer.x, y: 0 },
-    { x: foyer.x, y: foyer.y + Math.max(r, plancher) },
-    { x: refX, y: ligneY },
-    { x: refX, y: -plancher },
-    { x: refX, y: plancher },
-    ...pointsConfirmes,
+    { x: foyer.x - r, y: foyer.y },
+    { x: foyer.x + r, y: foyer.y },
+    { x: foyer.x, y: foyer.y + r },
+    { x: foyer.x, y: foyer.y - r },
+    { x: refX, y: ligneMin },
+    { x: refX, y: ligneMax },
   ];
 }

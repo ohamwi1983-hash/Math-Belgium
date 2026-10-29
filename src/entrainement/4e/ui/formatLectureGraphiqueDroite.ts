@@ -24,8 +24,8 @@ export function consigneGeneraleLecture(exercice: ExerciceLectureGraphiqueDroite
 /** Aide niveau 1 — rappel de méthode, jamais une valeur réelle de l'exercice. */
 export function texteAideNiveau1(exercice: ExerciceLectureGraphiqueDroite): string {
   return exercice.variante === "cartesienne"
-    ? "Choisis deux points à coordonnées entières que la droite traverse sur le graphe, puis calcule un vecteur directeur (différence des coordonnées) avant d'écrire l'équation, sous la forme de ton choix (implicite, ou explicite en x ou en y)."
-    : "Repère un point à coordonnées entières sur la droite : ce sera ton point de référence (x₀ ; y₀). Puis, à partir d'un second point, calcule les composantes (a ; b) du vecteur directeur.";
+    ? "Prends deux des points marqués sur la droite et lis leurs coordonnées sur le quadrillage, puis calcule un vecteur directeur (différence des coordonnées) avant d'écrire l'équation, sous la forme de ton choix (implicite, ou explicite en x ou en y)."
+    : "Prends l'un des points marqués sur la droite : ce sera ton point de référence (x₀ ; y₀). Puis, à partir d'un second point marqué, calcule les composantes (a ; b) du vecteur directeur.";
 }
 
 export const LIBELLE_VARIANTE: Record<VarianteLectureGraphiqueDroite, string> = {

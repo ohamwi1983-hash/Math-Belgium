@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_RAYON } from "../moteur/sessionEquationCercle";
 import { diagnostiquerRayon } from "../moteur/verificationEquationCercle";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_GENERALE_EQUATION_CERCLE, CONSIGNE_RAYON, PLACEHOLDER_RAYON, formatAideRayonNiveau2Latex, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
+import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { CONSIGNE_GENERALE_EQUATION_CERCLE, consigneRayon, formatAideRayonNiveau2Latex, placeholderRayon, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { Katex } from "./Katex";
@@ -18,7 +18,7 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (reponse: number) => void;
+  onValider: (reponse: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -37,12 +37,8 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
 
   const complet = rayon.trim() !== "";
 
-  function construireReponse(): number {
-    return Number(rayon.replace(",", "."));
-  }
-
   const apresEchec = tentativesUtilisees > 0;
-  const statut = apresEchec ? diagnostiquerRayon(exercice, construireReponse()) : undefined;
+  const statut = apresEchec ? diagnostiquerRayon(exercice, rayon) : undefined;
   const erronee = apresEchec && statut !== "correct";
 
   const latexAide2 = formatAideRayonNiveau2Latex(exercice);
@@ -53,7 +49,7 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
         blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon={niveauAide >= 2} />}
       />
-      <p className="prompt-text">{CONSIGNE_RAYON}</p>
+      <p className="prompt-text">{consigneRayon(exercice)}</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="equation-cercle-rayon">
@@ -62,10 +58,10 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
         <input
           id="equation-cercle-rayon"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder={PLACEHOLDER_RAYON}
+          placeholder={placeholderRayon(exercice)}
           value={rayon}
-          onChange={(e) => setRayon(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setRayon(filtrerSaisieNumeriqueRacine(e.target.value))}
+          onKeyDown={gererKeyDownNumeriqueRacine}
         />
       </div>
 
@@ -88,7 +84,7 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_RAYON} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(rayon)}>
           Valider
         </button>
         {tentativesUtilisees > 0 && (

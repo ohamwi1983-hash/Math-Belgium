@@ -1,27 +1,29 @@
 /**
  * Couche présentation — "Lieux géométriques : intersection", REFONTE COMPLÈTE
  * (`promptgen54refontecomplete.md`) sur 3 écrans (identification / équations / résolution).
- * Réutilise `formatPointLatex`/`formatSommeTermesGeneree`/`formatEquationExpliciteYLatex`/
- * `FragmentConsigne` (`ui/formatEquationDroite.ts`, module frère déjà partagé
- * par le groupe "droites") — jamais dupliqués, même `texte`/`latex` locaux que le reste du chapitre
- * 6 (convention établie, ex. `formatEquationCercleDeveloppee.ts`).
+ * Réutilise `formatPointLatex`/`formatEquationExpliciteYLatex`/`FragmentConsigne`
+ * (`ui/formatEquationDroite.ts`, module frère déjà partagé par le groupe "droites") — jamais
+ * dupliqués, même `texte`/`latex` locaux que le reste du chapitre (convention établie, ex.
+ * `formatEquationCercleDeveloppee.ts`).
  *
  * ## ⚠️ Convention d'énoncé propre à ce générateur — divergence ASSUMÉE, ne jamais "corriger"
  *
- * Contrairement à la convention standard du chapitre 6, AUCUNE équation cartésienne de droite
+ * Contrairement à la convention standard du chapitre, AUCUNE équation cartésienne de droite
  * n'est jamais affichée en toutes lettres dans l'énoncé, et les mots "centre"/"foyer" ne sont
  * jamais utilisés pour désigner les points caractéristiques du cercle/de la parabole — l'objet même
  * de l'écran 1 est que l'élève déduise LUI-MÊME le type de chaque lieu à partir de sa définition
  * verbale, jamais une donnée déjà nommée. Une fois le type validé (écran 1 confirmé), les écrans 2
  * et 3 peuvent en revanche employer le vocabulaire technique usuel (pente, ordonnée à l'origine,
- * centre, rayon, foyer, paramètre p) dans leurs blocs "état actuel" — l'énoncé verbal d'origine,
- * lui, reste affiché tel quel sur les 3 écrans (cohérence énoncé/état actuel, convention
- * transversale du projet).
+ * centre, rayon, foyer, paramètre p) dans le récapitulatif "Ce qu'on sait déjà" — l'énoncé verbal
+ * d'origine, lui, reste affiché tel quel sur les 3 écrans.
+ *
+ * Les 2 lieux d'un exercice sont toujours de TYPES DIFFÉRENTS (paire cercle-cercle retirée, voir
+ * `core/lieuxGeometriques.types.ts`) : chaque lieu est donc nommé par son type (« la droite », « le
+ * cercle »), jamais par un rang « premier »/« second ».
  */
 import type { Lieu, LieuCercle, LieuDroite, LieuParabole, NombrePointsIntersection, PaireLieux, TypeLieu } from "../core/lieuxGeometriques.types";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
-import { axeRadicalDeuxCercles } from "../generateurs/lieuxGeometriques/geometrieConique";
-import { formatEquationExpliciteYLatex, formatPointLatex, formatSommeTermesGeneree } from "./formatEquationDroite";
+import { formatEquationExpliciteYLatex, formatPointLatex } from "./formatEquationDroite";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
 
@@ -43,32 +45,63 @@ export const LIBELLE_TYPE_LIEU: Record<TypeLieu, string> = {
 
 export const LIBELLE_PAIRE: Record<PaireLieux, string> = {
   cercleDroite: "Cercle-droite",
-  cercleCercle: "Cercle-cercle",
   droiteParabole: "Droite-parabole",
 };
 
 /** Sous-titre affiché AU-DESSUS des champs numériques une fois le type sélectionné à l'écran
- * "identification" (`promptgen53gen54corrections.md`, B.2).
- *
- * Le champ `droite` seul annonce une tolérance : `m`/`p` sont vérifiés par `statutNumerique`
- * (`verificationDroite.ts`, `TOLERANCE=0.01`) et `m` peut être une vraie fraction non entière —
- * jamais annoncé jusqu'ici (audit de traçabilité de précision). `cercle`/`parabole` restent sans
- * note : leurs champs sont toujours des entiers exacts par construction. */
+ * "identification" (`promptgen53gen54corrections.md`, B.2). Le champ `droite` seul annonce les
+ * formes acceptées : `m`/`p` peuvent être de vraies fractions (ex. 3/4), tapables telles quelles
+ * (audit chapitre 7, point 60), ou un arrondi au centième (`statutNumerique`, `TOLERANCE=0.01`).
+ * `cercle`/`parabole` restent sans note : leurs champs sont toujours des entiers exacts. */
 export const SOUS_TITRE_CHAMPS_IDENTIFICATION: Record<TypeLieu, string> = {
-  droite: "Pente et ordonnée à l'origine (arrondi au centième accepté si besoin) :",
+  droite: "Pente et ordonnée à l'origine (fraction comme 3/4 ou arrondi au centième) :",
   cercle: "Centre et rayon :",
   parabole: "Foyer et paramètre p :",
 };
 
 // ============================================================================
-// Fraction irréductible pour toute valeur GÉNÉRÉE non entière — mêmes wrappers locaux dupliqués
-// qu'ailleurs sur la plateforme (`formatEquationDroite.ts`, `formatEquationCercleDeveloppee.ts`,
-// trop petits pour l'extraction, convention déjà établie).
+// Placeholders — toujours HORS de l'espace des tirages (audit chapitre 7, point 10 : un exemple
+// qui vaut la réponse la donne). Bornes de génération : `generateurs/lieuxGeometriques/index.ts`
+// (|m| ≤ 4, |p| ≤ 12, centre et foyer dans [−3 ; 3], R de 2 à 5, p de la parabole ±2 ou ±4, points
+// d'intersection dans [−10 ; 10]).
 // ============================================================================
 
+export const PLACEHOLDER_PENTE = "ex : 9/2";
+export const PLACEHOLDER_ORDONNEE_ORIGINE = "ex : 27/2";
+export const PLACEHOLDER_COORDONNEE_CENTRE_FOYER = "ex : 7";
+export const PLACEHOLDER_RAYON = "ex : 8";
+export const PLACEHOLDER_PARAMETRE_PARABOLE = "ex : 6";
+export const PLACEHOLDER_COORDONNEE_INTERSECTION = "ex : 15";
+
+/** Exemple d'équation adapté au TYPE du lieu (audit chapitre 7, point 60 : l'ancien exemple était
+ * toujours celui d'un cercle, même pour la droite et la parabole). */
+export function placeholderEquation(lieu: Lieu): string {
+  switch (lieu.type) {
+    case "droite":
+      return "ex : y=5x+13";
+    case "cercle":
+      return "ex : (x-6)^2+(y+7)^2=81";
+    case "parabole":
+      return lieu.orientation === "vertical" ? "ex : (x-6)^2+(y+5)^2=(y-9)^2" : "ex : (x-6)^2+(y+5)^2=(x-9)^2";
+  }
+}
+
+// ============================================================================
+// Fraction irréductible EXACTE pour toute valeur générée non entière — dénominateur jusqu'à 10 000
+// (audit chapitre 7, point 56 : le plafond par défaut de `formatFractionIrreductible`, 100, laissait
+// passer des flottants bruts comme `1.173611111111116` pour 169/144).
+// ============================================================================
+
+const DENOMINATEUR_MAX_EXACT = 10000;
+
+/** Le bruit flottant des calculs (ex. `2.7777777777777777` pour 25/9) reste très en deçà de la
+ * tolérance de `formatFractionIrreductible` (1e-9 sur `valeur·q`) : aucun arrondi préalable. */
+function fractionTexte(abs: number): string {
+  return formatFractionIrreductible(abs, DENOMINATEUR_MAX_EXACT);
+}
+
 function formatMagnitudeFractionLatex(abs: number): string {
-  const texteFraction = formatFractionIrreductible(abs);
-  const [numerateur, denominateur] = texteFraction.split("/");
+  const [numerateur, denominateur] = fractionTexte(abs).split("/");
   return denominateur === undefined ? numerateur! : `\\frac{${numerateur}}{${denominateur}}`;
 }
 
@@ -76,23 +109,41 @@ function formatValeurFractionLatex(valeur: number): string {
   return valeur < 0 ? `-${formatMagnitudeFractionLatex(-valeur)}` : formatMagnitudeFractionLatex(valeur);
 }
 
-/** `(variable-valeur)^2` — signe simplifié, jamais de double signe. Réutilisé pour le cercle (x_o,
- * y_o), la parabole (x_F, y_F, directrice) — même patron que `formatBinome` ailleurs sur la
- * plateforme (`formatEquationCercleDeveloppee.ts`), dupliqué localement (trop petit pour extraire). */
+/** `(variable-valeur)^2` — signe simplifié, jamais de double signe. */
 function formatBinomeCarreLatex(variable: "x" | "y", valeur: number): string {
   if (valeur === 0) return `${variable}^2`;
   const signe = valeur > 0 ? "-" : "+";
   return `(${variable}${signe}${formatMagnitudeFractionLatex(Math.abs(valeur))})^2`;
 }
 
+/** Somme de termes `valeur·suffixe` — coefficient 1 omis, signes simplifiés, fractions exactes. */
+function formatSommeTermesLatex(termes: { valeur: number; suffixe: string }[]): string {
+  const nonNuls = termes.filter((t) => Math.abs(t.valeur) > 1e-12);
+  if (nonNuls.length === 0) return "0";
+  return nonNuls
+    .map((terme, index) => {
+      const abs = Math.abs(terme.valeur);
+      const corps = terme.suffixe !== "" && Math.abs(abs - 1) < 1e-12 ? terme.suffixe : `${formatMagnitudeFractionLatex(abs)}${terme.suffixe}`;
+      if (index === 0) return terme.valeur < 0 ? `-${corps}` : corps;
+      return `${terme.valeur < 0 ? "-" : "+"} ${corps}`;
+    })
+    .join(" ");
+}
+
 // ============================================================================
 // Définition VERBALE de chaque lieu — jamais d'équation de droite, jamais "centre"/"foyer".
 // ============================================================================
 
-/** Fraction-aware : accepte n'importe quel `m` rationnel (jamais seulement les petits entiers),
- * jamais le mot "pente" ni la lettre `m`. */
+/** Fraction-aware : accepte n'importe quel `m` rationnel, jamais le mot "pente" ni la lettre `m`.
+ * `m = 1` et `m = −1` ont leur propre tournure (« égale à leur abscisse », « égale à l'opposé de
+ * leur abscisse ») — jamais « −1 fois leur abscisse » (audit chapitre 7, point 7). */
 function segmentsDefinitionDroite(droite: LieuDroite): FragmentConsigne[] {
-  const segments: FragmentConsigne[] = [texte("les points dont l'ordonnée est égale à "), latex(formatValeurFractionLatex(droite.m)), texte(" fois leur abscisse")];
+  const segments: FragmentConsigne[] =
+    droite.m === 1
+      ? [texte("les points dont l'ordonnée est égale à leur abscisse")]
+      : droite.m === -1
+        ? [texte("les points dont l'ordonnée est égale à l'opposé de leur abscisse")]
+        : [texte("les points dont l'ordonnée est égale à "), latex(formatValeurFractionLatex(droite.m)), texte(" fois leur abscisse")];
   if (droite.p > 0) segments.push(texte(", augmentée de "), latex(formatMagnitudeFractionLatex(droite.p)));
   else if (droite.p < 0) segments.push(texte(", diminuée de "), latex(formatMagnitudeFractionLatex(-droite.p)));
   return segments;
@@ -122,11 +173,9 @@ function segmentsDefinitionLieu(lieu: Lieu): FragmentConsigne[] {
   }
 }
 
-/** Énoncé — toujours visible, identique sur les 3 écrans (cohérence énoncé/état actuel). Aucune
- * numérotation de rang ("premier"/"second") — les 2 lieux sont introduits sur un pied d'égalité,
- * cohérent avec la vérification par ENSEMBLE de l'écran "identification" (B.4, ci-dessous), qui
- * n'impose elle non plus aucune correspondance position-par-position entre bloc de saisie et lieu
- * de l'énoncé (`promptgen53gen54corrections.md`, B.1). */
+/** Énoncé — toujours visible, identique sur les 3 écrans. Aucune numérotation de rang
+ * ("premier"/"second") — les 2 lieux sont introduits sur un pied d'égalité, cohérent avec la
+ * vérification par ENSEMBLE de l'écran "identification". */
 export function segmentsEnonce(exercice: ExerciceLieuxGeometriques): FragmentConsigne[] {
   return [
     texte("Quel est le lieu des points qui sont à la fois "),
@@ -138,10 +187,8 @@ export function segmentsEnonce(exercice: ExerciceLieuxGeometriques): FragmentCon
 }
 
 // ============================================================================
-// Description TECHNIQUE d'un lieu (une fois son type validé) — réutilisée à la fois par l'aide
-// niveau 2 de l'écran "identification" (exemple partiel sur UN SEUL des 2 lieux) et par le bloc
-// "état actuel" de l'écran "équations" (les 2 lieux). Formats donnés par
-// `promptgen54refontecomplete.md`.
+// Description TECHNIQUE d'un lieu (une fois son type validé) — aide niveau 2 de l'écran
+// "identification" (UN SEUL des 2 lieux), réponse attendue et correction exportée.
 // ============================================================================
 
 export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
@@ -157,6 +204,19 @@ export function segmentsDescriptionLieu(lieu: Lieu): FragmentConsigne[] {
         texte(" et de paramètre "),
         latex(`p=${formatValeurFractionLatex(lieu.p)}`),
       ];
+  }
+}
+
+/** Caractéristiques d'un lieu en une seule chaîne LaTeX (`\displaystyle` : fractions lisibles) —
+ * récapitulatif "Ce qu'on sait déjà" (`recapitulatifLieuxGeometriques.ts`). */
+export function formatCaracteristiquesLieuLatex(lieu: Lieu): string {
+  switch (lieu.type) {
+    case "droite":
+      return `\\displaystyle m = ${formatValeurFractionLatex(lieu.m)},\\; p = ${formatValeurFractionLatex(lieu.p)}`;
+    case "cercle":
+      return `\\displaystyle \\text{centre } ${formatPointLatex(lieu.centre)},\\; R = ${lieu.rayon}`;
+    case "parabole":
+      return `\\displaystyle \\text{foyer } ${formatPointLatex(lieu.foyer)},\\; p = ${formatValeurFractionLatex(lieu.p)}\\; (\\text{${lieu.orientation === "vertical" ? "axe vertical" : "axe horizontal"}})`;
   }
 }
 
@@ -180,10 +240,33 @@ export function segmentsAideIdentificationNiveau1(): FragmentConsigne[] {
   ];
 }
 
-/** Exemple partiel — révèle la description technique d'UN SEUL des 2 lieux (le premier), jamais du
- * second, pour laisser quelque chose à trouver à l'élève. */
+/** Exemple partiel — révèle la description technique d'UN SEUL des 2 lieux (le premier cité dans
+ * l'énoncé), jamais du second, pour laisser quelque chose à trouver à l'élève. */
 export function segmentsAideIdentificationNiveau2(exercice: ExerciceLieuxGeometriques): FragmentConsigne[] {
-  return [texte("Par exemple, pour le premier lieu : "), ...segmentsDescriptionLieu(exercice.lieu1)];
+  return [texte("Par exemple, pour le premier lieu cité dans l'énoncé : "), ...segmentsDescriptionLieu(exercice.lieu1)];
+}
+
+/** Réponse d'identification SAISIE par l'élève, mise en forme pour la fiche de consultation. */
+export function formatReponseIdentificationLatex(
+  reponse: { type: "droite"; m: number; p: number } | { type: "cercle"; x0: number; y0: number; rayon: number } | { type: "parabole"; xF: number; yF: number; p: number },
+): string {
+  switch (reponse.type) {
+    case "droite":
+      return `\\text{Droite : } m = ${formatValeurSaisieLatex(reponse.m)},\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
+    case "cercle":
+      return `\\text{Cercle : centre } (${formatValeurSaisieLatex(reponse.x0)} ; ${formatValeurSaisieLatex(reponse.y0)}),\\; R = ${formatValeurSaisieLatex(reponse.rayon)}`;
+    case "parabole":
+      return `\\text{Parabole : foyer } (${formatValeurSaisieLatex(reponse.xF)} ; ${formatValeurSaisieLatex(reponse.yF)}),\\; p = ${formatValeurSaisieLatex(reponse.p)}`;
+  }
+}
+
+/** Valeur saisie — décimal à virgule tant qu'il est court (« 0,75 »), fraction exacte pour une
+ * fraction tapée dont le développement décimal ne se termine pas (« 1/3 », jamais « 0,333… »). */
+function formatValeurSaisieLatex(valeur: number): string {
+  if (!Number.isFinite(valeur)) return "?";
+  const decimal = String(valeur);
+  if (decimal.length <= 8) return decimal.replace(".", "{,}");
+  return formatValeurFractionLatex(valeur);
 }
 
 // ============================================================================
@@ -198,10 +281,8 @@ const LIBELLE_TYPE_LIEU_PARTITIF: Record<TypeLieu, string> = {
   parabole: "de la parabole",
 };
 
-/** Label du champ de texte libre d'un bloc de l'écran "équations" — repris du TYPE réel du lieu,
- * jamais "premier"/"second" (`promptgen53gen54corrections.md`, B.5 : l'écran est désormais
- * restructuré en 2 blocs DISTINCTS, chacun avec ses propres caractéristiques suivies immédiatement
- * de son propre champ, plutôt qu'un unique bloc "état actuel" combiné). */
+/** Label du champ de texte libre d'un bloc de l'écran "équations" — repris du TYPE réel du lieu
+ * (les 2 lieux sont toujours de types différents), jamais "premier"/"second". */
 export function libelleChampEquation(lieu: Lieu): string {
   return `Équation ${LIBELLE_TYPE_LIEU_PARTITIF[lieu.type]} :`;
 }
@@ -211,7 +292,7 @@ export function libelleChampEquation(lieu: Lieu): string {
  * jamais été calculé par l'élève à l'écran 1 (seuls foyer et p le sont). */
 export function latexGabaritGenerique(type: TypeLieu, orientation?: "vertical" | "horizontal"): string {
   if (type === "droite") return "y = mx + p";
-  if (type === "cercle") return "(x-x_o)^2+(y-y_o)^2=R^2";
+  if (type === "cercle") return "(x-x_0)^2+(y-y_0)^2=R^2";
   return orientation === "horizontal" ? "(x-x_F)^2+(y-y_F)^2=(x-x_{\\text{directrice}})^2" : "(x-x_F)^2+(y-y_F)^2=(y-y_{\\text{directrice}})^2";
 }
 
@@ -230,6 +311,24 @@ export function formatEquationLieuLatex(lieu: Lieu): string {
   }
 }
 
+/** Le lieu de type `type` de l'exercice — chaque type apparaît au plus une fois. */
+function trouverLieu<T extends Lieu["type"]>(exercice: ExerciceLieuxGeometriques, type: T): Extract<Lieu, { type: T }> {
+  const lieu = exercice.lieu1.type === type ? exercice.lieu1 : exercice.lieu2;
+  return lieu as Extract<Lieu, { type: T }>;
+}
+
+/** L'autre lieu que la droite (cercle ou parabole). */
+function lieuCourbe(exercice: ExerciceLieuxGeometriques): LieuCercle | LieuParabole {
+  return (exercice.lieu1.type === "droite" ? exercice.lieu2 : exercice.lieu1) as LieuCercle | LieuParabole;
+}
+
+/** Réponse attendue de l'écran "équations" — une ligne par lieu, nommée par son type. */
+export function formatEquationsAttenduesLatex(exercice: ExerciceLieuxGeometriques): string {
+  const courbe = lieuCourbe(exercice);
+  const droite = trouverLieu(exercice, "droite");
+  return `\\begin{aligned} &\\text{${LIBELLE_TYPE_LIEU[courbe.type]} : } ${formatEquationLieuLatex(courbe)} \\\\ &\\text{Droite : } ${formatEquationLieuLatex(droite)} \\end{aligned}`;
+}
+
 // ============================================================================
 // Écran 3 — Résolution (catégorie "Aucun"/"Au moins un" + points add-as-needed).
 // ============================================================================
@@ -239,50 +338,32 @@ export const CONSIGNE_GENERALE_RESOLUTION = "Résous ce système, combien y a-t-
 export const LIBELLE_AUCUN = "Aucun";
 export const LIBELLE_AU_MOINS_UN = "Au moins un";
 
-/** Bloc "état actuel" — système à accolade des 2 équations RÉELLES (jamais celles saisies par
- * l'élève, mêmes valeurs déjà validées à l'écran précédent). */
+/** Système à accolade des 2 équations RÉELLES (jamais celles saisies par l'élève, mêmes valeurs
+ * déjà validées à l'écran précédent) — courbe d'abord, droite ensuite. */
 export function formatEtatActuelSystemeLatex(exercice: ExerciceLieuxGeometriques): string {
-  return `\\begin{cases} ${formatEquationLieuLatex(exercice.lieu1)} \\\\ ${formatEquationLieuLatex(exercice.lieu2)} \\end{cases}`;
+  return `\\displaystyle \\begin{cases} ${formatEquationLieuLatex(lieuCourbe(exercice))} \\\\ ${formatEquationLieuLatex(trouverLieu(exercice, "droite"))} \\end{cases}`;
 }
 
-/** Méthode DIFFÉRENCIÉE selon la grande variante — piège explicite pour cercle-cercle (substituer
- * directement dans l'une des 2 équations de cercle au lieu de passer par l'axe radical). */
+/** Méthode selon la grande variante — toujours la substitution de la droite, méthode du cours
+ * (« résous le système par substitution »). */
 export function segmentsAideResolutionNiveau1(exercice: ExerciceLieuxGeometriques): FragmentConsigne[] {
   switch (exercice.paire) {
     case "cercleDroite":
       return [texte("Substitue l'équation de la droite dans celle du cercle pour obtenir une équation du second degré, puis résous-la.")];
     case "droiteParabole":
       return [texte("Substitue l'équation de la droite dans celle de la parabole pour obtenir une équation du second degré, puis résous-la.")];
-    case "cercleCercle":
-      return [
-        texte("Soustrais les deux équations de cercle pour obtenir l'équation de l'"),
-        latex("\\text{axe radical}"),
-        texte(
-          " (une droite) — attention, substituer directement l'une des deux équations de cercle dans l'autre ne fonctionne pas ici. Substitue ensuite CET axe radical dans l'une des deux équations de cercle, puis résous.",
-        ),
-      ];
   }
 }
 
 // ============================================================================
 // Substitution RÉELLEMENT effectuée pour l'aide niveau 2 de l'écran "résolution"
-// (`promptgen53gen54corrections.md`, B.6) — l'ancien affichage réutilisait `exercice.quadratique`
-// (précalculé à la génération via une paramétrisation point+direction en `t`, héritée de l'ancien
-// contenu du 53e exercice, voir `generateurs/lieuxGeometriques/geometrieConique.ts`) en l'étiquetant
-// "t", alors que la méthode DÉCRITE à l'élève (aide niveau 1, ci-dessus : "substitue l'équation de
-// la droite dans celle du cercle/de la parabole") ne fait jamais intervenir de paramètre `t` — les
-// équations montrées à l'écran 2 sont toutes cartésiennes (x,y), jamais paramétriques. Ces
-// primitives recalculent donc, PUREMENT POUR L'AFFICHAGE (jamais consommées par
-// `diagnostiquerResolution`/`exercice.quadratique`, qui restent tous deux inchangés — aucune
-// modification de la génération ni de la vérification), les VRAIS coefficients A/B/C dans la
-// variable RÉELLEMENT éliminée par cette méthode de substitution cartésienne.
+// (`promptgen53gen54corrections.md`, B.6) — recalcule, PUREMENT POUR L'AFFICHAGE (jamais consommé
+// par `diagnostiquerResolution`/`exercice.quadratique`), les VRAIS coefficients A/B/C dans la
+// variable RÉELLEMENT éliminée par la substitution cartésienne décrite à l'aide niveau 1.
 //
-// Calcul par ÉCHANTILLONNAGE EXACT plutôt que dérivation algébrique manuelle (source d'erreur) :
-// substituer une expression AFFINE (la droite, ou l'axe radical, toujours de degré 1) dans une
-// cible quadratique produit TOUJOURS un polynôme de degré ≤2 dans le paramètre restant — 3 points
-// d'échantillonnage (différences finies à v=0,1,2) suffisent donc à reconstruire A/B/C exactement,
-// même principe de fiabilité que `diagnostiquerEquivalenceQuadratiqueXY` (échantillonnage plutôt que
-// développement symbolique à la main).
+// Calcul par ÉCHANTILLONNAGE EXACT plutôt que dérivation algébrique manuelle : substituer une
+// expression AFFINE (la droite) dans une cible quadratique produit TOUJOURS un polynôme de degré ≤2
+// dans le paramètre restant — 3 points d'échantillonnage (différences finies à v=0,1,2) suffisent.
 // ============================================================================
 
 function cibleCercleLieu(cercle: LieuCercle): (x: number, y: number) => number {
@@ -317,13 +398,8 @@ function coefficientsParEchantillonnage(cible: (x: number, y: number) => number,
   return { A, B, C };
 }
 
-function trouverLieu<T extends Lieu["type"]>(exercice: ExerciceLieuxGeometriques, type: T): Extract<Lieu, { type: T }> {
-  const lieu = exercice.lieu1.type === type ? exercice.lieu1 : exercice.lieu2;
-  return lieu as Extract<Lieu, { type: T }>;
-}
-
-/** Cercle-droite : la droite est TOUJOURS résolue en `y=mx+p` (`LieuDroite`, jamais une forme
- * `x=...`), donc la substituer dans l'équation du cercle élimine TOUJOURS `y` — variable "x". */
+/** Cercle-droite : la droite est TOUJOURS résolue en `y=mx+p`, donc la substituer dans l'équation
+ * du cercle élimine TOUJOURS `y` — variable "x". */
 function substitutionCercleDroite(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
   const droite = trouverLieu(exercice, "droite");
   const cercle = trouverLieu(exercice, "cercle");
@@ -335,9 +411,9 @@ function substitutionCercleDroite(exercice: ExerciceLieuxGeometriques): Substitu
   return { variable: "x", A, B, C };
 }
 
-/** Droite-parabole : la substitution NATURELLE dépend de l'orientation de la parabole — verticale
- * (naturellement résolue en y) : on élimine y via la droite, variable "x" ; horizontale
- * (naturellement résolue en x) : on élimine x via la droite (résolue en x=(y-p)/m), variable "y". */
+/** Droite-parabole : la substitution NATURELLE dépend de l'orientation de la parabole — verticale :
+ * on élimine y via la droite, variable "x" ; horizontale : on élimine x via la droite (résolue en
+ * x=(y-p)/m), variable "y". */
 function substitutionDroiteParabole(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
   const droite = trouverLieu(exercice, "droite");
   const parabole = trouverLieu(exercice, "parabole");
@@ -357,52 +433,55 @@ function substitutionDroiteParabole(exercice: ExerciceLieuxGeometriques): Substi
   return { variable: "y", A, B, C };
 }
 
-/** Cercle-cercle : substitue l'AXE RADICAL (soustraction des deux équations de cercle, réutilisée
- * telle quelle depuis `generateurs/lieuxGeometriques/geometrieConique.ts` — jamais redéveloppée)
- * dans l'un des deux cercles. L'axe radical est générique (`ax+by+c=0`) : `b≠0` (cas courant) élimine
- * `y`, variable "x" ; `b=0` (axe radical vertical, les 2 centres partagent la même ordonnée) élimine
- * directement `x` (constant), variable "y". */
-function substitutionCercleCercle(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
-  const cercle1 = exercice.lieu1 as LieuCercle;
-  const cercle2 = exercice.lieu2 as LieuCercle;
-  const axe = axeRadicalDeuxCercles(cercle1, cercle2);
-  if (axe.b !== 0) {
-    const { A, B, C } = coefficientsParEchantillonnage(
-      cibleCercleLieu(cercle1),
-      (v) => v,
-      (v) => -(axe.a * v + axe.c) / axe.b,
-    );
-    return { variable: "x", A, B, C };
-  }
-  const { A, B, C } = coefficientsParEchantillonnage(
-    cibleCercleLieu(cercle1),
-    () => -axe.c / axe.a,
-    (v) => v,
-  );
-  return { variable: "y", A, B, C };
-}
-
-/** Dispatch par grande variante — voir chaque fonction pour la justification de la variable choisie. */
 export function substitutionResolution(exercice: ExerciceLieuxGeometriques): SubstitutionQuadratique {
   switch (exercice.paire) {
     case "cercleDroite":
       return substitutionCercleDroite(exercice);
     case "droiteParabole":
       return substitutionDroiteParabole(exercice);
-    case "cercleCercle":
-      return substitutionCercleCercle(exercice);
   }
 }
 
-/** L'équation du second degré RÉELLEMENT obtenue par la méthode décrite — jamais résolue, jamais la
- * lettre `t` (voir l'en-tête de section). */
-export function formatQuadratiqueSubstitutionLatex(exercice: ExerciceLieuxGeometriques): string {
-  const { variable, A, B, C } = substitutionResolution(exercice);
-  return `${formatSommeTermesGeneree([
+function pgcd(a: number, b: number): number {
+  return b === 0 ? a : pgcd(b, a % b);
+}
+
+/** Numérateur/dénominateur exacts d'un coefficient (valeur rationnelle, dénominateur ≤ 10 000). */
+function numerateurDenominateur(valeur: number): { numerateur: number; denominateur: number } {
+  const [numerateur, denominateur] = fractionTexte(Math.abs(valeur)).split("/");
+  const signe = valeur < 0 ? -1 : 1;
+  return { numerateur: signe * Number(numerateur), denominateur: denominateur === undefined ? 1 : Number(denominateur) };
+}
+
+/** Coefficients ENTIERS premiers entre eux, de même signe que `A` positif — l'équation multipliée
+ * par le dénominateur commun (ex. `25x² − 30x + 9 = 0` plutôt que `25/16·x² − …`). */
+function coefficientsEntiers({ A, B, C }: { A: number; B: number; C: number }): { a: number; b: number; c: number; multiplicateur: number } {
+  const fractions = [A, B, C].map(numerateurDenominateur);
+  const ppcm = fractions.reduce((acc, f) => (acc * f.denominateur) / pgcd(acc, f.denominateur), 1);
+  const entiers = fractions.map((f) => (f.numerateur * ppcm) / f.denominateur);
+  const diviseur = entiers.reduce((acc, n) => pgcd(acc, Math.abs(n)), 0) || 1;
+  const signe = entiers[0]! < 0 ? -1 : 1;
+  const [a, b, c] = entiers.map((n) => (signe * n) / diviseur) as [number, number, number];
+  return { a, b, c, multiplicateur: (signe * ppcm) / diviseur };
+}
+
+function formatQuadratiqueLatex(variable: "x" | "y", A: number, B: number, C: number): string {
+  return `${formatSommeTermesLatex([
     { valeur: A, suffixe: `${variable}^2` },
     { valeur: B, suffixe: variable },
     { valeur: C, suffixe: "" },
   ])} = 0`;
+}
+
+/** L'équation du second degré RÉELLEMENT obtenue par la méthode décrite — fractions EXACTES (jamais
+ * de flottant brut, audit chapitre 7, point 56), suivie de sa forme à coefficients entiers quand
+ * elle diffère (multiplication par le dénominateur commun). Jamais résolue. */
+export function formatQuadratiqueSubstitutionLatex(exercice: ExerciceLieuxGeometriques): string {
+  const { variable, A, B, C } = substitutionResolution(exercice);
+  const exacte = formatQuadratiqueLatex(variable, A, B, C);
+  const entiers = coefficientsEntiers({ A, B, C });
+  if (entiers.multiplicateur === 1) return `\\displaystyle ${exacte}`;
+  return `\\displaystyle ${exacte} \\iff ${formatQuadratiqueLatex(variable, entiers.a, entiers.b, entiers.c)}`;
 }
 
 // ============================================================================

@@ -1,9 +1,10 @@
+import { useMemo } from "react";
 import { Circle, Line, Mafs, MovablePoint, Point as MafsPoint, Transform } from "mafs";
 import "mafs/core.css";
 import type { ExerciceConstructionParabole } from "../core/constructionParabole.types";
 import type { Point } from "../core/vecteur.types";
 import { rCanonique } from "../moteur/verificationConstructionParabole";
-import { DECALAGE_POIGNEE_LIGNE, pointsAffichesConstruction } from "../ui/constructionParaboleGraph";
+import { DECALAGE_POIGNEE_LIGNE, bornesLigneConstruction, pointsCadreConstruction, rMaximal } from "../ui/constructionParaboleGraph";
 import { calculerViewBoxGrilleTournee, demiPorteeGrilleTournee } from "../ui/grilleTourneeGraph";
 import {
   EPAISSEUR_TRAIT_DISCRETE,
@@ -31,6 +32,8 @@ interface Props {
    * à la droite de l'itération courante — voir A.1/A.2, `promptgen53corrections.md`). Vide par
    * défaut (première itération). */
   pointsConfirmes?: Point[];
+  /** Écran clos : les 2 poignées deviennent de simples points fixes (plus aucun glisser). */
+  verrouille?: boolean;
 }
 
 const COULEUR_DIRECTRICE = "#495057";
@@ -45,12 +48,18 @@ const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
 
-function snapEntierPositif(ancre: { x: number; y: number }) {
-  return ([, y]: [number, number]): [number, number] => [ancre.x, ancre.y + Math.max(0, Math.round(y - ancre.y))];
+function borner(valeur: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, valeur));
 }
 
-function snapEntier(x: number) {
-  return ([, y]: [number, number]): [number, number] => [x, Math.round(y)];
+/** Poignée-rayon : crantée sur les entiers, jamais en dessous de F, jamais au-delà de `rMax`. */
+function snapRayon(ancre: { x: number; y: number }, rMax: number) {
+  return ([, y]: [number, number]): [number, number] => [ancre.x, ancre.y + borner(Math.round(y - ancre.y), 0, rMax)];
+}
+
+/** Poignée-ligne : crantée sur les entiers, bornée à `[min, max]` (`bornesLigneConstruction`). */
+function snapLigne(x: number, [min, max]: [number, number]) {
+  return ([, y]: [number, number]): [number, number] => [x, borner(Math.round(y), min, max)];
 }
 
 /**
@@ -80,15 +89,20 @@ export function ConstructionParaboleGraph({
   rErronee = false,
   ligneErronee = false,
   pointsConfirmes = [],
+  verrouille = false,
 }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
   const hauteur = largeur / RATIO_GRAPHE;
   const { foyer, theta } = exercice;
   const refX = foyer.x + DECALAGE_POIGNEE_LIGNE;
-  const pointsAffiches = pointsAffichesConstruction(exercice, r, ligneY, pointsConfirmes);
-  const viewBox = calculerViewBoxGrilleTournee(pointsAffiches, theta);
-  const demiPortee = demiPorteeGrilleTournee(pointsAffiches);
+  // Cadre FIXE par exercice — jamais recalculé pendant le glisser (voir `ui/constructionParaboleGraph.ts`).
+  const { viewBox, demiPortee } = useMemo(() => {
+    const cadre = pointsCadreConstruction(exercice);
+    return { viewBox: calculerViewBoxGrilleTournee(cadre, exercice.theta), demiPortee: demiPorteeGrilleTournee(cadre) };
+  }, [exercice]);
+  const rMax = rMaximal(exercice);
+  const bornesLigne = bornesLigneConstruction(exercice);
   const couleurCompas = rErronee ? COULEUR_ERRONEE : COULEUR_COMPAS;
   const couleurEquerre = ligneErronee ? COULEUR_ERRONEE : COULEUR_EQUERRE;
 
@@ -106,13 +120,27 @@ export function ConstructionParaboleGraph({
           {pointsConfirmes.map((p, index) => (
             <MafsPoint key={index} x={p.x} y={p.y} color={COULEUR_POINT_CONFIRME} />
           ))}
-          <MovablePoint
-            point={[foyer.x, foyer.y + r]}
-            onMove={([, y]) => onChangeR(Math.max(0, Math.round(y - foyer.y)))}
-            constrain={snapEntierPositif(foyer)}
-            color={couleurCompas}
-          />
-          <MovablePoint point={[refX, ligneY]} onMove={([, y]) => onChangeLigneY(Math.round(y))} constrain={snapEntier(refX)} color={couleurEquerre} />
+          {verrouille ? (
+            <>
+              <MafsPoint x={foyer.x} y={foyer.y + r} color={couleurCompas} />
+              <MafsPoint x={refX} y={ligneY} color={couleurEquerre} />
+            </>
+          ) : (
+            <>
+              <MovablePoint
+                point={[foyer.x, foyer.y + r]}
+                onMove={([, y]) => onChangeR(borner(Math.round(y - foyer.y), 0, rMax))}
+                constrain={snapRayon(foyer, rMax)}
+                color={couleurCompas}
+              />
+              <MovablePoint
+                point={[refX, ligneY]}
+                onMove={([, y]) => onChangeLigneY(borner(Math.round(y), bornesLigne[0], bornesLigne[1]))}
+                constrain={snapLigne(refX, bornesLigne)}
+                color={couleurEquerre}
+              />
+            </>
+          )}
         </Transform>
       </Mafs>
     </div>

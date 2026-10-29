@@ -8,7 +8,8 @@ import {
   diagnostiquerParametrique,
 } from "../moteur/verificationEquationDroite";
 import type { ReponseCoefficients } from "../moteur/typesEquationDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -32,8 +33,11 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-const PLACEHOLDER_TEXTE_X = "ex : x=2+t×3";
-const PLACEHOLDER_TEXTE_Y = "ex : y=1-t×2";
+/** Exemples hors de l'espace des tirages (vecteur (7 ; −9), jamais colinéaire à un vecteur tiré
+ * — composantes ≤ 5) : un placeholder ne doit jamais pouvoir être la réponse (audit chapitre 7,
+ * point 10). */
+const PLACEHOLDER_TEXTE_X = "ex : x=1,5+t×7";
+const PLACEHOLDER_TEXTE_Y = "ex : y=-0,5-t×9";
 
 /**
  * Écran 3 (dernière phase, atteinte ssi `exercice.possible`) — le nombre et le nom des champs
@@ -57,8 +61,9 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
   const champsNumeriques = [champ1, champ2, champ3].slice(0, nombreChampsNumeriques);
   const complet = estParametrique ? texteX.trim() !== "" && texteY.trim() !== "" : champsNumeriques.every((v) => v.trim() !== "");
 
+  /** Fraction « p/q » acceptée (tout triplet proportionnel est juste, ex. a = 1, b = −1/2). */
   function nombre(texte: string): number {
-    return Number(texte.replace(",", "."));
+    return parserNombreOuFraction(texte) ?? Number.NaN;
   }
 
   function construireReponse(): ReponseCoefficients {
@@ -126,16 +131,16 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
       ) : (
         labelsNumeriques.slice(0, nombreChampsNumeriques).map((label, index) => (
           <div className="field field-inline" key={label}>
-            <label className="field-label" htmlFor={`equation-droite-coefficients-${index}`}>
+            <label className="field-label field-label-minuscule" htmlFor={`equation-droite-coefficients-${index}`}>
               {label}
             </label>
             <input
               id={`equation-droite-coefficients-${index}`}
               className={`text-input${erronee ? " is-erronee" : ""}`}
-              placeholder="ex : 2"
+              placeholder="ex : 1,5"
               value={valeursNumeriques[index]}
-              onChange={(e) => settersNumeriques[index](filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => settersNumeriques[index](filtrerSaisieNumeriqueFraction(e.target.value))}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
         ))

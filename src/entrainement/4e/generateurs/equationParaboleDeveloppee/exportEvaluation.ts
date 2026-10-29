@@ -3,13 +3,13 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   CONSIGNE_CARACTERISTIQUES,
-  CONSIGNE_COMPLETION,
   formatCompletionLatex,
   formatDirectriceLatex,
   formatEquationDeveloppeeLatex,
   formatFoyerLatex,
   formatRegroupementLatex,
   formatSommetLatex,
+  segmentsConsigneCompletion,
   segmentsConsigneRegroupement,
 } from "../../ui/formatEquationParaboleDeveloppee";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationParaboleDeveloppee } from "./index";
@@ -65,7 +65,7 @@ function construireEnonceEquationParaboleDeveloppee(instance: ExerciceEquationPa
     enteteFragments: [texte("On considère l'équation développée suivante d'une parabole :"), latex(formatEquationDeveloppeeLatex(instance))],
     questions: [
       { consigne: segmentsConsigneRegroupement(instance), reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(CONSIGNE_COMPLETION)], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: segmentsConsigneCompletion(instance), reponse: { type: "lignes", nombre: 3 } },
       { consigne: [texte(CONSIGNE_CARACTERISTIQUES)], reponse: { type: "lignes", nombre: 4 } },
     ],
   };
@@ -77,11 +77,19 @@ function construireCorrectionEquationParaboleDeveloppee(instance: ExerciceEquati
   return [
     {
       type: "paragraphe",
-      fragments: [texte("a) On met en évidence le coefficient a et sépare les 2 variables : "), latex(formatRegroupementLatex(instance)), texte(".")],
+      fragments: [
+        texte(
+          instance.a === 1
+            ? "a) On isole les termes de la variable au carré dans le premier membre : "
+            : `a) On isole les termes de la variable au carré dans le premier membre, puis on met en évidence leur coefficient ${instance.a} : `,
+        ),
+        latex(formatRegroupementLatex(instance)),
+        texte("."),
+      ],
     },
     {
       type: "paragraphe",
-      fragments: [texte("b) En complétant le carré : "), latex(formatCompletionLatex(instance)), texte(".")],
+      fragments: [texte("b) En complétant le carré : "), latex(formatCompletionLatex(instance)), texte(", donc "), latex(`2p = ${2 * instance.p}`), texte(".")],
     },
     {
       type: "paragraphe",

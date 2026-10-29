@@ -1,6 +1,6 @@
 import type { EtatSessionEquationCercle } from "../moteur/typesEquationCercle";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatEtatActuelCentreLatex } from "./formatEquationCercle";
+import { formatEtatActuelCentreLatex, formatRayonLatex } from "./formatEquationCercle";
 
 /**
  * Récapitulatif "Ce qu'on sait déjà" — 3 phases FIXES ("centre" → "rayon" → "equation", voir
@@ -21,7 +21,7 @@ export function calculerRecapitulatifEquationCercle(etat: EtatSessionEquationCer
   }
 
   if (etat.scoreRayonExercice !== null) {
-    entrees.push({ libelle: "Rayon", estLatex: true, valeur: `R = ${exercice.rayon}`, revele: etat.rayonRevele });
+    entrees.push({ libelle: "Rayon", estLatex: true, valeur: `\\displaystyle R = ${formatRayonLatex(exercice)}`, revele: etat.rayonRevele });
   }
 
   return entrees;

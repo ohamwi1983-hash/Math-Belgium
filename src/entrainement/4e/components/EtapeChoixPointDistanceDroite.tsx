@@ -20,7 +20,8 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (reponse: Point) => void;
+  /** `saisie` : les deux champs tels que tapés, pour la fiche de consultation (puces cliquables). */
+  onValider: (reponse: Point, saisie: { x: string; y: string }) => void;
   validation?: ValidationEtapeProps | null;
 }
 
@@ -57,6 +58,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
                 { droite: exercice.d1, label: "d₁", couleur: COULEUR_D },
                 { droite: exercice.d2, label: "d₂", couleur: COULEUR_D },
               ]}
+              cadrage={{ droites: [exercice.d1, exercice.d2], points: [] }}
             />
           </>
         }
@@ -103,7 +105,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
             <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT} onActiverAide={onActiverAide} />
           )}
 
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse(), { x, y })}>
             Valider
           </button>
           {tentativesUtilisees > 0 && (

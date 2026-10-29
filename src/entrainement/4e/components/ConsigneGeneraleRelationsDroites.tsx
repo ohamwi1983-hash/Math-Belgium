@@ -7,16 +7,12 @@ interface Props {
 }
 
 /**
- * Consigne générale — rappelle l'objectif complet de l'exercice (forme de sortie cible, droite $d$
- * cherchée passant par le point $A$, critère parallèle/perpendiculaire, droite $b$ de référence),
- * affichée identique sur les 3 écrans (`promptgen45modifications.md`, point 1). Même patron
- * fragment par fragment (texte brut / KaTeX inline courts, `RenduFragments`) que
- * `ConsigneGeneraleEquationDroite`.
+ * Consigne générale — rappelle l'objectif complet de l'exercice, affichée identique sur les 3
+ * écrans. Même patron fragment par fragment (texte brut / KaTeX inline courts, `RenduFragments`)
+ * que `ConsigneGeneraleEquationDroite`. Rendue SANS conteneur : `EnTeteExercice` l'enveloppe déjà
+ * dans son `<p className="prompt-text">` (un `<p>` ici donnait un `<p>` dans un `<p>`, HTML
+ * invalide et erreur console React — audit chapitre 7, point 6).
  */
 export function ConsigneGeneraleRelationsDroites({ exercice }: Props) {
-  return (
-    <p className="prompt-text">
-      <RenduFragments fragments={segmentsConsigneGeneraleRelationsDroites(exercice)} />
-    </p>
-  );
+  return <RenduFragments fragments={segmentsConsigneGeneraleRelationsDroites(exercice)} />;
 }

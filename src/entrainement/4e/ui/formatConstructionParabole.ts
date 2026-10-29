@@ -11,7 +11,7 @@ export const CONSIGNE_CONSTRUCTION =
   "Choisis un rayon au compas, puis construis la droite parallèle à la directrice, à cette même distance, du côté du foyer.";
 
 export const TEXTE_AIDE_CONSTRUCTION_NIVEAU1 =
-  "Le compas est toujours centré en F : choisis un rayon r crantable, strictement supérieur à la moitié de la distance entre F et la directrice. L'équerre construit ensuite une droite parallèle à la directrice, à cette même distance r, du côté de F.";
+  "Le compas est toujours centré en F : choisis un rayon r strictement supérieur à la moitié de la distance entre F et la directrice. L'équerre construit ensuite une droite parallèle à la directrice, à cette même distance r, du côté de F.";
 
 export const TEXTE_AIDE_CONSTRUCTION_NIVEAU2 = "Un cercle correctement construit est affiché en exemple — reste à placer la droite parallèle au bon endroit.";
 
@@ -22,8 +22,19 @@ export const TEXTE_AIDE_CONSTRUCTION_NIVEAU2 = "Un cercle correctement construit
  * `promptgen53corrections.md`, A.4 : cette réutilisation n'est pas une erreur de construction, donc
  * pas la même sévérité visuelle). */
 export function messageRayonInvalide(exercice: ExerciceConstructionParabole, r: number): string | null {
-  return r <= rMinimal(exercice) ? `Rayon trop petit : il doit être strictement supérieur à ${rMinimal(exercice)}.` : null;
+  // Jamais la valeur numérique du rayon minimal : la trouver fait partie du raisonnement demandé.
+  return r <= rMinimal(exercice) ? "Rayon trop petit : le cercle ne couperait pas la parallèle en 2 points. Il doit être strictement supérieur à la moitié de la distance entre F et la directrice." : null;
 }
+
+/** Réponse attendue (révélée) d'une itération de construction — le rayon de repli retenu par le
+ * moteur, jamais une phrase générique. */
+export function texteConstructionAttendue(r: number): string {
+  return `Par exemple r = ${r} : le cercle de centre F et de rayon ${r}, et la droite parallèle à la directrice, à la distance ${r}, du côté de F (dessinés ci-dessus). Leurs 2 points d'intersection sont sur la parabole.`;
+}
+
+/** Réponse attendue (révélée) de l'écran "trace". */
+export const TEXTE_TRACE_ATTENDU =
+  "Les 6 points dans l'ordre le long de la courbe, d'une extrémité à l'autre (les deux sens sont acceptés) — la parabole complète est tracée ci-dessus.";
 
 /** `true` ssi la valeur crantée de `r` correspond exactement à un rayon déjà confirmé à une
  * itération précédente de la même instance (`promptgen53corrections.md`, A.4/A.5) — un r réutilisé

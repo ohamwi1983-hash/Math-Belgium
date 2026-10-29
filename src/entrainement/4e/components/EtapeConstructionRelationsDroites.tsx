@@ -3,7 +3,8 @@ import type { ExerciceRelationsDroites } from "../core/relationsDroites.types";
 import { NIVEAU_AIDE_MAX_CONSTRUCTION } from "../moteur/sessionRelationsDroites";
 import { diagnostiquerConstruction } from "../moteur/verificationRelationsDroites";
 import type { ReponseVecteur } from "../moteur/verificationRelationsDroites";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, consigneConstruction, formatAideConstructionNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideConstructionNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
@@ -13,6 +14,11 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+
+/** Entier, décimal (virgule ou point) ou fraction « p/q » — NaN si illisible (`parse_error`). */
+function lire(texte: string): number {
+  return parserNombreOuFraction(texte) ?? Number.NaN;
+}
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -39,7 +45,7 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
   const complet = [x, y].every((v) => v.trim() !== "");
 
   function construireReponse(): ReponseVecteur {
-    return { x: Number(x.replace(",", ".")), y: Number(y.replace(",", ".")) };
+    return { x: lire(x), y: lire(y) };
   }
 
   const apresEchec = tentativesUtilisees > 0;
@@ -69,8 +75,8 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
         <div className="field field-inline">
@@ -82,8 +88,8 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
+            onKeyDown={gererKeyDownNumeriqueFraction}
           />
         </div>
       </div>

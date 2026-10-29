@@ -10,6 +10,7 @@
 import type { ExerciceConstructionDroite } from "../core/constructionDroite.types";
 import type { Point } from "../core/vecteur.types";
 import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex } from "./formatEquationDroite";
+import { nombreFr } from "./nombreFr";
 
 
 /** Rendu de l'équation réellement affichée à l'élève — dispatché sur `variante`, jamais recalculé
@@ -59,9 +60,9 @@ export function consignePoints(exercice: ExerciceConstructionDroite): string {
     case "implicite":
       return "Trouve deux points à coordonnées entières distincts qui vérifient cette équation.";
     case "explicite_y":
-      return "Choisis deux valeurs entières distinctes de x, calcule y à chaque fois, puis donne les deux points obtenus.";
+      return "Trouve deux points distincts de cette droite à coordonnées entières : choisis une valeur de x qui donne un y entier, calcule y, puis recommence avec une autre valeur de x.";
     case "explicite_x":
-      return "Choisis deux valeurs entières distinctes de y, calcule x à chaque fois, puis donne les deux points obtenus.";
+      return "Trouve deux points distincts de cette droite à coordonnées entières : choisis une valeur de y qui donne un x entier, calcule x, puis recommence avec une autre valeur de y.";
   }
 }
 
@@ -73,9 +74,9 @@ export function texteAidePointsNiveau1(exercice: ExerciceConstructionDroite): st
     case "implicite":
       return "Choisis une valeur entière pour x, résous l'équation pour trouver y (ou l'inverse si c'est plus simple). Recommence avec une autre valeur pour un second point.";
     case "explicite_y":
-      return "Remplace x par une valeur entière de ton choix, calcule y = mx + p pour obtenir un point de la droite. Recommence avec une autre valeur de x.";
+      return "Remplace x par une valeur entière, calcule y = mx + p. Si m ou p est une fraction, toutes les valeurs de x ne donnent pas un y entier : essaie-en plusieurs jusqu'à obtenir un y entier. Pour le second point, ajoute à x le dénominateur de m (y augmente alors du numérateur, il reste entier).";
     case "explicite_x":
-      return "Remplace y par une valeur entière de ton choix, calcule x = ny + q pour obtenir un point de la droite. Recommence avec une autre valeur de y.";
+      return "Remplace y par une valeur entière, calcule x = ny + q. Si n ou q est une fraction, toutes les valeurs de y ne donnent pas un x entier : essaie-en plusieurs jusqu'à obtenir un x entier. Pour le second point, ajoute à y le dénominateur de n (x augmente alors du numérateur, il reste entier).";
   }
 }
 
@@ -104,5 +105,14 @@ export function formatEtatActuelPointsLatex(cible1: Point, cible2: Point): strin
  * `cible1` à titre d'exemple (déjà connues de l'élève via le bloc "état actuel" ci-dessus — cette
  * aide porte sur la TECHNIQUE de placement, jamais sur une donnée cachée). */
 export function texteAideTraceNiveau1(cible1: Point): string {
-  return `Pour placer le point (${cible1.x} ; ${cible1.y}) : pars de l'origine, déplace-toi de ${cible1.x} unité(s) sur l'axe horizontal, puis de ${cible1.y} unité(s) sur l'axe vertical. Fais de même pour le second point.`;
+  const signe = (v: number) => nombreFr(v).replace("-", "−");
+  return `Pour placer le point (${signe(cible1.x)} ; ${signe(cible1.y)}) : pars de l'origine, ${deplacement(cible1.x, "vers la droite", "vers la gauche", "ne te déplace pas horizontalement")}, puis ${deplacement(cible1.y, "vers le haut", "vers le bas", "ne te déplace pas verticalement")}. Fais de même pour le second point.`;
+}
+
+/** « avance de 3 unités vers la droite » / « de 1 unité vers la gauche » — jamais « de -1 unité(s) »
+ * (audit chapitre 7, point 18). */
+function deplacement(valeur: number, sensPositif: string, sensNegatif: string, sansDeplacement: string): string {
+  if (valeur === 0) return sansDeplacement;
+  const n = Math.abs(valeur);
+  return `avance de ${nombreFr(n)} unité${n > 1 ? "s" : ""} ${valeur > 0 ? sensPositif : sensNegatif}`;
 }

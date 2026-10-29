@@ -29,16 +29,25 @@ function tirerComposanteNonNulle(): number {
   return randomInt(1, 4) * (Math.random() < 0.5 ? -1 : 1);
 }
 
-/** Vecteur directeur toujours non nul sur les deux composantes — garantit `formeExpliciteYPossible`
- * ET `formeExpliciteXPossible` simultanément, sans jamais avoir besoin de distinguer le cas par
- * `variante` (contrairement à "Équation d'une droite", qui force volontairement le cas-piège). */
-function tirerVecteur(): Composantes {
+/** Part des droites parallèles à un axe (x = k, y = k) — le cours insiste sur ces deux cas, jamais
+ * tirés auparavant (0 sur 40 000 — audit chapitre 7, point 18). */
+const PROBABILITE_PARALLELE_AXE = 0.15;
+
+/** Vecteur directeur : le plus souvent non nul sur les deux composantes, sinon parallèle à un axe —
+ * jamais une direction incompatible avec la forme affichée (jamais vertical pour `explicite_y`, qui
+ * reçoit alors une horizontale « y = p » ; jamais horizontal pour `explicite_x`, qui reçoit alors
+ * une verticale « x = q »). */
+function tirerVecteur(variante: VarianteConstructionDroite): Composantes {
+  if (Math.random() < PROBABILITE_PARALLELE_AXE) {
+    const horizontal = variante === "explicite_y" ? true : variante === "explicite_x" ? false : Math.random() < 0.5;
+    return horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 };
+  }
   return { x: tirerComposanteNonNulle(), y: tirerComposanteNonNulle() };
 }
 
 export function construireExercice(variante: VarianteConstructionDroite): ExerciceConstructionDroite {
   const point: Point = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
-  const vecteur = tirerVecteur();
+  const vecteur = tirerVecteur(variante);
   const referenceImplicite = implicteDepuisPointVecteur(point, vecteur);
 
   return {
