@@ -1,5 +1,5 @@
 import type { ResultatExerciceQuizGeometrieAnalytique } from "../moteur/typesQuizGeometrieAnalytique";
-import { LigneRecap, TotalPointsRecap, libelleStatutRecap, statutRecap } from "./LigneRecap";
+import { LigneRecap, statutRecap } from "./LigneRecap";
 
 interface Props {
   resultat: ResultatExerciceQuizGeometrieAnalytique;
@@ -32,9 +32,8 @@ export function ResultatPanelQuizGeometrieAnalytique({ resultat, labelBouton, on
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
       </p>
       <LigneRecap label="Résultat" statut={statut}>
-        {libelleStatutRecap(statut)}
+        {correct ? "Correct" : "Incorrect"}
       </LigneRecap>
-      <TotalPointsRecap points={resultat.score} maxPoints={100} />
       <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}

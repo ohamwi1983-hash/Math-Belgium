@@ -16,16 +16,6 @@ export function statutRecap(revele: boolean, niveauAide: number | null): StatutR
   return "verte";
 }
 
-/** Libellé humain par défaut d'un statut — utilisé comme contenu de `LigneRecap` sur le 4e, faute
- * d'un helper `formatXxxAttenduLatex` par écran pour les 58 générateurs (hors scope de ce chantier,
- * qui ne porte que sur le format d'affichage, pas sur l'ajout d'un rendu de réponse attendue par
- * écran — voir `promptuniformisationrecap4e.md`). */
-export function libelleStatutRecap(statut: StatutRecap): string {
-  if (statut === "rouge") return "Réponse révélée";
-  if (statut === "orange") return "Correct (aide utilisée)";
-  return "Correct";
-}
-
 interface LigneRecapProps {
   label: string;
   statut: StatutRecap;
@@ -47,15 +37,3 @@ export function LigneRecap({ label, statut, children }: LigneRecapProps) {
   );
 }
 
-/**
- * Résumé chiffré EN COMPLÉMENT de la liste colorée, jamais à sa place (`promptuniformisationrecap4e.md`,
- * point 2) — total de points pondérés déjà calculé par le moteur (jamais recalculé ici), affiché
- * sous la forme `"points/maxPoints"`.
- */
-export function TotalPointsRecap({ points, maxPoints }: { points: number; maxPoints: number }) {
-  return (
-    <p className="recap-final-total">
-      Total : {Math.round(points)}/{maxPoints}
-    </p>
-  );
-}

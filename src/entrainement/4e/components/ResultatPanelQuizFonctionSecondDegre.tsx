@@ -38,8 +38,8 @@ export function ResultatPanelQuizFonctionSecondDegre({ resultat, labelBouton, on
           <span>{libelleVraiFaux(resultat.question.reponse)}</span>
         </li>
         <li className="score-item">
-          <span>Score</span>
-          <span className={classeScore(resultat.score)}>{resultat.score}/100</span>
+          <span>Résultat</span>
+          <span className={classeScore(resultat.score)}>{correct ? "Correct" : "Incorrect"}</span>
         </li>
       </ul>
       <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
