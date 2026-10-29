@@ -100,10 +100,11 @@ function distracteursSol(piquet: Piquet, direction: Point3D, ombre: Point3D): Ca
   const permutee = intersectionAvecSol(sommet, { x: direction.y, y: direction.x, z: direction.z });
   return [
     { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(0.45, 0.6, 0.05))), erreur: "traceTropCourte" },
-    { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(1.45, 1.75, 0.05))), erreur: "traceTropLongue" },
+    { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(1.35, 1.55, 0.05))), erreur: "traceTropLongue" },
     { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(0.55, 0.7, 0.05)), erreur: "surRayonSansTrace" },
-    { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(1.3, 1.5, 0.05)), erreur: "surRayonSansTrace" },
-    { position: soustraire3D(base, trace), erreur: "sensOppose" },
+    { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(1.25, 1.4, 0.05)), erreur: "surRayonSansTrace" },
+    // Sens opposé, raccourci : l'erreur reste lisible sans doubler la taille de la scène.
+    { position: additionner3D(base, multiplierScalaire3D(trace, -randomReel(0.6, 0.8, 0.05))), erreur: "sensOppose" },
     { position: permutee, erreur: "composantesPermutees" },
   ];
 }
@@ -508,7 +509,7 @@ function construireObstacle(): ExerciceOmbreSoleilObstacle {
     const piedImpact: Point3D = { x: impact.point.x, y: impact.point.y, z: 0 };
     pool.push(
       { position: additionner3D(baton.base, multiplierScalaire3D(soustraire3D(piedImpact, baton.base), randomReel(0.35, 0.65, 0.05))), erreur: "traceTropCourte" },
-      { position: soustraire3D(baton.base, trace), erreur: "sensOppose" },
+      { position: additionner3D(baton.base, multiplierScalaire3D(trace, -randomReel(0.6, 0.8, 0.05))), erreur: "sensOppose" },
       { position: permutee, erreur: "composantesPermutees" },
       ...distracteursSol(baton, direction, ombreSansObstacle).filter((c) => c.erreur === "traceTropLongue" || c.erreur === "surRayonSansTrace"),
     );

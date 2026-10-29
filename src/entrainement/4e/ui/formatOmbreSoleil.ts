@@ -44,7 +44,7 @@ export const COULEURS_OMBRE = {
   selection: "#f08c00",
   correct: "#2f9e44",
   refuse: "#e03131",
-  aide: "#7048e8",
+  aide: "#d6336c",
 } as const;
 
 export function fusionner(...elements: ElementsCroquis[]): ElementsCroquis {
@@ -231,7 +231,7 @@ export const CONSIGNE_POINT_SIMPLE =
 
 export const AIDE_POINT_SIMPLE = [
   "Méthode : l'ombre du sommet est à l'intersection de deux droites — le rayon issu du sommet de A, parallèle au rayon de l'exemple, et la trace au sol issue du pied de A, parallèle à l'ombre de E (du pied de E à son ombre).",
-  "Le rayon issu du sommet de A est tracé en violet. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de A.",
+  "Le rayon issu du sommet de A est tracé en rose. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de A.",
 ];
 
 export const CONSIGNE_DIRECTION_OBSTACLE =
@@ -239,7 +239,7 @@ export const CONSIGNE_DIRECTION_OBSTACLE =
 
 export const AIDE_DIRECTION_OBSTACLE = [
   "Méthode : des droites parallèles restent parallèles sur le dessin. Le bon rayon a exactement la même inclinaison que le rayon pointillé de l'exemple, et part du même côté.",
-  "Le rayon de l'exemple a été recopié en violet, parallèlement, depuis le pied du bâton A : compare-lui l'inclinaison de chaque candidat.",
+  "Le rayon de l'exemple a été recopié en rose, parallèlement, depuis le pied du bâton A : compare-lui l'inclinaison de chaque candidat.",
 ];
 
 export const CONSIGNE_POINT_OBSTACLE =
@@ -247,7 +247,7 @@ export const CONSIGNE_POINT_OBSTACLE =
 
 export const AIDE_POINT_OBSTACLE = [
   "Méthode : suis la trace au sol issue du pied de A (parallèle à l'ombre de E). Pour chaque obstacle qu'elle traverse, regarde si le rayon passe au-dessus ou s'il le heurte. L'ombre s'arrête sur la PREMIÈRE surface que le rayon touche.",
-  "La trace au sol et le rayon sont tracés en violet. Le premier obstacle que le rayon heurte arrête l'ombre ; s'il passe au-dessus de tous, l'ombre atteint le sol.",
+  "La trace au sol et le rayon sont tracés en rose. Le premier obstacle que le rayon heurte arrête l'ombre ; s'il passe au-dessus de tous, l'ombre atteint le sol.",
 ];
 
 export const CONSIGNE_DIRECTION_INCONNUE =
@@ -255,14 +255,14 @@ export const CONSIGNE_DIRECTION_INCONNUE =
 
 export const AIDE_DIRECTION_INCONNUE = [
   "Méthode : la lumière va du sommet {connu} vers son ombre {connu}′. Le bon rayon est parallèle au trait pointillé qui les relie : même inclinaison sur le dessin, et même sens (vers le bas, du côté de l'ombre).",
-  "Le trait pointillé a été recopié en violet, parallèlement, depuis le pied du sommet {id} (le point du sol à sa verticale) : compare-lui l'inclinaison et le sens de chaque candidat.",
+  "Le trait pointillé a été recopié en rose, parallèlement, depuis le pied du sommet {id} (le point du sol à sa verticale) : compare-lui l'inclinaison et le sens de chaque candidat.",
 ];
 
 export const CONSIGNE_POINT_SOMMET = "Choisis le point {id}′ où tombe l'ombre du sommet {id} du campanile.";
 
 export const AIDE_POINT_SOMMET = [
   "Méthode : l'ombre de {id} est à l'intersection du rayon issu de {id} (parallèle au trait pointillé {connu} → {connu}′) et de la trace au sol issue du pied de {id} (le point du sol à sa verticale), parallèle à la trace au sol qui mène à {connu}′.",
-  "Le rayon issu de {id} est tracé en violet. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de {id}.",
+  "Le rayon issu de {id} est tracé en rose. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de {id}.",
 ];
 
 export function avecId(texte: string, id: string, connu = ""): string {
