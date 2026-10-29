@@ -9,10 +9,27 @@ import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_GEOMETRIE_ESPACE } from "./banque";
 
 export const CATALOGUE_VARIANTES: { id: VarianteQuizGeometrieEspace; label: string }[] = [
+  { id: "perspectiveCavaliere", label: "Perspective cavalière" },
+  { id: "plansEtDroites", label: "Plans et positions de deux droites" },
   { id: "positionDroitePlan", label: "Position d'une droite par rapport à un plan" },
+  { id: "parallelismePercee", label: "Plans, parallélisme et point de percée" },
   { id: "sectionPlaneSolide", label: "Section plane d'un solide" },
+  { id: "perspectiveCentrale", label: "Perspective centrale et point de fuite" },
   { id: "ombreSoleil", label: "Ombre au soleil — projection parallèle" },
 ];
+
+/** Taille réelle de la banque d'un thème — jamais une constante fixe : `AppQuizGeometrieEspace.tsx`
+ * l'utilise pour fixer `nombreExercices`, seule façon pour `creerGenerateurSansRepetition` de garder
+ * sa garantie « jamais de répétition dans une session » (`.claude/rules/quiz-generators.md`). */
+export function nombreQuestions(varianteId: VarianteQuizGeometrieEspace): number {
+  return BANQUE_QUIZ_GEOMETRIE_ESPACE[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizGeometrieEspace): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_GEOMETRIE_ESPACE[varianteId];
@@ -45,9 +62,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizGeometrieEspace`) pourrait
- * répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée, ré-mélangée
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) :
+ * sans cette précaution, le tirage indépendant habituel (`genererExerciceQuizGeometrieEspace`)
+ * pourrait répéter une question avant d'avoir couvert toutes les autres. État interne (file mélangée, ré-mélangée
  * à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette
  * fonction — voir `AppQuizGeometrieEspace.tsx`, qui en crée une par session démarrée.
  */

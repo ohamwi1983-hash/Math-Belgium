@@ -3,30 +3,42 @@ import type { VarianteQuizGeometrieEspace } from "./core/quizGeometrieEspace.typ
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizGeometrieEspace, soumettreReponseQuizGeometrieEspace } from "./moteur/sessionQuizGeometrieEspace";
 import type { EtatSessionQuizGeometrieEspace, ResultatExerciceQuizGeometrieEspace } from "./moteur/typesQuizGeometrieEspace";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizGeometrieEspace";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs/quizGeometrieEspace";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizGeometrieEspace } from "./components/EtapeQuestionQuizGeometrieEspace";
 import { ResultatPanelQuizGeometrieEspace } from "./components/ResultatPanelQuizGeometrieEspace";
 import { ResumeSessionQuizGeometrieEspace } from "./components/ResumeSessionQuizGeometrieEspace";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizGeometrieEspace/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs/quizGeometrieEspace/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizGeometrieEspace): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizGeometrieEspace): EtatSessionQuizGeometrieEspace {
-  return demarrerSessionQuizGeometrieEspace(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizGeometrieEspace(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
+}
+
+/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que
+ * `AppQuizGeometrieAnalytique.tsx`) — jamais sur l'écran normal donné aux élèves. */
+function modeDevActif(): boolean {
+  if (import.meta.env.DEV) return true;
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que les 7 quiz précédents
- * (gen59-65). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais
- * visible sur l'écran normal donné aux élèves. */
+ * (gen59-65). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement
+ * (`modeDevActif`), jamais visible sur l'écran normal donné aux élèves. */
 export function AppQuizGeometrieEspace() {
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizGeometrieEspace | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizGeometrieEspace | null>(null);
@@ -49,7 +61,7 @@ export function AppQuizGeometrieEspace() {
     const theme = varianteId as VarianteQuizGeometrieEspace;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizGeometrieEspace(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizGeometrieEspace(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -59,8 +71,8 @@ export function AppQuizGeometrieEspace() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Géométrie dans l'espace — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 6{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <p className="app-subtitle">Chapitre 8 — {CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label ?? "Géométrie dans l'espace"}</p>
+        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />}
         {enCoursDeSession && etat && (
           <div className="card-progress">
             <div className="card-progress-row">
@@ -80,7 +92,10 @@ export function AppQuizGeometrieEspace() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">3 thèmes, 35 affirmations vrai/faux chacun — révision complète du sous-chapitre.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux chacun — révision complète du chapitre.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

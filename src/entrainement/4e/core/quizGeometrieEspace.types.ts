@@ -1,16 +1,22 @@
 /**
- * Couche core — contrat pour "Géométrie dans l'espace" (quiz vrai/faux, chapitre 6 dans la
- * nomenclature du projet — `docs/liste-generateurs.md`, gen39-41, sous-groupe "Géométrie dans
- * l'espace"). Structure identique aux 7 quiz précédents (gen59-65) : mono-écran, une seule
- * tentative, thème choisi par l'élève.
+ * Couche core — contrat pour "Géométrie dans l'espace" (quiz vrai/faux, chapitre 8 de 4e). Structure
+ * identique aux 7 quiz précédents (gen59-65) : mono-écran, une seule tentative, thème choisi par
+ * l'élève.
  *
- * 3 thèmes, un par générateur (gen39 à gen41) — aucun doublon de contenu mathématique entre deux
- * générateurs distincts, donc aucune fusion de thèmes : chaque générateur teste une compétence
- * distincte (classification droite/plan, reconstruction d'un polygone de section, projection
- * parallèle). Exclut délibérément gen42-65 ("Géométrie analytique plane", autre sous-chapitre) et
- * gen55-58 (autres chapitres) — hors périmètre de "Géométrie dans l'espace".
+ * 7 thèmes qui suivent les sections du cours (`src/content/chapters/4e/geometrie-dans-espace.ts`) —
+ * audit chapitre 8, points 44 et 46 : l'ancienne banque (3 thèmes calqués sur gen39-41) décrivait
+ * surtout l'interface des générateurs et ignorait la moitié du cours (perspective cavalière, plans et
+ * droites, parallélisme, point de percée, perspective centrale). Les identifiants des 3 thèmes
+ * d'origine sont conservés.
  */
-export type VarianteQuizGeometrieEspace = "positionDroitePlan" | "sectionPlaneSolide" | "ombreSoleil";
+export type VarianteQuizGeometrieEspace =
+  | "perspectiveCavaliere"
+  | "plansEtDroites"
+  | "positionDroitePlan"
+  | "parallelismePercee"
+  | "sectionPlaneSolide"
+  | "perspectiveCentrale"
+  | "ombreSoleil";
 
 export interface QuestionVraiFaux {
   enonce: string;

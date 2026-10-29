@@ -65,8 +65,9 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Une longueur en profondeur ne se lit jamais sur le dessin',
           text:
             "À cause de la réduction de moitié, un segment porté par l'axe y paraît deux fois " +
-            'plus court qu\'il ne l\'est réellement ! Une face perpendiculaire à y se dessine ' +
-            "même comme un parallélogramme — jamais comme un rectangle. C'est pourquoi aucun " +
+            'plus court qu\'il ne l\'est réellement ! Une face qui contient la direction y (le ' +
+            'dessus, le dessous, les côtés) se dessine même comme un parallélogramme — jamais comme ' +
+            "un rectangle. Seules les faces avant et arrière gardent leur vraie forme. C'est pourquoi aucun " +
             "exercice de ce chapitre ne te demande de mesurer une longueur à la règle sur le " +
             'croquis. Tu raisonnes toujours sur les **sommets nommés** et sur leurs relations ' +
             '(appartenance, parallélisme, intersection) — jamais sur une distance lue à l\'œil.',
@@ -351,8 +352,9 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un plan est désigné par **3 sommets** du solide. Une droite est désignée par **2 ' +
-            'sommets**. Jamais par une équation. La question posée a toujours exactement une des ' +
+            'Un plan est désigné par **3 points nommés** du solide, le plus souvent des sommets. ' +
+            'Une droite est désignée par **2 points nommés** : deux sommets, ou un sommet et un point ' +
+            'nommé sur une arête (comme le milieu I d\'une arête). Jamais par une équation. La question posée a toujours exactement une des ' +
             'trois réponses suivantes — jamais une quatrième. La droite est **incluse** dans le ' +
             'plan. Ou elle est **parallèle** au plan, sans y être incluse. Ou elle est ' +
             '**sécante** au plan : elle le coupe en un point unique.',
@@ -451,9 +453,7 @@ export const geometrieDansEspace: ChapterContent = {
           text:
             'Le plan reste toujours infini, même si le dessin ne montre que la face du solide qui ' +
             'le porte ! Une droite peut donc être sécante en un point situé **en dehors** du ' +
-            'solide dessiné. Deux mots à connaître, mais jamais utilisés dans les énoncés : « ' +
-            'déterminant » et « produit scalaire » restent des outils de calcul internes — jamais ' +
-            'des mots que l\'énoncé emploie.',
+            'solide dessiné, ou à l\'intérieur d\'une arête — pas seulement en un sommet.',
         },
         {
           kind: 'entrainement',
@@ -461,8 +461,9 @@ export const geometrieDansEspace: ChapterContent = {
           generatorId: 'gen39',
           description: [
             'Classe la position d\'une droite par rapport à un plan, sur un solide en perspective ' +
-              'cavalière (parallélépipède, cube ou prisme). Justifie ensuite ton choix, avec une ' +
-              'sélection structurée adaptée au cas trouvé.',
+              'cavalière (parallélépipède, cube ou prisme). Justifie ensuite ton choix selon le cas ' +
+              'trouvé : sommets du plan, droite parallèle, ou point d\'intersection — qui peut tomber ' +
+              'sur un point nommé d\'une arête.',
           ],
           chantier: '4e',
           whereLabel: "4e → « 39. Position d'une droite par rapport à un plan »",
@@ -753,13 +754,25 @@ export const geometrieDansEspace: ChapterContent = {
           items: [
             '**Segment direct** — dès qu\'une face a ses **2** points de section déjà connus, ' +
               'relie-les. Tu obtiens un côté du polygone de section.',
-            '**Point auxiliaire** — quand plus aucune face n\'a ses 2 points connus, prolonge ' +
-              'deux droites coplanaires du solide (arêtes, diagonales, ou segments déjà tracés de ' +
-              'la section) jusqu\'à leur intersection. Ce nouveau point auxiliaire débloque une ' +
-              'face encore à moitié connue.',
+            '**Point auxiliaire** — quand plus aucune face n\'a ses 2 points connus, vise une face ' +
+              'encore à moitié connue (un seul point de section). Choisis **deux droites situées ' +
+              'dans une même face** : l\'une dans le **plan de coupe** (le plus souvent un côté de ' +
+              'section déjà tracé), l\'autre dans le **plan de la face visée** (une arête de cette ' +
+              'face, par exemple). Prolonge-les jusqu\'à leur intersection I. I appartient à la fois ' +
+              'au plan de coupe et au plan de la face visée : la droite qui relie I au point déjà ' +
+              'connu de cette face porte son côté de section, et coupe son arête au point manquant.',
             'Répète ces deux étapes jusqu\'à ce que **tous les côtés attendus** du polygone soient ' +
               'tracés : c\'est la fermeture complète.',
           ],
+        },
+        {
+          kind: 'attention',
+          label: 'Un point auxiliaire doit être un point NOUVEAU',
+          text:
+            'Croiser un côté déjà tracé avec une arête qui passe par l\'une de ses extrémités ne ' +
+            'construit rien : les deux droites se coupent en un point déjà connu ! Le point ' +
+            'auxiliaire n\'est utile que s\'il est distinct de tous les points déjà trouvés — le ' +
+            'plus souvent, il tombe en dehors du solide, sur le prolongement des droites.',
         },
         {
           kind: 'piege',
@@ -770,23 +783,38 @@ export const geometrieDansEspace: ChapterContent = {
             'toujours les deux points de la même face, avant de pouvoir les relier.',
         },
         {
+          kind: 'rappel',
+          label: 'Une autre construction classique, par parallèles',
+          items: [
+            'Sur un **parallélépipède**, il existe une deuxième technique. Elle s\'appuie sur le ' +
+              'parallélisme des faces opposées : un plan coupe deux plans parallèles suivant deux ' +
+              'droites parallèles. Par le point déjà connu sur une face, mène la parallèle au côté ' +
+              'de section déjà tracé sur la face opposée. Elle coupe l\'arête cherchée exactement où ' +
+              'il faut. Cette technique exploite spécifiquement les faces parallèles d\'un ' +
+              'parallélépipède — le point auxiliaire par intersection, lui, fonctionne aussi sur un ' +
+              'tétraèdre.',
+          ],
+        },
+        {
           kind: 'exemple',
           badge: '4 faces traversées',
           formula:
-            'P et Q (face avant) sont déjà connus au départ, ainsi que R (face droite). La face ' +
-            'arrière n\'a qu\'un seul point connu (R), et la face gauche aussi (P).',
+            'Le plan de coupe traverse les 4 arêtes verticales d\'un parallélépipède. P (arête avant ' +
+            'gauche), Q (arête avant droite) et R (arête arrière droite) sont connus au départ.',
           steps: [
             { tag: '1 — segment direct', text: 'la face avant a ses 2 points connus (P et Q) → on trace [PQ].' },
+            { tag: '2 — segment direct', text: 'la face droite a ses 2 points connus (Q et R) → on trace [QR].' },
             {
-              tag: '2 — plus de segment direct disponible',
-              text: 'aucune autre face n\'a encore 2 points connus (la face droite n\'a que R, l\'arrière n\'a que R, la gauche n\'a que P).',
+              tag: '3 — plus de segment direct disponible',
+              text: 'la face arrière n\'a qu\'un point connu (R), la face gauche aussi (P).',
             },
             {
-              tag: '3 — point auxiliaire',
+              tag: '4 — point manquant de la face arrière',
               text:
-                'on prolonge deux droites du solide jusqu\'à leur intersection. Le point obtenu, ' +
-                'une fois relié à R, tombe exactement sur le point de section manquant de la face ' +
-                'arrière : c\'est le nouveau point S.',
+                'croiser [QR] avec l\'arête arrière droite ne donnerait que R, déjà connu : aucun ' +
+                'point nouveau. Mais les faces avant et arrière sont parallèles, donc le plan de coupe ' +
+                'les traverse suivant deux droites parallèles. Par R, on mène dans la face arrière la ' +
+                'parallèle à (PQ) : elle coupe l\'arête arrière gauche au point S.',
             },
           ],
           result: {
@@ -795,20 +823,6 @@ export const geometrieDansEspace: ChapterContent = {
               'les 4 côtés [PQ], [QR], [RS] et [SP] ferment le polygone de section. Chaque face ' +
               'traversée y a bien apporté exactement 2 sommets.',
           },
-        },
-        {
-          kind: 'rappel',
-          label: 'Une autre construction classique, par parallèles',
-          items: [
-            'Sur un **parallélépipède**, il existe une deuxième technique pour construire le même ' +
-              'point auxiliaire. Elle s\'appuie sur le parallélisme des faces opposées. Par le ' +
-              'point déjà connu sur la face opposée, mène la parallèle au premier côté déjà tracé ' +
-              'de la section. Elle coupe l\'arête cherchée exactement où il faut. Les deux ' +
-              'méthodes (point auxiliaire par intersection, ou construction par parallèle) mènent ' +
-              'toujours au même point. Seule la seconde exploite spécifiquement les faces ' +
-              'parallèles d\'un parallélépipède — la première, elle, fonctionne aussi sur un ' +
-              'tétraèdre.',
-          ],
         },
         {
           kind: 'application',
@@ -854,7 +868,8 @@ export const geometrieDansEspace: ChapterContent = {
           description: [
             'Reconstruis progressivement le polygone de section d\'un solide en perspective ' +
               'cavalière, un point ou un segment à la fois. Segment direct dès que 2 points d\'une ' +
-              'face sont connus, sinon construction d\'un point auxiliaire.',
+              'face sont connus, sinon construction d\'un point auxiliaire. Le dernier côté se ' +
+              'referme tout seul.',
           ],
           chantier: '4e',
           whereLabel: "4e → « 40. Section plane d'un solide »",
@@ -1087,10 +1102,23 @@ export const geometrieDansEspace: ChapterContent = {
             'Identifie la direction du soleil, à partir de l\'exemple déjà résolu (le point et ' +
               'son ombre déjà connue).',
             'Pour chaque point à projeter, trace la droite parallèle à cette direction.',
-            'Trouve où cette droite rencontre le sol — ou un solide-obstacle placé avant le sol.',
+            'Trouve où cette droite rencontre le sol — ou le **premier** solide-obstacle placé ' +
+              'avant le sol, sur lequel le rayon s\'arrête.',
             'Relie les points-ombres trouvés entre eux, pour reconstituer l\'ombre complète de ' +
               'l\'objet.',
           ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Sur le dessin : passer par la trace au sol',
+          text:
+            'Sur un dessin en perspective, le point où une droite oblique « rencontre le sol » ne se ' +
+            'lit pas tout seul : le sol est lui aussi dessiné en perspective. Pour un bâton vertical, ' +
+            'trace d\'abord **au sol**, depuis son pied, la parallèle à l\'ombre du piquet-exemple ' +
+            '(la droite qui relie le pied de l\'exemple à son ombre). Mène ensuite, depuis le sommet ' +
+            'du bâton, la parallèle à la direction du soleil. Ces deux droites sont coplanaires — ' +
+            'elles sont dans le plan vertical qui contient le bâton et la direction du soleil : leur ' +
+            'intersection est l\'ombre du sommet.',
         },
         { kind: 'subheading', text: 'Le piège central — confondre la verticale et la vraie direction oblique' },
         {
@@ -1191,8 +1219,9 @@ export const geometrieDansEspace: ChapterContent = {
           items: [
             '**Un seul piquet, sol plat** — un seul point à projeter, sélection directe.',
             '**Avec obstacles** — la direction n\'est confirmée qu\'une seule fois pour toute la ' +
-              'scène. L\'ombre peut ensuite « casser » sur un à trois solides-obstacles, avant ' +
-              'd\'atteindre le sol.',
+              'scène. On projette le sommet du bâton : le rayon s\'arrête au **premier** ' +
+              'solide-obstacle qu\'il rencontre, et l\'ombre se forme sur lui. Si aucun obstacle ' +
+              'n\'est sur son trajet, l\'ombre atteint le sol, comme sans obstacle.',
             '**Direction inconnue** — il faut d\'abord déduire la direction elle-même, à partir ' +
               'd\'un sommet réel du solide et de son ombre déjà connue. Ensuite seulement, tu ' +
               'projettes les autres sommets.',
@@ -1249,8 +1278,8 @@ export const geometrieDansEspace: ChapterContent = {
           generatorId: 'gen41',
           description: [
             'Retrouve la direction de la lumière à partir d\'un exemple déjà résolu. Projette ' +
-              'ensuite un ou plusieurs points pour reconstituer une ombre — au sol, ou en la ' +
-              'faisant casser sur des solides-obstacles.',
+              'ensuite un ou plusieurs points pour reconstituer une ombre — au sol, ou sur le ' +
+              'premier solide-obstacle que le rayon rencontre.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 41. Ombre au soleil »',
@@ -1262,18 +1291,18 @@ export const geometrieDansEspace: ChapterContent = {
       id: 'revision',
       number: 13,
       title: 'Révision — quiz vrai/faux',
-      kicker: '60 affirmations en 3 thèmes',
+      kicker: '245 affirmations en 7 thèmes',
       blocks: [
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'y9OlAV4pqK4' },
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre les trois générateurs de ce chapitre — un thème par ' +
-            'générateur, sans les mélanger. Contrairement au chapitre sur les droites et cercles ' +
-            'du plan, aucune affirmation ne porte sur une coordonnée numérique précise. Les trois ' +
-            'générateurs d\'origine ne montrent d\'ailleurs jamais de coordonnées 3D à l\'élève. ' +
-            'Les affirmations testent donc les définitions et le raisonnement géométrique — ' +
-            'jamais un calcul chiffré.',
+            'Un quiz vrai/faux qui couvre tout le chapitre, en 7 thèmes qui suivent l\'ordre des ' +
+            'sections : perspective cavalière, plans et positions de deux droites, position d\'une ' +
+            'droite par rapport à un plan, plans/parallélisme/point de percée, section plane, ' +
+            'perspective centrale, ombre au soleil. Contrairement au chapitre sur les droites et ' +
+            'cercles du plan, aucune affirmation ne porte sur une coordonnée numérique : elles ' +
+            'testent les définitions et le raisonnement géométrique — jamais un calcul chiffré.',
         },
       ],
     },
@@ -1313,6 +1342,30 @@ export const geometrieDansEspace: ChapterContent = {
         formulas: [
           { text: 'Chaque face traversée → exactement **2** sommets de la section' },
           { text: 'Résultat : toujours un seul polygone fermé' },
+          {
+            text: 'Point auxiliaire : intersection d\'une droite du plan de coupe et d\'une droite du plan de la face visée',
+            condition: 'les deux droites dans une même face, et un point NOUVEAU',
+          },
+          { text: 'Parallélépipède : deux faces opposées → deux côtés de section parallèles' },
+        ],
+      },
+      {
+        title: 'Perspective centrale',
+        formulas: [
+          { text: 'Ligne d\'horizon : à la hauteur de l\'œil (ou de l\'objectif)' },
+          { text: 'Parallèles d\'un même plan horizontal → un même point de fuite, sur la ligne d\'horizon' },
+          { text: 'Ne conserve pas le parallélisme des arêtes (contrairement à la cavalière)' },
+        ],
+      },
+      {
+        title: 'Ombre au soleil',
+        formulas: [
+          { text: 'Rayons parallèles : une seule direction pour toute la scène, lue sur un exemple déjà résolu' },
+          {
+            text: 'Ombre d\'un point : parallèle à la direction du soleil, jusqu\'au sol ou au premier obstacle',
+            condition: 'oblique, jamais verticale — et dans le bon sens',
+          },
+          { text: 'Bâton vertical : trace au sol depuis le pied, parallèle à l\'ombre de l\'exemple' },
         ],
       },
     ],
@@ -1377,7 +1430,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: "Géométrie dans l'espace — quiz vrai/faux",
       generatorId: 'gen66',
       description: [
-        '60 affirmations pré-écrites, réparties en 3 thèmes (20 par thème), qui reprennent tout ' +
+        '245 affirmations pré-écrites, réparties en 7 thèmes (35 par thème), qui reprennent tout ' +
           'ce chapitre. Un seul essai par question ; la justification est toujours révélée.',
       ],
       chantier: '4e',
