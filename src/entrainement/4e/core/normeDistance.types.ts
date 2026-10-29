@@ -9,12 +9,13 @@
  * **Hors périmètre, confirmé par la spec** : la normalisation/vecteur unitaire n'est jamais incluse
  * dans ce générateur (hors programme de 4e).
  *
- * **Exactitude par construction, jamais de tolérance sur une racine irrationnelle** — toutes les
- * normes/distances de ce générateur sont des ENTIERS EXACTS (jamais un décimal arrondi) : les
- * variantes 1/2/4/5 reposent sur des triplets pythagoriciens (`generateurs/normeDistance/aleatoire.ts`)
- * pour garantir `√(a²+b²)` toujours entier ; la variante 6 (pythagore) travaille directement sur les
- * longueurs AU CARRÉ (jamais de racine extraite du tout), toujours entières pour n'importe quel
- * vecteur à composantes entières, sans qu'aucun triplet ne soit nécessaire.
+ * **Exactitude par construction, jamais de décimal arrondi** — chaque norme/distance est stockée
+ * AU CARRÉ (`normeCarree`, `distanceCarree`, `carreAB`..., toujours entiers pour des composantes
+ * entières) et affichée en `m√k` irréductible (`ui/formatNormeDistance.ts::formatLongueurIrreductibleLatex`) :
+ * entière quand le carré est parfait (triplets pythagoriciens, `generateurs/normeDistance/aleatoire.ts`),
+ * radicale sinon (corrections chapitre 6, point 16). La valeur réelle (`norme`, `distance`,
+ * `longueurAB`...) n'est que `√carré`, comparée à la saisie avec une tolérance quasi nulle — une
+ * approximation décimale d'une racine n'est jamais acceptée.
  */
 import type { Composantes, Point } from "./vecteur.types";
 
@@ -25,6 +26,7 @@ export interface ExerciceNormeVecteur {
   variante: "vecteur";
   v: Composantes;
   vNom: string;
+  normeCarree: number;
   norme: number;
 }
 
@@ -36,6 +38,7 @@ export interface ExerciceDistance {
   pointB: Point;
   labelB: string;
   vecteurAB: Composantes;
+  distanceCarree: number;
   distance: number;
 }
 
@@ -52,9 +55,9 @@ export interface ExerciceDistance {
 export type ClassificationTriangleIsocele = "isoceleA" | "isoceleB" | "isoceleC" | "scalene";
 
 /** Variante 4 — triangle isocèle/scalène (3 écrans : construction des 3 côtés, calcul des 3
- * longueurs, conclusion). Construit par la méthode "deux triangles rectangles recollés le long
- * d'une jambe commune" (voir `generateurs/normeDistance/index.ts`) — garantit les 3 longueurs
- * TOUJOURS entières exactes, sans jamais nécessiter de boucle de secours. */
+ * longueurs, conclusion). Isocèle : deux vecteurs de même norme issus du sommet principal, base
+ * d'orientation quelconque (voir `generateurs/normeDistance/index.ts`) ; longueurs entières ou
+ * radicales, classification dérivée des carrés (comparaison exacte entre entiers). */
 export interface ExerciceIsocele {
   variante: "isocele";
   pointA: Point;
@@ -66,14 +69,17 @@ export interface ExerciceIsocele {
   vecteurAB: Composantes;
   vecteurAC: Composantes;
   vecteurBC: Composantes;
+  carreAB: number;
+  carreAC: number;
+  carreBC: number;
   longueurAB: number;
   longueurAC: number;
   longueurBC: number;
   classification: ClassificationTriangleIsocele;
 }
 
-/** 0, 1 (racine double) ou 2 solutions réelles à `(x-p)²+q² = cible²` — "0 solution" génère
- * délibérément aussi, cas pédagogiquement valable (spec, variante 5). */
+/** 0, 1 (racine double) ou 2 solutions réelles à `(x-p)²+(x-r)² = cibleCarree` — "0 solution"
+ * génère délibérément aussi, cas pédagogiquement valable (spec, variante 5). */
 export type TypeSolutionNormeDistance = "deux" | "une" | "zero";
 
 /** Variante 5 — déterminer x pour une norme cible (2 écrans : réduction à `ax²+bx+c=0`, résolution
@@ -81,9 +87,13 @@ export type TypeSolutionNormeDistance = "deux" | "une" | "zero";
  * structurellement quadratique, jusqu'à 2 solutions réelles. */
 export interface ExerciceParametreNorme {
   variante: "parametre";
+  /** `v⃗ = (x-p ; x-r)` — x dans LES DEUX composantes (corrections chapitre 6, point 21) : le
+   * nombre de solutions dépend de `(p-r)²` comparé à `2·cibleCarree`, jamais lisible d'un coup
+   * d'œil (l'ancienne forme `(x-p ; q)` se devinait en comparant `|q|` à la cible). */
   p: number;
-  q: number;
-  cible: number;
+  r: number;
+  /** Carré de la norme cible (affichée `m√k` irréductible, entière si carré parfait). */
+  cibleCarree: number;
   a: number;
   b: number;
   c: number;

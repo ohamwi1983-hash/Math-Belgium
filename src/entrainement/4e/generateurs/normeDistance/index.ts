@@ -22,15 +22,46 @@ import type {
 } from "../../core/normeDistance.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
 import { additionner, determinant, multiplier, normeCarree, produitPourOrthogonalite, soustraire } from "../vecteur/arithmetique";
-import { TRIPLETS_PYTHAGORICIENS, randomInt, vecteurNormeExacte } from "./aleatoire";
+import { randomInt, vecteurNormeExacte } from "./aleatoire";
+
+// ============================================================================
+// Tirages partagés — normes entières OU radicales (corrections chapitre 6, point 16)
+// ============================================================================
+
+const BORNE_COMPOSANTE = 6;
+
+function estCarreParfait(n: number): boolean {
+  const racine = Math.round(Math.sqrt(n));
+  return racine * racine === n;
+}
+
+/** Vecteur à norme radicale (`√N`, `N` non carré parfait), composantes non nulles dans
+ * `[-6;6]` — rejet tant que la norme tombe entière (rare). */
+function vecteurNormeRadicale(): Composantes {
+  for (;;) {
+    const v = { x: randomInt(-BORNE_COMPOSANTE, BORNE_COMPOSANTE), y: randomInt(-BORNE_COMPOSANTE, BORNE_COMPOSANTE) };
+    if (v.x !== 0 && v.y !== 0 && !estCarreParfait(normeCarree(v))) return v;
+  }
+}
+
+/** Une fois sur deux une norme entière (triplet pythagoricien), une fois sur deux une norme
+ * radicale — jamais "toujours entière" (l'élève doit savoir écrire `√29`, `2√5`...). */
+function vecteurNormeEntiereOuRadicale(): Composantes {
+  if (Math.random() < 0.5) {
+    const { x, y } = vecteurNormeExacte();
+    return { x, y };
+  }
+  return vecteurNormeRadicale();
+}
 
 // ============================================================================
 // Variante 1 — norme d'un vecteur donné
 // ============================================================================
 
 function construireVecteur(): ExerciceNormeVecteur {
-  const { x, y, norme } = vecteurNormeExacte();
-  return { variante: "vecteur", v: { x, y }, vNom: "u", norme };
+  const v = vecteurNormeEntiereOuRadicale();
+  const carre = normeCarree(v);
+  return { variante: "vecteur", v, vNom: "u", normeCarree: carre, norme: Math.sqrt(carre) };
 }
 
 // ============================================================================
@@ -39,10 +70,10 @@ function construireVecteur(): ExerciceNormeVecteur {
 
 function construireDistance(): ExerciceDistance {
   const pointA = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
-  const { x, y, norme } = vecteurNormeExacte();
-  const vecteurAB = { x, y };
+  const vecteurAB = vecteurNormeEntiereOuRadicale();
   const pointB = additionner(pointA, vecteurAB);
-  return { variante: "distance", pointA, labelA: "A", pointB, labelB: "B", vecteurAB, distance: norme };
+  const carre = normeCarree(vecteurAB);
+  return { variante: "distance", pointA, labelA: "A", pointB, labelB: "B", vecteurAB, distanceCarree: carre, distance: Math.sqrt(carre) };
 }
 
 // ============================================================================
@@ -50,30 +81,20 @@ function construireDistance(): ExerciceDistance {
 // ============================================================================
 
 /**
- * Méthode "deux triangles rectangles recollés le long d'une jambe commune" — la méthode classique
- * de génération de triangles à côtés ENTIERS exacts (dits "triangles héroniens"), utilisée ici
- * plutôt qu'un tirage-puis-vérification (qui échouerait presque toujours, un triangle formé de 3
- * vecteurs Pythagore-exacts choisis indépendamment n'a quasiment jamais un 3e côté lui-même exact).
+ * Isocèle : deux vecteurs `w1`, `w2` de MÊME norme issus du sommet principal `S` (`B = S+w1`,
+ * `C = S+w2`), `w2` tiré parmi TOUS les vecteurs de `[-6;6]²` de même norme que `w1` et non
+ * colinéaires à lui — symétriques/rotations de `w1` (`(-b;a)`, `(b;a)`, `(a;-b)`...) mais aussi,
+ * quand la norme s'y prête, une autre décomposition (`(3;4)`/`(5;0)`). La base `w2-w1` a donc une
+ * orientation quelconque (corrections chapitre 6, point 16 — l'ancienne construction donnait
+ * toujours une base horizontale) et les longueurs sont entières ou radicales.
  *
- * Apex au sommet, jambe commune verticale de longueur `H_COMMUN_ISOCELE` : `gauche = apex - (p1,
- * H)`, `droite = apex + (p2, -H)`. Alors :
- * - `|apex-gauche| = √(p1²+H²)` — entier exact si `(p1,H,·)` est un triplet pythagoricien.
- * - `|apex-droite| = √(p2²+H²)` — entier exact si `(p2,H,·)` est un triplet pythagoricien.
- * - `|gauche-droite| = p1+p2` — TOUJOURS entier exact, aucune condition supplémentaire.
+ * Scalène : `w1`, `w2` quelconques aux 3 longueurs au carré deux à deux distinctes.
  *
- * `p1=p2` (même candidat) ⟹ les deux jambes obliques sont égales ⟹ isocèle à l'apex. `p1≠p2` ⟹ les
- * 3 côtés sont deux à deux distincts (vérifié par énumération exhaustive des 2 candidats retenus,
- * voir `generateurs/normeDistance/index.test.ts`) ⟹ scalène. Aucune boucle de secours n'est
- * nécessaire : cette construction ne peut jamais produire de configuration dégénérée ou
- * accidentellement équilatérale (voir `core/normeDistance.types.ts::ClassificationTriangleIsocele`
- * pour la preuve que l'équilatéral est de toute façon mathématiquement impossible ici).
+ * Garde-fou commun : `|det(w1;w2)| ≥ max(‖w1‖²;‖w2‖²)/4` (angle au sommet d'au moins ~14°) —
+ * jamais un triangle quasi plat. Aucun triangle équilatéral possible (coordonnées entières, voir
+ * `core/normeDistance.types.ts::ClassificationTriangleIsocele`) : la classification, dérivée a
+ * posteriori des carrés, le signale tout de même par une erreur.
  */
-const H_COMMUN_ISOCELE = 12;
-const CANDIDATS_P_ISOCELE: readonly [number, number][] = [
-  [5, 13],
-  [9, 15],
-];
-
 function classifierTriangleIsocele(ab: number, ac: number, bc: number): ClassificationTriangleIsocele {
   const abEgAc = ab === ac;
   const abEgBc = ab === bc;
@@ -89,15 +110,53 @@ function classifierTriangleIsocele(ab: number, ac: number, bc: number): Classifi
   return "scalene";
 }
 
+function vecteurNonNul(): Composantes {
+  let v = { x: 0, y: 0 };
+  while (v.x === 0 && v.y === 0) {
+    v = { x: randomInt(-BORNE_COMPOSANTE, BORNE_COMPOSANTE), y: randomInt(-BORNE_COMPOSANTE, BORNE_COMPOSANTE) };
+  }
+  return v;
+}
+
+function assezOuvert(w1: Composantes, w2: Composantes): boolean {
+  return 4 * Math.abs(determinant(w1, w2)) >= Math.max(normeCarree(w1), normeCarree(w2));
+}
+
+function vecteursMemeNormeNonColineaires(w: Composantes): Composantes[] {
+  const cible = normeCarree(w);
+  const resultat: Composantes[] = [];
+  for (let x = -BORNE_COMPOSANTE; x <= BORNE_COMPOSANTE; x++) {
+    for (let y = -BORNE_COMPOSANTE; y <= BORNE_COMPOSANTE; y++) {
+      const candidat = { x, y };
+      if (normeCarree(candidat) === cible && assezOuvert(w, candidat)) resultat.push(candidat);
+    }
+  }
+  return resultat;
+}
+
+function tirerCotesIsocele(): [Composantes, Composantes] {
+  // (-b;a) est toujours de même norme et perpendiculaire : la liste n'est jamais vide.
+  const w1 = vecteurNonNul();
+  const candidats = vecteursMemeNormeNonColineaires(w1);
+  return [w1, candidats[randomInt(0, candidats.length - 1)]];
+}
+
+function tirerCotesScalene(): [Composantes, Composantes] {
+  for (;;) {
+    const w1 = vecteurNonNul();
+    const w2 = vecteurNonNul();
+    const carres = [normeCarree(w1), normeCarree(w2), normeCarree(soustraire(w2, w1))];
+    if (new Set(carres).size === 3 && assezOuvert(w1, w2)) return [w1, w2];
+  }
+}
+
 function construireIsocele(): ExerciceIsocele {
   const estScalene = Math.random() < 0.25;
-  const p1 = CANDIDATS_P_ISOCELE[randomInt(0, CANDIDATS_P_ISOCELE.length - 1)][0];
-  const candidatsP2 = estScalene ? CANDIDATS_P_ISOCELE.filter(([p]) => p !== p1) : CANDIDATS_P_ISOCELE.filter(([p]) => p === p1);
-  const p2 = candidatsP2[randomInt(0, candidatsP2.length - 1)][0];
+  const [w1, w2] = estScalene ? tirerCotesScalene() : tirerCotesIsocele();
 
   const apex: Point = { x: randomInt(-3, 3), y: randomInt(-3, 3) };
-  const gauche: Point = { x: apex.x - p1, y: apex.y - H_COMMUN_ISOCELE };
-  const droite: Point = { x: apex.x + p2, y: apex.y - H_COMMUN_ISOCELE };
+  const gauche: Point = additionner(apex, w1);
+  const droite: Point = additionner(apex, w2);
 
   // Assignation aléatoire des 3 sommets numériques (apex/gauche/droite) aux labels A/B/C — la
   // classification est dérivée A POSTERIORI des longueurs réellement obtenues, jamais choisie a
@@ -115,11 +174,9 @@ function construireIsocele(): ExerciceIsocele {
   const vecteurAB = soustraire(pointB, pointA);
   const vecteurAC = soustraire(pointC, pointA);
   const vecteurBC = soustraire(pointC, pointB);
-  // Math.round : la propriété carré-parfait est garantie exacte par construction, ce round élimine
-  // seulement le bruit de virgule flottante résiduel de Math.sqrt (ex. 12.999999999999998).
-  const longueurAB = Math.round(Math.sqrt(normeCarree(vecteurAB)));
-  const longueurAC = Math.round(Math.sqrt(normeCarree(vecteurAC)));
-  const longueurBC = Math.round(Math.sqrt(normeCarree(vecteurBC)));
+  const carreAB = normeCarree(vecteurAB);
+  const carreAC = normeCarree(vecteurAC);
+  const carreBC = normeCarree(vecteurBC);
 
   return {
     variante: "isocele",
@@ -132,10 +189,13 @@ function construireIsocele(): ExerciceIsocele {
     vecteurAB,
     vecteurAC,
     vecteurBC,
-    longueurAB,
-    longueurAC,
-    longueurBC,
-    classification: classifierTriangleIsocele(longueurAB, longueurAC, longueurBC),
+    carreAB,
+    carreAC,
+    carreBC,
+    longueurAB: Math.sqrt(carreAB),
+    longueurAC: Math.sqrt(carreAC),
+    longueurBC: Math.sqrt(carreBC),
+    classification: classifierTriangleIsocele(carreAB, carreAC, carreBC),
   };
 }
 
@@ -144,47 +204,60 @@ function construireIsocele(): ExerciceIsocele {
 // ============================================================================
 
 /**
- * `v=(x-p,q)`, `‖v‖=cible` ⟺ `(x-p)²+q²=cible²` ⟺ `(x-p)²=cible²-q²=D`. Cible choisie AVANT toute
- * construction de composantes (jamais un tirage puis une classification a posteriori) :
- * - `"deux"` : `D=d²` (`d` entier non nul), obtenu en tirant `(q,d,cible)` directement comme un
- *   triplet pythagoricien — garantit `D` toujours un carré parfait, donc `x=p±d` toujours entier.
- * - `"une"` : `q=cible` (`D=0` exactement) — racine double `x=p`.
- * - `"zero"` : `q>cible>0` (`D<0`) — aucune racine réelle, cas pédagogiquement valable généré au
- *   même titre que les deux autres (poids égal, 1/3 chacun).
+ * `v⃗=(x-p ; x-r)`, `‖v⃗‖²=N` ⟺ `2x²-2(p+r)x+p²+r²-N=0`, de discriminant réduit
+ * `Δ' = 2N-(p-r)²` (`Δ = 4Δ'`). x figure dans LES DEUX composantes (corrections chapitre 6,
+ * point 21) : le nombre de solutions n'est plus lisible d'un coup d'œil (l'ancienne forme
+ * `(x-p ; q)` se devinait en comparant `|q|` à la cible). Type choisi AVANT construction, poids
+ * égaux (1/3 chacun) :
+ * - `"deux"` : `Δ' = d²` (`d≥1` de même parité que `p-r`) ⟹ `x = (p+r±d)/2`, toujours entiers.
+ * - `"une"` : `p-r` pair non nul, `N = (p-r)²/2` (cible `t√2`) ⟹ racine double `x = (p+r)/2`.
+ * - `"zero"` : `1 ≤ N < (p-r)²/2` ⟹ aucune racine réelle.
+ * `N` (= `cibleCarree`) est affiché en `m√k` irréductible, entier quand c'est un carré parfait.
  */
 function construireParametreNorme(): ExerciceParametreNorme {
-  const p = randomInt(-4, 4);
   const typeSolution: TypeSolutionNormeDistance = (["deux", "une", "zero"] as const)[randomInt(0, 2)];
 
-  let q: number;
-  let cible: number;
+  let p: number;
+  let r: number;
+  let cibleCarree: number;
   let solutions: number[];
 
   if (typeSolution === "deux") {
-    const [leg1, leg2, hyp] = TRIPLETS_PYTHAGORICIENS[randomInt(0, TRIPLETS_PYTHAGORICIENS.length - 1)];
-    const [qAbs, d] = Math.random() < 0.5 ? [leg1, leg2] : [leg2, leg1];
-    q = Math.random() < 0.5 ? qAbs : -qAbs;
-    cible = hyp;
-    solutions = [p - d, p + d].sort((valeurA, valeurB) => valeurA - valeurB);
+    do {
+      p = randomInt(-4, 4);
+      r = randomInt(-4, 4);
+    } while (p === r);
+    const ecart = p - r;
+    let d: number;
+    do {
+      d = randomInt(1, 7);
+    } while ((d - ecart) % 2 !== 0);
+    cibleCarree = (ecart * ecart + d * d) / 2;
+    solutions = [(p + r - d) / 2, (p + r + d) / 2];
   } else if (typeSolution === "une") {
-    const qAbs = randomInt(1, 6);
-    q = Math.random() < 0.5 ? qAbs : -qAbs;
-    cible = qAbs;
-    solutions = [p];
+    do {
+      p = randomInt(-4, 4);
+      r = randomInt(-4, 4);
+    } while (p === r || (p - r) % 2 !== 0);
+    cibleCarree = ((p - r) * (p - r)) / 2;
+    solutions = [(p + r) / 2];
   } else {
-    const cibleAbs = randomInt(1, 5);
-    const qAbs = cibleAbs + randomInt(1, 5);
-    q = Math.random() < 0.5 ? qAbs : -qAbs;
-    cible = cibleAbs;
+    // |p-r| ≥ 2 garantit (p-r)²/2 > 1, donc au moins un N entier possible.
+    do {
+      p = randomInt(-4, 4);
+      r = randomInt(-4, 4);
+    } while (Math.abs(p - r) < 2);
+    const borne = Math.ceil(((p - r) * (p - r)) / 2) - 1;
+    cibleCarree = randomInt(1, borne);
     solutions = [];
   }
 
-  const a = 1;
-  const b = -2 * p;
-  const c = p * p + q * q - cible * cible;
+  const a = 2;
+  const b = -2 * (p + r);
+  const c = p * p + r * r - cibleCarree;
   const discriminant = b * b - 4 * a * c;
 
-  return { variante: "parametre", p, q, cible, a, b, c, discriminant, typeSolution, solutions };
+  return { variante: "parametre", p, r, cibleCarree, a, b, c, discriminant, typeSolution, solutions };
 }
 
 // ============================================================================

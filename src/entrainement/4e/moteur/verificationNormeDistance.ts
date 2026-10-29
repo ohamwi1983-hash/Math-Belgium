@@ -17,7 +17,10 @@ import type { ClassificationTriangleIsocele, ExerciceDistance, ExerciceIsocele, 
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
 
-const TOLERANCE = 0.01;
+/** Quasi nulle : les normes/longueurs attendues sont entières ou radicales (`√29`, `2√5`), une
+ * approximation décimale (`5,39`) n'est jamais acceptée — seule une forme exacte (entier,
+ * `√…`/`sqrt(…)`, `m√k`) tombe à moins de 1e-6 de la valeur réelle. */
+const TOLERANCE = 1e-6;
 
 function statutNumerique(valeur: number, cible: number): StatutVerification {
   if (!Number.isFinite(valeur)) return "parse_error";
@@ -27,7 +30,10 @@ function statutNumerique(valeur: number, cible: number): StatutVerification {
 /** `√` unicode → `sqrt(...)`, même translittération que `verificationDistanceDroite.ts` — seule
  * adaptation nécessaire, `evaluerExpressionGenerale` ne tokenise que la forme fonction. */
 function remplacerRacineUnicode(texte: string): string {
-  return texte.replace(/√\(/g, "sqrt(").replace(/√\s*(\d+(?:[.,]\d+)?)/g, "sqrt($1)");
+  return texte
+    .replace(/[\u2212\u2013]/g, "-")
+    .replace(/√\(/g, "sqrt(")
+    .replace(/√\s*(\d+(?:[.,]\d+)?)/g, "sqrt($1)");
 }
 
 /** Champ de texte libre acceptant entier/fraction/racine/décimal — même patron que
@@ -155,7 +161,7 @@ export function verifierConclusionIsocele(exercice: ExerciceIsocele, reponse: Re
 // ============================================================================
 
 /** Points d'échantillonnage pour comparer l'équation soumise (LHS=RHS) à l'équation cible
- * `ax²+bx+c=0` (`a=1` toujours, voir `generateurs/normeDistance/index.ts`) — 5 points, largement
+ * `ax²+bx+c=0` (`a=2` toujours, voir `generateurs/normeDistance/index.ts`) — 5 points, largement
  * suffisant pour déterminer une équivalence de degré ≤2 (3 points suffiraient déjà), marge
  * supplémentaire pour réduire le risque de faux positif sur une expression non polynomiale. */
 const POINTS_ECHANTILLON_EQUATION = [-5, -2, 1, 4, 8];
@@ -173,18 +179,29 @@ export function diagnostiquerReductionParametreNorme(exercice: ExerciceParametre
   if (cotes.length !== 2) return "parse_error";
   const [gauche, droite] = cotes;
 
+  const differences: number[] = [];
   try {
     for (const x of POINTS_ECHANTILLON_EQUATION) {
       const g = evaluerExpressionGenerale(remplacerRacineUnicode(gauche), x);
       const d = evaluerExpressionGenerale(remplacerRacineUnicode(droite), x);
       if (!Number.isFinite(g) || !Number.isFinite(d)) return "parse_error";
-      const diff = g - d;
-      const cible = exercice.a * x * x + exercice.b * x + exercice.c;
-      if (Math.abs(diff - cible) > TOLERANCE) return "not_equivalent";
+      differences.push(g - d);
     }
   } catch {
     return "parse_error";
   }
+  // Toute équation PROPORTIONNELLE à `ax²+bx+c=0` (facteur non nul, ex. `2x²−16x+194=0`) est
+  // acceptée, comme aux générateurs 24/25 ; le facteur est lu au point où la cible est la plus
+  // grande (jamais nulle : `a≠0`, donc la cible n'a que 2 racines au plus).
+  const cibles = POINTS_ECHANTILLON_EQUATION.map((x) => exercice.a * x * x + exercice.b * x + exercice.c);
+  const iRef = cibles.reduce((meilleur, c, i) => (Math.abs(c) > Math.abs(cibles[meilleur]) ? i : meilleur), 0);
+  const facteur = differences[iRef] / cibles[iRef];
+  if (!Number.isFinite(facteur) || Math.abs(facteur) < 1e-9) return "not_equivalent";
+  if (cibles.some((c, i) => Math.abs(differences[i] - facteur * c) > TOLERANCE * Math.max(1, Math.abs(facteur)))) return "not_equivalent";
+  // Une équation équivalente mais NON développée (`(x−4)²+(x+1)²=25`, `2(x²−3x)+1=0`,
+  // `(x−1)(x−2)=0`) n'est pas « réduite » : l'écran demande la forme développée, comme aux
+  // générateurs 24/25 — toute parenthèse (hors `sqrt(`) est refusée.
+  if (texte.replace(/sqrt\(/g, "").includes("(")) return "not_equivalent";
   return "correct";
 }
 

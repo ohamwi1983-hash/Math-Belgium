@@ -54,7 +54,7 @@ export function EtapeResolutionAvecXColinearite({ exercice, tentativesUtilisees,
         <label className="field-label" htmlFor="colinearite-resolutionavecx-x">
           x =
         </label>
-        <input
+        <input disabled={!!validation}
           id="colinearite-resolutionavecx-x"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}

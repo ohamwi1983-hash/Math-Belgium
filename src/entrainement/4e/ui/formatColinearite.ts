@@ -24,7 +24,9 @@ type ExerciceTest = ExerciceColinearVecteurs | ExerciceColinearPoints;
 type ExerciceAvecX = ExerciceColinearParametre | ExerciceColinearPointsParametre;
 
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  // Virgule décimale (`{,}` : pas d'espace parasite en KaTeX) — seules les saisies de l'élève,
+  // affichées dans la fiche de consultation, peuvent être décimales (corrections chapitre 6).
+  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "").replace(".", "{,}");
 }
 
 export function versLin(v: Composantes): ComposantesLin {
@@ -247,12 +249,15 @@ export const RAPPEL_VECTORIEL_COLINEARITE_FIN = "vaut 0.";
 // ============================================================================
 // Placeholders — jamais un exemple qui révèle la réponse
 // ============================================================================
+// Toujours HORS de l'ensemble des valeurs tirées (corrections chapitre 6, point 21) : les données
+// sont entières, un exemple décimal ne peut jamais coïncider avec une réponse ; « ex : 0,5x » reste
+// assez court pour les 6 champs symboliques côte à côte (61 px utiles à 1280 px).
 
-export const PLACEHOLDER_CRITERE = "ex : 5";
-export const PLACEHOLDER_COMPOSANTE = "ex : 4";
-export const PLACEHOLDER_COMPOSANTE_SYMBOLIQUE = "ex : 2x-1 ou 5";
+export const PLACEHOLDER_CRITERE = "ex : 2,5";
+export const PLACEHOLDER_COMPOSANTE = "ex : 2,5";
+export const PLACEHOLDER_COMPOSANTE_SYMBOLIQUE = "ex : 0,5x";
 export const PLACEHOLDER_EQUATION_REDUITE = "ex : 2x-3=0";
-export const PLACEHOLDER_SOLUTION_X = "ex : -1";
+export const PLACEHOLDER_SOLUTION_X = "ex : 2,5";
 
 /** Libellé du bouton Aide progressive — même petite fonction pure dupliquée qu'ailleurs dans le
  * projet (ex. `formatCombinaisonVecteurs.ts`), jamais un couplage entre générateurs pour un si

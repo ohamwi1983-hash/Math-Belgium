@@ -4,7 +4,8 @@ export function randomInt(min: number, max: number): number {
 
 /**
  * Triplets pythagoriciens `(jambe1, jambe2, hypoténuse)` — `jambe1²+jambe2²=hypoténuse²` — pierre
- * angulaire des variantes "vecteur"/"distance"/"parametre" de ce générateur : n'importe quel
+ * angulaire des normes ENTIÈRES des variantes "vecteur"/"distance" (l'autre moitié des tirages est
+ * radicale, voir `index.ts::vecteurNormeEntiereOuRadicale`) : n'importe quel
  * vecteur dont les composantes sont (dans un ordre quelconque, avec un signe quelconque) l'une de
  * ces deux jambes a une norme TOUJOURS entière exacte, jamais une racine irrationnelle. **Jamais
  * utilisée pour la variante "pythagore"**, qui travaille directement sur les longueurs AU CARRÉ —

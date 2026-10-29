@@ -56,10 +56,17 @@ const POINTS_ECHANTILLON = [0.37, 1.53, -0.82, 2.19, -1.41];
  * `promptcorrectionsgenerateur24complet.md`, point 1. Réutilise `evaluerExpression`
  * (`expressionAlgebrique.ts`, exercice 1) plutôt qu'un parseur dédié.
  */
+/** Signe moins typographique (« − » U+2212, « – » tiret demi-cadratin) → « - » ASCII avant toute
+ * lecture d'un champ texte (audit du chapitre 6 : « −3 » donnait une erreur de syntaxe). Local à ce
+ * générateur — le parseur partagé n'est pas modifié. */
+function normaliserSigneMoins(texte: string): string {
+  return texte.replace(/[\u2212\u2013]/g, "-");
+}
+
 export function diagnostiquerComposanteLineaire(texte: string, cible: LinExpr): StatutVerification {
   let valeurs: number[];
   try {
-    valeurs = POINTS_ECHANTILLON.map((x) => evaluerExpression(texte, x));
+    valeurs = POINTS_ECHANTILLON.map((x) => evaluerExpression(normaliserSigneMoins(texte), x));
   } catch {
     return "parse_error";
   }
@@ -94,8 +101,12 @@ export interface ReponseTest {
   conclusionAlignement: boolean | null;
 }
 
+/** Variante "points" : l'ordre det(AC, AB) — l'opposé — est aussi accepté (audit du chapitre 6 :
+ * l'énoncé ne fixe pas lequel des deux vecteurs vient en premier ; seule la conclusion compte). */
 export function diagnostiquerCritereTest(exercice: ExerciceTest, valeur: number): StatutVerification {
-  return statutNumerique(valeur, critereReel(exercice));
+  const statut = statutNumerique(valeur, critereReel(exercice));
+  if (statut !== "correct" && exercice.variante === "points" && statutNumerique(valeur, -critereReel(exercice)) === "correct") return "correct";
+  return statut;
 }
 
 export function verifierConclusion(exercice: ExerciceTest, reponse: boolean): boolean {
@@ -193,7 +204,7 @@ export function verifierConstructionAvecX(exercice: ExerciceColinearPointsParame
  * bien définie.
  */
 export function diagnostiquerReductionAvecX(exercice: ExerciceAvecX, texte: string): StatutVerification {
-  return diagnostiquerFormeCanonique(texte, { a: 0, b: exercice.coefX, c: exercice.coefConst });
+  return diagnostiquerFormeCanonique(normaliserSigneMoins(texte), { a: 0, b: exercice.coefX, c: exercice.coefConst });
 }
 
 export function verifierReductionAvecX(exercice: ExerciceAvecX, texte: string): boolean {

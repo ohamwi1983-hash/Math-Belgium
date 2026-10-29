@@ -36,19 +36,22 @@ function ChampSymbolique({
   valeur,
   onChange,
   erronee,
+  gele,
 }: {
   id: string;
   label: string;
   valeur: string;
   onChange: (v: string) => void;
   erronee: boolean;
+  /** Champ figé pendant `ValidationEcran` (écran clos). */
+  gele: boolean;
 }) {
   return (
     <div className="field field-inline">
       <label className="field-label field-label-minuscule" htmlFor={id}>
         <Katex expression={label} />
       </label>
-      <input
+      <input disabled={gele}
         id={id}
         className={`text-input${erronee ? " is-erronee" : ""}`}
         placeholder={PLACEHOLDER_COMPOSANTE_SYMBOLIQUE}
@@ -117,14 +120,14 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
 
       <div className="field-row-groupe">
         <div className="field-row">
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-abx"
             label={`x_{${exercice.labelA}${exercice.labelB}} =`}
             valeur={abX}
             onChange={setAbX}
             erronee={evaluation !== null && evaluation.abX !== "correct"}
           />
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-aby"
             label={`y_{${exercice.labelA}${exercice.labelB}} =`}
             valeur={abY}
@@ -133,14 +136,14 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
           />
         </div>
         <div className="field-row">
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-acx"
             label={`x_{${exercice.labelA}${exercice.labelC}} =`}
             valeur={acX}
             onChange={setAcX}
             erronee={evaluation !== null && evaluation.acX !== "correct"}
           />
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-acy"
             label={`y_{${exercice.labelA}${exercice.labelC}} =`}
             valeur={acY}
@@ -149,14 +152,14 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
           />
         </div>
         <div className="field-row">
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-bcx"
             label={`x_{${exercice.labelB}${exercice.labelC}} =`}
             valeur={bcX}
             onChange={setBcX}
             erronee={evaluation !== null && evaluation.bcX !== "correct"}
           />
-          <ChampSymbolique
+          <ChampSymbolique gele={!!validation}
             id="orthogonalite-avecx-bcy"
             label={`y_{${exercice.labelB}${exercice.labelC}} =`}
             valeur={bcY}

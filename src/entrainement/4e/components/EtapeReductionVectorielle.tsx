@@ -51,8 +51,9 @@ export function EtapeReductionVectorielle({ exercice, tentativesUtilisees, tenta
         <input
           id="reduction-vectorielle-reponse"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="ex : MA"
+          placeholder="ex : PQ"
           value={texte}
+          disabled={!!validation}
           onChange={(e) => setTexte(e.target.value)}
         />
       </div>

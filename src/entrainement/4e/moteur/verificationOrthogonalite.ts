@@ -38,10 +38,17 @@ const POINTS_ECHANTILLON = [0.37, 1.53, -0.82, 2.19, -1.41];
  * `promptcorrectionsgenerateur25complet.md`, point 1. Réutilise `evaluerExpression`
  * (`expressionAlgebrique.ts`, exercice 1) plutôt qu'un parseur dédié.
  */
+/** Signe moins typographique (« − » U+2212, « – » tiret demi-cadratin) → « - » ASCII avant toute
+ * lecture d'un champ texte (audit du chapitre 6 : « −3 » donnait une erreur de syntaxe). Local à ce
+ * générateur — le parseur partagé n'est pas modifié. */
+function normaliserSigneMoins(texte: string): string {
+  return texte.replace(/[\u2212\u2013]/g, "-");
+}
+
 export function diagnostiquerComposanteLineaire(texte: string, cible: LinExpr): StatutVerification {
   let valeurs: number[];
   try {
-    valeurs = POINTS_ECHANTILLON.map((x) => evaluerExpression(texte, x));
+    valeurs = POINTS_ECHANTILLON.map((x) => evaluerExpression(normaliserSigneMoins(texte), x));
   } catch {
     return "parse_error";
   }
@@ -94,7 +101,7 @@ export function verifierTest(exercice: ExerciceOrthogonaliteTest, reponse: Repon
 // ============================================================================
 
 export function diagnostiquerReductionParametre(exercice: ExerciceOrthogonaliteParametre, texte: string): StatutVerification {
-  return diagnostiquerFormeCanonique(texte, { a: 0, b: exercice.coefX, c: exercice.coefConst });
+  return diagnostiquerFormeCanonique(normaliserSigneMoins(texte), { a: 0, b: exercice.coefX, c: exercice.coefConst });
 }
 
 export function verifierReductionParametre(exercice: ExerciceOrthogonaliteParametre, texte: string): boolean {
@@ -233,7 +240,7 @@ function reductionVersEnonce(r: Reduction): { a: number; b: number; c: number } 
  * non nul de l'équation de référence).
  */
 export function diagnostiquerReductionSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: Sommet, texte: string): StatutVerification {
-  return diagnostiquerFormeCanonique(texte, reductionVersEnonce(reductionSommet(exercice, sommet)));
+  return diagnostiquerFormeCanonique(normaliserSigneMoins(texte), reductionVersEnonce(reductionSommet(exercice, sommet)));
 }
 
 export function verifierReductionSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: Sommet, texte: string): boolean {

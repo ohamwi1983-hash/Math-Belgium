@@ -59,7 +59,7 @@ export function EtapeReductionParametreOrthogonalite({ exercice, tentativesUtili
         <label className="field-label" htmlFor="orthogonalite-reductionparametre-equation">
           Équation =
         </label>
-        <input
+        <input disabled={!!validation}
           id="orthogonalite-reductionparametre-equation"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION_REDUITE}

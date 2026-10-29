@@ -83,7 +83,7 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
         <label className="field-label" htmlFor="colinearite-test-critere">
           Critère =
         </label>
-        <input
+        <input disabled={!!validation}
           id="colinearite-test-critere"
           className={`text-input${critereErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}
@@ -93,17 +93,19 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
         />
       </div>
 
-      {estPoints && (
+      {estPoints && exercice.variante === "points" && (
         <>
+          {/* Variante "points" : les vecteurs réellement construits, AB⃗ et AC⃗ — jamais u⃗/v⃗, absents de l'énoncé. */}
           <p className="prompt-text prompt-text--question-multiple">
-            {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
+            {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE}{" "}
+            <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} />{" "}
             {QUESTION_COLINEARITE_VECTEURS_APRES}
           </p>
           <div className="options-grid-compact">
-            <button type="button" className={conclusionColinearite === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(true)}>
+            <button disabled={!!validation} type="button" className={conclusionColinearite === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(true)}>
               {LIBELLES_OUI_NON.positif}
             </button>
-            <button type="button" className={conclusionColinearite === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(false)}>
+            <button disabled={!!validation} type="button" className={conclusionColinearite === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionColinearite(false)}>
               {LIBELLES_OUI_NON.negatif}
             </button>
           </div>
@@ -119,10 +121,10 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
         </p>
       )}
       <div className="options-grid-compact">
-        <button type="button" className={conclusionAlignement === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(true)}>
+        <button disabled={!!validation} type="button" className={conclusionAlignement === true ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(true)}>
           {LIBELLES_OUI_NON.positif}
         </button>
-        <button type="button" className={conclusionAlignement === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(false)}>
+        <button disabled={!!validation} type="button" className={conclusionAlignement === false ? "btn toggle-active" : "btn"} onClick={() => setConclusionAlignement(false)}>
           {LIBELLES_OUI_NON.negatif}
         </button>
       </div>

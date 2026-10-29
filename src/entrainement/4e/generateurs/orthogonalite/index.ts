@@ -25,23 +25,8 @@ import type {
 import type { Composantes, Point } from "../../core/vecteur.types";
 import { additionner, determinant, multiplier, produitPourOrthogonalite, soustraire } from "../vecteur/arithmetique";
 import { randomInt } from "./aleatoire";
+import { tirerPaireUniforme } from "../vecteur/pairesUniformes";
 import { additionnerLin, composantesLinEvaluees, negLin, pointFromNum, produitSymbolique, soustraireLin } from "./lin";
-
-const COEFFICIENTS_MULTIPLE = [-3, -2, -1, 1, 2, 3];
-
-function vecteurAleatoire(borne = 5): Composantes {
-  let v = { x: 0, y: 0 };
-  while (v.x === 0 && v.y === 0) {
-    v = { x: randomInt(-borne, borne), y: randomInt(-borne, borne) };
-  }
-  return v;
-}
-
-/** Rotation de 90° — perpendiculaire exacte à `v` (jamais d'arrondi, l'orthogonalité est garantie
- * par construction plutôt que testée après coup). */
-function perpendiculaire(v: Composantes): Composantes {
-  return { x: -v.y, y: v.x };
-}
 
 /** Diviseurs entiers positifs de `n` (`n` toujours un entier non nul) — utilisée pour construire
  * la variante "parametre" avec une réponse `x` toujours entière (même principe que `cas4a` : le
@@ -61,18 +46,7 @@ function diviseurs(n: number): number[] {
 // ============================================================================
 
 function construireTest(): ExerciceOrthogonaliteTest {
-  const v1 = vecteurAleatoire();
-  const doitEtreOrthogonaux = Math.random() < 0.5;
-
-  let v2: Composantes;
-  if (doitEtreOrthogonaux) {
-    const k = COEFFICIENTS_MULTIPLE[randomInt(0, COEFFICIENTS_MULTIPLE.length - 1)];
-    v2 = multiplier(k, perpendiculaire(v1));
-  } else {
-    do {
-      v2 = vecteurAleatoire();
-    } while (produitPourOrthogonalite(v1, v2) === 0);
-  }
+  const [v1, v2] = tirerPaireUniforme(produitPourOrthogonalite, Math.random() < 0.5);
 
   return {
     variante: "test",
@@ -131,16 +105,7 @@ function construireTriangle(): ExerciceOrthogonaliteTriangle {
     const doitEtreRectangle = Math.random() < 0.5;
     const sommetCible: Sommet = (["A", "B", "C"] as const)[randomInt(0, 2)];
 
-    const w1 = vecteurAleatoire();
-    let w2: Composantes;
-    if (doitEtreRectangle) {
-      const k = COEFFICIENTS_MULTIPLE[randomInt(0, COEFFICIENTS_MULTIPLE.length - 1)];
-      w2 = multiplier(k, perpendiculaire(w1));
-    } else {
-      do {
-        w2 = vecteurAleatoire();
-      } while (produitPourOrthogonalite(w1, w2) === 0);
-    }
+    const [w1, w2] = tirerPaireUniforme(produitPourOrthogonalite, doitEtreRectangle);
 
     const sommetPoint = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
     const autre1 = additionner(sommetPoint, w1);

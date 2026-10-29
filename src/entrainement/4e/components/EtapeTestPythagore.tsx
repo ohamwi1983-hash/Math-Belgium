@@ -51,7 +51,7 @@ export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMa
 
       <div className="options-grid-compact">
         {SOMMETS.map((s) => (
-          <button key={s} type="button" className={choix === s ? "btn toggle-active" : "btn"} onClick={() => setChoix(s)}>
+          <button disabled={!!validation} key={s} type="button" className={choix === s ? "btn toggle-active" : "btn"} onClick={() => setChoix(s)}>
             {libelleRectangleEn(s, exercice)}
           </button>
         ))}

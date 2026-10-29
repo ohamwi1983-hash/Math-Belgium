@@ -64,7 +64,7 @@ export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tent
         <label className="field-label" htmlFor="colinearite-resolution-x">
           x =
         </label>
-        <input
+        <input disabled={!!validation}
           id="colinearite-resolution-x"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}

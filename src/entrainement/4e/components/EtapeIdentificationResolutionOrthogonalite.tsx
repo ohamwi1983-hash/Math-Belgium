@@ -102,7 +102,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
         <label className="field-label" htmlFor="orthogonalite-identification-x">
           x =
         </label>
-        <input
+        <input disabled={!!validation}
           id="orthogonalite-identification-x"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}
@@ -114,14 +114,14 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
 
       <p className="prompt-text prompt-text--question-multiple">{QUESTION_TRIANGLE_RECTANGLE}</p>
       <div className="options-grid-compact">
-        <button
+        <button disabled={!!validation}
           type="button"
           className={estRectangle === true ? "btn toggle-active" : "btn"}
           onClick={() => setEstRectangle(true)}
         >
           {LIBELLES_OUI_NON.positif}
         </button>
-        <button
+        <button disabled={!!validation}
           type="button"
           className={estRectangle === false ? "btn toggle-active" : "btn"}
           onClick={() => {
@@ -138,7 +138,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
           <p className="prompt-text prompt-text--question-multiple contenu-conditionnel">{QUESTION_SOMMET_RECTANGLE}</p>
           <div className="options-grid-compact">
             {SOMMETS.map((s) => (
-              <button key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
+              <button disabled={!!validation} key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
                 {labelSommet(exercice, s)}
               </button>
             ))}

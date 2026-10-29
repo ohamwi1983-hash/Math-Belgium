@@ -52,7 +52,7 @@ export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesM
         <label className="field-label" htmlFor="norme-distance-calcul">
           dist(A,B) =
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-calcul"
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_NORME}

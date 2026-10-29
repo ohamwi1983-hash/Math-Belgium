@@ -91,7 +91,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
             <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-abx">
               <Katex expression={`x_{${exercice.labelA}${exercice.labelB}} =`} />
             </label>
-            <input
+            <input disabled={!!validation}
               id="colinearite-construction-abx"
               className={`text-input${abXErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
@@ -104,7 +104,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
             <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-aby">
               <Katex expression={`y_{${exercice.labelA}${exercice.labelB}} =`} />
             </label>
-            <input
+            <input disabled={!!validation}
               id="colinearite-construction-aby"
               className={`text-input${abYErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
@@ -119,7 +119,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
             <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acx">
               <Katex expression={`x_{${exercice.labelA}${exercice.labelC}} =`} />
             </label>
-            <input
+            <input disabled={!!validation}
               id="colinearite-construction-acx"
               className={`text-input${acXErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
@@ -132,7 +132,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
             <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acy">
               <Katex expression={`y_{${exercice.labelA}${exercice.labelC}} =`} />
             </label>
-            <input
+            <input disabled={!!validation}
               id="colinearite-construction-acy"
               className={`text-input${acYErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}

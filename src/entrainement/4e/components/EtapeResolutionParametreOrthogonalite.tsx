@@ -60,7 +60,7 @@ export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtil
         <label className="field-label" htmlFor="orthogonalite-resolution-x">
           x =
         </label>
-        <input
+        <input disabled={!!validation}
           id="orthogonalite-resolution-x"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}

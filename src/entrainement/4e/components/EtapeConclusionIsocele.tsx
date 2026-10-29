@@ -56,7 +56,7 @@ export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativ
 
       <div className="options-grid-compact">
         {OPTIONS_NATURE_TRIANGLE.map((option) => (
-          <button key={option.valeur} type="button" className={nature === option.valeur ? "btn toggle-active" : "btn"} onClick={() => choisirNature(option.valeur)}>
+          <button disabled={!!validation} key={option.valeur} type="button" className={nature === option.valeur ? "btn toggle-active" : "btn"} onClick={() => choisirNature(option.valeur)}>
             {option.libelle}
           </button>
         ))}
@@ -67,7 +67,7 @@ export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativ
           <p className="prompt-text contenu-conditionnel">en</p>
           <div className="options-grid-compact">
             {SOMMETS_ISOCELE.map((s) => (
-              <button key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
+              <button disabled={!!validation} key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
                 {s}
               </button>
             ))}

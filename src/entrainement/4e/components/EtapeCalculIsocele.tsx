@@ -60,7 +60,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
         <label className="field-label" htmlFor="norme-distance-isocele-ab">
           <Katex expression={formatLabelNormeLatex(exercice.labelA, exercice.labelB)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-isocele-ab"
           className={`text-input${evaluation !== null && evaluation.ab !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
@@ -72,7 +72,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
         <label className="field-label" htmlFor="norme-distance-isocele-ac">
           <Katex expression={formatLabelNormeLatex(exercice.labelA, exercice.labelC)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-isocele-ac"
           className={`text-input${evaluation !== null && evaluation.ac !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
@@ -84,7 +84,7 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
         <label className="field-label" htmlFor="norme-distance-isocele-bc">
           <Katex expression={formatLabelNormeLatex(exercice.labelB, exercice.labelC)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-isocele-bc"
           className={`text-input${evaluation !== null && evaluation.bc !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}

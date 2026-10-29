@@ -60,7 +60,7 @@ export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentat
         <label className="field-label field-label-minuscule" htmlFor={id}>
           <Katex expression={label} />
         </label>
-        <input
+        <input disabled={!!validation}
           id={id}
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_COMPOSANTE}

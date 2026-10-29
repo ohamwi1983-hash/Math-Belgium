@@ -8,7 +8,7 @@ import type {
   ExercicePythagore,
   VarianteNormeDistance,
 } from "../../core/normeDistance.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BlocCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   CONSIGNE_GENERALE_DISTANCE,
@@ -28,6 +28,7 @@ import {
   formatEtatActuelVecteursPythagoreLatex,
   formatEtatActuelVecteursTriangleLatex,
   formatLabelNormeVecteurLatex,
+  formatLongueurIrreductibleLatex,
   formatSolutionsAttenduesTexte,
   formatVecteurLatex,
   formuleSubstitueeNormeLatex,
@@ -120,10 +121,6 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDist
  *   sans option "pas rectangle").
  */
 
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-}
-
 // ============================================================================
 // Variante 1 — norme d'un vecteur donné
 // ============================================================================
@@ -139,7 +136,7 @@ function construireCorrectionVecteur(exercice: ExerciceNormeVecteur): BlocCorrec
   return [
     {
       type: "paragraphe",
-      fragments: [latex(`${formatLabelNormeVecteurLatex(exercice)} ${formuleSubstitueeNormeLatex(exercice.v)} = ${formatNombre(exercice.norme)}`)],
+      fragments: [latex(`${formatLabelNormeVecteurLatex(exercice)} ${formuleSubstitueeNormeLatex(exercice.v)} = ${formatLongueurIrreductibleLatex(exercice.normeCarree)}`)],
       bloc: true,
     },
   ];
@@ -164,7 +161,7 @@ function construireEnonceDistance(exercice: ExerciceDistance): SectionExercice {
 }
 
 function construireCorrectionDistance(exercice: ExerciceDistance): BlocCorrection[] {
-  const { labelA, pointA, labelB, pointB, vecteurAB, distance } = exercice;
+  const { labelA, pointA, labelB, pointB, vecteurAB, distanceCarree } = exercice;
   return [
     {
       type: "paragraphe",
@@ -178,7 +175,7 @@ function construireCorrectionDistance(exercice: ExerciceDistance): BlocCorrectio
     },
     {
       type: "paragraphe",
-      fragments: [texte("b) "), latex(`${formatAideNormeABNiveau2Latex(labelA, labelB, vecteurAB)} = ${formatNombre(distance)}`)],
+      fragments: [texte("b) "), latex(`${formatAideNormeABNiveau2Latex(labelA, labelB, vecteurAB)} = ${formatLongueurIrreductibleLatex(distanceCarree)}`)],
     },
   ];
 }
@@ -198,20 +195,21 @@ function libelleClassificationIsocele(
   labelA: string,
   labelB: string,
   labelC: string,
-  longueurAB: number,
-  longueurAC: number,
-  longueurBC: number,
-): string {
+  carreAB: number,
+  carreAC: number,
+  carreBC: number,
+): FragmentConsigne[] {
+  const [ab, ac, bc] = [carreAB, carreAC, carreBC].map(formatLongueurIrreductibleLatex);
   if (classification === "isoceleA") {
-    return `Le triangle est isocèle en ${labelA} : ${labelA}${labelB} = ${labelA}${labelC} = ${formatNombre(longueurAB)}.`;
+    return [texte(`Le triangle est isocèle en ${labelA} : `), latex(`${labelA}${labelB} = ${labelA}${labelC} = ${ab}`), texte(".")];
   }
   if (classification === "isoceleB") {
-    return `Le triangle est isocèle en ${labelB} : ${labelA}${labelB} = ${labelB}${labelC} = ${formatNombre(longueurAB)}.`;
+    return [texte(`Le triangle est isocèle en ${labelB} : `), latex(`${labelA}${labelB} = ${labelB}${labelC} = ${ab}`), texte(".")];
   }
   if (classification === "isoceleC") {
-    return `Le triangle est isocèle en ${labelC} : ${labelA}${labelC} = ${labelB}${labelC} = ${formatNombre(longueurAC)}.`;
+    return [texte(`Le triangle est isocèle en ${labelC} : `), latex(`${labelA}${labelC} = ${labelB}${labelC} = ${ac}`), texte(".")];
   }
-  return `Le triangle est scalène : ses 3 côtés (${formatNombre(longueurAB)}, ${formatNombre(longueurAC)}, ${formatNombre(longueurBC)}) sont de longueurs deux à deux différentes.`;
+  return [texte("Le triangle est scalène : ses 3 côtés ("), latex(`${ab}`), texte(", "), latex(`${ac}`), texte(", "), latex(`${bc}`), texte(") sont de longueurs deux à deux différentes.")];
 }
 
 function construireEnonceIsocele(exercice: ExerciceIsocele): SectionExercice {
@@ -249,7 +247,7 @@ function construireEnonceIsocele(exercice: ExerciceIsocele): SectionExercice {
 }
 
 function construireCorrectionIsocele(exercice: ExerciceIsocele): BlocCorrection[] {
-  const { labelA, pointA, labelB, pointB, labelC, pointC, vecteurAB, vecteurAC, vecteurBC, longueurAB, longueurAC, longueurBC, classification } = exercice;
+  const { labelA, pointA, labelB, pointB, labelC, pointC, vecteurAB, vecteurAC, vecteurBC, carreAB, carreAC, carreBC, classification } = exercice;
 
   const vecteursSubstitues = `\\begin{gathered} ${formatAideVecteurABNiveau2Latex(labelA, pointA, labelB, pointB)} \\\\ ${formatAideVecteurABNiveau2Latex(
     labelA,
@@ -258,11 +256,11 @@ function construireCorrectionIsocele(exercice: ExerciceIsocele): BlocCorrection[
     pointC,
   )} \\\\ ${formatAideVecteurABNiveau2Latex(labelB, pointB, labelC, pointC)} \\end{gathered}`;
 
-  const longueursSubstituees = `\\begin{gathered} \\|\\vec{${labelA}${labelB}}\\| = ${formuleSubstitueeNormeLatex(vecteurAB)} = ${formatNombre(
-    longueurAB,
-  )} \\\\ \\|\\vec{${labelA}${labelC}}\\| = ${formuleSubstitueeNormeLatex(vecteurAC)} = ${formatNombre(
-    longueurAC,
-  )} \\\\ \\|\\vec{${labelB}${labelC}}\\| = ${formuleSubstitueeNormeLatex(vecteurBC)} = ${formatNombre(longueurBC)} \\end{gathered}`;
+  const longueursSubstituees = `\\begin{gathered} \\|\\vec{${labelA}${labelB}}\\| = ${formuleSubstitueeNormeLatex(vecteurAB)} = ${formatLongueurIrreductibleLatex(
+    carreAB,
+  )} \\\\ \\|\\vec{${labelA}${labelC}}\\| = ${formuleSubstitueeNormeLatex(vecteurAC)} = ${formatLongueurIrreductibleLatex(
+    carreAC,
+  )} \\\\ \\|\\vec{${labelB}${labelC}}\\| = ${formuleSubstitueeNormeLatex(vecteurBC)} = ${formatLongueurIrreductibleLatex(carreBC)} \\end{gathered}`;
 
   return [
     {
@@ -278,7 +276,7 @@ function construireCorrectionIsocele(exercice: ExerciceIsocele): BlocCorrection[
     { type: "paragraphe", fragments: [texte("b) "), latex(longueursSubstituees)], bloc: true },
     {
       type: "paragraphe",
-      fragments: [texte("c) "), texte(libelleClassificationIsocele(classification, labelA, labelB, labelC, longueurAB, longueurAC, longueurBC))],
+      fragments: [texte("c) "), ...libelleClassificationIsocele(classification, labelA, labelB, labelC, carreAB, carreAC, carreBC)],
     },
   ];
 }

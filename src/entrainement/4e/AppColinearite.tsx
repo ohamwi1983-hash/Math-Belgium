@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ExerciceColinearite } from "./core/colinearite.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -26,10 +26,13 @@ import { EtapeResolutionAvecXColinearite } from "./components/EtapeResolutionAve
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifColinearite } from "./ui/recapitulatifColinearite";
 import { conclusionAttendue, critereReel } from "./moteur/verificationColinearite";
+import type { ReponseConstructionAvecX, ReponseConstructionVecteurs, ReponseTest } from "./moteur/verificationColinearite";
 import { formatComposantesLinMatriceLatex, formatComposantesMatriceLatex, formatEquationReduiteLatex, LIBELLES_OUI_NON } from "./ui/formatColinearite";
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -74,20 +77,32 @@ function revelationConstruction(exercice: ExerciceColinearite) {
 /** Révélation de la résolution (V2/V4 dernier écran) — les 3 cas (unique/identité/contradiction). */
 function revelationResolution(exercice: ExerciceColinearite) {
   if (exercice.variante !== "parametre" && exercice.variante !== "pointsParametre") return null;
-  if (exercice.typeSolution === "unique") return <Katex expression={`x = ${exercice.solutionX}`} />;
+  if (exercice.typeSolution === "unique") return <Katex expression={`x = ${String(exercice.solutionX).replace(".", "{,}")}`} />;
   if (exercice.typeSolution === "identite") return <span>Tout x convient (une infinité de solutions).</span>;
   return <span>Aucun x ne convient (aucune solution).</span>;
 }
 
-/** Révélation de l'écran "Test de colinéarité" (V1/V3, phase "test" uniquement). */
-function revelationTest(exercice: ExerciceColinearite) {
-  if (exercice.variante !== "vecteurs" && exercice.variante !== "points") return null;
+function ouiNon(valeur: boolean): string {
+  return valeur ? LIBELLES_OUI_NON.positif : LIBELLES_OUI_NON.negatif;
+}
+
+/** Critère + conclusion(s) d'un écran "test" — partagé par la réponse attendue et par la fiche de
+ * consultation (même mise en forme pour « ta réponse » et « réponse attendue »). */
+function resumeTest(critere: number, colineaires: boolean, alignes: boolean | null): ReactNode {
   return (
     <>
-      Critère attendu : {critereReel(exercice)} — Conclusion attendue :{" "}
-      {conclusionAttendue(exercice) ? LIBELLES_OUI_NON.positif : LIBELLES_OUI_NON.negatif}
+      Critère = {String(critere).replace(".", ",")} · Colinéaires : {ouiNon(colineaires)}
+      {alignes !== null && <> · Alignés : {ouiNon(alignes)}</>}
     </>
   );
+}
+
+/** Révélation de l'écran "Test de colinéarité" (V1/V3, phase "test" uniquement) — VALEURS seules :
+ * `ValidationEcran` affiche déjà « Réponse attendue : » (jamais « Critère attendu : » en double). */
+function revelationTest(exercice: ExerciceColinearite) {
+  if (exercice.variante !== "vecteurs" && exercice.variante !== "points") return null;
+  const conclusion = conclusionAttendue(exercice);
+  return resumeTest(critereReel(exercice), conclusion, exercice.variante === "points" ? conclusion : null);
 }
 
 /**
@@ -105,25 +120,65 @@ function construireReponseAttendue(etat: EtatSessionColinearite, exercice: Exerc
     if (etat.phase === "test") return revelationTest(exercice);
   }
   if (exercice.variante === "parametre") {
-    if (etat.phase === "reduction")
-      return (
-        <>
-          Équation attendue : <Katex expression={formatEquationReduiteLatex(exercice)} />
-        </>
-      );
-    if (etat.phase === "resolution") return <>Solution attendue : {revelationResolution(exercice)}</>;
+    if (etat.phase === "reduction") return <Katex expression={formatEquationReduiteLatex(exercice)} />;
+    if (etat.phase === "resolution") return revelationResolution(exercice);
   }
   if (exercice.variante === "pointsParametre") {
     if (etat.phase === "constructionAvecX") return revelationConstruction(exercice);
-    if (etat.phase === "reductionAvecX")
-      return (
-        <>
-          Équation attendue : <Katex expression={formatEquationReduiteLatex(exercice)} />
-        </>
-      );
-    if (etat.phase === "resolutionAvecX") return <>Solution attendue : {revelationResolution(exercice)}</>;
+    if (etat.phase === "reductionAvecX") return <Katex expression={formatEquationReduiteLatex(exercice)} />;
+    if (etat.phase === "resolutionAvecX") return revelationResolution(exercice);
   }
   return undefined;
+}
+
+/** Titre de la fiche de consultation d'un écran clos. */
+const TITRES_ECRANS: Record<PhaseColinearite, string> = {
+  constructionVecteurs: "Vecteurs construits",
+  constructionAvecX: "Vecteurs construits",
+  reduction: "Équation réduite",
+  reductionAvecX: "Équation réduite",
+  resolution: "Valeur de x",
+  resolutionAvecX: "Valeur de x",
+  test: "Test de colinéarité",
+};
+
+function formatSaisieNombre(valeur: number): string {
+  return String(valeur).replace(".", "{,}");
+}
+
+/** Saisie libre de l'élève, telle quelle — champ vide affiché « — ». */
+function saisieBrute(texte: string): string {
+  return texte.trim() === "" ? "—" : texte;
+}
+
+function saisieConstructionVecteurs(exercice: { labelA: string; labelB: string; labelC: string }, reponse: ReponseConstructionVecteurs): ReactNode {
+  const { labelA, labelB, labelC } = exercice;
+  return (
+    <Katex
+      expression={`\\begin{gathered} \\vec{${labelA}${labelB}} = \\begin{pmatrix} ${formatSaisieNombre(reponse.abX)} \\\\ ${formatSaisieNombre(reponse.abY)} \\end{pmatrix} \\\\ \\vec{${labelA}${labelC}} = \\begin{pmatrix} ${formatSaisieNombre(reponse.acX)} \\\\ ${formatSaisieNombre(reponse.acY)} \\end{pmatrix} \\end{gathered}`}
+    />
+  );
+}
+
+/** Composantes avec x : saisies libres (`2x-1`), affichées telles quelles, jamais réinterprétées. */
+function saisieConstructionAvecX(exercice: { labelA: string; labelB: string; labelC: string }, reponse: ReponseConstructionAvecX): ReactNode {
+  const { labelA, labelB, labelC } = exercice;
+  return (
+    <>
+      <p>
+        {labelA}
+        {labelB} : ({saisieBrute(reponse.abX)} ; {saisieBrute(reponse.abY)})
+      </p>
+      <p>
+        {labelA}
+        {labelC} : ({saisieBrute(reponse.acX)} ; {saisieBrute(reponse.acY)})
+      </p>
+    </>
+  );
+}
+
+function saisieTest(reponse: ReponseTest): ReactNode {
+  return resumeTest(reponse.critere, reponse.conclusionColinearite, reponse.conclusionAlignement);
 }
 
 /** Séquence de phases pour l'exercice courant — dépend de la variante (voir `typesColinearite.ts`,
@@ -164,8 +219,15 @@ function calculerSegmentsProgression(etat: EtatSessionColinearite): EtatPuceProg
 export function AppColinearite() {
   const [etat, setEtat] = useState<EtatSessionColinearite>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
+   * moteur ; un écran clos = une entrée, dans l'ordre de la séquence (même index que sa puce). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` des écrans pour qu'aucune saisie de
+   * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice ». */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionColinearite) {
+  function terminerEtape(nouvelEtat: EtatSessionColinearite, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -177,13 +239,24 @@ export function AppColinearite() {
               ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.testRevele
               : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.resolutionRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
+      setHistorique((h) => [
+        ...h,
+        { titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat, etat.exerciceCourant) },
+      ]);
       return;
     }
     setEtat(nouvelEtat);
   }
 
+  function reinitialiserHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
+  }
+
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) reinitialiserHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -196,6 +269,7 @@ export function AppColinearite() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    reinitialiserHistorique();
     setEtat(demarrerSessionColinearite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteColinearite)));
   }
 
@@ -213,9 +287,9 @@ export function AppColinearite() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Colinéarité et alignement de points</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} />}
+        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} onSegmentClick={(index) => setFicheOuverteIndex(index)} />}
       </header>
 
       <main className="card">
@@ -223,73 +297,83 @@ export function AppColinearite() {
         <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "constructionVecteurs" && exercice.variante === "points" ? (
           <EtapeConstructionVecteursColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseConstructionVecteurs(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstructionVecteurs(etat, reponse), saisieConstructionVecteurs(exercice, reponse))}
             validation={validation}
           />
         ) : etat.phase === "constructionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeConstructionAvecXColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseConstructionAvecX(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstructionAvecX(etat, reponse), saisieConstructionAvecX(exercice, reponse))}
             validation={validation}
           />
         ) : etat.phase === "reduction" && exercice.variante === "parametre" ? (
           <EtapeReductionColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideReduction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte), saisieBrute(texte))}
             validation={validation}
           />
         ) : etat.phase === "resolution" && exercice.variante === "parametre" ? (
           <EtapeResolutionColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(valeur) => terminerEtape(soumettreReponseResolution(etat, valeur))}
+            onValider={(valeur) => terminerEtape(soumettreReponseResolution(etat, valeur), <Katex expression={`x = ${formatSaisieNombre(valeur)}`} />)}
             validation={validation}
           />
         ) : etat.phase === "reductionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeReductionAvecXColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideReduction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseReductionAvecX(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseReductionAvecX(etat, texte), saisieBrute(texte))}
             validation={validation}
           />
         ) : etat.phase === "resolutionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeResolutionAvecXColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(valeur) => terminerEtape(soumettreReponseResolutionAvecX(etat, valeur))}
+            onValider={(valeur) => terminerEtape(soumettreReponseResolutionAvecX(etat, valeur), <Katex expression={`x = ${formatSaisieNombre(valeur)}`} />)}
             validation={validation}
           />
         ) : (exercice.variante === "vecteurs" || exercice.variante === "points") && etat.phase === "test" ? (
           <EtapeTestColinearite
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideTest}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseTest(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseTest(etat, reponse), saisieTest(reponse))}
             validation={validation}
           />
         ) : null}
         </div>
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

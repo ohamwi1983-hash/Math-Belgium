@@ -63,7 +63,7 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
         <label className="field-label" htmlFor="orthogonalite-test-critere">
           Critère =
         </label>
-        <input
+        <input disabled={!!validation}
           id="orthogonalite-test-critere"
           className={`text-input${critereErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}
@@ -78,10 +78,10 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
         {QUESTION_ORTHOGONALITE_VECTEURS_APRES}
       </p>
       <div className="options-grid-compact">
-        <button type="button" className={conclusion === true ? "btn toggle-active" : "btn"} onClick={() => setConclusion(true)}>
+        <button disabled={!!validation} type="button" className={conclusion === true ? "btn toggle-active" : "btn"} onClick={() => setConclusion(true)}>
           {LIBELLES_OUI_NON.positif}
         </button>
-        <button type="button" className={conclusion === false ? "btn toggle-active" : "btn"} onClick={() => setConclusion(false)}>
+        <button disabled={!!validation} type="button" className={conclusion === false ? "btn toggle-active" : "btn"} onClick={() => setConclusion(false)}>
           {LIBELLES_OUI_NON.negatif}
         </button>
       </div>

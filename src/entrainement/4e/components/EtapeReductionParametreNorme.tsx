@@ -55,7 +55,7 @@ export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, te
         <label className="field-label field-label-minuscule" htmlFor="norme-distance-reduction-equation">
           Équation :
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-reduction-equation"
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION_PARAMETRE}

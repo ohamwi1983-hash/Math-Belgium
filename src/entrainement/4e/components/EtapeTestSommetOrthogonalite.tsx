@@ -101,7 +101,7 @@ export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtili
         <label className="field-label" htmlFor={`orthogonalite-testsommet-${sommet}`}>
           Critère =
         </label>
-        <input
+        <input disabled={!!validation}
           id={`orthogonalite-testsommet-${sommet}`}
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}

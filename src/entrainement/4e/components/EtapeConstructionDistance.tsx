@@ -62,7 +62,7 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
           <label className="field-label field-label-minuscule" htmlFor="norme-distance-construction-x">
             <Katex expression={`x_{${exercice.labelA}${exercice.labelB}} =`} />
           </label>
-          <input
+          <input disabled={!!validation}
             id="norme-distance-construction-x"
             className={`text-input${evaluation !== null && evaluation.x !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
@@ -75,7 +75,7 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
           <label className="field-label field-label-minuscule" htmlFor="norme-distance-construction-y">
             <Katex expression={`y_{${exercice.labelA}${exercice.labelB}} =`} />
           </label>
-          <input
+          <input disabled={!!validation}
             id="norme-distance-construction-y"
             className={`text-input${evaluation !== null && evaluation.y !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}

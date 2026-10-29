@@ -7,6 +7,7 @@ import type { FigureReduction } from "./core/reductionVectorielle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeReductionVectorielle } from "./components/EtapeReductionVectorielle";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { Katex } from "./components/Katex";
 
 const CONSIGNE_GENERALE = "Réduis cette somme de vecteurs à l'aide de la relation de Chasles.";
 
@@ -34,6 +35,9 @@ interface TransitionEnAttente {
 export function AppReductionVectorielle() {
   const [etat, setEtat] = useState<EtatSessionReductionVectorielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : sert de `key` à
+   * l'écran pour qu'il reparte d'un champ vide, jamais de la saisie de l'exercice précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionReductionVectorielle) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
@@ -47,7 +51,12 @@ export function AppReductionVectorielle() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -56,17 +65,13 @@ export function AppReductionVectorielle() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionReductionVectorielle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FigureReduction)));
+    setNumeroExercice((n) => n + 1);
   }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <>
-            Réponse attendue : {exercice.pointDepart}
-            {exercice.pointArrivee}
-          </>
-        ),
+        reponseAttendue: <Katex expression={`\\vec{${exercice.pointDepart}${exercice.pointArrivee}}`} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -77,7 +82,7 @@ export function AppReductionVectorielle() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Réduction d'une somme de vecteurs (Chasles)</h1>
-        <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
+        <p className="app-subtitle">Chapitre 6 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
@@ -85,6 +90,7 @@ export function AppReductionVectorielle() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeReductionVectorielle
+            key={numeroExercice}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

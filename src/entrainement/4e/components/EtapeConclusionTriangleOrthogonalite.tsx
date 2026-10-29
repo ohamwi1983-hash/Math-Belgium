@@ -69,14 +69,14 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
       <p className="prompt-text">{QUESTION_TRIANGLE_RECTANGLE}</p>
 
       <div className="options-grid-compact">
-        <button
+        <button disabled={!!validation}
           type="button"
           className={estRectangle === true ? "btn toggle-active" : "btn"}
           onClick={() => setEstRectangle(true)}
         >
           {LIBELLES_OUI_NON.positif}
         </button>
-        <button
+        <button disabled={!!validation}
           type="button"
           className={estRectangle === false ? "btn toggle-active" : "btn"}
           onClick={() => {
@@ -93,7 +93,7 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
           <p className="prompt-text contenu-conditionnel">{QUESTION_SOMMET_RECTANGLE}</p>
           <div className="options-grid-compact">
             {SOMMETS.map((s) => (
-              <button key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
+              <button disabled={!!validation} key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>
                 {labelSommet(exercice, s)}
               </button>
             ))}

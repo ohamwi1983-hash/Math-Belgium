@@ -21,7 +21,9 @@ function latex(valeur: string): FragmentConsigne {
 }
 
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  // Virgule décimale (`{,}` : pas d'espace parasite en KaTeX) — seules les saisies de l'élève,
+  // affichées dans la fiche de consultation, peuvent être décimales (corrections chapitre 6).
+  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "").replace(".", "{,}");
 }
 
 /** Réservée aux POINTS — notation en ligne `(x ; y)`. Ne jamais l'utiliser pour un vecteur (voir
@@ -207,10 +209,9 @@ export function formatEtatActuelVecteursTriangleLatex(labelA: string, labelB: st
 }
 
 /** Bloc "état actuel" de l'écran 3 (`conclusionIsocele`) — les 3 normes confirmées à l'écran 2, en
- * fraction irréductible (toujours entières pour cette variante, voir `core/normeDistance.types.ts`,
- * mais réutilise `formatFractionIrreductible`-like : `formatNombre` suffit, jamais de décimal). */
+ * `m√k` irréductible (entières ou radicales, voir `core/normeDistance.types.ts`), jamais de décimal. */
 export function formatEtatActuelLongueursIsoceleLatex(exercice: ExerciceIsocele): string {
-  return `\\begin{gathered} \\|\\vec{${exercice.labelA}${exercice.labelB}}\\| = ${formatNombre(exercice.longueurAB)} \\\\ \\|\\vec{${exercice.labelA}${exercice.labelC}}\\| = ${formatNombre(exercice.longueurAC)} \\\\ \\|\\vec{${exercice.labelB}${exercice.labelC}}\\| = ${formatNombre(exercice.longueurBC)} \\end{gathered}`;
+  return `\\begin{gathered} \\|\\vec{${exercice.labelA}${exercice.labelB}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreAB)} \\\\ \\|\\vec{${exercice.labelA}${exercice.labelC}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreAC)} \\\\ \\|\\vec{${exercice.labelB}${exercice.labelC}}\\| = ${formatLongueurIrreductibleLatex(exercice.carreBC)} \\end{gathered}`;
 }
 
 /** Choix de nature (écran 3) — remplace l'ancien choix à 5 valeurs (dont "Équilatéral", piège
@@ -246,7 +247,9 @@ export function segmentsConsigneParametre(exercice: ExerciceParametreNorme): Fra
   return [
     texte("Quelle valeur doit avoir x pour que le vecteur "),
     latex("\\vec{v}"),
-    texte(` soit de longueur ${formatNombre(exercice.cible)} ?`),
+    texte(" soit de longueur "),
+    latex(formatLongueurIrreductibleLatex(exercice.cibleCarree)),
+    texte(" ?"),
   ];
 }
 
@@ -259,8 +262,8 @@ export function formatEnonceParametreLatex(exercice: ExerciceParametreNorme): st
  * `\quad`-jointe. */
 export function formatTermesEnonceParametreLatex(exercice: ExerciceParametreNorme): string[] {
   return [
-    `\\vec{v}\\begin{pmatrix} ${formatBinome(exercice.p)} \\\\ ${formatNombre(exercice.q)} \\end{pmatrix}`,
-    `\\|\\vec{v}\\| = ${formatNombre(exercice.cible)}`,
+    `\\vec{v}\\begin{pmatrix} ${formatBinome(exercice.p)} \\\\ ${formatBinome(exercice.r)} \\end{pmatrix}`,
+    `\\|\\vec{v}\\| = ${formatLongueurIrreductibleLatex(exercice.cibleCarree)}`,
   ];
 }
 
@@ -273,9 +276,8 @@ export function formatAideNormeSubstitueeParametreLatex(exercice: ExerciceParame
   // Parenthèses autour du binôme UNIQUEMENT quand p≠0 (expression composée "x-p"/"x+p") — jamais
   // autour d'un "x" seul, qui donnerait "(x)²" superflu (audit transversal,
   // `promptauditparenthesessuperflues.md`).
-  const binome = formatBinome(exercice.p);
-  const binomeCarre = exercice.p === 0 ? `${binome}^2` : `(${binome})^2`;
-  return `\\|\\vec{v}\\| = \\sqrt{${binomeCarre}+(${formatNombre(exercice.q)})^2} = ${formatNombre(exercice.cible)}`;
+  const carreBinome = (valeur: number) => (valeur === 0 ? `${formatBinome(valeur)}^2` : `(${formatBinome(valeur)})^2`);
+  return `\\|\\vec{v}\\| = \\sqrt{${carreBinome(exercice.p)}+${carreBinome(exercice.r)}} = ${formatLongueurIrreductibleLatex(exercice.cibleCarree)}`;
 }
 
 export function formatEquationReduiteParametreNormeLatex(exercice: ExerciceParametreNorme): string {
@@ -295,7 +297,7 @@ export function formatSolutionsAttenduesTexte(exercice: ExerciceParametreNorme):
   return exercice.solutions.map((x) => `x = ${formatNombre(x)}`).join(" ou ");
 }
 
-export const PLACEHOLDER_EQUATION_PARAMETRE = "ex : x^2-4x-12=0";
+export const PLACEHOLDER_EQUATION_PARAMETRE = "ex : x^2+3x-7=0";
 
 // ============================================================================
 // Variante 6 — Pythagore, méthode alternative
@@ -371,10 +373,10 @@ export function aideMethodeResolutionQuadratiqueNiveau1(): { texte: string; late
   };
 }
 
-export const PLACEHOLDER_NORME = "ex : 5";
-export const PLACEHOLDER_COMPOSANTE = "ex : 3";
-export const PLACEHOLDER_LONGUEUR = "ex : 13";
-export const PLACEHOLDER_SOLUTION_X = "ex : -1";
+export const PLACEHOLDER_NORME = "ex : 3√11";
+export const PLACEHOLDER_COMPOSANTE = "ex : 2,5";
+export const PLACEHOLDER_LONGUEUR = "ex : 3√11";
+export const PLACEHOLDER_SOLUTION_X = "ex : 2,5";
 
 /** Libellé du bouton Aide progressive — même petite fonction pure dupliquée qu'ailleurs dans le
  * projet (ex. `colinearite/formatColinearite.ts`, `orthogonalite/formatOrthogonalite.ts`), jamais

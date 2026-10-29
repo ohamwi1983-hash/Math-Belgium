@@ -60,7 +60,7 @@ export function EtapeReductionColinearite({ exercice, tentativesUtilisees, tenta
         <label className="field-label" htmlFor="colinearite-reduction-equation">
           Équation =
         </label>
-        <input
+        <input disabled={!!validation}
           id="colinearite-reduction-equation"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION_REDUITE}

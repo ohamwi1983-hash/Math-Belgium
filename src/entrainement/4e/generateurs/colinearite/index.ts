@@ -20,24 +20,15 @@ import type {
   VarianteColinearite,
 } from "../../core/colinearite.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
-import { additionner, determinant, multiplier } from "../vecteur/arithmetique";
+import { additionner, determinant } from "../vecteur/arithmetique";
 import { randomInt } from "./aleatoire";
 import { construireVecteurAvecX } from "./linExpr";
-
-const COEFFICIENTS_MULTIPLE = [-3, -2, 2, 3];
+import { tirerPaireUniforme } from "../vecteur/pairesUniformes";
 
 /** `-0` produit par `a*b-a*b` quand les deux produits coïncident — jamais affiché "-0" à l'élève,
  * même précaution que `normaliserZero` (exercice "tableau de signes"). */
 function normaliserZero(valeur: number): number {
   return valeur === 0 ? 0 : valeur;
-}
-
-function vecteurAleatoire(): Composantes {
-  let v = { x: 0, y: 0 };
-  while (v.x === 0 && v.y === 0) {
-    v = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
-  }
-  return v;
 }
 
 function composantesLinFixe(v: Composantes): ComposantesLin {
@@ -52,18 +43,7 @@ function pointLinDepuisVecteur(origine: Point, v: ComposantesLin): ComposantesLi
 }
 
 function construireVecteurs(): ExerciceColinearVecteurs {
-  const v1 = vecteurAleatoire();
-  const doitEtreColineaire = Math.random() < 0.5;
-
-  let v2: Composantes;
-  if (doitEtreColineaire) {
-    const k = COEFFICIENTS_MULTIPLE[randomInt(0, COEFFICIENTS_MULTIPLE.length - 1)];
-    v2 = multiplier(k, v1);
-  } else {
-    do {
-      v2 = vecteurAleatoire();
-    } while (determinant(v1, v2) === 0);
-  }
+  const [v1, v2] = tirerPaireUniforme(determinant, Math.random() < 0.5);
 
   return {
     variante: "vecteurs",
@@ -78,18 +58,7 @@ function construireVecteurs(): ExerciceColinearVecteurs {
 
 function construirePoints(): ExerciceColinearPoints {
   const pointA = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
-  const vecteurAB = vecteurAleatoire();
-  const doitEtreAligne = Math.random() < 0.5;
-
-  let vecteurAC: Composantes;
-  if (doitEtreAligne) {
-    const k = COEFFICIENTS_MULTIPLE[randomInt(0, COEFFICIENTS_MULTIPLE.length - 1)];
-    vecteurAC = multiplier(k, vecteurAB);
-  } else {
-    do {
-      vecteurAC = vecteurAleatoire();
-    } while (determinant(vecteurAB, vecteurAC) === 0);
-  }
+  const [vecteurAB, vecteurAC] = tirerPaireUniforme(determinant, Math.random() < 0.5);
 
   const pointB = additionner(pointA, vecteurAB);
   const pointC = additionner(pointA, vecteurAC);

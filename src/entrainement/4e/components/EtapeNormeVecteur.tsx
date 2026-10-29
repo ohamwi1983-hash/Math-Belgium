@@ -48,7 +48,7 @@ export function EtapeNormeVecteur({ exercice, tentativesUtilisees, tentativesMax
         <label className="field-label field-label-minuscule" htmlFor="norme-distance-vecteur-norme">
           <Katex expression={formatLabelNormeVecteurLatex(exercice)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-vecteur-norme"
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_NORME}

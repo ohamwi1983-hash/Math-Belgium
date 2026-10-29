@@ -94,7 +94,7 @@ export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentatives
         <label className="field-label" htmlFor={`orthogonalite-reductionsommet-${sommet}-equation`}>
           Équation =
         </label>
-        <input
+        <input disabled={!!validation}
           id={`orthogonalite-reductionsommet-${sommet}-equation`}
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_EQUATION_REDUITE}

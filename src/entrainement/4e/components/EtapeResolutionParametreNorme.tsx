@@ -84,10 +84,10 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
       <p className="prompt-text">Résous cette équation.</p>
 
       <div className="options-grid">
-        <button type="button" className={choix === "aucune" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucune")}>
+        <button disabled={!!validation} type="button" className={choix === "aucune" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucune")}>
           Aucune solution
         </button>
-        <button type="button" className={choix === "auMoins" ? "btn toggle-active" : "btn"} onClick={() => choisir("auMoins")}>
+        <button disabled={!!validation} type="button" className={choix === "auMoins" ? "btn toggle-active" : "btn"} onClick={() => choisir("auMoins")}>
           Au moins une solution
         </button>
       </div>
@@ -96,7 +96,7 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
         <div className="liste-morceaux contenu-conditionnel">
           {valeurs.map((valeur, index) => (
             <div key={index} className="liste-morceaux-ligne">
-              <input
+              <input disabled={!!validation}
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_SOLUTION_X}
                 value={valeur}
@@ -105,14 +105,14 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
                 aria-label={`Solution ${index + 1}`}
               />
               {valeurs.length > 1 && (
-                <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la solution ${index + 1}`} onClick={() => retirerChamp(index)}>
+                <button disabled={!!validation} type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la solution ${index + 1}`} onClick={() => retirerChamp(index)}>
                   ×
                 </button>
               )}
             </div>
           ))}
           {valeurs.length < 2 && (
-            <button type="button" className="btn liste-morceaux-ajouter" onClick={ajouterChamp}>
+            <button disabled={!!validation} type="button" className="btn liste-morceaux-ajouter" onClick={ajouterChamp}>
               + Ajouter une solution
             </button>
           )}

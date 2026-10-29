@@ -61,7 +61,7 @@ export function EtapeCalculPythagore({ exercice, tentativesUtilisees, tentatives
         <label className="field-label" htmlFor="norme-distance-pythagore-calc-ab">
           <Katex expression={formatLabelNormeLatex(exercice.labelA, exercice.labelB)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-pythagore-calc-ab"
           className={`text-input${evaluation !== null && evaluation.ab !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
@@ -73,7 +73,7 @@ export function EtapeCalculPythagore({ exercice, tentativesUtilisees, tentatives
         <label className="field-label" htmlFor="norme-distance-pythagore-calc-ac">
           <Katex expression={formatLabelNormeLatex(exercice.labelA, exercice.labelC)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-pythagore-calc-ac"
           className={`text-input${evaluation !== null && evaluation.ac !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
@@ -85,7 +85,7 @@ export function EtapeCalculPythagore({ exercice, tentativesUtilisees, tentatives
         <label className="field-label" htmlFor="norme-distance-pythagore-calc-bc">
           <Katex expression={formatLabelNormeLatex(exercice.labelB, exercice.labelC)} />
         </label>
-        <input
+        <input disabled={!!validation}
           id="norme-distance-pythagore-calc-bc"
           className={`text-input${evaluation !== null && evaluation.bc !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LONGUEUR}
