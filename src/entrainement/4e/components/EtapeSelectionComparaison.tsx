@@ -2,7 +2,10 @@ import { useState } from "react";
 import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.types";
 import { Katex } from "./Katex";
 import { VecteurGraph } from "./VecteurGraph";
-import { consigneSelection, vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
+import { aideSelectionComparaison, consigneSelection, vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
+import { NIVEAU_AIDE_MAX_COMPARAISON } from "../moteur/typesComparaisonVecteurs";
+import { BoutonAide } from "./BoutonAide";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -10,6 +13,8 @@ interface Props {
   exercice: ExerciceComparaisonVecteurs;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (labels: string[]) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -26,7 +31,7 @@ interface Props {
  * vecteur correspondant sur le graphe (sélection "sur la figure" au sens visuel, même si
  * l'interaction elle-même passe par les boutons).
  */
-export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [selection, setSelection] = useState<string[]>([]);
   const consigne = consigneSelection(exercice);
   const { points, vecteurs, viewBox } = vecteursAffichesComparaison(exercice, selection);
@@ -60,8 +65,19 @@ export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tenta
           ))}
       </div>
 
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          {aideSelectionComparaison(exercice, niveauAide).map((ligne, i) => (
+            <p key={i}>
+              <SegmentsInline segments={ligne} />
+            </p>
+          ))}
+        </div>
+      )}
+
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPARAISON.selection} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={selection.length === 0} onClick={() => onValider(selection)}>
           Valider
         </button>

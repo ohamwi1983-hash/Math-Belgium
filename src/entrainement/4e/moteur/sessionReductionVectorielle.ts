@@ -8,6 +8,7 @@ import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import { verifierReduction } from "./verificationReductionVectorielle";
+import { NIVEAU_AIDE_MAX_REDUCTION } from "./typesReductionVectorielle";
 import type { EtatSessionReductionVectorielle, ResultatExerciceReductionVectorielle } from "./typesReductionVectorielle";
 
 const POINTS_DE_BASE = 100;
@@ -23,6 +24,7 @@ export function demarrerSessionReductionVectorielle(
     exerciceCourant: generateur(),
     phase: "reduction",
     etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
     resultats: [],
     terminee: false,
   };
@@ -53,7 +55,20 @@ function cloturerExerciceOuSuivant(
     exerciceCourant: etat.generateur(),
     phase: "reduction",
     etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
   };
+}
+
+/** Révèle le niveau d'aide suivant de l'écran — lève si la session est terminée ou si le niveau
+ * maximal est déjà atteint (même contrat que les autres générateurs à aide). */
+export function activerAideSuivante(etat: EtatSessionReductionVectorielle): EtatSessionReductionVectorielle {
+  if (etat.terminee) {
+    throw new Error("activerAideSuivante : la session est déjà terminée");
+  }
+  if (etat.niveauAide >= NIVEAU_AIDE_MAX_REDUCTION) {
+    throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+  }
+  return { ...etat, niveauAide: etat.niveauAide + 1 };
 }
 
 /** Dernière (et seule) phase, clôture l'exercice. */
@@ -75,5 +90,6 @@ export function soumettreReponseReduction(etat: EtatSessionReductionVectorielle,
   return cloturerExerciceOuSuivant(etat, {
     scoreReduction: etapeCourante.score as number,
     reductionRevele: etapeCourante.revelee,
+    niveauAideReduction: etat.niveauAide,
   });
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
-import { demarrerSessionReductionVectorielle, soumettreReponseReduction } from "./moteur/sessionReductionVectorielle";
+import { activerAideSuivante, demarrerSessionReductionVectorielle, soumettreReponseReduction } from "./moteur/sessionReductionVectorielle";
 import type { EtatSessionReductionVectorielle } from "./moteur/typesReductionVectorielle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceReductionVectorielle } from "./generateurs/reductionVectorielle";
 import type { FigureReduction } from "./core/reductionVectorielle.types";
@@ -94,6 +94,8 @@ export function AppReductionVectorielle() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            niveauAide={etat.niveauAide}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte))}
             validation={validation}
           />

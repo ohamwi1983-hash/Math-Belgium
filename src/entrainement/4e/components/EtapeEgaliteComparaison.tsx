@@ -2,9 +2,12 @@ import { useState } from "react";
 import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.types";
 import { Katex } from "./Katex";
 import { VecteurGraph } from "./VecteurGraph";
-import { vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
+import { aideEgaliteComparaison, vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
 import { diagnostiquerEgalite } from "../moteur/verificationComparaisonVecteurs";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { NIVEAU_AIDE_MAX_COMPARAISON } from "../moteur/typesComparaisonVecteurs";
+import { BoutonAide } from "./BoutonAide";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -12,6 +15,8 @@ interface Props {
   exercice: ExerciceComparaisonVecteurs;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (texte: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -20,7 +25,7 @@ interface Props {
 }
 
 /** Dernière étape : écris l'égalité reliant `cibleEgalite` à `labelReference` (ex. `c = 2h`). */
-export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerEgalite(exercice, texte) : undefined;
@@ -50,8 +55,19 @@ export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentati
       </div>
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          {aideEgaliteComparaison(exercice, niveauAide).map((ligne, i) => (
+            <p key={i}>
+              <SegmentsInline segments={ligne} />
+            </p>
+          ))}
+        </div>
+      )}
+
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPARAISON.egalite} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
           Valider
         </button>

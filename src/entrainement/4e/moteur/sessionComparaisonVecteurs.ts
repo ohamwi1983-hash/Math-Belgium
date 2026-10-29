@@ -10,6 +10,7 @@ import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import { verifierEgalite, verifierSelection } from "./verificationComparaisonVecteurs";
+import { NIVEAU_AIDE_MAX_COMPARAISON } from "./typesComparaisonVecteurs";
 import type { EtatSessionComparaisonVecteurs, ResultatExerciceComparaisonVecteurs } from "./typesComparaisonVecteurs";
 
 const POINTS_DE_BASE = 100;
@@ -27,6 +28,8 @@ export function demarrerSessionComparaisonVecteurs(
     etapeCourante: demarrerEtapeTentatives(),
     scoreSelectionExercice: null,
     selectionRevele: false,
+    niveauAide: 0,
+    niveauAideSelection: 0,
     resultats: [],
     terminee: false,
   };
@@ -59,7 +62,21 @@ function cloturerExerciceOuSuivant(
     etapeCourante: demarrerEtapeTentatives(),
     scoreSelectionExercice: null,
     selectionRevele: false,
+    niveauAide: 0,
+    niveauAideSelection: 0,
   };
+}
+
+/** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée ou si le
+ * niveau maximal de cet écran est déjà atteint (même contrat que les autres générateurs à aide). */
+export function activerAideSuivante(etat: EtatSessionComparaisonVecteurs): EtatSessionComparaisonVecteurs {
+  if (etat.terminee) {
+    throw new Error("activerAideSuivante : la session est déjà terminée");
+  }
+  if (etat.niveauAide >= NIVEAU_AIDE_MAX_COMPARAISON[etat.phase]) {
+    throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+  }
+  return { ...etat, niveauAide: etat.niveauAide + 1 };
 }
 
 export function soumettreReponseSelection(etat: EtatSessionComparaisonVecteurs, labels: string[]): EtatSessionComparaisonVecteurs {
@@ -83,6 +100,8 @@ export function soumettreReponseSelection(etat: EtatSessionComparaisonVecteurs, 
     phase: "egalite",
     scoreSelectionExercice: etapeCourante.score as number,
     selectionRevele: etapeCourante.revelee,
+    niveauAide: 0,
+    niveauAideSelection: etat.niveauAide,
   };
 }
 
@@ -107,5 +126,7 @@ export function soumettreReponseEgalite(etat: EtatSessionComparaisonVecteurs, te
     selectionRevele: etat.selectionRevele,
     scoreEgalite: etapeCourante.score as number,
     egaliteRevele: etapeCourante.revelee,
+    niveauAideSelection: etat.niveauAideSelection,
+    niveauAideEgalite: etat.niveauAide,
   });
 }

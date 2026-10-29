@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceComparaisonVecteurs, ProprieteComparaison } from "./core/comparaisonVecteurs.types";
 import type { ReglagesSession } from "./core/session.types";
-import { demarrerSessionComparaisonVecteurs, soumettreReponseEgalite, soumettreReponseSelection } from "./moteur/sessionComparaisonVecteurs";
+import { activerAideSuivante, demarrerSessionComparaisonVecteurs, soumettreReponseEgalite, soumettreReponseSelection } from "./moteur/sessionComparaisonVecteurs";
 import type { EtatSessionComparaisonVecteurs, PhaseComparaisonVecteurs } from "./moteur/typesComparaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonVecteurs } from "./generateurs/comparaisonVecteurs";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -87,7 +87,8 @@ function calculerSegmentsProgression(etat: EtatSessionComparaisonVecteurs): Etat
   return ORDRE_PHASES.map((_phase, index) => {
     if (index === indexCourant) return "courante";
     if (index > indexCourant) return "a-venir";
-    return etat.selectionRevele ? "revele" : "correcte";
+    if (etat.selectionRevele) return "revele";
+    return etat.niveauAideSelection > 0 ? "aide" : "correcte";
   });
 }
 
@@ -174,6 +175,8 @@ export function AppComparaisonVecteurs() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            niveauAide={etat.niveauAide}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(labels) =>
               terminerEtape(
                 soumettreReponseSelection(etat, labels),
@@ -188,6 +191,8 @@ export function AppComparaisonVecteurs() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
+            niveauAide={etat.niveauAide}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseEgalite(etat, texte), texte)}
             validation={validation}
           />

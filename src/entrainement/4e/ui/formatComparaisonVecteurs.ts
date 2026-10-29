@@ -137,3 +137,108 @@ export function vecteursAffichesComparaison(
   }));
   return { points: [], vecteurs, viewBox };
 }
+
+type SegmentAide = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
+
+const t = (valeur: string): SegmentAide => ({ type: "texte", valeur });
+const k = (valeur: string): SegmentAide => ({ type: "katex", valeur });
+
+function vecteurColonneLatex(label: string, x: number, y: number): string {
+  return `\\vec{${label}}\\begin{pmatrix} ${x} \\\\ ${y} \\end{pmatrix}`;
+}
+
+function composantesDe(exercice: ExerciceComparaisonVecteurs, label: string): { x: number; y: number } {
+  const v = exercice.vecteurs.find((w) => w.label === label);
+  if (!v) throw new Error(`composantesDe : vecteur ${label} introuvable`);
+  return v.composantes;
+}
+
+function carreLatex(n: number): string {
+  return n < 0 ? `(${n})^2` : `${n}^2`;
+}
+
+/** Aides de l'écran « sélection » (audit chapitre 6, F4). Niveau 1 : définition du cours de la
+ * propriété demandée, sur des lettres u, v jamais tirées sur la figure. Niveau 2 : composantes de
+ * la référence lues sur la grille (et sa norme pour « longueur ») — jamais les vecteurs à
+ * sélectionner. Vocabulaire de la colinéarité uniquement (jamais celui de l'orthogonalité). */
+export function aideSelectionComparaison(exercice: ExerciceComparaisonVecteurs, niveau: number): SegmentAide[][] {
+  const lignes: SegmentAide[][] = [];
+  const ref = exercice.labelReference;
+  if (niveau >= 1) {
+    if (exercice.propriete === "longueur") {
+      lignes.push([
+        t("Deux vecteurs ont la même longueur quand ils ont la même norme — leur direction et leur sens peuvent être différents. La norme de "),
+        k("\\vec{v}\\begin{pmatrix} x \\\\ y \\end{pmatrix}"),
+        t(" vaut "),
+        k("\\sqrt{x^2 + y^2}"),
+        t("."),
+      ]);
+    } else if (exercice.propriete === "direction") {
+      lignes.push([
+        t("Deux vecteurs ont la même direction (ils sont colinéaires) quand l'un est un multiple de l'autre : "),
+        k("\\vec{v} = k\\,\\vec{u}"),
+        t(" — leurs supports sont parallèles. Leur sens et leur longueur peuvent être différents."),
+      ]);
+    } else {
+      lignes.push([
+        t("Deux vecteurs ont le même sens quand ils ont la même direction et pointent du même côté : "),
+        k("\\vec{v} = k\\,\\vec{u}"),
+        t(" avec "),
+        k("k > 0"),
+        t(". Leur longueur peut être différente."),
+      ]);
+    }
+  }
+  if (niveau >= 2) {
+    const { x, y } = composantesDe(exercice, ref);
+    lignes.push([t("Lis les composantes de la référence sur la grille : "), k(vecteurColonneLatex(ref, x, y)), t(".")]);
+    if (exercice.propriete === "longueur") {
+      const n2 = x * x + y * y;
+      const racine = Math.sqrt(n2);
+      const valeur = Number.isInteger(racine) ? `\\sqrt{${n2}} = ${racine}` : `\\sqrt{${n2}}`;
+      lignes.push([
+        t("Sa norme vaut "),
+        k(`\\sqrt{${carreLatex(x)} + ${carreLatex(y)}} = ${valeur}`),
+        t(" : lis les composantes de chaque autre vecteur et garde ceux qui ont la même norme."),
+      ]);
+    } else {
+      lignes.push([
+        t("Garde les vecteurs dont les deux composantes sont celles de "),
+        k(`\\vec{${ref}}`),
+        t(exercice.propriete === "sens" ? " multipliées par un même nombre k positif." : " multipliées par un même nombre k (positif ou négatif)."),
+      ]);
+    }
+  }
+  return lignes;
+}
+
+/** Aides de l'écran « égalité » (audit chapitre 6, F4). Niveau 1 : méthode (trouver k). Niveau 2 :
+ * composantes des deux vecteurs lues sur la grille — jamais k ni l'égalité elle-même. */
+export function aideEgaliteComparaison(exercice: ExerciceComparaisonVecteurs, niveau: number): SegmentAide[][] {
+  const lignes: SegmentAide[][] = [];
+  const ref = exercice.labelReference;
+  const cible = exercice.cibleEgalite;
+  if (niveau >= 1) {
+    lignes.push([
+      t("Les deux vecteurs ont la même direction : cherche le nombre k tel que "),
+      k(`\\vec{${cible}} = k\\,\\vec{${ref}}`),
+      t(" — chaque composante de "),
+      k(`\\vec{${cible}}`),
+      t(" est celle de "),
+      k(`\\vec{${ref}}`),
+      t(" multipliée par k. Si les deux vecteurs sont de sens contraires, k est négatif."),
+    ]);
+  }
+  if (niveau >= 2) {
+    const c = composantesDe(exercice, cible);
+    const r = composantesDe(exercice, ref);
+    lignes.push([
+      t("Composantes lues sur la grille : "),
+      k(vecteurColonneLatex(cible, c.x, c.y)),
+      t(" et "),
+      k(vecteurColonneLatex(ref, r.x, r.y)),
+      t("."),
+    ]);
+  }
+  return lignes;
+}
