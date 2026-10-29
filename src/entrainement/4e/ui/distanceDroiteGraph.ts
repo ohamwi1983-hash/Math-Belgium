@@ -130,13 +130,41 @@ function distancePointDroite(p: Point, d: DroiteImplicite): number {
   return Math.abs(d.a * p.x + d.b * p.y + d.c) / (Math.sqrt(d.a * d.a + d.b * d.b) || 1);
 }
 
+export type AttacheEtiquettePoint = "ne" | "nw" | "se" | "sw";
+
+const DIRECTIONS_ATTACHE: Record<AttacheEtiquettePoint, Point> = {
+  ne: { x: Math.SQRT1_2, y: Math.SQRT1_2 },
+  nw: { x: -Math.SQRT1_2, y: Math.SQRT1_2 },
+  se: { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
+  sw: { x: -Math.SQRT1_2, y: -Math.SQRT1_2 },
+};
+
+/** Coin où poser l'étiquette d'un point (P, Q) — le plus éloigné, en angle, des droites qui passent
+ * par ce point (audit chapitre 7, point 32 : posée au nord, l'étiquette de Q tombait pile sur la
+ * droite b quand celle-ci était verticale). */
+export function attacheEtiquettePoint(point: Point, droites: DroiteImplicite[]): AttacheEtiquettePoint {
+  const passant = droites.filter((d) => distancePointDroite(point, d) < 1e-6);
+  let meilleure: AttacheEtiquettePoint = "ne";
+  let meilleurScore = -Infinity;
+  for (const attache of ["ne", "nw", "se", "sw"] as AttacheEtiquettePoint[]) {
+    const c = DIRECTIONS_ATTACHE[attache];
+    // |sin| de l'angle entre la direction de l'étiquette et chaque droite passant par le point.
+    const score = Math.min(1, ...passant.map((d) => Math.abs(c.x * d.a + c.y * d.b) / (Math.sqrt(d.a * d.a + d.b * d.b) || 1)));
+    if (score > meilleurScore + 1e-9) {
+      meilleurScore = score;
+      meilleure = attache;
+    }
+  }
+  return meilleure;
+}
+
 /**
  * Position des étiquettes de TOUTES les droites d'un même graphe — audit chapitre 7, point 32 :
  * `pointEtiquetteDroite` place chaque étiquette sur la projection du centre du cadre, souvent pile
  * sur Q (et donc sur l'étiquette de Q, ou sur celle d'une autre droite). Ici, plusieurs positions
  * candidates le long de la partie visible de chaque droite (des deux côtés du trait) sont notées
- * par leur distance à l'obstacle le plus proche — points affichés et leur étiquette (posée au-dessus
- * du point), autres droites, étiquettes déjà placées, origine (graduations des axes) — et la mieux
+ * par leur distance à l'obstacle le plus proche — points affichés et leur étiquette (posée dans le
+ * coin choisi par `attacheEtiquettePoint`), autres droites, étiquettes déjà placées, origine (graduations des axes) — et la mieux
  * dégagée est retenue.
  */
 export function placerEtiquettesDroites(droites: DroiteImplicite[], points: Point[], viewBox: ViewBox): Point[] {
@@ -144,7 +172,13 @@ export function placerEtiquettesDroites(droites: DroiteImplicite[], points: Poin
   const hauteur = Math.abs(viewBox.y[1] - viewBox.y[0]);
   const echelle = Math.min(largeur, hauteur) || 1;
   const decalage = echelle * FRACTION_DECALAGE_PERPENDICULAIRE;
-  const obstaclesFixes: Point[] = [...points, ...points.map((p) => ({ x: p.x, y: p.y + decalage }))];
+  const obstaclesFixes: Point[] = [
+    ...points,
+    ...points.map((p) => {
+      const direction = DIRECTIONS_ATTACHE[attacheEtiquettePoint(p, droites)];
+      return { x: p.x + direction.x * decalage, y: p.y + direction.y * decalage };
+    }),
+  ];
   const placees: Point[] = [];
 
   return droites.map((d, indice) => {

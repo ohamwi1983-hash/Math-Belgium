@@ -5,7 +5,7 @@ import type { Point } from "../core/vecteur.types";
 import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
 import type { DroiteImplicite } from "../core/droite.types";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
-import { anglePenteDroite, placerEtiquettesDroites, viewBoxCadrageDistanceDroite, viewBoxDistanceDroite } from "../ui/distanceDroiteGraph";
+import { anglePenteDroite, attacheEtiquettePoint, placerEtiquettesDroites, viewBoxCadrageDistanceDroite, viewBoxDistanceDroite } from "../ui/distanceDroiteGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { pointDepuisImpliciteDroite } from "../moteur/verificationDroite";
 import { GrilleAdaptative } from "./mafsGraphPartage";
@@ -73,7 +73,7 @@ export function DistanceDroiteGraph({ lignes, points = [], cadrage }: Props) {
         {points.map((p, i) => (
           <g key={`point-${i}`}>
             <MafsPoint x={p.point.x} y={p.point.y} color={p.couleur} />
-            <Text x={p.point.x} y={p.point.y} attach="n" color={p.couleur}>
+            <Text x={p.point.x} y={p.point.y} attach={attacheEtiquettePoint(p.point, lignes.map((l) => l.droite))} attachDistance={10} color={p.couleur}>
               {p.label}
             </Text>
           </g>

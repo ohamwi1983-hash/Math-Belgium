@@ -5,9 +5,10 @@
  * `rayon_indirect` (le point marqué est décalé en diagonale — rayon retrouvé par la formule de
  * distance, jamais lisible directement sur la grille).
  *
- * Cadrage lisible (audit chapitre 7, points 41 et 43) : centre dans [−4 ; 4]², rayon ≤ 6 pour
- * `rayon_direct`, écarts |dx|, |dy| ≤ 5 pour `rayon_indirect` — la figure tient dans environ 24
- * unités, ce qui permet un quadrillage de pas 1 (chaque coordonnée entière se lit sur un nœud).
+ * Cadrage lisible (audit chapitre 7, points 41 et 43) : centre dans [−4 ; 4]², rayon ≤ 5 pour
+ * `rayon_direct`, écarts |dx|, |dy| ≤ 4 pour `rayon_indirect` (R ≤ 4√2) — la figure tient dans
+ * une douzaine d'unités de haut, ce qui permet un quadrillage de pas 1 lisible même sur téléphone
+ * (chaque coordonnée entière se lit sur un nœud).
  * Pour `rayon_indirect`, R² = dx² + dy² est toujours entier mais R est le plus souvent irrationnel
  * (√13, √20…) : c'est R² qui entre dans l'équation, exactement comme dans le cours.
  */
@@ -24,8 +25,8 @@ function signeAleatoire(): 1 | -1 {
 
 const BORNE_CENTRE = 4;
 const RAYON_DIRECT_MIN = 2;
-const RAYON_DIRECT_MAX = 6;
-const ECART_INDIRECT_MAX = 5;
+const RAYON_DIRECT_MAX = 5;
+const ECART_INDIRECT_MAX = 4;
 
 function tirerCentre(): Point {
   return { x: randomInt(-BORNE_CENTRE, BORNE_CENTRE), y: randomInt(-BORNE_CENTRE, BORNE_CENTRE) };

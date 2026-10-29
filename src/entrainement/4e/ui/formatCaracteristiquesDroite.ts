@@ -287,8 +287,8 @@ export function segmentsAideCaracteristiquesNiveau1(exercice: ExerciceCaracteris
 
 /** Conclusion d'une verticale — uniquement ce qui est demandé (jamais « α = 90° » pour Oy). */
 function conclusionVerticaleLatex(exercice: ExerciceCaracteristiquesDroite): string {
-  if (exercice.caracteristiqueDemandee === "pente") return "\\text{verticale} : \; m \\text{ et } p \\text{ n'existent pas}";
-  return `\\text{verticale} : \; \\alpha = ${Math.round(angleDemande(exercice))}^\\circ, \; p \\text{ n'existe pas}`;
+  if (exercice.caracteristiqueDemandee === "pente") return "\\text{verticale} : \\; m \\text{ et } p \\text{ n'existent pas}";
+  return `\\text{verticale} : \\; \\alpha = ${Math.round(angleDemande(exercice))}^\\circ, \\; p \\text{ n'existe pas}`;
 }
 
 /** Aide niveau 2 — formule(s) substituée(s) avec le point/vecteur CONFIRMÉS à l'écran 1, jamais
@@ -302,7 +302,7 @@ export function formatAideCaracteristiquesNiveau2Latex(exercice: ExerciceCaracte
     return `\\vec{u}${formatVecteurLatex(v)} \\Rightarrow ${conclusionVerticaleLatex(exercice)}`;
   }
   if (exercice.caracteristiqueDemandee === "pente") {
-    return `\\vec{u}${formatVecteurLatex(v)} : \; m = \\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}, \\quad p = ${formatNombreLatex(a.y)} - m\\cdot ${formatFacteurLatex(a.x)}`;
+    return `\\vec{u}${formatVecteurLatex(v)} : \\; m = \\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}, \\quad p = ${formatNombreLatex(a.y)} - m\\cdot ${formatFacteurLatex(a.x)}`;
   }
   const pente = exercice.pente!;
   const formuleAngle = exercice.caracteristiqueDemandee === "angleOx" ? "\\alpha = \\arctan(m)" : "\\alpha = 90^\\circ - \\arctan(m)";

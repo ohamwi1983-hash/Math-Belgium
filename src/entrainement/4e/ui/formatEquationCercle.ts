@@ -133,8 +133,8 @@ export function formatEquationAttendueLatex(exercice: ExerciceEquationCercle): s
   return `${formatBinomeCentreCarreLatex("x", centre.x)} + ${formatBinomeCentreCarreLatex("y", centre.y)} = ${rayonCarre}`;
 }
 
-/** Exemples de saisie choisis HORS de l'espace des tirages (centre dans [−4 ; 4]², R ≤ 6 en lecture
- * directe, R² ≤ 50 en lecture indirecte) — un placeholder ne vaut jamais la réponse (audit
+/** Exemples de saisie choisis HORS de l'espace des tirages (centre dans [−4 ; 4]², R ≤ 5 en lecture
+ * directe, R² ≤ 32 en lecture indirecte) — un placeholder ne vaut jamais la réponse (audit
  * chapitre 7, point 10). */
 export const PLACEHOLDER_COORDONNEE = "ex : 7";
 export function placeholderRayon(exercice: ExerciceEquationCercle): string {

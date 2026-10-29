@@ -2,7 +2,7 @@ import type { ExerciceEquationCercle } from "../../core/equationCercle.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
-import { viewBoxEquationCercle } from "../../ui/equationCercleGraph";
+import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../../ui/equationCercleGraph";
 import {
   CONSIGNE_CENTRE,
   CONSIGNE_EQUATION,
@@ -13,7 +13,6 @@ import {
   formatEtatActuelCentreLatex,
   formatRayonLatex,
 } from "../../ui/formatEquationCercle";
-import { RATIO_GRAPHE, etendreViewBoxPourEtiquettes } from "../../ui/mafsTransformation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercle } from "./index";
 
 /**
@@ -53,10 +52,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationC
  * `boiteMoustaches/exportEvaluation.ts`), mais réutilise autant que possible la géométrie déjà pure
  * et testée du reste du projet plutôt que d'en reconstruire une nouvelle — `viewBoxEquationCercle`
  * (`ui/equationCercleGraph.ts`, cadrage dérivé des 4 points cardinaux du cercle + le point marqué,
- * déjà utilisé côté écran), `etendreViewBoxPourEtiquettes`/`calculerPasGrille`/`RATIO_GRAPHE`
- * (`ui/mafsTransformation.ts`, même calcul de pas de grille "nombre rond" et de marge de clairance
- * que le reste du projet). Seul le rendu `<svg>` lui-même (grille, axes, ellipse représentant le
- * cercle, point, croix du centre, segment du rayon) est propre à ce fichier, aucun équivalent
+ * déjà utilisé côté écran, avec le même rapport `RATIO_GRAPHE_CERCLE`). Seul le rendu `<svg>`
+ * lui-même (grille de pas 1, axes, cercle, point, croix du centre, segment du rayon) est propre à ce fichier, aucun équivalent
  * générique n'existant à réutiliser.
  *
  * **PAS `regroupable`** : `AdaptateurFeuilleExercices.regroupable` exige à la fois une seule
@@ -120,14 +117,14 @@ interface OptionsSvgEquationCercle {
 /**
  * `<svg>` autonome du graphe de gen49 — grille de pas 1 + axes gradués, cercle tracé, point
  * marqué ; le centre (croix) et le segment du rayon ne sont ajoutés que si demandé (`options`,
- * correction uniquement). Cadrage identique à l'écran (`viewBoxEquationCercle` +
- * `etendreViewBoxPourEtiquettes`, mêmes fonctions pures que `EquationCercleGraph.tsx`), avec UNE
+ * correction uniquement). Cadrage identique à l'écran (`viewBoxEquationCercle`, même
+ * fonction pure que `EquationCercleGraph.tsx`), avec UNE
  * seule échelle sur les deux axes : le cercle est un vrai `<circle>`, jamais une ellipse.
  */
 function construireSvgEquationCercle(exercice: ExerciceEquationCercle, options: OptionsSvgEquationCercle = {}): string {
-  const viewBox = etendreViewBoxPourEtiquettes(viewBoxEquationCercle(exercice));
+  const viewBox = viewBoxEquationCercle(exercice);
   const largeur = LARGEUR_SVG;
-  const hauteur = Math.round(largeur / RATIO_GRAPHE);
+  const hauteur = Math.round(largeur / RATIO_GRAPHE_CERCLE);
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
   // UNE seule échelle pour les deux axes (audit chapitre 7, point 41) : deux échelles
