@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersXBar, ExerciceBienaymeTchebychevNombreVersXBar } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
-import { LABEL_XBAR, PRECISION_UNITE, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieXBarBienaymeTchebychev, gererKeyDownXBarBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { LABEL_XBAR, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -26,9 +26,10 @@ interface Props {
 
 const MAX = 2;
 
-/** Rôle "x̄ retrouvé" (v6XBar, v8XBar) — dernier écran, arrondi standard (pas de piège). k (et le
- * pourcentage écran 0 pour V8) sont listés dans le récapitulatif "Ce qu'on sait déjà" au niveau de
- * l'App. */
+/** Rôle "x̄ retrouvé" (v6XBar, v8XBar) — dernier écran, sans écran k avant lui : l'intervalle de
+ * Bienaymé-Tchebychev [x̄ − kσ ; x̄ + kσ] est symétrique, x̄ se lit donc en son centre (valeur exacte,
+ * aucun arrondi). Le pourcentage de l'écran 0 (V8) reste listé dans le récapitulatif "Ce qu'on sait
+ * déjà" au niveau de l'App. */
 export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
@@ -37,7 +38,7 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
   return (
     <div>
       <p className="prompt-text">
-        Quelle est la moyenne <Katex expression={LABEL_XBAR} /> (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
+        Quelle est la moyenne <Katex expression={LABEL_XBAR} /> (en {exercice.contexte.unite}) ? (valeur exacte)
       </p>
 
       <div className="field field-inline">
@@ -49,8 +50,8 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 172"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownBienaymeTchebychev}
+          onChange={(e) => setTexte(filtrerSaisieXBarBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownXBarBienaymeTchebychev}
         />
       </div>
 

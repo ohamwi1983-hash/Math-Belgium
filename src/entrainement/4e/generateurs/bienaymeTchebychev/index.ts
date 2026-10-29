@@ -159,14 +159,15 @@ export function construireIntervalleVersXBar(): ExerciceBienaymeTchebychevInterv
   const contexte = tirerContexte();
   const sigma = tirerSigma(contexte);
   const pourcentDonne = tirerPourcentDonne();
-  const kAttendu = arrondi2(kDepuisPourcent(pourcentDonne));
+  // k ne sert qu'à construire l'intervalle : il n'est jamais demandé dans cette variante.
+  const k = arrondi2(kDepuisPourcent(pourcentDonne));
   const xBarCible = tirerXBar(contexte);
-  const d = Math.round(kAttendu * sigma);
+  const d = Math.round(k * sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
   // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
   const xBarAttendu = (borneInf + borneSup) / 2;
-  return { variante: "intervalleVersXBar", contexte, sigma, pourcentDonne, borneInf, borneSup, kAttendu, xBarAttendu };
+  return { variante: "intervalleVersXBar", contexte, sigma, pourcentDonne, borneInf, borneSup, xBarAttendu };
 }
 
 export function construireNombreVersSigma(): ExerciceBienaymeTchebychevNombreVersSigma {
@@ -190,14 +191,15 @@ export function construireNombreVersXBar(): ExerciceBienaymeTchebychevNombreVers
   const n = tirerN();
   const nombreMinDonne = tirerNombreMinDonne(n);
   const pourcentAttendu0 = arrondi2((100 * nombreMinDonne) / n);
-  const kAttendu = arrondi2(kDepuisPourcent(pourcentAttendu0));
+  // k ne sert qu'à construire l'intervalle : il n'est jamais demandé dans cette variante.
+  const k = arrondi2(kDepuisPourcent(pourcentAttendu0));
   const xBarCible = tirerXBar(contexte);
-  const d = Math.round(kAttendu * sigma);
+  const d = Math.round(k * sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
   // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
   const xBarAttendu = (borneInf + borneSup) / 2;
-  return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, pourcentAttendu0, kAttendu, xBarAttendu };
+  return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, pourcentAttendu0, xBarAttendu };
 }
 
 function construireUneFois(varianteId: VarianteBienaymeTchebychev): ExerciceBienaymeTchebychev {

@@ -875,6 +875,14 @@ export const statistiqueDescriptive: ChapterContent = {
           result: { tag: 'résultat', text: 'c\'est dans l\'intervalle $[\\bar{x}-\\sqrt{20}\\sigma\\,;\\,\\bar{x}+\\sqrt{20}\\sigma]$ qu\'il y a au moins 95 % des valeurs' },
         },
         {
+          kind: 'astuce',
+          label: 'Retrouver la moyenne',
+          text:
+            'L\'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$ est **symétrique** autour de ' +
+            '$\\bar{x}$ : si l\'énoncé te le donne sous la forme $[a\\,;\\,b]$, la moyenne est son ' +
+            'centre, $\\bar{x} = \\dfrac{a+b}{2}$ — inutile de calculer k.',
+        },
+        {
           kind: 'piege',
           label: 'Arrondir sans perdre la garantie',
           text:

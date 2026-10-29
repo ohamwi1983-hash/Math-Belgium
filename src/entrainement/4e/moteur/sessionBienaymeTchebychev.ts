@@ -106,13 +106,11 @@ function construireResultat(
   const v4Intervalle = champ(scoresAccumules, "v4Intervalle");
   const v5K = champ(scoresAccumules, "v5K");
   const v5Sigma = champ(scoresAccumules, "v5Sigma");
-  const v6K = champ(scoresAccumules, "v6K");
   const v6XBar = champ(scoresAccumules, "v6XBar");
   const v7Pourcent0 = champ(scoresAccumules, "v7Pourcent0");
   const v7K = champ(scoresAccumules, "v7K");
   const v7Sigma = champ(scoresAccumules, "v7Sigma");
   const v8Pourcent0 = champ(scoresAccumules, "v8Pourcent0");
-  const v8K = champ(scoresAccumules, "v8K");
   const v8XBar = champ(scoresAccumules, "v8XBar");
 
   return {
@@ -153,9 +151,6 @@ function construireResultat(
     scoreV5Sigma: v5Sigma.score,
     v5SigmaRevele: v5Sigma.revele,
     niveauAideV5Sigma: v5Sigma.niveauAide,
-    scoreV6K: v6K.score,
-    v6KRevele: v6K.revele,
-    niveauAideV6K: v6K.niveauAide,
     scoreV6XBar: v6XBar.score,
     v6XBarRevele: v6XBar.revele,
     niveauAideV6XBar: v6XBar.niveauAide,
@@ -171,9 +166,6 @@ function construireResultat(
     scoreV8Pourcent0: v8Pourcent0.score,
     v8Pourcent0Revele: v8Pourcent0.revele,
     niveauAideV8Pourcent0: v8Pourcent0.niveauAide,
-    scoreV8K: v8K.score,
-    v8KRevele: v8K.revele,
-    niveauAideV8K: v8K.niveauAide,
     scoreV8XBar: v8XBar.score,
     v8XBarRevele: v8XBar.revele,
     niveauAideV8XBar: v8XBar.niveauAide,
@@ -304,12 +296,6 @@ export function soumettreReponseV5Sigma(etat: EtatSessionBienaymeTchebychev, tex
   return soumettrePhase(etat, "v5Sigma", texte, (t) => verifierSigma(exercice, t));
 }
 
-export function soumettreReponseV6K(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "intervalleVersXBar") throw new Error("soumettreReponseV6K : réservé à la variante 'intervalleVersXBar'");
-  return soumettrePhase(etat, "v6K", texte, (t) => verifierK(exercice, t));
-}
-
 export function soumettreReponseV6XBar(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "intervalleVersXBar") throw new Error("soumettreReponseV6XBar : réservé à la variante 'intervalleVersXBar'");
@@ -338,12 +324,6 @@ export function soumettreReponseV8Pourcent0(etat: EtatSessionBienaymeTchebychev,
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "nombreVersXBar") throw new Error("soumettreReponseV8Pourcent0 : réservé à la variante 'nombreVersXBar'");
   return soumettrePhase(etat, "v8Pourcent0", texte, (t) => verifierPourcentDepuisNombre(exercice, t));
-}
-
-export function soumettreReponseV8K(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "nombreVersXBar") throw new Error("soumettreReponseV8K : réservé à la variante 'nombreVersXBar'");
-  return soumettrePhase(etat, "v8K", texte, (t) => verifierK(exercice, t));
 }
 
 export function soumettreReponseV8XBar(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {

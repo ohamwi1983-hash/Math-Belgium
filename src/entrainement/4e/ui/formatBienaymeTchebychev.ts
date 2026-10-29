@@ -39,7 +39,13 @@
  * affichée (tolérance minime, bruit de virgule flottante) pour décider "=" (aucun arrondi réel) vs
  * "≈" (un arrondi a réellement changé la valeur).
  */
-import type { ContexteBienaymeTchebychev, ExerciceBienaymeTchebychev, VarianteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
+import type {
+  ContexteBienaymeTchebychev,
+  ExerciceBienaymeTchebychev,
+  ExerciceBienaymeTchebychevIntervalleVersXBar,
+  ExerciceBienaymeTchebychevNombreVersXBar,
+  VarianteBienaymeTchebychev,
+} from "../core/bienaymeTchebychev.types";
 import { aupresDesPopulationMajuscule, de } from "./phrasesContexteStatistique";
 import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
@@ -226,7 +232,7 @@ function segmentsQuestionV8(contexte: ContexteBienaymeTchebychev, n: number, nom
 }
 
 /** Unique source de l'énoncé (contexte + question) pour les 8 variantes — consommée telle quelle
- * par les 20 écrans (`EnonceBienaymeTchebychev.tsx`), jamais recalculée différemment d'un écran à
+ * par les 18 écrans (`EnonceBienaymeTchebychev.tsx`), jamais recalculée différemment d'un écran à
  * l'autre de la même variante (règle d'affichage transversale). */
 export function formatEnonceSegments(exercice: ExerciceBienaymeTchebychev): SegmentTexte[] {
   switch (exercice.variante) {
@@ -292,25 +298,33 @@ export interface ValeurEtatActuel {
   exact: boolean;
 }
 
-function kValeurExacte(exercice: ExerciceBienaymeTchebychev): number {
+/** Variantes qui demandent k — toutes sauf V6/V8 (x̄ se lit au centre de l'intervalle, sans k). */
+export type ExerciceBienaymeTchebychevAvecK = Exclude<
+  ExerciceBienaymeTchebychev,
+  ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar
+>;
+
+export function demandeK(exercice: ExerciceBienaymeTchebychev): exercice is ExerciceBienaymeTchebychevAvecK {
+  return exercice.variante !== "intervalleVersXBar" && exercice.variante !== "nombreVersXBar";
+}
+
+function kValeurExacte(exercice: ExerciceBienaymeTchebychevAvecK): number {
   switch (exercice.variante) {
     case "intervalleVersPourcent":
     case "intervalleVersNombre":
       return (exercice.borneSup - exercice.xBar) / exercice.sigma;
     case "pourcentVersIntervalle":
     case "intervalleVersSigma":
-    case "intervalleVersXBar":
       return Math.sqrt(100 / (100 - exercice.pourcentDonne));
     case "nombreVersIntervalle":
     case "nombreVersSigma":
-    case "nombreVersXBar":
       return Math.sqrt(100 / (100 - exercice.pourcentAttendu0));
   }
 }
 
 /** État actuel de k — appelée uniquement sur des écrans APRÈS le rôle "k depuis...", où
  * `exercice.kAttendu` est déjà confirmé. */
-export function kEtatActuel(exercice: ExerciceBienaymeTchebychev): ValeurEtatActuel {
+export function kEtatActuel(exercice: ExerciceBienaymeTchebychevAvecK): ValeurEtatActuel {
   return { valeur: exercice.kAttendu, exact: estArrondiExact(kValeurExacte(exercice), exercice.kAttendu) };
 }
 
@@ -374,7 +388,7 @@ export function texteAideKDepuisIntervalleNiveau2(exercice: { xBar: number; sigm
 }
 
 // ============================================================================
-// Aides — rôle "k depuis un pourcentage donné" (v2K, v4K, v5K, v6K, v7K, v8K).
+// Aides — rôle "k depuis un pourcentage donné" (v2K, v4K, v5K, v7K).
 // ============================================================================
 
 export function texteAideKDepuisPourcentNiveau1(): AideAvecFormule {
@@ -444,22 +458,22 @@ export function texteAideSigmaNiveau2(exercice: { borneSup: number; xBar: number
 }
 
 // ============================================================================
-// Aides — rôle "x̄ retrouvé" (v6XBar, v8XBar) — même principe en miroir : Aide 1 = même formule
-// générale non isolée (identique à celle de σ, seule l'inconnue à retrouver diffère) ; Aide 2 =
-// équation substituée, non résolue pour x̄.
+// Aides — rôle "x̄ retrouvé" (v6XBar, v8XBar) : x̄ se lit au centre de l'intervalle symétrique
+// [x̄ − kσ ; x̄ + kσ] (aucun écran k). Aide 1 = propriété de symétrie, non substituée ; Aide 2 =
+// milieu substitué avec les bornes de l'énoncé, non calculé.
 // ============================================================================
 
 export function texteAideXBarNiveau1(): AideAvecFormule {
   return {
-    texte: "Formule de l'intervalle garanti, sans isoler x̄ (non substituée) :",
-    latex: `\\text{borne sup} = ${LABEL_XBAR} + ${LABEL_K}${LABEL_SIGMA}`,
+    texte: "L'intervalle de Bienaymé-Tchebychev est symétrique autour de la moyenne : la moyenne en est le centre.",
+    latex: `\\left[\\,${LABEL_XBAR} - ${LABEL_K}${LABEL_SIGMA}\\,;\\,${LABEL_XBAR} + ${LABEL_K}${LABEL_SIGMA}\\,\\right]`,
   };
 }
 
-export function texteAideXBarNiveau2(exercice: { borneSup: number; sigma: number; kAttendu: number }): AideAvecFormule {
+export function texteAideXBarNiveau2(exercice: { borneInf: number; borneSup: number }): AideAvecFormule {
   return {
-    texte: "Équation substituée avec le k validé à l'écran précédent et la borne connue (non résolue) :",
-    latex: `${LABEL_XBAR} + ${formatNombreLatex(exercice.kAttendu)}\\times ${exercice.sigma} = ${exercice.borneSup}`,
+    texte: "Le centre de l'intervalle donné est la moyenne de ses deux bornes (calcul non effectué) :",
+    latex: `${LABEL_XBAR} = \\dfrac{${formatNombreLatex(exercice.borneInf)} + ${formatNombreLatex(exercice.borneSup)}}{2}`,
   };
 }
 
@@ -469,7 +483,7 @@ export function texteAideXBarNiveau2(exercice: { borneSup: number; sigma: number
 // (absent de la liste du point 5, reste un simple "X individus").
 // ============================================================================
 
-export function formatKAttenduTexte(exercice: ExerciceBienaymeTchebychev): string {
+export function formatKAttenduTexte(exercice: ExerciceBienaymeTchebychevAvecK): string {
   const v = kEtatActuel(exercice);
   return virgulesTexte(`k ${v.exact ? "=" : "≈"} ${formatNombreTexte(v.valeur)}`);
 }

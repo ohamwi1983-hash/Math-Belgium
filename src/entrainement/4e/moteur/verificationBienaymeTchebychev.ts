@@ -9,6 +9,7 @@
  * ("Vérification par égalité exacte sur la valeur numérique attendue telle que calculée par le
  * générateur", `promptgen37refonte.md`).
  */
+import { evaluerExpressionGenerale } from "./expressionGenerale";
 import { parserNombreOuFraction } from "./verificationAnalyseFonction";
 import type { StatutVerification } from "./statutVerification";
 
@@ -124,17 +125,29 @@ export function verifierSigma(exercice: { sigmaAttendu: number }, texte: string)
 // x̄ retrouvé (V6/V8).
 // ============================================================================
 
-type ExerciceXBar = { xBarAttendu: number; borneInf: number; borneSup: number; sigma: number; kAttendu: number };
+type ExerciceXBar = { xBarAttendu: number };
 
-/** x̄ = milieu de l'intervalle symétrique (cible principale) ; on accepte aussi la valeur obtenue
- * par « borne sup − kσ » ou « borne inf + kσ » avec le k validé à l'écran précédent, arrondie à
- * l'unité (même consigne d'arrondi). */
+/** x̄ = centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ] donné dans l'énoncé — la cible est
+ * exacte (milieu de deux bornes) ; toute écriture équivalente du nombre est acceptée (décimal,
+ * virgule, fraction, ou le calcul « (a+b)/2 » saisi tel quel). */
 export function diagnostiquerXBar(exercice: ExerciceXBar, texte: string): StatutVerification {
   const statut = statutValeur(texte, exercice.xBarAttendu);
-  if (statut !== "not_equivalent") return statut;
-  const parSup = Math.round(exercice.borneSup - exercice.kAttendu * exercice.sigma + 1e-9);
-  const parInf = Math.round(exercice.borneInf + exercice.kAttendu * exercice.sigma + 1e-9);
-  return statutValeur(texte, parSup) === "correct" || statutValeur(texte, parInf) === "correct" ? "correct" : "not_equivalent";
+  if (statut !== "parse_error") return statut;
+  const valeur = expressionNumerique(normaliserSaisieBienaymeTchebychev(texte).replace(/,/g, "."));
+  if (valeur === null) return "parse_error";
+  return Math.abs(valeur - exercice.xBarAttendu) <= TOLERANCE ? "correct" : "not_equivalent";
+}
+
+/** Calcul numérique sans x (« (12+30)/2 ») — `null` si la saisie ne se lit pas ou dépend de x. */
+function expressionNumerique(texte: string): number | null {
+  if (texte.trim() === "") return null;
+  try {
+    const v0 = evaluerExpressionGenerale(texte, 0);
+    const v1 = evaluerExpressionGenerale(texte, 1);
+    return Number.isFinite(v0) && Math.abs(v0 - v1) <= TOLERANCE ? v0 : null;
+  } catch {
+    return null;
+  }
 }
 
 export function verifierXBar(exercice: ExerciceXBar, texte: string): boolean {

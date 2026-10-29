@@ -13,6 +13,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
+  type ExerciceBienaymeTchebychevAvecK,
   formatEnonceSegments,
   formatIntervalleAttenduTexte,
   formatKAttenduTexte,
@@ -39,6 +40,7 @@ import {
   texteAidePourcentNiveau2,
   texteAideSigmaNiveau1,
   texteAideSigmaNiveau2,
+  texteAideXBarNiveau1,
   texteAideXBarNiveau2,
   type SegmentTexte,
 } from "../../ui/formatBienaymeTchebychev";
@@ -65,11 +67,11 @@ import { avecVirgulesBelges } from "../../ui/nombreFr";
  * - `intervalleVersSigma` (`construireIntervalleVersSigma`) : x̄, intervalle, pourcentage minimal
  *   donnés → k → σ (arrondi standard, à l'unité).
  * - `intervalleVersXBar` (`construireIntervalleVersXBar`) : σ, intervalle, pourcentage minimal
- *   donnés → k → x̄ (arrondi standard, à l'unité).
+ *   donnés → x̄, centre de l'intervalle (valeur exacte, aucun k).
  * - `nombreVersSigma` (`construireNombreVersSigma`) : x̄, intervalle, n, nombre minimal donnés →
  *   pourcentage minimal (arrondi standard) → k → σ (arrondi standard, à l'unité).
  * - `nombreVersXBar` (`construireNombreVersXBar`) : σ, intervalle, n, nombre minimal donnés →
- *   pourcentage minimal (arrondi standard) → k → x̄ (arrondi standard, à l'unité).
+ *   pourcentage minimal (arrondi standard) → x̄, centre de l'intervalle (valeur exacte, aucun k).
  *
  * `ExerciceBienaymeTchebychev` est une UNION discriminée sur `variante` (8 interfaces distinctes,
  * `core/bienaymeTchebychev.types.ts`), jamais un type unique aux champs optionnels — chaque
@@ -112,7 +114,7 @@ import { avecVirgulesBelges } from "../../ui/nombreFr";
  * l'élève contre points) deviennent les étapes de calcul détaillées, et les valeurs finales
  * proviennent des fonctions `formatXxxAttenduTexte` du panneau de révélation
  * (`ResultatPanelBienaymeTchebychev.tsx`) — MÊME correspondance variante→formateur que ce composant :
- * `formatKAttenduTexte` (toutes), `formatPourcentAttenduTexte` (V1/V3), `formatIntervalleAttenduTexte`
+ * `formatKAttenduTexte` (toutes sauf V6/V8), `formatPourcentAttenduTexte` (V1/V3), `formatIntervalleAttenduTexte`
  * (V2/V4), `formatNombreAttenduTexte` (V3), `formatPourcentDepuisNombreAttenduTexte` (V4/V7/V8),
  * `formatSigmaAttenduTexte` (V5/V7), `formatXBarAttenduTexte` (V6/V8). Ces fonctions portent déjà le
  * bon signe "=" vs "≈" (arrondi exact ou non, voir le commentaire de tête de
@@ -159,11 +161,11 @@ function construireConsigneTravail(instance: ExerciceBienaymeTchebychev): string
     case "intervalleVersSigma":
       return `Calcule k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
     case "intervalleVersXBar":
-      return `Calcule la moyenne x̄ demandée (${PRECISION_UNITE}) : l'intervalle garanti est centré sur x̄. Tu peux aussi passer par k (${PRECISION_K}). Détaille chaque étape.`;
+      return `Détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
     case "nombreVersSigma":
       return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
     case "nombreVersXBar":
-      return `Calcule la moyenne x̄ demandée (${PRECISION_UNITE}) : l'intervalle garanti est centré sur x̄. Tu peux aussi passer par le pourcentage correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}) et k (${PRECISION_K}). Détaille chaque étape.`;
+      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
   }
 }
 
@@ -192,10 +194,10 @@ function etapeKDepuisIntervalle(instance: ExerciceBienaymeTchebychevIntervalleVe
   ];
 }
 
-/** Étape "k depuis le pourcentage donné" (V2, V4, V5, V6, V7, V8) — `pourcentAffiche` est le
- * pourcentage déjà connu à ce stade : donné directement en énoncé (V2/V5/V6, `pourcentDonne`) ou
- * lui-même déjà calculé à l'étape précédente (V4/V7/V8, `pourcentAttendu0`). */
-function etapeKDepuisPourcent(instance: ExerciceBienaymeTchebychev, pourcentAffiche: number): FragmentConsigne[] {
+/** Étape "k depuis le pourcentage donné" (V2, V4, V5, V7) — `pourcentAffiche` est le pourcentage
+ * déjà connu à ce stade : donné directement en énoncé (V2/V5, `pourcentDonne`) ou lui-même déjà
+ * calculé à l'étape précédente (V4/V7, `pourcentAttendu0`). */
+function etapeKDepuisPourcent(instance: ExerciceBienaymeTchebychevAvecK, pourcentAffiche: number): FragmentConsigne[] {
   const aide1 = texteAideKDepuisPourcentNiveau1();
   const aide2 = texteAideKDepuisPourcentNiveau2(pourcentAffiche);
   return [
@@ -272,16 +274,17 @@ function etapeSigma(instance: ExerciceBienaymeTchebychevIntervalleVersSigma | Ex
 }
 
 /** Étape "moyenne x̄ retrouvée" (V6, V8) — l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est symétrique
- * autour de x̄ : x̄ est son milieu. La méthode par k (équation substituée des aides) est rappelée en
- * contrôle. */
+ * autour de x̄ : x̄ est son milieu (aucun calcul de k, comme sur l'écran interactif). Mêmes formules
+ * que les aides de `EtapeXBarFinal.tsx`. */
 function etapeXBar(instance: ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar): FragmentConsigne[] {
+  const aide1 = texteAideXBarNiveau1();
   const aide2 = texteAideXBarNiveau2(instance);
   return [
-    texte("L'intervalle garanti est centré sur la moyenne : "),
-    latex(`\\bar{x} = \\dfrac{${formatNombreLatex(instance.borneInf)} + ${formatNombreLatex(instance.borneSup)}}{2}`),
-    texte(` — ${formatXBarAttenduTexte(instance)} (${PRECISION_UNITE}). Contrôle avec le k trouvé ci-dessus : `),
+    texte(`${aide1.texte} `),
+    latex(aide1.latex),
+    texte(" — avec les bornes données : "),
     latex(aide2.latex),
-    texte("."),
+    texte(` — ${formatXBarAttenduTexte(instance)}.`),
   ];
 }
 
@@ -324,7 +327,6 @@ function construireCorrectionBienaymeTchebychev(instance: ExerciceBienaymeTcheby
     case "intervalleVersXBar":
       return [
         intro,
-        { type: "paragraphe", fragments: etapeKDepuisPourcent(instance, instance.pourcentDonne) },
         { type: "paragraphe", fragments: etapeXBar(instance) },
       ];
     case "nombreVersSigma":
@@ -338,7 +340,6 @@ function construireCorrectionBienaymeTchebychev(instance: ExerciceBienaymeTcheby
       return [
         intro,
         { type: "paragraphe", fragments: etapePourcentDepuisNombre(instance) },
-        { type: "paragraphe", fragments: etapeKDepuisPourcent(instance, instance.pourcentAttendu0) },
         { type: "paragraphe", fragments: etapeXBar(instance) },
       ];
   }

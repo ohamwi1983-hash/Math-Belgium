@@ -2,7 +2,7 @@ import type { EtatSessionBienaymeTchebychev, PhaseBienaymeTchebychev } from "../
 import { SEQUENCES } from "../moteur/typesBienaymeTchebychev";
 import type { ExerciceBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatEtatActuelKLatex, formatEtatActuelPourcentLatex, kEtatActuel, pourcentAttendu0EtatActuel, pourcentAttenduEtatActuel } from "./formatBienaymeTchebychev";
+import { demandeK, formatEtatActuelKLatex, formatEtatActuelPourcentLatex, kEtatActuel, pourcentAttendu0EtatActuel, pourcentAttenduEtatActuel } from "./formatBienaymeTchebychev";
 
 /**
  * Valeur d'une entrée du récapitulatif pour une phase donnée — réutilise TELLES QUELLES les
@@ -17,9 +17,8 @@ function valeurPourPhase(exercice: ExerciceBienaymeTchebychev, phase: PhaseBiena
     case "v3K":
     case "v4K":
     case "v5K":
-    case "v6K":
     case "v7K":
-    case "v8K":
+      if (!demandeK(exercice)) throw new Error(`recapitulatifBienaymeTchebychev : exercice sans k (${phase})`);
       return { libelle: "k", estLatex: true, valeur: formatEtatActuelKLatex(kEtatActuel(exercice)) };
     case "v4Pourcent0":
     case "v7Pourcent0":

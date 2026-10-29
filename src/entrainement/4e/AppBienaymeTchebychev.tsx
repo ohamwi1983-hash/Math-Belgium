@@ -16,12 +16,10 @@ import {
   soumettreReponseV4Pourcent0,
   soumettreReponseV5K,
   soumettreReponseV5Sigma,
-  soumettreReponseV6K,
   soumettreReponseV6XBar,
   soumettreReponseV7K,
   soumettreReponseV7Pourcent0,
   soumettreReponseV7Sigma,
-  soumettreReponseV8K,
   soumettreReponseV8Pourcent0,
   soumettreReponseV8XBar,
 } from "./moteur/sessionBienaymeTchebychev";
@@ -146,7 +144,6 @@ function construireReponseAttendue(
     if (etat.phase === "v5Sigma") return <>σ attendu : {formatSigmaAttenduTexte(exercice)}</>;
   }
   if (exercice.variante === "intervalleVersXBar") {
-    if (etat.phase === "v6K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
     if (etat.phase === "v6XBar") return <>x̄ attendu : {formatXBarAttenduTexte(exercice)}</>;
   }
   if (exercice.variante === "nombreVersSigma") {
@@ -156,7 +153,6 @@ function construireReponseAttendue(
   }
   if (exercice.variante === "nombreVersXBar") {
     if (etat.phase === "v8Pourcent0") return <>% minimal attendu : {formatPourcentDepuisNombreAttenduTexte(exercice)}</>;
-    if (etat.phase === "v8K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
     if (etat.phase === "v8XBar") return <>x̄ attendu : {formatXBarAttenduTexte(exercice)}</>;
   }
   return undefined;
@@ -391,17 +387,6 @@ export function AppBienaymeTchebychev() {
               onValider={(texte) => terminerEtape(soumettreReponseV5Sigma(etat, texte), texte)}
               validation={validation}
             />
-          ) : etat.phase === "v6K" && exercice.variante === "intervalleVersXBar" ? (
-            <EtapeKDepuisPourcent
-              key={`${numeroExercice}-${etat.phase}`}
-              exercice={exercice}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAide}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV6K(etat, texte), texte)}
-              validation={validation}
-            />
           ) : etat.phase === "v6XBar" && exercice.variante === "intervalleVersXBar" ? (
             <EtapeXBarFinal
               key={`${numeroExercice}-${etat.phase}`}
@@ -451,17 +436,6 @@ export function AppBienaymeTchebychev() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(texte) => terminerEtape(soumettreReponseV8Pourcent0(etat, texte), texte)}
-              validation={validation}
-            />
-          ) : etat.phase === "v8K" && exercice.variante === "nombreVersXBar" ? (
-            <EtapeKDepuisPourcent
-              key={`${numeroExercice}-${etat.phase}`}
-              exercice={exercice}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAide}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV8K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v8XBar" && exercice.variante === "nombreVersXBar" ? (

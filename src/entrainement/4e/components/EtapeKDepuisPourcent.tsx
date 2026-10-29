@@ -1,10 +1,8 @@
 import { useState } from "react";
 import type {
   ExerciceBienaymeTchebychevIntervalleVersSigma,
-  ExerciceBienaymeTchebychevIntervalleVersXBar,
   ExerciceBienaymeTchebychevNombreVersIntervalle,
   ExerciceBienaymeTchebychevNombreVersSigma,
-  ExerciceBienaymeTchebychevNombreVersXBar,
   ExerciceBienaymeTchebychevPourcentVersIntervalle,
 } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
@@ -20,9 +18,7 @@ type Exercice =
   | ExerciceBienaymeTchebychevPourcentVersIntervalle
   | ExerciceBienaymeTchebychevNombreVersIntervalle
   | ExerciceBienaymeTchebychevIntervalleVersSigma
-  | ExerciceBienaymeTchebychevIntervalleVersXBar
-  | ExerciceBienaymeTchebychevNombreVersSigma
-  | ExerciceBienaymeTchebychevNombreVersXBar;
+  | ExerciceBienaymeTchebychevNombreVersSigma;
 
 interface Props {
   exercice: Exercice;
@@ -39,26 +35,24 @@ interface Props {
 
 const MAX = 2;
 
-/** Pourcentage à substituer dans l'aide niveau 2 — soit la donnée directe `pourcentDonne` (V2/V5/V6),
- * soit la valeur CONFIRMÉE à l'écran précédent `pourcentAttendu0` (V4/V7/V8). Discrimination par
+/** Pourcentage à substituer dans l'aide niveau 2 — soit la donnée directe `pourcentDonne` (V2/V5),
+ * soit la valeur CONFIRMÉE à l'écran précédent `pourcentAttendu0` (V4/V7). Discrimination par
  * `switch` sur `variante` (jamais un `in`/`??` en cascade, qui ne narrowe pas correctement l'union
  * après une variable intermédiaire). */
 function pourcentAffichePour(exercice: Exercice): number {
   switch (exercice.variante) {
     case "pourcentVersIntervalle":
     case "intervalleVersSigma":
-    case "intervalleVersXBar":
       return exercice.pourcentDonne;
     case "nombreVersIntervalle":
     case "nombreVersSigma":
-    case "nombreVersXBar":
       return exercice.pourcentAttendu0;
   }
 }
 
-/** Rôle "k depuis un pourcentage donné" (v2K, v4K, v5K, v6K, v7K, v8K) — le pourcentage est soit une
- * DONNÉE directe de l'énoncé (V2/V5/V6, `pourcentDonne`, déjà affiché dans l'énoncé), soit une valeur
- * CONFIRMÉE à l'écran précédent (V4/V7/V8, `pourcentAttendu0`, listée dans le récapitulatif "Ce
+/** Rôle "k depuis un pourcentage donné" (v2K, v4K, v5K, v7K) — le pourcentage est soit une
+ * DONNÉE directe de l'énoncé (V2/V5, `pourcentDonne`, déjà affiché dans l'énoncé), soit une valeur
+ * CONFIRMÉE à l'écran précédent (V4/V7, `pourcentAttendu0`, listée dans le récapitulatif "Ce
  * qu'on sait déjà" au niveau de l'App plutôt que rappelée ici). */
 export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");

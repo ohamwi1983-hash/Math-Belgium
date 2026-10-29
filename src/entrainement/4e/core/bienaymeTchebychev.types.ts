@@ -33,12 +33,12 @@
  *   arrondi standard à 2 décimales, AUCUNE aide) → k → intervalle (bornes élargies).
  * - `intervalleVersSigma` (V5) : x̄, intervalle, pourcentage minimal donnés → k → σ (arrondi
  *   mathématique standard, à l'unité).
- * - `intervalleVersXBar` (V6) : σ, intervalle, pourcentage minimal donnés → k → x̄ (arrondi
- *   standard).
+ * - `intervalleVersXBar` (V6) : σ, intervalle, pourcentage minimal donnés → x̄, lu directement
+ *   comme le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ] (aucun écran k).
  * - `nombreVersSigma` (V7) : x̄, intervalle, n, nombre minimal donnés → pourcentage minimal (écran
  *   0, AUCUNE aide) → k → σ (arrondi standard).
  * - `nombreVersXBar` (V8) : σ, intervalle, n, nombre minimal donnés → pourcentage minimal (écran
- *   0, AUCUNE aide) → k → x̄ (arrondi standard).
+ *   0, AUCUNE aide) → x̄, centre de l'intervalle symétrique (aucun écran k).
  */
 /** Un contexte narratif (population + caractère étudié) — voir `generateurs/bienaymeTchebychev/
  * contextes.ts` pour la banque de 30 entrées tirées aléatoirement. Le contrat lui-même n'importe
@@ -155,8 +155,9 @@ export interface ExerciceBienaymeTchebychevIntervalleVersSigma {
   sigmaAttendu: number;
 }
 
-/** V6 — intervalle + pourcentage minimal donnés (σ connu) → k → x̄ (2 écrans, `xBarAttendu`
- * terminal). */
+/** V6 — intervalle + pourcentage minimal donnés (σ connu) → x̄ (1 écran, `xBarAttendu` terminal) :
+ * l'intervalle de Bienaymé-Tchebychev est symétrique autour de x̄, qui se lit en son centre — k
+ * n'est jamais demandé (il ne sert qu'à construire l'intervalle). */
 export interface ExerciceBienaymeTchebychevIntervalleVersXBar {
   variante: "intervalleVersXBar";
   contexte: ContexteBienaymeTchebychev;
@@ -164,7 +165,6 @@ export interface ExerciceBienaymeTchebychevIntervalleVersXBar {
   pourcentDonne: number;
   borneInf: number;
   borneSup: number;
-  kAttendu: number;
   xBarAttendu: number;
 }
 
@@ -184,7 +184,7 @@ export interface ExerciceBienaymeTchebychevNombreVersSigma {
 }
 
 /** V8 — intervalle + n + nombre minimal donnés (σ connu) → pourcentage (écran 0, aucune aide) →
- * k → x̄ (3 écrans, `xBarAttendu` terminal). */
+ * x̄, centre de l'intervalle symétrique (2 écrans, `xBarAttendu` terminal, k jamais demandé). */
 export interface ExerciceBienaymeTchebychevNombreVersXBar {
   variante: "nombreVersXBar";
   contexte: ContexteBienaymeTchebychev;
@@ -194,7 +194,6 @@ export interface ExerciceBienaymeTchebychevNombreVersXBar {
   borneInf: number;
   borneSup: number;
   pourcentAttendu0: number;
-  kAttendu: number;
   xBarAttendu: number;
 }
 

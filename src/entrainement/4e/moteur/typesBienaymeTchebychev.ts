@@ -1,6 +1,6 @@
 /**
  * Couche B — types de session pour "Inégalité de Bienaymé-Tchebychev" (chapitre 5) — refonte
- * complète, 20 écrans possibles au total répartis sur 8 variantes, chacune une SÉQUENCE FIXE et
+ * complète, 18 écrans possibles au total répartis sur 8 variantes, chacune une SÉQUENCE FIXE et
  * DISJOINTE des 7 autres (aucun nom de phase partagé entre deux variantes, même principe
  * qu'"Orthogonalité et théorème de Pythagore généralisé") :
  * - `intervalleVersPourcent` (V1) : v1K → v1Pourcent (2 écrans).
@@ -8,9 +8,10 @@
  * - `intervalleVersNombre` (V3)   : v3K → v3Pourcent → v3Nombre (3 écrans).
  * - `nombreVersIntervalle` (V4)   : v4Pourcent0 → v4K → v4Intervalle (3 écrans).
  * - `intervalleVersSigma` (V5)    : v5K → v5Sigma (2 écrans).
- * - `intervalleVersXBar` (V6)     : v6K → v6XBar (2 écrans).
+ * - `intervalleVersXBar` (V6)     : v6XBar (1 écran — x̄ se lit au centre de l'intervalle, aucun
+ *   écran k).
  * - `nombreVersSigma` (V7)        : v7Pourcent0 → v7K → v7Sigma (3 écrans).
- * - `nombreVersXBar` (V8)         : v8Pourcent0 → v8K → v8XBar (3 écrans).
+ * - `nombreVersXBar` (V8)         : v8Pourcent0 → v8XBar (2 écrans, aucun écran k).
  */
 import type { ExerciceBienaymeTchebychev, GenerateurExerciceBienaymeTchebychev, VarianteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -29,13 +30,11 @@ export type PhaseBienaymeTchebychev =
   | "v4Intervalle"
   | "v5K"
   | "v5Sigma"
-  | "v6K"
   | "v6XBar"
   | "v7Pourcent0"
   | "v7K"
   | "v7Sigma"
   | "v8Pourcent0"
-  | "v8K"
   | "v8XBar";
 
 export const SEQUENCES: Record<VarianteBienaymeTchebychev, PhaseBienaymeTchebychev[]> = {
@@ -44,9 +43,9 @@ export const SEQUENCES: Record<VarianteBienaymeTchebychev, PhaseBienaymeTchebych
   intervalleVersNombre: ["v3K", "v3Pourcent", "v3Nombre"],
   nombreVersIntervalle: ["v4Pourcent0", "v4K", "v4Intervalle"],
   intervalleVersSigma: ["v5K", "v5Sigma"],
-  intervalleVersXBar: ["v6K", "v6XBar"],
+  intervalleVersXBar: ["v6XBar"],
   nombreVersSigma: ["v7Pourcent0", "v7K", "v7Sigma"],
-  nombreVersXBar: ["v8Pourcent0", "v8K", "v8XBar"],
+  nombreVersXBar: ["v8Pourcent0", "v8XBar"],
 };
 
 /** Niveau d'aide maximal par écran, voir `promptgen37refonte.md` (section par variante) — même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle
@@ -65,13 +64,11 @@ export const NIVEAU_AIDE_MAX: Record<PhaseBienaymeTchebychev, number> = {
   v4Intervalle: 1,
   v5K: 2,
   v5Sigma: 2,
-  v6K: 2,
   v6XBar: 2,
   v7Pourcent0: 0,
   v7K: 2,
   v7Sigma: 2,
   v8Pourcent0: 0,
-  v8K: 2,
   v8XBar: 2,
 };
 
@@ -119,9 +116,6 @@ export interface ResultatExerciceBienaymeTchebychev {
   scoreV5Sigma: number | null;
   v5SigmaRevele: boolean;
   niveauAideV5Sigma: number;
-  scoreV6K: number | null;
-  v6KRevele: boolean;
-  niveauAideV6K: number;
   scoreV6XBar: number | null;
   v6XBarRevele: boolean;
   niveauAideV6XBar: number;
@@ -137,9 +131,6 @@ export interface ResultatExerciceBienaymeTchebychev {
   scoreV8Pourcent0: number | null;
   v8Pourcent0Revele: boolean;
   niveauAideV8Pourcent0: number;
-  scoreV8K: number | null;
-  v8KRevele: boolean;
-  niveauAideV8K: number;
   scoreV8XBar: number | null;
   v8XBarRevele: boolean;
   niveauAideV8XBar: number;
