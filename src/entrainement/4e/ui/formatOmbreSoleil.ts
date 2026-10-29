@@ -1,48 +1,198 @@
 import type { PointExtraSolide3D, SegmentExtraSolide3D } from "../components/Solide3DSketch";
-import type { FaceSolide3D, Point3D, Solide3D } from "../core/geometrieEspace.types";
+import type { Point3D, Solide3D } from "../core/geometrieEspace.types";
 import type {
+  CadrageScene,
   DirectionCandidate,
   ExerciceOmbreSoleil,
   ExerciceOmbreSoleilDirectionInconnue,
   ExerciceOmbreSoleilObstacle,
+  ExerciceOmbreSoleilSimple,
   ObstacleOmbreSoleil,
   Piquet,
   PiquetAResoudre,
 } from "../core/ombreSoleil.types";
-import { additionner3D, multiplierScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
-import { ombreDepuis, solideCollision, sommetPiquet, verifierDirection } from "../moteur/verificationOmbreSoleil";
-
-/** Les 2 variantes à boucle — jamais "simple", qui n'a pas de tableau `obstacles`/`piquets`. */
-export type ExerciceOmbreSoleilBoucle = ExerciceOmbreSoleilObstacle | ExerciceOmbreSoleilDirectionInconnue;
+import { additionner3D, multiplierScalaire3D, produitScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
+import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
+import { DIRECTION_VUE_3D } from "./solide3DSketch";
 
 /**
  * Présentation — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace").
- * Terminologie interdite dans tout texte affiché à l'élève : "déterminant", "produit scalaire"
- * (même règle que "Position droite/plan"/"Section plane d'un solide"). Aucune saisie libre nulle
- * part (sélection uniquement, spec section "Vérification") — jamais de `StatutVerification`, le
- * message générique "Incorrect — tentative N/M" suffit partout.
  *
- * **La direction de lumière n'est JAMAIS montrée numériquement** — chaque écran de sélection
- * présente 4 candidats génériques ("Candidat 1".."4"), l'ordre étant MÉLANGÉ à l'affichage
- * (`ordreAffichageCandidats`) pour que le premier candidat de `exercice.directionsCandidates`
- * (toujours la vraie direction, `id==="d0"`) ne se retrouve jamais systématiquement à la même
- * position visuelle d'un exercice à l'autre — sans ce mélange, l'élève apprendrait par réflexe
- * "le premier bouton est toujours bon" plutôt qu'à raisonner. Un seul aperçu (le candidat
- * actuellement sélectionné) est tracé à la fois sur le croquis, jamais les 4 simultanément — même
- * principe que "Section plane d'un solide" (`apercuSegmentFace`).
- *
- * **Extension (section 2) — variante `obstacle` refondue autour d'un "bâton" isolé + 1 à 3
- * solides-obstacles réels** (`core/ombreSoleil.types.ts`, `ObstacleAResoudre`) : `itemBoucleCourant`
- * centralise TOUTE la divergence entre les 2 variantes à boucle en un seul point plutôt que de la
- * disperser dans chaque composant `Etape*.tsx` — pour `obstacle`, l'origine du rayon reste le MÊME
- * bâton à chaque itération (jamais un nouveau piquet), l'obstacle testé change (déjà filtré via
- * `solideCollision`) ; pour `directionInconnue`, chaque itération porte son propre piquet, jamais
- * d'obstacle (toujours le sol seul, comportement historique inchangé).
+ * **La direction de lumière n'est JAMAIS montrée numériquement.** Chaque écran propose 4 candidats
+ * dessinés EN MÊME TEMPS sur le croquis, numérotés 1 à 4 dans un ordre mélangé à chaque écran
+ * (le numéro du bouton correspond au numéro du dessin). La scène entière (sol, obstacles, bâtons)
+ * est dessinée ici en segments/points annexes : le solide passé à `Solide3DSketch` ne sert qu'au
+ * cadrage (aucune face), sauf pour le campanile, dessiné par le composant lui-même. La visibilité
+ * des arêtes d'un obstacle est calculée obstacle par obstacle (normales extérieures réelles, escalier
+ * concave compris), plus avec le centre de toute la scène.
  */
 
-/** Fisher-Yates — copie mélangée, jamais l'ordre canonique de `exercice.directionsCandidates`
- * (voir l'en-tête du fichier). */
-export function ordreAffichageCandidats(candidats: readonly DirectionCandidate[]): DirectionCandidate[] {
+export type ExerciceOmbreSoleilBoucle = ExerciceOmbreSoleilObstacle | ExerciceOmbreSoleilDirectionInconnue;
+
+export interface ElementsCroquis {
+  points: PointExtraSolide3D[];
+  segments: SegmentExtraSolide3D[];
+}
+
+export const COULEURS_OMBRE = {
+  arete: "#495057",
+  areteCachee: "#adb5bd",
+  sol: "#ced4da",
+  baton: "#495057",
+  exemple: "#868e96",
+  candidat: "#4263eb",
+  selection: "#f08c00",
+  correct: "#2f9e44",
+  refuse: "#e03131",
+  aide: "#7048e8",
+} as const;
+
+export function fusionner(...elements: ElementsCroquis[]): ElementsCroquis {
+  return { points: elements.flatMap((e) => e.points), segments: elements.flatMap((e) => e.segments) };
+}
+
+// --- Cadrage et scène ----------------------------------------------------------------------------
+
+/** Solide transmis à `Solide3DSketch` : seulement des sommets virtuels (cadrage figé à la
+ * génération), aucune face — sauf pour le campanile, affiché avec ses vraies arêtes. */
+export function solidePourAffichage(exercice: ExerciceOmbreSoleil): Solide3D {
+  const sommets: Record<string, Point3D> = {};
+  exercice.cadrage.points.forEach((p, i) => {
+    sommets[`cadrage${i}`] = p;
+  });
+  if (exercice.variante === "directionInconnue") {
+    return { ...exercice.solide, sommets: { ...sommets, ...exercice.solide.sommets } };
+  }
+  return { id: "cube", label: "", sommets, faces: [] };
+}
+
+function elementsSol(cadrage: CadrageScene): ElementsCroquis {
+  const s = cadrage.sol;
+  return { points: [], segments: s.map((a, i) => ({ a, b: s[(i + 1) % 4], couleur: COULEURS_OMBRE.sol })) };
+}
+
+const AXES = ["x", "y", "z"] as const;
+
+function dansObstacleStrict(p: Point3D, obstacle: ObstacleOmbreSoleil): boolean {
+  return obstacle.boites.some((b) => AXES.every((a) => p[a] > b.min[a] + 1e-9 && p[a] < b.max[a] - 1e-9));
+}
+
+/** Normale extérieure d'une face axis-aligned d'un obstacle (union de boîtes, éventuellement
+ * concave) : sens choisi en testant de quel côté de la face se trouve la matière. */
+function normaleExterieure(obstacle: ObstacleOmbreSoleil, face: string[]): Point3D | null {
+  const points = face.map((n) => obstacle.solide.sommets[n]);
+  const axe = AXES.find((a) => points.every((p) => Math.abs(p[a] - points[0][a]) < 1e-9));
+  if (!axe) return null;
+  const centre = multiplierScalaire3D(points.reduce((acc, p) => additionner3D(acc, p), { x: 0, y: 0, z: 0 }), 1 / points.length);
+  const valeurs = obstacle.boites.flatMap((b) => [b.min[axe], b.max[axe]]);
+  const unite: Point3D = { x: 0, y: 0, z: 0, [axe]: 1 };
+  if (Math.abs(points[0][axe] - Math.min(...valeurs)) < 1e-9) return multiplierScalaire3D(unite, -1);
+  if (Math.abs(points[0][axe] - Math.max(...valeurs)) < 1e-9) return unite;
+  // Face intérieure à la boîte englobante (contremarche, giron) : la matière est du côté opposé.
+  return dansObstacleStrict(additionner3D(centre, multiplierScalaire3D(unite, 0.01)), obstacle) ? multiplierScalaire3D(unite, -1) : unite;
+}
+
+/** Arêtes d'un obstacle, visibles en trait plein, cachées en pointillé clair — ou toutes dans
+ * `couleurMiseEnEvidence` (obstacle touché, dans la correction). */
+export function aretesObstacle(obstacle: ObstacleOmbreSoleil, couleurMiseEnEvidence?: string): SegmentExtraSolide3D[] {
+  const parCle = new Map<string, { a: Point3D; b: Point3D; visible: boolean }>();
+  for (const face of obstacle.solide.faces) {
+    const normale = normaleExterieure(obstacle, face);
+    const visible = normale !== null && produitScalaire3D(normale, DIRECTION_VUE_3D) > 0;
+    for (let i = 0; i < face.length; i++) {
+      const [n1, n2] = [face[i], face[(i + 1) % face.length]].sort();
+      const cle = `${n1}-${n2}`;
+      const existante = parCle.get(cle);
+      if (existante) existante.visible = existante.visible || visible;
+      else parCle.set(cle, { a: obstacle.solide.sommets[n1], b: obstacle.solide.sommets[n2], visible });
+    }
+  }
+  return [...parCle.values()].map(({ a, b, visible }) => ({
+    a,
+    b,
+    couleur: couleurMiseEnEvidence ?? (visible ? COULEURS_OMBRE.arete : COULEURS_OMBRE.areteCachee),
+    pointille: !visible,
+  }));
+}
+
+export function elementsBaton(piquet: Piquet, couleur: string = COULEURS_OMBRE.baton): ElementsCroquis {
+  return {
+    points: [{ position: sommetPiquet(piquet), label: piquet.id, couleur }],
+    segments: [{ a: piquet.base, b: sommetPiquet(piquet), couleur }],
+  };
+}
+
+/** L'exemple : le bâton E, son rayon (pointillé) et son ombre au sol (segment du pied à l'ombre). */
+export function elementsExemple(piquet: Piquet, ombre: Point3D): ElementsCroquis {
+  const baton = elementsBaton(piquet, COULEURS_OMBRE.exemple);
+  return {
+    points: [...baton.points, { position: ombre, label: "Ombre de E", couleur: COULEURS_OMBRE.exemple }],
+    segments: [
+      ...baton.segments,
+      { a: sommetPiquet(piquet), b: ombre, couleur: COULEURS_OMBRE.exemple, pointille: true },
+      { a: piquet.base, b: ombre, couleur: COULEURS_OMBRE.exemple },
+    ],
+  };
+}
+
+/** La paire donnée de la variante `directionInconnue` : sommet connu, ombre connue, rayon et trace
+ * au sol (du pied du sommet à son ombre). */
+export function elementsPaireConnue(exercice: ExerciceOmbreSoleilDirectionInconnue): ElementsCroquis {
+  const sommet = sommetPiquet(exercice.piquetConnu);
+  return {
+    points: [
+      { position: sommet, label: exercice.piquetConnu.id, couleur: COULEURS_OMBRE.exemple },
+      { position: exercice.ombreConnue, label: "Ombre connue", couleur: COULEURS_OMBRE.exemple },
+    ],
+    segments: [
+      { a: sommet, b: exercice.ombreConnue, couleur: COULEURS_OMBRE.exemple, pointille: true },
+      { a: exercice.piquetConnu.base, b: exercice.ombreConnue, couleur: COULEURS_OMBRE.exemple, pointille: true },
+    ],
+  };
+}
+
+/** Fond de l'écran (tout ce qui ne dépend pas des candidats). */
+export function elementsScene(exercice: ExerciceOmbreSoleil, indexObstacleMisEnEvidence: number | null = null): ElementsCroquis {
+  const sol = elementsSol(exercice.cadrage);
+  if (exercice.variante === "simple") {
+    return fusionner(sol, elementsExemple(exercice.piquetExemple, exercice.ombreExemple), elementsBaton(exercice.piquet.piquet));
+  }
+  if (exercice.variante === "obstacle") {
+    const obstacles: ElementsCroquis = {
+      points: [],
+      segments: exercice.obstacles.flatMap((o, i) => aretesObstacle(o, i === indexObstacleMisEnEvidence ? COULEURS_OMBRE.correct : undefined)),
+    };
+    return fusionner(sol, obstacles, elementsExemple(exercice.piquetExemple, exercice.ombreExemple), elementsBaton(exercice.baton));
+  }
+  return fusionner(sol, elementsPaireConnue(exercice));
+}
+
+// --- Candidats ------------------------------------------------------------------------------------
+
+export type EtatCandidat = "neutre" | "selectionne" | "correct" | "refuse";
+
+export function couleurCandidat(etat: EtatCandidat): string {
+  if (etat === "selectionne") return COULEURS_OMBRE.selection;
+  if (etat === "correct") return COULEURS_OMBRE.correct;
+  if (etat === "refuse") return COULEURS_OMBRE.refuse;
+  return COULEURS_OMBRE.candidat;
+}
+
+/** Aperçu d'une direction candidate : segment pointillé depuis le sommet, numéro à son extrémité. */
+export function dessinDirection(origine: Point3D, candidat: DirectionCandidate, numero: number, etat: EtatCandidat): ElementsCroquis {
+  const couleur = couleurCandidat(etat);
+  return {
+    points: [{ position: candidat.extremiteApercu, label: String(numero), couleur }],
+    segments: [{ a: origine, b: candidat.extremiteApercu, couleur, pointille: true }],
+  };
+}
+
+export function dessinPoint(position: Point3D, numero: number, etat: EtatCandidat): ElementsCroquis {
+  return { points: [{ position, label: String(numero), couleur: couleurCandidat(etat) }], segments: [] };
+}
+
+/** Fisher-Yates — ordre d'affichage des candidats (numéros 1 à 4), refait à chaque écran. */
+export function melangerCandidats<T>(candidats: readonly T[]): T[] {
   const copie = [...candidats];
   for (let i = copie.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -51,382 +201,154 @@ export function ordreAffichageCandidats(candidats: readonly DirectionCandidate[]
   return copie;
 }
 
-// --- Croquis — solide de cadrage synthétique --------------------------------------------------------
+// --- Aides dessinées ---------------------------------------------------------------------------------
 
-const MARGE_SOL = 3;
-const COULEUR_PIQUET = "#495057";
-const COULEUR_EXEMPLE = "#868e96";
-const COULEUR_SELECTION = "#f08c00";
-
-interface BornesSol {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
+/** Rayon issu de `sommet`, prolongé au-delà du sol (jusqu'à 1,4 fois sa longueur) pour que son
+ * extrémité ne désigne jamais la réponse. */
+export function rayonProlonge(sommet: Point3D, direction: Point3D, couleur: string = COULEURS_OMBRE.aide): SegmentExtraSolide3D {
+  const tSol = -sommet.z / direction.z;
+  return { a: sommet, b: additionner3D(sommet, multiplierScalaire3D(direction, 1.4 * tSol)), couleur, pointille: true };
 }
 
-/** Englobe les piquets/bâtons affichés ET, désormais, la GÉOMÉTRIE RÉELLE de chaque solide-obstacle
- * (tous ses sommets, pas seulement un rectangle abstrait — voir `cadrageSolide`) — le rectangle du
- * sol doit rester assez grand pour border correctement une caisse ou un escalier de plusieurs
- * marches, jamais seulement les positions x/y d'un ancien "mur plat" ponctuel. */
-function bornesScene(piquetsVisibles: readonly Piquet[], obstacles: readonly ObstacleOmbreSoleil[]): BornesSol {
-  const xs = piquetsVisibles.map((p) => p.base.x);
-  const ys = piquetsVisibles.map((p) => p.base.y);
-  for (const obstacle of obstacles) {
-    for (const sommet of Object.values(obstacle.solide.sommets)) {
-      xs.push(sommet.x);
-      ys.push(sommet.y);
-    }
-  }
-  return {
-    xMin: Math.min(...xs) - MARGE_SOL,
-    xMax: Math.max(...xs) + MARGE_SOL,
-    yMin: Math.min(...ys) - MARGE_SOL,
-    yMax: Math.max(...ys) + MARGE_SOL,
-  };
+/** Trace au sol issue du pied, parallèle à l'ombre de l'exemple, prolongée de la même façon. */
+export function traceProlongee(piquet: Piquet, direction: Point3D, couleur: string = COULEURS_OMBRE.aide): SegmentExtraSolide3D {
+  const tSol = -piquet.hauteur / direction.z;
+  const horizontale: Point3D = { x: direction.x, y: direction.y, z: 0 };
+  return { a: piquet.base, b: additionner3D(piquet.base, multiplierScalaire3D(horizontale, 1.4 * tSol)), couleur, pointille: true };
 }
 
-/**
- * Solide de CADRAGE synthétique — jamais un vrai gabarit (`generateurs/solide3D/gabarits.ts`, hors
- * de propos ici, voir `core/ombreSoleil.types.ts`) : seulement de quoi border correctement le
- * viewBox de `Solide3DSketch` (dérivé UNIQUEMENT de `solide.sommets`, voir `ui/solide3DSketch.ts`) —
- * le rectangle du sol (toujours présent, dessiné en trait), la base/le sommet de chaque piquet en
- * sommets NON reliés par aucune face (jamais dans le wireframe, juste pour englober correctement
- * leur hauteur dans le calcul du viewBox), et, depuis l'extension (section 2), le wireframe RÉEL de
- * chaque solide-obstacle fusionné dans ce même solide de cadrage (sommets/faces préfixés par index,
- * `obs${i}_${nom}`, pour ne jamais collisionner entre deux obstacles ni avec le sol/les piquets).
- * `id` fixé à une valeur arbitraire du catalogue partagé (jamais utilisé ailleurs pour ce
- * générateur) — seul le type `NomSolide3D` l'exige, cette valeur n'est jamais affichée ni comparée.
- *
- * **Limite cosmétique acceptée, jamais corrigée dans le code partagé** : `normaleExterieureFace`
- * (`ui/solide3DSketch.ts`) décide si une face est visible/cachée en la comparant au centroïde
- * GLOBAL de TOUS les sommets du solide passé — pour une scène à plusieurs obstacles potentiellement
- * éloignés les uns des autres, cette heuristique peut se tromper sur la visibilité de certaines
- * faces d'obstacle (rendu plein/pointillé) sans jamais toucher la vérité terrain (qui vit
- * exclusivement dans `moteur/verificationOmbreSoleil.ts`, jamais recalculée ici) — un risque
- * purement visuel, délibérément accepté plutôt que de modifier `solide3DSketch.ts`, partagé et
- * correct pour "Position droite/plan"/"Section plane d'un solide" (gabarits convexes uniques).
- */
-export function cadrageSolide(piquetsVisibles: readonly Piquet[], obstacles: readonly ObstacleOmbreSoleil[] = []): Solide3D {
-  const bornes = bornesScene(piquetsVisibles, obstacles);
-  const sommets: Record<string, Point3D> = {
-    sol1: { x: bornes.xMin, y: bornes.yMin, z: 0 },
-    sol2: { x: bornes.xMax, y: bornes.yMin, z: 0 },
-    sol3: { x: bornes.xMax, y: bornes.yMax, z: 0 },
-    sol4: { x: bornes.xMin, y: bornes.yMax, z: 0 },
-  };
-  const faces: FaceSolide3D[] = [["sol1", "sol2", "sol3", "sol4"]];
-
-  piquetsVisibles.forEach((piquet, index) => {
-    sommets[`piquet${index}base`] = piquet.base;
-    sommets[`piquet${index}tip`] = sommetPiquet(piquet);
-  });
-
-  obstacles.forEach((obstacle, indexObstacle) => {
-    for (const [nom, point] of Object.entries(obstacle.solide.sommets)) {
-      sommets[`obs${indexObstacle}_${nom}`] = point;
-    }
-    for (const face of obstacle.solide.faces) {
-      faces.push(face.map((nom) => `obs${indexObstacle}_${nom}`));
-    }
-  });
-
-  return { id: "cube", label: "", sommets, faces };
+/** Copie du rayon de référence (même direction), tracée depuis un pied — compare l'inclinaison
+ * sans se superposer aux candidats, qui partent du sommet. */
+export function copieRayonDepuisPied(pied: Point3D, sommetReference: Point3D, ombreReference: Point3D): SegmentExtraSolide3D {
+  const vecteur = soustraire3D(ombreReference, sommetReference);
+  return { a: pied, b: additionner3D(pied, multiplierScalaire3D(vecteur, 0.6)), couleur: COULEURS_OMBRE.aide, pointille: true };
 }
 
-/** Segment vertical (base→sommet) d'un piquet — toujours dans une couleur dédiée, jamais confondu
- * avec un rayon de lumière (toujours en pointillé). */
-export function segmentPiquet(piquet: Piquet, couleur = COULEUR_PIQUET): SegmentExtraSolide3D {
-  return { a: piquet.base, b: sommetPiquet(piquet), couleur };
-}
-
-/** Marqueur au sommet du piquet, étiqueté par son id (déjà attribué par la Couche A — "A".."D",
- * "E" pour l'exemple/le piquet connu). */
-export function pointSommetPiquet(piquet: Piquet, couleur = COULEUR_PIQUET): PointExtraSolide3D {
-  return { position: sommetPiquet(piquet), label: piquet.id, couleur };
-}
-
-/** L'exemple déjà résolu (variantes A/B) — segment piquet + rayon lumineux (pointillé) + marqueur
- * d'ombre, toujours dans la couleur "exemple" neutre, jamais confondue avec la sélection en cours. */
-export function elementsExemple(piquetExemple: Piquet, ombreExemple: Point3D): { points: PointExtraSolide3D[]; segments: SegmentExtraSolide3D[] } {
-  return {
-    points: [pointSommetPiquet(piquetExemple, COULEUR_EXEMPLE), { position: ombreExemple, label: "Exemple", couleur: COULEUR_EXEMPLE }],
-    segments: [segmentPiquet(piquetExemple, COULEUR_EXEMPLE), { a: sommetPiquet(piquetExemple), b: ombreExemple, couleur: COULEUR_EXEMPLE, pointille: true }],
-  };
-}
-
-const LONGUEUR_APERCU_DIRECTION = 3;
-
-function normaliser(v: Point3D): Point3D {
-  const norme = Math.hypot(v.x, v.y, v.z) || 1;
-  return multiplierScalaire3D(v, 1 / norme);
-}
-
-/** Aperçu (pointillé orange) du candidat de DIRECTION actuellement sélectionné — un segment de
- * longueur FIXE depuis le sommet du piquet (jamais jusqu'à son vrai point d'ombre, qui révélerait
- * la réponse de l'étape "point" suivante) : seule la PENTE du segment doit être comparée à
- * l'exemple, jamais sa longueur. `null` tant qu'aucun candidat n'est sélectionné. */
-export function apercuDirection(piquet: Piquet, candidat: DirectionCandidate | null): SegmentExtraSolide3D | null {
-  if (!candidat) return null;
-  const sommet = sommetPiquet(piquet);
-  const bout = additionner3D(sommet, multiplierScalaire3D(normaliser(candidat.vecteur), LONGUEUR_APERCU_DIRECTION));
-  return { a: sommet, b: bout, couleur: COULEUR_SELECTION, pointille: true };
-}
-
-/** Aperçu (rayon pointillé + marqueur) du candidat de POINT D'OMBRE actuellement sélectionné —
- * calculé RÉELLEMENT via `ombreDepuis` (jamais une position approximative), avec l'obstacle RÉEL de
- * l'item de boucle courant s'il y en a un (déjà filtré via `solideCollision`, voir
- * `itemBoucleCourant`). `null` tant qu'aucun candidat n'est sélectionné. */
-export function apercuPoint(
-  piquet: Piquet,
-  candidat: DirectionCandidate | null,
-  obstacle: Solide3D | undefined,
-): { point: PointExtraSolide3D; segment: SegmentExtraSolide3D } | null {
-  if (!candidat) return null;
-  const sommet = sommetPiquet(piquet);
-  const ombre = ombreDepuis(sommet, candidat.vecteur, obstacle);
-  return {
-    point: { position: ombre, label: "?", couleur: COULEUR_SELECTION },
-    segment: { a: sommet, b: ombre, couleur: COULEUR_SELECTION, pointille: true },
-  };
-}
-
-// --- Textes ------------------------------------------------------------------------------------------
+// --- Textes -----------------------------------------------------------------------------------------
 
 export const CONSIGNE_POINT_SIMPLE =
-  "Un piquet vertical projette une ombre sur le sol, dans la direction du soleil illustrée par l'exemple ci-dessous. Sélectionne le bon point d'ombre.";
+  "Le soleil éclaire le bâton A comme le bâton E de l'exemple (rayon pointillé, ombre au sol). Choisis le point où tombe l'ombre du sommet de A.";
 
-export const TEXTE_AIDE_POINT_SIMPLE_NIVEAU1 =
-  "Rappel de la méthode : trace, depuis le sommet du piquet, une droite PARALLÈLE à la direction de l'exemple (jamais verticale) — c'est elle qui indique où tombe l'ombre.";
+export const AIDE_POINT_SIMPLE = [
+  "Méthode : l'ombre du sommet est à l'intersection de deux droites — le rayon issu du sommet de A, parallèle au rayon de l'exemple, et la trace au sol issue du pied de A, parallèle à l'ombre de E (du pied de E à son ombre).",
+  "Le rayon issu du sommet de A est tracé en violet. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de A.",
+];
 
-export const TEXTE_AIDE_POINT_SIMPLE_NIVEAU2 =
-  "La droite correcte est désormais tracée depuis le sommet du piquet — il ne reste plus qu'à repérer où elle rencontre le sol parmi les candidats proposés.";
+export const CONSIGNE_DIRECTION_OBSTACLE =
+  "Tous les rayons du soleil sont parallèles. Choisis le rayon qui part du sommet du bâton A dans la même direction que le rayon de l'exemple E.";
 
-export const CONSIGNE_DIRECTION =
-  "Sélectionne, parmi les 4 candidats, la droite RÉELLEMENT parallèle à la direction du soleil illustrée par l'exemple.";
+export const AIDE_DIRECTION_OBSTACLE = [
+  "Méthode : des droites parallèles restent parallèles sur le dessin. Le bon rayon a exactement la même inclinaison que le rayon pointillé de l'exemple, et part du même côté.",
+  "Le rayon de l'exemple a été recopié en violet, parallèlement, depuis le pied du bâton A : compare-lui l'inclinaison de chaque candidat.",
+];
 
-export const TEXTE_AIDE_DIRECTION_NIVEAU1 =
-  "Rappel de la méthode : la lumière frappe tous les objets dans EXACTEMENT la même direction — compare la pente de chaque candidat à celle de l'exemple, jamais à la verticale.";
+export const CONSIGNE_POINT_OBSTACLE =
+  "Le rayon issu du sommet du bâton A est tracé. Choisis le point où l'ombre du sommet de A s'arrête réellement : sur un obstacle, ou sur le sol.";
 
-export const CONSIGNE_POINT =
-  "Sélectionne, parmi les 4 candidats, le point où l'ombre de ce piquet touche réellement une surface.";
-
-/** Aide 2, PARTAGÉE entre les 2 sous-étapes d'un même item de boucle (spec, variante B/C) — révèle
- * uniquement la SURFACE réellement touchée (obstacle ou sol direct), jamais le point exact. Prend
- * toujours une forme `PiquetAResoudre` — pour la variante `obstacle`, `itemBoucleCourant` construit
- * un wrapper synthétique autour de l'obstacle réellement testé à cette itération, jamais un second
- * texte dédié. */
-export function texteAideNiveau2SurfaceTouchee(piquet: PiquetAResoudre): string {
-  return piquet.surObstacle
-    ? "L'ombre de ce piquet touche l'obstacle — elle ne va pas jusqu'au sol."
-    : "L'ombre de ce piquet passe au-dessus de tout obstacle et touche directement le sol.";
-}
+export const AIDE_POINT_OBSTACLE = [
+  "Méthode : suis la trace au sol issue du pied de A (parallèle à l'ombre de E). Pour chaque obstacle qu'elle traverse, regarde si le rayon passe au-dessus ou s'il le heurte. L'ombre s'arrête sur la PREMIÈRE surface que le rayon touche.",
+  "La trace au sol et le rayon sont tracés en violet. Le premier obstacle que le rayon heurte arrête l'ombre ; s'il passe au-dessus de tous, l'ombre atteint le sol.",
+];
 
 export const CONSIGNE_DIRECTION_INCONNUE =
-  "Voici un piquet et son ombre déjà connus. Déduis-en, parmi les 4 candidats, la direction réelle de la lumière — jamais devinée, toujours déduite de cette seule paire.";
+  "La lumière est inconnue, mais l'ombre d'un sommet du campanile est donnée (trait pointillé). Choisis le rayon qui part du sommet {id} dans la même direction que la lumière.";
 
-export const TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1 =
-  "Rappel de la méthode : la bonne direction est celle qui relie EXACTEMENT le sommet du piquet connu à son ombre déjà observée — compare chaque candidat à cette paire, jamais à une supposition.";
+export const AIDE_DIRECTION_INCONNUE = [
+  "Méthode : la lumière va du sommet connu vers son ombre. Le bon rayon est parallèle au trait pointillé qui les relie : même inclinaison sur le dessin, et même sens (vers le bas, du côté de l'ombre).",
+  "Le trait pointillé a été recopié en violet, parallèlement, depuis le pied du sommet {id} : compare-lui l'inclinaison et le sens de chaque candidat.",
+];
 
-export const TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2 =
-  "La direction correcte relie exactement le sommet du piquet connu à l'ombre déjà observée sur le croquis.";
+export const CONSIGNE_POINT_SOMMET = "Choisis le point où tombe l'ombre du sommet {id} du campanile.";
 
-export function libelleCandidat(index: number): string {
-  return `Candidat ${index + 1}`;
+export const AIDE_POINT_SOMMET = [
+  "Méthode : l'ombre de {id} est à l'intersection du rayon issu de {id} (parallèle au trait pointillé de l'ombre connue) et de la trace au sol issue du pied de {id} (le point du sol à sa verticale), parallèle à la trace de l'ombre connue.",
+  "Le rayon issu de {id} est tracé en violet. Parmi les points qui sont sur lui, l'ombre est celui qui est aussi sur la trace au sol issue du pied de {id}.",
+];
+
+export function avecId(texte: string, id: string): string {
+  return texte.split("{id}").join(id);
 }
 
-/** Titre affiché en tête d'écran, jamais un identifiant de code (`ExerciceOmbreSoleil` n'a pas de
- * champ "titre" — dérivé ici uniquement de la variante, pour rester cohérent avec le reste du
- * projet où la présentation ne relit jamais un identifiant technique). */
-export function titreVariante(exercice: ExerciceOmbreSoleil): string {
-  if (exercice.variante === "simple") return "Ombre simple";
-  if (exercice.variante === "obstacle") return "Ombre avec obstacle";
-  return "Direction inconnue";
+export function libelleDirection(numero: number): string {
+  return `Rayon ${numero}`;
 }
 
-/** Progression au sein de la boucle (variantes B/C) — un compteur live, toujours dérivé de l'état
- * vivant, jamais une formule fragile (même principe que "Section plane d'un solide"). Le nom de
- * l'unité comptée diverge selon la variante — "obstacles" pour `obstacle` (une itération de boucle
- * = un solide-obstacle, jamais un piquet — voir `core/ombreSoleil.types.ts`), "piquets" pour
- * `directionInconnue` (comportement historique inchangé). */
-export function texteProgressionBoucle(exercice: ExerciceOmbreSoleilBoucle, nombreResolus: number): string {
+export function libellePoint(numero: number): string {
+  return `Point ${numero}`;
+}
+
+// --- Conclusion ----------------------------------------------------------------------------------
+
+export function libelleObstacle(obstacle: ObstacleOmbreSoleil): string {
+  return obstacle.type === "escalier" ? "l'escalier" : "la caisse";
+}
+
+export function texteConclusion(exercice: ExerciceOmbreSoleil): string {
+  if (exercice.variante === "simple") {
+    return "L'ombre du bâton A est le segment qui va de son pied jusqu'à l'ombre de son sommet, parallèle à l'ombre de E.";
+  }
   if (exercice.variante === "obstacle") {
-    return `Obstacles résolus : ${nombreResolus}/${exercice.obstacles.length}`;
+    if (exercice.indexObstacleTouche === null) {
+      return "Le rayon issu du sommet de A passe au-dessus (ou à côté) de tous les obstacles : l'ombre du sommet atteint le sol.";
+    }
+    return `Le rayon issu du sommet de A heurte d'abord ${libelleObstacle(exercice.obstacles[exercice.indexObstacleTouche])} (en vert) : l'ombre du sommet s'arrête sur sa surface, elle n'atteint pas le sol.`;
   }
-  return `Piquets résolus : ${nombreResolus}/${exercice.piquets.length}`;
+  return "L'ombre portée du campanile est reconstituée : son contour relie la base aux ombres des sommets. Les ombres des autres sommets s'obtiennent par le même procédé.";
 }
 
-/** Vérité utilitaire uniquement — `soustraire3D`/`sommetPiquet` réutilisées ici pour rester
- * cohérentes avec les calculs de vérification, jamais une seconde formule divergente. */
-export function directionReelleVersOmbre(piquet: Piquet, ombre: Point3D): Point3D {
-  return soustraire3D(ombre, sommetPiquet(piquet));
+function elementsOmbreSommet(sommet: Point3D, ombre: Point3D, label: string): ElementsCroquis {
+  return {
+    points: [{ position: ombre, label, couleur: COULEURS_OMBRE.correct }],
+    segments: [{ a: sommet, b: ombre, couleur: COULEURS_OMBRE.correct, pointille: true }],
+  };
 }
 
-// --- Item de boucle courant — centralise TOUTE la divergence entre les 2 variantes à boucle -------
-
-/** Toutes les données nécessaires aux 2 écrans de la boucle (`EtapeDirectionOmbre`/`EtapePointOmbre`)
- * pour l'item COURANT (index `resolus.length`) — un seul point de dispatch par variante, jamais
- * dispersé dans chaque composant. */
-export interface ItemBoucleCourant {
-  /** Piquet dont le sommet sert d'origine au rayon lumineux — le BÂTON pour `obstacle` (le MÊME
-   * objet à travers toute la boucle, jamais un nouveau piquet par obstacle), le piquet propre à cet
-   * index pour `directionInconnue`. */
-  piquetOrigine: Piquet;
-  /** Solide de collision RÉEL testé pour cet item (déjà filtré via `solideCollision`, jamais le
-   * solide brut d'un escalier) — `undefined` pour `directionInconnue`, qui ne teste jamais
-   * d'obstacle (toujours le sol seul, `verifierPointOmbre`). */
-  obstacle: Solide3D | undefined;
-  /** Vérité terrain de cet item, sous une forme `PiquetAResoudre`-compatible — pour `obstacle`, un
-   * wrapper SYNTHÉTIQUE autour du bâton + l'ombre réelle de CET obstacle précis (`ObstacleAResoudre`
-   * n'a pas lui-même de champ `piquet`), pour réutiliser telle quelle
-   * `texteAideNiveau2SurfaceTouchee` sans texte dédié. */
-  verite: PiquetAResoudre;
+/** Ombres des sommets déjà projetés (variante `directionInconnue`), avant le sommet `index`. */
+export function ombresDejaTrouvees(exercice: ExerciceOmbreSoleilDirectionInconnue, index: number): ElementsCroquis {
+  return fusionner(...exercice.piquets.slice(0, index).map((p) => elementsOmbreSommet(sommetPiquet(p.piquet), p.ombre, `${p.piquet.id}′`)));
 }
 
-export function itemBoucleCourant(exercice: ExerciceOmbreSoleilBoucle, index: number): ItemBoucleCourant {
+/** Image finale (écran de conclusion et corrigé exporté). */
+export function elementsConclusion(exercice: ExerciceOmbreSoleil): ElementsCroquis {
+  if (exercice.variante === "simple") {
+    const p: PiquetAResoudre = exercice.piquet;
+    return fusionner(elementsScene(exercice), elementsOmbreSommet(sommetPiquet(p.piquet), p.ombre, "Ombre de A"), {
+      points: [],
+      segments: [{ a: p.piquet.base, b: p.ombre, couleur: COULEURS_OMBRE.correct }],
+    });
+  }
   if (exercice.variante === "obstacle") {
-    const obstacleResoudre = exercice.obstacles[index];
-    return {
-      piquetOrigine: exercice.baton,
-      obstacle: solideCollision(obstacleResoudre.obstacle),
-      verite: { piquet: exercice.baton, ombre: obstacleResoudre.ombre, surObstacle: obstacleResoudre.surObstacle },
-    };
+    const auSol = exercice.indexObstacleTouche === null;
+    return fusionner(
+      elementsScene(exercice, exercice.indexObstacleTouche),
+      elementsOmbreSommet(sommetPiquet(exercice.baton), exercice.ombre, "Ombre de A"),
+      { points: [], segments: auSol ? [{ a: exercice.baton.base, b: exercice.ombre, couleur: COULEURS_OMBRE.correct }] : [] },
+    );
   }
-  const piquetResoudre = exercice.piquets[index];
-  return { piquetOrigine: piquetResoudre.piquet, obstacle: undefined, verite: piquetResoudre };
+  const ombres = [
+    ...exercice.piquets.map((p) => ({ id: p.piquet.id, sommet: sommetPiquet(p.piquet), ombre: p.ombre })),
+    ...exercice.ombresAutres,
+  ];
+  const contour = exercice.contourOmbre;
+  return fusionner(
+    elementsScene(exercice),
+    ...ombres.map((o) => elementsOmbreSommet(o.sommet, o.ombre, `${o.id}′`)),
+    { points: [], segments: contour.map((a, i) => ({ a, b: contour[(i + 1) % contour.length], couleur: COULEURS_OMBRE.correct })) },
+  );
 }
 
-// --- Cadrage/éléments cumulatifs, communs aux écrans d'un même exercice --------------------------
+// --- Accès communs ---------------------------------------------------------------------------------
 
-/** Tous les piquets réellement montrés au cours de l'exercice (exemple/connu compris) — sert
- * UNIQUEMENT à border le viewBox (`cadrageSolide`) : calculé une seule fois par exercice pour que le
- * cadrage reste STABLE d'un écran à l'autre. Pour `obstacle`, un seul bâton (jamais un par
- * obstacle — c'est le MÊME bâton résolu à chaque itération de la boucle, voir `itemBoucleCourant`) ;
- * les solides-obstacles eux-mêmes sont fusionnés séparément, voir `obstaclesDeExercice`/
- * `cadrageSolide`. */
-export function piquetsPourCadrage(exercice: ExerciceOmbreSoleil): Piquet[] {
-  if (exercice.variante === "simple") return [exercice.piquetExemple, exercice.piquet.piquet];
-  if (exercice.variante === "obstacle") return [exercice.piquetExemple, exercice.baton];
-  return [exercice.piquetConnu, ...exercice.piquets.map((p) => p.piquet)];
-}
-
-/** Les solides-obstacles RÉELS de l'exercice, à fusionner dans le solide de cadrage
- * (`cadrageSolide`) — toujours vide pour `simple`/`directionInconnue` (ni l'un ni l'autre n'a de
- * notion d'obstacle). */
-export function obstaclesDeExercice(exercice: ExerciceOmbreSoleil): ObstacleOmbreSoleil[] {
-  return exercice.variante === "obstacle" ? exercice.obstacles.map((o) => o.obstacle) : [];
-}
-
-/**
- * Solide RÉELLEMENT affiché pour un exercice — variantes "simple"/"obstacle" (modèle bâton isolé,
- * voir `core/ombreSoleil.types.ts`) : le solide de cadrage synthétique habituel (`cadrageSolide`),
- * désormais enrichi du wireframe RÉEL de chaque solide-obstacle pour `obstacle` (jamais un mur plat
- * abstrait). Variante "directionInconnue" (le seul cas où l'objet projeté EST un vrai gabarit) : le
- * VRAI solide tiré (`exercice.solide`), sommets et faces intacts — wireframe complet affiché,
- * jamais réduit à un cube synthétique — étendu de sommets VIRTUELS jamais référencés par aucune
- * face (donc jamais une arête supplémentaire tracée), un par ombre déjà connue à l'avance
- * (`ombreConnue` + chaque `piquets[i].ombre`, toujours vérité terrain déjà calculée), pour que le
- * viewBox les cadre correctement dès le premier écran — cadrage stable d'un écran à l'autre, même
- * principe que `piquetsPourCadrage`/`cadrageSolide` pour les 2 autres variantes.
- */
-export function solidePourAffichage(exercice: ExerciceOmbreSoleil): Solide3D {
-  if (exercice.variante !== "directionInconnue") {
-    return cadrageSolide(piquetsPourCadrage(exercice), obstaclesDeExercice(exercice));
-  }
-  const sommets: Record<string, Point3D> = { ...exercice.solide.sommets };
-  sommets.ombreConnueCadrage = exercice.ombreConnue;
-  exercice.piquets.forEach((p, index) => {
-    sommets[`ombreCadrage${index}`] = p.ombre;
-  });
-  return { ...exercice.solide, sommets };
-}
-
-/** Retrouve, parmi les 4 candidats, celui qui correspond RÉELLEMENT à la vraie direction — jamais
- * un id câblé en dur (`"d0"`, toujours vrai par construction côté Couche A, voir
- * `ombreGeometrie.ts::construireDirectionsCandidates`, mais jamais supposé ici) : dérivé via la même
- * fonction de vérité terrain que la Couche B, cohérent avec le reste du projet (ex. "Section plane
- * d'un solide"/"Colinéarité", qui retrouvent toujours la bonne réponse par re-vérification, jamais
- * par position dans un tableau). Sert uniquement à dessiner l'aide de niveau 2 (droite déjà tracée),
- * jamais à décider l'ordre d'affichage des boutons (voir `ordreAffichageCandidats`). */
-export function directionCorrecte(exercice: ExerciceOmbreSoleil): DirectionCandidate {
-  const trouve = exercice.directionsCandidates.find((c) => verifierDirection(exercice, c.id));
-  if (!trouve) throw new Error("directionCorrecte : aucun candidat ne correspond à la vraie direction — exercice mal formé");
+export function directionCorrecte(exercice: ExerciceOmbreSoleilBoucle): DirectionCandidate {
+  const trouve = exercice.directionsCandidates.find((c) => Math.hypot(c.vecteur.x - exercice.direction.x, c.vecteur.y - exercice.direction.y, c.vecteur.z - exercice.direction.z) < 1e-9);
+  if (!trouve) throw new Error("directionCorrecte : exercice mal formé");
   return trouve;
 }
 
-const COULEUR_OMBRE_FINALE = "#2f9e44";
-
-/** Image complète d'un piquet déjà résolu — segment vertical, rayon lumineux (pointillé) jusqu'à son
- * ombre réelle, et le marqueur d'ombre lui-même. Réutilisée à la fois pour les items déjà validés
- * pendant la boucle (`elementsResolus`) et pour l'écran de conclusion (`elementsConclusion`). */
-function elementsPiquetResolu(pr: PiquetAResoudre, couleur = COULEUR_OMBRE_FINALE): { points: PointExtraSolide3D[]; segments: SegmentExtraSolide3D[] } {
-  return {
-    points: [pointSommetPiquet(pr.piquet), { position: pr.ombre, label: `Ombre ${pr.piquet.id}`, couleur }],
-    segments: [segmentPiquet(pr.piquet), { a: sommetPiquet(pr.piquet), b: pr.ombre, couleur, pointille: true }],
-  };
+/** Sommet d'où partent les aperçus de direction : le bâton A (obstacle) ou le premier sommet à
+ * projeter (direction inconnue — jamais le sommet connu, dont le rayon est déjà dessiné). */
+export function origineApercusDirection(exercice: ExerciceOmbreSoleilBoucle): Piquet {
+  return exercice.variante === "obstacle" ? exercice.baton : exercice.piquets[0].piquet;
 }
 
-/** Image d'un obstacle déjà résolu de la boucle `obstacle` — le bâton (segment + marqueur de
- * sommet) reste le MÊME à chaque itération (jamais redessiné en double, `elementsResolus` ne
- * l'ajoute qu'une fois via `itemBoucleCourant`/le composant appelant) : cette fonction ne produit
- * que le rayon + le marqueur d'ombre propres à CET obstacle précis, étiqueté par son rang
- * d'affichage (`"Ombre 1"`, `"Ombre 2"`...) plutôt que par un id de piquet partagé par tous. */
-function elementsObstacleResolu(baton: Piquet, obstacleResoudre: { ombre: Point3D }, indexAffiche: number, couleur = COULEUR_OMBRE_FINALE): { points: PointExtraSolide3D[]; segments: SegmentExtraSolide3D[] } {
-  const sommet = sommetPiquet(baton);
-  return {
-    points: [{ position: obstacleResoudre.ombre, label: `Ombre ${indexAffiche + 1}`, couleur }],
-    segments: [{ a: sommet, b: obstacleResoudre.ombre, couleur, pointille: true }],
-  };
-}
-
-/** Items déjà validés de la boucle courante (indices dans `resolus`), affichés en PLUS de l'exemple
- * et de l'item en cours — l'élève voit ainsi tout son travail déjà accompli rester visible d'un item
- * à l'autre, jamais effacé (même principe que `connus`/`segmentsTraces`, "Section plane d'un
- * solide"). Pour `obstacle`, chaque index résolu produit un rayon+marqueur d'ombre distinct depuis
- * le MÊME bâton (jamais redessiné en double) ; pour `directionInconnue`, comportement historique
- * inchangé (un piquet complet par index). */
-export function elementsResolus(exercice: ExerciceOmbreSoleilBoucle, resolus: number[]): { points: PointExtraSolide3D[]; segments: SegmentExtraSolide3D[] } {
-  const points: PointExtraSolide3D[] = [];
-  const segments: SegmentExtraSolide3D[] = [];
-  if (exercice.variante === "obstacle") {
-    for (const index of resolus) {
-      const { points: p, segments: s } = elementsObstacleResolu(exercice.baton, exercice.obstacles[index], index);
-      points.push(...p);
-      segments.push(...s);
-    }
-    return { points, segments };
-  }
-  for (const index of resolus) {
-    const { points: p, segments: s } = elementsPiquetResolu(exercice.piquets[index]);
-    points.push(...p);
-    segments.push(...s);
-  }
-  return { points, segments };
-}
-
-/** Image finale, écran de conclusion — "relier les points-ombres pour reconstituer l'ombre
- * complète" (spec, étape 4). Pour "simple" (un seul piquet) et "obstacle" (un seul bâton, dont
- * seule la VÉRITÉ TERRAIN GLOBALE de la scène compte — `exercice.ombre`/`indexObstacleTouche`,
- * jamais les N résultats hypothétiques testés indépendamment pendant la boucle), aucun segment de
- * liaison — rien à relier, une seule ombre réelle. Pour "directionInconnue" (plusieurs vrais
- * sommets du même gabarit), tous les piquets reliés entre eux dans l'ordre de résolution. */
-export function elementsConclusion(exercice: ExerciceOmbreSoleil): { points: PointExtraSolide3D[]; segments: SegmentExtraSolide3D[] } {
-  if (exercice.variante === "simple") {
-    return elementsPiquetResolu(exercice.piquet);
-  }
-  if (exercice.variante === "obstacle") {
-    const verite: PiquetAResoudre = { piquet: exercice.baton, ombre: exercice.ombre, surObstacle: exercice.indexObstacleTouche !== null };
-    return elementsPiquetResolu(verite);
-  }
-  const points: PointExtraSolide3D[] = [];
-  const segments: SegmentExtraSolide3D[] = [];
-  for (const pr of exercice.piquets) {
-    const { points: p, segments: s } = elementsPiquetResolu(pr);
-    points.push(...p);
-    segments.push(...s);
-  }
-  for (let i = 0; i < exercice.piquets.length - 1; i++) {
-    segments.push({ a: exercice.piquets[i].ombre, b: exercice.piquets[i + 1].ombre, couleur: COULEUR_OMBRE_FINALE });
-  }
-  return { points, segments };
-}
+export type { ExerciceOmbreSoleilSimple };

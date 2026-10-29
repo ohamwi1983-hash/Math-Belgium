@@ -26,6 +26,24 @@ export interface LigneCandidateExercice {
   points: [Point3D, Point3D];
 }
 
+/** Une étape de la résolution de RÉFÉRENCE calculée à la génération (une résolution valable parmi
+ * d'autres, jamais imposée à l'élève) — consommée par la correction exportée pour détailler la
+ * construction de chaque point auxiliaire (audit chapitre 8, point 26). Les droites sont désignées
+ * par les mêmes clés que `LigneCandidateExercice.cle` (`arete:AB`, `diagonale:AC`) ou
+ * `segment:a-b` (segment de section déjà tracé, ids de `points`). */
+export type EtapeResolutionSection =
+  | { type: "segment"; face: number; pointA: number; pointB: number }
+  | {
+      type: "auxiliaire";
+      ligne1: string;
+      ligne2: string;
+      pointAuxiliaire: Point3D;
+      faceCommune: number | null;
+      face: number;
+      pointConnu: number;
+      pointCible: number;
+    };
+
 export interface ExerciceSectionPlaneSolide {
   solide: Solide3D;
   plan: [Point3D, Point3D, Point3D]; // le plan de coupe (3 points quelconques, pas nécessairement des sommets nommés)
@@ -34,6 +52,7 @@ export interface ExerciceSectionPlaneSolide {
   facesCroisees: number[];
   idsDepart: [number, number, number]; // ids (dans `points`) de P, Q, R, dans cet ordre
   lignesStatiques: LigneCandidateExercice[]; // candidats fixes (arêtes + diagonales) de l'écran B
+  resolutionReference: EtapeResolutionSection[];
 }
 
 export type GenerateurExerciceSectionPlaneSolide = () => ExerciceSectionPlaneSolide;

@@ -3,26 +3,19 @@ import type { Point3D, Solide3D } from "./geometrieEspace.types";
 /**
  * Contrat — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace"). Projection
  * parallèle : une direction de lumière fixe (`direction`, JAMAIS montrée numériquement à l'élève)
- * projette des piquets verticaux vers le sol (z=0) ou, pour la variante `obstacle`, vers un ou
- * plusieurs solides-obstacles posés au sol — vérité terrain calculée une seule fois à la
- * génération, jamais recalculée différemment en cours d'exercice.
+ * projette le sommet d'un bâton vertical vers le sol (z=0) ou vers le PREMIER solide-obstacle
+ * réellement rencontré le long du rayon — vérité terrain calculée une seule fois à la génération,
+ * jamais recalculée différemment en cours d'exercice.
  *
- * **Simplification délibérée pour les variantes `simple`/`obstacle`, documentée ici plutôt que
- * devinée** : l'objet dont on cherche l'ombre est modélisé comme un piquet vertical isolé (jamais
- * un sommet d'un solide gabarit du chapitre) — même modèle qu'un "bâton" planté au sol, jamais une
- * arête/un solide réel. Le rendu SVG partagé (`Solide3DSketch`) reste réutilisé tel quel : le(s)
- * piquet(s)/obstacle(s)/sol sont encodés comme un `Solide3D` de cadrage synthétique (jamais un des
- * gabarits du chapitre pour le PIQUET lui-même), ses sommets nommés ne sont jamais étiquetés
- * (`labelsSommets={false}`) — tous les points réellement montrés à l'élève passent par
- * `pointsExtra`/`segmentsExtra`, comme "Section plane d'un solide" le fait déjà pour ses points de
- * section.
+ * **Modèle délibéré pour les variantes `simple`/`obstacle`** : l'objet dont on cherche l'ombre est
+ * un bâton vertical isolé (jamais un sommet d'un solide gabarit du chapitre). Le croquis est
+ * entièrement construit en `pointsExtra`/`segmentsExtra` de `Solide3DSketch` (sol, obstacles,
+ * bâtons), le solide passé au composant ne servant qu'au cadrage (sommets virtuels, aucune face).
  *
- * **Variante `directionInconnue` (C), à l'inverse, projette réellement les sommets d'un gabarit** —
- * `pyramideCarree`/`campanile` (`GABARITS_OMBRE_DIRECTION_INCONNUE`,
- * `generateurs/solide3D/gabarits.ts`) : `solide` porte l'INSTANCE réellement tirée (coordonnées
- * internes fixes du gabarit, translatée horizontalement une seule fois pour varier sa position dans
- * la scène), affichée en wireframe complet ; `piquetConnu` et chaque élément de `piquets` sont
- * TOUJOURS des sommets non-sol (z>0) de ce même solide, jamais des points indépendants.
+ * **Variante `directionInconnue`** : projette réellement les sommets du campanile
+ * (`generateurs/solide3D/gabarits.ts`), translaté horizontalement. La pyramide a été retirée
+ * (audit du chapitre 8, décision H5a) : son unique sommet hors sol était déjà le sommet donné, il ne
+ * restait rien à projeter.
  */
 
 export type VarianteOmbreSoleil = "simple" | "obstacle" | "directionInconnue";
@@ -33,76 +26,108 @@ export interface Piquet {
   hauteur: number; // sommet implicite = base + (0,0,hauteur)
 }
 
-/** Direction candidate pour les écrans de sélection (étape "direction" des variantes B/C, dérivation
- * implicite des candidats-points de la variante A) — `id` interne, jamais montré tel quel à l'élève
- * (libellés dérivés côté présentation). */
+/** Direction candidate pour les écrans "direction" — `id` interne, jamais montré tel quel à l'élève
+ * (libellés "Candidat k" dérivés côté présentation, dans un ordre mélangé). */
 export interface DirectionCandidate {
   id: string;
   vecteur: Point3D;
+  /** Extrémité de l'aperçu tracé depuis le sommet concerné — longueur choisie pour que les 4
+   * aperçus aient la même longueur À L'ÉCRAN (seul l'angle doit les départager). */
+  extremiteApercu: Point3D;
 }
 
-/** Un piquet à résoudre, avec sa vérité terrain déjà calculée (jamais recalculée différemment côté
- * présentation/vérification — seule la Couche A calcule la géométrie de construction). */
+/** Cadrage du croquis, figé à la génération pour rester identique d'un écran à l'autre : le
+ * rectangle du sol dessiné, et tous les points 3D qui doivent tenir dans le cadre (sommets, ombres,
+ * candidats, aperçus, obstacles). */
+export interface CadrageScene {
+  sol: [Point3D, Point3D, Point3D, Point3D];
+  points: Point3D[];
+}
+
+/** Point candidat pour les écrans "point" — construit par la Couche A INDÉPENDAMMENT des directions
+ * candidates (audit du chapitre 8, point 38 : les 4 points ne sont plus les 4 projections des 4
+ * directions de l'écran précédent). Chaque distracteur incarne une erreur de construction précise
+ * (`erreur`, jamais affichée à l'élève : sert aux corrections et aux contrôles). */
+export type ErreurPointOmbre =
+  | "aucune"
+  | "traceTropCourte"
+  | "traceTropLongue"
+  | "surRayonSansTrace"
+  | "sensOppose"
+  | "composantesPermutees"
+  | "traverseObstacle"
+  | "obstacleSuivant"
+  | "surObstacleSurvole";
+
+export interface PointCandidat {
+  id: string;
+  position: Point3D;
+  erreur: ErreurPointOmbre;
+}
+
+/** Un bâton (ou un sommet du campanile) à projeter, avec sa vérité terrain et ses 4 points
+ * candidats (le vrai compris). */
 export interface PiquetAResoudre {
   piquet: Piquet;
   ombre: Point3D;
-  surObstacle: boolean;
+  pointsCandidats: PointCandidat[];
 }
 
 export interface ExerciceOmbreSoleilSimple {
   variante: "simple";
   direction: Point3D;
-  directionsCandidates: DirectionCandidate[];
   piquetExemple: Piquet;
   ombreExemple: Point3D;
   piquet: PiquetAResoudre;
+  cadrage: CadrageScene;
 }
 
-/** Un solide-obstacle vrai (jamais un simple mur plat) — soit une caisse (réutilise directement un
- * gabarit existant du chapitre), soit l'escalier de caisses empilées (`construireEscalierCaisses`,
- * section 1.c) : les deux modélisés comme un vrai `Solide3D`, testé comme un bloc ATOMIQUE via
- * l'algorithme général d'intersection rayon/solide (`intersectionAvecSolide`,
- * `generateurs/solide3D/geometrieEspace.ts`) — jamais itéré marche par marche/face par face côté
- * élève. */
+/** Boîte alignée sur les axes — brique de collision. Une caisse = 1 boîte ; l'escalier = 1 boîte
+ * par colonne de marche (union de colonnes), ce qui prend en compte ses faces de profil (audit,
+ * point 33), jamais réductibles à un rectangle unique. */
+export interface Boite3D {
+  min: Point3D;
+  max: Point3D;
+}
+
 export type TypeObstacleOmbreSoleil = "caisse" | "escalier";
 
 export interface ObstacleOmbreSoleil {
   type: TypeObstacleOmbreSoleil;
+  /** Solide affiché (faces réelles, escalier compris). */
   solide: Solide3D;
+  /** Géométrie de collision (union de boîtes). */
+  boites: Boite3D[];
 }
 
-/** Un obstacle à résoudre dans la boucle de la variante B — même principe que `PiquetAResoudre`
- * (vérité terrain déjà calculée à la génération, jamais recalculée côté présentation/vérification) :
- * `ombre` teste la direction VRAIE contre CE seul solide, indépendamment des autres obstacles de la
- * scène (une itération de boucle = un solide-obstacle, jamais une face ni une marche) — `surObstacle`
- * vrai si ce solide précis est réellement touché, auquel cas `ombre` est un point sur sa surface ;
- * sinon `ombre` retombe directement sur le sol (comme si cet obstacle était seul dans la scène). */
-export interface ObstacleAResoudre {
-  obstacle: ObstacleOmbreSoleil;
-  ombre: Point3D;
-  surObstacle: boolean;
-}
-
+/**
+ * Variante B — UNE seule question par scène (décision H4a) : où l'ombre du bâton s'arrête-t-elle
+ * réellement ? Sur le PREMIER obstacle rencontré le long du rayon (t minimal), ou sur le sol si le
+ * rayon passe à côté ou au-dessus de tous les obstacles (`indexObstacleTouche === null`, cas
+ * désormais réellement tiré — audit, point 35).
+ */
 export interface ExerciceOmbreSoleilObstacle {
   variante: "obstacle";
   direction: Point3D;
   directionsCandidates: DirectionCandidate[];
   piquetExemple: Piquet;
   ombreExemple: Point3D;
-  /** Le "bâton" isolé dont on cherche l'ombre — même modèle qu'un piquet planté au sol (comme la
-   * variante A), jamais un sommet d'un des solides-obstacles de la scène. */
   baton: Piquet;
-  /** 1 à 3 solides-obstacles à résoudre, une itération de boucle par obstacle (jamais par
-   * face/marche) — décision explicite prise en conversation, préférée à une itération plus fine. */
-  obstacles: ObstacleAResoudre[];
-  /** Index dans `obstacles` du solide RÉELLEMENT touché par l'ombre du bâton (le premier rencontré le
-   * long du rayon), ou `null` si aucun ne l'est (l'ombre atteint alors directement le sol) — vérité
-   * terrain GLOBALE de la scène entière, distincte du test PAR obstacle porté par `ObstacleAResoudre`
-   * : utilisée par l'écran de conclusion pour reconstituer l'ombre réelle, jamais par la boucle
-   * elle-même. */
+  obstacles: ObstacleOmbreSoleil[];
   indexObstacleTouche: number | null;
-  /** Le point d'ombre final réel de la scène — sur `obstacles[indexObstacleTouche].obstacle`, ou au
-   * sol si `indexObstacleTouche` est `null`. */
+  /** Point d'ombre final réel (sur l'obstacle touché, ou au sol). */
+  ombre: Point3D;
+  /** Où le rayon atteindrait le sol s'il n'y avait aucun obstacle. */
+  ombreSansObstacle: Point3D;
+  pointsCandidats: PointCandidat[];
+  cadrage: CadrageScene;
+}
+
+/** Ombre d'un sommet du campanile que l'élève ne projette pas lui-même — montrée dans la
+ * conclusion, "par le même procédé". */
+export interface OmbreSommet {
+  id: string;
+  sommet: Point3D;
   ombre: Point3D;
 }
 
@@ -110,18 +135,20 @@ export interface ExerciceOmbreSoleilDirectionInconnue {
   variante: "directionInconnue";
   direction: Point3D;
   directionsCandidates: DirectionCandidate[];
-  /** Le gabarit RÉELLEMENT tiré (pyramideCarree ou campanile), translaté aléatoirement — toujours
-   * affiché en wireframe complet, jamais réduit à ses seuls sommets projetés. */
+  /** Le campanile tiré, translaté horizontalement. */
   solide: Solide3D;
-  /** Un sommet NON-SOL de `solide`, tiré au hasard — jamais un sommet de base (z=0), dont l'ombre
-   * coïnciderait trivialement avec lui-même et ne permettrait aucune déduction de direction. */
+  /** Un sommet hors sol du campanile, donné avec son ombre. */
   piquetConnu: Piquet;
   ombreConnue: Point3D;
-  /** Les AUTRES sommets non-sol de `solide` (jamais `piquetConnu` lui-même) — 0 pour la pyramide
-   * (un seul sommet non-sol au total, l'apex, déjà consommé par `piquetConnu` : cas dégénéré
-   * assumé, déjà géré par la Couche B — transition directe vers "conclusion" après l'étape 0), 1 à
-   * 4 pour le campanile. */
+  /** Sommets hors sol que l'élève projette (1 à 3 écrans) — toujours des sommets dont l'ombre tombe
+   * hors de l'emprise au sol du campanile (sinon elle serait cachée sous le bâtiment). */
   piquets: PiquetAResoudre[];
+  /** Ombres des autres sommets hors sol, montrées dans la conclusion. */
+  ombresAutres: OmbreSommet[];
+  /** Contour de l'ombre portée au sol : enveloppe convexe de la base et des ombres des sommets
+   * hors sol, dans l'ordre du tracé. */
+  contourOmbre: Point3D[];
+  cadrage: CadrageScene;
 }
 
 export type ExerciceOmbreSoleil = ExerciceOmbreSoleilSimple | ExerciceOmbreSoleilObstacle | ExerciceOmbreSoleilDirectionInconnue;

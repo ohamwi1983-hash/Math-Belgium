@@ -1,186 +1,246 @@
 import type { Point3D, Solide3D } from "../../core/geometrieEspace.types";
 import type {
+  Boite3D,
+  CadrageScene,
   DirectionCandidate,
+  ErreurPointOmbre,
   ExerciceOmbreSoleil,
   ExerciceOmbreSoleilDirectionInconnue,
   ExerciceOmbreSoleilObstacle,
   ExerciceOmbreSoleilSimple,
-  ObstacleAResoudre,
   ObstacleOmbreSoleil,
+  OmbreSommet,
   Piquet,
   PiquetAResoudre,
-  TypeObstacleOmbreSoleil,
+  PointCandidat,
   VarianteOmbreSoleil,
 } from "../../core/ombreSoleil.types";
-import { additionner3D, distance3D, multiplierScalaire3D } from "../solide3D/geometrieEspace";
+import { additionner3D, distance3D, multiplierScalaire3D, soustraire3D } from "../solide3D/geometrieEspace";
+import { construireEscalierCaisses, GABARITS_SOLIDE3D, HAUTEUR_MARCHE_ESCALIER, LARGEUR_MARCHE_ESCALIER, PROFONDEUR_ESCALIER } from "../solide3D/gabarits";
 import {
-  construireEscalierCaisses,
-  GABARITS_OMBRE_DIRECTION_INCONNUE,
-  GABARITS_SOLIDE3D,
-  LARGEUR_MARCHE_ESCALIER,
-  NOMBRE_MARCHES_MAX,
-  NOMBRE_MARCHES_MIN,
-  PROFONDEUR_ESCALIER,
-  tirerNomGabarit,
-} from "../solide3D/gabarits";
-import { construireDirectionsCandidates, intersectionAvecSol, ombreDepuis, ombrePiquet, sommetPiquet } from "./ombreGeometrie";
+  construireDirectionsCandidates,
+  dansEmpriseObstacle,
+  distancePixel,
+  echellePixel,
+  impactScene,
+  impactsObstacles,
+  intersectionAvecSol,
+  projeter2D,
+  sommetPiquet,
+} from "./ombreGeometrie";
 
 /**
- * Couche A — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace"). **Aucun
- * tirage-puis-classification** : la direction de lumière et les piquets sont toujours construits
- * AVANT que la vérité terrain (point d'ombre, mur touché ou non) n'en soit déduite — jamais
- * l'inverse. Voir `core/ombreSoleil.types.ts` pour la simplification assumée (piquets verticaux
- * indépendants plutôt que les sommets d'un solide gabarit).
+ * Couche A — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace"). Refonte issue
+ * de l'audit du chapitre 8 :
+ * - variante `obstacle` : une seule question par scène (H4a), le premier impact réel du rayon
+ *   (obstacle ou sol) ; scènes cohérentes (aucun bâton ni piquet d'exemple dans un obstacle, aucun
+ *   obstacle qui en chevauche un autre, rayon de l'exemple jamais intercepté — point 32) ; environ
+ *   30 % de scènes où l'ombre atteint le sol en passant au-dessus d'un obstacle (point 35) ;
+ * - variante `directionInconnue` : campanile seul (H5a), ombre complète reconstituée par son vrai
+ *   contour (enveloppe convexe) ;
+ * - points candidats indépendants des directions candidates, chacun incarnant une erreur de
+ *   construction précise (point 38), tous discernables à l'écran (point 40).
+ * Les tirages qui ne respectent pas ces contraintes sont rejetés et refaits.
  */
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function randomReel(min: number, max: number, pas = 0.5): number {
+  return min + pas * randomInt(0, Math.round((max - min) / pas));
+}
+
+function choisir<T>(tableau: readonly T[]): T {
+  return tableau[randomInt(0, tableau.length - 1)];
+}
+
 const COMPOSANTES_DIRECTION = [-3, -2, -1, 1, 2, 3];
 
-/** Direction de lumière — toujours `dz<0` (la lumière descend), et `dx≠0, dy≠0, dx≠dy, dx≠-dy` pour
- * que les 4 candidats de `construireDirectionsCandidates` restent deux à deux distincts. */
-function construireDirection(): Point3D {
-  const dx = COMPOSANTES_DIRECTION[randomInt(0, COMPOSANTES_DIRECTION.length - 1)];
-  const candidatsDy = COMPOSANTES_DIRECTION.filter((v) => v !== dx && v !== -dx);
-  const dy = candidatsDy[randomInt(0, candidatsDy.length - 1)];
-  const dz = -randomInt(3, 6);
-  return { x: dx, y: dy, z: dz };
+/** Direction de lumière — toujours `dz<0` (la lumière descend), `dx≠0, dy≠0, |dx|≠|dy|`. */
+function construireDirection(dzMin: number, dzMax: number): Point3D {
+  const dx = choisir(COMPOSANTES_DIRECTION);
+  const dy = choisir(COMPOSANTES_DIRECTION.filter((v) => Math.abs(v) !== Math.abs(dx)));
+  return { x: dx, y: dy, z: -randomInt(dzMin, dzMax) };
 }
 
 const PLAGE_BASE = 6;
-const SEPARATION_MIN_BASES = 2;
 
-function tirerBase(basesExistantes: Point3D[]): Point3D {
-  for (let tentative = 0; tentative < 200; tentative++) {
-    const candidat: Point3D = { x: randomInt(-PLAGE_BASE, PLAGE_BASE), y: randomInt(-PLAGE_BASE, PLAGE_BASE), z: 0 };
-    if (basesExistantes.every((b) => distance3D(b, candidat) >= SEPARATION_MIN_BASES)) return candidat;
+function tirerPiquet(id: string, basesExistantes: Point3D[], separationMin: number, hauteurMin = 2, hauteurMax = 5): Piquet | null {
+  for (let tentative = 0; tentative < 100; tentative++) {
+    const base: Point3D = { x: randomInt(-PLAGE_BASE, PLAGE_BASE), y: randomInt(-PLAGE_BASE, PLAGE_BASE), z: 0 };
+    if (basesExistantes.every((b) => distance3D(b, base) >= separationMin)) return { id, base, hauteur: randomInt(hauteurMin, hauteurMax) };
   }
-  // Repli défensif — ne devrait jamais être atteint (large plage, peu de points à placer).
-  return { x: randomInt(-PLAGE_BASE, PLAGE_BASE), y: randomInt(-PLAGE_BASE, PLAGE_BASE), z: 0 };
+  return null;
 }
 
-function tirerPiquet(id: string, basesExistantes: Point3D[]): Piquet {
-  return { id, base: tirerBase(basesExistantes), hauteur: randomInt(2, 5) };
+// --- Points candidats (indépendants des directions candidates) ------------------------------------
+
+const K_CAVALIER = Math.cos(Math.PI / 4) * 0.5;
+
+/** Point du sol dont l'image à l'écran tombe sur l'image du rayon au paramètre `t` — il « est sur
+ * le rayon » sur le dessin, sans être sur la trace au sol (erreur : rayon tracé sans la trace). */
+function pointSolSurImageDuRayon(sommet: Point3D, direction: Point3D, t: number): Point3D {
+  const p = additionner3D(sommet, multiplierScalaire3D(direction, t));
+  return { x: p.x - p.z, y: p.y + p.z / K_CAVALIER, z: 0 };
 }
 
-/** Points d'ombre candidats d'un piquet — un par direction candidate, y compris la vraie (jamais
- * stockés sur le contrat, recalculés à la demande depuis les 4 directions déjà fixées). Jamais
- * appelée avec un obstacle : les seuls consommateurs restants (variantes A et C) projettent toujours
- * sur le sol seul — voir `pointsCandidatsObstacle` pour l'équivalent par solide-obstacle. */
-function pointsCandidats(piquet: Piquet, directionsCandidates: DirectionCandidate[]): { id: string; position: Point3D }[] {
-  return directionsCandidates.map((dc) => ({ id: dc.id, position: ombrePiquet(piquet, dc.vecteur).position }));
+interface CandidatBrut {
+  position: Point3D;
+  erreur: ErreurPointOmbre;
 }
 
-const SEPARATION_MIN_CANDIDATS = 0.5;
+/** Familles de distracteurs « au sol » : trace au sol de mauvaise longueur, point sur l'image du
+ * rayon sans être sur la trace, sens opposé, composantes permutées. */
+function famillesSol(piquet: Piquet, direction: Point3D, ombre: Point3D): CandidatBrut[][] {
+  const base = piquet.base;
+  const sommet = sommetPiquet(piquet);
+  const trace = soustraire3D(ombre, base);
+  const tSol = -sommet.z / direction.z;
+  const permutee = intersectionAvecSol(sommet, { x: direction.y, y: direction.x, z: direction.z });
+  return [
+    [
+      { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(0.45, 0.6, 0.05))), erreur: "traceTropCourte" },
+      { position: additionner3D(base, multiplierScalaire3D(trace, randomReel(1.45, 1.75, 0.05))), erreur: "traceTropLongue" },
+    ],
+    [
+      { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(0.55, 0.7, 0.05)), erreur: "surRayonSansTrace" },
+      { position: pointSolSurImageDuRayon(sommet, direction, tSol * randomReel(1.3, 1.5, 0.05)), erreur: "surRayonSansTrace" },
+    ],
+    [
+      { position: soustraire3D(base, trace), erreur: "sensOppose" },
+      { position: permutee, erreur: "composantesPermutees" },
+    ],
+  ];
+}
 
-/** Exige que les points d'une liste restent deux à deux à une distance minimale — évite qu'un
- * écran de sélection propose 2 candidats visuellement/numériquement confondus. */
-function suffisammentDistincts(points: { position: Point3D }[]): boolean {
-  for (let i = 0; i < points.length; i++) {
-    for (let j = i + 1; j < points.length; j++) {
-      if (distance3D(points[i].position, points[j].position) < SEPARATION_MIN_CANDIDATS) return false;
+/** Tire 3 distracteurs, un par famille (puis complète avec les familles restantes), qui respectent
+ * `valide`. */
+function choisirDistracteurs(familles: CandidatBrut[][], valide: (c: CandidatBrut) => boolean): CandidatBrut[] | null {
+  const retenus: CandidatBrut[] = [];
+  const restants: CandidatBrut[] = [];
+  for (const famille of familles) {
+    const valides = famille.filter(valide);
+    if (valides.length === 0) continue;
+    const i = randomInt(0, valides.length - 1);
+    if (retenus.length < 3) retenus.push(valides[i]);
+    restants.push(...valides.filter((_, j) => j !== i));
+  }
+  for (const c of restants) {
+    if (retenus.length >= 3) break;
+    retenus.push(c);
+  }
+  return retenus.length === 3 ? retenus : null;
+}
+
+function versCandidats(vrai: Point3D, distracteurs: CandidatBrut[]): PointCandidat[] {
+  return [{ position: vrai, erreur: "aucune" as const }, ...distracteurs].map((c, i) => ({ id: `p${i}`, position: c.position, erreur: c.erreur }));
+}
+
+// --- Cadrage et lisibilité --------------------------------------------------------------------------
+
+const MARGE_SOL = 1.2;
+const SEPARATION_CANDIDATS_PX = 24;
+const SEPARATION_AUTRES_PX = 16;
+const SEPARATION_APERCUS_PX = 20;
+/** Longueur à l'écran des aperçus de direction, en pixels. */
+const LONGUEUR_APERCU_PX = 80;
+
+function construireCadrage(pointsSol: Point3D[], autres: Point3D[]): CadrageScene {
+  const xs = pointsSol.map((p) => p.x);
+  const ys = pointsSol.map((p) => p.y);
+  const xMin = Math.min(...xs) - MARGE_SOL;
+  const xMax = Math.max(...xs) + MARGE_SOL;
+  const yMin = Math.min(...ys) - MARGE_SOL;
+  const yMax = Math.max(...ys) + MARGE_SOL;
+  const sol: CadrageScene["sol"] = [
+    { x: xMin, y: yMin, z: 0 },
+    { x: xMax, y: yMin, z: 0 },
+    { x: xMax, y: yMax, z: 0 },
+    { x: xMin, y: yMax, z: 0 },
+  ];
+  return { sol, points: [...sol, ...autres] };
+}
+
+/** Candidats deux à deux séparés de 24 px, et à 16 px au moins des autres points dessinés. */
+function candidatsLisibles(candidats: readonly PointCandidat[], autresPoints: readonly Point3D[], echelle: number): boolean {
+  for (let i = 0; i < candidats.length; i++) {
+    for (let j = i + 1; j < candidats.length; j++) {
+      if (distancePixel(candidats[i].position, candidats[j].position, echelle) < SEPARATION_CANDIDATS_PX) return false;
+    }
+    if (autresPoints.some((p) => distancePixel(candidats[i].position, p, echelle) < SEPARATION_AUTRES_PX)) return false;
+  }
+  return true;
+}
+
+function apercusLisibles(directions: readonly DirectionCandidate[], echelle: number): boolean {
+  for (let i = 0; i < directions.length; i++) {
+    for (let j = i + 1; j < directions.length; j++) {
+      if (distancePixel(directions[i].extremiteApercu, directions[j].extremiteApercu, echelle) < SEPARATION_APERCUS_PX) return false;
     }
   }
   return true;
 }
 
-const MAX_TENTATIVES_INSTANCE = 500;
+const MAX_TENTATIVES_INSTANCE = 6000;
+
+/** Directions candidates dont les aperçus mesurent ~80 px à l'écran : la longueur dépend de
+ * l'échelle finale, qui dépend elle-même des extrémités des aperçus (inclus dans le cadrage) —
+ * quelques ajustements successifs suffisent à converger. */
+function directionsAvecApercusALaBonneLongueur(direction: Point3D, origine: Point3D, scene: Point3D[]): DirectionCandidate[] | null {
+  let echelle = echellePixel(scene);
+  let directions: DirectionCandidate[] | null = null;
+  for (let iteration = 0; iteration < 3; iteration++) {
+    directions = construireDirectionsCandidates(direction, origine, LONGUEUR_APERCU_PX / echelle);
+    if (!directions) return null;
+    echelle = echellePixel([...scene, ...directions.map((d) => d.extremiteApercu)]);
+  }
+  return directions;
+}
 
 // --- Variante A — Ombre simple sur sol plat --------------------------------------------------------
 
 function construireSimple(): ExerciceOmbreSoleilSimple {
   for (let tentative = 0; tentative < MAX_TENTATIVES_INSTANCE; tentative++) {
-    const direction = construireDirection();
-    const directionsCandidates = construireDirectionsCandidates(direction);
-    const piquetExemple = tirerPiquet("E", []);
-    const ombreExemple = ombrePiquet(piquetExemple, direction).position;
+    const direction = construireDirection(3, 6);
+    const piquetExemple = tirerPiquet("E", [], 0);
+    if (!piquetExemple) continue;
+    const piquetA = tirerPiquet("A", [piquetExemple.base], 4);
+    if (!piquetA) continue;
+    const ombreExemple = intersectionAvecSol(sommetPiquet(piquetExemple), direction);
+    const ombre = intersectionAvecSol(sommetPiquet(piquetA), direction);
 
-    const piquetBrut = tirerPiquet("A", [piquetExemple.base]);
-    if (!suffisammentDistincts(pointsCandidats(piquetBrut, directionsCandidates))) continue;
+    const distracteurs = choisirDistracteurs(famillesSol(piquetA, direction, ombre), () => true);
+    if (!distracteurs) continue;
+    const pointsCandidats = versCandidats(ombre, distracteurs);
 
-    const { position, surObstacle } = ombrePiquet(piquetBrut, direction);
-    const piquet: PiquetAResoudre = { piquet: piquetBrut, ombre: position, surObstacle };
+    const pointsSol = [piquetExemple.base, ombreExemple, piquetA.base, ...pointsCandidats.map((c) => c.position)];
+    const cadrage = construireCadrage(pointsSol, [sommetPiquet(piquetExemple), sommetPiquet(piquetA)]);
+    const echelle = echellePixel(cadrage.points);
+    if (!candidatsLisibles(pointsCandidats, [piquetExemple.base, ombreExemple, piquetA.base], echelle)) continue;
 
-    return { variante: "simple", direction, directionsCandidates, piquetExemple, ombreExemple, piquet };
+    const piquet: PiquetAResoudre = { piquet: piquetA, ombre, pointsCandidats };
+    return { variante: "simple", direction, piquetExemple, ombreExemple, piquet, cadrage };
   }
   throw new Error(`construireSimple : aucune instance valide trouvée après ${MAX_TENTATIVES_INSTANCE} tentatives`);
 }
 
-// --- Variante B — Ombre avec obstacle(s) --------------------------------------------------------
-//
-// Refonte (section 2 de l'extension) : un "bâton" isolé (même modèle qu'un piquet de la variante A,
-// jamais un sommet d'un des solides-obstacles) projette son ombre, qui peut "casser" sur 1 à 3
-// solides-obstacles VRAIS (caisse ou escalier) plutôt que sur un mur plat abstrait — décision
-// explicite prise en conversation : UNE itération de boucle PAR SOLIDE-OBSTACLE (jamais par face ni
-// par marche), la direction étant confirmée UNE SEULE FOIS avant la boucle (jamais reconfirmée par
-// obstacle). L'escalier, testé comme un bloc ATOMIQUE via l'algorithme général `intersectionAvecSolide`
-// (jamais itéré marche par marche côté élève), n'utilise cependant que ses faces LATÉRALES (risers/
-// treads) pour la physique — ses 2 faces de profil (avant/arrière) sont des polygones en escalier
-// CONCAVES, jamais réductibles à un simple rectangle axis-aligned (l'hypothèse d'`intersectionAvecFaceRectangle`) :
-// `solideCollision` les exclut, le rendu visuel complet (`Solide3DSketch`) reste, lui, inchangé.
+// --- Variante B — Ombre avec obstacle(s) ------------------------------------------------------------
 
-/** Solide de COLLISION d'un obstacle — pour l'escalier, exclut ses 2 faces de profil (toujours les 2
- * premières de `construireEscalierCaisses`, voir sa doc) : jamais utilisées pour la physique, le
- * rendu visuel complet les garde malgré tout (`ObstacleAResoudre.obstacle.solide` reste le solide
- * ENTIER). Une caisse n'a, elle, que des faces déjà rectangulaires — inchangée. */
-function solideCollision(obstacle: ObstacleOmbreSoleil): Solide3D {
-  if (obstacle.type !== "escalier") return obstacle.solide;
-  return { ...obstacle.solide, faces: obstacle.solide.faces.slice(2) };
-}
-
-/** Points d'ombre candidats d'un obstacle donné — un par direction candidate, testée en isolation
- * contre CE seul solide (jamais les autres obstacles de la scène) — même principe que
- * `pointsCandidats`, généralisé au solide de collision plutôt qu'un piquet+sol. */
-function pointsCandidatsObstacle(
-  origine: Point3D,
-  directionsCandidates: DirectionCandidate[],
-  obstacle: ObstacleOmbreSoleil,
-): { id: string; position: Point3D }[] {
-  return directionsCandidates.map((dc) => ({ id: dc.id, position: ombreDepuis(origine, dc.vecteur, solideCollision(obstacle)).position }));
-}
-
-/** `n` fractions de `tSol` strictement croissantes (avec un léger jitter) — place les obstacles dans
- * l'ORDRE où le rayon les rencontrerait potentiellement, du plus proche du bâton au plus proche du
- * sol : nécessaire pour que `indexObstacleTouche` (le premier RÉELLEMENT touché) corresponde à la
- * réalité physique de la scène. */
-function fractionsCroissantes(n: number): number[] {
-  const fractions: number[] = [];
-  for (let i = 0; i < n; i++) {
-    const base = (i + 1) / (n + 1);
-    const jitter = (Math.random() - 0.5) * ((1 / (n + 1)) * 0.5);
-    fractions.push(base + jitter);
-  }
-  return fractions;
-}
-
-/** Caisse (parallélépipède rectangle) positionnée le long du rayon issu de `origine`, à la fraction
- * `fraction` de sa trajectoire vers le sol — `garanti` centre la caisse EXACTEMENT sur le rayon
- * (garantit qu'elle est réellement touchée, même principe que l'ancienne `construireObstacleAutourDe`
- * du mur plat, généralisée en vrai `Solide3D`) ; sinon un décalage horizontal aléatoire produit une
- * variété hit/miss NATURELLE, jamais un rejet basé sur l'issue. */
-function construireCaisseObstacle(origine: Point3D, direction: Point3D, fraction: number, garanti: boolean): Solide3D {
-  const tSol = -origine.z / direction.z;
-  const pointRay = additionner3D(origine, multiplierScalaire3D(direction, fraction * tSol));
-  const decalageX = garanti ? 0 : (Math.random() - 0.5) * 6;
-  const demiLargeurX = 1 + Math.random();
-  const demiLargeurY = 1 + Math.random();
-  const hauteur = pointRay.z + 0.5 + Math.random();
-  const cx = pointRay.x + decalageX;
-  const cy = pointRay.y;
+function solideBoite(boite: Boite3D, label: string): Solide3D {
+  const { min, max } = boite;
   return {
     id: "cube",
-    label: "Caisse",
+    label,
     sommets: {
-      A: { x: cx - demiLargeurX, y: cy - demiLargeurY, z: 0 },
-      B: { x: cx + demiLargeurX, y: cy - demiLargeurY, z: 0 },
-      C: { x: cx + demiLargeurX, y: cy + demiLargeurY, z: 0 },
-      D: { x: cx - demiLargeurX, y: cy + demiLargeurY, z: 0 },
-      E: { x: cx - demiLargeurX, y: cy - demiLargeurY, z: hauteur },
-      F: { x: cx + demiLargeurX, y: cy - demiLargeurY, z: hauteur },
-      G: { x: cx + demiLargeurX, y: cy + demiLargeurY, z: hauteur },
-      H: { x: cx - demiLargeurX, y: cy + demiLargeurY, z: hauteur },
+      A: { x: min.x, y: min.y, z: 0 },
+      B: { x: max.x, y: min.y, z: 0 },
+      C: { x: max.x, y: max.y, z: 0 },
+      D: { x: min.x, y: max.y, z: 0 },
+      E: { x: min.x, y: min.y, z: max.z },
+      F: { x: max.x, y: min.y, z: max.z },
+      G: { x: max.x, y: max.y, z: max.z },
+      H: { x: min.x, y: max.y, z: max.z },
     },
     faces: [
       ["A", "B", "C", "D"],
@@ -193,71 +253,243 @@ function construireCaisseObstacle(origine: Point3D, direction: Point3D, fraction
   };
 }
 
-/** Escalier positionné (translaté horizontalement) près du rayon, à la fraction `fraction` de sa
- * trajectoire — jamais un slot "garanti", voir la boucle de construction : toujours un décalage
- * naturel (hit/miss non forcé). */
-function construireEscalierObstacle(origine: Point3D, direction: Point3D, fraction: number): Solide3D {
-  const tSol = -origine.z / direction.z;
-  const pointRay = additionner3D(origine, multiplierScalaire3D(direction, fraction * tSol));
-  const nombreMarches = randomInt(NOMBRE_MARCHES_MIN, NOMBRE_MARCHES_MAX);
-  const brut = construireEscalierCaisses(nombreMarches);
-  const largeurTotale = nombreMarches * LARGEUR_MARCHE_ESCALIER;
-  const decalageX = (Math.random() - 0.5) * 6;
-  const dx = pointRay.x + decalageX - largeurTotale / 2;
-  const dy = pointRay.y - PROFONDEUR_ESCALIER / 2;
-  return translaterSolideHorizontalement(brut, dx, dy);
+function construireCaisse(centre: Point3D, hauteurBaton: number): ObstacleOmbreSoleil {
+  const demiX = randomReel(0.7, 1.5);
+  const demiY = randomReel(0.7, 1.5);
+  // Jamais plus haute que le bâton : une caisse plus haute que lui le masquerait sur le dessin.
+  const hauteur = randomReel(1, hauteurBaton - 0.5);
+  const boite: Boite3D = { min: { x: centre.x - demiX, y: centre.y - demiY, z: 0 }, max: { x: centre.x + demiX, y: centre.y + demiY, z: hauteur } };
+  return { type: "caisse", solide: solideBoite(boite, "Caisse"), boites: [boite] };
 }
 
-const PROBABILITE_ESCALIER = 0.4;
+/** Escalier de 3 marches centré en `centre` — une boîte de collision par colonne de marche. */
+function construireEscalier(centre: Point3D): ObstacleOmbreSoleil {
+  const nombreMarches = 3;
+  const brut = construireEscalierCaisses(nombreMarches);
+  const dx = centre.x - (nombreMarches * LARGEUR_MARCHE_ESCALIER) / 2;
+  const dy = centre.y - PROFONDEUR_ESCALIER / 2;
+  const sommets: Record<string, Point3D> = {};
+  for (const [nom, p] of Object.entries(brut.sommets)) sommets[nom] = { x: p.x + dx, y: p.y + dy, z: p.z };
+  const boites: Boite3D[] = [];
+  for (let i = 1; i <= nombreMarches; i++) {
+    boites.push({
+      min: { x: dx + (i - 1) * LARGEUR_MARCHE_ESCALIER, y: dy, z: 0 },
+      max: { x: dx + i * LARGEUR_MARCHE_ESCALIER, y: dy + PROFONDEUR_ESCALIER, z: i * HAUTEUR_MARCHE_ESCALIER },
+    });
+  }
+  return { type: "escalier", solide: { ...brut, sommets }, boites };
+}
+
+/** Deux emprises au sol séparées d'au moins `marge`. */
+function emprisesDisjointes(a: ObstacleOmbreSoleil, b: ObstacleOmbreSoleil, marge: number): boolean {
+  return a.boites.every((ba) =>
+    b.boites.every(
+      (bb) => ba.max.x + marge <= bb.min.x || bb.max.x + marge <= ba.min.x || ba.max.y + marge <= bb.min.y || bb.max.y + marge <= ba.min.y,
+    ),
+  );
+}
+
+/** Point de la surface supérieure de l'obstacle situé au-dessus de la trace au sol — le distracteur
+ * « l'ombre s'arrête sur l'obstacle » quand le rayon passe en réalité au-dessus de lui. */
+function pointSurObstacleSurvole(base: Point3D, ombre: Point3D, obstacle: ObstacleOmbreSoleil): Point3D | null {
+  const dedans: number[] = [];
+  for (let k = 1; k < 40; k++) {
+    const s = k / 40;
+    const p = additionner3D(base, multiplierScalaire3D(soustraire3D(ombre, base), s));
+    if (dansEmpriseObstacle(p, obstacle, -0.2)) dedans.push(s);
+  }
+  if (dedans.length === 0) return null;
+  const s = dedans[Math.floor(dedans.length / 2)];
+  const p = additionner3D(base, multiplierScalaire3D(soustraire3D(ombre, base), s));
+  const boite = obstacle.boites.find((b) => p.x >= b.min.x && p.x <= b.max.x && p.y >= b.min.y && p.y <= b.max.y);
+  return boite ? { x: p.x, y: p.y, z: boite.max.z } : null;
+}
+
+/** L'obstacle est devant le bâton (plus près de l'observateur) et son dessin recouvre celui du
+ * bâton. */
+function masqueBaton(obstacle: ObstacleOmbreSoleil, piquet: Piquet): boolean {
+  const devant = obstacle.boites.some((b) => b.min.y < piquet.base.y);
+  if (!devant) return false;
+  const sommets = Object.values(obstacle.solide.sommets).map(projeter2D);
+  const xMin = Math.min(...sommets.map((p) => p.x));
+  const xMax = Math.max(...sommets.map((p) => p.x));
+  const yMin = Math.min(...sommets.map((p) => p.y));
+  const yMax = Math.max(...sommets.map((p) => p.y));
+  const pied = projeter2D(piquet.base);
+  const tete = projeter2D(sommetPiquet(piquet));
+  const marge = 0.3;
+  return pied.x > xMin - marge && pied.x < xMax + marge && Math.max(pied.y, tete.y) > yMin - marge && Math.min(pied.y, tete.y) < yMax + marge;
+}
+
+/** Le point tombe dans le rectangle englobant le dessin de l'obstacle. */
+function dansDessinObstacle(p: Point3D, obstacle: ObstacleOmbreSoleil): boolean {
+  const sommets = Object.values(obstacle.solide.sommets).map(projeter2D);
+  const q = projeter2D(p);
+  const marge = 0.4;
+  return (
+    q.x > Math.min(...sommets.map((s) => s.x)) - marge &&
+    q.x < Math.max(...sommets.map((s) => s.x)) + marge &&
+    q.y > Math.min(...sommets.map((s) => s.y)) - marge &&
+    q.y < Math.max(...sommets.map((s) => s.y)) + marge
+  );
+}
+
+/** Distance (en pixels) d'un point au segment [a, b], sur le dessin. */
+function distancePixelSegment(p: Point3D, a: Point3D, b: Point3D, echelle: number): number {
+  const P = projeter2D(p);
+  const A = projeter2D(a);
+  const B = projeter2D(b);
+  const dx = B.x - A.x;
+  const dy = B.y - A.y;
+  const longueurCarree = dx * dx + dy * dy || 1;
+  const t = Math.max(0, Math.min(1, ((P.x - A.x) * dx + (P.y - A.y) * dy) / longueurCarree));
+  return Math.hypot(P.x - (A.x + t * dx), P.y - (A.y + t * dy)) * echelle;
+}
+
+const PROBABILITE_OMBRE_AU_SOL = 0.3;
+const PROBABILITE_ESCALIER = 0.35;
 
 function construireObstacle(): ExerciceOmbreSoleilObstacle {
+  // Issue visée tirée UNE fois, avant les essais : sinon l'issue la plus facile à construire
+  // l'emporterait sur la proportion voulue.
+  const cibleSol = Math.random() < PROBABILITE_OMBRE_AU_SOL;
   for (let tentative = 0; tentative < MAX_TENTATIVES_INSTANCE; tentative++) {
-    const direction = construireDirection();
-    const directionsCandidates = construireDirectionsCandidates(direction);
-    const piquetExemple = tirerPiquet("E", []);
-    const ombreExemple = ombrePiquet(piquetExemple, direction).position;
+    const direction = construireDirection(2, 3);
+    const piquetExemple = tirerPiquet("E", [], 0);
+    if (!piquetExemple) continue;
+    const baton = tirerPiquet("A", [piquetExemple.base], 5, 4, 6);
+    if (!baton) continue;
+    const sommet = sommetPiquet(baton);
+    const ombreSansObstacle = intersectionAvecSol(sommet, direction);
+    const trace = soustraire3D(ombreSansObstacle, baton.base);
+    const longueurTrace = Math.hypot(trace.x, trace.y);
+    if (longueurTrace < 2) continue;
+    const perpendiculaire: Point3D = { x: -trace.y / longueurTrace, y: trace.x / longueurTrace, z: 0 };
 
-    const baton = tirerPiquet("A", [piquetExemple.base]);
-    const origine = sommetPiquet(baton);
-
+    // Un obstacle « principal » est posé SUR la trace au sol, à une hauteur choisie pour l'issue
+    // visée : plus haut que le rayon (l'ombre s'y arrête) ou plus bas (le rayon passe au-dessus et
+    // l'ombre atteint le sol). Les autres obstacles sont étalés le long de la trace.
     const nombreObstacles = randomInt(1, 3);
-    const indexGaranti = randomInt(0, nombreObstacles - 1);
-    const fractions = fractionsCroissantes(nombreObstacles);
+    const indexPrincipal = randomInt(0, nombreObstacles - 1);
+    const obstacles: ObstacleOmbreSoleil[] = [];
+    let principalImpossible = false;
+    for (let i = 0; i < nombreObstacles; i++) {
+      const s = 0.45 + (i * 1.0) / nombreObstacles + randomReel(0, 0.15, 0.05);
+      if (i === indexPrincipal) {
+        const centre = additionner3D(baton.base, multiplierScalaire3D(trace, Math.min(s, 0.8)));
+        const caisse = construireCaisse(centre, baton.hauteur);
+        const coins = Object.values(caisse.solide.sommets).filter((c) => c.z === 0);
+        const hauteursRayon = coins.map((c) => baton.hauteur * (1 - ((c.x - baton.base.x) * trace.x + (c.y - baton.base.y) * trace.y) / (longueurTrace * longueurTrace)));
+        const hauteur = cibleSol ? Math.min(...hauteursRayon) - randomReel(0.4, 1, 0.1) : Math.max(...hauteursRayon) + randomReel(0.3, 1.5, 0.1);
+        if (hauteur < 0.5 || hauteur > baton.hauteur - 0.3) {
+          principalImpossible = true;
+          break;
+        }
+        const boite = { ...caisse.boites[0], max: { ...caisse.boites[0].max, z: hauteur } };
+        obstacles.push({ type: "caisse", solide: solideBoite(boite, "Caisse"), boites: [boite] });
+        continue;
+      }
+      const decalage = randomReel(-2, 2, 0.5);
+      const centre = additionner3D(additionner3D(baton.base, multiplierScalaire3D(trace, s)), multiplierScalaire3D(perpendiculaire, decalage));
+      // L'escalier (4,5 de haut) seulement si le bâton le dépasse.
+      const escalier = baton.hauteur >= 5 && Math.random() < PROBABILITE_ESCALIER;
+      obstacles.push(escalier ? construireEscalier(centre) : construireCaisse(centre, baton.hauteur));
+    }
+    if (principalImpossible) continue;
 
-    // Le slot "garanti" est toujours une caisse (guarantee géométrique simple) ; les autres slots
-    // choisissent librement entre caisse et escalier, jamais forcés — la variété hit/miss y est
-    // naturelle, jamais un rejet basé sur l'issue.
-    const obstaclesBruts: ObstacleOmbreSoleil[] = fractions.map((fraction, i) => {
-      const estGaranti = i === indexGaranti;
-      const type: TypeObstacleOmbreSoleil = !estGaranti && Math.random() < PROBABILITE_ESCALIER ? "escalier" : "caisse";
-      const solide = type === "escalier" ? construireEscalierObstacle(origine, direction, fraction) : construireCaisseObstacle(origine, direction, fraction, estGaranti);
-      return { type, solide };
-    });
+    // Cohérence de la scène (audit, point 32).
+    let coherente = true;
+    for (let i = 0; i < obstacles.length && coherente; i++) {
+      for (let j = i + 1; j < obstacles.length; j++) {
+        if (!emprisesDisjointes(obstacles[i], obstacles[j], 0.6)) coherente = false;
+      }
+    }
+    if (!coherente) continue;
+    if (obstacles.some((o) => dansEmpriseObstacle(baton.base, o, 1.2) || dansEmpriseObstacle(piquetExemple.base, o, 1))) continue;
+    // Aucun bâton caché derrière un obstacle placé devant lui sur le dessin.
+    if (obstacles.some((o) => masqueBaton(o, baton) || masqueBaton(o, piquetExemple))) continue;
+    const ombreExemple = intersectionAvecSol(sommetPiquet(piquetExemple), direction);
+    if (impactScene(sommetPiquet(piquetExemple), direction, obstacles).indexObstacle !== null) continue;
+    if (obstacles.some((o) => dansEmpriseObstacle(ombreExemple, o, 0.3))) continue;
 
-    const obstacles: ObstacleAResoudre[] = obstaclesBruts.map((obstacle) => {
-      const { position, surObstacle } = ombreDepuis(origine, direction, solideCollision(obstacle));
-      return { obstacle, ombre: position, surObstacle };
-    });
+    const impact = impactScene(sommet, direction, obstacles);
+    if (cibleSol !== (impact.indexObstacle === null)) continue;
+    if (impact.indexObstacle === null && obstacles.some((o) => dansEmpriseObstacle(ombreSansObstacle, o, 0.3))) continue;
 
-    if (!obstacles.some((o) => o.surObstacle)) continue; // garantie de construction, revérifiée
-    if (!obstacles.every((o) => suffisammentDistincts(pointsCandidatsObstacle(origine, directionsCandidates, o.obstacle)))) continue;
+    // Distracteurs propres aux obstacles, prioritaires.
+    const auSolValide = (p: Point3D) => p.z !== 0 || !obstacles.some((o) => dansEmpriseObstacle(p, o, 0.2));
+    const familles: CandidatBrut[][] = [];
+    if (impact.indexObstacle !== null) {
+      familles.push([{ position: ombreSansObstacle, erreur: "traverseObstacle" }]);
+      const suivants = impactsObstacles(sommet, direction, obstacles).filter((i) => i.indexObstacle !== impact.indexObstacle);
+      familles.push(suivants.map((i) => ({ position: i.point, erreur: "obstacleSuivant" as const })));
+    } else {
+      const survoles = obstacles
+        .map((o) => pointSurObstacleSurvole(baton.base, ombreSansObstacle, o))
+        .filter((p): p is Point3D => p !== null)
+        .map((p) => ({ position: p, erreur: "surObstacleSurvole" as const }));
+      if (survoles.length === 0) continue; // le rayon doit passer au-dessus d'au moins un obstacle
+      familles.push(survoles);
+    }
+    const sol = famillesSol(baton, direction, ombreSansObstacle);
+    const permutee = impactScene(sommet, { x: direction.y, y: direction.x, z: direction.z }, obstacles).point;
+    familles.push([...sol[0], ...sol[1], { position: soustraire3D(baton.base, trace), erreur: "sensOppose" }, { position: permutee, erreur: "composantesPermutees" }]);
 
-    const indexReel = obstacles.findIndex((o) => o.surObstacle);
-    const indexObstacleTouche = indexReel >= 0 ? indexReel : null;
-    const ombre = indexObstacleTouche !== null ? obstacles[indexObstacleTouche].ombre : intersectionAvecSol(origine, direction);
+    const distracteurs = choisirDistracteurs(familles, (c) => auSolValide(c.position) && distance3D(c.position, impact.point) > 0.3);
+    if (!distracteurs) continue;
+    const pointsCandidats = versCandidats(impact.point, distracteurs);
 
-    return { variante: "obstacle", direction, directionsCandidates, piquetExemple, ombreExemple, baton, obstacles, indexObstacleTouche, ombre };
+    const sommetsObstacles = obstacles.flatMap((o) => Object.values(o.solide.sommets));
+    const directionsCandidates = directionsAvecApercusALaBonneLongueur(direction, sommet, [
+      piquetExemple.base,
+      sommetPiquet(piquetExemple),
+      baton.base,
+      sommet,
+      ...sommetsObstacles,
+      ...pointsCandidats.map((c) => c.position),
+    ]);
+    if (!directionsCandidates) continue;
+
+    const pointsSol = [piquetExemple.base, ombreExemple, baton.base, ombreSansObstacle, ...pointsCandidats.map((c) => c.position), ...sommetsObstacles];
+    const cadrage = construireCadrage(pointsSol, [
+      sommetPiquet(piquetExemple),
+      sommet,
+      ...sommetsObstacles,
+      ...pointsCandidats.map((c) => c.position),
+      ...directionsCandidates.map((d) => d.extremiteApercu),
+    ]);
+    const echelle = echellePixel(cadrage.points);
+    if (!candidatsLisibles(pointsCandidats, [piquetExemple.base, ombreExemple, baton.base], echelle)) continue;
+    if (!apercusLisibles(directionsCandidates, echelle)) continue;
+    // L'exemple reste à l'écart : ni dans le dessin d'un obstacle, ni sous les aperçus du bâton A.
+    const pointsExemple = [piquetExemple.base, sommetPiquet(piquetExemple), ombreExemple];
+    if (obstacles.some((o) => pointsExemple.some((p) => dansDessinObstacle(p, o)))) continue;
+    if (directionsCandidates.some((d) => pointsExemple.some((p) => distancePixelSegment(p, sommet, d.extremiteApercu, echelle) < 18))) continue;
+
+    return {
+      variante: "obstacle",
+      direction,
+      directionsCandidates,
+      piquetExemple,
+      ombreExemple,
+      baton,
+      obstacles,
+      indexObstacleTouche: impact.indexObstacle,
+      ombre: impact.point,
+      ombreSansObstacle,
+      pointsCandidats,
+      cadrage,
+    };
   }
   throw new Error(`construireObstacle : aucune instance valide trouvée après ${MAX_TENTATIVES_INSTANCE} tentatives`);
 }
 
-// --- Variante C — Direction inconnue à déduire ---------------------------------------------------
+// --- Variante C — Direction inconnue à déduire (campanile) -----------------------------------------
 
 const PLAGE_TRANSLATION_SOLIDE = 4;
+const MARGE_EMPRISE_CAMPANILE = 0.4;
+const NOMBRE_SOMMETS_A_PROJETER_MAX = 3;
 
-/** Translate horizontalement (x,y) TOUS les sommets d'un gabarit fixe — jamais en z (le sol reste le
- * sol) — pour que sa position dans la scène varie d'un exercice à l'autre malgré des coordonnées
- * internes par ailleurs fixes (catalogue fermé, voir `core/geometrieEspace.types.ts`). */
 function translaterSolideHorizontalement(solide: Solide3D, dx: number, dy: number): Solide3D {
   const sommets: Record<string, Point3D> = {};
   for (const [nom, p] of Object.entries(solide.sommets)) {
@@ -266,41 +498,105 @@ function translaterSolideHorizontalement(solide: Solide3D, dx: number, dy: numbe
   return { ...solide, sommets };
 }
 
-/** Un sommet nommé du solide, réinterprété comme `Piquet` — `sommetPiquet({base,hauteur}) =
- * base+(0,0,hauteur)` retombe alors exactement sur `p`, aucune conversion à part n'est nécessaire. */
 function piquetDepuisSommet(nom: string, p: Point3D): Piquet {
   return { id: nom, base: { x: p.x, y: p.y, z: 0 }, hauteur: p.z };
 }
 
+/** Enveloppe convexe (plan du sol) — chaîne monotone d'Andrew, sens trigonométrique. */
+function enveloppeConvexe(points: Point3D[]): Point3D[] {
+  const tries = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
+  const produit = (o: Point3D, a: Point3D, b: Point3D) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const bas: Point3D[] = [];
+  for (const p of tries) {
+    while (bas.length >= 2 && produit(bas[bas.length - 2], bas[bas.length - 1], p) <= 1e-9) bas.pop();
+    bas.push(p);
+  }
+  const haut: Point3D[] = [];
+  for (const p of [...tries].reverse()) {
+    while (haut.length >= 2 && produit(haut[haut.length - 2], haut[haut.length - 1], p) <= 1e-9) haut.pop();
+    haut.push(p);
+  }
+  return [...bas.slice(0, -1), ...haut.slice(0, -1)];
+}
+
 function construireDirectionInconnue(): ExerciceOmbreSoleilDirectionInconnue {
   for (let tentative = 0; tentative < MAX_TENTATIVES_INSTANCE; tentative++) {
-    const direction = construireDirection();
-    const directionsCandidates = construireDirectionsCandidates(direction);
-
-    const nomGabarit = tirerNomGabarit(GABARITS_OMBRE_DIRECTION_INCONNUE);
+    const direction = construireDirection(2, 3);
     const dx = randomInt(-PLAGE_TRANSLATION_SOLIDE, PLAGE_TRANSLATION_SOLIDE);
     const dy = randomInt(-PLAGE_TRANSLATION_SOLIDE, PLAGE_TRANSLATION_SOLIDE);
-    const solide = translaterSolideHorizontalement(GABARITS_SOLIDE3D[nomGabarit], dx, dy);
+    const solide = translaterSolideHorizontalement(GABARITS_SOLIDE3D.campanile, dx, dy);
+    const base = ["A", "B", "C", "D"].map((n) => solide.sommets[n]);
+    const xMin = Math.min(...base.map((p) => p.x));
+    const xMax = Math.max(...base.map((p) => p.x));
+    const yMin = Math.min(...base.map((p) => p.y));
+    const yMax = Math.max(...base.map((p) => p.y));
+    const horsEmprise = (p: Point3D) =>
+      p.x < xMin - MARGE_EMPRISE_CAMPANILE || p.x > xMax + MARGE_EMPRISE_CAMPANILE || p.y < yMin - MARGE_EMPRISE_CAMPANILE || p.y > yMax + MARGE_EMPRISE_CAMPANILE;
 
-    const sommetsNonSol = Object.entries(solide.sommets).filter(([, p]) => p.z > 0);
-    const indexConnu = randomInt(0, sommetsNonSol.length - 1);
-    const [nomConnu, pointConnu] = sommetsNonSol[indexConnu];
-    const piquetConnu = piquetDepuisSommet(nomConnu, pointConnu);
-    const ombreConnue = ombrePiquet(piquetConnu, direction).position;
+    const sommetsHorsSol = Object.entries(solide.sommets)
+      .filter(([, p]) => p.z > 0)
+      .map(([nom, p]) => ({ id: nom, sommet: p, ombre: intersectionAvecSol(p, direction) }));
+    const visibles = sommetsHorsSol.filter((s) => horsEmprise(s.ombre));
+    if (visibles.length < 3) continue;
 
-    const piquetsBruts = sommetsNonSol
-      .filter((_, i) => i !== indexConnu)
-      .map(([nom, p]) => piquetDepuisSommet(nom, p));
+    const connu = choisir(visibles);
+    const eligibles = visibles.filter((s) => s.id !== connu.id);
+    const nombreAProjeter = randomInt(2, Math.min(NOMBRE_SOMMETS_A_PROJETER_MAX, eligibles.length));
+    // L'apex S en priorité quand il est projetable : c'est lui qui donne la pointe de l'ombre.
+    const ordonnes = [...eligibles].sort((a, b) => (a.id === "S" ? -1 : b.id === "S" ? 1 : Math.random() - 0.5));
+    const aProjeter = ordonnes.slice(0, nombreAProjeter);
+    const ombresAutres: OmbreSommet[] = sommetsHorsSol.filter((s) => s.id !== connu.id && !aProjeter.includes(s));
 
-    if (!suffisammentDistincts(pointsCandidats(piquetConnu, directionsCandidates))) continue;
-    if (!piquetsBruts.every((p) => suffisammentDistincts(pointsCandidats(p, directionsCandidates)))) continue;
+    const toutesOmbres = sommetsHorsSol.map((s) => s.ombre);
+    const piquets: PiquetAResoudre[] = [];
+    let echec = false;
+    for (const s of aProjeter) {
+      const piquet = piquetDepuisSommet(s.id, s.sommet);
+      const distracteurs = choisirDistracteurs(famillesSol(piquet, direction, s.ombre), (c) => horsEmprise(c.position));
+      if (!distracteurs) {
+        echec = true;
+        break;
+      }
+      piquets.push({ piquet, ombre: s.ombre, pointsCandidats: versCandidats(s.ombre, distracteurs) });
+    }
+    if (echec) continue;
 
-    const piquets: PiquetAResoudre[] = piquetsBruts.map((p) => {
-      const { position } = ombrePiquet(p, direction); // sol uniquement, jamais d'obstacle en variante C
-      return { piquet: p, ombre: position, surObstacle: false };
-    });
+    const piquetConnu = piquetDepuisSommet(connu.id, connu.sommet);
+    const contourOmbre = enveloppeConvexe([...base, ...toutesOmbres]);
+    const candidats = piquets.flatMap((p) => p.pointsCandidats.map((c) => c.position));
+    // Les aperçus partent du premier sommet à projeter, jamais du sommet connu (dont le rayon est
+    // déjà dessiné : le bon candidat s'y superposerait).
+    const directionsCandidates = directionsAvecApercusALaBonneLongueur(direction, sommetPiquet(piquets[0].piquet), [...Object.values(solide.sommets), ...toutesOmbres, ...candidats]);
+    if (!directionsCandidates) continue;
 
-    return { variante: "directionInconnue", direction, directionsCandidates, solide, piquetConnu, ombreConnue, piquets };
+    const cadrage = construireCadrage([...base, ...toutesOmbres, ...candidats], [
+      ...Object.values(solide.sommets),
+      ...candidats,
+      ...directionsCandidates.map((d) => d.extremiteApercu),
+    ]);
+    const echelle = echellePixel(cadrage.points);
+    if (!apercusLisibles(directionsCandidates, echelle)) continue;
+    const lisibles = piquets.every((p) =>
+      candidatsLisibles(
+        p.pointsCandidats,
+        toutesOmbres.filter((o) => distance3D(o, p.ombre) > 1e-9),
+        echelle,
+      ),
+    );
+    if (!lisibles) continue;
+
+    return {
+      variante: "directionInconnue",
+      direction,
+      directionsCandidates,
+      solide,
+      piquetConnu,
+      ombreConnue: connu.ombre,
+      piquets,
+      ombresAutres,
+      contourOmbre,
+      cadrage,
+    };
   }
   throw new Error(`construireDirectionInconnue : aucune instance valide trouvée après ${MAX_TENTATIVES_INSTANCE} tentatives`);
 }

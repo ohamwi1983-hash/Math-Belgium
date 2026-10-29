@@ -1,17 +1,14 @@
 /**
  * Couche B — moteur de session pour "Ombre au soleil" (41e générateur, chapitre "Géométrie dans
- * l'espace"). N'importe jamais rien de `src/generateurs/` — voir `sessionOmbreSoleil.test.ts` pour
- * la preuve avec un générateur factice, même principe que les 40 autres moteurs du projet.
+ * l'espace"). N'importe jamais rien de `src/generateurs/`.
  *
- * Aide PROGRESSIVE (2 niveaux max sur "pointSimple", 2 niveaux max sur "directionInconnue", 2
- * niveaux max PARTAGÉS sur le flux "direction"→"point" d'un même piquet, aucune aide sur
- * "conclusion") — même mécanique que le reste du projet.
+ * Aide progressive (2 niveaux par écran noté, aucune sur "conclusion"), remise à 0 à chaque écran.
  */
-import type { ExerciceOmbreSoleil, GenerateurExerciceOmbreSoleil, PiquetAResoudre } from "../core/ombreSoleil.types";
+import type { ExerciceOmbreSoleil, GenerateurExerciceOmbreSoleil } from "../core/ombreSoleil.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
-import type { ReglagesEtape } from "./etapeTentatives";
-import { sommetPiquet, verifierDirection, verifierPointObstacle, verifierPointOmbre } from "./verificationOmbreSoleil";
+import type { EtatEtapeTentatives, ReglagesEtape } from "./etapeTentatives";
+import { verifierDirection, verifierPoint } from "./verificationOmbreSoleil";
 import type { EtatSessionOmbreSoleil, PhaseOmbreSoleil, ResultatExerciceOmbreSoleil } from "./typesOmbreSoleil";
 
 const POINTS_DE_BASE = 100;
@@ -25,29 +22,15 @@ function phaseInitiale(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil {
   return "direction";
 }
 
-/** Séquence COMPLÈTE des phases pour un exercice donné — connue entièrement dès sa génération
- * (contrairement à "Section plane d'un solide", `typesSectionPlaneSolide.ts`, où la suite dépend de
- * la face réellement choisie par l'élève à chaque étape) : la longueur de la boucle est fixée par
- * `exercice.obstacles.length`/`exercice.piquets.length`, déjà connus à la génération. Réutilisée
- * telle quelle par `AppOmbreSoleil.tsx::calculerSegmentsProgression` (puces de progression), jamais
- * une deuxième reconstitution divergente. Une même valeur de phase ("point", ou "direction" pour
- * `directionInconnue`) apparaît plusieurs fois dans le tableau — l'appelant ne doit donc jamais
- * localiser la phase courante par `indexOf(etat.phase)` (ambigu ici), mais directement par
- * `etat.scoresAccumules.length` : chaque écran noté de cette séquence pousse exactement une entrée à
- * sa clôture, dans l'ordre, donc l'index dans ce tableau coïncide toujours avec l'index dans
- * `scoresAccumules`/`revelesAccumules`/`niveauxAideAccumules`. */
+/** Séquence COMPLÈTE des écrans notés d'un exercice, connue dès sa génération — l'écran courant est
+ * toujours `etat.scoresAccumules.length` (une même phase "point" peut apparaître plusieurs fois). */
 export function sequencePourExercice(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil[] {
   if (exercice.variante === "simple") return ["pointSimple"];
-  if (exercice.variante === "obstacle") {
-    return ["direction", ...exercice.obstacles.map(() => "point" as const)];
-  }
-  return ["directionInconnue", ...exercice.piquets.flatMap(() => ["direction", "point"] as const)];
+  if (exercice.variante === "obstacle") return ["direction", "point"];
+  return ["directionInconnue", ...exercice.piquets.map(() => "point" as const)];
 }
 
-export function demarrerSessionOmbreSoleil(
-  reglages: ReglagesSession,
-  generateur: GenerateurExerciceOmbreSoleil,
-): EtatSessionOmbreSoleil {
+export function demarrerSessionOmbreSoleil(reglages: ReglagesSession, generateur: GenerateurExerciceOmbreSoleil): EtatSessionOmbreSoleil {
   const exerciceCourant = generateur();
   return {
     reglages,
@@ -67,47 +50,33 @@ export function demarrerSessionOmbreSoleil(
 }
 
 function reglagesEtape(etat: EtatSessionOmbreSoleil): ReglagesEtape {
-  return {
-    pointsDeBase: POINTS_DE_BASE,
-    tentativesMax: etat.reglages.tentativesMax,
-  };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
 }
 
-/** Révèle le niveau d'aide suivant de l'unité pédagogique courante — lève si la session est
- * terminée, si l'écran courant est "conclusion" (aucune aide, jamais de bouton), ou si le niveau
- * maximal de l'écran courant est déjà atteint. */
+export function niveauAideMaxPhase(phase: PhaseOmbreSoleil): number {
+  if (phase === "conclusion") return 0;
+  if (phase === "pointSimple") return NIVEAU_AIDE_MAX_POINT_SIMPLE;
+  if (phase === "directionInconnue") return NIVEAU_AIDE_MAX_DIRECTION_INCONNUE;
+  return NIVEAU_AIDE_MAX_LOOP;
+}
+
+/** Révèle le niveau d'aide suivant de l'écran courant. */
 export function activerAideSuivante(etat: EtatSessionOmbreSoleil): EtatSessionOmbreSoleil {
-  if (etat.terminee) {
-    throw new Error("activerAideSuivante : la session est déjà terminée");
-  }
-  if (etat.phase === "conclusion") {
-    throw new Error("activerAideSuivante : aucune aide sur l'écran de conclusion");
-  }
-  const max =
-    etat.phase === "pointSimple"
-      ? NIVEAU_AIDE_MAX_POINT_SIMPLE
-      : etat.phase === "directionInconnue"
-        ? NIVEAU_AIDE_MAX_DIRECTION_INCONNUE
-        : NIVEAU_AIDE_MAX_LOOP;
-  if (etat.niveauAide >= max) {
+  if (etat.terminee) throw new Error("activerAideSuivante : la session est déjà terminée");
+  if (etat.phase === "conclusion") throw new Error("activerAideSuivante : aucune aide sur l'écran de conclusion");
+  if (etat.niveauAide >= niveauAideMaxPhase(etat.phase)) {
     throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
   }
   return { ...etat, niveauAide: etat.niveauAide + 1 };
 }
 
-function cloturerExerciceOuSuivant(
-  etat: EtatSessionOmbreSoleil,
-  resultat: ResultatExerciceOmbreSoleil,
-): EtatSessionOmbreSoleil {
+function cloturerExerciceOuSuivant(etat: EtatSessionOmbreSoleil, resultat: ResultatExerciceOmbreSoleil): EtatSessionOmbreSoleil {
   const resultats = [...etat.resultats, resultat];
   const indexExercice = etat.indexExercice + 1;
-
   if (indexExercice >= etat.reglages.nombreExercices) {
     return { ...etat, resultats, indexExercice, terminee: true };
   }
-
   const exerciceCourant = etat.generateur();
-
   return {
     ...etat,
     resultats,
@@ -123,184 +92,90 @@ function cloturerExerciceOuSuivant(
   };
 }
 
-/** Piquets à résoudre de l'exercice courant — variante "directionInconnue" UNIQUEMENT (`simple` et
- * `obstacle` n'ont pas de tableau `piquets`, `obstacle` a `obstacles` à la place). */
-function piquetsDeExercice(exercice: ExerciceOmbreSoleil): PiquetAResoudre[] {
-  if (exercice.variante !== "directionInconnue") {
-    throw new Error("piquetsDeExercice : seule la variante 'directionInconnue' a un tableau piquets");
-  }
-  return exercice.piquets;
-}
-
-/** Écran unique de la variante "simple" : sélectionne directement le point d'ombre du piquet, sans
- * passer par une étape "direction" séparée (spec, variante A — un seul écran). Clôture toujours
- * directement l'exercice. */
-export function soumettreReponsePointSimple(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
-  if (etat.terminee || etat.phase !== "pointSimple" || etat.exerciceCourant.variante !== "simple") {
-    throw new Error("soumettreReponsePointSimple : la session n'est pas à l'étape pointSimple");
-  }
-  const exercice = etat.exerciceCourant;
-
-  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
-    ...reglagesEtape(etat),
-    verifier: (r) => verifierPointOmbre(exercice, exercice.piquet, r),
-    revelerReponse: () => {},
-  });
-
-  if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
-  }
-
-  const score = etapeCourante.score as number;
-  const scoresAccumules = [...etat.scoresAccumules, score];
-  const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
-  const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
-
-  return { ...etat, phase: "conclusion", etapeCourante: demarrerEtapeTentatives(), scoresAccumules, revelesAccumules, niveauxAideAccumules };
-}
-
-/** Étape 0 de la variante "directionInconnue" : déduire la direction cachée depuis l'unique paire
- * piquet connu/ombre connue. Transitionne vers "direction" (s'il reste des piquets à résoudre) ou
- * directement "conclusion" (cas limite, jamais atteint en pratique — `piquets` a toujours au moins
- * 1 élément pour cette variante, gardé par symétrie avec le reste de la boucle). */
-export function soumettreReponseDirectionInconnue(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
-  if (etat.terminee || etat.phase !== "directionInconnue" || etat.exerciceCourant.variante !== "directionInconnue") {
-    throw new Error("soumettreReponseDirectionInconnue : la session n'est pas à l'étape directionInconnue");
-  }
-  const exercice = etat.exerciceCourant;
-
-  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
-    ...reglagesEtape(etat),
-    verifier: (r) => verifierDirection(exercice, r),
-    revelerReponse: () => {},
-  });
-
-  if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
-  }
-
-  const score = etapeCourante.score as number;
-  const scoresAccumules = [...etat.scoresAccumules, score];
-  const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
-  const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
-
-  const phase: PhaseOmbreSoleil = exercice.piquets.length > 0 ? "direction" : "conclusion";
-
-  return { ...etat, phase, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresAccumules, revelesAccumules, niveauxAideAccumules };
-}
-
-/** Boucle piquet par piquet (variantes "obstacle" et "directionInconnue", une fois la direction
- * connue) — étape 1 : sélectionner la bonne direction parmi les 4 candidats. Le niveau d'aide n'est
- * PAS réinitialisé en sortie (même unité pédagogique que l'étape "point" qui suit, même principe que
- * "Section plane d'un solide"). */
-export function soumettreReponseDirection(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
-  if (etat.terminee || etat.phase !== "direction") {
-    throw new Error("soumettreReponseDirection : la session n'est pas à l'étape direction");
-  }
-  const exercice = etat.exerciceCourant;
-
-  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
-    ...reglagesEtape(etat),
-    verifier: (r) => verifierDirection(exercice, r),
-    revelerReponse: () => {},
-  });
-
-  if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
-  }
-
-  const score = etapeCourante.score as number;
-  const scoresAccumules = [...etat.scoresAccumules, score];
-  const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
-  const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
-
-  return {
-    ...etat,
-    phase: "point",
-    etapeCourante: demarrerEtapeTentatives(),
-    scoresAccumules,
-    revelesAccumules,
-    niveauxAideAccumules,
-    // niveauAide volontairement PAS réinitialisé ici — même unité pédagogique que l'étape suivante.
-  };
-}
-
-/** Boucle, étape 2 (dernière étape de l'item courant) : sélectionner le point d'ombre réel — la
- * projection du BÂTON sur ce solide-obstacle précis (variante `obstacle`) ou du piquet courant du
- * gabarit (variante `directionInconnue`). L'item courant est toujours `resolus.length` (le premier
- * non résolu dans l'ordre du tableau) — une fois validé, il rejoint `resolus` et le niveau d'aide
- * repart à 0 pour l'item suivant.
- *
- * **Seule fonction de ce moteur qui dispatch sur la variante** (`direction` n'en a jamais besoin,
- * sa transition `→ "point"` étant identique dans les deux cas) — pour la variante `obstacle`, la
- * phase suivante reste `"point"` (l'obstacle suivant, jamais de nouvelle étape "direction" — la
- * direction n'est confirmée qu'une seule fois pour toute la scène) ; pour `directionInconnue`, elle
- * redevient `"direction"` (comportement historique inchangé, un couple direction/point par piquet). */
-export function soumettreReponsePoint(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
-  if (etat.terminee || etat.phase !== "point") {
-    throw new Error("soumettreReponsePoint : la session n'est pas à l'étape point");
-  }
-  const exercice = etat.exerciceCourant;
-  const indexItem = etat.resolus.length;
-
-  let verifier: (r: string) => boolean;
-  let nombreItems: number;
-  let phaseSuivanteSiIncomplet: PhaseOmbreSoleil;
-
-  if (exercice.variante === "obstacle") {
-    const origine = sommetPiquet(exercice.baton);
-    const obstacleResoudre = exercice.obstacles[indexItem];
-    verifier = (r) => verifierPointObstacle(exercice, origine, obstacleResoudre, r);
-    nombreItems = exercice.obstacles.length;
-    phaseSuivanteSiIncomplet = "point";
-  } else {
-    const piquetResoudre = piquetsDeExercice(exercice)[indexItem];
-    verifier = (r) => verifierPointOmbre(exercice, piquetResoudre, r);
-    nombreItems = piquetsDeExercice(exercice).length;
-    phaseSuivanteSiIncomplet = "direction";
-  }
-
-  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
+/** Soumission commune : tant que l'écran n'est pas clos, seule l'étape change ; à sa clôture, on
+ * accumule score/révélation/aide et on passe à `phaseSuivante`. */
+function soumettre(
+  etat: EtatSessionOmbreSoleil,
+  id: string,
+  verifier: (id: string) => boolean,
+  phaseSuivante: (etat: EtatSessionOmbreSoleil) => { phase: PhaseOmbreSoleil; resolus?: number[] },
+): EtatSessionOmbreSoleil {
+  const etapeCourante: EtatEtapeTentatives = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
     ...reglagesEtape(etat),
     verifier,
     revelerReponse: () => {},
   });
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
-  if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
-  }
-
-  const score = etapeCourante.score as number;
-  const scoresAccumules = [...etat.scoresAccumules, score];
-  const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
-  const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
-  const resolus = [...etat.resolus, indexItem];
-  const phase: PhaseOmbreSoleil = resolus.length >= nombreItems ? "conclusion" : phaseSuivanteSiIncomplet;
-
+  const suite = phaseSuivante(etat);
   return {
     ...etat,
-    phase,
-    resolus,
+    phase: suite.phase,
+    resolus: suite.resolus ?? etat.resolus,
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
-    scoresAccumules,
-    revelesAccumules,
-    niveauxAideAccumules,
+    scoresAccumules: [...etat.scoresAccumules, etapeCourante.score as number],
+    revelesAccumules: [...etat.revelesAccumules, etapeCourante.revelee],
+    niveauxAideAccumules: [...etat.niveauxAideAccumules, etat.niveauAide],
   };
 }
 
-/** Écran de conclusion, dernière étape : aucune interaction/vérification — clôture toujours
- * l'exercice, agrège la moyenne des scores déjà accumulés. */
+/** Écran unique de la variante "simple" : choisir le point d'ombre du bâton. */
+export function soumettreReponsePointSimple(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
+  const exercice = etat.exerciceCourant;
+  if (etat.terminee || etat.phase !== "pointSimple" || exercice.variante !== "simple") {
+    throw new Error("soumettreReponsePointSimple : la session n'est pas à l'étape pointSimple");
+  }
+  return soumettre(etat, id, (r) => verifierPoint(exercice.piquet.pointsCandidats, exercice.piquet.ombre, r), () => ({ phase: "conclusion" }));
+}
+
+/** Variante "directionInconnue", étape 0 : déduire la direction depuis la paire sommet/ombre connue. */
+export function soumettreReponseDirectionInconnue(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
+  const exercice = etat.exerciceCourant;
+  if (etat.terminee || etat.phase !== "directionInconnue" || exercice.variante !== "directionInconnue") {
+    throw new Error("soumettreReponseDirectionInconnue : la session n'est pas à l'étape directionInconnue");
+  }
+  return soumettre(etat, id, (r) => verifierDirection(exercice, r), () => ({ phase: exercice.piquets.length > 0 ? "point" : "conclusion" }));
+}
+
+/** Variante "obstacle", écran 1 : choisir le rayon parallèle à celui de l'exemple. */
+export function soumettreReponseDirection(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
+  const exercice = etat.exerciceCourant;
+  if (etat.terminee || etat.phase !== "direction" || exercice.variante !== "obstacle") {
+    throw new Error("soumettreReponseDirection : la session n'est pas à l'étape direction");
+  }
+  return soumettre(etat, id, (r) => verifierDirection(exercice, r), () => ({ phase: "point" }));
+}
+
+/** Écran "point" : premier impact réel (variante obstacle), ou ombre du sommet courant (variante
+ * directionInconnue, un écran par sommet). */
+export function soumettreReponsePoint(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
+  const exercice = etat.exerciceCourant;
+  if (etat.terminee || etat.phase !== "point" || exercice.variante === "simple") {
+    throw new Error("soumettreReponsePoint : la session n'est pas à l'étape point");
+  }
+  if (exercice.variante === "obstacle") {
+    return soumettre(etat, id, (r) => verifierPoint(exercice.pointsCandidats, exercice.ombre, r), () => ({ phase: "conclusion" }));
+  }
+  const index = etat.resolus.length;
+  const piquet = exercice.piquets[index];
+  return soumettre(
+    etat,
+    id,
+    (r) => verifierPoint(piquet.pointsCandidats, piquet.ombre, r),
+    () => {
+      const resolus = [...etat.resolus, index];
+      return { phase: resolus.length >= exercice.piquets.length ? "conclusion" : "point", resolus };
+    },
+  );
+}
+
+/** Écran de conclusion : aucune vérification, clôture l'exercice. */
 export function soumettreConclusion(etat: EtatSessionOmbreSoleil): EtatSessionOmbreSoleil {
   if (etat.terminee || etat.phase !== "conclusion") {
     throw new Error("soumettreConclusion : la session n'est pas à l'étape conclusion");
   }
   const scores = etat.scoresAccumules;
   const scoreMoyen = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-  return cloturerExerciceOuSuivant(etat, {
-    scores,
-    scoreMoyen,
-    revelees: etat.revelesAccumules,
-    niveauxAide: etat.niveauxAideAccumules,
-  });
+  return cloturerExerciceOuSuivant(etat, { scores, scoreMoyen, revelees: etat.revelesAccumules, niveauxAide: etat.niveauxAideAccumules });
 }

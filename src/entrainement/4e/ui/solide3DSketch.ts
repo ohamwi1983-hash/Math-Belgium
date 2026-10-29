@@ -7,7 +7,7 @@ import {
   produitVectoriel3D,
   soustraire3D,
 } from "../moteur/geometrieEspace";
-import { projeterPoint3D, type Point2D } from "./projectionCavaliere";
+import { ANGLE_CAVALIER, COEFFICIENT_REDUCTION, projeterPoint3D, type Point2D } from "./projectionCavaliere";
 
 /**
  * Préparation géométrique pure (jamais de JSX ici) du rendu SVG statique en perspective cavalière —
@@ -204,4 +204,131 @@ export function calculerPolygonePlan(solide: Solide3D, plan: PlanSolide3D): Poin
     .map((p) => ({ p, angle: Math.atan2(p.y - centre.y, p.x - centre.x) }))
     .sort((a, b) => a.angle - b.angle)
     .map(({ p }) => p);
+}
+
+/**
+ * Direction EXACTE de la projection cavalière (`ui/projectionCavaliere.ts`), orientée du solide vers
+ * l'observateur : `projeterPoint3D` envoie (−c ; 1 ; −c) sur l'origine, avec c = k·cos(α). Utilisée
+ * pour décider si un POINT (pas une face) est caché par le solide — `DIRECTION_VUE_3D` reste la
+ * convention de visibilité des faces, inchangée.
+ */
+const COEFFICIENT_OBLIQUE = Math.cos(ANGLE_CAVALIER) * COEFFICIENT_REDUCTION;
+const DIRECTION_VERS_OBSERVATEUR: Point3D = { x: COEFFICIENT_OBLIQUE, y: -1, z: COEFFICIENT_OBLIQUE };
+
+/**
+ * Vrai si le point `p` est caché par le solide (supposé CONVEXE : parallélépipède, cube, prisme,
+ * tétraèdre) — soit il est à l'intérieur, soit le rayon qui part de `p` vers l'observateur traverse
+ * l'intérieur du solide. Un point posé sur une face visible n'est donc jamais caché, un point posé
+ * sur une face cachée l'est.
+ */
+export function pointCacheParSolide(solide: Solide3D, p: Point3D): boolean {
+  const EPS = 1e-7;
+  let tBas = -Infinity;
+  let tHaut = Infinity;
+  for (const face of solide.faces) {
+    const normale = normaleExterieureFace(solide, face);
+    const norme = Math.sqrt(produitScalaire3D(normale, normale)) || 1;
+    const f0 = produitScalaire3D(normale, soustraire3D(p, solide.sommets[face[0]])) / norme;
+    const pente = produitScalaire3D(normale, DIRECTION_VERS_OBSERVATEUR) / norme;
+    if (Math.abs(pente) < EPS) {
+      if (f0 >= -EPS) return false;
+      continue;
+    }
+    const tLimite = -f0 / pente;
+    if (pente > 0) tHaut = Math.min(tHaut, tLimite);
+    else tBas = Math.max(tBas, tLimite);
+  }
+  return tHaut - Math.max(tBas, 0) > 1e-4;
+}
+
+export interface SegmentDroitePixel {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  cache: boolean;
+}
+
+/**
+ * Tracé d'une droite (a, b) PROLONGÉE au-delà de ses deux points (une droite n'a pas d'extrémités) et
+ * découpée en morceaux visibles / cachés par le solide — les morceaux cachés se dessinent en
+ * pointillé, comme les arêtes cachées. Le prolongement vaut 35 % de |ab| (au moins 1,2 unité) de
+ * chaque côté, rogné au cadre du SVG.
+ */
+export function calculerSegmentsDroite(solide: Solide3D, a: Point3D, b: Point3D): SegmentDroitePixel[] {
+  const echelle = calculerEchelleProjection(solide);
+  const direction = soustraire3D(b, a);
+  const longueur = Math.sqrt(produitScalaire3D(direction, direction)) || 1;
+  const extension = Math.max(0.35, 1.2 / longueur);
+  let tMin = -extension;
+  let tMax = 1 + extension;
+
+  // Rognage au cadre (la projection est affine en t) — marge de 6 px.
+  const pa = projeter3DVersPixel(a, echelle);
+  const pb = projeter3DVersPixel(b, echelle);
+  const bornes: [number, number, number][] = [
+    [pa.x, pb.x - pa.x, LARGEUR_SVG],
+    [pa.y, pb.y - pa.y, HAUTEUR_SVG],
+  ];
+  for (const [origine, pente, taille] of bornes) {
+    if (Math.abs(pente) < 1e-9) continue;
+    const t1 = (6 - origine) / pente;
+    const t2 = (taille - 6 - origine) / pente;
+    tMin = Math.max(tMin, Math.min(t1, t2, 0));
+    tMax = Math.min(tMax, Math.max(t1, t2, 1));
+  }
+
+  const pointEn = (t: number): Point3D => additionner3D(a, multiplierScalaire3D(direction, t));
+  const cacheEn = (t: number): boolean => pointCacheParSolide(solide, pointEn(t));
+
+  const PAS = 240;
+  const coupures: number[] = [tMin];
+  let etat = cacheEn(tMin);
+  let tPrecedent = tMin;
+  for (let i = 1; i <= PAS; i++) {
+    const t = tMin + ((tMax - tMin) * i) / PAS;
+    const etatT = cacheEn(t);
+    if (etatT !== etat) {
+      let bas = tPrecedent;
+      let haut = t;
+      for (let k = 0; k < 18; k++) {
+        const milieu = (bas + haut) / 2;
+        if (cacheEn(milieu) === etat) bas = milieu;
+        else haut = milieu;
+      }
+      coupures.push((bas + haut) / 2);
+      etat = etatT;
+    }
+    tPrecedent = t;
+  }
+  coupures.push(tMax);
+
+  const segments: SegmentDroitePixel[] = [];
+  for (let i = 0; i < coupures.length - 1; i++) {
+    const debut = coupures[i];
+    const fin = coupures[i + 1];
+    if (fin - debut < 1e-6) continue;
+    const p1 = projeter3DVersPixel(pointEn(debut), echelle);
+    const p2 = projeter3DVersPixel(pointEn(fin), echelle);
+    segments.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, cache: cacheEn((debut + fin) / 2) });
+  }
+  return segments;
+}
+
+/** Position pixel de l'étiquette d'un point annexe, décalée vers l'extérieur du solide (même
+ * principe que `calculerLabelsSommetsPixel`) — pour un point nommé posé sur une arête (milieu I...),
+ * jamais collé sur le trait. */
+export function positionLabelExterieur(solide: Solide3D, p: Point3D, distance = 14): Point2D {
+  const sommetsPixel = calculerSommetsPixel(solide);
+  const points = Object.values(sommetsPixel);
+  const centre = {
+    x: points.reduce((s, q) => s + q.x, 0) / points.length,
+    y: points.reduce((s, q) => s + q.y, 0) / points.length,
+  };
+  const pixel = projeter3DVersPixel(p, calculerEchelleProjection(solide));
+  const dx = pixel.x - centre.x;
+  const dy = pixel.y - centre.y;
+  const longueur = Math.hypot(dx, dy);
+  if (longueur < 1e-6) return { x: pixel.x, y: pixel.y - distance };
+  return { x: pixel.x + (dx / longueur) * distance, y: pixel.y + (dy / longueur) * distance };
 }

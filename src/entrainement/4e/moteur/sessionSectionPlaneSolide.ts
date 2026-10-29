@@ -9,19 +9,27 @@
  * CHAQUE mutation d'état (segment tracé, point découvert), elle retourne toujours la phase
  * pertinente, sans jamais énumérer les itérations à l'avance.
  *
- * Aide PROGRESSIVE (2 niveaux max sur "segmentDirect", 2 niveaux max PARTAGÉS sur le flux
- * "auxiliaireLignes"→"auxiliaireFace", aucune aide sur "conclusion") — même mécanique que le reste du
- * projet.
+ * Aide PROGRESSIVE (2 niveaux max par écran, remise à 0 à chaque écran — y compris entre
+ * "auxiliaireLignes" et "auxiliaireFace", qui ont chacun leurs propres aides depuis l'audit du
+ * chapitre 8 ; aucune aide sur "conclusion") — même mécanique que le reste du projet.
+ *
+ * **Tentatives (audit chapitre 8, décision H2a)** : UNE seule tentative sur les écrans de choix
+ * parmi quelques faces ("segmentDirect", "auxiliaireFace"), qui se gagnaient sinon par élimination ;
+ * l'écran "auxiliaireLignes" (≈ 2 paires valables sur plus de 300) garde `reglages.tentativesMax`.
+ * Le DERNIER segment du polygone (un seul candidat possible) est tracé automatiquement, sans écran.
  */
 import type { GenerateurExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import {
+  ciblesAuxiliaires,
   cleSegment,
   facesPretesPourSegment,
+  pairesLignesValides,
   pointDebloqueParFaceAuxiliaire,
   polygoneFerme,
+  resoudreLigne,
   verifierFaceAuxiliaire,
   verifierLignesAuxiliaires,
   verifierSegmentDirect,
@@ -31,6 +39,30 @@ import type { EtatSessionSectionPlaneSolide, ResultatExerciceSectionPlaneSolide 
 const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_SEGMENT = 2;
 export const NIVEAU_AIDE_MAX_AUXILIAIRE = 2;
+/** Une seule tentative sur les écrans de choix de face (décision H2a, voir l'en-tête). */
+export const TENTATIVES_MAX_CHOIX_FACE = 1;
+
+/** Nombre de tentatives de l'écran COURANT — 1 pour un choix de face, `reglages.tentativesMax`
+ * pour le choix des 2 droites. Utilisé par le moteur ET par l'affichage du message d'erreur. */
+export function tentativesMaxPhase(etat: Pick<EtatSessionSectionPlaneSolide, "phase" | "reglages">): number {
+  return etat.phase === "auxiliaireLignes" ? etat.reglages.tentativesMax : TENTATIVES_MAX_CHOIX_FACE;
+}
+
+/** Trace AUTOMATIQUEMENT le dernier segment du polygone quand il est le seul restant et que ses 2
+ * points sont connus (un seul candidat possible : un écran pour lui ne testerait rien, audit
+ * chapitre 8, point 23). Mute `segmentsTraces` et renvoie la clé tracée, ou `null`. */
+function tracerDernierSegmentSiSeul(
+  etat: Pick<EtatSessionSectionPlaneSolide, "exerciceCourant">,
+  connus: ReadonlySet<number>,
+  segmentsTraces: Set<string>,
+): string | null {
+  if (segmentsTraces.size !== etat.exerciceCourant.points.length - 1) return null;
+  const pretes = facesPretesPourSegment(etat.exerciceCourant, connus, segmentsTraces);
+  if (pretes.length !== 1) return null;
+  const cle = cleSegment(pretes[0].pointA, pretes[0].pointB);
+  segmentsTraces.add(cle);
+  return cle;
+}
 
 function phaseDepuisEtat(
   etat: Pick<EtatSessionSectionPlaneSolide, "exerciceCourant">,
@@ -62,6 +94,8 @@ export function demarrerSessionSectionPlaneSolide(
     scoresAccumules: [],
     revelesAccumules: [],
     niveauxAideAccumules: [],
+    segmentAutomatique: null,
+    derniereConstruction: null,
     resultats: [],
     terminee: false,
   };
@@ -70,7 +104,7 @@ export function demarrerSessionSectionPlaneSolide(
 function reglagesEtape(etat: EtatSessionSectionPlaneSolide): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
   };
 }
 
@@ -119,6 +153,8 @@ function cloturerExerciceOuSuivant(
     scoresAccumules: [],
     revelesAccumules: [],
     niveauxAideAccumules: [],
+    segmentAutomatique: null,
+    derniereConstruction: null,
   };
 }
 
@@ -159,6 +195,7 @@ export function soumettreReponseSegmentDirect(
   const facesPretes = facesPretesPourSegment(etat.exerciceCourant, connusSet, segmentsTracesSet);
   const faceConfirmee = facesPretes.find((f) => f.face === faceChoisie) ?? facesPretes[0];
   segmentsTracesSet.add(cleSegment(faceConfirmee.pointA, faceConfirmee.pointB));
+  const segmentAutomatique = tracerDernierSegmentSiSeul(etat, connusSet, segmentsTracesSet);
 
   const phase = phaseDepuisEtat(etat, connusSet, segmentsTracesSet);
 
@@ -166,6 +203,7 @@ export function soumettreReponseSegmentDirect(
     ...etat,
     phase,
     segmentsTraces: [...segmentsTracesSet],
+    segmentAutomatique,
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoresAccumules,
@@ -176,8 +214,8 @@ export function soumettreReponseSegmentDirect(
 
 /** Écran B, étape 1 : les 2 droites choisies doivent réellement débloquer au moins une face à
  * moitié connue — une fois validées, elles sont conservées (`ligneAuxiliaireChoisie`) pour l'étape
- * "auxiliaireFace" qui suit, jamais recalculées indépendamment. L'aide n'est PAS réinitialisée en
- * sortie (même unité pédagogique que l'étape suivante, spec section "Écran type B"). */
+ * "auxiliaireFace" qui suit, jamais recalculées indépendamment. L'aide est remise à 0 en sortie :
+ * l'écran "face" a ses propres aides (audit chapitre 8). */
 export function soumettreReponseAuxiliaireLignes(
   etat: EtatSessionSectionPlaneSolide,
   ligne1: string,
@@ -216,32 +254,26 @@ export function soumettreReponseAuxiliaireLignes(
     phase: "auxiliaireFace",
     ligneAuxiliaireChoisie: pairesValides,
     etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
     scoresAccumules,
     revelesAccumules,
     niveauxAideAccumules,
-    // niveauAide volontairement PAS réinitialisé ici — même unité pédagogique que l'étape suivante.
   };
 }
 
+/** Paire RÉVÉLÉE après échec — la plus lisible des paires valables (`pairesLignesValides` : 2
+ * droites d'une même face, point auxiliaire proche du solide), jamais une paire « creuse ». */
 function trouverPaireLignesValide(
   exercice: EtatSessionSectionPlaneSolide["exerciceCourant"],
   connus: ReadonlySet<number>,
   segmentsTraces: ReadonlySet<string>,
 ): [string, string] {
-  const candidats = [
-    ...exercice.lignesStatiques.map((l) => l.cle),
-    ...[...segmentsTraces].map((s) => `segment:${s}`),
-  ];
-  for (let i = 0; i < candidats.length; i++) {
-    for (let j = i + 1; j < candidats.length; j++) {
-      if (verifierLignesAuxiliaires(exercice, connus, candidats[i], candidats[j])) {
-        return [candidats[i], candidats[j]];
-      }
-    }
-  }
-  // Ne devrait jamais arriver pour une instance résoluble (garantie `simulationResoluble` à la
+  const meilleure = pairesLignesValides(exercice, connus, segmentsTraces)[0];
+  if (meilleure) return [meilleure.ligne1, meilleure.ligne2];
+  // Ne devrait jamais arriver pour une instance résoluble (garantie `resolutionReference` à la
   // génération) — garde défensive plutôt qu'un throw, pour ne jamais bloquer le flux.
-  return [candidats[0], candidats[1]];
+  const premiere = exercice.lignesStatiques;
+  return [premiere[0].cle, premiere[1].cle];
 }
 
 /** Écran B, étape 2 (dernière étape du flux auxiliaire) : la face choisie doit être réellement
@@ -275,18 +307,20 @@ export function soumettreReponseAuxiliaireFace(
   const revelesAccumules = [...etat.revelesAccumules, etapeCourante.revelee];
   const niveauxAideAccumules = [...etat.niveauxAideAccumules, etat.niveauAide];
 
-  const pointDebloque =
-    pointDebloqueParFaceAuxiliaire(etat.exerciceCourant, connusSet, ligne1, ligne2, faceChoisie) ??
-    pointDebloqueParFacePremiereValide(etat.exerciceCourant, connusSet, ligne1, ligne2);
-  connusSet.add(pointDebloque);
+  const construction = constructionConfirmee(etat.exerciceCourant, connusSet, ligne1, ligne2, faceChoisie);
+  connusSet.add(construction.pointCible);
 
   const segmentsTracesSet = new Set(etat.segmentsTraces);
+  const segmentAutomatique = tracerDernierSegmentSiSeul(etat, connusSet, segmentsTracesSet);
   const phase = phaseDepuisEtat(etat, connusSet, segmentsTracesSet);
 
   return {
     ...etat,
     phase,
     connus: [...connusSet],
+    segmentsTraces: [...segmentsTracesSet],
+    segmentAutomatique,
+    derniereConstruction: { ligne1, ligne2, ...construction },
     ligneAuxiliaireChoisie: null,
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
@@ -296,22 +330,24 @@ export function soumettreReponseAuxiliaireFace(
   };
 }
 
-function pointDebloqueParFacePremiereValide(
+/** Construction réellement confirmée à l'écran "face" : celle de la face choisie si elle est
+ * correcte, sinon la première face réellement débloquée par la paire (garantie non vide,
+ * `verifierLignesAuxiliaires` déjà validé à l'étape précédente pour cette même paire). */
+function constructionConfirmee(
   exercice: EtatSessionSectionPlaneSolide["exerciceCourant"],
   connus: ReadonlySet<number>,
   ligne1: string,
   ligne2: string,
-): number {
-  // Recherche directe via les mêmes primitives que verifierFaceAuxiliaire, sans re-parcourir toutes
-  // les faces à la main — réutilise `pointDebloqueParFaceAuxiliaire` en testant chaque face croisée
-  // jusqu'à trouver la première réellement débloquée (garanti non vide, `verifierLignesAuxiliaires`
-  // déjà validé à l'étape précédente pour cette même paire).
-  for (const face of exercice.facesCroisees) {
-    const point = pointDebloqueParFaceAuxiliaire(exercice, connus, ligne1, ligne2, face);
-    if (point !== null) return point;
-  }
+  faceChoisie: number,
+): { face: number; pointConnu: number; pointCible: number } {
+  const l1 = resoudreLigne(exercice, ligne1);
+  const l2 = resoudreLigne(exercice, ligne2);
+  const cibles = l1 && l2 ? ciblesAuxiliaires(exercice, connus, l1, l2) : [];
+  const cible = cibles.find((c) => c.face === faceChoisie) ?? cibles[0];
+  if (cible) return cible;
   // Ne devrait jamais arriver — garde défensive.
-  return exercice.points[0].id;
+  const point = pointDebloqueParFaceAuxiliaire(exercice, connus, ligne1, ligne2, faceChoisie);
+  return { face: faceChoisie, pointConnu: point ?? exercice.points[0].id, pointCible: point ?? exercice.points[0].id };
 }
 
 /** Écran de conclusion, dernière étape : aucune interaction/vérification (spec, "Condition

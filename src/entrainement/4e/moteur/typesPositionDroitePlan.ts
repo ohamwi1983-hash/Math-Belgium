@@ -28,9 +28,9 @@ export interface EtatSessionPositionDroitePlan {
   phase: PhasePositionDroitePlan;
   etapeCourante: EtatEtapeTentatives;
   /** Aide PROGRESSIVE par écran (même mécanique que "Triangle quelconque"/"Colinéarité"/
-   * "Orthogonalité") — 2 niveaux sur "classification" (rappel des 3 critères, puis appartenance des
-   * 2 points au plan), 1 seul niveau sur "justification" (rappel de la propriété générale liée à la
-   * catégorie trouvée). */
+   * "Orthogonalité") — 2 niveaux sur "classification" (rappel des 3 critères, puis la méthode
+   * appliquée à la figure, sans trancher), 1 seul niveau sur "justification" (rappel de la propriété
+   * générale liée à la catégorie trouvée). */
   niveauAideClassification: number;
   niveauAideJustification: number;
   scoreClassificationExercice: number | null;

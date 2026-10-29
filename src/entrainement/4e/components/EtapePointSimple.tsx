@@ -1,12 +1,9 @@
-import { useState } from "react";
-import type { DirectionCandidate, ExerciceOmbreSoleilSimple } from "../core/ombreSoleil.types";
-import { NIVEAU_AIDE_MAX_POINT_SIMPLE } from "../moteur/sessionOmbreSoleil";
-import { apercuDirection, apercuPoint, CONSIGNE_POINT_SIMPLE, directionCorrecte, elementsExemple, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_POINT_SIMPLE_NIVEAU1, TEXTE_AIDE_POINT_SIMPLE_NIVEAU2 } from "../ui/formatOmbreSoleil";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { Solide3DSketch } from "./Solide3DSketch";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ExerciceOmbreSoleilSimple } from "../core/ombreSoleil.types";
+import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
+import { AIDE_POINT_SIMPLE, CONSIGNE_POINT_SIMPLE, dessinPoint, elementsScene, libellePoint, rayonProlonge, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
+import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOmbreSoleilSimple;
@@ -14,77 +11,23 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (id: string) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+  onValider: (id: string, fiche: FicheChoixOmbre) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Écran unique — variante A ("Ombre simple sur sol plat", spec section "Variante A"). Sélection
- * DIRECTE du point-ombre parmi les 4 candidats (l'option principale de la spec, pas le détour par
- * une sélection de droite séparée) : le mélange des candidats (`ordreAffichageCandidats`) est figé
- * une seule fois par exercice via `useState` (lazy init) — jamais recalculé à chaque rendu, sans
- * quoi les boutons se réordonneraient sous les doigts de l'élève à chaque interaction.
- */
-export function EtapePointSimple({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [candidats] = useState<DirectionCandidate[]>(() => ordreAffichageCandidats(exercice.directionsCandidates));
-  const [choix, setChoix] = useState<DirectionCandidate | null>(null);
-  const max = NIVEAU_AIDE_MAX_POINT_SIMPLE;
-  const erronee = tentativesUtilisees > 0;
-
-  const solide = solidePourAffichage(exercice);
-  const exemple = elementsExemple(exercice.piquetExemple, exercice.ombreExemple);
-  const apercu = apercuPoint(exercice.piquet.piquet, choix, undefined);
-  const directionRevelee = niveauAide >= 2 ? apercuDirection(exercice.piquet.piquet, directionCorrecte(exercice)) : null;
-
-  const points = [...exemple.points, pointSommetPiquet(exercice.piquet.piquet)];
-  if (apercu) points.push(apercu.point);
-  const segments = [...exemple.segments, segmentPiquet(exercice.piquet.piquet)];
-  if (directionRevelee) segments.push(directionRevelee);
-  if (apercu) segments.push(apercu.segment);
-
+/** Variante A — écran unique : choisir le point d'ombre du sommet du bâton parmi 4 points dessinés. */
+export function EtapePointSimple({ exercice, ...reste }: Props) {
+  const p = exercice.piquet;
   return (
-    <div>
-      <p className="prompt-text">{CONSIGNE_POINT_SIMPLE}</p>
-
-      <Solide3DSketch solide={solide} pointsExtra={points} segmentsExtra={segments} labelsSommets={false} />
-
-      <div className="options-grid-compact">
-        {candidats.map((candidat, index) => (
-          <button
-            key={candidat.id}
-            type="button"
-            className={`btn${choix?.id === candidat.id ? " toggle-active" : ""}${erronee && choix?.id === candidat.id ? " is-erronee" : ""}`}
-            onClick={() => setChoix(candidat)}
-          >
-            {libelleCandidat(index)}
-          </button>
-        ))}
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_POINT_SIMPLE_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_POINT_SIMPLE_NIVEAU2}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+    <ChoixCandidatsOmbre
+      {...reste}
+      solide={solidePourAffichage(exercice)}
+      fond={elementsScene(exercice)}
+      consigne={CONSIGNE_POINT_SIMPLE}
+      candidats={p.pointsCandidats.map((c) => ({ id: c.id, dessin: (numero, etat) => dessinPoint(c.position, numero, etat) }))}
+      idCorrect={p.pointsCandidats.find((c) => c.erreur === "aucune")!.id}
+      libelle={libellePoint}
+      aides={[{ texte: AIDE_POINT_SIMPLE[0] }, { texte: AIDE_POINT_SIMPLE[1], dessin: { points: [], segments: [rayonProlonge(sommetPiquet(p.piquet), exercice.direction)] } }]}
+    />
   );
 }

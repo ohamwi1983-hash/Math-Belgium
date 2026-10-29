@@ -1,12 +1,9 @@
-import { useState } from "react";
-import type { DirectionCandidate, ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
-import { NIVEAU_AIDE_MAX_DIRECTION_INCONNUE } from "../moteur/sessionOmbreSoleil";
-import { apercuDirection, CONSIGNE_DIRECTION_INCONNUE, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2 } from "../ui/formatOmbreSoleil";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { Solide3DSketch } from "./Solide3DSketch";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
+import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
+import { AIDE_DIRECTION_INCONNUE, avecId, CONSIGNE_DIRECTION_INCONNUE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, origineApercusDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
+import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOmbreSoleilDirectionInconnue;
@@ -14,76 +11,27 @@ interface Props {
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (id: string) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+  onValider: (id: string, fiche: FicheChoixOmbre) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Étape 0 (supplémentaire, avant la décomposition commune) — variante C, "sens inverse" (spec
- * section "Variante C") : DÉDUIRE la direction de lumière depuis la seule paire piquet connu/ombre
- * connue déjà affichée, jamais la deviner. Aucune aide ne trace la solution — texte seul, insistant
- * explicitement sur le piège propre à cette variante (deviner plutôt que déduire rigoureusement).
- */
-export function EtapeDirectionInconnue({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [candidats] = useState<DirectionCandidate[]>(() => ordreAffichageCandidats(exercice.directionsCandidates));
-  const [choix, setChoix] = useState<DirectionCandidate | null>(null);
-  const max = NIVEAU_AIDE_MAX_DIRECTION_INCONNUE;
-  const erronee = tentativesUtilisees > 0;
-
-  const solide = solidePourAffichage(exercice);
-  const apercu = apercuDirection(exercice.piquetConnu, choix);
-  const sommetConnu = pointSommetPiquet(exercice.piquetConnu);
-
-  const points = [sommetConnu, { position: exercice.ombreConnue, label: "Ombre connue", couleur: "#495057" }];
-  const segments = [
-    segmentPiquet(exercice.piquetConnu),
-    { a: sommetConnu.position, b: exercice.ombreConnue, couleur: "#495057", pointille: true },
-  ];
-  if (apercu) segments.push(apercu);
-
+/** Variante C, étape 0 — déduire la direction de la lumière de la seule paire sommet/ombre connue.
+ * Les aperçus partent d'un AUTRE sommet que le sommet connu : il faut comparer des inclinaisons,
+ * pas repérer un aperçu superposé au trait déjà dessiné. */
+export function EtapeDirectionInconnue({ exercice, ...reste }: Props) {
+  const origine = origineApercusDirection(exercice);
+  const sommet = sommetPiquet(origine);
+  const copie = copieRayonDepuisPied(origine.base, sommetPiquet(exercice.piquetConnu), exercice.ombreConnue);
   return (
-    <div>
-      <p className="prompt-text">{CONSIGNE_DIRECTION_INCONNUE}</p>
-
-      <Solide3DSketch solide={solide} pointsExtra={points} segmentsExtra={segments} labelsSommets={false} />
-
-      <div className="options-grid-compact">
-        {candidats.map((candidat, index) => (
-          <button
-            key={candidat.id}
-            type="button"
-            className={`btn${choix?.id === candidat.id ? " toggle-active" : ""}${erronee && choix?.id === candidat.id ? " is-erronee" : ""}`}
-            onClick={() => setChoix(candidat)}
-          >
-            {libelleCandidat(index)}
-          </button>
-        ))}
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+    <ChoixCandidatsOmbre
+      {...reste}
+      solide={solidePourAffichage(exercice)}
+      fond={elementsScene(exercice)}
+      consigne={avecId(CONSIGNE_DIRECTION_INCONNUE, origine.id)}
+      candidats={exercice.directionsCandidates.map((d) => ({ id: d.id, dessin: (numero, etat) => dessinDirection(sommet, d, numero, etat) }))}
+      idCorrect={directionCorrecte(exercice).id}
+      libelle={libelleDirection}
+      aides={[{ texte: AIDE_DIRECTION_INCONNUE[0] }, { texte: avecId(AIDE_DIRECTION_INCONNUE[1], origine.id), dessin: { points: [], segments: [copie] } }]}
+    />
   );
 }

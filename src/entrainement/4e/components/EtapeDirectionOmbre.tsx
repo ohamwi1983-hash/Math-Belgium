@@ -1,99 +1,34 @@
-import { useState } from "react";
-import type { DirectionCandidate } from "../core/ombreSoleil.types";
-import { NIVEAU_AIDE_MAX_LOOP } from "../moteur/sessionOmbreSoleil";
-import { apercuDirection, CONSIGNE_DIRECTION, elementsExemple, elementsResolus, type ExerciceOmbreSoleilBoucle, itemBoucleCourant, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_DIRECTION_NIVEAU1, texteAideNiveau2SurfaceTouchee, texteProgressionBoucle } from "../ui/formatOmbreSoleil";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { Solide3DSketch } from "./Solide3DSketch";
-import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ExerciceOmbreSoleilObstacle } from "../core/ombreSoleil.types";
+import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
+import { AIDE_DIRECTION_OBSTACLE, CONSIGNE_DIRECTION_OBSTACLE, copieRayonDepuisPied, dessinDirection, directionCorrecte, elementsScene, libelleDirection, solidePourAffichage } from "../ui/formatOmbreSoleil";
+import { ChoixCandidatsOmbre } from "./ChoixCandidatsOmbre";
+import type { FicheChoixOmbre } from "./ChoixCandidatsOmbre";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 
 interface Props {
-  exercice: ExerciceOmbreSoleilBoucle;
-  resolus: number[];
+  exercice: ExerciceOmbreSoleilObstacle;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
   onActiverAide: () => void;
-  onValider: (id: string) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+  onValider: (id: string, fiche: FicheChoixOmbre) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-/**
- * Boucle, étape 1 — sélectionner la droite parallèle à la direction de lumière (variantes
- * B/"obstacle" et C/"directionInconnue", spec section "Écran-type"). L'exemple affiché dépend de la
- * variante : le segment déjà résolu (`piquetExemple`) pour "obstacle", le piquet connu
- * (`piquetConnu`) pour "directionInconnue" — les deux jouent EXACTEMENT le même rôle de référence
- * visuelle, seul leur nom de champ diffère sur le contrat. `itemBoucleCourant` centralise le reste
- * de la divergence entre les 2 variantes (voir `ui/formatOmbreSoleil.ts`) : pour "obstacle", ce
- * n'est jamais un nouveau piquet à chaque itération, toujours le MÊME bâton.
- *
- * Le mélange des candidats est refait à chaque NOUVEL item (`useState` réinitialisé via `key`
- * côté `AppOmbreSoleil.tsx`, jamais recalculé à chaque rendu au sein d'un même item).
- */
-export function EtapeDirectionOmbre({ exercice, resolus, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
-  const [candidats] = useState<DirectionCandidate[]>(() => ordreAffichageCandidats(exercice.directionsCandidates));
-  const [choix, setChoix] = useState<DirectionCandidate | null>(null);
-  const max = NIVEAU_AIDE_MAX_LOOP;
-  const erronee = tentativesUtilisees > 0;
-
-  const piquetExemple = exercice.variante === "obstacle" ? exercice.piquetExemple : exercice.piquetConnu;
-  const ombreExemple = exercice.variante === "obstacle" ? exercice.ombreExemple : exercice.ombreConnue;
-  const item = itemBoucleCourant(exercice, resolus.length);
-
-  const solide = solidePourAffichage(exercice);
-  const exemple = elementsExemple(piquetExemple, ombreExemple);
-  const deja = elementsResolus(exercice, resolus);
-  const apercu = apercuDirection(item.piquetOrigine, choix);
-
-  const points = [...exemple.points, ...deja.points, pointSommetPiquet(item.piquetOrigine)];
-  const segments = [...exemple.segments, ...deja.segments, segmentPiquet(item.piquetOrigine)];
-  if (apercu) segments.push(apercu);
-
+/** Variante B, écran 1 — choisir le rayon parallèle à celui de l'exemple (4 aperçus dessinés). */
+export function EtapeDirectionOmbre({ exercice, ...reste }: Props) {
+  const sommet = sommetPiquet(exercice.baton);
+  const copie = copieRayonDepuisPied(exercice.baton.base, sommetPiquet(exercice.piquetExemple), exercice.ombreExemple);
   return (
-    <div>
-      <p className="prompt-text">{CONSIGNE_DIRECTION}</p>
-      <p className="prompt-fact">{texteProgressionBoucle(exercice, resolus.length)}</p>
-
-      <Solide3DSketch solide={solide} pointsExtra={points} segmentsExtra={segments} labelsSommets={false} />
-
-      <div className="options-grid-compact">
-        {candidats.map((candidat, index) => (
-          <button
-            key={candidat.id}
-            type="button"
-            className={`btn${choix?.id === candidat.id ? " toggle-active" : ""}${erronee && choix?.id === candidat.id ? " is-erronee" : ""}`}
-            onClick={() => setChoix(candidat)}
-          >
-            {libelleCandidat(index)}
-          </button>
-        ))}
-      </div>
-
-      {niveauAide > 0 && (
-        <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_DIRECTION_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2SurfaceTouchee(item.verite)}</p>}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
-          Valider
-        </button>
-        {tentativesUtilisees > 0 && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-    </div>
+    <ChoixCandidatsOmbre
+      {...reste}
+      solide={solidePourAffichage(exercice)}
+      fond={elementsScene(exercice)}
+      consigne={CONSIGNE_DIRECTION_OBSTACLE}
+      candidats={exercice.directionsCandidates.map((d) => ({ id: d.id, dessin: (numero, etat) => dessinDirection(sommet, d, numero, etat) }))}
+      idCorrect={directionCorrecte(exercice).id}
+      libelle={libelleDirection}
+      aides={[{ texte: AIDE_DIRECTION_OBSTACLE[0] }, { texte: AIDE_DIRECTION_OBSTACLE[1], dessin: { points: [], segments: [copie] } }]}
+    />
   );
 }

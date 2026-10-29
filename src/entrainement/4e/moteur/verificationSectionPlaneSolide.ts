@@ -1,6 +1,6 @@
 import type { Point3D } from "../core/geometrieEspace.types";
 import type { ExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
-import { intersectionDeuxDroites3D, points3Colineaires } from "./geometrieEspace";
+import { intersectionDeuxDroites3D, normalePlan, normeCarree3D, points3AlignesDistincts, produitScalaire3D, soustraire3D } from "./geometrieEspace";
 
 /**
  * Couche B — vérification "Section plane d'un solide" (40e générateur, chapitre "Géométrie dans
@@ -107,8 +107,10 @@ export interface CibleAuxiliaire {
 /** Pour une paire de droites données (déjà résolues en coordonnées 3D), les faces à moitié connues
  * (exactement 1 des 2 points de la face déjà connu) que cette paire permet de débloquer — le point
  * auxiliaire I (intersection des 2 droites) doit tomber sur la MÊME droite que le point déjà connu Y
- * et le point cible X (`points3Colineaires(Y,I,X)`), jamais une simple coïncidence de plan. `[]` si
- * les 2 droites sont parallèles/non coplanaires (`intersectionDeuxDroites3D` retourne `null`) ou si
+ * et le point cible X, jamais une simple coïncidence de plan, ET être DISTINCT de Y
+ * (`points3AlignesDistincts(Y,I,X)`, audit chapitre 8, point 17) : un I confondu avec Y — ex. le
+ * segment [PQ] avec l'arête qui porte P, qui se coupent en P — ne construit rien. `[]` si les 2
+ * droites sont parallèles/non coplanaires (`intersectionDeuxDroites3D` retourne `null`) ou si
  * aucune face à moitié connue n'est concernée. */
 export function ciblesAuxiliaires(
   exercice: ExerciceSectionPlaneSolide,
@@ -129,7 +131,7 @@ export function ciblesAuxiliaires(
     if (aConnu === bConnu) continue; // face totalement connue ou totalement inconnue : jamais une cible
     const connu = aConnu ? a : b;
     const cible = aConnu ? b : a;
-    if (points3Colineaires(connu.position, intersection, cible.position)) {
+    if (points3AlignesDistincts(connu.position, intersection, cible.position)) {
       resultat.push({ face, pointConnu: connu.id, pointCible: cible.id });
     }
   }
@@ -183,6 +185,60 @@ export function pointDebloqueParFaceAuxiliaire(
   if (!ligne1 || !ligne2) return null;
   const cible = ciblesAuxiliaires(exercice, connus, ligne1, ligne2).find((c) => c.face === faceChoisie);
   return cible ? cible.pointCible : null;
+}
+
+/** Point auxiliaire I de 2 droites (identifiants), `null` si elles ne se coupent pas. */
+export function pointAuxiliaireDesLignes(exercice: ExerciceSectionPlaneSolide, identifiantLigne1: string, identifiantLigne2: string): Point3D | null {
+  const ligne1 = resoudreLigne(exercice, identifiantLigne1);
+  const ligne2 = resoudreLigne(exercice, identifiantLigne2);
+  if (!ligne1 || !ligne2) return null;
+  return intersectionDeuxDroites3D(ligne1, ligne2);
+}
+
+/** Faces du solide dont le PLAN contient la droite (identifiant) — une arête est dans 2 faces, une
+ * diagonale ou un segment de section dans 1. Sert aux aides (« ces 2 droites sont dans la face… »). */
+export function facesContenantLigne(exercice: ExerciceSectionPlaneSolide, identifiant: string): number[] {
+  const ligne = resoudreLigne(exercice, identifiant);
+  if (!ligne) return [];
+  const { solide } = exercice;
+  const resultat: number[] = [];
+  solide.faces.forEach((face, index) => {
+    const [a, b, c] = face.map((nom) => solide.sommets[nom]);
+    const normale = normalePlan(a, b, c);
+    const n = Math.sqrt(normeCarree3D(normale));
+    if (ligne.every((p) => Math.abs(produitScalaire3D(normale, soustraire3D(p, a))) / n < 1e-6)) resultat.push(index);
+  });
+  return resultat;
+}
+
+/** Toutes les paires de droites (statiques + segments déjà tracés) qui débloquent une face, avec
+ * leur point auxiliaire — classées de la plus « lisible » à la moins lisible : 2 droites d'une même
+ * face du solide (méthode du cours) d'abord, puis le point auxiliaire le plus proche du centre du
+ * solide (donc visible sur le croquis). Sert à la réponse révélée et à l'aide 2. */
+export function pairesLignesValides(
+  exercice: ExerciceSectionPlaneSolide,
+  connus: ReadonlySet<number>,
+  segmentsTraces: ReadonlySet<string>,
+): { ligne1: string; ligne2: string; pointAuxiliaire: Point3D; faceCommune: number | null }[] {
+  const candidats = [...exercice.lignesStatiques.map((l) => l.cle), ...[...segmentsTraces].map((s) => `segment:${s}`)];
+  const sommets = Object.values(exercice.solide.sommets);
+  const centre = {
+    x: sommets.reduce((s, p) => s + p.x, 0) / sommets.length,
+    y: sommets.reduce((s, p) => s + p.y, 0) / sommets.length,
+    z: sommets.reduce((s, p) => s + p.z, 0) / sommets.length,
+  };
+  const paires: { ligne1: string; ligne2: string; pointAuxiliaire: Point3D; faceCommune: number | null; rang: number }[] = [];
+  for (let i = 0; i < candidats.length; i++) {
+    for (let j = i + 1; j < candidats.length; j++) {
+      if (!verifierLignesAuxiliaires(exercice, connus, candidats[i], candidats[j])) continue;
+      const pointAuxiliaire = pointAuxiliaireDesLignes(exercice, candidats[i], candidats[j])!;
+      const faces1 = facesContenantLigne(exercice, candidats[i]);
+      const faceCommune = facesContenantLigne(exercice, candidats[j]).find((f) => faces1.includes(f)) ?? null;
+      const rang = (faceCommune === null ? 1000 : 0) + Math.sqrt(normeCarree3D(soustraire3D(pointAuxiliaire, centre)));
+      paires.push({ ligne1: candidats[i], ligne2: candidats[j], pointAuxiliaire, faceCommune, rang });
+    }
+  }
+  return paires.sort((a, b) => a.rang - b.rang).map(({ rang: _rang, ...p }) => p);
 }
 
 // --- Condition d'arrêt ------------------------------------------------------------------------------

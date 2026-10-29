@@ -4,8 +4,10 @@ import {
   calculerEchelleProjection,
   calculerGeometrieSolide3D,
   calculerPolygonePlan,
+  calculerSegmentsDroite,
   HAUTEUR_SVG,
   LARGEUR_SVG,
+  positionLabelExterieur,
   projeter3DVersPixel,
 } from "../ui/solide3DSketch";
 
@@ -13,6 +15,10 @@ export interface PointExtraSolide3D {
   position: Point3D;
   label: string;
   couleur: string;
+  /** Étiquette décalée vers l'extérieur du solide (comme celles des sommets) au lieu d'être posée
+   * juste au-dessus du point — utile pour un point nommé posé sur une arête (milieu I...). Absent par
+   * défaut : comportement historique inchangé. */
+  labelExterieur?: boolean;
 }
 
 export interface SegmentExtraSolide3D {
@@ -27,8 +33,12 @@ interface Props {
   /** Plan mis en évidence (coloré/hachuré) — désigné par 3 sommets nommés, jamais montré par
    * équation. */
   plan?: PlanSolide3D;
-  /** Droite mise en évidence, désignée par 2 sommets nommés. */
+  /** Droite mise en évidence, désignée par 2 sommets nommés — tracée PROLONGÉE au-delà de ses deux
+   * points, partie cachée par le solide en pointillé (`calculerSegmentsDroite`). */
   droite?: DroiteSolide3D;
+  /** Même chose que `droite`, mais par 2 points 3D quelconques (ex. un sommet et le milieu nommé
+   * d'une arête) — prioritaire sur `droite` quand les deux sont fournis. */
+  droitePoints?: [Point3D, Point3D];
   /** Points annexes (ex. points de section, points d'ombre) — coordonnées 3D internes réelles,
    * jamais des sommets nommés du solide. */
   pointsExtra?: PointExtraSolide3D[];
@@ -47,10 +57,18 @@ interface Props {
  * (projection, visibilité des arêtes, polygone du plan) est déjà calculée par `ui/solide3DSketch.ts`
  * — ce composant ne fait que consommer ces structures, jamais de logique géométrique ici.
  */
-export function Solide3DSketch({ solide, plan, droite, pointsExtra = [], segmentsExtra = [], labelsSommets = true }: Props) {
+export function Solide3DSketch({ solide, plan, droite, droitePoints, pointsExtra = [], segmentsExtra = [], labelsSommets = true }: Props) {
   const geometrie = useMemo(() => calculerGeometrieSolide3D(solide), [solide]);
   const echelleProjection = useMemo(() => calculerEchelleProjection(solide), [solide]);
   const polygonePlan = useMemo(() => (plan ? calculerPolygonePlan(solide, plan) : null), [solide, plan]);
+  const extremitesDroite: [Point3D, Point3D] | null = droitePoints ?? (droite ? [solide.sommets[droite[0]], solide.sommets[droite[1]]] : null);
+  // Clé par coordonnées : un nouveau tableau à chaque rendu ne doit pas relancer le découpage.
+  const cleDroite = extremitesDroite ? JSON.stringify(extremitesDroite) : "";
+  const segmentsDroite = useMemo(() => {
+    if (!cleDroite) return [];
+    const [a, b] = JSON.parse(cleDroite) as [Point3D, Point3D];
+    return calculerSegmentsDroite(solide, a, b);
+  }, [solide, cleDroite]);
 
   const aretesCachees = geometrie.aretes.filter((a) => !a.visible);
   const aretesVisibles = geometrie.aretes.filter((a) => a.visible);
@@ -80,13 +98,16 @@ export function Solide3DSketch({ solide, plan, droite, pointsExtra = [], segment
         return <line key={`${n1}-${n2}`} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} className="solide3d-arete" />;
       })}
 
-      {droite &&
-        (() => {
-          const [n1, n2] = droite;
-          const p1 = geometrie.sommetsPixel[n1];
-          const p2 = geometrie.sommetsPixel[n2];
-          return <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} className="solide3d-droite" />;
-        })()}
+      {segmentsDroite.map((segment, index) => (
+        <line
+          key={`droite-${index}`}
+          x1={segment.x1}
+          y1={segment.y1}
+          x2={segment.x2}
+          y2={segment.y2}
+          className={`solide3d-droite${segment.cache ? " is-cachee" : ""}`}
+        />
+      ))}
 
       {segmentsExtra.map((segment, index) => {
         const p1 = projeter3DVersPixel(segment.a, echelleProjection);
@@ -119,10 +140,11 @@ export function Solide3DSketch({ solide, plan, droite, pointsExtra = [], segment
 
       {pointsExtra.map((point, index) => {
         const p = projeter3DVersPixel(point.position, echelleProjection);
+        const label = point.labelExterieur ? positionLabelExterieur(solide, point.position) : { x: p.x, y: p.y - 11 };
         return (
           <g key={`point-extra-${index}`}>
             <circle cx={p.x} cy={p.y} r={5} className="solide3d-point-extra" style={{ fill: point.couleur }} />
-            <text x={p.x} y={p.y - 11} className="solide3d-point-extra-label" style={{ fill: point.couleur }}>
+            <text x={label.x} y={label.y} className="solide3d-point-extra-label" style={{ fill: point.couleur }}>
               {point.label}
             </text>
           </g>
