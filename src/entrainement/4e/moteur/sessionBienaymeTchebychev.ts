@@ -110,7 +110,6 @@ function construireResultat(
   const v7Pourcent0 = champ(scoresAccumules, "v7Pourcent0");
   const v7K = champ(scoresAccumules, "v7K");
   const v7Sigma = champ(scoresAccumules, "v7Sigma");
-  const v8Pourcent0 = champ(scoresAccumules, "v8Pourcent0");
   const v8XBar = champ(scoresAccumules, "v8XBar");
 
   return {
@@ -163,9 +162,6 @@ function construireResultat(
     scoreV7Sigma: v7Sigma.score,
     v7SigmaRevele: v7Sigma.revele,
     niveauAideV7Sigma: v7Sigma.niveauAide,
-    scoreV8Pourcent0: v8Pourcent0.score,
-    v8Pourcent0Revele: v8Pourcent0.revele,
-    niveauAideV8Pourcent0: v8Pourcent0.niveauAide,
     scoreV8XBar: v8XBar.score,
     v8XBarRevele: v8XBar.revele,
     niveauAideV8XBar: v8XBar.niveauAide,
@@ -318,12 +314,6 @@ export function soumettreReponseV7Sigma(etat: EtatSessionBienaymeTchebychev, tex
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "nombreVersSigma") throw new Error("soumettreReponseV7Sigma : réservé à la variante 'nombreVersSigma'");
   return soumettrePhase(etat, "v7Sigma", texte, (t) => verifierSigma(exercice, t));
-}
-
-export function soumettreReponseV8Pourcent0(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "nombreVersXBar") throw new Error("soumettreReponseV8Pourcent0 : réservé à la variante 'nombreVersXBar'");
-  return soumettrePhase(etat, "v8Pourcent0", texte, (t) => verifierPourcentDepuisNombre(exercice, t));
 }
 
 export function soumettreReponseV8XBar(etat: EtatSessionBienaymeTchebychev, texte: string): EtatSessionBienaymeTchebychev {

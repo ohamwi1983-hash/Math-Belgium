@@ -58,7 +58,7 @@ export function verifierPourcent(exercice: { pourcentAttendu: number }, texte: s
 }
 
 // ============================================================================
-// Pourcentage minimal depuis un nombre d'individus donné (écran 0 des variantes V4/V7/V8).
+// Pourcentage minimal depuis un nombre d'individus donné (écran 0 des variantes V4/V7).
 // ============================================================================
 
 export function diagnostiquerPourcentDepuisNombre(exercice: { pourcentAttendu0: number }, texte: string): StatutVerification {

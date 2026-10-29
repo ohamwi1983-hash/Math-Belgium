@@ -27,6 +27,13 @@ export function deCaractere(contexte: ContexteBienaymeTchebychev): string {
   return `de ${defini}`;
 }
 
+/** Population reprise par un démonstratif : « ces véhicules », jamais « ces véhicules d'un parc
+ * automobile » (le complément est déjà dans l'énoncé — audit gen37). Garde le nom seul, avant son
+ * premier complément (« d'un/d'une/de/du/des/en … »). */
+export function populationReprise(contexte: ContexteBienaymeTchebychev): string {
+  return contexte.population.split(/ (?:d'|de |du |des |en )/)[0];
+}
+
 /** « chez les étudiants » / « pour les véhicules d'un parc automobile ». */
 export function aupresDesPopulation(contexte: ContexteBienaymeTchebychev): string {
   return `${contexte.populationAnimee ? "chez" : "pour"} les ${contexte.population}`;

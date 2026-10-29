@@ -71,7 +71,7 @@ import { avecVirgulesBelges } from "../../ui/nombreFr";
  * - `nombreVersSigma` (`construireNombreVersSigma`) : x̄, intervalle, n, nombre minimal donnés →
  *   pourcentage minimal (arrondi standard) → k → σ (arrondi standard, à l'unité).
  * - `nombreVersXBar` (`construireNombreVersXBar`) : σ, intervalle, n, nombre minimal donnés →
- *   pourcentage minimal (arrondi standard) → x̄, centre de l'intervalle (valeur exacte, aucun k).
+ *   x̄, centre de l'intervalle (valeur exacte, ni pourcentage ni k).
  *
  * `ExerciceBienaymeTchebychev` est une UNION discriminée sur `variante` (8 interfaces distinctes,
  * `core/bienaymeTchebychev.types.ts`), jamais un type unique aux champs optionnels — chaque
@@ -86,7 +86,7 @@ import { avecVirgulesBelges } from "../../ui/nombreFr";
  * intervalle pour l'autre, etc. — voir `AdaptateurFeuilleExercices.regroupable` dans
  * `genererFeuilleExercices.ts`, qui exclut explicitement ce cas), la consigne de la question elle-
  * même (`construireConsigneTravail` ci-dessous) mentionne les valeurs tirées à chaque fois qu'une
- * étape intermédiaire "sans aide" (calcul du pourcentage depuis le nombre donné, V4/V7/V8, ou le
+ * étape intermédiaire "sans aide" (calcul du pourcentage depuis le nombre donné, V4/V7, ou le
  * nombre d'individus final, V3) n'a pas de formule d'aide dédiée sur l'écran interactif et doit donc
  * être réexpliquée en toutes lettres — jamais une consigne GÉNÉRIQUE indépendante de l'instance,
  * même au sein d'une seule variante.
@@ -115,11 +115,11 @@ import { avecVirgulesBelges } from "../../ui/nombreFr";
  * proviennent des fonctions `formatXxxAttenduTexte` du panneau de révélation
  * (`ResultatPanelBienaymeTchebychev.tsx`) — MÊME correspondance variante→formateur que ce composant :
  * `formatKAttenduTexte` (toutes sauf V6/V8), `formatPourcentAttenduTexte` (V1/V3), `formatIntervalleAttenduTexte`
- * (V2/V4), `formatNombreAttenduTexte` (V3), `formatPourcentDepuisNombreAttenduTexte` (V4/V7/V8),
+ * (V2/V4), `formatNombreAttenduTexte` (V3), `formatPourcentDepuisNombreAttenduTexte` (V4/V7),
  * `formatSigmaAttenduTexte` (V5/V7), `formatXBarAttenduTexte` (V6/V8). Ces fonctions portent déjà le
  * bon signe "=" vs "≈" (arrondi exact ou non, voir le commentaire de tête de
  * `ui/formatBienaymeTchebychev.ts`) — jamais recalculé ici. Les 2 étapes "pourcentage" SANS aide
- * dédiée sur l'écran interactif (pourcentage depuis le nombre donné pour V4/V7/V8 ; nombre minimal
+ * dédiée sur l'écran interactif (pourcentage depuis le nombre donné pour V4/V7 ; nombre minimal
  * d'individus final pour V3 — toutes deux documentées "AUCUNE aide" dans `core/
  * bienaymeTchebychev.types.ts`) sont les deux seuls endroits où une formule est écrite directement
  * ici plutôt qu'importée, en dupliquant fidèlement le calcul de `generateurs/bienaymeTchebychev/
@@ -165,7 +165,7 @@ function construireConsigneTravail(instance: ExerciceBienaymeTchebychev): string
     case "nombreVersSigma":
       return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
     case "nombreVersXBar":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
+      return `Détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
   }
 }
 
@@ -236,11 +236,11 @@ function etapeNombreFinal(instance: ExerciceBienaymeTchebychevIntervalleVersNomb
   ];
 }
 
-/** Étape "pourcentage minimal correspondant au nombre donné" (V4, V7, V8 — écran 0, SANS aide sur
+/** Étape "pourcentage minimal correspondant au nombre donné" (V4, V7 — écran 0, SANS aide sur
  * l'écran interactif) : pourcentAttendu0 = arrondi2(100 × nombreMinDonne / n), dupliquant fidèlement
  * `generateurs/bienaymeTchebychev/index.ts`. */
 function etapePourcentDepuisNombre(
-  instance: ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma | ExerciceBienaymeTchebychevNombreVersXBar,
+  instance: ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma,
 ): FragmentConsigne[] {
   return [
     texte("Pourcentage minimal correspondant au nombre donné : "),
@@ -339,7 +339,6 @@ function construireCorrectionBienaymeTchebychev(instance: ExerciceBienaymeTcheby
     case "nombreVersXBar":
       return [
         intro,
-        { type: "paragraphe", fragments: etapePourcentDepuisNombre(instance) },
         { type: "paragraphe", fragments: etapeXBar(instance) },
       ];
   }

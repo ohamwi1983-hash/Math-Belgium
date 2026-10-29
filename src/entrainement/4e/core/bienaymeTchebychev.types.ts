@@ -37,8 +37,8 @@
  *   comme le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ] (aucun écran k).
  * - `nombreVersSigma` (V7) : x̄, intervalle, n, nombre minimal donnés → pourcentage minimal (écran
  *   0, AUCUNE aide) → k → σ (arrondi standard).
- * - `nombreVersXBar` (V8) : σ, intervalle, n, nombre minimal donnés → pourcentage minimal (écran
- *   0, AUCUNE aide) → x̄, centre de l'intervalle symétrique (aucun écran k).
+ * - `nombreVersXBar` (V8) : σ, intervalle, n, nombre minimal donnés → x̄, lu directement comme le
+ *   centre de l'intervalle symétrique (ni pourcentage ni k à calculer).
  */
 /** Un contexte narratif (population + caractère étudié) — voir `generateurs/bienaymeTchebychev/
  * contextes.ts` pour la banque de 30 entrées tirées aléatoirement. Le contrat lui-même n'importe
@@ -157,7 +157,8 @@ export interface ExerciceBienaymeTchebychevIntervalleVersSigma {
 
 /** V6 — intervalle + pourcentage minimal donnés (σ connu) → x̄ (1 écran, `xBarAttendu` terminal) :
  * l'intervalle de Bienaymé-Tchebychev est symétrique autour de x̄, qui se lit en son centre — k
- * n'est jamais demandé (il ne sert qu'à construire l'intervalle). */
+ * n'est jamais demandé. L'intervalle est construit pour que l'énoncé soit vrai : avec
+ * k = demi-largeur/σ, 1 − 1/k² ≥ `pourcentDonne` %. */
 export interface ExerciceBienaymeTchebychevIntervalleVersXBar {
   variante: "intervalleVersXBar";
   contexte: ContexteBienaymeTchebychev;
@@ -183,8 +184,9 @@ export interface ExerciceBienaymeTchebychevNombreVersSigma {
   sigmaAttendu: number;
 }
 
-/** V8 — intervalle + n + nombre minimal donnés (σ connu) → pourcentage (écran 0, aucune aide) →
- * x̄, centre de l'intervalle symétrique (2 écrans, `xBarAttendu` terminal, k jamais demandé). */
+/** V8 — intervalle + n + nombre minimal donnés (σ connu) → x̄, centre de l'intervalle symétrique
+ * (1 écran, ni pourcentage ni k demandés). L'intervalle est construit pour que l'énoncé soit vrai :
+ * avec k = demi-largeur/σ, n × (1 − 1/k²) ≥ `nombreMinDonne`. */
 export interface ExerciceBienaymeTchebychevNombreVersXBar {
   variante: "nombreVersXBar";
   contexte: ContexteBienaymeTchebychev;
@@ -193,7 +195,6 @@ export interface ExerciceBienaymeTchebychevNombreVersXBar {
   nombreMinDonne: number;
   borneInf: number;
   borneSup: number;
-  pourcentAttendu0: number;
   xBarAttendu: number;
 }
 

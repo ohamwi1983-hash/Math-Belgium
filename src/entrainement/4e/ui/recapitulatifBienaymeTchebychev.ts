@@ -21,9 +21,8 @@ function valeurPourPhase(exercice: ExerciceBienaymeTchebychev, phase: PhaseBiena
       if (!demandeK(exercice)) throw new Error(`recapitulatifBienaymeTchebychev : exercice sans k (${phase})`);
       return { libelle: "k", estLatex: true, valeur: formatEtatActuelKLatex(kEtatActuel(exercice)) };
     case "v4Pourcent0":
-    case "v7Pourcent0":
-    case "v8Pourcent0": {
-      if (exercice.variante !== "nombreVersIntervalle" && exercice.variante !== "nombreVersSigma" && exercice.variante !== "nombreVersXBar") {
+    case "v7Pourcent0": {
+      if (exercice.variante !== "nombreVersIntervalle" && exercice.variante !== "nombreVersSigma") {
         throw new Error(`recapitulatifBienaymeTchebychev : exercice inattendu (${phase})`);
       }
       return { libelle: "% minimal", estLatex: true, valeur: formatEtatActuelPourcentLatex(pourcentAttendu0EtatActuel(exercice)) };

@@ -1,6 +1,6 @@
 /**
  * Couche B — types de session pour "Inégalité de Bienaymé-Tchebychev" (chapitre 5) — refonte
- * complète, 18 écrans possibles au total répartis sur 8 variantes, chacune une SÉQUENCE FIXE et
+ * complète, 17 écrans possibles au total répartis sur 8 variantes, chacune une SÉQUENCE FIXE et
  * DISJOINTE des 7 autres (aucun nom de phase partagé entre deux variantes, même principe
  * qu'"Orthogonalité et théorème de Pythagore généralisé") :
  * - `intervalleVersPourcent` (V1) : v1K → v1Pourcent (2 écrans).
@@ -11,7 +11,8 @@
  * - `intervalleVersXBar` (V6)     : v6XBar (1 écran — x̄ se lit au centre de l'intervalle, aucun
  *   écran k).
  * - `nombreVersSigma` (V7)        : v7Pourcent0 → v7K → v7Sigma (3 écrans).
- * - `nombreVersXBar` (V8)         : v8Pourcent0 → v8XBar (2 écrans, aucun écran k).
+ * - `nombreVersXBar` (V8)         : v8XBar (1 écran — x̄ se lit au centre de l'intervalle, ni
+ *   pourcentage ni k à calculer).
  */
 import type { ExerciceBienaymeTchebychev, GenerateurExerciceBienaymeTchebychev, VarianteBienaymeTchebychev } from "../core/bienaymeTchebychev.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -34,7 +35,6 @@ export type PhaseBienaymeTchebychev =
   | "v7Pourcent0"
   | "v7K"
   | "v7Sigma"
-  | "v8Pourcent0"
   | "v8XBar";
 
 export const SEQUENCES: Record<VarianteBienaymeTchebychev, PhaseBienaymeTchebychev[]> = {
@@ -45,11 +45,11 @@ export const SEQUENCES: Record<VarianteBienaymeTchebychev, PhaseBienaymeTchebych
   intervalleVersSigma: ["v5K", "v5Sigma"],
   intervalleVersXBar: ["v6XBar"],
   nombreVersSigma: ["v7Pourcent0", "v7K", "v7Sigma"],
-  nombreVersXBar: ["v8Pourcent0", "v8XBar"],
+  nombreVersXBar: ["v8XBar"],
 };
 
 /** Niveau d'aide maximal par écran, voir `promptgen37refonte.md` (section par variante) — même mécanique que "Colinéarité"/"Orthogonalité"/"Triangle
- * quelconque". Un écran à `max=0` (`v3Nombre`, `v4Pourcent0`/`v7Pourcent0`/`v8Pourcent0`) n'affiche
+ * quelconque". Un écran à `max=0` (`v3Nombre`, `v4Pourcent0`/`v7Pourcent0`) n'affiche
  * aucun bouton "Aide" côté composant, jamais un bouton perpétuellement désactivé. */
 export const NIVEAU_AIDE_MAX: Record<PhaseBienaymeTchebychev, number> = {
   v1K: 2,
@@ -68,7 +68,6 @@ export const NIVEAU_AIDE_MAX: Record<PhaseBienaymeTchebychev, number> = {
   v7Pourcent0: 0,
   v7K: 2,
   v7Sigma: 2,
-  v8Pourcent0: 0,
   v8XBar: 2,
 };
 
@@ -128,9 +127,6 @@ export interface ResultatExerciceBienaymeTchebychev {
   scoreV7Sigma: number | null;
   v7SigmaRevele: boolean;
   niveauAideV7Sigma: number;
-  scoreV8Pourcent0: number | null;
-  v8Pourcent0Revele: boolean;
-  niveauAideV8Pourcent0: number;
   scoreV8XBar: number | null;
   v8XBarRevele: boolean;
   niveauAideV8XBar: number;

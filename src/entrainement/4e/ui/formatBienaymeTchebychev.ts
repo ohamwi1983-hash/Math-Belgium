@@ -46,7 +46,7 @@ import type {
   ExerciceBienaymeTchebychevNombreVersXBar,
   VarianteBienaymeTchebychev,
 } from "../core/bienaymeTchebychev.types";
-import { aupresDesPopulationMajuscule, de } from "./phrasesContexteStatistique";
+import { aupresDesPopulationMajuscule, de, populationReprise } from "./phrasesContexteStatistique";
 import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
 export const LABEL_XBAR = "\\bar{x}";
@@ -130,8 +130,8 @@ export function precisionPourcentFinal(variante: "intervalleVersPourcent" | "int
   return variante === "intervalleVersPourcent" ? PRECISION_UNITE_PAR_DEFAUT : "arrondi au centième par défaut, c'est-à-dire vers le bas";
 }
 
-/** Pourcentage tiré d'un nombre minimal (écran 0 de V4/V7/V8) : vers le haut quand il mène à un
- * intervalle garanti (V4), arrondi ordinaire quand il sert à retrouver σ ou x̄. */
+/** Pourcentage tiré d'un nombre minimal (écran 0 de V4/V7) : vers le haut quand il mène à un
+ * intervalle garanti (V4), arrondi ordinaire quand il sert à retrouver σ (V7). */
 export function precisionPourcentDepuisNombre(variante: VarianteBienaymeTchebychev): string {
   return variante === "nombreVersIntervalle" ? PRECISION_K_PAR_EXCES : PRECISION_POURCENT_INTERMEDIAIRE;
 }
@@ -142,7 +142,7 @@ export function precisionPourcentDepuisNombre(variante: VarianteBienaymeTchebych
 // ============================================================================
 
 function phraseCesPopulation(contexte: ContexteBienaymeTchebychev): string {
-  return virgulesTexte(`ces ${contexte.population}`);
+  return virgulesTexte(`ces ${populationReprise(contexte)}`);
 }
 
 function phraseCaractereComprisEntre(contexte: ContexteBienaymeTchebychev, borneInf: number, borneSup: number): string {
@@ -328,7 +328,7 @@ export function kEtatActuel(exercice: ExerciceBienaymeTchebychevAvecK): ValeurEt
   return { valeur: exercice.kAttendu, exact: estArrondiExact(kValeurExacte(exercice), exercice.kAttendu) };
 }
 
-/** État actuel de `pourcentAttendu0` (écran 0 des variantes V4/V7/V8), rappelé aux écrans suivants. */
+/** État actuel de `pourcentAttendu0` (écran 0 des variantes V4/V7), rappelé aux écrans suivants. */
 export function pourcentAttendu0EtatActuel(exercice: { n: number; nombreMinDonne: number; pourcentAttendu0: number }): ValeurEtatActuel {
   return { valeur: exercice.pourcentAttendu0, exact: estArrondiExact((100 * exercice.nombreMinDonne) / exercice.n, exercice.pourcentAttendu0) };
 }

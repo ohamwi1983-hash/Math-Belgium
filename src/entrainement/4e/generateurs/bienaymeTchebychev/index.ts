@@ -62,6 +62,15 @@ function kDepuisPourcent(pourcent: number): number {
   return Math.sqrt(100 / (100 - pourcent));
 }
 
+/** Demi-largeur ENTIÈRE d'un intervalle annoncé dans l'énoncé quand σ est DONNÉ (variantes x̄) : arrondie vers le
+ * HAUT à partir du k exact, pour que l'énoncé reste vrai — avec k réel = d/σ ≥ k exact, la garantie
+ * 1 − 1/k² couvre toujours le pourcentage (ou le nombre) annoncé. Un arrondi au plus proche pouvait
+ * produire un énoncé faux (ex. « au moins 32 % entre 12 et 16 » avec σ = 2 : k réel = 1, garantie
+ * nulle — audit gen37). */
+function demiLargeurGarantie(kExact: number, sigma: number): number {
+  return arrondiVersLeHaut(kExact * sigma);
+}
+
 const N_MIN = 60;
 const N_MAX = 400;
 
@@ -159,10 +168,9 @@ export function construireIntervalleVersXBar(): ExerciceBienaymeTchebychevInterv
   const contexte = tirerContexte();
   const sigma = tirerSigma(contexte);
   const pourcentDonne = tirerPourcentDonne();
-  // k ne sert qu'à construire l'intervalle : il n'est jamais demandé dans cette variante.
-  const k = arrondi2(kDepuisPourcent(pourcentDonne));
   const xBarCible = tirerXBar(contexte);
-  const d = Math.round(k * sigma);
+  // k n'est jamais demandé dans cette variante : il ne sert qu'à construire un intervalle vrai.
+  const d = demiLargeurGarantie(kDepuisPourcent(pourcentDonne), sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
   // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
@@ -190,16 +198,15 @@ export function construireNombreVersXBar(): ExerciceBienaymeTchebychevNombreVers
   const sigma = tirerSigma(contexte);
   const n = tirerN();
   const nombreMinDonne = tirerNombreMinDonne(n);
-  const pourcentAttendu0 = arrondi2((100 * nombreMinDonne) / n);
-  // k ne sert qu'à construire l'intervalle : il n'est jamais demandé dans cette variante.
-  const k = arrondi2(kDepuisPourcent(pourcentAttendu0));
   const xBarCible = tirerXBar(contexte);
-  const d = Math.round(k * sigma);
+  // Ni k ni le pourcentage ne sont demandés dans cette variante : ils ne servent qu'à construire un
+  // intervalle vrai (au moins `nombreMinDonne` individus garantis).
+  const d = demiLargeurGarantie(kDepuisPourcent((100 * nombreMinDonne) / n), sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
   // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
   const xBarAttendu = (borneInf + borneSup) / 2;
-  return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, pourcentAttendu0, xBarAttendu };
+  return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, xBarAttendu };
 }
 
 function construireUneFois(varianteId: VarianteBienaymeTchebychev): ExerciceBienaymeTchebychev {

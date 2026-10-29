@@ -28,8 +28,7 @@ const MAX = 2;
 
 /** Rôle "x̄ retrouvé" (v6XBar, v8XBar) — dernier écran, sans écran k avant lui : l'intervalle de
  * Bienaymé-Tchebychev [x̄ − kσ ; x̄ + kσ] est symétrique, x̄ se lit donc en son centre (valeur exacte,
- * aucun arrondi). Le pourcentage de l'écran 0 (V8) reste listé dans le récapitulatif "Ce qu'on sait
- * déjà" au niveau de l'App. */
+ * aucun arrondi). Seul écran des variantes V6 et V8. */
 export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";

@@ -1,9 +1,5 @@
 import { useState } from "react";
-import type {
-  ExerciceBienaymeTchebychevNombreVersIntervalle,
-  ExerciceBienaymeTchebychevNombreVersSigma,
-  ExerciceBienaymeTchebychevNombreVersXBar,
-} from "../core/bienaymeTchebychev.types";
+import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevNombreVersSigma } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcentDepuisNombre } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { precisionPourcentDepuisNombre } from "../ui/formatBienaymeTchebychev";
@@ -11,7 +7,7 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
-type Exercice = ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma | ExerciceBienaymeTchebychevNombreVersXBar;
+type Exercice = ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma;
 
 interface Props {
   exercice: Exercice;
@@ -24,8 +20,8 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Rôle "pourcentage minimal depuis un nombre d'individus donné" (v4Pourcent0, v7Pourcent0,
- * v8Pourcent0) — toujours le PREMIER écran de sa variante (n et le nombre minimal sont déjà dans
+/** Rôle "pourcentage minimal depuis un nombre d'individus donné" (v4Pourcent0, v7Pourcent0) —
+ * toujours le PREMIER écran de sa variante (n et le nombre minimal sont déjà dans
  * l'énoncé), AUCUNE aide (même convention "max=0 → pas de bouton"). */
 export function EtapePourcentDepuisNombre({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
