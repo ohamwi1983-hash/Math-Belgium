@@ -8,6 +8,7 @@ import type { EtatSessionApplicationPhysique } from "../moteur/typesApplicationP
 import type { FragmentConsigne } from "./formatEquationDroite";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { nombreFr } from "./nombreFr";
+import { calculerViewBoxVecteurs } from "./vecteurGraph";
 
 export type { FragmentConsigne };
 
@@ -24,9 +25,9 @@ function latex(valeur: string): FragmentConsigne {
 export interface VecteursSchemaApplicationPhysique {
   /** v1, en direction plein Nord depuis l'origine. */
   v1: Composantes;
-  /** v2, déplacement libre (pas encore ancré) — à tracer bout à bout à l'extrémité de v1. */
+  /** v2, depuis la même origine que v1 (règle du parallélogramme). */
   v2: Composantes;
-  /** Résultante (v1+v2), depuis l'origine. */
+  /** Résultante (v1+v2), diagonale du parallélogramme issue de l'origine. */
   resultante: Composantes;
 }
 
@@ -47,61 +48,313 @@ export function calculerVecteursSchema(exercice: ExerciceApplicationPhysique): V
   return { v1, v2, resultante: { x: v1.x + v2.x, y: v1.y + v2.y } };
 }
 
-/** Fraction du plus grand côté du schéma : décalage d'une étiquette par rapport à son vecteur, et
- * marge ajoutée autour de la figure (étiquettes comprises). */
-const FRACTION_DECALAGE_ETIQUETTE_SCHEMA = 0.1;
-const FRACTION_MARGE_SCHEMA = 0.1;
-/** Hauteur d'une étiquette (lettre + flèche, dessinées AU-DESSUS de son point d'ancrage), en
- * fraction du plus grand côté : décalage supplémentaire d'une étiquette placée sous son vecteur, et
- * marge supplémentaire en haut de la figure. */
-const FRACTION_HAUTEUR_ETIQUETTE_SCHEMA = 0.1;
+/** Largeur (px) du graphe par défaut, pour convertir en unités du schéma les tailles des
+ * étiquettes (fixes en pixels) quand la largeur réelle n'est pas fournie (croquis imprimé de
+ * l'export, 260 px de large) — l'écran passe la largeur réelle de son `VecteurGraph`. */
+const LARGEUR_REFERENCE_PX = 260;
+/** Encombrement en pixels autour de son ancrage d'une étiquette vectorielle `LabelVecteurFleche`
+ * (lettre 22 px + indice + flèche au-dessus, mesuré ≈ 20 × 33 px) : ancrage = ligne de base. */
+const ETIQUETTE_VECTEUR_PX = { gauche: 12, droite: 12, bas: 10, haut: 24 };
+/** Demi-encombrement du « θ » (police 18 px, mesuré ≈ 11 × 18 px). */
+const THETA_PX = { demiLargeur: 7, demiHauteur: 9 };
+/** Rose des vents : longueur d'une branche, distance des lettres (14 px) au centre, demi-encombrement. */
+const ROSE_PX = { branche: 11, lettres: 25, demiLargeur: 31, demiHauteur: 33 };
+/** Jeu minimal (px) entre une étiquette et un trait, et entre deux étiquettes (plus large : deux
+ * étiquettes accolées se liraient comme une seule, « F_R θ »). */
+const JEU_PX = 3;
+const JEU_ETIQUETTES_PX = 8;
 
-export interface PositionsEtiquettesSchema {
-  v1: Point;
-  v2: Point;
-  resultante: Point;
-  /** Coins de la zone à afficher (figure + étiquettes + marge), pour `VecteurGraph.viewBoxFixe`. */
+export interface ArcAngleSchema {
+  /** Points de l'arc (ou du petit carré d'angle droit), dans l'ordre, à relier en polyligne. */
+  points: Point[];
+  /** Position (centre) du « θ ». */
+  label: Point;
+}
+
+export interface RoseDesVentsSchema {
+  centre: Point;
+  /** Extrémités des 4 branches (N, E, S, O). */
+  branches: { N: Point; E: Point; S: Point; O: Point };
+  /** Positions (centres) des 4 lettres. */
+  lettres: { N: Point; E: Point; S: Point; O: Point };
+}
+
+export interface GeometrieSchemaApplicationPhysique extends VecteursSchemaApplicationPhysique {
+  /** Quatrième sommet du parallélogramme (extrémité de la résultante, v1 + v2). */
+  sommetOppose: Point;
+  /** Côtés en pointillés : parallèle à v2 depuis l'extrémité de v1, parallèle à v1 depuis
+   * l'extrémité de v2. */
+  cotesPointilles: [[Point, Point], [Point, Point]];
+  arc: ArcAngleSchema;
+  /** Ancrages (ligne de base) des étiquettes vectorielles. */
+  etiquettes: { v1: Point; v2: Point; resultante: Point };
+  rose: RoseDesVentsSchema;
+  /** Coins de la zone à afficher (figure, étiquettes, rose et marge), résultante comprise même
+   * quand elle est masquée : la fenêtre ne bouge pas quand elle apparaît. */
   coins: [Point, Point];
 }
 
-/**
- * Étiquettes du schéma (audit chapitre 6, point 26) — chacune placée du côté EXTÉRIEUR du triangle
- * vectoriel (à l'opposé de son centre de gravité), et à des hauteurs différentes le long des deux
- * vecteurs issus de l'origine (40 % pour v₁, 60 % pour la résultante). Le placement au milieu, du
- * même côté pour tous, superposait v₁ et v_R dès que le triangle était mince (vent faible devant la
- * vitesse propre) ; et sans marge proportionnelle (`calculerViewBoxVecteurs` n'ajoute que 1,5 unité,
- * rien face à des vitesses de 300 km/h) l'étiquette de v₂ sortait du cadre.
- */
-export function positionsEtiquettesSchema(exercice: ExerciceApplicationPhysique): PositionsEtiquettesSchema {
-  const { v1, v2, resultante } = calculerVecteursSchema(exercice);
-  const sommets: Point[] = [{ x: 0, y: 0 }, v1, resultante];
-  const centre = { x: (v1.x + resultante.x) / 3, y: (v1.y + resultante.y) / 3 };
-  const xs = sommets.map((p) => p.x);
-  const ys = sommets.map((p) => p.y);
-  const taille = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
-  const decalage = taille * FRACTION_DECALAGE_ETIQUETTE_SCHEMA;
+interface Boite {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
 
-  function placer(origine: Point, vecteur: Composantes, fraction: number): Point {
-    const point = { x: origine.x + vecteur.x * fraction, y: origine.y + vecteur.y * fraction };
-    const longueur = Math.hypot(vecteur.x, vecteur.y) || 1;
-    let perp = { x: -vecteur.y / longueur, y: vecteur.x / longueur };
-    if (perp.x * (centre.x - point.x) + perp.y * (centre.y - point.y) > 0) perp = { x: -perp.x, y: -perp.y };
-    const sousLeVecteur = perp.y < -0.3 ? taille * FRACTION_HAUTEUR_ETIQUETTE_SCHEMA * -perp.y : 0;
-    return { x: point.x + perp.x * decalage, y: point.y + perp.y * decalage - sousLeVecteur };
+type Segment = [Point, Point];
+
+function boitesSeChevauchent(a: Boite, b: Boite): boolean {
+  return a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+}
+
+/** Le segment traverse-t-il la boîte ? (découpage de Liang-Barsky). */
+function segmentCroiseBoite([a, b]: Segment, boite: Boite): boolean {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const p = [-dx, dx, -dy, dy];
+  const q = [a.x - boite.x0, boite.x1 - a.x, a.y - boite.y0, boite.y1 - a.y];
+  let t0 = 0;
+  let t1 = 1;
+  for (let i = 0; i < 4; i++) {
+    if (p[i] === 0) {
+      if (q[i] < 0) return false;
+      continue;
+    }
+    const t = q[i] / p[i];
+    if (p[i] < 0) {
+      if (t > t1) return false;
+      t0 = Math.max(t0, t);
+    } else {
+      if (t < t0) return false;
+      t1 = Math.min(t1, t);
+    }
   }
+  return true;
+}
 
-  const positions = {
-    v1: placer({ x: 0, y: 0 }, v1, 0.4),
-    v2: placer(v1, v2, 0.5),
-    resultante: placer({ x: 0, y: 0 }, resultante, 0.6),
-  };
-  const tous = [...sommets, positions.v1, positions.v2, positions.resultante];
-  const marge = taille * FRACTION_MARGE_SCHEMA;
-  const coins: [Point, Point] = [
-    { x: Math.min(...tous.map((p) => p.x)) - marge, y: Math.min(...tous.map((p) => p.y)) - marge },
-    { x: Math.max(...tous.map((p) => p.x)) + marge, y: Math.max(...tous.map((p) => p.y)) + marge + taille * FRACTION_HAUTEUR_ETIQUETTE_SCHEMA },
+/** Premier candidat dont la boîte (agrandie du jeu) ne touche ni un trait ni une étiquette déjà
+ * placée — le premier de la liste à défaut (jamais atteint sur les tirages réels, voir les tests
+ * Playwright de la décision F3). */
+function premierCandidatLibre(candidats: Point[], boiteDe: (p: Point) => Boite, traits: Segment[], occupees: Boite[], s: number): Point {
+  const gonfler = (b: Boite, jeuPx: number): Boite => ({ x0: b.x0 - jeuPx * s, x1: b.x1 + jeuPx * s, y0: b.y0 - jeuPx * s, y1: b.y1 + jeuPx * s });
+  for (const candidat of candidats) {
+    const b = boiteDe(candidat);
+    const pourTraits = gonfler(b, JEU_PX);
+    const pourEtiquettes = gonfler(b, JEU_ETIQUETTES_PX);
+    if (traits.some((t) => segmentCroiseBoite(t, pourTraits))) continue;
+    if (occupees.some((o) => boitesSeChevauchent(o, pourEtiquettes))) continue;
+    return candidat;
+  }
+  return candidats[0];
+}
+
+/** Candidats d'ancrage le long d'un vecteur : à chaque décalage (du plus proche au plus lointain),
+ * chaque fraction de sa longueur, de chaque côté autorisé (`normales`, vecteurs unitaires). */
+function candidatsLeLong(depart: Point, vecteur: Composantes, fractions: number[], normales: Composantes[], s: number): Point[] {
+  const candidats: Point[] = [];
+  for (let decalagePx = 4; decalagePx <= 90; decalagePx += 3) {
+    for (const f of fractions) {
+      for (const n of normales) {
+        candidats.push({ x: depart.x + vecteur.x * f + n.x * decalagePx * s, y: depart.y + vecteur.y * f + n.y * decalagePx * s });
+      }
+    }
+  }
+  return candidats;
+}
+
+function disposerSchema(exercice: ExerciceApplicationPhysique, s: number): Omit<GeometrieSchemaApplicationPhysique, keyof VecteursSchemaApplicationPhysique> {
+  const { v1, v2, resultante } = calculerVecteursSchema(exercice);
+  const origine = { x: 0, y: 0 };
+  const sommetOppose = { x: resultante.x, y: resultante.y };
+  const cotesPointilles: [[Point, Point], [Point, Point]] = [
+    [{ x: v1.x, y: v1.y }, sommetOppose],
+    [{ x: v2.x, y: v2.y }, sommetOppose],
   ];
-  return { ...positions, coins };
+  // +1 : v2 du côté Est (x > 0), -1 : côté Ouest. v1 est vertical, la figure entière est du côté
+  // de v2 : l'autre côté est libre (étiquette de v1 et rose des vents).
+  const signe = exercice.coteDeviation === "est" ? 1 : -1;
+  const boiteVecteur = (p: Point): Boite => ({
+    x0: p.x - ETIQUETTE_VECTEUR_PX.gauche * s,
+    x1: p.x + ETIQUETTE_VECTEUR_PX.droite * s,
+    y0: p.y - ETIQUETTE_VECTEUR_PX.bas * s,
+    y1: p.y + ETIQUETTE_VECTEUR_PX.haut * s,
+  });
+  const boiteTheta = (p: Point): Boite => ({
+    x0: p.x - THETA_PX.demiLargeur * s,
+    x1: p.x + THETA_PX.demiLargeur * s,
+    y0: p.y - THETA_PX.demiHauteur * s,
+    y1: p.y + THETA_PX.demiHauteur * s,
+  });
+
+  // Arc θ entre les directions de v1 (90°) et de v2, centré sur l'origine commune — jamais plus
+  // long que le plus court des deux vecteurs (vent faible : v2 ne fait parfois qu'une douzaine de px).
+  const longueurMin = Math.min(Math.hypot(v1.x, v1.y), Math.hypot(v2.x, v2.y));
+  const rayon = Math.min(Math.max(0.3 * longueurMin, 16 * s), 30 * s, 0.7 * longueurMin);
+  const theta = (exercice.angleEntreVecteurs * Math.PI) / 180;
+  const angleV1 = Math.PI / 2;
+  const angleV2 = angleV1 - signe * theta;
+  let pointsArc: Point[];
+  if (exercice.angleEntreVecteurs === 90) {
+    const cote = rayon * 0.7;
+    const u1 = { x: Math.cos(angleV1), y: Math.sin(angleV1) };
+    const u2 = { x: Math.cos(angleV2), y: Math.sin(angleV2) };
+    pointsArc = [
+      { x: u1.x * cote, y: u1.y * cote },
+      { x: (u1.x + u2.x) * cote, y: (u1.y + u2.y) * cote },
+      { x: u2.x * cote, y: u2.y * cote },
+    ];
+  } else {
+    const etapes = 24;
+    pointsArc = Array.from({ length: etapes + 1 }, (_, i) => {
+      const angle = angleV1 + ((angleV2 - angleV1) * i) / etapes;
+      return { x: rayon * Math.cos(angle), y: rayon * Math.sin(angle) };
+    });
+  }
+  const traits: Segment[] = [
+    [origine, v1],
+    [origine, v2],
+    [origine, resultante],
+    ...cotesPointilles,
+    ...pointsArc.slice(1).map((p, i): Segment => [pointsArc[i], p]),
+  ];
+
+  // Étiquette de v1 : du côté libre, à l'opposé de v2.
+  const etiquetteV1 = premierCandidatLibre(
+    candidatsLeLong(origine, v1, [0.5, 0.4, 0.6, 0.3, 0.7], [{ x: -signe, y: 0 }], s),
+    boiteVecteur,
+    traits,
+    [],
+    s,
+  );
+  const occupees = [boiteVecteur(etiquetteV1)];
+
+  // Étiquette de v2 : à l'extérieur du parallélogramme (normale opposée à son centre).
+  const longueurV2 = Math.hypot(v2.x, v2.y) || 1;
+  let normaleV2 = { x: -v2.y / longueurV2, y: v2.x / longueurV2 };
+  if (normaleV2.x * (sommetOppose.x / 2 - v2.x / 2) + normaleV2.y * (sommetOppose.y / 2 - v2.y / 2) > 0) {
+    normaleV2 = { x: -normaleV2.x, y: -normaleV2.y };
+  }
+  const etiquetteV2 = premierCandidatLibre(candidatsLeLong(origine, v2, [0.5, 0.6, 0.4, 0.7, 0.3], [normaleV2], s), boiteVecteur, traits, occupees, s);
+  occupees.push(boiteVecteur(etiquetteV2));
+
+  // « θ » à l'intérieur de l'angle, dans le plus large des deux secteurs que la résultante y
+  // découpe (sur la bissectrice, il tomberait sur elle dès que ‖v1‖ = ‖v2‖), au-delà de l'arc.
+  const deviation = Math.atan2(exercice.v2 * Math.sin(theta), exercice.v1 + exercice.v2 * Math.cos(theta));
+  const angleR = angleV1 - signe * deviation;
+  const milieuV1R = (angleV1 + angleR) / 2;
+  const milieuRV2 = (angleR + angleV2) / 2;
+  const directions = deviation > theta - deviation ? [milieuV1R, milieuRV2, (angleV1 + angleV2) / 2] : [milieuRV2, milieuV1R, (angleV1 + angleV2) / 2];
+  const candidatsTheta: Point[] = [];
+  for (let distancePx = 0; distancePx <= 140; distancePx += 3) {
+    const d = rayon + (THETA_PX.demiHauteur + JEU_PX + distancePx) * s;
+    for (const a of directions) candidatsTheta.push({ x: d * Math.cos(a), y: d * Math.sin(a) });
+  }
+  const labelTheta = premierCandidatLibre(candidatsTheta, boiteTheta, traits, occupees, s);
+  occupees.push(boiteTheta(labelTheta));
+
+  // Rose des vents du côté libre, en haut de la figure, au-delà de l'étiquette de v1.
+  const ys = [0, v1.y, v2.y, sommetOppose.y];
+  const yHaut = Math.max(...ys);
+  const boiteV1 = occupees[0];
+  const debordementLibre = Math.max(0, signe > 0 ? -boiteV1.x0 : boiteV1.x1);
+  const centreRose = { x: -signe * (debordementLibre + (ROSE_PX.demiLargeur + 2 * JEU_PX) * s), y: yHaut - ROSE_PX.demiHauteur * s };
+  const b = ROSE_PX.branche * s;
+  const l = ROSE_PX.lettres * s;
+  const rose: RoseDesVentsSchema = {
+    centre: centreRose,
+    branches: {
+      N: { x: centreRose.x, y: centreRose.y + b },
+      E: { x: centreRose.x + b, y: centreRose.y },
+      S: { x: centreRose.x, y: centreRose.y - b },
+      O: { x: centreRose.x - b, y: centreRose.y },
+    },
+    lettres: {
+      N: { x: centreRose.x, y: centreRose.y + l },
+      E: { x: centreRose.x + l, y: centreRose.y },
+      S: { x: centreRose.x, y: centreRose.y - l },
+      O: { x: centreRose.x - l, y: centreRose.y },
+    },
+  };
+  const boiteRose: Boite = {
+    x0: centreRose.x - ROSE_PX.demiLargeur * s,
+    x1: centreRose.x + ROSE_PX.demiLargeur * s,
+    y0: centreRose.y - ROSE_PX.demiHauteur * s,
+    y1: centreRose.y + ROSE_PX.demiHauteur * s,
+  };
+  occupees.push(boiteRose);
+
+  // Résultante (affichée seulement une fois l'écran « direction » validé) : placée maintenant,
+  // pour que la fenêtre ne bouge pas à son apparition.
+  const longueurR = Math.hypot(resultante.x, resultante.y) || 1;
+  const normaleR = { x: -resultante.y / longueurR, y: resultante.x / longueurR };
+  const versV2 = normaleR.x * v2.x + normaleR.y * v2.y > 0 ? normaleR : { x: -normaleR.x, y: -normaleR.y };
+  const etiquetteR = premierCandidatLibre(
+    candidatsLeLong(origine, resultante, [0.55, 0.45, 0.65, 0.35, 0.75], [versV2, { x: -versV2.x, y: -versV2.y }], s),
+    boiteVecteur,
+    traits,
+    occupees,
+    s,
+  );
+  occupees.push(boiteVecteur(etiquetteR));
+
+  const xs = [0, v1.x, v2.x, sommetOppose.x, ...occupees.flatMap((o) => [o.x0, o.x1])];
+  const tousY = [...ys, ...occupees.flatMap((o) => [o.y0, o.y1])];
+  const marge = 8 * s;
+  const coins: [Point, Point] = [
+    { x: Math.min(...xs) - marge, y: Math.min(...tousY) - marge },
+    { x: Math.max(...xs) + marge, y: Math.max(...tousY) + marge },
+  ];
+
+  return {
+    sommetOppose,
+    cotesPointilles,
+    arc: { points: pointsArc, label: labelTheta },
+    etiquettes: { v1: etiquetteV1, v2: etiquetteV2, resultante: etiquetteR },
+    rose,
+    coins,
+  };
+}
+
+function unitesParPixel(coins: Point[], largeurPx: number): number {
+  const viewBox = calculerViewBoxVecteurs(coins.map((point) => ({ point, label: "" })));
+  return (viewBox.x[1] - viewBox.x[0]) / largeurPx;
+}
+
+/**
+ * Schéma « règle du parallélogramme » (décision F3, aligné sur le cours, section application
+ * physique) : v1 et v2 partent de la MÊME origine, l'angle θ de l'énoncé est marqué par un arc à
+ * l'origine (petit carré si θ = 90°), le parallélogramme est esquissé en pointillés, et la
+ * résultante est sa diagonale issue de l'origine. Une rose des vents est posée du côté libre de la
+ * figure (côté opposé à v2 : v1 est vertical, la figure entière est du côté de v2).
+ *
+ * Les étiquettes ont une taille fixe en PIXELS, la figure une taille en unités de l'énoncé (un vent
+ * de 20 km/h face à un avion à 300 km/h ne fait qu'une douzaine de pixels) : la disposition est donc
+ * calculée à l'échelle réelle (unités par pixel, déduite de la fenêtre elle-même et de la largeur
+ * `largeurPx` du graphe — deux passes
+ * suffisent, la fenêtre ne grandissant qu'à peine avec les étiquettes) et chaque étiquette prend le
+ * premier emplacement libre (aucun trait, aucune autre étiquette) parmi ses candidats préférés.
+ */
+export function geometrieSchemaApplicationPhysique(
+  exercice: ExerciceApplicationPhysique,
+  largeurPx: number = LARGEUR_REFERENCE_PX,
+): GeometrieSchemaApplicationPhysique {
+  const vecteurs = calculerVecteursSchema(exercice);
+  const sommets: Point[] = [{ x: 0, y: 0 }, vecteurs.v1, vecteurs.v2, vecteurs.resultante];
+  let s = unitesParPixel(sommets, largeurPx);
+  let disposition = disposerSchema(exercice, s);
+  for (let passe = 0; passe < 2; passe++) {
+    const sSuivant = unitesParPixel(disposition.coins, largeurPx);
+    if (sSuivant <= s * 1.01) break;
+    s = sSuivant;
+    disposition = disposerSchema(exercice, s);
+  }
+  return { ...vecteurs, ...disposition };
+}
+
+/** Légende du schéma : valeur de θ, rappelée sous la figure (le « θ » de l'arc reste court pour
+ * tenir entre les deux vecteurs même pour θ = 30°). */
+export function legendeAngleSchemaApplicationPhysique(exercice: ExerciceApplicationPhysique): string {
+  return `θ = ${exercice.angleEntreVecteurs}° : angle entre les deux ${libelleGrandeurApplicationPhysique(exercice.contexte)}, depuis leur origine commune`;
 }
 
 const LIBELLES_CONTEXTE: Record<ContexteApplicationPhysique, string> = {

@@ -33,7 +33,7 @@ export function EtapeInterpretationApplicationPhysique({ exercice, tentativesUti
       <RecapitulatifPanel entrees={recapitulatif} />
       <EnTeteExercice
         consigneGenerale={formatEnonceApplicationPhysique(exercice)}
-        blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
+        blocDonnees={<SchemaApplicationPhysique exercice={exercice} afficherResultante={!!validation} />}
       />
 
       <p className="prompt-text">Dans quelle direction cardinale se dirige la résultante ?</p>

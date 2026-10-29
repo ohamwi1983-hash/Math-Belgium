@@ -2307,6 +2307,16 @@
   text-align: center;
 }
 
+/* Schéma « Applications physiques » (gen29) : légende de θ collée sous le cadre du graphe, la marge
+ * basse du cadre passant après elle. */
+.entrainement .schema-application-physique .mafs-graph {
+  margin-bottom: 0;
+}
+
+.entrainement .schema-application-physique-legende {
+  margin: 6px 0 18px;
+}
+
 .entrainement .mafs-graph-legende {
   display: flex;
   flex-wrap: wrap;
