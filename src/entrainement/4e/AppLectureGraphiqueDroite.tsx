@@ -41,6 +41,10 @@ interface TransitionEnAttente {
 export function AppLectureGraphiqueDroite() {
   const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDroite>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` de l'écran pour qu'aucune saisie de
+   * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice » (audit chapitre 7,
+   * point 2). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDroite) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
@@ -54,6 +58,7 @@ export function AppLectureGraphiqueDroite() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -65,6 +70,7 @@ export function AppLectureGraphiqueDroite() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionLectureGraphiqueDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteLectureGraphiqueDroite)));
   }
 
@@ -82,7 +88,7 @@ export function AppLectureGraphiqueDroite() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Lecture graphique — équation d'une droite</h1>
-        <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
+        <p className="app-subtitle">Chapitre 7 — Géométrie analytique plane</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
@@ -90,6 +96,7 @@ export function AppLectureGraphiqueDroite() {
         <div className="card-body">
         {exercice.variante === "cartesienne" ? (
           <EtapeLectureCartesienne
+            key={`${numeroExercice}-cartesienne`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -100,6 +107,7 @@ export function AppLectureGraphiqueDroite() {
           />
         ) : (
           <EtapeLectureParametrique
+            key={`${numeroExercice}-parametrique`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}

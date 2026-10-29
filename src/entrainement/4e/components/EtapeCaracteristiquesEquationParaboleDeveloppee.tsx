@@ -4,7 +4,7 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionEquationParab
 import { diagnostiquerDirectrice, diagnostiquerFoyer, diagnostiquerP, diagnostiquerSommet } from "../moteur/verificationEquationParaboleDeveloppee";
 import type { ReponseEcranCaracteristiques } from "../moteur/typesEquationParaboleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_DIRECTRICE_HORIZONTAL, PLACEHOLDER_DIRECTRICE_VERTICAL, PLACEHOLDER_P, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_P, placeholderDirectrice, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -157,7 +157,7 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
         <input
           id="equation-parabole-developpee-directrice"
           className={`text-input${directriceErronee ? " is-erronee" : ""}`}
-          placeholder={exercice.variante === "vertical" ? PLACEHOLDER_DIRECTRICE_VERTICAL : PLACEHOLDER_DIRECTRICE_HORIZONTAL}
+          placeholder={placeholderDirectrice(exercice)}
           value={directrice}
           onChange={(e) => setDirectrice(e.target.value)}
         />

@@ -26,8 +26,10 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-const PLACEHOLDER_TEXTE_X = "ex : x=2+t×3";
-const PLACEHOLDER_TEXTE_Y = "ex : y=1-t×2";
+/** Exemples hors de l'espace des tirages (vecteur (7 ; −9), composantes tirées ≤ 4) : un
+ * placeholder ne doit jamais pouvoir être la réponse (audit chapitre 7, point 10). */
+const PLACEHOLDER_TEXTE_X = "ex : x=1,5+t×7";
+const PLACEHOLDER_TEXTE_Y = "ex : y=-0,5-t×9";
 
 /**
  * Variante "parametrique" — 2 champs de texte libre (`promptgen43gen44etcorrectionschapitre6.md`,

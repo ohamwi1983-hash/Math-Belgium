@@ -1,5 +1,7 @@
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
+import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
+import { normaliserRacinesUnSansLautre } from "./verificationUnSansLautre";
 
 /**
  * Évaluateur générique d'expressions algébriques à DEUX variables (x, y), dédié à la vérification
@@ -37,7 +39,13 @@ interface Jeton {
   valeur?: number;
 }
 
-function tokeniser(expression: string): Jeton[] {
+/** Signes moins typographiques (« − » U+2212, « – » U+2013, « — » U+2014) — un clavier mobile ou
+ * un copier-coller en produit souvent : convertis en « - » avant toute lecture (audit chapitre 7,
+ * point 4 — `(x−2)^2+(y+3)^2=25` tombait jusqu'ici en `parse_error`). */
+const SIGNES_MOINS_TYPOGRAPHIQUES = /[\u2212\u2013\u2014]/g;
+
+function tokeniser(texteBrut: string): Jeton[] {
+  const expression = texteBrut.replace(SIGNES_MOINS_TYPOGRAPHIQUES, "-");
   const jetons: Jeton[] = [];
   let i = 0;
   while (i < expression.length) {
@@ -365,14 +373,14 @@ function depouillerGroupesRedondants(noeud: NoeudXY): NoeudXY {
   return noeud.type === "groupe" ? depouillerGroupesRedondants(noeud.interieur) : noeud;
 }
 
-/** Vrai si `noeud` est (une fois les groupes redondants dépouillés) exactement `variable` seule, ou
- * une négation/un nombre pur — utilisé pour reconnaître le membre NUMÉRIQUE d'un binôme, y compris
- * une double négation explicite comme "-(-1.5)" (ex. "y-(-1.5)", écrit par un élève pour "y+1.5"). */
-function estNombrePur(noeud: NoeudXY): boolean {
-  const n = depouillerGroupesRedondants(noeud);
-  if (n.type === "nombre") return true;
-  if (n.type === "negation") return estNombrePur(n.operande);
-  return false;
+/** Vrai si `noeud` ne contient AUCUNE variable — un nombre, une négation (y compris une double
+ * négation explicite comme "-(-1.5)", écrite par un élève pour "y+1.5"), mais aussi une fraction
+ * ("1/2", "-3/2", "(1/2)"), un produit ou une puissance de nombres : utilisé pour reconnaître le
+ * membre NUMÉRIQUE d'un binôme ou le coefficient devant un groupe. Audit chapitre 7, point 44 :
+ * seul un nombre nu était reconnu, si bien que `(x-1/2)^2` — la forme même de la réponse affichée
+ * (`\frac{1}{2}`) — était refusé par la garde structurelle de la complétion du carré. */
+export function estNombrePur(noeud: NoeudXY): boolean {
+  return !contientVariableUsage(noeud, "x") && !contientVariableUsage(noeud, "y");
 }
 
 /** Vrai si `noeud` (une fois un éventuel groupe englobant dépouillé) est exactement `variable` seule
@@ -402,6 +410,29 @@ export function classifierCarreParfaitXY(terme: NoeudXY): "x" | "y" | null {
     if (estBinomeOuVariable(puissanceNode.base, variable)) return variable;
   }
   return null;
+}
+
+/** Vrai si l'équation est écrite sous la forme « centre-rayon » NON développée : un membre contient
+ * exactement deux carrés parfaits explicites `coefficient·(binôme)²`, un en x et un en y (plus,
+ * éventuellement, des termes purement numériques), et l'autre membre ne contient aucune variable.
+ * Garde structurelle de l'écran « équation » de gen49 (audit chapitre 7, point 42) — appliquée EN
+ * PLUS de l'équivalence algébrique, jamais à sa place : `x^2+y^2-4x+6y-12=0` décrit bien le même
+ * cercle, mais n'est pas la forme demandée. */
+export function estFormeCentreRayonXY(texte: string): boolean {
+  const equation = parserEquationXY(texte);
+  if (!equation) return false;
+  const essai = (avecCarres: NoeudXY, autre: NoeudXY): boolean => {
+    if (!estNombrePur(autre)) return false;
+    const variables: ("x" | "y")[] = [];
+    for (const { terme } of flattenAdditif(avecCarres)) {
+      if (estNombrePur(terme)) continue;
+      const variable = classifierCarreParfaitXY(terme);
+      if (variable === null) return false;
+      variables.push(variable);
+    }
+    return variables.length === 2 && variables.includes("x") && variables.includes("y");
+  };
+  return essai(equation.gauche, equation.droite) || essai(equation.droite, equation.gauche);
 }
 
 /** Décalages fixes, non ronds — jamais alignés par coïncidence sur un centre/rayon entier. */
@@ -520,21 +551,44 @@ export function verifierCentre(exercice: ExerciceEquationCercle, reponse: Repons
   return diagnostiquerCentre(exercice, reponse) === "correct";
 }
 
+/** Arrondi au centième accepté pour un rayon irrationnel (√13 ≈ 3,61) — marge flottante incluse. */
+const TOLERANCE_RAYON = 0.005 + 1e-9;
+
 /** Écran "rayon" — un seul champ, toujours le RAYON lui-même (jamais r² — le piège central de
  * l'exercice, "rayon donné au lieu du rayon carré", n'a de sens que sur l'écran équation final,
- * qui compare bien r² une fois la vraie valeur de rayon confirmée ici). */
-export function diagnostiquerRayon(exercice: ExerciceEquationCercle, rayon: number): StatutVerification {
-  return statutNumeriqueSimple(rayon, exercice.rayon);
+ * qui compare bien r² une fois la vraie valeur de rayon confirmée ici). Texte libre : forme exacte
+ * (`√13`, `sqrt(13)`, `2√5`) ou valeur décimale arrondie au centième (`3,61`) — `rayon_indirect`
+ * donne le plus souvent un rayon irrationnel (audit chapitre 7, point 43). */
+export function diagnostiquerRayon(exercice: ExerciceEquationCercle, texte: string): StatutVerification {
+  let valeur: number;
+  try {
+    valeur = evaluerExpressionGenerale(normaliserRacinesUnSansLautre(texte), 0);
+  } catch {
+    return "parse_error";
+  }
+  if (!Number.isFinite(valeur)) return "parse_error";
+  return Math.abs(valeur - exercice.rayon) <= TOLERANCE_RAYON ? "correct" : "not_equivalent";
 }
 
-export function verifierRayon(exercice: ExerciceEquationCercle, rayon: number): boolean {
-  return diagnostiquerRayon(exercice, rayon) === "correct";
+export function verifierRayon(exercice: ExerciceEquationCercle, texte: string): boolean {
+  return diagnostiquerRayon(exercice, texte) === "correct";
 }
 
 /** Écran "équation" (dernier, clôture l'exercice) — réutilise directement `diagnostiquerEquationCercle`
- * contre le centre/rayon RÉELS de l'exercice, jamais une resaisie des 2 écrans précédents. */
+ * contre le centre/R² RÉELS de l'exercice, jamais une resaisie des 2 écrans précédents. La consigne
+ * demande la forme NON développée : une équation équivalente mais développée est refusée
+ * (`estFormeCentreRayonXY`, audit chapitre 7, point 42) — voir `estEquationCercleDeveloppee` pour
+ * le message dédié. */
 export function diagnostiquerEquationExercice(exercice: ExerciceEquationCercle, texte: string): StatutVerification {
-  return diagnostiquerEquationCercle(texte, exercice.centre.x, exercice.centre.y, exercice.rayon * exercice.rayon);
+  const equivalence = diagnostiquerEquationCercle(texte, exercice.centre.x, exercice.centre.y, exercice.rayonCarre);
+  if (equivalence !== "correct") return equivalence;
+  return estFormeCentreRayonXY(texte) ? "correct" : "not_equivalent";
+}
+
+/** Vrai si `texte` décrit bien le cercle de l'exercice mais sous une forme développée (ou mal
+ * structurée) — l'écran affiche alors un message qui le dit, au lieu d'un simple « Incorrect ». */
+export function estEquationCercleDeveloppee(exercice: ExerciceEquationCercle, texte: string): boolean {
+  return diagnostiquerEquationCercle(texte, exercice.centre.x, exercice.centre.y, exercice.rayonCarre) === "correct" && !estFormeCentreRayonXY(texte);
 }
 
 export function verifierEquationExercice(exercice: ExerciceEquationCercle, texte: string): boolean {

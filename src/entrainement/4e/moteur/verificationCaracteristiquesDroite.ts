@@ -28,12 +28,27 @@ export function verifierExtraction(exercice: ExerciceCaracteristiquesDroite, rep
 /** Un champ de l'écran 2 : soit une valeur numérique soumise, soit "n'existe pas" (cas verticale). */
 export type ReponseChamp = { existe: true; valeur: number } | { existe: false };
 
+/** Tolérance d'un angle en degrés — une pente quelconque donne un angle non remarquable
+ * (ex. arctan(2) ≈ 63,43°), demandé arrondi à l'unité : tout arrondi correct à l'unité (63) ou
+ * plus fin (63,4) est accepté, jamais un angle faux d'un degré ou plus. Les angles remarquables
+ * (entiers exacts) restent acceptés tels quels. */
+export const TOLERANCE_ANGLE = 0.5;
+
 /** Compare un `ReponseChamp` à sa cible réelle (`number` si elle existe, `null` sinon — même
- * convention que le contrat, `ExerciceCaracteristiquesDroite.pente`/`ordonneeOrigine`). */
-export function diagnostiquerChamp(reponse: ReponseChamp, cible: number | null): StatutVerification {
+ * convention que le contrat, `ExerciceCaracteristiquesDroite.pente`/`ordonneeOrigine`).
+ * `tolerance` absente : `statutNumerique` (±0,01, pente/ordonnée à l'origine). */
+export function diagnostiquerChamp(reponse: ReponseChamp, cible: number | null, tolerance?: number): StatutVerification {
   if (cible === null) return reponse.existe ? "not_equivalent" : "correct";
   if (!reponse.existe) return "not_equivalent";
-  return statutNumerique(reponse.valeur, cible);
+  if (tolerance === undefined) return statutNumerique(reponse.valeur, cible);
+  if (!Number.isFinite(reponse.valeur)) return "parse_error";
+  return Math.abs(reponse.valeur - cible) <= tolerance + 1e-9 ? "correct" : "not_equivalent";
+}
+
+/** Tolérance du champ principal : `TOLERANCE_ANGLE` pour un angle, celle de `statutNumerique` pour
+ * la pente. Exportée pour le marquage champ par champ de `EtapeCaracteristiquesDroite.tsx`. */
+export function toleranceChampPrincipal(exercice: ExerciceCaracteristiquesDroite): number | undefined {
+  return exercice.caracteristiqueDemandee === "pente" ? undefined : TOLERANCE_ANGLE;
 }
 
 export interface ReponseCaracteristiques {
@@ -51,7 +66,7 @@ export function cibleChampPrincipal(exercice: ExerciceCaracteristiquesDroite): n
 }
 
 export function diagnostiquerCaracteristiques(exercice: ExerciceCaracteristiquesDroite, reponse: ReponseCaracteristiques): StatutVerification {
-  const statutPrincipal = diagnostiquerChamp(reponse.champPrincipal, cibleChampPrincipal(exercice));
+  const statutPrincipal = diagnostiquerChamp(reponse.champPrincipal, cibleChampPrincipal(exercice), toleranceChampPrincipal(exercice));
   const statutOrdonnee = diagnostiquerChamp(reponse.ordonnee, exercice.ordonneeOrigine);
   return combinerStatuts(statutPrincipal, statutOrdonnee);
 }

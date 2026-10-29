@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationCercle";
-import { diagnostiquerEquationExercice } from "../moteur/verificationEquationCercle";
-import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1 } from "../ui/formatEquationCercle";
+import { diagnostiquerEquationExercice, estEquationCercleDeveloppee } from "../moteur/verificationEquationCercle";
+import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, MESSAGE_FORME_DEVELOPPEE, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { Katex } from "./Katex";
@@ -39,6 +39,7 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
   const apresEchec = tentativesUtilisees > 0;
   const statut = apresEchec ? diagnostiquerEquationExercice(exercice, texte) : undefined;
   const erronee = apresEchec && statut !== "correct";
+  const formeDeveloppee = erronee && estEquationCercleDeveloppee(exercice, texte);
 
   return (
     <div>
@@ -78,7 +79,7 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
         </button>
         {tentativesUtilisees > 0 && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {formeDeveloppee ? `${MESSAGE_FORME_DEVELOPPEE} — tentative ${tentativesUtilisees}/${tentativesMax}.` : formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
           </p>
         )}
         </>

@@ -1,5 +1,7 @@
 import type { ResultatExerciceQuizGeometrieAnalytique } from "../moteur/typesQuizGeometrieAnalytique";
 import { LigneRecap, statutRecap } from "./LigneRecap";
+import { RenduFragments } from "./RenduFragments";
+import { fragmentsTexteGeometrieAnalytique } from "../ui/formatQuizGeometrieAnalytique";
 
 interface Props {
   resultat: ResultatExerciceQuizGeometrieAnalytique;
@@ -27,14 +29,20 @@ export function ResultatPanelQuizGeometrieAnalytique({ resultat, labelBouton, on
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <RenduFragments fragments={fragmentsTexteGeometrieAnalytique(resultat.question.enonce)} />
+      </p>
       <p className="prompt-text">
         Ta réponse : {libelleVraiFaux(resultat.reponseChoisie)} — Réponse correcte : {libelleVraiFaux(resultat.question.reponse)}
       </p>
       <LigneRecap label="Résultat" statut={statut}>
         {correct ? "Correct" : "Incorrect"}
       </LigneRecap>
-      <div className="triangle-quelconque-aide">{resultat.question.justification}</div>
+      <div className="triangle-quelconque-aide">
+        <p>
+          <RenduFragments fragments={fragmentsTexteGeometrieAnalytique(resultat.question.justification)} />
+        </p>
+      </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}
       </button>

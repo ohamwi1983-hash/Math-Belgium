@@ -2,9 +2,16 @@ import { useState } from "react";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_RESOLUTION, LIBELLE_AUCUN, LIBELLE_AU_MOINS_UN, formatEtatActuelSystemeLatex, formatQuadratiqueSubstitutionLatex, segmentsAideResolutionNiveau1 } from "../ui/formatLieuxGeometriques";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import {
+  CONSIGNE_GENERALE_RESOLUTION,
+  LIBELLE_AUCUN,
+  LIBELLE_AU_MOINS_UN,
+  PLACEHOLDER_COORDONNEE_INTERSECTION,
+  formatQuadratiqueSubstitutionLatex,
+  segmentsAideResolutionNiveau1,
+} from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -62,7 +69,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
     if (choix === "aucun") return { auMoinsUn: false, points: [] };
     if (choix === "auMoinsUn") {
       if (points.some((p) => p.x.trim() === "" || p.y.trim() === "")) return null;
-      const nombres = points.map((p) => ({ x: Number(p.x.replace(",", ".")), y: Number(p.y.replace(",", ".")) }));
+      const nombres = points.map((p) => ({ x: parserNombreOuFraction(p.x) ?? Number.NaN, y: parserNombreOuFraction(p.y) ?? Number.NaN }));
       if (nombres.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y))) return null;
       return { auMoinsUn: true, points: nombres };
     }
@@ -75,9 +82,6 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_RESOLUTION}</p>
-      <div className="equation-box">
-        <Katex expression={formatEtatActuelSystemeLatex(exercice)} block />
-      </div>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === "aucun" ? " toggle-active" : ""}`} onClick={() => choisir("aucun")}>
@@ -100,10 +104,10 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
                   <input
                     id={`lieux-geometriques-resolution-x-${index}`}
                     className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
-                    placeholder={PLACEHOLDER_COORDONNEE}
+                    placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
                     value={point.x}
-                    onChange={(e) => modifierPoint(index, "x", filtrerSaisieNumerique(e.target.value))}
-                    onKeyDown={gererKeyDownNumerique}
+                    onChange={(e) => modifierPoint(index, "x", filtrerSaisieNumeriqueFraction(e.target.value))}
+                    onKeyDown={gererKeyDownNumeriqueFraction}
                   />
                 </div>
                 <div className="field field-inline">
@@ -113,10 +117,10 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
                   <input
                     id={`lieux-geometriques-resolution-y-${index}`}
                     className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
-                    placeholder={PLACEHOLDER_COORDONNEE}
+                    placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
                     value={point.y}
-                    onChange={(e) => modifierPoint(index, "y", filtrerSaisieNumerique(e.target.value))}
-                    onKeyDown={gererKeyDownNumerique}
+                    onChange={(e) => modifierPoint(index, "y", filtrerSaisieNumeriqueFraction(e.target.value))}
+                    onKeyDown={gererKeyDownNumeriqueFraction}
                   />
                 </div>
               </div>
@@ -142,7 +146,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
           </p>
           {niveauAide >= 2 && (
             <p>
-              <Katex expression={formatQuadratiqueSubstitutionLatex(exercice)} />
+              On obtient : <Katex expression={formatQuadratiqueSubstitutionLatex(exercice)} />
             </p>
           )}
         </div>

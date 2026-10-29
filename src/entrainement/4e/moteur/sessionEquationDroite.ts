@@ -4,14 +4,12 @@
  * factice.
  *
  * Séquence dépendant de `exercice.formeCible` (`promptgen42modificationsv2.md`) — voir
- * `PhaseEquationDroite` (`typesEquationDroite.ts`) pour le détail complet des 3 chemins disjoints :
- * "implicite" garde `extraction → possibilite → coefficients` (INCHANGÉ) ; "parametrique" saute
- * directement à `extraction → coefficients` (partie B.1, écran "possibilite" supprimé) ;
- * "explicite_y"/"explicite_x" vont à `extraction → possibiliteCoefficients` (partie A, écran
- * fusionné terminal).
+ * `PhaseEquationDroite` (`typesEquationDroite.ts`) pour le détail des 2 chemins disjoints :
+ * "implicite"/"parametrique" vont à `extraction → coefficients` ; "explicite_y"/"explicite_x" vont
+ * à `extraction → possibiliteCoefficients` (écran fusionné terminal).
  *
  * Aide PROGRESSIVE par écran (même principe que "Colinéarité"/"Orthogonalité") : 2 niveaux sur
- * "extraction", "coefficients" et "possibiliteCoefficients", 1 seul sur "possibilite".
+ * chaque écran.
  */
 import type { ExerciceEquationDroite, GenerateurExerciceEquationDroite } from "../core/equationDroite.types";
 import type { ReglagesSession } from "../core/session.types";
@@ -25,27 +23,21 @@ import {
   diagnostiquerParametrique,
   diagnostiquerPossibiliteCoefficients,
   verifierExtraction,
-  verifierPossibilite,
 } from "./verificationEquationDroite";
 import type { ReponseExtraction } from "./verificationEquationDroite";
 
 const POINTS_DE_BASE = 100;
 
 export const NIVEAU_AIDE_MAX_EXTRACTION = 2;
-/** Écran "possibilite" sans aide (`promptgen42modifications.md`, point 3) : l'aide révélait
- * directement possible/impossible plutôt que d'orienter la réflexion — retirée, aucune aide de
- * remplacement (même patron que "Colinéarité"/"Orthogonalité" écrans "resolution"). */
-export const NIVEAU_AIDE_MAX_POSSIBILITE = 0;
 export const NIVEAU_AIDE_MAX_COEFFICIENTS = 2;
 /** Écran fusionné (partie A) — reprend le contenu de l'ancienne aide de "coefficients" (2 niveaux),
  * adapté au choix Possible/Impossible de l'élève (`formatAideNiveau2PossibiliteCoefficientsLatex`). */
 export const NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS = 2;
 
 /** Phase suivant "extraction", déterminée par `formeCible` — voir l'en-tête de fichier pour le
- * détail des 3 chemins. */
+ * détail des 2 chemins. */
 function prochainePhaseApresExtraction(exercice: ExerciceEquationDroite): PhaseEquationDroite {
-  if (exercice.formeCible === "parametrique") return "coefficients";
-  if (exercice.formeCible === "implicite") return "possibilite";
+  if (exercice.formeCible === "parametrique" || exercice.formeCible === "implicite") return "coefficients";
   return "possibiliteCoefficients";
 }
 
@@ -55,26 +47,20 @@ function etatInitial(exercice: ExerciceEquationDroite): Pick<
   | "phase"
   | "etapeCourante"
   | "niveauAideExtraction"
-  | "niveauAidePossibilite"
   | "niveauAideCoefficients"
   | "niveauAidePossibiliteCoefficients"
   | "scoreExtractionExercice"
   | "extractionRevele"
-  | "scorePossibiliteExercice"
-  | "possibiliteRevele"
 > {
   return {
     exerciceCourant: exercice,
     phase: "extraction",
     etapeCourante: demarrerEtapeTentatives(),
     niveauAideExtraction: 0,
-    niveauAidePossibilite: 0,
     niveauAideCoefficients: 0,
     niveauAidePossibiliteCoefficients: 0,
     scoreExtractionExercice: null,
     extractionRevele: false,
-    scorePossibiliteExercice: null,
-    possibiliteRevele: false,
   };
 }
 
@@ -103,9 +89,6 @@ export function activerAideSuivante(etat: EtatSessionEquationDroite): EtatSessio
   if (etat.phase === "extraction") {
     if (etat.niveauAideExtraction >= NIVEAU_AIDE_MAX_EXTRACTION) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
     return { ...etat, niveauAideExtraction: etat.niveauAideExtraction + 1 };
-  }
-  if (etat.phase === "possibilite") {
-    throw new Error("activerAideSuivante : aucune aide sur cet écran");
   }
   if (etat.phase === "possibiliteCoefficients") {
     if (etat.niveauAidePossibiliteCoefficients >= NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS)
@@ -161,53 +144,6 @@ export function soumettreReponseExtraction(etat: EtatSessionEquationDroite, repo
   };
 }
 
-/** Écran "possibilite" — mène à "coefficients" si `exercice.possible`, sinon clôture directement
- * l'exercice (`scoreCoefficients: null`). */
-export function soumettreReponsePossibilite(etat: EtatSessionEquationDroite, reponse: "possible" | "impossible"): EtatSessionEquationDroite {
-  if (etat.terminee || etat.phase !== "possibilite") {
-    throw new Error("soumettreReponsePossibilite : la session n'est pas à l'étape possibilite");
-  }
-  const exercice = etat.exerciceCourant;
-
-  const etapeCourante = soumettreEtapeTentatives<"possible" | "impossible">(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
-    verifier: (r) => verifierPossibilite(exercice, r),
-    revelerReponse: () => {},
-  });
-
-  if (!etapeCourante.terminee) {
-    return { ...etat, etapeCourante };
-  }
-
-  const score = etapeCourante.score as number;
-
-  if (!exercice.possible) {
-    return cloturerExerciceOuSuivant(etat, {
-      typeDonnee: exercice.donnees.type,
-      formeCible: exercice.formeCible,
-      scoreExtraction: etat.scoreExtractionExercice as number,
-      extractionRevele: etat.extractionRevele,
-      extractionAideUtilisee: etat.niveauAideExtraction > 0,
-      scorePossibilite: score,
-      possibiliteRevele: etapeCourante.revelee,
-      scoreCoefficients: null,
-      coefficientsRevele: false,
-      coefficientsAideUtilisee: false,
-      scorePossibiliteCoefficients: null,
-      possibiliteCoefficientsRevele: false,
-      possibiliteCoefficientsAideUtilisee: false,
-    });
-  }
-
-  return {
-    ...etat,
-    etapeCourante: demarrerEtapeTentatives(),
-    phase: "coefficients",
-    scorePossibiliteExercice: score,
-    possibiliteRevele: etapeCourante.revelee,
-  };
-}
-
 function verifierCoefficients(exercice: ExerciceEquationDroite, reponse: ReponseCoefficients): boolean {
   switch (exercice.formeCible) {
     case "parametrique":
@@ -221,11 +157,8 @@ function verifierCoefficients(exercice: ExerciceEquationDroite, reponse: Reponse
   }
 }
 
-/** Écran "coefficients" — atteint soit depuis "possibilite" (formeCible "implicite",
- * `scorePossibiliteExercice` alors populé), soit DIRECTEMENT depuis "extraction" (formeCible
- * "parametrique", partie B.1 — `scorePossibiliteExercice` reste alors `null`, jamais un score
- * déguisé pour un écran qui n'a pas eu lieu). Dernière phase de ces 2 chemins, clôture toujours
- * l'exercice. */
+/** Écran "coefficients" — atteint directement depuis "extraction" (formeCible "implicite" ou
+ * "parametrique"). Dernière phase de ce chemin, clôture toujours l'exercice. */
 export function soumettreReponseCoefficients(etat: EtatSessionEquationDroite, reponse: ReponseCoefficients): EtatSessionEquationDroite {
   if (etat.terminee || etat.phase !== "coefficients") {
     throw new Error("soumettreReponseCoefficients : la session n'est pas à l'étape coefficients");
@@ -250,8 +183,6 @@ export function soumettreReponseCoefficients(etat: EtatSessionEquationDroite, re
     scoreExtraction: etat.scoreExtractionExercice as number,
     extractionRevele: etat.extractionRevele,
     extractionAideUtilisee: etat.niveauAideExtraction > 0,
-    scorePossibilite: etat.scorePossibiliteExercice,
-    possibiliteRevele: etat.possibiliteRevele,
     scoreCoefficients: score,
     coefficientsRevele: etapeCourante.revelee,
     coefficientsAideUtilisee: etat.niveauAideCoefficients > 0,
@@ -263,7 +194,7 @@ export function soumettreReponseCoefficients(etat: EtatSessionEquationDroite, re
 
 /** Écran fusionné "possibilité + équation" (partie A, formes explicite_y/explicite_x uniquement) —
  * dernière phase de ce chemin, clôture toujours l'exercice directement (jamais de score
- * intermédiaire à persister dans `etat`, contrairement à "extraction"/"possibilite"). */
+ * intermédiaire à persister dans `etat`, contrairement à "extraction"). */
 export function soumettreReponsePossibiliteCoefficients(etat: EtatSessionEquationDroite, reponse: ReponsePossibiliteCoefficients): EtatSessionEquationDroite {
   if (etat.terminee || etat.phase !== "possibiliteCoefficients") {
     throw new Error("soumettreReponsePossibiliteCoefficients : la session n'est pas à l'étape possibiliteCoefficients");
@@ -288,8 +219,6 @@ export function soumettreReponsePossibiliteCoefficients(etat: EtatSessionEquatio
     scoreExtraction: etat.scoreExtractionExercice as number,
     extractionRevele: etat.extractionRevele,
     extractionAideUtilisee: etat.niveauAideExtraction > 0,
-    scorePossibilite: null,
-    possibiliteRevele: false,
     scoreCoefficients: null,
     coefficientsRevele: false,
     coefficientsAideUtilisee: false,

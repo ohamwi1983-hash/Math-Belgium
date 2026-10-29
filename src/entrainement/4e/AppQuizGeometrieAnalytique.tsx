@@ -3,30 +3,42 @@ import type { VarianteQuizGeometrieAnalytique } from "./core/quizGeometrieAnalyt
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizGeometrieAnalytique, soumettreReponseQuizGeometrieAnalytique } from "./moteur/sessionQuizGeometrieAnalytique";
 import type { EtatSessionQuizGeometrieAnalytique, ResultatExerciceQuizGeometrieAnalytique } from "./moteur/typesQuizGeometrieAnalytique";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizGeometrieAnalytique";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs/quizGeometrieAnalytique";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizGeometrieAnalytique } from "./components/EtapeQuestionQuizGeometrieAnalytique";
 import { ResultatPanelQuizGeometrieAnalytique } from "./components/ResultatPanelQuizGeometrieAnalytique";
 import { ResumeSessionQuizGeometrieAnalytique } from "./components/ResumeSessionQuizGeometrieAnalytique";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizGeometrieAnalytique/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
+ * `generateurs/quizGeometrieAnalytique/index.ts`) — jamais une constante fixe : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt donc toutes les questions du thème sans
+ * jamais en répéter une (convention `.claude/rules/quiz-generators.md`). */
+function reglagesPourTheme(theme: VarianteQuizGeometrieAnalytique): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizGeometrieAnalytique): EtatSessionQuizGeometrieAnalytique {
-  return demarrerSessionQuizGeometrieAnalytique(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizGeometrieAnalytique(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
+}
+
+/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que les hooks
+ * DEV-ONLY de `6e-6h/App6gen*.tsx`) — jamais sur l'écran normal donné aux élèves. */
+function modeDevActif(): boolean {
+  if (import.meta.env.DEV) return true;
+  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que les 6 quiz précédents
- * (gen59-64). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais
- * visible sur l'écran normal donné aux élèves. */
+ * (gen59-64). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement
+ * (`modeDevActif`), jamais visible sur l'écran normal donné aux élèves. */
 export function AppQuizGeometrieAnalytique() {
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizGeometrieAnalytique | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizGeometrieAnalytique | null>(null);
@@ -49,7 +61,7 @@ export function AppQuizGeometrieAnalytique() {
     const theme = varianteId as VarianteQuizGeometrieAnalytique;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizGeometrieAnalytique(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizGeometrieAnalytique(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -59,8 +71,8 @@ export function AppQuizGeometrieAnalytique() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Géométrie analytique plane — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 6{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <p className="app-subtitle">Chapitre 7 — {CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label ?? "Géométrie analytique plane"}</p>
+        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />}
         {enCoursDeSession && etat && (
           <div className="card-progress">
             <div className="card-progress-row">
@@ -80,7 +92,10 @@ export function AppQuizGeometrieAnalytique() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">13 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux chacun — révision complète du chapitre.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

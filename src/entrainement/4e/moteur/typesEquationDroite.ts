@@ -9,17 +9,15 @@ import type { ReponseExpliciteX, ReponseExpliciteY, ReponseImplicite, ReponsePar
 export type ReponseCoefficients = ReponseParametrique | ReponseImplicite | ReponseExpliciteY | ReponseExpliciteX;
 
 /**
- * Séquence dépendant de `formeCible` (`promptgen42modificationsv2.md`) — 3 chemins DISJOINTS,
- * jamais les 4 noms de phase atteints par une même instance :
- * - "implicite" : `extraction → possibilite → coefficients` (INCHANGÉ — seule forme où l'écran
- *   "possibilite" séparé subsiste, `possible` y est toujours vrai par construction).
- * - "parametrique" : `extraction → coefficients` (partie B.1 — écran "possibilite" supprimé, une
- *   droite pouvant TOUJOURS s'écrire sous forme paramétrique, ce test n'avait pas de vraie
- *   alternative).
+ * Séquence dépendant de `formeCible` (`promptgen42modificationsv2.md`) — 2 chemins DISJOINTS :
+ * - "implicite"/"parametrique" : `extraction → coefficients`. Toute droite s'écrit sous ces deux
+ *   formes : un écran "est-ce possible ?" n'aurait qu'une seule bonne réponse, toujours la même
+ *   (audit chapitre 7, point 12 — l'ancien écran "possibilite" de l'implicite se devinait à 100 %).
  * - "explicite_y"/"explicite_x" : `extraction → possibiliteCoefficients` (partie A — fusionne
- *   l'ancien couple "possibilite"+"coefficients" en un seul écran, terminal).
+ *   l'ancien couple "possibilite"+"coefficients" en un seul écran, terminal), seule forme où la
+ *   réponse peut être « impossible » (droite verticale/horizontale).
  */
-export type PhaseEquationDroite = "extraction" | "possibilite" | "coefficients" | "possibiliteCoefficients";
+export type PhaseEquationDroite = "extraction" | "coefficients" | "possibiliteCoefficients";
 
 export interface ResultatExerciceEquationDroite {
   typeDonnee: TypeDonneeEntree;
@@ -31,11 +29,6 @@ export interface ResultatExerciceEquationDroite {
    * uniformisé (`LigneRecap`/`statutRecap`), qui distingue "correct sans aide" (vert) de "correct
    * avec aide" (orange). */
   extractionAideUtilisee: boolean;
-  /** `null` pour "parametrique" (écran supprimé, partie B.1) et pour "explicite_y"/"explicite_x"
-   * (fusionné dans `scorePossibiliteCoefficients`, partie A) — non-`null` uniquement pour
-   * "implicite", seule forme où cet écran séparé subsiste. */
-  scorePossibilite: number | null;
-  possibiliteRevele: boolean;
   /** `null` ssi `formeCible` est "explicite_y"/"explicite_x" (fusionné, voir
    * `scorePossibiliteCoefficients`) — non-`null` pour "implicite"/"parametrique", toujours atteint
    * pour ces deux formes (`possible` toujours vrai). */
@@ -61,7 +54,6 @@ export interface EtatSessionEquationDroite {
   phase: PhaseEquationDroite;
   etapeCourante: EtatEtapeTentatives;
   niveauAideExtraction: number;
-  niveauAidePossibilite: number;
   niveauAideCoefficients: number;
   niveauAidePossibiliteCoefficients: number;
   /** Scores des écrans déjà clos de cet exercice, conservés jusqu'à la clôture de l'exercice
@@ -71,8 +63,6 @@ export interface EtatSessionEquationDroite {
    * clôture de l'exercice, jamais relu à une phase ultérieure. */
   scoreExtractionExercice: number | null;
   extractionRevele: boolean;
-  scorePossibiliteExercice: number | null;
-  possibiliteRevele: boolean;
   resultats: ResultatExerciceEquationDroite[];
   terminee: boolean;
 }

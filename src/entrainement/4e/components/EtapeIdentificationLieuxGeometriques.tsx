@@ -1,10 +1,21 @@
 import { useState } from "react";
 import type { ExerciceLieuxGeometriques, Lieu, TypeLieu } from "../core/lieuxGeometriques.types";
-import { diagnostiquerIdentification, diagnostiquerIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
+import { diagnostiquerIdentification, diagnostiquerIdentificationLieu, lieuxComparesIdentification } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_IDENTIFICATION, LIBELLE_TYPE_LIEU, SOUS_TITRE_CHAMPS_IDENTIFICATION, segmentsAideIdentificationNiveau1, segmentsAideIdentificationNiveau2 } from "../ui/formatLieuxGeometriques";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import {
+  CONSIGNE_GENERALE_IDENTIFICATION,
+  LIBELLE_TYPE_LIEU,
+  PLACEHOLDER_COORDONNEE_CENTRE_FOYER,
+  PLACEHOLDER_ORDONNEE_ORIGINE,
+  PLACEHOLDER_PARAMETRE_PARABOLE,
+  PLACEHOLDER_PENTE,
+  PLACEHOLDER_RAYON,
+  SOUS_TITRE_CHAMPS_IDENTIFICATION,
+  segmentsAideIdentificationNiveau1,
+  segmentsAideIdentificationNiveau2,
+} from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -28,9 +39,21 @@ interface ChampsLieuBrut {
 
 const CHAMPS_VIDES: ChampsLieuBrut = { type: null, m: "", p: "", x0: "", y0: "", rayon: "", xF: "", yF: "", pParabole: "" };
 
+/** Entier, décimal (virgule ou point) ou fraction `p/q` (audit chapitre 7, point 60 : une pente
+ * comme 3/4 doit pouvoir s'écrire telle quelle) — `NaN` si illisible (`parse_error` côté moteur). */
 function nombre(texte: string): number {
-  return Number(texte.trim().replace(",", "."));
+  return parserNombreOuFraction(texte) ?? Number.NaN;
 }
+
+/** Bloc de saisie d'UN lieu — encadré neutre, jamais le jaune `.triangle-quelconque-aide`, réservé
+ * aux aides (audit chapitre 7, point 60). */
+const STYLE_BLOC_LIEU = {
+  marginTop: 16,
+  padding: "12px 14px",
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-md)",
+  background: "var(--color-surface)",
+} as const;
 
 function construireReponseLieu(champs: ChampsLieuBrut): ReponseIdentificationLieu | null {
   if (champs.type === "droite") {
@@ -52,7 +75,8 @@ interface ChampsLieuInputProps {
   numero: 1 | 2;
   champs: ChampsLieuBrut;
   onChange: (champs: ChampsLieuBrut) => void;
-  lieuReel: Lieu;
+  /** Lieu auquel ce bloc est comparé — appariement retenu par `lieuxComparesIdentification`. */
+  lieuCompare: Lieu;
   apresEchec: boolean;
 }
 
@@ -61,14 +85,14 @@ interface ChampsLieuInputProps {
  * jamais affiché comme "premier"/"second" : la vérification se fait désormais PAR ENSEMBLE, voir
  * `verificationLieuxGeometriques.ts::diagnostiquerIdentification`, B.4). Un sous-titre apparaît
  * au-dessus des champs numériques une fois un type sélectionné (B.2), jamais avant. */
-function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: ChampsLieuInputProps) {
+function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: ChampsLieuInputProps) {
   const reponse = construireReponseLieu(champs);
-  const erronee = apresEchec && reponse !== null && diagnostiquerIdentificationLieu(lieuReel, reponse) !== "correct";
+  const erronee = apresEchec && reponse !== null && diagnostiquerIdentificationLieu(lieuCompare, reponse) !== "correct";
   const classeChamp = `text-input${erronee ? " is-erronee" : ""}`;
   const prefixe = `lieux-geometriques-lieu${numero}`;
 
   return (
-    <div className="triangle-quelconque-aide">
+    <div style={STYLE_BLOC_LIEU}>
       <div className="options-grid-compact">
         {TYPES_LIEU.map((type) => (
           <button
@@ -93,10 +117,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
             <input
               id={`${prefixe}-m`}
               className={classeChamp}
-              placeholder={PLACEHOLDER_COORDONNEE}
+              placeholder={PLACEHOLDER_PENTE}
               value={champs.m}
-              onChange={(e) => onChange({ ...champs, m: filtrerSaisieNumerique(e.target.value) })}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => onChange({ ...champs, m: filtrerSaisieNumeriqueFraction(e.target.value) })}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
           <div className="field field-inline">
@@ -106,10 +130,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
             <input
               id={`${prefixe}-p`}
               className={classeChamp}
-              placeholder={PLACEHOLDER_COORDONNEE}
+              placeholder={PLACEHOLDER_ORDONNEE_ORIGINE}
               value={champs.p}
-              onChange={(e) => onChange({ ...champs, p: filtrerSaisieNumerique(e.target.value) })}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => onChange({ ...champs, p: filtrerSaisieNumeriqueFraction(e.target.value) })}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
         </div>
@@ -125,10 +149,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
               <input
                 id={`${prefixe}-x0`}
                 className={classeChamp}
-                placeholder={PLACEHOLDER_COORDONNEE}
+                placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.x0}
-                onChange={(e) => onChange({ ...champs, x0: filtrerSaisieNumerique(e.target.value) })}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => onChange({ ...champs, x0: filtrerSaisieNumeriqueFraction(e.target.value) })}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
             <div className="field field-inline">
@@ -138,10 +162,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
               <input
                 id={`${prefixe}-y0`}
                 className={classeChamp}
-                placeholder={PLACEHOLDER_COORDONNEE}
+                placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.y0}
-                onChange={(e) => onChange({ ...champs, y0: filtrerSaisieNumerique(e.target.value) })}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => onChange({ ...champs, y0: filtrerSaisieNumeriqueFraction(e.target.value) })}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           </div>
@@ -152,10 +176,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
             <input
               id={`${prefixe}-rayon`}
               className={classeChamp}
-              placeholder={PLACEHOLDER_COORDONNEE}
+              placeholder={PLACEHOLDER_RAYON}
               value={champs.rayon}
-              onChange={(e) => onChange({ ...champs, rayon: filtrerSaisieNumerique(e.target.value) })}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => onChange({ ...champs, rayon: filtrerSaisieNumeriqueFraction(e.target.value) })}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
         </>
@@ -171,10 +195,10 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
               <input
                 id={`${prefixe}-xF`}
                 className={classeChamp}
-                placeholder={PLACEHOLDER_COORDONNEE}
+                placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.xF}
-                onChange={(e) => onChange({ ...champs, xF: filtrerSaisieNumerique(e.target.value) })}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => onChange({ ...champs, xF: filtrerSaisieNumeriqueFraction(e.target.value) })}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
             <div className="field field-inline">
@@ -184,24 +208,24 @@ function ChampsLieuInput({ numero, champs, onChange, lieuReel, apresEchec }: Cha
               <input
                 id={`${prefixe}-yF`}
                 className={classeChamp}
-                placeholder={PLACEHOLDER_COORDONNEE}
+                placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.yF}
-                onChange={(e) => onChange({ ...champs, yF: filtrerSaisieNumerique(e.target.value) })}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => onChange({ ...champs, yF: filtrerSaisieNumeriqueFraction(e.target.value) })}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           </div>
           <div className="field field-inline">
-            <label className="field-label field-label-minuscule" htmlFor={`${prefixe}-p`}>
+            <label className="field-label field-label-minuscule" htmlFor={`${prefixe}-pParabole`}>
               p =
             </label>
             <input
-              id={`${prefixe}-p`}
+              id={`${prefixe}-pParabole`}
               className={classeChamp}
-              placeholder={PLACEHOLDER_COORDONNEE}
+              placeholder={PLACEHOLDER_PARAMETRE_PARABOLE}
               value={champs.pParabole}
-              onChange={(e) => onChange({ ...champs, pParabole: filtrerSaisieNumerique(e.target.value) })}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => onChange({ ...champs, pParabole: filtrerSaisieNumeriqueFraction(e.target.value) })}
+              onKeyDown={gererKeyDownNumeriqueFraction}
             />
           </div>
         </>
@@ -234,13 +258,14 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
   const reponseLieu2 = construireReponseLieu(champs2);
   const complet = reponseLieu1 !== null && reponseLieu2 !== null;
   const statutGlobal = apresEchec && complet ? diagnostiquerIdentification(exercice, { lieu1: reponseLieu1, lieu2: reponseLieu2 }) : undefined;
+  const [lieuCompare1, lieuCompare2] = lieuxComparesIdentification(exercice, reponseLieu1, reponseLieu2);
 
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_IDENTIFICATION}</p>
 
-      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuReel={exercice.lieu1} apresEchec={apresEchec} />
-      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuReel={exercice.lieu2} apresEchec={apresEchec} />
+      <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuCompare={lieuCompare1} apresEchec={apresEchec} />
+      <ChampsLieuInput numero={2} champs={champs2} onChange={setChamps2} lieuCompare={lieuCompare2} apresEchec={apresEchec} />
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">

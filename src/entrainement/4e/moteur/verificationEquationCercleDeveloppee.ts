@@ -40,11 +40,13 @@
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
+import { normaliserRacinesUnSansLautre } from "./verificationUnSansLautre";
 import type { NoeudXY } from "./verificationEquationCercle";
 import {
   classifierCarreParfaitXY,
   classifierGroupeRegroupementXY,
   diagnostiquerEquivalenceQuadratiqueXY,
+  estNombrePur,
   flattenAdditif,
   parserEquationXY,
 } from "./verificationEquationCercle";
@@ -57,11 +59,17 @@ function cibleDeveloppee(x: number, y: number, exercice: ExerciceEquationCercleD
   return k * x * x + k * y * y + bx * x + by * y - c;
 }
 
+/** Termes additifs de `cote` qui contiennent une variable — les termes purement numériques
+ * (`(x²-4x)+(y²+6y)-12=0`) ne changent rien à la structure demandée. */
+function termesAvecVariable(cote: NoeudXY): ReturnType<typeof flattenAdditif> {
+  return flattenAdditif(cote).filter(({ terme }) => !estNombrePur(terme));
+}
+
 /** Vrai si `cote` (un des deux membres de l'équation, gauche OU droite — l'élève peut légitimement
  * écrire la constante en premier) est une somme de 2 groupes coefficient·(...) couvrant chacun une
  * variable différente, avec le carré de cette variable explicitement présent (pas encore complété). */
 function estStructureRegroupementValide(cote: NoeudXY): boolean {
-  const termes = flattenAdditif(cote);
+  const termes = termesAvecVariable(cote);
   if (termes.length !== 2) return false;
   const [c1, c2] = termes.map((t) => classifierGroupeRegroupementXY(t.terme));
   return c1 !== null && c2 !== null && c1 !== c2;
@@ -70,7 +78,7 @@ function estStructureRegroupementValide(cote: NoeudXY): boolean {
 /** Même principe que `estStructureRegroupementValide`, mais exige 2 carrés parfaits explicites
  * `coefficient·(variable±p)²` plutôt que 2 groupes non encore complétés. */
 function estStructureCompletionValide(cote: NoeudXY): boolean {
-  const termes = flattenAdditif(cote);
+  const termes = termesAvecVariable(cote);
   if (termes.length !== 2) return false;
   const [c1, c2] = termes.map((t) => classifierCarreParfaitXY(t.terme));
   return c1 !== null && c2 !== null && c1 !== c2;
@@ -122,7 +130,7 @@ export function verifierCompletionCarre(exercice: ExerciceEquationCercleDevelopp
  * — donc toujours une décimale exacte, jamais réellement affecté par la valeur exacte de cette
  * tolérance —, le rayon peut être irrationnel (variante "irrationnel") — c'est la marge qui compte
  * réellement, désormais cohérente pour les deux champs du même écran. */
-const TOLERANCE_CENTRE_RAYON = 0.005;
+const TOLERANCE_CENTRE_RAYON = 0.005 + 1e-9;
 
 function statutNumeriqueSimple(valeur: number, cible: number, tolerance: number): StatutVerification {
   if (!Number.isFinite(valeur)) return "parse_error";
@@ -151,14 +159,16 @@ export function verifierCentre(exercice: ExerciceEquationCercleDeveloppee, repon
 }
 
 /** Toujours le RAYON lui-même (jamais r² — le piège central), parsé symboliquement : accepte aussi
- * bien "2.5" que "sqrt(8.25)" ou "sqrt(33)/2". */
+ * bien "2,5" que "sqrt(8.25)", "√18", "3√2" ou "√(33)/2" (audit chapitre 7, point 45 : le « √ »
+ * du cours tombait en `parse_error`). */
 export function diagnostiquerRayon(exercice: ExerciceEquationCercleDeveloppee, texte: string): StatutVerification {
   let valeur: number;
   try {
-    valeur = evaluerExpressionGenerale(texte, 0);
+    valeur = evaluerExpressionGenerale(normaliserRacinesUnSansLautre(texte), 0);
   } catch {
     return "parse_error";
   }
+  if (!Number.isFinite(valeur)) return "parse_error";
   return statutNumeriqueSimple(valeur, exercice.rayon, TOLERANCE_CENTRE_RAYON);
 }
 

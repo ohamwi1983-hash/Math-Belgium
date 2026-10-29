@@ -73,3 +73,112 @@ export function viewBoxDistanceDroite(lignes: LigneAffichee[], pointsSupplementa
   ];
   return calculerViewBoxVecteurs(points);
 }
+
+/** Point de la droite le plus proche de l'origine (projection orthogonale). */
+function projectionOrigine(d: DroiteImplicite): Point {
+  const n2 = d.a * d.a + d.b * d.b || 1;
+  return { x: (-d.a * d.c) / n2, y: (-d.b * d.c) / n2 };
+}
+
+/**
+ * Cadrage FIXE d'un exercice — audit chapitre 7, point 32 : le viewBox était recalculé à partir des
+ * seuls éléments affichés, et changeait donc dès que l'aide faisait apparaître b ou Q. L'appelant
+ * passe ici TOUT ce que l'exercice connaît déjà (P et Q dès qu'ils sont fixés : les deux droites
+ * passent par eux, elles traversent donc forcément le cadre), et le cadre ne bouge plus d'un niveau
+ * d'aide à l'autre. Sans P/Q (écran « choisir un point »), chaque droite est ancrée sur son point le
+ * plus proche de l'origine.
+ */
+export function viewBoxCadrageDistanceDroite(droites: DroiteImplicite[], pointsConnus: Point[]): { x: [number, number]; y: [number, number] } {
+  const ancrages = pointsConnus.length > 0 ? pointsConnus : droites.map(projectionOrigine);
+  return calculerViewBoxVecteurs(ancrages.map((point) => ({ point, label: "" })));
+}
+
+type ViewBox = { x: [number, number]; y: [number, number] };
+
+/** Portion de la droite visible dans `viewBox` (réduit de `marge` de chaque côté), sous la forme
+ * point + direction unitaire + intervalle de paramètre ; `null` si elle ne traverse pas le cadre. */
+function segmentVisible(d: DroiteImplicite, viewBox: ViewBox, marge: number): { origine: Point; u: Point; t: [number, number] } | null {
+  const x0 = viewBox.x[0] + marge;
+  const x1 = viewBox.x[1] - marge;
+  const y0 = viewBox.y[0] + marge;
+  const y1 = viewBox.y[1] - marge;
+  const centre = { x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
+  const n2 = d.a * d.a + d.b * d.b || 1;
+  const residu = d.a * centre.x + d.b * centre.y + d.c;
+  const origine = { x: centre.x - (residu * d.a) / n2, y: centre.y - (residu * d.b) / n2 };
+  const norme = Math.sqrt(n2);
+  const u = { x: -d.b / norme, y: d.a / norme };
+  let tMin = -Infinity;
+  let tMax = Infinity;
+  for (const [o, v, lo, hi] of [
+    [origine.x, u.x, x0, x1],
+    [origine.y, u.y, y0, y1],
+  ] as const) {
+    if (Math.abs(v) < 1e-9) {
+      if (o < lo || o > hi) return null;
+      continue;
+    }
+    const ta = (lo - o) / v;
+    const tb = (hi - o) / v;
+    tMin = Math.max(tMin, Math.min(ta, tb));
+    tMax = Math.min(tMax, Math.max(ta, tb));
+  }
+  return tMin < tMax ? { origine, u, t: [tMin, tMax] } : null;
+}
+
+function distancePointDroite(p: Point, d: DroiteImplicite): number {
+  return Math.abs(d.a * p.x + d.b * p.y + d.c) / (Math.sqrt(d.a * d.a + d.b * d.b) || 1);
+}
+
+/**
+ * Position des étiquettes de TOUTES les droites d'un même graphe — audit chapitre 7, point 32 :
+ * `pointEtiquetteDroite` place chaque étiquette sur la projection du centre du cadre, souvent pile
+ * sur Q (et donc sur l'étiquette de Q, ou sur celle d'une autre droite). Ici, plusieurs positions
+ * candidates le long de la partie visible de chaque droite (des deux côtés du trait) sont notées
+ * par leur distance à l'obstacle le plus proche — points affichés et leur étiquette (posée au-dessus
+ * du point), autres droites, étiquettes déjà placées, origine (graduations des axes) — et la mieux
+ * dégagée est retenue.
+ */
+export function placerEtiquettesDroites(droites: DroiteImplicite[], points: Point[], viewBox: ViewBox): Point[] {
+  const largeur = Math.abs(viewBox.x[1] - viewBox.x[0]);
+  const hauteur = Math.abs(viewBox.y[1] - viewBox.y[0]);
+  const echelle = Math.min(largeur, hauteur) || 1;
+  const decalage = echelle * FRACTION_DECALAGE_PERPENDICULAIRE;
+  const obstaclesFixes: Point[] = [...points, ...points.map((p) => ({ x: p.x, y: p.y + decalage }))];
+  const placees: Point[] = [];
+
+  return droites.map((d, indice) => {
+    const segment = segmentVisible(d, viewBox, echelle * 0.08);
+    if (!segment) {
+      const repli = pointEtiquetteDroite(d, viewBox);
+      placees.push(repli);
+      return repli;
+    }
+    const norme = Math.sqrt(d.a * d.a + d.b * d.b) || 1;
+    const normale = { x: d.a / norme, y: d.b / norme };
+    let meilleure: Point = segment.origine;
+    let meilleurScore = -Infinity;
+    for (let i = 0; i <= 10; i++) {
+      const t = segment.t[0] + ((segment.t[1] - segment.t[0]) * (i + 0.5)) / 11;
+      for (const cote of [1, -1]) {
+        const candidat = {
+          x: segment.origine.x + t * segment.u.x + cote * decalage * normale.x,
+          y: segment.origine.y + t * segment.u.y + cote * decalage * normale.y,
+        };
+        const distances = [
+          ...obstaclesFixes.map((o) => Math.hypot(candidat.x - o.x, candidat.y - o.y)),
+          ...placees.map((o) => Math.hypot(candidat.x - o.x, candidat.y - o.y)),
+          ...droites.filter((_, j) => j !== indice).map((autre) => distancePointDroite(candidat, autre)),
+          Math.hypot(candidat.x, candidat.y) * 1.5,
+        ];
+        const score = Math.min(...distances);
+        if (score > meilleurScore) {
+          meilleurScore = score;
+          meilleure = candidat;
+        }
+      }
+    }
+    placees.push(meilleure);
+    return meilleure;
+  });
+}

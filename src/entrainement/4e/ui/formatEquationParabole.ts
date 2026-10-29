@@ -73,7 +73,10 @@ export function formatEquationAttendueLatex(exercice: ExerciceEquationParabole):
 
 export const CONSIGNE_SOMMET_FOYER = "Lis les coordonnées du sommet S et du foyer F sur le graphe.";
 
-export const TEXTE_AIDE_SOMMET_FOYER_NIVEAU1 = "Repère précisément le sommet S (le point le plus \"resserré\" de la courbe) et le foyer F, tous deux à coordonnées entières.";
+/** Aide niveau 1 — la clé du cours (section « La parabole ») : S est sur l'axe de la parabole, à
+ * mi-chemin entre le foyer F et la directrice d. */
+export const TEXTE_AIDE_SOMMET_FOYER_NIVEAU1 =
+  "Le sommet S est sur l'axe de la parabole, exactement à mi-chemin entre le foyer F et la directrice d. S et F ont tous deux des coordonnées entières.";
 
 /** Aide niveau 2 — ne révèle JAMAIS les coordonnées de S en texte (`promptgen51modificationscompletes.md`,
  * partie B.3) : le point S est marqué visuellement sur le graphe (`EquationParaboleGraph`,
@@ -83,20 +86,38 @@ export const TEXTE_AIDE_SOMMET_FOYER_NIVEAU2 = "Le sommet S est désormais local
 export const CONSIGNE_EQUATION = "Écris l'équation de cette parabole.";
 
 /** Aide 1 — ADAPTATIVE selon l'orientation réelle de l'instance, jamais figée sur une seule forme
- * (`promptgen51modificationscompletes.md`, partie C.2). Le vecteur rouge illustratif (directrice→
- * foyer) qui accompagne ce texte est affiché par `EquationParaboleGraph`
- * (`afficherVecteurP={niveauAide >= 1}`), pas construit ici — ce module ne connaît que le texte. */
+ * (`promptgen51modificationscompletes.md`, partie C.2) : équation ET formule de p du tableau du
+ * cours (`p = 2(y_F-y_S)` ou `p = 2(x_F-x_S)`), jamais une notation absente du cours. Le vecteur
+ * rouge illustratif (directrice→foyer, longueur signée p) qui accompagne ce texte est affiché par
+ * `EquationParaboleGraph` (`afficherVecteurP={niveauAide >= 1}`), pas construit ici. */
 export function segmentsAideEquationNiveau1(exercice: ExerciceEquationParabole): FragmentConsigne[] {
-  const equation = exercice.variante === "vertical" ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)";
-  return [texte("Rappel : l'équation de la parabole est "), latex(equation), texte(", où "), latex("p=\\vec{\\text{dist}}(d,F)")];
+  const vertical = exercice.variante === "vertical";
+  const equation = vertical ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)";
+  const formuleP = vertical ? "p=2(y_F-y_S)" : "p=2(x_F-x_S)";
+  return [
+    texte("Rappel : l'équation de la parabole est "),
+    latex(equation),
+    texte(", où "),
+    latex(formuleP),
+    texte(" (p est signé : la flèche rouge va de la directrice au foyer)."),
+  ];
 }
 
-/** Aide niveau 2 — p déjà calculé (valeur signée), reste à assembler l'équation dans la bonne
- * forme. */
+/** Valeur entre parenthèses si négative — jamais « 1 − −1 ». */
+function entreParenthesesSiNegatif(valeur: number): string {
+  return valeur < 0 ? `(${valeur})` : String(valeur);
+}
+
+/** Aide niveau 2 — formule de p substituée et calculée (valeur signée), reste à assembler
+ * l'équation dans la bonne forme (coefficient 2p). */
 export function formatAideEquationNiveau2Latex(exercice: ExerciceEquationParabole): string {
-  return `p = ${exercice.p}`;
+  const { sommet, foyer, p } = exercice;
+  const [cF, cS, nom] = exercice.variante === "vertical" ? [foyer.y, sommet.y, "y"] : [foyer.x, sommet.x, "x"];
+  return `p = 2(${nom}_F-${nom}_S) = 2(${cF}-${entreParenthesesSiNegatif(cS)}) = ${p}`;
 }
 
-export const PLACEHOLDER_COORDONNEE = "ex : 3";
-export const PLACEHOLDER_EQUATION_VERTICAL = "ex : (x-1)^2=16(y+2)";
-export const PLACEHOLDER_EQUATION_HORIZONTAL = "ex : (y-1)^2=16(x+2)";
+/** Placeholders HORS de l'espace des tirages (`generateurs/equationParabole`) — jamais une réponse
+ * possible : coordonnées de S et F toujours dans [−7 ; 7], et 2p toujours multiple de 4. */
+export const PLACEHOLDER_COORDONNEE = "ex : 8";
+export const PLACEHOLDER_EQUATION_VERTICAL = "ex : (x-1)^2=6(y+2)";
+export const PLACEHOLDER_EQUATION_HORIZONTAL = "ex : (y-1)^2=6(x+2)";

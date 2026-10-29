@@ -8,9 +8,8 @@
  * paramétrer la droite par un point d'ancrage + un vecteur direction, substituer dans l'équation de
  * la cible, résoudre le second degré résultant en `t`. Généralisée ici à un CERCLE, une PARABOLE OU
  * une DROITE (`coniqueDepuisDroite`, cas dégénéré `A=B=C=0`) via une représentation conique commune
- * `Ax²+Bxy+Cy²+Dx+Ey+F=0` — les 3 grandes variantes du générateur (cercle-droite, cercle-cercle,
- * droite-parabole) se ramènent ainsi toutes à la MÊME primitive `intersectionDroiteConique` :
- * cercle-cercle en substituant l'axe radical (`axeRadicalDeuxCercles`) dans l'un des deux cercles.
+ * `Ax²+Bxy+Cy²+Dx+Ey+F=0` — les 2 grandes variantes du générateur (cercle-droite,
+ * droite-parabole) se ramènent ainsi toutes deux à la MÊME primitive `intersectionDroiteConique`.
  * INCHANGÉ depuis la version précédente de ce générateur, sauf l'ajout de `coniqueDepuisDroite`/
  * `coniqueDepuisLieu` (vérification d'appartenance générique, écran "résolution" de la refonte
  * `promptgen54refontecomplete.md`) et l'adaptation des types `Lieu*` (`core/lieuxGeometriques.types.ts`).
@@ -143,16 +142,4 @@ export function tangenteEnPoint(conique: Conique, point: Point): DroiteImplicite
   const gx = 2 * A * x + B * y + D;
   const gy = B * x + 2 * C * y + E;
   return { a: gx, b: gy, c: -(gx * x + gy * y) };
-}
-
-/**
- * Soustraction des deux équations de cercle : `(x-x1)²+(y-y1)²-r1² - [(x-x2)²+(y-y2)²-r2²] = 0`
- * simplifie en `-2(x1-x2)x -2(y1-y2)y + (x1²+y1²-r1²)-(x2²+y2²-r2²) = 0`. Piège pédagogique central
- * du sous-cas cercle-cercle (voir CLAUDE.md, section dédiée) : substituer directement dans l'une des
- * deux équations de cercle plutôt que de passer par cet axe radical.
- */
-export function axeRadicalDeuxCercles(c1: LieuCercle, c2: LieuCercle): DroiteImplicite {
-  const k1 = coniqueDepuisCercle(c1);
-  const k2 = coniqueDepuisCercle(c2);
-  return { a: k1.D - k2.D, b: k1.E - k2.E, c: k1.F - k2.F };
 }

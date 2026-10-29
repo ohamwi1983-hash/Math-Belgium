@@ -3,7 +3,8 @@ import type { ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDro
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionCaracteristiquesDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseExtraction } from "../moteur/verificationCaracteristiquesDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
+import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneExtractionCaracteristiquesDroite } from "./ConsigneExtractionCaracteristiquesDroite";
@@ -40,10 +41,16 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
 
   const complet = [px, py, vx, vy].every((v) => v.trim() !== "");
 
+  /** Fraction « p/q » acceptée (pente/ordonnée rationnelles : y = −1/3·x + 5/3 donne le point
+   * (0 ; 5/3) et le vecteur (1 ; −1/3)) — une saisie illisible devient NaN (`parse_error`). */
+  function lire(texte: string): number {
+    return parserNombreOuFraction(texte) ?? Number.NaN;
+  }
+
   function construireReponse(): ReponseExtraction {
     return {
-      point: { x: Number(px.replace(",", ".")), y: Number(py.replace(",", ".")) },
-      vecteur: { x: Number(vx.replace(",", ".")), y: Number(vy.replace(",", ".")) },
+      point: { x: lire(px), y: lire(py) },
+      vecteur: { x: lire(vx), y: lire(vy) },
     };
   }
 
@@ -76,8 +83,8 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={champ.placeholder}
                 value={champ.valeur}
-                onChange={(e) => champ.setter(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => champ.setter(filtrerSaisieNumeriqueFraction(e.target.value))}
+                onKeyDown={gererKeyDownNumeriqueFraction}
               />
             </div>
           ))}

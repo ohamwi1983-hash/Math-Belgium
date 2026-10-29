@@ -54,7 +54,7 @@ export function EtapeLectureCartesienne({ exercice, tentativesUtilisees, tentati
         <input
           id="lecture-droite-cartesienne"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="ex : y=2x-1"
+          placeholder="ex : y=0,4x+1,7"
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />

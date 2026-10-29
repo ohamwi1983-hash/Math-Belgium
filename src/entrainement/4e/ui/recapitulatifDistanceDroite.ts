@@ -1,6 +1,6 @@
 import type { EtatSessionDistanceDroite } from "../moteur/typesDistanceDroite";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { calculerEtatActuelDistanceDroite } from "./formatDistanceDroite";
+import { calculerEtatActuelDistanceDroite, nomDroiteCible } from "./formatDistanceDroite";
 
 /**
  * Récapitulatif "Ce qu'on sait déjà" — séquence TOUJOURS linéaire (`choixPoint?` → `equationB` →
@@ -11,17 +11,20 @@ import { calculerEtatActuelDistanceDroite } from "./formatDistanceDroite";
  * `calculerEtatActuelDistanceDroite` (déjà écrite pour l'ancien bloc "état actuel"), appelée avec
  * un seul champ non-`null` à la fois pour en extraire la ligne isolée correspondant à CET écran
  * (elle rend alors directement cette ligne, sans l'emballage `\begin{gathered}` réservé à
- * plusieurs lignes — voir son corps).
+ * plusieurs lignes — voir son corps). `\displaystyle` (audit chapitre 7, point 8) : le système
+ * {b ; d} rendu en ligne était minuscule.
  */
 export function calculerRecapitulatifDistanceDroite(etat: EtatSessionDistanceDroite): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
+  const nomCible = nomDroiteCible(exercice).latex;
   const entrees: EntreeRecapitulatif[] = [];
+  const vide = { point: null, droiteCible: null, bAttendue: null, qAttendu: null };
 
   if (etat.scoreChoixPointExercice !== null) {
     entrees.push({
       libelle: "Point choisi",
       estLatex: true,
-      valeur: calculerEtatActuelDistanceDroite({ variante: "paralleles", point: etat.point!, droiteCible: null, bAttendue: null, qAttendu: null })!,
+      valeur: calculerEtatActuelDistanceDroite({ ...vide, variante: "paralleles", nomCible, point: etat.point! })!,
       revele: etat.choixPointRevele,
     });
   }
@@ -30,7 +33,7 @@ export function calculerRecapitulatifDistanceDroite(etat: EtatSessionDistanceDro
     entrees.push({
       libelle: "Équation de b",
       estLatex: true,
-      valeur: calculerEtatActuelDistanceDroite({ variante: exercice.variante, point: null, droiteCible: etat.droiteCible!, bAttendue: etat.bAttendue!, qAttendu: null })!,
+      valeur: `\\displaystyle ${calculerEtatActuelDistanceDroite({ ...vide, variante: exercice.variante, nomCible, droiteCible: etat.droiteCible!, bAttendue: etat.bAttendue! })!}`,
       revele: etat.equationBRevele,
     });
   }
@@ -39,7 +42,7 @@ export function calculerRecapitulatifDistanceDroite(etat: EtatSessionDistanceDro
     entrees.push({
       libelle: "Point Q",
       estLatex: true,
-      valeur: calculerEtatActuelDistanceDroite({ variante: exercice.variante, point: null, droiteCible: null, bAttendue: null, qAttendu: etat.qAttendu! })!,
+      valeur: `\\displaystyle ${calculerEtatActuelDistanceDroite({ ...vide, variante: exercice.variante, nomCible, qAttendu: etat.qAttendu! })!}`,
       revele: etat.intersectionQRevele,
     });
   }
