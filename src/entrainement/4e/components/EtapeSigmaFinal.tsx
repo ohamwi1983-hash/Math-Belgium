@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersSigma, ExerciceBienaymeTchebychevNombreVersSigma } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerSigma } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { LABEL_SIGMA, PRECISION_UNITE, texteAideSigmaNiveau1, texteAideSigmaNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -49,8 +49,8 @@ export function EtapeSigmaFinal({ exercice, tentativesUtilisees, tentativesMax, 
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 8"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 

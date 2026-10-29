@@ -18,6 +18,7 @@ const RAYON_POINT_SELECTIONNE = 9;
 const LARGEUR_PAR_DEFAUT = 420;
 const LARGEUR_MIN = 240;
 const LARGEUR_MAX = 480;
+const SEUIL_LARGEUR_ETROITE = 400;
 
 interface Props {
   serieA: SerieComparaison;
@@ -78,6 +79,9 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
   const pointsA = pointsCourbeCumulee(serieA, cumul);
   const pointsB = pointsCourbeCumulee(serieB, cumul);
   const viewBox = calculerViewBoxComparaisonSeries(pointsA, pointsB);
+  // Valeurs à 3 chiffres ou plus : sur un graphe étroit, un nombre X sur deux suffit (sinon ils se
+  // touchent — audit chapitre 4, mobile 390 px).
+  const grandesValeurs = Math.max(...[...pointsA, ...pointsB].map((p) => Math.abs(p.x))) >= 100;
 
   const courbes = [
     { points: pointsA, couleur: COULEUR_A, label: "A", selectionne: selectionneA, onSelectionner: setSelectionneA },
@@ -87,7 +91,14 @@ export function ComparaisonSeriesGraph({ serieA, serieB, cumul }: Props) {
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} />
+        <GrilleAdaptative
+          largeur={largeur}
+          hauteur={hauteur}
+          onPasChange={(x, y) => setPas({ x, y })}
+          formatEtiquette={nombreFr}
+          etiquettesAuxBords
+          uneEtiquetteXSurDeux={grandesValeurs && largeur < SEUIL_LARGEUR_ETROITE}
+        />
         {courbes.map((courbe) => (
           <g key={courbe.label}>
             {courbe.points.slice(0, -1).map((sommet, i) => (

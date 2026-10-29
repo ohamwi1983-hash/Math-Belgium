@@ -5,8 +5,8 @@ import type {
   ExerciceBienaymeTchebychevNombreVersXBar,
 } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcentDepuisNombre } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PRECISION_POURCENT_INTERMEDIAIRE } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { precisionPourcentDepuisNombre } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -34,7 +34,7 @@ export function EtapePourcentDepuisNombre({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <p className="prompt-text">Quel est le pourcentage minimal correspondant à ce nombre d'individus ? ({PRECISION_POURCENT_INTERMEDIAIRE})</p>
+      <p className="prompt-text">Quel est le pourcentage minimal correspondant à ce nombre d'individus ? ({precisionPourcentDepuisNombre(exercice.variante)})</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="bienayme-pourcent-depuis-nombre">
@@ -45,8 +45,8 @@ export function EtapePourcentDepuisNombre({ exercice, tentativesUtilisees, tenta
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 75,5"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 

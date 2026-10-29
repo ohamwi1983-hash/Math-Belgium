@@ -41,9 +41,9 @@
  * littérale d'un composant de gen37** (dont les 8 variantes sont chacune typées trop étroitement
  * pour être appliquées telles quelles ici) : `kBT` toujours FIXÉ à 2 (jamais résolu comme dans
  * gen37, dont les variantes retrouvent k depuis un intervalle ou un pourcentage) — `borneInfBT`/
- * `borneSupBT` = $\bar{x}\mp k\sigma$ calculés directement (arrondis à 2 décimales, jamais élargis
- * vers l'extérieur comme la variante 2 de gen37, qui doit couvrir toute combinaison produisant le
- * même pourcentage cible — ici k est déjà fixé, la formule est directe) ; `pourcentAttenduBT` =
+ * `borneSupBT` = $\bar{x}\mp k\sigma$ calculés directement, puis arrondis à l'unité VERS L'EXTÉRIEUR
+ * comme gen37 et le cours (audit chapitre 4 : un arrondi vers l'intérieur ne garantirait plus les
+ * 75 %) ; `pourcentAttenduBT` =
  * $100(1-1/k^2)$, toujours exactement 75 pour $k=2$ (aucun arrondi nécessaire). La vérification de
  * ces 2 champs réutilise telle quelle `diagnostiquerIntervalleAttendu`/`verifierIntervalleAttendu`/
  * `diagnostiquerPourcent`/`verifierPourcent` (`moteur/verificationBienaymeTchebychev.ts`, typées
@@ -117,9 +117,9 @@ interface ExerciceSyntheseCommun {
   ecartTypeAttendu: number;
   /** k fixé à 2 pour l'étape Bienaymé-Tchebychev — jamais résolu, contrairement à gen37. */
   kBT: number;
-  /** xBar - kBT·ecartTypeAttendu, arrondi à 2 décimales. */
+  /** xBar - kBT·ecartTypeAttendu, arrondi à l'unité VERS LE BAS (garde la garantie). */
   borneInfBT: number;
-  /** xBar + kBT·ecartTypeAttendu, arrondi à 2 décimales. */
+  /** xBar + kBT·ecartTypeAttendu, arrondi à l'unité VERS LE HAUT (garde la garantie). */
   borneSupBT: number;
   /** 100·(1-1/kBT²) — toujours exactement 75 pour kBT=2. */
   pourcentAttenduBT: number;

@@ -22,6 +22,7 @@
 import type { ExerciceSynthese, VarianteExerciceSynthese } from "../core/exerciceSynthese.types";
 import { versDispersion } from "../moteur/verificationExerciceSynthese";
 import { ecartTypeEtatActuel } from "./formatDispersion";
+import { PRECISION_INTERVALLE_FINAL } from "./formatBienaymeTchebychev";
 import { phraseRepartition } from "./phrasesContexteStatistique";
 import { virgulesLatex, virgulesTexte } from "./nombreFr";
 
@@ -101,7 +102,9 @@ export function borneSupBTEtatActuel(exercice: ExerciceSynthese): ValeurEtatActu
 // ============================================================================
 
 export function consigneBtIntervalle(exercice: ExerciceSynthese): string {
-  return virgulesTexte(`Avec k = ${exercice.kBT}, quel est l'intervalle garanti par l'inégalité de Bienaymé-Tchebychev (en ${exercice.contexte.unite}) ? (arrondi à 2 décimales)`);
+  return virgulesTexte(
+    `Avec k = ${exercice.kBT}, quel est l'intervalle garanti par l'inégalité de Bienaymé-Tchebychev (en ${exercice.contexte.unite}) ? (${PRECISION_INTERVALLE_FINAL})`,
+  );
 }
 
 export interface AideDeuxLignes {

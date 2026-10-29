@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersXBar, ExerciceBienaymeTchebychevNombreVersXBar } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { LABEL_XBAR, PRECISION_UNITE, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -49,8 +49,8 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 172"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 

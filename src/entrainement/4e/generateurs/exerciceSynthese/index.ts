@@ -45,8 +45,13 @@
  * **Cadrage de la boîte à moustaches** (`bornePlage`) — même construction que "Boîte à moustaches"
  * (`calculerBornePlage`, dupliquée pas importée).
  *
- * **Arrondi à 2 décimales** (`varianceAttendue`/`ecartTypeAttendu`/`borneInfBT`/`borneSupBT`/
- * `pourcentAttenduBT`, et `xBar` de la variante `"classes"`) — réutilise DIRECTEMENT `arrondi2`
+ * **Intervalle de Bienaymé-Tchebychev** (`borneInfBT`/`borneSupBT`) — bornes arrondies à l'unité
+ * VERS L'EXTÉRIEUR (`arrondiVersLeBas`/`arrondiVersLeHaut`), même convention que gen37 et que le
+ * cours (« Arrondir sans perdre la garantie », audit chapitre 4) : un intervalle arrondi vers
+ * l'intérieur ne garantirait plus les 75 %. Le reste de ce paragraphe vaut pour les autres valeurs.
+ *
+ * **Arrondi à 2 décimales** (`varianceAttendue`/`ecartTypeAttendu`/`pourcentAttenduBT`, et `xBar`
+ * de la variante `"classes"`) — réutilise DIRECTEMENT `arrondi2`
  * (`generateurs/bienaymeTchebychev/arrondis.ts`, import générateur→générateur, protégé par un
  * epsilon `1e-9` contre le bruit de virgule flottante), jamais une réimplémentation locale
  * (`promptcorrectionsauditgroupees.md`, point 4) — même arrondi standard que le `k` résolu de
@@ -65,7 +70,7 @@ import type {
 } from "../../core/exerciceSynthese.types";
 import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.types";
 import type { PlageAxe } from "../../core/boiteMoustaches.types";
-import { arrondi2 } from "../bienaymeTchebychev/arrondis";
+import { arrondi2, arrondiVersLeBas, arrondiVersLeHaut } from "../bienaymeTchebychev/arrondis";
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
 import { borneRealiste, tirerEchelle, tirerEchelleCentree, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { calculerParametreDePosition } from "../mediane/parametreDePosition";
@@ -260,8 +265,8 @@ function construireDiscrete(contexteImpose?: ContexteBienaymeTchebychev): Exerci
     const varianceAttendue = arrondi2(sommeProduits / n);
     const ecartTypeAttendu = arrondi2(Math.sqrt(varianceAttendue));
 
-    const borneInfBT = arrondi2(xBar - K_BT * ecartTypeAttendu);
-    const borneSupBT = arrondi2(xBar + K_BT * ecartTypeAttendu);
+    const borneInfBT = arrondiVersLeBas(xBar - K_BT * ecartTypeAttendu);
+    const borneSupBT = arrondiVersLeHaut(xBar + K_BT * ecartTypeAttendu);
     if (!borneRealiste(contexte, borneInfBT)) continue;
     const pourcentAttenduBT = arrondi2(100 * (1 - 1 / K_BT ** 2));
 
@@ -390,8 +395,8 @@ function construireClasses(contexteImpose?: ContexteBienaymeTchebychev): Exercic
     const varianceAttendue = arrondi2(sommeProduits / n);
     const ecartTypeAttendu = arrondi2(Math.sqrt(varianceAttendue));
 
-    const borneInfBT = arrondi2(xBar - K_BT * ecartTypeAttendu);
-    const borneSupBT = arrondi2(xBar + K_BT * ecartTypeAttendu);
+    const borneInfBT = arrondiVersLeBas(xBar - K_BT * ecartTypeAttendu);
+    const borneSupBT = arrondiVersLeHaut(xBar + K_BT * ecartTypeAttendu);
     if (!borneRealiste(contexte, borneInfBT)) continue;
     const pourcentAttenduBT = arrondi2(100 * (1 - 1 / K_BT ** 2));
 

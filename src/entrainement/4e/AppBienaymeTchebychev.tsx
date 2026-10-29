@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -54,6 +55,8 @@ import { SegmentsInline } from "./components/SegmentsInline";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -159,11 +162,24 @@ function construireReponseAttendue(
   return undefined;
 }
 
+/** Titre de la fiche de consultation d'un écran clos — dérivé du suffixe de la phase (les 8
+ * variantes partagent les mêmes rôles d'écran : k, % minimal, intervalle, nombre, σ, x̄). */
+function titreEcran(phase: EtatSessionBienaymeTchebychev["phase"]): string {
+  if (phase.endsWith("Pourcent0")) return "% correspondant au nombre donné";
+  if (phase.endsWith("Pourcent")) return "% minimal garanti";
+  if (phase.endsWith("Intervalle")) return "Intervalle garanti";
+  if (phase.endsWith("Nombre")) return "Nombre minimal d'individus";
+  if (phase.endsWith("Sigma")) return "Écart-type σ";
+  if (phase.endsWith("XBar")) return "Moyenne x̄";
+  return "Valeur de k";
+}
+
 /** Segments de la barre de puces — réutilise `SEQUENCES` (même séquence réelle que le récapitulatif,
  * jamais une deuxième reconstitution) et `scoresAccumules[phase]` (score/aide déjà capturés à la
  * clôture de chaque écran, voir `ui/recapitulatifBienaymeTchebychev.ts`). La dernière phase de
  * chaque variante (toujours terminale) n'a jamais besoin de sa propre branche "close" — même
- * principe que `AppOptimisation.tsx`. Puces purement visuelles (pas de `onSegmentClick`). */
+ * principe que `AppOptimisation.tsx`. Puces cliquables : chaque écran clos ouvre sa fiche de
+ * consultation (`FicheReponseEcran`, même patron que gen5). */
 function calculerSegmentsProgression(etat: EtatSessionBienaymeTchebychev): EtatPuceProgression[] {
   const sequence = SEQUENCES[etat.exerciceCourant.variante];
   const indexCourant = sequence.indexOf(etat.phase);
@@ -179,18 +195,37 @@ function calculerSegmentsProgression(etat: EtatSessionBienaymeTchebychev): EtatP
 export function AppBienaymeTchebychev() {
   const [etat, setEtat] = useState<EtatSessionBienaymeTchebychev>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
+   * moteur ; un écran clos = une entrée, dans l'ordre de `SEQUENCES` (même index que sa puce). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` des écrans pour qu'aucune saisie de
+   * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice ». */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionBienaymeTchebychev) {
+  function terminerEtape(nouvelEtat: EtatSessionBienaymeTchebychev, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: reveleEcranClos(etat, nouvelEtat) });
+      const revele = reveleEcranClos(etat, nouvelEtat);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      setHistorique((h) => [
+        ...h,
+        { titre: titreEcran(etat.phase), votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat, etat.exerciceCourant) },
+      ]);
       return;
     }
     setEtat(nouvelEtat);
   }
 
+  function reinitialiserHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
+  }
+
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) reinitialiserHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -200,6 +235,7 @@ export function AppBienaymeTchebychev() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    reinitialiserHistorique();
     setEtat(demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteBienaymeTchebychev)));
   }
 
@@ -219,7 +255,7 @@ export function AppBienaymeTchebychev() {
         <h1 className="app-title">Inégalité de Bienaymé-Tchebychev</h1>
         <p className="app-subtitle">Chapitre 4 — Statistiques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -229,199 +265,223 @@ export function AppBienaymeTchebychev() {
           <CalculatriceScientifique />
           {etat.phase === "v1K" && exercice.variante === "intervalleVersPourcent" ? (
             <EtapeKDepuisIntervalle
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV1K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV1K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v1Pourcent" && exercice.variante === "intervalleVersPourcent" ? (
             <EtapePourcentFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV1Pourcent(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV1Pourcent(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v2K" && exercice.variante === "pourcentVersIntervalle" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV2K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV2K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v2Intervalle" && exercice.variante === "pourcentVersIntervalle" ? (
             <EtapeIntervalleFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV2Intervalle(etat, { borneInf, borneSup }))}
+              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV2Intervalle(etat, { borneInf, borneSup }), `[${borneInf} ; ${borneSup}]`)}
               validation={validation}
             />
           ) : etat.phase === "v3K" && exercice.variante === "intervalleVersNombre" ? (
             <EtapeKDepuisIntervalle
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV3K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV3K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v3Pourcent" && exercice.variante === "intervalleVersNombre" ? (
             <EtapePourcentFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV3Pourcent(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV3Pourcent(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v3Nombre" && exercice.variante === "intervalleVersNombre" ? (
             <EtapeNombreFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => terminerEtape(soumettreReponseV3Nombre(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV3Nombre(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v4Pourcent0" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapePourcentDepuisNombre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => terminerEtape(soumettreReponseV4Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV4Pourcent0(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v4K" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV4K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV4K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v4Intervalle" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapeIntervalleFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV4Intervalle(etat, { borneInf, borneSup }))}
+              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV4Intervalle(etat, { borneInf, borneSup }), `[${borneInf} ; ${borneSup}]`)}
               validation={validation}
             />
           ) : etat.phase === "v5K" && exercice.variante === "intervalleVersSigma" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV5K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV5K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v5Sigma" && exercice.variante === "intervalleVersSigma" ? (
             <EtapeSigmaFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV5Sigma(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV5Sigma(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v6K" && exercice.variante === "intervalleVersXBar" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV6K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV6K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v6XBar" && exercice.variante === "intervalleVersXBar" ? (
             <EtapeXBarFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV6XBar(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV6XBar(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v7Pourcent0" && exercice.variante === "nombreVersSigma" ? (
             <EtapePourcentDepuisNombre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => terminerEtape(soumettreReponseV7Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV7Pourcent0(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v7K" && exercice.variante === "nombreVersSigma" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV7K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV7K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v7Sigma" && exercice.variante === "nombreVersSigma" ? (
             <EtapeSigmaFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV7Sigma(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV7Sigma(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v8Pourcent0" && exercice.variante === "nombreVersXBar" ? (
             <EtapePourcentDepuisNombre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => terminerEtape(soumettreReponseV8Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV8Pourcent0(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v8K" && exercice.variante === "nombreVersXBar" ? (
             <EtapeKDepuisPourcent
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV8K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV8K(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "v8XBar" && exercice.variante === "nombreVersXBar" ? (
             <EtapeXBarFinal
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseV8XBar(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV8XBar(etat, texte), texte)}
               validation={validation}
             />
           ) : null}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

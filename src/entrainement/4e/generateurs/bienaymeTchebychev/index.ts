@@ -11,7 +11,7 @@
 import { randomInt } from "./aleatoire";
 import { CONTEXTES } from "./contextes";
 import { borneRealiste } from "./echelleContexte";
-import { arrondi2, arrondiUnite, arrondiVersLeBas, arrondiVersLeHaut } from "./arrondis";
+import { arrondi2, arrondi2VersLeBas, arrondi2VersLeHaut, arrondiUnite, arrondiVersLeBas, arrondiVersLeHaut } from "./arrondis";
 import type {
   ContexteBienaymeTchebychev,
   ExerciceBienaymeTchebychev,
@@ -95,7 +95,8 @@ export function construireIntervalleVersPourcent(): ExerciceBienaymeTchebychevIn
   const d = tirerDemiLargeur(sigma);
   const borneInf = xBar - d;
   const borneSup = xBar + d;
-  const kAttendu = arrondi2(d / sigma);
+  // k arrondi vers le bas : un k plus petit ne promet jamais un pourcentage plus grand que garanti.
+  const kAttendu = arrondi2VersLeBas(d / sigma);
   const pourcentExact = 100 * (1 - 1 / (kAttendu * kAttendu));
   const pourcentAttendu = arrondiVersLeBas(pourcentExact);
   return { variante: "intervalleVersPourcent", contexte, xBar, sigma, borneInf, borneSup, kAttendu, pourcentAttendu };
@@ -106,7 +107,8 @@ export function construirePourcentVersIntervalle(): ExerciceBienaymeTchebychevPo
   const xBar = tirerXBar(contexte);
   const sigma = tirerSigma(contexte);
   const pourcentDonne = tirerPourcentDonne();
-  const kAttendu = arrondi2(kDepuisPourcent(pourcentDonne));
+  // k arrondi vers le haut : l'intervalle obtenu est au moins aussi large que l'intervalle garanti.
+  const kAttendu = arrondi2VersLeHaut(kDepuisPourcent(pourcentDonne));
   const borneInfAttendue = arrondiVersLeBas(xBar - kAttendu * sigma);
   const borneSupAttendue = arrondiVersLeHaut(xBar + kAttendu * sigma);
   return { variante: "pourcentVersIntervalle", contexte, xBar, sigma, pourcentDonne, kAttendu, borneInfAttendue, borneSupAttendue };
@@ -120,8 +122,8 @@ export function construireIntervalleVersNombre(): ExerciceBienaymeTchebychevInte
   const borneInf = xBar - d;
   const borneSup = xBar + d;
   const n = tirerN();
-  const kAttendu = arrondi2(d / sigma);
-  const pourcentAttendu = arrondi2(100 * (1 - 1 / (kAttendu * kAttendu)));
+  const kAttendu = arrondi2VersLeBas(d / sigma);
+  const pourcentAttendu = arrondi2VersLeBas(100 * (1 - 1 / (kAttendu * kAttendu)));
   const nMinAttendu = arrondiVersLeBas((pourcentAttendu / 100) * n);
   return { variante: "intervalleVersNombre", contexte, xBar, sigma, borneInf, borneSup, n, kAttendu, pourcentAttendu, nMinAttendu };
 }
@@ -132,8 +134,9 @@ export function construireNombreVersIntervalle(): ExerciceBienaymeTchebychevNomb
   const sigma = tirerSigma(contexte);
   const n = tirerN();
   const nombreMinDonne = tirerNombreMinDonne(n);
-  const pourcentAttendu0 = arrondi2((100 * nombreMinDonne) / n);
-  const kAttendu = arrondi2(kDepuisPourcent(pourcentAttendu0));
+  // Pourcentage et k arrondis vers le haut : l'intervalle doit contenir au moins `nombreMinDonne`.
+  const pourcentAttendu0 = arrondi2VersLeHaut((100 * nombreMinDonne) / n);
+  const kAttendu = arrondi2VersLeHaut(kDepuisPourcent(pourcentAttendu0));
   const borneInfAttendue = arrondiVersLeBas(xBar - kAttendu * sigma);
   const borneSupAttendue = arrondiVersLeHaut(xBar + kAttendu * sigma);
   return { variante: "nombreVersIntervalle", contexte, xBar, sigma, n, nombreMinDonne, pourcentAttendu0, kAttendu, borneInfAttendue, borneSupAttendue };
@@ -161,7 +164,8 @@ export function construireIntervalleVersXBar(): ExerciceBienaymeTchebychevInterv
   const d = Math.round(kAttendu * sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
-  const xBarAttendu = arrondiUnite(borneSup - kAttendu * sigma);
+  // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
+  const xBarAttendu = (borneInf + borneSup) / 2;
   return { variante: "intervalleVersXBar", contexte, sigma, pourcentDonne, borneInf, borneSup, kAttendu, xBarAttendu };
 }
 
@@ -191,7 +195,8 @@ export function construireNombreVersXBar(): ExerciceBienaymeTchebychevNombreVers
   const d = Math.round(kAttendu * sigma);
   const borneInf = xBarCible - d;
   const borneSup = xBarCible + d;
-  const xBarAttendu = arrondiUnite(borneSup - kAttendu * sigma);
+  // x̄ est le centre de l'intervalle symétrique [x̄ − kσ ; x̄ + kσ].
+  const xBarAttendu = (borneInf + borneSup) / 2;
   return { variante: "nombreVersXBar", contexte, sigma, n, nombreMinDonne, borneInf, borneSup, pourcentAttendu0, kAttendu, xBarAttendu };
 }
 

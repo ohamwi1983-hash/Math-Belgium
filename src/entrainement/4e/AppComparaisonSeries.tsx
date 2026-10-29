@@ -58,8 +58,13 @@ export function AppComparaisonSeries() {
     setEtat(nouvelEtat);
   }
 
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` de l'écran et du graphique pour
+   * qu'aucune saisie ni sélection de point de l'exercice précédent ne survive (audit chapitre 4). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
+
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -69,6 +74,7 @@ export function AppComparaisonSeries() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionComparaisonSeries(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteComparaisonSeries)));
   }
 
@@ -93,9 +99,10 @@ export function AppComparaisonSeries() {
       <main className="card">
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={<DonneesComparaisonSeries exercice={exercice} />} />
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={<DonneesComparaisonSeries key={numeroExercice} exercice={exercice} />} />
           {question.type === "centrage" ? (
             <EtapeCentrageComparaison
+              key={numeroExercice}
               exercice={exercice}
               question={question}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -107,6 +114,7 @@ export function AppComparaisonSeries() {
             />
           ) : question.type === "dispersion" ? (
             <EtapeDispersionComparaison
+              key={numeroExercice}
               exercice={exercice}
               question={question}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -118,6 +126,7 @@ export function AppComparaisonSeries() {
             />
           ) : question.type === "seuil" ? (
             <EtapeSeuilComparaison
+              key={numeroExercice}
               exercice={exercice}
               question={question}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -129,6 +138,7 @@ export function AppComparaisonSeries() {
             />
           ) : (
             <EtapeInterpretationComparaison
+              key={numeroExercice}
               exercice={exercice}
               question={question}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}

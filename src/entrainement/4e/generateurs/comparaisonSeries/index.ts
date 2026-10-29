@@ -12,10 +12,10 @@
  * indépendants entre générateurs du même chapitre) pour garantir des fréquences cumulées toujours
  * entières exactes.
  *
- * **Règle en cascade Q1/médiane/Q3** (`indexMedianeDepuisCumules` + logique associée) — dupliquée
- * depuis "Étendue et écart interquartile"/gen35 : le premier `x_i` dont l'effectif cumulé dépasse
- * STRICTEMENT `n/2` (jamais `≥`), Q1/Q3 dérivés en cascade depuis la position `m` de la médiane —
- * voir `etendueInterquartile/index.ts` pour la preuve mathématique complète, non répétée ici.
+ * **Règle du seuil du cours pour Q1/médiane/Q3** (audit chapitre 4) — `calculerParametreDePosition`
+ * (`mediane/parametreDePosition.ts`, même fonction que gen33/gen35) : premier `x_i` dont l'effectif
+ * cumulé dépasse STRICTEMENT `n/4`, `n/2`, `3n/4`. L'ancienne règle « par demi-série » donnait un
+ * autre Q1/Q3 dans 92 % des séries, ce qui contredisait le cours (et la lecture du graphique).
  *
  * **$\bar{x}$/σ — cascade de valeurs déjà arrondies**, même principe que "Paramètres de
  * dispersion"/gen34 : `variance` calculée depuis le $\bar{x}$ EXACT (non arrondi) puis arrondie à 2
@@ -41,6 +41,7 @@ import type { ContexteBienaymeTchebychev } from "../../core/bienaymeTchebychev.t
 import { CONTEXTES } from "../bienaymeTchebychev/contextes";
 import { type EchelleContexte, tirerEchelle, valeurEchelle, valeursRealistes } from "../bienaymeTchebychev/echelleContexte";
 import { randomInt } from "./aleatoire";
+import { calculerParametreDePosition } from "../mediane/parametreDePosition";
 
 /** `n` toujours un DIVISEUR EXACT de 100 — même pool que "Tableau de fréquences"/"Médiane"
  * (dupliqué, pas importé) : garantit `frequenceCumulee` toujours un entier exact, quel que soit
@@ -82,12 +83,6 @@ function tirerEffectifs(n: number, k: number): number[] {
   return effectifs;
 }
 
-/** Même règle stricte que "Médiane"/"Étendue et écart interquartile" — dupliquée, pas importée. */
-function indexMedianeDepuisCumules(lignes: LigneComparaisonSeries[], n: number): number {
-  const seuil = n / 2;
-  return lignes.findIndex((ligne) => ligne.effectifCumule > seuil);
-}
-
 /** Construit une série complète (table + résumé) — `null` si le tirage est dégénéré (médiane à une
  * extrémité du tableau, ou écart interquartile nul), à retirer côté appelant. */
 function construireSerieUneFois(echelle: EchelleContexte, n: number, k: number): SerieComparaison | null {
@@ -101,20 +96,12 @@ function construireSerieUneFois(echelle: EchelleContexte, n: number, k: number):
     return { valeur, effectif: effectifs[i], effectifCumule, frequenceCumulee: Math.round((effectifCumule * 100) / n) };
   });
 
-  const indexMediane = indexMedianeDepuisCumules(lignes, n);
+  const donnees = { type: "discrete" as const, valeurs: lignes.map((l) => l.valeur), cumules: lignes.map((l) => l.effectifCumule) };
+  const indexMediane = calculerParametreDePosition(donnees, n / 2).index;
   if (indexMediane <= 0 || indexMediane >= lignes.length - 1) return null;
 
-  const m = lignes[indexMediane].effectifCumule;
-  const seuilQ1 = m / 2;
-  const indexQ1 = lignes.slice(0, indexMediane + 1).findIndex((ligne) => ligne.effectifCumule > seuilQ1);
-
-  const tailleMoitieSup = n - m + 1;
-  const seuilQ3 = tailleMoitieSup / 2;
-  const indexQ3Relatif = lignes.slice(indexMediane).findIndex((ligne) => ligne.effectifCumule - (m - 1) > seuilQ3);
-  const indexQ3 = indexMediane + indexQ3Relatif;
-
-  const q1 = lignes[indexQ1].valeur;
-  const q3 = lignes[indexQ3].valeur;
+  const q1 = calculerParametreDePosition(donnees, n / 4).valeur;
+  const q3 = calculerParametreDePosition(donnees, (3 * n) / 4).valeur;
   const ecartInterquartile = arrondir2(q3 - q1);
   if (ecartInterquartile <= 0) return null;
 

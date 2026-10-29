@@ -63,6 +63,11 @@ export function calculerViewBoxComparaisonSeries(pointsA: PointCourbeCumulee[], 
 
   const margeX = Math.max(1, (xMax - xMin) * 0.15);
   const margeY = Math.max(1, yMax * 0.15);
+  // Marges gauche/basse élargies : les nombres des axes sont épinglés à ces deux bords
+  // (`etiquettesAuxBords`, `ComparaisonSeriesGraph.tsx`) et ne doivent jamais toucher le premier
+  // point des courbes, posé sur y=0 (audit chapitre 4).
+  const margeGauche = Math.max(1, (xMax - xMin) * 0.22);
+  const margeBas = Math.max(1, yMax * 0.24);
 
-  return { x: [xMin - margeX, xMax + margeX], y: [-margeY, yMax + margeY] };
+  return { x: [xMin - margeGauche, xMax + margeX], y: [-margeBas, yMax + margeY] };
 }

@@ -46,7 +46,7 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
         <input
           id="synthese-bt-pourcent"
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder="ex : 75"
+          placeholder="ex : 60"
           value={texte}
           onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
           onKeyDown={gererKeyDownNumerique}

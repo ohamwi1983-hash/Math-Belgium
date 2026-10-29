@@ -14,8 +14,16 @@ import type { StatutVerification } from "./statutVerification";
 
 const TOLERANCE = 1e-6;
 
+/** Saisie propre à ce générateur, appliquée AVANT le parseur partagé (jamais modifié) : un « % »
+ * final (« 75 % », « 75% ») est retiré — la question porte déjà sur un pourcentage — et les signes
+ * moins typographiques (« − », « – ») deviennent un tiret ordinaire (borne négative d'une
+ * température, par exemple). */
+export function normaliserSaisieBienaymeTchebychev(texte: string): string {
+  return texte.replace(/[\u2212\u2013]/g, "-").replace(/\s*%\s*$/, "");
+}
+
 function statutValeur(texte: string, cible: number): StatutVerification {
-  const valeur = parserNombreOuFraction(texte);
+  const valeur = parserNombreOuFraction(normaliserSaisieBienaymeTchebychev(texte));
   if (valeur === null) return "parse_error";
   return Math.abs(valeur - cible) <= TOLERANCE ? "correct" : "not_equivalent";
 }
@@ -116,10 +124,19 @@ export function verifierSigma(exercice: { sigmaAttendu: number }, texte: string)
 // x̄ retrouvé (V6/V8).
 // ============================================================================
 
-export function diagnostiquerXBar(exercice: { xBarAttendu: number }, texte: string): StatutVerification {
-  return statutValeur(texte, exercice.xBarAttendu);
+type ExerciceXBar = { xBarAttendu: number; borneInf: number; borneSup: number; sigma: number; kAttendu: number };
+
+/** x̄ = milieu de l'intervalle symétrique (cible principale) ; on accepte aussi la valeur obtenue
+ * par « borne sup − kσ » ou « borne inf + kσ » avec le k validé à l'écran précédent, arrondie à
+ * l'unité (même consigne d'arrondi). */
+export function diagnostiquerXBar(exercice: ExerciceXBar, texte: string): StatutVerification {
+  const statut = statutValeur(texte, exercice.xBarAttendu);
+  if (statut !== "not_equivalent") return statut;
+  const parSup = Math.round(exercice.borneSup - exercice.kAttendu * exercice.sigma + 1e-9);
+  const parInf = Math.round(exercice.borneInf + exercice.kAttendu * exercice.sigma + 1e-9);
+  return statutValeur(texte, parSup) === "correct" || statutValeur(texte, parInf) === "correct" ? "correct" : "not_equivalent";
 }
 
-export function verifierXBar(exercice: { xBarAttendu: number }, texte: string): boolean {
+export function verifierXBar(exercice: ExerciceXBar, texte: string): boolean {
   return diagnostiquerXBar(exercice, texte) === "correct";
 }

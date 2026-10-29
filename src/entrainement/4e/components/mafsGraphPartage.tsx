@@ -88,6 +88,8 @@ export function GrilleAdaptative({
   masquerAxes,
   masquerEtiquettesY,
   formatEtiquette,
+  etiquettesAuxBords,
+  uneEtiquetteXSurDeux,
 }: {
   largeur: number;
   hauteur: number;
@@ -112,6 +114,14 @@ export function GrilleAdaptative({
    * décimal, comportement inchangé). Fourni par les graphes du chapitre « Statistique descriptive »
    * (`nombreFr`, virgule décimale belge — audit chapitre 4). */
   formatEtiquette?: (valeur: number) => string;
+  /** Épingle les nombres de l'axe X au bord BAS et ceux de l'axe Y au bord GAUCHE du cadre, et
+   * dégage le coin bas-gauche — absent/`false` par défaut (nombres sur les axes, comportement
+   * inchangé). Fourni par `ComparaisonSeriesGraph.tsx` (gen38, audit chapitre 4) : ses courbes
+   * cumulées démarrent sur y=0, exactement là où les nombres de l'axe X se posaient. */
+  etiquettesAuxBords?: boolean;
+  /** N'affiche qu'un nombre X sur deux (le quadrillage reste complet) — pour les valeurs à 3 chiffres
+   * ou plus sur un graphe étroit (mobile). Absent/`false` par défaut. */
+  uneEtiquetteXSurDeux?: boolean;
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -128,7 +138,18 @@ export function GrilleAdaptative({
   return (
     <Fragment>
       <Coordinates.Cartesian xAxis={{ lines: pasX, axis: !masquerAxes, labels: undefined }} yAxis={{ lines: pasY, axis: !masquerAxes, labels: undefined }} />
-      {!masquerAxes && <GraduationsFlottantes largeur={largeur} hauteur={hauteur} pasX={pasX} pasY={pasY} masquerEtiquettesY={masquerEtiquettesY} formatEtiquette={formatEtiquette} />}
+      {!masquerAxes && (
+        <GraduationsFlottantes
+          largeur={largeur}
+          hauteur={hauteur}
+          pasX={pasX}
+          pasY={pasY}
+          masquerEtiquettesY={masquerEtiquettesY}
+          formatEtiquette={formatEtiquette}
+          etiquettesAuxBords={etiquettesAuxBords}
+          uneEtiquetteXSurDeux={uneEtiquetteXSurDeux}
+        />
+      )}
     </Fragment>
   );
 }
@@ -177,12 +198,16 @@ function GraduationsFlottantes({
   pasY,
   masquerEtiquettesY,
   formatEtiquette = formatEtiquetteGrille,
+  etiquettesAuxBords = false,
+  uneEtiquetteXSurDeux = false,
 }: {
   largeur: number;
   hauteur: number;
   pasX: number;
   pasY: number;
   formatEtiquette?: (valeur: number) => string;
+  etiquettesAuxBords?: boolean;
+  uneEtiquetteXSurDeux?: boolean;
   /** Masque UNIQUEMENT les graduations flottantes de l'axe Y (jamais celles de l'axe X) — même
    * convention et même appelant que `masquerEtiquettesY` de `GrilleAdaptative` ci-dessus
    * (`BoiteMoustachesGraph.tsx` : axe Y jamais une vraie grandeur, juste un séparateur de ligne).
@@ -202,12 +227,28 @@ function GraduationsFlottantes({
   const [axeLocalX, axeLocalY] = vec.transform([0, 0], matrice);
   const ecranAxeX = axeLocalX - origineX;
   const ecranAxeY = axeLocalY - origineY;
-  const yNombresX = positionEcranClampee(ecranAxeY, hauteur, MARGE_GRADUATION_FLOTTANTE) + origineY;
-  const xNombresY = positionEcranClampee(ecranAxeX, largeur, MARGE_GRADUATION_FLOTTANTE) + origineX;
-  const ancrageNombresY = ecranAxeX > largeur - MARGE_GRADUATION_FLOTTANTE ? "end" : "start";
+  const yNombresX = etiquettesAuxBords
+    ? hauteur - MARGE_GRADUATION_FLOTTANTE + origineY
+    : positionEcranClampee(ecranAxeY, hauteur, MARGE_GRADUATION_FLOTTANTE) + origineY;
+  const xNombresY = etiquettesAuxBords
+    ? MARGE_GRADUATION_FLOTTANTE / 2 + origineX
+    : positionEcranClampee(ecranAxeX, largeur, MARGE_GRADUATION_FLOTTANTE) + origineX;
+  const ancrageNombresY = !etiquettesAuxBords && ecranAxeX > largeur - MARGE_GRADUATION_FLOTTANTE ? "end" : "start";
 
-  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX);
-  const ticksY = masquerEtiquettesY ? [] : graduationsDansPlage(visibleY[0], visibleY[1], pasY);
+  // Coin bas-gauche dégagé (mode `etiquettesAuxBords`) : les nombres X trop à gauche et les nombres Y
+  // trop bas s'y chevaucheraient.
+  const COIN_X = 44;
+  const COIN_Y = 2 * MARGE_GRADUATION_FLOTTANTE + 6;
+  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX).filter(
+    (x) =>
+      (!uneEtiquetteXSurDeux || Math.round(x / pasX) % 2 === 0) &&
+      (!etiquettesAuxBords || vec.transform([x, 0], matrice)[0] - origineX > COIN_X),
+  );
+  const ticksY = masquerEtiquettesY
+    ? []
+    : graduationsDansPlage(visibleY[0], visibleY[1], pasY).filter(
+        (y) => !etiquettesAuxBords || vec.transform([0, y], matrice)[1] - origineY < hauteur - COIN_Y,
+      );
 
   return (
     <g ref={groupRef} className="mafs-shadow">

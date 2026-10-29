@@ -22,9 +22,13 @@ import {
   formatPourcentDepuisNombreAttenduTexte,
   formatSigmaAttenduTexte,
   formatXBarAttenduTexte,
+  PRECISION_INTERVALLE_FINAL,
   PRECISION_K,
-  PRECISION_POURCENT_INTERMEDIAIRE,
+  PRECISION_K_PAR_DEFAUT,
   PRECISION_UNITE,
+  PRECISION_UNITE_PAR_DEFAUT,
+  precisionKDepuisPourcent,
+  precisionPourcentDepuisNombre,
   precisionPourcentFinal,
   texteAideIntervalleFinalNiveau1,
   texteAideKDepuisIntervalleNiveau1,
@@ -35,7 +39,6 @@ import {
   texteAidePourcentNiveau2,
   texteAideSigmaNiveau1,
   texteAideSigmaNiveau2,
-  texteAideXBarNiveau1,
   texteAideXBarNiveau2,
   type SegmentTexte,
 } from "../../ui/formatBienaymeTchebychev";
@@ -146,21 +149,21 @@ function construireEnonceBienaymeTchebychev(instance: ExerciceBienaymeTchebychev
 function construireConsigneTravail(instance: ExerciceBienaymeTchebychev): string {
   switch (instance.variante) {
     case "intervalleVersPourcent":
-      return `Calcule k (${PRECISION_K}), puis le pourcentage minimal demandé (${PRECISION_UNITE}, vers le bas), en détaillant chaque étape.`;
+      return `Calcule k (${PRECISION_K_PAR_DEFAUT}), puis le pourcentage minimal demandé (${PRECISION_UNITE_PAR_DEFAUT}), en détaillant chaque étape.`;
     case "pourcentVersIntervalle":
-      return `Calcule k (${PRECISION_K}), puis les bornes de l'intervalle demandé (arrondies à l'unité, élargies vers l'extérieur), en détaillant chaque étape.`;
+      return `Calcule k (${precisionKDepuisPourcent(instance.variante)}), puis les bornes de l'intervalle demandé (${PRECISION_INTERVALLE_FINAL}), en détaillant chaque étape.`;
     case "intervalleVersNombre":
-      return `Calcule k (${PRECISION_K}), le pourcentage minimal intermédiaire (${PRECISION_POURCENT_INTERMEDIAIRE}), puis le nombre minimal d'individus demandé (${PRECISION_UNITE}, vers le bas), en détaillant chaque étape.`;
+      return `Calcule k (${PRECISION_K_PAR_DEFAUT}), le pourcentage minimal intermédiaire (${precisionPourcentFinal(instance.variante)}), puis le nombre minimal d'individus demandé (${PRECISION_UNITE_PAR_DEFAUT}), en détaillant chaque étape.`;
     case "nombreVersIntervalle":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${PRECISION_POURCENT_INTERMEDIAIRE}), puis k (${PRECISION_K}), puis les bornes de l'intervalle demandé (arrondies à l'unité, élargies vers l'extérieur), en détaillant chaque étape.`;
+      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${precisionKDepuisPourcent(instance.variante)}), puis les bornes de l'intervalle demandé (${PRECISION_INTERVALLE_FINAL}), en détaillant chaque étape.`;
     case "intervalleVersSigma":
       return `Calcule k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
     case "intervalleVersXBar":
-      return `Calcule k (${PRECISION_K}), puis la moyenne x̄ demandée (${PRECISION_UNITE}), en détaillant chaque étape.`;
+      return `Calcule la moyenne x̄ demandée (${PRECISION_UNITE}) : l'intervalle garanti est centré sur x̄. Tu peux aussi passer par k (${PRECISION_K}). Détaille chaque étape.`;
     case "nombreVersSigma":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${PRECISION_POURCENT_INTERMEDIAIRE}), puis k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
+      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
     case "nombreVersXBar":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${PRECISION_POURCENT_INTERMEDIAIRE}), puis k (${PRECISION_K}), puis la moyenne x̄ demandée (${PRECISION_UNITE}), en détaillant chaque étape.`;
+      return `Calcule la moyenne x̄ demandée (${PRECISION_UNITE}) : l'intervalle garanti est centré sur x̄. Tu peux aussi passer par le pourcentage correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}) et k (${PRECISION_K}). Détaille chaque étape.`;
   }
 }
 
@@ -185,7 +188,7 @@ function etapeKDepuisIntervalle(instance: ExerciceBienaymeTchebychevIntervalleVe
     latex(aide1.latex),
     texte(" — équation avec les données de l'exercice : "),
     latex(aide2.latex),
-    texte(` — on isole k : ${formatKAttenduTexte(instance)} (${PRECISION_K}).`),
+    texte(` — on isole k : ${formatKAttenduTexte(instance)} (${PRECISION_K_PAR_DEFAUT}).`),
   ];
 }
 
@@ -200,7 +203,7 @@ function etapeKDepuisPourcent(instance: ExerciceBienaymeTchebychev, pourcentAffi
     latex(aide1.latex),
     texte(" — équation avec les données de l'exercice : "),
     latex(aide2.latex),
-    texte(` — on isole k : ${formatKAttenduTexte(instance)} (${PRECISION_K}).`),
+    texte(` — on isole k : ${formatKAttenduTexte(instance)} (${precisionKDepuisPourcent(instance.variante)}).`),
   ];
 }
 
@@ -216,7 +219,7 @@ function etapePourcentFinal(
     latex(aide1.latex),
     texte(" — formule substituée avec le k trouvé ci-dessus : "),
     latex(aide2.latex),
-    texte(` — le pourcentage minimal garanti est donc ${formatPourcentAttenduTexte(instance)} (${precisionPourcentFinal(variante)}${variante === "intervalleVersPourcent" ? ", vers le bas" : ""}).`),
+    texte(` — le pourcentage minimal garanti est donc ${formatPourcentAttenduTexte(instance)} (${precisionPourcentFinal(variante)}).`),
   ];
 }
 
@@ -240,7 +243,7 @@ function etapePourcentDepuisNombre(
   return [
     texte("Pourcentage minimal correspondant au nombre donné : "),
     latex(`\\dfrac{100\\times ${formatNombreLatex(instance.nombreMinDonne)}}{${formatNombreLatex(instance.n)}}`),
-    texte(` ${formatPourcentDepuisNombreAttenduTexte(instance)} (${PRECISION_POURCENT_INTERMEDIAIRE}).`),
+    texte(` ${formatPourcentDepuisNombreAttenduTexte(instance)} (${precisionPourcentDepuisNombre(instance.variante)}).`),
   ];
 }
 
@@ -250,7 +253,7 @@ function etapeIntervalleFinal(instance: ExerciceBienaymeTchebychevPourcentVersIn
   return [
     texte(`${aide1.texte} `),
     latex(aide1.latex),
-    texte(` — l'intervalle garanti est donc ${formatIntervalleAttenduTexte(instance)} (${PRECISION_UNITE}, bornes élargies vers l'extérieur).`),
+    texte(` — l'intervalle garanti est donc ${formatIntervalleAttenduTexte(instance)} (${PRECISION_INTERVALLE_FINAL}).`),
   ];
 }
 
@@ -268,16 +271,17 @@ function etapeSigma(instance: ExerciceBienaymeTchebychevIntervalleVersSigma | Ex
   ];
 }
 
-/** Étape "moyenne x̄ retrouvée" (V6, V8) — même principe en miroir que `etapeSigma`. */
+/** Étape "moyenne x̄ retrouvée" (V6, V8) — l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est symétrique
+ * autour de x̄ : x̄ est son milieu. La méthode par k (équation substituée des aides) est rappelée en
+ * contrôle. */
 function etapeXBar(instance: ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar): FragmentConsigne[] {
-  const aide1 = texteAideXBarNiveau1();
   const aide2 = texteAideXBarNiveau2(instance);
   return [
-    texte(`${aide1.texte} `),
-    latex(aide1.latex),
-    texte(" — équation avec le k trouvé ci-dessus et la borne connue : "),
+    texte("L'intervalle garanti est centré sur la moyenne : "),
+    latex(`\\bar{x} = \\dfrac{${formatNombreLatex(instance.borneInf)} + ${formatNombreLatex(instance.borneSup)}}{2}`),
+    texte(` — ${formatXBarAttenduTexte(instance)} (${PRECISION_UNITE}). Contrôle avec le k trouvé ci-dessus : `),
     latex(aide2.latex),
-    texte(` — on isole x̄ : ${formatXBarAttenduTexte(instance)} (${PRECISION_UNITE}).`),
+    texte("."),
   ];
 }
 

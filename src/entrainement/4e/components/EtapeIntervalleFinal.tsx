@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevPourcentVersIntervalle } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerIntervalleAttendu } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PRECISION_UNITE, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { PRECISION_INTERVALLE_FINAL, RAPPEL_ARRONDI_GARANTIE, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -47,7 +47,7 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">
-        Quel est l'intervalle garanti (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
+        Quel est l'intervalle garanti (en {exercice.contexte.unite}) ? ({PRECISION_INTERVALLE_FINAL})
       </p>
 
       <div className="field-row">
@@ -60,8 +60,8 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
             className={`text-input${statut !== undefined && statut.borneInf !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 10"
             value={borneInf}
-            onChange={(e) => setBorneInf(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setBorneInf(filtrerSaisieBienaymeTchebychev(e.target.value))}
+            onKeyDown={gererKeyDownBienaymeTchebychev}
           />
         </div>
         <div className="field">
@@ -73,8 +73,8 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
             className={`text-input${statut !== undefined && statut.borneSup !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 30"
             value={borneSup}
-            onChange={(e) => setBorneSup(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setBorneSup(filtrerSaisieBienaymeTchebychev(e.target.value))}
+            onKeyDown={gererKeyDownBienaymeTchebychev}
           />
         </div>
       </div>
@@ -83,6 +83,7 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
         <div className="triangle-quelconque-aide">
           <p>{texteAideIntervalleFinalNiveau1().texte}</p>
           <Katex expression={texteAideIntervalleFinalNiveau1().latex} block />
+          <p>{RAPPEL_ARRONDI_GARANTIE}</p>
         </div>
       )}
       {!validation && (

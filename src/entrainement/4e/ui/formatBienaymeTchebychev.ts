@@ -97,15 +97,37 @@ export function libelleVarianteBienaymeTchebychev(variante: VarianteBienaymeTche
 // (`generateurs/bienaymeTchebychev/arrondis.ts`), jamais une nouvelle tolérance.
 // ============================================================================
 
-export const PRECISION_K = "arrondi à la deuxième décimale";
-export const PRECISION_POURCENT_INTERMEDIAIRE = "arrondi à la 2e décimale";
+export const PRECISION_K = "arrondi au centième";
+export const PRECISION_K_PAR_DEFAUT = "arrondi au centième par défaut, c'est-à-dire vers le bas";
+export const PRECISION_K_PAR_EXCES = "arrondi au centième par excès, c'est-à-dire vers le haut";
+export const PRECISION_POURCENT_INTERMEDIAIRE = "arrondi au centième";
 export const PRECISION_UNITE = "arrondi à l'unité";
+export const PRECISION_UNITE_PAR_DEFAUT = "arrondi à l'unité par défaut, c'est-à-dire vers le bas";
+export const PRECISION_INTERVALLE_FINAL =
+  "bornes arrondies à l'unité vers l'extérieur : la borne inférieure vers le bas, la borne supérieure vers le haut";
 
-/** L'écran "pourcentage minimal" est partagé entre V1 (final, `arrondiVersLeBas` à l'UNITÉ) et V3
- * (intermédiaire, `arrondi2` standard à la 2e décimale) — seule la précision AFFICHÉE en dépend,
- * jamais la vérification elle-même (déjà capturée par la valeur de `pourcentAttendu`). */
+/** Rappel commun aux aides des écrans où le sens d'arrondi compte (même règle que le bloc
+ * « Arrondir sans perdre la garantie » du cours). */
+export const RAPPEL_ARRONDI_GARANTIE =
+  "On arrondit toujours dans le sens qui conserve la garantie : un pourcentage ou un nombre minimal vers le bas, " +
+  "les bornes d'un intervalle vers l'extérieur, et k vers le bas si on en déduit un pourcentage, vers le haut si on en déduit un intervalle.";
+
+/** k déduit d'un pourcentage : vers le haut quand il sert à construire un intervalle garanti (V2/V4),
+ * arrondi au centième ordinaire quand il sert à retrouver σ ou x̄ (V5 à V8). */
+export function precisionKDepuisPourcent(variante: VarianteBienaymeTchebychev): string {
+  return variante === "pourcentVersIntervalle" || variante === "nombreVersIntervalle" ? PRECISION_K_PAR_EXCES : PRECISION_K;
+}
+
+/** L'écran "pourcentage minimal" est partagé entre V1 (final, à l'unité) et V3 (intermédiaire, au
+ * centième) — vers le bas dans les deux cas (`generateurs/bienaymeTchebychev/arrondis.ts`). */
 export function precisionPourcentFinal(variante: "intervalleVersPourcent" | "intervalleVersNombre"): string {
-  return virgulesTexte(variante === "intervalleVersPourcent" ? PRECISION_UNITE : PRECISION_POURCENT_INTERMEDIAIRE);
+  return variante === "intervalleVersPourcent" ? PRECISION_UNITE_PAR_DEFAUT : "arrondi au centième par défaut, c'est-à-dire vers le bas";
+}
+
+/** Pourcentage tiré d'un nombre minimal (écran 0 de V4/V7/V8) : vers le haut quand il mène à un
+ * intervalle garanti (V4), arrondi ordinaire quand il sert à retrouver σ ou x̄. */
+export function precisionPourcentDepuisNombre(variante: VarianteBienaymeTchebychev): string {
+  return variante === "nombreVersIntervalle" ? PRECISION_K_PAR_EXCES : PRECISION_POURCENT_INTERMEDIAIRE;
 }
 
 // ============================================================================
@@ -165,7 +187,9 @@ function segmentsQuestionV4(contexte: ContexteBienaymeTchebychev, n: number, nom
 
 function segmentsQuestionV5(contexte: ContexteBienaymeTchebychev, pourcentDonne: number, borneInf: number, borneSup: number): SegmentTexte[] {
   return [
-    T(`Sachant qu'au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}, quel est l'écart-type `),
+    T(
+      `D'après l'inégalité de Bienaymé-Tchebychev, au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}. Quel est l'écart-type `,
+    ),
     Kx(LABEL_SIGMA),
     T(" ?"),
   ];
@@ -173,7 +197,9 @@ function segmentsQuestionV5(contexte: ContexteBienaymeTchebychev, pourcentDonne:
 
 function segmentsQuestionV6(contexte: ContexteBienaymeTchebychev, pourcentDonne: number, borneInf: number, borneSup: number): SegmentTexte[] {
   return [
-    T(`Sachant qu'au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}, quelle est la moyenne `),
+    T(
+      `D'après l'inégalité de Bienaymé-Tchebychev, au moins ${pourcentDonne} % de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}. Quelle est la moyenne `,
+    ),
     Kx(LABEL_XBAR),
     T(" ?"),
   ];
@@ -182,7 +208,7 @@ function segmentsQuestionV6(contexte: ContexteBienaymeTchebychev, pourcentDonne:
 function segmentsQuestionV7(contexte: ContexteBienaymeTchebychev, n: number, nombreMinDonne: number, borneInf: number, borneSup: number): SegmentTexte[] {
   return [
     T(
-      `Sur un échantillon de ${n} ${contexte.population}, sachant qu'au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}, quel est l'écart-type `,
+      `Sur un échantillon de ${n} ${contexte.population}, l'inégalité de Bienaymé-Tchebychev garantit qu'au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}. Quel est l'écart-type `,
     ),
     Kx(LABEL_SIGMA),
     T(" ?"),
@@ -192,7 +218,7 @@ function segmentsQuestionV7(contexte: ContexteBienaymeTchebychev, n: number, nom
 function segmentsQuestionV8(contexte: ContexteBienaymeTchebychev, n: number, nombreMinDonne: number, borneInf: number, borneSup: number): SegmentTexte[] {
   return [
     T(
-      `Sur un échantillon de ${n} ${contexte.population}, sachant qu'au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}, quelle est la moyenne `,
+      `Sur un échantillon de ${n} ${contexte.population}, l'inégalité de Bienaymé-Tchebychev garantit qu'au moins ${nombreMinDonne} de ${phraseCesPopulation(contexte)} ont ${phraseCaractereComprisEntre(contexte, borneInf, borneSup)}. Quelle est la moyenne `,
     ),
     Kx(LABEL_XBAR),
     T(" ?"),
@@ -302,8 +328,9 @@ function sigmaValeurExacte(exercice: { borneSup: number; xBar: number; kAttendu:
   return (exercice.borneSup - exercice.xBar) / exercice.kAttendu;
 }
 
-function xBarValeurExacte(exercice: { borneSup: number; sigma: number; kAttendu: number }): number {
-  return exercice.borneSup - exercice.kAttendu * exercice.sigma;
+/** x̄ attendu = milieu de l'intervalle donné, toujours exact (bornes entières symétriques). */
+function xBarValeurExacte(exercice: { borneInf: number; borneSup: number }): number {
+  return (exercice.borneInf + exercice.borneSup) / 2;
 }
 
 function borneInfValeurExacte(exercice: { xBar: number; kAttendu: number; sigma: number }): number {
@@ -479,7 +506,7 @@ export function formatSigmaAttenduTexte(exercice: { borneSup: number; xBar: numb
   return virgulesTexte(`σ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.sigmaAttendu)}`);
 }
 
-export function formatXBarAttenduTexte(exercice: { borneSup: number; sigma: number; kAttendu: number; xBarAttendu: number }): string {
+export function formatXBarAttenduTexte(exercice: { borneInf: number; borneSup: number; xBarAttendu: number }): string {
   const exact = estArrondiExact(xBarValeurExacte(exercice), exercice.xBarAttendu);
   return virgulesTexte(`x̄ ${exact ? "=" : "≈"} ${formatNombreTexte(exercice.xBarAttendu)}`);
 }

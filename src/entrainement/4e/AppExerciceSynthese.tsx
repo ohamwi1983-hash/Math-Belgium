@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -71,6 +72,8 @@ import { calculerRecapitulatifExerciceSynthese } from "./ui/recapitulatifExercic
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
@@ -99,7 +102,8 @@ const PHASES_CALCULATRICE = new Set<PhaseExerciceSynthese>(["quotient", "varianc
  * que le moteur, jamais une deuxième reconstitution) et `etat.scoresAccumules[phase]` (écrans déjà
  * clos de CET exercice — `revele`/`niveauAide` déjà calculés par le moteur). "btPourcent" (dernière
  * phase des 2 séquences) n'a jamais besoin de sa propre branche "close" : jamais consultée comme
- * phase passée. Puces purement visuelles (pas de `onSegmentClick`). */
+ * phase passée. Puces cliquables : chaque écran clos ouvre sa fiche de consultation
+ * (`FicheReponseEcran`, même patron que gen5). */
 function calculerSegmentsProgression(etat: EtatSessionExerciceSynthese): EtatPuceProgression[] {
   const sequence = SEQUENCES[etat.exerciceCourant.variante];
   const indexCourant = sequence.indexOf(etat.phase);
@@ -110,6 +114,66 @@ function calculerSegmentsProgression(etat: EtatSessionExerciceSynthese): EtatPuc
     if (ecran.revele) return "revele";
     return ecran.niveauAide > 0 ? "aide" : "correcte";
   });
+}
+
+/** Titre de la fiche de consultation d'un écran clos (puce cliquable). */
+const TITRE_ECRAN: Record<PhaseExerciceSynthese, string> = {
+  centres: "Centres des classes",
+  sommes: "Sommes",
+  quotient: "Moyenne pondérée",
+  mediane: "Médiane",
+  q1: "Premier quartile",
+  q3: "Troisième quartile",
+  minMaxMode: "Minimum, maximum et mode",
+  polygone: "Polygone des effectifs cumulés",
+  lectureMediane: "Lecture de la médiane",
+  lectureQ1: "Lecture du premier quartile",
+  lectureQ3: "Lecture du troisième quartile",
+  synthese: "Synthèse",
+  boxplot: "Boîte à moustaches",
+  tableau: "Tableau de dispersion",
+  varianceEcartType: "Variance et écart-type",
+  btIntervalle: "Intervalle de Bienaymé-Tchebychev",
+  btPourcent: "% minimal garanti",
+};
+
+const LIBELLE_CHAMP: Record<string, string> = {
+  seuil: "seuil",
+  mediane: "médiane",
+  q1: "Q1",
+  q3: "Q3",
+  min: "min",
+  max: "max",
+  modes: "mode(s)",
+  mode: "mode",
+  produits: "produits",
+  sommeN: "Σnᵢ",
+  sommeXN: "Σxᵢnᵢ",
+  sommeProduits: "Σ(xᵢ − x̄)²nᵢ",
+  variance: "V",
+  ecartType: "σ",
+  xMin: "x min",
+  xMax: "x max",
+  etendue: "étendue",
+  classeModale: "classe modale",
+};
+
+/** Réponse saisie, rendue lisible pour la fiche de consultation — les écrans repris de gen32/33/34/36
+ * soumettent des formes variées (texte, liste, objet de champs, points du polygone). */
+function formaterReponseSaisie(valeur: unknown): string {
+  if (valeur === null || valeur === undefined || valeur === "") return "—";
+  if (typeof valeur === "string") return valeur;
+  if (typeof valeur === "number") return nombreFr(valeur);
+  if (Array.isArray(valeur)) return valeur.map(formaterReponseSaisie).join(" ; ");
+  if (typeof valeur === "object") {
+    const objet = valeur as Record<string, unknown>;
+    if ("x" in objet && "y" in objet) return `(${formaterReponseSaisie(objet.x)} ; ${formaterReponseSaisie(objet.y)})`;
+    if ("borneInf" in objet && "borneSup" in objet) return `[${formaterReponseSaisie(objet.borneInf)} ; ${formaterReponseSaisie(objet.borneSup)}]`;
+    return Object.entries(objet)
+      .map(([cle, v]) => `${LIBELLE_CHAMP[cle] ?? cle} = ${cle === "classeModale" && typeof v === "number" ? `n° ${v + 1}` : formaterReponseSaisie(v)}`)
+      .join(", ");
+  }
+  return String(valeur);
 }
 
 /** Réponse attendue à afficher dans `ValidationEcran` pour la phase QUI VIENT DE SE TERMINER —
@@ -222,8 +286,22 @@ interface TransitionEnAttente {
 export function AppExerciceSynthese() {
   const [etat, setEtat] = useState<EtatSessionExerciceSynthese>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation des écrans clos — une entrée par écran clos, dans l'ordre de `SEQUENCES` (même
+   * index que sa puce) ; remise à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la `key` des écrans pour que leur état local
+   * (champs saisis, nombre de lignes) reparte de zéro — sans lui, « Générer » vers un exercice qui
+   * a moins de lignes laissait « Valider » bloqué (même défaut que gen31/gen32, audit chapitre 4). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionExerciceSynthese) {
+  function reinitialiserHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionExerciceSynthese, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // "btPourcent" est la seule phase terminale des 2 séquences — à ce moment,
@@ -233,6 +311,15 @@ export function AppExerciceSynthese() {
       const revele =
         etat.phase === "btPourcent" ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.btPourcentRevele : nouvelEtat.scoresAccumules[etat.phase]!.revele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
+      setHistorique((h) => [
+        ...h,
+        {
+          titre: TITRE_ECRAN[etat.phase],
+          votreReponse,
+          correcte: !revele,
+          reponseAttendue: <div className="answer-reveal">{reponseAttenduePhase(etat.phase, etat.exerciceCourant)}</div>,
+        },
+      ]);
       return;
     }
     setEtat(nouvelEtat);
@@ -240,12 +327,14 @@ export function AppExerciceSynthese() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) reinitialiserHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    reinitialiserHistorique();
     setEtat(demarrerSessionExerciceSynthese(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteExerciceSynthese)));
   }
 
@@ -296,7 +385,7 @@ export function AppExerciceSynthese() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={blocDonnees} />
@@ -304,148 +393,148 @@ export function AppExerciceSynthese() {
           {PHASES_CALCULATRICE.has(phase) && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (
             <EtapeCentresMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMoyennePondereeClasses(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseCentres(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCentres(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "sommes" ? (
             <EtapeSommesMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMoyennePonderee(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSommes(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSommes(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "quotient" ? (
             <EtapeQuotientMoyennePonderee
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMoyennePonderee(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseQuotient(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQuotient(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "mediane" && exercice.variante === "discrete" ? (
             <EtapeMedianeDiscrete
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeDiscrete(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseMediane(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseMediane(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "q1" && exercice.variante === "discrete" ? (
             <EtapeQ1Mediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeDiscrete(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseQ1(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQ1(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "q3" && exercice.variante === "discrete" ? (
             <EtapeQ3Mediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeDiscrete(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseQ3(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQ3(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "minMaxMode" && exercice.variante === "discrete" ? (
             <EtapeMinMaxModeMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeDiscrete(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseMinMaxMode(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseMinMaxMode(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "polygone" && exercice.variante === "classes" ? (
             <EtapePolygoneMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeClasses(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(points) => terminerEtape(soumettreReponsePolygone(etat, points))}
+              onValider={(points) => terminerEtape(soumettreReponsePolygone(etat, points), formaterReponseSaisie(points))}
               validation={validation}
             />
           ) : phase === "lectureMediane" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeClasses(exercice)}
               parametre="mediane"
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "mediane", texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "mediane", texte), formaterReponseSaisie(texte))}
               validation={validation}
             />
           ) : phase === "lectureQ1" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeClasses(exercice)}
               parametre="q1"
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "q1", texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "q1", texte), formaterReponseSaisie(texte))}
               validation={validation}
             />
           ) : phase === "lectureQ3" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeClasses(exercice)}
               parametre="q3"
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "q3", texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLecture(etat, "q3", texte), formaterReponseSaisie(texte))}
               validation={validation}
             />
           ) : phase === "synthese" && exercice.variante === "classes" ? (
             <EtapeSyntheseMediane
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versMedianeClasses(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSynthese(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSynthese(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "boxplot" ? (
             <EtapeConstruction
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versBoiteMoustaches(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseBoxplot(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseBoxplot(etat, reponse), formaterReponseSaisie(reponse))}
               // Cran du glissement = plus grand pas commun des 5 valeurs attendues (entiers, multiples de
               // l'unité d'échelle du contexte, ou quartiles arrondis au palier de lecture).
               pas={pasCommun(Object.values(versBoiteMoustaches(exercice).valeurs))}
@@ -453,51 +542,55 @@ export function AppExerciceSynthese() {
             />
           ) : phase === "tableau" ? (
             <EtapeTableauDispersion
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versDispersion(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseTableau(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseTableau(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "varianceEcartType" ? (
             <EtapeVarianceEcartTypeDispersion
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={versDispersion(exercice)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseVarianceEcartType(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseVarianceEcartType(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : phase === "btIntervalle" ? (
             <EtapeBtIntervalle
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseBtIntervalle(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseBtIntervalle(etat, reponse), formaterReponseSaisie(reponse))}
               validation={validation}
             />
           ) : (
             <EtapeBtPourcent
-              key={phase}
+              key={`${numeroExercice}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseBtPourcent(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBtPourcent(etat, texte), formaterReponseSaisie(texte))}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

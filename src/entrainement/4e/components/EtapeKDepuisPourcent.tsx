@@ -8,8 +8,8 @@ import type {
   ExerciceBienaymeTchebychevPourcentVersIntervalle,
 } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_K, PRECISION_K, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { LABEL_K, RAPPEL_ARRONDI_GARANTIE, precisionKDepuisPourcent, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -70,7 +70,7 @@ export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">
-        Détermine <Katex expression={LABEL_K} /> pour ce pourcentage minimal ({PRECISION_K}).
+        Détermine <Katex expression={LABEL_K} /> pour ce pourcentage minimal ({precisionKDepuisPourcent(exercice.variante)}).
       </p>
 
       <div className="field field-inline">
@@ -82,8 +82,8 @@ export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentatives
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 2,5"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 
@@ -91,6 +91,7 @@ export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentatives
         <div className="triangle-quelconque-aide">
           <p>{texteAideKDepuisPourcentNiveau1().texte}</p>
           <Katex expression={texteAideKDepuisPourcentNiveau1().latex} block />
+          {(exercice.variante === "pourcentVersIntervalle" || exercice.variante === "nombreVersIntervalle") && <p>{RAPPEL_ARRONDI_GARANTIE}</p>}
           {niveauAide >= 2 && (
             <>
               <p>{texteAideKDepuisPourcentNiveau2(pourcentAffiche).texte}</p>

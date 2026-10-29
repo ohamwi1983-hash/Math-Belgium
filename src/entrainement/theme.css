@@ -927,12 +927,14 @@
   margin-bottom: 14px;
 }
 
+/* Pas de `text-transform: uppercase` : le titre porte souvent une variable mathématique (« Valeur de
+ * k », « Écart-type σ », « Moyenne x̄ ») dont la casse a un sens — même correctif que les kickers et
+ * labels de callout du contenu (audit chapitre 4). */
 .entrainement .fiche-reponse-eyebrow {
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--color-text-muted);
   margin: 0;
 }

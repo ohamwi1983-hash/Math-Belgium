@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre, ExerciceBienaymeTchebychevIntervalleVersPourcent } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcent } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { RAPPEL_ARRONDI_GARANTIE, precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -48,8 +48,8 @@ export function EtapePourcentFinal({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 75"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 
@@ -57,6 +57,7 @@ export function EtapePourcentFinal({ exercice, tentativesUtilisees, tentativesMa
         <div className="triangle-quelconque-aide">
           <p>{texteAidePourcentNiveau1().texte}</p>
           <Katex expression={texteAidePourcentNiveau1().latex} block />
+          <p>{RAPPEL_ARRONDI_GARANTIE}</p>
           {niveauAide >= 2 && (
             <>
               <p>{texteAidePourcentNiveau2(exercice.kAttendu).texte}</p>

@@ -38,3 +38,16 @@ export function arrondiVersLeBas(valeur: number): number {
 export function arrondiVersLeHaut(valeur: number): number {
   return Math.ceil(valeur - EPSILON);
 }
+
+/** Arrondi au centième VERS LE BAS — k quand on en déduit un pourcentage (V1/V3) et pourcentage
+ * intermédiaire (V3) : un k plus petit ne promet jamais plus que ce que l'inégalité garantit. */
+export function arrondi2VersLeBas(valeur: number): number {
+  return Math.floor((valeur + EPSILON) * 100) / 100;
+}
+
+/** Arrondi au centième VERS LE HAUT — k quand on en déduit un intervalle (V2/V4) et pourcentage
+ * intermédiaire tiré d'un nombre minimal (V4) : un k plus grand élargit l'intervalle, donc garde
+ * la garantie vraie. */
+export function arrondi2VersLeHaut(valeur: number): number {
+  return Math.ceil((valeur - EPSILON) * 100) / 100;
+}

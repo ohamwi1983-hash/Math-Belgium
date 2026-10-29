@@ -163,7 +163,10 @@ export function segmentsConsigneSeuil(question: QuestionSeuil, exercice: Exercic
   const unite = exercice.contexte.unite;
   const sujet = question.estFrequence ? "Quel pourcentage des données de la série" : "Combien d'individus de la série";
   const verbe = question.estFrequence ? "a une valeur" : "ont une valeur";
-  const precision = question.estFrequence ? " (arrondi à l'unité)" : "";
+  // Aucune précision d'arrondi : n divise toujours 100 (`CANDIDATS_N`), donc chaque fréquence cumulée
+  // — et la différence de deux d'entre elles — est un pourcentage entier exact (audit chapitre 4 :
+  // l'ancienne mention « arrondi à l'unité » laissait croire à un arrondi qui n'existe pas).
+  const precision = "";
 
   if (question.indexBas === null) {
     return [T(`${sujet} ${question.serie} ${verbe} inférieure ou égale à ${valeurHaut} ${unite} ?${precision}`)];
@@ -213,6 +216,12 @@ function accordEleve(compris: "compris" | "comprise"): string {
   return virgulesTexte(compris === "comprise" ? "élevée" : "élevé");
 }
 
+/** Accord de "varié"/"variée" et de "le/la plus faible" avec le genre du caractère — dérivé de
+ * `moyenAccord` (« le poids … varié », « la taille … variée »), jamais un nouveau champ de genre. */
+function estFeminin(moyen: "moyen" | "moyenne"): boolean {
+  return moyen === "moyenne";
+}
+
 /** Décrit le profil de la série `serie` — dérivé de sa médiane/dispersion RELATIVES à l'autre
  * série, jamais d'une valeur absolue (ni d'un domaine sémantique figé comme "jeune"/"âgé", trop
  * spécifique à un seul contexte narratif parmi la banque). */
@@ -223,7 +232,8 @@ export function texteProfilSerie(exercice: ExerciceComparaisonSeries, serie: "A"
   const niveauBas = cible.mediane < autre.mediane;
   const homogene = cible.sigma < autre.sigma;
   const niveauTexte = niveauBas ? "plutôt faible" : `plutôt ${accordEleve(contexte.comprisAccord)}`;
-  const dispersionTexte = homogene ? "peu variée d'un individu à l'autre" : "très variée d'un individu à l'autre";
+  const varie = estFeminin(contexte.moyenAccord) ? "variée" : "varié";
+  const dispersionTexte = homogene ? `peu ${varie} d'un individu à l'autre` : `très ${varie} d'un individu à l'autre`;
   return virgulesTexte(`une population où ${contexte.caractereDefini} est ${niveauTexte} et ${dispersionTexte}`);
 }
 
@@ -238,7 +248,7 @@ export function segmentsAideInterpretationNiveau1(): SegmentTexte[] {
 export function segmentsAideInterpretationNiveau2(exercice: ExerciceComparaisonSeries): SegmentTexte[] {
   return [
     T(
-      `Rappel : ${exercice.contexte.caractereDefini} le plus faible se lit sur la série dont la médiane est la plus basse ; l'homogénéité se lit sur celle dont l'écart-type (ou l'écart interquartile) est le plus petit.`,
+      `Rappel : ${exercice.contexte.caractereDefini} ${estFeminin(exercice.contexte.moyenAccord) ? "la" : "le"} plus faible se lit sur la série dont la médiane est la plus basse ; l'homogénéité se lit sur celle dont l'écart-type (ou l'écart interquartile) est le plus petit.`,
     ),
   ];
 }

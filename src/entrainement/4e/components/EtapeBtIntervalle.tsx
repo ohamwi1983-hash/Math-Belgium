@@ -58,7 +58,7 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
           <input
             id="synthese-bt-intervalle-inf"
             className={`text-input${statut !== undefined && statut.borneInf !== "correct" ? " is-erronee" : ""}`}
-            placeholder="ex : -0,66"
+            placeholder="ex : 12"
             value={borneInf}
             onChange={(e) => setBorneInf(filtrerSaisieNumerique(e.target.value))}
             onKeyDown={gererKeyDownNumerique}
@@ -71,7 +71,7 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
           <input
             id="synthese-bt-intervalle-sup"
             className={`text-input${statut !== undefined && statut.borneSup !== "correct" ? " is-erronee" : ""}`}
-            placeholder="ex : 10,66"
+            placeholder="ex : 30"
             value={borneSup}
             onChange={(e) => setBorneSup(filtrerSaisieNumerique(e.target.value))}
             onKeyDown={gererKeyDownNumerique}

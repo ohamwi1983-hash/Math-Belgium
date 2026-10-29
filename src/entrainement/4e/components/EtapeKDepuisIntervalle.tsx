@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre, ExerciceBienaymeTchebychevIntervalleVersPourcent } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_K, PRECISION_K, texteAideKDepuisIntervalleNiveau1, texteAideKDepuisIntervalleNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
+import { LABEL_K, PRECISION_K_PAR_DEFAUT, RAPPEL_ARRONDI_GARANTIE, texteAideKDepuisIntervalleNiveau1, texteAideKDepuisIntervalleNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -36,7 +36,7 @@ export function EtapeKDepuisIntervalle({ exercice, tentativesUtilisees, tentativ
   return (
     <div>
       <p className="prompt-text">
-        Détermine <Katex expression={LABEL_K} /> pour cet intervalle ({PRECISION_K}).
+        Détermine <Katex expression={LABEL_K} /> pour cet intervalle ({PRECISION_K_PAR_DEFAUT}).
       </p>
 
       <div className="field field-inline">
@@ -48,8 +48,8 @@ export function EtapeKDepuisIntervalle({ exercice, tentativesUtilisees, tentativ
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 2,5"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
+          onKeyDown={gererKeyDownBienaymeTchebychev}
         />
       </div>
 
@@ -57,6 +57,7 @@ export function EtapeKDepuisIntervalle({ exercice, tentativesUtilisees, tentativ
         <div className="triangle-quelconque-aide">
           <p>{texteAideKDepuisIntervalleNiveau1().texte}</p>
           <Katex expression={texteAideKDepuisIntervalleNiveau1().latex} block />
+          <p>{RAPPEL_ARRONDI_GARANTIE}</p>
           {niveauAide >= 2 && (
             <>
               <p>{texteAideKDepuisIntervalleNiveau2(exercice).texte}</p>
