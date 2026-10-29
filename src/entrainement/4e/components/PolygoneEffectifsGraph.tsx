@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Line, Mafs, MovablePoint, Point as MafsPoint } from "mafs";
 import "mafs/core.css";
-import { EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
-import { calculerViewBoxPolygoneEffectifs } from "../ui/lectureQuartileGraph";
+import { EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreLargeurXPourEtiquettes, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
+import { calculerViewBoxPolygoneEffectifs, calculerViewBoxPolygoneFixe, cibleLignesSansChevauchement } from "../ui/lectureQuartileGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -27,6 +27,9 @@ interface Props {
    * À grande échelle (kilométrages, salaires), les bornes sont des multiples de 100, 1000... : un
    * cran de 1 rendrait la borne exacte impossible à atteindre au doigt (audit chapitre 4). */
   pasX?: number;
+  /** Fenêtre FIXE tirée de l'exercice (première borne inférieure, dernière borne supérieure,
+   * effectif total) — absente : fenêtre recalculée depuis les points (comportement historique). */
+  fenetre?: { xMin: number; xMax: number; n: number };
 }
 
 const COULEUR_FIXE = "#212529";
@@ -79,21 +82,27 @@ function snapGrille(pasX: number) {
  * glissement (`constrain`, en coordonnées DONNÉES) n'est jamais affecté par ce découplage — seule
  * la conversion donnée→pixel change, jamais la logique de magnétisme elle-même.
  */
-export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacerPoint, pasX = 1 }: Props) {
+export function PolygoneEffectifsGraph({ pointFixe, points, erronees, onDeplacerPoint, pasX = 1, fenetre }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
   const hauteur = largeur / RATIO_GRAPHE;
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
   const [selectionne, setSelectionne] = useState<number | null>(null);
 
-  const viewBox = calculerViewBoxPolygoneEffectifs([pointFixe, ...points]);
-  const viewBoxEtendu = etendreViewBoxPourEtiquettes(viewBox);
+  const viewBox = fenetre ? calculerViewBoxPolygoneFixe(fenetre.xMin, fenetre.xMax, fenetre.n) : calculerViewBoxPolygoneEffectifs([pointFixe, ...points]);
+  const cibleX = cibleLignesSansChevauchement(largeur, [viewBox.x[0], viewBox.x[1]], nombreFr);
+  // Avec une fenêtre fixe, chaque axe est étendu SEUL (X aux graduations, Y gardé tel quel) :
+  // `etendreViewBoxPourEtiquettes` recouple X et Y par le ratio et élargissait X bien au-delà des
+  // classes (axe −50…150 pour des classes de 7 à 25).
+  const viewBoxEtendu = fenetre
+    ? { x: etendreLargeurXPourEtiquettes(viewBox, cibleX, RATIO_GRAPHE).x, y: viewBox.y }
+    : etendreViewBoxPourEtiquettes(viewBox, cibleX, undefined, 10);
   const sommets: PointXY[] = [pointFixe, ...points];
 
   return (
     <div className="mafs-graph" ref={wrapperRef}>
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} />
+        <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} formatEtiquette={nombreFr} cibleNombreLignes={cibleX} cibleNombreLignesY={10} />
         {sommets.slice(0, -1).map((sommet, i) => (
           <Line.Segment key={`segment-${i}`} point1={[sommet.x, sommet.y]} point2={[sommets[i + 1].x, sommets[i + 1].y]} color={COULEUR_SEGMENT} weight={EPAISSEUR_TRAIT_STANDARD} />
         ))}

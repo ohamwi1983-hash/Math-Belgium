@@ -100,3 +100,14 @@ export function verifierVarianceEcartType(exercice: ExerciceDispersion, reponse:
   const statut = diagnostiquerVarianceEcartType(exercice, reponse);
   return statut.variance === "correct" && statut.ecartType === "correct";
 }
+
+/** Erreur ciblée (audit chapitre 4) : σ saisi = √(Σ/n) calculé sur la variance NON arrondie, au lieu
+ * de partir de la variance arrondie comme l'impose le cours. N'est jamais vrai quand les deux
+ * calculs donnent la même valeur (σ serait alors simplement correct). */
+export function ecartTypeDepuisVarianceNonArrondie(exercice: ExerciceDispersion, texte: string): boolean {
+  const valeur = parserNombreOuFraction(texte);
+  if (valeur === null) return false;
+  const ecartTypeNonArrondi = Math.round(Math.sqrt(exercice.sommeProduits / exercice.n) * 100) / 100;
+  if (Math.abs(ecartTypeNonArrondi - exercice.ecartTypeAttendu) <= TOLERANCE) return false;
+  return Math.abs(valeur - ecartTypeNonArrondi) <= TOLERANCE;
+}

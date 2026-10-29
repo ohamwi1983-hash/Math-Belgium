@@ -63,6 +63,32 @@ export function calculerViewBoxPolygoneEffectifs(points: PointPolygoneXY[]): Vie
   return { x: [xMin, xMax], y: [yMin, yMax] };
 }
 
+/** ViewBox FIXE de l'écran « Polygone » (audit chapitre 4) — tirée de l'exercice (première borne
+ * inférieure → dernière borne supérieure ; effectifs cumulés de 0 à n), jamais des points mobiles :
+ * recalculée depuis les points, la fenêtre changeait d'échelle à chaque glissement (et partait de
+ * y ∈ [−3 ; 3] au départ, tous les points étant posés à y = 0). Marge proportionnelle à chaque axe. */
+export function calculerViewBoxPolygoneFixe(xMin: number, xMax: number, n: number): ViewBoxPolygoneEffectifs {
+  const margeX = Math.max((xMax - xMin) * 0.08, MARGE);
+  const margeY = Math.max(n * 0.08, MARGE);
+  return { x: [xMin - margeX, xMax + margeX], y: [-margeY, n + margeY] };
+}
+
+/** Largeur moyenne (pixels) d'un caractère des nombres de graduation Mafs, plus l'espace minimal
+ * entre deux nombres voisins — estimation volontairement large (chiffres + virgule + signe). */
+const LARGEUR_CARACTERE_GRADUATION = 8;
+const ESPACE_ENTRE_GRADUATIONS = 14;
+
+/** Nombre cible de lignes verticales du quadrillage pour que les nombres de l'axe X ne se
+ * chevauchent jamais (audit chapitre 4 : « −150−160−170… », « 3212321632203224… » à 390 px) —
+ * dérivé de la largeur réelle du graphe et du plus long nombre à afficher, borné à [2 ; 10] (10 =
+ * cible par défaut de `calculerPasGrille`, jamais dépassée : rien ne change pour un graphe déjà
+ * lisible). */
+export function cibleLignesSansChevauchement(largeurPx: number, valeurs: number[], formatEtiquette: (v: number) => string): number {
+  const caracteres = Math.max(...valeurs.map((v) => formatEtiquette(v).length));
+  const largeurEtiquette = caracteres * LARGEUR_CARACTERE_GRADUATION + ESPACE_ENTRE_GRADUATIONS;
+  return Math.max(2, Math.min(10, Math.floor(largeurPx / largeurEtiquette)));
+}
+
 /**
  * Les 2 sommets du polygone qui ENCADRENT un seuil donné — les extrémités du segment sur lequel
  * l'interpolation linéaire se fait pour ce seuil (`promptgen33gen35aidesinterpolation.md`, aide 3 des

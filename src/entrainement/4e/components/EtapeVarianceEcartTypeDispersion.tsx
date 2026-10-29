@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseVarianceEcartType } from "../moteur/verificationDispersion";
-import { diagnostiquerVarianceEcartType } from "../moteur/verificationDispersion";
+import { diagnostiquerVarianceEcartType, ecartTypeDepuisVarianceNonArrondie } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE } from "../moteur/sessionDispersion";
 import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
@@ -48,6 +48,7 @@ export function EtapeVarianceEcartTypeDispersion({
   const apresEchec = tentativesUtilisees > 0;
   const evaluation = apresEchec ? diagnostiquerVarianceEcartType(exercice, { variance, ecartType }) : null;
   const statut = evaluation && (evaluation.variance === "parse_error" || evaluation.ecartType === "parse_error") ? "parse_error" : undefined;
+  const sigmaDepuisVarianceBrute = evaluation !== null && evaluation.ecartType !== "correct" && ecartTypeDepuisVarianceNonArrondie(exercice, ecartType);
   const consigneV = consigneVariance(exercice.contexte);
   const consigneS = consigneEcartType(exercice.contexte);
   const aide2 = texteAideVarianceEcartTypeNiveau2(exercice);
@@ -115,6 +116,11 @@ export function EtapeVarianceEcartTypeDispersion({
         {tentativesUtilisees > 0 && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            {sigmaDepuisVarianceBrute && (
+              <>
+                {" "}Ton écart-type est calculé à partir de la variance non arrondie : calcule <Katex expression={`${LABEL_ECART_TYPE}=\\sqrt{${LABEL_VARIANCE}}`} /> à partir de la variance arrondie à 2 décimales.
+              </>
+            )}
           </p>
         )}
         </>

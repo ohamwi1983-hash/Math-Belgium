@@ -226,36 +226,34 @@ export function ratioGraphe(nombreLignes: 1 | 2): number {
  * seconde série (variante "comparaison"). La première ligne est toujours la plus haute (Y décroît
  * avec l'index). */
 export function yLigne(index: number, nombreLignes: 1 | 2): number {
-  return (nombreLignes - 1 - index) * ESPACEMENT_LIGNE;
+  return (nombreLignes - 1 - index) * ESPACEMENT_LIGNE + Y_PREMIERE_LIGNE;
 }
+
+/** Hauteur de la ligne la plus basse au-dessus de l'axe des abscisses (y = 0, où se placent les
+ * nombres de graduation) — audit chapitre 4 : à y = 0, la boîte (ou la boîte B en comparaison)
+ * recouvrait l'axe et ses nombres. Laisse la place des étiquettes alternées sous la boîte. */
+const Y_PREMIERE_LIGNE = DEMI_HAUTEUR_BOITE + 2.4;
+/** Marge sous l'axe pour ses nombres de graduation. */
+const MARGE_SOUS_AXE = 1.6;
+/** Place de l'étiquette « A » au-dessus de la boîte du haut (variante comparaison). */
+const MARGE_ETIQUETTE_SERIE = 1.6;
 
 export interface ViewBoxBoiteMoustaches {
   x: [number, number];
   y: [number, number];
 }
 
-/** Même principe que `ajusterAuRatio` (`ui/vecteurGraph.ts`, dupliquée pas importée — petite
- * fonction pure, jamais risquer une régression sur l'autre consommateur pour un partage marginal) :
- * élargit la dimension la plus étroite pour respecter le ratio demandé, jamais un rétrécissement. */
-function ajusterAuRatio(x: [number, number], y: [number, number], ratio: number): ViewBoxBoiteMoustaches {
-  const largeurX = x[1] - x[0];
-  const largeurY = y[1] - y[0];
-  const centreY = (y[0] + y[1]) / 2;
-  if (largeurX / largeurY > ratio) {
-    const demiLargeurY = largeurX / ratio / 2;
-    return { x, y: [centreY - demiLargeurY, centreY + demiLargeurY] };
-  }
-  const centreX = (x[0] + x[1]) / 2;
-  const demiLargeurX = (largeurY * ratio) / 2;
-  return { x: [centreX - demiLargeurX, centreX + demiLargeurX], y };
-}
-
-/** ViewBox couvrant `bornePlage` en X et les `nombreLignes` lignes en Y, avec une marge fixe autour
- * de la boîte la plus haute/basse — puis ajusté au ratio propre à ce graphe. */
+/** ViewBox couvrant `bornePlage` en X et, en Y, de l'axe (avec ses nombres) jusqu'au-dessus de la
+ * boîte la plus haute. X et Y sont DÉCOUPLÉS (audit chapitre 4) : Y n'est qu'un séparateur de
+ * lignes, jamais une grandeur — l'ancien ajustement au ratio rendait Y aussi large que X divisé par
+ * le ratio, donc des boîtes plates (quelques pixels) dès que l'axe couvrait des milliers d'unités
+ * (kilométrages, salaires). Le rendu (`BoiteMoustachesGraph`, `preserveAspectRatio={false}`) et
+ * l'export SVG gardent ce Y tel quel. */
 export function calculerViewBoxBoiteMoustaches(bornePlage: PlageAxe, nombreLignes: 1 | 2): ViewBoxBoiteMoustaches {
-  const yMin = yLigne(nombreLignes - 1, nombreLignes) - DEMI_HAUTEUR_BOITE - MARGE_VERTICALE;
-  const yMax = yLigne(0, nombreLignes) + DEMI_HAUTEUR_BOITE + MARGE_VERTICALE;
-  return ajusterAuRatio([bornePlage.min, bornePlage.max], [yMin, yMax], ratioGraphe(nombreLignes));
+  // En comparaison, la lettre « A » se pose au-dessus de la boîte du haut : place réservée en plus.
+  const margeHaut = MARGE_VERTICALE + (nombreLignes === 2 ? MARGE_ETIQUETTE_SERIE : 0);
+  const yMax = yLigne(0, nombreLignes) + DEMI_HAUTEUR_BOITE + margeHaut;
+  return { x: [bornePlage.min, bornePlage.max], y: [-MARGE_SOUS_AXE, yMax] };
 }
 
 /** Nettoie le bruit résiduel de virgule flottante (ex. `2.4000000000000004`) après un crantage à un

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -29,6 +30,14 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+
+/** Titre de la fiche de consultation d'un écran clos (puces cliquables, variante comparaison). */
+const TITRE_PHASE_COMPARAISON: Partial<Record<PhaseBoiteMoustaches, string>> = {
+  comparaisonMedianes: "Comparaison des médianes",
+  comparaisonDispersions: "Comparaison des dispersions",
+};
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -69,8 +78,12 @@ interface TransitionEnAttente {
 export function AppBoiteMoustaches() {
   const [etat, setEtat] = useState<EtatSessionBoiteMoustaches>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans clos (puces cliquables, variante comparaison — seule
+   * variante à plusieurs écrans), remise à vide à chaque exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionBoiteMoustaches) {
+  function terminerEtape(nouvelEtat: EtatSessionBoiteMoustaches, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -79,6 +92,10 @@ export function AppBoiteMoustaches() {
           : etat.phase === "comparaisonDispersions"
             ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.comparaisonDispersionsRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.revele;
+      const titre = TITRE_PHASE_COMPARAISON[etat.phase];
+      if (titre && votreReponse !== undefined) {
+        setHistorique((h) => [...h, { titre, votreReponse, correcte: !revele, reponseAttendue: revele ? calculerReponseAttendue() : undefined }]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -87,12 +104,20 @@ export function AppBoiteMoustaches() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionBoiteMoustaches(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteBoiteMoustaches)));
   }
 
@@ -137,7 +162,7 @@ export function AppBoiteMoustaches() {
       </header>
 
       <main className="card">
-        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} />}
+        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} onSegmentClick={(index) => setFicheOuverteIndex(index)} />}
 
         <div className="card-body">
           <EnTeteExercice
@@ -182,7 +207,7 @@ export function AppBoiteMoustaches() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(soumettreReponseComparaisonMedianes(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseComparaisonMedianes(etat, choix), `Série ${choix}`)}
               validation={validation}
             />
           ) : (
@@ -192,12 +217,16 @@ export function AppBoiteMoustaches() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(soumettreReponseComparaisonDispersions(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseComparaisonDispersions(etat, choix), `Série ${choix}`)}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

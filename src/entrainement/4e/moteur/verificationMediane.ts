@@ -255,7 +255,10 @@ export function toleranceLecture(exercice: ExerciceMedianeClasses): number {
 function statutValeurTolerance(texte: string, cible: number, tolerance: number): StatutVerification {
   const valeur = parserNombreOuFraction(texte);
   if (valeur === null) return "parse_error";
-  return Math.abs(valeur - cible) <= tolerance ? "correct" : "not_equivalent";
+  // Marge d'arrondi flottant (audit chapitre 4) : sans elle, une saisie à EXACTEMENT ±tolérance
+  // (ex. cible 703,3, saisie 703,4) était refusée environ 4 fois sur 10.
+  const epsilon = 1e-9 * Math.max(1, Math.abs(cible), tolerance);
+  return Math.abs(valeur - cible) <= tolerance + epsilon ? "correct" : "not_equivalent";
 }
 
 /** Seuil correspondant au paramètre — utilisé côté présentation (aide) pour rappeler le calcul

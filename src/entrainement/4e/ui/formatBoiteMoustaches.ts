@@ -104,7 +104,7 @@ export function segmentsConsigneConstruction(exercice: ExerciceBoiteMoustachesCo
  * jamais que le minimum et le maximum). Rendue en une seule expression KaTeX, réutilisée aussi par
  * la révélation du panneau de résultat (contexte différent, même contenu). */
 export function formatCinqNombresLatex(valeurs: CinqNombres): string {
-  return virgulesLatex(formatTermesCinqNombresLatex(valeurs).join(",\\ "));
+  return virgulesLatex(formatTermesCinqNombresLatex(valeurs).join(";\\ "));
 }
 
 /** Version "bloc fitter" de `formatCinqNombresLatex` (`promptblocfittertousgenerateurs.md`) — un

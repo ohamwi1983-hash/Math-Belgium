@@ -77,8 +77,10 @@ export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax
         <p>
           Série donnée :{" "}
           <span className="equation-box-termes">
-            {formatTermesCinqNombresLatex(exercice.valeurs).map((terme, i) => (
-              <Katex key={i} expression={terme} />
+            {formatTermesCinqNombresLatex(exercice.valeurs).map((terme, i, termes) => (
+              // « ; » entre les 5 nombres (audit chapitre 4 : « x_min = 3 Q₁ = 6 » se lisait d'un
+              // bloc sur mobile) — jamais « , », déjà la virgule décimale.
+              <Katex key={i} expression={i < termes.length - 1 ? `${terme}\\,;` : terme} />
             ))}
           </span>
         </p>

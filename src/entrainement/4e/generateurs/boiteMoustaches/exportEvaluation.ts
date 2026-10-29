@@ -203,7 +203,7 @@ function construireSvgBoiteMoustaches(bornePlage: PlageAxe, lignes: LigneBoiteEv
 
   const viewBox = calculerViewBoxBoiteMoustaches(bornePlage, nombreLignes);
   const cibleNombreLignesX = cibleNombreLignesXAdaptative(bornePlage);
-  const viewBoxEtendu = etendreLargeurXPourEtiquettes(viewBox, cibleNombreLignesX, ratio, MANTISSES_GRILLE_BOITE);
+  const viewBoxEtendu = { x: etendreLargeurXPourEtiquettes(viewBox, cibleNombreLignesX, ratio, MANTISSES_GRILLE_BOITE).x, y: viewBox.y };
   const [xMin, xMax] = viewBoxEtendu.x;
   const [yMin, yMax] = viewBoxEtendu.y;
 
@@ -244,7 +244,7 @@ ${cadre}
 // ============================================================================
 
 function construireEnonceConstruction(exercice: ExerciceBoiteMoustachesConstruction): SectionExercice {
-  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(",\\ ");
+  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(";\\ ");
   return {
     enteteFragments: [texte(formatEnonceTexte(exercice)), texte(" Voici les 5 valeurs qui la caractérisent : "), latex(valeursLatex), texte(".")],
     enteteHtml: construireSvgBoiteMoustaches(exercice.bornePlage, []),
@@ -259,7 +259,7 @@ function construireEnonceConstruction(exercice: ExerciceBoiteMoustachesConstruct
 }
 
 function construireCorrectionConstruction(exercice: ExerciceBoiteMoustachesConstruction): BlocCorrection[] {
-  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(",\\ ");
+  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(";\\ ");
   return [
     { type: "html", html: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }], true) },
     { type: "paragraphe", fragments: [texte("Boîte à moustaches attendue : "), latex(valeursLatex), texte(".")] },
@@ -296,7 +296,7 @@ function construireEnonceLecture(exercice: ExerciceBoiteMoustachesLecture): Sect
 }
 
 function construireCorrectionLecture(exercice: ExerciceBoiteMoustachesLecture): BlocCorrection[] {
-  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(",\\ ");
+  const valeursLatex = formatTermesCinqNombresLatex(exercice.valeurs).join(";\\ ");
   return [
     { type: "html", html: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }], true) },
     { type: "paragraphe", fragments: [texte("Valeurs attendues : "), latex(valeursLatex), texte(".")] },

@@ -71,7 +71,9 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
     <div>
       <p className="prompt-text">{CONSIGNE_POLYGONE}</p>
 
-      <PolygoneEffectifsGraph pointFixe={pointFixe} points={points} erronees={erronees} onDeplacerPoint={deplacerPoint} pasX={cranBornes(exercice)} />
+      <PolygoneEffectifsGraph pointFixe={pointFixe} points={points} erronees={erronees} onDeplacerPoint={deplacerPoint} pasX={cranBornes(exercice)}
+        fenetre={{ xMin: exercice.classes[0].borneInf, xMax: exercice.classes[exercice.classes.length - 1].borneSup, n: exercice.classes[exercice.classes.length - 1].effectifCumule }}
+      />
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">

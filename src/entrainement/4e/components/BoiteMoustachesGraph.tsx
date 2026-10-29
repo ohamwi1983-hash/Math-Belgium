@@ -18,6 +18,7 @@ import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
 import { nombreFr, virgulesTexte } from "../ui/nombreFr";
+import { cibleLignesSansChevauchement } from "../ui/lectureQuartileGraph";
 
 const CLES: (keyof CinqNombres)[] = ["min", "q1", "mediane", "q3", "max"];
 
@@ -84,12 +85,18 @@ export function BoiteMoustachesGraph({ bornePlage, lignes }: Props) {
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
 
   const viewBox = calculerViewBoxBoiteMoustaches(bornePlage, nombreLignes);
-  const cibleNombreLignesX = cibleNombreLignesXAdaptative(bornePlage);
-  const viewBoxEtendu = etendreLargeurXPourEtiquettes(viewBox, cibleNombreLignesX, ratio, MANTISSES_GRILLE_BOITE);
+  // Nombres de graduation jamais chevauchants à la largeur réelle (audit chapitre 4 :
+  // « 3212321632203224… » à 390 px) — `max − 0,5` couvre les graduations décimales.
+  const cibleNombreLignesX = Math.min(
+    cibleNombreLignesXAdaptative(bornePlage),
+    cibleLignesSansChevauchement(largeur, [bornePlage.min, bornePlage.max, bornePlage.max - 0.5], nombreFr),
+  );
+  // X seul étendu aux graduations ; Y gardé tel quel (découplé de X, voir `calculerViewBoxBoiteMoustaches`).
+  const viewBoxEtendu = { x: etendreLargeurXPourEtiquettes(viewBox, cibleNombreLignesX, ratio, MANTISSES_GRILLE_BOITE).x, y: viewBox.y };
 
   return (
     <div className="mafs-graph" ref={wrapperRef}>
-      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
+      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBoxEtendu.x, y: viewBoxEtendu.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
         <GrilleAdaptative
           largeur={largeur}
           hauteur={hauteur}

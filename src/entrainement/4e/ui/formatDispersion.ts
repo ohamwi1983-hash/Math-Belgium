@@ -122,9 +122,11 @@ export function texteAideTableauNiveau1(): SegmentTexte[] {
 export function texteAideTableauNiveau2(exercice: ExerciceDispersion): AideDeuxLignes {
   const ligne = exercice.lignes[INDEX_LIGNE_EXEMPLE];
   const ecart = ligne.valeur - exercice.xBar;
+  // Un écart négatif est TOUJOURS parenthésé : −6^2 vaudrait −36, jamais 36 (audit chapitre 4).
+  const ecartLatex = ecart < 0 ? `(${formatNombreLatex(ecart)})` : formatNombreLatex(ecart);
   return {
     texte: "Pour la première ligne :",
-    latex: `(${ligne.valeur}-${exercice.xBar})^2 \\cdot ${ligne.effectif} = ${formatNombreLatex(ecart)}^2 \\cdot ${ligne.effectif} = ${ligne.produitAttendu}`,
+    latex: virgulesLatex(`(${ligne.valeur}-${exercice.xBar})^2 \\cdot ${ligne.effectif} = ${ecartLatex}^2 \\cdot ${ligne.effectif} = ${ligne.produitAttendu}`),
   };
 }
 
@@ -160,8 +162,10 @@ export function texteAideVarianceEcartTypeNiveau1(): AideDeuxLignes {
 
 export function texteAideVarianceEcartTypeNiveau2(exercice: ExerciceDispersion): AideDeuxLignes {
   return {
-    texte: "Substitué (non calculé) :",
-    latex: `\\begin{gathered} ${LABEL_VARIANCE} = \\dfrac{${exercice.sommeProduits}}{${exercice.n}} \\\\ ${LABEL_ECART_TYPE} = \\sqrt{${formatNombreLatex(exercice.varianceAttendue)}} \\end{gathered}`,
+    texte: "Avec les valeurs de l'exercice (non calculé) :",
+    // σ = √V sans substituer V : la variance arrondie est justement la réponse du premier champ
+    // de cet écran — l'afficher ici la donnerait (audit chapitre 4).
+    latex: `\\begin{gathered} ${LABEL_VARIANCE} = \\dfrac{${exercice.sommeProduits}}{${exercice.n}} \\\\ ${LABEL_ECART_TYPE} = \\sqrt{${LABEL_VARIANCE}} \\end{gathered}`,
   };
 }
 
