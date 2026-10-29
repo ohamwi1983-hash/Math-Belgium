@@ -1023,8 +1023,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             't\'intéresse — une hauteur, une distance entre deux points inaccessibles… La ' +
             '**triangulation** contourne ce problème, avec **deux triangles**. D\'abord, un ' +
             'triangle **pont**, entièrement résoluble avec les données de l\'énoncé. Tu en ' +
-            'tires un côté ou un angle. Cette valeur devient une donnée du triangle **cible** ' +
-            '— toujours quelconque, résolu à la fin par la loi des sinus.',
+            'tires un côté ou un angle (parfois plusieurs valeurs). Ces valeurs deviennent des ' +
+            'données du triangle **cible** — toujours quelconque, résolu à la fin par la loi des ' +
+            'sinus ou par Al-Kashi.',
         },
         {
           kind: 'intuition',
@@ -1037,7 +1038,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Les 2 façons de relier les deux triangles',
+          label: 'Les 3 façons de relier les deux triangles',
           items: [
             '**Côté partagé** — les deux triangles ont un vrai côté en commun (une diagonale, ' +
               'par exemple). Calcule sa longueur dans le triangle pont. Utilise-la ensuite ' +
@@ -1046,6 +1047,12 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '**Angle partagé** — deux visées prises depuis un même point donnent un angle du ' +
               'triangle cible, par leur différence. Une seconde hypothèse propre au contexte ' +
               '(souvent un angle droit) ferme le triangle.',
+            '**Sommet partagé** — les deux triangles ont un sommet commun O, et le même angle ' +
+              'en O (deux trajectoires qui partent du même point, par exemple). Dans le triangle ' +
+              'pont OAB, calcule l\'angle en O et les deux côtés qui en partent, OA et OB. ' +
+              'Retranche à chacun la distance déjà parcourue : tu obtiens les deux côtés OC et ' +
+              'OD du triangle cible OCD. Avec l\'angle en O, compris entre eux, Al-Kashi donne ' +
+              'le troisième côté.',
           ],
         },
         {
@@ -1072,6 +1079,63 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: 'triangle pont rectangle BFS', text: 'h = BS×sin β ≈ 46,2×sin 52° ≈ 36,4 m' },
           ],
           result: { tag: 'résultat', text: 'hauteur de la tour ≈ 36,4 m' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -4,
+            xMax: 42,
+            yMin: -5,
+            yMax: 36,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 36.86, y: 0 }, tone: 'faint', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 11.15, y: 30.64 }, tone: 'faint', arrow: false },
+              { from: { x: 36.86, y: 0 }, to: { x: 11.15, y: 30.64 }, tone: 'faint', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 26.86, y: 0 }, tone: 'good', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 8.42, y: 23.13 }, tone: 'good', arrow: false },
+              { from: { x: 26.86, y: 0 }, to: { x: 8.42, y: 23.13 }, tone: 'accent', arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 36.86, y: 0, label: 'A', tone: 'ink', labelPos: 'right' },
+              { x: 11.15, y: 30.64, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 26.86, y: 0, label: 'C', tone: 'good', labelPos: 'below' },
+              { x: 8.42, y: 23.13, label: 'D', tone: 'good', labelPos: 'left' },
+              { x: 31.86, y: 0, label: '10 km', tone: 'ink', labelPos: 'above', node: false },
+              { x: 9.79, y: 26.89, label: '8 km', tone: 'ink', labelPos: 'left', node: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 70, radiusPx: 22, label: '70°', tone: 'accent' }],
+            caption:
+              'sommet partagé : le triangle pont OAB et le triangle cible OCD ont le même ' +
+              'sommet O et le même angle en O. C et D sont les positions des navires, ' +
+              'à 10 km de A et à 8 km de B.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux navires, sommet partagé',
+          formula:
+            'Deux navires quittent le même port O vers les destinations A et B, distantes de ' +
+            '40 km. On connaît les angles $\\widehat{OAB} = 50°$ et $\\widehat{OBA} = 60°$. ' +
+            'Il reste au premier navire 10 km à parcourir, au second 8 km. Quelle distance ' +
+            'les sépare ?',
+          steps: [
+            { tag: 'triangle pont OAB — angle en O', text: '$\\hat{O} = 180° - 50° - 60° = 70°$' },
+            { tag: 'OA — loi des sinus', text: '$OA = \\dfrac{40 \\times \\sin 60°}{\\sin 70°} \\approx 36{,}86$ km' },
+            { tag: 'OB — loi des sinus', text: '$OB = \\dfrac{40 \\times \\sin 50°}{\\sin 70°} \\approx 32{,}61$ km' },
+            {
+              tag: 'soustraction — côtés du triangle cible',
+              text: '$OC = 36{,}86 - 10 = 26{,}86$ km et $OD = 32{,}61 - 8 = 24{,}61$ km',
+            },
+            {
+              tag: 'triangle cible OCD — Al-Kashi',
+              text: '$CD^2 = 26{,}86^2 + 24{,}61^2 - 2 \\times 26{,}86 \\times 24{,}61 \\times \\cos 70° \\approx 874{,}9$',
+            },
+            { tag: 'racine carrée', text: '$CD \\approx \\sqrt{874{,}9} \\approx 29{,}58$ km' },
+          ],
+          result: { tag: 'résultat', text: 'distance entre les deux navires ≈ 29,58 km' },
         },
         {
           kind: 'astuce',
