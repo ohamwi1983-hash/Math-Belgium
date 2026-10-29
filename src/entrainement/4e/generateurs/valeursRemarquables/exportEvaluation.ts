@@ -6,6 +6,7 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { libelleQuadrant } from "../../ui/formatCercleTrigonometrique";
 import { formatEnonceCercleTrigLatex } from "../../ui/formatValeursRemarquables";
 import { LATEX_COS, LATEX_SIN, LATEX_TAN } from "./tables";
+import { estSurAxe } from "../../moteur/verificationCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceValeursRemarquables } from "./index";
 
 /**
@@ -91,7 +92,8 @@ function construireEnonceValeursRemarquables(instance: ExerciceValeursRemarquabl
     enteteFragments: [texte("On considère l'angle "), latex(formatEnonceCercleTrigLatex(instance.angleDepart)), texte(".")],
     questions: [
       { consigne: [texte("Dans quel quadrant ou sur quel axe se trouve cet angle ?")] },
-      { consigne: [texte("Quel est l'angle du premier quadrant associé à cet angle ?")] },
+      // Angle sur un axe (décision E1) : aucun quadrant, donc pas d'angle du premier quadrant.
+      ...(estSurAxe(instance) ? [] : [{ consigne: [texte("Quel est l'angle du premier quadrant associé à cet angle ?")] }]),
       {
         consigne: [
           texte("Donne la valeur exacte de "),
@@ -136,6 +138,22 @@ function construireCorrectionValeursRemarquables(instance: ExerciceValeursRemarq
     ...fragmentsValeurTan("\\tan(\\theta)", tanLatex),
     texte("."),
   ];
+
+  if (estSurAxe(instance)) {
+    const fragmentsAxe: FragmentConsigne[] = [
+      texte("b) Un angle sur un axe n'appartient à aucun quadrant : on donne directement sa valeur exacte, lue sur le cercle (coordonnées de M(θ)) : "),
+      latex(`\\sin(\\theta) = ${sinLatex}`),
+      texte(", "),
+      latex(`\\cos(\\theta) = ${cosLatex}`),
+      texte(", "),
+      ...fragmentsValeurTan("\\tan(\\theta)", tanLatex),
+      texte("."),
+    ];
+    return [
+      { type: "paragraphe", fragments: fragmentsQuadrant },
+      { type: "paragraphe", fragments: fragmentsAxe },
+    ];
+  }
 
   return [
     { type: "paragraphe", fragments: fragmentsQuadrant },

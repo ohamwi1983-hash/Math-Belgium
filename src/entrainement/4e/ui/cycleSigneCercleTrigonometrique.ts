@@ -1,4 +1,4 @@
-import type { Signe, SigneTan } from "../core/cercleTrigonometrique.types";
+import type { Signe, SigneTan, ValeurAxe, ValeurAxeTan } from "../core/cercleTrigonometrique.types";
 
 /**
  * Cycle des cellules de l'écran "Signes" (correction 5, promptcorrectionsgenerateurcercletrigo1.md)
@@ -46,4 +46,41 @@ export function cyclerSigneTan(actuel: EtatCelluleTan): EtatCelluleTan {
  */
 export function celluleSigneErronee(saisie: EtatCelluleSigne | EtatCelluleTan, attendu: Signe | SigneTan): boolean {
   return saisie !== "?" && saisie !== attendu;
+}
+
+/** Écran « valeurs exactes » des angles sur un axe (décision E1) — même principe de cycle avec
+ * retour à "?" : sin/cos sur 1, −1, 0 ; tan ajoute « n'existe pas ». */
+export type EtatCelluleValeurAxe = "?" | ValeurAxe;
+export type EtatCelluleValeurAxeTan = "?" | ValeurAxeTan;
+
+export function cyclerValeurAxe(actuel: EtatCelluleValeurAxe): EtatCelluleValeurAxe {
+  switch (actuel) {
+    case "?":
+      return "1";
+    case "1":
+      return "-1";
+    case "-1":
+      return "0";
+    case "0":
+      return "?";
+  }
+}
+
+export function cyclerValeurAxeTan(actuel: EtatCelluleValeurAxeTan): EtatCelluleValeurAxeTan {
+  switch (actuel) {
+    case "?":
+      return "1";
+    case "1":
+      return "-1";
+    case "-1":
+      return "0";
+    case "0":
+      return "indefini";
+    case "indefini":
+      return "?";
+  }
+}
+
+export function libelleValeurAxe(valeur: EtatCelluleValeurAxe | EtatCelluleValeurAxeTan): string {
+  return valeur === "-1" ? "−1" : valeur === "indefini" ? "∄" : valeur;
 }

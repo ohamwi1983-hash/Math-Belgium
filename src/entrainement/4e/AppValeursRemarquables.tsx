@@ -22,6 +22,7 @@ import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { formatEnonceCercleTrigLatex } from "./ui/formatValeursRemarquables";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifValeursRemarquables } from "./ui/recapitulatifValeursRemarquables";
+import { estSurAxe } from "./moteur/verificationCercleTrigonometrique";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -39,8 +40,10 @@ function nouvelleSession(): EtatSessionValeursRemarquables {
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
- * générateur (voir `PhaseValeursRemarquables`/les branches de `terminerEtape` ci-dessous). */
+ * générateur (voir `PhaseValeursRemarquables`/les branches de `terminerEtape` ci-dessous). Un angle
+ * sur un axe (décision E1) saute « angle du premier quadrant ». */
 const ORDRE_PHASES: PhaseValeursRemarquables[] = ["quadrant", "anglePremierQuadrant", "valeursExactes"];
+const ORDRE_PHASES_AXE: PhaseValeursRemarquables[] = ["quadrant", "valeursExactes"];
 
 /** Même ternaire que `terminerEtape` (ci-dessous) et `recapitulatifValeursRemarquables.ts` pour lire
  * `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. `valeursExactes`
@@ -48,7 +51,8 @@ const ORDRE_PHASES: PhaseValeursRemarquables[] = ["quadrant", "anglePremierQuadr
  * l'exercice n'est pas terminé elle est forcément "courante" (dernière phase active), et une fois
  * terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
 function calculerSegmentsProgression(etat: EtatSessionValeursRemarquables): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((phase) => {
+  const ordre = estSurAxe(etat.exerciceCourant) ? ORDRE_PHASES_AXE : ORDRE_PHASES;
+  return ordre.map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = phase === "quadrant" ? etat.scoreQuadrantExercice : phase === "anglePremierQuadrant" ? etat.scoreAnglePremierQuadrantExercice : null;
     if (score === null) return "a-venir";

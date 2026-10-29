@@ -8,6 +8,7 @@ import {
   soumettreReponseQuadrant,
   soumettreReponseReduction,
   soumettreReponseSignes,
+  soumettreReponseValeursAxe,
 } from "./moteur/sessionCercleTrigonometrique";
 import type { EtatSessionCercleTrigonometrique, PhaseCercleTrigonometrique } from "./moteur/typesCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./generateurs/cercleTrigonometrique";
@@ -17,10 +18,12 @@ import { EtapeReductionCercleTrig } from "./components/EtapeReductionCercleTrig"
 import { EtapeQuadrantCercleTrig } from "./components/EtapeQuadrantCercleTrig";
 import { EtapeAnglePremierQuadrantCercleTrig } from "./components/EtapeAnglePremierQuadrantCercleTrig";
 import { EtapeSignesCercleTrig } from "./components/EtapeSignesCercleTrig";
+import { EtapeValeursAxeCercleTrig } from "./components/EtapeValeursAxeCercleTrig";
 import { formatEnonceCercleTrigLatex, libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifCercleTrigonometrique } from "./ui/recapitulatifCercleTrigonometrique";
-import { necessiteReduction } from "./moteur/verificationCercleTrigonometrique";
+import { estSurAxe, necessiteReduction, valeursAxeAttendues } from "./moteur/verificationCercleTrigonometrique";
+import { libelleValeurAxe } from "./ui/cycleSigneCercleTrigonometrique";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -49,10 +52,12 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Les 3 phases toujours présentes, dans l'ordre réel — "reduction" s'intercale en tête, seulement
- * si nécessaire (voir `calculerSegmentsProgression` ci-dessous et le commentaire de tête de
- * sessionCercleTrigonometrique.ts : "[reduction] → quadrant → anglePremierQuadrant → signes"). */
+/** Phases toujours présentes, dans l'ordre réel — "reduction" s'intercale en tête, seulement si
+ * nécessaire (voir `calculerSegmentsProgression` ci-dessous et le commentaire de tête de
+ * sessionCercleTrigonometrique.ts). Un angle sur un axe (décision E1) saute « angle du premier
+ * quadrant » et « signes » au profit de « valeursAxe ». */
 const PHASES_FIXES: PhaseCercleTrigonometrique[] = ["quadrant", "anglePremierQuadrant", "signes"];
+const PHASES_FIXES_AXE: PhaseCercleTrigonometrique[] = ["quadrant", "valeursAxe"];
 
 /**
  * Segments de la barre de puces — "reduction" n'est incluse que si elle a réellement lieu : soit
@@ -72,7 +77,8 @@ function libelleSigne(signe: "+" | "-" | "0"): string {
 
 function calculerSegmentsProgression(etat: EtatSessionCercleTrigonometrique): EtatPuceProgression[] {
   const reductionApplicable = etat.scoreReductionExercice !== null || necessiteReduction(etat.exerciceCourant);
-  const phases: PhaseCercleTrigonometrique[] = reductionApplicable ? ["reduction", ...PHASES_FIXES] : PHASES_FIXES;
+  const fixes = estSurAxe(etat.exerciceCourant) ? PHASES_FIXES_AXE : PHASES_FIXES;
+  const phases: PhaseCercleTrigonometrique[] = reductionApplicable ? ["reduction", ...fixes] : fixes;
   const indexCourant = phases.indexOf(etat.phase);
 
   return phases.map((phase, k) => {
@@ -140,7 +146,9 @@ export function AppCercleTrigonometrique() {
             ? nouvelEtat.quadrantRevele
             : etat.phase === "anglePremierQuadrant"
               ? nouvelEtat.anglePremierQuadrantRevele
-              : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.signesRevele;
+              : etat.phase === "valeursAxe"
+                ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.valeursAxeRevele
+                : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.signesRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -169,6 +177,7 @@ export function AppCercleTrigonometrique() {
   }
 
   const exercice = etat.exerciceCourant;
+  const attenduAxe = valeursAxeAttendues(exercice);
 
   const validation = enAttente
     ? {
@@ -181,6 +190,11 @@ export function AppCercleTrigonometrique() {
               <>{libelleQuadrant(exercice.quadrant)}</>
             ) : etat.phase === "anglePremierQuadrant" ? (
               <>{exercice.anglePremierQuadrant}°</>
+            ) : etat.phase === "valeursAxe" ? (
+              <>
+                sin(θ) = {libelleValeurAxe(attenduAxe.sin)} ; cos(θ) = {libelleValeurAxe(attenduAxe.cos)} ; tan(θ){" "}
+                {attenduAxe.tan === "indefini" ? "n'existe pas" : `= ${libelleValeurAxe(attenduAxe.tan)}`}
+              </>
             ) : (
               <>
                 sin(θ) : {libelleSigne(exercice.signeSin)} ; cos(θ) : {libelleSigne(exercice.signeCos)} ; tan(θ) :{" "}
@@ -243,6 +257,18 @@ export function AppCercleTrigonometrique() {
               aideActivee={etat.aideAnglePremierQuadrantUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
               onValider={(valeur) => terminerEtape(soumettreReponseAnglePremierQuadrant(etat, valeur), `${valeur}°`)}
+              validation={validation}
+            />
+          ) : etat.phase === "valeursAxe" ? (
+            <EtapeValeursAxeCercleTrig
+              key={`${numeroExercice}-${etat.phase}`}
+              exercice={etat.exerciceCourant}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              aideActivee={etat.aideValeursAxeUtilisee}
+              onActiverAide={() => setEtat(activerAide(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseValeursAxe(etat, reponse))}
               validation={validation}
             />
           ) : (

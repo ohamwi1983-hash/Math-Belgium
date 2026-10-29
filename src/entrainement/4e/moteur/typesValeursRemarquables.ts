@@ -6,6 +6,9 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * (contrairement au premier générateur, qui saute "reduction" quand inutile) : l'angle de départ
  * est directement utilisable pour identifier le quadrant ici, aucune réduction n'est jamais
  * demandée à l'élève (`promptcreationgenerateur15.md`). */
+/** Angle dans un quadrant : quadrant → anglePremierQuadrant → valeursExactes. Angle sur un axe
+ * (décision E1) : quadrant → valeursExactes — un angle sur un axe n'appartient à aucun quadrant,
+ * le cours demande directement sa valeur exacte. */
 export type PhaseValeursRemarquables = "quadrant" | "anglePremierQuadrant" | "valeursExactes";
 
 export interface ResultatExerciceValeursRemarquables {
@@ -16,7 +19,8 @@ export interface ResultatExerciceValeursRemarquables {
    * du score a posteriori) — contrairement au générateur 14, l'écran "Quadrant" a bien un bouton
    * Aide ici (les 3 écrans en ont un, voir `sessionValeursRemarquables.ts`). */
   quadrantAideUtilisee: boolean;
-  scoreAnglePremierQuadrant: number;
+  /** `null` pour un angle sur un axe (écran sauté, décision E1). */
+  scoreAnglePremierQuadrant: number | null;
   anglePremierQuadrantRevele: boolean;
   anglePremierQuadrantAideUtilisee: boolean;
   scoreValeursExactes: number;

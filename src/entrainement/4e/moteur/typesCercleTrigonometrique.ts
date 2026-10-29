@@ -12,7 +12,9 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * ou "quadrant" sinon. "reduction" est donc la seule phase conditionnellement absente — les 3
  * suivantes ont toujours lieu.
  */
-export type PhaseCercleTrigonometrique = "reduction" | "quadrant" | "anglePremierQuadrant" | "signes";
+/** Angle hors axe : [reduction] → quadrant → anglePremierQuadrant → signes. Angle sur un axe
+ * (décision E1) : [reduction] → quadrant → valeursAxe — ni angle du premier quadrant ni signes. */
+export type PhaseCercleTrigonometrique = "reduction" | "quadrant" | "anglePremierQuadrant" | "signes" | "valeursAxe";
 
 export interface ResultatExerciceCercleTrigonometrique {
   variante: VarianteCercleTrigId;
@@ -24,14 +26,20 @@ export interface ResultatExerciceCercleTrigonometrique {
   reductionAideUtilisee: boolean;
   scoreQuadrant: number;
   quadrantRevele: boolean;
-  scoreAnglePremierQuadrant: number;
+  /** `null` pour un angle sur un axe (écran sauté, décision E1). */
+  scoreAnglePremierQuadrant: number | null;
   anglePremierQuadrantRevele: boolean;
   /** Écran "Angle du premier quadrant" — capturé à la clôture, voir `reductionAideUtilisee`. */
   anglePremierQuadrantAideUtilisee: boolean;
-  scoreSignes: number;
+  /** `null` pour un angle sur un axe (remplacé par `scoreValeursAxe`). */
+  scoreSignes: number | null;
   signesRevele: boolean;
   /** Écran "Signes" — capturé à la clôture, voir `reductionAideUtilisee`. */
   signesAideUtilisee: boolean;
+  /** Écran « valeurs exactes » des angles sur un axe — `null` hors axe. */
+  scoreValeursAxe: number | null;
+  valeursAxeRevele: boolean;
+  valeursAxeAideUtilisee: boolean;
 }
 
 export interface EtatSessionCercleTrigonometrique {
@@ -51,6 +59,7 @@ export interface EtatSessionCercleTrigonometrique {
   aideReductionUtilisee: boolean;
   aideAnglePremierQuadrantUtilisee: boolean;
   aideSignesUtilisee: boolean;
+  aideValeursAxeUtilisee: boolean;
   scoreReductionExercice: number | null;
   reductionRevele: boolean;
   scoreQuadrantExercice: number | null;

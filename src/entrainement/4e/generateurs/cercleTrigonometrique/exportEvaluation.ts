@@ -1,8 +1,10 @@
-import type { ExerciceCercleTrigonometrique, Quadrant, Signe, SigneTan, VarianteCercleTrigId } from "../../core/cercleTrigonometrique.types";
+import type { ExerciceCercleTrigonometrique, Quadrant, Signe, SigneTan, ValeurAxeTan, VarianteCercleTrigId } from "../../core/cercleTrigonometrique.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceCercleTrigLatex, libelleQuadrant } from "../../ui/formatCercleTrigonometrique";
+import { estSurAxe, valeursAxeAttendues } from "../../moteur/verificationCercleTrigonometrique";
+import { libelleValeurAxe } from "../../ui/cycleSigneCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./index";
 
 /**
@@ -143,7 +145,52 @@ function texteJustificationSignes(exercice: ExerciceCercleTrigonometrique): stri
   }
 }
 
+/** Angle sur un axe (décision E1) : ni angle du premier quadrant ni signes — on demande
+ * directement la valeur exacte de sin, cos et tan. */
+function construireEnonceAxe(exercice: ExerciceCercleTrigonometrique): SectionExercice {
+  return {
+    enteteFragments: [texte("On considère l'angle orienté suivant : "), latex(formatEnonceCercleTrigLatex(exercice.angleDepart))],
+    questions: [
+      {
+        consigne: [texte("Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?")],
+        reponse: { type: "lignes", nombre: 2 },
+      },
+      {
+        consigne: [texte("Dans quel quadrant (I, II, III ou IV) ou sur quel axe (Ox ou Oy) se trouve cet angle ?")],
+        reponse: { type: "lignes", nombre: 0 },
+      },
+      {
+        consigne: [texte("Donne la valeur exacte de "), latex("\\sin(\\theta)"), texte(", "), latex("\\cos(\\theta)"), texte(" et "), latex("\\tan(\\theta)"), texte(".")],
+        reponse: { type: "tableau", libellesLignes: LIBELLES_LIGNES_SIGNES, nombreColonnes: 1 },
+      },
+    ],
+  };
+}
+
+function libelleValeurExport(valeur: ValeurAxeTan): string {
+  return valeur === "indefini" ? "n'existe pas" : libelleValeurAxe(valeur);
+}
+
+function construireCorrectionAxe(exercice: ExerciceCercleTrigonometrique): BlocCorrection[] {
+  const attendu = valeursAxeAttendues(exercice);
+  const explication =
+    exercice.quadrant === "axeOx"
+      ? `Un angle sur un axe n'appartient à aucun quadrant : on donne directement sa valeur exacte. M(θ) est le point (${libelleValeurAxe(attendu.cos)} ; 0) de l'axe Ox : cos θ = ${libelleValeurAxe(attendu.cos)}, sin θ = 0 et tan θ = sin θ / cos θ = 0.`
+      : `Un angle sur un axe n'appartient à aucun quadrant : on donne directement sa valeur exacte. M(θ) est le point (0 ; ${libelleValeurAxe(attendu.sin)}) de l'axe Oy : sin θ = ${libelleValeurAxe(attendu.sin)}, cos θ = 0, donc tan θ = sin θ / cos θ n'existe pas.`;
+  return [
+    paragraphe("a", texteReduction(exercice)),
+    paragraphe("b", texteJustificationQuadrant(exercice)),
+    paragraphe("c", explication),
+    {
+      type: "tableau",
+      libellesLignes: LIBELLES_LIGNES_SIGNES,
+      valeursParLigne: [[libelleValeurExport(attendu.sin)], [libelleValeurExport(attendu.cos)], [libelleValeurExport(attendu.tan)]],
+    },
+  ];
+}
+
 function construireEnonceCercleTrigonometrique(exercice: ExerciceCercleTrigonometrique): SectionExercice {
+  if (estSurAxe(exercice)) return construireEnonceAxe(exercice);
   return {
     enteteFragments: [texte("On considère l'angle orienté suivant : "), latex(formatEnonceCercleTrigLatex(exercice.angleDepart))],
     questions: [
@@ -172,6 +219,7 @@ function paragraphe(lettre: string, texteCorps: string): BlocCorrection {
 }
 
 function construireCorrectionCercleTrigonometrique(exercice: ExerciceCercleTrigonometrique): BlocCorrection[] {
+  if (estSurAxe(exercice)) return construireCorrectionAxe(exercice);
   const { signeSin, signeCos, signeTan } = exercice;
 
   return [

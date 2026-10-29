@@ -28,6 +28,20 @@ export type SigneTan = Signe | "indefini";
 
 export type VarianteCercleTrigId = "angle_negatif" | "angle_superieur_360" | "multiple_90";
 
+/** Valeur exacte d'un angle SUR UN AXE (0°, 90°, 180°, 270°) — décision E1 : ces angles
+ * n'appartiennent à aucun quadrant, le cours demande leur valeur exacte directement (jamais un
+ * signe ni un angle du premier quadrant). sin et cos valent −1, 0 ou 1 ; tan vaut 0 ou n'existe pas. */
+export type ValeurAxe = "1" | "-1" | "0";
+export type ValeurAxeTan = ValeurAxe | "indefini";
+
+/** Réponse de l'écran « valeurs exactes » des angles sur un axe — même principe de cellules
+ * cycliques avec "?" que `ReponseSignes`. */
+export interface ReponseValeursAxe {
+  sin: ValeurAxe | "?";
+  cos: ValeurAxe | "?";
+  tan: ValeurAxeTan | "?";
+}
+
 /**
  * "?" est une réponse possible pour chaque champ (correction 5) : le tableau de l'écran "Signes"
  * cycle chaque cellule en boucle, y compris un retour à "?" (jamais généré côté exercice, jamais

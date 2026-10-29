@@ -4,19 +4,21 @@
  * sessionCercleTrigonometrique.test.ts pour la preuve avec un générateur factice, même principe
  * que les treize autres moteurs du projet.
  *
- * 4 phases, toujours dans le même ordre, une seule conditionnellement absente :
- * [reduction] → quadrant → anglePremierQuadrant → signes.
+ * Phases, toujours dans le même ordre :
+ * [reduction] → quadrant → anglePremierQuadrant → signes (angle dans un quadrant) ;
+ * [reduction] → quadrant → valeursAxe (angle sur un axe — décision E1 : 0°, 90°, 180° et 270°
+ * n'appartiennent à aucun quadrant, le cours demande directement leur valeur exacte).
  * "reduction" n'a lieu que si l'angle de l'énoncé n'est pas déjà dans [0°,360°[
  * (necessiteReduction) — la séquence démarre directement sur "reduction" ou "quadrant" selon le
  * cas, aucun écran "énoncé" séparé (correction 1, promptcorrectionsgenerateurcercletrigo1.md :
  * l'écran "énoncé" seul, sans question, a été supprimé — le bloc affichant l'angle reste visible
  * sur tous les écrans restants, porté par chaque composant d'étape, pas par une phase dédiée).
  */
-import type { ExerciceCercleTrigonometrique, GenerateurExerciceCercleTrigonometrique, Quadrant, ReponseSignes } from "../core/cercleTrigonometrique.types";
+import type { ExerciceCercleTrigonometrique, GenerateurExerciceCercleTrigonometrique, Quadrant, ReponseSignes, ReponseValeursAxe } from "../core/cercleTrigonometrique.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import { necessiteReduction, verifierAnglePremierQuadrant, verifierQuadrant, verifierReduction, verifierSignes } from "./verificationCercleTrigonometrique";
+import { estSurAxe, necessiteReduction, verifierAnglePremierQuadrant, verifierQuadrant, verifierReduction, verifierSignes, verifierValeursAxe } from "./verificationCercleTrigonometrique";
 import type { EtatSessionCercleTrigonometrique, PhaseCercleTrigonometrique, ResultatExerciceCercleTrigonometrique } from "./typesCercleTrigonometrique";
 
 const POINTS_DE_BASE = 100;
@@ -41,6 +43,7 @@ export function demarrerSessionCercleTrigonometrique(
     aideReductionUtilisee: false,
     aideAnglePremierQuadrantUtilisee: false,
     aideSignesUtilisee: false,
+    aideValeursAxeUtilisee: false,
     scoreReductionExercice: null,
     reductionRevele: false,
     scoreQuadrantExercice: null,
@@ -75,6 +78,8 @@ export function activerAide(etat: EtatSessionCercleTrigonometrique): EtatSession
       return { ...etat, aideAnglePremierQuadrantUtilisee: true };
     case "signes":
       return { ...etat, aideSignesUtilisee: true };
+    case "valeursAxe":
+      return { ...etat, aideValeursAxeUtilisee: true };
     case "quadrant":
       throw new Error("activerAide : l'écran Quadrant n'a pas de bouton Aide");
   }
@@ -103,6 +108,7 @@ function cloturerExerciceOuSuivant(
     aideReductionUtilisee: false,
     aideAnglePremierQuadrantUtilisee: false,
     aideSignesUtilisee: false,
+    aideValeursAxeUtilisee: false,
     scoreReductionExercice: null,
     reductionRevele: false,
     scoreQuadrantExercice: null,
@@ -160,7 +166,8 @@ export function soumettreReponseQuadrant(etat: EtatSessionCercleTrigonometrique,
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "anglePremierQuadrant",
+    // Angle sur un axe (décision E1) : aucun quadrant, donc ni angle du premier quadrant ni signes.
+    phase: estSurAxe(etat.exerciceCourant) ? "valeursAxe" : "anglePremierQuadrant",
     scoreQuadrantExercice: score,
     quadrantRevele: etapeCourante.revelee,
   };
@@ -225,5 +232,45 @@ export function soumettreReponseSignes(etat: EtatSessionCercleTrigonometrique, r
     scoreSignes: score,
     signesRevele: etapeCourante.revelee,
     signesAideUtilisee: etat.aideSignesUtilisee,
+    scoreValeursAxe: null,
+    valeursAxeRevele: false,
+    valeursAxeAideUtilisee: false,
+  });
+}
+
+/** Dernière étape des angles sur un axe (décision E1) : valeur exacte de sin, cos et tan,
+ * à la place des écrans « angle du premier quadrant » et « signes ». */
+export function soumettreReponseValeursAxe(etat: EtatSessionCercleTrigonometrique, reponse: ReponseValeursAxe): EtatSessionCercleTrigonometrique {
+  if (etat.terminee || etat.phase !== "valeursAxe") {
+    throw new Error("soumettreReponseValeursAxe : la session n'est pas à l'étape valeurs exactes (angle sur un axe)");
+  }
+
+  const etapeCourante = soumettreEtapeTentatives<ReponseValeursAxe>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierValeursAxe(etat.exerciceCourant, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) {
+    return { ...etat, etapeCourante };
+  }
+
+  const score = etapeCourante.score as number;
+  return cloturerExerciceOuSuivant(etat, {
+    variante: etat.exerciceCourant.variante,
+    scoreReduction: etat.scoreReductionExercice,
+    reductionRevele: etat.reductionRevele,
+    reductionAideUtilisee: etat.aideReductionUtilisee,
+    scoreQuadrant: etat.scoreQuadrantExercice as number,
+    quadrantRevele: etat.quadrantRevele,
+    scoreAnglePremierQuadrant: null,
+    anglePremierQuadrantRevele: false,
+    anglePremierQuadrantAideUtilisee: false,
+    scoreSignes: null,
+    signesRevele: false,
+    signesAideUtilisee: false,
+    scoreValeursAxe: score,
+    valeursAxeRevele: etapeCourante.revelee,
+    valeursAxeAideUtilisee: etat.aideValeursAxeUtilisee,
   });
 }

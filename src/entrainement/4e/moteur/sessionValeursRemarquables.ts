@@ -12,6 +12,7 @@ import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
 import { verifierAnglePremierQuadrant, verifierQuadrant, verifierValeursExactes } from "./verificationValeursRemarquables";
+import { estSurAxe } from "./verificationCercleTrigonometrique";
 import type { EtatSessionValeursRemarquables, ResultatExerciceValeursRemarquables } from "./typesValeursRemarquables";
 
 const POINTS_DE_BASE = 100;
@@ -112,7 +113,8 @@ export function soumettreReponseQuadrant(etat: EtatSessionValeursRemarquables, r
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "anglePremierQuadrant",
+    // Angle sur un axe (décision E1) : aucun quadrant, donc pas d'angle du premier quadrant.
+    phase: estSurAxe(etat.exerciceCourant) ? "valeursExactes" : "anglePremierQuadrant",
     scoreQuadrantExercice: score,
     quadrantRevele: etapeCourante.revelee,
   };
@@ -171,7 +173,7 @@ export function soumettreReponseValeursExactes(
     scoreQuadrant: etat.scoreQuadrantExercice as number,
     quadrantRevele: etat.quadrantRevele,
     quadrantAideUtilisee: etat.aideQuadrantUtilisee,
-    scoreAnglePremierQuadrant: etat.scoreAnglePremierQuadrantExercice as number,
+    scoreAnglePremierQuadrant: etat.scoreAnglePremierQuadrantExercice,
     anglePremierQuadrantRevele: etat.anglePremierQuadrantRevele,
     anglePremierQuadrantAideUtilisee: etat.aideAnglePremierQuadrantUtilisee,
     scoreValeursExactes: score,

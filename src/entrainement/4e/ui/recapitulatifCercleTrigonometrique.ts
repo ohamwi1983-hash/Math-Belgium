@@ -1,6 +1,7 @@
 import type { EtatSessionCercleTrigonometrique } from "../moteur/typesCercleTrigonometrique";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { libelleQuadrant } from "./formatCercleTrigonometrique";
+import { estSurAxe } from "../moteur/verificationCercleTrigonometrique";
 
 /**
  * Même principe que les 13 autres récapitulatifs du projet : dérivé uniquement des scores déjà
@@ -17,7 +18,8 @@ export function calculerRecapitulatifCercleTrigonometrique(etat: EtatSessionCerc
   }
 
   if (etat.scoreQuadrantExercice !== null) {
-    entrees.push({ libelle: "Quadrant", estLatex: false, valeur: libelleQuadrant(exercice.quadrant), revele: etat.quadrantRevele });
+    // Sur un axe, l'angle n'appartient à aucun quadrant (décision E1) : libellé « Position ».
+    entrees.push({ libelle: estSurAxe(exercice) ? "Position" : "Quadrant", estLatex: false, valeur: libelleQuadrant(exercice.quadrant), revele: etat.quadrantRevele });
   }
 
   if (etat.scoreAnglePremierQuadrantExercice !== null) {

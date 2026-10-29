@@ -1,4 +1,4 @@
-import type { ExerciceCercleTrigonometrique, Quadrant, ReponseSignes } from "../core/cercleTrigonometrique.types";
+import type { ExerciceCercleTrigonometrique, Quadrant, ReponseSignes, ReponseValeursAxe, Signe, ValeurAxe, ValeurAxeTan } from "../core/cercleTrigonometrique.types";
 import type { StatutVerification } from "./statutVerification";
 
 const TOLERANCE = 1e-9;
@@ -52,5 +52,37 @@ export function evaluerSignes(exercice: ExerciceCercleTrigonometrique, reponse: 
 
 export function verifierSignes(exercice: ExerciceCercleTrigonometrique, reponse: ReponseSignes): boolean {
   const evaluation = evaluerSignes(exercice, reponse);
+  return evaluation.sin && evaluation.cos && evaluation.tan;
+}
+
+/** Angle sur un axe (0°, 90°, 180°, 270° une fois réduit) — décision E1 : aucun quadrant, donc ni
+ * angle du premier quadrant ni signes ; on demande directement la valeur exacte. Partagé avec gen15
+ * (`ExerciceValeursRemarquables` a aussi un champ `quadrant`). */
+export function estSurAxe(exercice: { quadrant: Quadrant }): boolean {
+  return exercice.quadrant === "axeOx" || exercice.quadrant === "axeOy";
+}
+
+function valeurDepuisSigne(signe: Signe): ValeurAxe {
+  return signe === "+" ? "1" : signe === "-" ? "-1" : "0";
+}
+
+/** Sur un axe, M(θ) est l'un des points (±1 ; 0) ou (0 ; ±1) : sin et cos valent exactement −1, 0
+ * ou 1, donc leur valeur se déduit sans ambiguïté de leur signe ; tan vaut 0 (axe Ox) ou n'existe
+ * pas (axe Oy, cos θ = 0). */
+export function valeursAxeAttendues(exercice: ExerciceCercleTrigonometrique): { sin: ValeurAxe; cos: ValeurAxe; tan: ValeurAxeTan } {
+  return {
+    sin: valeurDepuisSigne(exercice.signeSin),
+    cos: valeurDepuisSigne(exercice.signeCos),
+    tan: exercice.signeTan === "indefini" ? "indefini" : valeurDepuisSigne(exercice.signeTan),
+  };
+}
+
+export function evaluerValeursAxe(exercice: ExerciceCercleTrigonometrique, reponse: ReponseValeursAxe): { sin: boolean; cos: boolean; tan: boolean } {
+  const attendu = valeursAxeAttendues(exercice);
+  return { sin: reponse.sin === attendu.sin, cos: reponse.cos === attendu.cos, tan: reponse.tan === attendu.tan };
+}
+
+export function verifierValeursAxe(exercice: ExerciceCercleTrigonometrique, reponse: ReponseValeursAxe): boolean {
+  const evaluation = evaluerValeursAxe(exercice, reponse);
   return evaluation.sin && evaluation.cos && evaluation.tan;
 }
