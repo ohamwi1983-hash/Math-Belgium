@@ -110,9 +110,8 @@ function construireEnonceValeursRemarquables(instance: ExerciceValeursRemarquabl
 function construireCorrectionValeursRemarquables(instance: ExerciceValeursRemarquables): BlocCorrection[] {
   const { angleDepart, angleReduit, quadrant, anglePremierQuadrant, sinLatex, cosLatex, tanLatex } = instance;
 
-  // Seul cas du domaine ]90°,360°] où la réduction modulo 360 change réellement la valeur affichée
-  // (angleDepart=360 ⟹ angleReduit=0) — voir le commentaire de tête de `construireAngleDepart`
-  // (index.ts) : jamais mentionné quand angleDepart est déjà la mesure réduite.
+  // Forme négative ou ≥ 360° (voir `construireAngleDepart`, index.ts) : jamais mentionné quand
+  // angleDepart est déjà la mesure réduite.
   const reduction = angleDepart !== angleReduit ? ` (soit θ = ${angleReduit}° une fois ramené dans [0°, 360°[)` : "";
 
   const fragmentsQuadrant: FragmentConsigne[] = [texte(`a) θ = ${angleDepart}°${reduction} — ${libelleQuadrant(quadrant)}.`)];

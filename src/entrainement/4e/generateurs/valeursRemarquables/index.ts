@@ -8,12 +8,11 @@
  * combinent sans aucun cas particulier supplémentaire (vérifié pour les 5 angles × 4 quadrants +
  * les 2 axes, voir les tests).
  *
- * Refonte `promptcreationgenerateur15.md` — domaine restreint à `]90°,360°]` (jamais `[0°,90°]`,
- * quadrant I exclu) : `construireAngleDepart` ne tire donc plus jamais la branche "quadrant I"
- * (`ref` lui-même) de l'ancienne formule à 4 branches — seules les 3 branches restantes
- * (`180-ref`/`180+ref`/`360-ref`, quadrants II/III/IV) sont conservées pour `ref∈{30,45,60}`. `ref=0`
- * ne couvre plus que `{180°,360°}` (`0°` exclu) et `ref=90` ne couvre plus que `{270°}` (`90°`
- * exclu, donc plus aucun tirage aléatoire nécessaire pour ce cas).
+ * Audit du chapitre 5 : l'ancien domaine `]90°,360°]` ne donnait que 11 angles possibles. Pour
+ * `ref∈{30,45,60}`, les 4 quadrants sont désormais couverts (`ref`, `180-ref`, `180+ref`, `360-ref`),
+ * et un exercice sur 4 décale cette mesure de ±360° (forme négative ou ≥ 360°, à ramener dans
+ * [0° ; 360°[ comme dans le premier générateur du chapitre). Les cas sur les axes sont inchangés
+ * (`ref=0` ⟹ `{0°,180°}`, `0°` remplaçant l'ancien `360°` ; `ref=90` ⟹ `270°`).
  */
 import type {
   AngleRemarquable,
@@ -28,23 +27,18 @@ import { LATEX_COS, LATEX_SIN, LATEX_TAN, MAGNITUDE_COS, MAGNITUDE_SIN, MAGNITUD
 const ANGLES_REMARQUABLES: AngleRemarquable[] = [0, 30, 45, 60, 90];
 
 /**
- * Construit `angleDepart` par symétrie depuis `ref`, dans le domaine `]90°,360°]` uniquement
- * (spec section "Variantes") : `ref=0` ⟹ `{180°,360°}` (axe Ox, `0°` exclu du domaine) ; `ref=90`
- * ⟹ toujours `270°` (axe Oy, `90°` exclu — un seul angle possible, jamais de tirage) ; `ref∈{30,45,
- * 60}` ⟹ `{180-ref,180+ref,360-ref}` (quadrants II/III/IV — `ref` lui-même, quadrant I, exclu).
+ * Construit `angleDepart` par symétrie depuis `ref` : `ref=0` ⟹ `{0°,180°}` (axe Ox) ; `ref=90` ⟹
+ * toujours `270°` (axe Oy) ; `ref∈{30,45,60}` ⟹ `{ref,180-ref,180+ref,360-ref}` (quadrants I à IV),
+ * décalé de ±360° une fois sur 4.
  */
 function construireAngleDepart(ref: AngleRemarquable): number {
-  if (ref === 0) return randomInt(0, 1) === 0 ? 180 : 360;
+  if (ref === 0) return randomInt(0, 1) === 0 ? 0 : 180;
   if (ref === 90) return 270;
 
-  switch (randomInt(0, 2)) {
-    case 0:
-      return 180 - ref;
-    case 1:
-      return 180 + ref;
-    default:
-      return 360 - ref;
-  }
+  const bases = [ref, 180 - ref, 180 + ref, 360 - ref];
+  const base = bases[randomInt(0, bases.length - 1)];
+  if (randomInt(0, 3) !== 0) return base;
+  return randomInt(0, 1) === 0 ? base - 360 : base + 360;
 }
 
 function appliquerSigneValeur(signe: Signe, magnitude: number): number {
@@ -70,9 +64,8 @@ export function construireAvecVarianteId(
   overrides?: { angleDepart?: number },
 ): ExerciceValeursRemarquables {
   const angleDepart = overrides?.angleDepart ?? construireAngleDepart(varianteId);
-  // Toujours dans [0°,360°[ — angleDepart=360 est le seul cas du domaine ]90°,360°] où la
-  // normalisation modulo change réellement la valeur (360%360=0).
-  const angleReduit = angleDepart % 360;
+  // Toujours dans [0°,360°[, y compris pour une forme négative ou ≥ 360°.
+  const angleReduit = ((angleDepart % 360) + 360) % 360;
   const quadrant = calculerQuadrant(angleReduit);
   const signeSin = calculerSigneSin(angleReduit, quadrant);
   const signeCos = calculerSigneCos(angleReduit, quadrant);

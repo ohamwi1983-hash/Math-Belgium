@@ -15,15 +15,12 @@ import type { Quadrant } from "./cercleTrigonometrique.types";
 export type AngleRemarquable = 0 | 30 | 45 | 60 | 90;
 
 /**
- * `angleDepart` est toujours dans `]90°,360°]` (refonte `promptcreationgenerateur15.md` — jamais
- * dans `[0°,90°]`, le quadrant I n'est plus couvert par ce générateur) ; `angleReduit` est sa
- * mesure équivalente dans `[0°,360°[` (`angleDepart % 360`, donc `angleReduit=0` exactement quand
- * `angleDepart=360`) — nécessaire pour réutiliser telles quelles les fonctions/aides du premier
- * générateur du chapitre (`calculerQuadrant`/`calculerTrajetCercleTrig`/`calculerAideSignes`...),
- * qui attendent toutes un angle déjà dans `[0°,360°[`. Aucun écran "Réduction" ne montre cette
- * distinction à l'élève (contrairement au premier générateur) : `angleDepart` est directement
- * utilisable pour identifier le quadrant, la normalisation modulo 360 n'est qu'un détail interne de
- * calcul. `tanValeur`/`tanLatex` : `null`/"n'existe pas" ssi `anglePremierQuadrant===90` ET
+ * `angleDepart` couvre les 4 quadrants et les axes, et peut être négatif ou ≥ 360° (un exercice
+ * sur 4 pour `ref∈{30,45,60}`, voir `construireAngleDepart`) ; `angleReduit` est sa mesure
+ * équivalente dans `[0°,360°[` — nécessaire pour réutiliser telles quelles les fonctions/aides du
+ * premier générateur du chapitre (`calculerQuadrant`/`calculerAideSignes`...), qui attendent toutes
+ * un angle déjà dans `[0°,360°[`. Il n'y a pas d'écran "Réduction" dans ce générateur : l'aide de
+ * l'écran "Quadrant" rappelle de ramener l'angle dans [0° ; 360°[ quand c'est nécessaire. `tanValeur`/`tanLatex` : `null`/"n'existe pas" ssi `anglePremierQuadrant===90` ET
  * `quadrant==="axeOy"` (tan(90°) et tan(270°) ne sont pas définies) — tous les autres champs sont
  * entièrement dérivés à la génération, jamais recalculés différemment côté vérification.
  */

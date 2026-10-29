@@ -3,7 +3,7 @@ import type { ExerciceValeursRemarquables } from "../core/valeursRemarquables.ty
 import type { Quadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
+import { BoutonAide } from "./BoutonAide";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -26,9 +26,10 @@ interface Props {
  * Écran "Quadrant" — réutilise tel quel le sélecteur interactif du premier générateur du chapitre
  * (`CercleQuadrantSelecteur`), déjà entièrement générique (aucune dépendance au contrat de cet
  * exercice au-delà du type `Quadrant`). Premier écran de la séquence (pas d'écran "Réduction" pour
- * ce générateur — `promptcreationgenerateur15.md`) : son aide réutilise donc directement
- * `AideReductionCercleTrig` du générateur 14 ("le cercle avec le rayon de l'angle"), grâce à sa prop
- * désormais typée structurellement (`AngleSurCercle`) — `exercice` la satisfait déjà tel quel.
+ * ce générateur — `promptcreationgenerateur15.md`). Son aide est une aide de MÉTHODE (entre quels
+ * multiples de 90° tombe l'angle), jamais le dessin du point θ sur le cercle : l'ancien dessin
+ * (`AideReductionCercleTrig`) plaçait l'angle dans son quadrant et donnait donc directement la
+ * réponse de cet écran (audit du chapitre 5).
  */
 export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, aideActivee, onActiverAide, onValider, validation}: Props) {
   const [selection, setSelection] = useState<Quadrant | null>(null);
@@ -40,7 +41,21 @@ export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, 
 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />
 
-      <AideReductionCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
+      <div>
+        {aideActivee && (
+          <div className="triangle-quelconque-aide">
+            {(exercice.angleDepart < 0 || exercice.angleDepart >= 360) && (
+              <p>Ramène d'abord l'angle entre 0° et 360° : ajoute ou retire 360° autant de fois que nécessaire.</p>
+            )}
+            <p>
+              Repère entre quels multiples de 90° tombe l'angle : entre 0° et 90°, quadrant I ; entre 90° et 180°,
+              quadrant II ; entre 180° et 270°, quadrant III ; entre 270° et 360°, quadrant IV. Un angle égal à 0°,
+              90°, 180° ou 270° se trouve sur un axe.
+            </p>
+          </div>
+        )}
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      </div>
       {!validation && (
         <>
         <button

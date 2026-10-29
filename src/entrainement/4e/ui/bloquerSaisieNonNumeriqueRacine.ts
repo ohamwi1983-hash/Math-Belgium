@@ -12,8 +12,11 @@ import type { KeyboardEvent } from "react";
  * (`moteur/verificationUnSansLautre.ts`), qui reconnaît maintenant `rac(x)`/`racN(x)` — sans ces
  * deux lettres en plus de `s`/`q`/`r`/`t`, le filtre bloquait silencieusement la frappe de "rac("
  * dans ce générateur précis alors que la réponse aurait été acceptée si l'élève avait pu la taper.
+ *
+ * `√` et le signe moins typographique `−` ajoutés (audit du chapitre 5) : la vérification
+ * (`normaliserRacinesUnSansLautre`) les convertit en `sqrt(…)` / `-`.
  */
-const CARACTERE_AUTORISE = /^[0-9\-.,/sqrtac()]$/i;
+const CARACTERE_AUTORISE = /^[0-9\-.,/sqrtac()√−]$/i;
 
 export function gererKeyDownNumeriqueRacine(e: KeyboardEvent<HTMLInputElement>): void {
   if (e.ctrlKey || e.metaKey || e.altKey) return;

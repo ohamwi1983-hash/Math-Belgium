@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAide,
@@ -17,6 +18,8 @@ import { EtapeTangenteUnSansLautre } from "./components/EtapeTangenteUnSansLautr
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de l'autre.";
 import { Katex } from "./components/Katex";
@@ -61,6 +64,12 @@ function calculerSegmentsProgression(etat: EtatSessionUnSansLautre): EtatPucePro
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
  * passer à l'écran suivant"). */
+/** Titre de la fiche de consultation de l'écran courant — la grandeur demandée par cet écran. */
+function titreEcran(etat: EtatSessionUnSansLautre): string {
+  const cible = etat.exerciceCourant.fonctionCible;
+  return etat.phase === "carre" ? `Valeur de ${cible}²(θ)` : etat.phase === "valeurSignee" ? `Valeur de ${cible}(θ)` : "Valeur de tan(θ)";
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionUnSansLautre;
   revele: boolean;
@@ -69,8 +78,18 @@ interface TransitionEnAttente {
 export function AppUnSansLautre() {
   const [etat, setEtat] = useState<EtatSessionUnSansLautre>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, jamais dans le moteur ; remis à vide à chaque nouvel exercice (patron gen14). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : inclus dans la `key`
+   * des écrans, pour qu'un écran de même phase soit remonté à neuf — sans ça, la saisie de
+   * l'exercice précédent restait dans le champ (même patron que gen31/gen32). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionUnSansLautre) {
+  /** `votreReponse` : poussée dans l'historique seulement quand l'écran se clôt réellement, avec la
+   * réponse attendue de CET écran (`reponseAttendue`, calculée ci-dessous pour `etat.phase`). */
+  function terminerEtape(nouvelEtat: EtatSessionUnSansLautre, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -79,6 +98,9 @@ export function AppUnSansLautre() {
           : etat.phase === "valeurSignee"
             ? nouvelEtat.valeurSigneeRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tangenteRevele;
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [...h, { titre: titreEcran(etat), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue : undefined }]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -87,12 +109,20 @@ export function AppUnSansLautre() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setNumeroExercice((n) => n + 1);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionUnSansLautre(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionConnue)));
   }
 
@@ -100,11 +130,11 @@ export function AppUnSansLautre() {
 
   const reponseAttendue =
     etat.phase === "carre" ? (
-      <Katex expression={formatCarreCibleLatex(exercice)} />
+      <Katex expression={`\\displaystyle ${formatCarreCibleLatex(exercice)}`} />
     ) : etat.phase === "valeurSignee" ? (
-      <Katex expression={formatValeurCibleSimplifieeLatex(exercice)} />
+      <Katex expression={`\\displaystyle ${formatValeurCibleSimplifieeLatex(exercice)}`} />
     ) : (
-      <Katex expression={formatValeurTangenteSimplifieeLatex(exercice)} />
+      <Katex expression={`\\displaystyle ${formatValeurTangenteSimplifieeLatex(exercice)}`} />
     );
 
   const validation = enAttente
@@ -121,9 +151,9 @@ export function AppUnSansLautre() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Retrouver sin ou cos à partir de l'autre</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -139,37 +169,44 @@ export function AppUnSansLautre() {
           />
           {etat.phase === "carre" ? (
             <EtapeCarreUnSansLautre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideCarreUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseCarre(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseCarre(etat, texte), texte)}
               validation={validation}
             />
           ) : etat.phase === "valeurSignee" ? (
             <EtapeValeurSigneeUnSansLautre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideValeurSigneeUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseValeurSignee(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseValeurSignee(etat, texte), texte)}
               validation={validation}
             />
           ) : (
             <EtapeTangenteUnSansLautre
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideTangenteUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseTangente(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseTangente(etat, texte), texte)}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

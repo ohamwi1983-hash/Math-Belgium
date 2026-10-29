@@ -64,6 +64,12 @@ const PHASES_FIXES: PhaseCercleTrigonometrique[] = ["quadrant", "anglePremierQua
  * `calculerRecapitulatifCercleTrigonometrique` (ui/recapitulatifCercleTrigonometrique.ts). "signes"
  * (dernière phase) n'a pas de branche "close" propre : une fois notée, un nouvel exercice démarre.
  */
+/** Signe affiché à l'élève — vrai signe moins typographique « − » (jamais le tiret « - » du modèle
+ * interne). */
+function libelleSigne(signe: "+" | "-" | "0"): string {
+  return signe === "-" ? "−" : signe;
+}
+
 function calculerSegmentsProgression(etat: EtatSessionCercleTrigonometrique): EtatPuceProgression[] {
   const reductionApplicable = etat.scoreReductionExercice !== null || necessiteReduction(etat.exerciceCourant);
   const phases: PhaseCercleTrigonometrique[] = reductionApplicable ? ["reduction", ...PHASES_FIXES] : PHASES_FIXES;
@@ -92,6 +98,10 @@ export function AppCercleTrigonometrique() {
    * chaque nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : inclus dans la `key`
+   * des écrans, pour qu'un écran de même phase soit remonté à neuf — sans ça, la saisie de
+   * l'exercice précédent restait dans le champ (même patron que gen31/gen32/gen35). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
    * réutilise `calculerRecapitulatifCercleTrigonometrique` pour la réponse ATTENDUE (l'entrée qui
@@ -142,6 +152,7 @@ export function AppCercleTrigonometrique() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -153,6 +164,7 @@ export function AppCercleTrigonometrique() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionCercleTrigonometrique(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteCercleTrigId)));
   }
 
@@ -164,15 +176,15 @@ export function AppCercleTrigonometrique() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec
           ? undefined
           : etat.phase === "reduction" ? (
-              <>Angle réduit attendu : {exercice.angleReduit}°</>
+              <>{exercice.angleReduit}°</>
             ) : etat.phase === "quadrant" ? (
-              <>Quadrant attendu : {libelleQuadrant(exercice.quadrant)}</>
+              <>{libelleQuadrant(exercice.quadrant)}</>
             ) : etat.phase === "anglePremierQuadrant" ? (
-              <>Angle du premier quadrant attendu : {exercice.anglePremierQuadrant}°</>
+              <>{exercice.anglePremierQuadrant}°</>
             ) : (
               <>
-                Signes attendus : sin(θ) {exercice.signeSin} ; cos(θ) {exercice.signeCos} ; tan(θ){" "}
-                {exercice.signeTan === "indefini" ? "∄" : exercice.signeTan}
+                sin(θ) : {libelleSigne(exercice.signeSin)} ; cos(θ) : {libelleSigne(exercice.signeCos)} ; tan(θ) :{" "}
+                {exercice.signeTan === "indefini" ? "∄" : libelleSigne(exercice.signeTan)}
               </>
             ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -185,7 +197,7 @@ export function AppCercleTrigonometrique() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Placement et lecture sur le cercle trigonométrique</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -202,6 +214,7 @@ export function AppCercleTrigonometrique() {
           />
           {etat.phase === "reduction" ? (
             <EtapeReductionCercleTrig
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -213,6 +226,7 @@ export function AppCercleTrigonometrique() {
             />
           ) : etat.phase === "quadrant" ? (
             <EtapeQuadrantCercleTrig
+              key={`${numeroExercice}-${etat.phase}`}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -221,6 +235,7 @@ export function AppCercleTrigonometrique() {
             />
           ) : etat.phase === "anglePremierQuadrant" ? (
             <EtapeAnglePremierQuadrantCercleTrig
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -232,6 +247,7 @@ export function AppCercleTrigonometrique() {
             />
           ) : (
             <EtapeSignesCercleTrig
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

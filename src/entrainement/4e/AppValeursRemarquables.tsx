@@ -76,6 +76,9 @@ export function AppValeursRemarquables() {
    * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : inclus dans la `key`
+   * des écrans, pour qu'un écran de même phase soit remonté à neuf (même patron que gen31/gen32). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
    * `calculerRecapitulatifValeursRemarquables` pour la réponse ATTENDUE ; cette fonction ne produit
@@ -116,6 +119,7 @@ export function AppValeursRemarquables() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -125,6 +129,7 @@ export function AppValeursRemarquables() {
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionValeursRemarquables(REGLAGES_DEMO, () => construireAvecVarianteId(Number(varianteId) as AngleRemarquable)));
   }
 
@@ -135,13 +140,14 @@ export function AppValeursRemarquables() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "quadrant" ? (
-          <>Quadrant attendu : {libelleQuadrant(exercice.quadrant)}</>
+          <>{libelleQuadrant(exercice.quadrant)}</>
         ) : etat.phase === "anglePremierQuadrant" ? (
-          <>Angle du premier quadrant attendu : {exercice.anglePremierQuadrant}°</>
+          <>{exercice.anglePremierQuadrant}°</>
         ) : (
           <>
-            Valeurs attendues : sin(θ) = <Katex expression={exercice.sinLatex} /> ; cos(θ) = <Katex expression={exercice.cosLatex} /> ;
-            tan(θ) = {exercice.tanLatex === "n'existe pas" ? "n'existe pas" : <Katex expression={exercice.tanLatex} />}
+            sin(θ) = <Katex expression={`\\displaystyle ${exercice.sinLatex}`} /> ; cos(θ) ={" "}
+            <Katex expression={`\\displaystyle ${exercice.cosLatex}`} /> ; tan(θ) ={" "}
+            {exercice.tanLatex === "n'existe pas" ? "n'existe pas" : <Katex expression={`\\displaystyle ${exercice.tanLatex}`} />}
           </>
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -154,7 +160,7 @@ export function AppValeursRemarquables() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Valeurs trigonométriques remarquables</h1>
-        <p className="app-subtitle">Chapitre 3</p>
+        <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES.map((v) => ({ id: String(v.id), label: v.label }))} onGenerer={forcerVariante} />
       </header>
 
@@ -172,6 +178,7 @@ export function AppValeursRemarquables() {
           />
           {etat.phase === "quadrant" ? (
             <EtapeQuadrantVR
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -183,6 +190,7 @@ export function AppValeursRemarquables() {
             />
           ) : etat.phase === "anglePremierQuadrant" ? (
             <EtapeAnglePremierQuadrantVR
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -194,6 +202,7 @@ export function AppValeursRemarquables() {
             />
           ) : (
             <EtapeValeursExactesVR
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

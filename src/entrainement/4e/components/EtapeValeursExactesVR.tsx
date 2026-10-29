@@ -94,17 +94,17 @@ export function EtapeValeursExactesVR({
             <tr>
               <td className="grille-signes-zone">
                 <button type="button" className={classeCelluleSinCos(sin, exercice.sinValeur)} onClick={() => setSin(cyclerValeurSinCos)}>
-                  <Katex expression={formatCelluleSinCosLatex(sin)} />
+                  <Katex expression={`\\displaystyle ${formatCelluleSinCosLatex(sin)}`} />
                 </button>
               </td>
               <td className="grille-signes-zone">
                 <button type="button" className={classeCelluleSinCos(cos, exercice.cosValeur)} onClick={() => setCos(cyclerValeurSinCos)}>
-                  <Katex expression={formatCelluleSinCosLatex(cos)} />
+                  <Katex expression={`\\displaystyle ${formatCelluleSinCosLatex(cos)}`} />
                 </button>
               </td>
               <td className="grille-signes-zone">
                 <button type="button" className={classeCelluleTan(tan, exercice.tanValeur)} onClick={() => setTan(cyclerValeurTan)}>
-                  <Katex expression={formatCelluleTanLatex(tan)} />
+                  <Katex expression={`\\displaystyle ${formatCelluleTanLatex(tan)}`} />
                 </button>
               </td>
             </tr>
