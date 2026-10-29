@@ -42,7 +42,14 @@ function tirerVecteur(): Composantes {
   }
   const x = randomInt(1, 4) * (Math.random() < 0.5 ? -1 : 1);
   const y = randomInt(1, 4) * (Math.random() < 0.5 ? -1 : 1);
-  return { x, y };
+  // Réduit par le PGCD : le vecteur canonique (récapitulatif, réponse révélée) reste le plus simple,
+  // jamais (−4 ; −4) pour la droite y = x + 1.
+  const g = pgcd(Math.abs(x), Math.abs(y));
+  return { x: x / g, y: y / g };
+}
+
+function pgcd(a: number, b: number): number {
+  return b === 0 ? a : pgcd(b, a % b);
 }
 
 /** Rotation de 90° — `(a,b) → (-b,a)`, exactement l'exemple de la spec, cohérente avec le critère
@@ -90,7 +97,13 @@ function construireDroiteDonnee(point: Point, vecteur: Composantes, bucket: "car
   const formes = formesCartesiennesPossibles(vecteur);
   const forme: FormeEntreeRelation = formes[randomInt(0, formes.length - 1)]!;
   droite.formeEntree = forme;
-  if (forme === "implicite") droite.impliciteEntree = implicteDepuisPointVecteur(point, vecteur);
+  if (forme === "implicite") {
+    // Premier coefficient non nul positif à l'affichage (« x + y + 1 = 0 », jamais « −x − y − 1 = 0 ») —
+    // même droite, la vérification compare par proportionnalité.
+    const e = implicteDepuisPointVecteur(point, vecteur);
+    const signe = e.a < 0 || (e.a === 0 && e.b < 0) ? -1 : 1;
+    droite.impliciteEntree = { a: e.a === 0 ? 0 : signe * e.a, b: e.b === 0 ? 0 : signe * e.b, c: e.c === 0 ? 0 : signe * e.c };
+  }
   else if (forme === "explicite_y") droite.expliciteYEntree = expliciteYDepuisPointVecteur(point, vecteur);
   else droite.expliciteXEntree = expliciteXDepuisPointVecteur(point, vecteur);
   return droite;

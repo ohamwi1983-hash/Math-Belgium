@@ -44,7 +44,8 @@ export function EtapeRelationRelationsDroites({ exercice, niveauAide, onActiverA
       />
       <p className="prompt-text">{CONSIGNE_RELATION}</p>
 
-      <div className="options-grid">
+      {/* Une colonne : « Ni parallèles ni perpendiculaires » déborde d'une grille à 2 colonnes à 390 px. */}
+      <div className="options-grid" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
         {OPTIONS.map((option) => (
           <button
             key={option}

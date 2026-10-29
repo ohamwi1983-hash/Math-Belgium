@@ -3,7 +3,6 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
-  CONSIGNE_RELATION,
   consigneConstruction,
   consigneEquation,
   consigneExtraction,
@@ -111,7 +110,7 @@ function construireEnonceReconnaissance(exercice: ExerciceRelationsDroites): Sec
         reponse: { type: "lignes", nombre: 0 },
       },
       { consigne: [texte(consigneExtraction2(exercice))], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(CONSIGNE_RELATION.replace(" Une seule tentative.", " Justifie."))], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte("Les droites d₁ et d₂ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie.")], reponse: { type: "lignes", nombre: 0 } },
     ],
   };
 }

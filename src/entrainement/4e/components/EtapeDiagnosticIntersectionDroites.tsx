@@ -36,8 +36,10 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilise
    * choix suivant, pas encore validé et peut-être juste, était déjà rouge). */
   const [dernierSoumis, setDernierSoumis] = useState<ConclusionIntersectionDroites | null>(null);
   const max = NIVEAU_AIDE_MAX_DIAGNOSTIC;
-  const soumisCorrect = validation != null && !validation.revele;
-  const estRejete = (option: ConclusionIntersectionDroites) => tentativesUtilisees > 0 && !soumisCorrect && option === dernierSoumis;
+  // Écran clos : `tentativesUtilisees` n'est pas encore mis à jour (l'état suivant attend le clic
+  // sur « Écran suivant »), seul `validation.revele` dit si la dernière soumission était fausse.
+  const derniereSoumissionFausse = validation ? validation.revele : tentativesUtilisees > 0;
+  const estRejete = (option: ConclusionIntersectionDroites) => derniereSoumissionFausse && option === dernierSoumis;
   const [ligneD1, ligneD2] = formatLignesEnonce(exercice);
 
   return (

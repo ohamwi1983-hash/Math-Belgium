@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Circle, Line, Mafs, Point as MafsPoint } from "mafs";
 import "mafs/core.css";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
-import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, etendreViewBoxPourEtiquettes } from "../ui/mafsTransformation";
-import { viewBoxEquationCercle } from "../ui/equationCercleGraph";
+import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_STANDARD, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
+import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../ui/equationCercleGraph";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { GrilleAdaptative, PointCroix } from "./mafsGraphPartage";
 import { useLargeurConteneur } from "./useLargeurConteneur";
@@ -41,9 +41,8 @@ const LARGEUR_MIN_ETIQUETTE_PAR_UNITE = 22;
 export function EquationCercleGraph({ exercice, afficherRayon = false, afficherCentre = false }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
   const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
-  const hauteur = largeur / RATIO_GRAPHE;
-  const viewBox = viewBoxEquationCercle(exercice);
-  const viewBoxEtendu = etendreViewBoxPourEtiquettes(viewBox);
+  const hauteur = largeur / RATIO_GRAPHE_CERCLE;
+  const viewBoxEtendu = viewBoxEquationCercle(exercice);
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
 
   return (

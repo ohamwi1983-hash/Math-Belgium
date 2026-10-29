@@ -318,7 +318,8 @@ export function formatEtatActuelVecteurChercheLatex(exercice: ExerciceRelationsD
 // Écran 3 (famille `reconnaissance`) — relation entre d₁ et d₂.
 // ============================================================================
 
-export const CONSIGNE_RELATION = "Les droites d₁ et d₂ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Une seule tentative.";
+/** Consigne de l'écran — la question elle-même est déjà dans l'énoncé (consigne générale). */
+export const CONSIGNE_RELATION = "Choisis la relation entre d₁ et d₂ à l'aide de leurs vecteurs directeurs (une seule tentative).";
 
 /** Aide niveau 1 — la méthode du cours, dans l'ordre : colinéarité d'abord, orthogonalité ensuite. */
 export function segmentsAideRelationNiveau1(): FragmentConsigne[] {
