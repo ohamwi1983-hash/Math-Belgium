@@ -5,10 +5,10 @@
  * Jamais un triangle tiré au hasard puis classé a posteriori : chaque configuration choisit
  * d'abord ses données connues, puis en déduit le triangle complet.
  *
- * Deux configurations UNIQUEMENT, jamais le cas ambigu SSA — voir sa doc,
- * `core/triangleQuelconque.types.ts`. Rôles toujours fixes (même simplification que "Loi des
- * sinus"/"Loi des cosinus", voir CLAUDE.md) : `loiSinus` cherche toujours `b`, `alKashi` cherche
- * toujours `A` — la variété vient des valeurs tirées, pas de la combinatoire des rôles.
+ * Trois configurations, jamais le cas ambigu SSA — voir sa doc, `core/triangleQuelconque.types.ts`.
+ * Rôles toujours fixes (même simplification que "Loi des sinus"/"Loi des cosinus", voir CLAUDE.md) :
+ * `loiSinus` cherche toujours `b`, `alKashi` cherche toujours `A`, `alKashiCote` cherche toujours
+ * `a` — la variété vient des valeurs tirées, pas de la combinatoire des rôles.
  *
  * `unite` (`promptcorrectionsgenerateur19unitesnotation.md`) : tirée uniformément parmi les 5
  * valeurs de `UniteLongueur`, une seule fois par exercice — jamais retirée indépendamment pour
@@ -20,7 +20,7 @@ import type {
   GenerateurExerciceTriangleQuelconque,
   UniteLongueur,
 } from "../../core/triangleQuelconque.types";
-import { resoudreAAS, resoudreSSS } from "../triangle/resoudreTriangle";
+import { resoudreAAS, resoudreSAS, resoudreSSS } from "../triangle/resoudreTriangle";
 import { randomInt } from "./aleatoire";
 
 /** Unité de longueur tirée uniformément, fixée pour tout l'exercice (les deux écrans) —
@@ -68,14 +68,58 @@ function construireAlKashi(): ExerciceTriangleQuelconque {
   return { configuration: "alKashi", triangle: resoudreSSS(a, b, c), donneeManquante: "A", unite: tirerUnite() };
 }
 
+/**
+ * Config `alKashiCote` (SAS, jamais ambigu) — l'exemple résolu du cours (« côté a — Al-Kashi » :
+ * `a² = b² + c² − 2bc·cos(A)`) : `b`, `c` tirés dans [5,20] (mêmes bornes de lisibilité que
+ * `alKashi`), l'angle compris `A` dans [25°,150°] (parfois obtus, `cos(A) < 0`), jamais 90° (Al-Kashi
+ * y dégénère en Pythagore). Rejeté tant qu'un angle du triangle obtenu est sous 12° (triangle trop
+ * plat, croquis et valeurs peu lisibles) ou qu'une erreur classique serait tolérée
+ * (`erreurClassiqueToleree`). L'élève cherche toujours `a` (= BC, opposé à `A`).
+ */
+/** Tolérance de la vérification (`max(0.05, 1 %)`, `verificationTriangle.ts`), copiée ici car
+ * `src/generateurs/` ne dépend jamais de `src/moteur/` — avec une marge de sécurité ×1,2. */
+function dansLaTolerance(valeur: number, attendu: number): boolean {
+  return Math.abs(valeur - attendu) <= 1.2 * Math.max(0.05, Math.abs(attendu) * 0.01);
+}
+
+/**
+ * Vrai si une erreur classique de l'élève tomberait par coïncidence dans la tolérance de ±1 %
+ * (décision de garder cette tolérance, audit du chapitre 5) : oubli du terme « −2bc·cos(A) »
+ * (≈ Pythagore, quand A est proche de 90°), cosinus calculé en radians, ou signe du cosinus inversé
+ * pour un angle obtus. Un tel tirage est rejeté : l'erreur doit toujours être refusée.
+ */
+function erreurClassiqueToleree(b: number, c: number, A: number, a: number): boolean {
+  const D2R = Math.PI / 180;
+  const sansCos = Math.sqrt(b * b + c * c);
+  const radians = Math.sqrt(Math.max(0, b * b + c * c - 2 * b * c * Math.cos(A)));
+  const signeInverse = Math.sqrt(b * b + c * c + 2 * b * c * Math.cos(A * D2R));
+  return [sansCos, radians, signeInverse].some((v) => dansLaTolerance(v, a));
+}
+
+function construireAlKashiCote(): ExerciceTriangleQuelconque {
+  for (;;) {
+    const b = randomInt(5, 20);
+    const c = randomInt(5, 20);
+    const A = randomInt(25, 150);
+    if (A === 90) continue;
+    const triangle = resoudreSAS(b, c, A);
+    if (Math.min(triangle.A, triangle.B, triangle.C) < 12) continue;
+    if (erreurClassiqueToleree(b, c, A, triangle.a)) continue;
+    return { configuration: "alKashiCote", triangle, donneeManquante: "a", unite: tirerUnite() };
+  }
+}
+
 export const CATALOGUE_VARIANTES: { id: ConfigurationTriangleQuelconque; label: string }[] = [
   { id: "loiSinus", label: "Côté manquant (loi des sinus)" },
   { id: "alKashi", label: "Angle manquant (Al-Kashi)" },
+  { id: "alKashiCote", label: "Côté manquant, 2 côtés + angle compris (Al-Kashi)" },
 ];
 
 /** Convention CLAUDE.md ("Catalogue de variantes") — force la configuration demandée. */
 export function construireAvecVarianteId(varianteId: ConfigurationTriangleQuelconque): ExerciceTriangleQuelconque {
-  return varianteId === "loiSinus" ? construireLoiSinus() : construireAlKashi();
+  if (varianteId === "loiSinus") return construireLoiSinus();
+  if (varianteId === "alKashi") return construireAlKashi();
+  return construireAlKashiCote();
 }
 
 export const genererExerciceTriangleQuelconque: GenerateurExerciceTriangleQuelconque = () => {

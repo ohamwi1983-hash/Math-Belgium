@@ -169,6 +169,7 @@ interface DonneesFormuleAireLocales {
 const DONNEES_FORMULE_AIRE: Record<ExerciceTriangleQuelconque["configuration"], DonneesFormuleAireLocales> = {
   loiSinus: { cote1: "a", cote2: "b", angleCompris: "C" },
   alKashi: { cote1: "b", cote2: "c", angleCompris: "A" },
+  alKashiCote: { cote1: "b", cote2: "c", angleCompris: "A" },
 };
 
 

@@ -4,13 +4,15 @@
  * `Triangle` (`triangle.types.ts`, module partagé du chapitre) — même couplage assumé que les
  * autres générateurs du chapitre.
  *
- * Deux configurations UNIQUEMENT, jamais le cas ambigu SSA (2 côtés + un angle qui n'est PAS
- * l'angle compris entre eux) — explicitement hors de portée de ce générateur, réservé à un futur
- * générateur séparé non développé ici :
+ * Trois configurations, jamais le cas ambigu SSA (2 côtés + un angle qui n'est PAS l'angle compris
+ * entre eux) — explicitement hors de portée de ce générateur, réservé à un futur générateur séparé
+ * non développé ici :
  * - `loiSinus` : 2 angles + 1 côté connus, 1 côté manquant (AAS, jamais ambigu — les 3 angles sont
  *   déjà déterminés, `resoudreAAS` ne fait qu'un simple rapport).
  * - `alKashi` : 3 côtés connus, 1 angle manquant (SSS, jamais ambigu sur [0°,180°] — `resoudreSSS`
  *   utilise `acos`).
+ * - `alKashiCote` : 2 côtés + l'angle compris connus, le 3e côté manquant (SAS, l'exemple résolu du
+ *   cours : `a² = b² + c² − 2bc·cos(A)`, jamais ambigu — `resoudreSAS`).
  *
  * `donneeManquante` identifie explicitement quelle lettre du `Triangle` résolu est la donnée à
  * retrouver à l'écran 1 — dérivée à la génération, jamais redevinée côté vérification/présentation.
@@ -24,7 +26,7 @@
  */
 import type { CoteTriangle, SommetTriangle, Triangle } from "./triangle.types";
 
-export type ConfigurationTriangleQuelconque = "loiSinus" | "alKashi";
+export type ConfigurationTriangleQuelconque = "loiSinus" | "alKashi" | "alKashiCote";
 
 /** Une lettre du triangle — un côté (a/b/c) ou un angle (A/B/C), selon la configuration. */
 export type LettreTriangle = CoteTriangle | SommetTriangle;
@@ -37,7 +39,7 @@ export type UniteLongueur = "mm" | "cm" | "dm" | "m" | "km";
 export interface ExerciceTriangleQuelconque {
   configuration: ConfigurationTriangleQuelconque;
   triangle: Triangle;
-  /** La lettre manquante à retrouver à l'écran 1 — toujours un côté pour `loiSinus`, toujours un angle pour `alKashi`. */
+  /** La lettre manquante à retrouver à l'écran 1 — un côté pour `loiSinus` (`b`) et `alKashiCote` (`a`), un angle pour `alKashi` (`A`). */
   donneeManquante: LettreTriangle;
   unite: UniteLongueur;
 }

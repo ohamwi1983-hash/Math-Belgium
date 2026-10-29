@@ -34,7 +34,8 @@ function estCote(lettre: LettreTriangle): lettre is CoteTriangle {
  * Les deux côtés + l'angle compris "directement disponibles" à l'écran 2 selon la configuration —
  * `loiSinus` : `a` (donné), `b` (retrouvé à l'écran 1), `C=180-A-B` (déductible trivialement des
  * deux angles déjà donnés) ; `alKashi` : `b`,`c` (donnés dès le départ), `A` (retrouvé à l'écran 1,
- * angle compris entre `b` et `c`). Mathématiquement, l'aire d'un triangle est invariante quel que
+ * angle compris entre `b` et `c`) ; `alKashiCote` : `b`,`c` et `A` (tous donnés dès le départ, l'angle
+ * compris de la formule d'Al-Kashi). Mathématiquement, l'aire d'un triangle est invariante quel que
  * soit le couple choisi (`½ab·sinC = ½bc·sinA = ½ac·sinB`) — cette sélection ne pilote donc jamais
  * la valeur numérique attendue (toujours la même quelle que soit la configuration), seulement le
  * texte des aides/consignes (voir `formatTriangleQuelconque.ts`), pour rester cohérente avec les
@@ -49,6 +50,7 @@ export interface DonneesFormuleAire {
 const DONNEES_FORMULE_AIRE: Record<ConfigurationTriangleQuelconque, DonneesFormuleAire> = {
   loiSinus: { cote1: "a", cote2: "b", angleCompris: "C" },
   alKashi: { cote1: "b", cote2: "c", angleCompris: "A" },
+  alKashiCote: { cote1: "b", cote2: "c", angleCompris: "A" },
 };
 
 export function donneesFormuleAire(exercice: ExerciceTriangleQuelconque): DonneesFormuleAire {

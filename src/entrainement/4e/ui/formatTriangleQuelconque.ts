@@ -99,6 +99,7 @@ function poserValeur(valeurs: TriangleSketchValeurs, lettre: LettreTriangle, tex
 const DONNEES_CONNUES: Record<ConfigurationTriangleQuelconque, { cotes: CoteTriangle[]; angles: SommetTriangle[] }> = {
   loiSinus: { cotes: ["a"], angles: ["A", "B"] },
   alKashi: { cotes: ["a", "b", "c"], angles: [] },
+  alKashiCote: { cotes: ["b", "c"], angles: ["A"] },
 };
 
 export function donneesConnues(exercice: ExerciceTriangleQuelconque): { cotes: CoteTriangle[]; angles: SommetTriangle[] } {
@@ -115,6 +116,7 @@ export function donneesConnues(exercice: ExerciceTriangleQuelconque): { cotes: C
 const PAIRES_PERTINENTES: Record<ConfigurationTriangleQuelconque, CoteTriangle[]> = {
   loiSinus: ["a", "b"],
   alKashi: ["a"],
+  alKashiCote: ["a"],
 };
 
 export function pairesPertinentes(exercice: ExerciceTriangleQuelconque): CoteTriangle[] {
@@ -156,6 +158,7 @@ export function notationDonneeManquante(exercice: ExerciceTriangleQuelconque): s
 const LIBELLE_CONFIGURATION: Record<ConfigurationTriangleQuelconque, string> = {
   loiSinus: "Loi des sinus",
   alKashi: "Loi des cosinus (Al-Kashi)",
+  alKashiCote: "Loi des cosinus (Al-Kashi)",
 };
 
 export function libelleConfiguration(configuration: ConfigurationTriangleQuelconque): string {
@@ -183,6 +186,7 @@ export function placeholderDonneeManquante(exercice: ExerciceTriangleQuelconque)
 const NOM_LOI: Record<ConfigurationTriangleQuelconque, string> = {
   loiSinus: "la loi des sinus",
   alKashi: "la loi des cosinus (Al-Kashi)",
+  alKashiCote: "la loi des cosinus (Al-Kashi)",
 };
 
 export function texteAide1DonneeManquante(exercice: ExerciceTriangleQuelconque): string {
@@ -209,8 +213,20 @@ function formuleAlKashi(exercice: ExerciceTriangleQuelconque): string {
   return `BC² = AC²+AB²-2·AC·AB·cos(A) → cos(A) = ((${b})²+(${c})²-(${a})²)/(2·${b}·${c})`;
 }
 
+/** Formule substituée d'Al-Kashi pour le côté `a` = BC (configuration `alKashiCote`, l'exemple résolu
+ * du cours : `a² = b² + c² − 2bc·cos(A)`, puis racine carrée) — même parenthésage des longueurs
+ * élevées au carré que `formuleAlKashi`, jamais la valeur finale (il reste le calcul à faire). */
+function formuleAlKashiCote(exercice: ExerciceTriangleQuelconque): string {
+  const b = formatValeurLettre(exercice, "b");
+  const c = formatValeurLettre(exercice, "c");
+  const A = formatValeurLettre(exercice, "A");
+  return `BC² = AC²+AB²-2·AC·AB·cos(A) → BC = √((${b})²+(${c})²-2·${b}·${c}·cos(${A}))`;
+}
+
 export function texteAide2DonneeManquante(exercice: ExerciceTriangleQuelconque): string {
-  return exercice.configuration === "loiSinus" ? formuleLoiSinus(exercice) : formuleAlKashi(exercice);
+  if (exercice.configuration === "loiSinus") return formuleLoiSinus(exercice);
+  if (exercice.configuration === "alKashi") return formuleAlKashi(exercice);
+  return formuleAlKashiCote(exercice);
 }
 
 export const NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE = 2;
