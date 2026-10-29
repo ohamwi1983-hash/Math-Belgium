@@ -1,7 +1,17 @@
-import type { ExerciceSectionPlaneSolide, PointSectionExercice } from "../../core/sectionPlaneSolide.types";
+import type { ExerciceSectionPlaneSolide } from "../../core/sectionPlaneSolide.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
-import { libelleFace, libellePoint, pointsExtraConnus, segmentsExtraTraces, TEXTE_AIDE_AUXILIAIRE_NIVEAU1, TEXTE_AIDE_SEGMENT_NIVEAU1 } from "../../ui/formatSectionPlaneSolide";
+import {
+  elementsConstructionAuxiliaire,
+  libelleFace,
+  libelleLigne,
+  libellePoint,
+  nomPolygoneSection,
+  pointsExtraConnus,
+  segmentsExtraTraces,
+  TEXTE_AIDE_AUXILIAIRE_NIVEAU1,
+  TEXTE_AIDE_SEGMENT_NIVEAU1,
+} from "../../ui/formatSectionPlaneSolide";
 import { calculerAretesAvecVisibilite, calculerEchelleProjection, calculerLabelsSommetsPixel, calculerSommetsPixel, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide } from "./index";
 
@@ -25,20 +35,11 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPl
  * font que rejouer, côté état vivant d'une session interactive, un sous-ensemble de ce que
  * `points`/`ordreCyclique` connaissent déjà intégralement.
  *
- * **Étiquetage des sommets P/Q/R/S/T/…** : réutilise directement `ui/formatSectionPlaneSolide.ts::libellePoint`
- * (déjà exportée, pure, prend un tableau ordonné `connus` et un id) plutôt que de dupliquer sa
- * logique — mais lui passe un ordre synthétique `ordreLabelsDepuisExercice` (P, Q, R d'abord — même
- * ordre que `idsDepart`/l'état initial réel d'une session interactive, voir
- * `moteur/sessionSectionPlaneSolide.ts::demarrerSessionSectionPlaneSolide` — puis les points restants
- * dans l'ordre cyclique du polygone) plutôt que le véritable ordre de découverte d'une session jouée
- * (qui dépend des choix libres de l'élève à l'écran B, donc n'existe pas pour une instance générée
- * hors session). Ce choix ne change RIEN à la validité de l'étiquetage : `libellePoint` n'exige
- * aucune propriété de l'ordre fourni au-delà d'être une permutation valide des ids, seule la LETTRE
- * P/Q/R étant garantie par construction (elle occupe toujours les 3 premières positions).
- * `ui/formatSectionPlaneSolide.ts::pointsExtraConnus`/`segmentsExtraTraces` sont réutilisées de la
- * même façon pour obtenir les points/segments à dessiner (positions 3D + label + couleur hex déjà
- * calculée, `COULEUR_CONNU`/`COULEUR_SELECTION` — PAS des classes CSS, voir plus bas) plutôt que de
- * redériver soi-même ce mapping id → position/étiquette.
+ * **Étiquetage des sommets P/Q/R/S/T/…** : réutilise `ui/formatSectionPlaneSolide.ts::libellePoint`
+ * avec l'ordre de DÉCOUVERTE de la résolution de référence (`exercice.resolutionReference`, calculée
+ * une seule fois à la génération par `polygoneSection.ts::resolutionReference`) — P, Q, R puis
+ * chaque point auxiliaire dans l'ordre où la correction le construit, pour que les lettres de la
+ * figure suivent exactement le texte. Les points auxiliaires de construction sont nommés I₁, I₂…
  *
  * **SVG autonome, PAS `Solide3DSketch.tsx`** : ce composant React s'appuie sur des classes CSS
  * (`solide3d-arete`, `solide3d-sommet-point`…) définies dans `App.css`, inaccessible au document HTML
@@ -78,15 +79,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPl
  * (jamais reformulés) — ce sont déjà des phrases autonomes décrivant le principe géométrique, pas des
  * instructions d'interface ("Sélectionne...").
  *
- * **Correction RESYNTHÉTISÉE** depuis les champs déjà connus et corrects de l'instance tirée
- * (`points`, `ordreCyclique`, `facesCroisees`, `idsDepart`) : nombre de faces traversées, nom du
- * polygone obtenu (quadrilatère/pentagone/hexagone selon `points.length`), arête sur laquelle se
- * trouve chaque sommet, et ordre cyclique complet en repartant de P — jamais une resimulation de
- * l'ordre exact de découverte d'une partie jouée (qui dépendrait de choix libres non déterministes,
- * voir plus haut). Tout point AUTRE que P/Q/R est nécessairement un point auxiliaire (jamais un
- * segment direct, qui ne fait que RELIER 2 points déjà connus sans jamais en découvrir un nouveau —
- * voir `polygoneSection.ts::simulationResoluble` : seule `ciblesAuxiliaires` ajoute un id à `connus`)
- * — la correction l'affirme donc sans avoir besoin de rejouer la résolution.
+ * **Correction RESYNTHÉTISÉE** depuis les champs déjà connus et corrects de l'instance tirée : nombre
+ * de faces traversées (chacune fournit un CÔTÉ de la section), puis chaque étape de la résolution de
+ * référence — segment direct, ou construction détaillée d'un point auxiliaire (les 2 droites
+ * prolongées, la face commune, le point I obtenu, la droite qui donne le nouveau point — audit
+ * chapitre 8, point 26) — et enfin le polygone fermé. Une résolution valable parmi d'autres, jamais
+ * l'ordre exact d'une partie jouée (qui dépend des choix libres de l'élève).
  *
  * **PAS `regroupable`** — `enteteHtml` (le solide en perspective cavalière) est utilisé, ce qui
  * disqualifie `regroupable` à lui seul (voir la doc du champ, `export/genererFeuilleExercices.ts`),
@@ -103,26 +101,16 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPl
 const COULEUR_ARETE = "#1a1a2e";
 const COULEUR_ARETE_CACHEE = "#adb5bd";
 
-const NOMS_POLYGONE: Record<number, string> = {
-  3: "triangle",
-  4: "quadrilatère",
-  5: "pentagone",
-  6: "hexagone",
-  7: "heptagone",
-  8: "octogone",
-};
-
-function nomPolygone(k: number): string {
-  return NOMS_POLYGONE[k] ?? `polygone à ${k} côtés`;
-}
-
-/** P, Q, R d'abord (même ordre que `idsDepart`, l'état initial réel d'une session), puis les autres
- * sommets du polygone dans l'ordre cyclique — voir le commentaire de tête pour pourquoi cet ordre
- * synthétique (pas un ordre de découverte réel) reste un usage valide de `libellePoint`. */
+/** Ordre de DÉCOUVERTE de la résolution de référence (`exercice.resolutionReference`, calculée à la
+ * génération) : P, Q, R, puis chaque point auxiliaire dans l'ordre où la correction le construit —
+ * pour que les lettres S, T, … de la figure suivent exactement le texte de la correction. */
 function ordreLabelsDepuisExercice(exercice: ExerciceSectionPlaneSolide): number[] {
-  const { idsDepart, ordreCyclique } = exercice;
-  const restants = ordreCyclique.filter((id) => !idsDepart.includes(id));
-  return [...idsDepart, ...restants];
+  const ordre: number[] = [...exercice.idsDepart];
+  for (const etape of exercice.resolutionReference) {
+    if (etape.type === "auxiliaire" && !ordre.includes(etape.pointCible)) ordre.push(etape.pointCible);
+  }
+  for (const id of exercice.ordreCyclique) if (!ordre.includes(id)) ordre.push(id); // garde défensive
+  return ordre;
 }
 
 /** `ordreCyclique`, re-décalé pour commencer par P (id `idsDepart[0]`) — même cycle, juste plus
@@ -144,6 +132,38 @@ function segmentsPolygoneCles(exercice: ExerciceSectionPlaneSolide): string[] {
   });
 }
 
+const INDICES = ["₁", "₂", "₃", "₄", "₅", "₆"];
+
+function nomPointAuxiliaire(rang: number): string {
+  return `I${INDICES[rang] ?? rang + 1}`;
+}
+
+interface Pixel {
+  x: number;
+  y: number;
+}
+
+/** Cadre de la figure : le cadre habituel du croquis, élargi si besoin pour contenir les points
+ * auxiliaires de la correction (jamais coupés). */
+function cadreFigure(extra: Pixel[]): { x: number; y: number; largeur: number; hauteur: number } {
+  const marge = 22;
+  const xs = [0, LARGEUR_SVG, ...extra.map((p) => p.x - marge), ...extra.map((p) => p.x + marge)];
+  const ys = [0, HAUTEUR_SVG, ...extra.map((p) => p.y - marge), ...extra.map((p) => p.y + marge)];
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, largeur: Math.max(...xs) - x, hauteur: Math.max(...ys) - y };
+}
+
+/** Position d'étiquette décalée radialement vers l'EXTÉRIEUR du solide (même principe que les
+ * étiquettes de sommet, `calculerLabelsSommetsPixel`) — jamais posée sur une arête (audit
+ * chapitre 8, point 26). */
+function positionEtiquette(p: Pixel, centre: Pixel, distance = 14): Pixel {
+  const dx = p.x - centre.x;
+  const dy = p.y - centre.y;
+  const longueur = Math.hypot(dx, dy) || 1;
+  return { x: p.x + (dx / longueur) * distance, y: p.y + (dy / longueur) * distance + 4 };
+}
+
 /** Solide en perspective cavalière (arêtes + sommets nommés), TOUJOURS affiché — géométrie
  * intégralement issue de `ui/solide3DSketch.ts`, jamais recalculée ici. */
 function construireSvgSolide(exercice: ExerciceSectionPlaneSolide): string {
@@ -152,22 +172,17 @@ function construireSvgSolide(exercice: ExerciceSectionPlaneSolide): string {
   const labelsSommetsPixel = calculerLabelsSommetsPixel(solide);
   const aretes = calculerAretesAvecVisibilite(solide);
 
+  const ligne = (p1: Pixel, p2: Pixel, attributs: string) =>
+    `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" ${attributs}/>`;
+
   const aretesCacheesHtml = aretes
     .filter((a) => !a.visible)
-    .map((a) => {
-      const p1 = sommetsPixel[a.sommets[0]];
-      const p2 = sommetsPixel[a.sommets[1]];
-      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${COULEUR_ARETE_CACHEE}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-    })
+    .map((a) => ligne(sommetsPixel[a.sommets[0]], sommetsPixel[a.sommets[1]], `stroke="${COULEUR_ARETE_CACHEE}" stroke-width="1.5" stroke-dasharray="4 3"`))
     .join("");
 
   const aretesVisiblesHtml = aretes
     .filter((a) => a.visible)
-    .map((a) => {
-      const p1 = sommetsPixel[a.sommets[0]];
-      const p2 = sommetsPixel[a.sommets[1]];
-      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${COULEUR_ARETE}" stroke-width="1.75"/>`;
-    })
+    .map((a) => ligne(sommetsPixel[a.sommets[0]], sommetsPixel[a.sommets[1]], `stroke="${COULEUR_ARETE}" stroke-width="1.75"`))
     .join("");
 
   const sommetsHtml = Object.entries(sommetsPixel)
@@ -184,46 +199,84 @@ function construireSvgSolide(exercice: ExerciceSectionPlaneSolide): string {
 }
 
 /** Points de section à afficher (P/Q/R seuls en énoncé, tous en correction) + segments de fermeture
- * du polygone (uniquement en correction) — positions/étiquettes/couleurs hex issues de
- * `pointsExtraConnus`/`segmentsExtraTraces` (`ui/formatSectionPlaneSolide.ts`, déjà en couleurs
- * inline, jamais des classes CSS), projetées ici dans le MÊME repère pixel que le solide via
- * `projeter3DVersPixel(_, calculerEchelleProjection(solide))`. */
+ * du polygone (correction : pointillés sur les faces cachées) + constructions auxiliaires de la
+ * résolution de référence (correction : points I₁, I₂… et droites prolongées). Positions issues de
+ * `pointsExtraConnus`/`segmentsExtraTraces`/`elementsConstructionAuxiliaire`
+ * (`ui/formatSectionPlaneSolide.ts`, couleurs inline), projetées dans le MÊME repère pixel que le
+ * solide via `projeter3DVersPixel(_, calculerEchelleProjection(solide))`. */
 function construireSvgSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide, avecSection: boolean): string {
   const echelleProjection = calculerEchelleProjection(exercice.solide);
-  const idsAffiches = avecSection ? ordreLabelsDepuisExercice(exercice) : exercice.idsDepart;
+  const projeter = (p: Parameters<typeof projeter3DVersPixel>[0]) => projeter3DVersPixel(p, echelleProjection);
+  const ordreLabels = ordreLabelsDepuisExercice(exercice);
+  const idsAffiches = avecSection ? ordreLabels : exercice.idsDepart;
+  const sommetsPixel = Object.values(calculerSommetsPixel(exercice.solide));
+  const centre = { x: sommetsPixel.reduce((s, p) => s + p.x, 0) / sommetsPixel.length, y: sommetsPixel.reduce((s, p) => s + p.y, 0) / sommetsPixel.length };
 
   let segmentsHtml = "";
+  let constructionsHtml = "";
+  const pointsAuxiliairesPixel: Pixel[] = [];
   if (avecSection) {
     segmentsHtml = segmentsExtraTraces(exercice, segmentsPolygoneCles(exercice))
       .map((segment) => {
-        const p1 = projeter3DVersPixel(segment.a, echelleProjection);
-        const p2 = projeter3DVersPixel(segment.b, echelleProjection);
-        return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${segment.couleur}" stroke-width="3" stroke-linecap="round"/>`;
+        const p1 = projeter(segment.a);
+        const p2 = projeter(segment.b);
+        const tirets = segment.pointille ? ` stroke-dasharray="6 4"` : "";
+        return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${segment.couleur}" stroke-width="3" stroke-linecap="round"${tirets}/>`;
       })
       .join("");
+
+    let rang = 0;
+    for (const etape of exercice.resolutionReference) {
+      if (etape.type !== "auxiliaire") continue;
+      const connusAvant = ordreLabels.slice(0, ordreLabels.indexOf(etape.pointCible));
+      const { segments, points } = elementsConstructionAuxiliaire(exercice, connusAvant, etape.ligne1, etape.ligne2, etape);
+      constructionsHtml += segments
+        .map((segment) => {
+          const p1 = projeter(segment.a);
+          const p2 = projeter(segment.b);
+          return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${segment.couleur}" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+        })
+        .join("");
+      const I = points[0];
+      if (I) {
+        const p = projeter(I.position);
+        pointsAuxiliairesPixel.push(p);
+        const etiquette = positionEtiquette(p, centre);
+        constructionsHtml +=
+          `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${I.couleur}" stroke="#ffffff" stroke-width="1.5"/>` +
+          `<text x="${etiquette.x.toFixed(1)}" y="${etiquette.y.toFixed(1)}" font-size="12" font-weight="700" fill="${I.couleur}" text-anchor="middle">${nomPointAuxiliaire(rang)}</text>`;
+      }
+      rang++;
+    }
   }
 
-  const pointsHtml = pointsExtraConnus(exercice, idsAffiches)
+  const pointsHtml = pointsExtraConnus(exercice, ordreLabels)
+    .filter((_, index) => idsAffiches.includes(ordreLabels[index]))
     .map((point) => {
-      const p = projeter3DVersPixel(point.position, echelleProjection);
+      const p = projeter(point.position);
+      const etiquette = positionEtiquette(p, centre);
       return (
         `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${point.couleur}" stroke="#ffffff" stroke-width="1.5"/>` +
-        `<text x="${p.x.toFixed(1)}" y="${(p.y - 11).toFixed(1)}" font-size="12" font-weight="700" fill="${point.couleur}" text-anchor="middle">${point.label}</text>`
+        `<text x="${etiquette.x.toFixed(1)}" y="${etiquette.y.toFixed(1)}" font-size="12" font-weight="700" fill="${point.couleur}" text-anchor="middle">${point.label}</text>`
       );
     })
     .join("");
 
-  return `<svg width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" viewBox="0 0 ${LARGEUR_SVG} ${HAUTEUR_SVG}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto 14px;border:1px solid #e6e6f0;border-radius:8px;background:#ffffff;">
-<rect x="0" y="0" width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" fill="#ffffff"/>
+  const cadre = cadreFigure(pointsAuxiliairesPixel);
+  const largeurAffichee = Math.min(cadre.largeur, 520);
+  const hauteurAffichee = (cadre.hauteur * largeurAffichee) / cadre.largeur;
+  return `<svg width="${largeurAffichee.toFixed(0)}" height="${hauteurAffichee.toFixed(0)}" viewBox="${cadre.x.toFixed(1)} ${cadre.y.toFixed(1)} ${cadre.largeur.toFixed(1)} ${cadre.hauteur.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto 14px;border:1px solid #e6e6f0;border-radius:8px;background:#ffffff;">
+<rect x="${cadre.x.toFixed(1)}" y="${cadre.y.toFixed(1)}" width="${cadre.largeur.toFixed(1)}" height="${cadre.hauteur.toFixed(1)}" fill="#ffffff"/>
 ${construireSvgSolide(exercice)}
+${constructionsHtml}
 ${segmentsHtml}
 ${pointsHtml}
 </svg>`;
 }
 
 const CONSIGNE_PAPIER =
-  "Le plan de coupe passe par les 3 points P, Q et R marqués sur le solide. Retrouve puis trace le polygone de section complet (tous les sommets où ce plan coupe les arêtes du solide, reliés dans l'ordre jusqu'à refermer le polygone). " +
-  `${TEXTE_AIDE_SEGMENT_NIVEAU1} ${TEXTE_AIDE_AUXILIAIRE_NIVEAU1}`;
+  "Le plan de coupe passe par les 3 points P, Q et R marqués sur le solide. Retrouve puis trace le polygone de section complet (tous les points où ce plan coupe les arêtes du solide, reliés dans l'ordre jusqu'à refermer le polygone ; les côtés situés sur une face cachée se tracent en pointillés). " +
+  `${TEXTE_AIDE_SEGMENT_NIVEAU1} Quand plus aucune face n'a 2 points connus, construis un point auxiliaire : ${TEXTE_AIDE_AUXILIAIRE_NIVEAU1.replace(/^Méthode : /, "")}`;
 
 function construireEnonceSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): SectionExercice {
   return {
@@ -233,20 +286,50 @@ function construireEnonceSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide
   };
 }
 
-/** Sommet du polygone décrit pour la correction : lettre déjà attribuée (`libellePoint`) + arête du
- * solide sur laquelle il se trouve + "donné"/"point auxiliaire" — tout point autre que P/Q/R est
- * nécessairement un point auxiliaire (voir le commentaire de tête). */
-function texteDescriptionPoint(point: PointSectionExercice, label: string): string {
-  const arete = `${point.arete[0]}${point.arete[1]}`;
-  return point.labelDepart ? `${label} (donné, sur l'arête ${arete})` : `${label} (point auxiliaire, sur l'arête ${arete})`;
+/** « le segment [PQ] », « l'arête [BF] », « la diagonale [AC] ». */
+function avecArticle(libelle: string): string {
+  if (libelle.startsWith("arête")) return `l'${libelle}`;
+  if (libelle.startsWith("diagonale")) return `la ${libelle}`;
+  return `le ${libelle}`;
+}
+
+/** Une phrase par étape de la résolution de référence — segments directs ET construction détaillée
+ * de chaque point auxiliaire (quelles droites, dans quelle face, où elles se coupent, quelle droite
+ * donne le nouveau point — audit chapitre 8, point 26). */
+function textesEtapes(exercice: ExerciceSectionPlaneSolide): string[] {
+  const ordreLabels = ordreLabelsDepuisExercice(exercice);
+  const lettre = (id: number) => libellePoint(ordreLabels, id);
+  const arete = (id: number) => {
+    const point = exercice.points.find((p) => p.id === id)!;
+    return `[${point.arete[0]}${point.arete[1]}]`;
+  };
+  let rang = 0;
+  const textes: string[] = [];
+  for (const etape of exercice.resolutionReference) {
+    if (etape.type === "segment") {
+      const [a, b] = ordreLabels.indexOf(etape.pointA) <= ordreLabels.indexOf(etape.pointB) ? [etape.pointA, etape.pointB] : [etape.pointB, etape.pointA];
+      textes.push(`Dans la face ${libelleFace(exercice, etape.face)}, ${lettre(a)} et ${lettre(b)} sont connus : on trace le segment [${lettre(a)}${lettre(b)}].`);
+      continue;
+    }
+    const connusAvant = ordreLabels.slice(0, ordreLabels.indexOf(etape.pointCible));
+    const nomI = nomPointAuxiliaire(rang++);
+    const l1 = libelleLigne(exercice, connusAvant, etape.ligne1);
+    const l2 = libelleLigne(exercice, connusAvant, etape.ligne2);
+    const dansFace = etape.faceCommune !== null ? `Dans la face ${libelleFace(exercice, etape.faceCommune)}, on` : "On";
+    textes.push(
+      `Plus aucune face n'a 2 points connus. ${dansFace} prolonge ${avecArticle(l1)} et ${avecArticle(l2)} : ces droites se coupent en ${nomI}, point du plan de coupe. ` +
+        `${nomI} est aussi dans le plan de la face ${libelleFace(exercice, etape.face)}, où ${lettre(etape.pointConnu)} est déjà connu : la droite (${nomI}${lettre(etape.pointConnu)}) coupe l'arête ${arete(etape.pointCible)} en ${lettre(etape.pointCible)}.`,
+    );
+  }
+  return textes;
 }
 
 function construireCorrectionSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BlocCorrection[] {
   const ordreLabels = ordreLabelsDepuisExercice(exercice);
   const ordreDepuisP = ordreCycliqueDepuisP(exercice).map((id) => exercice.points.find((p) => p.id === id)!);
   const facesListe = exercice.facesCroisees.map((f) => libelleFace(exercice, f)).join(", ");
-  const descriptions = ordreDepuisP.map((p) => texteDescriptionPoint(p, libellePoint(ordreLabels, p.id)));
   const cycleLettres = [...ordreDepuisP.map((p) => libellePoint(ordreLabels, p.id)), libellePoint(ordreLabels, ordreDepuisP[0].id)].join(" → ");
+  const k = exercice.points.length;
 
   return [
     { type: "html", html: construireSvgSectionPlaneSolide(exercice, true) },
@@ -254,17 +337,16 @@ function construireCorrectionSectionPlaneSolide(exercice: ExerciceSectionPlaneSo
       type: "paragraphe",
       fragments: [
         texte(
-          `Le plan (PQR) traverse ${exercice.facesCroisees.length} faces du solide : ${facesListe}. Chacune de ces faces fournit un sommet de la section. ` +
-            `${TEXTE_AIDE_SEGMENT_NIVEAU1} ${TEXTE_AIDE_AUXILIAIRE_NIVEAU1}`,
+          `Le plan (PQR) traverse ${exercice.facesCroisees.length} faces du solide : ${facesListe}. Chacune de ces faces fournit un côté de la section (le segment qui relie ses 2 points de section) : la section a donc ${k} côtés.`,
         ),
       ],
     },
+    ...textesEtapes(exercice).map((t): BlocCorrection => ({ type: "paragraphe", fragments: [texte(t)] })),
     {
       type: "paragraphe",
       fragments: [
         texte(
-          `Le polygone de section obtenu est un ${nomPolygone(exercice.points.length)} à ${exercice.points.length} sommets : ${descriptions.join(", ")}. ` +
-            `En les reliant dans cet ordre — ${cycleLettres} — on obtient le polygone de section fermé (en bleu sur la figure).`,
+          `Le polygone de section est un ${nomPolygoneSection(k)} : ${cycleLettres} (en bleu sur la figure ; les côtés situés sur une face cachée sont en pointillés, les constructions auxiliaires en violet).`,
         ),
       ],
     },

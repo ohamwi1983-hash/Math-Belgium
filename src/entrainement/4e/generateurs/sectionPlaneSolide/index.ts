@@ -2,7 +2,7 @@ import type { NomSolide3D, Point3D, Solide3D } from "../../core/geometrieEspace.
 import type { ExerciceSectionPlaneSolide, LigneCandidateExercice, PointSectionExercice } from "../../core/sectionPlaneSolide.types";
 import { distance3D, EPSILON_3D } from "../solide3D/geometrieEspace";
 import { GABARITS_SOLIDE3D, GABARITS_TOUS, tirerNomGabarit } from "../solide3D/gabarits";
-import { calculerPolygoneSection, lignesCandidatesStatiques, type PlanPoints3D, simulationResoluble } from "./polygoneSection";
+import { calculerPolygoneSection, lignesCandidatesStatiques, type PlanPoints3D, resolutionReference } from "./polygoneSection";
 
 /**
  * Couche A — "Section plane d'un solide" (40e générateur, chapitre "Géométrie dans l'espace").
@@ -12,13 +12,12 @@ import { calculerPolygoneSection, lignesCandidatesStatiques, type PlanPoints3D, 
  * 1. Le polygone de section doit croiser AU MOINS `K_MIN=4` faces — une section triangulaire
  *    (k=3) ne nécessite jamais de point auxiliaire, ce qui viderait l'exercice de son intérêt
  *    pédagogique central (spec : "piège central à cibler... construire un point auxiliaire").
- * 2. `simulationResoluble` doit confirmer que l'instance est réellement résoluble en un nombre
+ * 2. `resolutionReference` doit confirmer que l'instance est réellement résoluble en un nombre
  *    borné d'itérations depuis {P,Q,R} — voir `polygoneSection.ts` pour la garantie de
- *    terminaison complète. Vérifié empiriquement sur des milliers de tirages aléatoires avant
- *    implémentation (méthode "verify before fixing" du projet) : cette contrainte n'est en
- *    pratique JAMAIS le facteur limitant — 100% des instances à k≥4 générées lors de ce test se
- *    sont révélées résolubles, sur les 4 gabarits — la boucle de secours ci-dessous n'est donc
- *    quasiment jamais retentée plus d'une poignée de fois.
+ *    terminaison complète. Depuis l'audit du chapitre 8 (points 17-18), seules les constructions
+ *    auxiliaires NON creuses comptent : environ 6,5 % des pavés/cubes, qui ne se résolvaient que
+ *    grâce à un point auxiliaire confondu avec un point connu, sont désormais rejetés ici.
+ * 3. Aucun sommet de la section à moins de 10 % d'une extrémité de son arête (point 25).
  */
 
 function randomInt(min: number, max: number): number {
@@ -61,13 +60,13 @@ function tirerPointSurArete(solide: Solide3D, arete: [string, string]): Point3D 
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
 }
 
-/** Dérive le libellé affiché ("arête AB" / "diagonale AC") depuis la clé stable produite par
+/** Dérive le libellé affiché ("arête [AB]" / "diagonale [AC]") depuis la clé stable produite par
  * `lignesCandidatesStatiques` — jamais un second champ redondant côté `polygoneSection.ts`, qui
  * ne connaît rien de la présentation. */
 function libelleDepuisCle(cle: string): string {
   const [prefixe, sommets] = cle.split(":");
   const mot = prefixe === "arete" ? "arête" : "diagonale";
-  return `${mot} ${sommets}`;
+  return `${mot} [${sommets}]`;
 }
 
 function lignesStatiquesAvecLabel(solide: Solide3D): LigneCandidateExercice[] {
@@ -75,6 +74,16 @@ function lignesStatiquesAvecLabel(solide: Solide3D): LigneCandidateExercice[] {
 }
 
 const K_MIN = 4;
+
+/** Aucun sommet de la section collé à un sommet du solide (audit chapitre 8, point 25) : sinon
+ * polygone en « lame » et étiquettes superposées aux sommets. Même marge que P, Q, R. */
+const T_MIN_SUR_ARETE = 0.1;
+
+function positionRelativeSurArete(solide: Solide3D, arete: [string, string], point: Point3D): number {
+  const a = solide.sommets[arete[0]];
+  const b = solide.sommets[arete[1]];
+  return distance3D(a, point) / distance3D(a, b);
+}
 
 function tenterGenererPourGabarit(nomGabarit: NomSolide3D): ExerciceSectionPlaneSolide | null {
   const solide = GABARITS_SOLIDE3D[nomGabarit];
@@ -98,7 +107,13 @@ function tenterGenererPourGabarit(nomGabarit: NomSolide3D): ExerciceSectionPlane
   if (idsDepart.some((id) => id === undefined)) return null; // garde défensive, ne devrait jamais arriver
   const [idP, idQ, idR] = idsDepart as [number, number, number];
 
-  if (!simulationResoluble(solide, polygone, [idP, idQ, idR])) return null;
+  if (polygone.points.some((p) => {
+    const t = positionRelativeSurArete(solide, p.arete, p.position);
+    return t < T_MIN_SUR_ARETE || t > 1 - T_MIN_SUR_ARETE;
+  })) return null;
+
+  const resolution = resolutionReference(solide, polygone, [idP, idQ, idR]);
+  if (!resolution) return null;
 
   const points: PointSectionExercice[] = polygone.points.map((p) => ({
     id: p.id,
@@ -116,10 +131,11 @@ function tenterGenererPourGabarit(nomGabarit: NomSolide3D): ExerciceSectionPlane
     facesCroisees: polygone.facesCroisees,
     idsDepart: [idP, idQ, idR],
     lignesStatiques: lignesStatiquesAvecLabel(solide),
+    resolutionReference: resolution,
   };
 }
 
-const MAX_TENTATIVES = 500;
+const MAX_TENTATIVES = 2000;
 
 /** Convention CLAUDE.md — catalogue `{id,label}` + `construireAvecVarianteId` : le seul axe
  * discret pertinent pour ce générateur est le GABARIT lui-même (la section elle-même n'a pas de

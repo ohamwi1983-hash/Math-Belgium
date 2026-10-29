@@ -169,6 +169,31 @@ export function points3Colineaires(a: Point3D, b: Point3D, c: Point3D): boolean 
   return sontParalleles3D(soustraire3D(b, a), soustraire3D(c, a));
 }
 
+/** Seuil d'alignement NORMALISÉ (carré du sinus de l'angle entre les 2 directions) — indépendant de
+ * la longueur des vecteurs comparés, contrairement à `points3Colineaires` (produit vectoriel brut
+ * comparé à `EPSILON_3D`, qui devient vrai dès qu'un des deux vecteurs est très court). */
+const SINUS_CARRE_ALIGNEMENT = 1e-16;
+
+/** Distance minimale (unités 3D internes, solides de 4 à 6 unités de côté) en deçà de laquelle deux
+ * points de construction sont considérés comme CONFONDUS — environ 1 % d'une arête. */
+export const DISTANCE_POINTS_DISTINCTS_3D = 0.05;
+
+/**
+ * a, b et c alignés, avec b DISTINCT de a (audit chapitre 8, point 17) — version stricte de
+ * `points3Colineaires` pour la construction d'un point auxiliaire de "Section plane d'un solide" :
+ * un point auxiliaire b confondu avec le point déjà connu a rendait l'alignement trivialement vrai
+ * (vecteur b−a nul), ce qui faisait accepter une « construction » qui ne construit rien. Le test
+ * d'alignement lui-même est normalisé (sinus de l'angle), jamais un produit vectoriel brut.
+ */
+export function points3AlignesDistincts(a: Point3D, b: Point3D, c: Point3D): boolean {
+  const u = soustraire3D(b, a);
+  const v = soustraire3D(c, a);
+  const nu = normeCarree3D(u);
+  const nv = normeCarree3D(v);
+  if (nu < DISTANCE_POINTS_DISTINCTS_3D ** 2 || nv < DISTANCE_POINTS_DISTINCTS_3D ** 2) return false;
+  return normeCarree3D(produitVectoriel3D(u, v)) / (nu * nv) < SINUS_CARRE_ALIGNEMENT;
+}
+
 const AXES_3D = ["x", "y", "z"] as const;
 type Axe3D = (typeof AXES_3D)[number];
 

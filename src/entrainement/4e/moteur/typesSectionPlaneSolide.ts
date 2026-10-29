@@ -58,12 +58,9 @@ export interface EtatSessionSectionPlaneSolide {
    * "auxiliaireFace" du même flux, jamais recalculés indépendamment ; `null` en dehors de ce flux. */
   ligneAuxiliaireChoisie: [string, string] | null;
   etapeCourante: EtatEtapeTentatives;
-  /** Aide PROGRESSIVE — un seul compteur, portant sur l'unité pédagogique COURANTE : remis à 0 à
-   * chaque nouveau segment direct, et à chaque nouvelle construction auxiliaire (jamais entre les 2
-   * sous-étapes "lignes"/"face" d'une MÊME construction — l'écran B partage ses 2 niveaux d'aide sur
-   * l'ensemble du flux, spec section "Écran type B"). 2 niveaux max sur chaque type d'écran, aucune
-   * aide sur "conclusion" (pas de bouton du tout, même convention que les autres écrans `max=0` du
-   * projet). */
+  /** Aide PROGRESSIVE — un seul compteur, remis à 0 à chaque nouvel écran (y compris entre les
+   * sous-étapes "lignes"/"face" d'une même construction, qui ont chacune leurs aides depuis l'audit
+   * du chapitre 8). 2 niveaux max sur chaque type d'écran, aucune aide sur "conclusion". */
   niveauAide: number;
   /** Scores déjà clos de l'exercice EN COURS — accumulés au fil des itérations, agrégés en
    * `scoreMoyen` seulement à la fermeture du polygone (écran "conclusion"). `revelesAccumules`/
@@ -72,6 +69,20 @@ export interface EtatSessionSectionPlaneSolide {
   scoresAccumules: number[];
   revelesAccumules: boolean[];
   niveauxAideAccumules: number[];
+  /** Clé du dernier segment tracé AUTOMATIQUEMENT (seul candidat restant, audit chapitre 8) —
+   * `null` tant que ce n'est pas arrivé dans l'exercice en cours. */
+  segmentAutomatique: string | null;
+  /** Dernière construction auxiliaire confirmée (paire de droites + face débloquée) — dessinée
+   * (point auxiliaire I, droite I–point connu, nouveau point) à la validation de l'écran "face". */
+  derniereConstruction: ConstructionAuxiliaireConfirmee | null;
   resultats: ResultatExerciceSectionPlaneSolide[];
   terminee: boolean;
+}
+
+export interface ConstructionAuxiliaireConfirmee {
+  ligne1: string;
+  ligne2: string;
+  face: number;
+  pointConnu: number;
+  pointCible: number;
 }

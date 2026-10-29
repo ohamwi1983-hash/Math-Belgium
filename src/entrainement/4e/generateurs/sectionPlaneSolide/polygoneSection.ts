@@ -5,8 +5,8 @@ import {
   intersectionDroitePlan,
   normalePlan,
   normeCarree3D,
-  points3Colineaires,
   produitScalaire3D,
+  produitVectoriel3D,
   soustraire3D,
 } from "../solide3D/geometrieEspace";
 
@@ -217,6 +217,35 @@ export function facesPretesPourSegment(
   return resultats;
 }
 
+// --- Alignement strict (audit chapitre 8, point 17) ----------------------------------------------
+
+/** Distance minimale en deçà de laquelle 2 points de construction sont CONFONDUS (≈ 1 % d'une arête)
+ * — même valeur que `DISTANCE_POINTS_DISTINCTS_3D` côté Couche B (`moteur/geometrieEspace.ts`),
+ * réécrite ici (frontière Couche A ↔ B, voir CLAUDE.md). */
+const DISTANCE_POINTS_DISTINCTS = 0.05;
+const SINUS_CARRE_ALIGNEMENT = 1e-16;
+
+/** a, b, c alignés avec b DISTINCT de a — un point auxiliaire I confondu avec le point déjà connu
+ * rendait l'ancien test (`points3Colineaires`, produit vectoriel brut) trivialement vrai : la
+ * « construction » ne construisait rien (audit chapitre 8, point 17). Alignement normalisé (sinus
+ * de l'angle), jamais un produit vectoriel brut dépendant de la longueur des vecteurs. */
+function alignesDistincts(a: Point3D, b: Point3D, c: Point3D): boolean {
+  const u = soustraire3D(b, a);
+  const v = soustraire3D(c, a);
+  const nu = normeCarree3D(u);
+  const nv = normeCarree3D(v);
+  if (nu < DISTANCE_POINTS_DISTINCTS ** 2 || nv < DISTANCE_POINTS_DISTINCTS ** 2) return false;
+  return normeCarree3D(produitVectoriel3D(u, v)) / (nu * nv) < SINUS_CARRE_ALIGNEMENT;
+}
+
+/** La droite (2 points) est contenue dans le plan de la face `face` du solide. */
+export function ligneDansFace(solide: Solide3D, ligne: [Point3D, Point3D], face: number): boolean {
+  const sommetsFace = solide.faces[face].map((nom) => solide.sommets[nom]);
+  const normale = normalePlan(sommetsFace[0], sommetsFace[1], sommetsFace[2]);
+  const n = Math.sqrt(normeCarree3D(normale));
+  return ligne.every((p) => Math.abs(produitScalaire3D(normale, soustraire3D(p, sommetsFace[0]))) / n < 1e-6);
+}
+
 // --- Écran B — construction d'un point auxiliaire ------------------------------------------------
 
 export interface CibleAuxiliaire {
@@ -252,7 +281,7 @@ export function ciblesAuxiliaires(
     if (aConnu === bConnu) continue; // les 2 déjà connus (prête pour segment) ou les 2 encore inconnus
     const connu = aConnu ? pa : pb;
     const cible = aConnu ? pb : pa;
-    if (points3Colineaires(connu.position, I, cible.position)) {
+    if (alignesDistincts(connu.position, I, cible.position)) {
       resultats.push({ face, pointConnu: connu.id, pointCible: cible.id });
     }
   }
@@ -280,49 +309,150 @@ export function polygoneFerme(polygone: PolygoneSection, segmentsTraces: Readonl
 
 const MAX_ITERATIONS_SIMULATION = 40;
 
+/** Une étape de la résolution de RÉFÉRENCE — rejouée une seule fois à la génération, puis portée
+ * par l'exercice (`ExerciceSectionPlaneSolide.resolutionReference`) pour la correction exportée
+ * (construction de chaque point auxiliaire détaillée, audit chapitre 8, point 26). Jamais imposée à
+ * l'élève, qui reste libre de son ordre et de ses droites à l'écran. */
+export type EtapeResolutionReference =
+  | { type: "segment"; face: number; pointA: number; pointB: number }
+  | {
+      type: "auxiliaire";
+      ligne1: string;
+      ligne2: string;
+      /** Point auxiliaire I, intersection des 2 droites prolongées. */
+      pointAuxiliaire: Point3D;
+      /** Une face dont le plan contient les 2 droites (`null` si aucune — 2 droites coplanaires
+       * hors de toute face, jamais préférées par `meilleureConstruction`). */
+      faceCommune: number | null;
+      face: number;
+      pointConnu: number;
+      pointCible: number;
+    };
+
+/** Projection cavalière du croquis (45°, coefficient 0,5) — réécrite ici en 2 lignes plutôt
+ * qu'importée de `ui/projectionCavaliere.ts` (la Couche A ne dépend jamais de la présentation) ;
+ * sert UNIQUEMENT à vérifier qu'un point auxiliaire reste dans le cadre du croquis. */
+function projeterCavaliere(p: Point3D): { x: number; y: number } {
+  const k = 0.5 * Math.SQRT1_2;
+  return { x: p.x + p.y * k, y: p.z + p.y * k };
+}
+
+/** Marge autour du solide projeté (fraction de sa plus grande dimension 2D) dans laquelle un point
+ * auxiliaire reste visible : le croquis (`ui/solide3DSketch.ts`) laisse 36 px de marge sur
+ * 400 × 320 autour du solide, soit au moins ≈ 10 % de sa taille de chaque côté. */
+const MARGE_CADRE_RELATIVE = 0.08;
+
+/** Le point auxiliaire, une fois projeté, tombe dans le cadre du croquis (solide projeté + marge) —
+ * le cadre du croquis est FIXE (calculé sur les seuls sommets du solide), un point hors de ce
+ * cadre serait coupé à l'écran. */
+export function pointDansCadreCroquis(solide: Solide3D, point: Point3D): boolean {
+  const projetes = Object.values(solide.sommets).map(projeterCavaliere);
+  const minX = Math.min(...projetes.map((p) => p.x));
+  const maxX = Math.max(...projetes.map((p) => p.x));
+  const minY = Math.min(...projetes.map((p) => p.y));
+  const maxY = Math.max(...projetes.map((p) => p.y));
+  const marge = MARGE_CADRE_RELATIVE * Math.max(maxX - minX, maxY - minY);
+  const p = projeterCavaliere(point);
+  return p.x >= minX - marge && p.x <= maxX + marge && p.y >= minY - marge && p.y <= maxY + marge;
+}
+
+/** Distance (3D) du point au centre du solide — départage 2 constructions également valables. */
+function distanceAuCentre(solide: Solide3D, point: Point3D): number {
+  const sommets = Object.values(solide.sommets);
+  const centre = {
+    x: sommets.reduce((s, p) => s + p.x, 0) / sommets.length,
+    y: sommets.reduce((s, p) => s + p.y, 0) / sommets.length,
+    z: sommets.reduce((s, p) => s + p.z, 0) / sommets.length,
+  };
+  return Math.sqrt(normeCarree3D(soustraire3D(point, centre)));
+}
+
+function faceCommuneDesLignes(solide: Solide3D, l1: [Point3D, Point3D], l2: [Point3D, Point3D]): number | null {
+  for (let f = 0; f < solide.faces.length; f++) {
+    if (ligneDansFace(solide, l1, f) && ligneDansFace(solide, l2, f)) return f;
+  }
+  return null;
+}
+
+/** Meilleure construction auxiliaire disponible depuis l'état donné — parmi TOUTES les paires
+ * valides, préfère (1) un point auxiliaire visible dans le cadre du croquis, (2) 2 droites d'une
+ * même face du solide (méthode du cours), puis (3) le point auxiliaire le plus proche du solide.
+ * `null` si aucune paire ne débloque rien. */
+export function meilleureConstruction(
+  solide: Solide3D,
+  polygone: PolygoneSection,
+  connus: ReadonlySet<number>,
+  lignes: readonly LigneCandidate[],
+): Extract<EtapeResolutionReference, { type: "auxiliaire" }> | null {
+  let meilleure: Extract<EtapeResolutionReference, { type: "auxiliaire" }> | null = null;
+  let meilleurRang = Infinity;
+  for (let i = 0; i < lignes.length; i++) {
+    for (let j = i + 1; j < lignes.length; j++) {
+      const cibles = ciblesAuxiliaires(polygone, connus, lignes[i].points, lignes[j].points);
+      if (cibles.length === 0) continue;
+      const I = intersectionDeuxDroites3D(lignes[i].points, lignes[j].points)!;
+      const faceCommune = faceCommuneDesLignes(solide, lignes[i].points, lignes[j].points);
+      const rang = (pointDansCadreCroquis(solide, I) ? 0 : 10000) + (faceCommune === null ? 1000 : 0) + distanceAuCentre(solide, I);
+      if (rang < meilleurRang) {
+        meilleurRang = rang;
+        meilleure = {
+          type: "auxiliaire",
+          ligne1: lignes[i].cle,
+          ligne2: lignes[j].cle,
+          pointAuxiliaire: I,
+          faceCommune,
+          face: cibles[0].face,
+          pointConnu: cibles[0].pointConnu,
+          pointCible: cibles[0].pointCible,
+        };
+      }
+    }
+  }
+  return meilleure;
+}
+
 /**
  * Simule une résolution complète depuis un ensemble de points de départ — utilisée UNIQUEMENT à la
  * génération pour garantir qu'une instance produite est résoluble en un nombre raisonnable
  * d'itérations (voir CLAUDE.md, "Condition d'arrêt") : rejoue les 2 types de coup (segment direct,
- * point auxiliaire) jusqu'à fermeture du polygone, ou renvoie `false` si aucun coup n'est
+ * point auxiliaire) jusqu'à fermeture du polygone, ou renvoie `null` si aucun coup n'est
  * disponible à une étape (ou si le nombre d'itérations dépasse la borne de sécurité) — la fonction
- * de génération retire alors et retire un autre tirage. **Jamais utilisée pendant l'exercice
- * lui-même**, qui laisse l'élève choisir librement parmi les coups valides à chaque écran, dans
- * n'importe quel ordre — l'ordre choisi ici (premier coup trouvé) est arbitraire et sans incidence
- * sur la résolubilité : l'ensemble des points/segments connus ne fait jamais que croître, donc
- * aucun coup disponible à un instant donné ne peut jamais être "manqué" en en jouant un autre
- * d'abord (argument de confluence, jamais un cas spécial à traiter par ordre).
+ * de génération retire alors un autre tirage. Depuis l'audit du chapitre 8 (point 17), seules les
+ * constructions NON creuses comptent (`alignesDistincts`) : une instance qui ne se résolvait que
+ * grâce à un point auxiliaire confondu avec un point connu est désormais rejetée (point 18).
+ * **Jamais utilisée pendant l'exercice lui-même**, qui laisse l'élève choisir librement parmi les
+ * coups valides à chaque écran, dans n'importe quel ordre — l'ensemble des points/segments connus
+ * ne fait jamais que croître, donc aucun coup disponible à un instant donné ne peut jamais être
+ * "manqué" en en jouant un autre d'abord (argument de confluence).
  */
-export function simulationResoluble(solide: Solide3D, polygone: PolygoneSection, depart: readonly number[]): boolean {
+export function resolutionReference(solide: Solide3D, polygone: PolygoneSection, depart: readonly number[]): EtapeResolutionReference[] | null {
   const connus = new Set<number>(depart);
   const segmentsTraces = new Set<string>();
   const lignesStatiques = lignesCandidatesStatiques(solide);
+  const etapes: EtapeResolutionReference[] = [];
 
   for (let iteration = 0; iteration < MAX_ITERATIONS_SIMULATION; iteration++) {
-    if (polygoneFerme(polygone, segmentsTraces)) return true;
+    if (polygoneFerme(polygone, segmentsTraces)) return etapes;
 
     const pretes = facesPretesPourSegment(polygone, connus, segmentsTraces);
     if (pretes.length > 0) {
       segmentsTraces.add(cleSegment(pretes[0].pointA, pretes[0].pointB));
+      etapes.push({ type: "segment", ...pretes[0] });
       continue;
     }
 
     const lignesTracees = segmentsAttendus(polygone)
       .filter(([a, b]) => segmentsTraces.has(cleSegment(a, b)))
       .map(([a, b]) => ligneSegmentTrace(polygone, a, b));
-    const toutesLesLignes = [...lignesStatiques, ...lignesTracees];
-
-    let trouve = false;
-    for (let i = 0; i < toutesLesLignes.length && !trouve; i++) {
-      for (let j = i + 1; j < toutesLesLignes.length && !trouve; j++) {
-        const cibles = ciblesAuxiliaires(polygone, connus, toutesLesLignes[i].points, toutesLesLignes[j].points);
-        if (cibles.length > 0) {
-          connus.add(cibles[0].pointCible);
-          trouve = true;
-        }
-      }
-    }
-    if (!trouve) return false;
+    const construction = meilleureConstruction(solide, polygone, connus, [...lignesStatiques, ...lignesTracees]);
+    // Point auxiliaire hors du cadre fixe du croquis : l'élève ne le verrait pas — instance rejetée.
+    if (!construction || !pointDansCadreCroquis(solide, construction.pointAuxiliaire)) return null;
+    connus.add(construction.pointCible);
+    etapes.push(construction);
   }
-  return false;
+  return null;
+}
+
+export function simulationResoluble(solide: Solide3D, polygone: PolygoneSection, depart: readonly number[]): boolean {
+  return resolutionReference(solide, polygone, depart) !== null;
 }
