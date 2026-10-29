@@ -493,6 +493,21 @@
  * `EtapeSegmentDirect`/`EtapePointOmbre`/`EtapeDirectionOmbre`/`EtapeAuxiliaireLignes`/
  * `EtapeAuxiliaireFace`) : même défaut trouvé pendant le balayage générique (point B), même
  * correctif — un indicateur d'avancement n'est pas plus "la question" qu'un fait donné. */
+/* Ligne d'un bloc de données (`BlocDonneesTriangleLies`, gen58 : « AB = 9 m », « angle = 40° ») —
+ * même raison que `.prompt-fact` ci-dessous : hors du décompte de `:not(:has(~ .prompt-text))`,
+ * toutes les lignes d'un même bloc gardent le même style (la dernière n'est pas « la question »). */
+.entrainement .bloc-donnees-ligne {
+  font-size: 14px;
+  color: var(--color-text);
+  margin: 0 0 6px;
+  /* Sur mobile, évite une unité seule sur la dernière ligne (« … = 14 » / « km »). */
+  text-wrap: balance;
+}
+
+.entrainement .bloc-donnees-ligne:last-child {
+  margin-bottom: 0;
+}
+
 .entrainement .prompt-fact {
   font-size: 13px;
   font-style: italic;
