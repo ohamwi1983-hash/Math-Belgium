@@ -11,7 +11,7 @@ import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEquationsEx
  * équation exponentielle ou logarithmique) — feuille d'évaluation, voir
  * `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence.
  *
- * 7 familles STRUCTURELLEMENT DISJOINTES à 2 ou 3 écrans chacune (`PHASES_PAR_FAMILLE`,
+ * 6 familles STRUCTURELLEMENT DISJOINTES à 2 ou 3 écrans chacune (`PHASES_PAR_FAMILLE`,
  * `ui6e/formatEquationsExpLog.ts`) — plutôt que dupliquer un dispatch par famille comme
  * `equationsCyclometriques/exportEvaluation.ts`, cet adaptateur reste GÉNÉRIQUE sur `famille` en
  * réutilisant DIRECTEMENT les fonctions déjà écrites côté écran pour piloter l'interactif :
@@ -36,9 +36,6 @@ const TAILLE_REPONSE: Record<PhaseEquationsExpLog, number> = {
   eEcran1: 2,
   eEcran2: 2,
   eEcran3: 3,
-  fEcran1: 2,
-  fEcran2: 2,
-  fEcran3: 3,
   gEcran1: 2,
   gEcran2: 2,
 };

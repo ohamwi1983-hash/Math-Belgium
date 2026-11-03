@@ -21,7 +21,6 @@ const REGLAGES_DEMO: ReglagesSession6e = {
  * 1/2/3/4/7/8/9/10, révisés par 6gen64-71) — même situation que "Lieux géométriques" (6gen72). Il
  * est désigné par son seul nom partout, y compris dans `docs/historique-6e.md` et
  * `.claude/rules/6e-chapitres.md`. Le sous-titre le nomme donc plutôt que d'inventer un numéro. */
-const NOM_CHAPITRE = "Chapitre « Les coniques »";
 
 function nouvelleSession(theme: VarianteQuizConiques): EtatSessionQuizConiques {
   return demarrerSessionQuizConiques(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
@@ -63,10 +62,7 @@ export function App6gen73() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Les coniques — vrai ou faux</h1>
-        <p className="app-subtitle">
-          {NOM_CHAPITRE}
-          {themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}
-        </p>
+        <p className="app-subtitle">Chapitre 10 — {themeChoisi ? CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label : "Les coniques"}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">

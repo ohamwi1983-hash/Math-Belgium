@@ -57,7 +57,7 @@ export function App6gen70() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Analyse combinatoire — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 9{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-subtitle">Chapitre 7 — {themeChoisi ? CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label : "Analyse combinatoire"}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">

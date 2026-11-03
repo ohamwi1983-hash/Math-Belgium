@@ -1,6 +1,6 @@
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
-import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.types";
+import type { ExerciceEtudeFonctionLogarithme } from "../core6e/etudeFonctionLogarithme.types";
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -9,7 +9,7 @@ import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionEtudeFonctionLog } from "./GrapheOptionEtudeFonctionLog";
 
 interface Props {
-  exercice: ExerciceEtudeLogNonE;
+  exercice: ExerciceEtudeFonctionLogarithme;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;

@@ -15,6 +15,10 @@ import { baseEntiere, baseFraction, baseValeurLog } from "../rationnel";
  * **Pool de bases ÉTENDU** par rapport à la spec source (voir en-tête de
  * `core6e/inequationsLogarithmiques.types.ts`) : `{2,3,5}` (>1) ET `{1/2,1/3,1/5}` (<1), 50/50 —
  * pour que le piège de l'écran 4 (inversion des bornes) soit réellement rencontré.
+ *
+ * **Bornes lisibles** (audit 6e ch. 3, point 22) : les bornes en x sont des puissances `base^y` —
+ * `y∈[-3;3]` pour les bases 2 et 1/2 (au plus 8 ou 1/8), `y∈[-2;2]` pour 3, 5, 1/3, 1/5 (au plus
+ * 25 ou 1/25), jamais 125 ni 1/125.
  */
 
 const POOL_BASE_SUP = [baseEntiere(2), baseEntiere(3), baseEntiere(5)];
@@ -27,9 +31,10 @@ export function construireD(): ExerciceLogD {
   const baseVal = baseValeurLog(base);
 
   const A = tirerParmi([-2, -1, 1, 2] as const);
-  const y1 = tirerEntier(-3, 3);
-  let y2 = tirerEntier(-3, 3);
-  while (y2 === y1) y2 = tirerEntier(-3, 3);
+  const yMax = baseVal === 2 || baseVal === 0.5 ? 3 : 2;
+  const y1 = tirerEntier(-yMax, yMax);
+  let y2 = tirerEntier(-yMax, yMax);
+  while (y2 === y1) y2 = tirerEntier(-yMax, yMax);
   const comparateur = tirerComparateur(COMPARATEURS);
 
   // A(y-y1)(y-y2) = Ay² - A(y1+y2)y + A·y1·y2

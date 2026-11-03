@@ -4,7 +4,8 @@ import { RenduFragments } from "../components/RenduFragments";
 import type { SigneCroissance } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseCroissanceGrilleC } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import type { FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, PLACEHOLDER_VALEUR_EXTREMUM } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -18,10 +19,9 @@ interface AideAvecLatex {
 interface Props {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
-  /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
-   * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
-  etatActuel: string[];
-  k: number;
+  /** Les 4 intervalles en LaTeX, délimités par les 2 valeurs exclues et le zéro de f'
+   * (`intervallesGrilleCLatex`). */
+  intervalles: string[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -37,17 +37,18 @@ interface Props {
 }
 
 /** Écran "croissance", forme "grilleC" — famille C uniquement : tableau de signe de f' à 4 cases
- * FIXES (jamais add-as-needed, le nombre de branches est structurellement déterminé par le domaine
- * ℝ\{-k,k}), délimitées par -k, 0, k, plus la position du maximum local (toujours 0, mais vérifiée
- * comme les autres, jamais présupposée côté écran). `App6gen21.tsx` doit le rendre avec
- * `key={indexExercice}`. */
-export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActuel, k, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * FIXES (domaine à 3 branches + zéro de f'), plus la VALEUR de l'extremum local (sa position est
+ * l'une des bornes affichées, la demander n'aurait rien vérifié). */
+export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, intervalles, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [signes, setSignes] = useState<(SigneCroissance | null)[]>([null, null, null, null]);
-  const [positionMax, setPositionMax] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [valeur, setValeur] = useState("");
+  /** Dernière réponse soumise — une case n'est rouge que si elle n'a pas changé depuis ce refus. */
+  const [soumis, setSoumis] = useState<ReponseCroissanceGrilleC | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && !validation;
+  const caseRefusee = (i: number) => montrerErreurs && soumis !== null && soumis.signes[i] === signes[i];
+  const valeurRefusee = montrerErreurs && soumis !== null && soumis.valeurExtremum === valeur;
 
-  const labels = [`]-\\infty\\,;\\,-${k}[`, `]-${k}\\,;\\,0[`, `]0\\,;\\,${k}[`, `]${k}\\,;\\,+\\infty[`];
-  const complet = signes.every((s) => s !== null) && positionMax.trim() !== "";
+  const complet = signes.every((s) => s !== null) && valeur.trim() !== "";
 
   function majSigne(index: number, valeur: SigneCroissance) {
     setSignes(signes.map((s, i) => (i === index ? valeur : s)));
@@ -55,7 +56,9 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
 
   function valider() {
     if (!complet) return;
-    onValider({ signes: signes as SigneCroissance[], positionMax });
+    const reponse = { signes: signes as SigneCroissance[], valeurExtremum: valeur };
+    setSoumis(reponse);
+    onValider(reponse);
   }
 
   return (
@@ -68,17 +71,10 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuel.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      {labels.map((label, i) => (
+      {intervalles.map((label, i) => (
         <div className="field" key={label}>
           <p className="field-label field-label-minuscule">
             <Katex expression={label} />
@@ -86,14 +82,14 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
           <div className="options-grid-compact">
             <button
               type="button"
-              className={`btn ${signes[i] === "croissante" ? "toggle-active" : ""} ${montrerErreurs && signes[i] === "croissante" ? "is-erronee" : ""}`}
+              className={`btn ${signes[i] === "croissante" ? "toggle-active" : ""} ${caseRefusee(i) && signes[i] === "croissante" ? "is-erronee" : ""}`}
               onClick={() => majSigne(i, "croissante")}
             >
               Croissante
             </button>
             <button
               type="button"
-              className={`btn ${signes[i] === "decroissante" ? "toggle-active" : ""} ${montrerErreurs && signes[i] === "decroissante" ? "is-erronee" : ""}`}
+              className={`btn ${signes[i] === "decroissante" ? "toggle-active" : ""} ${caseRefusee(i) && signes[i] === "decroissante" ? "is-erronee" : ""}`}
               onClick={() => majSigne(i, "decroissante")}
             >
               Décroissante
@@ -101,9 +97,10 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
           </div>
         </div>
       ))}
+      <ApercuExpressionLatex texte={valeur} />
       <div className="field">
-        <label className="field-label field-label-minuscule">Position du maximum local (x=...)</label>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={positionMax} placeholder="ex : 0" onChange={(e) => setPositionMax(e.target.value)} />
+        <label className="field-label field-label-minuscule">Valeur de l'extremum local</label>
+        <input type="text" className={`text-input ${valeurRefusee ? "is-erronee" : ""}`} value={valeur} placeholder={PLACEHOLDER_VALEUR_EXTREMUM} onChange={(e) => setValeur(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

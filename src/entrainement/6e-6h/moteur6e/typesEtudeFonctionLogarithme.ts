@@ -1,44 +1,32 @@
 /**
- * Couche B (6e) — types pour `6gen21`. Contrairement à `6gen11` (TOUJOURS 6 écrans fixes pour ses 4
- * familles), le NOMBRE d'écrans varie ici selon la famille : 6 pour A-D (domaine → limites →
- * asymptotes → croissance → concavite → graphique), 2 seulement pour E (domaine → comportementInfini,
- * traitement qualitatif allégé — voir `core6e/etudeFonctionLogarithme.types.ts`). Même principe de
- * "variable screen count per family" que `6gen16` (`typesDomaineDeriveeLogarithme.ts`,
- * `phaseApres` dépendant de la famille) mais appliqué ici à un flux BEAUCOUP plus court (2 chemins
- * possibles, pas 7 espaces de phases nommés par famille) — un seul jeu de noms de phase partagé,
- * `phaseApres` prend la famille en paramètre plutôt que de préfixer chaque nom de phase par la
- * lettre de famille.
+ * Couche B (6e) — types pour `6gen21`. Les 5 familles suivent les 6 MÊMES écrans que `6gen11`
+ * (domaine → limites → asymptotes → croissance → concavité → graphique) ; seule la forme de
+ * l'écran "croissance" change pour la famille C (tableau de signe à 4 cases).
  */
-import type { ExerciceEtudeFonctionLogarithme, FamilleEtudeFonctionLogarithme } from "../core6e/etudeFonctionLogarithme.types";
+import type { ExerciceEtudeFonctionLogarithme } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseEtudeFonctionLogarithme = "domaine" | "limites" | "asymptotes" | "croissance" | "concavite" | "graphique" | "comportementInfini";
+export type PhaseEtudeFonctionLogarithme = "domaine" | "limites" | "asymptotes" | "croissance" | "concavite" | "graphique";
+
+export const PHASES_ETUDE_LOG: PhaseEtudeFonctionLogarithme[] = ["domaine", "limites", "asymptotes", "croissance", "concavite", "graphique"];
 
 export function phaseInitiale(): PhaseEtudeFonctionLogarithme {
   return "domaine";
 }
 
-/** Famille E : domaine → comportementInfini → terminé (2 écrans). Familles A-D : les 6 écrans
- * fixes, même ordre que `6gen11`. */
-export function phaseApres(phase: PhaseEtudeFonctionLogarithme, famille: FamilleEtudeFonctionLogarithme): PhaseEtudeFonctionLogarithme | "termine" {
-  if (famille === "E") {
-    return phase === "domaine" ? "comportementInfini" : "termine";
-  }
-  switch (phase) {
-    case "domaine":
-      return "limites";
-    case "limites":
-      return "asymptotes";
-    case "asymptotes":
-      return "croissance";
-    case "croissance":
-      return "concavite";
-    case "concavite":
-      return "graphique";
-    default:
-      return "termine";
-  }
+export function phaseApres(phase: PhaseEtudeFonctionLogarithme): PhaseEtudeFonctionLogarithme | "termine" {
+  const i = PHASES_ETUDE_LOG.indexOf(phase);
+  return i === PHASES_ETUDE_LOG.length - 1 ? "termine" : PHASES_ETUDE_LOG[i + 1];
+}
+
+/** Nombre de tentatives par écran (audit chapitre 3 de 6e) : une seule sur le QCM graphique (4
+ * courbes — sinon il se gagne par élimination) ; 2 sur la concavité (3 catégories, dont 2 sans
+ * saisie) ; le réglage de session ailleurs (saisies ouvertes ou combinaisons nombreuses). */
+export function tentativesMaxPhase(phase: PhaseEtudeFonctionLogarithme, tentativesSession: number): number {
+  if (phase === "graphique") return 1;
+  if (phase === "concavite") return Math.min(2, tentativesSession);
+  return tentativesSession;
 }
 
 /** Détail de clôture d'un écran (`revele`/`niveauAide` AU MOMENT PRÉCIS de la clôture, avant que la
@@ -51,22 +39,15 @@ export interface DetailPhaseEtudeFonctionLogarithme {
   niveauAide: number;
 }
 
-/**
- * Scores partiels — champs `| null` plutôt qu'un union discriminée stricte par famille (6 écrans
- * pour A-D, 2 pour E). `null` signifie "écran non applicable à cette famille", jamais "non encore atteint" (un
- * écran non encore atteint n'apparaît simplement pas dans `ResultatExerciceEtudeFonctionLogarithme`
- * tant que l'exercice n'est pas clos — ce type ne décrit que l'état FINAL, une fois l'exercice
- * entièrement résolu).
- */
+/** Scores de l'exercice clos (6 écrans pour toutes les familles). */
 export interface ResultatExerciceEtudeFonctionLogarithme {
   exercice: ExerciceEtudeFonctionLogarithme;
   scoreDomaine: number;
-  scoreLimites: number | null;
-  scoreAsymptotes: number | null;
-  scoreCroissance: number | null;
-  scoreConcavite: number | null;
-  scoreGraphique: number | null;
-  scoreComportementInfini: number | null;
+  scoreLimites: number;
+  scoreAsymptotes: number;
+  scoreCroissance: number;
+  scoreConcavite: number;
+  scoreGraphique: number;
   details: Partial<Record<PhaseEtudeFonctionLogarithme, DetailPhaseEtudeFonctionLogarithme>>;
 }
 

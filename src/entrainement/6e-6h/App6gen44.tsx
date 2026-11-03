@@ -152,6 +152,7 @@ export function App6gen44() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Dénombrement combiné et sélections contraintes</h1>
+        <p className="app-subtitle">Chapitre 7 — Analyse combinatoire</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

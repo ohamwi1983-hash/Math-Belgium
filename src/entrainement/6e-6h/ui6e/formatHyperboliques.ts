@@ -5,7 +5,9 @@ import type {
   ExerciceHyperboliquesD,
   ExerciceHyperboliques,
 } from "../core6e/hyperboliques.types";
+import type { StatutPariteHyperbolique } from "../core6e/hyperboliques.types";
 import type { PhaseHyperboliques } from "../moteur6e/typesHyperboliques";
+import { pariteAttendueA, signeLimiteMoinsInfiniD, signeLimitePlusInfiniD } from "../moteur6e/verificationHyperboliques";
 import { fusionnerOperateurSigne } from "./formatOperateurSigne";
 
 /**
@@ -39,28 +41,29 @@ function latex(valeur: string): FragmentConsigne {
 const SH = "\\operatorname{sh}";
 const CH = "\\operatorname{ch}";
 
-/** Consigne générale UNIQUE, partagée par les 4 familles (spec : "Propriétés de référence à
- * rappeler dans la consigne générale, disponibles pour toutes les familles") — sh/ch sont des
- * fonctions FIXES et NOMMÉES, jamais un paramètre d'exercice, donc leur rappel ne dépend d'aucun
- * champ de l'exercice (contrairement à `6gen16`, où la consigne générale variait selon la
- * famille) — même principe que `CONSIGNE_GENERALE` (`6gen6`, `formatLimitesExponentielles.ts`). */
+/** Consigne générale UNIQUE, partagée par les 4 familles — seulement les DÉFINITIONS de sh et ch
+ * (jamais leur parité ni leurs dérivées : ce sont précisément des réponses attendues par les
+ * familles A et C — le rappel nécessaire vit dans les aides de l'écran concerné). */
 export const CONSIGNE_GENERALE: FragmentConsigne[] = [
   texte("Rappel : "),
   latex(`${SH}(x)=\\dfrac{e^x-e^{-x}}{2}`),
-  texte(" est IMPAIRE, "),
+  texte(" et "),
   latex(`${CH}(x)=\\dfrac{e^x+e^{-x}}{2}`),
-  texte(" est PAIRE ; "),
-  latex(`${CH}^2(x)-${SH}^2(x)=1`),
-  texte(" pour tout x ; "),
-  latex(`${SH}'=${CH}`),
-  texte(" et "),
-  latex(`${CH}'=${SH}`),
-  texte(" (donc "),
-  latex(`${SH}''=${SH}`),
-  texte(" et "),
-  latex(`${CH}''=${CH}`),
-  texte(")."),
+  texte("."),
 ];
+
+/** "" / "-" / "2" — jamais un coefficient ±1 littéral devant un corps de formule. */
+function formatCoef(a: number): string {
+  if (a === 1) return "";
+  if (a === -1) return "-";
+  return `${a}`;
+}
+
+/** Argument "kx" — jamais "1x". */
+function formatArgument(k: number, negatif = false): string {
+  const corps = k === 1 ? "x" : `${k}x`;
+  return negatif ? `-${corps}` : corps;
+}
 
 // ============================================================================
 // Famille A — Parité de combinaisons.
@@ -69,9 +72,9 @@ export const CONSIGNE_GENERALE: FragmentConsigne[] = [
 function formatFonctionA(exercice: ExerciceHyperboliquesA): string {
   switch (exercice.type) {
     case "shKx":
-      return `${SH}(${exercice.k}x)`;
+      return `${formatCoef(exercice.a)}${SH}(${formatArgument(exercice.k)})`;
     case "chKx":
-      return `${CH}(${exercice.k}x)`;
+      return `${formatCoef(exercice.a)}${CH}(${formatArgument(exercice.k)})`;
     case "shChProduit":
       return `${SH}(x)\\cdot ${CH}(x)`;
     case "shCarre":
@@ -82,17 +85,25 @@ function formatFonctionA(exercice: ExerciceHyperboliquesA): string {
       return `${SH}(x)+${CH}(x)`;
     case "shMoinsCh":
       return `${SH}(x)-${CH}(x)`;
+    case "shPlusConstante":
+      return `${SH}(x) ${fusionnerOperateurSigne("+", `${exercice.c}`)}`;
+    case "xSh":
+      return `x\\,${SH}(x)`;
+    case "xCh":
+      return `x\\,${CH}(x)`;
+    case "shCube":
+      return `\\left[${SH}(x)\\right]^3`;
   }
 }
 
 /** f(−x), substitué en utilisant la parité de sh/ch SÉPARÉMENT — comparaison finale à f(x)/−f(x)
- * volontairement NON FAITE (spec, aide niveau 2). */
-function formatFMoinsXA(exercice: ExerciceHyperboliquesA): string {
+ * volontairement NON FAITE (aide niveau 2). */
+export function formatFMoinsXA(exercice: ExerciceHyperboliquesA): string {
   switch (exercice.type) {
     case "shKx":
-      return `${SH}(-${exercice.k}x) = -${SH}(${exercice.k}x)`;
+      return `${formatCoef(exercice.a)}${SH}(${formatArgument(exercice.k, true)}) = ${formatCoef(exercice.a)}\\left[-${SH}(${formatArgument(exercice.k)})\\right]`;
     case "chKx":
-      return `${CH}(-${exercice.k}x) = ${CH}(${exercice.k}x)`;
+      return `${formatCoef(exercice.a)}${CH}(${formatArgument(exercice.k, true)}) = ${formatCoef(exercice.a)}${CH}(${formatArgument(exercice.k)})`;
     case "shChProduit":
       return `${SH}(-x)\\cdot ${CH}(-x) = \\left[-${SH}(x)\\right]\\cdot ${CH}(x)`;
     case "shCarre":
@@ -103,57 +114,113 @@ function formatFMoinsXA(exercice: ExerciceHyperboliquesA): string {
       return `${SH}(-x)+${CH}(-x) = -${SH}(x)+${CH}(x)`;
     case "shMoinsCh":
       return `${SH}(-x)-${CH}(-x) = -${SH}(x)-${CH}(x)`;
+    case "shPlusConstante":
+      return `${SH}(-x) ${fusionnerOperateurSigne("+", `${exercice.c}`)} = -${SH}(x) ${fusionnerOperateurSigne("+", `${exercice.c}`)}`;
+    case "xSh":
+      return `(-x)\\,${SH}(-x) = (-x)\\cdot\\left[-${SH}(x)\\right]`;
+    case "xCh":
+      return `(-x)\\,${CH}(-x) = (-x)\\cdot ${CH}(x)`;
+    case "shCube":
+      return `\\left[${SH}(-x)\\right]^3 = \\left[-${SH}(x)\\right]^3`;
   }
 }
 
+const LIBELLE_PARITE: Record<StatutPariteHyperbolique, string> = { paire: "paire", impaire: "impaire", aucune: "ni paire ni impaire" };
+
+/** Réponse attendue (révélation, fiche, corrigé) — f(−x) développée puis la conclusion. */
+function formatReponseAParite(exercice: ExerciceHyperboliquesA): string {
+  const parite = pariteAttendueA(exercice);
+  const comparaison = parite === "paire" ? " = f(x)" : parite === "impaire" ? " = -f(x)" : "";
+  return `f(-x) = ${formatFMoinsXA(exercice)}${comparaison} \\;\\Rightarrow\\; \\text{f est ${LIBELLE_PARITE[parite]}}`;
+}
+
 function aideANiveau1(): AideAvecLatex {
-  return { texte: "Méthode générale : calcule f(−x) et compare-le à f(x) et à −f(x) — ne te fie pas à une intuition sur les briques de base (sh, ch peuvent se combiner de façon contre-intuitive).", latex: null };
+  return {
+    texte: "Calcule f(−x) en utilisant sh(−x) = −sh(x) (sh est impaire) et ch(−x) = ch(x) (ch est paire), puis compare le résultat à f(x) et à −f(x).",
+    latex: `${SH}(-x)=-${SH}(x),\\quad ${CH}(-x)=${CH}(x)`,
+  };
 }
 function aideANiveau2(exercice: ExerciceHyperboliquesA): AideAvecLatex {
   return { texte: "f(−x), en utilisant la parité de sh et ch séparément (comparaison finale à toi de faire) :", latex: formatFMoinsXA(exercice) };
 }
 
 // ============================================================================
-// Famille B — Identité ch²−sh²=1. x0 reste toujours caché.
+// Famille B — Identité ch²−sh²=1, valeur(s) EXACTE(S). x0 reste toujours caché.
 // ============================================================================
 
+function pgcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) [x, y] = [y, x % y];
+  return x;
+}
+
+/** k en LaTeX — entier, ou fraction irréductible signée. */
+function formatKLatex(exercice: ExerciceHyperboliquesB): string {
+  if (exercice.kDen === 1) return `${exercice.kNum}`;
+  const signe = exercice.kNum < 0 ? "-" : "";
+  return `${signe}\\dfrac{${Math.abs(exercice.kNum)}}{${exercice.kDen}}`;
+}
+
+/** √N / D simplifié : extrait le plus grand carré de N, réduit la fraction. */
+function formatRacineSurEntier(n: number, d: number): string {
+  let s = 1;
+  let r = n;
+  for (let f = 2; f * f <= r; f++) {
+    while (r % (f * f) === 0) {
+      r /= f * f;
+      s *= f;
+    }
+  }
+  const g = pgcd(s, d);
+  const num = s / g;
+  const den = d / g;
+  const numLatex = r === 1 ? `${num}` : num === 1 ? `\\sqrt{${r}}` : `${num}\\sqrt{${r}}`;
+  return den === 1 ? numLatex : `\\dfrac{${numLatex}}{${den}}`;
+}
+
+/** Valeur exacte positive de la racine attendue : √(1+k²) (trouverCh) ou √(k²−1) (trouverSh),
+ * k = kNum/kDen ⟹ √(kDen² ± kNum²)/kDen. */
+function formatRacineB(exercice: ExerciceHyperboliquesB): string {
+  const n = exercice.sousType === "trouverCh" ? exercice.kDen * exercice.kDen + exercice.kNum * exercice.kNum : exercice.kNum * exercice.kNum - exercice.kDen * exercice.kDen;
+  return formatRacineSurEntier(n, exercice.kDen);
+}
+
 function formatDonneesB(exercice: ExerciceHyperboliquesB): string[] {
-  if (exercice.sousType === "trouverCh") return [`${SH}(x_0) = ${exercice.k}`];
-  const donnees = [`${CH}(x_0) = ${exercice.k}`];
+  if (exercice.sousType === "trouverCh") return [`${SH}(x_0) = ${formatKLatex(exercice)}`];
+  const donnees = [`${CH}(x_0) = ${formatKLatex(exercice)}`];
   if (exercice.signeX0 !== null) donnees.push(exercice.signeX0 > 0 ? "x_0 > 0" : "x_0 < 0");
   return donnees;
 }
 
-/** Expression isolée CORRECTE — dérivée uniquement des paramètres de l'exercice (jamais de la
- * saisie élève), réutilisée pour l'aide niveau 2 (écran 1) ET l'état actuel (écran 2). */
-function formatExpressionIsoleeB(exercice: ExerciceHyperboliquesB): string {
-  if (exercice.sousType === "trouverCh") return `${CH}(x_0) = \\sqrt{1+(${exercice.k})^2}`;
-  const radicande = `(${exercice.k})^2-1`;
-  if (exercice.signeX0 === null) return `${SH}(x_0) = \\pm\\sqrt{${radicande}}`;
-  return `${SH}(x_0) = ${exercice.signeX0 > 0 ? "" : "-"}\\sqrt{${radicande}}`;
+function formatReponseB(exercice: ExerciceHyperboliquesB): string {
+  const racine = formatRacineB(exercice);
+  if (exercice.sousType === "trouverCh") return `${CH}(x_0) = ${racine}`;
+  if (exercice.signeX0 === null) return `${SH}(x_0) = ${racine} \\quad \\text{ou} \\quad ${SH}(x_0) = -${racine}`;
+  return `${SH}(x_0) = ${exercice.signeX0 > 0 ? "" : "-"}${racine}`;
 }
 
-function consigneB(phase: "bIsoler" | "bValeurs"): FragmentConsigne[] {
-  if (phase === "bIsoler") {
-    return [
-      texte("À partir de l'identité "),
-      latex(`${CH}^2(x_0)-${SH}^2(x_0)=1`),
-      texte(", isole l'inconnue demandée (exprime-la à l'aide d'une racine carrée, avec ou sans ±)."),
-    ];
-  }
-  return [texte("Calcule la ou les valeurs numériques, à partir de l'expression CORRECTE de l'étape précédente.")];
+function consigneB(exercice: ExerciceHyperboliquesB): FragmentConsigne[] {
+  const inconnue = exercice.sousType === "trouverCh" ? `${CH}(x_0)` : `${SH}(x_0)`;
+  return [
+    texte("Calcule la valeur EXACTE de "),
+    latex(inconnue),
+    texte(" (écris une racine avec sqrt(…)). S'il y a plusieurs valeurs possibles, donne-les toutes."),
+  ];
 }
 
-function aideBNiveau1(phase: "bIsoler" | "bValeurs"): AideAvecLatex {
-  if (phase === "bIsoler") return { texte: "Rappelle-toi l'identité ch²(x)−sh²(x)=1, à réarranger selon l'inconnue cherchée.", latex: `${CH}^2(x)-${SH}^2(x)=1` };
-  return { texte: "Remplace k par sa valeur connue dans l'expression isolée, puis calcule la valeur numérique.", latex: null };
+function aideBNiveau1(): AideAvecLatex {
+  return {
+    texte: "Utilise l'identité ch²(x)−sh²(x)=1 pour isoler le CARRÉ de l'inconnue. Rappel : ch(x) ≥ 1 est toujours positive, sh(x) a le même signe que x.",
+    latex: `${CH}^2(x)-${SH}^2(x)=1`,
+  };
 }
-function aideBNiveau2(phase: "bIsoler" | "bValeurs", exercice: ExerciceHyperboliquesB): AideAvecLatex {
-  if (phase === "bIsoler") {
-    const radicande = exercice.sousType === "trouverCh" ? `1+(${exercice.k})^2` : `(${exercice.k})^2-1`;
-    return { texte: "Expression sous la racine (signe(s) à déterminer non tranché(s)) :", latex: `\\sqrt{${radicande}}` };
+function aideBNiveau2(exercice: ExerciceHyperboliquesB): AideAvecLatex {
+  const k = formatKLatex(exercice);
+  if (exercice.sousType === "trouverCh") {
+    return { texte: "Carré de l'inconnue (racine et signe encore à déterminer) :", latex: `${CH}^2(x_0) = 1+${SH}^2(x_0) = 1+\\left(${k}\\right)^2` };
   }
-  return { texte: "Expression isolée déjà confirmée (recalcule-la numériquement) :", latex: formatExpressionIsoleeB(exercice) };
+  return { texte: "Carré de l'inconnue (racine et signe(s) encore à déterminer) :", latex: `${SH}^2(x_0) = ${CH}^2(x_0)-1 = \\left(${k}\\right)^2-1` };
 }
 
 // ============================================================================
@@ -182,51 +249,57 @@ function formatSommeTermes(termes: TermeSigne[]): string {
 
 function formatFonctionC(exercice: ExerciceHyperboliquesC): string {
   const { a, b, k } = exercice;
+  const arg = formatArgument(k);
   return formatSommeTermes([
-    { valeur: a, suffixe: `${SH}(${k}x)` },
-    { valeur: b, suffixe: `${CH}(${k}x)` },
+    { valeur: a, suffixe: `${SH}(${arg})` },
+    { valeur: b, suffixe: `${CH}(${arg})` },
   ]);
 }
 
-function formatDeriveeC(exercice: ExerciceHyperboliquesC): string {
+/** f'(x) développée : a·k·ch(kx) + b·k·sh(kx). */
+export function formatDeriveeC(exercice: ExerciceHyperboliquesC): string {
   const { a, b, k } = exercice;
-  const interieur = formatSommeTermes([
-    { valeur: a, suffixe: `${CH}(${k}x)` },
-    { valeur: b, suffixe: `${SH}(${k}x)` },
+  const arg = formatArgument(k);
+  return formatSommeTermes([
+    { valeur: a * k, suffixe: `${CH}(${arg})` },
+    { valeur: b * k, suffixe: `${SH}(${arg})` },
   ]);
-  return `${k}\\left[${interieur}\\right]`;
 }
 
-function formatDeriveeSecondeC(exercice: ExerciceHyperboliquesC): string {
-  return `${exercice.k * exercice.k}\\left[${formatFonctionC(exercice)}\\right]`;
-}
-
-function consigneC(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): FragmentConsigne[] {
-  if (phase === "cDerivee") {
-    return [texte("Calcule f'(x), en utilisant "), latex(`${SH}'=${CH}`), texte(" et "), latex(`${CH}'=${SH}`), texte(" (attention à la chaîne pour l'argument kx).")];
-  }
-  if (phase === "cDeriveeSeconde") {
-    return [texte("Calcule f''(x) à partir de l'expression CORRECTE de f'(x) obtenue à l'étape précédente.")];
-  }
-  return [texte("Exprime la relation entre f''(x) et f(x) : quelle est la valeur du coefficient tel que "), latex("f''(x) = \\text{coefficient}\\cdot f(x)"), texte(" ?")];
-}
-
-function aideCNiveau1(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): AideAvecLatex {
-  if (phase === "cDerivee") return { texte: "Rappel : sh'=ch et ch'=sh (pas de changement de signe, contrairement à sin/cos).", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
-  if (phase === "cDeriveeSeconde") return { texte: "Applique EXACTEMENT la même règle (sh'=ch, ch'=sh) à f'(x), en n'oubliant pas la chaîne.", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
-  return { texte: "Rappel : sh et ch vérifient chacune f''=f — une combinaison linéaire des deux hérite d'une propriété analogue, avec un facteur k² dû à la chaîne.", latex: `${SH}'' = ${SH},\\quad ${CH}'' = ${CH}` };
-}
-function aideCNiveau2(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation", exercice: ExerciceHyperboliquesC): AideAvecLatex {
+/** f''(x) développée : a·k²·sh(kx) + b·k²·ch(kx). */
+export function formatDeriveeSecondeC(exercice: ExerciceHyperboliquesC): string {
   const { a, b, k } = exercice;
+  const arg = formatArgument(k);
+  return formatSommeTermes([
+    { valeur: a * k * k, suffixe: `${SH}(${arg})` },
+    { valeur: b * k * k, suffixe: `${CH}(${arg})` },
+  ]);
+}
+
+function consigneC(phase: "cDerivee" | "cDeriveeSeconde"): FragmentConsigne[] {
+  if (phase === "cDerivee") return [texte("Calcule f'(x).")];
+  return [texte("Calcule f''(x) à partir de l'expression CORRECTE de f'(x) obtenue à l'étape précédente.")];
+}
+
+function aideCNiveau1(phase: "cDerivee" | "cDeriveeSeconde"): AideAvecLatex {
+  if (phase === "cDerivee") return { texte: "Rappel : sh'=ch et ch'=sh (pas de changement de signe, contrairement à sin/cos), et la dérivée de sh(kx) fait apparaître le facteur k (dérivée de l'argument).", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
+  return { texte: "Applique EXACTEMENT la même règle (sh'=ch, ch'=sh) à f'(x), en n'oubliant pas le facteur k de l'argument.", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
+}
+
+/** "a·k" sans facteur 1 inutile. */
+function produitCoefK(a: number, k: number): string {
+  return k === 1 ? `${a}` : `${a}\\cdot ${k}`;
+}
+
+function aideCNiveau2(phase: "cDerivee" | "cDeriveeSeconde", exercice: ExerciceHyperboliquesC): AideAvecLatex {
+  const { a, b, k } = exercice;
+  const arg = formatArgument(k);
   if (phase === "cDerivee") {
-    const termeB = fusionnerOperateurSigne("+", `${b}\\cdot ${k}\\cdot ${CH}'(${k}x)`);
-    return { texte: "Chaîne appliquée à kx affichée, dérivées de sh et ch non substituées :", latex: `f'(x) = ${a}\\cdot ${k}\\cdot ${SH}'(${k}x) ${termeB}` };
+    const termeB = fusionnerOperateurSigne("+", `${produitCoefK(b, k)}\\cdot ${CH}'(${arg})`);
+    return { texte: "Facteur k de l'argument affiché, dérivées de sh et ch non substituées :", latex: `f'(x) = ${produitCoefK(a, k)}\\cdot ${SH}'(${arg}) ${termeB}` };
   }
-  if (phase === "cDeriveeSeconde") {
-    const termeB = fusionnerOperateurSigne("+", `${b}\\cdot ${k}\\cdot ${SH}'(${k}x)`);
-    return { texte: "Chaîne appliquée à kx (dérivée de f' déjà confirmée), dérivées de sh et ch non substituées :", latex: `f''(x) = ${a}\\cdot ${k}\\cdot ${CH}'(${k}x) ${termeB}` };
-  }
-  return { texte: "f''(x) et f(x) affichés côte à côte (rapport non identifié) :", latex: `f''(x) = ${formatDeriveeSecondeC(exercice)},\\quad f(x) = ${formatFonctionC(exercice)}` };
+  const termeB = fusionnerOperateurSigne("+", `${produitCoefK(b * k, k)}\\cdot ${SH}'(${arg})`);
+  return { texte: "Facteur k de l'argument affiché (dérivée de f' confirmée), dérivées de sh et ch non substituées :", latex: `f''(x) = ${produitCoefK(a * k, k)}\\cdot ${CH}'(${arg}) ${termeB}` };
 }
 
 // ============================================================================
@@ -242,7 +315,7 @@ function formatFonctionD(exercice: ExerciceHyperboliquesD): string {
 }
 
 /** Forme réécrite CORRECTE en e^x/e^(−x) — dérivée uniquement des paramètres de l'exercice. */
-function formatFormeExponentielleD(exercice: ExerciceHyperboliquesD): string {
+export function formatFormeExponentielleD(exercice: ExerciceHyperboliquesD): string {
   const { a, b } = exercice;
   const numerateur = formatSommeTermes([
     { valeur: a + b, suffixe: "e^x" },
@@ -251,22 +324,29 @@ function formatFormeExponentielleD(exercice: ExerciceHyperboliquesD): string {
   return `\\dfrac{${numerateur}}{2}`;
 }
 
+function formatReponseDLimites(exercice: ExerciceHyperboliquesD): string {
+  const signe = (s: "plus_infini" | "moins_infini") => (s === "plus_infini" ? "+\\infty" : "-\\infty");
+  return `\\lim_{x\\to+\\infty} f(x) = ${signe(signeLimitePlusInfiniD(exercice))},\\quad \\lim_{x\\to-\\infty} f(x) = ${signe(signeLimiteMoinsInfiniD(exercice))}`;
+}
+
 function consigneD(phase: "dReecriture" | "dLimites"): FragmentConsigne[] {
   if (phase === "dReecriture") {
-    return [texte("Réécris f(x) en termes de "), latex("e^x"), texte(" et "), latex("e^{-x}"), texte(", puis identifie le terme dominant à chaque infini.")];
+    return [texte("Réécris f(x) en termes de "), latex("e^x"), texte(" et "), latex("e^{-x}"), texte(" (regroupe les termes en "), latex("e^x"), texte(" et en "), latex("e^{-x}"), texte(").")];
   }
-  return [texte("Conclus le signe de la limite de f à chaque infini, à partir de la forme CORRECTE de l'étape précédente (1 statut par direction).")];
+  return [texte("Conclus le signe de la limite de f à chaque infini, à partir de la forme CORRECTE de l'étape précédente.")];
 }
 
 function aideDNiveau1(phase: "dReecriture" | "dLimites"): AideAvecLatex {
-  if (phase === "dReecriture") return { texte: "Rappelle-toi de réécrire sh et ch en termes de eˣ et e⁻ˣ avant toute analyse de limite.", latex: `${SH}(x)=\\dfrac{e^x-e^{-x}}{2},\\quad ${CH}(x)=\\dfrac{e^x+e^{-x}}{2}` };
-  return { texte: "À chaque infini, un seul des deux termes exponentiels survit (l'autre tend vers 0) — repère lequel.", latex: null };
+  if (phase === "dReecriture") return { texte: "Remplace sh(x) et ch(x) par leur définition en eˣ et e⁻ˣ, puis regroupe les termes en eˣ d'un côté et en e⁻ˣ de l'autre.", latex: `${SH}(x)=\\dfrac{e^x-e^{-x}}{2},\\quad ${CH}(x)=\\dfrac{e^x+e^{-x}}{2}` };
+  return { texte: "À chaque infini, un seul des deux termes exponentiels survit (l'autre tend vers 0) — repère lequel, puis regarde le signe de son coefficient.", latex: null };
 }
 function aideDNiveau2(phase: "dReecriture" | "dLimites", exercice: ExerciceHyperboliquesD): AideAvecLatex {
   const { a, b } = exercice;
   if (phase === "dReecriture") {
-    const termeB = fusionnerOperateurSigne("+", `${b}\\cdot\\dfrac{e^x+e^{-x}}{2}`);
-    return { texte: "Expression développée mais non regroupée par puissance d'exponentielle :", latex: `f(x) = ${a}\\cdot\\dfrac{e^x-e^{-x}}{2} ${termeB}` };
+    return {
+      texte: `Coefficients à calculer, avec a = ${a} et b = ${b} :`,
+      latex: "\\text{coefficient de } e^x = \\dfrac{a+b}{2},\\quad \\text{coefficient de } e^{-x} = \\dfrac{b-a}{2}",
+    };
   }
   return { texte: "Signe de (a+b) et de (b−a), rappelés séparément (conclusion non donnée) :", latex: `a+b = ${a + b},\\quad b-a = ${b - a}` };
 }
@@ -291,18 +371,10 @@ export function blocDonnees(exercice: ExerciceHyperboliques): string[] {
 }
 
 /** État actuel — `null` sur tout écran dont la vérification ne dépend PAS d'un écran précédent
- * (aParite, bIsoler, cDerivee, dReecriture sont chacun le premier écran de leur famille). Non-null
- * uniquement quand l'écran réutilise réellement la vérité mathématique CONFIRMÉE d'un écran
- * antérieur. */
+ * (aParite, bValeurs, cDerivee, dReecriture sont chacun le premier écran de leur famille). */
 export function etatActuel(exercice: ExerciceHyperboliques, phase: PhaseHyperboliques): string[] | null {
-  if (exercice.famille === "B" && phase === "bValeurs") {
-    return [`${formatExpressionIsoleeB(exercice)}\\ \\text{(confirmé à l'étape précédente)}`];
-  }
   if (exercice.famille === "C" && phase === "cDeriveeSeconde") {
     return [`f'(x) = ${formatDeriveeC(exercice)}\\ \\text{(confirmé à l'étape précédente)}`];
-  }
-  if (exercice.famille === "C" && phase === "cRelation") {
-    return [`f'(x) = ${formatDeriveeC(exercice)}\\ \\text{(confirmé à l'étape 1)}`, `f''(x) = ${formatDeriveeSecondeC(exercice)}\\ \\text{(confirmé à l'étape 2)}`];
   }
   if (exercice.famille === "D" && phase === "dLimites") {
     return [`f(x) = ${formatFormeExponentielleD(exercice)}\\ \\text{(confirmé à l'étape précédente)}`];
@@ -310,14 +382,30 @@ export function etatActuel(exercice: ExerciceHyperboliques, phase: PhaseHyperbol
   return null;
 }
 
+/** Réponse attendue d'un écran, en LaTeX — utilisée telle quelle par la révélation, la fiche de
+ * consultation, le récapitulatif « Ce qu'on sait déjà » et le corrigé exporté (jamais un texte
+ * générique). */
+export function reponseAttendueLatex(exercice: ExerciceHyperboliques, phase: PhaseHyperboliques): string {
+  switch (exercice.famille) {
+    case "A":
+      return formatReponseAParite(exercice);
+    case "B":
+      return formatReponseB(exercice);
+    case "C":
+      return phase === "cDerivee" ? `f'(x) = ${formatDeriveeC(exercice)}` : `f''(x) = ${formatDeriveeSecondeC(exercice)}`;
+    case "D":
+      return phase === "dReecriture" ? `f(x) = ${formatFormeExponentielleD(exercice)}` : formatReponseDLimites(exercice);
+  }
+}
+
 export function consigneEcran(exercice: ExerciceHyperboliques, phase: PhaseHyperboliques): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return [texte("Détermine la parité de cette fonction (paire, impaire, ou aucune des deux).")];
     case "B":
-      return consigneB(phase as "bIsoler" | "bValeurs");
+      return consigneB(exercice);
     case "C":
-      return consigneC(phase as "cDerivee" | "cDeriveeSeconde" | "cRelation");
+      return consigneC(phase as "cDerivee" | "cDeriveeSeconde");
     case "D":
       return consigneD(phase as "dReecriture" | "dLimites");
   }
@@ -328,9 +416,9 @@ export function aideNiveau1(exercice: ExerciceHyperboliques, phase: PhaseHyperbo
     case "A":
       return aideANiveau1();
     case "B":
-      return aideBNiveau1(phase as "bIsoler" | "bValeurs");
+      return aideBNiveau1();
     case "C":
-      return aideCNiveau1(phase as "cDerivee" | "cDeriveeSeconde" | "cRelation");
+      return aideCNiveau1(phase as "cDerivee" | "cDeriveeSeconde");
     case "D":
       return aideDNiveau1(phase as "dReecriture" | "dLimites");
   }
@@ -341,11 +429,10 @@ export function aideNiveau2(exercice: ExerciceHyperboliques, phase: PhaseHyperbo
     case "A":
       return aideANiveau2(exercice);
     case "B":
-      return aideBNiveau2(phase as "bIsoler" | "bValeurs", exercice);
+      return aideBNiveau2(exercice);
     case "C":
-      return aideCNiveau2(phase as "cDerivee" | "cDeriveeSeconde" | "cRelation", exercice);
+      return aideCNiveau2(phase as "cDerivee" | "cDeriveeSeconde", exercice);
     case "D":
       return aideDNiveau2(phase as "dReecriture" | "dLimites", exercice);
   }
 }
-

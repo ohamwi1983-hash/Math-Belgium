@@ -2,7 +2,7 @@ import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarit
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { nombreEtapesAlgebriques } from "../../moteur6e/typesProprietesLogarithme";
-import { aideNiveau2, consigneGenerale, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesLogarithme";
+import { consigneEcriteEtape, consigneGenerale, expressionDemandeeLatex, formatReponseAttenduePhaseLatex, membreGaucheCorrigeLatex, nomProprieteDeLEtape, phaseTransformationDeLEtape } from "../../ui6e/formatProprietesLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./index";
 
 /**
@@ -20,21 +20,21 @@ function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarit
   const total = nombreEtapesAlgebriques(exercice);
   return {
     enteteFragments: [...consigneGenerale(exercice), texte(" "), latex(expressionDemandeeLatex(exercice)), texte(".")],
-    questions: Array.from({ length: total }, (_, phase) => ({ consigne: consigneEcran(exercice, phase), reponse: { type: "lignes" as const, nombre: 2 } })),
+    questions: Array.from({ length: total }, (_, etape) => ({ consigne: consigneEcriteEtape(exercice, etape), reponse: { type: "lignes" as const, nombre: 2 } })),
   };
 }
 
 function construireCorrectionProprietesLogarithme(exercice: ExerciceProprieteLogarithme): BlocCorrection[] {
   const total = nombreEtapesAlgebriques(exercice);
-  return Array.from({ length: total }, (_, phase) => {
-    const lettre = String.fromCharCode(97 + phase); // a), b), c)...
+  return Array.from({ length: total }, (_, etape) => {
+    const lettre = String.fromCharCode(97 + etape); // a), b), c)...
     return {
       type: "paragraphe" as const,
       fragments: [
-        texte(`${lettre}) Étape intermédiaire : `),
-        latex(aideNiveau2(exercice, phase).latex ?? ""),
+        texte(`${lettre}) ${nomProprieteDeLEtape(exercice, etape)} : `),
+        latex(membreGaucheCorrigeLatex(exercice, etape)),
         texte(" = "),
-        latex(formatReponseAttenduePhaseLatex(exercice, phase)[0]),
+        latex(formatReponseAttenduePhaseLatex(exercice, phaseTransformationDeLEtape(exercice, etape))[0]),
         texte("."),
       ],
     };

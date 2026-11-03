@@ -149,6 +149,7 @@ export function App6gen26() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calcul d'aires par intégrale</h1>
+        <p className="app-subtitle">Chapitre 4 — Intégrales et primitives</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionCalculAires(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

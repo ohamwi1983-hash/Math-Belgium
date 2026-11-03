@@ -202,6 +202,7 @@ export function App6gen12() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Exponentielles : problèmes</h1>
+        <p className="app-subtitle">Chapitre 2 — Fonctions exponentielles</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

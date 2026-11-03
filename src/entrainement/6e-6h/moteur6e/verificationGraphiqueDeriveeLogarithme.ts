@@ -20,10 +20,8 @@ import { diagnostiquerEquivalenceFonction } from "./equivalenceExponentielle";
  * (6gen8) : 2 implémentations indépendantes de la même math, jamais l'une réutilisant l'autre,
  * pour qu'une erreur dans l'une ne se propage jamais silencieusement à l'autre.
  *
- * L'écran "selection" (les 3 familles) réutilise UNE SEULE fonction, indépendante de la famille —
- * `indexChoisi === exercice.indexCorrect`, exactement comme `6gen5`/`6gen8` — le QCM ne dépend
- * jamais de ce que l'élève a répondu à l'écran "derivee" précédent (spec : "à partir de la valeur
- * correcte").
+ * L'écran "selection" (1er écran, les 3 familles) réutilise UNE SEULE fonction, indépendante de la
+ * famille — `indexChoisi === exercice.indexCorrect`, exactement comme `6gen5`/`6gen8`.
  */
 
 const TOLERANCE = 0.01;
@@ -33,7 +31,7 @@ function diviseurLn(base: number, baseEstE: boolean): number {
 }
 
 // ============================================================================
-// Famille A — f'(x) = k·[1−ln(x)]/(x²·ln(base)) [ou /x² seul si base=e].
+// Famille A — f'(x) = k·[1−ln(x)]/(x²·ln(base)) [ou /x² seul si base=e] (c disparaît).
 // ============================================================================
 
 const POINTS_A = [0.3, 0.9, 2, 5.5];
@@ -52,14 +50,14 @@ export function verifierADerivee(exercice: ExerciceGraphiqueDeriveeLogA, texte: 
 }
 
 // ============================================================================
-// Famille B — f'(x) = k·e^x·[ln(x)+1/x].
+// Famille B — f'(x) = k·e^(ax)·[a·ln(x)+1/x] (la constante c de f disparaît).
 // ============================================================================
 
 const POINTS_B = [0.2, 0.6, 1.5, 3];
 
 function referenceBDerivee(exercice: ExerciceGraphiqueDeriveeLogB): (x: number) => number {
-  const { k } = exercice;
-  return (x) => k * Math.exp(x) * (Math.log(x) + 1 / x);
+  const { k, a } = exercice;
+  return (x) => k * Math.exp(a * x) * (a * Math.log(x) + 1 / x);
 }
 
 export function diagnostiquerBDerivee(exercice: ExerciceGraphiqueDeriveeLogB, texte: string): StatutVerification {
@@ -70,14 +68,14 @@ export function verifierBDerivee(exercice: ExerciceGraphiqueDeriveeLogB, texte: 
 }
 
 // ============================================================================
-// Famille C — f'(x) = k·(ln(x)+1).
+// Famille C — f'(x) = k·(ln(x)+1) + p (la constante c de f disparaît).
 // ============================================================================
 
 const POINTS_C = [0.1, 0.5, 1.4, 4];
 
 function referenceCDerivee(exercice: ExerciceGraphiqueDeriveeLogC): (x: number) => number {
-  const { k } = exercice;
-  return (x) => k * (Math.log(x) + 1);
+  const { k, p } = exercice;
+  return (x) => k * (Math.log(x) + 1) + p;
 }
 
 export function diagnostiquerCDerivee(exercice: ExerciceGraphiqueDeriveeLogC, texte: string): StatutVerification {

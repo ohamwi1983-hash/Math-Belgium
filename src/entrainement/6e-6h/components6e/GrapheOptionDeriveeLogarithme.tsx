@@ -2,16 +2,21 @@ import { useState } from "react";
 import { Mafs, Plot } from "mafs";
 import "mafs/core.css";
 import type { ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeriveeLogarithme.types";
-import { CIBLE_NOMBRE_LIGNES_QCM, evaluerCandidat, type ViewBoxGraphiqueDeriveeLogarithme } from "../ui6e/formatGraphiqueDeriveeLogarithme";
+import { CIBLE_NOMBRE_LIGNES_QCM, evaluerCandidat, evaluerFonction, type ViewBoxGraphiqueDeriveeLogarithme } from "../ui6e/formatGraphiqueDeriveeLogarithme";
 import { EPAISSEUR_TRAIT_ACCENTUE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { DomaineTraceX, GrilleAdaptative } from "../components/mafsGraphPartage";
 
 const COULEUR_COURBE = "#1971c2";
+/** Couleur du graphique de f lui-même (écran "selection") — distincte du bleu des 4 candidats f'. */
+const COULEUR_FONCTION = "#c2410c";
 
 interface Props {
   exercice: ExerciceGraphiqueDeriveeLogarithme;
+  /** Index du candidat f' à tracer — ignoré quand `fonction` est vrai. */
   index: number;
+  /** true : trace f ELLE-MÊME (graphique donné à l'élève), pas un candidat f'. */
+  fonction?: boolean;
   viewBox: ViewBoxGraphiqueDeriveeLogarithme;
   /** Mesurées par l'appelant (`EtapeSelectionGraphiqueQCM`, `useLargeurConteneur`) — les 4
    * graphiques d'un même écran partagent toujours la même taille. */
@@ -50,7 +55,7 @@ interface Props {
  * `calculerViewBoxGraphique` (`ui6e/formatGraphiqueDeriveeLogarithme.ts`) — cas le plus concret sur
  * ce chantier : domaine `x>0` pour les 3 familles, `fenetreX` restait donc TOUJOURS strictement à
  * droite de 0, laissant l'axe Y (x=0) entièrement hors du viewBox initial sur les 4 candidats. */
-export function GrapheOptionDeriveeLogarithme({ exercice, index, viewBox, largeur, hauteur }: Props) {
+export function GrapheOptionDeriveeLogarithme({ exercice, index, fonction = false, viewBox, largeur, hauteur }: Props) {
   const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
   return (
     <div className="mafs-graph">
@@ -67,11 +72,11 @@ export function GrapheOptionDeriveeLogarithme({ exercice, index, viewBox, largeu
           {(domaine) => (
             <Plot.OfX
               y={(x) => {
-                const v = evaluerCandidat(exercice, index, x);
+                const v = fonction ? evaluerFonction(exercice, x) : evaluerCandidat(exercice, index, x);
                 return v === null ? NaN : v;
               }}
               domain={domaine}
-              color={COULEUR_COURBE}
+              color={fonction ? COULEUR_FONCTION : COULEUR_COURBE}
               weight={EPAISSEUR_TRAIT_ACCENTUE}
             />
           )}

@@ -1,5 +1,6 @@
-import type { ExerciceEqLogA, ExerciceEqLogB, ExerciceEqLogC, ExerciceEqLogD, ExerciceEqLogE, ExerciceEqLogF, ExerciceEqLogG, ExerciceEquationsExpLog, IssueSimplificationG } from "../core6e/equationsExpLog.types";
+import type { ExerciceEqLogA, ExerciceEqLogB, ExerciceEqLogC, ExerciceEqLogD, ExerciceEqLogE, ExerciceEqLogG, ExerciceEquationsExpLog, IssueSimplificationG } from "../core6e/equationsExpLog.types";
 import type { PhaseEquationsExpLog } from "../moteur6e/typesEquationsExpLog";
+import { formatFractionLatex } from "./formatFraction";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen14`. Consigne générale FIXE
@@ -72,6 +73,52 @@ function formatAffineLatex(m: number, n: number, variable = "x"): string {
   return n > 0 ? `${terme}+${n}` : `${terme}-${Math.abs(n)}`;
 }
 
+function estEntier(v: number): boolean {
+  return Math.abs(v - Math.round(v)) < 1e-9;
+}
+
+/** Forme EXACTE suivie de sa valeur approchée à la virgule (`\\approx`) — la réponse révélée donne
+ * toujours la forme exacte que demande la consigne, jamais seulement « ≈ 3,644 ». Un entier
+ * s'affiche seul. */
+function exactEtApprox(exact: string, v: number): string {
+  if (estEntier(v)) return String(Math.round(v));
+  return `${exact} \\approx ${formatDecimal(v, 3)}`;
+}
+
+/** Combinaison linéaire `c₁·ln(a₁) + c₂·ln(a₂) + …` (termes nuls omis, coefficients ±1 implicites,
+ * signes simplifiés) — "0" si tous les coefficients sont nuls. */
+function combinaisonLnLatex(termes: { c: number; arg: number }[]): string {
+  let resultat = "";
+  for (const { c, arg } of termes) {
+    if (c === 0) continue;
+    const abs = Math.abs(c);
+    const corps = `${abs === 1 ? "" : abs}\\ln(${arg})`;
+    if (resultat === "") resultat = c < 0 ? `-${corps}` : corps;
+    else resultat += c < 0 ? `-${corps}` : `+${corps}`;
+  }
+  return resultat === "" ? "0" : resultat;
+}
+
+/** Fraction `num/den` de deux combinaisons de ln, signe sorti du dénominateur (premier terme non nul
+ * du dénominateur rendu positif). */
+function fractionLnLatex(num: { c: number; arg: number }[], den: { c: number; arg: number }[]): string {
+  const premier = den.find((t) => t.c !== 0);
+  const signe = premier !== undefined && premier.c < 0 ? -1 : 1;
+  const n = num.map((t) => ({ c: signe * t.c, arg: t.arg }));
+  const d = den.map((t) => ({ c: signe * t.c, arg: t.arg }));
+  const numLatex = combinaisonLnLatex(n);
+  if (numLatex === "0") return "0";
+  return `\\dfrac{${numLatex}}{${combinaisonLnLatex(d)}}`;
+}
+
+/** Exposant entier `k` tel que `base^k = t`, ou `null` (même plage que le générateur). */
+function exposantEntier(t: number, base: number): number | null {
+  for (let k = -2; k <= 6; k++) {
+    if (Math.abs(Math.pow(base, k) - t) < 1e-9) return k;
+  }
+  return null;
+}
+
 // ============================================================================
 // Famille A.
 // ============================================================================
@@ -89,14 +136,34 @@ function blocDonneesA(ex: ExerciceEqLogA): string[] {
   return [`${ex.base}^{${formatAffineLatex(ex.m, ex.n)}} = ${formatCLatex(ex)}`];
 }
 
+/** Exposant cible en forme EXACTE : l'entier `p` quand `C` est une puissance de la base, sinon
+ * `ln(C)/ln(base)`. */
+function exposantExactA(ex: ExerciceEqLogA): string {
+  if (ex.p !== null) return String(ex.p);
+  return `\\dfrac{\\ln(${ex.C})}{\\ln(${ex.base})}`;
+}
+
+/** x = (exposant − n)/m en forme EXACTE : fraction si l'exposant est entier, sinon
+ * (ln(C) − n·ln(base)) / (m·ln(base)). */
+function xExactA(ex: ExerciceEqLogA): string {
+  if (ex.p !== null) return formatFractionLatex(ex.p - ex.n, ex.m);
+  return fractionLnLatex(
+    [
+      { c: 1, arg: ex.C },
+      { c: -ex.n, arg: ex.base },
+    ],
+    [{ c: ex.m, arg: ex.base }],
+  );
+}
+
 function etatActuelA(ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): string[] | null {
   if (phase === "aEcran1") return null;
-  return [`\\text{exposant} = ${formatValeurLatex(ex.exposantCible)}`];
+  return [`\\text{exposant} = ${exposantExactA(ex)}`];
 }
 
 function consigneEcranA(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): FragmentConsigne[] {
   if (phase === "aEcran1") return [texte("Isole l'exposant : s'il correspond à une puissance entière reconnaissable de la base, donne-le directement (sans logarithme) ; sinon, exprime-le à l'aide d'un logarithme.")];
-  return [texte("À partir de la valeur CORRECTE de l'étape précédente, résous l'équation affine et donne x (forme exacte, éventuellement sous forme logarithmique).")];
+  return [texte("À partir de la valeur CORRECTE de l'étape précédente, résous l'équation affine et donne x en valeur exacte (par exemple avec des ln) ou arrondie au millième.")];
 }
 
 function aideA1(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
@@ -106,11 +173,11 @@ function aideA1(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLate
 
 function aideA2(ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
   if (phase === "aEcran1") return { texte: "Tentative de décomposition en puissance de la base (conclusion non donnée) :", latex: `${ex.base}^{?} = ${formatCLatex(ex)}` };
-  return { texte: "Équation prête à résoudre (isolation non faite) :", latex: `${formatAffineLatex(ex.m, ex.n)} = ${formatValeurLatex(ex.exposantCible)}` };
+  return { texte: "Équation prête à résoudre (isolation non faite) :", latex: `${formatAffineLatex(ex.m, ex.n)} = ${exposantExactA(ex)}` };
 }
 
 function formatReponseA(ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): string[] {
-  return phase === "aEcran1" ? [formatValeurLatex(ex.exposantCible)] : [formatValeurLatex(ex.x)];
+  return phase === "aEcran1" ? [exactEtApprox(exposantExactA(ex), ex.exposantCible)] : [exactEtApprox(xExactA(ex), ex.x)];
 }
 
 // ============================================================================
@@ -128,7 +195,7 @@ function etatActuelB(ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): string[]
 
 function consigneEcranB(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): FragmentConsigne[] {
   if (phase === "bEcran1") return [texte("Prends le logarithme népérien des deux membres et développe ("), latex("\\ln(a^u)=u\\cdot\\ln(a)"), texte(").")];
-  return [texte("À partir de la forme développée CORRECTE de l'étape précédente, regroupe les termes en x d'un côté, les constantes de l'autre, puis isole x.")];
+  return [texte("À partir de la forme développée CORRECTE de l'étape précédente, regroupe les termes en x d'un côté, les constantes de l'autre, puis isole x. Donne x en valeur exacte ou arrondie au millième.")];
 }
 
 function aideB1(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLatex {
@@ -138,12 +205,30 @@ function aideB1(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLate
 
 function aideB2(ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLatex {
   if (phase === "bEcran1") return { texte: "Un membre développé, l'autre non :", latex: `(${formatAffineLatex(ex.m1, ex.n1)})\\ln(${ex.base1}) = \\ldots` };
-  return { texte: "Équation réarrangée (résolution non faite) :", latex: `x\\cdot(${ex.m1}\\ln(${ex.base1})-${ex.m2}\\ln(${ex.base2})) = ${ex.n2}\\ln(${ex.base2})-${ex.n1}\\ln(${ex.base1})` };
+  const den = combinaisonLnLatex([
+    { c: ex.m1, arg: ex.base1 },
+    { c: -ex.m2, arg: ex.base2 },
+  ]);
+  const num = combinaisonLnLatex([
+    { c: ex.n2, arg: ex.base2 },
+    { c: -ex.n1, arg: ex.base1 },
+  ]);
+  return { texte: "Équation réarrangée (résolution non faite) :", latex: `x\\cdot\\big(${den}\\big) = ${num}` };
 }
 
 function formatReponseB(ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): string[] {
   if (phase === "bEcran1") return [`(${formatAffineLatex(ex.m1, ex.n1)})\\ln(${ex.base1}) = (${formatAffineLatex(ex.m2, ex.n2)})\\ln(${ex.base2})`];
-  return [formatValeurLatex(ex.x)];
+  const exact = fractionLnLatex(
+    [
+      { c: ex.n2, arg: ex.base2 },
+      { c: -ex.n1, arg: ex.base1 },
+    ],
+    [
+      { c: ex.m1, arg: ex.base1 },
+      { c: -ex.m2, arg: ex.base2 },
+    ],
+  );
+  return [exactEtApprox(exact, ex.x)];
 }
 
 // ============================================================================
@@ -186,7 +271,7 @@ function etatActuelC(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3
 function consigneEcranC(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
   if (phase === "cEcran1") return [texte("Pose "), latex("t=\\text{base}^x"), texte(" et réécris l'équation ci-dessus en fonction de t seul.")];
   if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t, et ne garde que les valeurs strictement positives ("), latex("\\text{base}^x>0"), texte(" toujours).")];
-  return [texte("Pour chaque valeur de t CORRECTE de l'étape précédente, détermine x — directement si t est une puissance reconnaissable de la base, sinon à l'aide d'un logarithme. "), ...RAPPEL_LN_FRAGMENTS];
+  return [texte("Pour chaque valeur de t CORRECTE de l'étape précédente, détermine x — directement si t est une puissance reconnaissable de la base, sinon à l'aide d'un logarithme (valeur exacte ou arrondie au millième). "), ...RAPPEL_LN_FRAGMENTS];
 }
 
 function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -195,11 +280,13 @@ function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): 
   return { texte: "Rappel : vérifie pour chaque t s'il s'agit d'une puissance entière reconnaissable de la base avant de recourir au logarithme.", latex: null };
 }
 
-function racinesBrutes(ex: ExerciceEqLogC): number[] {
-  const discriminant = ex.B * ex.B - 4 * ex.A * ex.Cc;
-  if (discriminant < 0) return [];
-  const racine = Math.sqrt(discriminant);
-  return [(-ex.B - racine) / (2 * ex.A), (-ex.B + racine) / (2 * ex.A)].sort((a, b) => a - b);
+/** x = log_base(t) en forme EXACTE : l'entier k si t = base^k, `ln(t)` en base e, sinon
+ * `ln(t)/ln(base)`. */
+function xExactC(ex: ExerciceEqLogC, t: number): string {
+  const k = exposantEntier(t, ex.base);
+  if (k !== null) return String(k);
+  if (Math.abs(ex.base - Math.E) < 1e-9) return `\\ln(${t})`;
+  return `\\dfrac{\\ln(${t})}{\\ln(${ex.base})}`;
 }
 
 function aideC2(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -208,8 +295,8 @@ function aideC2(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): A
     return { texte: "Substitution amorcée (le reste n'est pas encore réécrit) :", latex: `${t2}+\\ldots=0` };
   }
   if (phase === "cEcran2") {
-    const racines = racinesBrutes(ex);
-    return { texte: "Racines du second degré (signe non encore vérifié) :", latex: racines.length === 0 ? "\\text{aucune racine réelle}" : `t \\in \\{${racines.map((t) => formatValeurLatex(t)).join(";\\ ")}\\}` };
+    const discriminant = ex.B * ex.B - 4 * ex.A * ex.Cc;
+    return { texte: "Discriminant de l'équation en t (racines non calculées) :", latex: `\\Delta = (${ex.B})^2-4\\cdot ${ex.A}\\cdot (${ex.Cc}) = ${discriminant}` };
   }
   const plusAmbigu = [...ex.tValides].sort((a, b) => b - a)[0];
   return { texte: "Pour la valeur la plus ambiguë, tentative de décomposition amorcée :", latex: plusAmbigu === undefined ? "\\text{(aucune valeur de t valide)}" : `${formatBaseLatex(ex.base)}^{?} \\approx ${formatValeurLatex(plusAmbigu)}` };
@@ -223,7 +310,7 @@ function formatReponseC(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcr
     return [`${t2}${t1}${t0}=0`];
   }
   if (phase === "cEcran2") return ex.tValides.length === 0 ? ["\\varnothing"] : ex.tValides.map((t) => formatValeurLatex(t));
-  return ex.xValides.length === 0 ? ["\\varnothing"] : ex.xValides.map((x) => formatValeurLatex(x));
+  return ex.xValides.length === 0 ? ["\\varnothing"] : ex.tValides.map((t, i) => exactEtApprox(xExactC(ex, t), ex.xValides[i]));
 }
 
 // ============================================================================
@@ -231,38 +318,36 @@ function formatReponseC(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcr
 // ============================================================================
 
 function blocDonneesD(ex: ExerciceEqLogD): string[] {
-  return ex.sousType === "D1" ? [`\\log_x(${ex.N}) = ${ex.k}`] : [`\\log_{${ex.a}}(x) = ${ex.k}`];
+  return [`\\log_{${ex.a}}(x) = ${ex.k}`];
 }
 
-function etatActuelD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): string[] | null {
+function xExactD(ex: ExerciceEqLogD): string {
+  return ex.k >= 0 ? String(Math.pow(ex.a, ex.k)) : formatFractionLatex(1, Math.pow(ex.a, -ex.k));
+}
+
+function etatActuelD(_ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): string[] | null {
   if (phase === "dEcran1") return null;
-  return ex.sousType === "D1" ? ["\\text{CE} : ]0;1[\\ \\cup\\ ]1;+\\infty["] : ["\\text{CE} : ]0;+\\infty["];
+  return ["\\text{CE} : ]0;+\\infty["];
 }
 
-function consigneEcranD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Pose la condition d'existence (CE) — rappelle-toi ce que doit vérifier x selon qu'il est la base ou l'argument du logarithme.")];
-  return ex.sousType === "D1"
-    ? [texte("Résous "), latex("\\log_x(N)=k"), texte(" pour x (élève l'équation à la puissance 1/k).")]
-    : [texte("Résous "), latex("\\log_a(x)=k"), texte(" pour x directement.")];
+function consigneEcranD(_ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Pose la condition d'existence (CE) — rappelle-toi ce que doit vérifier l'argument d'un logarithme.")];
+  return [texte("Résous l'équation pour x et donne sa valeur exacte.")];
 }
 
-function aideD1(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
-  if (phase === "dEcran1") {
-    return ex.sousType === "D1" ? { texte: "Rappel : ici x est la BASE du logarithme, donc x>0 ET x≠1.", latex: "x>0 \\quad\\text{et}\\quad x\\neq 1" } : { texte: "Rappel : ici x est l'ARGUMENT du logarithme (la base est déjà connue), donc seulement x>0.", latex: "x>0" };
-  }
-  return ex.sousType === "D1" ? { texte: "Rappel : log_x(N)=k équivaut à x^k=N, donc x=N^(1/k).", latex: "\\log_x(N)=k \\iff x^k=N \\iff x=N^{1/k}" } : { texte: "Rappel : log_a(x)=k équivaut directement à x=a^k.", latex: "\\log_a(x)=k \\iff x=a^k" };
+function aideD1(_ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
+  if (phase === "dEcran1") return { texte: "Rappel : l'argument d'un logarithme doit être strictement positif ; sa base doit être strictement positive et différente de 1.", latex: null };
+  return { texte: "Rappel : un logarithme et une exponentielle de même base se défont mutuellement.", latex: "\\log_a(x)=k \\iff x=a^k" };
 }
 
-function aideD2(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
-  if (phase === "dEcran1") {
-    return ex.sousType === "D1" ? { texte: "CE affichée sous forme d'inéquations (non combinées) :", latex: "x>0 \\quad \\text{et} \\quad x\\neq 1" } : { texte: "CE affichée sous forme d'inéquation :", latex: "x>0" };
-  }
-  return ex.sousType === "D1" ? { texte: "Équation prête (puissance non calculée) :", latex: `x^{${ex.k}} = ${ex.N}` } : { texte: "Expression prête (calcul non fait) :", latex: `x = ${ex.a}^{${ex.k}}` };
+function aideD2(_ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
+  if (phase === "dEcran1") return { texte: "Ici, x est l'ARGUMENT du logarithme (la base est déjà connue).", latex: null };
+  return { texte: "Rappel des puissances d'exposant nul ou négatif :", latex: "a^0=1, \\qquad a^{-n}=\\dfrac{1}{a^n}" };
 }
 
 function formatReponseD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): string[] {
-  if (phase === "dEcran1") return ex.sousType === "D1" ? ["]0;1[\\ \\cup\\ ]1;+\\infty["] : ["]0;+\\infty["];
-  return [formatValeurLatex(ex.x)];
+  if (phase === "dEcran1") return ["]0;+\\infty["];
+  return [xExactD(ex)];
 }
 
 // ============================================================================
@@ -274,8 +359,24 @@ function blocDonneesE(ex: ExerciceEqLogE): string[] {
   return [`\\log_{${b}}(x-${ex.p}) + \\log_{${b}}(x-${ex.q}) = \\log_{${b}}(${formatAffineLatex(ex.e, ex.d)})`];
 }
 
+/** Borne de la CE en valeur EXACTE : un entier, ou `-d/e` en fraction irréductible (les seules
+ * bornes non entières possibles, voir `familles/E.ts`) — jamais un flottant brut (« 4.333… »). */
+function borneCELatex(ex: ExerciceEqLogE, borne: number): string {
+  if (estEntier(borne)) return String(Math.round(borne));
+  return formatFractionLatex(-ex.d, ex.e);
+}
+
 function ceELatex(ex: ExerciceEqLogE): string {
-  return ex.ceSup === null ? `x > ${ex.ceInf}` : `${ex.ceInf} < x < ${formatValeurLatex(ex.ceSup)}`;
+  return ex.ceSup === null ? `x > ${borneCELatex(ex, ex.ceInf)}` : `${borneCELatex(ex, ex.ceInf)} < x < ${borneCELatex(ex, ex.ceSup)}`;
+}
+
+/** `x² − Sx + P` développé, signes simplifiés. */
+function polynomeELatex(ex: ExerciceEqLogE): string {
+  const S = ex.p + ex.q + ex.e;
+  const P = ex.p * ex.q - ex.d;
+  const termeX = S === 0 ? "" : S > 0 ? `-${S === 1 ? "" : S}x` : `+${-S === 1 ? "" : -S}x`;
+  const termeC = P === 0 ? "" : P > 0 ? `+${P}` : `-${-P}`;
+  return `x^2${termeX}${termeC}`;
 }
 
 function etatActuelE(ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string[] | null {
@@ -300,53 +401,17 @@ function aideE2(ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): A
   if (phase === "eEcran1") return { texte: "Inéquations individuelles (intersection non faite) :", latex: `x>${ex.p} \\quad ; \\quad x>${ex.q}` };
   if (phase === "eEcran2") {
     const b = formatBaseLatex(ex.base);
-    return { texte: "Logarithmes combinés à gauche (logarithme non encore retiré) :", latex: `\\log_{${b}}\\big((x-${ex.p})(x-${ex.q})\\big) = \\log_{${b}}(${formatAffineLatex(ex.e, ex.d)})` };
+    return { texte: "Membre de gauche combiné (il reste à égaler les arguments des deux membres) :", latex: `\\log_{${b}}\\big((x-${ex.p})(x-${ex.q})\\big)` };
   }
-  return { texte: "Racines de l'équation polynomiale, rappelées à côté de la CE (verdict non donné) :", latex: `x \\in \\{${ex.racinesAlgebriques.map((r) => formatValeurLatex(r)).join(";\\ ")}\\} \\quad \\text{CE} : ${ceELatex(ex)}` };
+  const S = ex.p + ex.q + ex.e;
+  const P = ex.p * ex.q - ex.d;
+  return { texte: "Équation développée et son discriminant (racines non calculées) — à confronter ensuite à la CE :", latex: `${polynomeELatex(ex)}=0 \\qquad \\Delta = ${S * S - 4 * P}` };
 }
 
 function formatReponseE(ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string[] {
   if (phase === "eEcran1") return [ceELatex(ex)];
   if (phase === "eEcran2") return [`(x-${ex.p})(x-${ex.q}) = ${formatAffineLatex(ex.e, ex.d)}`];
   return ex.solutionsFinales.length === 0 ? ["\\varnothing"] : ex.solutionsFinales.map((r) => formatValeurLatex(r));
-}
-
-// ============================================================================
-// Famille F.
-// ============================================================================
-
-function blocDonneesF(ex: ExerciceEqLogF): string[] {
-  return [`\\log_x(${ex.a}) + \\log_{${ex.a}}(x) = ${ex.k}`];
-}
-
-function etatActuelF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] | null {
-  if (phase === "fEcran1") return null;
-  if (phase === "fEcran2") return ["]0;1[\\ \\cup\\ ]1;+\\infty["];
-  return ["]0;1[\\ \\cup\\ ]1;+\\infty[", `y+\\dfrac{1}{y} = ${ex.k}`];
-}
-
-function consigneEcranF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texte("Pose la CE (x est à la fois une base de logarithme et un argument).")];
-  if (phase === "fEcran2") return [texte("Change de base pour "), latex(`\\log_x(${ex.a})`), texte(", pose "), latex(`y=\\log_{${ex.a}}(x)`), texte(", et réécris l'équation en y.")];
-  return [texte("Résous l'équation en y obtenue, puis reconvertis chaque solution valide en "), latex(`x = ${ex.a}^y`), texte(" (tolérance numérique acceptée — réponses non nécessairement exactes).")];
-}
-
-function aideF1(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Rappel : x est ici la base du logarithme log_x(a), donc x>0 et x≠1.", latex: "\\log_x(a),\\quad x>0 \\quad\\text{et}\\quad x\\neq 1" };
-  if (phase === "fEcran2") return { texte: `Rappel de la formule de changement de base : log_a(N)=log_b(N)/log_b(a) — ici log_x(${ex.a}) = log_${ex.a}(${ex.a})/log_${ex.a}(x) = 1/y.`, latex: `\\log_x(${ex.a}) = \\dfrac{\\log_{${ex.a}}(${ex.a})}{\\log_{${ex.a}}(x)} = \\dfrac{1}{y}` };
-  return { texte: "Rappel : multiplie par y pour obtenir y²-ky+1=0, résous, puis calcule a^y pour chaque solution.", latex: `y^2-${ex.k}y+1=0` };
-}
-
-function aideF2(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "CE affichée sous forme d'inéquations (non combinées) :", latex: "x>0 \\quad \\text{et} \\quad x\\neq 1" };
-  if (phase === "fEcran2") return { texte: "Équation partiellement réécrite en y (la substitution de log_x(a) n'est pas encore faite) :", latex: `\\log_{${ex.a}}(${ex.a}) \\text{ substitué} \\Rightarrow \\log_x(${ex.a}) + y = ${ex.k}` };
-  return { texte: "Solutions en y (conversion en x non faite) :", latex: `y \\in \\{${ex.yValides.map((y) => formatValeurLatex(y)).join(";\\ ")}\\}` };
-}
-
-function formatReponseF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] {
-  if (phase === "fEcran1") return ["]0;1[\\ \\cup\\ ]1;+\\infty["];
-  if (phase === "fEcran2") return [`y+\\dfrac{1}{y} = ${ex.k}`];
-  return ex.xValides.map((x) => formatValeurLatex(x));
 }
 
 // ============================================================================
@@ -366,34 +431,52 @@ function etatActuelG(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): string[]
 }
 
 function consigneEcranG(_ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): FragmentConsigne[] {
-  if (phase === "gEcran1") return [texte("Pose la CE, puis combine/simplifie les deux membres de l'équation (fais disparaître les logarithmes).")];
-  return [texte("À partir de la simplification CORRECTE de l'étape précédente, choisis le verdict qui s'applique.")];
+  if (phase === "gEcran1") return [texte("Fais disparaître les logarithmes : combine les membres si nécessaire, puis égale les arguments. Écris l'équation obtenue.")];
+  return [texte("Confronte l'équation simplifiée CORRECTE de l'étape précédente à la condition d'existence de l'équation de départ, puis choisis le verdict qui s'applique.")];
 }
 
 function aideG1(_ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): AideAvecLatex {
-  if (phase === "gEcran1") return { texte: "", latex: null };
+  if (phase === "gEcran1") return { texte: "Rappel : une somme de logarithmes de même base devient le logarithme du produit, et deux logarithmes de même base sont égaux si et seulement si leurs arguments le sont.", latex: "\\log_b(A)+\\log_b(B)=\\log_b(A\\cdot B), \\qquad \\log_b(A)=\\log_b(B) \\iff A=B" };
   return { texte: "Rappel des 3 issues possibles après simplification : l'ensemble vide par violation de la CE, l'ensemble vide par discriminant négatif, ou vrai sur tout le domaine (= la CE elle-même).", latex: null };
 }
 
+/** Aides de niveau 2 : orientent vers le BON test sans jamais énoncer le verdict (audit : l'ancienne
+ * aide disait « l'égalité obtenue est une IDENTITÉ » ou « discriminant < 0 », soit la réponse). */
 function aideG2(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): AideAvecLatex {
-  if (phase === "gEcran1") return { texte: "", latex: null };
-  if (ex.type === "violationCE") {
-    const x0 = (ex.n2 - ex.n1) / (ex.m1 - ex.m2);
-    const valeur = ex.m1 * x0 + ex.n1;
-    return { texte: "Résultat de la simplification rappelé (résolution de l'équation linéaire, verdict non donné) :", latex: `x = ${formatValeurLatex(x0)} \\quad \\Rightarrow \\quad \\text{argument} = ${formatValeurLatex(valeur)}` };
+  if (phase === "gEcran1") {
+    if (ex.type === "identite") return { texte: "Applique la règle du produit au membre de gauche, puis compare-le au membre de droite.", latex: null };
+    return { texte: "Chaque membre est déjà un seul logarithme de même base : égale directement leurs arguments.", latex: null };
   }
-  if (ex.type === "identite") return { texte: "Résultat de la simplification rappelé (verdict non donné) : l'égalité obtenue est une IDENTITÉ, vraie pour tout x.", latex: null };
-  return { texte: "Résultat de la simplification rappelé (verdict non donné) :", latex: `x^2 = ${ex.c0 - ex.b0} \\quad (\\text{discriminant} < 0)` };
+  if (ex.type === "violationCE") return { texte: "Résous l'équation simplifiée, puis remplace x par la valeur trouvée dans un argument de l'équation de départ : est-il strictement positif ?", latex: null };
+  if (ex.type === "identite") return { texte: "L'équation simplifiée ne contient plus x : demande-toi pour quels x l'équation de départ a seulement un sens.", latex: null };
+  return { texte: "Isole x² dans l'équation simplifiée et regarde le signe du second membre.", latex: null };
+}
+
+/** CE de l'identité (`m1x+n1>0` et `m2x+n2>0`), en valeurs exactes — jamais vide (voir
+ * `familles/G.ts`). */
+function ceIdentiteLatex(ex: Extract<ExerciceEqLogG, { type: "identite" }>): string {
+  const conditions = [
+    { m: ex.m1, n: ex.n1 },
+    { m: ex.m2, n: ex.n2 },
+  ].map(({ m, n }) => ({ croissante: m > 0, seuil: -n / m, latex: formatFractionLatex(-n, m) }));
+  const minorants = conditions.filter((c) => c.croissante).sort((a, b) => b.seuil - a.seuil);
+  const majorants = conditions.filter((c) => !c.croissante).sort((a, b) => a.seuil - b.seuil);
+  if (majorants.length === 0) return `x > ${minorants[0].latex}`;
+  if (minorants.length === 0) return `x < ${majorants[0].latex}`;
+  return `${minorants[0].latex} < x < ${majorants[0].latex}`;
 }
 
 function formatReponseG(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): string[] {
   if (phase === "gEcran1") {
     if (ex.type === "violationCE") return [`${formatAffineLatex(ex.m1, ex.n1)} = ${formatAffineLatex(ex.m2, ex.n2)}`];
-    if (ex.type === "identite") return ["0=0"];
+    if (ex.type === "identite") {
+      const produit = `(${formatAffineLatex(ex.m1, ex.n1)})(${formatAffineLatex(ex.m2, ex.n2)})`;
+      return [`${produit} = ${produit} \\iff 0=0`];
+    }
     return [`x^2 = ${ex.c0 - ex.b0}`];
   }
-  if (ex.type === "violationCE") return ["\\varnothing\\ (\\text{CE violée})"];
-  if (ex.type === "identite") return ["\\text{vrai sur tout le domaine (= la CE)}"];
+  if (ex.type === "violationCE") return ["\\varnothing\\ (\\text{la solution trouvée viole la CE})"];
+  if (ex.type === "identite") return [`\\text{vrai pour tout } x \\text{ de la CE : } ${ceIdentiteLatex(ex)}`];
   return ["\\varnothing\\ (\\text{discriminant} < 0)"];
 }
 
@@ -417,8 +500,6 @@ export function blocDonnees(exercice: ExerciceEquationsExpLog): string[] {
       return blocDonneesD(exercice);
     case "E":
       return blocDonneesE(exercice);
-    case "F":
-      return blocDonneesF(exercice);
     case "G":
       return blocDonneesG(exercice);
   }
@@ -436,8 +517,6 @@ export function etatActuel(exercice: ExerciceEquationsExpLog, phase: PhaseEquati
       return etatActuelD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return etatActuelE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3");
-    case "F":
-      return etatActuelF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
     case "G":
       return etatActuelG(exercice, phase as "gEcran1" | "gEcran2");
   }
@@ -455,8 +534,6 @@ export function consigneEcran(exercice: ExerciceEquationsExpLog, phase: PhaseEqu
       return consigneEcranD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return consigneEcranE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3");
-    case "F":
-      return consigneEcranF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
     case "G":
       return consigneEcranG(exercice, phase as "gEcran1" | "gEcran2");
   }
@@ -474,8 +551,6 @@ export function aideNiveau1(exercice: ExerciceEquationsExpLog, phase: PhaseEquat
       return aideD1(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return aideE1(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3");
-    case "F":
-      return aideF1(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
     case "G":
       return aideG1(exercice, phase as "gEcran1" | "gEcran2");
   }
@@ -493,8 +568,6 @@ export function aideNiveau2(exercice: ExerciceEquationsExpLog, phase: PhaseEquat
       return aideD2(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return aideE2(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3");
-    case "F":
-      return aideF2(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
     case "G":
       return aideG2(exercice, phase as "gEcran1" | "gEcran2");
   }
@@ -514,8 +587,6 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationsExpLo
       return formatReponseD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return formatReponseE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3");
-    case "F":
-      return formatReponseF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
     case "G":
       return formatReponseG(exercice, phase as "gEcran1" | "gEcran2");
   }
@@ -535,9 +606,6 @@ export const LIBELLE_PHASE: Record<PhaseEquationsExpLog, string> = {
   eEcran1: "Étape 1 (CE)",
   eEcran2: "Étape 2 (combinaison)",
   eEcran3: "Étape 3 (résolution filtrée)",
-  fEcran1: "Étape 1 (CE)",
-  fEcran2: "Étape 2 (changement de base)",
-  fEcran3: "Étape 3 (résolution)",
   gEcran1: "Étape 1 (simplification)",
   gEcran2: "Étape 2 (verdict)",
 };
@@ -550,7 +618,6 @@ export const PHASES_PAR_FAMILLE: Record<ExerciceEquationsExpLog["famille"], Phas
   C: ["cEcran1", "cEcran2", "cEcran3"],
   D: ["dEcran1", "dEcran2"],
   E: ["eEcran1", "eEcran2", "eEcran3"],
-  F: ["fEcran1", "fEcran2", "fEcran3"],
   G: ["gEcran1", "gEcran2"],
 };
 

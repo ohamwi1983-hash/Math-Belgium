@@ -3,7 +3,7 @@ import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
 import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, PLACEHOLDER_LIMITE_VALEUR } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -43,7 +43,7 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
         </button>
       </div>
       {etat.statut === "valeur" && (
-        <input type="text" className={`text-input contenu-conditionnel ${erreur ? "is-erronee" : ""}`} value={etat.texte} placeholder="ex : 1, 0.5..." onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
+        <input type="text" className={`text-input contenu-conditionnel ${erreur ? "is-erronee" : ""}`} value={etat.texte} placeholder={PLACEHOLDER_LIMITE_VALEUR} onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
       )}
     </div>
   );
@@ -52,9 +52,6 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
 interface Props {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
-  /** Rappel du domaine confirmé à l'écran précédent (consigne : "aux bornes de SON DOMAINE") — voir
-   * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
-  etatActuel: string[];
   labels: DirectionLabel[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -70,13 +67,16 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "limites" — arité VARIABLE (2 directions pour A/B/D, 6 pour C, voir
- * `ui6e/formatEtudeFonctionLogarithme.ts::directionLabelsLimites`) — UN SEUL composant générique,
- * jamais un par arité (contrairement à `6gen11` qui avait `EtapeLimitesDeux`/`EtapeLimitesQuatre`
- * séparés). `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+/** Écran "limites" — arité VARIABLE (2 directions, 6 pour la famille C, voir
+ * `ui6e/formatEtudeFonctionLogarithme.ts::directionLabelsLimites`) — UN SEUL composant générique.
+ * `App6gen21.tsx` le rend avec une `key` qui change à chaque exercice. */
+export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<EtatLocal[]>(() => labels.map(() => ({ statut: null, texte: "" })));
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse soumise — seule une direction encore identique à cette réponse refusée est
+   * marquée en rouge (jamais un nouveau choix pas encore validé). */
+  const [soumis, setSoumis] = useState<EtatLocal[] | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && !validation;
+  const refusee = (i: number) => montrerErreurs && soumis !== null && soumis[i].statut === etats[i].statut && soumis[i].texte === etats[i].texte;
 
   function complet(e: EtatLocal): boolean {
     return e.statut !== null && (e.statut !== "valeur" || e.texte.trim() !== "");
@@ -89,6 +89,7 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
 
   function valider() {
     if (!tousComplets) return;
+    setSoumis(etats);
     const reponse: ReponseLimite[] = etats.map((e) => (e.statut === "valeur" ? { type: "valeur", texte: e.texte } : { type: e.statut as "plus_infini" | "moins_infini" | "zero" }));
     onValider(reponse);
   }
@@ -103,18 +104,11 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuel.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
       {labels.map((l, i) => (
-        <GroupeLimite key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} onChange={(e) => majEtat(i, e)} />
+        <GroupeLimite key={l.id} label={l.latex} etat={etats[i]} erreur={refusee(i)} onChange={(e) => majEtat(i, e)} />
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">

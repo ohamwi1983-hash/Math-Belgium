@@ -59,11 +59,16 @@ export function EtapeDeuxChampsDomaineDeriveeLog({
 }: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
+  /** Paire SOUMISE — même principe que `EtapeChampDomaineDeriveeLog` (audit 6e ch. 3, point 4). */
+  const [soumis, setSoumis] = useState<{ a: string; b: string } | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs ? diagnostiquer({ a, b }) : null;
+  const dernierStatut = montrerErreurs && soumis !== null ? diagnostiquer(soumis) : null;
+  const rougeA = montrerErreurs && soumis !== null && a === soumis.a;
+  const rougeB = montrerErreurs && soumis !== null && b === soumis.b;
 
   function valider() {
     if (a.trim() === "" || b.trim() === "") return;
+    setSoumis({ a, b });
     onValider({ a, b });
   }
 
@@ -94,11 +99,11 @@ export function EtapeDeuxChampsDomaineDeriveeLog({
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">{labelA}</label>
-          <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={a} onChange={(e) => setA(e.target.value)} />
+          <input type="text" className={`text-input ${rougeA ? "is-erronee" : ""}`} value={a} onChange={(e) => setA(e.target.value)} />
         </div>
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">{labelB}</label>
-          <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value)} />
+          <input type="text" className={`text-input ${rougeB ? "is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value)} />
         </div>
       </div>
       {niveauAide >= 1 && (

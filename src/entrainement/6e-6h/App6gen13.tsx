@@ -2,13 +2,15 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./generateurs6e/proprietesLogarithme";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponse } from "./moteur6e/sessionProprietesLogarithme";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponse, tentativesMaxEcran } from "./moteur6e/sessionProprietesLogarithme";
+import { ecranDeLaPhase } from "./moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme, PhaseProprietesLogarithme } from "./moteur6e/typesProprietesLogarithme";
 import { diagnostiquerEcran } from "./moteur6e/verificationProprietesLogarithme";
 import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
+import { EtapeChoixProprieteLogarithme } from "./components6e/EtapeChoixProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { consigneGenerale, etatActuel, expressionDemandeeLatex, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
+import { OPTIONS_PROPRIETES, PLACEHOLDER_TRANSFORMATION, consigneGenerale, etatActuel, expressionDemandeeLatex, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
 import { calculerRecapitulatifProprietesLogarithme, calculerSegmentsProgressionProprietesLogarithme } from "./ui6e/recapitulatifProprietesLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -44,6 +46,10 @@ export function App6gen13() {
    * l'écran refermé (`niveauAide` est remis à 0 à chaque transition), capturé ICI au moment exact de
    * la clôture réelle (même garde que `terminerEtape`). Remis à vide comme `historique`. */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseProprietesLogarithme, boolean>>>({});
+  /** Incrémenté à CHAQUE nouvel exercice (y compris via le sélecteur de développement) — entre dans
+   * la `key` des écrans pour qu'un nouvel exercice reparte toujours de champs vides, même quand il
+   * démarre sur le même index d'écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionProprietesLogarithme, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -84,6 +90,7 @@ export function App6gen13() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -94,13 +101,15 @@ export function App6gen13() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionProprietesLogarithme(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxEcran(etat);
+  const ecran = ecranDeLaPhase(exercice, phase);
   const niveauAide = etat.niveauAide;
 
   const validation = enAttente
@@ -125,13 +134,12 @@ export function App6gen13() {
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: aideNiveau1(),
     aideNiveau2: aideNiveau2(exercice, phase),
-    tentativesUtilisees,
-    tentativesMax,
     niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
     validation,
   };
+  const libelleChoix = (id: string) => OPTIONS_PROPRIETES.find((o) => o.id === id)?.label ?? id;
 
   // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionProprietesLogarithme`
   // avec `aideUtiliseeParPhase` capturé localement ci-dessus — indexé directement par `phase` (index
@@ -146,18 +154,30 @@ export function App6gen13() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Propriétés du logarithme</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifProprietesLogarithme(etat)} />
-        <EtapeProprieteLogarithme
-          key={phase}
-          {...propsCommun}
-          placeholder="ex : m+n"
-          diagnostiquer={(texte) => diagnostiquerEcran(exercice, phase, texte)}
-          onValider={(texte) => terminerEtape(soumettreReponse(etat, texte), texte)}
-        />
+        {ecran.kind === "choix" ? (
+          <EtapeChoixProprieteLogarithme
+            key={`${numeroExercice}-${phase}`}
+            {...propsCommun}
+            options={OPTIONS_PROPRIETES}
+            onValider={(choix) => terminerEtape(soumettreReponse(etat, choix), libelleChoix(choix))}
+          />
+        ) : (
+          <EtapeProprieteLogarithme
+            key={`${numeroExercice}-${phase}`}
+            {...propsCommun}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            placeholder={PLACEHOLDER_TRANSFORMATION}
+            diagnostiquer={(texte) => diagnostiquerEcran(exercice, phase, texte)}
+            onValider={(texte) => terminerEtape(soumettreReponse(etat, texte), texte)}
+          />
+        )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

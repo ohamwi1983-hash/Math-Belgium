@@ -185,6 +185,7 @@ export function App6gen49() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Variables aléatoires discrètes et espérance</h1>
+        <p className="app-subtitle">Chapitre 8 — Variables aléatoires et lois de probabilités</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionVariablesDiscretesEsperance(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

@@ -48,13 +48,6 @@ function nouvelleSession(): EtatSessionPositionDroitePlan {
   return demarrerSessionPositionDroitePlan(REGLAGES_DEMO, genererExercicePositionDroitePlan);
 }
 
-/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que gen65,
- * `AppQuizGeometrieAnalytique.tsx`) — jamais sur l'écran normal donné aux élèves. */
-function modeDevActif(): boolean {
-  if (import.meta.env.DEV) return true;
-  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
-}
-
 /** Ordre d'affichage des puces — toujours linéaire ici, 2 phases fixes. "justification" (dernière
  * phase) n'est jamais consultée comme passée : un nouvel exercice redémarre juste après. */
 const ORDRE_PHASES: PhasePositionDroitePlan[] = ["classification", "justification"];
@@ -179,7 +172,7 @@ export function AppPositionDroitePlan() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Position d'une droite par rapport à un plan</h1>
         <p className="app-subtitle">Chapitre 8 — Géométrie dans l'espace</p>
-        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />}
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 

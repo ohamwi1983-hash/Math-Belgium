@@ -42,7 +42,8 @@ interface EtatPartie {
   texte: string;
 }
 
-function GroupePartie({ config, etat, erreur, onChange }: { config: ConfigPartieDiagnostic; etat: EtatPartie; erreur: boolean; onChange: (e: EtatPartie) => void }) {
+function GroupePartie({ config, etat, refuse, onChange }: { config: ConfigPartieDiagnostic; etat: EtatPartie; refuse: EtatPartie | null; onChange: (e: EtatPartie) => void }) {
+  const estRefuse = (statut: EtatPartie["statut"]) => refuse !== null && refuse.statut === statut && etat.statut === statut && (statut !== "valeur" || refuse.texte === etat.texte);
   return (
     <div className="field">
       <p className="field-label field-label-minuscule">{config.label}</p>
@@ -51,7 +52,7 @@ function GroupePartie({ config, etat, erreur, onChange }: { config: ConfigPartie
           <button
             key={option}
             type="button"
-            className={`btn ${etat.statut === option ? "toggle-active" : ""} ${erreur && etat.statut === option ? "is-erronee" : ""}`}
+            className={`btn ${etat.statut === option ? "toggle-active" : ""} ${estRefuse(option) ? "is-erronee" : ""}`}
             onClick={() => onChange({ statut: option, texte: etat.texte })}
           >
             <Katex expression={LABELS[option]} />
@@ -60,7 +61,7 @@ function GroupePartie({ config, etat, erreur, onChange }: { config: ConfigPartie
         {config.autoriserValeurLibre && (
           <button
             type="button"
-            className={`btn ${etat.statut === "valeur" ? "toggle-active" : ""} ${erreur && etat.statut === "valeur" ? "is-erronee" : ""}`}
+            className={`btn ${etat.statut === "valeur" ? "toggle-active" : ""} ${estRefuse("valeur") ? "is-erronee" : ""}`}
             onClick={() => onChange({ statut: "valeur", texte: etat.texte })}
           >
             Valeur finie
@@ -71,7 +72,7 @@ function GroupePartie({ config, etat, erreur, onChange }: { config: ConfigPartie
         <>
           <ApercuExpressionLatex texte={etat.texte} />
           <div className="field contenu-conditionnel">
-            <input type="text" className={`text-input ${erreur ? "is-erronee" : ""}`} value={etat.texte} placeholder={config.placeholderValeur} onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
+            <input type="text" className={`text-input ${estRefuse("valeur") ? "is-erronee" : ""}`} value={etat.texte} placeholder={config.placeholderValeur} onChange={(e) => onChange({ statut: "valeur", texte: e.target.value })} />
           </div>
         </>
       )}
@@ -89,16 +90,20 @@ function reponseDepuisEtat(etat: EtatPartie): ReponseLimiteLog | null {
  * dénominateur, ou 2 facteurs selon le sous-type) AVANT toute conclusion, 2 sous-réponses
  * indépendantes combinées derrière UN SEUL bouton "Valider" (spec : "Champ : valeurs/statuts de
  * chaque partie"). Même patron que `EtapeFacteursC.tsx` (6gen6), étendu pour supporter une option
- * "Valeur finie" par partie. `App6gen17.tsx` doit le rendre avec `key={phase}`. */
+ * "Valeur finie" par partie. `App6gen17.tsx` doit le rendre avec une `key` qui change à chaque
+ * exercice et à chaque écran. */
 export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etat1, setEtat1] = useState<EtatPartie>({ statut: null, texte: "" });
   const [etat2, setEtat2] = useState<EtatPartie>({ statut: null, texte: "" });
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge (audit chapitre 3 de 6e, point 4). */
+  const [soumis, setSoumis] = useState<[EtatPartie, EtatPartie] | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && soumis !== null;
 
   function valider() {
     const reponse1 = reponseDepuisEtat(etat1);
     const reponse2 = reponseDepuisEtat(etat2);
     if (reponse1 === null || reponse2 === null) return;
+    setSoumis([etat1, etat2]);
     onValider({ partie1: reponse1, partie2: reponse2 });
   }
 
@@ -117,8 +122,8 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <GroupePartie config={partie1} etat={etat1} erreur={montrerErreurs} onChange={setEtat1} />
-      <GroupePartie config={partie2} etat={etat2} erreur={montrerErreurs} onChange={setEtat2} />
+      <GroupePartie config={partie1} etat={etat1} refuse={montrerErreurs && soumis ? soumis[0] : null} onChange={setEtat1} />
+      <GroupePartie config={partie2} etat={etat2} refuse={montrerErreurs && soumis ? soumis[1] : null} onChange={setEtat2} />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

@@ -7,7 +7,7 @@ import type { ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeri
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { phaseApres, phaseInitiale } from "./typesGraphiqueDeriveeLogarithme";
+import { phaseApres, phaseInitiale, tentativesMaxPhase } from "./typesGraphiqueDeriveeLogarithme";
 import type { EtatSessionGraphiqueDeriveeLogarithme, PhaseGraphiqueDeriveeLogarithme, ResultatExerciceGraphiqueDeriveeLogarithme } from "./typesGraphiqueDeriveeLogarithme";
 import { verifierEcranDerivee, verifierEcranSelection } from "./verificationGraphiqueDeriveeLogarithme";
 
@@ -21,16 +21,16 @@ function etatInitial(
   exercice: ExerciceGraphiqueDeriveeLogarithme,
 ): Pick<
   EtatSessionGraphiqueDeriveeLogarithme,
-  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreDeriveePartiel" | "deriveeRevele" | "deriveeNiveauAide" | "derniereTransitionRevelee"
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreSelectionPartiel" | "selectionRevele" | "selectionNiveauAide" | "derniereTransitionRevelee"
 > {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
-    scoreDeriveePartiel: null,
-    deriveeRevele: false,
-    deriveeNiveauAide: null,
+    scoreSelectionPartiel: null,
+    selectionRevele: false,
+    selectionNiveauAide: null,
     derniereTransitionRevelee: false,
   };
 }
@@ -43,7 +43,7 @@ export function demarrerSessionGraphiqueDeriveeLogarithme(
 }
 
 function reglagesEtape(etat: EtatSessionGraphiqueDeriveeLogarithme): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax) };
 }
 
 export function activerAideSuivante(etat: EtatSessionGraphiqueDeriveeLogarithme): EtatSessionGraphiqueDeriveeLogarithme {
@@ -83,15 +83,15 @@ function avancerPhase<TReponse>(
   const phaseSuivante = phaseApres(etat.phase);
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceGraphiqueDeriveeLogarithme = { exercice, scoreDerivee: etat.scoreDeriveePartiel as number, scoreSelection: score };
+    const resultat: ResultatExerciceGraphiqueDeriveeLogarithme = { exercice, scoreSelection: etat.scoreSelectionPartiel as number, scoreDerivee: score };
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
   return {
     ...etat,
-    scoreDeriveePartiel: score,
-    deriveeRevele: revele,
-    deriveeNiveauAide: etat.niveauAide,
+    scoreSelectionPartiel: score,
+    selectionRevele: revele,
+    selectionNiveauAide: etat.niveauAide,
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     phase: phaseSuivante,

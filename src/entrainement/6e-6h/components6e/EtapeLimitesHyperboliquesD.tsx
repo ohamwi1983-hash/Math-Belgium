@@ -45,11 +45,15 @@ const OPTIONS: { id: SigneLimiteHyperbolique; latex: string }[] = [
 export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const [moinsInfini, setMoinsInfini] = useState<SigneLimiteHyperbolique | null>(null);
+  /** Dernière réponse SOUMISE — seuls ses choix passent en rouge, jamais un choix modifié depuis. */
+  const [soumis, setSoumis] = useState<ReponseLimitesD | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const refuse = (montrerErreurs || validation?.revele === true) && soumis !== null;
   const complet = plusInfini !== null && moinsInfini !== null;
 
   function valider() {
     if (plusInfini === null || moinsInfini === null) return;
+    setSoumis({ plusInfini, moinsInfini });
     onValider({ plusInfini, moinsInfini });
   }
 
@@ -84,7 +88,8 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
           <button
             key={o.id}
             type="button"
-            className={`btn ${plusInfini === o.id ? "toggle-active" : ""} ${montrerErreurs && plusInfini === o.id ? "is-erronee" : ""}`}
+            className={`btn ${plusInfini === o.id ? "toggle-active" : ""} ${refuse && plusInfini === o.id && soumis?.plusInfini === o.id ? "is-erronee" : ""}`}
+            disabled={!!validation}
             onClick={() => setPlusInfini(o.id)}
           >
             <Katex expression={o.latex} />
@@ -100,7 +105,8 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
           <button
             key={o.id}
             type="button"
-            className={`btn ${moinsInfini === o.id ? "toggle-active" : ""} ${montrerErreurs && moinsInfini === o.id ? "is-erronee" : ""}`}
+            className={`btn ${moinsInfini === o.id ? "toggle-active" : ""} ${refuse && moinsInfini === o.id && soumis?.moinsInfini === o.id ? "is-erronee" : ""}`}
+            disabled={!!validation}
             onClick={() => setMoinsInfini(o.id)}
           >
             <Katex expression={o.latex} />

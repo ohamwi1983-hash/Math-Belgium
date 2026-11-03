@@ -34,13 +34,13 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; valeur: CategorieCroissance | null; erreur: boolean; onChange: (v: CategorieCroissance) => void }) {
+function GroupeCategorie({ label, valeur, refuse, onChange }: { label: string; valeur: CategorieCroissance | null; refuse: CategorieCroissance | null; onChange: (v: CategorieCroissance) => void }) {
   return (
     <div className="field">
       <p className="field-label field-label-minuscule">{label}</p>
       <div className="options-grid-compact">
         {OPTIONS.map((option) => (
-          <button key={option} type="button" className={`btn ${valeur === option ? "toggle-active" : ""} ${erreur && valeur === option ? "is-erronee" : ""}`} onClick={() => onChange(option)}>
+          <button key={option} type="button" className={`btn ${valeur === option ? "toggle-active" : ""} ${refuse === option && valeur === option ? "is-erronee" : ""}`} onClick={() => onChange(option)}>
             {formatCategorieLabel(option)}
           </button>
         ))}
@@ -53,14 +53,17 @@ function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; v
  * (log/polynôme/exponentielle) du numérateur ET du dénominateur, 2 sous-réponses indépendantes
  * combinées derrière UN SEUL bouton "Valider" (spec : "Champ : description du terme dominant de
  * chaque côté"). Même patron que `EtapeFacteursC.tsx` (6gen6). `App6gen17.tsx` doit le rendre avec
- * `key={phase}`. */
+ * une `key` qui change à chaque exercice et à chaque écran. */
 export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [numerateur, setNumerateur] = useState<CategorieCroissance | null>(null);
   const [denominateur, setDenominateur] = useState<CategorieCroissance | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge (audit chapitre 3 de 6e, point 4). */
+  const [soumis, setSoumis] = useState<ReponseDominanceA | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && soumis !== null;
 
   function valider() {
     if (numerateur === null || denominateur === null) return;
+    setSoumis({ numerateur, denominateur });
     onValider({ numerateur, denominateur });
   }
 
@@ -77,8 +80,8 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} erreur={montrerErreurs} onChange={setNumerateur} />
-      <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} erreur={montrerErreurs} onChange={setDenominateur} />
+      <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} refuse={montrerErreurs ? (soumis?.numerateur ?? null) : null} onChange={setNumerateur} />
+      <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} refuse={montrerErreurs ? (soumis?.denominateur ?? null) : null} onChange={setDenominateur} />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

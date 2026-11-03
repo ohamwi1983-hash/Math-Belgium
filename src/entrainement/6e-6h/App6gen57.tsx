@@ -174,6 +174,7 @@ export function App6gen57() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Problèmes de lieux : méthode des génératrices</h1>
+        <p className="app-subtitle">Chapitre 9 — Lieux géométriques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionMethodeGeneratrices(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

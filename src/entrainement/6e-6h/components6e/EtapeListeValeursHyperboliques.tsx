@@ -23,6 +23,9 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (textes: string[]) => void;
+  /** Message d'erreur pour la DERNIÈRE saisie soumise (syntaxe, valeur approchée, ou simple
+   * « incorrect ») — construit par l'appelant, qui connaît la cible. */
+  messageErreur: (textes: string[], tentativesUtilisees: number, tentativesMax: number) => string;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -37,9 +40,13 @@ interface Props {
  * CLAUDE.md), aucune gate "Pas de solution" ici (toujours au moins 1 valeur pour cette famille).
  * `App6gen19.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, messageErreur, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
+  /** Dernière saisie SOUMISE — une ligne n'est rouge que tant qu'elle reste identique à sa valeur
+   * soumise (jamais pendant que l'élève tape une nouvelle réponse). */
+  const [lignesSoumises, setLignesSoumises] = useState<string[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const refuse = (montrerErreurs || validation?.revele === true) && lignesSoumises !== null;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
 
   function ajouterLigne() {
@@ -54,6 +61,7 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
   }
   function valider() {
     if (!complet) return;
+    setLignesSoumises(lignes);
     onValider(lignes);
   }
 
@@ -88,8 +96,8 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
           <div key={i}>
             <ApercuExpressionLatex texte={ligne} />
             <div className="field-row">
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} onChange={(e) => modifierLigne(i, e.target.value)} />
-              {lignes.length > 1 && (
+              <input type="text" className={`text-input ${refuse && lignesSoumises?.[i] === ligne ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} readOnly={!!validation} aria-label={`Valeur ${i + 1}`} onChange={(e) => modifierLigne(i, e.target.value)} />
+              {lignes.length > 1 && !validation && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la valeur ${i + 1}`} onClick={() => retirerLigne(i)}>
                   ×
                 </button>
@@ -97,7 +105,7 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
             </div>
           </div>
         ))}
-        {lignes.length < 2 && (
+        {lignes.length < 2 && !validation && (
           <button type="button" className="btn" onClick={ajouterLigne}>
             {labelAjout}
           </button>
@@ -121,9 +129,9 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {montrerErreurs && lignesSoumises !== null && (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {messageErreur(lignesSoumises, tentativesUtilisees, tentativesMax)}
           </p>
         )}
         </>

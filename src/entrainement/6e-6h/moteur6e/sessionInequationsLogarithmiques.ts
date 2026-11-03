@@ -24,6 +24,7 @@ import {
   verifierDReecrire,
   verifierDResoudreY,
   verifierEReconnaitre,
+  verifierEResoudre,
   verifierFCE,
   verifierFConclure,
   verifierFSimplifier,
@@ -33,6 +34,15 @@ const POINTS_DE_BASE = 100;
 
 /** 2 niveaux d'aide sur tous les écrans (spec explicite pour chaque famille). */
 export const NIVEAU_AIDE_MAX = 2;
+
+/** Écrans à choix FERMÉ gagnables par élimination (audit 6e ch. 3, point 5) : une seule tentative.
+ * `fConclure` (2 cas ∅/intervalle, plus l'ensemble à construire) garde 2 tentatives — l'élimination
+ * pure n'y suffit pas, mais 3 essais laissaient tester toutes les combinaisons ∅/non-∅. */
+const TENTATIVES_PAR_PHASE: Partial<Record<PhaseInequationLogarithmique, number>> = { eReconnaitre: 1, fConclure: 2 };
+
+export function tentativesMaxPhase(etat: Pick<EtatSessionInequationLogarithmique, "phase" | "reglages">): number {
+  return Math.min(etat.reglages.tentativesMax, TENTATIVES_PAR_PHASE[etat.phase] ?? etat.reglages.tentativesMax);
+}
 
 function etatInitial(
   exercice: ExerciceInequationLogarithmique,
@@ -55,7 +65,7 @@ export function demarrerSessionInequationLogarithmique(
 }
 
 function reglagesEtape(etat: EtatSessionInequationLogarithmique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionInequationLogarithmique): EtatSessionInequationLogarithmique {
@@ -95,7 +105,7 @@ function construireResultat(exercice: ExerciceInequationLogarithmique, scores: P
         scoreConvertirX: scores.dConvertirX as number,
       };
     case "E":
-      return { famille: "E", exercice, score: scores.eReconnaitre as number };
+      return { famille: "E", exercice, score: scores.eReconnaitre as number, scoreResoudre: scores.eResoudre ?? null };
     case "F":
       return { famille: "F", exercice, scoreCE: scores.fCE as number, scoreSimplifier: scores.fSimplifier as number, scoreConclure: scores.fConclure as number };
   }
@@ -124,7 +134,7 @@ function avancerPhase<TReponse>(
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
-  const phaseSuivante = phaseApres(etat.phase);
+  const phaseSuivante = phaseApres(etat.phase, exercice);
 
   if (phaseSuivante === "termine") {
     return cloturerExerciceOuSuivant({ ...etat, revelesPartiels }, construireResultat(exercice, scoresPartiels), revele);
@@ -199,6 +209,10 @@ export function soumettreReponseDConvertirX(etat: EtatSessionInequationLogarithm
 
 export function soumettreReponseEReconnaitre(etat: EtatSessionInequationLogarithmique, estImpossible: boolean): EtatSessionInequationLogarithmique {
   return avancerPhase(etat, estImpossible, (e, r) => (e.famille === "E" ? verifierEReconnaitre(e, r) : false), "eReconnaitre");
+}
+
+export function soumettreReponseEResoudre(etat: EtatSessionInequationLogarithmique, reponse: EnsembleReelGuide): EtatSessionInequationLogarithmique {
+  return avancerPhase(etat, reponse, (e, r) => (e.famille === "E" ? verifierEResoudre(e, r) : false), "eResoudre");
 }
 
 // ============================================================================

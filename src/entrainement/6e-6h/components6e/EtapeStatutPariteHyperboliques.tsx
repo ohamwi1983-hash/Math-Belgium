@@ -35,13 +35,17 @@ const OPTIONS: { id: StatutPariteHyperbolique; label: string }[] = [
 /** Écran GÉNÉRIQUE "statut à 3 issues" — famille A (écran unique) de `6gen19`. Choix véritable
  * présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (convention CLAUDE.md).
  * Même patron que `EtapeStatutGEquationsExpLog.tsx` (`6gen14`). `App6gen19.tsx` doit le rendre
- * avec `key={phase}`. */
+ * avec une `key` qui change à chaque exercice. */
 export function EtapeStatutPariteHyperboliques({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<StatutPariteHyperbolique | null>(null);
+  /** Dernier choix SOUMIS — seul lui passe en rouge (jamais un nouveau choix pas encore validé). */
+  const [choixSoumis, setChoixSoumis] = useState<StatutPariteHyperbolique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const refuse = (montrerErreurs || validation?.revele === true) && choixSoumis !== null;
 
   function valider() {
     if (choix === null) return;
+    setChoixSoumis(choix);
     onValider(choix);
   }
 
@@ -64,7 +68,7 @@ export function EtapeStatutPariteHyperboliques({ consigneGenerale, blocDonnees, 
       </p>
       <div className="options-grid-compact">
         {OPTIONS.map((o) => (
-          <button key={o.id} type="button" className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choix === o.id ? "is-erronee" : ""}`} onClick={() => setChoix(o.id)}>
+          <button key={o.id} type="button" className={`btn ${choix === o.id ? "toggle-active" : ""} ${refuse && choix === o.id && choixSoumis === o.id ? "is-erronee" : ""}`} disabled={!!validation} onClick={() => setChoix(o.id)}>
             {o.label}
           </button>
         ))}

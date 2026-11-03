@@ -8,7 +8,7 @@ import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { phaseApres, phaseInitiale } from "./typesProprietesLogarithme";
+import { ecranDeLaPhase, phaseApres, phaseInitiale } from "./typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme, ResultatExerciceProprietesLogarithme } from "./typesProprietesLogarithme";
 import { verifierEcran } from "./verificationProprietesLogarithme";
 
@@ -16,6 +16,13 @@ const POINTS_DE_BASE = 100;
 
 /** 2 niveaux d'aide sur CHAQUE écran (convention héritée, inchangée par la refonte). */
 export const NIVEAU_AIDE_MAX = 2;
+
+/** Tentatives de l'écran COURANT : une seule sur un écran de choix de propriété (choix fermé,
+ * sinon gagnable par élimination — audit 6e ch.3, recommandation K1/point 5), le réglage de
+ * session sur un écran de transformation (champ libre). */
+export function tentativesMaxEcran(etat: EtatSessionProprietesLogarithme): number {
+  return ecranDeLaPhase(etat.exerciceCourant, etat.phase).kind === "choix" ? 1 : etat.reglages.tentativesMax;
+}
 
 function etatInitial(
   exercice: ExerciceProprieteLogarithme,
@@ -39,7 +46,7 @@ export function demarrerSessionProprietesLogarithme(reglages: ReglagesSession6e,
 }
 
 function reglagesEtape(etat: EtatSessionProprietesLogarithme): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcran(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionProprietesLogarithme): EtatSessionProprietesLogarithme {

@@ -167,6 +167,7 @@ export function App6gen50() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Loi binomiale</h1>
+        <p className="app-subtitle">Chapitre 8 — Variables aléatoires et lois de probabilités</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionLoiBinomiale(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

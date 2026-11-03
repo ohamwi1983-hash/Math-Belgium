@@ -185,7 +185,8 @@ function arbreVersLatexInterieur(noeud: Noeud): string {
       return `${base}^{${noeud.p}}`;
     }
     case "racine":
-      return `\\sqrt[${noeud.k}]{${arbreVersLatexInterieur(noeud.interieur)}}`;
+      // Racine carrée : `\sqrt{…}` sans indice (l'indice 2 n'est jamais écrit) — audit 6e ch.3.
+      return noeud.k === 2 ? `\\sqrt{${arbreVersLatexInterieur(noeud.interieur)}}` : `\\sqrt[${noeud.k}]{${arbreVersLatexInterieur(noeud.interieur)}}`;
   }
 }
 

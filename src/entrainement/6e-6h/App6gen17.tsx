@@ -12,16 +12,12 @@ import {
   soumettreReponseBReformuler,
   soumettreReponseCConclure,
   soumettreReponseCDiagnostic,
-  soumettreReponseDConclure,
-  soumettreReponseDExposant,
-  soumettreReponseDLimiteExposant,
-  soumettreReponseEConclure,
-  soumettreReponseEDevelopper,
-  soumettreReponseESimplifier,
+  tentativesMaxPhase,
 } from "./moteur6e/sessionLimitesLogarithmiques";
 import { phaseApres, phaseInitiale } from "./moteur6e/typesLimitesLogarithmiques";
 import type { EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique } from "./moteur6e/typesLimitesLogarithmiques";
 import type { ReponseLimiteLog } from "./moteur6e/verificationLimitesLogarithmiques";
+import { diagnostiquerBConclure, diagnostiquerBReformuler } from "./moteur6e/verificationLimitesLogarithmiques";
 import { EtapeChampLimiteLog } from "./components6e/EtapeChampLimiteLog";
 import { EtapeDiagnosticC } from "./components6e/EtapeDiagnosticC";
 import { EtapeDominanceA } from "./components6e/EtapeDominanceA";
@@ -35,10 +31,9 @@ import {
   consigneEcran,
   etatActuel,
   formatCategorieLabel,
-  formatCibleTexte,
   formatLimiteEnonceLatex,
 } from "./ui6e/formatLimitesLogarithmiques";
-import { calculerRecapitulatifLimiteLogarithmique, calculerSegmentsProgressionLimiteLogarithmique } from "./ui6e/recapitulatifLimitesLogarithmiques";
+import { calculerRecapitulatifLimiteLogarithmique, calculerSegmentsProgressionLimiteLogarithmique, valeurPourPhase } from "./ui6e/recapitulatifLimitesLogarithmiques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -54,12 +49,6 @@ const LIBELLE_PHASE: Record<PhaseLimiteLogarithmique, string> = {
   bConclure: "Limite",
   cDiagnostic: "Diagnostic (num./dénom.)",
   cConclure: "Limite",
-  dExposant: "Exposant isolé",
-  dLimiteExposant: "Limite de l'exposant",
-  dConclure: "Limite",
-  eDevelopper: "Numérateur développé",
-  eSimplifier: "Forme simplifiée",
-  eConclure: "Limite",
 };
 
 /** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
@@ -117,6 +106,11 @@ export function App6gen17() {
    * (`detailsPartiels[phase].niveauAide`, voir `DetailPhaseLimiteLogarithmique`). */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro d'exercice LOCAL (incrémenté à chaque nouvel exercice, y compris via le sélecteur dev) —
+   * inclus dans la `key` des écrans : `indexExercice` du moteur reste à 0 avec `nombreExercices: 1`,
+   * et `key={cleEcran}` seul laissait la saisie d'un exercice dans l'exercice suivant (audit chapitre 3
+   * de 6e, point 3). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionLimiteLogarithmique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -153,6 +147,7 @@ export function App6gen17() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -162,60 +157,35 @@ export function App6gen17() {
   function forcerVariante(id: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionLimiteLogarithmique(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const enonceLatex = formatLimiteEnonceLatex(exercice);
+  // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré pour la
+  // vérification Playwright — jamais consommé par le code applicatif (même patron que `App6gen27.tsx`).
+  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
+  if (modeDevActif) {
+    (window as unknown as { __debug6gen17?: unknown }).__debug6gen17 = { exercice, phase };
+  }
+
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxPhase(etat);
+  const cleEcran = `${numeroExercice}-${phase}`;
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
   const consigne = consigneEcran(phase, exercice);
   const etatAct = etatActuel(phase, exercice);
 
-  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
-  // `ResultatPanelLimitesLogarithmiques.tsx` — jamais une cible recalculée séparément. Narrowe
-  // `exercice.famille` avant de lire ses champs propres à la famille, `phase` seul ne suffisant pas
-  // à TypeScript pour prouver la correspondance phase/famille, même si elle est garantie à
-  // l'exécution (préfixe de phase par lettre de famille).
+  // Réponse attendue = valeur EXACTE de l'écran (même source que le récapitulatif,
+  // `valeurPourPhase`) — jamais une phrase générique ni un flottant brut (audit chapitre 3 de 6e,
+  // point 6).
   const reponseAttenduePhase = () => {
-    if (exercice.famille === "A") {
-      if (phase === "aDominance") {
-        return (
-          <>
-            Numérateur : {formatCategorieLabel(exercice.dominanceNumerateur)} — Dénominateur :{" "}
-            {formatCategorieLabel(exercice.dominanceDenominateur)}
-          </>
-        );
-      }
-      if (phase === "aConclure") return <Katex expression={formatCibleTexte(exercice.limiteGlobale)} />;
-    }
-    if (exercice.famille === "B") {
-      if (phase === "bReformuler") {
-        return "Forme reformulée en u=x/x0−1, faisant apparaître la limite de référence, équivalente à f(x).";
-      }
-      if (phase === "bConclure") return <Katex expression={String(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "C") {
-      if (phase === "cDiagnostic") {
-        return "Numérateur et dénominateur (ou chaque facteur) évalués séparément, avant toute conclusion.";
-      }
-      if (phase === "cConclure") return <Katex expression={formatCibleTexte(exercice.limiteFinale)} />;
-    }
-    if (exercice.famille === "D") {
-      if (phase === "dExposant") return "f^g réécrit e^(g·ln f), exposant g·ln(f) isolé, équivalent à la forme attendue.";
-      if (phase === "dLimiteExposant") return <Katex expression={String(exercice.limiteExposant)} />;
-      if (phase === "dConclure") return <Katex expression={`e^{${exercice.limiteExposant}}`} />;
-    }
-    if (exercice.famille === "E") {
-      if (phase === "eDevelopper") return <Katex expression="x^2\left(\ln 3+\frac12\right)" />;
-      if (phase === "eSimplifier") return <Katex expression="\frac{\ln 3+\frac12}{4}" />;
-      if (phase === "eConclure") return <Katex expression="\frac{2\ln 3+1}{8}" />;
-    }
-    return null;
+    const { valeur, estLatex } = valeurPourPhase(exercice, phase);
+    return estLatex ? <Katex expression={valeur} /> : <>{valeur}</>;
   };
 
   const validation = enAttente
@@ -241,6 +211,7 @@ export function App6gen17() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calculer des limites (fonctions logarithmes)</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -248,7 +219,7 @@ export function App6gen17() {
         <RecapitulatifPanel entrees={calculerRecapitulatifLimiteLogarithmique(etat)} />
         {phase === "aDominance" && exercice.famille === "A" && (
               <EtapeDominanceA
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -269,7 +240,7 @@ export function App6gen17() {
             )}
             {phase === "aConclure" && exercice.famille === "A" && (
               <EtapeReponseLimiteLog
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -289,11 +260,12 @@ export function App6gen17() {
 
             {phase === "bReformuler" && (
               <EtapeChampLimiteLog
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
-                placeholder="ex : ln(1+2*u)/(2*ln(1+u)) (en fonction de u)"
+                placeholder="expression en fonction de u"
+                diagnostiquer={exercice.famille === "B" ? (texte) => diagnostiquerBReformuler(exercice, texte) : undefined}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -307,11 +279,12 @@ export function App6gen17() {
             )}
             {phase === "bConclure" && (
               <EtapeChampLimiteLog
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
-                placeholder="ex : 1/2, ln(3)..."
+                placeholder="ex : 5/7 ou 3*ln(7)"
+                diagnostiquer={exercice.famille === "B" ? (texte) => diagnostiquerBConclure(exercice, texte) : undefined}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -326,7 +299,7 @@ export function App6gen17() {
 
             {phase === "cDiagnostic" && exercice.famille === "C" && (
               <EtapeDiagnosticC
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 partie1={configDiagnosticPartiesC(exercice).partie1}
@@ -349,7 +322,7 @@ export function App6gen17() {
             )}
             {phase === "cConclure" && (
               <EtapeReponseLimiteLog
-                key={phase}
+                key={cleEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -367,115 +340,6 @@ export function App6gen17() {
               />
             )}
 
-            {phase === "dExposant" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : (3/x^2)*ln(cos(2*x))"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseDExposant(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
-            {phase === "dLimiteExposant" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : -6"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseDLimiteExposant(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
-            {phase === "dConclure" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : exp(-6)"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseDConclure(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
-
-            {phase === "eDevelopper" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : x^2*(ln(3)+1/2)"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseEDevelopper(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
-            {phase === "eSimplifier" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : (ln(3)+1/2)/4"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseESimplifier(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
-            {phase === "eConclure" && (
-              <EtapeChampLimiteLog
-                key={phase}
-                consigneEcran={consigne}
-                enonceLatex={enonceLatex}
-                etatActuel={etatAct}
-                placeholder="ex : (2*ln(3)+1)/8"
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseEConclure(etat, texte), texte)}
-                validation={validation}
-              />
-            )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

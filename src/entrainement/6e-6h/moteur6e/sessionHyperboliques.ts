@@ -14,18 +14,9 @@ import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { DetailPhaseHyperboliques, EtatSessionHyperboliques, PhaseHyperboliques, ResultatExerciceHyperboliques } from "./typesHyperboliques";
-import { phaseApres, phaseInitiale } from "./typesHyperboliques";
+import { phaseApres, phaseInitiale, tentativesMaxPhase } from "./typesHyperboliques";
 import type { ReponseLimitesD } from "./verificationHyperboliques";
-import {
-  verifierAParite,
-  verifierBIsoler,
-  verifierBValeurs,
-  verifierCDerivee,
-  verifierCDeriveeSeconde,
-  verifierCRelation,
-  verifierDLimites,
-  verifierDReecriture,
-} from "./verificationHyperboliques";
+import { verifierAParite, verifierBValeurs, verifierCDerivee, verifierCDeriveeSeconde, verifierDLimites, verifierDReecriture } from "./verificationHyperboliques";
 
 const POINTS_DE_BASE = 100;
 
@@ -41,7 +32,7 @@ export function demarrerSessionHyperboliques(reglages: ReglagesSession6e, genera
 }
 
 function reglagesEtape(etat: EtatSessionHyperboliques): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax) };
 }
 
 export function activerAideSuivante(etat: EtatSessionHyperboliques): EtatSessionHyperboliques {
@@ -64,9 +55,9 @@ function construireResultat(exercice: ExerciceHyperboliques, scores: Partial<Rec
     case "A":
       return { famille: "A", exercice, scoreParite: scores.aParite as number, details };
     case "B":
-      return { famille: "B", exercice, scoreIsoler: scores.bIsoler as number, scoreValeurs: scores.bValeurs as number, details };
+      return { famille: "B", exercice, scoreValeurs: scores.bValeurs as number, details };
     case "C":
-      return { famille: "C", exercice, scoreDerivee: scores.cDerivee as number, scoreDeriveeSeconde: scores.cDeriveeSeconde as number, scoreRelation: scores.cRelation as number, details };
+      return { famille: "C", exercice, scoreDerivee: scores.cDerivee as number, scoreDeriveeSeconde: scores.cDeriveeSeconde as number, details };
     case "D":
       return { famille: "D", exercice, scoreReecriture: scores.dReecriture as number, scoreLimites: scores.dLimites as number, details };
   }
@@ -114,10 +105,6 @@ export function soumettreReponseAParite(etat: EtatSessionHyperboliques, choix: S
 // Famille B.
 // ============================================================================
 
-export function soumettreReponseBIsoler(etat: EtatSessionHyperboliques, texte: string): EtatSessionHyperboliques {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "B" ? verifierBIsoler(e as ExerciceHyperboliquesB, r) : false), "bIsoler");
-}
-
 export function soumettreReponseBValeurs(etat: EtatSessionHyperboliques, textes: string[]): EtatSessionHyperboliques {
   return avancerPhase(etat, textes, (e, r) => (e.famille === "B" ? verifierBValeurs(e as ExerciceHyperboliquesB, r) : false), "bValeurs");
 }
@@ -132,10 +119,6 @@ export function soumettreReponseCDerivee(etat: EtatSessionHyperboliques, texte: 
 
 export function soumettreReponseCDeriveeSeconde(etat: EtatSessionHyperboliques, texte: string): EtatSessionHyperboliques {
   return avancerPhase(etat, texte, (e, r) => (e.famille === "C" ? verifierCDeriveeSeconde(e as ExerciceHyperboliquesC, r) : false), "cDeriveeSeconde");
-}
-
-export function soumettreReponseCRelation(etat: EtatSessionHyperboliques, texte: string): EtatSessionHyperboliques {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "C" ? verifierCRelation(e as ExerciceHyperboliquesC, r) : false), "cRelation");
 }
 
 // ============================================================================

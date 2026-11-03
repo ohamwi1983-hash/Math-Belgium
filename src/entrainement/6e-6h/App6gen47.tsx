@@ -151,6 +151,7 @@ export function App6gen47() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilité hypergéométrique (tirage sans remise)</h1>
+        <p className="app-subtitle">Chapitre 7 — Analyse combinatoire</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

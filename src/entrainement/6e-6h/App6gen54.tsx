@@ -198,6 +198,7 @@ export function App6gen54() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Points et droites remarquables du triangle</h1>
+        <p className="app-subtitle">Chapitre 9 — Lieux géométriques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionPointsDroitesRemarquablesTriangle(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

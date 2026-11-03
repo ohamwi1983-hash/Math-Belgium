@@ -37,23 +37,45 @@ export type SigneLimiteHyperbolique = "plus_infini" | "moins_infini";
 // −e^(−x), aucune symétrie).
 // ============================================================================
 
-export type TypeCombinaisonA = "shKx" | "chKx" | "shChProduit" | "shCarre" | "chCarre" | "shPlusCh" | "shMoinsCh";
+export type TypeCombinaisonA =
+  | "shKx"
+  | "chKx"
+  | "shChProduit"
+  | "shCarre"
+  | "chCarre"
+  | "shPlusCh"
+  | "shMoinsCh"
+  | "shPlusConstante"
+  | "xSh"
+  | "xCh"
+  | "shCube";
 
+/** a·sh(kx) / a·ch(kx) — `a` coefficient non nul (jamais ±1 affiché littéralement), k∈{1,2,3}. */
 export interface ExerciceHyperboliquesAAvecK {
   famille: "A";
   type: "shKx" | "chKx";
+  a: number;
   k: number;
+}
+
+/** sh(x)+c — `c` constante non nulle : ni paire ni impaire (piège : sh seule est impaire). */
+export interface ExerciceHyperboliquesAConstante {
+  famille: "A";
+  type: "shPlusConstante";
+  c: number;
 }
 
 export interface ExerciceHyperboliquesASansK {
   famille: "A";
-  type: "shChProduit" | "shCarre" | "chCarre" | "shPlusCh" | "shMoinsCh";
+  type: "shChProduit" | "shCarre" | "chCarre" | "shPlusCh" | "shMoinsCh" | "xSh" | "xCh" | "shCube";
 }
 
-export type ExerciceHyperboliquesA = ExerciceHyperboliquesAAvecK | ExerciceHyperboliquesASansK;
+export type ExerciceHyperboliquesA = ExerciceHyperboliquesAAvecK | ExerciceHyperboliquesAConstante | ExerciceHyperboliquesASansK;
 
 // ============================================================================
-// Famille B — Utiliser ch²(x0)−sh²(x0)=1 (2 écrans : isoler symboliquement, calculer). x0 caché.
+// Famille B — Utiliser ch²(x0)−sh²(x0)=1 (1 écran : la ou les valeurs EXACTES). x0 caché.
+// `k` est un rationnel, stocké en fraction irréductible (`kNum/kDen`, kDen>0) pour l'affichage —
+// `k` lui-même (= kNum/kDen) sert au calcul.
 // ============================================================================
 
 /** "donné sh, trouver ch" : k=sh(x0) (peut être négatif ou nul). Réponse UNIQUE, ch(x0)=√(1+k²)
@@ -62,6 +84,8 @@ export interface ExerciceHyperboliquesBTrouverCh {
   famille: "B";
   sousType: "trouverCh";
   k: number;
+  kNum: number;
+  kDen: number;
 }
 
 /** "donné ch, trouver sh" : k=ch(x0)>1 strictement. `signeX0` précise le signe de x0 QUAND il est
@@ -71,13 +95,15 @@ export interface ExerciceHyperboliquesBTrouverSh {
   famille: "B";
   sousType: "trouverSh";
   k: number;
+  kNum: number;
+  kDen: number;
   signeX0: 1 | -1 | null;
 }
 
 export type ExerciceHyperboliquesB = ExerciceHyperboliquesBTrouverCh | ExerciceHyperboliquesBTrouverSh;
 
 // ============================================================================
-// Famille C — f(x) = a·sh(kx) + b·ch(kx) (3 écrans : f', f'', relation f''=k²·f).
+// Famille C — f(x) = a·sh(kx) + b·ch(kx) (2 écrans : f', f'').
 // a,b∈{-3,...,-1,1,...,3} (jamais 0 — combinaison dégénérée sinon), k∈{1,2,3}.
 // ============================================================================
 
@@ -90,7 +116,7 @@ export interface ExerciceHyperboliquesC {
 
 // ============================================================================
 // Famille D — f(x) = a·sh(x) + b·ch(x) = [(a+b)e^x + (b−a)e^(−x)]/2 (2 écrans : réécriture en
-// e^x/e^(−x), conclusion du signe de la limite à chaque infini). a,b∈{-3,...,-1,1,...,3}, en
+// e^x/e^(−x), conclusion du signe de la limite à chaque infini). a,b∈{-4,...,-1,1,...,4}, en
 // EXCLUANT a+b=0 et a=b (cas limites non génériques, spec explicite) — garantit que (a+b) et
 // (b−a) sont tous deux non nuls, donc que chaque limite est bien ±∞ (jamais une forme finie).
 // ============================================================================

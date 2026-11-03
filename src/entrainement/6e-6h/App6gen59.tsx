@@ -173,6 +173,7 @@ export function App6gen59() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Équation d'une conique depuis ses caractéristiques</h1>
+        <p className="app-subtitle">Chapitre 10 — Les coniques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

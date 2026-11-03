@@ -263,6 +263,9 @@ export const fonctionsLogarithmes: ChapterContent = {
               '\\qquad \\log_a(x^r) = r \\cdot \\log_a(x)$',
             'Avec les cas particuliers $\\log_a(1)=0$ et $\\log_a(a)=1$, valables pour toute ' +
               'base $a>0$, $a \\neq 1$.',
+            'Racine $n$-ième ($n \\geq 2$ entier) — cas particulier de la puissance avec ' +
+              '$r = 1/n$, puisque $\\sqrt[n]{x} = x^{1/n}$ : $\\log_a\\!\\left(\\sqrt[n]{x}\\right) = ' +
+              '\\dfrac{\\log_a(x)}{n}$ (par exemple $\\ln(\\sqrt{x}) = \\tfrac{1}{2}\\ln(x)$).',
           ],
         },
         {
@@ -891,8 +894,9 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Propriétés du logarithme',
           generatorId: '6gen13',
           description: [
-            'Applique les propriétés algébriques du logarithme (produit, quotient, puissance, ' +
-              'changement de base) pour décomposer une expression logarithmique, étape par étape.',
+            'Reconnais à chaque étape la propriété qui s\'applique (produit, quotient, ' +
+              'puissance, racine, changement de base), puis applique-la pour décomposer une ' +
+              'expression logarithmique, étape par étape.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 13. Propriétés du logarithme »',
@@ -1113,12 +1117,29 @@ export const fonctionsLogarithmes: ChapterContent = {
             'genre de sortie que ce chapitre permet enfin d\'écrire simplement.',
         },
         {
+          kind: 'methode',
+          label: 'Équation toujours vraie ou jamais vraie',
+          items: [
+            'Après avoir combiné les logarithmes et égalé les arguments, confronte **toujours** le ' +
+              'résultat à la condition d\'existence (CE) de l\'équation **de départ**. Trois issues ' +
+              'mènent à un ensemble-solution particulier :',
+            '**La solution trouvée viole la CE** : elle est rejetée — si c\'était la seule, ' +
+              '$S = \\varnothing$.',
+            '**L\'équation simplifiée n\'a aucune solution réelle**, par exemple $x^2 = $ un nombre ' +
+              'négatif : $S = \\varnothing$, alors que la CE, elle, n\'est pas vide.',
+            '**L\'équation se réduit à une identité** ($0 = 0$, ou ' +
+              '$\\log_a(A) + \\log_a(B) = \\log_a(AB)$) : elle est vraie pour **tout** $x$ de la CE, ' +
+              'et **seulement** là — $S$ est la CE tout entière, jamais $\\mathbb{R}$.',
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Résoudre une équation exponentielle ou logarithmique',
           generatorId: '6gen14',
           description: [
             'Résous une équation exponentielle ou logarithmique en appliquant log_a ou exp_a ' +
-              'aux deux membres, avec vérification de la condition d\'existence.',
+              'aux deux membres, puis confronte le résultat à la condition d\'existence : ' +
+              'solution rejetée, aucune solution, ou identité vraie sur toute la CE.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 14. Résoudre une équation exponentielle ou logarithmique »',
@@ -1422,7 +1443,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           generatorId: '6gen15',
           description: [
             'Résous une inéquation logarithmique en tenant compte du sens de la base pour ' +
-              'inverser (ou non) le comparateur, en déterminant le domaine avant l\'ensemble-solution.',
+              'inverser (ou non) le comparateur, en déterminant le domaine avant l\'ensemble-solution ' +
+              '— y compris quand ce domaine est vide.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 15. Résoudre une inéquation logarithmique »',
@@ -2351,8 +2373,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Graphique de la fonction dérivée',
           generatorId: '6gen20',
           description: [
-            'Associe une fonction logarithmique et sa dérivée à partir de leur graphique, en ' +
-              'utilisant le signe et les extremums.',
+            'À partir du graphique d\'une fonction logarithmique, choisis celui de sa dérivée en ' +
+              'utilisant le signe et les extremums, puis confirme par le calcul de f\'.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 20. Graphique de la fonction dérivée »',
@@ -2423,8 +2445,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Étudier une fonction (synthèse)',
           generatorId: '6gen21',
           description: [
-            'Mène une étude complète (domaine, limites, asymptotes, variation, extremum) sur ' +
-              'une fonction logarithmique composée.',
+            'Mène une étude complète (domaine, limites, asymptotes, variation, extremum, ' +
+              'concavité) sur une fonction construite avec un logarithme, comme ln(x)/x.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 21. Étudier une fonction (synthèse) »',
@@ -2549,8 +2571,9 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Logarithmes : problèmes',
           generatorId: '6gen22',
           description: [
-            'Modélise une situation concrète (pH, demi-vie radioactive, croissance ' +
-              'logistique) à partir d\'un contexte narratif, en isolant l\'inconnue via ln.',
+            'Modélise une situation concrète (échelles logarithmiques comme le pH ou les ' +
+              'décibels, demi-vie radioactive, croissance logistique) à partir d\'un contexte ' +
+              'narratif, en isolant l\'inconnue via ln.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 22. Logarithmes : problèmes »',
@@ -2649,8 +2672,9 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Quiz vrai/faux : réviser tout le chapitre',
       generatorId: '6gen66',
       description: [
-        'Choisis un thème et teste-toi sur tout le chapitre — affirmations pré-écrites, une ' +
-          'seule tentative par question, justification toujours révélée.',
+        'Choisis un thème et teste-toi sur tout le chapitre : 350 affirmations pré-écrites en ' +
+          '10 thèmes (35 par thème), une seule tentative par question, justification toujours ' +
+          'révélée.',
       ],
       chantier: '6e-6h',
       whereLabel: '6e (6h) → « 66. Quiz vrai/faux — Fonctions logarithmes »',

@@ -41,7 +41,8 @@ function pasNombreRond(etendue: number): number {
 }
 
 export function formatNombreGraphique(v: number): string {
-  return Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2);
+  // Virgule décimale (convention française du site) — seul changement par rapport à l'arrondi.
+  return Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2).replace(".", ",");
 }
 
 function echapperAttribut(texte: string): string {

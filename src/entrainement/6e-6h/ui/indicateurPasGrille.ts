@@ -3,18 +3,17 @@ import { formatEtiquetteGrille } from "./mafsTransformation";
 /** prompt-grille-pas-fractionnaires.md : 1/3 (0,333...) est une décimale périodique — même après
  * `formatEtiquetteGrille`, elle s'afficherait avec du bruit de virgule flottante (ex.
  * "0.3333333333") plutôt que la fraction exacte que représente ce pas. Rendue en fraction "1/3"
- * à la place. 1/2 (0,5), déjà un décimal propre, n'a besoin d'aucun traitement spécial — reste
- * affiché "0,5 unités" comme avant, seul 1/3 bénéficie de ce cas particulier. */
+ * à la place. 1/2 (0,5), déjà un décimal propre, n'a besoin d'aucun traitement spécial — affiché
+ * "0,5 unité", seul 1/3 bénéficie de ce cas particulier. */
 const VALEUR_TIERS = 1 / 3;
 
-/** "1 unité" (singulier, exactement quand pas=1), "1/3 unité" (le seul autre cas singulier —
- * fraction, jamais "unités") ou "{pas} unités" (pluriel sinon, y compris pour un pas < 1 comme
- * 0,5) — même nettoyage du bruit de virgule flottante que les étiquettes d'axe
- * (`formatEtiquetteGrille`) pour le cas général, jamais une valeur reformatée indépendamment. */
+/** Accord français : « unité » au singulier pour un pas strictement inférieur à 2 (1 unité,
+ * 0,5 unité, 1/3 unité), « unités » à partir de 2 — même nettoyage du bruit de virgule flottante
+ * (et même virgule décimale) que les étiquettes d'axe (`formatEtiquetteGrille`). */
 function formatUnites(pas: number): string {
-  if (pas === 1) return "1 unité";
-  if (Math.abs(pas - VALEUR_TIERS) < 1e-6) return "1/3 unité";
-  return `${formatEtiquetteGrille(pas)} unités`;
+  const unite = pas < 2 ? "unité" : "unités";
+  if (Math.abs(pas - VALEUR_TIERS) < 1e-6) return `1/3 ${unite}`;
+  return `${formatEtiquetteGrille(pas)} ${unite}`;
 }
 
 /**

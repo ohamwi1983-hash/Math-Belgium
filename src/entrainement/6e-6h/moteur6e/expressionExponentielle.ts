@@ -20,11 +20,14 @@
  * "Sinus et cosinus hyperboliques" — additif pur, voir la table `FONCTIONS` ci-dessous ; `racN`,
  * N≥4 collé juste après "rac", pour une racine n-ième quelconque — ex. `rac4(x)` ; `log` seul =
  * base 10, `logN` (N collé juste après "log", ex. `log2(x)`) pour une base quelconque, changement
- * de base via `ln`). Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
+ * de base via `ln`). Audit chapitre 3 de 6e : signes « − », « · », « × », « √ »/« ∛ », valeur absolue
+ * `|…|`, alias `cosh`/`sinh`/`tanh`/`th`, et fonction sans parenthèses suivie d'un seul atome
+ * (« ln2 », « ln 2 », « √5 », « ln x² ») — toutes ces saisies levaient une erreur auparavant, aucune
+ * saisie déjà acceptée ne change de valeur. Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
  * propagés nativement (`Math.log(-1)`, `Math.sqrt(-1)`...) ; seule une erreur de SYNTAXE lève.
  */
 
-type TypeJeton = "nombre" | "identifiant" | "+" | "-" | "*" | "/" | "^" | "(" | ")" | "fin";
+type TypeJeton = "nombre" | "identifiant" | "+" | "-" | "*" | "/" | "^" | "(" | ")" | "|" | "fin";
 
 interface Jeton {
   type: TypeJeton;
@@ -32,8 +35,20 @@ interface Jeton {
   nom?: string;
 }
 
+/** Écritures typographiques normalisées avant l'analyse (audit chapitre 3 de 6e, point 2) : signes
+ * moins « − – — », produits « · × ⋅ », division « ÷ ». Additif pur : ces caractères levaient tous
+ * "Caractère inattendu" auparavant, aucune saisie déjà acceptée ne change de valeur. */
+function normaliserSaisie(texte: string): string {
+  return texte
+    .replace(/[−–—]/g, "-")
+    .replace(/[·×⋅∙]/g, "*")
+    .replace(/÷/g, "/")
+    .replace(/²/g, "^2")
+    .replace(/³/g, "^3");
+}
+
 function tokeniser(texte: string): Jeton[] {
-  const s = texte.replace(/²/g, "^2").replace(/³/g, "^3");
+  const s = normaliserSaisie(texte);
   const jetons: Jeton[] = [];
   let i = 0;
   while (i < s.length) {
@@ -98,7 +113,14 @@ function tokeniser(texte: string): Jeton[] {
       jetons.push({ type: "identifiant", nom: mot });
       continue;
     }
-    if ("+-*/^()".includes(c)) {
+    // "√" / "∛" — racine écrite avec le symbole (√5, √(x+1), 2√3) : même jeton que "sqrt"/"cbrt",
+    // l'argument non parenthésé étant lu par `argumentSansParentheses()` ci-dessous.
+    if (c === "√" || c === "∛") {
+      jetons.push({ type: "identifiant", nom: c === "√" ? "sqrt" : "cbrt" });
+      i++;
+      continue;
+    }
+    if ("+-*/^()|".includes(c)) {
       jetons.push({ type: c as TypeJeton });
       i++;
       continue;
@@ -131,6 +153,11 @@ const FONCTIONS: Record<string, (v: number) => number> = {
   // équivalentes mais moins traçables ici) : sh(u)=(e^u-e^(-u))/2, ch(u)=(e^u+e^(-u))/2.
   sh: (u: number) => (Math.exp(u) - Math.exp(-u)) / 2,
   ch: (u: number) => (Math.exp(u) + Math.exp(-u)) / 2,
+  // Notations des calculatrices (audit chapitre 3 de 6e) : alias des mêmes définitions.
+  sinh: (u: number) => (Math.exp(u) - Math.exp(-u)) / 2,
+  cosh: (u: number) => (Math.exp(u) + Math.exp(-u)) / 2,
+  th: Math.tanh,
+  tanh: Math.tanh,
 };
 
 /**
@@ -216,9 +243,39 @@ class Analyseur {
     return v;
   }
 
+  /** Profondeur de valeurs absolues |…| ouvertes : à l'intérieur, une barre FERME la valeur absolue
+   * en cours, elle n'en ouvre jamais une nouvelle (pas d'imbrication |…|…| sans parenthèses). */
+  private profondeurAbs = 0;
+
   private demarreAtome(): boolean {
     const t = this.actuel().type;
-    return t === "nombre" || t === "identifiant" || t === "(";
+    return t === "nombre" || t === "identifiant" || t === "(" || (t === "|" && this.profondeurAbs === 0);
+  }
+
+  private estNomFonction(nom: string): boolean {
+    return nom in FONCTIONS || MOTIF_RACINE_N.test(nom) || MOTIF_LOG_N.test(nom);
+  }
+
+  private appliquerFonction(nom: string, arg: number): number {
+    const fn = FONCTIONS[nom];
+    if (fn) return fn(arg);
+    const correspondanceRacineN = MOTIF_RACINE_N.exec(nom);
+    if (correspondanceRacineN) return racineN(arg, Number(correspondanceRacineN[1]));
+    const correspondanceLogN = MOTIF_LOG_N.exec(nom);
+    if (correspondanceLogN) return logN(arg, Number(correspondanceLogN[1]));
+    throw new Error(`Fonction inconnue : "${nom}"`);
+  }
+
+  /** Argument d'une fonction écrite sans parenthèses (« ln2 », « ln 2 », « √5 », « √x », « ln x² ») :
+   * un seul atome, avec son exposant éventuel (« ln x² » = ln(x²), comme à l'écrit). Ces saisies
+   * levaient toutes une erreur auparavant : additif pur. */
+  private argumentSansParentheses(): number {
+    const base = this.atome();
+    if (this.actuel().type === "^") {
+      this.avancer();
+      return puissanceReelle(base, this.facteurUnaire());
+    }
+    return base;
   }
 
   private terme(): number {
@@ -276,6 +333,14 @@ class Analyseur {
       this.attendre(")");
       return v;
     }
+    if (t.type === "|" && this.profondeurAbs === 0) {
+      this.avancer();
+      this.profondeurAbs++;
+      const v = this.expression();
+      this.attendre("|");
+      this.profondeurAbs--;
+      return Math.abs(v);
+    }
     if (t.type === "identifiant") {
       this.avancer();
       const nom = t.nom as string;
@@ -286,13 +351,10 @@ class Analyseur {
         this.avancer();
         const arg = this.expression();
         this.attendre(")");
-        const fn = FONCTIONS[nom];
-        if (fn) return fn(arg);
-        const correspondanceRacineN = MOTIF_RACINE_N.exec(nom);
-        if (correspondanceRacineN) return racineN(arg, Number(correspondanceRacineN[1]));
-        const correspondanceLogN = MOTIF_LOG_N.exec(nom);
-        if (correspondanceLogN) return logN(arg, Number(correspondanceLogN[1]));
-        throw new Error(`Fonction inconnue : "${nom}"`);
+        return this.appliquerFonction(nom, arg);
+      }
+      if (this.estNomFonction(nom) && this.demarreAtome()) {
+        return this.appliquerFonction(nom, this.argumentSansParentheses());
       }
       throw new Error(`Identifiant inconnu : "${nom}"`);
     }

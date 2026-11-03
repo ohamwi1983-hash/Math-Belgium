@@ -3,7 +3,7 @@ import { ensembleUnMorceau } from "../../ensembleReel";
 import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../aleatoire";
 import { COMPARATEURS, inverserComparateur, tirerComparateur } from "../comparateur";
 import { intersecterEnsembles, resoudreAffine, resoudreQuadratiqueFacteurs } from "../intervalle";
-import { baseEntiere, baseFraction, baseValeurLog } from "../rationnel";
+import { baseEntiere, baseFraction, baseValeurLog, bornesSimples } from "../rationnel";
 
 /**
  * Famille B — `log_base(f(x)) [comparateur] log_base(g(x))`, comparaison DIRECTE des arguments
@@ -57,6 +57,8 @@ export function construireBDirect(): ExerciceLogBDirect {
     const comparaisonBruteEcran2 = ensembleUnMorceau(resoudreAffine(m1 - m2, n1 - n2, comparateurArgument, 0));
     const solutionEcran2 = intersecterEnsembles(ceEcran1, comparaisonBruteEcran2);
     if (solutionEcran2.morceaux.length === 0) continue;
+    // Bornes saisissables (audit 6e ch. 3, point 22) — fraction de dénominateur ≤ 12.
+    if (!bornesSimples(ceEcran1) || !bornesSimples(solutionEcran2)) continue;
 
     return { famille: "B", sousType: "direct", base, baseSuperieureA1, f: { m: m1, n: n1 }, g: { m: m2, n: n2 }, comparateur, ceEcran1, comparaisonBruteEcran2, solutionEcran2 };
   }
@@ -91,6 +93,9 @@ export function construireBRacine(): ExerciceLogBRacine {
     const comparaisonBruteEcran2 = resoudreQuadratiqueFacteurs(-m2 * m2, z1, z2, comparateurArgument);
     const solutionEcran2 = intersecterEnsembles(ceEcran1, comparaisonBruteEcran2);
     if (solutionEcran2.morceaux.length === 0) continue;
+    // Bornes saisissables (audit 6e ch. 3, point 22) : la borne -b/a de la CE pouvait avoir un
+    // dénominateur jusqu'à 2·|m2·n2|+m2²·10 — fraction de dénominateur ≤ 12 imposée.
+    if (!bornesSimples(ceEcran1) || !bornesSimples(solutionEcran2)) continue;
 
     return { famille: "B", sousType: "racine", base, baseSuperieureA1, a, b, g: { m: m2, n: n2 }, z1, z2, comparateur, ceEcran1, comparaisonBruteEcran2, solutionEcran2 };
   }

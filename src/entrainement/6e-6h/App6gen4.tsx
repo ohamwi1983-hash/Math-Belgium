@@ -259,6 +259,7 @@ export function App6gen4() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Dérivées de fonctions cyclométriques</h1>
+        <p className="app-subtitle">Chapitre 1 — Fonctions réciproques & cyclométriques</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

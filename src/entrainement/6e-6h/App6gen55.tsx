@@ -188,6 +188,7 @@ export function App6gen55() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Cercles</h1>
+        <p className="app-subtitle">Chapitre 9 — Lieux géométriques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionCercles(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

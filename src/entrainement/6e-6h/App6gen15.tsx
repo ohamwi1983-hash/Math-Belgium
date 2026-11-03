@@ -18,10 +18,13 @@ import {
   soumettreReponseDReecrire,
   soumettreReponseDResoudreY,
   soumettreReponseEReconnaitre,
+  soumettreReponseEResoudre,
   soumettreReponseFCE,
   soumettreReponseFConclure,
   soumettreReponseFSimplifier,
+  tentativesMaxPhase,
 } from "./moteur6e/sessionInequationsLogarithmiques";
+import { diagnostiquerCCombiner, diagnostiquerDReecrire, diagnostiquerFConclureParCas, diagnostiquerFSimplifier } from "./moteur6e/verificationInequationsLogarithmiques";
 import { phaseApres, phaseInitiale } from "./moteur6e/typesInequationsLogarithmiques";
 import type { EtatSessionInequationLogarithmique, PhaseInequationLogarithmique } from "./moteur6e/typesInequationsLogarithmiques";
 import { EtapeChampSimpleIneqLog } from "./components6e/EtapeChampSimpleIneqLog";
@@ -30,7 +33,7 @@ import { EtapeDeuxCasIneqLog } from "./components6e/EtapeDeuxCasIneqLog";
 import { EtapeIntervalleIneqLog } from "./components6e/EtapeIntervalleIneqLog";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { LIBELLE_PHASE_LOG, aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
+import { LIBELLE_PHASE_LOG, OPTION_E_POSSIBLE, OPTION_E_VIDE, aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { calculerRecapitulatifInequationsLogarithmiques, calculerSegmentsProgressionInequationsLogarithmiques } from "./ui6e/recapitulatifInequationsLogarithmiques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
@@ -48,7 +51,7 @@ function sequencePourExercice(exercice: Parameters<typeof phaseInitiale>[0]): Ph
   let phase: PhaseInequationLogarithmique | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }
@@ -73,8 +76,21 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Exemples de saisie — choisis HORS de l'espace des tirages (audit 6e ch. 3, point 8) : jamais une
+ * réponse possible d'un exercice. `cCombiner` : n1∈[−4;4] et |n|≤6 dans les familles, donc 7/−9
+ * n'apparaissent jamais ; `dReecrire` : racines 5 et −1/2 hors de [−3;3] ; `fSimplifier` : r≤10. */
+const PLACEHOLDERS = {
+  cCombiner: "ex : (x+7)*(2x-9)  ou  (x+7)/(2x-9)",
+  dReecrire: "ex : 2y^2-9y-5<0",
+  fSimplifier: "ex : (x+12)^2",
+};
+
 export function App6gen15() {
   const [etat, setEtat] = useState<EtatSessionInequationLogarithmique>(nouvelleSession);
+  /** Compteur d'exercices — entre dans la `key` de chaque écran pour que « Nouvel exercice » ou
+   * « Générer » remonte toujours un écran vierge, même quand la phase ne change pas (audit 6e ch. 3,
+   * point 3 : un choix de la famille E survivait d'un exercice E au suivant). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInequationLogarithmique`, jamais dans le moteur. Remis à vide
@@ -117,6 +133,7 @@ export function App6gen15() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -129,6 +146,7 @@ export function App6gen15() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionInequationLogarithmique(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -136,7 +154,8 @@ export function App6gen15() {
   const phase = etat.phase;
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxPhase(etat);
+  const cle = `${numeroExercice}-${phase}`;
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
@@ -165,6 +184,7 @@ export function App6gen15() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Résoudre une inéquation logarithmique</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -172,7 +192,7 @@ export function App6gen15() {
         <RecapitulatifPanel entrees={calculerRecapitulatifInequationsLogarithmiques(etat)} />
         {phase === "aCE" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -188,7 +208,7 @@ export function App6gen15() {
             )}
             {phase === "aResoudre" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -205,7 +225,7 @@ export function App6gen15() {
 
             {phase === "bCE" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -221,7 +241,7 @@ export function App6gen15() {
             )}
             {phase === "bResoudre" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -238,7 +258,7 @@ export function App6gen15() {
 
             {phase === "cCE" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -254,10 +274,11 @@ export function App6gen15() {
             )}
             {phase === "cCombiner" && (
               <EtapeChampSimpleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                placeholder="ex : (x+1)*(x-3)  ou  (x+1)/(x-3)"
+                placeholder={PLACEHOLDERS.cCombiner}
+                diagnostiquer={(texte) => (exercice.famille === "C" ? diagnostiquerCCombiner(exercice, texte) : "parse_error")}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -271,7 +292,7 @@ export function App6gen15() {
             )}
             {phase === "cComparer" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -288,7 +309,7 @@ export function App6gen15() {
 
             {phase === "dCE" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -304,10 +325,11 @@ export function App6gen15() {
             )}
             {phase === "dReecrire" && (
               <EtapeChampSimpleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                placeholder="ex : y^2-y-2<0"
+                placeholder={PLACEHOLDERS.dReecrire}
+                diagnostiquer={(texte) => (exercice.famille === "D" ? diagnostiquerDReecrire(exercice, texte) : "parse_error")}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -321,7 +343,7 @@ export function App6gen15() {
             )}
             {phase === "dResoudreY" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -337,7 +359,7 @@ export function App6gen15() {
             )}
             {phase === "dConvertirX" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -354,11 +376,11 @@ export function App6gen15() {
 
             {phase === "eReconnaitre" && (
               <EtapeChoixDeuxIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                optionGauche={{ id: "vide", label: "∅ — CE incompatible, aucune solution" }}
-                optionDroite={{ id: "possible", label: "La CE est satisfiable" }}
+                optionGauche={{ id: "vide", label: OPTION_E_VIDE }}
+                optionDroite={{ id: "possible", label: OPTION_E_POSSIBLE }}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -366,14 +388,30 @@ export function App6gen15() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(id) => terminerEtape(soumettreReponseEReconnaitre(etat, id === "vide"), id === "vide" ? "∅ — CE incompatible, aucune solution" : "La CE est satisfiable")}
+                onValider={(id) => terminerEtape(soumettreReponseEReconnaitre(etat, id === "vide"), id === "vide" ? OPTION_E_VIDE : OPTION_E_POSSIBLE)}
+                validation={validation}
+              />
+            )}
+            {phase === "eResoudre" && (
+              <EtapeIntervalleIneqLog
+                key={cle}
+                consigneEcran={consigne}
+                enonceLatex={enonceLatex}
+                aideNiveau1={aide1}
+                aideNiveau2={aide2}
+                tentativesUtilisees={tentativesUtilisees}
+                tentativesMax={tentativesMax}
+                niveauAide={niveauAide}
+                niveauAideMax={NIVEAU_AIDE_MAX}
+                onActiverAide={onActiverAide}
+                onValider={(reponse) => terminerEtape(soumettreReponseEResoudre(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse)} />)}
                 validation={validation}
               />
             )}
 
             {phase === "fCE" && (
               <EtapeIntervalleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -389,10 +427,11 @@ export function App6gen15() {
             )}
             {phase === "fSimplifier" && (
               <EtapeChampSimpleIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                placeholder="ex : (x-3)^2"
+                placeholder={PLACEHOLDERS.fSimplifier}
+                diagnostiquer={(texte) => (exercice.famille === "F" ? diagnostiquerFSimplifier(exercice, texte) : "parse_error")}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -406,7 +445,7 @@ export function App6gen15() {
             )}
             {phase === "fConclure" && (
               <EtapeDeuxCasIneqLog
-                key={phase}
+                key={cle}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -416,6 +455,7 @@ export function App6gen15() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
+                evaluerCas={(reponse) => (exercice.famille === "F" ? diagnostiquerFConclureParCas(exercice, reponse) : { superieur: false, inferieur: false })}
                 onValider={(reponse) =>
                   terminerEtape(
                     soumettreReponseFConclure(etat, reponse),

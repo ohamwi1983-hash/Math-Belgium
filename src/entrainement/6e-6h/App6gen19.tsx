@@ -7,62 +7,29 @@ import {
   activerAideSuivante,
   demarrerSessionHyperboliques,
   soumettreReponseAParite,
-  soumettreReponseBIsoler,
   soumettreReponseBValeurs,
   soumettreReponseCDerivee,
   soumettreReponseCDeriveeSeconde,
-  soumettreReponseCRelation,
   soumettreReponseDLimites,
   soumettreReponseDReecriture,
 } from "./moteur6e/sessionHyperboliques";
-import { phaseApres, phaseInitiale } from "./moteur6e/typesHyperboliques";
+import { tentativesMaxPhase } from "./moteur6e/typesHyperboliques";
 import type { EtatSessionHyperboliques, PhaseHyperboliques } from "./moteur6e/typesHyperboliques";
-import {
-  diagnostiquerBIsoler,
-  diagnostiquerCDerivee,
-  diagnostiquerCDeriveeSeconde,
-  diagnostiquerCRelation,
-  diagnostiquerDReecriture,
-} from "./moteur6e/verificationHyperboliques";
+import { diagnostiquerBValeurs, diagnostiquerCDerivee, diagnostiquerCDeriveeSeconde, diagnostiquerDReecriture, estApproximationB } from "./moteur6e/verificationHyperboliques";
+import { formatMessageErreur } from "./ui/messageErreur";
+import { Katex } from "./components/Katex";
 import { EtapeChampHyperboliques } from "./components6e/EtapeChampHyperboliques";
 import { EtapeLimitesHyperboliquesD } from "./components6e/EtapeLimitesHyperboliquesD";
 import { EtapeListeValeursHyperboliques } from "./components6e/EtapeListeValeursHyperboliques";
 import { EtapeStatutPariteHyperboliques } from "./components6e/EtapeStatutPariteHyperboliques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel } from "./ui6e/formatHyperboliques";
-import { calculerRecapitulatifHyperboliques, calculerSegmentsProgressionHyperboliques } from "./ui6e/recapitulatifHyperboliques";
+import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel, reponseAttendueLatex } from "./ui6e/formatHyperboliques";
+import { LIBELLE_PHASE_HYPERBOLIQUES, calculerRecapitulatifHyperboliques, calculerSegmentsProgressionHyperboliques, sequenceReelleHyperboliques } from "./ui6e/recapitulatifHyperboliques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
-
-/** Même libellé, phase par phase, que `LIBELLE_PHASE` (`ui6e/recapitulatifHyperboliques.ts`, non
- * exporté) — répliqué ICI pour la fiche de consultation. */
-const LIBELLE_PHASE: Record<PhaseHyperboliques, string> = {
-  aParite: "Parité",
-  bIsoler: "Inconnue isolée",
-  bValeurs: "Valeur(s)",
-  cDerivee: "f'(x)",
-  cDeriveeSeconde: "f''(x)",
-  cRelation: "Coefficient k²",
-  dReecriture: "f(x) réécrite",
-  dLimites: "Signes des limites",
-};
-
-/** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
- * `sequenceReelle` (`ui6e/recapitulatifHyperboliques.ts`, non exporté), répliquée ICI à partir de
- * `phaseInitiale`/`phaseApres` pour aligner l'index des segments de `ProgressionPuces` sur celui de
- * `historique`. */
-function sequenceReelle(exercice: Parameters<typeof phaseInitiale>[0]): PhaseHyperboliques[] {
-  const sequence: PhaseHyperboliques[] = [];
-  let phase: PhaseHyperboliques | "termine" = phaseInitiale(exercice);
-  while (phase !== "termine") {
-    sequence.push(phase);
-    phase = phaseApres(phase);
-  }
-  return sequence;
-}
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -70,12 +37,13 @@ function nouvelleSession(): EtatSessionHyperboliques {
   return demarrerSessionHyperboliques(REGLAGES_DEMO, genererExerciceHyperboliques);
 }
 
+/** Exemples de saisie HORS de l'espace des tirages (k ≤ 3 et |a|,|b| ≤ 3 en C ; a+b ≤ 7 en D ;
+ * √7 n'est jamais une valeur de B) — un exemple ne doit jamais être la réponse. */
+const PLACEHOLDER_VALEUR_B = "ex : sqrt(7)";
 const PLACEHOLDERS: Partial<Record<PhaseHyperboliques, string>> = {
-  bIsoler: "ex : sqrt(1+3^2)",
-  cDerivee: "ex : 3*(2*ch(3*x)-sh(3*x))",
-  cDeriveeSeconde: "ex : 9*(2*sh(3*x)-ch(3*x))",
-  cRelation: "ex : 9",
-  dReecriture: "ex : ((2+3)*exp(x)+(3-2)*exp(-x))/2",
+  cDerivee: "ex : 5*ch(5*x)+sh(5*x)",
+  cDeriveeSeconde: "ex : 25*sh(5*x)",
+  dReecriture: "ex : 9*exp(x)+exp(-x)",
 };
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -97,6 +65,10 @@ export function App6gen19() {
    * (`detailsPartiels[phase].niveauAide`, voir `DetailPhaseHyperboliques`). */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice », panneau dev) — fait partie de la
+   * `key` des écrans pour qu'aucune saisie/sélection ne survive d'un exercice au suivant, même
+   * quand la phase est identique (famille A : un seul écran). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionHyperboliques, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -115,7 +87,7 @@ export function App6gen19() {
         setHistorique((h) => [
           ...h,
           {
-            titre: LIBELLE_PHASE[etat.phase],
+            titre: LIBELLE_PHASE_HYPERBOLIQUES[etat.phase],
             votreReponse,
             correcte: !revele,
             reponseAttendue: revele ? reponseAttenduePhase() : undefined,
@@ -133,15 +105,19 @@ export function App6gen19() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
     setEnAttente(null);
+    setFicheOuverteIndex(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
     setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionHyperboliques(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
   }
 
@@ -151,21 +127,18 @@ export function App6gen19() {
   const etatAct = etatActuel(exercice, phase);
   const consigne = consigneEcran(exercice, phase);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxPhase(phase, etat.reglages.tentativesMax);
+  const cle = `${numeroExercice}-${phase}`;
   const niveauAide = etat.niveauAide;
   const aide1 = aideNiveau1(exercice, phase);
   const aide2 = aideNiveau2(exercice, phase);
 
   function diagnostiquerChampUnique(texte: string) {
     switch (phase) {
-      case "bIsoler":
-        return exercice.famille === "B" ? diagnostiquerBIsoler(exercice, texte) : "parse_error";
       case "cDerivee":
         return exercice.famille === "C" ? diagnostiquerCDerivee(exercice, texte) : "parse_error";
       case "cDeriveeSeconde":
         return exercice.famille === "C" ? diagnostiquerCDeriveeSeconde(exercice, texte) : "parse_error";
-      case "cRelation":
-        return exercice.famille === "C" ? diagnostiquerCRelation(exercice, texte) : "parse_error";
       case "dReecriture":
         return exercice.famille === "D" ? diagnostiquerDReecriture(exercice, texte) : "parse_error";
       default:
@@ -174,26 +147,19 @@ export function App6gen19() {
   }
 
   function onValiderChampUnique(texte: string) {
-    if (phase === "bIsoler") return terminerEtape(soumettreReponseBIsoler(etat, texte), texte);
     if (phase === "cDerivee") return terminerEtape(soumettreReponseCDerivee(etat, texte), texte);
     if (phase === "cDeriveeSeconde") return terminerEtape(soumettreReponseCDeriveeSeconde(etat, texte), texte);
-    if (phase === "cRelation") return terminerEtape(soumettreReponseCRelation(etat, texte), texte);
     return terminerEtape(soumettreReponseDReecriture(etat, texte), texte);
   }
 
-  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
-  // `ResultatPanelHyperboliques.tsx` — jamais une cible recalculée séparément.
-  const reponseAttenduePhase = () => {
-    if (phase === "aParite") return "Parité déterminée en comparant f(−x) à f(x) et à −f(x).";
-    if (phase === "bIsoler") return "Inconnue isolée à partir de l'identité ch²(x0)−sh²(x0)=1.";
-    if (phase === "bValeurs") return "Calculée(s) à partir de l'expression confirmée à l'étape précédente.";
-    if (phase === "cDerivee") return "f'(x) calculée via sh'=ch et ch'=sh, avec la chaîne pour l'argument kx.";
-    if (phase === "cDeriveeSeconde") return "f''(x) calculée à partir de f'(x) confirmée à l'étape précédente.";
-    if (phase === "cRelation") return "Coefficient k² identifié à partir de f''(x) confirmée à l'étape précédente.";
-    if (phase === "dReecriture") return "f(x) réécrite en termes de eˣ et e⁻ˣ.";
-    if (phase === "dLimites") return "Signe de chaque limite déduit de la forme confirmée à l'étape précédente.";
-    return null;
-  };
+  function messageErreurB(textes: string[], utilisees: number, max: number): string {
+    if (exercice.famille !== "B") return formatMessageErreur(utilisees, max);
+    if (estApproximationB(exercice, textes)) return `Valeur approchée — donne la valeur EXACTE, avec une racine (sqrt(…)). Tentative ${utilisees}/${max}.`;
+    return formatMessageErreur(utilisees, max, diagnostiquerBValeurs(exercice, textes));
+  }
+
+  /** Réponse attendue de l'écran courant, en LaTeX — la même que le récapitulatif et le corrigé. */
+  const reponseAttenduePhase = () => <Katex expression={reponseAttendueLatex(exercice, phase)} block />;
 
   const validation = enAttente
     ? {
@@ -206,7 +172,7 @@ export function App6gen19() {
 
   // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionHyperboliques`
   // avec `detailsPartiels[phase].niveauAide`, déjà persisté côté moteur (jamais recalculé ici).
-  const sequence = sequenceReelle(exercice);
+  const sequence = sequenceReelleHyperboliques(exercice);
   const segments: EtatPuceProgression[] = calculerSegmentsProgressionHyperboliques(etat).map((segment, index) => {
     if (segment !== "correcte") return segment;
     const detail = etat.detailsPartiels[sequence[index]];
@@ -218,6 +184,7 @@ export function App6gen19() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Sinus et cosinus hyperboliques (sh, ch)</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -225,7 +192,7 @@ export function App6gen19() {
         <RecapitulatifPanel entrees={calculerRecapitulatifHyperboliques(etat)} />
         {phase === "aParite" && (
               <EtapeStatutPariteHyperboliques
-                key={phase}
+                key={cle}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 consigneEcran={consigne}
@@ -245,12 +212,12 @@ export function App6gen19() {
 
             {phase === "bValeurs" && (
               <EtapeListeValeursHyperboliques
-                key={phase}
+                key={cle}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}
                 consigneEcran={consigne}
-                placeholder="ex : sqrt(8)"
+                placeholder={PLACEHOLDER_VALEUR_B}
                 labelAjout="+ Ajouter une valeur"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -260,13 +227,14 @@ export function App6gen19() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={(textes) => terminerEtape(soumettreReponseBValeurs(etat, textes), textes.join(" ; "))}
+                messageErreur={messageErreurB}
                 validation={validation}
               />
             )}
 
             {phase === "dLimites" && (
               <EtapeLimitesHyperboliquesD
-                key={phase}
+                key={cle}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}
@@ -288,7 +256,7 @@ export function App6gen19() {
 
             {phase !== "aParite" && phase !== "bValeurs" && phase !== "dLimites" && (
               <EtapeChampHyperboliques
-                key={phase}
+                key={cle}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}

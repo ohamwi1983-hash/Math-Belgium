@@ -1,23 +1,19 @@
-import type {
-  CandidatEtudeLogA,
-  CandidatEtudeLogB,
-  CandidatEtudeLogC,
-  CandidatEtudeLogD,
-  CibleAsymptote,
-  CibleConcaviteLog,
-  ExerciceEtudeFonctionLogarithme,
-  ExerciceEtudeLogE,
-  ExerciceEtudeLogNonE,
-} from "../core6e/etudeFonctionLogarithme.types";
+import type { CibleAsymptote, CibleConcaviteLog, ExerciceEtudeFonctionLogarithme, ExerciceEtudeLogB, ExerciceEtudeLogC } from "../core6e/etudeFonctionLogarithme.types";
 import type { CibleLimite } from "../core6e/limitesExponentielles.types";
 import type { DetailPhaseEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme } from "../moteur6e/typesEtudeFonctionLogarithme";
+import { PHASES_ETUDE_LOG } from "../moteur6e/typesEtudeFonctionLogarithme";
+import { calculerViewBoxCandidats, evaluerCandidatFamille } from "../generateurs6e/etudeFonctionLogarithme/graphe";
+import type { ViewBoxEtudeFonctionLog } from "../generateurs6e/etudeFonctionLogarithme/graphe";
+import { coefficientLatex, termeConstanteLatex, trinomeLatex } from "../generateurs6e/etudeFonctionLogarithme/familles/latex";
 import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 import { assurerAxesVisibles } from "../ui/mafsTransformation";
 
+export type { ViewBoxEtudeFonctionLog } from "../generateurs6e/etudeFonctionLogarithme/graphe";
+
 /**
- * Couche présentation (6e) — formatage LaTeX, évaluation des candidats (rendu Mafs) et textes de
- * consigne/aide pour `6gen21`. Consigne générale et bloc de données (f(x)) redondants sur chaque
- * écran (spec explicite), même principe que `formatEtudeFonctionExponentielle.ts` (`6gen11`).
+ * Couche présentation (6e) — formatage LaTeX, cadrage des candidats (rendu Mafs) et textes de
+ * consigne/aide pour `6gen21`. Les aides de niveau 2 donnent l'outil ou l'expression intermédiaire
+ * (dérivée, condition à résoudre), jamais la réponse de l'écran.
  */
 export const CONSIGNE_GENERALE = "Étudie la fonction suivante :";
 
@@ -36,201 +32,100 @@ function latex(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
+/** Nombre en LaTeX avec virgule décimale (« 2{,}72 »), arrondi au centième. */
+function nombreLatex(v: number): string {
+  const r = Math.round(v * 100) / 100;
+  return String(r).replace(".", "{,}");
+}
+
+/** Nombre entier entre parenthèses s'il est négatif (« (-3) »). */
+function entreParentheses(v: number): string {
+  return v < 0 ? `(${v})` : String(v);
+}
+
+// ============================================================================
+// Exemples de saisie — tous HORS de l'espace des réponses possibles.
+// ============================================================================
+
+export const PLACEHOLDER_LIMITE_VALEUR = "ex : 7,5";
+export const PLACEHOLDER_ASYMPTOTE = "ex : y = 7 ou x = −8";
+export const PLACEHOLDER_POSITION_EXTREMUM = "ex : 7/e";
+export const PLACEHOLDER_VALEUR_EXTREMUM = "ex : 5ln(7)";
+export const PLACEHOLDER_INFLEXION = "ex : e^(9/2)";
+
 // ============================================================================
 // f(x) — un helper par famille.
 // ============================================================================
 
+function baseBLatex(ex: Pick<ExerciceEtudeLogB, "bNum" | "bDen">): string {
+  if (ex.bDen === 2) return "\\dfrac{x}{2}";
+  return ex.bNum === 1 ? "x" : `${ex.bNum}x`;
+}
+
+function trinomeC(ex: ExerciceEtudeLogC): string {
+  return trinomeLatex(-2 * ex.p, ex.p * ex.p - ex.q * ex.q);
+}
+
 export function formatFonctionLatex(exercice: ExerciceEtudeFonctionLogarithme): string {
   switch (exercice.famille) {
-    case "A":
-      return `f(x) = x^{${exercice.a}x}`;
-    case "B":
-      return `f(x) = x^{\\frac{${exercice.k}}{x}}`;
-    case "C":
-      return `f(x) = \\ln\\left|${exercice.k}^2 - x^2\\right|`;
-    case "D":
-      return `f(x) = x + ${exercice.c === 1 ? "" : exercice.c}e^{-x}`;
-    case "E":
-      return `f(x) = e^{${exercice.a}x}${exercice.trig === "sin" ? "\\sin(x)" : "\\cos(x)"}`;
-  }
-}
-
-// ============================================================================
-// Évaluation des candidats — chaque distracteur est une VRAIE fonction renvoyable (voir le core
-// pour la justification de chaque distracteur). Familles A/B ont un domaine restreint (x>0) —
-// `evaluerCandidat` renvoie `null` hors domaine, jamais NaN propagé sans contrôle.
-// ============================================================================
-
-function evaluerCandidatA(c: CandidatEtudeLogA, x: number): number | null {
-  if (x <= 0) return null;
-  if (c.type === "reel") return Math.pow(x, c.a * x);
-  if (c.type === "minimumMalPlace") return Math.pow(x, c.a * x + c.decalageExposant);
-  if (c.type === "limiteZeroIncorrecte") return c.facteurLimite * Math.pow(x, c.a * x);
-  return 1 + 6 / (1 + Math.exp(-4 * (x - 1 / Math.E)));
-}
-
-function evaluerCandidatB(c: CandidatEtudeLogB, x: number): number | null {
-  if (x <= 0) return null;
-  if (c.type === "reel") return Math.pow(x, c.k / x);
-  if (c.type === "extremumMalPlace") return Math.pow(x, c.k / x + c.decalageExposant);
-  if (c.type === "sansAsymptoteHorizontale") return Math.pow(x, c.k / x) + 0.06 * x;
-  return Math.pow(x, -c.k / x);
-}
-
-function evaluerCandidatC(c: CandidatEtudeLogC, x: number): number | null {
-  if (c.type === "reel") {
-    const v = c.k * c.k - x * x;
-    return v === 0 ? null : Math.log(Math.abs(v));
-  }
-  if (c.type === "domaineRestreint") {
-    const v = c.k * c.k - x * x;
-    return v > 0 ? Math.log(v) : null;
-  }
-  if (c.type === "asymptotesMalPlacees") {
-    const kp = c.k + c.decalage;
-    const v = kp * kp - x * x;
-    return v === 0 ? null : Math.log(Math.abs(v));
-  }
-  // asymetrieIncorrecte
-  const u = x - c.decalage;
-  const v = c.k * c.k - u * u;
-  return v === 0 ? null : Math.log(Math.abs(v));
-}
-
-function evaluerCandidatD(c: CandidatEtudeLogD, x: number): number {
-  if (c.type === "reel") return x + c.c * Math.exp(-x);
-  if (c.type === "pasAsymptoteOblique") return x + c.c * Math.sqrt(Math.abs(x));
-  if (c.type === "minimumMalPlace") return x + c.c * Math.exp(-(x - c.decalageMin));
-  return x + c.c * (2 / (1 + Math.exp(-x)) - 1);
-}
-
-/** Magnitude au-delà de laquelle un point est traité comme HORS RENDU (retourné `null` plutôt que
- * la valeur brute) — nécessaire ici au-delà du simple rôle de `PLAFOND_STATS` (qui ne filtre que le
- * calcul d'ÉCHELLE, jamais le tracé lui-même, suffisant pour `6gen11`) : la famille B a une VRAIE
- * singularité en x=0 (k/x→±∞), et ses distracteurs (`extremumMalPlace`, exposant `k/x+décalage`)
- * peuvent y atteindre des magnitudes ASTRONOMIQUES (jusqu'à ~1e80 mesuré près de x=0,05 pour
- * k=-3) — bug trouvé par vérification Playwright : un `Plot.OfX` de Mafs alimenté avec une valeur
- * pareille produit un attribut SVG `d` dont la formatation numérique du navigateur échoue
- * silencieusement en erreur console ("Expected number"), sans planter le rendu mais sans jamais y
- * placer le trait non plus. Filtrer ICI (au niveau de l'évaluation brute, pas seulement du calcul
- * de viewBox) élimine le problème à la source pour toute famille future ayant le même risque.
- */
-const PLAFOND_RENDU = 1e6;
-
-export function evaluerCandidat(exercice: ExerciceEtudeLogNonE, index: number, x: number): number | null {
-  const v = (() => {
-    switch (exercice.famille) {
-      case "A":
-        return evaluerCandidatA(exercice.candidats[index], x);
-      case "B":
-        return evaluerCandidatB(exercice.candidats[index], x);
-      case "C":
-        return evaluerCandidatC(exercice.candidats[index], x);
-      case "D":
-        return evaluerCandidatD(exercice.candidats[index], x);
+    case "A": {
+      const { k, c } = exercice;
+      const signe = k < 0 ? "-" : "";
+      const absK = Math.abs(k);
+      const numerateur = c === 0 ? (absK === 1 ? "\\ln(x)" : `${absK}\\ln(x)`) : absK === 1 ? `\\ln(x)${termeConstanteLatex(c)}` : `${absK}\\left(\\ln(x)${termeConstanteLatex(c)}\\right)`;
+      return `f(x) = ${signe}\\dfrac{${numerateur}}{x}`;
     }
-  })();
-  if (v === null || !Number.isFinite(v) || Math.abs(v) > PLAFOND_RENDU) return null;
-  return v;
-}
-
-// ============================================================================
-// Fenêtre d'affichage commune aux candidats — même principe que `6gen11`, plafond de magnitude Y
-// par famille pour éviter des tracés dominés par une explosion locale.
-// ============================================================================
-
-export interface ViewBoxEtudeFonctionLog {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-}
-
-function fenetreX(exercice: ExerciceEtudeLogNonE): [number, number] {
-  switch (exercice.famille) {
-    case "A":
-      return [0.05, 3];
-    case "B":
-      return [0.05, 7];
+    case "B": {
+      const base = baseBLatex(exercice);
+      const puissance = base === "x" ? "x" : `\\left(${base}\\right)`;
+      return `f(x) = ${puissance}^{${exercice.a === 1 ? "" : exercice.a}x}${termeConstanteLatex(exercice.c)}`;
+    }
     case "C":
-      return [-exercice.k - 3, exercice.k + 3];
+      return `f(x) = ${coefficientLatex(exercice.m)}\\ln\\left|${trinomeC(exercice)}\\right|`;
     case "D":
-      return [-3, 4];
+      return `f(x) = ${coefficientLatex(exercice.m)}\\ln\\left(${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p + exercice.a * exercice.a)}\\right)`;
+    case "E": {
+      const { m, c } = exercice;
+      const absM = Math.abs(m);
+      const signe = m < 0 ? "-" : "";
+      const signeQuotient = m < 0 ? "-" : "+";
+      return `f(x) = ${signe}${absM === 1 ? "" : absM}\\ln(x) ${signeQuotient} \\dfrac{${absM * c}}{x}`;
+    }
   }
 }
 
-const PLAFOND_STATS: Record<ExerciceEtudeLogNonE["famille"], number> = {
-  A: 15,
-  B: 15,
-  C: 8,
-  D: 12,
-};
+// ============================================================================
+// Candidats du QCM graphique (formule unique, `generateurs6e/etudeFonctionLogarithme/graphe.ts`).
+// ============================================================================
 
-/** Densité de grille cible, partagée avec `GrapheOptionEtudeFonctionLog.tsx` (`GrilleAdaptative`) —
- * voir `CIBLE_NOMBRE_LIGNES_QCM` de `ui6e/formatGraphiquesCyclometriques.ts` (même rôle, même
- * précaution de synchronisation) pour la justification complète. */
+export function evaluerCandidat(exercice: ExerciceEtudeFonctionLogarithme, index: number, x: number): number | null {
+  return evaluerCandidatFamille(exercice.famille, exercice.candidats[index], x);
+}
+
+/** Densité de grille cible, partagée avec `GrapheOptionEtudeFonctionLog.tsx` (`GrilleAdaptative`). */
 export const CIBLE_NOMBRE_LIGNES_QCM = 6;
 
-/** Composition finale du viewBox — voir `finaliserViewBox` de
- * `ui6e/formatGraphiquesCyclometriques.ts` pour la justification complète (`ratio=1` : conteneur
- * CARRÉ, jamais `RATIO_GRAPHE`). */
-function finaliserViewBox(x: [number, number], y: [number, number]): ViewBoxEtudeFonctionLog {
-  const { x: xFinal, y: yFinal } = assurerAxesVisibles({ x, y });
-  return { xMin: xFinal[0], xMax: xFinal[1], yMin: yFinal[0], yMax: yFinal[1] };
-}
-
-export function calculerViewBox(exercice: ExerciceEtudeLogNonE): ViewBoxEtudeFonctionLog {
-  const [xMin, xMax] = fenetreX(exercice);
-  const plafond = PLAFOND_STATS[exercice.famille];
-  const valeurs: number[] = [];
-  for (let index = 0; index < exercice.candidats.length; index++) {
-    for (let i = 0; i <= 80; i++) {
-      const x = xMin + ((xMax - xMin) * i) / 80;
-      const y = evaluerCandidat(exercice, index, x);
-      if (y === null || !Number.isFinite(y)) continue;
-      if (Math.abs(y) > plafond) continue;
-      valeurs.push(y);
-    }
-  }
-  if (valeurs.length === 0) return finaliserViewBox([xMin, xMax], [-1, 1]);
-  const yMinBrut = Math.min(...valeurs);
-  const yMaxBrut = Math.max(...valeurs);
-  const marge = Math.max(0.4, (yMaxBrut - yMinBrut) * 0.15);
-  return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
+/** Même cadrage que celui qui a servi au contrôle de discernabilité à la génération, axes rendus
+ * visibles (`assurerAxesVisibles`). */
+export function calculerViewBox(exercice: ExerciceEtudeFonctionLogarithme): ViewBoxEtudeFonctionLog {
+  const vb = calculerViewBoxCandidats(exercice.famille, exercice.candidats, exercice.candidats[exercice.indexCorrect], exercice.valeursRemarquables);
+  const { x, y } = assurerAxesVisibles({ x: [vb.xMin, vb.xMax], y: [vb.yMin, vb.yMax] });
+  return { xMin: x[0], xMax: x[1], yMin: y[0], yMax: y[1] };
 }
 
 // ============================================================================
-// Équation d'une asymptote (révélation/aide) — `CibleAsymptote` → LaTeX.
+// Équation d'une asymptote — `CibleAsymptote` → LaTeX.
 // ============================================================================
-
-function formatSommeTermes(termes: { valeur: number; suffixe: string }[]): string {
-  const nonNuls = termes.filter((t) => t.valeur !== 0);
-  if (nonNuls.length === 0) return "0";
-  return nonNuls
-    .map((t, i) => {
-      const abs = Math.abs(t.valeur);
-      const corps = t.suffixe === "" ? `${abs}` : abs === 1 ? t.suffixe : `${abs}${t.suffixe}`;
-      if (i === 0) return t.valeur < 0 ? `-${corps}` : corps;
-      return `${t.valeur < 0 ? "-" : "+"} ${corps}`;
-    })
-    .join(" ");
-}
 
 export function formatEquationAsymptoteLatex(cible: CibleAsymptote): string {
-  if (cible.type === "horizontale") return `y=${cible.valeur}`;
-  if (cible.type === "verticale") return `x=${cible.p}`;
-  if (cible.type === "oblique") {
-    const droite = formatSommeTermes([
-      { valeur: cible.a, suffixe: "x" },
-      { valeur: cible.b, suffixe: "" },
-    ]);
-    return `y=${droite}`;
-  }
+  if (cible.type === "horizontale") return `y = ${cible.valeur}`;
+  if (cible.type === "verticale") return `x = ${cible.p}`;
+  if (cible.type === "oblique") return `y = ${cible.a === 1 ? "" : cible.a}x${termeConstanteLatex(cible.b)}`;
   return "\\text{aucune asymptote}";
 }
 
 // ============================================================================
-// Labels de direction — arité variable (2 pour A/B/D, 6 pour C, 1 pour les asymptotes de B).
+// Labels de direction.
 // ============================================================================
 
 export interface DirectionLabel {
@@ -238,53 +133,67 @@ export interface DirectionLabel {
   latex: string;
 }
 
-export function directionLabelsLimites(exercice: ExerciceEtudeLogNonE): DirectionLabel[] {
+const DIRECTIONS_ZERO_PLUS: DirectionLabel[] = [
+  { id: "zeroPlus", latex: "x \\to 0^+" },
+  { id: "plusInfini", latex: "x \\to +\\infty" },
+];
+const DIRECTIONS_INFINIS: DirectionLabel[] = [
+  { id: "moinsInfini", latex: "x \\to -\\infty" },
+  { id: "plusInfini", latex: "x \\to +\\infty" },
+];
+
+export function directionLabelsLimites(exercice: ExerciceEtudeFonctionLogarithme): DirectionLabel[] {
   switch (exercice.famille) {
     case "A":
     case "B":
-      return [
-        { id: "zeroPlus", latex: "x \\to 0^+" },
-        { id: "plusInfini", latex: "x \\to +\\infty" },
-      ];
+    case "E":
+      return DIRECTIONS_ZERO_PLUS;
+    case "D":
+      return DIRECTIONS_INFINIS;
     case "C": {
-      const k = exercice.k;
+      const r1 = entreParentheses(exercice.p - exercice.q);
+      const r2 = entreParentheses(exercice.p + exercice.q);
       return [
         { id: "moinsInfini", latex: "x \\to -\\infty" },
-        { id: "moinsKMoins", latex: `x \\to (-${k})^-` },
-        { id: "moinsKPlus", latex: `x \\to (-${k})^+` },
-        { id: "kMoins", latex: `x \\to ${k}^-` },
-        { id: "kPlus", latex: `x \\to ${k}^+` },
+        { id: "r1Moins", latex: `x \\to ${r1}^-` },
+        { id: "r1Plus", latex: `x \\to ${r1}^+` },
+        { id: "r2Moins", latex: `x \\to ${r2}^-` },
+        { id: "r2Plus", latex: `x \\to ${r2}^+` },
         { id: "plusInfini", latex: "x \\to +\\infty" },
       ];
     }
+  }
+}
+
+/** Famille C : étiquettes NEUTRES (jamais « x = r₁ », qui serait la réponse à taper). */
+export function directionLabelsAsymptotes(exercice: ExerciceEtudeFonctionLogarithme): DirectionLabel[] {
+  switch (exercice.famille) {
+    case "A":
+    case "B":
+    case "E":
+      return DIRECTIONS_ZERO_PLUS;
     case "D":
+      return DIRECTIONS_INFINIS;
+    case "C":
       return [
-        { id: "moinsInfini", latex: "x \\to -\\infty" },
-        { id: "plusInfini", latex: "x \\to +\\infty" },
+        { id: "asymptote1", latex: "\\text{1re asymptote verticale}" },
+        { id: "asymptote2", latex: "\\text{2e asymptote verticale}" },
       ];
   }
 }
 
-export function directionLabelsAsymptotes(exercice: ExerciceEtudeLogNonE): DirectionLabel[] {
-  switch (exercice.famille) {
-    case "A":
-      return [
-        { id: "zeroPlus", latex: "x \\to 0^+" },
-        { id: "plusInfini", latex: "x \\to +\\infty" },
-      ];
-    case "B":
-      return [{ id: "plusInfini", latex: "x \\to +\\infty" }];
-    case "C":
-      return [
-        { id: "gauche", latex: `x = -${exercice.k}` },
-        { id: "droite", latex: `x = ${exercice.k}` },
-      ];
-    case "D":
-      return [
-        { id: "moinsInfini", latex: "x \\to -\\infty" },
-        { id: "plusInfini", latex: "x \\to +\\infty" },
-      ];
-  }
+/** Famille C : l'existence des 2 asymptotes verticales découle directement du domaine (2 valeurs
+ * exclues, limites infinies) — seules leurs équations sont demandées. */
+export function forcerPresenceAsymptotes(exercice: ExerciceEtudeFonctionLogarithme): boolean[] {
+  return exercice.famille === "C" ? [true, true] : [false, false];
+}
+
+/** Bornes du tableau de signe de la famille C (r₁, p, r₂). */
+export function intervallesGrilleCLatex(exercice: ExerciceEtudeLogC): string[] {
+  const r1 = exercice.p - exercice.q;
+  const r2 = exercice.p + exercice.q;
+  const p = exercice.p;
+  return [`]-\\infty\\,;\\,${r1}[`, `]${r1}\\,;\\,${p}[`, `]${p}\\,;\\,${r2}[`, `]${r2}\\,;\\,+\\infty[`];
 }
 
 // ============================================================================
@@ -292,143 +201,217 @@ export function directionLabelsAsymptotes(exercice: ExerciceEtudeLogNonE): Direc
 // ============================================================================
 
 export function consigneDomaine(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
-  if (exercice.famille === "C") return [texte("Détermine le domaine de définition de f — attention à la valeur absolue.")];
-  return [texte("Détermine le domaine de définition de f.")];
+  switch (exercice.famille) {
+    case "A":
+      return [texte("Détermine le domaine de définition de f (logarithme ET dénominateur).")];
+    case "B":
+      return [texte("Détermine le domaine de définition de f (puissance à exposant variable).")];
+    case "C":
+      return [texte("Détermine le domaine de définition de f — attention à la valeur absolue.")];
+    case "D":
+      return [texte("Détermine le domaine de définition de f — étudie le signe du trinôme.")];
+    case "E":
+      return [texte("Détermine le domaine de définition de f.")];
+  }
 }
 
-export function consigneLimites(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
-  if (exercice.famille === "C") return [texte("Détermine les 6 limites suivantes (aux deux infinis, puis aux 4 approches des valeurs exclues).")];
+export function consigneLimites(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("Détermine les 6 limites suivantes : aux deux infinis, puis de part et d'autre de chaque valeur exclue.")];
   return [texte("Détermine les limites de f aux bornes de son domaine.")];
 }
 
-export function consigneAsymptotes(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
-  if (exercice.famille === "B") return [texte("À partir des limites CORRECTES précédentes, détermine l'équation de l'asymptote horizontale de f.")];
-  if (exercice.famille === "C") return [texte("À partir des limites CORRECTES précédentes, détermine les 2 asymptotes verticales de f.")];
-  return [texte("À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.")];
+export function consigneAsymptotes(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("À partir des limites, donne l'équation des 2 asymptotes verticales de f (dans l'ordre de ton choix).")];
+  return [texte("À partir des limites, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.")];
 }
 
-export function consigneCroissance(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
-  if (exercice.famille === "C") return [texte("Étudie le signe de "), latex("f'"), texte(" sur chacun des 4 intervalles délimités par -k, 0 et k, et conclus sur le maximum local.")];
-  return [texte("Étudie le signe de "), latex("f'"), texte(" et conclus sur la croissance de f (monotonie constante, ou extremum et sa position).")];
+export function consigneCroissance(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
+  if (exercice.famille === "C") {
+    return [
+      texte("Étudie le signe de "),
+      latex("f'"),
+      texte(" sur chacun des 4 intervalles, puis donne la valeur de l'extremum local (valeur exacte ou arrondie au centième)."),
+    ];
+  }
+  return [texte("Étudie le signe de "), latex("f'"), texte(" et conclus : sens de variation, nature et position de l'extremum (valeur exacte ou arrondie au centième).")];
 }
 
 export function consigneConcavite(): FragmentConsigne[] {
-  return [texte("Étudie le signe de "), latex("f''"), texte(" et conclus sur la concavité de f (convexe, concave, ou point(s) d'inflexion et leur(s) position(s)).")];
+  return [
+    texte("Étudie le signe de "),
+    latex("f''"),
+    texte(" et conclus sur la concavité de f (convexe, concave, ou point(s) d'inflexion et leur(s) position(s), valeur exacte ou arrondie au centième)."),
+  ];
 }
 
 export function consigneGraphique(): FragmentConsigne[] {
   return [texte("Sélectionne le graphique qui représente f.")];
 }
 
-export function consigneComportementInfiniE(): FragmentConsigne[] {
-  return [texte("Détermine le comportement de f dans chaque direction — une limite existe-t-elle (et vaut 0), ou n'existe-t-elle pas ?")];
-}
-
 // ============================================================================
-// Aides — 2 niveaux par écran, motif `{texte, latex}` partout.
+// Aides — 2 niveaux par écran. Le niveau 2 donne l'outil ou l'expression intermédiaire, jamais la
+// réponse.
 // ============================================================================
 
 export function aideDomaineNiveau1(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
-  if (exercice.famille === "A" || exercice.famille === "B") return { texte: "Une puissance x^u n'est définie (au sens réel général) que pour une base x STRICTEMENT POSITIVE.", latex: "x^u \\text{ défini} \\iff x>0" };
-  if (exercice.famille === "C") return { texte: "Rappel : |u|>0 dès que u≠0, quel que soit le signe de u — le domaine de ln|u| est donc plus large que celui de ln(u) seul.", latex: "|u|>0 \\text{ dès que } u\\neq 0" };
-  return { texte: "Une somme/produit d'une exponentielle et d'un polynôme (ou d'une fonction trigonométrique) est toujours défini sur tout ℝ.", latex: null };
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "ln(u) n'existe que si u > 0, et un dénominateur ne peut pas s'annuler.", latex: "\\ln(u) : u>0 \\qquad \\dfrac{\\dots}{v} : v\\neq 0" };
+    case "B":
+      return { texte: "Une puissance à exposant variable s'écrit avec l'exponentielle : elle n'est définie que si sa base est strictement positive.", latex: "u^{v}=e^{v\\ln(u)}" };
+    case "C":
+      return { texte: "|u| > 0 dès que u ≠ 0, quel que soit le signe de u : le domaine de ln|u| est plus large que celui de ln(u).", latex: "|u|>0 \\iff u\\neq 0" };
+    case "D":
+      return { texte: "ln(u) exige u > 0 : étudie le signe du trinôme sous le logarithme.", latex: null };
+    case "E":
+      return { texte: "ln(x) exige x > 0, et le quotient exige un dénominateur non nul.", latex: null };
+  }
 }
 
 export function aideDomaineNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
-  if (exercice.famille === "A" || exercice.famille === "B") return { texte: "Aucune autre restriction à chercher pour cette famille.", latex: null };
-  if (exercice.famille === "C") {
-    const k = exercice.k;
-    return { texte: "Les deux cas séparés (union non faite) :", latex: `\\begin{gathered} ${k}^2-x^2>0 \\\\ ${k}^2-x^2<0 \\end{gathered}` };
+  switch (exercice.famille) {
+    case "A":
+    case "E":
+      return { texte: "Les deux conditions portent sur le même x : écris-les, puis garde les x qui vérifient les deux.", latex: null };
+    case "B":
+      return { texte: "Écris la condition « base strictement positive » pour cette fonction et résous-la :", latex: `${baseBLatex(exercice)} > 0` };
+    case "C":
+      return { texte: "Il suffit d'exclure les zéros du trinôme : résous", latex: `${trinomeC(exercice)} = 0` };
+    case "D": {
+      const b = -2 * exercice.p;
+      const c = exercice.p * exercice.p + exercice.a * exercice.a;
+      return { texte: "Calcule le discriminant du trinôme (son signe dit si le trinôme peut s'annuler ou devenir négatif) :", latex: `\\Delta = ${entreParentheses(b)}^2 - 4\\cdot ${c}` };
+    }
   }
-  return { texte: "Aucune restriction à chercher pour cette famille.", latex: null };
 }
 
-export function aideLimitesNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Croissances comparées : x·ln(x) → 0 quand x→0⁺ (résultat déjà connu). En +∞, la base et l'exposant grandissent tous les deux.", latex: "x\\ln(x)\\to 0 \\text{ quand } x\\to 0^+" };
-  if (exercice.famille === "B") return { texte: "Croissances comparées : ln(x)/x → 0 quand x→+∞ (résultat déjà connu). En 0⁺, distingue le signe de k.", latex: "\\dfrac{\\ln(x)}{x}\\to 0 \\text{ quand } x\\to+\\infty" };
-  if (exercice.famille === "C") return { texte: "Aux points exclus, |k²-x²| → 0⁺ (valeur qui s'annule mais reste positive) — le logarithme d'une quantité qui tend vers 0⁺ tend vers -∞.", latex: "|k^2-x^2|\\to 0^+" };
-  return { texte: "Piège : les deux limites sont infinies, mais cela ne signifie pas 'pas d'asymptote' — regarde l'étape suivante avant de conclure.", latex: null };
+export function aideLimitesNiveau1(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "En 0⁺, ln(x) → −∞ et le dénominateur x → 0⁺ ; en +∞, croissances comparées.", latex: "\\lim_{x\\to+\\infty}\\dfrac{\\ln(x)}{x}=0" };
+    case "B":
+      return { texte: "Réécris la puissance avec l'exponentielle et étudie la limite de l'exposant.", latex: "u^{v}=e^{v\\ln(u)}" };
+    case "C":
+      return { texte: "Aux valeurs exclues, |trinôme| → 0⁺ et ln(0⁺) = −∞ ; aux infinis, le trinôme → +∞.", latex: null };
+    case "D":
+      return { texte: "Aux infinis, le trinôme tend vers +∞, donc son logarithme aussi.", latex: null };
+    case "E":
+      return { texte: "Mets au même dénominateur pour lever l'indétermination en 0⁺.", latex: "\\ln(x)+\\dfrac{c}{x}=\\dfrac{x\\ln(x)+c}{x}" };
+  }
 }
 
-export function aideLimitesNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Exposant a :", latex: `a=${exercice.a}` };
-  if (exercice.famille === "B") return { texte: "Signe de k (détermine le comportement en 0⁺) :", latex: `k=${exercice.k}` };
-  if (exercice.famille === "C") return { texte: "Valeur de k :", latex: `k=${exercice.k}` };
-  return { texte: "En -∞, l'exponentielle domine totalement le terme linéaire.", latex: `c\\,e^{-x} \\to +\\infty \\text{ quand } x\\to-\\infty` };
+export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Sépare la fraction en deux termes :", latex: `f(x) = ${exercice.k}\\cdot\\dfrac{\\ln(x)}{x} + \\dfrac{${exercice.k * exercice.c}}{x}` };
+    case "B":
+      return { texte: "En 0⁺, croissances comparées :", latex: "\\lim_{x\\to 0^+} x\\ln(x) = 0" };
+    case "C":
+    case "D":
+      return { texte: "Tiens compte du signe du facteur devant le logarithme : il inverse les limites s'il est négatif.", latex: null };
+    case "E":
+      return { texte: "En 0⁺, croissances comparées : le numérateur x·ln(x) + c tend vers c > 0.", latex: "\\lim_{x\\to 0^+} x\\ln(x) = 0" };
+  }
 }
 
-export function aideAsymptotesNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Une limite finie non nulle en une borne FINIE du domaine (ici x=0) n'est PAS une asymptote — l'asymptote horizontale exige une limite en ±∞.", latex: null };
-  if (exercice.famille === "B") return { texte: "L'asymptote horizontale existe si la limite en +∞ est une valeur FINIE.", latex: null };
-  if (exercice.famille === "C") return { texte: "Une asymptote verticale x=p existe quand la limite en p (d'un côté au moins) est infinie.", latex: null };
-  return { texte: "Une limite finie (0 ou une valeur) donne une asymptote HORIZONTALE ; une asymptote OBLIQUE y=ax+b existe si f(x)-(ax+b)→0. Une limite infinie sans cette propriété ne donne AUCUNE asymptote.", latex: "y=ax+b \\quad\\text{si}\\quad f(x)-(ax+b)\\to 0" };
-}
-
-export function aideAsymptotesNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Aucune des deux directions n'a d'asymptote pour cette famille.", latex: null };
-  if (exercice.famille === "B") return { texte: "Équation attendue :", latex: "y=1" };
-  if (exercice.famille === "C") return { texte: "Les 2 valeurs exclues du domaine :", latex: `x=-${exercice.k} \\text{ et } x=${exercice.k}` };
-  return { texte: "En +∞, x+c·e^(-x) - x = c·e^(-x) → 0 : c'est la définition d'une asymptote oblique y=x. En -∞, cette même différence diverge — aucune asymptote de ce côté.", latex: "x+c\\,e^{-x}-x = c\\,e^{-x}\\to 0 \\quad\\Rightarrow\\quad y=x" };
-}
-
-export function aideCroissanceNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Dérivation logarithmique : pose ln(f)=ax·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe (f>0 toujours).", latex: "\\ln(f)=ax\\cdot\\ln(x)" };
-  if (exercice.famille === "B") return { texte: "Dérivation logarithmique : pose ln(f)=(k/x)·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe.", latex: "\\ln(f)=\\dfrac{k}{x}\\cdot\\ln(x)" };
-  if (exercice.famille === "C") return { texte: "f'(x)=2x/(x²-k²) — étudie séparément le signe du numérateur et du dénominateur sur chacun des 4 intervalles.", latex: "f'(x)=\\dfrac{2x}{x^2-k^2}" };
-  return { texte: "f'(x) = 1 - c·e^(-x), nul en une seule valeur — étudie son signe avant/après pour confirmer un minimum.", latex: "f'(x)=1-c\\,e^{-x}" };
-}
-
-export function aideCroissanceNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f'/f = a(ln(x)+1), nul en ln(x)=-1 :", latex: "x = \\dfrac{1}{e}" };
-  if (exercice.famille === "B") return { texte: "f'/f = k(1-ln(x))/x², nul en ln(x)=1 :", latex: "x = e" };
-  if (exercice.famille === "C") return { texte: "Signe de x²-k² sur chaque intervalle (k=" + exercice.k + ") :", latex: `\\begin{gathered} x<-${exercice.k} : x^2-k^2>0 \\\\ -${exercice.k}<x<0 : x^2-k^2<0 \\\\ 0<x<${exercice.k} : x^2-k^2<0 \\\\ x>${exercice.k} : x^2-k^2>0 \\end{gathered}` };
-  return { texte: "f'(x)=0 en :", latex: `x = \\ln(${exercice.c})` };
-}
-
-export function aideConcaviteNiveau1(_exercice: ExerciceEtudeLogNonE): AideAvecLatex {
+export function aideAsymptotesNiveau1(_exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
   return {
     texte:
-      "Étudie le signe de la dérivée SECONDE f'' : si f'' est POSITIVE, f est CONVEXE ; si f'' est NÉGATIVE, f est CONCAVE ; si f'' CHANGE DE SIGNE en un (ou plusieurs) point(s), ce(s) point(s) est/sont (un/des) POINT(S) D'INFLEXION.",
+      "Limite infinie quand x tend vers une valeur finie a ⟹ asymptote verticale x = a. Limite finie L en ±∞ ⟹ asymptote horizontale y = L. Une limite finie en une borne FINIE du domaine n'est PAS une asymptote.",
+    latex: null,
+  };
+}
+
+export function aideAsymptotesNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Relis tes limites : en 0⁺ et en +∞, chacune est-elle infinie, finie ou nulle ?", latex: null };
+    case "C":
+      return { texte: "Les candidates sont les valeurs exclues du domaine, là où f tend vers ±∞.", latex: null };
+    default:
+      return { texte: "Pour une limite infinie en ±∞, cherche une éventuelle asymptote oblique : f(x)/x a-t-il une limite finie non nulle ?", latex: "\\lim_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}" };
+  }
+}
+
+export function aideCroissanceNiveau1(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Dérive le quotient, puis étudie le signe du numérateur (x² > 0).", latex: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}" };
+    case "B":
+      return { texte: "Dérivation logarithmique : pose g(x) = f(x) − c, prends ln des deux membres et dérive.", latex: `\\ln\\left(g(x)\\right) = ${exercice.a === 1 ? "" : exercice.a}x\\ln\\left(${baseBLatex(exercice)}\\right)` };
+    case "C":
+      return { texte: "Dérive ln|u| comme ln(u) : (ln|u|)' = u'/u, puis étudie séparément le signe du numérateur et du trinôme sur chaque intervalle.", latex: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" };
+    case "D":
+      return { texte: "Dérive le logarithme d'une fonction :", latex: "\\left(\\ln(u)\\right)'=\\dfrac{u'}{u}" };
+    case "E":
+      return { texte: "Dérive terme à terme, puis mets au même dénominateur.", latex: "\\left(\\dfrac{c}{x}\\right)' = -\\dfrac{c}{x^2}" };
+  }
+}
+
+export function aideCroissanceNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Après simplification (l'équation f'(x) = 0 reste à résoudre) :", latex: `f'(x) = \\dfrac{${exercice.k}\\left(${1 - exercice.c} - \\ln(x)\\right)}{x^2}` };
+    case "B":
+      return { texte: "Tu dois obtenir (g > 0, il reste à étudier le signe de la parenthèse) :", latex: `\\dfrac{g'(x)}{g(x)} = ${exercice.a === 1 ? "" : exercice.a}\\left(\\ln\\left(${baseBLatex(exercice)}\\right) + 1\\right)` };
+    case "C":
+      return { texte: "La valeur de l'extremum se calcule en remplaçant x par le zéro de f' dans f. Au passage, le trinôme y vaut :", latex: `${-exercice.q * exercice.q}` };
+    case "D":
+      return { texte: "Dérivée (son signe reste à étudier) :", latex: `f'(x) = \\dfrac{${exercice.m}\\left(2x${termeConstanteLatex(-2 * exercice.p)}\\right)}{${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p + exercice.a * exercice.a)}}` };
+    case "E":
+      return { texte: "Dérivée terme à terme (mise au même dénominateur non faite) :", latex: `f'(x) = ${exercice.m}\\left(\\dfrac{1}{x} - \\dfrac{${exercice.c}}{x^2}\\right)` };
+  }
+}
+
+export function aideConcaviteNiveau1(_exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  return {
+    texte: "Étudie le signe de f'' : f'' > 0 ⟹ convexe, f'' < 0 ⟹ concave ; un changement de signe de f'' donne un point d'inflexion.",
     latex: "f''(x) > 0 \\Rightarrow \\text{convexe} \\qquad f''(x) < 0 \\Rightarrow \\text{concave}",
   };
 }
 
-export function aideConcaviteNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f''(x) = f(x)·[a²(ln(x)+1)² + a/x] — une somme de deux termes toujours positifs (x>0, a>0).", latex: "f''(x)=f(x)\\cdot\\left[a^2(\\ln(x)+1)^2+\\dfrac{a}{x}\\right]" };
-  if (exercice.famille === "B") return { texte: "Résultat NON trivial pour cette famille : la position exacte des points d'inflexion n'a pas de forme simple — utilise ta calculatrice pour un balayage numérique du signe de f''.", latex: null };
-  if (exercice.famille === "C") return { texte: "f''(x) = -2(x²+k²)/(k²-x²)² sur ]-k;k[, et une formule de même signe sur les 2 autres branches — toujours strictement négative.", latex: "f''(x)=\\dfrac{-2(x^2+k^2)}{(k^2-x^2)^2} \\quad \\text{sur } ]-k;k[" };
-  return { texte: "f''(x) = c·e^(-x) — toujours strictement positif (c>0).", latex: "f''(x)=c\\,e^{-x}" };
+export function aideConcaviteNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Dérivée seconde (son signe reste à étudier) :", latex: `f''(x) = \\dfrac{${exercice.k}\\left(2\\ln(x)${termeConstanteLatex(2 * exercice.c - 3)}\\right)}{x^3}` };
+    case "B":
+      return { texte: "Avec g = f − c : g'' = g·[(g'/g)² + (g'/g)'] — compare chaque terme à 0 (x > 0).", latex: `\\dfrac{g''(x)}{g(x)} = ${exercice.a * exercice.a === 1 ? "" : exercice.a * exercice.a}\\left(\\ln\\left(${baseBLatex(exercice)}\\right)+1\\right)^2 + \\dfrac{${exercice.a}}{x}` };
+    case "C":
+      return {
+        texte: "Dérivée seconde (son signe reste à étudier) :",
+        latex: `f''(x) = \\dfrac{${-2 * exercice.m}\\left(\\left(x${termeConstanteLatex(-exercice.p)}\\right)^2 + ${exercice.q * exercice.q}\\right)}{\\left(${trinomeC(exercice)}\\right)^2}`,
+      };
+    case "D":
+      return {
+        texte: "Dérivée seconde (son signe reste à étudier) :",
+        latex: `f''(x) = \\dfrac{${2 * exercice.m}\\left(${exercice.a * exercice.a} - \\left(x${termeConstanteLatex(-exercice.p)}\\right)^2\\right)}{\\left(${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p + exercice.a * exercice.a)}\\right)^2}`,
+      };
+    case "E":
+      return { texte: "Dérivée seconde terme à terme (mise au même dénominateur non faite) :", latex: `f''(x) = ${exercice.m}\\left(-\\dfrac{1}{x^2} + \\dfrac{${2 * exercice.c}}{x^3}\\right)` };
+  }
 }
 
-export function aideGraphiqueNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Le graphique doit rester CONVEXE sur tout son domaine (x>0), avec un minimum unique en x=1/e ≈ 0,37, et une limite FINIE (1) en x→0⁺ — jamais une asymptote verticale à cet endroit.", latex: "x=\\dfrac{1}{e}" };
-  if (exercice.famille === "B") return { texte: "Le graphique doit présenter une asymptote HORIZONTALE y=1 en +∞ (jamais un tracé qui continue de s'écarter), et un seul extremum en x=e.", latex: "y=1,\\quad x=e" };
-  if (exercice.famille === "C") return { texte: "Le graphique doit être SYMÉTRIQUE par rapport à l'axe des y, avec 2 asymptotes verticales bien placées en x=±k.", latex: "x=\\pm k" };
-  return { texte: "Le graphique doit se RAPPROCHER de la droite y=x en +∞ (jamais s'en éloigner), et n'avoir qu'un seul minimum.", latex: "y=x" };
+export function aideGraphiqueNiveau1(_exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  return { texte: "Compare chaque graphique à tes conclusions : limites et asymptotes, sens de variation et extremum, concavité.", latex: null };
 }
 
-export function aideGraphiqueNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Position du minimum :", latex: "x=1/e \\approx 0{,}37" };
-  if (exercice.famille === "B") return { texte: exercice.k > 0 ? "Un MAXIMUM (pas un minimum) en x=e." : "Un MINIMUM (pas un maximum) en x=e.", latex: "x=e" };
-  if (exercice.famille === "C") return { texte: "Valeur du maximum local en x=0 :", latex: `\\ln(${exercice.k}^2) = 2\\ln(${exercice.k})` };
-  return { texte: exercice.c > 0 ? "Position du minimum :" : "", latex: exercice.c > 0 ? `x=\\ln(${exercice.c})` : null };
-}
-
-export function aideComportementInfiniNiveau1(): AideAvecLatex {
-  return {
-    texte: "|f(x)| ≤ |e^(ax)| toujours (l'enveloppe encadre l'oscillation, |sin|/|cos| ≤ 1) — si l'enveloppe tend vers 0, f aussi (encadrement) ; si elle explose, f oscille indéfiniment SANS jamais se stabiliser.",
-    latex: "|f(x)|\\le |e^{ax}|",
-  };
-}
-
-export function aideComportementInfiniNiveau2(exercice: ExerciceEtudeLogE): AideAvecLatex {
-  const directionZero = exercice.a < 0 ? "x \\to +\\infty" : "x \\to -\\infty";
-  return { texte: "La direction où l'enveloppe tend vers 0 (conclusion sur l'autre direction non donnée) :", latex: directionZero };
+export function aideGraphiqueNiveau2(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
+  switch (exercice.famille) {
+    case "A":
+      return { texte: "Regarde en particulier le comportement près de 0⁺ et la droite dont la courbe se rapproche en +∞.", latex: null };
+    case "B":
+      return { texte: "Regarde en particulier le point de départ de la courbe en 0⁺ et la nature de l'extremum.", latex: null };
+    case "C":
+      return { texte: "Regarde en particulier l'axe de symétrie de la courbe et ses 3 branches.", latex: null };
+    case "D":
+      return { texte: "Regarde en particulier l'abscisse de l'extremum et l'écart entre les deux points d'inflexion.", latex: null };
+    case "E":
+      return { texte: "Regarde en particulier l'existence d'un extremum et le comportement près de 0⁺.", latex: null };
+  }
 }
 
 // ============================================================================
-// Récapitulatif final — un libellé + un contenu par écran RÉELLEMENT visité par la famille de
-// l'exercice (6 écrans pour A-D, 2 pour E).
+// Récapitulatif et réponse révélée — un contenu LaTeX par écran.
 // ============================================================================
 
 export const LIBELLE_PHASE_ETUDE_LOG: Record<PhaseEtudeFonctionLogarithme, string> = {
@@ -438,18 +421,10 @@ export const LIBELLE_PHASE_ETUDE_LOG: Record<PhaseEtudeFonctionLogarithme, strin
   croissance: "Croissance",
   concavite: "Concavité",
   graphique: "Graphique",
-  comportementInfini: "Comportement à l'infini",
 };
 
-/** Ordre d'affichage des phases RÉELLEMENT visitées par une famille donnée. */
-export function phasesVisitees(famille: ExerciceEtudeFonctionLogarithme["famille"]): PhaseEtudeFonctionLogarithme[] {
-  if (famille === "E") return ["domaine", "comportementInfini"];
-  return ["domaine", "limites", "asymptotes", "croissance", "concavite", "graphique"];
-}
-
-export interface ContenuRecap {
-  texte: string | null;
-  latex: string | null;
+export function phasesVisitees(): PhaseEtudeFonctionLogarithme[] {
+  return PHASES_ETUDE_LOG;
 }
 
 function formatCibleLimiteLatex(cible: CibleLimite): string {
@@ -459,109 +434,51 @@ function formatCibleLimiteLatex(cible: CibleLimite): string {
   return String(cible.valeur);
 }
 
-export function formatLimitesRecapLatex(exercice: ExerciceEtudeLogNonE): string {
-  const labels = directionLabelsLimites(exercice);
-  const lignes = labels.map((l, i) => `${l.latex} : ${formatCibleLimiteLatex(exercice.limites[i])}`);
-  return `\\begin{gathered} ${lignes.join(" \\\\ ")} \\end{gathered}`;
+/** « e ≈ 2,72 » — la forme exacte, suivie de sa valeur approchée quand elle n'est pas entière. */
+function positionLatex(exacte: string, valeur: number): string {
+  if (Number.isInteger(valeur) || exacte === String(valeur)) return exacte;
+  return `${exacte} \\approx ${nombreLatex(valeur)}`;
 }
 
-function formatAsymptotesRecapLatex(exercice: ExerciceEtudeLogNonE): string {
-  const labels = directionLabelsAsymptotes(exercice);
-  const lignes = labels.map((l, i) => `${l.latex} : ${formatEquationAsymptoteLatex(exercice.asymptotes[i])}`);
-  return `\\begin{gathered} ${lignes.join(" \\\\ ")} \\end{gathered}`;
+function formatConcaviteLatex(concavite: CibleConcaviteLog): string {
+  if (concavite.type === "convexe_partout") return "\\text{convexe sur tout le domaine}";
+  if (concavite.type === "concave_partout") return "\\text{concave sur tout le domaine}";
+  const positions = concavite.positions.map((p, i) => `x = ${positionLatex(concavite.positionsLatex[i], p)}`);
+  return concavite.positions.length > 1 ? `\\text{points d'inflexion en } ${positions.join(" \\text{ et } ")}` : `\\text{point d'inflexion en } ${positions[0]}`;
 }
 
-function formatConcaviteRecap(concavite: CibleConcaviteLog): ContenuRecap {
-  if (concavite.type === "convexe_partout") return { texte: "Convexe (partout)", latex: null };
-  if (concavite.type === "concave_partout") return { texte: "Concave (partout)", latex: null };
-  const label = concavite.positions.length > 1 ? "Points d'inflexion en x=" : "Point d'inflexion en x=";
-  return { texte: `${label}${concavite.positions.map((p) => p.toFixed(3)).join(" et x=")}`, latex: null };
-}
-
-/** Contenu affiché par la `LigneRecap` d'un écran donné — LA RÉPONSE RÉELLEMENT attendue de cet
- * écran, jamais recalculée depuis un score. */
-export function contenuRecapPhase(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): ContenuRecap {
+/** Réponse RÉELLEMENT attendue d'un écran, toujours en LaTeX — alimente la réponse révélée, la
+ * fiche de consultation, le récapitulatif et le corrigé exporté. */
+export function contenuRecapLatex(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): string {
   switch (phase) {
     case "domaine":
-      return { texte: null, latex: formatEnsembleReelLatex(exercice.domaine) };
-    case "limites":
-      return exercice.famille === "E" ? { texte: null, latex: null } : { texte: null, latex: formatLimitesRecapLatex(exercice) };
-    case "asymptotes":
-      return exercice.famille === "E" ? { texte: null, latex: null } : { texte: null, latex: formatAsymptotesRecapLatex(exercice) };
+      return formatEnsembleReelLatex(exercice.domaine);
+    case "limites": {
+      const labels = directionLabelsLimites(exercice);
+      return `\\begin{gathered} ${labels.map((l, i) => `${l.latex} : ${formatCibleLimiteLatex(exercice.limites[i])}`).join(" \\\\ ")} \\end{gathered}`;
+    }
+    case "asymptotes": {
+      if (exercice.famille === "C") return exercice.asymptotes.map(formatEquationAsymptoteLatex).join(" \\quad\\text{et}\\quad ");
+      const labels = directionLabelsAsymptotes(exercice);
+      return `\\begin{gathered} ${labels.map((l, i) => `${l.latex} : ${formatEquationAsymptoteLatex(exercice.asymptotes[i])}`).join(" \\\\ ")} \\end{gathered}`;
+    }
     case "croissance": {
-      if (exercice.famille === "E") return { texte: null, latex: null };
       if (exercice.famille === "C") {
-        const c = exercice.croissance;
-        return { texte: `Signes : ${c.signes.join(", ")} — maximum local en x=${c.positionMax}`, latex: null };
+        const intervalles = intervallesGrilleCLatex(exercice);
+        const lignes = exercice.croissance.signes.map((s, i) => `\\text{${s === "croissante" ? "croissante" : "décroissante"} sur } ${intervalles[i]}`);
+        const nature = exercice.croissance.extremum === "maximum" ? "maximum" : "minimum";
+        lignes.push(`\\text{${nature} local : } f(${exercice.croissance.positionExtremum}) = ${positionLatex(exercice.croissance.valeurExtremumLatex, exercice.croissance.valeurExtremum)}`);
+        return `\\begin{gathered} ${lignes.join(" \\\\ ")} \\end{gathered}`;
       }
       const c = exercice.croissance;
-      if (c.type === "croissante_partout") return { texte: "Croissante (partout)", latex: null };
-      if (c.type === "decroissante_partout") return { texte: "Décroissante (partout)", latex: null };
-      return { texte: `${c.type === "minimum" ? "Minimum" : "Maximum"} en x=${typeof c.position === "number" ? c.position.toFixed(3) : c.position}`, latex: null };
+      if (c.type === "croissante_partout") return "\\text{croissante sur tout le domaine}";
+      if (c.type === "decroissante_partout") return "\\text{décroissante sur tout le domaine}";
+      return `\\text{${c.type === "minimum" ? "minimum" : "maximum"} en } x = ${positionLatex(exercice.croissanceLatex, c.position as number)}`;
     }
     case "concavite":
-      return exercice.famille === "E" ? { texte: null, latex: null } : formatConcaviteRecap(exercice.concavite);
+      return formatConcaviteLatex(exercice.concavite);
     case "graphique":
-      return exercice.famille === "E" ? { texte: null, latex: null } : { texte: `Graphique n°${exercice.indexCorrect + 1}`, latex: null };
-    case "comportementInfini": {
-      if (exercice.famille !== "E") return { texte: null, latex: null };
-      const fmt = (s: string) => (s === "zero" ? "0" : "n'existe pas");
-      return { texte: null, latex: `\\begin{gathered} x\\to-\\infty : ${fmt(exercice.comportement.moinsInfini)} \\\\ x\\to+\\infty : ${fmt(exercice.comportement.plusInfini)} \\end{gathered}` };
-    }
-  }
-}
-
-/** Un fragment KaTeX unique `\text{label : } ...` à partir d'un `ContenuRecap` — `texte` seul est
- * enveloppé dans `\text{}` (croissance/concavité), `latex` seul est ajouté après le label (domaine/
- * limites/asymptotes/graphique), les deux combinés sinon. */
-function fragmentDepuisContenuRecap(label: string, contenu: ContenuRecap): string {
-  if (contenu.latex !== null) return `\\text{${label} : } ${contenu.latex}`;
-  if (contenu.texte !== null) return `\\text{${label} : ${contenu.texte}}`;
-  return `\\text{${label}}`;
-}
-
-/**
- * Bloc "état actuel" — écrans ≥2 UNIQUEMENT quand la tâche de l'écran s'appuie RÉELLEMENT sur un
- * fait confirmé d'un écran antérieur (CLAUDE.md : consigne générale → bloc données → bloc "état
- * actuel" → bloc de travail) — `null` quand la tâche est autonome (signe de f'/f'', recalculé
- * directement depuis f, indépendamment de tout écran précédent), même philosophie que `etatActuel`
- * de `formatDomaineDeriveeLogarithme.ts` (6gen16, "null sur tout écran dont la vérification ne
- * dépend pas d'un écran précédent"). Dérivé UNIQUEMENT de l'exercice via `contenuRecapPhase`
- * (jamais de la saisie brute de l'élève) :
- * - `limites` (consigne "aux bornes de son domaine") : rappelle le domaine confirmé.
- * - `asymptotes` (consigne explicite "à partir des limites CORRECTES précédentes") : rappelle les
- *   limites confirmées.
- * - `croissance` (consigne "étudie le signe de f' et conclus" — s'appuie implicitement sur le
- *   domaine/les limites/les asymptotes déjà établis pour situer la conclusion) : rappelle domaine +
- *   limites + asymptotes, dans cet ordre — familles A/B/D (forme "standard") ET famille C (forme
- *   "grilleC"), même rappel dans les deux cas.
- * - `concavite` (synthèse partielle avant le graphique) : rappelle domaine + limites + asymptotes +
- *   croissance, dans cet ordre.
- * - `graphique` (synthèse finale, doit choisir le graphique cohérent avec TOUS les faits établis) :
- *   rappelle domaine/limites/asymptotes/croissance/concavité, dans cet ordre.
- * - `comportementInfini` (famille E uniquement, chemin séparé domaine→comportementInfini) : rappelle
- *   le domaine déjà confirmé — seule phase où la famille E a quelque chose à rappeler.
- * - famille E : `null` partout SAUF `comportementInfini` (domaine toujours ℝ, sans incidence sur le
- *   comportement qualitatif ailleurs).
- */
-export function etatActuel(phase: PhaseEtudeFonctionLogarithme, exercice: ExerciceEtudeFonctionLogarithme): string[] | null {
-  if (exercice.famille === "E") {
-    if (phase === "comportementInfini") return [fragmentDepuisContenuRecap("Domaine", contenuRecapPhase(exercice, "domaine"))];
-    return null;
-  }
-  switch (phase) {
-    case "limites":
-      return [fragmentDepuisContenuRecap("Domaine", contenuRecapPhase(exercice, "domaine"))];
-    case "asymptotes":
-      return [fragmentDepuisContenuRecap("Limites", contenuRecapPhase(exercice, "limites"))];
-    case "croissance":
-      return (["domaine", "limites", "asymptotes"] as const).map((p) => fragmentDepuisContenuRecap(LIBELLE_PHASE_ETUDE_LOG[p], contenuRecapPhase(exercice, p)));
-    case "concavite":
-      return (["domaine", "limites", "asymptotes", "croissance"] as const).map((p) => fragmentDepuisContenuRecap(LIBELLE_PHASE_ETUDE_LOG[p], contenuRecapPhase(exercice, p)));
-    case "graphique":
-      return (["domaine", "limites", "asymptotes", "croissance", "concavite"] as const).map((p) => fragmentDepuisContenuRecap(LIBELLE_PHASE_ETUDE_LOG[p], contenuRecapPhase(exercice, p)));
-    default:
-      return null;
+      return `\\text{graphique ${String.fromCharCode(65 + exercice.indexCorrect)}}`;
   }
 }
 

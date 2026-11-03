@@ -28,17 +28,10 @@ function nouvelleSession(theme: VarianteQuizGeometrieEspace): EtatSessionQuizGeo
   return demarrerSessionQuizGeometrieEspace(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
-/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que
- * `AppQuizGeometrieAnalytique.tsx`) — jamais sur l'écran normal donné aux élèves. */
-function modeDevActif(): boolean {
-  if (import.meta.env.DEV) return true;
-  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
-}
-
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que les 7 quiz précédents
- * (gen59-65). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement
- * (`modeDevActif`), jamais visible sur l'écran normal donné aux élèves. */
+ * (gen59-65). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais
+ * visible sur l'écran normal donné aux élèves. */
 export function AppQuizGeometrieEspace() {
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizGeometrieEspace | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizGeometrieEspace | null>(null);
@@ -72,7 +65,7 @@ export function AppQuizGeometrieEspace() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Géométrie dans l'espace — vrai ou faux</h1>
         <p className="app-subtitle">Chapitre 8 — {CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label ?? "Géométrie dans l'espace"}</p>
-        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />}
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="card-progress">
             <div className="card-progress-row">

@@ -1,6 +1,6 @@
 import type { ExerciceHyperboliquesA, ExerciceHyperboliquesB, ExerciceHyperboliquesC, ExerciceHyperboliquesD, SigneLimiteHyperbolique, StatutPariteHyperbolique } from "../core6e/hyperboliques.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
+import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction } from "./equivalenceExponentielle";
 
 /**
  * Couche B (6e) — vérification pour `6gen19`. N'importe jamais rien de `src/generateurs6e/` — voir
@@ -21,15 +21,12 @@ import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnos
  *   généreux (une tolérance à 0.01 laisserait passer, par exemple, `2.24` pour `√5≈2.236`, ce qui
  *   est correct, mais aussi masquerait une erreur de radicande d'ampleur comparable).
  *
- * **Décision de conception — famille B, écran "isoler" sans signe de x0 précisé** : le champ est
- * un texte libre UNIQUE (spec : "Champ : expression symbolique... avec ou sans ±"), mais
- * `expressionExponentielle.ts` (évaluateur partagé) ne reconnaît pas le symbole "±" (glyphe non
- * arithmétique, jamais ajouté pour ce seul besoin — resterait de toute façon ambigu à évaluer
- * numériquement en un point unique, et aucun autre écran de la plateforme n'a ce besoin). Résolu
- * en acceptant L'UNE OU L'AUTRE des deux valeurs possibles (+√(k²−1) OU −√(k²−1)) à CET écran — la
- * reconnaissance du bon RADICANDE (k²−1) est déjà le point pédagogique de cet écran ; le fait que
- * les DEUX signes sont possibles reste intégralement testé à l'écran suivant (`bValeurs`,
- * add-as-needed, qui exige littéralement les 2 valeurs quand le signe n'est pas précisé).
+ * **Famille B — un seul écran, valeur(s) EXACTE(S)** : l'ancien couple "isoler"/"valeurs"
+ * faisait doublon (la même saisie `sqrt(...)` validait les deux écrans). Désormais un seul écran,
+ * add-as-needed (1 ou 2 valeurs) : quand le signe de x0 n'est pas précisé, les DEUX valeurs
+ * ±√(k²−1) sont exigées (piège central : sh peut être positive ou négative). Tolérance exacte
+ * (`TOLERANCE_EXACTE`) — une valeur approchée au centième est détectée séparément
+ * (`estApproximationB`) pour afficher « donne la valeur exacte » plutôt qu'un simple « faux ».
  */
 
 const TOLERANCE_ALGEBRIQUE = 0.01;
@@ -56,6 +53,10 @@ const PARITE_PAR_TYPE: Record<ExerciceHyperboliquesA["type"], StatutPariteHyperb
   chCarre: "paire",
   shPlusCh: "aucune",
   shMoinsCh: "aucune",
+  shPlusConstante: "aucune", // piège : sh est impaire, mais sh(x)+c (c≠0) ne l'est plus
+  xSh: "paire", // produit de deux fonctions impaires
+  xCh: "impaire", // impaire × paire
+  shCube: "impaire",
 };
 
 export function pariteAttendueA(exercice: ExerciceHyperboliquesA): StatutPariteHyperbolique {
@@ -76,22 +77,6 @@ function racineTrouverSh(exercice: { k: number }): number {
   return Math.sqrt(exercice.k * exercice.k - 1);
 }
 
-export function diagnostiquerBIsoler(exercice: ExerciceHyperboliquesB, texte: string): StatutVerification {
-  if (exercice.sousType === "trouverCh") {
-    return diagnostiquerValeur(texte, cibleTrouverCh(exercice), TOLERANCE_EXACTE);
-  }
-  const racine = racineTrouverSh(exercice);
-  if (exercice.signeX0 !== null) {
-    return diagnostiquerValeur(texte, exercice.signeX0 * racine, TOLERANCE_EXACTE);
-  }
-  const statutPositif = diagnostiquerValeur(texte, racine, TOLERANCE_EXACTE);
-  if (statutPositif !== "not_equivalent") return statutPositif;
-  return diagnostiquerValeur(texte, -racine, TOLERANCE_EXACTE);
-}
-export function verifierBIsoler(exercice: ExerciceHyperboliquesB, texte: string): boolean {
-  return diagnostiquerBIsoler(exercice, texte) === "correct";
-}
-
 function valeursAttenduesB(exercice: ExerciceHyperboliquesB): number[] {
   if (exercice.sousType === "trouverCh") return [cibleTrouverCh(exercice)];
   const racine = racineTrouverSh(exercice);
@@ -99,8 +84,18 @@ function valeursAttenduesB(exercice: ExerciceHyperboliquesB): number[] {
   return [racine, -racine];
 }
 
+export function valeursExactesB(exercice: ExerciceHyperboliquesB): number[] {
+  return valeursAttenduesB(exercice);
+}
+
 export function diagnostiquerBValeurs(exercice: ExerciceHyperboliquesB, textes: string[]): StatutVerification {
   return diagnostiquerEnsembleValeurs(textes, valeursAttenduesB(exercice), TOLERANCE_EXACTE);
+}
+
+/** Vrai si la saisie est juste à un ARRONDI au centième près (ex. « 2,24 » pour √5) sans être la
+ * valeur exacte — sert seulement à choisir le message d'erreur, jamais à accepter la réponse. */
+export function estApproximationB(exercice: ExerciceHyperboliquesB, textes: string[]): boolean {
+  return diagnostiquerBValeurs(exercice, textes) === "not_equivalent" && diagnostiquerEnsembleValeurs(textes, valeursAttenduesB(exercice), 0.0051) === "correct";
 }
 export function verifierBValeurs(exercice: ExerciceHyperboliquesB, textes: string[]): boolean {
   return diagnostiquerBValeurs(exercice, textes) === "correct";
@@ -133,18 +128,6 @@ export function verifierCDeriveeSeconde(exercice: ExerciceHyperboliquesC, texte:
   return diagnostiquerCDeriveeSeconde(exercice, texte) === "correct";
 }
 
-/** Écran "relation" — champ interprété comme la VALEUR du coefficient k² uniquement (jamais une
- * relation textuelle complète "f''=...f", reconnaissance de motif jugée fragile et hors de portée
- * de l'évaluateur partagé, qui ne lie aucune variable "f") — décision documentée, cohérente avec
- * le reste du chantier (champ numérique simple plutôt qu'un parseur de relation ad hoc). Tolérance
- * par défaut (0.01) : k²∈{1,4,9}, entier, largement dans la marge. */
-export function diagnostiquerCRelation(exercice: ExerciceHyperboliquesC, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.k * exercice.k);
-}
-export function verifierCRelation(exercice: ExerciceHyperboliquesC, texte: string): boolean {
-  return diagnostiquerCRelation(exercice, texte) === "correct";
-}
-
 // ============================================================================
 // Famille D — f(x) = a·sh(x) + b·ch(x) = [(a+b)e^x + (b−a)e^(−x)]/2.
 // ============================================================================
@@ -159,7 +142,7 @@ function referenceD(exercice: ExerciceHyperboliquesD): (x: number) => number {
  * pas la reconnaissance visée par cet écran (même esprit que les gardes structurelles de 6gen16
  * famille E/G, `verificationDomaineDeriveeLogarithme.ts`). */
 function contientShOuCh(texte: string): boolean {
-  return /\b(sh|ch)\s*\(/i.test(texte);
+  return /\b(sh|ch|sinh|cosh)\s*\(/i.test(texte);
 }
 
 export function diagnostiquerDReecriture(exercice: ExerciceHyperboliquesD, texte: string): StatutVerification {

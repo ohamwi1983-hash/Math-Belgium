@@ -25,18 +25,14 @@
  *   saine, esprit "produit avec terme logarithmique" préservé.
  * - **Famille F, sous-type "lnSurSin"** (ln(sin(e^x))/sin(e^x) dans la spec source) : même
  *   problème de domaine périodique infini (e^x parcourt (0;+∞), sin(e^x)>0 sur une infinité
- *   d'intervalles). Même résolution : `ln(2+sin(e^x))/(2+sin(e^x))`, domaine ℝ.
- * - **Famille F, sous-type "racineArcsin"** (spec : "√(1−arcsin(e^x))") : le domaine LITTÉRAL exige
- *   arcsin(e^x)≤1 ⟺ e^x≤sin(1) ⟺ x≤ln(sin(1)) — borne TRANSCENDANTE, non saisissable exactement
- *   via `EnsembleReelGuideBuilder` (qui n'accepte qu'entier/décimal/fraction, jamais une expression
- *   symbolique — même contrainte que 6gen7 famille F, restriction de k aux carrés parfaits pour
- *   `arccos`). Résolu en RÉORDONNANT la composition (racine à l'intérieur plutôt qu'à l'extérieur) :
- *   `arcsin(√(1−e^x))` — même intention pédagogique (racine+arcsin+exponentielle, révision pure
- *   chapitres 1-2, AUCUN logarithme, conforme à la spec), domaine exactement `x≤0` (`e^x≤1`), la
- *   condition arcsin(√(1−e^x))∈[-1;1] étant alors automatiquement satisfaite (√(1−e^x)∈[0;1[⊂[-1;1]).
- * - **Famille F, sous-type "arctanLog"** : "log(2x)" sans base explicite (contrairement aux autres
- *   familles, qui écrivent systématiquement "log_base") — interprété comme le logarithme décimal
- *   (base 10), convention standard quand "log" apparaît sans indice explicite.
+ *   d'intervalles). Même résolution : `ln(a+sin(e^x))/(a+sin(e^x))` (a≥2), domaine ℝ.
+ * - **Famille F, sous-type "racineArcsin"** (spec : "√(1−arcsin(e^x))") : borne de domaine
+ *   transcendante, puis reformulation en arcsin(√(1−e^x)) sans aucun logarithme — sous-type RETIRÉ
+ *   (audit 6e ch. 3, point 27), remplacé par "arcsinLogX" = arcsin(log_base(x)), domaine exact
+ *   `[1/base ; base]`.
+ * - **Famille F, sous-type "arctanLog"** : "log(2x)" sans base explicite, à l'origine interprété
+ *   comme le logarithme décimal ; généralisé (audit 6e ch. 3, point 27) en arctan(kx)/(1−log_base x),
+ *   point exclu caché x=base.
  * - **Famille G, sous-types "à simplifier"** : la spec donne littéralement "(√x)^x" pour le premier,
  *   mais annonce que "les deux [sous-types] se réduisent à la même forme finale x^(1+x/2)" — or
  *   (√x)^x = x^(x/2) ≠ x^(1+x/2) (elles diffèrent d'un facteur x). Le second sous-type, lui,
@@ -299,22 +295,23 @@ export type ExerciceDomaineDeriveeLogE =
 
 // ============================================================================
 // Famille F — Synthèse transversale, log+trig+exponentielle+cyclométrique (2 écrans : domaine,
-// dérivée). 4 sous-types (voir note de tête pour "lnSurSin"/"racineArcsin", reformulés pour
-// domaine exactement constructible).
+// dérivée). 4 sous-types, tous PARAMÉTRÉS et tous avec un logarithme (audit 6e ch. 3, point 27 :
+// 6 exercices distincts seulement, et l'ancien sous-type "racineArcsin" — arcsin(√(1−e^x)) — ne
+// contenait aucun logarithme ; remplacé par "arcsinLogX").
 // ============================================================================
 
-/** f(x) = ln(2+sin(e^x))/(2+sin(e^x)). Domaine ℝ. */
+/** f(x) = ln(a+sin(e^x))/(a+sin(e^x)), `a∈{2,3,4}`. Domaine ℝ (a+sin(e^x) ≥ a−1 ≥ 1 > 0). */
 export interface ExerciceDomaineDeriveeLogFLnSurSin {
   famille: "F";
   sousType: "lnSurSin";
   domaine: EnsembleReelGuide;
+  a: number;
 }
 
 /**
  * f(x) = arcsin(log_base(k^x)), avec `k=base^p` — garantit `log_base(k^x)=p·x` EXACTEMENT (une
  * fonction affine simple), donc un domaine borné SYMÉTRIQUE `[-1/p;1/p]` propre (même esprit que
- * 6gen7 §F, restriction pour borne exactement saisissable). `p∈{2,3}`, couples (base,k) valides
- * dans la plage spec `base∈{2,3,5,7,10}`, `k∈{2,...,9}` : (2,4,p=2), (2,8,p=3), (3,9,p=2).
+ * 6gen7 §F, restriction pour borne exactement saisissable). `base∈{2,3,5}`, `p∈{2,3}`.
  */
 export interface ExerciceDomaineDeriveeLogFArcsinLog {
   famille: "F";
@@ -325,26 +322,28 @@ export interface ExerciceDomaineDeriveeLogFArcsinLog {
   p: 2 | 3;
 }
 
-/** f(x) = arcsin(√(1−e^x)) — reformulation de "√(1−arcsin(e^x))" (voir note de tête), pure
- * révision chapitres 1-2, aucun logarithme. Domaine x≤0. */
-export interface ExerciceDomaineDeriveeLogFRacineArcsin {
+/** f(x) = arcsin(log_base(x)), `base∈{2,3,5,10}`. Domaine `[1/base ; base]` (−1 ≤ log_base x ≤ 1). */
+export interface ExerciceDomaineDeriveeLogFArcsinLogX {
   famille: "F";
-  sousType: "racineArcsin";
+  sousType: "arcsinLogX";
   domaine: EnsembleReelGuide;
+  base: number;
 }
 
-/** f(x) = arctan(2x)/(1−log₁₀(2x)). Domaine x>0 ET x≠5 (point exclu caché, dénominateur nul en
- * log₁₀(2x)=1 i.e. 2x=10). */
+/** f(x) = arctan(kx)/(1−log_base(x)), `k∈{1,2,3}`, `base∈{2,3,5,10}`. Domaine x>0 ET x≠base (point
+ * exclu caché : le dénominateur s'annule pour log_base(x)=1). */
 export interface ExerciceDomaineDeriveeLogFArctanLog {
   famille: "F";
   sousType: "arctanLog";
   domaine: EnsembleReelGuide;
+  k: number;
+  base: number;
 }
 
 export type ExerciceDomaineDeriveeLogF =
   | ExerciceDomaineDeriveeLogFLnSurSin
   | ExerciceDomaineDeriveeLogFArcsinLog
-  | ExerciceDomaineDeriveeLogFRacineArcsin
+  | ExerciceDomaineDeriveeLogFArcsinLogX
   | ExerciceDomaineDeriveeLogFArctanLog;
 
 // ============================================================================
@@ -352,25 +351,28 @@ export type ExerciceDomaineDeriveeLogF =
 // f'/f, isoler f') — NOUVEAUTÉ CENTRALE. Aucun champ `domaine` (hypothèse reprise de l'énoncé
 // source : bases supposées strictement positives, pas d'écran de domaine pour cette famille).
 //
-// **Décision de conception — aucun paramètre numérique aléatoire** : contrairement aux 6 autres
-// familles, la spec ne donne AUCUNE plage de coefficients pour la famille G — chaque variante est
-// une formule STRUCTURELLEMENT fixe (`x^x`, `x^(sin x)`...). `construireG()` tire uniquement la
-// VARIANTE (8 au total), équiprobable — voir `generateurs6e/domaineDeriveeLogarithme/familles/G.ts`.
+// **Paramètre `a`** (audit 6e ch. 3, point 27 : 8 exercices seulement, tous fixes) : la plupart
+// des variantes portent désormais un entier `a` (coefficient de l'exposant, constante de la base…),
+// et 2 variantes ont été ajoutées (`xLnx`, `affinePuissanceX`) — 20 exercices distincts. `a=1` pour
+// les 2 variantes restées fixes (`racineXPuissanceX`, `xRacineXPuissanceX`).
 // ============================================================================
 
 export type VarianteG =
-  | "xx" // x^x
-  | "xSinx" // x^(sin x)
-  | "cosTan" // (cos x)^(tan x)
-  | "unSurXPuissanceX" // (1+1/x)^x
-  | "sinXInvX" // (sin x)^(1/x)
+  | "xx" // x^(a·x), a∈{1,2,3}
+  | "xSinx" // x^(sin(a·x)), a∈{1,2}
+  | "cosTan" // (cos x)^(a·tan x), a∈{1,2}
+  | "unSurXPuissanceX" // (1+a/x)^x, a∈{1,2,3}
+  | "sinXInvX" // (sin x)^(a/x), a∈{1,2}
   | "racineXPuissanceX" // x·(√x)^x = x^(1+x/2) — voir note de tête (coquille corrigée)
   | "xRacineXPuissanceX" // x·√(x^x) = x^(1+x/2)
-  | "produit"; // (1+x)/x^(1+x) = (1+x)·x^(-(1+x))
+  | "produit" // (a+x)/x^(a+x) = (a+x)·x^(-(a+x)), a∈{1,2}
+  | "xLnx" // x^(ln x)
+  | "affinePuissanceX"; // (x+a)^x, a∈{1,2,3}
 
 export interface ExerciceDomaineDeriveeLogG {
   famille: "G";
   variante: VarianteG;
+  a: number;
 }
 
 export type ExerciceDomaineDeriveeLogarithme =

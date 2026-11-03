@@ -1,5 +1,5 @@
 /**
- * Couche B (6e) — types pour `6gen17`. 5 familles STRUCTURELLEMENT DISJOINTES (2 ou 3 écrans
+ * Couche B (6e) — types pour `6gen17`. 3 familles STRUCTURELLEMENT DISJOINTES (2 écrans
  * chacune) — `phaseInitiale`/`phaseApres` dispatchent sur `exercice.famille`, jamais une séquence
  * commune (même principe que `typesLimitesExponentielles.ts`, 6gen6). Noms de phase préfixés par
  * la lettre de famille pour rester non-ambigus dans `scoresPartiels`, qui accumule au fil des
@@ -15,13 +15,7 @@ export type PhaseLimiteLogarithmique =
   | "bReformuler"
   | "bConclure"
   | "cDiagnostic"
-  | "cConclure"
-  | "dExposant"
-  | "dLimiteExposant"
-  | "dConclure"
-  | "eDevelopper"
-  | "eSimplifier"
-  | "eConclure";
+  | "cConclure";
 
 export function phaseInitiale(exercice: ExerciceLimiteLogarithmique): PhaseLimiteLogarithmique {
   switch (exercice.famille) {
@@ -31,10 +25,6 @@ export function phaseInitiale(exercice: ExerciceLimiteLogarithmique): PhaseLimit
       return "bReformuler";
     case "C":
       return "cDiagnostic";
-    case "D":
-      return "dExposant";
-    case "E":
-      return "eDevelopper";
   }
 }
 
@@ -52,18 +42,6 @@ export function phaseApres(phase: PhaseLimiteLogarithmique): PhaseLimiteLogarith
       return "cConclure";
     case "cConclure":
       return "termine";
-    case "dExposant":
-      return "dLimiteExposant";
-    case "dLimiteExposant":
-      return "dConclure";
-    case "dConclure":
-      return "termine";
-    case "eDevelopper":
-      return "eSimplifier";
-    case "eSimplifier":
-      return "eConclure";
-    case "eConclure":
-      return "termine";
   }
 }
 
@@ -79,23 +57,7 @@ export interface DetailPhaseLimiteLogarithmique {
 export type ResultatExerciceLimiteLogarithmique =
   | { famille: "A"; exercice: ExerciceLimiteLogarithmique; scoreDominance: number; scoreConclure: number; details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>> }
   | { famille: "B"; exercice: ExerciceLimiteLogarithmique; scoreReformuler: number; scoreConclure: number; details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>> }
-  | { famille: "C"; exercice: ExerciceLimiteLogarithmique; scoreDiagnostic: number; scoreConclure: number; details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>> }
-  | {
-      famille: "D";
-      exercice: ExerciceLimiteLogarithmique;
-      scoreExposant: number;
-      scoreLimiteExposant: number;
-      scoreConclure: number;
-      details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>>;
-    }
-  | {
-      famille: "E";
-      exercice: ExerciceLimiteLogarithmique;
-      scoreDevelopper: number;
-      scoreSimplifier: number;
-      scoreConclure: number;
-      details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>>;
-    };
+  | { famille: "C"; exercice: ExerciceLimiteLogarithmique; scoreDiagnostic: number; scoreConclure: number; details: Partial<Record<PhaseLimiteLogarithmique, DetailPhaseLimiteLogarithmique>> };
 
 export interface EtatSessionLimiteLogarithmique {
   reglages: ReglagesSession6e;

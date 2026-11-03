@@ -46,13 +46,6 @@ function nouvelleSession(): EtatSessionSectionPlaneSolide {
   return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolide);
 }
 
-/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que
- * `AppQuizGeometrieAnalytique.tsx`) — jamais sur l'écran normal donné aux élèves. */
-function modeDevActif(): boolean {
-  if (import.meta.env.DEV) return true;
-  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
-}
-
 /** Libellé de la phase COURANTE (fixe, 4 valeurs) — jamais un indicateur "écran X/N" par exercice,
  * le nombre d'écrans révélerait la forme de la section (voir `HistoriqueEcransSectionPlaneSolide`). */
 const LIBELLE_PHASE: Record<PhaseSectionPlaneSolide, string> = {
@@ -186,7 +179,7 @@ export function AppSectionPlaneSolide() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Section plane d'un solide</h1>
         <p className="app-subtitle">Chapitre 8 — Géométrie dans l'espace</p>
-        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />}
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <div className="card-progress">
           <div className="card-progress-row">
             <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>

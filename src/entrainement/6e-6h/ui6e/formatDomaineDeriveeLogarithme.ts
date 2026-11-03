@@ -77,6 +77,32 @@ function formatXMoins(p: number): string {
   return p > 0 ? `x-${p}` : `x+${-p}`;
 }
 
+/** `mx+n` affiché (jamais de coefficient ±1 littéral ni de terme nul). */
+function formatAffine(m: number, n: number): string {
+  return formatSommeTermes([
+    { valeur: m, suffixe: "x" },
+    { valeur: n, suffixe: "" },
+  ]);
+}
+
+/** `k·x` affiché — `x` si k=1. */
+function formatKx(k: number): string {
+  return k === 1 ? "x" : `${k}x`;
+}
+
+/** Fraction LaTeX `num/den` précédée de son signe : `-\dfrac{3}{…}` plutôt que `\dfrac{-3}{…}`. */
+function fractionSignee(numerateur: number, reste: string, denominateur: string): string {
+  const abs = Math.abs(numerateur);
+  const corps = `\\dfrac{${abs === 1 && reste !== "" ? "" : abs}${reste}}{${denominateur}}`;
+  return numerateur < 0 ? `-${corps}` : corps;
+}
+
+/** `· ln(base)` dans un dénominateur — rien si la base est e (ln(e)=1, audit 6e ch. 3, point 28 :
+ * le corrigé affichait « ·ln(e) »). */
+function facteurLnBase(base: number, baseEstE: boolean): string {
+  return baseEstE ? "" : `\\ln(${base})`;
+}
+
 // ============================================================================
 // Famille A
 // ============================================================================
@@ -85,7 +111,21 @@ function formatFonctionA(exercice: ExerciceDomaineDeriveeLogA): string {
   const { base, baseEstE } = exercice;
   if (exercice.sousType === "puissance") return formatLog(`${exercice.k}^x`, base, baseEstE);
   if (exercice.sousType === "carre") return formatLog(`x^2+${exercice.c}`, base, baseEstE);
-  return formatLog(formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]), base, baseEstE);
+  return formatLog(formatAffine(exercice.m, exercice.n), base, baseEstE);
+}
+
+function argumentA(exercice: ExerciceDomaineDeriveeLogA): { u: string; uPrime: string } {
+  if (exercice.sousType === "puissance") return { u: `${exercice.k}^x`, uPrime: `\\ln(${exercice.k})\\cdot ${exercice.k}^x` };
+  if (exercice.sousType === "carre") return { u: `x^2+${exercice.c}`, uPrime: "2x" };
+  return { u: formatAffine(exercice.m, exercice.n), uPrime: `${exercice.m}` };
+}
+
+function deriveeLatexA(exercice: ExerciceDomaineDeriveeLogA): string {
+  const lnB = facteurLnBase(exercice.base, exercice.baseEstE);
+  if (exercice.sousType === "puissance") return exercice.baseEstE ? `\\ln(${exercice.k})` : `\\dfrac{\\ln(${exercice.k})}{\\ln(${exercice.base})}`;
+  if (exercice.sousType === "carre") return lnB === "" ? `\\dfrac{2x}{x^2+${exercice.c}}` : `\\dfrac{2x}{(x^2+${exercice.c})${lnB}}`;
+  const arg = formatAffine(exercice.m, exercice.n);
+  return fractionSignee(exercice.m, "", lnB === "" ? arg : `(${arg})${lnB}`);
 }
 
 function consigneA(phase: "aDomaine" | "aDerivee"): FragmentConsigne[] {
@@ -97,17 +137,12 @@ function aideANiveau1(phase: "aDomaine" | "aDerivee"): AideAvecLatex {
   return { texte: "Rappel de la formule générique (attention, ln(e)=1 si la base est e) :", latex: "\\frac{d}{dx}\\left[\\log_{\\text{base}}(u)\\right] = \\frac{u'(x)}{u(x)\\cdot\\ln(\\text{base})}" };
 }
 
+/** Audit 6e ch. 3, point 9 : l'aide 2 de la dérivée était la dérivée complète (acceptée telle
+ * quelle) et celle du domaine affichait « ℝ » — elles s'arrêtent désormais avant la réponse. */
 function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineDeriveeLogA): AideAvecLatex {
-  const b = formatBase(exercice.base, exercice.baseEstE);
-  if (phase === "aDomaine") {
-    if (exercice.sousType === "puissance" || exercice.sousType === "carre") return { texte: "L'argument est toujours strictement positif — domaine :", latex: "\\mathbb{R}" };
-    const puissance = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-    return { texte: "Inéquation restante (non résolue) :", latex: `${puissance} > 0` };
-  }
-  if (exercice.sousType === "puissance") return { texte: "Forme substituée (non simplifiée), u=" + `${exercice.k}^x` + " :", latex: `\\dfrac{\\ln(${exercice.k})\\cdot ${exercice.k}^x}{${exercice.k}^x\\cdot\\ln(${b})}` };
-  if (exercice.sousType === "carre") return { texte: "Forme substituée (non simplifiée), u=x²+c :", latex: `\\dfrac{2x}{(x^2+${exercice.c})\\cdot\\ln(${b})}` };
-  const puissance = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-  return { texte: "Forme substituée (non simplifiée), u=mx+n :", latex: `\\dfrac{${exercice.m}}{(${puissance})\\cdot\\ln(${b})}` };
+  const { u, uPrime } = argumentA(exercice);
+  if (phase === "aDomaine") return { texte: "Inéquation à étudier (non résolue) — pour quels x l'argument est-il strictement positif ?", latex: `${u} > 0` };
+  return { texte: `Argument et sa dérivée (base ${formatBase(exercice.base, exercice.baseEstE)}) — il reste à les placer dans la formule :`, latex: `u(x) = ${u},\\qquad u'(x) = ${uPrime}` };
 }
 
 // ============================================================================
@@ -115,13 +150,21 @@ function aideANiveau2(phase: "aDomaine" | "aDerivee", exercice: ExerciceDomaineD
 // ============================================================================
 
 function formatFonctionB(exercice: ExerciceDomaineDeriveeLogB): string {
-  if (exercice.sousType === "doubleContrainte") {
-    const arg = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-    return `\\sqrt{1-${formatLog(arg, exercice.base, false)}}`;
-  }
+  if (exercice.sousType === "doubleContrainte") return `\\sqrt{1-${formatLog(formatAffine(exercice.m, exercice.n), exercice.base, false)}}`;
   if (exercice.sousType === "racineInterne") return formatLog("\\sqrt{1-x^2}", exercice.base, false);
   if (exercice.sousType === "quadratique") return formatLog(`x^2-${exercice.k}^2`, exercice.base, false);
   return formatLog(`\\sqrt{${formatXMoins(exercice.p)}}`, exercice.base, false);
+}
+
+function deriveeLatexB(exercice: ExerciceDomaineDeriveeLogB): string {
+  const b = exercice.base;
+  if (exercice.sousType === "doubleContrainte") {
+    const arg = formatAffine(exercice.m, exercice.n);
+    return fractionSignee(-exercice.m, "", `2(${arg})\\ln(${b})\\sqrt{1-\\log_{${b}}(${arg})}`);
+  }
+  if (exercice.sousType === "racineInterne") return `-\\dfrac{x}{(1-x^2)\\ln(${b})}`;
+  if (exercice.sousType === "quadratique") return `\\dfrac{2x}{(x^2-${exercice.k * exercice.k})\\ln(${b})}`;
+  return `\\dfrac{1}{2(${formatXMoins(exercice.p)})\\ln(${b})}`;
 }
 
 function consigneB(phase: "bDomaine" | "bDerivee"): FragmentConsigne[] {
@@ -131,9 +174,9 @@ function consigneB(phase: "bDomaine" | "bDerivee"): FragmentConsigne[] {
 function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeLogB): AideAvecLatex {
   if (phase === "bDomaine") {
     if (exercice.sousType === "doubleContrainte") return { texte: "Attention : il y a ICI DEUX conditions à croiser, pas une seule (l'argument du log ET le radicande).", latex: null };
-    if (exercice.sousType === "racineInterne") return { texte: "L'argument du log (une racine) doit être strictement positif, et son intérieur doit être ≥ 0.", latex: "\\begin{gathered} 1-x^2 > 0 \\\\ 1-x^2 \\geq 0 \\end{gathered}" };
+    if (exercice.sousType === "racineInterne") return { texte: "L'argument du log (une racine) doit être strictement positif, et son intérieur doit être ≥ 0.", latex: null };
     if (exercice.sousType === "quadratique") return { texte: "L'argument du log doit être strictement positif — résous une inéquation quadratique.", latex: null };
-    return { texte: "L'argument du log est une racine ; l'ensemble se ramène à une seule condition simple (voir aide 2).", latex: null };
+    return { texte: "L'argument du log est une racine : elle doit exister ET être strictement positive.", latex: null };
   }
   return { texte: "Rappel de la formule générique — attention à la chaîne (dérivée de l'intérieur en plus) :", latex: "\\frac{d}{dx}\\left[\\log_{\\text{base}}(u)\\right] = \\frac{u'(x)}{u(x)\\cdot\\ln(\\text{base})}" };
 }
@@ -141,20 +184,21 @@ function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineD
 function aideBNiveau2(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeLogB): AideAvecLatex {
   if (phase === "bDomaine") {
     if (exercice.sousType === "doubleContrainte") {
-      const arg = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
+      const arg = formatAffine(exercice.m, exercice.n);
       return { texte: "Les deux inéquations, affichées séparément (intersection non faite) :", latex: `\\begin{gathered} ${arg} > 0 \\\\ ${arg} \\leq ${exercice.base} \\end{gathered}` };
     }
-    if (exercice.sousType === "racineInterne") return { texte: "Conditions séparées :", latex: "\\begin{gathered} 1-x^2 \\geq 0 \\\\ 1-x^2 > 0 \\end{gathered}" };
+    if (exercice.sousType === "racineInterne") return { texte: "Conditions séparées :", latex: "\\begin{gathered} 1-x^2 \\geq 0 \\\\ \\sqrt{1-x^2} > 0 \\end{gathered}" };
     if (exercice.sousType === "quadratique") return { texte: "Inéquation à résoudre :", latex: `x^2-${exercice.k}^2 > 0` };
-    return { texte: `Condition simplifiée (x=${exercice.p} annule aussi bien la racine que le log, donc exclu) :`, latex: `x > ${exercice.p}` };
+    return { texte: "Les deux conditions (à combiner) :", latex: `\\begin{gathered} ${formatXMoins(exercice.p)} \\geq 0 \\\\ \\sqrt{${formatXMoins(exercice.p)}} > 0 \\end{gathered}` };
   }
+  const b = exercice.base;
   if (exercice.sousType === "doubleContrainte") {
-    const arg = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-    return { texte: "u et u' (règle de la chaîne, pas encore assemblés) :", latex: `\\begin{gathered} u(x) = 1-\\log_{${exercice.base}}(${arg}) \\\\ u'(x) = -\\dfrac{${exercice.m}}{(${arg})\\cdot\\ln(${exercice.base})} \\end{gathered}` };
+    const arg = formatAffine(exercice.m, exercice.n);
+    return { texte: "Fonction intérieure et sa dérivée (règle de la chaîne, pas encore assemblées) :", latex: `w(x) = 1-\\log_{${b}}(${arg}),\\qquad w'(x) = ${fractionSignee(-exercice.m, "", `(${arg})\\ln(${b})`)}` };
   }
-  if (exercice.sousType === "racineInterne") return { texte: "Forme substituée (non simplifiée) :", latex: `\\dfrac{-x/\\sqrt{1-x^2}}{\\sqrt{1-x^2}\\cdot\\ln(${exercice.base})}` };
-  if (exercice.sousType === "quadratique") return { texte: "Forme substituée (non simplifiée) :", latex: `\\dfrac{2x}{(x^2-${exercice.k}^2)\\cdot\\ln(${exercice.base})}` };
-  return { texte: "Forme substituée (non simplifiée) :", latex: `\\dfrac{1}{2(${formatXMoins(exercice.p)})\\cdot\\ln(${exercice.base})}` };
+  if (exercice.sousType === "racineInterne") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = \\sqrt{1-x^2},\\qquad u'(x) = -\\dfrac{x}{\\sqrt{1-x^2}}` };
+  if (exercice.sousType === "quadratique") return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = x^2-${exercice.k}^2,\\qquad u'(x) = 2x` };
+  return { texte: "Argument et sa dérivée — il reste à les placer dans la formule :", latex: `u(x) = \\sqrt{${formatXMoins(exercice.p)}},\\qquad u'(x) = \\dfrac{1}{2\\sqrt{${formatXMoins(exercice.p)}}}` };
 }
 
 // ============================================================================
@@ -176,8 +220,8 @@ function facteursLatexC(exercice: ExerciceDomaineDeriveeLogC): { u: string; uPri
     return { u: `${b}^x`, uPrime, v: "\\ln(x)", vPrime: "\\dfrac{1}{x}" };
   }
   if (exercice.sousType === "carreLn") {
-    const arg = formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }]);
-    return { u: "x^2", uPrime: "2x", v: `\\ln(${arg})`, vPrime: `\\dfrac{${exercice.m}}{${arg}}` };
+    const arg = formatAffine(exercice.m, exercice.n);
+    return { u: "x^2", uPrime: "2x", v: `\\ln(${arg})`, vPrime: fractionSignee(exercice.m, "", arg) };
   }
   const { k } = exercice;
   return { u: "\\ln(x)", uPrime: "\\dfrac{1}{x}", v: `\\sqrt{x^2-${k}^2}`, vPrime: `\\dfrac{x}{\\sqrt{x^2-${k}^2}}` };
@@ -188,6 +232,29 @@ function formatFonctionC(exercice: ExerciceDomaineDeriveeLogC): string {
   return `(${u})\\cdot ${v}`;
 }
 
+/** f'(x)=u'v+uv', déjà simplifiée quand c'est immédiat (kx·1/x = k...). */
+function deriveeLatexC(exercice: ExerciceDomaineDeriveeLogC): string {
+  switch (exercice.sousType) {
+    case "produitLn":
+      return `${exercice.k}\\ln(x)+${exercice.k}`;
+    case "trigLn": {
+      const { uPrime, u } = facteursLatexC(exercice);
+      const trig2 = exercice.trig2 === "sin" ? "\\sin(x)" : "\\cos(x)";
+      const second = exercice.trig2 === "sin" ? `+\\dfrac{${u}\\cos(x)}{2+${trig2}}` : `-\\dfrac{${u}\\sin(x)}{2+${trig2}}`;
+      return `${uPrime}\\ln(2+${trig2})${second}`;
+    }
+    case "expoLn":
+      return exercice.baseEstE ? "e^x\\ln(x)+\\dfrac{e^x}{x}" : `\\ln(${exercice.base})\\cdot ${exercice.base}^x\\ln(x)+\\dfrac{${exercice.base}^x}{x}`;
+    case "carreLn": {
+      const arg = formatAffine(exercice.m, exercice.n);
+      const second = fractionSignee(exercice.m, "x^2", arg);
+      return `2x\\ln(${arg})${second.startsWith("-") ? "" : "+"}${second}`;
+    }
+    case "lnRacine":
+      return `\\dfrac{\\sqrt{x^2-${exercice.k}^2}}{x}+\\dfrac{x\\ln(x)}{\\sqrt{x^2-${exercice.k}^2}}`;
+  }
+}
+
 function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentConsigne[] {
   if (phase === "cDomaine") return [texte(CONSIGNE_DOMAINE)];
   if (phase === "cFacteurs") return [texte("Dérive chaque facteur SÉPARÉMENT ("), latex("u'(x)"), texte(" et "), latex("v'(x)"), texte(").")];
@@ -195,17 +262,30 @@ function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentCon
 }
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
-  if (phase === "cDomaine") return { texte: "Un produit de fonctions déjà définies partout (ou sur un domaine simple) hérite du domaine le plus restrictif.", latex: null };
+  if (phase === "cDomaine") return { texte: "Un produit de fonctions hérite des conditions de CHACUN de ses facteurs.", latex: null };
   if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment.", latex: "f(x)=u(x)\\cdot v(x)" };
   return { texte: "Rappel de la formule du produit (non substituée) :", latex: "(uv)' = u'v + uv'" };
 }
 
+/** Sous-expressions qui imposent une condition — jamais le domaine lui-même (audit 6e ch. 3,
+ * point 9 : l'aide 2 affichait « x>0 », la réponse). */
+function conditionsDomaineC(exercice: ExerciceDomaineDeriveeLogC): string {
+  switch (exercice.sousType) {
+    case "produitLn":
+    case "expoLn":
+      return "\\ln(x)\\ :\\ \\text{argument} > 0";
+    case "trigLn":
+      return `\\ln\\left(2+${exercice.trig2 === "sin" ? "\\sin(x)" : "\\cos(x)"}\\right)\\ :\\ \\text{encadre } ${exercice.trig2 === "sin" ? "\\sin(x)" : "\\cos(x)"}`;
+    case "carreLn":
+      return `\\ln(${formatAffine(exercice.m, exercice.n)})\\ :\\ \\text{argument} > 0`;
+    case "lnRacine":
+      return `\\begin{gathered} \\ln(x)\\ :\\ \\text{argument} > 0 \\\\ \\sqrt{x^2-${exercice.k}^2}\\ :\\ \\text{radicande} \\geq 0 \\end{gathered}`;
+  }
+}
+
 function aideCNiveau2(phase: "cDomaine" | "cFacteurs" | "cAssemblage", exercice: ExerciceDomaineDeriveeLogC): AideAvecLatex {
   const { u, uPrime, v, vPrime } = facteursLatexC(exercice);
-  if (phase === "cDomaine") {
-    const dom = exercice.sousType === "produitLn" || exercice.sousType === "expoLn" ? "x>0" : exercice.sousType === "lnRacine" ? `x \\geq ${exercice.k}` : exercice.sousType === "trigLn" ? "\\mathbb{R}" : "";
-    return { texte: "Domaine :", latex: dom || null };
-  }
+  if (phase === "cDomaine") return { texte: "Sous-expressions qui imposent une condition (à résoudre puis croiser) :", latex: conditionsDomaineC(exercice) };
   if (phase === "cFacteurs") return { texte: "u(x) et v(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} u(x) = ${u} \\\\ v(x) = ${v} \\end{gathered}` };
   return { texte: "u, v, u' et v' (déjà confirmés à l'étape précédente) :", latex: `u=${u},\\ v=${v},\\ u'=${uPrime},\\ v'=${vPrime}` };
 }
@@ -232,6 +312,14 @@ function formatFonctionD(exercice: ExerciceDomaineDeriveeLogD): string {
   return `\\frac{${n}}{${d}}`;
 }
 
+/** f'(x)=(N'D−ND')/D², simplifiée quand c'est immédiat. */
+function deriveeLatexD(exercice: ExerciceDomaineDeriveeLogD): string {
+  if (exercice.sousType === "sommeLog") return exercice.baseEstE ? "\\dfrac{1-\\ln(x)}{x^2}" : `\\dfrac{1-\\ln(x)}{x^2\\ln(${exercice.base})}`;
+  if (exercice.sousType === "lnSurKx") return `\\dfrac{1-\\ln(x)}{${exercice.k}x^2}`;
+  const { n, nPrime } = nDLatexD(exercice);
+  return `\\dfrac{\\left(${nPrime}\\right)\\ln(x)-\\dfrac{${n}}{x}}{\\left(\\ln(x)\\right)^2}`;
+}
+
 function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): FragmentConsigne[] {
   if (phase === "dDomaine") return [texte(CONSIGNE_DOMAINE)];
   if (phase === "dND") return [texte("Dérive le numérateur N ET le dénominateur D SÉPARÉMENT ("), latex("N'(x)"), texte(" et "), latex("D'(x)"), texte(").")];
@@ -241,7 +329,7 @@ function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): FragmentConsigne[
 function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage", exercice: ExerciceDomaineDeriveeLogD): AideAvecLatex {
   if (phase === "dDomaine") {
     if (exercice.sousType === "expoSurLn") return { texte: "Le dénominateur d'une fraction doit être non nul — vérifie si l'expression du dénominateur peut s'annuler, même si elle 'a l'air' toujours définie.", latex: null };
-    return { texte: "N'oublie pas la condition du logarithme (argument strictement positif).", latex: null };
+    return { texte: "N'oublie pas la condition du logarithme (argument strictement positif), ni celle du dénominateur.", latex: null };
   }
   if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
   return { texte: "Rappel de la formule du quotient (non substituée) :", latex: "\\left(\\frac{N}{D}\\right)' = \\frac{N'D - ND'}{D^2}" };
@@ -250,8 +338,8 @@ function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage", exercice: Exerc
 function aideDNiveau2(phase: "dDomaine" | "dND" | "dAssemblage", exercice: ExerciceDomaineDeriveeLogD): AideAvecLatex {
   const { n, nPrime, d, dPrime } = nDLatexD(exercice);
   if (phase === "dDomaine") {
-    if (exercice.sousType === "expoSurLn") return { texte: "Équation dénominateur=0 (non résolue) :", latex: "\\ln(x) = 0" };
-    return { texte: "Domaine : x>0 (déjà couvert par le log et/ou le dénominateur).", latex: "x>0" };
+    if (exercice.sousType === "expoSurLn") return { texte: "Conditions à croiser (non résolues) :", latex: "\\begin{gathered} x > 0 \\\\ \\ln(x) \\neq 0 \\end{gathered}" };
+    return { texte: "Conditions à croiser (non résolues) :", latex: `\\begin{gathered} \\text{argument du log} > 0 \\\\ ${d} \\neq 0 \\end{gathered}` };
   }
   if (phase === "dND") return { texte: "N(x) et D(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} N(x) = ${n} \\\\ D(x) = ${d} \\end{gathered}` };
   return { texte: "N, D, N' et D' (déjà confirmés à l'étape précédente) :", latex: `N=${n},\\ D=${d},\\ N'=${nPrime},\\ D'=${dPrime}` };
@@ -265,12 +353,8 @@ function formatFonctionEOrigine(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
       return "\\ln\\left((e^x-1)^2\\right)";
-    case "quotientDifference": {
-      const { m, n, p, q } = exercice;
-      const num = formatSommeTermes([{ valeur: m, suffixe: "x" }, { valeur: n, suffixe: "" }]);
-      const den = formatSommeTermes([{ valeur: p, suffixe: "x" }, { valeur: q, suffixe: "" }]);
-      return `\\ln\\left(\\dfrac{${num}}{${den}}\\right)`;
-    }
+    case "quotientDifference":
+      return `\\ln\\left(\\dfrac{${formatAffine(exercice.m, exercice.n)}}{${formatAffine(exercice.p, exercice.q)}}\\right)`;
     case "puissanceSimple":
       return "\\ln(\\sqrt{x})";
     case "combinaison":
@@ -286,12 +370,8 @@ function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
       return "2\\ln\\left|e^x-1\\right|";
-    case "quotientDifference": {
-      const { m, n, p, q } = exercice;
-      const num = formatSommeTermes([{ valeur: m, suffixe: "x" }, { valeur: n, suffixe: "" }]);
-      const den = formatSommeTermes([{ valeur: p, suffixe: "x" }, { valeur: q, suffixe: "" }]);
-      return `\\ln(${num})-\\ln(${den})`;
-    }
+    case "quotientDifference":
+      return `\\ln(${formatAffine(exercice.m, exercice.n)})-\\ln(${formatAffine(exercice.p, exercice.q)})`;
     case "puissanceSimple":
       return "\\dfrac{1}{2}\\ln(x)";
     case "combinaison":
@@ -300,6 +380,26 @@ function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
       return `2\\ln\\left|x^2-${exercice.k}^2\\right|`;
     case "dejaSimplifie":
       return "x\\ln(x)";
+  }
+}
+
+function deriveeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeLogE): string {
+  switch (exercice.sousType) {
+    case "puissanceAbs":
+      return "\\dfrac{2e^x}{e^x-1}";
+    case "quotientDifference": {
+      const premier = fractionSignee(exercice.m, "", formatAffine(exercice.m, exercice.n));
+      const second = fractionSignee(-exercice.p, "", formatAffine(exercice.p, exercice.q));
+      return `${premier}${second.startsWith("-") ? "" : "+"}${second}`;
+    }
+    case "puissanceSimple":
+      return "\\dfrac{1}{2x}";
+    case "combinaison":
+      return "\\dfrac{3(\\ln x)^2}{x}-\\dfrac{3}{x}";
+    case "valeurAbsolueQuadratique":
+      return `\\dfrac{4x}{x^2-${exercice.k * exercice.k}}`;
+    case "dejaSimplifie":
+      return "\\ln(x)+1";
   }
 }
 
@@ -317,7 +417,7 @@ function texteProprieteE(exercice: ExerciceDomaineDeriveeLogE): string {
     case "quotientDifference":
       return "Propriété du quotient : ln(a/b) = ln(a)−ln(b) — valable seulement si a ET b sont positifs SÉPARÉMENT (pas juste leur quotient).";
     case "puissanceSimple":
-      return "Propriété de la puissance : ln(√x) = ln(x^(1/2)) = (1/2)ln(x).";
+      return "Propriété de la puissance : ln(√x) = ln(x^(1/2)).";
     case "combinaison":
       return "Propriété de la puissance : ln(x³) = 3ln(x) — n'affecte QUE ce terme, (ln x)³ reste inchangé (ce n'est pas ln d'une puissance).";
     case "dejaSimplifie":
@@ -332,25 +432,36 @@ function aideENiveau1(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
       puissanceAbs: "\\ln(u^2)=2\\ln|u|",
       valeurAbsolueQuadratique: "\\ln(u^2)=2\\ln|u|",
       quotientDifference: "\\ln\\left(\\dfrac{a}{b}\\right)=\\ln(a)-\\ln(b)",
-      puissanceSimple: "\\ln(\\sqrt{x})=\\ln\\left(x^{1/2}\\right)=\\dfrac{1}{2}\\ln(x)",
+      puissanceSimple: "\\ln\\left(x^{r}\\right)=r\\ln(x)",
       combinaison: "\\ln(x^3)=3\\ln(x)",
       dejaSimplifie: "\\ln(x^x)=x\\cdot\\ln(x)",
     };
     return { texte: texteProprieteE(exercice), latex: latexProprieteE[exercice.sousType] };
   }
-  return { texte: "La forme simplifiée est nettement plus simple à dériver — dérive-la directement.", latex: null };
+  return { texte: "La forme simplifiée est nettement plus simple à dériver — dérive-la directement, terme à terme.", latex: "\\left(\\ln u\\right)' = \\dfrac{u'}{u}" };
+}
+
+/** Condition(s) du domaine de l'expression ORIGINALE, non résolues (audit 6e ch. 3, point 9 : l'aide
+ * donnait le domaine, et renvoyait à un « bloc données » qui ne le contient pas). */
+function conditionsDomaineE(exercice: ExerciceDomaineDeriveeLogE): string {
+  switch (exercice.sousType) {
+    case "puissanceAbs":
+      return "(e^x-1)^2 > 0";
+    case "quotientDifference":
+      return `\\dfrac{${formatAffine(exercice.m, exercice.n)}}{${formatAffine(exercice.p, exercice.q)}} > 0`;
+    case "puissanceSimple":
+      return "x \\geq 0 \\quad\\text{et}\\quad \\sqrt{x} > 0";
+    case "combinaison":
+      return "x > 0 \\quad\\text{et}\\quad x^3 > 0";
+    case "valeurAbsolueQuadratique":
+      return `(x^2-${exercice.k}^2)^2 > 0`;
+    case "dejaSimplifie":
+      return "x^x \\text{ (base } x \\text{ réelle quelconque : base } > 0\\text{)} \\quad\\text{et}\\quad x^x > 0";
+  }
 }
 
 function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: ExerciceDomaineDeriveeLogE): AideAvecLatex {
-  if (phase === "eDomaine") {
-    const dom =
-      exercice.sousType === "puissanceAbs" || exercice.sousType === "valeurAbsolueQuadratique"
-        ? "\\mathbb{R}\\setminus\\{\\text{racine(s)}\\}"
-        : exercice.sousType === "quotientDifference"
-          ? "]r_1;r_2["
-          : "x>0";
-    return { texte: "Domaine (voir bloc données pour les valeurs exactes) :", latex: dom };
-  }
+  if (phase === "eDomaine") return { texte: "Condition(s) à résoudre sur l'expression originale :", latex: conditionsDomaineE(exercice) };
   if (phase === "eSimplifier") {
     switch (exercice.sousType) {
       case "puissanceAbs":
@@ -360,14 +471,15 @@ function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
       case "quotientDifference":
         return { texte: "Première étape (quotient séparé, pas encore les 2 termes finaux) :", latex: "\\ln(\\text{numérateur})-\\ln(\\text{dénominateur})" };
       case "puissanceSimple":
-        return { texte: "Première étape (exposant 1/2 pas encore descendu) :", latex: "\\ln(x^{1/2})" };
+        return { texte: "Première étape (exposant pas encore descendu) :", latex: "\\ln(x^{1/2})" };
       case "combinaison":
-        return { texte: "Première étape (seul le second terme se simplifie) :", latex: "(\\ln x)^3-3\\ln(x)" };
+        // Audit 6e ch. 3, point 9 : l'aide affichait la forme simplifiée complète (la réponse).
+        return { texte: "Seul le second terme se simplifie — le premier reste tel quel :", latex: "(\\ln x)^3 - \\ln(x^3) = (\\ln x)^3 - \\,?\\cdot\\ln(x)" };
       case "dejaSimplifie":
-        return { texte: "Dernière étape laissée à toi (propriété déjà rappelée ci-dessus).", latex: null };
+        return { texte: "L'exposant x « descend » devant le logarithme, comme un exposant numérique.", latex: "\\ln(x^x) = \\,?\\cdot\\ln(x)" };
     }
   }
-  return { texte: "Dérivée de la forme simplifiée :", latex: formeSimplifieeLatexE(exercice) };
+  return { texte: "Forme à dériver (simplifiée, confirmée à l'étape précédente) — dérive chaque terme séparément :", latex: formeSimplifieeLatexE(exercice) };
 }
 
 // ============================================================================
@@ -377,13 +489,29 @@ function aideENiveau2(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: 
 function formatFonctionF(exercice: ExerciceDomaineDeriveeLogF): string {
   switch (exercice.sousType) {
     case "lnSurSin":
-      return "\\dfrac{\\ln(2+\\sin(e^x))}{2+\\sin(e^x)}";
+      return `\\dfrac{\\ln(${exercice.a}+\\sin(e^x))}{${exercice.a}+\\sin(e^x)}`;
     case "arcsinLog":
       return `\\arcsin\\left(${formatLog(`${exercice.k}^x`, exercice.base, false)}\\right)`;
-    case "racineArcsin":
-      return "\\arcsin\\left(\\sqrt{1-e^x}\\right)";
+    case "arcsinLogX":
+      return `\\arcsin\\left(\\log_{${exercice.base}}(x)\\right)`;
     case "arctanLog":
-      return "\\dfrac{\\arctan(2x)}{1-\\log_{10}(2x)}";
+      return `\\dfrac{\\arctan(${formatKx(exercice.k)})}{1-\\log_{${exercice.base}}(x)}`;
+  }
+}
+
+function deriveeLatexF(exercice: ExerciceDomaineDeriveeLogF): string {
+  switch (exercice.sousType) {
+    case "lnSurSin":
+      return `\\dfrac{e^x\\cos(e^x)\\left(1-\\ln(${exercice.a}+\\sin(e^x))\\right)}{\\left(${exercice.a}+\\sin(e^x)\\right)^2}`;
+    case "arcsinLog":
+      return `\\dfrac{${exercice.p}}{\\sqrt{1-${exercice.p * exercice.p}x^2}}`;
+    case "arcsinLogX":
+      return `\\dfrac{1}{x\\ln(${exercice.base})\\sqrt{1-\\left(\\log_{${exercice.base}}(x)\\right)^2}}`;
+    case "arctanLog": {
+      const { k, base } = exercice;
+      const kCarreX2 = k === 1 ? "x^2" : `${k * k}x^2`;
+      return `\\dfrac{\\dfrac{${k}\\left(1-\\log_{${base}}(x)\\right)}{1+${kCarreX2}}+\\dfrac{\\arctan(${formatKx(k)})}{x\\ln(${base})}}{\\left(1-\\log_{${base}}(x)\\right)^2}`;
+    }
   }
 }
 
@@ -392,20 +520,28 @@ function consigneF(phase: "fDomaine" | "fDerivee"): FragmentConsigne[] {
 }
 
 function aideFNiveau1(phase: "fDomaine" | "fDerivee"): AideAvecLatex {
-  if (phase === "fDomaine") {
-    return { texte: "Énumère séparément chaque sous-expression qui impose une condition de domaine avant de les croiser.", latex: null };
-  }
-  return { texte: "Plusieurs niveaux de chaîne — dérive de l'extérieur vers l'intérieur, formule déjà connue des chapitres précédents.", latex: null };
+  if (phase === "fDomaine") return { texte: "Énumère séparément chaque sous-expression qui impose une condition de domaine avant de les croiser.", latex: null };
+  return { texte: "Plusieurs niveaux de chaîne — dérive de l'extérieur vers l'intérieur, avec les formules des chapitres précédents.", latex: "\\left(\\arcsin u\\right)' = \\dfrac{u'}{\\sqrt{1-u^2}}\\qquad \\left(\\arctan u\\right)' = \\dfrac{u'}{1+u^2}\\qquad \\left(\\log_b u\\right)' = \\dfrac{u'}{u\\ln b}" };
 }
 
 function aideFNiveau2(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineDeriveeLogF): AideAvecLatex {
   if (phase === "fDomaine") {
-    if (exercice.sousType === "lnSurSin") return { texte: "2+sin(e^x) est toujours dans [1;3], jamais nul ni négatif — domaine :", latex: "\\mathbb{R}" };
-    if (exercice.sousType === "arcsinLog") return { texte: "Condition (non résolue) :", latex: "-1 \\leq \\log_{\\text{base}}(k^x) \\leq 1" };
-    if (exercice.sousType === "racineArcsin") return { texte: "Condition (non résolue) :", latex: "1-e^x \\geq 0" };
-    return { texte: "Conditions individuelles (intersection non faite) :", latex: "\\begin{gathered} 2x > 0 \\\\ 1-\\log_{10}(2x) \\neq 0 \\end{gathered}" };
+    if (exercice.sousType === "lnSurSin") return { texte: "Encadre le sinus pour savoir si l'argument du log (et le dénominateur) peut s'annuler ou devenir négatif :", latex: `-1 \\leq \\sin(e^x) \\leq 1` };
+    if (exercice.sousType === "arcsinLog") return { texte: "Condition (non résolue) :", latex: `-1 \\leq \\log_{${exercice.base}}(${exercice.k}^x) \\leq 1` };
+    if (exercice.sousType === "arcsinLogX") return { texte: "Conditions à croiser (non résolues) :", latex: `\\begin{gathered} x > 0 \\\\ -1 \\leq \\log_{${exercice.base}}(x) \\leq 1 \\end{gathered}` };
+    return { texte: "Conditions individuelles (intersection non faite) :", latex: `\\begin{gathered} x > 0 \\\\ 1-\\log_{${exercice.base}}(x) \\neq 0 \\end{gathered}` };
   }
-  return { texte: "Dérivées de chaque niveau séparément — assemblage final laissé à toi.", latex: null };
+  // Audit 6e ch. 3, point 27 : cette aide annonçait « Dérivées de chaque niveau » sans rien afficher.
+  switch (exercice.sousType) {
+    case "lnSurSin":
+      return { texte: "Quotient N/D avec N = ln(D) — dérivées séparées (assemblage laissé à toi) :", latex: `D(x) = ${exercice.a}+\\sin(e^x),\\quad D'(x) = e^x\\cos(e^x),\\quad N'(x) = \\dfrac{D'(x)}{D(x)}` };
+    case "arcsinLog":
+      return { texte: "Simplifie d'abord l'argument : " + `${exercice.k} = ${exercice.base}^${exercice.p}`, latex: `\\log_{${exercice.base}}(${exercice.k}^x) = x\\cdot\\log_{${exercice.base}}(${exercice.k}) = ?\\cdot x` };
+    case "arcsinLogX":
+      return { texte: "Fonction intérieure et sa dérivée (assemblage laissé à toi) :", latex: `u(x) = \\log_{${exercice.base}}(x),\\qquad u'(x) = \\dfrac{1}{x\\ln(${exercice.base})}` };
+    case "arctanLog":
+      return { texte: "Numérateur et dénominateur, chacun dérivé séparément (assemblage via (N'D−ND')/D² laissé à toi) :", latex: `N' = \\dfrac{${exercice.k}}{1+${exercice.k === 1 ? "x^2" : `${exercice.k * exercice.k}x^2`}},\\qquad D = 1-\\log_{${exercice.base}}(x),\\qquad D' = -\\dfrac{1}{x\\ln(${exercice.base})}` };
+  }
 }
 
 // ============================================================================
@@ -415,66 +551,134 @@ function aideFNiveau2(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineD
 interface UVLatexG {
   u: string;
   v: string;
+  uPrime: string;
+  vPrime: string;
+}
+
+/** Coefficient affiché devant une expression — rien si 1. */
+function coef(a: number): string {
+  return a === 1 ? "" : String(a);
 }
 
 function uvLatexG(exercice: ExerciceDomaineDeriveeLogG): UVLatexG {
+  const { a } = exercice;
   switch (exercice.variante) {
     case "xx":
-      return { u: "x", v: "x" };
+      return { u: "x", v: formatKx(a), uPrime: "1", vPrime: String(a) };
     case "xSinx":
-      return { u: "x", v: "\\sin(x)" };
+      return { u: "x", v: `\\sin(${formatKx(a)})`, uPrime: "1", vPrime: `${coef(a)}\\cos(${formatKx(a)})` };
     case "cosTan":
-      return { u: "\\cos(x)", v: "\\tan(x)" };
+      return { u: "\\cos(x)", v: `${coef(a)}\\tan(x)`, uPrime: "-\\sin(x)", vPrime: `\\dfrac{${a}}{\\cos^2(x)}` };
     case "unSurXPuissanceX":
-      return { u: "1+\\dfrac{1}{x}", v: "x" };
+      return { u: `1+\\dfrac{${a}}{x}`, v: "x", uPrime: `-\\dfrac{${a}}{x^2}`, vPrime: "1" };
     case "sinXInvX":
-      return { u: "\\sin(x)", v: "\\dfrac{1}{x}" };
+      return { u: "\\sin(x)", v: `\\dfrac{${a}}{x}`, uPrime: "\\cos(x)", vPrime: `-\\dfrac{${a}}{x^2}` };
     case "racineXPuissanceX":
     case "xRacineXPuissanceX":
-      return { u: "x", v: "1+\\dfrac{x}{2}" };
+      return { u: "x", v: "1+\\dfrac{x}{2}", uPrime: "1", vPrime: "\\dfrac{1}{2}" };
     case "produit":
-      return { u: "x", v: "-(1+x)" };
+      return { u: "x", v: `-(x+${a})`, uPrime: "1", vPrime: "-1" };
+    case "xLnx":
+      return { u: "x", v: "\\ln(x)", uPrime: "1", vPrime: "\\dfrac{1}{x}" };
+    case "affinePuissanceX":
+      return { u: `x+${a}`, v: "x", uPrime: "1", vPrime: "1" };
   }
 }
 
+/** `u^{v}` — base entre parenthèses sauf si c'est la seule lettre x. */
+function puissanceUV(u: string, v: string): string {
+  return u === "x" ? `x^{${v}}` : `\\left(${u}\\right)^{${v}}`;
+}
+
 function formatFonctionG(exercice: ExerciceDomaineDeriveeLogG): string {
+  const { a } = exercice;
   switch (exercice.variante) {
     case "xx":
-      return "x^x";
+      return a === 1 ? "x^x" : `x^{${a}x}`;
     case "xSinx":
-      return "x^{\\sin(x)}";
+      return `x^{\\sin(${formatKx(a)})}`;
     case "cosTan":
-      return "(\\cos x)^{\\tan x}";
+      return `(\\cos x)^{${coef(a)}\\tan x}`;
     case "unSurXPuissanceX":
-      return "\\left(1+\\dfrac{1}{x}\\right)^x";
+      return `\\left(1+\\dfrac{${a}}{x}\\right)^x`;
     case "sinXInvX":
-      return "(\\sin x)^{1/x}";
+      return `(\\sin x)^{\\frac{${a}}{x}}`;
     case "racineXPuissanceX":
       return "x\\cdot(\\sqrt{x})^x";
     case "xRacineXPuissanceX":
       return "x\\cdot\\sqrt{x^x}";
     case "produit":
-      return "\\dfrac{1+x}{x^{1+x}}";
+      return `\\dfrac{x+${a}}{x^{x+${a}}}`;
+    case "xLnx":
+      return "x^{\\ln x}";
+    case "affinePuissanceX":
+      return `(x+${a})^x`;
   }
 }
 
-function consigneG(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): FragmentConsigne[] {
-  if (phase === "gIdentifier") return [texte("Reconnais la structure "), latex("u(x)^{v(x)}"), texte(" de cette fonction (simplifie d'abord si nécessaire pour ramener à une seule base élevée à un seul exposant).")];
-  if (phase === "gFPrimeSurF") return [texte("Prends le ln des deux membres et dérive implicitement : exprime "), latex("f'/f"), texte(" à partir de la forme "), latex("u^v"), texte(" CORRECTE de l'étape précédente.")];
-  return [texte("Isole f' en multipliant par "), latex("f=u^v"), texte(" (le cas échéant, ajoute la règle du produit pour le facteur affine restant).")];
+/** f'/f simplifiée, pour f ENTIÈRE (produit : le terme 1/(x+a) en plus). */
+function fPrimeSurFLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
+  const { a } = exercice;
+  switch (exercice.variante) {
+    case "xx":
+      return `${coef(a)}\\ln(x)+${a}`;
+    case "xSinx":
+      return `${coef(a)}\\cos(${formatKx(a)})\\ln(x)+\\dfrac{\\sin(${formatKx(a)})}{x}`;
+    case "cosTan":
+      return `\\dfrac{${coef(a)}\\ln(\\cos x)}{\\cos^2 x}-${coef(a)}\\tan^2 x`;
+    case "unSurXPuissanceX":
+      return `\\ln\\left(1+\\dfrac{${a}}{x}\\right)-\\dfrac{${a}}{x+${a}}`;
+    case "sinXInvX":
+      return `-\\dfrac{${coef(a)}\\ln(\\sin x)}{x^2}+\\dfrac{${coef(a)}\\cos x}{x\\sin x}`;
+    case "racineXPuissanceX":
+    case "xRacineXPuissanceX":
+      return "\\dfrac{\\ln(x)}{2}+\\dfrac{1}{x}+\\dfrac{1}{2}";
+    case "produit":
+      return `\\dfrac{1}{x+${a}}-\\ln(x)-\\dfrac{x+${a}}{x}`;
+    case "xLnx":
+      return "\\dfrac{2\\ln(x)}{x}";
+    case "affinePuissanceX":
+      return `\\ln(x+${a})+\\dfrac{x}{x+${a}}`;
+  }
+}
+
+/** f réécrite sous sa forme la plus simple (une seule puissance pour les 2 variantes « à
+ * simplifier », f d'origine pour le produit). */
+function fSimplifieeLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
+  if (exercice.variante === "racineXPuissanceX" || exercice.variante === "xRacineXPuissanceX") return "x^{1+\\frac{x}{2}}";
+  return formatFonctionG(exercice);
+}
+
+function consigneG(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice: ExerciceDomaineDeriveeLogG): FragmentConsigne[] {
+  if (phase === "gIdentifier") {
+    // Audit 6e ch. 3, point 25 : pour la variante « produit », f n'est PAS de la forme u^v — l'écran
+    // le dit désormais et ne demande que la partie puissance.
+    if (exercice.variante === "produit") return [texte("Écris f(x) comme produit "), latex(`(x+${exercice.a})\\cdot u(x)^{v(x)}`), texte(" : donne la partie puissance "), latex("u(x)^{v(x)}"), texte(" (une seule base, un seul exposant).")];
+    return [texte("Reconnais la structure "), latex("u(x)^{v(x)}"), texte(" de cette fonction (simplifie d'abord si nécessaire pour ramener à une seule base élevée à un seul exposant).")];
+  }
+  if (phase === "gFPrimeSurF") {
+    if (exercice.variante === "produit") return [texte("Prends le ln des deux membres ("), latex(`\\ln f = \\ln(x+${exercice.a}) + v\\cdot\\ln u`), texte(") et dérive implicitement : exprime "), latex("f'/f"), texte(" pour f entière.")];
+    return [texte("Prends le ln des deux membres et dérive implicitement : exprime "), latex("f'/f"), texte(" à partir de la forme "), latex("u^v"), texte(" CORRECTE de l'étape précédente.")];
+  }
+  return [texte("Isole f' en multipliant "), latex("f'/f"), texte(" par f.")];
 }
 
 function aideGNiveau1(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): AideAvecLatex {
   if (phase === "gIdentifier") return { texte: "Cherche à ramener f(x) à une SEULE base variable élevée à un SEUL exposant variable (utilise les propriétés des puissances si besoin).", latex: null };
-  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u" };
-  return { texte: "Il faut multiplier par f (c'est-à-dire remettre u^v) pour isoler f'.", latex: "f=u^v" };
+  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u \;\\Rightarrow\; \\dfrac{f'}{f} = v'\\ln u + v\\dfrac{u'}{u}" };
+  return { texte: "Il faut multiplier f'/f par f pour isoler f'.", latex: "f' = f\\cdot\\dfrac{f'}{f}" };
 }
 
 function aideGNiveau2(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice: ExerciceDomaineDeriveeLogG): AideAvecLatex {
-  const { u, v } = uvLatexG(exercice);
-  if (phase === "gIdentifier") return { texte: "Forme u^v attendue (base, exposant) :", latex: `u(x)=${u},\\quad v(x)=${v}` };
-  if (phase === "gFPrimeSurF") return { texte: "ln f = v·ln u affiché, dérivation des deux membres non faite :", latex: `\\ln f = (${v})\\cdot\\ln(${u})` };
-  return { texte: "f'/f et f=u^v rappelés côte à côte, multiplication non faite :", latex: `\\dfrac{f'}{f} = ...,\\quad f = (${u})^{${v}}` };
+  const { u, v, uPrime, vPrime } = uvLatexG(exercice);
+  if (phase === "gIdentifier") {
+    // Audit 6e ch. 3, point 9 : l'aide donnait u ET v, donc la réponse.
+    if (exercice.variante === "racineXPuissanceX") return { texte: "Écris chaque facteur comme une puissance de x, puis additionne les exposants :", latex: "x = x^1,\\qquad (\\sqrt{x})^x = \\left(x^{1/2}\\right)^x = x^{?}" };
+    if (exercice.variante === "xRacineXPuissanceX") return { texte: "Écris chaque facteur comme une puissance de x, puis additionne les exposants :", latex: "x = x^1,\\qquad \\sqrt{x^x} = \\left(x^{x}\\right)^{1/2} = x^{?}" };
+    return { texte: "La base (à ne pas confondre avec l'exposant) :", latex: `u(x) = ${u}` };
+  }
+  if (phase === "gFPrimeSurF") return { texte: "u, v et leurs dérivées — il reste à les placer dans v'·ln u + v·u'/u :", latex: `u=${u},\\ u'=${uPrime},\\qquad v=${v},\\ v'=${vPrime}` };
+  return { texte: "f et f'/f côte à côte, multiplication non faite :", latex: `f = ${fSimplifieeLatexG(exercice)},\\qquad \\dfrac{f'}{f} = ${fPrimeSurFLatexG(exercice)}` };
 }
 
 // ============================================================================
@@ -502,6 +706,48 @@ export function blocDonnees(exercice: ExerciceDomaineDeriveeLogarithme): string[
   }
 }
 
+/** Partie puissance u^v attendue à l'écran `gIdentifier` (forme réduite, une seule puissance). */
+function formeUVLatexG(exercice: ExerciceDomaineDeriveeLogG): string {
+  const { u, v } = uvLatexG(exercice);
+  return puissanceUV(u, v);
+}
+
+/**
+ * Réponse attendue EXACTE de chaque écran, en LaTeX — affichée après un échec (révélation, fiche de
+ * consultation) et dans le corrigé exporté (audit 6e ch. 3, points 6 et 28 : la révélation était
+ * une phrase générique, le corrigé contenait « ·ln(e) », « (1)·ln(…) » ou des formes non
+ * simplifiées). Les dérivées sont données sous une forme simplifiée lisible ; toute forme
+ * équivalente reste acceptée par le moteur. `null` pour un écran de domaine (le domaine se formate
+ * via `formatEnsembleReelLatex(exercice.domaine)` côté appelant).
+ */
+export function reponseAttendueLatex(exercice: ExerciceDomaineDeriveeLogarithme, phase: PhaseDomaineDeriveeLogarithme): string | null {
+  switch (exercice.famille) {
+    case "A":
+      return phase === "aDerivee" ? `f'(x) = ${deriveeLatexA(exercice)}` : null;
+    case "B":
+      return phase === "bDerivee" ? `f'(x) = ${deriveeLatexB(exercice)}` : null;
+    case "C": {
+      const { uPrime, vPrime } = facteursLatexC(exercice);
+      if (phase === "cFacteurs") return `u'(x) = ${uPrime},\\qquad v'(x) = ${vPrime}`;
+      return phase === "cAssemblage" ? `f'(x) = ${deriveeLatexC(exercice)}` : null;
+    }
+    case "D": {
+      const { nPrime, dPrime } = nDLatexD(exercice);
+      if (phase === "dND") return `N'(x) = ${nPrime},\\qquad D'(x) = ${dPrime}`;
+      return phase === "dAssemblage" ? `f'(x) = ${deriveeLatexD(exercice)}` : null;
+    }
+    case "E":
+      if (phase === "eSimplifier") return `f(x) = ${formeSimplifieeLatexE(exercice)}`;
+      return phase === "eDerivee" ? `f'(x) = ${deriveeSimplifieeLatexE(exercice)}` : null;
+    case "F":
+      return phase === "fDerivee" ? `f'(x) = ${deriveeLatexF(exercice)}` : null;
+    case "G":
+      if (phase === "gIdentifier") return exercice.variante === "produit" ? `f(x) = (x+${exercice.a})\\cdot ${formeUVLatexG(exercice)}` : `f(x) = ${formeUVLatexG(exercice)}`;
+      if (phase === "gFPrimeSurF") return `\\dfrac{f'(x)}{f(x)} = ${fPrimeSurFLatexG(exercice)}`;
+      return phase === "gIsoler" ? `f'(x) = ${fSimplifieeLatexG(exercice)}\\cdot\\left(${fPrimeSurFLatexG(exercice)}\\right)` : null;
+  }
+}
+
 /** État actuel — `null` sur tout écran dont la vérification ne dépend PAS d'un écran précédent
  * (domaine et dérivée sont deux tâches indépendantes pour A/B/F ; famille E : domaine calculé sur
  * l'expression ORIGINALE, indépendant de la simplification qui suit). Non-`null` uniquement quand
@@ -523,12 +769,10 @@ export function etatActuel(exercice: ExerciceDomaineDeriveeLogarithme, phase: Ph
     return [`f(x) = ${formeSimplifieeLatexE(exercice)}\\ \\text{(forme simplifiée confirmée)}`];
   }
   if (exercice.famille === "G" && phase === "gFPrimeSurF") {
-    const { u, v } = uvLatexG(exercice);
-    return [`u^v = (${u})^{${v}}\\ \\text{(structure confirmée)}`];
+    return [`u^v = ${formeUVLatexG(exercice)}\\ \\text{(structure confirmée)}`];
   }
   if (exercice.famille === "G" && phase === "gIsoler") {
-    const { u, v } = uvLatexG(exercice);
-    return [`u^v = (${u})^{${v}}\\ \\text{(structure confirmée)}`, "\\text{f'/f confirmé à l'étape précédente}"];
+    return [`u^v = ${formeUVLatexG(exercice)}\\ \\text{(structure confirmée)}`, `\\dfrac{f'}{f} = ${fPrimeSurFLatexG(exercice)}\\ \\text{(confirmé)}`];
   }
   return null;
 }
@@ -548,7 +792,7 @@ export function consigneEcran(exercice: ExerciceDomaineDeriveeLogarithme, phase:
     case "F":
       return consigneF(phase as "fDomaine" | "fDerivee");
     case "G":
-      return consigneG(phase as "gIdentifier" | "gFPrimeSurF" | "gIsoler");
+      return consigneG(phase as "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice);
   }
 }
 
@@ -595,4 +839,3 @@ export function labelsDeuxChamps(exercice: ExerciceDomaineDeriveeLogarithme): { 
   if (exercice.famille === "C") return { a: "u'(x) =", b: "v'(x) =" };
   return { a: "N'(x) =", b: "D'(x) =" };
 }
-

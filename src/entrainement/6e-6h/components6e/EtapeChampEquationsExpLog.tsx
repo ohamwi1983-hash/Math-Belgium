@@ -41,16 +41,23 @@ interface Props {
  * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen14` — réutilisé par la quasi-totalité des
  * écrans du générateur (exposants, équations développées/en t/en y, valeurs numériques). Structure
  * d'écran imposée par CLAUDE.md : consigne générale → bloc données → bloc de travail, toujours cet
- * ordre. `App6gen14.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran)
+ * ordre. `App6gen14.tsx` doit le rendre avec une `key` qui change à chaque écran ET à chaque
+ * nouvel exercice (remet le champ à vide)
  * — même patron que `EtapeChampExpoProblemes.tsx` (6gen12).
  */
 export function EtapeChampEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
+  /** Dernière saisie SOUMISE : le champ n'est rouge que tant qu'il la contient encore (une nouvelle
+   * saisie n'est jamais marquée fausse avant d'avoir été validée), et le message d'erreur décrit
+   * toujours cette saisie-là, pas la frappe en cours. */
+  const [texteSoumis, setTexteSoumis] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
+  const erronee = montrerErreurs && texteSoumis !== null && texte === texteSoumis;
+  const dernierStatut = montrerErreurs && diagnostiquer && texteSoumis !== null ? diagnostiquer(texteSoumis) : null;
 
   function valider() {
     if (texte.trim() === "") return;
+    setTexteSoumis(texte);
     onValider(texte);
   }
 
@@ -73,7 +80,7 @@ export function EtapeChampEquationsExpLog({ consigneGenerale, blocDonnees, consi
       </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input type="text" className={`text-input ${erronee ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

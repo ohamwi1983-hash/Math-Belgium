@@ -1,46 +1,24 @@
-import type {
-  CibleAsymptote,
-  CibleConcaviteLog,
-  CibleCroissanceGrilleC,
-  ComportementInfiniE,
-  ExerciceEtudeFonctionLogarithme,
-  ExerciceEtudeLogE,
-  ExerciceEtudeLogNonE,
-  SigneCroissance,
-  StatutLimiteQualitatif,
-  TypeConcaviteLog,
-} from "../core6e/etudeFonctionLogarithme.types";
+import type { CibleAsymptote, CibleConcaviteLog, CibleCroissanceGrilleC, ExerciceEtudeFonctionLogarithme, SigneCroissance, TypeConcaviteLog } from "../core6e/etudeFonctionLogarithme.types";
 import type { CibleCroissance, TypeCroissance } from "../core6e/etudeFonctionExponentielle.types";
+import type { CibleLimite } from "../core6e/limitesExponentielles.types";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { verifierEnsembleReelGuide } from "./verificationEnsembleReel";
 import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnostiquerValeur, evaluerExpressionExponentielle } from "./equivalenceExponentielle";
-import { verifierReponseLimite } from "./verificationLimitesExponentielles";
 import type { ReponseLimite } from "./verificationLimitesExponentielles";
 
 /**
- * Couche B (6e) — vérification pour `6gen21`. N'importe jamais rien de `src/generateurs6e/` — voir
- * `verificationEtudeFonctionLogarithme.test.ts` pour la preuve avec des exercices factices définis
- * localement.
+ * Couche B (6e) — vérification pour `6gen21`. N'importe jamais rien de `src/generateurs6e/`.
  *
- * **Réutilisation directe (moteur→moteur, même chantier, même principe que `6gen11`)** —
- * `verifierEnsembleReelGuide` (domaine), `verifierReponseLimite`/`ReponseLimite` (limites),
- * `diagnostiquerValeur`/`diagnostiquerEquivalenceFonction`/`diagnostiquerEnsembleValeurs`
- * (équivalence numérique, "Algebrite/mathjs" des specs source) — jamais réimplémentés.
- *
- * **`limites`/`asymptotes` — écrans à ARITÉ VARIABLE (2 à 6 directions), vérifiés par un SEUL
- * mécanisme générique** (zip tableau réponse ↔ tableau cible) plutôt que 3 fonctions dupliquées par
- * nombre de directions (voir la note de conception de `core6e/etudeFonctionLogarithme.types.ts`).
- *
- * **Asymptotes — équation TEXTE LIBRE, jamais les mécanismes ∅/ℝ/intervalle** — même décision de
- * conception que `6gen11` (`verifierEquationAsymptoteLog`, réplique locale).
+ * Réutilise `verifierEnsembleReelGuide` (domaine) et les comparaisons numériques partagées de
+ * `equivalenceExponentielle.ts`. Les positions (extremum, inflexions) s'acceptent en forme exacte
+ * (`1/e`, `e^(3/2)`, `sqrt(e)`, `1/(2e)`…) ou arrondies au centième (tolérance 0,01).
  */
 
 const TOLERANCE = 0.01;
 const POINTS_OBLIQUE = [-3.3, -1.7, 1.1, 2.9];
 
 // ============================================================================
-// Écran "domaine" — délégation directe à `verifierEnsembleReelGuide` (les 5 familles ont un écran
-// domaine, y compris E).
+// Écran "domaine".
 // ============================================================================
 
 export function verifierEcranDomaine(exercice: ExerciceEtudeFonctionLogarithme, reponse: EnsembleReelGuide): boolean {
@@ -48,19 +26,25 @@ export function verifierEcranDomaine(exercice: ExerciceEtudeFonctionLogarithme, 
 }
 
 // ============================================================================
-// Écran "limites" — arité variable (2 pour A/B/D, 6 pour C). Famille E n'a pas cet écran (son
-// équivalent qualitatif est `verifierEcranComportementInfiniE`, plus bas).
+// Écran "limites" — 2 directions (6 pour la famille C). Une limite nulle s'accepte aussi bien par
+// le bouton « 0 » que par « Valeur finie » + 0.
 // ============================================================================
 
-export function verifierEcranLimites(exercice: ExerciceEtudeLogNonE, reponse: ReponseLimite[]): boolean {
+export function verifierLimite(cible: CibleLimite, reponse: ReponseLimite): boolean {
+  if (cible.type === "valeur") return reponse.type === "valeur" && diagnostiquerValeur(reponse.texte, cible.valeur, TOLERANCE) === "correct";
+  if (cible.type === "zero") return reponse.type === "zero" || (reponse.type === "valeur" && diagnostiquerValeur(reponse.texte, 0, TOLERANCE) === "correct");
+  return reponse.type === cible.type;
+}
+
+export function verifierEcranLimites(exercice: ExerciceEtudeFonctionLogarithme, reponse: ReponseLimite[]): boolean {
   const cibles = exercice.limites;
   if (reponse.length !== cibles.length) return false;
-  return cibles.every((c, i) => verifierReponseLimite(c, reponse[i]));
+  return cibles.every((c, i) => verifierLimite(c, reponse[i]));
 }
 
 // ============================================================================
-// Écran "asymptotes" — arité variable (1 pour B, 2 pour A/C/D). Réponse GUIDÉE "existe/n'existe
-// pas" + équation texte libre conditionnelle, comme `6gen11`.
+// Écran "asymptotes" — "existe/n'existe pas" + équation texte libre. Famille C : les 2 asymptotes
+// verticales s'acceptent dans n'importe quel ordre (étiquettes neutres côté écran).
 // ============================================================================
 
 export interface ReponseAsymptoteDirection {
@@ -69,38 +53,41 @@ export interface ReponseAsymptoteDirection {
   texte: string;
 }
 
-function verifierEquationAsymptoteLog(texte: string, cible: CibleAsymptote): boolean {
-  const i = texte.indexOf("=");
-  if (i === -1) return false;
-  const gauche = texte.slice(0, i).trim().toLowerCase();
-  const droite = texte.slice(i + 1);
-  if (cible.type === "horizontale") {
-    return gauche === "y" && diagnostiquerValeur(droite, cible.valeur, TOLERANCE) === "correct";
-  }
-  if (cible.type === "verticale") {
-    return gauche === "x" && diagnostiquerValeur(droite, cible.p, TOLERANCE) === "correct";
-  }
-  if (cible.type === "oblique") {
-    if (gauche !== "y") return false;
-    return diagnostiquerEquivalenceFonction(droite, (x) => cible.a * x + cible.b, POINTS_OBLIQUE, TOLERANCE) === "correct";
-  }
-  return false; // cible.type === "aucune" — jamais atteint, traité avant l'appel.
+/** Retire les espaces et un éventuel préfixe « AV : », « AH : »… avant l'équation. */
+function nettoyerEquation(texte: string): string {
+  return texte.replace(/^\s*a[vho]\s*[:≡]\s*/i, "").trim();
 }
 
-export function verifierEcranAsymptotes(exercice: ExerciceEtudeLogNonE, reponse: ReponseAsymptoteDirection[]): boolean {
+export function verifierEquationAsymptote(texte: string, cible: CibleAsymptote): boolean {
+  const propre = nettoyerEquation(texte);
+  const i = propre.indexOf("=");
+  if (i === -1) return false;
+  const gauche = propre.slice(0, i).trim().toLowerCase();
+  const droite = propre.slice(i + 1);
+  if (cible.type === "horizontale") return gauche === "y" && diagnostiquerValeur(droite, cible.valeur, TOLERANCE) === "correct";
+  if (cible.type === "verticale") return gauche === "x" && diagnostiquerValeur(droite, cible.p, TOLERANCE) === "correct";
+  if (cible.type === "oblique") return gauche === "y" && diagnostiquerEquivalenceFonction(droite, (x) => cible.a * x + cible.b, POINTS_OBLIQUE, TOLERANCE) === "correct";
+  return false;
+}
+
+function verifierDirection(cible: CibleAsymptote, reponse: ReponseAsymptoteDirection): boolean {
+  if (cible.type === "aucune") return reponse.existe === false;
+  return reponse.existe && verifierEquationAsymptote(reponse.texte, cible);
+}
+
+export function verifierEcranAsymptotes(exercice: ExerciceEtudeFonctionLogarithme, reponse: ReponseAsymptoteDirection[]): boolean {
   const cibles = exercice.asymptotes;
   if (reponse.length !== cibles.length) return false;
-  return cibles.every((c, i) => {
-    if (c.type === "aucune") return reponse[i].existe === false;
-    if (!reponse[i].existe) return false;
-    return verifierEquationAsymptoteLog(reponse[i].texte, c);
-  });
+  if (exercice.famille === "C") {
+    const [a, b] = cibles;
+    return (verifierDirection(a, reponse[0]) && verifierDirection(b, reponse[1])) || (verifierDirection(b, reponse[0]) && verifierDirection(a, reponse[1]));
+  }
+  return cibles.every((c, i) => verifierDirection(c, reponse[i]));
 }
 
 // ============================================================================
-// Écran "croissance" — 2 formes structurellement distinctes : "standard" (catégorie + position
-// d'extremum optionnelle, familles A/B/D, même contrat `CibleCroissance` que `6gen11`) et "grilleC"
-// (tableau de signe à 4 cases fixes, famille C uniquement).
+// Écran "croissance" — "standard" (catégorie + position) pour A/B/D/E, "grilleC" (tableau de signe
+// à 4 cases + VALEUR de l'extremum local — sa position est une borne affichée) pour C.
 // ============================================================================
 
 export interface ReponseCroissanceStandard {
@@ -117,19 +104,18 @@ export function verifierEcranCroissanceStandard(cible: CibleCroissance, reponse:
 
 export interface ReponseCroissanceGrilleC {
   signes: SigneCroissance[];
-  positionMax: string;
+  /** Valeur de l'extremum local, f(p). */
+  valeurExtremum: string;
 }
 
 export function verifierEcranCroissanceGrilleC(cible: CibleCroissanceGrilleC, reponse: ReponseCroissanceGrilleC): boolean {
   if (reponse.signes.length !== cible.signes.length) return false;
   if (!cible.signes.every((s, i) => s === reponse.signes[i])) return false;
-  return diagnostiquerValeur(reponse.positionMax, cible.positionMax, TOLERANCE) === "correct";
+  return diagnostiquerValeur(reponse.valeurExtremum, cible.valeurExtremum, TOLERANCE) === "correct";
 }
 
 // ============================================================================
-// Écran "concavité" — généralise `6gen11` à 0..N points d'inflexion (pattern add-as-needed côté
-// écran, `diagnostiquerEnsembleValeurs` déjà taillé pour une comparaison de LISTE ordre-indifférent
-// — jamais réimplémenté).
+// Écran "concavité" — 0, 1 ou 2 points d'inflexion (liste ordre-indifférente).
 // ============================================================================
 
 export interface ReponseConcaviteLog {
@@ -145,26 +131,11 @@ export function verifierEcranConcavite(cible: CibleConcaviteLog, reponse: Repons
 }
 
 // ============================================================================
-// Écran "graphique" — QCM, familles A-D uniquement (E n'a pas de QCM graphique, spec explicite).
+// Écran "graphique" — QCM à 4 courbes.
 // ============================================================================
 
-export function verifierEcranGraphique(exercice: ExerciceEtudeLogNonE, indexChoisi: number): boolean {
+export function verifierEcranGraphique(exercice: ExerciceEtudeFonctionLogarithme, indexChoisi: number): boolean {
   return indexChoisi === exercice.indexCorrect;
-}
-
-// ============================================================================
-// Écran "comportementInfini" — famille E uniquement. Comparaison catégorielle pure (2 statuts par
-// direction), aucune vérification d'expression/intervalle nécessaire.
-// ============================================================================
-
-export interface ReponseComportementInfiniE {
-  moinsInfini: StatutLimiteQualitatif;
-  plusInfini: StatutLimiteQualitatif;
-}
-
-export function verifierEcranComportementInfiniE(exercice: ExerciceEtudeLogE, reponse: ReponseComportementInfiniE): boolean {
-  const cible: ComportementInfiniE = exercice.comportement;
-  return reponse.moinsInfini === cible.moinsInfini && reponse.plusInfini === cible.plusInfini;
 }
 
 export { evaluerExpressionExponentielle };

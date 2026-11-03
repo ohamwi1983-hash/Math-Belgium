@@ -2,7 +2,9 @@ import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./generateurs6e/graphiqueDeriveeLogarithme/index";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionGraphiqueDeriveeLogarithme, soumettreReponseDerivee, soumettreReponseSelection } from "./moteur6e/sessionGraphiqueDeriveeLogarithme";
+import { tentativesMaxPhase } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
 import type { EtatSessionGraphiqueDeriveeLogarithme } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
+import { diagnostiquerEcranDerivee } from "./moteur6e/verificationGraphiqueDeriveeLogarithme";
 import { Katex } from "./components/Katex";
 import { EtapeChampGraphiqueDeriveeLogarithme } from "./components6e/EtapeChampGraphiqueDeriveeLogarithme";
 import { EtapeSelectionGraphiqueDeriveeLogarithme } from "./components6e/EtapeSelectionGraphiqueDeriveeLogarithme";
@@ -19,13 +21,14 @@ import {
   formatFonctionLatex,
   placeholderDerivee,
 } from "./ui6e/formatGraphiqueDeriveeLogarithme";
-import { calculerRecapitulatifGraphiqueDeriveeLogarithme, calculerSegmentsProgressionGraphiqueDeriveeLogarithme } from "./ui6e/recapitulatifGraphiqueDeriveeLogarithme";
+import { calculerRecapitulatifGraphiqueDeriveeLogarithme, calculerSegmentsProgressionGraphiqueDeriveeLogarithme, lettreGraphiqueCorrect } from "./ui6e/recapitulatifGraphiqueDeriveeLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
+const LETTRES = "ABCD";
 
 function nouvelleSession(): EtatSessionGraphiqueDeriveeLogarithme {
   return demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeLogarithme);
@@ -39,41 +42,36 @@ interface TransitionEnAttente {
 export function App6gen20() {
   const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeLogarithme>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
-  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
-   * tenu ICI, jamais dans le moteur : la saisie de l'élève n'a aucune autre utilité une fois l'écran
-   * clos. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, jamais dans
+   * le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque nouvel exercice — fait partie de la `key` des écrans (`indexExercice`
+   * reste à 0 avec `nombreExercices: 1`, la phase seule ne suffit donc pas). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  /** Seul l'écran "derivee" peut jamais être consulté : "selection" est le dernier écran de
-   * l'exercice, `phase` n'avance jamais au-delà de lui (voir `typesGraphiqueDeriveeLogarithme.ts`),
-   * donc `calculerRecapitulatifGraphiqueDeriveeLogarithme` ne le voit JAMAIS comme "clos" — y
-   * pousser une entrée rejouerait toujours celle de "derivee" (bug déjà rencontré sur la référence
-   * 4e, voir `AppAnalyseFonction.tsx`). */
-  function ajouterHistorique(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme, votreReponse: string) {
-    const recap = calculerRecapitulatifGraphiqueDeriveeLogarithme(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: derniere.libelle,
-        votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
-      },
-    ]);
-  }
+  const exercice = etat.exerciceCourant;
+  const viewBox = calculerViewBoxGraphique(exercice);
 
-  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'écran "derivee" vient
-   * RÉELLEMENT de se clore (jamais à chaque tentative ratée tant que `scoreDeriveePartiel` reste
-   * `null` côté moteur — même garde que la transition d'écran elle-même) ; jamais pour la clôture de
-   * "selection" (dernier écran, voir `ajouterHistorique`). */
-  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme, votreReponse?: string) {
+  /** Graphique correct (lettre + tracé) — révélation et fiche de consultation. */
+  const reponseSelection = (
+    <div className="graphe-qcm-carte">
+      <p className="graphe-qcm-label">Graphique {lettreGraphiqueCorrect(etat)}</p>
+      <GrapheOptionDeriveeLogarithme exercice={exercice} index={exercice.indexCorrect} viewBox={viewBox} largeur={240} hauteur={190} />
+    </div>
+  );
+
+  /** Seul l'écran "selection" (1er écran) peut être consulté : "derivee" est le dernier écran, la
+   * phase n'avance jamais au-delà de lui. */
+  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme, indexChoisi?: number) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined && etat.phase === "derivee") {
-        ajouterHistorique(nouvelEtat, votreReponse);
+      if (indexChoisi !== undefined && etat.phase === "selection") {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          { titre: "Graphique de f'", votreReponse: `Graphique ${LETTRES[indexChoisi] ?? indexChoisi + 1}`, correcte: !revele, reponseAttendue: revele ? reponseSelection : undefined },
+        ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
@@ -86,6 +84,7 @@ export function App6gen20() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -97,27 +96,18 @@ export function App6gen20() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
-  // consécutifs, ce qui empêcherait React de remonter le composant et laisserait la saisie/
-  // sélection de l'exercice précédent persister visuellement (leçon déjà retenue à plusieurs
-  // reprises sur ce chantier — voir CLAUDE.md).
-  const cle = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax);
+  const cle = `${numeroExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue:
-          etat.phase === "derivee" ? (
-            <Katex expression={formatDeriveeCorrecteLatex(exercice)} />
-          ) : (
-            <GrapheOptionDeriveeLogarithme exercice={exercice} index={exercice.indexCorrect} viewBox={calculerViewBoxGraphique(exercice)} largeur={150} hauteur={150} />
-          ),
+        reponseAttendue: etat.phase === "derivee" ? <Katex expression={formatDeriveeCorrecteLatex(exercice)} block /> : reponseSelection,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -128,17 +118,33 @@ export function App6gen20() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Graphique de la dérivée (fonctions logarithmes)</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifGraphiqueDeriveeLogarithme(etat)} />
+        {etat.phase === "selection" && (
+          <EtapeSelectionGraphiqueDeriveeLogarithme
+            key={cle}
+            exercice={exercice}
+            aideNiveau1={aideSelectionNiveau1()}
+            aideNiveau2={aideSelectionNiveau2(exercice)}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index), index)}
+            validation={validation}
+          />
+        )}
         {etat.phase === "derivee" && (
           <EtapeChampGraphiqueDeriveeLogarithme
             key={cle}
             consigneEcran={consigneEcranDerivee()}
             fonctionLatex={formatFonctionLatex(exercice)}
-            placeholder={placeholderDerivee(exercice)}
+            placeholder={placeholderDerivee()}
             aideNiveau1={aideDeriveeNiveau1(exercice)}
             aideNiveau2={aideDeriveeNiveau2(exercice)}
             tentativesUtilisees={tentativesUtilisees}
@@ -146,22 +152,8 @@ export function App6gen20() {
             niveauAide={etat.niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte), texte)}
-            validation={validation}
-          />
-        )}
-        {etat.phase === "selection" && (
-          <EtapeSelectionGraphiqueDeriveeLogarithme
-            key={cle}
-            exercice={exercice}
-            aideNiveau1={aideSelectionNiveau1(exercice)}
-            aideNiveau2={aideSelectionNiveau2(exercice)}
-            tentativesUtilisees={tentativesUtilisees}
-            tentativesMax={tentativesMax}
-            niveauAide={etat.niveauAide}
-            niveauAideMax={NIVEAU_AIDE_MAX}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index))}
+            onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+            diagnostiquer={(texte) => diagnostiquerEcranDerivee(exercice, texte)}
             validation={validation}
           />
         )}

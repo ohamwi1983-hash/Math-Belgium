@@ -509,9 +509,10 @@ export function verifierEDerivee(exercice: ExerciceDomaineDeriveeLogE, texte: st
 
 function referenceFDerivee(exercice: ExerciceDomaineDeriveeLogF): (x: number) => number {
   if (exercice.sousType === "lnSurSin") {
+    const { a } = exercice;
     return (x) => {
       const w = Math.exp(x);
-      const g = 2 + Math.sin(w);
+      const g = a + Math.sin(w);
       const gPrime = Math.cos(w) * w;
       return (gPrime * (1 - Math.log(g))) / (g * g);
     };
@@ -520,19 +521,20 @@ function referenceFDerivee(exercice: ExerciceDomaineDeriveeLogF): (x: number) =>
     const { p } = exercice;
     return (x) => p / Math.sqrt(1 - p * x * p * x);
   }
-  if (exercice.sousType === "racineArcsin") {
+  if (exercice.sousType === "arcsinLogX") {
+    const lnBase = Math.log(exercice.base);
     return (x) => {
-      const s = Math.sqrt(1 - Math.exp(x));
-      const sPrime = -Math.exp(x) / (2 * s);
-      return sPrime / Math.sqrt(1 - s * s);
+      const w = Math.log(x) / lnBase;
+      return 1 / (x * lnBase * Math.sqrt(1 - w * w));
     };
   }
-  const ln10 = Math.log(10);
+  const { k, base } = exercice;
+  const lnBase = Math.log(base);
   return (x) => {
-    const n = Math.atan(2 * x);
-    const nPrime = 2 / (1 + 4 * x * x);
-    const d = 1 - Math.log(2 * x) / ln10;
-    const dPrime = -1 / (x * ln10);
+    const n = Math.atan(k * x);
+    const nPrime = k / (1 + k * k * x * x);
+    const d = 1 - Math.log(x) / lnBase;
+    const dPrime = -1 / (x * lnBase);
     return (nPrime * d - n * dPrime) / (d * d);
   };
 }
@@ -543,8 +545,12 @@ function pointsFDerivee(exercice: ExerciceDomaineDeriveeLogF): number[] {
     const { p } = exercice;
     return [-0.6 / p, -0.3 / p, 0.3 / p, 0.6 / p];
   }
-  if (exercice.sousType === "racineArcsin") return [-2.5, -1.5, -0.8, -0.3];
-  return [0.5, 1.5, 8, 12];
+  if (exercice.sousType === "arcsinLogX") {
+    const { base } = exercice;
+    return [1.3 / base, 0.8, 1.2, 0.7 * base];
+  }
+  const { base } = exercice;
+  return [0.3, 0.6 * base, 1.6 * base, 2.5 * base];
 }
 
 export function diagnostiquerFDerivee(exercice: ExerciceDomaineDeriveeLogF, texte: string): StatutVerification {
@@ -556,8 +562,8 @@ export function verifierFDerivee(exercice: ExerciceDomaineDeriveeLogF, texte: st
 
 // ============================================================================
 // Famille G — dérivation logarithmique implicite. `uvDeG` retourne u/u'/v/v' — pour la variante
-// "produit", u/v désignent UNIQUEMENT la partie puissance x^(-(1+x)) (jamais f(x) entier, voir
-// `core6e/domaineDeriveeLogarithme.types.ts`).
+// "produit", u/v désignent UNIQUEMENT la partie puissance x^(-(a+x)) ; f'/f et f' portent, eux,
+// sur f(x) ENTIÈRE (voir `referenceGFPrimeSurF`).
 // ============================================================================
 
 interface UVDeG {
@@ -569,44 +575,53 @@ interface UVDeG {
 }
 
 function uvDeG(exercice: ExerciceDomaineDeriveeLogG): UVDeG {
+  const { a } = exercice;
   switch (exercice.variante) {
     case "xx":
-      return { u: (x) => x, uPrime: () => 1, v: (x) => x, vPrime: () => 1, points: POINTS_POSITIFS };
+      return { u: (x) => x, uPrime: () => 1, v: (x) => a * x, vPrime: () => a, points: POINTS_POSITIFS };
     case "xSinx":
-      return { u: (x) => x, uPrime: () => 1, v: (x) => Math.sin(x), vPrime: (x) => Math.cos(x), points: POINTS_POSITIFS };
+      return { u: (x) => x, uPrime: () => 1, v: (x) => Math.sin(a * x), vPrime: (x) => a * Math.cos(a * x), points: POINTS_POSITIFS };
     case "cosTan":
-      return { u: (x) => Math.cos(x), uPrime: (x) => -Math.sin(x), v: (x) => Math.tan(x), vPrime: (x) => 1 / Math.pow(Math.cos(x), 2), points: [-0.8, -0.3, 0.3, 0.8] };
+      return { u: (x) => Math.cos(x), uPrime: (x) => -Math.sin(x), v: (x) => a * Math.tan(x), vPrime: (x) => a / Math.pow(Math.cos(x), 2), points: [-0.8, -0.3, 0.3, 0.8] };
     case "unSurXPuissanceX":
-      return { u: (x) => 1 + 1 / x, uPrime: (x) => -1 / (x * x), v: (x) => x, vPrime: () => 1, points: [1, 2, 3, 5] };
+      return { u: (x) => 1 + a / x, uPrime: (x) => -a / (x * x), v: (x) => x, vPrime: () => 1, points: [1, 2, 3, 5] };
     case "sinXInvX":
-      return { u: (x) => Math.sin(x), uPrime: (x) => Math.cos(x), v: (x) => 1 / x, vPrime: (x) => -1 / (x * x), points: [0.5, 1.0, 1.8, 2.5] };
+      return { u: (x) => Math.sin(x), uPrime: (x) => Math.cos(x), v: (x) => a / x, vPrime: (x) => -a / (x * x), points: [0.5, 1.0, 1.8, 2.5] };
     case "racineXPuissanceX":
     case "xRacineXPuissanceX":
       return { u: (x) => x, uPrime: () => 1, v: (x) => 1 + x / 2, vPrime: () => 0.5, points: POINTS_POSITIFS };
     case "produit":
-      return { u: (x) => x, uPrime: () => 1, v: (x) => -(1 + x), vPrime: () => -1, points: POINTS_POSITIFS };
+      return { u: (x) => x, uPrime: () => 1, v: (x) => -(a + x), vPrime: () => -1, points: POINTS_POSITIFS };
+    case "xLnx":
+      return { u: (x) => x, uPrime: () => 1, v: (x) => Math.log(x), vPrime: (x) => 1 / x, points: POINTS_POSITIFS };
+    case "affinePuissanceX":
+      return { u: (x) => x + a, uPrime: () => 1, v: (x) => x, vPrime: () => 1, points: POINTS_POSITIFS };
   }
 }
 
+/** Écran 1 : la forme u^v — pour "produit", uniquement la PARTIE PUISSANCE x^(−(a+x)) (la consigne
+ * de cet écran le dit explicitement, voir `consigneG`). */
 function referenceGIdentifier(exercice: ExerciceDomaineDeriveeLogG): (x: number) => number {
   const { u, v } = uvDeG(exercice);
   return (x) => Math.pow(u(x), v(x));
 }
 
+/** Écran 2 : f'/f de la fonction f ENTIÈRE. Pour "produit", f=(a+x)·u^v donc
+ * ln f = ln(a+x) + v·ln u et f'/f = 1/(a+x) + v'·ln u + v·u'/u (audit 6e ch. 3, point 25 : la
+ * vraie f'/f était refusée, seule celle de la partie puissance était attendue). */
 function referenceGFPrimeSurF(exercice: ExerciceDomaineDeriveeLogG): (x: number) => number {
   const { u, uPrime, v, vPrime } = uvDeG(exercice);
-  return (x) => vPrime(x) * Math.log(u(x)) + (v(x) * uPrime(x)) / u(x);
+  const partiePuissance = (x: number) => vPrime(x) * Math.log(u(x)) + (v(x) * uPrime(x)) / u(x);
+  if (exercice.variante !== "produit") return partiePuissance;
+  const { a } = exercice;
+  return (x) => 1 / (a + x) + partiePuissance(x);
 }
 
 function referenceGIsoler(exercice: ExerciceDomaineDeriveeLogG): (x: number) => number {
   const { u, v } = uvDeG(exercice);
   const fPrimeSurF = referenceGFPrimeSurF(exercice);
-  const g = (x: number) => Math.pow(u(x), v(x));
-  const gPrime = (x: number) => g(x) * fPrimeSurF(x);
-  if (exercice.variante !== "produit") return gPrime;
-  // Sous-type "produit" : f(x) = (1+x)·g(x) → f'(x) = g(x) + (1+x)·g'(x) (règle du produit, le
-  // facteur affine (1+x) se dérive classiquement en parallèle — spec explicite).
-  return (x: number) => g(x) + (1 + x) * gPrime(x);
+  const f = exercice.variante === "produit" ? (x: number) => (exercice.a + x) * Math.pow(u(x), v(x)) : (x: number) => Math.pow(u(x), v(x));
+  return (x) => f(x) * fPrimeSurF(x);
 }
 
 /** Garde structurelle écran 1 : les 2 sous-types "à simplifier d'abord" doivent aboutir à une

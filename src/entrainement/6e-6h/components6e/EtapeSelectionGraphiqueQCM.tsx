@@ -10,6 +10,12 @@ const LETTRES = ["A", "B", "C", "D", "E", "F"] as const;
 const LARGEUR_MIN = 200;
 const LARGEUR_MAX = 360;
 const LARGEUR_PAR_DEFAUT = 280;
+/** Écart entre 2 cartes quand elles tiennent sur 2 colonnes. */
+const ECART_COLONNES = 12;
+/** Hauteur = 80 % de la largeur (au lieu d'un carré) : 4 graphiques empilés sur téléphone restaient
+ * trop hauts pour garder le choix à portée de vue. `preserveAspectRatio={false}` étant actif sur
+ * chaque graphique, ce ratio reste purement esthétique. */
+const RATIO_HAUTEUR = 0.8;
 
 /** Même forme que `AideAvecLatex` exportée par chaque `ui6e/formatXxx.ts` concerné — jamais
  * importée d'un module précis (généricité du composant, voir en-tête ci-dessous), la compatibilité
@@ -61,11 +67,14 @@ interface Props {
  *   n'a plus lieu d'être une fois les graphiques non interactifs). La lettre attribuée à chaque
  *   graphique EST sa position dans `candidats` (0→A, 1→B, ...), déjà randomisée à la génération —
  *   aucun nouveau mélange ici, seule la représentation (lettre plutôt que bouton cliquable) change.
- * - En dessous, 4 boutons de choix texte SÉPARÉS "A"/"B"/"C"/"D", `.options-grid-compact` (grille 2
- *   colonnes, convention standard boutons de choix du projet) — un clic ne fait que sélectionner
- *   (`.btn.toggle-active`), jamais valider directement. Bouton "Valider" obligatoire, inchangé.
- * - Feedback après Valider : uniquement le bouton lettre sélectionné passe en `.is-erronee` (rouge)
- *   si faux — même principe que tout QCM texte du chantier (`EtapeQcmComplexesAvances.tsx`,
+ * - Sous CHAQUE graphique, son propre bouton de choix « Graphique A »… (`.options-grid-compact`,
+ *   convention standard des boutons de choix) — le choix reste collé au graphique qu'il désigne
+ *   (sur téléphone, une grille de lettres placée sous les 4 graphiques empilés obligeait à
+ *   défiler loin du graphique choisi). Un clic ne fait que sélectionner (`.btn.toggle-active`),
+ *   jamais valider directement. Bouton "Valider" obligatoire, inchangé. Les cartes passent sur 2
+ *   colonnes dès que la largeur le permet (2 × `LARGEUR_MIN`).
+ * - Feedback après Valider : uniquement le bouton du choix SOUMIS passe en `.is-erronee` (rouge)
+ *   si faux — jamais un nouveau choix pas encore validé — même principe que tout QCM texte du chantier (`EtapeQcmComplexesAvances.tsx`,
  *   `6gen42`). Aucun feedback vert visible en pratique : comme sur CE même QCM texte de référence,
  *   une réponse correcte fait avancer la phase IMMÉDIATEMENT (`avancerPhase`/`soumettreEtapeTentatives`
  *   côté `moteur6e/`), ce composant est donc démonté avant qu'un état "vert" n'ait la moindre chance
@@ -95,37 +104,47 @@ export function EtapeSelectionGraphiqueQCM({
   validation,
 }: Props) {
   const [choix, setChoix] = useState<number | null>(null);
+  /** Dernier choix SOUMIS — seul lui passe en rouge, jamais un nouveau choix pas encore validé. */
+  const [choixSoumis, setChoixSoumis] = useState<number | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const refuse = (montrerErreurs || validation?.revele === true) && choixSoumis !== null;
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
-  const largeur = Math.min(LARGEUR_MAX, Math.max(LARGEUR_MIN, largeurMesuree || LARGEUR_PAR_DEFAUT));
-  const hauteur = largeur;
+  const largeurConteneur = largeurMesuree || LARGEUR_PAR_DEFAUT;
+  const colonnes = largeurConteneur >= 2 * LARGEUR_MIN + ECART_COLONNES ? 2 : 1;
+  const largeurColonne = (largeurConteneur - ECART_COLONNES * (colonnes - 1)) / colonnes;
+  // Jamais plus large que la colonne réelle (pas de débordement sur un écran étroit), plafonnée à LARGEUR_MAX.
+  const largeur = Math.round(Math.min(LARGEUR_MAX, largeurColonne));
+  const hauteur = Math.round(largeur * RATIO_HAUTEUR);
 
   function valider() {
     if (choix === null) return;
+    setChoixSoumis(choix);
     onValider(choix);
   }
 
   return (
     <div>
-      <div className="graphes-qcm-liste" ref={wrapperRef}>
+      <div
+        className="graphes-qcm-liste"
+        ref={wrapperRef}
+        style={{ display: "grid", gridTemplateColumns: `repeat(${colonnes}, minmax(0, 1fr))`, gap: ECART_COLONNES }}
+      >
         {Array.from({ length: nombreOptions }, (_, index) => (
           <div className="graphe-qcm-carte" key={index}>
             <p className="graphe-qcm-label">{LETTRES[index]}</p>
             {renderGraphique(index, largeur, hauteur)}
+            <div className="options-grid-compact" style={{ gridTemplateColumns: "1fr", marginTop: 6 }}>
+              <button
+                type="button"
+                className={`btn${choix === index ? " toggle-active" : ""}${refuse && choix === index && choixSoumis === index ? " is-erronee" : ""}`}
+                aria-pressed={choix === index}
+                disabled={!!validation}
+                onClick={() => setChoix(index)}
+              >
+                Graphique {LETTRES[index]}
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
-
-      <div className="options-grid-compact">
-        {LETTRES.slice(0, nombreOptions).map((lettre, index) => (
-          <button
-            key={lettre}
-            type="button"
-            className={`btn${choix === index ? " toggle-active" : ""}${montrerErreurs && choix === index ? " is-erronee" : ""}`}
-            onClick={() => setChoix(index)}
-          >
-            {lettre}
-          </button>
         ))}
       </div>
 

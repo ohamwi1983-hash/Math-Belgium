@@ -1,6 +1,6 @@
 /**
  * Couche core (6e) — contrat pour `6gen14` ("Résoudre une équation exponentielle ou
- * logarithmique", chapitre 3 "Fonctions logarithmes"). 7 familles STRUCTURELLEMENT DISJOINTES
+ * logarithmique", chapitre 3 "Fonctions logarithmes"). 6 familles STRUCTURELLEMENT DISJOINTES (A à E et G ; F « changement de base en x » retirée, hors cours)
  * (union discriminée par `famille`, jamais un seul type à champs `| null` partagés) — même
  * principe que `exponentiellesProblemes.types.ts` (6gen12) —, chacune tirée de façon ÉQUIPROBABLE
  * (voir `generateurs6e/equationsExpLog/index.ts`).
@@ -84,33 +84,18 @@ export interface ExerciceEqLogC {
 }
 
 // ============================================================================
-// Famille D — log_x(N)=k / log_a(x)=k, deux sous-types selon la position de l'inconnue (2 écrans).
+// Famille D — log_a(x)=k, base connue, x argument du logarithme (2 écrans).
 // ============================================================================
 
-export type SousTypeD = "D1" | "D2";
-
-/** D1 — `x` est la BASE du logarithme : `log_x(N)=k` ⟹ `x=N^(1/k)`. CE : `x∈ℝ₀⁺\{1}`. */
-export interface ExerciceEqLogD1 {
+/** `log_a(x)=k` ⟹ `x=a^k` directement. CE : `x>0` (`a` connu, ≠1). Le sous-type « x base du
+ * logarithme » (`log_x(N)=k`) a été retiré : la base inconnue n'est pas au programme du cours. */
+export interface ExerciceEqLogD {
   famille: "D";
-  sousType: "D1";
-  N: number;
-  k: number;
-  /** N^(1/k), valeur EXACTE (généralement irrationnelle) — réponse de l'écran 2. */
-  x: number;
-}
-
-/** D2 — `x` est l'ARGUMENT du logarithme, base `a` connue : `log_a(x)=k` ⟹ `x=a^k` directement.
- * CE : `x>0` (`a` déjà connu, ≠1 par hypothèse générale). */
-export interface ExerciceEqLogD2 {
-  famille: "D";
-  sousType: "D2";
   a: number;
   k: number;
   /** a^k — réponse de l'écran 2. */
   x: number;
 }
-
-export type ExerciceEqLogD = ExerciceEqLogD1 | ExerciceEqLogD2;
 
 // ============================================================================
 // Famille E — combiner des logs, rejet CE (3 écrans, variabilité assumée).
@@ -147,27 +132,6 @@ export interface ExerciceEqLogE {
   /** Sous-ensemble de `racinesAlgebriques` compris dans `]ceInf;ceSup[` (ou `]ceInf;+∞[`), trié
    * croissant — 0, 1 ou 2 éléments (variabilité assumée) — réponse attendue de l'écran 3. */
   solutionsFinales: number[];
-}
-
-// ============================================================================
-// Famille F — changement de base (3 écrans).
-// ============================================================================
-
-/**
- * `log_x(a) + log_a(x) = k`, `a` connu. Changement de base : `log_x(a)=1/log_a(x)`, donc en posant
- * `y=log_a(x)` : `y+1/y=k` ⟺ `y²-ky+1=0`. `|k|>2` GARANTIT un discriminant `k²-4>0` (2 racines y
- * réelles distinctes, jamais nulles — leur produit vaut 1) — voir `familles/F.ts`.
- */
-export interface ExerciceEqLogF {
-  famille: "F";
-  a: number;
-  k: number;
-  /** Racines y = [k±√(k²-4)]/2, triées croissant. */
-  yValides: number[];
-  /** x = a^y pour chaque y, même ordre — valeurs EXACTES (généralement irrationnelles,
-   * `TOLÉRANCE NUMÉRIQUE` explicitement acceptée pour cette famille, voir prompt) — réponse
-   * attendue de l'écran 3. */
-  xValides: number[];
 }
 
 // ============================================================================
@@ -217,7 +181,7 @@ export interface ExerciceEqLogG_DiscriminantNegatif {
 
 export type ExerciceEqLogG = ExerciceEqLogG_ViolationCE | ExerciceEqLogG_Identite | ExerciceEqLogG_DiscriminantNegatif;
 
-export type ExerciceEquationsExpLog = ExerciceEqLogA | ExerciceEqLogB | ExerciceEqLogC | ExerciceEqLogD | ExerciceEqLogE | ExerciceEqLogF | ExerciceEqLogG;
+export type ExerciceEquationsExpLog = ExerciceEqLogA | ExerciceEqLogB | ExerciceEqLogC | ExerciceEqLogD | ExerciceEqLogE | ExerciceEqLogG;
 
 export type FamilleEquationsExpLog = ExerciceEquationsExpLog["famille"];
 

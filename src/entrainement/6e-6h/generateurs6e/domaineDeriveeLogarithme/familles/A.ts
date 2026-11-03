@@ -18,7 +18,9 @@ export function construireA(): ExerciceDomaineDeriveeLogA {
 
 function construirePuissance(): ExerciceDomaineDeriveeLogAPuissance {
   const { base, baseEstE } = tirerBaseLogAvecE();
-  const k = tirerEntier(2, 9);
+  // Jamais k=base (audit 6e ch. 3, point 27) : log_5(5^x)=x, exercice trivial.
+  let k = tirerEntier(2, 9);
+  while (!baseEstE && k === base) k = tirerEntier(2, 9);
   return { famille: "A", sousType: "puissance", domaine: ensembleReel(), base, baseEstE, k };
 }
 

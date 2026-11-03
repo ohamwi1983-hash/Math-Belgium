@@ -43,7 +43,7 @@ import { EtapeDomaineDomaineDeriveeLog } from "./components6e/EtapeDomaineDomain
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps } from "./ui6e/formatDomaineDeriveeLogarithme";
+import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps, reponseAttendueLatex } from "./ui6e/formatDomaineDeriveeLogarithme";
 import { calculerRecapitulatifDomaineDeriveeLogarithme, calculerSegmentsProgressionDomaineDeriveeLogarithme } from "./ui6e/recapitulatifDomaineDeriveeLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -97,17 +97,21 @@ function nouvelleSession(): EtatSessionDomaineDeriveeLogarithme {
 const PHASES_DOMAINE = new Set<PhaseDomaineDeriveeLogarithme>(["aDomaine", "bDomaine", "cDomaine", "dDomaine", "eDomaine", "fDomaine"]);
 const PHASES_DEUX_CHAMPS = new Set<PhaseDomaineDeriveeLogarithme>(["cFacteurs", "dND"]);
 
+/** Exemples de saisie — choisis HORS de l'espace des tirages (audit 6e ch. 3, point 8 : plusieurs
+ * étaient la réponse exacte, jusqu'à 100 % des cas en E « puissanceSimple » et en G « xx ») :
+ * coefficient 11 ou 7, base 6 ou 7, jamais produits par les familles concernées. Virgule décimale
+ * proscrite (point 7) : aucun nombre décimal. */
 const PLACEHOLDERS: Partial<Record<PhaseDomaineDeriveeLogarithme, string>> = {
-  aDerivee: "ex : (ln(2)*2^x)/(2^x*ln(3))",
-  bDerivee: "ex : -x/((1-x^2)*ln(2))",
-  cAssemblage: "ex : 3*ln(x)+(3*x)*(1/x)",
-  dAssemblage: "ex : ((1/x)*(2*x)-ln(x)*2)/(2*x)^2",
-  eSimplifier: "ex : 0.5*ln(x)",
-  eDerivee: "ex : 1/(2*x)",
-  fDerivee: "ex : 2/sqrt(1-(2*x)^2)",
-  gIdentifier: "ex : x^x",
-  gFPrimeSurF: "ex : ln(x)+1",
-  gIsoler: "ex : x^x*(ln(x)+1)",
+  aDerivee: "ex : 6/((3x+11)*ln(7))",
+  bDerivee: "ex : -x/((16-x^2)*ln(6))",
+  cAssemblage: "ex : 11*ln(x)+(11x)*(1/x)",
+  dAssemblage: "ex : ((1/x)*(11x)-ln(x)*11)/(11x)^2",
+  eSimplifier: "ex : 4*ln(x)-ln(x+9)",
+  eDerivee: "ex : 3/(5x)",
+  fDerivee: "ex : 5/sqrt(1-(5x)^2)",
+  gIdentifier: "ex : (x+7)^(2x)",
+  gFPrimeSurF: "ex : 2*ln(x+7)+2x/(x+7)",
+  gIsoler: "ex : (x+7)^(2x)*(2*ln(x+7)+2x/(x+7))",
 };
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -121,6 +125,9 @@ interface TransitionEnAttente {
 
 export function App6gen16() {
   const [etat, setEtat] = useState<EtatSessionDomaineDeriveeLogarithme>(nouvelleSession);
+  /** Compteur d'exercices — entre dans la `key` de chaque écran (audit 6e ch. 3, point 3 : la saisie
+   * survivait à « Générer » quand la phase restait la même). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionDomaineDeriveeLogarithme`, jamais dans le moteur. Remis à vide
@@ -165,6 +172,7 @@ export function App6gen16() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
     } else {
       setEtat(enAttente.etatSuivant);
@@ -175,6 +183,7 @@ export function App6gen16() {
   function forcerVariante(id: string) {
     setEnAttente(null);
     setHistorique([]);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -237,23 +246,12 @@ export function App6gen16() {
     return terminerEtape(soumettreReponseGIsoler(etat, texte), texte);
   }
 
-  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
-  // `ResultatPanelDomaineDeriveeLogarithme.tsx` — jamais une cible recalculée séparément.
+  // Réponse attendue EXACTE de l'écran, en LaTeX (audit 6e ch. 3, point 6 : c'était une phrase
+  // générique du type « Dérivée calculée directement... ») — même source que le corrigé exporté.
   const reponseAttenduePhase = () => {
     if (PHASES_DOMAINE.has(phase) && exercice.famille !== "G") return <Katex expression={formatEnsembleReelLatex(exercice.domaine)} />;
-    if (phase === "aDerivee" || phase === "bDerivee" || phase === "fDerivee") {
-      return "Dérivée calculée directement, vérifiée par équivalence numérique avec f'(x).";
-    }
-    if (phase === "cFacteurs") return "u'(x) et v'(x), vérifiées séparément par équivalence numérique.";
-    if (phase === "cAssemblage") return "f'(x) assemblée, vérifiée par équivalence numérique.";
-    if (phase === "dND") return "N'(x) et D'(x), vérifiées séparément par équivalence numérique.";
-    if (phase === "dAssemblage") return "f'(x) assemblée via (N'D−ND')/D², vérifiée par équivalence numérique.";
-    if (phase === "eSimplifier") return "Forme simplifiée via les propriétés du log, jamais une recopie brute de l'énoncé.";
-    if (phase === "eDerivee") return "Dérivée de la forme simplifiée, vérifiée par équivalence numérique avec f'(x).";
-    if (phase === "gIdentifier") return "u(x) et v(x) identifiés (simplification préalable si nécessaire).";
-    if (phase === "gFPrimeSurF") return "f'/f = v'·ln(u) + v·u'/u, par dérivation logarithmique implicite.";
-    if (phase === "gIsoler") return "f' isolée en multipliant par f=u^v.";
-    return null;
+    const reponse = reponseAttendueLatex(exercice, phase);
+    return reponse === null ? null : <Katex expression={reponse} />;
   };
 
   const validation = enAttente
@@ -279,6 +277,7 @@ export function App6gen16() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Domaine, dérivée et dérivation logarithmique</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -286,7 +285,7 @@ export function App6gen16() {
         <RecapitulatifPanel entrees={calculerRecapitulatifDomaineDeriveeLogarithme(etat)} />
         {PHASES_DOMAINE.has(phase) && (
           <EtapeDomaineDomaineDeriveeLog
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             consigneEcran={consigne}
@@ -304,7 +303,7 @@ export function App6gen16() {
 
         {PHASES_DEUX_CHAMPS.has(phase) && (
           <EtapeDeuxChampsDomaineDeriveeLog
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             etatActuel={etatAct}
@@ -331,12 +330,12 @@ export function App6gen16() {
 
         {!PHASES_DOMAINE.has(phase) && !PHASES_DEUX_CHAMPS.has(phase) && (
           <EtapeChampDomaineDeriveeLog
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             etatActuel={etatAct}
             consigneEcran={consigne}
-            placeholder={PLACEHOLDERS[phase] ?? "ex : ln(x)+1"}
+            placeholder={PLACEHOLDERS[phase] ?? ""}
             aideNiveau1={aide1}
             aideNiveau2={aide2}
             tentativesUtilisees={tentativesUtilisees}

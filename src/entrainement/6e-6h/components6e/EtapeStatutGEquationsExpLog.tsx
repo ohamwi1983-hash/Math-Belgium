@@ -40,13 +40,16 @@ const OPTIONS: { id: IssueSimplificationG; label: string }[] = [
 /** Écran GÉNÉRIQUE "statut à 3 issues" — famille G écran 2 uniquement (choix véritable présenté à
  * l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary`, convention CLAUDE.md). Même
  * patron que `EtapeChoixOuiNonExpoProblemes.tsx` (6gen12), étendu à 3 options plutôt que 2.
- * `App6gen14.tsx` doit le rendre avec `key={phase}`. */
+ * `App6gen14.tsx` doit le rendre avec une `key` propre à l'exercice et à l'écran. */
 export function EtapeStatutGEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IssueSimplificationG | null>(null);
+  /** Seul le choix SOUMIS et refusé est marqué rouge — jamais un nouveau choix avant validation. */
+  const [choixRefuse, setChoixRefuse] = useState<IssueSimplificationG | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   function valider() {
     if (choix === null) return;
+    setChoixRefuse(choix);
     onValider(choix);
   }
 
@@ -69,7 +72,7 @@ export function EtapeStatutGEquationsExpLog({ consigneGenerale, blocDonnees, con
       </p>
       <div className="options-grid-compact">
         {OPTIONS.map((o) => (
-          <button key={o.id} type="button" className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choix === o.id ? "is-erronee" : ""}`} onClick={() => setChoix(o.id)}>
+          <button key={o.id} type="button" className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choixRefuse === o.id ? "is-erronee" : ""}`} onClick={() => setChoix(o.id)}>
             {o.label}
           </button>
         ))}

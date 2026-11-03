@@ -6,8 +6,12 @@ const K_VALEURS = [-3, -2, -1, 1, 2, 3] as const;
  * parmi ces 5 valeurs, `"e"` un marqueur interne remplacé par `Math.E`/`baseEstE=true`). */
 const BASES_OPTIONS = [2, 3, 5, 7, "e"] as const;
 /** Pool de constantes pour le distracteur "zéro mal placé" — jamais `1` (sinon son zéro
- * coïnciderait avec x=e du candidat réel, cf. `constanteNumerateur`). */
-const CONSTANTES_ZERO_MAL_PLACE = [-1, 0, 2, 3] as const;
+ * coïnciderait avec x=e du candidat réel, cf. `constanteNumerateur`) ; zéros en x=e^(−1)≈0,37,
+ * x=1 ou x=e^1,5≈4,48, tous VISIBLES dans la fenêtre [0,2 ; 7] (un zéro hors cadre se confondait
+ * avec « pas de zéro »). */
+const CONSTANTES_ZERO_MAL_PLACE = [-1, 0, 1.5] as const;
+/** Décalage vertical de f — ne change rien à f'. */
+const CONSTANTES_C = [-1, 0, 1] as const;
 
 function tirerBase(): { base: number; baseEstE: boolean } {
   const choix = tirerParmi(BASES_OPTIONS);
@@ -15,7 +19,7 @@ function tirerBase(): { base: number; baseEstE: boolean } {
 }
 
 /**
- * Famille A — `f(x) = k·log_base(x)/x`. 2 écrans : `f'(x) = k·[1−ln(x)]/(x²·ln(base))` (ou sans le
+ * Famille A — `f(x) = k·log_base(x)/x + c`. 2 écrans : `f'(x) = k·[1−ln(x)]/(x²·ln(base))` (ou sans le
  * `ln(base)` si `base=e`) — le zéro de `f'` est TOUJOURS en x=e, quels que soient k et base ; la
  * courbe n'est PAS monotone (pic).
  */
@@ -29,7 +33,7 @@ export function construireA(): ExerciceGraphiqueDeriveeLogA {
   const monotone: CandidatDeriveeLogA = { k, base, baseEstE, type: "monotone", constanteNumerateur: 1 };
 
   const { candidats, indexCorrect } = melangerAvecIndexCorrect([reel, signeInverse, zeroMalPlace, monotone]);
-  return { famille: "A", k, base, baseEstE, candidats, indexCorrect };
+  return { famille: "A", k, base, baseEstE, c: tirerParmi(CONSTANTES_C), candidats, indexCorrect };
 }
 
 export { K_VALEURS as A_K_VALEURS, BASES_OPTIONS as A_BASES_OPTIONS, CONSTANTES_ZERO_MAL_PLACE as A_CONSTANTES_ZERO_MAL_PLACE };

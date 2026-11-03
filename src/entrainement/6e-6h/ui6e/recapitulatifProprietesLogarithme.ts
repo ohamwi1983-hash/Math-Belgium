@@ -1,4 +1,4 @@
-import { nombreEtapesAlgebriques } from "../moteur6e/typesProprietesLogarithme";
+import { ecranDeLaPhase, nombreEcrans } from "../moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme } from "../moteur6e/typesProprietesLogarithme";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatProprietesLogarithme";
@@ -12,16 +12,20 @@ import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatPropriete
  */
 export function calculerRecapitulatifProprietesLogarithme(etat: EtatSessionProprietesLogarithme): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
-  return etat.scoresPartiels.map((_score, phase) => {
+  // Les écrans de CHOIX de propriété ne figurent pas dans le récapitulatif : le libellé de l'écran
+  // de transformation qui suit nomme déjà la propriété (« Étape 1 (produit) »).
+  return etat.scoresPartiels.flatMap((_score, phase) => {
+    if (ecranDeLaPhase(exercice, phase).kind === "choix") return [];
     const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-    return { libelle: libellePhase(exercice, phase), estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: etat.revelesPartiels[phase] };
+    return [{ libelle: libellePhase(exercice, phase), estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: etat.revelesPartiels[phase] }];
   });
 }
 
-/** Une puce par écran RÉELLEMENT prévu pour l'exercice courant (nombre variable, voir
- * `moteur6e/typesProprietesLogarithme.ts::nombreEtapesAlgebriques`), jamais une séquence fixe commune. */
+/** Une puce par écran RÉELLEMENT prévu pour l'exercice courant (choix de propriété + transformation
+ * par étape d'argument, voir `moteur6e/typesProprietesLogarithme.ts::sequenceEcrans`), jamais une
+ * séquence fixe commune. */
 export function calculerSegmentsProgressionProprietesLogarithme(etat: EtatSessionProprietesLogarithme) {
-  const total = nombreEtapesAlgebriques(etat.exerciceCourant);
+  const total = nombreEcrans(etat.exerciceCourant);
   return Array.from({ length: total }, (_, i) => {
     if (i === etat.phase) return "courante" as const;
     if (i > etat.phase) return "a-venir" as const;
