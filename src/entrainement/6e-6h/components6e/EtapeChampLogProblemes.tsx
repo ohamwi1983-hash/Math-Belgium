@@ -45,11 +45,17 @@ interface Props {
  */
 export function EtapeChampLogProblemes({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
+  /** Dernière saisie soumise — le champ n'est rouge que tant qu'il contient encore cette saisie
+   * refusée (jamais pendant la frappe d'une nouvelle réponse), et le message d'erreur décrit
+   * TOUJOURS cette saisie-là. */
+  const [soumis, setSoumis] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
+  const dernierStatut = montrerErreurs && diagnostiquer && soumis !== null ? diagnostiquer(soumis) : null;
+  const champRefuse = montrerErreurs && !validation && soumis === texte;
 
   function valider() {
     if (texte.trim() === "") return;
+    setSoumis(texte);
     onValider(texte);
   }
 
@@ -71,7 +77,7 @@ export function EtapeChampLogProblemes({ consigneGenerale, blocDonnees, consigne
         <RenduFragments fragments={consigneEcran} />
       </p>
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input type="text" className={`text-input ${champRefuse ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

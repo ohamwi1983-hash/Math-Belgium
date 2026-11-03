@@ -4,7 +4,7 @@ import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseCroissanceStandard } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import type { FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, PLACEHOLDER_POSITION_EXTREMUM } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -25,9 +25,6 @@ const OPTIONS: { id: ReponseCroissanceStandard["type"]; label: string; requiertP
 interface Props {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
-  /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
-   * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
-  etatActuel: string[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -42,19 +39,25 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "croissance", forme "standard" — familles A/B/D (catégorie + position d'extremum
+/** Écran "croissance", forme "standard" — familles A/B/D/E (catégorie + position d'extremum
  * optionnelle, même contrat `CibleCroissance` que `6gen11`). Voir `EtapeCroissanceGrilleCLog.tsx`
- * pour la famille C. `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * pour la famille C. */
+export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseCroissanceStandard["type"] | null>(null);
   const [position, setPosition] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse soumise — le choix et le champ ne sont rouges que s'ils n'ont pas changé
+   * depuis ce refus. */
+  const [soumis, setSoumis] = useState<ReponseCroissanceStandard | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && !validation;
+  const typeRefuse = montrerErreurs && soumis !== null && soumis.type === type;
+  const positionRefusee = typeRefuse && soumis !== null && soumis.position === position;
 
   const requiertPosition = type === "minimum" || type === "maximum";
   const complet = type !== null && (!requiertPosition || position.trim() !== "");
 
   function valider() {
     if (!complet || type === null) return;
+    setSoumis({ type, position });
     onValider({ type, position });
   }
 
@@ -68,19 +71,12 @@ export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatAct
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuel.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (
-          <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${montrerErreurs && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>
+          <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${typeRefuse && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>
             {o.label}
           </button>
         ))}
@@ -90,7 +86,7 @@ export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatAct
           <ApercuExpressionLatex texte={position} />
           <div className="field contenu-conditionnel">
             <label className="field-label field-label-minuscule">Position de l'extremum (x=...)</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={position} placeholder="ex : 1/e, e, ln(3)..." onChange={(e) => setPosition(e.target.value)} />
+            <input type="text" className={`text-input ${positionRefusee ? "is-erronee" : ""}`} value={position} placeholder={PLACEHOLDER_POSITION_EXTREMUM} onChange={(e) => setPosition(e.target.value)} />
           </div>
         </>
       )}

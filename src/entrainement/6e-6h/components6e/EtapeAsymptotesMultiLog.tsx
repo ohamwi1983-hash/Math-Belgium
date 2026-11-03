@@ -4,7 +4,7 @@ import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseAsymptoteDirection } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, PLACEHOLDER_ASYMPTOTE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -20,12 +20,16 @@ function GroupeAsymptote({
   etat,
   erreur,
   forcerPresence,
+  touche,
   onChange,
 }: {
   label: string;
   etat: ReponseAsymptoteDirection;
   erreur: boolean;
   forcerPresence: boolean;
+  /** `false` tant que l'élève n'a rien choisi : aucun bouton ne paraît pré-sélectionné (sinon
+   * « Aucune asymptote » semblait choisi alors que Valider restait grisé). */
+  touche: boolean;
   onChange: (e: ReponseAsymptoteDirection) => void;
 }) {
   return (
@@ -35,7 +39,7 @@ function GroupeAsymptote({
       </p>
       {!forcerPresence && (
         <div className="options-grid-compact">
-          <button type="button" className={`btn ${etat.existe === false ? "toggle-active" : ""} ${erreur && etat.existe === false ? "is-erronee" : ""}`} onClick={() => onChange({ existe: false, texte: etat.texte })}>
+          <button type="button" className={`btn ${touche && etat.existe === false ? "toggle-active" : ""} ${erreur && etat.existe === false ? "is-erronee" : ""}`} onClick={() => onChange({ existe: false, texte: etat.texte })}>
             Aucune asymptote
           </button>
           <button type="button" className={`btn ${etat.existe === true ? "toggle-active" : ""} ${erreur && etat.existe === true ? "is-erronee" : ""}`} onClick={() => onChange({ existe: true, texte: etat.texte })}>
@@ -50,7 +54,7 @@ function GroupeAsymptote({
             type="text"
             className={`text-input ${forcerPresence ? "" : "contenu-conditionnel"} ${erreur ? "is-erronee" : ""}`}
             value={etat.texte}
-            placeholder="ex : y=0, x=3, y=-2x+1..."
+            placeholder={PLACEHOLDER_ASYMPTOTE}
             onChange={(e) => onChange({ existe: true, texte: e.target.value })}
           />
         </>
@@ -62,13 +66,9 @@ function GroupeAsymptote({
 interface Props {
   enonceLatex: string;
   consigneEcran: FragmentConsigne[];
-  /** Rappel des limites confirmées à l'écran précédent (consigne explicite : "à partir des limites
-   * CORRECTES précédentes") — voir `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
-  etatActuel: string[];
   labels: DirectionLabel[];
-  /** longueur = `labels.length` — `true` pour une direction où l'asymptote est TOUJOURS présente
-   * (famille B, famille C), auquel cas aucun toggle "Aucune/Il y a" n'est affiché, juste le champ
-   * texte directement. */
+  /** longueur = `labels.length` — `true` quand l'asymptote est TOUJOURS présente (famille C), auquel
+   * cas aucun toggle "Aucune/Il y a" n'est affiché, juste le champ texte directement. */
   forcerPresence: boolean[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -84,15 +84,18 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "asymptotes" — arité VARIABLE (1 direction pour B, 2 pour A/C/D) — UN SEUL composant
- * générique. Réponse GUIDÉE "existe/n'existe pas" + équation texte libre conditionnelle (sauf
+/** Écran "asymptotes" — 2 directions (ou 2 asymptotes verticales pour la famille C) — UN SEUL
+ * composant générique. Réponse GUIDÉE "existe/n'existe pas" + équation texte libre conditionnelle (sauf
  * `forcerPresence`, où l'existence est déjà acquise), vérifiée par ÉQUIVALENCE NUMÉRIQUE de
- * l'équation soumise (même décision de conception que `6gen11`). `App6gen21.tsx` doit le rendre
- * avec `key={indexExercice}`. */
-export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * l'équation soumise (même décision de conception que `6gen11`). `App6gen21.tsx` le rend avec une
+ * `key` qui change à chaque exercice. */
+export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<ReponseAsymptoteDirection[]>(() => labels.map((_, i) => ({ existe: forcerPresence[i], texte: "" })));
   const [touches, setTouches] = useState<boolean[]>(() => labels.map(() => false));
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse soumise — seule une direction inchangée depuis ce refus est marquée en rouge. */
+  const [soumis, setSoumis] = useState<ReponseAsymptoteDirection[] | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && !validation;
+  const refusee = (i: number) => montrerErreurs && soumis !== null && soumis[i].existe === etats[i].existe && soumis[i].texte === etats[i].texte;
 
   function complet(i: number): boolean {
     const e = etats[i];
@@ -102,12 +105,13 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel
   const tousComplets = labels.every((_, i) => complet(i));
 
   function majEtat(index: number, nouvel: ReponseAsymptoteDirection) {
-    setEtats(etats.map((e, i) => (i === index ? nouvel : e)));
-    setTouches(touches.map((t, i) => (i === index ? true : t)));
+    setEtats((courants) => courants.map((e, i) => (i === index ? nouvel : e)));
+    setTouches((courants) => courants.map((t, i) => (i === index ? true : t)));
   }
 
   function valider() {
     if (!tousComplets) return;
+    setSoumis(etats);
     onValider(etats);
   }
 
@@ -121,18 +125,11 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuel.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
       {labels.map((l, i) => (
-        <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} forcerPresence={forcerPresence[i]} onChange={(e) => majEtat(i, e)} />
+        <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={refusee(i)} forcerPresence={forcerPresence[i]} touche={touches[i]} onChange={(e) => majEtat(i, e)} />
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">

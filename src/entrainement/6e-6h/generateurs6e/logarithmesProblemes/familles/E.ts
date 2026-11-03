@@ -70,7 +70,11 @@ export function construireE(contexteForce?: ContexteE, deduireABForce?: boolean)
   const deltaLDonnee = arrondir(a * Math.log10(tirerParmi(K_ECRAN3_POOL)), 2);
   const reponseEcran3 = sensEcran3 === "versDeltaL" ? a * Math.log10(kEcran3) : Math.pow(10, deltaLDonnee / a);
 
-  const [L1e4, L2e4] = [tirerLDansPlage(cfg.rangeL, cfg.decimalsL), tirerLDansPlage(cfg.rangeL, cfg.decimalsL)];
+  // Écran 4 (décibels seulement) : deux sources de niveaux PROCHES (écart de 0 à 6 dB), sinon la
+  // combinaison vaut presque le maximum des deux et le calcul n'apprend rien.
+  const avecEcran4 = cfg.id === "decibels";
+  const L1e4 = tirerLDansPlage([cfg.rangeL[0] + 6, cfg.rangeL[1]], cfg.decimalsL);
+  const L2e4 = avecEcran4 ? L1e4 - tirerEntier(0, 6) : tirerLDansPlage(cfg.rangeL, cfg.decimalsL);
   const X1e4 = Math.pow(10, (L1e4 - b) / a);
   const X2e4 = Math.pow(10, (L2e4 - b) / a);
   const Ltotal = a * Math.log10(X1e4 + X2e4) + b;
@@ -78,6 +82,7 @@ export function construireE(contexteForce?: ContexteE, deduireABForce?: boolean)
   return {
     famille: "E",
     contexteE: cfg.id,
+    avecEcran4,
     a,
     b,
     deduireAB,

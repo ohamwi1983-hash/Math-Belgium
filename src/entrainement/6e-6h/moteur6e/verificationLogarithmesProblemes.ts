@@ -1,7 +1,6 @@
-import type { ExerciceLogProbA, ExerciceLogProbB, ExerciceLogProbC, ExerciceLogProbD, ExerciceLogProbE, ExerciceLogProbF, ExerciceLogProbG } from "../core6e/logarithmesProblemes.types";
+import type { ExerciceLogProbA, ExerciceLogProbB, ExerciceLogProbC, ExerciceLogProbE, ExerciceLogProbF } from "../core6e/logarithmesProblemes.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerEquationDifference, diagnostiquerEquivalenceFonction, diagnostiquerValeur, separerEquationTexte } from "./equivalenceExponentielle";
-import { evaluerExpressionExponentielle } from "./expressionExponentielle";
+import { diagnostiquerEquivalenceFonction, diagnostiquerValeur, separerEquationTexte } from "./equivalenceExponentielle";
 
 /**
  * Couche B (6e) — vérification pour `6gen22`. N'importe jamais rien de `src/generateurs6e/` — voir
@@ -12,31 +11,20 @@ import { evaluerExpressionExponentielle } from "./expressionExponentielle";
  * arbitraire, équivalence à 2 variables libres...) est écrite ICI, jamais dans les fichiers
  * partagés.
  *
- * **Tolérances** (convention arrondie, héritée de 6gen12) :
- * - `toleranceArrondie(cible)` — `max(0,5 ; 1% de |cible|)`, pour toute valeur numérique "mesurée"
- *   dont l'énoncé annonce un arrondi.
- * - `toleranceEchelle(cible)` — `max(0,5 ; 2% de |cible|)`, légèrement plus large que
- *   `toleranceArrondie` : réservée à la famille E, dont certaines valeurs (`X`) peuvent couvrir
- *   plusieurs ordres de grandeur (ex. décibels, magnitude) et chaînent plusieurs étapes de calcul.
- * - `tolerancePrix(cible)` — `max(0,01 ; 3% de |cible|)` — valeurs typiquement PETITES (prix
- *   d'équilibre famille G, taux famille A/F) où une tolérance absolue de 0,5 serait bien trop
- *   large (accepterait n'importe quel signe/ordre de grandeur).
- * - `TOLERANCE_TAUX` (0,03) — taux/rapports (r) dont la référence peut avoir légèrement bougé à
- *   cause d'un arrondi d'affichage en amont.
- * - `TOLERANCE_EXPRESSION` (0,05) — comparaisons d'expressions/modèles par échantillonnage
- *   numérique.
+ * **Tolérances** (audit chapitre 3 de 6e) — toujours RELATIVES, avec un petit plancher absolu
+ * adapté à l'ordre de grandeur de la réponse : l'ancienne tolérance `max(0,5 ; 2 %)` acceptait
+ * « 0 » pour une concentration de 1,26·10⁻³ mol/L, et un taux voisin faux (r = 1,03 pour 1,05).
+ * - `toleranceRelative(cible, rel, plancher)` — `max(plancher, rel·|cible|)`.
+ * - `TOLERANCE_EXPRESSION` (0,05) — comparaisons d'expressions/modèles par échantillonnage.
  */
 const TOLERANCE_EXPRESSION = 0.05;
-const TOLERANCE_TAUX = 0.03;
+/** Taux multiplicateur r (famille B) — les valeurs possibles sont espacées de 0,02 à 0,03. */
+const TOLERANCE_TAUX_R = 0.005;
+/** Réponse entière (nombre de périodes). */
+const TOLERANCE_ENTIER = 0.01;
 
-function toleranceArrondie(cible: number): number {
-  return Math.max(0.5, Math.abs(cible) * 0.01);
-}
-function toleranceEchelle(cible: number): number {
-  return Math.max(0.5, Math.abs(cible) * 0.02);
-}
-function tolerancePrix(cible: number): number {
-  return Math.max(0.01, Math.abs(cible) * 0.03);
+function toleranceRelative(cible: number, rel: number, plancher: number): number {
+  return Math.max(plancher, Math.abs(cible) * rel);
 }
 
 const NORMALISER_SYMBOLE: Record<string, string> = { ">=": ">=", "≥": ">=", "<=": "<=", "≤": "<=", "=": "=", "<": "<", ">": ">" };
@@ -62,38 +50,6 @@ function diagnostiquerEquationVariable(
   const statutDroite = diagnostiquerEquivalenceFonction(separe.droite, refDroite, points, tolerance, variable);
   if (statutDroite === "parse_error") return "parse_error";
   if (statutGauche === "not_equivalent" || statutDroite === "not_equivalent") return "not_equivalent";
-  return "correct";
-}
-
-/** Compare un texte (fonction de 2 variables LIBRES nommées) à une référence à 2 arguments —
- * nécessaire pour la famille D (le modèle affiché reste symbolique en `k`, jamais une valeur
- * numérique concrète). Grille `points1×points2` échantillonnée intégralement. */
-function diagnostiquerEquivalenceDeuxVariables(
-  texte: string,
-  variables: [string, string],
-  reference: (v1: number, v2: number) => number,
-  points1: number[],
-  points2: number[],
-  tolerance: number = TOLERANCE_EXPRESSION,
-): StatutVerification {
-  let comparables = 0;
-  for (const v1 of points1) {
-    for (const v2 of points2) {
-      const attendu = reference(v1, v2);
-      if (!Number.isFinite(attendu)) continue;
-      let soumis: number;
-      try {
-        soumis = evaluerExpressionExponentielle(texte, { [variables[0]]: v1, [variables[1]]: v2 });
-      } catch {
-        return "parse_error";
-      }
-      if (!Number.isFinite(soumis)) return "not_equivalent";
-      comparables++;
-      if (Math.abs(soumis - attendu) > tolerance) return "not_equivalent";
-    }
-  }
-  const minimumRequis = Math.min(6, points1.length * points2.length);
-  if (comparables < minimumRequis) return "parse_error";
   return "correct";
 }
 
@@ -144,23 +100,31 @@ export function diagnostiquerAEcran2(exercice: ExerciceLogProbA, texte: string):
 /** Écran 3, sous-type "resoudreT", variante "simple" — 1 valeur numérique. */
 export function diagnostiquerAEcran3Simple(exercice: ExerciceLogProbA, texte: string): StatutVerification {
   if (exercice.sousType !== "resoudreT") return "parse_error";
-  return diagnostiquerValeur(texte, exercice.t1Reponse, toleranceArrondie(exercice.t1Reponse));
+  return diagnostiquerValeur(texte, exercice.t1Reponse, TOLERANCE_ENTIER);
 }
 
 /** Écran 3, sous-type "resoudreT", variante "fenêtre" — 2 valeurs ORDONNÉES (t1 puis t2). */
 export function diagnostiquerAEcran3Fenetre(exercice: ExerciceLogProbA, texte1: string, texte2: string): StatutVerification {
   if (exercice.sousType !== "resoudreT") return "parse_error";
-  return diagnostiquerPaireValeurs(texte1, exercice.t1Reponse, texte2, exercice.t2Reponse, toleranceArrondie(exercice.t1Reponse), toleranceArrondie(exercice.t2Reponse));
+  return diagnostiquerPaireValeurs(texte1, exercice.t1Reponse, texte2, exercice.t2Reponse, TOLERANCE_ENTIER, TOLERANCE_ENTIER);
 }
 
+/** Taux i : accepté en décimal (0,0451) ou en pourcentage (4,51 % — avec ou sans le signe « % »,
+ * une valeur ≥ 1 ne pouvant être qu'un pourcentage ici, puisque i < 1). */
 export function diagnostiquerAEcran3Taux(exercice: ExerciceLogProbA, texte: string): StatutVerification {
   if (exercice.sousType !== "resoudreTaux") return "parse_error";
-  return diagnostiquerValeur(texte, exercice.i, tolerancePrix(exercice.i));
+  const tolerance = toleranceRelative(exercice.i, 0.01, 0.0006);
+  const enPourcent = texte.trim().endsWith("%");
+  const sansPourcent = texte.replace(/%\s*$/, "");
+  if (enPourcent) return diagnostiquerValeur(sansPourcent, 100 * exercice.i, 100 * tolerance);
+  const statut = diagnostiquerValeur(sansPourcent, exercice.i, tolerance);
+  if (statut !== "not_equivalent") return statut;
+  return diagnostiquerValeur(sansPourcent, 100 * exercice.i, 100 * tolerance) === "correct" && 100 * exercice.i >= 1 ? "correct" : "not_equivalent";
 }
 
 export function diagnostiquerAEcran3Decroissance(exercice: ExerciceLogProbA, texte: string): StatutVerification {
   if (exercice.sousType !== "tauxDecroissance") return "parse_error";
-  return diagnostiquerValeur(texte, exercice.k, tolerancePrix(exercice.k));
+  return diagnostiquerValeur(texte, exercice.k, toleranceRelative(exercice.k, 0.01, 0.0006));
 }
 
 export function verifierAEcran1(exercice: ExerciceLogProbA, texte: string): boolean {
@@ -186,17 +150,21 @@ export function verifierAEcran3Decroissance(exercice: ExerciceLogProbA, texte: s
 // Famille B — 4 écrans.
 // ============================================================================
 
+/** r de référence = taux recalculé depuis les valeurs AFFICHÉES ; le taux exact du modèle est
+ * aussi accepté (écart ≤ 0,005, bien en dessous de l'espacement des taux possibles). */
 export function diagnostiquerBEcran1(exercice: ExerciceLogProbB, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.r, TOLERANCE_TAUX);
+  const statut = diagnostiquerValeur(texte, exercice.rAffiche, TOLERANCE_TAUX_R);
+  if (statut !== "not_equivalent") return statut;
+  return diagnostiquerValeur(texte, exercice.r, TOLERANCE_TAUX_R);
 }
 export function diagnostiquerBEcran2(exercice: ExerciceLogProbB, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.Q0, toleranceArrondie(exercice.Q0));
+  return diagnostiquerValeur(texte, exercice.Q0, toleranceRelative(exercice.Q0, 0.01, 0.01));
 }
 export function diagnostiquerBEcran3(exercice: ExerciceLogProbB, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.valeurRef, toleranceArrondie(exercice.valeurRef));
+  return diagnostiquerValeur(texte, exercice.valeurRef, toleranceRelative(exercice.valeurRef, 0.01, 0.01));
 }
 export function diagnostiquerBEcran4(exercice: ExerciceLogProbB, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.tCible, toleranceArrondie(exercice.tCible));
+  return diagnostiquerValeur(texte, exercice.tCible, toleranceRelative(exercice.tCible, 0.01, 0.05));
 }
 
 export function verifierBEcran1(exercice: ExerciceLogProbB, texte: string): boolean {
@@ -217,14 +185,15 @@ export function verifierBEcran4(exercice: ExerciceLogProbB, texte: string): bool
 // ============================================================================
 
 export function diagnostiquerCEcran1(exercice: ExerciceLogProbC, texte: string): StatutVerification {
-  const cible = exercice.sens === "versT" ? exercice.T : exercice.lambda;
-  return diagnostiquerValeur(texte, cible, exercice.sens === "versT" ? toleranceArrondie(cible) : tolerancePrix(cible));
+  if (exercice.sens === "versT") return diagnostiquerValeur(texte, exercice.T, toleranceRelative(exercice.T, 0.01, 0.01));
+  return diagnostiquerValeur(texte, exercice.lambda, toleranceRelative(exercice.lambda, 0.02, 1e-9));
 }
 export function diagnostiquerCEcran2(exercice: ExerciceLogProbC, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.tEcran2, toleranceArrondie(exercice.tEcran2));
+  return diagnostiquerValeur(texte, exercice.tEcran2, toleranceRelative(exercice.tEcran2, 0.01, 0.05));
 }
+/** Facteur correctif voisin de 1 (ex. 5 730/5 568 ≈ 1,029) : arrondi au millième demandé. */
 export function diagnostiquerCEcran3(exercice: ExerciceLogProbC, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.facteurCorrectif, tolerancePrix(exercice.facteurCorrectif));
+  return diagnostiquerValeur(texte, exercice.facteurCorrectif, 0.0015);
 }
 
 export function verifierCEcran1(exercice: ExerciceLogProbC, texte: string): boolean {
@@ -238,51 +207,24 @@ export function verifierCEcran3(exercice: ExerciceLogProbC, texte: string): bool
 }
 
 // ============================================================================
-// Famille D — 2 écrans, expressions à 2 variables libres (t/T et k, jamais résolu numériquement).
-// ============================================================================
-
-const POINTS_TD = [0, 1, 2, 5];
-const POINTS_KD = [-2, -1, -0.5, 0.5, 1, 2];
-
-export function diagnostiquerDEcran1(exercice: ExerciceLogProbD, texte: string): StatutVerification {
-  const { Ta, T0 } = exercice;
-  return diagnostiquerEquivalenceDeuxVariables(texte, ["t", "k"], (t, k) => Ta + (T0 - Ta) * Math.exp(k * t), POINTS_TD, POINTS_KD, TOLERANCE_EXPRESSION);
-}
-
-export function diagnostiquerDEcran2(exercice: ExerciceLogProbD, texte: string): StatutVerification {
-  // Variable "t" (MINUSCULE) plutôt que "T" — le tokeniseur d'`expressionExponentielle.ts` met en
-  // MINUSCULE tout identifiant (`nom.toLowerCase()`), donc une clé "T" dans le Record de variables
-  // ne matcherait JAMAIS l'identifiant réellement produit pour un "T" tapé par l'élève (toujours lu
-  // "t"). Aucune ambiguïté de sens ici : l'écran 2 n'a pas de variable "temps" à ce stade (déjà
-  // substitué), donc réutiliser la même lettre normalisée pour "la température T" est sans risque —
-  // l'élève peut taper indifféremment "T" ou "t", les deux sont interprétés identiquement.
-  const { Ta, T0 } = exercice;
-  const pointsT = [0.1, 0.3, 0.5, 0.7, 0.9].map((frac) => Ta + frac * (T0 - Ta));
-  return diagnostiquerEquivalenceDeuxVariables(texte, ["t", "k"], (T, k) => (1 / k) * Math.log((T - Ta) / (T0 - Ta)), pointsT, POINTS_KD, TOLERANCE_EXPRESSION);
-}
-
-export function verifierDEcran1(exercice: ExerciceLogProbD, texte: string): boolean {
-  return diagnostiquerDEcran1(exercice, texte) === "correct";
-}
-export function verifierDEcran2(exercice: ExerciceLogProbD, texte: string): boolean {
-  return diagnostiquerDEcran2(exercice, texte) === "correct";
-}
-
-// ============================================================================
 // Famille E — 3 ou 4 écrans (écran 1 sauté si `deduireAB===false`).
 // ============================================================================
 
 export function diagnostiquerEEcran1(exercice: ExerciceLogProbE, texteA: string, texteB: string): StatutVerification {
-  return diagnostiquerPaireValeurs(texteA, exercice.a, texteB, exercice.b, Math.max(0.05, Math.abs(exercice.a) * 0.1), Math.max(0.05, Math.abs(exercice.b) * 0.1));
+  return diagnostiquerPaireValeurs(texteA, exercice.a, texteB, exercice.b, toleranceRelative(exercice.a, 0.02, 0.02), toleranceRelative(exercice.b, 0.02, 0.02));
 }
+/** Une valeur d'échelle L s'arrondit au centième ; une grandeur X (souvent minuscule : 10⁻³ mol/L)
+ * ne se juge qu'en relatif. */
 export function diagnostiquerEEcran2(exercice: ExerciceLogProbE, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.reponseEcran2, toleranceEchelle(exercice.reponseEcran2));
+  const cible = exercice.reponseEcran2;
+  return diagnostiquerValeur(texte, cible, exercice.sensEcran2 === "versL" ? toleranceRelative(cible, 0.01, 0.02) : toleranceRelative(cible, 0.02, 0));
 }
 export function diagnostiquerEEcran3(exercice: ExerciceLogProbE, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.reponseEcran3, toleranceEchelle(exercice.reponseEcran3));
+  const cible = exercice.reponseEcran3;
+  return diagnostiquerValeur(texte, cible, exercice.sensEcran3 === "versDeltaL" ? toleranceRelative(cible, 0.01, 0.01) : toleranceRelative(cible, 0.02, 0));
 }
 export function diagnostiquerEEcran4(exercice: ExerciceLogProbE, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.Ltotal, toleranceArrondie(exercice.Ltotal));
+  return diagnostiquerValeur(texte, exercice.Ltotal, 0.1);
 }
 
 export function verifierEEcran1(exercice: ExerciceLogProbE, texteA: string, texteB: string): boolean {
@@ -303,13 +245,13 @@ export function verifierEEcran4(exercice: ExerciceLogProbE, texte: string): bool
 // ============================================================================
 
 export function diagnostiquerFEcran1(exercice: ExerciceLogProbF, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.a, tolerancePrix(exercice.a));
+  return diagnostiquerValeur(texte, exercice.a, toleranceRelative(exercice.a, 0.01, 0.01));
 }
 export function diagnostiquerFEcran2(exercice: ExerciceLogProbF, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.t, tolerancePrix(exercice.t));
+  return diagnostiquerValeur(texte, exercice.t, toleranceRelative(exercice.t, 0.01, 0.01));
 }
 export function diagnostiquerFEcran3(exercice: ExerciceLogProbF, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.k, toleranceArrondie(exercice.k));
+  return diagnostiquerValeur(texte, exercice.k, 0.01);
 }
 
 export function verifierFEcran1(exercice: ExerciceLogProbF, texte: string): boolean {
@@ -320,37 +262,4 @@ export function verifierFEcran2(exercice: ExerciceLogProbF, texte: string): bool
 }
 export function verifierFEcran3(exercice: ExerciceLogProbF, texte: string): boolean {
   return diagnostiquerFEcran3(exercice, texte) === "correct";
-}
-
-// ============================================================================
-// Famille G — 4 écrans.
-// ============================================================================
-
-const POINTS_U = [-3, -2, -1, 0, 1, 2, 3, 5];
-
-export function diagnostiquerGEcran1(exercice: ExerciceLogProbG, texteO: string, texteD: string): StatutVerification {
-  return diagnostiquerPaireValeurs(texteO, exercice.oX0, texteD, exercice.dX0, toleranceArrondie(exercice.oX0), toleranceArrondie(exercice.dX0));
-}
-export function diagnostiquerGEcran2(exercice: ExerciceLogProbG, texte: string): StatutVerification {
-  const { A, B } = exercice;
-  return diagnostiquerEquationDifference(texte, "u", (u) => A * u * u - (A + B), POINTS_U, TOLERANCE_EXPRESSION);
-}
-export function diagnostiquerGEcran3(exercice: ExerciceLogProbG, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.xEquilibre, tolerancePrix(exercice.xEquilibre));
-}
-export function diagnostiquerGEcran4(exercice: ExerciceLogProbG, texte: string): StatutVerification {
-  return diagnostiquerValeur(texte, exercice.xEcran4, tolerancePrix(exercice.xEcran4));
-}
-
-export function verifierGEcran1(exercice: ExerciceLogProbG, texteO: string, texteD: string): boolean {
-  return diagnostiquerGEcran1(exercice, texteO, texteD) === "correct";
-}
-export function verifierGEcran2(exercice: ExerciceLogProbG, texte: string): boolean {
-  return diagnostiquerGEcran2(exercice, texte) === "correct";
-}
-export function verifierGEcran3(exercice: ExerciceLogProbG, texte: string): boolean {
-  return diagnostiquerGEcran3(exercice, texte) === "correct";
-}
-export function verifierGEcran4(exercice: ExerciceLogProbG, texte: string): boolean {
-  return diagnostiquerGEcran4(exercice, texte) === "correct";
 }

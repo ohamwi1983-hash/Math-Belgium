@@ -4,7 +4,7 @@ import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { TypeConcaviteLog } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseConcaviteLog } from "../moteur6e/verificationEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE, consigneConcavite } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, PLACEHOLDER_INFLEXION, consigneConcavite } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -23,9 +23,6 @@ const OPTIONS: { id: TypeConcaviteLog; label: string }[] = [
 
 interface Props {
   enonceLatex: string;
-  /** Rappel de domaine + limites + asymptotes + croissance déjà confirmés — voir
-   * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
-  etatActuel: string[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -40,22 +37,25 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "concavité" — généralise `6gen11` (au plus 1 point d'inflexion) à 0..N points, pattern
- * "add-as-needed" (croix rouge `×`/bouton "+ Ajouter") pour la liste de positions — nécessaire pour
- * la famille B, qui a TOUJOURS un point d'inflexion mais parfois DEUX (voir
- * `generateurs6e/etudeFonctionLogarithme/familles/B.ts`). Commun aux 4 familles A-D.
- * `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+/** Écran "concavité" — 0, 1 ou 2 points d'inflexion, pattern "add-as-needed" (croix `×`/bouton
+ * "+ Ajouter") pour la liste de positions (famille D : 2 points d'inflexion). Commun aux 5 familles. */
+export function EtapeConcaviteLog({ enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<TypeConcaviteLog | null>(null);
   const [positions, setPositions] = useState<string[]>([""]);
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse soumise — rouge seulement sur ce qui n'a pas changé depuis ce refus. */
+  const [soumis, setSoumis] = useState<ReponseConcaviteLog | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0 && !validation;
+  const typeRefuse = montrerErreurs && soumis !== null && soumis.type === type;
+  const positionsRefusees = typeRefuse && soumis !== null && soumis.positionsTexte.join("|") === positions.join("|");
 
   const requiertPositions = type === "inflexions";
   const complet = type !== null && (!requiertPositions || positions.every((p) => p.trim() !== ""));
 
   function valider() {
     if (!complet || type === null) return;
-    onValider({ type, positionsTexte: requiertPositions ? positions : [] });
+    const reponse = { type, positionsTexte: requiertPositions ? positions : [] };
+    setSoumis({ type, positionsTexte: positions });
+    onValider(reponse);
   }
 
   return (
@@ -68,19 +68,12 @@ export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNi
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuel.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
       <p className="prompt-text">
         <RenduFragments fragments={consigneConcavite()} />
       </p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (
-          <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${montrerErreurs && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>
+          <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${typeRefuse && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>
             {o.label}
           </button>
         ))}
@@ -93,8 +86,8 @@ export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNi
               <div className="liste-morceaux-ligne">
                 <input
                   type="text"
-                  className={`text-input ${montrerErreurs ? "is-erronee" : ""}`}
-                  placeholder="position (x=...)"
+                  className={`text-input ${positionsRefusees ? "is-erronee" : ""}`}
+                  placeholder={PLACEHOLDER_INFLEXION}
                   value={p}
                   onChange={(e) => setPositions(positions.map((v, j) => (j === i ? e.target.value : v)))}
                 />

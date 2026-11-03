@@ -1,71 +1,67 @@
-import type { CandidatEtudeLogC, ExerciceEtudeLogC } from "../../../core6e/etudeFonctionLogarithme.types";
-import type { CibleAsymptote } from "../../../core6e/etudeFonctionExponentielle.types";
+import type { ExerciceEtudeLogC, SigneCroissance } from "../../../core6e/etudeFonctionLogarithme.types";
 import type { CibleLimite } from "../../../core6e/limitesExponentielles.types";
 import { ensemblePrivePoints } from "../../ensembleReel";
-import { melangerAvecIndexCorrect, tirerParmi } from "../aleatoire";
+import { assemblerQcm, tirerParmi } from "../aleatoire";
+import { candidat } from "../graphe";
 
-const K_VALEURS = [2, 3, 4, 5] as const;
-/** Pool de décalages, jamais `0` (sinon les distracteurs coïncideraient avec le réel). */
-const DECALAGE_VALEURS = [-2, -1, 1, 2] as const;
+const M_VALEURS = [-2, -1, 1, 2] as const;
+const P_VALEURS = [-2, -1, 0, 1, 2] as const;
+const Q_VALEURS = [1, 2, 3] as const;
 
 /**
- * Famille C — `f(x) = ln|k²-x²|`, k∈{2,3,4,5}. Domaine ℝ\{-k,k} — 3 branches, ÉLARGI par la valeur
- * absolue par rapport à `ln(k²-x²)` seul (piège central écran 1 : les deux régions |x|>k sont AUSSI
- * valides). Paire. 2 asymptotes verticales symétriques x=±k. Maximum local en x=0 (valeur 2ln k).
- *
- * **Domaine** : `k²-x²` s'annule en x=±k (exclus) ; `|k²-x²|>0` PARTOUT ailleurs (que k²-x² soit
- * positif OU négatif), donc `ln|k²-x²|` est défini sur ℝ\{-k,k} tout entier — pas seulement
- * ]-k;k[ (où k²-x²>0 SANS valeur absolue).
- *
- * **Croissance — f'(x)=2x/(x²-k²), tableau de signe sur 4 intervalles, INVARIANT en k** :
- * - x<-k : 2x<0, x²-k²>0 (|x|>k) ⟹ f'<0, décroissante.
- * - -k<x<0 : 2x<0, x²-k²<0 (|x|<k) ⟹ f'>0, croissante.
- * - 0<x<k : 2x>0, x²-k²<0 ⟹ f'<0, décroissante.
- * - x>k : 2x>0, x²-k²>0 ⟹ f'>0, croissante.
- * Motif [décroissante, croissante, décroissante, croissante] TOUJOURS le même quel que soit k>0 —
- * maximum local unique en x=0 (croissante puis décroissante autour de 0), cohérent avec la spec.
- *
- * **Concavité — TOUJOURS concave partout, jamais d'inflexion (résultat propre à cette famille,
- * contrairement à ce qu'on pourrait attendre d'une fonction à 3 branches)** : sur ]-k;k[, avec
- * g(x)=k²-x², f=ln(g), f'=-2x/g, f''=[g''·g-(g')²]/g² = [-2g-4x²]/g² = -2(k²+x²)/g² < 0 TOUJOURS.
- * Sur |x|>k, avec h(x)=x²-k², f=ln(h), f'=2x/h, f''=[2h-4x²]/h² = -2(x²+k²)/h² < 0 TOUJOURS aussi.
- * Les 2 formules coïncident en signe (toujours strictement négatif) : concave sur les 3 branches,
- * sans exception — jamais de changement de signe, donc jamais de point d'inflexion.
+ * Famille C — `f(x) = m·ln|x² − 2px + p² − q²|` = m·ln|(x−p)² − q²|, racines entières r₁=p−q et
+ * r₂=p+q (l'élève les trouve en factorisant le trinôme).
+ * - Domaine ℝ∖{r₁ ; r₂} — ÉLARGI par la valeur absolue (piège : pas seulement là où le trinôme
+ *   est positif).
+ * - Aux racines, |…| → 0⁺ ⟹ m·ln(0⁺) = −∞·signe(m) des deux côtés ; aux infinis, +∞·signe(m).
+ * - f'(x) = 2m(x−p)/((x−p)²−q²) : tableau de signe sur ]−∞;r₁[, ]r₁;p[, ]p;r₂[, ]r₂;+∞[, extremum
+ *   local en x=p (maximum si m>0, minimum si m<0), de valeur f(p) = m·ln(q²) = 2m·ln(q).
+ * - f''(x) = −2m((x−p)²+q²)/((x−p)²−q²)² : signe constant −signe(m) — concave (m>0) ou convexe
+ *   (m<0) partout, jamais d'inflexion.
  */
 export function construireC(): ExerciceEtudeLogC {
-  const k = tirerParmi(K_VALEURS);
+  for (;;) {
+    const m = tirerParmi(M_VALEURS);
+    const p = tirerParmi(P_VALEURS);
+    const q = tirerParmi(Q_VALEURS);
+    const r1 = p - q;
+    const r2 = p + q;
+    const params = { m, p, q };
+    const reel = candidat("reel", params);
+    const remarquables = [m * Math.log(q * q)];
+    const qcm = assemblerQcm("C", reel, remarquables, [
+      () => candidat("domaineRestreint", params, { domaineRestreint: true }),
+      () => candidat("axeDecale", { ...params, p: p + tirerParmi([-1, 1]) }),
+      () => candidat("typeInverse", { ...params, m: -m }),
+    ]);
+    if (qcm === null) continue;
 
-  const limites: [CibleLimite, CibleLimite, CibleLimite, CibleLimite, CibleLimite, CibleLimite] = [
-    { type: "plus_infini" }, // x→-∞
-    { type: "moins_infini" }, // x→(-k)⁻
-    { type: "moins_infini" }, // x→(-k)⁺
-    { type: "moins_infini" }, // x→k⁻
-    { type: "moins_infini" }, // x→k⁺
-    { type: "plus_infini" }, // x→+∞
-  ];
-  const asymptotes: [CibleAsymptote, CibleAsymptote] = [
-    { type: "verticale", p: -k },
-    { type: "verticale", p: k },
-  ];
-
-  const reel: CandidatEtudeLogC = { type: "reel", k, decalage: 0 };
-  const domaineRestreint: CandidatEtudeLogC = { type: "domaineRestreint", k, decalage: 0 };
-  const asymptotesMalPlacees: CandidatEtudeLogC = { type: "asymptotesMalPlacees", k, decalage: tirerParmi(DECALAGE_VALEURS) };
-  const asymetrieIncorrecte: CandidatEtudeLogC = { type: "asymetrieIncorrecte", k, decalage: tirerParmi(DECALAGE_VALEURS) };
-
-  const { candidats, indexCorrect } = melangerAvecIndexCorrect([reel, domaineRestreint, asymptotesMalPlacees, asymetrieIncorrecte]);
-
-  return {
-    famille: "C",
-    k,
-    domaine: ensemblePrivePoints([-k, k]),
-    limites,
-    asymptotes,
-    croissance: { signes: ["decroissante", "croissante", "decroissante", "croissante"], positionMax: 0 },
-    concavite: { type: "concave_partout", positions: [] },
-    candidats,
-    indexCorrect,
-  };
+    const versInfini: CibleLimite = m > 0 ? { type: "plus_infini" } : { type: "moins_infini" };
+    const versRacine: CibleLimite = m > 0 ? { type: "moins_infini" } : { type: "plus_infini" };
+    const signes: [SigneCroissance, SigneCroissance, SigneCroissance, SigneCroissance] =
+      m > 0 ? ["decroissante", "croissante", "decroissante", "croissante"] : ["croissante", "decroissante", "croissante", "decroissante"];
+    return {
+      famille: "C",
+      m,
+      p,
+      q,
+      domaine: ensemblePrivePoints([r1, r2]),
+      limites: [versInfini, versRacine, versRacine, versRacine, versRacine, versInfini],
+      asymptotes: [
+        { type: "verticale", p: r1 },
+        { type: "verticale", p: r2 },
+      ],
+      croissance: {
+        signes,
+        extremum: m > 0 ? "maximum" : "minimum",
+        positionExtremum: p,
+        valeurExtremum: m * Math.log(q * q),
+        valeurExtremumLatex: q === 1 ? "0" : `${2 * m}\\ln(${q})`,
+      },
+      concavite: m > 0 ? { type: "concave_partout", positions: [], positionsLatex: [] } : { type: "convexe_partout", positions: [], positionsLatex: [] },
+      valeursRemarquables: remarquables,
+      candidats: qcm.candidats,
+      indexCorrect: qcm.indexCorrect,
+    };
+  }
 }
-
-export { K_VALEURS as C_K_VALEURS, DECALAGE_VALEURS as C_DECALAGE_VALEURS };

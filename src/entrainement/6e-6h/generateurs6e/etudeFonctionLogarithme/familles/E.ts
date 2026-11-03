@@ -1,38 +1,49 @@
 import type { ExerciceEtudeLogE } from "../../../core6e/etudeFonctionLogarithme.types";
-import { ensembleReel } from "../../ensembleReel";
-import { tirerParmi } from "../aleatoire";
+import type { CibleLimite } from "../../../core6e/limitesExponentielles.types";
+import { ensembleUnMorceau, versLeHautDepuis } from "../../ensembleReel";
+import { assemblerQcm, tirerParmi } from "../aleatoire";
+import { candidat } from "../graphe";
 
-const A_VALEURS = [-2, -1, 1, 2] as const;
-const TRIG_VALEURS = ["sin", "cos"] as const;
+const M_VALEURS = [-2, -1, 1, 2] as const;
+const C_VALEURS = [1, 2, 3, 4] as const;
 
 /**
- * Famille E — `f(x) = e^(ax)·trig(x)`, a≠0, trig∈{sin,cos}. Nature différente des familles A-D :
- * oscillation amortie/amplifiée, sans tableau de variation possible (f' s'annule une infinité de
- * fois) et sans limite du tout dans une direction — traitement volontairement allégé (2 écrans,
- * qualitatif seulement, jamais de QCM graphique).
- *
- * **Comportement à chaque infini** : `|f(x)| ≤ |e^(ax)|` toujours (l'enveloppe encadre
- * l'oscillation, |trig(x)|≤1). Dans la direction où l'enveloppe |e^(ax)|→0, f est COINCÉE entre
- * deux quantités qui tendent vers 0 — par encadrement, f→0. Dans la direction où l'enveloppe
- * explose, l'oscillation continue indéfiniment (trig(x) ne cesse jamais d'osciller entre -1 et 1)
- * pendant que l'amplitude grandit sans borne — AUCUNE limite n'existe (ni finie, ni infinie).
- *
- * a<0 : e^(ax)→0 quand x→+∞ (enveloppe amortie côté +∞) et e^(ax)→+∞ quand x→-∞ (amplifiée côté
- * -∞) — donc limite=0 en +∞, n'existe pas en -∞. a>0 : l'inverse.
+ * Famille E — `f(x) = m(ln(x) + c/x)`, c>0.
+ * - Domaine ]0;+∞[.
+ * - x→0⁺ : c/x → +∞ l'emporte sur ln(x) → −∞ (x·ln(x) → 0, donc ln(x)+c/x = (x·ln(x)+c)/x) ⟹
+ *   +∞·signe(m), asymptote verticale x=0. x→+∞ : +∞·signe(m), aucune asymptote (f(x)/x → 0).
+ * - f'(x) = m(x−c)/x² : extremum en x=c (minimum si m>0, maximum si m<0).
+ * - f''(x) = m(2c−x)/x³ : un point d'inflexion en x=2c.
  */
 export function construireE(): ExerciceEtudeLogE {
-  const a = tirerParmi(A_VALEURS);
-  const trig = tirerParmi(TRIG_VALEURS);
+  for (;;) {
+    const m = tirerParmi(M_VALEURS);
+    const c = tirerParmi(C_VALEURS);
+    const params = { m, c, s: 1 };
+    const reel = candidat("reel", params);
+    const remarquables = [m * (Math.log(c) + 1)];
+    const autresC = C_VALEURS.filter((v) => Math.abs(v - c) >= 2);
+    const qcm = assemblerQcm("E", reel, remarquables, [
+      () => candidat("extremumDecale", { ...params, c: tirerParmi(autresC) }),
+      () => candidat("typeInverse", { ...params, m: -m }),
+      () => candidat("sansExtremum", { ...params, s: -1 }),
+    ]);
+    if (qcm === null) continue;
 
-  const comportement = a < 0 ? { moinsInfini: "nexiste_pas" as const, plusInfini: "zero" as const } : { moinsInfini: "zero" as const, plusInfini: "nexiste_pas" as const };
-
-  return {
-    famille: "E",
-    a,
-    trig,
-    domaine: ensembleReel(),
-    comportement,
-  };
+    const versInfini: CibleLimite = m > 0 ? { type: "plus_infini" } : { type: "moins_infini" };
+    return {
+      famille: "E",
+      m,
+      c,
+      domaine: ensembleUnMorceau(versLeHautDepuis(0, false)),
+      limites: [versInfini, versInfini],
+      asymptotes: [{ type: "verticale", p: 0 }, { type: "aucune" }],
+      croissance: { type: m > 0 ? "minimum" : "maximum", position: c },
+      croissanceLatex: String(c),
+      concavite: { type: "inflexions", positions: [2 * c], positionsLatex: [String(2 * c)] },
+      valeursRemarquables: remarquables,
+      candidats: qcm.candidats,
+      indexCorrect: qcm.indexCorrect,
+    };
+  }
 }
-
-export { A_VALEURS as E_A_VALEURS, TRIG_VALEURS as E_TRIG_VALEURS };

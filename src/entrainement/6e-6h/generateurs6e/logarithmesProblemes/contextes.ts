@@ -75,7 +75,7 @@ export const CONTEXTES_A_DECROISSANCE: ContexteADecroissance[] = [
     label: "Absorption de la lumière dans l'eau",
     unite: "mètres de profondeur",
     grandeur: "l'intensité lumineuse (en %)",
-    phrase: (Q0, p) => `À la surface d'un lac, l'intensité lumineuse vaut ${Q0} (en unité arbitraire). Chaque mètre de profondeur supplémentaire absorbe ${fr(p)} % de l'intensité restante.`,
+    phrase: (Q0, p) => `À la surface d'un lac, l'intensité lumineuse vaut ${Q0} lux. Chaque mètre de profondeur supplémentaire absorbe ${fr(p)} % de l'intensité restante.`,
   },
   {
     id: "eliminationMedicament",
@@ -140,7 +140,7 @@ export const CONTEXTES_A_TAUX_DECROISSANCE: ContexteATauxDecroissance[] = [
     id: "intensiteSonore",
     label: "Atténuation d'une intensité sonore",
     unite: "mètres",
-    phrase: (Q0, pourcentBaisse, h) => `Le niveau d'une source sonore correspond à une intensité de ${Q0} (unité arbitraire) à la source. Après ${h} mètres, il n'en reste plus que ${fr(100 - pourcentBaisse)} %.`,
+    phrase: (Q0, pourcentBaisse, h) => `Une source sonore émet une intensité de ${Q0} mW/m² à la source. Après ${h} mètres, il n'en reste plus que ${fr(100 - pourcentBaisse)} %.`,
   },
   {
     id: "chargeCondensateur",
@@ -200,13 +200,20 @@ export const CONTEXTES_B: ContexteB[] = [
 ];
 
 // ============================================================================
-// Famille C — radioactivité, demi-vie.
+// Famille C — radioactivité, demi-vie. Valeurs physiques réelles pour les isotopes réels (carbone 14 :
+// 5 730 ans, iode 131 : 8,02 jours), pool libre pour l'élément fictif.
 // ============================================================================
 
 export interface ContexteC {
   id: string;
   label: string;
   element: string;
+  unite: string;
+  /** Demi-vie actuellement admise (`null` : tirée dans `poolT`). */
+  T: number | null;
+  poolT: readonly number[];
+  /** Ancienne estimation publiée de la demi-vie (`null` : tirée autour de T). */
+  ancienneEstimation: number | null;
   phraseIntro: () => string;
 }
 
@@ -215,55 +222,31 @@ export const CONTEXTES_C: ContexteC[] = [
     id: "carbone14",
     label: "Carbone 14 (datation)",
     element: "le carbone 14",
+    unite: "ans",
+    T: 5730,
+    poolT: [],
+    ancienneEstimation: 5568,
     phraseIntro: () => "Le carbone 14 est un isotope radioactif utilisé pour dater des matériaux organiques.",
   },
   {
     id: "iode131",
     label: "Iode 131 (usage médical)",
     element: "l'iode 131",
+    unite: "jours",
+    T: 8.02,
+    poolT: [],
+    ancienneEstimation: 8.1,
     phraseIntro: () => "L'iode 131 est un isotope radioactif utilisé en médecine nucléaire.",
   },
   {
     id: "elementFictif",
     label: "Élément radioactif fictif (Zorium-X)",
     element: "le zorium-X",
-    phraseIntro: () => "Le zorium-X est un élément radioactif (fictif) étudié en laboratoire.",
-  },
-];
-
-// ============================================================================
-// Famille D — asymptote non nulle.
-// ============================================================================
-
-export interface ContexteD {
-  id: string;
-  label: string;
-  unite: string;
-  grandeur: string;
-  phrase: (Ta: number, T0: number) => string;
-}
-
-export const CONTEXTES_D: ContexteD[] = [
-  {
-    id: "refroidissementCafe",
-    label: "Refroidissement d'un café",
-    unite: "minutes",
-    grandeur: "la température (en °C)",
-    phrase: (Ta, T0) => `Une tasse de café à ${T0} °C est posée dans une pièce maintenue à ${Ta} °C. Elle refroidit progressivement en tendant vers la température de la pièce.`,
-  },
-  {
-    id: "concentrationMedicament",
-    label: "Concentration d'un médicament vers un résidu stable",
     unite: "heures",
-    grandeur: "la concentration (en mg/L)",
-    phrase: (Ta, T0) => `La concentration d'un médicament dans le sang vaut ${T0} mg/L juste après la prise, et tend vers un résidu constant de ${Ta} mg/L.`,
-  },
-  {
-    id: "fourFroid",
-    label: "Refroidissement d'un four",
-    unite: "minutes",
-    grandeur: "la température (en °C)",
-    phrase: (Ta, T0) => `Un four à ${T0} °C est éteint dans un atelier maintenu à ${Ta} °C. Sa température tend vers celle de l'atelier.`,
+    T: null,
+    poolT: [5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80],
+    ancienneEstimation: null,
+    phraseIntro: () => "Le zorium-X est un élément radioactif (fictif) étudié en laboratoire.",
   },
 ];
 
@@ -300,28 +283,5 @@ export const CONTEXTES_F: ContexteF[] = [
     unite: "années",
     grandeurCapacite: "individus (en centaines)",
     phrase: (k, y0) => `Une population animale réintroduite dans une réserve suit une croissance logistique dont la capacité d'accueil du milieu est ${k} centaines d'individus. À l'année 0, la population compte ${fr(y0)} centaines d'individus.`,
-  },
-];
-
-// ============================================================================
-// Famille G — équilibre offre/demande.
-// ============================================================================
-
-export interface ContexteG {
-  id: string;
-  label: string;
-  phrase: () => string;
-}
-
-export const CONTEXTES_G: ContexteG[] = [
-  {
-    id: "marcheAgricole",
-    label: "Marché d'un produit agricole",
-    phrase: () => "Sur un marché, l'offre et la demande d'un produit dépendent toutes deux de son prix unitaire x (en €).",
-  },
-  {
-    id: "marcheTechnologique",
-    label: "Marché d'un objet technologique",
-    phrase: () => "Le nombre d'unités qu'un fabricant est prêt à produire (offre) et le nombre d'unités que les clients sont prêts à acheter (demande) dépendent du prix de vente x (en €).",
   },
 ];

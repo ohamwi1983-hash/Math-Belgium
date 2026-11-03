@@ -1,4 +1,4 @@
-import type { ExerciceLogarithmesProblemes, ExerciceLogProbA, ExerciceLogProbB, ExerciceLogProbC, ExerciceLogProbD, ExerciceLogProbE, ExerciceLogProbF, ExerciceLogProbG } from "../core6e/logarithmesProblemes.types";
+import type { ExerciceLogarithmesProblemes, ExerciceLogProbA, ExerciceLogProbB, ExerciceLogProbC, ExerciceLogProbE, ExerciceLogProbF } from "../core6e/logarithmesProblemes.types";
 import {
   CONTEXTES_A_CROISSANCE,
   CONTEXTES_A_DECROISSANCE,
@@ -6,9 +6,7 @@ import {
   CONTEXTES_A_TAUX_DECROISSANCE,
   CONTEXTES_B,
   CONTEXTES_C,
-  CONTEXTES_D,
   CONTEXTES_F,
-  CONTEXTES_G,
 } from "../generateurs6e/logarithmesProblemes/contextes";
 import type { PhaseLogarithmesProblemes } from "../moteur6e/typesLogarithmesProblemes";
 
@@ -47,6 +45,19 @@ function formatDecimalTexte(v: number, decimales = 2): string {
   const f = Math.pow(10, decimales);
   const r = Math.round(v * f) / f;
   return String(r).replace(".", ",");
+}
+
+/** Nombre à `chiffres` chiffres significatifs, en LaTeX (notation scientifique pour les très
+ * petites/grandes valeurs, virgule décimale). */
+function formatSignificatif(v: number, chiffres = 3): string {
+  if (v === 0) return "0";
+  const exposant = Math.floor(Math.log10(Math.abs(v)));
+  if (exposant < -3 || exposant > 5) {
+    const mantisse = Math.round((v / Math.pow(10, exposant)) * Math.pow(10, chiffres - 1)) / Math.pow(10, chiffres - 1);
+    return `${String(mantisse).replace(".", "{,}")} \\times 10^{${exposant}}`;
+  }
+  const decimales = Math.max(0, chiffres - 1 - exposant);
+  return formatDecimal(v, decimales);
 }
 
 /** `± b` (avec espace de tête), OMIS si `b=0` — cas réel pour les contextes pH/décibels (famille
@@ -121,9 +132,9 @@ function etatActuelA(ex: ExerciceLogProbA, phase: PhaseA): string[] | null {
     if (phase === "aEcran2") return [eq1];
     return [eq1, `(1+i)^{${ex.n}} = ${formatDecimal(ex.cibleAffiche / ex.Q0, 4)}`];
   }
-  const eq1 = `${ex.Q0}\\cdot e^{-kh} = ${formatDecimal(ex.fraction * ex.Q0, 2)}`;
+  const eq1 = `${ex.Q0}\\cdot e^{-${ex.h}k} = ${formatDecimal(ex.fraction * ex.Q0, 2)}`;
   if (phase === "aEcran2") return [eq1];
-  return [eq1, `e^{-kh} = ${formatDecimal(ex.fraction, 2)}`];
+  return [eq1, `e^{-${ex.h}k} = ${formatDecimal(ex.fraction, 2)}`];
 }
 
 function consigneEcranA(ex: ExerciceLogProbA, phase: PhaseA): FragmentConsigne[] {
@@ -133,28 +144,28 @@ function consigneEcranA(ex: ExerciceLogProbA, phase: PhaseA): FragmentConsigne[]
     return [texte("Pose l'équation qui traduit cette situation (l'inconnue est le taux k).")];
   }
   if (phase === "aEcran2") {
-    if (ex.sousType === "resoudreT") return [texte("À partir de la forme CORRECTE de l'étape précédente, isole le terme exponentiel.")];
-    return [texte("À partir de la forme CORRECTE de l'étape précédente, isole le terme élevé à une puissance.")];
+    if (ex.sousType === "resoudreT") return [texte("En partant de l'équation de l'étape précédente, isole le terme exponentiel.")];
+    return [texte("En partant de l'équation de l'étape précédente, isole le terme élevé à une puissance.")];
   }
   if (ex.sousType === "resoudreT") {
     return ex.variante === "simple"
       ? [texte("Résous : donne le nombre ENTIER de périodes à partir duquel ce seuil est atteint (arrondi au-dessus, on ne peut pas compter une période partielle).")]
       : [texte("Résous les 2 seuils : donne, pour chacun, le nombre ENTIER de périodes à partir duquel il est atteint (arrondi au-dessus).")];
   }
-  if (ex.sousType === "resoudreTaux") return [texte("Résous pour i à partir de la forme CORRECTE de l'étape précédente (utilise une racine n-ième — l'inconnue est la BASE, pas l'exposant).")];
-  return [texte("Résous pour k à partir de la forme CORRECTE de l'étape précédente (utilise le logarithme népérien).")];
+  if (ex.sousType === "resoudreTaux") return [texte("Résous pour i en partant de l'équation de l'étape précédente (l'inconnue est dans la base : racine n-ième). Donne i en décimal arrondi au dix-millième (ex. 0,0451) ou en pourcentage (4,51 %).")];
+  return [texte("Résous pour k en partant de l'équation de l'étape précédente (logarithme népérien). Donne k arrondi au dix-millième.")];
 }
 
 function aideA1(ex: ExerciceLogProbA, phase: PhaseA): AideAvecLatex {
   if (phase === "aEcran1") {
     if (ex.sousType === "resoudreT") return { texte: `Rappel : ${ex.croissance ? "une hausse" : "une baisse"} de p % correspond à un facteur ${ex.croissance ? "r=1+p/100" : "r=1-p/100"}.`, latex: ex.croissance ? "r=1+\\dfrac{p}{100}" : "r=1-\\dfrac{p}{100}" };
     if (ex.sousType === "resoudreTaux") return { texte: "Modèle Q0·(1+i)^n=cible — ici, contrairement à un taux fixe, c'est le TAUX i qui est l'inconnue.", latex: "Q_0\\cdot(1+i)^{n}=\\text{cible}" };
-    return { texte: "Modèle Q0·e^(-kh)=fraction·Q0 — l'inconnue est le taux de décroissance k.", latex: "Q_0\\cdot e^{-kh}=\\text{fraction}\\cdot Q_0" };
+    return { texte: "Modèle Q0·e^(−k·h) = fraction·Q0, avec h la durée écoulée — l'inconnue est le taux de décroissance k.", latex: "Q_0\\cdot e^{-k\\,h}=\\text{fraction}\\cdot Q_0" };
   }
   if (phase === "aEcran2") {
     if (ex.sousType === "resoudreT") return { texte: "Divise les deux membres par Q0 pour isoler le terme en r.", latex: null };
     if (ex.sousType === "resoudreTaux") return { texte: "Divise les deux membres par Q0 pour isoler (1+i)^n.", latex: null };
-    return { texte: "Divise les deux membres par Q0 pour isoler e^(-kh).", latex: null };
+    return { texte: "Divise les deux membres par Q0 pour isoler l'exponentielle.", latex: null };
   }
   if (ex.sousType === "resoudreT") return { texte: "Passe au logarithme (népérien ou décimal) des deux membres, puis isole t.", latex: null };
   if (ex.sousType === "resoudreTaux")
@@ -166,31 +177,31 @@ function aideA2(ex: ExerciceLogProbA, phase: PhaseA): AideAvecLatex {
   if (phase === "aEcran1") {
     if (ex.sousType === "resoudreT") return { texte: "Facteur déjà calculé (équation non posée) :", latex: `r = ${formatDecimal(ex.r, 4)}` };
     if (ex.sousType === "resoudreTaux") return { texte: "Forme attendue (non posée) :", latex: "Q_0\\cdot(1+i)^{n} = \\text{cible}" };
-    return { texte: "Forme attendue (non posée) :", latex: "Q_0\\cdot e^{-kh} = \\text{fraction}\\cdot Q_0" };
+    return { texte: "Valeurs à substituer :", latex: `Q_0 = ${ex.Q0},\\quad h = ${ex.h},\\quad \\text{fraction} = ${formatDecimal(ex.fraction, 2)}` };
   }
   if (phase === "aEcran2") {
     if (ex.sousType === "resoudreT") return { texte: "Équation prête pour le logarithme :", latex: equationA1(ex) };
     if (ex.sousType === "resoudreTaux") return { texte: "Équation prête pour la racine n-ième :", latex: `${ex.Q0}\\cdot(1+i)^{${ex.n}} = ${ex.cibleAffiche}` };
-    return { texte: "Équation prête pour le logarithme :", latex: `${ex.Q0}\\cdot e^{-kh} = ${formatDecimal(ex.fraction * ex.Q0, 2)}` };
+    return { texte: "Équation prête pour le logarithme :", latex: `${ex.Q0}\\cdot e^{-${ex.h}k} = ${formatDecimal(ex.fraction * ex.Q0, 2)}` };
   }
   if (ex.sousType === "resoudreT") return { texte: "Terme isolé, logarithme non appliqué :", latex: equationA2(ex) };
   if (ex.sousType === "resoudreTaux") return { texte: "Équation racine n-ième affichée, non résolue :", latex: `1+i = \\sqrt[${ex.n}]{${formatDecimal(ex.cibleAffiche / ex.Q0, 4)}}` };
-  return { texte: "Terme isolé, logarithme non appliqué :", latex: `e^{-kh} = ${formatDecimal(ex.fraction, 2)}` };
+  return { texte: "Terme isolé, logarithme non appliqué :", latex: `e^{-${ex.h}k} = ${formatDecimal(ex.fraction, 2)}` };
 }
 
 function reponseA(ex: ExerciceLogProbA, phase: PhaseA): string[] {
   if (phase === "aEcran1") {
     if (ex.sousType === "resoudreT") return [equationA1(ex)];
     if (ex.sousType === "resoudreTaux") return [`${ex.Q0}\\cdot(1+i)^{${ex.n}} = ${ex.cibleAffiche}`];
-    return [`${ex.Q0}\\cdot e^{-kh} = ${formatDecimal(ex.fraction * ex.Q0, 2)}`];
+    return [`${ex.Q0}\\cdot e^{-${ex.h}k} = ${formatDecimal(ex.fraction * ex.Q0, 2)}`];
   }
   if (phase === "aEcran2") {
     if (ex.sousType === "resoudreT") return [equationA2(ex)];
     if (ex.sousType === "resoudreTaux") return [`(1+i)^{${ex.n}} = ${formatDecimal(ex.cibleAffiche / ex.Q0, 4)}`];
-    return [`e^{-kh} = ${formatDecimal(ex.fraction, 2)}`];
+    return [`e^{-${ex.h}k} = ${formatDecimal(ex.fraction, 2)}`];
   }
   if (ex.sousType === "resoudreT") return ex.variante === "simple" ? [`t = ${ex.t1Reponse}`] : [`t_1 = ${ex.t1Reponse}`, `t_2 = ${ex.t2Reponse}`];
-  if (ex.sousType === "resoudreTaux") return [`i \\approx ${formatDecimal(ex.i, 4)}`];
+  if (ex.sousType === "resoudreTaux") return [`i \\approx ${formatDecimal(ex.i, 4)} \\quad (\\approx ${formatDecimal(100 * ex.i, 2)}\\,\\%)`];
   return [`k \\approx ${formatDecimal(ex.k, 4)}`];
 }
 
@@ -220,14 +231,14 @@ function consigneEcranB(ex: ExerciceLogProbB, phase: "bEcran1" | "bEcran2" | "bE
     case "bEcran1":
       return [texte("Déduis le taux multiplicateur r entre les deux instants connus.")];
     case "bEcran2":
-      return [texte("À partir du taux r CORRECT de l'étape précédente, détermine Q0 (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
+      return [texte("À partir du taux r de l'étape précédente, détermine Q0 (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
     case "bEcran3":
-      return [texte("À partir du modèle CORRECT, calcule la valeur au temps "), latex(`t=${ex.tRef}`), texte(".")];
+      return [texte("À partir du modèle obtenu, calcule la valeur au temps "), latex(`t=${ex.tRef}`), texte(".")];
     case "bEcran4":
       return [
-        texte(`À partir de la valeur CORRECTE de l'étape précédente, détermine le temps t auquel ${contexteB(ex.contexteId).multiple(ex.k)} (par rapport à `),
+        texte(`À partir de la valeur de l'étape précédente, détermine l'instant t (compté depuis t = 0, comme t₁ et t₂) auquel ${contexteB(ex.contexteId).multiple(ex.k)} par rapport à sa valeur en `),
         latex(`t=${ex.tRef}`),
-        texte(").")
+        texte("."),
       ];
   }
 }
@@ -276,15 +287,17 @@ function contexteC(id: string) {
   return CONTEXTES_C.find((c) => c.id === id)!;
 }
 
+const UNITE_SINGULIER: Record<string, string> = { ans: "an", jours: "jour", heures: "heure" };
+
 function consigneGeneraleC(ex: ExerciceLogProbC): FragmentConsigne[] {
   const ctx = contexteC(ex.contexteId);
   if (ex.sens === "versT") {
-    return [texte(`${ctx.phraseIntro()} Sa constante de désintégration vaut `), latex(`\\lambda \\approx ${formatDecimal(ex.lambda, 3)}`), texte(" par unité de temps.")];
+    return [texte(`${ctx.phraseIntro()} Sa constante de désintégration vaut `), latex(`\\lambda \\approx ${formatSignificatif(ex.lambda)}`), texte(` par ${UNITE_SINGULIER[ex.unite] ?? ex.unite}.`)];
   }
-  return [texte(`${ctx.phraseIntro()} Sa demi-vie vaut `), latex(`T = ${ex.T}`), texte(" (unité arbitraire).")];
+  return [texte(`${ctx.phraseIntro()} Sa demi-vie vaut `), latex(`T = ${formatDecimal(ex.T, 2)}`), texte(` ${ex.unite}.`)];
 }
 function blocDonneesC(ex: ExerciceLogProbC): string[] {
-  return ex.sens === "versT" ? [`\\lambda \\approx ${formatDecimal(ex.lambda, 3)}`] : [`T = ${ex.T}`];
+  return ex.sens === "versT" ? [`\\lambda \\approx ${formatSignificatif(ex.lambda)}`] : [`T = ${formatDecimal(ex.T, 2)}`];
 }
 function etatActuelC(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): string[] | null {
   if (phase === "cEcran1") return null;
@@ -292,16 +305,17 @@ function etatActuelC(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcra
   return null;
 }
 function consigneEcranC(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte(ex.sens === "versT" ? "Déduis la demi-vie T depuis λ." : "Déduis la constante de désintégration λ depuis T.")];
+  if (phase === "cEcran1") return [texte(ex.sens === "versT" ? `Déduis la demi-vie T (en ${ex.unite}) depuis λ.` : `Déduis la constante de désintégration λ (par ${UNITE_SINGULIER[ex.unite] ?? ex.unite}) depuis T.`)];
   if (phase === "cEcran2") {
-    return [texte(`À partir du T CORRECT de l'étape précédente, détermine le temps t nécessaire pour qu'il ne reste plus que ${formatDecimalTexte(ex.fractionEcran2 * 100, 1)} % de la quantité initiale.`)];
+    const depart = ex.sens === "versT" ? "À partir de la demi-vie T trouvée à l'étape précédente" : "À partir de la demi-vie T donnée";
+    return [texte(`${depart}, détermine le temps t (en ${ex.unite}) nécessaire pour qu'il ne reste plus que ${formatDecimalTexte(ex.fractionEcran2 * 100, 1)} % de la quantité initiale.`)];
   }
   return [
-    texte("Deux estimations de la demi-vie de cet élément ont été publiées : "),
-    latex(`T_1 = ${ex.T1}`),
-    texte(" et "),
-    latex(`T_2 = ${ex.T2}`),
-    texte(". Calcule le facteur correctif entre les deux (à appliquer à tout âge publié avec l'ancienne estimation)."),
+    texte("Une ancienne estimation de la demi-vie valait "),
+    latex(`T_1 = ${formatDecimal(ex.T1, 2)}`),
+    texte(` ${ex.unite} ; la valeur admise aujourd'hui est `),
+    latex(`T_2 = ${formatDecimal(ex.T2, 2)}`),
+    texte(` ${ex.unite}. Par quel facteur faut-il multiplier une durée calculée avec l'ancienne estimation ? (arrondi au millième)`),
   ];
 }
 function aideC1(_ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -312,47 +326,12 @@ function aideC1(_ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3")
 function aideC2(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
   if (phase === "cEcran1") return { texte: "Valeur numérique de ln(2) :", latex: "\\ln 2 \\approx 0{,}693" };
   if (phase === "cEcran2") return { texte: "Équation posée, non résolue :", latex: `${formatDecimal(ex.fractionEcran2, 3)} = \\left(\\dfrac{1}{2}\\right)^{t/${formatDecimal(ex.T, 2)}}` };
-  return { texte: "Facteur correctif :", latex: `\\dfrac{T_2}{T_1} = \\dfrac{${ex.T2}}{${ex.T1}}` };
+  return { texte: "Le facteur correctif est le rapport de la valeur admise aujourd'hui à l'ancienne estimation.", latex: null };
 }
 function reponseC(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): string[] {
-  if (phase === "cEcran1") return [ex.sens === "versT" ? `T \\approx ${formatDecimal(ex.T, 2)}` : `\\lambda \\approx ${formatDecimal(ex.lambda, 4)}`];
+  if (phase === "cEcran1") return [ex.sens === "versT" ? `T \\approx ${formatDecimal(ex.T, 2)}` : `\\lambda \\approx ${formatSignificatif(ex.lambda)}`];
   if (phase === "cEcran2") return [formatDecimal(ex.tEcran2, 2)];
   return [formatDecimal(ex.facteurCorrectif, 3)];
-}
-
-// ============================================================================
-// Famille D.
-// ============================================================================
-
-function contexteD(id: string) {
-  return CONTEXTES_D.find((c) => c.id === id)!;
-}
-
-function consigneGeneraleD(ex: ExerciceLogProbD): FragmentConsigne[] {
-  return [texte(contexteD(ex.contexteId).phrase(ex.Ta, ex.T0))];
-}
-function blocDonneesD(ex: ExerciceLogProbD): string[] {
-  return [`T_a = ${ex.Ta}`, `T_0 = ${ex.T0}`];
-}
-function etatActuelD(ex: ExerciceLogProbD, phase: "dEcran1" | "dEcran2"): string[] | null {
-  if (phase === "dEcran1") return null;
-  return [`T(t) = ${ex.Ta}+(${ex.T0}-${ex.Ta})\\cdot e^{kt}`];
-}
-function consigneEcranD(_ex: ExerciceLogProbD, phase: "dEcran1" | "dEcran2"): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Pose le modèle T(t) décrivant cette situation (k reste symbolique — pas assez de données pour le déterminer).")];
-  return [texte("À partir du modèle CORRECT de l'étape précédente, exprime t en fonction de T (k reste dans ta réponse).")];
-}
-function aideD1(_ex: ExerciceLogProbD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "Le modèle général à asymptote non nulle est T(t)=Ta+(T0−Ta)·e^(kt), avec Ta l'asymptote et T0 la valeur initiale.", latex: "T(t)=T_a+(T_0-T_a)\\cdot e^{kt}" };
-  return { texte: "Isole d'abord e^(kt), puis passe au logarithme, avant de diviser par k.", latex: null };
-}
-function aideD2(ex: ExerciceLogProbD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "Valeurs à substituer :", latex: `T_a=${ex.Ta}, \\quad T_0=${ex.T0}` };
-  return { texte: "e^(kt) isolé, logarithme non appliqué :", latex: `e^{kt} = \\dfrac{T-${ex.Ta}}{${ex.T0}-${ex.Ta}}` };
-}
-function reponseD(ex: ExerciceLogProbD, phase: "dEcran1" | "dEcran2"): string[] {
-  if (phase === "dEcran1") return [`T(t) = ${ex.Ta}+(${ex.T0}-${ex.Ta})\\cdot e^{kt}`];
-  return [`t = \\dfrac{1}{k}\\ln\\!\\left(\\dfrac{T-${ex.Ta}}{${ex.T0}-${ex.Ta}}\\right)`];
 }
 
 // ============================================================================
@@ -370,7 +349,7 @@ function consigneGeneraleE(ex: ExerciceLogProbE): FragmentConsigne[] {
   return [texte(`On étudie ${label.nom}, une échelle logarithmique liée à ${label.grandeur} par `), latex("L = a\\cdot\\log_{10}(X) + b"), texte(".")];
 }
 function blocDonneesE(ex: ExerciceLogProbE): string[] {
-  if (ex.deduireAB) return [`X_1 = 10^{${Math.log10(ex.X1).toFixed(0)}}, \\ L_1 = ${formatDecimal(ex.L1, 1)}`, `X_2 = 10^{${Math.log10(ex.X2).toFixed(0)}}, \\ L_2 = ${formatDecimal(ex.L2, 1)}`];
+  if (ex.deduireAB) return [`X_1 = 10^{${Math.round(Math.log10(ex.X1))}}, \\ L_1 = ${formatDecimal(ex.L1, 1)}`, `X_2 = 10^{${Math.round(Math.log10(ex.X2))}}, \\ L_2 = ${formatDecimal(ex.L2, 1)}`];
   return [`a = ${formatDecimal(ex.a, 3)}`, `b = ${formatDecimal(ex.b, 3)}`];
 }
 function etatActuelE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): string[] | null {
@@ -384,9 +363,9 @@ function consigneEcranE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eE
   if (phase === "eEcran1") return [texte("Déduis a et b à partir des 2 points donnés (système de 2 équations).")];
   if (phase === "eEcran2") {
     if (ex.sensEcran2 === "versL") {
-      return [texte("À partir de a, b CORRECTS, calcule L pour "), latex(`X = 10^{${Math.log10(ex.X0).toFixed(0)}}`), texte(".")];
+      return [texte("À partir de a et b, calcule L pour "), latex(`X = 10^{${Math.round(Math.log10(ex.X0))}}`), texte(" (arrondi au centième).")];
     }
-    return [texte("À partir de a, b CORRECTS, calcule X pour "), latex(`L = ${formatDecimal(ex.L0Affiche, 1)}`), texte(".")];
+    return [texte("À partir de a et b, calcule X pour "), latex(`L = ${formatDecimal(ex.L0Affiche, 1)}`), texte(" (en notation scientifique si besoin, par exemple 3,2e-4 pour 3,2·10⁻⁴).")];
   }
   if (phase === "eEcran3") {
     if (ex.sensEcran3 === "versDeltaL") {
@@ -395,29 +374,31 @@ function consigneEcranE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eE
     return [texte("Si L varie de "), latex(`\\Delta L=${formatDecimal(ex.deltaLDonnee, 2)}`), texte(", par quel facteur k est multiplié X ?")];
   }
   return [
-    texte("Deux sources combinées valent "),
+    texte("Deux sources sonores émettent séparément des niveaux "),
     latex(`L_1 = ${formatDecimal(ex.L1e4, 1)}`),
-    texte(" et "),
+    texte(" dB et "),
     latex(`L_2 = ${formatDecimal(ex.L2e4, 1)}`),
-    texte(" séparément. Quelle est la valeur d'échelle "),
+    texte(" dB. Leurs intensités s'additionnent : quel est le niveau sonore "),
     latex("L_{total}"),
-    texte(" de leur combinaison (PIÈGE : "),
-    latex("L_1+L_2"),
-    texte(" n'est PAS la bonne réponse) ?"),
+    texte(" des deux sources ensemble (arrondi au dixième) ?"),
   ];
 }
 function aideE1(_ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
   if (phase === "eEcran1") return { texte: "Pose L1=a·log10(X1)+b et L2=a·log10(X2)+b, puis résous ce système de 2 équations à 2 inconnues.", latex: "L_1=a\\cdot\\log_{10}(X_1)+b\\qquad L_2=a\\cdot\\log_{10}(X_2)+b" };
   if (phase === "eEcran2") return { texte: "Substitue directement la valeur donnée dans le modèle L=a·log10(X)+b confirmé.", latex: "L=a\\cdot\\log_{10}(X)+b" };
   if (phase === "eEcran3") return { texte: "Attention : un facteur MULTIPLICATIF sur X correspond à un écart ADDITIF sur L (ΔL=a·log10(k)) — ne confonds pas les deux opérations.", latex: "\\Delta L=a\\cdot\\log_{10}(k)" };
-  return { texte: "L'échelle logarithmique n'est PAS additive — deux valeurs de L ne s'additionnent JAMAIS directement.", latex: null };
+  return { texte: "Ce sont les intensités X qui s'additionnent, pas les niveaux L : reconvertis chaque niveau en intensité, additionne, puis repasse à l'échelle logarithmique.", latex: "X = 10^{(L-b)/a}" };
 }
 function aideE2(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Valeurs connues du contexte (à titre de vérification, non fournies telles quelles à l'élève dans un vrai exercice) :", latex: `a \\approx ${formatDecimal(ex.a, 3)}, \\quad b \\approx ${formatDecimal(ex.b, 3)}` };
+  if (phase === "eEcran1")
+    return {
+      texte: "Système posé (il reste à le résoudre — soustrais les deux équations pour éliminer b) :",
+      latex: `\\begin{cases} ${formatDecimal(ex.L1, 1)} = a\\cdot ${Math.round(Math.log10(ex.X1))} + b \\\\ ${formatDecimal(ex.L2, 1)} = a\\cdot ${Math.round(Math.log10(ex.X2))} + b \\end{cases}`,
+    };
   if (phase === "eEcran2")
     return {
       texte: "Substitution faite, calcul final non fait :",
-      latex: ex.sensEcran2 === "versL" ? `L = ${formatDecimal(ex.a, 3)}\\cdot ${Math.log10(ex.X0).toFixed(0)}${formatPlusB(ex.b, 3)}` : `X = 10^{(${formatDecimalTexte(ex.L0Affiche, 1)}-${formatDecimal(ex.b, 2)})/${formatDecimal(ex.a, 3)}}`,
+      latex: ex.sensEcran2 === "versL" ? `L = ${formatDecimal(ex.a, 3)}\\cdot ${Math.round(Math.log10(ex.X0))}${formatPlusB(ex.b, 3)}` : `X = 10^{(${formatDecimalTexte(ex.L0Affiche, 1)}-${formatDecimal(ex.b, 2)})/${formatDecimal(ex.a, 3)}}`,
     };
   if (phase === "eEcran3") return { texte: "Formule de propriété d'échelle :", latex: "\\Delta L = a\\cdot \\log_{10}(k) \\quad \\Longleftrightarrow \\quad k = 10^{\\Delta L / a}" };
   return {
@@ -455,7 +436,7 @@ function etatActuelF(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcra
 function consigneEcranF(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): FragmentConsigne[] {
   if (phase === "fEcran1") return [texte("Détermine la constante a à partir de la valeur initiale donnée.")];
   if (phase === "fEcran2") {
-    return [texte("À partir du a CORRECT de l'étape précédente, détermine le temps t où la croissance est maximale ("), latex("y(t)=k/2"), texte(").")];
+    return [texte("À partir de a (étape précédente), détermine le temps t où la croissance est maximale ("), latex("y(t)=k/2"), texte(").")];
   }
   return [texte("Que vaut la limite de "), latex("y(t)"), texte(" quand t devient très grand ?")];
 }
@@ -467,69 +448,12 @@ function aideF1(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3")
 function aideF2(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
   if (phase === "fEcran1") return { texte: "Équation posée, non résolue :", latex: `${formatDecimal(ex.y0, 1)} = \\dfrac{${ex.k}}{1+a}` };
   if (phase === "fEcran2") return { texte: "Équation posée, non résolue :", latex: `\\dfrac{${ex.k}}{2} = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
-  return { texte: "Valeur limite :", latex: `y(t) \\to ${ex.k}` };
+  return { texte: "Remplace e^(−rt) par sa limite dans l'expression de y(t) :", latex: `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
 }
 function reponseF(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] {
   if (phase === "fEcran1") return [formatDecimal(ex.a, 3)];
   if (phase === "fEcran2") return [formatDecimal(ex.t, 2)];
   return [String(ex.k)];
-}
-
-// ============================================================================
-// Famille G.
-// ============================================================================
-
-function contexteG() {
-  return CONTEXTES_G[0];
-}
-
-function consigneGeneraleG(_ex: ExerciceLogProbG): FragmentConsigne[] {
-  return [texte(contexteG().phrase())];
-}
-function blocDonneesG(ex: ExerciceLogProbG): string[] {
-  return [`o(x) = ${ex.A}\\cdot(e^{${ex.m}x}-1)`, `d(x) = \\dfrac{${ex.B}}{e^{${ex.m}x}+1}`];
-}
-function etatActuelG(ex: ExerciceLogProbG, phase: "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4"): string[] | null {
-  if (phase === "gEcran1") return null;
-  const ligne1 = `o(${formatDecimalTexte(ex.x0, 2)}) \\approx ${formatDecimal(ex.oX0, 0)}, \\quad d(${formatDecimalTexte(ex.x0, 2)}) \\approx ${formatDecimal(ex.dX0, 0)}`;
-  if (phase === "gEcran2") return [ligne1];
-  const ligne2 = `${ex.A}\\cdot u^2-${ex.A + ex.B} = 0`;
-  if (phase === "gEcran3") return [ligne1, ligne2];
-  return [ligne1, ligne2, `x_{équilibre} \\approx ${formatDecimal(ex.xEquilibre, 3)}`];
-}
-function consigneEcranG(ex: ExerciceLogProbG, phase: "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4"): FragmentConsigne[] {
-  if (phase === "gEcran1") {
-    return [texte("Évalue "), latex(`o(${formatDecimalTexte(ex.x0, 2)})`), texte(" et "), latex(`d(${formatDecimalTexte(ex.x0, 2)})`), texte(".")];
-  }
-  if (phase === "gEcran2") {
-    return [texte("Pose le changement de variable "), latex("u=e^{mx}"), texte(" pour l'équation d'équilibre "), latex("o(x)=d(x)"), texte(", et réécris-la en équation polynomiale en u.")];
-  }
-  if (phase === "gEcran3") {
-    return [texte("À partir de l'équation en u CORRECTE de l'étape précédente, résous-la (filtre "), latex("u>0"), texte("), puis reconvertis en x (le prix d'équilibre).")];
-  }
-  if (ex.sensEcran4 === "offre") return [texte("Résous "), latex(`o(x)=${ex.cibleEcran4}`), texte(" (équation exponentielle simple).")];
-  return [texte("Résous "), latex(`d(x)=${ex.cibleEcran4}`), texte(" (équation exponentielle simple).")];
-}
-function aideG1(_ex: ExerciceLogProbG, phase: "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4"): AideAvecLatex {
-  if (phase === "gEcran1") return { texte: "Substitue directement x0 dans o(x) et dans d(x).", latex: null };
-  if (phase === "gEcran2") return { texte: "Pose u=e^(mx), puis réécris chaque membre de l'équation d'équilibre en fonction de u.", latex: "u=e^{mx}" };
-  if (phase === "gEcran3") return { texte: "Cette équation n'a pas de terme linéaire en u — isole directement u², puis prends la racine carrée POSITIVE (u=e^(mx)>0).", latex: "u=e^{mx}>0" };
-  return { texte: "Isole e^(mx), puis passe au logarithme népérien.", latex: null };
-}
-function aideG2(ex: ExerciceLogProbG, phase: "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4"): AideAvecLatex {
-  if (phase === "gEcran1") return { texte: "Modèles rappelés :", latex: `o(x) = ${ex.A}(e^{${ex.m}x}-1), \\quad d(x) = \\dfrac{${ex.B}}{e^{${ex.m}x}+1}` };
-  if (phase === "gEcran2") return { texte: "Développement partiel (non terminé) :", latex: `${ex.A}(u-1) = \\dfrac{${ex.B}}{u+1}` };
-  if (phase === "gEcran3") return { texte: "Valeur de u (reconversion en x non faite) :", latex: `u = \\sqrt{\\dfrac{${ex.A + ex.B}}{${ex.A}}} \\approx ${formatDecimal(ex.uEquilibre, 3)}` };
-  return {
-    texte: "Équation isolée, logarithme non appliqué :",
-    latex: ex.sensEcran4 === "offre" ? `e^{${ex.m}x} = ${formatDecimal(ex.cibleEcran4 / ex.A + 1, 3)}` : `e^{${ex.m}x} = ${formatDecimal(ex.B / ex.cibleEcran4 - 1, 3)}`,
-  };
-}
-function reponseG(ex: ExerciceLogProbG, phase: "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4"): string[] {
-  if (phase === "gEcran1") return [`o(${formatDecimalTexte(ex.x0, 2)}) \\approx ${formatDecimal(ex.oX0, 0)}`, `d(${formatDecimalTexte(ex.x0, 2)}) \\approx ${formatDecimal(ex.dX0, 0)}`];
-  if (phase === "gEcran2") return [`${ex.A}\\cdot u^2-${ex.A + ex.B} = 0`];
-  if (phase === "gEcran3") return [`x \\approx ${formatDecimal(ex.xEquilibre, 3)}`];
-  return [`x \\approx ${formatDecimal(ex.xEcran4, 3)}`];
 }
 
 // ============================================================================
@@ -544,14 +468,10 @@ export function consigneGenerale(exercice: ExerciceLogarithmesProblemes): Fragme
       return consigneGeneraleB(exercice);
     case "C":
       return consigneGeneraleC(exercice);
-    case "D":
-      return consigneGeneraleD(exercice);
     case "E":
       return consigneGeneraleE(exercice);
     case "F":
       return consigneGeneraleF(exercice);
-    case "G":
-      return consigneGeneraleG(exercice);
   }
 }
 
@@ -563,14 +483,10 @@ export function blocDonnees(exercice: ExerciceLogarithmesProblemes): string[] {
       return blocDonneesB(exercice);
     case "C":
       return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
     case "E":
       return blocDonneesE(exercice);
     case "F":
       return blocDonneesF(exercice);
-    case "G":
-      return blocDonneesG(exercice);
   }
 }
 
@@ -582,14 +498,10 @@ export function etatActuel(exercice: ExerciceLogarithmesProblemes, phase: PhaseL
       return etatActuelB(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4");
     case "C":
       return etatActuelC(exercice, phase as "cEcran1" | "cEcran2" | "cEcran3");
-    case "D":
-      return etatActuelD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return etatActuelE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4");
     case "F":
       return etatActuelF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
-    case "G":
-      return etatActuelG(exercice, phase as "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4");
   }
 }
 
@@ -601,14 +513,10 @@ export function consigneEcran(exercice: ExerciceLogarithmesProblemes, phase: Pha
       return consigneEcranB(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4");
     case "C":
       return consigneEcranC(exercice, phase as "cEcran1" | "cEcran2" | "cEcran3");
-    case "D":
-      return consigneEcranD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return consigneEcranE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4");
     case "F":
       return consigneEcranF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
-    case "G":
-      return consigneEcranG(exercice, phase as "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4");
   }
 }
 
@@ -620,14 +528,10 @@ export function aideNiveau1(exercice: ExerciceLogarithmesProblemes, phase: Phase
       return aideB1(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4");
     case "C":
       return aideC1(exercice, phase as "cEcran1" | "cEcran2" | "cEcran3");
-    case "D":
-      return aideD1(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return aideE1(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4");
     case "F":
       return aideF1(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
-    case "G":
-      return aideG1(exercice, phase as "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4");
   }
 }
 
@@ -639,14 +543,10 @@ export function aideNiveau2(exercice: ExerciceLogarithmesProblemes, phase: Phase
       return aideB2(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4");
     case "C":
       return aideC2(exercice, phase as "cEcran1" | "cEcran2" | "cEcran3");
-    case "D":
-      return aideD2(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return aideE2(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4");
     case "F":
       return aideF2(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
-    case "G":
-      return aideG2(exercice, phase as "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4");
   }
 }
 
@@ -659,14 +559,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLogarithmesPro
       return reponseB(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4");
     case "C":
       return reponseC(exercice, phase as "cEcran1" | "cEcran2" | "cEcran3");
-    case "D":
-      return reponseD(exercice, phase as "dEcran1" | "dEcran2");
     case "E":
       return reponseE(exercice, phase as "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4");
     case "F":
       return reponseF(exercice, phase as "fEcran1" | "fEcran2" | "fEcran3");
-    case "G":
-      return reponseG(exercice, phase as "gEcran1" | "gEcran2" | "gEcran3" | "gEcran4");
   }
 }
 
@@ -682,8 +578,6 @@ export const LIBELLE_PHASE: Record<PhaseLogarithmesProblemes, string> = {
   cEcran1: "Étape 1 (demi-vie)",
   cEcran2: "Étape 2 (application)",
   cEcran3: "Étape 3 (facteur correctif)",
-  dEcran1: "Étape 1 (modèle)",
-  dEcran2: "Étape 2 (inversion)",
   eEcran1: "Étape 1 (a, b)",
   eEcran2: "Étape 2 (évaluation)",
   eEcran3: "Étape 3 (propriété d'échelle)",
@@ -691,10 +585,6 @@ export const LIBELLE_PHASE: Record<PhaseLogarithmesProblemes, string> = {
   fEcran1: "Étape 1 (constante a)",
   fEcran2: "Étape 2 (croissance maximale)",
   fEcran3: "Étape 3 (limite)",
-  gEcran1: "Étape 1 (évaluations)",
-  gEcran2: "Étape 2 (équation en u)",
-  gEcran3: "Étape 3 (prix d'équilibre)",
-  gEcran4: "Étape 4 (résolution ciblée)",
 };
 
 /**
@@ -710,14 +600,10 @@ export function phasesPourExercice(exercice: ExerciceLogarithmesProblemes): Phas
       return ["bEcran1", "bEcran2", "bEcran3", "bEcran4"];
     case "C":
       return ["cEcran1", "cEcran2", "cEcran3"];
-    case "D":
-      return ["dEcran1", "dEcran2"];
     case "E":
-      return exercice.deduireAB ? ["eEcran1", "eEcran2", "eEcran3", "eEcran4"] : ["eEcran2", "eEcran3", "eEcran4"];
+      return [...(exercice.deduireAB ? (["eEcran1"] as const) : []), "eEcran2", "eEcran3", ...(exercice.avecEcran4 ? (["eEcran4"] as const) : [])];
     case "F":
       return ["fEcran1", "fEcran2", "fEcran3"];
-    case "G":
-      return ["gEcran1", "gEcran2", "gEcran3", "gEcran4"];
   }
 }
 

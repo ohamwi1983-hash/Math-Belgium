@@ -23,8 +23,6 @@ import {
   verifierCEcran1,
   verifierCEcran2,
   verifierCEcran3,
-  verifierDEcran1,
-  verifierDEcran2,
   verifierEEcran1,
   verifierEEcran2,
   verifierEEcran3,
@@ -32,10 +30,6 @@ import {
   verifierFEcran1,
   verifierFEcran2,
   verifierFEcran3,
-  verifierGEcran1,
-  verifierGEcran2,
-  verifierGEcran3,
-  verifierGEcran4,
 } from "./verificationLogarithmesProblemes";
 
 const POINTS_DE_BASE = 100;
@@ -92,8 +86,6 @@ function construireResultat(exercice: ExerciceLogarithmesProblemes, scores: Part
       return { famille: "B", exercice, scoreEcran1: scores.bEcran1 as number, scoreEcran2: scores.bEcran2 as number, scoreEcran3: scores.bEcran3 as number, scoreEcran4: scores.bEcran4 as number };
     case "C":
       return { famille: "C", exercice, scoreEcran1: scores.cEcran1 as number, scoreEcran2: scores.cEcran2 as number, scoreEcran3: scores.cEcran3 as number };
-    case "D":
-      return { famille: "D", exercice, scoreEcran1: scores.dEcran1 as number, scoreEcran2: scores.dEcran2 as number };
     case "E":
       return {
         famille: "E",
@@ -101,12 +93,10 @@ function construireResultat(exercice: ExerciceLogarithmesProblemes, scores: Part
         scoreEcran1: exercice.deduireAB ? (scores.eEcran1 as number) : null,
         scoreEcran2: scores.eEcran2 as number,
         scoreEcran3: scores.eEcran3 as number,
-        scoreEcran4: scores.eEcran4 as number,
+        scoreEcran4: exercice.avecEcran4 ? (scores.eEcran4 as number) : null,
       };
     case "F":
       return { famille: "F", exercice, scoreEcran1: scores.fEcran1 as number, scoreEcran2: scores.fEcran2 as number, scoreEcran3: scores.fEcran3 as number };
-    case "G":
-      return { famille: "G", exercice, scoreEcran1: scores.gEcran1 as number, scoreEcran2: scores.gEcran2 as number, scoreEcran3: scores.gEcran3 as number, scoreEcran4: scores.gEcran4 as number };
   }
 }
 
@@ -132,7 +122,7 @@ function avancerPhase<TReponse>(
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const aidePartiels = { ...etat.aidePartiels, [etat.phase]: etat.niveauAide > 0 };
-  const phaseSuivante = phaseApres(etat.phase);
+  const phaseSuivante = phaseApres(etat.phase, exercice);
 
   if (phaseSuivante === "termine") {
     return {
@@ -218,17 +208,6 @@ export function soumettreReponseCEcran3(etat: EtatSessionLogarithmesProblemes, t
 }
 
 // ============================================================================
-// Famille D.
-// ============================================================================
-
-export function soumettreReponseDEcran1(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "D" ? verifierDEcran1(e, r) : false), "dEcran1");
-}
-export function soumettreReponseDEcran2(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "D" ? verifierDEcran2(e, r) : false), "dEcran2");
-}
-
-// ============================================================================
 // Famille E.
 // ============================================================================
 
@@ -262,26 +241,4 @@ export function soumettreReponseFEcran2(etat: EtatSessionLogarithmesProblemes, t
 }
 export function soumettreReponseFEcran3(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
   return avancerPhase(etat, texte, (e, r) => (e.famille === "F" ? verifierFEcran3(e, r) : false), "fEcran3");
-}
-
-// ============================================================================
-// Famille G.
-// ============================================================================
-
-export interface ReponseGEcran1 {
-  texteO: string;
-  texteD: string;
-}
-
-export function soumettreReponseGEcran1(etat: EtatSessionLogarithmesProblemes, reponse: ReponseGEcran1): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, reponse, (e, r) => (e.famille === "G" ? verifierGEcran1(e, r.texteO, r.texteD) : false), "gEcran1");
-}
-export function soumettreReponseGEcran2(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGEcran2(e, r) : false), "gEcran2");
-}
-export function soumettreReponseGEcran3(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGEcran3(e, r) : false), "gEcran3");
-}
-export function soumettreReponseGEcran4(etat: EtatSessionLogarithmesProblemes, texte: string): EtatSessionLogarithmesProblemes {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "G" ? verifierGEcran4(e, r) : false), "gEcran4");
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mafs, Plot } from "mafs";
 import "mafs/core.css";
-import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.types";
+import type { ExerciceEtudeFonctionLogarithme } from "../core6e/etudeFonctionLogarithme.types";
 import { CIBLE_NOMBRE_LIGNES_QCM, evaluerCandidat, type ViewBoxEtudeFonctionLog } from "../ui6e/formatEtudeFonctionLogarithme";
 import { EPAISSEUR_TRAIT_ACCENTUE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
 import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
@@ -10,7 +10,7 @@ import { DomaineTraceX, GrilleAdaptative } from "../components/mafsGraphPartage"
 const COULEUR_COURBE = "#1971c2";
 
 interface Props {
-  exercice: ExerciceEtudeLogNonE;
+  exercice: ExerciceEtudeFonctionLogarithme;
   index: number;
   viewBox: ViewBoxEtudeFonctionLog;
   /** Mesurées par l'appelant (`EtapeSelectionGraphiqueQCM`, `useLargeurConteneur`) — les 4

@@ -2,33 +2,28 @@ import type { ExerciceLogarithmesProblemes, FamilleLogarithmesProblemes } from "
 import { construireA, construireA_resoudreT, construireA_resoudreTaux, construireA_tauxDecroissance } from "./familles/A";
 import { construireB } from "./familles/B";
 import { construireC } from "./familles/C";
-import { construireD } from "./familles/D";
 import { construireE } from "./familles/E";
 import { construireF } from "./familles/F";
-import { construireG } from "./familles/G";
 import { tirerParmi } from "./aleatoire";
 
-/** Tirage ÉQUIPROBABLE de la FAMILLE (spec explicite : "Tirage aléatoire d'1 famille parmi 7 (A à
- * G, équiprobable)") — le sous-type/contexte est ensuite tiré À L'INTÉRIEUR du constructeur de
+/** Tirage ÉQUIPROBABLE de la FAMILLE parmi 5 (A, B, C, E, F — les contextes offre/demande et
+ * refroidissement de Newton, absents du cours, ont été retirés : audit chapitre 3 de 6e, K10) — le
+ * sous-type/contexte est ensuite tiré À L'INTÉRIEUR du constructeur de
  * chaque famille, même principe que `exponentiellesProblemes/index.ts` (6gen12). */
 export const CATALOGUE_FAMILLES: { id: FamilleLogarithmesProblemes; label: string }[] = [
   { id: "A", label: "A — Croissance/décroissance, résoudre pour t ou le taux" },
   { id: "B", label: "B — Modèle à 2 points, extrapolation" },
   { id: "C", label: "C — Radioactivité, demi-vie" },
-  { id: "D", label: "D — Asymptote non nulle" },
   { id: "E", label: "E — Échelle logarithmique généralisée" },
   { id: "F", label: "F — Courbe logistique généralisée" },
-  { id: "G", label: "G — Équilibre offre/demande" },
 ];
 
 const CONSTRUCTEURS: Record<FamilleLogarithmesProblemes, () => ExerciceLogarithmesProblemes> = {
   A: construireA,
   B: construireB,
   C: construireC,
-  D: construireD,
   E: construireE,
   F: construireF,
-  G: construireG,
 };
 
 export function construireAvecFamilleId(id: FamilleLogarithmesProblemes): ExerciceLogarithmesProblemes {
@@ -55,7 +50,6 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "B", label: "B — Modèle à 2 points, extrapolation" },
   { id: "C-versT", label: "C — Demi-vie (λ donné, trouver T)" },
   { id: "C-versLambda", label: "C — Demi-vie (T donné, trouver λ)" },
-  { id: "D", label: "D — Asymptote non nulle" },
   { id: "E-pH-deduire", label: "E — pH (avec déduction de a, b)" },
   { id: "E-pH-direct", label: "E — pH (a, b donnés)" },
   { id: "E-decibels-deduire", label: "E — Décibels (avec déduction de a, b)" },
@@ -63,7 +57,6 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "E-magnitude-deduire", label: "E — Magnitude sismique (avec déduction de a, b)" },
   { id: "E-magnitude-direct", label: "E — Magnitude sismique (a, b donnés)" },
   { id: "F", label: "F — Courbe logistique généralisée" },
-  { id: "G", label: "G — Équilibre offre/demande" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceLogarithmesProblemes {
@@ -82,8 +75,6 @@ export function construireAvecVarianteId(id: string): ExerciceLogarithmesProblem
       return construireC("versT");
     case "C-versLambda":
       return construireC("versLambda");
-    case "D":
-      return construireD();
     case "E-pH-deduire":
       return construireE("pH", true);
     case "E-pH-direct":
@@ -98,8 +89,6 @@ export function construireAvecVarianteId(id: string): ExerciceLogarithmesProblem
       return construireE("magnitude", false);
     case "F":
       return construireF();
-    case "G":
-      return construireG();
     default:
       throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
   }
