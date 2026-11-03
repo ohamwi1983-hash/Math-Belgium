@@ -1,27 +1,11 @@
-import type { ExerciceDetermParamA, ExerciceDetermParamB, ExerciceDetermParamC, ExerciceDeterminerParametresLogarithme } from "../core6e/determinerParametresLogarithme.types";
+import type { ExerciceDeterminerParametresLogarithme } from "../core6e/determinerParametresLogarithme.types";
 import type { PhaseDeterminerParametresLogarithme } from "../moteur6e/typesDeterminerParametresLogarithme";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen18`. 3 familles
- * STRUCTURELLEMENT DISJOINTES (2 ou 3 écrans selon la famille, comme `formatExponentiellesProblemes.ts`
- * 6gen12) — tout dispatche sur `exercice.famille` PUIS `phase`.
- *
- * **Convention de substitution numérique** (résout une contrainte technique du moteur) : les
- * constantes de l'énoncé (`x0`,`x1`,`k1`,`r1`,`r2`) sont TOUJOURS substituées par leur VALEUR
- * NUMÉRIQUE dans les consignes/placeholders — jamais par leur NOM symbolique. Ce n'est pas qu'un
- * choix pédagogique : `moteur6e/expressionExponentielle.ts` (l'évaluateur qui interprète le texte
- * élève) ne reconnaît que des identifiants purement alphabétiques ("x0" s'y tokeniserait en "x"
- * suivi de "0", jamais comme un seul identifiant) — un élève qui taperait "x0" littéralement
- * obtiendrait donc un `parse_error`. Toute consigne/placeholder illustre donc l'équation avec la
- * valeur numérique déjà en place (ex. "m*5+n=0", jamais "m*x0+n=0").
- *
- * **Valeurs EXACTES, jamais de décimal** (convention CLAUDE.md) pour toute valeur affichée
- * (aide/récapitulatif) : `m` (sous-type "ordonnée") est un rationnel propre, affiché en fraction
- * irréductible ; toutes les autres solutions (`m`/`n` sous-type "point", `p`/`q`/`r` famille B) sont
- * IRRATIONNELLES par construction (division par `ln(k1)`) — affichées sous forme EXACTE
- * `coef·ln(k1)/dénominateur` (fraction irréductible elle aussi), jamais arrondies. La saisie ÉLÈVE,
- * elle, reste libre décimal/fraction (vérifiée par tolérance, `moteur6e/verificationDetermi
- * nerParametresLogarithme.ts`).
+ * Textes, aides et formatage LaTeX pour `6gen18` (f(x) = a + b·ln(x) depuis un graphique). Les aides
+ * suivent la décomposition du générateur (voir `core6e/determinerParametresLogarithme.types.ts`) :
+ * niveau 1 = la propriété à mobiliser, niveau 2 = la méthode appliquée au graphique — jamais la
+ * valeur finale de a, de b ou de f(x).
  */
 
 export interface AideAvecLatex {
@@ -29,370 +13,184 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
- * via `components/RenduFragments.tsx`. */
+/** Fragment de consigne mixant prose française et LaTeX inline (`components/RenduFragments.tsx`). */
 export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
 
 function texte(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };
 }
+
 function latex(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b !== 0) {
-    [a, b] = [b, a % b];
-  }
-  return a || 1;
-}
-
-/** Fraction irréductible LaTeX pour un rationnel EXACT num/den (den réduit toujours positif, signe
- * remonté devant la fraction) — jamais de décimal. Retourne l'entier seul si le dénominateur réduit
- * vaut 1. */
-export function formatFractionSimplifieeLatex(num: number, den: number): string {
-  if (num === 0) return "0";
-  const signe = num < 0 !== den < 0 ? "-" : "";
-  let n = Math.abs(num);
-  let d = Math.abs(den);
-  const g = pgcd(n, d);
-  n /= g;
-  d /= g;
-  return d === 1 ? `${signe}${n}` : `${signe}\\dfrac{${n}}{${d}}`;
-}
-
-/** Fraction irréductible LaTeX pour `coef·ln(k1)/den` (coef,den entiers non nuls) — forme EXACTE
- * d'une solution IRRATIONNELLE (division par `ln(k1)`), jamais un décimal arrondi : familles A
- * (sous-type "point") et B, dont les solutions ne sont jamais des rationnels propres. */
-export function formatCoefLnFractionLatex(coef: number, k1: number, den: number): string {
-  if (coef === 0) return "0";
-  const signe = coef < 0 !== den < 0 ? "-" : "";
-  let c = Math.abs(coef);
-  let d = Math.abs(den);
-  const g = pgcd(c, d);
-  c /= g;
-  d /= g;
-  const numerateur = c === 1 ? `\\ln(${k1})` : `${c}\\ln(${k1})`;
-  return d === 1 ? `${signe}${numerateur}` : `${signe}\\dfrac{${numerateur}}{${d}}`;
-}
-
-// ============================================================================
-// Famille A.
-// ============================================================================
-
-function denomA(exercice: ExerciceDetermParamA & { sousType: "point" }): number {
-  return exercice.x1 - exercice.x0;
-}
-
-export function formatMLatexA(exercice: ExerciceDetermParamA): string {
-  if (exercice.sousType === "ordonnee") return formatFractionSimplifieeLatex(-exercice.k, exercice.x0);
-  return formatCoefLnFractionLatex(1, exercice.k1, denomA(exercice));
-}
-
-export function formatNLatexA(exercice: ExerciceDetermParamA): string {
-  if (exercice.sousType === "ordonnee") return String(exercice.k);
-  return formatCoefLnFractionLatex(-exercice.x0, exercice.k1, denomA(exercice));
-}
-
-function equation2LatexA(exercice: ExerciceDetermParamA): string {
-  return exercice.sousType === "ordonnee" ? `n=${exercice.k}` : `m\\cdot ${exercice.x1}+n=\\ln(${exercice.k1})`;
-}
-
-function libelleDeuxiemeConditionA(exercice: ExerciceDetermParamA): string {
-  return exercice.sousType === "ordonnee" ? "ordonnée à l'origine" : "point de passage";
-}
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("On cherche "), latex("f(x)=\\ln(mx+n)"), texte(" vérifiant les 2 conditions ci-dessous.")];
-}
-
-export function blocDonneesA(exercice: ExerciceDetermParamA): string[] {
-  const condition2 = exercice.sousType === "ordonnee" ? `\\text{Ordonnée à l'origine : } ${exercice.k}` : `\\text{Passe par le point } \\left(${exercice.x1}\\,;\\,\\ln(${exercice.k1})\\right)`;
-  return ["f(x)=\\ln(mx+n)", `\\text{Asymptote verticale : } x=${exercice.x0}`, condition2];
-}
-
-export function etatActuelA(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): string[] | null {
-  if (phase !== "aEcran2") return null;
-  return [`m\\cdot ${exercice.x0}+n=0`, equation2LatexA(exercice)];
-}
-
-export function consigneEcranA(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
-  if (phase === "aEcran1") {
-    return [
-      texte("Traduis chacune des 2 conditions en une équation portant sur "),
-      latex("m"),
-      texte(" et "),
-      latex("n"),
-      texte(' — utilise directement les valeurs numériques données (jamais "'),
-      latex("x_0"),
-      texte('"/"'),
-      latex("x_1"),
-      texte('"/"'),
-      latex("k_1"),
-      texte('" comme symboles).'),
-    ];
-  }
-  return [texte("Résous ce système à 2 équations et donne les valeurs de "), latex("m"), texte(" et "), latex("n"), texte(" (fraction ou décimal).")];
-}
-
-export function labelsEcranA(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
-  if (phase === "aEcran1") return { a: "Équation 1 (asymptote)", b: `Équation 2 (${libelleDeuxiemeConditionA(exercice)})` };
-  return { a: "m =", b: "n =" };
-}
-
-export function placeholdersEcranA(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
-  if (phase === "aEcran1") {
-    const b = exercice.sousType === "ordonnee" ? `n=${exercice.k}` : `m*${exercice.x1}+n=ln(${exercice.k1})`;
-    return { a: `m*${exercice.x0}+n=0`, b };
-  }
-  return { a: "ex : -2/5", b: "ex : 1,3" };
-}
-
-export function aideNiveau1A(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "aEcran1") {
-    return { texte: "Une asymptote verticale de ln(mx+n) correspond à l'annulation de l'argument : mx+n=0.", latex: "mx+n=0" };
-  }
-  return { texte: "Isole n dans l'équation de l'asymptote (la plus simple), puis substitue dans la deuxième équation.", latex: null };
-}
-
-export function aideNiveau2A(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "aEcran1") {
-    return { texte: "L'équation de l'asymptote est déjà posée — il reste à traduire la deuxième condition :", latex: `m\\cdot ${exercice.x0}+n=0` };
-  }
-  return { texte: "Substitution faite (calcul non terminé) :", latex: `n=-m\\cdot ${exercice.x0},\\quad ${equation2LatexA(exercice)}` };
-}
-
-export function formatReponseAttendueA(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): string[] {
-  if (phase === "aEcran1") return [`m\\cdot ${exercice.x0}+n=0`, equation2LatexA(exercice)];
-  return [`m=${formatMLatexA(exercice)}`, `n=${formatNLatexA(exercice)}`];
-}
-
-// ============================================================================
-// Famille B.
-// ============================================================================
-
-function denomB(exercice: ExerciceDetermParamB): number {
-  return (exercice.x1 - exercice.r1) * (exercice.x1 - exercice.r2);
-}
-
-export function formatPLatexB(exercice: ExerciceDetermParamB): string {
-  return formatCoefLnFractionLatex(1, exercice.k1, denomB(exercice));
-}
-export function formatQLatexB(exercice: ExerciceDetermParamB): string {
-  return formatCoefLnFractionLatex(-(exercice.r1 + exercice.r2), exercice.k1, denomB(exercice));
-}
-export function formatRLatexB(exercice: ExerciceDetermParamB): string {
-  return formatCoefLnFractionLatex(exercice.r1 * exercice.r2, exercice.k1, denomB(exercice));
-}
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On cherche "), latex("f(x)=\\ln(px^2+qx+r)"), texte(" vérifiant les conditions ci-dessous.")];
-}
-
-export function blocDonneesB(exercice: ExerciceDetermParamB): string[] {
-  return [
-    "f(x)=\\ln(px^2+qx+r)",
-    `\\text{Asymptotes verticales : } x=${exercice.r1} \\text{ et } x=${exercice.r2}`,
-    `\\text{Passe par le point } \\left(${exercice.x1}\\,;\\,\\ln(${exercice.k1})\\right)`,
-  ];
-}
-
-export function etatActuelB(exercice: ExerciceDetermParamB, phase: PhaseDeterminerParametresLogarithme): string[] | null {
-  if (phase === "bEcran2") return [`q=-p\\cdot(${exercice.r1}+${exercice.r2})`, `r=p\\cdot ${exercice.r1}\\cdot ${exercice.r2}`];
-  if (phase === "bEcran3") return [`q=-p\\cdot(${exercice.r1}+${exercice.r2})`, `r=p\\cdot ${exercice.r1}\\cdot ${exercice.r2}`, `p=${formatPLatexB(exercice)}`];
-  return null;
-}
-
-export function consigneEcranB(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
-  if (phase === "bEcran1") {
-    return [
-      texte("Écris "),
-      latex("p(x-r_1)(x-r_2)"),
-      texte(" sous la forme "),
-      latex("px^2+qx+r"),
-      texte(" (utilise directement les valeurs numériques de "),
-      latex("r_1"),
-      texte(" et "),
-      latex("r_2"),
-      texte("), puis exprime "),
-      latex("q"),
-      texte(" et "),
-      latex("r"),
-      texte(" en fonction de "),
-      latex("p"),
-      texte("."),
-    ];
-  }
-  if (phase === "bEcran2") return [texte("Utilise la condition du point de passage pour trouver la valeur de "), latex("p"), texte(".")];
-  return [texte("Donne les valeurs de "), latex("q"), texte(" et "), latex("r"), texte(", à partir de la valeur de "), latex("p"), texte(" trouvée à l'étape précédente.")];
-}
-
-export function labelsEcranB(phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
-  if (phase === "bEcran3") return { a: "q =", b: "r =" };
-  return { a: "q (en fonction de p) =", b: "r (en fonction de p) =" };
-}
-
-export function placeholdersEcranB(exercice: ExerciceDetermParamB, phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
-  if (phase === "bEcran1") return { a: `-p*(${exercice.r1}+${exercice.r2})`, b: `p*${exercice.r1}*${exercice.r2}` };
-  return { a: "ex : 1,2", b: "ex : -3,4" };
-}
-
-export function aideNiveau1B(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "bEcran1") {
-    return { texte: "Un polynôme du second degré ayant 2 racines connues r1 et r2 s'écrit p(x-r1)(x-r2).", latex: "p(x-r_1)(x-r_2)" };
-  }
-  if (phase === "bEcran2") return { texte: "Remplace q et r (trouvés à l'étape précédente) dans px²+qx+r, puis utilise la condition du point de passage.", latex: "px^2+qx+r" };
-  return { texte: "Réutilise les expressions de q(p) et r(p) trouvées à l'étape 1, avec la valeur de p trouvée à l'étape 2.", latex: null };
-}
-
-export function aideNiveau2B(exercice: ExerciceDetermParamB, phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "bEcran1") {
-    return { texte: "Développement partiellement effectué — q et r restent à isoler :", latex: `p\\left(x^2-(${exercice.r1}+${exercice.r2})x+${exercice.r1}\\cdot ${exercice.r2}\\right)` };
-  }
-  if (phase === "bEcran2") {
-    return { texte: "Condition du point de passage (calcul non terminé) :", latex: `p\\cdot(${exercice.x1}-${exercice.r1})(${exercice.x1}-${exercice.r2})=\\ln(${exercice.k1})` };
-  }
-  return { texte: "Valeur de p à substituer :", latex: `p=${formatPLatexB(exercice)}` };
-}
-
-export function formatReponseAttendueB(exercice: ExerciceDetermParamB, phase: PhaseDeterminerParametresLogarithme): string[] {
-  if (phase === "bEcran1") return [`q=-p\\cdot(${exercice.r1}+${exercice.r2})`, `r=p\\cdot ${exercice.r1}\\cdot ${exercice.r2}`];
-  if (phase === "bEcran2") return [`p=${formatPLatexB(exercice)}`];
-  return [`q=${formatQLatexB(exercice)}`, `r=${formatRLatexB(exercice)}`];
-}
-
-// ============================================================================
-// Famille C.
-// ============================================================================
-
-function symboleC(exercice: ExerciceDetermParamC): "<" | ">" {
-  return exercice.typeExtremum === "maximum" ? "<" : ">";
-}
-
-export function consigneGeneraleC(exercice: ExerciceDetermParamC): FragmentConsigne[] {
-  return [
-    texte("On cherche à quelles conditions sur "),
-    latex("p,q,r"),
-    texte(" la fonction "),
-    latex("f(x)=\\ln(px^2+qx+r)"),
-    texte(` admet un ${exercice.typeExtremum} local en `),
-    latex(`x=${exercice.x0}`),
-    texte("."),
-  ];
-}
-
-export function blocDonneesC(exercice: ExerciceDetermParamC): string[] {
-  return ["f(x)=\\ln(px^2+qx+r)", `\\text{Extremum recherché : ${exercice.typeExtremum} local en } x=${exercice.x0}`];
-}
-
-export function etatActuelC(exercice: ExerciceDetermParamC, phase: PhaseDeterminerParametresLogarithme): string[] | null {
-  if (phase === "cEcran2") return [`p${symboleC(exercice)}0`];
-  if (phase === "cEcran3") return [`p${symboleC(exercice)}0`, `q=-2\\cdot p\\cdot ${exercice.x0}`];
-  return null;
-}
-
-export function consigneEcranC(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
-  if (phase === "cEcran1") {
-    return [
-      texte("ln est une fonction croissante : un extremum de "),
-      latex("f"),
-      texte(" coïncide avec un extremum de "),
-      latex("u(x)=px^2+qx+r"),
-      texte(". Quelle condition cela impose-t-il sur le signe de "),
-      latex("p"),
-      texte(" ?"),
-    ];
-  }
-  if (phase === "cEcran2") {
-    return [
-      texte("Le sommet de la parabole "),
-      latex("u"),
-      texte(" doit se trouver exactement en "),
-      latex("x=x_0"),
-      texte(" — utilise directement la valeur numérique de "),
-      latex("x_0"),
-      texte(". Écris la relation entre "),
-      latex("q"),
-      texte(" et "),
-      latex("p"),
-      texte("."),
-    ];
-  }
-  return [
-    texte("Pour que l'extremum de "),
-    latex("f"),
-    texte(" existe réellement, il faut que "),
-    latex("u(x_0)"),
-    texte(" soit strictement positif (domaine de ln). Écris cette condition comme une inéquation sur "),
-    latex("r"),
-    texte(" (en fonction de "),
-    latex("p"),
-    texte(", utilise la valeur numérique de "),
-    latex("x_0"),
-    texte(")."),
-  ];
-}
-
-export function placeholderEcranC(exercice: ExerciceDetermParamC, phase: PhaseDeterminerParametresLogarithme): string {
-  if (phase === "cEcran1") return `ex : p${symboleC(exercice)}0`;
-  if (phase === "cEcran2") return `ex : q=-2*p*${exercice.x0}`;
-  return `ex : r>p*${exercice.x0 * exercice.x0}`;
-}
-
-export function aideNiveau1C(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "ln est croissante : un extremum de ln(u) est TOUJOURS de la même nature (max/min) que celui de u lui-même.", latex: null };
-  if (phase === "cEcran2") return { texte: "Le sommet d'une parabole px²+qx+r se situe en x=-q/(2p).", latex: "x=-\\dfrac{q}{2p}" };
-  return { texte: "Un extremum de ln(u) suppose que u soit bien strictement positif à cet endroit — ce n'est pas automatique, c'est une condition supplémentaire à poser.", latex: null };
-}
-
-export function aideNiveau2C(exercice: ExerciceDetermParamC, phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
-  if (phase === "cEcran1") {
-    const nature = exercice.typeExtremum === "maximum" ? "vers le bas (concavité négative)" : "vers le haut (concavité positive)";
-    return { texte: `Pour un ${exercice.typeExtremum} de u, la parabole doit être tournée ${nature} — quel signe cela impose-t-il pour p ?`, latex: null };
-  }
-  if (phase === "cEcran2") {
-    return { texte: "Position du sommet, avec x0 substitué numériquement (relation non isolée) :", latex: `-\\dfrac{q}{2p}=${exercice.x0}` };
-  }
-  return { texte: `u(x0), avec q déjà substitué (q=-2p·${exercice.x0}) :`, latex: `u(${exercice.x0})=p\\cdot ${exercice.x0}^2+\\left(-2p\\cdot ${exercice.x0}\\right)\\cdot ${exercice.x0}+r=-p\\cdot ${exercice.x0 * exercice.x0}+r` };
-}
-
-export function formatReponseAttendueC(exercice: ExerciceDetermParamC, phase: PhaseDeterminerParametresLogarithme): string[] {
-  if (phase === "cEcran1") return [`p${symboleC(exercice)}0`];
-  if (phase === "cEcran2") return [`q=-2\\cdot p\\cdot ${exercice.x0}`];
-  return [`r>p\\cdot ${exercice.x0 * exercice.x0}`];
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
 export const LIBELLE_PHASE: Record<PhaseDeterminerParametresLogarithme, string> = {
-  aEcran1: "Étape 1 (système d'équations)",
-  aEcran2: "Étape 2 (résolution)",
-  bEcran1: "Étape 1 (q,r en fonction de p)",
-  bEcran2: "Étape 2 (valeur de p)",
-  bEcran3: "Étape 3 (valeurs de q,r)",
-  cEcran1: "Étape 1 (signe de p)",
-  cEcran2: "Étape 2 (relation sur q)",
-  cEcran3: "Étape 3 (inéquation sur r)",
+  lireA: "Valeur de a",
+  equationB: "Équation en b",
+  fonction: "Expression de f(x)",
 };
 
-export const PHASES_PAR_FAMILLE: Record<ExerciceDeterminerParametresLogarithme["famille"], PhaseDeterminerParametresLogarithme[]> = {
-  A: ["aEcran1", "aEcran2"],
-  B: ["bEcran1", "bEcran2", "bEcran3"],
-  C: ["cEcran1", "cEcran2", "cEcran3"],
-};
+// ============================================================================
+// Géométrie de la figure (partagée par le graphe interactif et l'export).
+// ============================================================================
+
+export function evaluerF(exercice: ExerciceDeterminerParametresLogarithme, x: number): number {
+  return exercice.a + exercice.b * Math.log(x);
+}
+
+/** Abscisse de la seconde marque : e, e², ou 1 (point de contact de la tangente). */
+export function abscisseSecondeMarque(exercice: ExerciceDeterminerParametresLogarithme): number {
+  if (exercice.variante === "pointE") return Math.E;
+  if (exercice.variante === "pointE2") return Math.E * Math.E;
+  return 1;
+}
+
+/** Ordonnée lue sur le graphique au point d'abscisse e (resp. e²) : a + b (resp. a + 2b). */
+export function ordonneeSecondeMarque(exercice: ExerciceDeterminerParametresLogarithme): number {
+  if (exercice.variante === "pointE") return exercice.a + exercice.b;
+  if (exercice.variante === "pointE2") return exercice.a + 2 * exercice.b;
+  return exercice.a;
+}
+
+export interface CadreGraphe {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+}
+
+/** Cadre ENTIER (quadrillage d'unité 1) contenant les deux marques, la tangente lisible entre x = 0
+ * et x = 2, et au moins 2 unités de marge verticale. */
+export function cadreGraphe(exercice: ExerciceDeterminerParametresLogarithme): CadreGraphe {
+  const xMax = exercice.variante === "pointE2" ? 9 : 4;
+  const ordonnees = [0, exercice.a, ordonneeSecondeMarque(exercice), evaluerF(exercice, xMax)];
+  if (exercice.variante === "pente") ordonnees.push(exercice.a - exercice.b, exercice.a + exercice.b);
+  const yMin = Math.floor(Math.min(...ordonnees)) - 2;
+  const yMax = Math.ceil(Math.max(...ordonnees)) + 2;
+  return { xMin: -0.6, xMax, yMin, yMax };
+}
+
+/** Segment de tangente affiché (variante `pente`) : de x = 0 à x = 2,5, droite y = a + b(x − 1). */
+export function segmentTangente(exercice: ExerciceDeterminerParametresLogarithme): [[number, number], [number, number]] {
+  const y = (x: number) => exercice.a + exercice.b * (x - 1);
+  return [
+    [0, y(0)],
+    [2.5, y(2.5)],
+  ];
+}
+
+// ============================================================================
+// Consignes.
+// ============================================================================
+
+export const CONSIGNE_GENERALE: FragmentConsigne[] = [
+  texte("Le graphique est celui de "),
+  latex("f(x) = a + b\\cdot\\ln(x)"),
+  texte(", où a et b sont des nombres entiers. Retrouve a et b à partir du graphique."),
+];
+
+/** Description de ce que montre le graphique (bloc de données sous la figure ; aussi seule
+ * description disponible dans un export Word/PDF, qui ne reçoit pas la figure). */
+export function descriptionGraphique(exercice: ExerciceDeterminerParametresLogarithme, avecCoordonnees: boolean): FragmentConsigne[] {
+  const p1 = exercice.lettrePoint1;
+  const p2 = exercice.lettrePoint2;
+  const coord1 = avecCoordonnees ? [texte(" a pour coordonnées "), latex(`(1\\,;\\,${exercice.a})`)] : [texte(" est le point de la courbe d'abscisse 1")];
+  if (exercice.variante === "pente") {
+    const tangente = avecCoordonnees
+      ? [texte(" ; la tangente à la courbe en ce point passe aussi par "), latex(`(2\\,;\\,${exercice.a + exercice.b})`), texte(".")]
+      : [texte(" ; la droite tracée en orange est la tangente à la courbe en ce point.")];
+    return [texte(`${p1}`), ...coord1, ...tangente];
+  }
+  const abscisse = exercice.variante === "pointE" ? "e" : "e^2";
+  const coord2 = avecCoordonnees
+    ? [texte(` ; ${p2} a pour coordonnées `), latex(`(${abscisse}\\,;\\,${ordonneeSecondeMarque(exercice)})`), texte(".")]
+    : [texte(` ; ${p2} est le point de la courbe d'abscisse `), latex(abscisse), texte(".")];
+  return [texte(`${p1}`), ...coord1, ...coord2];
+}
+
+export function consigneEcran(phase: PhaseDeterminerParametresLogarithme, exercice: ExerciceDeterminerParametresLogarithme): FragmentConsigne[] {
+  if (phase === "lireA") return [texte("Détermine la valeur de a à l'aide du graphique.")];
+  if (phase === "equationB") {
+    if (exercice.variante === "pente") return [texte("Traduis l'information donnée par la tangente en une équation d'inconnue b.")];
+    return [texte(`Traduis l'information donnée par le point ${exercice.lettrePoint2} en une équation d'inconnue b.`)];
+  }
+  return [texte("Résous l'équation, puis écris l'expression complète de "), latex("f(x)"), texte(".")];
+}
+
+// ============================================================================
+// Aides — jamais la valeur finale.
+// ============================================================================
+
+export function aideNiveau1(phase: PhaseDeterminerParametresLogarithme, exercice: ExerciceDeterminerParametresLogarithme): AideAvecLatex {
+  if (phase === "lireA") return { texte: "Cherche la valeur de x pour laquelle le terme b·ln(x) disparaît.", latex: null };
+  if (phase === "equationB") {
+    if (exercice.variante === "pente") return { texte: "La pente de la tangente au point d'abscisse 1 est le nombre dérivé f′(1). Commence par dériver f :", latex: "f'(x) = \\dfrac{b}{x}" };
+    return { texte: `Le point ${exercice.lettrePoint2} est sur la courbe : son ordonnée est l'image de son abscisse par f.`, latex: exercice.variante === "pointE" ? "f(e) = a + b\\cdot\\ln(e)" : "f(e^2) = a + b\\cdot\\ln(e^2)" };
+  }
+  return { texte: "Isole b dans l'équation de l'étape précédente.", latex: null };
+}
+
+export function aideNiveau2(phase: PhaseDeterminerParametresLogarithme, exercice: ExerciceDeterminerParametresLogarithme): AideAvecLatex {
+  if (phase === "lireA") {
+    return {
+      texte: `Comme ln(1) = 0, f(1) = a : lis l'ordonnée du point ${exercice.lettrePoint1}, d'abscisse 1 (repérée en pointillé sur le graphique).`,
+      latex: "f(1) = a + b\\cdot\\ln(1) = a",
+    };
+  }
+  if (phase === "equationB") {
+    if (exercice.variante === "pente") {
+      return {
+        texte: "Lis la pente sur le quadrillage : depuis le point de contact, avance d'une unité vers la droite et compte de combien d'unités la tangente monte (ou descend). Cette pente est égale à :",
+        latex: "f'(1) = \\dfrac{b}{1}",
+      };
+    }
+    const n = exercice.variante === "pointE" ? "" : "2";
+    return {
+      texte: `${exercice.variante === "pointE" ? "ln(e) = 1" : "ln(e²) = 2"} : remplace a par sa valeur (étape 1) et f(${exercice.variante === "pointE" ? "e" : "e²"}) par l'ordonnée lue du point ${exercice.lettrePoint2}.`,
+      latex: `a + ${n}b = \\text{ordonnée de } ${exercice.lettrePoint2}`,
+    };
+  }
+  return { texte: "Remplace ensuite a et b par leurs valeurs, et vérifie avec les deux informations du graphique :", latex: "f(x) = a + b\\cdot\\ln(x)" };
+}
+
+// ============================================================================
+// Réponses attendues (révélation, récapitulatif, corrigé).
+// ============================================================================
+
+function formatAPlusBLnX(a: number, b: number): string {
+  const terme = b === 1 ? "\\ln(x)" : b === -1 ? "-\\ln(x)" : `${b}\\ln(x)`;
+  if (a === 0) return terme;
+  return b < 0 ? `${a} ${terme}` : `${a} + ${terme}`;
+}
+
+export function formatFonctionLatex(exercice: ExerciceDeterminerParametresLogarithme): string {
+  return `f(x) = ${formatAPlusBLnX(exercice.a, exercice.b)}`;
+}
+
+/** Équation attendue de l'écran 2, avec a remplacé (une des formes acceptées). */
+export function formatEquationBLatex(exercice: ExerciceDeterminerParametresLogarithme): string {
+  const { a, b } = exercice;
+  if (exercice.variante === "pente") return `f'(1) = \\dfrac{b}{1} = ${b} \\iff b = ${b}`;
+  const y = ordonneeSecondeMarque(exercice);
+  const coef = exercice.variante === "pointE" ? "" : "2";
+  const ln = exercice.variante === "pointE" ? "\\ln(e)" : "\\ln(e^2)";
+  const gauche = a === 0 ? `${coef}b` : `${a} + ${coef}b`;
+  const gaucheComplete = a === 0 ? `b\\cdot${ln}` : `${a} + b\\cdot${ln}`;
+  return `${gaucheComplete} = ${y} \\iff ${gauche} = ${y}`;
+}
 
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceDeterminerParametresLogarithme, phase: PhaseDeterminerParametresLogarithme): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return formatReponseAttendueA(exercice, phase);
-    case "B":
-      return formatReponseAttendueB(exercice, phase);
-    case "C":
-      return formatReponseAttendueC(exercice, phase);
-  }
+  if (phase === "lireA") return [`a = f(1) = ${exercice.a}`];
+  if (phase === "equationB") return [formatEquationBLatex(exercice)];
+  return [`b = ${exercice.b}`, formatFonctionLatex(exercice)];
 }
 
+// ============================================================================
+// Placeholders — hors de l'espace des tirages (jamais une réponse acceptée).
+// ============================================================================
+
+export const PLACEHOLDERS: Record<PhaseDeterminerParametresLogarithme, string> = {
+  lireA: "ex : 7",
+  equationB: "ex : 2*b+1=10",
+  fonction: "ex : 5+7*ln(x)",
+};

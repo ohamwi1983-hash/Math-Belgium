@@ -1,4 +1,5 @@
 import type { ExerciceLimiteLogB, ExerciceLimiteLogB1, ExerciceLimiteLogB2 } from "../../../core6e/limitesLogarithmiques.types";
+import { formatFractionLatex } from "../../../ui6e/formatFraction";
 import { tirerEntierNonNul, tirerParmi } from "../aleatoire";
 
 /**
@@ -30,14 +31,14 @@ export function construireBQuotient(): ExerciceLimiteLogB1 {
   const m = tirerEntierNonNul(-3, 3);
   const n = 1 - m * x0;
   const limiteFinale = (m * x0) / k;
-  return { famille: "B", sousType: "quotient", k, x0, m, n, limiteFinale };
+  return { famille: "B", sousType: "quotient", k, x0, m, n, limiteFinale, limiteLatex: formatFractionLatex(m * x0, k) };
 }
 
 export function construireBProduit(): ExerciceLimiteLogB2 {
   const k = tirerParmi(K_PRODUIT);
   const x0 = tirerParmi(X0_CANDIDATS);
   const limiteFinale = x0 * Math.log(k);
-  return { famille: "B", sousType: "produit", k, x0, limiteFinale };
+  return { famille: "B", sousType: "produit", k, x0, limiteFinale, limiteLatex: `${x0 === 1 ? "" : x0}\\ln(${k})` };
 }
 
 export function construireB(): ExerciceLimiteLogB {

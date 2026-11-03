@@ -17,7 +17,7 @@ const BASES_SUP = [2, 3, 4, 5] as const;
 export function construireC1(): ExerciceLimiteLogC1 {
   const c = tirerEntier(1, 5);
   const direction: "droite" | "gauche" = Math.random() < 0.5 ? "droite" : "gauche";
-  const partieNumerateur: CibleLimiteLog = { type: "valeur", valeur: Math.log(1 + c) };
+  const partieNumerateur: CibleLimiteLog = { type: "valeur", valeur: Math.log(1 + c), latex: `\\ln(${1 + c})` };
   const partieDenominateur: CibleLimiteLog = { type: "zero" };
   // Numérateur toujours POSITIF (ln(1+c)>0 car c≥1) : le signe de la limite ne dépend donc que du
   // signe du dénominateur (0+ à droite, 0- à gauche).
@@ -36,24 +36,28 @@ export function construireC2(): ExerciceLimiteLogC2 {
   const coefC = tirerEntier(1, 4) * (Math.random() < 0.5 ? 1 : -1);
   const direction: DirectionX = Math.random() < 0.5 ? "plus_infini" : "moins_infini";
   const partieFacteur1: CibleLimiteLog = direction === "plus_infini" ? { type: "plus_infini" } : { type: "moins_infini" };
-  const partieFacteur2: CibleLimiteLog = { type: "valeur", valeur: 1 };
+  const partieFacteur2: CibleLimiteLog = { type: "valeur", valeur: 1, latex: "1" };
   const limiteFinale: CibleLimiteLog = partieFacteur1;
   return { famille: "C", sousType: "c2", base, coefC, direction, partieFacteur1, partieFacteur2, limiteFinale };
 }
 
 // ============================================================================
-// c3 — f(x) = (base^x−base+sin(x)) / ln(1+coefC·x²), base>1, x→0. Numérateur(0) = 1−base < 0
-// (JAMAIS 0, piège central : ressemble à 0/0 mais ne l'est pas). Dénominateur→0+ (ln(1+positif)),
-// deux côtés confondus (coefC·x²≥0 quel que soit le signe de x) — limite TOUJOURS déterminée
-// (−∞), aucune direction à tirer.
+// c3 — f(x) = (base^x + q + sin(x)) / ln(1+coefC·x²), base>1, x→0. Numérateur(0) = 1+q, JAMAIS 0
+// (q≠−1 : piège central, ressemble à 0/0 mais ne l'est pas). Dénominateur→0+ (ln(1+positif)),
+// deux côtés confondus (coefC·x²≥0 quel que soit le signe de x) — limite déterminée, de signe celui
+// de 1+q (+∞ ou −∞ selon le tirage, pour ne jamais se deviner).
 // ============================================================================
+
+const Q_C3 = [-4, -3, -2, 1, 2, 3] as const;
 
 export function construireC3(): ExerciceLimiteLogC3 {
   const base = tirerParmi([2, 3, 4] as const);
+  const q = tirerParmi(Q_C3);
   const coefC = tirerEntier(1, 4);
-  const partieNumerateur: CibleLimiteLog = { type: "valeur", valeur: 1 - base };
+  const partieNumerateur: CibleLimiteLog = { type: "valeur", valeur: 1 + q, latex: String(1 + q) };
   const partieDenominateur: CibleLimiteLog = { type: "zero" };
-  return { famille: "C", sousType: "c3", base, coefC, partieNumerateur, partieDenominateur, limiteFinale: { type: "moins_infini" } };
+  const limiteFinale: CibleLimiteLog = 1 + q > 0 ? { type: "plus_infini" } : { type: "moins_infini" };
+  return { famille: "C", sousType: "c3", base, q, coefC, partieNumerateur, partieDenominateur, limiteFinale };
 }
 
 const SOUS_TYPES: (() => ExerciceLimiteLogC)[] = [construireC1, construireC2, construireC3];

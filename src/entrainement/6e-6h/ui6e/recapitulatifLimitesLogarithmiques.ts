@@ -2,13 +2,13 @@ import type { ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmique
 import { phaseApres, phaseInitiale } from "../moteur6e/typesLimitesLogarithmiques";
 import type { EtatSessionLimiteLogarithmique, PhaseLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatCategorieLabel, formatCibleTexte } from "./formatLimitesLogarithmiques";
+import { formatCategorieLabel, formatCibleTexte, formatReformulationBLatex } from "./formatLimitesLogarithmiques";
 
 /**
  * Récapitulatif "Ce qu'on sait déjà" pour `6gen17`. Reprend EXACTEMENT, phase par phase, le contenu
  * de `reponseAttenduePhase` (`App6gen17.tsx`, lui-même aligné sur l'ancien
- * `ResultatPanelLimitesLogarithmiques.tsx`) — jamais une cible recalculée séparément. Couvre les 12
- * phases (familles A à E, E étant une instance UNIQUE, donc toutes ses valeurs sont fixes).
+ * `ResultatPanelLimitesLogarithmiques.tsx`) — jamais une cible recalculée séparément. Couvre les 6
+ * phases (familles A à C).
  *
  * `revele` déduit de `detailsPartiels[phase].revele` — jamais `scoresPartiels[phase] === 0`, non
  * fiable ici (voir le commentaire de `DetailPhaseLimiteLogarithmique`,
@@ -22,17 +22,12 @@ const LIBELLE_PHASE: Record<PhaseLimiteLogarithmique, string> = {
   bConclure: "Limite",
   cDiagnostic: "Diagnostic (num./dénom.)",
   cConclure: "Limite",
-  dExposant: "Exposant isolé",
-  dLimiteExposant: "Limite de l'exposant",
-  dConclure: "Limite",
-  eDevelopper: "Numérateur développé",
-  eSimplifier: "Forme simplifiée",
-  eConclure: "Limite",
 };
 
 type FragmentsRecap = Pick<EntreeRecapitulatif, "valeur" | "estLatex">;
 
-function valeurPourPhase(exercice: ExerciceLimiteLogarithmique, phase: PhaseLimiteLogarithmique): FragmentsRecap {
+/** Exporté pour `App6gen17.tsx` (réponse attendue, fiche de consultation) — même contenu partout. */
+export function valeurPourPhase(exercice: ExerciceLimiteLogarithmique, phase: PhaseLimiteLogarithmique): FragmentsRecap {
   if (exercice.famille === "A") {
     if (phase === "aDominance") {
       return { valeur: `Numérateur : ${formatCategorieLabel(exercice.dominanceNumerateur)} — Dénominateur : ${formatCategorieLabel(exercice.dominanceDenominateur)}`, estLatex: false };
@@ -40,22 +35,14 @@ function valeurPourPhase(exercice: ExerciceLimiteLogarithmique, phase: PhaseLimi
     return { valeur: formatCibleTexte(exercice.limiteGlobale), estLatex: true };
   }
   if (exercice.famille === "B") {
-    if (phase === "bReformuler") return { valeur: "Forme reformulée en u=x/x0−1, faisant apparaître la limite de référence, équivalente à f(x).", estLatex: false };
-    return { valeur: String(exercice.limiteFinale), estLatex: true };
+    if (phase === "bReformuler") return { valeur: `f = ${formatReformulationBLatex(exercice)}`, estLatex: true };
+    return { valeur: exercice.limiteLatex, estLatex: true };
   }
-  if (exercice.famille === "C") {
-    if (phase === "cDiagnostic") return { valeur: "Numérateur et dénominateur (ou chaque facteur) évalués séparément, avant toute conclusion.", estLatex: false };
-    return { valeur: formatCibleTexte(exercice.limiteFinale), estLatex: true };
+  if (phase === "cDiagnostic") {
+    const [cible1, cible2] = exercice.sousType === "c2" ? [exercice.partieFacteur1, exercice.partieFacteur2] : [exercice.partieNumerateur, exercice.partieDenominateur];
+    return { valeur: `\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}`, estLatex: true };
   }
-  if (exercice.famille === "D") {
-    if (phase === "dExposant") return { valeur: "f^g réécrit e^(g·ln f), exposant g·ln(f) isolé, équivalent à la forme attendue.", estLatex: false };
-    if (phase === "dLimiteExposant") return { valeur: String(exercice.limiteExposant), estLatex: true };
-    return { valeur: `e^{${exercice.limiteExposant}}`, estLatex: true };
-  }
-  // Famille E — instance unique, valeurs fixes.
-  if (phase === "eDevelopper") return { valeur: "x^2\\left(\\ln 3+\\frac12\\right)", estLatex: true };
-  if (phase === "eSimplifier") return { valeur: "\\frac{\\ln 3+\\frac12}{4}", estLatex: true };
-  return { valeur: "\\frac{2\\ln 3+1}{8}", estLatex: true };
+  return { valeur: formatCibleTexte(exercice.limiteFinale), estLatex: true };
 }
 
 function sequenceReelle(exercice: ExerciceLimiteLogarithmique): PhaseLimiteLogarithmique[] {

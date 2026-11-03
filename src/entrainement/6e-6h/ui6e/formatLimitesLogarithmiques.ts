@@ -1,4 +1,4 @@
-import type { ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogD, ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmiques.types";
+import type { CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC, ExerciceLimiteLogarithmique } from "../core6e/limitesLogarithmiques.types";
 import type { PhaseLimiteLogarithmique } from "../moteur6e/typesLimitesLogarithmiques";
 
 /**
@@ -52,6 +52,11 @@ function formatSommeTermes(termes: TermeSigne[]): string {
     .join(" ");
 }
 
+/** Base décimale (ex. 0,2) avec la virgule française — jamais `0.2`. */
+function formatBaseDecimale(base: number): string {
+  return String(base).replace(".", "{,}");
+}
+
 /** Jamais d'exposant `^{1}` littéral. */
 function formatPuissance(base: string, exposant: number): string {
   return exposant === 1 ? base : `${base}^{${exposant}}`;
@@ -60,10 +65,26 @@ function formatPuissance(base: string, exposant: number): string {
 const LABELS_CIBLE: Record<string, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 /** Exporté pour le récapitulatif final — contenu de chaque `LigneRecap` = la cible RÉELLEMENT
- * attendue de l'écran, jamais un score. */
-export function formatCibleTexte(cible: { type: string; valeur?: number }): string {
-  if (cible.type === "valeur") return String(cible.valeur);
+ * attendue de l'écran, jamais un score. Une valeur finie s'affiche sous sa forme EXACTE
+ * (`cible.latex`, ex. `\dfrac{\ln(5)}{2}`), jamais un flottant brut. */
+export function formatCibleTexte(cible: CibleLimiteLog): string {
+  if (cible.type === "valeur") return cible.latex;
   return LABELS_CIBLE[cible.type];
+}
+
+/** `1+ku` sans double signe (jamais `1+-3u`). */
+function formatUnPlusKU(coefficient: number): string {
+  if (coefficient === 0) return "1";
+  const abs = Math.abs(coefficient);
+  const corps = abs === 1 ? "u" : `${abs}u`;
+  return coefficient > 0 ? `1+${corps}` : `1-${corps}`;
+}
+
+/** `ku` sans coefficient 1 visible. */
+function formatKU(coefficient: number): string {
+  if (coefficient === 1) return "u";
+  if (coefficient === -1) return "-u";
+  return `${coefficient}u`;
 }
 
 const LABELS_CATEGORIE: Record<string, string> = { log: "Logarithme", polynome: "Polynôme", exponentielle: "Exponentielle" };
@@ -84,12 +105,12 @@ function formatFonctionA(exercice: ExerciceLimiteLogA): string {
       return `\\frac{${numerateur}}{${denominateur}}`;
     }
     case "sous2": {
-      const denominateur = formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }]);
-      return `\\frac{${exercice.base}^x}{${denominateur}}`;
+      const puissance = formatSommeTermes([{ valeur: exercice.q, suffixe: formatPuissance("x", exercice.d) }]);
+      return exercice.orientation === "expSurPoly" ? `\\frac{${exercice.base}^x}{${puissance}}` : `\\frac{${puissance}}{${exercice.base}^x}`;
     }
     case "sous3": {
-      const numerateur = formatSommeTermes([{ valeur: exercice.p1, suffixe: `${formatPuissance("x", exercice.d1)}\\ln(x)` }]);
-      const denominateur = formatSommeTermes([{ valeur: exercice.p2, suffixe: `${formatPuissance("x", exercice.d2)}\\log_{${exercice.base}}(x)` }]);
+      const numerateur = formatSommeTermes([{ valeur: exercice.p1, suffixe: "\\ln(x)" }, { valeur: exercice.c1, suffixe: "" }]);
+      const denominateur = formatSommeTermes([{ valeur: exercice.p2, suffixe: `\\log_{${exercice.base}}(x)` }, { valeur: exercice.c2, suffixe: "" }]);
       return `\\frac{${numerateur}}{${denominateur}}`;
     }
     case "sous4": {
@@ -99,7 +120,7 @@ function formatFonctionA(exercice: ExerciceLimiteLogA): string {
     case "sous5": {
       const numerateur = formatSommeTermes([
         { valeur: exercice.a1, suffixe: formatPuissance("x", exercice.d1) },
-        { valeur: exercice.c1, suffixe: `${exercice.base1}^x`, cdot: true },
+        { valeur: exercice.c1, suffixe: `${formatBaseDecimale(exercice.base1)}^x`, cdot: true },
       ]);
       const denominateur = formatSommeTermes([
         { valeur: exercice.a2, suffixe: formatPuissance("x", exercice.d2) },
@@ -110,8 +131,7 @@ function formatFonctionA(exercice: ExerciceLimiteLogA): string {
   }
 }
 
-function formatDirectionA(exercice: ExerciceLimiteLogA): string {
-  if (exercice.sousType === "sous2") return exercice.direction === "plus_infini" ? "x \\to +\\infty" : "x \\to -\\infty";
+function formatDirectionA(): string {
   return "x \\to +\\infty";
 }
 
@@ -119,7 +139,7 @@ function consigneA(phase: "aDominance" | "aConclure"): FragmentConsigne[] {
   if (phase === "aDominance") {
     return [texte("Identifie le terme dominant au numérateur et au dénominateur séparément (hiérarchie "), latex("\\ln(x) \\ll x^n \\ll \\text{base}^x"), texte(" avec base>1).")];
   }
-  return [texte("À partir de la dominance CORRECTE de l'étape précédente, conclus la limite globale.")];
+  return [texte("À partir de la dominance de l'étape précédente, conclus la limite (valeur exacte si elle est finie).")];
 }
 
 const RAPPEL_HIERARCHIE_LATEX = "\\ln(x) \\ll x^n \\ll \\text{base}^x \\ (\\text{base}>1)";
@@ -134,20 +154,76 @@ function aideA1(phase: "aDominance" | "aConclure"): AideAvecLatex {
   return { texte: "Compare la catégorie dominante du numérateur à celle du dénominateur (déjà confirmées à l'étape précédente) pour conclure.", latex: null };
 }
 
+/** Aide 2 de la famille A — jamais les catégories elles-mêmes (écran dominance) ni la limite
+ * (écran conclure) : pour la dominance, la liste des termes à comparer et leur comportement de
+ * référence ; pour la conclusion, la forme factorisée par les termes dominants, non simplifiée. */
 function aideA2(phase: "aDominance" | "aConclure", exercice: ExerciceLimiteLogA): AideAvecLatex {
   if (phase === "aDominance") {
-    return { texte: "Catégorie de CHAQUE terme de l'expression (comparaison finale non faite) :", latex: `\\text{num.} \\to ${formatCategorieLabel(exercice.dominanceNumerateur)},\\quad \\text{dénom.} \\to ${formatCategorieLabel(exercice.dominanceDenominateur)}` };
+    return {
+      texte: "Comportement de chaque type de terme quand x → +∞ (à appliquer à chaque terme de l'expression) :",
+      latex: "\\begin{gathered} \\ln(x),\\ \\log_b(x) \\to +\\infty \\text{ (très lentement)} \\\\ x^n \\to +\\infty \\\\ b^x \\to +\\infty \\text{ si } b>1,\\quad b^x \\to 0 \\text{ si } 0<b<1 \\end{gathered}",
+    };
   }
-  return { texte: "Dominance confirmée des deux côtés :", latex: `\\text{num.} \\to ${formatCategorieLabel(exercice.dominanceNumerateur)},\\quad \\text{dénom.} \\to ${formatCategorieLabel(exercice.dominanceDenominateur)}` };
+  return { texte: "Mets en évidence le terme dominant en haut et en bas (calcul final non fait) :", latex: formeFactoriseeA(exercice) };
+}
+
+/** ` + \frac{n}{d}` / ` - \frac{|n|}{d}` / rien si n = 0 — jamais `+ \frac{-3}{x}`. */
+function plusFraction(numerateur: number, denominateur: string): string {
+  if (numerateur === 0) return "";
+  return `${numerateur < 0 ? " - " : " + "}\\frac{${Math.abs(numerateur)}}{${denominateur}}`;
+}
+
+function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
+  switch (exercice.sousType) {
+    case "sous1":
+      return `\\frac{\\ln(x)}{${formatPuissance("x", exercice.d)}} \\cdot \\frac{${exercice.k}}{${exercice.a}${plusFraction(exercice.b, formatPuissance("x", exercice.d))}}`;
+    case "sous2":
+      if (exercice.orientation === "expSurPoly") {
+        const facteur = exercice.q === 1 ? "" : ` \\cdot \\frac{1}{${exercice.q}}`;
+        return `\\frac{${exercice.base}^x}{${formatPuissance("x", exercice.d)}}${facteur}`;
+      }
+      return `${exercice.q === 1 ? "" : `${exercice.q} \\cdot `}\\frac{${formatPuissance("x", exercice.d)}}{${exercice.base}^x}`;
+    case "sous3":
+      return `\\frac{\\ln(x)\\left(${exercice.p1}${plusFraction(exercice.c1, "\\ln(x)")}\\right)}{\\ln(x)\\left(\\frac{${exercice.p2}}{\\ln(${exercice.base})}${plusFraction(exercice.c2, "\\ln(x)")}\\right)}`;
+    case "sous4": {
+      const px = formatSommeTermes([{ valeur: exercice.a, suffixe: formatPuissance("x", exercice.d) }]);
+      const reste = (base: number) => (exercice.c === 0 ? `\\log_{${base}}(x)` : `${exercice.c} + \\log_{${base}}(x)`);
+      return `\\frac{${px}\\left(1 + \\frac{${reste(exercice.base1)}}{${px}}\\right)}{${px}\\left(1 + \\frac{${reste(exercice.base2)}}{${px}}\\right)}`;
+    }
+    case "sous5": {
+      const px1 = formatPuissance("x", exercice.d1);
+      const px2 = formatPuissance("x", exercice.d2);
+      const terme1 = formatSommeTermes([{ valeur: exercice.c1, suffixe: `${formatBaseDecimale(exercice.base1)}^x`, cdot: true }]);
+      const terme2 = formatSommeTermes([{ valeur: exercice.a2, suffixe: px2 }]);
+      return `\\frac{${px1}}{${exercice.base2}^x} \\cdot \\frac{${exercice.a1} + \\frac{${terme1}}{${px1}}}{${exercice.c2} + \\frac{${terme2}}{${exercice.base2}^x}}`;
+    }
+  }
 }
 
 // ============================================================================
 // Famille B
 // ============================================================================
 
+/** Base `x/x0` simplifiée (jamais `x/1`), éventuellement élevée à `k` (jamais `^1`). */
+function formatBaseB(x0: number, k: number): string {
+  const quotient = x0 === 1 ? "x" : `\\frac{x}{${x0}}`;
+  if (k === 1) return quotient;
+  return x0 === 1 ? `x^{${k}}` : `\\left(${quotient}\\right)^{${k}}`;
+}
+
 function formatFonctionB(exercice: ExerciceLimiteLogB): string {
-  if (exercice.sousType === "quotient") return `\\log_{\\left(\\frac{x}{${exercice.x0}}\\right)^{${exercice.k}}}\\left(${formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }])}\\right)`;
-  return `(x-${exercice.x0})\\cdot\\log_{\\frac{x}{${exercice.x0}}}(${exercice.k})`;
+  if (exercice.sousType === "quotient") return `\\log_{${formatBaseB(exercice.x0, exercice.k)}}\\left(${formatSommeTermes([{ valeur: exercice.m, suffixe: "x" }, { valeur: exercice.n, suffixe: "" }])}\\right)`;
+  return `(x-${exercice.x0})\\cdot\\log_{${formatBaseB(exercice.x0, 1)}}(${exercice.k})`;
+}
+
+/** Forme reformulée de référence en u (une des formes équivalentes acceptées) — affichée comme
+ * réponse attendue, dans le récapitulatif et le corrigé. */
+export function formatReformulationBLatex(exercice: ExerciceLimiteLogB): string {
+  if (exercice.sousType === "quotient") {
+    const k = exercice.k === 1 ? "" : `${exercice.k}`;
+    return `\\dfrac{\\ln\\left(${formatUnPlusKU(exercice.m * exercice.x0)}\\right)}{${k}\\ln(1+u)}`;
+  }
+  return `\\dfrac{${formatKU(exercice.x0)}\\ln(${exercice.k})}{\\ln(1+u)}`;
 }
 
 function consigneB(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): FragmentConsigne[] {
@@ -167,11 +243,17 @@ function aideB1(phase: "bReformuler" | "bConclure"): AideAvecLatex {
 }
 
 function aideB2(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): AideAvecLatex {
-  if (phase === "bConclure") return { texte: TEXTE_REFERENCE, latex: FORMULE_REFERENCE_LATEX };
-  if (exercice.sousType === "quotient") {
-    return { texte: "Substitution amorcée (base et argument réécrits en u, non terminée) :", latex: `\\log_{(1+u)^{${exercice.k}}}\\left(1+${exercice.m * exercice.x0}u\\right)` };
+  if (phase === "bConclure") {
+    if (exercice.sousType === "quotient") {
+      const c = exercice.m * exercice.x0;
+      return { texte: "Fais apparaître la limite de référence en haut et en bas (calcul final non fait) :", latex: `\\dfrac{${c}\\cdot\\dfrac{\\ln(${formatUnPlusKU(c)})}{${formatKU(c)}}}{${exercice.k}\\cdot\\dfrac{\\ln(1+u)}{u}}` };
+    }
+    return { texte: "Fais apparaître la limite de référence (calcul final non fait) :", latex: `${exercice.x0}\\ln(${exercice.k})\\cdot\\dfrac{u}{\\ln(1+u)}` };
   }
-  return { texte: "Substitution amorcée (non terminée) :", latex: `${exercice.x0}\\cdot u \\cdot \\log_{1+u}(${exercice.k})` };
+  if (exercice.sousType === "quotient") {
+    return { texte: "Substitution amorcée (base et argument réécrits en u, non terminée) :", latex: `\\log_{${exercice.k === 1 ? "1+u" : `(1+u)^{${exercice.k}}`}}\\left(${formatUnPlusKU(exercice.m * exercice.x0)}\\right)` };
+  }
+  return { texte: "Substitution amorcée (non terminée) :", latex: `${formatKU(exercice.x0)} \\cdot \\log_{1+u}(${exercice.k})` };
 }
 
 // ============================================================================
@@ -182,7 +264,8 @@ function formatFonctionC(exercice: ExerciceLimiteLogC): string {
   if (exercice.sousType === "c1") return `\\log_x(x+${exercice.c})`;
   if (exercice.sousType === "c2") return `x\\cdot ${exercice.base}^{\\frac{${exercice.coefC}}{x}}`;
   const denominateur = exercice.coefC === 1 ? "x^2" : `${exercice.coefC}x^2`;
-  return `\\frac{${exercice.base}^x - ${exercice.base} + \\sin(x)}{\\ln(1+${denominateur})}`;
+  const constante = exercice.q < 0 ? `- ${-exercice.q}` : `+ ${exercice.q}`;
+  return `\\frac{${exercice.base}^x ${constante} + \\sin(x)}{\\ln(1+${denominateur})}`;
 }
 
 function formatDirectionC(exercice: ExerciceLimiteLogC): string {
@@ -193,7 +276,7 @@ function formatDirectionC(exercice: ExerciceLimiteLogC): string {
 
 function consigneC(phase: "cDiagnostic" | "cConclure"): FragmentConsigne[] {
   if (phase === "cDiagnostic") return [texte("Évalue séparément le numérateur et le dénominateur (ou chaque facteur) AVANT toute technique de forme indéterminée.")];
-  return [texte("À partir du diagnostic CORRECT de l'étape précédente, conclus la limite (détermine le signe si besoin).")];
+  return [texte("À partir du diagnostic de l'étape précédente, conclus la limite (détermine le signe si besoin).")];
 }
 
 function aideC1(phase: "cDiagnostic" | "cConclure"): AideAvecLatex {
@@ -216,82 +299,23 @@ export function configDiagnosticPartiesC(exercice: ExerciceLimiteLogC): { partie
   if (exercice.sousType === "c2") {
     return {
       partie1: { label: "Facteur x →", optionsCategorielles: ["plus_infini", "moins_infini"], autoriserValeurLibre: false, placeholderValeur: "" },
-      partie2: { label: `Facteur ${exercice.base}^(c/x) →`, optionsCategorielles: [], autoriserValeurLibre: true, placeholderValeur: "ex : 1" },
+      partie2: { label: `Facteur ${exercice.base}^(c/x) →`, optionsCategorielles: [], autoriserValeurLibre: true, placeholderValeur: "ex : 5/7" },
     };
   }
   return {
-    partie1: { label: "Numérateur (valeur finie)", optionsCategorielles: [], autoriserValeurLibre: true, placeholderValeur: "ex : ln(3)" },
+    partie1: { label: "Numérateur (valeur finie)", optionsCategorielles: [], autoriserValeurLibre: true, placeholderValeur: "ex : 3*ln(7)" },
     partie2: { label: "Dénominateur →", optionsCategorielles: ["plus_infini", "moins_infini", "zero"], autoriserValeurLibre: false, placeholderValeur: "" },
   };
 }
 
+/** Aide 2 de la famille C — la démarche appliquée à l'exercice, jamais les valeurs elles-mêmes. */
 function aideC2(phase: "cDiagnostic" | "cConclure", exercice: ExerciceLimiteLogC): AideAvecLatex {
-  const [cible1, cible2] = exercice.sousType === "c2" ? [exercice.partieFacteur1, exercice.partieFacteur2] : [exercice.partieNumerateur, exercice.partieDenominateur];
-  if (phase === "cDiagnostic") return { texte: "Valeur/statut de chaque partie :", latex: `\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}` };
-  return { texte: "Diagnostic confirmé :", latex: `\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}` };
-}
-
-// ============================================================================
-// Famille D
-// ============================================================================
-
-function formatFonctionD(exercice: ExerciceLimiteLogD): string {
-  return `\\left(\\cos(${exercice.k}x)\\right)^{\\frac{${exercice.c}}{x^2}}`;
-}
-
-function consigneD(phase: "dExposant" | "dLimiteExposant" | "dConclure"): FragmentConsigne[] {
-  if (phase === "dExposant") {
-    return [texte("Réécris "), latex("f^g"), texte(" sous la forme "), latex("e^{g\\cdot\\ln f}"), texte(", et isole la limite de l'exposant "), latex("g(x)\\cdot\\ln(f(x))"), texte(" à calculer.")];
+  if (phase === "cDiagnostic") {
+    if (exercice.sousType === "c1") return { texte: "Remplace x par 1 dans le numérateur ln(x+c). Pour le dénominateur ln(x), rappelle-toi que ln(1)=0 et regarde de quel côté de 1 on arrive.", latex: "\\log_x(x+c) = \\dfrac{\\ln(x+c)}{\\ln(x)}" };
+    if (exercice.sousType === "c2") return { texte: "L'exposant c/x tend vers 0 quand x devient infini : que vaut alors base^(c/x) ?", latex: `${exercice.base}^{\\frac{${exercice.coefC}}{x}} = ${exercice.base}^{\\,\\square}\\ \\text{avec } \\square \\to 0` };
+    return { texte: "Remplace x par 0 dans le numérateur (base⁰ = 1 et sin(0) = 0). Le dénominateur ln(1+cx²) tend vers ln(1).", latex: null };
   }
-  if (phase === "dLimiteExposant") return [texte("Calcule la limite de l'exposant CORRECT de l'étape précédente.")];
-  return [texte("Conclus en exponentiant le résultat CORRECT de l'étape précédente.")];
-}
-
-function aideD1(phase: "dExposant" | "dLimiteExposant" | "dConclure"): AideAvecLatex {
-  if (phase === "dExposant") return { texte: "Méthode générale pour toute forme indéterminée f^g (1^∞, 0^0, ∞^0) : réécris f^g = e^(g·ln f), puis étudie la limite de l'EXPOSANT.", latex: "f^g = e^{g\\cdot\\ln(f)}" };
-  if (phase === "dLimiteExposant") return { texte: "Rappel de l'équivalent de ln(cos(u)) au voisinage de 0 :", latex: "\\ln(\\cos(u)) \\sim -\\frac{u^2}{2} \\quad (u \\to 0)" };
-  return { texte: "Une fois la limite de l'exposant connue, il ne reste qu'à exponentier ce résultat.", latex: null };
-}
-
-function aideD2(phase: "dExposant" | "dLimiteExposant" | "dConclure", exercice: ExerciceLimiteLogD): AideAvecLatex {
-  if (phase === "dExposant") return { texte: "Exposant à calculer (limite non calculée) :", latex: `\\frac{${exercice.c}}{x^2}\\cdot\\ln\\left(\\cos(${exercice.k}x)\\right)` };
-  if (phase === "dLimiteExposant") return { texte: "Substitution amorcée (calcul final non fait) :", latex: `\\frac{${exercice.c}}{x^2}\\cdot\\left(-\\frac{(${exercice.k}x)^2}{2}\\right)` };
-  return { texte: "Limite de l'exposant (déjà confirmée) :", latex: `${exercice.limiteExposant}` };
-}
-
-// ============================================================================
-// Famille E — instance unique.
-// ============================================================================
-
-function formatFonctionE(): string {
-  return "\\frac{3^x\\sin(x) - \\ln(1+x)}{x^4+4x^2}";
-}
-
-function consigneE(phase: "eDevelopper" | "eSimplifier" | "eConclure"): FragmentConsigne[] {
-  if (phase === "eDevelopper") {
-    return [texte("Développe "), latex("3^x\\sin(x)"), texte(" et "), latex("\\ln(1+x)"), texte(" à l'ordre 2, puis exprime le numérateur développé.")];
-  }
-  if (phase === "eSimplifier") {
-    return [texte("Simplifie le numérateur CORRECT de l'étape précédente (les termes d'ordre 1 s'annulent) et le dénominateur ("), latex("x^4+4x^2 \\sim 4x^2"), texte(").")];
-  }
-  return [texte("Conclus la valeur numérique à partir de la forme CORRECTE de l'étape précédente.")];
-}
-
-function aideE1(phase: "eDevelopper" | "eSimplifier" | "eConclure"): AideAvecLatex {
-  if (phase === "eDevelopper") {
-    return {
-      texte: "Rappel des développements limités à l'ordre 2 nécessaires :",
-      latex: "\\begin{gathered} 3^x \\approx 1+x\\ln 3 \\\\ \\sin(x) \\approx x-\\frac{x^3}{6} \\\\ \\ln(1+x) \\approx x-\\frac{x^2}{2} \\end{gathered}",
-    };
-  }
-  if (phase === "eSimplifier") return { texte: "Le dénominateur x⁴+4x² a un terme dominant clair au voisinage de 0.", latex: "x^4+4x^2 \\sim 4x^2 \\quad (x \\to 0)" };
-  return { texte: "Le rapport simplifié à l'étape précédente est déjà une CONSTANTE (le facteur x² s'est simplifié) — il ne reste qu'à l'évaluer.", latex: null };
-}
-
-function aideE2(phase: "eDevelopper" | "eSimplifier" | "eConclure"): AideAvecLatex {
-  if (phase === "eDevelopper") return { texte: "Numérateur et dénominateur affichés développés (simplification finale non faite) :", latex: "\\left(x+x^2\\ln 3\\right) - \\left(x-\\frac{x^2}{2}\\right)" };
-  if (phase === "eSimplifier") return { texte: "Numérateur (déjà confirmé) et dénominateur substitués (non simplifié) :", latex: "\\frac{x^2\\left(\\ln 3+\\frac{1}{2}\\right)}{4x^2}" };
-  return { texte: "Valeur du rapport simplifié (déjà confirmée) :", latex: "\\frac{\\ln 3+\\frac12}{4}" };
+  return { texte: "Règle des signes : une constante non nulle divisée par un nombre qui tend vers 0 tend vers l'infini, avec le signe du quotient ; l'infini multiplié par une constante positive reste un infini de même signe.", latex: null };
 }
 
 // ============================================================================
@@ -303,15 +327,11 @@ function aideE2(phase: "eDevelopper" | "eSimplifier" | "eConclure"): AideAvecLat
 export function formatLimiteEnonceLatex(exercice: ExerciceLimiteLogarithmique): string {
   switch (exercice.famille) {
     case "A":
-      return `\\lim_{${formatDirectionA(exercice)}} \\left(${formatFonctionA(exercice)}\\right)`;
+      return `\\lim_{${formatDirectionA()}} \\left(${formatFonctionA(exercice)}\\right)`;
     case "B":
       return `\\lim_{x \\to ${exercice.x0}} \\left(${formatFonctionB(exercice)}\\right)`;
     case "C":
       return `\\lim_{${formatDirectionC(exercice)}} \\left(${formatFonctionC(exercice)}\\right)`;
-    case "D":
-      return `\\lim_{x \\to 0} ${formatFonctionD(exercice)}`;
-    case "E":
-      return `\\lim_{x \\to 0} ${formatFonctionE()}`;
   }
 }
 
@@ -323,10 +343,6 @@ export function consigneEcran(phase: PhaseLimiteLogarithmique, exercice: Exercic
       return consigneB(phase as "bReformuler" | "bConclure", exercice);
     case "C":
       return consigneC(phase as "cDiagnostic" | "cConclure");
-    case "D":
-      return consigneD(phase as "dExposant" | "dLimiteExposant" | "dConclure");
-    case "E":
-      return consigneE(phase as "eDevelopper" | "eSimplifier" | "eConclure");
   }
 }
 
@@ -338,10 +354,6 @@ export function aideNiveau1(phase: PhaseLimiteLogarithmique, exercice: ExerciceL
       return aideB1(phase as "bReformuler" | "bConclure");
     case "C":
       return aideC1(phase as "cDiagnostic" | "cConclure");
-    case "D":
-      return aideD1(phase as "dExposant" | "dLimiteExposant" | "dConclure");
-    case "E":
-      return aideE1(phase as "eDevelopper" | "eSimplifier" | "eConclure");
   }
 }
 
@@ -353,10 +365,6 @@ export function aideNiveau2(phase: PhaseLimiteLogarithmique, exercice: ExerciceL
       return aideB2(phase as "bReformuler" | "bConclure", exercice);
     case "C":
       return aideC2(phase as "cDiagnostic" | "cConclure", exercice);
-    case "D":
-      return aideD2(phase as "dExposant" | "dLimiteExposant" | "dConclure", exercice);
-    case "E":
-      return aideE2(phase as "eDevelopper" | "eSimplifier" | "eConclure");
   }
 }
 
@@ -375,36 +383,14 @@ export function etatActuel(phase: PhaseLimiteLogarithmique, exercice: ExerciceLi
   switch (exercice.famille) {
     case "A":
       if (phase === "aDominance") return null;
-      return [`\\text{num.} \\to ${formatCategorieLabel(exercice.dominanceNumerateur)},\\quad \\text{dénom.} \\to ${formatCategorieLabel(exercice.dominanceDenominateur)}`];
+      return [`\\text{num.} \\to \\text{${formatCategorieLabel(exercice.dominanceNumerateur)}},\\quad \\text{dénom.} \\to \\text{${formatCategorieLabel(exercice.dominanceDenominateur)}}`];
     case "B":
       if (phase === "bReformuler") return null;
-      return [
-        exercice.sousType === "quotient"
-          ? `\\log_{(1+u)^{${exercice.k}}}\\left(1+${exercice.m * exercice.x0}u\\right)`
-          : `${exercice.x0}\\cdot u \\cdot \\log_{1+u}(${exercice.k})`,
-      ];
+      return [`f = ${formatReformulationBLatex(exercice)}`];
     case "C": {
       if (phase === "cDiagnostic") return null;
       const [cible1, cible2] = exercice.sousType === "c2" ? [exercice.partieFacteur1, exercice.partieFacteur2] : [exercice.partieNumerateur, exercice.partieDenominateur];
       return [`\\text{partie 1} \\to ${formatCibleTexte(cible1)},\\quad \\text{partie 2} \\to ${formatCibleTexte(cible2)}`];
     }
-    case "D": {
-      // Correctif transversal (même bug que 6gen1, voir CLAUDE.md/`docs/historique-6e.md`) :
-      // `dConclure` (3e écran) ne montrait QUE la limite de l'exposant (écran 2), jamais l'exposant
-      // lui-même (écran 1) — ACCUMULE désormais les deux, plus ancien en premier.
-      if (phase === "dExposant") return null;
-      const lignes = [`\\text{Exposant (étape 1) : } \\frac{${exercice.c}}{x^2}\\cdot\\ln\\left(\\cos(${exercice.k}x)\\right)`];
-      if (phase === "dConclure") lignes.push(`\\text{Limite de l'exposant (étape 2) : } ${exercice.limiteExposant}`);
-      return lignes;
-    }
-    case "E": {
-      // Même correctif : `eConclure` (3e écran) ne montrait QUE la simplification (écran 2), jamais
-      // le développement (écran 1).
-      if (phase === "eDevelopper") return null;
-      const lignes = ["\\text{Développé (étape 1) : } \\left(x+x^2\\ln 3\\right) - \\left(x-\\frac{x^2}{2}\\right)"];
-      if (phase === "eConclure") lignes.push("\\text{Simplifié (étape 2) : } \\frac{\\ln 3+\\frac12}{4}");
-      return lignes;
-    }
   }
 }
-

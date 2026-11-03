@@ -49,17 +49,25 @@ interface Props {
 
 /**
  * Écran GÉNÉRIQUE "cible catégorielle ±∞/0/valeur" (`6gen17`) — réutilisé par les écrans A-conclure
- * et C-conclure. `App6gen17.tsx` doit le rendre avec `key={phase}`. Même patron que
+ * et C-conclure. `App6gen17.tsx` doit le rendre avec une `key` qui change à chaque exercice ET à
+ * chaque écran. Même patron que
  * `EtapeReponseLimite.tsx` (6gen6).
  */
 export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<ReponseLimiteLog["type"] | null>(null);
   const [texte, setTexte] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge, jamais une nouvelle sélection
+   * pas encore validée (audit chapitre 3 de 6e, point 4). */
+  const [soumis, setSoumis] = useState<{ statut: ReponseLimiteLog["type"]; texte: string } | null>(null);
+  // Après une révélation (1 seule tentative), l'état de session n'est appliqué qu'au clic sur
+  // « Écran suivant » : `validation.revele` signale alors le refus.
+  const montrerErreurs = tentativesUtilisees > 0 || Boolean(validation?.revele);
+  const estRefuse = (option: ReponseLimiteLog["type"]) => montrerErreurs && soumis !== null && soumis.statut === option && statut === option && (option !== "valeur" || soumis.texte === texte);
 
   function valider() {
     if (statut === null) return;
     if (statut === "valeur" && texte.trim() === "") return;
+    setSoumis({ statut, texte });
     onValider(statut === "valeur" ? { type: "valeur", texte } : { type: statut });
   }
 
@@ -87,12 +95,12 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
       </p>
       <div className="options-grid-compact">
         {optionsCategorielles.map((option) => (
-          <button key={option} type="button" className={`btn ${statut === option ? "toggle-active" : ""} ${montrerErreurs && statut === option ? "is-erronee" : ""}`} onClick={() => setStatut(option)}>
+          <button key={option} type="button" className={`btn ${statut === option ? "toggle-active" : ""} ${estRefuse(option) ? "is-erronee" : ""}`} onClick={() => setStatut(option)}>
             <Katex expression={LABELS[option]} />
           </button>
         ))}
         {autoriserValeurLibre && (
-          <button type="button" className={`btn ${statut === "valeur" ? "toggle-active" : ""} ${montrerErreurs && statut === "valeur" ? "is-erronee" : ""}`} onClick={() => setStatut("valeur")}>
+          <button type="button" className={`btn ${statut === "valeur" ? "toggle-active" : ""} ${estRefuse("valeur") ? "is-erronee" : ""}`} onClick={() => setStatut("valeur")}>
             Valeur finie
           </button>
         )}
@@ -101,7 +109,7 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
         <>
           <ApercuExpressionLatex texte={texte} />
           <div className="field contenu-conditionnel">
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder="ex : 0, 1/2, ln(3)..." onChange={(e) => setTexte(e.target.value)} />
+            <input type="text" className={`text-input ${estRefuse("valeur") ? "is-erronee" : ""}`} value={texte} placeholder="ex : 5/7 ou 3*ln(7)" onChange={(e) => setTexte(e.target.value)} />
           </div>
         </>
       )}

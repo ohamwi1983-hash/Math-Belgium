@@ -1,6 +1,6 @@
 /**
  * Couche core (6e) — contrat pour `6gen17` ("Calculer des limites, fonctions logarithmes",
- * chapitre 3). 5 familles A-E STRUCTURELLEMENT DISJOINTES (union discriminée), même principe que
+ * chapitre 3). 3 familles A-C STRUCTURELLEMENT DISJOINTES (union discriminée), même principe que
  * `limitesExponentielles.types.ts` (6gen6, chapitre 2) : nombre d'écrans variable (2 ou 3) et forme
  * de réponse variable par écran, la plupart catégorielle (+∞/−∞/0/valeur) plutôt qu'un champ libre
  * systématique.
@@ -17,14 +17,12 @@
  * avec le principe "champ texte libre réservé aux calculs/expressions" déjà établi (6gen6, famille
  * G, note de conception sur l'écran "ordre1").
  *
- * **Décision de conception — Famille A, sous-type 3 ("quotient de logs")** : la spec décrit
- * `P1(x)·ln(x)/(P2(x)·log_base(x))`, un ratio de PRODUITS (pas de sommes) — la notion de "terme
- * dominant" ne s'applique pas littéralement à un facteur unique de chaque côté. Modélisé en
- * considérant que la partie notable de chaque côté (celle qui nécessite la réécriture
- * log_base(x)=ln(x)/ln(base) pour être comparée) est catégorisée `"log"` des deux côtés — le calcul
- * final (écran 2) compare ensuite les degrés de P1/P2 (ratio de polynômes, technique déjà connue)
- * une fois ln(x) simplifié. P1/P2 sont ici des MONÔMES (p·x^d) pour garder l'écran 2 calculable
- * simplement par comparaison de degrés d1/d2.
+ * **Décision de conception — Famille A, sous-type 3 ("quotient de logs")** : f(x) =
+ * (p1·ln(x)+c1)/(p2·log_base(x)+c2). Le terme dominant de chaque côté est un LOGARITHME (il domine
+ * la constante), d'où une forme ∞/∞ entre deux logarithmes de bases différentes : la réécriture
+ * log_base(x) = ln(x)/ln(base) donne la limite p1·ln(base)/p2. (L'ancienne forme, un produit
+ * x^d·ln(x) sur x^d·log_base(x), rendait la catégorie « logarithme / logarithme » incohérente :
+ * c'est la puissance de x qui y décidait de la limite.)
  *
  * **Décision de conception — Famille B, sous-type "quotient de logs"** : la spec écrit littéralement
  * `log_(x^k)(g(x))` avec la condition "x0^k=1 au même point x0", mais avec `x0∈{1,2}` cette
@@ -36,31 +34,27 @@
  *
  * **Décision de conception — Famille C** : 3 sous-types calqués sur les 3 exemples de la spec —
  * `c1` (`log_x(x+cste)`, x→1±, dénominateur→0 signé par la direction), `c2` (`x·base^(c/x)`,
- * x→±∞, second facteur→constante non nulle), `c3` (`(base^x−base+sin(x))/ln(1+c·x²)`, x→0,
- * numérateur→valeur finie non nulle par construction, calqué directement sur l'exemple
- * `(2^x−2+sinx)/ln(1+4x²)` de la spec, base>1 imposé pour garantir un numérateur toujours négatif
- * et donc une limite globale toujours déterminée sans ambiguïté de signe). L'écran 1 ("évaluer
+ * x→±∞, second facteur→constante non nulle), `c3` (`(base^x+q+sin(x))/ln(1+c·x²)`, x→0,
+ * numérateur→1+q, valeur finie NON NULLE par construction (q≠−1), de signe variable pour que la
+ * limite (+∞ ou −∞) ne se devine pas). L'écran 1 ("évaluer
  * séparément chaque partie") est modélisé par une réponse à 2 parties, chacune une cible
  * catégorielle `CibleLimiteLog` — même primitive que l'écran 2 (conclusion), réutilisée pour les
  * DEUX écrans de cette famille.
  *
- * **Décision de conception — Famille D** : `f(x)=(cos(kx))^(c/x²)`, x→0, forme 1^∞. Vérifié par
- * construction : limite finale = `e^(−ck²/2)` (dérivation : ln(f)=(c/x²)·ln(cos(kx)),
- * ln(cos(kx))≈−(kx)²/2 pour x→0 [équivalent à ln(1+u)~u appliqué à u=cos(kx)−1≈−(kx)²/2], donc
- * ln(f)→(c/x²)·(−k²x²/2)=−ck²/2).
+ * **Familles D (forme 1^∞) et E (développements limités) retirées** (audit chapitre 3 de 6e,
+ * décision K4) : ces deux techniques ne sont enseignées dans aucun cours du site. Le générateur
+ * se limite aux trois familles couvertes par la section « Calculer des limites » du cours :
+ * croissances comparées (A), limite de référence ln(1+u)/u → 1 (B), limites déterminées
+ * déguisées (C).
  *
- * **Décision de conception — Famille E** : instance UNIQUE codée en dur (même patron que la famille
- * G de `limitesExponentielles.types.ts`, 6gen6) — `f(x)=(3^x·sin(x)−ln(1+x))/(x⁴+4x²)`, x→0,
- * limite=`(2ln3+1)/8` (spec explicite, propriété non généralisable à d'autres coefficients : les
- * développements à l'ordre 1 s'annulent EXACTEMENT, il faut pousser à l'ordre 2 — voir
- * `generateurs6e/limitesLogarithmiques/familles/E.ts` pour la dérivation complète). Tirée avec un
- * poids RÉDUIT par rapport aux familles A-D (voir `generateurs6e/limitesLogarithmiques/index.ts`).
+ * **Valeur exacte affichée** : toute cible `valeur` porte sa forme LaTeX EXACTE (`latex`, ex.
+ * `\frac{\ln 5}{2}`), construite par le générateur — jamais un flottant brut affiché à l'élève.
  */
 
-export type FamilleLimiteLogarithmique = "A" | "B" | "C" | "D" | "E";
+export type FamilleLimiteLogarithmique = "A" | "B" | "C";
 
 /** Cible catégorielle ou valeur exacte — voir la note de conception ci-dessus. */
-export type CibleLimiteLog = { type: "plus_infini" } | { type: "moins_infini" } | { type: "zero" } | { type: "valeur"; valeur: number };
+export type CibleLimiteLog = { type: "plus_infini" } | { type: "moins_infini" } | { type: "zero" } | { type: "valeur"; valeur: number; latex: string };
 
 export type DirectionX = "plus_infini" | "moins_infini";
 
@@ -69,8 +63,8 @@ export type CategorieCroissance = "log" | "polynome" | "exponentielle";
 
 // ============================================================================
 // Famille A — Croissances comparées (2 écrans : dominance, conclure). 5 sous-types
-// STRUCTURELLEMENT disjoints (union sur `sousType`), toujours x→+∞ SAUF le sous-type 2 (x→±∞, seul
-// sous-type dont la spec mentionne explicitement les deux directions).
+// STRUCTURELLEMENT disjoints (union sur `sousType`), toujours x→+∞ (vers −∞, baseˣ→0 n'est pas
+// une forme indéterminée : la dominance n'y aurait aucun sens).
 // ============================================================================
 
 /** Sous-type 1 — f(x) = k·ln(x) / (a·x^d + b), x→+∞. Toujours → 0 (log≪polynôme). */
@@ -86,28 +80,30 @@ export interface ExerciceLimiteLogA1 {
   limiteGlobale: CibleLimiteLog;
 }
 
-/** Sous-type 2 — f(x) = base^x / (q·x^d), base>1, q>0 (simplification assumée, voir A.ts),
- * x→±∞ (direction tirée). */
+/** Sous-type 2 — f(x) = base^x / (q·x^d) (`expSurPoly`, → +∞) ou (q·x^d) / base^x
+ * (`polySurExp`, → 0), base>1, q>0, x→+∞. */
 export interface ExerciceLimiteLogA2 {
   famille: "A";
   sousType: "sous2";
   base: number;
   q: number;
   d: 1 | 2 | 3;
-  direction: DirectionX;
+  orientation: "expSurPoly" | "polySurExp";
   dominanceNumerateur: CategorieCroissance;
   dominanceDenominateur: CategorieCroissance;
   limiteGlobale: CibleLimiteLog;
 }
 
-/** Sous-type 3 — f(x) = (p1·x^d1·ln(x)) / (p2·x^d2·log_base(x)), x→+∞. */
+/** Sous-type 3 — f(x) = (p1·ln(x) + c1) / (p2·log_base(x) + c2), x→+∞. Le logarithme domine
+ * la constante des deux côtés (forme ∞/∞) ; après réécriture log_base(x) = ln(x)/ln(base), la
+ * limite vaut p1·ln(base)/p2. */
 export interface ExerciceLimiteLogA3 {
   famille: "A";
   sousType: "sous3";
   p1: number;
-  d1: 1 | 2 | 3;
+  c1: number;
   p2: number;
-  d2: 1 | 2 | 3;
+  c2: number;
   base: number;
   dominanceNumerateur: CategorieCroissance;
   dominanceDenominateur: CategorieCroissance;
@@ -164,6 +160,8 @@ export interface ExerciceLimiteLogB1 {
   m: number;
   n: number;
   limiteFinale: number;
+  /** Forme exacte de `limiteFinale` (fraction irréductible). */
+  limiteLatex: string;
 }
 
 /** "Produit" — f(x) = (x−x0)·log_{x/x0}(k), x→x0. Forme 0×∞. Limite = x0·ln(k). */
@@ -173,6 +171,8 @@ export interface ExerciceLimiteLogB2 {
   k: number;
   x0: 1 | 2;
   limiteFinale: number;
+  /** Forme exacte de `limiteFinale` (ex. `2\ln(3)`). */
+  limiteLatex: string;
 }
 
 export type ExerciceLimiteLogB = ExerciceLimiteLogB1 | ExerciceLimiteLogB2;
@@ -206,12 +206,13 @@ export interface ExerciceLimiteLogC2 {
   limiteFinale: CibleLimiteLog;
 }
 
-/** c3 — f(x) = (base^x−base+sin(x)) / ln(1+coefC·x²), base>1, x→0. Numérateur→1−base≠0 (piège
- * central : ressemble à 0/0 mais ne l'est pas). */
+/** c3 — f(x) = (base^x + q + sin(x)) / ln(1+coefC·x²), base>1, x→0. Numérateur→1+q≠0 (piège
+ * central : ressemble à 0/0 mais ne l'est pas) ; le signe de 1+q fixe celui de l'infini. */
 export interface ExerciceLimiteLogC3 {
   famille: "C";
   sousType: "c3";
   base: number;
+  q: number;
   coefC: number;
   partieNumerateur: CibleLimiteLog;
   partieDenominateur: CibleLimiteLog;
@@ -220,31 +221,6 @@ export interface ExerciceLimiteLogC3 {
 
 export type ExerciceLimiteLogC = ExerciceLimiteLogC1 | ExerciceLimiteLogC2 | ExerciceLimiteLogC3;
 
-// ============================================================================
-// Famille D — Forme 1^∞, technique f^g=e^(g·ln f) (3 écrans : exposant, limite de l'exposant,
-// conclure). f(x) = (cos(kx))^(c/x²), x→0.
-// ============================================================================
-
-export interface ExerciceLimiteLogD {
-  famille: "D";
-  k: 1 | 2 | 3;
-  c: 1 | 2 | 3 | 4;
-  /** = −c·k²/2 (vérifié par construction). */
-  limiteExposant: number;
-  /** = e^limiteExposant. */
-  limiteFinale: number;
-}
-
-// ============================================================================
-// Famille E — Cas avancé, instance UNIQUE codée en dur (3 écrans : développer, simplifier,
-// conclure). f(x) = (3^x·sin(x)−ln(1+x)) / (x⁴+4x²), x→0. Limite = (2ln3+1)/8.
-// ============================================================================
-
-export interface ExerciceLimiteLogE {
-  famille: "E";
-  limiteFinale: number;
-}
-
-export type ExerciceLimiteLogarithmique = ExerciceLimiteLogA | ExerciceLimiteLogB | ExerciceLimiteLogC | ExerciceLimiteLogD | ExerciceLimiteLogE;
+export type ExerciceLimiteLogarithmique = ExerciceLimiteLogA | ExerciceLimiteLogB | ExerciceLimiteLogC;
 
 export type GenerateurExerciceLimiteLogarithmique = () => ExerciceLimiteLogarithmique;

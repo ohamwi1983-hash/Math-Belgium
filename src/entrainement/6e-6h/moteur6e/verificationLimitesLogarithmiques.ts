@@ -1,13 +1,6 @@
-import type {
-  CategorieCroissance,
-  CibleLimiteLog,
-  ExerciceLimiteLogA,
-  ExerciceLimiteLogB,
-  ExerciceLimiteLogC,
-  ExerciceLimiteLogD,
-  ExerciceLimiteLogE,
-} from "../core6e/limitesLogarithmiques.types";
-import { diagnostiquerValeur, evaluerExpressionExponentielle } from "./equivalenceExponentielle";
+import type { CategorieCroissance, CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../core6e/limitesLogarithmiques.types";
+import type { StatutVerification } from "../moteur/statutVerification";
+import { evaluerExpressionExponentielle } from "./equivalenceExponentielle";
 
 /**
  * Couche B (6e) — vérification pour `6gen17`. N'importe jamais rien de `src/generateurs6e/` — voir
@@ -23,24 +16,41 @@ import { diagnostiquerValeur, evaluerExpressionExponentielle } from "./equivalen
  */
 export type ReponseLimiteLog = { type: "plus_infini" } | { type: "moins_infini" } | { type: "zero" } | { type: "valeur"; texte: string };
 
-const TOLERANCE = 0.01;
+/**
+ * **Tolérance RELATIVE** (audit chapitre 3 de 6e, point 29) — l'ancienne tolérance absolue de 0,01
+ * acceptait « 0 » pour une petite valeur. Écart admis : max(0,005 ; 0,2 % de la cible), assez pour
+ * une valeur décimale arrondie au centième (ex. « 0,46 » pour ln(5)/... ≈ 0,4621), jamais pour une
+ * valeur voisine fausse.
+ */
+export function toleranceValeur(cible: number): number {
+  return Math.max(0.005, 0.002 * Math.abs(cible));
+}
+
+/** Valeur numérique fermée (aucune variable) — `parse_error` si illisible, comparaison à
+ * `toleranceValeur` sinon. */
+export function diagnostiquerValeurLimite(texte: string, cible: number): StatutVerification {
+  let soumis: number;
+  try {
+    soumis = evaluerExpressionExponentielle(texte, {});
+  } catch {
+    return "parse_error";
+  }
+  if (!Number.isFinite(soumis)) return "not_equivalent";
+  return Math.abs(soumis - cible) <= toleranceValeur(cible) ? "correct" : "not_equivalent";
+}
 
 export function verifierReponseLimiteLog(cible: CibleLimiteLog, reponse: ReponseLimiteLog): boolean {
   if (cible.type === "valeur") {
-    return reponse.type === "valeur" && diagnostiquerValeur(reponse.texte, cible.valeur, TOLERANCE) === "correct";
+    return reponse.type === "valeur" && diagnostiquerValeurLimite(reponse.texte, cible.valeur) === "correct";
   }
   return reponse.type === cible.type;
-}
-
-function memeValeur(texte: string, cible: number): boolean {
-  return diagnostiquerValeur(texte, cible, TOLERANCE) === "correct";
 }
 
 /** Compare une expression (fonction de `variable`) à une référence fermée en échantillonnant
  * plusieurs points — réplique locale de `diagnostiquerEquivalenceFonction` mais retourne un simple
  * booléen (cette vérification-ci n'expose qu'un booléen à `etapeTentatives.ts`, comme tous les
  * autres écrans de ce moteur), même patron que `verificationLimitesExponentielles.ts` (6gen6). */
-function equivalenteAReference(texte: string, reference: (v: number) => number, points: number[], variable = "x"): boolean {
+function diagnostiquerEquivalenteAReference(texte: string, reference: (v: number) => number, points: number[], variable = "x"): StatutVerification {
   let comparables = 0;
   for (const v of points) {
     const attendu = reference(v);
@@ -49,21 +59,13 @@ function equivalenteAReference(texte: string, reference: (v: number) => number, 
     try {
       soumis = evaluerExpressionExponentielle(texte, { [variable]: v });
     } catch {
-      return false;
+      return "parse_error";
     }
-    if (!Number.isFinite(soumis)) return false;
+    if (!Number.isFinite(soumis)) return "not_equivalent";
     comparables++;
-    if (Math.abs(soumis - attendu) > TOLERANCE) return false;
+    if (Math.abs(soumis - attendu) > 1e-3 * Math.max(1, Math.abs(attendu))) return "not_equivalent";
   }
-  return comparables >= Math.min(3, points.length);
-}
-
-function normaliser(texte: string): string {
-  return texte.replace(/\s+/g, "").toLowerCase();
-}
-
-function texteEstRecopieLitterale(texteSoumis: string, texteSource: string): boolean {
-  return normaliser(texteSoumis) === normaliser(texteSource);
+  return comparables >= Math.min(3, points.length) ? "correct" : "parse_error";
 }
 
 // ============================================================================
@@ -101,12 +103,20 @@ function referenceBReformuler(exercice: ExerciceLimiteLogB): (u: number) => numb
   return (u: number) => (x0 * u * Math.log(k)) / Math.log(1 + u);
 }
 
+export function diagnostiquerBReformuler(exercice: ExerciceLimiteLogB, texte: string): StatutVerification {
+  return diagnostiquerEquivalenteAReference(texte, referenceBReformuler(exercice), POINTS_U, "u");
+}
+
 export function verifierBReformuler(exercice: ExerciceLimiteLogB, texte: string): boolean {
-  return equivalenteAReference(texte, referenceBReformuler(exercice), POINTS_U, "u");
+  return diagnostiquerBReformuler(exercice, texte) === "correct";
+}
+
+export function diagnostiquerBConclure(exercice: ExerciceLimiteLogB, texte: string): StatutVerification {
+  return diagnostiquerValeurLimite(texte, exercice.limiteFinale);
 }
 
 export function verifierBConclure(exercice: ExerciceLimiteLogB, texte: string): boolean {
-  return memeValeur(texte, exercice.limiteFinale);
+  return diagnostiquerBConclure(exercice, texte) === "correct";
 }
 
 // ============================================================================
@@ -131,63 +141,4 @@ export function verifierCDiagnostic(exercice: ExerciceLimiteLogC, reponse: Repon
 
 export function verifierCConclure(exercice: ExerciceLimiteLogC, reponse: ReponseLimiteLog): boolean {
   return verifierReponseLimiteLog(exercice.limiteFinale, reponse);
-}
-
-// ============================================================================
-// Famille D — 3 écrans (exposant, limite de l'exposant, conclure).
-// ============================================================================
-
-function referenceDExposant(exercice: ExerciceLimiteLogD): (x: number) => number {
-  const { k, c } = exercice;
-  return (x: number) => (c / (x * x)) * Math.log(Math.cos(k * x));
-}
-
-function texteSourceD(exercice: ExerciceLimiteLogD): string {
-  const { k, c } = exercice;
-  return `cos(${k}*x)^(${c}/x^2)`;
-}
-
-const POINTS_D = [-0.2, -0.15, -0.1, -0.05, 0.05, 0.1, 0.15, 0.2];
-
-export function verifierDExposant(exercice: ExerciceLimiteLogD, texte: string): boolean {
-  if (texteEstRecopieLitterale(texte, texteSourceD(exercice))) return false;
-  return equivalenteAReference(texte, referenceDExposant(exercice), POINTS_D);
-}
-
-export function verifierDLimiteExposant(exercice: ExerciceLimiteLogD, texte: string): boolean {
-  return memeValeur(texte, exercice.limiteExposant);
-}
-
-export function verifierDConclure(exercice: ExerciceLimiteLogD, texte: string): boolean {
-  return memeValeur(texte, exercice.limiteFinale);
-}
-
-// ============================================================================
-// Famille E — 3 écrans (développer, simplifier, conclure), instance unique. Le numérateur
-// développé à l'ordre 2 (x²·(ln3+1/2)) et le numérateur RÉEL (3^x·sin(x)−ln(1+x)) ne coïncident
-// QU'AU VOISINAGE DE 0 — échantillonner à des points GÉNÉRIQUES (pas nécessairement proches de 0)
-// rejette donc NATURELLEMENT une recopie de l'expression originale, aucune garde anti-recopie
-// dédiée n'est nécessaire ici (contrairement aux autres familles de ce fichier).
-// ============================================================================
-
-const POINTS_GENERIQUES = [-2.7, -1.9, -1.1, -0.6, 0.6, 1.1, 1.9, 2.7];
-
-function referenceENumerateurOrdre2(x: number): number {
-  return x * x * (Math.log(3) + 0.5);
-}
-
-export function verifierEDevelopper(_exercice: ExerciceLimiteLogE, texte: string): boolean {
-  return equivalenteAReference(texte, referenceENumerateurOrdre2, POINTS_GENERIQUES);
-}
-
-/** Ratio SIMPLIFIÉ — x⁴+4x²~4x² au dénominateur, x² se simplifie EXACTEMENT avec le numérateur
- * développé à l'écran précédent : le résultat est une CONSTANTE (plus aucune dépendance en x). */
-const CIBLE_E_SIMPLIFIEE = (Math.log(3) + 0.5) / 4;
-
-export function verifierESimplifier(_exercice: ExerciceLimiteLogE, texte: string): boolean {
-  return memeValeur(texte, CIBLE_E_SIMPLIFIEE);
-}
-
-export function verifierEConclure(exercice: ExerciceLimiteLogE, texte: string): boolean {
-  return memeValeur(texte, exercice.limiteFinale);
 }

@@ -21,18 +21,22 @@ import {
   verifierBReformuler,
   verifierCConclure,
   verifierCDiagnostic,
-  verifierDConclure,
-  verifierDExposant,
-  verifierDLimiteExposant,
-  verifierEConclure,
-  verifierEDevelopper,
-  verifierESimplifier,
 } from "./verificationLimitesLogarithmiques";
 
 const POINTS_DE_BASE = 100;
 
 /** 2 niveaux d'aide sur tous les écrans (spec explicite pour chaque famille). */
 export const NIVEAU_AIDE_MAX = 2;
+
+/** Une seule tentative sur les écrans à choix fermé (dominance, conclusion catégorielle,
+ * diagnostic) — sinon ils se gagnent par élimination (audit chapitre 3 de 6e, point 5). Les écrans à
+ * expression libre (famille B) gardent `reglages.tentativesMax`. */
+export const TENTATIVES_CHOIX_FERME = 1;
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseLimiteLogarithmique> = new Set(["aDominance", "aConclure", "cDiagnostic", "cConclure"]);
+
+export function tentativesMaxPhase(etat: Pick<EtatSessionLimiteLogarithmique, "phase" | "reglages">): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
+}
 
 function etatInitial(
   exercice: ExerciceLimiteLogarithmique,
@@ -45,7 +49,7 @@ export function demarrerSessionLimiteLogarithmique(reglages: ReglagesSession6e, 
 }
 
 function reglagesEtape(etat: EtatSessionLimiteLogarithmique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionLimiteLogarithmique): EtatSessionLimiteLogarithmique {
@@ -75,10 +79,6 @@ function construireResultat(
       return { famille: "B", exercice, scoreReformuler: scores.bReformuler as number, scoreConclure: scores.bConclure as number, details };
     case "C":
       return { famille: "C", exercice, scoreDiagnostic: scores.cDiagnostic as number, scoreConclure: scores.cConclure as number, details };
-    case "D":
-      return { famille: "D", exercice, scoreExposant: scores.dExposant as number, scoreLimiteExposant: scores.dLimiteExposant as number, scoreConclure: scores.dConclure as number, details };
-    case "E":
-      return { famille: "E", exercice, scoreDevelopper: scores.eDevelopper as number, scoreSimplifier: scores.eSimplifier as number, scoreConclure: scores.eConclure as number, details };
   }
 }
 
@@ -146,36 +146,4 @@ export function soumettreReponseCDiagnostic(etat: EtatSessionLimiteLogarithmique
 
 export function soumettreReponseCConclure(etat: EtatSessionLimiteLogarithmique, reponse: ReponseLimiteLog): EtatSessionLimiteLogarithmique {
   return avancerPhase(etat, reponse, (e, r) => (e.famille === "C" ? verifierCConclure(e, r) : false), "cConclure");
-}
-
-// ============================================================================
-// Famille D
-// ============================================================================
-
-export function soumettreReponseDExposant(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "D" ? verifierDExposant(e, r) : false), "dExposant");
-}
-
-export function soumettreReponseDLimiteExposant(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "D" ? verifierDLimiteExposant(e, r) : false), "dLimiteExposant");
-}
-
-export function soumettreReponseDConclure(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "D" ? verifierDConclure(e, r) : false), "dConclure");
-}
-
-// ============================================================================
-// Famille E
-// ============================================================================
-
-export function soumettreReponseEDevelopper(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "E" ? verifierEDevelopper(e, r) : false), "eDevelopper");
-}
-
-export function soumettreReponseESimplifier(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "E" ? verifierESimplifier(e, r) : false), "eSimplifier");
-}
-
-export function soumettreReponseEConclure(etat: EtatSessionLimiteLogarithmique, texte: string): EtatSessionLimiteLogarithmique {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "E" ? verifierEConclure(e, r) : false), "eConclure");
 }

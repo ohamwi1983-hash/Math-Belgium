@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
+import type { StatutVerification } from "../moteur/statutVerification";
+import { formatMessageErreur } from "../ui/messageErreur";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
 import type { FragmentConsigne } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -29,6 +31,9 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  /** Statut à 3 valeurs de la dernière saisie refusée — distingue une erreur de syntaxe
+   * (`parse_error`) d'une réponse fausse dans le message affiché. */
+  diagnostiquer?: (texte: string) => StatutVerification;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -36,14 +41,18 @@ interface Props {
 }
 
 /** Écran GÉNÉRIQUE à un seul champ texte libre (`6gen17`) — réutilisé par tous les écrans à
- * réponse en expression/valeur libre (B×2, D×3, E×3). `App6gen17.tsx` doit le rendre avec
- * `key={phase}`. Même patron que `EtapeChampLimiteExpo.tsx` (6gen6). */
-export function EtapeChampLimiteLog({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * réponse en expression/valeur libre (famille B). `App6gen17.tsx` doit le rendre avec une `key`
+ * qui change à chaque exercice et à chaque écran. Même patron que `EtapeChampLimiteExpo.tsx` (6gen6). */
+export function EtapeChampLimiteLog({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Dernière saisie REFUSÉE — le champ n'est rouge que tant qu'il la contient encore. */
+  const [soumis, setSoumis] = useState<string | null>(null);
+  const montrerErreurs = (tentativesUtilisees > 0 || Boolean(validation?.revele)) && soumis !== null;
+  const statut = montrerErreurs && diagnostiquer ? diagnostiquer(soumis as string) : null;
 
   function valider() {
     if (texte.trim() === "") return;
+    setSoumis(texte);
     onValider(texte);
   }
 
@@ -71,7 +80,7 @@ export function EtapeChampLimiteLog({ consigneEcran, enonceLatex, etatActuel, pl
       </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && texte === soumis ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
@@ -93,7 +102,7 @@ export function EtapeChampLimiteLog({ consigneEcran, enonceLatex, etatActuel, pl
         </button>
         {montrerErreurs && (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
           </p>
         )}
         </>

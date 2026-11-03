@@ -1,4 +1,4 @@
-import type { CibleLimiteLog, DirectionX, ExerciceLimiteLogA, ExerciceLimiteLogA1, ExerciceLimiteLogA2, ExerciceLimiteLogA3, ExerciceLimiteLogA4, ExerciceLimiteLogA5 } from "../../../core6e/limitesLogarithmiques.types";
+import type { CibleLimiteLog, ExerciceLimiteLogA, ExerciceLimiteLogA1, ExerciceLimiteLogA2, ExerciceLimiteLogA3, ExerciceLimiteLogA4, ExerciceLimiteLogA5 } from "../../../core6e/limitesLogarithmiques.types";
 import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../aleatoire";
 
 /**
@@ -34,37 +34,60 @@ export function construireA1(): ExerciceLimiteLogA1 {
 }
 
 // ============================================================================
-// Sous-type 2 — f(x) = base^x / (q·x^d), base>1, q>0, x→±∞ (direction tirée).
+// Sous-type 2 — x→+∞, base>1, q>0 : soit f(x) = base^x / (q·x^d) (→ +∞, l'exponentielle du
+// numérateur domine), soit f(x) = (q·x^d) / base^x (→ 0, l'exponentielle du dénominateur domine).
+// Jamais x→−∞ : base^x y tend vers 0, il n'y a plus de forme indéterminée à trancher par la
+// dominance (audit chapitre 3 de 6e, point 31).
 // ============================================================================
 
 export function construireA2(): ExerciceLimiteLogA2 {
   const base = tirerParmi(BASES_SUP);
   const q = tirerEntier(1, 4);
   const d = tirerParmi(DEGRES);
-  const direction: DirectionX = Math.random() < 0.5 ? "plus_infini" : "moins_infini";
-  const limiteGlobale: CibleLimiteLog = direction === "plus_infini" ? { type: "plus_infini" } : { type: "zero" };
-  return { famille: "A", sousType: "sous2", base, q, d, direction, dominanceNumerateur: "exponentielle", dominanceDenominateur: "polynome", limiteGlobale };
+  const orientation = Math.random() < 0.5 ? "expSurPoly" : "polySurExp";
+  if (orientation === "expSurPoly") {
+    return { famille: "A", sousType: "sous2", base, q, d, orientation, dominanceNumerateur: "exponentielle", dominanceDenominateur: "polynome", limiteGlobale: { type: "plus_infini" } };
+  }
+  return { famille: "A", sousType: "sous2", base, q, d, orientation, dominanceNumerateur: "polynome", dominanceDenominateur: "exponentielle", limiteGlobale: { type: "zero" } };
 }
 
 // ============================================================================
-// Sous-type 3 — f(x) = (p1·x^d1·ln(x)) / (p2·x^d2·log_base(x)), x→+∞. Après réécriture
-// log_base(x)=ln(x)/ln(base), le ln(x) se simplifie exactement : f(x) = (p1·ln(base)/p2)·x^(d1-d2).
+// Sous-type 3 — f(x) = (p1·ln(x) + c1) / (p2·log_base(x) + c2), x→+∞. Le logarithme domine la
+// constante des deux côtés ; après réécriture log_base(x) = ln(x)/ln(base) et division par ln(x),
+// f(x) → p1/(p2/ln(base)) = p1·ln(base)/p2.
 // ============================================================================
+
+function pgcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) [x, y] = [y, x % y];
+  return x || 1;
+}
+
+/** Forme exacte de p·ln(base)/q (fraction irréductible, signe devant) — ex. `-\dfrac{3\ln(2)}{2}`. */
+export function formatMultipleLnLatex(p: number, q: number, base: number): string {
+  const g = pgcd(p, q);
+  let num = p / g;
+  let den = q / g;
+  if (den < 0) {
+    num = -num;
+    den = -den;
+  }
+  const signe = num < 0 ? "-" : "";
+  const absNum = Math.abs(num);
+  const corps = `${absNum === 1 ? "" : absNum}\\ln(${base})`;
+  return den === 1 ? `${signe}${corps}` : `${signe}\\dfrac{${corps}}{${den}}`;
+}
 
 export function construireA3(): ExerciceLimiteLogA3 {
   const p1 = tirerEntierNonNul(-3, 3);
   const p2 = tirerEntierNonNul(-3, 3);
-  const d1 = tirerParmi(DEGRES);
-  const d2 = tirerParmi(DEGRES);
+  const c1 = tirerEntier(-4, 4);
+  const c2 = tirerEntier(-4, 4);
   const base = tirerParmi(BASES_SUP);
-
-  const facteur = (p1 * Math.log(base)) / p2;
-  let limiteGlobale: CibleLimiteLog;
-  if (d1 > d2) limiteGlobale = facteur > 0 ? { type: "plus_infini" } : { type: "moins_infini" };
-  else if (d1 === d2) limiteGlobale = { type: "valeur", valeur: facteur };
-  else limiteGlobale = { type: "zero" };
-
-  return { famille: "A", sousType: "sous3", p1, d1, p2, d2, base, dominanceNumerateur: "log", dominanceDenominateur: "log", limiteGlobale };
+  const valeur = (p1 * Math.log(base)) / p2;
+  const limiteGlobale: CibleLimiteLog = { type: "valeur", valeur, latex: formatMultipleLnLatex(p1, p2, base) };
+  return { famille: "A", sousType: "sous3", p1, c1, p2, c2, base, dominanceNumerateur: "log", dominanceDenominateur: "log", limiteGlobale };
 }
 
 // ============================================================================
@@ -77,7 +100,7 @@ export function construireA4(): ExerciceLimiteLogA4 {
   const d = tirerParmi(DEGRES);
   const c = tirerEntier(-4, 4);
   const [base1, base2] = tirerDeuxBasesDistinctes();
-  return { famille: "A", sousType: "sous4", a, d, c, base1, base2, dominanceNumerateur: "polynome", dominanceDenominateur: "polynome", limiteGlobale: { type: "valeur", valeur: 1 } };
+  return { famille: "A", sousType: "sous4", a, d, c, base1, base2, dominanceNumerateur: "polynome", dominanceDenominateur: "polynome", limiteGlobale: { type: "valeur", valeur: 1, latex: "1" } };
 }
 
 function tirerDeuxBasesDistinctes(): [number, number] {

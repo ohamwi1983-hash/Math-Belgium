@@ -1,107 +1,51 @@
 import type { ExerciceDeterminerParametresLogarithme } from "../../core6e/determinerParametresLogarithme.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import type { PhaseDeterminerParametresLogarithme } from "../../moteur6e/typesDeterminerParametresLogarithme";
-import {
-  blocDonneesA,
-  blocDonneesB,
-  blocDonneesC,
-  consigneEcranA,
-  consigneEcranB,
-  consigneEcranC,
-  consigneGeneraleA,
-  consigneGeneraleB,
-  consigneGeneraleC,
-  formatReponseAttenduePhaseLatex,
-  LIBELLE_PHASE,
-  PHASES_PAR_FAMILLE,
-} from "../../ui6e/formatDeterminerParametresLogarithme";
+import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
+import { construireSvgParametresLogarithme } from "./svgParametresLogarithme";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDeterminerParametresLogarithme>` pour `6gen18`
- * ("Déterminer des paramètres depuis des conditions graphiques") — feuille d'évaluation.
- *
- * Malgré son nom, ce générateur n'affiche AUCUN graphique côté écran (`App6gen18.tsx` ne monte
- * jamais de composant SVG/Mafs) : les "conditions" sont des données textuelles/LaTeX (asymptote
- * verticale, ordonnée à l'origine, point de passage, racines, extremum) posées via
- * `EtapeChampDeterminerParametres`/`EtapeDeuxChampsDeterminerParametres` — jamais lues sur un
- * dessin. Donc pas d'`enteteHtml` ici, contrairement à `transformationsGraphiques/exportEvaluation.ts`.
- *
- * Même patron que `exponentiellesProblemes/exportEvaluation.ts` (7 familles, 2 à 4 écrans guidés
- * par famille) : 3 familles STRUCTURELLEMENT DISJOINTES (A/B/C), chacune 2 (A) ou 3 (B, C) écrans
- * (`PHASES_PAR_FAMILLE`), condensées en autant de questions écrites — une question par écran
- * réellement traversé par la famille tirée. Le corrigé de chaque question lit la réponse déjà
- * établie via `formatReponseAttenduePhaseLatex` (couche `ui6e/formatDeterminerParametresLogarithme.ts`,
- * la MÊME fonction qui alimente déjà `ResultatPanelDeterminerParametresLogarithme.tsx`), jamais
- * recalculée indépendamment.
- *
- * `regroupable` volontairement ABSENT : chaque instance produit 2 ou 3 questions (jamais une
- * seule), et la consigne de chaque écran dépend de la famille tirée (pas une consigne générale
- * unique indépendante de l'instance) — les deux critères du mécanisme de regroupement (voir
- * `AdaptateurFeuilleExercices.regroupable`) sont donc déjà exclus, indépendamment du fait qu'il n'y
- * ait pas de graphique.
+ * (f(x) = a + b·ln(x) depuis un graphique) — feuille d'évaluation. Le graphique est joint en SVG
+ * (`enteteHtml`, pipeline HTML) ; comme les pipelines Word/PDF ne reçoivent pas la figure,
+ * l'en-tête décrit aussi les informations lues (coordonnées des points / de la tangente), pour
+ * que la feuille reste faisable dans tous les formats. Trois questions, une par écran (a, équation
+ * en b, f(x)) ; le corrigé reprend les mêmes formes que la réponse attendue à l'écran.
  */
 
-function blocDonnees(exercice: ExerciceDeterminerParametresLogarithme): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-  }
-}
-
-function consigneGenerale(exercice: ExerciceDeterminerParametresLogarithme) {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC(exercice);
-  }
-}
-
-function consigneEcran(exercice: ExerciceDeterminerParametresLogarithme, phase: PhaseDeterminerParametresLogarithme) {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-  }
-}
-
-function construireEnonceDeterminerParametresLogarithme(exercice: ExerciceDeterminerParametresLogarithme): SectionExercice {
-  const phases = PHASES_PAR_FAMILLE[exercice.famille];
-  const donnees = blocDonnees(exercice);
+function construireEnonce(exercice: ExerciceDeterminerParametresLogarithme): SectionExercice {
   return {
-    enteteFragments: [...consigneGenerale(exercice), ...(donnees.length > 0 ? [latex(donnees.join(",\\quad "))] : [])],
-    questions: phases.map((phase) => ({
-      consigne: [texte(`${LIBELLE_PHASE[phase]} — `), ...consigneEcran(exercice, phase)],
-      reponse: { type: "lignes" as const, nombre: 3 },
-    })),
+    enteteFragments: [...CONSIGNE_GENERALE, texte(" Sur le graphique : "), ...descriptionGraphique(exercice, true)],
+    enteteHtml: construireSvgParametresLogarithme(exercice),
+    questions: [
+      { consigne: consigneEcran("lireA", exercice), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran("equationB", exercice), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran("fonction", exercice), reponse: { type: "lignes", nombre: 2 } },
+    ],
   };
 }
 
-function construireCorrectionDeterminerParametresLogarithme(exercice: ExerciceDeterminerParametresLogarithme): BlocCorrection[] {
-  const phases = PHASES_PAR_FAMILLE[exercice.famille];
-  return phases.map((phase) => ({
-    type: "paragraphe",
-    fragments: [texte(`${LIBELLE_PHASE[phase]} : `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\quad "))],
-  }));
+function construireCorrection(exercice: ExerciceDeterminerParametresLogarithme): BlocCorrection[] {
+  const raison =
+    exercice.variante === "pente"
+      ? "la pente de la tangente en x = 1 est f′(1), et f′(x) = b/x : "
+      : exercice.variante === "pointE"
+        ? `le point ${exercice.lettrePoint2} est sur la courbe et ln(e) = 1 (piège : f(e) = a + b, pas a) : `
+        : `le point ${exercice.lettrePoint2} est sur la courbe et ln(e²) = 2 : `;
+  return [
+    { type: "paragraphe", fragments: [texte("a) Comme ln(1) = 0, "), latex(`f(1) = a + b\\cdot\\ln(1) = a`), texte(` : on lit f(1) = ${exercice.a}, donc a = ${exercice.a}.`)] },
+    { type: "paragraphe", fragments: [texte(`b) ${raison[0].toUpperCase()}${raison.slice(1)}`), latex(formatEquationBLatex(exercice)), texte(".")] },
+    { type: "paragraphe", fragments: [texte(`c) b = ${exercice.b}, donc `), latex(formatFonctionLatex(exercice)), texte(".")] },
+  ];
 }
 
 export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuilleExercices<ExerciceDeterminerParametresLogarithme> = {
-  titreDocument: "Déterminer des paramètres depuis des conditions — Évaluation",
+  titreDocument: "Paramètres depuis des conditions graphiques — Évaluation",
   nomFichierBase: "determiner-parametres-logarithme",
   genererInstance: genererExerciceDeterminerParametresLogarithme,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce: construireEnonceDeterminerParametresLogarithme,
-  construireCorrection: construireCorrectionDeterminerParametresLogarithme,
+  construireEnonce,
+  construireCorrection,
 };
