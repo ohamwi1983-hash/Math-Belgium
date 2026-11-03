@@ -1,5 +1,5 @@
 /**
- * Couche B (6e) — types pour `6gen19`. 4 familles STRUCTURELLEMENT DISJOINTES (1 à 3 écrans
+ * Couche B (6e) — types pour `6gen19`. 4 familles STRUCTURELLEMENT DISJOINTES (1 ou 2 écrans
  * chacune, FIXE par famille) — `phaseInitiale`/`phaseApres` dispatchent sur `exercice.famille`,
  * même principe que `typesDomaineDeriveeLogarithme.ts` (`6gen16`).
  */
@@ -7,14 +7,17 @@ import type { ExerciceHyperboliques } from "../core6e/hyperboliques.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseHyperboliques = "aParite" | "bIsoler" | "bValeurs" | "cDerivee" | "cDeriveeSeconde" | "cRelation" | "dReecriture" | "dLimites";
+/** Famille B : un seul écran "bValeurs" (la ou les valeurs EXACTES — l'ancien écran "isoler"
+ * symbolique faisait doublon). Famille C : f' puis f'' (l'ancien écran "relation" f''=k²·f était
+ * trivial une fois f'' confirmée). */
+export type PhaseHyperboliques = "aParite" | "bValeurs" | "cDerivee" | "cDeriveeSeconde" | "dReecriture" | "dLimites";
 
 export function phaseInitiale(exercice: ExerciceHyperboliques): PhaseHyperboliques {
   switch (exercice.famille) {
     case "A":
       return "aParite";
     case "B":
-      return "bIsoler";
+      return "bValeurs";
     case "C":
       return "cDerivee";
     case "D":
@@ -26,15 +29,11 @@ export function phaseApres(phase: PhaseHyperboliques): PhaseHyperboliques | "ter
   switch (phase) {
     case "aParite":
       return "termine";
-    case "bIsoler":
-      return "bValeurs";
     case "bValeurs":
       return "termine";
     case "cDerivee":
       return "cDeriveeSeconde";
     case "cDeriveeSeconde":
-      return "cRelation";
-    case "cRelation":
       return "termine";
     case "dReecriture":
       return "dLimites";
@@ -54,16 +53,16 @@ export interface DetailPhaseHyperboliques {
 
 export type ResultatExerciceHyperboliques =
   | { famille: "A"; exercice: ExerciceHyperboliques; scoreParite: number; details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>> }
-  | { famille: "B"; exercice: ExerciceHyperboliques; scoreIsoler: number; scoreValeurs: number; details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>> }
-  | {
-      famille: "C";
-      exercice: ExerciceHyperboliques;
-      scoreDerivee: number;
-      scoreDeriveeSeconde: number;
-      scoreRelation: number;
-      details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>>;
-    }
+  | { famille: "B"; exercice: ExerciceHyperboliques; scoreValeurs: number; details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>> }
+  | { famille: "C"; exercice: ExerciceHyperboliques; scoreDerivee: number; scoreDeriveeSeconde: number; details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>> }
   | { famille: "D"; exercice: ExerciceHyperboliques; scoreReecriture: number; scoreLimites: number; details: Partial<Record<PhaseHyperboliques, DetailPhaseHyperboliques>> };
+
+/** Nombre de tentatives PAR ÉCRAN : une seule sur les choix fermés (parité : 3 choix ; limites :
+ * 4 combinaisons) — sinon ils se gagnent par élimination ; les écrans à saisie libre gardent le
+ * réglage de session. */
+export function tentativesMaxPhase(phase: PhaseHyperboliques, tentativesSession: number): number {
+  return phase === "aParite" || phase === "dLimites" ? 1 : tentativesSession;
+}
 
 export interface EtatSessionHyperboliques {
   reglages: ReglagesSession6e;

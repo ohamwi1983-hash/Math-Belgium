@@ -13,7 +13,7 @@ export function tirerParmi<T>(candidats: readonly T[]): T {
 const COEFFICIENTS_NON_NULS = [-3, -2, -1, 1, 2, 3] as const;
 
 /** Coefficient entier dans {-3,...,-1,1,...,3} — jamais 0 (combinaison dégénérée sinon). Utilisé
- * par les familles B ("trouverCh"), C et D. */
+ * par la famille C. */
 export function tirerCoefficientNonNul(): number {
   return tirerParmi(COEFFICIENTS_NON_NULS);
 }

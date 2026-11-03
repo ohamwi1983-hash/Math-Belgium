@@ -8,10 +8,15 @@
  * moteur/contrat partagé entre générateurs, sauf les 2 fichiers explicitement partagés — voir
  * CLAUDE.md).
  *
- * **Toutes les familles suivent exactement 2 écrans** ("derivee" puis "selection") — contrairement
- * à `6gen8` (1 ou 2 écrans SELON la famille), la spec de `6gen20` est explicite : "Toutes les
- * familles suivent 2 écrans". `moteur6e/typesGraphiqueDeriveeLogarithme.ts` n'a donc PAS besoin
- * d'une fonction `phaseInitiale(exercice)` dépendant de la famille — toujours "derivee" d'abord.
+ * **Toutes les familles suivent exactement 2 écrans** : "selection" (le GRAPHIQUE de f est donné,
+ * l'élève choisit celui de f' en lisant les variations, les extremums et les pentes de f — la
+ * compétence annoncée par la carte du cours), PUIS "derivee" (calcul de f'(x), qui confirme le
+ * choix). L'ordre inverse (calcul d'abord, formule de f' affichée pendant le choix) faisait du
+ * choix graphique une simple évaluation de formule.
+ *
+ * **Constante `c`** : f(x) + c a la MÊME dérivée — décale le graphique de f verticalement sans
+ * rien changer à f'. Tirée seulement en famille B (f monotone) ; toujours 0 en A et C, où le
+ * décalage forçait l'axe y=0 dans le cadre et aplatissait l'extremum de f.
  *
  * `candidats`/`indexCorrect` (les 3 familles) : même mécanisme que `6gen8`/`6gen5` — 4 candidats
  * déjà MÉLANGÉS à la génération (`indexCorrect` pointe vers celui qui est mathématiquement
@@ -22,7 +27,7 @@
  */
 
 // ============================================================================
-// Famille A — f(x) = k·log_base(x)/x, base∈{2,3,5,7}∪{e}, k∈{-3,-2,-1,1,2,3}.
+// Famille A — f(x) = k·log_base(x)/x, base∈{2,3,5,7}∪{e}, k∈{-3,-2,-1,1,2,3} (c = 0).
 // f'(x) = k·[1−ln(x)]/(x²·ln(base)) (ou sans le ln(base) si base=e).
 //
 // **Propriété structurelle** : le zéro de f' est TOUJOURS en x=e, quels que soient k et base — la
@@ -54,21 +59,25 @@ export interface ExerciceGraphiqueDeriveeLogA {
   k: number;
   base: number;
   baseEstE: boolean;
+  c: number;
   candidats: CandidatDeriveeLogA[];
   indexCorrect: number;
 }
 
 // ============================================================================
-// Famille B — f(x) = k·e^x·ln(x), k∈{-3,-2,-1,1,2,3}. f'(x) = k·e^x·[ln(x)+1/x].
+// Famille B — f(x) = k·e^(ax)·ln(x) + c, k∈{-3,-2,-1,1,2,3}, a∈{1,2}, c∈{-1,0,1}.
+// f'(x) = k·e^(ax)·[a·ln(x)+1/x].
 //
-// **Propriété structurelle** : ln(x)+1/x ≥ 1 pour tout x>0 (minimum atteint en x=1, jamais nul,
-// jamais négatif) — le signe de f' est donc entièrement déterminé par le signe de k, JAMAIS nul.
+// **Propriété structurelle** : a·ln(x)+1/x > 0 pour tout x>0 quand a∈{1,2} (minimum en x=1/a,
+// valant a·(1−ln a) > 0) — le signe de f' est donc entièrement déterminé par le signe de k,
+// JAMAIS nul : f n'a aucun extremum.
 // ============================================================================
 
 export type TypeCandidatDeriveeLogB = "reel" | "signeInverse" | "traverseZero" | "borneMauvaise";
 
 export interface CandidatDeriveeLogB {
   k: number;
+  a: number;
   /** "reel" — la vraie dérivée (jamais nulle, même signe que k partout). "signeInverse" — dérivée
    * niée (confond le signe de k, spec distracteur 1). "traverseZero" — oublie le terme `e^x/x` de
    * la règle du produit (erreur plausible : dérive seulement le facteur `e^x`, oublie `v'=1/x`),
@@ -83,16 +92,18 @@ export interface CandidatDeriveeLogB {
 export interface ExerciceGraphiqueDeriveeLogB {
   famille: "B";
   k: number;
+  a: number;
+  c: number;
   candidats: CandidatDeriveeLogB[];
   indexCorrect: number;
 }
 
 // ============================================================================
-// Famille C — f(x) = k·x·ln(x), k∈{-3,-2,-1,1,2,3}. f'(x) = k·(ln(x)+1).
+// Famille C — f(x) = k·x·ln(x) + p·x, k∈{-3,-2,-1,1,2,3}, p∈{-1,0,1} (c = 0).
+// f'(x) = k·(ln(x)+1) + p = k·(ln(x)+s) avec s = 1 + p/k.
 //
-// **Propriété structurelle** : le zéro de f' est TOUJOURS en x=1/e, quel que soit k — et,
-// contrairement à la famille A, cette dérivée est ELLE-MÊME monotone (croissante si k>0,
-// décroissante si k<0).
+// **Propriété structurelle** : le zéro de f' (l'extremum de f) est en x = e^(−s) — x=1/e quand
+// p=0 — et cette dérivée est ELLE-MÊME monotone (croissante si k>0, décroissante si k<0).
 // ============================================================================
 
 export type TypeCandidatDeriveeLogC = "reel" | "signeInverse" | "zeroMalPlace" | "formeEnPic";
@@ -105,14 +116,16 @@ export interface CandidatDeriveeLogC {
    * littéralement la FORME de la famille A (`k·(1−ln(x))/x²`, un pic non monotone) plutôt que la
    * droite monotone attendue ici — confond avec la signature de la famille A (spec distracteur 3). */
   type: TypeCandidatDeriveeLogC;
-  /** Constante additive dans `(ln(x)+constanteAdditive)` — `1` pour "reel" (zéro exact en x=1/e) ;
-   * UNIQUEMENT ≠1 pour "zeroMalPlace" ; ignorée par "signeInverse"/"formeEnPic". */
+  /** Constante additive s dans `k·(ln(x)+s)` — `1+p/k` pour "reel"/"signeInverse" (zéro en
+   * x=e^(−s), l'extremum de f) ; décalée de ±1 pour "zeroMalPlace" ; ignorée par "formeEnPic". */
   constanteAdditive: number;
 }
 
 export interface ExerciceGraphiqueDeriveeLogC {
   famille: "C";
   k: number;
+  p: number;
+  c: number;
   candidats: CandidatDeriveeLogC[];
   indexCorrect: number;
 }

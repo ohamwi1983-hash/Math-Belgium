@@ -7,7 +7,7 @@ import { assurerAxesVisibles } from "../ui/mafsTransformation";
  * sur chaque écran. Chaque aide porteuse de formule utilise le motif `{texte, latex}` — jamais du
  * LaTeX brut mêlé au texte (convention établie ailleurs sur ce chantier, voir CLAUDE.md).
  */
-export const CONSIGNE_GENERALE = "Voici l'expression d'une fonction f.";
+export const CONSIGNE_GENERALE = "Voici l'expression et le graphique d'une fonction f.";
 
 export interface AideAvecLatex {
   texte: string;
@@ -25,16 +25,42 @@ function formatCoefLatex(k: number): string {
   return `${k}`;
 }
 
+/** « + c » / « − 1 » / rien si c = 0. */
+function formatConstante(c: number): string {
+  if (c === 0) return "";
+  return c > 0 ? ` + ${c}` : ` - ${-c}`;
+}
+
+/** e^{x} / e^{2x} — jamais « e^{1x} ». */
+function formatExpAx(a: number): string {
+  return a === 1 ? "e^{x}" : `e^{${a}x}`;
+}
+
 export function formatFonctionLatex(exercice: ExerciceGraphiqueDeriveeLogarithme): string {
   switch (exercice.famille) {
     case "A": {
       const logPart = exercice.baseEstE ? "\\ln(x)" : `\\log_{${exercice.base}}(x)`;
-      return `f(x) = \\dfrac{${formatCoefLatex(exercice.k)}${logPart}}{x}`;
+      return `f(x) = \\dfrac{${formatCoefLatex(exercice.k)}${logPart}}{x}${formatConstante(exercice.c)}`;
     }
     case "B":
-      return `f(x) = ${formatCoefLatex(exercice.k)}\\,e^{x}\\ln(x)`;
+      return `f(x) = ${formatCoefLatex(exercice.k)}\\,${formatExpAx(exercice.a)}\\ln(x)${formatConstante(exercice.c)}`;
+    case "C": {
+      const termeP = exercice.p === 0 ? "" : exercice.p > 0 ? ` + ${formatCoefLatex(exercice.p)}x` : ` - ${formatCoefLatex(-exercice.p)}x`;
+      return `f(x) = ${formatCoefLatex(exercice.k)}\\,x\\ln(x)${termeP}${formatConstante(exercice.c)}`;
+    }
+  }
+}
+
+/** Évaluation de f ELLE-MÊME (graphique donné à l'écran "selection"). */
+export function evaluerFonction(exercice: ExerciceGraphiqueDeriveeLogarithme, x: number): number | null {
+  if (x <= 0) return null;
+  switch (exercice.famille) {
+    case "A":
+      return (exercice.k * Math.log(x)) / (x * (exercice.baseEstE ? 1 : Math.log(exercice.base))) + exercice.c;
+    case "B":
+      return exercice.k * Math.exp(exercice.a * x) * Math.log(x) + exercice.c;
     case "C":
-      return `f(x) = ${formatCoefLatex(exercice.k)}\\,x\\ln(x)`;
+      return exercice.k * x * Math.log(x) + exercice.p * x + exercice.c;
   }
 }
 
@@ -49,10 +75,14 @@ export function formatDeriveeCorrecteLatex(exercice: ExerciceGraphiqueDeriveeLog
       const denominateur = exercice.baseEstE ? "x^{2}" : `x^{2}\\ln(${exercice.base})`;
       return `f'(x) = \\dfrac{${numerateur}}{${denominateur}}`;
     }
-    case "B":
-      return `f'(x) = ${formatCoefLatex(exercice.k)}\\,e^{x}\\left(\\ln(x)+\\dfrac{1}{x}\\right)`;
-    case "C":
-      return `f'(x) = ${formatCoefLatex(exercice.k)}\\left(\\ln(x)+1\\right)`;
+    case "B": {
+      const termeLn = exercice.a === 1 ? "\\ln(x)" : `${exercice.a}\\ln(x)`;
+      return `f'(x) = ${formatCoefLatex(exercice.k)}\\,${formatExpAx(exercice.a)}\\left(${termeLn}+\\dfrac{1}{x}\\right)`;
+    }
+    case "C": {
+      const constante = exercice.k + exercice.p;
+      return `f'(x) = ${formatCoefLatex(exercice.k)}\\ln(x)${formatConstante(constante)}`;
+    }
   }
 }
 
@@ -82,15 +112,16 @@ export function evaluerCandidatA(c: CandidatDeriveeLogA, x: number): number | nu
 
 export function evaluerCandidatB(c: CandidatDeriveeLogB, x: number): number | null {
   if (x <= 0) return null;
+  const e = Math.exp(c.a * x);
   switch (c.type) {
     case "reel":
-      return c.k * Math.exp(x) * (Math.log(x) + 1 / x);
+      return c.k * e * (c.a * Math.log(x) + 1 / x);
     case "signeInverse":
-      return -c.k * Math.exp(x) * (Math.log(x) + 1 / x);
+      return -c.k * e * (c.a * Math.log(x) + 1 / x);
     case "traverseZero":
-      return c.k * Math.exp(x) * Math.log(x);
+      return c.k * c.a * e * Math.log(x);
     case "borneMauvaise":
-      return c.k * (Math.log(x) + 1 / x);
+      return c.k * (c.a * Math.log(x) + 1 / x);
   }
 }
 
@@ -98,9 +129,9 @@ export function evaluerCandidatC(c: CandidatDeriveeLogC, x: number): number | nu
   if (x <= 0) return null;
   switch (c.type) {
     case "reel":
-      return c.k * (Math.log(x) + 1);
+      return c.k * (Math.log(x) + c.constanteAdditive);
     case "signeInverse":
-      return -c.k * (Math.log(x) + 1);
+      return -c.k * (Math.log(x) + c.constanteAdditive);
     case "zeroMalPlace":
       return c.k * (Math.log(x) + c.constanteAdditive);
     case "formeEnPic":
@@ -142,9 +173,30 @@ function fenetreX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number
       // ln(x)+1/x minimal en x=1 ; comportement aux 2 bornes (x→0+ ET x→+∞, tous deux vers +∞ en
       // magnitude, spec) visible sur une fenêtre resserrée (croissance/décroissance très rapide).
       return [0.08, 2.3];
-    case "C":
-      // Zéro toujours en x=1/e≈0.368 ; droite monotone, fenêtre symétrique autour de ce zéro.
-      return [0.05, 2.6];
+    case "C": {
+      // Fenêtre RELATIVE à l'extremum x0=e^(−s) ∈ [0,135 ; 1] : une fenêtre fixe [0,04 ; 2,6]
+      // rendait le creux de f invisible pour x0≈0,135. Les zéros x0/e et x0·e du distracteur
+      // "zeroMalPlace" restent dans [x0/5 ; 6·x0].
+      const x0 = Math.exp(-(1 + exercice.p / exercice.k));
+      return [Math.max(0.02, x0 / 5), 6 * x0];
+    }
+  }
+}
+
+/** Sous-intervalle X sur lequel l'ÉCHELLE Y est calculée (la courbe reste tracée sur toute la
+ * fenêtre `fenetreX`). Famille A : la divergence en 1/x² près de 0 écrasait tout le reste — le
+ * zéro de f' en x=e (et l'extremum de f) devenait invisible, deux candidats paraissaient
+ * identiques. L'échelle est donc prise sur [1 ; 7], la partie proche de 0 sort du cadre. */
+function fenetreEchelleX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number] {
+  switch (exercice.famille) {
+    case "A":
+      return [1, 7];
+    case "B":
+      return [0.3, 2.3];
+    case "C": {
+      const x0 = Math.exp(-(1 + exercice.p / exercice.k));
+      return [x0 / 3, 6 * x0];
+    }
   }
 }
 
@@ -159,7 +211,9 @@ function fenetreX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number
 const PLAFOND_STATS: Record<ExerciceGraphiqueDeriveeLogarithme["famille"], number> = {
   A: 20,
   B: 40,
-  C: 10,
+  // 6 (et non 10) : le pic du distracteur "formeEnPic" près de 0 écrasait l'échelle, rendant le
+  // décalage d'une unité du distracteur "zeroMalPlace" (k=±1) à peine visible.
+  C: 6,
 };
 
 /** Densité de grille cible, partagée avec `GrapheOptionDeriveeLogarithme.tsx` (`GrilleAdaptative`)
@@ -179,11 +233,12 @@ function finaliserViewBox(x: [number, number], y: [number, number]): ViewBoxGrap
  * (contrainte de la spec). */
 export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeLogarithme): ViewBoxGraphiqueDeriveeLogarithme {
   const [xMin, xMax] = fenetreX(exercice);
+  const [eMin, eMax] = fenetreEchelleX(exercice);
   const plafond = PLAFOND_STATS[exercice.famille];
   const valeurs: number[] = [];
   for (let index = 0; index < exercice.candidats.length; index++) {
     for (let i = 0; i <= 80; i++) {
-      const x = xMin + ((xMax - xMin) * i) / 80;
+      const x = eMin + ((eMax - eMin) * i) / 80;
       const y = evaluerCandidat(exercice, index, x);
       if (y === null || !Number.isFinite(y)) continue;
       if (Math.abs(y) > plafond) continue;
@@ -193,60 +248,75 @@ export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeLogar
   if (valeurs.length === 0) return finaliserViewBox([xMin, xMax], [-1, 1]);
   const yMinBrut = Math.min(...valeurs);
   const yMaxBrut = Math.max(...valeurs);
-  const marge = Math.max(0.4, (yMaxBrut - yMinBrut) * 0.15);
+  const marge = Math.max(0.05, (yMaxBrut - yMinBrut) * 0.15);
   return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
 }
 
-// ============================================================================
-// Bloc "état actuel" — écran "selection" uniquement (2e et dernier écran, CLAUDE.md : consigne
-// générale → bloc données → bloc "état actuel" → bloc de travail). Réutilise TEL QUEL
-// `formatDeriveeCorrecteLatex` — dérivé uniquement des paramètres bruts de l'exercice, jamais de
-// la saisie élève à l'écran "derivee". `null` sur l'écran "derivee" (1er écran, rien à rappeler).
-// Même convention que `etatActuel` de 6gen13/6gen16.
-// ============================================================================
+/** Plafond de magnitude Y pour le graphique de f lui-même (même mécanisme que `PLAFOND_STATS`). */
+const PLAFOND_FONCTION: Record<ExerciceGraphiqueDeriveeLogarithme["famille"], number> = {
+  A: 12,
+  B: 40,
+  C: 10,
+};
 
-export function etatActuelSelection(exercice: ExerciceGraphiqueDeriveeLogarithme): string[] {
-  return [formatDeriveeCorrecteLatex(exercice)];
+/** Fenêtre du graphique de f — MÊME étendue X que les 4 candidats (lecture verticale directe de
+ * l'abscisse d'un extremum), étendue Y propre à f. */
+export function calculerViewBoxFonction(exercice: ExerciceGraphiqueDeriveeLogarithme): ViewBoxGraphiqueDeriveeLogarithme {
+  const [xMin, xMax] = fenetreX(exercice);
+  const [eMin, eMax] = fenetreEchelleX(exercice);
+  const plafond = PLAFOND_FONCTION[exercice.famille];
+  const valeurs: number[] = [];
+  for (let i = 0; i <= 120; i++) {
+    const x = eMin + ((eMax - eMin) * i) / 120;
+    const y = evaluerFonction(exercice, x);
+    if (y === null || !Number.isFinite(y) || Math.abs(y) > plafond) continue;
+    valeurs.push(y);
+  }
+  if (valeurs.length === 0) return finaliserViewBox([xMin, xMax], [-1, 1]);
+  const yMinBrut = Math.min(...valeurs);
+  const yMaxBrut = Math.max(...valeurs);
+  const marge = Math.max(0.05, (yMaxBrut - yMinBrut) * 0.15);
+  return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
 }
 
 // ============================================================================
 // Consignes/aides — 2 niveaux par écran, spec explicite pour chaque famille.
 // ============================================================================
 
+function formatNombreFr(v: number, decimales = 2): string {
+  return Number(v.toFixed(decimales)).toString().replace(".", ",");
+}
+
 export function consigneEcranDerivee(): string {
-  return "Calcule f'(x).";
+  return "Calcule f'(x) — elle doit confirmer le graphique choisi à l'étape précédente.";
 }
 
 export function consigneEcranSelection(): string {
-  return "Sélectionne le graphique qui représente f'(x).";
+  return "En lisant le graphique de f (variations, extremums, pentes), sélectionne le graphique qui représente f'(x).";
 }
 
-export function placeholderDerivee(exercice: ExerciceGraphiqueDeriveeLogarithme): string {
-  switch (exercice.famille) {
-    case "A":
-      return exercice.baseEstE ? "ex : 2*(1-ln(x))/x^2" : `ex : 2*(1-ln(x))/(x^2*ln(${exercice.base}))`;
-    case "B":
-      return "ex : 2*e^x*(ln(x)+1/x)";
-    case "C":
-      return "ex : 2*(ln(x)+1)";
-  }
+/** Exemple de saisie SANS rapport avec les formes attendues (jamais une réponse, jamais un gabarit
+ * dont il suffirait de changer un coefficient). */
+export function placeholderDerivee(): string {
+  return "ex : 4*x*ln(x)-1/x";
 }
 
 export function aideDeriveeNiveau1(exercice: ExerciceGraphiqueDeriveeLogarithme): AideAvecLatex {
+  const rappelC = "La dérivée d'une constante est nulle.";
   switch (exercice.famille) {
     case "A":
       return {
-        texte: "Rappel de la règle du quotient, appliquée à ln(x)/x — pense ensuite à diviser le tout par ln(base) (sauf si base=e) :",
+        texte: `Règle du quotient, appliquée à ln(x)/x — divise ensuite le tout par ln(base) (sauf si base=e). ${rappelC}`,
         latex: "\\left(\\dfrac{u}{v}\\right)' = \\dfrac{u'v-uv'}{v^2}, \\quad u=\\ln(x),\\ v=x",
       };
     case "B":
       return {
-        texte: "Rappel de la règle du produit, combinée à la dérivée de ln(x) :",
-        latex: "(uv)' = u'v+uv', \\quad u=e^{x},\\ v=\\ln(x),\\ v'=\\dfrac{1}{x}",
+        texte: `Règle du produit, avec la dérivée de e^(ax) et celle de ln(x). ${rappelC}`,
+        latex: "(uv)' = u'v+uv', \\quad u=e^{ax},\\ u'=a\\,e^{ax},\\ v=\\ln(x),\\ v'=\\dfrac{1}{x}",
       };
     case "C":
       return {
-        texte: "Rappel de la règle du produit, appliquée à x·ln(x) :",
+        texte: `Règle du produit pour x·ln(x) ; le terme p·x se dérive en p. ${rappelC}`,
         latex: "(uv)' = u'v+uv', \\quad u=x,\\ v=\\ln(x)",
       };
   }
@@ -256,49 +326,49 @@ export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithme)
   switch (exercice.famille) {
     case "A":
       return {
-        texte: "Numérateur de la règle du quotient, AVANT simplification (u=ln(x), v=x) :",
+        texte: "Numérateur de la règle du quotient pour ln(x)/x, AVANT simplification (u=ln(x), v=x) :",
         latex: "u'v - uv' = \\dfrac{1}{x}\\cdot x - \\ln(x)\\cdot 1",
       };
-    case "B":
+    case "B": {
+      const ea = formatExpAx(exercice.a);
+      const da = exercice.a === 1 ? "" : `${exercice.a}`;
       return {
-        texte: "Les deux termes de la règle du produit, séparément — non encore combinés :",
-        latex: "u'v = e^{x}\\ln(x), \\quad uv' = e^{x}\\cdot\\dfrac{1}{x}",
+        texte: "Les deux termes de la règle du produit pour e^(ax)·ln(x), séparément — non encore combinés :",
+        latex: `u'v = ${da}${ea}\\ln(x), \\quad uv' = ${ea}\\cdot\\dfrac{1}{x}`,
       };
+    }
     case "C":
       return {
-        texte: "Les deux termes de la règle du produit, affichés — simplification non faite :",
+        texte: "Les deux termes de la règle du produit pour x·ln(x), affichés — simplification non faite :",
         latex: "u'v = 1\\cdot\\ln(x), \\quad uv' = x\\cdot\\dfrac{1}{x}",
       };
   }
 }
 
-export function aideSelectionNiveau1(exercice: ExerciceGraphiqueDeriveeLogarithme): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return { texte: "Le zéro de cette dérivée est TOUJOURS en x=e, quels que soient k et la base — et sa courbe n'est PAS monotone (elle forme un pic).", latex: "x=e" };
-    case "B":
-      return { texte: "ln(x)+1/x reste TOUJOURS ≥1 pour x>0 (jamais nul, jamais négatif) — le signe de f' dépend donc uniquement du signe de k.", latex: "\\ln(x)+\\dfrac{1}{x}\\ge 1 \\quad (x>0)" };
-    case "C":
-      return {
-        texte: "Le zéro de cette dérivée est TOUJOURS en x=1/e, quel que soit k — et, contrairement à la famille k·log_base(x)/x, cette courbe est monotone (une droite croissante ou décroissante, jamais un pic).",
-        latex: "x=\\dfrac{1}{e}",
-      };
-  }
+/** Abscisse de l'extremum de f (zéro de f'), `null` pour la famille B (aucun extremum). */
+export function abscisseExtremum(exercice: ExerciceGraphiqueDeriveeLogarithme): number | null {
+  if (exercice.famille === "A") return Math.E;
+  if (exercice.famille === "C") return Math.exp(-(1 + exercice.p / exercice.k));
+  return null;
+}
+
+export function aideSelectionNiveau1(): AideAvecLatex {
+  return {
+    texte: "Lis les variations de f sur son graphique : là où f croît, f'(x) > 0 (au-dessus de l'axe) ; là où f décroît, f'(x) < 0 ; à un maximum ou un minimum de f, f'(x) = 0. Élimine les graphiques qui ne respectent pas ces signes.",
+    latex: null,
+  };
 }
 
 export function aideSelectionNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithme): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A": {
-      const avant = exercice.k > 0 ? "positif" : "négatif";
-      const apres = exercice.k > 0 ? "négatif" : "positif";
-      return { texte: `Avant x=e (par exemple en x=1), f' est ${avant} ; après x=e (par exemple en x=e²), f' est ${apres}.`, latex: null };
-    }
-    case "B":
-      return { texte: "La valeur minimale de ln(x)+1/x est exactement 1, atteinte en x=1 :", latex: "\\ln(1)+\\dfrac{1}{1} = 1" };
-    case "C": {
-      const sens = exercice.k > 0 ? "croissante" : "décroissante";
-      return { texte: `f'(x) = k·(ln(x)+1) est croissante si k>0, décroissante si k<0. Ici, f' est ${sens}.`, latex: "f'(x)=k\\cdot(\\ln(x)+1)" };
-    }
+  const xe = abscisseExtremum(exercice);
+  if (xe !== null) {
+    return {
+      texte: `Repère l'abscisse de l'extremum de f sur son graphique (x ≈ ${formatNombreFr(xe)}) : le graphique de f' doit couper l'axe des x EXACTEMENT à cette abscisse — vérifie ensuite son signe de part et d'autre.`,
+      latex: null,
+    };
   }
+  return {
+    texte: "f n'a ni maximum ni minimum : f' ne s'annule jamais. Pour départager les graphiques restants, estime la pente de la tangente à f en x = 1 et compare-la à la valeur lue en x = 1 sur chaque graphique.",
+    latex: null,
+  };
 }
-

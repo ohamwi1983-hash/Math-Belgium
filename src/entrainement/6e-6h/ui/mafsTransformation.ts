@@ -208,7 +208,8 @@ export const EPAISSEUR_TRAIT_ACCENTUE_FORT = 4;
  * `defaultLabelMaker` implicite.
  */
 export function formatEtiquetteGrille(valeur: number): string {
-  return String(Number(valeur.toPrecision(10)));
+  // Virgule décimale (convention française du site) — seul changement par rapport à l'arrondi.
+  return String(Number(valeur.toPrecision(10))).replace(".", ",");
 }
 
 /** Ratio largeur/hauteur du conteneur du graphe (voir .mafs-graph, App.css) — fixe et connu à

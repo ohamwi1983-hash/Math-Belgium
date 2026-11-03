@@ -1,7 +1,8 @@
 import { Katex } from "../components/Katex";
+import { useLargeurConteneur } from "../components/useLargeurConteneur";
 import type { ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeriveeLogarithme.types";
 import type { AideAvecLatex } from "../ui6e/formatGraphiqueDeriveeLogarithme";
-import { CONSIGNE_GENERALE, calculerViewBoxGraphique, consigneEcranSelection, etatActuelSelection, formatFonctionLatex } from "../ui6e/formatGraphiqueDeriveeLogarithme";
+import { CONSIGNE_GENERALE, calculerViewBoxFonction, calculerViewBoxGraphique, consigneEcranSelection, formatFonctionLatex } from "../ui6e/formatGraphiqueDeriveeLogarithme";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
@@ -20,11 +21,17 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "selection" (les 3 familles, `6gen20`) — en-tête propre à ce générateur ; le corps du QCM
- * (4 graphiques lettrés A→D empilés, non cliquables, + 4 boutons de choix texte séparés + Valider)
- * est délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen11/6gen21. */
+const LARGEUR_MAX_F = 420;
+
+/** Écran "selection" (1er écran, les 3 familles, `6gen20`) — le GRAPHIQUE de f est donné (avec son
+ * expression), l'élève choisit celui de f' parmi 4 en lisant variations, extremums et pentes de f.
+ * Jamais la formule de f' à l'écran (elle se calcule à l'écran suivant, qui confirme le choix). Le
+ * corps du QCM est délégué à `EtapeSelectionGraphiqueQCM` (partagé 6gen5/6gen8/6gen11/6gen21). */
 export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBoxGraphique(exercice);
+  const viewBoxF = calculerViewBoxFonction(exercice);
+  const [refF, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
+  const largeurF = Math.round(Math.min(LARGEUR_MAX_F, largeurMesuree || 300));
 
   return (
     <div>
@@ -36,12 +43,9 @@ export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, aideNiveau1
           </div>
         }
       />
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {etatActuelSelection(exercice).map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
+      <div className="graphe-qcm-carte" ref={refF}>
+        <p className="graphe-qcm-label">Graphique de f</p>
+        <GrapheOptionDeriveeLogarithme exercice={exercice} index={0} fonction viewBox={viewBoxF} largeur={largeurF} hauteur={Math.round(largeurF * 0.75)} />
       </div>
       <p className="prompt-text">{consigneEcranSelection()}</p>
 

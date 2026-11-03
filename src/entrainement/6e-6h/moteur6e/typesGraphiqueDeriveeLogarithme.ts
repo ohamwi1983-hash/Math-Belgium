@@ -1,26 +1,32 @@
 /**
- * Couche B (6e) — types pour `6gen20`. Séquence FIXE, indépendante de la famille : "derivee" →
- * "selection" — les 3 familles (A/B/C) traversent TOUJOURS les 2 écrans (contrairement à `6gen8`,
- * où les familles A/C n'avaient qu'un seul écran) — voir `core6e/graphiqueDeriveeLogarithme.types.ts`.
+ * Couche B (6e) — types pour `6gen20`. Séquence FIXE, indépendante de la famille : "selection"
+ * (choisir le graphique de f' en lisant celui de f) → "derivee" (calculer f'(x), qui confirme le
+ * choix) — voir `core6e/graphiqueDeriveeLogarithme.types.ts`.
  */
 import type { ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeriveeLogarithme.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseGraphiqueDeriveeLogarithme = "derivee" | "selection";
+export type PhaseGraphiqueDeriveeLogarithme = "selection" | "derivee";
 
 export function phaseInitiale(): PhaseGraphiqueDeriveeLogarithme {
-  return "derivee";
+  return "selection";
 }
 
 export function phaseApres(phase: PhaseGraphiqueDeriveeLogarithme): PhaseGraphiqueDeriveeLogarithme | "termine" {
-  return phase === "derivee" ? "selection" : "termine";
+  return phase === "selection" ? "derivee" : "termine";
+}
+
+/** Une seule tentative pour le choix graphique (4 options : il se gagnait sinon par élimination) ;
+ * la saisie libre de f'(x) garde le réglage de session. */
+export function tentativesMaxPhase(phase: PhaseGraphiqueDeriveeLogarithme, tentativesSession: number): number {
+  return phase === "selection" ? 1 : tentativesSession;
 }
 
 export interface ResultatExerciceGraphiqueDeriveeLogarithme {
   exercice: ExerciceGraphiqueDeriveeLogarithme;
-  scoreDerivee: number;
   scoreSelection: number;
+  scoreDerivee: number;
 }
 
 export interface EtatSessionGraphiqueDeriveeLogarithme {
@@ -30,33 +36,20 @@ export interface EtatSessionGraphiqueDeriveeLogarithme {
   phase: PhaseGraphiqueDeriveeLogarithme;
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
-  /** Score de l'écran "derivee", conservé jusqu'à la clôture de l'écran "selection" — `null`
-   * uniquement tant que l'écran "derivee" n'est pas encore terminé (jamais `null` dans un
-   * `ResultatExerciceGraphiqueDeriveeLogarithme`, toutes les familles traversent cet écran). */
-  scoreDeriveePartiel: number | null;
-  /** true si l'écran "derivee" a dû être révélé (tentatives épuisées) — jusqu'au 2025-10, déduit
-   * indirectement de `scoreDeriveePartiel === 0` (un succès ne vaut jamais exactement 0, l'ancienne pénalité par tentative garantissant un score strictement positif même à la dernière tentative
-   * autorisée) ; champ explicite ajouté pendant le balayage générique (point A). Volontairement
-   * distinct de `derniereTransitionRevelee` ci-dessous : ce dernier n'est valable que JUSTE après
-   * la clôture d'un écran (écrasé à la transition suivante), alors que ce champ doit rester lisible
-   * tant que l'écran "selection" (qui suit) est affiché. */
-  deriveeRevele: boolean;
-  /** `niveauAide` AU MOMENT PRÉCIS de la clôture de l'écran "derivee" (avant que la transition vers
-   * "selection" ne le remette à zéro) — même principe que `scoreDeriveePartiel`/
-   * `derniereTransitionRevelee`, jamais recalculé depuis le score (ambigu : un score réduit peut
-   * aussi venir de tentatives ratées). Pilote la puce jaune "correcte avec aide" de
-   * `ProgressionPuces`. `null` tant que l'écran "derivee" n'est pas encore clos. */
-  deriveeNiveauAide: number | null;
+  /** Score de l'écran "selection" (1er écran), conservé jusqu'à la clôture de "derivee" — `null`
+   * tant que "selection" n'est pas terminé. */
+  scoreSelectionPartiel: number | null;
+  /** true si l'écran "selection" a dû être révélé — lisible tant que "derivee" est affiché
+   * (contrairement à `derniereTransitionRevelee`, écrasé à la transition suivante). */
+  selectionRevele: boolean;
+  /** `niveauAide` AU MOMENT de la clôture de "selection" (avant sa remise à zéro) — pilote la
+   * puce jaune "correcte avec aide". `null` tant que "selection" n'est pas clos. */
+  selectionNiveauAide: number | null;
   indexExercice: number;
   resultats: ResultatExerciceGraphiqueDeriveeLogarithme[];
   terminee: boolean;
-  /** Vrai UNIQUEMENT juste après l'appel à `soumettreReponseXxx` qui a clos un écran par
-   * épuisement des tentatives (réponse jamais trouvée, révélée) plutôt que par réussite — jamais
-   * vrai sur un appel qui ne clôt rien (tentative ratée mais pas encore épuisée) ni sur une
-   * clôture par réussite. Existe car `etapeCourante` est réinitialisé (`revelee` remis à false)
-   * DANS LE MÊME appel qui fait avancer `phase` — `App6gen20.tsx` ne peut donc pas lire
-   * `etat.etapeCourante.revelee` (qui reflète l'état AVANT cette soumission, jamais après) pour
-   * capturer le statut `revele` du récapitulatif final ; il doit lire CE champ sur l'état RETOURNÉ
-   * par `soumettreReponseXxx` à la place. Voir `docs/historique-6e.md` (6gen8/6gen16, même piège). */
+  /** Vrai UNIQUEMENT juste après l'appel qui a clos un écran par épuisement des tentatives —
+   * `etapeCourante` étant réinitialisé dans le MÊME appel, `App6gen20.tsx` lit CE champ sur l'état
+   * retourné (voir `docs/historique-6e.md`, 6gen8/6gen16, même piège). */
   derniereTransitionRevelee: boolean;
 }
