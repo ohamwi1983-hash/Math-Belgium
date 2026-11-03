@@ -3,7 +3,7 @@ import { ensembleUnMorceau } from "../../ensembleReel";
 import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../aleatoire";
 import { COMPARATEURS, inverserComparateur, tirerComparateur } from "../comparateur";
 import { intersecterEnsembles, resoudreAffine, resoudreQuadratiqueFacteurs } from "../intervalle";
-import { baseEntiere, baseFraction, baseValeurLog } from "../rationnel";
+import { baseEntiere, baseFraction, baseValeurLog, bornesSimples } from "../rationnel";
 
 /**
  * Famille C — combiner en un seul log, comparer.
@@ -60,6 +60,7 @@ function construireCProduit(): ExerciceLogC {
     const comparaisonBrute = resoudreQuadratiqueFacteurs(m2, z1, z2, comparateurArgument);
     const solutionEcran3 = intersecterEnsembles(ceEcran1, comparaisonBrute);
     if (solutionEcran3.morceaux.length === 0) continue;
+    if (!bornesSimples(ceEcran1) || !bornesSimples(solutionEcran3)) continue;
 
     return { famille: "C", sousType: "produit", base, baseSuperieureA1, f: { m: 1, n: n1 }, g: { m: m2, n: n2 }, k, comparateur, ceEcran1, solutionEcran3 };
   }
@@ -91,6 +92,8 @@ function construireCQuotient(): ExerciceLogC {
     const comparaisonBrute = ensembleUnMorceau(resoudreAffine(pente, n1 - k * n2, comparateurArgument, 0));
     const solutionEcran3 = intersecterEnsembles(ceEcran1, comparaisonBrute);
     if (solutionEcran3.morceaux.length === 0) continue;
+    // Bornes saisissables (audit 6e ch. 3, point 22) — fraction de dénominateur ≤ 12.
+    if (!bornesSimples(ceEcran1) || !bornesSimples(solutionEcran3)) continue;
 
     return { famille: "C", sousType: "quotient", base, baseSuperieureA1, f: { m: m1, n: n1 }, g: { m: m2, n: n2 }, k, comparateur, ceEcran1, solutionEcran3 };
   }

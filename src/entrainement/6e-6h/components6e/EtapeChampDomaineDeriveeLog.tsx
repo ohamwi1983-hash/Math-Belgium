@@ -58,11 +58,15 @@ export function EtapeChampDomaineDeriveeLog({
   validation,
 }: Props) {
   const [texte, setTexte] = useState("");
+  /** Saisie SOUMISE — le message d'erreur décrit celle-ci (pas la frappe en cours), et le rouge ne
+   * reste que tant qu'elle n'est pas modifiée (audit 6e ch. 3, point 4). */
+  const [texteSoumis, setTexteSoumis] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs ? diagnostiquer(texte) : null;
+  const dernierStatut = montrerErreurs && texteSoumis !== null ? diagnostiquer(texteSoumis) : null;
 
   function valider() {
     if (texte.trim() === "") return;
+    setTexteSoumis(texte);
     onValider(texte);
   }
 
@@ -90,7 +94,7 @@ export function EtapeChampDomaineDeriveeLog({
       </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input type="text" className={`text-input ${montrerErreurs && texte === texteSoumis ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

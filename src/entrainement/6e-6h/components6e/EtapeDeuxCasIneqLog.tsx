@@ -28,6 +28,9 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseFConclure) => void;
+  /** Verdict cas par cas de la réponse soumise — seul le choix ∅/intervalle du cas réellement faux
+   * passe en rouge (audit 6e ch. 3, point 4). */
+  evaluerCas: (reponse: ReponseFConclure) => { superieur: boolean; inferieur: boolean };
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -56,9 +59,12 @@ function versReponse(etat: EtatCas): ReponseCasBaseLog | null {
  * d'intervalle révélé dans un conteneur `.contenu-conditionnel` uniquement après le choix
  * "Un intervalle". `App6gen15.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, evaluerCas, validation}: Props) {
   const [casSuperieur, setCasSuperieur] = useState<EtatCas>(CAS_VIDE);
   const [casInferieur, setCasInferieur] = useState<EtatCas>(CAS_VIDE);
+  /** Statut soumis de chaque cas QUAND il a été refusé (`null` si ce cas était juste) — le rouge
+   * disparaît dès que l'élève change le choix de ce cas. */
+  const [refuses, setRefuses] = useState<{ superieur: EtatCas["statut"]; inferieur: EtatCas["statut"] }>({ superieur: null, inferieur: null });
   const montrerErreurs = tentativesUtilisees > 0;
 
   const reponseSuperieur = versReponse(casSuperieur);
@@ -67,24 +73,27 @@ export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, aideNiveau1, a
 
   function valider() {
     if (reponseSuperieur === null || reponseInferieur === null) return;
-    onValider({ casSuperieur: reponseSuperieur, casInferieur: reponseInferieur });
+    const reponse = { casSuperieur: reponseSuperieur, casInferieur: reponseInferieur };
+    const verdict = evaluerCas(reponse);
+    setRefuses({ superieur: verdict.superieur ? null : casSuperieur.statut, inferieur: verdict.inferieur ? null : casInferieur.statut });
+    onValider(reponse);
   }
 
-  function renderCas(label: string, etat: EtatCas, setEtat: (e: EtatCas) => void) {
+  function renderCas(label: string, etat: EtatCas, setEtat: (e: EtatCas) => void, statutRefuse: EtatCas["statut"]) {
     return (
       <div className="field">
         <p className="field-label">{label}</p>
         <div className="options-grid-compact">
           <button
             type="button"
-            className={`btn ${etat.statut === "vide" ? "toggle-active" : ""} ${montrerErreurs && etat.statut === "vide" ? "is-erronee" : ""}`}
+            className={`btn ${etat.statut === "vide" ? "toggle-active" : ""} ${montrerErreurs && statutRefuse === "vide" && etat.statut === "vide" ? "is-erronee" : ""}`}
             onClick={() => setEtat({ statut: "vide", ensemble: null })}
           >
             ∅ — Aucune solution
           </button>
           <button
             type="button"
-            className={`btn ${etat.statut === "intervalle" ? "toggle-active" : ""} ${montrerErreurs && etat.statut === "intervalle" ? "is-erronee" : ""}`}
+            className={`btn ${etat.statut === "intervalle" ? "toggle-active" : ""} ${montrerErreurs && statutRefuse === "intervalle" && etat.statut === "intervalle" ? "is-erronee" : ""}`}
             onClick={() => setEtat({ statut: "intervalle", ensemble: etat.ensemble })}
           >
             Un intervalle (à construire)
@@ -113,8 +122,8 @@ export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, aideNiveau1, a
         <RenduFragments fragments={consigneEcran} />
       </p>
 
-      {renderCas("Cas a>1", casSuperieur, setCasSuperieur)}
-      {renderCas("Cas 0<a<1", casInferieur, setCasInferieur)}
+      {renderCas("Cas a>1", casSuperieur, setCasSuperieur, refuses.superieur)}
+      {renderCas("Cas 0<a<1", casInferieur, setCasInferieur, refuses.inferieur)}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

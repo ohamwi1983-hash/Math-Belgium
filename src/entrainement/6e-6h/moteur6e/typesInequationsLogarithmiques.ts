@@ -20,6 +20,7 @@ export type PhaseInequationLogarithmique =
   | "dResoudreY"
   | "dConvertirX"
   | "eReconnaitre"
+  | "eResoudre"
   | "fCE"
   | "fSimplifier"
   | "fConclure";
@@ -41,7 +42,9 @@ export function phaseInitiale(exercice: ExerciceInequationLogarithmique): PhaseI
   }
 }
 
-export function phaseApres(phase: PhaseInequationLogarithmique): PhaseInequationLogarithmique | "termine" {
+/** `exercice` n'est consulté que pour la famille E : l'écran « résoudre » n'existe que si la CE est
+ * satisfiable (refonte K3, voir `core6e/inequationsLogarithmiques.types.ts`). */
+export function phaseApres(phase: PhaseInequationLogarithmique, exercice: ExerciceInequationLogarithmique): PhaseInequationLogarithmique | "termine" {
   switch (phase) {
     case "aCE":
       return "aResoudre";
@@ -66,6 +69,8 @@ export function phaseApres(phase: PhaseInequationLogarithmique): PhaseInequation
     case "dConvertirX":
       return "termine";
     case "eReconnaitre":
+      return exercice.famille === "E" && exercice.ceCompatible ? "eResoudre" : "termine";
+    case "eResoudre":
       return "termine";
     case "fCE":
       return "fSimplifier";
@@ -81,7 +86,7 @@ export type ResultatExerciceInequationLogarithmique =
   | { famille: "B"; exercice: ExerciceInequationLogarithmique; scoreCE: number; scoreResoudre: number }
   | { famille: "C"; exercice: ExerciceInequationLogarithmique; scoreCE: number; scoreCombiner: number; scoreComparer: number }
   | { famille: "D"; exercice: ExerciceInequationLogarithmique; scoreCE: number; scoreReecrire: number; scoreResoudreY: number; scoreConvertirX: number }
-  | { famille: "E"; exercice: ExerciceInequationLogarithmique; score: number }
+  | { famille: "E"; exercice: ExerciceInequationLogarithmique; score: number; scoreResoudre: number | null }
   | { famille: "F"; exercice: ExerciceInequationLogarithmique; scoreCE: number; scoreSimplifier: number; scoreConclure: number };
 
 export interface EtatSessionInequationLogarithmique {

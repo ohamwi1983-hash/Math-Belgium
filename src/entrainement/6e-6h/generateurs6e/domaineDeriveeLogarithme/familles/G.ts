@@ -4,12 +4,24 @@ import { tirerParmi } from "../aleatoire";
 /**
  * Famille G — dérivation logarithmique implicite, f(x)=u(x)^v(x) (3 écrans : identifier u^v, f'/f,
  * isoler f') — NOUVEAUTÉ CENTRALE. Aucun champ `domaine` (bases supposées strictement positives,
- * spec explicite). Aucun paramètre numérique aléatoire — la spec ne donne aucune plage de
- * coefficients pour cette famille, chaque variante est une formule structurellement fixe. 8
- * variantes équiprobables (5 "direct" + 2 "à simplifier d'abord" + 1 "combiné produit").
+ * spec explicite). 10 variantes équiprobables, la plupart paramétrées par un entier `a` (audit 6e
+ * ch. 3, point 27) — 20 exercices distincts au total.
  */
-const VARIANTES_G: readonly VarianteG[] = ["xx", "xSinx", "cosTan", "unSurXPuissanceX", "sinXInvX", "racineXPuissanceX", "xRacineXPuissanceX", "produit"];
+const VALEURS_A: Record<VarianteG, readonly number[]> = {
+  xx: [1, 2, 3],
+  xSinx: [1, 2],
+  cosTan: [1, 2],
+  unSurXPuissanceX: [1, 2, 3],
+  sinXInvX: [1, 2],
+  racineXPuissanceX: [1],
+  xRacineXPuissanceX: [1],
+  produit: [1, 2],
+  xLnx: [1],
+  affinePuissanceX: [1, 2, 3],
+};
+const VARIANTES_G = Object.keys(VALEURS_A) as VarianteG[];
 
 export function construireG(): ExerciceDomaineDeriveeLogG {
-  return { famille: "G", variante: tirerParmi(VARIANTES_G) };
+  const variante = tirerParmi(VARIANTES_G);
+  return { famille: "G", variante, a: tirerParmi(VALEURS_A[variante]) };
 }

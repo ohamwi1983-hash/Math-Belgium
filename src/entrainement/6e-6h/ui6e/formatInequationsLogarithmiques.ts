@@ -52,6 +52,12 @@ export function baseLatex(base: BaseLog): string {
   return `\\frac{${base.num}}{${base.den}}`;
 }
 
+/** `base^{exposant}` — base fractionnaire entre parenthèses (`(1/2)^{-3}`, jamais `\frac{1}{2}^{-3}`). */
+function puissanceBaseLatex(base: BaseLog, exposant: number): string {
+  const b = base.den === 1 ? baseLatex(base) : `\\left(${baseLatex(base)}\\right)`;
+  return `${b}^{${exposant}}`;
+}
+
 function formatAffineLatex(f: AffineLog): string {
   return formatSommeTermes([
     { valeur: f.m, suffixe: "x" },
@@ -70,6 +76,11 @@ export function symboleComparateurLatex(cmp: Comparateur): string {
     case "<=":
       return "\\leq";
   }
+}
+
+function inverserComparateurLatex(cmp: Comparateur): Comparateur {
+  const INVERSE: Record<Comparateur, Comparateur> = { "<": ">", ">": "<", "<=": ">=", ">=": "<=" };
+  return INVERSE[cmp];
 }
 
 function logBaseLatex(base: string, argument: string): string {
@@ -96,9 +107,12 @@ function aideA1(phase: "aCE" | "aResoudre"): AideAvecLatex {
 
 function aideA2(phase: "aCE" | "aResoudre", exercice: ExerciceLogA): AideAvecLatex {
   if (phase === "aCE") return { texte: "Condition d'existence :", latex: `${formatAffineLatex({ m: exercice.m, n: exercice.n })} > 0` };
+  // Audit 6e ch. 3, point 9 : l'aide affichait l'intervalle déjà résolu, qui EST la réponse dès que
+  // la CE le contient entièrement — seule l'inéquation sur l'argument (sens adapté) est montrée.
+  const cmp = exercice.baseSuperieureA1 ? exercice.comparateur : inverserComparateurLatex(exercice.comparateur);
   return {
-    texte: `Base ${exercice.baseSuperieureA1 ? ">1" : "<1"} : sens ${exercice.baseSuperieureA1 ? "conservé" : "inversé"}. Inégalité sur l'argument SEUL (intersection avec la CE non faite) :`,
-    latex: formatEnsembleReelLatex(exercice.argumentBrutEcran2),
+    texte: `Base ${exercice.baseSuperieureA1 ? ">1" : "<1"} : sens ${exercice.baseSuperieureA1 ? "conservé" : "inversé"}. Inéquation sur l'argument à résoudre, puis à intersecter avec la CE :`,
+    latex: `${formatAffineLatex({ m: exercice.m, n: exercice.n })} ${symboleComparateurLatex(cmp)} ${puissanceBaseLatex(exercice.base, exercice.k)}`,
   };
 }
 
@@ -134,7 +148,12 @@ function aideB2(phase: "bCE" | "bResoudre", exercice: ExerciceLogB): AideAvecLat
     const argGauche = exercice.sousType === "racine" ? formatAffineLatex({ m: exercice.a, n: exercice.b }) : formatAffineLatex(exercice.f);
     return { texte: "Les 2 conditions de positivité :", latex: `${argGauche} > 0 \\quad\\text{ET}\\quad ${formatAffineLatex(exercice.g)} > 0` };
   }
-  return { texte: "Intervalle de la comparaison d'arguments SEULE (intersection avec la CE non faite) :", latex: formatEnsembleReelLatex(exercice.comparaisonBruteEcran2) };
+  // Audit 6e ch. 3, point 9 : inéquation sur les arguments NON résolue (l'intervalle résolu était
+  // souvent déjà la réponse finale).
+  const cmp = symboleComparateurLatex(exercice.baseSuperieureA1 ? exercice.comparateur : inverserComparateurLatex(exercice.comparateur));
+  const gauche = exercice.sousType === "racine" ? formatAffineLatex({ m: exercice.a, n: exercice.b }) : formatAffineLatex(exercice.f);
+  const droite = exercice.sousType === "racine" ? `\\left(${formatAffineLatex(exercice.g)}\\right)^2` : formatAffineLatex(exercice.g);
+  return { texte: `Base ${exercice.baseSuperieureA1 ? ">1 (sens conservé)" : "<1 (sens inversé)"} — inéquation sur les arguments à résoudre, puis à intersecter avec la CE :`, latex: `${gauche} ${cmp} ${droite}` };
 }
 
 // ============================================================================
@@ -178,7 +197,9 @@ function aideC1(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC
 
 function aideC2(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): AideAvecLatex {
   if (phase === "cCE") return { texte: "Les 2 conditions de positivité :", latex: `${formatAffineLatex(exercice.f)} > 0 \\quad\\text{ET}\\quad ${formatAffineLatex(exercice.g)} > 0` };
-  if (phase === "cCombiner") return { texte: "Combinaison partiellement effectuée — il ne reste qu'à l'écrire explicitement :", latex: `\\log_{${baseLatex(exercice.base)}}\\left(${formatCombinaisonC(exercice)}\\right)` };
+  // Audit 6e ch. 3, point 9 : l'aide donnait la combinaison elle-même (la réponse) — elle identifie
+  // seulement f et g.
+  if (phase === "cCombiner") return { texte: `Identifie les deux arguments, puis écris leur ${exercice.sousType === "produit" ? "produit" : "quotient"} :`, latex: `f(x)=${formatAffineLatex(exercice.f)},\\quad g(x)=${formatAffineLatex(exercice.g)}` };
   return { texte: "Base " + (exercice.baseSuperieureA1 ? ">1 (sens conservé)." : "<1 (sens inversé)."), latex: exercice.baseSuperieureA1 ? "\\text{base}>1" : "\\text{base}<1" };
 }
 
@@ -232,22 +253,23 @@ function aideD1(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): Aide
 
 function aideD2(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX", exercice: ExerciceLogD): AideAvecLatex {
   switch (phase) {
+    // Audit 6e ch. 3, point 9 : ces deux aides affichaient la réponse exacte de l'écran.
     case "dCE":
-      return { texte: "Condition d'existence :", latex: "x > 0" };
+      return { texte: "Un seul logarithme apparaît, toujours avec le même argument : écris la condition que cet argument doit vérifier.", latex: null };
     case "dReecrire":
-      return { texte: "Réécriture attendue (avec y=log_base(x)) :", latex: `${formatQuadratiqueYLatex(exercice)} ${symboleComparateurLatex(exercice.comparateur)} 0` };
+      return { texte: "Substitution terme à terme — les coefficients de l'énoncé ne changent pas :", latex: `\\left(\\log_{${baseLatex(exercice.base)}} x\\right)^2 \\to y^2 \\qquad \\log_{${baseLatex(exercice.base)}} x \\to y` };
     case "dResoudreY":
       return { texte: "Les 2 racines du trinôme en y sont :", latex: `y=${exercice.y1} \\quad\\text{et}\\quad y=${exercice.y2}` };
     case "dConvertirX":
       return {
         texte: "Bornes en x calculées séparément (ordre final non tranché) :",
-        latex: `${baseLatex(exercice.base)}^{${exercice.y1}} \\quad\\text{et}\\quad ${baseLatex(exercice.base)}^{${exercice.y2}}`,
+        latex: `${puissanceBaseLatex(exercice.base, exercice.y1)} \\quad\\text{et}\\quad ${puissanceBaseLatex(exercice.base, exercice.y2)}`,
       };
   }
 }
 
 // ============================================================================
-// Famille E — 1 écran, TOUJOURS ∅.
+// Famille E — reconnaître si la CE est satisfiable, puis résoudre si elle l'est (refonte K3).
 // ============================================================================
 
 function formatEnonceE(exercice: ExerciceLogE): string {
@@ -255,17 +277,28 @@ function formatEnonceE(exercice: ExerciceLogE): string {
   return `${logBaseLatex(bl, formatAffineLatex({ m: 1, n: -exercice.p }))} ${symboleComparateurLatex(exercice.comparateur)} ${logBaseLatex(bl, formatAffineLatex({ m: -1, n: exercice.r }))}`;
 }
 
-function consigneE(): FragmentConsigne[] {
-  return [txt("Sans résoudre l'inégalité principale : pose la CE, et détermine si elle est satisfiable.")];
+function consigneE(phase: "eReconnaitre" | "eResoudre"): FragmentConsigne[] {
+  if (phase === "eReconnaitre") return [txt("Avant de résoudre : pose la CE et détermine si elle admet des solutions.")];
+  return [txt("La CE est satisfiable : à partir de la CE CORRECTE de l'étape précédente, compare les arguments avec le bon sens, puis intersecte avec la CE.")];
 }
 
-function aideE1(): AideAvecLatex {
-  return { texte: "Avant de résoudre quoi que ce soit d'autre, vérifie toujours que la CE elle-même est non vide.", latex: null };
+function aideE1(phase: "eReconnaitre" | "eResoudre"): AideAvecLatex {
+  if (phase === "eReconnaitre") return { texte: "Chacun des deux arguments doit être strictement positif. Écris les deux conditions, puis regarde si un même x peut les vérifier toutes les deux.", latex: null };
+  return { texte: "log_base(f) [symbole] log_base(g) équivaut à f [même symbole] g si base>1, ou f [symbole inversé] g si 0<base<1 — uniquement sur la CE.", latex: "\\text{base}>1\\qquad 0<\\text{base}<1" };
 }
 
-function aideE2(exercice: ExerciceLogE): AideAvecLatex {
-  return { texte: "Les 2 conditions de la CE, côte à côte (incompatibilité non confirmée) :", latex: `x > ${exercice.p} \\quad\\text{ET}\\quad x < ${exercice.r}` };
+function aideE2(phase: "eReconnaitre" | "eResoudre", exercice: ExerciceLogE): AideAvecLatex {
+  if (phase === "eReconnaitre") return { texte: "Les 2 conditions de la CE, côte à côte (compare les deux bornes) :", latex: `x > ${exercice.p} \\quad\\text{ET}\\quad x < ${exercice.r}` };
+  const cmp = symboleComparateurLatex(exercice.baseSuperieureA1 ? exercice.comparateur : inverserComparateurLatex(exercice.comparateur));
+  return {
+    texte: `Base ${exercice.baseSuperieureA1 ? ">1 (sens conservé)" : "<1 (sens inversé)"} — inéquation sur les arguments à résoudre, puis à intersecter avec la CE :`,
+    latex: `${formatAffineLatex({ m: 1, n: -exercice.p })} ${cmp} ${formatAffineLatex({ m: -1, n: exercice.r })}`,
+  };
 }
+
+/** Libellés des deux boutons de l'écran de reconnaissance — partagés par l'écran et la fiche. */
+export const OPTION_E_VIDE = "∅ — la CE n'a aucune solution";
+export const OPTION_E_POSSIBLE = "La CE admet des solutions";
 
 // ============================================================================
 // Famille F — 3 écrans.
@@ -284,7 +317,9 @@ function formatEnonceF(exercice: ExerciceLogF): string {
 function consigneF(phase: "fCE" | "fSimplifier" | "fConclure"): FragmentConsigne[] {
   switch (phase) {
     case "fCE":
-      return [txt("Pose la CE. Remarque : "), ltx("f(x)-g(x)"), txt(" est un carré, donc "), ltx("f(x)\\geq g(x)"), txt(" toujours — la CE se réduit-elle à une seule condition ?")];
+      // Audit 6e ch. 3, point 24 : la consigne donnait la clé (« f−g est un carré, donc f≥g ») —
+      // remarque déplacée dans l'aide 1.
+      return [txt("Pose la CE : les deux arguments doivent être strictement positifs.")];
     case "fSimplifier":
       return [txt("Simplifie "), ltx("f(x)-g(x)"), txt(" et reconnais un carré parfait.")];
     case "fConclure":
@@ -295,7 +330,7 @@ function consigneF(phase: "fCE" | "fSimplifier" | "fConclure"): FragmentConsigne
 function aideF1(phase: "fCE" | "fSimplifier" | "fConclure"): AideAvecLatex {
   switch (phase) {
     case "fCE":
-      return { texte: "Pose les deux conditions de positivité séparément avant de chercher à les simplifier.", latex: null };
+      return { texte: "Pose les deux conditions de positivité séparément. Compare ensuite f(x) et g(x) : si l'une est toujours plus grande que l'autre, une des deux conditions entraîne l'autre.", latex: null };
     case "fSimplifier":
       return { texte: "Développe f(x)-g(x) terme à terme, sans chercher à factoriser tout de suite.", latex: "f(x)-g(x)" };
     case "fConclure":
@@ -355,7 +390,8 @@ export function etatActuel(phase: PhaseInequationLogarithmique, exercice: Exerci
       return [ce, reecriture, `\\text{Solution en y : } y \\in ${formatEnsembleReelLatex(exercice.solutionEcran3)}`];
     }
     case "E":
-      return null;
+      if (phase === "eReconnaitre") return null;
+      return [`\\text{CE : } x \\in ${formatEnsembleReelLatex(exercice.ceEcran1)}`];
     case "F":
       if (phase === "fCE") return null;
       if (phase === "fSimplifier") return [`\\text{CE : } x \\in ${formatEnsembleReelLatex(exercice.ceEcran1)}`];
@@ -395,7 +431,7 @@ export function consigneEcran(phase: PhaseInequationLogarithmique, exercice: Exe
     case "D":
       return consigneD(phase as "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX");
     case "E":
-      return consigneE();
+      return consigneE(phase as "eReconnaitre" | "eResoudre");
     case "F":
       return consigneF(phase as "fCE" | "fSimplifier" | "fConclure");
   }
@@ -412,7 +448,7 @@ export function aideNiveau1(phase: PhaseInequationLogarithmique, exercice: Exerc
     case "D":
       return aideD1(phase as "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX");
     case "E":
-      return aideE1();
+      return aideE1(phase as "eReconnaitre" | "eResoudre");
     case "F":
       return aideF1(phase as "fCE" | "fSimplifier" | "fConclure");
   }
@@ -429,7 +465,7 @@ export function aideNiveau2(phase: PhaseInequationLogarithmique, exercice: Exerc
     case "D":
       return aideD2(phase as "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX", exercice);
     case "E":
-      return aideE2(exercice);
+      return aideE2(phase as "eReconnaitre" | "eResoudre", exercice);
     case "F":
       return aideF2(phase as "fCE" | "fSimplifier" | "fConclure", exercice);
   }
@@ -451,7 +487,8 @@ export const LIBELLE_PHASE_LOG: Record<PhaseInequationLogarithmique, string> = {
   dReecrire: "Réécriture en y",
   dResoudreY: "Résolution en y",
   dConvertirX: "Conversion en x (ensemble-solution)",
-  eReconnaitre: "Reconnaissance",
+  eReconnaitre: "Reconnaissance de la CE",
+  eResoudre: "Résolution (ensemble-solution)",
   fCE: "Condition d'existence",
   fSimplifier: "Carré parfait",
   fConclure: "Conclusion (2 cas)",
@@ -484,7 +521,8 @@ export function contenuRecapPhase(exercice: ExerciceInequationLogarithmique, pha
       if (phase === "dResoudreY") return { texte: null, latex: formatEnsembleReelLatex(exercice.solutionEcran3) };
       return { texte: null, latex: formatEnsembleReelLatex(exercice.solutionEcran4) };
     case "E":
-      return { texte: "∅ — CE incompatible, aucune solution", latex: null };
+      if (phase === "eReconnaitre") return exercice.ceCompatible ? { texte: null, latex: `\\text{CE : } x \\in ${formatEnsembleReelLatex(exercice.ceEcran1)}` } : { texte: null, latex: `\\text{CE : } x > ${exercice.p} \\text{ et } x < ${exercice.r} \\;\\Rightarrow\\; S = \\emptyset` };
+      return { texte: null, latex: formatEnsembleReelLatex(exercice.solution) };
     case "F":
       if (phase === "fCE") return { texte: null, latex: formatEnsembleReelLatex(exercice.ceEcran1) };
       if (phase === "fSimplifier") return { texte: null, latex: formatCarreXMoinsR(exercice.r) };

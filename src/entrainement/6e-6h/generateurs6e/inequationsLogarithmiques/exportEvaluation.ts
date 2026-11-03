@@ -24,7 +24,7 @@ function phasesDeLaFamille(exercice: ExerciceInequationLogarithmique): PhaseIneq
   let phase: PhaseInequationLogarithmique | "termine" = phaseInitiale(exercice);
   while (phase !== "termine") {
     phases.push(phase);
-    phase = phaseApres(phase);
+    phase = phaseApres(phase, exercice);
   }
   return phases;
 }
@@ -48,6 +48,7 @@ function reponsePourPhase(phase: PhaseInequationLogarithmique): ZoneReponse {
     case "aResoudre":
     case "bResoudre":
     case "cComparer":
+    case "eResoudre":
     case "dResoudreY":
     case "dConvertirX":
     case "fConclure":

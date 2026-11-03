@@ -44,10 +44,16 @@ interface Props {
  */
 export function EtapeChoixDeuxIneqLog({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
+  /** Dernier choix SOUMIS — seul ce choix est marqué en rouge, et seulement tant qu'il reste
+   * sélectionné (audit 6e ch. 3, point 4 : la nouvelle sélection passait en rouge avant même d'être
+   * validée). */
+  const [choixSoumis, setChoixSoumis] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const estRefuse = (id: string) => montrerErreurs && choixSoumis === id && choix === id;
 
   function valider() {
     if (choix === null) return;
+    setChoixSoumis(choix);
     onValider(choix);
   }
 
@@ -68,14 +74,14 @@ export function EtapeChoixDeuxIneqLog({ consigneEcran, enonceLatex, optionGauche
       <div className="options-grid-compact">
         <button
           type="button"
-          className={`btn ${choix === optionGauche.id ? "toggle-active" : ""} ${montrerErreurs && choix === optionGauche.id ? "is-erronee" : ""}`}
+          className={`btn ${choix === optionGauche.id ? "toggle-active" : ""} ${estRefuse(optionGauche.id) ? "is-erronee" : ""}`}
           onClick={() => setChoix(optionGauche.id)}
         >
           {optionGauche.label}
         </button>
         <button
           type="button"
-          className={`btn ${choix === optionDroite.id ? "toggle-active" : ""} ${montrerErreurs && choix === optionDroite.id ? "is-erronee" : ""}`}
+          className={`btn ${choix === optionDroite.id ? "toggle-active" : ""} ${estRefuse(optionDroite.id) ? "is-erronee" : ""}`}
           onClick={() => setChoix(optionDroite.id)}
         >
           {optionDroite.label}

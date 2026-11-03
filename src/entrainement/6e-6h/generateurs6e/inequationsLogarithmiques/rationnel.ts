@@ -38,3 +38,20 @@ export function puissanceExacteLog(base: BaseLog, exposant: number): { num: numb
 export function valeurExacteVersNombre(v: { num: number; den: number }): number {
   return v.num / v.den;
 }
+
+/** Vrai si `valeur` s'écrit comme une fraction de dénominateur ≤ `maxDenominateur` (12 par défaut)
+ * — garde de génération (audit 6e ch. 3, point 22) : une borne d'ensemble-solution que l'élève doit
+ * taper ne doit jamais exiger une fraction du type 5001/3000. */
+export function estFractionSimple(valeur: number, maxDenominateur = 12): boolean {
+  for (let d = 1; d <= maxDenominateur; d++) {
+    const n = valeur * d;
+    if (Math.abs(n - Math.round(n)) < 1e-9) return true;
+  }
+  return false;
+}
+
+/** Toutes les bornes finies d'un ensemble sont-elles des fractions simples (voir
+ * `estFractionSimple`) ? */
+export function bornesSimples(ensemble: { morceaux: { inf: number | null; sup: number | null }[] }, maxDenominateur = 12): boolean {
+  return ensemble.morceaux.every((m) => (m.inf === null || estFractionSimple(m.inf, maxDenominateur)) && (m.sup === null || estFractionSimple(m.sup, maxDenominateur)));
+}

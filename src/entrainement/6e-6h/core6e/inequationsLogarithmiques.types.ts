@@ -8,8 +8,8 @@ import type { EnsembleReelGuide } from "./ensembleReel.types";
  *
  * **Statuts ∅ (famille E, et un des deux cas de la famille F)** : même décision de conception que
  * `inequationsExponentielles.types.ts` (voir son en-tête pour la justification complète) —
- * `EnsembleReelGuide` n'est PAS étendu d'une 4e forme "vide" ici non plus. Famille E est une pure
- * reconnaissance catégorielle (booléen `estImpossible`), et la famille F représente chaque cas via
+ * `EnsembleReelGuide` n'est PAS étendu d'une 4e forme "vide" ici non plus. Famille E commence par
+ * une reconnaissance catégorielle (booléen `estImpossible`), et la famille F représente chaque cas via
  * `ReponseCasBaseLog { estVide: boolean; ensemble: EnsembleReelGuide | null }` — jamais un 3e
  * statut ajouté au type partagé.
  *
@@ -180,20 +180,32 @@ export interface ExerciceLogD {
 }
 
 // ============================================================================
-// Famille E — domaine vide par construction — 1 écran.
+// Famille E — reconnaître si la CE est satisfiable (1 écran), puis résoudre si elle l'est (2e
+// écran, uniquement dans ce cas).
 // ============================================================================
 
 /**
- * `log_base(f) [comparateur] log_base(g)`, `f(x)=x-p`, `g(x)=r-x`, `r<p` — CE (`f>0 ET g>0`)
- * TOUJOURS impossible (`x>p` et `x<r` avec `r<p` : aucune valeur commune). Écran unique : conclure
- * ∅ SANS résoudre l'inégalité principale.
+ * `log_base(f) [comparateur] log_base(g)`, `f(x)=x-p`, `g(x)=r-x`. CE : `x>p ET x<r`.
+ *
+ * **Refonte (audit 6e ch. 3, décision K3)** : la famille était TOUJOURS ∅ (`r<p` par construction),
+ * donc devinable sans réfléchir et gagnée par élimination. Elle mélange désormais, à parts égales,
+ * une CE incompatible (`r≤p`, `ceCompatible=false`, l'exercice s'arrête à l'écran de reconnaissance)
+ * et une CE satisfiable (`r>p`, `ceEcran1=]p;r[`) : l'élève doit alors résoudre l'inéquation sur la
+ * CE (`f [comparateur'] g ⇔ 2x [comparateur'] p+r`, sens inversé si `base<1`) — `solution` est cet
+ * ensemble intersecté avec la CE.
  */
 export interface ExerciceLogE {
   famille: "E";
   base: BaseLog;
+  baseSuperieureA1: boolean;
   p: number;
   r: number;
   comparateur: Comparateur;
+  ceCompatible: boolean;
+  /** `]p;r[` si `ceCompatible`, sinon ensemble vide (aucun morceau). */
+  ceEcran1: EnsembleReelGuide;
+  /** Ensemble-solution — vide si `!ceCompatible`. */
+  solution: EnsembleReelGuide;
 }
 
 // ============================================================================
