@@ -13,7 +13,7 @@
  * suffisant pour toute fraction générée par ce chantier (dénominateurs ≤10 en pratique).
  *
  * **Au-delà de `maxDenominateur`** (audit 6e ch. 3, point 22) : avant d'abandonner, la recherche
- * continue jusqu'à `DENOMINATEUR_ETENDU` avec une tolérance BEAUCOUP plus serrée (1e-9 relatif),
+ * continue jusqu'à `DENOMINATEUR_ETENDU` avec une tolérance BEAUCOUP plus serrée (≈1e-11 relatif),
  * qui ne reconnaît qu'un vrai rationnel calculé en flottant (ex. `5^{-3}=0.008000000000000002` →
  * 1/125), jamais un irrationnel approché par hasard. Le résultat pour toute valeur déjà reconnue
  * avec un dénominateur ≤ `maxDenominateur` est inchangé (même boucle, même ordre) : seul l'ancien
@@ -66,7 +66,9 @@ function retrouverFraction(valeur: number, maxDenominateur: number): [number, nu
   }
   for (let d = Math.max(2, maxDenominateur + 1); d <= DENOMINATEUR_ETENDU; d++) {
     const n = valeur * d;
-    if (Math.abs(n - Math.round(n)) < 1e-9 * Math.max(1, Math.abs(n))) return [Math.round(n), d];
+    // Tolérance relative à la VALEUR (erreur d'arrondi d'un vrai p/q calculé en flottant ≈ 1e-16·|v|·d),
+    // jamais au numérateur : sinon un irrationnel retombe trop souvent « sur » une fraction.
+    if (Math.abs(n - Math.round(n)) < 1e-11 * Math.max(1, Math.abs(valeur)) * d) return [Math.round(n), d];
   }
   return null;
 }

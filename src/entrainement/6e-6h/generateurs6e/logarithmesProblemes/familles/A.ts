@@ -18,10 +18,18 @@ import { arrondir, tirerDeuxEntiersDistinctsTries, tirerEntier, tirerParmi } fro
 const T_CIBLE_MIN = 2;
 const T_CIBLE_MAX = 15;
 
-function resoudreEntierPeriodes(Q0: number, r: number, tCibleVoulu: number): { cibleAffiche: number; tExact: number; tReponse: number } {
-  const cibleBrute = Q0 * Math.pow(r, tCibleVoulu);
-  const cibleAffiche = arrondir(cibleBrute, 0);
+/** Écart minimal entre le temps exact et l'entier le plus proche (audit chapitre 3 de 6e, K9) :
+ * avec un seuil arrondi, un temps exact du type 9,0014 transformait la réponse « 10 périodes » en
+ * piège d'arrondi (9 refusé alors que le seuil est atteint « quasiment » à 9). */
+const ECART_ENTIER_MIN = 0.1;
+
+function resoudreEntierPeriodes(Q0: number, r: number, tCibleVoulu: number): { cibleAffiche: number; tExact: number; tReponse: number } | null {
+  // Temps visé NON entier (partie fractionnaire entre 0,2 et 0,8) : le seuil affiché tombe entre
+  // deux périodes, jamais juste à côté d'un entier.
+  const tVise = tCibleVoulu + 0.2 + 0.6 * Math.random();
+  const cibleAffiche = arrondir(Q0 * Math.pow(r, tVise), 0);
   const tExact = Math.log(cibleAffiche / Q0) / Math.log(r);
+  if (Math.abs(tExact - Math.round(tExact)) < ECART_ENTIER_MIN) return null;
   return { cibleAffiche, tExact, tReponse: Math.ceil(tExact) };
 }
 
@@ -33,9 +41,13 @@ export function construireA_resoudreT(varianteForcee?: "simple" | "fenetre"): Ex
   const r = croissance ? 1 + p / 100 : 1 - p / 100;
   const contexte = tirerParmi(croissance ? CONTEXTES_A_CROISSANCE : CONTEXTES_A_DECROISSANCE);
 
-  const [tCible1, tCible2] = tirerDeuxEntiersDistinctsTries(T_CIBLE_MIN, T_CIBLE_MAX);
-  const un = resoudreEntierPeriodes(Q0, r, tCible1);
-  const deux = resoudreEntierPeriodes(Q0, r, tCible2);
+  let un: ReturnType<typeof resoudreEntierPeriodes> = null;
+  let deux: ReturnType<typeof resoudreEntierPeriodes> = null;
+  while (un === null || deux === null || un.tReponse === deux.tReponse) {
+    const [tCible1, tCible2] = tirerDeuxEntiersDistinctsTries(T_CIBLE_MIN, T_CIBLE_MAX);
+    un = resoudreEntierPeriodes(Q0, r, tCible1);
+    deux = resoudreEntierPeriodes(Q0, r, tCible2);
+  }
 
   return {
     famille: "A",

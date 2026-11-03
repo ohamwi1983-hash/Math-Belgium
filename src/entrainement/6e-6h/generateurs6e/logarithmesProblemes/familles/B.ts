@@ -36,5 +36,8 @@ export function construireB(): ExerciceLogProbB {
   const k = tirerParmi(K_POOL);
   const tCible = tRef + Math.log(k) / Math.log(r);
 
-  return { famille: "B", contexteId: contexte.id, t1, t2, v1, r, v2, v2Affiche, Q0, tRef, valeurRef, k, tCible };
+  // Taux recalculé depuis les valeurs AFFICHÉES (la seule chose que l'élève peut utiliser).
+  const rAffiche = Math.pow(v2Affiche / v1, 1 / delta);
+
+  return { famille: "B", contexteId: contexte.id, t1, t2, v1, r, rAffiche, v2, v2Affiche, Q0, tRef, valeurRef, k, tCible };
 }

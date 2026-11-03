@@ -14,8 +14,9 @@
  * choix). L'ordre inverse (calcul d'abord, formule de f' affichée pendant le choix) faisait du
  * choix graphique une simple évaluation de formule.
  *
- * **Constante `c`** (les 3 familles) : f(x) + c a la MÊME dérivée — décale le graphique de f
- * verticalement (aucune mémorisation d'une image possible) sans rien changer à f'.
+ * **Constante `c`** : f(x) + c a la MÊME dérivée — décale le graphique de f verticalement sans
+ * rien changer à f'. Tirée seulement en famille B (f monotone) ; toujours 0 en A et C, où le
+ * décalage forçait l'axe y=0 dans le cadre et aplatissait l'extremum de f.
  *
  * `candidats`/`indexCorrect` (les 3 familles) : même mécanisme que `6gen8`/`6gen5` — 4 candidats
  * déjà MÉLANGÉS à la génération (`indexCorrect` pointe vers celui qui est mathématiquement
@@ -26,7 +27,7 @@
  */
 
 // ============================================================================
-// Famille A — f(x) = k·log_base(x)/x + c, base∈{2,3,5,7}∪{e}, k∈{-3,-2,-1,1,2,3}, c∈{-1,0,1}.
+// Famille A — f(x) = k·log_base(x)/x, base∈{2,3,5,7}∪{e}, k∈{-3,-2,-1,1,2,3} (c = 0).
 // f'(x) = k·[1−ln(x)]/(x²·ln(base)) (ou sans le ln(base) si base=e).
 //
 // **Propriété structurelle** : le zéro de f' est TOUJOURS en x=e, quels que soient k et base — la
@@ -98,7 +99,7 @@ export interface ExerciceGraphiqueDeriveeLogB {
 }
 
 // ============================================================================
-// Famille C — f(x) = k·x·ln(x) + p·x + c, k∈{-3,-2,-1,1,2,3}, p∈{-1,0,1}, c∈{-1,0,1}.
+// Famille C — f(x) = k·x·ln(x) + p·x, k∈{-3,-2,-1,1,2,3}, p∈{-1,0,1} (c = 0).
 // f'(x) = k·(ln(x)+1) + p = k·(ln(x)+s) avec s = 1 + p/k.
 //
 // **Propriété structurelle** : le zéro de f' (l'extremum de f) est en x = e^(−s) — x=1/e quand

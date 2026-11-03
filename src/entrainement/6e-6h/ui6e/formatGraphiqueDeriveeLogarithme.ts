@@ -173,9 +173,13 @@ function fenetreX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number
       // ln(x)+1/x minimal en x=1 ; comportement aux 2 bornes (x→0+ ET x→+∞, tous deux vers +∞ en
       // magnitude, spec) visible sur une fenêtre resserrée (croissance/décroissance très rapide).
       return [0.08, 2.3];
-    case "C":
-      // Zéro (extremum de f) en x=e^(−s) ∈ [0,135 ; 1] ; courbe monotone.
-      return [0.04, 2.6];
+    case "C": {
+      // Fenêtre RELATIVE à l'extremum x0=e^(−s) ∈ [0,135 ; 1] : une fenêtre fixe [0,04 ; 2,6]
+      // rendait le creux de f invisible pour x0≈0,135. Les zéros x0/e et x0·e du distracteur
+      // "zeroMalPlace" restent dans [x0/5 ; 6·x0].
+      const x0 = Math.exp(-(1 + exercice.p / exercice.k));
+      return [Math.max(0.02, x0 / 5), 6 * x0];
+    }
   }
 }
 
@@ -189,8 +193,10 @@ function fenetreEchelleX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number,
       return [1, 7];
     case "B":
       return [0.3, 2.3];
-    case "C":
-      return [0.1, 2.6];
+    case "C": {
+      const x0 = Math.exp(-(1 + exercice.p / exercice.k));
+      return [x0 / 3, 6 * x0];
+    }
   }
 }
 

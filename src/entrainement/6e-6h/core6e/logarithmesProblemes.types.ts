@@ -1,6 +1,7 @@
 /**
  * Couche core (6e) — contrat pour `6gen22` ("Logarithmes : problèmes", chapitre 3 "Fonctions
- * logarithmes"). 7 familles STRUCTURELLEMENT DISJOINTES (union discriminée par `famille`, jamais
+ * logarithmes"). 5 familles STRUCTURELLEMENT DISJOINTES (A, B, C, E, F — D et G retirées, voir
+ * `generateurs6e/logarithmesProblemes/index.ts`) (union discriminée par `famille`, jamais
  * un seul type à champs `| null` partagés) — même principe que `exponentiellesProblemes.types.ts`
  * (6gen12) —, chacune tirée de façon ÉQUIPROBABLE (voir `generateurs6e/logarithmesProblemes/index.ts`).
  *
@@ -14,8 +15,7 @@
  * interne invisible à l'élève) — voir `generateurs6e/logarithmesProblemes/familles/*.ts` pour le
  * détail par famille.
  *
- * **Chaque famille référence un `contexteId`** (sauf famille D, familles E/G ont un contexte fixe
- * par construction) — résolu côté `ui6e/formatLogarithmesProblemes.ts` via les bassins de
+ * **Chaque famille référence un `contexteId`** (la famille E a un contexte fixe par construction) — résolu côté `ui6e/formatLogarithmesProblemes.ts` via les bassins de
  * `generateurs6e/logarithmesProblemes/contextes.ts` (jamais stocké en dur ici).
  *
  * **Portée** (spec 6gen22) : l'exercice "régression linéaire sur données linéarisées" (38 du
@@ -101,6 +101,8 @@ export interface ExerciceLogProbB {
   /** Taux EXACT choisi à la génération ("génération par construction") — réponse de l'écran 1. */
   r: number;
   /** v1·r^(t2-t1), valeur EXACTE. */
+  /** Taux recalculé depuis les valeurs affichées (v2Affiche/v1)^(1/Δt) — référence de l'écran 1. */
+  rAffiche: number;
   v2: number;
   /** v2 arrondi — seule valeur d'AFFICHAGE dans l'énoncé. */
   v2Affiche: number;
@@ -125,6 +127,8 @@ export type SensDemiVieC = "versT" | "versLambda";
 export interface ExerciceLogProbC {
   famille: "C";
   contexteId: string;
+  /** Unité de temps du contexte (« ans », « jours », « heures ») — jamais « unité arbitraire ». */
+  unite: string;
   sens: SensDemiVieC;
   /** Donné DIRECTEMENT si `sens==="versT"` (l'écran 1 déduit T), sinon DÉRIVÉ de `T` (voir
    * `familles/C.ts`) — dans les deux cas, valeur EXACTE utilisée par l'écran 2. */
@@ -144,20 +148,6 @@ export interface ExerciceLogProbC {
 }
 
 // ============================================================================
-// Famille D — Asymptote non nulle, valeur donnée directement (2 écrans, allégé vs 6gen14).
-// ============================================================================
-
-/** `k` reste SYMBOLIQUE (jamais généré numériquement, pas assez de données pour le déterminer —
- * spec explicite) : ce type n'a donc AUCUN champ `k`. */
-export interface ExerciceLogProbD {
-  famille: "D";
-  contexteId: string;
-  /** Ta < T0 (cohérent avec un refroidissement). */
-  Ta: number;
-  T0: number;
-}
-
-// ============================================================================
 // Famille E — Échelle logarithmique généralisée (pH, décibels, Richter) (4 écrans, la plus riche).
 // ============================================================================
 
@@ -168,6 +158,10 @@ export type SensEcran3E = "versDeltaL" | "versFacteur";
 export interface ExerciceLogProbE {
   famille: "E";
   contexteE: ContexteE;
+  /** Écran 4 (combinaison de 2 sources) présent UNIQUEMENT pour les décibels : additionner deux
+   * intensités sonores a un sens physique, additionner deux concentrations de pH ou deux énergies
+   * sismiques pour en faire « une » source n'en a pas. */
+  avecEcran4: boolean;
   /** `L = a·log10(X) + b` — valeurs EXACTES, propres à `contexteE` (voir `familles/E.ts`). */
   a: number;
   b: number;
@@ -223,34 +217,7 @@ export interface ExerciceLogProbF {
   t: number;
 }
 
-// ============================================================================
-// Famille G — Équilibre offre/demande, changement de variable (4 écrans).
-// ============================================================================
-
-export type SensEcran4G = "offre" | "demande";
-
-export interface ExerciceLogProbG {
-  famille: "G";
-  A: number;
-  B: number;
-  m: number;
-  x0: number;
-  /** A·(e^(m·x0)-1), valeur EXACTE — 1ʳᵉ réponse de l'écran 1. */
-  oX0: number;
-  /** B/(e^(m·x0)+1), valeur EXACTE — 2ᵉ réponse de l'écran 1. */
-  dX0: number;
-  /** sqrt((A+B)/A), valeur EXACTE — racine positive de l'équation en u de l'écran 2. */
-  uEquilibre: number;
-  /** ln(uEquilibre)/m, valeur EXACTE — réponse de l'écran 3 (prix d'équilibre). */
-  xEquilibre: number;
-  sensEcran4: SensEcran4G;
-  cibleEcran4: number;
-  /** Solution EXACTE de o(x)=cibleEcran4 ou d(x)=cibleEcran4 selon `sensEcran4` — réponse de
-   * l'écran 4. */
-  xEcran4: number;
-}
-
-export type ExerciceLogarithmesProblemes = ExerciceLogProbA | ExerciceLogProbB | ExerciceLogProbC | ExerciceLogProbD | ExerciceLogProbE | ExerciceLogProbF | ExerciceLogProbG;
+export type ExerciceLogarithmesProblemes = ExerciceLogProbA | ExerciceLogProbB | ExerciceLogProbC | ExerciceLogProbE | ExerciceLogProbF;
 
 export type FamilleLogarithmesProblemes = ExerciceLogarithmesProblemes["famille"];
 
