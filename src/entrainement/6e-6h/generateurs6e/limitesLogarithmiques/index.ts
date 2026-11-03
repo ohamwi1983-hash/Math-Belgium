@@ -11,16 +11,16 @@ import { construireC, construireCSousType } from "./familles/C";
  * tirage interne, qui resterait non déterministe.
  */
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
-  { id: "A-sous1", label: "A1 — k·ln(x)/P(x)" },
-  { id: "A-sous2", label: "A2 — exponentielle et puissance" },
+  { id: "A-sous1", label: "A1 — k·ln(x)/P(x) → 0" },
+  { id: "A-sous2", label: "A2 — baseˣ/P(x), x→±∞" },
   { id: "A-sous3", label: "A3 — quotient de logs (bases différentes)" },
-  { id: "A-sous4", label: "A4 — même polynôme des deux côtés" },
-  { id: "A-sous5", label: "A5 — mélange poly/exponentielle" },
+  { id: "A-sous4", label: "A4 — même polynôme dominant → 1" },
+  { id: "A-sous5", label: "A5 — mélange poly/exponentielle → 0" },
   { id: "B-quotient", label: "B1 — quotient de logs (base→1)" },
   { id: "B-produit", label: "B2 — produit (x−x0)·log(k)" },
   { id: "C-c1", label: "C1 — log_x(x+c), x→1±" },
-  { id: "C-c2", label: "C2 — x·baseˣ(c/x)" },
-  { id: "C-c3", label: "C3 — quotient en x→0" },
+  { id: "C-c2", label: "C2 — x·baseˣ(c/x), ∞×constante" },
+  { id: "C-c3", label: "C3 — numérateur ne s'annule pas" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceLimiteLogarithmique {

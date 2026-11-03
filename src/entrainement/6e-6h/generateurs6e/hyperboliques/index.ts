@@ -30,24 +30,22 @@ export type VarianteId =
   | "C"
   | "D";
 
-/** Libellés volontairement NEUTRES (jamais la parité attendue ni le nombre de valeurs attendues)
- * — le panneau reste réservé au développement, mais un libellé ne doit jamais trahir la réponse. */
 export const CATALOGUE_VARIANTES: { id: VarianteId; label: string }[] = [
-  { id: "A_shKx", label: "A — a·sh(kx)" },
-  { id: "A_chKx", label: "A — a·ch(kx)" },
-  { id: "A_shChProduit", label: "A — sh(x)·ch(x)" },
-  { id: "A_shCarre", label: "A — sh(x)²" },
-  { id: "A_chCarre", label: "A — ch(x)²" },
-  { id: "A_shPlusCh", label: "A — sh(x)+ch(x)" },
-  { id: "A_shMoinsCh", label: "A — sh(x)−ch(x)" },
-  { id: "A_shPlusConstante", label: "A — sh(x)+c" },
-  { id: "A_xSh", label: "A — x·sh(x)" },
-  { id: "A_xCh", label: "A — x·ch(x)" },
-  { id: "A_shCube", label: "A — sh(x)³" },
-  { id: "B_trouverCh", label: "B — donné sh(x₀), trouver ch(x₀)" },
-  { id: "B_trouverShSansSigne", label: "B — donné ch(x₀), trouver sh(x₀) (signe de x₀ non précisé)" },
-  { id: "B_trouverShSignePlus", label: "B — donné ch(x₀), trouver sh(x₀) (x₀ > 0)" },
-  { id: "B_trouverShSigneMoins", label: "B — donné ch(x₀), trouver sh(x₀) (x₀ < 0)" },
+  { id: "A_shKx", label: "A — sh(kx) [impaire]" },
+  { id: "A_chKx", label: "A — ch(kx) [paire]" },
+  { id: "A_shChProduit", label: "A — sh(x)·ch(x) [impaire]" },
+  { id: "A_shCarre", label: "A — sh(x)² [PAIRE — piège]" },
+  { id: "A_chCarre", label: "A — ch(x)² [paire]" },
+  { id: "A_shPlusCh", label: "A — sh(x)+ch(x) [ni l'une ni l'autre]" },
+  { id: "A_shMoinsCh", label: "A — sh(x)−ch(x) [ni l'une ni l'autre]" },
+  { id: "A_shPlusConstante", label: "A — sh(x)+c [ni l'une ni l'autre — piège]" },
+  { id: "A_xSh", label: "A — x·sh(x) [PAIRE — piège]" },
+  { id: "A_xCh", label: "A — x·ch(x) [impaire]" },
+  { id: "A_shCube", label: "A — sh(x)³ [impaire]" },
+  { id: "B_trouverCh", label: "B — donné sh, trouver ch (1 valeur)" },
+  { id: "B_trouverShSansSigne", label: "B — donné ch, trouver sh (signe non précisé, 2 valeurs)" },
+  { id: "B_trouverShSignePlus", label: "B — donné ch, trouver sh (x0>0, 1 valeur)" },
+  { id: "B_trouverShSigneMoins", label: "B — donné ch, trouver sh (x0<0, 1 valeur)" },
   { id: "C", label: "C — Dérivée et dérivée seconde de a·sh(kx)+b·ch(kx)" },
   { id: "D", label: "D — Limites en ±∞ de a·sh(x)+b·ch(x)" },
 ];

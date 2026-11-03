@@ -179,6 +179,21 @@ function fenetreX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number
   }
 }
 
+/** Sous-intervalle X sur lequel l'ÉCHELLE Y est calculée (la courbe reste tracée sur toute la
+ * fenêtre `fenetreX`). Famille A : la divergence en 1/x² près de 0 écrasait tout le reste — le
+ * zéro de f' en x=e (et l'extremum de f) devenait invisible, deux candidats paraissaient
+ * identiques. L'échelle est donc prise sur [1 ; 7], la partie proche de 0 sort du cadre. */
+function fenetreEchelleX(exercice: ExerciceGraphiqueDeriveeLogarithme): [number, number] {
+  switch (exercice.famille) {
+    case "A":
+      return [1, 7];
+    case "B":
+      return [0.3, 2.3];
+    case "C":
+      return [0.1, 2.6];
+  }
+}
+
 /**
  * Plafond de magnitude Y utilisé pour le calcul d'ÉCHELLE, PAR FAMILLE — une valeur qui le dépasse
  * est ignorée du calcul d'étendue Y (elle reste TRACÉE, `Plot.OfX` la porte simplement hors du
@@ -212,11 +227,12 @@ function finaliserViewBox(x: [number, number], y: [number, number]): ViewBoxGrap
  * (contrainte de la spec). */
 export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeLogarithme): ViewBoxGraphiqueDeriveeLogarithme {
   const [xMin, xMax] = fenetreX(exercice);
+  const [eMin, eMax] = fenetreEchelleX(exercice);
   const plafond = PLAFOND_STATS[exercice.famille];
   const valeurs: number[] = [];
   for (let index = 0; index < exercice.candidats.length; index++) {
     for (let i = 0; i <= 80; i++) {
-      const x = xMin + ((xMax - xMin) * i) / 80;
+      const x = eMin + ((eMax - eMin) * i) / 80;
       const y = evaluerCandidat(exercice, index, x);
       if (y === null || !Number.isFinite(y)) continue;
       if (Math.abs(y) > plafond) continue;
@@ -226,7 +242,7 @@ export function calculerViewBoxGraphique(exercice: ExerciceGraphiqueDeriveeLogar
   if (valeurs.length === 0) return finaliserViewBox([xMin, xMax], [-1, 1]);
   const yMinBrut = Math.min(...valeurs);
   const yMaxBrut = Math.max(...valeurs);
-  const marge = Math.max(0.4, (yMaxBrut - yMinBrut) * 0.15);
+  const marge = Math.max(0.05, (yMaxBrut - yMinBrut) * 0.15);
   return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
 }
 
@@ -241,10 +257,11 @@ const PLAFOND_FONCTION: Record<ExerciceGraphiqueDeriveeLogarithme["famille"], nu
  * l'abscisse d'un extremum), étendue Y propre à f. */
 export function calculerViewBoxFonction(exercice: ExerciceGraphiqueDeriveeLogarithme): ViewBoxGraphiqueDeriveeLogarithme {
   const [xMin, xMax] = fenetreX(exercice);
+  const [eMin, eMax] = fenetreEchelleX(exercice);
   const plafond = PLAFOND_FONCTION[exercice.famille];
   const valeurs: number[] = [];
   for (let i = 0; i <= 120; i++) {
-    const x = xMin + ((xMax - xMin) * i) / 120;
+    const x = eMin + ((eMax - eMin) * i) / 120;
     const y = evaluerFonction(exercice, x);
     if (y === null || !Number.isFinite(y) || Math.abs(y) > plafond) continue;
     valeurs.push(y);
@@ -252,7 +269,7 @@ export function calculerViewBoxFonction(exercice: ExerciceGraphiqueDeriveeLogari
   if (valeurs.length === 0) return finaliserViewBox([xMin, xMax], [-1, 1]);
   const yMinBrut = Math.min(...valeurs);
   const yMaxBrut = Math.max(...valeurs);
-  const marge = Math.max(0.4, (yMaxBrut - yMinBrut) * 0.15);
+  const marge = Math.max(0.05, (yMaxBrut - yMinBrut) * 0.15);
   return finaliserViewBox([xMin, xMax], [yMinBrut - marge, yMaxBrut + marge]);
 }
 
