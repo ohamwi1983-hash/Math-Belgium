@@ -45,7 +45,10 @@ interface Props {
 export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, labelAucune, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [aucune, setAucune] = useState(false);
   const [lignes, setLignes] = useState<string[]>([""]);
+  /** Dernière liste SOUMISE — les champs ne sont rouges que tant qu'ils la contiennent encore. */
+  const [lignesSoumises, setLignesSoumises] = useState<string[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const erronee = montrerErreurs && lignesSoumises !== null && lignesSoumises.length === lignes.length && lignesSoumises.every((l, i) => l === lignes[i]);
   const complet = aucune || (lignes.length > 0 && lignes.every((l) => l.trim() !== ""));
 
   function ajouterLigne() {
@@ -63,6 +66,7 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consi
   }
   function valider() {
     if (!complet) return;
+    setLignesSoumises(lignes);
     onValider(aucune ? [] : lignes);
   }
 
@@ -92,7 +96,7 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consi
             <div key={i}>
               <ApercuExpressionLatex texte={ligne} />
               <div className="field-row">
-                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} onChange={(e) => modifierLigne(i, e.target.value)} />
+                <input type="text" className={`text-input ${erronee ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} onChange={(e) => modifierLigne(i, e.target.value)} />
                 {lignes.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la valeur ${i + 1}`} onClick={() => retirerLigne(i)}>
                     ×

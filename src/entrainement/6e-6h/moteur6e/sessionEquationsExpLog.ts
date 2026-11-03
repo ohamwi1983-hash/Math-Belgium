@@ -8,7 +8,7 @@ import type { ExerciceEquationsExpLog, IssueSimplificationG } from "../core6e/eq
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { NIVEAU_AIDE_MAX_PAR_PHASE, phaseApres, phaseInitiale } from "./typesEquationsExpLog";
+import { NIVEAU_AIDE_MAX_PAR_PHASE, TENTATIVES_MAX_PAR_PHASE, phaseApres, phaseInitiale } from "./typesEquationsExpLog";
 import type { EtatSessionEquationsExpLog, PhaseEquationsExpLog, ResultatExerciceEquationsExpLog } from "./typesEquationsExpLog";
 import {
   verifierAEcran1,
@@ -23,9 +23,6 @@ import {
   verifierEEcran1,
   verifierEEcran2,
   verifierEEcran3,
-  verifierFEcran1,
-  verifierFEcran2,
-  verifierFEcran3,
   verifierGEcran1,
   verifierGEcran2,
 } from "./verificationEquationsExpLog";
@@ -53,12 +50,18 @@ export function demarrerSessionEquationsExpLog(reglages: ReglagesSession6e, gene
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Plafond de tentatives de la phase COURANTE — `TENTATIVES_MAX_PAR_PHASE` s'il en définit un
+ * (écran de choix fermé), sinon le réglage de session. Exporté pour l'affichage « tentative x/N ». */
+export function tentativesMaxCourant(etat: EtatSessionEquationsExpLog): number {
+  return TENTATIVES_MAX_PAR_PHASE[etat.phase] ?? etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEquationsExpLog): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 /** Plafond du niveau d'aide de la phase COURANTE — voir `NIVEAU_AIDE_MAX_PAR_PHASE`
- * (`typesEquationsExpLog.ts`) : uniformément 2, sauf `gEcran1` (0). */
+ * (`typesEquationsExpLog.ts`). */
 export function niveauAideMaxCourant(etat: EtatSessionEquationsExpLog): number {
   return NIVEAU_AIDE_MAX_PAR_PHASE[etat.phase];
 }
@@ -91,8 +94,6 @@ function construireResultat(exercice: ExerciceEquationsExpLog, scores: Partial<R
       return { famille: "D", exercice, scoreEcran1: scores.dEcran1 as number, scoreEcran2: scores.dEcran2 as number };
     case "E":
       return { famille: "E", exercice, scoreEcran1: scores.eEcran1 as number, scoreEcran2: scores.eEcran2 as number, scoreEcran3: scores.eEcran3 as number };
-    case "F":
-      return { famille: "F", exercice, scoreEcran1: scores.fEcran1 as number, scoreEcran2: scores.fEcran2 as number, scoreEcran3: scores.fEcran3 as number };
     case "G":
       return { famille: "G", exercice, scoreEcran1: scores.gEcran1 as number, scoreEcran2: scores.gEcran2 as number };
   }
@@ -195,20 +196,6 @@ export function soumettreReponseEEcran2(etat: EtatSessionEquationsExpLog, texte:
 }
 export function soumettreReponseEEcran3(etat: EtatSessionEquationsExpLog, textes: string[]): EtatSessionEquationsExpLog {
   return avancerPhase(etat, textes, (e, r) => (e.famille === "E" ? verifierEEcran3(e, r) : false), "eEcran3");
-}
-
-// ============================================================================
-// Famille F.
-// ============================================================================
-
-export function soumettreReponseFEcran1(etat: EtatSessionEquationsExpLog, reponse: EnsembleReelGuide): EtatSessionEquationsExpLog {
-  return avancerPhase(etat, reponse, (e, r) => (e.famille === "F" ? verifierFEcran1(e, r) : false), "fEcran1");
-}
-export function soumettreReponseFEcran2(etat: EtatSessionEquationsExpLog, texte: string): EtatSessionEquationsExpLog {
-  return avancerPhase(etat, texte, (e, r) => (e.famille === "F" ? verifierFEcran2(e, r) : false), "fEcran2");
-}
-export function soumettreReponseFEcran3(etat: EtatSessionEquationsExpLog, textes: string[]): EtatSessionEquationsExpLog {
-  return avancerPhase(etat, textes, (e, r) => (e.famille === "F" ? verifierFEcran3(e, r) : false), "fEcran3");
 }
 
 // ============================================================================

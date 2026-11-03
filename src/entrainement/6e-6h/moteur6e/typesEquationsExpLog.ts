@@ -1,5 +1,5 @@
 /**
- * Couche B (6e) — types pour `6gen14`. 7 familles STRUCTURELLEMENT DISJOINTES (2 ou 3 écrans selon
+ * Couche B (6e) — types pour `6gen14`. 6 familles STRUCTURELLEMENT DISJOINTES (A à E et G) (2 ou 3 écrans selon
  * la famille) — `phaseInitiale`/`phaseApres` dispatchent sur `exercice.famille`, jamais une
  * séquence commune (même principe que `typesExponentiellesProblemes.ts`, 6gen12).
  */
@@ -20,9 +20,6 @@ export type PhaseEquationsExpLog =
   | "eEcran1"
   | "eEcran2"
   | "eEcran3"
-  | "fEcran1"
-  | "fEcran2"
-  | "fEcran3"
   | "gEcran1"
   | "gEcran2";
 
@@ -38,8 +35,6 @@ export function phaseInitiale(exercice: ExerciceEquationsExpLog): PhaseEquations
       return "dEcran1";
     case "E":
       return "eEcran1";
-    case "F":
-      return "fEcran1";
     case "G":
       return "gEcran1";
   }
@@ -71,12 +66,6 @@ export function phaseApres(phase: PhaseEquationsExpLog): PhaseEquationsExpLog | 
       return "eEcran3";
     case "eEcran3":
       return "termine";
-    case "fEcran1":
-      return "fEcran2";
-    case "fEcran2":
-      return "fEcran3";
-    case "fEcran3":
-      return "termine";
     case "gEcran1":
       return "gEcran2";
     case "gEcran2":
@@ -84,10 +73,8 @@ export function phaseApres(phase: PhaseEquationsExpLog): PhaseEquationsExpLog | 
   }
 }
 
-/** Plafond du niveau d'aide, PAR PHASE — uniformément 2, SAUF `gEcran1` (0 : le prompt ne liste
- * aucune section "Aides écran 1" pour la famille G, contrairement à toutes les autres phases — un
- * écran "pose la CE et combine/simplifie en une seule fois", sans palier d'aide prévu). Même
- * convention "max=0 → pas de bouton" que `BoutonAide.tsx`. */
+/** Plafond du niveau d'aide, PAR PHASE — uniformément 2 (l'écran `gEcran1` a désormais ses propres
+ * aides, il n'en avait aucune). Même convention "max=0 → pas de bouton" que `BoutonAide.tsx`. */
 export const NIVEAU_AIDE_MAX_PAR_PHASE: Record<PhaseEquationsExpLog, number> = {
   aEcran1: 2,
   aEcran2: 2,
@@ -101,11 +88,15 @@ export const NIVEAU_AIDE_MAX_PAR_PHASE: Record<PhaseEquationsExpLog, number> = {
   eEcran1: 2,
   eEcran2: 2,
   eEcran3: 2,
-  fEcran1: 2,
-  fEcran2: 2,
-  fEcran3: 2,
-  gEcran1: 0,
+  gEcran1: 2,
   gEcran2: 2,
+};
+
+/** Plafond de tentatives PROPRE à une phase, prioritaire sur `reglages.tentativesMax` — le verdict
+ * de la famille G est un choix fermé à 3 issues : avec 3 tentatives il se gagnait toujours par
+ * élimination, il n'en a donc qu'une (même règle que les écrans de choix des autres générateurs). */
+export const TENTATIVES_MAX_PAR_PHASE: Partial<Record<PhaseEquationsExpLog, number>> = {
+  gEcran2: 1,
 };
 
 export type ResultatExerciceEquationsExpLog =
@@ -114,7 +105,6 @@ export type ResultatExerciceEquationsExpLog =
   | { famille: "C"; exercice: ExerciceEquationsExpLog; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
   | { famille: "D"; exercice: ExerciceEquationsExpLog; scoreEcran1: number; scoreEcran2: number }
   | { famille: "E"; exercice: ExerciceEquationsExpLog; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
-  | { famille: "F"; exercice: ExerciceEquationsExpLog; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
   | { famille: "G"; exercice: ExerciceEquationsExpLog; scoreEcran1: number; scoreEcran2: number };
 
 export interface EtatSessionEquationsExpLog {

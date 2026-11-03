@@ -35,11 +35,31 @@ function construireViolationCE(): Extract<ExerciceEqLogG, { type: "violationCE" 
  */
 function construireIdentite(): Extract<ExerciceEqLogG, { type: "identite" }> {
   const base = tirerParmi(BASES_G);
-  const m1 = tirerParmi(M_NON_NUL);
-  const m2 = tirerParmi(M_NON_NUL);
-  const n1 = tirerEntier(-5, 5);
-  const n2 = tirerEntier(-5, 5);
+  let m1 = 0;
+  let m2 = 0;
+  let n1 = 0;
+  let n2 = 0;
+  do {
+    m1 = tirerParmi(M_NON_NUL);
+    m2 = tirerParmi(M_NON_NUL);
+    n1 = tirerEntier(-5, 5);
+    n2 = tirerEntier(-5, 5);
+  } while (!ceIdentiteNonVide(m1, n1, m2, n2));
   return { famille: "G", type: "identite", base, m1, n1, m2, n2 };
+}
+
+/** CE de l'identité : `m1x+n1>0` ET `m2x+n2>0`. Deux demi-droites de sens opposés peuvent être
+ * disjointes (ex. x>3 et x<−1) — l'identité serait alors « vraie sur un domaine vide », verdict
+ * contradictoire : ces tirages sont rejetés (audit : 25 % des tirages avant correction). */
+function ceIdentiteNonVide(m1: number, n1: number, m2: number, n2: number): boolean {
+  const s1 = -n1 / m1;
+  const s2 = -n2 / m2;
+  if (m1 > 0 && m2 > 0) return true;
+  if (m1 < 0 && m2 < 0) return true;
+  // Sens opposés : intervalle ]borne de la croissante ; borne de la décroissante[.
+  const inf = m1 > 0 ? s1 : s2;
+  const sup = m1 > 0 ? s2 : s1;
+  return sup - inf > 1;
 }
 
 /**

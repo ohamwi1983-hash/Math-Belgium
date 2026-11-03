@@ -159,4 +159,61 @@ export function diagnostiquerEquationDifference(
   return "correct";
 }
 
+/**
+ * Variante de `diagnostiquerEquationDifference` qui accepte aussi tout MULTIPLE NON NUL de la
+ * différence de référence : gauche−droite doit valoir λ·`referenceDifference` pour un même λ≠0 à
+ * tous les points échantillonnés. Couvre les membres inversés (λ=−1) et une équation divisée ou
+ * multipliée par une constante (« t²−4t+3=0 » pour « 2t²−8t+6=0 ») — ajoutée pour `6gen14`, les
+ * fonctions existantes ci-dessus restent inchangées pour leurs autres appelants.
+ * λ est estimé par moindres carrés, puis chaque point est contrôlé avec une tolérance mise à
+ * l'échelle de |λ|. Si la référence est identiquement nulle (identité « 0=0 »), la différence doit
+ * l'être aussi.
+ */
+export function diagnostiquerEquationProportionnelle(
+  texte: string,
+  variable: string,
+  referenceDifference: (v: number) => number,
+  points: number[],
+  tolerance: number = TOLERANCE_DEFAUT,
+): StatutVerification {
+  const separe = separerEquationTexte(texte);
+  if (separe === null) return "parse_error";
+  const diffs: number[] = [];
+  const refs: number[] = [];
+  for (const v of points) {
+    const attendu = referenceDifference(v);
+    if (!Number.isFinite(attendu)) continue;
+    let gauche: number;
+    let droite: number;
+    try {
+      gauche = evaluerExpressionExponentielle(separe.gauche, { [variable]: v });
+      droite = evaluerExpressionExponentielle(separe.droite, { [variable]: v });
+    } catch {
+      return "parse_error";
+    }
+    const diff = gauche - droite;
+    if (!Number.isFinite(diff)) return "not_equivalent";
+    diffs.push(diff);
+    refs.push(attendu);
+  }
+  if (diffs.length < Math.min(3, points.length)) return "parse_error";
+  const normeRef = Math.max(...refs.map((r) => Math.abs(r)));
+  if (normeRef <= tolerance) {
+    return diffs.every((d) => Math.abs(d) <= tolerance) ? "correct" : "not_equivalent";
+  }
+  let produit = 0;
+  let carre = 0;
+  for (let i = 0; i < refs.length; i++) {
+    produit += diffs[i] * refs[i];
+    carre += refs[i] * refs[i];
+  }
+  const lambda = produit / carre;
+  if (Math.abs(lambda) < 1e-6) return "not_equivalent";
+  const toleranceEchelle = tolerance * Math.max(1, Math.abs(lambda));
+  for (let i = 0; i < refs.length; i++) {
+    if (Math.abs(diffs[i] - lambda * refs[i]) > toleranceEchelle) return "not_equivalent";
+  }
+  return "correct";
+}
+
 export { evaluerExpressionExponentielle };

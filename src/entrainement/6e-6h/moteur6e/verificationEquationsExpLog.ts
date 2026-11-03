@@ -1,7 +1,7 @@
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
-import type { ExerciceEqLogA, ExerciceEqLogB, ExerciceEqLogC, ExerciceEqLogD, ExerciceEqLogE, ExerciceEqLogF, ExerciceEqLogG, IssueSimplificationG } from "../core6e/equationsExpLog.types";
+import type { ExerciceEqLogA, ExerciceEqLogB, ExerciceEqLogC, ExerciceEqLogD, ExerciceEqLogE, ExerciceEqLogG, IssueSimplificationG } from "../core6e/equationsExpLog.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerEnsembleValeurs, diagnostiquerEquationDifference, diagnostiquerEquationTexte, diagnostiquerValeur } from "./equivalenceExponentielle";
+import { diagnostiquerEnsembleValeurs, diagnostiquerEquationProportionnelle, diagnostiquerValeur } from "./equivalenceExponentielle";
 import { verifierEnsembleReelGuide } from "./verificationEnsembleReel";
 
 /**
@@ -16,21 +16,22 @@ import { verifierEnsembleReelGuide } from "./verificationEnsembleReel";
  * de risque de `parse_error` sur une saisie guidée par boutons.
  *
  * **Tolérances** : `TOLERANCE_EXACTE` (1e-3) pour toute valeur numérique EXACTE (potentiellement
- * irrationnelle) issue d'une arithmétique déterministe (familles A, B, C, D) ; `TOLERANCE_LARGE`
- * (5e-2) pour les comparaisons d'ÉQUATIONS/EXPRESSIONS par échantillonnage numérique (marge pour
- * l'arrondi de calcul de l'élève, même ordre que `TOLERANCE_EXPRESSION` de 6gen12) ;
- * `TOLERANCE_F` (0,05, proportionnellement large) pour la famille F — la SEULE où le prompt accepte
- * explicitement une tolérance numérique sur la valeur finale ("réponses potentiellement
- * irrationnelles... vérification symbolique/numérique tolérante, pas de forme exacte imposée").
+ * irrationnelle) issue d'une arithmétique déterministe — une valeur arrondie au MILLIÈME (écart
+ * ≤ 5e-4) passe toujours, ce que dit la consigne ; `TOLERANCE_LARGE` (5e-2) pour les comparaisons
+ * d'ÉQUATIONS par échantillonnage numérique (marge pour l'arrondi de calcul de l'élève).
+ *
+ * **Équations** : comparées via `diagnostiquerEquationProportionnelle` — gauche−droite doit être un
+ * MULTIPLE NON NUL de la différence de référence. Accepte donc les membres inversés, une équation
+ * divisée par son coefficient dominant, ou tout déplacement de terme (audit : ces formes justes
+ * étaient refusées à 100 %). Les RACINES de la référence s'ajoutent aux points échantillonnés : une
+ * équation équivalente doit s'y annuler aussi, ce qui écarte une équation fausse quasi
+ * proportionnelle (référence presque constante sur les points fixes, racine lointaine).
  */
 const TOLERANCE_EXACTE = 1e-3;
 const TOLERANCE_LARGE = 0.05;
-const TOLERANCE_F = 0.05;
 
 const POINTS_X = [-4, -3, -2, -1, -0.5, 0.5, 1, 2, 3, 4, 5];
 const POINTS_T = [0.1, 0.5, 1, 1.5, 2, 3, 4, 5, 7, 10];
-/** Évite 0 (famille F écran 2, l'équation manipule `1/y`). */
-const POINTS_Y = [-4, -3, -2, -1, 1, 2, 3, 4];
 
 // ============================================================================
 // Famille A — 2 écrans.
@@ -54,7 +55,8 @@ export function verifierAEcran2(exercice: ExerciceEqLogA, texte: string): boolea
 // ============================================================================
 
 export function diagnostiquerBEcran1(exercice: ExerciceEqLogB, texte: string): StatutVerification {
-  return diagnostiquerEquationTexte(texte, (x) => (exercice.m1 * x + exercice.n1) * Math.log(exercice.base1), (x) => (exercice.m2 * x + exercice.n2) * Math.log(exercice.base2), POINTS_X, TOLERANCE_LARGE);
+  const { m1, n1, m2, n2, base1, base2 } = exercice;
+  return diagnostiquerEquationProportionnelle(texte, "x", (x) => (m1 * x + n1) * Math.log(base1) - (m2 * x + n2) * Math.log(base2), [...POINTS_X, exercice.x], TOLERANCE_LARGE);
 }
 export function diagnostiquerBEcran2(exercice: ExerciceEqLogB, texte: string): StatutVerification {
   return diagnostiquerValeur(texte, exercice.x, TOLERANCE_EXACTE);
@@ -71,7 +73,10 @@ export function verifierBEcran2(exercice: ExerciceEqLogB, texte: string): boolea
 // ============================================================================
 
 export function diagnostiquerCEcran1(exercice: ExerciceEqLogC, texte: string): StatutVerification {
-  return diagnostiquerEquationDifference(texte, "t", (t) => exercice.A * t * t + exercice.B * t + exercice.Cc, POINTS_T, TOLERANCE_LARGE);
+  const { A, B, Cc } = exercice;
+  const discriminant = B * B - 4 * A * Cc;
+  const racines = discriminant >= 0 ? [(-B - Math.sqrt(discriminant)) / (2 * A), (-B + Math.sqrt(discriminant)) / (2 * A)] : [];
+  return diagnostiquerEquationProportionnelle(texte, "t", (t) => A * t * t + B * t + Cc, [...POINTS_T, ...racines], TOLERANCE_LARGE);
 }
 export function diagnostiquerCEcran2(exercice: ExerciceEqLogC, textes: string[]): StatutVerification {
   return diagnostiquerEnsembleValeurs(textes, exercice.tValides, TOLERANCE_EXACTE);
@@ -93,23 +98,12 @@ export function verifierCEcran3(exercice: ExerciceEqLogC, textes: string[]): boo
 // Famille D — 2 écrans.
 // ============================================================================
 
-/** CE attendue, différente selon le sous-type (piège central de la famille, spec explicite) :
- * D1 (`x` = base) : `ℝ₀⁺\{1}` = `]0;1[∪]1;+∞[`. D2 (`x` = argument) : `]0;+∞[`. */
-export function ceAttendueD(exercice: ExerciceEqLogD): EnsembleReelGuide {
-  if (exercice.sousType === "D1") {
-    return {
-      forme: "intervalles",
-      points: [],
-      morceaux: [
-        { inf: 0, sup: 1, infInclus: false, supInclus: false },
-        { inf: 1, sup: null, infInclus: false, supInclus: false },
-      ],
-    };
-  }
+/** CE attendue : `x` est l'ARGUMENT du logarithme (base connue) ⟹ `]0;+∞[`. */
+export function ceAttendueD(): EnsembleReelGuide {
   return { forme: "intervalles", points: [], morceaux: [{ inf: 0, sup: null, infInclus: false, supInclus: false }] };
 }
-export function verifierDEcran1(exercice: ExerciceEqLogD, reponse: EnsembleReelGuide): boolean {
-  return verifierEnsembleReelGuide(reponse, ceAttendueD(exercice));
+export function verifierDEcran1(_exercice: ExerciceEqLogD, reponse: EnsembleReelGuide): boolean {
+  return verifierEnsembleReelGuide(reponse, ceAttendueD());
 }
 export function diagnostiquerDEcran2(exercice: ExerciceEqLogD, texte: string): StatutVerification {
   return diagnostiquerValeur(texte, exercice.x, TOLERANCE_EXACTE);
@@ -130,7 +124,7 @@ export function verifierEEcran1(exercice: ExerciceEqLogE, reponse: EnsembleReelG
 }
 export function diagnostiquerEEcran2(exercice: ExerciceEqLogE, texte: string): StatutVerification {
   const { p, q, e, d } = exercice;
-  return diagnostiquerEquationDifference(texte, "x", (x) => x * x - (p + q + e) * x + (p * q - d), POINTS_X, TOLERANCE_LARGE);
+  return diagnostiquerEquationProportionnelle(texte, "x", (x) => x * x - (p + q + e) * x + (p * q - d), [...POINTS_X, ...exercice.racinesAlgebriques], TOLERANCE_LARGE);
 }
 export function diagnostiquerEEcran3(exercice: ExerciceEqLogE, textes: string[]): StatutVerification {
   return diagnostiquerEnsembleValeurs(textes, exercice.solutionsFinales, TOLERANCE_EXACTE);
@@ -140,43 +134,6 @@ export function verifierEEcran2(exercice: ExerciceEqLogE, texte: string): boolea
 }
 export function verifierEEcran3(exercice: ExerciceEqLogE, textes: string[]): boolean {
   return diagnostiquerEEcran3(exercice, textes) === "correct";
-}
-
-// ============================================================================
-// Famille F — 3 écrans.
-// ============================================================================
-
-export function ceAttendueF(): EnsembleReelGuide {
-  return {
-    forme: "intervalles",
-    points: [],
-    morceaux: [
-      { inf: 0, sup: 1, infInclus: false, supInclus: false },
-      { inf: 1, sup: null, infInclus: false, supInclus: false },
-    ],
-  };
-}
-export function verifierFEcran1(_exercice: ExerciceEqLogF, reponse: EnsembleReelGuide): boolean {
-  return verifierEnsembleReelGuide(reponse, ceAttendueF());
-}
-export function diagnostiquerFEcran2(exercice: ExerciceEqLogF, texte: string): StatutVerification {
-  return diagnostiquerEquationDifference(texte, "y", (y) => y + 1 / y - exercice.k, POINTS_Y, TOLERANCE_LARGE);
-}
-/** Tolérance ABSOLUE mais PROPORTIONNÉE à l'échelle des valeurs comparées (`x=a^y`, amplitude très
- * variable d'un tirage à l'autre) — même principe que `toleranceArrondie` (6gen12). */
-function toleranceRelativeF(valeurs: number[]): number {
-  const echelle = Math.max(1, ...valeurs.map((v) => Math.abs(v)));
-  return TOLERANCE_F * echelle;
-}
-
-export function diagnostiquerFEcran3(exercice: ExerciceEqLogF, textes: string[]): StatutVerification {
-  return diagnostiquerEnsembleValeurs(textes, exercice.xValides, toleranceRelativeF(exercice.xValides));
-}
-export function verifierFEcran2(exercice: ExerciceEqLogF, texte: string): boolean {
-  return diagnostiquerFEcran2(exercice, texte) === "correct";
-}
-export function verifierFEcran3(exercice: ExerciceEqLogF, textes: string[]): boolean {
-  return diagnostiquerFEcran3(exercice, textes) === "correct";
 }
 
 // ============================================================================
@@ -203,7 +160,8 @@ export function issueAttendueG(exercice: ExerciceEqLogG): IssueSimplificationG {
 }
 
 export function diagnostiquerGEcran1(exercice: ExerciceEqLogG, texte: string): StatutVerification {
-  return diagnostiquerEquationDifference(texte, "x", referenceDifferenceG(exercice), POINTS_X, TOLERANCE_LARGE);
+  const racines = exercice.type === "violationCE" ? [(exercice.n2 - exercice.n1) / (exercice.m1 - exercice.m2)] : [];
+  return diagnostiquerEquationProportionnelle(texte, "x", referenceDifferenceG(exercice), [...POINTS_X, ...racines], TOLERANCE_LARGE);
 }
 export function verifierGEcran1(exercice: ExerciceEqLogG, texte: string): boolean {
   return diagnostiquerGEcran1(exercice, texte) === "correct";
