@@ -20,12 +20,16 @@ function GroupeAsymptote({
   etat,
   erreur,
   forcerPresence,
+  touche,
   onChange,
 }: {
   label: string;
   etat: ReponseAsymptoteDirection;
   erreur: boolean;
   forcerPresence: boolean;
+  /** `false` tant que l'élève n'a rien choisi : aucun bouton ne paraît pré-sélectionné (sinon
+   * « Aucune asymptote » semblait choisi alors que Valider restait grisé). */
+  touche: boolean;
   onChange: (e: ReponseAsymptoteDirection) => void;
 }) {
   return (
@@ -35,7 +39,7 @@ function GroupeAsymptote({
       </p>
       {!forcerPresence && (
         <div className="options-grid-compact">
-          <button type="button" className={`btn ${etat.existe === false ? "toggle-active" : ""} ${erreur && etat.existe === false ? "is-erronee" : ""}`} onClick={() => onChange({ existe: false, texte: etat.texte })}>
+          <button type="button" className={`btn ${touche && etat.existe === false ? "toggle-active" : ""} ${erreur && etat.existe === false ? "is-erronee" : ""}`} onClick={() => onChange({ existe: false, texte: etat.texte })}>
             Aucune asymptote
           </button>
           <button type="button" className={`btn ${etat.existe === true ? "toggle-active" : ""} ${erreur && etat.existe === true ? "is-erronee" : ""}`} onClick={() => onChange({ existe: true, texte: etat.texte })}>
@@ -101,8 +105,8 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, labels, fo
   const tousComplets = labels.every((_, i) => complet(i));
 
   function majEtat(index: number, nouvel: ReponseAsymptoteDirection) {
-    setEtats(etats.map((e, i) => (i === index ? nouvel : e)));
-    setTouches(touches.map((t, i) => (i === index ? true : t)));
+    setEtats((courants) => courants.map((e, i) => (i === index ? nouvel : e)));
+    setTouches((courants) => courants.map((t, i) => (i === index ? true : t)));
   }
 
   function valider() {
@@ -125,7 +129,7 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, labels, fo
         <RenduFragments fragments={consigneEcran} />
       </p>
       {labels.map((l, i) => (
-        <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={refusee(i)} forcerPresence={forcerPresence[i]} onChange={(e) => majEtat(i, e)} />
+        <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={refusee(i)} forcerPresence={forcerPresence[i]} touche={touches[i]} onChange={(e) => majEtat(i, e)} />
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">

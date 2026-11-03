@@ -2445,8 +2445,10 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Étudier une fonction (synthèse)',
           generatorId: '6gen21',
           description: [
-            'Mène une étude complète (domaine, limites, asymptotes, variation, extremum, ' +
-              'concavité) sur une fonction construite avec un logarithme, comme ln(x)/x.',
+            'Mène une étude complète en 6 écrans (domaine, limites, asymptotes, variation, ' +
+              'extremum, concavité) sur cinq familles logarithmiques — k(ln x + c)/x, ' +
+              '(bx)^(ax) + c, ln|trinôme|, ln(trinôme toujours positif), m(ln x + c/x) — puis ' +
+              'choisis le bon graphique, en une seule tentative.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 21. Étudier une fonction (synthèse) »',
@@ -2522,6 +2524,34 @@ export const fonctionsLogarithmes: ChapterContent = {
                 '$e^{-\\lambda T} = \\dfrac{1}{2} \\implies -\\lambda T = \\ln(1/2) = -\\ln(2) ' +
                 '\\implies T = \\dfrac{\\ln(2)}{\\lambda}$',
             },
+            {
+              kind: 'para',
+              text:
+                'Ordres de grandeur réels : le **carbone 14** a une demi-vie d\'environ ' +
+                '**5 730 ans** (datation des restes organiques), l\'**iode 131** d\'environ ' +
+                '**8,02 jours** (médecine nucléaire). La demi-vie ne dépend que de $\\lambda$, ' +
+                'jamais de la quantité initiale $N_0$.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — combiner deux niveaux sonores',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB, où $I$ est l\'intensité. ' +
+                'Deux machines produisent chacune **60 dB**. Quel est le niveau quand elles ' +
+                'fonctionnent ensemble ?',
+            },
+            {
+              kind: 'para',
+              text:
+                'Ce sont les **intensités** qui s\'additionnent, pas les niveaux : $I_{total} = 2I$, ' +
+                'donc $L_{total} = 10\\log_{10}(2I/I_0) = 60 + 10\\log_{10}(2) \\approx 63$ dB.',
+            },
+            { kind: 'para', text: 'Jamais 120 dB : doubler l\'intensité n\'ajoute qu\'environ 3 dB.' },
           ],
         },
         {
@@ -2572,8 +2602,9 @@ export const fonctionsLogarithmes: ChapterContent = {
           generatorId: '6gen22',
           description: [
             'Modélise une situation concrète (échelles logarithmiques comme le pH ou les ' +
-              'décibels, demi-vie radioactive, croissance logistique) à partir d\'un contexte ' +
-              'narratif, en isolant l\'inconnue via ln.',
+              'décibels, y compris la combinaison de deux niveaux sonores ; demi-vies réelles ' +
+              'comme le carbone 14 ou l\'iode 131 ; croissance logistique) à partir d\'un ' +
+              'contexte narratif, en isolant l\'inconnue via ln.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 22. Logarithmes : problèmes »',

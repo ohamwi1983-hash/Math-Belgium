@@ -84,7 +84,7 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, labels, aideN
   const tousComplets = etats.every(complet);
 
   function majEtat(index: number, nouvel: EtatLocal) {
-    setEtats(etats.map((e, i) => (i === index ? nouvel : e)));
+    setEtats((courants) => courants.map((e, i) => (i === index ? nouvel : e)));
   }
 
   function valider() {
