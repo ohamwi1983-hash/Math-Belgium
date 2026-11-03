@@ -86,6 +86,11 @@ function construireArbre(ordre: readonly ("produit" | "quotient" | "puissance" |
   let prochaineVariable: NomVariable = "N";
   let aN = false;
   let aP = false;
+  // Exposant p et indice k toujours DIFFÉRENTS quand puissance et racine coexistent : p = k donnait
+  // un exercice dégénéré (`(∜X)⁴`, `∛(M³)`) où l'étape de la racine ne transformait rien
+  // (audit 6e ch.3, ~1 tirage sur 3 de ces combinaisons).
+  const p = tirerParmi(EXPOSANTS);
+  const k = tirerParmi(EXPOSANTS.filter((e) => e !== p));
   for (const caracteristique of ordre) {
     if (caracteristique === "produit" || caracteristique === "quotient") {
       noeud = { kind: caracteristique, gauche: noeud, droite: { kind: "var", nom: prochaineVariable } };
@@ -93,9 +98,9 @@ function construireArbre(ordre: readonly ("produit" | "quotient" | "puissance" |
       else aP = true;
       prochaineVariable = prochaineVariable === "N" ? "P" : "N";
     } else if (caracteristique === "puissance") {
-      noeud = { kind: "puissance", interieur: noeud, p: tirerParmi(EXPOSANTS) };
+      noeud = { kind: "puissance", interieur: noeud, p };
     } else {
-      noeud = { kind: "racine", interieur: noeud, k: tirerParmi(EXPOSANTS) };
+      noeud = { kind: "racine", interieur: noeud, k };
     }
   }
   return { arbre: noeud, aN, aP };

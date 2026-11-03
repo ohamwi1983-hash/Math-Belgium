@@ -49,7 +49,8 @@ interface Props {
  * demandée) → bloc de travail. Plus de bloc "données" séparé listant m/n/q/c : ces lettres sont
  * introduites DANS la phrase de `consigneGenerale` elle-même (voir
  * `ui6e/formatProprietesLogarithme.ts`), jamais répétées à part sans valeur à montrer.
- * `App6gen13.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
+ * `App6gen13.tsx` doit le rendre avec une `key` incluant le numéro d'exercice ET l'écran (remet le
+ * champ à vide à chaque écran comme après « Générer »).
  */
 export function EtapeProprieteLogarithme({
   consigneGenerale,
@@ -69,11 +70,16 @@ export function EtapeProprieteLogarithme({
   validation,
 }: Props) {
   const [texte, setTexte] = useState("");
+  /** Dernier texte SOUMIS — seul lui est marqué en rouge après un refus ; dès que l'élève modifie
+   * le champ, le rouge disparaît (jamais une saisie neuve marquée fausse avant validation). */
+  const [texteSoumis, setTexteSoumis] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
+  const champRefuse = montrerErreurs && texteSoumis !== null && texte === texteSoumis;
+  const dernierStatut = montrerErreurs && diagnostiquer && texteSoumis !== null ? diagnostiquer(texteSoumis) : null;
 
   function valider() {
     if (texte.trim() === "") return;
+    setTexteSoumis(texte);
     onValider(texte);
   }
 
@@ -101,7 +107,7 @@ export function EtapeProprieteLogarithme({
       <div className="field">
         <input
           type="text"
-          className={`text-input ${montrerErreurs ? "is-erronee" : ""}`}
+          className={`text-input ${champRefuse ? "is-erronee" : ""}`}
           value={texte}
           placeholder={placeholder}
           onChange={(e) => setTexte(e.target.value)}

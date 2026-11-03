@@ -3,6 +3,7 @@ import type { VariablesLibres } from "../core6e/decompositionLogarithme";
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { evaluerExpressionExponentielle } from "./expressionExponentielle";
+import { caracteristiqueDeLEtape, ecranDeLaPhase } from "./typesProprietesLogarithme";
 import type { PhaseProprietesLogarithme } from "./typesProprietesLogarithme";
 
 /**
@@ -33,6 +34,18 @@ const POINTS_Q = [3.333, 0.8, -2.5, 6.123, 1.01, -5.5, 4.44];
 const POINTS_R = [4.567, -0.6, 7.25, 1.11, -3.8, 5.05, 0.99];
 const POINTS_C = [1.789, 3.14, -1.1, 0.654, 8.2, -2.22, 6.05];
 
+/** Lettres-variables de l'exercice (m, n, q, r, c) : un mot formé UNIQUEMENT de ces lettres
+ * (`mc`, `nc`, `mnc`…) est un PRODUIT IMPLICITE, jamais un identifiant inconnu — l'évaluateur partagé
+ * lit tout mot de plusieurs lettres comme un seul nom, si bien que la forme développée naturelle
+ * « mc + nc » du changement de base était refusée (erreur de syntaxe, audit 6e ch.3). Découpage
+ * LOCAL, avant l'appel à l'évaluateur (aucun nom de fonction n'est formé de ces seules lettres). */
+const MOT_DE_VARIABLES = /[a-zA-Z]+/g;
+const LETTRES_VARIABLES = /^[mnqrc]+$/;
+
+export function decouperProduitsImplicites(texte: string): string {
+  return texte.replace(MOT_DE_VARIABLES, (mot) => (mot.length > 1 && LETTRES_VARIABLES.test(mot) ? mot.split("").join("*") : mot));
+}
+
 /** Compare un texte (variables libres m,n,q,r,c) à une référence fermée, en échantillonnant 7
  * points indépendants — jamais de bibliothèque d'algèbre symbolique (voir en-tête de fichier). */
 export function diagnostiquerEquivalenceLogarithme(
@@ -47,7 +60,7 @@ export function diagnostiquerEquivalenceLogarithme(
     if (!Number.isFinite(attendu)) continue;
     let soumis: number;
     try {
-      soumis = evaluerExpressionExponentielle(texte, vars as unknown as Record<string, number>);
+      soumis = evaluerExpressionExponentielle(decouperProduitsImplicites(texte), vars as unknown as Record<string, number>);
     } catch {
       return "parse_error";
     }
@@ -60,22 +73,27 @@ export function diagnostiquerEquivalenceLogarithme(
   return "correct";
 }
 
-/** Référence (fonction de variables libres) de l'écran algébrique `phase`. */
-export function referenceEcranAlgebrique(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): (vars: VariablesLibres) => number {
+/** Référence (fonction de variables libres) de l'étape algébrique `etape` (index d'étape, pas
+ * d'écran — voir `typesProprietesLogarithme.ts::sequenceEcrans`). */
+export function referenceEtapeAlgebrique(exercice: ExerciceProprieteLogarithme, etape: number): (vars: VariablesLibres) => number {
   const etats = calculerEtatsArgument(exercice.arbre);
   const etapesArgument = etats.length - 1;
-  if (phase < etapesArgument) {
-    const etatCible = etats[phase + 1];
+  if (etape < etapesArgument) {
+    const etatCible = etats[etape + 1];
     return (vars) => etatVersValeur(etatCible, vars);
   }
   // Étape de changement de base — toujours la DERNIÈRE étape algébrique quand elle existe
-  // (`phase === etapesArgument`), jamais atteinte autrement (garde-fou côté appelant).
+  // (`etape === etapesArgument`), jamais atteinte autrement (garde-fou côté appelant).
   const etatFinal = etats[etapesArgument];
   return (vars) => etatVersValeur(etatFinal, vars) * (vars.c as number);
 }
 
+/** Statut à 3 valeurs d'un écran de TRANSFORMATION (champ texte). Un écran de choix n'a pas de
+ * statut de syntaxe : `verifierEcran` le compare directement à la caractéristique attendue. */
 export function diagnostiquerEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme, texte: string): StatutVerification {
-  return diagnostiquerEquivalenceLogarithme(texte, referenceEcranAlgebrique(exercice, phase));
+  const ecran = ecranDeLaPhase(exercice, phase);
+  if (ecran.kind === "choix") return texte === caracteristiqueDeLEtape(exercice, ecran.etape) ? "correct" : "not_equivalent";
+  return diagnostiquerEquivalenceLogarithme(texte, referenceEtapeAlgebrique(exercice, ecran.etape));
 }
 
 export function verifierEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme, texte: string): boolean {

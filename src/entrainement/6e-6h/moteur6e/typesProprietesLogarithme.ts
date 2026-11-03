@@ -14,17 +14,57 @@
  * À L'EXÉCUTION.
  */
 import { calculerEtatsArgument } from "../core6e/decompositionLogarithme";
+import type { Caracteristique, Noeud } from "../core6e/decompositionLogarithme";
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
+/** Index de l'ÉCRAN courant dans `sequenceEcrans(exercice)` (pas l'index de l'étape algébrique). */
 export type PhaseProprietesLogarithme = number;
 
-/** Nombre d'écrans de l'exercice — un par caractéristique de la combinaison (produit/quotient/
- * puissance/racine/changementBase), AUCUN écran supplémentaire. */
+/**
+ * Un écran de l'exercice (audit 6e ch.3, décision K1) : chaque étape algébrique d'ARGUMENT
+ * (produit/quotient/puissance/racine) est précédée d'un écran « choix » où l'élève reconnaît
+ * lui-même la propriété à appliquer (une seule tentative), puis d'un écran « transformation » où il
+ * l'applique. L'étape de changement de base (toujours la dernière, voir
+ * `core6e/decompositionLogarithme.ts`) n'a PAS d'écran de choix : à ce moment l'argument est
+ * entièrement décomposé et la consigne demande explicitement `log_b(...)`, le choix serait forcé.
+ * `etape` = index de l'étape algébrique (0 … `nombreEtapesAlgebriques - 1`).
+ */
+export type EcranProprietesLogarithme = { kind: "choix"; etape: number } | { kind: "transformation"; etape: number };
+
+/** Nombre d'étapes ALGÉBRIQUES — une par caractéristique de la combinaison (produit/quotient/
+ * puissance/racine/changementBase). */
 export function nombreEtapesAlgebriques(exercice: ExerciceProprieteLogarithme): number {
   const etapesArgument = calculerEtatsArgument(exercice.arbre).length - 1;
   return etapesArgument + (exercice.avecChangementBase ? 1 : 0);
+}
+
+/** Caractéristique RÉELLEMENT testée à l'étape algébrique donnée — déduite du nœud pelé à cette
+ * étape (ou "changementBase" pour la dernière étape quand l'exercice l'inclut). */
+export function caracteristiqueDeLEtape(exercice: ExerciceProprieteLogarithme, etape: number): Caracteristique {
+  const etats = calculerEtatsArgument(exercice.arbre);
+  const etapesArgument = etats.length - 1;
+  if (etape < etapesArgument) return (etats[etape].reste as Exclude<Noeud, { kind: "var" }>).kind;
+  return "changementBase";
+}
+
+export function sequenceEcrans(exercice: ExerciceProprieteLogarithme): EcranProprietesLogarithme[] {
+  const ecrans: EcranProprietesLogarithme[] = [];
+  const total = nombreEtapesAlgebriques(exercice);
+  for (let etape = 0; etape < total; etape++) {
+    if (caracteristiqueDeLEtape(exercice, etape) !== "changementBase") ecrans.push({ kind: "choix", etape });
+    ecrans.push({ kind: "transformation", etape });
+  }
+  return ecrans;
+}
+
+export function ecranDeLaPhase(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): EcranProprietesLogarithme {
+  return sequenceEcrans(exercice)[phase];
+}
+
+export function nombreEcrans(exercice: ExerciceProprieteLogarithme): number {
+  return sequenceEcrans(exercice).length;
 }
 
 export function phaseInitiale(): PhaseProprietesLogarithme {
@@ -33,12 +73,12 @@ export function phaseInitiale(): PhaseProprietesLogarithme {
 
 export function phaseApres(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): PhaseProprietesLogarithme | "termine" {
   const suivante = phase + 1;
-  return suivante < nombreEtapesAlgebriques(exercice) ? suivante : "termine";
+  return suivante < nombreEcrans(exercice) ? suivante : "termine";
 }
 
 export interface ResultatExerciceProprietesLogarithme {
   exercice: ExerciceProprieteLogarithme;
-  /** Un score par écran RÉELLEMENT traversé, dans l'ordre (longueur = `nombreEtapesAlgebriques(exercice)`). */
+  /** Un score par écran RÉELLEMENT traversé, dans l'ordre (longueur = `nombreEcrans(exercice)`). */
   scores: number[];
 }
 
