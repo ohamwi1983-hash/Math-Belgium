@@ -42,13 +42,6 @@ function nouvelleSession(): EtatSessionOmbreSoleil {
   return demarrerSessionOmbreSoleil(REGLAGES_DEMO, genererExerciceOmbreSoleil);
 }
 
-/** Panneau dev visible seulement en développement ou avec `?dev=1` (même garde que
- * `AppQuizGeometrieAnalytique.tsx`) — jamais sur l'écran normal donné aux élèves. */
-function modeDevActif(): boolean {
-  if (import.meta.env.DEV) return true;
-  return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("dev") === "1";
-}
-
 const TITRES_ECRANS: Record<PhaseOmbreSoleil, string> = {
   pointSimple: "Ombre du sommet",
   directionInconnue: "Direction de la lumière",
@@ -144,7 +137,7 @@ export function AppOmbreSoleil() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Ombre au soleil</h1>
         <p className="app-subtitle">Chapitre 8 — Géométrie dans l'espace</p>
-        {modeDevActif() && <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />}
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
