@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./generateurs6e/etudeFonctionLogarithme";
@@ -7,7 +7,6 @@ import {
   activerAideSuivante,
   demarrerSessionEtudeFonctionLogarithme,
   soumettreReponseAsymptotes,
-  soumettreReponseComportementInfini,
   soumettreReponseConcavite,
   soumettreReponseCroissance,
   soumettreReponseDomaine,
@@ -15,8 +14,8 @@ import {
   soumettreReponseLimites,
 } from "./moteur6e/sessionEtudeFonctionLogarithme";
 import type { EtatSessionEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme } from "./moteur6e/typesEtudeFonctionLogarithme";
+import { tentativesMaxPhase } from "./moteur6e/typesEtudeFonctionLogarithme";
 import { EtapeAsymptotesMultiLog } from "./components6e/EtapeAsymptotesMultiLog";
-import { EtapeComportementInfiniE } from "./components6e/EtapeComportementInfiniE";
 import { EtapeConcaviteLog } from "./components6e/EtapeConcaviteLog";
 import { EtapeCroissanceGrilleCLog } from "./components6e/EtapeCroissanceGrilleCLog";
 import { EtapeCroissanceStandardLog } from "./components6e/EtapeCroissanceStandardLog";
@@ -28,8 +27,6 @@ import { Katex } from "./components/Katex";
 import {
   aideAsymptotesNiveau1,
   aideAsymptotesNiveau2,
-  aideComportementInfiniNiveau1,
-  aideComportementInfiniNiveau2,
   aideConcaviteNiveau1,
   aideConcaviteNiveau2,
   aideCroissanceNiveau1,
@@ -44,10 +41,12 @@ import {
   consigneCroissance,
   consigneDomaine,
   consigneLimites,
-  contenuRecapPhase,
+  contenuRecapLatex,
   directionLabelsAsymptotes,
   directionLabelsLimites,
+  forcerPresenceAsymptotes,
   formatFonctionLatex,
+  intervallesGrilleCLatex,
   LIBELLE_PHASE_ETUDE_LOG,
 } from "./ui6e/formatEtudeFonctionLogarithme";
 import { calculerRecapitulatifEtudeFonctionLogarithme, calculerSegmentsProgressionEtudeFonctionLogarithme } from "./ui6e/recapitulatifEtudeFonctionLogarithme";
@@ -58,17 +57,21 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
+const LIBELLES_CROISSANCE: Record<string, string> = {
+  croissante_partout: "croissante partout",
+  decroissante_partout: "décroissante partout",
+  minimum: "minimum",
+  maximum: "maximum",
+};
+
+const LIBELLES_CONCAVITE: Record<string, string> = {
+  convexe_partout: "convexe partout",
+  concave_partout: "concave partout",
+  inflexions: "point(s) d'inflexion",
+};
+
 function nouvelleSession(): EtatSessionEtudeFonctionLogarithme {
   return demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, genererExerciceEtudeFonctionLogarithme);
-}
-
-/** `forcerPresence` de l'écran asymptotes, par famille (voir `core6e/etudeFonctionLogarithme.types.ts`
- * pour la justification : B et C ont toujours une asymptote dans chaque direction listée, A et D
- * laissent l'élève choisir). */
-function forcerPresenceAsymptotes(famille: "A" | "B" | "C" | "D"): boolean[] {
-  if (famille === "B") return [true];
-  if (famille === "C") return [true, true];
-  return [false, false];
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -88,6 +91,10 @@ export function App6gen21() {
    * clos. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur d'exercices de la page — `indexExercice` du moteur repart à 0 à chaque nouvelle
+   * session (1 exercice par session), il ne suffit donc pas à remonter les écrans entre deux
+   * exercices consécutifs de même phase. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` (jamais `nouvelEtat.phase`), appelé avant que
    * `setEtat` n'applique la transition — réutilise `calculerRecapitulatifEtudeFonctionLogarithme`
@@ -106,7 +113,7 @@ export function App6gen21() {
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
       },
     ]);
   }
@@ -135,6 +142,7 @@ export function App6gen21() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -146,31 +154,24 @@ export function App6gen21() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
+  const tentativesMax = tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax);
   const niveauAide = etat.niveauAide;
   const enonceLatex = formatFonctionLatex(exercice);
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
-  // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
-  // consécutifs, ce qui empêcherait React de remonter le composant (leçon retenue à de nombreuses
-  // reprises sur ce chantier, voir CLAUDE.md).
-  const cle = `${etat.indexExercice}-${etat.phase}`;
+  // Clé = compteur d'exercices de la page + phase : chaque nouvel exercice remonte l'écran (champs
+  // et choix vidés), même quand la phase reste identique.
+  const cle = `${numeroExercice}-${etat.phase}`;
 
-  // Hook de debug pour vérification Playwright — jamais destiné aux élèves, ne sert qu'à inspecter
-  // l'exercice/la phase courants depuis un script externe (même principe que `?dev=1`).
-  useEffect(() => {
-    (window as unknown as { __debug6gen21?: unknown }).__debug6gen21 = { exercice, phase: etat.phase };
-  }, [exercice, etat.phase]);
-
-  const contenuRecap = contenuRecapPhase(exercice, etat.phase);
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
+        reponseAttendue: <Katex expression={contenuRecapLatex(exercice, etat.phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -181,6 +182,7 @@ export function App6gen21() {
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction (synthèse, logarithmes)</h1>
+        <p className="app-subtitle">Chapitre 3 — Fonctions logarithmes</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionLogarithme(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
@@ -212,12 +214,11 @@ export function App6gen21() {
               />
             )}
 
-            {etat.phase === "limites" && exercice.famille !== "E" && (
+            {etat.phase === "limites" && (
               <EtapeLimitesMultiLog
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneLimites(exercice)}
-                etatActuel={[]}
                 labels={directionLabelsLimites(exercice)}
                 aideNiveau1={aideLimitesNiveau1(exercice)}
                 aideNiveau2={aideLimitesNiveau2(exercice)}
@@ -236,14 +237,13 @@ export function App6gen21() {
               />
             )}
 
-            {etat.phase === "asymptotes" && exercice.famille !== "E" && (
+            {etat.phase === "asymptotes" && (
               <EtapeAsymptotesMultiLog
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneAsymptotes(exercice)}
-                etatActuel={[]}
                 labels={directionLabelsAsymptotes(exercice)}
-                forcerPresence={forcerPresenceAsymptotes(exercice.famille)}
+                forcerPresence={forcerPresenceAsymptotes(exercice)}
                 aideNiveau1={aideAsymptotesNiveau1(exercice)}
                 aideNiveau2={aideAsymptotesNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -263,8 +263,7 @@ export function App6gen21() {
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
-                etatActuel={[]}
-                k={exercice.k}
+                intervalles={intervallesGrilleCLatex(exercice)}
                 aideNiveau1={aideCroissanceNiveau1(exercice)}
                 aideNiveau2={aideCroissanceNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -273,17 +272,19 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) =>
-                  terminerEtape(soumettreReponseCroissance(etat, { type: "grilleC", reponse }), `${reponse.signes.join(" ; ")} ; max en x=${reponse.positionMax}`)
+                  terminerEtape(
+                    soumettreReponseCroissance(etat, { type: "grilleC", reponse }),
+                    `${reponse.signes.map((s) => (s === "croissante" ? "croissante" : "décroissante")).join(" ; ")} ; extremum local : ${reponse.valeurExtremum}`,
+                  )
                 }
                 validation={validation}
               />
             )}
-            {etat.phase === "croissance" && (exercice.famille === "A" || exercice.famille === "B" || exercice.famille === "D") && (
+            {etat.phase === "croissance" && exercice.famille !== "C" && (
               <EtapeCroissanceStandardLog
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
-                etatActuel={[]}
                 aideNiveau1={aideCroissanceNiveau1(exercice)}
                 aideNiveau2={aideCroissanceNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -294,18 +295,17 @@ export function App6gen21() {
                 onValider={(reponse) =>
                   terminerEtape(
                     soumettreReponseCroissance(etat, { type: "standard", reponse }),
-                    `${reponse.type}${reponse.position ? ` (extremum en x=${reponse.position})` : ""}`,
+                    `${LIBELLES_CROISSANCE[reponse.type]}${reponse.position ? ` en x=${reponse.position}` : ""}`,
                   )
                 }
                 validation={validation}
               />
             )}
 
-            {etat.phase === "concavite" && exercice.famille !== "E" && (
+            {etat.phase === "concavite" && (
               <EtapeConcaviteLog
                 key={cle}
                 enonceLatex={enonceLatex}
-                etatActuel={[]}
                 aideNiveau1={aideConcaviteNiveau1(exercice)}
                 aideNiveau2={aideConcaviteNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -316,14 +316,14 @@ export function App6gen21() {
                 onValider={(reponse) =>
                   terminerEtape(
                     soumettreReponseConcavite(etat, reponse),
-                    `${reponse.type}${reponse.positionsTexte.length > 0 ? ` (inflexion(s) en x=${reponse.positionsTexte.join(", ")})` : ""}`,
+                    `${LIBELLES_CONCAVITE[reponse.type]}${reponse.positionsTexte.length > 0 ? ` en x=${reponse.positionsTexte.join(" et x=")}` : ""}`,
                   )
                 }
                 validation={validation}
               />
             )}
 
-            {etat.phase === "graphique" && exercice.famille !== "E" && (
+            {etat.phase === "graphique" && (
               <EtapeSelectionGraphiqueEtudeFonctionLog
                 key={cle}
                 exercice={exercice}
@@ -339,27 +339,6 @@ export function App6gen21() {
               />
             )}
 
-            {etat.phase === "comportementInfini" && exercice.famille === "E" && (
-              <EtapeComportementInfiniE
-                key={cle}
-                enonceLatex={enonceLatex}
-                etatActuel={[]}
-                aideNiveau1={aideComportementInfiniNiveau1()}
-                aideNiveau2={aideComportementInfiniNiveau2(exercice)}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={onActiverAide}
-                onValider={(reponse) =>
-                  terminerEtape(
-                    soumettreReponseComportementInfini(etat, reponse),
-                    `lim(-∞) ${reponse.moinsInfini === "zero" ? "= 0" : "n'existe pas"} ; lim(+∞) ${reponse.plusInfini === "zero" ? "= 0" : "n'existe pas"}`,
-                  )
-                }
-                validation={validation}
-              />
-            )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
