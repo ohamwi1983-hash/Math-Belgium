@@ -59,7 +59,7 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
   const [denominateur, setDenominateur] = useState<CategorieCroissance | null>(null);
   /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge (audit chapitre 3 de 6e, point 4). */
   const [soumis, setSoumis] = useState<ReponseDominanceA | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0 && soumis !== null;
+  const montrerErreurs = (tentativesUtilisees > 0 || Boolean(validation?.revele)) && soumis !== null;
 
   function valider() {
     if (numerateur === null || denominateur === null) return;

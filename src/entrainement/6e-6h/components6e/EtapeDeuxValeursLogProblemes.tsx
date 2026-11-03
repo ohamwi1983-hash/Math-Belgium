@@ -35,17 +35,22 @@ interface Props {
 }
 
 /** Écran GÉNÉRIQUE à 2 champs numériques FIXES pour `6gen22` (famille A "fenêtre" écran 3, famille
- * E écran 1, famille G écran 1) — jamais un pattern add-as-needed ici (le nombre de champs est
+ * E écran 1) — jamais un pattern add-as-needed ici (le nombre de champs est
  * toujours EXACTEMENT 2, connu à la conception). Copié-adapté de
  * `EtapeDeuxValeursExpoProblemes.tsx` (6gen12). */
 export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte1, setTexte1] = useState("");
   const [texte2, setTexte2] = useState("");
+  /** Dernière paire soumise — un champ n'est rouge que s'il contient encore la saisie refusée. */
+  const [soumis, setSoumis] = useState<[string, string] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const refuse1 = montrerErreurs && !validation && soumis !== null && soumis[0] === texte1;
+  const refuse2 = montrerErreurs && !validation && soumis !== null && soumis[1] === texte2;
   const complet = texte1.trim() !== "" && texte2.trim() !== "";
 
   function valider() {
     if (!complet) return;
+    setSoumis([texte1, texte2]);
     onValider(texte1, texte2);
   }
 
@@ -71,14 +76,14 @@ export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, co
         <p className="field-label field-label-minuscule">
           <Katex expression={labelChamp1} />
         </p>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte1} placeholder="valeur" onChange={(e) => setTexte1(e.target.value)} />
+        <input type="text" className={`text-input ${refuse1 ? "is-erronee" : ""}`} value={texte1} placeholder="valeur" onChange={(e) => setTexte1(e.target.value)} />
       </div>
       <ApercuExpressionLatex texte={texte2} label={labelChamp2} />
       <div className="field-row">
         <p className="field-label field-label-minuscule">
           <Katex expression={labelChamp2} />
         </p>
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte2} placeholder="valeur" onChange={(e) => setTexte2(e.target.value)} />
+        <input type="text" className={`text-input ${refuse2 ? "is-erronee" : ""}`} value={texte2} placeholder="valeur" onChange={(e) => setTexte2(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

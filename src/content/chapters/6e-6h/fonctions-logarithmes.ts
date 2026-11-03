@@ -2111,9 +2111,9 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Calculer des limites',
           generatorId: '6gen17',
           description: [
-            'Calcule des limites de fonctions logarithmiques en utilisant les limites ' +
-              'fondamentales, la croissance comparée et le classement complet exponentielle > ' +
-              'puissance > logarithme.',
+            'Calcule des limites de fonctions logarithmiques : croissance comparée ' +
+              '(exponentielle > puissance > logarithme), limite de référence ln(1+u)/u → 1, et ' +
+              'limites déterminées déguisées en formes indéterminées.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 17. Calculer des limites »',

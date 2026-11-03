@@ -62,12 +62,12 @@ export interface CadreGraphe {
 /** Cadre ENTIER (quadrillage d'unité 1) contenant les deux marques, la tangente lisible entre x = 0
  * et x = 2, et au moins 2 unités de marge verticale. */
 export function cadreGraphe(exercice: ExerciceDeterminerParametresLogarithme): CadreGraphe {
-  const xMax = exercice.variante === "pointE2" ? 8 : 4;
+  const xMax = exercice.variante === "pointE2" ? 9 : 4;
   const ordonnees = [0, exercice.a, ordonneeSecondeMarque(exercice), evaluerF(exercice, xMax)];
   if (exercice.variante === "pente") ordonnees.push(exercice.a - exercice.b, exercice.a + exercice.b);
   const yMin = Math.floor(Math.min(...ordonnees)) - 2;
   const yMax = Math.ceil(Math.max(...ordonnees)) + 2;
-  return { xMin: -1, xMax, yMin, yMax };
+  return { xMin: -0.6, xMax, yMin, yMax };
 }
 
 /** Segment de tangente affiché (variante `pente`) : de x = 0 à x = 2,5, droite y = a + b(x − 1). */

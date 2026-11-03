@@ -1,5 +1,5 @@
 /**
- * Couche B (6e) — types pour `6gen22`. 7 familles STRUCTURELLEMENT DISJOINTES (2 à 4 écrans selon
+ * Couche B (6e) — types pour `6gen22`. 5 familles STRUCTURELLEMENT DISJOINTES (2 à 4 écrans selon
  * la famille) — `phaseInitiale`/`phaseApres` dispatchent sur `exercice.famille`, jamais une
  * séquence commune (même principe que `typesExponentiellesProblemes.ts`, 6gen12).
  *
@@ -7,7 +7,8 @@
  * n'existe que si `exercice.deduireAB===true` (spec : "sauf si a,b déjà fournis..., cet écran est
  * sauté pour cette instance") — `phaseInitiale` est donc la SEULE fonction de ce fichier qui lit un
  * champ de l'exercice au-delà de `famille` (mêmes noms de phase `eEcran1..4` réutilisés, `eEcran1`
- * simplement absent de la séquence traversée quand il est sauté).
+ * simplement absent de la séquence traversée quand il est sauté). De même, l'écran 4 n'existe que
+ * pour les décibels (`exercice.avecEcran4`) — `phaseApres` reçoit donc aussi l'exercice.
  */
 import type { ExerciceLogarithmesProblemes } from "../core6e/logarithmesProblemes.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
@@ -24,19 +25,13 @@ export type PhaseLogarithmesProblemes =
   | "cEcran1"
   | "cEcran2"
   | "cEcran3"
-  | "dEcran1"
-  | "dEcran2"
   | "eEcran1"
   | "eEcran2"
   | "eEcran3"
   | "eEcran4"
   | "fEcran1"
   | "fEcran2"
-  | "fEcran3"
-  | "gEcran1"
-  | "gEcran2"
-  | "gEcran3"
-  | "gEcran4";
+  | "fEcran3";
 
 export function phaseInitiale(exercice: ExerciceLogarithmesProblemes): PhaseLogarithmesProblemes {
   switch (exercice.famille) {
@@ -46,18 +41,14 @@ export function phaseInitiale(exercice: ExerciceLogarithmesProblemes): PhaseLoga
       return "bEcran1";
     case "C":
       return "cEcran1";
-    case "D":
-      return "dEcran1";
     case "E":
       return exercice.deduireAB ? "eEcran1" : "eEcran2";
     case "F":
       return "fEcran1";
-    case "G":
-      return "gEcran1";
   }
 }
 
-export function phaseApres(phase: PhaseLogarithmesProblemes): PhaseLogarithmesProblemes | "termine" {
+export function phaseApres(phase: PhaseLogarithmesProblemes, exercice: ExerciceLogarithmesProblemes): PhaseLogarithmesProblemes | "termine" {
   switch (phase) {
     case "aEcran1":
       return "aEcran2";
@@ -79,16 +70,12 @@ export function phaseApres(phase: PhaseLogarithmesProblemes): PhaseLogarithmesPr
       return "cEcran3";
     case "cEcran3":
       return "termine";
-    case "dEcran1":
-      return "dEcran2";
-    case "dEcran2":
-      return "termine";
     case "eEcran1":
       return "eEcran2";
     case "eEcran2":
       return "eEcran3";
     case "eEcran3":
-      return "eEcran4";
+      return exercice.famille === "E" && exercice.avecEcran4 ? "eEcran4" : "termine";
     case "eEcran4":
       return "termine";
     case "fEcran1":
@@ -97,14 +84,6 @@ export function phaseApres(phase: PhaseLogarithmesProblemes): PhaseLogarithmesPr
       return "fEcran3";
     case "fEcran3":
       return "termine";
-    case "gEcran1":
-      return "gEcran2";
-    case "gEcran2":
-      return "gEcran3";
-    case "gEcran3":
-      return "gEcran4";
-    case "gEcran4":
-      return "termine";
   }
 }
 
@@ -112,12 +91,10 @@ export type ResultatExerciceLogarithmesProblemes =
   | { famille: "A"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
   | { famille: "B"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number; scoreEcran4: number }
   | { famille: "C"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
-  | { famille: "D"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number }
   /** `scoreEcran1` — `null` quand `exercice.deduireAB===false` (écran sauté pour cette instance,
    * jamais noté). */
-  | { famille: "E"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number | null; scoreEcran2: number; scoreEcran3: number; scoreEcran4: number }
-  | { famille: "F"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number }
-  | { famille: "G"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number; scoreEcran4: number };
+  | { famille: "E"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number | null; scoreEcran2: number; scoreEcran3: number; scoreEcran4: number | null }
+  | { famille: "F"; exercice: ExerciceLogarithmesProblemes; scoreEcran1: number; scoreEcran2: number; scoreEcran3: number };
 
 export interface EtatSessionLogarithmesProblemes {
   reglages: ReglagesSession6e;

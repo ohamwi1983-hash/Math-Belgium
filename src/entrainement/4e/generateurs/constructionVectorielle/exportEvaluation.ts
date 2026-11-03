@@ -288,7 +288,7 @@ function construireCorrectionConstructionVectorielle(exercice: ExerciceConstruct
       fragments: [
         texte("Vérification par les composantes : "),
         latex(
-          `${coefTexte}\\vec{${exercice.labelA}${exercice.labelB}} = ${coefTexte}\\begin{pmatrix} ${formatNombreGraphique(exercice.pointB.x - exercice.pointA.x)} \\\\ ${formatNombreGraphique(exercice.pointB.y - exercice.pointA.y)} \\end{pmatrix} = \\begin{pmatrix} ${formatNombreGraphique(cibleComposantes.x)} \\\\ ${formatNombreGraphique(cibleComposantes.y)} \\end{pmatrix}`,
+          `${coefTexte}\\vec{${exercice.labelA}${exercice.labelB}} = ${coefTexte}\\begin{pmatrix} ${formatNombreGraphique(exercice.pointB.x - exercice.pointA.x).replace(",", "{,}")} \\\\ ${formatNombreGraphique(exercice.pointB.y - exercice.pointA.y).replace(",", "{,}")} \\end{pmatrix} = \\begin{pmatrix} ${formatNombreGraphique(cibleComposantes.x).replace(",", "{,}")} \\\\ ${formatNombreGraphique(cibleComposantes.y).replace(",", "{,}")} \\end{pmatrix}`,
         ),
         texte("."),
       ],

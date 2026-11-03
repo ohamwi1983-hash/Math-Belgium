@@ -536,7 +536,7 @@ function aideFNiveau2(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineD
     case "lnSurSin":
       return { texte: "Quotient N/D avec N = ln(D) — dérivées séparées (assemblage laissé à toi) :", latex: `D(x) = ${exercice.a}+\\sin(e^x),\\quad D'(x) = e^x\\cos(e^x),\\quad N'(x) = \\dfrac{D'(x)}{D(x)}` };
     case "arcsinLog":
-      return { texte: "Simplifie d'abord l'argument : " + `${exercice.k} = ${exercice.base}^${exercice.p}`, latex: `\\log_{${exercice.base}}(${exercice.k}^x) = x\\cdot\\log_{${exercice.base}}(${exercice.k}) = ?\\cdot x` };
+      return { texte: `Simplifie d'abord l'argument (${exercice.k} est une puissance de ${exercice.base}) :`, latex: `\\log_{${exercice.base}}(${exercice.k}^x) = x\\cdot\\log_{${exercice.base}}(${exercice.k}) = \\,?\\cdot x` };
     case "arcsinLogX":
       return { texte: "Fonction intérieure et sa dérivée (assemblage laissé à toi) :", latex: `u(x) = \\log_{${exercice.base}}(x),\\qquad u'(x) = \\dfrac{1}{x\\ln(${exercice.base})}` };
     case "arctanLog":
@@ -587,7 +587,8 @@ function uvLatexG(exercice: ExerciceDomaineDeriveeLogG): UVLatexG {
 
 /** `u^{v}` — base entre parenthèses sauf si c'est la seule lettre x. */
 function puissanceUV(u: string, v: string): string {
-  return u === "x" ? `x^{${v}}` : `\\left(${u}\\right)^{${v}}`;
+  const exposant = v.replace(/\\dfrac/g, "\\frac");
+  return u === "x" ? `x^{${exposant}}` : `\\left(${u}\\right)^{${exposant}}`;
 }
 
 function formatFonctionG(exercice: ExerciceDomaineDeriveeLogG): string {
@@ -665,7 +666,7 @@ function consigneG(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice: E
 
 function aideGNiveau1(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): AideAvecLatex {
   if (phase === "gIdentifier") return { texte: "Cherche à ramener f(x) à une SEULE base variable élevée à un SEUL exposant variable (utilise les propriétés des puissances si besoin).", latex: null };
-  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u \;\\Rightarrow\; \\dfrac{f'}{f} = v'\\ln u + v\\dfrac{u'}{u}" };
+  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u \\;\\Rightarrow\\; \\dfrac{f'}{f} = v'\\ln u + v\\dfrac{u'}{u}" };
   return { texte: "Il faut multiplier f'/f par f pour isoler f'.", latex: "f' = f\\cdot\\dfrac{f'}{f}" };
 }
 

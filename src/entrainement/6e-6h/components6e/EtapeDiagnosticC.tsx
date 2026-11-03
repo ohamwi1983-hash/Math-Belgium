@@ -97,7 +97,7 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
   const [etat2, setEtat2] = useState<EtatPartie>({ statut: null, texte: "" });
   /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge (audit chapitre 3 de 6e, point 4). */
   const [soumis, setSoumis] = useState<[EtatPartie, EtatPartie] | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0 && soumis !== null;
+  const montrerErreurs = (tentativesUtilisees > 0 || Boolean(validation?.revele)) && soumis !== null;
 
   function valider() {
     const reponse1 = reponseDepuisEtat(etat1);

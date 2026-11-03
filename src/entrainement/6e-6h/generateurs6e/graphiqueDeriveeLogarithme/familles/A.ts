@@ -7,9 +7,9 @@ const K_VALEURS = [-3, -2, -1, 1, 2, 3] as const;
 const BASES_OPTIONS = [2, 3, 5, 7, "e"] as const;
 /** Pool de constantes pour le distracteur "zéro mal placé" — jamais `1` (sinon son zéro
  * coïnciderait avec x=e du candidat réel, cf. `constanteNumerateur`) ; zéros en x=e^(−1)≈0,37,
- * x=1 ou x=e^1,5≈4,48, tous VISIBLES dans la fenêtre [0,2 ; 7] (un zéro hors cadre se confondait
- * avec « pas de zéro »). */
-const CONSTANTES_ZERO_MAL_PLACE = [-1, 0, 1.5] as const;
+ * x=1 ou x=e^0,5≈1,65, tous AVANT x=e, là où la courbe est encore raide : au-delà de e, f' est
+ * presque nulle et un zéro déplacé y devenait indiscernable du vrai. */
+const CONSTANTES_ZERO_MAL_PLACE = [-1, 0, 0.5] as const;
 
 
 function tirerBase(): { base: number; baseEstE: boolean } {

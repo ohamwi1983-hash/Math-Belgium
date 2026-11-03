@@ -75,7 +75,7 @@ export const CONTEXTES_A_DECROISSANCE: ContexteADecroissance[] = [
     label: "Absorption de la lumière dans l'eau",
     unite: "mètres de profondeur",
     grandeur: "l'intensité lumineuse (en %)",
-    phrase: (Q0, p) => `À la surface d'un lac, l'intensité lumineuse vaut ${Q0} (en unité arbitraire). Chaque mètre de profondeur supplémentaire absorbe ${fr(p)} % de l'intensité restante.`,
+    phrase: (Q0, p) => `À la surface d'un lac, l'intensité lumineuse vaut ${Q0} lux. Chaque mètre de profondeur supplémentaire absorbe ${fr(p)} % de l'intensité restante.`,
   },
   {
     id: "eliminationMedicament",
@@ -140,7 +140,7 @@ export const CONTEXTES_A_TAUX_DECROISSANCE: ContexteATauxDecroissance[] = [
     id: "intensiteSonore",
     label: "Atténuation d'une intensité sonore",
     unite: "mètres",
-    phrase: (Q0, pourcentBaisse, h) => `Le niveau d'une source sonore correspond à une intensité de ${Q0} (unité arbitraire) à la source. Après ${h} mètres, il n'en reste plus que ${fr(100 - pourcentBaisse)} %.`,
+    phrase: (Q0, pourcentBaisse, h) => `Une source sonore émet une intensité de ${Q0} mW/m² à la source. Après ${h} mètres, il n'en reste plus que ${fr(100 - pourcentBaisse)} %.`,
   },
   {
     id: "chargeCondensateur",

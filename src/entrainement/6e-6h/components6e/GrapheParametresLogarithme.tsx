@@ -36,9 +36,9 @@ export function GrapheParametresLogarithme({ exercice, surlignerAbscisse1 }: Pro
   return (
     <div ref={ref} className="mafs-graph" style={{ maxWidth: LARGEUR_MAX, marginInline: "auto" }}>
       {largeur > 0 && (
-        <Mafs width={largeur} height={hauteur} viewBox={{ x: [cadre.xMin, cadre.xMax], y: [cadre.yMin, cadre.yMax], padding: 0 }} pan={false} zoom={false} preserveAspectRatio={false}>
+        <Mafs width={largeur} height={hauteur} viewBox={{ x: [cadre.xMin, cadre.xMax + 0.5], y: [cadre.yMin - 0.4, cadre.yMax + 0.4], padding: 0 }} pan={false} zoom={false} preserveAspectRatio={false}>
           <Coordinates.Cartesian
-            xAxis={{ lines: 1, labels: (n) => (n === 0 ? "" : String(n)) }}
+            xAxis={{ lines: 1, labels: (n) => (n <= 0 || (exercice.variante !== "pente" && Math.abs(n - x2) < 0.7) ? "" : String(n)) }}
             yAxis={{ lines: 1, labels: (n) => (n === 0 || n % pasEtiquetteY !== 0 ? "" : String(n)) }}
           />
           <Plot.OfX y={(x) => (x > 0 ? evaluerF(exercice, x) : NaN)} domain={[0.005, cadre.xMax]} color={COULEUR_COURBE} weight={EPAISSEUR_TRAIT_ACCENTUE} />
@@ -51,13 +51,13 @@ export function GrapheParametresLogarithme({ exercice, surlignerAbscisse1 }: Pro
                 {exercice.variante === "pointE" ? "e" : "e²"}
               </Text>
               <Point x={x2} y={y2} color={COULEUR_POINT} />
-              <Text x={x2} y={y2} attach="ne" attachDistance={12} color={COULEUR_POINT} size={18}>
+              <Text x={x2} y={y2} attach={x2 > cadre.xMax - 1.5 ? "nw" : "ne"} attachDistance={12} color={COULEUR_POINT} size={18}>
                 {exercice.lettrePoint2}
               </Text>
             </>
           )}
           <Point x={1} y={exercice.a} color={COULEUR_POINT} />
-          <Text x={1} y={exercice.a} attach="nw" attachDistance={12} color={COULEUR_POINT} size={18}>
+          <Text x={1} y={exercice.a} attach={exercice.variante === "pente" && exercice.b > 0 ? "se" : "ne"} attachDistance={12} color={COULEUR_POINT} size={18}>
             {exercice.lettrePoint1}
           </Text>
         </Mafs>

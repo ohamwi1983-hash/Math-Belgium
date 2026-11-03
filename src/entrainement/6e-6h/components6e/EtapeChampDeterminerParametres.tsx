@@ -61,7 +61,7 @@ export function EtapeChampDeterminerParametres({
   const idChamp = useId();
   const [texte, setTexte] = useState("");
   const [soumis, setSoumis] = useState<string | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0 && soumis !== null;
+  const montrerErreurs = (tentativesUtilisees > 0 || Boolean(validation?.revele)) && soumis !== null;
   const statut = montrerErreurs ? diagnostiquer(soumis as string) : null;
 
   function valider() {

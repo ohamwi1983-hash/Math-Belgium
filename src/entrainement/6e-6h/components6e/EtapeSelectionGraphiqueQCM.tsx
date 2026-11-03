@@ -84,9 +84,9 @@ interface Props {
  *   toute l'information de correction vit sur les boutons lettre, les graphiques restent neutres.
  *
  * Largeur/hauteur des graphiques mesurées une seule fois ici (`useLargeurConteneur`, même hook que
- * `MafsGraphTransformation.tsx` etc., transversal 3 chantiers) et bornées `[200;360]` (défaut 280
- * avant la première mesure) — carrées (hauteur = largeur) comme l'étaient les anciennes vignettes
- * 150×150, simplement agrandies : `preserveAspectRatio={false}` étant déjà actif sur chaque
+ * `MafsGraphTransformation.tsx` etc., transversal 3 chantiers) : largeur de la colonne (1 ou 2
+ * colonnes), plafonnée à 360 (défaut 280 avant la première mesure), hauteur = 80 % de la largeur
+ * (`RATIO_HAUTEUR`) : `preserveAspectRatio={false}` étant déjà actif sur chaque
  * graphique (obligatoire, voir CLAUDE.md), le choix du ratio largeur/hauteur de la CARTE est
  * purement esthétique et n'affecte jamais la fidélité mathématique du tracé.
  */

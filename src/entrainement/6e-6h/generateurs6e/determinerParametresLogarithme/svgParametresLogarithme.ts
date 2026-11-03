@@ -24,9 +24,10 @@ export function construireSvgParametresLogarithme(exercice: ExerciceDeterminerPa
   const pasEtiquetteY = yMax - yMin > 14 ? 2 : 1;
   const morceaux: string[] = [`<rect x="0" y="0" width="${LARGEUR}" height="${HAUTEUR}" fill="#ffffff"/>`];
 
+  const xMarque = exercice.variante === "pente" ? null : abscisseSecondeMarque(exercice);
   for (let x = Math.ceil(xMin); x <= xMax; x++) {
     morceaux.push(`<line x1="${sx(x).toFixed(1)}" y1="${MARGE}" x2="${sx(x).toFixed(1)}" y2="${HAUTEUR - MARGE}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
-    if (x !== 0) morceaux.push(`<text x="${sx(x).toFixed(1)}" y="${(sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${x < 0 ? "−" : ""}${Math.abs(x)}</text>`);
+    if (x > 0 && (xMarque === null || Math.abs(x - xMarque) >= 0.7)) morceaux.push(`<text x="${sx(x).toFixed(1)}" y="${(sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${x < 0 ? "−" : ""}${Math.abs(x)}</text>`);
   }
   for (let y = Math.ceil(yMin); y <= yMax; y++) {
     morceaux.push(`<line x1="${MARGE}" y1="${sy(y).toFixed(1)}" x2="${LARGEUR - MARGE}" y2="${sy(y).toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
@@ -55,10 +56,11 @@ export function construireSvgParametresLogarithme(exercice: ExerciceDeterminerPa
     morceaux.push(`<line x1="${sx(x2).toFixed(1)}" y1="${sy(0).toFixed(1)}" x2="${sx(x2).toFixed(1)}" y2="${sy(y2).toFixed(1)}" stroke="${COULEUR_POINT}" stroke-width="1" stroke-dasharray="3 3"/>`);
     morceaux.push(`<text x="${sx(x2).toFixed(1)}" y="${(sy(0) + (y2 >= 0 ? 20 : -6)).toFixed(1)}" font-size="9" font-style="italic" text-anchor="middle" fill="${COULEUR_POINT}">${exercice.variante === "pointE" ? "e" : "e²"}</text>`);
     morceaux.push(`<circle cx="${sx(x2).toFixed(1)}" cy="${sy(y2).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`);
-    morceaux.push(`<text x="${(sx(x2) + 5).toFixed(1)}" y="${(sy(y2) - 5).toFixed(1)}" font-size="10" font-weight="bold" fill="${COULEUR_POINT}">${exercice.lettrePoint2}</text>`);
+    const versGauche = x2 > xMax - 1.5;
+    morceaux.push(`<text x="${(sx(x2) + (versGauche ? -12 : 5)).toFixed(1)}" y="${(sy(y2) - 5).toFixed(1)}" font-size="10" font-weight="bold" fill="${COULEUR_POINT}">${exercice.lettrePoint2}</text>`);
   }
   morceaux.push(`<circle cx="${sx(1).toFixed(1)}" cy="${sy(exercice.a).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`);
-  morceaux.push(`<text x="${(sx(1) - 12).toFixed(1)}" y="${(sy(exercice.a) - 5).toFixed(1)}" font-size="10" font-weight="bold" fill="${COULEUR_POINT}">${exercice.lettrePoint1}</text>`);
+  morceaux.push(`<text x="${(sx(1) + 5).toFixed(1)}" y="${(sy(exercice.a) + (exercice.variante === "pente" && exercice.b > 0 ? 13 : -5)).toFixed(1)}" font-size="10" font-weight="bold" fill="${COULEUR_POINT}">${exercice.lettrePoint1}</text>`);
   morceaux.push(`<rect x="0.5" y="0.5" width="${LARGEUR - 1}" height="${HAUTEUR - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>`);
 
   return `<svg class="graphe-cyclo" width="${LARGEUR}" height="${HAUTEUR}" viewBox="0 0 ${LARGEUR} ${HAUTEUR}" xmlns="http://www.w3.org/2000/svg">${morceaux.join("")}</svg>`;

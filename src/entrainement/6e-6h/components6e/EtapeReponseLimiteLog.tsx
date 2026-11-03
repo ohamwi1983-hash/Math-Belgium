@@ -59,7 +59,9 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
   /** Dernière réponse REFUSÉE — seul ce choix est marqué en rouge, jamais une nouvelle sélection
    * pas encore validée (audit chapitre 3 de 6e, point 4). */
   const [soumis, setSoumis] = useState<{ statut: ReponseLimiteLog["type"]; texte: string } | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  // Après une révélation (1 seule tentative), l'état de session n'est appliqué qu'au clic sur
+  // « Écran suivant » : `validation.revele` signale alors le refus.
+  const montrerErreurs = tentativesUtilisees > 0 || Boolean(validation?.revele);
   const estRefuse = (option: ReponseLimiteLog["type"]) => montrerErreurs && soumis !== null && soumis.statut === option && statut === option && (option !== "valeur" || soumis.texte === texte);
 
   function valider() {
