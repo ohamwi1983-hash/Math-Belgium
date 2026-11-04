@@ -709,6 +709,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[
   problemes: [
     "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$.",
     "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$.",
+    "Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB.",
     "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$.",
   ],
   },
