@@ -74,6 +74,48 @@ export interface CatalogueVarianteEntree {
   label: string;
 }
 
+/** Une étape du corrigé détaillé (rédaction modèle) — `label` court affiché dans la marge
+ * (« Condition », « Méthode », « Calcul », « Vérification », « Conclusion »…), `sousQuestion` (« a »,
+ * « b »…) quand l'étape répond à une sous-question précise de l'énoncé. */
+export interface EtapeCorrection {
+  label: string;
+  fragments: FragmentConsigne[];
+  sousQuestion?: string;
+}
+
+/** Un critère du barème — `points` est un POIDS : le rendu le ramène au total de points choisi
+ * par le professeur pour la question (proportionnellement, arrondi au demi-point). Écrire des poids
+ * dont la somme vaut 4 (total par défaut d'un exercice) quand c'est naturel. */
+export interface CritereBareme {
+  sousQuestion?: string;
+  critere: FragmentConsigne[];
+  points: number;
+}
+
+export interface ErreurFrequente {
+  description: FragmentConsigne[];
+  /** Coût indicatif, en texte libre (« −2 », « 0 pt sur a) »…). */
+  cout?: string;
+}
+
+/** Grille de correction d'une instance (document professeur de l'évaluation). */
+export interface BaremeExercice {
+  /** Réponse finale, affichée en tête de la question pour corriger vite. */
+  reponseFinale: FragmentConsigne[];
+  criteres: CritereBareme[];
+  erreursFrequentes?: ErreurFrequente[];
+  /** Autres écritures à accepter (forme non simplifiée, valeur approchée…). */
+  reponsesAcceptees?: FragmentConsigne[][];
+}
+
+/** Une étape de la version aménagée : une consigne courte par ligne, un rappel facultatif (indice
+ * de méthode, jamais la réponse), et le poids de l'étape dans le barème. */
+export interface EtapeAmenagee {
+  consigne: FragmentConsigne[];
+  rappel?: FragmentConsigne[];
+  points?: number;
+}
+
 export interface AdaptateurFeuilleExercices<T> {
   titreDocument: string;
   /** Utilisé pour composer le nom du fichier téléchargé (voir telechargerBlob.ts), sans extension. */
@@ -88,6 +130,19 @@ export interface AdaptateurFeuilleExercices<T> {
   genererInstanceAvecVariante?: (varianteId: string) => T;
   construireEnonce: (instance: T) => SectionExercice;
   construireCorrection: (instance: T) => BlocCorrection[];
+  /** Difficulté de l'instance : 1 = application directe, 2 = plusieurs étapes, 3 = réflexion. */
+  difficulte?: (instance: T) => 1 | 2 | 3;
+  /** Résultat seul, sans démarche (page « Je vérifie » de la feuille d'exercices). */
+  reponseBreve?: (instance: T) => FragmentConsigne[];
+  /** Corrigé détaillé étape par étape ; à défaut, `construireCorrection` est utilisé. */
+  correctionDetaillee?: (instance: T) => EtapeCorrection[];
+  /** Barème détaillé (grille de correction de l'évaluation, points par sous-question). */
+  bareme?: (instance: T) => BaremeExercice;
+  /** Énoncé de la version aménagée, découpé en étapes ; à défaut, les sous-questions de
+   * `construireEnonce` servent d'étapes. */
+  enonceAmenage?: (instance: T) => EtapeAmenagee[];
+  /** Durée indicative d'une instance en évaluation, en minutes (estimation de durée du panneau). */
+  dureeMinutes?: number;
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
    * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
    * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée
