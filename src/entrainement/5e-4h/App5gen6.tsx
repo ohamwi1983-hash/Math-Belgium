@@ -18,13 +18,17 @@ import {
 import type { EtatSessionArcSecteur, PhaseArcSecteur } from "./moteur5e/typesArcsSecteurs";
 import { quantitesManquantes } from "./moteur5e/typesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
+import { diagnostiquerQuantiteArcSecteur } from "./moteur5e/toleranceArcsSecteurs";
 import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSecteur";
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
 import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex, LABELS, segmentsDonneesConnues } from "./ui5e/formatArcsSecteurs";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
 
-const CONSIGNE_GENERALE = "Calcule la longueur de cet arc ou l'aire de ce secteur.";
+/** Consigne par mode (audit 5e ch. 2, point 8 : « Calcule la longueur de cet arc ou l'aire de ce
+ * secteur » s'affichait aussi pour une conversion, et ne disait pas qu'on demande θ et r). */
+const CONSIGNE_DEUX_VERS_TROIS = "Deux grandeurs de ce secteur circulaire sont données. Retrouve les trois autres parmi l'angle θ (en degrés et en radians), le rayon r, la longueur s de l'arc et l'aire A du secteur.";
+const CONSIGNE_CONVERSION = "Convertis cette mesure d'angle.";
 import { calculerRecapitulatifArcSecteur } from "./ui5e/recapitulatifArcSecteur";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -94,6 +98,9 @@ export function App5gen6() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
+  /** Numéro de l'exercice affiché — clé des écrans, pour que leurs champs repartent vides à chaque
+   * nouvel exercice, même quand deux exercices de suite ont le même écran (deux conversions). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Réutilise `reponseAttenduePhase` — EXACTEMENT la même source que la bannière `validation`
    * ci-dessous pour l'écran COURANT revélé. */
@@ -135,6 +142,7 @@ export function App5gen6() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
       setFicheOuverteIndex(null);
@@ -149,6 +157,7 @@ export function App5gen6() {
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionArcSecteur(REGLAGES_DEMO, id === "conversion" ? genererExerciceConversion : genererExerciceDeuxVersTrois));
   }
 
@@ -170,6 +179,7 @@ export function App5gen6() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Arcs et secteurs</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -179,7 +189,7 @@ export function App5gen6() {
       <main className="card">
         <div className="card-body">
           <EnTeteExercice
-            consigneGenerale={CONSIGNE_GENERALE}
+            consigneGenerale={exercice.mode === "conversion" ? CONSIGNE_CONVERSION : CONSIGNE_DEUX_VERS_TROIS}
             blocDonnees={
               exercice.mode === "deuxVersTrois" ? (
                 <div className="equation-box equation-box-donnees">
@@ -193,7 +203,7 @@ export function App5gen6() {
           <RecapitulatifPanel entrees={calculerRecapitulatifArcSecteur(etat)} />
           {exercice.mode === "deuxVersTrois" && (
             <EtapeQuantiteArcSecteur
-              key={etat.phase}
+              key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               phase={etat.phase as QuantiteArcSecteur}
               tentativesUtilisees={tentativesUtilisees}
@@ -202,12 +212,13 @@ export function App5gen6() {
               niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte), `${LABELS[etat.phase as QuantiteArcSecteur]} = ${texte}`)}
-              diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurs[etat.phase as QuantiteArcSecteur])}
+              diagnostiquer={(texte) => diagnostiquerQuantiteArcSecteur(texte, exercice, etat.phase as QuantiteArcSecteur)}
               validation={validation}
             />
           )}
           {exercice.mode === "conversion" && (
             <EtapeConversionArcSecteur
+              key={`${numeroExercice}-conversion`}
               exercice={exercice}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}

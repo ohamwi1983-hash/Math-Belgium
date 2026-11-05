@@ -10,6 +10,7 @@ const R_MIN = 5;
 const R_MAX = 20;
 /** Écart minimal entre r1/r2 — 2 rayons trop proches produiraient 2 écrans quasi identiques. */
 const ECART_R_MIN = 2;
+const THETA1_MIN = 40;
 
 function entierAleatoire(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -27,7 +28,9 @@ function tirerR1R2C(): { r1: number; r2: number; c: number } {
     if (c <= 0 || c >= 2 * rMin) continue;
     const theta1 = calculerSegmentCirculaire(r1, c).thetaDeg;
     const theta2 = calculerSegmentCirculaire(r2, c).thetaDeg;
-    if (theta1 > 10 && theta1 < 170 && theta2 > 10 && theta2 < 170) return { r1, r2, c };
+    // θ₁ ≥ 40° (grand cercle, le plus petit des deux angles) : sinon la lentille n'est qu'une lame
+    // quasi invisible sur le croquis (ex. r₁ = 20, r₂ = 15, c = 8 — audit 5e ch. 2, point 46).
+    if (theta1 >= THETA1_MIN && theta1 < 170 && theta2 > 10 && theta2 < 170) return { r1, r2, c };
   }
   // Repli garanti valide : r1=R_MIN+ECART_R_MIN, r2=R_MIN, c=r2 (θ2=60°, θ1 encore plus ouvert
   // puisque r1>r2 à c fixé — toujours dans la plage acceptée).

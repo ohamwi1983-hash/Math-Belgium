@@ -10,27 +10,12 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesParametresSinusoideGraphique";
 import type { EtatSessionParametresSinusoideGraphique, PhaseParametresSinusoideGraphique, ResultatExerciceParametresSinusoideGraphique } from "./typesParametresSinusoideGraphique";
-import { cibleAmplitude, cibleAscendantPrincipal, cibleDecalage, cibleFrequence, ciblePeriode, verifierPhiModuloT, verifierValeurSinusoide } from "./verificationParametresSinusoideGraphique";
+import { diagnostiquerPhaseParametresSinusoideGraphique } from "./verificationParametresSinusoideGraphique";
 
 const POINTS_DE_BASE = 100;
 
 /** Chaque écran a exactement 2 niveaux d'aide — spec explicite. */
 export const NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE = 2;
-
-function verifierReponse(exercice: ExerciceParametresSinusoideGraphique, phase: PhaseParametresSinusoideGraphique, texte: string): boolean {
-  switch (phase) {
-    case "decalage":
-      return verifierValeurSinusoide(texte, cibleDecalage(exercice));
-    case "amplitude":
-      return verifierValeurSinusoide(texte, cibleAmplitude(exercice));
-    case "periode":
-      return verifierValeurSinusoide(texte, ciblePeriode(exercice));
-    case "frequence":
-      return verifierValeurSinusoide(texte, cibleFrequence(exercice));
-    case "phi":
-      return verifierPhiModuloT(texte, cibleAscendantPrincipal(exercice), ciblePeriode(exercice));
-  }
-}
 
 function etatInitial(
   exercice: ExerciceParametresSinusoideGraphique,
@@ -46,8 +31,12 @@ function etatInitial(
   | "amplitudeRevele"
   | "scorePeriodePartiel"
   | "periodeRevele"
+  | "scorePulsationPartiel"
+  | "pulsationRevele"
   | "scoreFrequencePartiel"
   | "frequenceRevele"
+  | "scorePhiPartiel"
+  | "phiRevele"
 > {
   return {
     exerciceCourant: exercice,
@@ -60,8 +49,12 @@ function etatInitial(
     amplitudeRevele: false,
     scorePeriodePartiel: null,
     periodeRevele: false,
+    scorePulsationPartiel: null,
+    pulsationRevele: false,
     scoreFrequencePartiel: null,
     frequenceRevele: false,
+    scorePhiPartiel: null,
+    phiRevele: false,
   };
 }
 
@@ -95,7 +88,7 @@ export function soumettreReponseParametresSinusoideGraphique(etat: EtatSessionPa
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),
-    verifier: (t) => verifierReponse(exercice, phase, t),
+    verifier: (t) => diagnostiquerPhaseParametresSinusoideGraphique(exercice, phase, t) === "correct",
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
@@ -112,8 +105,10 @@ export function soumettreReponseParametresSinusoideGraphique(etat: EtatSessionPa
         scoreDecalage: etat.scoreDecalagePartiel as number,
         scoreAmplitude: etat.scoreAmplitudePartiel as number,
         scorePeriode: etat.scorePeriodePartiel as number,
+        scorePulsation: etat.scorePulsationPartiel as number,
         scoreFrequence: etat.scoreFrequencePartiel as number,
-        scorePhi: score,
+        scorePhi: etat.scorePhiPartiel as number,
+        scoreDephasage: score,
       },
       revele,
     );
@@ -129,9 +124,15 @@ export function soumettreReponseParametresSinusoideGraphique(etat: EtatSessionPa
   } else if (phase === "periode") {
     partielsMisAJour.scorePeriodePartiel = score;
     partielsMisAJour.periodeRevele = revele;
+  } else if (phase === "pulsation") {
+    partielsMisAJour.scorePulsationPartiel = score;
+    partielsMisAJour.pulsationRevele = revele;
   } else if (phase === "frequence") {
     partielsMisAJour.scoreFrequencePartiel = score;
     partielsMisAJour.frequenceRevele = revele;
+  } else if (phase === "phi") {
+    partielsMisAJour.scorePhiPartiel = score;
+    partielsMisAJour.phiRevele = revele;
   }
 
   return { ...etat, ...partielsMisAJour, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereEtapeRevelee: revele };

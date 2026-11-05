@@ -9,6 +9,16 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
+/** Exemples hors de l'espace des tirages (θ° multiple de 5, r entier, θ_rad/s/A multiples de π
+ * de dénominateur divisant 72 — jamais 11), virgule décimale. */
+const PLACEHOLDERS: Record<QuantiteArcSecteur, string> = {
+  thetaDeg: "ex : 37,5",
+  thetaRad: "ex : 7*pi/11",
+  r: "ex : 2,5",
+  l: "ex : 7*pi/11",
+  A: "ex : 7*pi/11",
+};
+
 interface Props {
   exercice: ExerciceModeDeuxVersTrois;
   phase: QuantiteArcSecteur;
@@ -56,7 +66,7 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
     <div>
       <p className="prompt-text">{consigneQuantite(phase)}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 5*pi/6 ou 2.62" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={PLACEHOLDERS[phase]} />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>Formule(s) disponible(s) :</p>

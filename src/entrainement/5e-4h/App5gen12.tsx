@@ -76,6 +76,9 @@ function calculerSegmentsProgression(
 
 export function App5gen12() {
   const [etat, setEtat] = useState<EtatSessionGeometrieCercle>(nouvelleSession);
+  /** Numéro d'exercice — fait partie de la `key` du champ : un nouvel exercice qui recommence par
+   * la même phase remonte quand même le champ (saisie remise à zéro). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionGeometrieCercle`, jamais dans le moteur. Remis à vide à chaque
@@ -120,6 +123,7 @@ export function App5gen12() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -130,6 +134,7 @@ export function App5gen12() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(demarrerSessionGeometrieCercle(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioGeometrieCercle)));
@@ -153,6 +158,7 @@ export function App5gen12() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes de géométrie du cercle</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
@@ -160,7 +166,7 @@ export function App5gen12() {
         <div className="card-body">
           <RecapitulatifPanel entrees={calculerRecapitulatifGeometrieCercle(etat)} />
           <EtapeChampGeometrieCercle
-            key={etat.phase}
+            key={`${numeroExercice}-${etat.phase}`}
             exercice={exercice}
             phase={etat.phase}
             tentativesUtilisees={tentativesUtilisees}

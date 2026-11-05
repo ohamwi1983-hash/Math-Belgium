@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
-import type { ReponseArgument } from "../moteur5e/verificationEquationTrig";
+import type { ReponseArgument } from "../moteur5e/verificationEquationTrig5gen10";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
 import { formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";

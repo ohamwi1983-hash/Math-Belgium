@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig, ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { diagnostiquerArgument, type ReponseArgument, type ReponseDeuxFacteursArgument } from "../moteur5e/verificationEquationTrig";
+import { diagnostiquerArgument, type ReponseArgument, type ReponseDeuxFacteursArgument } from "../moteur5e/verificationEquationTrig5gen10";
 import { CONSIGNE_ARGUMENT_PRODUIT, formatEnonceProduitLatex, formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";

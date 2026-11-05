@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import type { PhasePolygonesArcsSecteurs } from "../moteur5e/typesPolygonesArcsSecteurs";
-import { consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1, texteAideNiveau3 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { aideNiveau3 as calculerAideNiveau3, consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -40,7 +40,7 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aideNiveau3 = texteAideNiveau3(exercice, phase);
+  const aideNiveau3 = calculerAideNiveau3(exercice, phase);
 
   function valider() {
     if (texte.trim() === "") return;
@@ -53,12 +53,16 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
       <p className="prompt-text">{consignePhase(phase)}</p>
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={surlignagePourPhase(exercice, phase)} />
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 3*pi/4" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 7*pi/11" />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(phase)} block />
           {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
-          {niveauAide >= 3 && aideNiveau3 !== null && <p>{aideNiveau3}</p>}
+          {niveauAide >= 3 && aideNiveau3 !== null && (
+            <p>
+              {aideNiveau3.texte} <Katex expression={aideNiveau3.latex} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (

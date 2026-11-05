@@ -6,8 +6,9 @@ import {
   consigneConversion,
   formatValeurCibleConversionLatex,
   formatValeurQuantiteLatex,
+  LABELS,
+  LABELS_LATEX,
   labelQuantite,
-  labelReponseConversion,
   latexEnonceConversion,
 } from "../../ui5e/formatArcsSecteurs";
 import { genererExerciceArcSecteur, genererExerciceConversion, genererExerciceDeuxVersTrois } from "./index";
@@ -15,7 +16,7 @@ import { genererExerciceArcSecteur, genererExerciceConversion, genererExerciceDe
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceArcSecteur>` pour 5gen6 (Arcs et secteurs) —
  * feuille d'évaluation. `ExerciceArcSecteur` a 2 modes structurellement disjoints (voir
- * `core5e/arcsSecteurs.types.ts`) : "deuxVersTrois" (2 des 5 quantités θ°/θ_rad/r/l/A données, les
+ * `core5e/arcsSecteurs.types.ts`) : "deuxVersTrois" (2 des 5 quantités θ°/θ_rad/r/s/A données, les
  * 3 autres à retrouver) et "conversion" (conversion degrés↔radians pure) — les deux gérés ici, tout
  * `formatValeurQuantiteLatex`/`labelQuantite` réutilisés tels quels de l'écran interactif.
  */
@@ -36,7 +37,7 @@ function construireEnonceArcSecteur(exercice: ExerciceArcSecteur): SectionExerci
     ],
     questions: [
       {
-        consigne: [texte(`Détermine les 3 quantités manquantes : ${manquantes.map((q) => labelQuantite(q).replace(/\s*=\s*$/, "")).join(", ")} (arrondis au centième près).`)],
+        consigne: [texte(`Détermine les 3 quantités manquantes : ${manquantes.map((q) => LABELS[q]).join(", ")} (arrondis au centième près).`)],
         reponse: { type: "lignes", nombre: 4 },
       },
     ],
@@ -45,7 +46,7 @@ function construireEnonceArcSecteur(exercice: ExerciceArcSecteur): SectionExerci
 
 function construireCorrectionArcSecteur(exercice: ExerciceArcSecteur): BlocCorrection[] {
   if (exercice.mode === "conversion") {
-    return [{ type: "paragraphe", fragments: [latex(`${labelReponseConversion(exercice)} ${formatValeurCibleConversionLatex(exercice)}`)] }];
+    return [{ type: "paragraphe", fragments: [latex(`${exercice.direction === "degVersRad" ? LABELS_LATEX.thetaRad : LABELS_LATEX.thetaDeg} = ${formatValeurCibleConversionLatex(exercice)}`)] }];
   }
   const manquantes = ORDRE_QUANTITES_ARC_SECTEUR.filter((q) => !exercice.connues.includes(q));
   return manquantes.map((q: QuantiteArcSecteur) => ({

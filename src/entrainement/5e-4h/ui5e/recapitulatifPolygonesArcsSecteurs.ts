@@ -24,9 +24,9 @@ function sequenceComplete(exercice: ExercicePolygonesArcsSecteurs): PhasePolygon
 const LIBELLES: Record<PhasePolygonesArcsSecteurs, string> = {
   cercleEntier: "Cercle entier",
   arcElementaire: "Arc élémentaire",
-  arcMultiPas: "Arc multi-pas",
+  arcMultiPas: "Arc surligné",
   secteurElementaire: "Secteur élémentaire",
-  secteurMultiPas: "Secteur multi-pas",
+  secteurMultiPas: "Secteur surligné",
 };
 
 /** Même dispatch que `App5gen7.tsx::releveDeLaPhase` pour les phases NON terminales (booléens

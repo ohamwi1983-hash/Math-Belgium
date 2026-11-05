@@ -144,9 +144,9 @@ function calculerSegmentsProgression(
 const LIBELLE_PHASE: Record<PhasePolygonesArcsSecteurs, string> = {
   cercleEntier: "Cercle entier",
   arcElementaire: "Arc élémentaire",
-  arcMultiPas: "Arc multi-pas",
+  arcMultiPas: "Arc surligné",
   secteurElementaire: "Secteur élémentaire",
-  secteurMultiPas: "Secteur multi-pas",
+  secteurMultiPas: "Secteur surligné",
 };
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
@@ -240,6 +240,7 @@ export function App5gen7() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Polygones, arcs et secteurs</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}

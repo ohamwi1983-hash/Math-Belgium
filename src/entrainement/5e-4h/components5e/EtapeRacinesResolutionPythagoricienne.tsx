@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { diagnostiquerUneRacine, type ReponseRacine, type ReponseRacinesPythagoricienne } from "../moteur5e/verificationEquationTrig";
+import { diagnostiquerUneRacine, type ReponseRacine, type ReponseRacinesPythagoricienne } from "../moteur5e/verificationEquationTrig5gen10";
 import { CONSIGNE_RACINES_RESOLUTION, TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";

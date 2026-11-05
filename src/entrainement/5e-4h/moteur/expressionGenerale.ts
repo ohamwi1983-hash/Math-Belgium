@@ -57,6 +57,52 @@ const ALIAS_FONCTIONS: Record<string, string> = {
   tan: "tan",
 };
 
+/** Découpe un mot collé en une suite de noms connus (« pi », « x », variables fournies), en
+ * préférant les noms les plus longs ; `null` si le mot ne se découpe pas entièrement. */
+function decomposerMotColle(mot: string, variables: Record<string, number>): string[] | null {
+  const noms = ["pi", "x", ...Object.keys(variables)].sort((a, b) => b.length - a.length);
+  const memo = new Map<number, string[] | null>();
+  const depuis = (i: number): string[] | null => {
+    if (i === mot.length) return [];
+    if (memo.has(i)) return memo.get(i)!;
+    let res: string[] | null = null;
+    for (const nom of noms) {
+      if (nom.length > 0 && mot.startsWith(nom, i)) {
+        const suite = depuis(i + nom.length);
+        if (suite) {
+          res = [nom, ...suite];
+          break;
+        }
+      }
+    }
+    memo.set(i, res);
+    return res;
+  };
+  return mot.length > 0 ? depuis(0) : null;
+}
+
+/**
+ * Saisie « naturelle » ramenée à la syntaxe du tokeniseur (audit 5e ch. 2, point 1) — l'élève recopie
+ * ce que l'écran affiche :
+ * - « − » (U+2212, moins typographique) et « – » (tiret demi-cadratin) → « - » ;
+ * - « π » → « pi » (entouré d'espaces : « 2π », « kπ », « πx » restent des produits implicites) ;
+ * - « √2 », « √x », « √π », « √(…) » → « sqrt(2) », « sqrt(x) », « sqrt(pi) », « sqrt(…) » (la racine
+ *   porte sur le seul nombre ou nom qui suit, comme à l'écrit) ;
+ * - « ° » retiré partout : dans ce module, un nombre suivi de « ° » est toujours une mesure en
+ *   degrés — les champs « en degrés » attendent ce nombre, et sin/cos/tan évaluent déjà leur argument
+ *   en degrés (ALIAS_FONCTIONS) ; dans un champ en radians, « 150° » n'est plus une erreur de syntaxe
+ *   mais une valeur fausse (refusée).
+ * « · » et « × » sont déjà des opérateurs de multiplication du tokeniseur.
+ */
+function normaliserSaisie(expression: string): string {
+  return expression
+    .replace(/[\u2212\u2013]/g, "-")
+    .replace(/°/g, "")
+    .replace(/√\s*(\(|\d+(?:[.,]\d+)?|π|[a-zA-Z]+)/g, (_, cible: string) => (cible === "(" ? "sqrt(" : `sqrt(${cible})`))
+    .replace(/√/g, "sqrt")
+    .replace(/π/g, " pi ");
+}
+
 function tokeniser(expression: string, variables: Record<string, number>): Jeton[] {
   // Table de recherche insensible à la casse — même convention que "pi" ci-dessous (mot entier,
   // comparé en minuscules).
@@ -146,7 +192,14 @@ function tokeniser(expression: string, variables: Record<string, number>): Jeton
         continue;
       }
       const canonique = ALIAS_FONCTIONS[mot.toLowerCase()];
-      if (!canonique) throw new Error(`Identifiant inconnu dans l'expression : "${mot}"`);
+      if (!canonique) {
+        // Mot collé formé uniquement de noms connus (« kpi », « npi », « pix ») : lu comme leur
+        // produit implicite (k·π), comme « k pi » avec un espace — jamais pour un nom de fonction.
+        const morceaux = decomposerMotColle(mot.toLowerCase(), variablesMinuscules);
+        if (!morceaux) throw new Error(`Identifiant inconnu dans l'expression : "${mot}"`);
+        for (const m of morceaux) jetons.push(m === "x" ? { type: "X" } : { type: "NOMBRE", valeurNombre: m === "pi" ? Math.PI : variablesMinuscules[m] });
+        continue;
+      }
       jetons.push({ type: "FONCTION", nomFonction: canonique });
       continue;
     }
@@ -413,6 +466,6 @@ function evaluer(noeud: Noeud, x: number): number {
  * vers ce paramètre plutôt que de continuer à pré-substituer.
  */
 export function evaluerExpressionGenerale(expression: string, x: number, variables: Record<string, number> = {}): number {
-  const noeud = new Parseur(tokeniser(expression, variables)).analyser();
+  const noeud = new Parseur(tokeniser(normaliserSaisie(expression), variables)).analyser();
   return evaluer(noeud, x);
 }

@@ -66,14 +66,14 @@ import {
   diagnostiquerSolutionsEgalite,
   diagnostiquerSolutionsProduit,
   diagnostiquerSolutionsPythagoricienne,
-} from "./moteur5e/verificationEquationTrig";
+} from "./moteur5e/verificationEquationTrig5gen10";
 import type {
   ReponseArgument,
   ReponseDeuxFacteursArgument,
   ReponseDeuxFacteursLignes,
   ReponseRacine,
   ReponseRacinesPythagoricienne,
-} from "./moteur5e/verificationEquationTrig";
+} from "./moteur5e/verificationEquationTrig5gen10";
 import type {
   EtatSessionEquationTrigonometrique,
   PhaseEquationTrigonometrique,

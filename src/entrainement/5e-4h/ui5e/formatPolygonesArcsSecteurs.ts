@@ -33,15 +33,15 @@ export function segmentsDonnees(exercice: ExercicePolygonesArcsSecteurs): string
  * bloc de données séparé pour ce générateur, cette consigne en tient lieu (convention énoncé,
  * exception au même titre que 5gen5 pour la consigne). */
 export function consigneGenerale(exercice: ExercicePolygonesArcsSecteurs): string {
-  return `Le cercle suivant est de rayon r=${exercice.r} et a ${exercice.n} sommets.`;
+  return `Sur ce cercle de centre O et de rayon r = ${exercice.r}, on a placé ${exercice.n} points régulièrement espacés : ce sont les sommets d'un polygone régulier à ${exercice.n} côtés.`;
 }
 
 const CONSIGNES: Record<PhasePolygonesArcsSecteurs, string> = {
   cercleEntier: "Calcule la circonférence et l'aire du cercle entier (arrondis au centième près).",
   arcElementaire: "Calcule la longueur de l'arc élémentaire, entre 2 sommets consécutifs (arrondis au centième près).",
-  arcMultiPas: "Calcule la longueur de l'arc surligné (compte le nombre de crans sur le diagramme). Arrondis au centième près.",
+  arcMultiPas: "Calcule la longueur de l'arc surligné (compte le nombre de côtés du polygone qu'il couvre). Arrondis au centième près.",
   secteurElementaire: "Calcule l'aire du secteur élémentaire, entre 2 sommets consécutifs (arrondis au centième près).",
-  secteurMultiPas: "Calcule l'aire du secteur surligné (compte le nombre de crans sur le diagramme). Arrondis au centième près.",
+  secteurMultiPas: "Calcule l'aire du secteur surligné (compte le nombre de côtés du polygone qu'il couvre). Arrondis au centième près.",
 };
 
 export function consignePhase(phase: PhasePolygonesArcsSecteurs): string {
@@ -49,7 +49,7 @@ export function consignePhase(phase: PhasePolygonesArcsSecteurs): string {
 }
 
 const AIDES_NIVEAU1: Record<PhasePolygonesArcsSecteurs, string> = {
-  cercleEntier: "Circonférence = 2\\pi r \\qquad \\text{Aire} = \\pi r^2",
+  cercleEntier: "\\text{Circonférence} = 2\\pi r \\qquad \\text{Aire} = \\pi r^2",
   arcElementaire: "\\text{longueur d'arc} = \\text{fraction du cercle} \\times \\text{circonférence}",
   arcMultiPas: "\\text{longueur d'arc} = \\text{fraction du cercle} \\times \\text{circonférence}",
   secteurElementaire: "\\text{aire du secteur} = \\text{fraction du cercle} \\times \\text{aire totale}",
@@ -66,22 +66,30 @@ function segmentActif(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolyg
   return null;
 }
 
-/** Niveau 2 — formule substituée (r et n connus), le comptage de crans n'est PAS fourni pour les
- * écrans multi-pas (le "k" reste symbolique, spec explicite). */
+/** Niveau 2 — formule substituée (r et n connus), le nombre k de côtés couverts n'est PAS fourni
+ * pour les écrans « arc/secteur surligné » (k reste symbolique, spec explicite). */
 export function latexAideNiveau2(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygonesArcsSecteurs): string {
   const { r, n } = exercice;
   if (phase === "cercleEntier") return `\\text{Circonférence} = 2\\pi \\times ${r} \\qquad \\text{Aire} = \\pi \\times ${r}^2`;
   if (phase === "arcElementaire") return `\\text{longueur d'arc} = \\dfrac{1}{${n}} \\times 2\\pi \\times ${r}`;
   if (phase === "secteurElementaire") return `\\text{aire du secteur} = \\dfrac{1}{${n}} \\times \\pi \\times ${r}^2`;
-  if (phase === "arcMultiPas") return `\\text{longueur d'arc} = \\dfrac{k}{${n}} \\times 2\\pi \\times ${r}`;
-  return `\\text{aire du secteur} = \\dfrac{k}{${n}} \\times \\pi \\times ${r}^2`;
+  if (phase === "arcMultiPas") return `\\text{longueur d'arc} = \\dfrac{k}{${n}} \\times 2\\pi \\times ${r} \\qquad (k = \\text{nombre de côtés couverts})`;
+  return `\\text{aire du secteur} = \\dfrac{k}{${n}} \\times \\pi \\times ${r}^2 \\qquad (k = \\text{nombre de côtés couverts})`;
 }
 
-/** Niveau 3 (écrans multi-pas uniquement) — désigne les 2 sommets à observer, sans donner k. */
-export function texteAideNiveau3(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygonesArcsSecteurs): string | null {
+/** Niveau 3 (écrans « surligné » uniquement) — donne la lecture du schéma : le nombre k de côtés
+ * couverts, donc la fraction k/n du cercle. Il reste le calcul (fraction × circonférence ou
+ * fraction × aire) : jamais la réponse. Avant, ce niveau désignait seulement les deux sommets
+ * extrêmes, déjà surlignés sur le schéma (audit 5e ch. 2, point 18) — il n'aidait pas l'élève
+ * bloqué sur le comptage, qui est la seule étape propre à ces écrans. */
+export function aideNiveau3(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygonesArcsSecteurs): { texte: string; latex: string } | null {
   const segment = segmentActif(exercice, phase);
   if (segment === null) return null;
-  return `Compte le nombre de crans entre les sommets ${labelSommet(segment.indexDepart)} et ${labelSommet(segment.indexArrivee)} sur le diagramme (dans le sens le plus court).`;
+  const objet = phase === "arcMultiPas" ? "l'arc surligné" : "le secteur surligné";
+  return {
+    texte: `De ${labelSommet(segment.indexDepart)} à ${labelSommet(segment.indexArrivee)}, ${objet} couvre ${segment.k} côtés du polygone sur ${exercice.n} : il représente cette fraction du cercle entier :`,
+    latex: `\\dfrac{${segment.k}}{${exercice.n}}`,
+  };
 }
 
 // ============================================================================
@@ -154,9 +162,9 @@ function sequenceComplete(exercice: ExercicePolygonesArcsSecteurs): PhasePolygon
 
 const LABELS_ETAT_ACTUEL: Record<Exclude<PhasePolygonesArcsSecteurs, "cercleEntier">, string> = {
   arcElementaire: "Arc élémentaire",
-  arcMultiPas: "Arc multi-pas",
+  arcMultiPas: "Arc surligné",
   secteurElementaire: "Secteur élémentaire",
-  secteurMultiPas: "Secteur multi-pas",
+  secteurMultiPas: "Secteur surligné",
 };
 
 /** Bloc "état actuel" (screens 2+ uniquement) — sur "arcElementaire" (2e écran), rappelle la

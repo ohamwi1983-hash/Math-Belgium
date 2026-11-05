@@ -19,6 +19,12 @@ function IconeRecap({ revele }: { revele: boolean }) {
   );
 }
 
+/** `\displaystyle` : les fractions du récapitulatif gardent leur taille de formule (audit 5e ch. 2,
+ * point 4) — en mode « inline », KaTeX les réduit à la taille d'un indice. */
+function enDisplaystyle(latex: string): string {
+  return latex.trimStart().startsWith("\\displaystyle") ? latex : `\\displaystyle ${latex}`;
+}
+
 /**
  * Récapitulatif accumulé des étapes déjà closes de l'exercice en cours — équivalent 5e-4h du
  * composant 4e du même nom : toujours la valeur confirmée (jamais la saisie de l'élève), avec une
@@ -31,8 +37,9 @@ export function RecapitulatifPanel({ entrees }: Props) {
     <div className="recap-panel">
       <p className="recap-panel-titre">Ce qu'on sait déjà</p>
       <ul className="recap-list">
-        {entrees.map((entree) => (
-          <li key={entree.libelle} className="recap-item">
+        {entrees.map((entree, index) => (
+          // Clé indexée : deux lignes peuvent porter le même libellé (θ₁ et θ₂ en « θ (radians) »).
+          <li key={`${index}-${entree.libelle}`} className="recap-item">
             <span className={`recap-icone ${entree.revele ? "recap-icone-revele" : "recap-icone-correcte"}`}>
               <IconeRecap revele={entree.revele} />
             </span>
@@ -41,11 +48,11 @@ export function RecapitulatifPanel({ entrees }: Props) {
               {entree.valeurs !== undefined ? (
                 <span className="equation-box-termes">
                   {entree.valeurs.map((valeur, i) => (
-                    <Katex key={i} expression={valeur} />
+                    <Katex key={i} expression={enDisplaystyle(valeur)} />
                   ))}
                 </span>
               ) : entree.estLatex ? (
-                <Katex expression={entree.valeur} />
+                <Katex expression={enDisplaystyle(entree.valeur)} />
               ) : (
                 entree.valeur
               )}

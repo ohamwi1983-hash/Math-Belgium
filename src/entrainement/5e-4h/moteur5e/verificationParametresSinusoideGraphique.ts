@@ -10,10 +10,10 @@
  * réponse φ_cible+k·T (k entier relatif quelconque), voir la spec ("vérification par équivalence
  * modulo T").
  */
-import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ParametresSinusoideBase } from "../core5e/parametresSinusoide.types";
-import { TOLERANCE_SINUSOIDE, cibleAmplitude, cibleDecalage, cibleFrequence, ciblePeriode, diagnostiquerValeurSinusoide, verifierValeurSinusoide } from "./verificationParametresSinusoide";
+import type { PhaseParametresSinusoideGraphique } from "./typesParametresSinusoideGraphique";
+import { TOLERANCE_SINUSOIDE, cibleAmplitude, cibleDecalage, cibleFrequence, ciblePeriode, diagnostiquerValeurModulo, diagnostiquerValeurSinusoide, verifierValeurSinusoide } from "./verificationParametresSinusoide";
 
 export { TOLERANCE_SINUSOIDE, cibleAmplitude, cibleDecalage, cibleFrequence, ciblePeriode, diagnostiquerValeurSinusoide, verifierValeurSinusoide };
 
@@ -36,20 +36,45 @@ export function cibleAscendantPrincipal(exercice: ParametresSinusoideBase): numb
 }
 
 /** Accepte toute réponse φ_cible+k·T (k entier relatif) — jamais une seule valeur exacte, puisque
- * le graphique affiche plusieurs cycles et donc plusieurs passages ascendants valides. */
+ * le graphique affiche plusieurs cycles et donc plusieurs passages ascendants valides. Même logique
+ * que `diagnostiquerValeurModulo` (5gen8), réutilisée telle quelle. */
 export function diagnostiquerPhiModuloT(texte: string, phiCible: number, periode: number): StatutVerification {
-  try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
-    if (!Number.isFinite(valeur)) return "parse_error";
-    const ecart = valeur - phiCible;
-    const k = Math.round(ecart / periode);
-    const reste = ecart - k * periode;
-    return Math.abs(reste) <= TOLERANCE_SINUSOIDE ? "correct" : "not_equivalent";
-  } catch {
-    return "parse_error";
-  }
+  return diagnostiquerValeurModulo(texte, phiCible, periode);
 }
 
 export function verifierPhiModuloT(texte: string, phiCible: number, periode: number): boolean {
   return diagnostiquerPhiModuloT(texte, phiCible, periode) === "correct";
+}
+
+/** Pulsation ω = 2π/T. */
+export function ciblePulsationGraphique(exercice: ParametresSinusoideBase): number {
+  return (2 * Math.PI) / ciblePeriode(exercice);
+}
+
+/** Phase φ = −ω·x₀, x₀ = passage ascendant retenu (amplitude prise POSITIVE, comme l'amplitude
+ * demandée |A| : f(x) = |A|·sin(ωx + φ) + b) — acceptée à 2π près (tout autre passage ascendant
+ * x₀ + kT donne φ − 2kπ). */
+export function cibleDephasageGraphique(exercice: ParametresSinusoideBase): number {
+  return -ciblePulsationGraphique(exercice) * cibleAscendantPrincipal(exercice);
+}
+
+/** Diagnostic d'UNE saisie pour l'écran `phase` — source unique pour le score (session) ET pour le
+ * message d'erreur affiché (appli). */
+export function diagnostiquerPhaseParametresSinusoideGraphique(exercice: ParametresSinusoideBase, phase: PhaseParametresSinusoideGraphique, texte: string): StatutVerification {
+  switch (phase) {
+    case "decalage":
+      return diagnostiquerValeurSinusoide(texte, cibleDecalage(exercice));
+    case "amplitude":
+      return diagnostiquerValeurSinusoide(texte, cibleAmplitude(exercice));
+    case "periode":
+      return diagnostiquerValeurSinusoide(texte, ciblePeriode(exercice));
+    case "pulsation":
+      return diagnostiquerValeurSinusoide(texte, ciblePulsationGraphique(exercice));
+    case "frequence":
+      return diagnostiquerValeurSinusoide(texte, cibleFrequence(exercice));
+    case "phi":
+      return diagnostiquerPhiModuloT(texte, cibleAscendantPrincipal(exercice), ciblePeriode(exercice));
+    case "dephasage":
+      return diagnostiquerValeurModulo(texte, cibleDephasageGraphique(exercice), 2 * Math.PI);
+  }
 }

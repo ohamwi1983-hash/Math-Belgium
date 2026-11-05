@@ -57,13 +57,13 @@ export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax
           className={`text-input${circonferenceErronee ? " is-erronee" : ""}`}
           value={circonference}
           onChange={(e) => setCirconference(e.target.value)}
-          placeholder="ex : 4*pi"
+          placeholder="ex : 7*pi/11"
         />
       </div>
       <ApercuExpressionLatex texte={aire} label="Aire =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Aire =</label>
-        <input type="text" className={`text-input${aireErronee ? " is-erronee" : ""}`} value={aire} onChange={(e) => setAire(e.target.value)} placeholder="ex : 4*pi" />
+        <input type="text" className={`text-input${aireErronee ? " is-erronee" : ""}`} value={aire} onChange={(e) => setAire(e.target.value)} placeholder="ex : 7*pi/11" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

@@ -2,7 +2,6 @@ import type { ExercicePolygonesArcsSecteurs } from "../../core5e/polygonesArcsSe
 import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
-  consigneGenerale,
   formatAireTotaleAttendueLatex,
   formatArcElementaireAttendueLatex,
   formatArcMultiPasAttendueLatex,
@@ -29,17 +28,21 @@ function construireEnoncePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSe
   ];
   if (exercice.arcMultiPas !== null) {
     questions.push({
-      consigne: [texte(`Calcule la longueur de l'arc reliant 2 sommets espacés de ${exercice.arcMultiPas.k} crans, dans le sens le plus court (arrondis au centième près).`)],
+      consigne: [texte(`Calcule la longueur du plus court arc qui relie deux sommets séparés par ${exercice.arcMultiPas.k} côtés du polygone (arrondis au centième près).`)],
       reponse: { type: "lignes", nombre: 1 },
     });
   }
   if (exercice.secteurMultiPas !== null) {
     questions.push({
-      consigne: [texte(`Calcule l'aire du secteur reliant 2 sommets espacés de ${exercice.secteurMultiPas.k} crans, dans le sens le plus court (arrondis au centième près).`)],
+      consigne: [texte(`Calcule l'aire du plus petit secteur délimité par deux sommets séparés par ${exercice.secteurMultiPas.k} côtés du polygone (arrondis au centième près).`)],
       reponse: { type: "lignes", nombre: 1 },
     });
   }
-  return { enteteFragments: [texte(consigneGenerale(exercice))], questions };
+  // Pas de schéma sur papier : l'énoncé décrit la figure au lieu de renvoyer à « ce cercle ».
+  return {
+    enteteFragments: [texte(`Sur un cercle de centre O et de rayon r = ${exercice.r}, on place ${exercice.n} points régulièrement espacés : ce sont les sommets d'un polygone régulier à ${exercice.n} côtés.`)],
+    questions,
+  };
 }
 
 function construireCorrectionPolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): BlocCorrection[] {
@@ -52,9 +55,9 @@ function construireCorrectionPolygonesArcsSecteurs(exercice: ExercicePolygonesAr
     { type: "paragraphe", fragments: [texte("Secteur élémentaire = "), latex(formatSecteurElementaireAttendueLatex(exercice)), texte(".")] },
   ];
   const arcMultiPas = formatArcMultiPasAttendueLatex(exercice);
-  if (arcMultiPas !== null) blocs.push({ type: "paragraphe", fragments: [texte("Arc multi-pas = "), latex(arcMultiPas), texte(".")] });
+  if (arcMultiPas !== null) blocs.push({ type: "paragraphe", fragments: [texte(`Arc couvrant ${exercice.arcMultiPas?.k} côtés = `), latex(arcMultiPas), texte(".")] });
   const secteurMultiPas = formatSecteurMultiPasAttendueLatex(exercice);
-  if (secteurMultiPas !== null) blocs.push({ type: "paragraphe", fragments: [texte("Secteur multi-pas = "), latex(secteurMultiPas), texte(".")] });
+  if (secteurMultiPas !== null) blocs.push({ type: "paragraphe", fragments: [texte(`Secteur couvrant ${exercice.secteurMultiPas?.k} côtés = `), latex(secteurMultiPas), texte(".")] });
   return blocs;
 }
 

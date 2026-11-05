@@ -10,8 +10,24 @@
 import type { ExerciceGeometrieCercle, ExerciceLentille, ExerciceSecteurBalaye, ExerciceSegmentCirculaire, ScenarioGeometrieCercle } from "../core5e/geometrieCercle.types";
 import type { PhaseGeometrieCercle } from "../moteur5e/typesGeometrieCercle";
 
-function arrondi2(v: number): number {
-  return Math.round(v * 100) / 100;
+/** Nombre arrondi à `decimales` décimales, en notation LaTeX à virgule décimale (`{,}`). */
+function nombreLatex(v: number, decimales: number): string {
+  const f = 10 ** decimales;
+  const r = Math.round(v * f) / f;
+  return String(Object.is(r, -0) ? 0 : r).replace(".", "{,}");
+}
+
+/** Valeur arrondie COMME LA CONSIGNE LE DEMANDE (θ au dixième, aire à l'unité), suivie de la
+ * valeur plus précise entre parenthèses — l'élève voit la réponse attendue au bon arrondi et peut
+ * réutiliser la valeur précise aux écrans suivants (audit 5e ch. 2, point 44). */
+function valeurArrondieLatex(v: number, decimales: number, decimalesPrecises: number): string {
+  return `\approx ${nombreLatex(v, decimales)}\ \ (${nombreLatex(v, decimalesPrecises)})`;
+}
+function angleLatex(v: number): string {
+  return valeurArrondieLatex(v, 1, 4);
+}
+function aireLatex(v: number): string {
+  return valeurArrondieLatex(v, 0, 2);
 }
 
 // ============================================================================
@@ -25,7 +41,7 @@ export function consigneGenerale(exercice: ExerciceGeometrieCercle): string {
     case "segmentCirculaire":
       return "Détermine l'aire du segment circulaire délimité par la corde de longueur c et l'arc de rayon r.";
     case "lentille":
-      return "Deux cercles de rayon r₁ et r₂ sécants partagent une corde commune c. Détermine l'aire de la lentille (la zone commune aux deux cercles).";
+      return "Deux cercles de rayons r₁ et r₂ se coupent : la corde commune mesure c, et les centres des deux cercles sont de part et d'autre de cette corde. Détermine l'aire de la lentille (la zone commune aux deux cercles).";
   }
 }
 
@@ -35,10 +51,10 @@ function formatDonneesSecteurBalaye(ex: ExerciceSecteurBalaye): string[] {
   return [`\\theta=${ex.thetaDeg}°`, `r_1=${ex.r1}`, `r_2=${ex.r2}`];
 }
 function formatDonneesSegmentCirculaire(ex: ExerciceSegmentCirculaire): string[] {
-  return [`r=${ex.r}`, `c=${arrondi2(ex.c)}`];
+  return [`r=${ex.r}`, `c=${nombreLatex(ex.c, 2)}`];
 }
 function formatDonneesLentille(ex: ExerciceLentille): string[] {
-  return [`r_1=${ex.segment1.r}`, `r_2=${ex.segment2.r}`, `c=${arrondi2(ex.c)}`];
+  return [`r_1=${ex.segment1.r}`, `r_2=${ex.segment2.r}`, `c=${nombreLatex(ex.c, 2)}`];
 }
 
 export function blocDonneesLatex(exercice: ExerciceGeometrieCercle): string[] {
@@ -57,19 +73,19 @@ export function blocDonneesLatex(exercice: ExerciceGeometrieCercle): string[] {
 // ============================================================================
 
 const LABELS: Record<PhaseGeometrieCercle, string> = {
-  conversionRad: "θ (rad) =",
+  conversionRad: "θ (radians) =",
   aireGrandSecteur: "A₁ =",
   airePetitSecteur: "A₂ =",
-  aireBalayee: "A=",
+  aireBalayee: "A =",
   angleTheta: "θ (radians) =",
   aireSecteur: "Aire du secteur =",
   aireTriangle: "Aire du triangle =",
   aireSegment: "Aire du segment =",
-  angle1: "θ (radians) =",
+  angle1: "θ₁ (radians) =",
   secteur1: "Aire du secteur 1 =",
   triangle1: "Aire du triangle 1 =",
   segmentAire1: "Aire du segment 1 =",
-  angle2: "θ (radians) =",
+  angle2: "θ₂ (radians) =",
   secteur2: "Aire du secteur 2 =",
   triangle2: "Aire du triangle 2 =",
   segmentAire2: "Aire du segment 2 =",
@@ -88,15 +104,15 @@ const CONSIGNES: Record<PhaseGeometrieCercle, string> = {
   angleTheta: "Utilise la loi des cosinus sur le triangle isocèle rayon-rayon-corde pour trouver θ, EN RADIANS (arrondis au dixième de radian près).",
   aireSecteur: "Calcule l'aire du secteur correspondant (arrondis à l'unité près).",
   aireTriangle: "Calcule l'aire du triangle isocèle formé par les 2 rayons et la corde (arrondis à l'unité près).",
-  aireSegment: "Calcule l'aire du segment circulaire (arrondis à l'unité près) :",
+  aireSegment: "Calcule l'aire du segment circulaire (arrondis à l'unité près).",
   angle1: "Loi des cosinus sur le premier cercle (rayon r₁) : trouve θ₁, EN RADIANS (arrondis au dixième de radian près).",
   secteur1: "Aire du secteur du premier cercle (arrondis à l'unité près).",
   triangle1: "Aire du triangle isocèle du premier cercle (arrondis à l'unité près).",
-  segmentAire1: "Calcule l'aire du segment circulaire (arrondis à l'unité près) :",
+  segmentAire1: "Calcule l'aire du segment circulaire du premier cercle (arrondis à l'unité près).",
   angle2: "Loi des cosinus sur le second cercle (rayon r₂) : trouve θ₂, EN RADIANS (arrondis au dixième de radian près).",
   secteur2: "Aire du secteur du second cercle (arrondis à l'unité près).",
   triangle2: "Aire du triangle isocèle du second cercle (arrondis à l'unité près).",
-  segmentAire2: "Calcule l'aire du segment circulaire (arrondis à l'unité près) :",
+  segmentAire2: "Calcule l'aire du segment circulaire du second cercle (arrondis à l'unité près).",
   aireLentille: "Aire de la lentille : segment 1 + segment 2 (arrondis à l'unité près).",
 };
 
@@ -168,49 +184,49 @@ export function formatValeurPhaseLatex(exercice: ExerciceGeometrieCercle, phase:
     case "secteurBalaye":
       switch (phase) {
         case "conversionRad":
-          return `\\theta_{rad} = ${arrondi2(exercice.thetaRad)}`;
+          return `\\theta_{rad} ${angleLatex(exercice.thetaRad)}`;
         case "aireGrandSecteur":
-          return `A_1 = ${arrondi2(exercice.aireGrandSecteur)}`;
+          return `A_1 ${aireLatex(exercice.aireGrandSecteur)}`;
         case "airePetitSecteur":
-          return `A_2 = ${arrondi2(exercice.airePetitSecteur)}`;
+          return `A_2 ${aireLatex(exercice.airePetitSecteur)}`;
         case "aireBalayee":
-          return `A_1-A_2 = ${arrondi2(exercice.aireBalayee)}`;
+          return `A_1-A_2 ${aireLatex(exercice.aireBalayee)}`;
         default:
           return "";
       }
     case "segmentCirculaire":
       switch (phase) {
         case "angleTheta":
-          return `\\theta = ${arrondi2(exercice.thetaRad)}`;
+          return `\\theta ${angleLatex(exercice.thetaRad)}`;
         case "aireSecteur":
-          return `A_{secteur} = ${arrondi2(exercice.aireSecteur)}`;
+          return `A_{secteur} ${aireLatex(exercice.aireSecteur)}`;
         case "aireTriangle":
-          return `A_{triangle} = ${arrondi2(exercice.aireTriangle)}`;
+          return `A_{triangle} ${aireLatex(exercice.aireTriangle)}`;
         case "aireSegment":
-          return `A_{segment} = ${arrondi2(exercice.aireSegment)}`;
+          return `A_{segment} ${aireLatex(exercice.aireSegment)}`;
         default:
           return "";
       }
     case "lentille":
       switch (phase) {
         case "angle1":
-          return `\\theta_1 = ${arrondi2(exercice.segment1.thetaRad)}`;
+          return `\\theta_1 ${angleLatex(exercice.segment1.thetaRad)}`;
         case "secteur1":
-          return `A_{secteur,1} = ${arrondi2(exercice.segment1.aireSecteur)}`;
+          return `A_{secteur,1} ${aireLatex(exercice.segment1.aireSecteur)}`;
         case "triangle1":
-          return `A_{triangle,1} = ${arrondi2(exercice.segment1.aireTriangle)}`;
+          return `A_{triangle,1} ${aireLatex(exercice.segment1.aireTriangle)}`;
         case "segmentAire1":
-          return `A_{segment,1} = ${arrondi2(exercice.segment1.aireSegment)}`;
+          return `A_{segment,1} ${aireLatex(exercice.segment1.aireSegment)}`;
         case "angle2":
-          return `\\theta_2 = ${arrondi2(exercice.segment2.thetaRad)}`;
+          return `\\theta_2 ${angleLatex(exercice.segment2.thetaRad)}`;
         case "secteur2":
-          return `A_{secteur,2} = ${arrondi2(exercice.segment2.aireSecteur)}`;
+          return `A_{secteur,2} ${aireLatex(exercice.segment2.aireSecteur)}`;
         case "triangle2":
-          return `A_{triangle,2} = ${arrondi2(exercice.segment2.aireTriangle)}`;
+          return `A_{triangle,2} ${aireLatex(exercice.segment2.aireTriangle)}`;
         case "segmentAire2":
-          return `A_{segment,2} = ${arrondi2(exercice.segment2.aireSegment)}`;
+          return `A_{segment,2} ${aireLatex(exercice.segment2.aireSegment)}`;
         case "aireLentille":
-          return `A_{lentille} = ${arrondi2(exercice.aireLentille)}`;
+          return `A_{lentille} ${aireLatex(exercice.aireLentille)}`;
         default:
           return "";
       }
@@ -249,37 +265,37 @@ export function texteAideNiveau2(exercice: ExerciceGeometrieCercle, phase: Phase
         case "airePetitSecteur":
           return `A_2 = \\dfrac{1}{2} \\times ${exercice.r2}^2 \\times \\theta`;
         case "aireBalayee":
-          return `A_1 - A_2 = ${arrondi2(exercice.aireGrandSecteur)} - ${arrondi2(exercice.airePetitSecteur)}`;
+          return `A_1 - A_2 = ${nombreLatex(exercice.aireGrandSecteur, 2)} - ${nombreLatex(exercice.airePetitSecteur, 2)}`;
         default:
           return "";
       }
     case "segmentCirculaire":
       switch (phase) {
         case "angleTheta":
-          return `\\cos\\theta = \\dfrac{2\\times${exercice.r}^2 - ${arrondi2(exercice.c)}^2}{2\\times${exercice.r}^2}`;
+          return `\\cos\\theta = \\dfrac{2\\times${exercice.r}^2 - ${nombreLatex(exercice.c, 2)}^2}{2\\times${exercice.r}^2}`;
         case "aireSecteur":
           return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\theta_{rad}`;
         case "aireTriangle":
-          return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\sin(${arrondi2(exercice.thetaRad)})`;
+          return `A = \\dfrac{1}{2} \\times ${exercice.r}^2 \\times \\sin(${nombreLatex(exercice.thetaRad, 2)})`;
         default:
           return "";
       }
     case "lentille":
       switch (phase) {
         case "angle1":
-          return `\\cos\\theta_1 = \\dfrac{2\\times${exercice.segment1.r}^2 - ${arrondi2(exercice.c)}^2}{2\\times${exercice.segment1.r}^2}`;
+          return `\\cos\\theta_1 = \\dfrac{2\\times${exercice.segment1.r}^2 - ${nombreLatex(exercice.c, 2)}^2}{2\\times${exercice.segment1.r}^2}`;
         case "secteur1":
           return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\theta_{1,rad}`;
         case "triangle1":
-          return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\sin(${arrondi2(exercice.segment1.thetaRad)})`;
+          return `A = \\dfrac{1}{2} \\times ${exercice.segment1.r}^2 \\times \\sin(${nombreLatex(exercice.segment1.thetaRad, 2)})`;
         case "angle2":
-          return `\\cos\\theta_2 = \\dfrac{2\\times${exercice.segment2.r}^2 - ${arrondi2(exercice.c)}^2}{2\\times${exercice.segment2.r}^2}`;
+          return `\\cos\\theta_2 = \\dfrac{2\\times${exercice.segment2.r}^2 - ${nombreLatex(exercice.c, 2)}^2}{2\\times${exercice.segment2.r}^2}`;
         case "secteur2":
           return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\theta_{2,rad}`;
         case "triangle2":
-          return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\sin(${arrondi2(exercice.segment2.thetaRad)})`;
+          return `A = \\dfrac{1}{2} \\times ${exercice.segment2.r}^2 \\times \\sin(${nombreLatex(exercice.segment2.thetaRad, 2)})`;
         case "aireLentille":
-          return `${arrondi2(exercice.segment1.aireSegment)} + ${arrondi2(exercice.segment2.aireSegment)}`;
+          return `${nombreLatex(exercice.segment1.aireSegment, 2)} + ${nombreLatex(exercice.segment2.aireSegment, 2)}`;
         default:
           return "";
       }

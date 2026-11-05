@@ -47,7 +47,7 @@ export function EtapeConversionArcSecteur({ exercice, tentativesUtilisees, tenta
       <ApercuExpressionLatex texte={texte} label={labelReponseConversion(exercice)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">{labelReponseConversion(exercice)}</label>
-        <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 5*pi/6 ou 2.62" />
+        <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={exercice.direction === "degVersRad" ? "ex : 7*pi/11" : "ex : 37,5"} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

@@ -67,6 +67,16 @@ function demiPiMoinsB1MoinsB2(b1: RationnelPi, b2: RationnelPi): RationnelPi {
   return additionnerRationnelPi(additionnerRationnelPi(DEMI_PI, negatifRationnelPi(b1)), negatifRationnelPi(b2));
 }
 
+/** tan(A) = −tan(B) : les x de la série A = −B + kπ où A ≡ π/2 (mod π) n'en sont PAS solutions —
+ * les deux tangentes y sont indéfinies (audit 5e ch. 2, point 32 : ex. tan(x − π/4) = −tan(2x/3)
+ * retenait x = 3π/4). La série reste écrite telle quelle à l'écran « résoudre » ; seules les
+ * solutions finales dans [0 ; 2π[ écartent ces valeurs. */
+function solutionsDefinies(identite: IdentiteEgalite, a1: CoefficientRationnel, b1: ValeurPiOuDecimale, solutions: number[]): number[] {
+  if (identite !== "tanVersTan") return solutions;
+  const a = a1.numerateur / a1.denominateur;
+  return solutions.filter((x) => Math.abs(Math.cos(a * x + b1.decimal)) >= 1e-9);
+}
+
 const MAX_SOLUTIONS = 5;
 const TENTATIVES_MAX = 200;
 
@@ -108,14 +118,14 @@ export function construireExerciceEgaliteExpressions(): ExerciceEgaliteExpressio
 
   let [a1, a2] = tirerA1EtA2();
   let branches = construireBranches(identite, a1, a2, b1, b2);
-  let solutions = solutionsDistinctes(branches);
+  let solutions = solutionsDefinies(identite, a1, b1Valeur, solutionsDistinctes(branches));
   let tentative = 0;
   // Reroll BORNÉ de (a1,a2) seuls (jamais identite/b1/b2) tant que le nombre de solutions dépasse 5
   // ou tombe à 0 — même principe que la famille "directe" (voir `index.ts`).
   while ((solutions.length > MAX_SOLUTIONS || solutions.length === 0) && tentative < TENTATIVES_MAX) {
     [a1, a2] = tirerA1EtA2();
     branches = construireBranches(identite, a1, a2, b1, b2);
-    solutions = solutionsDistinctes(branches);
+    solutions = solutionsDefinies(identite, a1, b1Valeur, solutionsDistinctes(branches));
     tentative++;
   }
 

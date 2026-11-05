@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { diagnostiquerIsolerX, type ReponseDeuxFacteursLignes } from "../moteur5e/verificationEquationTrig";
+import { diagnostiquerIsolerX, type ReponseDeuxFacteursLignes } from "../moteur5e/verificationEquationTrig5gen10";
 import { formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";

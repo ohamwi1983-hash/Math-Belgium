@@ -1,21 +1,34 @@
 /**
  * Couche B (5e) — types pour 5gen6 ("Arcs et secteurs"). Le mode "deuxVersTrois" a une séquence
- * d'écrans DYNAMIQUE (les 3 quantités manquantes, dans l'ordre conceptuel fixe
- * `ORDRE_QUANTITES_ARC_SECTEUR`) — la phase est directement le NOM de la quantité demandée
+ * d'écrans DYNAMIQUE (les 3 quantités manquantes, ordonnées par dépendance — voir
+ * `quantitesManquantes`) — la phase est directement le NOM de la quantité demandée
  * (`QuantiteArcSecteur`), jamais un nom de phase arbitraire ; le mode "conversion" a une seule
  * phase ("conversion"). Aucun mécanisme de continuité nécessaire (contrairement à 5gen5) : la
  * cible de chaque écran est déjà connue EXACTEMENT depuis la génération (voir
  * `core5e/arcsSecteurs.types.ts`).
  */
-import { ORDRE_QUANTITES_ARC_SECTEUR } from "../core5e/arcsSecteurs.types";
+import { DEPENDANCES_ARC_SECTEUR, ORDRE_RESOLUTION_ARC_SECTEUR } from "../core5e/arcsSecteurs.types";
 import type { ExerciceArcSecteur, ExerciceModeConversion, ExerciceModeDeuxVersTrois, GenerateurExerciceArcSecteur, QuantiteArcSecteur } from "../core5e/arcsSecteurs.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 export type PhaseArcSecteur = QuantiteArcSecteur | "conversion";
 
+/** Les 3 quantités manquantes, dans l'ordre des ÉCRANS : à chaque étape, la première quantité de
+ * `ORDRE_RESOLUTION_ARC_SECTEUR` qu'une formule de `DEPENDANCES_ARC_SECTEUR` permet de calculer
+ * avec les données et les quantités déjà trouvées. Toujours possible pour les 9 paires de
+ * données (vérifié par script, audit 5e ch. 2) ; repli défensif sur l'ordre fixe sinon. */
 export function quantitesManquantes(exercice: ExerciceModeDeuxVersTrois): QuantiteArcSecteur[] {
-  return ORDRE_QUANTITES_ARC_SECTEUR.filter((q) => q !== exercice.connues[0] && q !== exercice.connues[1]);
+  const disponibles = new Set<QuantiteArcSecteur>(exercice.connues);
+  const restantes = ORDRE_RESOLUTION_ARC_SECTEUR.filter((q) => !disponibles.has(q));
+  const ordre: QuantiteArcSecteur[] = [];
+  while (restantes.length > 0) {
+    const i = restantes.findIndex((q) => DEPENDANCES_ARC_SECTEUR[q].some((requis) => requis.every((x) => disponibles.has(x))));
+    const suivante = restantes.splice(i >= 0 ? i : 0, 1)[0];
+    ordre.push(suivante);
+    disponibles.add(suivante);
+  }
+  return ordre;
 }
 
 export function phaseInitiale(exercice: ExerciceArcSecteur): PhaseArcSecteur {

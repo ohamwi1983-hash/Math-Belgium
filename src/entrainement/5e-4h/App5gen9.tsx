@@ -14,17 +14,8 @@ import { formatChampParametreGraphiqueLatex, labelPhase } from "./ui5e/formatPar
 import { Katex } from "./components/Katex";
 import type { PhaseParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
 import { ORDRE_PHASES_SINUSOIDE_GRAPHIQUE } from "./moteur5e/typesParametresSinusoideGraphique";
-import type { ExerciceParametresSinusoideGraphique } from "./core5e/parametresSinusoideGraphique.types";
-import type { StatutVerification } from "./moteur/statutVerification";
-import {
-  cibleAmplitude,
-  cibleAscendantPrincipal,
-  cibleDecalage,
-  cibleFrequence,
-  ciblePeriode,
-  diagnostiquerPhiModuloT,
-  diagnostiquerValeurSinusoide,
-} from "./moteur5e/verificationParametresSinusoideGraphique";
+import { diagnostiquerPhaseParametresSinusoideGraphique } from "./moteur5e/verificationParametresSinusoideGraphique";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { calculerRecapitulatifParametresSinusoideGraphique } from "./ui5e/recapitulatifParametresSinusoideGraphique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -38,28 +29,6 @@ function nouvelleSession(): EtatSessionParametresSinusoideGraphique {
   return demarrerSessionParametresSinusoideGraphique(REGLAGES_DEMO, genererExerciceParametresSinusoideGraphique);
 }
 
-/** Réplique le dispatch `verifierReponse` (privé, `moteur5e/sessionParametresSinusoideGraphique.ts`)
- * — même phase→cible que le score, uniquement pour alimenter les fonctions `diagnostiquerXxx` déjà
- * existantes côté A.1 (promptcorrectionsregroupees.md), jamais une nouvelle logique de vérification. */
-function diagnostiquerReponsePourPhase(
-  exercice: ExerciceParametresSinusoideGraphique,
-  phase: PhaseParametresSinusoideGraphique,
-  texte: string,
-): StatutVerification {
-  switch (phase) {
-    case "decalage":
-      return diagnostiquerValeurSinusoide(texte, cibleDecalage(exercice));
-    case "amplitude":
-      return diagnostiquerValeurSinusoide(texte, cibleAmplitude(exercice));
-    case "periode":
-      return diagnostiquerValeurSinusoide(texte, ciblePeriode(exercice));
-    case "frequence":
-      return diagnostiquerValeurSinusoide(texte, cibleFrequence(exercice));
-    case "phi":
-      return diagnostiquerPhiModuloT(texte, cibleAscendantPrincipal(exercice), ciblePeriode(exercice));
-  }
-}
-
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
  * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
 interface TransitionEnAttente {
@@ -67,44 +36,51 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même source que `calculerRecapitulatifParametresSinusoideGraphique`
- * (`decalageRevele`/`amplitudeRevele`/`periodeRevele`/`frequenceRevele`) — `phi` (dernière phase)
- * n'a pas de champ `scorePhiPartiel` : forcément "courante" tant que l'exercice n'est pas terminé
- * (dernière phase active). */
+/** Score partiel et signal « révélé » d'une phase déjà close — `null` tant qu'elle ne l'est pas ;
+ * "dephasage" (dernière phase) est forcément « courante » tant que l'exercice n'est pas terminé. */
+function etatPhaseClose(etat: EtatSessionParametresSinusoideGraphique, phase: PhaseParametresSinusoideGraphique): { score: number | null; revele: boolean } {
+  switch (phase) {
+    case "decalage":
+      return { score: etat.scoreDecalagePartiel, revele: etat.decalageRevele };
+    case "amplitude":
+      return { score: etat.scoreAmplitudePartiel, revele: etat.amplitudeRevele };
+    case "periode":
+      return { score: etat.scorePeriodePartiel, revele: etat.periodeRevele };
+    case "pulsation":
+      return { score: etat.scorePulsationPartiel, revele: etat.pulsationRevele };
+    case "frequence":
+      return { score: etat.scoreFrequencePartiel, revele: etat.frequenceRevele };
+    case "phi":
+      return { score: etat.scorePhiPartiel, revele: etat.phiRevele };
+    case "dephasage":
+      return { score: null, revele: false };
+  }
+}
+
 function calculerSegmentsProgression(
   etat: EtatSessionParametresSinusoideGraphique,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
 ): EtatPuceProgression[] {
   return ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.map((phase) => {
     if (phase === etat.phase) return "courante";
-    const score =
-      phase === "decalage"
-        ? etat.scoreDecalagePartiel
-        : phase === "amplitude"
-          ? etat.scoreAmplitudePartiel
-          : phase === "periode"
-            ? etat.scorePeriodePartiel
-            : phase === "frequence"
-              ? etat.scoreFrequencePartiel
-              : null;
+    const { score, revele } = etatPhaseClose(etat, phase);
     if (score === null) return "a-venir";
-    const revele =
-      phase === "decalage"
-        ? etat.decalageRevele
-        : phase === "amplitude"
-          ? etat.amplitudeRevele
-          : phase === "periode"
-            ? etat.periodeRevele
-            : phase === "frequence"
-              ? etat.frequenceRevele
-              : false;
     if (revele) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
 
+/** Première session : si l'URL porte un code d'exercice (QR code d'une feuille, `?code=`), rouvre
+ * EXACTEMENT l'exercice imprimé (même tirage que l'adaptateur d'export) ; ensuite, tirages libres. */
+function sessionInitiale(): EtatSessionParametresSinusoideGraphique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const premier = genererAvecCode(code, undefined, genererExerciceParametresSinusoideGraphique, undefined);
+  return demarrerSessionParametresSinusoideGraphique(REGLAGES_DEMO, () => premier);
+}
+
 export function App5gen9() {
-  const [etat, setEtat] = useState<EtatSessionParametresSinusoideGraphique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionParametresSinusoideGraphique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des phases déjà closes (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionParametresSinusoideGraphique`, jamais dans le moteur. Remis à
@@ -126,7 +102,7 @@ export function App5gen9() {
   }
 
   /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand la phase se clôt RÉELLEMENT (même
-   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour "phi"
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour "dephasage"
    * (dernière phase, jamais "close" au sens de `calculerRecapitulatifParametresSinusoideGraphique`
    * non plus) — détectée dynamiquement via `nouvelEtat.resultats.length > etat.resultats.length`. */
   function terminerEtape(nouvelEtat: EtatSessionParametresSinusoideGraphique, votreReponse?: ReactNode) {
@@ -174,6 +150,7 @@ export function App5gen9() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Paramètres d'une fonction sinusoïdale — lecture graphique</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -192,7 +169,7 @@ export function App5gen9() {
             niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoideGraphique(etat, texte), `${labelPhase(etat.phase)} ${texte}`)}
-            diagnostiquer={(texte) => diagnostiquerReponsePourPhase(exercice, etat.phase, texte)}
+            diagnostiquer={(texte) => diagnostiquerPhaseParametresSinusoideGraphique(exercice, etat.phase, texte)}
             validation={validation}
           />
         </div>

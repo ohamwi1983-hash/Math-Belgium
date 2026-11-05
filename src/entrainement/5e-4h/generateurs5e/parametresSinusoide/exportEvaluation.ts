@@ -18,8 +18,8 @@ function construireEnonceParametresSinusoide(exercice: ExerciceParametresSinusoi
     enteteFragments: [texte("On considère la fonction sinusoïdale "), latex(formatFormuleLatex(exercice))],
     questions: [
       {
-        consigne: [texte("Détermine l'amplitude A, le décalage horizontal Φ, la période T, la fréquence f et le décalage vertical b de cette fonction (arrondis au centième près).")],
-        reponse: { type: "lignes", nombre: 5 },
+        consigne: [texte("Détermine l'amplitude, la pulsation ω, la période T, la fréquence, le déphasage φ, le décalage horizontal Φ et le décalage vertical b de cette fonction (valeurs exactes, ou arrondies au centième).")],
+        reponse: { type: "lignes", nombre: 7 },
       },
     ],
   };

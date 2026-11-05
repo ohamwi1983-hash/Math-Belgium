@@ -1,14 +1,19 @@
 /**
- * Couche B (5e) — types pour 5gen8 ("Paramètres d'une fonction sinusoïdale"). Séquence FIXE à 5
- * écrans, jamais de saut conditionnel (contrairement à 5gen6/5gen7) — ordre A, φ, T, f, b (spec).
+ * Couche B (5e) — types pour 5gen8 ("Paramètres d'une fonction sinusoïdale"). Séquence FIXE à 7
+ * écrans, jamais de saut conditionnel (contrairement à 5gen6/5gen7) — ordre du cours (section
+ * « Paramètres », f(x) = A·sin(ωx + φ) + b) : amplitude, pulsation ω, période T, fréquence, déphasage
+ * φ, décalage horizontal Φ = −φ/ω, décalage vertical b.
+ *
+ * Identifiants de phase historiques conservés : "phi" désigne le DÉCALAGE HORIZONTAL Φ (champ
+ * `exercice.phi`), "dephasage" le déphasage φ du cours (`exercice.C`), "pulsation" ω (`exercice.B`).
  */
 import type { ExerciceParametresSinusoide } from "../core5e/parametresSinusoide.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseParametresSinusoide = "amplitude" | "phi" | "periode" | "frequence" | "decalage";
+export type PhaseParametresSinusoide = "amplitude" | "pulsation" | "periode" | "frequence" | "dephasage" | "phi" | "decalage";
 
-export const ORDRE_PHASES_SINUSOIDE: PhaseParametresSinusoide[] = ["amplitude", "phi", "periode", "frequence", "decalage"];
+export const ORDRE_PHASES_SINUSOIDE: PhaseParametresSinusoide[] = ["amplitude", "pulsation", "periode", "frequence", "dephasage", "phi", "decalage"];
 
 export function phaseInitiale(): PhaseParametresSinusoide {
   return ORDRE_PHASES_SINUSOIDE[0];
@@ -22,6 +27,8 @@ export function phaseApres(phaseActuelle: PhaseParametresSinusoide): PhaseParame
 export interface ResultatExerciceParametresSinusoide {
   exercice: ExerciceParametresSinusoide;
   scoreAmplitude: number;
+  scorePulsation: number;
+  scoreDephasage: number;
   scorePhi: number;
   scorePeriode: number;
   scoreFrequence: number;
@@ -42,6 +49,12 @@ export interface EtatSessionParametresSinusoide {
    * `scoreAmplitudePartiel === 0` ; champ explicite ajouté pendant le balayage générique
    * (point A). */
   amplitudeRevele: boolean;
+  scorePulsationPartiel: number | null;
+  /** même principe que `amplitudeRevele` ci-dessus. */
+  pulsationRevele: boolean;
+  scoreDephasagePartiel: number | null;
+  /** même principe que `amplitudeRevele` ci-dessus. */
+  dephasageRevele: boolean;
   scorePhiPartiel: number | null;
   /** même principe que `amplitudeRevele` ci-dessus. */
   phiRevele: boolean;

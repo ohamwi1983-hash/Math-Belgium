@@ -1,4 +1,4 @@
-import type { EtatSessionParametresSinusoideGraphique } from "../moteur5e/typesParametresSinusoideGraphique";
+import type { EtatSessionParametresSinusoideGraphique, PhaseParametresSinusoideGraphique } from "../moteur5e/typesParametresSinusoideGraphique";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatChampParametreGraphiqueLatex } from "./formatParametresSinusoideGraphique";
 
@@ -22,42 +22,15 @@ import { formatChampParametreGraphiqueLatex } from "./formatParametresSinusoideG
 export function calculerRecapitulatifParametresSinusoideGraphique(etat: EtatSessionParametresSinusoideGraphique): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
   const entrees: EntreeRecapitulatif[] = [];
-
-  if (etat.scoreDecalagePartiel !== null) {
-    entrees.push({
-      libelle: "Décalage vertical",
-      estLatex: true,
-      valeur: formatChampParametreGraphiqueLatex(exercice, "decalage"),
-      revele: etat.decalageRevele,
-    });
-  }
-
-  if (etat.scoreAmplitudePartiel !== null) {
-    entrees.push({
-      libelle: "Amplitude",
-      estLatex: true,
-      valeur: formatChampParametreGraphiqueLatex(exercice, "amplitude"),
-      revele: etat.amplitudeRevele,
-    });
-  }
-
-  if (etat.scorePeriodePartiel !== null) {
-    entrees.push({
-      libelle: "Période",
-      estLatex: true,
-      valeur: formatChampParametreGraphiqueLatex(exercice, "periode"),
-      revele: etat.periodeRevele,
-    });
-  }
-
-  if (etat.scoreFrequencePartiel !== null) {
-    entrees.push({
-      libelle: "Fréquence",
-      estLatex: true,
-      valeur: formatChampParametreGraphiqueLatex(exercice, "frequence"),
-      revele: etat.frequenceRevele,
-    });
-  }
-
+  const ajouter = (libelle: string, phase: PhaseParametresSinusoideGraphique, score: number | null, revele: boolean) => {
+    if (score !== null) entrees.push({ libelle, estLatex: true, valeur: formatChampParametreGraphiqueLatex(exercice, phase), revele });
+  };
+  // Ordre de `ORDRE_PHASES_SINUSOIDE_GRAPHIQUE` (la dernière entrée est la phase qui vient de se clore).
+  ajouter("Décalage vertical", "decalage", etat.scoreDecalagePartiel, etat.decalageRevele);
+  ajouter("Amplitude", "amplitude", etat.scoreAmplitudePartiel, etat.amplitudeRevele);
+  ajouter("Période", "periode", etat.scorePeriodePartiel, etat.periodeRevele);
+  ajouter("Pulsation", "pulsation", etat.scorePulsationPartiel, etat.pulsationRevele);
+  ajouter("Fréquence", "frequence", etat.scoreFrequencePartiel, etat.frequenceRevele);
+  ajouter("Décalage horizontal", "phi", etat.scorePhiPartiel, etat.phiRevele);
   return entrees;
 }

@@ -1,6 +1,6 @@
-import type { EtatSessionParametresSinusoide } from "../moteur5e/typesParametresSinusoide";
+import type { EtatSessionParametresSinusoide, PhaseParametresSinusoide } from "../moteur5e/typesParametresSinusoide";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatAmplitudeAbsolueLatex, formatFrequenceLatex, formatRationnelPiLatex } from "./formatParametresSinusoide";
+import { formatChampParametreLatex } from "./formatParametresSinusoide";
 
 /**
  * Construit le récapitulatif des paramètres déjà confirmés de l'exercice en cours — reprend
@@ -27,19 +27,16 @@ import { formatAmplitudeAbsolueLatex, formatFrequenceLatex, formatRationnelPiLat
 export function calculerRecapitulatifParametresSinusoide(etat: EtatSessionParametresSinusoide): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
   const entrees: EntreeRecapitulatif[] = [];
-
-  if (etat.scoreAmplitudePartiel !== null) {
-    entrees.push({ libelle: "Amplitude (A)", estLatex: true, valeur: `|A| = ${formatAmplitudeAbsolueLatex(exercice.A)}`, revele: etat.amplitudeRevele });
-  }
-  if (etat.scorePhiPartiel !== null) {
-    entrees.push({ libelle: "Déphasage (Φ)", estLatex: true, valeur: `\\Phi = ${formatRationnelPiLatex(exercice.phi)}`, revele: etat.phiRevele });
-  }
-  if (etat.scorePeriodePartiel !== null) {
-    entrees.push({ libelle: "Période (T)", estLatex: true, valeur: `T = ${formatRationnelPiLatex(exercice.T)}`, revele: etat.periodeRevele });
-  }
-  if (etat.scoreFrequencePartiel !== null) {
-    entrees.push({ libelle: "Fréquence (f)", estLatex: true, valeur: `f = ${formatFrequenceLatex(exercice)}`, revele: etat.frequenceRevele });
-  }
-
+  const ajouter = (libelle: string, phase: PhaseParametresSinusoide, score: number | null, revele: boolean) => {
+    if (score !== null) entrees.push({ libelle, estLatex: true, valeur: formatChampParametreLatex(exercice, phase), revele });
+  };
+  // Ordre de `ORDRE_PHASES_SINUSOIDE` (la dernière entrée est toujours la phase qui vient de se clore,
+  // voir `App5gen8.tsx::ajouterHistorique`).
+  ajouter("Amplitude", "amplitude", etat.scoreAmplitudePartiel, etat.amplitudeRevele);
+  ajouter("Pulsation (ω)", "pulsation", etat.scorePulsationPartiel, etat.pulsationRevele);
+  ajouter("Période (T)", "periode", etat.scorePeriodePartiel, etat.periodeRevele);
+  ajouter("Fréquence", "frequence", etat.scoreFrequencePartiel, etat.frequenceRevele);
+  ajouter("Déphasage (φ)", "dephasage", etat.scoreDephasagePartiel, etat.dephasageRevele);
+  ajouter("Décalage horizontal (Φ)", "phi", etat.scorePhiPartiel, etat.phiRevele);
   return entrees;
 }

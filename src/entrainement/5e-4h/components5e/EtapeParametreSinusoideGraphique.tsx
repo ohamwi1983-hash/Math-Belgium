@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { ExerciceParametresSinusoideGraphique } from "../core5e/parametresSinusoideGraphique.types";
 import type { PhaseParametresSinusoideGraphique } from "../moteur5e/typesParametresSinusoideGraphique";
 import {
+  aideNiveau1,
   consigneGenerale,
   consignePhase,
   labelPhase,
-  texteAideNiveau1,
+  placeholderPhase,
   texteAideNiveau2,
 } from "../ui5e/formatParametresSinusoideGraphique";
+import { Katex } from "../components/Katex";
 import { SinusoideGraph } from "./SinusoideGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -76,12 +78,13 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 3, pi/4..."
+          placeholder={placeholderPhase(phase)}
         />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
+          <p>{aideNiveau1(phase).texte}</p>
+          {aideNiveau1(phase).latex && <Katex expression={aideNiveau1(phase).latex!} block />}
           {niveauAide >= 2 && <p>{texteAideNiveau2(phase)}</p>}
         </div>
       )}

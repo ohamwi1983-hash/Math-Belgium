@@ -39,8 +39,8 @@ import {
   diagnostiquerSolutionsEgalite,
   diagnostiquerSolutionsProduit,
   diagnostiquerSolutionsPythagoricienne,
-} from "./verificationEquationTrig";
-import type { ReponseArgument, ReponseDeuxFacteursArgument, ReponseDeuxFacteursLignes, ReponseRacinesPythagoricienne } from "./verificationEquationTrig";
+} from "./verificationEquationTrig5gen10";
+import type { ReponseArgument, ReponseDeuxFacteursArgument, ReponseDeuxFacteursLignes, ReponseRacinesPythagoricienne } from "./verificationEquationTrig5gen10";
 
 const POINTS_DE_BASE = 100;
 

@@ -3,13 +3,10 @@
  * dépendre de `src/moteur5e/` (seule `src/moteur5e/` ne peut jamais dépendre de
  * `src/generateurs5e/`) — réutilise `quantitesManquantes` (`moteur5e/typesArcsSecteurs.ts`).
  *
- * Simplification assumée pour cette livraison (signalée explicitement, voir CLAUDE.md section
- * 5gen6) : l'aide niveau 2 substitue la PREMIÈRE formule disponible compte tenu des quantités
- * déjà connues à cet écran (préférence fixe par quantité cible, voir `FORMULES` ci-dessous) —
- * jamais un raisonnement en plusieurs étapes ; dans le cas rare où AUCUNE formule candidate n'est
- * entièrement satisfaite par les quantités connues (ex. θ° demandé avant θ_rad, quand θ° et θ_rad
- * sont tous deux manquants), on retombe sur la formule générale non substituée plutôt que de ne
- * rien afficher.
+ * L'aide niveau 2 substitue la PREMIÈRE formule disponible compte tenu des quantités déjà connues
+ * à cet écran (préférence fixe par quantité cible, voir `FORMULES` ci-dessous). Les écrans sont
+ * ordonnés par dépendance (`quantitesManquantes`, `DEPENDANCES_ARC_SECTEUR`) : une formule est
+ * toujours applicable ; le repli sur la formule générale non substituée reste une garde.
  */
 import { ORDRE_QUANTITES_ARC_SECTEUR } from "../core5e/arcsSecteurs.types";
 import type { ExerciceModeConversion, ExerciceModeDeuxVersTrois, QuantiteArcSecteur } from "../core5e/arcsSecteurs.types";
@@ -60,17 +57,35 @@ export function formatValeurQuantiteLatex(quantite: QuantiteArcSecteur, exercice
   }
 }
 
-export const LABELS: Record<QuantiteArcSecteur, string> = { thetaDeg: "θ (degrés)", thetaRad: "θ (radians)", r: "r", l: "l", A: "A" };
+/** Libellés en TEXTE (titres de fiche, récapitulatif, saisie rappelée). La longueur d'arc est
+ * notée s, comme dans le cours (s = rθ) — la clé interne reste `l`. */
+export const LABELS: Record<QuantiteArcSecteur, string> = { thetaDeg: "θ (degrés)", thetaRad: "θ (radians)", r: "r", l: "s", A: "A" };
 
+/** Mêmes libellés en LaTeX (« θ (degrés) » écrit tel quel dans KaTeX passait en italique collé,
+ * avec un avertissement `unicodeTextInMathMode`). */
+export const LABELS_LATEX: Record<QuantiteArcSecteur, string> = {
+  thetaDeg: "\\theta\\ (\\text{degrés})",
+  thetaRad: "\\theta\\ (\\text{radians})",
+  r: "r",
+  l: "s",
+  A: "A",
+};
+
+/** Libellé LaTeX suivi de « = » (bloc de données, énoncé papier). */
 export function labelQuantite(quantite: QuantiteArcSecteur): string {
-  return `${LABELS[quantite]} =`;
+  return `${LABELS_LATEX[quantite]} =`;
+}
+
+/** Nombre décimal en LaTeX avec la virgule décimale (`{,}`). */
+function nombreLatex(x: number): string {
+  return String(x).replace(".", "{,}");
 }
 
 const CONSIGNES: Record<QuantiteArcSecteur, string> = {
   thetaDeg: "Calcule la mesure de l'angle θ, en degrés (arrondis au centième près).",
   thetaRad: "Calcule la mesure de l'angle θ, en radians (arrondis au centième près).",
   r: "Calcule le rayon r du cercle (arrondis au centième près).",
-  l: "Calcule la longueur l de l'arc (arrondis au centième près).",
+  l: "Calcule la longueur s de l'arc (arrondis au centième près).",
   A: "Calcule l'aire A du secteur (arrondis au centième près).",
 };
 
@@ -88,7 +103,7 @@ export function quantitesConnuesJusqua(exercice: ExerciceModeDeuxVersTrois, phas
 }
 
 export function segmentsDonneesConnues(exercice: ExerciceModeDeuxVersTrois, connues: QuantiteArcSecteur[]): string[] {
-  return ORDRE_QUANTITES_ARC_SECTEUR.filter((q) => connues.includes(q)).map((q) => `${LABELS[q]} = ${formatValeurQuantiteLatex(q, exercice)}`);
+  return ORDRE_QUANTITES_ARC_SECTEUR.filter((q) => connues.includes(q)).map((q) => `${LABELS_LATEX[q]} = ${formatValeurQuantiteLatex(q, exercice)}`);
 }
 
 /**
@@ -116,21 +131,21 @@ const FORMULES: Record<QuantiteArcSecteur, FormuleArcSecteur[]> = {
   thetaDeg: [{ requiert: ["thetaRad"], latexGeneral: "\\theta° = \\theta_{rad} \\times \\dfrac{180}{\\pi}", latexSubstitue: (ex) => `\\theta° = ${formatValeurQuantiteLatex("thetaRad", ex)} \\times \\dfrac{180}{\\pi}` }],
   thetaRad: [
     { requiert: ["thetaDeg"], latexGeneral: "\\theta_{rad} = \\theta° \\times \\dfrac{\\pi}{180}", latexSubstitue: (ex) => `\\theta_{rad} = ${formatValeurQuantiteLatex("thetaDeg", ex)} \\times \\dfrac{\\pi}{180}` },
-    { requiert: ["r", "l"], latexGeneral: "\\theta_{rad} = \\dfrac{l}{r}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("r", ex)}}` },
+    { requiert: ["r", "l"], latexGeneral: "\\theta_{rad} = \\dfrac{s}{r}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("r", ex)}}` },
     { requiert: ["r", "A"], latexGeneral: "\\theta_{rad} = \\dfrac{2A}{r^2}", latexSubstitue: (ex) => `\\theta_{rad} = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${ex.valeurs.r}^2}` },
   ],
   r: [
-    { requiert: ["thetaRad", "l"], latexGeneral: "r = \\dfrac{l}{\\theta_{rad}}", latexSubstitue: (ex) => `r = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("thetaRad", ex)}}` },
+    { requiert: ["thetaRad", "l"], latexGeneral: "r = \\dfrac{s}{\\theta_{rad}}", latexSubstitue: (ex) => `r = \\dfrac{${formatValeurQuantiteLatex("l", ex)}}{${formatValeurQuantiteLatex("thetaRad", ex)}}` },
     { requiert: ["thetaRad", "A"], latexGeneral: "r = \\sqrt{\\dfrac{2A}{\\theta_{rad}}}", latexSubstitue: (ex) => `r = \\sqrt{\\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${formatValeurQuantiteLatex("thetaRad", ex)}}}` },
-    { requiert: ["l", "A"], latexGeneral: "r = \\dfrac{2A}{l}", latexSubstitue: (ex) => `r = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${formatValeurQuantiteLatex("l", ex)}}` },
+    { requiert: ["l", "A"], latexGeneral: "r = \\dfrac{2A}{s}", latexSubstitue: (ex) => `r = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${formatValeurQuantiteLatex("l", ex)}}` },
   ],
   l: [
-    { requiert: ["r", "thetaRad"], latexGeneral: "l = r \\times \\theta_{rad}", latexSubstitue: (ex) => `l = ${ex.valeurs.r} \\times ${formatValeurQuantiteLatex("thetaRad", ex)}` },
-    { requiert: ["r", "A"], latexGeneral: "l = \\dfrac{2A}{r}", latexSubstitue: (ex) => `l = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${ex.valeurs.r}}` },
+    { requiert: ["r", "thetaRad"], latexGeneral: "s = r \\times \\theta_{rad}", latexSubstitue: (ex) => `s = ${ex.valeurs.r} \\times ${formatValeurQuantiteLatex("thetaRad", ex)}` },
+    { requiert: ["r", "A"], latexGeneral: "s = \\dfrac{2A}{r}", latexSubstitue: (ex) => `s = \\dfrac{2 \\times ${formatValeurQuantiteLatex("A", ex)}}{${ex.valeurs.r}}` },
   ],
   A: [
     { requiert: ["r", "thetaRad"], latexGeneral: "A = \\dfrac{1}{2} r^2 \\theta_{rad}", latexSubstitue: (ex) => `A = \\dfrac{1}{2} \\times ${ex.valeurs.r}^2 \\times ${formatValeurQuantiteLatex("thetaRad", ex)}` },
-    { requiert: ["r", "l"], latexGeneral: "A = \\dfrac{1}{2} \\times r \\times l", latexSubstitue: (ex) => `A = \\dfrac{1}{2} \\times ${ex.valeurs.r} \\times ${formatValeurQuantiteLatex("l", ex)}` },
+    { requiert: ["r", "l"], latexGeneral: "A = \\dfrac{1}{2} \\times r \\times s", latexSubstitue: (ex) => `A = \\dfrac{1}{2} \\times ${ex.valeurs.r} \\times ${formatValeurQuantiteLatex("l", ex)}` },
   ],
 };
 
@@ -167,6 +182,10 @@ export function labelDepartConversion(exercice: ExerciceModeConversion): string 
   return exercice.direction === "degVersRad" ? "θ (degrés) =" : "θ (radians) =";
 }
 
+function labelDepartConversionLatex(exercice: ExerciceModeConversion): string {
+  return `${exercice.direction === "degVersRad" ? LABELS_LATEX.thetaDeg : LABELS_LATEX.thetaRad} =`;
+}
+
 export function labelReponseConversion(exercice: ExerciceModeConversion): string {
   return exercice.direction === "degVersRad" ? "θ (radians) =" : "θ (degrés) =";
 }
@@ -175,16 +194,16 @@ export function labelReponseConversion(exercice: ExerciceModeConversion): string
  * uniquement) — `valeurDepart` a été calculée exactement comme `k*Math.PI/36` à la génération, la
  * division/l'arrondi ci-dessous la retrouve donc sans perte. */
 function formatValeurDepartConversionLatex(exercice: ExerciceModeConversion): string {
-  if (exercice.direction === "degVersRad") return `${exercice.valeurDepart}^\\circ`;
+  if (exercice.direction === "degVersRad") return `${nombreLatex(exercice.valeurDepart)}^\\circ`;
   if (exercice.type === "exacte") {
     const k = Math.round(exercice.valeurDepart / (Math.PI / 36));
     return formatMultipleDePiLatex(k, 36);
   }
-  return `${exercice.valeurDepart}`;
+  return nombreLatex(exercice.valeurDepart);
 }
 
 export function latexEnonceConversion(exercice: ExerciceModeConversion): string {
-  return `${labelDepartConversion(exercice)} ${formatValeurDepartConversionLatex(exercice)}`;
+  return `${labelDepartConversionLatex(exercice)} ${formatValeurDepartConversionLatex(exercice)}`;
 }
 
 export const TEXTE_AIDE_CONVERSION_NIVEAU1 = "\\theta_{rad} = \\theta° \\times \\dfrac{\\pi}{180} \\qquad \\theta° = \\theta_{rad} \\times \\dfrac{180}{\\pi}";
@@ -202,8 +221,8 @@ export function latexAideConversionNiveau2(exercice: ExerciceModeConversion): st
 export function formatValeurCibleConversionLatex(exercice: ExerciceModeConversion): string {
   if (exercice.direction === "degVersRad") {
     if (exercice.type === "exacte") return fractionPiThetaRad(exercice.valeurDepart);
-    return `${Math.round(exercice.valeurCible * 100) / 100}`;
+    return nombreLatex(Math.round(exercice.valeurCible * 100) / 100);
   }
   const deg = exercice.type === "exacte" ? exercice.valeurCible : Math.round(exercice.valeurCible * 100) / 100;
-  return `${deg}^\\circ`;
+  return `${nombreLatex(deg)}^\\circ`;
 }

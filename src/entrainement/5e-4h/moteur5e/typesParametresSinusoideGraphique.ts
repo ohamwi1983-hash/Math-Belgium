@@ -1,15 +1,17 @@
 /**
  * Couche B (5e) — types pour 5gen9 ("Paramètres d'une fonction sinusoïdale — lecture graphique").
- * Séquence FIXE à 5 écrans, ordre DIFFÉRENT de 5gen8 : b, A, T, f, φ (situer le bon passage
- * ascendant, écran φ, suppose d'avoir déjà établi où se trouve la ligne médiane, écran b — spec).
+ * Séquence FIXE à 7 écrans, ordre de la méthode du cours (section « lecture graphique ») : b, A, T,
+ * pulsation ω = 2π/T, fréquence, décalage horizontal Φ (abscisse x₀ d'un passage ASCENDANT par la
+ * ligne médiane — situer le bon passage suppose d'avoir établi la médiane, écran b), puis phase
+ * φ = −ω·x₀. Identifiant historique : "phi" = Φ (x₀), "dephasage" = φ.
  */
 import type { ExerciceParametresSinusoideGraphique } from "../core5e/parametresSinusoideGraphique.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type PhaseParametresSinusoideGraphique = "decalage" | "amplitude" | "periode" | "frequence" | "phi";
+export type PhaseParametresSinusoideGraphique = "decalage" | "amplitude" | "periode" | "pulsation" | "frequence" | "phi" | "dephasage";
 
-export const ORDRE_PHASES_SINUSOIDE_GRAPHIQUE: PhaseParametresSinusoideGraphique[] = ["decalage", "amplitude", "periode", "frequence", "phi"];
+export const ORDRE_PHASES_SINUSOIDE_GRAPHIQUE: PhaseParametresSinusoideGraphique[] = ["decalage", "amplitude", "periode", "pulsation", "frequence", "phi", "dephasage"];
 
 export function phaseInitiale(): PhaseParametresSinusoideGraphique {
   return ORDRE_PHASES_SINUSOIDE_GRAPHIQUE[0];
@@ -25,8 +27,10 @@ export interface ResultatExerciceParametresSinusoideGraphique {
   scoreDecalage: number;
   scoreAmplitude: number;
   scorePeriode: number;
+  scorePulsation: number;
   scoreFrequence: number;
   scorePhi: number;
+  scoreDephasage: number;
 }
 
 export interface EtatSessionParametresSinusoideGraphique {
@@ -48,9 +52,15 @@ export interface EtatSessionParametresSinusoideGraphique {
   scorePeriodePartiel: number | null;
   /** même principe que `decalageRevele` ci-dessus. */
   periodeRevele: boolean;
+  scorePulsationPartiel: number | null;
+  /** même principe que `decalageRevele` ci-dessus. */
+  pulsationRevele: boolean;
   scoreFrequencePartiel: number | null;
   /** même principe que `decalageRevele` ci-dessus. */
   frequenceRevele: boolean;
+  scorePhiPartiel: number | null;
+  /** même principe que `decalageRevele` ci-dessus. */
+  phiRevele: boolean;
   indexExercice: number;
   resultats: ResultatExerciceParametresSinusoideGraphique[];
   terminee: boolean;

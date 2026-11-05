@@ -52,11 +52,24 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
   // remontage du composant via `key={phase}` au changement d'écran, qui réinitialise l'état local).
   const champErronee = dernierStatut !== null && dernierStatut !== "correct";
 
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2,
+   * point 48) — l'élève corrige son écriture, rien n'est décompté. */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
+
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    const statut = diagnostiquer ? diagnostiquer(texte) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(texte);
   }
+  /** Exemple de format HORS de l'espace des réponses possibles : un angle de 0,05 rad est
+   * inférieur au plus petit angle tiré (10°), une aire de 2345,6 dépasse la plus grande aire tirée. */
+  const placeholder = /^(conversionRad|angleTheta|angle1|angle2)$/.test(phase) ? "ex : 0,05" : "ex : 2345,6";
 
   return (
     <div>
@@ -73,8 +86,17 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
       <GeometrieCercleSketch exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <div className="field field-inline">
-        <label className="field-label">{labelPhase(phase)}</label>
-        <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 3,14" />
+        <label className="field-label field-label-minuscule">{labelPhase(phase)}</label>
+        <input
+          type="text"
+          className={`text-input${champErronee || ecritureIllisible ? " is-erronee" : ""}`}
+          value={texte}
+          onChange={(e) => {
+            setTexte(e.target.value);
+            setEcritureIllisible(false);
+          }}
+          placeholder={placeholder}
+        />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
@@ -88,7 +110,12 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

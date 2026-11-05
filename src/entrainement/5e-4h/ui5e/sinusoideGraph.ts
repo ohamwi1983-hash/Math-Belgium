@@ -327,6 +327,8 @@ function pointLePlusProche(points: PointCleSinusoide[], xCible: number): PointCl
  * - **amplitude** — aide niveau 2 ("le point sommet") → 1 sommet (max ou min, le plus proche du
  *   centre visible) SEUL — la droite médiane, elle, n'est PAS un point (voir `segmentsAideActive`,
  *   affichée par défaut sur cet écran indépendamment du niveau d'aide).
+ * - **pulsation** et **dephasage** (écrans ajoutés, méthode du cours ω = 2π/T, φ = −ω·x₀) —
+ *   mêmes repères que **frequence** et **phi** respectivement (ils réutilisent T et x₀).
  * - **periode** et **frequence** — aide niveau 2 ("deux sommets consécutifs de MÊME NATURE") → 2
  *   `max` consécutifs (séparés exactement de T, jamais un max et un min) ; **frequence** réutilise le
  *   même repère que **periode** (son propre texte d'aide 2 renvoie explicitement à "la période T déjà
@@ -358,6 +360,7 @@ export function pointsAideActive(exercice: ParametresSinusoideBase, phase: Phase
       return [pointLePlusProche([...maxPoints, ...minPoints], xCentre)];
     }
     case "periode":
+    case "pulsation":
     case "frequence": {
       if (niveauAide < 2) return [];
       const parX = [...maxPoints].sort((a, b) => a.x - b.x);
@@ -366,7 +369,8 @@ export function pointsAideActive(exercice: ParametresSinusoideBase, phase: Phase
       const voisin = idx < parX.length - 1 ? parX[idx + 1] : parX[idx - 1];
       return [pivot, voisin];
     }
-    case "phi": {
+    case "phi":
+    case "dephasage": {
       if (niveauAide < 2) return [];
       const xCible = xAscendantPrincipal(exercice);
       const point = points.find((p) => p.type === "ascendant" && Math.abs(p.x - xCible) < 1e-6);
@@ -444,8 +448,10 @@ export function segmentsAideActive(exercice: ParametresSinusoideBase, phase: Pha
       const [pivot, voisin] = pointsAideActive(exercice, "periode", 2);
       return [{ kind: "segment", point1: [pivot.x, pivot.y], point2: [voisin.x, voisin.y], style: "dashed" }];
     }
+    case "pulsation":
     case "frequence":
     case "phi":
+    case "dephasage":
       return [];
   }
 }

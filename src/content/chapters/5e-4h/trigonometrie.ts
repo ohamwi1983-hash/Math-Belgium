@@ -314,9 +314,9 @@ export const trigonometrie: ChapterContent = {
           title: 'Arcs et secteurs',
           generatorId: '5gen6',
           description: [
-            'Convertis des angles entre degrés et radians. Puis calcule des longueurs ' +
-              'd\'arc et des aires de secteurs circulaires, à partir d\'un rayon et d\'un ' +
-              'angle donnés.',
+            'Un secteur est décrit par cinq grandeurs : rayon, angle en degrés, angle en ' +
+              'radians, longueur d\'arc s et aire. Deux sont données : retrouve les trois ' +
+              'autres. Ou convertis une mesure d\'angle entre degrés et radians.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 6. Arcs et secteurs »',
@@ -448,9 +448,10 @@ export const trigonometrie: ChapterContent = {
           title: 'Polygones, arcs et secteurs',
           generatorId: '5gen7',
           description: [
-            'Lis un diagramme qui combine un polygone régulier inscrit dans un cercle et un ' +
-              'ou plusieurs secteurs/arcs. Puis calcule l\'aire d\'une figure composée, en ' +
-              'décomposant en triangles et secteurs élémentaires.',
+            'Un cercle de rayon r porte n points régulièrement espacés (les sommets d\'un ' +
+              'polygone régulier inscrit). Calcule la circonférence et l\'aire du disque, puis ' +
+              'la longueur d\'un arc et l\'aire d\'un secteur qui couvrent un ou plusieurs ' +
+              'côtés — chacun comme une fraction du cercle complet.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 7. Polygones, arcs et secteurs »',
@@ -591,8 +592,10 @@ export const trigonometrie: ChapterContent = {
           title: 'Problèmes de géométrie du cercle',
           generatorId: '5gen12',
           description: [
-            'Combine secteurs, segments circulaires et loi des cosinus. Retrouve une corde, ' +
-              'un rayon ou une aire dans des figures géométriques variées.',
+            'Trois problèmes : l\'aire balayée par un essuie-glace (différence de deux ' +
+              'secteurs) ; un segment circulaire (angle au centre par la loi des cosinus, puis ' +
+              'secteur − triangle) ; une lentille, aire commune à deux disques qui partagent une ' +
+              'corde. Calcule l\'angle au centre, puis les aires.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 12. Problèmes de géométrie du cercle »',
@@ -886,9 +889,9 @@ export const trigonometrie: ChapterContent = {
           title: "Paramètres d'une fonction sinusoïdale",
           generatorId: '5gen8',
           description: [
-            'Pars d\'une expression donnée. Identifie l\'amplitude, la pulsation, la ' +
-              'période, la fréquence, le déphasage φ, le décalage horizontal Φ et le ' +
-              'décalage vertical.',
+            'Pars d\'une expression donnée. Identifie l\'amplitude, la pulsation ω, la ' +
+              'phase φ, la période, la fréquence, le décalage horizontal Φ et le décalage ' +
+              'vertical.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 8. Paramètres d\'une fonction sinusoïdale »',
@@ -981,9 +984,9 @@ export const trigonometrie: ChapterContent = {
           title: 'Paramètres — lecture graphique',
           generatorId: '5gen9',
           description: [
-            'Retrouve l\'amplitude, la période, la pulsation, la phase et le décalage ' +
-              'vertical d\'une fonction sinusoïdale directement à partir de son graphique, ' +
-              'sans formule de départ.',
+            'Retrouve l\'amplitude, la période, la pulsation ω, la phase φ, le décalage ' +
+              'horizontal Φ et le décalage vertical d\'une fonction sinusoïdale directement à ' +
+              'partir de son graphique, sans formule de départ.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 9. Paramètres — lecture graphique »',
@@ -1087,174 +1090,10 @@ export const trigonometrie: ChapterContent = {
       ],
     },
     {
-      id: 'modeliser',
-      number: 7,
-      title: 'Modéliser une fonction sinusoïdale en contexte',
-      kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale',
-      blocks: [
-        { kind: 'video', title: 'Modéliser une situation périodique par une sinusoïde (grande roue)', youtubeId: 'fw20BqIfKCU' },
-        {
-          kind: 'para',
-          text:
-            'Face à une situation concrète et périodique (grande roue, marée, température ' +
-            'saisonnière…), tu construis le modèle sinusoïdal toujours dans le **même ' +
-            'ordre**. D\'abord l\'amplitude et le décalage vertical, à partir des valeurs ' +
-            'extrêmes. Ensuite la période (donc la pulsation). Et enfin la phase — la ' +
-            'seule qui a besoin d\'une **condition initiale** précise, donnée par l\'énoncé.',
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode — construire le modèle pas à pas',
-          items: [
-            'A = (valeur max − valeur min) / 2.',
-            'b = (valeur max + valeur min) / 2.',
-            'T = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ ω = 2π/T.',
-            'φ : injecte la condition initiale (une valeur connue à un instant connu) dans ' +
-              '$A\\sin(\\omega t+\\varphi)+b$. Résous en φ, en choisissant la solution la ' +
-              'plus simple parmi l\'infinité de solutions possibles.',
-          ],
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Exemple résolu — une grande roue',
-          blocks: [
-            {
-              kind: 'para',
-              text:
-                'Une grande roue a un rayon de 15 m. Le centre de la roue est situé à 17 m ' +
-                'du sol. Elle fait un tour complet en 8 minutes. À l\'instant $t=0$ ' +
-                '(l\'embarquement), une nacelle se trouve à son point le plus bas.',
-            },
-            {
-              kind: 'illustrationGroup',
-              items: [
-                {
-                  kind: 'circleDiagram',
-                  groundLine: true,
-                  markedPoint: { angle: -PI / 2, label: 't=0' },
-                  radiusLabel: 'r=15',
-                  caption: 'la nacelle part du point le plus bas (t=0)',
-                },
-              ],
-            },
-            {
-              kind: 'para',
-              text:
-                'Amplitude et décalage vertical, à partir des positions extrêmes : hauteur ' +
-                'maximale $= 17+15=32$ m, minimale $=17-15=2$ m $\\implies A=15,\\ b=17$.',
-            },
-            { kind: 'para', text: 'Pulsation, avec $T=8$ min : $\\omega = \\dfrac{2\\pi}{8} = \\dfrac{\\pi}{4}$.' },
-            {
-              kind: 'para',
-              text:
-                'Phase, condition initiale hauteur(0)=2 : $15\\sin(\\varphi)+17=2 \\implies ' +
-                '\\sin(\\varphi)=-1 \\implies \\varphi = -\\dfrac{\\pi}{2}$ (solution la plus simple).',
-            },
-            {
-              kind: 'para',
-              text: 'Modèle complet : $hauteur(t) = 15\\sin(\\dfrac{\\pi}{4}t - \\dfrac{\\pi}{2}) + 17$ (t en minutes).',
-            },
-            {
-              kind: 'illustration',
-              illustration: {
-                kind: 'curvePlot',
-                curves: [{ fn: (t) => 15 * Math.sin((PI / 4) * t - PI / 2) + 17, tone: 'good' }],
-                xMin: 0,
-                xMax: 12,
-                xTicks: [4, 8, 12],
-                // Pas d'étiquette sur la droite y=2 : coïncide avec le point "t=0" juste en
-                // dessous, qui affiche déjà cette valeur (hauteur=2) — chevauchement constaté.
-                horizontalAsymptotes: [{ y: 2 }, { y: 32, label: 'max = 32' }],
-                points: [
-                  { x: 0, y: 2, label: 't=0', tone: 'accent' },
-                  { x: 4, y: 32, label: '', tone: 'accent' },
-                ],
-                xAxisLabel: 't (min)',
-                yAxisLabel: 'hauteur (m)',
-                caption:
-                  'la nacelle part du point bas (t=0, hauteur=2) et atteint le point haut ' +
-                  '(hauteur=32) après un demi-tour, à t=4 min',
-              },
-            },
-            {
-              kind: 'para',
-              text:
-                'Vérification : $hauteur(4) = 15\\sin(\\pi - \\pi/2) + 17 = 15\\sin(\\pi/2)+17 ' +
-                '= 32$ m. C\'est exactement le point le plus haut, atteint après un ' +
-                'demi-tour (4 minutes) — cohérent !',
-            },
-          ],
-        },
-        {
-          kind: 'attention',
-          label: 'Attention — φ n\'est pas unique',
-          text:
-            'L\'équation $\\sin(\\varphi) = -1$ a une infinité de solutions ($\\varphi = ' +
-            '-\\pi/2 + 2k\\pi$). On choisit, par convention, la plus simple — en général ' +
-            'celle qui appartient à $]-\\pi\\,;\\,\\pi]$. Mais n\'importe quelle autre ' +
-            'valeur de cette famille donnerait exactement la même fonction, puisque le ' +
-            'sinus est périodique de période 2π.',
-        },
-        {
-          kind: 'astuce',
-          text:
-            'Une fois ton modèle construit, vérifie-le toujours sur **une deuxième donnée** ' +
-            'de l\'énoncé — ici, le point haut à t=4, un demi-tour plus tard, comme dans ' +
-            'l\'exemple ci-dessus. Une erreur de signe sur φ se détecte tout de suite si la ' +
-            'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
-        },
-        {
-          kind: 'atelier',
-          tag: 'modele-sinusoidal-widget',
-          label: 'Manipule toi-même — construis le modèle pas à pas',
-          caption:
-            'Règle le rayon, la hauteur du centre et la période, puis choisis la position de ' +
-            'départ (t=0) sur la roue — A, b, ω et φ se recalculent en direct exactement selon ' +
-            'la méthode ci-dessus. φ n\'est jamais réglé directement : il est toujours DÉDUIT ' +
-            'de la position choisie, comme dans la méthode. La vérification affichée reprend ' +
-            'l\'astuce du demi-tour plus tard.',
-        },
-        {
-          kind: 'historique',
-          titre: "Le mathématicien qui a prouvé qu'on peut tout décomposer en sinusoïdes",
-          image: {
-            src: '/images/historique/fourier.jpg',
-            alt: 'Portrait de Joseph Fourier',
-            caption:
-              'Joseph Fourier (1768–1830), gravure d\'après un portrait de Julien-Léopold ' +
-              'Boilly, début du 19e siècle. Domaine public.',
-          },
-          text:
-            'Pourquoi une sinusoïde, et pas une autre forme, pour modéliser un phénomène ' +
-            'périodique ? Le mathématicien français **Joseph Fourier** répond à cette ' +
-            'question en 1822, dans un mémoire sur la propagation de la chaleur : il ' +
-            'démontre qu\'en combinant suffisamment de sinusoïdes de fréquences ' +
-            "différentes, on peut reconstruire quasiment n'importe quel signal périodique, " +
-            'même un signal qui ne ressemble pas du tout à une sinusoïde (un signal carré, ' +
-            'un battement cardiaque, un son complexe). Ce résultat, aujourd\'hui appelé ' +
-            'analyse de Fourier, explique pourquoi la sinusoïde est LE bloc de construction ' +
-            'fondamental de tous les phénomènes périodiques — la grande roue de cette ' +
-            "section n'en est qu'un cas particulier, le plus simple possible : une seule " +
-            'sinusoïde, sans combinaison.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Modéliser une fonction sinusoïdale en contexte',
-          generatorId: '5gen13',
-          description: [
-            'Construis pas à pas une fonction sinusoïdale complète à partir d\'une situation ' +
-              'concrète (grande roue, marée, température saisonnière…).',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
-        },
-      ],
-    },
-    {
       id: 'equations',
-      number: 8,
-      title: 'Équations trigonométriques trig(ax+b) = k',
-      kicker: 'isoler l\'argument, résoudre au cercle trigonométrique, puis diviser par a',
+      number: 7,
+      title: 'Équations trigonométriques',
+      kicker: 'trig(ax+b) = k, produit nul, second degré en sin ou cos, égalité de deux expressions',
       blocks: [
         { kind: 'video', title: 'Équations trigonométriques trig(ax + b) = k', youtubeId: 'mOwnAw5DlCY' },
         { kind: 'subheading', text: 'Résoudre sin x = t, cos x = t, tan x = t' },
@@ -1406,16 +1245,377 @@ export const trigonometrie: ChapterContent = {
             'prend jamais de valeur en dehors de [−1 ; 1]. Ce n\'est pas une erreur à ' +
             'corriger — c\'est une réponse valable : l\'ensemble des solutions est vide.',
         },
+        { kind: 'subheading', text: 'Équation « produit nul »' },
+        {
+          kind: 'para',
+          text:
+            'Un produit est nul dès que **l\'un** de ses facteurs est nul : $A \\cdot B = 0 ' +
+            '\\iff A = 0$ ou $B = 0$. Chaque facteur donne une équation $trig(ax+b) = k$ que tu ' +
+            'sais déjà résoudre ; l\'ensemble des solutions est la **réunion** des solutions des ' +
+            'deux facteurs. Si l\'équation n\'est pas encore factorisée, cherche un facteur ' +
+            'commun : avec $T = \\cos(x)$ par exemple, $T^2 - kT = 0$ devient $T(T-k) = 0$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'produit nul — réunion des solutions',
+          formula: 'Résous $\\sin(x)\\cdot\\left(2\\cos(x)-1\\right) = 0$ dans $[0\\,;2\\pi[$.',
+          steps: [
+            { tag: 'premier facteur nul', text: '$\\sin(x) = 0 \\implies x = 0$ ou $x = \\pi$' },
+            { tag: 'second facteur nul', text: '$2\\cos(x) - 1 = 0 \\iff \\cos(x) = \\dfrac{1}{2} \\implies x = \\dfrac{\\pi}{3}$ ou $x = \\dfrac{5\\pi}{3}$' },
+          ],
+          result: { tag: 'réunion des deux facteurs', text: '$S = \\left\\{0\\,;\\dfrac{\\pi}{3}\\,;\\pi\\,;\\dfrac{5\\pi}{3}\\right\\}$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'à factoriser d\'abord',
+          formula: 'Résous $\\cos^2(x) - \\dfrac{1}{2}\\cos(x) = 0$ dans $[0\\,;2\\pi[$.',
+          steps: [
+            { tag: 'mettre cos(x) en évidence', text: '$\\cos(x)\\cdot\\left(\\cos(x) - \\dfrac{1}{2}\\right) = 0$' },
+            { tag: 'premier facteur nul', text: '$\\cos(x) = 0 \\implies x = \\dfrac{\\pi}{2}$ ou $x = \\dfrac{3\\pi}{2}$' },
+            { tag: 'second facteur nul', text: '$\\cos(x) = \\dfrac{1}{2} \\implies x = \\dfrac{\\pi}{3}$ ou $x = \\dfrac{5\\pi}{3}$' },
+          ],
+          result: { tag: 'réunion des deux facteurs', text: '$S = \\left\\{\\dfrac{\\pi}{3}\\,;\\dfrac{\\pi}{2}\\,;\\dfrac{3\\pi}{2}\\,;\\dfrac{5\\pi}{3}\\right\\}$' },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Diviser les deux membres par $\\cos(x)$ pour « simplifier » : on perd toutes les ' +
+            'solutions de $\\cos(x) = 0$. Dans un produit nul, on ne divise jamais par un ' +
+            'facteur — on le met en évidence.',
+        },
+        { kind: 'subheading', text: 'Équation du second degré en sin ou en cos' },
+        {
+          kind: 'para',
+          text:
+            'Quand une équation mélange $\\sin^2(x)$ et $\\cos(x)$ (ou $\\cos^2(x)$ et $\\sin(x)$), ' +
+            'l\'identité $\\sin^2(x) + \\cos^2(x) = 1$ permet de tout écrire avec **une seule** ' +
+            'fonction. Un changement de variable ramène alors à une équation du second degré.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — substitution t = cos(x) ou t = sin(x)',
+          items: [
+            'Remplace $\\sin^2(x)$ par $1 - \\cos^2(x)$ (ou $\\cos^2(x)$ par $1 - \\sin^2(x)$) : ' +
+              'il ne reste qu\'une fonction trigonométrique.',
+            'Pose $t = \\cos(x)$ (ou $t = \\sin(x)$) et résous l\'équation du second degré en $t$ ' +
+              '(discriminant).',
+            '**Rejette** toute racine $t$ en dehors de $[-1\\,;1]$ : un cosinus ou un sinus ne ' +
+              'prend jamais une telle valeur.',
+            'Pour chaque racine restante, résous $\\cos(x) = t$ (ou $\\sin(x) = t$) au cercle ' +
+              'trigonométrique.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'une racine à rejeter',
+          formula: 'Résous $2\\sin^2(x) - \\cos(x) + 1 = 0$ dans $[0\\,;2\\pi[$.',
+          steps: [
+            { tag: 'remplacer sin²(x) par 1 − cos²(x)', text: '$2\\left(1 - \\cos^2(x)\\right) - \\cos(x) + 1 = 0 \\iff 2\\cos^2(x) + \\cos(x) - 3 = 0$' },
+            { tag: 'poser t = cos(x)', text: '$2t^2 + t - 3 = 0$, $\\Delta = 1 + 24 = 25$, $t = \\dfrac{-1 \\pm 5}{4}$ : $t = 1$ ou $t = -\\dfrac{3}{2}$' },
+            { tag: 'rejeter t = −3/2 (hors de [−1 ; 1])', text: 'il reste $\\cos(x) = 1$' },
+            { tag: 'résoudre cos(x) = 1', text: '$x = 0 + 2k\\pi$, donc $x = 0$ dans $[0\\,;2\\pi[$' },
+          ],
+          result: { tag: 'résultat', text: '$S = \\{0\\}$' },
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — une racine rejetée n\'est pas une erreur',
+          text:
+            'Trouver $t = -\\dfrac{3}{2}$ ou $t = 2$ ne signifie pas que ton calcul est faux : ' +
+            'c\'est une racine de l\'équation en $t$ qui ne correspond à aucun angle. Si toutes ' +
+            'les racines sont rejetées, l\'équation n\'a aucune solution.',
+        },
+        { kind: 'subheading', text: 'Égalité de deux expressions trigonométriques' },
+        {
+          kind: 'para',
+          text:
+            'Pour résoudre $\\cos(A) = \\sin(B)$, on écrit les deux membres avec la **même** ' +
+            'fonction grâce aux angles complémentaires, puis on égale les arguments, comme au ' +
+            'cercle trigonométrique.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Conversions utiles',
+          items: [
+            '$\\sin(\\theta) = \\cos\\left(\\dfrac{\\pi}{2} - \\theta\\right)$ et ' +
+              '$\\cos(\\theta) = \\sin\\left(\\dfrac{\\pi}{2} - \\theta\\right)$ (angles complémentaires).',
+            '$-\\tan(\\theta) = \\tan(-\\theta)$ (la tangente est impaire).',
+            '$\\cos(A) = \\cos(B) \\iff A = B + 2k\\pi$ ou $A = -B + 2k\\pi$.',
+            '$\\sin(A) = \\sin(B) \\iff A = B + 2k\\pi$ ou $A = \\pi - B + 2k\\pi$.',
+            '$\\tan(A) = \\tan(B) \\iff A = B + k\\pi$ — une seule famille.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'convertir, puis égaler les arguments',
+          formula: 'Résous $\\cos(2x) = \\sin(x)$ dans $[0\\,;2\\pi[$.',
+          steps: [
+            { tag: 'écrire sin(x) avec un cosinus', text: '$\\sin(x) = \\cos\\left(\\dfrac{\\pi}{2} - x\\right)$, donc $\\cos(2x) = \\cos\\left(\\dfrac{\\pi}{2} - x\\right)$' },
+            { tag: 'première famille', text: '$2x = \\dfrac{\\pi}{2} - x + 2k\\pi \\iff 3x = \\dfrac{\\pi}{2} + 2k\\pi \\iff x = \\dfrac{\\pi}{6} + \\dfrac{2k\\pi}{3}$' },
+            { tag: 'seconde famille', text: '$2x = -\\left(\\dfrac{\\pi}{2} - x\\right) + 2k\\pi \\iff x = -\\dfrac{\\pi}{2} + 2k\\pi$' },
+            { tag: 'garder les valeurs de [0 ; 2π[', text: 'première famille : $\\dfrac{\\pi}{6}$, $\\dfrac{5\\pi}{6}$, $\\dfrac{3\\pi}{2}$ ; seconde famille : $\\dfrac{3\\pi}{2}$' },
+          ],
+          result: { tag: 'résultat (3π/2 n\'est compté qu\'une fois)', text: '$S = \\left\\{\\dfrac{\\pi}{6}\\,;\\dfrac{5\\pi}{6}\\,;\\dfrac{3\\pi}{2}\\right\\}$' },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Pour $\\tan(A) = -\\tan(B)$, recopier le signe moins à l\'extérieur et écrire ' +
+            '$A = B + k\\pi$ : c\'est faux. On écrit d\'abord $-\\tan(B) = \\tan(-B)$, ce qui ' +
+            'donne $A = -B + k\\pi$.',
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — la tangente n\'existe pas partout',
+          text:
+            '$\\tan(u)$ n\'est pas définie quand $u = \\dfrac{\\pi}{2} + k\\pi$. Dès qu\'une ' +
+            'équation contient une tangente (facteur d\'un produit, égalité de deux tangentes), ' +
+            'vérifie chaque valeur trouvée : si l\'argument d\'une tangente vaut ' +
+            '$\\dfrac{\\pi}{2} + k\\pi$, la valeur est **rejetée**. Par exemple, $x = ' +
+            '\\dfrac{3\\pi}{4}$ ne peut pas être solution d\'une équation contenant ' +
+            '$\\tan\\left(x - \\dfrac{\\pi}{4}\\right)$, car $\\tan\\left(\\dfrac{\\pi}{2}\\right)$ ' +
+            'n\'existe pas.',
+        },
         {
           kind: 'entrainement',
           title: 'Équations trigonométriques trig(ax+b)=k',
           generatorId: '5gen10',
           description: [
-            'Résous des équations de la forme sin(ax+b)=k, cos(ax+b)=k ou tan(ax+b)=k, en ' +
-              'isolant l\'argument puis en revenant à x — y compris les cas sans solution.',
+            'Résous des équations trigonométriques : trig(ax+b) = k, produit nul, second degré ' +
+              'en sin ou cos (substitution t), égalité de deux expressions (cos(A) = sin(B), ' +
+              'tan(A) = −tan(B)). Donne les familles de solutions puis les solutions dans ' +
+              '[0 ; 2π[, y compris les cas sans solution.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 10. Équations trigonométriques trig(ax+b)=k »',
+        },
+      ],
+    },
+    {
+      id: 'modeliser',
+      number: 8,
+      title: 'Modéliser une fonction sinusoïdale en contexte',
+      kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale — puis résoudre f(t) ≥ k',
+      blocks: [
+        { kind: 'video', title: 'Modéliser une situation périodique par une sinusoïde (grande roue)', youtubeId: 'fw20BqIfKCU' },
+        {
+          kind: 'para',
+          text:
+            'Face à une situation concrète et périodique (grande roue, marée, température ' +
+            'saisonnière…), tu construis le modèle sinusoïdal toujours dans le **même ' +
+            'ordre**. D\'abord l\'amplitude et le décalage vertical, à partir des valeurs ' +
+            'extrêmes. Ensuite la période (donc la pulsation). Et enfin la phase — la ' +
+            'seule qui a besoin d\'une **condition initiale** précise, donnée par l\'énoncé.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — construire le modèle pas à pas',
+          items: [
+            'A = (valeur max − valeur min) / 2.',
+            'b = (valeur max + valeur min) / 2.',
+            'T = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ ω = 2π/T.',
+            'φ : injecte la condition initiale (une valeur connue à un instant connu) dans ' +
+              '$A\\sin(\\omega t+\\varphi)+b$. Résous en φ, en choisissant la solution la ' +
+              'plus simple parmi l\'infinité de solutions possibles.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — une grande roue',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Une grande roue a un rayon de 15 m. Le centre de la roue est situé à 17 m ' +
+                'du sol. Elle fait un tour complet en 8 minutes. À l\'instant $t=0$ ' +
+                '(l\'embarquement), une nacelle se trouve à son point le plus bas.',
+            },
+            {
+              kind: 'illustrationGroup',
+              items: [
+                {
+                  kind: 'circleDiagram',
+                  groundLine: true,
+                  markedPoint: { angle: -PI / 2, label: 't=0' },
+                  radiusLabel: 'r=15',
+                  caption: 'la nacelle part du point le plus bas (t=0)',
+                },
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                'Amplitude et décalage vertical, à partir des positions extrêmes : hauteur ' +
+                'maximale $= 17+15=32$ m, minimale $=17-15=2$ m $\\implies A=15,\\ b=17$.',
+            },
+            { kind: 'para', text: 'Pulsation, avec $T=8$ min : $\\omega = \\dfrac{2\\pi}{8} = \\dfrac{\\pi}{4}$.' },
+            {
+              kind: 'para',
+              text:
+                'Phase, condition initiale hauteur(0)=2 : $15\\sin(\\varphi)+17=2 \\implies ' +
+                '\\sin(\\varphi)=-1 \\implies \\varphi = -\\dfrac{\\pi}{2}$ (solution la plus simple).',
+            },
+            {
+              kind: 'para',
+              text: 'Modèle complet : $hauteur(t) = 15\\sin(\\dfrac{\\pi}{4}t - \\dfrac{\\pi}{2}) + 17$ (t en minutes).',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (t) => 15 * Math.sin((PI / 4) * t - PI / 2) + 17, tone: 'good' }],
+                xMin: 0,
+                xMax: 12,
+                xTicks: [4, 8, 12],
+                // Pas d'étiquette sur la droite y=2 : coïncide avec le point "t=0" juste en
+                // dessous, qui affiche déjà cette valeur (hauteur=2) — chevauchement constaté.
+                horizontalAsymptotes: [{ y: 2 }, { y: 32, label: 'max = 32' }],
+                points: [
+                  { x: 0, y: 2, label: 't=0', tone: 'accent' },
+                  { x: 4, y: 32, label: '', tone: 'accent' },
+                ],
+                xAxisLabel: 't (min)',
+                yAxisLabel: 'hauteur (m)',
+                caption:
+                  'la nacelle part du point bas (t=0, hauteur=2) et atteint le point haut ' +
+                  '(hauteur=32) après un demi-tour, à t=4 min',
+              },
+            },
+            {
+              kind: 'para',
+              text:
+                'Vérification : $hauteur(4) = 15\\sin(\\pi - \\pi/2) + 17 = 15\\sin(\\pi/2)+17 ' +
+                '= 32$ m. C\'est exactement le point le plus haut, atteint après un ' +
+                'demi-tour (4 minutes) — cohérent !',
+            },
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — φ n\'est pas unique',
+          text:
+            'L\'équation $\\sin(\\varphi) = -1$ a une infinité de solutions ($\\varphi = ' +
+            '-\\pi/2 + 2k\\pi$). On choisit, par convention, la plus simple — en général ' +
+            'celle qui appartient à $]-\\pi\\,;\\,\\pi]$. Mais n\'importe quelle autre ' +
+            'valeur de cette famille donnerait exactement la même fonction, puisque le ' +
+            'sinus est périodique de période 2π.',
+        },
+        {
+          kind: 'astuce',
+          text:
+            'Une fois ton modèle construit, vérifie-le toujours sur **une deuxième donnée** ' +
+            'de l\'énoncé — ici, le point haut à t=4, un demi-tour plus tard, comme dans ' +
+            'l\'exemple ci-dessus. Une erreur de signe sur φ se détecte tout de suite si la ' +
+            'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
+        },
+        { kind: 'subheading', text: 'Résoudre une inéquation f(t) ≥ k ou f(t) ≤ k' },
+        {
+          kind: 'para',
+          text:
+            'Une fois le modèle construit, une question fréquente est : **pendant combien de ' +
+            'temps** la grandeur dépasse-t-elle (ou reste-t-elle sous) un seuil $k$ ? On résout ' +
+            'alors $A\\sin(\\omega t+\\varphi)+b \\geq k$ avec la même démarche que pour une ' +
+            'équation (section précédente) : isoler le sinus, lire la réponse sur le cercle — un ' +
+            '**arc** cette fois, pas deux points — puis revenir à $t$.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — inéquation sinusoïdale',
+          items: [
+            'Pose $u = \\omega t + \\varphi$ et isole le sinus : $\\sin(u) \\geq m$ (ou ' +
+              '$\\leq m$), avec $m = \\dfrac{k-b}{A}$ si $A > 0$ (si $A < 0$, le sens de ' +
+              'l\'inégalité s\'inverse).',
+            'Si $m > 1$ ou $m < -1$, l\'inéquation est toujours vraie ou toujours fausse : ' +
+              'conclus directement.',
+            'Sinon, lis l\'arc solution sur le cercle : $\\sin(u) \\geq m \\iff u \\in ' +
+              '[\\arcsin(m)\\,;\\pi - \\arcsin(m)] + 2k\\pi$ (l\'arc du haut). Pour ' +
+              '$\\sin(u) \\leq m$, c\'est l\'arc complémentaire : $u \\in [\\pi - \\arcsin(m)\\,;' +
+              '2\\pi + \\arcsin(m)] + 2k\\pi$.',
+            'Reviens à $t$ sur chaque borne : $t = \\dfrac{u - \\varphi}{\\omega}$ (avec ' +
+              '$\\omega > 0$, l\'ordre des bornes est conservé).',
+            'Liste les intervalles qui tombent dans la fenêtre demandée, en ajoutant ou ' +
+              'retranchant des périodes $T$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'un arc, puis retour à t',
+          formula:
+            'Grande roue ci-dessus : pendant les 8 premières minutes, quand la nacelle est-elle à ' +
+            'au moins 24,5 m du sol ? On résout $15\\sin\\left(\\dfrac{\\pi}{4}t - ' +
+            '\\dfrac{\\pi}{2}\\right) + 17 \\geq 24{,}5$ pour $t \\in [0\\,;8]$.',
+          steps: [
+            { tag: 'isoler le sinus, avec u = πt/4 − π/2', text: '$\\sin(u) \\geq \\dfrac{24{,}5 - 17}{15} = \\dfrac{1}{2}$' },
+            { tag: 'lire l\'arc du haut sur le cercle', text: '$u \\in \\left[\\dfrac{\\pi}{6}\\,;\\dfrac{5\\pi}{6}\\right] + 2k\\pi$' },
+            { tag: 'revenir à t : t = (u + π/2) · 4/π', text: '$u = \\dfrac{\\pi}{6} \\implies t = \\dfrac{8}{3}$ ; $u = \\dfrac{5\\pi}{6} \\implies t = \\dfrac{16}{3}$' },
+            { tag: 'garder ce qui tombe dans [0 ; 8]', text: 'avec $k = 0$ : $\\left[\\dfrac{8}{3}\\,;\\dfrac{16}{3}\\right]$ ; avec $k = \\pm 1$, on ajoute $\\pm 8$ min : hors de la fenêtre' },
+          ],
+          result: { tag: 'résultat — de 2 min 40 s à 5 min 20 s', text: '$t \\in \\left[\\dfrac{8}{3}\\,;\\dfrac{16}{3}\\right]$' },
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: PI / 6, label: 'u=π/6', tone: 'accent' },
+              { angle: (5 * PI) / 6, label: 'u=5π/6', tone: 'accent' },
+            ],
+            connectPoints: true,
+            horizontalLine: { y: 0.5, label: 'sin u = 1/2' },
+            angleArcs: [{ from: PI / 6, to: (5 * PI) / 6, tone: 'good', radiusPx: 100 }],
+            caption: 'sin(u) ≥ 1/2 : tout l\'arc du haut, entre u = π/6 et u = 5π/6 (en vert)',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Pour $\\sin(u) \\leq m$, garder l\'arc $[\\arcsin(m)\\,;\\pi - \\arcsin(m)]$ : c\'est ' +
+            'l\'arc où le sinus est le **plus grand**. Dessine toujours le cercle et la droite ' +
+            'horizontale $y = m$ avant de choisir l\'arc.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'modele-sinusoidal-widget',
+          label: 'Manipule toi-même — construis le modèle pas à pas',
+          caption:
+            'Règle le rayon, la hauteur du centre et la période, puis choisis la position de ' +
+            'départ (t=0) sur la roue — A, b, ω et φ se recalculent en direct exactement selon ' +
+            'la méthode ci-dessus. φ n\'est jamais réglé directement : il est toujours DÉDUIT ' +
+            'de la position choisie, comme dans la méthode. La vérification affichée reprend ' +
+            'l\'astuce du demi-tour plus tard.',
+        },
+        {
+          kind: 'historique',
+          titre: "Le mathématicien qui a prouvé qu'on peut tout décomposer en sinusoïdes",
+          image: {
+            src: '/images/historique/fourier.jpg',
+            alt: 'Portrait de Joseph Fourier',
+            caption:
+              'Joseph Fourier (1768–1830), gravure d\'après un portrait de Julien-Léopold ' +
+              'Boilly, début du 19e siècle. Domaine public.',
+          },
+          text:
+            'Pourquoi une sinusoïde, et pas une autre forme, pour modéliser un phénomène ' +
+            'périodique ? Le mathématicien français **Joseph Fourier** répond à cette ' +
+            'question en 1822, dans un mémoire sur la propagation de la chaleur : il ' +
+            'démontre qu\'en combinant suffisamment de sinusoïdes de fréquences ' +
+            "différentes, on peut reconstruire quasiment n'importe quel signal périodique, " +
+            'même un signal qui ne ressemble pas du tout à une sinusoïde (un signal carré, ' +
+            'un battement cardiaque, un son complexe). Ce résultat, aujourd\'hui appelé ' +
+            'analyse de Fourier, explique pourquoi la sinusoïde est LE bloc de construction ' +
+            'fondamental de tous les phénomènes périodiques — la grande roue de cette ' +
+            "section n'en est qu'un cas particulier, le plus simple possible : une seule " +
+            'sinusoïde, sans combinaison.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Modéliser une fonction sinusoïdale en contexte',
+          generatorId: '5gen13',
+          description: [
+            'Construis pas à pas le modèle complet A sin(ωt + φ) + b : à partir d\'une grande ' +
+              'roue, d\'un maximum et d\'un minimum avec un point extremum, de deux points de ' +
+              'la courbe ou de paramètres donnés. Utilise-le ensuite pour résoudre une équation ' +
+              'f(t) = k, trouver des extremums ou résoudre une inéquation f(t) ≥ k.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
         },
       ],
     },
@@ -1463,6 +1663,17 @@ export const trigonometrie: ChapterContent = {
           { text: '$\\cos x = t \\Rightarrow x=\\alpha+2k\\pi$ ou $x=-\\alpha+2k\\pi$' },
           { text: '$\\tan x = t \\Rightarrow x=\\alpha+k\\pi$', condition: 'une seule famille de solutions' },
           { text: '$|k|>1$ (sin/cos) — aucune solution' },
+          { text: '$A\\cdot B = 0 \\iff A = 0$ ou $B = 0$', condition: 'produit nul — réunion des solutions' },
+          { text: '$\\sin^2 x + \\cos^2 x = 1$', condition: 'second degré : poser $t=\\cos x$ ou $t=\\sin x$, rejeter $|t|>1$' },
+          { text: '$\\sin\\theta = \\cos\\left(\\frac{\\pi}{2}-\\theta\\right)$, $\\;-\\tan\\theta = \\tan(-\\theta)$', condition: 'égalité de deux expressions' },
+          { text: '$\\tan u$ existe $\\iff u \\neq \\frac{\\pi}{2}+k\\pi$' },
+        ],
+      },
+      {
+        title: 'Inéquations sinusoïdales',
+        formulas: [
+          { text: '$\\sin u \\geq m \\iff u \\in [\\arcsin m\\,;\\pi-\\arcsin m]+2k\\pi$', condition: 'arc du haut' },
+          { text: '$\\sin u \\leq m \\iff u \\in [\\pi-\\arcsin m\\,;2\\pi+\\arcsin m]+2k\\pi$', condition: 'arc complémentaire' },
         ],
       },
     ],
@@ -1483,10 +1694,15 @@ export const trigonometrie: ChapterContent = {
         'pour T. Traversée montante de la ligne moyenne pour φ (en vérifiant le sens de variation).',
       '**Extremums** — sin(u)=1 seul (période 2π, maximums) ≠ sin(u)=±1 réunis (période π, ' +
         'tous les extremums). Ne confonds jamais les deux formules.',
-      '**Modéliser en contexte** — A et b à partir des extrêmes. T (donc ω) à partir de la ' +
-        'durée d\'un cycle. φ en dernier, à partir d\'une condition initiale précise.',
       '**Équations trig(ax+b)=k** — isole l\'argument, résous au cercle trigonométrique, ' +
         'divise TOUT (constante et période) par a. $|k|>1$ pour sin/cos ⟹ aucune solution.',
+      '**Autres équations** — produit nul : réunion des solutions de chaque facteur. Second ' +
+        'degré en sin/cos : $\\sin^2+\\cos^2=1$, poser $t$, rejeter $|t|>1$. Égalité de deux ' +
+        'expressions : convertir ($\\sin\\theta=\\cos(\\pi/2-\\theta)$), puis égaler les ' +
+        'arguments. Avec une tangente, rejeter les valeurs où elle n\'existe pas.',
+      '**Modéliser en contexte** — A et b à partir des extrêmes. T (donc ω) à partir de la ' +
+        'durée d\'un cycle. φ en dernier, à partir d\'une condition initiale précise. Une ' +
+        'inéquation $f(t)\\geq k$ se lit comme un arc du cercle, puis se ramène à $t$.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
@@ -1494,6 +1710,7 @@ export const trigonometrie: ChapterContent = {
         'Ai-je bien converti tout angle en degrés vers les radians avant d\'utiliser s=rθ ou A=½r²θ ?',
         'Pour une sinusoïde : ai-je distingué la pulsation ω de la période T (T=2π/ω, jamais l\'inverse) ?',
         'Pour une équation trig(ax+b)=k : ai-je divisé par a le terme constant ET le terme périodique en 2kπ ?',
+        'Pour une équation en t = cos(x) ou sin(x), ai-je rejeté les racines hors de [−1 ; 1] ? Avec une tangente, ai-je écarté les valeurs où elle n\'existe pas ?',
         'Pour des extremums : la question porte-t-elle sur les maximums seuls, les minimums seuls, ou tous les extremums réunis — et ai-je pris la bonne période (2π/a ou π/a) ?',
       ],
     },

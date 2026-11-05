@@ -3,7 +3,7 @@
  * jamais rien de `src/generateurs5e/` — voir `sessionParametresSinusoide.test.ts` pour la preuve
  * avec un exercice factice défini localement.
  *
- * Séquence FIXE à 5 écrans (A, φ, T, f, b), jamais de saut conditionnel — plus simple que la
+ * Séquence FIXE à 7 écrans (A, ω, T, f, φ, Φ, b), jamais de saut conditionnel — plus simple que la
  * plupart des moteurs récents de la plateforme à cet égard (même principe que "Caractéristiques
  * d'une fonction", chapitre 2 de la 4e).
  */
@@ -12,28 +12,13 @@ import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesParametresSinusoide";
-import type { EtatSessionParametresSinusoide, PhaseParametresSinusoide, ResultatExerciceParametresSinusoide } from "./typesParametresSinusoide";
-import { cibleAmplitude, cibleDecalage, cibleDephasage, cibleFrequence, ciblePeriode, verifierValeurSinusoide } from "./verificationParametresSinusoide";
+import type { EtatSessionParametresSinusoide, ResultatExerciceParametresSinusoide } from "./typesParametresSinusoide";
+import { diagnostiquerPhaseParametresSinusoide } from "./verificationParametresSinusoide";
 
 const POINTS_DE_BASE = 100;
 
 /** Chaque écran a exactement 2 niveaux d'aide — spec explicite. */
 export const NIVEAU_AIDE_MAX_SINUSOIDE = 2;
-
-function cibleActuelle(exercice: ExerciceParametresSinusoide, phase: PhaseParametresSinusoide): number {
-  switch (phase) {
-    case "amplitude":
-      return cibleAmplitude(exercice);
-    case "phi":
-      return cibleDephasage(exercice);
-    case "periode":
-      return ciblePeriode(exercice);
-    case "frequence":
-      return cibleFrequence(exercice);
-    case "decalage":
-      return cibleDecalage(exercice);
-  }
-}
 
 function etatInitial(
   exercice: ExerciceParametresSinusoide,
@@ -45,6 +30,10 @@ function etatInitial(
   | "niveauAide"
   | "scoreAmplitudePartiel"
   | "amplitudeRevele"
+  | "scorePulsationPartiel"
+  | "pulsationRevele"
+  | "scoreDephasagePartiel"
+  | "dephasageRevele"
   | "scorePhiPartiel"
   | "phiRevele"
   | "scorePeriodePartiel"
@@ -59,6 +48,10 @@ function etatInitial(
     niveauAide: 0,
     scoreAmplitudePartiel: null,
     amplitudeRevele: false,
+    scorePulsationPartiel: null,
+    pulsationRevele: false,
+    scoreDephasagePartiel: null,
+    dephasageRevele: false,
     scorePhiPartiel: null,
     phiRevele: false,
     scorePeriodePartiel: null,
@@ -94,11 +87,11 @@ function cloturerExerciceOuSuivant(etat: EtatSessionParametresSinusoide, resulta
 export function soumettreReponseParametresSinusoide(etat: EtatSessionParametresSinusoide, texte: string): EtatSessionParametresSinusoide {
   if (etat.terminee) throw new Error("soumettreReponseParametresSinusoide : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
-  const cible = cibleActuelle(exercice, etat.phase);
+  const phase = etat.phase;
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),
-    verifier: (t) => verifierValeurSinusoide(t, cible),
+    verifier: (t) => diagnostiquerPhaseParametresSinusoide(exercice, phase, t) === "correct",
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
@@ -113,6 +106,8 @@ export function soumettreReponseParametresSinusoide(etat: EtatSessionParametresS
       {
         exercice,
         scoreAmplitude: etat.scoreAmplitudePartiel as number,
+        scorePulsation: etat.scorePulsationPartiel as number,
+        scoreDephasage: etat.scoreDephasagePartiel as number,
         scorePhi: etat.scorePhiPartiel as number,
         scorePeriode: etat.scorePeriodePartiel as number,
         scoreFrequence: etat.scoreFrequencePartiel as number,
@@ -126,6 +121,12 @@ export function soumettreReponseParametresSinusoide(etat: EtatSessionParametresS
   if (etat.phase === "amplitude") {
     partielsMisAJour.scoreAmplitudePartiel = score;
     partielsMisAJour.amplitudeRevele = revele;
+  } else if (etat.phase === "pulsation") {
+    partielsMisAJour.scorePulsationPartiel = score;
+    partielsMisAJour.pulsationRevele = revele;
+  } else if (etat.phase === "dephasage") {
+    partielsMisAJour.scoreDephasagePartiel = score;
+    partielsMisAJour.dephasageRevele = revele;
   } else if (etat.phase === "phi") {
     partielsMisAJour.scorePhiPartiel = score;
     partielsMisAJour.phiRevele = revele;

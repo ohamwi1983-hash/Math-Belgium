@@ -55,3 +55,21 @@ export function cheminSecteur(segment: SegmentMultiPas, n: number): string {
   const arrivee = positionSommet(segment.indexArrivee, n);
   return `M ${CENTRE.x} ${CENTRE.y} L ${depart.x} ${depart.y} A ${RAYON_PIXEL} ${RAYON_PIXEL} 0 0 1 ${arrivee.x} ${arrivee.y} Z`;
 }
+
+/** Chemin SVG du polygone régulier inscrit (ses côtés relient les sommets consécutifs) — sert à
+ * compter le nombre de côtés couverts par un arc ou un secteur. */
+export function cheminPolygone(n: number): string {
+  return Array.from({ length: n }, (_, i) => positionSommet(i, n))
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+    .join(" ") + " Z";
+}
+
+/** Rayon tracé du centre vers le milieu de l'arc entre le dernier sommet et le premier (en haut à
+ * gauche), avec la position de son libellé « r » (décalée perpendiculairement au rayon). */
+export function rayonDessine(n: number): { fin: PointSVG; label: PointSVG } {
+  const angle = -Math.PI / 2 - Math.PI / n;
+  const fin = { x: CENTRE.x + RAYON_PIXEL * Math.cos(angle), y: CENTRE.y + RAYON_PIXEL * Math.sin(angle) };
+  const milieu = { x: (CENTRE.x + fin.x) / 2, y: (CENTRE.y + fin.y) / 2 };
+  const perp = { x: -Math.sin(angle), y: Math.cos(angle) };
+  return { fin, label: { x: milieu.x + 10 * perp.x, y: milieu.y + 10 * perp.y } };
+}

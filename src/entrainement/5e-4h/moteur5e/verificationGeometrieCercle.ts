@@ -28,6 +28,7 @@ import type { PhaseGeometrieCercle } from "./typesGeometrieCercle";
 export const TOLERANCE_ARRONDIE = 0.5;
 export const TOLERANCE_DIXIEME = 0.05;
 
+
 function diagnostiquerAvecTolerance(texte: string, cible: number, tolerance: number): StatutVerification {
   try {
     const valeur = evaluerExpressionGenerale(texte, 0);
@@ -48,61 +49,134 @@ export function diagnostiquerCalculDixieme(texte: string, cible: number): Statut
   return diagnostiquerAvecTolerance(texte, cible, TOLERANCE_DIXIEME);
 }
 
-/** Dispatch, par scénario PUIS par phase, sur la cible et la tolérance attendue — `exercice` est
- * TypeScript-narrowed à l'intérieur de chaque branche `switch(exercice.scenario)`, jamais un cast
- * manuel. Lève si `phase` n'appartient pas à la séquence du scénario donné (jamais atteint en
- * pratique, `phaseApres` ne produit jamais une phase hors séquence — garde défensive, même principe
- * que `commeDirecte`/`commeProduit` de 5gen10). */
+// ============================================================================
+// Cibles RECALCULÉES depuis les valeurs de θ que l'élève peut réellement utiliser (audit 5e ch. 2,
+// point 42). La consigne fait arrondir θ au dixième de radian puis chaque aire à l'unité : un élève
+// qui réutilise SON θ arrondi et SES aires arrondies était refusé dans 61 à 85 % des cas avec la
+// seule cible exacte ±0,5. On accepte donc toute réponse à ±0,5 (arrondi à l'unité) de l'aire
+// calculée avec θ exact, θ au dixième (demandé), au centième ou à 4 décimales (affiché dans « Ce
+// qu'on sait déjà ») ; pour une différence (segment, aire balayée) ou la lentille, on accepte aussi
+// EXACTEMENT la combinaison des aires déjà arrondies à l'unité. Une bande de tolérance continue acceptait au contraire des
+// erreurs de méthode (triangle = r·c/2 dans 26 % des tirages) — vérifié par simulation.
+// ============================================================================
+
+const MARGE = 1e-6;
+
+function candidatsTheta(theta: number): number[] {
+  return [theta, ...[1, 2, 4].map((d) => Math.round(theta * 10 ** d) / 10 ** d)];
+}
+
+function valeurSaisie(texte: string): number | "parse_error" {
+  try {
+    const v = evaluerExpressionGenerale(texte, 0);
+    return Number.isFinite(v) ? v : "parse_error";
+  } catch {
+    return "parse_error";
+  }
+}
+
+/** Correct ssi la saisie est à `tolerance` d'au moins une cible candidate. */
+function diagnostiquerCandidats(texte: string, cibles: number[], tolerance: number): StatutVerification {
+  const v = valeurSaisie(texte);
+  if (v === "parse_error") return v;
+  return cibles.some((c) => Math.abs(v - c) <= tolerance + MARGE) ? "correct" : "not_equivalent";
+}
+
+/** Différence de deux aires (segment = secteur − triangle, aire balayée = A₁ − A₂) : soit la
+ * différence calculée puis arrondie (±0,5), soit EXACTEMENT la différence des deux aires déjà
+ * arrondies à l'unité. */
+function ciblesDifference(thetas: number[], a: (t: number) => number, b: (t: number) => number): { arrondies: number[]; entieres: number[] } {
+  return { arrondies: thetas.map((t) => a(t) - b(t)), entieres: thetas.map((t) => Math.round(a(t)) - Math.round(b(t))) };
+}
+
+function diagnostiquerDifference(texte: string, cibles: { arrondies: number[]; entieres: number[] }): StatutVerification {
+  const statut = diagnostiquerCandidats(texte, cibles.arrondies, TOLERANCE_ARRONDIE);
+  if (statut !== "not_equivalent") return statut;
+  return diagnostiquerCandidats(texte, cibles.entieres, 0);
+}
+
+const secteur = (r: number, t: number) => 0.5 * r * r * t;
+const triangle = (r: number, t: number) => 0.5 * r * r * Math.sin(t);
+const segment = (r: number, t: number) => secteur(r, t) - triangle(r, t);
+
+function diagnostiquerAngle(texte: string, cible: number): StatutVerification {
+  return diagnostiquerCandidats(texte, [cible], TOLERANCE_DIXIEME);
+}
+
+/** Dispatch, par scénario PUIS par phase, sur les cibles candidates — `exercice` est
+ * TypeScript-narrowed à l'intérieur de chaque branche `switch(exercice.scenario)`. Lève si `phase`
+ * n'appartient pas à la séquence du scénario donné (garde défensive, jamais atteinte). */
 export function diagnostiquerChamp(exercice: ExerciceGeometrieCercle, phase: PhaseGeometrieCercle, texte: string): StatutVerification {
   switch (exercice.scenario) {
-    case "secteurBalaye":
+    case "secteurBalaye": {
+      const thetas = candidatsTheta(exercice.thetaRad);
+      const { r1, r2 } = exercice;
       switch (phase) {
         case "conversionRad":
-          return diagnostiquerCalculDixieme(texte, exercice.thetaRad);
+          return diagnostiquerAngle(texte, exercice.thetaRad);
         case "aireGrandSecteur":
-          return diagnostiquerCalculArrondi(texte, exercice.aireGrandSecteur);
+          return diagnostiquerCandidats(texte, thetas.map((t) => secteur(r1, t)), TOLERANCE_ARRONDIE);
         case "airePetitSecteur":
-          return diagnostiquerCalculArrondi(texte, exercice.airePetitSecteur);
+          return diagnostiquerCandidats(texte, thetas.map((t) => secteur(r2, t)), TOLERANCE_ARRONDIE);
         case "aireBalayee":
-          return diagnostiquerCalculArrondi(texte, exercice.aireBalayee);
+          return diagnostiquerDifference(texte, ciblesDifference(thetas, (t) => secteur(r1, t), (t) => secteur(r2, t)));
         default:
           throw new Error(`diagnostiquerChamp : phase '${phase}' hors séquence de 'secteurBalaye'`);
       }
-    case "segmentCirculaire":
+    }
+    case "segmentCirculaire": {
+      const { r } = exercice;
+      const thetas = candidatsTheta(exercice.thetaRad);
       switch (phase) {
         case "angleTheta":
-          return diagnostiquerCalculDixieme(texte, exercice.thetaRad);
+          return diagnostiquerAngle(texte, exercice.thetaRad);
         case "aireSecteur":
-          return diagnostiquerCalculArrondi(texte, exercice.aireSecteur);
+          return diagnostiquerCandidats(texte, thetas.map((t) => secteur(r, t)), TOLERANCE_ARRONDIE);
         case "aireTriangle":
-          return diagnostiquerCalculArrondi(texte, exercice.aireTriangle);
+          return diagnostiquerCandidats(texte, thetas.map((t) => triangle(r, t)), TOLERANCE_ARRONDIE);
         case "aireSegment":
-          return diagnostiquerCalculArrondi(texte, exercice.aireSegment);
+          return diagnostiquerDifference(texte, ciblesDifference(thetas, (t) => secteur(r, t), (t) => triangle(r, t)));
         default:
           throw new Error(`diagnostiquerChamp : phase '${phase}' hors séquence de 'segmentCirculaire'`);
       }
-    case "lentille":
+    }
+    case "lentille": {
+      const s1 = exercice.segment1;
+      const s2 = exercice.segment2;
+      const t1 = candidatsTheta(s1.thetaRad);
+      const t2 = candidatsTheta(s2.thetaRad);
       switch (phase) {
         case "angle1":
-          return diagnostiquerCalculDixieme(texte, exercice.segment1.thetaRad);
+          return diagnostiquerAngle(texte, s1.thetaRad);
         case "secteur1":
-          return diagnostiquerCalculArrondi(texte, exercice.segment1.aireSecteur);
+          return diagnostiquerCandidats(texte, t1.map((t) => secteur(s1.r, t)), TOLERANCE_ARRONDIE);
         case "triangle1":
-          return diagnostiquerCalculArrondi(texte, exercice.segment1.aireTriangle);
+          return diagnostiquerCandidats(texte, t1.map((t) => triangle(s1.r, t)), TOLERANCE_ARRONDIE);
         case "segmentAire1":
-          return diagnostiquerCalculArrondi(texte, exercice.segment1.aireSegment);
+          return diagnostiquerDifference(texte, ciblesDifference(t1, (t) => secteur(s1.r, t), (t) => triangle(s1.r, t)));
         case "angle2":
-          return diagnostiquerCalculDixieme(texte, exercice.segment2.thetaRad);
+          return diagnostiquerAngle(texte, s2.thetaRad);
         case "secteur2":
-          return diagnostiquerCalculArrondi(texte, exercice.segment2.aireSecteur);
+          return diagnostiquerCandidats(texte, t2.map((t) => secteur(s2.r, t)), TOLERANCE_ARRONDIE);
         case "triangle2":
-          return diagnostiquerCalculArrondi(texte, exercice.segment2.aireTriangle);
+          return diagnostiquerCandidats(texte, t2.map((t) => triangle(s2.r, t)), TOLERANCE_ARRONDIE);
         case "segmentAire2":
-          return diagnostiquerCalculArrondi(texte, exercice.segment2.aireSegment);
+          return diagnostiquerDifference(texte, ciblesDifference(t2, (t) => secteur(s2.r, t), (t) => triangle(s2.r, t)));
         case "aireLentille":
-          return diagnostiquerCalculArrondi(texte, exercice.aireLentille);
+        {
+          // Somme de deux segments : chacun calculé puis arrondi, ou différence de deux aires
+          // arrondies (entier exact) — toutes les combinaisons des deux cercles.
+          const seg1 = ciblesDifference(t1, (t) => secteur(s1.r, t), (t) => triangle(s1.r, t));
+          const seg2 = ciblesDifference(t2, (t) => secteur(s2.r, t), (t) => triangle(s2.r, t));
+          const v1 = [...seg1.arrondies.map(Math.round), ...seg1.entieres];
+          const v2 = [...seg2.arrondies.map(Math.round), ...seg2.entieres];
+          const statut = diagnostiquerCandidats(texte, t1.flatMap((a) => t2.map((b) => segment(s1.r, a) + segment(s2.r, b))), TOLERANCE_ARRONDIE);
+          if (statut !== "not_equivalent") return statut;
+          return diagnostiquerCandidats(texte, v1.flatMap((a) => v2.map((b) => a + b)), 0);
+        }
         default:
           throw new Error(`diagnostiquerChamp : phase '${phase}' hors séquence de 'lentille'`);
       }
+    }
   }
 }

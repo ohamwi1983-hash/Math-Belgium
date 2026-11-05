@@ -38,8 +38,17 @@ function casTrigZero(fonction: FonctionTrig, regime: RegimeEquationTrig) {
   return { k: 0, kLatex: "0", regime, aucuneSolution: false, casSpecial: false, branchesU: branchesGeneralesSin(regime === "exact" ? zeroPi : null, 0) };
 }
 
+/** x où la tangente d'un facteur n'est pas définie (argument ≡ π/2 mod π) : le produit n'y existe
+ * pas, même si l'AUTRE facteur s'y annule (audit 5e ch. 2, point 32 — ex. tan(x)·cos(x) = 0 ne
+ * retient pas x = π/2). */
+export function tangenteIndefinie(facteur: ExerciceEquationTrig, x: number): boolean {
+  if (facteur.fonction !== "tan") return false;
+  const a = facteur.a.numerateur / facteur.a.denominateur;
+  return Math.abs(Math.cos(a * x + facteur.b.decimal)) < 1e-9;
+}
+
 function unionBornee(facteur1: ExerciceEquationTrig, facteur2: ExerciceEquationTrig): number[] {
-  return unionSolutions(facteur1.solutions, facteur2.solutions);
+  return unionSolutions(facteur1.solutions, facteur2.solutions).filter((x) => !tangenteIndefinie(facteur1, x) && !tangenteIndefinie(facteur2, x));
 }
 
 /** Sous-cas "factoree" — 2 facteurs indépendants (richesse maximale : fonctions différentes

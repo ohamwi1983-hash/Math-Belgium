@@ -1946,3 +1946,40 @@ paths:
   `.katex-error`, `0` `$` isolé, aucun débordement horizontal sur mobile ; `tsc -b`/`npm run
   build`/`npm run lint` propres (aucun avertissement nouveau). Rollout aux autres chapitres en
   attente de confirmation utilisateur sur ce prototype.
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : lot F des corrections de l'audit du
+  chapitre (décisions de l'utilisateur : enseigner dans le cours ce que les générateurs demandent,
+  plutôt que de retirer ces familles des générateurs).
+  - **Ordre des sections** : « Équations trigonométriques » (id `equations`, désormais n° 7) passe
+    AVANT « Modéliser » (id `modeliser`, n° 8) — 5gen13 réutilise la technique des équations. Ids
+    inchangés (liens, `evaluationPayload.ts`, générateurs) ; aucun renvoi littéral « section N »
+    dans le fichier. L'énoncé de démonstration positionnel de `modeliser` (grande roue) vise
+    toujours le PREMIER exemple de la section : le nouvel exemple d'inéquation est placé après.
+  - **Section `equations`** (titre « Équations trigonométriques », kicker élargi) : 3 techniques de
+    5gen10 désormais enseignées — produit nul (réunion, mise en évidence T(T−k)=0, piège « diviser
+    par cos x »), second degré en sin/cos (sin²+cos²=1, substitution t, rejet de |t|>1, exemple
+    2sin²x − cos x + 1 = 0 → S={0}), égalité de deux expressions (rappel des conversions
+    sin θ = cos(π/2−θ), −tan θ = tan(−θ), exemple cos(2x) = sin(x) → {π/6 ; 5π/6 ; 3π/2}, piège du
+    signe de −tan) ; plus une Attention sur l'existence de la tangente (u ≠ π/2 + kπ).
+  - **Section `modeliser`** : sous-section « Résoudre une inéquation f(t) ≥ k ou f(t) ≤ k »
+    (méthode de 5gen13 : m = (k−b)/A, |m|>1, arc du haut [arcsin m ; π−arcsin m], arc
+    complémentaire pour ≤, retour à t, fenêtre), exemple sur la grande roue (≥ 24,5 m →
+    t ∈ [8/3 ; 16/3]) avec cercle (`circleAngles` + `angleArcs` vert sur l'arc solution), piège sur
+    le mauvais arc.
+  - **Cartes** alignées sur ce que font vraiment les générateurs : 5gen6 (2 grandeurs données parmi
+    5, conversions), 5gen7 (circonférence, aire, arc, secteur en fraction du cercle — plus de
+    « figure composée »), 5gen8/5gen9 (ω et φ, ajoutés aux générateurs par le lot C), 5gen10 (les
+    4 familles), 5gen12 (essuie-glace, segment, lentille — plus de « corde/rayon »), 5gen13
+    (contextes réels + équation/extremums/inéquation).
+  - **Formulaire** : formules des 3 nouvelles techniques et un groupe « Inéquations
+    sinusoïdales » ; **synthèse** : un item « Autres équations », item « Modéliser » complété,
+    une ligne de checklist.
+  - **Quiz 5gen40** (banque) : thème « paramètres » réécrit dans la notation du cours (ω, φ, Φ au
+    lieu de B, C et d'un φ horizontal), « une seule famille de solutions » (au lieu de « solution
+    unique »), longueur d'arc s = rθ (au lieu de l), « θ(rad) », « hₛₒₗ », signe moins « − »
+    typographique partout (mots composés préservés).
+  **Piège rencontré** : des chaînes LaTeX insérées par un script Python sans chaîne brute
+  (`'\\frac'` écrit `\frac` dans le TS) donnent `\f` (saut de page) → 2 `.katex-error` détectées au
+  rendu, jamais par `tsc`. Toujours vérifier `.katex-error` après une insertion scriptée.
+  Vérifié : `tsc` sans erreur sur ces fichiers, `verifier-enonces-evaluation` OK, page à 390 et
+  1280 px : 0 `.katex-error`, 0 `$`/`**` isolé, 0 débordement, 0 erreur console ; quiz à 390 px.

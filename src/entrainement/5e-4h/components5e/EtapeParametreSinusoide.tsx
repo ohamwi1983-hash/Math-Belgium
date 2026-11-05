@@ -2,12 +2,13 @@ import { useState } from "react";
 import type { ExerciceParametresSinusoide } from "../core5e/parametresSinusoide.types";
 import type { PhaseParametresSinusoide } from "../moteur5e/typesParametresSinusoide";
 import {
+  aideNiveau1,
   consigneGenerale,
   consignePhase,
   formatFormuleLatex,
   labelPhase,
   latexAideNiveau2,
-  texteAideNiveau1,
+  placeholderPhase,
 } from "../ui5e/formatParametresSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -38,11 +39,11 @@ interface Props {
 }
 
 /**
- * Écran UNIQUE, paramétré par la phase courante — les 5 écrans du générateur (A, φ, T, f, b)
+ * Écran UNIQUE, paramétré par la phase courante — les 7 écrans du générateur (A, ω, T, f, φ, Φ, b)
  * réutilisent tous ce composant. `App5gen8.tsx` doit le rendre avec `key={phase}` (leçon retenue de
  * 5gen6/5gen7 : sans cette clé, React réutilise la même instance entre deux phases et le champ
  * `texte` local garde la réponse de l'écran précédent). Consigne générale + bloc de données
- * (formule tirée) redondants sur les 5 écrans (convention transversale de la plateforme). Les
+ * (formule tirée) redondants sur les 7 écrans (convention transversale de la plateforme). Les
  * paramètres déjà confirmés sont présentés par `RecapitulatifPanel` (`App5gen8.tsx`,
  * `ui5e/recapitulatifParametresSinusoide.ts`), plus l'ancien bloc "état actuel" local
  * (`EtatActuelParametresSinusoide`, retiré ici — doublon visuel).
@@ -81,12 +82,13 @@ export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, 
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 3, pi/4, sqrt(2)..."
+          placeholder={placeholderPhase(phase)}
         />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
+          <p>{aideNiveau1(phase).texte}</p>
+          {aideNiveau1(phase).latex && <Katex expression={aideNiveau1(phase).latex!} block />}
           {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
         </div>
       )}

@@ -15,6 +15,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesArcsSecteurs";
 import type { EtatSessionArcSecteur, PhaseArcSecteur, ResultatExerciceArcSecteur } from "./typesArcsSecteurs";
 import { verifierValeurArcSecteur } from "./verificationArcsSecteurs";
+import { diagnostiquerQuantiteArcSecteur } from "./toleranceArcsSecteurs";
 
 const POINTS_DE_BASE = 100;
 
@@ -67,7 +68,10 @@ export function soumettreReponseArcSecteur(etat: EtatSessionArcSecteur, texte: s
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),
-    verifier: (t) => verifierValeurArcSecteur(t, cible),
+    // Mode "deuxVersTrois" : tolérance qui absorbe l'arrondi au centième des valeurs réutilisées
+    // (`toleranceArcsSecteurs.ts`) ; conversion (un seul calcul) : ±0,01.
+    verifier: (t) =>
+      exercice.mode === "conversion" ? verifierValeurArcSecteur(t, cible) : diagnostiquerQuantiteArcSecteur(t, exercice, etat.phase as QuantiteArcSecteur) === "correct",
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
