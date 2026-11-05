@@ -175,7 +175,8 @@ function etapesCote(poly: Exercice | PolynomeLineaire, nom: "D" | "N", lettre: s
   const reduit = formatPolynomeMisEnEvidence(poly);
   const etapes: EtapeCorrection[] = [];
   if (estPolynomeLineaire(poly)) {
-    etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte("Premier degré : on met le coefficient de x en évidence.")] });
+    const methode = Math.abs(poly.k) === 1 ? "Premier degré, déjà sous forme factorisée." : "Premier degré : on met le coefficient de x en évidence.";
+    etapes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte(methode)] });
     etapes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [latex(`${nom}(x) = ${reduit}`)] });
     return etapes;
   }

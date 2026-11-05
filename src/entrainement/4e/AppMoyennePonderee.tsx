@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -33,6 +34,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionMoyennePonderee {
   return demarrerSessionMoyennePonderee(REGLAGES_DEMO, genererExerciceMoyennePonderee);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur
+ * d'export (même catalogue de variantes) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionMoyennePonderee {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionMoyennePonderee(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceMoyennePonderee, (id) => construireAvecVarianteId(id as VarianteMoyennePonderee)));
 }
 
 /** Séquence FIXE mais choisie dès le départ selon la variante (même logique que `phaseInitiale`,
@@ -70,7 +80,7 @@ interface TransitionEnAttente {
 }
 
 export function AppMoyennePonderee() {
-  const [etat, setEtat] = useState<EtatSessionMoyennePonderee>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionMoyennePonderee>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (dont « Générer ») : entre dans la `key` des écrans pour
    * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de

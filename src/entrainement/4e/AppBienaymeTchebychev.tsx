@@ -54,6 +54,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -64,6 +65,20 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionBienaymeTchebychev {
   return demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, genererExerciceBienaymeTchebychev);
+}
+
+/** Première session : si l'URL porte `?code=` (QR code d'une feuille d'exercices), rouvre EXACTEMENT
+ * l'exercice imprimé — mêmes fonctions et même catalogue que l'adaptateur d'export ; les exercices
+ * suivants sont tirés normalement. */
+function sessionInitiale(): EtatSessionBienaymeTchebychev {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  let premier = true;
+  return demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, () => {
+    if (!premier) return genererExerciceBienaymeTchebychev();
+    premier = false;
+    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceBienaymeTchebychev, (id) => construireAvecVarianteId(id as VarianteBienaymeTchebychev));
+  });
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -187,7 +202,7 @@ function calculerSegmentsProgression(etat: EtatSessionBienaymeTchebychev): EtatP
 }
 
 export function AppBienaymeTchebychev() {
-  const [etat, setEtat] = useState<EtatSessionBienaymeTchebychev>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionBienaymeTchebychev>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `SEQUENCES` (même index que sa puce). */

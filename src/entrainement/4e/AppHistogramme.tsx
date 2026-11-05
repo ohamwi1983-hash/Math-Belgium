@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -28,6 +29,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionHistogramme {
   return demarrerSessionHistogramme(REGLAGES_DEMO, genererExerciceHistogramme);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur
+ * d'export (même catalogue de variantes) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionHistogramme {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionHistogramme(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceHistogramme, (id) => construireAvecVarianteId(id as VarianteHistogramme)));
 }
 
 /** Séquence dépendant de `exercice.variante` ("effectif" : classement → trace ; "frequence" :
@@ -61,7 +71,7 @@ interface TransitionEnAttente {
 }
 
 export function AppHistogramme() {
-  const [etat, setEtat] = useState<EtatSessionHistogramme>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionHistogramme>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (dont « Générer ») : entre dans la `key` des écrans pour
    * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de

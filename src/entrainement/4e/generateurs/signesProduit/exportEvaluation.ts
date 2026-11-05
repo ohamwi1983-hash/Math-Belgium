@@ -102,7 +102,7 @@ function etapeFacteur(facteur: FacteurSignesProduit, poids: number): Etape {
     return {
       consigne: [texte("Détermine le signe du facteur "), latex(f), texte(".")],
       lignes: [
-        { label: "Calcul", fragments: [latex(`\\Delta = ${nombre(b)}^2 - 4 \\cdot ${a < 0 ? `(${nombre(a)})` : nombre(a)} \\cdot ${c < 0 ? `(${nombre(c)})` : nombre(c)} = ${nombre(delta)} < 0`)] },
+        { label: "Calcul", fragments: [latex(`\\Delta = ${b === 0 ? "" : `${b < 0 ? `(${nombre(b)})` : nombre(b)}^2 `}- 4 \\cdot ${a < 0 ? `(${nombre(a)})` : nombre(a)} \\cdot ${c < 0 ? `(${nombre(c)})` : nombre(c)} = ${nombre(delta)} < 0`)] },
         { label: "Conclusion", fragments: [texte(`Aucune racine : le facteur garde le signe de son coefficient dominant, il est toujours ${signe}.`)] },
       ],
       critere: [latex(f), texte(` toujours ${signe} (`), latex("\\Delta < 0"), texte(")")],

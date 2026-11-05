@@ -529,7 +529,7 @@ function baremeMediane(instance: ExerciceMediane): BaremeExercice {
     { sousQuestion: "a", critere: discrete ? [texte("Seuil n/2 et médiane (règle « dépasse strictement »)")] : [texte("Médiane par interpolation dans la bonne classe")], points: 1 },
     { sousQuestion: "b", critere: [latex("Q_1"), texte(discrete ? " (seuil n/4)" : " par interpolation")], points: 1 },
     { sousQuestion: "b", critere: [latex("Q_3"), texte(discrete ? " (seuil 3n/4)" : " par interpolation")], points: 1 },
-    { sousQuestion: "c", critere: [texte(discrete ? "Minimum et maximum" : "xmin, xmax et étendue")], points: 0.5 },
+    { sousQuestion: "c", critere: discrete ? [texte("Minimum et maximum")] : [latex("x_{min}"), texte(", "), latex("x_{max}"), texte(" et étendue")], points: 0.5 },
     { sousQuestion: "c", critere: [texte(discrete ? "Mode(s)" : "Classe modale et mode (centre de la classe)")], points: 0.5 },
   ];
   const erreurs: ErreurFrequente[] = discrete

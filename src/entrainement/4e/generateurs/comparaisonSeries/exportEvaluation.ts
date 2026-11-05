@@ -430,9 +430,14 @@ function difficulteComparaisonSeries(instance: ExerciceComparaisonSeries): 1 | 2
   return instance.question.type === "seuil" ? 1 : 3;
 }
 
+function texteReponseSeuil(question: QuestionSeuil): string {
+  if (question.estFrequence) return `${formatNombre(question.reponseAttendue)} %`;
+  return `${formatNombre(question.reponseAttendue)} ${question.reponseAttendue === 1 ? "individu" : "individus"}`;
+}
+
 function reponseBreveComparaisonSeries(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
   const { question } = instance;
-  if (question.type === "seuil") return [texte(`${formatNombre(question.reponseAttendue)}${question.estFrequence ? " %" : question.indexBas === null ? " individus" : " individus"}`)];
+  if (question.type === "seuil") return [texte(texteReponseSeuil(question))];
   return segmentsVersFragments(segmentsReponseAttendueCourte(question));
 }
 
@@ -494,7 +499,7 @@ function correctionDetailleeComparaisonSeries(instance: ExerciceComparaisonSerie
       fragments: [texte(question.estFrequence ? "On lit la fréquence cumulée à la valeur demandée" : "On lit l'effectif cumulé à la valeur demandée"), texte(question.indexBas === null ? "." : " ; pour une tranche, on soustrait le cumul à la borne basse du cumul à la borne haute.")],
     });
     etapes.push({ label: "Lecture", fragments: fragmentsExplicationSeuil(question, instance) });
-    etapes.push({ label: "Conclusion", fragments: [texte(`${formatNombre(question.reponseAttendue)}${question.estFrequence ? " %" : " individus"}.`)] });
+    etapes.push({ label: "Conclusion", fragments: [texte(`${texteReponseSeuil(question)}.`)] });
     etapes.push({ label: "Piège", fragments: [texte("C'est l'effectif CUMULÉ qui compte les individus jusqu'à une valeur — pas l'effectif de la seule ligne de cette valeur.")] });
   } else {
     etapes.push({ label: "Méthode", fragments: [texte("On compare d'abord les médianes (niveau général), puis les dispersions (homogénéité) des deux séries. "), texte(sourceIndicateurs(instance))] });

@@ -80,13 +80,13 @@ function formatNombre(valeur: number): string {
 }
 
 const CONSIGNE_TABLEAU = [
-  texte("Reconstruis le tableau ci-dessous : une colonne par donnée (dans l'ordre où elles sont données ci-dessus), plus une dernière colonne pour les totaux. Pour chaque colonne de donnée, recopie "),
+  texte("Dresse le tableau des calculs : pour chaque valeur, "),
   latex(LABEL_VALEUR_XI),
-  texte(" et "),
+  texte(", "),
   latex(LABEL_EFFECTIF_NI),
-  texte(", puis calcule "),
+  texte(" et "),
   latex(LABEL_PRODUIT),
-  texte(". Dans la dernière colonne, donne les deux totaux "),
+  texte(" ; dans une dernière colonne, les totaux "),
   latex(LABEL_SOMME_N),
   texte(" et "),
   latex(LABEL_SOMME_PRODUIT),
@@ -98,7 +98,7 @@ function consigneVarianceEcartType(instance: ExerciceDispersion) {
   return [
     texte("Calcule la variance "),
     latex(LABEL_VARIANCE),
-    texte(` à partir des deux totaux trouvés ci-dessus (arrondie à la 2e décimale, en ${unite}²), puis déduis-en l'écart-type `),
+    texte(` à partir de ces deux totaux (arrondie à la 2e décimale, en ${unite}²), puis déduis-en l'écart-type `),
     latex(`${LABEL_ECART_TYPE}=\\sqrt{${LABEL_VARIANCE}}`),
     texte(` (arrondi à la 2e décimale, en ${unite}).`),
   ];

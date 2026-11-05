@@ -246,10 +246,10 @@ function etapeIsolerCombiner(isolee: string, combinee: string, symbole: string):
     type: "isoler",
     consigne: [texte("Ramène l'inéquation à la forme « … "), latex(symbole), texte(" 0 », puis combine les fractions en une seule.")],
     lignes: [
-      { label: "Méthode", fragments: [texte("On passe tout dans le membre de gauche (jamais de multiplication par le dénominateur, dont le signe dépend de x) : "), latex(isolee)] },
-      { label: "Calcul", fragments: [texte("Au même dénominateur : "), latex(combinee)] },
+      { label: "Méthode", fragments: [texte("On passe tout dans le membre de gauche (jamais de multiplication par le dénominateur, dont le signe dépend de x) : "), latex(`\\displaystyle ${isolee}`)] },
+      { label: "Calcul", fragments: [texte("Au même dénominateur : "), latex(`\\displaystyle ${combinee}`)] },
     ],
-    critere: [texte("Inéquation ramenée à une seule fraction comparée à 0 : "), latex(combinee)],
+    critere: [texte("Inéquation ramenée à une seule fraction comparée à 0 : "), latex(`\\displaystyle ${combinee}`)],
   };
 }
 
@@ -339,7 +339,7 @@ function etapeSimplifierFraction(fraction: ExerciceSimplification): EtapePapier 
       { label: "Calcul", fragments: [latex(`N(x) = ${formeFactoriseeDeP2(N)}`), texte(` (${libelleCategorie(N.categorie).toLowerCase()}) ; `), latex(`D(x) = ${formeFactoriseeDeP2(D)}`), texte(` (${libelleCategorie(D.categorie).toLowerCase()}).`)] },
       {
         label: "Conclusion",
-        fragments: [texte("Le facteur commun "), latex(`(${formatFacteurRacine(fraction.racineCommune)})`), texte(" se simplifie (sa racine reste interdite) : "), latex(formatFractionSimplifiee(fraction)), texte(".")],
+        fragments: [texte("Le facteur commun "), latex(`(${formatFacteurRacine(fraction.racineCommune)})`), texte(" se simplifie (sa racine reste interdite) : "), latex(`\\displaystyle ${formatFractionSimplifiee(fraction)}`), texte(".")],
       },
     ],
     critere: [texte("Factorisations et fraction simplifiée : "), latex(formatFractionSimplifiee(fraction))],
@@ -464,7 +464,7 @@ function piege(exercice: ExerciceInequationRationnelle): FragmentConsigne[] {
 }
 
 function enonceOriginal(exercice: ExerciceInequationRationnelle): FragmentConsigne[] {
-  return [texte("Résous dans "), latex("\\mathbb{R}"), texte(" l'inéquation suivante : "), latex(formatEnonceOriginalComplet(exercice))];
+  return [texte("Résous dans "), latex("\\mathbb{R}"), texte(" l'inéquation suivante : "), latex(`\\displaystyle ${formatEnonceOriginalComplet(exercice)}`)];
 }
 
 function construireEnonceInequationRationnelle(exercice: ExerciceInequationRationnelle): SectionExercice {

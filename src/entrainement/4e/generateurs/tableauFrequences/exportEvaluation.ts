@@ -152,7 +152,7 @@ function correctionDetailleeTableauFrequences(instance: ExerciceTableauFrequence
 
 function baremeTableauFrequences(instance: ExerciceTableauFrequences): BaremeExercice {
   return {
-    reponseFinale: [texte(`tableau à ${instance.lignes.length} valeurs, n = ${nombreFr(instance.n)}`)],
+    reponseFinale: [latex(tableauFrequencesLatex(instance))],
     criteres: [
       { critere: [texte("Valeurs distinctes rangées par ordre croissant, effectifs corrects (somme = n)")], points: 1 },
       { critere: [texte("Fréquences en % : "), latex("f_i = \\dfrac{n_i}{n} \\times 100")], points: 1 },

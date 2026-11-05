@@ -296,12 +296,35 @@ function ceLatex(instance: ExerciceEquationRationnelle): string {
   return instance.ce.map((valeur) => `x \\neq ${formatNombre(valeur)}`).join(" \\text{ et } ");
 }
 
+/** Lignes « Méthode / Calcul / Conclusion » de la résolution d'un `Exercice` (équation obtenue, ou
+ * P2 de la fraction de gauche à factoriser) — tout en LaTeX, valeurs de l'instance. */
+function lignesResolution(exercice: Exercice, lettre: string, quoi: "resoudre" | "factoriser"): EtapeCorrection[] {
+  const racines = racinesDistinctes(exercice.solution.racines);
+  const conclusion = racines.length === 1 ? `x = ${formatNombre(racines[0])}` : racines.map((r) => `x = ${formatNombre(r)}`).join(" \\text{ ou } ");
+  const lignes: EtapeCorrection[] = [];
+  if (exercice.enonce.a === 0) {
+    lignes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte("Équation du premier degré : on isole x.")] });
+  } else if (exercice.categorie === "cas_general") {
+    lignes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte("Aucune méthode rapide : on calcule le discriminant.")] });
+    lignes.push({ label: "Calcul", sousQuestion: lettre, fragments: [latex(`\\Delta = ${formatNombre(exercice.solution.delta ?? 0)}`)] });
+  } else {
+    const forme = exercice.solution.formeFactorisee ?? formatFormeFactoriseeDepuisRacines(exercice.enonce, exercice.solution.racines);
+    lignes.push({ label: "Méthode", sousQuestion: lettre, fragments: [texte(`${libelleCategorie(exercice.categorie)}.`)] });
+    lignes.push({ label: "Calcul", sousQuestion: lettre, fragments: [latex(`${forme} = 0`)] });
+  }
+  if (quoi === "resoudre") {
+    lignes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [latex(conclusion), texte(racines.length === 1 && exercice.enonce.a !== 0 ? " (racine double)" : "")] });
+  }
+  return lignes;
+}
+
 function lignesSimplifier(instance: ExerciceEquationRationnelle, lettre: string): EtapeCorrection[] {
   if (estCas4(instance)) {
     const p2 = p2DeFractionGauche(instance);
     const expressionP2 = instance.construction === "p2_sur_p1" ? formatEquationNumerateur(p2) : formatEquationDenominateur(p2);
     return [
-      { label: "Factorisation", sousQuestion: lettre, fragments: [latex(expressionP2), texte(" : "), ...fragmentsResolution(p2)] },
+      { label: "Expression", sousQuestion: lettre, fragments: [latex(expressionP2)] },
+      ...lignesResolution(p2, lettre, "factoriser"),
       { label: "Conclusion", sousQuestion: lettre, fragments: [texte("La fraction de gauche devient "), latex(papier(formatFractionGaucheFactorisee(instance))), texte(", d'où "), latex(papier(formatEquationRationnelleLatexApresSimplification(instance)))] },
     ];
   }
@@ -322,7 +345,7 @@ function correctionDetailleeEquationRationnelle(instance: ExerciceEquationRation
   lignes.push(
     { label: "Méthode", sousQuestion: lettre("eliminer"), fragments: [texte("On multiplie les deux membres par le dénominateur commun (non nul sous les CE), puis on regroupe tout dans un membre.")] },
     { label: "Conclusion", sousQuestion: lettre("eliminer"), fragments: [latex(formatEnonceLatex(instance.equationIsolee.enonce))] },
-    { label: "Calcul", sousQuestion: lettre("resoudre"), fragments: fragmentsResolution(instance.equationIsolee) },
+    ...lignesResolution(instance.equationIsolee, lettre("resoudre"), "resoudre"),
   );
   const verification: FragmentConsigne[] = [];
   decisions.forEach(({ racine, rejetee }, index) => {

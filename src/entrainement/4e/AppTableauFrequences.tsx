@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -36,6 +37,15 @@ function nouvelleSession(): EtatSessionTableauFrequences {
   return demarrerSessionTableauFrequences(REGLAGES_DEMO, genererExerciceTableauFrequences);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur
+ * d'export (sans catalogue de variantes) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionTableauFrequences {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTableauFrequences(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceTableauFrequences, undefined));
+}
+
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (4 phases fixes,
  * aucun saut conditionnel, voir `typesTableauFrequences.ts`). "frequencesCumulees" (dernière
  * phase) n'a jamais besoin de sa propre branche "close" — même principe que gen9/gen55. Puces
@@ -65,7 +75,7 @@ interface TransitionEnAttente {
 }
 
 export function AppTableauFrequences() {
-  const [etat, setEtat] = useState<EtatSessionTableauFrequences>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTableauFrequences>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionTableauFrequences) {

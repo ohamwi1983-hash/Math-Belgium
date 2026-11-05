@@ -26,6 +26,7 @@ import { adaptateurEvaluationInequationRationnelle } from '../entrainement/4e/ge
 import { adaptateurExportWordAnalyseFonction } from '../entrainement/4e/generateurs/analyseFonction/exportWord'
 import { adaptateurEvaluationTransformationsGraphiques } from '../entrainement/4e/generateurs/transformationsGraphiques/exportEvaluation'
 import { adaptateurEvaluationFormeCanoniqueTransformations } from '../entrainement/4e/generateurs/formeCanoniqueTransformations/exportEvaluation'
+import { adaptateurEvaluationRelationsRacines } from '../entrainement/4e/generateurs/relationsRacines/exportEvaluation'
 import { adaptateurEvaluationFonctionsReference } from '../entrainement/4e/generateurs/fonctionsReference/exportEvaluation'
 import { adaptateurEvaluationFormeCanoniqueFonctionsReference } from '../entrainement/4e/generateurs/formeCanoniqueFonctionsReference/exportEvaluation'
 import { adaptateurEvaluationCaracteristiquesFonction } from '../entrainement/4e/generateurs/caracteristiquesFonction/exportEvaluation'
@@ -80,6 +81,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen4: versionPapier(adaptateurEvaluationEquationRationnelle) as unknown as AdaptateurFeuilleExercices<never>,
   gen5: versionPapier(adaptateurEvaluationSignesProduit) as unknown as AdaptateurFeuilleExercices<never>,
   gen6: versionPapier(adaptateurEvaluationInequationRationnelle) as unknown as AdaptateurFeuilleExercices<never>,
+  gen67: versionPapier(adaptateurEvaluationRelationsRacines) as unknown as AdaptateurFeuilleExercices<never>,
   gen7: adaptateurExportWordAnalyseFonction as unknown as AdaptateurFeuilleExercices<never>,
   gen8: adaptateurEvaluationTransformationsGraphiques as unknown as AdaptateurFeuilleExercices<never>,
   gen9: adaptateurEvaluationFormeCanoniqueTransformations as unknown as AdaptateurFeuilleExercices<never>,

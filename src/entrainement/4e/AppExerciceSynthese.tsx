@@ -74,6 +74,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 import { pasCommun } from "./generateurs/bienaymeTchebychev/echelleContexte";
@@ -89,6 +90,20 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionExerciceSynthese {
   return demarrerSessionExerciceSynthese(REGLAGES_DEMO, genererExerciceSynthese);
+}
+
+/** Première session : si l'URL porte `?code=` (QR code d'une feuille d'exercices), rouvre EXACTEMENT
+ * l'exercice imprimé — mêmes fonctions et même catalogue que l'adaptateur d'export ; les exercices
+ * suivants sont tirés normalement. */
+function sessionInitiale(): EtatSessionExerciceSynthese {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  let premier = true;
+  return demarrerSessionExerciceSynthese(REGLAGES_DEMO, () => {
+    if (!premier) return genererExerciceSynthese();
+    premier = false;
+    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSynthese, (id) => construireAvecVarianteId(id as VarianteExerciceSynthese));
+  });
 }
 
 /** Écrans nécessitant un calcul décimal non fourni par l'énoncé — moyenne pondérée (quotient),
@@ -284,7 +299,7 @@ interface TransitionEnAttente {
  * terminale (dernière phase des 2 séquences, `SEQUENCES` — `typesExerciceSynthese.ts`).
  */
 export function AppExerciceSynthese() {
-  const [etat, setEtat] = useState<EtatSessionExerciceSynthese>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionExerciceSynthese>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation des écrans clos — une entrée par écran clos, dans l'ordre de `SEQUENCES` (même
    * index que sa puce) ; remise à vide à chaque nouvel exercice. */
