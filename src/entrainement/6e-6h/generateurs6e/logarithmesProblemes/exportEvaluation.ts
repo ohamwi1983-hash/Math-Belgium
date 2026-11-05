@@ -105,6 +105,14 @@ function passageLogA(exercice: ExerciceLogarithmesProblemes): string | null {
   return `${ligne(exercice.cible1Affiche, exercice.t1Exact, "_1")} \\qquad ${ligne(exercice.cible2Affiche, exercice.t2Exact, "_2")}`;
 }
 
+/** Famille E, écran 1 : les niveaux L₁, L₂ donnés sont-ils arrondis (le système ne retombe alors
+ * qu'approximativement sur les constantes a, b de l'échelle) ? */
+function pointsArrondisE(exercice: ExerciceLogarithmesProblemes): boolean {
+  if (exercice.famille !== "E" || !exercice.deduireAB) return false;
+  const ecart = (X: number, L: number) => Math.abs(exercice.a * Math.log10(X) + exercice.b - L);
+  return ecart(exercice.X1, exercice.L1) > 1e-9 || ecart(exercice.X2, exercice.L2) > 1e-9;
+}
+
 interface PiegeLog {
   phase: PhaseLogarithmesProblemes;
   texte: string;
@@ -163,6 +171,8 @@ function correctionDetailleeLogarithmesProblemes(exercice: ExerciceLogarithmesPr
     const passage = phase === "aEcran3" ? passageLogA(exercice) : null;
     if (passage !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(passage)] });
     for (const piege of listePieges) if (piege.phase === phase) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(piege.texte)] });
+    if (phase === "eEcran1" && pointsArrondisE(exercice))
+      etapes.push({ label: "Remarque", sousQuestion, fragments: [texte("L₁ et L₂ sont arrondis au dixième : le système donne a et b à cet arrondi près ; on retient les constantes de définition de l'échelle.")] });
     etapes.push({ label: "Conclusion", sousQuestion, fragments: fragmentsReponse(exercice, phase) });
     return etapes;
   });
@@ -173,6 +183,7 @@ function baremeLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): Bar
   const poids = poidsPhases(exercice);
   const acceptees: FragmentConsigne[][] = [[texte("Valeur arrondie à la précision demandée ; un écart dû à l'arrondi d'une étape intermédiaire est toléré")]];
   if (exercice.famille === "A" && exercice.sousType === "resoudreTaux") acceptees.push([texte("i en décimal ou en pourcentage")]);
+  if (pointsArrondisE(exercice)) acceptees.push([texte("a et b obtenus par le système à partir des valeurs arrondies de L₁ et L₂ (écart dû à l'arrondi)")]);
   return {
     reponseFinale: fragmentsReponse(exercice, phases[phases.length - 1]),
     criteres: phases.map((phase, i) => ({ sousQuestion: LETTRES[i], critere: [texte(`${LIBELLE_PHASE[phase]} : `), ...fragmentsReponse(exercice, phase)], points: poids[i] })),

@@ -1370,6 +1370,33 @@ table.feature-table td { white-space: normal; }
 .admin-eval-total { margin: 0; font-weight: 700; color: var(--ink-soft); font-size: 0.9rem; font-family: var(--mono); }
 .admin-eval-lien { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
 
+/* Répartition des points par processus + durée estimée (mise à jour en direct). */
+.admin-eval-repartition { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.85rem; color: var(--ink-soft); }
+.admin-eval-repartition-item { position: relative; padding-bottom: 5px; font-family: var(--mono); }
+.admin-eval-repartition-barre { position: absolute; left: 0; bottom: 0; height: 3px; border-radius: 2px; background: var(--accent); }
+
+/* Documents générés (Ouvrir / Télécharger / Imprimer-PDF / Word) et enregistrements. */
+.admin-eval-documents, .admin-eval-enregistrees {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px;
+}
+.admin-eval-documents h3 { margin: 0 0 8px; font-size: 1rem; }
+.admin-eval-documents ul, .admin-eval-enregistrees ul { list-style: none; margin: 0; padding: 0; }
+.admin-eval-documents li, .admin-eval-enregistrees li {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--line);
+}
+.admin-eval-documents-nom { font-weight: 600; }
+.admin-eval-documents-actions, .admin-eval-documents-pied { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-eval-documents-pied { margin: 10px 0 0; }
+.admin-eval-documents button, .admin-eval-enregistrees button {
+  padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper);
+  color: var(--ink); font: inherit; font-size: 0.82rem; cursor: pointer; min-height: 32px;
+}
+.admin-eval-documents button:hover:not(:disabled), .admin-eval-enregistrees button:hover { border-color: var(--accent); background: var(--accent-soft); }
+.admin-eval-codes { margin: 10px 0 0; font-family: var(--mono); font-size: 0.78rem; color: var(--ink-faint); overflow-wrap: anywhere; }
+.admin-eval-enregistrees summary { cursor: pointer; font-weight: 600; }
+.admin-eval-enregistrees > p { margin: 8px 0 0; }
+
 @media (max-width: 640px) {
   .admin-eval-divider { display: none; }
   .admin-eval-bottombar { justify-content: flex-start; }

@@ -1,8 +1,25 @@
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
-import { genererEvaluationLocalement, peutGenererLocalement } from '../../lib/evaluationLocal'
+import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry'
+import {
+  codesDuPlan,
+  construirePlan,
+  effacerHistorique,
+  enregistrerDansHistorique,
+  enregistrerPlan,
+  genererCopieDocxDepuisPlan,
+  genererDocumentsDepuisPlan,
+  lireHistorique,
+  lirePlanDepuisJson,
+  lirePlansEnregistres,
+  peutGenererLocalement,
+  supprimerPlanEnregistre,
+  type DocumentGenere,
+  type PlanDocument,
+  type PlanEnregistre,
+} from '../../lib/evaluationLocal'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
@@ -104,6 +121,21 @@ function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+/** Durée indicative d'une ligne, en minutes — `dureeMinutes` de l'adaptateur quand il la fournit,
+ * sinon ≈ 2,5 min par point (même règle que la durée imprimée sur la copie). */
+function dureeLigne(ligne: LigneSelection, points: number): number {
+  if (ligne.type === 'exercice') {
+    const d = EVALUATION_ADAPTER_REGISTRY[ligne.cle ?? '']?.dureeMinutes
+    if (d !== undefined) return d * ligne.nombre
+  }
+  if (ligne.type === 'vraiFaux') return 2 * ligne.nombre
+  return points * 2.5
+}
+
+function slugFichier(texte: string): string {
+  return texte.replace(/[\\/:*?"<>|]/g, '-').trim()
+}
+
 /** Résumé flottant (position fixe, toujours visible) du nombre total de questions/exercices
  * sélectionnés — et, en mode évaluation, du total de points — pour que l'admin/l'élève garde ce
  * compte sous les yeux en parcourant un long tableau, sans devoir défiler jusqu'à la barre du bas. */
@@ -190,7 +222,16 @@ export function EvaluationGeneratorPanel({
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
   const [nombreSeries, setNombreSeries] = useState(1)
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
-  const [afficherTitresSection, setAfficherTitresSection] = useState(true)
+  const [afficherTitresSection, setAfficherTitresSection] = useState(false)
+  const [versionAmenagee, setVersionAmenagee] = useState(false)
+  /** Dernière génération locale : plan figé (graines) + documents produits. */
+  const [planCourant, setPlanCourant] = useState<PlanDocument | null>(null)
+  const [documents, setDocuments] = useState<DocumentGenere[]>([])
+  const [enregistrees, setEnregistrees] = useState<PlanEnregistre[]>(() => lirePlansEnregistres())
+  const [nombreHistorique, setNombreHistorique] = useState(() => lireHistorique().length)
+  const [message, setMessage] = useState<string | null>(null)
+  const urlsDocuments = useRef<string[]>([])
+  const entreeImport = useRef<HTMLInputElement>(null)
   /** Sélection exclusive (groupe de type radio) : un seul processus affiché à la fois, jamais 2 ou 3
    * simultanément — voir `.admin-eval-processus-bar`. */
   const [processusActif, setProcessusActif] = useState<Processus>(1)
@@ -321,6 +362,118 @@ export function EvaluationGeneratorPanel({
 
   const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
   const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
+  const pointsParProcessus = ([1, 2, 3] as const).map((p) => lignes.filter((l) => l.processus === p).reduce((t, l) => t + pointsLigne(l), 0))
+  const dureeEstimee = Math.max(5, Math.ceil(lignes.filter((l) => l.nombre > 0).reduce((t, l) => t + dureeLigne(l, pointsLigne(l)), 0) / 5) * 5)
+
+  function nomBase(plan: PlanDocument): string {
+    return slugFichier(plan.entete.titre)
+  }
+
+  function nomFichier(plan: PlanDocument, doc: DocumentGenere): string {
+    return `${nomBase(plan)} — ${doc.suffixe}.html`
+  }
+
+  function urlDocument(doc: DocumentGenere): string {
+    const url = URL.createObjectURL(doc.blob)
+    urlsDocuments.current.push(url)
+    return url
+  }
+
+  function ouvrirDocument(doc: DocumentGenere, imprimer: boolean) {
+    window.open(urlDocument(doc) + (imprimer ? '#imprimer' : ''), '_blank')
+  }
+
+  function toutTelecharger(plan: PlanDocument, docs: DocumentGenere[]) {
+    for (const doc of docs) declencherTelechargement(doc.blob, nomFichier(plan, doc))
+  }
+
+  async function rendrePlan(plan: PlanDocument, nouveau: boolean) {
+    setErreur(null)
+    setMessage(null)
+    setUrlGeneree(null)
+    setGenereEnCours(true)
+    try {
+      for (const u of urlsDocuments.current) URL.revokeObjectURL(u)
+      urlsDocuments.current = []
+      const docs = await genererDocumentsDepuisPlan(plan)
+      setPlanCourant(plan)
+      setDocuments(docs)
+      setGenereLocalementCompte(docs.length)
+      if (nouveau) {
+        enregistrerDansHistorique(plan)
+        setNombreHistorique(lireHistorique().length)
+      }
+    } catch (e) {
+      console.error(e)
+      setErreur('Erreur pendant la génération — réessaie.')
+    } finally {
+      setGenereEnCours(false)
+    }
+  }
+
+  async function telechargerWord(lettre: string) {
+    if (!planCourant) return
+    setGenereEnCours(true)
+    try {
+      const blob = await genererCopieDocxDepuisPlan(planCourant, lettre)
+      if (blob) declencherTelechargement(blob, `${nomBase(planCourant)} — serie-${lettre}-copie.docx`)
+    } catch (e) {
+      console.error(e)
+      setErreur('Erreur pendant la génération du fichier Word.')
+    } finally {
+      setGenereEnCours(false)
+    }
+  }
+
+  /** Recharge un plan enregistré : la sélection du panneau ET les graines (mêmes exercices). */
+  function chargerPlan(plan: PlanDocument) {
+    const nh = resoudreNiveauHeures(plan.levelSlug)
+    if (verrouille && plan.levelSlug !== verrouille.levelSlug) {
+      setErreur('Ce fichier concerne un autre niveau que cette page.')
+      return
+    }
+    if (nh) {
+      setNiveau(nh.niveau)
+      setHeures(nh.heures)
+    }
+    if (!verrouille) setChapitresSlugs(plan.chapitresSlugs)
+    setLignes(plan.lignes)
+    setTitre(plan.entete.titre)
+    setDate(plan.entete.date)
+    if (plan.entete.numero !== undefined) setNumero(plan.entete.numero)
+    setHeuresSemaine(plan.entete.heuresSemaine)
+    if (plan.entete.calculatrice) setCalculatrice(plan.entete.calculatrice)
+    setNombreSeries(plan.series.length)
+    setAfficherTitresSection(plan.entete.afficherTitresSection)
+    setVersionAmenagee(!!plan.entete.versionAmenagee)
+    void rendrePlan(plan, false)
+  }
+
+  function enregistrerPlanCourant() {
+    if (!planCourant) return
+    const nom = window.prompt('Nom de cet enregistrement :', planCourant.entete.titre)
+    if (!nom) return
+    try {
+      setEnregistrees(enregistrerPlan(nom, planCourant))
+      setMessage(`« ${nom} » enregistré dans ce navigateur.`)
+    } catch (e) {
+      setErreur((e as Error).message)
+    }
+  }
+
+  function exporterPlanJson() {
+    if (!planCourant) return
+    declencherTelechargement(new Blob([JSON.stringify(planCourant, null, 1)], { type: 'application/json' }), `${nomBase(planCourant)} — configuration.json`)
+  }
+
+  async function importerPlanJson(fichier: File) {
+    const plan = lirePlanDepuisJson(await fichier.text())
+    if (!plan) {
+      setErreur('Fichier non reconnu : choisis un fichier « configuration.json » exporté depuis ce panneau.')
+      return
+    }
+    chargerPlan(plan)
+  }
 
   async function genererEvaluation() {
     if (chapitres.length === 0 || !levelSlug) return
@@ -341,6 +494,10 @@ export function EvaluationGeneratorPanel({
       nombreSeries: nombreSeriesEffectif,
       afficherTitresSection,
       mode,
+      versionAmenagee,
+      surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
+      titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
+      urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
     }
     const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections }))
     const items = construireItemsPayload(entete, lignes, chapitresPayload)
@@ -351,29 +508,20 @@ export function EvaluationGeneratorPanel({
       return
     }
 
-    // 4e (chapitres 1 à 8) : génération 100% locale, sans passer par plateforme-maths — voir
-    // `evaluationLocal.ts` pour la portée exacte (tous les générateurs sauf les questions
-    // vrai/faux, dont les banques n'ont pas encore été portées).
+    // Génération 100 % locale (voir `evaluationLocal.ts` pour la portée exacte) : plan figé
+    // (graines) puis documents. Une banque vrai/faux manquante fait échouer le plan → repli URL.
     if (peutGenererLocalement(levelSlug, items)) {
-      setErreur(null)
-      setUrlGeneree(null)
       setGenereLocalementCompte(null)
-      setGenereEnCours(true)
+      let plan: PlanDocument | null = null
       try {
-        const series = await genererEvaluationLocalement(entete, items)
-        for (const { serieLettre, enonce, corrige } of series) {
-          const suffixeSerie = series.length > 1 ? ` — série ${serieLettre}` : ''
-          declencherTelechargement(enonce, `${titreFinal}${suffixeSerie} — énoncé.html`)
-          declencherTelechargement(corrige, `${titreFinal}${suffixeSerie} — corrigé.html`)
-        }
-        setGenereLocalementCompte(series.length * 2)
+        plan = await construirePlan(levelSlug, entete, items, lignes, chapitres.map((c) => c.slug))
       } catch (e) {
-        console.error(e)
-        setErreur('Erreur pendant la génération — réessaie.')
-      } finally {
-        setGenereEnCours(false)
+        console.warn('Génération locale impossible, repli sur plateforme-maths :', e)
       }
-      return
+      if (plan) {
+        await rendrePlan(plan, true)
+        return
+      }
     }
 
     const url = buildEvaluationUrl(levelSlug, entete, lignes, chapitresPayload)
@@ -402,7 +550,7 @@ export function EvaluationGeneratorPanel({
       {!verrouille && (
         <p className="admin-eval-intro">
           Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais
-          directement ici (aucune redirection), sauf sélection d'une question vrai/faux.
+          directement ici (aucune redirection), vrai/faux compris — sauf « Fonctions réciproques et cyclométriques » dont la banque vrai/faux reste sur plateforme-maths.
         </p>
       )}
 
@@ -544,6 +692,10 @@ export function EvaluationGeneratorPanel({
           <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
           Afficher les titres de section
         </label>
+        <label className="admin-eval-checkbox-field" htmlFor="eval-amenagee" title="Police très lisible, une question par page, chaque question découpée en étapes — mêmes questions, même barème.">
+          <input id="eval-amenagee" type="checkbox" checked={versionAmenagee} onChange={(e) => setVersionAmenagee(e.target.checked)} />
+          Version aménagée en plus
+        </label>
       </div>
       {!estExercice && nombreSeries > 1 && (
         <p className="admin-eval-indisponible">
@@ -580,6 +732,19 @@ export function EvaluationGeneratorPanel({
           </div>
 
           <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalPoints} />
+
+          {totalNombre > 0 && (
+            <div className="admin-eval-repartition" aria-live="polite">
+              {!estExercice &&
+                ([1, 2, 3] as const).map((p) => (
+                  <span key={p} className="admin-eval-repartition-item">
+                    <span className="admin-eval-repartition-barre" style={{ width: `${totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0}%` }} />
+                    {LABEL_PROCESSUS[p]} : {pointsParProcessus[p - 1]} pt{pointsParProcessus[p - 1] > 1 ? 's' : ''} ({totalPoints > 0 ? Math.round((pointsParProcessus[p - 1] / totalPoints) * 100) : 0} %)
+                  </span>
+                ))}
+              <span className="admin-eval-repartition-item">Durée estimée : ≈ {dureeEstimee} min</span>
+            </div>
+          )}
 
           {[processusActif].map((processus) => {
             const lignesProcessus = lignes.filter((l) => l.processus === processus)
@@ -730,7 +895,11 @@ export function EvaluationGeneratorPanel({
             <button type="button" className="admin-gate-submit" onClick={genererEvaluation} disabled={genereEnCours}>
               {genereEnCours
                 ? 'Génération en cours…'
-                : `${estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé + corrigé)`}
+                : estExercice
+                  ? 'Générer la feuille d’exercices'
+                  : nombreSeries > 1
+                    ? `Générer les ${nombreSeries} séries`
+                    : "Générer l'évaluation"}
             </button>
           </div>
           {erreur && <p className="admin-gate-error">{erreur}</p>}
@@ -743,7 +912,109 @@ export function EvaluationGeneratorPanel({
               .
             </p>
           )}
-          {genereLocalementCompte !== null && <p className="admin-eval-lien">{genereLocalementCompte} fichier(s) téléchargé(s) directement.</p>}
+          {message && <p className="admin-eval-lien">{message}</p>}
+          {planCourant && documents.length > 0 && genereLocalementCompte !== null && (
+            <div className="admin-eval-documents">
+              <h3>Documents générés</h3>
+              <ul>
+                {documents.map((doc) => (
+                  <li key={doc.suffixe}>
+                    <span className="admin-eval-documents-nom">{doc.libelle}</span>
+                    <span className="admin-eval-documents-actions">
+                      <button type="button" onClick={() => ouvrirDocument(doc, false)}>
+                        Ouvrir
+                      </button>
+                      <button type="button" onClick={() => declencherTelechargement(doc.blob, nomFichier(planCourant, doc))}>
+                        Télécharger
+                      </button>
+                      <button type="button" onClick={() => ouvrirDocument(doc, true)}>
+                        Imprimer / PDF
+                      </button>
+                      {doc.type === 'enonce' && doc.serieLettre && (
+                        <button type="button" onClick={() => void telechargerWord(doc.serieLettre!)} disabled={genereEnCours}>
+                          Word
+                        </button>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="admin-eval-documents-pied">
+                <button type="button" onClick={() => toutTelecharger(planCourant, documents)}>
+                  Tout télécharger
+                </button>
+                <button type="button" onClick={enregistrerPlanCourant}>
+                  Enregistrer dans ce navigateur
+                </button>
+                <button type="button" onClick={exporterPlanJson}>
+                  Exporter la configuration (JSON)
+                </button>
+              </p>
+              {codesDuPlan(planCourant).length > 0 && (
+                <p className="admin-eval-codes">
+                  Codes des exercices :{' '}
+                  {codesDuPlan(planCourant)
+                    .map((c) => `${planCourant.series.length > 1 ? `${c.serie} ` : ''}${c.generatorId} ${c.code}`)
+                    .join(' · ')}
+                </p>
+              )}
+            </div>
+          )}
+
+          <details className="admin-eval-enregistrees">
+            <summary>
+              Enregistrements, import et historique ({enregistrees.length} enregistrement{enregistrees.length > 1 ? 's' : ''})
+            </summary>
+            {enregistrees.length > 0 ? (
+              <ul>
+                {enregistrees.map((e) => (
+                  <li key={e.id}>
+                    <span>
+                      {e.nom} <span className="admin-eval-variante-label">— {new Date(e.enregistreLe).toLocaleDateString('fr-BE')}</span>
+                    </span>
+                    <span className="admin-eval-documents-actions">
+                      <button type="button" onClick={() => chargerPlan(e.plan)}>
+                        Recharger (mêmes exercices)
+                      </button>
+                      <button type="button" onClick={() => setEnregistrees(supprimerPlanEnregistre(e.id))}>
+                        Supprimer
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="admin-eval-variante-label">Aucun enregistrement dans ce navigateur.</p>
+            )}
+            <p className="admin-eval-documents-pied">
+              <button type="button" onClick={() => entreeImport.current?.click()}>
+                Importer une configuration (JSON)
+              </button>
+              <input
+                ref={entreeImport}
+                type="file"
+                accept="application/json,.json"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) void importerPlanJson(f)
+                  e.target.value = ''
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  effacerHistorique()
+                  setNombreHistorique(0)
+                }}
+              >
+                Effacer l'historique ({nombreHistorique} exercice{nombreHistorique > 1 ? 's' : ''} déjà tiré{nombreHistorique > 1 ? 's' : ''})
+              </button>
+            </p>
+            <p className="admin-eval-variante-label">
+              L'historique évite de redonner un exercice déjà imprimé depuis ce navigateur : un tirage identique est automatiquement retiré.
+            </p>
+          </details>
         </>
       )}
     </div>

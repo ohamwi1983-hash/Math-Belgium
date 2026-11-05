@@ -14,7 +14,6 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
-  CritereBareme,
   ErreurFrequente,
   EtapeAmenagee,
   EtapeCorrection,
@@ -439,7 +438,7 @@ function correctionD(ex: ExerciceLogD): EtapeCorrection[] {
       label: "Calcul",
       sousQuestion: "d",
       fragments: [
-        latex(`x=${puissanceBaseLatex(ex.base, "y" as unknown as number)}`),
+        latex(`x=${ex.base.den === 1 ? bl : `\\left(${bl}\\right)`}^{y}`),
         texte(ex.baseSuperieureA1 ? " est croissante (bornes dans le même ordre) : " : " est décroissante (bornes échangées) : "),
         latex(`${puissanceBaseLatex(ex.base, ya)}=${formatFractionLatex(pa.num, pa.den)}`),
         texte(", "),
