@@ -55,6 +55,12 @@ const NOM_FAMILLE: Record<FamilleReference, string> = {
   valeur_absolue: "fonction valeur absolue",
 };
 
+/** Formule en `\\displaystyle` : sur papier, une fraction en ligne (`\\frac` en style texte) est
+ * illisible, surtout imbriquée (forme de départ de l'inverse). */
+function formule(expression: string): FragmentConsigne {
+  return latex(`\\displaystyle ${expression}`);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Briques LaTeX du corrigé
 // ---------------------------------------------------------------------------------------------
@@ -200,7 +206,7 @@ function formeCanoniqueLatex(exercice: ExerciceFormeCanoniqueFonctionReference):
 
 function construireEnonceFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): SectionExercice {
   return {
-    enteteFragments: [texte("On considère la fonction "), latex(formatFormeDepartLatex(exercice)), texte(".")],
+    enteteFragments: [texte("On considère la fonction "), formule(formatFormeDepartLatex(exercice)), texte(".")],
     questions: [{ consigne: [texte(CONSIGNE_GENERALE)] }],
   };
 }
@@ -214,7 +220,7 @@ function construireCorrectionFormeCanoniqueFonctionsReference(exercice: Exercice
   const libelleFamille = CATALOGUE_VARIANTES.find((variante) => variante.id === exercice.famille)?.label ?? exercice.famille;
   return [
     { type: "paragraphe", fragments: [texte(`Fonction de référence reconnue : ${libelleFamille}.`)] },
-    { type: "paragraphe", fragments: [texte("Forme canonique : "), latex(formeCanoniqueLatex(exercice))] },
+    { type: "paragraphe", fragments: [texte("Forme canonique : "), formule(formeCanoniqueLatex(exercice))] },
   ];
 }
 
@@ -226,7 +232,7 @@ function difficulteFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanon
 }
 
 function reponseBreveFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
-  return [latex(formeCanoniqueLatex(exercice))];
+  return [formule(formeCanoniqueLatex(exercice))];
 }
 
 function correctionDetailleeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EtapeCorrection[] {
@@ -234,13 +240,13 @@ function correctionDetailleeFormeCanoniqueFonctionsReference(exercice: ExerciceF
   return [
     { label: "Famille", fragments: [texte(`La forme de départ enveloppe x dans la ${NOM_FAMILLE[exercice.famille]} : `), latex(fonctionReferenceLatex(exercice.famille)), texte(".")] },
     { label: "Méthode", fragments: methode(exercice) },
-    { label: "Calcul", fragments: [latex(calculIntermediaire(exercice))] },
-    { label: "Conclusion", fragments: [latex(formeCanoniqueLatex(exercice))] },
+    { label: "Calcul", fragments: [formule(calculIntermediaire(exercice))] },
+    { label: "Conclusion", fragments: [formule(formeCanoniqueLatex(exercice))] },
     {
       label: "Transformations",
       fragments: [
         texte("Une décomposition possible à partir de g : "),
-        latex(formatGabaritLatex(exercice)),
+        formule(formatGabaritLatex(exercice)),
         ...(transformations.length > 0 ? [texte(" — "), ...transformations, texte(".")] : [texte(".")]),
       ],
     },
@@ -273,7 +279,7 @@ function erreursFrequentes(exercice: ExerciceFormeCanoniqueFonctionReference): E
 
 function baremeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): BaremeExercice {
   return {
-    reponseFinale: [latex(formeCanoniqueLatex(exercice))],
+    reponseFinale: [formule(formeCanoniqueLatex(exercice))],
     criteres: [
       { critere: [texte("Reconnaît la fonction de référence")], points: 0.5 },
       { critere: methode(exercice), points: 1 },
@@ -297,7 +303,7 @@ function enonceAmenageFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCa
     case "carre":
       return [
         reconnaitre,
-        { consigne: [texte("Mets le coefficient de x² en évidence dans les termes en x.")], rappel: [latex("ax^2 + bx = a\\left(x^2 + \\frac{b}{a}x\\right)")], points: 1 },
+        { consigne: [texte("Mets le coefficient de x² en évidence dans les termes en x.")], rappel: [latex("ax^2 + bx = a\\left(x^2 + \\dfrac{b}{a}x\\right)")], points: 1 },
         { consigne: [texte("Complète le carré.")], rappel: [latex("x^2 + 2kx = (x + k)^2 - k^2")], points: 1 },
         { consigne: [texte("Distribue le coefficient et regroupe les constantes.")], rappel: [texte("Le terme soustrait est lui aussi multiplié par le coefficient.")], points: 1 },
         conclure,
@@ -305,7 +311,7 @@ function enonceAmenageFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCa
     case "inverse":
       return [
         reconnaitre,
-        { consigne: [texte("Écris le numérateur à l'aide du dénominateur.")], rappel: [latex("ax + b = \\frac{a}{c}(cx + d) + \\text{reste}")], points: 1 },
+        { consigne: [texte("Écris le numérateur à l'aide du dénominateur.")], rappel: [latex("ax + b = \\dfrac{a}{c}(cx + d) + \\text{reste}")], points: 1 },
         { consigne: [texte("Sépare la fraction en deux termes.")], points: 1 },
         { consigne: [texte("Mets le coefficient de x en évidence au dénominateur pour faire apparaître x − p.")], points: 1 },
         conclure,
@@ -322,7 +328,7 @@ function enonceAmenageFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCa
     case "racine_cubique":
       return [
         reconnaitre,
-        { consigne: [texte("Mets le coefficient de x en évidence sous la racine.")], rappel: [latex("ax + b = a\\left(x + \\frac{b}{a}\\right)")], points: 1.5 },
+        { consigne: [texte("Mets le coefficient de x en évidence sous la racine.")], rappel: [latex("ax + b = a\\left(x + \\dfrac{b}{a}\\right)")], points: 1.5 },
         { consigne: [texte("Garde ce coefficient sous la racine ; recopie le facteur devant et le terme constant.")], points: 1.5 },
         conclure,
       ];

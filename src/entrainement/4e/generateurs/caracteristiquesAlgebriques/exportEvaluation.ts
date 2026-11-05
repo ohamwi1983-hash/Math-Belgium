@@ -348,7 +348,7 @@ function justificationParite(instance: ExerciceCaracteristiquesAlgebriquesNiveau
 function proprieteIntermediaireLatex(famille: FamilleReference): string {
   switch (famille) {
     case "valeur_absolue":
-      return "|u| = K \\;(K>0) \\iff u = K \\text{ ou } u = -K";
+      return "|u| = K \\;(K>0) \\iff u = K \\text{ ou } -u = K";
     case "carre":
       return "u^2 = K \\;(K>0) \\iff u = \\sqrt{K} \\text{ ou } u = -\\sqrt{K}";
     case "inverse":
