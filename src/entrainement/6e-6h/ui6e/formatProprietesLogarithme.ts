@@ -259,10 +259,17 @@ export function phaseTransformationDeLEtape(exercice: ExerciceProprieteLogarithm
 /** Consigne d'une étape sur la FEUILLE papier (export) : pas d'écran de choix séparé, l'élève
  * identifie la propriété puis l'applique, sur la même question (décision K1 : jamais nommée). */
 export function consigneEcriteEtape(exercice: ExerciceProprieteLogarithme, etape: number): FragmentConsigne[] {
-  const transformation = consigneEcran(exercice, phaseTransformationDeLEtape(exercice, etape));
-  if (caracteristiqueDeLEtape(exercice, etape) === "changementBase") return transformation;
-  // Remplace « Applique cette propriété à » par une consigne qui demande d'abord de l'identifier.
-  return [texte("Identifie la propriété du logarithme à appliquer en premier à "), ...transformation.slice(1, 2), texte(", puis applique-la."), ...transformation.slice(2).map((f, i) => (i === 0 && f.type === "texte" ? texte(f.valeur.replace(/^\. /, " ")) : f))];
+  if (caracteristiqueDeLEtape(exercice, etape) === "changementBase") return consigneEcran(exercice, phaseTransformationDeLEtape(exercice, etape));
+  const ecran = sequenceEcrans(exercice)[phaseTransformationDeLEtape(exercice, etape)];
+  return [texte("Quelle propriété appliques-tu en premier à "), latex(resteDeLEtape(exercice, ecran.etape)), texte(" ? Applique-la.")];
+}
+
+/** Règle de notation de la feuille papier — énoncée UNE fois dans l'en-tête de l'exercice plutôt
+ * que répétée à chaque sous-question (`consigneEcriteEtape`). */
+export function regleNotationEcrite(): FragmentConsigne[] {
+  return [
+    texte("À chaque étape, écris m, n, q pour les parties déjà extraites et r pour le logarithme de la partie qui reste à décomposer, puis garde les termes déjà obtenus."),
+  ];
 }
 
 /** Nom de la propriété appliquée à l'étape (corrigé exporté). */

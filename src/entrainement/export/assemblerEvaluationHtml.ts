@@ -24,9 +24,7 @@ import { qrCodeSvg } from "./qrSvg";
  * Tous les champs enrichis des items sont optionnels : un générateur qui ne les fournit pas encore
  * (autres chapitres) est rendu proprement avec son énoncé/corrigé historiques.
  *
- * L'en-tête « Nom et prénom … N° » de l'évaluation se répète sur chaque page imprimée via le
- * `<thead>` d'un tableau unique (CSS 2.1, respecté par Chromium à l'impression) plutôt que
- * `position: fixed`, qui ne se répétait pas de façon fiable.
+ * Les champs Nom / Classe / N° figurent une seule fois, dans le cartouche de la première page.
  */
 
 const LETTRES = "abcdefghijklmnopqrstuvwxyz";
@@ -186,7 +184,7 @@ td, th { font-size: inherit; }
 .etapes .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--accent); padding-top: 2px; }
 .piege { display: flex; gap: 10px; margin-top: 6px; padding: 7px 12px; background: #f3f5f8; border-radius: 6px; }
 .piege .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; color: var(--alerte); white-space: nowrap; padding-top: 2px; }
-.etapes-libres p { margin: 0.25em 0; }
+.etapes-libres p { margin: 0 0 0.55em; }
 @media print { body { padding: 0; } }
 `;
 
@@ -213,6 +211,7 @@ h3.rubrique { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-wei
 .explication { color: var(--gris); margin: 0 0 8px; }
 .cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .carte { border: 1px solid var(--filet); border-radius: 6px; padding: 8px 10px; break-inside: avoid; }
+.carte.large { grid-column: 1 / -1; }
 .carte .num { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 700; color: var(--accent); text-transform: uppercase; display: block; }
 table.bilan { width: 100%; font-size: 10.5pt; }
 table.bilan th { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--gris); text-align: left; padding: 6px; border-bottom: 1.5px solid var(--encre); }
@@ -420,9 +419,20 @@ function reponseBreveHtml(item: ItemEvaluation): string {
   return `<span class="explication">Voir le corrigé détaillé.</span>`;
 }
 
+/** Une réponse brève longue (plusieurs résultats enchaînés, limites empilées, tableaux) est
+ * illisible dans une carte au tiers de la largeur : elle occupe alors toute la ligne. La longueur
+ * est estimée sur le texte « visible » (une commande LaTeX compte pour un caractère, les accolades
+ * et `\dfrac` ne comptent pas — une fraction est à peu près aussi large que son numérateur). */
+function reponseBreveLongue(item: ItemEvaluation): boolean {
+  const fragments = item.reponseBreve ?? [];
+  const visible = (f: FragmentConsigne) => (f.type === "texte" ? f.valeur : f.valeur.replace(/\\d?frac/g, "").replace(/\\[a-zA-Z]+/g, "x").replace(/[{}\s]/g, ""));
+  const longueur = fragments.reduce((total, f) => total + visible(f).length, 0);
+  return longueur > 24 || fragments.some((f) => f.type === "latex" && /\\(begin|displaystyle|substack)/.test(f.valeur));
+}
+
 function pageJeVerifieHtml(entete: EnteteEvaluation, numerotes: { item: ItemEvaluation; numero: number }[]): string {
   const cartes = numerotes
-    .map(({ item, numero }) => `<div class="carte"><span class="num">Exercice ${numero}</span>${reponseBreveHtml(item)}</div>`)
+    .map(({ item, numero }) => `<div class="carte${reponseBreveLongue(item) ? " large" : ""}"><span class="num">Exercice ${numero}</span>${reponseBreveHtml(item)}</div>`)
     .join("");
 
   // Une ligne par section du cours présente dans la feuille, dans l'ordre du cours.
@@ -505,7 +515,7 @@ function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
   <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
     <h1>${echapperHtml(titreEvaluation(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
     <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série ${echapperHtml(entete.serieLettre)} · ${duree} minutes · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
-  <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span></div>
+  <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
 </div>`;
 }
 
@@ -517,8 +527,10 @@ function resultatsHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): strin
   return `<div class="resultats"><table><tr><th style="text-align:left">Processus</th>${tetes}<th class="total">Total</th></tr><tr><td class="lbl">Points</td>${cases}<td class="total vide">…… / ${nombreFr(total)}</td></tr></table>${calculatriceHtml(entete.calculatrice)}</div>`;
 }
 
+/** Plus de bandeau « Nom et prénom … N° » répété en haut de page : il faisait doublon avec les
+ * champs Nom / Classe / N° du cartouche (les élèves répondent de toute façon sur une feuille à part). */
 function enveloppeEvaluation(contenu: string): string {
-  return `<table class="page-cadre"><thead><tr><td><div class="entete-repetee"><span>Nom et prénom : ______________________________________</span><span>N° ____</span></div></td></tr></thead><tbody><tr><td>${contenu}</td></tr></tbody></table>`;
+  return contenu;
 }
 
 function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], avecCorrection: boolean): string {
@@ -625,7 +637,7 @@ export async function genererVersionAmenagee(entete: EnteteEvaluation, items: It
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
   const droite = estExercice ? "Mêmes exercices,<br>présentés pas à pas" : `Série ${echapperHtml(entete.serieLettre)}<br>Mêmes questions, même barème`;
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
-<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
+<div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
 ${!estExercice && entete.calculatrice ? `<p><b>Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.</b></p>` : ""}`;
   const pages = itemsNumerotes(items)
     .map(({ item, numero }, i) => `${i > 0 ? '<div class="saut-page"></div>' : ""}${i === 0 ? tete : ""}${questionAmenageeHtml(item, numero, estExercice)}`)

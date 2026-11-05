@@ -125,7 +125,7 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
       spacing: { after: 120 },
     }),
   );
-  enfants.push(new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________", size: 20 })], spacing: { after: 160 } }));
+  enfants.push(new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } }));
   enfants.push(tableauResultats(items));
   if (entete.calculatrice) {
     enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? "9A3B12" : "2F6B3A" })], spacing: { before: 120 } }));

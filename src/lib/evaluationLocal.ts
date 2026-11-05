@@ -393,13 +393,18 @@ const RE_ETIQUETTE = /^\s*([^:]{1,32}?)\s:\s/
 function itemOuverte(el: Extract<ElementPlan, { type: 'ouverte' }>): ItemEvaluation {
   const correction: BlocCorrection[] = el.question.corrige.map((paragraphe) => ({ type: 'paragraphe', fragments: paragraphe }))
   // Paragraphes « Étiquette : texte » (étapes d'un exemple résolu) → grille étiquette | texte.
-  const correctionDetaillee: EtapeCorrection[] = el.question.corrige.map((paragraphe) => {
+  const etiquetees = el.question.corrige.map((paragraphe): EtapeCorrection => {
     const [premier, ...reste] = paragraphe
     const m = premier?.type === 'texte' ? RE_ETIQUETTE.exec(premier.valeur) : null
     if (!m || !premier) return { label: '', fragments: paragraphe }
     const suite = premier.valeur.slice(m[0].length)
     return { label: m[1], fragments: [...(suite ? [texte(suite)] : []), ...reste] }
   })
+  // Une démonstration rédigée en prose (exempleLibre) n'a qu'une étiquette çà et là (« Conséquence
+  // importante : … ») : la grille étiquette | texte y laisserait une colonne presque vide. Sous la
+  // moitié de paragraphes étiquetés, on garde des paragraphes libres, un bloc par paragraphe.
+  const majoriteEtiquetee = etiquetees.filter((e) => e.label).length * 2 >= etiquetees.length
+  const correctionDetaillee: EtapeCorrection[] = majoriteEtiquetee ? etiquetees : el.question.corrige.map((paragraphe) => ({ label: '', fragments: paragraphe }))
   return {
     ...champsCommuns(el),
     nature: 'ouverte',

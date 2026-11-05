@@ -17,6 +17,7 @@ import { caracteristiqueDeLEtape, nombreEtapesAlgebriques } from "../../moteur6e
 import {
   FORMULE_PROPRIETE,
   consigneEcriteEtape,
+  regleNotationEcrite,
   consigneGenerale,
   expressionDemandeeLatex,
   formatReponseAttenduePhaseLatex,
@@ -40,7 +41,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePropriete
 function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarithme): SectionExercice {
   const total = nombreEtapesAlgebriques(exercice);
   return {
-    enteteFragments: [...consigneGenerale(exercice), texte(" "), latex(expressionDemandeeLatex(exercice)), texte(".")],
+    enteteFragments: [...consigneGenerale(exercice), texte(" "), latex(expressionDemandeeLatex(exercice)), texte(". "), ...regleNotationEcrite()],
     questions: Array.from({ length: total }, (_, etape) => ({ consigne: consigneEcriteEtape(exercice, etape), reponse: { type: "lignes" as const, nombre: 2 } })),
   };
 }
@@ -219,7 +220,7 @@ function enonceAmenageProprietesLogarithme(exercice: ExerciceProprieteLogarithme
     }
     const reste = resteVersLatexLogA(etats[etape]) ?? arbreVersLatexLogA(exercice.arbre);
     return {
-      consigne: [texte("Transforme "), latex(reste), texte(" avec UNE propriété du logarithme.")],
+      consigne: [texte("Transforme "), latex(reste), texte(" avec une seule propriété du logarithme.")],
       rappel:
         etape === 0
           ? [texte("Cherche l'opération qu'on ferait en dernier en calculant l'argument. Écris m, n, q pour ce qui est extrait, r pour ce qui reste.")]

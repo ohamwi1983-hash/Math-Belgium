@@ -193,7 +193,8 @@ function correctionA(ex: ExerciceEqLogA): EtapeCorrection[] {
   const secondMembre = ex.p !== null ? String(ex.p - ex.n) : `${exposantExactA(ex)}${ex.n === 0 ? "" : ex.n > 0 ? `-${ex.n}` : `+${-ex.n}`}`;
   etapes.push({ label: "Calcul", sousQuestion: "b", fragments: [latex(`${formatCoef(ex.m)}x=${secondMembre}`), texte(", donc "), latex(egaliteX(rep(ex, "aEcran2")[0]))] });
   etapes.push({ label: "Conclusion", fragments: [latex(ensembleLatex([xExactA(ex)]))] });
-  etapes.push({ label: "Piège", fragments: piegeA(ex) });
+  const piege = piegeA(ex);
+  if (piege) etapes.push({ label: "Piège", fragments: piege });
   return etapes;
 }
 
@@ -201,11 +202,16 @@ function formatCoef(m: number): string {
   return m === 1 ? "" : m === -1 ? "-" : String(m);
 }
 
-function piegeA(ex: ExerciceEqLogA): FragmentConsigne[] {
+/** Piège propre à l'instance — `null` quand aucun ne s'applique (ex. 5^{x+4} = 25 : m = 1, rien à
+ * diviser), pour ne jamais afficher un avertissement hors sujet. */
+function piegeA(ex: ExerciceEqLogA): FragmentConsigne[] | null {
   if (ex.estPuissancePropre && ex.p === 0) return [texte("Le second membre vaut 1 : "), latex(`1=${ex.base}^{0}`), texte(", l'exposant est 0 (pas 1).")];
   if (ex.estPuissancePropre && (ex.p as number) < 0) return [texte("Une fraction "), latex(`\\dfrac{1}{${ex.base}^{k}}`), texte(" s'écrit "), latex(`${ex.base}^{-k}`), texte(" : l'exposant est NÉGATIF.")];
   if (!ex.estPuissancePropre) return [latex(`\\log_{${ex.base}}(${ex.C})=\\dfrac{\\ln(${ex.C})}{\\ln(${ex.base})}`), texte(", et non "), latex(`\\dfrac{\\ln(${ex.base})}{\\ln(${ex.C})}`), texte(" ni "), latex(`\\ln\\!\\left(\\dfrac{${ex.C}}{${ex.base}}\\right)`), texte(".")];
-  return [texte("Isoler x : soustraire n PUIS diviser par m — en gardant le signe de m.")];
+  if (ex.m === 1) return null;
+  const n = ex.n === 0 ? "" : ex.n > 0 ? `on soustrait ${ex.n}, puis ` : `on ajoute ${-ex.n}, puis `;
+  if (ex.m < 0) return [texte(`Pour isoler x, ${n}on divise par `), latex(String(ex.m)), texte(" : diviser par un nombre négatif change le signe du résultat.")];
+  return [texte(`Pour isoler x, ${n}on divise par `), latex(String(ex.m)), texte(" — dans cet ordre.")];
 }
 
 function baremeA(ex: ExerciceEqLogA): BaremeExercice {
@@ -223,7 +229,8 @@ function baremeA(ex: ExerciceEqLogA): BaremeExercice {
   if (!ex.estPuissancePropre) erreurs.push({ description: [texte("Rapport inversé : "), latex(`\\dfrac{\\ln(${base})}{\\ln(${ex.C})}`)], cout: "−1" });
   if (ex.estPuissancePropre && (ex.p as number) < 0) erreurs.push({ description: [texte("Exposant positif au lieu de "), latex(String(ex.p))], cout: "−1" });
   if (ex.estPuissancePropre && ex.p === 0) erreurs.push({ description: [texte("Exposant 1 au lieu de 0 (confusion "), latex(`${base}^{1}`), texte(" / "), latex(`${base}^{0}=1`), texte(")")], cout: "−1" });
-  erreurs.push({ description: [texte("Oubli de diviser par m, ou erreur de signe en isolant x")], cout: "−1" });
+  if (ex.m !== 1) erreurs.push({ description: [texte("Oubli de diviser par m, ou erreur de signe en isolant x")], cout: "−1" });
+  else if (ex.n !== 0) erreurs.push({ description: [texte("Erreur de signe en faisant passer "), latex(String(ex.n)), texte(" dans l'autre membre")], cout: "−1" });
   const acceptees: FragmentConsigne[][] = [];
   if (!estEntierNum(ex.x)) acceptees.push([texte("Valeur arrondie au millième : "), latex(`x\\approx ${arrondiMillieme(ex.x)}`)]);
   if (!ex.estPuissancePropre) acceptees.push([texte("Forme exacte avec "), latex(`\\log_{${base}}(${ex.C})`), texte(" ou avec des log décimaux")]);

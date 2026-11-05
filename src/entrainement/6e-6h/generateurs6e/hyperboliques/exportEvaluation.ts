@@ -63,7 +63,7 @@ function construireEnonceHyperboliques(exercice: ExerciceHyperboliques): Section
   const phases = phasesPourExercice(exercice);
   const donnees = blocDonnees(exercice);
   return {
-    enteteFragments: [...CONSIGNE_GENERALE, latex(donnees.join(",\\quad "))],
+    enteteFragments: [...CONSIGNE_GENERALE, texte(" On donne "), latex(donnees.join(",\\quad ")), texte(".")],
     questions: phases.map((phase) => {
       const suffixe = phase === "aParite" ? " Justifie en calculant f(−x)." : "";
       return {
