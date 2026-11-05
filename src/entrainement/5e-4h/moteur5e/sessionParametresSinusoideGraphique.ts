@@ -9,7 +9,7 @@ import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesParametresSinusoideGraphique";
-import type { EtatSessionParametresSinusoideGraphique, PhaseParametresSinusoideGraphique, ResultatExerciceParametresSinusoideGraphique } from "./typesParametresSinusoideGraphique";
+import type { EtatSessionParametresSinusoideGraphique, ResultatExerciceParametresSinusoideGraphique } from "./typesParametresSinusoideGraphique";
 import { diagnostiquerPhaseParametresSinusoideGraphique } from "./verificationParametresSinusoideGraphique";
 
 const POINTS_DE_BASE = 100;

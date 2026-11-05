@@ -74,7 +74,8 @@ export function calculerRecapitulatifPolygonesArcsSecteurs(etat: EtatSessionPoly
   return precedentes.map((phase) => {
     const revele = phaseRevelee(etat, phase);
     if (phase === "cercleEntier") {
-      const valeurs = [formatCirconferenceAttendueLatex(exercice), formatAireTotaleAttendueLatex(exercice)];
+      // Chaque valeur nommée (avant : « 10π 25π » sans dire laquelle est la circonférence).
+      const valeurs = [`\\text{Circonférence} = ${formatCirconferenceAttendueLatex(exercice)}`, `\\text{Aire} = ${formatAireTotaleAttendueLatex(exercice)}`];
       return { libelle: LIBELLES.cercleEntier, estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele };
     }
     const valeur =

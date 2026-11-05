@@ -9,14 +9,15 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
-/** Exemples hors de l'espace des tirages (θ° multiple de 5, r entier, θ_rad/s/A multiples de π
- * de dénominateur divisant 72 — jamais 11), virgule décimale. */
+/** Exemples HORS de la plage des réponses possibles (même avec la tolérance) : θ_rad ≥ 10° ≈ 0,17,
+ * s et A ≥ 0,35, r ≥ 2 entier, θ° multiple de 5 — virgule décimale (audit 5e ch. 2, point 2 :
+ * « ex : 5*pi/6 ou 2.62 » était parfois la réponse attendue). */
 const PLACEHOLDERS: Record<QuantiteArcSecteur, string> = {
   thetaDeg: "ex : 37,5",
-  thetaRad: "ex : 7*pi/11",
-  r: "ex : 2,5",
-  l: "ex : 7*pi/11",
-  A: "ex : 7*pi/11",
+  thetaRad: "ex : pi/50",
+  r: "ex : 1,5",
+  l: "ex : pi/50",
+  A: "ex : pi/50",
 };
 
 interface Props {

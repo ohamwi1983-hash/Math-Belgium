@@ -50,10 +50,12 @@ export function consignePhase(phase: PhasePolygonesArcsSecteurs): string {
 
 const AIDES_NIVEAU1: Record<PhasePolygonesArcsSecteurs, string> = {
   cercleEntier: "\\text{Circonférence} = 2\\pi r \\qquad \\text{Aire} = \\pi r^2",
-  arcElementaire: "\\text{longueur d'arc} = \\text{fraction du cercle} \\times \\text{circonférence}",
-  arcMultiPas: "\\text{longueur d'arc} = \\text{fraction du cercle} \\times \\text{circonférence}",
-  secteurElementaire: "\\text{aire du secteur} = \\text{fraction du cercle} \\times \\text{aire totale}",
-  secteurMultiPas: "\\text{aire du secteur} = \\text{fraction du cercle} \\times \\text{aire totale}",
+  // Notations du cours (s = longueur d'arc, A = aire du secteur) : formules assez courtes pour tenir
+  // à 390 px sans défilement.
+  arcElementaire: "s = \\text{fraction du cercle} \\times 2\\pi r",
+  arcMultiPas: "s = \\text{fraction du cercle} \\times 2\\pi r",
+  secteurElementaire: "A = \\text{fraction du cercle} \\times \\pi r^2",
+  secteurMultiPas: "A = \\text{fraction du cercle} \\times \\pi r^2",
 };
 
 export function texteAideNiveau1(phase: PhasePolygonesArcsSecteurs): string {
@@ -71,10 +73,17 @@ function segmentActif(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolyg
 export function latexAideNiveau2(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygonesArcsSecteurs): string {
   const { r, n } = exercice;
   if (phase === "cercleEntier") return `\\text{Circonférence} = 2\\pi \\times ${r} \\qquad \\text{Aire} = \\pi \\times ${r}^2`;
-  if (phase === "arcElementaire") return `\\text{longueur d'arc} = \\dfrac{1}{${n}} \\times 2\\pi \\times ${r}`;
-  if (phase === "secteurElementaire") return `\\text{aire du secteur} = \\dfrac{1}{${n}} \\times \\pi \\times ${r}^2`;
-  if (phase === "arcMultiPas") return `\\text{longueur d'arc} = \\dfrac{k}{${n}} \\times 2\\pi \\times ${r} \\qquad (k = \\text{nombre de côtés couverts})`;
-  return `\\text{aire du secteur} = \\dfrac{k}{${n}} \\times \\pi \\times ${r}^2 \\qquad (k = \\text{nombre de côtés couverts})`;
+  if (phase === "arcElementaire") return `s = \\dfrac{1}{${n}} \\times 2\\pi \\times ${r}`;
+  if (phase === "secteurElementaire") return `A = \\dfrac{1}{${n}} \\times \\pi \\times ${r}^2`;
+  if (phase === "arcMultiPas") return `s = \\dfrac{k}{${n}} \\times 2\\pi \\times ${r}`;
+  return `A = \\dfrac{k}{${n}} \\times \\pi \\times ${r}^2`;
+}
+
+/** Légende de l'aide niveau 2 des écrans « surligné » : ce que désigne k. */
+export function legendeAideNiveau2(phase: PhasePolygonesArcsSecteurs): string | null {
+  if (phase === "arcMultiPas") return "où k est le nombre de côtés du polygone couverts par l'arc.";
+  if (phase === "secteurMultiPas") return "où k est le nombre de côtés du polygone couverts par le secteur.";
+  return null;
 }
 
 /** Niveau 3 (écrans « surligné » uniquement) — donne la lecture du schéma : le nombre k de côtés

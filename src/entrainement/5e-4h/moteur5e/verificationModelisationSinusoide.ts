@@ -2,24 +2,20 @@
  * Couche B (5e) — vérification pour 5gen13 ("Modéliser une fonction sinusoïdale en contexte").
  * N'importe jamais rien de `src/generateurs5e/`.
  *
- * Réutilise DIRECTEMENT (moteur→moteur, déjà établi ailleurs sur la plateforme) :
- * - `diagnostiquerValeurArcSecteur` (`verificationArcsSecteurs.ts`, 5gen6, tolérance serrée ±0.01) —
- *   pour tout champ "nombre simple" (A, b, vitesses, bornes en u/t...).
- * - `diagnostiquerBranches`/`diagnostiquerEnsembleNumerique` (`verificationEquationTrig.ts`, 5gen10)
- *   — pour les écrans Phase 2 "resoudre"/"extremum", exactement le même format `{constante,periode}`
- *   que 5gen10/5gen11, ici toujours en régime "decimal" (`exact:null`, ce générateur ne travaille
- *   jamais avec des multiples exacts de π).
+ * Réutilise DIRECTEMENT (moteur→moteur) `diagnostiquerValeurArcSecteur` (5gen6, ±0,01) pour les
+ * nombres simples. Les écrans de Phase 2 (branches en u et en t, solutions, bornes d'inéquation)
+ * n'utilisent PLUS la primitive de 5gen10 (marge fixe ±0,01, refusait 21 à 76 % des démarches
+ * correctes) : marges propagées locales, voir « Tolérances PROPAGÉES » ci-dessous.
  *
  * RÉPLIQUE localement (jamais importée, ces fonctions sont PRIVÉES à leur module d'origine) :
  * - `diagnostiquerSysteme` — même patron que
  *   `verificationProblemesContexte.ts::diagnostiquerEquationLineaireAB` (5gen5), adapté aux 2
  *   variables nommées `omega`/`phi` plutôt que `a`/`b`.
  */
-import type { DonneesPhase1, IntervalleModelisation, QuestionExtremum, QuestionInequation, QuestionResoudre } from "../core5e/modelisationSinusoide.types";
+import type { BrancheModelisation, DonneesPhase1, IntervalleModelisation, QuestionExtremum, QuestionInequation, QuestionResoudre } from "../core5e/modelisationSinusoide.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerValeurArcSecteur } from "./verificationArcsSecteurs";
-import { diagnostiquerBranches, diagnostiquerEnsembleNumerique } from "./verificationEquationTrig";
 import { diagnostiquerCalculArrondi, diagnostiquerCalculDixieme } from "./verificationGeometrieCercle";
 
 /** `${v}` bascule en notation scientifique ("2.4e-15") dès que |v| est très proche de 0 (cas
@@ -72,16 +68,146 @@ function combiner2(a: StatutVerification, b: StatutVerification): StatutVerifica
 // φ modulo 2π (B2) — accepte toute valeur congrue, jamais seulement la valeur "naturelle".
 // ============================================================================
 
-export function diagnostiquerPhiModuloDeuxPi(texte: string, cible: number): StatutVerification {
+export function diagnostiquerPhiModuloDeuxPi(texte: string, cible: number, tolerance = 0.01): StatutVerification {
   try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
+    const valeur = evaluerExpressionGenerale(resoudreInverseTrig(texte), 0);
     if (!Number.isFinite(valeur)) return "parse_error";
     const ecart = valeur - cible;
     const kEntier = Math.round(ecart / (2 * Math.PI));
-    return Math.abs(ecart - kEntier * 2 * Math.PI) <= 0.01 ? "correct" : "not_equivalent";
+    return Math.abs(ecart - kEntier * 2 * Math.PI) <= tolerance + MARGE ? "correct" : "not_equivalent";
   } catch {
     return "parse_error";
   }
+}
+
+// ============================================================================
+// Tolérances PROPAGÉES (audit 5e ch. 2, points 49 et 51). Chaque écran accepte une réponse
+// arrondie au centième (±0,005) ; une valeur obtenue en DIVISANT par ω une grandeur elle-même
+// arrondie au centième hérite d'une erreur 0,005/ω (ω descend à 2π/60 ≈ 0,1), et une solution
+// t = c + n·p cumule l'erreur de c et n fois celle de p. Les marges ci-dessous bornent exactement ces
+// erreurs (démarche correcte ⇒ acceptée) sans couvrir une erreur de méthode (vérifié par simulation,
+// scratchpad 5c2-E).
+// ============================================================================
+
+const MARGE = 1e-6;
+/** Une valeur en u (argument) arrondie au centième. */
+const TOLERANCE_U = 0.0055;
+/** Arrondi au centième de la valeur finale demandée. */
+const ARRONDI_CENTIEME = 0.0055;
+
+/** Erreur sur t = (u − φ)/ω quand u est arrondi au centième (φ, ω affichés à 5 décimales). */
+export function toleranceT(omega: number): number {
+  return ARRONDI_CENTIEME + TOLERANCE_U / Math.abs(omega);
+}
+
+/** Erreur sur t = c + n·p quand c ET p sont chacun à `toleranceT` près. */
+function toleranceSolution(omega: number, n: number): number {
+  return ARRONDI_CENTIEME + (TOLERANCE_U / Math.abs(omega)) * (1 + Math.abs(n));
+}
+
+/** ω = 2π/T demandé « exact ou arrondi au millième » : ±0,0005. Refuse π/T et 1/T, que l'ancienne
+ * marge ±0,05 acceptait dans 57 % et 14 % des tirages (ω ≈ 0,05–0,3). */
+export function diagnostiquerPulsation(texte: string, omega: number): StatutVerification {
+  return diagnostiquerAvecTolerance(texte, omega, 0.0005);
+}
+
+/** φ (B2) = argument cible − ω·t₀ : ω arrondi au millième ⇒ erreur 0,0005·t₀, plus l'arrondi au
+ * centième de φ. */
+export function tolerancePhiB2(t0: number): number {
+  return ARRONDI_CENTIEME + 0.0005 * Math.abs(t0);
+}
+
+/** B3 : ω = (α₁ − α₂)/(t₁ − t₂) et φ = α₁ − ω·t₁ avec des α arrondis au centième. */
+export function toleranceOmegaB3(t1: number, t2: number): number {
+  return ARRONDI_CENTIEME + (2 * TOLERANCE_U) / Math.abs(t1 - t2);
+}
+export function tolerancePhiB3(t1: number, t2: number): number {
+  return ARRONDI_CENTIEME + TOLERANCE_U + toleranceOmegaB3(t1, t2) * Math.max(Math.abs(t1), Math.abs(t2));
+}
+
+function diagnostiquerAvecTolerance(texte: string, cible: number, tolerance: number): StatutVerification {
+  try {
+    const valeur = evaluerExpressionGenerale(resoudreInverseTrig(texte), 0);
+    if (!Number.isFinite(valeur)) return "parse_error";
+    return Math.abs(valeur - cible) <= tolerance + MARGE ? "correct" : "not_equivalent";
+  } catch {
+    return "parse_error";
+  }
+}
+
+export function diagnostiquerResolutionB3(omegaTexte: string, phiTexte: string, omega: number, phi: number, t1: number, t2: number): StatutVerification {
+  return combiner2(diagnostiquerAvecTolerance(omegaTexte, omega, toleranceOmegaB3(t1, t2)), diagnostiquerPhiModuloDeuxPi(phiTexte, phi, tolerancePhiB3(t1, t2)));
+}
+
+// ============================================================================
+// Branches à entier libre k (ou n) — RÉPLIQUÉ localement (la primitive de 5gen10 a une marge fixe
+// ±0,01) avec des marges paramétrées. asin/acos/atan résolus avant évaluation (point 48 : l'exemple
+// « asin(0,37) + 2*k*pi » du champ doit être accepté).
+// ============================================================================
+
+interface LigneBranche {
+  f0: number;
+  periode: number;
+}
+
+function evaluerLigneBranche(texte: string): LigneBranche | null {
+  try {
+    const expr = resoudreInverseTrig(texte);
+    const f0 = evaluerExpressionGenerale(expr, 0, { k: 0, n: 0 });
+    const f1 = evaluerExpressionGenerale(expr, 0, { k: 1, n: 1 });
+    if (!Number.isFinite(f0) || !Number.isFinite(f1)) return null;
+    return { f0, periode: f1 - f0 };
+  } catch {
+    return null;
+  }
+}
+
+function correspondBranche(ligne: LigneBranche, branche: BrancheModelisation, toleranceConstante: number, tolerancePeriode: number): boolean {
+  if (Math.abs(Math.abs(ligne.periode) - Math.abs(branche.periode)) > tolerancePeriode + MARGE) return false;
+  const ecart = ligne.f0 - branche.constante;
+  const kEntier = Math.round(ecart / branche.periode);
+  return Math.abs(ecart - kEntier * branche.periode) <= toleranceConstante + MARGE;
+}
+
+export function diagnostiquerBranchesTolerance(lignes: string[], branches: BrancheModelisation[], toleranceConstante: number, tolerancePeriode: number): StatutVerification {
+  const evaluations = lignes.map(evaluerLigneBranche);
+  if (evaluations.some((e) => e === null)) return "parse_error";
+  if (evaluations.length !== branches.length) return "not_equivalent";
+  const restantes = [...branches];
+  for (const ligne of evaluations as LigneBranche[]) {
+    const index = restantes.findIndex((b) => correspondBranche(ligne, b, toleranceConstante, tolerancePeriode));
+    if (index === -1) return "not_equivalent";
+    restantes.splice(index, 1);
+  }
+  return "correct";
+}
+
+/** Solutions t dans la fenêtre : chaque cible t = c + n·p (c, p de sa branche) a sa propre marge
+ * `toleranceSolution(ω, n)` ; ordre indifférent, une saisie par cible. */
+export function diagnostiquerSolutionsTolerance(textes: string[], cibles: number[], branches: BrancheModelisation[], omega: number): StatutVerification {
+  const valeurs: number[] = [];
+  for (const texte of textes) {
+    try {
+      const v = evaluerExpressionGenerale(resoudreInverseTrig(texte), 0);
+      if (!Number.isFinite(v)) return "parse_error";
+      valeurs.push(v);
+    } catch {
+      return "parse_error";
+    }
+  }
+  if (valeurs.length !== cibles.length) return "not_equivalent";
+  const marge = (t: number) => {
+    let nMin = Infinity;
+    for (const b of branches) nMin = Math.min(nMin, Math.abs(Math.round((t - b.constante) / b.periode)));
+    return toleranceSolution(omega, Number.isFinite(nMin) ? nMin : 0);
+  };
+  const restantes = [...cibles];
+  for (const v of valeurs) {
+    const index = restantes.findIndex((c) => Math.abs(c - v) <= marge(c) + MARGE);
+    if (index === -1) return "not_equivalent";
+    restantes.splice(index, 1);
+  }
+  return "correct";
 }
 
 // ============================================================================
@@ -177,8 +303,9 @@ export function diagnostiquerSysteme(gauche: string, droite: string, t: number, 
     const constanteRef = -alphaRef;
     const k = coeffPhi / coeffPhiRef;
     if (!Number.isFinite(k) || Math.abs(k) < 1e-9) return "not_equivalent";
-    const memeCoeffOmega = Math.abs(coeffOmega - k * coeffOmegaRef) < 1e-3;
-    const memeConstante = Math.abs(c0 - k * constanteRef) < 1e-3;
+    const memeCoeffOmega = Math.abs(coeffOmega - k * coeffOmegaRef) < 1e-3 * Math.max(1, Math.abs(k));
+    // α arrondi au centième accepté (point 49) : ±0,0055 sur la constante, à l'échelle k près.
+    const memeConstante = Math.abs(c0 - k * constanteRef) <= (TOLERANCE_U + MARGE) * Math.max(1, Math.abs(k));
     return memeCoeffOmega && memeConstante ? "correct" : "not_equivalent";
   } catch {
     return "parse_error";
@@ -246,12 +373,18 @@ function evaluerTrigRadiansEnT(texte: string, tValeur: number, variablesExtra: R
   return evaluerExpressionGenerale(expr, 0, variables);
 }
 
-function diagnostiquerEquivalenceEnT(texte: string, cible: (t: number) => number, variablesExtra: Record<string, number> = {}): StatutVerification {
+/** Marge en t de l'équivalence f(t) : ω et φ recopiés à 4–5 décimales (ou ω au millième, comme
+ * demandé à l'écran « pulsation ») — |Δf| ≤ |A|·(|Δω|·|t| + |Δφ|), avec |Δω|, |Δφ| ≤ 0,0006. */
+function margeFonction(A: number, t: number): number {
+  return 0.002 + Math.abs(A) * 0.0006 * (Math.abs(t) + 1);
+}
+
+function diagnostiquerEquivalenceEnT(texte: string, cible: (t: number) => number, A: number, variablesExtra: Record<string, number> = {}): StatutVerification {
   try {
     for (const t of [1, 2.37, -1.5, 5.1]) {
       const valeur = evaluerTrigRadiansEnT(texte, t, variablesExtra);
       if (!Number.isFinite(valeur)) return "parse_error";
-      if (Math.abs(valeur - cible(t)) > 1e-3) return "not_equivalent";
+      if (Math.abs(valeur - cible(t)) > margeFonction(A, t)) return "not_equivalent";
     }
     return "correct";
   } catch {
@@ -268,12 +401,12 @@ export function diagnostiquerFonctionFinaleSymbolique(texte: string, A: number, 
   const contientPhiSymbolique = /\bphi\b/i.test(texte) || texte.includes("φ");
   if (!contientPhiSymbolique) return "not_equivalent";
   const normalise = texte.replace(/φ/g, "phi");
-  return diagnostiquerEquivalenceEnT(normalise, (t) => A * Math.sin(omega * t) + b, { phi: 0 });
+  return diagnostiquerEquivalenceEnT(normalise, (t) => A * Math.sin(omega * t) + b, A, { phi: 0 });
 }
 
 /** Techniques B2/B3/donnée — φ NUMÉRIQUEMENT connu, équivalence algébrique complète. */
 export function diagnostiquerFonctionFinaleNumerique(texte: string, A: number, omega: number, phi: number, b: number): StatutVerification {
-  return diagnostiquerEquivalenceEnT(texte, (t) => A * Math.sin(omega * t + phi) + b);
+  return diagnostiquerEquivalenceEnT(texte, (t) => A * Math.sin(omega * t + phi) + b, A);
 }
 
 export function diagnostiquerFonctionFinale(donnees: DonneesPhase1, texte: string): StatutVerification {
@@ -283,12 +416,8 @@ export function diagnostiquerFonctionFinale(donnees: DonneesPhase1, texte: strin
 }
 
 // ============================================================================
-// Phase 2 — Type "resoudre" (réutilise diagnostiquerBranches/diagnostiquerEnsembleNumerique).
+// Phase 2 — Type "resoudre".
 // ============================================================================
-
-function versValeur(v: number) {
-  return { exact: null, decimal: v };
-}
 
 export interface ReponseArgumentResoudre {
   aucuneSolution: boolean;
@@ -298,60 +427,59 @@ export interface ReponseArgumentResoudre {
 export function diagnostiquerArgumentResoudre(question: QuestionResoudre, reponse: ReponseArgumentResoudre): StatutVerification {
   if (reponse.aucuneSolution) return question.aucuneSolution ? "correct" : "not_equivalent";
   if (question.aucuneSolution) return "not_equivalent";
-  return diagnostiquerBranches(
-    reponse.lignes,
-    question.branchesU.map((br) => ({ constante: versValeur(br.constante), periode: versValeur(br.periode) })),
-  );
+  return diagnostiquerBranchesTolerance(reponse.lignes, question.branchesU, TOLERANCE_U + ARRONDI_CENTIEME, ARRONDI_CENTIEME);
 }
 
-export function diagnostiquerIsolerTResoudre(question: QuestionResoudre, lignes: string[]): StatutVerification {
-  return diagnostiquerBranches(
-    lignes,
-    question.branchesT.map((br) => ({ constante: versValeur(br.constante), periode: versValeur(br.periode) })),
-  );
+export function diagnostiquerIsolerTResoudre(question: QuestionResoudre, lignes: string[], omega: number): StatutVerification {
+  return diagnostiquerBranchesTolerance(lignes, question.branchesT, toleranceT(omega), toleranceT(omega));
 }
 
-export function diagnostiquerSolutionsResoudre(question: QuestionResoudre, textes: string[]): StatutVerification {
-  return diagnostiquerEnsembleNumerique(textes, question.solutions);
+export function diagnostiquerSolutionsResoudre(question: QuestionResoudre, textes: string[], omega: number): StatutVerification {
+  return diagnostiquerSolutionsTolerance(textes, question.solutions, question.branchesT, omega);
 }
 
 // ============================================================================
-// Phase 2 — Type "extremum" (réutilise le même mécanisme que 5gen11).
+// Phase 2 — Type "extremum".
 // ============================================================================
 
 export function diagnostiquerPoserExtremum(question: QuestionExtremum, texte: string): StatutVerification {
-  return diagnostiquerBranches([texte], [{ constante: versValeur(question.brancheU.constante), periode: versValeur(question.brancheU.periode) }]);
+  return diagnostiquerBranchesTolerance([texte], [question.brancheU], TOLERANCE_U + ARRONDI_CENTIEME, ARRONDI_CENTIEME);
 }
 
-export function diagnostiquerIsolerTExtremum(question: QuestionExtremum, texte: string): StatutVerification {
-  return diagnostiquerBranches([texte], [{ constante: versValeur(question.brancheT.constante), periode: versValeur(question.brancheT.periode) }]);
+export function diagnostiquerIsolerTExtremum(question: QuestionExtremum, texte: string, omega: number): StatutVerification {
+  return diagnostiquerBranchesTolerance([texte], [question.brancheT], toleranceT(omega), toleranceT(omega));
 }
 
-export function diagnostiquerSolutionsExtremum(question: QuestionExtremum, textes: string[]): StatutVerification {
-  return diagnostiquerEnsembleNumerique(textes, question.solutions);
+export function diagnostiquerSolutionsExtremum(question: QuestionExtremum, textes: string[], omega: number): StatutVerification {
+  return diagnostiquerSolutionsTolerance(textes, question.solutions, [question.brancheT], omega);
 }
 
 // ============================================================================
-// Phase 2 — Type "inequation" (technique NOUVELLE sur la plateforme).
+// Phase 2 — Type "inequation".
 // ============================================================================
+
+/** « ≥ », « ≤ » (et leurs variantes) écrits comme à l'écran ⇒ « >= », « <= » (point 58). */
+function normaliserComparateurs(texte: string): string {
+  return texte.replace(/[≥⩾]/g, ">=").replace(/[≤⩽]/g, "<=");
+}
 
 /** Écran 1 — isoler sin(ωt+φ)◇m. Cas spécial (|m|>1) : comparaison textuelle directe du choix.
  * Cas général : extrait le symbole de comparaison (>=/<=/>/<) et la valeur du membre droit —
- * NE VÉRIFIE PAS la structure exacte du membre gauche (au-delà de la présence de "sin("),
- * simplification assumée documentée dans CLAUDE.md. */
-export function diagnostiquerIsolerSinInequation(texte: string, casSpecialCible: "toujoursVrai" | "toujoursFaux" | null, sens: "ge" | "le", m: number): StatutVerification {
+ * NE VÉRIFIE PAS la structure exacte du membre gauche (au-delà de la présence de "sin("). */
+export function diagnostiquerIsolerSinInequation(texteBrut: string, casSpecialCible: "toujoursVrai" | "toujoursFaux" | null, sens: "ge" | "le", m: number): StatutVerification {
   if (casSpecialCible !== null) {
-    return texte.trim() === casSpecialCible ? "correct" : "not_equivalent";
+    return texteBrut.trim() === casSpecialCible ? "correct" : "not_equivalent";
   }
+  const texte = normaliserComparateurs(texteBrut);
   const match = texte.match(/(>=|<=|>|<)/);
   if (!match) return "parse_error";
   const symbole = match[0];
   const [gauche, droite] = texte.split(symbole);
   if (!/sin\s*\(/.test(gauche)) return "parse_error";
   try {
-    const valeur = evaluerExpressionGenerale(droite, 0);
+    const valeur = evaluerExpressionGenerale(resoudreInverseTrig(droite), 0);
     if (!Number.isFinite(valeur)) return "parse_error";
-    if (Math.abs(valeur - m) > 0.01) return "not_equivalent";
+    if (Math.abs(valeur - m) > ARRONDI_CENTIEME + MARGE) return "not_equivalent";
     const sensSoumis = symbole.startsWith(">") ? "ge" : "le";
     return sensSoumis === sens ? "correct" : "not_equivalent";
   } catch {
@@ -359,31 +487,56 @@ export function diagnostiquerIsolerSinInequation(texte: string, casSpecialCible:
   }
 }
 
+function valeurOuErreur(texte: string): number | "parse_error" {
+  try {
+    const v = evaluerExpressionGenerale(resoudreInverseTrig(texte), 0);
+    return Number.isFinite(v) ? v : "parse_error";
+  } catch {
+    return "parse_error";
+  }
+}
+
+/** Deux bornes comparées MODULO `periode` (même décalage pour les deux : c'est le même arc), avec
+ * une marge par borne (point 50 : [−π−arcsin m ; arcsin m] et [π−arcsin m ; 2π+arcsin m] décrivent le
+ * même ensemble). */
+function diagnostiquerBornesModulo(infTexte: string, supTexte: string, infRef: number, supRef: number, periode: number, tolerance: number): StatutVerification {
+  const inf = valeurOuErreur(infTexte);
+  const sup = valeurOuErreur(supTexte);
+  if (inf === "parse_error" || sup === "parse_error") return "parse_error";
+  const j = Math.round((inf - infRef) / periode);
+  const ok = Math.abs(inf - (infRef + j * periode)) <= tolerance + MARGE && Math.abs(sup - (supRef + j * periode)) <= tolerance + MARGE;
+  return ok ? "correct" : "not_equivalent";
+}
+
 export function diagnostiquerResoudreUInequation(question: QuestionInequation, infTexte: string, supTexte: string): StatutVerification {
-  return combiner2(diagnostiquerNombre(infTexte, question.borneInfU), diagnostiquerNombre(supTexte, question.borneSupU));
+  return diagnostiquerBornesModulo(infTexte, supTexte, question.borneInfU, question.borneSupU, 2 * Math.PI, TOLERANCE_U + ARRONDI_CENTIEME);
 }
 
-export function diagnostiquerIsolerTInequation(question: QuestionInequation, infTexte: string, supTexte: string): StatutVerification {
-  return combiner2(diagnostiquerNombre(infTexte, question.borneInfT), diagnostiquerNombre(supTexte, question.borneSupT));
+export function diagnostiquerIsolerTInequation(question: QuestionInequation, infTexte: string, supTexte: string, omega: number): StatutVerification {
+  return diagnostiquerBornesModulo(infTexte, supTexte, question.borneInfT, question.borneSupT, (2 * Math.PI) / Math.abs(omega), toleranceT(omega));
 }
 
-/** Écran 4 — équivalence d'ENSEMBLES d'intervalles, ordre indifférent (add-as-needed). */
-export function diagnostiquerListerIntervalles(paires: [string, string][], cible: IntervalleModelisation[]): StatutVerification {
+/** Écran 4 — équivalence d'ENSEMBLES d'intervalles, ordre indifférent (add-as-needed). Une borne
+ * égale à 0 ou à la fenêtre (intervalle coupé) se lit directement (±0,01) ; une autre borne vaut
+ * borne_t + n·(2π/ω) et reçoit la marge propagée correspondante. */
+export function diagnostiquerListerIntervalles(paires: [string, string][], question: QuestionInequation, omega: number): StatutVerification {
+  const cible = question.intervalles;
   if (paires.length !== cible.length) return "not_equivalent";
   const valeurs: IntervalleModelisation[] = [];
   for (const [infTexte, supTexte] of paires) {
-    try {
-      const inf = evaluerExpressionGenerale(infTexte, 0);
-      const sup = evaluerExpressionGenerale(supTexte, 0);
-      if (!Number.isFinite(inf) || !Number.isFinite(sup)) return "parse_error";
-      valeurs.push({ inf, sup });
-    } catch {
-      return "parse_error";
-    }
+    const inf = valeurOuErreur(infTexte);
+    const sup = valeurOuErreur(supTexte);
+    if (inf === "parse_error" || sup === "parse_error") return "parse_error";
+    valeurs.push({ inf, sup });
   }
+  const periode = (2 * Math.PI) / Math.abs(omega);
+  const marge = (borne: number, base: number) =>
+    Math.abs(borne) < 1e-9 || Math.abs(borne - question.fenetre) < 1e-9 ? 2 * ARRONDI_CENTIEME : toleranceSolution(omega, Math.round((borne - base) / periode));
   const restantes = [...cible];
   for (const v of valeurs) {
-    const index = restantes.findIndex((c) => Math.abs(c.inf - v.inf) <= 0.01 && Math.abs(c.sup - v.sup) <= 0.01);
+    const index = restantes.findIndex(
+      (c) => Math.abs(c.inf - v.inf) <= marge(c.inf, question.borneInfT) + MARGE && Math.abs(c.sup - v.sup) <= marge(c.sup, question.borneSupT) + MARGE,
+    );
     if (index === -1) return "not_equivalent";
     restantes.splice(index, 1);
   }

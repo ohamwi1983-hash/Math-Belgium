@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import type { PhasePolygonesArcsSecteurs } from "../moteur5e/typesPolygonesArcsSecteurs";
-import { aideNiveau3 as calculerAideNiveau3, consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { aideNiveau3 as calculerAideNiveau3, consignePhase, latexAideNiveau2, legendeAideNiveau2, surlignagePourPhase, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -58,6 +58,7 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(phase)} block />
           {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
+          {niveauAide >= 2 && legendeAideNiveau2(phase) !== null && <p>{legendeAideNiveau2(phase)}</p>}
           {niveauAide >= 3 && aideNiveau3 !== null && (
             <p>
               {aideNiveau3.texte} <Katex expression={aideNiveau3.latex} />

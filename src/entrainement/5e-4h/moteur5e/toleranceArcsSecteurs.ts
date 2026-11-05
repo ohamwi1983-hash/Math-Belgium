@@ -49,29 +49,29 @@ export function valeursDepuisPaire(qa: QuantiteArcSecteur, va: number, qb: Quant
   return { thetaDeg: (theta * 180) / Math.PI, thetaRad: theta, r, l: r * theta, A: 0.5 * r * r * theta };
 }
 
-/** Quantités que l'élève a à sa disposition à l'écran de `quantite` : les 2 données et les
- * quantités trouvées aux écrans précédents. */
-function disponiblesAvant(exercice: ExerciceModeDeuxVersTrois, quantite: QuantiteArcSecteur): QuantiteArcSecteur[] {
-  const ordre = quantitesManquantes(exercice);
-  return [...exercice.connues, ...ordre.slice(0, ordre.indexOf(quantite))];
-}
-
-/** Tolérance de l'écran de `quantite` (voir l'en-tête du fichier). Une valeur entière (r, θ° multiple
- * de 5) est supposée recopiée telle quelle ; toute autre valeur peut avoir été arrondie au
- * centième. */
-export function toleranceQuantiteArcSecteur(exercice: ExerciceModeDeuxVersTrois, quantite: QuantiteArcSecteur): number {
+/** Plus grand écart possible entre la valeur exacte de `quantite` et une valeur calculée par une
+ * démarche correcte à cet écran : chaque donnée non entière peut avoir été arrondie au centième
+ * (±0,005) ; chaque quantité trouvée à un écran précédent peut s'écarter de sa valeur exacte de
+ * tout ce que cet écran acceptait (son propre écart maximal + l'arrondi au centième de la réponse),
+ * quelle que soit la paire de valeurs dont l'élève part. Une donnée entière (r, θ° multiple de 5)
+ * est supposée recopiée telle quelle. */
+function ecartPropage(exercice: ExerciceModeDeuxVersTrois, quantite: QuantiteArcSecteur): number {
   const v = exercice.valeurs;
-  const dispo = disponiblesAvant(exercice, quantite);
+  const ordre = quantitesManquantes(exercice);
+  const trouvees = ordre.slice(0, ordre.indexOf(quantite));
+  const dispo = [...exercice.connues, ...trouvees];
+  const marges = new Map<QuantiteArcSecteur, number>();
+  for (const c of exercice.connues) marges.set(c, Number.isInteger(Math.round(v[c] * 1e9) / 1e9) ? 0 : DEMI_CENTIEME);
+  for (const t of trouvees) marges.set(t, ecartPropage(exercice, t) + DEMI_CENTIEME);
   const exacte = v[quantite];
   let ecartMax = 0;
   for (let i = 0; i < dispo.length; i++) {
     for (let j = i + 1; j < dispo.length; j++) {
       const qa = dispo[i];
       const qb = dispo[j];
-      const marge = (q: QuantiteArcSecteur) => (Number.isInteger(Math.round(v[q] * 1e9) / 1e9) ? 0 : DEMI_CENTIEME);
       for (const sa of [-1, 1]) {
         for (const sb of [-1, 1]) {
-          const valeurs = valeursDepuisPaire(qa, v[qa] + sa * marge(qa), qb, v[qb] + sb * marge(qb));
+          const valeurs = valeursDepuisPaire(qa, v[qa] + sa * (marges.get(qa) as number), qb, v[qb] + sb * (marges.get(qb) as number));
           if (valeurs === null) continue;
           const ecart = Math.abs(valeurs[quantite] - exacte);
           if (Number.isFinite(ecart)) ecartMax = Math.max(ecartMax, ecart);
@@ -79,7 +79,13 @@ export function toleranceQuantiteArcSecteur(exercice: ExerciceModeDeuxVersTrois,
       }
     }
   }
-  return TOLERANCE_BASE_ARC_SECTEUR + ecartMax;
+  return ecartMax;
+}
+
+/** Tolérance de l'écran de `quantite` : 0,01 (arrondi de la réponse au centième, comme avant) +
+ * l'écart propagé par les valeurs arrondies réutilisées (`ecartPropage`). */
+export function toleranceQuantiteArcSecteur(exercice: ExerciceModeDeuxVersTrois, quantite: QuantiteArcSecteur): number {
+  return TOLERANCE_BASE_ARC_SECTEUR + ecartPropage(exercice, quantite);
 }
 
 export function diagnostiquerQuantiteArcSecteur(texte: string, exercice: ExerciceModeDeuxVersTrois, quantite: QuantiteArcSecteur): StatutVerification {

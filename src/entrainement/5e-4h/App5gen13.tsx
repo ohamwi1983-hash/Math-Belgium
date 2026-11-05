@@ -64,15 +64,16 @@ import {
   diagnostiquerIsolerTInequation,
   diagnostiquerIsolerTResoudre,
   diagnostiquerListerIntervalles,
-  diagnostiquerNombre,
-  diagnostiquerNombreDixieme,
   diagnostiquerNombreUnite,
   diagnostiquerPhiModuloDeuxPi,
   diagnostiquerPoserExtremum,
+  diagnostiquerPulsation,
+  diagnostiquerResolutionB3,
   diagnostiquerResoudreUInequation,
   diagnostiquerSolutionsExtremum,
   diagnostiquerSolutionsResoudre,
   diagnostiquerSysteme,
+  tolerancePhiB2,
 } from "./moteur5e/verificationModelisationSinusoide";
 import type { ReponseArgumentResoudre } from "./moteur5e/verificationModelisationSinusoide";
 import type { StatutVerification } from "./moteur/statutVerification";
@@ -140,10 +141,10 @@ function diagnostiquerChampSimplePhase(
     case "pulsation":
       if (phase1.technique !== "b1" && phase1.technique !== "b2")
         throw new Error("diagnostiquerChampSimplePhase : phase 'pulsation' hors technique b1/b2");
-      return diagnostiquerNombreDixieme(texte, phase1.fonction.omega);
+      return diagnostiquerPulsation(texte, phase1.fonction.omega);
     case "phi":
       if (phase1.technique !== "b2") throw new Error("diagnostiquerChampSimplePhase : phase 'phi' hors technique b2");
-      return diagnostiquerPhiModuloDeuxPi(texte, phase1.fonction.phi as number);
+      return diagnostiquerPhiModuloDeuxPi(texte, phase1.fonction.phi as number, tolerancePhiB2(phase1.t0));
     case "fonctionFinale":
       return diagnostiquerFonctionFinale(phase1, texte);
     case "poserExtremum": {
@@ -156,7 +157,7 @@ function diagnostiquerChampSimplePhase(
       const question = exercice.phase2;
       if (question === null || question.type !== "extremum")
         throw new Error("diagnostiquerChampSimplePhase : phase 'isolerTExtremum' hors phase2 'extremum'");
-      return diagnostiquerIsolerTExtremum(question, texte);
+      return diagnostiquerIsolerTExtremum(question, texte, exercice.phase1.fonction.omega);
     }
     default:
       throw new Error(`diagnostiquerChampSimplePhase : phase '${phase}' inattendue`);
@@ -178,7 +179,7 @@ function diagnostiquerSystemePhase(exercice: ExerciceModelisationSinusoide, repo
 function diagnostiquerResolutionPhase(exercice: ExerciceModelisationSinusoide, reponse: ReponseResolution): StatutVerification {
   const phase1 = exercice.phase1;
   if (phase1.technique !== "b3") throw new Error("diagnostiquerResolutionPhase : technique hors 'b3'");
-  return combinerStatuts(diagnostiquerNombre(reponse.omega, phase1.fonction.omega), diagnostiquerNombre(reponse.phi, phase1.fonction.phi as number));
+  return diagnostiquerResolutionB3(reponse.omega, reponse.phi, phase1.fonction.omega, phase1.fonction.phi as number, phase1.t1, phase1.t2);
 }
 
 function diagnostiquerArgumentResoudrePhase(exercice: ExerciceModelisationSinusoide, reponse: ReponseArgumentResoudre): StatutVerification {
@@ -196,11 +197,12 @@ function diagnostiquerLignesPhase(
     const question = exercice.phase2;
     if (question === null || question.type !== "extremum")
       throw new Error("diagnostiquerLignesPhase : phase 'solutionsExtremum' hors phase2 'extremum'");
-    return diagnostiquerSolutionsExtremum(question, lignes);
+    return diagnostiquerSolutionsExtremum(question, lignes, exercice.phase1.fonction.omega);
   }
   const question = exercice.phase2;
   if (question === null || question.type !== "resoudre") throw new Error(`diagnostiquerLignesPhase : phase '${phase}' hors phase2 'resoudre'`);
-  return phase === "isolerTResoudre" ? diagnostiquerIsolerTResoudre(question, lignes) : diagnostiquerSolutionsResoudre(question, lignes);
+  const omega = exercice.phase1.fonction.omega;
+  return phase === "isolerTResoudre" ? diagnostiquerIsolerTResoudre(question, lignes, omega) : diagnostiquerSolutionsResoudre(question, lignes, omega);
 }
 
 function diagnostiquerIsolerSinInequationPhase(exercice: ExerciceModelisationSinusoide, texte: string): StatutVerification {
@@ -218,13 +220,13 @@ function diagnostiquerBornesPhase(
   if (question === null || question.type !== "inequation") throw new Error(`diagnostiquerBornesPhase : phase '${phase}' hors phase2 'inequation'`);
   return phase === "resoudreUInequation"
     ? diagnostiquerResoudreUInequation(question, reponse.inf, reponse.sup)
-    : diagnostiquerIsolerTInequation(question, reponse.inf, reponse.sup);
+    : diagnostiquerIsolerTInequation(question, reponse.inf, reponse.sup, exercice.phase1.fonction.omega);
 }
 
 function diagnostiquerListerIntervallesPhase(exercice: ExerciceModelisationSinusoide, paires: [string, string][]): StatutVerification {
   const question = exercice.phase2;
   if (question === null || question.type !== "inequation") throw new Error("diagnostiquerListerIntervallesPhase : phase2 hors type 'inequation'");
-  return diagnostiquerListerIntervalles(paires, question.intervalles);
+  return diagnostiquerListerIntervalles(paires, question, exercice.phase1.fonction.omega);
 }
 
 function nouvelleSession(): EtatSessionModelisationSinusoide {
@@ -273,6 +275,9 @@ function formatReponsePaires(paires: [string, string][]): string {
 
 export function App5gen13() {
   const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(nouvelleSession);
+  /** Numéro d'exercice — fait partie de la `key` des écrans : un nouvel exercice qui recommence
+   * par la même phase remonte quand même le composant (saisie remise à zéro). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionModelisationSinusoide`, jamais dans le moteur. Remis à vide à
@@ -317,6 +322,7 @@ export function App5gen13() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroExercice((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -328,6 +334,7 @@ export function App5gen13() {
   function forcerVariante(id: string) {
     const [technique, phase2Choix] = id.split("|") as [TechniquePhase1, Phase2ChoixDev];
     setEnAttente(null);
+    setNumeroExercice((n) => n + 1);
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setEtat(demarrerSessionModelisationSinusoide(REGLAGES_DEMO, () => construireAvecTechniqueEtPhase2(technique, phase2Choix)));
@@ -336,7 +343,7 @@ export function App5gen13() {
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroExercice}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
   const technique = exercice.phase1.technique;
   /** Calculatrice — écrans supplémentaires au-delà de "systeme"/"argumentResoudre"/
@@ -381,6 +388,7 @@ export function App5gen13() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Modéliser une fonction sinusoïdale en contexte</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_TECHNIQUE_PHASE2} onGenerer={forcerVariante} />

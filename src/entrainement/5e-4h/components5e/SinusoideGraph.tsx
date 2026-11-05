@@ -76,8 +76,13 @@ interface Props {
 interface EtatGrilleSinusoide {
   pasX: RationnelPi;
   pasY: RationnelPi;
-  xPaneRange: [number, number];
-  yPaneRange: [number, number];
+  /** Étendue RÉELLEMENT visible à l'écran (pan/zoom inclus) — PAS `usePaneContext().xPaneRange` :
+   * Mafs arrondit ses « panes » vers l'extérieur (puissances de 2, marge de 1/8), si bien qu'un
+   * texte ancré sur `xPaneRange[0]` pouvait tomber jusqu'à ~200 px à gauche du cadre (audit 5e ch. 2,
+   * graduations Y toutes invisibles sur ~15 % des graphes). Lue sur le `viewBox` du `<svg>` de Mafs
+   * (`viewBoxX = xMin/xSpan·largeur`, `viewBoxY = −yMax/ySpan·hauteur`, voir `node_modules/mafs`). */
+  xVisible: [number, number];
+  yVisible: [number, number];
 }
 
 /**
@@ -114,18 +119,36 @@ function GrilleSinusoideAdaptative({
   const [xPaneMin, xPaneMax] = xPaneRange;
   const [yPaneMin, yPaneMax] = yPaneRange;
   const onEtatChangeRef = useRef(onEtatChange);
+  const groupeRef = useRef<SVGGElement>(null);
+  const derniereCleRef = useRef("");
   useLayoutEffect(() => {
     onEtatChangeRef.current = onEtatChange;
   });
+  // À chaque rendu (pan/zoom compris) : étendue visible lue sur le viewBox du <svg> de Mafs ;
+  // `onEtatChange` n'est rappelé que si quelque chose a changé (jamais de boucle de rendu).
   useLayoutEffect(() => {
-    onEtatChangeRef.current({ pasX, pasY, xPaneRange: [xPaneMin, xPaneMax], yPaneRange: [yPaneMin, yPaneMax] });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pasX.numerateur, pasX.denominateur, pasX.degrePi, pasY.numerateur, pasY.denominateur, pasY.degrePi, xPaneMin, xPaneMax, yPaneMin, yPaneMax]);
+    const vb = groupeRef.current?.ownerSVGElement?.viewBox.baseVal;
+    let xVisible: [number, number] = [xPaneMin, xPaneMax];
+    let yVisible: [number, number] = [yPaneMin, yPaneMax];
+    if (vb && vb.width > 0) {
+      const xMinVisible = (vb.x * xSpan) / largeur;
+      const yMaxVisible = (-vb.y * ySpan) / hauteur;
+      xVisible = [xMinVisible, xMinVisible + xSpan];
+      yVisible = [yMaxVisible - ySpan, yMaxVisible];
+    }
+    const cle = JSON.stringify([pasX, pasY, xVisible.map((v) => v.toFixed(6)), yVisible.map((v) => v.toFixed(6))]);
+    if (cle === derniereCleRef.current) return;
+    derniereCleRef.current = cle;
+    onEtatChangeRef.current({ pasX, pasY, xVisible, yVisible });
+  });
   return (
-    <Coordinates.Cartesian
-      xAxis={{ lines: valeurNumerique(pasX), axis: true, labels: undefined }}
-      yAxis={{ lines: valeurNumerique(pasY), axis: true, labels: undefined }}
-    />
+    <>
+      <g ref={groupeRef} />
+      <Coordinates.Cartesian
+        xAxis={{ lines: valeurNumerique(pasX), axis: true, labels: undefined }}
+        yAxis={{ lines: valeurNumerique(pasY), axis: true, labels: undefined }}
+      />
+    </>
   );
 }
 
@@ -278,7 +301,7 @@ function formatUnitePas(pas: RationnelPi): string {
  * l'audit : "zoomer pour lire un point oblige à s'éloigner de l'origine"), l'étiquette de repli se
  * retrouvait hors du cadre ACTUELLEMENT affiché — flottante sur un bord qui n'existe plus à l'écran,
  * pas sur le bord visible. Corrigé en repliant sur le bord du pane COURANT
- * (`etat.xPaneRange[0]`/`etat.yPaneRange[0]`, déjà lu en direct par `GrilleSinusoideAdaptative` et
+ * (`etat.xVisible[0]`/`etat.yVisible[0]`, déjà lu en direct par `GrilleSinusoideAdaptative` et
  * réactif au pan/zoom) quand disponible, `xMin`/`yMin` restant le repli initial (avant le premier
  * rendu de `GrilleSinusoideAdaptative`, `etat` encore `null`) — simple substitution de la source de
  * vérité utilisée par ce repli déjà existant, jamais un second mécanisme parallèle.
@@ -295,8 +318,12 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
   const pointsAide = phase && niveauAide !== undefined ? pointsAideActive(exercice, phase, niveauAide) : [];
   const segmentsAide = phase && niveauAide !== undefined ? segmentsAideActive(exercice, phase, niveauAide) : [];
 
-  const zeroXVisible = etat ? etat.xPaneRange[0] <= 0 && 0 <= etat.xPaneRange[1] : xMin <= 0 && 0 <= xMax;
-  const zeroYVisible = etat ? etat.yPaneRange[0] <= 0 && 0 <= etat.yPaneRange[1] : yMin <= 0 && 0 <= yMax;
+  const zeroXVisible = etat ? etat.xVisible[0] <= 0 && 0 <= etat.xVisible[1] : xMin <= 0 && 0 <= xMax;
+  const zeroYVisible = etat ? etat.yVisible[0] <= 0 && 0 <= etat.yVisible[1] : yMin <= 0 && 0 <= yMax;
+  // Une étiquette X centrée sur un tick trop proche d'un bord visible serait coupée (audit 5e ch. 2 :
+  // « −7π/2 » rogné en bord gauche sur 53/60 graphes à 390 px) — on ne l'affiche pas.
+  const [xVisMin, xVisMax] = etat ? etat.xVisible : [xMin, xMax];
+  const margeEtiquetteX = ((xVisMax - xVisMin) * 24) / largeur;
   // Neuvième point du "Douzième bug" (trouvé en vérifiant CE correctif, pas seulement supposé) :
   // ancrer les étiquettes Y sur l'axe (x=0) les rapproche du texte des étiquettes X (elles aussi
   // ancrées sur y=0) chaque fois qu'une valeur clé Y (b/b±A) est proche de 0 EN PIXELS — pas
@@ -314,8 +341,9 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
         {positionsTicksX(exercice).map((tick, index) => {
           if (index % 3 !== 0) return null;
           const x = valeurNumerique(tick);
+          if (x < xVisMin + margeEtiquetteX || x > xVisMax - margeEtiquetteX) return null;
           const surAxe = zeroXVisible && Math.abs(x) >= seuilCollisionX;
-          const yRepli = etat ? etat.yPaneRange[0] : yMin;
+          const yRepli = etat ? etat.yVisible[0] : yMin;
           return (
             <Text key={index} x={x} y={surAxe ? 0 : yRepli} attach={surAxe ? "s" : "n"} size={14} color={COULEUR_GRADUATION}>
               {formatRationnelPiTexte(tick)}
@@ -326,7 +354,7 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
           .filter((v) => etiquetteYVisible(exercice, v))
           .map((v, index) => {
             const surAxe = zeroYVisible && Math.abs(v) >= seuilCollisionY;
-            const xRepli = etat ? etat.xPaneRange[0] : xMin;
+            const xRepli = etat ? etat.xVisible[0] : xMin;
             return (
               <Text
                 key={index}

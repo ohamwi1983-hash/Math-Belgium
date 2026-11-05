@@ -27,8 +27,11 @@ export function genererQuestionResoudre(fonction: FonctionModelisationSinusoide,
   if (phi === null) throw new Error("genererQuestionResoudre : phi doit être numériquement connu (jamais tiré pour la technique 'b1')");
 
   const solvable = Math.random() < PROBABILITE_SOLVABLE;
-  const m = solvable ? reelAleatoire(-0.9, 0.9) : reelAleatoire(1.05, 1.6) * (Math.random() < 0.5 ? 1 : -1);
-  const k = A * m + b;
+  const mTire = solvable ? reelAleatoire(-0.9, 0.9) : reelAleatoire(1.05, 1.6) * (Math.random() < 0.5 ? 1 : -1);
+  // Valeur visée k arrondie au centième (c'est celle de l'énoncé), m recalculé EXACTEMENT depuis
+  // ce k : l'élève qui calcule m = (k − b)/A à partir de l'énoncé obtient la vraie valeur.
+  const k = Math.round((A * mTire + b) * 100) / 100;
+  const m = (k - b) / A;
 
   if (!solvable) {
     return { type: "resoudre", k, fenetre, aucuneSolution: true, branchesU: [], branchesT: [], solutions: [] };

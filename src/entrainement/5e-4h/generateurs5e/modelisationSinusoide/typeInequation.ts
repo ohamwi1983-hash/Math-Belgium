@@ -49,8 +49,11 @@ export function genererQuestionInequation(fonction: FonctionModelisationSinusoid
 
   const sens: "ge" | "le" = Math.random() < 0.5 ? "ge" : "le";
   const solvable = Math.random() < PROBABILITE_SOLVABLE;
-  const m = solvable ? reelAleatoire(-0.85, 0.85) : reelAleatoire(1.05, 1.6) * (Math.random() < 0.5 ? 1 : -1);
-  const k = A * m + b;
+  const mTire = solvable ? reelAleatoire(-0.85, 0.85) : reelAleatoire(1.05, 1.6) * (Math.random() < 0.5 ? 1 : -1);
+  // Valeur visée k arrondie au centième (c'est celle de l'énoncé), m recalculé EXACTEMENT depuis
+  // ce k : l'élève qui calcule m = (k − b)/A à partir de l'énoncé obtient la vraie valeur.
+  const k = Math.round((A * mTire + b) * 100) / 100;
+  const m = (k - b) / A;
 
   if (!solvable) {
     const casSpecial = casSpecialPourM(m, sens);

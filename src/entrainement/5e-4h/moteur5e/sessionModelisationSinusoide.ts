@@ -22,15 +22,16 @@ import {
   diagnostiquerIsolerTInequation,
   diagnostiquerIsolerTResoudre,
   diagnostiquerListerIntervalles,
-  diagnostiquerNombre,
-  diagnostiquerNombreDixieme,
   diagnostiquerNombreUnite,
   diagnostiquerPhiModuloDeuxPi,
   diagnostiquerPoserExtremum,
+  diagnostiquerPulsation,
+  diagnostiquerResolutionB3,
   diagnostiquerResoudreUInequation,
   diagnostiquerSolutionsExtremum,
   diagnostiquerSolutionsResoudre,
   diagnostiquerSysteme,
+  tolerancePhiB2,
 } from "./verificationModelisationSinusoide";
 import type { ReponseArgumentResoudre } from "./verificationModelisationSinusoide";
 
@@ -127,6 +128,10 @@ function soumettreEcran<T>(etat: EtatSessionModelisationSinusoide, phaseAttendue
 // `commeDirecte`/`commeProduit` de 5gen10).
 // ============================================================================
 
+function omegaDe(etat: EtatSessionModelisationSinusoide): number {
+  return etat.exerciceCourant.phase1.fonction.omega;
+}
+
 function commeB1OuB2(exercice: ExerciceModelisationSinusoide): DonneesB1 | DonneesB2 {
   const d = exercice.phase1;
   if (d.technique !== "b1" && d.technique !== "b2") throw new Error("commeB1OuB2 : technique hors 'b1'/'b2'");
@@ -176,7 +181,7 @@ export function soumettreReponseDecalage(etat: EtatSessionModelisationSinusoide,
 
 export function soumettreReponsePulsation(etat: EtatSessionModelisationSinusoide, texte: string): EtatSessionModelisationSinusoide {
   const cible = commeB1OuB2(etat.exerciceCourant).fonction.omega;
-  return soumettreEcran(etat, "pulsation", texte, (t) => diagnostiquerNombreDixieme(t, cible) === "correct");
+  return soumettreEcran(etat, "pulsation", texte, (t) => diagnostiquerPulsation(t, cible) === "correct");
 }
 
 // ============================================================================
@@ -184,8 +189,9 @@ export function soumettreReponsePulsation(etat: EtatSessionModelisationSinusoide
 // ============================================================================
 
 export function soumettreReponsePhi(etat: EtatSessionModelisationSinusoide, texte: string): EtatSessionModelisationSinusoide {
-  const cible = commeB2(etat.exerciceCourant).fonction.phi as number;
-  return soumettreEcran(etat, "phi", texte, (t) => diagnostiquerPhiModuloDeuxPi(t, cible) === "correct");
+  const donnees = commeB2(etat.exerciceCourant);
+  const cible = donnees.fonction.phi as number;
+  return soumettreEcran(etat, "phi", texte, (t) => diagnostiquerPhiModuloDeuxPi(t, cible, tolerancePhiB2(donnees.t0)) === "correct");
 }
 
 // ============================================================================
@@ -216,7 +222,7 @@ export interface ReponseResolution {
 
 export function soumettreReponseResolution(etat: EtatSessionModelisationSinusoide, reponse: ReponseResolution): EtatSessionModelisationSinusoide {
   const donnees = commeB3(etat.exerciceCourant);
-  return soumettreEcran(etat, "resolution", reponse, (r) => diagnostiquerNombre(r.omega, donnees.fonction.omega) === "correct" && diagnostiquerNombre(r.phi, donnees.fonction.phi as number) === "correct");
+  return soumettreEcran(etat, "resolution", reponse, (r) => diagnostiquerResolutionB3(r.omega, r.phi, donnees.fonction.omega, donnees.fonction.phi as number, donnees.t1, donnees.t2) === "correct");
 }
 
 // ============================================================================
@@ -239,12 +245,12 @@ export function soumettreReponseArgumentResoudre(etat: EtatSessionModelisationSi
 
 export function soumettreReponseIsolerTResoudre(etat: EtatSessionModelisationSinusoide, lignes: string[]): EtatSessionModelisationSinusoide {
   const question = commeResoudre(etat.exerciceCourant);
-  return soumettreEcran(etat, "isolerTResoudre", lignes, (l) => diagnostiquerIsolerTResoudre(question, l) === "correct");
+  return soumettreEcran(etat, "isolerTResoudre", lignes, (l) => diagnostiquerIsolerTResoudre(question, l, omegaDe(etat)) === "correct");
 }
 
 export function soumettreReponseSolutionsResoudre(etat: EtatSessionModelisationSinusoide, textes: string[]): EtatSessionModelisationSinusoide {
   const question = commeResoudre(etat.exerciceCourant);
-  return soumettreEcran(etat, "solutionsResoudre", textes, (t) => diagnostiquerSolutionsResoudre(question, t) === "correct");
+  return soumettreEcran(etat, "solutionsResoudre", textes, (t) => diagnostiquerSolutionsResoudre(question, t, omegaDe(etat)) === "correct");
 }
 
 // ============================================================================
@@ -258,12 +264,12 @@ export function soumettreReponsePoserExtremum(etat: EtatSessionModelisationSinus
 
 export function soumettreReponseIsolerTExtremum(etat: EtatSessionModelisationSinusoide, texte: string): EtatSessionModelisationSinusoide {
   const question = commeExtremum(etat.exerciceCourant);
-  return soumettreEcran(etat, "isolerTExtremum", texte, (t) => diagnostiquerIsolerTExtremum(question, t) === "correct");
+  return soumettreEcran(etat, "isolerTExtremum", texte, (t) => diagnostiquerIsolerTExtremum(question, t, omegaDe(etat)) === "correct");
 }
 
 export function soumettreReponseSolutionsExtremum(etat: EtatSessionModelisationSinusoide, textes: string[]): EtatSessionModelisationSinusoide {
   const question = commeExtremum(etat.exerciceCourant);
-  return soumettreEcran(etat, "solutionsExtremum", textes, (t) => diagnostiquerSolutionsExtremum(question, t) === "correct");
+  return soumettreEcran(etat, "solutionsExtremum", textes, (t) => diagnostiquerSolutionsExtremum(question, t, omegaDe(etat)) === "correct");
 }
 
 // ============================================================================
@@ -287,10 +293,10 @@ export function soumettreReponseResoudreUInequation(etat: EtatSessionModelisatio
 
 export function soumettreReponseIsolerTInequation(etat: EtatSessionModelisationSinusoide, reponse: ReponseBornes): EtatSessionModelisationSinusoide {
   const question = commeInequation(etat.exerciceCourant);
-  return soumettreEcran(etat, "isolerTInequation", reponse, (r) => diagnostiquerIsolerTInequation(question, r.inf, r.sup) === "correct");
+  return soumettreEcran(etat, "isolerTInequation", reponse, (r) => diagnostiquerIsolerTInequation(question, r.inf, r.sup, omegaDe(etat)) === "correct");
 }
 
 export function soumettreReponseListerIntervalles(etat: EtatSessionModelisationSinusoide, paires: [string, string][]): EtatSessionModelisationSinusoide {
   const question = commeInequation(etat.exerciceCourant);
-  return soumettreEcran(etat, "listerIntervallesInequation", paires, (p) => diagnostiquerListerIntervalles(p, question.intervalles) === "correct");
+  return soumettreEcran(etat, "listerIntervallesInequation", paires, (p) => diagnostiquerListerIntervalles(p, question, omegaDe(etat)) === "correct");
 }
