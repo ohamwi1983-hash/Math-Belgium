@@ -158,13 +158,13 @@ function consigneEcranA(ex: ExerciceLogProbA, phase: PhaseA): FragmentConsigne[]
 
 function aideA1(ex: ExerciceLogProbA, phase: PhaseA): AideAvecLatex {
   if (phase === "aEcran1") {
-    if (ex.sousType === "resoudreT") return { texte: `Rappel : ${ex.croissance ? "une hausse" : "une baisse"} de p % correspond à un facteur ${ex.croissance ? "r=1+p/100" : "r=1-p/100"}.`, latex: ex.croissance ? "r=1+\\dfrac{p}{100}" : "r=1-\\dfrac{p}{100}" };
-    if (ex.sousType === "resoudreTaux") return { texte: "Modèle Q0·(1+i)^n=cible — ici, contrairement à un taux fixe, c'est le TAUX i qui est l'inconnue.", latex: "Q_0\\cdot(1+i)^{n}=\\text{cible}" };
-    return { texte: "Modèle Q0·e^(−k·h) = fraction·Q0, avec h la durée écoulée — l'inconnue est le taux de décroissance k.", latex: "Q_0\\cdot e^{-k\\,h}=\\text{fraction}\\cdot Q_0" };
+    if (ex.sousType === "resoudreT") return { texte: `Rappel : ${ex.croissance ? "une hausse" : "une baisse"} de p % correspond au facteur multiplicatif :`, latex: ex.croissance ? "r=1+\\dfrac{p}{100}" : "r=1-\\dfrac{p}{100}" };
+    if (ex.sousType === "resoudreTaux") return { texte: "Modèle des intérêts composés — ici, contrairement à un taux fixe, c'est le TAUX i qui est l'inconnue :", latex: "Q_0\\cdot(1+i)^{n}=\\text{cible}" };
+    return { texte: "Modèle de décroissance continue, avec h la durée écoulée — l'inconnue est le taux de décroissance k :", latex: "Q_0\\cdot e^{-k\\,h}=\\text{fraction}\\cdot Q_0" };
   }
   if (phase === "aEcran2") {
     if (ex.sousType === "resoudreT") return { texte: "Divise les deux membres par Q0 pour isoler le terme en r.", latex: null };
-    if (ex.sousType === "resoudreTaux") return { texte: "Divise les deux membres par Q0 pour isoler (1+i)^n.", latex: null };
+    if (ex.sousType === "resoudreTaux") return { texte: "Divise les deux membres par Q₀ pour isoler la puissance :", latex: "(1+i)^{n}" };
     return { texte: "Divise les deux membres par Q0 pour isoler l'exponentielle.", latex: null };
   }
   if (ex.sousType === "resoudreT") return { texte: "Passe au logarithme (népérien ou décimal) des deux membres, puis isole t.", latex: null };
@@ -249,9 +249,9 @@ function aideB1(ex: ExerciceLogProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" |
     case "bEcran2":
       return { texte: "Un point connu et r suffisent à reconstituer Q0.", latex: null };
     case "bEcran3":
-      return { texte: "Substitue directement t dans le modèle Q(t)=Q0·r^t confirmé.", latex: "Q(t)=Q_0\\cdot r^{t}" };
+      return { texte: "Substitue directement t dans le modèle obtenu :", latex: "Q(t)=Q_0\\cdot r^{t}" };
     case "bEcran4":
-      return { texte: `Pose l'équation Q0·r^t=${ex.k}·Q(${ex.tRef}), isole r^t, PUIS logarithme.`, latex: `Q_0\\cdot r^{t}=${ex.k}\\cdot Q(${ex.tRef})` };
+      return { texte: "Pose l'équation ci-dessous, isole la puissance de r, PUIS prends le logarithme :", latex: `Q_0\\cdot r^{t}=${ex.k}\\cdot Q(${ex.tRef})` };
   }
 }
 function aideB2(ex: ExerciceLogProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4"): AideAvecLatex {
@@ -319,8 +319,8 @@ function consigneEcranC(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cE
   ];
 }
 function aideC1(_ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Rappel — définition N(T)=N0/2 :", latex: "T = \\dfrac{\\ln 2}{\\lambda} \\quad \\Longleftrightarrow \\quad \\lambda = \\dfrac{\\ln 2}{T}" };
-  if (phase === "cEcran2") return { texte: "N(t)=N0·(1/2)^(t/T) est équivalente à N0·e^(−λt), mais plus pratique ici : elle évite de calculer λ séparément.", latex: "N(t)=N_0\\cdot\\left(\\dfrac{1}{2}\\right)^{t/T}=N_0\\cdot e^{-\\lambda t}" };
+  if (phase === "cEcran1") return { texte: "Rappel — au bout d'une demi-vie T, il reste la moitié de la quantité initiale :", latex: "T = \\dfrac{\\ln 2}{\\lambda} \\quad \\Longleftrightarrow \\quad \\lambda = \\dfrac{\\ln 2}{T}" };
+  if (phase === "cEcran2") return { texte: "Les deux écritures du modèle sont équivalentes ; la première est plus pratique ici : elle évite de calculer λ :", latex: "N(t)=N_0\\cdot\\left(\\dfrac{1}{2}\\right)^{t/T}=N_0\\cdot e^{-\\lambda t}" };
   return { texte: "Tous les âges publiés sont proportionnels à la demi-vie utilisée pour les calculer.", latex: null };
 }
 function aideC2(ex: ExerciceLogProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -384,9 +384,9 @@ function consigneEcranE(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eE
   ];
 }
 function aideE1(_ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Pose L1=a·log10(X1)+b et L2=a·log10(X2)+b, puis résous ce système de 2 équations à 2 inconnues.", latex: "L_1=a\\cdot\\log_{10}(X_1)+b\\qquad L_2=a\\cdot\\log_{10}(X_2)+b" };
-  if (phase === "eEcran2") return { texte: "Substitue directement la valeur donnée dans le modèle L=a·log10(X)+b confirmé.", latex: "L=a\\cdot\\log_{10}(X)+b" };
-  if (phase === "eEcran3") return { texte: "Attention : un facteur MULTIPLICATIF sur X correspond à un écart ADDITIF sur L (ΔL=a·log10(k)) — ne confonds pas les deux opérations.", latex: "\\Delta L=a\\cdot\\log_{10}(k)" };
+  if (phase === "eEcran1") return { texte: "Écris le modèle pour chacun des deux points, puis résous ce système de 2 équations à 2 inconnues :", latex: "L_1=a\\cdot\\log_{10}(X_1)+b\\qquad L_2=a\\cdot\\log_{10}(X_2)+b" };
+  if (phase === "eEcran2") return { texte: "Substitue directement la valeur donnée dans le modèle :", latex: "L=a\\cdot\\log_{10}(X)+b" };
+  if (phase === "eEcran3") return { texte: "Attention : un facteur MULTIPLICATIF sur X correspond à un écart ADDITIF sur L — ne confonds pas les deux opérations :", latex: "\\Delta L=a\\cdot\\log_{10}(k)" };
   return { texte: "Ce sont les intensités X qui s'additionnent, pas les niveaux L : reconvertis chaque niveau en intensité, additionne, puis repasse à l'échelle logarithmique.", latex: "X = 10^{(L-b)/a}" };
 }
 function aideE2(ex: ExerciceLogProbE, phase: "eEcran1" | "eEcran2" | "eEcran3" | "eEcran4"): AideAvecLatex {
@@ -443,12 +443,12 @@ function consigneEcranF(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "f
 function aideF1(_ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
   if (phase === "fEcran1") return { texte: "Substitue t=0 dans le modèle et résous pour a.", latex: null };
   if (phase === "fEcran2") return { texte: "La croissance maximale d'une courbe logistique se situe exactement à la moitié de la capacité k.", latex: null };
-  return { texte: "Quand t→+∞, le terme e^(−rt) tend vers 0.", latex: "t\\to+\\infty \\Rightarrow e^{-rt}\\to 0" };
+  return { texte: "Quand t tend vers +∞, le terme exponentiel tend vers 0 :", latex: "t\\to+\\infty \\Rightarrow e^{-rt}\\to 0" };
 }
 function aideF2(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
   if (phase === "fEcran1") return { texte: "Équation posée, non résolue :", latex: `${formatDecimal(ex.y0, 1)} = \\dfrac{${ex.k}}{1+a}` };
   if (phase === "fEcran2") return { texte: "Équation posée, non résolue :", latex: `\\dfrac{${ex.k}}{2} = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
-  return { texte: "Remplace e^(−rt) par sa limite dans l'expression de y(t) :", latex: `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
+  return { texte: "Remplace le terme exponentiel par sa limite dans l'expression de y(t) :", latex: `y(t) = \\dfrac{${ex.k}}{1+${formatDecimal(ex.a, 3)}\\cdot e^{-${formatDecimal(ex.r, 4)}t}}` };
 }
 function reponseF(ex: ExerciceLogProbF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string[] {
   if (phase === "fEcran1") return [formatDecimal(ex.a, 3)];

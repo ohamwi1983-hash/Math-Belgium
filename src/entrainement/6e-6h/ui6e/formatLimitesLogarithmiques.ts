@@ -239,7 +239,7 @@ const TEXTE_REFERENCE = "Limite de référence (nouvelle dans ce chapitre, analo
 
 function aideB1(phase: "bReformuler" | "bConclure"): AideAvecLatex {
   if (phase === "bConclure") return { texte: TEXTE_REFERENCE, latex: FORMULE_REFERENCE_LATEX };
-  return { texte: "Un logarithme dont la BASE et l'ARGUMENT tendent tous deux vers 1 en même temps est une forme 0/0 déguisée — la substitution u=x/x0−1 la révèle.", latex: "u=\\dfrac{x}{x_0}-1" };
+  return { texte: "Un logarithme dont la BASE et l'ARGUMENT tendent tous deux vers 1 en même temps est une forme 0/0 déguisée — la substitution ci-dessous la révèle :", latex: "u=\\dfrac{x}{x_0}-1" };
 }
 
 function aideB2(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): AideAvecLatex {
@@ -312,7 +312,7 @@ export function configDiagnosticPartiesC(exercice: ExerciceLimiteLogC): { partie
 function aideC2(phase: "cDiagnostic" | "cConclure", exercice: ExerciceLimiteLogC): AideAvecLatex {
   if (phase === "cDiagnostic") {
     if (exercice.sousType === "c1") return { texte: "Remplace x par 1 dans le numérateur ln(x+c). Pour le dénominateur ln(x), rappelle-toi que ln(1)=0 et regarde de quel côté de 1 on arrive.", latex: "\\log_x(x+c) = \\dfrac{\\ln(x+c)}{\\ln(x)}" };
-    if (exercice.sousType === "c2") return { texte: "L'exposant c/x tend vers 0 quand x devient infini : que vaut alors base^(c/x) ?", latex: `${exercice.base}^{\\frac{${exercice.coefC}}{x}} = ${exercice.base}^{\\,\\square}\\ \\text{avec } \\square \\to 0` };
+    if (exercice.sousType === "c2") return { texte: "L'exposant tend vers 0 quand x devient infini : que vaut alors la puissance ?", latex: `${exercice.base}^{\\frac{${exercice.coefC}}{x}} = ${exercice.base}^{\\,\\square}\\ \\text{avec } \\square \\to 0` };
     return { texte: "Remplace x par 0 dans le numérateur (base⁰ = 1 et sin(0) = 0). Le dénominateur ln(1+cx²) tend vers ln(1).", latex: null };
   }
   return { texte: "Règle des signes : une constante non nulle divisée par un nombre qui tend vers 0 tend vers l'infini, avec le signe du quotient ; l'infini multiplié par une constante positive reste un infini de même signe.", latex: null };

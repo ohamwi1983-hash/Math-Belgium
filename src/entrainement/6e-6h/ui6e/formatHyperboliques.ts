@@ -282,7 +282,7 @@ function consigneC(phase: "cDerivee" | "cDeriveeSeconde"): FragmentConsigne[] {
 }
 
 function aideCNiveau1(phase: "cDerivee" | "cDeriveeSeconde"): AideAvecLatex {
-  if (phase === "cDerivee") return { texte: "Rappel : sh'=ch et ch'=sh (pas de changement de signe, contrairement à sin/cos), et la dérivée de sh(kx) fait apparaître le facteur k (dérivée de l'argument).", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
+  if (phase === "cDerivee") return { texte: "Rappel : pas de changement de signe (contrairement à sin et cos), et la dérivée de sh(kx) fait apparaître le facteur k (dérivée de l'argument) :", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
   return { texte: "Applique EXACTEMENT la même règle (sh'=ch, ch'=sh) à f'(x), en n'oubliant pas le facteur k de l'argument.", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
 }
 

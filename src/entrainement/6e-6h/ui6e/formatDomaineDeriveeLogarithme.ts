@@ -263,7 +263,7 @@ function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentCon
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
   if (phase === "cDomaine") return { texte: "Un produit de fonctions hérite des conditions de CHACUN de ses facteurs.", latex: null };
-  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment.", latex: "f(x)=u(x)\\cdot v(x)" };
+  if (phase === "cFacteurs") return { texte: "Identifie les deux facteurs u(x) et v(x), puis dérive chacun indépendamment :", latex: "f(x)=u(x)\\cdot v(x)" };
   return { texte: "Rappel de la formule du produit (non substituée) :", latex: "(uv)' = u'v + uv'" };
 }
 
@@ -331,7 +331,7 @@ function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage", exercice: Exerc
     if (exercice.sousType === "expoSurLn") return { texte: "Le dénominateur d'une fraction doit être non nul — vérifie si l'expression du dénominateur peut s'annuler, même si elle 'a l'air' toujours définie.", latex: null };
     return { texte: "N'oublie pas la condition du logarithme (argument strictement positif), ni celle du dénominateur.", latex: null };
   }
-  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
+  if (phase === "dND") return { texte: "Identifie le numérateur N(x) et le dénominateur D(x), puis dérive chacun indépendamment :", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
   return { texte: "Rappel de la formule du quotient (non substituée) :", latex: "\\left(\\frac{N}{D}\\right)' = \\frac{N'D - ND'}{D^2}" };
 }
 
@@ -413,15 +413,15 @@ function texteProprieteE(exercice: ExerciceDomaineDeriveeLogE): string {
   switch (exercice.sousType) {
     case "puissanceAbs":
     case "valeurAbsolueQuadratique":
-      return "Propriété de la puissance : ln(u²) = 2ln|u| — ATTENTION, la valeur absolue est indispensable (u peut être négatif).";
+      return "Propriété de la puissance — ATTENTION, la valeur absolue est indispensable (u peut être négatif) :";
     case "quotientDifference":
-      return "Propriété du quotient : ln(a/b) = ln(a)−ln(b) — valable seulement si a ET b sont positifs SÉPARÉMENT (pas juste leur quotient).";
+      return "Propriété du quotient — valable seulement si a ET b sont positifs SÉPARÉMENT (pas juste leur quotient) :";
     case "puissanceSimple":
-      return "Propriété de la puissance : ln(√x) = ln(x^(1/2)).";
+      return "Propriété de la puissance, après avoir écrit la racine carrée comme une puissance d'exposant un demi :";
     case "combinaison":
-      return "Propriété de la puissance : ln(x³) = 3ln(x) — n'affecte QUE ce terme, (ln x)³ reste inchangé (ce n'est pas ln d'une puissance).";
+      return "Propriété de la puissance — elle n'affecte QUE le terme ln(x³) ; (ln x)³ reste inchangé (ce n'est pas le logarithme d'une puissance) :";
     case "dejaSimplifie":
-      return "Propriété de la puissance : ln(x^x) = x·ln(x), même si x est lui-même l'exposant.";
+      return "Propriété de la puissance, même quand l'exposant est x lui-même :";
   }
 }
 
@@ -534,13 +534,13 @@ function aideFNiveau2(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineD
   // Audit 6e ch. 3, point 27 : cette aide annonçait « Dérivées de chaque niveau » sans rien afficher.
   switch (exercice.sousType) {
     case "lnSurSin":
-      return { texte: "Quotient N/D avec N = ln(D) — dérivées séparées (assemblage laissé à toi) :", latex: `D(x) = ${exercice.a}+\\sin(e^x),\\quad D'(x) = e^x\\cos(e^x),\\quad N'(x) = \\dfrac{D'(x)}{D(x)}` };
+      return { texte: "Quotient dont le numérateur est le logarithme du dénominateur — dérivées séparées (assemblage laissé à toi) :", latex: `D(x) = ${exercice.a}+\\sin(e^x),\\quad D'(x) = e^x\\cos(e^x),\\quad N'(x) = \\dfrac{D'(x)}{D(x)}` };
     case "arcsinLog":
       return { texte: `Simplifie d'abord l'argument (${exercice.k} est une puissance de ${exercice.base}) :`, latex: `\\log_{${exercice.base}}(${exercice.k}^x) = x\\cdot\\log_{${exercice.base}}(${exercice.k}) = \\,?\\cdot x` };
     case "arcsinLogX":
       return { texte: "Fonction intérieure et sa dérivée (assemblage laissé à toi) :", latex: `u(x) = \\log_{${exercice.base}}(x),\\qquad u'(x) = \\dfrac{1}{x\\ln(${exercice.base})}` };
     case "arctanLog":
-      return { texte: "Numérateur et dénominateur, chacun dérivé séparément (assemblage via (N'D−ND')/D² laissé à toi) :", latex: `N' = \\dfrac{${exercice.k}}{1+${exercice.k === 1 ? "x^2" : `${exercice.k * exercice.k}x^2`}},\\qquad D = 1-\\log_{${exercice.base}}(x),\\qquad D' = -\\dfrac{1}{x\\ln(${exercice.base})}` };
+      return { texte: "Numérateur et dénominateur, chacun dérivé séparément (assemblage par la règle du quotient laissé à toi) :", latex: `N' = \\dfrac{${exercice.k}}{1+${exercice.k === 1 ? "x^2" : `${exercice.k * exercice.k}x^2`}},\\qquad D = 1-\\log_{${exercice.base}}(x),\\qquad D' = -\\dfrac{1}{x\\ln(${exercice.base})}` };
   }
 }
 
@@ -666,7 +666,7 @@ function consigneG(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice: E
 
 function aideGNiveau1(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): AideAvecLatex {
   if (phase === "gIdentifier") return { texte: "Cherche à ramener f(x) à une SEULE base variable élevée à un SEUL exposant variable (utilise les propriétés des puissances si besoin).", latex: null };
-  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u \\;\\Rightarrow\\; \\dfrac{f'}{f} = v'\\ln u + v\\dfrac{u'}{u}" };
+  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : prends le logarithme des deux membres, puis dérive-les — le membre de gauche donne f'/f par dérivation implicite :", latex: "\\ln f = v\\cdot\\ln u \\;\\Rightarrow\\; \\dfrac{f'}{f} = v'\\ln u + v\\dfrac{u'}{u}" };
   return { texte: "Il faut multiplier f'/f par f pour isoler f'.", latex: "f' = f\\cdot\\dfrac{f'}{f}" };
 }
 
@@ -678,7 +678,7 @@ function aideGNiveau2(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice
     if (exercice.variante === "xRacineXPuissanceX") return { texte: "Écris chaque facteur comme une puissance de x, puis additionne les exposants :", latex: "x = x^1,\\qquad \\sqrt{x^x} = \\left(x^{x}\\right)^{1/2} = x^{?}" };
     return { texte: "La base (à ne pas confondre avec l'exposant) :", latex: `u(x) = ${u}` };
   }
-  if (phase === "gFPrimeSurF") return { texte: "u, v et leurs dérivées — il reste à les placer dans v'·ln u + v·u'/u :", latex: `u=${u},\\ u'=${uPrime},\\qquad v=${v},\\ v'=${vPrime}` };
+  if (phase === "gFPrimeSurF") return { texte: "u, v et leurs dérivées — il reste à les placer dans l'expression de f'/f :", latex: `u=${u},\\ u'=${uPrime},\\qquad v=${v},\\ v'=${vPrime}` };
   return { texte: "f et f'/f côte à côte, multiplication non faite :", latex: `f = ${fSimplifieeLatexG(exercice)},\\qquad \\dfrac{f'}{f} = ${fPrimeSurFLatexG(exercice)}` };
 }
 

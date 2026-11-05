@@ -33,11 +33,8 @@ function latex(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
-const RAPPEL_LN = "Rappel : un logarithme de base numérique s'écrit ln(argument)/ln(base) — jamais log(...) littéral.";
-
-/** Même rappel que `RAPPEL_LN`, en fragments (texte/LaTeX mêlés) pour `consigneEcranC` cEcran3 — la
- * version string reste utilisée telle quelle dans les textes d'aide (`AideAvecLatex.texte`, jamais
- * convertis ici, convention distincte). */
+/** Rappel de SAISIE (l'évaluateur ne lit pas `log_base(…)`), en fragments pour `consigneEcranC`
+ * cEcran3 — retiré de la version papier (`export/consignePapier.ts`). */
 const RAPPEL_LN_FRAGMENTS: FragmentConsigne[] = [texte("Rappel : un logarithme de base numérique s'écrit "), latex("\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}"), texte(" — jamais "), latex("\\log(\\ldots)"), texte(" littéral.")];
 
 export function formatBaseLatex(base: number): string {
@@ -167,7 +164,7 @@ function consigneEcranA(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): Frag
 }
 
 function aideA1(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: `Rappel : vérifie d'abord si le second membre peut s'écrire comme une puissance entière ou simple de la base avant de recourir au logarithme. ${RAPPEL_LN}`, latex: "\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}" };
+  if (phase === "aEcran1") return { texte: "Rappel : vérifie d'abord si le second membre peut s'écrire comme une puissance entière ou simple de la base avant de recourir au logarithme. Un logarithme de base numérique s'écrit à l'aide de ln :", latex: "\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}" };
   return { texte: "Rappel : substitue l'exposant cible CORRECT de l'étape précédente dans mx+n=exposant, puis isole x.", latex: "mx+n=\\text{exposant}" };
 }
 
@@ -199,7 +196,7 @@ function consigneEcranB(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): Frag
 }
 
 function aideB1(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Rappel : ln(a^u)=u·ln(a), à appliquer aux DEUX membres.", latex: "\\ln(a^u)=u\\cdot\\ln(a)" };
+  if (phase === "bEcran1") return { texte: "Rappel : propriété de la puissance, à appliquer aux DEUX membres :", latex: "\\ln(a^u)=u\\cdot\\ln(a)" };
   return { texte: "Rappel : regroupe tous les termes en x d'un côté de l'égalité, les constantes de l'autre.", latex: null };
 }
 
@@ -275,8 +272,8 @@ function consigneEcranC(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEc
 }
 
 function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Rappel : base^{2x}=(base^x)²=t², et base^x=t.", latex: "\\text{base}^{2x}=(\\text{base}^x)^2=t^2,\\quad \\text{base}^x=t" };
-  if (phase === "cEcran2") return { texte: "Rappel : une fois les racines du second degré trouvées, élimine toute valeur ≤0 (impossible pour base^x).", latex: "\\text{base}^x>0" };
+  if (phase === "cEcran1") return { texte: "Rappel : écris les puissances de la base à l'aide de t :", latex: "\\text{base}^{2x}=(\\text{base}^x)^2=t^2,\\quad \\text{base}^x=t" };
+  if (phase === "cEcran2") return { texte: "Rappel : une fois les racines du second degré trouvées, élimine toute valeur négative ou nulle — une puissance de la base est toujours strictement positive :", latex: "\\text{base}^x>0" };
   return { texte: "Rappel : vérifie pour chaque t s'il s'agit d'une puissance entière reconnaissable de la base avant de recourir au logarithme.", latex: null };
 }
 
@@ -393,7 +390,7 @@ function consigneEcranE(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEc
 
 function aideE1(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
   if (phase === "eEcran1") return { texte: "Rappel : chaque argument de chaque logarithme doit être strictement positif, séparément.", latex: null };
-  if (phase === "eEcran2") return { texte: "Rappel : log_base(A)+log_base(B) = log_base(A·B), puis égale les arguments (même base des deux côtés).", latex: "\\log_{\\text{base}}(A)+\\log_{\\text{base}}(B)=\\log_{\\text{base}}(A\\cdot B)" };
+  if (phase === "eEcran2") return { texte: "Rappel : une somme de logarithmes de même base est le logarithme du produit ; égale ensuite les arguments (même base des deux côtés) :", latex: "\\log_{\\text{base}}(A)+\\log_{\\text{base}}(B)=\\log_{\\text{base}}(A\\cdot B)" };
   return { texte: "Rappel : vérifie chaque racine trouvée contre la CE avant de conclure — n'en élimine ni n'en garde une par erreur.", latex: null };
 }
 

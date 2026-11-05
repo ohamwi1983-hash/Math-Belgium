@@ -189,10 +189,10 @@ function aideC1(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC
   if (phase === "cCE") return { texte: "Chacun des deux arguments doit être strictement positif — pose les deux conditions séparément.", latex: null };
   if (phase === "cCombiner") {
     return exercice.sousType === "produit"
-      ? { texte: "Rappel : log_base(f)+log_base(g) = log_base(f·g).", latex: "\\log_{\\text{base}}(f)+\\log_{\\text{base}}(g)=\\log_{\\text{base}}(f\\cdot g)" }
-      : { texte: "Rappel : log_base(f)-log_base(g) = log_base(f/g).", latex: "\\log_{\\text{base}}(f)-\\log_{\\text{base}}(g)=\\log_{\\text{base}}\\left(\\dfrac{f}{g}\\right)" };
+      ? { texte: "Rappel : une somme de logarithmes de même base est le logarithme du produit :", latex: "\\log_{\\text{base}}(f)+\\log_{\\text{base}}(g)=\\log_{\\text{base}}(f\\cdot g)" }
+      : { texte: "Rappel : une différence de logarithmes de même base est le logarithme du quotient :", latex: "\\log_{\\text{base}}(f)-\\log_{\\text{base}}(g)=\\log_{\\text{base}}\\left(\\dfrac{f}{g}\\right)" };
   }
-  return { texte: "log_base(f·g ou f/g) [symbole] log_base(k) équivaut à (f·g ou f/g) [même ou inversé selon la base] k — uniquement à l'intérieur de la CE.", latex: null };
+  return { texte: "Comparer deux logarithmes de même base revient à comparer leurs arguments : même sens si la base est supérieure à 1, sens inversé si elle est comprise entre 0 et 1 — uniquement à l'intérieur de la CE.", latex: null };
 }
 
 function aideC2(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): AideAvecLatex {
@@ -247,7 +247,7 @@ function aideD1(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): Aide
     case "dResoudreY":
       return { texte: "Calcule le discriminant (ou utilise les racines déjà visibles) pour construire le tableau de signes du trinôme en y.", latex: null };
     case "dConvertirX":
-      return { texte: "Convertir un intervalle en y vers x via x=base^y conserve le sens si base>1, l'inverse si 0<base<1 — y compris pour l'ORDRE des bornes.", latex: "x=\\text{base}^{y}\\qquad \\text{base}>1\\ (\\text{sens conservé})\\qquad 0<\\text{base}<1\\ (\\text{sens inversé})" };
+      return { texte: "Pour revenir de y à x, le sens dépend de la base — y compris pour l'ORDRE des bornes :", latex: "x=\\text{base}^{y}\\qquad \\text{base}>1\\ (\\text{sens conservé})\\qquad 0<\\text{base}<1\\ (\\text{sens inversé})" };
   }
 }
 

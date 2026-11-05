@@ -306,17 +306,17 @@ export function aideDeriveeNiveau1(exercice: ExerciceGraphiqueDeriveeLogarithme)
   switch (exercice.famille) {
     case "A":
       return {
-        texte: `Règle du quotient, appliquée à ln(x)/x — divise ensuite le tout par ln(base) (sauf si base=e). ${rappelC}`,
+        texte: `Règle du quotient, avec u = ln(x) et v = x — divise ensuite le tout par ln(base) (sauf si la base est e). ${rappelC}`,
         latex: "\\left(\\dfrac{u}{v}\\right)' = \\dfrac{u'v-uv'}{v^2}, \\quad u=\\ln(x),\\ v=x",
       };
     case "B":
       return {
-        texte: `Règle du produit, avec la dérivée de e^(ax) et celle de ln(x). ${rappelC}`,
+        texte: `Règle du produit, avec la dérivée de l'exponentielle et celle de ln(x). ${rappelC}`,
         latex: "(uv)' = u'v+uv', \\quad u=e^{ax},\\ u'=a\\,e^{ax},\\ v=\\ln(x),\\ v'=\\dfrac{1}{x}",
       };
     case "C":
       return {
-        texte: `Règle du produit pour x·ln(x) ; le terme p·x se dérive en p. ${rappelC}`,
+        texte: `Règle du produit pour le terme x ln(x) ; le terme px se dérive en p. ${rappelC}`,
         latex: "(uv)' = u'v+uv', \\quad u=x,\\ v=\\ln(x)",
       };
   }
@@ -326,20 +326,20 @@ export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithme)
   switch (exercice.famille) {
     case "A":
       return {
-        texte: "Numérateur de la règle du quotient pour ln(x)/x, AVANT simplification (u=ln(x), v=x) :",
+        texte: "Numérateur de la règle du quotient, AVANT simplification (u = ln(x), v = x) :",
         latex: "u'v - uv' = \\dfrac{1}{x}\\cdot x - \\ln(x)\\cdot 1",
       };
     case "B": {
       const ea = formatExpAx(exercice.a);
       const da = exercice.a === 1 ? "" : `${exercice.a}`;
       return {
-        texte: "Les deux termes de la règle du produit pour e^(ax)·ln(x), séparément — non encore combinés :",
+        texte: "Les deux termes de la règle du produit (exponentielle fois logarithme), séparément — non encore combinés :",
         latex: `u'v = ${da}${ea}\\ln(x), \\quad uv' = ${ea}\\cdot\\dfrac{1}{x}`,
       };
     }
     case "C":
       return {
-        texte: "Les deux termes de la règle du produit pour x·ln(x), affichés — simplification non faite :",
+        texte: "Les deux termes de la règle du produit pour x ln(x) — simplification non faite :",
         latex: "u'v = 1\\cdot\\ln(x), \\quad uv' = x\\cdot\\dfrac{1}{x}",
       };
   }

@@ -310,7 +310,7 @@ export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionLogarithme): A
     case "D":
       return { texte: "Tiens compte du signe du facteur devant le logarithme : il inverse les limites s'il est négatif.", latex: null };
     case "E":
-      return { texte: "En 0⁺, croissances comparées : le numérateur x·ln(x) + c tend vers c > 0.", latex: "\\lim_{x\\to 0^+} x\\ln(x) = 0" };
+      return { texte: "En 0⁺, croissances comparées : le terme x ln(x) tend vers 0, donc le numérateur tend vers c > 0 :", latex: "\\lim_{x\\to 0^+} x\\ln(x) = 0" };
   }
 }
 
@@ -329,7 +329,7 @@ export function aideAsymptotesNiveau2(exercice: ExerciceEtudeFonctionLogarithme)
     case "C":
       return { texte: "Les candidates sont les valeurs exclues du domaine, là où f tend vers ±∞.", latex: null };
     default:
-      return { texte: "Pour une limite infinie en ±∞, cherche une éventuelle asymptote oblique : f(x)/x a-t-il une limite finie non nulle ?", latex: "\\lim_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}" };
+      return { texte: "Pour une limite infinie en ±∞, cherche une éventuelle asymptote oblique : le quotient ci-dessous a-t-il une limite finie non nulle ?", latex: "\\lim_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}" };
   }
 }
 
@@ -340,7 +340,7 @@ export function aideCroissanceNiveau1(exercice: ExerciceEtudeFonctionLogarithme)
     case "B":
       return { texte: "Dérivation logarithmique : pose g(x) = f(x) − c, prends ln des deux membres et dérive.", latex: `\\ln\\left(g(x)\\right) = ${exercice.a === 1 ? "" : exercice.a}x\\ln\\left(${baseBLatex(exercice)}\\right)` };
     case "C":
-      return { texte: "Dérive ln|u| comme ln(u) : (ln|u|)' = u'/u, puis étudie séparément le signe du numérateur et du trinôme sur chaque intervalle.", latex: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" };
+      return { texte: "Dérive ln|u| comme ln(u), puis étudie séparément le signe du numérateur et du trinôme sur chaque intervalle :", latex: "\\left(\\ln|u|\\right)'=\\dfrac{u'}{u}" };
     case "D":
       return { texte: "Dérive le logarithme d'une fonction :", latex: "\\left(\\ln(u)\\right)'=\\dfrac{u'}{u}" };
     case "E":
