@@ -575,10 +575,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
   // label) du bloc d'exemple du cours (`src/content/chapters/4e/equations-inequations-second-degre.ts`).
-  // Exception : les deux blocs « Démonstration » de § resoudre (Viète, forme factorisée) portent le
-  // MÊME label, aucune clé ne les distingue — ils restent appariés par POSITION (entrées texte aux
-  // indices 6 et 7 de la liste, les blocs 6 et 7 de la section). Renommer ces labels dans le cours
-  // permettrait de les passer aussi en clé.
+  // Les deux démonstrations de § resoudre ont des labels distincts dans le cours (« … relations de
+  // Viète », « … forme factorisée ») : elles aussi sont appariées par clé.
   'equations-inequations-second-degre': {
   resoudre: [
     { cle: 'mise en évidence — c = 0', enonce: "Résous l'équation $2x^2-6x=0$ par une méthode rapide, sans calculer le discriminant." },
@@ -587,8 +585,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'étape par étape', enonce: "Démontre, en complétant le carré, que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$." },
     { cle: 'cas général', enonce: "Résous l'équation $2x^2-10x+8=0$ à l'aide du discriminant." },
     { cle: 'mise en évidence généralisée', enonce: "Résous l'équation $(x+2)^2=3(x+2)$ sans développer, en mettant en évidence un facteur commun." },
-    "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$.",
-    "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$.",
+    { cle: 'relations de Viète', enonce: "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$." },
+    { cle: 'forme factorisée', enonce: "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$." },
     { cle: 'application directe', enonce: "Écris une équation du second degré de la forme $x^2-Sx+P=0$ dont les solutions sont $x_1=2$ et $x_2=5$, à l'aide de la somme $S$ et du produit $P$ des racines." },
   ],
   'signe-trinome': [

@@ -107,7 +107,7 @@ export const statistiqueDescriptive: ChapterContent = {
             { tag: '1 — valeurs distinctes, ordre croissant', text: '3, 5, 7, 12' },
             { tag: '2 — compter chaque valeur', text: '3 apparaît 6 fois, 5 apparaît 7 fois, 7 apparaît 4 fois, 12 apparaît 3 fois (total 6+7+4+3 = 20 ✓)' },
           ],
-          result: { tag: 'tableau complet', text: 'voir le tableau ci-dessous' },
+          result: { tag: 'tableau complet', text: 'fréquences 30 %, 35 %, 20 %, 15 % ; effectifs cumulés 6, 13, 17, 20 ; fréquences cumulées 30 %, 65 %, 85 %, 100 % (tableau ci-dessous)' },
         },
         {
           kind: 'featureTable',
@@ -203,7 +203,7 @@ export const statistiqueDescriptive: ChapterContent = {
             },
             { tag: 'compter', text: '6 + 7 + 4 + 3 = 20 données ✓' },
           ],
-          result: { tag: 'tableau + histogramme', text: 'voir ci-dessous' },
+          result: { tag: 'tableau + histogramme', text: 'effectifs 6, 7, 4, 3 et fréquences 30 %, 35 %, 20 %, 15 % pour [0 ; 2[, [2 ; 4[, [4 ; 6[, [6 ; 8] ; histogramme : 4 barres de largeur 2 et de hauteurs 6, 7, 4, 3 (tableau et histogramme ci-dessous)' },
         },
         {
           kind: 'featureTable',

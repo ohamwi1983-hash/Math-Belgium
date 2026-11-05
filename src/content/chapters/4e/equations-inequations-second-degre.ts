@@ -317,7 +317,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: 'Démonstration — relations de Viète',
           blocks: [
             {
               kind: 'para',
@@ -391,7 +391,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: 'Démonstration — forme factorisée',
           blocks: [
             {
               kind: 'para',

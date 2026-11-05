@@ -208,5 +208,7 @@ export function formatFractionSimplifiee(exercice: ExerciceSimplification): stri
 
   const numerateur = formatPolynomeSimplifie(exercice.numerateur, exercice.racineCommune, coeffNumBrut / diviseur);
   const denominateur = formatPolynomeSimplifie(exercice.denominateur, exercice.racineCommune, coeffDenomBrut / diviseur);
+  // Dénominateur entièrement simplifié : « 4x », pas « 4x/1 ».
+  if (denominateur === "1") return numerateur;
   return `\\frac{${numerateur}}{${denominateur}}`;
 }
