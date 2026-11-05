@@ -50,7 +50,12 @@ import {
   construireNiveau1AvecFamille,
   construireNiveau2AvecFamille,
   creerGenerateurCaracteristiquesAlgebriques,
+  genererExerciceCaracteristiquesAlgebriques,
 } from "./generateurs/caracteristiquesAlgebriques";
+import { FAMILLES } from "./generateurs/fonctionsReference";
+import type { GenerateurExerciceCaracteristiquesAlgebriques } from "./core/caracteristiquesAlgebriques.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import type { CodeExerciceDecode } from "../export/codeExercice";
 import type { FamilleReference } from "./core/fonctionsReference.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
@@ -112,6 +117,35 @@ function demarrer(
       : Object.values(reglagesFamilles.quantites).reduce((total: number, quantite: number) => total + quantite, 0);
   const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices };
   return demarrerSessionCaracteristiquesAlgebriques(reglagesSession, creerGenerateurCaracteristiquesAlgebriques(reglagesFamilles, niveau));
+}
+
+/** Réglages d'une session ouverte par le code d'un exercice imprimé (`?code=XXXXXX`) : tirage
+ * aléatoire, niveau 1 — le niveau des feuilles d'exercices et évaluations (voir l'adaptateur
+ * `generateurs/caracteristiquesAlgebriques/exportEvaluation.ts`). */
+const REGLAGES_FAMILLES_CODE: ReglagesFamillesFonctionReference = {
+  mode: "aleatoire",
+  quantites: Object.fromEntries(FAMILLES.map((famille) => [famille, 0])) as Record<FamilleReference, number>,
+};
+
+/** Générateur dont le PREMIER exercice est l'instance du code imprimé — tirée avec les MÊMES
+ * fonctions que l'adaptateur d'export (`genererInstance` = `genererExerciceCaracteristiquesAlgebriques`,
+ * variante = `construireNiveau1AvecFamille`) ; la suite de la session reste un tirage normal. */
+function generateurDepuisCode(code: CodeExerciceDecode): GenerateurExerciceCaracteristiquesAlgebriques {
+  const suite = creerGenerateurCaracteristiquesAlgebriques(REGLAGES_FAMILLES_CODE, "niveau1");
+  let premier = true;
+  return () => {
+    if (!premier) return suite();
+    premier = false;
+    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCaracteristiquesAlgebriques, (id) => construireNiveau1AvecFamille(id as FamilleReference));
+  };
+}
+
+/** Session initiale : directement l'exercice imprimé si l'URL porte un code, sinon l'écran de
+ * réglages (`null`). */
+function sessionInitiale(): EtatSessionCaracteristiquesAlgebriques | null {
+  const code = lireCodeDepuisUrl();
+  if (!code) return null;
+  return demarrerSessionCaracteristiquesAlgebriques({ ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE }, generateurDepuisCode(code));
 }
 
 /** Séquence de phases pour l'exercice courant — niveau 1 : `ce→domaine→ordonnee→parite→isolement→
@@ -416,9 +450,9 @@ function releveRevelePhase(etatAvant: EtatSessionCaracteristiquesAlgebriques, no
 }
 
 export function AppCaracteristiquesAlgebriques() {
-  const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(null);
+  const [etat, setEtat] = useState<EtatSessionCaracteristiquesAlgebriques | null>(sessionInitiale);
+  const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(() => (etat ? REGLAGES_FAMILLES_CODE : null));
   const [niveau, setNiveau] = useState<NiveauCaracteristiquesAlgebriques>("niveau1");
-  const [etat, setEtat] = useState<EtatSessionCaracteristiquesAlgebriques | null>(null);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function commencerSession(reglages: ReglagesFamillesFonctionReference, niveauChoisi: NiveauCaracteristiquesAlgebriques) {

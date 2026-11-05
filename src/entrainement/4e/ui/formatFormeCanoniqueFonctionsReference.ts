@@ -8,6 +8,12 @@ import { formatFractionIrreductible } from "./formatFraction";
  * `formatFractionIrreductible` déjà utilisée pour xS/yS ailleurs). */
 const DENOMINATEUR_MAX_COEFFICIENT = 700;
 
+/** Résidu flottant d'un calcul de coefficients (ex. `c = -4e-16` pour un vrai 0) : traité comme 0,
+ * jamais affiché « − 0 » (bug vu sur l'énoncé du carré). */
+function estNul(valeur: number): boolean {
+  return Math.abs(valeur) < 1e-9;
+}
+
 /** Rend un coefficient combiné (potentiellement fractionnaire, ex. `2/27`) en LaTeX — signe porté
  * devant `\frac{}{}`, jamais à l'intérieur du numérateur. */
 export function formatCoefficientLatex(valeur: number): string {
@@ -24,8 +30,8 @@ export function formatCoefficientLatex(valeur: number): string {
  * voir `construireFormeDepart`) : rendues en `\frac{}{}` exacte via `formatCoefficientLatex`,
  * jamais en décimal brut. */
 export function formatLineaire(a: number, b: number): string {
-  const partieX = a === 0 ? "" : a === 1 ? "x" : a === -1 ? "-x" : `${formatCoefficientLatex(a)}x`;
-  if (b === 0) return partieX === "" ? "0" : partieX;
+  const partieX = estNul(a) ? "" : a === 1 ? "x" : a === -1 ? "-x" : `${formatCoefficientLatex(a)}x`;
+  if (estNul(b)) return partieX === "" ? "0" : partieX;
   const signe = b > 0 ? "+" : "-";
   const partieB = `${signe} ${formatCoefficientLatex(Math.abs(b))}`;
   return partieX === "" ? `${formatCoefficientLatex(b)}` : `${partieX} ${partieB}`;
@@ -60,8 +66,8 @@ export function formatFormeDepartLatex(exercice: ExerciceFormeCanoniqueFonctionR
     case "carre": {
       const termeA = forme.a === 1 ? "" : forme.a === -1 ? "-" : formatCoefficientLatex(forme.a);
       const termeB =
-        forme.b === 0 ? "" : ` ${forme.b > 0 ? "+" : "-"} ${Math.abs(forme.b) === 1 ? "" : formatCoefficientLatex(Math.abs(forme.b))}x`;
-      const termeC = forme.c === 0 ? "" : ` ${forme.c > 0 ? "+" : "-"} ${formatCoefficientLatex(Math.abs(forme.c))}`;
+        estNul(forme.b) ? "" : ` ${forme.b > 0 ? "+" : "-"} ${Math.abs(forme.b) === 1 ? "" : formatCoefficientLatex(Math.abs(forme.b))}x`;
+      const termeC = estNul(forme.c) ? "" : ` ${forme.c > 0 ? "+" : "-"} ${formatCoefficientLatex(Math.abs(forme.c))}`;
       return `f(x) = ${termeA}x^2${termeB}${termeC}`;
     }
     case "cube":
@@ -96,7 +102,7 @@ function formatBinomeCoef(coef: number, p: number, avecParentheses: boolean): st
 }
 
 function formatResidu(q: number): string {
-  if (q === 0) return "";
+  if (estNul(q)) return "";
   return ` ${q > 0 ? "+" : "-"} ${Math.abs(q)}`;
 }
 

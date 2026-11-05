@@ -506,7 +506,7 @@ function enonceAmenageCaracteristiquesAlgebriques(instance: ExerciceCaracteristi
   const avecIntermediaire = equationIsoleeAdmetSolution(instance);
   const etapes: EtapeAmenagee[] = [
     {
-      consigne: [texte("Écris les conditions d'existence de f (s'il y en a).")],
+      consigne: [texte("Écris les conditions d'existence de f, s'il en existe.")],
       rappel: [texte("Un dénominateur doit être non nul ; ce qui est sous une racine carrée doit être positif ou nul. Le carré, le cube, la racine cubique et la valeur absolue n'imposent aucune condition.")],
       points: 0.5,
     },

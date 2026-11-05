@@ -72,16 +72,15 @@ function binome(p: number): string {
   return p > 0 ? `x - ${formatCoefficientLatex(p)}` : `x + ${formatCoefficientLatex(-p)}`;
 }
 
-/** ` + v` / ` - |v|` / rien si v = 0. */
-function termeConstant(v: number): string {
-  if (v === 0) return "";
-  return v > 0 ? ` + ${formatCoefficientLatex(v)}` : ` - ${formatCoefficientLatex(-v)}`;
+/** `coef(x − p)`, ou `coef·x` sans parenthèses si p = 0. */
+function produitBinome(coef: number, p: number): string {
+  return p === 0 ? `${prefixe(coef)}x` : `${prefixe(coef)}(${binome(p)})`;
 }
 
-/** ` + \frac{n}{d}` avec le signe du numérateur sorti devant la fraction. */
-function termeFraction(numerateur: number, denominateurLatex: string): string {
-  const signe = numerateur < 0 ? "-" : "+";
-  return ` ${signe} \\frac{${formatCoefficientLatex(Math.abs(numerateur))}}{${denominateurLatex}}`;
+/** ` + v` / ` - |v|` / rien si v = 0. */
+function termeConstant(v: number): string {
+  if (Math.abs(v) < 1e-9) return "";
+  return v > 0 ? ` + ${formatCoefficientLatex(v)}` : ` - ${formatCoefficientLatex(-v)}`;
 }
 
 function egal(a: number, b: number): boolean {
@@ -122,20 +121,27 @@ function calculIntermediaire(exercice: ExerciceFormeCanoniqueFonctionReference):
       const reste = forme.b - (forme.a * forme.d) / forme.c;
       const p = -forme.d / forme.c;
       const denominateur = formatLineaire(forme.c, forme.d);
-      const etape1 = `f(x) = \\frac{${prefixe(quotient)}\\left(${denominateur}\\right)${termeConstant(reste)}}{${denominateur}}`;
-      const etape2 = `${formatCoefficientLatex(quotient)}${termeFraction(reste, denominateur)}`;
-      const etape3 = `${formatCoefficientLatex(quotient)}${termeFraction(reste / forme.c, binome(p))}`;
-      return `${etape1} = ${etape2} = ${etape3}`;
+      const fraction = (numerateur: number, den: string) => `${numerateur < 0 ? "-" : ""}\\frac{${formatCoefficientLatex(Math.abs(numerateur))}}{${den}}`;
+      const finale = `${fraction(reste / forme.c, binome(p))}${termeConstant(quotient)}`;
+      if (quotient === 0) {
+        // Numérateur constant : rien à diviser, seulement le coefficient de x à sortir du dénominateur.
+        return forme.c === 1 ? `f(x) = ${finale} \\quad (\\text{déjà de la forme } \\tfrac{a}{x - p})` : `f(x) = ${fraction(reste, denominateur)} = ${finale}`;
+      }
+      const numerateur = quotient === 1 ? `${denominateur}${termeConstant(reste)}` : `${prefixe(quotient)}\\left(${denominateur}\\right)${termeConstant(reste)}`;
+      const separee = `${fraction(reste, denominateur)}${termeConstant(quotient)}`;
+      return `f(x) = \\frac{${numerateur}}{${denominateur}} = ${separee}${forme.c === 1 ? "" : ` = ${finale}`}`;
     }
     case "cube": {
       const p = -forme.a / forme.b;
-      return `(${formatLineaire(forme.b, forme.a)})^3 = \\left(${prefixe(forme.b)}(${binome(p)})\\right)^3 = ${prefixe(forme.b ** 3)}(${binome(p)})^3`;
+      const puissance = p === 0 ? `${prefixe(forme.b ** 3)}x^3` : `${prefixe(forme.b ** 3)}(${binome(p)})^3`;
+      return `(${formatLineaire(forme.b, forme.a)})^3 = \\left(${produitBinome(forme.b, p)}\\right)^3 = ${puissance}`;
     }
     case "racine_carree":
     case "racine_cubique": {
       const p = -forme.b / forme.a;
       const racine = (contenu: string) => (forme.type === "racine_carree" ? `\\sqrt{${contenu}}` : `\\sqrt[3]{${contenu}}`);
-      return `${racine(formatLineaire(forme.a, forme.b))} = ${racine(`${prefixe(forme.a)}(${binome(p)})`)}`;
+      if (p === 0) return `${racine(formatLineaire(forme.a, forme.b))} \\quad (\\text{pas de terme constant : rien à mettre en évidence})`;
+      return `${racine(formatLineaire(forme.a, forme.b))} = ${racine(produitBinome(forme.a, p))}`;
     }
     case "valeur_absolue": {
       const p = -forme.b / forme.a;

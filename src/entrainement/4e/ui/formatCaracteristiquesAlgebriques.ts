@@ -41,7 +41,7 @@ const NOM_BASE_AIDE: Record<FamilleReference, string> = {
   cube: "le cube",
   racine_carree: "la racine carrée",
   racine_cubique: "la racine cubique",
-  inverse: "la fraction 1/(…)",
+  inverse: "l'inverse",
   valeur_absolue: "la valeur absolue",
 };
 
@@ -72,7 +72,7 @@ export function texteAideSeparation(famille: FamilleReference): string {
 export function texteAideDebarrasser(famille: FamilleReference): string {
   switch (famille) {
     case "inverse":
-      return "Si 1/u = K, multiplie les deux membres par u (non nul grâce aux conditions d'existence) : 1 = K·u, puis développe.";
+      return "Si l'inverse de u vaut K, multiplie les deux membres par u (non nul grâce aux conditions d'existence) : le membre de gauche devient 1 ; développe ensuite le membre de droite.";
     case "racine_carree":
       return "Si √u = K (avec K ≥ 0), élève les deux membres au carré : u = K².";
     case "racine_cubique":
@@ -85,13 +85,13 @@ export function texteAideDebarrasser(famille: FamilleReference): string {
   }
 }
 
-const RAPPEL_DELTA = "calcule Δ = b² − 4ac : Δ < 0 → aucun zéro ; Δ = 0 → un seul zéro x = −b/(2a) ; Δ > 0 → deux zéros x = (−b ± √Δ)/(2a)";
+const RAPPEL_DELTA = "calcule Δ = b² − 4ac : s'il est négatif, aucun zéro ; s'il est nul, un seul zéro ; s'il est positif, deux zéros, donnés par la formule des racines du second degré";
 
 /** Écran "zéros" — dépend du niveau et, au niveau 2, de la famille (équation finale différente). */
 export function texteAideZeros(exercice: ExerciceCaracteristiquesAlgebriques): string {
   if (exercice.niveau === "niveau1") {
     return (
-      "Résous la ou les équations du 1er degré obtenues : ax + b = V donne x = (V − b)/a. Si l'équation isolée demandait " +
+      "Résous la ou les équations du 1er degré obtenues : pour isoler x dans ax + b = V, soustrais b puis divise par a. Si l'équation isolée demandait " +
       "qu'un carré, une valeur absolue ou une racine carrée vaille un nombre négatif, il n'y a aucun zéro."
     );
   }
