@@ -155,7 +155,7 @@ export const PLACEHOLDER_POSER_EQUATION_EXTREMUMS = "ex : 7*x-3=pi/5+k*pi";
 export const PLACEHOLDER_ISOLER_X_EXTREMUMS = "ex : pi/5+k*2*pi/7";
 
 /** Réponse finale révélée, lisible EN x (point 40 : elle n'était montrée que sur un cercle, les x
- * placés comme des angles) — fractions de π quand la valeur en est une (dénominateur ≤ 48). */
+ * placés comme des angles) — fraction de π, ou fraction simple, quand la valeur en est une. */
 export function formatSolutionsExtremumsLatex(solutions: number[]): string {
   const valeur = (v: number): string => {
     if (Math.abs(v) < 1e-9) return "0";
@@ -169,6 +169,16 @@ export function formatSolutionsExtremumsLatex(solutions: number[]): string {
         const den = d / a;
         const numerateur = num === 1 ? "\\pi" : `${num}\\pi`;
         return den === 1 ? numerateur : `\\frac{${numerateur}}{${den}}`;
+      }
+    }
+    // Valeur rationnelle sans π (période T entière : x = 3/2, 4…).
+    for (let d = 1; d <= 48; d++) {
+      const n = Math.round(v * d);
+      if (Math.abs(v - n / d) < 1e-9) {
+        let a = Math.abs(n);
+        let b = d;
+        while (b) [a, b] = [b, a % b];
+        return d / a === 1 ? `${n / a}` : `\\frac{${n / a}}{${d / a}}`;
       }
     }
     return v.toFixed(2).replace(".", "{,}");

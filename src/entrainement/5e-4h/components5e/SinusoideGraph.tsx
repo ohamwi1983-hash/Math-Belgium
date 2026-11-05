@@ -339,6 +339,9 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
   const presDUnBordY = (v: number) => (yVisMax - v) * pxParUniteY < margeYPx || (v - yVisMin) * pxParUniteY < margeYPx;
   const yEtiquetteY = (v: number) => Math.min(yVisMax - margeYPx / pxParUniteY, Math.max(yVisMin + margeYPx / pxParUniteY, v));
   const attachY = (v: number): "e" | "ne" | "se" => (presDUnBordY(v) ? "e" : attachEtiquetteY(exercice, v));
+  // Axe des ordonnées collé au bord DROIT : étiquettes à GAUCHE de l'axe (sinon coupées).
+  const axeYPresDeDroite = ((xVisMax - 0) * largeur) / (xVisMax - xVisMin) < 30;
+  const versGauche = (a: "e" | "ne" | "se"): "w" | "nw" | "sw" => (a === "e" ? "w" : a === "ne" ? "nw" : "sw");
   // Neuvième point du "Douzième bug" (trouvé en vérifiant CE correctif, pas seulement supposé) :
   // ancrer les étiquettes Y sur l'axe (x=0) les rapproche du texte des étiquettes X (elles aussi
   // ancrées sur y=0) chaque fois qu'une valeur clé Y (b/b±A) est proche de 0 EN PIXELS — pas
@@ -362,7 +365,7 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
           const surAxe = zeroYVisible && Math.abs(x) >= seuilCollisionX;
           const yRepli = yBordBas;
           return (
-            <Text key={index} x={x} y={surAxe ? 0 : yRepli} attach={attachX(surAxe)} size={14} color={COULEUR_GRADUATION}>
+            <Text key={index} x={x} y={surAxe ? Math.min(0, yVisMax - 4 / pxParUniteY) : yRepli} attach={attachX(surAxe)} size={14} color={COULEUR_GRADUATION}>
               {formatRationnelPiTexte(tick)}
             </Text>
           );
@@ -378,7 +381,7 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
                 key={index}
                 x={surAxe ? 0 : xRepli}
                 y={yEtiquetteY(v)}
-                attach={attachY(v)}
+                attach={surAxe && axeYPresDeDroite ? versGauche(attachY(v)) : attachY(v)}
                 attachDistance={4}
                 size={12}
                 color={COULEUR_GRADUATION}

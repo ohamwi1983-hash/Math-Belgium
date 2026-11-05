@@ -97,7 +97,7 @@ function solutionsBrancheUnique(brancheX: BrancheExtremum): number[] {
   const brut: number[] = [];
   for (let k = N_MIN; k <= N_MAX; k++) {
     const v = constante + periode * k;
-    if (v >= -TOLERANCE && v < DEUX_PI) brut.push(v < 0 ? 0 : v);
+    if (v >= -TOLERANCE && v < DEUX_PI - TOLERANCE) brut.push(v < 0 ? 0 : v);
   }
   const triees = [...brut].sort((a, b) => a - b);
   const resultat: number[] = [];
