@@ -26,6 +26,7 @@
     "katex": "$katex"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "141.0.0",
     "@types/katex": "^0.16.8",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
