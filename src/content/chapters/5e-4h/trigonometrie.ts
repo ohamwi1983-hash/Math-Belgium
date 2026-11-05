@@ -1395,7 +1395,7 @@ export const trigonometrie: ChapterContent = {
       id: 'modeliser',
       number: 8,
       title: 'Modéliser une fonction sinusoïdale en contexte',
-      kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale — puis résoudre f(t) ≥ k',
+      kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale — puis résoudre f(t) ≥ y₀',
       blocks: [
         { kind: 'video', title: 'Modéliser une situation périodique par une sinusoïde (grande roue)', youtubeId: 'fw20BqIfKCU' },
         {
@@ -1508,13 +1508,13 @@ export const trigonometrie: ChapterContent = {
             'l\'exemple ci-dessus. Une erreur de signe sur φ se détecte tout de suite si la ' +
             'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
         },
-        { kind: 'subheading', text: 'Résoudre une inéquation f(t) ≥ k ou f(t) ≤ k' },
+        { kind: 'subheading', text: 'Résoudre une inéquation f(t) ≥ y₀ ou f(t) ≤ y₀' },
         {
           kind: 'para',
           text:
             'Une fois le modèle construit, une question fréquente est : **pendant combien de ' +
-            'temps** la grandeur dépasse-t-elle (ou reste-t-elle sous) un seuil $k$ ? On résout ' +
-            'alors $A\\sin(\\omega t+\\varphi)+b \\geq k$ avec la même démarche que pour une ' +
+            'temps** la grandeur dépasse-t-elle (ou reste-t-elle sous) un seuil $y_0$ ? On résout ' +
+            'alors $A\\sin(\\omega t+\\varphi)+b \\geq y_0$ avec la même démarche que pour une ' +
             'équation (section précédente) : isoler le sinus, lire la réponse sur le cercle — un ' +
             '**arc** cette fois, pas deux points — puis revenir à $t$.',
         },
@@ -1523,7 +1523,7 @@ export const trigonometrie: ChapterContent = {
           label: 'Méthode — inéquation sinusoïdale',
           items: [
             'Pose $u = \\omega t + \\varphi$ et isole le sinus : $\\sin(u) \\geq m$ (ou ' +
-              '$\\leq m$), avec $m = \\dfrac{k-b}{A}$ si $A > 0$ (si $A < 0$, le sens de ' +
+              '$\\leq m$), avec $m = \\dfrac{y_0-b}{A}$ si $A > 0$ (si $A < 0$, le sens de ' +
               'l\'inégalité s\'inverse).',
             'Si $m > 1$ ou $m < -1$, l\'inéquation est toujours vraie ou toujours fausse : ' +
               'conclus directement.',
@@ -1612,7 +1612,7 @@ export const trigonometrie: ChapterContent = {
             'Construis pas à pas le modèle complet A sin(ωt + φ) + b : à partir d\'une grande ' +
               'roue, d\'un maximum et d\'un minimum avec un point extremum, de deux points de ' +
               'la courbe ou de paramètres donnés. Utilise-le ensuite pour résoudre une équation ' +
-              'f(t) = k, trouver des extremums ou résoudre une inéquation f(t) ≥ k.',
+              'f(t) = y₀, trouver des extremums ou résoudre une inéquation f(t) ≥ y₀.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 13. Modéliser une fonction sinusoïdale en contexte »',
@@ -1702,7 +1702,7 @@ export const trigonometrie: ChapterContent = {
         'arguments. Avec une tangente, rejeter les valeurs où elle n\'existe pas.',
       '**Modéliser en contexte** — A et b à partir des extrêmes. T (donc ω) à partir de la ' +
         'durée d\'un cycle. φ en dernier, à partir d\'une condition initiale précise. Une ' +
-        'inéquation $f(t)\\geq k$ se lit comme un arc du cercle, puis se ramène à $t$.',
+        'inéquation $f(t)\\geq y_0$ se lit comme un arc du cercle, puis se ramène à $t$.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',

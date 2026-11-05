@@ -365,7 +365,7 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
           const surAxe = zeroYVisible && Math.abs(x) >= seuilCollisionX;
           const yRepli = yBordBas;
           return (
-            <Text key={index} x={x} y={surAxe ? Math.min(0, yVisMax - 4 / pxParUniteY) : yRepli} attach={attachX(surAxe)} size={14} color={COULEUR_GRADUATION}>
+            <Text key={index} x={x} y={surAxe ? Math.max(yBordBas, Math.min(0, yVisMax - 4 / pxParUniteY)) : yRepli} attach={attachX(surAxe)} size={14} color={COULEUR_GRADUATION}>
               {formatRationnelPiTexte(tick)}
             </Text>
           );
