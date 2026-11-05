@@ -57,3 +57,18 @@ export function construireAvecPresence(arcMultiPas: boolean, secteurMultiPas: bo
 export function genererExercicePolygonesArcsSecteurs(): ExercicePolygonesArcsSecteurs {
   return construireAvecPresence(Math.random() < PROBABILITE_ECRAN_OPTIONNEL, Math.random() < PROBABILITE_ECRAN_OPTIONNEL);
 }
+
+/** Variantes forçables — MÊME catalogue pour l'adaptateur d'export (`exportEvaluation.ts`) et pour
+ * l'appli (`App5gen7.tsx`, lecture de `?code=`), avec les identifiants du sélecteur de l'appli
+ * (« 00 » … « 11 » : présence de l'arc puis du secteur couvrant plusieurs côtés). Le code d'un
+ * exercice imprimé encode l'indice dans CE tableau. */
+export const CATALOGUE_VARIANTES_POLYGONES = [
+  { id: "00", label: "Arc et secteur entre sommets consécutifs seulement" },
+  { id: "10", label: "+ arc couvrant plusieurs côtés" },
+  { id: "01", label: "+ secteur couvrant plusieurs côtés" },
+  { id: "11", label: "+ arc et secteur couvrant plusieurs côtés" },
+];
+
+export function genererPolygonesAvecVariante(id: string): ExercicePolygonesArcsSecteurs {
+  return construireAvecPresence(id[0] === "1", id[1] === "1");
+}

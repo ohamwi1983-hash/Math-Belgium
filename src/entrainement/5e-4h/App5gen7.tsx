@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "./core5e/polygonesArcsSecteurs.types";
 import type { EtatSessionPolygonesArcsSecteurs, PhasePolygonesArcsSecteurs } from "./moteur5e/typesPolygonesArcsSecteurs";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecPresence, genererExercicePolygonesArcsSecteurs } from "./generateurs5e/polygonesArcsSecteurs";
+import { CATALOGUE_VARIANTES_POLYGONES, construireAvecPresence, genererExercicePolygonesArcsSecteurs, genererPolygonesAvecVariante } from "./generateurs5e/polygonesArcsSecteurs";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
 const OPTIONS_PRESENCE = [
@@ -45,6 +46,16 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionPolygonesArcsSecteurs {
   return demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, genererExercicePolygonesArcsSecteurs);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son exercice est CETTE instance — tirée avec les MÊMES fonctions que l'adaptateur
+ * d'export (`generateurs5e/polygonesArcsSecteurs/exportEvaluation.ts`). La suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionPolygonesArcsSecteurs {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const exercice = genererAvecCode(code, CATALOGUE_VARIANTES_POLYGONES, genererExercicePolygonesArcsSecteurs, genererPolygonesAvecVariante);
+  return demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, () => exercice);
 }
 
 /** Révèle le champ `xxxRevele` de la phase qui vient de se terminer (`phase` = `etat.phase`, AVANT
@@ -157,7 +168,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen7() {
-  const [etat, setEtat] = useState<EtatSessionPolygonesArcsSecteurs>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionPolygonesArcsSecteurs>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionPolygonesArcsSecteurs`, jamais dans le moteur. Remis à vide à

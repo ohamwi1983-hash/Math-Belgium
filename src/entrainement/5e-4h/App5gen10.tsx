@@ -8,7 +8,10 @@ import type {
   ExercicePythagoricienne,
 } from "./core5e/equationsTrigonometriques.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
+  CATALOGUE_FAMILLES_EQUATION_TRIG,
+  construireEquationTrigAvecFamille,
   construireExerciceEgaliteExpressions,
   construireExercicePythagoricienne,
   genererExerciceEquationTrig,
@@ -125,6 +128,16 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionEquationTrigonometrique {
   return demarrerSessionEquationTrig(REGLAGES_DEMO, genererExerciceEquationTrigonometrique);
+}
+
+/** Première session : si l'URL porte un code d'exercice (QR code d'une feuille, `?code=`), rouvre
+ * EXACTEMENT l'exercice imprimé — mêmes fonctions de tirage que l'adaptateur d'export
+ * (`generateurs5e/equationsTrigonometriques/exportEvaluation.ts`) ; ensuite, tirages libres. */
+function sessionInitiale(): EtatSessionEquationTrigonometrique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const premier = genererAvecCode(code, CATALOGUE_FAMILLES_EQUATION_TRIG, genererExerciceEquationTrigonometrique, construireEquationTrigAvecFamille);
+  return demarrerSessionEquationTrig(REGLAGES_DEMO, () => premier);
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -262,7 +275,7 @@ function formatReponseRacinesPythagoricienne(reponse: ReponseRacinesPythagoricie
 }
 
 export function App5gen10() {
-  const [etat, setEtat] = useState<EtatSessionEquationTrigonometrique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationTrigonometrique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEquationTrigonometrique`, jamais dans le moteur. Remis à vide à

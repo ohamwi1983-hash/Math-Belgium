@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecTechniqueEtPhase2, genererExerciceModelisationSinusoide } from "./generateurs5e/modelisationSinusoide";
+import { CATALOGUE_TECHNIQUES, construireAvecTechnique, construireAvecTechniqueEtPhase2, genererExerciceModelisationSinusoide } from "./generateurs5e/modelisationSinusoide";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { Phase2ChoixDev } from "./generateurs5e/modelisationSinusoide";
 import type { ExerciceModelisationSinusoide, TechniquePhase1 } from "./core5e/modelisationSinusoide.types";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -233,6 +234,17 @@ function nouvelleSession(): EtatSessionModelisationSinusoide {
   return demarrerSessionModelisationSinusoide(REGLAGES_DEMO, genererExerciceModelisationSinusoide);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), le premier
+ * exercice est EXACTEMENT celui de la feuille — même tirage que l'adaptateur d'export
+ * (`generateurs5e/modelisationSinusoide/exportEvaluation.ts` : `CATALOGUE_TECHNIQUES`,
+ * `construireAvecTechnique`, `genererExerciceModelisationSinusoide`) ; ensuite, tirages libres. */
+function sessionInitiale(): EtatSessionModelisationSinusoide {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const premier = genererAvecCode(code, CATALOGUE_TECHNIQUES, genererExerciceModelisationSinusoide, (id) => construireAvecTechnique(id as TechniquePhase1));
+  return demarrerSessionModelisationSinusoide(REGLAGES_DEMO, () => premier);
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionModelisationSinusoide;
   revele: boolean;
@@ -274,7 +286,7 @@ function formatReponsePaires(paires: [string, string][]): string {
 }
 
 export function App5gen13() {
-  const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(sessionInitiale);
   /** Numéro d'exercice — fait partie de la `key` des écrans : un nouvel exercice qui recommence
    * par la même phase remonte quand même le composant (saisie remise à zéro). */
   const [numeroExercice, setNumeroExercice] = useState(0);

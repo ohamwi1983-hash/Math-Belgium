@@ -114,3 +114,27 @@ export function genererExerciceEquationTrigonometrique(): ExerciceEquationTrigon
   if (tirage < 0.75) return construireExercicePythagoricienne();
   return construireExerciceEgaliteExpressions();
 }
+
+/** Catalogue des 4 familles (variantes de la feuille d'exercices / de l'évaluation), dans l'ordre du
+ * sélecteur de variantes de `App5gen10.tsx` — partagé entre l'adaptateur d'export et la lecture du
+ * `?code=` (QR code) de l'appli, pour rouvrir EXACTEMENT l'exercice imprimé. */
+export const CATALOGUE_FAMILLES_EQUATION_TRIG: { id: ExerciceEquationTrigonometrique["famille"]; label: string }[] = [
+  { id: "directe", label: "Application directe" },
+  { id: "produit", label: "Produit de facteurs" },
+  { id: "pythagoricienne", label: "Substitution pythagoricienne" },
+  { id: "egalite", label: "Égalité avec conversion" },
+];
+
+/** Exercice d'une famille donnée — mêmes générateurs que le sélecteur de variantes de l'appli. */
+export function construireEquationTrigAvecFamille(id: string): ExerciceEquationTrigonometrique {
+  switch (id) {
+    case "produit":
+      return genererExerciceProduitFacteurs();
+    case "pythagoricienne":
+      return construireExercicePythagoricienne();
+    case "egalite":
+      return construireExerciceEgaliteExpressions();
+    default:
+      return { famille: "directe", exercice: genererExerciceEquationTrig() };
+  }
+}

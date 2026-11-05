@@ -113,6 +113,23 @@ export function construireAvecTechniqueEtPhase2(technique: TechniquePhase1, phas
   }
 }
 
+/** Catalogue des techniques de construction — partagé par l'adaptateur d'export (variantes de la
+ * feuille/évaluation, `exportEvaluation.ts`) et l'appli (`?code=` du QR code) : l'indice de variante
+ * encodé dans le code d'exercice désigne une entrée de CE tableau, dans cet ordre. */
+export const CATALOGUE_TECHNIQUES: { id: TechniquePhase1; label: string }[] = [
+  { id: "b1", label: "Grande roue (A, b, ω ; φ littéral)" },
+  { id: "b2", label: "Maximum, minimum et un extremum connu" },
+  { id: "b3", label: "Deux points de la courbe" },
+  { id: "donnee", label: "Fonction donnée" },
+];
+
+/** Technique de construction imposée, la suite (présence et type de la Phase 2) tirée selon les
+ * mêmes règles que `genererExerciceModelisationSinusoide`. */
+export function construireAvecTechnique(technique: TechniquePhase1): ExerciceModelisationSinusoide {
+  const phase1 = construireAvecTechniqueId(technique);
+  return { phase1, phase2: construirePhase2(phase1) };
+}
+
 export function genererExerciceModelisationSinusoide(): ExerciceModelisationSinusoide {
   const phase1 = construireAvecTechniqueId(tirerTechnique());
   const phase2 = construirePhase2(phase1);

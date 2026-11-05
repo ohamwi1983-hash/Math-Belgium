@@ -265,11 +265,14 @@ export function texteAideConversionEgaliteNiveau1(exercice: ExerciceEgaliteExpre
   return TEXTE_AIDE_CONVERSION_EGALITE_NIVEAU1[exercice.identite];
 }
 
+/** −B et π/2 − B avec B = a₂x + b₂ : parenthèses autour de B dès qu'il a deux termes (sinon
+ * « π/2 − 2x/3 + π » au lieu de « π/2 − (2x/3 + π) », faux). */
 export function formatAideConversionEgaliteNiveau2Latex(exercice: ExerciceEgaliteExpressions): string {
   const argB = formatArgumentLatex(exercice.a2, exercice.b2);
-  if (exercice.identite === "tanVersTan") return `\\tan\\left(-${argB}\\right)`;
+  const b = exercice.b2.decimal === 0 ? argB : `\\left(${argB}\\right)`;
+  if (exercice.identite === "tanVersTan") return `\\tan\\left(-${b}\\right)`;
   const fnCible = exercice.identite === "cosVersCos" ? "\\cos" : "\\sin";
-  return `${fnCible}\\left(\\dfrac{\\pi}{2}-${argB}\\right)`;
+  return `${fnCible}\\left(\\dfrac{\\pi}{2}-${b}\\right)`;
 }
 
 export const CONSIGNE_RESOUDRE_EGALITE = "Égale les arguments (une ou deux séries selon la fonction, k entier), puis isole x dans chaque série.";

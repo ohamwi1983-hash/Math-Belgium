@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceArcSecteur, QuantiteArcSecteur } from "./core5e/arcsSecteurs.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { genererExerciceArcSecteur, genererExerciceConversion, genererExerciceDeuxVersTrois } from "./generateurs5e/arcsSecteurs";
+import { CATALOGUE_VARIANTES_ARC_SECTEUR, genererArcSecteurAvecVariante, genererExerciceArcSecteur, genererExerciceConversion, genererExerciceDeuxVersTrois } from "./generateurs5e/arcsSecteurs";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
 const OPTIONS_MODE = [
@@ -40,6 +41,16 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionArcSecteur {
   return demarrerSessionArcSecteur(REGLAGES_DEMO, genererExerciceArcSecteur);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son exercice est CETTE instance — tirée avec les MÊMES fonctions que l'adaptateur
+ * d'export (`generateurs5e/arcsSecteurs/exportEvaluation.ts`). La suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionArcSecteur {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const exercice = genererAvecCode(code, CATALOGUE_VARIANTES_ARC_SECTEUR, genererExerciceArcSecteur, genererArcSecteurAvecVariante);
+  return demarrerSessionArcSecteur(REGLAGES_DEMO, () => exercice);
 }
 
 /** Révèle le champ `revele` de la phase qui vient de se terminer (`phase` = `etat.phase`, AVANT la
@@ -89,7 +100,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen6() {
-  const [etat, setEtat] = useState<EtatSessionArcSecteur>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionArcSecteur>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des quantités déjà closes (puces cliquables de
    * `ProgressionPuces`, mode "deuxVersTrois" uniquement — le mode "conversion" n'a qu'un seul écran,

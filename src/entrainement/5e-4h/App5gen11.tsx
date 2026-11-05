@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecFonction, genererExerciceExtremumsSinusoide } from "./generateurs5e/extremumsSinusoide";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceExtremumsSinusoide } from "./generateurs5e/extremumsSinusoide";
 import type { FonctionExtremum } from "./core5e/extremumsSinusoide.types";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
@@ -40,6 +41,16 @@ function nouvelleSession(): EtatSessionExtremumsSinusoide {
   return demarrerSessionExtremumsSinusoide(REGLAGES_DEMO, genererExerciceExtremumsSinusoide);
 }
 
+/** Première session : si l'URL porte un code d'exercice (QR code d'une feuille, `?code=`), rouvre
+ * EXACTEMENT l'exercice imprimé — mêmes fonctions de tirage que l'adaptateur d'export
+ * (`generateurs5e/extremumsSinusoide/exportEvaluation.ts`) ; ensuite, tirages libres. */
+function sessionInitiale(): EtatSessionExtremumsSinusoide {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const premier = genererAvecCode(code, CATALOGUE_FONCTIONS_EXTREMUMS, genererExerciceExtremumsSinusoide, (id) => construireAvecFonction(id as FonctionExtremum));
+  return demarrerSessionExtremumsSinusoide(REGLAGES_DEMO, () => premier);
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionExtremumsSinusoide;
   revele: boolean;
@@ -63,7 +74,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen11() {
-  const [etat, setEtat] = useState<EtatSessionExtremumsSinusoide>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionExtremumsSinusoide>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionExtremumsSinusoide`, jamais dans le moteur. Remis à vide à

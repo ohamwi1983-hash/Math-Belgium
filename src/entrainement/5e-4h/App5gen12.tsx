@@ -21,6 +21,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -53,6 +54,17 @@ function nouvelleSession(): EtatSessionGeometrieCercle {
   return demarrerSessionGeometrieCercle(REGLAGES_DEMO, genererExerciceGeometrieCercle);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), le premier
+ * exercice est EXACTEMENT celui de la feuille — même tirage que l'adaptateur d'export
+ * (`generateurs5e/geometrieCercle/exportEvaluation.ts` : `CATALOGUE_SCENARIOS`,
+ * `construireAvecScenarioId`, `genererExerciceGeometrieCercle`) ; ensuite, tirages libres. */
+function sessionInitiale(): EtatSessionGeometrieCercle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  const premier = genererAvecCode(code, CATALOGUE_SCENARIOS, genererExerciceGeometrieCercle, (id) => construireAvecScenarioId(id as ScenarioGeometrieCercle));
+  return demarrerSessionGeometrieCercle(REGLAGES_DEMO, () => premier);
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionGeometrieCercle;
   revele: boolean;
@@ -75,7 +87,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen12() {
-  const [etat, setEtat] = useState<EtatSessionGeometrieCercle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionGeometrieCercle>(sessionInitiale);
   /** Numéro d'exercice — fait partie de la `key` du champ : un nouvel exercice qui recommence par
    * la même phase remonte quand même le champ (saisie remise à zéro). */
   const [numeroExercice, setNumeroExercice] = useState(0);

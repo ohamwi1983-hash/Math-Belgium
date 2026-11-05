@@ -23,6 +23,13 @@ import { additionnerRationnelPi, calculerB, calculerC, inverseRationnelPi, multi
 
 const FONCTIONS: FonctionExtremum[] = ["sin", "cos"];
 
+/** Variantes de la feuille d'exercices / de l'évaluation, dans l'ordre du sélecteur de variantes de
+ * `App5gen11.tsx` — partagé entre l'adaptateur d'export et la lecture du `?code=` (QR code). */
+export const CATALOGUE_FONCTIONS_EXTREMUMS: { id: FonctionExtremum; label: string }[] = [
+  { id: "sin", label: "sin" },
+  { id: "cos", label: "cos" },
+];
+
 export function tirerFonction(): FonctionExtremum {
   return FONCTIONS[Math.floor(Math.random() * FONCTIONS.length)];
 }

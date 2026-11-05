@@ -121,7 +121,7 @@ function formatMagnitudeRationnelleLatex(numerateur: number, denominateur: numbe
   return denominateur === 1 ? `${numerateur}` : `\\dfrac{${numerateur}}{${denominateur}}`;
 }
 
-function formatRationnelPiLatex(valeur: RationnelPi): string {
+export function formatRationnelPiLatex(valeur: RationnelPi): string {
   const v = reduireRationnelPi(valeur);
   if (v.numerateur === 0) return "0";
   const signe = v.numerateur < 0 ? "-" : "";
@@ -137,7 +137,7 @@ function formatRationnelPiLatex(valeur: RationnelPi): string {
   return `${signe}\\dfrac{${n}}{${denomAvecPi}}`;
 }
 
-function formatMagnitudeAmplitudeLatex(A: AmplitudeSinusoide): string {
+export function formatMagnitudeAmplitudeLatex(A: AmplitudeSinusoide): string {
   if (A.radicande !== null) return `\\sqrt{${A.radicande}}`;
   const r = A.rationnelle!;
   return formatMagnitudeRationnelleLatex(r.numerateur, r.denominateur);
@@ -153,7 +153,7 @@ function formatFrequenceLatex(exercice: ExerciceParametresSinusoideGraphique): s
  * (Couche A, jamais en flottant) : φ lui-même si A>0, φ+T/2 si A<0. Jamais géré la classe
  * d'équivalence complète (φ+k·T) dans le récapitulatif/l'état actuel — seule cette valeur
  * canonique unique est affichée (voir la tâche : "juste la valeur retenue"). */
-function phiRetenu(exercice: ExerciceParametresSinusoideGraphique): RationnelPi {
+export function phiRetenu(exercice: ExerciceParametresSinusoideGraphique): RationnelPi {
   return exercice.A.signe > 0 ? exercice.phi : additionnerRationnelPi(exercice.phi, diviserParEntier(exercice.T, 2));
 }
 
@@ -166,7 +166,7 @@ const DEUX_PI: RationnelPi = { numerateur: 2, denominateur: 1, degrePi: 1 };
 /** φ = −ω·x₀ (x₀ = passage ascendant retenu), réduit dans ]−π ; π] — la valeur la plus simple parmi
  * celles acceptées à 2π près (`cibleDephasageGraphique`). Toujours un multiple rationnel de π (ω et x₀
  * ont des degrés de π opposés, voir `rationnelPi.ts`). */
-function phaseRetenue(exercice: ExerciceParametresSinusoideGraphique): RationnelPi {
+export function phaseRetenue(exercice: ExerciceParametresSinusoideGraphique): RationnelPi {
   const omega = multiplierRationnelPi(DEUX_PI, inverseRationnelPi(exercice.T));
   const brut = negatifRationnelPi(multiplierRationnelPi(omega, phiRetenu(exercice)));
   // brut est de degré 1 : n/d·π. Réduction dans ]−π ; π] : n/d dans ]−1 ; 1].

@@ -98,3 +98,16 @@ export function genererExerciceConversion(): ExerciceModeConversion {
 export function genererExerciceArcSecteur(): ExerciceArcSecteur {
   return Math.random() < POIDS_CONVERSION ? genererExerciceConversion() : genererExerciceDeuxVersTrois();
 }
+
+/** Variantes forçables — MÊME catalogue pour l'adaptateur d'export (`exportEvaluation.ts`) et pour
+ * l'appli (`App5gen6.tsx`, lecture de `?code=`) : le code d'un exercice imprimé encode l'indice de
+ * variante dans CE tableau, l'appli doit donc le relire avec les mêmes identifiants et la même
+ * fonction de génération (`genererArcSecteurAvecVariante`). */
+export const CATALOGUE_VARIANTES_ARC_SECTEUR = [
+  { id: "deuxVersTrois", label: "2 données → 3 inconnues" },
+  { id: "conversion", label: "Conversion degrés ↔ radians" },
+];
+
+export function genererArcSecteurAvecVariante(id: string): ExerciceArcSecteur {
+  return id === "conversion" ? genererExerciceConversion() : genererExerciceDeuxVersTrois();
+}
