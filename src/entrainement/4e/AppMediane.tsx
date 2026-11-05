@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -59,6 +60,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionMediane {
   return demarrerSessionMediane(REGLAGES_DEMO, genererExerciceMediane);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME
+ * catalogue que l'adaptateur d'export (`generateurs/mediane/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionMediane {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionMediane(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceMediane, (id) => construireAvecVarianteId(id as VarianteMediane)));
 }
 
 /** Séquence FIXE mais choisie dès le départ selon la variante (même logique que `phaseInitiale`,
@@ -155,7 +165,7 @@ function idExercice(exercice: object): number {
 }
 
 export function AppMediane() {
-  const [etat, setEtat] = useState<EtatSessionMediane>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionMediane>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — une entrée par écran, dans
    * l'ordre de la séquence (chaque écran se clôt une seule fois), remise à vide à chaque exercice. */

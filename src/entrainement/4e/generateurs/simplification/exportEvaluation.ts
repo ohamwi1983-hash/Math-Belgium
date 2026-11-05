@@ -119,9 +119,22 @@ function fragmentsCoteCorrige(poly: Exercice | PolynomeLineaire, nomFonction: "D
 // factoriser le numérateur, simplifier) ; toutes les valeurs viennent des formateurs de l'écran.
 // ============================================================================
 
+/** Fraction lisible sur papier (\dfrac) ; une fraction de dénominateur 1 (ou −1) s'écrit sans
+ * barre — `formatFractionSimplifiee` (partagé avec l'écran) garde « …/1 » quand le facteur commun
+ * emporte tout le dénominateur. */
+function fractionPapier(l: string): string {
+  const m = /^\\frac\{(.*)\}\{(-?)1\}$/.exec(l);
+  if (m) return m[2] === "-" ? `-\\left(${m[1]}\\right)` : m[1];
+  return l.replace(/\\frac/g, "\\dfrac");
+}
+
+function simplifieePapier(instance: ExerciceSimplification): string {
+  return fractionPapier(formatFractionSimplifiee(instance));
+}
+
 /** « F(x) = … » — l'énoncé et le corrigé nomment la fraction. */
 function fractionNommee(instance: ExerciceSimplification): string {
-  return `F(x) = ${formatFraction(instance)}`;
+  return `F(x) = ${fractionPapier(formatFraction(instance))}`;
 }
 
 /** Étapes du raisonnement (titres « Étape n » du corrigé). */
@@ -204,8 +217,8 @@ function correctionDetailleeSimplification(instance: ExerciceSimplification): Et
         texte(" : on simplifie ce facteur (on simplifie des facteurs, jamais des termes)."),
       ],
     },
-    { label: "Calcul", sousQuestion: "d", fragments: [latex(`F(x) = ${formatFractionProgressive(instance, "factorisee", "factorisee")}`)] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [latex(`F(x) = ${formatFractionSimplifiee(instance)}`), texte(" pour "), latex(formatCE(ce))] },
+    { label: "Calcul", sousQuestion: "d", fragments: [latex(`F(x) = ${fractionPapier(formatFractionProgressive(instance, "factorisee", "factorisee"))}`)] },
+    { label: "Conclusion", sousQuestion: "d", fragments: [latex(`F(x) = ${simplifieePapier(instance)}`), texte(" pour "), latex(formatCE(ce))] },
     {
       label: "Piège",
       sousQuestion: "d",
@@ -219,7 +232,7 @@ function correctionDetailleeSimplification(instance: ExerciceSimplification): Et
 }
 
 function reponseBreveSimplification(instance: ExerciceSimplification): FragmentConsigne[] {
-  return [texte("CE : "), latex(formatCE(conditionsExistence(instance.denominateur))), texte(" ; "), latex(`F(x) = ${formatFractionSimplifiee(instance)}`)];
+  return [texte("CE : "), latex(formatCE(conditionsExistence(instance.denominateur))), texte(" ; "), latex(`F(x) = ${simplifieePapier(instance)}`)];
 }
 
 function aCasGeneral(instance: ExerciceSimplification): boolean {
@@ -244,7 +257,7 @@ function baremeSimplification(instance: ExerciceSimplification): BaremeExercice 
     { sousQuestion: "a", critere: [texte("Dénominateur factorisé : "), latex(`D(x) = ${formeFactoriseeCote(instance.denominateur)}`)], points: pa },
     { sousQuestion: "b", critere: [texte("Conditions d'existence : "), latex(formatCE(conditionsExistence(instance.denominateur)))], points: pb },
     { sousQuestion: "c", critere: [texte("Numérateur factorisé : "), latex(`N(x) = ${formeFactoriseeCote(instance.numerateur)}`)], points: pc },
-    { sousQuestion: "d", critere: [texte("Fraction simplifiée : "), latex(`F(x) = ${formatFractionSimplifiee(instance)}`)], points: pd },
+    { sousQuestion: "d", critere: [texte("Fraction simplifiée : "), latex(`F(x) = ${simplifieePapier(instance)}`)], points: pd },
   ];
   const erreurs: ErreurFrequente[] = [
     {

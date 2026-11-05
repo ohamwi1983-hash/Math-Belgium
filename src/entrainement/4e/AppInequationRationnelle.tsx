@@ -71,6 +71,7 @@ import {
 import type { EtatSessionInequationRationnelle, PhaseInequationRationnelle } from "./moteur/sessionInequationRationnelle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurInequationRationnelle, type VarianteInequationRationnelleId } from "./generateurs/inequationRationnelle";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral } from "./moteur/verification";
 import {
   diagnostiquerMiseEnEvidenceFraction,
@@ -199,6 +200,18 @@ const REGLAGES_NIVEAU: ReglagesInequationRationnelle = {
 
 function nouvelleSession(): EtatSessionInequationRationnelle {
   return demarrerSessionInequationRationnelle(REGLAGES_DEMO, creerGenerateurInequationRationnelle(REGLAGES_NIVEAU));
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), le premier
+ * exercice est cette instance — tirée avec la MÊME fabrique (mêmes réglages que
+ * `REGLAGES_PAR_DEFAUT` de `generateurs/inequationRationnelle/exportEvaluation.ts`) et le MÊME
+ * catalogue que l'adaptateur d'export ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionInequationRationnelle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionInequationRationnelle(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, creerGenerateurInequationRationnelle(REGLAGES_NIVEAU), (id) => construireAvecVarianteId(id as VarianteInequationRationnelleId)),
+  );
 }
 
 /**
@@ -823,7 +836,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
 }
 
 export function AppInequationRationnelle() {
-  const [etat, setEtat] = useState<EtatSessionInequationRationnelle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionInequationRationnelle>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInequationRationnelle`, jamais dans le moteur. Remis à vide à

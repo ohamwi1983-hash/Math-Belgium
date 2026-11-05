@@ -187,8 +187,8 @@ function enoncePapierDispersion(instance: ExerciceDispersion): EnoncePapier {
     section: {
       enteteFragments: enVirgules([
         texte(`${aupresDesPopulationMajuscule(contexte)}, ${contexte.caractereDefini} ${contexte.moyenAccord} est `),
-        latex(`${LABEL_XBAR} = ${nombreFrLatex(xBar)}\\text{ ${contexte.unite}}`),
-        texte(". Voici la répartition des données (valeur observée, effectif) : "),
+        latex(`${LABEL_XBAR} = ${nombreFrLatex(xBar)}`),
+        texte(` ${contexte.unite}. Voici la répartition des données (valeur observée, effectif) : `),
         latex(tableauDonneesLatex(instance)),
       ]),
       questions: [

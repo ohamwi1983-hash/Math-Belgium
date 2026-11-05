@@ -232,6 +232,11 @@ function construireCorrectionEquationRationnelle(instance: ExerciceEquationRatio
 // et conclure — les mêmes regroupements que le commentaire de tête, valeurs de l'instance.
 // ============================================================================
 
+/** Fractions lisibles sur papier. */
+function papier(l: string): string {
+  return l.replace(/\\frac/g, "\\dfrac");
+}
+
 type EtapeEquationRationnelle = "ce" | "simplifier" | "eliminer" | "resoudre" | "conclure";
 
 function etapesDe(instance: ExerciceEquationRationnelle): EtapeEquationRationnelle[] {
@@ -264,14 +269,14 @@ function consigneEtape(instance: ExerciceEquationRationnelle, etape: EtapeEquati
 /** Étapes du raisonnement (titres « Étape n » du corrigé). */
 function construireEnonceEquationRationnelle(instance: ExerciceEquationRationnelle): SectionExercice {
   return {
-    enteteFragments: [texte("On considère l'équation "), latex(formatEquationRationnelleLatex(instance)), texte(".")],
+    enteteFragments: [texte("On considère l'équation "), latex(papier(formatEquationRationnelleLatex(instance))), texte(".")],
     questions: etapesDe(instance).map((etape) => ({ consigne: consigneEtape(instance, etape) })),
   };
 }
 
 function enoncePapierEquationRationnelle(instance: ExerciceEquationRationnelle): EnoncePapier {
   return {
-    section: { enteteFragments: [texte("Résous dans ℝ l'équation "), latex(formatEquationRationnelleLatex(instance)), texte(".")], questions: [] },
+    section: { enteteFragments: [texte("Résous dans ℝ l'équation "), latex(papier(formatEquationRationnelleLatex(instance))), texte(".")], questions: [] },
   };
 }
 
@@ -297,12 +302,12 @@ function lignesSimplifier(instance: ExerciceEquationRationnelle, lettre: string)
     const expressionP2 = instance.construction === "p2_sur_p1" ? formatEquationNumerateur(p2) : formatEquationDenominateur(p2);
     return [
       { label: "Factorisation", sousQuestion: lettre, fragments: [latex(expressionP2), texte(" : "), ...fragmentsResolution(p2)] },
-      { label: "Conclusion", sousQuestion: lettre, fragments: [texte("La fraction de gauche devient "), latex(formatFractionGaucheFactorisee(instance)), texte(", d'où "), latex(formatEquationRationnelleLatexApresSimplification(instance))] },
+      { label: "Conclusion", sousQuestion: lettre, fragments: [texte("La fraction de gauche devient "), latex(papier(formatFractionGaucheFactorisee(instance))), texte(", d'où "), latex(papier(formatEquationRationnelleLatexApresSimplification(instance)))] },
     ];
   }
   return [
     { label: "Méthode", sousQuestion: lettre, fragments: [texte("On simplifie par le facteur commun de chaque fraction réductible (sous les CE).")] },
-    { label: "Conclusion", sousQuestion: lettre, fragments: [latex(formatEquationRationnelleLatexApresSimplification(instance))] },
+    { label: "Conclusion", sousQuestion: lettre, fragments: [latex(papier(formatEquationRationnelleLatexApresSimplification(instance)))] },
   ];
 }
 
@@ -356,7 +361,7 @@ function baremeEquationRationnelle(instance: ExerciceEquationRationnelle): Barem
       case "ce":
         return [texte("Conditions d'existence : "), latex(ceLatex(instance))];
       case "simplifier":
-        return [texte("Simplification correcte : "), latex(formatEquationRationnelleLatexApresSimplification(instance))];
+        return [texte("Simplification correcte : "), latex(papier(formatEquationRationnelleLatexApresSimplification(instance)))];
       case "eliminer":
         return [texte("Équation sans fraction : "), latex(formatEnonceLatex(instance.equationIsolee.enonce))];
       case "resoudre":

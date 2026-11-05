@@ -9,7 +9,7 @@ import type {
   ExerciceBienaymeTchebychevNombreVersXBar,
   ExerciceBienaymeTchebychevPourcentVersIntervalle,
 } from "../../core/bienaymeTchebychev.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -24,7 +24,6 @@ import {
   formatSigmaAttenduTexte,
   formatXBarAttenduTexte,
   PRECISION_INTERVALLE_FINAL,
-  PRECISION_K,
   PRECISION_K_PAR_DEFAUT,
   PRECISION_UNITE,
   PRECISION_UNITE_PAR_DEFAUT,
@@ -45,7 +44,7 @@ import {
   type SegmentTexte,
 } from "../../ui/formatBienaymeTchebychev";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, segmentEnVirgules } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev>` pour gen37 (Inégalité de
@@ -138,34 +137,72 @@ function versFragments(segments: SegmentTexte[]): FragmentConsigne[] {
   return segments.map((segment) => (segment.type === "texte" ? texte(segment.valeur) : latex(segment.valeur)));
 }
 
+/** Énoncé « par étapes » : une question par écran du générateur (k, pourcentage, nombre,
+ * intervalle, σ ou x̄) — ce sont les étapes d'apprentissage, reprises en titres du corrigé ; l'énoncé
+ * IMPRIMÉ est `enoncePapierBienaymeTchebychev` (énoncé + consigne globale, sans étapes). */
 function construireEnonceBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): SectionExercice {
   return {
     enteteFragments: versFragments(formatEnonceSegments(instance)),
-    questions: [{ consigne: [texte(construireConsigneTravail(instance))] }],
+    questions: etapesBienaymeTchebychev(instance).map((etape) => ({ consigne: [texte(CONSIGNE_ETAPE[etape](instance))] })),
   };
 }
 
-/** Consigne de méthode — jamais une répétition de la question (déjà dans `enteteFragments`), jamais
- * générique (mentionne les règles d'arrondi propres à la variante, elles-mêmes propres à chaque
- * inconnue finale — voir `arrondis.ts`). */
-function construireConsigneTravail(instance: ExerciceBienaymeTchebychev): string {
+type EtapeBT = "kIntervalle" | "kPourcent" | "pourcentFinal" | "nombreFinal" | "pourcentDepuisNombre" | "intervalleFinal" | "sigma" | "xBar";
+
+function etapesBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EtapeBT[] {
   switch (instance.variante) {
     case "intervalleVersPourcent":
-      return `Calcule k (${PRECISION_K_PAR_DEFAUT}), puis le pourcentage minimal demandé (${PRECISION_UNITE_PAR_DEFAUT}), en détaillant chaque étape.`;
+      return ["kIntervalle", "pourcentFinal"];
     case "pourcentVersIntervalle":
-      return `Calcule k (${precisionKDepuisPourcent(instance.variante)}), puis les bornes de l'intervalle demandé (${PRECISION_INTERVALLE_FINAL}), en détaillant chaque étape.`;
+      return ["kPourcent", "intervalleFinal"];
     case "intervalleVersNombre":
-      return `Calcule k (${PRECISION_K_PAR_DEFAUT}), le pourcentage minimal intermédiaire (${precisionPourcentFinal(instance.variante)}), puis le nombre minimal d'individus demandé (${PRECISION_UNITE_PAR_DEFAUT}), en détaillant chaque étape.`;
+      return ["kIntervalle", "pourcentFinal", "nombreFinal"];
     case "nombreVersIntervalle":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${precisionKDepuisPourcent(instance.variante)}), puis les bornes de l'intervalle demandé (${PRECISION_INTERVALLE_FINAL}), en détaillant chaque étape.`;
+      return ["pourcentDepuisNombre", "kPourcent", "intervalleFinal"];
     case "intervalleVersSigma":
-      return `Calcule k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
+      return ["kPourcent", "sigma"];
     case "intervalleVersXBar":
-      return `Détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
+      return ["xBar"];
     case "nombreVersSigma":
-      return `Calcule d'abord le pourcentage minimal correspondant au nombre donné (${precisionPourcentDepuisNombre(instance.variante)}), puis k (${PRECISION_K}), puis l'écart-type σ demandé (${PRECISION_UNITE}), en détaillant chaque étape.`;
+      return ["pourcentDepuisNombre", "kPourcent", "sigma"];
     case "nombreVersXBar":
-      return `Détermine la moyenne x̄ demandée (valeur exacte) : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est centré sur x̄. Justifie ta réponse.`;
+      return ["xBar"];
+  }
+}
+
+const CONSIGNE_ETAPE: Record<EtapeBT, (instance: ExerciceBienaymeTchebychev) => string> = {
+  kIntervalle: () => `Calcule k à partir de l'intervalle donné (${PRECISION_K_PAR_DEFAUT}).`,
+  kPourcent: (i) => `Calcule k à partir du pourcentage minimal (${precisionKDepuisPourcent(i.variante)}).`,
+  pourcentFinal: (i) =>
+    `Calcule le pourcentage minimal garanti (${precisionPourcentFinal(i.variante === "intervalleVersNombre" ? "intervalleVersNombre" : "intervalleVersPourcent")}).`,
+  nombreFinal: () => `Déduis le nombre minimal d'individus (${PRECISION_UNITE_PAR_DEFAUT}).`,
+  pourcentDepuisNombre: (i) => `Convertis le nombre minimal donné en pourcentage de l'effectif (${precisionPourcentDepuisNombre(i.variante)}).`,
+  intervalleFinal: () => `Calcule les bornes de l'intervalle (${PRECISION_INTERVALLE_FINAL}).`,
+  sigma: () => `Calcule l'écart-type σ (${PRECISION_UNITE}).`,
+  xBar: () => "Détermine la moyenne x̄ : l'intervalle garanti est centré sur x̄.",
+};
+
+/** Consigne GLOBALE de l'énoncé papier : la question est déjà posée par `formatEnonceSegments` ;
+ * on ajoute seulement la justification attendue et les règles d'arrondi (celles de la génération,
+ * `arrondis.ts`, sans lesquelles la réponse ne coïnciderait pas) — jamais la méthode pas à pas. */
+function consigneGlobale(instance: ExerciceBienaymeTchebychev): string {
+  const justifie = "Justifie à l'aide de l'inégalité de Bienaymé-Tchebychev.";
+  switch (instance.variante) {
+    case "intervalleVersPourcent":
+      return `${justifie} Arrondis k au centième par défaut et le pourcentage à l'unité par défaut.`;
+    case "pourcentVersIntervalle":
+      return `${justifie} Arrondis k au centième par excès ; ${PRECISION_INTERVALLE_FINAL}.`;
+    case "intervalleVersNombre":
+      return `${justifie} Arrondis k et le pourcentage au centième par défaut, le nombre d'individus à l'unité par défaut.`;
+    case "nombreVersIntervalle":
+      return `${justifie} Arrondis le pourcentage et k au centième par excès ; ${PRECISION_INTERVALLE_FINAL}.`;
+    case "intervalleVersSigma":
+      return `${justifie} Arrondis k au centième et σ à l'unité.`;
+    case "nombreVersSigma":
+      return `${justifie} Arrondis le pourcentage et k au centième, σ à l'unité.`;
+    case "intervalleVersXBar":
+    case "nombreVersXBar":
+      return `${justifie}`;
   }
 }
 
@@ -344,6 +381,138 @@ function construireCorrectionBienaymeTchebychev(instance: ExerciceBienaymeTcheby
   }
 }
 
+// ============================================================================
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème) — voir
+// `.claude/rules/feuilles-evaluations.md`. Les champs enrichis ne passent pas par
+// `avecVirgulesBelges` (qui n'enveloppe que `construireEnonce`/`construireCorrection`) :
+// `enVirgules` les convertit ici.
+// ============================================================================
+
+const LETTRES = "abcdefgh";
+
+function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
+  return fragments.map(segmentEnVirgules);
+}
+
+function enoncePapierBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EnoncePapier {
+  return {
+    section: { enteteFragments: enVirgules([...versFragments(formatEnonceSegments(instance)), texte(` ${consigneGlobale(instance)}`)]), questions: [] },
+  };
+}
+
+function difficulteBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): 1 | 2 | 3 {
+  const nombre = etapesBienaymeTchebychev(instance).length;
+  return nombre === 1 ? 1 : nombre === 2 ? 2 : 3;
+}
+
+function reponseBreveBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): FragmentConsigne[] {
+  switch (instance.variante) {
+    case "intervalleVersPourcent":
+      return [texte(`Au moins ${formatPourcentAttenduTexte(instance).replace(/^[=≈] /, "")}`)];
+    case "intervalleVersNombre":
+      return [texte(`Au moins ${formatNombreAttenduTexte(instance.nMinAttendu)}`)];
+    case "pourcentVersIntervalle":
+    case "nombreVersIntervalle":
+      return [texte(`Intervalle ${formatIntervalleAttenduTexte(instance).replace(/^[=≈] /, "")}`)];
+    case "intervalleVersSigma":
+    case "nombreVersSigma":
+      return [texte(formatSigmaAttenduTexte(instance))];
+    case "intervalleVersXBar":
+    case "nombreVersXBar":
+      return [texte(formatXBarAttenduTexte(instance))];
+  }
+}
+
+function fragmentsEtape(instance: ExerciceBienaymeTchebychev, etape: EtapeBT): FragmentConsigne[] {
+  switch (etape) {
+    case "kIntervalle":
+      return etapeKDepuisIntervalle(instance as ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre);
+    case "kPourcent": {
+      const avecK = instance as ExerciceBienaymeTchebychevAvecK & { pourcentDonne?: number; pourcentAttendu0?: number };
+      return etapeKDepuisPourcent(avecK, (avecK.pourcentDonne ?? avecK.pourcentAttendu0) as number);
+    }
+    case "pourcentFinal":
+      return etapePourcentFinal(
+        instance as ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre,
+        instance.variante === "intervalleVersNombre" ? "intervalleVersNombre" : "intervalleVersPourcent",
+      );
+    case "nombreFinal":
+      return etapeNombreFinal(instance as ExerciceBienaymeTchebychevIntervalleVersNombre);
+    case "pourcentDepuisNombre":
+      return etapePourcentDepuisNombre(instance as ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma);
+    case "intervalleFinal":
+      return etapeIntervalleFinal(instance as ExerciceBienaymeTchebychevPourcentVersIntervalle | ExerciceBienaymeTchebychevNombreVersIntervalle);
+    case "sigma":
+      return etapeSigma(instance as ExerciceBienaymeTchebychevIntervalleVersSigma | ExerciceBienaymeTchebychevNombreVersSigma);
+    case "xBar":
+      return etapeXBar(instance as ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar);
+  }
+}
+
+const PIEGE_ETAPE: Partial<Record<EtapeBT, string>> = {
+  kIntervalle: "k se calcule avec la DEMI-largeur de l'intervalle (distance de x̄ à une borne), pas avec sa largeur totale.",
+  pourcentFinal: "La proportion garantie est 1 − 1/k², pas 1 − 1/k ; un minimum garanti s'arrondit vers le BAS.",
+  intervalleFinal: "Pour garantir le pourcentage, l'intervalle s'arrondit vers l'EXTÉRIEUR (borne inférieure vers le bas, supérieure vers le haut).",
+  nombreFinal: "Un nombre minimal d'individus s'arrondit vers le bas (on ne peut pas garantir une fraction d'individu).",
+};
+
+function correctionDetailleeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EtapeCorrection[] {
+  const etapes = etapesBienaymeTchebychev(instance);
+  const lignes: EtapeCorrection[] = [{ label: "Rappel", sousQuestion: "a", fragments: introFragments() }];
+  etapes.forEach((etape, i) => {
+    lignes.push({ label: etape === "xBar" ? "Méthode" : "Calcul", sousQuestion: LETTRES[i], fragments: fragmentsEtape(instance, etape) });
+    const piege = PIEGE_ETAPE[etape];
+    if (piege) lignes.push({ label: "Piège", sousQuestion: LETTRES[i], fragments: [texte(piege)] });
+  });
+  return lignes.map((l) => ({ ...l, fragments: enVirgules(l.fragments) }));
+}
+
+const LIBELLE_CRITERE: Record<EtapeBT, string> = {
+  kIntervalle: "k calculé à partir de l'intervalle, bien arrondi",
+  kPourcent: "k calculé à partir du pourcentage (1 − 1/k² = p), bien arrondi",
+  pourcentFinal: "Pourcentage minimal 1 − 1/k², arrondi dans le bon sens",
+  nombreFinal: "Nombre minimal d'individus, arrondi vers le bas",
+  pourcentDepuisNombre: "Nombre donné converti en pourcentage de l'effectif",
+  intervalleFinal: "Intervalle [x̄ − kσ ; x̄ + kσ], bornes arrondies vers l'extérieur",
+  sigma: "σ isolé à partir d'une borne, bien arrondi",
+  xBar: "x̄ = centre de l'intervalle",
+};
+
+/** Poids par étape (somme 4, aucun critère sous 0,5). */
+function poidsEtapes(etapes: EtapeBT[]): number[] {
+  if (etapes.length === 1) return [4];
+  if (etapes.length === 2) return [2, 2];
+  return etapes.map((e) => (e === "pourcentDepuisNombre" || e === "nombreFinal" ? 1 : 1.5));
+}
+
+function baremeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): BaremeExercice {
+  const etapes = etapesBienaymeTchebychev(instance);
+  const poids = poidsEtapes(etapes);
+  const criteres: CritereBareme[] =
+    etapes.length === 1
+      ? [
+          { sousQuestion: "a", critere: [texte("Justification : l'intervalle garanti [x̄ − kσ ; x̄ + kσ] est symétrique autour de x̄")], points: 2 },
+          { sousQuestion: "a", critere: [texte(`Valeur : ${formatXBarAttenduTexte(instance as ExerciceBienaymeTchebychevIntervalleVersXBar)}`)], points: 2 },
+        ]
+      : etapes.map((etape, i) => ({ sousQuestion: LETTRES[i], critere: [texte(LIBELLE_CRITERE[etape])], points: poids[i] }));
+  const erreurs: ErreurFrequente[] = [];
+  const i = (e: EtapeBT) => etapes.indexOf(e);
+  if (i("kIntervalle") >= 0) erreurs.push({ description: [texte("k calculé avec la largeur totale de l'intervalle au lieu de la demi-largeur")], cout: `0 pt sur ${LETTRES[i("kIntervalle")]})` });
+  if (i("pourcentFinal") >= 0 || i("kPourcent") >= 0) {
+    const e = i("pourcentFinal") >= 0 ? i("pourcentFinal") : i("kPourcent");
+    erreurs.push({ description: [texte("1 − 1/k utilisé au lieu de 1 − 1/k²")], cout: `0 pt sur ${LETTRES[e]})` });
+  }
+  if (i("pourcentFinal") >= 0 || i("nombreFinal") >= 0) erreurs.push({ description: [texte("Minimum garanti arrondi vers le haut")], cout: "−0,5" });
+  if (i("intervalleFinal") >= 0) erreurs.push({ description: [texte("Bornes arrondies vers l'intérieur de l'intervalle")], cout: "−0,5" });
+  if (i("pourcentDepuisNombre") >= 0) erreurs.push({ description: [texte("Pourcentage calculé sur le nombre donné sans le rapporter à l'effectif total")], cout: `0 pt sur ${LETTRES[i("pourcentDepuisNombre")]})` });
+  return {
+    reponseFinale: enVirgules(reponseBreveBienaymeTchebychev(instance)),
+    criteres: criteres.map((c) => ({ ...c, critere: enVirgules(c.critere) })),
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: etapes.length > 1 ? [[texte("Valeurs intermédiaires non arrondies, si l'arrondi final respecte le sens demandé")]] : undefined,
+  };
+}
+
 const adaptateurEvaluationBienaymeTchebychevBrut: AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev> = {
   titreDocument: "Inégalité de Bienaymé-Tchebychev — Évaluation",
   nomFichierBase: "bienayme-tchebychev",
@@ -352,6 +521,12 @@ const adaptateurEvaluationBienaymeTchebychevBrut: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceBienaymeTchebychev,
   construireCorrection: construireCorrectionBienaymeTchebychev,
+  difficulte: difficulteBienaymeTchebychev,
+  reponseBreve: (instance) => enVirgules(reponseBreveBienaymeTchebychev(instance)),
+  correctionDetaillee: correctionDetailleeBienaymeTchebychev,
+  bareme: baremeBienaymeTchebychev,
+  enoncePapier: enoncePapierBienaymeTchebychev,
+  dureeMinutes: 5,
   // 8 variantes structurellement différentes (donnée/inconnue échangées), consigne dépendante de
   // l'instance à chaque fois qu'une étape "sans aide" doit être réexpliquée — jamais une consigne
   // générique : voir le commentaire de tête.

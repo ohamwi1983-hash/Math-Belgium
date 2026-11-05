@@ -71,7 +71,7 @@ function consigneTrace(instance: ExerciceHistogramme): string {
 }
 
 function construireEnonceHistogramme(instance: ExerciceHistogramme): SectionExercice {
-  const { contexte, classes, donneesBrutes } = instance;
+  const { classes, donneesBrutes } = instance;
   const listeClasses = classes.map((_, i) => formatClasseTexte(instance, i)).join(", ");
 
   const questions: SectionExercice["questions"] = [{ consigne: [texte(consigneClassement(instance))] }];

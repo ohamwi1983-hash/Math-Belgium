@@ -13,6 +13,7 @@ import {
 import type { EtatSessionRelationsRacines, PhaseRelationsRacines } from "./moteur/sessionRelationsRacines";
 import { diagnostiquerEquationDepuisRacines, diagnostiquerFactorisation } from "./moteur/verificationRelationsRacines";
 import { genererExerciceRelationsRacines } from "./generateurs/relationsRacines";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeSommeProduit } from "./components/EtapeSommeProduit";
 import { EtapeFactorisationRacines } from "./components/EtapeFactorisationRacines";
 import { EtapeEquationDepuisRacines } from "./components/EtapeEquationDepuisRacines";
@@ -36,6 +37,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionRelationsRacines {
   return demarrerSessionRelationsRacines(REGLAGES_DEMO, genererExerciceRelationsRacines);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son exercice est cette instance — tirée avec la MÊME fonction que l'adaptateur d'export
+ * (`generateurs/relationsRacines/exportEvaluation.ts`, sans catalogue de variantes) ; la suite reste
+ * un tirage normal. */
+function sessionInitiale(): EtatSessionRelationsRacines {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionRelationsRacines(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceRelationsRacines, undefined));
 }
 
 /** Même ordre que la vraie séquence des phases (type `PhaseRelationsRacines`). */
@@ -64,7 +75,7 @@ interface TransitionEnAttente {
 }
 
 export function AppRelationsRacines() {
-  const [etat, setEtat] = useState<EtatSessionRelationsRacines>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionRelationsRacines>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);

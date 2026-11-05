@@ -383,6 +383,12 @@ function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
   return fragments.map(segmentEnVirgules);
 }
 
+/** Phrase d'ouverture de l'énoncé papier : « On étudie la répartition … . » — la phrase d'écran
+ * (« Voici la répartition … : ») annonce un tableau qui n'existe pas sur papier. */
+function phraseEtude(exercice: ExerciceBoiteMoustaches): string {
+  return formatEnonceTexte(exercice).replace(/^Voici la répartition/, "On étudie la répartition").replace(/\s*:\s*$/, ".");
+}
+
 function cinqNombresLatex(valeurs: CinqNombres): string {
   return formatTermesCinqNombresLatex(valeurs).join(";\\ ");
 }
@@ -392,7 +398,7 @@ function enoncePapierBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EnonceP
   if (exercice.variante === "construction") {
     return {
       section: {
-        enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" Voici les 5 valeurs qui la caractérisent : "), latex(cinqNombresLatex(exercice.valeurs)), texte(".")]),
+        enteteFragments: enVirgules([texte(phraseEtude(exercice)), texte(" Voici les 5 valeurs qui la caractérisent : "), latex(cinqNombresLatex(exercice.valeurs)), texte(".")]),
         questions: [
           {
             consigne: enVirgules([
@@ -407,7 +413,7 @@ function enoncePapierBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EnonceP
   if (exercice.variante === "lecture") {
     return {
       section: {
-        enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" La boîte à moustaches ci-dessous représente cette série.")]),
+        enteteFragments: enVirgules([texte(phraseEtude(exercice)), texte(" La boîte à moustaches ci-dessous représente cette série.")]),
         enteteHtml: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }]),
         questions: [
           {
@@ -432,7 +438,7 @@ function enoncePapierBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EnonceP
   }
   return {
     section: {
-      enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" Le graphique ci-dessous représente les boîtes à moustaches des 2 séries.")]),
+      enteteFragments: enVirgules([texte(phraseEtude(exercice)), texte(" Le graphique ci-dessous représente les boîtes à moustaches des 2 séries.")]),
       enteteHtml: construireSvgBoiteMoustaches(exercice.bornePlage, construireLignesComparaison(exercice)),
       questions: [
         {

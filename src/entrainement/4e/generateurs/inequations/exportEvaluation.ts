@@ -163,7 +163,9 @@ function etapesResolution(instance: ExerciceInequation): EtapeResolution[] {
         fragments:
           deltaEffectif < 0
             ? [texte("Δ < 0 ne veut pas dire « pas de solution » : selon le signe de a et le symbole, S est ℝ tout entier ou vide.")]
-            : symbole === "≤" || symbole === "≥"
+            : r1 === r2
+              ? [texte("Racine double : le trinôme ne change pas de signe. Avec une inégalité large, la racine elle-même est solution ; avec une inégalité stricte, elle est exclue.")]
+              : symbole === "≤" || symbole === "≥"
               ? [texte("Inégalité large : les racines font partie de l'ensemble-solution (crochets fermés).")]
               : [texte("Inégalité stricte : les racines sont exclues (crochets ouverts).")],
       },
@@ -219,10 +221,12 @@ function baremeInequations(instance: ExerciceInequation): BaremeExercice {
             : [texte("Ensemble-solution, crochets corrects : "), latex(`S = ${ensembleLatex(instance.solution)}`)],
     points: POIDS[e.phase],
   }));
-  const erreurs: ErreurFrequente[] = [
-    { description: [texte("Signes intérieur/extérieur des racines inversés")], cout: `0 pt sur ${lettre("intervalle")})` },
-    { description: [texte("Crochets ouverts/fermés inversés (inégalité stricte ou large)")], cout: `moitié des points sur ${lettre("intervalle")})` },
-  ];
+  const erreurs: ErreurFrequente[] = [];
+  if (instance.delta > 0) {
+    erreurs.push({ description: [texte("Signes intérieur/extérieur des racines inversés")], cout: `0 pt sur ${lettre("intervalle")})` });
+    erreurs.push({ description: [texte("Crochets ouverts/fermés inversés (inégalité stricte ou large)")], cout: `moitié des points sur ${lettre("intervalle")})` });
+  }
+  if (instance.delta === 0) erreurs.push({ description: [texte("Racine double comptée comme deux racines distinctes, ou mal incluse/exclue")], cout: `moitié des points sur ${lettre("intervalle")})` });
   if (instance.delta < 0) erreurs.push({ description: [texte("Δ < 0 conclu en S = ∅ sans regarder le signe de a")], cout: `0 pt sur ${lettre("intervalle")})` });
   return {
     reponseFinale: [latex(`S = ${ensembleLatex(instance.solution)}`)],

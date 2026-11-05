@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -57,6 +58,15 @@ function nouvelleSession(): EtatSessionDispersion {
   return demarrerSessionDispersion(REGLAGES_DEMO, genererExerciceDispersion);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME
+ * catalogue que l'adaptateur d'export (`generateurs/dispersion/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionDispersion {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDispersion(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceDispersion, undefined));
+}
+
 const ORDRE_PHASES: PhaseDispersion[] = ["tableau", "varianceEcartType"];
 
 function calculerSegmentsProgression(etat: EtatSessionDispersion): EtatPuceProgression[] {
@@ -78,7 +88,7 @@ interface TransitionEnAttente {
 }
 
 export function AppDispersion() {
-  const [etat, setEtat] = useState<EtatSessionDispersion>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDispersion>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables), remise à vide à chaque exercice. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);

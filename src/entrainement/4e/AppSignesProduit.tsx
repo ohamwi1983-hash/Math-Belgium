@@ -52,6 +52,7 @@ import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE, libelleCategorie } from "./ui/cate
 import { formatSolutionEnsembleProduitLatex } from "./ui/formatSolutionEnsembleProduit";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Résous cette inéquation en étudiant le signe de chacun de ses facteurs.";
 
@@ -69,6 +70,17 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionSignesProduit {
   return demarrerSessionSignesProduit(REGLAGES_DEMO, genererExerciceSignesProduit);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), le premier
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export (`generateurs/signesProduit/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionSignesProduit {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSignesProduit(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSignesProduit, (id) => construireAvecVarianteId(id as VarianteSignesProduitId)),
+  );
 }
 
 /** Le facteur quadratique factorisable de l'exercice courant, s'il existe — même principe que p2DeFractionGauche (AppEquationRationnelle.tsx). */
@@ -233,7 +245,7 @@ interface TransitionEnAttente {
 }
 
 export function AppSignesProduit() {
-  const [etat, setEtat] = useState<EtatSessionSignesProduit>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSignesProduit>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSignesProduit`, jamais dans le moteur (voir

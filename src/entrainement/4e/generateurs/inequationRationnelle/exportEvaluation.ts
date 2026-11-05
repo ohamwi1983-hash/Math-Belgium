@@ -5,7 +5,6 @@ import type {
   ValeurCelluleQuotient,
 } from "../../core/inequationRationnelle.types";
 import type { ExerciceSimplification, PolynomeLineaire } from "../../core/simplification.types";
-import type { SolutionEnsembleProduit } from "../../core/signesProduit.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,

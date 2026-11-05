@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -50,6 +51,15 @@ function nouvelleSession(): EtatSessionBoiteMoustaches {
   return demarrerSessionBoiteMoustaches(REGLAGES_DEMO, genererExerciceBoiteMoustaches);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son PREMIER exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME
+ * catalogue que l'adaptateur d'export (`generateurs/boiteMoustaches/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionBoiteMoustaches {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionBoiteMoustaches(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceBoiteMoustaches, (id) => construireAvecVarianteId(id as VarianteBoiteMoustaches)));
+}
+
 const SEQUENCE_COMPARAISON: PhaseBoiteMoustaches[] = ["comparaisonMedianes", "comparaisonDispersions"];
 
 /** Segments de la barre de puces — seule la variante "comparaison" traverse une vraie séquence à 2
@@ -76,7 +86,7 @@ interface TransitionEnAttente {
 }
 
 export function AppBoiteMoustaches() {
-  const [etat, setEtat] = useState<EtatSessionBoiteMoustaches>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionBoiteMoustaches>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables, variante comparaison — seule
    * variante à plusieurs écrans), remise à vide à chaque exercice. */
