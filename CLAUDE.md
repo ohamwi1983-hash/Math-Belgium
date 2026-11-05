@@ -60,6 +60,7 @@ tâches :
 | `.claude/rules/export-pipeline.md` | `src/lib/export/**`, `src/components/chapter/ExportSection.tsx` | Pipeline d'export Word/PDF/PowerPoint (`collectBlocks`, `captureBlocks`, `buildPdf`/`buildDocx`/`buildPptx`). |
 | `.claude/rules/content-history.md` | `src/content/chapters/**` | Historique détaillé, chapitre par chapitre, des migrations/enrichissements déjà réalisés (choix éditoriaux, bugs trouvés et corrigés, kinds ajoutés). |
 | `.claude/rules/quiz-generators.md` | `src/entrainement/**/generateurs/quiz*/**` | Convention des bancs d'affirmations vrai/faux : jamais de « grand calcul » (seulement vérification rapide), critère de tri, et le piège `nombreExercices` fixe si le compte varie par thème. |
+| `.claude/rules/feuilles-evaluations.md` | `src/entrainement/export/**`, `**/exportEvaluation.ts`, `src/lib/evaluation*.ts`, `src/lib/banquesVraiFaux.ts` | Méthode des feuilles d'exercices et évaluations (pilote 6e ch. 3) : décisions de l'utilisateur (pas de place de réponse, énoncé papier sans sous-questions, version aménagée, sélecteurs intacts), champs d'adaptateur à remplir, `versionPapier`, `?code=`, vrai/faux, mise en page A4, vérifications. À relire avant d'étendre la refonte à un chapitre. |
 
 ## Vérification avant de pousser
 
