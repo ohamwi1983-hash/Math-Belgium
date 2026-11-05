@@ -591,6 +591,19 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie.",
   ],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // d'exemple du cours (`src/content/chapters/4e/caracteristiques-fonctions-reference.ts`).
+  'caracteristiques-fonctions-reference': {
+    algebrique: [
+      { cle: 'inverse', enonce: "Étudie algébriquement la fonction $f(x) = \\dfrac{1}{2x+4} - \\dfrac{1}{3}$ : détermine sa condition d'existence, son domaine de définition et ses zéros." },
+      { cle: 'racine carrée', enonce: "Étudie algébriquement la fonction $f(x) = \\sqrt{2x-4} - \\dfrac{1}{2}$ : détermine sa condition d'existence, son domaine de définition et ses zéros." },
+    ],
+    transformer: [
+      { cle: 'inverse, translations', enonce: "Pour $f(x) = \\dfrac{1}{x-3} + 2$, identifie les transformations (TH et TV) appliquées à la fonction de référence $x \\mapsto \\dfrac{1}{x}$, puis donne les équations des asymptotes de son graphique." },
+      { cle: 'inverse — division', enonce: "Écris $f(x) = \\dfrac{2x+7}{x+3}$ sous la forme $\\dfrac{1}{x-TH} + TV$ en faisant apparaître $x+3$ au numérateur, puis donne TH et TV." },
+      { cle: 'valeur absolue — facteur commun', enonce: "Écris $f(x) = |2x+6|$ sous la forme $EV \\cdot |x-TH| + TV$, puis donne TH, EV et TV." },
+    ],
+  },
   'statistique-descriptive': {
   moyenne: [
     "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$.",
@@ -981,7 +994,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)

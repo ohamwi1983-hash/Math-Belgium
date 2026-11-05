@@ -4,7 +4,8 @@ import type { ReglagesFamillesFonctionReference, ReponseCurseursFonctionReferenc
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionFonctionReference, soumettreChoixFamille, soumettreReponse } from "./moteur/sessionFonctionsReference";
 import type { EtatSessionFonctionReference } from "./moteur/typesFonctionsReference";
-import { CATALOGUE_VARIANTES, construireAvecFamille, creerGenerateurFonctionReference } from "./generateurs/fonctionsReference";
+import { CATALOGUE_VARIANTES, construireAvecFamille, creerGenerateurFonctionReference, genererExerciceFonctionReference } from "./generateurs/fonctionsReference";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { FamilleReference } from "./core/fonctionsReference.types";
 import { calculerRecapitulatifFonctionReference } from "./ui/recapitulatifFonctionsReference";
 import { formatEquationFonctionReferenceLatex } from "./ui/formatFonctionsReference";
@@ -48,6 +49,22 @@ function demarrer(reglagesFamilles: ReglagesFamillesFonctionReference): EtatSess
       : Object.values(reglagesFamilles.quantites).reduce((total: number, quantite: number) => total + quantite, 0);
   const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices };
   return demarrerSessionFonctionReference(reglagesSession, creerGenerateurFonctionReference(reglagesFamilles));
+}
+
+/** Session ouverte par le QR code d'une feuille imprimée (`?code=XXXXXX`) : l'écran de réglages est
+ * sauté et le PREMIER exercice est l'instance imprimée — tirée avec les MÊMES fonctions de génération
+ * que l'adaptateur d'export (`generateurs/fonctionsReference/exportEvaluation.ts`) ; les exercices
+ * suivants sont des tirages normaux. `null` sans code dans l'URL. */
+function sessionDepuisCode(): EtatSessionFonctionReference | null {
+  const code = lireCodeDepuisUrl();
+  if (!code) return null;
+  let premier = true;
+  const generateur = () => {
+    if (!premier) return genererExerciceFonctionReference();
+    premier = false;
+    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceFonctionReference, (id) => construireAvecFamille(id as FamilleReference));
+  };
+  return demarrerSessionFonctionReference({ ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE }, generateur);
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -127,7 +144,7 @@ function calculerSegmentsProgression(etat: EtatSessionFonctionReference): EtatPu
 
 export function AppFonctionsReference() {
   const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(null);
-  const [etat, setEtat] = useState<EtatSessionFonctionReference | null>(null);
+  const [etat, setEtat] = useState<EtatSessionFonctionReference | null>(sessionDepuisCode);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   /** Curseurs de l'écran "exercice", remontés ici (plutôt que locaux à `EtapeFonctionsReferenceExercice`)

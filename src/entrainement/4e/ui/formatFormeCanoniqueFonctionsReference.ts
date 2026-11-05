@@ -10,7 +10,7 @@ const DENOMINATEUR_MAX_COEFFICIENT = 700;
 
 /** Rend un coefficient combiné (potentiellement fractionnaire, ex. `2/27`) en LaTeX — signe porté
  * devant `\frac{}{}`, jamais à l'intérieur du numérateur. */
-function formatCoefficientLatex(valeur: number): string {
+export function formatCoefficientLatex(valeur: number): string {
   const brut = formatFractionIrreductible(valeur, DENOMINATEUR_MAX_COEFFICIENT);
   if (!brut.includes("/")) return brut;
   const negatif = brut.startsWith("-");
@@ -23,7 +23,7 @@ function formatCoefficientLatex(valeur: number): string {
  * de plusieurs familles est désormais dérivé directement de CH/EH/EV/CV, généralement non entier —
  * voir `construireFormeDepart`) : rendues en `\frac{}{}` exacte via `formatCoefficientLatex`,
  * jamais en décimal brut. */
-function formatLineaire(a: number, b: number): string {
+export function formatLineaire(a: number, b: number): string {
   const partieX = a === 0 ? "" : a === 1 ? "x" : a === -1 ? "-x" : `${formatCoefficientLatex(a)}x`;
   if (b === 0) return partieX === "" ? "0" : partieX;
   const signe = b > 0 ? "+" : "-";
@@ -91,7 +91,8 @@ function formatBinomeCoef(coef: number, p: number, avecParentheses: boolean): st
   if (coef === 1) return interieur;
   const groupe = p === 0 ? interieur : avecParentheses ? `(${interieur})` : interieur;
   if (coef === -1) return `-${groupe}`;
-  return `${formatCoefficientLatex(coef)}${p === 0 && !avecParentheses ? interieur : `(${interieur})`}`;
+  // `x` nu jamais parenthésé (`-2x`, pas `-2(x)`), même quand le binôme le serait.
+  return `${formatCoefficientLatex(coef)}${p === 0 ? interieur : `(${interieur})`}`;
 }
 
 function formatResidu(q: number): string {
@@ -115,11 +116,12 @@ export function formatFonctionSimpleLatex(
   }
   if (famille === "valeur_absolue") {
     const groupe = p === 0 ? "x" : p > 0 ? `x - ${p}` : `x + ${-p}`;
-    const base = a === 1 ? "" : formatCoefficientLatex(a);
+    const base = a === 1 ? "" : a === -1 ? "-" : formatCoefficientLatex(a);
     return `f(x) = ${base}\\left|${groupe}\\right|${formatResidu(q)}`;
   }
   const groupe = p === 0 ? "x" : p > 0 ? `x - ${p}` : `x + ${-p}`;
-  return `f(x) = \\frac{${formatCoefficientLatex(a)}}{${groupe}}${formatResidu(q)}`;
+  // Signe porté devant la fraction (`-\\frac{5}{x}`), jamais dans le numérateur.
+  return `f(x) = ${a < 0 ? "-" : ""}\\frac{${formatCoefficientLatex(Math.abs(a))}}{${groupe}}${formatResidu(q)}`;
 }
 
 /** `outer·\sqrt{inner(x-p)}+q` / `outer·\sqrt[3]{inner(x-p)}+q` — coefficients externe et interne
@@ -285,4 +287,22 @@ export function formatGabaritEtape4Latex(exercice: ExerciceFormeCanoniqueFonctio
     sox: exercice.sox,
     tv: 0,
   });
+}
+
+/** `g(x)` de la famille de référence, en LaTeX (corrigé et version aménagée des feuilles). */
+export function fonctionReferenceLatex(famille: FamilleReference): string {
+  switch (famille) {
+    case "carre":
+      return "g(x) = x^2";
+    case "cube":
+      return "g(x) = x^3";
+    case "racine_carree":
+      return "g(x) = \\sqrt{x}";
+    case "racine_cubique":
+      return "g(x) = \\sqrt[3]{x}";
+    case "inverse":
+      return "g(x) = \\frac{1}{x}";
+    case "valeur_absolue":
+      return "g(x) = |x|";
+  }
 }

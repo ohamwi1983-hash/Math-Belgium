@@ -1,63 +1,334 @@
 import type { ExerciceFormeCanoniqueFonctionReference, FamilleReference } from "../../core/formeCanoniqueFonctionsReference.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeAmenagee,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { cibleFinale } from "../../moteur/verificationFormeCanoniqueFonctionsReference";
-import { formatCibleLatex, formatFormeDepartLatex } from "../../ui/formatFormeCanoniqueFonctionsReference";
+import {
+  fonctionReferenceLatex,
+  formatCibleLatex,
+  formatCoefficientLatex,
+  formatFormeDepartLatex,
+  formatGabaritLatex,
+  formatLineaire,
+} from "../../ui/formatFormeCanoniqueFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFormeCanoniqueFonctionReference } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference>` pour gen11
  * (Transformer une fonction de référence — forme canonique et transformations, chapitre 3,
- * `AppFormeCanoniqueFonctionsReference.tsx`) — feuille d'évaluation.
+ * `AppFormeCanoniqueFonctionsReference.tsx`) — feuille d'exercices et évaluation.
  *
- * Analogue direct de gen9 (`generateurs/formeCanoniqueTransformations/exportEvaluation.ts`),
- * généralisé aux 6 familles de référence (`FAMILLES`) : l'écran interactif fait passer par 6
- * phases fixes (reconnaissance de la famille → forme canonique → EH/CH/SOY → TH → EV/CV/SOX → TV,
- * voir `core/formeCanoniqueFonctionsReference.types.ts`), mais SEULE la toute première étape
- * écrite (`EtapeCanoniqueFR.tsx`, phase "canonique") correspond à un travail effectivement
- * reproductible sur papier : l'élève y simplifie `formeDepart` (affichée telle quelle, jamais
- * pré-simplifiée) en un unique champ libre `f(x) = ...`. Les phases suivantes (EH/CH/SOY, TH,
- * EV/CV/SOX, TV) ne font que reconstruire CE MÊME résultat morceau par morceau via des curseurs —
- * elles n'ajoutent aucune information supplémentaire à vérifier par écrit (contrairement à gen9,
- * où cette même condensation en une question unique était déjà le choix fait).
+ * Énoncé papier = l'énoncé (la forme de départ) et la consigne globale de l'appli (« détermine la
+ * forme canonique ») — voir `.claude/rules/feuilles-evaluations.md`. Les 6 écrans du générateur
+ * (reconnaissance de la famille → forme canonique → EH/CH/SOY → TH → EV/CV/SOX → TV) sont des
+ * étapes d'apprentissage : la reconnaissance et la simplification passent dans le corrigé, et les
+ * transformations (curseurs) y sont données comme UNE décomposition possible — sur papier elles
+ * ne sont pas demandées, parce qu'elles ne sont pas uniques (pour le carré ou la valeur absolue, un
+ * étirement vertical et une compression horizontale donnent la même courbe).
  *
- * Cible utilisée pour la correction — `cibleEtape1` (vérification de la phase "canonique") est
- * TOUJOURS égale, terme à terme, à `cibleFinale` du même exercice (propriété de cohérence
- * documentée dans `verificationFormeCanoniqueFonctionsReference.ts`, section "Étape 1") : la forme
- * canonique demandée ici EST donc directement la fonction finale complète, jamais un résultat
- * partiel. `cibleFinale`/`formatCibleLatex` sont réutilisées telles quelles (déjà les fonctions du
- * module de vérification/formatage utilisées côté écran) plutôt que recalculées indépendamment ici
- * — même principe que `generateurs/fonctionsReference/exportEvaluation.ts` (gen10), qui importe
- * lui aussi directement `moteur/verificationFonctionsReference.ts` (la règle "`src/generateurs/`
- * n'importe jamais `src/moteur/`" ne s'applique qu'à la Couche A — génération, `index.ts` — jamais
- * à l'export, qui a toujours légitimement réutilisé la vérification/le formatage existants).
+ * Une seule question par instance et consigne GÉNÉRIQUE (aucune valeur tirée), sans `enteteHtml` :
+ * `regroupable: true` (plusieurs fonctions sous une même question a) b) c) en évaluation).
  *
- * `regroupable: true` — une seule question par instance, consigne GÉNÉRIQUE (constante, aucune
- * valeur tirée interpolée), sans `enteteHtml` : remplit exactement les 3 conditions de
- * `AdaptateurFeuilleExercices.regroupable` (voir `export/genererFeuilleExercices.ts`). gen9 ne
- * l'active pas lui-même, mais seulement parce que son adaptateur a été écrit avant l'introduction
- * de ce mécanisme (commit `64eeb7e`, antérieur à `5faf026` qui l'introduit) — jamais parce qu'il ne
- * remplirait pas les conditions ; gen11, écrit après, l'active donc directement.
+ * Toutes les valeurs viennent des fonctions de l'écran : `cibleFinale`/`formatCibleLatex`
+ * (réponse attendue), `formatFormeDepartLatex` (énoncé), `formatGabaritLatex` (décomposition en
+ * transformations) ; seuls les calculs intermédiaires du corrigé (p, quotient/reste) sont
+ * recalculés depuis `formeDepart`, par les mêmes formules que `cibleEtape1`.
  */
 
-const CONSIGNE_GENERALE = "Simplifie cette expression pour obtenir sa forme canonique (fonction de référence transformée).";
+const CONSIGNE_GENERALE = "Détermine la forme canonique de la fonction (fonction de référence transformée).";
+
+const NOM_FAMILLE: Record<FamilleReference, string> = {
+  carre: "fonction carré",
+  cube: "fonction cube",
+  racine_carree: "fonction racine carrée",
+  racine_cubique: "fonction racine cubique",
+  inverse: "fonction inverse",
+  valeur_absolue: "fonction valeur absolue",
+};
+
+// ---------------------------------------------------------------------------------------------
+// Briques LaTeX du corrigé
+// ---------------------------------------------------------------------------------------------
+
+/** Coefficient placé devant un facteur : 1 → rien, −1 → « − », sinon le nombre (fraction exacte). */
+function prefixe(valeur: number): string {
+  if (valeur === 1) return "";
+  if (valeur === -1) return "-";
+  return formatCoefficientLatex(valeur);
+}
+
+/** `x − p` (ou `x + |p|`, ou `x` si p = 0). */
+function binome(p: number): string {
+  if (p === 0) return "x";
+  return p > 0 ? `x - ${formatCoefficientLatex(p)}` : `x + ${formatCoefficientLatex(-p)}`;
+}
+
+/** ` + v` / ` - |v|` / rien si v = 0. */
+function termeConstant(v: number): string {
+  if (v === 0) return "";
+  return v > 0 ? ` + ${formatCoefficientLatex(v)}` : ` - ${formatCoefficientLatex(-v)}`;
+}
+
+/** ` + \frac{n}{d}` avec le signe du numérateur sorti devant la fraction. */
+function termeFraction(numerateur: number, denominateurLatex: string): string {
+  const signe = numerateur < 0 ? "-" : "+";
+  return ` ${signe} \\frac{${formatCoefficientLatex(Math.abs(numerateur))}}{${denominateurLatex}}`;
+}
+
+function egal(a: number, b: number): boolean {
+  return Math.abs(a - b) < 1e-9;
+}
+
+/** Méthode de simplification de la famille (corrigé). */
+function methode(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
+  switch (exercice.formeDepart.type) {
+    case "carre":
+      return [texte("Compléter le carré : mettre le coefficient de x² en évidence dans les termes en x, puis utiliser "), latex("x^2 + 2kx = (x + k)^2 - k^2"), texte(".")];
+    case "inverse":
+      return [texte("Diviser : écrire le numérateur à l'aide du dénominateur, séparer la fraction en deux termes, puis mettre le coefficient de x en évidence au dénominateur.")];
+    case "cube":
+      return [texte("Mettre le coefficient de x en évidence à l'intérieur du cube, puis le faire sortir au cube : "), latex("(b\\cdot u)^3 = b^3\\cdot u^3"), texte(".")];
+    case "racine_carree":
+    case "racine_cubique":
+      return [texte("Mettre le coefficient de x en évidence sous la racine pour faire apparaître x − p ; ce coefficient reste sous la racine.")];
+    case "valeur_absolue":
+      return [texte("Mettre le coefficient de x en évidence dans la valeur absolue, puis le faire sortir en valeur absolue : "), latex("|a\\cdot u| = |a|\\cdot|u|"), texte(".")];
+  }
+}
+
+/** Calcul intermédiaire (corrigé), recalculé depuis `formeDepart` par les formules de `cibleEtape1`. */
+function calculIntermediaire(exercice: ExerciceFormeCanoniqueFonctionReference): string {
+  const forme = exercice.formeDepart;
+  switch (forme.type) {
+    case "carre": {
+      const p = -forme.b / (2 * forme.a);
+      if (egal(p, 0)) return `f(x) = ${prefixe(forme.a)}x^2${termeConstant(forme.c)} \\quad (\\text{pas de terme en } x)`;
+      const lineaire = `x^2 ${-2 * p > 0 ? "+" : "-"} ${prefixe(Math.abs(2 * p))}x`;
+      const avecA = (contenu: string) => (forme.a === 1 ? contenu : `${prefixe(forme.a)}\\left[${contenu}\\right]`);
+      const premier = forme.a === 1 ? lineaire : `${prefixe(forme.a)}\\left(${lineaire}\\right)`;
+      return `f(x) = ${premier}${termeConstant(forme.c)} = ${avecA(`(${binome(p)})^2 - ${formatCoefficientLatex(p * p)}`)}${termeConstant(forme.c)}`;
+    }
+    case "inverse": {
+      const quotient = forme.a / forme.c;
+      const reste = forme.b - (forme.a * forme.d) / forme.c;
+      const p = -forme.d / forme.c;
+      const denominateur = formatLineaire(forme.c, forme.d);
+      const etape1 = `f(x) = \\frac{${prefixe(quotient)}\\left(${denominateur}\\right)${termeConstant(reste)}}{${denominateur}}`;
+      const etape2 = `${formatCoefficientLatex(quotient)}${termeFraction(reste, denominateur)}`;
+      const etape3 = `${formatCoefficientLatex(quotient)}${termeFraction(reste / forme.c, binome(p))}`;
+      return `${etape1} = ${etape2} = ${etape3}`;
+    }
+    case "cube": {
+      const p = -forme.a / forme.b;
+      return `(${formatLineaire(forme.b, forme.a)})^3 = \\left(${prefixe(forme.b)}(${binome(p)})\\right)^3 = ${prefixe(forme.b ** 3)}(${binome(p)})^3`;
+    }
+    case "racine_carree":
+    case "racine_cubique": {
+      const p = -forme.b / forme.a;
+      const racine = (contenu: string) => (forme.type === "racine_carree" ? `\\sqrt{${contenu}}` : `\\sqrt[3]{${contenu}}`);
+      return `${racine(formatLineaire(forme.a, forme.b))} = ${racine(`${prefixe(forme.a)}(${binome(p)})`)}`;
+    }
+    case "valeur_absolue": {
+      const p = -forme.b / forme.a;
+      return `\\left|${formatLineaire(forme.a, forme.b)}\\right| = \\left|${formatCoefficientLatex(forme.a)}\\right|\\cdot\\left|${binome(p)}\\right| = ${prefixe(Math.abs(forme.a))}\\left|${binome(p)}\\right|`;
+    }
+  }
+}
+
+/** Rapport `n/d` en LaTeX, jamais réduit à un décimal. */
+function rapport(n: number, d: number): string {
+  return d === 1 ? `${n}` : `\\tfrac{${n}}{${d}}`;
+}
+
+/** Les transformations d'UNE décomposition possible (celle de l'exercice tiré), dans l'ordre de la
+ * formule unifiée du cours. */
+function listeTransformations(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[][] {
+  const items: FragmentConsigne[][] = [];
+  const horizontal = exercice.ch / exercice.eh;
+  if (horizontal > 1) items.push([texte("compression horizontale "), latex(`\\tfrac{CH}{EH} = ${rapport(exercice.ch, exercice.eh)}`)]);
+  if (horizontal < 1) items.push([texte("étirement horizontal "), latex(`\\tfrac{CH}{EH} = ${rapport(exercice.ch, exercice.eh)}`)]);
+  if (exercice.soy) items.push([texte("symétrie d'axe Oy")]);
+  if (exercice.th !== 0) items.push([texte("translation horizontale "), latex(`TH = ${exercice.th}`)]);
+  const vertical = exercice.ev / exercice.cv;
+  if (vertical > 1) items.push([texte("étirement vertical "), latex(`\\tfrac{EV}{CV} = ${rapport(exercice.ev, exercice.cv)}`)]);
+  if (vertical < 1) items.push([texte("compression verticale "), latex(`\\tfrac{EV}{CV} = ${rapport(exercice.ev, exercice.cv)}`)]);
+  if (exercice.sox) items.push([texte("symétrie d'axe Ox")]);
+  if (exercice.tv !== 0) items.push([texte("translation verticale "), latex(`TV = ${exercice.tv}`)]);
+  return items;
+}
+
+function piege(exercice: ExerciceFormeCanoniqueFonctionReference): string {
+  switch (exercice.formeDepart.type) {
+    case "carre":
+      return "En complétant le carré, le terme soustrait p² est lui aussi multiplié par le coefficient mis en évidence.";
+    case "inverse":
+      return "Le reste de la division doit encore être divisé par le coefficient de x du dénominateur, pour faire apparaître x − p.";
+    case "cube":
+      return "Le coefficient mis en évidence dans le cube sort AU CUBE, pas tel quel.";
+    case "racine_carree":
+    case "racine_cubique":
+      return "Le coefficient mis en évidence reste SOUS la racine : on ne le fait pas sortir.";
+    case "valeur_absolue":
+      return "Le coefficient sort de la valeur absolue en valeur absolue : un coefficient négatif devient positif.";
+  }
+}
+
+const PIEGE_SIGNE = "Piège du signe : x + 3 = x − (−3), donc le point caractéristique est en x = −3, pas en x = 3.";
+
+function formeCanoniqueLatex(exercice: ExerciceFormeCanoniqueFonctionReference): string {
+  return formatCibleLatex(exercice.famille, cibleFinale(exercice));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Champs de l'adaptateur
+// ---------------------------------------------------------------------------------------------
 
 function construireEnonceFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): SectionExercice {
   return {
     enteteFragments: [texte("On considère la fonction "), latex(formatFormeDepartLatex(exercice)), texte(".")],
-    questions: [{ consigne: [texte(CONSIGNE_GENERALE)], reponse: { type: "lignes", nombre: 3 } }],
+    questions: [{ consigne: [texte(CONSIGNE_GENERALE)] }],
   };
+}
+
+/** Énoncé papier : déjà l'énoncé et la consigne globale (une seule question, sans étape). */
+function enoncePapierFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EnoncePapier {
+  return { section: construireEnonceFormeCanoniqueFonctionsReference(exercice), etapesParQuestion: [["a"]] };
 }
 
 function construireCorrectionFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): BlocCorrection[] {
   const libelleFamille = CATALOGUE_VARIANTES.find((variante) => variante.id === exercice.famille)?.label ?? exercice.famille;
   return [
     { type: "paragraphe", fragments: [texte(`Fonction de référence reconnue : ${libelleFamille}.`)] },
-    {
-      type: "paragraphe",
-      fragments: [texte("Forme canonique : "), latex(formatCibleLatex(exercice.famille, cibleFinale(exercice)))],
-    },
+    { type: "paragraphe", fragments: [texte("Forme canonique : "), latex(formeCanoniqueLatex(exercice))] },
   ];
+}
+
+function difficulteFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): 1 | 2 | 3 {
+  const forme = exercice.formeDepart;
+  if (forme.type === "inverse") return 3;
+  if (forme.type === "carre") return forme.a === 1 && Number.isInteger(forme.b / 2) ? 2 : 3;
+  return [forme.a, forme.b].every(Number.isInteger) ? 2 : 3;
+}
+
+function reponseBreveFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): FragmentConsigne[] {
+  return [latex(formeCanoniqueLatex(exercice))];
+}
+
+function correctionDetailleeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EtapeCorrection[] {
+  const transformations = listeTransformations(exercice).flatMap((item, i) => (i === 0 ? item : [texte(", "), ...item]));
+  return [
+    { label: "Famille", fragments: [texte(`La forme de départ enveloppe x dans la ${NOM_FAMILLE[exercice.famille]} : `), latex(fonctionReferenceLatex(exercice.famille)), texte(".")] },
+    { label: "Méthode", fragments: methode(exercice) },
+    { label: "Calcul", fragments: [latex(calculIntermediaire(exercice))] },
+    { label: "Conclusion", fragments: [latex(formeCanoniqueLatex(exercice))] },
+    {
+      label: "Transformations",
+      fragments: [
+        texte("Une décomposition possible à partir de g : "),
+        latex(formatGabaritLatex(exercice)),
+        ...(transformations.length > 0 ? [texte(" — "), ...transformations, texte(".")] : [texte(".")]),
+      ],
+    },
+    { label: "Piège", fragments: [texte(exercice.th !== 0 && exercice.formeDepart.type !== "carre" && exercice.formeDepart.type !== "inverse" ? `${piege(exercice)} ${PIEGE_SIGNE}` : piege(exercice))] },
+  ];
+}
+
+function erreursFrequentes(exercice: ExerciceFormeCanoniqueFonctionReference): ErreurFrequente[] {
+  const erreurs: ErreurFrequente[] = [{ description: [texte("Signe de p inversé (x + p au lieu de x − p)")], cout: "−1" }];
+  switch (exercice.formeDepart.type) {
+    case "carre":
+      erreurs.push({ description: [texte("Terme −p² non multiplié par le coefficient mis en évidence")], cout: "−1" });
+      break;
+    case "inverse":
+      erreurs.push({ description: [texte("Quotient et reste de la division confondus")], cout: "−2" });
+      break;
+    case "cube":
+      erreurs.push({ description: [texte("Coefficient sorti du cube sans être élevé au cube")], cout: "−1" });
+      break;
+    case "racine_carree":
+    case "racine_cubique":
+      erreurs.push({ description: [texte("Coefficient sorti de la racine")], cout: "−1" });
+      break;
+    case "valeur_absolue":
+      erreurs.push({ description: [texte("Coefficient négatif sorti de la valeur absolue avec son signe")], cout: "−1" });
+      break;
+  }
+  return erreurs;
+}
+
+function baremeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): BaremeExercice {
+  return {
+    reponseFinale: [latex(formeCanoniqueLatex(exercice))],
+    criteres: [
+      { critere: [texte("Reconnaît la fonction de référence")], points: 0.5 },
+      { critere: methode(exercice), points: 1 },
+      { critere: [texte("Valeur de p correcte, signe compris (point caractéristique en x = p)")], points: 1 },
+      { critere: [texte("Coefficient et terme constant corrects")], points: 1 },
+      { critere: [texte("Forme canonique finale correctement écrite")], points: 0.5 },
+    ],
+    erreursFrequentes: erreursFrequentes(exercice),
+    reponsesAcceptees: [[texte("Coefficient écrit sous une autre forme exacte (fraction non réduite, décimal exact)")], [texte("Transformations correctes décrites en plus (non exigées)")]],
+  };
+}
+
+function enonceAmenageFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EtapeAmenagee[] {
+  const reconnaitre: EtapeAmenagee = {
+    consigne: [texte("Reconnais la fonction de référence g cachée dans f.")],
+    rappel: [texte("Regarde ce qui enveloppe x : un carré, un cube, une racine, une fraction ou une valeur absolue.")],
+    points: 0.5,
+  };
+  const conclure: EtapeAmenagee = { consigne: [texte("Écris la forme canonique de f.")], points: 0.5 };
+  switch (exercice.formeDepart.type) {
+    case "carre":
+      return [
+        reconnaitre,
+        { consigne: [texte("Mets le coefficient de x² en évidence dans les termes en x.")], rappel: [latex("ax^2 + bx = a\\left(x^2 + \\frac{b}{a}x\\right)")], points: 1 },
+        { consigne: [texte("Complète le carré.")], rappel: [latex("x^2 + 2kx = (x + k)^2 - k^2")], points: 1 },
+        { consigne: [texte("Distribue le coefficient et regroupe les constantes.")], rappel: [texte("Le terme soustrait est lui aussi multiplié par le coefficient.")], points: 1 },
+        conclure,
+      ];
+    case "inverse":
+      return [
+        reconnaitre,
+        { consigne: [texte("Écris le numérateur à l'aide du dénominateur.")], rappel: [latex("ax + b = \\frac{a}{c}(cx + d) + \\text{reste}")], points: 1 },
+        { consigne: [texte("Sépare la fraction en deux termes.")], points: 1 },
+        { consigne: [texte("Mets le coefficient de x en évidence au dénominateur pour faire apparaître x − p.")], points: 1 },
+        conclure,
+      ];
+    case "cube":
+      return [
+        reconnaitre,
+        { consigne: [texte("Mets le coefficient de x en évidence à l'intérieur des parenthèses.")], points: 1 },
+        { consigne: [texte("Fais sortir ce coefficient du cube.")], rappel: [latex("(b\\cdot u)^3 = b^3\\cdot u^3")], points: 1 },
+        { consigne: [texte("Multiplie par le facteur placé devant, puis garde le terme constant.")], points: 1 },
+        conclure,
+      ];
+    case "racine_carree":
+    case "racine_cubique":
+      return [
+        reconnaitre,
+        { consigne: [texte("Mets le coefficient de x en évidence sous la racine.")], rappel: [latex("ax + b = a\\left(x + \\frac{b}{a}\\right)")], points: 1.5 },
+        { consigne: [texte("Garde ce coefficient sous la racine ; recopie le facteur devant et le terme constant.")], points: 1.5 },
+        conclure,
+      ];
+    case "valeur_absolue":
+      return [
+        reconnaitre,
+        { consigne: [texte("Mets le coefficient de x en évidence dans la valeur absolue.")], points: 1 },
+        { consigne: [texte("Fais sortir ce coefficient de la valeur absolue.")], rappel: [latex("|a\\cdot u| = |a|\\cdot|u|")], points: 1 },
+        { consigne: [texte("Multiplie par le facteur placé devant, puis garde le terme constant.")], points: 1 },
+        conclure,
+      ];
+  }
 }
 
 export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference> = {
@@ -68,5 +339,12 @@ export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeu
   genererInstanceAvecVariante: (id) => construireAvecFamille(id as FamilleReference),
   construireEnonce: construireEnonceFormeCanoniqueFonctionsReference,
   construireCorrection: construireCorrectionFormeCanoniqueFonctionsReference,
+  difficulte: difficulteFormeCanoniqueFonctionsReference,
+  reponseBreve: reponseBreveFormeCanoniqueFonctionsReference,
+  correctionDetaillee: correctionDetailleeFormeCanoniqueFonctionsReference,
+  bareme: baremeFormeCanoniqueFonctionsReference,
+  enonceAmenage: enonceAmenageFormeCanoniqueFonctionsReference,
+  enoncePapier: enoncePapierFormeCanoniqueFonctionsReference,
+  dureeMinutes: 5,
   regroupable: true,
 };

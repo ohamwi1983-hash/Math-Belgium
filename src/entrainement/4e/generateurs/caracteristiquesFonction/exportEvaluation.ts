@@ -1,6 +1,17 @@
 import type { ExerciceCaracteristiquesFonction } from "../../core/caracteristiquesFonction.types";
 import type { Morceau } from "../../core/inequation.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeAmenagee,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
 import { calculerViewBoxCaracteristiques } from "../../ui/mafsCaracteristiquesFonction";
@@ -83,7 +94,7 @@ function formatBorneLatex(borne: number | "-inf" | "+inf"): string {
  * (dupliquée ici en LaTeX plutôt que texte brut, jamais réexportée : cette dernière n'a pas de
  * variante LaTeX déjà écrite). */
 function formatMorceauLatex(morceau: Morceau): string {
-  return `${morceau.crochetGauche}${formatBorneLatex(morceau.borneGauche)} ; ${formatBorneLatex(morceau.borneDroite)}${morceau.crochetDroit}`;
+  return `${morceau.crochetGauche}${formatBorneLatex(morceau.borneGauche)}\\,;\\,${formatBorneLatex(morceau.borneDroite)}${morceau.crochetDroit}`;
 }
 
 function formatMorceauxLatex(morceaux: Morceau[]): string {
@@ -277,10 +288,214 @@ function construireCorrectionCaracteristiquesFonction(exercice: ExerciceCaracter
   return blocs;
 }
 
+// ============================================================================
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème, version aménagée).
+// Les 8 lectures (une par écran, toujours dans le même ordre) sont les ÉTAPES a)…h) : sur papier,
+// l'énoncé est le graphique + une consigne globale qui les énumère ; elles passent dans le corrigé.
+// Toutes les valeurs viennent du moteur de vérification partagé avec l'écran
+// (`moteur/verificationCaracteristiquesFonction.ts`), jamais recalculées ici.
+// ============================================================================
+
+const LEGENDE =
+  "Le graphique ci-dessous représente une fonction f (trait plein : la courbe ; pointillé : asymptotes et discontinuité ; cercle plein : point appartenant à la courbe ; cercle vide : point exclu).";
+
+/** Ensemble d'intervalles, ou ∅ s'il n'y en a aucun. */
+function ensembleLatex(morceaux: Morceau[]): string {
+  return morceaux.length === 0 ? "\\varnothing" : formatMorceauxLatex(morceaux);
+}
+
+function zerosLatex(exercice: ExerciceCaracteristiquesFonction): string | null {
+  const zeros = [...exercice.zeros].sort((a, b) => a - b);
+  return zeros.length === 0 ? null : zeros.map((z) => `x = ${formatNombre(z)}`).join(" \\text{ ; } ");
+}
+
+function ordonneeLatex(exercice: ExerciceCaracteristiquesFonction): string | null {
+  return existeOrdonneeCaracteristiques(exercice) ? `f(0) = ${formatNombre(evaluerCourbeCaracteristiques(exercice, 0))}` : null;
+}
+
+function valeurLatex(exercice: ExerciceCaracteristiquesFonction): string | null {
+  return existeValeurEnVCaracteristiques(exercice) ? `f(${formatNombre(exercice.v)}) = ${formatNombre(evaluerCourbeCaracteristiques(exercice, exercice.v))}` : null;
+}
+
+function asymptotesLatex(exercice: ExerciceCaracteristiquesFonction): string {
+  return `AV \\equiv x = ${formatNombre(exercice.AV)} \\quad\\text{et}\\quad AH \\equiv y = ${formatNombre(exercice.L)}`;
+}
+
+/** Abscisses exclues du domaine, dans l'ordre croissant, avec leur raison (lecture du graphique). */
+function exclusions(exercice: ExerciceCaracteristiquesFonction): { x: number; fragments: FragmentConsigne[] }[] {
+  const liste: { x: number; fragments: FragmentConsigne[] }[] = [
+    { x: exercice.AV, fragments: [latex(`x = ${formatNombre(exercice.AV)}`), texte(" (asymptote verticale)")] },
+    { x: exercice.c, fragments: [latex(`x = ${formatNombre(exercice.c)}`), texte(" (cercle vide seul)")] },
+    ...exercice.gaps.map((g) => ({ x: g.g1, fragments: [latex(`]${formatNombre(g.g1)}\\,;\\,${formatNombre(g.g2)}[`), texte(" (aucun tracé ; les bornes, points pleins, restent)")] })),
+  ];
+  if (exercice.discontinuite.type === "trou") liste.push({ x: exercice.b5, fragments: [latex(`x = ${formatNombre(exercice.b5)}`), texte(" (deux cercles vides, aucun point plein)")] });
+  return liste.sort((a, b) => a.x - b.x);
+}
+
+function lectureValeur(exercice: ExerciceCaracteristiquesFonction): FragmentConsigne[] {
+  const v = formatNombre(exercice.v);
+  if (exercice.v === exercice.c) return [texte("En "), latex(`x = ${v}`), texte(", la courbe n'a qu'un cercle vide : cette abscisse n'appartient pas au domaine.")];
+  switch (exercice.discontinuite.type) {
+    case "pointPlein":
+      return [texte("En "), latex(`x = ${v}`), texte(", un cercle vide (fin du morceau de gauche) et un point plein : la valeur est l'ordonnée du point plein.")];
+    case "trou":
+      return [texte("En "), latex(`x = ${v}`), texte(", les deux marqueurs sont des cercles vides : aucun point de la courbe, la valeur n'existe pas.")];
+    case "pointRedefini":
+      return [texte("En "), latex(`x = ${v}`), texte(", deux cercles vides et un point plein isolé à une autre hauteur : la valeur est l'ordonnée du point plein isolé.")];
+  }
+}
+
+function enoncePapierCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [texte(LEGENDE)],
+      enteteHtml: construireGrapheCaracteristiques(exercice),
+      questions: [
+        {
+          consigne: [
+            texte(
+              "Lis sur le graphique les caractéristiques de f : son domaine de définition, ses zéros, les intervalles sur lesquels f est strictement croissante, strictement décroissante et constante, son ordonnée à l'origine, sa valeur en ",
+            ),
+            latex(`x = ${formatNombre(exercice.v)}`),
+            texte(" (si elle existe) et les équations de ses deux asymptotes."),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [["a", "b", "c", "d", "e", "f", "g", "h"]],
+  };
+}
+
+function reponseBreveCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): FragmentConsigne[] {
+  const zeros = zerosLatex(exercice);
+  const ordonnee = ordonneeLatex(exercice);
+  const valeur = valeurLatex(exercice);
+  return [
+    texte("Domaine : "),
+    latex(ensembleLatex(domaineCaracteristiques(exercice))),
+    texte(" ; zéros : "),
+    ...(zeros ? [latex(zeros)] : [texte("aucun")]),
+    texte(" ; croissante sur "),
+    latex(ensembleLatex(croissanceAttendueCaracteristiques(exercice))),
+    texte(" ; décroissante sur "),
+    latex(ensembleLatex(decroissanceAttendueCaracteristiques(exercice))),
+    texte(" ; constante sur "),
+    latex(ensembleLatex(constanceAttendueCaracteristiques(exercice))),
+    texte(" ; "),
+    ...(ordonnee ? [latex(ordonnee)] : [texte("pas d'ordonnée à l'origine")]),
+    texte(" ; "),
+    ...(valeur ? [latex(valeur)] : [latex(`f(${formatNombre(exercice.v)})`), texte(" n'existe pas")]),
+    texte(" ; "),
+    latex(asymptotesLatex(exercice)),
+  ];
+}
+
+function correctionDetailleeCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): EtapeCorrection[] {
+  const zeros = zerosLatex(exercice);
+  const ordonnee = ordonneeLatex(exercice);
+  const valeur = valeurLatex(exercice);
+  const b5 = formatNombre(exercice.b5);
+  const etapes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("On repère les abscisses sans point de la courbe : asymptote verticale, cercle vide sans point plein à la même abscisse, intervalle sans tracé.")] },
+    { label: "Lecture", sousQuestion: "a", fragments: [texte("Exclus : "), ...exclusions(exercice).flatMap((e, i) => [...(i === 0 ? [] : [texte(" ; ")]), ...e.fragments]), texte(".")] },
+    { label: "Conclusion", sousQuestion: "a", fragments: [latex(`\\mathrm{dom}\\,f = ${ensembleLatex(domaineCaracteristiques(exercice))}`)] },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments:
+        exercice.discontinuite.type === "trou"
+          ? [texte("En "), latex(`x = ${b5}`), texte(", les deux marqueurs sont vides : cette abscisse est exclue, même sans asymptote.")]
+          : [texte("En "), latex(`x = ${b5}`), texte(", le cercle vide ne suffit pas à exclure l'abscisse : un point plein existe à la même abscisse, donc elle appartient au domaine.")],
+    },
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("Les zéros sont les abscisses des points de la courbe situés sur l'axe des abscisses.")] },
+    { label: "Conclusion", sousQuestion: "b", fragments: zeros ? [latex(zeros)] : [texte("Aucun zéro : la courbe ne rencontre jamais l'axe des abscisses.")] },
+    { label: "Méthode", sousQuestion: "c", fragments: [texte("La courbe monte de gauche à droite ; deux morceaux séparés par une asymptote, un trou ou un intervalle sans tracé restent deux intervalles distincts.")] },
+    { label: "Conclusion", sousQuestion: "c", fragments: [texte("Strictement croissante sur "), latex(ensembleLatex(croissanceAttendueCaracteristiques(exercice))), texte(".")] },
+    { label: "Méthode", sousQuestion: "d", fragments: [texte("La courbe descend de gauche à droite.")] },
+    { label: "Conclusion", sousQuestion: "d", fragments: [texte("Strictement décroissante sur "), latex(ensembleLatex(decroissanceAttendueCaracteristiques(exercice))), texte(".")] },
+    { label: "Méthode", sousQuestion: "e", fragments: [texte("La courbe est un palier horizontal ; les intervalles sans tracé le coupent en plusieurs morceaux.")] },
+    { label: "Conclusion", sousQuestion: "e", fragments: [texte("Constante sur "), latex(ensembleLatex(constanceAttendueCaracteristiques(exercice))), texte(".")] },
+    { label: "Méthode", sousQuestion: "f", fragments: [texte("L'ordonnée à l'origine est l'ordonnée du point de la courbe d'abscisse 0, s'il existe.")] },
+    { label: "Conclusion", sousQuestion: "f", fragments: ordonnee ? [latex(ordonnee)] : [texte("0 n'appartient pas au domaine : f n'a pas d'ordonnée à l'origine.")] },
+    { label: "Lecture", sousQuestion: "g", fragments: lectureValeur(exercice) },
+    { label: "Conclusion", sousQuestion: "g", fragments: valeur ? [latex(valeur)] : [latex(`f(${formatNombre(exercice.v)})`), texte(" n'existe pas.")] },
+    { label: "Méthode", sousQuestion: "h", fragments: [texte("Une asymptote verticale a une équation de la forme « x = constante », une asymptote horizontale de la forme « y = constante ».")] },
+    { label: "Conclusion", sousQuestion: "h", fragments: [latex(asymptotesLatex(exercice))] },
+  ];
+  return etapes;
+}
+
+function baremeCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): BaremeExercice {
+  const criteres: CritereBareme[] = [
+    { sousQuestion: "a", critere: [texte("Domaine : toutes les exclusions, et seulement elles")], points: 0.5 },
+    { sousQuestion: "b", critere: [texte("Zéros : tous, sans valeur en trop")], points: 0.5 },
+    { sousQuestion: "c", critere: [texte("Intervalles de croissance (bornes et crochets)")], points: 0.5 },
+    { sousQuestion: "d", critere: [texte("Intervalles de décroissance (bornes et crochets)")], points: 0.5 },
+    { sousQuestion: "e", critere: [texte("Intervalle(s) de constance")], points: 0.5 },
+    { sousQuestion: "f", critere: existeOrdonneeCaracteristiques(exercice) ? [texte("Ordonnée à l'origine")] : [texte("Absence d'ordonnée à l'origine (0 exclu du domaine)")], points: 0.5 },
+    { sousQuestion: "g", critere: existeValeurEnVCaracteristiques(exercice) ? [texte("Valeur lue sur le point plein")] : [texte("Valeur inexistante (abscisse exclue)")], points: 0.5 },
+    { sousQuestion: "h", critere: [texte("Les deux équations d'asymptotes, sous la forme « x = … » et « y = … »")], points: 0.5 },
+  ];
+  const erreurs: ErreurFrequente[] = [
+    { description: [texte("Oublier d'exclure le point creux "), latex(`x = ${formatNombre(exercice.c)}`), texte(" (cercle vide seul)")], cout: "0 pt sur a)" },
+  ];
+  if (exercice.gaps.length > 0) erreurs.push({ description: [texte("Exclure aussi les bornes des intervalles sans tracé (ce sont des points pleins)")], cout: "0 pt sur a)" });
+  if (exercice.discontinuite.type !== "trou") erreurs.push({ description: [texte("Exclure "), latex(`x = ${formatNombre(exercice.b5)}`), texte(" à cause du cercle vide, alors qu'un point plein existe à la même abscisse")], cout: "0 pt sur a)" });
+  erreurs.push({ description: [texte("Réunir en un seul intervalle deux morceaux séparés par une asymptote, un trou ou un intervalle sans tracé")], cout: "0 pt sur l'intervalle concerné" });
+  erreurs.push({
+    description:
+      exercice.v === exercice.c || exercice.discontinuite.type === "trou"
+        ? [texte("Donner pour "), latex(`f(${formatNombre(exercice.v)})`), texte(" l'ordonnée d'un cercle vide")]
+        : [texte("Lire "), latex(`f(${formatNombre(exercice.v)})`), texte(" sur le cercle vide au lieu du point plein")],
+    cout: "0 pt sur g)",
+  });
+  erreurs.push({ description: [texte("Équations d'asymptotes inversées ("), latex("y = "), texte(" pour la verticale, "), latex("x = "), texte(" pour l'horizontale)")], cout: "0 pt sur h)" });
+  return {
+    reponseFinale: reponseBreveCaracteristiquesFonction(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [
+      [texte("Domaine écrit sous la forme "), latex("\\mathbb{R} \\setminus \\{\\ldots\\}"), texte(" (avec les intervalles retirés)")],
+      [texte("Zéros donnés comme un ensemble de valeurs")],
+    ],
+  };
+}
+
+function enonceAmenageCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): EtapeAmenagee[] {
+  return [
+    { consigne: [texte("Donne le domaine de définition de f.")], rappel: [texte("Cherche les abscisses SANS point de la courbe : asymptote, cercle vide seul, intervalle sans tracé.")], points: 1 },
+    { consigne: [texte("Donne les zéros de f.")], rappel: [texte("Un zéro est l'abscisse d'un point de la courbe posé sur l'axe des abscisses.")], points: 1 },
+    { consigne: [texte("Sur quels intervalles f est-elle strictement croissante ?")], rappel: [texte("La courbe monte quand on va de gauche à droite.")], points: 1 },
+    { consigne: [texte("Sur quels intervalles f est-elle strictement décroissante ?")], rappel: [texte("La courbe descend quand on va de gauche à droite.")], points: 1 },
+    { consigne: [texte("Sur quel(s) intervalle(s) f est-elle constante ?")], rappel: [texte("La courbe forme un palier horizontal.")], points: 1 },
+    { consigne: [texte("Donne l'ordonnée à l'origine de f.")], rappel: [texte("C'est l'ordonnée du point de la courbe d'abscisse 0, s'il existe.")], points: 1 },
+    {
+      consigne: [texte("La fonction est-elle définie en "), latex(`x = ${formatNombre(exercice.v)}`), texte(" ? Si oui, donne sa valeur.")],
+      rappel: [texte("Seul un point PLEIN donne une valeur : un cercle vide n'appartient pas à la courbe.")],
+      points: 1,
+    },
+    { consigne: [texte("Donne les équations des deux asymptotes.")], rappel: [texte("Verticale : « x = … » ; horizontale : « y = … ».")], points: 1 },
+  ];
+}
+
+/** Plus il y a d'exclusions particulières (intervalles sans tracé, discontinuité « trou » ou point
+ * redéfini), plus la lecture du domaine et de f(v) demande de réflexion. */
+function difficulteCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): 1 | 2 | 3 {
+  const pieges = exercice.gaps.length + (exercice.discontinuite.type === "pointPlein" ? 0 : 1);
+  return pieges >= 2 ? 3 : 2;
+}
+
 export const adaptateurEvaluationCaracteristiquesFonction: AdaptateurFeuilleExercices<ExerciceCaracteristiquesFonction> = {
   titreDocument: "Caractéristiques d'une fonction (lecture graphique) — Évaluation",
   nomFichierBase: "caracteristiques-fonction",
   genererInstance: genererExerciceCaracteristiquesFonction,
   construireEnonce: construireEnonceCaracteristiquesFonction,
   construireCorrection: construireCorrectionCaracteristiquesFonction,
+  difficulte: difficulteCaracteristiquesFonction,
+  reponseBreve: reponseBreveCaracteristiquesFonction,
+  correctionDetaillee: correctionDetailleeCaracteristiquesFonction,
+  bareme: baremeCaracteristiquesFonction,
+  enonceAmenage: enonceAmenageCaracteristiquesFonction,
+  enoncePapier: enoncePapierCaracteristiquesFonction,
+  dureeMinutes: 8,
 };

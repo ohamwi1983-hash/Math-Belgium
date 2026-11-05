@@ -16,6 +16,7 @@ import {
 } from "./moteur/sessionCaracteristiquesFonction";
 import type { EtatSessionCaracteristiquesFonction } from "./moteur/typesCaracteristiquesFonction";
 import { genererExerciceCaracteristiquesFonction } from "./generateurs/caracteristiquesFonction";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeDomaineCaracteristiques } from "./components/EtapeDomaineCaracteristiques";
 import { EtapeZerosCaracteristiques } from "./components/EtapeZerosCaracteristiques";
 import { EtapeCroissanceCaracteristiques } from "./components/EtapeCroissanceCaracteristiques";
@@ -53,6 +54,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionCaracteristiquesFonction {
   return demarrerSessionCaracteristiquesFonction(REGLAGES_DEMO, genererExerciceCaracteristiquesFonction);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec la MÊME fonction de génération que l'adaptateur d'export
+ * (`generateurs/caracteristiquesFonction/exportEvaluation.ts`, sans catalogue de variantes) ; la
+ * suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionCaracteristiquesFonction {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCaracteristiquesFonction(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceCaracteristiquesFonction, undefined));
 }
 
 /** Arrondi d'affichage (3 décimales) pour une révélation — jamais utilisé pour la vérification elle-même. */
@@ -130,7 +141,7 @@ function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesFonction):
 }
 
 export function AppCaracteristiquesFonction() {
-  const [etat, setEtat] = useState<EtatSessionCaracteristiquesFonction>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCaracteristiquesFonction>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesFonction) {

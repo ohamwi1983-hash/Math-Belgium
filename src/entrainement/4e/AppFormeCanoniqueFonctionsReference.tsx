@@ -36,6 +36,7 @@ import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction de référence transformée.";
 
@@ -48,6 +49,18 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionFormeCanoniqueFonctionReference {
   return demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, genererExerciceFormeCanoniqueFonctionReference);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code des
+ * feuilles d'exercices), son exercice est CETTE instance — tirée avec les MÊMES fonctions de
+ * génération que l'adaptateur d'export (`generateurs/formeCanoniqueFonctionsReference/exportEvaluation.ts`) ;
+ * les sessions suivantes reviennent au tirage normal. */
+function sessionInitiale(): EtatSessionFormeCanoniqueFonctionReference {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceFormeCanoniqueFonctionReference, (id) => construireAvecFamille(id as FamilleReference)),
+  );
 }
 
 /** 6 phases fixes, toujours le même ordre — pas de mécanisme d'aide sur ce générateur (aucun champ
@@ -85,7 +98,7 @@ interface TransitionEnAttente {
 }
 
 export function AppFormeCanoniqueFonctionsReference() {
-  const [etat, setEtat] = useState<EtatSessionFormeCanoniqueFonctionReference>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionFormeCanoniqueFonctionReference>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueFonctionReference) {
