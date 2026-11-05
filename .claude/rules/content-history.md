@@ -1983,3 +1983,16 @@ paths:
   rendu, jamais par `tsc`. Toujours vérifier `.katex-error` après une insertion scriptée.
   Vérifié : `tsc` sans erreur sur ces fichiers, `verifier-enonces-evaluation` OK, page à 390 et
   1280 px : 0 `.katex-error`, 0 `$`/`**` isolé, 0 débordement, 0 erreur console ; quiz à 390 px.
+
+## 4e — chapitres 2 et 4 : ajustements pour les feuilles et évaluations (refonte papier)
+
+- **Équations et inéquations du second degré** (§ resoudre) : les deux blocs `exempleLibre`
+  « Démonstration » portaient le même label ; ils s'appellent désormais « Démonstration — relations
+  de Viète » et « Démonstration — forme factorisée », pour que leurs énoncés imprimés
+  (`ENONCES_DEMONSTRATION`, `src/lib/evaluationPayload.ts`) soient appariés par clé. Ne pas revenir
+  à un label commun : le build (`verifier-enonces-evaluation`, mode strict) échouerait.
+- **Statistique descriptive** : les résultats des exemples « liste brute, n = 20 » et « 4 classes,
+  amplitude 2 » disaient seulement « voir (le tableau) ci-dessous ». Le corrigé imprimé d'une
+  question démonstration est dérivé du TEXTE de l'exemple (le `featureTable` qui suit n'est pas
+  repris) : ces résultats énoncent maintenant les valeurs (fréquences, cumuls, effectifs, hauteurs
+  des barres), le tableau restant affiché en dessous à l'écran.
