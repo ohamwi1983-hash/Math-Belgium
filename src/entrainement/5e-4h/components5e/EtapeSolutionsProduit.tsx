@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, CONSIGNE_SOLUTIONS_PRODUIT, formatEnonceProduitLatex, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
+import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, AVERTISSEMENT_TANGENTE_INDEFINIE, CONSIGNE_SOLUTIONS_PRODUIT, formatEnonceProduitLatex, produitContientTangente, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -66,6 +66,7 @@ export function EtapeSolutionsProduit({ exercice, tentativesUtilisees, tentative
       <p className="prompt-text">
         {CONSIGNE_SOLUTIONS_PRODUIT}
         {auMoinsUnFacteurDecimal && ANNONCE_PRECISION_PRODUIT_SOLUTIONS}
+        {produitContientTangente(exercice) && AVERTISSEMENT_TANGENTE_INDEFINIE}
       </p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime={regimeProduit(exercice)} />}
       {lignes.map((ligne, i) => (
@@ -77,7 +78,7 @@ export function EtapeSolutionsProduit({ exercice, tentativesUtilisees, tentative
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/6"
+              placeholder="ex : 2*pi/5"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>

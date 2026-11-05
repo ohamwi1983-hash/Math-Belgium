@@ -42,6 +42,8 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = inf.trim() !== "" && sup.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
@@ -56,7 +58,13 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
   function valider() {
     if (!complet) return;
     const reponse = { inf, sup };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(reponse);
   }
 
@@ -97,7 +105,12 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

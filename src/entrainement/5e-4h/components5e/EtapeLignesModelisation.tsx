@@ -35,6 +35,8 @@ interface Props {
 export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -54,12 +56,18 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
   }
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(lignes));
+    const statut = diagnostiquer ? diagnostiquer(lignes) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(lignes);
   }
 
   const libelleAjout = phase === "isolerTResoudre" ? "+ Ajouter une série" : "+ Ajouter une solution";
-  const placeholder = phase === "isolerTResoudre" ? "ex : (asin(0.5)-0.7)/0.3 + k*20.9" : "ex : 12.4";
+  const placeholder = phase === "isolerTResoudre" ? "ex : 4,7 + k*2,5" : "ex : 12,4";
 
   return (
     <div>
@@ -98,7 +106,12 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

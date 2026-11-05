@@ -18,9 +18,15 @@ export type { RationnelPi };
 
 export type FonctionExtremum = "sin" | "cos";
 
-/** Une branche fusionnée constante+k·période — UNE SEULE branche pour tout l'exercice (jamais 2
- * comme le cas spécial k=±1 de 5gen10 : sin(u)=±1 ⟺ u=π/2+kπ, cos(u)=±1 ⟺ u=kπ, période TOUJOURS π,
- * jamais 2π — voir CLAUDE.md section 5gen11 pour la preuve de fusion). */
+/** Ce que l'exercice demande (audit 5e ch. 2, point 38) : les maximums SEULS, les minimums SEULS, ou
+ * tous les extremums réunis — le piège central du cours (sin(u) = 1 seul ≠ sin(u) = ±1). */
+export type ModeExtremum = "maximums" | "minimums" | "extremums";
+
+/** UNE SEULE branche constante + k·période pour tout l'exercice :
+ * - mode « extremums » : branche fusionnée sin(u) = ±1 ⟺ u = π/2 + kπ, cos(u) = ±1 ⟺ u = kπ, période π ;
+ * - mode « maximums »/« minimums » : sin(u) = 1 ⟺ u = π/2 + 2kπ, sin(u) = −1 ⟺ u = −π/2 + 2kπ,
+ *   cos(u) = 1 ⟺ u = 2kπ, cos(u) = −1 ⟺ u = π + 2kπ, période 2π (la valeur visée, 1 ou −1, dépend du
+ *   signe de l'amplitude). */
 export interface BrancheExtremum {
   constante: RationnelPi;
   periode: RationnelPi;
@@ -28,6 +34,7 @@ export interface BrancheExtremum {
 
 export interface ExerciceExtremumsSinusoide {
   fonction: FonctionExtremum;
+  mode: ModeExtremum;
   /** Affichée dans l'énoncé (fonction source complète), jamais utilisée dans le calcul. */
   amplitude: AmplitudeSinusoide;
   /** Toujours un entier simple, jamais lié à π — affiché dans l'énoncé, jamais utilisé dans le

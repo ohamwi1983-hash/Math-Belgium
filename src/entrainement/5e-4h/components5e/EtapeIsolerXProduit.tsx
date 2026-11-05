@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerIsolerX, type ReponseDeuxFacteursLignes } from "../moteur5e/verificationEquationTrig5gen10";
-import { formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_ISOLER_X_PRODUIT, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -70,7 +70,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
           </div>
         }
       />
-      <p className="prompt-text">Résous ces équations ci-dessus et donne les valeurs de x.</p>
+      <p className="prompt-text">{CONSIGNE_ISOLER_X_PRODUIT}</p>
 
       <p className="prompt-text prompt-text--question-multiple">
         Facteur 1{facteur1NecessiteLignes && exercice.facteur1.regime === "decimal" && ANNONCE_PRECISION_DECIMAL} :
@@ -86,7 +86,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
                   className={`text-input${facteur1Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes1((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/6 + k*pi"
+                  placeholder="ex : pi/5 + k*pi/7"
                 />
                 {lignes1.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes1((arr) => arr.filter((_, j) => j !== i))}>
@@ -118,7 +118,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
                   className={`text-input${facteur2Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes2((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/6 + k*pi"
+                  placeholder="ex : pi/5 + k*pi/7"
                 />
                 {lignes2.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes2((arr) => arr.filter((_, j) => j !== i))}>

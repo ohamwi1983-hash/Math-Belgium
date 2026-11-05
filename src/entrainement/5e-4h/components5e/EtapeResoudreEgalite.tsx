@@ -3,6 +3,8 @@ import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometri
 import {
   CONSIGNE_RESOUDRE_EGALITE,
   formatAideResoudreEgaliteNiveau2Latex,
+  formatEnonceEgaliteLatex,
+  latexAideResoudreEgaliteNiveau1,
   texteAideResoudreEgaliteNiveau1,
 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
@@ -50,7 +52,14 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
+      <EnTeteExercice
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceEgaliteLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_RESOUDRE_EGALITE}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>
@@ -61,7 +70,7 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/6 + k*2*pi"
+              placeholder="ex : pi/5 + k*2*pi/7"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>
@@ -77,6 +86,7 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideResoudreEgaliteNiveau1(exercice)}</p>
+          <Katex expression={latexAideResoudreEgaliteNiveau1(exercice)} block />
           {niveauAide >= 2 && aide2.map((formule, i) => <Katex key={i} expression={formule} block />)}
         </div>
       )}

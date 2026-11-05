@@ -35,7 +35,7 @@ export const OPTIONS_FAMILLE: { id: FamilleEquationTrigonometrique; label: strin
   { id: "directe", label: "Application directe" },
   { id: "produit", label: "Produit de facteurs" },
   { id: "pythagoricienne", label: "Substitution pythagoricienne" },
-  { id: "egalite", label: "Égalité de deux expressions" },
+  { id: "egalite", label: "Égalité avec conversion" },
 ];
 
 function formatFacteurBrutLatex(facteur: ExerciceEquationTrig): string {
@@ -160,7 +160,8 @@ export function formatEnonceEquationTrigonometriqueLatex(exercice: ExerciceEquat
 
 export const CONSIGNE_PREFACTEUR = "Factorise cette équation.";
 export const TEXTE_AIDE_PREFACTEUR_NIVEAU1 =
-  "Les deux termes partagent un même facteur — la fonction trigonométrique elle-même. Mets-la en évidence, comme tu le ferais avec X²−a·X = X(X−a).";
+  "Les deux termes partagent un même facteur — la fonction trigonométrique elle-même. Mets-la en évidence, comme pour un polynôme :";
+export const LATEX_AIDE_PREFACTEUR_NIVEAU1 = "X^2 - aX = X(X - a)";
 export function formatAidePrefacteurNiveau2Latex(exercice: ExerciceProduitFacteurs): string {
   const fn = NOM_FONCTION_LATEX[exercice.facteur2.fonction];
   const arg = formatArgumentLatex(exercice.facteur2.a, exercice.facteur2.b);
@@ -168,7 +169,8 @@ export function formatAidePrefacteurNiveau2Latex(exercice: ExerciceProduitFacteu
 }
 
 export const CONSIGNE_SEPARER_FACTEURS = "Écris les 2 équations correspondantes.";
-export const TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1 = "\"A·B = 0\" équivaut à \"A = 0 OU B = 0\" — jamais une somme (A+B=0 est une équation totalement différente).";
+export const TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1 = "Un produit est nul si et seulement si l'un de ses facteurs est nul — on écrit deux équations, jamais une somme :";
+export const LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1 = "A\\cdot B = 0 \\iff A = 0 \\ \\text{ ou } \\ B = 0";
 export function formatAideSepararFacteursNiveau2Latex(exercice: ExerciceProduitFacteurs): string[] {
   return [formatEquationEnonceLatex(exercice.facteur1), formatEquationEnonceLatex(exercice.facteur2)];
 }
@@ -181,10 +183,17 @@ export function formatQuestionArgumentTexte(fonction: FonctionTrig): string {
   return `Quelles sont les valeurs d'angles (en rad) dont le ${fonction} vaut`;
 }
 
-export const CONSIGNE_ARGUMENT_PRODUIT = "Résous l'argument de chacune des 2 équations.";
-export const CONSIGNE_ISOLER_X_PRODUIT = "Résous ces équations ci-dessus et donne les valeurs de x.";
+export const CONSIGNE_ARGUMENT_PRODUIT = "Pour chacune des 2 équations, donne les séries d'angles solutions pour l'argument (k entier).";
+export const CONSIGNE_ISOLER_X_PRODUIT = "Pour chacune des 2 équations, isole x dans chaque série trouvée (k entier).";
 
-export const CONSIGNE_SOLUTIONS_PRODUIT = "Liste toutes les solutions distinctes dans [0;2π[ (l'union des 2 facteurs, une valeur par point).";
+/** Point 32 : quand une tangente figure dans l'équation, ses valeurs interdites sont écartées. */
+export const AVERTISSEMENT_TANGENTE_INDEFINIE = " Écarte les valeurs pour lesquelles une tangente de l'équation n'est pas définie.";
+
+export const CONSIGNE_SOLUTIONS_PRODUIT = "Donne toutes les solutions de l'équation dans [0 ; 2π[ : réunis celles des 2 facteurs, chaque valeur une seule fois.";
+
+export function produitContientTangente(exercice: ExerciceProduitFacteurs): boolean {
+  return exercice.facteur1.fonction === "tan" || exercice.facteur2.fonction === "tan";
+}
 
 /** Annonce de précision pour l'écran final "solutionsProduit" — l'union peut mélanger des valeurs
  * venant d'un facteur en régime "exact" (angle remarquable) et d'un facteur en régime "decimal"
@@ -207,19 +216,30 @@ export function regimeProduit(exercice: ExerciceProduitFacteurs): RegimeEquation
 // "racinesResolution"/"solutionsPythagoricienne".
 // ============================================================================
 
-export const CONSIGNE_CONVERSION_PYTHAGORICIENNE = "Fais en sorte que cette équation soit seulement en sin/cos (ça dépend de l'énoncé).";
-export const TEXTE_AIDE_CONVERSION_NIVEAU1 = "Remplace le terme au carré de la fonction NON visée par 1 moins le carré de la fonction visée (ex. sin²(x) = 1-cos²(x)), puis développe et réduis.";
+export function consigneConversionPythagoricienne(exercice: ExercicePythagoricienne): string {
+  return `Grâce à sin²(x) + cos²(x) = 1, réécris cette équation avec ${exercice.fonctionCible}(x) seulement.`;
+}
+export const TEXTE_AIDE_CONVERSION_NIVEAU1 = "Remplace le carré de l'autre fonction grâce à la relation fondamentale, puis développe et réduis :";
+export function latexAideConversionNiveau1(exercice: ExercicePythagoricienne): string {
+  return exercice.fonctionCible === "cos" ? "\\sin^2(x) = 1 - \\cos^2(x)" : "\\cos^2(x) = 1 - \\sin^2(x)";
+}
 export function formatAideConversionNiveau2Latex(exercice: ExercicePythagoricienne): string {
   return formatPolynomeCibleLatex(exercice);
 }
 
-export const CONSIGNE_RACINES_PYTHAGORICIENNE = "Résous cette équation du second degré en sin(...)/cos(...) (selon l'énoncé).";
+/** Point 34 : t est introduit explicitement (t = cos(x) ou sin(x)). */
+export function consigneRacinesPythagoricienne(exercice: ExercicePythagoricienne): string {
+  return `Pose t = ${exercice.fonctionCible}(x) : l'équation devient une équation du second degré en t. Donne ses deux racines t₁ et t₂.`;
+}
 export const TEXTE_AIDE_RACINES_NIVEAU1 = "C'est une équation du second degré ordinaire — discriminant, ou toute autre technique déjà connue (mise en évidence, produit remarquable...).";
 
-export const CONSIGNE_RACINES_RESOLUTION = "Pour CHAQUE racine trouvée, décide : peut-elle être une valeur de cos(x) ou de sin(x) ? Si oui, résous l'équation correspondante ; sinon, rejette-la.";
-export const TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 = "cos(x) et sin(x) restent TOUJOURS compris entre -1 et 1 — une racine hors de cet intervalle ne peut correspondre à AUCUNE valeur réelle de x, elle doit être rejetée.";
+export function consigneRacinesResolution(exercice: ExercicePythagoricienne): string {
+  const f = `${exercice.fonctionCible}(x)`;
+  return `Pour chaque racine t, résous ${f} = t (séries avec k entier) — ou rejette-la si ${f} ne peut pas valoir t.`;
+}
+export const TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 = "cos(x) et sin(x) restent TOUJOURS compris entre −1 et 1 — une racine hors de cet intervalle ne correspond à AUCUNE valeur réelle de x : elle doit être rejetée.";
 
-export const CONSIGNE_SOLUTIONS_PYTHAGORICIENNE = "Liste toutes les solutions distinctes dans [0;2π[ (l'union des racines valides).";
+export const CONSIGNE_SOLUTIONS_PYTHAGORICIENNE = "Donne toutes les solutions de l'équation dans [0 ; 2π[ (celles des racines gardées), chaque valeur une seule fois.";
 
 // ============================================================================
 // Famille "egalite" — écrans "conversionEgalite"/"resoudreEgalite"/"solutionsEgalite".
@@ -228,10 +248,19 @@ export const CONSIGNE_SOLUTIONS_PYTHAGORICIENNE = "Liste toutes les solutions di
 export const CONSIGNE_CONVERSION_EGALITE = "Convertis l'un des 2 membres pour que les 2 côtés utilisent la MÊME fonction trigonométrique.";
 
 const TEXTE_AIDE_CONVERSION_EGALITE_NIVEAU1: Record<"cosVersCos" | "sinVersSin" | "tanVersTan", string> = {
-  cosVersCos: "sin(θ) = cos(π/2-θ) — remplace le membre en sin par un membre en cos.",
-  sinVersSin: "cos(θ) = sin(π/2-θ) — remplace le membre en cos par un membre en sin.",
-  tanVersTan: "-tan(θ) = tan(-θ) — remplace \"-tan(...)\" par \"tan(-...)\", jamais recopier le signe tel quel devant tan.",
+  cosVersCos: "Remplace le membre en sinus par un membre en cosinus (angles complémentaires) :",
+  sinVersSin: "Remplace le membre en cosinus par un membre en sinus (angles complémentaires) :",
+  tanVersTan: "La tangente est impaire : fais entrer le signe « − » dans la tangente, au lieu de le laisser devant :",
 };
+const LATEX_AIDE_CONVERSION_EGALITE_NIVEAU1: Record<ExerciceEgaliteExpressions["identite"], string> = {
+  cosVersCos: "\\sin\\theta = \\cos\\left(\\frac{\\pi}{2} - \\theta\\right)",
+  sinVersSin: "\\cos\\theta = \\sin\\left(\\frac{\\pi}{2} - \\theta\\right)",
+  tanVersTan: "-\\tan\\theta = \\tan(-\\theta)",
+};
+export function latexAideConversionEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
+  return LATEX_AIDE_CONVERSION_EGALITE_NIVEAU1[exercice.identite];
+}
+
 export function texteAideConversionEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
   return TEXTE_AIDE_CONVERSION_EGALITE_NIVEAU1[exercice.identite];
 }
@@ -243,12 +272,21 @@ export function formatAideConversionEgaliteNiveau2Latex(exercice: ExerciceEgalit
   return `${fnCible}\\left(\\dfrac{\\pi}{2}-${argB}\\right)`;
 }
 
-export const CONSIGNE_RESOUDRE_EGALITE = "Applique l'identité d'égalité, puis isole x dans chaque série (utilise \"k\" comme entier libre).";
+export const CONSIGNE_RESOUDRE_EGALITE = "Égale les arguments (une ou deux séries selon la fonction, k entier), puis isole x dans chaque série.";
 const TEXTE_AIDE_RESOUDRE_EGALITE_NIVEAU1: Record<"cosVersCos" | "sinVersSin" | "tanVersTan", string> = {
-  cosVersCos: "cos(A)=cos(B) ⟺ A=B+2kπ OU A=-B+2kπ (k entier) — 2 séries distinctes.",
-  sinVersSin: "sin(A)=sin(B) ⟺ A=B+2kπ OU A=(π-B)+2kπ (k entier) — 2 séries distinctes.",
-  tanVersTan: "tan(A)=tan(B) ⟺ A=B+kπ (k entier) — une seule série, période π.",
+  cosVersCos: "Deux cosinus égaux : deux séries (k entier).",
+  sinVersSin: "Deux sinus égaux : deux séries (k entier).",
+  tanVersTan: "Deux tangentes égales : une seule série, de période π (k entier).",
 };
+const LATEX_AIDE_RESOUDRE_EGALITE_NIVEAU1: Record<ExerciceEgaliteExpressions["identite"], string> = {
+  cosVersCos: "\\cos A = \\cos B \\iff A = B + 2k\\pi \\ \\text{ ou } \\ A = -B + 2k\\pi",
+  sinVersSin: "\\sin A = \\sin B \\iff A = B + 2k\\pi \\ \\text{ ou } \\ A = \\pi - B + 2k\\pi",
+  tanVersTan: "\\tan A = \\tan B \\iff A = B + k\\pi",
+};
+export function latexAideResoudreEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
+  return LATEX_AIDE_RESOUDRE_EGALITE_NIVEAU1[exercice.identite];
+}
+
 export function texteAideResoudreEgaliteNiveau1(exercice: ExerciceEgaliteExpressions): string {
   return TEXTE_AIDE_RESOUDRE_EGALITE_NIVEAU1[exercice.identite];
 }
@@ -256,7 +294,7 @@ export function formatAideResoudreEgaliteNiveau2Latex(exercice: ExerciceEgaliteE
   return exercice.branches.map((b: BrancheX) => `x = ${formatBrancheLatex(b)}`);
 }
 
-export const CONSIGNE_SOLUTIONS_EGALITE = "Liste toutes les solutions distinctes dans [0;2π[ (une valeur par point).";
+export const CONSIGNE_SOLUTIONS_EGALITE = "Donne toutes les solutions de l'équation dans [0 ; 2π[, chaque valeur une seule fois.";
 
 // ============================================================================
 // Bloc "état actuel" — PAR FAMILLE, à partir du 2e écran de la séquence de CETTE famille (jamais
@@ -350,8 +388,7 @@ function formatRacineTLatex(t: number): string {
 
 /** Réponse attendue de l'écran "racinesPythagoricienne" — les 2 racines t1/t2. */
 export function formatTermesRacinesTLatex(exercice: ExercicePythagoricienne): string[] {
-  const T = exercice.fonctionCible === "cos" ? "\\cos(x)" : "\\sin(x)";
-  return [exercice.racine1, exercice.racine2].map((r) => `${T} = ${formatRacineTLatex(r.t)}`);
+  return [exercice.racine1, exercice.racine2].map((r, i) => `t_${i + 1} = ${formatRacineTLatex(r.t)}`);
 }
 
 /** Réponse attendue de l'écran "racinesResolution" — pour CHAQUE racine, "rejetée" (si invalide)

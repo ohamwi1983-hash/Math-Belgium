@@ -324,6 +324,21 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
   // « −7π/2 » rogné en bord gauche sur 53/60 graphes à 390 px) — on ne l'affiche pas.
   const [xVisMin, xVisMax] = etat ? etat.xVisible : [xMin, xMax];
   const margeEtiquetteX = ((xVisMax - xVisMin) * 24) / largeur;
+  // `attach` de Mafs (`node_modules/mafs`, `Text`) : "n" = texte AU-DESSUS du point (baseline), "s" =
+  // texte EN DESSOUS (hanging). Sur l'axe : en dessous, sauf si l'axe frôle le bord bas ; au bord bas
+  // (axe hors champ) : au-dessus, ancré 5 px plus haut que le bord (les jambages restent dans le
+  // cadre). Idem pour les étiquettes Y trop près du bord haut/bas : écartées vers l'intérieur.
+  const [yVisMin, yVisMax] = etat ? etat.yVisible : [yMin, yMax];
+  const pxParUniteY = hauteur / (yVisMax - yVisMin);
+  const axeXPresDuBas = (0 - yVisMin) * pxParUniteY < 22;
+  const attachX = (surAxe: boolean): "n" | "s" => (surAxe && !axeXPresDuBas ? "s" : "n");
+  const yBordBas = yVisMin + 5 / pxParUniteY;
+  // Étiquette Y à moins de 9 px du bord haut/bas : ramenée à 9 px du bord (centrée, "e") — jamais
+  // coupée par le cadre ; ailleurs, placement habituel (`attachEtiquetteY`).
+  const margeYPx = 9;
+  const presDUnBordY = (v: number) => (yVisMax - v) * pxParUniteY < margeYPx || (v - yVisMin) * pxParUniteY < margeYPx;
+  const yEtiquetteY = (v: number) => Math.min(yVisMax - margeYPx / pxParUniteY, Math.max(yVisMin + margeYPx / pxParUniteY, v));
+  const attachY = (v: number): "e" | "ne" | "se" => (presDUnBordY(v) ? "e" : attachEtiquetteY(exercice, v));
   // Neuvième point du "Douzième bug" (trouvé en vérifiant CE correctif, pas seulement supposé) :
   // ancrer les étiquettes Y sur l'axe (x=0) les rapproche du texte des étiquettes X (elles aussi
   // ancrées sur y=0) chaque fois qu'une valeur clé Y (b/b±A) est proche de 0 EN PIXELS — pas
@@ -342,10 +357,12 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
           if (index % 3 !== 0) return null;
           const x = valeurNumerique(tick);
           if (x < xVisMin + margeEtiquetteX || x > xVisMax - margeEtiquetteX) return null;
-          const surAxe = zeroXVisible && Math.abs(x) >= seuilCollisionX;
-          const yRepli = etat ? etat.yVisible[0] : yMin;
+          // Une étiquette X se pose sur l'axe des abscisses (y = 0) — donc seulement si y = 0 est
+          // VISIBLE (le test portait par erreur sur x = 0 : étiquettes Y et X hors cadre, audit 5e ch. 2).
+          const surAxe = zeroYVisible && Math.abs(x) >= seuilCollisionX;
+          const yRepli = yBordBas;
           return (
-            <Text key={index} x={x} y={surAxe ? 0 : yRepli} attach={surAxe ? "s" : "n"} size={14} color={COULEUR_GRADUATION}>
+            <Text key={index} x={x} y={surAxe ? 0 : yRepli} attach={attachX(surAxe)} size={14} color={COULEUR_GRADUATION}>
               {formatRationnelPiTexte(tick)}
             </Text>
           );
@@ -353,14 +370,15 @@ export function SinusoideGraph({ exercice, phase, niveauAide }: Props) {
         {positionsTicksY(exercice)
           .filter((v) => etiquetteYVisible(exercice, v))
           .map((v, index) => {
-            const surAxe = zeroYVisible && Math.abs(v) >= seuilCollisionY;
+            // Une étiquette Y se pose sur l'axe des ordonnées (x = 0) — seulement si x = 0 est visible.
+            const surAxe = zeroXVisible && Math.abs(v) >= seuilCollisionY;
             const xRepli = etat ? etat.xVisible[0] : xMin;
             return (
               <Text
                 key={index}
                 x={surAxe ? 0 : xRepli}
-                y={v}
-                attach={attachEtiquetteY(exercice, v)}
+                y={yEtiquetteY(v)}
+                attach={attachY(v)}
                 attachDistance={4}
                 size={12}
                 color={COULEUR_GRADUATION}

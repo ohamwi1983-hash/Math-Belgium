@@ -52,8 +52,11 @@ function labelFamille(famille: ExerciceEquationTrigonometrique["famille"]): stri
 function entreeUnique(libelle: string, valeur: string, estLatex: boolean, revele: boolean): EntreeRecapitulatif {
   return { libelle, estLatex, valeur, revele };
 }
+/** Point 34 (audit 5e ch. 2) : séparateur « ; » visible entre les termes (ils s'affichaient collés,
+ * ex. « sin(x)=1,5 sin(x)=−0,5 »). */
 function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): EntreeRecapitulatif {
-  return { libelle, estLatex: true, valeur: valeurs.join("\\quad"), valeurs, revele };
+  const separees = valeurs.map((v, i) => (i < valeurs.length - 1 ? `${v}\\;;` : v));
+  return { libelle, estLatex: true, valeur: valeurs.join("\\quad"), valeurs: separees, revele };
 }
 
 /**
@@ -107,7 +110,7 @@ export function calculerRecapitulatifEquationTrig(etat: EtatSessionEquationTrigo
   } else if (exercice.famille === "pythagoricienne") {
     const ex = commePythagoricienne(exercice);
     if (close("conversionPythagoricienne")) entrees.push(entreeUnique("Polynôme cible", formatPolynomeCibleLatex(ex), true, revele("conversionPythagoricienne")));
-    if (close("racinesPythagoricienne")) entrees.push(entreeMultiple("Racines en t", formatTermesRacinesTLatex(ex), revele("racinesPythagoricienne")));
+    if (close("racinesPythagoricienne")) entrees.push(entreeMultiple("Racines t₁ et t₂", formatTermesRacinesTLatex(ex), revele("racinesPythagoricienne")));
     if (close("racinesResolution")) entrees.push(entreeMultiple("Résolution", formatTermesRacinesResolutionLatex(ex), revele("racinesResolution")));
     if (close("solutionsPythagoricienne"))
       entrees.push(entreeUnique("Solutions", formatSolutionsTexte(ex.solutionsUnion, "exact"), false, revele("solutionsPythagoricienne")));

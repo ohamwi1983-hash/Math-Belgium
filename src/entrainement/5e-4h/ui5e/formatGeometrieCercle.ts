@@ -21,7 +21,7 @@ function nombreLatex(v: number, decimales: number): string {
  * valeur plus précise entre parenthèses — l'élève voit la réponse attendue au bon arrondi et peut
  * réutiliser la valeur précise aux écrans suivants (audit 5e ch. 2, point 44). */
 function valeurArrondieLatex(v: number, decimales: number, decimalesPrecises: number): string {
-  return `\approx ${nombreLatex(v, decimales)}\ \ (${nombreLatex(v, decimalesPrecises)})`;
+  return `\\approx ${nombreLatex(v, decimales)}\\ \\ (${nombreLatex(v, decimalesPrecises)})`;
 }
 function angleLatex(v: number): string {
   return valeurArrondieLatex(v, 1, 4);

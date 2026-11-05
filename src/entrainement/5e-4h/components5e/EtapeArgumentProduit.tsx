@@ -3,7 +3,7 @@ import type { ExerciceEquationTrig, ExerciceProduitFacteurs } from "../core5e/eq
 import { diagnostiquerArgument, type ReponseArgument, type ReponseDeuxFacteursArgument } from "../moteur5e/verificationEquationTrig5gen10";
 import { CONSIGNE_ARGUMENT_PRODUIT, formatEnonceProduitLatex, formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, latexAideArgumentNiveau2, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -80,7 +80,7 @@ function BlocFacteurArgument({
                   className={`text-input${erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/3 + 2*k*pi"
+                  placeholder="ex : 2*pi/5 + 2*k*pi"
                 />
                 {lignes.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>
@@ -154,7 +154,9 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
           {niveauAide >= 2 && (
             <>
               <p>Facteur 1 — {texteAideArgumentNiveau2(exercice.facteur1.fonction)}</p>
+              <Katex expression={latexAideArgumentNiveau2(exercice.facteur1.fonction)} block />
               <p>Facteur 2 — {texteAideArgumentNiveau2(exercice.facteur2.fonction)}</p>
+              <Katex expression={latexAideArgumentNiveau2(exercice.facteur2.fonction)} block />
             </>
           )}
         </div>

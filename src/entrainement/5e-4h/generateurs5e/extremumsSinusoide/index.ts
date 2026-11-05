@@ -15,7 +15,8 @@
  * 1 + (-1) = 0), produisant naturellement une période "pure" en x — aucune primitive supplémentaire
  * nécessaire dans `rationnelPi.ts`.
  */
-import type { BrancheExtremum, ExerciceExtremumsSinusoide, FonctionExtremum } from "../../core5e/extremumsSinusoide.types";
+import type { AmplitudeSinusoide } from "../../core5e/parametresSinusoide.types";
+import type { BrancheExtremum, ExerciceExtremumsSinusoide, FonctionExtremum, ModeExtremum } from "../../core5e/extremumsSinusoide.types";
 import { tirerAmplitude, tirerDecalageVertical, tirerPhi, tirerT } from "../parametresSinusoide/parametres";
 import type { RationnelPi } from "../parametresSinusoide/rationnelPi";
 import { additionnerRationnelPi, calculerB, calculerC, inverseRationnelPi, multiplierRationnelPi, negatifRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
@@ -30,9 +31,44 @@ const PI_UNITE: RationnelPi = { numerateur: 1, denominateur: 1, degrePi: 1 };
 const DEMI_PI: RationnelPi = { numerateur: 1, denominateur: 2, degrePi: 1 };
 const ZERO_PI: RationnelPi = { numerateur: 0, denominateur: 1, degrePi: 1 };
 
-/** u = π/2+kπ (sin) ou u = 0+kπ (cos) — période TOUJOURS π. */
+/** u = π/2+kπ (sin) ou u = 0+kπ (cos) — période π (mode « extremums »). */
 function brancheUFusionnee(fonction: FonctionExtremum): BrancheExtremum {
   return { constante: fonction === "sin" ? DEMI_PI : ZERO_PI, periode: PI_UNITE };
+}
+
+const DEUX_PI_UNITE: RationnelPi = { numerateur: 2, denominateur: 1, degrePi: 1 };
+const MOINS_DEMI_PI: RationnelPi = { numerateur: -1, denominateur: 2, degrePi: 1 };
+
+const MODES: ModeExtremum[] = ["maximums", "minimums", "extremums"];
+
+export function tirerMode(): ModeExtremum {
+  return MODES[Math.floor(Math.random() * MODES.length)];
+}
+
+/** Valeur que doit prendre sin(u)/cos(u) : un maximum de A·sin(u) + b est atteint en sin(u) = 1 si
+ * A > 0, mais en sin(u) = −1 si A < 0 (et inversement pour un minimum). */
+export function valeurTrigVisee(mode: "maximums" | "minimums", amplitude: AmplitudeSinusoide): 1 | -1 {
+  const positif = amplitude.signe > 0;
+  return (mode === "maximums") === positif ? 1 : -1;
+}
+
+/** Branche en u du mode (période 2π pour les maximums ou les minimums seuls, π pour les extremums
+ * réunis — audit 5e ch. 2, point 38). */
+function brancheUPourMode(fonction: FonctionExtremum, mode: ModeExtremum, amplitude: AmplitudeSinusoide): BrancheExtremum {
+  if (mode === "extremums") return brancheUFusionnee(fonction);
+  const vise = valeurTrigVisee(mode, amplitude);
+  if (fonction === "sin") return { constante: vise === 1 ? DEMI_PI : MOINS_DEMI_PI, periode: DEUX_PI_UNITE };
+  return { constante: vise === 1 ? ZERO_PI : PI_UNITE, periode: DEUX_PI_UNITE };
+}
+
+/** Constante de phase ramenée dans ]−π ; π] (point 39) : C et C + 2mπ donnent la même fonction —
+ * « cos(x − 4π) » s'écrit « cos(x) ». */
+export function reduireConstantePhase(c: RationnelPi): RationnelPi {
+  if (c.degrePi !== 1) return c;
+  const enPi = c.numerateur / c.denominateur;
+  if (enPi > -1 && enPi <= 1) return c;
+  const m = Math.ceil((enPi - 1) / 2);
+  return additionnerRationnelPi(c, { numerateur: -2 * m, denominateur: 1, degrePi: 1 });
 }
 
 function diviserParA(v: RationnelPi, a: RationnelPi): RationnelPi {
@@ -78,13 +114,14 @@ const TENTATIVES_MAX = 200;
  * solutions dans [0;2π[ dépasse 5 (lisibilité de l'écran bonus) ou tombe à 0 (période résultante en
  * x parfois > 2π, un point peut alors légitimement manquer la fenêtre — même classe de cas dégénéré
  * que 5gen10, corrigée ici DÈS LA CONCEPTION plutôt qu'après coup). */
-export function construireAvecFonction(fonction: FonctionExtremum): ExerciceExtremumsSinusoide {
-  const brancheU = brancheUFusionnee(fonction);
+export function construireAvecFonction(fonction: FonctionExtremum, mode: ModeExtremum = tirerMode()): ExerciceExtremumsSinusoide {
+  const amplitude = tirerAmplitude();
+  const brancheU = brancheUPourMode(fonction, mode, amplitude);
 
   let T = tirerT();
   let phi = tirerPhi(T);
   let a = calculerB(T);
-  let bArg = calculerC(a, phi);
+  let bArg = reduireConstantePhase(calculerC(a, phi));
   let brancheX = construireBrancheX(brancheU, a, bArg);
   let solutions = solutionsBrancheUnique(brancheX);
   let tentative = 0;
@@ -92,7 +129,7 @@ export function construireAvecFonction(fonction: FonctionExtremum): ExerciceExtr
     T = tirerT();
     phi = tirerPhi(T);
     a = calculerB(T);
-    bArg = calculerC(a, phi);
+    bArg = reduireConstantePhase(calculerC(a, phi));
     brancheX = construireBrancheX(brancheU, a, bArg);
     solutions = solutionsBrancheUnique(brancheX);
     tentative++;
@@ -100,7 +137,8 @@ export function construireAvecFonction(fonction: FonctionExtremum): ExerciceExtr
 
   return {
     fonction,
-    amplitude: tirerAmplitude(),
+    mode,
+    amplitude,
     decalageVertical: tirerDecalageVertical(),
     a,
     bArg,

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import type { ExerciceExtremumsSinusoide } from "../core5e/extremumsSinusoide.types";
 import {
-  CONSIGNE_GENERALE_EXTREMUMS,
   TEXTE_AIDE_SOLUTIONS_NIVEAU1,
   TEXTE_AIDE_SOLUTIONS_NIVEAU2,
-  TEXTE_CONSIGNE_SOLUTIONS,
+  consigneGeneraleExtremums,
+  consigneSolutionsExtremums,
   formatFonctionSourceLatex,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
@@ -73,7 +73,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_EXTREMUMS}
+        consigneGenerale={consigneGeneraleExtremums(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-termes">
             {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
@@ -82,7 +82,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
           </div>
         }
       />
-      <p className="prompt-text">{TEXTE_CONSIGNE_SOLUTIONS}</p>
+      <p className="prompt-text">{consigneSolutionsExtremums(exercice)}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (
         <div key={i}>
@@ -93,7 +93,7 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
               className={`text-input${ligneErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => modifierLigne(i, e.target.value)}
-              placeholder="ex : pi/12"
+              placeholder="ex : 2*pi/5"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>

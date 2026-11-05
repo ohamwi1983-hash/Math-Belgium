@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import type { ReponseSysteme } from "../moteur5e/sessionModelisationSinusoide";
 import { arrondiPrecis, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
+
+const virgule = (v: number) => String(v).replace(".", ",").replace("-", "−");
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -36,6 +38,8 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
   const [equation1, setEquation1] = useState("");
   const [equation2, setEquation2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = equation1.trim() !== "" && equation2.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
@@ -53,7 +57,13 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
   function valider() {
     if (!complet) return;
     const reponse = { equation1, equation2 };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(reponse);
   }
 
@@ -62,18 +72,18 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
       <p className="prompt-text">{consignePhase(exercice, "systeme")}</p>
       <ApercuExpressionLatex texte={equation1} />
       <div className="field">
-        <label className="field-label field-label-minuscule">équation pour t₁={donnees.t1}, f₁={arrondiPrecis(donnees.v1)} :</label>
+        <label className="field-label field-label-minuscule">équation pour t₁={donnees.t1}, f₁={virgule(arrondiPrecis(donnees.v1))} :</label>
         <input
           type="text"
           className={`text-input${equation1Erronee ? " is-erronee" : ""}`}
           value={equation1}
           onChange={(e) => setEquation1(e.target.value)}
-          placeholder="ex : omega*2+phi=asin((1.5-4)/5)"
+          placeholder="ex : omega*2+phi=asin((1,5-4)/5)"
         />
       </div>
       <ApercuExpressionLatex texte={equation2} />
       <div className="field">
-        <label className="field-label field-label-minuscule">équation pour t₂={donnees.t2}, f₂={arrondiPrecis(donnees.v2)} :</label>
+        <label className="field-label field-label-minuscule">équation pour t₂={donnees.t2}, f₂={virgule(arrondiPrecis(donnees.v2))} :</label>
         <input
           type="text"
           className={`text-input${equation2Erronee ? " is-erronee" : ""}`}
@@ -94,7 +104,12 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

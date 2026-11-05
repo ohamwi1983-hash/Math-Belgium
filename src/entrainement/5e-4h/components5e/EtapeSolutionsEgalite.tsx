@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SOLUTIONS_EGALITE } from "../ui5e/formatEquationTrigonometrique";
+import { AVERTISSEMENT_TANGENTE_INDEFINIE, CONSIGNE_SOLUTIONS_EGALITE, formatEnonceEgaliteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
@@ -45,8 +46,18 @@ export function EtapeSolutionsEgalite({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
-      <p className="prompt-text">{CONSIGNE_SOLUTIONS_EGALITE}</p>
+      <EnTeteExercice
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceEgaliteLatex(exercice)} block />
+          </div>
+        }
+      />
+      <p className="prompt-text">
+        {CONSIGNE_SOLUTIONS_EGALITE}
+        {exercice.identite === "tanVersTan" && AVERTISSEMENT_TANGENTE_INDEFINIE}
+      </p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (
         <div key={i}>
@@ -57,7 +68,7 @@ export function EtapeSolutionsEgalite({ exercice, tentativesUtilisees, tentative
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/6"
+              placeholder="ex : 2*pi/5"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
 import type { ReponseArgument } from "../moteur5e/verificationEquationTrig5gen10";
-import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
+import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex, latexAideArgumentNiveau2, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
 import { formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -100,7 +100,7 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
                 className={`text-input${lignesErronee ? " is-erronee" : ""}`}
                 value={ligne}
                 onChange={(e) => modifierLigne(i, e.target.value)}
-                placeholder="ex : pi/3 + 2*k*pi"
+                placeholder="ex : 2*pi/5 + 2*k*pi"
               />
               {lignes.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
@@ -118,7 +118,12 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideArgumentNiveau1(exercice.fonction)}</p>
-          {niveauAide >= 2 && <p>{texteAideArgumentNiveau2(exercice.fonction)}</p>}
+          {niveauAide >= 2 && (
+            <>
+              <p>{texteAideArgumentNiveau2(exercice.fonction)}</p>
+              <Katex expression={latexAideArgumentNiveau2(exercice.fonction)} block />
+            </>
+          )}
         </div>
       )}
       {!validation && (

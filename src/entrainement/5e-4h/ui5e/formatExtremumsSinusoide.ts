@@ -5,7 +5,8 @@
  * présentation→présentation) — jamais un second algorithme de rendu de `RationnelPi`.
  */
 import { reduireRationnelPi } from "../generateurs5e/parametresSinusoide/rationnelPi";
-import type { ExerciceExtremumsSinusoide, FonctionExtremum, RationnelPi } from "../core5e/extremumsSinusoide.types";
+import type { ExerciceExtremumsSinusoide, ModeExtremum, RationnelPi } from "../core5e/extremumsSinusoide.types";
+import { valeurTrigVisee } from "../generateurs5e/extremumsSinusoide";
 import { formatCoefficientAmplitudeLatex, formatRationnelPiLatex } from "./formatParametresSinusoide";
 
 /** Coefficient de x — omet le "1" littéral (même convention que l'amplitude, déjà établie). */
@@ -88,18 +89,32 @@ export function formatTermesEtatActuelExtremums(exercice: ExerciceExtremumsSinus
 // Consignes.
 // ============================================================================
 
-export const CONSIGNE_GENERALE_EXTREMUMS = "Détermine où cette fonction atteint un extremum (maximum ou minimum).";
-
-const CONSIGNES_PHASE: Record<"poserEquation" | "isolerX", string> = {
-  poserEquation: "Écris l'équation qui permet de déterminer les extrema (utilise « k » comme entier libre).",
-  isolerX: "Donne les solutions de cette équation en fonction de k.",
+/** Ce que l'on cherche, selon le mode (point 38) — « extremums », jamais « extrema » (vocabulaire du cours). */
+const OBJET_MODE: Record<ModeExtremum, string> = {
+  maximums: "ses maximums",
+  minimums: "ses minimums",
+  extremums: "tous ses extremums (maximums et minimums)",
 };
 
-export function consignePhaseExtremums(phase: "poserEquation" | "isolerX"): string {
-  return CONSIGNES_PHASE[phase];
+/** Point 40 : l'intervalle final est annoncé dès l'énoncé. */
+export function consigneGeneraleExtremums(exercice: ExerciceExtremumsSinusoide): string {
+  return `Détermine où cette fonction atteint ${OBJET_MODE[exercice.mode]} : d'abord pour tout x réel (k désigne un entier), puis dans [0 ; 2π[.`;
 }
 
-export const TEXTE_CONSIGNE_SOLUTIONS = "Liste toutes les positions d'extremum distinctes dans [0;2π[ (une valeur par point).";
+const OBJET_MODE_COURT: Record<ModeExtremum, string> = {
+  maximums: "des maximums",
+  minimums: "des minimums",
+  extremums: "des extremums",
+};
+
+export function consignePhaseExtremums(exercice: ExerciceExtremumsSinusoide, phase: "poserEquation" | "isolerX"): string {
+  if (phase === "poserEquation") return `Écris l'équation qui donne les positions ${OBJET_MODE_COURT[exercice.mode]} (utilise « k » comme entier).`;
+  return "Isole x : donne les solutions de cette équation en fonction de k.";
+}
+
+export function consigneSolutionsExtremums(exercice: ExerciceExtremumsSinusoide): string {
+  return `Donne toutes les positions ${OBJET_MODE_COURT[exercice.mode]} dans [0 ; 2π[, chaque valeur une seule fois.`;
+}
 
 // ============================================================================
 // Aides — écran "poserEquation" UNIQUEMENT (B.1 : aide niveau 2 retirée, écran "isolerX" n'a plus
@@ -109,19 +124,54 @@ export const TEXTE_CONSIGNE_SOLUTIONS = "Liste toutes les positions d'extremum d
 /** "X" (jamais "u") et "série" (jamais "branche") — renommage B.1, le texte rappelle uniquement la
  * méthode (jamais de valeur substituée : le niveau 2, qui donnait la formule substituée, est
  * entièrement retiré). */
-export function texteAideNiveau1Extremums(fonction: FonctionExtremum): string {
-  return fonction === "sin"
-    ? "sin(X)=±1 ⟺ X=π/2+k·π — UNE SEULE série fusionnée, de période π (jamais 2π : ce cas est distinct du cas spécial sin(X)=1 seul, qui aurait 2 séries de période 2π)."
-    : "cos(X)=±1 ⟺ X=k·π — UNE SEULE série fusionnée, de période π (jamais 2π : ce cas est distinct du cas spécial cos(X)=1 seul, qui aurait 2 séries de période 2π).";
+/** Aide de niveau 1 (point 35 : texte en phrase, formule en LaTeX). Pour un maximum ou un minimum
+ * seul, la valeur visée (1 ou −1) dépend du SIGNE de l'amplitude. */
+export function texteAideNiveau1Extremums(exercice: ExerciceExtremumsSinusoide): string {
+  const f = exercice.fonction;
+  if (exercice.mode === "extremums") return `Les extremums sont atteints quand ${f}(X) vaut 1 OU −1 : ces deux cas se réunissent en une seule série, de période π.`;
+  const vise = valeurTrigVisee(exercice.mode, exercice.amplitude);
+  const signe = exercice.amplitude.signe > 0 ? "positive" : "négative";
+  const objet = exercice.mode === "maximums" ? "Les maximums" : "Les minimums";
+  return `${objet} sont atteints quand ${f}(X) = ${vise === 1 ? "1" : "−1"} (l'amplitude est ${signe}) : une seule série, de période 2π.`;
+}
+
+export function latexAideNiveau1Extremums(exercice: ExerciceExtremumsSinusoide): string {
+  const f = exercice.fonction === "sin" ? "\\sin" : "\\cos";
+  if (exercice.mode === "extremums") return exercice.fonction === "sin" ? "\\sin X = \\pm 1 \\iff X = \\frac{\\pi}{2} + k\\pi" : "\\cos X = \\pm 1 \\iff X = k\\pi";
+  const vise = valeurTrigVisee(exercice.mode, exercice.amplitude);
+  if (exercice.fonction === "sin") return vise === 1 ? `${f} X = 1 \\iff X = \\frac{\\pi}{2} + 2k\\pi` : `${f} X = -1 \\iff X = -\\frac{\\pi}{2} + 2k\\pi`;
+  return vise === 1 ? `${f} X = 1 \\iff X = 2k\\pi` : `${f} X = -1 \\iff X = \\pi + 2k\\pi`;
 }
 
 export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 =
-  "Balaie k (entier relatif) dans la branche x=constante+k·période obtenue à l'écran précédent, et ne garde que les valeurs qui tombent dans [0;2π[.";
+  "Donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) dans la série de x obtenue à l'écran précédent, et garde les valeurs comprises dans [0 ; 2π[.";
 export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Un premier point est déjà placé sur le cercle, à titre d'exemple — retrouve les autres de la même façon.";
 
 /** Placeholder de l'écran "poserEquation" — équation complète, argument substitué (B.1, jamais la
  * forme abstraite "u=..."). Statique (même convention que l'ancien placeholder unique) : un exemple
  * générique, jamais dérivé de l'exercice tiré. */
-export const PLACEHOLDER_POSER_EQUATION_EXTREMUMS = "ex : 2*x-3=k*pi";
+export const PLACEHOLDER_POSER_EQUATION_EXTREMUMS = "ex : 7*x-3=pi/5+k*pi";
 /** Placeholder de l'écran "isolerX" — "n" renommé "k" (B.1). */
-export const PLACEHOLDER_ISOLER_X_EXTREMUMS = "ex : pi/12+k*pi/2";
+export const PLACEHOLDER_ISOLER_X_EXTREMUMS = "ex : pi/5+k*2*pi/7";
+
+/** Réponse finale révélée, lisible EN x (point 40 : elle n'était montrée que sur un cercle, les x
+ * placés comme des angles) — fractions de π quand la valeur en est une (dénominateur ≤ 48). */
+export function formatSolutionsExtremumsLatex(solutions: number[]): string {
+  const valeur = (v: number): string => {
+    if (Math.abs(v) < 1e-9) return "0";
+    for (let d = 1; d <= 48; d++) {
+      const n = Math.round((v / Math.PI) * d);
+      if (n !== 0 && Math.abs(v - (n * Math.PI) / d) < 1e-9) {
+        let a = Math.abs(n);
+        let b = d;
+        while (b) [a, b] = [b, a % b];
+        const num = n / a;
+        const den = d / a;
+        const numerateur = num === 1 ? "\\pi" : `${num}\\pi`;
+        return den === 1 ? numerateur : `\\frac{${numerateur}}{${den}}`;
+      }
+    }
+    return v.toFixed(2).replace(".", "{,}");
+  };
+  return `x \\in \\left\\{ ${solutions.map(valeur).join(" \\,;\\, ")} \\right\\}`;
+}

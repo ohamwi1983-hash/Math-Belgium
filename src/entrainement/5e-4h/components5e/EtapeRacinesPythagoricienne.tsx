@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_RACINES_PYTHAGORICIENNE, TEXTE_AIDE_RACINES_NIVEAU1, formatPolynomeCibleLatex } from "../ui5e/formatEquationTrigonometrique";
+import { TEXTE_AIDE_RACINES_NIVEAU1, consigneRacinesPythagoricienne, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -50,7 +50,6 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
     onValider(textes);
   }
 
-  const fn = exercice.fonctionCible === "cos" ? "\\cos" : "\\sin";
 
   return (
     <div>
@@ -58,22 +57,22 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box">
-            <Katex expression={formatPolynomeCibleLatex(exercice)} block />
+            <Katex expression={formatEnonceMixteLatex(exercice)} block />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_RACINES_PYTHAGORICIENNE}</p>
+      <p className="prompt-text">{consigneRacinesPythagoricienne(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
-          <Katex expression={`${fn}(x_1)`} />
+          <Katex expression="t_1" />
         </label>
-        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t1} onChange={(e) => setT1(e.target.value)} placeholder="ex : 1/2" />
+        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t1} onChange={(e) => setT1(e.target.value)} placeholder="ex : 3/7" />
       </div>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
-          <Katex expression={`${fn}(x_2)`} />
+          <Katex expression="t_2" />
         </label>
-        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : -1" />
+        <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : -2/7" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

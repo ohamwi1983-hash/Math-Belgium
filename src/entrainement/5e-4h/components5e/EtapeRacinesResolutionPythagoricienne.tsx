@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerUneRacine, type ReponseRacine, type ReponseRacinesPythagoricienne } from "../moteur5e/verificationEquationTrig5gen10";
-import { CONSIGNE_RACINES_RESOLUTION, TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 } from "../ui5e/formatEquationTrigonometrique";
+import { TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1, consigneRacinesResolution, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -29,6 +30,11 @@ interface Props {
 
 function formatT(t: number): string {
   return Number.isInteger(t) ? String(t) : t.toString().replace(".", ",");
+}
+
+/** Même valeur, virgule protégée pour KaTeX (sinon espace parasite après la virgule). */
+function formatTLatex(t: number): string {
+  return formatT(t).replace(",", "{,}");
 }
 
 /** Écran 3 (famille "pythagoricienne") — pour CHAQUE racine, l'élève décide de la rejeter (|t|>1,
@@ -61,10 +67,19 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
-      <p className="prompt-text">{CONSIGNE_RACINES_RESOLUTION}</p>
+      <EnTeteExercice
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceMixteLatex(exercice)} block />
+          </div>
+        }
+      />
+      <p className="prompt-text">{consigneRacinesResolution(exercice)}</p>
 
-      <p className="prompt-text prompt-text--question-multiple">Racine t = {formatT(exercice.racine1.t)} :</p>
+      <p className="prompt-text prompt-text--question-multiple">
+        Racine <Katex expression={`t_1 = ${formatTLatex(exercice.racine1.t)}`} /> : <Katex expression={`\\${exercice.fonctionCible}(x) = ${formatTLatex(exercice.racine1.t)}`} />
+      </p>
       <button type="button" className={`btn ${rejeter1 ? "toggle-active" : ""}`} onClick={() => setRejeter1((v) => !v)}>
         Rejeter cette racine
       </button>
@@ -79,7 +94,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
                   className={`text-input${racine1Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes1((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/3 + 2*k*pi"
+                  placeholder="ex : 2*pi/5 + 2*k*pi"
                 />
                 {lignes1.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes1((arr) => arr.filter((_, j) => j !== i))}>
@@ -95,7 +110,9 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </div>
       )}
 
-      <p className="prompt-text prompt-text--question-multiple">Racine t = {formatT(exercice.racine2.t)} :</p>
+      <p className="prompt-text prompt-text--question-multiple">
+        Racine <Katex expression={`t_2 = ${formatTLatex(exercice.racine2.t)}`} /> : <Katex expression={`\\${exercice.fonctionCible}(x) = ${formatTLatex(exercice.racine2.t)}`} />
+      </p>
       <button type="button" className={`btn ${rejeter2 ? "toggle-active" : ""}`} onClick={() => setRejeter2((v) => !v)}>
         Rejeter cette racine
       </button>
@@ -110,7 +127,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
                   className={`text-input${racine2Erronee ? " is-erronee" : ""}`}
                   value={ligne}
                   onChange={(e) => setLignes2((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-                  placeholder="ex : pi/3 + 2*k*pi"
+                  placeholder="ex : 2*pi/5 + 2*k*pi"
                 />
                 {lignes2.length > 1 && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes2((arr) => arr.filter((_, j) => j !== i))}>

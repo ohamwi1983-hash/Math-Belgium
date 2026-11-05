@@ -60,7 +60,9 @@ export function solutionsDistinctes(branchesX: BrancheX[]): number[] {
   for (const branche of branchesX) {
     for (let n = N_MIN; n <= N_MAX; n++) {
       const v = branche.constante.decimal + branche.periode.decimal * n;
-      if (v >= -TOLERANCE && v < DEUX_PI) brut.push(v < 0 ? 0 : v);
+      // Borne haute stricte À LA TOLÉRANCE près : 2π − 1e-15 (flottant) est 2π, hors de [0;2π[ — et
+      // déjà présent sous la forme 0 (sinon 0 et « 2π » comptaient comme 2 solutions distinctes).
+      if (v >= -TOLERANCE && v < DEUX_PI - TOLERANCE) brut.push(v < 0 ? 0 : v);
     }
   }
   const triees = [...brut].sort((a, b) => a - b);

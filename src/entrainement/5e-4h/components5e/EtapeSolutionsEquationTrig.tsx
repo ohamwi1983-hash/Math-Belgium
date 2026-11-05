@@ -65,7 +65,7 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
         }
       />
       <p className="prompt-text">
-        Liste toutes les solutions distinctes dans [0;2π[ (une valeur par point).
+        Donne toutes les solutions de l'équation dans [0 ; 2π[, chaque valeur une seule fois.
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}
       </p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime={exercice.regime} />}
@@ -73,7 +73,7 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />
           <div className="field-row">
-            <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne} onChange={(e) => modifierLigne(i, e.target.value)} placeholder="ex : pi/6" />
+            <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne} onChange={(e) => modifierLigne(i, e.target.value)} placeholder="ex : 2*pi/5" />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>
                 ×

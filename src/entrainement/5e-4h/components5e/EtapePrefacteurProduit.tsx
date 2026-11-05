@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_PREFACTEUR, TEXTE_AIDE_PREFACTEUR_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_PREFACTEUR, LATEX_AIDE_PREFACTEUR_NIVEAU1, TEXTE_AIDE_PREFACTEUR_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -57,10 +57,11 @@ export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativ
       />
       <p className="prompt-text">{CONSIGNE_PREFACTEUR}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : tan(x)*(tan(x)-1/2)" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : sin(5x)*(sin(5x)-3/7)" />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_PREFACTEUR_NIVEAU1}</p>
+          <Katex expression={LATEX_AIDE_PREFACTEUR_NIVEAU1} block />
         </div>
       )}
       {!validation && (

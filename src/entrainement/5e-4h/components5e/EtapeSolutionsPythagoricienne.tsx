@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SOLUTIONS_PYTHAGORICIENNE } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_SOLUTIONS_PYTHAGORICIENNE, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
@@ -46,7 +47,14 @@ export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
+      <EnTeteExercice
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceMixteLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_SOLUTIONS_PYTHAGORICIENNE}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (
@@ -58,7 +66,7 @@ export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, t
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => setLignes((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
-              placeholder="ex : pi/3"
+              placeholder="ex : 2*pi/5"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => setLignes((arr) => arr.filter((_, j) => j !== i))}>

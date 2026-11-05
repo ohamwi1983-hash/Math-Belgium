@@ -37,6 +37,8 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
   const [choixAucunAngle, setChoixAucunAngle] = useState<boolean | null>(null);
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const lignesVisibles = choixAucunAngle === false;
   const complet = choixAucunAngle === true || (lignesVisibles && lignes.length > 0 && lignes.every((l) => l.trim() !== ""));
@@ -45,7 +47,7 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
   /** Les lignes forment UNE seule réponse (l'ensemble des branches), jamais des champs indépendants
    * — même flag partagé par toute la liste que "pointsErronee" dans `EnsembleReelGuideBuilder.tsx`. */
   const lignesErronee = apresEchec && lignesVisibles && !!diagnostiquer && lignes.every((l) => l.trim() !== "") && diagnostiquer(reponseCourante) !== "correct";
-  const placeholder = "ex : asin(0.5) + k*2*pi";
+  const placeholder = "ex : asin(0,37) + 2*k*pi";
 
   function ajouterLigne() {
     setLignes((arr) => [...arr, ""]);
@@ -59,7 +61,13 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
   function valider() {
     if (!complet) return;
     const reponse: ReponseArgumentResoudre = choixAucunAngle === true ? { aucuneSolution: true, lignes: [] } : { aucuneSolution: false, lignes };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(reponse);
   }
 
@@ -112,7 +120,12 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

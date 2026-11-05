@@ -229,7 +229,7 @@ const PLACEHOLDERS: Record<PhaseParametresSinusoide, string> = {
   amplitude: "ex : 7/3",
   pulsation: "ex : 5pi/7",
   periode: "ex : 7pi",
-  frequence: "ex : 1/(7pi)",
+  frequence: "ex : 2/7",
   dephasage: "ex : -5pi/7",
   phi: "ex : 5pi/7",
   decalage: "ex : -7,5",

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { ExerciceExtremumsSinusoide } from "../core5e/extremumsSinusoide.types";
 import {
-  CONSIGNE_GENERALE_EXTREMUMS,
   PLACEHOLDER_ISOLER_X_EXTREMUMS,
   PLACEHOLDER_POSER_EQUATION_EXTREMUMS,
+  consigneGeneraleExtremums,
   consignePhaseExtremums,
   formatFonctionSourceLatex,
+  latexAideNiveau1Extremums,
   texteAideNiveau1Extremums,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
@@ -67,7 +68,7 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_EXTREMUMS}
+        consigneGenerale={consigneGeneraleExtremums(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-termes">
             {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
@@ -76,7 +77,7 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
           </div>
         }
       />
-      <p className="prompt-text">{consignePhaseExtremums(phase)}</p>
+      <p className="prompt-text">{consignePhaseExtremums(exercice, phase)}</p>
       {phase === "poserEquation" ? (
         <>
           <ApercuExpressionLatex texte={texte} />
@@ -108,7 +109,8 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1Extremums(exercice.fonction)}</p>
+          <p>{texteAideNiveau1Extremums(exercice)}</p>
+          <Katex expression={latexAideNiveau1Extremums(exercice)} block />
         </div>
       )}
       {!validation && (

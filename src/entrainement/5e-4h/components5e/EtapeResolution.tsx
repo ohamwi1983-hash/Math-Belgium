@@ -36,6 +36,8 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
   const [omega, setOmega] = useState("");
   const [phi, setPhi] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = omega.trim() !== "" && phi.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
@@ -47,7 +49,13 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
   function valider() {
     if (!complet) return;
     const reponse = { omega, phi };
-    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    const statut = diagnostiquer ? diagnostiquer(reponse) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(reponse);
   }
 
@@ -82,7 +90,12 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

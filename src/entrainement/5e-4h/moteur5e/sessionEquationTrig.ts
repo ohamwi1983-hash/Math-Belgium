@@ -82,8 +82,14 @@ export function demarrerSessionEquationTrig(reglages: ReglagesSession5e, generat
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Point 36 (audit 5e ch. 2) : le choix de la technique (4 options) se gagnerait par élimination
+ * avec plusieurs essais — une seule tentative sur cet écran. */
+export function tentativesMaxEquationTrig(etat: Pick<EtatSessionEquationTrigonometrique, "reglages">, phase: PhaseEquationTrigonometrique): number {
+  return phase === "reconnaissance" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEquationTrigonometrique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEquationTrig(etat, etat.phase) };
 }
 
 

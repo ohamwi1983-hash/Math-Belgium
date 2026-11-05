@@ -30,6 +30,8 @@ interface Props {
 export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [paires, setPaires] = useState<[string, string][]>([["", ""]]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = paires.length > 0 && paires.every(([inf, sup]) => inf.trim() !== "" && sup.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -49,7 +51,13 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
   }
   function valider() {
     if (!complet) return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(paires));
+    const statut = diagnostiquer ? diagnostiquer(paires) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(paires);
   }
 
@@ -94,7 +102,12 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_CONVERSION_PYTHAGORICIENNE, TEXTE_AIDE_CONVERSION_NIVEAU1, formatEnonceMixteLatex } from "../ui5e/formatEquationTrigonometrique";
+import { TEXTE_AIDE_CONVERSION_NIVEAU1, consigneConversionPythagoricienne, formatEnonceMixteLatex, latexAideConversionNiveau1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -52,18 +52,19 @@ export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, 
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_CONVERSION_PYTHAGORICIENNE}</p>
+      <p className="prompt-text">{consigneConversionPythagoricienne(exercice)}</p>
       <ApercuExpressionLatex texte={texte} />
       <input
         type="text"
         className={`text-input${texteErronee ? " is-erronee" : ""}`}
         value={texte}
         onChange={(e) => setTexte(e.target.value)}
-        placeholder={`ex : 4*${exercice.fonctionCible}(x)^2+6*${exercice.fonctionCible}(x)-4`}
+        placeholder={`ex : 7*${exercice.fonctionCible}(x)^2-3*${exercice.fonctionCible}(x)+5`}
       />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_CONVERSION_NIVEAU1}</p>
+          <Katex expression={latexAideConversionNiveau1(exercice)} block />
         </div>
       )}
       {!validation && (

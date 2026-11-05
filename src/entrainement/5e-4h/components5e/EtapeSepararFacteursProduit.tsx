@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SEPARER_FACTEURS, TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_SEPARER_FACTEURS, LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1, TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -63,16 +63,17 @@ export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, ten
       <ApercuExpressionLatex texte={ligne1} label="Équation 1" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Équation 1</label>
-        <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne1} onChange={(e) => setLigne1(e.target.value)} placeholder="ex : tan(x)=0" />
+        <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne1} onChange={(e) => setLigne1(e.target.value)} placeholder="ex : cos(5x)=0" />
       </div>
       <ApercuExpressionLatex texte={ligne2} label="Équation 2" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Équation 2</label>
-        <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne2} onChange={(e) => setLigne2(e.target.value)} placeholder="ex : tan(x)=1/2" />
+        <input type="text" className={`text-input${lignesErronee ? " is-erronee" : ""}`} value={ligne2} onChange={(e) => setLigne2(e.target.value)} placeholder="ex : cos(5x)=3/7" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1}</p>
+          <Katex expression={LATEX_AIDE_SEPARER_FACTEURS_NIVEAU1} block />
         </div>
       )}
       {!validation && (

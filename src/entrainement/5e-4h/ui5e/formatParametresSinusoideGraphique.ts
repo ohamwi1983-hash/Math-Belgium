@@ -54,7 +54,7 @@ const PLACEHOLDERS: Record<PhaseParametresSinusoideGraphique, string> = {
   amplitude: "ex : 7/3",
   periode: "ex : 7pi",
   pulsation: "ex : 5pi/7",
-  frequence: "ex : 1/(7pi)",
+  frequence: "ex : 2/7",
   phi: "ex : 5pi/7",
   dephasage: "ex : -5pi/7",
 };

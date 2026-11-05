@@ -62,7 +62,7 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
         }
       />
       <p className="prompt-text">
-        Résous ces équations ci-dessus et donne les valeurs de x.
+        Isole x dans chaque série trouvée (k entier).
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}
       </p>
       {lignes.map((ligne, i) => (
@@ -74,7 +74,7 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
               className={`text-input${lignesErronee ? " is-erronee" : ""}`}
               value={ligne}
               onChange={(e) => modifierLigne(i, e.target.value)}
-              placeholder="ex : pi/6 + k*pi"
+              placeholder="ex : pi/5 + k*pi/7"
             />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirerLigne(i)}>

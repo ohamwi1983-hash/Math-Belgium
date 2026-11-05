@@ -23,10 +23,9 @@ import {
 } from "./moteur5e/verificationExtremumsSinusoide";
 import type { EtatSessionExtremumsSinusoide, PhaseExtremumsSinusoide } from "./moteur5e/typesExtremumsSinusoide";
 import { ORDRE_PHASES_EXTREMUMS } from "./moteur5e/typesExtremumsSinusoide";
-import { formatTermesEtatActuelExtremums } from "./ui5e/formatExtremumsSinusoide";
+import { formatSolutionsExtremumsLatex, formatTermesEtatActuelExtremums } from "./ui5e/formatExtremumsSinusoide";
 import { EtapeParametreExtremum } from "./components5e/EtapeParametreExtremum";
 import { EtapeSolutionsExtremum } from "./components5e/EtapeSolutionsExtremum";
-import { CercleTrigEquationSketch } from "./components5e/CercleTrigEquationSketch";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifExtremumsSinusoide } from "./ui5e/recapitulatifExtremumsSinusoide";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
@@ -74,6 +73,8 @@ export function App5gen11() {
   /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que 5gen10). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseExtremumsSinusoide, boolean>>>({});
+  /** Incrémenté à chaque nouvelle session : entre dans la clé des écrans (champs remis à zéro). */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -109,6 +110,7 @@ export function App5gen11() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroSession((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -121,6 +123,7 @@ export function App5gen11() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionExtremumsSinusoide(REGLAGES_DEMO, () => construireAvecFonction(id as FonctionExtremum)));
   }
 
@@ -139,7 +142,7 @@ export function App5gen11() {
           ) : etat.phase === "isolerX" ? (
             <Katex expression={brancheXAttendue} />
           ) : (
-            <CercleTrigEquationSketch points={exercice.solutions} regime="exact" />
+            <Katex expression={formatSolutionsExtremumsLatex(exercice.solutions)} block />
           ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
@@ -151,6 +154,7 @@ export function App5gen11() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extremums d'une fonction sinusoïdale</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_FONCTION} onGenerer={forcerVariante} />
@@ -159,7 +163,7 @@ export function App5gen11() {
           <RecapitulatifPanel entrees={calculerRecapitulatifExtremumsSinusoide(etat)} />
           {(etat.phase === "poserEquation" || etat.phase === "isolerX") && (
             <EtapeParametreExtremum
-              key={etat.phase}
+              key={`${numeroSession}-${etat.indexExercice}-${etat.phase}`}
               exercice={exercice}
               phase={etat.phase}
               tentativesUtilisees={tentativesUtilisees}
@@ -180,7 +184,7 @@ export function App5gen11() {
           )}
           {etat.phase === "solutions" && (
             <EtapeSolutionsExtremum
-              key={etat.phase}
+              key={`${numeroSession}-${etat.indexExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}

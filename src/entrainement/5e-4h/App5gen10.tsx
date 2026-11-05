@@ -49,6 +49,7 @@ import {
   soumettreReponseSolutionsEgalite,
   soumettreReponseSolutionsProduit,
   soumettreReponseSolutionsPythagoricienne,
+  tentativesMaxEquationTrig,
 } from "./moteur5e/sessionEquationTrig";
 import {
   diagnostiquerArgument,
@@ -272,6 +273,9 @@ export function App5gen10() {
    * `niveauAide` à 0 dès la transition — voir le commentaire de `calculerSegmentsProgression`).
    * Remis à vide aux mêmes endroits que `historique`. */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseEquationTrigonometrique, boolean>>>({});
+  /** Incrémenté à chaque nouvelle session (« Nouvel exercice », « Générer ») : entre dans la clé des
+   * écrans, pour que les champs repartent toujours vides. */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -307,6 +311,7 @@ export function App5gen10() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroSession((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -317,8 +322,8 @@ export function App5gen10() {
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxEquationTrig(etat, etat.phase);
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
@@ -334,6 +339,7 @@ export function App5gen10() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Équations trigonométriques</h1>
+        <p className="app-subtitle">Chapitre 2 — Trigonométrie</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev
@@ -342,6 +348,7 @@ export function App5gen10() {
           setEnAttente(null);
           setHistorique([]);
           setAideUtiliseeParPhase({});
+          setNumeroSession((n) => n + 1);
           setEtat(demarrerSessionEquationTrig(REGLAGES_DEMO, GENERATEURS_FAMILLE[id]));
         }}
       />

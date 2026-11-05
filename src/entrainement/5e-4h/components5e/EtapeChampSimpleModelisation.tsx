@@ -37,9 +37,15 @@ interface Props {
  * "poserExtremum"/"isolerTExtremum" illustrent la variable libre "k" ; les autres phases gardent
  * le placeholder générique ci-dessous. */
 const PLACEHOLDERS: Partial<Record<PhaseModelisationSinusoide, string>> = {
-  fonctionFinale: "ex : 5*sin(0.3*t+1.2)+4",
-  poserExtremum: "ex : pi/2 + k*pi",
-  isolerTExtremum: "ex : (pi/2-0.7)/0.3 + k*3.14",
+  // Exemples de FORMAT hors de l'espace des réponses (point 2) : jamais u = π/2 + kπ (réponse de
+  // « poserExtremum » à chaque tirage), jamais un A/b entier ni un ω = 2π/T possible.
+  amplitude: "ex : 2,5",
+  decalage: "ex : 7,5",
+  pulsation: "ex : 1,3",
+  phi: "ex : 3*pi/5",
+  fonctionFinale: "ex : 7*sin(0,4*t-0,9)+2",
+  poserExtremum: "ex : 1,2 + k*pi/4",
+  isolerTExtremum: "ex : 4,7 + k*2,5",
 };
 
 /**
@@ -51,14 +57,22 @@ const PLACEHOLDERS: Partial<Record<PhaseModelisationSinusoide, string>> = {
 export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const placeholder = PLACEHOLDERS[phase] ?? "ex : 3, pi/4, sqrt(2)...";
+  const placeholder = PLACEHOLDERS[phase] ?? "ex : 2,5";
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    const statut = diagnostiquer ? diagnostiquer(texte) : null;
+    if (statut === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    if (statut !== null) setDernierStatut(statut);
     onValider(texte);
   }
 
@@ -88,7 +102,12 @@ export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilis
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {montrerErreurs && !ecritureIllisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

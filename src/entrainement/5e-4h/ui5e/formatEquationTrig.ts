@@ -7,7 +7,9 @@
 import { pgcd } from "../generateurs5e/parametresSinusoide/rationnelPi";
 import type { BrancheAngle, CoefficientRationnel, FonctionTrig, RegimeEquationTrig, ValeurCible, ValeurPiOuDecimale } from "../core5e/equationsTrigonometriques.types";
 
-export const CONSIGNE_GENERALE_EQUATION_TRIG = "Résous cette équation.";
+/** Point 35 (audit 5e ch. 2) : l'intervalle final est annoncé dès l'énoncé, plus seulement au
+ * dernier écran. */
+export const CONSIGNE_GENERALE_EQUATION_TRIG = "Résous cette équation : d'abord dans ℝ (k désigne un entier), puis dans [0 ; 2π[.";
 
 /** Annonce de précision (régime "decimal" UNIQUEMENT — jamais affichée en régime "exact", où la
  * réponse attendue est une expression exacte avec π, aucun arrondi en jeu) — même formulation que
@@ -104,13 +106,19 @@ export function texteAideArgumentNiveau1(fonction: FonctionTrig): string {
  * par fonction, jamais conditionnée par `aucuneSolution`/`casSpecial` (simplification assumée —
  * voir CLAUDE.md section 5gen10). */
 export function texteAideArgumentNiveau2(fonction: FonctionTrig): string {
-  if (fonction === "sin") return "sin(X)=a ⟹ X = arcsin(a) + 2kπ OU X = (π − arcsin(a)) + 2kπ (k entier)";
-  if (fonction === "cos") return "cos(X)=a ⟹ X = arccos(a) + 2kπ OU X = −arccos(a) + 2kπ (k entier)";
-  return "tan(X)=a ⟹ X = arctan(a) + kπ (k entier)";
+  if (fonction === "tan") return "Formule du cours (k entier) — une seule série :";
+  return "Formule du cours (k entier) — deux séries :";
+}
+
+/** Formule de l'aide de niveau 2, en LaTeX (point 35 : plus de formule écrite au clavier). */
+export function latexAideArgumentNiveau2(fonction: FonctionTrig): string {
+  if (fonction === "sin") return "\\sin X = a \\iff X = \\arcsin a + 2k\\pi \\ \\text{ ou } \\ X = \\pi - \\arcsin a + 2k\\pi";
+  if (fonction === "cos") return "\\cos X = a \\iff X = \\arccos a + 2k\\pi \\ \\text{ ou } \\ X = -\\arccos a + 2k\\pi";
+  return "\\tan X = a \\iff X = \\arctan a + k\\pi";
 }
 
 export const TEXTE_AIDE_ISOLER_X_NIVEAU1 =
-  "N'oublie pas de diviser TOUT le membre de droite par a : la constante ET le terme périodique (nπ devient nπ/a, ou 2nπ/a selon le cas) — jamais seulement la constante.";
+  "Divise TOUT le membre de droite par a : la constante ET le terme en k — la période est elle aussi divisée par a, jamais seulement la constante.";
 
 /** Aide 2 — formule x=(u-b)/a SUBSTITUÉE (les vraies valeurs de u, a, b) mais PAS calculée/simplifiée
  * — une entrée par branche de `branchesU`. */
@@ -120,8 +128,8 @@ export function formatAideIsolerXNiveau2Latex(exercice: { a: CoefficientRationne
   return exercice.branchesU.map((u) => `x = \\dfrac{(${formatBrancheLatex(u)}) - (${bLatex})}{${aLatex}}`);
 }
 
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 = "Combien de points distincts un tour complet ([0;2π[) contient-il pour cette série ? Balaye k jusqu'au bouclage complet, pas seulement k=-1, 0, 1.";
-export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Le premier point est déjà placé sur le cercle, à titre d'exemple. Retrouve les autres en balayant n.";
+export const TEXTE_AIDE_SOLUTIONS_NIVEAU1 = "Donne à k des valeurs entières successives (…, −1, 0, 1, 2, …) et garde toutes les valeurs de x comprises dans [0 ; 2π[ — pas seulement celles obtenues pour k = −1, 0 et 1.";
+export const TEXTE_AIDE_SOLUTIONS_NIVEAU2 = "Le premier point est déjà placé sur le cercle, à titre d'exemple. Retrouve les autres en faisant varier k.";
 
 /** Cherche p/q (q≤24) tel que v≈(p/q)·π, à tolérance serrée — reconstruction du label texte (pas
  * KaTeX, un `<text>` SVG brut ne peut pas rendre de LaTeX réel) du cercle trigonométrique en régime

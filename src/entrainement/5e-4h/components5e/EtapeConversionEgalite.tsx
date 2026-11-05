@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_CONVERSION_EGALITE, formatEnonceEgaliteLatex, texteAideConversionEgaliteNiveau1 } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_CONVERSION_EGALITE, formatEnonceEgaliteLatex, latexAideConversionEgaliteNiveau1, texteAideConversionEgaliteNiveau1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -54,10 +54,11 @@ export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativ
       />
       <p className="prompt-text">{CONSIGNE_CONVERSION_EGALITE}</p>
       <ApercuExpressionLatex texte={texte} />
-      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(pi/2-x-pi/4)" />
+      <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(pi/2-5x-pi/7)" />
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideConversionEgaliteNiveau1(exercice)}</p>
+          <Katex expression={latexAideConversionEgaliteNiveau1(exercice)} block />
         </div>
       )}
       {!validation && (

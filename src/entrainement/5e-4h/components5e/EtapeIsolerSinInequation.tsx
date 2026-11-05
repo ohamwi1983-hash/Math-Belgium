@@ -33,6 +33,8 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
   const [texte, setTexte] = useState("");
   const [choixCasSpecial, setChoixCasSpecial] = useState<"toujoursVrai" | "toujoursFaux" | null>(null);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 2, point 48). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && texte.trim() !== "" && diagnostiquer(texte) !== "correct";
@@ -73,7 +75,13 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
                 disabled={choixCasSpecial === null}
                 onClick={() => {
                   if (choixCasSpecial === null) return;
-                  if (diagnostiquer) setDernierStatut(diagnostiquer(choixCasSpecial));
+                  const statut = diagnostiquer ? diagnostiquer(choixCasSpecial) : null;
+                  if (statut === "parse_error") {
+                    setEcritureIllisible(true);
+                    return;
+                  }
+                  setEcritureIllisible(false);
+                  if (statut !== null) setDernierStatut(statut);
                   onValider(choixCasSpecial);
                 }}
               >
@@ -90,7 +98,7 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
               className={`text-input${texteErronee ? " is-erronee" : ""}`}
               value={texte}
               onChange={(e) => setTexte(e.target.value)}
-              placeholder="ex : sin(u)>=0.42"
+              placeholder="ex : sin(u) ≥ 0,42"
             />
           </div>
           {!validation && (
@@ -102,7 +110,13 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
                 disabled={texte.trim() === ""}
                 onClick={() => {
                   if (texte.trim() === "") return;
-                  if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+                  const statut = diagnostiquer ? diagnostiquer(texte) : null;
+                  if (statut === "parse_error") {
+                    setEcritureIllisible(true);
+                    return;
+                  }
+                  setEcritureIllisible(false);
+                  if (statut !== null) setDernierStatut(statut);
                   onValider(texte);
                 }}
               >
@@ -112,7 +126,12 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
           )}
         </>
       )}
-      {!validation && montrerErreurs && (
+      {!validation && ecritureIllisible && (
+        <p className="alert-error" role="alert">
+          Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+        </p>
+      )}
+      {!validation && montrerErreurs && !ecritureIllisible && (
         <p className="alert-error" role="alert">
           {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
         </p>

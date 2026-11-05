@@ -1,28 +1,17 @@
 /**
- * Couche B (5e) — vérification pour 5gen11 ("Extremums d'une fonction sinusoïdale"). N'importe
- * jamais rien de `src/generateurs5e/`. Réutilise DIRECTEMENT `diagnostiquerBranches`/
- * `diagnostiquerEnsembleNumerique` (`moteur5e/verificationEquationTrig.ts`, 5gen10, moteur→moteur
- * déjà établi ailleurs sur la plateforme) : `brancheU`/`brancheX` de 5gen11 sont structurellement
- * identiques à une `BrancheCible` (`{constante, periode}`) de 5gen10 une fois wrappées en
- * `ValeurPiOuDecimale` — `a`/`bArg` étant TOUJOURS des `RationnelPi` exacts (jamais de régime
- * décimal ici), le wrapping est trivial (`exact: v` systématique).
+ * Couche B (5e) — vérification pour 5gen11 (« Extremums d'une fonction sinusoïdale »). N'importe
+ * jamais rien de `src/generateurs5e/`.
  *
- * B.1 — écran 1, changement de comportement (pas seulement de texte) : la réponse ATTENDUE est
- * désormais l'équation COMPLÈTE, argument substitué ("ax+bArg = constante+k·période"), jamais la
- * forme abstraite "u=...". `diagnostiquerPoserEquationExtremum` sépare donc le texte soumis en
- * membre gauche/droit (sur le PREMIER "=" seulement) et vérifie CHACUN indépendamment :
- * - membre gauche : doit être la fonction AFFINE "a·x+bArg" EXACTE de l'exercice (pas une forme
- *   affine quelconque) — extraite par évaluation en x=0/x=1 (`evaluerExpressionGenerale`, qui
- *   interprète nativement le jeton "x", contrairement à "k"/"n" qui doivent être substitués à la
- *   main ailleurs dans ce fichier) et comparée à (bArg, a) à ±`TOLERANCE_EQUATION_TRIG` près.
- * - membre droit : réutilise `diagnostiquerBranches` TEL QUEL (même primitive que l'ancien écran,
- *   simplement appliquée au membre droit isolé plutôt qu'au texte entier).
+ * Écrans 1 et 2 (audit 5e ch. 2, point 40) : la réponse est une ÉQUATION en x et k ; elle est
+ * acceptée dès qu'elle est équivalente à la série attendue « x = c + k·p » — côtés inversés,
+ * équation multipliée par un nombre non nul, k parcouru dans l'autre sens, constante décalée d'un
+ * nombre entier de périodes, « x = » recopié en tête. Écran 3 : ensemble numérique
+ * (`diagnostiquerEnsembleNumerique`, partagé, inchangé).
  */
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
-import type { ValeurPiOuDecimale } from "../core5e/equationsTrigonometriques.types";
 import type { ExerciceExtremumsSinusoide, RationnelPi } from "../core5e/extremumsSinusoide.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { TOLERANCE_EQUATION_TRIG, diagnostiquerBranches, diagnostiquerEnsembleNumerique } from "./verificationEquationTrig";
+import { TOLERANCE_EQUATION_TRIG, diagnostiquerEnsembleNumerique } from "./verificationEquationTrig";
 
 /** Dupliquée depuis `generateurs5e/parametresSinusoide/rationnelPi.ts::valeurNumerique` — jamais
  * importée (`src/moteur5e/` n'importe jamais `src/generateurs5e/`, règle non négociable). */
@@ -30,48 +19,69 @@ function valeurNumeriqueLocal(v: RationnelPi): number {
   return (v.numerateur / v.denominateur) * Math.PI ** v.degrePi;
 }
 
-function versValeur(v: RationnelPi): ValeurPiOuDecimale {
-  return { exact: v, decimal: valeurNumeriqueLocal(v) };
-}
 
-/** Membre gauche de l'écran 1 — doit être EXACTEMENT "a·x+bArg" (pas une forme affine quelconque) :
- * évalué en x=0 (⟹ bArg) et x=1 (⟹ a+bArg, donc pente=a). `null` ⟺ parse_error (expression
- * illisible, ex. si l'élève y écrit "k" par erreur — "k" n'est pas un identifiant connu de
- * `evaluerExpressionGenerale`, ce qui lève une exception ici, correctement traduite en parse_error).
- * "pi" est reconnu nativement par `evaluerExpressionGenerale` (audit promptauditparsingpisqrt.md),
- * aucune substitution textuelle n'est plus nécessaire ici. */
-function evaluerMembreAffineEnX(texte: string): { constante: number; pente: number } | null {
+/** Différence membre gauche − membre droit, évaluée en (x, k). `null` ⟺ illisible. */
+function differenceEquation(texte: string): ((x: number, k: number) => number) | null {
+  const parties = texte.split("=");
+  if (parties.length !== 2 || parties.some((p) => p.trim() === "")) return null;
+  const [gauche, droite] = parties;
+  const f = (x: number, k: number) => evaluerExpressionGenerale(gauche, x, { k, n: k }) - evaluerExpressionGenerale(droite, x, { k, n: k });
   try {
-    const f0 = evaluerExpressionGenerale(texte, 0);
-    const f1 = evaluerExpressionGenerale(texte, 1);
-    if (!Number.isFinite(f0) || !Number.isFinite(f1)) return null;
-    return { constante: f0, pente: f1 - f0 };
+    if (!Number.isFinite(f(0, 0))) return null;
   } catch {
     return null;
   }
+  return f;
 }
 
-/** Écran 1 — poser l'équation d'extremum COMPLÈTE (B.1) : "a·x+bArg = constante+k·période". */
-export function diagnostiquerPoserEquationExtremum(exercice: ExerciceExtremumsSinusoide, texte: string): StatutVerification {
-  const parties = texte.split("=");
-  if (parties.length !== 2) return "parse_error";
-  const [membreGauche, membreDroit] = parties;
-
-  const affine = evaluerMembreAffineEnX(membreGauche);
-  if (affine === null) return "parse_error";
-
-  const aVal = valeurNumeriqueLocal(exercice.a);
-  const bArgVal = valeurNumeriqueLocal(exercice.bArg);
-  if (Math.abs(affine.constante - bArgVal) > TOLERANCE_EQUATION_TRIG || Math.abs(affine.pente - aVal) > TOLERANCE_EQUATION_TRIG) {
-    return "not_equivalent";
+/** L'équation soumise est-elle ÉQUIVALENTE à « x = c + k·p » (k entier) — à un facteur non nul près,
+ * côtés éventuellement inversés, k parcouru dans un sens ou l'autre, constante décalée d'un nombre
+ * entier de périodes (point 40 : « k·π = 2x/3 − 5π/6 », « 2x − 5π/2 = 3kπ » acceptés) ? La différence
+ * D(x, k) doit être affine : D = α·x + β·k + γ avec α ≠ 0, |β/α| = |p| et −γ/α ≡ c (mod p). */
+function equivalenteASerieEnX(texte: string, c: number, p: number): StatutVerification {
+  const D = differenceEquation(texte);
+  if (D === null) return "parse_error";
+  let valeurs: number[];
+  try {
+    valeurs = [D(0, 0), D(1, 0), D(0, 1), D(1, 1), D(2, 3), D(-1, 2)];
+  } catch {
+    return "parse_error";
   }
-
-  return diagnostiquerBranches([membreDroit], [{ constante: versValeur(exercice.brancheU.constante), periode: versValeur(exercice.brancheU.periode) }]);
+  if (valeurs.some((v) => !Number.isFinite(v))) return "parse_error";
+  const [d00, d10, d01] = valeurs;
+  const alpha = d10 - d00;
+  const beta = d01 - d00;
+  const gamma = d00;
+  const affine = (x: number, k: number) => alpha * x + beta * k + gamma;
+  const pointsTest: [number, number, number][] = [[1, 1, valeurs[3]], [2, 3, valeurs[4]], [-1, 2, valeurs[5]]];
+  if (pointsTest.some(([x, k, v]) => Math.abs(affine(x, k) - v) > 1e-6 * (1 + Math.abs(v)))) return "not_equivalent";
+  if (Math.abs(alpha) < 1e-9) return "not_equivalent";
+  const periode = beta / alpha;
+  const constante = -gamma / alpha;
+  if (Math.abs(Math.abs(periode) - Math.abs(p)) > TOLERANCE_EQUATION_TRIG) return "not_equivalent";
+  const ecart = constante - c;
+  const tours = Math.round(ecart / p);
+  return Math.abs(ecart - tours * p) <= TOLERANCE_EQUATION_TRIG ? "correct" : "not_equivalent";
 }
 
-/** Écran 2 — isoler x (x=constante+k·période, UNE SEULE branche). */
+/** Écran 1 — poser l'équation des positions cherchées : toute équation ÉQUIVALENTE à
+ * « a·x + bArg = constante + k·période » (point 40), y compris déjà résolue en x. */
+export function diagnostiquerPoserEquationExtremum(exercice: ExerciceExtremumsSinusoide, texte: string): StatutVerification {
+  const a = valeurNumeriqueLocal(exercice.a);
+  const bArg = valeurNumeriqueLocal(exercice.bArg);
+  const cU = valeurNumeriqueLocal(exercice.brancheU.constante);
+  const pU = valeurNumeriqueLocal(exercice.brancheU.periode);
+  // a·x + bArg = cU + k·pU ⟺ x = (cU − bArg)/a + k·pU/a.
+  return equivalenteASerieEnX(texte, (cU - bArg) / a, pU / a);
+}
+
+/** Écran 2 — isoler x (une seule série). Le champ est précédé de « x = » : un « x = » recopié en tête
+ * est accepté, de même qu'une équation complète équivalente. */
 export function diagnostiquerIsolerXExtremum(exercice: ExerciceExtremumsSinusoide, texte: string): StatutVerification {
-  return diagnostiquerBranches([texte], [{ constante: versValeur(exercice.brancheX.constante), periode: versValeur(exercice.brancheX.periode) }]);
+  const c = valeurNumeriqueLocal(exercice.brancheX.constante);
+  const p = valeurNumeriqueLocal(exercice.brancheX.periode);
+  const equation = texte.includes("=") ? texte : `x = ${texte}`;
+  return equivalenteASerieEnX(equation, c, p);
 }
 
 /** Écran 3 (bonus) — solutions distinctes dans [0;2π[, équivalence d'ensembles. */

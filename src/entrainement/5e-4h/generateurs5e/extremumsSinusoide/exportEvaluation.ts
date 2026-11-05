@@ -1,7 +1,7 @@
 import type { ExerciceExtremumsSinusoide, FonctionExtremum } from "../../core5e/extremumsSinusoide.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { CONSIGNE_GENERALE_EXTREMUMS, TEXTE_CONSIGNE_SOLUTIONS, formatEquationSubstitueeLatex, formatFonctionSourceLatex } from "../../ui5e/formatExtremumsSinusoide";
+import { consigneGeneraleExtremums, consigneSolutionsExtremums, formatEquationSubstitueeLatex, formatFonctionSourceLatex } from "../../ui5e/formatExtremumsSinusoide";
 import { construireAvecFonction, genererExerciceExtremumsSinusoide } from "./index";
 
 /**
@@ -16,8 +16,8 @@ function construireEnonceExtremumsSinusoide(exercice: ExerciceExtremumsSinusoide
   return {
     enteteFragments: [texte("On considère la fonction "), latex(`f(x) = ${formatFonctionSourceLatex(exercice)}`)],
     questions: [
-      { consigne: [texte(CONSIGNE_GENERALE_EXTREMUMS)], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(TEXTE_CONSIGNE_SOLUTIONS)], reponse: { type: "lignes", nombre: 2 } },
+      { consigne: [texte(consigneGeneraleExtremums(exercice))], reponse: { type: "lignes", nombre: 2 } },
+      { consigne: [texte(consigneSolutionsExtremums(exercice))], reponse: { type: "lignes", nombre: 2 } },
     ],
   };
 }
