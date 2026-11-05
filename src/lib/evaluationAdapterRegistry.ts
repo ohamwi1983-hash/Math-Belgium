@@ -223,6 +223,7 @@ import { adaptateurEvaluationEquationsExponentielles } from '../entrainement/6e-
 import { adaptateurEvaluationInequationsExponentielles } from '../entrainement/6e-6h/generateurs6e/inequationsExponentielles/exportEvaluation'
 import { adaptateurEvaluationEtudeFonctionExponentielle } from '../entrainement/6e-6h/generateurs6e/etudeFonctionExponentielle/exportEvaluation'
 import { adaptateurEvaluationExponentiellesProblemes } from '../entrainement/6e-6h/generateurs6e/exponentiellesProblemes/exportEvaluation'
+import { versionPapier } from '../entrainement/export/consignePapier'
 import { adaptateurEvaluationProprietesLogarithme } from '../entrainement/6e-6h/generateurs6e/proprietesLogarithme/exportEvaluation'
 import { adaptateurEvaluationGraphiqueDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/graphiqueDeriveeLogarithme/exportEvaluation'
 import { adaptateurEvaluationDeterminerParametresLogarithme } from '../entrainement/6e-6h/generateurs6e/determinerParametresLogarithme/exportEvaluation'
@@ -287,16 +288,16 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen10': adaptateurEvaluationInequationsExponentielles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen11': adaptateurEvaluationEtudeFonctionExponentielle as unknown as AdaptateurFeuilleExercices<never>,
   '6gen12': adaptateurEvaluationExponentiellesProblemes as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen13': adaptateurEvaluationProprietesLogarithme as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen20': adaptateurEvaluationGraphiqueDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen18': adaptateurEvaluationDeterminerParametresLogarithme as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen19': adaptateurEvaluationHyperboliques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen14': adaptateurEvaluationEquationsExpLog as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen17': adaptateurEvaluationLimitesLogarithmiques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen22': adaptateurEvaluationLogarithmesProblemes as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen21': adaptateurEvaluationEtudeFonctionLogarithme as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen15': adaptateurEvaluationInequationsLogarithmiques as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen16': adaptateurEvaluationDomaineDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen13': versionPapier(adaptateurEvaluationProprietesLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen20': versionPapier(adaptateurEvaluationGraphiqueDeriveeLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen18': versionPapier(adaptateurEvaluationDeterminerParametresLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen19': versionPapier(adaptateurEvaluationHyperboliques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen14': versionPapier(adaptateurEvaluationEquationsExpLog) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen17': versionPapier(adaptateurEvaluationLimitesLogarithmiques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen22': versionPapier(adaptateurEvaluationLogarithmesProblemes) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen21': versionPapier(adaptateurEvaluationEtudeFonctionLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen15': versionPapier(adaptateurEvaluationInequationsLogarithmiques) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen16': versionPapier(adaptateurEvaluationDomaineDeriveeLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen43': adaptateurEvaluationDenombrementFondamental as unknown as AdaptateurFeuilleExercices<never>,
   '6gen44': adaptateurEvaluationDenombrementCombine as unknown as AdaptateurFeuilleExercices<never>,
   '6gen45': adaptateurEvaluationBinomeNewton as unknown as AdaptateurFeuilleExercices<never>,
