@@ -26,6 +26,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ExerciceDeterminerParametresLogarithme } from "./core6e/determinerParametresLogarithme.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen18` — Paramètres depuis des conditions graphiques : f(x) = a + b·ln(x), a et b lus sur un
@@ -51,6 +52,21 @@ function nouvelleSession(): EtatSessionDeterminerParametresLogarithme {
   return demarrerSessionDeterminerParametresLogarithme(REGLAGES_DEMO, genererExerciceDeterminerParametresLogarithme);
 }
 
+/** Tirage de l'instance imprimée sur une feuille (code `?code=XXXXXX`) — MÊMES fonctions de
+ * génération que l'adaptateur d'export (`generateurs6e/determinerParametresLogarithme/exportEvaluation.ts`). */
+function exerciceDuCode(code: NonNullable<ReturnType<typeof lireCodeDepuisUrl>>): ExerciceDeterminerParametresLogarithme {
+  return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceDeterminerParametresLogarithme, (id) =>
+    construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
+  );
+}
+
+/** Première session : l'exercice du code de l'URL s'il y en a un, sinon un tirage normal. */
+function sessionInitiale(): EtatSessionDeterminerParametresLogarithme {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDeterminerParametresLogarithme(REGLAGES_DEMO, () => exerciceDuCode(code));
+}
+
 /** État tenu en attente dès qu'un écran se termine — appliqué au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement. */
 interface TransitionEnAttente {
@@ -69,7 +85,7 @@ function ReponseLatex({ valeurs }: { valeurs: string[] }) {
 }
 
 export function App6gen18() {
-  const [etat, setEtat] = useState<EtatSessionDeterminerParametresLogarithme>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDeterminerParametresLogarithme>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);

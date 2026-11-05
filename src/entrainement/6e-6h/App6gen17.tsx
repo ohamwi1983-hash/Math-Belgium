@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./generateurs6e/limitesLogarithmiques";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
@@ -87,6 +88,16 @@ function nouvelleSession(): EtatSessionLimiteLogarithmique {
   return demarrerSessionLimiteLogarithmique(REGLAGES_DEMO, genererExerciceLimiteLogarithmique);
 }
 
+/** Première session : l'exercice imprimé sur une feuille (`?code=XXXXXX`) s'il y en a un — MÊMES
+ * fonctions de génération que l'adaptateur d'export (`generateurs6e/limitesLogarithmiques/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionLimiteLogarithmique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLimiteLogarithmique(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceLimiteLogarithmique, (id) => construireAvecVarianteId(id)),
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -97,7 +108,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen17() {
-  const [etat, setEtat] = useState<EtatSessionLimiteLogarithmique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLimiteLogarithmique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionLimiteLogarithmique`, jamais dans le moteur. Remis à vide à

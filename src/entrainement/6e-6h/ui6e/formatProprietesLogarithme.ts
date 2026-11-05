@@ -72,7 +72,7 @@ export const OPTIONS_PROPRIETES: readonly { id: Caracteristique; label: string }
   { id: "changementBase", label: "Changement de base" },
 ];
 
-const FORMULE_PROPRIETE: Record<Caracteristique, string> = {
+export const FORMULE_PROPRIETE: Record<Caracteristique, string> = {
   produit: "\\log_a(X\\cdot Y)=\\log_a(X)+\\log_a(Y)",
   quotient: "\\log_a\\!\\left(\\dfrac{X}{Y}\\right)=\\log_a(X)-\\log_a(Y)",
   puissance: "\\log_a(X^{p})=p\\cdot\\log_a(X)",

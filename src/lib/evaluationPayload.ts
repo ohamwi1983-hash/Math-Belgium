@@ -489,7 +489,19 @@ function extraireParagraphes(blocks: Block[]): FragmentTexte[][] {
  * chapitre ajouté demandera sa propre liste, construite au cas par cas — une section absente de
  * cette table (ou un index sans entrée) retombe sur le label brut, voir `deriveQuestionsOuvertes`.
  */
-const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[]>> = {
+/** Énoncé APPARIÉ PAR CLÉ à son bloc d'exemple (robuste à l'ajout/au déplacement d'un bloc dans la
+ * section, contrairement à l'appariement par position) : `cle` doit apparaître dans le `label`
+ * (`exempleLibre`) ou le `badge` (`exemple`) du bloc — ou, pour un bloc sans titre, dans le texte de
+ * ses deux premiers paragraphes. Comparaison sensible à la casse, espaces normalisés. Une entrée
+ * texte simple reste appariée par position (ancien format, encore utilisé par les autres chapitres). */
+export interface EnonceDemonstrationCle {
+  cle: string
+  enonce: string
+}
+
+type EntreeEnonceDemonstration = string | undefined | EnonceDemonstrationCle
+
+const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstration[]>> = {
   'fonctions-reciproques-cyclometriques': {
   reciproques: [
     "Démontre que si $f$ est injective, sa relation réciproque est une fonction.",
@@ -656,61 +668,61 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[
   },
   'fonctions-logarithmes': {
   proprietes: [
-    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(xy) = \\log_a(x) + \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété des puissances $a^p \\cdot a^q = a^{p+q}$.",
-    "Démontre que, pour $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$, $\\log_a(x^r) = r \\cdot \\log_a(x)$, en réécrivant $x$ comme une puissance de $a$ grâce à (P4), puis en utilisant la propriété $(a^p)^r = a^{p \\cdot r}$.",
-    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété $a^p/a^q = a^{p-q}$.",
-    "Calcule $\\log_2(8) - \\log_2(2)$ en te ramenant à un seul logarithme grâce aux propriétés algébriques du logarithme.",
-    "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x \\in \\mathbb{R}$, $a^x = b^{\\,x \\cdot \\log_b(a)}$ (changement de base pour les exponentielles), en réécrivant $a$ comme une puissance de $b$ grâce à (P4) appliquée en base $b$.",
-    "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes), en posant $y=\\log_a(x)$ et en appliquant le changement de base pour les exponentielles à l'égalité $a^y=x$.",
-    "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$, en calculant la dérivée de $a^x$ de deux façons différentes — une fois via le changement de base vers $e$, une fois via la formule $(a^x)' = a^x \\cdot \\ln(a)$ déjà connue — puis en identifiant les deux résultats.",
-    "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$.",
+    { cle: 'logarithme d\'un produit', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(xy) = \\log_a(x) + \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété des puissances $a^p \\cdot a^q = a^{p+q}$." },
+    { cle: 'logarithme d\'une puissance', enonce: "Démontre que, pour $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$, $\\log_a(x^r) = r \\cdot \\log_a(x)$, en réécrivant $x$ comme une puissance de $a$ grâce à (P4), puis en utilisant la propriété $(a^p)^r = a^{p \\cdot r}$." },
+    { cle: 'logarithme d\'un quotient', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété $a^p/a^q = a^{p-q}$." },
+    { cle: '\\log_2(8) - \\log_2(2)', enonce: "Calcule $\\log_2(8) - \\log_2(2)$ en te ramenant à un seul logarithme grâce aux propriétés algébriques du logarithme." },
+    { cle: 'changement de base pour les exponentielles', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x \\in \\mathbb{R}$, $a^x = b^{\\,x \\cdot \\log_b(a)}$ (changement de base pour les exponentielles), en réécrivant $a$ comme une puissance de $b$ grâce à (P4) appliquée en base $b$." },
+    { cle: 'changement de base pour les logarithmes', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes), en posant $y=\\log_a(x)$ et en appliquant le changement de base pour les exponentielles à l'égalité $a^y=x$." },
+    { cle: 'pourquoi ln est exactement log_e', enonce: "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$, en calculant la dérivée de $a^x$ de deux façons différentes — une fois via le changement de base vers $e$, une fois via la formule $(a^x)' = a^x \\cdot \\ln(a)$ déjà connue — puis en identifiant les deux résultats." },
+    { cle: 'réécrire une exponentielle avec une base choisie', enonce: "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$." },
   ],
   equations: [
-    "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième.",
-    "Résous l'équation $\\ln(2x-1) = 3$ : détermine le domaine, applique $\\exp$ aux deux membres, puis vérifie que la solution respecte la condition d'existence.",
-    "Résous l'équation $\\log_3(2w^2-1) = 4$ : détermine d'abord la condition d'existence sur $w$, résous ensuite l'équation, et vérifie que les solutions obtenues la respectent.",
-    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$, en démontrant séparément les deux sens de l'équivalence.",
-    "Résous l'équation $\\log_3(6w-1) = \\log_3(-4w^2+3)$ : détermine la condition d'existence, résous l'équation du second degré qui en résulte, puis rejette toute solution qui ne respecte pas la condition d'existence.",
-    "Résous l'équation $(\\ln(x))^2 - \\ln(x) - 2 = 0$ à l'aide de la substitution $t = \\ln(x)$.",
+    { cle: '3^x = 20', enonce: "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième." },
+    { cle: '\\ln(2x-1) = 3', enonce: "Résous l'équation $\\ln(2x-1) = 3$ : détermine le domaine, applique $\\exp$ aux deux membres, puis vérifie que la solution respecte la condition d'existence." },
+    { cle: 'condition d\'existence sur un argument du second degré', enonce: "Résous l'équation $\\log_3(2w^2-1) = 4$ : détermine d'abord la condition d'existence sur $w$, résous ensuite l'équation, et vérifie que les solutions obtenues la respectent." },
+    { cle: 'Démonstration — égalité de deux logarithmes', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$, en démontrant séparément les deux sens de l'équivalence." },
+    { cle: 'avec rejet d\'une racine', enonce: "Résous l'équation $\\log_3(6w-1) = \\log_3(-4w^2+3)$ : détermine la condition d'existence, résous l'équation du second degré qui en résulte, puis rejette toute solution qui ne respecte pas la condition d'existence." },
+    { cle: 'substitution t = log_a(x)', enonce: "Résous l'équation $(\\ln(x))^2 - \\ln(x) - 2 = 0$ à l'aide de la substitution $t = \\ln(x)$." },
   ],
   inequations: [
-    "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$).",
-    "Démontre que, pour $a>1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u < v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$).",
-    "Démontre que, pour $0<a<1$, $u>0$ et $y \\in \\mathbb{R}$, $\\log_a(u) < y \\iff u > a^y$, en te ramenant à la comparaison de deux logarithmes de même base déjà démontrée.",
-    "Résous l'inéquation $\\ln(x) \\le 2$ : détermine le domaine, puis l'ensemble-solution en appliquant $\\exp$ aux deux membres.",
-    "Résous l'inéquation $\\ln(x-1) > 0$ : détermine le domaine, résous l'inéquation, et vérifie que l'ensemble-solution obtenu est bien inclus dans le domaine.",
-    "Résous l'inéquation $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis résous la même comparaison en base $e$, $\\ln(6w-1) \\ge \\ln(-4w^2+3)$ : détermine chaque fois le domaine et compare les deux ensembles-solutions obtenus.",
+    { cle: 'cas 0 < a < 1', enonce: "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$)." },
+    { cle: 'cas a > 1', enonce: "Démontre que, pour $a>1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u < v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$)." },
+    { cle: 'comparaison avec une constante', enonce: "Démontre que, pour $0<a<1$, $u>0$ et $y \\in \\mathbb{R}$, $\\log_a(u) < y \\iff u > a^y$, en te ramenant à la comparaison de deux logarithmes de même base déjà démontrée." },
+    { cle: 'base e > 1', enonce: "Résous l'inéquation $\\ln(x) \\le 2$ : détermine le domaine, puis l'ensemble-solution en appliquant $\\exp$ aux deux membres." },
+    { cle: 'domaine plus restrictif que la solution', enonce: "Résous l'inéquation $\\ln(x-1) > 0$ : détermine le domaine, résous l'inéquation, et vérifie que l'ensemble-solution obtenu est bien inclus dans le domaine." },
+    { cle: 'même inéquation, deux bases différentes', enonce: "Résous l'inéquation $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis résous la même comparaison en base $e$, $\\ln(6w-1) \\ge \\ln(-4w^2+3)$ : détermine chaque fois le domaine et compare les deux ensembles-solutions obtenus." },
   ],
   derivee: [
-    "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour $x>0$, en utilisant la formule de dérivation d'une fonction réciproque appliquée à $\\exp$ et $\\ln$, sachant que $\\exp' = \\exp$.",
-    "Détermine le domaine puis calcule la dérivée de chacune des fonctions suivantes : $f(x) = \\ln(x^2+1)$ et $g(x) = \\ln(x-3)$.",
-    "Calcule la dérivée de $f(x) = x^2 \\cdot \\sqrt{x+1}$ (pour $x>0$) en utilisant la dérivation logarithmique.",
-    "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$, en réécrivant $(g(x))^{h(x)}$ sous la forme $e^{h(x) \\cdot \\ln(g(x))}$.",
-    "Calcule la dérivée de $f(x) = (1+\\sqrt{x})^{2x}$ pour $x>0$, en passant par l'écriture $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$.",
-    "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$, en exprimant $\\log_a$ à l'aide de $\\ln$ par changement de base.",
+    { cle: 'Démonstration de ln\'(x) = 1/x', enonce: "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour $x>0$, en utilisant la formule de dérivation d'une fonction réciproque appliquée à $\\exp$ et $\\ln$, sachant que $\\exp' = \\exp$." },
+    { cle: '\\ln(x^2+1)', enonce: "Détermine le domaine puis calcule la dérivée de chacune des fonctions suivantes : $f(x) = \\ln(x^2+1)$ et $g(x) = \\ln(x-3)$." },
+    { cle: 'Exemple résolu — dérivation logarithmique', enonce: "Calcule la dérivée de $f(x) = x^2 \\cdot \\sqrt{x+1}$ (pour $x>0$) en utilisant la dérivation logarithmique." },
+    { cle: 'dérivée d\'une puissance à exposant variable', enonce: "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$, en réécrivant $(g(x))^{h(x)}$ sous la forme $e^{h(x) \\cdot \\ln(g(x))}$." },
+    { cle: 'exposant variable, dérivée logarithmique complète', enonce: "Calcule la dérivée de $f(x) = (1+\\sqrt{x})^{2x}$ pour $x>0$, en passant par l'écriture $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$." },
+    { cle: 'Démonstration de logₐ\'(x)', enonce: "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$, en exprimant $\\log_a$ à l'aide de $\\ln$ par changement de base." },
   ],
   limites: [
-    "Calcule $\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x)$, en identifiant la forme indéterminée et en citant le résultat de croissance comparée qui permet de la lever.",
-    "Calcule $\\displaystyle\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}$, en posant $u=x-1$ et en te ramenant à la limite fondamentale $\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$.",
+    { cle: 'forme indéterminée 0 × (−∞)', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x)$, en identifiant la forme indéterminée et en citant le résultat de croissance comparée qui permet de la lever." },
+    { cle: '\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}', enonce: "Calcule $\\displaystyle\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}$, en posant $u=x-1$ et en te ramenant à la limite fondamentale $\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$." },
   ],
   parametres: [
-    "Détermine $a$ et $b$ sachant que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(1;4)$ et que sa tangente en $x=1$ a pour pente $3$.",
-    "Sachant que $a=2$ et que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(e;5)$, détermine $b$.",
+    { cle: 'passe par $(1;4)$', enonce: "Détermine $a$ et $b$ sachant que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(1;4)$ et que sa tangente en $x=1$ a pour pente $3$." },
+    { cle: 'point en x = e', enonce: "Sachant que $a=2$ et que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(e;5)$, détermine $b$." },
   ],
   hyperboliques: [
-    "Vérifie numériquement l'identité $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ en $x=1$, à partir des valeurs approchées $\\text{ch}(1) \\approx 1{,}5431$ et $\\text{sh}(1) \\approx 1{,}1752$.",
+    { cle: 'vérification numérique', enonce: "Vérifie numériquement l'identité $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ en $x=1$, à partir des valeurs approchées $\\text{ch}(1) \\approx 1{,}5431$ et $\\text{sh}(1) \\approx 1{,}1752$." },
   ],
   graphique: [
-    "Étudie le signe de la dérivée de $f(x) = x - \\ln(x)$ sur son domaine $]0;+\\infty[$, et déduis-en la nature et la valeur de son extremum.",
+    { cle: '$f(x) = x - \\ln(x)$', enonce: "Étudie le signe de la dérivée de $f(x) = x - \\ln(x)$ sur son domaine $]0;+\\infty[$, et déduis-en la nature et la valeur de son extremum." },
   ],
   etude: [
-    "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, dérivée et extremum, limites aux bornes du domaine et asymptotes.",
+    { cle: 'étude complète', enonce: "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, dérivée et extremum, limites aux bornes du domaine et asymptotes." },
   ],
   problemes: [
-    "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$.",
-    "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$.",
-    "Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB.",
-    "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$.",
+    { cle: 'pH', enonce: "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$." },
+    { cle: 'demi-vie radioactive', enonce: "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$." },
+    { cle: 'combiner deux niveaux sonores', enonce: "Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB." },
+    { cle: 'croissance logistique', enonce: "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$." },
   ],
   },
   'primitives-integrales': {
@@ -910,14 +922,73 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[
  * mécaniquement du contenu du bloc (fiable) ; l'énoncé préfère le phrasé soigné de
  * `ENONCES_DEMONSTRATION` quand il existe, sinon retombe sur le label brut du bloc.
  */
+type BlocExemple = Extract<Block, { kind: 'exemple' } | { kind: 'exempleLibre' }>
+
+function blocsExemple(section: ChapterSection): BlocExemple[] {
+  return section.blocks.filter((b): b is BlocExemple => b.kind === 'exemple' || b.kind === 'exempleLibre')
+}
+
+function normaliserCle(texte: string): string {
+  return texte.replace(/\s+/g, ' ').trim()
+}
+
+/** Texte contre lequel une `cle` est cherchée : le titre du bloc s'il en a un, sinon le début de
+ * son contenu. */
+function texteIdentifiantBloc(bloc: BlocExemple): string {
+  if (bloc.kind === 'exemple') return normaliserCle(bloc.badge || bloc.formula || '')
+  if (bloc.label) return normaliserCle(bloc.label)
+  const paras = bloc.blocks.filter((b): b is Extract<Block, { kind: 'para' }> => b.kind === 'para').slice(0, 2)
+  return normaliserCle(paras.map((b) => b.text).join(' '))
+}
+
+export interface AppariementEnonces {
+  /** Énoncé soigné par bloc (même ordre que les blocs `exemple`/`exempleLibre`), `undefined` si aucun. */
+  enonces: (string | undefined)[]
+  /** Clés d'énoncé qui ne trouvent aucun bloc, ou en trouvent plusieurs. */
+  orphelins: { cle: string; nombreBlocs: number }[]
+  /** Entrées positionnelles au-delà du nombre de blocs (énoncé sans exemple). */
+  enTrop: number
+  /** Index des blocs sans aucun énoncé soigné (retomberaient sur leur label brut). */
+  blocsSansEnonce: number[]
+}
+
+/** Apparie les énoncés soignés d'une section à ses blocs d'exemple : d'abord par clé, puis, pour
+ * les blocs restants, par position (entrées texte simple). Exporté pour la vérification au build
+ * (`scripts/verifier-enonces-evaluation.mjs`). */
+export function apparierEnoncesDemonstration(chapitreSlug: string, section: ChapterSection): AppariementEnonces {
+  const blocs = blocsExemple(section)
+  const entrees = ENONCES_DEMONSTRATION[chapitreSlug]?.[section.id] ?? []
+  const enonces: (string | undefined)[] = blocs.map(() => undefined)
+  const identifiants = blocs.map(texteIdentifiantBloc)
+  const orphelins: { cle: string; nombreBlocs: number }[] = []
+  entrees.forEach((entree) => {
+    if (typeof entree !== 'object') return
+    const cle = normaliserCle(entree.cle)
+    const trouves = identifiants.map((id, i) => (id.includes(cle) ? i : -1)).filter((i) => i >= 0)
+    if (trouves.length !== 1) {
+      orphelins.push({ cle: entree.cle, nombreBlocs: trouves.length })
+      return
+    }
+    enonces[trouves[0]] = entree.enonce
+  })
+  entrees.forEach((entree, index) => {
+    if (typeof entree === 'string' && index < blocs.length && enonces[index] === undefined) enonces[index] = entree
+  })
+  const enTrop = entrees.filter((e, i) => typeof e === 'string' && i >= blocs.length).length
+  const blocsSansEnonce = enonces.map((e, i) => (e === undefined ? i : -1)).filter((i) => i >= 0)
+  return { enonces, orphelins, enTrop, blocsSansEnonce }
+}
+
+/** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
+ * aucun bloc sans énoncé). */
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes']
+
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
-  const candidats = section.blocks.filter(
-    (b): b is Extract<Block, { kind: 'exemple' } | { kind: 'exempleLibre' }> => b.kind === 'exemple' || b.kind === 'exempleLibre',
-  )
-  const enoncesSoignes = ENONCES_DEMONSTRATION[chapitreSlug]?.[section.id]
+  const candidats = blocsExemple(section)
+  const { enonces } = apparierEnoncesDemonstration(chapitreSlug, section)
 
   return candidats.map((candidat, index) => {
-    const enonceSoigneTexte = enoncesSoignes?.[index]
+    const enonceSoigneTexte = enonces[index]
 
     if (candidat.kind === 'exemple') {
       const enonceBrut = [candidat.badge, candidat.formula].filter(Boolean).join(' — ')
@@ -3528,6 +3599,9 @@ export interface ItemPayload {
   vraiFaux?: { chapitre?: ChapitreFonctionnel; theme: string; nombre: number }
   /** Une entrée par série anti-triche — voir `construireOuvertesParSerie`. */
   ouvertesParSerie?: QuestionOuverte[][]
+  /** Section du cours d'origine (génération locale : banque vrai/faux du chapitre, page « Je fais
+   * le point », étiquette de notion). Ignoré par plateforme-maths. */
+  section?: { chapitreSlug: string; numero: number; titre: string }
 }
 
 /** Encode un objet JS en base64 sûr pour l'UTF-8 (accents français compris) — décodage symétrique
@@ -3589,6 +3663,14 @@ export interface EnTeteEvaluation {
    * série anti-triche (voir `EnteteEvaluation.mode` côté plateforme-maths,
    * `assemblerEvaluationHtml.ts`). `'evaluation'`/absent = comportement historique (`/admin`). */
   mode?: 'evaluation' | 'exercice'
+  /** Génération locale uniquement : produire aussi la version aménagée (police lisible, une
+   * question par page, étapes). */
+  versionAmenagee?: boolean
+  /** Génération locale uniquement : surtitre « 6e (6h) · Chapitre 3 », titre du chapitre et adresse
+   * de sa page (feuille d'exercices). */
+  surtitre?: string
+  titreChapitre?: string
+  urlChapitre?: string
 }
 
 /**
@@ -3633,6 +3715,7 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
     if (!chapitre || !section) continue
 
     const titreSection = multiChapitres ? `${chapitre.chapterNumber}. ${chapitre.title} — ${section.number}. ${section.title}` : `${section.number}. ${section.title}`
+    const sectionRef = { chapitreSlug: ligne.chapitreSlug, numero: section.number, titre: section.title }
 
     if (ligne.type === 'exercice') {
       const config = generateursPourSection(ligne.chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
@@ -3641,15 +3724,15 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
         .filter(([, nombre]) => nombre > 0)
         .map(([varianteId, nombre]) => ({ varianteId, nombre, points: ligne.pointsParVariante?.[varianteId] ?? ligne.points }))
       if (parVariante.length === 0) continue
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante }, section: sectionRef })
     } else if (ligne.type === 'vraiFaux') {
       const config = themesPourSection(ligne.chapitreSlug, ligne.sectionId).find((t) => t.quizTheme === ligne.cle)
       if (!config) continue
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: config.quizChapitre, theme: config.quizTheme, nombre: ligne.nombre } })
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: config.quizChapitre, theme: config.quizTheme, nombre: ligne.nombre }, section: sectionRef })
     } else {
       const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(ligne.chapitreSlug, section) : deriveQuestionsComprehension(ligne.chapitreSlug, section.id)
       const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
-      if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie })
+      if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie, section: sectionRef })
     }
   }
 
@@ -3660,7 +3743,8 @@ export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, 
   const baseUrl = EVALUATION_BASE_URL_PAR_LEVELSLUG[levelSlug]
   if (!baseUrl) return null
 
-  const items = construireItemsPayload(entete, lignes, chapitres)
+  // `section` ne sert qu'à la génération locale : inutile d'allonger l'URL avec.
+  const items = construireItemsPayload(entete, lignes, chapitres).map(({ section: _section, ...reste }) => reste)
   if (items.length === 0) return null
 
   const base64 = encoderPayload({

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./generateurs6e/graphiqueDeriveeLogarithme/index";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionGraphiqueDeriveeLogarithme, soumettreReponseDerivee, soumettreReponseSelection } from "./moteur6e/sessionGraphiqueDeriveeLogarithme";
 import { tentativesMaxPhase } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
 import type { EtatSessionGraphiqueDeriveeLogarithme } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
@@ -34,13 +35,21 @@ function nouvelleSession(): EtatSessionGraphiqueDeriveeLogarithme {
   return demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeLogarithme);
 }
 
+/** Première session : l'exercice imprimé sur une feuille (`?code=XXXXXX`) s'il y en a un — MÊMES
+ * fonctions de génération que l'adaptateur d'export (`generateurs6e/graphiqueDeriveeLogarithme/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionGraphiqueDeriveeLogarithme {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceGraphiqueDeriveeLogarithme, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionGraphiqueDeriveeLogarithme;
   revele: boolean;
 }
 
 export function App6gen20() {
-  const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeLogarithme>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeLogarithme>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, jamais dans
    * le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */

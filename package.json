@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
+    "build": "tsc -b && node scripts/verifier-enonces-evaluation.mjs && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -16,6 +16,7 @@
     "katex": "^0.18.4",
     "mafs": "^0.21.0",
     "mathjs": "^15.2.0",
+    "qrcode-generator": "2.0.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-katex": "^3.1.0",

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques } from "./generateurs6e/hyperboliques";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
@@ -37,6 +38,14 @@ function nouvelleSession(): EtatSessionHyperboliques {
   return demarrerSessionHyperboliques(REGLAGES_DEMO, genererExerciceHyperboliques);
 }
 
+/** Première session : l'exercice imprimé sur une feuille (`?code=XXXXXX`) s'il y en a un — MÊMES
+ * fonctions de génération que l'adaptateur d'export (`generateurs6e/hyperboliques/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionHyperboliques {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionHyperboliques(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceHyperboliques, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
+}
+
 /** Exemples de saisie HORS de l'espace des tirages (k ≤ 3 et |a|,|b| ≤ 3 en C ; a+b ≤ 7 en D ;
  * √7 n'est jamais une valeur de B) — un exemple ne doit jamais être la réponse. */
 const PLACEHOLDER_VALEUR_B = "ex : sqrt(7)";
@@ -56,7 +65,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen19() {
-  const [etat, setEtat] = useState<EtatSessionHyperboliques>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionHyperboliques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionHyperboliques`, jamais dans le moteur. Remis à vide à chaque

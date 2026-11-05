@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./generateurs6e/etudeFonctionLogarithme";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   NIVEAU_AIDE_MAX,
   activerAideSuivante,
@@ -74,6 +75,14 @@ function nouvelleSession(): EtatSessionEtudeFonctionLogarithme {
   return demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, genererExerciceEtudeFonctionLogarithme);
 }
 
+/** Première session : l'exercice imprimé sur une feuille (`?code=XXXXXX`) s'il y en a un — MÊMES
+ * fonctions de génération que l'adaptateur d'export (`generateurs6e/etudeFonctionLogarithme/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionEtudeFonctionLogarithme {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceEtudeFonctionLogarithme, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -84,7 +93,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen21() {
-  const [etat, setEtat] = useState<EtatSessionEtudeFonctionLogarithme>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEtudeFonctionLogarithme>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur : la saisie de l'élève n'a aucune autre utilité une fois l'écran

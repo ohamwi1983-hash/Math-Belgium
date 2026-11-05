@@ -40,13 +40,13 @@ const RAPPEL_LN = "Rappel : un logarithme de base numérique s'écrit ln(argumen
  * convertis ici, convention distincte). */
 const RAPPEL_LN_FRAGMENTS: FragmentConsigne[] = [texte("Rappel : un logarithme de base numérique s'écrit "), latex("\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}"), texte(" — jamais "), latex("\\log(\\ldots)"), texte(" littéral.")];
 
-function formatBaseLatex(base: number): string {
+export function formatBaseLatex(base: number): string {
   return Math.abs(base - Math.E) < 1e-9 ? "e" : String(base);
 }
 
 /** Décimal FRANÇAIS (virgule) arrondi — pour l'AFFICHAGE (aides, récapitulatif) seulement, jamais
  * la valeur de comparaison (toujours exacte côté `moteur6e/verificationEquationsExpLog.ts`). */
-function formatDecimal(v: number, decimales = 3): string {
+export function formatDecimal(v: number, decimales = 3): string {
   const f = Math.pow(10, decimales);
   const r = Math.round(v * f) / f;
   return String(r).replace(".", "{,}").replace("-{,}", "-0{,}");
@@ -67,7 +67,7 @@ function formatCoefFois(coef: number, variable: string): string {
 
 /** "mx+n" (ou "mx-|n|"), signe correctement géré — jamais "+-2" à l'écran (convention CLAUDE.md,
  * "jamais de signe non simplifié"). */
-function formatAffineLatex(m: number, n: number, variable = "x"): string {
+export function formatAffineLatex(m: number, n: number, variable = "x"): string {
   const terme = formatCoefFois(m, variable);
   if (n === 0) return terme;
   return n > 0 ? `${terme}+${n}` : `${terme}-${Math.abs(n)}`;
@@ -87,7 +87,7 @@ function exactEtApprox(exact: string, v: number): string {
 
 /** Combinaison linéaire `c₁·ln(a₁) + c₂·ln(a₂) + …` (termes nuls omis, coefficients ±1 implicites,
  * signes simplifiés) — "0" si tous les coefficients sont nuls. */
-function combinaisonLnLatex(termes: { c: number; arg: number }[]): string {
+export function combinaisonLnLatex(termes: { c: number; arg: number }[]): string {
   let resultat = "";
   for (const { c, arg } of termes) {
     if (c === 0) continue;
@@ -127,7 +127,7 @@ function exposantEntier(t: number, base: number): number | null {
  * irréductible, jamais de décimal") : quand `C=base^p` avec `p<0`, `C` est une fraction exacte
  * `1/base^|p|` (ex. `2^-2=1/4`) — rendue en fraction LaTeX plutôt qu'en `0,25`. Dans tous les
  * autres cas (`p≥0`, ou générique) `C` est déjà un entier. */
-function formatCLatex(ex: ExerciceEqLogA): string {
+export function formatCLatex(ex: ExerciceEqLogA): string {
   if (ex.p !== null && ex.p < 0) return `\\dfrac{1}{${ex.base}^{${-ex.p}}}`;
   return String(ex.C);
 }
@@ -138,14 +138,14 @@ function blocDonneesA(ex: ExerciceEqLogA): string[] {
 
 /** Exposant cible en forme EXACTE : l'entier `p` quand `C` est une puissance de la base, sinon
  * `ln(C)/ln(base)`. */
-function exposantExactA(ex: ExerciceEqLogA): string {
+export function exposantExactA(ex: ExerciceEqLogA): string {
   if (ex.p !== null) return String(ex.p);
   return `\\dfrac{\\ln(${ex.C})}{\\ln(${ex.base})}`;
 }
 
 /** x = (exposant − n)/m en forme EXACTE : fraction si l'exposant est entier, sinon
  * (ln(C) − n·ln(base)) / (m·ln(base)). */
-function xExactA(ex: ExerciceEqLogA): string {
+export function xExactA(ex: ExerciceEqLogA): string {
   if (ex.p !== null) return formatFractionLatex(ex.p - ex.n, ex.m);
   return fractionLnLatex(
     [
@@ -282,7 +282,7 @@ function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): 
 
 /** x = log_base(t) en forme EXACTE : l'entier k si t = base^k, `ln(t)` en base e, sinon
  * `ln(t)/ln(base)`. */
-function xExactC(ex: ExerciceEqLogC, t: number): string {
+export function xExactC(ex: ExerciceEqLogC, t: number): string {
   const k = exposantEntier(t, ex.base);
   if (k !== null) return String(k);
   if (Math.abs(ex.base - Math.E) < 1e-9) return `\\ln(${t})`;
@@ -321,7 +321,7 @@ function blocDonneesD(ex: ExerciceEqLogD): string[] {
   return [`\\log_{${ex.a}}(x) = ${ex.k}`];
 }
 
-function xExactD(ex: ExerciceEqLogD): string {
+export function xExactD(ex: ExerciceEqLogD): string {
   return ex.k >= 0 ? String(Math.pow(ex.a, ex.k)) : formatFractionLatex(1, Math.pow(ex.a, -ex.k));
 }
 
@@ -366,12 +366,12 @@ function borneCELatex(ex: ExerciceEqLogE, borne: number): string {
   return formatFractionLatex(-ex.d, ex.e);
 }
 
-function ceELatex(ex: ExerciceEqLogE): string {
+export function ceELatex(ex: ExerciceEqLogE): string {
   return ex.ceSup === null ? `x > ${borneCELatex(ex, ex.ceInf)}` : `${borneCELatex(ex, ex.ceInf)} < x < ${borneCELatex(ex, ex.ceSup)}`;
 }
 
 /** `x² − Sx + P` développé, signes simplifiés. */
-function polynomeELatex(ex: ExerciceEqLogE): string {
+export function polynomeELatex(ex: ExerciceEqLogE): string {
   const S = ex.p + ex.q + ex.e;
   const P = ex.p * ex.q - ex.d;
   const termeX = S === 0 ? "" : S > 0 ? `-${S === 1 ? "" : S}x` : `+${-S === 1 ? "" : -S}x`;
@@ -454,7 +454,7 @@ function aideG2(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): AideAvecLatex
 
 /** CE de l'identité (`m1x+n1>0` et `m2x+n2>0`), en valeurs exactes — jamais vide (voir
  * `familles/G.ts`). */
-function ceIdentiteLatex(ex: Extract<ExerciceEqLogG, { type: "identite" }>): string {
+export function ceIdentiteLatex(ex: Extract<ExerciceEqLogG, { type: "identite" }>): string {
   const conditions = [
     { m: ex.m1, n: ex.n1 },
     { m: ex.m2, n: ex.n2 },

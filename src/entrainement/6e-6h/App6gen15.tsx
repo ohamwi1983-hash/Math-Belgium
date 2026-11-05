@@ -41,6 +41,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
  * `sequencePourExercice` (`ui6e/recapitulatifInequationsLogarithmiques.ts`, non exporté), répliquée
@@ -60,6 +61,15 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionInequationLogarithmique {
   return demarrerSessionInequationLogarithmique(REGLAGES_DEMO, genererExerciceInequationLogarithmique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/inequationsLogarithmiques/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionInequationLogarithmique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionInequationLogarithmique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceInequationLogarithmique, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
 }
 
 /** Format court "votre réponse" pour l'écran "fConclure" (`ReponseCasBaseLog`, `core6e/inequationsLogarithmiques.types.ts`). */
@@ -86,7 +96,7 @@ const PLACEHOLDERS = {
 };
 
 export function App6gen15() {
-  const [etat, setEtat] = useState<EtatSessionInequationLogarithmique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionInequationLogarithmique>(sessionInitiale);
   /** Compteur d'exercices — entre dans la `key` de chaque écran pour que « Nouvel exercice » ou
    * « Générer » remonte toujours un écran vierge, même quand la phase ne change pas (audit 6e ch. 3,
    * point 3 : un choix de la famille E survivait d'un exercice E au suivant). */

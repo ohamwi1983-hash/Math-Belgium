@@ -1,11 +1,28 @@
 import type { ExerciceEtudeFonctionLogarithme, ExerciceEtudeLogC } from "../../core6e/etudeFonctionLogarithme.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  EtapeAmenagee,
+  EtapeCorrection,
+  QuestionExercice,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { construireSvgFonction } from "../../../export/svgGraph";
 import {
+  aideAsymptotesNiveau1,
+  aideConcaviteNiveau1,
   aideConcaviteNiveau2,
+  aideCroissanceNiveau1,
   aideCroissanceNiveau2,
+  aideDomaineNiveau1,
+  aideDomaineNiveau2,
+  aideGraphiqueNiveau1,
+  aideLimitesNiveau1,
+  aideLimitesNiveau2,
+  type AideAvecLatex,
   calculerViewBox,
   consigneAsymptotes,
   consigneConcavite,
@@ -20,6 +37,7 @@ import {
   LIBELLE_PHASE_ETUDE_LOG,
 } from "../../ui6e/formatEtudeFonctionLogarithme";
 import type { PhaseEtudeFonctionLogarithme } from "../../moteur6e/typesEtudeFonctionLogarithme";
+import { termeConstanteLatex, trinomeLatex } from "./familles/latex";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./index";
 
 /**
@@ -100,6 +118,132 @@ function construireCorrectionEtudeFonctionLogarithme(exercice: ExerciceEtudeFonc
   return blocs;
 }
 
+// ============================================================================
+// Feuille d'exercices / évaluation enrichies — difficulté, réponse brève, corrigé détaillé, barème,
+// version aménagée. Chaque réponse vient de `contenuRecapLatex` (celle de l'appli) ; chaque méthode
+// des aides de niveau 1, chaque calcul intermédiaire des aides de niveau 2 (jamais leur texte, qui
+// s'adresse à l'élève en cours de résolution).
+// ============================================================================
+
+const PHASES: PhaseEtudeFonctionLogarithme[] = ["domaine", "limites", "asymptotes", "croissance", "concavite", "graphique"];
+const LETTRE_SOUS_QUESTION: Record<PhaseEtudeFonctionLogarithme, string> = { domaine: "a", limites: "b", asymptotes: "c", croissance: "d", concavite: "e", graphique: "f" };
+
+function fragmentsAide(aide: AideAvecLatex): FragmentConsigne[] {
+  return aide.latex === null ? [texte(aide.texte)] : [texte(`${aide.texte} `), latex(aide.latex)];
+}
+
+/** f'(x) de la famille C — (m·ln|u|)' = m·u'/u, u = (x−p)² − q². */
+function deriveeCLatex(exercice: ExerciceEtudeLogC): string {
+  return `f'(x) = \\dfrac{${2 * exercice.m}\\left(x${termeConstanteLatex(-exercice.p)}\\right)}{${trinomeLatex(-2 * exercice.p, exercice.p * exercice.p - exercice.q * exercice.q)}}`;
+}
+
+function aideMethode(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): AideAvecLatex {
+  switch (phase) {
+    case "domaine":
+      return aideDomaineNiveau1(exercice);
+    case "limites":
+      return aideLimitesNiveau1(exercice);
+    case "asymptotes":
+      return aideAsymptotesNiveau1(exercice);
+    case "croissance":
+      return aideCroissanceNiveau1(exercice);
+    case "concavite":
+      return aideConcaviteNiveau1(exercice);
+    case "graphique":
+      return aideGraphiqueNiveau1(exercice);
+  }
+}
+
+/** Calcul intermédiaire (LaTeX) d'un écran, ou `null` s'il n'y en a pas. */
+function calculIntermediaire(exercice: ExerciceEtudeFonctionLogarithme, phase: PhaseEtudeFonctionLogarithme): string | null {
+  switch (phase) {
+    case "domaine":
+      return aideDomaineNiveau2(exercice).latex;
+    case "limites":
+      return aideLimitesNiveau2(exercice).latex;
+    case "croissance":
+      return exercice.famille === "C" ? deriveeCLatex(exercice) : aideCroissanceNiveau2(exercice).latex;
+    case "concavite":
+      return aideConcaviteNiveau2(exercice).latex;
+    default:
+      return null;
+  }
+}
+
+const PIEGE: Record<ExerciceEtudeFonctionLogarithme["famille"], { phase: PhaseEtudeFonctionLogarithme; texte: string; cout: string }> = {
+  A: { phase: "limites", texte: "En +∞, ln(x)/x tend vers 0 (croissances comparées) : ne pas conclure à +∞.", cout: "−1" },
+  B: { phase: "asymptotes", texte: "La limite en 0⁺ est finie et 0 est une borne finie du domaine : x = 0 n'est PAS une asymptote.", cout: "−1" },
+  C: { phase: "domaine", texte: "ln|u| n'exige que u ≠ 0 : on exclut seulement les deux zéros du trinôme, pas tout l'intervalle où il est négatif.", cout: "−1" },
+  D: { phase: "asymptotes", texte: "Des limites infinies en ±∞ ne donnent ni asymptote verticale ni asymptote horizontale (domaine ℝ).", cout: "−1" },
+  E: { phase: "limites", texte: "En 0⁺, ln(x) + c/x est une forme indéterminée : il faut la lever (même dénominateur) avant de conclure.", cout: "−1" },
+};
+
+const POIDS: Record<PhaseEtudeFonctionLogarithme, number> = { domaine: 1, limites: 2, asymptotes: 1, croissance: 2, concavite: 1, graphique: 1 };
+
+function difficulteEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): 1 | 2 | 3 {
+  return exercice.famille === "B" || exercice.famille === "C" ? 3 : 2;
+}
+
+function reponseBreveEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
+  return PHASES.flatMap((phase, i) => [texte(`${i === 0 ? "" : " ; "}${LETTRE_SOUS_QUESTION[phase]}) `), latex(contenuRecapLatex(exercice, phase))]);
+}
+
+function correctionDetailleeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): EtapeCorrection[] {
+  const piege = PIEGE[exercice.famille];
+  return PHASES.flatMap((phase) => {
+    const sousQuestion = LETTRE_SOUS_QUESTION[phase];
+    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: fragmentsAide(aideMethode(exercice, phase)) }];
+    const calcul = calculIntermediaire(exercice, phase);
+    if (calcul !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
+    if (piege.phase === phase) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(piege.texte)] });
+    etapes.push({ label: "Conclusion", sousQuestion, fragments: [latex(contenuRecapLatex(exercice, phase))] });
+    return etapes;
+  });
+}
+
+function baremeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): BaremeExercice {
+  const piege = PIEGE[exercice.famille];
+  return {
+    reponseFinale: reponseBreveEtudeFonctionLogarithme(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Domaine correct, conditions d'existence écrites")], points: POIDS.domaine },
+      { sousQuestion: "b", critere: [texte("Toutes les limites aux bornes du domaine (la moitié des points si une limite manque ou est fausse)")], points: POIDS.limites },
+      { sousQuestion: "c", critere: [texte("Asymptotes déduites des limites (et seulement elles)")], points: POIDS.asymptotes },
+      { sousQuestion: "d", critere: [texte("f'(x) correcte")], points: 1 },
+      { sousQuestion: "d", critere: [texte("Signe de f', variations et extremum")], points: POIDS.croissance - 1 },
+      { sousQuestion: "e", critere: [texte("Signe de f'' : concavité et points d'inflexion")], points: POIDS.concavite },
+      { sousQuestion: "f", critere: [texte("Graphique choisi, cohérent avec l'étude")], points: POIDS.graphique },
+    ],
+    erreursFrequentes: [
+      { description: [texte(piege.texte)], cout: piege.cout },
+      { description: [texte("Inverser croissance et décroissance en oubliant le signe du coefficient devant le logarithme")], cout: "−1" },
+    ],
+    reponsesAcceptees: [[texte("Positions exactes (e^{…}, fractions) ou valeurs approchées au centième si la forme exacte est donnée")], [texte("Domaine écrit en intervalles ou en notation d'ensemble")]],
+  };
+}
+
+const CONSIGNE_AMENAGEE: Record<PhaseEtudeFonctionLogarithme, string> = {
+  domaine: "Écris les conditions d'existence, puis le domaine de f.",
+  limites: "Calcule la limite de f à chaque borne du domaine.",
+  asymptotes: "Déduis de tes limites les asymptotes de la courbe.",
+  croissance: "",
+  concavite: "Calcule f''(x), étudie son signe et conclus sur la concavité.",
+  graphique: "Choisis le graphique (A, B, C ou D) qui correspond à ton étude.",
+};
+
+function enonceAmenageEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): EtapeAmenagee[] {
+  return PHASES.flatMap((phase): EtapeAmenagee[] => {
+    const rappel = fragmentsAide(aideMethode(exercice, phase));
+    if (phase === "croissance") {
+      return [
+        { consigne: [texte("Calcule f'(x).")], rappel, points: 1 },
+        { consigne: [texte("Étudie le signe de f'(x), puis donne les variations et l'extremum de f.")], points: POIDS.croissance - 1 },
+      ];
+    }
+    return [{ consigne: [texte(CONSIGNE_AMENAGEE[phase])], rappel, points: POIDS[phase] }];
+  });
+}
+
 export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExercices<ExerciceEtudeFonctionLogarithme> = {
   titreDocument: "Étudier une fonction (synthèse, logarithmes) — Évaluation",
   nomFichierBase: "etude-fonction-logarithme",
@@ -108,4 +252,10 @@ export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExerc
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]),
   construireEnonce: construireEnonceEtudeFonctionLogarithme,
   construireCorrection: construireCorrectionEtudeFonctionLogarithme,
+  difficulte: difficulteEtudeFonctionLogarithme,
+  reponseBreve: reponseBreveEtudeFonctionLogarithme,
+  correctionDetaillee: correctionDetailleeEtudeFonctionLogarithme,
+  bareme: baremeEtudeFonctionLogarithme,
+  enonceAmenage: enonceAmenageEtudeFonctionLogarithme,
+  dureeMinutes: 25,
 };

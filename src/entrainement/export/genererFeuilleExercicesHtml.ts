@@ -38,6 +38,24 @@ export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { blo
     .join("");
 }
 
+/**
+ * En-tête d'exercice (`SectionExercice.enteteFragments`) : les formules restent DANS la phrase
+ * (KaTeX en ligne) — le mode « display » (formule centrée sur sa propre ligne) n'est utilisé que
+ * quand l'en-tête est une formule seule, ou quand la phrase ANNONCE la formule qui la termine
+ * (texte finissant par « : »). Auparavant tout l'en-tête passait en display, ce qui coupait les
+ * phrases en morceaux (« Le graphique est celui de / f(x) = … / , où a et b… »).
+ */
+export function fragmentsEnteteHtml(fragments: FragmentConsigne[]): string {
+  const significatifs = fragments.filter((f) => f.type === "latex" || f.valeur.trim() !== "");
+  if (significatifs.length === 1 && significatifs[0].type === "latex") return fragmentsVersHtml(significatifs, { bloc: true });
+  const dernier = significatifs[significatifs.length - 1];
+  const avant = significatifs[significatifs.length - 2];
+  if (dernier?.type === "latex" && avant?.type === "texte" && avant.valeur.trim().endsWith(":") && significatifs.slice(0, -1).every((f) => f.type === "texte")) {
+    return fragmentsVersHtml(significatifs.slice(0, -1)) + fragmentsVersHtml([dernier], { bloc: true });
+  }
+  return fragmentsVersHtml(fragments);
+}
+
 function tableauHtml(libellesLignes: string[], valeursParLigne: (string[] | null)[], nombreColonnes: number): string {
   const lignes = libellesLignes.map((libelle, i) => {
     const valeurs = valeursParLigne[i] ?? Array.from({ length: nombreColonnes }, () => "");
@@ -63,12 +81,12 @@ const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 export function sectionExerciceHtml(section: SectionExercice, indexExercice: number): string {
   let html = `<h2>Exercice ${indexExercice + 1}</h2>`;
   if (section.enteteFragments) {
-    html += `<div class="entete">${fragmentsVersHtml(section.enteteFragments, { bloc: true })}</div>`;
+    html += `<div class="entete">${fragmentsEnteteHtml(section.enteteFragments)}</div>`;
   }
   section.questions.forEach((question, q) => {
     const lettre = LETTRES[q] ?? String(q + 1);
+    // Aucune zone de réponse : les élèves répondent sur une feuille à part (décision utilisateur).
     html += `<p><strong>${lettre}) </strong>${fragmentsVersHtml(question.consigne)}</p>`;
-    html += zoneReponseHtml(question.reponse);
   });
   return `<section class="exercice">${html}</section>`;
 }

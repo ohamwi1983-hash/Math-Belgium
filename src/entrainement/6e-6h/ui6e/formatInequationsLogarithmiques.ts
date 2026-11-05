@@ -53,12 +53,12 @@ export function baseLatex(base: BaseLog): string {
 }
 
 /** `base^{exposant}` — base fractionnaire entre parenthèses (`(1/2)^{-3}`, jamais `\frac{1}{2}^{-3}`). */
-function puissanceBaseLatex(base: BaseLog, exposant: number): string {
+export function puissanceBaseLatex(base: BaseLog, exposant: number): string {
   const b = base.den === 1 ? baseLatex(base) : `\\left(${baseLatex(base)}\\right)`;
   return `${b}^{${exposant}}`;
 }
 
-function formatAffineLatex(f: AffineLog): string {
+export function formatAffineLatex(f: AffineLog): string {
   return formatSommeTermes([
     { valeur: f.m, suffixe: "x" },
     { valeur: f.n, suffixe: "" },
@@ -78,12 +78,12 @@ export function symboleComparateurLatex(cmp: Comparateur): string {
   }
 }
 
-function inverserComparateurLatex(cmp: Comparateur): Comparateur {
+export function inverserComparateurLatex(cmp: Comparateur): Comparateur {
   const INVERSE: Record<Comparateur, Comparateur> = { "<": ">", ">": "<", "<=": ">=", ">=": "<=" };
   return INVERSE[cmp];
 }
 
-function logBaseLatex(base: string, argument: string): string {
+export function logBaseLatex(base: string, argument: string): string {
   return `\\log_{${base}}\\left(${argument}\\right)`;
 }
 

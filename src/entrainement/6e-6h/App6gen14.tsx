@@ -49,6 +49,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /** Mêmes 3 libellés que `OPTIONS` (`components6e/EtapeStatutGEquationsExpLog.tsx`, non exporté) —
  * répliqués ICI pour formater "votre réponse" dans la fiche de consultation. */
@@ -64,6 +65,15 @@ function nouvelleSession(): EtatSessionEquationsExpLog {
   return demarrerSessionEquationsExpLog(REGLAGES_DEMO, genererExerciceEquationsExpLog);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/equationsExpLog/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionEquationsExpLog {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationsExpLog(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceEquationsExpLog, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -74,7 +84,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen14() {
-  const [etat, setEtat] = useState<EtatSessionEquationsExpLog>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationsExpLog>(sessionInitiale);
   /** Compteur d'exercices AFFICHÉS — `etat.indexExercice` reste à 0 (`nombreExercices: 1`), il ne
    * distingue donc pas deux exercices successifs. Incrémenté à chaque nouvel exercice, il entre dans
    * la `key` des écrans pour vider la saisie même quand la phase est la même. */

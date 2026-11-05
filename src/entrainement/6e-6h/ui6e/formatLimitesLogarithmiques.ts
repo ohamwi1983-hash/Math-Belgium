@@ -173,7 +173,7 @@ function plusFraction(numerateur: number, denominateur: string): string {
   return `${numerateur < 0 ? " - " : " + "}\\frac{${Math.abs(numerateur)}}{${denominateur}}`;
 }
 
-function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
+export function formeFactoriseeA(exercice: ExerciceLimiteLogA): string {
   switch (exercice.sousType) {
     case "sous1":
       return `\\frac{\\ln(x)}{${formatPuissance("x", exercice.d)}} \\cdot \\frac{${exercice.k}}{${exercice.a}${plusFraction(exercice.b, formatPuissance("x", exercice.d))}}`;

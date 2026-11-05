@@ -41,6 +41,7 @@ import { EtapeChampDomaineDeriveeLog } from "./components6e/EtapeChampDomaineDer
 import { EtapeDeuxChampsDomaineDeriveeLog } from "./components6e/EtapeDeuxChampsDomaineDeriveeLog";
 import { EtapeDomaineDomaineDeriveeLog } from "./components6e/EtapeDomaineDomaineDeriveeLog";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { Katex } from "./components/Katex";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps, reponseAttendueLatex } from "./ui6e/formatDomaineDeriveeLogarithme";
@@ -94,6 +95,19 @@ function nouvelleSession(): EtatSessionDomaineDeriveeLogarithme {
   return demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, genererExerciceDomaineDeriveeLogarithme);
 }
 
+/** Exercice d'un code imprimé sur une feuille — MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/domaineDeriveeLogarithme/exportEvaluation.ts`). */
+function exerciceDuCode(code: NonNullable<ReturnType<typeof lireCodeDepuisUrl>>): ReturnType<typeof genererExerciceDomaineDeriveeLogarithme> {
+  return genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceDomaineDeriveeLogarithme, (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]));
+}
+
+/** Première session : l'exercice du code de l'URL s'il y en a un, sinon un tirage normal. */
+function sessionInitiale(): EtatSessionDomaineDeriveeLogarithme {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, () => exerciceDuCode(code));
+}
+
 const PHASES_DOMAINE = new Set<PhaseDomaineDeriveeLogarithme>(["aDomaine", "bDomaine", "cDomaine", "dDomaine", "eDomaine", "fDomaine"]);
 const PHASES_DEUX_CHAMPS = new Set<PhaseDomaineDeriveeLogarithme>(["cFacteurs", "dND"]);
 
@@ -124,7 +138,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen16() {
-  const [etat, setEtat] = useState<EtatSessionDomaineDeriveeLogarithme>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDomaineDeriveeLogarithme>(sessionInitiale);
   /** Compteur d'exercices — entre dans la `key` de chaque écran (audit 6e ch. 3, point 3 : la saisie
    * survivait à « Générer » quand la phase restait la même). */
   const [numeroExercice, setNumeroExercice] = useState(0);
