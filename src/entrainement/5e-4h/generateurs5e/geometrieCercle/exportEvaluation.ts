@@ -50,20 +50,15 @@ function construireEnonceGeometrieCercle(exercice: ExerciceGeometrieCercle): Sec
   };
 }
 
-const CONSIGNE_PAPIER: Record<ScenarioGeometrieCercle, string> = {
-  secteurBalaye: "Calcule l'aire balayée, arrondie à l'unité (angles en radians au dixième près si tu les arrondis).",
-  segmentCirculaire: "Calcule l'aire du segment circulaire, arrondie à l'unité (angles en radians au dixième près si tu les arrondis).",
-  lentille: "Calcule l'aire de la lentille, arrondie à l'unité (angles en radians au dixième près si tu les arrondis).",
-};
-
+/** Énoncé papier : la consigne générale (qui énonce déjà l'aire demandée), les données, la précision
+ * attendue et le croquis — sans les étapes. */
 function enoncePapierGeometrieCercle(exercice: ExerciceGeometrieCercle): EnoncePapier {
   return {
     section: {
-      enteteFragments: enteteFragments(exercice),
+      enteteFragments: [...enteteFragments(exercice), texte(" Donne l'aire arrondie à l'unité.")],
       enteteHtml: construireSvgGeometrieCercle(exercice),
-      questions: [{ consigne: [texte(CONSIGNE_PAPIER[exercice.scenario])] }],
+      questions: [],
     },
-    etapesParQuestion: [phasesDuScenario(exercice.scenario).map((_, i) => LETTRES[i])],
   };
 }
 

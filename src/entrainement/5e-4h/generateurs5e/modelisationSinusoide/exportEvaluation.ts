@@ -48,7 +48,8 @@ function consigneEtape(exercice: ExerciceModelisationSinusoide, phase: PhaseMode
     .replace(/\s*\(utilise « k » comme entier libre\)/g, " (k entier)")
     .replace(/\s*\(arrondi au centième accepté si besoin\)/g, "")
     .replace(/ ; arrondi au centième accepté si besoin\)/g, ")")
-    .replace(/\s*\(écris « phi »\)/g, "");
+    .replace(/\s*\(écris « phi »\)/g, "")
+    .replace("Écris f(t) = A·sin(ωt+φ)+b en remplaçant", "Écris f(t) en remplaçant");
 }
 
 function construireEnonceModelisationSinusoide(exercice: ExerciceModelisationSinusoide): SectionExercice {
@@ -95,14 +96,14 @@ function introduction(technique: TechniquePhase1): FragmentConsigne[] {
         texte(" ; A et b sont connus. On connaît deux points de la courbe, situés sur une même montée : en chacun d'eux, l'argument ωt + φ est compris entre −π/2 et π/2."),
       ];
     case "donnee":
-      return [texte("On considère la fonction suivante, où t ≥ 0.")];
+      return [];
   }
 }
 
 function enteteFragments(exercice: ExerciceModelisationSinusoide): FragmentConsigne[] {
   const donnees = formatTermesDonneesConstructionLatex(exercice);
-  const libelle = exercice.phase1.technique === "donnee" ? " " : " Données : ";
-  return [...introduction(exercice.phase1.technique), texte(libelle), latex(donnees.join(",\\quad ")), texte(".")];
+  if (exercice.phase1.technique === "donnee") return [texte("On considère la fonction "), latex(donnees.join(",\\quad ")), texte(", avec t ≥ 0.")];
+  return [...introduction(exercice.phase1.technique), texte(" Données : "), latex(donnees.join(",\\quad ")), texte(".")];
 }
 
 function questionConstruction(technique: TechniquePhase1): FragmentConsigne[] {
@@ -181,8 +182,16 @@ function reponseExploitation(q: QuestionPhase2): FragmentConsigne[] {
   }
 }
 
+/** Réponse de la construction : f(t) ; pour B2, précédée de ω et φ en valeur exacte (demandées
+ * exactes, alors que f(t) les écrit en décimal). */
+function reponseConstruction(exercice: ExerciceModelisationSinusoide): FragmentConsigne[] {
+  if (exercice.phase1.technique === "donnee") return [];
+  const exacts = exercice.phase1.technique === "b2" ? [...formatTermesReponseAttendueModelisationSinusoide(exercice, "pulsation"), ...formatTermesReponseAttendueModelisationSinusoide(exercice, "phi")] : [];
+  return joindre([...exacts, ...formatTermesReponseAttendueModelisationSinusoide(exercice, "fonctionFinale")]);
+}
+
 function reponseBreveModelisationSinusoide(exercice: ExerciceModelisationSinusoide): FragmentConsigne[] {
-  const construction = exercice.phase1.technique === "donnee" ? [] : joindre(formatTermesReponseAttendueModelisationSinusoide(exercice, "fonctionFinale"));
+  const construction = reponseConstruction(exercice);
   if (exercice.phase2 === null) return construction;
   const exploitation = reponseExploitation(exercice.phase2);
   if (construction.length === 0) return exploitation;
@@ -265,17 +274,13 @@ function correctionDetailleeModelisationSinusoide(exercice: ExerciceModelisation
 }
 
 function baremeModelisationSinusoide(exercice: ExerciceModelisationSinusoide): BaremeExercice {
-  const phases = ordreComplet(exercice);
-  const nbConstruction = phases.filter(estConstruction).length;
-  const nbExploitation = phases.length - nbConstruction;
-  // 4 points répartis à parts égales entre les deux questions (ou tout sur la seule question).
-  const totalConstruction = nbExploitation === 0 ? 4 : nbConstruction === 0 ? 0 : 2;
-  const totalExploitation = 4 - totalConstruction;
-  const criteres = phases.map((phase, i) => {
-    const reponse = formatTermesReponseAttendueModelisationSinusoide(exercice, phase);
-    const poids = estConstruction(phase) ? totalConstruction / nbConstruction : totalExploitation / nbExploitation;
-    return { sousQuestion: LETTRES[i], critere: [texte(`${LIBELLE_PHASE[phase]} : `), ...joindre(reponse)], points: poids };
-  });
+  // Un poids égal par étape (au plus 8 étapes : aucune ne tombe à 0 point une fois le total
+  // ramené au demi-point) — chaque question pèse ainsi son nombre d'étapes.
+  const criteres = ordreComplet(exercice).map((phase, i) => ({
+    sousQuestion: LETTRES[i],
+    critere: [texte(`${LIBELLE_PHASE[phase]} : `), ...joindre(formatTermesReponseAttendueModelisationSinusoide(exercice, phase))],
+    points: 1,
+  }));
 
   const d = exercice.phase1;
   const q = exercice.phase2;

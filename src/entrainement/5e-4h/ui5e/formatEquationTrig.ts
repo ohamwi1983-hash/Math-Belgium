@@ -28,7 +28,14 @@ function arrondi1(v: number): number {
   return Object.is(r, -0) ? 0 : r;
 }
 
+/** Décimal en LaTeX : virgule protégée « {,} » (une virgule nue est une ponctuation pour KaTeX,
+ * suivie d'une espace : « 2, 8 »). */
 function formatDecimalLatex(v: number): string {
+  return arrondi1(v).toString().replace(".", "{,}");
+}
+
+/** Décimal en texte brut (étiquettes `<text>` SVG du cercle) : virgule simple. */
+function formatDecimalTexte(v: number): string {
   return arrondi1(v).toString().replace(".", ",");
 }
 
@@ -159,5 +166,5 @@ export function formatAngleLabelTexte(v: number, regime: RegimeEquationTrig): st
       return frac.numerateur === 1 ? `π/${frac.denominateur}` : `${frac.numerateur}π/${frac.denominateur}`;
     }
   }
-  return formatDecimalLatex(v);
+  return formatDecimalTexte(v);
 }

@@ -30,10 +30,11 @@ function arrondi1(v: number): number {
   return Object.is(r, -0) ? 0 : r;
 }
 
-/** Convention française — "." → "," (même principe que `ui/formatBienaymeTchebychev.ts`, réimplémenté
- * ici car `src/generateurs5e/` ne peut jamais importer `src/ui/`/`src/ui5e/`). */
+/** Convention française, en LaTeX — "." → "{,}" (virgule protégée : une virgule nue est une
+ * ponctuation pour KaTeX, suivie d'une espace, « 2, 8 »). Réimplémenté ici car `src/generateurs5e/`
+ * ne peut jamais importer `src/ui/`/`src/ui5e/`. */
 function formatDecimalLatex(v: number): string {
-  return arrondi1(v).toString().replace(".", ",");
+  return arrondi1(v).toString().replace(".", "{,}");
 }
 
 function tirerSigne(): 1 | -1 {

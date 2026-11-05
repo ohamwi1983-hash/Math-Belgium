@@ -58,12 +58,27 @@ export function formatFonctionSourceLatex(exercice: ExerciceExtremumsSinusoide):
  * forme qui est désormais la réponse ATTENDUE à l'écran 1, voir
  * `moteur5e/verificationExtremumsSinusoide.ts::diagnostiquerPoserEquationExtremum`). Réutilisée
  * telle quelle par le bloc "état actuel" des écrans 2/3 (B.2). */
+/** Terme « k·période » écrit comme au cours : « 2k\\pi », « k\\pi », « \\dfrac{2k\\pi}{3} », « 2k »,
+ * « \\dfrac{k}{2} » — jamais « k\\cdot 2 ». La période est positive (signe sans effet, k ∈ ℤ). */
+function formatTermeKLatex(periode: RationnelPi): string {
+  const r = reduireRationnelPi(periode);
+  const n = Math.abs(r.numerateur);
+  const d = r.denominateur;
+  const coeff = n === 1 ? "k" : `${n}k`;
+  if (r.degrePi === 1) return d === 1 ? `${coeff}\\pi` : `\\dfrac{${coeff}\\pi}{${d}}`;
+  if (r.degrePi === -1) return `\\dfrac{${coeff}}{${d === 1 ? "" : d}\\pi}`;
+  return d === 1 ? coeff : `\\dfrac{${coeff}}{${d}}`;
+}
+
+/** « constante + k·période », la constante omise si nulle. */
+function formatSerieLatex(branche: { constante: RationnelPi; periode: RationnelPi }): string {
+  const terme = formatTermeKLatex(branche.periode);
+  if (reduireRationnelPi(branche.constante).numerateur === 0) return terme;
+  return `${formatRationnelPiLatex(branche.constante)} + ${terme}`;
+}
+
 export function formatEquationSubstitueeLatex(exercice: ExerciceExtremumsSinusoide): string {
-  const constanteReduite = reduireRationnelPi(exercice.brancheU.constante);
-  const periode = formatRationnelPiLatex(exercice.brancheU.periode);
-  if (constanteReduite.numerateur === 0) return `${formatArgumentLatex(exercice)} = k\\cdot ${periode}`;
-  const constante = formatRationnelPiLatex(exercice.brancheU.constante);
-  return `${formatArgumentLatex(exercice)} = ${constante} + k\\cdot ${periode}`;
+  return `${formatArgumentLatex(exercice)} = ${formatSerieLatex(exercice.brancheU)}`;
 }
 
 /**
@@ -79,10 +94,7 @@ export function formatTermesEtatActuelExtremums(exercice: ExerciceExtremumsSinus
   if (phase === "poserEquation") return [];
   const termeEquation = formatEquationSubstitueeLatex(exercice);
   if (phase === "isolerX") return [termeEquation];
-  const constanteX = formatRationnelPiLatex(exercice.brancheX.constante);
-  const periodeX = formatRationnelPiLatex(exercice.brancheX.periode);
-  const termeX = `x = ${constanteX} + k\\cdot ${periodeX}`;
-  return [termeEquation, termeX];
+  return [termeEquation, `x = ${formatSerieLatex(exercice.brancheX)}`];
 }
 
 // ============================================================================

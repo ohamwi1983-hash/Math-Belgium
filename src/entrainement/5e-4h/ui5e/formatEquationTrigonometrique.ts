@@ -74,7 +74,7 @@ export function simplifierAffichageProduit(latex: string): string {
   s = s.replace(/\s*-\s*0(?=\\right\)|$)/g, "");
   // 4. "1\cdot " isolé — jamais précédé d'un chiffre, d'une virgule décimale ou d'un signe "-"
   // (qui en ferait respectivement le "1" final d'une décimale comme "2,1", ou un "-1\cdot " réel).
-  s = s.replace(/(?<![\d,-])1\\cdot\s*/g, "");
+  s = s.replace(/(?<![\d,}-])1\\cdot\s*/g, "");
   return s;
 }
 
@@ -118,8 +118,9 @@ export function formatEnonceMixteLatex(exercice: ExercicePythagoricienne): strin
  * LaTeX-résultat). */
 export function formatPolynomeCibleLatex(exercice: ExercicePythagoricienne): string {
   const { alpha, beta, gamma, fonctionCible } = exercice;
-  const T = `${fonctionCible === "cos" ? "\\cos" : "\\sin"}(x)`;
-  const t1 = formatTermeSigneLatex(alpha, `${T}^2`, true);
+  const nom = fonctionCible === "cos" ? "\\cos" : "\\sin";
+  const T = `${nom}(x)`;
+  const t1 = formatTermeSigneLatex(alpha, `${nom}^2(x)`, true);
   const t2 = formatTermeSigneLatex(beta, T, t1 === "");
   const t3 = formatTermeSigneLatex(gamma, "", t1 === "" && t2 === "");
   const membres = [t1, t2, t3].filter((t) => t !== "");

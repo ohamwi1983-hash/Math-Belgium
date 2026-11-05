@@ -12,7 +12,6 @@ import type {
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneGeneraleExtremums,
-  consignePhaseExtremums,
   consigneSolutionsExtremums,
   formatEquationSubstitueeLatex,
   formatFonctionSourceLatex,
@@ -33,12 +32,14 @@ import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceE
  * (équation, isoler x, positions dans [0 ; 2π[) sont les étapes du corrigé.
  */
 
+const NOM_MODE_DE = { maximums: "des maximums", minimums: "des minimums", extremums: "des extremums" } as const;
+
 function construireEnonce(exercice: ExerciceExtremumsSinusoide): SectionExercice {
   return {
     enteteFragments: [texte("On considère la fonction "), latex(`f(x) = ${formatFonctionSourceLatex(exercice)}`)],
     questions: [
-      { consigne: [texte(consignePhaseExtremums(exercice, "poserEquation"))] },
-      { consigne: [texte(consignePhaseExtremums(exercice, "isolerX"))] },
+      { consigne: [texte(`Écris l'équation qui donne les positions ${NOM_MODE_DE[exercice.mode]} (k entier).`)] },
+      { consigne: [texte("Isole x dans cette série.")] },
       { consigne: [texte(consigneSolutionsExtremums(exercice))] },
     ],
   };
@@ -67,6 +68,7 @@ function reponseBreve(exercice: ExerciceExtremumsSinusoide): FragmentConsigne[] 
 }
 
 const NOM_MODE = { maximums: "les maximums", minimums: "les minimums", extremums: "les extremums" } as const;
+
 
 /** Phrase de méthode de l'étape 1 (valeur visée par sin/cos), en clair — la formule suit en LaTeX. */
 function methodeEquation(exercice: ExerciceExtremumsSinusoide): string {

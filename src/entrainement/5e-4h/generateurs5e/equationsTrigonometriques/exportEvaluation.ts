@@ -105,8 +105,11 @@ function termePeriodeLatex(periode: number): string {
   return f.d === 1 ? num : `\\frac{${num}}{${f.d}}`;
 }
 
+/** Valeur seulement approchée : ni fraction de π, ni nombre exact au centième (ex. x = 1 + kπ, venu
+ * de b = −1, reste une égalité). */
 function estDecimale(v: ValeurPiOuDecimale): boolean {
-  return v.exact === null && fractionDePi(v.decimal) === null;
+  if (v.exact !== null || fractionDePi(v.decimal) !== null) return false;
+  return Math.abs(v.decimal * 100 - Math.round(v.decimal * 100)) > 1e-9;
 }
 
 /** « constante + k·période » — la constante omise si nulle. */
@@ -199,7 +202,7 @@ function construireEnonce(exercice: ExerciceEquationTrigonometrique): SectionExe
 function annoncePrecision(exercice: ExerciceEquationTrigonometrique): string {
   switch (exercice.famille) {
     case "directe":
-      return exercice.exercice.regime === "decimal" ? " Arrondis au centième les valeurs qui ne sont pas exactes." : "";
+      return exercice.exercice.regime === "decimal" && !exercice.exercice.aucuneSolution ? " Arrondis au centième les valeurs qui ne sont pas exactes." : "";
     case "produit":
       return exercice.facteur1.regime === "decimal" || exercice.facteur2.regime === "decimal" ? " Arrondis au centième les valeurs qui ne sont pas des angles remarquables." : "";
     default:
@@ -213,7 +216,7 @@ function enoncePapier(exercice: ExerciceEquationTrigonometrique): EnoncePapier {
       enteteFragments: [
         texte("Résous l'équation "),
         latex(formatEnonceEquationTrigonometriqueLatex(exercice)),
-        texte(` d'abord dans ℝ (k désigne un entier), puis dans [0 ; 2π[.${annoncePrecision(exercice)}`),
+        texte(`, d'abord dans ℝ (k désigne un entier), puis dans [0 ; 2π[.${annoncePrecision(exercice)}`),
       ],
       questions: [],
     },
@@ -408,7 +411,7 @@ function valeurT(t: number): string {
 }
 
 function polynomeEnT(e: ExercicePythagoricienne): string {
-  return formatPolynomeCibleLatex(e).replace(/\\(cos|sin)\(x\)/g, "t");
+  return formatPolynomeCibleLatex(e).replace(/\\(cos|sin)\^2\(x\)/g, "t^2").replace(/\\(cos|sin)\(x\)/g, "t");
 }
 
 function correctionEgalite(e: ExerciceEgaliteExpressions): EtapeCorrection[] {

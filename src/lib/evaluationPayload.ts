@@ -643,8 +643,35 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   'trigonometrie': {
-  modeliser: [
-    "Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du sol. Elle effectue un tour complet en 8 minutes. À l'instant $t=0$ (l'embarquement), une nacelle se trouve à son point le plus bas. Détermine le modèle complet $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes), en justifiant chaque paramètre, puis vérifie ton résultat en calculant $hauteur(4)$.",
+  'arcs-secteurs': [
+    { cle: 'conversion + arc + secteur', enonce: "Un secteur circulaire a un rayon $r = 6$ cm et un angle au centre de $60°$. Convertis cet angle en radians, puis calcule la longueur de l'arc et l'aire du secteur (valeurs exactes, puis approchées au centième)." },
+  ],
+  'polygones': [
+    { cle: 'hexagone inscrit — segment circulaire', enonce: "Un hexagone régulier ABCDEF est inscrit dans un cercle de centre O et de rayon $r = 4$ cm. Calcule l'aire de la région comprise entre le côté [AB] et l'arc AB (valeur exacte, puis approchée au centième)." },
+  ],
+  'geometrie-cercle': [
+    { cle: 'segment circulaire + corde', enonce: "Dans un cercle de centre O et de rayon $r = 10$ cm, deux rayons OA et OB forment un angle $\\theta = \\dfrac{2\\pi}{3}$. Calcule l'aire du segment circulaire délimité par la corde [AB], puis la longueur de cette corde (valeurs approchées au centième)." },
+  ],
+  'parametres': [
+    { cle: 'identifier les paramètres', enonce: "On donne $f(x) = 3\\sin(2x - \\dfrac{\\pi}{3}) + 1$. Détermine l'amplitude A (puis le maximum et le minimum de f), la pulsation $\\omega$, la période T, la fréquence, le déphasage $\\varphi$, le décalage horizontal $\\Phi$ et le décalage vertical b." },
+    { cle: 'construction complète', enonce: "On donne $f(x) = 3\\sin(2x + \\dfrac{\\pi}{4}) + 1$. Détermine A, b, la période T et le décalage horizontal $\\Phi$, puis donne les cinq points remarquables d'une période (en partant de $\\Phi$) qui permettent de tracer la courbe." },
+  ],
+  'lecture-graphique': [
+    { cle: 'lecture complète sur un graphique', enonce: "Le graphique d'une fonction $f(x) = A\\sin(\\omega x + \\varphi) + b$ (avec $A > 0$ et $\\omega > 0$) présente un maximum en $(1{,}5\\,;5)$, le maximum suivant en $x = 5{,}5$, et un minimum en $(3{,}5\\,;-1)$ ; la courbe traverse sa ligne moyenne en montant en $x = 0{,}5$. Détermine A, b, $\\omega$ et $\\varphi$, puis écris $f(x)$." },
+  ],
+  'extremums': [
+    { cle: 'maximums, minimums, puis extremums réunis', enonce: "On donne $f(x) = 2\\sin(3x + \\dfrac{\\pi}{6}) - 1$. Détermine séparément les abscisses des maximums, puis celles des minimums, puis tous les extremums réunis ($k \\in \\mathbb{Z}$)." },
+  ],
+  'equations': [
+    { cle: 'deux familles de solutions', enonce: "Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans $\\mathbb{R}$." },
+    { cle: 'produit nul — réunion des solutions', enonce: "Résous $\\sin(x)\\cdot\\left(2\\cos(x)-1\\right) = 0$ dans $[0\\,;2\\pi[$." },
+    { cle: 'à factoriser d\'abord', enonce: "Résous $\\cos^2(x) - \\dfrac{1}{2}\\cos(x) = 0$ dans $[0\\,;2\\pi[$." },
+    { cle: 'une racine à rejeter', enonce: "Résous $2\\sin^2(x) - \\cos(x) + 1 = 0$ dans $[0\\,;2\\pi[$." },
+    { cle: 'convertir, puis égaler les arguments', enonce: "Résous $\\cos(2x) = \\sin(x)$ dans $[0\\,;2\\pi[$." },
+  ],
+  'modeliser': [
+    { cle: 'Exemple résolu — une grande roue', enonce: "Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du sol. Elle effectue un tour complet en 8 minutes. À l'instant $t=0$ (l'embarquement), une nacelle se trouve à son point le plus bas. Détermine le modèle complet $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes), en justifiant chaque paramètre, puis vérifie ton résultat en calculant $hauteur(4)$." },
+    { cle: 'un arc, puis retour à t', enonce: "Une grande roue a un rayon de 15 m, son centre est à 17 m du sol et elle fait un tour complet en 8 minutes ; la hauteur d'une nacelle (en m) est $hauteur(t) = 15\\sin\\left(\\dfrac{\\pi}{4}t - \\dfrac{\\pi}{2}\\right) + 17$, avec $t$ en minutes. Pendant les 8 premières minutes, quand la nacelle est-elle à au moins 24,5 m du sol ? Résous $hauteur(t) \\geq 24{,}5$ pour $t \\in [0\\,;8]$." },
   ],
   },
   'suites': {
@@ -994,7 +1021,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
