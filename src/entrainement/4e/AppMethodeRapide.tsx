@@ -24,6 +24,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSecondDeg
 import { EtapeSimplificationCoefficients } from "./components/EtapeSimplificationCoefficients";
 import { EtapeIsolement } from "./components/EtapeIsolement";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeZeros } from "./components/EtapeZeros";
@@ -46,6 +47,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSession {
   return demarrerSession(REGLAGES_DEMO, genererExerciceSecondDegre);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue
+ * que l'adaptateur d'export ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSession {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSession(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSecondDegre, (id) => construireAvecVarianteId(id as VarianteSecondDegreId)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -130,7 +140,7 @@ interface TransitionEnAttente {
 }
 
 export function AppMethodeRapide() {
-  const [etat, setEtat] = useState<EtatSession>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSession>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSession`, jamais dans le moteur (voir AppAnalyseFonction.tsx). Remis à

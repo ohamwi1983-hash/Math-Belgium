@@ -41,6 +41,7 @@ import {
   type VarianteEquationRationnelleId,
 } from "./generateurs/equationRationnelle";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { Katex } from "./components/Katex";
 import { EtapeCEDirecte } from "./components/EtapeCEDirecte";
 import { EtapeRacinesFlexibles } from "./components/EtapeRacinesFlexibles";
@@ -115,6 +116,17 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionEquationRationnelle {
   return demarrerSessionEquationRationnelle(REGLAGES_DEMO, genererExerciceEquationRationnelle);
+}
+
+/** Premier exercice : celui d'une feuille imprimée si l'URL porte un code (`?code=`, QR code de la
+ * feuille d'exercices) — tiré avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export ; sinon un tirage libre. Les exercices suivants sont toujours libres. */
+function sessionInitiale(): EtatSessionEquationRationnelle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationRationnelle(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationRationnelle, (id) => construireAvecVarianteId(id as VarianteEquationRationnelleId)),
+  );
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -449,7 +461,7 @@ function releveRevelePhase(etat: EtatSessionEquationRationnelle, nouvelEtat: Eta
 }
 
 export function AppEquationRationnelle() {
-  const [etat, setEtat] = useState<EtatSessionEquationRationnelle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationRationnelle>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEquationRationnelle`, jamais dans le moteur. Remis à vide à

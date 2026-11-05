@@ -5,7 +5,7 @@ import type {
   QuestionSeuil,
   SerieComparaison,
 } from "../../core/comparaisonSeries.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -20,10 +20,13 @@ import {
   segmentsSeuilAttendu,
   texteProfilSerie,
   type SegmentTexte,
+  LABEL_SIGMA,
 } from "../../ui/formatComparaisonSeries";
 import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee, type PointCourbeCumulee } from "../../ui/comparaisonSeriesGraph";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonSeries } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, segmentEnVirgules, virgulesLatex } from "../../ui/nombreFr";
+import { LABEL_Q1, LABEL_Q2, LABEL_Q3 } from "../../ui/formatBoiteMoustaches";
+
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceComparaisonSeries>` pour gen38 (Comparaison de
@@ -403,6 +406,143 @@ function construireCorrectionComparaisonSeries(instance: ExerciceComparaisonSeri
   return blocs;
 }
 
+// ============================================================================
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème) — voir
+// `.claude/rules/feuilles-evaluations.md`. Une seule question par instance : elle EST la consigne
+// globale (aucune étape d'apprentissage à retirer) ; le corrigé détaille la démarche.
+// Les champs enrichis ne passent pas par `avecVirgulesBelges` (qui n'enveloppe que
+// `construireEnonce`/`construireCorrection`) : `enVirgules` les convertit ici.
+// ============================================================================
+
+function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
+  return fragments.map(segmentEnVirgules);
+}
+
+function n(valeur: number): string {
+  return virgulesLatex(formatNombre(valeur));
+}
+
+function difficulteComparaisonSeries(instance: ExerciceComparaisonSeries): 1 | 2 | 3 {
+  if (instance.variante === "recapitulatif") return 1;
+  if (instance.variante === "graphique") return 2;
+  // Tableaux bruts : le seuil se lit dans la colonne « cumulé », le profil exige de calculer
+  // médianes et dispersions des deux séries.
+  return instance.question.type === "seuil" ? 1 : 3;
+}
+
+function reponseBreveComparaisonSeries(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
+  const { question } = instance;
+  if (question.type === "seuil") return [texte(`${formatNombre(question.reponseAttendue)}${question.estFrequence ? " %" : question.indexBas === null ? " individus" : " individus"}`)];
+  return segmentsVersFragments(segmentsReponseAttendueCourte(question));
+}
+
+function segmentsReponseAttendueCourte(question: Exclude<QuestionComparaisonSeries, QuestionSeuil>): SegmentTexte[] {
+  if (question.type === "centrage") return segmentsCentrageAttendu(question);
+  if (question.type === "dispersion") return segmentsDispersionAttendu(question);
+  return segmentsInterpretationAttendu(question);
+}
+
+/** Origine des indicateurs selon la présentation des données. */
+function sourceIndicateurs(instance: ExerciceComparaisonSeries): string {
+  if (instance.variante === "recapitulatif") return "On les lit directement dans le tableau récapitulatif.";
+  if (instance.variante === "graphique") return "Sur les courbes cumulées, la médiane est l'abscisse où la courbe atteint la moitié de l'effectif (50 %), Q1 et Q3 celles du quart et des trois quarts.";
+  return "On les calcule à partir des effectifs cumulés de chaque tableau (seuils n/4, n/2, 3n/4).";
+}
+
+function lignesMedianes(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
+  const { serieA, serieB, contexte } = instance;
+  return [
+    texte("Série A : "),
+    latex(`${LABEL_Q2} = ${n(serieA.mediane)}`),
+    texte(` ${contexte.unite} ; série B : `),
+    latex(`${LABEL_Q2} = ${n(serieB.mediane)}`),
+    texte(` ${contexte.unite}.`),
+  ];
+}
+
+function lignesDispersion(instance: ExerciceComparaisonSeries): FragmentConsigne[] {
+  const { serieA, serieB } = instance;
+  return [
+    texte("Écarts-types : "),
+    latex(`${LABEL_SIGMA}_A = ${n(serieA.sigma)}`),
+    texte(" et "),
+    latex(`${LABEL_SIGMA}_B = ${n(serieB.sigma)}`),
+    texte(" ; écarts interquartiles : "),
+    latex(`(${LABEL_Q3}-${LABEL_Q1})_A = ${n(serieA.ecartInterquartile)}`),
+    texte(" et "),
+    latex(`(${LABEL_Q3}-${LABEL_Q1})_B = ${n(serieB.ecartInterquartile)}`),
+    texte("."),
+  ];
+}
+
+function correctionDetailleeComparaisonSeries(instance: ExerciceComparaisonSeries): EtapeCorrection[] {
+  const { question } = instance;
+  const etapes: EtapeCorrection[] = [];
+  if (question.type === "centrage") {
+    etapes.push({ label: "Méthode", fragments: [texte("La médiane partage la série en deux moitiés de même effectif : on compare la médiane des deux séries. "), texte(sourceIndicateurs(instance))] });
+    etapes.push({ label: "Lecture", fragments: lignesMedianes(instance) });
+    etapes.push({ label: "Conclusion", fragments: segmentsVersFragments(segmentsCentrageAttendu(question)) });
+    etapes.push({ label: "Piège", fragments: [texte("Comparer les étendues ou les valeurs maximales ne renseigne pas sur la position du milieu de la série.")] });
+  } else if (question.type === "dispersion") {
+    etapes.push({ label: "Méthode", fragments: [texte("Une série est d'autant plus homogène que ses valeurs sont peu dispersées : on compare l'écart-type et/ou l'écart interquartile (le plus petit l'emporte). "), texte(sourceIndicateurs(instance))] });
+    etapes.push({ label: "Calcul", fragments: lignesDispersion(instance) });
+    etapes.push({ label: "Conclusion", fragments: [...segmentsVersFragments(segmentsDispersionAttendu(question)), texte(question.nombreArguments === 2 ? " Les deux mesures vont dans le même sens : ce sont les deux arguments attendus." : " Une seule de ces deux mesures suffit comme argument.")] });
+    etapes.push({ label: "Piège", fragments: [texte("L'étendue (max − min) ne dépend que des deux valeurs extrêmes : elle n'est pas un argument valable d'homogénéité.")] });
+  } else if (question.type === "seuil") {
+    etapes.push({
+      label: "Méthode",
+      fragments: [texte(question.estFrequence ? "On lit la fréquence cumulée à la valeur demandée" : "On lit l'effectif cumulé à la valeur demandée"), texte(question.indexBas === null ? "." : " ; pour une tranche, on soustrait le cumul à la borne basse du cumul à la borne haute.")],
+    });
+    etapes.push({ label: "Lecture", fragments: fragmentsExplicationSeuil(question, instance) });
+    etapes.push({ label: "Conclusion", fragments: [texte(`${formatNombre(question.reponseAttendue)}${question.estFrequence ? " %" : " individus"}.`)] });
+    etapes.push({ label: "Piège", fragments: [texte("C'est l'effectif CUMULÉ qui compte les individus jusqu'à une valeur — pas l'effectif de la seule ligne de cette valeur.")] });
+  } else {
+    etapes.push({ label: "Méthode", fragments: [texte("On compare d'abord les médianes (niveau général), puis les dispersions (homogénéité) des deux séries. "), texte(sourceIndicateurs(instance))] });
+    etapes.push({ label: "Niveau", fragments: lignesMedianes(instance) });
+    etapes.push({ label: "Dispersion", fragments: lignesDispersion(instance) });
+    etapes.push({ label: "Profils", fragments: [texte(`Série A : ${texteProfilSerie(instance, "A")}. Série B : ${texteProfilSerie(instance, "B")}.`)] });
+    etapes.push({ label: "Conclusion", fragments: segmentsVersFragments(segmentsInterpretationAttendu(question)) });
+  }
+  return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
+}
+
+function baremeComparaisonSeries(instance: ExerciceComparaisonSeries): BaremeExercice {
+  const { question } = instance;
+  const c = (texteCritere: string, points: number): CritereBareme => ({ critere: [texte(texteCritere)], points });
+  let criteres: CritereBareme[];
+  const erreurs: ErreurFrequente[] = [];
+  const acceptees: FragmentConsigne[][] = [];
+  if (question.type === "centrage") {
+    criteres = [c("Médiane de la série A", 1), c("Médiane de la série B", 1), c("Comparaison des médianes et conclusion", 2)];
+    erreurs.push({ description: [texte("Comparer les moyennes, les étendues ou les maximums au lieu des médianes")], cout: "0 pt sur la conclusion" });
+  } else if (question.type === "dispersion") {
+    criteres =
+      question.nombreArguments === 2
+        ? [c("Écarts-types comparés", 1.5), c("Écarts interquartiles comparés", 1.5), c("Conclusion : série la plus homogène", 1)]
+        : [c("Une mesure de dispersion pertinente (écart-type ou écart interquartile) comparée", 2), c("Conclusion : série la plus homogène", 2)];
+    erreurs.push({ description: [texte("Étendue utilisée comme argument")], cout: "0 pt pour cet argument" });
+    erreurs.push({ description: [texte("Série la plus dispersée désignée comme la plus homogène")], cout: "0 pt sur la conclusion" });
+    acceptees.push([texte("Justification par l'écart-type ou par l'écart interquartile, au choix si un seul argument est demandé")]);
+  } else if (question.type === "seuil") {
+    criteres =
+      question.indexBas === null
+        ? [c("Lecture du cumul à la bonne valeur", 2), c("Réponse", 2)]
+        : [c("Cumul à la borne haute", 1), c("Cumul à la borne basse", 1), c("Différence des deux cumuls", 2)];
+    erreurs.push({ description: [texte("Effectif de la seule ligne lu au lieu de l'effectif cumulé")], cout: "0 pt sur la lecture" });
+    if (question.indexBas !== null) erreurs.push({ description: [texte("Cumul de la borne haute donné sans soustraire celui de la borne basse")], cout: "−2" });
+    if (question.estFrequence) acceptees.push([texte("Pourcentage écrit avec ou sans le symbole %")]);
+  } else {
+    criteres = [c("Comparaison des niveaux (médianes)", 1.5), c("Comparaison des dispersions", 1.5), c("Série correspondant au profil", 1)];
+    erreurs.push({ description: [texte("Niveau et dispersion confondus (série la plus homogène prise pour la plus élevée)")], cout: "0 pt sur la conclusion" });
+  }
+  return {
+    reponseFinale: reponseBreveComparaisonSeries(instance),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: acceptees.length > 0 ? acceptees : undefined,
+  };
+}
+
 const adaptateurEvaluationComparaisonSeriesBrut: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = {
   titreDocument: "Comparaison de deux séries statistiques — Évaluation",
   nomFichierBase: "comparaison-series-statistiques",
@@ -411,7 +551,24 @@ const adaptateurEvaluationComparaisonSeriesBrut: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceComparaisonSeries,
   construireCorrection: construireCorrectionComparaisonSeries,
+  difficulte: difficulteComparaisonSeries,
+  reponseBreve: (instance) => enVirgules(reponseBreveComparaisonSeries(instance)),
+  correctionDetaillee: correctionDetailleeComparaisonSeries,
+  bareme: (instance) => {
+    const b = baremeComparaisonSeries(instance);
+    return { ...b, reponseFinale: enVirgules(b.reponseFinale) };
+  },
+  dureeMinutes: 4,
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
-export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = avecVirgulesBelges(adaptateurEvaluationComparaisonSeriesBrut);
+const adaptateurVirgules = avecVirgulesBelges(adaptateurEvaluationComparaisonSeriesBrut);
+
+export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = {
+  ...adaptateurVirgules,
+  // Énoncé papier tiré de l'énoncé DÉJÀ en virgules (tableaux et graphique compris).
+  enoncePapier: (instance) => {
+    const section = adaptateurVirgules.construireEnonce(instance);
+    return { section: { ...section, questions: section.questions.map((q) => ({ consigne: q.consigne })) }, etapesParQuestion: [["a"]] };
+  },
+};

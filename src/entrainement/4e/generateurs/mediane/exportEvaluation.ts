@@ -1,5 +1,5 @@
 import type { ExerciceMediane, ExerciceMedianeClasses, ExerciceMedianeDiscrete } from "../../core/mediane.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, EtapeCorrection, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -21,7 +21,7 @@ import {
 } from "../../ui/formatMediane";
 import { precisionLecture, seuilLecture, valeurCibleLecture, type ParametreLecture } from "../../moteur/verificationMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFr, nombreFrLatex, segmentEnVirgules } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceMediane>` pour gen33 (« Médiane, quartiles et
@@ -304,6 +304,259 @@ function construireCorrectionMediane(instance: ExerciceMediane): BlocCorrection[
   return instance.variante === "discrete" ? construireCorrectionDiscrete(instance) : construireCorrectionClasses(instance);
 }
 
+// ============================================================================
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème) — voir
+// `.claude/rules/feuilles-evaluations.md`. Les étapes du corrigé sont les 3 questions de
+// `construireEnonce` (a : médiane ; b : Q1 et Q3 ; c : min/max/mode ou synthèse) ; toutes les
+// valeurs viennent de l'instance (déjà calculées par le générateur, règle « dépasse STRICTEMENT le
+// seuil » du cours, interpolation pour les classes) — jamais un second calcul.
+// ============================================================================
+
+/** Notation décimale belge sur les fragments des champs enrichis (`avecVirgulesBelges` ne couvre
+ * que `construireEnonce`/`construireCorrection`). */
+function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
+  return fragments.map(segmentEnVirgules);
+}
+
+function enoncePapierMediane(instance: ExerciceMediane): EnoncePapier {
+  const unite = instance.contexte.unite;
+  if (instance.variante === "discrete") {
+    return {
+      section: {
+        enteteFragments: enVirgules([texte(formatEnonceTexte(instance)), latex(tableauDonneesLatexDiscrete(instance))]),
+        questions: [
+          {
+            consigne: [
+              texte("Détermine la médiane "),
+              latex("Q_2"),
+              texte(", le premier quartile "),
+              latex("Q_1"),
+              texte(", le troisième quartile "),
+              latex("Q_3"),
+              texte(`, le minimum, le maximum et le(s) mode(s) de cette série (en ${unite}).`),
+            ],
+          },
+        ],
+      },
+      etapesParQuestion: [["a", "b", "c"]],
+    };
+  }
+  const precision = libellePrecisionLecture(precisionLecture(instance.etendue));
+  return {
+    section: {
+      enteteFragments: enVirgules([texte(formatEnonceTexte(instance)), latex(tableauDonneesLatexClasses(instance))]),
+      questions: [
+        {
+          consigne: [
+            texte("Détermine par interpolation linéaire la médiane "),
+            latex("Q_2"),
+            texte(" et les quartiles "),
+            latex("Q_1"),
+            texte(" et "),
+            latex("Q_3"),
+            texte(` (en ${unite}, ${precision}). Donne ensuite `),
+            latex("x_{min}"),
+            texte(", "),
+            latex("x_{max}"),
+            texte(", l'étendue, la classe modale et le mode de cette série."),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [["a", "b", "c"]],
+  };
+}
+
+function reponseBreveMediane(instance: ExerciceMediane): FragmentConsigne[] {
+  const u = instance.contexte.unite;
+  if (instance.variante === "discrete") {
+    const modes = instance.modes.map(nombreFr).join(" ; ");
+    return [
+      latex(`Q_2 = ${nombreFrLatex(instance.mediane)}`),
+      texte(" ; "),
+      latex(`Q_1 = ${nombreFrLatex(instance.q1)}`),
+      texte(" ; "),
+      latex(`Q_3 = ${nombreFrLatex(instance.q3)}`),
+      texte(` (en ${u}) ; min = ${nombreFr(instance.min)} ; max = ${nombreFr(instance.max)} ; mode${instance.modes.length > 1 ? "s" : ""} = ${modes}`),
+    ];
+  }
+  return [
+    latex(`Q_2 \\approx ${nombreFrLatex(instance.mediane)}`),
+    texte(" ; "),
+    latex(`Q_1 \\approx ${nombreFrLatex(instance.q1)}`),
+    texte(" ; "),
+    latex(`Q_3 \\approx ${nombreFrLatex(instance.q3)}`),
+    texte(` (en ${u}) ; `),
+    latex(`x_{min} = ${nombreFrLatex(instance.xMin)}`),
+    texte(" ; "),
+    latex(`x_{max} = ${nombreFrLatex(instance.xMax)}`),
+    texte(` ; étendue = ${nombreFr(instance.etendue)} ; classe modale ${formatClasseTexte(instance, instance.indexClasseModale)} ; mode = ${nombreFr(instance.modeCentreClasseModale)}`),
+  ];
+}
+
+/** Lignes « seuil puis première valeur dont le cumulé dépasse strictement le seuil » (discrète). */
+function etapesSeuilDiscrete(
+  instance: ExerciceMedianeDiscrete,
+  lettre: string,
+  formule: string,
+  seuil: number,
+  index: number,
+  symbole: string,
+): EtapeCorrection[] {
+  const ligne = instance.lignes[index];
+  const calcul: EtapeCorrection = {
+    label: "Calcul",
+    sousQuestion: lettre,
+    fragments: [latex(`${formule} = ${nombreFrLatex(seuil)}`), texte(` ; premier effectif cumulé strictement supérieur : ${nombreFr(ligne.effectifCumule)}, atteint en `), latex(`x = ${nombreFrLatex(ligne.valeur)}`), texte(".")],
+  };
+  const conclusion: EtapeCorrection = { label: "Conclusion", sousQuestion: lettre, fragments: [latex(`${symbole} = ${nombreFrLatex(ligne.valeur)}`), texte(` ${instance.contexte.unite}.`)] };
+  return [calcul, conclusion];
+}
+
+/** Ligne dont l'effectif cumulé vaut EXACTEMENT un seuil — le piège du cours (« dépasse
+ * strictement » : on passe à la ligne suivante). */
+function cumuleEgalSeuil(instance: ExerciceMedianeDiscrete): { formule: string; seuil: number } | null {
+  const seuils: [string, number][] = [["n/2", instance.seuil], ["n/4", instance.seuilQ1], ["3n/4", instance.seuilQ3]];
+  for (const [formule, seuil] of seuils) if (instance.lignes.some((l) => l.effectifCumule === seuil)) return { formule, seuil };
+  return null;
+}
+
+function correctionDetailleeDiscrete(instance: ExerciceMedianeDiscrete): EtapeCorrection[] {
+  const u = instance.contexte.unite;
+  const etapes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [texte("La médiane est la première valeur dont l'effectif cumulé dépasse strictement le seuil "), latex("n/2"), texte(` (ici n = ${instance.n}).`)],
+    },
+    ...etapesSeuilDiscrete(instance, "a", "\\dfrac{n}{2}", instance.seuil, instance.indexMediane, "Q_2"),
+    {
+      label: "Méthode",
+      sousQuestion: "b",
+      fragments: [texte("Même règle avec les seuils "), latex("n/4"), texte(" pour "), latex("Q_1"), texte(" et "), latex("3n/4"), texte(" pour "), latex("Q_3"), texte(".")],
+    },
+    ...etapesSeuilDiscrete(instance, "b", "\\dfrac{n}{4}", instance.seuilQ1, instance.indexQ1, "Q_1"),
+    ...etapesSeuilDiscrete(instance, "b", "\\dfrac{3n}{4}", instance.seuilQ3, instance.indexQ3, "Q_3"),
+    {
+      label: "Méthode",
+      sousQuestion: "c",
+      fragments: [texte(`Minimum et maximum : plus petite et plus grande valeur observée. Mode : valeur(s) d'effectif maximal (ici ${effectifMaximalMinMaxMode(instance)}).`)],
+    },
+    {
+      label: "Conclusion",
+      sousQuestion: "c",
+      fragments: [texte(`Minimum = ${nombreFr(instance.min)} ${u} ; maximum = ${nombreFr(instance.max)} ${u} ; mode${instance.modes.length > 1 ? "s" : ""} = ${instance.modes.map(nombreFr).join(" et ")} ${u}.`)],
+    },
+  ];
+  const piege = cumuleEgalSeuil(instance);
+  etapes.push({
+    label: "Piège",
+    fragments: piege
+      ? [texte(`Un effectif cumulé vaut exactement le seuil ${piege.formule} = ${nombreFr(piege.seuil)} : il ne le dépasse pas strictement, on passe donc à la valeur suivante.`)]
+      : [texte("Le mode est la VALEUR la plus fréquente, pas son effectif.")],
+  });
+  return etapes;
+}
+
+function etapesInterpolation(instance: ExerciceMedianeClasses, lettre: string, parametre: ParametreLecture, symbole: string): EtapeCorrection[] {
+  const { inf, sup } = pointsEncadresLecture(instance, parametre);
+  const precision = libellePrecisionLecture(precisionLecture(instance.etendue));
+  return [
+    {
+      label: "Calcul",
+      sousQuestion: lettre,
+      fragments: [
+        texte(`Seuil ${nombreFr(seuilLecture(instance, parametre))}, entre `),
+        latex(`(x_{inf} ; v_{inf}) = (${nombreFrLatex(inf.x)} ; ${nombreFrLatex(inf.y)})`),
+        texte(" et "),
+        latex(`(x_{sup} ; v_{sup}) = (${nombreFrLatex(sup.x)} ; ${nombreFrLatex(sup.y)})`),
+        texte(" : "),
+        latex(formatFormuleInterpolationLatex(parametre)),
+      ],
+    },
+    { label: "Conclusion", sousQuestion: lettre, fragments: [latex(`${symbole} \\approx ${nombreFrLatex(valeurCibleLecture(instance, parametre))}`), texte(` ${instance.contexte.unite} (${precision}).`)] },
+  ];
+}
+
+function correctionDetailleeClasses(instance: ExerciceMedianeClasses): EtapeCorrection[] {
+  const u = instance.contexte.unite;
+  return [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [
+        texte("Sur le polygone des effectifs cumulés, on repère la classe où le cumulé franchit le seuil "),
+        latex("n/2"),
+        texte(`, puis on interpole linéairement dans cette classe (n = ${instance.n}).`),
+      ],
+    },
+    ...etapesInterpolation(instance, "a", "mediane", "Q_2"),
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("Même méthode avec les seuils "), latex("n/4"), texte(" et "), latex("3n/4"), texte(".")] },
+    ...etapesInterpolation(instance, "b", "q1", "Q_1"),
+    ...etapesInterpolation(instance, "b", "q3", "Q_3"),
+    {
+      label: "Méthode",
+      sousQuestion: "c",
+      fragments: [
+        latex("x_{min}"),
+        texte(" et "),
+        latex("x_{max}"),
+        texte(` : bornes extrêmes des classes ; classe modale : classe d'effectif maximal (${effectifMaximalSynthese(instance)}) ; mode : centre de la classe modale.`),
+      ],
+    },
+    {
+      label: "Conclusion",
+      sousQuestion: "c",
+      fragments: [
+        latex(`x_{min} = ${nombreFrLatex(instance.xMin)}`),
+        texte(" ; "),
+        latex(`x_{max} = ${nombreFrLatex(instance.xMax)}`),
+        texte(` ; étendue = ${nombreFr(instance.etendue)} ${u} ; classe modale ${formatClasseTexte(instance, instance.indexClasseModale)} ; mode = ${nombreFr(instance.modeCentreClasseModale)} ${u}.`),
+      ],
+    },
+    { label: "Piège", fragments: [texte("Pour des données en classes, le mode est le CENTRE de la classe modale, pas la classe elle-même ni son effectif.")] },
+  ];
+}
+
+function correctionDetailleeMediane(instance: ExerciceMediane): EtapeCorrection[] {
+  const etapes = instance.variante === "discrete" ? correctionDetailleeDiscrete(instance) : correctionDetailleeClasses(instance);
+  return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
+}
+
+function baremeMediane(instance: ExerciceMediane): BaremeExercice {
+  const discrete = instance.variante === "discrete";
+  const criteres: CritereBareme[] = [
+    { sousQuestion: "a", critere: discrete ? [texte("Seuil n/2 et médiane (règle « dépasse strictement »)")] : [texte("Médiane par interpolation dans la bonne classe")], points: 1 },
+    { sousQuestion: "b", critere: [latex("Q_1"), texte(discrete ? " (seuil n/4)" : " par interpolation")], points: 1 },
+    { sousQuestion: "b", critere: [latex("Q_3"), texte(discrete ? " (seuil 3n/4)" : " par interpolation")], points: 1 },
+    { sousQuestion: "c", critere: [texte(discrete ? "Minimum et maximum" : "xmin, xmax et étendue")], points: 0.5 },
+    { sousQuestion: "c", critere: [texte(discrete ? "Mode(s)" : "Classe modale et mode (centre de la classe)")], points: 0.5 },
+  ];
+  const erreurs: ErreurFrequente[] = discrete
+    ? [
+        { description: [texte("Valeur retenue dont l'effectif cumulé est ÉGAL au seuil (au lieu de le dépasser strictement)")], cout: "0 pt sur le paramètre concerné" },
+        { description: [texte("Médiane prise au milieu de la liste des valeurs distinctes, sans tenir compte des effectifs")], cout: "0 pt sur a)" },
+        { description: [texte("Mode donné comme l'effectif maximal au lieu de la valeur")], cout: "0 pt sur le mode" },
+      ]
+    : [
+        { description: [texte("Interpolation dans la mauvaise classe (classe où le cumulé n'a pas encore franchi le seuil)")], cout: "0 pt sur le paramètre concerné" },
+        { description: [texte("Mode donné comme la classe modale (ou son effectif) au lieu de son centre")], cout: "0 pt sur le mode" },
+      ];
+  const acceptees: FragmentConsigne[][] = discrete
+    ? [[texte("Modes listés dans n'importe quel ordre")]]
+    : [[texte("Valeur lue graphiquement sur le polygone des effectifs cumulés, à la précision demandée près")]];
+  return {
+    reponseFinale: reponseBreveMediane(instance).map(segmentEnVirgules),
+    criteres: criteres.map((c) => ({ ...c, critere: enVirgules(c.critere) })),
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: acceptees,
+  };
+}
+
+function difficulteMediane(instance: ExerciceMediane): 1 | 2 | 3 {
+  return instance.variante === "classes" ? 3 : 2;
+}
+
 const adaptateurEvaluationMedianeBrut: AdaptateurFeuilleExercices<ExerciceMediane> = {
   titreDocument: "Médiane, quartiles et mode — Évaluation",
   nomFichierBase: "mediane-quartiles-mode",
@@ -315,4 +568,12 @@ const adaptateurEvaluationMedianeBrut: AdaptateurFeuilleExercices<ExerciceMedian
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
-export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMediane> = avecVirgulesBelges(adaptateurEvaluationMedianeBrut);
+export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMediane> = {
+  ...avecVirgulesBelges(adaptateurEvaluationMedianeBrut),
+  difficulte: difficulteMediane,
+  reponseBreve: (instance) => reponseBreveMediane(instance).map(segmentEnVirgules),
+  correctionDetaillee: correctionDetailleeMediane,
+  bareme: baremeMediane,
+  enoncePapier: enoncePapierMediane,
+  dureeMinutes: 8,
+};

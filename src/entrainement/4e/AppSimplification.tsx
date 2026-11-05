@@ -37,6 +37,7 @@ import { diagnostiquerMiseEnEvidenceFraction, diagnostiquerMiseEnEvidenceP1, dia
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSimplification } from "./generateurs/simplification";
 import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeRacinesFlexibles } from "./components/EtapeRacinesFlexibles";
 import { EtapeCEDirecte } from "./components/EtapeCEDirecte";
@@ -89,6 +90,17 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionSimplification {
   return demarrerSessionSimplification(REGLAGES_DEMO, genererExerciceSimplification);
+}
+
+/** Premier exercice : celui d'une feuille imprimée si l'URL porte un code (`?code=`, QR code de la
+ * feuille d'exercices) — tiré avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export ; sinon un tirage libre. Les exercices suivants sont toujours libres. */
+function sessionInitiale(): EtatSessionSimplification {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSimplification(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSimplification, (id) => construireAvecVarianteId(id as TypeFraction)),
+  );
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -215,7 +227,7 @@ interface TransitionEnAttente {
 }
 
 export function AppSimplification() {
-  const [etat, setEtat] = useState<EtatSessionSimplification>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSimplification>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSimplification`, jamais dans le moteur (voir

@@ -1,5 +1,14 @@
 import type { ExerciceSignesProduit, FacteurLineaire, FacteurSignesProduit, ValeurCellule } from "../../core/signesProduit.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceSignesProduitLatex, formatFacteurLatex, formatFormeFactoriseeSignesProduit, formatLineaireDeveloppe } from "../../ui/formatSignesProduit";
@@ -7,189 +16,212 @@ import { formatSolutionEnsembleProduitLatex } from "../../ui/formatSolutionEnsem
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { ordreLignesGrille } from "./grille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSignesProduit, type VarianteSignesProduitId } from "./index";
+import { tableauSignesLatex } from "./tableauSignesLatex";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceSignesProduit>` pour gen5 (Signe d'un produit de
- * plusieurs facteurs) — voir `generateurs/analyseFonction/exportWord.ts` pour le mécanisme
- * générique de référence.
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceSignesProduit>` pour gen5 (signe d'un produit de
+ * plusieurs facteurs) — méthode des feuilles : `.claude/rules/feuilles-evaluations.md`.
  *
- * Écran interactif (`AppSignesProduit.tsx`) : une longue séquence d'étapes guidées — une par
- * facteur (racine d'un facteur linéaire ; méthode + factorisation + racines d'un facteur
- * factorisable ; méthode + signe d'un facteur irréductible), puis le tableau de signes complet,
- * puis l'ensemble-solution. Sur papier, cette séquence est condensée en AU PLUS 4 questions
- * lettrées, dans le même ordre logique (jamais réinventé) : (a) racines des facteurs du 1er degré
- * [omise si aucun], (b) factorisation/signe des facteurs du 2nd degré [omise si aucun], (c) tableau
- * de signes complet, (d) ensemble-solution — jamais un nombre FIXE de questions (2 à 4 selon la
- * composition de l'instance, voir CATALOGUE_VARIANTES), donc jamais `regroupable` (qui exige
- * exactement 1 question par instance, voir `genererFeuilleExercices.ts`).
+ * Énoncé papier (`enoncePapier`) : l'inéquation et la consigne globale de l'appli (« Résous cette
+ * inéquation en étudiant le signe de chacun de ses facteurs »), sans sous-question. Les étapes de
+ * l'écran — une par facteur, dans l'ordre de `exercice.facteurs` (racine d'un facteur du 1er degré,
+ * factorisation d'un facteur du 2nd degré, signe d'un facteur irréductible), puis le tableau de
+ * signes et l'ensemble-solution — sont les étapes du corrigé (`construireEnonce`, lettres a, b, …).
  *
- * Piège évité — étiquettes de lignes du tableau : `ui/formatSignesProduit.ts::formatLigneLabel`
- * (utilisé à l'écran) affiche la forme MONIQUE "x - r" de chaque racine, ce qui RÉVÈLE la racine
- * directement dans le tableau vierge de la question (c) — une fuite de la réponse à la question
- * (a)/(b), impossible à l'écran (étapes séquentielles verrouillées) mais réelle sur une feuille où
- * toutes les questions sont visibles simultanément. Chaque ligne du tableau ci-dessous correspond
- * donc à un facteur BRUT tel qu'il apparaît dans l'énoncé (`formatFacteurLatex`, jamais sa forme
- * monique factorisée), et sa correction est REconstituée en multipliant les lignes déjà correctes
- * de `exercice.grille.lignes` (jamais un nouveau calcul de signe indépendant) — voir
- * `combinerLignesFacteur` ci-dessous.
+ * Le tableau de signes du corrigé a une ligne par facteur BRUT de l'énoncé (jamais sa forme
+ * monique), reconstituée en multipliant les lignes de `exercice.grille.lignes` qui lui appartiennent
+ * (`ordreLignesGrille`) — jamais un calcul de signe indépendant.
  */
 
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-}
+const LETTRES = "abcdefghijklmnopqrstuvwxyz";
 
-/** Version texte pur (jamais rendue par KaTeX — voir `ZoneReponse`/`BlocCorrection` "tableau",
- * qui n'affichent jamais leurs libellés/valeurs autrement qu'en texte échappé) de la forme donnée
- * d'un facteur, telle qu'affichée dans l'énoncé — seul "x^2" (LaTeX) doit être converti en "x²". */
-function texteFacteur(facteur: FacteurSignesProduit): string {
-  return formatFacteurLatex(facteur).replace(/\^2/g, "²");
-}
-
-function estQuadratique(facteur: FacteurSignesProduit): facteur is Exclude<FacteurSignesProduit, FacteurLineaire> {
-  return facteur.type !== "lineaire";
+function nombre(valeur: number): string {
+  return Number.isInteger(valeur) ? String(valeur) : String(Math.round(valeur * 100) / 100).replace(".", "{,}");
 }
 
 /** "+"×"+"="+" et "-"×"-"="+", "+"×"-"="-", tout "0" absorbe — même règle que la ligne produit de
- * `construireGrille` (grille.ts), appliquée ici à un sous-ensemble de lignes (celles d'UN SEUL
- * facteur brut) plutôt qu'à toutes les lignes de la grille. */
+ * `construireGrille` (grille.ts), appliquée aux seules lignes d'UN facteur brut. */
 function combinerSignes(a: ValeurCellule, b: ValeurCellule): ValeurCellule {
   if (a === "0" || b === "0") return "0";
   return a === b ? "+" : "-";
 }
 
-/**
- * Une ligne de signe par facteur BRUT de `exercice.facteurs` (jamais par sous-ligne p0/p1/p2 —
- * voir commentaire de tête) : reconstituée en multipliant, colonne par colonne, les lignes
- * `exercice.grille.lignes` qui appartiennent à ce facteur (`ordreLignesGrille` donne leur
- * correspondance `facteurIndex`, jamais recalculée indépendamment).
- */
 function lignesParFacteurBrut(exercice: ExerciceSignesProduit): ValeurCellule[][] {
   const refs = ordreLignesGrille(exercice.facteurs);
   const groupes: ValeurCellule[][][] = exercice.facteurs.map(() => []);
   refs.forEach((ref, i) => groupes[ref.facteurIndex].push(exercice.grille.lignes[i]));
   const nbColonnes = exercice.grille.produit.length;
   return groupes.map((lignesDuFacteur) =>
-    Array.from({ length: nbColonnes }, (_, colonne) =>
-      lignesDuFacteur.reduce<ValeurCellule>((acc, ligne) => combinerSignes(acc, ligne[colonne]), "+"),
-    ),
+    Array.from({ length: nbColonnes }, (_, colonne) => lignesDuFacteur.reduce<ValeurCellule>((acc, ligne) => combinerSignes(acc, ligne[colonne]), "+")),
   );
 }
 
-function libellesLignesTableau(instance: ExerciceSignesProduit): string[] {
-  return ["x", ...instance.facteurs.map(texteFacteur), "Signe du produit"];
+function tableauLatex(exercice: ExerciceSignesProduit): string {
+  const lignes = lignesParFacteurBrut(exercice).map((valeurs, i) => ({ libelle: formatFacteurLatex(exercice.facteurs[i]), valeurs }));
+  return tableauSignesLatex(exercice.racines, lignes, { libelle: "\\text{produit}", valeurs: exercice.grille.produit });
 }
 
-/** Nombre de lignes laissées à l'élève — assez généreux pour une résolution rédigée complète. */
-function nombreLignesReponse(instance: ExerciceSignesProduit): number {
-  return Math.max(10, instance.facteurs.length * 3 + 4);
+const CONSIGNE_GLOBALE = "Résous l'inéquation suivante en étudiant le signe de chacun de ses facteurs : ";
+
+const RETENIR: Record<ExerciceSignesProduit["symbole"], string> = {
+  "<": "On garde les zones où le produit est strictement négatif (racines exclues).",
+  ">": "On garde les zones où le produit est strictement positif (racines exclues).",
+  "≤": "On garde les zones où le produit est négatif, et les racines où il s'annule.",
+  "≥": "On garde les zones où le produit est positif, et les racines où il s'annule.",
+};
+
+/** Une étape du corrigé : sa consigne (titre « Étape n — … »), ses lignes, son critère et son poids. */
+interface Etape {
+  consigne: FragmentConsigne[];
+  lignes: { label: string; fragments: FragmentConsigne[] }[];
+  critere: FragmentConsigne[];
+  poids: number;
 }
 
-function construireEnonceSignesProduit(instance: ExerciceSignesProduit): SectionExercice {
+function etapeFacteur(facteur: FacteurSignesProduit, poids: number): Etape {
+  const f = formatFacteurLatex(facteur);
+  if (facteur.type === "lineaire") {
+    const { k, p } = facteur.polynome;
+    return {
+      consigne: [texte("Détermine la racine du facteur "), latex(f), texte(".")],
+      lignes: [
+        { label: "Calcul", fragments: [latex(`${formatLineaireDeveloppe(k, p)} = 0 \\iff x = ${nombre(p)}`)] },
+        {
+          label: "Signe",
+          fragments: [texte(`Coefficient de x ${k > 0 ? "positif" : "négatif"} : le facteur est ${k > 0 ? "négatif" : "positif"} avant `), latex(`x = ${nombre(p)}`), texte(` et ${k > 0 ? "positif" : "négatif"} après.`)],
+        },
+      ],
+      critere: [texte("Racine de "), latex(f), texte(" : "), latex(`x = ${nombre(p)}`)],
+      poids,
+    };
+  }
+  if (facteur.type === "quadratique_irreductible") {
+    const { a, b, c } = facteur.enonce;
+    const delta = b * b - 4 * a * c;
+    const signe = facteur.signe === "+" ? "positif" : "négatif";
+    return {
+      consigne: [texte("Détermine le signe du facteur "), latex(f), texte(".")],
+      lignes: [
+        { label: "Calcul", fragments: [latex(`\\Delta = ${nombre(b)}^2 - 4 \\cdot ${a < 0 ? `(${nombre(a)})` : nombre(a)} \\cdot ${c < 0 ? `(${nombre(c)})` : nombre(c)} = ${nombre(delta)} < 0`)] },
+        { label: "Conclusion", fragments: [texte(`Aucune racine : le facteur garde le signe de son coefficient dominant, il est toujours ${signe}.`)] },
+      ],
+      critere: [latex(f), texte(` toujours ${signe} (`), latex("\\Delta < 0"), texte(")")],
+      poids,
+    };
+  }
+  const { categorie, enonce, solution } = facteur.exercice;
+  const [r1, r2] = [...solution.racines].sort((x, y) => x - y);
+  const forme = formatFormeFactoriseeSignesProduit(enonce, solution.racines);
+  const racines = r1 === r2 ? `x = ${nombre(r1)} \\text{ (racine double)}` : `x = ${nombre(r1)} \\text{ et } x = ${nombre(r2)}`;
   return {
-    enteteFragments: [
-      texte("Résous l'inéquation suivante à l'aide d'un tableau de signes. Indique et justifie toutes les étapes de ta démarche : "),
-      latex(formatEnonceSignesProduitLatex(instance)),
-    ],
-    questions: [
+    consigne: [texte("Factorise le facteur "), latex(f), texte(" et donne ses racines.")],
+    lignes: [
+      { label: "Méthode", fragments: [texte(`${libelleCategorie(categorie)} : `), latex(`${f} = ${forme}`)] },
       {
-        consigne: [texte("Développe ici ta résolution complète, étape par étape.")],
-        reponse: { type: "lignes", nombre: nombreLignesReponse(instance) },
+        label: "Conclusion",
+        fragments:
+          r1 === r2
+            ? [latex(racines), texte(" : un carré est positif ou nul, ce facteur s'annule en "), latex(`x = ${nombre(r1)}`), texte(" sans changer de signe.")]
+            : [latex(racines), texte(".")],
       },
     ],
+    critere: [texte("Factorisation de "), latex(f), texte(" et racines : "), latex(racines)],
+    poids,
   };
 }
 
-/**
- * Résolution rédigée et justifiée, un seul exercice ouvert sur la copie — jamais de sous-questions
- * a)/b)/c)/d) comme avant : étude de chaque facteur (racines des facteurs du premier degré,
- * factorisation/signe des facteurs du second degré), tableau de signes, puis ensemble-solution,
- * dans le même ordre logique que l'écran interactif (voir commentaire de tête), mais enchaînés
- * comme un manuel scolaire le ferait plutôt qu'une suite de réponses brèves à des questions
- * fermées séparées.
- */
-function construireCorrectionSignesProduit(instance: ExerciceSignesProduit): BlocCorrection[] {
-  const blocs: BlocCorrection[] = [];
-
-  const lineaires = instance.facteurs.filter((f): f is FacteurLineaire => f.type === "lineaire");
-  const quadratiques = instance.facteurs.filter(estQuadratique);
-
-  if (lineaires.length > 0) {
-    blocs.push({
-      type: "paragraphe",
-      fragments: [
-        texte(
-          lineaires.length > 1
-            ? "On commence par annuler chaque facteur du premier degré : "
-            : "On commence par annuler le facteur du premier degré : ",
-        ),
-        ...lineaires.flatMap((facteur, i): FragmentConsigne[] => {
-          const texteBrut = formatLineaireDeveloppe(facteur.polynome.k, facteur.polynome.p);
-          const suffixe = i < lineaires.length - 1 ? " ; " : ".";
-          return [latex(`${texteBrut} = 0 \\Longrightarrow x = ${formatNombre(facteur.polynome.p)}`), texte(suffixe)];
-        }),
+function etapes(exercice: ExerciceSignesProduit): Etape[] {
+  const poidsFacteur = 1.5 / exercice.facteurs.length;
+  return [
+    ...exercice.facteurs.map((f) => etapeFacteur(f, poidsFacteur)),
+    {
+      consigne: [texte("Dresse le tableau de signes du produit.")],
+      lignes: [
+        { label: "Méthode", fragments: [texte("Une ligne par facteur ; dans chaque colonne, le signe du produit est le produit des signes (règle des signes).")] },
+        { label: "Tableau", fragments: [latex(tableauLatex(exercice))] },
       ],
-    });
+      critere: [texte("Tableau de signes complet : une ligne par facteur, ligne du produit juste")],
+      poids: 1.5,
+    },
+    {
+      consigne: [texte("Donne l'ensemble des solutions de l'inéquation.")],
+      lignes: [
+        { label: "Méthode", fragments: [texte(RETENIR[exercice.symbole])] },
+        { label: "Conclusion", fragments: [latex(`S = ${formatSolutionEnsembleProduitLatex(exercice.solution)}`)] },
+      ],
+      critere: [latex(`S = ${formatSolutionEnsembleProduitLatex(exercice.solution)}`), texte(" (crochets justes)")],
+      poids: 1,
+    },
+  ];
+}
+
+/** Piège unique, le plus pertinent pour l'instance. */
+function piege(exercice: ExerciceSignesProduit): FragmentConsigne[] {
+  const carre = exercice.facteurs.find((f) => f.type === "quadratique_factorisable" && f.exercice.solution.racines[0] === f.exercice.solution.racines[1]);
+  if (carre) return [texte("En une racine double, le produit s'annule mais ne change PAS de signe : ne pas alterner les signes de part et d'autre.")];
+  const lineaireNegatif = exercice.facteurs.find((f): f is FacteurLineaire => f.type === "lineaire" && f.polynome.k < 0);
+  if (lineaireNegatif) return [texte("Un facteur du premier degré à coefficient de x négatif est positif AVANT sa racine : ne pas recopier « − puis + » par réflexe.")];
+  if (exercice.facteurs.some((f) => f.type === "quadratique_irreductible")) return [texte("Un facteur sans racine (Δ < 0) a une ligne entière du même signe, sans 0 : il ne crée aucune colonne.")];
+  return [texte(exercice.symbole === "<" || exercice.symbole === ">" ? "Inégalité stricte : les racines (produit nul) sont exclues, crochets ouverts." : "Inégalité large : les racines (produit nul) font partie des solutions, crochets fermés.")];
+}
+
+function construireEnonceSignesProduit(exercice: ExerciceSignesProduit): SectionExercice {
+  return {
+    enteteFragments: [texte(CONSIGNE_GLOBALE), latex(formatEnonceSignesProduitLatex(exercice))],
+    questions: etapes(exercice).map((e) => ({ consigne: e.consigne })),
+  };
+}
+
+function enoncePapierSignesProduit(exercice: ExerciceSignesProduit): EnoncePapier {
+  return { section: { enteteFragments: [texte(CONSIGNE_GLOBALE), latex(formatEnonceSignesProduitLatex(exercice)), texte(".")], questions: [] } };
+}
+
+function correctionDetailleeSignesProduit(exercice: ExerciceSignesProduit): EtapeCorrection[] {
+  const liste = etapes(exercice);
+  const lignes: EtapeCorrection[] = liste.flatMap((e, i) => e.lignes.map((l) => ({ ...l, sousQuestion: LETTRES[i] })));
+  const iTableau = liste.length - 2;
+  lignes.push({ label: "Piège", sousQuestion: LETTRES[iTableau], fragments: piege(exercice) });
+  return lignes;
+}
+
+/** Ancien corrigé (paragraphes) — dérivé du corrigé détaillé, une seule source. */
+function construireCorrectionSignesProduit(exercice: ExerciceSignesProduit): BlocCorrection[] {
+  return etapes(exercice).flatMap((e): BlocCorrection[] => e.lignes.map((l) => ({ type: "paragraphe", fragments: [texte(`${l.label} : `), ...l.fragments] })));
+}
+
+function reponseBreveSignesProduit(exercice: ExerciceSignesProduit): FragmentConsigne[] {
+  return [latex(`S = ${formatSolutionEnsembleProduitLatex(exercice.solution)}`)];
+}
+
+function difficulteSignesProduit(exercice: ExerciceSignesProduit): 1 | 2 | 3 {
+  const factorisable = exercice.facteurs.some((f) => f.type === "quadratique_factorisable");
+  const carre = exercice.facteurs.some((f) => f.type === "quadratique_factorisable" && f.exercice.solution.racines[0] === f.exercice.solution.racines[1]);
+  const score = exercice.facteurs.length + (factorisable ? 1 : 0) + (carre ? 1 : 0);
+  return score <= 2 ? 1 : score === 3 ? 2 : 3;
+}
+
+function baremeSignesProduit(exercice: ExerciceSignesProduit): BaremeExercice {
+  const liste = etapes(exercice);
+  const lTableau = LETTRES[liste.length - 2];
+  const lSolution = LETTRES[liste.length - 1];
+  const criteres: CritereBareme[] = liste.map((e, i) => ({ sousQuestion: LETTRES[i], critere: e.critere, points: e.poids }));
+  const erreurs: ErreurFrequente[] = [];
+  if (exercice.facteurs.some((f) => f.type === "lineaire" && f.polynome.k < 0)) {
+    erreurs.push({ description: [texte("Signe d'un facteur du premier degré inversé (coefficient de x négatif)")], cout: `−1 sur ${lTableau})` });
   }
-
-  quadratiques.forEach((facteur) => {
-    if (facteur.type === "quadratique_irreductible") {
-      blocs.push({
-        type: "paragraphe",
-        fragments: [
-          texte("Pour le facteur du second degré "),
-          latex(formatFacteurLatex(facteur)),
-          texte(`, le discriminant est négatif : ce facteur est irréductible dans ℝ, et toujours ${facteur.signe === "+" ? "positif" : "négatif"}.`),
-        ],
-      });
-    } else {
-      const { categorie, enonce, solution } = facteur.exercice;
-      const [r1, r2] = [...solution.racines].sort((a, b) => a - b);
-      // Même forme que l'application (-x(x + 5) plutôt que x(-x - 5), audit gen5).
-      const formeFactorisee = formatFormeFactoriseeSignesProduit(enonce, solution.racines);
-      blocs.push({
-        type: "paragraphe",
-        fragments: [
-          texte("Pour le facteur du second degré "),
-          latex(formatFacteurLatex(facteur)),
-          texte(`, on utilise la méthode « ${libelleCategorie(categorie)} » : `),
-          latex(`= ${formeFactorisee}`),
-          texte(
-            r1 === r2
-              ? `, ce qui donne la racine double x = ${formatNombre(r1)} : un carré n'est jamais négatif, ce facteur est nul en x = ${formatNombre(r1)} et du signe de son coefficient dominant ailleurs.`
-              : `, ce qui donne les racines x = ${formatNombre(r1)} et x = ${formatNombre(r2)}.`,
-          ),
-        ],
-      });
-    }
-  });
-
-  blocs.push({
-    type: "paragraphe",
-    fragments: [texte("On reporte tous ces résultats dans un tableau de signes, en multipliant le signe de chaque facteur à chaque colonne :")],
-  });
-
-  const nbColonnesInterieur = instance.grille.produit.length;
-  const ligneXMilieu = Array.from({ length: nbColonnesInterieur }, (_, i) => (i % 2 === 1 ? formatNombre(instance.racines[(i - 1) / 2]) : ""));
-  const ligneX = ["−∞", ...ligneXMilieu, "+∞"];
-  const lignesFacteurs = lignesParFacteurBrut(instance).map((ligne) => ["", ...ligne, ""]);
-  const ligneProduit = ["", ...instance.grille.produit, ""];
-
-  blocs.push({
-    type: "tableau",
-    libellesLignes: libellesLignesTableau(instance),
-    valeursParLigne: [ligneX, ...lignesFacteurs, ligneProduit],
-  });
-
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte("Le tableau donne directement l'ensemble des solutions de l'inéquation : "),
-      latex(`S = ${formatSolutionEnsembleProduitLatex(instance.solution)}`),
-      texte("."),
-    ],
-  });
-
-  return blocs;
+  if (exercice.facteurs.some((f) => f.type === "quadratique_irreductible")) {
+    erreurs.push({ description: [texte("Facteur sans racine oublié dans le tableau, ou supposé changer de signe")], cout: `0 pt sur ${lTableau})` });
+  }
+  if (exercice.facteurs.some((f) => f.type === "quadratique_factorisable" && f.exercice.solution.racines[0] === f.exercice.solution.racines[1])) {
+    erreurs.push({ description: [texte("Racine double traitée comme une racine simple (changement de signe)")], cout: `−1 sur ${lTableau})` });
+  }
+  erreurs.push({ description: [texte("Crochets mal choisis : racines incluses avec une inégalité stricte, ou exclues avec une inégalité large")], cout: `−0,5 sur ${lSolution})` });
+  return {
+    reponseFinale: reponseBreveSignesProduit(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Ensemble décrit par des inégalités (ex. « x ≤ … ou x ≥ … »)")], [texte("Facteurs rangés dans un autre ordre dans le tableau")]],
+  };
 }
 
 export const adaptateurEvaluationSignesProduit: AdaptateurFeuilleExercices<ExerciceSignesProduit> = {
@@ -200,7 +232,11 @@ export const adaptateurEvaluationSignesProduit: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteSignesProduitId),
   construireEnonce: construireEnonceSignesProduit,
   construireCorrection: construireCorrectionSignesProduit,
-  // Une seule question ouverte par instance (voir commentaire de tête) : pas de sous-questions
-  // lettrées, mais `regroupable` reste exclu car la consigne mentionne l'inéquation tirée
-  // (`latex(...)` dans `enteteFragments`), jamais une consigne générique indépendante de l'instance.
+  difficulte: difficulteSignesProduit,
+  reponseBreve: reponseBreveSignesProduit,
+  correctionDetaillee: correctionDetailleeSignesProduit,
+  bareme: baremeSignesProduit,
+  enoncePapier: enoncePapierSignesProduit,
+  dureeMinutes: 8,
+  // La consigne mentionne l'inéquation tirée : jamais `regroupable`.
 };

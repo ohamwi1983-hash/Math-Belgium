@@ -1,5 +1,14 @@
 import type { Exercice, VarianteIrrationnelle } from "../../core/generateur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
@@ -9,7 +18,6 @@ import {
   necessiteSimplification,
 } from "../../moteur/simplificationEquation";
 import {
-  estSolutionUnique,
   formatEnonceAffichage,
   formatEnonceLatex,
   formatEquationIsoleeNonDeveloppee,
@@ -42,8 +50,10 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSecondDeg
  * correction relit une valeur déjà calculée par le générateur ou déjà formatée par une fonction du
  * projet déjà utilisée côté écran, `ui/formatEquation.ts`/`ui/categorieLabels.ts` : mêmes fonctions
  * que `ui/etatActuel.ts`/`ui/recapitulatif.ts`/`ResultatPanel.tsx`) pour construire, pour CHAQUE
- * instance tirée, exactement la même liste de questions a) b) c)… que ce que l'élève verrait à
- * l'écran pour cette instance précise — jamais un gabarit à nombre de questions fixe.
+ * instance tirée, exactement la même liste d'étapes que ce que l'élève verrait à l'écran pour cette
+ * instance précise — jamais un gabarit à nombre d'étapes fixe. Sur papier, ces étapes ne sont PAS
+ * des sous-questions : l'énoncé imprimé (`enoncePapier`) ne garde que l'équation et la consigne
+ * globale ; les étapes titrent le corrigé détaillé (voir `.claude/rules/feuilles-evaluations.md`).
  *
  * Variante irrationnelle (`exercice.irrationnel`, ~50% pour les 4 familles 1-4) : toujours générée
  * avec `formeAffichage="canonique"` et `a=1` (jamais de simplification/isolement/développement
@@ -147,140 +157,283 @@ function formatSubstitutionRacineDouble(enonce: Exercice["enonce"], bAffiche: st
   return `x = \\dfrac{-b}{2a} = \\dfrac{-${bAffiche}}{2 \\cdot ${parenthese(enonce.a)}} = ${r}`;
 }
 
-/**
- * Construit, dans l'ORDRE réel de l'écran, les paragraphes d'une résolution RÉDIGÉE et ENTIÈREMENT
- * JUSTIFIÉE pour CETTE instance (voir commentaire de tête) — un seul exercice ouvert sur la copie
- * ("Résous cette équation"), jamais de sous-questions guidées a)/b)/c) : chaque paragraphe reprend
- * le même enchaînement logique que l'écran interactif (simplification → isolement → développement →
- * reconnaissance → Δ/factorisation → solutions), mais rédigé comme un manuel scolaire justifierait
- * chaque étape, plutôt qu'une réponse brute à une question fermée. `exerciceTravail` est déjà la
- * forme sur laquelle isolement/développement/reconnaissance/champ1/zéros travaillent réellement —
- * l'énoncé réduit une fois la simplification confirmée, exactement comme `exerciceCourant` côté
- * session (`soumettreReponseSimplification`), jamais l'énoncé de surface d'origine.
- */
-function construireParagraphesResolution(instance: Exercice): FragmentConsigne[][] {
-  const paragraphes: FragmentConsigne[][] = [];
+/** Virgule décimale dans une formule LaTeX (`1.5` → `1{,}5`) — les valeurs du générateur peuvent
+ * être décimales (racines, Δ réduit), la feuille imprimée n'affiche jamais de point décimal. */
+function virguleLatex(chaine: string): string {
+  return chaine.replace(/(\d)\.(\d)/g, "$1{,}$2");
+}
 
+/** Virgule décimale dans un texte courant (`1.5` → `1,5`). */
+function virguleTexte(chaine: string): string {
+  return chaine.replace(/(\d)\.(\d)/g, "$1,$2");
+}
+
+function avecVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
+  return fragments.map((f) => (f.type === "latex" ? latex(virguleLatex(f.valeur)) : texte(virguleTexte(f.valeur))));
+}
+
+/** Écrans de l'appli (`moteur/session.ts`) : "zeros" = l'écran `champ2`. */
+type PhaseSecondDegre = "simplification" | "isolement" | "developper" | "reconnaissance" | "champ1" | "zeros";
+
+interface EtapeResolution {
+  phase: PhaseSecondDegre;
+  /** Consigne de l'écran correspondant — sert de titre d'étape au corrigé (jamais imprimée dans l'énoncé). */
+  consigne: FragmentConsigne[];
+  lignes: { label: string; fragments: FragmentConsigne[] }[];
+}
+
+function piegeCategorie(exercice: Exercice): FragmentConsigne[] | null {
+  switch (exercice.categorie) {
+    case "mise_en_evidence":
+      return [texte("Ne pas diviser les deux membres par x : on perdrait la solution "), latex("x = 0"), texte(".")];
+    case "binome_conjugue":
+      return [texte("Une équation du type "), latex("x^2 = k"), texte(" avec k > 0 a DEUX solutions, "), latex("\\sqrt{k}"), texte(" et "), latex("-\\sqrt{k}"), texte(".")];
+    case "produit_remarquable":
+      return [texte("Un carré parfait égal à 0 donne une seule solution (racine double), pas deux.")];
+    case "cas_general":
+      return [texte("Dans "), latex("\\Delta = b^2 - 4ac"), texte(", le carré de b est toujours positif : "), latex("(-3)^2 = 9"), texte(", jamais −9.")];
+    case "mise_en_evidence_generalisee":
+      return [texte("Ne pas diviser les deux membres par la parenthèse commune : on perdrait la solution qui l'annule.")];
+    default:
+      return null;
+  }
+}
+
+/**
+ * Étapes du raisonnement pour CETTE instance, dans l'ordre réel des écrans (mêmes prédicats que
+ * `moteur/session.ts`, voir commentaire de tête) : simplification → isolement → développement →
+ * reconnaissance → Δ/factorisation → solutions. Chaque étape porte la consigne de son écran (titre
+ * d'étape du corrigé) et sa résolution rédigée. `exerciceTravail` est la forme sur laquelle les
+ * écrans suivants travaillent réellement (l'énoncé réduit une fois la simplification confirmée).
+ */
+function etapesResolution(instance: Exercice): EtapeResolution[] {
+  const etapes: EtapeResolution[] = [];
   const simplificationNecessaire = necessiteSimplification(instance);
   const exerciceTravail = simplificationNecessaire ? exerciceSimplifie(instance) : instance;
 
   if (simplificationNecessaire) {
     const g = facteurCommun(instance.enonce);
     const enonceReduit = enonceSimplifie(instance.enonce);
-    paragraphes.push([
-      texte(
-        `Les trois coefficients de l'équation ont pour plus grand commun diviseur ${g} : on peut diviser toute l'équation par ${g} sans changer ses solutions. On obtient l'équation équivalente `,
-      ),
-      latex(formatEnonceAffichage(enonceReduit, instance.formeAffichage, instance.parametresAffichage)),
-      texte("."),
-    ]);
+    etapes.push({
+      phase: "simplification",
+      consigne: [texte("Simplifie l'équation au maximum (coefficients entiers, sans facteur commun).")],
+      lignes: [
+        {
+          label: "Calcul",
+          fragments: [
+            texte(`Les trois coefficients ont pour plus grand commun diviseur ${g} : on divise toute l'équation par ${g} sans changer ses solutions. On obtient `),
+            latex(formatEnonceAffichage(enonceReduit, instance.formeAffichage, instance.parametresAffichage)),
+            texte("."),
+          ],
+        },
+      ],
+    });
   }
 
-  const isolementNecessaire = necessiteIsolement(exerciceTravail);
-  if (isolementNecessaire) {
+  if (necessiteIsolement(exerciceTravail)) {
     const formeDirecte = demandeFormeGeneraleDirecte(exerciceTravail);
-    paragraphes.push([
-      texte(
-        formeDirecte
-          ? "Pour résoudre cette équation, on la réécrit directement sous la forme générale ax² + bx + c = 0 : "
-          : "Pour résoudre cette équation, il faut d'abord regrouper tous les termes dans un même membre afin d'obtenir une expression égale à 0 : ",
-      ),
-      latex(formatEquationIsoleeNonDeveloppee(exerciceTravail)),
-      texte("."),
-    ]);
+    etapes.push({
+      phase: "isolement",
+      consigne: [texte(formeDirecte ? "Réécris l'équation sous la forme ax² + bx + c = 0." : "Regroupe tous les termes dans un même membre.")],
+      lignes: [
+        {
+          label: "Calcul",
+          fragments: [
+            texte(formeDirecte ? "On ramène tout dans le membre de gauche, sous la forme générale : " : "On ramène tous les termes dans le membre de gauche, pour obtenir une expression égale à 0 : "),
+            latex(formatEquationIsoleeNonDeveloppee(exerciceTravail)),
+            texte("."),
+          ],
+        },
+      ],
+    });
   }
 
   if (necessiteDeveloppement(exerciceTravail)) {
-    paragraphes.push([
-      texte("Le membre de gauche contient encore un produit : on le développe pour faire apparaître clairement les coefficients a, b et c. On obtient "),
-      latex(formatEnonceLatex(exerciceTravail.enonce)),
-      texte("."),
-    ]);
+    etapes.push({
+      phase: "developper",
+      consigne: [texte("Développe pour obtenir la forme ax² + bx + c = 0.")],
+      lignes: [
+        {
+          label: "Calcul",
+          fragments: [texte("Le membre de gauche contient encore un produit : on le développe pour faire apparaître a, b et c. "), latex(formatEnonceLatex(exerciceTravail.enonce)), texte(".")],
+        },
+      ],
+    });
   }
 
-  const reconnaissanceNecessaire = necessiteReconnaissance(exerciceTravail);
-  if (reconnaissanceNecessaire) {
-    paragraphes.push([
-      texte(
-        exerciceTravail.categorie === "cas_general"
-          ? "Cette équation ne rentre dans aucun cas de factorisation directe (mise en évidence, binôme conjugué ou produit remarquable) : on utilise donc la formule générale du discriminant."
-          : `On observe que cette équation correspond au cas « ${libelleCategorie(exerciceTravail.categorie)} » : c'est la méthode la plus directe pour la résoudre.`,
-      ),
-    ]);
+  if (necessiteReconnaissance(exerciceTravail)) {
+    etapes.push({
+      phase: "reconnaissance",
+      consigne: [texte("Choisis la méthode la plus rapide pour résoudre cette équation.")],
+      lignes: [
+        {
+          label: "Méthode",
+          fragments: [
+            texte(
+              exerciceTravail.categorie === "cas_general"
+                ? "Aucune factorisation directe (mise en évidence, binôme conjugué, produit remarquable) ne s'applique : on utilise la formule du discriminant."
+                : `L'équation correspond au cas « ${libelleCategorie(exerciceTravail.categorie)} » : c'est la méthode la plus directe.`,
+            ),
+          ],
+        },
+      ],
+    });
   }
 
-  // Δ/factorisation puis solutions, toujours fusionnés en une seule conclusion rédigée — jamais
-  // deux questions séparées comme à l'écran (fidèle au principe "une résolution continue", voir
-  // commentaire de tête).
+  const piege = piegeCategorie(exerciceTravail);
   if (exerciceTravail.categorie === "cas_general") {
     const delta = exerciceTravail.solution.delta as number;
     const bAffiche = formatBPourSubstitution(exerciceTravail.enonce, exerciceTravail.irrationnel);
-    paragraphes.push([
-      texte("On calcule le discriminant : "),
-      latex(formatSubstitutionDelta(exerciceTravail.enonce, delta, bAffiche)),
-      texte("."),
-    ]);
+    etapes.push({
+      phase: "champ1",
+      consigne: [texte("Calcule le discriminant Δ.")],
+      lignes: [
+        { label: "Calcul", fragments: [latex(formatSubstitutionDelta(exerciceTravail.enonce, delta, bAffiche))] },
+        ...(piege ? [{ label: "Piège", fragments: piege }] : []),
+      ],
+    });
     const [r1, r2] = formatTermesZerosAttendusLatex(exerciceTravail);
-    if (delta > 0) {
-      paragraphes.push([
-        texte("Comme Δ > 0, l'équation admet deux solutions distinctes, données par la formule résolvante : "),
-        latex(formatSubstitutionRacinesDistinctes(exerciceTravail.enonce, delta, bAffiche, r1, r2)),
-        texte("."),
-      ]);
-    } else if (delta === 0) {
-      paragraphes.push([
-        texte("Comme Δ = 0, l'équation admet une solution double, donnée par la formule résolvante : "),
-        latex(formatSubstitutionRacineDouble(exerciceTravail.enonce, bAffiche, r1)),
-        texte("."),
-      ]);
-    } else {
-      paragraphes.push([texte("Comme Δ < 0, cette équation n'admet aucune solution réelle.")]);
-    }
+    const conclusion: FragmentConsigne[] =
+      delta > 0
+        ? [texte("Δ > 0 : deux solutions distinctes, par la formule résolvante. "), latex(formatSubstitutionRacinesDistinctes(exerciceTravail.enonce, delta, bAffiche, r1, r2))]
+        : delta === 0
+          ? [texte("Δ = 0 : une solution double. "), latex(formatSubstitutionRacineDouble(exerciceTravail.enonce, bAffiche, r1))]
+          : [texte("Δ < 0 : l'équation n'a aucune solution réelle, "), latex("S = \\varnothing"), texte(".")];
+    etapes.push({ phase: "zeros", consigne: [texte("Donne les solutions de l'équation.")], lignes: [{ label: "Conclusion", fragments: conclusion }] });
   } else {
-    paragraphes.push([
-      texte(`On factorise l'équation à l'aide de la méthode « ${libelleCategorie(exerciceTravail.categorie)} » : `),
-      latex(`${exerciceTravail.solution.formeFactorisee} = 0`),
-      texte("."),
-    ]);
-    paragraphes.push([
-      texte(
-        "Un produit de facteurs est nul si et seulement si l'un au moins de ses facteurs est nul : on résout donc chaque facteur égalé à zéro, ce qui donne comme "
-          + `${estSolutionUnique(exerciceTravail) ? "solution" : "solutions"} : `,
-      ),
-      ...formatTermesZerosAttendusLatex(exerciceTravail).flatMap((terme, i, tableau): FragmentConsigne[] =>
-        i < tableau.length - 1 ? [latex(terme), texte(" ; ")] : [latex(terme)],
-      ),
-      texte("."),
-    ]);
+    etapes.push({
+      phase: "champ1",
+      consigne: [texte("Factorise le membre de gauche.")],
+      lignes: [{ label: "Calcul", fragments: [texte(`Méthode « ${libelleCategorie(exerciceTravail.categorie)} » : `), latex(`${exerciceTravail.solution.formeFactorisee} = 0`), texte(".")] }],
+    });
+    etapes.push({
+      phase: "zeros",
+      consigne: [texte("Donne les solutions de l'équation.")],
+      lignes: [
+        { label: "Méthode", fragments: [texte("Un produit de facteurs est nul si et seulement si l'un au moins de ses facteurs est nul : on égale chaque facteur à 0.")] },
+        { label: "Conclusion", fragments: [latex(`S = \\left\\{ ${formatTermesZerosAttendusLatex(exerciceTravail).join(" \\,;\\, ")} \\right\\}`)] },
+        ...(piege ? [{ label: "Piège", fragments: piege }] : []),
+      ],
+    });
   }
-
-  return paragraphes;
+  return etapes.map((e) => ({ ...e, lignes: e.lignes.map((l) => ({ ...l, fragments: avecVirgules(l.fragments) })) }));
 }
 
-/** Nombre de lignes laissées à l'élève — assez généreux pour une résolution rédigée complète, pas
- * seulement une réponse brève par sous-question (voir commentaire de tête). */
-function nombreLignesReponse(nombreParagraphes: number): number {
-  return Math.max(10, nombreParagraphes * 2 + 2);
+const LETTRES = "abcdefghijklmnopqrstuvwxyz";
+
+function enonceLatex(instance: Exercice): string {
+  return virguleLatex(formatEnonceAffichage(instance.enonce, instance.formeAffichage, instance.parametresAffichage, instance.irrationnel));
 }
 
+/** Étapes d'apprentissage (une par écran) : titres du corrigé, jamais imprimées dans l'énoncé
+ * (voir `enoncePapierSecondDegre`). */
 function construireEnonceSecondDegre(instance: Exercice): SectionExercice {
-  const nombreParagraphes = construireParagraphesResolution(instance).length;
   return {
-    enteteFragments: [
-      texte("Résous l'équation suivante. Indique et justifie toutes les étapes de ta démarche : "),
-      latex(formatEnonceAffichage(instance.enonce, instance.formeAffichage, instance.parametresAffichage, instance.irrationnel)),
-    ],
-    questions: [
-      {
-        consigne: [texte("Développe ici ta résolution complète, étape par étape.")],
-        reponse: { type: "lignes", nombre: nombreLignesReponse(nombreParagraphes) },
-      },
+    enteteFragments: [texte("Résous l'équation suivante : "), latex(enonceLatex(instance))],
+    questions: etapesResolution(instance).map((e) => ({ consigne: e.consigne })),
+  };
+}
+
+function enoncePapierSecondDegre(instance: Exercice): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [texte("Résous l'équation suivante par la méthode la plus rapide : "), latex(enonceLatex(instance)), texte(".")],
+      questions: [],
+    },
+  };
+}
+
+/** Ancien corrigé (pipelines Word/PDF historiques) : la même résolution, en paragraphes continus. */
+function construireCorrectionSecondDegre(instance: Exercice): BlocCorrection[] {
+  return etapesResolution(instance).flatMap((e) => e.lignes.filter((l) => l.label !== "Piège").map((l): BlocCorrection => ({ type: "paragraphe", fragments: l.fragments })));
+}
+
+function correctionDetailleeSecondDegre(instance: Exercice): EtapeCorrection[] {
+  return etapesResolution(instance).flatMap((e, i) => e.lignes.map((l): EtapeCorrection => ({ label: l.label, sousQuestion: LETTRES[i], fragments: l.fragments })));
+}
+
+function solutionsLatex(instance: Exercice): string {
+  const travail = necessiteSimplification(instance) ? exerciceSimplifie(instance) : instance;
+  if (travail.categorie === "cas_general" && (travail.solution.delta as number) < 0) return "S = \\varnothing";
+  return virguleLatex(`S = \\left\\{ ${formatTermesZerosAttendusLatex(travail).join(" \\,;\\, ")} \\right\\}`);
+}
+
+function reponseBreveSecondDegre(instance: Exercice): FragmentConsigne[] {
+  return [latex(solutionsLatex(instance))];
+}
+
+const POIDS_PHASE: Record<PhaseSecondDegre, number> = {
+  simplification: 0.5,
+  isolement: 0.5,
+  developper: 0.5,
+  reconnaissance: 0.5,
+  champ1: 1,
+  zeros: 1,
+};
+
+const CRITERE_PHASE: Record<PhaseSecondDegre, string> = {
+  simplification: "Équation divisée par le plus grand commun diviseur des coefficients",
+  isolement: "Tous les termes ramenés dans un même membre",
+  developper: "Développement correct (forme ax² + bx + c = 0)",
+  reconnaissance: "Méthode la plus rapide reconnue",
+  champ1: "",
+  zeros: "Solutions correctes",
+};
+
+function baremeSecondDegre(instance: Exercice): BaremeExercice {
+  const etapes = etapesResolution(instance);
+  const travail = necessiteSimplification(instance) ? exerciceSimplifie(instance) : instance;
+  const criteres: CritereBareme[] = etapes.map((e, i) => ({
+    sousQuestion: LETTRES[i],
+    critere:
+      e.phase === "champ1"
+        ? [texte(travail.categorie === "cas_general" ? "Discriminant correctement calculé" : "Factorisation correcte : "), ...(travail.categorie === "cas_general" ? [] : [latex(virguleLatex(`${travail.solution.formeFactorisee} = 0`))])]
+        : e.phase === "zeros"
+          ? [texte(`${CRITERE_PHASE.zeros} : `), latex(solutionsLatex(instance))]
+          : [texte(CRITERE_PHASE[e.phase])],
+    points: POIDS_PHASE[e.phase],
+  }));
+  const iChamp1 = etapes.findIndex((e) => e.phase === "champ1");
+  const iZeros = etapes.findIndex((e) => e.phase === "zeros");
+  const erreurs: ErreurFrequente[] = [];
+  switch (travail.categorie) {
+    case "mise_en_evidence":
+    case "mise_en_evidence_generalisee":
+      erreurs.push({ description: [texte("Division par le facteur commun : une solution perdue")], cout: `0 pt sur ${LETTRES[iZeros]})` });
+      break;
+    case "binome_conjugue":
+      erreurs.push({ description: [texte("Une seule solution donnée (la solution négative oubliée)")], cout: `moitié des points sur ${LETTRES[iZeros]})` });
+      break;
+    case "produit_remarquable":
+      erreurs.push({ description: [texte("Identité remarquable mal reconnue (signe du double produit)")], cout: `0 pt sur ${LETTRES[iChamp1]})` });
+      break;
+    case "cas_general":
+      erreurs.push({ description: [texte("Carré de b écrit négatif dans Δ")], cout: `0 pt sur ${LETTRES[iChamp1]}), suite notée sans double pénalité` });
+      erreurs.push({ description: [texte("Formule résolvante sans diviser par 2a")], cout: `0 pt sur ${LETTRES[iZeros]})` });
+      break;
+  }
+  if (necessiteIsolement(travail)) erreurs.push({ description: [texte("Erreur de signe en changeant un terme de membre")], cout: "0 pt sur l'étape, suite notée sans double pénalité" });
+  return {
+    reponseFinale: [latex(solutionsLatex(instance))],
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [
+      [texte("Méthode correcte autre que la plus rapide (par exemple le discriminant à la place d'une factorisation) : tous les points de résolution, pas ceux de la reconnaissance.")],
+      [texte("Solutions sous forme de fraction ou de décimal exact")],
     ],
   };
 }
 
-function construireCorrectionSecondDegre(instance: Exercice): BlocCorrection[] {
-  return construireParagraphesResolution(instance).map((fragments) => ({ type: "paragraphe", fragments }));
+/** ★ factorisation directe sans préparation ; ★★ discriminant, ou une étape de préparation ;
+ * ★★★ variante irrationnelle, ou au moins deux étapes de préparation (simplification, isolement,
+ * développement). */
+function difficulteSecondDegre(instance: Exercice): 1 | 2 | 3 {
+  const etapes = etapesResolution(instance);
+  const preparation = etapes.filter((e) => e.phase === "simplification" || e.phase === "isolement" || e.phase === "developper").length;
+  if (instance.irrationnel || preparation >= 2) return 3;
+  const travail = necessiteSimplification(instance) ? exerciceSimplifie(instance) : instance;
+  if (travail.categorie === "cas_general" || preparation === 1) return 2;
+  return 1;
 }
 
 export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercice> = {
@@ -291,7 +444,10 @@ export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteSecondDegreId),
   construireEnonce: construireEnonceSecondDegre,
   construireCorrection: construireCorrectionSecondDegre,
-  // Une seule question ouverte par instance (voir commentaire de tête) : pas de sous-questions
-  // lettrées, mais `regroupable` reste exclu car la consigne mentionne la valeur tirée (`latex(...)`
-  // dans `enteteFragments`, jamais une consigne générique indépendante de l'instance).
+  difficulte: difficulteSecondDegre,
+  reponseBreve: reponseBreveSecondDegre,
+  correctionDetaillee: correctionDetailleeSecondDegre,
+  bareme: baremeSecondDegre,
+  enoncePapier: enoncePapierSecondDegre,
+  dureeMinutes: 5,
 };

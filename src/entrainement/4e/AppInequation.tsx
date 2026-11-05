@@ -15,6 +15,7 @@ import { diagnostiquerSimplification } from "./moteur/verificationInequation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInequation, type VarianteInequationId } from "./generateurs/inequations";
 import { EtapeRacines } from "./components/EtapeRacines";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeSigneA } from "./components/EtapeSigneA";
 import { EtapeInequation } from "./components/EtapeInequation";
 import { EtapeSimplificationInequation } from "./components/EtapeSimplificationInequation";
@@ -39,6 +40,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionInequation {
   return demarrerSessionInequation(REGLAGES_DEMO, genererExerciceInequation);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille), son exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue
+ * que l'adaptateur d'export ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionInequation {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionInequation(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceInequation, (id) => construireAvecVarianteId(id as VarianteInequationId)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -84,7 +94,7 @@ interface TransitionEnAttente {
 }
 
 export function AppInequation() {
-  const [etat, setEtat] = useState<EtatSessionInequation>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionInequation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionInequation`, jamais dans le moteur. Remis à vide à chaque

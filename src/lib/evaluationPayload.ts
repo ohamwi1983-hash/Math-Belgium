@@ -572,23 +572,38 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     undefined,
   ],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
+  // label) du bloc d'exemple du cours (`src/content/chapters/4e/equations-inequations-second-degre.ts`).
+  // Exception : les deux blocs « Démonstration » de § resoudre (Viète, forme factorisée) portent le
+  // MÊME label, aucune clé ne les distingue — ils restent appariés par POSITION (entrées texte aux
+  // indices 6 et 7 de la liste, les blocs 6 et 7 de la section). Renommer ces labels dans le cours
+  // permettrait de les passer aussi en clé.
   'equations-inequations-second-degre': {
   resoudre: [
-    undefined,
-    undefined,
-    undefined,
-    "Démontre, en complétant le carré, que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$.",
-    undefined,
-    undefined,
+    { cle: 'mise en évidence — c = 0', enonce: "Résous l'équation $2x^2-6x=0$ par une méthode rapide, sans calculer le discriminant." },
+    { cle: 'différence de deux carrés', enonce: "Résous l'équation $2x^2-18=0$ par une méthode rapide, sans calculer le discriminant." },
+    { cle: 'carré parfait', enonce: "Résous l'équation $2x^2-12x+18=0$ en reconnaissant un carré parfait, sans calculer le discriminant." },
+    { cle: 'étape par étape', enonce: "Démontre, en complétant le carré, que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$." },
+    { cle: 'cas général', enonce: "Résous l'équation $2x^2-10x+8=0$ à l'aide du discriminant." },
+    { cle: 'mise en évidence généralisée', enonce: "Résous l'équation $(x+2)^2=3(x+2)$ sans développer, en mettant en évidence un facteur commun." },
     "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$.",
     "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$.",
-    undefined,
+    { cle: 'application directe', enonce: "Écris une équation du second degré de la forme $x^2-Sx+P=0$ dont les solutions sont $x_1=2$ et $x_2=5$, à l'aide de la somme $S$ et du produit $P$ des racines." },
+  ],
+  'signe-trinome': [
+    { cle: 'symbole large', enonce: "Résous l'inéquation $x^2-x-6 \\geq 0$ en étudiant le signe du trinôme." },
   ],
   'signe-produit': [
-    "Étudie le signe du produit $(x-1) \\cdot x \\cdot (x-3)$ à l'aide d'un tableau de signes à 3 facteurs, puis résous l'inéquation $(x-1) \\cdot x \\cdot (x-3) > 0$.",
+    { cle: '3 facteurs', enonce: "Étudie le signe du produit $(x-1) \\cdot x \\cdot (x-3)$ à l'aide d'un tableau de signes à 3 facteurs, puis résous l'inéquation $(x-1) \\cdot x \\cdot (x-3) > 0$." },
+  ],
+  simplifier: [
+    { cle: 'racine commune', enonce: "Simplifie la fraction rationnelle $\\dfrac{2x^2-6x}{x^2-x-6}$ : pose ses conditions d'existence, puis factorise le numérateur et le dénominateur." },
+  ],
+  'inconnue-denominateur': [
+    { cle: 'racine étrangère', enonce: "Résous l'équation $\\dfrac{5}{x-2} = \\dfrac{3x-3}{x^2-x-2}$, en posant d'abord ses conditions d'existence." },
   ],
   'inequations-rationnelles': [
-    "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie.",
+    { cle: 'quotient simple', enonce: "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie." },
   ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
@@ -604,16 +619,28 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'valeur absolue — facteur commun', enonce: "Écris $f(x) = |2x+6|$ sous la forme $EV \\cdot |x-TH| + TV$, puis donne TH, EV et TV." },
     ],
   },
+  // Appariement PAR CLÉ (build strict) — clé = badge ou label du bloc d'exemple du cours
+  // (`src/content/chapters/4e/statistique-descriptive.ts`).
   'statistique-descriptive': {
+  frequences: [
+    { cle: 'liste brute, n = 20', enonce: "Voici le nombre de livres lus en un an par 20 élèves : 3 ; 5 ; 3 ; 7 ; 5 ; 12 ; 5 ; 3 ; 7 ; 5 ; 3 ; 12 ; 7 ; 5 ; 3 ; 7 ; 5 ; 12 ; 3 ; 5. Construis le tableau des effectifs : valeurs distinctes $x_i$ dans l'ordre croissant, effectifs $n_i$, fréquences $f_i$ (en %), effectifs cumulés et fréquences cumulées." },
+  ],
+  histogramme: [
+    { cle: '4 classes, amplitude 2', enonce: "Voici le temps d'écran quotidien (en h) de 20 élèves : 1 ; 2 ; 3,5 ; 0,5 ; 6 ; 4 ; 1,5 ; 2,5 ; 5 ; 8 ; 0,5 ; 3 ; 1,8 ; 2,2 ; 4,5 ; 7 ; 1,2 ; 3,8 ; 5,5 ; 2,7. Répartis ces données dans les classes $[0\\,;2[$, $[2\\,;4[$, $[4\\,;6[$ et $[6\\,;8]$, donne l'effectif et la fréquence de chaque classe, puis construis l'histogramme." },
+  ],
   moyenne: [
-    "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$.",
+    { cle: 'données discrètes', enonce: "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$." },
   ],
   position: [
-    "Détermine la médiane, le premier quartile $Q_1$ et le troisième quartile $Q_3$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$ (effectif total $n=20$), à l'aide de la règle du seuil strictement dépassé sur les effectifs cumulés.",
-    undefined,
+    { cle: 'données discrètes, n = 20', enonce: "Détermine la médiane, le premier quartile $Q_1$ et le troisième quartile $Q_3$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$ (effectif total $n=20$), à l'aide de la règle du seuil strictement dépassé sur les effectifs cumulés." },
+    { cle: 'liste brute ordonnée', enonce: "Détermine le mode de la série ordonnée suivante : 1,8 ; 1,8 ; 2,6 ; 2,6 ; 2,6 ; 2,6 ; 2,7 ; 2,9 ; 3,0 ; 3,1 ; 3,1 ; 3,1 ; 3,3 ; 3,3 ; 3,5 ; 3,9 ; 4,0 ; 4,1 ; 4,1 ; 4,3." },
   ],
   dispersion: [
-    "Calcule la variance puis l'écart-type de la série de valeurs $x_i=6,8,12,14$ et d'effectifs respectifs $n_i=5,8,4,7$ (effectif total $n=24$), sachant que $\\bar{x}=10$.",
+    { cle: 'x̄ donné, n = 24', enonce: "Calcule la variance puis l'écart-type de la série de valeurs $x_i=6,8,12,14$ et d'effectifs respectifs $n_i=5,8,4,7$ (effectif total $n=24$), sachant que $\\bar{x}=10$." },
+  ],
+  tchebychev: [
+    { cle: 'k = 2', enonce: "À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine le pourcentage minimal des valeurs d'une série qui se trouvent dans l'intervalle $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$." },
+    { cle: 'à partir du pourcentage', enonce: "On veut qu'au moins 95 % des valeurs d'une série se trouvent dans l'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$. À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine la valeur de k à utiliser." },
   ],
   },
   'cercle-trigonometrique-triangles': {
@@ -1021,7 +1048,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)

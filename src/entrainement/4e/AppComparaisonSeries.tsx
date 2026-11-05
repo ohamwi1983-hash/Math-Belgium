@@ -20,6 +20,7 @@ import { SegmentsInline } from "./components/SegmentsInline";
 import { formatEnonceTexte, segmentsReponseAttendue } from "./ui/formatComparaisonSeries";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { DonneesComparaisonSeries } from "./components/DonneesComparaisonSeries";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,6 +31,21 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionComparaisonSeries {
   return demarrerSessionComparaisonSeries(REGLAGES_DEMO, genererExerciceComparaisonSeries);
+}
+
+/** Première session : si l'URL porte `?code=` (QR code d'une feuille d'exercices), rouvre EXACTEMENT
+ * l'exercice imprimé — mêmes fonctions et même catalogue que l'adaptateur d'export
+ * (`generateurs/comparaisonSeries/exportEvaluation.ts`) ; les exercices suivants sont tirés
+ * normalement. */
+function sessionInitiale(): EtatSessionComparaisonSeries {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  let premier = true;
+  return demarrerSessionComparaisonSeries(REGLAGES_DEMO, () => {
+    if (!premier) return genererExerciceComparaisonSeries();
+    premier = false;
+    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceComparaisonSeries, (id) => construireAvecVarianteId(id as VarianteComparaisonSeries));
+  });
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -45,7 +61,7 @@ interface TransitionEnAttente {
  * `sessionComparaisonSeries.ts`. Mono-écran : la transition n'est jamais qu'une clôture
  * d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppComparaisonSeries() {
-  const [etat, setEtat] = useState<EtatSessionComparaisonSeries>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComparaisonSeries>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionComparaisonSeries) {

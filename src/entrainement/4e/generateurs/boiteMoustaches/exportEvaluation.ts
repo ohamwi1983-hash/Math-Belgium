@@ -6,7 +6,7 @@ import type {
   ExerciceBoiteMoustachesLecture,
   PlageAxe,
 } from "../../core/boiteMoustaches.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import {
@@ -21,7 +21,7 @@ import {
 import { LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN, formatEnonceTexte, formatTermesCinqNombresLatex } from "../../ui/formatBoiteMoustaches";
 import { calculerPasGrille, etendreLargeurXPourEtiquettes } from "../../ui/mafsTransformation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBoiteMoustaches } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFrLatex, segmentEnVirgules } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBoiteMoustaches>` pour gen36 (Boîte à moustaches,
@@ -368,6 +368,203 @@ function construireCorrectionBoiteMoustaches(exercice: ExerciceBoiteMoustaches):
   return construireCorrectionComparaison(exercice);
 }
 
+// ============================================================================
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème) — voir
+// `.claude/rules/feuilles-evaluations.md`.
+// - construction : sur papier, l'élève TRACE la boîte sur sa propre feuille (aucun axe vierge
+//   imprimé : pas de zone de réponse) ; le corrigé garde la figure attendue (`construireCorrection`,
+//   bloc HTML), donc `correctionDetaillee` est vide pour cette variante.
+// - lecture : une consigne, la boîte est donnée.
+// - comparaison : une consigne globale (médianes, puis dispersion au sens de l'écart
+//   interquartile) ; les 2 écrans deviennent les 2 étapes du corrigé.
+// ============================================================================
+
+function enVirgules(fragments: FragmentConsigne[]): FragmentConsigne[] {
+  return fragments.map(segmentEnVirgules);
+}
+
+function cinqNombresLatex(valeurs: CinqNombres): string {
+  return formatTermesCinqNombresLatex(valeurs).join(";\\ ");
+}
+
+function enoncePapierBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EnoncePapier {
+  const u = exercice.contexte.unite;
+  if (exercice.variante === "construction") {
+    return {
+      section: {
+        enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" Voici les 5 valeurs qui la caractérisent : "), latex(cinqNombresLatex(exercice.valeurs)), texte(".")]),
+        questions: [
+          {
+            consigne: enVirgules([
+              texte(`Trace sur ta feuille la boîte à moustaches de cette série, sur un axe gradué (en ${u}) allant au moins de ${exercice.bornePlage.min} à ${exercice.bornePlage.max}.`),
+            ]),
+          },
+        ],
+      },
+      etapesParQuestion: [["a"]],
+    };
+  }
+  if (exercice.variante === "lecture") {
+    return {
+      section: {
+        enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" La boîte à moustaches ci-dessous représente cette série.")]),
+        enteteHtml: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }]),
+        questions: [
+          {
+            consigne: [
+              texte("Relève les cinq nombres de cette boîte à moustaches : "),
+              latex(LABEL_X_MIN),
+              texte(", "),
+              latex(LABEL_Q1),
+              texte(", la médiane "),
+              latex(LABEL_Q2),
+              texte(", "),
+              latex(LABEL_Q3),
+              texte(" et "),
+              latex(LABEL_X_MAX),
+              texte(` (en ${u}).`),
+            ],
+          },
+        ],
+      },
+      etapesParQuestion: [["a"]],
+    };
+  }
+  return {
+    section: {
+      enteteFragments: enVirgules([texte(formatEnonceTexte(exercice)), texte(" Le graphique ci-dessous représente les boîtes à moustaches des 2 séries.")]),
+      enteteHtml: construireSvgBoiteMoustaches(exercice.bornePlage, construireLignesComparaison(exercice)),
+      questions: [
+        {
+          consigne: [
+            texte("Compare les deux séries : laquelle a la plus grande médiane "),
+            latex(LABEL_Q2),
+            texte(", et laquelle est la plus dispersée au sens de l'écart interquartile "),
+            latex(`${LABEL_Q3}-${LABEL_Q1}`),
+            texte(" ? Justifie à l'aide du graphique."),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [["a", "b"]],
+  };
+}
+
+function reponseBreveBoiteMoustaches(exercice: ExerciceBoiteMoustaches): FragmentConsigne[] {
+  if (exercice.variante === "comparaison") {
+    return [texte(`Plus grande médiane : série ${exercice.medianePlusGrande} ; plus dispersée : série ${exercice.ecartInterquartilePlusGrand}`)];
+  }
+  return enVirgules([latex(cinqNombresLatex(exercice.valeurs))]);
+}
+
+function ecartInterquartile(v: CinqNombres): number {
+  return v.q3 - v.q1;
+}
+
+function correctionDetailleeBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EtapeCorrection[] {
+  if (exercice.variante === "construction") return [];
+  const u = exercice.contexte.unite;
+  if (exercice.variante === "lecture") {
+    return [
+      {
+        label: "Méthode",
+        sousQuestion: "a",
+        fragments: [
+          texte("Les extrémités des moustaches donnent "),
+          latex(LABEL_X_MIN),
+          texte(" et "),
+          latex(LABEL_X_MAX),
+          texte(", les bords de la boîte "),
+          latex(LABEL_Q1),
+          texte(" et "),
+          latex(LABEL_Q3),
+          texte(", et le trait intérieur la médiane "),
+          latex(LABEL_Q2),
+          texte("."),
+        ],
+      },
+      { label: "Conclusion", sousQuestion: "a", fragments: enVirgules([latex(cinqNombresLatex(exercice.valeurs)), texte(` (en ${u}).`)]) },
+      { label: "Piège", fragments: [texte("La médiane est le trait à l'intérieur de la boîte, pas forcément son milieu.")] },
+    ];
+  }
+  const { serieA, serieB } = exercice;
+  const eiA = ecartInterquartile(serieA);
+  const eiB = ecartInterquartile(serieB);
+  const etendueA = serieA.max - serieA.min;
+  const etendueB = serieB.max - serieB.min;
+  const piegeEtendue = etendueA !== etendueB && (etendueA > etendueB ? "A" : "B") !== exercice.ecartInterquartilePlusGrand;
+  const etapes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("On compare la position du trait intérieur (la médiane) des deux boîtes.")] },
+    {
+      label: "Lecture",
+      sousQuestion: "a",
+      fragments: enVirgules([latex(`Q_2(A) = ${nombreFrLatex(serieA.mediane)}`), texte(" et "), latex(`Q_2(B) = ${nombreFrLatex(serieB.mediane)}`), texte(` (en ${u}).`)]),
+    },
+    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`La série ${exercice.medianePlusGrande} a la plus grande médiane.`)] },
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("La dispersion se compare avec l'écart interquartile "), latex(`${LABEL_Q3}-${LABEL_Q1}`), texte(", la largeur de la boîte.")] },
+    {
+      label: "Calcul",
+      sousQuestion: "b",
+      fragments: enVirgules([
+        latex(`A : ${nombreFrLatex(serieA.q3)}-${nombreFrLatex(serieA.q1)} = ${nombreFrLatex(eiA)}`),
+        texte(" ; "),
+        latex(`B : ${nombreFrLatex(serieB.q3)}-${nombreFrLatex(serieB.q1)} = ${nombreFrLatex(eiB)}`),
+        texte("."),
+      ]),
+    },
+    { label: "Conclusion", sousQuestion: "b", fragments: [texte(`La série ${exercice.ecartInterquartilePlusGrand} est la plus dispersée.`)] },
+  ];
+  etapes.push({
+    label: "Piège",
+    fragments: piegeEtendue
+      ? [texte(`Ici, la série la plus étendue (moustaches les plus longues) n'est PAS la plus dispersée au sens de l'écart interquartile : on compare la largeur des boîtes, pas la longueur totale.`)]
+      : [texte("On compare la largeur des boîtes (écart interquartile), pas la longueur totale des moustaches.")],
+  });
+  return etapes;
+}
+
+function baremeBoiteMoustaches(exercice: ExerciceBoiteMoustaches): BaremeExercice {
+  let criteres: CritereBareme[];
+  let erreurs: ErreurFrequente[];
+  if (exercice.variante === "construction") {
+    criteres = [
+      { sousQuestion: "a", critere: [texte("Axe gradué régulièrement, avec son unité")], points: 0.5 },
+      { sousQuestion: "a", critere: [texte("Moustaches de "), latex(LABEL_X_MIN), texte(" à "), latex(LABEL_X_MAX)], points: 1 },
+      { sousQuestion: "a", critere: [texte("Boîte de "), latex(LABEL_Q1), texte(" à "), latex(LABEL_Q3)], points: 1.5 },
+      { sousQuestion: "a", critere: [texte("Trait de la médiane "), latex(LABEL_Q2), texte(" à sa valeur")], points: 1 },
+    ];
+    erreurs = [
+      { description: [texte("Médiane placée au milieu de la boîte au lieu de sa valeur")], cout: "0 pt sur la médiane" },
+      { description: [texte("Axe non gradué régulièrement (valeurs placées à intervalles égaux)")], cout: "0 pt sur l'axe" },
+    ];
+  } else if (exercice.variante === "lecture") {
+    criteres = [
+      { sousQuestion: "a", critere: [latex(LABEL_X_MIN), texte(" et "), latex(LABEL_X_MAX)], points: 1 },
+      { sousQuestion: "a", critere: [latex(LABEL_Q1)], points: 1 },
+      { sousQuestion: "a", critere: [latex(LABEL_Q3)], points: 1 },
+      { sousQuestion: "a", critere: [texte("Médiane "), latex(LABEL_Q2)], points: 1 },
+    ];
+    erreurs = [
+      { description: [texte("Médiane prise au milieu de la boîte")], cout: "0 pt sur la médiane" },
+      { description: [texte("Q1 et Q3 inversés")], cout: "0 pt sur Q1 et Q3" },
+    ];
+  } else {
+    criteres = [
+      { sousQuestion: "a", critere: [texte("Médianes lues sur le graphique")], points: 1 },
+      { sousQuestion: "a", critere: [texte(`Conclusion : série ${exercice.medianePlusGrande}`)], points: 1 },
+      { sousQuestion: "b", critere: [texte("Écarts interquartiles "), latex(`${LABEL_Q3}-${LABEL_Q1}`), texte(" des deux séries")], points: 1 },
+      { sousQuestion: "b", critere: [texte(`Conclusion : série ${exercice.ecartInterquartilePlusGrand}`)], points: 1 },
+    ];
+    erreurs = [{ description: [texte("Dispersion jugée sur la longueur totale (étendue) au lieu de l'écart interquartile")], cout: "0 pt sur b)" }];
+  }
+  return {
+    reponseFinale: reponseBreveBoiteMoustaches(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: exercice.variante === "comparaison" ? [[texte("Justification par la largeur des boîtes, sans calcul, si elle est explicite")]] : [[texte("Valeurs données dans un autre ordre si chacune est nommée")]],
+  };
+}
+
 const adaptateurEvaluationBoiteMoustachesBrut: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = {
   titreDocument: "Boîte à moustaches — Évaluation",
   nomFichierBase: "boite-moustaches",
@@ -381,4 +578,12 @@ const adaptateurEvaluationBoiteMoustachesBrut: AdaptateurFeuilleExercices<Exerci
 };
 
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
-export const adaptateurEvaluationBoiteMoustaches: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = avecVirgulesBelges(adaptateurEvaluationBoiteMoustachesBrut);
+export const adaptateurEvaluationBoiteMoustaches: AdaptateurFeuilleExercices<ExerciceBoiteMoustaches> = {
+  ...avecVirgulesBelges(adaptateurEvaluationBoiteMoustachesBrut),
+  difficulte: (exercice) => (exercice.variante === "comparaison" ? 2 : 1),
+  reponseBreve: reponseBreveBoiteMoustaches,
+  correctionDetaillee: correctionDetailleeBoiteMoustaches,
+  bareme: baremeBoiteMoustaches,
+  enoncePapier: enoncePapierBoiteMoustaches,
+  dureeMinutes: 4,
+};

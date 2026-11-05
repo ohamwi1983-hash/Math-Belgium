@@ -1,9 +1,9 @@
 import type { ExerciceTableauFrequences } from "../../core/tableauFrequences.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatEnonceTexte } from "../../ui/formatTableauFrequences";
 import { genererExerciceTableauFrequences } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTableauFrequences>` pour gen30 (Tableau de
@@ -51,11 +51,11 @@ function formatNombre(valeur: number): string {
 }
 
 const CONSIGNE_GENERALE =
-  "À partir de la liste brute ci-dessus, construis le tableau de fréquences complet de cette série : classe les valeurs distinctes par ordre croissant, puis donne, pour chacune, son effectif, sa fréquence (%), son effectif cumulé et sa fréquence cumulée (%).";
+  "Construis le tableau de fréquences complet de cette série : range les valeurs distinctes par ordre croissant, puis donne, pour chacune, son effectif, sa fréquence (en %), son effectif cumulé et sa fréquence cumulée (en %).";
 
 function construireEnonceTableauFrequences(instance: ExerciceTableauFrequences): SectionExercice {
   return {
-    enteteFragments: [texte(`${formatEnonceTexte(instance)} ${instance.donneesBrutes.join(", ")}.`)],
+    enteteFragments: [texte(`${formatEnonceTexte(instance)} ${instance.donneesBrutes.map(nombreFr).join(" ; ")}.`)],
     questions: [{ consigne: [texte(CONSIGNE_GENERALE)] }],
   };
 }
@@ -86,12 +86,106 @@ function construireCorrectionTableauFrequences(instance: ExerciceTableauFrequenc
   ];
 }
 
+// ============================================================================
+// Feuilles enrichies (difficulté, réponse brève, corrigé détaillé, barème, énoncé papier). Tout
+// vient de `instance.lignes` (la table de référence du générateur, la même que celle de l'écran) ;
+// nombres en notation belge (`nombreFr`/`nombreFrLatex`) — ces champs ne passent pas par
+// `avecVirgulesBelges`, qui ne convertit que `construireEnonce`/`construireCorrection`.
+// ============================================================================
+
+/** Tableau de fréquences complet en LaTeX (grandeurs en lignes, valeurs en colonnes, notations de
+ * l'écran x_i, n_i, f_i, v_i, φ_i). */
+function tableauFrequencesLatex(instance: ExerciceTableauFrequences): string {
+  const { lignes } = instance;
+  const rangees: [string, string[]][] = [
+    ["x_i", lignes.map((l) => nombreFrLatex(l.valeur))],
+    ["n_i", lignes.map((l) => nombreFrLatex(l.effectif))],
+    ["f_i\\ (\\%)", lignes.map((l) => nombreFrLatex(l.frequencePourcent))],
+    ["v_i", lignes.map((l) => nombreFrLatex(l.effectifCumule))],
+    ["\\varphi_i\\ (\\%)", lignes.map((l) => nombreFrLatex(l.frequenceCumulee))],
+  ];
+  return `\\begin{array}{l|${"c".repeat(lignes.length)}} ${rangees.map(([tete, cellules]) => [tete, ...cellules].join(" & ")).join(" \\\\ \\hline ")} \\end{array}`;
+}
+
+/** ★ : n = 10 ou 20 (fréquences « rondes ») et au plus 5 valeurs ; ★★ : n = 16 ou 25 (fréquences
+ * décimales, 6,25 % ou 4 %) ou 6 valeurs distinctes à cumuler. */
+function difficulteTableauFrequences(instance: ExerciceTableauFrequences): 1 | 2 | 3 {
+  return (instance.n === 10 || instance.n === 20) && instance.lignes.length <= 5 ? 1 : 2;
+}
+
+function reponseBreveTableauFrequences(instance: ExerciceTableauFrequences): FragmentConsigne[] {
+  return [latex(tableauFrequencesLatex(instance))];
+}
+
+function correctionDetailleeTableauFrequences(instance: ExerciceTableauFrequences): EtapeCorrection[] {
+  const { lignes, n } = instance;
+  const premiere = lignes[0];
+  return [
+    {
+      label: "Valeurs",
+      fragments: [
+        texte(`On range les ${lignes.length} valeurs distinctes de la liste par ordre croissant et on compte les occurrences de chacune (effectif `),
+        latex("n_i"),
+        texte(`) ; la somme des effectifs vaut n = ${nombreFr(n)}.`),
+      ],
+    },
+    { label: "Fréquences", fragments: [texte("Fréquence d'une valeur, en % : "), latex("f_i = \\dfrac{n_i}{n} \\times 100"), texte(".")] },
+    {
+      label: "Cumuls",
+      fragments: [
+        texte("Effectif cumulé : effectif cumulé de la ligne précédente + effectif de la ligne ; pour la première valeur, "),
+        latex(`v_1 = n_1 = ${nombreFrLatex(premiere.effectif)}`),
+        texte(". La fréquence cumulée se construit de la même façon avec les fréquences."),
+      ],
+    },
+    { label: "Tableau", fragments: [latex(tableauFrequencesLatex(instance))] },
+    {
+      label: "Vérification",
+      fragments: [texte(`Le dernier effectif cumulé vaut n = ${nombreFr(n)} et la dernière fréquence cumulée vaut 100 %.`)],
+    },
+    {
+      label: "Piège",
+      fragments: [texte("Les cumuls se calculent dans l'ordre CROISSANT des valeurs, jamais dans l'ordre de la liste brute.")],
+    },
+  ];
+}
+
+function baremeTableauFrequences(instance: ExerciceTableauFrequences): BaremeExercice {
+  return {
+    reponseFinale: [texte(`tableau à ${instance.lignes.length} valeurs, n = ${nombreFr(instance.n)}`)],
+    criteres: [
+      { critere: [texte("Valeurs distinctes rangées par ordre croissant, effectifs corrects (somme = n)")], points: 1 },
+      { critere: [texte("Fréquences en % : "), latex("f_i = \\dfrac{n_i}{n} \\times 100")], points: 1 },
+      { critere: [texte("Effectifs cumulés (le dernier vaut n)")], points: 1 },
+      { critere: [texte("Fréquences cumulées (la dernière vaut 100 %)")], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Cumuls calculés dans l'ordre de la liste brute, sans trier les valeurs")], cout: "0 pt sur les deux colonnes de cumuls" },
+      { description: [texte(`Fréquence calculée en divisant par le nombre de valeurs distinctes (${instance.lignes.length}) au lieu de n = ${nombreFr(instance.n)}`)], cout: "0 pt sur les fréquences, cumuls notés sans double pénalité" },
+      { description: [texte("Une valeur distincte oubliée")], cout: "−0,5 sur les effectifs, suite notée sans double pénalité" },
+    ],
+    reponsesAcceptees: [[texte("Fréquences en écriture décimale (0,15 au lieu de 15 %) si elles sont cohérentes")], [texte("Tableau disposé en colonnes plutôt qu'en lignes")]],
+  };
+}
+
+/** Une seule consigne (celle de `construireEnonce`) : identifier, fréquences, cumuls et fréquences
+ * cumulées ne sont qu'une tâche — reconstruire LE tableau de fréquences. */
+function enoncePapierTableauFrequences(instance: ExerciceTableauFrequences): EnoncePapier {
+  return { section: construireEnonceTableauFrequences(instance), etapesParQuestion: [["a"]] };
+}
+
 const adaptateurEvaluationTableauFrequencesBrut: AdaptateurFeuilleExercices<ExerciceTableauFrequences> = {
   titreDocument: "Tableau de fréquences — Évaluation",
   nomFichierBase: "tableau-frequences",
   genererInstance: genererExerciceTableauFrequences,
   construireEnonce: construireEnonceTableauFrequences,
   construireCorrection: construireCorrectionTableauFrequences,
+  difficulte: difficulteTableauFrequences,
+  reponseBreve: reponseBreveTableauFrequences,
+  correctionDetaillee: correctionDetailleeTableauFrequences,
+  bareme: baremeTableauFrequences,
+  enoncePapier: enoncePapierTableauFrequences,
+  dureeMinutes: 6,
   regroupable: true,
 };
 

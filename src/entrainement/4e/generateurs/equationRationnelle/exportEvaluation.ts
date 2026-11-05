@@ -4,7 +4,16 @@ import type {
   ExerciceCas4b,
   ExerciceEquationRationnelle,
 } from "../../core/equationRationnelle.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { libelleCategorie } from "../../ui/categorieLabels";
@@ -106,27 +115,6 @@ function fragmentsResolution(exercice: Exercice): FragmentConsigne[] {
     latex(`${formeFactorisee} = 0`),
     texte(` — ${texteRacines}.`),
   ];
-}
-
-/** Nombre de lignes laissées à l'élève — assez généreux pour une résolution rédigée complète. */
-function nombreLignesReponse(nombreParagraphes: number): number {
-  return Math.max(10, nombreParagraphes * 2 + 2);
-}
-
-function construireEnonceEquationRationnelle(instance: ExerciceEquationRationnelle): SectionExercice {
-  const nombreParagraphes = construireParagraphesResolution(instance).length;
-  return {
-    enteteFragments: [
-      texte("Résous l'équation suivante. Indique et justifie toutes les étapes de ta démarche : "),
-      latex(formatEquationRationnelleLatex(instance)),
-    ],
-    questions: [
-      {
-        consigne: [texte("Développe ici ta résolution complète, étape par étape.")],
-        reponse: { type: "lignes", nombre: nombreLignesReponse(nombreParagraphes) },
-      },
-    ],
-  };
 }
 
 /** Condition(s) d'existence — directement `exercice.ce`, jamais redérivée. */
@@ -237,6 +225,173 @@ function construireCorrectionEquationRationnelle(instance: ExerciceEquationRatio
   return construireParagraphesResolution(instance).map((fragments) => ({ type: "paragraphe", fragments }));
 }
 
+// ============================================================================
+// Feuilles enrichies (voir .claude/rules/feuilles-evaluations.md) : étapes du corrigé, énoncé
+// papier (énoncé + consigne globale, sans sous-questions), réponse brève, corrigé détaillé, barème.
+// Étapes = gestes de l'élève : CE, [simplifier], éliminer les dénominateurs, résoudre, vérifier
+// et conclure — les mêmes regroupements que le commentaire de tête, valeurs de l'instance.
+// ============================================================================
+
+type EtapeEquationRationnelle = "ce" | "simplifier" | "eliminer" | "resoudre" | "conclure";
+
+function etapesDe(instance: ExerciceEquationRationnelle): EtapeEquationRationnelle[] {
+  const simplifier = estCas4(instance) || instance.fractionsSimplifiables.length > 0;
+  return simplifier ? ["ce", "simplifier", "eliminer", "resoudre", "conclure"] : ["ce", "eliminer", "resoudre", "conclure"];
+}
+
+function lettreDe(instance: ExerciceEquationRationnelle, etape: EtapeEquationRationnelle): string {
+  return "abcde"[etapesDe(instance).indexOf(etape)];
+}
+
+function consigneEtape(instance: ExerciceEquationRationnelle, etape: EtapeEquationRationnelle): FragmentConsigne[] {
+  switch (etape) {
+    case "ce":
+      return [texte("Écris les conditions d'existence de l'équation.")];
+    case "simplifier":
+      if (estCas4(instance)) {
+        return [texte(`Factorise ${instance.construction === "p2_sur_p1" ? "le numérateur" : "le dénominateur"} de la fraction de gauche, puis simplifie-la.`)];
+      }
+      return [texte("Simplifie les fractions réductibles.")];
+    case "eliminer":
+      return [texte("Élimine les dénominateurs et ramène l'équation à une équation sans fraction.")];
+    case "resoudre":
+      return [texte("Résous l'équation obtenue.")];
+    case "conclure":
+      return [texte("Vérifie chaque solution avec les conditions d'existence et donne l'ensemble des solutions.")];
+  }
+}
+
+/** Étapes du raisonnement (titres « Étape n » du corrigé). */
+function construireEnonceEquationRationnelle(instance: ExerciceEquationRationnelle): SectionExercice {
+  return {
+    enteteFragments: [texte("On considère l'équation "), latex(formatEquationRationnelleLatex(instance)), texte(".")],
+    questions: etapesDe(instance).map((etape) => ({ consigne: consigneEtape(instance, etape) })),
+  };
+}
+
+function enoncePapierEquationRationnelle(instance: ExerciceEquationRationnelle): EnoncePapier {
+  return {
+    section: { enteteFragments: [texte("Résous dans ℝ l'équation "), latex(formatEquationRationnelleLatex(instance)), texte(".")], questions: [] },
+  };
+}
+
+function decisionsRacines(instance: ExerciceEquationRationnelle): { racine: number; rejetee: boolean }[] {
+  return racinesDistinctes(instance.equationIsolee.solution.racines).map((racine) => ({
+    racine,
+    rejetee: instance.ce.some((valeur) => Math.abs(valeur - racine) < 1e-6),
+  }));
+}
+
+function ensembleSolutionsLatex(instance: ExerciceEquationRationnelle): string {
+  const valides = decisionsRacines(instance).filter((d) => !d.rejetee).map((d) => d.racine).sort((a, b) => a - b);
+  return valides.length === 0 ? "S = \\varnothing" : `S = \\{${valides.map(formatNombre).join("\\ ;\\ ")}\\}`;
+}
+
+function ceLatex(instance: ExerciceEquationRationnelle): string {
+  return instance.ce.map((valeur) => `x \\neq ${formatNombre(valeur)}`).join(" \\text{ et } ");
+}
+
+function lignesSimplifier(instance: ExerciceEquationRationnelle, lettre: string): EtapeCorrection[] {
+  if (estCas4(instance)) {
+    const p2 = p2DeFractionGauche(instance);
+    const expressionP2 = instance.construction === "p2_sur_p1" ? formatEquationNumerateur(p2) : formatEquationDenominateur(p2);
+    return [
+      { label: "Factorisation", sousQuestion: lettre, fragments: [latex(expressionP2), texte(" : "), ...fragmentsResolution(p2)] },
+      { label: "Conclusion", sousQuestion: lettre, fragments: [texte("La fraction de gauche devient "), latex(formatFractionGaucheFactorisee(instance)), texte(", d'où "), latex(formatEquationRationnelleLatexApresSimplification(instance))] },
+    ];
+  }
+  return [
+    { label: "Méthode", sousQuestion: lettre, fragments: [texte("On simplifie par le facteur commun de chaque fraction réductible (sous les CE).")] },
+    { label: "Conclusion", sousQuestion: lettre, fragments: [latex(formatEquationRationnelleLatexApresSimplification(instance))] },
+  ];
+}
+
+function correctionDetailleeEquationRationnelle(instance: ExerciceEquationRationnelle): EtapeCorrection[] {
+  const lettre = (etape: EtapeEquationRationnelle) => lettreDe(instance, etape);
+  const decisions = decisionsRacines(instance);
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: lettre("ce"), fragments: [texte("Un dénominateur ne peut pas être nul : on exclut les valeurs qui annulent un dénominateur.")] },
+    { label: "Conclusion", sousQuestion: lettre("ce"), fragments: [texte("CE : "), latex(ceLatex(instance))] },
+  ];
+  if (etapesDe(instance).includes("simplifier")) lignes.push(...lignesSimplifier(instance, lettre("simplifier")));
+  lignes.push(
+    { label: "Méthode", sousQuestion: lettre("eliminer"), fragments: [texte("On multiplie les deux membres par le dénominateur commun (non nul sous les CE), puis on regroupe tout dans un membre.")] },
+    { label: "Conclusion", sousQuestion: lettre("eliminer"), fragments: [latex(formatEnonceLatex(instance.equationIsolee.enonce))] },
+    { label: "Calcul", sousQuestion: lettre("resoudre"), fragments: fragmentsResolution(instance.equationIsolee) },
+  );
+  const verification: FragmentConsigne[] = [];
+  decisions.forEach(({ racine, rejetee }, index) => {
+    if (index > 0) verification.push(texte(" ; "));
+    verification.push(latex(`x = ${formatNombre(racine)}`), texte(rejetee ? " est rejetée (elle annule un dénominateur)" : " respecte les CE"));
+  });
+  verification.push(texte("."));
+  lignes.push({ label: "Vérification", sousQuestion: lettre("conclure"), fragments: verification });
+  lignes.push({ label: "Conclusion", sousQuestion: lettre("conclure"), fragments: [latex(ensembleSolutionsLatex(instance))] });
+  const rejetees = decisions.filter((d) => d.rejetee);
+  if (rejetees.length > 0) {
+    lignes.push({
+      label: "Piège",
+      sousQuestion: lettre("conclure"),
+      fragments: [latex(`x = ${formatNombre(rejetees[0].racine)}`), texte(" vérifie l'équation sans fractions, mais annule un dénominateur de l'équation de départ : c'est une racine étrangère, à rejeter.")],
+    });
+  }
+  return lignes;
+}
+
+function reponseBreveEquationRationnelle(instance: ExerciceEquationRationnelle): FragmentConsigne[] {
+  return [latex(ensembleSolutionsLatex(instance))];
+}
+
+function difficulteEquationRationnelle(instance: ExerciceEquationRationnelle): 1 | 2 | 3 {
+  return estCas4(instance) || decisionsRacines(instance).some((d) => d.rejetee) ? 3 : 2;
+}
+
+const POIDS: Record<EtapeEquationRationnelle, number> = { ce: 1, simplifier: 0.5, eliminer: 1, resoudre: 1, conclure: 1 };
+
+function baremeEquationRationnelle(instance: ExerciceEquationRationnelle): BaremeExercice {
+  const etapes = etapesDe(instance);
+  const avecSimplification = etapes.includes("simplifier");
+  const critere = (etape: EtapeEquationRationnelle): FragmentConsigne[] => {
+    switch (etape) {
+      case "ce":
+        return [texte("Conditions d'existence : "), latex(ceLatex(instance))];
+      case "simplifier":
+        return [texte("Simplification correcte : "), latex(formatEquationRationnelleLatexApresSimplification(instance))];
+      case "eliminer":
+        return [texte("Équation sans fraction : "), latex(formatEnonceLatex(instance.equationIsolee.enonce))];
+      case "resoudre":
+        return [texte("Résolution de l'équation obtenue")];
+      case "conclure":
+        return [texte("Vérification des CE et ensemble des solutions : "), latex(ensembleSolutionsLatex(instance))];
+    }
+  };
+  const criteres: CritereBareme[] = etapes.map((etape) => ({
+    sousQuestion: lettreDe(instance, etape),
+    critere: critere(etape),
+    // Avec une étape de simplification, « éliminer » passe à 0,5 pour garder un total de 4.
+    points: avecSimplification && etape === "eliminer" ? 0.5 : POIDS[etape],
+  }));
+  const erreurs: ErreurFrequente[] = [
+    { description: [texte("Conditions d'existence oubliées")], cout: `0 pt sur ${lettreDe(instance, "ce")}) et ${lettreDe(instance, "conclure")})` },
+    { description: [texte("Un seul membre multiplié par le dénominateur commun")], cout: `0 pt sur ${lettreDe(instance, "eliminer")}), suite notée sans double pénalité` },
+  ];
+  if (decisionsRacines(instance).some((d) => d.rejetee)) {
+    erreurs.push({ description: [texte("Racine étrangère conservée dans l'ensemble des solutions")], cout: `0 pt sur ${lettreDe(instance, "conclure")})` });
+  }
+  if (instance.equationIsolee.categorie === "cas_general" && instance.equationIsolee.enonce.a !== 0) {
+    erreurs.push({ description: [texte("Erreur dans Δ ou dans la formule des racines")], cout: `0 pt sur ${lettreDe(instance, "resoudre")}), suite notée sans double pénalité` });
+  }
+  return {
+    reponseFinale: reponseBreveEquationRationnelle(instance),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [
+      [texte("Conditions d'existence écrites "), latex("x \\in \\mathbb{R} \\setminus \\{\\ldots\\}")],
+      [texte("Équation sans fraction sous une forme équivalente (non réduite, membres échangés)")],
+    ],
+  };
+}
+
 export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices<ExerciceEquationRationnelle> = {
   titreDocument: "L'inconnue au dénominateur — Évaluation",
   nomFichierBase: "equation-rationnelle",
@@ -245,7 +400,11 @@ export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteEquationRationnelleId),
   construireEnonce: construireEnonceEquationRationnelle,
   construireCorrection: construireCorrectionEquationRationnelle,
-  // Une seule question ouverte par instance (voir commentaire de tête) : pas de sous-questions
-  // lettrées, mais `regroupable` reste exclu car la consigne mentionne l'équation tirée
-  // (`latex(...)` dans `enteteFragments`), jamais une consigne générique indépendante de l'instance.
+  difficulte: difficulteEquationRationnelle,
+  reponseBreve: reponseBreveEquationRationnelle,
+  correctionDetaillee: correctionDetailleeEquationRationnelle,
+  bareme: baremeEquationRationnelle,
+  enoncePapier: enoncePapierEquationRationnelle,
+  dureeMinutes: 8,
+  // `regroupable` exclu : la consigne mentionne l'équation tirée, jamais générique.
 };
