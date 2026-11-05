@@ -1,4 +1,4 @@
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
+import type { AdaptateurFeuilleExercices, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import {
   genererEvaluationHtml,
@@ -320,6 +320,77 @@ function champsCommuns(el: ElementBase): Pick<ItemEvaluation, 'processus' | 'tit
   }
 }
 
+/** Le corrigé et la grille numérotent déjà « Étape n » : un préfixe « Étape n (libellé) — » porté
+ * par la consigne elle-même ne doit pas apparaître deux fois (« Étape n (libellé) : » d'un critère
+ * devient « libellé : »). */
+function sansPrefixeEtape(consigne: FragmentConsigne[]): FragmentConsigne[] {
+  const [premier, ...suite] = consigne
+  if (!premier || premier.type !== 'texte') return consigne
+  const reste = premier.valeur
+    .replace(/^Étape \d+(?: \([^)]*\))? — /, '')
+    .replace(/^Étape \d+ \(([^)]*)\) : /, '$1 : ')
+  return reste === premier.valeur ? consigne : [{ ...premier, valeur: reste }, ...suite]
+}
+
+/** Énoncé papier (`AdaptateurFeuilleExercices.enoncePapier`) : l'énoncé imprimé ne garde que
+ * l'énoncé et la consigne globale (et les vraies questions d'un problème) ; les sous-questions de
+ * `construireEnonce` — les étapes d'apprentissage du générateur — deviennent les étapes du corrigé
+ * (« Étape n — consigne », puis leur résolution). Les lettres d'étape du corrigé et du barème sont
+ * converties : numéro d'étape, et lettre de la question papier qui couvre l'étape s'il y en a
+ * plusieurs. La version aménagée garde son découpage (`enonceAmenage`). */
+function appliquerEnoncePapier(item: ItemEvaluation, papier: EnoncePapier): ItemEvaluation {
+  const etapes = item.section.questions
+  const numeroEtape = (lettre?: string) => {
+    if (!lettre) return undefined
+    const i = LETTRES.indexOf(lettre.toLowerCase().replace(/\)$/, ''))
+    return i >= 0 && i < etapes.length ? i + 1 : undefined
+  }
+  const plusieursQuestions = papier.section.questions.length > 1
+  const questionDeLEtape = new Map<string, string>()
+  papier.etapesParQuestion?.forEach((lettresEtapes, q) => {
+    for (const l of lettresEtapes) questionDeLEtape.set(l, LETTRES[q] ?? String(q + 1))
+  })
+  const questionPapier = (lettre?: string) => (plusieursQuestions && lettre ? questionDeLEtape.get(lettre.toLowerCase().replace(/\)$/, '')) : undefined)
+  // Renvois en clair (« 0 pt sur a) et b) », « en b) ») : vers la question papier si elle existe,
+  // sinon vers le numéro d'étape du corrigé.
+  const renvoi = (l: string) => questionPapier(l) ?? numeroEtape(l)
+  const reecrireRenvois = (t: string) =>
+    etapes.length < 2
+      ? t
+      : t.replace(/\b(sur|en) ([a-z])\)(?: et ([a-z])\))?/g, (tout, prep: string, l1: string, l2?: string) => {
+          const r1 = renvoi(l1)
+          const r2 = l2 ? renvoi(l2) : undefined
+          if (r1 === undefined || (l2 && r2 === undefined)) return tout
+          const q = typeof r1 === 'string'
+          if (r2 === undefined) return q ? `${prep} ${r1})` : `${prep === 'sur' ? 'sur' : 'à'} l'étape ${r1}`
+          return q ? `${prep} ${r1}) et ${r2})` : `${prep === 'sur' ? 'sur les' : 'aux'} étapes ${r1} et ${r2}`
+        })
+  const fragmentsPapier = (fr: FragmentConsigne[]) => fr.map((f) => (f.type === 'texte' ? { ...f, valeur: reecrireRenvois(f.valeur) } : f))
+  return {
+    ...item,
+    section: papier.section,
+    reponseBreve: papier.reponseBreve ?? item.reponseBreve,
+    etapesCorrige: etapes.length > 1 ? etapes.map((q, i) => ({ consigne: sansPrefixeEtape(q.consigne), question: questionPapier(LETTRES[i]) })) : undefined,
+    correctionDetaillee: item.correctionDetaillee?.map((e) => ({
+      ...e,
+      fragments: fragmentsPapier(e.fragments),
+      sousQuestion: questionPapier(e.sousQuestion),
+      etape: etapes.length > 1 ? numeroEtape(e.sousQuestion) : undefined,
+    })),
+    bareme: item.bareme && {
+      ...item.bareme,
+      criteres: item.bareme.criteres.map((c) => ({
+        ...c,
+        critere: fragmentsPapier(etapes.length > 1 ? sansPrefixeEtape(c.critere) : c.critere),
+        sousQuestion: questionPapier(c.sousQuestion),
+        etape: etapes.length > 1 ? numeroEtape(c.sousQuestion) : undefined,
+      })),
+      erreursFrequentes: item.bareme.erreursFrequentes?.map((e) => ({ description: fragmentsPapier(e.description), cout: e.cout && reecrireRenvois(e.cout) })),
+      reponsesAcceptees: item.bareme.reponsesAcceptees?.map(fragmentsPapier),
+    },
+  }
+}
+
 function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvaluation | null {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[el.generatorId]
   if (!adaptateur) return null
@@ -328,7 +399,7 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvalu
 
   if (tirees.length === 1) {
     const { inst, instance } = tirees[0]
-    return {
+    const item: ItemEvaluation = {
       ...communs,
       nature: 'exercice',
       points: inst.points,
@@ -342,6 +413,7 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvalu
       dureeMinutes: adaptateur.dureeMinutes,
       code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
     }
+    return adaptateur.enoncePapier ? appliquerEnoncePapier(item, adaptateur.enoncePapier(instance)) : item
   }
 
   // Regroupement (adaptateur `regroupable`) : une seule question, une ligne a)/b)/c) par instance.

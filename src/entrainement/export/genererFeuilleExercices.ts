@@ -81,6 +81,10 @@ export interface EtapeCorrection {
   label: string;
   fragments: FragmentConsigne[];
   sousQuestion?: string;
+  /** Numéro (1, 2…) de l'étape du raisonnement à laquelle se rattache cette ligne, quand l'énoncé
+   * papier n'a pas de sous-questions (`AdaptateurFeuilleExercices.enoncePapier`) — posé par le
+   * pipeline, jamais par l'adaptateur. */
+  etape?: number;
 }
 
 /** Un critère du barème — `points` est un POIDS : le rendu le ramène au total de points choisi
@@ -88,6 +92,8 @@ export interface EtapeCorrection {
  * dont la somme vaut 4 (total par défaut d'un exercice) quand c'est naturel. */
 export interface CritereBareme {
   sousQuestion?: string;
+  /** Voir `EtapeCorrection.etape`. */
+  etape?: number;
   critere: FragmentConsigne[];
   points: number;
 }
@@ -110,6 +116,23 @@ export interface BaremeExercice {
 
 /** Une étape de la version aménagée : une consigne courte par ligne, un rappel facultatif (indice
  * de méthode, jamais la réponse), et le poids de l'étape dans le barème. */
+/** Énoncé PAPIER d'un exercice (feuille d'exercices, évaluation) : l'énoncé et la consigne globale
+ * seulement. Les sous-questions de `construireEnonce` (une par écran du générateur) sont des étapes
+ * d'APPRENTISSAGE, propres au générateur interactif : sur papier, elles passent dans le corrigé
+ * (« Étape n — consigne », suivie de sa résolution), pas dans l'énoncé. Un problème peut garder de
+ * VRAIES questions distinctes (`section.questions`, a) b) c)…), chacune couvrant une ou plusieurs
+ * étapes. */
+export interface EnoncePapier {
+  section: SectionExercice;
+  /** Pour chaque question de `section.questions`, les lettres (« a », « b »…) des étapes de
+   * `construireEnonce` qu'elle couvre — les mêmes lettres que `sousQuestion` dans
+   * `correctionDetaillee` et `bareme`. Requis dès que `section.questions` n'est pas vide. */
+  etapesParQuestion?: string[][];
+  /** Réponse brève alignée sur l'énoncé papier, quand celle de `reponseBreve` est découpée par
+   * étape (« a) … ; b) … »). */
+  reponseBreve?: FragmentConsigne[];
+}
+
 export interface EtapeAmenagee {
   consigne: FragmentConsigne[];
   rappel?: FragmentConsigne[];
@@ -141,6 +164,10 @@ export interface AdaptateurFeuilleExercices<T> {
   /** Énoncé de la version aménagée, découpé en étapes ; à défaut, les sous-questions de
    * `construireEnonce` servent d'étapes. */
   enonceAmenage?: (instance: T) => EtapeAmenagee[];
+  /** Énoncé papier sans les étapes d'apprentissage (voir `EnoncePapier`) ; à défaut, les
+   * sous-questions de `construireEnonce` sont imprimées telles quelles. Ignoré quand plusieurs
+   * instances sont regroupées sous une question (`regroupable`). */
+  enoncePapier?: (instance: T) => EnoncePapier;
   /** Durée indicative d'une instance en évaluation, en minutes (estimation de durée du panneau). */
   dureeMinutes?: number;
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne

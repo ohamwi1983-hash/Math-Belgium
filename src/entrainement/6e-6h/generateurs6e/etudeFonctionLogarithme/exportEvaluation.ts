@@ -1,6 +1,6 @@
 import type { ExerciceEtudeFonctionLogarithme, ExerciceEtudeLogC } from "../../core6e/etudeFonctionLogarithme.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   EtapeAmenagee,
@@ -218,7 +218,7 @@ function baremeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme
       { description: [texte(piege.texte)], cout: piege.cout },
       { description: [texte("Inverser croissance et décroissance en oubliant le signe du coefficient devant le logarithme")], cout: "−1" },
     ],
-    reponsesAcceptees: [[texte("Positions exactes (e^{…}, fractions) ou valeurs approchées au centième si la forme exacte est donnée")], [texte("Domaine écrit en intervalles ou en notation d'ensemble")]],
+    reponsesAcceptees: [[texte("Positions exactes (puissances de e, fractions) ou valeurs approchées au centième si la forme exacte est donnée")], [texte("Domaine écrit en intervalles ou en notation d'ensemble")]],
   };
 }
 
@@ -244,6 +244,39 @@ function enonceAmenageEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLog
   });
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+const LIBELLE_PAPIER: Record<PhaseEtudeFonctionLogarithme, string> = {
+  domaine: "Domaine : ",
+  limites: "Limites : ",
+  asymptotes: "Asymptotes : ",
+  croissance: "Variations : ",
+  concavite: "Concavité : ",
+  graphique: "",
+};
+
+function enoncePapierEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): EnoncePapier {
+  const { enteteFragments, enteteHtml } = construireEnonceEtudeFonctionLogarithme(exercice);
+  return {
+    section: {
+      enteteFragments,
+      enteteHtml,
+      questions: [
+        {
+          consigne: [
+            texte(
+              "Étudie la fonction f : domaine de définition, limites aux bornes du domaine, asymptotes, variations et extremums, concavité et points d'inflexion (valeurs exactes ou arrondies au centième). Indique ensuite lequel des graphiques A à D représente f, et justifie.",
+            ),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [PHASES.map((phase) => LETTRE_SOUS_QUESTION[phase])],
+    reponseBreve: PHASES.flatMap((phase, i) => [texte(`${i === 0 ? "" : " ; "}${LIBELLE_PAPIER[phase]}`), latex(contenuRecapLatex(exercice, phase))]),
+  };
+}
+
 export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExercices<ExerciceEtudeFonctionLogarithme> = {
   titreDocument: "Étudier une fonction (synthèse, logarithmes) — Évaluation",
   nomFichierBase: "etude-fonction-logarithme",
@@ -257,5 +290,6 @@ export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExerc
   correctionDetaillee: correctionDetailleeEtudeFonctionLogarithme,
   bareme: baremeEtudeFonctionLogarithme,
   enonceAmenage: enonceAmenageEtudeFonctionLogarithme,
+  enoncePapier: enoncePapierEtudeFonctionLogarithme,
   dureeMinutes: 25,
 };

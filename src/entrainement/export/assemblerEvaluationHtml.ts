@@ -47,6 +47,10 @@ export interface ItemEvaluation {
   correctionDetaillee?: EtapeCorrection[];
   bareme?: BaremeExercice;
   enonceAmenage?: EtapeAmenagee[];
+  /** Étapes du raisonnement (anciennes sous-questions), quand l'énoncé imprimé n'a que la consigne
+   * globale (`AdaptateurFeuilleExercices.enoncePapier`) : le corrigé les affiche en titre de chaque
+   * groupe de lignes `EtapeCorrection.etape`. `question` : lettre de la question papier couverte. */
+  etapesCorrige?: { consigne: FragmentConsigne[]; question?: string }[];
   dureeMinutes?: number;
   /** Code reproductible de l'exercice (QR code de la feuille d'exercices, rappel dans la grille). */
   code?: { code: string; url: string };
@@ -191,6 +195,10 @@ td, th { font-size: inherit; }
 .etapes .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--accent); padding-top: 2px; }
 .piege { display: flex; gap: 10px; margin-top: 6px; padding: 7px 12px; background: #f3f5f8; border-radius: 6px; }
 .piege .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; color: var(--alerte); white-space: nowrap; padding-top: 2px; }
+.etape-titre { margin: 10px 0 4px; padding-top: 6px; border-top: 1px solid var(--filet); overflow-wrap: anywhere; }
+.etape-titre:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.etape-titre b { font-family: Archivo, Arial, sans-serif; font-size: 9pt; color: var(--accent); }
+.etape-num { font-family: Archivo, Arial, sans-serif; font-size: 8pt; font-weight: 600; color: var(--accent); }
 .etapes-libres p { margin: 0 0 0.55em; }
 @media print { body { padding: 0; width: auto; max-width: none; } }
 `;
@@ -230,6 +238,7 @@ table.bilan .relire { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt;
 .en-ligne .titre { font-family: Archivo, Arial, sans-serif; font-size: 10pt; font-weight: 700; display: block; }
 .en-ligne .url { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; color: var(--gris); }
 .corr { margin: 14px 0 0; break-inside: avoid; }
+.corr:has(.etape-titre) { break-inside: auto; }
 .corr h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; margin-bottom: 4px; }
 .corr h3 .notion { font-weight: 500; color: var(--gris); }
 .reponse-ancienne { color: inherit; }
@@ -259,6 +268,11 @@ const STYLE_EVALUATION = `
 .bloc-processus h2 { font-family: Archivo, Arial, sans-serif; font-size: 11.5pt; font-weight: 700; color: var(--accent); }
 .titre-section { font-family: Archivo, Arial, sans-serif; font-size: 9pt; color: var(--gris); margin: 8px 0 2px; }
 .question { margin: 8px 0 0; break-inside: avoid; page-break-inside: avoid; }
+/* Corrigé : une question corrigée pas à pas peut dépasser une page — elle se coupe ENTRE deux
+   étapes (titre d'étape jamais isolé en bas de page) plutôt que de laisser une page blanche. */
+.question:has(.correction-bloc) { break-inside: auto; page-break-inside: auto; }
+.ligne-titre, .etape-titre { break-after: avoid; page-break-after: avoid; }
+.etapes > *, .piege { break-inside: avoid; page-break-inside: avoid; }
 .question .ligne-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .question .num { font-weight: 700; }
 .correction-bloc { color: #1155cc; margin-top: 4px; }
@@ -367,8 +381,30 @@ function etapesCorrectionHtml(etapes: EtapeCorrection[]): string {
   return html;
 }
 
+/** Corrigé d'un énoncé papier sans sous-questions : chaque étape du raisonnement (ancienne
+ * sous-question du générateur) en titre, « Étape n — consigne », suivie de ses lignes. Les lignes
+ * sans étape (synthèse finale) viennent à la fin. */
+function etapesCorrigeParEtapeHtml(item: ItemEvaluation, lignes: EtapeCorrection[]): string {
+  const etapes = item.etapesCorrige ?? [];
+  let html = "";
+  etapes.forEach((etape, i) => {
+    const groupe = lignes.filter((e) => e.etape === i + 1);
+    if (groupe.length === 0) return;
+    const question = etape.question ? `${etape.question}) ` : "";
+    html += `<div class="etape-titre"><b>${question}Étape ${i + 1}</b> — ${fragmentsVersHtml(etape.consigne)}</div>`;
+    html += etapesCorrectionHtml(groupe.map((e) => ({ ...e, sousQuestion: undefined })));
+  });
+  const reste = lignes.filter((e) => e.etape === undefined || e.etape > etapes.length);
+  if (reste.length > 0) html += etapesCorrectionHtml(reste);
+  return html;
+}
+
 function correctionHtml(item: ItemEvaluation): string {
-  if (item.correctionDetaillee && item.correctionDetaillee.length > 0) return etapesCorrectionHtml(item.correctionDetaillee);
+  if (item.correctionDetaillee && item.correctionDetaillee.length > 0) {
+    return item.etapesCorrige && item.correctionDetaillee.some((e) => e.etape !== undefined)
+      ? etapesCorrigeParEtapeHtml(item, item.correctionDetaillee)
+      : etapesCorrectionHtml(item.correctionDetaillee);
+  }
   return `<div class="reponse-ancienne">${item.correction.map(blocCorrectionHtml).join("")}</div>`;
 }
 
@@ -574,7 +610,7 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
       }
       const pts = pointsCriteres(item);
       const criteres = item.bareme.criteres
-        .map((c, i) => `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(pts[i])}</b>`)
+        .map((c, i) => `<span>${c.sousQuestion ? `${echapperHtml(c.sousQuestion.replace(/\)$/, ""))}) ` : ""}${c.etape ? `<span class="etape-num">Étape ${c.etape}</span> ` : ""}${fragmentsVersHtml(c.critere)}</span><b>${nombreFr(pts[i])}</b>`)
         .join("");
       const erreurs = (item.bareme.erreursFrequentes ?? [])
         .map((e) => `${fragmentsVersHtml(e.description)}${e.cout ? ` → ${echapperHtml(e.cout)}` : ""}`)

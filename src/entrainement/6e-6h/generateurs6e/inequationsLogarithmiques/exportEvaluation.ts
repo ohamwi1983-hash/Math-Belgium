@@ -11,7 +11,7 @@ import type {
 } from "../../core6e/inequationsLogarithmiques.types";
 import type { EnsembleReelGuide } from "../../core6e/ensembleReel.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   ErreurFrequente,
@@ -651,6 +651,15 @@ function enonceAmenageInequationsLog(exercice: ExerciceInequationLogarithmique):
   }
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierInequationsLog(exercice: ExerciceInequationLogarithmique): EnoncePapier {
+  const discussion: FragmentConsigne[] =
+    exercice.famille === "F" ? [texte(", où "), latex("a>0"), texte(" et "), latex("a\\neq 1"), texte(". Distingue les cas "), latex("a>1"), texte(" et "), latex("0<a<1"), texte(".")] : [texte(".")];
+  return { section: { enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(formatEnonceLatex(exercice)), ...discussion], questions: [] } };
+}
+
 export const adaptateurEvaluationInequationsLogarithmiques: AdaptateurFeuilleExercices<ExerciceInequationLogarithmique> = {
   titreDocument: "Résoudre une inéquation logarithmique — Évaluation",
   nomFichierBase: "inequations-logarithmiques",
@@ -664,6 +673,7 @@ export const adaptateurEvaluationInequationsLogarithmiques: AdaptateurFeuilleExe
   correctionDetaillee: correctionDetailleeInequationsLog,
   bareme: baremeInequationsLog,
   enonceAmenage: enonceAmenageInequationsLog,
+  enoncePapier: enoncePapierInequationsLog,
   dureeMinutes: DUREE_MINUTES_INEQUATIONS_LOG,
   // Plusieurs questions par instance (1 à 4 selon la famille) ET consigne dépendante de l'instance
   // pour plusieurs familles (B/C mentionnent le sous-type, F mentionne le carré parfait) — aucune

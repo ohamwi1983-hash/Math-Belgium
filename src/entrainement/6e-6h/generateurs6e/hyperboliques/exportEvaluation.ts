@@ -1,6 +1,6 @@
 import type { ExerciceHyperboliques, ExerciceHyperboliquesB } from "../../core6e/hyperboliques.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   EtapeAmenagee,
@@ -174,7 +174,7 @@ function correctionDetailleeHyperboliques(exercice: ExerciceHyperboliques): Etap
     case "D": {
       const { a, b } = exercice;
       return [
-        { label: "Méthode", sousQuestion: "a", fragments: [texte("Remplacer sh(x) et ch(x) par leur définition, puis regrouper les termes en "), latex("e^x"), texte(" et en "), latex("e^{-x}"), texte(" : coefficient de "), latex("e^x"), texte(" = (a+b)/2, de "), latex("e^{-x}"), texte(" = (b−a)/2.")] },
+        { label: "Méthode", sousQuestion: "a", fragments: [texte("Remplacer sh(x) et ch(x) par leur définition, puis regrouper les termes en "), latex("e^x"), texte(" et en "), latex("e^{-x}"), texte(" : coefficient de "), latex("e^x"), texte(" : "), latex("\\dfrac{a+b}{2}"), texte(", de "), latex("e^{-x}"), texte(" : "), latex("\\dfrac{b-a}{2}"), texte(".")] },
         { label: "Calcul", sousQuestion: "a", fragments: [latex(`f(x) = ${formatFormeExponentielleD(exercice)}`)] },
         { label: "Limites", sousQuestion: "b", fragments: [texte("En +∞, "), latex("e^{-x}\\to 0"), texte(` : le terme en eˣ domine, de coefficient a+b = ${a + b}. En −∞, `), latex("e^{x}\\to 0"), texte(` : le terme en e⁻ˣ domine, de coefficient b−a = ${b - a}.`)] },
         { label: "Conclusion", sousQuestion: "b", fragments: [latex(reponseAttendueLatex(exercice, "dLimites"))] },
@@ -289,6 +289,32 @@ function enonceAmenageHyperboliques(exercice: ExerciceHyperboliques): EtapeAmena
   }
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierHyperboliques(exercice: ExerciceHyperboliques): EnoncePapier {
+  const { enteteFragments, questions } = construireEnonceHyperboliques(exercice);
+  const lettres = questions.map((_, i) => "abcdefghijklmnopqrstuvwxyz"[i]);
+  switch (exercice.famille) {
+    case "A":
+    case "B":
+      // Une seule question : elle EST la consigne globale.
+      return { section: { enteteFragments, questions }, etapesParQuestion: [lettres] };
+    case "C":
+      return {
+        section: { enteteFragments, questions: [{ consigne: [texte("Calcule f'(x) et f''(x).")] }] },
+        etapesParQuestion: [lettres],
+        reponseBreve: [latex(`f'(x) = ${formatDeriveeC(exercice)}`), texte(" ; "), latex(`f''(x) = ${formatDeriveeSecondeC(exercice)}`)],
+      };
+    case "D":
+      return {
+        section: { enteteFragments, questions: [{ consigne: [texte("Détermine les limites de f en "), latex("-\\infty"), texte(" et en "), latex("+\\infty"), texte(".")] }] },
+        etapesParQuestion: [lettres],
+        reponseBreve: [latex(reponseAttendueLatex(exercice, "dLimites"))],
+      };
+  }
+}
+
 export const adaptateurEvaluationHyperboliques: AdaptateurFeuilleExercices<ExerciceHyperboliques> = {
   titreDocument: "Sinus et cosinus hyperboliques (sh, ch) — Évaluation",
   nomFichierBase: "hyperboliques",
@@ -302,6 +328,7 @@ export const adaptateurEvaluationHyperboliques: AdaptateurFeuilleExercices<Exerc
   correctionDetaillee: correctionDetailleeHyperboliques,
   bareme: baremeHyperboliques,
   enonceAmenage: enonceAmenageHyperboliques,
+  enoncePapier: enoncePapierHyperboliques,
   dureeMinutes: 6,
 };
 

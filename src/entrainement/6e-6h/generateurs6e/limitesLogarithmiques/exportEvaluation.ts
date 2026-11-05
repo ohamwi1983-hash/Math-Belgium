@@ -1,5 +1,5 @@
 import type { CibleLimiteLog, ExerciceLimiteLogarithmique, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../../core6e/limitesLogarithmiques.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex, formeFactoriseeA } from "../../ui6e/formatLimitesLogarithmiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./index";
@@ -366,6 +366,13 @@ function enonceAmenage(exercice: ExerciceLimiteLogarithmique): EtapeAmenagee[] {
   ];
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapier(exercice: ExerciceLimiteLogarithmique): EnoncePapier {
+  return { section: { ...construireEnonceLimitesLogarithmiques(exercice), questions: [] } };
+}
+
 export const adaptateurEvaluationLimitesLogarithmiques: AdaptateurFeuilleExercices<ExerciceLimiteLogarithmique> = {
   titreDocument: "Calcul de limites (fonctions logarithmes) — Évaluation",
   nomFichierBase: "limites-logarithmiques",
@@ -379,5 +386,6 @@ export const adaptateurEvaluationLimitesLogarithmiques: AdaptateurFeuilleExercic
   correctionDetaillee,
   bareme,
   enonceAmenage,
+  enoncePapier: enoncePapier,
   dureeMinutes: 5,
 };

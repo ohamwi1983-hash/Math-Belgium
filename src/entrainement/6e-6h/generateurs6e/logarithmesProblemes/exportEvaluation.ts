@@ -1,6 +1,6 @@
 import type { ExerciceLogarithmesProblemes } from "../../core6e/logarithmesProblemes.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   EtapeAmenagee,
@@ -200,6 +200,71 @@ function enonceAmenageLogarithmesProblemes(exercice: ExerciceLogarithmesProbleme
   return phasesPourExercice(exercice).map((phase, i) => ({ consigne: consigneEcran(exercice, phase), rappel: fragmentsAide1(exercice, phase), points: poids[i] }));
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+/** Retire le renvoi à l'étape d'avant (« À partir de la demi-vie T trouvée à l'étape précédente, »,
+ * « À partir de a et b, »…) : sur papier, chaque question se lit seule. */
+function sansRenvoi(consigne: FragmentConsigne[]): FragmentConsigne[] {
+  const [premier, ...suite] = consigne;
+  if (!premier || premier.type !== "texte") return consigne;
+  const reste = premier.valeur.replace(/^À partir (?:de a et b|(?:de la|du|de l'|des|de) [^,]*?(?:étape précédente|obtenue?s?|donnée|trouvée)[^,]*), /, "");
+  if (reste === premier.valeur) return consigne;
+  return [texte(reste.charAt(0).toUpperCase() + reste.slice(1)), ...suite];
+}
+
+function consigneFinaleA(exercice: ExerciceLogarithmesProblemes): FragmentConsigne[] {
+  if (exercice.famille !== "A") return [];
+  if (exercice.sousType === "resoudreT") {
+    return exercice.variante === "simple"
+      ? [texte("Détermine le nombre entier de périodes à partir duquel le seuil est atteint.")]
+      : [texte("Pour chacun des deux seuils, détermine le nombre entier de périodes à partir duquel il est atteint.")];
+  }
+  if (exercice.sousType === "resoudreTaux") return [texte("Détermine le taux i, arrondi au dix-millième (ou en pourcentage).")];
+  return [texte("On modélise la quantité restante par "), latex("Q(t)=Q_0\\,e^{-kt}"), texte(". Détermine le taux de décroissance k, arrondi au dix-millième.")];
+}
+
+function enoncePapierLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): EnoncePapier {
+  const phases = phasesPourExercice(exercice);
+  const donnees = blocDonnees(exercice);
+  const modele: FragmentConsigne[] = exercice.famille === "F" ? [texte(" On la modélise par "), latex("y(t)=\\dfrac{k}{1+a\\,e^{-rt}}"), texte(".")] : [];
+  const enteteFragments: FragmentConsigne[] = [...consigneGenerale(exercice), ...modele, ...(donnees.length > 0 ? [texte(" Données : "), latex(donnees.join(",\\quad ")), texte(".")] : [])];
+  const lettre = (i: number) => "abcdefghijklmnopqrstuvwxyz"[i];
+  if (exercice.famille === "A") {
+    return { section: { enteteFragments, questions: [{ consigne: consigneFinaleA(exercice) }] }, etapesParQuestion: [phases.map((_, i) => lettre(i))], reponseBreve: fragmentsReponse(exercice, "aEcran3") };
+  }
+  if (exercice.famille === "B") {
+    return {
+      section: {
+        enteteFragments,
+        questions: [
+          { consigne: [texte("On suppose une évolution exponentielle "), latex("Q(t)=Q_0\\cdot r^{t}"), texte(". Détermine r et "), latex("Q_0"), texte(".")] },
+          { consigne: sansRenvoi(consigneEcran(exercice, "bEcran3")) },
+          { consigne: sansRenvoi(consigneEcran(exercice, "bEcran4")) },
+        ],
+      },
+      etapesParQuestion: [["a", "b"], ["c"], ["d"]],
+      reponseBreve: [
+        texte("a) r : "),
+        ...fragmentsReponse(exercice, "bEcran1"),
+        texte(" ; "),
+        latex("Q_0"),
+        texte(" : "),
+        ...fragmentsReponse(exercice, "bEcran2"),
+        texte(" ; b) "),
+        ...fragmentsReponse(exercice, "bEcran3"),
+        texte(" ; c) "),
+        ...fragmentsReponse(exercice, "bEcran4"),
+      ],
+    };
+  }
+  // C, E, F : chaque étape est une vraie question du problème (une question par étape).
+  return {
+    section: { enteteFragments, questions: phases.map((phase) => ({ consigne: sansRenvoi(consigneEcran(exercice, phase)) })) },
+    etapesParQuestion: phases.map((_, i) => [lettre(i)]),
+  };
+}
+
 export const adaptateurEvaluationLogarithmesProblemes: AdaptateurFeuilleExercices<ExerciceLogarithmesProblemes> = {
   titreDocument: "Logarithmes : problèmes — Évaluation",
   nomFichierBase: "logarithmes-problemes",
@@ -213,5 +278,6 @@ export const adaptateurEvaluationLogarithmesProblemes: AdaptateurFeuilleExercice
   correctionDetaillee: correctionDetailleeLogarithmesProblemes,
   bareme: baremeLogarithmesProblemes,
   enonceAmenage: enonceAmenageLogarithmesProblemes,
+  enoncePapier: enoncePapierLogarithmesProblemes,
   dureeMinutes: 12,
 };

@@ -9,7 +9,7 @@ import type {
   FamilleEquationsExpLog,
 } from "../../core6e/equationsExpLog.types";
 import type { PhaseEquationsExpLog } from "../../moteur6e/typesEquationsExpLog";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeAmenagee, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeAmenagee, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
@@ -624,6 +624,14 @@ function enonceAmenageEquationsExpLog(exercice: ExerciceEquationsExpLog): EtapeA
   }
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierEquationsExpLog(exercice: ExerciceEquationsExpLog): EnoncePapier {
+  const precision = exercice.famille === "A" || exercice.famille === "B" || exercice.famille === "C" ? " Donne chaque solution en valeur exacte ou arrondie au millième." : "";
+  return { section: { enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(blocDonnees(exercice)[0]), texte(`.${precision}`)], questions: [] } };
+}
+
 export const adaptateurEvaluationEquationsExpLog: AdaptateurFeuilleExercices<ExerciceEquationsExpLog> = {
   titreDocument: "Résoudre une équation exponentielle ou logarithmique — Évaluation",
   nomFichierBase: "equations-exp-log",
@@ -637,5 +645,6 @@ export const adaptateurEvaluationEquationsExpLog: AdaptateurFeuilleExercices<Exe
   correctionDetaillee: correctionDetailleeEquationsExpLog,
   bareme: baremeEquationsExpLog,
   enonceAmenage: enonceAmenageEquationsExpLog,
+  enoncePapier: enoncePapierEquationsExpLog,
   dureeMinutes: DUREE_MINUTES_EQUATIONS_EXP_LOG,
 };

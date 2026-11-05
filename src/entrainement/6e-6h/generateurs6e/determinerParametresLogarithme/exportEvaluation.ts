@@ -1,5 +1,5 @@
 import type { ExerciceDeterminerParametresLogarithme } from "../../core6e/determinerParametresLogarithme.types";
-import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex, ordonneeSecondeMarque } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
@@ -203,6 +203,19 @@ function enonceAmenage(exercice: ExerciceDeterminerParametresLogarithme): EtapeA
   ];
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapier(exercice: ExerciceDeterminerParametresLogarithme): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [...CONSIGNE_GENERALE.slice(0, 2), texte(", où a et b sont des nombres entiers. Retrouve a et b à partir du graphique, puis écris l'expression de f(x). Sur le graphique : "), ...descriptionGraphique(exercice, true)],
+      enteteHtml: construireSvgParametresLogarithme(exercice),
+      questions: [],
+    },
+  };
+}
+
 export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuilleExercices<ExerciceDeterminerParametresLogarithme> = {
   titreDocument: "Paramètres depuis des conditions graphiques — Évaluation",
   nomFichierBase: "determiner-parametres-logarithme",
@@ -216,5 +229,6 @@ export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuil
   correctionDetaillee,
   bareme,
   enonceAmenage,
+  enoncePapier: enoncePapier,
   dureeMinutes: 6,
 };

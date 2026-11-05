@@ -1,6 +1,6 @@
 import type { ExerciceDomaineDeriveeLogarithme, FamilleDomaineDeriveeLogarithme } from "../../core6e/domaineDeriveeLogarithme.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
@@ -300,6 +300,14 @@ function difficulteDomaineDeriveeLogarithme(exercice: Exercice): 1 | 2 | 3 {
 // Dispatch public + export de l'adaptateur.
 // ============================================================================
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierDomaineDeriveeLogarithme(exercice: ExerciceDomaineDeriveeLogarithme): EnoncePapier {
+  const consigne = exercice.famille === "G" ? "Calcule f'(x)." : "Détermine le domaine de définition de f, puis calcule f'(x).";
+  return { section: { enteteFragments: [texte("Soit "), latex(blocDonnees(exercice)[0]), texte(`. ${consigne}`)], questions: [] } };
+}
+
 export const adaptateurEvaluationDomaineDeriveeLogarithme: AdaptateurFeuilleExercices<ExerciceDomaineDeriveeLogarithme> = {
   titreDocument: "Domaine, dérivée et dérivation logarithmique — Évaluation",
   nomFichierBase: "domaine-derivee-logarithme",
@@ -313,6 +321,7 @@ export const adaptateurEvaluationDomaineDeriveeLogarithme: AdaptateurFeuilleExer
   correctionDetaillee: correctionDetailleeDomaineDeriveeLogarithme,
   bareme: baremeDomaineDeriveeLogarithme,
   enonceAmenage: enonceAmenageDomaineDeriveeLogarithme,
+  enoncePapier: enoncePapierDomaineDeriveeLogarithme,
   dureeMinutes: 6,
   // Nombre de questions VARIABLE selon la famille (2 pour A/B/F, 3 pour C/D/E/G) et en-tête
   // dépendant de l'instance (`blocDonnees`) — aucune des conditions de `regroupable` n'est réunie.

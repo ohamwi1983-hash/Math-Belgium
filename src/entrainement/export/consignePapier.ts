@@ -62,10 +62,16 @@ function sectionPapier(section: SectionExercice): SectionExercice {
 
 /** Adaptateur identique, dont l'énoncé (normal et aménagé) est passé en version papier. */
 export function versionPapier<T>(adaptateur: AdaptateurFeuilleExercices<T>): AdaptateurFeuilleExercices<T> {
-  const { construireEnonce, enonceAmenage } = adaptateur;
+  const { construireEnonce, enonceAmenage, enoncePapier } = adaptateur;
   return {
     ...adaptateur,
     construireEnonce: (instance) => sectionPapier(construireEnonce(instance)),
+    enoncePapier: enoncePapier
+      ? (instance) => {
+          const papier = enoncePapier(instance);
+          return { ...papier, section: sectionPapier(papier.section) };
+        }
+      : undefined,
     enonceAmenage: enonceAmenage
       ? (instance) => enonceAmenage(instance).map((e) => ({ ...e, consigne: consignePapier(e.consigne), rappel: consignePapier(e.rappel) }))
       : undefined,

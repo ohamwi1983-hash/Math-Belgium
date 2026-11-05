@@ -1,6 +1,6 @@
 import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarithme.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
@@ -230,6 +230,13 @@ function enonceAmenageProprietesLogarithme(exercice: ExerciceProprieteLogarithme
   });
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierProprietesLogarithme(exercice: ExerciceProprieteLogarithme): EnoncePapier {
+  return { section: { enteteFragments: [...consigneGenerale(exercice), texte(" "), latex(expressionDemandeeLatex(exercice)), texte(".")], questions: [] } };
+}
+
 export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercices<ExerciceProprieteLogarithme> = {
   titreDocument: "Propriétés du logarithme — Évaluation",
   nomFichierBase: "proprietes-logarithme",
@@ -243,6 +250,7 @@ export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercice
   correctionDetaillee: correctionDetailleeProprietesLogarithme,
   bareme: baremeProprietesLogarithme,
   enonceAmenage: enonceAmenageProprietesLogarithme,
+  enoncePapier: enoncePapierProprietesLogarithme,
   dureeMinutes: 7,
   // Nombre de questions VARIABLE par instance (3 ou 4, selon la combinaison tirée) et consigne de
   // chaque écran dépendante de la caractéristique réellement testée — ni "1 seule question", ni

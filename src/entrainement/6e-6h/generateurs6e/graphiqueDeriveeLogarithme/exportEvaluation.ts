@@ -1,6 +1,6 @@
 import type { ExerciceGraphiqueDeriveeLogarithme } from "../../core6e/graphiqueDeriveeLogarithme.types";
 import type {
-  AdaptateurFeuilleExercices,
+  AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
   EtapeAmenagee,
@@ -162,7 +162,7 @@ function baremeGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLoga
   const erreurs: BaremeExercice["erreursFrequentes"] = [{ description: [texte("Choisir le graphique de signe opposé (confondre croissance de f et signe de f')")], cout: "0 pt sur le choix" }];
   if (exercice.famille === "A") {
     erreurs.push({ description: [texte("Règle du quotient mal appliquée (oubli du carré x² au dénominateur)")], cout: "−1" });
-    if (!exercice.baseEstE) erreurs.push({ description: [texte(`Oublier le facteur 1/ln(${exercice.base}) de la dérivée de log_${exercice.base}(x)`)], cout: "−1" });
+    if (!exercice.baseEstE) erreurs.push({ description: [texte("Oublier le facteur "), latex(`\\dfrac{1}{\\ln(${exercice.base})}`), texte(" de la dérivée de "), latex(`\\log_{${exercice.base}}(x)`)], cout: "−1" });
   } else if (exercice.famille === "B") {
     erreurs.push({ description: [texte("Oublier un des deux termes de la règle du produit")], cout: "−1" });
   } else {
@@ -192,6 +192,18 @@ function enonceAmenageGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeri
   ];
 }
 
+/** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
+ * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
+ * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
+function enoncePapierGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): EnoncePapier {
+  const { enteteFragments, enteteHtml } = construireEnonceGraphiqueDeriveeLogarithme(exercice);
+  return {
+    section: { enteteFragments, enteteHtml, questions: [{ consigne: [texte("Indique lequel des graphiques A à D représente f'(x) et justifie à partir du graphique de f, puis confirme ton choix en calculant f'(x).")] }] },
+    etapesParQuestion: [["a", "b"]],
+    reponseBreve: [texte(`graphique ${lettreCorrecte(exercice)} ; `), latex(formatDeriveeCorrecteLatex(exercice))],
+  };
+}
+
 export const adaptateurEvaluationGraphiqueDeriveeLogarithme: AdaptateurFeuilleExercices<ExerciceGraphiqueDeriveeLogarithme> = {
   titreDocument: "Graphique de la dérivée (fonctions logarithmes) — Évaluation",
   nomFichierBase: "graphique-derivee-logarithme",
@@ -205,5 +217,6 @@ export const adaptateurEvaluationGraphiqueDeriveeLogarithme: AdaptateurFeuilleEx
   correctionDetaillee: correctionDetailleeGraphiqueDeriveeLogarithme,
   bareme: baremeGraphiqueDeriveeLogarithme,
   enonceAmenage: enonceAmenageGraphiqueDeriveeLogarithme,
+  enoncePapier: enoncePapierGraphiqueDeriveeLogarithme,
   dureeMinutes: 8,
 };
