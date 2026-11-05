@@ -5,7 +5,6 @@ import type {
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -292,57 +291,6 @@ function baremeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanonique
   };
 }
 
-function enonceAmenageFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanoniqueFonctionReference): EtapeAmenagee[] {
-  const reconnaitre: EtapeAmenagee = {
-    consigne: [texte("Reconnais la fonction de référence g cachée dans f.")],
-    rappel: [texte("Regarde ce qui enveloppe x : un carré, un cube, une racine, une fraction ou une valeur absolue.")],
-    points: 0.5,
-  };
-  const conclure: EtapeAmenagee = { consigne: [texte("Écris la forme canonique de f.")], points: 0.5 };
-  switch (exercice.formeDepart.type) {
-    case "carre":
-      return [
-        reconnaitre,
-        { consigne: [texte("Mets le coefficient de x² en évidence dans les termes en x.")], rappel: [latex("ax^2 + bx = a\\left(x^2 + \\dfrac{b}{a}x\\right)")], points: 1 },
-        { consigne: [texte("Complète le carré.")], rappel: [latex("x^2 + 2kx = (x + k)^2 - k^2")], points: 1 },
-        { consigne: [texte("Distribue le coefficient et regroupe les constantes.")], rappel: [texte("Le terme soustrait est lui aussi multiplié par le coefficient.")], points: 1 },
-        conclure,
-      ];
-    case "inverse":
-      return [
-        reconnaitre,
-        { consigne: [texte("Écris le numérateur à l'aide du dénominateur.")], rappel: [latex("ax + b = \\dfrac{a}{c}(cx + d) + \\text{reste}")], points: 1 },
-        { consigne: [texte("Sépare la fraction en deux termes.")], points: 1 },
-        { consigne: [texte("Mets le coefficient de x en évidence au dénominateur pour faire apparaître x − p.")], points: 1 },
-        conclure,
-      ];
-    case "cube":
-      return [
-        reconnaitre,
-        { consigne: [texte("Mets le coefficient de x en évidence à l'intérieur des parenthèses.")], points: 1 },
-        { consigne: [texte("Fais sortir ce coefficient du cube.")], rappel: [latex("(b\\cdot u)^3 = b^3\\cdot u^3")], points: 1 },
-        { consigne: [texte("Multiplie par le facteur placé devant, puis garde le terme constant.")], points: 1 },
-        conclure,
-      ];
-    case "racine_carree":
-    case "racine_cubique":
-      return [
-        reconnaitre,
-        { consigne: [texte("Mets le coefficient de x en évidence sous la racine.")], rappel: [latex("ax + b = a\\left(x + \\dfrac{b}{a}\\right)")], points: 1.5 },
-        { consigne: [texte("Garde ce coefficient sous la racine ; recopie le facteur devant et le terme constant.")], points: 1.5 },
-        conclure,
-      ];
-    case "valeur_absolue":
-      return [
-        reconnaitre,
-        { consigne: [texte("Mets le coefficient de x en évidence dans la valeur absolue.")], points: 1 },
-        { consigne: [texte("Fais sortir ce coefficient de la valeur absolue.")], rappel: [latex("|a\\cdot u| = |a|\\cdot|u|")], points: 1 },
-        { consigne: [texte("Multiplie par le facteur placé devant, puis garde le terme constant.")], points: 1 },
-        conclure,
-      ];
-  }
-}
-
 export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference> = {
   titreDocument: "Transformer une fonction de référence — forme canonique — Évaluation",
   nomFichierBase: "forme-canonique-fonctions-reference",
@@ -355,7 +303,6 @@ export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeu
   reponseBreve: reponseBreveFormeCanoniqueFonctionsReference,
   correctionDetaillee: correctionDetailleeFormeCanoniqueFonctionsReference,
   bareme: baremeFormeCanoniqueFonctionsReference,
-  enonceAmenage: enonceAmenageFormeCanoniqueFonctionsReference,
   enoncePapier: enoncePapierFormeCanoniqueFonctionsReference,
   dureeMinutes: 5,
   regroupable: true,

@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -59,7 +58,7 @@ function construireCorrectionLogarithmesProblemes(exercice: ExerciceLogarithmesP
 
 // ============================================================================
 // Feuille d'exercices / évaluation enrichies — difficulté, réponse brève, corrigé détaillé, barème,
-// version aménagée. Résultats : `formatReponseAttenduePhaseLatex` (ceux de l'appli) ; méthodes :
+// Résultats : `formatReponseAttenduePhaseLatex` (ceux de l'appli) ; méthodes :
 // aides de niveau 1 ; calculs intermédiaires : LaTeX des aides de niveau 2 (jamais leur texte, qui
 // s'adresse à l'élève en cours de résolution).
 // ============================================================================
@@ -195,11 +194,6 @@ function baremeLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): Bar
   };
 }
 
-function enonceAmenageLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes): EtapeAmenagee[] {
-  const poids = poidsPhases(exercice);
-  return phasesPourExercice(exercice).map((phase, i) => ({ consigne: consigneEcran(exercice, phase), rappel: fragmentsAide1(exercice, phase), points: poids[i] }));
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -277,7 +271,6 @@ export const adaptateurEvaluationLogarithmesProblemes: AdaptateurFeuilleExercice
   reponseBreve: reponseBreveLogarithmesProblemes,
   correctionDetaillee: correctionDetailleeLogarithmesProblemes,
   bareme: baremeLogarithmesProblemes,
-  enonceAmenage: enonceAmenageLogarithmesProblemes,
   enoncePapier: enoncePapierLogarithmesProblemes,
   dureeMinutes: 12,
 };

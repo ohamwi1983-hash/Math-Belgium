@@ -8,7 +8,6 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -248,7 +247,7 @@ function construireCorrectionCaracteristiquesAlgebriques(instance: ExerciceCarac
 }
 
 // ============================================================================
-// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème, version aménagée) —
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème) —
 // méthode `.claude/rules/feuilles-evaluations.md`. Toutes les valeurs viennent des MÊMES fonctions
 // que l'écran interactif (`ceAttendues`, `domaineAttendu`, `pariteAttendue`, `zerosNiveau1`,
 // `formatEquationIsoleeLatex`...) : jamais une seconde source.
@@ -502,38 +501,6 @@ function baremeCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlg
   };
 }
 
-function enonceAmenageCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): EtapeAmenagee[] {
-  const avecIntermediaire = equationIsoleeAdmetSolution(instance);
-  const etapes: EtapeAmenagee[] = [
-    {
-      consigne: [texte("Écris les conditions d'existence de f, s'il en existe.")],
-      rappel: [texte("Un dénominateur doit être non nul ; ce qui est sous une racine carrée doit être positif ou nul. Le carré, le cube, la racine cubique et la valeur absolue n'imposent aucune condition.")],
-      points: 0.5,
-    },
-    { consigne: [texte("Donne le domaine de définition de f.")], rappel: [texte("Il découle directement des conditions d'existence.")], points: 0.5 },
-    { consigne: [texte("Calcule l'ordonnée à l'origine f(0), ou explique pourquoi elle n'existe pas.")], rappel: [texte("Vérifie d'abord que 0 appartient au domaine.")], points: 0.5 },
-    {
-      consigne: [texte("Calcule f(−x), compare-le à f(x) et à −f(x), puis conclus : paire, impaire, ou ni l'une ni l'autre.")],
-      rappel: [texte("Paire : "), latex("f(-x) = f(x)"), texte(" ; impaire : "), latex("f(-x) = -f(x)"), texte(". Le domaine doit d'abord être symétrique par rapport à 0.")],
-      points: 1,
-    },
-    { consigne: [texte(instructionIsolement(instance.famille))], rappel: [texte("Fais passer la constante dans l'autre membre, en changeant son signe.")], points: 0.5 },
-  ];
-  if (avecIntermediaire) {
-    etapes.push({
-      consigne: [texte(necessiteSeparation(instance) ? "Écris les deux équations du premier degré obtenues." : instructionDebarrasser(instance.famille))],
-      rappel: [latex(proprieteIntermediaireLatex(instance.famille))],
-      points: 0.5,
-    });
-  }
-  etapes.push({
-    consigne: [texte("Donne les zéros de f.")],
-    rappel: [texte("Résous chaque équation du premier degré. Si l'équation isolée demande qu'un carré, une valeur absolue ou une racine carrée vaille un nombre négatif, il n'y a aucun zéro.")],
-    points: avecIntermediaire ? 0.5 : 1,
-  });
-  return etapes;
-}
-
 /** Énoncé papier : la fonction et la consigne globale — les 6 ou 7 sous-questions sont les étapes
  * des écrans, reprises dans le corrigé. */
 function enoncePapierCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): EnoncePapier {
@@ -561,7 +528,6 @@ export const adaptateurEvaluationCaracteristiquesAlgebriques: AdaptateurFeuilleE
   reponseBreve: reponseBreveCaracteristiquesAlgebriques,
   correctionDetaillee: correctionDetailleeCaracteristiquesAlgebriques,
   bareme: baremeCaracteristiquesAlgebriques,
-  enonceAmenage: enonceAmenageCaracteristiquesAlgebriques,
   enoncePapier: enoncePapierCaracteristiquesAlgebriques,
   dureeMinutes: 8,
 };

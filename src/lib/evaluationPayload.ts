@@ -3676,8 +3676,8 @@ export interface EnTeteEvaluation {
    * série anti-triche (voir `EnteteEvaluation.mode` côté plateforme-maths,
    * `assemblerEvaluationHtml.ts`). `'evaluation'`/absent = comportement historique (`/admin`). */
   mode?: 'evaluation' | 'exercice'
-  /** Génération locale uniquement : produire aussi la version aménagée (police lisible, une
-   * question par page, étapes). */
+  /** Génération locale uniquement : produire aussi la version aménagée (même énoncé, police
+   * lisible, une question par page). */
   versionAmenagee?: boolean
   /** Génération locale uniquement : surtitre « 6e (6h) · Chapitre 3 », titre du chapitre et adresse
    * de sa page (feuille d'exercices). */

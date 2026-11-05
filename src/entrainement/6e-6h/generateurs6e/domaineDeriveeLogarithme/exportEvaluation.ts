@@ -5,7 +5,6 @@ import type {
   BlocCorrection,
   CritereBareme,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -77,7 +76,7 @@ function construireCorrectionDomaineDeriveeLogarithme(exercice: ExerciceDomaineD
 }
 
 // ============================================================================
-// Champs enrichis (corrigé détaillé, barème, version aménagée) — tout est CALCULÉ à partir des mêmes
+// Champs enrichis (corrigé détaillé, barème) — tout est CALCULÉ à partir des mêmes
 // sources que l'écran interactif : `reponseAttendueLatex` (réponses), `formatEnsembleReelLatex`
 // (domaine), `aideNiveau1` (rappel de méthode, jamais la réponse — audit 6e ch. 3, point 9) et
 // `aideNiveau2` (ingrédients intermédiaires u, u′, conditions non résolues...), ce dernier écarté
@@ -121,11 +120,6 @@ function piegeDomaine(exercice: Exercice): string | null {
   if (exercice.famille === "D" && exercice.sousType === "expoSurLn") return "\\ln(x) \\neq 0 \\iff x \\neq 1";
   if (exercice.famille === "F" && exercice.sousType === "arctanLog") return `1-\\log_{${exercice.base}}(x) \\neq 0 \\iff x \\neq ${exercice.base}`;
   return null;
-}
-
-function rappelPhase(exercice: Exercice, phase: Phase): FragmentConsigne[] {
-  const a = aideNiveau1(exercice, phase);
-  return a.latex ? [texte(`${a.texte} `), latex(a.latex)] : [texte(a.texte)];
 }
 
 /** Libellé court de l'écran (corrigé, barème). */
@@ -257,26 +251,6 @@ function baremeDomaineDeriveeLogarithme(exercice: Exercice): BaremeExercice {
   return { reponseFinale: reponseBreveDomaineDeriveeLogarithme(exercice), criteres, erreursFrequentes: erreursFrequentes(exercice), reponsesAcceptees: acceptees };
 }
 
-/** Consigne de l'étape « ingrédients » d'une dérivée en un bloc (A, B, F). */
-function consigneIngredients(exercice: Exercice): FragmentConsigne[] {
-  if (exercice.famille === "B" && exercice.sousType === "doubleContrainte") return [texte("Écris la fonction sous la racine, "), latex("w(x)"), texte(", et sa dérivée "), latex("w'(x)"), texte(".")];
-  if (exercice.famille === "F") return [texte("Décompose f en fonctions emboîtées et dérive chaque niveau séparément.")];
-  return [texte("Écris l'argument du logarithme, "), latex("u(x)"), texte(", et sa dérivée "), latex("u'(x)"), texte(".")];
-}
-
-function enonceAmenageDomaineDeriveeLogarithme(exercice: Exercice): EtapeAmenagee[] {
-  return phasesDeLExercice(exercice).flatMap((phase): EtapeAmenagee[] => {
-    const poids = poidsPhase(exercice, phase);
-    if (estDeriveeEnUnBloc(phase)) {
-      return [
-        { consigne: consigneIngredients(exercice), rappel: [texte("La dérivée de l'intérieur sert dans la règle de la chaîne.")], points: 1 },
-        { consigne: [texte("Remplace dans la formule, puis simplifie "), latex("f'(x)"), texte(".")], rappel: rappelPhase(exercice, phase), points: poids - 1 },
-      ];
-    }
-    return [{ consigne: consigneEcran(exercice, phase), rappel: rappelPhase(exercice, phase), points: poids }];
-  });
-}
-
 function difficulteDomaineDeriveeLogarithme(exercice: Exercice): 1 | 2 | 3 {
   switch (exercice.famille) {
     case "A":
@@ -320,7 +294,6 @@ export const adaptateurEvaluationDomaineDeriveeLogarithme: AdaptateurFeuilleExer
   reponseBreve: reponseBreveDomaineDeriveeLogarithme,
   correctionDetaillee: correctionDetailleeDomaineDeriveeLogarithme,
   bareme: baremeDomaineDeriveeLogarithme,
-  enonceAmenage: enonceAmenageDomaineDeriveeLogarithme,
   enoncePapier: enoncePapierDomaineDeriveeLogarithme,
   dureeMinutes: 6,
   // Nombre de questions VARIABLE selon la famille (2 pour A/B/F, 3 pour C/D/E/G) et en-tête

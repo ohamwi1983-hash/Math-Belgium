@@ -4,7 +4,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   EnoncePapier,
-  EtapeAmenagee,
   EtapeCorrection,
   ErreurFrequente,
   FragmentConsigne,
@@ -164,7 +163,7 @@ function construireCorrectionFonctionsReference(exercice: ExerciceFonctionRefere
 }
 
 // ============================================================================
-// Feuilles enrichies (difficulté, réponse brève, corrigé détaillé, barème, version aménagée). Les
+// Feuilles enrichies (difficulté, réponse brève, corrigé détaillé, barème). Les
 // équations viennent TOUJOURS de `formatEquationFonctionReferenceLatex` (la même fonction que la
 // réponse révélée de l'écran) et les points de `pointUnitaire` (le même que le graphe de l'écran).
 // Étapes (lettres du corrigé et du barème) : a) famille, b) translations, c) facteur et symétries,
@@ -351,34 +350,6 @@ function baremeFonctionsReference(exercice: ExerciceFonctionReference): BaremeEx
   };
 }
 
-function enonceAmenageFonctionsReference(exercice: ExerciceFonctionReference): EtapeAmenagee[] {
-  const inverse = exercice.famille === "inverse";
-  return [
-    {
-      consigne: [texte("Reconnais la fonction de référence à la forme de la courbe.")],
-      rappel: [texte("Parabole : "), latex("x^2"), texte(" ; courbe en V : "), latex("|x|"), texte(" ; hyperbole : "), latex("\\dfrac{1}{x}"), texte(" ; demi-branche : "), latex("\\sqrt{x}"), texte(" ; courbe en S : "), latex("x^3"), texte(" ou "), latex("\\sqrt[3]{x}"), texte(".")],
-      points: 1,
-    },
-    {
-      consigne: [texte("Lis les coordonnées du point caractéristique : elles donnent les deux translations.")],
-      rappel: inverse
-        ? [texte("Pour "), latex("\\dfrac{1}{x}"), texte(", ce point est le centre, à l'intersection des asymptotes.")]
-        : [texte("C'est le point "), latex("(0\\,;\\,0)"), texte(" de la fonction de référence, après déplacement.")],
-      points: 1,
-    },
-    {
-      consigne: [texte("Calcule l'écart horizontal et l'écart vertical entre le point croix et le point caractéristique.")],
-      rappel: [texte("Pour la fonction de référence, les deux écarts valent 1. Un écart différent de 1 indique un étirement ou une compression ; un écart négatif, une symétrie.")],
-      points: 1,
-    },
-    {
-      consigne: [texte("Écris l'équation de f.")],
-      rappel: [texte("Le signe dans l'argument est l'opposé du sens de la translation horizontale.")],
-      points: 1,
-    },
-  ];
-}
-
 export const adaptateurEvaluationFonctionsReference: AdaptateurFeuilleExercices<ExerciceFonctionReference> = {
   titreDocument: "Transformer une fonction de référence — Évaluation",
   nomFichierBase: "fonctions-reference",
@@ -391,7 +362,6 @@ export const adaptateurEvaluationFonctionsReference: AdaptateurFeuilleExercices<
   reponseBreve: reponseBreveFonctionsReference,
   correctionDetaillee: correctionDetailleeFonctionsReference,
   bareme: baremeFonctionsReference,
-  enonceAmenage: enonceAmenageFonctionsReference,
   enoncePapier: enoncePapierFonctionsReference,
   dureeMinutes: 5,
 };

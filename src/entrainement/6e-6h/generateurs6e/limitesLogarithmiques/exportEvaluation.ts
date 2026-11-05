@@ -1,5 +1,5 @@
 import type { CibleLimiteLog, ExerciceLimiteLogarithmique, ExerciceLimiteLogA, ExerciceLimiteLogB, ExerciceLimiteLogC } from "../../core6e/limitesLogarithmiques.types";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, configDiagnosticPartiesC, consigneEcran, formatCategorieLabel, formatCibleTexte, formatLimiteEnonceLatex, formatReformulationBLatex, formeFactoriseeA } from "../../ui6e/formatLimitesLogarithmiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLimiteLogarithmique } from "./index";
@@ -114,8 +114,7 @@ function construireCorrectionLimitesLogarithmiques(exercice: ExerciceLimiteLogar
 }
 
 // ============================================================================
-// Champs de la refonte des feuilles (difficulté, réponse brève, corrigé détaillé, barème, version
-// aménagée) — tout est calculé à partir de l'instance, avec les mêmes formes exactes que le corrigé.
+// Champs de la refonte des feuilles (difficulté, réponse brève, corrigé détaillé, barème) — tout est calculé à partir de l'instance, avec les mêmes formes exactes que le corrigé.
 // ============================================================================
 
 const HIERARCHIE_LATEX = "\\ln(x) \\ll x^n \\ll b^x \\ (b>1)";
@@ -341,31 +340,6 @@ function bareme(exercice: ExerciceLimiteLogarithmique): BaremeExercice {
   return { reponseFinale: finale, criteres, erreursFrequentes, ...(reponsesAcceptees.length > 0 ? { reponsesAcceptees } : {}) };
 }
 
-function enonceAmenage(exercice: ExerciceLimiteLogarithmique): EtapeAmenagee[] {
-  if (exercice.famille === "A") {
-    return [
-      { consigne: [texte("Trouve le terme dominant du numérateur.")], rappel: [texte("Hiérarchie à l'infini : "), latex(HIERARCHIE_LATEX), texte(".")], points: 1 },
-      { consigne: [texte("Trouve le terme dominant du dénominateur.")], points: 1 },
-      { consigne: [texte("Mets ces termes dominants en évidence en haut et en bas.")], points: 1 },
-      { consigne: [texte("Conclus : donne la limite (valeur exacte si elle est finie).")], points: 1 },
-    ];
-  }
-  if (exercice.famille === "B") {
-    return [
-      { consigne: [texte("Pose "), latex("u = \\dfrac{x}{x_0} - 1"), texte(" et écris x en fonction de u.")], rappel: [texte("Quand x tend vers "), latex(`x_0 = ${exercice.x0}`), texte(", u tend vers 0.")], points: 1 },
-      { consigne: [texte("Réécris l'expression en fonction de u.")], rappel: [latex("\\log_b(a) = \\dfrac{\\ln(a)}{\\ln(b)}"), texte(".")], points: 1 },
-      { consigne: [texte("Fais apparaître "), latex("\\dfrac{\\ln(1+u)}{u}"), texte(".")], rappel: [latex(REFERENCE_LATEX), texte(".")], points: 1 },
-      { consigne: [texte("Conclus : donne la limite exacte.")], points: 1 },
-    ];
-  }
-  const { label1, label2 } = partiesC(exercice);
-  return [
-    { consigne: [texte(`Calcule la limite de la partie « ${label1.toLowerCase()} ».`)], rappel: [texte("Remplace x par la valeur vers laquelle il tend.")], points: 1 },
-    { consigne: [texte(`Calcule la limite de la partie « ${label2.toLowerCase()} ».`)], rappel: [texte("Si elle tend vers 0, précise de quel côté (0⁺ ou 0⁻).")], points: 1 },
-    { consigne: [texte("Conclus : donne la limite, avec son signe.")], rappel: [texte("Pense à la règle des signes.")], points: 2 },
-  ];
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -385,7 +359,6 @@ export const adaptateurEvaluationLimitesLogarithmiques: AdaptateurFeuilleExercic
   reponseBreve,
   correctionDetaillee,
   bareme,
-  enonceAmenage,
   enoncePapier: enoncePapier,
   dureeMinutes: 5,
 };

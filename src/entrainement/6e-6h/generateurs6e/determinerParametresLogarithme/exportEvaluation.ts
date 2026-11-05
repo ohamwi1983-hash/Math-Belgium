@@ -1,5 +1,5 @@
 import type { ExerciceDeterminerParametresLogarithme } from "../../core6e/determinerParametresLogarithme.types";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex, ordonneeSecondeMarque } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
@@ -174,35 +174,6 @@ function bareme(exercice: ExerciceDeterminerParametresLogarithme): BaremeExercic
   };
 }
 
-function enonceAmenage(exercice: ExerciceDeterminerParametresLogarithme): EtapeAmenagee[] {
-  const etape2: EtapeAmenagee =
-    exercice.variante === "pente"
-      ? {
-          consigne: [texte("Lis sur le graphique la pente de la tangente en x = 1.")],
-          rappel: [texte("Avance d'une unité vers la droite et compte de combien la tangente monte ou descend.")],
-          points: 1,
-        }
-      : {
-          consigne: [texte(`Écris l'équation donnée par le point ${exercice.lettrePoint2}.`)],
-          rappel: [texte("Son ordonnée est l'image de son abscisse : "), latex(exercice.variante === "pointE" ? "f(e) = a + b\\cdot\\ln(e)" : "f(e^2) = a + b\\cdot\\ln(e^2)"), texte(".")],
-          points: 1,
-        };
-  const etape3: EtapeAmenagee =
-    exercice.variante === "pente"
-      ? { consigne: [texte("Déduis-en la valeur de b.")], rappel: [latex("f'(x) = \\dfrac{b}{x}"), texte(", donc la pente en x = 1 vaut b.")], points: 1 }
-      : { consigne: [texte("Résous cette équation pour trouver b.")], rappel: [texte("Remplace a par la valeur trouvée à l'étape 1.")], points: 1 };
-  return [
-    {
-      consigne: [texte(`Lis l'ordonnée du point ${exercice.lettrePoint1}, d'abscisse 1 : c'est la valeur de a.`)],
-      rappel: [texte("ln(1) = 0, donc "), latex("f(1) = a"), texte(".")],
-      points: 1,
-    },
-    etape2,
-    etape3,
-    { consigne: [texte("Écris l'expression complète de "), latex("f(x)"), texte(".")], points: 1 },
-  ];
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -228,7 +199,6 @@ export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuil
   reponseBreve,
   correctionDetaillee,
   bareme,
-  enonceAmenage,
   enoncePapier: enoncePapier,
   dureeMinutes: 6,
 };

@@ -114,14 +114,12 @@ export interface BaremeExercice {
   reponsesAcceptees?: FragmentConsigne[][];
 }
 
-/** Une étape de la version aménagée : une consigne courte par ligne, un rappel facultatif (indice
- * de méthode, jamais la réponse), et le poids de l'étape dans le barème. */
 /** Énoncé PAPIER d'un exercice (feuille d'exercices, évaluation) : l'énoncé et la consigne globale
  * seulement. Les sous-questions de `construireEnonce` (une par écran du générateur) sont des étapes
  * d'APPRENTISSAGE, propres au générateur interactif : sur papier, elles passent dans le corrigé
  * (« Étape n — consigne », suivie de sa résolution), pas dans l'énoncé. Un problème peut garder de
  * VRAIES questions distinctes (`section.questions`, a) b) c)…), chacune couvrant une ou plusieurs
- * étapes. */
+ * étapes. La version aménagée imprime ce MÊME énoncé (seule la mise en page change). */
 export interface EnoncePapier {
   section: SectionExercice;
   /** Pour chaque question de `section.questions`, les lettres (« a », « b »…) des étapes de
@@ -131,12 +129,6 @@ export interface EnoncePapier {
   /** Réponse brève alignée sur l'énoncé papier, quand celle de `reponseBreve` est découpée par
    * étape (« a) … ; b) … »). */
   reponseBreve?: FragmentConsigne[];
-}
-
-export interface EtapeAmenagee {
-  consigne: FragmentConsigne[];
-  rappel?: FragmentConsigne[];
-  points?: number;
 }
 
 export interface AdaptateurFeuilleExercices<T> {
@@ -161,9 +153,6 @@ export interface AdaptateurFeuilleExercices<T> {
   correctionDetaillee?: (instance: T) => EtapeCorrection[];
   /** Barème détaillé (grille de correction de l'évaluation, points par sous-question). */
   bareme?: (instance: T) => BaremeExercice;
-  /** Énoncé de la version aménagée, découpé en étapes ; à défaut, les sous-questions de
-   * `construireEnonce` servent d'étapes. */
-  enonceAmenage?: (instance: T) => EtapeAmenagee[];
   /** Énoncé papier sans les étapes d'apprentissage (voir `EnoncePapier`) ; à défaut, les
    * sous-questions de `construireEnonce` sont imprimées telles quelles. Ignoré quand plusieurs
    * instances sont regroupées sous une question (`regroupable`). */

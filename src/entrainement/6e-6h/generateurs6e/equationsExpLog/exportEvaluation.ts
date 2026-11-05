@@ -9,7 +9,7 @@ import type {
   FamilleEquationsExpLog,
 } from "../../core6e/equationsExpLog.types";
 import type { PhaseEquationsExpLog } from "../../moteur6e/typesEquationsExpLog";
-import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeAmenagee, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, EnoncePapier, BaremeExercice, BlocCorrection, CritereBareme, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
@@ -91,11 +91,11 @@ function construireCorrectionEquationsExpLog(exercice: ExerciceEquationsExpLog):
 }
 
 // ============================================================================
-// Feuilles enrichies (corrigé détaillé, barème, version aménagée). Les réponses viennent TOUJOURS
+// Feuilles enrichies (corrigé détaillé, barème). Les réponses viennent TOUJOURS
 // de `formatReponseAttenduePhaseLatex` (la même fonction que `construireCorrection` et que la
 // réponse révélée de l'écran interactif) ; les étapes intermédiaires (discriminant, racines
 // rejetées, valeur testée dans la CE) sont recalculées depuis les paramètres de l'instance.
-// Barème : 4 critères d'1 point, en correspondance 1-1 avec les 4 étapes de la version aménagée.
+// Barème : 4 critères d'1 point, en correspondance 1-1 avec les 4 étapes du corrigé.
 // ============================================================================
 
 /** Réponse(s) attendue(s) d'une phase (LaTeX), identiques au corrigé historique. */
@@ -238,16 +238,6 @@ function baremeA(ex: ExerciceEqLogA): BaremeExercice {
   return { reponseFinale: reponseBreveEquationsExpLog(ex), criteres, erreursFrequentes: erreurs, reponsesAcceptees: acceptees };
 }
 
-function amenageA(ex: ExerciceEqLogA): EtapeAmenagee[] {
-  const base = String(ex.base);
-  return [
-    { consigne: [texte("Le second membre est-il une puissance de "), latex(base), texte(" ? Si oui, écris-le sous cette forme.")], rappel: [texte("Pense aux exposants 0 et négatifs : "), latex(`${base}^{0}=1`), texte(", "), latex(`${base}^{-1}=\\dfrac{1}{${base}}`), texte(".")], points: 1 },
-    { consigne: [texte("Écris l'équation vérifiée par l'exposant "), latex(formatAffineLatex(ex.m, ex.n)), texte(".")], rappel: [texte("Sinon, prends le logarithme : "), latex(`${base}^{u}=C\\iff u=\\dfrac{\\ln(C)}{\\ln(${base})}`), texte(".")], points: 1 },
-    { consigne: [texte("Isole x dans cette équation du premier degré.")], rappel: [texte("Enlève d'abord le terme constant, puis divise par le coefficient de x.")], points: 1 },
-    { consigne: [texte("Donne x en valeur exacte ou arrondie au millième.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille B
 
 function egaliteRegroupeeB(ex: ExerciceEqLogB): string {
@@ -297,15 +287,6 @@ function erreurParenthesesB(ex: ExerciceEqLogB): ErreurFrequente[] {
   if (!membre) return [];
   const faux = `${formatAffineLatex(membre.m, 0)}${membre.n > 0 ? "+" : "-"}${Math.abs(membre.n)}\\ln(${membre.base})`;
   return [{ description: [texte("Parenthèses oubliées : "), latex(faux), texte(" au lieu de "), latex(`(${formatAffineLatex(membre.m, membre.n)})\\ln(${membre.base})`)], cout: "−1" }];
-}
-
-function amenageB(ex: ExerciceEqLogB): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Prends le logarithme népérien des deux membres.")], rappel: [texte("Les bases "), latex(`${ex.base1}`), texte(" et "), latex(`${ex.base2}`), texte(" sont différentes : on ne peut pas égaler les exposants.")], points: 1 },
-    { consigne: [texte("Fais descendre chaque exposant devant son ln.")], rappel: [latex("\\ln(a^u)=u\\cdot\\ln(a)"), texte(" : garde des parenthèses autour de u.")], points: 1 },
-    { consigne: [texte("Regroupe les termes en x d'un côté, les autres de l'autre côté.")], rappel: [texte("Développe d'abord, puis mets x en évidence.")], points: 1 },
-    { consigne: [texte("Isole x : valeur exacte ou arrondie au millième.")], points: 1 },
-  ];
 }
 
 // ---------------------------------------------------------------------------- Famille C
@@ -365,16 +346,6 @@ function baremeC(ex: ExerciceEqLogC): BaremeExercice {
   };
 }
 
-function amenageC(ex: ExerciceEqLogC): EtapeAmenagee[] {
-  const b = formatBaseLatex(ex.base);
-  return [
-    { consigne: [texte("Pose "), latex(`t=${b}^{x}`), texte(" et réécris l'équation avec t seulement.")], rappel: [latex(`${b}^{2x}=\\left(${b}^{x}\\right)^{2}`)], points: 1 },
-    { consigne: [texte("Résous l'équation du second degré en t.")], rappel: [latex("\\Delta=b^{2}-4ac"), texte(", puis "), latex("t=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}")], points: 1 },
-    { consigne: [texte("Barre les valeurs de t impossibles.")], rappel: [latex(`${b}^{x}`), texte(" est toujours strictement positif.")], points: 1 },
-    { consigne: [texte("Pour chaque t restant, calcule x, puis donne S.")], rappel: [latex(`${b}^{x}=t\\iff x=\\dfrac{\\ln(t)}{\\ln(${b})}`)], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille D
 
 function puissanceDLatex(ex: ExerciceEqLogD): string {
@@ -417,15 +388,6 @@ function reponsesAccepteesD(ex: ExerciceEqLogD): FragmentConsigne[][] {
   return acceptees;
 }
 
-function amenageD(ex: ExerciceEqLogD): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence.")], rappel: [texte("Ce qui est dans le logarithme doit être strictement positif.")], points: 1 },
-    { consigne: [texte("Enlève le logarithme : écris x comme une puissance de "), latex(String(ex.a)), texte(".")], rappel: [latex("\\log_a(x)=k\\iff x=a^{k}")], points: 1 },
-    { consigne: [texte("Calcule cette puissance.")], rappel: ex.k < 0 ? [latex("a^{-n}=\\dfrac{1}{a^{n}}")] : ex.k === 0 ? [latex("a^{0}=1")] : undefined, points: 1 },
-    { consigne: [texte("Ta réponse respecte-t-elle la condition ? Conclus.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille E
 
 function correctionE(ex: ExerciceEqLogE): EtapeCorrection[] {
@@ -464,16 +426,6 @@ function baremeE(ex: ExerciceEqLogE): BaremeExercice {
     erreursFrequentes: erreurs,
     reponsesAcceptees: [[texte("CE écrite sous forme d'intervalle")], [texte("Équation développée "), latex(`${polynomeELatex(ex)}=0`), texte(" à la place de la forme produit en b)")]],
   };
-}
-
-function amenageE(ex: ExerciceEqLogE): EtapeAmenagee[] {
-  const b = formatBaseLatex(ex.base);
-  return [
-    { consigne: [texte("Écris la condition d'existence.")], rappel: [texte("Chacun des trois arguments doit être strictement positif ; garde la condition la plus forte.")], points: 1 },
-    { consigne: [texte("Écris le membre de gauche avec un seul logarithme, puis égale les arguments.")], rappel: [latex(`\\log_{${b}}(A)+\\log_{${b}}(B)=\\log_{${b}}(A\\cdot B)`)], points: 1 },
-    { consigne: [texte("Développe et résous l'équation du second degré.")], rappel: [latex("\\Delta=b^{2}-4ac")], points: 1 },
-    { consigne: [texte("Garde seulement les racines qui respectent la condition. Conclus.")], points: 1 },
-  ];
 }
 
 // ---------------------------------------------------------------------------- Famille G
@@ -561,16 +513,6 @@ function baremeG(ex: ExerciceEqLogG): BaremeExercice {
   };
 }
 
-function amenageG(ex: ExerciceEqLogG): EtapeAmenagee[] {
-  const methode: FragmentConsigne[] = ex.type === "identite" ? [texte("Écris le membre de gauche avec un seul logarithme.")] : [texte("Les deux membres ont la même base : égale les arguments.")];
-  return [
-    { consigne: methode, rappel: ex.type === "identite" ? [latex("\\log_b(A)+\\log_b(B)=\\log_b(A\\cdot B)")] : [latex("\\log_b(A)=\\log_b(B)\\iff A=B")], points: 1 },
-    { consigne: [texte("Simplifie l'équation obtenue au maximum.")], points: 1 },
-    { consigne: [texte("Écris la condition d'existence de l'équation de départ.")], rappel: [texte("Chaque argument doit être strictement positif.")], points: 1 },
-    { consigne: [texte("Compare ton résultat à cette condition et conclus.")], rappel: [texte("Trois issues possibles : aucune solution, ou tous les x de la condition.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Dispatch
 
 function correctionDetailleeEquationsExpLog(exercice: ExerciceEquationsExpLog): EtapeCorrection[] {
@@ -607,23 +549,6 @@ function baremeEquationsExpLog(exercice: ExerciceEquationsExpLog): BaremeExercic
   }
 }
 
-function enonceAmenageEquationsExpLog(exercice: ExerciceEquationsExpLog): EtapeAmenagee[] {
-  switch (exercice.famille) {
-    case "A":
-      return amenageA(exercice);
-    case "B":
-      return amenageB(exercice);
-    case "C":
-      return amenageC(exercice);
-    case "D":
-      return amenageD(exercice);
-    case "E":
-      return amenageE(exercice);
-    case "G":
-      return amenageG(exercice);
-  }
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -644,7 +569,6 @@ export const adaptateurEvaluationEquationsExpLog: AdaptateurFeuilleExercices<Exe
   reponseBreve: reponseBreveEquationsExpLog,
   correctionDetaillee: correctionDetailleeEquationsExpLog,
   bareme: baremeEquationsExpLog,
-  enonceAmenage: enonceAmenageEquationsExpLog,
   enoncePapier: enoncePapierEquationsExpLog,
   dureeMinutes: DUREE_MINUTES_EQUATIONS_EXP_LOG,
 };
