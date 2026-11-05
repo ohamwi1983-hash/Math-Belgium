@@ -157,8 +157,15 @@ const STYLE_COMMUN = `
 @page { size: A4; margin: 1.3cm 1.5cm; }
 * { box-sizing: border-box; }
 :root { --encre: #1b1d22; --gris: #4a4f58; --filet: #b9bec7; --accent: #1d5b8f; --fond-doux: #eef3f8; --alerte: #9a3b12; --bon: #2f6b3a; }
-body { margin: 0 auto; max-width: 21cm; padding: 0.8cm 1cm; color: var(--encre); background: #fff;
+body { margin: 0 auto; width: 21cm; max-width: 21cm; padding: 0.8cm 1cm; color: var(--encre); background: #fff;
   font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-size: 11.5pt; line-height: 1.5; }
+/* Document A4 : largeur fixe (une page imprimée), jamais compressé par un écran étroit — le
+   viewport « width=820 » fait dézoomer les téléphones au lieu de réagencer la page. Les formules
+   restent dans leur bloc : une formule display trop large défile au lieu de déborder, le texte
+   coupe les mots trop longs. */
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.ex-texte, .entete, .carte, .etapes > *, .cartouche .g, td, th { overflow-wrap: anywhere; min-width: 0; }
+img, svg { max-width: 100%; }
 .sans { font-family: Archivo, Arial, Helvetica, sans-serif; }
 p { margin: 0.35em 0; }
 h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
@@ -185,7 +192,7 @@ td, th { font-size: inherit; }
 .piege { display: flex; gap: 10px; margin-top: 6px; padding: 7px 12px; background: #f3f5f8; border-radius: 6px; }
 .piege .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; color: var(--alerte); white-space: nowrap; padding-top: 2px; }
 .etapes-libres p { margin: 0 0 0.55em; }
-@media print { body { padding: 0; } }
+@media print { body { padding: 0; width: auto; max-width: none; } }
 `;
 
 const STYLE_FEUILLE = `
@@ -293,7 +300,7 @@ function documentHtml(titre: string, corps: string, css: string, cssKatex: strin
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=820">
 <title>${echapperHtml(titre)}</title>
 ${police === "amenagee" ? POLICE_AMENAGEE : POLICES_STANDARD}
 <style>${cssKatex}${STYLE_COMMUN}${css}</style>
