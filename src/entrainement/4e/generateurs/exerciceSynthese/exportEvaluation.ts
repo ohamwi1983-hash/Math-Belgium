@@ -459,7 +459,7 @@ const PIEGE_QUESTION: Partial<Record<QuestionSynthese, string>> = {
 
 /** Libellés du tableau des écarts (`correctionDispersion`), en LaTeX. */
 const LIBELLE_LATEX_TABLEAU: Record<string, string> = {
-  "x_i (ou centre)": "x_i\\ (\\text{ou centre})",
+  "x_i (ou centre)": "x_i",
   n_i: "n_i",
   "(x_i-x̄)² · n_i": "(x_i-\\bar{x})^2 \\cdot n_i",
 };
@@ -475,9 +475,11 @@ function blocsVersLignes(blocs: BlocCorrection[], sousQuestion: string): EtapeCo
       return fragments.some((f) => f.valeur.trim() !== "") ? [{ label, sousQuestion, fragments }] : [];
     }
     if (bloc.type === "tableau") {
-      const colonnes = bloc.valeursParLigne[0]?.map(() => "c").join("") ?? "";
-      const lignes = bloc.libellesLignes.map((libelle, k) => `${LIBELLE_LATEX_TABLEAU[libelle] ?? `\\text{${libelle}}`} & ${bloc.valeursParLigne[k].join(" & ")}`).join(" \\\\ ");
-      return [{ label, sousQuestion, fragments: [latex(virgulesLatex(`\\begin{array}{l|${colonnes}} ${lignes} \\end{array}`))] }];
+      // Tableau VERTICAL (une ligne par valeur, 3 colonnes) : l'horizontal déborde du corrigé dès 6 valeurs.
+      const entetes = bloc.libellesLignes.map((libelle) => LIBELLE_LATEX_TABLEAU[libelle] ?? `\\text{${libelle}}`).join(" & ");
+      const lignes = (bloc.valeursParLigne[0] ?? []).map((_, k) => bloc.valeursParLigne.map((ligne) => ligne[k]).join(" & ")).join(" \\\\ ");
+      const colonnes = bloc.libellesLignes.map(() => "c").join("|");
+      return [{ label, sousQuestion, fragments: [latex(virgulesLatex(`\\begin{array}{${colonnes}} ${entetes} \\\\ \\hline ${lignes} \\end{array}`))] }];
     }
     return [];
   });
