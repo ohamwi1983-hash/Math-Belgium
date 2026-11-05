@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -84,7 +83,7 @@ function construireCorrectionHyperboliques(exercice: ExerciceHyperboliques): Blo
 
 // ============================================================================
 // Feuille d'exercices / évaluation enrichies — difficulté, réponse brève, corrigé détaillé, barème,
-// version aménagée. Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
+// Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
 // ============================================================================
 
 const SH = "\\operatorname{sh}";
@@ -251,44 +250,6 @@ function baremeHyperboliques(exercice: ExerciceHyperboliques): BaremeExercice {
   }
 }
 
-function enonceAmenageHyperboliques(exercice: ExerciceHyperboliques): EtapeAmenagee[] {
-  switch (exercice.famille) {
-    case "A":
-      return [
-        { consigne: [texte("Écris f(−x) : remplace chaque x par −x dans "), latex(fonctionLatex(exercice)), texte(".")], points: 1 },
-        { consigne: [texte("Simplifie avec la parité de sh et de ch.")], rappel: [latex(`${SH}(-x)=-${SH}(x)`), texte(" et "), latex(`${CH}(-x)=${CH}(x)`)], points: 1 },
-        { consigne: [texte("Compare ton résultat à f(x), puis à −f(x).")], points: 1 },
-        { consigne: [texte("Conclus : f est paire, impaire, ou ni l'une ni l'autre.")], rappel: [texte("Paire : f(−x) = f(x). Impaire : f(−x) = −f(x).")], points: 1 },
-      ];
-    case "B": {
-      const inconnue = exercice.sousType === "trouverCh" ? "ch(x₀)" : "sh(x₀)";
-      return [
-        { consigne: [texte("Écris l'identité qui relie ch et sh.")], rappel: [texte("Elle ressemble à cos² + sin² = 1, avec un signe moins.")], points: 1 },
-        { consigne: [texte(`Remplace la valeur donnée et calcule le carré de ${inconnue}.`)], points: 1 },
-        { consigne: [texte(`Prends la racine carrée et simplifie : c'est la valeur exacte de ${inconnue}.`)], points: 1 },
-        {
-          consigne: [texte(exercice.sousType === "trouverCh" ? "Choisis le signe de ch(x₀)." : exercice.signeX0 === null ? "Le signe de x₀ n'est pas donné : combien de valeurs conviennent ?" : "Utilise le signe de x₀ pour choisir le signe de sh(x₀).")],
-          rappel: [texte(exercice.sousType === "trouverCh" ? "ch(x) ≥ 1 pour tout réel x." : "sh(x) a toujours le même signe que x.")],
-          points: 1,
-        },
-      ];
-    }
-    case "C":
-      return [
-        { consigne: [texte("Dérive chaque terme de f(x).")], rappel: [latex(`${SH}' = ${CH}`), texte(", "), latex(`${CH}' = ${SH}`), texte(", sans changement de signe.")], points: 1 },
-        { consigne: [texte("N'oublie pas la dérivée de l'argument et écris f'(x).")], rappel: [texte("La dérivée de sh(kx) est k·ch(kx).")], points: 1 },
-        { consigne: [texte("Dérive f'(x) de la même façon et écris f''(x).")], points: 2 },
-      ];
-    case "D":
-      return [
-        { consigne: [texte("Remplace sh(x) et ch(x) par leur définition.")], rappel: [latex(`${SH}(x)=\\dfrac{e^x-e^{-x}}{2}`), texte(", "), latex(`${CH}(x)=\\dfrac{e^x+e^{-x}}{2}`)], points: 1 },
-        { consigne: [texte("Regroupe les termes en "), latex("e^x"), texte(" et les termes en "), latex("e^{-x}"), texte(".")], points: 1 },
-        { consigne: [texte("En +∞, quel terme tend vers 0 ? Déduis la limite de f.")], rappel: [latex("\\lim_{x\\to+\\infty} e^{-x}=0")], points: 1 },
-        { consigne: [texte("En −∞, quel terme tend vers 0 ? Déduis la limite de f.")], rappel: [latex("\\lim_{x\\to-\\infty} e^{x}=0")], points: 1 },
-      ];
-  }
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -327,7 +288,6 @@ export const adaptateurEvaluationHyperboliques: AdaptateurFeuilleExercices<Exerc
   reponseBreve: reponseBreveHyperboliques,
   correctionDetaillee: correctionDetailleeHyperboliques,
   bareme: baremeHyperboliques,
-  enonceAmenage: enonceAmenageHyperboliques,
   enoncePapier: enoncePapierHyperboliques,
   dureeMinutes: 6,
 };

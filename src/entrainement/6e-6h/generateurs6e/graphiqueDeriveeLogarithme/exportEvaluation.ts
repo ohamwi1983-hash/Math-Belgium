@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -75,7 +74,7 @@ function construireCorrectionGraphiqueDeriveeLogarithme(exercice: ExerciceGraphi
 
 // ============================================================================
 // Feuille d'exercices / évaluation enrichies — difficulté, réponse brève, corrigé détaillé, barème,
-// version aménagée. Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
+// Toutes les valeurs viennent de l'instance (mêmes fonctions que l'appli).
 // ============================================================================
 
 function pgcd(a: number, b: number): number {
@@ -181,17 +180,6 @@ function baremeGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLoga
   };
 }
 
-function enonceAmenageGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiqueDeriveeLogarithme): EtapeAmenagee[] {
-  const regle = REGLE_DERIVATION[exercice.famille];
-  return [
-    { consigne: [texte("Sur le graphique de f, repère où f est croissante et où elle est décroissante.")], rappel: [texte("f croissante ⇔ f'(x) > 0.")], points: 0.5 },
-    { consigne: [texte("Repère si f a un maximum ou un minimum, et à quelle abscisse.")], rappel: [texte("En un extremum de f, f'(x) = 0.")], points: 0.5 },
-    { consigne: [texte(`Choisis le graphique (A, B, C ou D) qui a ces signes${exercice.famille === "B" ? "" : " et ce zéro"}.`)], points: 1 },
-    { consigne: [texte(`Calcule f'(x) avec la ${regle.nom}.`)], rappel: [latex(regle.formule)], points: 1.5 },
-    { consigne: [texte("Vérifie que ta dérivée confirme le graphique choisi.")], points: 0.5 },
-  ];
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -216,7 +204,6 @@ export const adaptateurEvaluationGraphiqueDeriveeLogarithme: AdaptateurFeuilleEx
   reponseBreve: reponseBreveGraphiqueDeriveeLogarithme,
   correctionDetaillee: correctionDetailleeGraphiqueDeriveeLogarithme,
   bareme: baremeGraphiqueDeriveeLogarithme,
-  enonceAmenage: enonceAmenageGraphiqueDeriveeLogarithme,
   enoncePapier: enoncePapierGraphiqueDeriveeLogarithme,
   dureeMinutes: 8,
 };

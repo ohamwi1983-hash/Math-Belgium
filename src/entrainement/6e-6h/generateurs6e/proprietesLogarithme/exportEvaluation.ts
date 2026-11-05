@@ -5,7 +5,6 @@ import type {
   BlocCorrection,
   CritereBareme,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -64,7 +63,7 @@ function construireCorrectionProprietesLogarithme(exercice: ExerciceProprieteLog
 }
 
 // ============================================================================
-// Feuilles enrichies (corrigé détaillé, barème, version aménagée) — tout est RECALCULÉ depuis
+// Feuilles enrichies (corrigé détaillé, barème) — tout est RECALCULÉ depuis
 // l'instance avec les MÊMES fonctions que `construireCorrection` et que l'écran interactif
 // (`membreGaucheCorrigeLatex`, `formatReponseAttenduePhaseLatex`) : jamais de seconde source.
 // ============================================================================
@@ -207,29 +206,6 @@ function baremeProprietesLogarithme(exercice: ExerciceProprieteLogarithme): Bare
   return { reponseFinale: reponseBreveProprietesLogarithme(exercice), criteres, erreursFrequentes: erreursFrequentesProprietesLogarithme(exercice), reponsesAcceptees: acceptees };
 }
 
-function enonceAmenageProprietesLogarithme(exercice: ExerciceProprieteLogarithme): EtapeAmenagee[] {
-  const etats = calculerEtatsArgument(exercice.arbre);
-  const total = nombreEtapesAlgebriques(exercice);
-  return Array.from({ length: total }, (_, etape): EtapeAmenagee => {
-    if (caracteristiqueDeLEtape(exercice, etape) === "changementBase") {
-      return {
-        consigne: [texte("Exprime "), latex(logBLatex(exercice)), texte(" à l'aide du résultat de l'étape précédente et de c.")],
-        rappel: [texte("Changement de base : "), latex(FORMULE_PROPRIETE.changementBase), texte(" ; ici "), latex(`\\log_${exercice.b}(a)=c`), texte(".")],
-        points: 1,
-      };
-    }
-    const reste = resteVersLatexLogA(etats[etape]) ?? arbreVersLatexLogA(exercice.arbre);
-    return {
-      consigne: [texte("Transforme "), latex(reste), texte(" avec une seule propriété du logarithme.")],
-      rappel:
-        etape === 0
-          ? [texte("Cherche l'opération qu'on ferait en dernier en calculant l'argument. Écris m, n, q pour ce qui est extrait, r pour ce qui reste.")]
-          : [texte("Garde les termes déjà obtenus. Un coefficient devant le logarithme multiplie tout ce qui en sort.")],
-      points: 1,
-    };
-  });
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -249,7 +225,6 @@ export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercice
   reponseBreve: reponseBreveProprietesLogarithme,
   correctionDetaillee: correctionDetailleeProprietesLogarithme,
   bareme: baremeProprietesLogarithme,
-  enonceAmenage: enonceAmenageProprietesLogarithme,
   enoncePapier: enoncePapierProprietesLogarithme,
   dureeMinutes: 7,
   // Nombre de questions VARIABLE par instance (3 ou 4, selon la combinaison tirée) et consigne de

@@ -337,7 +337,7 @@ function sansPrefixeEtape(consigne: FragmentConsigne[]): FragmentConsigne[] {
  * `construireEnonce` — les étapes d'apprentissage du générateur — deviennent les étapes du corrigé
  * (« Étape n — consigne », puis leur résolution). Les lettres d'étape du corrigé et du barème sont
  * converties : numéro d'étape, et lettre de la question papier qui couvre l'étape s'il y en a
- * plusieurs. La version aménagée garde son découpage (`enonceAmenage`). */
+ * plusieurs. La version aménagée imprime ce même énoncé papier. */
 function appliquerEnoncePapier(item: ItemEvaluation, papier: EnoncePapier): ItemEvaluation {
   const etapes = item.section.questions
   const numeroEtape = (lettre?: string) => {
@@ -409,7 +409,6 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>): ItemEvalu
       reponseBreve: adaptateur.reponseBreve?.(instance),
       correctionDetaillee: adaptateur.correctionDetaillee?.(instance),
       bareme: adaptateur.bareme?.(instance),
-      enonceAmenage: adaptateur.enonceAmenage?.(instance),
       dureeMinutes: adaptateur.dureeMinutes,
       code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
     }
@@ -511,7 +510,6 @@ async function itemVraiFaux(el: Extract<ElementPlan, { type: 'vraiFaux' }>): Pro
       criteres: affirmations.map((a, i) => ({ sousQuestion: seule ? undefined : lettre(i), critere: [texte(`${vf(a.reponse)}, avec une justification correcte`)], points: 1 })),
       erreursFrequentes: [{ description: [texte('Bonne réponse sans justification, ou justification par un seul exemple numérique')], cout: 'la moitié des points de l’affirmation' }],
     },
-    enonceAmenage: affirmations.map((a, i) => ({ consigne: [texte(prefixe(i)), ...a.enonce, texte(' — Vrai ou faux ? Justifie.')], points: 1 })),
     dureeMinutes: affirmations.length * 2,
   }
 }

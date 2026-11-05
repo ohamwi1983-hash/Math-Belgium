@@ -15,7 +15,6 @@ import type {
   BaremeExercice,
   BlocCorrection,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -120,12 +119,12 @@ function construireCorrectionInequationsLogarithmiques(exercice: ExerciceInequat
 }
 
 // ============================================================================
-// Feuilles enrichies (corrigé détaillé, barème, version aménagée). Les ensembles intermédiaires
+// Feuilles enrichies (corrigé détaillé, barème). Les ensembles intermédiaires
 // et finals viennent TOUJOURS de l'instance (`ceEcran1`, `solutionEcran2`… — les mêmes champs que
 // vérifie l'écran interactif et qu'affiche `construireCorrection` via `contenuRecapPhase`) ; seules
 // les égalités de passage (argument ↔ puissance de la base, différence factorisée…) sont
 // réécrites ici depuis les paramètres tirés. Barème : 4 critères d'1 point, en correspondance 1-1
-// avec les 4 étapes de la version aménagée.
+// avec les 4 étapes du corrigé.
 // ============================================================================
 
 const DUREE_MINUTES_INEQUATIONS_LOG = 6;
@@ -164,8 +163,6 @@ function resoudrePremierDegreLatex(m: number, c: number, cmp: Comparateur): stri
 function sCorrige(ensemble: EnsembleReelGuide): FragmentConsigne[] {
   return [latex(`S=${ensembleLatex(ensemble)}`)];
 }
-
-const RAPPEL_SENS: FragmentConsigne[] = [texte("Base > 1 : même sens. Base entre 0 et 1 : sens inversé.")];
 
 function reponseBreveInequationsLog(exercice: ExerciceInequationLogarithmique): FragmentConsigne[] {
   switch (exercice.famille) {
@@ -257,15 +254,6 @@ function baremeA(ex: ExerciceLogA): BaremeExercice {
   };
 }
 
-function amenageA(ex: ExerciceLogA): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence.")], rappel: [texte("Ce qui est dans le logarithme doit être strictement positif.")], points: 1 },
-    { consigne: [texte("Écris "), latex(String(ex.k)), texte(" comme un logarithme de base "), latex(baseLatex(ex.base)), texte(", puis enlève les logarithmes.")], rappel: RAPPEL_SENS, points: 1 },
-    { consigne: [texte("Résous l'inéquation du premier degré obtenue.")], rappel: [texte("Diviser par un nombre négatif inverse le sens.")], points: 1 },
-    { consigne: [texte("Garde seulement les x qui respectent la condition. Donne S.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille B
 
 function argumentGaucheB(ex: ExerciceLogB): string {
@@ -332,19 +320,6 @@ function baremeB(ex: ExerciceLogB): BaremeExercice {
   };
 }
 
-function amenageB(ex: ExerciceLogB): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence des deux logarithmes.")], rappel: [texte("Chaque argument doit être strictement positif.")], points: 1 },
-    {
-      consigne: [texte("Enlève les logarithmes : compare les arguments.")],
-      rappel: ex.sousType === "racine" ? [...RAPPEL_SENS, texte(" Ensuite, élève les deux membres au carré.")] : RAPPEL_SENS,
-      points: 1,
-    },
-    { consigne: [texte("Résous l'inéquation obtenue.")], rappel: ex.sousType === "racine" ? [texte("Factorise et fais un tableau de signes.")] : [texte("Diviser par un nombre négatif inverse le sens.")], points: 1 },
-    { consigne: [texte("Garde seulement les x qui respectent la condition. Donne S.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille C
 
 function inequationArgumentsC(ex: ExerciceLogC): { comparaison: string; resolution: string } {
@@ -409,19 +384,6 @@ function baremeC(ex: ExerciceLogC): BaremeExercice {
   };
 }
 
-function amenageC(ex: ExerciceLogC): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence des deux logarithmes de gauche.")], rappel: [texte("Chaque argument doit être strictement positif.")], points: 1 },
-    {
-      consigne: [texte("Écris le membre de gauche avec un seul logarithme.")],
-      rappel: ex.sousType === "produit" ? [latex("\\log(f)+\\log(g)=\\log(f\\cdot g)")] : [latex("\\log(f)-\\log(g)=\\log\\!\\left(\\dfrac{f}{g}\\right)")],
-      points: 1,
-    },
-    { consigne: [texte("Enlève les logarithmes et résous l'inéquation obtenue.")], rappel: RAPPEL_SENS, points: 1 },
-    { consigne: [texte("Garde seulement les x qui respectent la condition. Donne S.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Famille D
 
 function correctionD(ex: ExerciceLogD): EtapeCorrection[] {
@@ -469,15 +431,6 @@ function baremeD(ex: ExerciceLogD): BaremeExercice {
     erreursFrequentes: erreurs,
     reponsesAcceptees: [[texte("Bornes laissées sous forme de puissances (ex. "), latex(puissanceBaseLatex(ex.base, ex.y1)), texte(")")]],
   };
-}
-
-function amenageD(ex: ExerciceLogD): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence.")], rappel: [texte("Ce qui est dans le logarithme doit être strictement positif.")], points: 1 },
-    { consigne: [texte("Pose "), latex(`y=\\log_{${baseLatex(ex.base)}}(x)`), texte(" et réécris l'inéquation en y.")], points: 1 },
-    { consigne: [texte("Résous l'inéquation du second degré en y.")], rappel: [texte("Racines, puis tableau de signes du trinôme.")], points: 1 },
-    { consigne: [texte("Reviens à x, garde les x de la condition et donne S.")], rappel: [latex(`x=\\text{base}^{y}`), texte(" : base < 1 → bornes échangées.")], points: 1 },
-  ];
 }
 
 // ---------------------------------------------------------------------------- Famille E
@@ -533,21 +486,6 @@ function baremeE(ex: ExerciceLogE): BaremeExercice {
   };
 }
 
-function amenageE(ex: ExerciceLogE): EtapeAmenagee[] {
-  const etapes: EtapeAmenagee[] = [
-    { consigne: [texte("Écris la condition du premier argument.")], rappel: [texte("L'argument doit être strictement positif.")], points: 1 },
-    { consigne: [texte("Écris la condition du second argument.")], points: 1 },
-  ];
-  if (!ex.ceCompatible) {
-    etapes.push({ consigne: [texte("Un même x peut-il vérifier les deux conditions ?")], rappel: [texte("Place les deux conditions sur un axe.")], points: 1 });
-    etapes.push({ consigne: [texte("Conclus.")], points: 1 });
-    return etapes;
-  }
-  etapes.push({ consigne: [texte("Enlève les logarithmes et résous l'inéquation obtenue.")], rappel: RAPPEL_SENS, points: 1 });
-  etapes.push({ consigne: [texte("Garde seulement les x qui respectent les deux conditions. Donne S.")], points: 1 });
-  return etapes;
-}
-
 // ---------------------------------------------------------------------------- Famille F
 
 function correctionF(ex: ExerciceLogF): EtapeCorrection[] {
@@ -589,15 +527,6 @@ function baremeF(ex: ExerciceLogF): BaremeExercice {
   };
 }
 
-function amenageF(_ex: ExerciceLogF): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Écris la condition d'existence.")], rappel: [texte("Les deux arguments doivent être strictement positifs ; l'un des deux entraîne l'autre.")], points: 1 },
-    { consigne: [texte("Calcule la différence des deux arguments et reconnais un carré.")], points: 1 },
-    { consigne: [texte("Cas "), latex("a>1"), texte(" : enlève les logarithmes et conclus.")], rappel: [texte("Un carré n'est jamais strictement négatif.")], points: 1 },
-    { consigne: [texte("Cas "), latex("0<a<1"), texte(" : même travail, sens inversé.")], points: 1 },
-  ];
-}
-
 // ---------------------------------------------------------------------------- Dispatch
 
 function correctionDetailleeInequationsLog(exercice: ExerciceInequationLogarithmique): EtapeCorrection[] {
@@ -634,23 +563,6 @@ function baremeInequationsLog(exercice: ExerciceInequationLogarithmique): Bareme
   }
 }
 
-function enonceAmenageInequationsLog(exercice: ExerciceInequationLogarithmique): EtapeAmenagee[] {
-  switch (exercice.famille) {
-    case "A":
-      return amenageA(exercice);
-    case "B":
-      return amenageB(exercice);
-    case "C":
-      return amenageC(exercice);
-    case "D":
-      return amenageD(exercice);
-    case "E":
-      return amenageE(exercice);
-    case "F":
-      return amenageF(exercice);
-  }
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -672,7 +584,6 @@ export const adaptateurEvaluationInequationsLogarithmiques: AdaptateurFeuilleExe
   reponseBreve: reponseBreveInequationsLog,
   correctionDetaillee: correctionDetailleeInequationsLog,
   bareme: baremeInequationsLog,
-  enonceAmenage: enonceAmenageInequationsLog,
   enoncePapier: enoncePapierInequationsLog,
   dureeMinutes: DUREE_MINUTES_INEQUATIONS_LOG,
   // Plusieurs questions par instance (1 à 4 selon la famille) ET consigne dépendante de l'instance

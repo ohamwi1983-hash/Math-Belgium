@@ -8,7 +8,7 @@
  * résultats et écrit à la main : ces tournures n'ont plus de sens.
  *
  * Plutôt que de dupliquer chaque consigne, `versionPapier` enveloppe l'adaptateur et réécrit les
- * fragments de texte de l'énoncé (en-tête, questions, version aménagée) selon les règles
+ * fragments de texte de l'énoncé (en-tête, questions, énoncé papier) selon les règles
  * ci-dessous. Le texte des écrans interactifs n'est pas touché.
  */
 import type { AdaptateurFeuilleExercices, FragmentConsigne, SectionExercice } from "./genererFeuilleExercices";
@@ -60,9 +60,9 @@ function sectionPapier(section: SectionExercice): SectionExercice {
   };
 }
 
-/** Adaptateur identique, dont l'énoncé (normal et aménagé) est passé en version papier. */
+/** Adaptateur identique, dont l'énoncé (`construireEnonce` et `enoncePapier`) est passé en version papier. */
 export function versionPapier<T>(adaptateur: AdaptateurFeuilleExercices<T>): AdaptateurFeuilleExercices<T> {
-  const { construireEnonce, enonceAmenage, enoncePapier } = adaptateur;
+  const { construireEnonce, enoncePapier } = adaptateur;
   return {
     ...adaptateur,
     construireEnonce: (instance) => sectionPapier(construireEnonce(instance)),
@@ -71,9 +71,6 @@ export function versionPapier<T>(adaptateur: AdaptateurFeuilleExercices<T>): Ada
           const papier = enoncePapier(instance);
           return { ...papier, section: sectionPapier(papier.section) };
         }
-      : undefined,
-    enonceAmenage: enonceAmenage
-      ? (instance) => enonceAmenage(instance).map((e) => ({ ...e, consigne: consignePapier(e.consigne), rappel: consignePapier(e.rappel) }))
       : undefined,
   };
 }

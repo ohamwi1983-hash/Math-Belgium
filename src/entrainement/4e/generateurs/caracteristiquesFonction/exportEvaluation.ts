@@ -7,7 +7,6 @@ import type {
   CritereBareme,
   EnoncePapier,
   ErreurFrequente,
-  EtapeAmenagee,
   EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
@@ -289,7 +288,7 @@ function construireCorrectionCaracteristiquesFonction(exercice: ExerciceCaracter
 }
 
 // ============================================================================
-// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème, version aménagée).
+// Feuilles enrichies (énoncé papier, réponse brève, corrigé détaillé, barème).
 // Les 8 lectures (une par écran, toujours dans le même ordre) sont les ÉTAPES a)…h) : sur papier,
 // l'énoncé est le graphique + une consigne globale qui les énumère ; elles passent dans le corrigé.
 // Toutes les valeurs viennent du moteur de vérification partagé avec l'écran
@@ -461,23 +460,6 @@ function baremeCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFoncti
   };
 }
 
-function enonceAmenageCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): EtapeAmenagee[] {
-  return [
-    { consigne: [texte("Donne le domaine de définition de f.")], rappel: [texte("Cherche les abscisses SANS point de la courbe : asymptote, cercle vide seul, intervalle sans tracé.")], points: 1 },
-    { consigne: [texte("Donne les zéros de f.")], rappel: [texte("Un zéro est l'abscisse d'un point de la courbe posé sur l'axe des abscisses.")], points: 1 },
-    { consigne: [texte("Sur quels intervalles f est-elle strictement croissante ?")], rappel: [texte("La courbe monte quand on va de gauche à droite.")], points: 1 },
-    { consigne: [texte("Sur quels intervalles f est-elle strictement décroissante ?")], rappel: [texte("La courbe descend quand on va de gauche à droite.")], points: 1 },
-    { consigne: [texte("Sur quel(s) intervalle(s) f est-elle constante ?")], rappel: [texte("La courbe forme un palier horizontal.")], points: 1 },
-    { consigne: [texte("Donne l'ordonnée à l'origine de f.")], rappel: [texte("C'est l'ordonnée du point de la courbe d'abscisse 0, s'il existe.")], points: 1 },
-    {
-      consigne: [texte("La fonction est-elle définie en "), latex(`x = ${formatNombre(exercice.v)}`), texte(" ? Si oui, donne sa valeur.")],
-      rappel: [texte("Seul un point PLEIN donne une valeur : un cercle vide n'appartient pas à la courbe.")],
-      points: 1,
-    },
-    { consigne: [texte("Donne les équations des deux asymptotes.")], rappel: [texte("Verticale : « x = … » ; horizontale : « y = … ».")], points: 1 },
-  ];
-}
-
 /** Plus il y a d'exclusions particulières (intervalles sans tracé, discontinuité « trou » ou point
  * redéfini), plus la lecture du domaine et de f(v) demande de réflexion. */
 function difficulteCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): 1 | 2 | 3 {
@@ -495,7 +477,6 @@ export const adaptateurEvaluationCaracteristiquesFonction: AdaptateurFeuilleExer
   reponseBreve: reponseBreveCaracteristiquesFonction,
   correctionDetaillee: correctionDetailleeCaracteristiquesFonction,
   bareme: baremeCaracteristiquesFonction,
-  enonceAmenage: enonceAmenageCaracteristiquesFonction,
   enoncePapier: enoncePapierCaracteristiquesFonction,
   dureeMinutes: 8,
 };

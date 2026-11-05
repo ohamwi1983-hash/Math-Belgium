@@ -1,4 +1,4 @@
-import type { BaremeExercice, BlocCorrection, EtapeAmenagee, EtapeCorrection, FragmentConsigne, SectionExercice } from "./genererFeuilleExercices";
+import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "./genererFeuilleExercices";
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
@@ -17,8 +17,8 @@ import { qrCodeSvg } from "./qrSvg";
  * - évaluation = copie de l'élève (numérotation continue, points par sous-question, tableau des
  *   résultats par processus, pictogramme calculatrice), corrigé, et grille de correction
  *   (document professeur : réponse finale, barème, erreurs fréquentes, réponses acceptées) ;
- * - version aménagée (les deux modes) : police très lisible, une question par page, chaque
- *   question découpée en étapes.
+ * - version aménagée (les deux modes) : même énoncé que la version normale (jamais découpé en
+ *   étapes), police très lisible, grand interligne, une question par page.
  * Aucune zone de réponse nulle part : les élèves répondent sur une feuille à part.
  *
  * Tous les champs enrichis des items sont optionnels : un générateur qui ne les fournit pas encore
@@ -46,7 +46,6 @@ export interface ItemEvaluation {
   reponseBreve?: FragmentConsigne[];
   correctionDetaillee?: EtapeCorrection[];
   bareme?: BaremeExercice;
-  enonceAmenage?: EtapeAmenagee[];
   /** Étapes du raisonnement (anciennes sous-questions), quand l'énoncé imprimé n'a que la consigne
    * globale (`AdaptateurFeuilleExercices.enoncePapier`) : le corrigé les affiche en titre de chaque
    * groupe de lignes `EtapeCorrection.etape`. `question` : lettre de la question papier couverte. */
@@ -314,9 +313,7 @@ body { font-family: 'Atkinson Hyperlegible', Verdana, Tahoma, sans-serif; font-s
 .q-am { break-inside: avoid; }
 .q-am h2 { font-size: 16pt; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .enonce-am { padding: 10px 14px; background: var(--fond-doux); border-radius: 8px; margin-bottom: 12px; }
-.etape-am { margin: 10px 0; }
-.etape-am .ligne { display: flex; justify-content: space-between; gap: 12px; }
-.etape-am .rappel { font-size: 11.5pt; color: var(--gris); }
+.enonce-am .entete + p, .enonce-am p { margin: 0.5em 0; }
 .identite-am { display: flex; gap: 24px; font-size: 11pt; color: var(--gris); margin-bottom: 10px; }
 .identite-am span.champ { display: inline-block; width: 5cm; border-bottom: 1px solid #8a8f98; }
 `;
@@ -660,39 +657,20 @@ export async function genererEvaluationHtml(entete: EnteteEvaluation, items: Ite
  * Version aménagée (feuille d'exercices et évaluation)
  * -------------------------------------------------------------------------------------------- */
 
-function etapesAmenageesDe(item: ItemEvaluation): EtapeAmenagee[] {
-  if (item.enonceAmenage && item.enonceAmenage.length > 0) return item.enonceAmenage;
-  const pts = pointsParSousQuestion(item);
-  return item.section.questions.map((q, i) => ({ consigne: q.consigne, points: pts.get(lettreCle(i)) }));
-}
-
+/** Question de la version aménagée : EXACTEMENT l'énoncé de la version normale (énoncé, consigne
+ * globale, vraies questions d'un problème avec leurs points) — jamais découpé en étapes (décision de
+ * l'utilisateur : l'aménagement porte sur la mise en page, pas sur le contenu). */
 function questionAmenageeHtml(item: ItemEvaluation, numero: number, estExercice: boolean): string {
-  const etapes = etapesAmenageesDe(item);
-  // Points par étape : ceux fournis par `enonceAmenage` sont des poids, ramenés au total ; à défaut,
-  // ceux des sous-questions (déjà en points).
-  const poids = etapes.map((e) => e.points ?? 0);
-  const pts = !estExercice && item.enonceAmenage && poids.some((p) => p > 0) ? repartirEnDemiPoints(poids, item.points) : etapes.map((e) => e.points);
-  const enonce = `${item.section.enteteFragments ? `<div>${fragmentsEnteteHtml(item.section.enteteFragments)}</div>` : ""}${item.section.enteteHtml ?? ""}`;
-  const unique = etapes.length === 1 && !item.enonceAmenage;
-  const etapesHtml = unique
-    ? `<div class="etape-am"><div class="ligne"><span>${fragmentsVersHtml(etapes[0].consigne)}</span></div></div>`
-    : etapes
-        .map((e, i) => {
-          const p = pts[i];
-          return `<div class="etape-am"><div class="ligne"><span><b>Étape ${i + 1}.</b> ${fragmentsVersHtml(e.consigne)}</span>${!estExercice && p !== undefined && p > 0 ? `<span class="pts">${pointsTexte(p)}</span>` : ""}</div>${
-            e.rappel ? `<div class="rappel">${fragmentsVersHtml(e.rappel)}</div>` : ""
-          }</div>`;
-        })
-        .join("");
   const titre = estExercice ? `Exercice ${numero} ${etoiles(item.difficulte)}` : `Question ${numero}`;
-  return `<section class="q-am"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2>${enonce ? `<div class="enonce-am">${enonce}</div>` : ""}${etapesHtml}</section>`;
+  const corps = corpsQuestionHtml(item, estExercice ? undefined : pointsParSousQuestion(item));
+  return `<section class="q-am"><h2><span>${titre}</span>${estExercice ? "" : `<span class="pts">${pointsTexte(item.points)}</span>`}</h2><div class="enonce-am">${corps}</div></section>`;
 }
 
 export async function genererVersionAmenagee(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
   const cssKatex = await obtenirCssKatexAutonome();
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
-  const droite = estExercice ? "Mêmes exercices,<br>présentés pas à pas" : `Série ${echapperHtml(entete.serieLettre)}<br>Mêmes questions, même barème`;
+  const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série ${echapperHtml(entete.serieLettre)}<br>Mêmes questions, même barème`;
   const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
 ${!estExercice && entete.calculatrice ? `<p><b>Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}.</b></p>` : ""}`;

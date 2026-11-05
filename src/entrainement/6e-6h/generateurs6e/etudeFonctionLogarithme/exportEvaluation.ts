@@ -3,7 +3,6 @@ import type {
   AdaptateurFeuilleExercices, EnoncePapier,
   BaremeExercice,
   BlocCorrection,
-  EtapeAmenagee,
   EtapeCorrection,
   QuestionExercice,
   SectionExercice,
@@ -120,7 +119,7 @@ function construireCorrectionEtudeFonctionLogarithme(exercice: ExerciceEtudeFonc
 
 // ============================================================================
 // Feuille d'exercices / évaluation enrichies — difficulté, réponse brève, corrigé détaillé, barème,
-// version aménagée. Chaque réponse vient de `contenuRecapLatex` (celle de l'appli) ; chaque méthode
+// Chaque réponse vient de `contenuRecapLatex` (celle de l'appli) ; chaque méthode
 // des aides de niveau 1, chaque calcul intermédiaire des aides de niveau 2 (jamais leur texte, qui
 // s'adresse à l'élève en cours de résolution).
 // ============================================================================
@@ -222,28 +221,6 @@ function baremeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme
   };
 }
 
-const CONSIGNE_AMENAGEE: Record<PhaseEtudeFonctionLogarithme, string> = {
-  domaine: "Écris les conditions d'existence, puis le domaine de f.",
-  limites: "Calcule la limite de f à chaque borne du domaine.",
-  asymptotes: "Déduis de tes limites les asymptotes de la courbe.",
-  croissance: "",
-  concavite: "Calcule f''(x), étudie son signe et conclus sur la concavité.",
-  graphique: "Choisis le graphique (A, B, C ou D) qui correspond à ton étude.",
-};
-
-function enonceAmenageEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLogarithme): EtapeAmenagee[] {
-  return PHASES.flatMap((phase): EtapeAmenagee[] => {
-    const rappel = fragmentsAide(aideMethode(exercice, phase));
-    if (phase === "croissance") {
-      return [
-        { consigne: [texte("Calcule f'(x).")], rappel, points: 1 },
-        { consigne: [texte("Étudie le signe de f'(x), puis donne les variations et l'extremum de f.")], points: POIDS.croissance - 1 },
-      ];
-    }
-    return [{ consigne: [texte(CONSIGNE_AMENAGEE[phase])], rappel, points: POIDS[phase] }];
-  });
-}
-
 /** Énoncé PAPIER (feuille d'exercices, évaluation) : l'énoncé et la consigne globale seulement.
  * Les sous-questions de `construireEnonce` sont les étapes d'apprentissage du générateur
  * interactif : sur papier, elles passent dans le corrigé (voir `EnoncePapier`). */
@@ -289,7 +266,6 @@ export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExerc
   reponseBreve: reponseBreveEtudeFonctionLogarithme,
   correctionDetaillee: correctionDetailleeEtudeFonctionLogarithme,
   bareme: baremeEtudeFonctionLogarithme,
-  enonceAmenage: enonceAmenageEtudeFonctionLogarithme,
   enoncePapier: enoncePapierEtudeFonctionLogarithme,
   dureeMinutes: 25,
 };
