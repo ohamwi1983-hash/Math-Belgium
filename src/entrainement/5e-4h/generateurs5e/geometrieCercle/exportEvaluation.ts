@@ -3,6 +3,7 @@ import type { PhaseGeometrieCercle } from "../../moteur5e/typesGeometrieCercle";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
+  CritereBareme,
   BlocCorrection,
   EnoncePapier,
   ErreurFrequente,
@@ -181,6 +182,22 @@ const CRITERE: Record<PhaseGeometrieCercle, string> = {
   aireLentille: "Lentille = somme des deux segments",
 };
 
+/** Critères du barème, un par étape. Lentille : 9 étapes pour 4 points arrondis au demi-point
+ * laisseraient un critère à 0 — les deux soustractions « segment = secteur − triangle » (même geste,
+ * 0,25 chacune) forment un seul critère, rattaché à l'étape du second segment. */
+function criteresBareme(exercice: ExerciceGeometrieCercle, phases: PhaseGeometrieCercle[], poids: number[]): CritereBareme[] {
+  const criteres: CritereBareme[] = phases.map((phase, i) => ({ sousQuestion: LETTRES[i], critere: [texte(`${CRITERE[phase]} : `), latex(formatValeurPhaseLatex(exercice, phase))], points: poids[i] }));
+  const i1 = phases.indexOf("segmentAire1");
+  const i2 = phases.indexOf("segmentAire2");
+  if (i1 < 0 || i2 < 0) return criteres;
+  criteres[i2] = {
+    sousQuestion: LETTRES[i2],
+    critere: [texte("Segments = secteur − triangle, pour chaque cercle : "), latex(formatValeurPhaseLatex(exercice, "segmentAire1")), texte(" ; "), latex(formatValeurPhaseLatex(exercice, "segmentAire2"))],
+    points: poids[i1] + poids[i2],
+  };
+  return criteres.filter((_, i) => i !== i1);
+}
+
 function baremeGeometrieCercle(exercice: ExerciceGeometrieCercle): BaremeExercice {
   const phases = phasesDuScenario(exercice.scenario);
   const poids = POIDS[exercice.scenario];
@@ -195,7 +212,7 @@ function baremeGeometrieCercle(exercice: ExerciceGeometrieCercle): BaremeExercic
   const { valeur } = aireFinale(exercice);
   return {
     reponseFinale: [latex(`A \\approx ${nombreLatex(valeur, 0)}`)],
-    criteres: phases.map((phase, i) => ({ sousQuestion: LETTRES[i], critere: [texte(`${CRITERE[phase]} : `), latex(formatValeurPhaseLatex(exercice, phase))], points: poids[i] })),
+    criteres: criteresBareme(exercice, phases, poids),
     erreursFrequentes: erreurs,
     reponsesAcceptees: [
       [texte("Aires obtenues avec θ arrondi au dixième (écart de quelques unités sur l'aire finale), si la démarche est correcte")],

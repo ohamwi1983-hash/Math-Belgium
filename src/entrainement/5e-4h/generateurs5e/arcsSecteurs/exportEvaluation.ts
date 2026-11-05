@@ -205,9 +205,10 @@ function baremeArcSecteur(exercice: ExerciceArcSecteur): BaremeExercice {
   const manquantes = quantitesManquantes(exercice);
   const criteres: CritereBareme[] = manquantes.flatMap((q, i): CritereBareme[] => [
     { sousQuestion: LETTRES[i], critere: [texte("Formule adaptée : "), latex(formuleDeLEtape(exercice, q).latexGeneral)], points: 0.5 },
-    { sousQuestion: LETTRES[i], critere: [latex(valeurAvecApprocheLatex(q, exercice))], points: 0.75 },
+    { sousQuestion: LETTRES[i], critere: [latex(valeurAvecApprocheLatex(q, exercice))], points: i === 0 ? 1 : 0.75 },
   ]);
-  criteres.push({ critere: [texte("θ en radians dans les formules de l'arc et du secteur")], points: 0.25 });
+  // « θ en radians dans s = rθ et A = ½r²θ » n'est pas un critère à part (0,25 pt, arrondi à 0 au
+  // demi-point) : c'est l'erreur fréquente « θ en degrés » ci-dessous, qui coûte la valeur de l'étape.
   const erreurs: ErreurFrequente[] = [];
   const etapePiege = etapeAvecThetaRadians(exercice);
   if (etapePiege !== null) erreurs.push({ description: [texte("θ en degrés dans "), latex("s = r\\theta"), texte(" ou "), latex("A = \\dfrac{1}{2}r^2\\theta")], cout: `0 pt sur la valeur en ${LETTRES[etapePiege]})` });
