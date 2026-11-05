@@ -126,10 +126,24 @@ export function repartirEnDemiPoints(poids: number[], total: number): number[] {
   return entiers.map((e) => e / 2);
 }
 
-/** Points de chaque critère du barème, ramenés au total de la question. */
+/** Points de chaque critère du barème, ramenés au total de la question. Répartition en deux temps :
+ * d'abord le total entre les sous-questions (au demi-point), puis chaque sous-question entre ses
+ * critères — sinon les arrondis critère par critère déplacent des points d'une sous-question à
+ * l'autre (deux fonctions regroupées à 3 pts chacune affichées « 3,5 » et « 2,5 »). */
 export function pointsCriteres(item: ItemEvaluation): number[] {
   if (!item.bareme || item.bareme.criteres.length === 0) return [];
-  return repartirEnDemiPoints(item.bareme.criteres.map((c) => c.points), item.points);
+  const criteres = item.bareme.criteres;
+  const cle = (c: (typeof criteres)[number]) => (c.sousQuestion ?? "").toLowerCase().replace(/\)$/, "");
+  const groupes = [...new Set(criteres.map(cle))];
+  if (groupes.length < 2) return repartirEnDemiPoints(criteres.map((c) => c.points), item.points);
+  const poidsGroupe = groupes.map((g) => criteres.filter((c) => cle(c) === g).reduce((t, c) => t + Math.max(0, c.points), 0));
+  const totalGroupe = repartirEnDemiPoints(poidsGroupe, item.points);
+  const res = new Array<number>(criteres.length).fill(0);
+  groupes.forEach((g, k) => {
+    const indices = criteres.map((c, i) => (cle(c) === g ? i : -1)).filter((i) => i >= 0);
+    repartirEnDemiPoints(indices.map((i) => criteres[i].points), totalGroupe[k]).forEach((pts, j) => (res[indices[j]] = pts));
+  });
+  return res;
 }
 
 /** Points par sous-question (« a », « b »…), somme des critères correspondants. */
