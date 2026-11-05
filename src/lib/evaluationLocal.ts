@@ -416,22 +416,25 @@ async function itemVraiFaux(el: Extract<ElementPlan, { type: 'vraiFaux' }>): Pro
   const affirmations = el.indices.map((i) => banque[i]).filter(Boolean)
   if (affirmations.length === 0) return null
   const vf = (r: boolean) => (r ? 'Vrai' : 'Faux')
+  const seule = affirmations.length === 1
   const lettre = (i: number) => LETTRES[i] ?? String(i + 1)
+  // Une seule affirmation : pas de lettre « a) » (même convention que les sous-questions).
+  const prefixe = (i: number) => (seule ? '' : `${lettre(i)}) `)
   return {
     ...champsCommuns(el),
     nature: 'vraiFaux',
     points: affirmations.length * el.pointsParAffirmation,
-    section: { enteteFragments: [texte(CONSIGNE_VRAI_FAUX)], questions: affirmations.map((a) => ({ consigne: a.enonce })) },
-    correction: affirmations.map((a, i) => ({ type: 'paragraphe', fragments: [texte(`${lettre(i)}) ${vf(a.reponse)} — `), ...a.justification] })),
+    section: { enteteFragments: [texte(seule ? 'Vrai ou faux ? Justifie ta réponse.' : CONSIGNE_VRAI_FAUX)], questions: affirmations.map((a) => ({ consigne: a.enonce })) },
+    correction: affirmations.map((a, i) => ({ type: 'paragraphe', fragments: [texte(`${prefixe(i)}${vf(a.reponse)} — `), ...a.justification] })),
     difficulte: 1,
-    reponseBreve: [texte(affirmations.map((a, i) => `${lettre(i)}) ${vf(a.reponse)}`).join(' · '))],
-    correctionDetaillee: affirmations.map((a, i) => ({ label: vf(a.reponse), sousQuestion: lettre(i), fragments: a.justification })),
+    reponseBreve: [texte(affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · '))],
+    correctionDetaillee: affirmations.map((a, i) => ({ label: vf(a.reponse), sousQuestion: seule ? undefined : lettre(i), fragments: a.justification })),
     bareme: {
-      reponseFinale: [texte(affirmations.map((a, i) => `${lettre(i)}) ${vf(a.reponse)}`).join(' · '))],
-      criteres: affirmations.map((a, i) => ({ sousQuestion: lettre(i), critere: [texte(`${vf(a.reponse)}, avec une justification correcte`)], points: 1 })),
+      reponseFinale: [texte(affirmations.map((a, i) => `${prefixe(i)}${vf(a.reponse)}`).join(' · '))],
+      criteres: affirmations.map((a, i) => ({ sousQuestion: seule ? undefined : lettre(i), critere: [texte(`${vf(a.reponse)}, avec une justification correcte`)], points: 1 })),
       erreursFrequentes: [{ description: [texte('Bonne réponse sans justification, ou justification par un seul exemple numérique')], cout: 'la moitié des points de l’affirmation' }],
     },
-    enonceAmenage: affirmations.map((a, i) => ({ consigne: [texte(`${lettre(i)}) `), ...a.enonce, texte(' — Vrai ou faux ? Justifie.')], points: 1 })),
+    enonceAmenage: affirmations.map((a, i) => ({ consigne: [texte(prefixe(i)), ...a.enonce, texte(' — Vrai ou faux ? Justifie.')], points: 1 })),
     dureeMinutes: affirmations.length * 2,
   }
 }

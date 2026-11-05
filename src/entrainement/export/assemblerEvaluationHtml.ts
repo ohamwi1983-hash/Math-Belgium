@@ -182,6 +182,11 @@ table { border-collapse: collapse; }
 td, th { font-size: inherit; }
 .surtitre { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
 .pied { margin-top: 1.2em; padding-top: 6px; border-top: 1px solid var(--filet); display: flex; justify-content: space-between; font-family: Archivo, Arial, sans-serif; font-size: 8pt; color: var(--gris); }
+.etapes { display: grid; grid-template-columns: 3.2cm minmax(0, 1fr); column-gap: 12px; row-gap: 4px; }
+.etapes .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--accent); padding-top: 2px; }
+.piege { display: flex; gap: 10px; margin-top: 6px; padding: 7px 12px; background: #f3f5f8; border-radius: 6px; }
+.piege .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; color: var(--alerte); white-space: nowrap; padding-top: 2px; }
+.etapes-libres p { margin: 0.25em 0; }
 @media print { body { padding: 0; } }
 `;
 
@@ -221,10 +226,6 @@ table.bilan .relire { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt;
 .corr { margin: 14px 0 0; break-inside: avoid; }
 .corr h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; margin-bottom: 4px; }
 .corr h3 .notion { font-weight: 500; color: var(--gris); }
-.etapes { display: grid; grid-template-columns: 3.2cm minmax(0, 1fr); column-gap: 12px; row-gap: 4px; }
-.etapes .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 600; color: var(--accent); padding-top: 2px; }
-.piege { display: flex; gap: 10px; margin-top: 6px; padding: 7px 12px; background: #f3f5f8; border-radius: 6px; }
-.piege .lbl { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt; font-weight: 700; color: var(--alerte); white-space: nowrap; padding-top: 2px; }
 .reponse-ancienne { color: #1155cc; }
 `;
 
@@ -343,7 +344,10 @@ function etapesCorrectionHtml(etapes: EtapeCorrection[]): string {
   const normales = etapes.filter((e) => e.label.trim().toLowerCase() !== "piège");
   const pieges = etapes.filter((e) => e.label.trim().toLowerCase() === "piège");
   let html = "";
-  if (normales.length > 0) {
+  if (normales.length > 0 && normales.every((e) => !e.label.trim() && !e.sousQuestion)) {
+    // Aucune étiquette (corrigé d'une question ouverte) : simples paragraphes, sans colonne vide.
+    html += `<div class="etapes-libres">${normales.map((e) => `<p>${fragmentsVersHtml(e.fragments)}</p>`).join("")}</div>`;
+  } else if (normales.length > 0) {
     html += `<div class="etapes">`;
     for (const e of normales) {
       const lbl = `${e.sousQuestion ? `${e.sousQuestion.replace(/\)$/, "")}) ` : ""}${e.label}`;
