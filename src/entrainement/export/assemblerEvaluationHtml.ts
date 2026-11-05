@@ -226,7 +226,7 @@ table.bilan .relire { font-family: Archivo, Arial, sans-serif; font-size: 8.5pt;
 .corr { margin: 14px 0 0; break-inside: avoid; }
 .corr h3 { font-family: Archivo, Arial, sans-serif; font-size: 12pt; font-weight: 700; margin-bottom: 4px; }
 .corr h3 .notion { font-weight: 500; color: var(--gris); }
-.reponse-ancienne { color: #1155cc; }
+.reponse-ancienne { color: inherit; }
 `;
 
 const STYLE_EVALUATION = `
