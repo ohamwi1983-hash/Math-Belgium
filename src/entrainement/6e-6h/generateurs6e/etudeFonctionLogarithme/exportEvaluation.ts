@@ -195,7 +195,13 @@ function correctionDetailleeEtudeFonctionLogarithme(exercice: ExerciceEtudeFonct
     const calcul = calculIntermediaire(exercice, phase);
     if (calcul !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(calcul)] });
     if (piege.phase === phase) etapes.push({ label: "Piège", sousQuestion, fragments: [texte(piege.texte)] });
-    etapes.push({ label: "Conclusion", sousQuestion, fragments: [latex(contenuRecapLatex(exercice, phase))] });
+    etapes.push({
+      label: "Conclusion",
+      sousQuestion,
+      fragments: [latex(contenuRecapLatex(exercice, phase))],
+      // Choix du graphique : les candidats, le bon mis en évidence (comme dans l'ancien corrigé).
+      figureHtml: phase === "graphique" ? construireGrilleSvgCandidats(exercice, exercice.indexCorrect) : undefined,
+    });
     return etapes;
   });
 }

@@ -468,13 +468,42 @@ function ecartInterquartile(v: CinqNombres): number {
 }
 
 function correctionDetailleeBoiteMoustaches(exercice: ExerciceBoiteMoustaches): EtapeCorrection[] {
-  if (exercice.variante === "construction") return [];
   const u = exercice.contexte.unite;
+  if (exercice.variante === "construction") {
+    // La réponse attendue EST un graphique : la boîte à moustaches tracée, avec ses 5 valeurs.
+    return [
+      {
+        label: "Méthode",
+        sousQuestion: "a",
+        fragments: [
+          texte("On gradue régulièrement l'axe, puis on trace la boîte de "),
+          latex(LABEL_Q1),
+          texte(" à "),
+          latex(LABEL_Q3),
+          texte(", le trait de la médiane "),
+          latex(LABEL_Q2),
+          texte(" à sa valeur, et les moustaches jusqu'à "),
+          latex(LABEL_X_MIN),
+          texte(" et "),
+          latex(LABEL_X_MAX),
+          texte("."),
+        ],
+      },
+      {
+        label: "Graphique",
+        sousQuestion: "a",
+        fragments: enVirgules([texte("Boîte à moustaches attendue : "), latex(cinqNombresLatex(exercice.valeurs)), texte(` (en ${u}).`)]),
+        figureHtml: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }], true),
+      },
+      { label: "Piège", fragments: [texte("La médiane se place à sa valeur sur l'axe, pas au milieu de la boîte.")] },
+    ];
+  }
   if (exercice.variante === "lecture") {
     return [
       {
         label: "Méthode",
         sousQuestion: "a",
+        figureHtml: construireSvgBoiteMoustaches(exercice.bornePlage, [{ valeurs: exercice.valeurs }], true),
         fragments: [
           texte("Les extrémités des moustaches donnent "),
           latex(LABEL_X_MIN),
@@ -500,7 +529,12 @@ function correctionDetailleeBoiteMoustaches(exercice: ExerciceBoiteMoustaches): 
   const etendueB = serieB.max - serieB.min;
   const piegeEtendue = etendueA !== etendueB && (etendueA > etendueB ? "A" : "B") !== exercice.ecartInterquartilePlusGrand;
   const etapes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: "a", fragments: [texte("On compare la position du trait intérieur (la médiane) des deux boîtes.")] },
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [texte("On compare la position du trait intérieur (la médiane) des deux boîtes.")],
+      figureHtml: construireSvgBoiteMoustaches(exercice.bornePlage, construireLignesComparaison(exercice), true),
+    },
     {
       label: "Lecture",
       sousQuestion: "a",

@@ -145,7 +145,8 @@ function piege(exercice: ExerciceGeometrieCercle, phase: PhaseGeometrieCercle): 
 function correctionDetailleeGeometrieCercle(exercice: ExerciceGeometrieCercle): EtapeCorrection[] {
   return phasesDuScenario(exercice.scenario).flatMap((phase, i) => {
     const sousQuestion = LETTRES[i];
-    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: methode(phase) }];
+    // Le croquis de l'énoncé en tête du corrigé (comme dans l'ancien corrigé).
+    const etapes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion, fragments: methode(phase), figureHtml: i === 0 ? construireSvgGeometrieCercle(exercice) : undefined }];
     const c = calcul(exercice, phase);
     if (c !== null) etapes.push({ label: "Calcul", sousQuestion, fragments: [latex(c)] });
     etapes.push({ label: "Conclusion", sousQuestion, fragments: [latex(formatValeurPhaseLatex(exercice, phase))] });

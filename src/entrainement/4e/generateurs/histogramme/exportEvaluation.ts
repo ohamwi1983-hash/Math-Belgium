@@ -12,6 +12,7 @@ import type {
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { valeurHauteur } from "../../ui/histogrammeGraph";
+import { construireSvgHistogramme } from "./histogrammeSvg";
 import {
   CONSIGNE_FREQUENCES,
   consigneClassement,
@@ -212,6 +213,8 @@ function correctionDetailleeHistogramme(instance: ExerciceHistogramme): EtapeCor
     label: "Conclusion",
     sousQuestion: t,
     fragments: [texte(`La hauteur de chaque barre est ${grandeur} de sa classe : `), texte(instance.classes.map((_, i) => `${classeTexte(instance, i)} → ${nombreFr(valeurHauteur(instance, i))}${instance.variante === "frequence" ? " %" : ""}`).join(" ; ")), texte(".")],
+    // La réponse est un graphique : l'histogramme attendu.
+    figureHtml: construireSvgHistogramme(instance),
   });
   etapes.push({
     label: "Piège",

@@ -150,7 +150,13 @@ function correctionDetailleeGraphiqueDeriveeLogarithme(exercice: ExerciceGraphiq
   return [
     { label: "Méthode", sousQuestion: "a", fragments: [texte("f croissante ⇔ f'(x) > 0 ; f décroissante ⇔ f'(x) < 0 ; en un extremum de f, f'(x) = 0.")] },
     { label: "Lecture", sousQuestion: "a", fragments: lectureGraphique(exercice) },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`Seul le graphique ${lettreCorrecte(exercice)} a ces signes${abscisseExtremumLatex(exercice) === null ? "" : " et ce zéro"}.`)] },
+    {
+      label: "Conclusion",
+      sousQuestion: "a",
+      fragments: [texte(`Seul le graphique ${lettreCorrecte(exercice)} a ces signes${abscisseExtremumLatex(exercice) === null ? "" : " et ce zéro"}.`)],
+      // Les graphiques candidats, le bon mis en évidence (comme dans l'ancien corrigé).
+      figureHtml: construireGrilleSvgCandidats(exercice, calculerViewBoxGraphique(exercice), exercice.indexCorrect),
+    },
     { label: "Méthode", sousQuestion: "b", fragments: [texte(`On dérive avec la ${regle.nom} : `), latex(regle.formule)] },
     { label: "Calcul", sousQuestion: "b", fragments: [latex(formatDeriveeCorrecteLatex(exercice))] },
     { label: "Vérification", sousQuestion: "b", fragments: abscisseExtremumLatex(exercice) === null ? [latex("e^{ax}>0"), texte(" et "), latex("a\\ln(x)+\\dfrac{1}{x}>0"), texte(" sur ]0 ; +∞[ : f'(x) a le signe de k et ne s'annule jamais, ce qui confirme le choix.")] : [texte("f'(x) s'annule en "), latex(`x = ${abscisseExtremumLatex(exercice)}`), texte(", ce qui confirme le choix.")] },

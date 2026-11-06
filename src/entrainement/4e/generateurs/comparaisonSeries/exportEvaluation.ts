@@ -521,6 +521,11 @@ function correctionDetailleeComparaisonSeries(instance: ExerciceComparaisonSerie
     etapes.push({ label: "Profils", fragments: [texte(`Série A : ${texteProfilSerie(instance, "A")}. Série B : ${texteProfilSerie(instance, "B")}.`)] });
     etapes.push({ label: "Conclusion", fragments: segmentsVersFragments(segmentsInterpretationAttendu(question)) });
   }
+  // Variante graphique (hors seuil, déjà annoté à sa lecture) : les courbes cumulées de l'énoncé
+  // en tête du corrigé, comme dans l'ancien corrigé.
+  if (instance.variante === "graphique" && question.type !== "seuil" && etapes.length > 0) {
+    etapes[0] = { ...etapes[0], figureHtml: construireSvgCourbesCumulees(instance.serieA, instance.serieB, instance.cumul ?? "effectif", instance.contexte.unite, []) };
+  }
   return etapes.map((e) => ({ ...e, fragments: enVirgules(e.fragments) }));
 }
 
