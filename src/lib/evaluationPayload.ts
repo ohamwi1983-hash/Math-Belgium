@@ -701,22 +701,36 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   },
   'suites': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge
+  // (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé reprend les nombres du cours.
   'suites-arithmetiques': [
-    undefined,
-    "Démontre, à l'aide de la méthode de la « double échelle » — écrire $S_n$ une seconde fois à l'envers, puis additionner les deux lignes colonne par colonne — que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$.",
-    undefined,
+    { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite arithmétique vaut $u_1 = 7$ et son sixième terme vaut $u_6 = 22$. Calcule la raison $r$, puis écris les six premiers termes." },
+    { cle: 'Démonstration — la « double échelle »', enonce: "Démontre, à l'aide de la méthode de la « double échelle » — écrire $S_n$ une seconde fois à l'envers, puis additionner les deux lignes colonne par colonne — que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$." },
+    { cle: 'somme des 20 premiers termes', enonce: "Calcule la somme des 20 premiers termes d'une suite arithmétique de premier terme $u_1 = 4$ et de raison $r = 3$." },
+    { cle: 'isoler x entre deux termes', enonce: "Dans une suite arithmétique de raison $r = 2$, on donne $u_3 = 2x+1$ et $u_7 = 5x-3$. Détermine $x$, puis $u_3$ et $u_7$." },
+    { cle: 'isoler x dans une somme', enonce: "Une suite arithmétique a pour premier terme $u_1 = x$ et pour raison $r = 3$. La somme de ses 10 premiers termes vaut $S_{10} = 175$. Détermine $x$." },
+    { cle: 'isoler le rang n', enonce: "Une suite arithmétique a pour premier terme $u_1 = 5$ et pour raison $r = 3$. Détermine le rang $n$ pour lequel $u_n = 302$." },
   ],
   'suites-geometriques': [
-    undefined,
-    "Démontre, en multipliant $S_n$ par $q$ puis en soustrayant terme à terme les deux égalités obtenues, que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$.",
-    undefined,
+    { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite géométrique vaut $u_1 = \\dfrac{1}{2}$ et son septième terme vaut $u_7 = 32$. Calcule la raison $q$, sachant qu'elle est positive." },
+    { cle: 'Démonstration — établir la formule de la somme', enonce: "Démontre, en multipliant $S_n$ par $q$ puis en soustrayant terme à terme les deux égalités obtenues, que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$." },
+    { cle: 'somme des 8 premiers termes', enonce: "Calcule la somme des 8 premiers termes d'une suite géométrique de premier terme $u_1 = 3$ et de raison $q = 2$." },
+    { cle: 'isoler x entre deux termes', enonce: "Dans une suite géométrique de raison $q = 2$, on donne $u_3 = x+5$ et $u_5 = 3x+8$. Détermine $x$, puis $u_3$ et $u_5$." },
+    { cle: 'isoler le rang n', enonce: "Une suite géométrique a pour premier terme $u_1 = 3$ et pour raison $q = 2$. Détermine le rang $n$ pour lequel $u_n = 384$, en réduisant à la même base." },
+  ],
+  'convergence': [
+    { cle: 'somme infinie', enonce: "Calcule la somme de tous les termes de la suite géométrique de premier terme $u_1 = 6$ et de raison $q = \\dfrac{1}{3}$ : $6 + 2 + \\dfrac{2}{3} + \\dfrac{2}{9} + \\ldots$ Justifie d'abord que cette somme existe." },
+    { cle: 'degrés égaux', enonce: "Calcule la limite de la suite $u_n = \\dfrac{3n-1}{2n+5}$ quand $n$ tend vers $+\\infty$, en divisant le numérateur et le dénominateur par la plus haute puissance de $n$ du dénominateur." },
+  ],
+  'problemes-classiques': [
+    { cle: "la légende de l'échiquier", enonce: "Une légende raconte qu'un roi veut récompenser l'inventeur du jeu d'échecs. L'inventeur demande un grain de blé sur la première case de l'échiquier, deux sur la deuxième, quatre sur la troisième, et ainsi de suite en doublant à chaque case, jusqu'à la 64ᵉ. Combien de grains de blé cela représente-t-il au total ? Donne la valeur exacte, puis une valeur approchée en notation scientifique." },
   ],
   'comparaison-suites': [
-    "En 2020, la ville A compte 50 000 habitants et croît de 2 000 habitants par an (croissance arithmétique). La même année, la ville B compte 30 000 habitants et croît de 8 % par an (croissance géométrique). Détermine, par balayage numérique, le premier rang — puis l'année correspondante — à partir duquel la population de B dépasse celle de A, en vérifiant explicitement que ce n'est pas encore le cas au rang précédent.",
+    { cle: 'deux villes, deux croissances', enonce: "En 2020, la ville A compte 50 000 habitants et croît de 2 000 habitants par an (croissance arithmétique). La même année, la ville B compte 30 000 habitants et croît de 8 % par an (croissance géométrique). Détermine, par balayage numérique, le premier rang — puis l'année correspondante — à partir duquel la population de B dépasse celle de A, en vérifiant explicitement que ce n'est pas encore le cas au rang précédent." },
   ],
   'recurrente-affine': [
-    "Démontre que, si la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) converge, sa limite $L$ vaut nécessairement $L = \\dfrac{b}{1-a}$.",
-    undefined,
+    { cle: 'Démonstration — pourquoi L = b/(1−a)', enonce: "Démontre que, si la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) converge, sa limite $L$ vaut nécessairement $L = \\dfrac{b}{1-a}$." },
+    { cle: 'dilution répétée', enonce: "Un aquarium contient un produit dont la concentration (en mg/L) suit la récurrence $u_{n+1} = 0{,}7 \\times u_n + 3$, avec $u_1 = 1$ : chaque semaine, 30 % du produit est filtré, puis 3 mg/L sont réintroduits. Justifie que la concentration se stabilise à long terme, et calcule vers quelle valeur." },
   ],
   },
   'derivees-applications': {
@@ -1047,7 +1061,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
