@@ -353,14 +353,14 @@ export function labelPhase(exercice: ExerciceSuiteClassique, phase: PhaseSuiteCl
 export function labelsListe(phase: PhaseSuiteClassique, exercice?: ExerciceSuiteClassique): { labels: string[]; enLatex: boolean } {
   switch (phase) {
     case "poidsComparaison":
-      return { labels: ["Poids total (en tonnes) =", "Nombre de fois ≈"], enLatex: false };
+      return { labels: ["Poids (t) =", "Nombre de fois ≈"], enLatex: false };
     case "resoudreSysteme":
       return { labels: ["a=", "\\Delta="], enLatex: true };
     case "suiteFinalePapyrus":
       return { labels: ["u_1=", "u_2=", "u_3=", "u_4=", "u_5="], enLatex: true };
     case "troisMethodes": {
       const n = exercice && exercice.scenario === "vitesse" ? exercice.n : 0;
-      return { labels: [`Sur les ${n} premières secondes (km/h) =`, `Pendant la ${ordinal(n)} seconde (km/h) =`], enLatex: false };
+      return { labels: [`Sur ${n} s (km/h) =`, `${ordinal(n)} seconde (km/h) =`], enLatex: false };
     }
     case "dixTermes":
       return { labels: Array.from({ length: 10 }, (_, i) => `u_{${i + 1}}=`), enLatex: true };
@@ -409,12 +409,19 @@ function hacher(texte: string): number {
   return h >>> 0;
 }
 
+/** Mélange de Fisher-Yates piloté par un générateur mulberry32 (graine = hachage de l'instance). */
 function melanger<T>(elements: T[], graine: number): T[] {
   const copie = [...elements];
-  let s = graine || 1;
+  let a = graine >>> 0;
+  const suivant = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
   for (let i = copie.length - 1; i > 0; i--) {
-    s = (Math.imul(s, 1103515245) + 12345) >>> 0;
-    const j = s % (i + 1);
+    const j = Math.floor(suivant() * (i + 1));
     [copie[i], copie[j]] = [copie[j], copie[i]];
   }
   return copie;
@@ -564,7 +571,7 @@ export function texteAideNiveau1(exercice: ExerciceSuiteClassique, phase: PhaseS
       return "L'aire de $U_k$ vaut $A_k-A_{k+1}$ : la première est $A_1-A_2$, et d'un petit triangle au suivant l'aire est encore divisée par 4.";
     case "sommePartielleA": {
       const { partsA: p, coloreesA: c } = asCarres(exercice);
-      return `À la 1re étape, on colorie $u_1=\\dfrac{${c}}{${p}}$ du grand carré ; chaque étape colorie $\\dfrac{1}{${p}}$ de ce qu'elle colorie à l'étape précédente : $q=\\dfrac{1}{${p}}$. Puis $S_5=u_1\\times\\dfrac{1-q^5}{1-q}$.`;
+      return `À la 1re étape, on colorie $u_1=\\dfrac{${c}}{${p}}$ du grand carré ; à chaque étape, on colorie $\\dfrac{1}{${p}}$ de ce qu'on a colorié à l'étape précédente : $q=\\dfrac{1}{${p}}$. Puis $S_5=u_1\\times\\dfrac{1-q^5}{1-q}$.`;
     }
     case "limitePuissanceA": {
       const p = asCarres(exercice).partsA;

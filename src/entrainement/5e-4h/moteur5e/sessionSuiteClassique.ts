@@ -90,15 +90,13 @@ function reglagesEtape(etat: EtatSessionSuiteClassique, phase: PhaseSuiteClassiq
  * aligné sur `texteAideNiveau2` : une phase listée ici avec un niveau 2 vide afficherait un bouton
  * d'aide sans effet. */
 export const PHASES_AVEC_AIDE_NIVEAU2 = new Set<PhaseSuiteClassique>([
-  "u64",
-  "sommeTotaleEchiquier",
+  "poidsComparaison",
   "resoudreSysteme",
   "resoudreRCombinees",
   "distance11",
   "sommeTotale11",
   "troisMethodes",
   "resoudrePhi",
-  "calculV5",
   "hauteursZigzag",
   "longueurZigzag",
   "airesZigzag",

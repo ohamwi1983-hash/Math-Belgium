@@ -109,11 +109,11 @@ export function fractionLisible(f: FractionQ): boolean {
   return Math.abs(f.num) <= 9999 && f.den <= 999;
 }
 
-/** Réponse à arrondir au centième : ni minuscule (sinon « 0 » serait accepté par la tolérance de
+/** Réponse à arrondir au centième : ni minuscule (au moins 0,02 : sinon « 0 » serait accepté par la tolérance de
  * 0,01 — vu pour u₁₀ = 0,0002), ni démesurée. */
 export function reponseArrondieLisible(f: FractionQ): boolean {
   const v = Math.abs(fractionQVersNombre(f));
-  return v >= 0.05 && v < 100000;
+  return v >= 0.02 && v < 100000;
 }
 
 function donneesLisibles(e: ExercicePrincipalSuiteGeometrique): boolean {

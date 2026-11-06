@@ -2,7 +2,8 @@ import type { ExerciceTrianglesZigzag } from "../../core5e/suitesClassiques.type
 import { sommeInfinie, termeGeometrique } from "../suitesGeometriques/parametres";
 import { choisirParmi } from "./aleatoire";
 
-export const COTES_ZIGZAG = [4, 6, 8, 10, 12] as const;
+/** Côtés pairs : les coefficients exacts (c/2ᵏ, c²/2⁷) restent des fractions à petit dénominateur. */
+export const COTES_ZIGZAG = [4, 6, 8, 10, 12, 14] as const;
 
 /** Scénario 6 — zigzag dans un triangle équilatéral ABC de côté c (modèle complet dans
  * `core5e/suitesClassiques.types.ts`). Dans le triangle rectangle Tₖ = C Hₖ₋₁ Hₖ (angle 60° en C),

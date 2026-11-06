@@ -3,7 +3,7 @@ import { choisirParmi } from "./aleatoire";
 
 /** Valeurs de x tirées : paires, positives ou négatives (r = −3x/2 entier). x = 6 (P = 216) est le
  * problème d'origine. */
-export const VALEURS_X_COMBINEES = [-8, -6, -4, -2, 2, 4, 6, 8, 10] as const;
+export const VALEURS_X_COMBINEES = [-10, -8, -6, -4, -2, 2, 4, 6, 8, 10, 12] as const;
 
 /** Scénario 3 — suites arithmétique et géométrique combinées.
  *

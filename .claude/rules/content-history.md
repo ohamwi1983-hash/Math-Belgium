@@ -2012,7 +2012,7 @@ paths:
   `apparierEnoncesDemonstration` : 0 orphelin, démonstrations toujours à l'indice 1). Notation
   clavier retirée : kickers, titres vidéo et descriptions de cartes en Unicode (uₙ, uₙ₊₁, qⁿ⁻¹),
   légendes en `$…$` ; « l'exposant est toujours (n−1) » (arithmétique) → « le facteur de r » ;
-  échiquier « plusieurs centaines de fois » → « plus d'un millier de fois (≈ 1 294) », avec les
-  constantes de 5gen17 (0,05 g le grain, 713 Mt). Cartes 5gen14/15/16/17/18/19/41 alignées sur le
+  échiquier « plusieurs centaines de fois » → « plus d'un millier de fois (≈ 1 150) », avec les
+  constantes de 5gen17 (0,05 g le grain, 800 Mt, valeur reprise de 5gen17 refondu). Cartes 5gen14/15/16/17/18/19/41 alignées sur le
   comportement final des générateurs (plus de « moyenne géométrique » ni « 0 solution » en 5gen15).
   Vérifié : 0 erreur KaTeX/console, 0 débordement, 0 texte brut `_`/`^`/`$` à 390 et 1280 px.

@@ -838,7 +838,7 @@ export const suites: ChapterContent = {
           ],
           result: {
             tag: 'résultat',
-            text: '$S_{64} = 2^{64}-1 \\approx 1{,}8446744\\times10^{19}$ grains — à environ 0,05 g le grain, près de $9{,}2\\times10^{11}$ tonnes : plus d\'un millier de fois (environ 1 294 fois) la production mondiale annuelle de blé, d\'environ 713 millions de tonnes.',
+            text: '$S_{64} = 2^{64}-1 \\approx 1{,}8446744\\times10^{19}$ grains — à environ 0,05 g le grain, près de $9{,}2\\times10^{11}$ tonnes : plus d\'un millier de fois (environ 1 150 fois) la production mondiale annuelle de blé, d\'environ 800 millions de tonnes.',
           },
         },
         {
@@ -907,9 +907,9 @@ export const suites: ChapterContent = {
               "longueurs ou d'aires. Elles décroissent à chaque étape d'une construction " +
               'géométrique répétée. Leur somme infinie a pourtant une valeur finie.',
             '**Les suites combinées** — une suite arithmétique et une suite géométrique qui ' +
-              "partagent certains termes. À démêler avec un système d'équations.",
+              "partagent certains termes. À démêler avec une équation du second degré.",
             '**Position et vitesse** — une distance parcourue par intervalles de temps égaux, ' +
-              'modélisée par une suite.',
+              'modélisée par une suite : les vitesses moyennes se calculent avec un terme et une somme.',
           ],
         },
         {
