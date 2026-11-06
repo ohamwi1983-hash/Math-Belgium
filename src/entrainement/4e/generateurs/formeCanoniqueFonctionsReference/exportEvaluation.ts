@@ -20,6 +20,7 @@ import {
   formatLineaire,
 } from "../../ui/formatFormeCanoniqueFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFormeCanoniqueFonctionReference } from "./index";
+import { construireGrapheFonctionReference } from "../fonctionsReference/exportEvaluation";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference>` pour gen11
@@ -248,6 +249,9 @@ function correctionDetailleeFormeCanoniqueFonctionsReference(exercice: ExerciceF
         formule(formatGabaritLatex(exercice)),
         ...(transformations.length > 0 ? [texte(" — "), ...transformations, texte(".")] : [texte(".")]),
       ],
+      // Graphique de f (forme canonique) avec g en pointillés : le point (0 ; 0) de g arrive au
+      // point caractéristique (TH ; TV), le point (1 ; 1) au point croix.
+      figureHtml: construireGrapheFonctionReference(exercice, true, "f (forme canonique)"),
     },
     { label: "Piège", fragments: [texte(exercice.th !== 0 && exercice.formeDepart.type !== "carre" && exercice.formeDepart.type !== "inverse" ? `${piege(exercice)} ${PIEGE_SIGNE}` : piege(exercice))] },
   ];

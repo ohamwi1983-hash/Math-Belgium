@@ -48,8 +48,14 @@ import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFonctionRefe
  * pôle, `construireSvgFonction` coupe le tracé exactement comme Mafs le fait pour `Plot.OfX`).
  */
 
-function construireGrapheFonctionReference(exercice: ExerciceFonctionReference, estCorrige: boolean): string {
-  const viewBox = calculerViewBoxFonctionReference(exercice);
+/** Exporté pour gen11 (forme canonique) : même courbe f, mêmes deux points, même fonction de
+ * référence en pointillés dans son corrigé détaillé. */
+export function construireGrapheFonctionReference(exercice: ExerciceFonctionReference, estCorrige: boolean, libelleCourbe = "f (courbe donnée)"): string {
+  // Corrigé : la fonction de référence g (paramètres neutres) en pointillés gris sous la courbe de
+  // f, pour voir les transformations appliquées au point (0 ; 0) et au point (1 ; 1). La fenêtre
+  // englobe alors les deux courbes (même calcul que l'écran, qui l'étend à la courbe « live »).
+  const reference: ExerciceFonctionReference = { famille: exercice.famille, th: 0, tv: 0, ch: 1, eh: 1, ev: 1, cv: 1, sox: false, soy: false };
+  const viewBox = estCorrige ? calculerViewBoxFonctionReference(exercice, reference) : calculerViewBoxFonctionReference(exercice);
   const croix = pointUnitaire(exercice);
   const largeur = 320;
   const points: PointMarqueSvg[] = [
@@ -58,23 +64,42 @@ function construireGrapheFonctionReference(exercice: ExerciceFonctionReference, 
       y: exercice.tv,
       forme: "point",
       label: estCorrige ? `(${exercice.th} ; ${exercice.tv})` : undefined,
-      labelPosition: "dessous",
+      // Étiquettes de part et d'autre des deux points (sinon elles se chevauchent quand le point
+      // croix est sous le point caractéristique).
+      labelPosition: croix.y >= exercice.tv ? "dessous" : "dessus",
     },
     {
       x: croix.x,
       y: croix.y,
       forme: "croix",
       label: estCorrige ? `(${formatFractionIrreductible(croix.x)} ; ${formatFractionIrreductible(croix.y)})` : undefined,
-      labelPosition: "dessus",
+      labelPosition: croix.y >= exercice.tv ? "dessus" : "dessous",
     },
   ];
   return construireSvgFonction((x) => evaluerFonctionReference(exercice, x), { xMin: viewBox.x[0], xMax: viewBox.x[1], yMin: viewBox.y[0], yMax: viewBox.y[1] }, {
-    largeur,
-    hauteur: largeur / RATIO_GRAPHE,
-    classe: "graphe-fonction-reference",
+    largeur: estCorrige ? 420 : largeur,
+    hauteur: (estCorrige ? 420 : largeur) / RATIO_GRAPHE,
+    classe: estCorrige ? "figure-corrige" : "graphe-fonction-reference",
     points,
+    courbesSecondaires: estCorrige ? [{ evaluer: (x) => evaluerFonctionReference(reference, x) }] : undefined,
+    legende: estCorrige
+      ? [
+          { texte: libelleCourbe, couleur: "#1971c2" },
+          { texte: `référence ${BASE_TEXTE[exercice.famille]}`, couleur: "#8a8f98", pointilles: true },
+        ]
+      : undefined,
   });
 }
+
+/** Nom court de la fonction de référence, pour la légende du graphique du corrigé (texte SVG). */
+const BASE_TEXTE: Record<FamilleReference, string> = {
+  carre: "y = x²",
+  cube: "y = x³",
+  racine_carree: "y = √x",
+  racine_cubique: "y = ∛x",
+  inverse: "y = 1/x",
+  valeur_absolue: "y = |x|",
+};
 
 /** Nombre (entier ou fraction irréductible) rendu en LaTeX — `\dfrac` plutôt que « p/q ». */
 function nombreLatex(valeur: number): string {
@@ -265,6 +290,7 @@ function correctionDetailleeFonctionsReference(exercice: ExerciceFonctionReferen
         latex(coordonneesLatex(th, tv)),
         texte(` : ${translationTexte(th, "horizontale", "la droite", "la gauche")}, ${translationTexte(tv, "verticale", "le haut", "le bas")}.`),
       ],
+      figureHtml: construireGrapheFonctionReference(exercice, true),
     },
     {
       label: "Méthode",

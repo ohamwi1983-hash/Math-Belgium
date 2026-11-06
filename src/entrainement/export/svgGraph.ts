@@ -102,6 +102,11 @@ export interface OptionsSvgFonction {
   classe?: string;
   /** Points marqués (sommet, point-croix...) — voir `PointMarqueSvg`. `[]`/absent = aucun. */
   points?: PointMarqueSvg[];
+  /** Courbes tracées SOUS la courbe principale (ex. fonction de référence en pointillés gris dans
+   * un corrigé de transformation). */
+  courbesSecondaires?: { evaluer: (x: number) => number | null; couleur?: string; pointilles?: boolean }[];
+  /** Légende en haut à gauche, une ligne par courbe (trait d'échantillon + texte). */
+  legende?: { texte: string; couleur: string; pointilles?: boolean }[];
 }
 
 /** Construit le `<svg>` autonome (axes, grille, courbe échantillonnée) d'UNE fonction réelle. */
@@ -137,13 +142,27 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   const axeX = `<line x1="${MARGE}" y1="${sy(0).toFixed(1)}" x2="${largeur - MARGE}" y2="${sy(0).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
   const axeY = `<line x1="${sx(0).toFixed(1)}" y1="${MARGE}" x2="${sx(0).toFixed(1)}" y2="${hauteur - MARGE}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
 
-  const segments = echantillonnerSegments(evaluer, xMin, xMax);
-  const chemins = segments
-    .filter((seg) => seg.length >= 4)
-    .map((seg) => {
-      let d = `M ${sx(seg[0]).toFixed(1)},${sy(seg[1]).toFixed(1)}`;
-      for (let i = 2; i < seg.length; i += 2) d += ` L ${sx(seg[i]).toFixed(1)},${sy(seg[i + 1]).toFixed(1)}`;
-      return `<path d="${d}" fill="none" stroke="${couleurCourbe}" stroke-width="2.2" stroke-linecap="round"/>`;
+  const tracer = (f: (x: number) => number | null, couleur: string, epaisseur: number, pointilles: boolean) =>
+    echantillonnerSegments(f, xMin, xMax)
+      .filter((seg) => seg.length >= 4)
+      .map((seg) => {
+        let d = `M ${sx(seg[0]).toFixed(1)},${sy(seg[1]).toFixed(1)}`;
+        for (let i = 2; i < seg.length; i += 2) d += ` L ${sx(seg[i]).toFixed(1)},${sy(seg[i + 1]).toFixed(1)}`;
+        return `<path d="${d}" fill="none" stroke="${couleur}" stroke-width="${epaisseur}" stroke-linecap="round"${pointilles ? ' stroke-dasharray="6 4"' : ""}/>`;
+      })
+      .join("");
+  // Une courbe secondaire peut sortir largement du cadre (ex. référence translatée hors de la fenêtre) :
+  // on la découpe aux bornes visibles, comme la principale (valeurs hors [yMin ; yMax] = trou).
+  const dansCadre = (f: (x: number) => number | null) => (x: number) => {
+    const y = f(x);
+    return y === null || y < yMin - (yMax - yMin) || y > yMax + (yMax - yMin) ? null : y;
+  };
+  const cheminsSecondaires = (options.courbesSecondaires ?? []).map((c) => tracer(dansCadre(c.evaluer), c.couleur ?? "#8a8f98", 1.6, c.pointilles ?? true)).join("");
+  const chemins = cheminsSecondaires + tracer(evaluer, couleurCourbe, 2.2, false);
+  const legende = (options.legende ?? [])
+    .map((l, i) => {
+      const y = 14 + i * 13;
+      return `<rect x="${MARGE + 2}" y="${y - 9}" width="${(l.texte.length * 4.6 + 28).toFixed(0)}" height="12" fill="#ffffff" opacity="0.85"/><line x1="${MARGE + 4}" y1="${y - 3}" x2="${MARGE + 20}" y2="${y - 3}" stroke="${l.couleur}" stroke-width="2"${l.pointilles ? ' stroke-dasharray="4 3"' : ""}/><text x="${MARGE + 24}" y="${y}" font-size="9" fill="${l.couleur}" font-family="Archivo, Arial, Helvetica, sans-serif">${echapperAttribut(l.texte)}</text>`;
     })
     .join("");
 
@@ -177,7 +196,7 @@ ${axeX}${axeY}
 ${chemins}
 ${labelsX.join("")}${labelsY.join("")}
 ${points}
-${lettreHtml}
+${legende}${lettreHtml}
 ${cadre}${coche}
 </svg>`;
 }

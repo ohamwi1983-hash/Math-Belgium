@@ -188,17 +188,78 @@ function construireMarqueursSupplementaires(exercice: ExerciceCaracteristiquesFo
   return morceaux.join("");
 }
 
-function construireGrapheCaracteristiques(exercice: ExerciceCaracteristiquesFonction): string {
+function construireGrapheCaracteristiques(exercice: ExerciceCaracteristiquesFonction, annote = false): string {
   const viewBoxMafs = calculerViewBoxCaracteristiques(exercice);
   const viewBox: ViewBoxSvg = { xMin: viewBoxMafs.x[0], xMax: viewBoxMafs.x[1], yMin: viewBoxMafs.y[0], yMax: viewBoxMafs.y[1] };
   const svgBase = construireSvgFonction(evaluerPourSvgCaracteristiques(exercice, viewBox), viewBox, {
     largeur: LARGEUR_SVG,
     hauteur: HAUTEUR_SVG,
     couleurCourbe: COULEUR_COURBE,
-    classe: "graphe-caracteristiques",
+    classe: annote ? "figure-corrige" : "graphe-caracteristiques",
   });
-  const marqueurs = construireMarqueursSupplementaires(exercice, viewBox);
+  const marqueurs = construireMarqueursSupplementaires(exercice, viewBox) + (annote ? construireAnnotationsCorrige(exercice, viewBox) : "");
   return svgBase.replace("</svg>", `${marqueurs}</svg>`);
+}
+
+const COULEUR_LECTURE = "#9a3b12";
+
+/** Nombre écrit dans le SVG du corrigé : virgule décimale et vrai signe moins. */
+function nombreSvg(valeur: number): string {
+  return formatNombre(valeur).replace(".", ",").replace("-", "−");
+}
+
+function texteLecture(x: number, y: number, contenu: string, ancre: "start" | "middle" | "end" = "middle"): string {
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9" font-weight="bold" fill="${COULEUR_LECTURE}" text-anchor="${ancre}" stroke="#ffffff" stroke-width="2.5" paint-order="stroke" font-family="Archivo, Arial, Helvetica, sans-serif">${contenu}</text>`;
+}
+
+/**
+ * Corrigé détaillé : les lectures attendues repérées SUR le graphique de l'énoncé — zéros (losanges
+ * sur l'axe des abscisses), ordonnée à l'origine, valeur en x = v (si elle existe) et équations des
+ * deux asymptotes. Mêmes valeurs que les conclusions du corrigé (`exercice.zeros`,
+ * `evaluerCourbeCaracteristiques`).
+ */
+function construireAnnotationsCorrige(exercice: ExerciceCaracteristiquesFonction, viewBox: ViewBoxSvg): string {
+  const { sx, sy } = construireTransformSvg(viewBox, LARGEUR_SVG, HAUTEUR_SVG);
+  const m: string[] = [];
+  const dansX = (x: number) => x >= viewBox.xMin && x <= viewBox.xMax;
+  const dansY = (y: number) => y >= viewBox.yMin && y <= viewBox.yMax;
+  const yAxe = Math.min(Math.max(sy(0), MARGE_SVG + 10), HAUTEUR_SVG - MARGE_SVG - 4);
+
+  for (const z of exercice.zeros) {
+    if (!dansX(z)) continue;
+    const X = sx(z);
+    m.push(`<path d="M ${X.toFixed(1)},${(yAxe - 4.5).toFixed(1)} l 4.5,4.5 l -4.5,4.5 l -4.5,-4.5 z" fill="${COULEUR_LECTURE}"/>`);
+    m.push(texteLecture(X, yAxe + 15, nombreSvg(z)));
+  }
+
+  if (existeOrdonneeCaracteristiques(exercice)) {
+    const y0 = evaluerCourbeCaracteristiques(exercice, 0);
+    if (dansY(y0)) {
+      m.push(`<circle cx="${sx(0).toFixed(1)}" cy="${sy(y0).toFixed(1)}" r="4.5" fill="none" stroke="${COULEUR_LECTURE}" stroke-width="1.6"/>`);
+      m.push(texteLecture(sx(0) + 7, sy(y0) - 6, `f(0) = ${nombreSvg(y0)}`, "start"));
+    }
+  }
+
+  if (existeValeurEnVCaracteristiques(exercice)) {
+    const yv = evaluerCourbeCaracteristiques(exercice, exercice.v);
+    if (dansX(exercice.v) && dansY(yv)) {
+      const X = sx(exercice.v);
+      const Y = sy(yv);
+      m.push(`<rect x="${(X - 5).toFixed(1)}" y="${(Y - 5).toFixed(1)}" width="10" height="10" fill="none" stroke="${COULEUR_LECTURE}" stroke-width="1.4"/>`);
+      const aGauche = X > LARGEUR_SVG - 80;
+      m.push(texteLecture(aGauche ? X - 8 : X + 8, Y + 14, `f(${nombreSvg(exercice.v)}) = ${nombreSvg(yv)}`, aGauche ? "end" : "start"));
+    }
+  }
+
+  if (dansX(exercice.AV)) {
+    const X = sx(exercice.AV);
+    const aGauche = X > LARGEUR_SVG - 60;
+    m.push(texteLecture(aGauche ? X - 4 : X + 4, MARGE_SVG + 10, `x = ${nombreSvg(exercice.AV)}`, aGauche ? "end" : "start"));
+  }
+  if (dansY(exercice.L)) {
+    m.push(texteLecture(LARGEUR_SVG - MARGE_SVG - 4, sy(exercice.L) - 4, `y = ${nombreSvg(exercice.L)}`, "end"));
+  }
+  return m.join("");
 }
 
 function construireEnonceCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFonction): SectionExercice {
@@ -395,6 +456,12 @@ function correctionDetailleeCaracteristiquesFonction(exercice: ExerciceCaracteri
   const valeur = valeurLatex(exercice);
   const b5 = formatNombre(exercice.b5);
   const etapes: EtapeCorrection[] = [
+    {
+      label: "Graphique",
+      sousQuestion: "a",
+      fragments: [texte("Les lectures attendues, repérées sur le graphique : zéros (losanges), ordonnée à l'origine (cercle), valeur demandée (carré) et équations des asymptotes.")],
+      figureHtml: construireGrapheCaracteristiques(exercice, true),
+    },
     { label: "Méthode", sousQuestion: "a", fragments: [texte("On repère les abscisses sans point de la courbe : asymptote verticale, cercle vide sans point plein à la même abscisse, intervalle sans tracé.")] },
     { label: "Lecture", sousQuestion: "a", fragments: [texte("Exclus : "), ...exclusions(exercice).flatMap((e, i) => [...(i === 0 ? [] : [texte(" ; ")]), ...e.fragments]), texte(".")] },
     { label: "Conclusion", sousQuestion: "a", fragments: [latex(`\\mathrm{dom}\\,f = ${ensembleLatex(domaineCaracteristiques(exercice))}`)] },
