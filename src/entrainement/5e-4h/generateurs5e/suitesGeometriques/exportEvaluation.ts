@@ -183,6 +183,20 @@ function enoncePapierSuiteGeometrique(exercice: ExerciceSuiteGeometrique): Enonc
         texte("."),
       ];
       break;
+    case "algebriqueTermeGeneral": {
+      // Termes réels plutôt que la phrase générique « uₚ et uₙ » de l'écran.
+      const [termeP, termeN, raison] = formatTermesDonneesLatex(exercice);
+      entete = [
+        texte("Dans une suite géométrique de raison "),
+        latex(raison),
+        texte(", deux termes sont donnés en fonction de x : "),
+        latex(termeP),
+        texte(" et "),
+        latex(termeN),
+        texte(". Détermine x, puis la valeur de ces deux termes. Donne les valeurs exactes."),
+      ];
+      break;
+    }
     default:
       entete = [texte(`${consigneGenerale(exercice)} On donne `), ...donneesFr(exercice), texte(". Donne les valeurs exactes.")];
   }

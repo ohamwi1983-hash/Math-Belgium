@@ -121,13 +121,19 @@ function tirerQPourExposant(exposant: number): FractionQ {
 
 /** Données et réponses lisibles (voir `fractionLisible`) : uₙ(x) ne doit plus afficher une
  * constante comme 196621/16384, ni les valeurs déduites (uₚ, uₙ une fois x connu). */
+function donneeLisible(f: FractionQ): boolean {
+  return fractionLisible(f) && Math.abs(f.num) <= 999 && f.den <= 16;
+}
+
 export function genererExerciceAlgebriqueTermeGeneral(): ExerciceAlgebriqueTermeGeneral {
   let exercice = genererExerciceAlgebriqueTermeGeneralBrut();
   for (let tentative = 0; tentative < 500; tentative++) {
     const { up, un, xReel } = exercice;
     const upX = additionnerFractionQ(multiplierFractionQ(entierVersFractionQ(up.a), xReel), entierVersFractionQ(up.b));
     const unX = additionnerFractionQ(multiplierFractionQ(entierVersFractionQ(un.a), xReel), un.b);
-    if ([un.b, upX, unX].every(fractionLisible)) return exercice;
+    // Données ÉCRITES dans l'énoncé (constante de uₙ(x)) et valeurs déduites : petites fractions
+    // seulement — `fractionLisible` (≤ 9999/999) laissait passer « u₁₁ = 3x − 9225/2 ».
+    if ([un.b, upX, unX].every(donneeLisible)) return exercice;
     exercice = genererExerciceAlgebriqueTermeGeneralBrut();
   }
   return exercice;

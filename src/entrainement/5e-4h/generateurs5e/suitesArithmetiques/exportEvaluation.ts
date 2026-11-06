@@ -208,6 +208,20 @@ function enoncePapierSuiteArithmetique(exercice: ExerciceSuiteArithmetique): Eno
         texte("."),
       ];
       break;
+    case "algebriqueTermeGeneral": {
+      // Termes réels plutôt que la phrase générique « uₚ et uₙ » de l'écran.
+      const [termeP, termeN, raison] = formatTermesDonneesLatex(exercice);
+      entete = [
+        texte("Dans une suite arithmétique de raison "),
+        latex(raison),
+        texte(", deux termes sont donnés en fonction de x : "),
+        latex(termeP),
+        texte(" et "),
+        latex(termeN),
+        texte(". Détermine x, puis la valeur de ces deux termes."),
+      ];
+      break;
+    }
     default:
       entete = [texte(`${consigneGenerale(exercice)} On donne `), ...donneesFr(exercice), texte(".")];
   }

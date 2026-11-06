@@ -463,7 +463,7 @@ function formatFormuleGeneraleConfirmeeLatex(exercice: ExerciceSuiteArithmetique
 /** Valeur de S_n trouvée à l'écran "calculerSn" (sous-cas D uniquement), une fois confirmée. */
 function formatSnTrouveConfirmeLatex(exercice: ExerciceSuiteArithmetique): string {
   const e = commeSommeSnD(exercice);
-  return `${s(e.n)}=${e.k}`;
+  return `${s(e.n)}=${formatValeurExacteLatex(e.k)}`;
 }
 
 /** Équation posée à l'écran "poserEquationAlgebrique" une fois confirmée — famille A : up(x) et
