@@ -29,11 +29,23 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionConvergenceSuite {
   return demarrerSessionConvergenceSuite(REGLAGES_DEMO, genererExerciceConvergenceSuite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/convergenceSuites/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionConvergenceSuite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionConvergenceSuite(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceConvergenceSuite, (id) => construireAvecVarianteId(id as VarianteConvergenceSuite)),
+  );
 }
 
 /** Puces de progression — pas de `ORDRE_PHASES` statique : la séquence réelle dépend de
@@ -85,7 +97,7 @@ function reponseAttenduePourPhase(exercice: ExerciceConvergenceSuite, phase: Pha
 }
 
 export function App5gen16() {
-  const [etat, setEtat] = useState<EtatSessionConvergenceSuite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionConvergenceSuite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionConvergenceSuite`, jamais dans le moteur. Remis à vide à chaque
