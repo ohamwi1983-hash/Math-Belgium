@@ -1996,3 +1996,23 @@ paths:
   question démonstration est dérivé du TEXTE de l'exemple (le `featureTable` qui suit n'est pas
   repris) : ces résultats énoncent maintenant les valeurs (fréquences, cumuls, effectifs, hauteurs
   des barres), le tableau restant affiché en dessous à l'écran.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`) : corrections issues de l'audit du chapitre (lot A,
+  décisions de l'utilisateur : ENSEIGNER ce que les générateurs demandent). Ajouts de cours :
+  « Retrouver une inconnue : x ou le rang n » en section 1 (relation $u_n = u_p + (n-p)r$,
+  méthode, 3 exemples : x entre deux termes, x dans une somme, rang n) et en section 2 (relation
+  $u_n = u_p\times q^{n-p}$, exemple x entre deux termes, méthode « réduire à la même base » +
+  exemple rang n) ; « La somme infinie d'une suite géométrique » en section 3 ($S_\infty =
+  u_1/(1-q)$ si $|q|<1$, exemple $6+2+\frac23+\ldots = 9$, Attention $q=1$) — la promesse de
+  l'astuce « et si |q| < 1 ? » et de l'encadré Zénon est enfin tenue. Remarque « si $u_1 = L$, la
+  suite récurrente affine est constante » dans le rappel du régime permanent, le formulaire et la
+  synthèse. Les nouveaux blocs `exemple` sont placés APRÈS les 3 blocs exemple/démonstration
+  existants de chaque section : l'appariement POSITIONNEL des énoncés de démonstration
+  (`ENONCES_DEMONSTRATION.suites`, `lib/evaluationPayload.ts`) reste aligné (vérifié par
+  `apparierEnoncesDemonstration` : 0 orphelin, démonstrations toujours à l'indice 1). Notation
+  clavier retirée : kickers, titres vidéo et descriptions de cartes en Unicode (uₙ, uₙ₊₁, qⁿ⁻¹),
+  légendes en `$…$` ; « l'exposant est toujours (n−1) » (arithmétique) → « le facteur de r » ;
+  échiquier « plusieurs centaines de fois » → « plus d'un millier de fois (≈ 1 294) », avec les
+  constantes de 5gen17 (0,05 g le grain, 713 Mt). Cartes 5gen14/15/16/17/18/19/41 alignées sur le
+  comportement final des générateurs (plus de « moyenne géométrique » ni « 0 solution » en 5gen15).
+  Vérifié : 0 erreur KaTeX/console, 0 débordement, 0 texte brut `_`/`^`/`$` à 390 et 1280 px.

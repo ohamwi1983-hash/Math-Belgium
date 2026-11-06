@@ -264,7 +264,7 @@ export const suites: ChapterContent = {
             'Résous l\'équation en $x$, puis **remplace** $x$ par sa valeur pour donner les termes ' +
               'demandés.',
             'Pour le rang : pose $u_n = k$, isole $n$. Le résultat doit être un **entier ' +
-              'naturel non nul** — sinon, k n\'est pas un terme de la suite.',
+              'naturel non nul** — sinon, $k$ n\'est pas un terme de la suite.',
           ],
         },
         {
@@ -668,7 +668,7 @@ export const suites: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Promesse tenue : que devient $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$ quand $n$ devient ' +
+            'Que devient $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$ quand $n$ devient ' +
             'très grand ? Si $|q| < 1$, le tableau ci-dessus dit que $q^n \\to 0$. Le numérateur ' +
             '$1 - q^n$ tend donc vers 1, et la somme se rapproche d\'une valeur **finie** : on ' +
             'additionne une infinité de termes, et pourtant le total reste borné — Achille ' +
