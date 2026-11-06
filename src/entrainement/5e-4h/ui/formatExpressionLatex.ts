@@ -393,7 +393,8 @@ function latexGroupeSiNecessaire(noeud: Noeud): string {
 function noeudVersLatex(noeud: Noeud): string {
   switch (noeud.type) {
     case "nombre":
-      return noeud.texte;
+      // Aperçu seulement : virgule décimale belge, quelle que soit la saisie (« 0.5 » ou « 0,5 »).
+      return noeud.texte.replace(/[.,]/, "{,}");
     case "x":
       return "x";
     case "variable":

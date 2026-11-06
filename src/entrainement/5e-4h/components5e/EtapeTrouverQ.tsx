@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
-import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteGeometrique";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui5e/formatSuiteGeometrique";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -96,6 +96,7 @@ export function EtapeTrouverQ({ exercice, tentativesUtilisees, tentativesMax, ni
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
+          {noteAideNiveau1(exercice, "trouverQ") && <p>{noteAideNiveau1(exercice, "trouverQ")}</p>}
           <Katex expression={texteAideNiveau1(exercice, "trouverQ")} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>

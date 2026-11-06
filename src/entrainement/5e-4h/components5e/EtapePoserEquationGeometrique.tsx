@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
 import type { ReponseEquation } from "../moteur5e/sessionSuiteGeometrique";
-import { consigneGenerale, consignePhase, consignePoserEquationAlgebriqueValeurLatex, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteGeometrique";
+import { consigneGenerale, consignePhase, consignePoserEquationAlgebriqueValeurLatex, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui5e/formatSuiteGeometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -96,6 +96,7 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
+          {noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique) && <p>{noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)}</p>}
           <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>

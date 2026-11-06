@@ -271,21 +271,38 @@ export function consignePhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSu
 // ============================================================================
 
 export function texteAideNiveau1(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string {
-  if (phase === "trouverQ") return "q^{k}=\\dfrac{u_m}{u_p}\\quad(k=\\text{écart des indices}).\\ \\text{Si }k\\text{ est pair, }q\\text{ a 2 valeurs opposées.}";
+  if (phase === "trouverQ") return "q^{k}=\\dfrac{u_m}{u_p}";
   if (phase === "trouverU1" || phase === "trouverU1B1" || phase === "trouverU1B2") return "u_1=\\dfrac{u_p}{q^{p-1}}";
   if (phase.startsWith("formuleGenerale")) return "u_n=u_1\\times q^{n-1}";
-  if (phase.startsWith("termesProches") || phase.startsWith("termeEloigne")) return "\\text{Substitue l'indice dans }u_n=u_1\\times q^{n-1}";
-  if (phase.startsWith("sommeSn")) return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}\\ \\text{si }q\\neq1,\\ \\text{sinon }S_n=n\\times u_1";
-  if (phase.startsWith("sommeInfinie")) return "S_\\infty=\\dfrac{u_1}{1-q}\\ \\text{existe SEULEMENT si }|q|<1\\text{ strictement}";
+  if (phase.startsWith("termesProches") || phase.startsWith("termeEloigne")) return "u_n=u_1\\times q^{n-1}";
+  if (phase.startsWith("sommeSn")) return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}";
+  if (phase.startsWith("sommeInfinie")) return "S_\\infty=\\dfrac{u_1}{1-q}";
   if (phase === "poserEquationAlgebrique" || phase === "resoudreXAlgebrique" || phase === "calculerTermesAlgebrique") {
     const e = commeAlgebrique(exercice);
-    if (e.famille === "algebriqueTermeGeneral") return "u_n=q^{n-p}\\times u_p\\quad(\\text{distribue }q^{n-p}\\text{ sur TOUTE l'expression de }u_p)";
+    if (e.famille === "algebriqueTermeGeneral") return "u_n=q^{n-p}\\times u_p";
     if (e.sousCas === "B") return `S_n(x)=${fractionQVersLatex(e.k)}`;
     return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}";
   }
   if (phase === "calculerSn") return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}";
-  if (phase === "poserEquationRangN" || phase === "resoudreRangN") return "u_n=u_1\\times q^{n-1}=k\\quad(\\text{réduis }k/u_1\\text{ à une puissance de }q\\text{ AVANT de comparer les exposants})";
+  if (phase === "poserEquationRangN" || phase === "resoudreRangN") return "u_n=u_1\\times q^{n-1}";
   return "";
+}
+
+/** Phrase qui accompagne la formule de l'aide 1 — en TEXTE (paragraphe), jamais dans le LaTeX :
+ * une phrase en `\\text{…}` dans une formule centrée ne passe pas à la ligne et était coupée sur
+ * téléphone. `null` : la formule suffit. */
+export function noteAideNiveau1(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string | null {
+  if (phase === "trouverQ") return "k est l'écart entre les deux indices. Si k est pair, q a deux valeurs opposées.";
+  if (phase.startsWith("termesProches") || phase.startsWith("termeEloigne")) return "Remplace n par l'indice demandé :";
+  if (phase.startsWith("sommeSn")) return "Pour q ≠ 1 :";
+  if (phase.startsWith("sommeInfinie")) return "La somme infinie existe seulement si |q| < 1 (strictement). Elle vaut alors :";
+  if (phase === "poserEquationAlgebrique" || phase === "resoudreXAlgebrique" || phase === "calculerTermesAlgebrique") {
+    const e = commeAlgebrique(exercice);
+    if (e.famille === "algebriqueTermeGeneral") return "Multiplie TOUTE l'expression de uₚ par q puissance (n − p) :";
+    return null;
+  }
+  if (phase === "poserEquationRangN" || phase === "resoudreRangN") return "Écris que uₙ vaut la valeur donnée, puis réduis k/u₁ à une puissance de q avant de comparer les exposants.";
+  return null;
 }
 
 export function texteAideNiveau2(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string {

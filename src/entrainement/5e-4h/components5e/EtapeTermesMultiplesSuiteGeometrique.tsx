@@ -9,6 +9,7 @@ import {
   labelsTermesProches,
   texteAideNiveau1,
   texteAideNiveau2,
+  noteAideNiveau1,
 } from "../ui5e/formatSuiteGeometrique";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -103,6 +104,7 @@ export function EtapeTermesMultiplesSuiteGeometrique({
       })}
       {niveauAide >= 1 && (
         <div className="aide-5e">
+          {noteAideNiveau1(exercice, phase) && <p>{noteAideNiveau1(exercice, phase)}</p>}
           <Katex expression={texteAideNiveau1(exercice, phase)} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>

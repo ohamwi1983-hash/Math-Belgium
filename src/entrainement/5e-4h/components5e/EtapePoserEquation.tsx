@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceSuiteArithmetique } from "../core5e/suitesArithmetiques.types";
 import type { PhaseSuiteArithmetique } from "../moteur5e/typesSuiteArithmetique";
 import type { ReponseEquation } from "../moteur5e/sessionSuiteArithmetique";
-import { PHASES_AIDE1_LATEX, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteArithmetique";
+import { PHASES_AIDE1_LATEX, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui5e/formatSuiteArithmetique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -93,6 +93,7 @@ export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tenta
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
+          {noteAideNiveau1(exercice, phase) && <p>{noteAideNiveau1(exercice, phase)}</p>}
           {PHASES_AIDE1_LATEX.has(phase as PhaseSuiteArithmetique) ? (
             <Katex expression={texteAideNiveau1(exercice, phase)} block />
           ) : (

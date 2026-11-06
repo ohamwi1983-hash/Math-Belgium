@@ -381,7 +381,7 @@ export function texteAideNiveau1(exercice: ExerciceSuiteArithmetique, phase: Pha
       // Piège de distribution — UNIQUEMENT documenté quand r est algébrique (sous-cas B/C) : il
       // faut distribuer (n-1) sur TOUTE l'expression r(x), pas seulement son coefficient en x.
       return e.sousCas === "B" || e.sousCas === "C"
-        ? "S_n=\\dfrac{n}{2}(2u_1+(n-1)r)\\ \\text{ (distribue }(n-1)\\text{ sur TOUT }r(x)\\text{)}"
+        ? "S_n=\\dfrac{n}{2}(2u_1+(n-1)r)"
         : "S_n=\\dfrac{n}{2}(2u_1+(n-1)r)";
     }
     case "resoudreXAlgebrique":
@@ -394,6 +394,15 @@ export function texteAideNiveau1(exercice: ExerciceSuiteArithmetique, phase: Pha
     case "resoudreRangN":
       return "u_n=u_1+(n-1)\\times r";
   }
+}
+
+/** Phrase qui accompagne la formule de l'aide 1 — en TEXTE, jamais dans le LaTeX (une phrase en
+ * `\\text{…}` dans une formule centrée était coupée sur téléphone). `null` : la formule suffit. */
+export function noteAideNiveau1(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique): string | null {
+  if (phase === "poserEquationAlgebrique" && exercice.famille === "algebriqueSommeSn" && (exercice.sousCas === "B" || exercice.sousCas === "C")) {
+    return "Distribue (n − 1) sur TOUTE l'expression de r(x) :";
+  }
+  return null;
 }
 
 /** Aide niveau 2 — LaTeX, formule/valeurs substituées, jamais le résultat final calculé. TOUTE
