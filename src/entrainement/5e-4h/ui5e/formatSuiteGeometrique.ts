@@ -24,7 +24,7 @@ import type {
   TermeLineaire,
   TermeLineaireFractionQ,
 } from "../core5e/suitesGeometriques.types";
-import { additionnerFractionQ, entierVersFractionQ, multiplierFractionQ, sommeGeometriqueFinieQ, sommeInfinieExisteQ, sommeInfinieQ, termeGeometriqueQ } from "../generateurs5e/suitesGeometriques/fraction";
+import { additionnerFractionQ, entierVersFractionQ, fractionQVersNombre, multiplierFractionQ, sommeGeometriqueFinieQ, sommeInfinieExisteQ, sommeInfinieQ, termeGeometriqueQ } from "../generateurs5e/suitesGeometriques/fraction";
 import { ordreComplet } from "../moteur5e/typesSuiteGeometrique";
 import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
 
@@ -57,14 +57,13 @@ function brancheActive(exercice: ExercicePrincipalSuiteGeometrique, phase: Phase
   return exercice.branches[index];
 }
 
-function estDouble(exercice: ExerciceSuiteGeometrique): boolean {
-  return exercice.famille === "principal" && exercice.statutQ === "double";
-}
-
-function suffixeBranche(phase: PhaseSuiteGeometrique): string {
-  if (phase.endsWith("B1")) return " (1ère suite, q>0)";
-  if (phase.endsWith("B2")) return " (2e suite, q<0)";
-  return "";
+/** « (1re suite, q > 0) » — le signe est LU sur la branche réelle (jamais écrit en dur : il était
+ * faux une fois sur deux quand q < 0 arrivait en tête ; `principal.ts` met désormais q > 0 en
+ * premier). */
+function suffixeBranche(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string {
+  if (!phase.endsWith("B1") && !phase.endsWith("B2")) return "";
+  const { q } = brancheActive(commePrincipal(exercice), phase);
+  return ` (${phase.endsWith("B1") ? "1re" : "2e"} suite, q ${q.num > 0 ? ">" : "<"} 0)`;
 }
 
 // ============================================================================
@@ -199,27 +198,27 @@ export function labelsCalculerTermesAlgebrique(exercice: ExerciceSuiteGeometriqu
 export const LIBELLE_PHASE_SUITE_GEOMETRIQUE: Record<PhaseSuiteGeometrique, string> = {
   trouverQ: "Trouver la raison q",
   trouverU1: "Trouver le premier terme u₁",
-  trouverU1B1: "Trouver u₁ (1ère suite)",
+  trouverU1B1: "Trouver u₁ (1re suite)",
   trouverU1B2: "Trouver u₁ (2e suite)",
   formuleGenerale: "Formule générale uₙ",
-  formuleGeneraleB1: "Formule générale uₙ (1ère suite)",
+  formuleGeneraleB1: "Formule générale uₙ (1re suite)",
   formuleGeneraleB2: "Formule générale uₙ (2e suite)",
   termesProches: "Termes consécutifs",
-  termesProchesB1: "Termes consécutifs (1ère suite)",
+  termesProchesB1: "Termes consécutifs (1re suite)",
   termesProchesB2: "Termes consécutifs (2e suite)",
   termeEloigne: "Terme éloigné",
-  termeEloigneB1: "Terme éloigné (1ère suite)",
+  termeEloigneB1: "Terme éloigné (1re suite)",
   termeEloigneB2: "Terme éloigné (2e suite)",
-  sommeSn: "Somme Sn",
-  sommeSnB1: "Somme Sn (1ère suite)",
-  sommeSnB2: "Somme Sn (2e suite)",
+  sommeSn: "Somme Sₙ",
+  sommeSnB1: "Somme Sₙ (1re suite)",
+  sommeSnB2: "Somme Sₙ (2e suite)",
   sommeInfinie: "Somme infinie S∞",
-  sommeInfinieB1: "Somme infinie S∞ (1ère suite)",
+  sommeInfinieB1: "Somme infinie S∞ (1re suite)",
   sommeInfinieB2: "Somme infinie S∞ (2e suite)",
   poserEquationAlgebrique: "Poser l'équation",
   resoudreXAlgebrique: "Résoudre pour x",
   calculerTermesAlgebrique: "Calculer les grandeurs algébriques",
-  calculerSn: "Calculer Sn",
+  calculerSn: "Calculer Sₙ",
   poserEquationRangN: "Poser l'équation",
   resoudreRangN: "Résoudre pour n",
 };
@@ -243,13 +242,10 @@ export function consignePoserEquationAlgebriqueValeurLatex(exercice: ExerciceAlg
 }
 
 export function consignePhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string {
-  const suffixe = suffixeBranche(phase);
-  if (phase === "trouverQ") {
-    const double = estDouble(exercice) || (exercice.famille === "principal" && exercice.k !== null && exercice.k % 2 === 0);
-    return double
-      ? "Détermine la ou les valeurs possibles de la raison q (pense à la parité de l'exposant : il peut y avoir 1 ou 2 solutions)."
-      : "Détermine la raison q.";
-  }
+  const suffixe = suffixeBranche(exercice, phase);
+  // Consigne UNIQUE, qu'il y ait une ou deux valeurs : l'ancienne ne parlait de « 1 ou 2 solutions »
+  // que lorsqu'il y en avait deux, ce qui trahissait le cas.
+  if (phase === "trouverQ") return "Détermine la ou les valeurs possibles de la raison q.";
   if (phase === "trouverU1" || phase === "trouverU1B1" || phase === "trouverU1B2") return `Détermine le premier terme u₁${suffixe}.`;
   if (phase === "formuleGenerale" || phase === "formuleGeneraleB1" || phase === "formuleGeneraleB2") {
     return `Exprime la formule générale uₙ, avec u₁ et q substitués${suffixe} (utilise "n" comme variable).`;
@@ -285,9 +281,9 @@ export function texteAideNiveau1(exercice: ExerciceSuiteGeometrique, phase: Phas
     const e = commeAlgebrique(exercice);
     if (e.famille === "algebriqueTermeGeneral") return "u_n=q^{n-p}\\times u_p\\quad(\\text{distribue }q^{n-p}\\text{ sur TOUTE l'expression de }u_p)";
     if (e.sousCas === "B") return `S_n(x)=${fractionQVersLatex(e.k)}`;
-    return "S_n=u_1\\times\\dfrac{q^n-1}{q-1}\\quad(\\text{ne divise pas par }q^n\\text{ directement : c'est }\\dfrac{q^n-1}{q-1}\\text{ qui multiplie }u_1)";
+    return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}";
   }
-  if (phase === "calculerSn") return "S_n=u_1\\times\\dfrac{q^n-1}{q-1}\\quad(u_1,\\ q\\text{ et }n\\text{ sont tous connus})";
+  if (phase === "calculerSn") return "S_n=u_1\\times\\dfrac{1-q^n}{1-q}";
   if (phase === "poserEquationRangN" || phase === "resoudreRangN") return "u_n=u_1\\times q^{n-1}=k\\quad(\\text{réduis }k/u_1\\text{ à une puissance de }q\\text{ AVANT de comparer les exposants})";
   return "";
 }
@@ -308,12 +304,16 @@ export function texteAideNiveau2(exercice: ExerciceSuiteGeometrique, phase: Phas
   if (phase.startsWith("sommeSn")) {
     const e = commePrincipal(exercice);
     const { u1, q } = brancheActive(e, phase);
-    return `${s(e.indiceSn)}=${fractionQVersLatex(u1)}\\times\\dfrac{1-${formatQPuissanceLatex(q, e.indiceSn)}}{1-${fractionQVersLatex(q)}}`;
+    return `${s(e.indiceSn)}=${fractionQVersLatex(u1)}\\times\\dfrac{1-${formatQPuissanceLatex(q, e.indiceSn)}}{1-${jetonLatex(q)}}`;
   }
   if (phase.startsWith("sommeInfinie")) {
+    // Jamais trompeuse : |q| à comparer à 1 (l'élève conclut), et la formule SOUS condition — la
+    // même aide dans les deux cas, elle ne trahit pas le verdict (l'ancienne affichait la formule
+    // substituée même quand la somme n'existe pas, contre l'aide 1).
     const e = commePrincipal(exercice);
     const { u1, q } = brancheActive(e, phase);
-    return `S_\\infty=\\dfrac{${fractionQVersLatex(u1)}}{1-${fractionQVersLatex(q)}}`;
+    const qAbs = { num: Math.abs(q.num), den: q.den };
+    return `\\begin{array}{c}|q|=${fractionQVersLatex(qAbs)}\\ \\text{(à comparer à 1)}\\\\[4pt]\\text{si }|q|<1 :\\ S_\\infty=\\dfrac{${fractionQVersLatex(u1)}}{1-${jetonLatex(q)}}\\end{array}`;
   }
   return "";
 }
@@ -379,7 +379,7 @@ function formatEquationAlgebriqueConfirmeeLatex(exercice: ExerciceAlgebriqueTerm
   }
   if (exercice.sousCas === "A") {
     const { u1, q, n, k } = exercice;
-    return `\\left(${formatTermeLatex(u1)}\\right)\\times\\dfrac{${formatQPuissanceLatex(q, n)}-1}{${jetonLatex(q)}-1}=${fractionQVersLatex(k)}`;
+    return `\\left(${formatTermeLatex(u1)}\\right)\\times\\dfrac{1-${formatQPuissanceLatex(q, n)}}{1-${jetonLatex(q)}}=${fractionQVersLatex(k)}`;
   }
   const { sn, k } = exercice;
   return `${formatTermeLatexQ(sn)}=${fractionQVersLatex(k)}`;
@@ -443,6 +443,25 @@ export function formatTermesEtatActuelSuiteGeometrique(exercice: ExerciceSuiteGe
 // — jamais un score. Couvre TOUS les écrans de `ordreComplet(exercice)`.
 // ============================================================================
 
+/** Valeur décimale arrondie au centième, virgule belge (« 0{,}06 », « −12{,}5 »). */
+function decimalCentiemeLatex(v: number): string {
+  const arrondi = Math.round(v * 100) / 100;
+  const texte = (Object.is(arrondi, -0) ? 0 : arrondi).toFixed(2).replace(/\.?0+$/, "");
+  return texte.replace(".", "{,}");
+}
+
+/** « gauche = valeur » pour une réponse demandée au centième : entier tel quel ; fraction courte
+ * suivie de sa valeur décimale (« \dfrac{15}{16} ≈ 0,94 ») ; fraction longue remplacée par la seule
+ * valeur décimale (« ≈ 1,33 » au lieu de 349525/262144) — l'élève a saisi un arrondi. */
+function egaliteArrondieLatex(gauche: string, f: FractionQ): string {
+  if (f.den === 1) return `${gauche}=${f.num}`;
+  const v = fractionQVersNombre(f);
+  const exacteAuCentieme = Math.abs(v * 100 - Math.round(v * 100)) < 1e-9;
+  const signe = exacteAuCentieme ? "=" : "\\approx";
+  const courte = f.den <= 100 && Math.abs(f.num) <= 9999;
+  return courte ? `${gauche}=${fractionQVersLatex(f)}${signe} ${decimalCentiemeLatex(v)}` : `${gauche}${signe} ${decimalCentiemeLatex(v)}`;
+}
+
 function formatTermesReponseAttenduePrincipalLatex(exercice: ExercicePrincipalSuiteGeometrique, phase: PhaseSuiteGeometrique): string[] {
   if (phase === "trouverQ") {
     return exercice.branches.map((b) => `q=${fractionQVersLatex(b.q)}`);
@@ -455,20 +474,20 @@ function formatTermesReponseAttenduePrincipalLatex(exercice: ExercicePrincipalSu
   }
   if (phase === "termesProches" || phase === "termesProchesB1" || phase === "termesProchesB2") {
     const { u1, q } = brancheActive(exercice, phase);
-    return exercice.indicesTermesProches.map((n) => `${u(n)}=${fractionQVersLatex(termeGeometriqueQ(u1, q, n))}`);
+    return exercice.indicesTermesProches.map((n) => egaliteArrondieLatex(u(n), termeGeometriqueQ(u1, q, n)));
   }
   if (phase === "termeEloigne" || phase === "termeEloigneB1" || phase === "termeEloigneB2") {
     const { u1, q } = brancheActive(exercice, phase);
-    return [`${u(exercice.indiceTermeEloigne)}=${fractionQVersLatex(termeGeometriqueQ(u1, q, exercice.indiceTermeEloigne))}`];
+    return [egaliteArrondieLatex(u(exercice.indiceTermeEloigne), termeGeometriqueQ(u1, q, exercice.indiceTermeEloigne))];
   }
   if (phase === "sommeSn" || phase === "sommeSnB1" || phase === "sommeSnB2") {
     const { u1, q } = brancheActive(exercice, phase);
-    return [`${s(exercice.indiceSn)}=${fractionQVersLatex(sommeGeometriqueFinieQ(u1, q, exercice.indiceSn))}`];
+    return [egaliteArrondieLatex(s(exercice.indiceSn), sommeGeometriqueFinieQ(u1, q, exercice.indiceSn))];
   }
   // sommeInfinie / sommeInfinieB1 / sommeInfinieB2 — seule catégorie de phase "principal" restante.
   const { u1, q } = brancheActive(exercice, phase);
   const cible = sommeInfinieExisteQ(q) ? sommeInfinieQ(u1, q) : null;
-  return cible === null ? ["\\text{Elle n'existe pas}"] : [`S_\\infty=${fractionQVersLatex(cible)}`];
+  return cible === null ? ["\\text{Elle n'existe pas}"] : [egaliteArrondieLatex("S_\\infty", cible)];
 }
 
 /** Labels associés aux cibles de `calculerTermesAlgebrique` — même dispatch que

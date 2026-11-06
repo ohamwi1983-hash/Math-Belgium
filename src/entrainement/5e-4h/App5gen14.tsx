@@ -21,6 +21,7 @@ import {
   soumettreReponseTermesProches,
   soumettreReponseTrouverR,
   soumettreReponseTrouverU1,
+  tentativesMaxSuiteArithmetique,
 } from "./moteur5e/sessionSuiteArithmetique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteArithmetique";
 import { ordreComplet } from "./moteur5e/typesSuiteArithmetique";
@@ -29,10 +30,9 @@ import {
   diagnostiquerEquationComplete,
   diagnostiquerEquationCompleteEnN,
   diagnostiquerFormuleGenerale,
-  diagnostiquerNombre,
   diagnostiquerRangEntierPositif,
-  diagnostiquerTermes,
 } from "./moteur5e/verificationSuiteArithmetique";
+import { diagnostiquerNombre, diagnostiquerTermes, estSolutionDirecte } from "./moteur5e/saisieNombreSuites";
 import type { StatutVerification } from "./moteur/statutVerification";
 import type { ExerciceSuiteArithmetique } from "./core5e/suitesArithmetiques.types";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
@@ -40,7 +40,7 @@ import { EtapeChampSimpleSuiteArithmetique } from "./components5e/EtapeChampSimp
 import { EtapeCoherenceJugement } from "./components5e/EtapeCoherenceJugement";
 import { EtapePoserEquation } from "./components5e/EtapePoserEquation";
 import { EtapeTermesMultiples } from "./components5e/EtapeTermesMultiples";
-import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteArithmetique";
+import { LIBELLE_PHASE_SUITE_ARITHMETIQUE, formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteArithmetique";
 import { calculerRecapitulatifSuiteArithmetique } from "./ui5e/recapitulatifSuiteArithmetique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -115,6 +115,7 @@ function diagnostiquerTermesMultiples(exercice: ExerciceSuiteArithmetique, phase
 /** Coefficients (pente, constante) de l'équation CIBLE — même calcul qu'`sessionSuiteArithmetique.ts`
  * (petite duplication assumée, présentation pure, jamais un import moteur→générateur). */
 function diagnostiquerPoserEquation(exercice: ExerciceSuiteArithmetique, phase: PhasePoserEquation, reponse: ReponseEquation): StatutVerification {
+  if (estSolutionDirecte(reponse.texte, phase === "poserEquationRangN" ? "n" : "x")) return "not_equivalent";
   if (phase === "poserEquationRangN") {
     if (exercice.famille !== "algebriqueRangN") return "parse_error";
     const pente = exercice.r;
@@ -209,6 +210,19 @@ function calculerSegmentsProgression(
   });
 }
 
+/** Réponse attendue d'un écran (bloc de validation et fiche des puces) — même source que le
+ * récapitulatif final (`formatReponseAttenduePhaseLatex`). */
+function reponseAttendueFiche(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique) {
+  if (phase === "coherenceJugement") return exercice.famille === "coherence" && exercice.coherent ? "Cohérentes" : "Incohérentes";
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionSuiteArithmetique;
   revele: boolean;
@@ -226,6 +240,10 @@ export function App5gen14() {
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
    * ce chantier). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteArithmetique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la clé des
+   * écrans, pour que les champs repartent vides même si le nouvel exercice commence par le même
+   * écran que le précédent (sinon React garde le composant et sa saisie). */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -237,19 +255,20 @@ export function App5gen14() {
       const revele = nouvelEtat.derniereEtapeRevelee;
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
       if (votreReponse !== undefined) {
-        const recap = calculerRecapitulatifSuiteArithmetique(nouvelEtat);
-        const derniere = recap[recap.length - 1];
-        if (derniere) {
-          setHistorique((h) => [
-            ...h,
-            {
-              titre: derniere.libelle,
-              votreReponse,
-              correcte: !derniere.revele,
-              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-            },
-          ]);
-        }
+        // Fiche de la phase qui VIENT de se clore (`etat.phase`) — jamais la dernière ligne du
+        // récapitulatif, qui ne contient que les valeurs « confirmées » (r, u₁, formule…) : les
+        // écrans « termes », « somme » ouvraient sinon la fiche « Formule générale ».
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_SUITE_ARITHMETIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttendueFiche(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -263,6 +282,7 @@ export function App5gen14() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
+      setNumeroSession((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -273,28 +293,20 @@ export function App5gen14() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxSuiteArithmetique(etat, etat.phase);
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue:
-          phase === "coherenceJugement" ? (
-            exercice.famille === "coherence" && exercice.coherent ? "Cohérentes" : "Incohérentes"
-          ) : (
-            <span className="equation-box-termes">
-              {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
-                <Katex key={i} expression={frag} />
-              ))}
-            </span>
-          ),
+        reponseAttendue: reponseAttendueFiche(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -305,6 +317,7 @@ export function App5gen14() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites arithmétiques, formule générale et termes</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />

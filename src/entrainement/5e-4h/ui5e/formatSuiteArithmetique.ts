@@ -29,6 +29,12 @@ import type { PhaseSuiteArithmetique } from "../moteur5e/typesSuiteArithmetique"
 function u(indice: number | string): string {
   return `u_{${indice}}`;
 }
+
+/** Nombre prêt à suivre un « × » ou un « − » : un négatif est mis entre parenthèses
+ * (« (n−1) × (−5) », jamais « (n−1) × −5 »). */
+function par(v: number): string {
+  return v < 0 ? `(${v})` : `${v}`;
+}
 function s(indice: number | string): string {
   return `S_{${indice}}`;
 }
@@ -62,7 +68,7 @@ export function consigneGenerale(exercice: ExerciceSuiteArithmetique): string {
     case "principal":
       return "Détermine tous les termes de cette suite arithmétique à partir des données fournies.";
     case "coherence":
-      return "Ces 3 données définissent-elles une suite arithmétique cohérente ?";
+      return "Une suite arithmétique a pour raison r et contient les deux termes donnés. Ces 3 données sont-elles cohérentes ?";
     case "algebriqueTermeGeneral":
       return "uₚ et uₙ, donnés en fonction de x, sont les termes d'une suite arithmétique de raison r. Détermine leurs valeurs.";
     case "algebriqueSommeSn":
@@ -234,6 +240,7 @@ export function labelsCalculerTermesAlgebrique(exercice: ExerciceSuiteArithmetiq
  * `niveauAideMaxSuiteArithmetique` les plafonne désormais à 0 — le bouton d'aide ne s'affiche donc
  * jamais pour ces 2 phases, cette entrée n'est en pratique plus jamais consommée. */
 export const PHASES_AIDE1_LATEX = new Set<PhaseSuiteArithmetique>([
+  "coherenceJugement",
   "trouverR",
   "trouverU1",
   "formuleGenerale",
@@ -318,7 +325,7 @@ export function consignePhase(exercice: ExerciceSuiteArithmetique, phase: PhaseS
     case "sommeSn":
       return "Calcule cette somme.";
     case "coherenceJugement":
-      return "Juge si ces 3 données décrivent une suite arithmétique cohérente.";
+      return "Choisis ta réponse.";
     case "calculerSn":
       return "Calcule la valeur de Sₙ (u₁, r et n sont tous connus).";
     case "poserEquationAlgebrique":
@@ -328,7 +335,7 @@ export function consignePhase(exercice: ExerciceSuiteArithmetique, phase: PhaseS
     case "calculerTermesAlgebrique":
       return "En déduire les valeurs numériques, maintenant que x est connu (substitue x dans chaque expression).";
     case "poserEquationRangN":
-      return "Pose l'équation traduisant uₙ=k (valeurs dans le bloc de données).";
+      return "Pose l'équation qui traduit que uₙ vaut la valeur donnée (l'inconnue est le rang n).";
     case "resoudreRangN":
       return "Résous, trouve n (un rang est toujours un entier positif, aucun arrondi accepté).";
   }
@@ -366,7 +373,7 @@ export function texteAideNiveau1(exercice: ExerciceSuiteArithmetique, phase: Pha
     case "calculerSn":
       return "S_n=\\dfrac{n}{2}(2u_1+(n-1)r)";
     case "coherenceJugement":
-      return "Vérifie si u(q) − u(p) = (q−p)·r exactement.";
+      return "u_q-u_p=(q-p)\\times r";
     case "poserEquationAlgebrique": {
       const e = commeAlgebrique(exercice);
       if (e.famille === "algebriqueTermeGeneral") return "u_n=u_p+(n-p)\\times r";
@@ -410,10 +417,11 @@ export function texteAideNiveau2(exercice: ExerciceSuiteArithmetique, phase: Pha
     case "resoudreRangN":
       return "";
     case "coherenceJugement": {
+      // Formule SUBSTITUÉE, jamais calculée : l'élève fait les deux calculs et compare (l'ancienne
+      // aide affichait les deux résultats, donc la réponse).
       if (exercice.famille !== "coherence") return "";
-      const produit = (exercice.q.indice - exercice.p.indice) * exercice.r;
-      const ecart = exercice.q.valeur - exercice.p.valeur;
-      return `(q-p)\\times r=(${exercice.q.indice}-${exercice.p.indice})\\times ${exercice.r}=${produit} \\quad ${u("q")}-${u("p")}=${ecart}`;
+      const { p, q, r } = exercice;
+      return `${u(q.indice)}-${u(p.indice)}=${q.valeur}-${par(p.valeur)}\\quad\\text{et}\\quad(${q.indice}-${p.indice})\\times ${par(r)}`;
     }
   }
 }
@@ -440,7 +448,7 @@ function formatUnConfirmeLatex(exercice: ExerciceSuiteArithmetique): string {
 
 function formatFormuleGeneraleConfirmeeLatex(exercice: ExerciceSuiteArithmetique): string {
   const e = commeAvecBase(exercice);
-  return `${u("n")}=${e.base.u1}+(n-1)\\times ${e.base.r}`;
+  return `${u("n")}=${e.base.u1}+(n-1)\\times ${par(e.base.r)}`;
 }
 
 /** Valeur de S_n trouvée à l'écran "calculerSn" (sous-cas D uniquement), une fois confirmée. */
@@ -462,9 +470,9 @@ function formatEquationAlgebriqueConfirmeeLatex(exercice: ExerciceSuiteArithmeti
   }
   switch (e.sousCas) {
     case "A":
-      return `\\dfrac{${e.n}}{2}\\left(2(${formatTermeLatex(e.u1)})+${e.n - 1}\\times ${e.r}\\right)=${e.k}`;
+      return `\\dfrac{${e.n}}{2}\\left(2(${formatTermeLatex(e.u1)})+${e.n - 1}\\times ${par(e.r)}\\right)=${e.k}`;
     case "B":
-      return `\\dfrac{${e.n}}{2}\\left(2\\times ${e.u1}+${e.n - 1}(${formatTermeLatex(e.r)})\\right)=${e.k}`;
+      return `\\dfrac{${e.n}}{2}\\left(2\\times ${par(e.u1)}+${e.n - 1}(${formatTermeLatex(e.r)})\\right)=${e.k}`;
     case "C":
       return `\\dfrac{${e.n}}{2}\\left(2(${formatTermeLatex(e.u1)})+${e.n - 1}(${formatTermeLatex(e.r)})\\right)=${e.k}`;
     case "D":
@@ -481,7 +489,7 @@ function formatXAlgebriqueConfirmeLatex(exercice: ExerciceSuiteArithmetique): st
  * à `formatEquationAlgebriqueConfirmeeLatex`), n reste symbolique (c'est l'inconnue). */
 function formatEquationRangNConfirmeeLatex(exercice: ExerciceSuiteArithmetique): string {
   const e = commeRangN(exercice);
-  return `${e.u1}+(n-1)\\times ${e.r}=${e.k}`;
+  return `${e.u1}+(n-1)\\times ${par(e.r)}=${e.k}`;
 }
 
 export function formatTermesEtatActuelLatex(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique): string[] | null {

@@ -30,11 +30,13 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "tableau" — un vrai `<table>` à 3 lignes (n=nSeuil-1, nSeuil, nSeuil+1) × 2 colonnes
- * (u_n, v_n) — 6 champs numériques au total, jamais une liste plate (la disposition en tableau est
- * pédagogiquement centrale ici : elle montre visuellement le "cran" de bascule). */
+/** Écran "tableau" — un vrai `<table>` à 4 lignes (fenêtre de rangs consécutifs décalée au hasard,
+ * le rang de bascule à une position variable) × 2 colonnes (Aₙ, Bₙ) — 8 champs numériques, jamais une
+ * liste plate (la disposition en tableau est pédagogiquement centrale ici : c'est en la parcourant
+ * que l'élève repère lui-même la bascule à l'écran suivant). Champs ≥ 44 px de haut (cible tactile). */
 export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerCellule, validation}: Props) {
-  const [valeurs, setValeurs] = useState<string[]>(["", "", "", "", "", ""]);
+  const nLignes = exercice.nTable.length;
+  const [valeurs, setValeurs] = useState<string[]>(() => Array.from({ length: 2 * nLignes }, () => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
@@ -63,8 +65,16 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
           <thead>
             <tr>
               <th>n</th>
-              <th>{labelU(exercice)}</th>
-              <th>{labelV(exercice)}</th>
+              <th>
+                <Katex expression="A_n" />
+                <br />
+                <small>{labelU(exercice)}</small>
+              </th>
+              <th>
+                <Katex expression="B_n" />
+                <br />
+                <small>{labelV(exercice)}</small>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -72,10 +82,26 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
               <tr key={n}>
                 <td>{n}</td>
                 <td>
-                  <input type="text" className={`text-input${celluleErronee(i) ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    aria-label={`A pour n = ${n}`}
+                    style={{ minHeight: 44 }}
+                    className={`text-input${celluleErronee(i) ? " is-erronee" : ""}`}
+                    value={valeurs[i]}
+                    onChange={(e) => modifier(i, e.target.value)}
+                  />
                 </td>
                 <td>
-                  <input type="text" className={`text-input${celluleErronee(i + 3) ? " is-erronee" : ""}`} value={valeurs[i + 3]} onChange={(e) => modifier(i + 3, e.target.value)} />
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    aria-label={`B pour n = ${n}`}
+                    style={{ minHeight: 44 }}
+                    className={`text-input${celluleErronee(i + nLignes) ? " is-erronee" : ""}`}
+                    value={valeurs[i + nLignes]}
+                    onChange={(e) => modifier(i + nLignes, e.target.value)}
+                  />
                 </td>
               </tr>
             ))}
@@ -85,7 +111,7 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "tableau")}</p>
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}
       {!validation && (

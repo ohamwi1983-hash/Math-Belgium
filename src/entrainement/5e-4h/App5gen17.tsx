@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceSuiteClassique } from "./generateurs5e/suitesClassiques";
 import type {
@@ -43,6 +44,7 @@ import {
   soumettreReponseSuitesFinalesCombinees,
   soumettreReponseTroisMethodes,
   soumettreReponseU64,
+  tentativesMaxSuiteClassique,
 } from "./moteur5e/sessionSuiteClassique";
 import { ordreComplet } from "./moteur5e/typesSuiteClassique";
 import type { EtatSessionSuiteClassique, PhaseSuiteClassique } from "./moteur5e/typesSuiteClassique";
@@ -56,6 +58,7 @@ import {
   diagnostiquerDistance11,
   diagnostiquerDixTermes,
   diagnostiquerHauteursZigzag,
+  diagnostiquerLongueurZigzag,
   diagnostiquerPoidsComparaison,
   diagnostiquerResoudrePhi,
   diagnostiquerResoudreRCombinees,
@@ -76,8 +79,9 @@ import { EtapeListeChampsClassique } from "./components5e/EtapeListeChampsClassi
 import { EtapeQCMClassique } from "./components5e/EtapeQCMClassique";
 import { EtapeSuitesFinalesCombinees } from "./components5e/EtapeSuitesFinalesCombinees";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, optionsQCM, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
+import { LIBELLE_PHASE_SUITE_CLASSIQUE, formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, optionsQCM, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
 import { calculerRecapitulatifSuiteClassique } from "./ui5e/recapitulatifSuiteClassique";
+import { TexteMathsClassique } from "./components5e/TexteMathsClassique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -98,6 +102,8 @@ const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteClassique>([
   "sommePartielleA",
   "sommeInfinieA",
   "sommeInfinieB",
+  "longueurZigzag",
+  "airesZigzagAC",
 ]);
 
 const PHASES_LISTE = new Set<PhaseSuiteClassique>([
@@ -108,7 +114,6 @@ const PHASES_LISTE = new Set<PhaseSuiteClassique>([
   "dixTermes",
   "hauteursZigzag",
   "airesZigzag",
-  "airesZigzagAC",
   "airesB",
 ]);
 
@@ -117,7 +122,6 @@ const PHASES_QCM = new Set<PhaseSuiteClassique>([
   "poserEquationCombinees",
   "formuleRecurrence",
   "proprieteInverse",
-  "longueurZigzag",
   "limitePuissanceA",
 ]);
 
@@ -134,6 +138,8 @@ const PHASES_CALCULATRICE_CHAMP_SIMPLE = new Set<PhaseSuiteClassique>([
   "resoudrePhi",
   "sommePartielleA",
   "sommeInfinieA",
+  "longueurZigzag",
+  "airesZigzagAC",
 ]);
 const PHASES_CALCULATRICE_LISTE = new Set<PhaseSuiteClassique>([
   "poidsComparaison",
@@ -142,7 +148,6 @@ const PHASES_CALCULATRICE_LISTE = new Set<PhaseSuiteClassique>([
   "troisMethodes",
   "hauteursZigzag",
   "airesZigzag",
-  "airesZigzagAC",
 ]);
 
 function nouvelleSession(): EtatSessionSuiteClassique {
@@ -168,9 +173,10 @@ function calculerSegmentsProgression(
 }
 
 /** Libellé lisible du choix QCM — recherché dans le même catalogue d'options que celui affiché à
- * l'élève (`optionsQCM`), jamais retapé. */
-function labelQCMChoisi(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, choixId: string): string {
-  return optionsQCM(exercice, phase).find((o) => o.id === choixId)?.label ?? choixId;
+ * l'élève (`optionsQCM`), jamais retapé ; rendu comme le bouton (prose + formules). */
+function labelQCMChoisi(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, choixId: string) {
+  const label = optionsQCM(exercice, phase).find((o) => o.id === choixId)?.label ?? choixId;
+  return <TexteMathsClassique texte={label} />;
 }
 
 function formatReponseSuitesFinalesCombinees(reponse: { arithmetique: string[]; geometrique: string[] }): string {
@@ -242,6 +248,10 @@ function soumettreChampSimple(etat: EtatSessionSuiteClassique, texte: string): E
       return soumettreReponseSommeInfinieA(etat, texte);
     case "sommeInfinieB":
       return soumettreReponseSommeInfinieB(etat, texte);
+    case "longueurZigzag":
+      return soumettreReponseLongueurZigzag(etat, texte);
+    case "airesZigzagAC":
+      return soumettreReponseAiresZigzagAC(etat, texte);
     default:
       throw new Error(`soumettreChampSimple : phase inattendue '${etat.phase}'`);
   }
@@ -263,8 +273,6 @@ function soumettreListe(etat: EtatSessionSuiteClassique, textes: string[]): Etat
       return soumettreReponseHauteursZigzag(etat, textes);
     case "airesZigzag":
       return soumettreReponseAiresZigzag(etat, textes);
-    case "airesZigzagAC":
-      return soumettreReponseAiresZigzagAC(etat, textes);
     case "airesB":
       return soumettreReponseAiresB(etat, textes);
     default:
@@ -282,8 +290,6 @@ function soumettreQCM(etat: EtatSessionSuiteClassique, choixId: string): EtatSes
       return soumettreReponseFormuleRecurrence(etat, choixId as never);
     case "proprieteInverse":
       return soumettreReponseProprieteInverse(etat, choixId as never);
-    case "longueurZigzag":
-      return soumettreReponseLongueurZigzag(etat, choixId as never);
     case "limitePuissanceA":
       return soumettreReponseLimitePuissanceA(etat, choixId as never);
     default:
@@ -321,6 +327,10 @@ function diagnostiquerChampSimple(exercice: ExerciceSuiteClassique, phase: Phase
       return diagnostiquerSommeInfinieA(texte, exercice as ExerciceCarresEmboites);
     case "sommeInfinieB":
       return diagnostiquerSommeInfinieB(texte, exercice as ExerciceCarresEmboites);
+    case "longueurZigzag":
+      return diagnostiquerLongueurZigzag(texte, exercice as ExerciceTrianglesZigzag);
+    case "airesZigzagAC":
+      return diagnostiquerAiresZigzagAC(texte, exercice as ExerciceTrianglesZigzag);
     default:
       throw new Error(`diagnostiquerChampSimple : phase inattendue '${phase}'`);
   }
@@ -343,8 +353,6 @@ function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteC
       return diagnostiquerHauteursZigzag(textes, exercice as ExerciceTrianglesZigzag);
     case "airesZigzag":
       return diagnostiquerAiresZigzag(textes, exercice as ExerciceTrianglesZigzag);
-    case "airesZigzagAC":
-      return diagnostiquerAiresZigzagAC(textes, exercice as ExerciceTrianglesZigzag);
     case "airesB":
       return diagnostiquerAiresB(textes, exercice as ExerciceCarresEmboites);
     default:
@@ -364,30 +372,35 @@ export function App5gen17() {
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
    * ce chantier). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteClassique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice », « Générer ») : fait partie de la clé
+   * des écrans, pour que les champs se vident même quand le nouvel exercice démarre sur la même
+   * phase que le précédent (audit 5e ch. 3, point 1). */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
    * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteClassique` pour la réponse
    * ATTENDUE. */
-  function terminerEtape(nouvelEtat: EtatSessionSuiteClassique, votreReponse?: string) {
+  function terminerEtape(nouvelEtat: EtatSessionSuiteClassique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele = nouvelEtat.derniereEtapeRevelee;
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
       if (votreReponse !== undefined) {
-        const recap = calculerRecapitulatifSuiteClassique(nouvelEtat);
-        const derniere = recap[recap.length - 1];
-        if (derniere) {
-          setHistorique((h) => [
-            ...h,
-            {
-              titre: derniere.libelle,
-              votreReponse,
-              correcte: !derniere.revele,
-              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-            },
-          ]);
-        }
+        // Fiche de l'écran QUI VIENT DE SE CLORE (`etat.phase`), jamais la dernière ligne du
+        // récapitulatif : celui-ci ne contient que les écrans antérieurs à la phase courante, donc
+        // la fiche du dernier écran d'un exercice reprenait le titre et la réponse de l'avant-dernier.
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_SUITE_CLASSIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePourPhase(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -399,6 +412,7 @@ export function App5gen17() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroSession((n) => n + 1);
       setHistorique([]);
       setAideUtiliseeParPhase({});
     } else {
@@ -411,13 +425,14 @@ export function App5gen17() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionSuiteClassique(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioSuiteClassique)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxSuiteClassique(etat, etat.phase);
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation = enAttente
@@ -434,6 +449,7 @@ export function App5gen17() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes classiques sur les suites</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />

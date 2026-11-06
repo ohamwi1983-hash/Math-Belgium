@@ -1,17 +1,49 @@
 /**
  * Couche présentation (5e) — consignes/labels/aides pour 5gen19 ("Suite récurrente affine et
  * régime permanent"). Séquence fixe à 3 écrans, identique pour les 2 régimes.
+ *
+ * Nombres affichés en DÉCIMAL à la virgule (a = 0,85 comme l'énoncé dit « 15 % », valeurs arrondies
+ * au centième comme demandé) — jamais une fraction illisible du type 51160313/500000 ; la valeur
+ * exacte n'est ajoutée à côté que si c'est une fraction lisible (dénominateur ≤ 20).
  */
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
 import type { FractionQ } from "../core5e/suitesGeometriques.types";
 import { fractionQVersNombre } from "../generateurs5e/suitesGeometriques/fraction";
 import type { PhaseSuiteRecurrenteAffine } from "../moteur5e/typesSuiteRecurrenteAffine";
 
-/** Fraction irréductible en LaTeX — entier si `den===1`, sinon fraction (signe porté par `num`) —
- * jamais un décimal (`prompt-chapitre-suites-audit-formatage.md`, même bug que 5gen15/16). */
-function fractionQVersLatex(f: FractionQ): string {
-  if (f.den === 1) return `${f.num}`;
-  return f.num < 0 ? `-\\dfrac{${-f.num}}{${f.den}}` : `\\dfrac{${f.num}}{${f.den}}`;
+/** Nombre décimal en LaTeX, virgule belge, au plus `decimales` décimales (zéros inutiles retirés). */
+function decimalLatex(valeur: number, decimales = 2): string {
+  const arrondi = Math.round(valeur * 10 ** decimales) / 10 ** decimales;
+  const texte = (arrondi === 0 ? 0 : arrondi).toFixed(decimales).replace(/\.?0+$/, "");
+  return texte.replace(".", "{,}");
+}
+
+/** Vrai si la fraction s'écrit exactement avec au plus 2 décimales (dénominateur divisant 100). */
+function estDecimalCentieme(f: FractionQ): boolean {
+  return 100 % f.den === 0;
+}
+
+/** Valeur révélée/affichée : exacte si elle tient en 2 décimales, sinon « ≈ arrondi au centième »,
+ * précédée de la fraction exacte seulement si elle est lisible (dénominateur ≤ 20). */
+function valeurLatex(nom: string, f: FractionQ): string {
+  const v = fractionQVersNombre(f);
+  if (estDecimalCentieme(f)) return `${nom}=${decimalLatex(v)}`;
+  if (f.den <= 20) {
+    const exacte = f.num < 0 ? `-\\dfrac{${-f.num}}{${f.den}}` : `\\dfrac{${f.num}}{${f.den}}`;
+    return `${nom}=${exacte}\\approx ${decimalLatex(v)}`;
+  }
+  return `${nom}\\approx ${decimalLatex(v)}`;
+}
+
+/** Coefficient a en décimal (a = 1 ∓ pct/100 : toujours exact au centième). */
+export function aLatex(exercice: ExerciceSuiteRecurrenteAffine): string {
+  return decimalLatex(fractionQVersNombre(exercice.a));
+}
+
+/** Lettre de la grandeur avec indice Unicode, pour du texte brut (consignes, libellés). */
+function indiceTexte(lettre: string, indice: string): string {
+  const sub: Record<string, string> = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", n: "ₙ", "+": "₊" };
+  return lettre + [...indice].map((c) => sub[c] ?? c).join("");
 }
 
 export function consigneGenerale(exercice: ExerciceSuiteRecurrenteAffine): string {
@@ -19,71 +51,84 @@ export function consigneGenerale(exercice: ExerciceSuiteRecurrenteAffine): strin
 }
 
 export function consignePoserRecurrence(exercice: ExerciceSuiteRecurrenteAffine): string {
-  return `On note ${exercice.variableGrandeur}ₙ la valeur après n étapes, avec ${exercice.variableGrandeur}₁=${exercice.u1}. Complète : ${exercice.variableGrandeur}ₙ₊₁ = ... en fonction de ${exercice.variableGrandeur}ₙ (utilise "x" pour représenter ${exercice.variableGrandeur}ₙ).`;
+  const V = exercice.variableGrandeur;
+  return (
+    `${indiceTexte(V, "1")} = ${exercice.u1} est la valeur initiale, et ${indiceTexte(V, "n+1")} la valeur une étape après ${indiceTexte(V, "n")}. ` +
+    `Exprime ${indiceTexte(V, "n+1")} en fonction de ${indiceTexte(V, "n")} (tape ${V} ou x pour ${indiceTexte(V, "n")}).`
+  );
+}
+
+/** Libellé du champ (et de l'aperçu) en texte brut : « Qₙ₊₁ = ». */
+export function libellePoserRecurrence(exercice: ExerciceSuiteRecurrenteAffine): string {
+  return `${indiceTexte(exercice.variableGrandeur, "n+1")} =`;
 }
 
 export function consigneRegimePermanent(_exercice: ExerciceSuiteRecurrenteAffine): string {
-  return "Cette suite a-t-elle un régime permanent (une valeur limite L vers laquelle elle se stabilise) ? Si oui, calcule-le (arrondis au centième près).";
+  return "Cette suite a-t-elle un régime permanent (une valeur limite L vers laquelle elle se stabilise) ? Si oui, calcule-le (arrondis au centième).";
 }
 
 export function consigneTermesSuccessifs(exercice: ExerciceSuiteRecurrenteAffine): string {
-  return `Calcule les 3 valeurs suivantes de la suite (${exercice.variableGrandeur}₂, ${exercice.variableGrandeur}₃, ${exercice.variableGrandeur}₄) à partir de ${exercice.variableGrandeur}₁=${exercice.u1} (arrondis au centième près).`;
+  const V = exercice.variableGrandeur;
+  return `Calcule les 3 valeurs suivantes (${indiceTexte(V, "2")}, ${indiceTexte(V, "3")}, ${indiceTexte(V, "4")}) à partir de ${indiceTexte(V, "1")} = ${exercice.u1}, arrondies au centième (tu peux réutiliser tes valeurs arrondies).`;
 }
 
-/** LaTeX PUR sur toute phase (même motif déjà établi sur 5gen15/16, voir en-tête de
- * `formatSuiteGeometrique.ts`) — rendu via `<Katex block />`, jamais un `<p>` brut. */
-export function texteAideNiveau1(exercice: ExerciceSuiteRecurrenteAffine, phase: "poserRecurrence" | "regimePermanent" | "termesSuccessifs"): string {
+export type PhaseAide = "poserRecurrence" | "regimePermanent" | "termesSuccessifs";
+
+/** Aide = une phrase (rendue en `<p>`, qui passe à la ligne sur téléphone) + une formule LaTeX
+ * optionnelle (rendue à part) — jamais un long `\text{…}` dans KaTeX, qui ne passe pas à la ligne. */
+export interface AideSuiteRecurrenteAffine {
+  texte: string;
+  latex: string;
+}
+
+export function texteAideNiveau1(exercice: ExerciceSuiteRecurrenteAffine, phase: PhaseAide): AideSuiteRecurrenteAffine {
+  const V = exercice.variableGrandeur;
   switch (phase) {
     case "poserRecurrence":
-      return "\\text{Repère le facteur multiplicatif appliqué à chaque étape (}a\\text{), puis la quantité fixe qui s'ajoute — ou se retranche si elle est négative — à chaque étape (}b\\text{).}";
+      return {
+        texte: "Repère le facteur multiplicatif appliqué à chaque étape (a), puis la quantité fixe qui s'ajoute — ou se retranche — à chaque étape (b) :",
+        latex: `${V}_{n+1}=a\\times ${V}_n+b`,
+      };
     case "regimePermanent":
-      return `\\text{À l'équilibre (régime permanent), la valeur ne change plus d'une étape à l'autre : } ${exercice.variableGrandeur}_{n+1}=${exercice.variableGrandeur}_n=L. \\text{ Mais cet équilibre n'existe que si } |a|<1 \\text{ — vérifie-le en premier.}`;
+      return { texte: "À l'équilibre (régime permanent), la valeur ne change plus d'une étape à l'autre :", latex: `${V}_{n+1}=${V}_n=L` };
     case "termesSuccessifs":
-      return "\\text{Applique la relation de récurrence trouvée à l'écran 1, en partant de la valeur initiale.}";
+      return { texte: "Applique la relation de récurrence trouvée au premier écran, en partant de la valeur initiale :", latex: `${V}_2=a\\times ${V}_1+b` };
   }
 }
 
-export function texteAideNiveau2(exercice: ExerciceSuiteRecurrenteAffine, phase: "poserRecurrence" | "regimePermanent" | "termesSuccessifs"): string {
+export function texteAideNiveau2(exercice: ExerciceSuiteRecurrenteAffine, phase: PhaseAide): AideSuiteRecurrenteAffine {
   if (phase === "poserRecurrence") {
-    return `${exercice.variableGrandeur}_{n+1}=a\\times ${exercice.variableGrandeur}_n+b \\text{, avec } a=${fractionQVersLatex(exercice.a)} \\text{ et } b=${exercice.b}`;
+    return { texte: "Ici :", latex: `a=${aLatex(exercice)} \\quad\\text{et}\\quad b=${exercice.b}` };
   }
   if (phase === "regimePermanent") {
-    if (exercice.regime === "divergent") {
-      const absA = fractionQVersNombre(exercice.a) < 0 ? `-\\left(${fractionQVersLatex(exercice.a)}\\right)` : fractionQVersLatex(exercice.a);
-      return `|a|=${absA}\\geq 1 \\Rightarrow \\text{ pas de régime permanent}`;
-    }
-    return `L=a\\times L+b \\Rightarrow L=\\dfrac{b}{1-a}`;
+    // Même aide dans les deux régimes : le critère et la formule, jamais la conclusion.
+    return {
+      texte: `Critère : un régime permanent existe seulement si |a| < 1 (ici a = ${aLatex(exercice).replace("{,}", ",")}). Dans ce cas, on résout L = a × L + b :`,
+      latex: `L=a\\times L+b \\iff L=\\dfrac{b}{1-a}`,
+    };
   }
-  return "";
+  return { texte: "", latex: "" };
 }
 
 // ============================================================================
-// Bloc "état actuel" + récapitulatif final — récapitulent, à partir du 2e écran de la séquence
-// FIXE (`poserRecurrence → regimePermanent → termesSuccessifs`, jamais de saut), les valeurs déjà
-// CONFIRMÉES plus tôt — jamais la saisie brute de l'élève, toujours dérivé PUREMENT de `exercice`
-// (même convention "état actuel" que le reste du projet, ex. `formatTermesEtatActuelCELatex`,
-// 5gen1). `null` (rien rendu) sur le tout premier écran ("poserRecurrence").
+// Bloc "état actuel" + récapitulatif final — valeurs déjà CONFIRMÉES, dérivées PUREMENT de
+// `exercice` (jamais la saisie de l'élève).
 // ============================================================================
 
-/** Terme `b` signé — porte son propre signe plutôt que d'être juxtaposé à un `+` littéral du
- * template (sinon double-signe `+-5` quand `b<0`, cas des contextes divergents). */
+/** Terme `b` signé (sinon double-signe `+-5` quand `b<0`, cas des contextes divergents). */
 function formatTermeB(b: number): string {
   return b < 0 ? `-${-b}` : `+${b}`;
 }
 
-/** Relation de récurrence confirmée à l'écran "poserRecurrence" — même formule que l'aide niveau 2
- * de cet écran, mais VOLONTAIREMENT réimplémentée ici (petite duplication assumée) plutôt
- * qu'appelée, réutilisant l'indice `_{n+1}` accolé correctement (jamais `_(n+1)`, qui ne
- * sous-indicerait qu'une parenthèse — voir le label de champ de `EtapePoserRecurrence.tsx`). */
 function formatRecurrenceConfirmeeLatex(exercice: ExerciceSuiteRecurrenteAffine): string {
-  return `${exercice.variableGrandeur}_{n+1}=${fractionQVersLatex(exercice.a)}\\times ${exercice.variableGrandeur}_n${formatTermeB(exercice.b)}`;
+  return `${exercice.variableGrandeur}_{n+1}=${aLatex(exercice)}\\times ${exercice.variableGrandeur}_n${formatTermeB(exercice.b)}`;
 }
 
-/** Régime confirmé à l'écran "regimePermanent" — "L=..." si convergent, jamais une valeur
- * inventée si divergent (n'existe pas). */
+/** Régime confirmé à l'écran "regimePermanent" — L décimal (fraction exacte à côté si lisible),
+ * jamais une valeur inventée si divergent (n'existe pas). */
 export function formatRegimeConfirmeLatex(exercice: ExerciceSuiteRecurrenteAffine): string {
-  if (exercice.regime === "divergent") return "L = \\text{n'existe pas}";
-  return `L=${fractionQVersLatex(exercice.L as FractionQ)}`;
+  if (exercice.regime === "divergent") return "L\\ \\text{n'existe pas}\\ (|a|\\geq 1)";
+  return valeurLatex("L", exercice.L as FractionQ);
 }
 
 export function formatTermesEtatActuelLatex(exercice: ExerciceSuiteRecurrenteAffine, phase: PhaseSuiteRecurrenteAffine): string[] | null {
@@ -93,15 +138,16 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceSuiteRecurrenteAff
   return termes;
 }
 
-/** Réponse attendue à un écran donné, pour le récapitulatif final (`ResultatPanelSuiteRecurrenteAffine.tsx`)
- * — en fragments LaTeX ("bloc fitter"), un fragment par valeur pour "termesSuccessifs" (3 valeurs). */
+/** Réponse attendue à un écran donné — en fragments LaTeX, un fragment par valeur pour
+ * "termesSuccessifs" (3 valeurs, arrondies au centième comme demandé). */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceSuiteRecurrenteAffine, phase: PhaseSuiteRecurrenteAffine): string[] {
+  const V = exercice.variableGrandeur;
   switch (phase) {
     case "poserRecurrence":
       return [formatRecurrenceConfirmeeLatex(exercice)];
     case "regimePermanent":
       return [formatRegimeConfirmeLatex(exercice)];
     case "termesSuccessifs":
-      return [`${exercice.variableGrandeur}_2=${fractionQVersLatex(exercice.u2)}`, `${exercice.variableGrandeur}_3=${fractionQVersLatex(exercice.u3)}`, `${exercice.variableGrandeur}_4=${fractionQVersLatex(exercice.u4)}`];
+      return [valeurLatex(`${V}_2`, exercice.u2), valeurLatex(`${V}_3`, exercice.u3), valeurLatex(`${V}_4`, exercice.u4)];
   }
 }

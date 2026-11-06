@@ -3,6 +3,8 @@ import type { ExerciceSuiteClassique } from "../core5e/suitesClassiques.types";
 import type { PhaseSuiteClassique } from "../moteur5e/typesSuiteClassique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, labelsListe, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { TexteMathsClassique } from "./TexteMathsClassique";
+import { FigureSuiteClassique } from "./FigureSuiteClassique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -32,7 +34,7 @@ interface Props {
 /** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed) — réutilisé par 10 des 26
  * phases de 5gen17 (2 à 10 champs selon la phase, `labelsListe` détermine le nombre et la casse). */
 export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
-  const { labels, enLatex } = labelsListe(phase);
+  const { labels, enLatex } = labelsListe(phase, exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,11 +60,14 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
       <EnTeteExercice
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
-          <div className="equation-box equation-box-donnees">
-            {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
+          <>
+            <div className="equation-box equation-box-donnees">
+              {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+            <FigureSuiteClassique exercice={exercice} phase={phase} />
+          </>
         }
       />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
@@ -74,8 +79,14 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <p>
+            <TexteMathsClassique texte={texteAideNiveau1(exercice, phase)} />
+          </p>
+          {niveauAide >= 2 && aide2.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <Katex expression={aide2} block />
+            </div>
+          )}
         </div>
       )}
       {!validation && (

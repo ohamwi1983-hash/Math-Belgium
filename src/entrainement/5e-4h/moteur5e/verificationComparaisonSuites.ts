@@ -23,19 +23,26 @@ function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
 }
 
+/** « 12 345 » (espace, espace insécable ou fine entre groupes de 3 chiffres) lu comme 12345 —
+ * l'évaluateur partagé ne connaît pas le séparateur de milliers ; normalisation LOCALE à ce
+ * générateur (valeurs du tableau souvent > 1 000). */
+export function retirerSeparateursMilliers(texte: string): string {
+  return texte.replace(/(\d)[\s\u00a0\u202f]+(?=\d{3}(?!\d))/g, "$1");
+}
+
 function diagnostiquerNombreTexte(texte: string, cible: number, tolerance: number): StatutVerification {
   try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
+    const valeur = evaluerExpressionGenerale(retirerSeparateursMilliers(texte), 0);
     return statutNumerique(valeur, cible, tolerance);
   } catch {
     return "parse_error";
   }
 }
 
-/** `textes` = [u(n-1), u(n), u(n+1), v(n-1), v(n), v(n+1)], dans cet ordre — les 6 cellules du
- * tableau, tolérance arrondie. */
+/** `textes` = [A aux rangs de `nTable`…, puis B aux mêmes rangs…], dans cet ordre — les
+ * 2 × `nTable.length` cellules du tableau, tolérance arrondie. */
 export function diagnostiquerTableau(textes: string[], exercice: ExerciceComparaisonSuites): StatutVerification {
-  if (textes.length !== 6) return "not_equivalent";
+  if (textes.length !== 2 * exercice.nTable.length) return "not_equivalent";
   const cibles = [...exercice.uTable, ...exercice.vTable];
   return combinerStatuts(...textes.map((t, i) => diagnostiquerNombreTexte(t, cibles[i], TOLERANCE_ARRONDIE)));
 }

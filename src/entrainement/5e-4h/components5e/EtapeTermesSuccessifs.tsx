@@ -33,6 +33,7 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
+  const aide1 = texteAideNiveau1(exercice, "termesSuccessifs");
   const aide2 = texteAideNiveau2(exercice, "termesSuccessifs");
   const labels = [`${exercice.variableGrandeur}_2=`, `${exercice.variableGrandeur}_3=`, `${exercice.variableGrandeur}_4=`];
 
@@ -53,13 +54,15 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
           <label className="field-label field-label-minuscule">
             <Katex expression={label} />
           </label>
-          <input type="text" className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
+          <input type="text" inputMode="decimal" style={{ minHeight: 44 }} className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "termesSuccessifs")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <p>{aide1.texte}</p>
+          {aide1.latex.length > 0 && <Katex expression={aide1.latex} block />}
+          {niveauAide >= 2 && aide2.texte.length > 0 && <p>{aide2.texte}</p>}
+          {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}
       {!validation && (

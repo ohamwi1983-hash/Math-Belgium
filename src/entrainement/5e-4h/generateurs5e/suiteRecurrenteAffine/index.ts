@@ -16,14 +16,42 @@ function suivant(a: FractionQ, b: number, u: FractionQ): FractionQ {
   return additionnerFractionQ(multiplierFractionQ(a, u), entierVersFractionQ(b));
 }
 
-/** Construit un exercice à partir d'un contexte précis (trame + bornes) — tire `pct`/`b`/`u1` dans
- * les bornes propres au contexte, `a`/`L`/`u2`/`u3`/`u4` calculés en arithmétique fractionnaire
- * exacte. Le régime (`contexte.regime`) découle directement du contexte, jamais retiré. */
+/** Marge imposée au-dessus du point fixe en régime divergent : u₁ ≥ MARGE_DIVERGENT × L*. */
+const MARGE_DIVERGENT = 1.2;
+const TENTATIVES_TIRAGE = 500;
+
+/**
+ * Tire `pct`/`b`/`u1` dans les bornes propres au contexte.
+ *
+ * Régime divergent (a = 1 + pct/100 > 1, b < 0) : le point fixe L* = b/(1−a) = |b|/(pct/100) est
+ * POSITIF (et non « toujours négatif », comme l'affirmait l'ancien commentaire de `contextes.ts`).
+ * Si u₁ < L*, u_{n+1} − u_n = (a−1)(u_n − L*) < 0 : la suite DÉCROÎT puis devient négative (bactéries,
+ * abonnés… négatifs). On impose donc u₁ ≥ 1,2·L* : la suite est alors croissante et positive, et
+ * s'éloigne visiblement de L* (divergence vers +∞). Tirage refait jusqu'à satisfaire la contrainte ;
+ * en dernier recours, |b| est réduit au plus grand entier compatible (jamais une suite décroissante).
+ */
+function tirerParametres(contexte: ContexteSuiteRecurrenteAffine): { pct: number; b: number; u1: number } {
+  if (contexte.regime === "convergent") {
+    return { pct: entierAleatoire(contexte.pctMin, contexte.pctMax), b: entierAleatoire(contexte.bMin, contexte.bMax), u1: entierAleatoire(contexte.u1Min, contexte.u1Max) };
+  }
+  for (let t = 0; t < TENTATIVES_TIRAGE; t++) {
+    const pct = entierAleatoire(contexte.pctMin, contexte.pctMax);
+    const b = entierAleatoire(contexte.bMin, contexte.bMax);
+    const u1 = entierAleatoire(contexte.u1Min, contexte.u1Max);
+    if (u1 >= (MARGE_DIVERGENT * -b * 100) / pct) return { pct, b, u1 };
+  }
+  const pct = entierAleatoire(contexte.pctMin, contexte.pctMax);
+  const u1 = entierAleatoire(contexte.u1Min, contexte.u1Max);
+  const bLimite = -Math.floor((u1 * pct) / (100 * MARGE_DIVERGENT));
+  return { pct, b: Math.min(-1, Math.max(contexte.bMin, bLimite)), u1 };
+}
+
+/** Construit un exercice à partir d'un contexte précis (trame + bornes) — `a`/`L`/`u2`/`u3`/`u4`
+ * calculés en arithmétique fractionnaire exacte. Le régime (`contexte.regime`) découle directement du
+ * contexte, jamais retiré. */
 function construireDepuisContexte(contexte: ContexteSuiteRecurrenteAffine): ExerciceSuiteRecurrenteAffine {
   const { regime } = contexte;
-  const b = entierAleatoire(contexte.bMin, contexte.bMax);
-  const u1 = entierAleatoire(contexte.u1Min, contexte.u1Max);
-  const pct = entierAleatoire(contexte.pctMin, contexte.pctMax);
+  const { pct, b, u1 } = tirerParametres(contexte);
   const pctSurCent = fractionQ(pct, 100);
   const a: FractionQ = regime === "convergent" ? soustraireFractionQ(entierVersFractionQ(1), pctSurCent) : additionnerFractionQ(entierVersFractionQ(1), pctSurCent);
   // L=b/(1-a) — pour le régime convergent, 1-a=pct/100 par construction : division directe, jamais

@@ -25,6 +25,42 @@ function coefficientDominant(p: PolynomeConvergence, deg: 1 | 2): number {
   return deg === 2 ? p.a : p.b;
 }
 
+function evaluer(p: PolynomeConvergence, n: number): number {
+  return p.a * n * n + p.b * n + p.c;
+}
+
+function pgcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) [x, y] = [y, x % y];
+  return x;
+}
+
+/** Racines réelles d'un polynôme de degré 1 ou 2 (aucune si Δ < 0). */
+function racinesReelles(p: PolynomeConvergence): number[] {
+  if (p.a === 0) return [-p.c / p.b];
+  const delta = p.b * p.b - 4 * p.a * p.c;
+  if (delta < 0) return [];
+  return [(-p.b - Math.sqrt(delta)) / (2 * p.a), (-p.b + Math.sqrt(delta)) / (2 * p.a)];
+}
+
+/**
+ * Audit 5c3b, points 5 et 6 — tirages rejetés :
+ * - Q(n) = 0 pour un entier n de 1 à 30 : la suite ne serait pas définie pour tout n ≥ 1 (avec des
+ *   coefficients dans [−9 ; 9], une racine entière vaut au plus 9 en valeur absolue : 30 suffit) ;
+ * - P et Q ont une racine commune (fraction simplifiable par un facteur en n) : une racine commune
+ *   réelle annule P en une racine de Q ; deux trinômes sans racine réelle n'ont une racine
+ *   complexe commune que s'ils sont proportionnels (degré 2 tous les deux, rapport constant) ;
+ * - tous les coefficients ont un diviseur commun > 1 (fraction simplifiable par une constante).
+ */
+function tirageValide(P: PolynomeConvergence, Q: PolynomeConvergence): boolean {
+  for (let n = 1; n <= 30; n++) if (evaluer(Q, n) === 0) return false;
+  for (const r of racinesReelles(Q)) if (Math.abs(evaluer(P, r)) < 1e-9 * Math.max(1, r * r)) return false;
+  if (P.a !== 0 && Q.a !== 0 && P.a * Q.b === P.b * Q.a && P.a * Q.c === P.c * Q.a) return false;
+  const diviseur = [P.a, P.b, P.c, Q.a, Q.b, Q.c].reduce((g, v) => pgcd(g, v), 0);
+  return diviseur <= 1;
+}
+
 const CAS = ["inferieur", "egal", "superieur"] as const;
 
 /** "Cible d'abord" : le cas de comparaison de degré est choisi EN PREMIER (uniforme, "fréquence
@@ -46,8 +82,12 @@ export function genererExerciceConvergenceQuelconque(): ExerciceConvergenceQuelc
     degP = d;
     degQ = d;
   }
-  const P = polynome(degP);
-  const Q = polynome(degQ);
+  let P = polynome(degP);
+  let Q = polynome(degQ);
+  while (!tirageValide(P, Q)) {
+    P = polynome(degP);
+    Q = polynome(degQ);
+  }
 
   let classification: ClassificationQuelconque;
   let limiteValeur: number | null = null;

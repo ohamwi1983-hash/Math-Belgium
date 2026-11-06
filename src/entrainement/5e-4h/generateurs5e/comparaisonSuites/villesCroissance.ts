@@ -1,14 +1,14 @@
 import type { ExerciceVillesCroissance } from "../../core5e/comparaisonSuites.types";
-import { basculeExactementA, trouverSeuil } from "./simulation";
+import { construireFenetre, trouverSeuil } from "./simulation";
 import { entierAleatoire, resoudrePeriode, tirerContexte } from "./utils";
 
-const TENTATIVES_MAX = 300;
+const TENTATIVES_MAX = 2000;
 const N_MAX_SIMULATION = 40;
 
 /** Côté A (géométrique, taux de croissance élevé, valeur de départ plus faible) vs côté B
  * (arithmétique, croissance linéaire) — A finit toujours par dépasser B. Retry borné jusqu'à obtenir
- * un seuil dans une fenêtre lisible [3,25] (jamais un seuil trop proche — le tableau a besoin de
- * n-1≥1 — ni trop lointain — table lisible). Contexte tiré une seule fois par exercice, dans le
+ * un seuil dans [3,20] et une fenêtre de tableau valide (`construireFenetre` : bascule visible sur
+ * les valeurs arrondies, valeurs réalistes). Contexte tiré une seule fois par exercice, dans le
  * bassin partagé filtré aux branches où il est narrativement cohérent. */
 export function construireVillesCroissance(): ExerciceVillesCroissance {
   const contexte = tirerContexte("villesCroissance");
@@ -21,15 +21,15 @@ export function construireVillesCroissance(): ExerciceVillesCroissance {
     const uDeN = (n: number) => u1 * Math.pow(1 + tauxPct / 100, n - 1);
     const vDeN = (n: number) => v1 + (n - 1) * d;
 
-    const nSeuil = trouverSeuil(uDeN, vDeN, "uGeV", N_MAX_SIMULATION);
-    if (nSeuil === null || nSeuil < 3 || nSeuil > 25) continue;
-    if (!basculeExactementA(uDeN, vDeN, "uGeV", nSeuil)) continue;
-
-    const nTable: [number, number, number] = [nSeuil - 1, nSeuil, nSeuil + 1];
+    const nSeuil = trouverSeuil(uDeN, vDeN, "aDepasseB", N_MAX_SIMULATION);
+    if (nSeuil === null || nSeuil < 3 || nSeuil > 20) continue;
+    const fenetre = construireFenetre(uDeN, vDeN, "aDepasseB", nSeuil, Math.max(u1, v1));
+    if (fenetre === null) continue;
+    const { nTable, uTable, vTable } = fenetre;
     const { anneeDepart, traductionValeur, uniteContexte } = resoudrePeriode(contexte, nSeuil);
     return {
       famille: "villesCroissance",
-      condition: "uGeV",
+      condition: "aDepasseB",
       contexte,
       u1,
       tauxPct,
@@ -38,8 +38,8 @@ export function construireVillesCroissance(): ExerciceVillesCroissance {
       anneeDepart,
       nSeuil,
       nTable,
-      uTable: [uDeN(nTable[0]), uDeN(nTable[1]), uDeN(nTable[2])],
-      vTable: [vDeN(nTable[0]), vDeN(nTable[1]), vDeN(nTable[2])],
+      uTable,
+      vTable,
       traductionValeur,
       uniteContexte,
     };

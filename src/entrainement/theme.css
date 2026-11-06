@@ -3350,49 +3350,34 @@
   background: var(--accent-ink);
 }
 
-/* Smartphone (audit chapitre 4, point 23) : la pilule « Calculatrice » recouvrait un champ, le
- * bouton Aide ou Valider selon le défilement. Elle devient une pastille ronde de 44 px (cible
- * tactile conservée, libellé gardé pour les lecteurs d'écran via `aria-label`), la page réserve
- * de quoi faire défiler le dernier contrôle au-dessus d'elle, et elle s'efface tant qu'un champ a
- * le focus (clavier ouvert : c'est là qu'elle masquait la saisie). */
+/* Smartphone : la calculatrice ne flotte plus par-dessus la page. Pastille fixe d'abord (audit
+ * chapitre 4, point 23), elle recouvrait encore la fin de la consigne ou d'un champ à 390 px selon le
+ * défilement (audit 5e chapitre 3, point 8 — capture 5gen15) : sur téléphone, le bouton reprend sa
+ * place dans le flux, juste sous l'écran qui le monte (`<CalculatriceScientifique />` est toujours
+ * rendu après le composant d'étape), aligné à droite, avec son libellé. Plus rien ne passe dessous,
+ * donc plus besoin de réserver de marge en bas de page ni de le masquer pendant la saisie. Le
+ * panneau ouvert reste, lui, en plein écran (`.calculatrice-overlay`). */
 @media (max-width: 600px) {
   .entrainement .calculatrice-bouton-flottant {
-    right: 12px;
-    bottom: 12px;
-    width: 44px;
-    height: 44px;
-    padding: 0;
+    position: static;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: opacity 0.15s ease;
+    gap: 8px;
+    width: fit-content;
+    min-height: 44px;
+    margin: 14px 0 0 auto;
+    padding: 0 18px;
+    box-shadow: 0 2px 6px rgba(24, 36, 48, 0.16);
   }
 
   .entrainement .calculatrice-bouton-flottant::before {
     content: "";
-    width: 22px;
-    height: 22px;
+    flex: none;
+    width: 18px;
+    height: 18px;
     background-color: currentColor;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2.5' width='14' height='19' rx='2.5' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Crect x='8' y='5.5' width='8' height='3.5' rx='0.8' fill='%23fff'/%3E%3Ccircle cx='9' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='9' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='17' r='1.2' fill='%23fff'/%3E%3C/svg%3E") no-repeat center / contain;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2.5' width='14' height='19' rx='2.5' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Crect x='8' y='5.5' width='8' height='3.5' rx='0.8' fill='%23fff'/%3E%3Ccircle cx='9' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='13' r='1.2' fill='%23fff'/%3E%3Ccircle cx='9' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='17' r='1.2' fill='%23fff'/%3E%3Ccircle cx='15' cy='17' r='1.2' fill='%23fff'/%3E%3C/svg%3E") no-repeat center / contain;
-  }
-
-  .entrainement .calculatrice-bouton-libelle {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .entrainement:has(.calculatrice-bouton-flottant) {
-    padding-bottom: 64px;
-  }
-
-  .entrainement:has(input:focus, textarea:focus, select:focus) .calculatrice-bouton-flottant {
-    opacity: 0;
-    pointer-events: none;
   }
 }
 

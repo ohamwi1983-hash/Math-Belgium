@@ -77,6 +77,10 @@ function ordrePrincipal(exercice: Extract<ExerciceSuiteGeometrique, { famille: "
       phases.push((suf === "" ? "trouverU1" : `trouverU1${suf}`) as PhaseSuiteGeometrique);
     }
     phases.push((suf === "" ? "formuleGenerale" : `formuleGenerale${suf}`) as PhaseSuiteGeometrique);
+    // Deux valeurs de q (décision de l'utilisateur) : la 1re suite (q > 0, voir `principal.ts`) est
+    // traitée en entier ; pour la 2e, seuls u₁ (si les données ne le donnent pas) et la formule
+    // générale sont demandés — refaire toute la chaîne pour −q menait à 11 à 13 écrans.
+    if (suf === "B2") continue;
     phases.push((suf === "" ? "termesProches" : `termesProches${suf}`) as PhaseSuiteGeometrique);
     phases.push((suf === "" ? "termeEloigne" : `termeEloigne${suf}`) as PhaseSuiteGeometrique);
     phases.push((suf === "" ? "sommeSn" : `sommeSn${suf}`) as PhaseSuiteGeometrique);

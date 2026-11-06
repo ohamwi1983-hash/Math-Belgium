@@ -19,10 +19,10 @@ export const suites: ChapterContent = {
       id: 'suites-arithmetiques',
       number: 1,
       title: 'Suites numériques et suites arithmétiques',
-      kicker: 'notation u_n, raison r, formule générale, moyenne et somme',
+      kicker: 'notation uₙ, raison r, formule générale, inconnue x ou rang n, somme',
       blocks: [
         { kind: 'video', title: 'Qu\'est-ce qu\'une suite numérique ? Terme, rang, formule explicite et récurrence', youtubeId: 'VL39ShU_-Yw' },
-        { kind: 'video', title: 'Suites arithmétiques : raison, formule u_n = u₁ + (n−1)r et somme des termes', youtubeId: 'aWb7XAIoPVI' },
+        { kind: 'video', title: 'Suites arithmétiques : raison, formule uₙ = u₁ + (n−1)r et somme des termes', youtubeId: 'aWb7XAIoPVI' },
         { kind: 'subheading', text: "Qu'est-ce qu'une suite numérique ?" },
         {
           kind: 'intuition',
@@ -94,7 +94,7 @@ export const suites: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: "Attention — l'exposant est toujours (n−1), jamais n",
+          label: "Attention — le facteur de r est toujours (n−1), jamais n",
           text:
             'Pour passer de $u_1$ à $u_n$, tu ajoutes la raison $r$ exactement $n-1$ fois — ' +
             'jamais n fois ! De $u_1$ à $u_2$, un seul pas. De $u_1$ à $u_6$, cinq pas. Écrire ' +
@@ -138,8 +138,8 @@ export const suites: ChapterContent = {
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
             caption:
-              'u_n : u1=2, r=1,5, elle croît — v_n : v1=11, r=−1,5, elle décroît — les deux ' +
-              'suites se croisent exactement au rang 4',
+              '$(u_n)$ : $u_1=2$, $r=1{,}5$, elle croît — $(v_n)$ : $v_1=11$, $r=-1{,}5$, elle ' +
+              'décroît — les deux suites se croisent exactement au rang 4',
           },
         },
         { kind: 'subheading', text: 'Moyenne arithmétique et somme des termes' },
@@ -236,14 +236,82 @@ export const suites: ChapterContent = {
             'dans l\'énoncé. Calcule-le toujours d\'abord, avec la formule générale, avant de ' +
             'l\'utiliser.',
         },
+        { kind: 'subheading', text: 'Retrouver une inconnue : x ou le rang n' },
+        {
+          kind: 'para',
+          text:
+            'Parfois, des termes (ou la somme) sont donnés **en fonction d\'une inconnue** $x$. ' +
+            'Ou bien c\'est le **rang** $n$ d\'un terme que tu cherches. La méthode est toujours ' +
+            'la même : écris la formule qui relie les grandeurs connues, puis résous l\'équation ' +
+            'obtenue — elle est du premier degré.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Relation entre deux termes quelconques',
+          items: [
+            '$u_n = u_p + (n-p)r$ — pour passer de $u_p$ à $u_n$, tu ajoutes la raison $(n-p)$ ' +
+              'fois. Avec $p = 1$, tu retrouves la formule générale : pas besoin de $u_1$ pour ' +
+              'relier deux termes.',
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — isoler une inconnue',
+          items: [
+            'Repère les grandeurs données en fonction de $x$ (un terme, la raison, la somme).',
+            'Écris la relation qui les relie : $u_n = u_p + (n-p)r$ entre deux termes, ou ' +
+              '$S_n = \\dfrac{n(u_1+u_n)}{2}$ si une somme intervient.',
+            'Résous l\'équation en $x$, puis **remplace** $x$ par sa valeur pour donner les termes ' +
+              'demandés.',
+            'Pour le rang : pose $u_n = k$, isole $n$. Le résultat doit être un **entier ' +
+              'naturel non nul** — sinon, k n\'est pas un terme de la suite.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'isoler x entre deux termes',
+          formula:
+            'Dans une suite arithmétique de raison $r = 2$, on donne $u_3 = 2x+1$ et ' +
+            '$u_7 = 5x-3$. Détermine $x$, puis $u_3$ et $u_7$.',
+          steps: [
+            { tag: 'relier les deux termes', text: '$u_7 = u_3 + (7-3)r \\implies 5x-3 = 2x+1+4\\times 2$' },
+            { tag: 'isoler x', text: '$5x - 2x = 9 + 3 \\implies 3x = 12 \\implies x = 4$' },
+          ],
+          result: { tag: 'résultat', text: '$x = 4$ : $u_3 = 9$ et $u_7 = 17$ (contrôle : $9 + 4\\times 2 = 17$)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'isoler x dans une somme',
+          formula:
+            'Une suite arithmétique a pour premier terme $u_1 = x$ et pour raison $r = 3$. La ' +
+            'somme de ses 10 premiers termes vaut $S_{10} = 175$. Détermine $x$.',
+          steps: [
+            { tag: 'exprimer u₁₀ en fonction de x', text: '$u_{10} = x + 9\\times 3 = x + 27$' },
+            { tag: 'remplacer dans la formule de la somme', text: '$175 = \\dfrac{10\\,(x + x + 27)}{2} = 5(2x+27) = 10x + 135$' },
+          ],
+          result: { tag: 'résultat', text: '$10x = 40 \\implies x = 4$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'isoler le rang n',
+          formula:
+            'Une suite arithmétique a pour premier terme $u_1 = 5$ et pour raison $r = 3$. À ' +
+            'quel rang $n$ vaut-elle 302 ?',
+          steps: [
+            { tag: 'poser uₙ = 302', text: '$5 + (n-1)\\times 3 = 302 \\implies (n-1)\\times 3 = 297$' },
+            { tag: 'isoler n', text: '$n - 1 = 99 \\implies n = 100$ — un entier naturel : 302 est bien un terme' },
+          ],
+          result: { tag: 'résultat', text: '$u_{100} = 302$' },
+        },
         {
           kind: 'entrainement',
           title: 'Suites arithmétiques, formule générale et termes',
           generatorId: '5gen14',
           description: [
             "Retrouve un terme, la raison ou le premier terme d'une suite arithmétique à partir " +
-              "de données variées. Calcule une somme de termes. Ou vérifie la cohérence de " +
-              "données sur-spécifiées.",
+              "de données variées, et calcule une somme de termes. Isole une inconnue x donnée " +
+              "dans des termes ou dans une somme, ou le rang n d'un terme. Ou vérifie la " +
+              "cohérence de données sur-spécifiées.",
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 14. Suites arithmétiques, formule générale et termes »',
@@ -256,7 +324,7 @@ export const suites: ChapterContent = {
       title: 'Suites géométriques',
       kicker: 'raison multiplicative q, formule générale, moyenne et somme',
       blocks: [
-        { kind: 'video', title: 'Suites géométriques : raison q, formule u_n = u₁·q^(n−1) et somme des termes', youtubeId: 'XWAtOBtrBRk' },
+        { kind: 'video', title: 'Suites géométriques : raison q, formule uₙ = u₁·qⁿ⁻¹ et somme des termes', youtubeId: 'XWAtOBtrBRk' },
         {
           kind: 'para',
           text:
@@ -343,8 +411,8 @@ export const suites: ChapterContent = {
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
             caption:
-              'u_n : u1=1, q=1,4, elle croît (tronquée à partir de n=6 pour rester lisible) — ' +
-              'v_n : v1=3,5, q=0,6, elle décroît et tend vers 0',
+              '$(u_n)$ : $u_1=1$, $q=1{,}4$, elle croît (tronquée à partir de $n=6$ pour rester ' +
+              'lisible) — $(v_n)$ : $v_1=3{,}5$, $q=0{,}6$, elle décroît et tend vers 0',
           },
         },
         { kind: 'subheading', text: 'Moyenne géométrique et somme des termes' },
@@ -404,6 +472,52 @@ export const suites: ChapterContent = {
           steps: [{ tag: 'application directe de la formule, n = 8', text: '$S_8 = 3 \\times \\dfrac{1-2^8}{1-2} = 3 \\times \\dfrac{1-256}{-1} = 3 \\times 255$' }],
           result: { tag: 'résultat', text: '$S_8 = 765$' },
         },
+        { kind: 'subheading', text: 'Retrouver une inconnue : x ou le rang n' },
+        {
+          kind: 'rappel',
+          label: 'Relation entre deux termes quelconques',
+          items: [
+            '$u_n = u_p \\times q^{\\,n-p}$ — pour passer de $u_p$ à $u_n$, tu multiplies par la ' +
+              'raison $(n-p)$ fois. Si $x$ apparaît dans un terme ou dans $u_1$ d\'une somme, ' +
+              'remplace dans cette relation (ou dans $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$) et ' +
+              'résous l\'équation du premier degré obtenue.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'isoler x entre deux termes',
+          formula:
+            'Dans une suite géométrique de raison $q = 2$, on donne $u_3 = x+5$ et ' +
+            '$u_5 = 3x+8$. Détermine $x$, puis $u_3$ et $u_5$.',
+          steps: [
+            { tag: 'relier les deux termes', text: '$u_5 = u_3 \\times q^{5-3} \\implies 3x+8 = (x+5)\\times 4 = 4x + 20$' },
+            { tag: 'isoler x', text: '$3x - 4x = 20 - 8 \\implies -x = 12 \\implies x = -12$' },
+          ],
+          result: { tag: 'résultat', text: '$x = -12$ : $u_3 = -7$ et $u_5 = -28$ (contrôle : $-7 \\times 4 = -28$)' },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — isoler le rang n : réduire à la même base',
+          items: [
+            'Pose $u_n = k$ : $u_1 \\times q^{n-1} = k$.',
+            'Isole la puissance : $q^{n-1} = \\dfrac{k}{u_1}$.',
+            'Écris $\\dfrac{k}{u_1}$ comme une puissance de la **même base** $q$ : $q^{n-1} = q^m$.',
+            'Deux puissances de la même base (différente de 0, 1 et −1) sont égales quand leurs ' +
+              'exposants le sont : $n - 1 = m$, donc $n = m + 1$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'isoler le rang n',
+          formula:
+            'Une suite géométrique a pour premier terme $u_1 = 3$ et pour raison $q = 2$. À quel ' +
+            'rang $n$ vaut-elle 384 ?',
+          steps: [
+            { tag: 'isoler la puissance', text: '$3\\times 2^{n-1} = 384 \\implies 2^{n-1} = \\dfrac{384}{3} = 128$' },
+            { tag: 'réduire à la même base', text: '$128 = 2^7 \\implies 2^{n-1} = 2^7 \\implies n - 1 = 7$' },
+          ],
+          result: { tag: 'résultat', text: '$n = 8$ : $u_8 = 384$' },
+        },
         {
           kind: 'astuce',
           label: 'Astuce — et si |q| < 1 ?',
@@ -443,8 +557,9 @@ export const suites: ChapterContent = {
           generatorId: '5gen15',
           description: [
             "Retrouve un terme, la raison ou le premier terme d'une suite géométrique — avec " +
-              'le piège de la racine paire (0, 1 ou 2 solutions). Calcule une somme finie ou ' +
-              'infinie. Ou entraîne-toi sur la moyenne géométrique.',
+              'le piège de la racine paire (une ou deux raisons possibles). Calcule une somme ' +
+              'finie ou infinie. Isole une inconnue x, ou le rang n d\'un terme en réduisant à ' +
+              'la même base.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 15. Suites géométriques, formule générale et termes »',
@@ -537,7 +652,7 @@ export const suites: ChapterContent = {
             trendLabel: { afterIndex: 6, text: 'w_n → 0' },
             xAxisLabel: 'n',
             yAxisLabel: 'w_n',
-            caption: 'w_n = 6×0,65^(n−1) : suite géométrique de raison 0<q<1, elle converge vers 0',
+            caption: '$w_n = 6\\times 0{,}65^{n-1}$ : suite géométrique de raison $0<q<1$, elle converge vers 0',
           },
         },
         {
@@ -548,6 +663,44 @@ export const suites: ChapterContent = {
             'Bascule entre arithmétique et géométrique, puis fais glisser la raison : passe par ' +
             'q=−1 pile (les points passent en rouge) pour voir l\'oscillation qui ne diverge PAS ' +
             'vers l\'infini — à ne surtout pas confondre avec q>1, qui grandit sans borne.',
+        },
+        { kind: 'subheading', text: "La somme infinie d'une suite géométrique" },
+        {
+          kind: 'para',
+          text:
+            'Promesse tenue : que devient $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$ quand $n$ devient ' +
+            'très grand ? Si $|q| < 1$, le tableau ci-dessus dit que $q^n \\to 0$. Le numérateur ' +
+            '$1 - q^n$ tend donc vers 1, et la somme se rapproche d\'une valeur **finie** : on ' +
+            'additionne une infinité de termes, et pourtant le total reste borné — Achille ' +
+            'rattrape bien la tortue.',
+        },
+        {
+          kind: 'rappel',
+          label: "Somme infinie d'une suite géométrique (|q| < 1)",
+          items: [
+            '$S_\\infty = \\dfrac{u_1}{1-q}$, seulement si $-1 < q < 1$. Si $|q| \\geq 1$, la ' +
+              'somme infinie **n\'existe pas** : les sommes $S_n$ ne se stabilisent pas.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme infinie',
+          formula:
+            'Calcule la somme de tous les termes de la suite géométrique de premier terme ' +
+            '$u_1 = 6$ et de raison $q = \\dfrac{1}{3}$ : $6 + 2 + \\dfrac{2}{3} + \\dfrac{2}{9} + \\ldots$',
+          steps: [
+            { tag: 'vérifier la condition', text: '$|q| = \\dfrac{1}{3} < 1$ : la somme infinie existe' },
+            { tag: 'appliquer la formule', text: '$S_\\infty = \\dfrac{6}{1-\\frac{1}{3}} = \\dfrac{6}{\\frac{2}{3}} = 6 \\times \\dfrac{3}{2}$' },
+          ],
+          result: { tag: 'résultat', text: '$S_\\infty = 9$' },
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — q = 1 : la suite converge, sa somme infinie non',
+          text:
+            'Pour $q = 1$, la suite est constante, donc convergente. Mais $S_n = n \\times u_1$ ' +
+            'grandit sans borne (si $u_1 \\neq 0$) : la somme infinie n\'existe pas. La condition ' +
+            'est bien $|q| < 1$ **strictement** — vérifie-la toujours avant d\'appliquer la formule.',
         },
         { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
         {
@@ -637,7 +790,7 @@ export const suites: ChapterContent = {
           generatorId: '5gen16',
           description: [
             'Classe la limite d\'une suite arithmétique, géométrique (avec les pièges q=−1 et ' +
-              'q<−1), ou d\'une suite quelconque u_n=P(n)/Q(n) en comparant les degrés du ' +
+              'q<−1), ou d\'une suite quelconque uₙ = P(n)/Q(n) en comparant les degrés du ' +
               'numérateur et du dénominateur.',
           ],
           chantier: '5e-4h',
@@ -685,7 +838,7 @@ export const suites: ChapterContent = {
           ],
           result: {
             tag: 'résultat',
-            text: '$S_{64} = 2^{64}-1 \\approx 1{,}8446744\\times10^{19}$ grains — plusieurs centaines de fois la production mondiale annuelle actuelle de blé.',
+            text: '$S_{64} = 2^{64}-1 \\approx 1{,}8446744\\times10^{19}$ grains — à environ 0,05 g le grain, près de $9{,}2\\times10^{11}$ tonnes : plus d\'un millier de fois (environ 1 294 fois) la production mondiale annuelle de blé, d\'environ 713 millions de tonnes.',
           },
         },
         {
@@ -733,9 +886,9 @@ export const suites: ChapterContent = {
             xAxisLabel: 'n',
             yAxisLabel: '',
             caption:
-              'u_n = 3+(n−1)×4 (points, croissance linéaire) contre v_n = 1×1,6^(n−1) (points ' +
-              'en couleur, croissance exponentielle) — v_n rattrape puis dépasse u_n dès le ' +
-              'rang 9, malgré un départ beaucoup plus lent',
+              '$u_n = 3+(n-1)\\times 4$ (points, croissance linéaire) contre ' +
+              '$v_n = 1\\times 1{,}6^{n-1}$ (points en couleur, croissance exponentielle) — $(v_n)$ ' +
+              'rattrape puis dépasse $(u_n)$ dès le rang 9, malgré un départ beaucoup plus lent',
           },
         },
         { kind: 'subheading', text: "D'autres grands classiques" },
@@ -840,7 +993,8 @@ export const suites: ChapterContent = {
           description: [
             'Sept mises en situation historiques ou géométriques classiques (échiquier, papyrus ' +
               'de Rhind, Fibonacci, triangles en zigzag, carrés emboîtés, suites combinées, ' +
-              'vitesse). À résoudre pas à pas avec les outils du chapitre.',
+              'vitesse), avec des nombres qui changent à chaque tirage. À résoudre pas à pas ' +
+              'avec les outils de ce chapitre.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 17. Problèmes classiques sur les suites »',
@@ -966,9 +1120,10 @@ export const suites: ChapterContent = {
           title: 'Comparaison numérique de deux suites',
           generatorId: '5gen18',
           description: [
-            'Complète un tableau de valeurs pour deux suites concurrentes (villes, stocks, ' +
-              "comptes d'épargne). Détermine le rang exact où l'une dépasse l'autre. Puis " +
-              "traduis ce rang dans l'unité du contexte.",
+            'Calcule les valeurs de deux suites concurrentes (villes, stocks, comptes ' +
+              "d'épargne) sur une plage de rangs, et repère toi-même le premier rang où l'une " +
+              "dépasse l'autre — en vérifiant le rang précédent. Puis traduis ce rang dans " +
+              "l'unité du contexte (année, « au cours du combientième mois »).",
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 18. Comparaison numérique de deux suites »',
@@ -979,9 +1134,9 @@ export const suites: ChapterContent = {
       id: 'recurrente-affine',
       number: 6,
       title: 'Suite récurrente affine et régime permanent',
-      kicker: 'u_(n+1) = a·u_n + b — ni arithmétique, ni géométrique',
+      kicker: 'uₙ₊₁ = a·uₙ + b — ni arithmétique, ni géométrique',
       blocks: [
-        { kind: 'video', title: 'Suite récurrente affine u_{n+1} = a·u_n + b et régime permanent L = b/(1−a)', youtubeId: '7ATLT1PpzIE' },
+        { kind: 'video', title: 'Suite récurrente affine uₙ₊₁ = a·uₙ + b et régime permanent L = b/(1−a)', youtubeId: '7ATLT1PpzIE' },
         {
           kind: 'para',
           text:
@@ -1013,6 +1168,9 @@ export const suites: ChapterContent = {
               'permanent**. C\'est le point fixe de la récurrence ($L = a\\times L+b$) : $L = ' +
               '\\dfrac{b}{1-a}$. Si $|a| \\geq 1$, ce régime permanent **n\'existe pas** : la ' +
               'suite diverge.',
+            'Cas particulier : si $u_1 = L$, tous les termes valent $L$ — la suite est **constante**, ' +
+              'quel que soit $a$ (elle est alors à la fois arithmétique de raison 0 et géométrique ' +
+              'de raison 1). Les conclusions ci-dessus supposent donc toujours $u_1 \\neq L$.',
           ],
         },
         {
@@ -1082,7 +1240,7 @@ export const suites: ChapterContent = {
             referenceLine: { value: 10, label: 'L=10' },
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
-            caption: 'u_(n+1) = 0,7×u_n + 3, u1=1 — les termes se rapprochent du régime permanent L=10 sans jamais l\'atteindre',
+            caption: '$u_{n+1} = 0{,}7\\times u_n + 3$, $u_1=1$ — les termes se rapprochent du régime permanent $L=10$ sans jamais l\'atteindre',
           },
         },
         {
@@ -1153,9 +1311,9 @@ export const suites: ChapterContent = {
           title: 'Suite récurrente affine et régime permanent',
           generatorId: '5gen19',
           description: [
-            'Pose la récurrence u_(n+1)=a·u_n+b à partir d\'un contexte de dosage ou de ' +
-              'dilution. Détermine si le régime permanent existe et calcule-le. Puis calcule ' +
-              'les termes suivants pas à pas.',
+            'Pose la récurrence uₙ₊₁ = a·uₙ + b à partir d\'un contexte de dosage, de dilution ' +
+              'ou de croissance (population, abonnés, dette). Détermine si le régime permanent ' +
+              'existe et calcule-le. Puis calcule les termes suivants pas à pas.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 19. Suite récurrente affine et régime permanent »',
@@ -1170,6 +1328,7 @@ export const suites: ChapterContent = {
         title: 'Suite arithmétique',
         formulas: [
           { text: '$u_n = u_1 + (n-1)r$' },
+          { text: '$u_n = u_p + (n-p)r$', condition: 'relation entre deux termes — pour isoler x ou le rang n' },
           { text: '$S_n = \\dfrac{n(u_1+u_n)}{2}$' },
           { text: '$u_n = \\dfrac{u_{n-1}+u_{n+1}}{2}$', condition: 'moyenne arithmétique — pour $n \\ge 2$' },
         ],
@@ -1178,7 +1337,9 @@ export const suites: ChapterContent = {
         title: 'Suite géométrique',
         formulas: [
           { text: '$u_n = u_1 \\times q^{n-1}$' },
+          { text: '$u_n = u_p \\times q^{n-p}$', condition: 'relation entre deux termes — rang n : réduire à la même base' },
           { text: '$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$', condition: '$q \\neq 1$' },
+          { text: '$S_\\infty = \\dfrac{u_1}{1-q}$', condition: 'somme infinie — seulement si $|q|<1$' },
           { text: '$u_n = \\sqrt{u_{n-1} \\times u_{n+1}}$', condition: 'moyenne géométrique — pour $n \\ge 2$' },
         ],
       },
@@ -1203,7 +1364,7 @@ export const suites: ChapterContent = {
         title: 'Suite récurrente affine',
         formulas: [
           { text: '$u_{n+1} = a \\times u_n + b$' },
-          { text: '$L = \\dfrac{b}{1-a}$', condition: 'régime permanent — seulement si $|a|<1$' },
+          { text: '$L = \\dfrac{b}{1-a}$', condition: 'régime permanent — seulement si $|a|<1$ (si $u_1 = L$, suite constante)' },
         ],
       },
     ],
@@ -1212,9 +1373,11 @@ export const suites: ChapterContent = {
   recap: {
     items: [
       '**Suite arithmétique** — $u_n = u_1 + (n-1)r$. Croissante si $r>0$, décroissante si ' +
-        '$r<0$. Somme $S_n = n(u_1+u_n)/2$.',
+        '$r<0$. Somme $S_n = n(u_1+u_n)/2$. Inconnue x ou rang n : relie deux termes par ' +
+        '$u_n = u_p + (n-p)r$, puis résous l\'équation du premier degré.',
       '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$. Somme $S_n = u_1(1-q^n)/(1-q)$. ' +
-        'Retrouver q depuis $q^k=a$ ? Vérifie la parité de k (0, 1 ou 2 solutions).',
+        'Retrouver q depuis $q^k=a$ ? Vérifie la parité de k (0, 1 ou 2 solutions). Rang n : ' +
+        'réduis à la même base. Somme infinie $S_\\infty = u_1/(1-q)$, seulement si $|q|<1$.',
       '**Convergence** — arithmétique : $\\pm\\infty$ selon le signe de r (jamais ' +
         'convergente, sauf r=0). Géométrique : 0 si $|q|<1$, $\\pm\\infty$ si $q>1$, n\'existe ' +
         'pas si $q\\leq-1$. Suite $P(n)/Q(n)$ : compare les degrés de P et Q.',
@@ -1224,7 +1387,8 @@ export const suites: ChapterContent = {
         'vérifiant que la condition est bien fausse au rang précédent. Traduis toujours le ' +
         'rang trouvé dans l\'unité du contexte.',
       '**Suite récurrente affine** — $u_{n+1}=a\\times u_n+b$. Régime permanent $L=b/(1-a)$, ' +
-        'seulement si $|a|<1$. Sinon, la suite diverge et L n\'existe pas.',
+        'seulement si $|a|<1$. Sinon, la suite diverge et L n\'existe pas (sauf si $u_1 = L$ : ' +
+        'la suite est alors constante).',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
@@ -1245,8 +1409,9 @@ export const suites: ChapterContent = {
       generatorId: '5gen41',
       description: [
         'Affirmations sur les suites arithmétiques et géométriques, la convergence, les ' +
-          'problèmes classiques et les suites récurrentes affines. Choisis un thème, réponds ' +
-          'vrai ou faux — la justification est toujours révélée.',
+          'problèmes classiques, la comparaison numérique de deux suites et les suites ' +
+          'récurrentes affines — plus un thème transversal sur tout le chapitre. Choisis un ' +
+          'thème, réponds vrai ou faux — la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 41. Les suites — quiz vrai/faux »',

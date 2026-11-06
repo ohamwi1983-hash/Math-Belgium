@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceConvergenceSuite } from "../core5e/convergenceSuites.types";
 import type { PhaseConvergenceSuite } from "../moteur5e/typesConvergenceSuites";
-import { consigneGenerale, consignePhase, formatTermesDonneesLatex, optionsClassification, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatConvergenceSuites";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, lignesAideNiveau1, lignesAideNiveau2, optionsClassification } from "../ui5e/formatConvergenceSuites";
+import { LignesAideConvergence } from "./LignesAideConvergence";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -64,7 +65,7 @@ export function EtapeClassificationConvergence({
   const complet = choixId !== null && (!optionChoisie?.requiertValeur || valeur.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
   const valeurErronee = apresEchec && !!optionChoisie?.requiertValeur && !!diagnostiquerValeur && diagnostiquerValeur(valeur) !== "correct";
-  const aide2 = texteAideNiveau2(exercice, phase as PhaseConvergenceSuite);
+  const aide2 = lignesAideNiveau2(exercice, phase as PhaseConvergenceSuite);
 
   function valider() {
     if (!complet || choixId === null) return;
@@ -106,8 +107,8 @@ export function EtapeClassificationConvergence({
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase as PhaseConvergenceSuite)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <LignesAideConvergence lignes={lignesAideNiveau1(exercice, phase as PhaseConvergenceSuite)} />
+          {niveauAide >= 2 && aide2.length > 0 && <LignesAideConvergence lignes={aide2} />}
         </div>
       )}
       {!validation && (
@@ -118,7 +119,11 @@ export function EtapeClassificationConvergence({
         </button>
         {montrerErreurs && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            {/* « Conclure » : une mauvaise conclusion clôt l'écran ; s'il reste ouvert après un échec,
+                c'est que la conclusion est juste et que seule la VALEUR de la limite est fausse. */}
+            {phase === "classifierQuelconque" && dernierStatut !== "parse_error"
+              ? `La conclusion est juste, mais la valeur de la limite ne l'est pas — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`
+              : formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>
         )}
         </>

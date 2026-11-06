@@ -1,5 +1,5 @@
 import type { BrancheSuiteGeometrique, ComboSuiteGeometrique, ExercicePrincipalSuiteGeometrique, FractionQ, StatutQ } from "../../core5e/suitesGeometriques.types";
-import { diviserFractionQ, entierVersFractionQ, fractionQVersNombre, multiplierFractionQ, opposeFractionQ, puissanceFractionQ, termeGeometriqueQ } from "./fraction";
+import { diviserFractionQ, entierVersFractionQ, fractionQVersNombre, multiplierFractionQ, opposeFractionQ, puissanceFractionQ, sommeGeometriqueFinieQ, sommeInfinieQ, termeGeometriqueQ } from "./fraction";
 
 /**
  * Pool de raisons rationnelles SIGNÉES — q est TOUJOURS choisi DEPUIS CE POOL pour les 4 combos
@@ -103,7 +103,53 @@ export const CATALOGUE_COMBOS: { id: ComboSuiteGeometrique; label: string }[] = 
   { id: "up_um", label: "Deux termes uₚ et uₘ" },
 ];
 
+/** Donnée affichée lisible : numérateur d'au plus 4 chiffres, dénominateur d'au plus 3 (l'audit
+ * relevait des données de 5 chiffres et plus dans 28 à 46 % des tirages selon le combo). */
+export function fractionLisible(f: FractionQ): boolean {
+  return Math.abs(f.num) <= 9999 && f.den <= 999;
+}
+
+/** Réponse à arrondir au centième : ni minuscule (sinon « 0 » serait accepté par la tolérance de
+ * 0,01 — vu pour u₁₀ = 0,0002), ni démesurée. */
+export function reponseArrondieLisible(f: FractionQ): boolean {
+  const v = Math.abs(fractionQVersNombre(f));
+  return v >= 0.05 && v < 100000;
+}
+
+function donneesLisibles(e: ExercicePrincipalSuiteGeometrique): boolean {
+  const d = e.donnees;
+  const valeurs: FractionQ[] =
+    d.combo === "direct" ? [d.u1, d.q] : d.combo === "u1_up" ? [d.u1, d.up.valeur] : d.combo === "q_up" ? [d.q, d.up.valeur] : [d.up.valeur, d.um.valeur];
+  return valeurs.every(fractionLisible) && e.branches.every((b) => fractionLisible(b.u1));
+}
+
+/** Toutes les réponses de la suite traitée en entier (la 1re branche, voir `ordreComplet`) restent
+ * lisibles — termes, terme éloigné, somme Sₙ et somme infinie si elle existe. */
+function reponsesLisibles(e: ExercicePrincipalSuiteGeometrique): boolean {
+  const { u1, q } = e.branches[0];
+  const termes = [...e.indicesTermesProches, e.indiceTermeEloigne].map((n) => termeGeometriqueQ(u1, q, n));
+  const somme = sommeGeometriqueFinieQ(u1, q, e.indiceSn);
+  const infinie = sommeInfinieQ(u1, q);
+  return [...termes, somme, ...(infinie === null ? [] : [infinie])].every(reponseArrondieLisible);
+}
+
+/** Deux valeurs de q (exposant pair) : la branche q > 0 en PREMIER — c'est elle qui est traitée en
+ * entier, et les libellés « 1re suite, q > 0 » / « 2e suite, q < 0 » en dépendent (l'ordre suivait
+ * auparavant le pool, et q < 0 arrivait en tête une fois sur deux). */
+function brancheQPositiveEnTete(e: ExercicePrincipalSuiteGeometrique): ExercicePrincipalSuiteGeometrique {
+  if (e.branches.length !== 2 || e.branches[0].q.num > 0) return e;
+  return { ...e, branches: [e.branches[1], e.branches[0]] };
+}
+
 export function construireAvecComboId(combo: ComboSuiteGeometrique): ExercicePrincipalSuiteGeometrique {
+  let exercice = brancheQPositiveEnTete(construireAvecComboIdBrut(combo));
+  for (let tentative = 0; tentative < 500 && !(donneesLisibles(exercice) && reponsesLisibles(exercice)); tentative++) {
+    exercice = brancheQPositiveEnTete(construireAvecComboIdBrut(combo));
+  }
+  return exercice;
+}
+
+function construireAvecComboIdBrut(combo: ComboSuiteGeometrique): ExercicePrincipalSuiteGeometrique {
   const indicesTermesProches = indicesTermesProchesAleatoires();
   // Borne absolue à 10 (jamais plus) : au-delà, un q=1/4 (le plus petit en magnitude du pool)
   // combiné à un u1=±1 (le plus petit possible) fait passer le terme sous 1e-6 en valeur absolue,

@@ -11,13 +11,14 @@ import {
   soumettreReponseClassificationGeometrique,
   soumettreReponseClassifierQuelconque,
   soumettreReponseDiviserQuelconque,
+  tentativesMaxConvergenceSuite,
 } from "./moteur5e/sessionConvergenceSuites";
 import { ordreComplet } from "./moteur5e/typesConvergenceSuites";
 import type { EtatSessionConvergenceSuite, PhaseConvergenceSuite } from "./moteur5e/typesConvergenceSuites";
-import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque } from "./moteur5e/verificationConvergenceSuites";
+import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque, erreurMethodeDiviserQuelconque, MESSAGE_ERREUR_DIVISION } from "./moteur5e/verificationConvergenceSuites";
 import { diagnostiquerNombre } from "./moteur5e/verificationSuiteArithmetique";
 import type { ClassificationQuelconque, ExerciceConvergenceSuite } from "./core5e/convergenceSuites.types";
-import { formatExpressionDiviseeLatex, libelleClassificationAttendue, optionsClassification, texteAideNiveau2 } from "./ui5e/formatConvergenceSuites";
+import { formatExpressionDiviseeLatex, LIBELLE_PHASE_CONVERGENCE_SUITE, libelleClassificationAttendue, optionsClassification, texteAideNiveau2 } from "./ui5e/formatConvergenceSuites";
 import { EtapeClassificationConvergence } from "./components5e/EtapeClassificationConvergence";
 import { EtapeDiviserQuelconque } from "./components5e/EtapeDiviserQuelconque";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
@@ -95,6 +96,10 @@ export function App5gen16() {
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
    * ce chantier). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseConvergenceSuite, boolean>>>({});
+  /** Compteur de générations : fait partie de la clé d'écran, pour que « Générer » ou « Nouvel
+   * exercice » remontent l'écran (champs vides) même quand le nouvel exercice commence par le même
+   * écran que le précédent (audit 5c3b point 8). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -105,20 +110,19 @@ export function App5gen16() {
     if (transitionDEcran) {
       const revele = nouvelEtat.derniereEtapeRevelee;
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      // Fiche de la puce : l'écran qui VIENT de se clore (`etat.phase`), jamais la dernière ligne
+      // du récapitulatif — celui-ci ne contient que l'expression divisée, d'où des fiches absentes
+      // (arithmétique, géométrique) ou au mauvais titre (« Conclure » affiché comme « Diviser »).
       if (votreReponse !== undefined) {
-        const recap = calculerRecapitulatifConvergenceSuite(nouvelEtat);
-        const derniere = recap[recap.length - 1];
-        if (derniere) {
-          setHistorique((h) => [
-            ...h,
-            {
-              titre: derniere.libelle,
-              votreReponse,
-              correcte: !derniere.revele,
-              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-            },
-          ]);
-        }
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_CONVERGENCE_SUITE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePourPhase(etat.exerciceCourant, etat.phase) : undefined,
+          },
+        ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -132,6 +136,7 @@ export function App5gen16() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -142,13 +147,14 @@ export function App5gen16() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionConvergenceSuite(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteConvergenceSuite)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxConvergenceSuite(etat, etat.phase);
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation = enAttente
@@ -165,6 +171,7 @@ export function App5gen16() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Convergence et divergence des suites</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
@@ -223,6 +230,10 @@ export function App5gen16() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDiviserQuelconque(etat, texte), texte)}
                   diagnostiquer={(texte) => (exercice.variante === "quelconque" ? diagnostiquerDiviserQuelconque(texte, exercice) : "parse_error")}
+                  messageMethode={(texte) => {
+                    const erreur = exercice.variante === "quelconque" ? erreurMethodeDiviserQuelconque(texte, exercice) : null;
+                    return erreur === null ? null : MESSAGE_ERREUR_DIVISION[erreur];
+                  }}
                   validation={validation}
                 />
               )}

@@ -1,20 +1,25 @@
 // Contrat core — 5gen18 "Comparaison numérique de deux suites". 3 branches, chacune 2 suites de
 // types/tendances différents (arithmétique vs géométrique, arithmétique décroissante vs croissante,
-// géométrique à taux différents) — technique INÉDITE sur la plateforme : pas de résolution
-// algébrique, un balayage de valeurs (simulation numérique directe) pour trouver le seuil n où la
-// condition bascule. `nSeuil` est donc calculé par simulation en Couche A (jamais une formule
-// fermée), puis les 3 lignes du tableau affiché à l'élève couvrent TOUJOURS [nSeuil-1, nSeuil,
-// nSeuil+1] — la condition est fausse à la première ligne, vraie aux 2 suivantes, ce qui teste
-// explicitement le piège "erreur d'un cran" (confondre nSeuil et nSeuil-1/nSeuil+1).
+// géométrique à taux différents) — technique du cours : pas de résolution algébrique, un BALAYAGE de
+// valeurs (simulation numérique directe) pour trouver le premier rang n où l'une des suites dépasse
+// STRICTEMENT l'autre (« Bₙ > Aₙ », comme le cours). `nSeuil` est donc calculé par simulation en
+// Couche A (jamais une formule fermée). Le tableau affiché à l'élève couvre une FENÊTRE de 4 rangs
+// consécutifs décalée au hasard : le rang de bascule y occupe la 2e, la 3e ou la 4e ligne (jamais la
+// 1re, pour que la ligne précédente — condition encore fausse — soit toujours visible). L'élève
+// repère donc lui-même la bascule dans le tableau, au lieu de la trouver toujours à la ligne du
+// milieu (ancien défaut : réponse devinable sans balayage).
 //
-// Les 3 branches partagent un même bassin de 50 contextes narratifs (`ContexteComparaisonSuites`,
+// Notation du cours : Aₙ (suite du « côté A », `u` dans le code) et Bₙ (côté B, `v`).
+//
+// Les 3 branches partagent un même bassin de contextes narratifs (`ContexteComparaisonSuites`,
 // `generateurs5e/comparaisonSuites/contextes.ts`) tiré aléatoirement à CHAQUE exercice, quelle que
 // soit la branche — jamais un contexte fixe par branche.
 
 export type FamilleComparaisonSuites = "villesCroissance" | "stockDemande" | "epargneCroissance";
 
-/** "uGeV" : la condition testée est u_n≥v_n. "vGeU" : la condition testée est v_n≥u_n. */
-export type ConditionComparaison = "uGeV" | "vGeU";
+/** "aDepasseB" : la condition testée est Aₙ > Bₙ. "bDepasseA" : la condition testée est Bₙ > Aₙ.
+ * Dépassement STRICT, comme le cours (« le premier rang où Bₙ > Aₙ »). */
+export type ConditionComparaison = "aDepasseB" | "bDepasseA";
 
 /** Contexte narratif — bassin unique de 50 entrées partagé par les 3 branches. `sujetA`/`sujetB`
  * sont des groupes nominaux COMPLETS (article + nom, ex. "la population du village A"), jamais
@@ -30,6 +35,10 @@ export interface ContexteComparaisonSuites {
   id: string;
   labelA: string;
   labelB: string;
+  /** Groupe nominal court AVEC article (« le parc A », « l'école B ») — utilisé dans la question
+   * « … le parc B dépasse le parc A », jamais le libellé de colonne sans article. */
+  nomA: string;
+  nomB: string;
   sujetA: string;
   sujetB: string;
   unite: string;
@@ -40,22 +49,24 @@ export interface ContexteComparaisonSuites {
 interface ExerciceComparaisonSuitesCommun {
   contexte: ContexteComparaisonSuites;
   nSeuil: number;
-  nTable: [number, number, number];
-  uTable: [number, number, number];
-  vTable: [number, number, number];
+  /** Les 4 rangs consécutifs du tableau (fenêtre décalée au hasard, voir l'en-tête). */
+  nTable: number[];
+  /** Aₙ et Bₙ aux rangs de `nTable` (valeurs exactes, arrondies à l'unité à l'affichage). */
+  uTable: number[];
+  vTable: number[];
   traductionValeur: number;
   condition: ConditionComparaison;
   uniteContexte: string;
-  /** Année de départ de la simulation — non-null seulement si `contexte.periode === "an"` (sinon la
-   * traduction finale est un simple décompte de mois écoulés, sans ancrage calendaire). */
+  /** Année du rang n = 1 — non-null seulement si `contexte.periode === "an"`. En mode « mois », le
+   * rang n EST le numéro du mois (« au cours du n-ième mois »), sans ancrage calendaire. */
   anneeDepart: number | null;
 }
 
 /** Côté A (géométrique, taux de croissance élevé) vs côté B (arithmétique, croissance linéaire) — A
- * finit toujours par dépasser B (u_n≥v_n) grâce à la croissance exponentielle. */
+ * finit toujours par dépasser B (Aₙ > Bₙ) grâce à la croissance exponentielle. */
 export interface ExerciceVillesCroissance extends ExerciceComparaisonSuitesCommun {
   famille: "villesCroissance";
-  condition: "uGeV";
+  condition: "aDepasseB";
   u1: number;
   tauxPct: number;
   v1: number;
@@ -63,10 +74,10 @@ export interface ExerciceVillesCroissance extends ExerciceComparaisonSuitesCommu
 }
 
 /** Côté A (arithmétique décroissant) vs côté B (arithmétique croissant) — B finit toujours par
- * dépasser A (v_n≥u_n). */
+ * dépasser A (Bₙ > Aₙ). */
 export interface ExerciceStockDemande extends ExerciceComparaisonSuitesCommun {
   famille: "stockDemande";
-  condition: "vGeU";
+  condition: "bDepasseA";
   u1: number;
   d1: number;
   v1: number;
@@ -74,10 +85,10 @@ export interface ExerciceStockDemande extends ExerciceComparaisonSuitesCommun {
 }
 
 /** Côté A (géométrique, taux élevé, valeur initiale plus faible) vs côté B (géométrique, taux plus
- * faible, valeur initiale plus élevée) — A finit toujours par dépasser B (u_n≥v_n). */
+ * faible, valeur initiale plus élevée) — A finit toujours par dépasser B (Aₙ > Bₙ). */
 export interface ExerciceEpargneCroissance extends ExerciceComparaisonSuitesCommun {
   famille: "epargneCroissance";
-  condition: "uGeV";
+  condition: "aDepasseB";
   u1: number;
   r1Pct: number;
   v1: number;

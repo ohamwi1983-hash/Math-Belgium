@@ -25,8 +25,20 @@ export function demarrerSessionConvergenceSuite(reglages: ReglagesSession5e, gen
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/**
+ * Tentatives par écran (audit 5c3b point 7, même règle qu'au chapitre 2) : un choix fermé qui se
+ * gagnerait par élimination n'a droit qu'à UNE tentative — classification arithmétique (3 options),
+ * géométrique (6 options). « Conclure » (4 options) garde le plafond des réglages pour la seule
+ * VALEUR de la limite (champ libre) ; une mauvaise CONCLUSION, elle, clôt l'écran tout de suite
+ * (`soumettreReponseClassifierQuelconque`).
+ */
+export function tentativesMaxConvergenceSuite(etat: Pick<EtatSessionConvergenceSuite, "reglages">, phase: PhaseConvergenceSuite): number {
+  if (phase === "classificationArithmetique" || phase === "classificationGeometrique") return 1;
+  return etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionConvergenceSuite): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxConvergenceSuite(etat, etat.phase) };
 }
 
 /** Plafond d'aide PAR PHASE/INSTANCE (B.3, `promptcorrectionsround2.md`) — remplace l'usage nu de
@@ -58,11 +70,20 @@ function cloturerExerciceOuSuivant(etat: EtatSessionConvergenceSuite, resultat: 
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionConvergenceSuite, phaseAttendue: PhaseConvergenceSuite, reponse: T, verifier: (r: T) => boolean): EtatSessionConvergenceSuite {
+function soumettreEcran<T>(
+  etat: EtatSessionConvergenceSuite,
+  phaseAttendue: PhaseConvergenceSuite,
+  reponse: T,
+  verifier: (r: T) => boolean,
+  derniereTentative = false,
+): EtatSessionConvergenceSuite {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
+  const reglages = reglagesEtape(etat);
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglages,
+    // Échec qui doit clore l'écran tout de suite (mauvaise conclusion sur un choix fermé).
+    tentativesMax: derniereTentative ? etat.etapeCourante.tentativesUtilisees + 1 : reglages.tentativesMax,
     verifier,
     revelerReponse: () => {},
   });
@@ -110,5 +131,8 @@ export function soumettreReponseDiviserQuelconque(etat: EtatSessionConvergenceSu
 
 export function soumettreReponseClassifierQuelconque(etat: EtatSessionConvergenceSuite, reponse: ReponseClassifierQuelconque): EtatSessionConvergenceSuite {
   const exo = commeQuelconque(etat.exerciceCourant);
-  return soumettreEcran(etat, "classifierQuelconque", reponse, (r) => diagnostiquerClassifierQuelconque(r, exo) === "correct");
+  // Mauvaise conclusion (choix fermé à 4 options) : écran clos et réponse révélée, sans 2e essai ;
+  // bonne conclusion mais valeur fausse : nouvel essai sur la valeur (plafond des réglages).
+  const mauvaiseConclusion = reponse.classification !== exo.classification;
+  return soumettreEcran(etat, "classifierQuelconque", reponse, (r) => diagnostiquerClassifierQuelconque(r, exo) === "correct", mauvaiseConclusion);
 }

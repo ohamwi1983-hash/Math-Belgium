@@ -52,7 +52,8 @@ export function EtapeCoherenceJugement({ exercice, tentativesUtilisees, tentativ
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "coherenceJugement")}</p>
+          <p>Les données sont cohérentes si cette égalité est vraie exactement :</p>
+          <Katex expression={texteAideNiveau1(exercice, "coherenceJugement")} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>
       )}

@@ -85,6 +85,10 @@ export function App5gen19() {
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
    * ce chantier). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteRecurrenteAffine, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : fait partie de la clé
+   * des écrans, pour que leurs champs repartent vides même quand le nouvel exercice commence par le
+   * même écran (même convention qu'`App5gen10.tsx`). */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -123,6 +127,7 @@ export function App5gen19() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
+      setNumeroSession((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -133,13 +138,14 @@ export function App5gen19() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () => construireAvecRegime(id as RegimeSuiteRecurrenteAffine)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
@@ -161,6 +167,7 @@ export function App5gen19() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suite récurrente affine et régime permanent</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />

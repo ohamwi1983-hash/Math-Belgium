@@ -25,7 +25,7 @@ import type {
   TermeLineaireFractionQ,
 } from "../../core5e/suitesGeometriques.types";
 import { additionnerFractionQ, diviserFractionQ, entierVersFractionQ, fractionQ, fractionQVersNombre, multiplierFractionQ, puissanceFractionQ, soustraireFractionQ } from "./fraction";
-import { Q_SIGNE_POOL } from "./principal";
+import { Q_SIGNE_POOL, fractionLisible } from "./principal";
 
 function entierAleatoire(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -119,7 +119,21 @@ function tirerQPourExposant(exposant: number): FractionQ {
   return elementAleatoire(candidats.length > 0 ? candidats : Q_SIGNE_POOL);
 }
 
+/** Données et réponses lisibles (voir `fractionLisible`) : uₙ(x) ne doit plus afficher une
+ * constante comme 196621/16384, ni les valeurs déduites (uₚ, uₙ une fois x connu). */
 export function genererExerciceAlgebriqueTermeGeneral(): ExerciceAlgebriqueTermeGeneral {
+  let exercice = genererExerciceAlgebriqueTermeGeneralBrut();
+  for (let tentative = 0; tentative < 500; tentative++) {
+    const { up, un, xReel } = exercice;
+    const upX = additionnerFractionQ(multiplierFractionQ(entierVersFractionQ(up.a), xReel), entierVersFractionQ(up.b));
+    const unX = additionnerFractionQ(multiplierFractionQ(entierVersFractionQ(un.a), xReel), un.b);
+    if ([un.b, upX, unX].every(fractionLisible)) return exercice;
+    exercice = genererExerciceAlgebriqueTermeGeneralBrut();
+  }
+  return exercice;
+}
+
+function genererExerciceAlgebriqueTermeGeneralBrut(): ExerciceAlgebriqueTermeGeneral {
   const xReel = tirerXCible();
   const [p, n] = tirerPetNDistincts();
   const q = tirerQPourExposant(n - p);
@@ -180,8 +194,14 @@ function genererSousCasB(): ExerciceAlgebriqueSommeSnB {
   return { famille: "algebriqueSommeSn", sousCas: "B", u1, q, n, sn, k, xReel };
 }
 
+/** Sₙ (donnée en A, réponse de « Calcule Sₙ » en B) et Sₙ(x) lisibles — l'audit relevait
+ * « S₁₂ = −4x + 50331633 » (q = ±4 avec n jusqu'à 12). */
 export function construireSommeSnAvecSousCas(sousCas: SousCasSommeSnGeometrique): ExerciceAlgebriqueSommeSn {
-  return sousCas === "A" ? genererSousCasA() : genererSousCasB();
+  const generer = () => (sousCas === "A" ? genererSousCasA() : genererSousCasB());
+  const lisible = (e: ExerciceAlgebriqueSommeSn) => fractionLisible(e.k) && (e.sousCas === "A" || fractionLisible(e.sn.b));
+  let exercice = generer();
+  for (let tentative = 0; tentative < 500 && !lisible(exercice); tentative++) exercice = generer();
+  return exercice;
 }
 
 /** Tirage uniforme sur les 2 sous-cas — "fréquence comparable", explicitement demandé. Exportée :
@@ -221,7 +241,14 @@ const Q_POSITIF_FRACTIONS: FractionQ[] = [
  * `u1·q^m=c·num^m` EXACT (produit d'entiers, jamais une division flottante) — `u1`/`k` restent donc
  * des `number` (toujours entiers par construction, voir `core5e/suitesGeometriques.types.ts`), seul
  * `q` est du type `FractionQ`. */
+/** u₁ et la valeur atteinte k bornés à 4 chiffres (3⁹ × 5 = 98 415 sinon). */
 export function genererExerciceAlgebriqueRangN(): ExerciceAlgebriqueRangN {
+  let exercice = genererExerciceAlgebriqueRangNBrut();
+  for (let tentative = 0; tentative < 500 && (Math.abs(exercice.u1) > 9999 || Math.abs(exercice.k) > 9999); tentative++) exercice = genererExerciceAlgebriqueRangNBrut();
+  return exercice;
+}
+
+function genererExerciceAlgebriqueRangNBrut(): ExerciceAlgebriqueRangN {
   const q = elementAleatoire(Q_POSITIF_FRACTIONS);
   const m = entierAleatoire(2, 9);
   const c = entierAleatoire(1, 5);

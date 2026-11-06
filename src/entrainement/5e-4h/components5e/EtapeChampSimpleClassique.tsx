@@ -3,6 +3,8 @@ import type { ExerciceSuiteClassique } from "../core5e/suitesClassiques.types";
 import type { PhaseSuiteClassique } from "../moteur5e/typesSuiteClassique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { TexteMathsClassique } from "./TexteMathsClassique";
+import { FigureSuiteClassique } from "./FigureSuiteClassique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -55,11 +57,14 @@ export function EtapeChampSimpleClassique({ exercice, phase, tentativesUtilisees
       <EnTeteExercice
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
-          <div className="equation-box equation-box-donnees">
-            {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
+          <>
+            <div className="equation-box equation-box-donnees">
+              {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+            <FigureSuiteClassique exercice={exercice} phase={phase} />
+          </>
         }
       />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
@@ -77,8 +82,14 @@ export function EtapeChampSimpleClassique({ exercice, phase, tentativesUtilisees
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <p>
+            <TexteMathsClassique texte={texteAideNiveau1(exercice, phase)} />
+          </p>
+          {niveauAide >= 2 && aide2.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <Katex expression={aide2} block />
+            </div>
+          )}
         </div>
       )}
       {!validation && (

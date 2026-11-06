@@ -9,6 +9,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { MESSAGE_SOLUTION_DIRECTE, estSolutionDirecte } from "../moteur5e/saisieNombreSuites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -48,10 +49,19 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
       : null;
   const apresEchec = tentativesUtilisees > 0;
   const equationErronee = apresEchec && !!diagnostiquer && complet && diagnostiquer({ texte }) !== "correct";
-  const placeholder = phase === "poserEquationRangN" ? "ex : 12*2^(n-1)=768" : "ex : 5x-47=-x+16-x+19";
+  // Exemples hors de l'espace des tirages (u₁ = 12 impossible avec q = 2 ; forme d'équation libre).
+  const placeholder = phase === "poserEquationRangN" ? "ex : 12×2^(n−1)=768" : "ex : 5x−47=2(x+16)";
+  const inconnue = phase === "poserEquationRangN" ? "n" : "x";
+  const [solutionDirecte, setSolutionDirecte] = useState(false);
 
   function valider() {
     if (!complet) return;
+    // « x = −3 » : c'est la solution, pas l'équation demandée — refusé sans consommer de tentative.
+    if (estSolutionDirecte(texte, inconnue)) {
+      setSolutionDirecte(true);
+      return;
+    }
+    setSolutionDirecte(false);
     const reponse: ReponseEquation = { texte };
     if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
     onValider(reponse);
@@ -77,7 +87,10 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
           type="text"
           className={`text-input${equationErronee ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => {
+            setTexte(e.target.value);
+            setSolutionDirecte(false);
+          }}
           placeholder={placeholder}
         />
       </div>
@@ -93,7 +106,12 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {solutionDirecte && (
+          <p className="alert-error" role="alert">
+            {MESSAGE_SOLUTION_DIRECTE}
+          </p>
+        )}
+        {montrerErreurs && !solutionDirecte && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

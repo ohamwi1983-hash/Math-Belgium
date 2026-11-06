@@ -1,8 +1,11 @@
 /**
  * Couche B (5e) — moteur de session pour 5gen17 ("Problèmes classiques sur les suites"). 26 écrans
- * répartis en 7 scénarios disjoints, chacun TOUJOURS traversé dans sa séquence COMPLÈTE (aucune
- * instance n'étant aléatoire, aucun saut conditionnel n'est nécessaire). N'importe jamais rien de
+ * répartis en 7 scénarios disjoints, chacun TOUJOURS traversé dans sa séquence COMPLÈTE (seuls les
+ * nombres varient d'un tirage à l'autre, jamais la suite des écrans). N'importe jamais rien de
  * `src/generateurs5e/`.
+ *
+ * Les écrans à CHOIX FERMÉ (QCM, 4 options) n'ont qu'UNE tentative (audit 5e ch. 3, point 3) :
+ * avec plusieurs essais, la bonne option se trouvait par élimination.
  */
 import type {
   ExerciceCarresEmboites,
@@ -47,7 +50,7 @@ import {
   diagnostiquerTroisMethodes,
   diagnostiquerU64,
 } from "./verificationSuiteClassique";
-import type { ChoixEquationCombinees, ChoixFormuleRecurrence, ChoixLimitePuissanceA, ChoixLongueurZigzag, ChoixProprieteInverse, ChoixSysteme } from "./verificationSuiteClassique";
+import type { ChoixEquationCombinees, ChoixFormuleRecurrence, ChoixLimitePuissanceA, ChoixProprieteInverse, ChoixSysteme } from "./verificationSuiteClassique";
 
 const POINTS_DE_BASE = 100;
 
@@ -70,22 +73,40 @@ export function demarrerSessionSuiteClassique(reglages: ReglagesSession5e, gener
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
-function reglagesEtape(etat: EtatSessionSuiteClassique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+/** Phases à choix fermé : une seule tentative. */
+export const PHASES_QCM_SUITE_CLASSIQUE = new Set<PhaseSuiteClassique>(["poserSysteme", "poserEquationCombinees", "formuleRecurrence", "proprieteInverse", "limitePuissanceA"]);
+
+/** Nombre de tentatives de l'écran `phase` — 1 pour un QCM, le réglage de session sinon. */
+export function tentativesMaxSuiteClassique(etat: EtatSessionSuiteClassique, phase: PhaseSuiteClassique): number {
+  return PHASES_QCM_SUITE_CLASSIQUE.has(phase) ? 1 : etat.reglages.tentativesMax;
 }
 
-/** Plafond d'aide PAR PHASE (B.3, `promptcorrectionsround2.md`) — remplace l'usage nu de
- * `NIVEAU_AIDE_MAX_SUITE_CLASSIQUE` (toujours 2). `texteAideNiveau2()`
- * (`ui5e/formatSuiteClassique.ts`) ne couvre que 4 des 26 phases du générateur (chacune
- * exclusive à un seul scénario via `ORDRE_PHASES` — voir `typesSuiteClassique.ts` — donc la
- * condition de scénario de `texteAideNiveau2` est TOUJOURS vraie dès que la phase correspondante
- * est atteinte) : "resoudreSysteme", "resoudreRCombinees", "troisMethodes", "resoudrePhi". Les 22
- * autres phases retombent sur `return ""` — chaque scénario traversant TOUJOURS sa séquence
- * complète (aucun tirage conditionnel, voir la doc de tête de `typesSuiteClassique.ts`), ces
- * écrans sont systématiquement atteints avec un niveau 2 vide. "suitesFinalesCombinees" cumule un
- * second défaut (son composant `EtapeSuitesFinalesCombinees.tsx` n'a même aucune branche
- * `niveauAide>=2`) — déjà couvert par ce plafonnage à 1, qui masque le bouton dans tous les cas. */
-const PHASES_AVEC_AIDE_NIVEAU2 = new Set<PhaseSuiteClassique>(["resoudreSysteme", "resoudreRCombinees", "troisMethodes", "resoudrePhi"]);
+function reglagesEtape(etat: EtatSessionSuiteClassique, phase: PhaseSuiteClassique): ReglagesEtape {
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxSuiteClassique(etat, phase) };
+}
+
+/** Plafond d'aide PAR PHASE : 2 niveaux là où `texteAideNiveau2()` (`ui5e/formatSuiteClassique.ts`)
+ * propose une forme substituée non résolue, 1 ailleurs (bouton masqué au-delà). Doit rester
+ * aligné sur `texteAideNiveau2` : une phase listée ici avec un niveau 2 vide afficherait un bouton
+ * d'aide sans effet. */
+export const PHASES_AVEC_AIDE_NIVEAU2 = new Set<PhaseSuiteClassique>([
+  "u64",
+  "sommeTotaleEchiquier",
+  "resoudreSysteme",
+  "resoudreRCombinees",
+  "distance11",
+  "sommeTotale11",
+  "troisMethodes",
+  "resoudrePhi",
+  "calculV5",
+  "hauteursZigzag",
+  "longueurZigzag",
+  "airesZigzag",
+  "airesZigzagAC",
+  "sommePartielleA",
+  "sommeInfinieA",
+  "sommeInfinieB",
+]);
 
 export function niveauAideMaxSuiteClassique(phase: PhaseSuiteClassique): number {
   return PHASES_AVEC_AIDE_NIVEAU2.has(phase) ? NIVEAU_AIDE_MAX_SUITE_CLASSIQUE : 1;
@@ -110,7 +131,7 @@ function soumettreEcran<T>(etat: EtatSessionSuiteClassique, phaseAttendue: Phase
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglagesEtape(etat, phaseAttendue),
     verifier,
     revelerReponse: () => {},
   });
@@ -264,13 +285,13 @@ export function soumettreReponseAiresZigzag(etat: EtatSessionSuiteClassique, tex
   const exo = commeZigzag(etat.exerciceCourant);
   return soumettreEcran(etat, "airesZigzag", textes, (t) => diagnostiquerAiresZigzag(t, exo) === "correct");
 }
-export function soumettreReponseLongueurZigzag(etat: EtatSessionSuiteClassique, choix: ChoixLongueurZigzag): EtatSessionSuiteClassique {
-  commeZigzag(etat.exerciceCourant);
-  return soumettreEcran(etat, "longueurZigzag", choix, diagnostiquerLongueurZigzag);
-}
-export function soumettreReponseAiresZigzagAC(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+export function soumettreReponseLongueurZigzag(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
   const exo = commeZigzag(etat.exerciceCourant);
-  return soumettreEcran(etat, "airesZigzagAC", textes, (t) => diagnostiquerAiresZigzagAC(t, exo) === "correct");
+  return soumettreEcran(etat, "longueurZigzag", texte, (t) => diagnostiquerLongueurZigzag(t, exo) === "correct");
+}
+export function soumettreReponseAiresZigzagAC(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeZigzag(etat.exerciceCourant);
+  return soumettreEcran(etat, "airesZigzagAC", texte, (t) => diagnostiquerAiresZigzagAC(t, exo) === "correct");
 }
 
 // ============================================================================

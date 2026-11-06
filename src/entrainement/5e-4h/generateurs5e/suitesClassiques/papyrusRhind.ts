@@ -1,19 +1,40 @@
 import type { ExercicePapyrusRhind } from "../../core5e/suitesClassiques.types";
 import { sommeArithmetique, termeArithmetique } from "../suitesArithmetiques/parametres";
+import { choisirParmi } from "./aleatoire";
 
-/** Scénario 2 — papyrus de Rhind (5 parts en progression arithmétique, somme=100).
+/** Couples (nombre de pains S, facteur k) retenus : parts a et Δ de dénominateur au plus 6 (les
+ * fractions restent lisibles, comme les 5/3 et 55/6 du papyrus). (100, 7) est le problème 40 du
+ * papyrus de Rhind lui-même. */
+export const COUPLES_PAPYRUS: readonly { somme: number; facteur: number }[] = (() => {
+  const couples: { somme: number; facteur: number }[] = [];
+  for (const somme of [50, 60, 75, 80, 90, 100, 120, 150, 180, 200, 240, 300]) {
+    for (const facteur of [3, 4, 5, 7]) {
+      const den = 15 * (facteur + 1);
+      const numA = somme * (9 - facteur);
+      const numD = somme * (2 * facteur - 3);
+      const denA = den / pgcd(numA, den);
+      const denD = den / pgcd(numD, den);
+      if (denA <= 6 && denD <= 6) couples.push({ somme, facteur });
+    }
+  }
+  return couples;
+})();
+
+function pgcd(a: number, b: number): number {
+  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
+}
+
+/** Scénario 2 — papyrus de Rhind : S pains partagés entre 5 personnes, parts en progression
+ * arithmétique (a, a + Δ, …, a + 4Δ), et la somme des 3 plus grandes parts vaut k fois celle des 2
+ * plus petites (papyrus : S = 100, k = 7).
  *
- * Système posé par l'élève : 5a+10Δ=100 (somme des 5 termes) et 7(2a+Δ)=3a+9Δ (la somme des 2
- * PLUS GRANDES parts vaut 1/7 de la somme des 3 plus petites — condition historique du papyrus).
- * Résolu ici algébriquement pour DÉRIVER a/Δ, jamais recopié :
- *   eq2 ⟺ 14a+7Δ=3a+9Δ ⟺ 11a=2Δ ⟺ Δ=5.5a
- *   eq1 ⟺ a=20-2Δ (substitution directe de sommeArithmetique(a,Δ,5)=100 ⟺ 5a+10Δ=100)
- *   ⟹ Δ=5.5(20-2Δ)=110-11Δ ⟹ 12Δ=110 ⟹ Δ=110/12=55/6
- */
-export function construirePapyrusRhind(): ExercicePapyrusRhind {
-  const sommeTotale = 100;
-  const delta = 110 / 12; // = 55/6 = 9+1/6
-  const a = 20 - 2 * delta; // = 5/3 = 1+2/3
+ * Système : 5a + 10Δ = S (somme des 5 parts) et k(2a + Δ) = 3a + 9Δ (2a + Δ = u₁ + u₂, les 2 plus
+ * petites ; 3a + 9Δ = u₃ + u₄ + u₅, les 3 plus grandes). La seconde équation donne
+ * (2k − 3)a = (9 − k)Δ ; avec a = S/5 − 2Δ : a = S(9 − k)/(15(k + 1)), Δ = S(2k − 3)/(15(k + 1)). */
+export function construirePapyrusRhind(couple = choisirParmi(COUPLES_PAPYRUS)): ExercicePapyrusRhind {
+  const { somme: sommeTotale, facteur } = couple;
+  const a = (sommeTotale * (9 - facteur)) / (15 * (facteur + 1));
+  const delta = (sommeTotale * (2 * facteur - 3)) / (15 * (facteur + 1));
   const termes: [number, number, number, number, number] = [
     termeArithmetique(a, delta, 1),
     termeArithmetique(a, delta, 2),
@@ -21,15 +42,14 @@ export function construirePapyrusRhind(): ExercicePapyrusRhind {
     termeArithmetique(a, delta, 4),
     termeArithmetique(a, delta, 5),
   ];
-  return { scenario: "papyrusRhind", sommeTotale, a, delta, termes };
+  return { scenario: "papyrusRhind", sommeTotale, facteur, a, delta, termes };
 }
 
-/** Vérifie que (a,delta) satisfait bien les 2 équations du système d'origine — utilisée par les
- * tests pour cross-vérifier la résolution ci-dessus indépendamment de la formule fermée. */
-export function verifieSystemePapyrusRhind(a: number, delta: number): { eq1: number; eq2Gauche: number; eq2Droite: number } {
+/** Les deux membres du système d'origine en (a, Δ) — pour recouper la résolution en test. */
+export function verifieSystemePapyrusRhind(e: ExercicePapyrusRhind): { somme: number; gauche: number; droite: number } {
   return {
-    eq1: sommeArithmetique(a, delta, 5),
-    eq2Gauche: 7 * (2 * a + delta),
-    eq2Droite: 3 * a + 9 * delta,
+    somme: sommeArithmetique(e.a, e.delta, 5),
+    gauche: e.facteur * (e.termes[0] + e.termes[1]),
+    droite: e.termes[2] + e.termes[3] + e.termes[4],
   };
 }

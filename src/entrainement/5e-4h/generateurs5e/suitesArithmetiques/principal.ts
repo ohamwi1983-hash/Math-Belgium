@@ -66,6 +66,29 @@ function tirerIndicesTermesProches(): [number, number, number, number] {
   return [n0, n0 + 1, n0 + 2, n0 + 3];
 }
 
+/** Plus grande valeur absolue d'un nombre demandé ou affiché (terme éloigné, somme) : au-delà, le
+ * calcul n'apprend rien de plus et la saisie devient fastidieuse (« 1 234 »). */
+export const VALEUR_ABSOLUE_MAX = 999;
+
+/** Indice « éloigné » dans [50 ; 200] dont le terme reste lisible (|uₙ| ≤ 999) — retiré tant que
+ * ce n'est pas le cas (toujours possible : |u₁| ≤ 20 et |r| ≤ 9 laissent au moins n = 50). */
+export function tirerIndiceTermeEloigne(u1: number, r: number): number {
+  for (let tentative = 0; tentative < 200; tentative++) {
+    const n = entierAleatoire(50, 200);
+    if (Math.abs(termeArithmetique(u1, r, n)) <= VALEUR_ABSOLUE_MAX) return n;
+  }
+  return 50;
+}
+
+/** Indice de la somme Sₙ dans [5 ; 25], somme bornée à ±999. */
+export function tirerIndiceSn(u1: number, r: number): number {
+  for (let tentative = 0; tentative < 200; tentative++) {
+    const n = entierAleatoire(5, 25);
+    if (Math.abs(sommeArithmetique(u1, r, n)) <= VALEUR_ABSOLUE_MAX) return n;
+  }
+  return 5;
+}
+
 export function construireAvecComboId(combo: ComboSuiteArithmetique): ExercicePrincipalSuiteArithmetique {
   const { u1, r } = tirerU1EtR();
   return {
@@ -73,8 +96,8 @@ export function construireAvecComboId(combo: ComboSuiteArithmetique): ExercicePr
     base: { u1, r },
     donnees: donneesPourCombo(combo, u1, r),
     indicesTermesProches: tirerIndicesTermesProches(),
-    indiceTermeEloigne: entierAleatoire(50, 200),
-    indiceSn: entierAleatoire(5, 25),
+    indiceTermeEloigne: tirerIndiceTermeEloigne(u1, r),
+    indiceSn: tirerIndiceSn(u1, r),
   };
 }
 

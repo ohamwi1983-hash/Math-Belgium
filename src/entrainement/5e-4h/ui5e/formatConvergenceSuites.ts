@@ -156,16 +156,17 @@ export const LIBELLE_PHASE_CONVERGENCE_SUITE: Record<PhaseConvergenceSuite, stri
   classifierQuelconque: "Conclure sur la limite",
 };
 
+/** Consigne d'écran — ne répète JAMAIS la question de la consigne générale (« converge-t-elle ou
+ * diverge-t-elle ? », audit 5c3b point 12) : elle dit seulement ce que l'élève fait sur CET écran. */
 export function consignePhase(_exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): string {
   switch (phase) {
     case "classificationArithmetique":
-      return "Cette suite converge-t-elle ou diverge-t-elle ? Si elle diverge, précise le sens.";
     case "classificationGeometrique":
-      return "Cette suite converge-t-elle ou diverge-t-elle ? Attention aux cas particuliers.";
+      return "Choisis le comportement de la suite.";
     case "diviserQuelconque":
-      return "Divise le numérateur et le dénominateur par la plus haute puissance de n présente au DÉNOMINATEUR.";
+      return "Divise le numérateur et le dénominateur par la plus haute puissance de n présente au DÉNOMINATEUR, puis écris uₙ sous la forme d'une seule fraction.";
     case "classifierQuelconque":
-      return "Conclus : quelle est la limite de cette suite ? (arrondis au centième près si tu dois entrer une valeur)";
+      return "Conclus : quelle est la limite de cette suite ? Si elle converge vers une valeur non nulle, donne cette valeur exacte (fraction) ou arrondie au centième.";
   }
   return "";
 }
@@ -173,14 +174,14 @@ export function consignePhase(_exercice: ExerciceConvergenceSuite, phase: PhaseC
 const OPTIONS_ARITHMETIQUE: OptionClassification[] = [
   { id: "convergeVersU1", label: "Converge vers u₁" },
   { id: "divergePlusInfini", label: "Diverge vers +∞" },
-  { id: "divergeMoinsInfini", label: "Diverge vers -∞" },
+  { id: "divergeMoinsInfini", label: "Diverge vers −∞" },
 ];
 
 const OPTIONS_GEOMETRIQUE: OptionClassification[] = [
   { id: "convergeVersU1", label: "Converge vers u₁" },
   { id: "convergeVersZero", label: "Converge vers 0" },
   { id: "divergePlusInfini", label: "Diverge vers +∞" },
-  { id: "divergeMoinsInfini", label: "Diverge vers -∞" },
+  { id: "divergeMoinsInfini", label: "Diverge vers −∞" },
   { id: "oscilleNeConvergePas", label: "Oscille, ne converge pas" },
   { id: "oscilleDivergeSansLimite", label: "Oscille avec amplitude croissante, diverge" },
 ];
@@ -189,7 +190,7 @@ const OPTIONS_QUELCONQUE: OptionClassification[] = [
   { id: "limiteZero", label: "Converge vers 0" },
   { id: "limiteValeur", label: "Converge vers une autre valeur", requiertValeur: true },
   { id: "divergePlusInfini", label: "Diverge vers +∞" },
-  { id: "divergeMoinsInfini", label: "Diverge vers -∞" },
+  { id: "divergeMoinsInfini", label: "Diverge vers −∞" },
 ];
 
 export function optionsClassification(_exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): OptionClassification[] {
@@ -199,36 +200,103 @@ export function optionsClassification(_exercice: ExerciceConvergenceSuite, phase
   return [];
 }
 
-export function texteAideNiveau1(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): string {
-  switch (phase) {
-    case "classificationArithmetique":
-      return "r=0 \\Rightarrow \\text{converge vers } u_1. \\quad r>0 \\Rightarrow \\text{diverge vers } +\\infty. \\quad r<0 \\Rightarrow \\text{diverge vers } -\\infty.";
-    case "classificationGeometrique":
-      return "q=1 \\Rightarrow \\text{converge vers } u_1. \\quad |q|<1 \\Rightarrow \\text{converge vers } 0. \\quad q>1 \\Rightarrow \\text{diverge vers } \\pm\\infty \\text{ selon le signe de } u_1. \\quad q=-1 \\Rightarrow \\text{oscille sans converger. } \\quad q<-1 \\Rightarrow \\text{oscille avec amplitude croissante.}";
-    case "diviserQuelconque":
-      return "Repère la plus haute puissance de n au DÉNOMINATEUR, puis divise CHAQUE terme (numérateur ET dénominateur) par cette puissance.";
-    case "classifierQuelconque": {
-      const e = exercice as ExerciceConvergenceQuelconque;
-      if (e.degP < e.degQ) return "n \\text{ élevé à une puissance négative tend vers } 0 \\text{ : tous les termes en } \\dfrac{1}{n}, \\dfrac{1}{n^2}\\ldots \\text{ disparaissent.}";
-      if (e.degP === e.degQ) return "\\text{Les termes en } \\dfrac{1}{n} \\text{ disparaissent, il reste le rapport des coefficients dominants.}";
-      return "Le dénominateur a disparu au numérateur mais pas au dénominateur : la suite diverge — détermine le signe.";
-    }
-  }
-  return "";
+/**
+ * Une ligne d'aide : texte en prose, éventuellement suivi d'une formule (LaTeX inline) et d'une fin
+ * de phrase. Rendue à l'écran comme un PARAGRAPHE (le texte passe à la ligne sur téléphone, jamais
+ * de prose dans le mode maths de KaTeX — audit 5c3b point 1 : « Repèrelaplushautepuissance… »
+ * collé et tronqué à 390 px). Seule source des aides : `texteAideNiveau1`/`texteAideNiveau2`
+ * (LaTeX, utilisés par l'export) en sont DÉRIVÉES, jamais réécrites à part.
+ */
+export interface LigneAide {
+  texte?: string;
+  latex?: string;
+  texteApres?: string;
 }
 
-export function texteAideNiveau2(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): string {
-  if (phase === "diviserQuelconque" && exercice.variante === "quelconque") {
-    const e = exercice as ExerciceConvergenceQuelconque;
-    return `${e.degQ === 2 ? "n^2" : "n"}`;
-  }
-  if (phase === "classifierQuelconque" && exercice.variante === "quelconque") {
-    const e = exercice as ExerciceConvergenceQuelconque;
-    if (e.classification === "limiteValeur") {
-      const dominantP = e.degP === 2 ? e.P.a : e.P.b;
-      const dominantQ = e.degQ === 2 ? e.Q.a : e.Q.b;
-      return `\\lim = ${fractionReduiteLatex(dominantP, dominantQ)}`;
+export function lignesAideNiveau1(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): LigneAide[] {
+  switch (phase) {
+    case "classificationArithmetique":
+      return [
+        { latex: "r = 0", texteApres: " : la suite est constante, elle converge vers u₁." },
+        { latex: "r > 0", texteApres: " : la suite diverge vers +∞." },
+        { latex: "r < 0", texteApres: " : la suite diverge vers −∞." },
+      ];
+    case "classificationGeometrique":
+      return [
+        { latex: "q = 1", texteApres: " : la suite est constante, elle converge vers u₁." },
+        { latex: "|q| < 1", texteApres: " : la suite converge vers 0." },
+        { latex: "q > 1", texteApres: " : la suite diverge vers +∞ ou −∞, selon le signe de u₁." },
+        { latex: "q = -1", texteApres: " : la suite oscille entre deux valeurs, elle ne converge pas." },
+        { latex: "q < -1", texteApres: " : la suite oscille avec une amplitude croissante, elle diverge." },
+      ];
+    case "diviserQuelconque":
+      return [{ texte: "Repère la plus haute puissance de n au dénominateur, puis divise chaque terme du numérateur ET du dénominateur par cette puissance." }];
+    case "classifierQuelconque": {
+      const e = exercice as ExerciceConvergenceQuelconque;
+      if (e.degP < e.degQ)
+        return [
+          { texte: "Après la division, chaque terme du numérateur contient ", latex: "\\dfrac{1}{n}", texteApres: " ou une puissance plus élevée : il tend vers 0." },
+          { texte: "Le dénominateur, lui, tend vers son coefficient dominant (un nombre non nul)." },
+        ];
+      if (e.degP === e.degQ)
+        return [
+          { texte: "Après la division, les termes en ", latex: "\\dfrac{1}{n}", texteApres: " tendent vers 0." },
+          { texte: "Il reste le quotient des coefficients dominants du numérateur et du dénominateur." },
+        ];
+      return [
+        { texte: "Après la division, le numérateur contient encore un terme en n, qui tend vers +∞ ou −∞ ; le dénominateur tend vers son coefficient dominant." },
+        { texte: "La suite diverge : son signe est celui du quotient des coefficients dominants." },
+      ];
     }
   }
-  return "";
+  return [];
+}
+
+export function lignesAideNiveau2(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): LigneAide[] {
+  if (phase === "diviserQuelconque" && exercice.variante === "quelconque") {
+    return [{ texte: "Divise par ", latex: exercice.degQ === 2 ? "n^2" : "n", texteApres: " : c'est la plus haute puissance de n du dénominateur." }];
+  }
+  if (phase === "classifierQuelconque" && exercice.variante === "quelconque" && exercice.classification === "limiteValeur") {
+    const dominantP = exercice.degP === 2 ? exercice.P.a : exercice.P.b;
+    const dominantQ = exercice.degQ === 2 ? exercice.Q.a : exercice.Q.b;
+    return [{ texte: "Quotient des coefficients dominants : ", latex: `\\lim = ${fractionReduiteLatex(dominantP, dominantQ)}` }];
+  }
+  return [];
+}
+
+/** Échappe le texte d'une ligne d'aide pour `\text{…}` (export LaTeX). */
+function texteLatex(texte: string): string {
+  // Les symboles mathématiques de la prose sortent du mode texte (KaTeX ne les a pas en police texte).
+  const SYMBOLES: [RegExp, string][] = [
+    [/\+∞/g, "+\\infty"],
+    [/−∞/g, "-\\infty"],
+    [/∞/g, "\\infty"],
+    [/u₁/g, "u_1"],
+    [/uₙ/g, "u_n"],
+    [/−/g, "-"],
+  ];
+  const echappe = texte.replace(/([{}%#&_$])/g, "\\$1");
+  let latex = `\\text{${echappe}}`;
+  for (const [motif, remplacement] of SYMBOLES) latex = latex.replace(motif, () => `}${remplacement}\\text{`);
+  return latex.replace(/\\text\{\}/g, "");
+}
+
+/** Version LaTeX (une ligne par `\\`) — utilisée par l'export ; à l'écran, les lignes sont
+ * rendues en paragraphes (`lignesAideNiveau1`). */
+function lignesVersLatex(lignes: LigneAide[]): string {
+  return lignes
+    .map((l) => [l.texte ? texteLatex(l.texte) : "", l.latex ?? "", l.texteApres ? texteLatex(l.texteApres) : ""].join(" ").trim())
+    .join(" \\\\ ");
+}
+
+export function texteAideNiveau1(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): string {
+  return lignesVersLatex(lignesAideNiveau1(exercice, phase));
+}
+
+/** Niveau 2 en LaTeX pur (export, réponse attendue) : pour la conclusion `limiteValeur`, la seule
+ * formule `\lim = …` (sans la prose), comme avant. */
+export function texteAideNiveau2(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite): string {
+  const lignes = lignesAideNiveau2(exercice, phase);
+  if (phase === "classifierQuelconque") return lignes[0]?.latex ?? "";
+  return lignesVersLatex(lignes);
 }

@@ -8,7 +8,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesSuiteRecurrenteAffine";
 import type { EtatSessionSuiteRecurrenteAffine, PhaseSuiteRecurrenteAffine, ResultatExerciceSuiteRecurrenteAffine } from "./typesSuiteRecurrenteAffine";
-import { diagnostiquerPoserRecurrence, diagnostiquerRegimePermanent, diagnostiquerTermesSuccessifs } from "./verificationSuiteRecurrenteAffine";
+import { diagnostiquerPoserRecurrence, diagnostiquerRegimePermanent, diagnostiquerTermesSuccessifs, verdictExistenceCorrect } from "./verificationSuiteRecurrenteAffine";
 import type { ReponseRegimePermanent } from "./verificationSuiteRecurrenteAffine";
 
 const POINTS_DE_BASE = 100;
@@ -93,8 +93,13 @@ export function soumettreReponsePoserRecurrence(etat: EtatSessionSuiteRecurrente
 export function soumettreReponseRegimePermanent(etat: EtatSessionSuiteRecurrenteAffine, reponse: ReponseRegimePermanent): EtatSessionSuiteRecurrenteAffine {
   if (etat.terminee || etat.phase !== "regimePermanent") throw new Error("soumettreReponseRegimePermanent : la session n'est pas à l'étape 'regimePermanent'");
 
+  // Le verdict « Existe / N'existe pas » est un choix fermé à 2 options : il se gagnerait par
+  // élimination avec plusieurs tentatives. Un verdict faux clôt donc l'écran immédiatement (réponse
+  // révélée) ; les tentatives restantes ne servent qu'au calcul de L quand le verdict est juste.
+  const verdictFaux = !verdictExistenceCorrect(reponse, etat.exerciceCourant);
   const etapeCourante = soumettreEtapeTentatives<ReponseRegimePermanent>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    tentativesMax: verdictFaux ? etat.etapeCourante.tentativesUtilisees + 1 : etat.reglages.tentativesMax,
     verifier: (r) => diagnostiquerRegimePermanent(r, etat.exerciceCourant) === "correct",
     revelerReponse: () => {},
   });

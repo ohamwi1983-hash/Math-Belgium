@@ -38,6 +38,7 @@ import {
   diagnostiquerTrouverU1,
 } from "./verificationSuiteGeometrique";
 import type { ReponseSommeInfinie } from "./verificationSuiteGeometrique";
+import { estSolutionDirecte } from "./saisieNombreSuites";
 
 const POINTS_DE_BASE = 100;
 
@@ -72,7 +73,17 @@ function reglagesEtape(etat: EtatSessionSuiteGeometrique): ReglagesEtape {
  * résolution/déduction qui suivent) et phases sans aide niveau 2 réelle (plafonnées à 1, le bouton
  * "Aide supplémentaire" resterait sinon cliquable/pénalisant pour un niveau 2 vide). */
 const PHASES_SANS_AIDE = new Set<PhaseSuiteGeometrique>(["resoudreXAlgebrique", "calculerTermesAlgebrique", "resoudreRangN"]);
-const PHASES_SANS_AIDE_NIVEAU2 = new Set<PhaseSuiteGeometrique>(["trouverQ", "poserEquationAlgebrique", "calculerSn", "poserEquationRangN"]);
+// Formule générale : l'ancienne aide 2 (formule substituée) ÉTAIT la réponse attendue — l'écran
+// garde la seule aide 1 (formule du cours), comme 5gen14.
+const PHASES_SANS_AIDE_NIVEAU2 = new Set<PhaseSuiteGeometrique>([
+  "trouverQ",
+  "poserEquationAlgebrique",
+  "calculerSn",
+  "poserEquationRangN",
+  "formuleGenerale",
+  "formuleGeneraleB1",
+  "formuleGeneraleB2",
+]);
 
 export function niveauAideMaxSuiteGeometrique(phase: PhaseSuiteGeometrique): number {
   if (PHASES_SANS_AIDE.has(phase)) return 0;
@@ -95,11 +106,20 @@ function cloturerExerciceOuSuivant(etat: EtatSessionSuiteGeometrique, resultat: 
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionSuiteGeometrique, phaseAttendue: PhaseSuiteGeometrique, reponse: T, verifier: (r: T) => boolean): EtatSessionSuiteGeometrique {
+/** `derniereTentative` : la réponse clôt l'écran quel que soit le nombre d'essais restants (verdict
+ * fermé faux, voir `soumettreSommeInfinie`). */
+function soumettreEcran<T>(
+  etat: EtatSessionSuiteGeometrique,
+  phaseAttendue: PhaseSuiteGeometrique,
+  reponse: T,
+  verifier: (r: T) => boolean,
+  derniereTentative = false,
+): EtatSessionSuiteGeometrique {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(derniereTentative ? { tentativesMax: etat.etapeCourante.tentativesUtilisees + 1 } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -235,10 +255,14 @@ export function soumettreReponseSommeSnB2(etat: EtatSessionSuiteGeometrique, tex
   return soumettreSommeSn(etat, "sommeSnB2", texte);
 }
 
+/** Le verdict « elle existe / elle n'existe pas » est un choix binaire : un verdict FAUX clôt l'écran
+ * (une seule tentative, sinon il se gagne par élimination). Verdict juste mais valeur fausse : les
+ * essais habituels restent, c'est un calcul. */
 function soumettreSommeInfinie(etat: EtatSessionSuiteGeometrique, phase: "sommeInfinie" | "sommeInfinieB1" | "sommeInfinieB2", reponse: ReponseSommeInfinie): EtatSessionSuiteGeometrique {
   const exo = commePrincipal(etat.exerciceCourant);
   const { u1, q } = brancheActive(exo, phase);
-  return soumettreEcran(etat, phase, reponse, (r) => diagnostiquerSommeInfinie(u1, q, r) === "correct");
+  const verdictFaux = reponse.existe !== (Math.abs(q.num) < q.den);
+  return soumettreEcran(etat, phase, reponse, (r) => diagnostiquerSommeInfinie(u1, q, r) === "correct", verdictFaux);
 }
 export function soumettreReponseSommeInfinie(etat: EtatSessionSuiteGeometrique, reponse: ReponseSommeInfinie): EtatSessionSuiteGeometrique {
   return soumettreSommeInfinie(etat, "sommeInfinie", reponse);
@@ -287,7 +311,7 @@ function penteConstanteEquationAlgebrique(exo: ExerciceAlgebriqueTermeGeneral | 
 export function soumettreReponsePoserEquationAlgebrique(etat: EtatSessionSuiteGeometrique, reponse: ReponseEquation): EtatSessionSuiteGeometrique {
   const exo = commeAlgebrique(etat.exerciceCourant);
   const { pente, constante } = penteConstanteEquationAlgebrique(exo);
-  return soumettreEcran(etat, "poserEquationAlgebrique", reponse, (r) => diagnostiquerEquationComplete(r.texte, pente, constante) === "correct");
+  return soumettreEcran(etat, "poserEquationAlgebrique", reponse, (r) => !estSolutionDirecte(r.texte, "x") && diagnostiquerEquationComplete(r.texte, pente, constante) === "correct");
 }
 
 export function soumettreReponseResoudreXAlgebrique(etat: EtatSessionSuiteGeometrique, texte: string): EtatSessionSuiteGeometrique {
@@ -330,7 +354,7 @@ export function soumettreReponseCalculerSn(etat: EtatSessionSuiteGeometrique, te
 
 export function soumettreReponsePoserEquationRangN(etat: EtatSessionSuiteGeometrique, reponse: ReponseEquation): EtatSessionSuiteGeometrique {
   const exo = commeRangN(etat.exerciceCourant);
-  return soumettreEcran(etat, "poserEquationRangN", reponse, (r) => diagnostiquerEquationCompleteEnN(r.texte, exo.u1, fractionQVersNombre(exo.q), exo.k) === "correct");
+  return soumettreEcran(etat, "poserEquationRangN", reponse, (r) => !estSolutionDirecte(r.texte, "n") && diagnostiquerEquationCompleteEnN(r.texte, exo.u1, fractionQVersNombre(exo.q), exo.k) === "correct");
 }
 
 export function soumettreReponseResoudreRangN(etat: EtatSessionSuiteGeometrique, texte: string): EtatSessionSuiteGeometrique {

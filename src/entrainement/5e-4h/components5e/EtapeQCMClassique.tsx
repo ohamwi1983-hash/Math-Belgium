@@ -3,6 +3,8 @@ import type { ExerciceSuiteClassique } from "../core5e/suitesClassiques.types";
 import type { PhaseSuiteClassique } from "../moteur5e/typesSuiteClassique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, optionsQCM, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { TexteMathsClassique } from "./TexteMathsClassique";
+import { FigureSuiteClassique } from "./FigureSuiteClassique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -23,7 +25,8 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran de choix multiple (QCM) — réutilisé par 6 des 26 phases de 5gen17. */
+/** Écran de choix multiple (QCM, une seule tentative — voir `PHASES_QCM_SUITE_CLASSIQUE`) —
+ * réutilisé par 5 des 26 phases de 5gen17. */
 export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const options = optionsQCM(exercice, phase);
   const [choixId, setChoixId] = useState<string | null>(null);
@@ -40,25 +43,44 @@ export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentat
       <EnTeteExercice
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
-          <div className="equation-box equation-box-donnees">
-            {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
+          <>
+            <div className="equation-box equation-box-donnees">
+              {formatTermesDonneesLatex(exercice, phase).map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+            <FigureSuiteClassique exercice={exercice} phase={phase} />
+          </>
         }
       />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
-      <div className="options-liste-longue">
+      {/* Une colonne : certains libellés sont des phrases (le texte passe à la ligne au lieu de
+       * déborder à 390 px). */}
+      <div className="options-grid" style={{ gridTemplateColumns: "1fr" }}>
         {options.map((o) => (
-          <button key={o.id} type="button" className={`btn ${choixId === o.id ? "toggle-active" : ""}`} onClick={() => setChoixId(o.id)}>
-            <Katex expression={o.label} />
+          <button
+            key={o.id}
+            type="button"
+            className={`btn ${choixId === o.id ? "toggle-active" : ""}`}
+            style={{ justifyContent: "flex-start", textAlign: "left" }}
+            onClick={() => setChoixId(o.id)}
+          >
+            <span>
+              <TexteMathsClassique texte={o.label} />
+            </span>
           </button>
         ))}
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <p>
+            <TexteMathsClassique texte={texteAideNiveau1(exercice, phase)} />
+          </p>
+          {niveauAide >= 2 && aide2.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <Katex expression={aide2} block />
+            </div>
+          )}
         </div>
       )}
       {!validation && (

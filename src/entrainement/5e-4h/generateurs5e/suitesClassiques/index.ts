@@ -36,8 +36,8 @@ export function construireAvecScenarioId(scenarioId: ScenarioSuiteClassique): Ex
   }
 }
 
-/** Instance FIXE par scénario (aucun paramètre aléatoire) — seul le SCÉNARIO tiré varie, uniformément
- * parmi les 7 (même principe que les 3 scénarios de 5gen5). */
+/** Scénario tiré uniformément parmi les 7, puis ses nombres tirés par son propre constructeur
+ * (chaque problème garde sa forme historique, ses données varient). */
 export function genererExerciceSuiteClassique(): ExerciceSuiteClassique {
   const scenarios = CATALOGUE_SCENARIOS.map((s) => s.id);
   const id = scenarios[Math.floor(Math.random() * scenarios.length)];

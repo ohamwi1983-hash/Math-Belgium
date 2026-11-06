@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ExerciceSuitesCombinees } from "../core5e/suitesClassiques.types";
-import { LABELS_SUITE_ARITHMETIQUE_COMBINEE, LABELS_SUITE_GEOMETRIQUE_COMBINEE, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1 } from "../ui5e/formatSuiteClassique";
+import { labelsSuitesFinalesCombinees, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { TexteMathsClassique } from "./TexteMathsClassique";
+import { FigureSuiteClassique } from "./FigureSuiteClassique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -27,10 +29,11 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran bespoke à 2 GROUPES de 3 champs (suite arithmétique 6,y,z puis suite géométrique y,x,z) —
+/** Écran bespoke à 2 GROUPES de 3 champs (suite arithmétique m, y, z — m donné — puis suite géométrique y, x, z) —
  * seul écran de 5gen17 qui ne rentre pas dans le patron "liste plate" générique. */
 export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
-  const [arithmetique, setArithmetique] = useState<string[]>(["6", "", ""]);
+  const [arithmetique, setArithmetique] = useState<string[]>(() => [String(exercice.arithmetique[0]).replace("-", "−"), "", ""]);
+  const LABELS = labelsSuitesFinalesCombinees();
   const [geometrique, setGeometrique] = useState<string[]>(["", "", ""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -54,17 +57,20 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
       <EnTeteExercice
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
-          <div className="equation-box equation-box-donnees">
-            {formatTermesDonneesLatex(exercice, "suitesFinalesCombinees").map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
+          <>
+            <div className="equation-box equation-box-donnees">
+              {formatTermesDonneesLatex(exercice, "suitesFinalesCombinees").map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+            <FigureSuiteClassique exercice={exercice} phase={"suitesFinalesCombinees"} />
+          </>
         }
       />
       <p className="prompt-text">{consignePhase(exercice, "suitesFinalesCombinees")}</p>
 
       <p>Suite arithmétique :</p>
-      {LABELS_SUITE_ARITHMETIQUE_COMBINEE.map((label, i) => (
+      {LABELS.arithmetique.map((label, i) => (
         <div key={i} className="field field-inline">
           <label className="field-label field-label-minuscule">
             <Katex expression={label} />
@@ -80,7 +86,7 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
       ))}
 
       <p>Suite géométrique :</p>
-      {LABELS_SUITE_GEOMETRIQUE_COMBINEE.map((label, i) => (
+      {LABELS.geometrique.map((label, i) => (
         <div key={i} className="field field-inline">
           <label className="field-label field-label-minuscule">
             <Katex expression={label} />
@@ -96,7 +102,9 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "suitesFinalesCombinees")} block />
+          <p>
+            <TexteMathsClassique texte={texteAideNiveau1(exercice, "suitesFinalesCombinees")} />
+          </p>
         </div>
       )}
       {!validation && (

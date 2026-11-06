@@ -25,6 +25,7 @@ import type {
   TermeLineaire,
 } from "../../core5e/suitesArithmetiques.types";
 import { tirerU1EtR } from "./parametres";
+import { VALEUR_ABSOLUE_MAX } from "./principal";
 
 function entierAleatoire(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
@@ -179,7 +180,7 @@ function genererSousCasD(): ExerciceAlgebriqueSommeSnD {
   return { famille: "algebriqueSommeSn", sousCas: "D", u1, r, n, sn, k, xReel };
 }
 
-export function construireSommeSnAvecSousCas(sousCas: SousCasSommeSn): ExerciceAlgebriqueSommeSn {
+function genererSousCasBrut(sousCas: SousCasSommeSn): ExerciceAlgebriqueSommeSn {
   switch (sousCas) {
     case "A":
       return genererSousCasA();
@@ -190,6 +191,19 @@ export function construireSommeSnAvecSousCas(sousCas: SousCasSommeSn): ExerciceA
     case "D":
       return genererSousCasD();
   }
+}
+
+/** La valeur de Sₙ (k) est une DONNÉE (sous-cas A, B, C) ou la réponse de l'écran « Calcule Sₙ »
+ * (sous-cas D) : toujours un entier de valeur absolue ≤ 999 — un x fractionnaire donnait sinon
+ * « S₉ = 105/2 » dans environ 20 % des tirages, et des sommes au-delà de 1 000. Retirage jusqu'à
+ * satisfaire la contrainte (atteinte en quelques essais). */
+export function construireSommeSnAvecSousCas(sousCas: SousCasSommeSn): ExerciceAlgebriqueSommeSn {
+  let exercice = genererSousCasBrut(sousCas);
+  for (let tentative = 0; tentative < 500; tentative++) {
+    if (Number.isInteger(exercice.k) && Math.abs(exercice.k) <= VALEUR_ABSOLUE_MAX) return exercice;
+    exercice = genererSousCasBrut(sousCas);
+  }
+  return exercice;
 }
 
 /** Tirage uniforme sur les 4 sous-cas — "fréquence comparable", explicitement demandé (contrairement
@@ -219,7 +233,10 @@ function tirerNCible(): number {
 
 export function genererExerciceAlgebriqueRangN(): ExerciceAlgebriqueRangN {
   const { u1, r } = tirerU1EtR();
-  const n = tirerNCible();
+  // Valeur atteinte bornée à ±999 (même borne que le terme éloigné de « principal »).
+  let n = tirerNCible();
+  for (let tentative = 0; tentative < 200 && Math.abs(u1 + (n - 1) * r) > VALEUR_ABSOLUE_MAX; tentative++) n = tirerNCible();
+  if (Math.abs(u1 + (n - 1) * r) > VALEUR_ABSOLUE_MAX) n = 50;
   const k = u1 + (n - 1) * r;
   return { famille: "algebriqueRangN", u1, r, n, k };
 }

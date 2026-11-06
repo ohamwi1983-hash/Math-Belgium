@@ -2,9 +2,12 @@
  * Couche B (5e) — types pour 5gen17 ("Problèmes classiques sur les suites"). 7 scénarios
  * STRUCTURELLEMENT DISJOINTS (union discriminée par `scenario`, même principe que 5gen5/5gen12) —
  * 26 phases au total (3+3+3+3+5+4+5), chaque scénario traversant TOUJOURS sa séquence complète
- * (aucune instance n'est aléatoire, donc aucun saut conditionnel n'est nécessaire ici, contrairement
- * à 5gen5/5gen12/5gen13). `ORDRE_PHASES` (table `Record<Scénario,Phase[]>`) pilote
- * `phaseInitiale`/`phaseApres` par simple indexation — même patron que 5gen12.
+ * (seuls les NOMBRES varient d'un tirage à l'autre, jamais la suite des écrans). `ORDRE_PHASES`
+ * (table `Record<Scénario,Phase[]>`) pilote `phaseInitiale`/`phaseApres` par simple indexation.
+ *
+ * Les noms de phases sont historiques (« distance11 » vaut désormais pour la n-ième seconde,
+ * « u64 » pour la case demandée, « troisMethodes » pour les deux vitesses moyennes, les 4 phases du
+ * zigzag pour le modèle reconstruit) : ils servent de clés internes, jamais affichés.
  */
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ExerciceSuiteClassique, ScenarioSuiteClassique } from "../core5e/suitesClassiques.types";
@@ -33,7 +36,7 @@ export type PhaseSuiteClassique =
   | "calculV5"
   | "resoudrePhi"
   | "proprieteInverse"
-  // trianglesZigzag
+  // trianglesZigzag (ℓ₁…ℓ₄, longueur limite, aires des Tₖ, aire totale des petits triangles Uₖ)
   | "hauteursZigzag"
   | "airesZigzag"
   | "longueurZigzag"
@@ -51,7 +54,7 @@ export const ORDRE_PHASES: Record<ScenarioSuiteClassique, PhaseSuiteClassique[]>
   suitesCombinees: ["poserEquationCombinees", "resoudreRCombinees", "suitesFinalesCombinees"],
   vitesse: ["distance11", "sommeTotale11", "troisMethodes"],
   fibonacci: ["dixTermes", "formuleRecurrence", "calculV5", "resoudrePhi", "proprieteInverse"],
-  trianglesZigzag: ["hauteursZigzag", "airesZigzag", "longueurZigzag", "airesZigzagAC"],
+  trianglesZigzag: ["hauteursZigzag", "longueurZigzag", "airesZigzag", "airesZigzagAC"],
   carresEmboites: ["sommePartielleA", "limitePuissanceA", "sommeInfinieA", "airesB", "sommeInfinieB"],
 };
 

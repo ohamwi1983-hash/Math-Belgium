@@ -14,9 +14,9 @@
  * Branche divergente — `b` est tiré NÉGATIF (bMin/bMax tous deux négatifs) pour représenter le
  * retrait/perte constant demandé par la spec, plutôt que l'ancien "toujours ajouté" (qui aurait
  * fallacieusement décrit un retrait comme un ajout). Avec `a>1` et `b<0`, le point fixe
- * `L*=b/(a-1)` est TOUJOURS négatif — tout `u1≥0` (toujours le cas, bornes positives) le dépasse
- * donc automatiquement, garantissant par construction une suite manifestement croissante (jamais
- * besoin d'un retirage/marge supplémentaire pour éviter une suite qui plongerait en négatif).
+ * `L*=b/(1-a)=|b|/(a-1)` est POSITIF (l'ancien commentaire le disait à tort toujours négatif) : si
+ * `u1<L*`, la suite décroît puis devient négative (bactéries, abonnés… négatifs, audit 5c3c). Le
+ * tirage (`index.ts`, `tirerParametres`) impose donc `u1 ≥ 1,2·L*` : suite croissante et positive.
  */
 import type { RegimeSuiteRecurrenteAffine } from "../../core5e/suiteRecurrenteAffine.types";
 
@@ -465,7 +465,7 @@ export const CONTEXTES_CONVERGENT: ContexteSuiteRecurrenteAffine[] = [
 // ============================================================================
 // Branche spéciale (divergent, |a|≥1) — 30 contextes, TOUS distincts des 30 ci-dessus. `b` négatif
 // (retrait/perte constant), voir l'en-tête du fichier pour la garantie de croissance sans passage en
-// négatif.
+// négatif (contrainte u1 ≥ 1,2·L* imposée au tirage, `index.ts`).
 // ============================================================================
 
 export const CONTEXTES_DIVERGENT: ContexteSuiteRecurrenteAffine[] = [

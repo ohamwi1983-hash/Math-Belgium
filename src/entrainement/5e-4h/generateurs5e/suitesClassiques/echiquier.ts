@@ -1,46 +1,42 @@
 import type { ExerciceEchiquier } from "../../core5e/suitesClassiques.types";
+import { choisirParmi, entierAleatoire } from "./aleatoire";
 
-const POIDS_GRAIN_GRAMMES = 0.05;
-const PRODUCTION_MONDIALE_TONNES = 713_000_000;
+/** Production mondiale annuelle de blé, donnée dans l'énoncé (ordre de grandeur actuel). */
+export const PRODUCTION_MONDIALE_TONNES = 800_000_000;
+const POIDS_GRAIN_GRAMMES = [0.04, 0.05, 0.06] as const;
 
-/** Scénario 1 — l'échiquier et les grains de blé. Instance FIXE (u1=1,q=2) — toutes les valeurs
- * affichées sont DÉRIVÉES par formule (jamais recopiées de l'énoncé) pour rester cross-vérifiables.
+/** Scénario 1 — la légende de l'échiquier : 1 grain sur la 1re case, on double à chaque case
+ * (u₁ = 1, q = 2, 64 cases — la légende reste intacte). Varient : la case dont on demande le nombre
+ * de grains (20 à 64) et le poids d'un grain (0,04 / 0,05 / 0,06 g).
  *
- * `u64`/`sommeTotale` sont calculés en `BigInt` (`2n**63n`/`2n**64n-1n`) plutôt qu'en réutilisant
- * `termeGeometrique`/`sommeGeometriqueFinie` (`suitesGeometriques/parametres.ts`, réutilisées telles
- * quelles ailleurs sur ce générateur, mais qui passent par `Math.pow` en `number` IEEE-754) : ces 2
- * valeurs dépassent `Number.MAX_SAFE_INTEGER` (2⁵³−1) — un flottant les représenterait avec les
- * derniers chiffres FAUX (`9223372036854776000` au lieu de `9223372036854775808`), alors que la
- * formule est purement entière ici (u1=1, q=2 entiers), donc exactement représentable en `BigInt`.
- * `poidsTotalTonnes` est dérivé à partir du `BigInt` exact, arrondi à 2 décimales SEULEMENT à la toute
- * fin (`Math.round`/division par 100 après conversion en `Number` — cette conversion finale est sans
- * perte, la valeur en tonnes ne comportant plus que ~12 chiffres significatifs, bien en-deçà de la
- * précision d'un double) — jamais affiché via `formatValeurLatex`/sa recherche de fraction
- * (`ui5e/formatSuiteClassique.ts`), qui produirait une fraction pédagogique absurde pour une quantité
- * physique en tonnes qui n'a jamais vocation à être une fraction. */
+ * `uCase`/`sommeTotale` sont calculés en `BigInt` : 2⁶³ et 2⁶⁴ − 1 dépassent
+ * `Number.MAX_SAFE_INTEGER`, un flottant en fausserait les derniers chiffres. `poidsTotalTonnes`
+ * part du `BigInt` exact (grains × poids en centièmes de gramme, puis tonnes) et n'est arrondi
+ * qu'à la toute fin. */
 export function construireEchiquier(): ExerciceEchiquier {
   const u1 = 1;
   const q = 2;
-  const u64 = 2n ** 63n; // = u1 × q^(64-1), u1=1 et q=2 entiers
-  const sommeTotale = 2n ** 64n - 1n; // = u1 × (q^64-1)/(q-1), u1=1 et q=2 entiers
+  const caseDemandee = entierAleatoire(20, 64);
+  const uCase = 2n ** BigInt(caseDemandee - 1); // u₁ × q^(n−1), u₁ = 1, q = 2
+  const sommeTotale = 2n ** 64n - 1n; // u₁ × (q⁶⁴ − 1)/(q − 1)
 
-  // poidsTotalTonnes = sommeTotale(grains) × 0,05(g/grain) / 1 000 000(g/tonne)
-  //                  = sommeTotale / 20 000 000, calculé en BigInt en centièmes de tonne (÷200 000)
-  //                  pour rester exact jusqu'à l'arrondi final à 2 décimales.
-  const CENTIEMES_DE_TONNE_PAR_GRAIN_DENOMINATEUR = 200_000n;
-  const quotientCentiemes = sommeTotale / CENTIEMES_DE_TONNE_PAR_GRAIN_DENOMINATEUR;
-  const resteCentiemes = sommeTotale % CENTIEMES_DE_TONNE_PAR_GRAIN_DENOMINATEUR;
-  const centiemesDeTonneArrondis = resteCentiemes * 2n >= CENTIEMES_DE_TONNE_PAR_GRAIN_DENOMINATEUR ? quotientCentiemes + 1n : quotientCentiemes;
-  const poidsTotalTonnes = Number(centiemesDeTonneArrondis) / 100;
+  const poidsGrainGrammes = choisirParmi(POIDS_GRAIN_GRAMMES);
+  // grammes = grains × poids ; poids en centièmes de gramme entier (4, 5 ou 6) pour rester exact.
+  const centiemesDeGramme = BigInt(Math.round(poidsGrainGrammes * 100));
+  const centiemesTotaux = sommeTotale * centiemesDeGramme; // en centièmes de gramme
+  // 1 t = 10⁶ g = 10⁸ centièmes de gramme ; on garde 2 décimales de tonne (÷ 10⁶).
+  const centiemesDeTonne = (centiemesTotaux + 500_000n) / 1_000_000n;
+  const poidsTotalTonnes = Number(centiemesDeTonne) / 100;
 
   const facteurComparaison = poidsTotalTonnes / PRODUCTION_MONDIALE_TONNES;
   return {
     scenario: "echiquier",
     u1,
     q,
-    u64,
+    caseDemandee,
+    uCase,
     sommeTotale,
-    poidsGrainGrammes: POIDS_GRAIN_GRAMMES,
+    poidsGrainGrammes,
     poidsTotalTonnes,
     productionMondialeTonnes: PRODUCTION_MONDIALE_TONNES,
     facteurComparaison,

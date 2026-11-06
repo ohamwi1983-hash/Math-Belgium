@@ -25,7 +25,8 @@
  */
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerNombre, diagnostiquerTermes } from "./verificationSuiteArithmetique";
+// Enveloppes qui acceptent l'espace des milliers (« 1 234 »), propres à 5gen14/5gen15.
+import { diagnostiquerNombre, diagnostiquerTermes } from "./saisieNombreSuites";
 import { diagnostiquerEnsembleNumerique } from "./verificationEquationTrig";
 import type { ExercicePrincipalSuiteGeometrique, FractionQ } from "../core5e/suitesGeometriques.types";
 import { fractionQVersNombre, sommeGeometriqueFinieQ } from "./fractionQ";

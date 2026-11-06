@@ -20,10 +20,10 @@ export function tirerContexte(famille: FamilleComparaisonSuites): ContexteCompar
   return tirerElement(eligibles);
 }
 
-/** Résout la temporalité de l'exercice à partir du contexte tiré — `periode==="an"` : ancrage
- * calendaire (année de départ + décalage), `periode==="mois"` : simple décompte de mois écoulés,
- * sans année. Partagé par les 3 branches (avant cette évolution, seule `stockDemande` utilisait le
- * mode "mois", câblé en dur par branche plutôt que par contexte). */
+/** Résout la temporalité de l'exercice à partir du contexte tiré — `periode==="an"` : le rang n = 1
+ * est l'année de départ, la traduction est `année = départ + (n − 1)` ; `periode==="mois"` : le rang n
+ * est le n-ième mois (« au cours du combientième mois »), la traduction est le numéro du mois, n
+ * lui-même (énoncé formulé en conséquence, `ui5e/formatComparaisonSuites.ts`). */
 export function resoudrePeriode(contexte: ContexteComparaisonSuites, nSeuil: number): { anneeDepart: number | null; traductionValeur: number; uniteContexte: string } {
   if (contexte.periode === "an") {
     const anneeDepart = entierAleatoire(2015, 2023);

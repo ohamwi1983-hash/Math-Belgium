@@ -29,8 +29,9 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "conclusion" — 2 champs : l'indice n trouvé, ET sa traduction dans l'unité du contexte
- * (année/mois) — les 2 doivent être corrects (piège explicite de la spec : oublier de traduire). */
+/** Écran "conclusion" — 2 champs : le rang n trouvé par balayage du tableau, ET sa traduction dans
+ * l'unité du contexte (année / numéro du mois) — les 2 doivent être corrects (piège du cours : oublier
+ * de traduire). */
 export function EtapeConclusionComparaisonSuites({
   exercice,
   tentativesUtilisees,
@@ -73,16 +74,17 @@ export function EtapeConclusionComparaisonSuites({
         <label className="field-label field-label-minuscule">
           <Katex expression="n=" />
         </label>
-        <input type="text" className={`text-input${nSeuilErronee ? " is-erronee" : ""}`} value={nSeuil} onChange={(e) => setNSeuil(e.target.value)} />
+        <input type="text" inputMode="numeric" style={{ minHeight: 44 }} className={`text-input${nSeuilErronee ? " is-erronee" : ""}`} value={nSeuil} onChange={(e) => setNSeuil(e.target.value)} />
       </div>
       <div className="field field-inline">
         <label className="field-label">{labelTraduction(exercice)}</label>
-        <input type="text" className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
+        <input type="text" inputMode="numeric" style={{ minHeight: 44 }} className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "conclusion")}</p>
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          {niveauAide >= 2 && aide2.texte.length > 0 && <p>{aide2.texte}</p>}
+          {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}
       {!validation && (

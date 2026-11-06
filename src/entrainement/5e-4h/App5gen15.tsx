@@ -66,7 +66,8 @@ import { EtapeSommeInfinie } from "./components5e/EtapeSommeInfinie";
 import { EtapeTermesMultiplesSuiteGeometrique } from "./components5e/EtapeTermesMultiplesSuiteGeometrique";
 import { EtapeTrouverQ } from "./components5e/EtapeTrouverQ";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { formatTermesReponseAttendueSuiteGeometrique } from "./ui5e/formatSuiteGeometrique";
+import { LIBELLE_PHASE_SUITE_GEOMETRIQUE, formatTermesReponseAttendueSuiteGeometrique } from "./ui5e/formatSuiteGeometrique";
+import { estSolutionDirecte } from "./moteur5e/saisieNombreSuites";
 import { calculerRecapitulatifSuiteGeometrique } from "./ui5e/recapitulatifSuiteGeometrique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -205,6 +206,7 @@ function diagnostiquerPoserEquationGeo(
   phase: "poserEquationAlgebrique" | "poserEquationRangN",
   reponse: ReponseEquation,
 ): StatutVerification {
+  if (estSolutionDirecte(reponse.texte, phase === "poserEquationRangN" ? "n" : "x")) return "not_equivalent";
   if (phase === "poserEquationRangN") {
     if (exercice.famille !== "algebriqueRangN") return "parse_error";
     return diagnostiquerEquationCompleteEnN(reponse.texte, exercice.u1, fractionQVersNombre(exercice.q), exercice.k);
@@ -271,6 +273,18 @@ function calculerSegmentsProgression(
 /** Formateurs locaux "votreReponse" — un format court dérivé directement de la réponse typée. */
 function formatReponseSommeInfinie(reponse: ReponseSommeInfinie): string {
   return reponse.existe ? reponse.valeur : "N'existe pas";
+}
+
+/** Réponse attendue d'un écran (bloc de validation et fiche des puces) — même source que le
+ * récapitulatif final. */
+function reponseAttendueEcran(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique) {
+  return (
+    <span className="equation-box-termes">
+      {formatTermesReponseAttendueSuiteGeometrique(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
 }
 
 interface TransitionEnAttente {
@@ -368,6 +382,10 @@ export function App5gen15() {
    * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
    * ce chantier). */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteGeometrique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la clé des
+   * écrans, pour que les champs repartent vides même si le nouvel exercice commence par le même
+   * écran que le précédent. */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
@@ -379,19 +397,20 @@ export function App5gen15() {
       const revele = nouvelEtat.derniereEtapeRevelee;
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
       if (votreReponse !== undefined) {
-        const recap = calculerRecapitulatifSuiteGeometrique(nouvelEtat);
-        const derniere = recap[recap.length - 1];
-        if (derniere) {
-          setHistorique((h) => [
-            ...h,
-            {
-              titre: derniere.libelle,
-              votreReponse,
-              correcte: !derniere.revele,
-              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-            },
-          ]);
-        }
+        // Fiche de la phase qui VIENT de se clore — jamais la dernière ligne du récapitulatif (qui ne
+        // contient que les valeurs « confirmées » : toutes les fiches après la formule s'intitulaient
+        // sinon « Formule générale uₙ »).
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_SUITE_GEOMETRIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttendueEcran(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -405,6 +424,7 @@ export function App5gen15() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
+      setNumeroSession((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -415,25 +435,20 @@ export function App5gen15() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <span className="equation-box-termes">
-            {formatTermesReponseAttendueSuiteGeometrique(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </span>
-        ),
+        reponseAttendue: reponseAttendueEcran(exercice, phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -444,6 +459,7 @@ export function App5gen15() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites géométriques, formule générale et termes</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />

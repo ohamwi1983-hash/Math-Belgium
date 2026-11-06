@@ -5,6 +5,7 @@
  */
 import type { ExerciceCoherenceSuiteArithmetique } from "../../core5e/suitesArithmetiques.types";
 import { termeArithmetique, tirerU1EtR } from "./parametres";
+import { tirerIndiceSn, tirerIndiceTermeEloigne } from "./principal";
 
 const PROBABILITE_COHERENT = 0.5;
 
@@ -34,8 +35,8 @@ export function genererExerciceCoherence(): ExerciceCoherenceSuiteArithmetique {
           const n0 = entierAleatoire(2, 10);
           return [n0, n0 + 1, n0 + 2, n0 + 3] as [number, number, number, number];
         })(),
-        indiceTermeEloigne: entierAleatoire(50, 200),
-        indiceSn: entierAleatoire(5, 25),
+        indiceTermeEloigne: tirerIndiceTermeEloigne(u1, r),
+        indiceSn: tirerIndiceSn(u1, r),
       }
     : {};
 

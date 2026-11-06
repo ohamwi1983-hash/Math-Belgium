@@ -1,8 +1,8 @@
 import type { ExerciceEpargneCroissance } from "../../core5e/comparaisonSuites.types";
-import { basculeExactementA, trouverSeuil } from "./simulation";
+import { construireFenetre, trouverSeuil } from "./simulation";
 import { entierAleatoire, resoudrePeriode, tirerContexte } from "./utils";
 
-const TENTATIVES_MAX = 300;
+const TENTATIVES_MAX = 2000;
 const N_MAX_SIMULATION = 40;
 
 /** Côté A (géométrique, taux élevé, valeur initiale plus faible) vs côté B (géométrique, taux plus
@@ -19,15 +19,15 @@ export function construireEpargneCroissance(): ExerciceEpargneCroissance {
     const uDeN = (n: number) => u1 * Math.pow(1 + r1Pct / 100, n - 1);
     const vDeN = (n: number) => v1 * Math.pow(1 + r2Pct / 100, n - 1);
 
-    const nSeuil = trouverSeuil(uDeN, vDeN, "uGeV", N_MAX_SIMULATION);
-    if (nSeuil === null || nSeuil < 3 || nSeuil > 25) continue;
-    if (!basculeExactementA(uDeN, vDeN, "uGeV", nSeuil)) continue;
-
-    const nTable: [number, number, number] = [nSeuil - 1, nSeuil, nSeuil + 1];
+    const nSeuil = trouverSeuil(uDeN, vDeN, "aDepasseB", N_MAX_SIMULATION);
+    if (nSeuil === null || nSeuil < 3 || nSeuil > 20) continue;
+    const fenetre = construireFenetre(uDeN, vDeN, "aDepasseB", nSeuil, Math.max(u1, v1));
+    if (fenetre === null) continue;
+    const { nTable, uTable, vTable } = fenetre;
     const { anneeDepart, traductionValeur, uniteContexte } = resoudrePeriode(contexte, nSeuil);
     return {
       famille: "epargneCroissance",
-      condition: "uGeV",
+      condition: "aDepasseB",
       contexte,
       u1,
       r1Pct,
@@ -36,8 +36,8 @@ export function construireEpargneCroissance(): ExerciceEpargneCroissance {
       anneeDepart,
       nSeuil,
       nTable,
-      uTable: [uDeN(nTable[0]), uDeN(nTable[1]), uDeN(nTable[2])],
-      vTable: [vDeN(nTable[0]), vDeN(nTable[1]), vDeN(nTable[2])],
+      uTable,
+      vTable,
       traductionValeur,
       uniteContexte,
     };

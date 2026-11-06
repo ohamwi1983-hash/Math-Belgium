@@ -22,11 +22,10 @@ import {
   diagnostiquerEquationComplete,
   diagnostiquerEquationCompleteEnN,
   diagnostiquerFormuleGenerale,
-  diagnostiquerNombre,
   diagnostiquerRangEntierPositif,
-  diagnostiquerTermes,
   verifierCoherence,
 } from "./verificationSuiteArithmetique";
+import { diagnostiquerNombre, diagnostiquerTermes, estSolutionDirecte } from "./saisieNombreSuites";
 
 const POINTS_DE_BASE = 100;
 
@@ -49,8 +48,15 @@ export function demarrerSessionSuiteArithmetique(reglages: ReglagesSession5e, ge
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur le jugement de cohérence : c'est un choix binaire, qui se gagnerait
+ * sinon par élimination (« Incorrect — tentative 1/3 », puis l'autre bouton). Les autres écrans
+ * gardent le réglage de session. */
+export function tentativesMaxSuiteArithmetique(etat: Pick<EtatSessionSuiteArithmetique, "reglages">, phase: PhaseSuiteArithmetique): number {
+  return phase === "coherenceJugement" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionSuiteArithmetique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxSuiteArithmetique(etat, etat.phase) };
 }
 
 /** Plafond d'aide PAR PHASE (B.3, `promptcorrectionsround2.md` ; étendu par
@@ -235,7 +241,7 @@ function penteConstanteEquationAlgebrique(exo: ExerciceAlgebriqueTermeGeneral | 
 export function soumettreReponsePoserEquationAlgebrique(etat: EtatSessionSuiteArithmetique, reponse: ReponseEquation): EtatSessionSuiteArithmetique {
   const exo = commeAlgebrique(etat.exerciceCourant);
   const { pente, constante } = penteConstanteEquationAlgebrique(exo);
-  return soumettreEcran(etat, "poserEquationAlgebrique", reponse, (r) => diagnostiquerEquationComplete(r.texte, pente, constante) === "correct");
+  return soumettreEcran(etat, "poserEquationAlgebrique", reponse, (r) => !estSolutionDirecte(r.texte, "x") && diagnostiquerEquationComplete(r.texte, pente, constante) === "correct");
 }
 
 export function soumettreReponseResoudreXAlgebrique(etat: EtatSessionSuiteArithmetique, texte: string): EtatSessionSuiteArithmetique {
@@ -284,7 +290,7 @@ export function soumettreReponsePoserEquationRangN(etat: EtatSessionSuiteArithme
   // u1+(n-1)r=k, variable "n" : pente=r, constante=u1-r-k (développé : u1+n·r-r-k).
   const pente = exo.r;
   const constante = exo.u1 - exo.r - exo.k;
-  return soumettreEcran(etat, "poserEquationRangN", reponse, (r) => diagnostiquerEquationCompleteEnN(r.texte, pente, constante) === "correct");
+  return soumettreEcran(etat, "poserEquationRangN", reponse, (r) => !estSolutionDirecte(r.texte, "n") && diagnostiquerEquationCompleteEnN(r.texte, pente, constante) === "correct");
 }
 
 export function soumettreReponseResoudreRangN(etat: EtatSessionSuiteArithmetique, texte: string): EtatSessionSuiteArithmetique {

@@ -1,10 +1,13 @@
 /**
  * Couche présentation (5e) — consignes/labels/aides pour 5gen18 ("Comparaison numérique de deux
  * suites"). 3 branches, séquence fixe à 2 écrans (tableau → conclusion), un contexte narratif tiré
- * dans un bassin de 50 partagé par les 3 branches (`generateurs5e/comparaisonSuites/contextes.ts`).
- * Les phrases de tendance ("croît de X %/...", "diminue de X unités/...") sont générées ICI, de
- * façon générique et invariable (jamais d'accord grammatical calculé), à partir du RÔLE mathématique
- * de la branche — le contexte ne fournit que des groupes nominaux neutres (`sujetA`/`sujetB`).
+ * dans un bassin partagé par les 3 branches (`generateurs5e/comparaisonSuites/contextes.ts`).
+ * Les phrases de tendance (« croît de X % par an », « diminue de X unités par mois ») sont générées
+ * ICI, de façon générique et invariable (jamais d'accord grammatical calculé), à partir du RÔLE
+ * mathématique de la branche — le contexte ne fournit que des groupes nominaux neutres
+ * (`sujetA`/`sujetB`, `nomA`/`nomB`).
+ *
+ * Notation du cours : Aₙ et Bₙ (jamais uₙ/vₙ côté élève), dépassement STRICT (« Bₙ > Aₙ »).
  */
 import type { ExerciceComparaisonSuites } from "../core5e/comparaisonSuites.types";
 
@@ -12,49 +15,84 @@ function capitaliser(texte: string): string {
   return texte.length === 0 ? texte : texte[0].toUpperCase() + texte.slice(1);
 }
 
-/** Coefficient multiplicatif `1+pct/100`, toujours affiché à exactement 2 décimales — `pct` étant un
- * pourcentage entier, ce coefficient est mathématiquement une décimale à 2 chiffres exacte, mais
- * `1+pct/100` en flottant IEEE754 brut produit parfois un résidu (ex. `pct=14` ⟹
- * `1.1400000000000001`, bug Playwright constaté) : `.toFixed(2)` force l'arrondi propre annoncé. */
-function formatTauxCroissance(pct: number): string {
-  return (1 + pct / 100).toFixed(2);
+/** Entier écrit à la belge : séparateur de milliers = espace fine insécable (« 12 345 »). */
+export function entierFr(valeur: number): string {
+  const n = Math.round(valeur);
+  const signe = n < 0 ? "−" : "";
+  return signe + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+/** Même entier, pour KaTeX : groupes de milliers séparés par une espace fine `\,`. */
+function entierLatex(valeur: number): string {
+  return String(Math.round(valeur)).replace(/\B(?=(\d{3})+(?!\d))/g, "\\,");
+}
+
+/** Coefficient multiplicatif `1+pct/100` en LaTeX, virgule décimale (`pct` entier ⇒ 2 décimales
+ * exactes ; `.toFixed(2)` évite le résidu flottant `1.1400000000000001`). */
+function coefficientLatex(pct: number): string {
+  return (1 + pct / 100).toFixed(2).replace(".", "{,}");
+}
+
+function periodeTexte(exercice: ExerciceComparaisonSuites): string {
+  return exercice.contexte.periode === "an" ? "par an" : "par mois";
 }
 
 function clauseCroissancePct(sujet: string, valeur: number, unite: string, pct: number, periode: string): string {
-  return `${sujet} vaut ${Math.round(valeur)} ${unite} et croît de ${pct} %/${periode}`;
+  return `${sujet} vaut ${entierFr(valeur)} ${unite} et croît de ${pct} % ${periode}`;
 }
 function clauseCroissanceLineaire(sujet: string, valeur: number, unite: string, delta: number, periode: string): string {
-  return `${sujet} vaut ${Math.round(valeur)} ${unite} et croît de ${delta} ${unite}/${periode}`;
+  return `${sujet} vaut ${entierFr(valeur)} ${unite} et croît de ${entierFr(delta)} ${unite} ${periode}`;
 }
 function clauseDeclinLineaire(sujet: string, valeur: number, unite: string, delta: number, periode: string): string {
-  return `${sujet} vaut ${Math.round(valeur)} ${unite} et diminue de ${delta} ${unite}/${periode}`;
+  return `${sujet} vaut ${entierFr(valeur)} ${unite} et diminue de ${entierFr(delta)} ${unite} ${periode}`;
+}
+
+/** Côté qui dépasse / côté depasse, en groupe nominal complet (« le parc B », « le parc A »). */
+function nomsDepassement(exercice: ExerciceComparaisonSuites): { qui: string; depasse: string } {
+  const { contexte } = exercice;
+  return exercice.condition === "aDepasseB" ? { qui: contexte.nomA, depasse: contexte.nomB } : { qui: contexte.nomB, depasse: contexte.nomA };
+}
+
+/** Condition du cours, en notation Aₙ/Bₙ (texte Unicode, jamais de LaTeX dans une phrase). */
+function conditionTexte(exercice: ExerciceComparaisonSuites): string {
+  return exercice.condition === "aDepasseB" ? "Aₙ > Bₙ" : "Bₙ > Aₙ";
 }
 
 export function consigneGenerale(exercice: ExerciceComparaisonSuites): string {
   const { contexte } = exercice;
-  const intro = contexte.periode === "an" ? `En ${exercice.anneeDepart}, ` : "";
+  const periode = periodeTexte(exercice);
   let clauseA: string;
   let clauseB: string;
   switch (exercice.famille) {
     case "villesCroissance":
-      clauseA = clauseCroissancePct(contexte.sujetA, exercice.u1, contexte.unite, exercice.tauxPct, contexte.periode);
-      clauseB = clauseCroissanceLineaire(contexte.sujetB, exercice.v1, contexte.unite, exercice.d, contexte.periode);
+      clauseA = clauseCroissancePct(contexte.sujetA, exercice.u1, contexte.unite, exercice.tauxPct, periode);
+      clauseB = clauseCroissanceLineaire(contexte.sujetB, exercice.v1, contexte.unite, exercice.d, periode);
       break;
     case "stockDemande":
-      clauseA = clauseDeclinLineaire(contexte.sujetA, exercice.u1, contexte.unite, exercice.d1, contexte.periode);
-      clauseB = clauseCroissanceLineaire(contexte.sujetB, exercice.v1, contexte.unite, exercice.d2, contexte.periode);
+      clauseA = clauseDeclinLineaire(contexte.sujetA, exercice.u1, contexte.unite, exercice.d1, periode);
+      clauseB = clauseCroissanceLineaire(contexte.sujetB, exercice.v1, contexte.unite, exercice.d2, periode);
       break;
     case "epargneCroissance":
-      clauseA = clauseCroissancePct(contexte.sujetA, exercice.u1, contexte.unite, exercice.r1Pct, contexte.periode);
-      clauseB = clauseCroissancePct(contexte.sujetB, exercice.v1, contexte.unite, exercice.r2Pct, contexte.periode);
+      clauseA = clauseCroissancePct(contexte.sujetA, exercice.u1, contexte.unite, exercice.r1Pct, periode);
+      clauseB = clauseCroissancePct(contexte.sujetB, exercice.v1, contexte.unite, exercice.r2Pct, periode);
       break;
   }
-  const cote = exercice.condition === "uGeV" ? contexte.labelA : contexte.labelB;
-  const autre = exercice.condition === "uGeV" ? contexte.labelB : contexte.labelA;
-  const question = contexte.periode === "mois" ? "après combien de mois" : "à partir de quelle année";
-  return `${intro}${capitaliser(clauseA)}. ${capitaliser(clauseB)}. Détermine ${question} ${cote} dépasse ${autre}.`;
+  const { qui, depasse } = nomsDepassement(exercice);
+  if (contexte.periode === "an") {
+    return (
+      `En ${exercice.anneeDepart}, ${clauseA}. ${capitaliser(clauseB)}. ` +
+      `On note Aₙ et Bₙ ces deux grandeurs au rang n (n = 1 correspond à ${exercice.anneeDepart}). ` +
+      `Détermine à partir de quelle année ${qui} dépasse ${depasse}.`
+    );
+  }
+  return (
+    `Au cours du 1er mois, ${clauseA}. ${capitaliser(clauseB)}. ` +
+    `On note Aₙ et Bₙ ces deux grandeurs au cours du n-ième mois. ` +
+    `Détermine au cours du combientième mois ${qui} dépasse ${depasse} pour la première fois.`
+  );
 }
 
+/** Libellés de colonne courts (sous Aₙ/Bₙ), sans article. */
 export function labelU(exercice: ExerciceComparaisonSuites): string {
   return exercice.contexte.labelA;
 }
@@ -66,73 +104,78 @@ export function labelV(exercice: ExerciceComparaisonSuites): string {
 export function formuleU(exercice: ExerciceComparaisonSuites): string {
   switch (exercice.famille) {
     case "villesCroissance":
-      return `u_n=${exercice.u1}\\times${formatTauxCroissance(exercice.tauxPct)}^{n-1}`;
+      return `A_n=${entierLatex(exercice.u1)}\\times${coefficientLatex(exercice.tauxPct)}^{n-1}`;
     case "stockDemande":
-      return `u_n=${exercice.u1}-(n-1)\\times${exercice.d1}`;
+      return `A_n=${entierLatex(exercice.u1)}-(n-1)\\times${entierLatex(exercice.d1)}`;
     case "epargneCroissance":
-      return `u_n=${exercice.u1}\\times${formatTauxCroissance(exercice.r1Pct)}^{n-1}`;
+      return `A_n=${entierLatex(exercice.u1)}\\times${coefficientLatex(exercice.r1Pct)}^{n-1}`;
   }
 }
 
 export function formuleV(exercice: ExerciceComparaisonSuites): string {
   switch (exercice.famille) {
     case "villesCroissance":
-      return `v_n=${exercice.v1}+(n-1)\\times${exercice.d}`;
+      return `B_n=${entierLatex(exercice.v1)}+(n-1)\\times${entierLatex(exercice.d)}`;
     case "stockDemande":
-      return `v_n=${exercice.v1}+(n-1)\\times${exercice.d2}`;
+      return `B_n=${entierLatex(exercice.v1)}+(n-1)\\times${entierLatex(exercice.d2)}`;
     case "epargneCroissance":
-      return `v_n=${exercice.v1}\\times${formatTauxCroissance(exercice.r2Pct)}^{n-1}`;
+      return `B_n=${entierLatex(exercice.v1)}\\times${coefficientLatex(exercice.r2Pct)}^{n-1}`;
   }
 }
 
-export function consigneTableau(_exercice: ExerciceComparaisonSuites): string {
-  return "Complète le tableau pour les 3 valeurs de n indiquées (arrondis les résultats à l'unité près).";
+/** Les rangs du tableau, en toutes lettres (« n = 6, 7, 8 et 9 ») — imprimés aussi sur papier. */
+function rangsTexte(exercice: ExerciceComparaisonSuites): string {
+  const rangs = exercice.nTable.map(String);
+  return `${rangs.slice(0, -1).join(", ")} et ${rangs[rangs.length - 1]}`;
+}
+
+export function consigneTableau(exercice: ExerciceComparaisonSuites): string {
+  return `Calcule Aₙ et Bₙ pour n = ${rangsTexte(exercice)} (arrondis à l'unité).`;
 }
 
 export function consigneConclusion(exercice: ExerciceComparaisonSuites): string {
-  const cote = exercice.condition === "uGeV" ? labelU(exercice) : labelV(exercice);
-  const question = exercice.contexte.periode === "mois" ? "Après combien de mois" : "À partir de quelle année";
-  return `D'après le tableau, quel est le plus petit n à partir duquel ${cote} l'emporte ? ${question} cela se produit-il ?`;
+  const traduction =
+    exercice.contexte.periode === "an" ? "Traduis ce rang en année." : "Traduis ce rang : au cours du combientième mois cela se produit-il ?";
+  return `D'après le tableau, quel est le plus petit rang n tel que ${conditionTexte(exercice)} ? ${traduction}`;
 }
 
 export function labelTraduction(exercice: ExerciceComparaisonSuites): string {
-  return exercice.uniteContexte === "mois" ? "Nombre de mois =" : "Année =";
+  return exercice.uniteContexte === "mois" ? "Numéro du mois =" : "Année =";
 }
 
-export function texteAideNiveau1(_exercice: ExerciceComparaisonSuites, phase: "tableau" | "conclusion"): string {
+export function texteAideNiveau1(exercice: ExerciceComparaisonSuites, phase: "tableau" | "conclusion"): string {
   if (phase === "tableau") {
-    return "Rappelle-toi les 2 formules des suites — substitue simplement n par la valeur indiquée sur chaque ligne.";
+    return "Écris d'abord la formule de chaque suite, puis remplace n par le rang de chaque ligne.";
   }
-  return "À l'équilibre exact, cherche la ligne où la condition devient vraie pour la première fois — pas une ligne avant, pas une ligne après.";
+  return `Compare Aₙ et Bₙ ligne par ligne : le rang cherché est le premier n pour lequel ${conditionTexte(exercice)}.`;
 }
 
-export function texteAideNiveau2(exercice: ExerciceComparaisonSuites, phase: "tableau" | "conclusion"): string {
+/** Aide de niveau 2. Tableau : les deux formules substituées (LaTeX). Conclusion : la MÉTHODE du
+ * balayage et la règle de traduction, jamais la valeur de n — `texte` (phrase) + `latex` optionnel. */
+export function texteAideNiveau2(exercice: ExerciceComparaisonSuites, phase: "tableau" | "conclusion"): { texte: string; latex: string } {
   if (phase === "tableau") {
-    return `${formuleU(exercice)} \\qquad ${formuleV(exercice)}`;
+    return { texte: "", latex: `${formuleU(exercice)} \\qquad ${formuleV(exercice)}` };
   }
-  if (exercice.contexte.periode === "mois") {
-    return `n=${exercice.nTable[1]}`;
+  const cond = conditionTexte(exercice);
+  const contraire = exercice.condition === "aDepasseB" ? "Aₙ ≤ Bₙ" : "Bₙ ≤ Aₙ";
+  const balayage = `Descends le tableau : à la première ligne où ${cond}, vérifie qu'à la ligne précédente on avait encore ${contraire}. Ce rang n est le rang de bascule.`;
+  if (exercice.contexte.periode === "an") {
+    return { texte: `${balayage} Puis traduis-le : le rang 1 correspond à ${exercice.anneeDepart}, donc`, latex: `\\text{année}=${exercice.anneeDepart}+(n-1)` };
   }
-  return `n=${exercice.nTable[1]} \\Rightarrow \\text{année}=${exercice.anneeDepart}+(n-1)`;
+  return { texte: `${balayage} Puis traduis-le : le rang n est le n-ième mois.`, latex: "" };
 }
 
 // ============================================================================
-// Réponse attendue — pour le bloc "état actuel" de l'écran "conclusion" (rappel du tableau déjà
-// rempli à l'écran "tableau", voir `TableComparaisonRecap.tsx`/`EtatActuelComparaisonSuites.tsx")
-// et pour l'écran récapitulatif final (`ResultatPanelComparaisonSuites.tsx`) — même convention
-// "dérivée PUREMENT de `exercice`, jamais de la saisie de l'élève" que le reste de la plateforme.
+// Réponse attendue — dérivée PUREMENT de `exercice`, jamais de la saisie de l'élève.
 // ============================================================================
 
-/** `n=` de la conclusion, en LaTeX — `nSeuil` est toujours un entier exact (index trouvé par
- * simulation, `generateurs5e/comparaisonSuites/simulation.ts`), jamais besoin d'arrondir. */
+/** `n=` de la conclusion, en LaTeX — `nSeuil` est toujours un entier exact. */
 export function formatConclusionNLatex(exercice: ExerciceComparaisonSuites): string {
   return `n=${exercice.nSeuil}`;
 }
 
-/** Traduction contextuelle attendue (année/nombre de mois), en TEXTE BRUT — même label que le champ
- * de saisie (`labelTraduction`), jamais du LaTeX (le label lui-même n'en est pas). `traductionValeur`
- * est toujours un entier exact par construction (année de départ + décalage entier, ou directement
- * `nSeuil`) — `Math.round` défensif, sans incidence sur la valeur réelle. */
+/** Traduction contextuelle attendue (année/numéro du mois), en TEXTE BRUT — même label que le champ
+ * de saisie (`labelTraduction`). */
 export function formatTraductionAttendueTexte(exercice: ExerciceComparaisonSuites): string {
   return `${labelTraduction(exercice)} ${Math.round(exercice.traductionValeur)}`;
 }

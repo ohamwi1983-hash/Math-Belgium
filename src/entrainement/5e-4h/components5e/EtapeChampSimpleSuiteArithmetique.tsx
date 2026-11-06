@@ -56,7 +56,9 @@ export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesU
   // TOUJOURS un entier positif (jamais de fraction/décimal, validation stricte côté
   // `diagnostiquerRangEntierPositif`) — placeholder dédié pour ne pas suggérer une forme fractionnaire
   // (`prompt5gen14remplacementvariante.md`).
-  const placeholder = phase === "formuleGenerale" ? "ex : 5+(n-1)*3" : phase === "resoudreRangN" ? "ex : 12" : "ex : 12, -3/2...";
+  // Exemples HORS de l'espace des tirages (|r| ≤ 9, u₁ entier, x de dénominateur 1, 2 ou 4, rang
+  // ≥ 50) : un exemple ne doit jamais être une réponse possible.
+  const placeholder = phase === "formuleGenerale" ? "ex : 7+(n−1)×12" : phase === "resoudreRangN" ? "ex : 12" : "ex : 13/7 ou 2,4";
 
   return (
     <div>

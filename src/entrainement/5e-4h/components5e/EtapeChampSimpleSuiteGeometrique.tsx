@@ -45,6 +45,9 @@ export function EtapeChampSimpleSuiteGeometrique({ exercice, phase, tentativesUt
   }
 
   const aide2 = texteAideNiveau2(exercice, phase);
+  // Exemples HORS de l'espace des tirages (q = 5/4 n'est pas dans le pool ; dénominateur 7
+  // impossible) — l'écran de la formule attend une expression en n, pas un nombre.
+  const placeholder = phase.startsWith("formuleGenerale") ? "ex : 7×(5/4)^(n−1)" : phase === "resoudreRangN" ? "ex : 15" : "ex : 13/7";
 
   return (
     <div>
@@ -68,7 +71,7 @@ export function EtapeChampSimpleSuiteGeometrique({ exercice, phase, tentativesUt
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 12, -3/2..."
+          placeholder={placeholder}
         />
       </div>
       {niveauAide >= 1 && (

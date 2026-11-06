@@ -1,8 +1,8 @@
 import type { ExerciceStockDemande } from "../../core5e/comparaisonSuites.types";
-import { basculeExactementA, trouverSeuil } from "./simulation";
+import { construireFenetre, trouverSeuil } from "./simulation";
 import { entierAleatoire, resoudrePeriode, tirerContexte } from "./utils";
 
-const TENTATIVES_MAX = 300;
+const TENTATIVES_MAX = 2000;
 const N_MAX_SIMULATION = 40;
 
 /** Côté A (arithmétique décroissant) vs côté B (arithmétique croissant) — B finit toujours par
@@ -19,15 +19,15 @@ export function construireStockDemande(): ExerciceStockDemande {
     const uDeN = (n: number) => u1 - (n - 1) * d1;
     const vDeN = (n: number) => v1 + (n - 1) * d2;
 
-    const nSeuil = trouverSeuil(uDeN, vDeN, "vGeU", N_MAX_SIMULATION);
-    if (nSeuil === null || nSeuil < 3 || nSeuil > 25) continue;
-    if (!basculeExactementA(uDeN, vDeN, "vGeU", nSeuil)) continue;
-
-    const nTable: [number, number, number] = [nSeuil - 1, nSeuil, nSeuil + 1];
+    const nSeuil = trouverSeuil(uDeN, vDeN, "bDepasseA", N_MAX_SIMULATION);
+    if (nSeuil === null || nSeuil < 3 || nSeuil > 20) continue;
+    const fenetre = construireFenetre(uDeN, vDeN, "bDepasseA", nSeuil, Math.max(u1, v1));
+    if (fenetre === null) continue;
+    const { nTable, uTable, vTable } = fenetre;
     const { anneeDepart, traductionValeur, uniteContexte } = resoudrePeriode(contexte, nSeuil);
     return {
       famille: "stockDemande",
-      condition: "vGeU",
+      condition: "bDepasseA",
       contexte,
       u1,
       d1,
@@ -36,8 +36,8 @@ export function construireStockDemande(): ExerciceStockDemande {
       anneeDepart,
       nSeuil,
       nTable,
-      uTable: [uDeN(nTable[0]), uDeN(nTable[1]), uDeN(nTable[2])],
-      vTable: [vDeN(nTable[0]), vDeN(nTable[1]), vDeN(nTable[2])],
+      uTable,
+      vTable,
       traductionValeur,
       uniteContexte,
     };

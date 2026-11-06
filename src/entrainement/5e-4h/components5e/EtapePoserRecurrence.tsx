@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
-import { consignePoserRecurrence, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
+import { consignePoserRecurrence, libellePoserRecurrence, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
+import { remplacerLettreGrandeur } from "../moteur5e/verificationSuiteRecurrenteAffine";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -33,6 +34,7 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  const aide1 = texteAideNiveau1(exercice, "poserRecurrence");
   const aide2 = texteAideNiveau2(exercice, "poserRecurrence");
 
   function valider() {
@@ -44,17 +46,22 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{consignePoserRecurrence(exercice)}</p>
-      <ApercuExpressionLatex texte={texte} label={`${exercice.variableGrandeur}_n+1 =`} />
+      {/* Aperçu : la lettre de la grandeur, acceptée à la saisie, est montrée comme x (variable de
+          l'aperçu partagé) — jamais un aperçu qui disparaît parce que « Q » lui est inconnu. */}
+      <ApercuExpressionLatex texte={remplacerLettreGrandeur(texte, exercice.variableGrandeur).replace(/\(x\)/g, "x")} label={libellePoserRecurrence(exercice)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
           <Katex expression={`${exercice.variableGrandeur}_{n+1}=`} />
         </label>
-        <input type="text" className="text-input" value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 0.75*x+3" />
+        {/* Exemple hors de l'espace des tirages (a ∈ [0,6 ; 0,95] ∪ [1,05 ; 1,2] dans ce générateur). */}
+        <input type="text" className="text-input" style={{ minHeight: 44 }} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 2,5·x − 1" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "poserRecurrence")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+          <p>{aide1.texte}</p>
+          {aide1.latex.length > 0 && <Katex expression={aide1.latex} block />}
+          {niveauAide >= 2 && aide2.texte.length > 0 && <p>{aide2.texte}</p>}
+          {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}
       {!validation && (
