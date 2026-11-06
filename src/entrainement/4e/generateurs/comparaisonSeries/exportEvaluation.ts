@@ -131,22 +131,27 @@ function segmentsVersFragments(segments: SegmentTexte[]): FragmentConsigne[] {
 // représentables en `FragmentConsigne` — ici 2 tableaux, jamais une simple prose+LaTeX).
 // ============================================================================
 
+// Même style de tableau que les données de gen32 (`moyennePonderee`) : bordures fines, colonnes
+// centrées — sans lui, le tableau HTML s'imprime en colonnes collées (« 33 1 1 »).
+const TD = 'style="border:1px solid #b9bec7;padding:3px 10px;text-align:center"';
+const TH = 'style="border:1px solid #b9bec7;padding:3px 10px;text-align:center;font-weight:600"';
+
 function ligneTableauBrutHtml(serie: SerieComparaison): string {
   return serie.lignes
-    .map((ligne) => `<tr><td>${formatNombre(ligne.valeur)}</td><td>${formatNombre(ligne.effectif)}</td><td>${formatNombre(ligne.effectifCumule)}</td></tr>`)
+    .map((ligne) => `<tr><td ${TD}>${formatNombre(ligne.valeur)}</td><td ${TD}>${formatNombre(ligne.effectif)}</td><td ${TD}>${formatNombre(ligne.effectifCumule)}</td></tr>`)
     .join("");
 }
 
 function tableauBrutHtml(serie: SerieComparaison, label: string): string {
   return (
-    `<table style="display:inline-table;margin:0 16px 8px 0;">` +
-    `<caption style="caption-side:top;text-align:left;font-weight:bold;">${echapperHtml(label)}</caption>` +
-    `<tr><th>x</th><th>n</th><th>cumulé</th></tr>${ligneTableauBrutHtml(serie)}</table>`
+    `<table style="display:inline-table;border-collapse:collapse;margin:0 24px 8px 0;">` +
+    `<caption style="caption-side:top;text-align:left;font-weight:bold;padding-bottom:3px;">${echapperHtml(label)}</caption>` +
+    `<tr><th ${TH}>xᵢ</th><th ${TH}>nᵢ</th><th ${TH}>effectif cumulé</th></tr>${ligneTableauBrutHtml(serie)}</table>`
   );
 }
 
 function construireTablesBruttesHtml(serieA: SerieComparaison, serieB: SerieComparaison): string {
-  return `<div style="display:flex;flex-wrap:wrap;">${tableauBrutHtml(serieA, "Série A")}${tableauBrutHtml(serieB, "Série B")}</div>`;
+  return `<div style="display:flex;flex-wrap:wrap;align-items:flex-start;">${tableauBrutHtml(serieA, "Série A")}${tableauBrutHtml(serieB, "Série B")}</div>`;
 }
 
 function construireTableRecapitulatifHtml(serieA: SerieComparaison, serieB: SerieComparaison, unite: string): string {
@@ -159,9 +164,9 @@ function construireTableRecapitulatifHtml(serieA: SerieComparaison, serieB: Seri
     { libelle: "Q3", a: serieA.q3, b: serieB.q3 },
     { libelle: "max", a: serieA.max, b: serieB.max },
   ];
-  const corps = lignes.map((ligne) => `<tr><th>${echapperHtml(ligne.libelle)}</th><td>${formatNombre(ligne.a)}</td><td>${formatNombre(ligne.b)}</td></tr>`).join("");
+  const corps = lignes.map((ligne) => `<tr><th ${TH}>${echapperHtml(ligne.libelle)}</th><td ${TD}>${formatNombre(ligne.a)}</td><td ${TD}>${formatNombre(ligne.b)}</td></tr>`).join("");
   return (
-    `<table><tr><th></th><th>Série A</th><th>Série B</th></tr>${corps}</table>` +
+    `<table style="border-collapse:collapse;margin:6px 0"><tr><th ${TH}></th><th ${TH}>Série A</th><th ${TH}>Série B</th></tr>${corps}</table>` +
     `<p style="font-size:0.85em;color:#555;">(valeurs en ${echapperHtml(unite)})</p>`
   );
 }
@@ -498,7 +503,15 @@ function correctionDetailleeComparaisonSeries(instance: ExerciceComparaisonSerie
       label: "Méthode",
       fragments: [texte(question.estFrequence ? "On lit la fréquence cumulée à la valeur demandée" : "On lit l'effectif cumulé à la valeur demandée"), texte(question.indexBas === null ? "." : " ; pour une tranche, on soustrait le cumul à la borne basse du cumul à la borne haute.")],
     });
-    etapes.push({ label: "Lecture", fragments: fragmentsExplicationSeuil(question, instance) });
+    etapes.push({
+      label: "Lecture",
+      fragments: fragmentsExplicationSeuil(question, instance),
+      // Variante graphique : la lecture se fait sur les courbes cumulées, annotées au seuil demandé.
+      figureHtml:
+        instance.variante === "graphique"
+          ? construireSvgCourbesCumulees(instance.serieA, instance.serieB, instance.cumul ?? "effectif", instance.contexte.unite, marqueursSeuilCorrection(question, instance))
+          : undefined,
+    });
     etapes.push({ label: "Conclusion", fragments: [texte(`${texteReponseSeuil(question)}.`)] });
     etapes.push({ label: "Piège", fragments: [texte("C'est l'effectif CUMULÉ qui compte les individus jusqu'à une valeur — pas l'effectif de la seule ligne de cette valeur.")] });
   } else {

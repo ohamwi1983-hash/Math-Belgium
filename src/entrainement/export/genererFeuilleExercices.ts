@@ -81,6 +81,9 @@ export interface EtapeCorrection {
   label: string;
   fragments: FragmentConsigne[];
   sousQuestion?: string;
+  /** Figure SVG (chaîne autonome) affichée sous le texte de la ligne — ex. polygone des effectifs
+   * cumulés avec la lecture des quartiles. Rendue par le pipeline HTML uniquement. */
+  figureHtml?: string;
   /** Numéro (1, 2…) de l'étape du raisonnement à laquelle se rattache cette ligne, quand l'énoncé
    * papier n'a pas de sous-questions (`AdaptateurFeuilleExercices.enoncePapier`) — posé par le
    * pipeline, jamais par l'adaptateur. */

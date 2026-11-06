@@ -195,7 +195,7 @@ function construireUneBoiteSvg(
  * (variante `construction`, énoncé) rend un axe gradué VIERGE avec une simple ligne de base à `y=0`
  * comme repère horizontal, sans aucune boîte tracée (voir commentaire de tête de fichier).
  */
-function construireSvgBoiteMoustaches(bornePlage: PlageAxe, lignes: LigneBoiteEvaluation[], avecEtiquettes = false): string {
+export function construireSvgBoiteMoustaches(bornePlage: PlageAxe, lignes: LigneBoiteEvaluation[], avecEtiquettes = false): string {
   const nombreLignes: 1 | 2 = lignes.length === 2 ? 2 : 1;
   const ratio = ratioGraphe(nombreLignes);
   const largeur = LARGEUR_SVG;

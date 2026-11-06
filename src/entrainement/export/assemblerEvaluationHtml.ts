@@ -286,6 +286,8 @@ const STYLE_EVALUATION = `
 .question:has(.correction-bloc) { break-inside: auto; page-break-inside: auto; }
 .ligne-titre, .etape-titre { break-after: avoid; page-break-after: avoid; }
 .etapes > *, .piege { break-inside: avoid; page-break-inside: avoid; }
+.figure-corrige-bloc { margin: 6px 0 2px; break-inside: avoid; page-break-inside: avoid; }
+.figure-corrige-bloc svg { display: block; width: 100%; max-width: 14cm; height: auto; }
 .question .ligne-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .question .num { font-weight: 700; }
 .correction-bloc { color: #1155cc; margin-top: 4px; }
@@ -371,18 +373,22 @@ function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, numbe
   return html;
 }
 
+function figureCorrigeHtml(e: EtapeCorrection): string {
+  return e.figureHtml ? `<div class="figure-corrige-bloc">${e.figureHtml}</div>` : "";
+}
+
 function etapesCorrectionHtml(etapes: EtapeCorrection[]): string {
   const normales = etapes.filter((e) => e.label.trim().toLowerCase() !== "piège");
   const pieges = etapes.filter((e) => e.label.trim().toLowerCase() === "piège");
   let html = "";
   if (normales.length > 0 && normales.every((e) => !e.label.trim() && !e.sousQuestion)) {
     // Aucune étiquette (corrigé d'une question ouverte) : simples paragraphes, sans colonne vide.
-    html += `<div class="etapes-libres">${normales.map((e) => `<p>${fragmentsVersHtml(e.fragments)}</p>`).join("")}</div>`;
+    html += `<div class="etapes-libres">${normales.map((e) => `<p>${fragmentsVersHtml(e.fragments)}</p>${figureCorrigeHtml(e)}`).join("")}</div>`;
   } else if (normales.length > 0) {
     html += `<div class="etapes">`;
     for (const e of normales) {
       const lbl = `${e.sousQuestion ? `${e.sousQuestion.replace(/\)$/, "")}) ` : ""}${e.label}`;
-      html += `<span class="lbl">${echapperHtml(lbl)}</span><span>${fragmentsVersHtml(e.fragments)}</span>`;
+      html += `<span class="lbl">${echapperHtml(lbl)}</span><span>${fragmentsVersHtml(e.fragments)}${figureCorrigeHtml(e)}</span>`;
     }
     html += `</div>`;
   }

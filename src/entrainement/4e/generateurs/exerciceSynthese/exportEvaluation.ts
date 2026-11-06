@@ -1,6 +1,8 @@
 import type { ExerciceSynthese } from "../../core/exerciceSynthese.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, ErreurFrequente, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { construireSvgPolygoneEffectifs } from "../mediane/polygoneEffectifsSvg";
+import { construireSvgBoiteMoustaches } from "../boiteMoustaches/exportEvaluation";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   versBoiteMoustaches,
@@ -490,6 +492,23 @@ function correctionDetailleeExerciceSynthese(exercice: ExerciceSynthese): EtapeC
     const lettre = LETTRES[i];
     const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion: lettre, fragments: methodeQuestion(exercice, question) }];
     lignes.push(...blocsVersLignes(CORRECTION_QUESTION[question](exercice, ""), lettre));
+    if (question === "boxplot") {
+      const boite = versBoiteMoustaches(exercice);
+      lignes.push({
+        label: "Graphique",
+        sousQuestion: lettre,
+        fragments: [texte("Boîte à moustaches attendue :")],
+        figureHtml: construireSvgBoiteMoustaches(boite.bornePlage, [{ valeurs: boite.valeurs }], true),
+      });
+    }
+    if (question === "polygone" && exercice.variante === "classes") {
+      lignes.push({
+        label: "Graphique",
+        sousQuestion: lettre,
+        fragments: [texte("Polygone des effectifs cumulés, avec la lecture de Q₁, Q₂ et Q₃ utilisée à la question suivante :")],
+        figureHtml: construireSvgPolygoneEffectifs(versMedianeClasses(exercice)),
+      });
+    }
     const piege = PIEGE_QUESTION[question];
     if (piege) lignes.push({ label: "Piège", sousQuestion: lettre, fragments: [texte(piege)] });
     return lignes.map((l) => ({ ...l, fragments: enVirgules(l.fragments) }));

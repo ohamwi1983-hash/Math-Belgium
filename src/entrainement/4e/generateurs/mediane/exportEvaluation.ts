@@ -1,6 +1,7 @@
 import type { ExerciceMediane, ExerciceMedianeClasses, ExerciceMedianeDiscrete } from "../../core/mediane.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, EtapeCorrection, ErreurFrequente, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { construireSvgPolygoneEffectifs } from "./polygoneEffectifsSvg";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import {
   LABEL_EFFECTIF_CUMULE_VI,
@@ -481,6 +482,12 @@ function etapesInterpolation(instance: ExerciceMedianeClasses, lettre: string, p
 function correctionDetailleeClasses(instance: ExerciceMedianeClasses): EtapeCorrection[] {
   const u = instance.contexte.unite;
   return [
+    {
+      label: "Graphique",
+      sousQuestion: "a",
+      fragments: [texte("Polygone des effectifs cumulés ; les seuils n/4, n/2 et 3n/4 donnent Q₁, Q₂ (la médiane) et Q₃ :")],
+      figureHtml: construireSvgPolygoneEffectifs(instance),
+    },
     {
       label: "Méthode",
       sousQuestion: "a",
