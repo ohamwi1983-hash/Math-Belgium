@@ -28,11 +28,23 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionComparaisonSuites {
   return demarrerSessionComparaisonSuites(REGLAGES_DEMO, genererExerciceComparaisonSuites);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export (`generateurs5e/comparaisonSuites/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionComparaisonSuites {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionComparaisonSuites(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceComparaisonSuites, (id) => construireAvecFamilleId(id as FamilleComparaisonSuites)),
+  );
 }
 
 interface TransitionEnAttente {
@@ -62,7 +74,7 @@ function calculerSegmentsProgression(etat: EtatSessionComparaisonSuites, aideUti
 }
 
 export function App5gen18() {
-  const [etat, setEtat] = useState<EtatSessionComparaisonSuites>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComparaisonSuites>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule de l'écran "tableau" déjà clos (seule puce cliquable — voir
    * `calculerSegmentsProgression`, "conclusion" ne clôt jamais avant la fin de l'exercice) — tenu

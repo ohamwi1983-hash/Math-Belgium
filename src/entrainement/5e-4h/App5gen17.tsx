@@ -88,6 +88,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -152,6 +153,17 @@ const PHASES_CALCULATRICE_LISTE = new Set<PhaseSuiteClassique>([
 
 function nouvelleSession(): EtatSessionSuiteClassique {
   return demarrerSessionSuiteClassique(REGLAGES_DEMO, genererExerciceSuiteClassique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/suitesClassiques/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteClassique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteClassique(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_SCENARIOS, genererExerciceSuiteClassique, (id) => construireAvecScenarioId(id as ScenarioSuiteClassique)),
+  );
 }
 
 /** Puces de progression — pas de `ORDRE_PHASES` local ici : celui déjà exporté par
@@ -361,7 +373,7 @@ function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteC
 }
 
 export function App5gen17() {
-  const [etat, setEtat] = useState<EtatSessionSuiteClassique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSuiteClassique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteClassique`, jamais dans le moteur. Remis à vide à chaque

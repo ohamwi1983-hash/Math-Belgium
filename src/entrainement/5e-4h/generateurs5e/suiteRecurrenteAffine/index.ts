@@ -77,6 +77,14 @@ function construireDepuisContexte(contexte: ContexteSuiteRecurrenteAffine): Exer
   };
 }
 
+/** Catalogue des 2 RÉGIMES — variantes forçables de l'adaptateur d'export et du code d'exercice
+ * (`?code=`) ; mêmes ids/libellés que le sélecteur de l'appli. Jamais les 60 contextes (catalogue
+ * trop gros pour l'URL du payload `/admin`). */
+export const CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE: { id: RegimeSuiteRecurrenteAffine; label: string }[] = [
+  { id: "convergent", label: "Convergente (|a| < 1)" },
+  { id: "divergent", label: "Divergente (|a| ≥ 1)" },
+];
+
 /** Force le régime (convergent/divergent) — tire un contexte au hasard parmi ceux de ce régime,
  * puis délègue à `construireDepuisContexte`. Voir le panneau dev-only (`SelecteurVarianteDev`). */
 export function construireAvecRegime(regime: RegimeSuiteRecurrenteAffine): ExerciceSuiteRecurrenteAffine {

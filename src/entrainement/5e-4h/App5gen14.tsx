@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteArithmetique } from "./generateurs5e/suitesArithmetiques";
 import type { FamilleSuiteArithmetiqueId } from "./generateurs5e/suitesArithmetiques";
@@ -186,6 +187,15 @@ function nouvelleSession(): EtatSessionSuiteArithmetique {
   return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, genererExerciceSuiteArithmetique);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/suitesArithmetiques/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteArithmetique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceSuiteArithmetique, (id) => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
+}
+
 /**
  * Puces de progression — PAS de `ORDRE_PHASES` statique ici (contrairement à
  * `AppAnalyseFonction.tsx`) : la séquence RÉELLE de phases dépend de `exercice.famille`/`combo`
@@ -229,7 +239,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen14() {
-  const [etat, setEtat] = useState<EtatSessionSuiteArithmetique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSuiteArithmetique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteArithmetique`, jamais dans le moteur. Remis à vide à

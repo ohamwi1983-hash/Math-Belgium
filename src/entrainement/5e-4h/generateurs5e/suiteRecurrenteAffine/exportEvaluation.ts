@@ -1,117 +1,220 @@
-import type { ExerciceSuiteRecurrenteAffine } from "../../core5e/suiteRecurrenteAffine.types";
-import type { FractionQ } from "../../core5e/suitesGeometriques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { ExerciceSuiteRecurrenteAffine, RegimeSuiteRecurrenteAffine } from "../../core5e/suiteRecurrenteAffine.types";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { fractionQVersNombre } from "../suitesGeometriques/fraction";
-import { consignePoserRecurrence, consigneRegimePermanent, consigneTermesSuccessifs } from "../../ui5e/formatSuiteRecurrenteAffine";
-import { genererExerciceSuiteRecurrenteAffine } from "./index";
+import {
+  aLatex,
+  consignePoserRecurrence,
+  consigneRegimePermanent,
+  consigneTermesSuccessifs,
+  formatRegimeConfirmeLatex,
+  formatReponseAttenduePhaseLatex,
+} from "../../ui5e/formatSuiteRecurrenteAffine";
+import { CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, construireAvecRegime, genererExerciceSuiteRecurrenteAffine } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSuiteRecurrenteAffine>` pour 5gen19 (Suite
- * récurrente affine et régime permanent) — feuille d'évaluation. L'écran interactif enchaîne 3
- * phases FIXES (`App5gen19.tsx` → `moteur5e/sessionSuiteRecurrenteAffine.ts` :
- * poserRecurrence → regimePermanent → termesSuccessifs, voir aussi `ui5e/formatSuiteRecurrenteAffine.ts`),
- * reprises ici telles quelles comme 3 questions écrites a)/b)/c) — jamais un exercice reformulé :
- * les consignes réutilisent directement `consignePoserRecurrence`/`consigneRegimePermanent`/
- * `consigneTermesSuccessifs`, déjà utilisées côté écran.
+ * récurrente affine et régime permanent) — feuille d'exercices et évaluation (méthode :
+ * `.claude/rules/feuilles-evaluations.md`).
  *
- * Le générateur expose 2 axes de variantes indépendants (`construireAvecRegime`/`construireAvecContexteId`,
- * voir `index.ts`) — NI L'UN NI L'AUTRE n'est câblé ici (`catalogueVariantes`/
- * `genererInstanceAvecVariante` volontairement absents, même convention que gen8/gen9/gen12 côté
- * 4e) : le contexte a 60 valeurs, un catalogue de cette taille ferait exploser la taille de l'URL
- * du payload `/admin` (constaté : 431 "Request Header Fields Too Large" dès qu'on force plusieurs
- * instances par contexte) et produirait 60 lignes dans le formulaire pour un seul générateur.
- * `genererInstance` (tirage uniforme parmi les 60 contextes) reste donc la seule voie — un
- * professeur qui demande N exercices obtient N contextes différents tirés au hasard, ce qui reste
- * l'usage réel recherché (varier le scénario concret) sans le problème de taille.
+ * Les 3 écrans du générateur (`poserRecurrence` → `regimePermanent` → `termesSuccessifs`) sont ici
+ * trois VRAIES questions d'un problème (modéliser, étudier le comportement à long terme, calculer
+ * des valeurs), pas des étapes de pur guidage : l'énoncé papier les garde en a) b) c), dans l'ordre
+ * de l'écran, avec les consignes de l'écran débarrassées de leurs tournures de saisie
+ * (« tape Q ou x pour Qₙ »). La notation (Q₁ valeur initiale, Qₙ₊₁ une étape après Qₙ) passe dans
+ * l'énoncé.
  *
- * `a` est TOUJOURS positif dans ce générateur (`1∓pct/100`, `pct>0` dans les deux branches, voir
- * `index.ts`/`contextes.ts`) : `|a|=a`, jamais besoin de gérer un `a` négatif dans le corrigé.
+ * Catalogue de variantes : les 2 RÉGIMES (mêmes ids que le sélecteur de l'appli,
+ * `construireAvecRegime`) — jamais les 60 contextes, dont le catalogue ferait exploser l'URL du
+ * payload `/admin` (constaté : 431 « Request Header Fields Too Large »).
+ *
+ * Valeurs : mêmes fonctions que l'écran (`aLatex`, `formatRegimeConfirmeLatex`,
+ * `formatReponseAttenduePhaseLatex` — décimal à la virgule, fraction exacte seulement si lisible).
  */
 
-/** Fraction irréductible en LaTeX — entier si `den===1`, sinon fraction (signe porté par `num`) —
- * jamais un décimal (`prompt-chapitre-suites-audit-formatage.md`, même bug que 5gen15/16). Duplique
- * volontairement `ui5e/formatSuiteRecurrenteAffine.ts::fractionQVersLatex` (non exporté), même
- * convention de petite duplication déjà établie sur ce chantier. */
-function fractionQVersLatex(f: FractionQ): string {
-  if (f.den === 1) return `${f.num}`;
-  return f.num < 0 ? `-\\dfrac{${-f.num}}{${f.den}}` : `\\dfrac{${f.num}}{${f.den}}`;
+
+/** Nombre décimal en LaTeX, virgule belge, au plus `decimales` décimales. */
+function decimalLatex(valeur: number, decimales = 2): string {
+  const arrondi = Math.round(valeur * 10 ** decimales) / 10 ** decimales;
+  return (arrondi === 0 ? 0 : arrondi).toFixed(decimales).replace(/\.?0+$/, "").replace(".", "{,}");
 }
 
-/** Arrondi au centième — même tolérance que `moteur5e/verificationSuiteRecurrenteAffine.ts::TOLERANCE_PRECISE`
- * (0.01), affiché à côté de la valeur exacte plutôt qu'à sa place. */
-function arrondiCentieme(f: FractionQ): string {
-  const arrondi = Math.round(fractionQVersNombre(f) * 100) / 100;
-  return (arrondi === 0 ? 0 : arrondi).toFixed(2);
+/** Indice Unicode (Q₁, Qₙ₊₁) pour le texte brut des consignes. */
+function indiceTexte(lettre: string, indice: string): string {
+  const sub: Record<string, string> = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", n: "ₙ", "+": "₊" };
+  return lettre + [...indice].map((c) => sub[c] ?? c).join("");
 }
 
-/** Terme `b` signé — porte son propre signe plutôt que d'être juxtaposé à un `+` littéral du
- * template (sinon double-signe `+-5` quand `b<0`, cas des contextes divergents). Duplique
- * `formatTermeB` de `ui5e/formatSuiteRecurrenteAffine.ts` (non exporté). */
-function formatTermeB(b: number): string {
-  return b < 0 ? `-${-b}` : `+${b}`;
+/** Consigne de l'écran « poser la récurrence » coupée en deux : la phrase de notation (énoncé) et
+ * la question, sans la tournure de saisie « (tape Q ou x pour Qₙ) ». */
+function decouperConsignePoser(exercice: ExerciceSuiteRecurrenteAffine): { notation: string; question: string } {
+  const brut = consignePoserRecurrence(exercice).replace(/\s*\(tape [^)]*\)/, "");
+  const i = brut.indexOf("Exprime");
+  return i < 0 ? { notation: "", question: brut } : { notation: brut.slice(0, i).trim(), question: brut.slice(i).trim() };
 }
 
-function formatRecurrenceLatex(exercice: ExerciceSuiteRecurrenteAffine): string {
-  return `${exercice.variableGrandeur}_{n+1}=${fractionQVersLatex(exercice.a)}\\times ${exercice.variableGrandeur}_n${formatTermeB(exercice.b)}`;
+/** Consigne des termes sans la parenthèse de saisie (« tu peux réutiliser… », réservée à l'écran). */
+function consigneTermesPapier(exercice: ExerciceSuiteRecurrenteAffine): string {
+  return consigneTermesSuccessifs(exercice).replace(/\s*\(tu peux [^)]*\)/, "");
+}
+
+function pourcentage(exercice: ExerciceSuiteRecurrenteAffine): number {
+  return Math.round(Math.abs(fractionQVersNombre(exercice.a) - 1) * 100);
+}
+
+function relationLatex(exercice: ExerciceSuiteRecurrenteAffine): string {
+  return formatReponseAttenduePhaseLatex(exercice, "poserRecurrence")[0];
 }
 
 function construireEnonceSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): SectionExercice {
+  const { notation, question } = decouperConsignePoser(exercice);
   return {
-    enteteFragments: [texte(exercice.phraseEnonce)],
-    questions: [
-      { consigne: [texte(consignePoserRecurrence(exercice))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneRegimePermanent(exercice))], reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(consigneTermesSuccessifs(exercice))], reponse: { type: "lignes", nombre: 4 } },
+    enteteFragments: [texte(notation ? `${exercice.phraseEnonce} ${notation}` : exercice.phraseEnonce)],
+    questions: [{ consigne: [texte(question)] }, { consigne: [texte(consigneRegimePermanent(exercice))] }, { consigne: [texte(consigneTermesPapier(exercice))] }],
+  };
+}
+
+/** Énoncé papier : le même (trois vraies questions, une par étape). */
+function enoncePapierSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): EnoncePapier {
+  return { section: construireEnonceSuiteRecurrenteAffine(exercice), etapesParQuestion: [["a"], ["b"], ["c"]] };
+}
+
+function construireCorrectionSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): BlocCorrection[] {
+  return [
+    { type: "paragraphe", fragments: [texte("a) "), latex(relationLatex(exercice))] },
+    { type: "paragraphe", fragments: [texte("b) "), latex(formatRegimeConfirmeLatex(exercice))] },
+    { type: "paragraphe", fragments: [texte("c) "), ...formatReponseAttenduePhaseLatex(exercice, "termesSuccessifs").flatMap((t, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(t)])] },
+  ];
+}
+
+function reponseBreveSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): FragmentConsigne[] {
+  const termes = formatReponseAttenduePhaseLatex(exercice, "termesSuccessifs");
+  return [
+    texte("a) "),
+    latex(relationLatex(exercice)),
+    texte(" ; b) "),
+    ...(exercice.regime === "divergent" ? [texte("pas de régime permanent")] : [latex(formatRegimeConfirmeLatex(exercice))]),
+    texte(" ; c) "),
+    ...termes.flatMap((t, i) => [...(i === 0 ? [] : [texte(", ")]), latex(t)]),
+  ];
+}
+
+function correctionDetailleeSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): EtapeCorrection[] {
+  const V = exercice.variableGrandeur;
+  const a = fractionQVersNombre(exercice.a);
+  const p = pourcentage(exercice);
+  const convergent = exercice.regime === "convergent";
+  const u2 = fractionQVersNombre(exercice.u2);
+  const u3 = fractionQVersNombre(exercice.u3);
+  const b = exercice.b;
+  const plusB = b < 0 ? `-${-b}` : `+${b}`;
+  const termes = formatReponseAttenduePhaseLatex(exercice, "termesSuccessifs");
+  const etapes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: convergent
+        ? [texte(`Retirer ${p} % revient à garder ${100 - p} %, donc à multiplier par `), latex(`a=1-${decimalLatex(p / 100)}=${aLatex(exercice)}`), texte(" ; la quantité fixe ajoutée ou retirée à chaque étape est "), latex(`b=${b}`), texte(".")]
+        : [texte(`Augmenter de ${p} % revient à multiplier par `), latex(`a=1+${decimalLatex(p / 100)}=${aLatex(exercice)}`), texte(" ; la quantité fixe ajoutée ou retirée à chaque étape est "), latex(`b=${b}`), texte(".")],
+    },
+    { label: "Conclusion", sousQuestion: "a", fragments: [latex(relationLatex(exercice))] },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments: convergent
+        ? [texte(`Multiplier par ${decimalLatex(p / 100).replace("{,}", ",")} (la part retirée) au lieu de ${aLatex(exercice).replace("{,}", ",")} (la part qui reste).`)]
+        : [texte(`Multiplier par ${decimalLatex(p / 100).replace("{,}", ",")} au lieu de ${aLatex(exercice).replace("{,}", ",")} : une hausse de ${p} % multiplie par 1 + ${p}/100.`)],
+    },
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("Un régime permanent existe seulement si "), latex("|a|<1"), texte(" ; on le trouve en résolvant "), latex("L=a\\times L+b"), texte(".")] },
+  ];
+  if (convergent) {
+    etapes.push({
+      label: "Calcul",
+      sousQuestion: "b",
+      fragments: [latex(`|a|=${aLatex(exercice)}<1`), texte(" ; "), latex(`L=\\dfrac{b}{1-a}=\\dfrac{${b}}{1-${aLatex(exercice)}}=\\dfrac{${b}}{${decimalLatex(1 - a)}}`)],
+    });
+    etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: [latex(formatRegimeConfirmeLatex(exercice)), texte(" : à long terme, la grandeur se stabilise vers cette valeur.")] });
+  } else {
+    etapes.push({ label: "Calcul", sousQuestion: "b", fragments: [latex(`|a|=${aLatex(exercice)}\\geq 1`)] });
+    etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: [texte("Pas de régime permanent : la suite s'éloigne de toute valeur fixe (elle croît sans limite).")] });
+    etapes.push({
+      label: "Piège",
+      sousQuestion: "b",
+      fragments: [texte("La formule donne pourtant un nombre, "), latex(`\\dfrac{b}{1-a}\\approx ${decimalLatex(b / (1 - a))}`), texte(" : ce n'est pas un régime permanent, puisque "), latex("|a|\\geq 1"), texte(".")],
+    });
+  }
+  etapes.push({ label: "Méthode", sousQuestion: "c", fragments: [texte("On applique la relation à partir de la valeur initiale ; on peut réutiliser les valeurs arrondies au centième.")] });
+  etapes.push({
+    label: "Calcul",
+    sousQuestion: "c",
+    fragments: [
+      latex(`${V}_2=${aLatex(exercice)}\\times ${exercice.u1}${plusB}`),
+      texte(" ; "),
+      latex(`${V}_3=${aLatex(exercice)}\\times ${decimalLatex(u2)}${plusB}`),
+      texte(" ; "),
+      latex(`${V}_4=${aLatex(exercice)}\\times ${decimalLatex(u3)}${plusB}`),
+    ],
+  });
+  etapes.push({ label: "Conclusion", sousQuestion: "c", fragments: termes.flatMap((t, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(t)]) });
+  etapes.push({ label: "Piège", sousQuestion: "c", fragments: [latex(`${V}_2=a\\times ${V}_1+b`), texte(", et non "), latex(`a\\times(${V}_1+b)`), texte(" : on multiplie d'abord, puis on ajoute b.")] });
+  return etapes;
+}
+
+function baremeSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): BaremeExercice {
+  const convergent = exercice.regime === "convergent";
+  const p = pourcentage(exercice);
+  const erreurs: ErreurFrequente[] = [
+    {
+      description: [texte(convergent ? `a = ${decimalLatex(p / 100).replace("{,}", ",")} (la part retirée) au lieu de ${aLatex(exercice).replace("{,}", ",")}` : `a = ${decimalLatex(p / 100).replace("{,}", ",")} au lieu de ${aLatex(exercice).replace("{,}", ",")}`)],
+      cout: "0 pt sur a), suite notée sans double pénalité",
+    },
+  ];
+  if (!convergent) erreurs.push({ description: [texte("Régime permanent annoncé alors que |a| ≥ 1 (valeur de b/(1 − a) donnée comme limite)")], cout: "0 pt sur la conclusion de b)" });
+  erreurs.push({ description: [texte(`Terme suivant calculé comme a × (${indiceTexte(exercice.variableGrandeur, "n")} + b)`)], cout: "−0,5 sur c)" });
+  return {
+    reponseFinale: reponseBreveSuiteRecurrenteAffine(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Relation de récurrence : "), latex(relationLatex(exercice))], points: 1 },
+      { sousQuestion: "b", critere: [texte("Critère "), latex("|a|<1"), texte(" appliqué")], points: 0.5 },
+      convergent
+        ? { sousQuestion: "b", critere: [texte("Régime permanent : "), latex(formatRegimeConfirmeLatex(exercice))], points: 1 }
+        : { sousQuestion: "b", critere: [texte("Conclusion : pas de régime permanent")], points: 1 },
+      { sousQuestion: "c", critere: [texte("Trois termes arrondis au centième : "), ...formatReponseAttenduePhaseLatex(exercice, "termesSuccessifs").flatMap((t, i) => [...(i === 0 ? [] : [texte(" ; ")]), latex(t)])], points: 1.5 },
+    ],
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [
+      [texte("Relation écrite avec une autre lettre (x, u…) pour " + indiceTexte(exercice.variableGrandeur, "n"))],
+      [texte("Termes calculés à partir des valeurs déjà arrondies (écart d'un centième)")],
+      ...(convergent ? [[texte("Régime permanent donné en fraction exacte")]] : []),
     ],
   };
 }
 
-function construireCorrectionSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): BlocCorrection[] {
-  const { variableGrandeur, u1, u2, u3, u4, regime, L, a, b } = exercice;
-
-  const correctionA: BlocCorrection = {
-    type: "paragraphe",
-    fragments: [texte("a) "), latex(formatRecurrenceLatex(exercice))],
-  };
-
-  const correctionB: BlocCorrection =
-    regime === "divergent"
-      ? {
-          type: "paragraphe",
-          fragments: [texte("b) "), latex(`|a|=${fractionQVersLatex(a)}\\geq 1`), texte(" ⟹ il n'existe pas de régime permanent.")],
-        }
-      : {
-          type: "paragraphe",
-          fragments: [
-            texte("b) "),
-            latex(`|a|=${fractionQVersLatex(a)}<1`),
-            texte(" ⟹ le régime permanent existe. "),
-            latex(`L=a\\times L+b \\Rightarrow L=\\dfrac{b}{1-a}=\\dfrac{${b}}{1-\\left(${fractionQVersLatex(a)}\\right)}=${fractionQVersLatex(L as FractionQ)}\\approx ${arrondiCentieme(L as FractionQ)}`),
-          ],
-        };
-
-  const correctionC: BlocCorrection = {
-    type: "paragraphe",
-    fragments: [
-      texte("c) "),
-      latex(`${variableGrandeur}_2=${fractionQVersLatex(a)}\\times ${u1}${formatTermeB(b)}=${fractionQVersLatex(u2)}\\approx ${arrondiCentieme(u2)}`),
-      texte(" ; "),
-      latex(`${variableGrandeur}_3=${fractionQVersLatex(a)}\\times \\left(${fractionQVersLatex(u2)}\\right)${formatTermeB(b)}=${fractionQVersLatex(u3)}\\approx ${arrondiCentieme(u3)}`),
-      texte(" ; "),
-      latex(`${variableGrandeur}_4=${fractionQVersLatex(a)}\\times \\left(${fractionQVersLatex(u3)}\\right)${formatTermeB(b)}=${fractionQVersLatex(u4)}\\approx ${arrondiCentieme(u4)}`),
-    ],
-  };
-
-  return [correctionA, correctionB, correctionC];
+function difficulteSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine): 1 | 2 | 3 {
+  return exercice.regime === "divergent" ? 3 : 2;
 }
 
 export const adaptateurEvaluationSuiteRecurrenteAffine: AdaptateurFeuilleExercices<ExerciceSuiteRecurrenteAffine> = {
   titreDocument: "Suite récurrente affine et régime permanent — Évaluation",
   nomFichierBase: "suite-recurrente-affine",
   genererInstance: genererExerciceSuiteRecurrenteAffine,
+  catalogueVariantes: CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE,
+  genererInstanceAvecVariante: (id) => construireAvecRegime(id as RegimeSuiteRecurrenteAffine),
   construireEnonce: construireEnonceSuiteRecurrenteAffine,
   construireCorrection: construireCorrectionSuiteRecurrenteAffine,
-  // 3 questions par instance (poserRecurrence/regimePermanent/termesSuccessifs) — jamais
-  // `regroupable` (réservé aux adaptateurs à 1 seule question, voir `AdaptateurFeuilleExercices.regroupable`).
+  difficulte: difficulteSuiteRecurrenteAffine,
+  reponseBreve: reponseBreveSuiteRecurrenteAffine,
+  correctionDetaillee: correctionDetailleeSuiteRecurrenteAffine,
+  bareme: baremeSuiteRecurrenteAffine,
+  enoncePapier: enoncePapierSuiteRecurrenteAffine,
+  dureeMinutes: 10,
 };

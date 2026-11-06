@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecRegime, genererExerciceSuiteRecurrenteAffine } from "./generateurs5e/suiteRecurrenteAffine";
+import { CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, construireAvecRegime, genererExerciceSuiteRecurrenteAffine } from "./generateurs5e/suiteRecurrenteAffine";
 import type { RegimeSuiteRecurrenteAffine } from "./core5e/suiteRecurrenteAffine.types";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
@@ -34,12 +34,24 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionSuiteRecurrenteAffine {
   return demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, genererExerciceSuiteRecurrenteAffine);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue (les 2 régimes)
+ * que l'adaptateur d'export (`generateurs5e/suiteRecurrenteAffine/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionSuiteRecurrenteAffine {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, genererExerciceSuiteRecurrenteAffine, (id) => construireAvecRegime(id as RegimeSuiteRecurrenteAffine)),
+  );
 }
 
 interface TransitionEnAttente {
@@ -74,7 +86,7 @@ function formatReponseRegimePermanent(reponse: { existe: boolean; L: string }): 
 }
 
 export function App5gen19() {
-  const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteRecurrenteAffine`, jamais dans le moteur. Remis à vide à

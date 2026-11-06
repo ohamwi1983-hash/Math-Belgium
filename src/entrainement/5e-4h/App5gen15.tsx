@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./generateurs5e/suitesGeometriques";
 import type { FamilleSuiteGeometriqueId } from "./generateurs5e/suitesGeometriques";
@@ -251,6 +252,15 @@ function nouvelleSession(): EtatSessionSuiteGeometrique {
   return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, genererExerciceSuiteGeometrique);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/suitesGeometriques/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteGeometrique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceSuiteGeometrique, (id) => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
+}
+
 /** Puces de progression — pas de `ORDRE_PHASES` statique (même raison que 5gen14) : la séquence
  * réelle dépend de `exercice.famille`/`combo`/`statutQ` (branches B1/B2 dupliquées), donc toujours
  * recalculée via `ordreComplet(exercice)`. Révélation lue depuis `etat.revelesPartiels[phase]`
@@ -371,7 +381,7 @@ function soumettrePoserEquation(
 }
 
 export function App5gen15() {
-  const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteGeometrique`, jamais dans le moteur. Remis à vide à chaque
