@@ -11,8 +11,20 @@ import type { ExerciceEquationInequationSecondDegre, FamilleEquationInequationSe
 import { formatDomaineLatex, formatFonctionDeveloppeeLatex } from "./formatOptimisation";
 import { CATALOGUE_FAMILLES } from "../generateurs/equationInequationSecondDegre";
 
+/** Nombre en LaTeX : au plus 2 décimales, virgule décimale « {,} » (jamais un point). */
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  return (Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "")).replace(".", "{,}");
+}
+
+/** Même nombre en TEXTE (consignes, réponses révélées) : virgule et « − » typographique. */
+function formatNombreTexte(valeur: number): string {
+  return formatNombre(valeur).replace("{,}", ",").replace("-", "−");
+}
+
+/** Domaine de validité en texte (« [5 ; 21] ») — donnée de l'énoncé : il ne se déduit pas toujours
+ * du texte narratif (bornes propres à la situation), il est donc toujours rappelé à l'élève. */
+export function formatDomaineTexte(exercice: ExerciceEquationInequationSecondDegre): string {
+  return `[${formatNombreTexte(exercice.base.domaine.inf)} ; ${formatNombreTexte(exercice.base.domaine.sup)}]`;
 }
 
 function capitaliser(texte: string): string {
@@ -112,7 +124,7 @@ export function texteAidePoserSystemeNiveau2(exercice: ExerciceEquationInequatio
 
 export function consignePoserEquationInequation(exercice: ExerciceEquationInequationSecondDegre): string {
   const { nomGrandeur, uniteGrandeur } = exercice.base.contexte;
-  const k = formatNombre(exercice.k);
+  const k = formatNombreTexte(exercice.k);
   if (exercice.variante === "equation") {
     return `${capitaliser(nomGrandeur)} vaut exactement ${k} ${uniteGrandeur} : pose l'équation correspondante.`;
   }
@@ -127,9 +139,10 @@ export function consigneResoudre(): string {
 }
 
 export function consigneValidation(exercice: ExerciceEquationInequationSecondDegre): string {
+  const domaine = `${exercice.base.contexte.labelVariable} ∈ ${formatDomaineTexte(exercice)}`;
   return exercice.variante === "equation"
-    ? "Chaque racine appartient-elle au domaine de validité (établi à l'écran 3) ? Classe chacune d'elles."
-    : "Détermine l'intervalle-solution valide, en tenant compte du domaine de validité (établi à l'écran 3) — arrondi au centième accepté si besoin.";
+    ? `Dans cette situation, le domaine de validité est ${domaine}. Chaque racine appartient-elle à ce domaine ? Classe chacune d'elles.`
+    : `Dans cette situation, le domaine de validité est ${domaine}. Détermine l'intervalle-solution valide, en tenant compte de ce domaine — arrondi au centième accepté si besoin.`;
 }
 
 export function consigneInterpretation(): string {
@@ -141,7 +154,7 @@ export function consigneInterpretation(): string {
 // ============================================================================
 
 export function texteAidePoserEquationInequationNiveau1(): string {
-  return "Rappel : reprends l'expression développée de la grandeur (établie à l'écran 2), et pose l'égalité/l'inégalité avec le seuil donné.";
+  return "Rappel : exprime la grandeur en fonction de la variable (développée), et pose l'égalité/l'inégalité avec le seuil donné.";
 }
 
 /** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. */
@@ -159,7 +172,7 @@ export function texteAideResoudreNiveau2(exercice: ExerciceEquationInequationSec
 }
 
 export function texteAideValidationNiveau1(): string {
-  return "Rappel : seules les valeurs comprises dans le domaine de validité (établi à l'écran 3) ont un sens dans ce contexte.";
+  return "Rappel : seules les valeurs comprises dans le domaine de validité ont un sens dans ce contexte.";
 }
 
 /** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. */
@@ -184,18 +197,18 @@ export function texteAideInterpretationNiveau1(): string {
 export function formatResolutionAttendueTexte(exercice: ExerciceEquationInequationSecondDegre): string {
   const label = exercice.base.contexte.labelVariable;
   if (exercice.variante === "equation") {
-    return exercice.racinesCandidates.map((r) => `${label} = ${formatNombre(r)}`).join(" ; ");
+    return exercice.racinesCandidates.map((r) => `${label} = ${formatNombreTexte(r)}`).join(" ; ");
   }
-  return `${label} ∈ ]${formatNombre(exercice.intervalleBrut.inf)} ; ${formatNombre(exercice.intervalleBrut.sup)}[`;
+  return `${label} ∈ ]${formatNombreTexte(exercice.intervalleBrut.inf)} ; ${formatNombreTexte(exercice.intervalleBrut.sup)}[`;
 }
 
 export function formatValidationAttendueTexte(exercice: ExerciceEquationInequationSecondDegre): string {
   const label = exercice.base.contexte.labelVariable;
   if (exercice.variante === "equation") {
     if (exercice.racinesValides.length === 0) return "aucune racine valide";
-    return exercice.racinesCandidates.map((r) => `${label} = ${formatNombre(r)} : ${exercice.racinesValides.includes(r) ? "valide" : "rejetée"}`).join(", ");
+    return exercice.racinesCandidates.map((r) => `${label} = ${formatNombreTexte(r)} : ${exercice.racinesValides.includes(r) ? "valide" : "rejetée"}`).join(", ");
   }
-  return `${label} ∈ [${formatNombre(exercice.intervalleValide.inf)} ; ${formatNombre(exercice.intervalleValide.sup)}]`;
+  return `${label} ∈ [${formatNombreTexte(exercice.intervalleValide.inf)} ; ${formatNombreTexte(exercice.intervalleValide.sup)}]`;
 }
 
 // ============================================================================

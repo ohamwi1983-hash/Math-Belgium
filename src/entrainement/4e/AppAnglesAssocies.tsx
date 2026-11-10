@@ -10,6 +10,7 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { BlocEnonceAnglesAssocies } from "./components/BlocEnonceAnglesAssocies";
 import { Katex } from "./components/Katex";
 import { decimal3Latex } from "./ui/formatAnglesAssocies";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
@@ -24,6 +25,15 @@ function nouvelleSession(): EtatSessionAnglesAssocies {
   return demarrerSessionAnglesAssocies(REGLAGES_DEMO, genererExerciceAnglesAssocies);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionAnglesAssocies {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionAnglesAssocies(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceAnglesAssocies, (id) => construireAvecVarianteId(id as IdVarianteAnglesAssocies)));
+}
+
 /** État tenu en attente dès que l'écran unique se termine (bonne réponse, ou tentatives épuisées) —
  * l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -36,7 +46,7 @@ interface TransitionEnAttente {
 /** Refonte écran unique (`promptgen17refontecomplete.md`) — plus de routage par phase, un seul
  * composant d'écran (`EtapeAnglesAssocies`) par exercice. */
 export function AppAnglesAssocies() {
-  const [etat, setEtat] = useState<EtatSessionAnglesAssocies>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionAnglesAssocies>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») — sert de `key` à
    * l'écran pour qu'il reparte d'un champ vide (audit du chapitre 5 : la saisie précédente restait

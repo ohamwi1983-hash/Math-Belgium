@@ -1,6 +1,6 @@
 import type { AngleRemarquable, ExerciceValeursRemarquables } from "../../core/valeursRemarquables.types";
 import type { Quadrant } from "../../core/cercleTrigonometrique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { libelleQuadrant } from "../../ui/formatCercleTrigonometrique";
@@ -8,6 +8,7 @@ import { formatEnonceCercleTrigLatex } from "../../ui/formatValeursRemarquables"
 import { LATEX_COS, LATEX_SIN, LATEX_TAN } from "./tables";
 import { estSurAxe } from "../../moteur/verificationCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceValeursRemarquables } from "./index";
+import { LIBELLE_CAS_QUADRANT_I, profilValeursRemarquables } from "../profilsEvaluation4eCh5";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceValeursRemarquables>` pour gen15 (Valeurs
@@ -162,6 +163,116 @@ function construireCorrectionValeursRemarquables(instance: ExerciceValeursRemarq
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les écrans quadrant → angle du premier quadrant → valeurs exactes sont les étapes du corrigé ;
+// l'énoncé imprimé garde l'angle et la consigne globale (valeurs exactes de sin, cos, tan).
+
+function enoncePapier(instance: ExerciceValeursRemarquables): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("On considère l'angle "),
+        latex(formatEnonceCercleTrigLatex(instance.angleDepart)),
+        texte(". Donne, sans calculatrice, la valeur exacte de "),
+        latex("\\sin\\theta"),
+        texte(", "),
+        latex("\\cos\\theta"),
+        texte(" et "),
+        latex("\\tan\\theta"),
+        texte("."),
+      ],
+      questions: [],
+    },
+  };
+}
+
+/** « sin θ = …, cos θ = …, tan θ = … » en LaTeX (« n'existe pas » en texte LaTeX). */
+function valeursLatex(instance: ExerciceValeursRemarquables): string {
+  const tan = instance.tanLatex === "n'existe pas" ? "\\tan\\theta \\text{ n'existe pas}" : `\\tan\\theta = ${instance.tanLatex}`;
+  return `\\sin\\theta = ${instance.sinLatex} ; \\ \\cos\\theta = ${instance.cosLatex} ; \\ ${tan}`;
+}
+
+function magnitudesLatex(ref: AngleRemarquable): string {
+  const tan = LATEX_TAN[ref] === "n'existe pas" ? `\\tan ${ref}^\\circ \\text{ n'existe pas}` : `\\tan ${ref}^\\circ = ${LATEX_TAN[ref]}`;
+  return `\\sin ${ref}^\\circ = ${LATEX_SIN[ref]} ; \\ \\cos ${ref}^\\circ = ${LATEX_COS[ref]} ; \\ ${tan}`;
+}
+
+function ligneReduction(instance: ExerciceValeursRemarquables): FragmentConsigne[] {
+  const { angleDepart, angleReduit } = instance;
+  if (angleDepart === angleReduit) return [texte(`θ = ${angleReduit}° est déjà entre 0° et 360°.`)];
+  return [texte("On ramène θ entre 0° et 360° : "), latex(`${angleDepart}^\\circ ${angleDepart < 0 ? "+" : "-"} 360^\\circ = ${angleReduit}^\\circ`), texte(".")];
+}
+
+function correctionDetaillee(instance: ExerciceValeursRemarquables): EtapeCorrection[] {
+  const { quadrant, angleReduit, anglePremierQuadrant } = instance;
+  const lignes: EtapeCorrection[] = [
+    { label: "Calcul", sousQuestion: "a", fragments: ligneReduction(instance) },
+    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`${angleReduit}° → ${libelleQuadrant(quadrant)}.`)] },
+  ];
+  if (estSurAxe(instance)) {
+    lignes.push(
+      { label: "Méthode", sousQuestion: "b", fragments: [texte("Sur un axe, M(θ) est l'un des points (±1 ; 0) ou (0 ; ±1) : cos θ est son abscisse, sin θ son ordonnée.")] },
+      { label: "Conclusion", sousQuestion: "b", fragments: [latex(valeursLatex(instance))] },
+      { label: "Piège", sousQuestion: "b", fragments: [texte(quadrant === "axeOy" ? "Sur l'axe Oy, cos θ = 0 : tan θ n'existe pas (elle ne vaut ni 0 ni 1)." : "Sur l'axe Ox, cos θ vaut 1 ou −1 selon le côté (180° donne −1).")] },
+    );
+    return lignes;
+  }
+  lignes.push(
+    { label: "Calcul", sousQuestion: "b", fragments: [texte(raisonAnglePremierQuadrant(quadrant, angleReduit, anglePremierQuadrant))] },
+    { label: "Méthode", sousQuestion: "c", fragments: [texte(`Valeurs remarquables de ${anglePremierQuadrant}° (valeurs absolues) : `), latex(magnitudesLatex(anglePremierQuadrant))] },
+    { label: "Calcul", sousQuestion: "c", fragments: [texte(`Signes donnés par le quadrant ${quadrant} :`)] },
+    { label: "Conclusion", sousQuestion: "c", fragments: [latex(valeursLatex(instance))] },
+    {
+      label: "Piège",
+      sousQuestion: "c",
+      fragments: [
+        anglePremierQuadrant === 45
+          ? texte("À 45°, sinus et cosinus ont la même valeur absolue, mais pas forcément le même signe.")
+          : texte("Ne pas échanger les valeurs de 30° et de 60° : "),
+        ...(anglePremierQuadrant === 45 ? [] : [latex("\\sin 30^\\circ = \\cos 60^\\circ = \\dfrac{1}{2}"), texte(" et "), latex("\\cos 30^\\circ = \\sin 60^\\circ = \\dfrac{\\sqrt{3}}{2}"), texte(".")]),
+      ],
+    },
+  );
+  return lignes;
+}
+
+function reponseBreve(instance: ExerciceValeursRemarquables): FragmentConsigne[] {
+  return [latex(valeursLatex(instance))];
+}
+
+function bareme(instance: ExerciceValeursRemarquables): BaremeExercice {
+  const surAxe = estSurAxe(instance);
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: surAxe
+      ? [
+          { sousQuestion: "a", critere: [texte(`Position : ${libelleQuadrant(instance.quadrant)}`)], points: 1 },
+          { sousQuestion: "b", critere: [texte("sin θ et cos θ exacts")], points: 2 },
+          { sousQuestion: "b", critere: [texte(instance.tanLatex === "n'existe pas" ? "tan θ n'existe pas (justifié : cos θ = 0)" : "tan θ = 0")], points: 1 },
+        ]
+      : [
+          { sousQuestion: "a", critere: [texte(`Quadrant : ${libelleQuadrant(instance.quadrant)}`)], points: 0.5 },
+          { sousQuestion: "b", critere: [texte(`Angle du premier quadrant : ${instance.anglePremierQuadrant}°`)], points: 1 },
+          { sousQuestion: "c", critere: [texte("Valeurs absolues exactes de sin, cos et tan")], points: 1.5 },
+          { sousQuestion: "c", critere: [texte("Signes corrects selon le quadrant")], points: 1 },
+        ],
+    erreursFrequentes: surAxe
+      ? instance.quadrant === "axeOy"
+        ? [{ description: [texte("tan θ = 0 sur l'axe Oy")], cout: "0 pt sur tan θ" }]
+        : [{ description: [texte("cos 180° pris égal à 1 (côté de l'axe Ox mal lu)")], cout: "−1" }]
+      : [
+          { description: [texte("Valeurs de 30° et 60° échangées")], cout: "−1" },
+          { description: [texte("Signe oublié (valeurs du premier quadrant recopiées)")], cout: "0 pt sur les signes" },
+        ],
+    reponsesAcceptees: [[texte("Écritures équivalentes : "), latex("\\dfrac{1}{\\sqrt{3}}"), texte(" pour "), latex("\\dfrac{\\sqrt{3}}{3}"), texte(", "), latex("\\dfrac{1}{\\sqrt{2}}"), texte(" pour "), latex("\\dfrac{\\sqrt{2}}{2}")]],
+  };
+}
+
+/** ★ quadrant I ou axe sans réduction ; ★★ sinon. */
+function difficulte(instance: ExerciceValeursRemarquables): 1 | 2 | 3 {
+  return (instance.quadrant === "I" || estSurAxe(instance)) && instance.angleDepart === instance.angleReduit ? 1 : 2;
+}
+
 export const adaptateurEvaluationValeursRemarquables: AdaptateurFeuilleExercices<ExerciceValeursRemarquables> = {
   titreDocument: "Valeurs trigonométriques remarquables — Évaluation",
   nomFichierBase: "valeurs-remarquables",
@@ -174,4 +285,12 @@ export const adaptateurEvaluationValeursRemarquables: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(Number(id) as AngleRemarquable),
   construireEnonce: construireEnonceValeursRemarquables,
   construireCorrection: construireCorrectionValeursRemarquables,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 3,
+  profilInstance: profilValeursRemarquables,
+  libelleCasParticulier: LIBELLE_CAS_QUADRANT_I,
 };

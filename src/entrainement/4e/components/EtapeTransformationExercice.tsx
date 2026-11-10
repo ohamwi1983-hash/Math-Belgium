@@ -191,7 +191,7 @@ export function EtapeTransformationExercice({
         <input
           id="transfo-equation"
           className={`text-input${equationErronee ? " is-erronee" : ""}`}
-          placeholder="ex : 2(x-3)^2+1"
+          placeholder="ex : 7/6(x-8)^2+9"
           value={equation}
           disabled={equationFermee}
           onChange={(e) => setEquation(e.target.value)}

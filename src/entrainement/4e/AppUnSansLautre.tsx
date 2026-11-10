@@ -30,6 +30,7 @@ import {
   formatValeurConnueLatex,
   formatValeurTangenteSimplifieeLatex,
 } from "./ui/formatUnSansLautre";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -40,6 +41,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionUnSansLautre {
   return demarrerSessionUnSansLautre(REGLAGES_DEMO, genererExerciceUnSansLautre);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionUnSansLautre {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionUnSansLautre(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceUnSansLautre, (id) => construireAvecVarianteId(id as FonctionConnue)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (3 phases fixes,
@@ -76,7 +86,7 @@ interface TransitionEnAttente {
 }
 
 export function AppUnSansLautre() {
-  const [etat, setEtat] = useState<EtatSessionUnSansLautre>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionUnSansLautre>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur ; remis à vide à chaque nouvel exercice (patron gen14). */

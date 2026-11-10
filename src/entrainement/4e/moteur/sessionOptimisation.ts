@@ -95,10 +95,19 @@ export function demarrerSessionOptimisation(reglages: ReglagesSession, generateu
   };
 }
 
+/** Choix fermés qui se gagnent par élimination (identification de x et y parmi 2 candidats chacun ;
+ * phrase de conclusion parmi 4 ou 5) : UNE seule tentative. */
+const PHASES_CHOIX_FERME: ReadonlySet<EtatSessionOptimisation["phase"]> = new Set(["identification", "interpretation"]);
+
+/** Nombre de tentatives de l'écran courant (affiché par les composants d'étape). */
+export function tentativesMaxCourant(etat: EtatSessionOptimisation): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionOptimisation): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
   };
 }
 

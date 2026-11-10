@@ -1,5 +1,5 @@
 import type { ExerciceSectionPlaneSolide } from "../../core/sectionPlaneSolide.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CritereBareme, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
 import {
   elementsConstructionAuxiliaire,
@@ -11,9 +11,11 @@ import {
   segmentsExtraTraces,
   TEXTE_AIDE_AUXILIAIRE_NIVEAU1,
   TEXTE_AIDE_SEGMENT_NIVEAU1,
+  segmentSurFaceCachee,
 } from "../../ui/formatSectionPlaneSolide";
 import { calculerAretesAvecVisibilite, calculerEchelleProjection, calculerLabelsSommetsPixel, calculerSommetsPixel, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide } from "./index";
+import { profilSectionPlaneSolide } from "../profilsEvaluation4eCh8";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSectionPlaneSolide>` pour gen40 ("Section plane
@@ -67,17 +69,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPl
  * `avecSection=true` (réservé à la correction) affiche en plus TOUS les sommets de la section
  * (P/Q/R/S/T/…) et les segments qui la referment, dans l'ordre cyclique complet.
  *
- * **Consigne composée, PAS une consigne d'écran existante reprise telle quelle** : aucune des 4
- * consignes d'écran de `ui/formatSectionPlaneSolide.ts` (`CONSIGNE_SEGMENT_DIRECT`,
- * `CONSIGNE_AUXILIAIRE_LIGNES`, `CONSIGNE_AUXILIAIRE_FACE`) ne convient telle quelle : chacune ne
- * couvre qu'UN micro-pas de la boucle interactive ("Sélectionne une face…", "Sélectionne 2
- * droites…"), jamais la tâche complète "reconstruis tout le polygone" qu'une feuille papier doit
- * poser en une seule fois (mêmes raisons que `constructionParabole`, où les 2 phases écran
- * deviennent UNE SEULE question papier). La consigne ci-dessous (`CONSIGNE_PAPIER`) est donc composée
- * d'une phrase d'ouverture générique + des 2 textes de MÉTHODE déjà écrits pour les aides de niveau 1
- * des 2 écrans (`TEXTE_AIDE_SEGMENT_NIVEAU1`, `TEXTE_AIDE_AUXILIAIRE_NIVEAU1`), réutilisés TELS QUELS
- * (jamais reformulés) — ce sont déjà des phrases autonomes décrivant le principe géométrique, pas des
- * instructions d'interface ("Sélectionne...").
+ * **Énoncé papier (refonte des feuilles, `enoncePapier`)** : la figure + UNE consigne globale
+ * (construire la section, nommer les nouveaux points, pointillés, nature du polygone) — aucun rappel
+ * de méthode (décision de l'utilisateur). Les étapes de la boucle interactive (côté direct, point
+ * auxiliaire, fermeture — `consignesEtapes`) sont les titres « Étape n — … » du corrigé, où vont
+ * aussi les 2 textes de méthode des aides de niveau 1 (`TEXTE_AIDE_SEGMENT_NIVEAU1`,
+ * `TEXTE_AIDE_AUXILIAIRE_NIVEAU1`).
  *
  * **Correction RESYNTHÉTISÉE** depuis les champs déjà connus et corrects de l'instance tirée : nombre
  * de faces traversées (chacune fournit un CÔTÉ de la section), puis chaque étape de la résolution de
@@ -88,8 +85,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPl
  *
  * **PAS `regroupable`** — `enteteHtml` (le solide en perspective cavalière) est utilisé, ce qui
  * disqualifie `regroupable` à lui seul (voir la doc du champ, `export/genererFeuilleExercices.ts`),
- * indépendamment du fait que la consigne soit par ailleurs bien générique (`CONSIGNE_PAPIER` ne
- * dépend d'aucune valeur tirée — seul `enteteFragments`/`enteteHtml` varie d'une instance à l'autre).
+ * et les étapes du corrigé dépendent de l'instance.
  *
  * **Catalogue de variantes = les 4 gabarits** (`CATALOGUE_VARIANTES`, déjà exporté par
  * `generateurs/sectionPlaneSolide/index.ts`, RÉUTILISÉ tel quel, jamais un second catalogue
@@ -274,15 +270,31 @@ ${pointsHtml}
 </svg>`;
 }
 
-const CONSIGNE_PAPIER =
-  "Le plan de coupe passe par les 3 points P, Q et R marqués sur le solide. Retrouve puis trace le polygone de section complet (tous les points où ce plan coupe les arêtes du solide, reliés dans l'ordre jusqu'à refermer le polygone ; les côtés situés sur une face cachée se tracent en pointillés). " +
-  `${TEXTE_AIDE_SEGMENT_NIVEAU1} Quand plus aucune face n'a 2 points connus, construis un point auxiliaire : ${TEXTE_AIDE_AUXILIAIRE_NIVEAU1.replace(/^Méthode : /, "")}`;
+/** Étapes du raisonnement (une par écran du générateur) : un côté tracé dans une face où 2 points
+ * sont connus, ou un point auxiliaire (écrans « droites » + « face »), puis la fermeture du
+ * polygone. Ce sont les titres « Étape n — … » du corrigé ; l'énoncé papier n'a qu'une consigne. */
+function consignesEtapes(exercice: ExerciceSectionPlaneSolide): string[] {
+  return [
+    ...exercice.resolutionReference.map((etape) =>
+      etape.type === "segment"
+        ? "Trace un côté de la section dans une face où 2 points de section sont déjà connus."
+        : "Plus aucune face n'a 2 points connus : construis un point auxiliaire, puis le nouveau point de section qu'il donne.",
+    ),
+    "Referme le polygone de section et donne sa nature.",
+  ];
+}
+
+/** « le cube ABCD-EFGH », « le tétraèdre ABCD »… (tous les gabarits sont masculins). */
+function leSolide(exercice: ExerciceSectionPlaneSolide): string {
+  const label = exercice.solide.label;
+  return `le ${label.charAt(0).toLowerCase()}${label.slice(1)}`;
+}
 
 function construireEnonceSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): SectionExercice {
   return {
-    enteteFragments: [texte(`On coupe le solide "${exercice.solide.label}" par un plan passant par les points P, Q et R.`)],
+    enteteFragments: [texte(`On coupe ${leSolide(exercice)} par le plan passant par les points P, Q et R marqués sur ses arêtes.`)],
     enteteHtml: construireSvgSectionPlaneSolide(exercice, false),
-    questions: [{ consigne: [texte(CONSIGNE_PAPIER)] }],
+    questions: consignesEtapes(exercice).map((c) => ({ consigne: [texte(c)] })),
   };
 }
 
@@ -353,6 +365,143 @@ function construireCorrectionSectionPlaneSolide(exercice: ExerciceSectionPlaneSo
   ];
 }
 
+// ============================================================================
+// Feuilles enrichies (difficulté, réponse brève, corrigé détaillé, barème, énoncé papier). Étapes =
+// `consignesEtapes` (une lettre par étape de `resolutionReference`, puis la fermeture). Textes et
+// figure : les MÊMES fonctions que le corrigé historique (`textesEtapes`, figure avec la section).
+// ============================================================================
+
+const LETTRES = "abcdefghijklmnopqrstuvwxyz";
+
+const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+function lettreEtape(index: number): string {
+  return LETTRES[index];
+}
+
+function cycleSection(exercice: ExerciceSectionPlaneSolide): string {
+  const ordreLabels = ordreLabelsDepuisExercice(exercice);
+  return ordreCycliqueDepuisP(exercice)
+    .map((id) => libellePoint(ordreLabels, id))
+    .join("");
+}
+
+function nombreAuxiliaires(exercice: ExerciceSectionPlaneSolide): number {
+  return exercice.resolutionReference.filter((e) => e.type === "auxiliaire").length;
+}
+
+/** Côtés de la section situés sur une face cachée (en pointillés), nommés. */
+function cotesCaches(exercice: ExerciceSectionPlaneSolide): string[] {
+  const ordreLabels = ordreLabelsDepuisExercice(exercice);
+  const { ordreCyclique } = exercice;
+  return ordreCyclique
+    .map((id, i) => [id, ordreCyclique[(i + 1) % ordreCyclique.length]] as const)
+    .filter(([a, b]) => segmentSurFaceCachee(exercice, a, b))
+    .map(([a, b]) => `[${libellePoint(ordreLabels, a)}${libellePoint(ordreLabels, b)}]`);
+}
+
+function difficulteSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): 1 | 2 | 3 {
+  return exercice.points.length >= 5 ? 3 : 2;
+}
+
+function reponseBreveSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): FragmentConsigne[] {
+  return [texte(`Section : ${nomPolygoneSection(exercice.points.length)} ${cycleSection(exercice)}.`)];
+}
+
+function correctionDetailleeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): EtapeCorrection[] {
+  const textes = textesEtapes(exercice);
+  const etapes: EtapeCorrection[] = [];
+  exercice.resolutionReference.forEach((etape, i) => {
+    // Rappel de méthode à la PREMIÈRE étape de chaque type.
+    if (etape.type === "segment" && !exercice.resolutionReference.slice(0, i).some((x) => x.type === "segment")) {
+      etapes.push({ label: "Méthode", sousQuestion: lettreEtape(i), fragments: [texte(majuscule(TEXTE_AIDE_SEGMENT_NIVEAU1.replace(/^Rappel de la méthode : /, "")))] });
+    }
+    if (etape.type === "auxiliaire" && !exercice.resolutionReference.slice(0, i).some((x) => x.type === "auxiliaire")) {
+      etapes.push({ label: "Méthode", sousQuestion: lettreEtape(i), fragments: [texte(majuscule(TEXTE_AIDE_AUXILIAIRE_NIVEAU1.replace(/^Méthode : /, "")))] });
+    }
+    etapes.push({ label: etape.type === "segment" ? "Tracé" : "Construction", sousQuestion: lettreEtape(i), fragments: [texte(textes[i])] });
+  });
+  const fin = lettreEtape(exercice.resolutionReference.length);
+  const k = exercice.points.length;
+  const faces = exercice.facesCroisees.map((f) => libelleFace(exercice, f)).join(", ");
+  const caches = cotesCaches(exercice);
+  etapes.push({
+    label: "Méthode",
+    sousQuestion: fin,
+    fragments: [texte(`Le plan (PQR) traverse ${exercice.facesCroisees.length} faces du solide : ${faces}. Chacune fournit un côté de la section, qui a donc ${k} côtés.`)],
+  });
+  etapes.push({
+    label: "Conclusion",
+    sousQuestion: fin,
+    fragments: [
+      texte(
+        `La section est le ${nomPolygoneSection(k)} ${cycleSection(exercice)}${caches.length > 0 ? ` ; ${caches.length > 1 ? "les côtés" : "le côté"} ${caches.join(", ")}, sur une face cachée, ${caches.length > 1 ? "se tracent" : "se trace"} en pointillés` : ""}.`,
+      ),
+    ],
+    // La réponse est une construction : la section attendue (constructions auxiliaires en violet).
+    figureHtml: construireSvgSectionPlaneSolide(exercice, true),
+  });
+  const premiereAux = exercice.resolutionReference.findIndex((e) => e.type === "auxiliaire");
+  etapes.push({
+    label: "Piège",
+    sousQuestion: premiereAux >= 0 ? lettreEtape(premiereAux) : fin,
+    fragments: [
+      texte(
+        "On ne prolonge que deux droites d'une même face (coplanaires) : deux droites qui se croisent seulement sur le dessin ne se coupent pas dans l'espace. Et deux points de section ne se relient que s'ils sont sur une même face.",
+      ),
+    ],
+  });
+  return etapes;
+}
+
+function baremeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BaremeExercice {
+  const ref = exercice.resolutionReference;
+  const fin = lettreEtape(ref.length);
+  const premierSegment = ref.findIndex((e) => e.type === "segment");
+  const premiereAux = ref.findIndex((e) => e.type === "auxiliaire");
+  const n = nombreAuxiliaires(exercice);
+  const k = exercice.points.length;
+  const criteres: CritereBareme[] = [
+    { sousQuestion: premierSegment >= 0 ? lettreEtape(premierSegment) : fin, critere: [texte("Côtés tracés directement dans les faces où 2 points de section sont connus")], points: 1 },
+    {
+      sousQuestion: premiereAux >= 0 ? lettreEtape(premiereAux) : fin,
+      critere: [texte(`${n > 1 ? `${n} points auxiliaires construits` : "Point auxiliaire construit"} en prolongeant deux droites d'une même face`)],
+      points: 1,
+    },
+    { sousQuestion: premiereAux >= 0 ? lettreEtape(premiereAux) : fin, critere: [texte(`${k - 3 > 1 ? `${k - 3} nouveaux points de section placés` : "Nouveau point de section placé"} sur la bonne arête`)], points: 1 },
+    { sousQuestion: fin, critere: [texte(`Polygone fermé à ${k} côtés (${nomPolygoneSection(k)}), côtés cachés en pointillés`)], points: 1 },
+  ];
+  return {
+    reponseFinale: reponseBreveSectionPlaneSolide(exercice),
+    criteres,
+    erreursFrequentes: [
+      { description: [texte("Deux points de section reliés alors qu'ils ne sont pas sur une même face (côté qui traverse le solide)")], cout: "−1" },
+      { description: [texte("Point auxiliaire obtenu en prolongeant deux droites non coplanaires")], cout: "0 pt sur le point auxiliaire et le point qu'il donne" },
+      { description: [texte("Côté situé sur une face cachée tracé en trait plein")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Autres noms pour les nouveaux points de section ou les points auxiliaires, si la construction est juste")]],
+  };
+}
+
+function enoncePapierSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [texte(`On coupe ${leSolide(exercice)} par le plan passant par les points P, Q et R marqués sur ses arêtes.`)],
+      enteteHtml: construireSvgSectionPlaneSolide(exercice, false),
+      questions: [
+        {
+          consigne: [
+            texte(
+              "Construis la section du solide par le plan (PQR) : nomme S, T… les nouveaux points de section dans l'ordre où tu les trouves, trace le polygone de section (côtés situés sur une face cachée en pointillés) et donne sa nature.",
+            ),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [consignesEtapes(exercice).map((_, i) => lettreEtape(i))],
+  };
+}
+
 export const adaptateurEvaluationSectionPlaneSolide: AdaptateurFeuilleExercices<ExerciceSectionPlaneSolide> = {
   titreDocument: "Section plane d'un solide — Évaluation",
   nomFichierBase: "section-plane-solide",
@@ -361,6 +510,13 @@ export const adaptateurEvaluationSectionPlaneSolide: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceSectionPlaneSolide,
   construireCorrection: construireCorrectionSectionPlaneSolide,
+  difficulte: difficulteSectionPlaneSolide,
+  reponseBreve: reponseBreveSectionPlaneSolide,
+  correctionDetaillee: correctionDetailleeSectionPlaneSolide,
+  bareme: baremeSectionPlaneSolide,
+  enoncePapier: enoncePapierSectionPlaneSolide,
+  dureeMinutes: 12,
+  profilInstance: profilSectionPlaneSolide,
   // PAS regroupable — `enteteHtml` (le solide en perspective cavalière) est utilisé, ce qui
   // disqualifie `regroupable` à lui seul, quelle que soit la consigne (voir le commentaire de tête).
 };

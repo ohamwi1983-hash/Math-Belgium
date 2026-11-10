@@ -18,8 +18,14 @@ import { formatSommeTermes } from "./formatEquation";
 import { CATALOGUE_FAMILLES } from "../generateurs/optimisation/index";
 import type { SegmentTexte } from "../components/SegmentsInline";
 
+/** Nombre en TEXTE : au plus 2 décimales, virgule décimale et « − » typographique. */
 function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+  return formatNombreLatex(valeur).replace("{,}", ",").replace("-", "−");
+}
+
+/** Même nombre en LaTeX : virgule décimale « {,} » (jamais un point). */
+function formatNombreLatex(valeur: number): string {
+  return (Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "")).replace(".", "{,}");
 }
 
 /** "de" + un nom de grandeur précédé de son article ("le"/"la"/"l'") — contracte "de le X" en
@@ -98,7 +104,7 @@ export function formatFonctionDeveloppeeLatex(fonction: CoefficientsQuadratiques
     { valeur: arrondi2(fonction.a), suffixe: `${labelVariable}^2` },
     { valeur: arrondi2(fonction.b), suffixe: labelVariable },
     { valeur: arrondi2(fonction.c), suffixe: "" },
-  ]);
+  ]).replace(/(\d)\.(\d)/g, "$1{,}$2");
 }
 
 /** Forme isolée `lettreCherchee = pente·labelVariable + ordonnee`, simplifiée — état actuel affiché
@@ -330,7 +336,7 @@ export function texteAideSommetNiveau1(exercice: ExerciceOptimisation): string {
 }
 
 export function texteAideSommetNiveau2(exercice: ExerciceOptimisation): string {
-  return `$x_S = -(${formatNombre(exercice.fonction.b)})/(2 \\cdot (${formatNombre(exercice.fonction.a)}))$.`;
+  return `$x_S = -(${formatNombreLatex(exercice.fonction.b)})/(2 \\cdot (${formatNombreLatex(exercice.fonction.a)}))$.`;
 }
 
 export function texteAideDecisionNiveau1(exercice: ExerciceOptimisation): string {
@@ -342,7 +348,7 @@ export function texteAideDecisionNiveau1(exercice: ExerciceOptimisation): string
 }
 
 export function texteAideDecisionNiveau2(exercice: ExerciceOptimisation): string {
-  return `Sommet : $x_S = ${formatNombre(exercice.sommet.x)}$. Domaine : [${formatNombre(exercice.domaine.inf)} ; ${formatNombre(exercice.domaine.sup)}].`;
+  return `Sommet : $x_S = ${formatNombreLatex(exercice.sommet.x)}$. Domaine : [${formatNombre(exercice.domaine.inf)} ; ${formatNombre(exercice.domaine.sup)}].`;
 }
 
 export function texteAideDecisionNiveau3(exercice: ExerciceOptimisation): string {
@@ -363,7 +369,7 @@ export function texteAideInterpretationNiveau1(): string {
 
 /** `labelVariable \in [inf ; sup]`, valeurs propres par construction (voir core, en-tête). */
 export function formatDomaineLatex(domaine: DomaineOptimisation, labelVariable: string): string {
-  return `${labelVariable} \\in [${formatNombre(domaine.inf)} ; ${formatNombre(domaine.sup)}]`;
+  return `${labelVariable} \\in [${formatNombreLatex(domaine.inf)} ; ${formatNombreLatex(domaine.sup)}]`;
 }
 
 function ligneFonction(exercice: ExerciceOptimisation): string {
@@ -375,11 +381,11 @@ function ligneDomaine(exercice: ExerciceOptimisation): string {
 }
 
 function ligneSommet(exercice: ExerciceOptimisation): string {
-  return `S(${formatNombre(exercice.sommet.x)} ; ${formatNombre(exercice.sommet.y)})`;
+  return `S(${formatNombreLatex(exercice.sommet.x)} ; ${formatNombreLatex(exercice.sommet.y)})`;
 }
 
 function ligneOptimal(exercice: ExerciceOptimisation): string {
-  return `\\text{Optimum} = ${formatNombre(exercice.optimal.y)} \\text{ pour } ${exercice.contexte.labelVariable} = ${formatNombre(exercice.optimal.x)}`;
+  return `\\text{Optimum} = ${formatNombreLatex(exercice.optimal.y)} \\text{ pour } ${exercice.contexte.labelVariable} = ${formatNombreLatex(exercice.optimal.x)}`;
 }
 
 function gathered(lignes: string[]): string {
@@ -420,12 +426,12 @@ export function formatDonneesFinalesLatex(exercice: ExerciceOptimisation): strin
 /** LaTeX réel (jamais `x_S`/`y_S` en texte brut, "_" littéral proscrit hors KaTeX) — à rendre via
  * `<Katex>`, jamais interpolé tel quel dans du texte brut. */
 export function formatSommetAttenduLatex(exercice: ExerciceOptimisation): string {
-  return `x_S = ${formatNombre(exercice.sommet.x)} \\, ; \\, y_S = ${formatNombre(exercice.sommet.y)}`;
+  return `x_S = ${formatNombreLatex(exercice.sommet.x)} \\, ; \\, y_S = ${formatNombreLatex(exercice.sommet.y)}`;
 }
 
 /** LaTeX réel — coordonnée optimale + valeur de la grandeur, à rendre via `<Katex>`. */
 export function formatOptimalAttenduLatex(exercice: ExerciceOptimisation): string {
-  return `${exercice.contexte.labelVariable} = ${formatNombre(exercice.optimal.x)} \\, ; \\, \\text{optimum} = ${formatNombre(exercice.optimal.y)}`;
+  return `${exercice.contexte.labelVariable} = ${formatNombreLatex(exercice.optimal.x)} \\, ; \\, \\text{optimum} = ${formatNombreLatex(exercice.optimal.y)}`;
 }
 
 /** Texte brut (jamais de LaTeX) — précise si l'optimum provient du sommet ou d'une borne. */

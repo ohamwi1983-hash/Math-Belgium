@@ -73,5 +73,6 @@ export function texteAide3Intro(exercice: ExerciceAnglesAssocies): string {
   return `${exercice.xReference}° est le complémentaire de ${exercice.alpha}°.`;
 }
 
-/** Exemple générique, jamais lié à la valeur réelle de l'exercice courant. */
-export const PLACEHOLDER_VALEUR_FINALE = "ex : -0,743";
+/** Exemple générique, hors de l'espace des tirages (−0,743 = cos 138° pouvait être une réponse) ;
+ * « − » typographique accepté par la saisie (`EtapeAnglesAssocies.tsx`). */
+export const PLACEHOLDER_VALEUR_FINALE = "ex : −2,5";

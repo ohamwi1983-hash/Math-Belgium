@@ -74,7 +74,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
         <input
           id="optimisation-contrainte"
           className={`text-input${apresEchec && statut && statut.equation !== "correct" ? " is-erronee" : ""}`}
-          placeholder={`ex : 2${exercice.contexte.labelVariable}+2${exercice.contrainte.lettreCherchee}=40`}
+          placeholder={`ex : 3${exercice.contexte.labelVariable}+5${exercice.contrainte.lettreCherchee}=17`}
           value={texteEquation}
           onChange={(e) => setTexteEquation(e.target.value)}
         />
@@ -87,7 +87,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
         <input
           id="optimisation-grandeur"
           className={`text-input${apresEchec && statut && statut.grandeur !== "correct" ? " is-erronee" : ""}`}
-          placeholder={`ex : ${exercice.contexte.labelVariable}*${exercice.contrainte.lettreCherchee}`}
+          placeholder={`ex : 3*${exercice.contexte.labelVariable}*${exercice.contrainte.lettreCherchee}`}
           value={texteGrandeur}
           onChange={(e) => setTexteGrandeur(e.target.value)}
         />

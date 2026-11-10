@@ -26,6 +26,8 @@ import { adaptateurEvaluationInequationRationnelle } from '../entrainement/4e/ge
 import { adaptateurExportWordAnalyseFonction } from '../entrainement/4e/generateurs/analyseFonction/exportWord'
 import { adaptateurEvaluationTransformationsGraphiques } from '../entrainement/4e/generateurs/transformationsGraphiques/exportEvaluation'
 import { adaptateurEvaluationFormeCanoniqueTransformations } from '../entrainement/4e/generateurs/formeCanoniqueTransformations/exportEvaluation'
+import { adaptateurEvaluationOptimisation } from '../entrainement/4e/generateurs/optimisation/exportEvaluation'
+import { adaptateurEvaluationEquationInequationSecondDegre } from '../entrainement/4e/generateurs/equationInequationSecondDegre/exportEvaluation'
 import { adaptateurEvaluationRelationsRacines } from '../entrainement/4e/generateurs/relationsRacines/exportEvaluation'
 import { adaptateurEvaluationFonctionsReference } from '../entrainement/4e/generateurs/fonctionsReference/exportEvaluation'
 import { adaptateurEvaluationFormeCanoniqueFonctionsReference } from '../entrainement/4e/generateurs/formeCanoniqueFonctionsReference/exportEvaluation'
@@ -85,6 +87,8 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen7: adaptateurExportWordAnalyseFonction as unknown as AdaptateurFeuilleExercices<never>,
   gen8: adaptateurEvaluationTransformationsGraphiques as unknown as AdaptateurFeuilleExercices<never>,
   gen9: adaptateurEvaluationFormeCanoniqueTransformations as unknown as AdaptateurFeuilleExercices<never>,
+  gen55: adaptateurEvaluationOptimisation as unknown as AdaptateurFeuilleExercices<never>,
+  gen57: adaptateurEvaluationEquationInequationSecondDegre as unknown as AdaptateurFeuilleExercices<never>,
   gen10: versionPapier(adaptateurEvaluationFonctionsReference) as unknown as AdaptateurFeuilleExercices<never>,
   gen11: versionPapier(adaptateurEvaluationFormeCanoniqueFonctionsReference) as unknown as AdaptateurFeuilleExercices<never>,
   gen12: versionPapier(adaptateurEvaluationCaracteristiquesFonction) as unknown as AdaptateurFeuilleExercices<never>,

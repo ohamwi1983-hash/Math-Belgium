@@ -1,7 +1,8 @@
 import type { ExercicePositionDroitePlan } from "../../core/positionDroitePlan.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
 import {
+  LIBELLE_CLASSIFICATION,
   libelleDroite,
   libellePlan,
   phrasePosition,
@@ -21,6 +22,7 @@ import {
   projeter3DVersPixel,
 } from "../../ui/solide3DSketch";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionDroitePlan } from "./index";
+import { CAS_PERCEE_SUR_LA_DROITE, LIBELLE_CAS_POSITION_DROITE_PLAN, PARAMETRES_POSITION_DROITE_PLAN, profilPositionDroitePlan } from "../profilsEvaluation4eCh8";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExercicePositionDroitePlan>` pour gen39 (Position d'une
@@ -196,8 +198,8 @@ function construireEnoncePositionDroitePlan(exercice: ExercicePositionDroitePlan
     enteteFragments: [texte(`Étudie la position de la droite ${libelleDroite(exercice)} par rapport au plan ${libellePlan(exercice)}.${definitions ? ` ${definitions}` : ""}`)],
     enteteHtml: construireSvgPositionDroitePlan(exercice),
     questions: [
-      { consigne: [texte("Que peux-tu dire de cette droite par rapport à ce plan ?")], reponse: { type: "lignes", nombre: 1 } },
-      { consigne: [texte(CONSIGNE_JUSTIFICATION_PAPIER)], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: [texte("Que peux-tu dire de cette droite par rapport à ce plan ?")] },
+      { consigne: [texte(CONSIGNE_JUSTIFICATION_PAPIER)] },
     ],
   };
 }
@@ -216,9 +218,137 @@ function construireCorrectionPositionDroitePlan(exercice: ExercicePositionDroite
       ? `Points de la figure dans le plan ${libellePlan(exercice)} : ${reponse} — ${exercice.droite[0]} et ${exercice.droite[1]} en font partie.`
       : classification === "parallele"
         ? `Ici, la droite ${libelleDroite(exercice)} a la même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}, qui est dans le plan ${libellePlan(exercice)}.`
-        : `Ici, la droite ${libelleDroite(exercice)} perce le plan en ${reponse}.`;
+        : `Ici, la droite ${libelleDroite(exercice)} perce le plan ${perceeEn(reponse)}.`;
 
   return [paragraphe("a", `${texteFaitsAppartenance(exercice)} ${conclusionClassification}`), paragraphe("b", `${texteAideJustification(classification)} ${ici}`)];
+}
+
+/** « le sommet B » → « au sommet B », « le point I » → « au point I », « un point de l'arête [AB] »
+ * → « en un point de l'arête [AB] » (le formateur d'écran renvoie le libellé du candidat). */
+function perceeEn(reponse: string): string {
+  if (reponse.startsWith("le sommet ")) return `au sommet ${reponse.slice("le sommet ".length)}`;
+  if (reponse.startsWith("le point ")) return `au point ${reponse.slice("le point ".length)}`;
+  return `en ${reponse}`;
+}
+
+// ============================================================================
+// Feuilles enrichies (difficulté, réponse brève, corrigé détaillé, barème, énoncé papier). Étapes
+// du corrigé = les 2 écrans : a) position (classification), b) justification. Tout vient des
+// formateurs de l'écran (`ui/formatPositionDroitePlan.ts`) ; la position est un VERDICT, jamais
+// un cas particulier du tirage (voir `profilsEvaluation4eCh8.ts`).
+// ============================================================================
+
+/** Phrase de justification concrète (étape b), la même que le corrigé historique. */
+function phraseJustification(exercice: ExercicePositionDroitePlan): string {
+  const reponse = texteReponseJustificationAttendue(exercice);
+  if (exercice.classification === "incluse") {
+    return `Points de la figure situés dans le plan ${libellePlan(exercice)} : ${reponse} — ${exercice.droite[0]} et ${exercice.droite[1]} en font partie, donc la droite ${libelleDroite(exercice)} est tout entière dans ce plan.`;
+  }
+  if (exercice.classification === "parallele") {
+    return `La droite ${libelleDroite(exercice)} a la même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}, qui est contenue dans le plan ${libellePlan(exercice)} : elle est donc parallèle à ce plan.`;
+  }
+  return `La droite ${libelleDroite(exercice)} perce le plan ${libellePlan(exercice)} ${perceeEn(reponse)}.`;
+}
+
+function perceeImmediate(exercice: ExercicePositionDroitePlan): boolean {
+  return (profilPositionDroitePlan(exercice).casParticulier ?? "").split("+").includes(CAS_PERCEE_SUR_LA_DROITE);
+}
+
+function difficultePositionDroitePlan(exercice: ExercicePositionDroitePlan): 1 | 2 | 3 {
+  if (exercice.classification === "secante" && perceeImmediate(exercice)) return exercice.pointsNommes.length === 0 ? 1 : 2;
+  if (exercice.classification === "incluse") return 2;
+  // Parallèle (chercher la droite du plan de même direction) ou percée à chercher ailleurs.
+  return exercice.pointsNommes.length > 0 ? 3 : 2;
+}
+
+function reponseBrevePositionDroitePlan(exercice: ExercicePositionDroitePlan): FragmentConsigne[] {
+  const reponse = texteReponseJustificationAttendue(exercice);
+  const detail =
+    exercice.classification === "incluse"
+      ? `points du plan : ${reponse}`
+      : exercice.classification === "parallele"
+        ? `même direction que ${reponse.startsWith("arête") ? "l'" : "la "}${reponse}`
+        : `percée ${perceeEn(reponse)}`;
+  return [texte(`${LIBELLE_CLASSIFICATION[exercice.classification]} ${libellePlan(exercice)} : ${detail}.`)];
+}
+
+const PIEGES: Record<ExercicePositionDroitePlan["classification"], string> = {
+  incluse: "Le plan ne se limite pas aux 3 points de son nom : il contient tous les sommets de la surface colorée et les milieux de ses arêtes.",
+  parallele:
+    "Ne pas conclure « sécante » parce que la droite semble couper le plan sur le dessin, ni « parallèle » parce qu'elle ne le touche pas : il faut trouver une arête ou une diagonale du plan de même direction.",
+  secante:
+    "Sur un dessin en perspective, deux droites qui se croisent sur le papier ne se coupent pas forcément dans l'espace : le point de percée doit être à la fois sur la droite et dans le plan.",
+};
+
+function correctionDetailleePositionDroitePlan(exercice: ExercicePositionDroitePlan): EtapeCorrection[] {
+  const definitions = textePointsNommes(exercice);
+  const etapes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [
+        texte(
+          "On regarde d'abord si les 2 points de la droite appartiennent au plan : si oui, elle est incluse. Sinon, si elle est parallèle à une arête ou à une diagonale du plan, elle est parallèle au plan. Sinon, elle est sécante.",
+        ),
+      ],
+    },
+    { label: "Lecture", sousQuestion: "a", fragments: [texte(`${definitions ? `${definitions} ` : ""}${texteFaitsAppartenance(exercice)}`)] },
+    { label: "Conclusion", sousQuestion: "a", fragments: [texte(`${phrasePosition(exercice).replace(/^la/, "La")}.`)] },
+    { label: "Méthode", sousQuestion: "b", fragments: [texte(texteAideJustification(exercice.classification))] },
+    { label: "Conclusion", sousQuestion: "b", fragments: [texte(phraseJustification(exercice))] },
+    { label: "Piège", sousQuestion: exercice.classification === "incluse" ? "b" : "a", fragments: [texte(PIEGES[exercice.classification])] },
+  ];
+  return etapes;
+}
+
+function baremePositionDroitePlan(exercice: ExercicePositionDroitePlan): BaremeExercice {
+  const reponse = texteReponseJustificationAttendue(exercice);
+  const elementJustification =
+    exercice.classification === "incluse"
+      ? `Points du plan cités (${reponse}), dont ${exercice.droite[0]} et ${exercice.droite[1]}`
+      : exercice.classification === "parallele"
+        ? `Droite du plan de même direction : ${reponse}`
+        : `Point de percée : ${reponse}`;
+  return {
+    reponseFinale: reponseBrevePositionDroitePlan(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte(`Appartenance (ou non) de ${exercice.droite[0]} et de ${exercice.droite[1]} au plan ${libellePlan(exercice)}`)], points: 1 },
+      { sousQuestion: "a", critere: [texte(`Position : ${LIBELLE_CLASSIFICATION[exercice.classification].toLowerCase()}`)], points: 1 },
+      { sousQuestion: "b", critere: [texte(elementJustification)], points: 1.5 },
+      { sousQuestion: "b", critere: [texte("Propriété utilisée énoncée (incluse : 2 points dans le plan ; parallèle : parallèle à une droite du plan ; sécante : un seul point commun)")], points: 0.5 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Position annoncée sans aucune justification")], cout: "0 pt sur b)" },
+      { description: [texte("Plan réduit aux 3 points de son nom (un sommet ou un milieu du plan oublié)")], cout: "−0,5 sur a)" },
+      {
+        description: [texte(exercice.classification === "secante" ? "Point de percée lu sur le dessin à un croisement qui n'est pas dans le plan" : "Parallèle et sécante confondues (lecture du dessin seul)")],
+        cout: exercice.classification === "secante" ? "0 pt sur le point de percée" : "0 pt sur a), b) noté selon sa cohérence",
+      },
+    ],
+    reponsesAcceptees: [[texte("Toute justification équivalente qui cite des éléments de la figure (arête parallèle, point commun…)")]],
+  };
+}
+
+function enoncePapierPositionDroitePlan(exercice: ExercicePositionDroitePlan): EnoncePapier {
+  const definitions = textePointsNommes(exercice);
+  return {
+    section: {
+      enteteFragments: [
+        texte(`Sur le solide ci-dessous, le plan ${libellePlan(exercice)} est coloré et la droite ${libelleDroite(exercice)} est tracée en trait épais.${definitions ? ` ${definitions}` : ""}`),
+      ],
+      enteteHtml: construireSvgPositionDroitePlan(exercice),
+      questions: [
+        {
+          consigne: [
+            texte(
+              `Étudie la position de la droite ${libelleDroite(exercice)} par rapport au plan ${libellePlan(exercice)} (incluse, parallèle ou sécante) et justifie ta réponse en citant les sommets, points, arêtes ou diagonales utiles (point de percée si la droite est sécante).`,
+            ),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [["a", "b"]],
+  };
 }
 
 export const adaptateurEvaluationPositionDroitePlan: AdaptateurFeuilleExercices<ExercicePositionDroitePlan> = {
@@ -229,6 +359,15 @@ export const adaptateurEvaluationPositionDroitePlan: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnoncePositionDroitePlan,
   construireCorrection: construireCorrectionPositionDroitePlan,
+  difficulte: difficultePositionDroitePlan,
+  reponseBreve: reponseBrevePositionDroitePlan,
+  correctionDetaillee: correctionDetailleePositionDroitePlan,
+  bareme: baremePositionDroitePlan,
+  enoncePapier: enoncePapierPositionDroitePlan,
+  dureeMinutes: 5,
+  profilInstance: profilPositionDroitePlan,
+  parametresAuChoix: PARAMETRES_POSITION_DROITE_PLAN,
+  libelleCasParticulier: LIBELLE_CAS_POSITION_DROITE_PLAN,
   // PAS regroupable : 2 questions par instance (classification/justification), jamais 1 seule, ET
   // `enteteHtml` (le croquis) utilisé sur chaque instance — 2 raisons indépendantes déjà suffisantes
   // chacune, voir le commentaire de tête.

@@ -7,10 +7,12 @@
 import { construireAvecParametresSysteme } from "../systemeSubstitution";
 import { randomInt } from "../aleatoire";
 
-const SKINS: string[] = [
-  "On cherche deux nombres entiers naturels. On connaît leur somme et leur produit.",
-  "Un professeur propose à sa classe de retrouver deux nombres entiers naturels, connaissant leur somme et leur produit.",
-  "Dans un jeu de devinette, deux nombres entiers naturels ont été choisis ; on connaît leur somme et leur produit.",
+/** La somme S est DONNÉE dans l'énoncé (le produit, ou le seuil, est dans la question finale) :
+ * sans elle, le système n'est pas posable — elle n'apparaissait auparavant nulle part à l'écran. */
+const SKINS: ((S: number) => string)[] = [
+  (S) => `On cherche deux nombres entiers naturels dont la somme vaut ${S}.`,
+  (S) => `Un professeur propose à sa classe de retrouver deux nombres entiers naturels dont la somme vaut ${S}.`,
+  (S) => `Dans un jeu de devinette, deux nombres entiers naturels dont la somme vaut ${S} ont été choisis.`,
 ];
 
 const R_MIN = 5;
@@ -27,7 +29,7 @@ export const construireSommeProduit = construireAvecParametresSysteme(() => {
     r2,
     label1: "la somme des deux nombres",
     label2: "leur produit",
-    phraseEnonce: SKINS[randomInt(0, SKINS.length - 1)]!,
+    phraseEnonce: SKINS[randomInt(0, SKINS.length - 1)]!(r1 + r2),
     labelVariable: "x",
     nomVariable: "l'un des deux nombres",
     nomGrandeur: "le produit des deux nombres",

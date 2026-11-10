@@ -1,5 +1,5 @@
 import type { ExerciceUnSansLautre } from "../../core/unSansLautre.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   formatCarreCibleLatex,
@@ -13,6 +13,7 @@ import {
   libelleQuadrantUnSansLautre,
 } from "../../ui/formatUnSansLautre";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceUnSansLautre } from "./index";
+import { LIBELLE_CAS_QUADRANT_I, PARAMETRES_UN_SANS_LAUTRE, profilUnSansLautre } from "../profilsEvaluation4eCh5";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceUnSansLautre>` pour gen16 ("L'un sans l'autre",
@@ -117,6 +118,97 @@ function construireCorrectionUnSansLautre(instance: ExerciceUnSansLautre): BlocC
   return blocs;
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les 3 écrans (carré, valeur signée, tangente) sont les étapes du corrigé ; l'énoncé imprimé
+// donne la valeur connue, l'intervalle et la consigne globale (valeur exacte de l'autre rapport et
+// de la tangente).
+
+function enoncePapier(instance: ExerciceUnSansLautre): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("On donne "),
+        latex(formatValeurConnueLatex(instance)),
+        texte(", avec "),
+        latex(formatIntervalleLatex(instance)),
+        texte(". Calcule la valeur exacte de "),
+        latex(formatFonctionCibleLatex(instance)),
+        texte(" et de "),
+        latex("\\tan\\theta"),
+        texte(", sans calculatrice."),
+      ],
+      questions: [],
+    },
+  };
+}
+
+function valeurConnueSeuleLatex(instance: ExerciceUnSansLautre): string {
+  return formatValeurConnueLatex(instance).split(" = ")[1];
+}
+
+function lignesCorrection(instance: ExerciceUnSansLautre): EtapeCorrection[] {
+  const { fonctionConnue, fonctionCible, quadrant, p, q, carreCibleNum, carreCibleDen } = instance;
+  const cible = formatFonctionCibleLatex(instance);
+  const cibleSimplifiee = formatValeurCibleSimplifieeLatex(instance);
+  const sinL = fonctionConnue === "sin" ? valeurConnueSeuleLatex(instance) : cibleSimplifiee;
+  const cosL = fonctionConnue === "cos" ? valeurConnueSeuleLatex(instance) : cibleSimplifiee;
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Identité fondamentale : "), latex("\\cos^2\\theta + \\sin^2\\theta = 1"), texte(".")] },
+    {
+      label: "Calcul",
+      sousQuestion: "a",
+      fragments: [latex(`${formatCarreLatex(fonctionCible)} = 1 - ${formatCarreLatex(fonctionConnue)} = 1 - \\dfrac{${p * p}}{${q * q}} = \\dfrac{${carreCibleNum}}{${carreCibleDen}}`)],
+    },
+    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${cible} = \\pm\\sqrt{${formatCarreCibleLatex(instance)}} = \\pm\\dfrac{\\sqrt{${carreCibleNum}}}{${q}}`)] },
+    {
+      label: "Conclusion",
+      sousQuestion: "b",
+      fragments: [texte(`θ est dans le quadrant ${libelleQuadrantUnSansLautre(quadrant)}, donc `), latex(formatSigneCibleLatex(instance)), texte(" : "), latex(`${cible} = ${cibleSimplifiee}`)],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: "c",
+      fragments: [latex(`\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta} = \\dfrac{${sinL}}{${cosL}} = ${formatValeurTangenteSimplifieeLatex(instance)}`)],
+    },
+    {
+      label: "Piège",
+      sousQuestion: "b",
+      fragments: [
+        quadrant === "I"
+          ? texte("La racine carrée donne deux valeurs opposées : c'est l'intervalle de θ qui choisit le signe (ici, tout est positif).")
+          : texte(`La racine carrée donne deux valeurs opposées : dans le quadrant ${quadrant}, le signe de ${fonctionCible} θ est ${instance.signeCible === 1 ? "positif" : "négatif"}, ce n'est pas le signe de la valeur donnée qui décide.`),
+      ],
+    },
+  ];
+}
+
+function reponseBreve(instance: ExerciceUnSansLautre): FragmentConsigne[] {
+  return [latex(`${formatFonctionCibleLatex(instance)} = ${formatValeurCibleSimplifieeLatex(instance)}`), texte(" ; "), latex(`\\tan\\theta = ${formatValeurTangenteSimplifieeLatex(instance)}`)];
+}
+
+function bareme(instance: ExerciceUnSansLautre): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Identité appliquée : "), latex(`${formatCarreLatex(instance.fonctionCible)} = ${formatCarreCibleLatex(instance)}`)], points: 1 },
+      { sousQuestion: "b", critere: [texte("Racine carrée simplifiée")], points: 0.5 },
+      { sousQuestion: "b", critere: [texte("Signe choisi selon le quadrant : "), latex(`${formatFonctionCibleLatex(instance)} = ${formatValeurCibleSimplifieeLatex(instance)}`)], points: 1 },
+      { sousQuestion: "c", critere: [texte("Tangente : "), latex(`\\tan\\theta = ${formatValeurTangenteSimplifieeLatex(instance)}`)], points: 1.5 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Signe de la valeur donnée recopié au lieu du signe imposé par le quadrant")], cout: "−1" },
+      { description: [latex(`${formatFonctionCibleLatex(instance)} = 1 - ${instance.fonctionConnue === "cos" ? "\\cos" : "\\sin"}\\theta`), texte(" (carrés oubliés)")], cout: "0 pt aux étapes 1 et 2" },
+      { description: [texte("Tangente calculée comme cos θ sur sin θ")], cout: "0 pt à l'étape 3" },
+    ],
+    reponsesAcceptees: [[texte("Fraction non rationalisée, ex. "), latex("\\dfrac{1}{\\sqrt{2}}"), texte(" au lieu de "), latex("\\dfrac{\\sqrt{2}}{2}")]],
+  };
+}
+
+/** ★ triplet pythagoricien au quadrant I ; ★★ sinon. */
+function difficulte(instance: ExerciceUnSansLautre): 1 | 2 | 3 {
+  return instance.typeValeur === "triplet" && instance.quadrant === "I" ? 1 : 2;
+}
+
 export const adaptateurEvaluationUnSansLautre: AdaptateurFeuilleExercices<ExerciceUnSansLautre> = {
   titreDocument: "Identité fondamentale (sin²θ + cos²θ = 1) — Évaluation",
   nomFichierBase: "un-sans-lautre-identite-fondamentale",
@@ -125,4 +217,13 @@ export const adaptateurEvaluationUnSansLautre: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceUnSansLautre,
   construireCorrection: construireCorrectionUnSansLautre,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee: lignesCorrection,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 4,
+  profilInstance: profilUnSansLautre,
+  libelleCasParticulier: LIBELLE_CAS_QUADRANT_I,
+  parametresAuChoix: PARAMETRES_UN_SANS_LAUTRE,
 };

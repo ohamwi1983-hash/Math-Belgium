@@ -27,6 +27,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -37,6 +38,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionValeursRemarquables {
   return demarrerSessionValeursRemarquables(REGLAGES_DEMO, genererExerciceValeursRemarquables);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionValeursRemarquables {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionValeursRemarquables(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES.map((v) => ({ id: String(v.id) })), genererExerciceValeursRemarquables, (id) => construireAvecVarianteId(Number(id) as AngleRemarquable)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -73,7 +83,7 @@ interface TransitionEnAttente {
 }
 
 export function AppValeursRemarquables() {
-  const [etat, setEtat] = useState<EtatSessionValeursRemarquables>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionValeursRemarquables>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionValeursRemarquables`, jamais dans le moteur (voir

@@ -9,6 +9,7 @@ import { EtapeQuelAngle } from "./components/EtapeQuelAngle";
 import { Katex } from "./components/Katex";
 import { formatTermesSolutionsLatex } from "./ui/formatQuelAngle";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Résous cette équation trigonométrique.";
 
@@ -23,6 +24,15 @@ function nouvelleSession(): EtatSessionQuelAngle {
   return demarrerSessionQuelAngle(REGLAGES_DEMO, genererExerciceQuelAngle);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionQuelAngle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionQuelAngle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceQuelAngle, (id) => construireAvecVarianteId(id as FonctionTrig)));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`. */
@@ -35,7 +45,7 @@ interface TransitionEnAttente {
  * note — voir `sessionQuelAngle.ts`. Mono-écran : la transition n'est jamais qu'une clôture
  * d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppQuelAngle() {
-  const [etat, setEtat] = useState<EtatSessionQuelAngle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionQuelAngle>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») — `key` de l'écran,
    * pour qu'il reparte sans choix ni valeur saisie (audit du chapitre 5). */

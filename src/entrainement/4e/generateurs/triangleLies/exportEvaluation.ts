@@ -1,6 +1,6 @@
 import type { ExerciceTriangleLies } from "../../core/triangleLies.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/fragmentsDocx";
 import { calculerCroquisTriangleLies, HAUTEUR_CROQUIS, LARGEUR_CROQUIS, segmentPartage } from "../../ui/triangleLiesSketch";
 import {
   consigneAngles,
@@ -13,11 +13,16 @@ import {
   formatDonneesPontTexte,
   formatNombre as formatNombreEcran,
   formatValeurUnite,
+  formatPontConfirme,
+  formatSoustractionConfirmee,
+  texteAidePontNiveau1,
+  texteAideSoustractionNiveau2,
   libellesSommetPartage,
   uniteLongueurPont,
 } from "../../ui/formatTriangleLies";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceTriangleLies } from "./index";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFrLatex } from "../../ui/nombreFr";
+import { profilCalculatrice } from "../profilsEvaluation4eCh5";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTriangleLies>` pour gen58 ("Triangles liés —
@@ -214,11 +219,17 @@ ${segmentsPont}${segmentsCible}${segmentPartageHtml}${points}${labels}
 </svg>`;
 }
 
+/** Consigne d'écran sans la mention de tolérance (« une valeur approchée est acceptée… »), qui sert
+ * aussi de titre d'étape dans le corrigé papier. */
+function sansTolerance(consigne: string): string {
+  return consigne.replace(/\.? \(une valeur approchée est acceptée, à environ 1 % près\)/, "").replace(/([^.])$/, "$1.");
+}
+
 function construireEnonceTriangleLies(instance: ExerciceTriangleLies): SectionExercice {
   const questions: SectionExercice["questions"] = [];
 
   questions.push({
-    consigne: [texte(`Données : ${formatDonneesPontTexte(instance).join(", ")}. ${consignePont(instance)}`)],
+    consigne: [texte(`Données : ${formatDonneesPontTexte(instance).join(", ")}. ${sansTolerance(consignePont(instance))}`)],
   });
 
   if (instance.variante === "anglePartage") {
@@ -226,19 +237,19 @@ function construireEnonceTriangleLies(instance: ExerciceTriangleLies): SectionEx
       consigne: [
         texte(
           `Données (visées depuis le même point d'observation) : ${formatAnglesBrutsViseeTexte(instance).join(", ")}. ` +
-            `Hypothèse : ${instance.hypotheseAnnexe}. ${consigneAngles()}`,
+            `Hypothèse : ${(instance.hypotheseAnnexe ?? "").replace(/\.$/, "")}. ${sansTolerance(consigneAngles())}`,
         ),
       ],
     });
   } else if (instance.variante === "sommetPartage") {
     questions.push({
-      consigne: [texte(`Données : ${formatDistancesParcouruesTexte(instance).join(", ")}. ${consigneSoustraction()}`)],
+      consigne: [texte(`Données : ${formatDistancesParcouruesTexte(instance).join(", ")}. ${sansTolerance(consigneSoustraction())}`)],
     });
   }
 
   const donneesCible = formatDonneesCibleEnonceTexte(instance);
   questions.push({
-    consigne: [texte(donneesCible.length > 0 ? `Données : ${donneesCible.join(", ")}. ${consigneCible(instance)}` : consigneCible(instance))],
+    consigne: [texte(donneesCible.length > 0 ? `Données : ${donneesCible.join(", ")}. ${sansTolerance(consigneCible(instance))}` : sansTolerance(consigneCible(instance)))],
   });
 
   return {
@@ -345,6 +356,151 @@ function formatUniteTransferee(instance: ExerciceTriangleLies): string {
   return uniteExemple ? ` ${uniteExemple}` : "";
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Le triangle « pont », puis (selon la structure) les angles ou la soustraction, sont des étapes de
+// GUIDAGE : sur papier, l'énoncé donne le contexte, le croquis, TOUTES les données (sans doublon) et
+// la seule vraie question, celle du triangle cible ; les écrans deviennent les étapes du corrigé.
+// Calculatrice indispensable (valeurs décimales, sinus et cosinus d'angles quelconques).
+
+function donneesPapier(instance: ExerciceTriangleLies): string[] {
+  const toutes = [...formatDonneesPontTexte(instance), ...formatAnglesBrutsViseeTexte(instance), ...formatDistancesParcouruesTexte(instance), ...formatDonneesCibleEnonceTexte(instance)];
+  return [...new Set(toutes)];
+}
+
+function enoncePapier(instance: ExerciceTriangleLies): EnoncePapier {
+  const hypothese = instance.hypotheseAnnexe ? ` Hypothèse : ${instance.hypotheseAnnexe.replace(/\.$/, "")}.` : "";
+  return {
+    section: {
+      enteteFragments: [texte(`${instance.contexte} Données : ${donneesPapier(instance).join(" ; ")}.${hypothese} ${instance.questionCible} Arrondis le résultat au centième.`)],
+      enteteHtml: construireCroquisHtml(instance),
+      questions: [],
+    },
+  };
+}
+
+function n(valeur: number): string {
+  return nombreFrLatex(Math.round(valeur * 100) / 100);
+}
+
+/** Côté du triangle cible qui donne la grandeur demandée (directement, ou après ajout d'une donnée
+ * déjà connue — même détection que `expliciterReponseCible`). */
+function coteCherche(instance: ExerciceTriangleLies): "b" | "c" {
+  const { triangleCible, valeurCibleAttendue } = instance;
+  // Hauteur de l'arbre = hauteur de M (calculée, pas donnée) + MT, côté opposé à l'angle utile.
+  if (instance.famille === "hauteurArbre") return "b";
+  const ecart = (cote: number) =>
+    Math.min(Math.abs(cote - valeurCibleAttendue), ...instance.donneesPont.filter((d) => d.unite === instance.uniteGrandeurCible).map((d) => Math.abs(cote + d.valeur - valeurCibleAttendue)));
+  return ecart(triangleCible.c) < ecart(triangleCible.b) ? "c" : "b";
+}
+
+function lignesCible(instance: ExerciceTriangleLies, lettre: string): EtapeCorrection[] {
+  const t = instance.triangleCible;
+  const unite = instance.uniteGrandeurCible.replace("²", "");
+  const u = unite ? `\\text{ ${unite}}` : "";
+  const objet = instance.questionCible.replace(/^Calcule /, "").replace(/\.$/, "");
+  const lignes: EtapeCorrection[] = [];
+  if (instance.variante === "sommetPartage") {
+    if (instance.grandeurDemandee === "aire") {
+      lignes.push(
+        { label: "Méthode", sousQuestion: lettre, fragments: [texte("Deux côtés et l'angle compris (au sommet commun) : "), latex("\\mathcal{A} = \\dfrac{1}{2} \\cdot b \\cdot c \\cdot \\sin A"), texte(".")] },
+        { label: "Calcul", sousQuestion: lettre, fragments: [latex(`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${n(t.b)} \\cdot ${n(t.c)} \\cdot \\sin ${n(t.A)}^\\circ \\approx ${n(instance.valeurCibleAttendue)}${u}^2`)] },
+      );
+    } else {
+      lignes.push(
+        { label: "Méthode", sousQuestion: lettre, fragments: [texte("Deux côtés et l'angle compris (au sommet commun) : loi des cosinus (Al-Kashi), "), latex("a^2 = b^2 + c^2 - 2bc\\cos A"), texte(".")] },
+        { label: "Calcul", sousQuestion: lettre, fragments: [latex(`a^2 = ${n(t.b)}^2 + ${n(t.c)}^2 - 2 \\cdot ${n(t.b)} \\cdot ${n(t.c)} \\cdot \\cos ${n(t.A)}^\\circ \\approx ${n(t.a * t.a)} \\quad\\Rightarrow\\quad a \\approx ${n(t.a)}${u}`)] },
+      );
+    }
+  } else {
+    lignes.push({ label: "Calcul", sousQuestion: lettre, fragments: [texte("Troisième angle du triangle cible (opposé au côté commun) : "), latex(`180^\\circ - ${n(t.B)}^\\circ - ${n(t.C)}^\\circ = ${n(t.A)}^\\circ`)] });
+    if (instance.grandeurDemandee === "aire") {
+      lignes.push(
+        { label: "Calcul", sousQuestion: lettre, fragments: [texte("Loi des sinus pour un deuxième côté : "), latex(`b = \\dfrac{${n(t.a)} \\cdot \\sin ${n(t.B)}^\\circ}{\\sin ${n(t.A)}^\\circ} \\approx ${n(t.b)}${u}`)] },
+        { label: "Calcul", sousQuestion: lettre, fragments: [texte("Aire (deux côtés et l'angle compris) : "), latex(`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${n(t.a)} \\cdot ${n(t.b)} \\cdot \\sin ${n(t.C)}^\\circ \\approx ${n(instance.valeurCibleAttendue)}${u}^2`)] },
+      );
+    } else if (instance.grandeurDemandee === "cote") {
+      const x = coteCherche(instance);
+      const angle = x === "b" ? t.B : t.C;
+      lignes.push({ label: "Calcul", sousQuestion: lettre, fragments: [texte("Loi des sinus (côté cherché face à l'angle de "), latex(`${n(angle)}^\\circ`), texte(") : "), latex(`\\dfrac{${n(t.a)} \\cdot \\sin ${n(angle)}^\\circ}{\\sin ${n(t.A)}^\\circ} \\approx ${n(t[x])}${u}`)] });
+    }
+  }
+  if (instance.famille === "hauteurArbre") {
+    const elevation = instance.anglesBrutsVisee?.[0]?.valeur ?? 0;
+    const hM = instance.valeurCibleAttendue - t.b;
+    lignes.push({
+      label: "Calcul",
+      sousQuestion: lettre,
+      fragments: [texte("Hauteur du point M (O et R au sol) : "), latex(`OM \\cdot \\sin ${n(elevation)}^\\circ = ${n(t.a)} \\cdot \\sin ${n(elevation)}^\\circ \\approx ${n(hM)}${u}`)],
+    });
+    lignes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [texte("Hauteur totale = hauteur de M + MT : "), latex(`${n(hM)} + ${n(t.b)} \\approx ${n(instance.valeurCibleAttendue)}${u}`)] });
+    return lignes;
+  }
+  const conclusion =
+    instance.grandeurDemandee === "cote" ? expliciterReponseCible(instance).replace(/^Réponse : /, `${objet} : `) : `${objet} : ${formatValeurUnite(instance.valeurCibleAttendue, instance.uniteGrandeurCible)}.`;
+  lignes.push({ label: "Conclusion", sousQuestion: lettre, fragments: [texte(conclusion.charAt(0).toUpperCase() + conclusion.slice(1))] });
+  return lignes;
+}
+
+function correctionDetaillee(instance: ExerciceTriangleLies): EtapeCorrection[] {
+  const { trianglePont, triangleCible } = instance;
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte(texteAidePontNiveau1(instance))] },
+    { label: "Calcul", sousQuestion: "a", fragments: [texte(`Triangle pont : ${formatPontConfirme(instance)}.`)] },
+  ];
+  if (instance.variante === "anglePartage") {
+    const [v1, v2] = instance.anglesBrutsVisee ?? [];
+    lignes.push(
+      { label: "Calcul", sousQuestion: "b", fragments: [texte("Angle utile = différence des deux visées : "), latex(`${n(v2?.valeur ?? 0)}^\\circ - ${n(v1?.valeur ?? 0)}^\\circ = ${n(triangleCible.B)}^\\circ`)] },
+      { label: "Calcul", sousQuestion: "b", fragments: [texte(`Hypothèse (${(instance.hypotheseAnnexe ?? "").replace(/\.$/, "")}) : deuxième angle ≈ ${formatNombre(triangleCible.C)}°.`)] },
+      ...lignesCible(instance, "c"),
+      { label: "Piège", sousQuestion: "b", fragments: [texte("L'angle du triangle cible est la DIFFÉRENCE des deux visées, jamais l'une des deux visées prise seule.")] },
+    );
+    return lignes;
+  }
+  if (instance.variante === "sommetPartage") {
+    lignes.push(
+      { label: "Calcul", sousQuestion: "b", fragments: [texte(`${texteAideSoustractionNiveau2(instance)}.`)] },
+      { label: "Conclusion", sousQuestion: "b", fragments: [texte(`${formatSoustractionConfirmee(instance)} ; angle au sommet commun inchangé : ${formatNombre(trianglePont.A)}°.`)] },
+      ...lignesCible(instance, "c"),
+      { label: "Piège", sousQuestion: "b", fragments: [texte("Les côtés du triangle cible sont les distances qui RESTENT à parcourir : côté du triangle pont moins la distance déjà parcourue.")] },
+    );
+    return lignes;
+  }
+  lignes.push(...lignesCible(instance, "b"), { label: "Piège", sousQuestion: "b", fragments: [texte("Le côté commun (la diagonale) se calcule d'abord dans le triangle pont : il ne se mesure pas sur le croquis, qui n'est pas à l'échelle.")] });
+  return lignes;
+}
+
+function reponseBreve(instance: ExerciceTriangleLies): FragmentConsigne[] {
+  return [texte(formatValeurUnite(instance.valeurCibleAttendue, instance.uniteGrandeurCible))];
+}
+
+function bareme(instance: ExerciceTriangleLies): BaremeExercice {
+  const trois = instance.variante !== "cotePartage";
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte(`Triangle pont résolu : ${formatPontConfirme(instance)}`)], points: 1.5 },
+      ...(trois
+        ? [{ sousQuestion: "b", critere: [texte(instance.variante === "anglePartage" ? "Les deux angles du triangle cible (différence des visées, hypothèse)" : "Les deux côtés du triangle cible (soustractions)")], points: 1 }]
+        : []),
+      { sousQuestion: trois ? "c" : "b", critere: [texte(instance.grandeurDemandee === "aire" ? "Formule de l'aire avec l'angle compris" : "Loi adaptée au triangle cible")], points: trois ? 0.5 : 1 },
+      { sousQuestion: trois ? "c" : "b", critere: [texte(`Résultat : ${formatValeurUnite(instance.valeurCibleAttendue, instance.uniteGrandeurCible)}`)], points: trois ? 1 : 1.5 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Calculatrice en radians")], cout: "−1" },
+      ...(instance.variante === "anglePartage" ? [{ description: [texte("Une visée brute utilisée comme angle du triangle cible")], cout: "0 pt à l'étape 2" }] : []),
+      ...(instance.variante === "sommetPartage" ? [{ description: [texte("Distances parcourues utilisées comme côtés du triangle cible")], cout: "0 pt à l'étape 2" }] : []),
+      { description: [texte("Longueur mesurée sur le croquis (pas à l'échelle)")], cout: "0 pt sur le résultat" },
+    ],
+    reponsesAcceptees: [[texte("Écart d'environ 1 % dû aux arrondis intermédiaires")], [texte("Résultat juste à partir d'une valeur intermédiaire fausse : points de méthode accordés (pas de double sanction)")]],
+  };
+}
+
+/** ★★ côté partagé ; ★★★ angle ou sommet partagé (une étape de plus). */
+function difficulte(instance: ExerciceTriangleLies): 1 | 2 | 3 {
+  return instance.variante === "cotePartage" ? 2 : 3;
+}
+
 export const adaptateurEvaluationTriangleLies: AdaptateurFeuilleExercices<ExerciceTriangleLies> = avecVirgulesBelges({
   titreDocument: "Triangles liés (triangulation) — Évaluation",
   nomFichierBase: "triangles-lies-triangulation",
@@ -353,6 +509,14 @@ export const adaptateurEvaluationTriangleLies: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0]),
   construireEnonce: construireEnonceTriangleLies,
   construireCorrection: construireCorrectionTriangleLies,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 8,
+  profilInstance: profilCalculatrice,
+  calculatriceIndispensable: true,
   // PAS regroupable — 11 contextes narratifs distincts, 2 à 3 questions par instance, `enteteHtml`
   // (croquis) présent : voir le commentaire de tête pour le détail des 3 conditions violées.
 });

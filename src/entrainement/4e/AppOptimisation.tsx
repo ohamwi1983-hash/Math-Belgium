@@ -10,6 +10,7 @@ import {
   soumettreReponseInterpretation,
   soumettreReponseSommet,
   soumettreReponseSysteme,
+  tentativesMaxCourant,
 } from "./moteur/sessionOptimisation";
 import type { EtatSessionOptimisation } from "./moteur/typesOptimisation";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceOptimisation } from "./generateurs/optimisation";
@@ -34,6 +35,7 @@ import {
   formatSystemeAccoladeLatex,
   libellePositionOptimum,
 } from "./ui/formatOptimisation";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -44,6 +46,17 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionOptimisation {
   return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son exercice est
+ * cette instance — tirée avec les MÊMES fonctions et le même catalogue (les 7 familles) que
+ * l'adaptateur d'export (`generateurs/optimisation/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionOptimisation {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionOptimisation(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceOptimisation, (id) => construireAvecFamilleId(id as (typeof CATALOGUE_FAMILLES)[number]["id"])),
+  );
 }
 
 /** Segments de la barre de puces — réutilise `sequencePourExercice` (même séquence réelle que le
@@ -98,8 +111,11 @@ interface TransitionEnAttente {
 }
 
 export function AppOptimisation() {
-  const [etat, setEtat] = useState<EtatSessionOptimisation>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionOptimisation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de génération, dans la clé des écrans : « Générer » ou « Nouvel exercice » remonte
+   * l'écran (champs vidés) même s'il reste sur la même phase. */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionOptimisation) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -126,12 +142,14 @@ export function AppOptimisation() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   function onGenererDev(familleId: string) {
     setEnAttente(null);
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionOptimisation(REGLAGES_DEMO, () => construireAvecFamilleId(familleId as (typeof CATALOGUE_FAMILLES)[number]["id"])));
   }
 
@@ -191,19 +209,19 @@ export function AppOptimisation() {
           <RecapitulatifPanel entrees={recapitulatif} />
           {phase === "identification" && exercice.variante === "modelisation" ? (
             <EtapeIdentificationOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
               validation={validation}
             />
           ) : phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
             <EtapeContrainteEtGrandeurOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideContrainteEtGrandeur}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseContrainteEtGrandeur(etat, reponse))}
@@ -211,10 +229,10 @@ export function AppOptimisation() {
             />
           ) : phase === "systeme" && exercice.variante === "modelisation" ? (
             <EtapeSystemeOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideSysteme}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) => terminerEtape(soumettreReponseSysteme(etat, texte))}
@@ -222,10 +240,10 @@ export function AppOptimisation() {
             />
           ) : phase === "domaine" && exercice.variante === "modelisation" ? (
             <EtapeDomaineOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideDomaine}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
@@ -233,10 +251,10 @@ export function AppOptimisation() {
             />
           ) : phase === "sommet" ? (
             <EtapeSommetOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideSommet}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseSommet(etat, reponse))}
@@ -244,10 +262,10 @@ export function AppOptimisation() {
             />
           ) : phase === "decision" ? (
             <EtapeDecisionOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideDecision}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponseDecision(etat, reponse))}
@@ -255,10 +273,10 @@ export function AppOptimisation() {
             />
           ) : phase === "interpretation" ? (
             <EtapeInterpretationOptimisation
-              key={phase}
+              key={`${generation}-${phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideInterpretation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(indexChoisi) => terminerEtape(soumettreReponseInterpretation(etat, indexChoisi))}

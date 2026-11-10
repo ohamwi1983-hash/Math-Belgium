@@ -17,6 +17,7 @@ import {
   soumettreReponseRacinesChamp1,
   soumettreReponseRacinesChamp2,
   soumettreReponseTableauSigneVariation,
+  tentativesMaxCourant,
 } from "./moteur/sessionAnalyseFonction";
 import { diagnostiquerChampPrincipal } from "./moteur/verification";
 import type { EtatSessionAnalyseFonction, PhaseAnalyseFonction } from "./moteur/typesAnalyseFonction";
@@ -45,6 +46,7 @@ import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "./ui/forma
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL, libelleCategorie } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Étudie cette fonction du second degré.";
 
@@ -71,6 +73,17 @@ const ETAPES_ACTIVES_DEMO: Record<EtapeAnalyseFonction, boolean> = {
 
 function nouvelleSession(): EtatSessionAnalyseFonction {
   return demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, genererExerciceAnalyseFonction);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son exercice est
+ * cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur d'export
+ * (`generateurs/analyseFonction/exportWord.ts`). */
+function sessionInitiale(): EtatSessionAnalyseFonction {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceAnalyseFonction, (id) => construireAvecVarianteId(id as VarianteAnalyseFonctionId)),
+  );
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -142,8 +155,11 @@ function calculerSegmentsProgression(etat: EtatSessionAnalyseFonction): EtatPuce
 }
 
 export function AppAnalyseFonction() {
-  const [etat, setEtat] = useState<EtatSessionAnalyseFonction>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionAnalyseFonction>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de génération, dans la clé des écrans : un nouvel exercice (bouton « Générer » ou
+   * « Nouvel exercice ») remonte l'écran, donc vide ses champs, même s'il reste sur la même phase. */
+  const [generation, setGeneration] = useState(0);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionAnalyseFonction`, jamais dans le moteur : la saisie de l'élève
    * n'a aucune autre utilité une fois l'étape close (le moteur ne garde qu'un score agrégé), donc
@@ -214,6 +230,7 @@ export function AppAnalyseFonction() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setGeneration((g) => g + 1);
       setHistorique([]);
     } else {
       setEtat(enAttente.etatSuivant);
@@ -226,6 +243,7 @@ export function AppAnalyseFonction() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setGeneration((g) => g + 1);
     setEtat(
       demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, () => construireAvecVarianteId(varianteId as VarianteAnalyseFonctionId)),
     );
@@ -269,7 +287,8 @@ export function AppAnalyseFonction() {
             <EtapeCoefficients
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               aideActivee={etat.aideCoefficientsUtilisee}
               onActiverAide={() => setEtat(activerAideCoefficients(etat))}
               onValider={(reponse) =>
@@ -281,7 +300,8 @@ export function AppAnalyseFonction() {
             <EtapeAllure
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               onValider={(reponse) => {
                 const texteAB = reponse.signeAB === "0" ? "a·b = 0" : reponse.signeAB === "+" ? "a·b > 0" : "a·b < 0";
@@ -293,7 +313,8 @@ export function AppAnalyseFonction() {
             <EtapeAxeSommet
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAxeSommetUtilisee}
               onActiverAide={() => setEtat(activerAideAxeSommet(etat))}
@@ -306,7 +327,8 @@ export function AppAnalyseFonction() {
             <EtapeDomaineImage
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideDomaineImageUtilisee}
               onActiverAide={() => setEtat(activerAideDomaineImage(etat))}
@@ -323,7 +345,8 @@ export function AppAnalyseFonction() {
             <EtapeReconnaissance
               exercice={etat.exerciceCourant.exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
@@ -335,7 +358,8 @@ export function AppAnalyseFonction() {
             <EtapeChamp1
               exercice={etat.exerciceCourant.exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
@@ -346,7 +370,8 @@ export function AppAnalyseFonction() {
             <EtapeRacinesFlexibles
               exercice={etat.exerciceCourant.exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines), racines.join(" ; "))}
@@ -356,7 +381,8 @@ export function AppAnalyseFonction() {
             <EtapeTableauSigneVariation
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              key={`${generation}-${etat.phase}`}
+              tentativesMax={tentativesMaxCourant(etat)}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideTableauSignesUtilisee}
               onActiverAide={() => setEtat(activerAideTableauSignes(etat))}

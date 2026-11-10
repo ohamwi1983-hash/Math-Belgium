@@ -104,10 +104,19 @@ export function demarrerSessionAnalyseFonction(
   };
 }
 
+/** Choix fermés qui se gagnent par élimination (signe de a / de a·b ; méthode parmi 4) : UNE seule
+ * tentative, sinon l'élève trouve la réponse en essayant les options une à une. */
+const PHASES_CHOIX_FERME: ReadonlySet<EtatSessionAnalyseFonction["phase"]> = new Set(["allure", "racinesReconnaissance"]);
+
+/** Nombre de tentatives de l'écran courant (affiché par les composants d'étape). */
+export function tentativesMaxCourant(etat: EtatSessionAnalyseFonction): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionAnalyseFonction): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
   };
 }
 

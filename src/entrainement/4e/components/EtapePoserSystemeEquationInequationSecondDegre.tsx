@@ -55,7 +55,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
         <input
           id="equation-inequation-systeme-relation1"
           className={`text-input${tentativesUtilisees > 0 && statut1 && statut1 !== "correct" ? " is-erronee" : ""}`}
-          placeholder="ex : x+y=20"
+          placeholder="ex : x-y=3"
           value={relation1}
           onChange={(e) => setRelation1(e.target.value)}
         />
@@ -67,7 +67,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
         <input
           id="equation-inequation-systeme-relation2"
           className={`text-input${tentativesUtilisees > 0 && statut2 && statut2 !== "correct" ? " is-erronee" : ""}`}
-          placeholder="ex : x*y=91"
+          placeholder="ex : 2x*y=7"
           value={relation2}
           onChange={(e) => setRelation2(e.target.value)}
         />

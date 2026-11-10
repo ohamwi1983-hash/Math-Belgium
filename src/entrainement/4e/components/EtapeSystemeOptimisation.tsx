@@ -59,7 +59,7 @@ export function EtapeSystemeOptimisation({ exercice, tentativesUtilisees, tentat
         <input
           id="optimisation-systeme"
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder="ex : -x^2+20x"
+          placeholder="ex : -3x^2+17x+5"
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />

@@ -30,6 +30,7 @@ import type { ReponseAnglesTriangleLies, ReponsePontSommetPartage, ReponseSoustr
 import { calculerRecapitulatifTriangleLies, entreeRecapPourPhase } from "./ui/recapitulatifTriangleLies";
 import { formatValeurUnite, libellesSommetPartage, uniteLongueurPont } from "./ui/formatTriangleLies";
 import type { ExerciceTriangleLies } from "./core/triangleLies.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -40,6 +41,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionTriangleLies {
   return demarrerSessionTriangleLies(REGLAGES_DEMO, genererExerciceTriangleLies);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionTriangleLies {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTriangleLies(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceTriangleLies, (id) => construireAvecFamilleId(id as FamilleTriangleLies)));
 }
 
 /** Écrans nécessitant un calcul décimal non fourni par l'énoncé (résolution du triangle pont/cible
@@ -100,7 +110,7 @@ function saisieAngles(r: ReponseAnglesTriangleLies): string {
 }
 
 export function AppTriangleLies() {
-  const [etat, setEtat] = useState<EtatSessionTriangleLies>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTriangleLies>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — une entrée par écran
    * clos, dans l'ordre des écrans, remise à vide à chaque nouvel exercice. */

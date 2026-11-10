@@ -15,6 +15,7 @@ import { EtapeEvCvSox } from "./components/EtapeEvCvSox";
 import { EtapeTv } from "./components/EtapeTv";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 
@@ -29,6 +30,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionFormeCanoniqueTransformation {
   return demarrerSessionFormeCanoniqueTransformation(REGLAGES_DEMO, genererExerciceFormeCanoniqueTransformation);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son exercice est
+ * cette instance — tirée avec la MÊME fonction que l'adaptateur d'export
+ * (`generateurs/formeCanoniqueTransformations/exportEvaluation.ts`, sans catalogue de variantes). */
+function sessionInitiale(): EtatSessionFormeCanoniqueTransformation {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionFormeCanoniqueTransformation(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceFormeCanoniqueTransformation, undefined));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases
@@ -60,8 +70,11 @@ interface TransitionEnAttente {
 }
 
 export function AppFormeCanoniqueTransformations() {
-  const [etat, setEtat] = useState<EtatSessionFormeCanoniqueTransformation>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionFormeCanoniqueTransformation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de génération, dans la clé des écrans : « Nouvel exercice » remonte l'écran même s'il
+   * revient à la même phase (champs vidés). */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueTransformation) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -82,6 +95,7 @@ export function AppFormeCanoniqueTransformations() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -125,6 +139,7 @@ export function AppFormeCanoniqueTransformations() {
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "canonique" ? (
             <EtapeCanonique
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -133,6 +148,7 @@ export function AppFormeCanoniqueTransformations() {
             />
           ) : etat.phase === "th" ? (
             <EtapeTh
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -141,6 +157,7 @@ export function AppFormeCanoniqueTransformations() {
             />
           ) : etat.phase === "evCvSox" ? (
             <EtapeEvCvSox
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -149,6 +166,7 @@ export function AppFormeCanoniqueTransformations() {
             />
           ) : (
             <EtapeTv
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}

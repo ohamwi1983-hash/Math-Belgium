@@ -10,6 +10,7 @@ import {
   soumettreReponseResoudre,
   soumettreReponseValidationEquation,
   soumettreReponseValidationInequation,
+  tentativesMaxCourant,
 } from "./moteur/sessionEquationInequationSecondDegre";
 import type { EtatSessionEquationInequationSecondDegre, PhaseEquationInequationSecondDegre } from "./moteur/typesEquationInequationSecondDegre";
 import {
@@ -33,6 +34,7 @@ import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatVal
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -58,6 +60,21 @@ const OPTIONS_DEV = PAIRES_VALIDES.map((p) => ({
   id: `${p.familleId}::${p.varianteId}`,
   label: `${LABEL_FAMILLE[p.familleId]} — ${LABEL_VARIANTE[p.varianteId]}`,
 }));
+
+/** Instance d'une paire « famille::variante » du sélecteur — MÊME fonction que l'adaptateur d'export
+ * (`generateurs/equationInequationSecondDegre/exportEvaluation.ts`, catalogue = ces 24 paires). */
+function construireDepuisOption(id: string) {
+  const [familleId, varianteId] = id.split("::") as [FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre];
+  return construireAvecFamilleId(familleId, varianteId);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son exercice est
+ * cette instance (même catalogue, même graine que la feuille). */
+function sessionInitiale(): EtatSessionEquationInequationSecondDegre {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationInequationSecondDegre(REGLAGES_DEMO, () => genererAvecCode(code, OPTIONS_DEV, genererExerciceEquationInequationSecondDegre, construireDepuisOption));
+}
 
 /** Séquence dépendant de `exercice.voieSysteme` (architecture D vs A/B/C — voir
  * `typesEquationInequationSecondDegre.ts`) : "interpretation" (dernière phase des 2 chemins) n'a
@@ -110,8 +127,11 @@ interface TransitionEnAttente {
 }
 
 export function AppEquationInequationSecondDegre() {
-  const [etat, setEtat] = useState<EtatSessionEquationInequationSecondDegre>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationInequationSecondDegre>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de génération, dans la clé des écrans : « Générer » ou « Nouvel exercice » remonte
+   * l'écran (champs vidés) même s'il reste sur la même phase. */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionEquationInequationSecondDegre) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -140,14 +160,15 @@ export function AppEquationInequationSecondDegre() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
-    const [familleId, varianteId] = id.split("::") as [FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre];
     setEnAttente(null);
-    setEtat(demarrerSessionEquationInequationSecondDegre(REGLAGES_DEMO, () => construireAvecFamilleId(familleId, varianteId)));
+    setGeneration((g) => g + 1);
+    setEtat(demarrerSessionEquationInequationSecondDegre(REGLAGES_DEMO, () => construireDepuisOption(id)));
   }
 
   const exercice = etat.exerciceCourant;
@@ -196,9 +217,10 @@ export function AppEquationInequationSecondDegre() {
           <QuestionFinale question={exercice.questionFinale} />
           {etat.phase === "poserSysteme" ? (
             <EtapePoserSystemeEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAidePoserSysteme}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponsePoserSysteme(etat, reponse))}
@@ -206,9 +228,10 @@ export function AppEquationInequationSecondDegre() {
             />
           ) : etat.phase === "isolerSubstituer" ? (
             <EtapePoserEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideIsolerSubstituer}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) => terminerEtape(soumettreReponseIsolerSubstituer(etat, texte))}
@@ -216,9 +239,10 @@ export function AppEquationInequationSecondDegre() {
             />
           ) : etat.phase === "poserEquationInequation" ? (
             <EtapePoserEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAidePoserEquationInequation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) => terminerEtape(soumettreReponsePoserEquationInequation(etat, texte))}
@@ -226,9 +250,10 @@ export function AppEquationInequationSecondDegre() {
             />
           ) : etat.phase === "resoudre" ? (
             <EtapeResoudreEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideResoudre}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(valeurs) => terminerEtape(soumettreReponseResoudre(etat, valeurs))}
@@ -236,9 +261,10 @@ export function AppEquationInequationSecondDegre() {
             />
           ) : etat.phase === "validation" ? (
             <EtapeValidationEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideValidation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValiderEquation={(reponses) => terminerEtape(soumettreReponseValidationEquation(etat, reponses))}
@@ -247,9 +273,10 @@ export function AppEquationInequationSecondDegre() {
             />
           ) : etat.phase === "interpretation" ? (
             <EtapeInterpretationEquationInequationSecondDegre
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideInterpretation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(indexChoisi) => terminerEtape(soumettreReponseInterpretation(etat, indexChoisi))}

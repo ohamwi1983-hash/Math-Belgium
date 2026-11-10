@@ -85,7 +85,7 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
         <input
           id="canonique-forme-complete"
           className={`text-input${erronee ? " is-erronee" : ""}`}
-          placeholder="ex : -4/3(x-2)^2+1"
+          placeholder="ex : -7/6(x-8)^2+9"
           value={formeCanonique}
           onChange={(e) => setFormeCanonique(e.target.value)}
         />

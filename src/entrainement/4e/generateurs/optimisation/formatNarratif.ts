@@ -15,7 +15,8 @@ export function formatFonctionNarrativeLatex(a: number, b: number, c: number, va
   return termes
     .map((terme, index) => {
       const abs = Math.abs(terme.valeur);
-      const coefficient = abs === 1 && terme.suffixe !== "" ? "" : String(abs);
+      // Virgule décimale (« 0{,}5 », jamais « 0.5 ») ; arrondi d'affichage contre les artefacts flottants.
+      const coefficient = abs === 1 && terme.suffixe !== "" ? "" : String(Number(abs.toFixed(6))).replace(".", "{,}");
       const corps = `${coefficient}${terme.suffixe}`;
       if (index === 0) return terme.valeur < 0 ? `-${corps}` : corps;
       return terme.valeur < 0 ? ` - ${corps}` : ` + ${corps}`;

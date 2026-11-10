@@ -29,6 +29,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Place et lis des valeurs sur le cercle trigonométrique.";
 
@@ -41,6 +42,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionCercleTrigonometrique {
   return demarrerSessionCercleTrigonometrique(REGLAGES_DEMO, genererExerciceCercleTrigonometrique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionCercleTrigonometrique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCercleTrigonometrique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCercleTrigonometrique, (id) => construireAvecVarianteId(id as VarianteCercleTrigId)));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -97,7 +107,7 @@ function calculerSegmentsProgression(etat: EtatSessionCercleTrigonometrique): Et
 }
 
 export function AppCercleTrigonometrique() {
-  const [etat, setEtat] = useState<EtatSessionCercleTrigonometrique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCercleTrigonometrique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionCercleTrigonometrique`, jamais dans le moteur. Remis à vide à

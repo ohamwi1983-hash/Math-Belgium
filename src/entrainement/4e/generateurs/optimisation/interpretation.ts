@@ -53,8 +53,13 @@ function motSensInverse(sens: SensOptimisation, genre: GenreGrandeur): string {
   return accordGenre(sens === "max" ? "minimal" : "maximal", genre);
 }
 
+/** Nombre en texte : virgule décimale, « − » typographique, au plus 2 décimales. */
+function nombre(valeur: number): string {
+  return String(Math.round(valeur * 100) / 100).replace(".", ",").replace("-", "−");
+}
+
 function phrase(p: ParametresInterpretation, sensTexte: string, valeurGrandeur: number, uniteGrandeur: string, valeurVariable: number): string {
-  return `${capitaliser(p.nomGrandeur)} ${sensTexte} : ${valeurGrandeur} ${uniteGrandeur}, atteinte pour ${p.labelVariable} = ${valeurVariable} ${p.uniteVariable}.`;
+  return `${capitaliser(p.nomGrandeur)} ${sensTexte} : ${nombre(valeurGrandeur)} ${uniteGrandeur}, ${accordGenre("atteint", p.genreGrandeur)} pour ${p.labelVariable} = ${nombre(valeurVariable)} ${p.uniteVariable}.`;
 }
 
 /** Question finale de l'exercice (ex. "Quelle est l'aire maximale ?"), affichée PERSISTANTE sur

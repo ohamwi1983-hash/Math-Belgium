@@ -71,7 +71,7 @@ export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValide
         <input
           id="th-fonction-intermediaire"
           className={`text-input${fonctionErronee ? " is-erronee" : ""}`}
-          placeholder="ex : (x-3)^2"
+          placeholder="ex : (x-8)^2"
           value={fonctionIntermediaire}
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />

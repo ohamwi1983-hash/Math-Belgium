@@ -50,7 +50,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
         <input
           id="equation-inequation-poser"
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
-          placeholder={exercice.variante === "equation" ? "ex : -x^2+20x=91" : "ex : -x^2+20x>91"}
+          placeholder={exercice.variante === "equation" ? "ex : -3x^2+17x=5" : "ex : -3x^2+17x>5"}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
         />

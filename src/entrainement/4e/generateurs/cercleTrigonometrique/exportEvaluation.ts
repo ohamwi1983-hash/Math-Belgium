@@ -282,7 +282,17 @@ function correctionDetaillee(exercice: ExerciceCercleTrigonometrique): EtapeCorr
   const lignes: EtapeCorrection[] = [
     { label: "Méthode", sousQuestion: "a", fragments: [texte("Ajouter ou retrancher des tours complets de 360° ne change pas le point sur le cercle.")] },
     { label: "Calcul", sousQuestion: "a", fragments: [latex(calculReductionLatex(exercice))] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [texte(texteJustificationQuadrant(exercice))] },
+    {
+      label: "Conclusion",
+      sousQuestion: "b",
+      fragments: [
+        texte(
+          estSurAxe(exercice)
+            ? `${exercice.angleReduit}° est sur l'axe ${exercice.quadrant === "axeOx" ? "Ox" : "Oy"} : il n'appartient à aucun quadrant.`
+            : texteJustificationQuadrant(exercice),
+        ),
+      ],
+    },
   ];
   if (estSurAxe(exercice)) {
     const v = valeursAxeAttendues(exercice);
@@ -338,12 +348,14 @@ function bareme(exercice: ExerciceCercleTrigonometrique): BaremeExercice {
       reponseFinale: reponseBreve(exercice),
       criteres: [
         { sousQuestion: "a", critere: [texte("Angle réduit : "), latex(deg(exercice.angleReduit))], points: 1 },
-        { sousQuestion: "b", critere: [texte(`Axe : ${libelleQuadrant(exercice.quadrant)}`)], points: 1 },
+        { sousQuestion: "b", critere: [texte(libelleQuadrant(exercice.quadrant))], points: 1 },
         { sousQuestion: "c", critere: [texte("Valeurs exactes : "), latex(valeursAxeLatex(exercice))], points: 2 },
       ],
       erreursFrequentes: [
         { description: [texte("Un angle sur un axe classé dans un quadrant")], cout: "0 pt à l'étape 2" },
-        { description: [texte("tan θ = 0 ou 1 sur l'axe Oy (au lieu de « n'existe pas »)")], cout: "−1" },
+        exercice.quadrant === "axeOy"
+          ? { description: [texte("tan θ = 0 ou 1 sur l'axe Oy (au lieu de « n'existe pas »)")], cout: "−1" }
+          : { description: [texte("sin θ et cos θ échangés (abscisse et ordonnée de M(θ) confondues)")], cout: "−1" },
       ],
       reponsesAcceptees: [[texte("Valeurs lues sur un cercle trigonométrique dessiné et justifiées par les coordonnées de M(θ)")]],
     };
@@ -352,7 +364,7 @@ function bareme(exercice: ExerciceCercleTrigonometrique): BaremeExercice {
     reponseFinale: reponseBreve(exercice),
     criteres: [
       { sousQuestion: "a", critere: [texte("Angle réduit : "), latex(deg(exercice.angleReduit))], points: 1 },
-      { sousQuestion: "b", critere: [texte(`Quadrant : ${libelleQuadrant(exercice.quadrant)}`)], points: 0.5 },
+      { sousQuestion: "b", critere: [texte(libelleQuadrant(exercice.quadrant))], points: 0.5 },
       { sousQuestion: "c", critere: [texte(`Angle du premier quadrant : ${exercice.anglePremierQuadrant}°`)], points: 1 },
       { sousQuestion: "d", critere: [texte("Les trois signes : "), latex(ligneSignesLatex(exercice))], points: 1.5 },
     ],

@@ -1,11 +1,12 @@
 import type { ExerciceTriangleQuelconque } from "../../core/triangleQuelconque.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
-import type { FragmentConsigne } from "../../ui/formatEquationDroite";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneAire,
   consigneDonneeManquante,
   formatAire,
+  libelleDonneeManquante,
+  valeurAffichee,
   libelleConfiguration,
   texteAide2Aire,
   texteAide2DonneeManquante,
@@ -15,7 +16,8 @@ import {
 import type { TriangleSketchGeometrie } from "../../ui/triangleSketch";
 import { calculerTriangleSketch } from "../../ui/triangleSketch";
 import { aireTriangle } from "../triangle/resoudreTriangle";
-import { avecVirgulesBelges } from "../../ui/nombreFr";
+import { avecVirgulesBelges, nombreFrLatex } from "../../ui/nombreFr";
+import { profilCalculatrice } from "../profilsEvaluation4eCh5";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTriangleQuelconque } from "./index";
 
 /**
@@ -188,6 +190,11 @@ function formatAireAffichage(instance: ExerciceTriangleQuelconque): string {
 
 // --- Énoncé / correction ---
 
+/** Consigne d'écran sans la mention de tolérance, qui sert aussi de titre d'étape au corrigé papier. */
+function sansTolerance(consigne: string): string {
+  return consigne.replace(/ \(une valeur approchée est acceptée, à environ 1 % près\)/, "");
+}
+
 function construireEnonceTriangleQuelconque(instance: ExerciceTriangleQuelconque): SectionExercice {
   const geometrie = calculerTriangleSketch(valeursTriangleSketchDonneeManquante(instance));
 
@@ -195,8 +202,8 @@ function construireEnonceTriangleQuelconque(instance: ExerciceTriangleQuelconque
     enteteFragments: [texte("On considère le triangle ABC suivant (les côtés minuscules sont opposés aux angles majuscules de même lettre) :")],
     enteteHtml: construireSvgTriangle(geometrie),
     questions: [
-      { consigne: [texte(consigneDonneeManquante(instance))], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(consigneAire())], reponse: { type: "lignes", nombre: 0 } },
+      { consigne: [texte(sansTolerance(consigneDonneeManquante(instance)))] },
+      { consigne: [texte(sansTolerance(consigneAire()))] },
     ],
   };
 }
@@ -215,6 +222,123 @@ function construireCorrectionTriangleQuelconque(instance: ExerciceTriangleQuelco
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les deux écrans (donnée manquante, puis aire) sont deux VRAIES questions distinctes d'un même
+// problème : elles restent a) et b) sur papier (b) réutilise le résultat de a), comme à l'écran).
+// Les consignes papier remplacent la tolérance d'écran (« à environ 1 % près ») par une précision
+// d'arrondi. Toutes les valeurs : `instance.triangle` (résolu à la génération) et les arrondis de
+// l'écran (`valeurAffichee`, `formatAire`). Calculatrice indispensable (valeurs décimales).
+
+const SEGMENT: Record<"a" | "b" | "c", string> = { a: "BC", b: "AC", c: "AB" };
+
+/** Valeur arrondie comme à l'écran, en LaTeX (virgule décimale), avec son unité. */
+function v(instance: ExerciceTriangleQuelconque, lettre: "a" | "b" | "c" | "A" | "B" | "C"): string {
+  const n = nombreFrLatex(valeurAffichee(instance, lettre));
+  return lettre === lettre.toLowerCase() ? `${n}\\text{ ${instance.unite}}` : `${n}^\\circ`;
+}
+
+function consignesPapier(instance: ExerciceTriangleQuelconque): FragmentConsigne[][] {
+  const premiere =
+    instance.donneeManquante === "A" ? "Calcule l'amplitude de l'angle A (au dixième de degré près)." : `Calcule la longueur du ${libelleDonneeManquante(instance).replace(/^le /, "")} (au centième près).`;
+  return [[texte(premiere)], [texte("Calcule l'aire du triangle ABC (au centième près).")]];
+}
+
+function enoncePapier(instance: ExerciceTriangleQuelconque): EnoncePapier {
+  const base = construireEnonceTriangleQuelconque(instance);
+  return {
+    section: { ...base, questions: consignesPapier(instance).map((consigne) => ({ consigne })) },
+    etapesParQuestion: [["a"], ["b"]],
+  };
+}
+
+function lignesDonneeManquante(instance: ExerciceTriangleQuelconque): EtapeCorrection[] {
+  const t = instance.triangle;
+  if (instance.configuration === "loiSinus") {
+    return [
+      { label: "Méthode", sousQuestion: "a", fragments: [texte("Deux angles et le côté opposé à l'un d'eux : loi des sinus, "), latex("\\dfrac{BC}{\\sin A} = \\dfrac{AC}{\\sin B}"), texte(".")] },
+      { label: "Calcul", sousQuestion: "a", fragments: [latex(`AC = \\dfrac{BC \\cdot \\sin B}{\\sin A} = \\dfrac{${v(instance, "a")} \\cdot \\sin ${v(instance, "B")}}{\\sin ${v(instance, "A")}} \\approx ${v(instance, "b")}`)] },
+    ];
+  }
+  if (instance.configuration === "alKashi") {
+    const cosA = (t.b * t.b + t.c * t.c - t.a * t.a) / (2 * t.b * t.c);
+    return [
+      { label: "Méthode", sousQuestion: "a", fragments: [texte("Trois côtés connus : loi des cosinus (Al-Kashi) résolue en cos A, "), latex("\\cos A = \\dfrac{AC^2 + AB^2 - BC^2}{2 \\cdot AC \\cdot AB}"), texte(".")] },
+      {
+        label: "Calcul",
+        sousQuestion: "a",
+        fragments: [latex(`\\cos A = \\dfrac{${nombreFrLatex(t.b)}^2 + ${nombreFrLatex(t.c)}^2 - ${nombreFrLatex(t.a)}^2}{2 \\cdot ${nombreFrLatex(t.b)} \\cdot ${nombreFrLatex(t.c)}} \\approx ${nombreFrLatex(Math.round(cosA * 10000) / 10000)} \\quad\\Rightarrow\\quad A \\approx ${v(instance, "A")}`)],
+      },
+    ];
+  }
+  const a2 = t.b * t.b + t.c * t.c - 2 * t.b * t.c * Math.cos((t.A * Math.PI) / 180);
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Deux côtés et l'angle compris : loi des cosinus (Al-Kashi), "), latex("BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos A"), texte(".")] },
+    {
+      label: "Calcul",
+      sousQuestion: "a",
+      fragments: [latex(`BC^2 = ${nombreFrLatex(t.b)}^2 + ${nombreFrLatex(t.c)}^2 - 2 \\cdot ${nombreFrLatex(t.b)} \\cdot ${nombreFrLatex(t.c)} \\cdot \\cos ${v(instance, "A")} \\approx ${nombreFrLatex(Math.round(a2 * 100) / 100)} \\quad\\Rightarrow\\quad BC \\approx ${v(instance, "a")}`)],
+    },
+  ];
+}
+
+function lignesAire(instance: ExerciceTriangleQuelconque): EtapeCorrection[] {
+  const { cote1, cote2, angleCompris } = DONNEES_FORMULE_AIRE[instance.configuration];
+  const lignes: EtapeCorrection[] = [];
+  if (instance.configuration === "loiSinus") {
+    lignes.push({ label: "Calcul", sousQuestion: "b", fragments: [texte("Angle compris entre BC et AC : "), latex(`C = 180^\\circ - ${v(instance, "A")} - ${v(instance, "B")} = ${v(instance, "C")}`)] });
+  }
+  lignes.push(
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("Aire = demi-produit de deux côtés par le sinus de l'angle compris : "), latex(`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${SEGMENT[cote1]} \\cdot ${SEGMENT[cote2]} \\cdot \\sin ${angleCompris}`)] },
+    {
+      label: "Calcul",
+      sousQuestion: "b",
+      fragments: [latex(`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${v(instance, cote1)} \\cdot ${v(instance, cote2)} \\cdot \\sin ${v(instance, angleCompris)} \\approx ${nombreFrLatex(Math.round(aireInstance(instance) * 100) / 100)}\\text{ ${instance.unite}}^2`)],
+    },
+  );
+  return lignes;
+}
+
+function correctionDetaillee(instance: ExerciceTriangleQuelconque): EtapeCorrection[] {
+  const piege: EtapeCorrection =
+    instance.configuration === "loiSinus"
+      ? { label: "Piège", sousQuestion: "a", fragments: [texte("Chaque côté va avec l'angle qui lui fait FACE : BC avec A, AC avec B.")] }
+      : instance.configuration === "alKashi"
+        ? { label: "Piège", sousQuestion: "a", fragments: [texte("Le côté opposé à A (BC) est celui qu'on retranche ; ne pas oublier l'arc cosinus pour passer de cos A à A.")] }
+        : { label: "Piège", sousQuestion: "a", fragments: [texte("Ne pas oublier le terme "), latex("-2 \\cdot AC \\cdot AB \\cdot \\cos A"), texte(", ni la racine carrée à la fin ; calculatrice en degrés.")] };
+  return [...lignesDonneeManquante(instance), piege, ...lignesAire(instance)];
+}
+
+function reponseBreve(instance: ExerciceTriangleQuelconque): FragmentConsigne[] {
+  const lettre = instance.donneeManquante;
+  const nom = lettre === "A" ? "A" : SEGMENT[lettre as "a" | "b" | "c"];
+  return [texte("a) "), latex(`${nom} \\approx ${v(instance, lettre)}`), texte(" ; b) "), latex(`\\mathcal{A} \\approx ${nombreFrLatex(Math.round(aireInstance(instance) * 100) / 100)}\\text{ ${instance.unite}}^2`)];
+}
+
+function bareme(instance: ExerciceTriangleQuelconque): BaremeExercice {
+  const loi = instance.configuration === "loiSinus" ? "Loi des sinus" : "Loi des cosinus (Al-Kashi)";
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte(`${loi} correctement appliquée (bons couples côté–angle)`)], points: 1 },
+      { sousQuestion: "a", critere: [texte(`Résultat : ${valeurAffichageDonneeManquante(instance)}`)], points: 1 },
+      { sousQuestion: "b", critere: [texte("Formule de l'aire avec deux côtés et l'angle compris")], points: 1 },
+      { sousQuestion: "b", critere: [texte(`Résultat : ${formatAireAffichage(instance)}`)], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Calculatrice en radians")], cout: "−1 par résultat" },
+      { description: [texte(instance.configuration === "loiSinus" ? "Côté associé au mauvais angle" : "Côté opposé mal identifié dans Al-Kashi")], cout: "0 pt sur le résultat de a)" },
+      { description: [texte("Angle non compris entre les deux côtés dans la formule de l'aire")], cout: "0 pt sur le résultat de b)" },
+      { description: [texte("Unité absente ou aire en unité de longueur")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("b) juste calculée à partir d'une valeur fausse de a) : points de méthode et de résultat de b) accordés (pas de double sanction)")]],
+  };
+}
+
+/** ★★ loi des sinus ou Al-Kashi pour un côté ; ★★★ Al-Kashi pour un angle (arc cosinus). */
+function difficulte(instance: ExerciceTriangleQuelconque): 1 | 2 | 3 {
+  return instance.configuration === "alKashi" ? 3 : 2;
+}
+
 export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<ExerciceTriangleQuelconque> = avecVirgulesBelges({
   titreDocument: "Triangle quelconque — Évaluation",
   nomFichierBase: "triangle-quelconque",
@@ -223,6 +347,14 @@ export const adaptateurEvaluationTriangleQuelconque: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceTriangleQuelconque,
   construireCorrection: construireCorrectionTriangleQuelconque,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 6,
+  profilInstance: profilCalculatrice,
+  calculatriceIndispensable: true,
   // 2 questions par instance, consigne de (a) dépendante de l'instance, `enteteHtml` (croquis SVG) :
   // 3 raisons indépendantes déjà suffisantes chacune — voir le commentaire de tête.
 });

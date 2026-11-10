@@ -22,6 +22,7 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Résous ce triangle quelconque.";
 
@@ -34,6 +35,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionTriangleQuelconque {
   return demarrerSessionTriangleQuelconque(REGLAGES_DEMO, genererExerciceTriangleQuelconque);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionTriangleQuelconque {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTriangleQuelconque(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTriangleQuelconque, (id) => construireAvecVarianteId(id as ConfigurationTriangleQuelconque)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -65,7 +75,7 @@ interface TransitionEnAttente {
 }
 
 export function AppTriangleQuelconque() {
-  const [etat, setEtat] = useState<EtatSessionTriangleQuelconque>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTriangleQuelconque>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionTriangleQuelconque`, jamais dans le moteur (voir

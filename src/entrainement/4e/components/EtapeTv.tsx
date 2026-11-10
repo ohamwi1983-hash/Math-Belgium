@@ -82,7 +82,7 @@ export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValide
         <input
           id="tv-fonction-intermediaire"
           className={`text-input${fonctionErronee ? " is-erronee" : ""}`}
-          placeholder="ex : -3/2(x+4)^2+2"
+          placeholder="ex : -7/6(x+8)^2+9"
           value={fonctionIntermediaire}
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />

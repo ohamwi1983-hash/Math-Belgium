@@ -1,166 +1,294 @@
 import type { ExerciceAnalyseFonction } from "../../core/analyseFonction.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatFonctionColoreeLatex, formatFonctionOrdreLatex, consigneAxeSommet } from "../../ui/formatAnalyseFonction";
+import { formatFonctionOrdreLatex, consigneAxeSommet } from "../../ui/formatAnalyseFonction";
+import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnalyseFonction } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceAnalyseFonction>` pour gen7 (Analyse d'une
- * fonction du second degré) — implémentation de référence du pilote export Word
- * (`promptexportwordpilotegen7.md`), à recopier/adapter pour tout autre générateur qui voudrait
- * ce même export (voir `export/genererFeuilleExercices.ts` pour le mécanisme générique).
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceAnalyseFonction>` pour gen7 (Analyse d'une fonction
+ * du second degré, chapitre 1, `AppAnalyseFonction.tsx`) — feuille d'exercices et évaluation.
  *
- * Décision documentée — comment les aides progressives deviennent une correction rédigée :
- * gen7 n'a PAS de texte d'aide à concaténer (vérifié en explorant `moteur/sessionAnalyseFonction.ts`
- * et les 4 composants `Etape*.tsx` porteurs d'une aide — `coefficients`/`axeSommet`/
- * `domaineImage`/`tableauSignes`) : ses 4 aides sont purement visuelles (une formule colorée ou un
- * croquis Ox/Oy interactif), jamais une phrase à révéler. Concaténer des fragments de hint
- * n'était donc pas une option pour ce générateur précis. La correction ci-dessous est à la place
- * RESYNTHÉTISÉE depuis les valeurs déjà connues et correctes de l'instance tirée
- * (`exercice.exercice.solution`, `exercice.xS/yS`, `exercice.grilleSigneVariation`) — un texte de
- * résolution nouveau, jamais une transcription. Pour un futur générateur dont les aides SONT déjà
- * du texte (`niveauAide` avec des chaînes, voir CLAUDE.md "Aide progressive additive"), la bonne
- * approche sera l'inverse : réutiliser/retravailler ces chaînes existantes plutôt que d'en
- * resynthétiser de nouvelles — à décider au cas par cas selon ce que le générateur expose déjà.
+ * Les écrans du générateur (coefficients, signes de a et de a·b, axe et sommet, ensemble-image,
+ * méthode de factorisation, factorisation, racines, tableau de signe et de variation — sans les
+ * deux écrans de factorisation pour une fonction irréductible) sont des étapes d'apprentissage :
+ * sur papier, l'énoncé est la fonction et la consigne globale « étudie cette fonction », rendue
+ * autosuffisante (ce que l'écran demandait étape par étape), et chaque écran devient une étape du
+ * corrigé, dans le même ordre (lettres a, b, c…).
  *
- * Rasterisation des formules : voir `export/katexImage.ts` — chaque fragment `latex(...)` ci-dessous
- * devient une image PNG au moment de l'assemblage du .docx (jamais une équation Word native).
+ * Valeurs exactes (fractions irréductibles, `formatFractionIrreductible` — l'écran accepte « p/q »)
+ * tirées de l'instance (`xS`, `yS`, `grilleSigneVariation`, `exercice.solution`), comme la réponse
+ * révélée de l'écran ; énoncé avec le MÊME ordre des termes que l'écran (`formatFonctionOrdreLatex`).
  */
 
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
+type EtapeGen7 = "coefficients" | "allure" | "axeSommet" | "image" | "methode" | "factorisation" | "racines" | "tableau";
+
+function etapes(instance: ExerciceAnalyseFonction): EtapeGen7[] {
+  return instance.exercice.categorie === "irreductible"
+    ? ["coefficients", "allure", "axeSommet", "image", "methode", "tableau"]
+    : ["coefficients", "allure", "axeSommet", "image", "methode", "factorisation", "racines", "tableau"];
+}
+
+function lettre(instance: ExerciceAnalyseFonction, etape: EtapeGen7): string {
+  return "abcdefgh"[etapes(instance).indexOf(etape)];
+}
+
+/** Nombre exact (entier ou fraction irréductible) en LaTeX. */
+function nombreLatex(valeur: number): string {
+  const brut = formatFractionIrreductible(valeur);
+  const m = /^(-?)(\d+)\/(\d+)$/.exec(brut);
+  return m ? `${m[1]}\\dfrac{${m[2]}}{${m[3]}}` : brut;
+}
+
+/** Même nombre en texte (tableau HTML) : « − » typographique, fraction « p/q ». */
+function nombreTexte(valeur: number): string {
+  return formatFractionIrreductible(valeur).replace("-", "−");
+}
+
+function fonctionLatex(instance: ExerciceAnalyseFonction): string {
+  return formatFonctionOrdreLatex(instance.exercice.enonce, instance.ordreTermes);
+}
+
+const CONSIGNE_GLOBALE =
+  " Étudie cette fonction du second degré : concavité de la parabole (signe de a), axe de symétrie et coordonnées du sommet, ensemble-image, racines (factorise par la méthode la plus rapide, ou justifie qu'il n'y en a pas) et tableau de signe et de variation.";
+
+function imageLatex(instance: ExerciceAnalyseFonction): string {
+  const y = nombreLatex(instance.yS);
+  return instance.exercice.enonce.a > 0 ? `\\mathrm{im}\\,f = \\left[${y}\\,;\\,+\\infty\\right[` : `\\mathrm{im}\\,f = \\left]-\\infty\\,;\\,${y}\\right]`;
+}
+
+function racinesTriees(instance: ExerciceAnalyseFonction): number[] {
+  const [r1, r2] = instance.exercice.solution.racines;
+  return r1 === r2 ? [r1] : [Math.min(r1, r2), Math.max(r1, r2)];
+}
+
+function racinesLatex(instance: ExerciceAnalyseFonction): string {
+  const r = racinesTriees(instance);
+  return r.length === 1 ? `x = ${nombreLatex(r[0])} \\text{ (racine double)}` : `x = ${nombreLatex(r[0])} \\text{ ou } x = ${nombreLatex(r[1])}`;
+}
+
+/** Tableau de signe et de variation (HTML autonome, styles en ligne) — mêmes colonnes que l'écran
+ * (`EtapeTableauSigneVariation`) : −∞ et +∞ dans leurs propres colonnes, puis l'alternance
+ * intervalle / valeur de `grilleSigneVariation`. */
+function tableauHtml(instance: ExerciceAnalyseFonction): string {
+  const { colonnesValeurs, ligneSigne, ligneVariation } = instance.grilleSigneVariation;
+  const ligneX = ligneSigne.map((_, i) => (i % 2 === 1 ? nombreTexte(colonnesValeurs[(i - 1) / 2]) : ""));
+  const cellule = (contenu: string, entete = false) =>
+    `<td style="border:1px solid #444;padding:4px 8px;text-align:center;min-width:28px;${entete ? "font-weight:600;text-align:left;white-space:nowrap;" : ""}">${contenu}</td>`;
+  const ligne = (titre: string, valeurs: string[]) => `<tr>${cellule(titre, true)}${valeurs.map((v) => cellule(v.replace("-", "−"))).join("")}</tr>`;
+  return (
+    `<table style="border-collapse:collapse;margin:6px 0;font-size:14px">` +
+    ligne("x", ["−∞", ...ligneX, "+∞"]) +
+    ligne("signe de f(x)", ["", ...ligneSigne, ""]) +
+    ligne("variation de f", ["", ...ligneVariation, ""]) +
+    `</table>`
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Énoncé (étapes = écrans) et énoncé papier
+// ---------------------------------------------------------------------------------------------
+
+function consigneEtape(etape: EtapeGen7): FragmentConsigne[] {
+  switch (etape) {
+    case "coefficients":
+      return [texte("Identifie les coefficients a, b et c.")];
+    case "allure":
+      return [texte("Donne le signe de a, puis celui du produit "), latex("a\\cdot b"), texte(".")];
+    case "axeSommet":
+      return [texte(consigneAxeSommet().replace(" (arrondi au centième accepté si besoin)", ""))];
+    case "image":
+      return [texte("Donne l'ensemble-image de f (son domaine est "), latex("\\mathbb{R}"), texte(").")];
+    case "methode":
+      return [texte("Quelle est la méthode la plus rapide pour trouver les racines de f ?")];
+    case "factorisation":
+      return [texte("Factorise "), latex("f(x)"), texte(".")];
+    case "racines":
+      return [texte("Donne les racines de f.")];
+    case "tableau":
+      return [texte("Complète le tableau de signe et de variation de f.")];
+  }
 }
 
 function construireEnonceAnalyseFonction(instance: ExerciceAnalyseFonction): SectionExercice {
-  const { exercice, ordreTermes, grilleSigneVariation } = instance;
-  // +2 : colonnes -∞/+∞ dédiées (jamais fusionnées avec la 1ʳᵉ/dernière colonne de
-  // `grilleSigneVariation`, qui reste elle-même la valeur du 1er/dernier intervalle) — même
-  // convention que l'écran interactif (`EtapeTableauSigneVariation.tsx`, cellules
-  // `grille-signes-borne` dédiées et toujours vides dans les lignes de données).
-  const nombreColonnesTableau = grilleSigneVariation.ligneSigne.length + 2;
-
   return {
-    enteteFragments: [texte("On considère la fonction "), latex(formatFonctionOrdreLatex(exercice.enonce, ordreTermes))],
-    questions: [
-      { consigne: [texte("Identifie les coefficients "), latex("a"), texte(", "), latex("b"), texte(" et "), latex("c"), texte(".")] },
-      { consigne: [texte("Donne le signe de "), latex("a"), texte(", puis celui du produit "), latex("a \\cdot b"), texte(".")] },
-      { consigne: [texte(consigneAxeSommet())], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte("Donne l'ensemble-image ("), latex("\\mathrm{im}\\,f"), texte(") de cette fonction (rappel : "), latex("\\mathrm{dom}\\,f=\\mathbb{R}"), texte(").")] },
-      {
-        consigne: [
-          texte("Factorise "),
-          latex("f(x)"),
-          texte(" en précisant la méthode utilisée (mise en évidence, binôme conjugué, produit remarquable), ou indique qu'aucune factorisation réelle n'est possible ; donne ensuite les racines de "),
-          latex("f"),
-          texte(", ou indique qu'il n'y en a pas."),
-        ],
-        reponse: { type: "lignes", nombre: 2 },
-      },
-      {
-        consigne: [texte("Complète le tableau de signe et de variation de "), latex("f"), texte(".")],
-        reponse: { type: "tableau", libellesLignes: ["x", "Signe de f(x)", "Variation"], nombreColonnes: nombreColonnesTableau },
-      },
-    ],
+    enteteFragments: [texte("On considère la fonction "), latex(fonctionLatex(instance)), texte(".")],
+    questions: etapes(instance).map((etape) => ({ consigne: consigneEtape(etape) })),
+  };
+}
+
+function enoncePapierAnalyseFonction(instance: ExerciceAnalyseFonction): EnoncePapier {
+  return {
+    section: { enteteFragments: [texte("On considère la fonction "), latex(fonctionLatex(instance)), texte("."), texte(CONSIGNE_GLOBALE)], questions: [] },
   };
 }
 
 function construireCorrectionAnalyseFonction(instance: ExerciceAnalyseFonction): BlocCorrection[] {
-  const { exercice, xS, yS, grilleSigneVariation } = instance;
-  const { a, b, c } = exercice.enonce;
-  const aPositif = a > 0;
+  return [
+    { type: "paragraphe", fragments: [texte(`Sommet : S(${nombreTexte(instance.xS)} ; ${nombreTexte(instance.yS)}). `), latex(imageLatex(instance))] },
+    { type: "html", html: tableauHtml(instance) },
+  ];
+}
 
-  const blocs: BlocCorrection[] = [];
+// ---------------------------------------------------------------------------------------------
+// Feuilles enrichies
+// ---------------------------------------------------------------------------------------------
 
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte("a) "),
-      latex(formatFonctionColoreeLatex(exercice.enonce)),
-      texte(` — donc a = ${formatNombre(a)}, b = ${formatNombre(b)}, c = ${formatNombre(c)}.`),
-    ],
-  });
+function difficulteAnalyseFonction(instance: ExerciceAnalyseFonction): 1 | 2 | 3 {
+  // Sommet fractionnaire : calculs de fractions dans y_S et dans le tableau.
+  if (!Number.isInteger(instance.xS) || !Number.isInteger(instance.yS)) return 3;
+  return 2;
+}
 
-  const signeAB = a * b;
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte(
-        `b) Puisque a ${aPositif ? "> 0" : "< 0"}, la parabole est ouverte vers le ${aPositif ? "haut (elle possède un minimum)" : "bas (elle possède un maximum)"}. ` +
-          `Le produit a·b vaut ${formatNombre(signeAB)}, donc il est ${signeAB > 0 ? "positif" : signeAB < 0 ? "négatif" : "nul"}.`,
-      ),
-    ],
-  });
+function reponseBreveAnalyseFonction(instance: ExerciceAnalyseFonction): FragmentConsigne[] {
+  const { a } = instance.exercice.enonce;
+  const fragments: FragmentConsigne[] = [
+    texte(`${a > 0 ? "Parabole tournée vers le haut" : "Parabole tournée vers le bas"}, axe `),
+    latex(`x = ${nombreLatex(instance.xS)}`),
+    texte(", sommet "),
+    latex(`S\\left(${nombreLatex(instance.xS)}\\,;\\,${nombreLatex(instance.yS)}\\right)`),
+    texte(", "),
+    latex(imageLatex(instance)),
+    texte(" ; "),
+  ];
+  if (instance.exercice.categorie === "irreductible") fragments.push(texte("aucune racine réelle."));
+  else fragments.push(latex(`f(x) = ${instance.exercice.solution.formeFactorisee ?? ""}`), texte(", racines "), latex(racinesLatex(instance)), texte("."));
+  return fragments;
+}
 
-  blocs.push({
-    type: "paragraphe",
-    fragments: [texte(`c) L'axe de symétrie a pour équation x = ${formatNombre(xS)}, donc le sommet est S(${formatNombre(xS)} ; ${formatNombre(yS)}).`)],
-  });
-
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte(
-        `d) dom f = ℝ. Comme a ${aPositif ? "> 0" : "< 0"}, f admet un ${aPositif ? "minimum" : "maximum"} en ${formatNombre(yS)}, ` +
-          `donc im f = ${aPositif ? `[${formatNombre(yS)} ; +∞[` : `]−∞ ; ${formatNombre(yS)}]`}.`,
-      ),
-    ],
-  });
-
-  if (exercice.categorie === "irreductible") {
-    blocs.push({
-      type: "paragraphe",
+function correctionDetailleeAnalyseFonction(instance: ExerciceAnalyseFonction): EtapeCorrection[] {
+  const L = (etape: EtapeGen7) => lettre(instance, etape);
+  const { a, b, c } = instance.exercice.enonce;
+  const { xS, yS } = instance;
+  const positif = a > 0;
+  const ab = a * b;
+  const lignes: EtapeCorrection[] = [
+    {
+      label: "Lecture",
+      sousQuestion: L("coefficients"),
+      fragments: [texte("On ordonne f(x) selon les puissances décroissantes de x : "), latex(`a = ${a}`), texte(", "), latex(`b = ${b}`), texte(", "), latex(`c = ${c}`), texte(".")],
+    },
+    {
+      label: "Allure",
+      sousQuestion: L("allure"),
       fragments: [
-        texte(
-          `e) Aucune factorisation réelle n'est possible ici. En effet, le sommet est S(${formatNombre(xS)} ; ${formatNombre(yS)}), donc f(x) ${aPositif ? "≥" : "≤"} ${formatNombre(yS)} ` +
-            `pour tout x — toujours ${aPositif ? "strictement positif" : "strictement négatif"}, f ne s'annule donc jamais : aucune racine réelle.`,
-        ),
+        latex(positif ? "a > 0" : "a < 0"),
+        texte(` : parabole tournée vers le ${positif ? "haut (minimum)" : "bas (maximum)"}. `),
+        latex(`a\\cdot b = ${ab}`),
+        texte(ab === 0 ? " : l'axe de symétrie est l'axe Oy." : ab > 0 ? " > 0 : a et b de même signe, l'axe de symétrie est à gauche de Oy." : " < 0 : a et b de signes contraires, l'axe de symétrie est à droite de Oy."),
+      ],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: L("axeSommet"),
+      fragments: [latex(`x_S = -\\dfrac{b}{2a} = -\\dfrac{${b}}{2\\cdot ${a < 0 ? `(${a})` : a}} = ${nombreLatex(xS)}`), texte(" ; "), latex(`y_S = f\\left(${nombreLatex(xS)}\\right) = ${nombreLatex(yS)}`), texte(".")],
+    },
+    { label: "Conclusion", sousQuestion: L("axeSommet"), fragments: [texte("Axe de symétrie "), latex(`x = ${nombreLatex(xS)}`), texte(", sommet "), latex(`S\\left(${nombreLatex(xS)}\\,;\\,${nombreLatex(yS)}\\right)`), texte(".")] },
+    {
+      label: "Conclusion",
+      sousQuestion: L("image"),
+      fragments: [texte(`f admet un ${positif ? "minimum" : "maximum"} ${nombreTexte(yS)} en son sommet : `), latex(imageLatex(instance)), texte(".")],
+    },
+  ];
+  if (instance.exercice.categorie === "irreductible") {
+    lignes.push({
+      label: "Méthode",
+      sousQuestion: L("methode"),
+      fragments: [
+        texte(`Aucune factorisation réelle : le sommet S est ${positif ? "au-dessus" : "en dessous"} de l'axe Ox et la parabole est tournée vers le ${positif ? "haut" : "bas"}, donc f(x) ${positif ? "≥" : "≤"} ${nombreTexte(yS)} : f ne s'annule jamais, aucune racine.`),
       ],
     });
   } else {
-    const { formeFactorisee, racines } = exercice.solution;
-    const [r1, r2] = racines;
-    const racineDouble = r1 === r2;
-    blocs.push({
-      type: "paragraphe",
-      fragments: [
-        texte(`e) Méthode : ${libelleCategorie(exercice.categorie)}. `),
-        latex(`f(x) = ${formeFactorisee}`),
-        texte(
-          racineDouble
-            ? ` — une racine double x = ${formatNombre(r1)}.`
-            : ` — deux racines distinctes x = ${formatNombre(Math.min(r1, r2))} et x = ${formatNombre(Math.max(r1, r2))}.`,
-        ),
-      ],
-    });
+    lignes.push(
+      { label: "Méthode", sousQuestion: L("methode"), fragments: [texte(`${libelleCategorie(instance.exercice.categorie)} : ${raisonMethode(instance)}`)] },
+      { label: "Calcul", sousQuestion: L("factorisation"), fragments: [latex(`f(x) = ${instance.exercice.solution.formeFactorisee ?? ""}`)] },
+      { label: "Conclusion", sousQuestion: L("racines"), fragments: [texte("Un produit est nul si l'un de ses facteurs est nul : "), latex(racinesLatex(instance)), texte(".")] },
+    );
   }
-
-  blocs.push({ type: "paragraphe", fragments: [texte("f) Tableau de signe et de variation :")] });
-
-  // -∞/+∞ dans leurs propres colonnes, jamais superposées à une valeur de `ligneSigne`/
-  // `ligneVariation` (voir commentaire de `construireEnonceAnalyseFonction`) : ces 2 lignes,
-  // purement des données de signe/variation, restent donc vides sous -∞ et +∞.
-  const { colonnesValeurs, ligneSigne, ligneVariation } = grilleSigneVariation;
-  const ligneXMilieu = ligneSigne.map((_, i) => (i % 2 === 1 ? formatNombre(colonnesValeurs[(i - 1) / 2]) : ""));
-  blocs.push({
-    type: "tableau",
-    libellesLignes: ["x", "Signe de f(x)", "Variation"],
-    valeursParLigne: [
-      ["−∞", ...ligneXMilieu, "+∞"],
-      ["", ...ligneSigne, ""],
-      ["", ...ligneVariation, ""],
-    ],
+  lignes.push({
+    label: "Tableau",
+    sousQuestion: L("tableau"),
+    fragments: [texte(instance.exercice.categorie === "irreductible" ? `Signe constant (celui de a), variation qui change au sommet x = ${nombreTexte(xS)} :` : `Signe de a à l'extérieur des racines, opposé entre elles ; variation qui change au sommet x = ${nombreTexte(xS)} :`)],
+    figureHtml: tableauHtml(instance),
   });
+  lignes.push(piege(instance));
+  return lignes;
+}
 
-  return blocs;
+function raisonMethode(instance: ExerciceAnalyseFonction): string {
+  switch (instance.exercice.categorie) {
+    case "mise_en_evidence":
+      return "pas de terme constant (c = 0), x se met en évidence.";
+    case "binome_conjugue":
+      return "pas de terme en x (b = 0) : différence de deux carrés.";
+    case "produit_remarquable":
+      return "trinôme carré parfait (Δ = 0).";
+    default:
+      return "";
+  }
+}
+
+function piege(instance: ExerciceAnalyseFonction): EtapeCorrection {
+  const L = (etape: EtapeGen7) => lettre(instance, etape);
+  if (instance.ordreTermes[0] !== "a") {
+    return { label: "Piège", sousQuestion: L("coefficients"), fragments: [texte("Les termes ne sont pas écrits dans l'ordre : a est le coefficient de "), latex("x^2"), texte(", pas le premier nombre écrit.")] };
+  }
+  if (instance.exercice.categorie === "produit_remarquable") {
+    return { label: "Piège", sousQuestion: L("tableau"), fragments: [texte("Racine double : le signe de f(x) ne change pas en traversant la racine, il s'annule seulement en ce point.")] };
+  }
+  return { label: "Piège", sousQuestion: L("image"), fragments: [texte("L'ensemble-image se lit sur l'ordonnée du sommet (pas sur son abscisse), avec le crochet fermé du côté du sommet.")] };
+}
+
+function baremeAnalyseFonction(instance: ExerciceAnalyseFonction): BaremeExercice {
+  const L = (etape: EtapeGen7) => lettre(instance, etape);
+  const irreductible = instance.exercice.categorie === "irreductible";
+  const criteres: CritereBareme[] = [
+    { sousQuestion: L("allure"), critere: [texte("Concavité justifiée par le signe de a")], points: 0.5 },
+    { sousQuestion: L("axeSommet"), critere: [texte("Axe "), latex(`x = ${nombreLatex(instance.xS)}`), texte(" et sommet "), latex(`S\\left(${nombreLatex(instance.xS)}\\,;\\,${nombreLatex(instance.yS)}\\right)`)], points: 1 },
+    { sousQuestion: L("image"), critere: [latex(imageLatex(instance))], points: 0.5 },
+    irreductible
+      ? { sousQuestion: L("methode"), critere: [texte("Absence de racine justifiée (sommet et concavité)")], points: 1 }
+      : { sousQuestion: L("factorisation"), critere: [texte("Factorisation par la méthode la plus rapide : "), latex(`f(x) = ${instance.exercice.solution.formeFactorisee ?? ""}`)], points: 0.5 },
+    ...(irreductible ? [] : [{ sousQuestion: L("racines"), critere: [latex(racinesLatex(instance))], points: 0.5 }]),
+    { sousQuestion: L("tableau"), critere: [texte("Tableau de signe et de variation complet et cohérent")], points: 1 },
+  ];
+  const erreurs: ErreurFrequente[] = [
+    { description: [texte("Ensemble-image construit avec l'abscisse du sommet au lieu de son ordonnée")], cout: "0 pt sur l'ensemble-image" },
+    { description: [texte("Signe de "), latex("x_S"), texte(" faux (oubli du « − » de "), latex("-\\dfrac{b}{2a}"), texte(")")], cout: "−0,5, suite notée sans double pénalité" },
+  ];
+  if (instance.ordreTermes[0] !== "a") erreurs.push({ description: [texte("Coefficients lus dans l'ordre d'écriture plutôt que par degré")], cout: "suite notée sans double pénalité" });
+  if (!irreductible) erreurs.push({ description: [texte("Racines trouvées par le discriminant au lieu de la méthode la plus rapide")], cout: "−0,5" });
+  return {
+    reponseFinale: reponseBreveAnalyseFonction(instance),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Valeurs exactes sous forme décimale exacte (2,5 pour 5/2)")], [texte("Sommet obtenu en complétant le carré plutôt qu'avec la formule de l'abscisse du sommet")]],
+  };
 }
 
 export const adaptateurExportWordAnalyseFonction: AdaptateurFeuilleExercices<ExerciceAnalyseFonction> = {
-  titreDocument: "Analyse d'une fonction du second degré — Feuille d'exercices",
+  titreDocument: "Analyse d'une fonction du second degré — Évaluation",
   nomFichierBase: "analyse-fonction-second-degre",
   genererInstance: genererExerciceAnalyseFonction,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceAnalyseFonction,
   construireCorrection: construireCorrectionAnalyseFonction,
+  difficulte: difficulteAnalyseFonction,
+  reponseBreve: reponseBreveAnalyseFonction,
+  correctionDetaillee: correctionDetailleeAnalyseFonction,
+  bareme: baremeAnalyseFonction,
+  enoncePapier: enoncePapierAnalyseFonction,
+  dureeMinutes: 10,
 };

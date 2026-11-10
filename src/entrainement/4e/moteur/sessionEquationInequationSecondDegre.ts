@@ -71,10 +71,18 @@ export function demarrerSessionEquationInequationSecondDegre(
   };
 }
 
+/** Choix fermés qui se gagnent par élimination : « valide / non valide » pour chaque racine (le
+ * bouton faux est signalé racine par racine) et phrase de conclusion parmi 4 — UNE seule tentative.
+ * L'intervalle validé d'une inéquation (saisie numérique) garde les tentatives des réglages. */
+export function tentativesMaxCourant(etat: EtatSessionEquationInequationSecondDegre): number {
+  const choixFerme = etat.phase === "interpretation" || (etat.phase === "validation" && etat.exerciceCourant.variante === "equation");
+  return choixFerme ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEquationInequationSecondDegre): ReglagesEtape {
   return {
     pointsDeBase: POINTS_DE_BASE,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
   };
 }
 

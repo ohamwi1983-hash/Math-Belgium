@@ -57,7 +57,7 @@ const X_TANGENTE = CENTRE_CERCLE_TRIG.x + RAYON_CERCLE_TRIG;
 export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
-  const nombre = Number(texte.trim().replace(",", "."));
+  const nombre = Number(texte.trim().replace(",", ".").replace(/[−–]/g, "-"));
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerValeurFinale(exercice, nombre) : undefined;
 

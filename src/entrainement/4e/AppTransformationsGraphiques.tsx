@@ -7,6 +7,7 @@ import { EtapeTransformationExercice } from "./components/EtapeTransformationExe
 import { formatEquationTransformationLatex } from "./ui/formatTransformationsGraphiques";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parabole.";
 
@@ -21,6 +22,15 @@ function nouvelleSession(): EtatSessionTransformationGraphique {
   return demarrerSessionTransformationGraphique(REGLAGES_DEMO, genererExerciceTransformationGraphique);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son exercice est
+ * cette instance — tirée avec la MÊME fonction que l'adaptateur d'export
+ * (`generateurs/transformationsGraphiques/exportEvaluation.ts`, sans catalogue de variantes). */
+function sessionInitiale(): EtatSessionTransformationGraphique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTransformationGraphique(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceTransformationGraphique, undefined));
+}
+
 /** État tenu en attente dès que les DEUX notes ("équation"/"curseurs") sont closes — l'état de
  * session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -33,8 +43,10 @@ interface TransitionEnAttente {
 }
 
 export function AppTransformationsGraphiques() {
-  const [etat, setEtat] = useState<EtatSessionTransformationGraphique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTransformationGraphique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de génération, clé de l'écran : « Nouvel exercice » remonte l'écran (champs vidés). */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionTransformationGraphique) {
     if (nouvelEtat.terminee !== etat.terminee) {
@@ -47,6 +59,7 @@ export function AppTransformationsGraphiques() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -89,6 +102,7 @@ export function AppTransformationsGraphiques() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeTransformationExercice
+            key={generation}
             exercice={exercice}
             tentativesEquation={etat.etapeEquation.tentativesUtilisees}
             tentativesCurseurs={etat.etapeCurseurs.tentativesUtilisees}

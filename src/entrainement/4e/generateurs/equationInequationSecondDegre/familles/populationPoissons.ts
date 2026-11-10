@@ -19,17 +19,17 @@ const SKINS: SkinPopulationPoissons[] = [
   {
     etang: "un étang de pisciculture",
     phraseEnonce: (etang, a, b, c) =>
-      `Un pisciculteur étudie l'effet de la nourriture distribuée sur la population de ${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+      `Un pisciculteur étudie l'effet de la nourriture distribuée sur la population d'${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
   },
   {
     etang: "un bassin d'aquaculture",
     phraseEnonce: (etang, a, b, c) =>
-      `Une exploitation aquacole étudie l'effet de la nourriture distribuée sur la population de ${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+      `Une exploitation aquacole étudie l'effet de la nourriture distribuée sur la population d'${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
   },
   {
     etang: "un étang communal",
     phraseEnonce: (etang, a, b, c) =>
-      `Une commune suit l'effet de la nourriture distribuée sur la population de ${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
+      `Une commune suit l'effet de la nourriture distribuée sur la population d'${etang} ; la population P (en poissons) en fonction de la quantité de nourriture x (en kg/semaine) distribuée vaut $P(x)=${formatFonctionNarrativeLatex(a, b, c, "x")}$.`,
   },
 ];
 
