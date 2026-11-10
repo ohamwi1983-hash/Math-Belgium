@@ -1,15 +1,16 @@
 import type { ExerciceConstructionDroite } from "../../core/constructionDroite.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import { calculerPasGrille } from "../../ui/mafsTransformation";
 import { pasGrilleConstructionDroite } from "../../ui/constructionDroiteGraph";
 import { calculerViewBoxVecteurs } from "../../ui/vecteurGraph";
 import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
-import { formatPointLatex } from "../../ui/formatEquationDroite";
-import { formatEnonceLatex, texteAidePointsNiveau1 } from "../../ui/formatConstructionDroite";
+import { formatPointLatex, formatValeurGenereeLatex } from "../../ui/formatEquationDroite";
+import { consignePoints, formatEnonceLatex, texteAidePointsNiveau1 } from "../../ui/formatConstructionDroite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionDroite } from "./index";
+import { LIBELLE_CAS_PARALLELE_AXE, profilConstructionDroite } from "../profilsEvaluation4eCh7Droites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceConstructionDroite>` pour gen44 ("Construction
@@ -239,17 +240,14 @@ ${pointsHtml}
 /** Consigne de l'unique question — voir le commentaire de tête pour pourquoi ce n'est PAS
  * `consigneGeneraleTrace` (`ui/formatConstructionDroite.ts`), écrite pour l'ordre d'affichage inverse
  * de l'écran. Dépend de `variante` (paramétrique vs cartésienne) — disqualifie `regroupable`. */
-function consigneTraceExport(exercice: ExerciceConstructionDroite): string {
-  return exercice.variante === "parametrique"
-    ? "Trace la droite dont la représentation paramétrique est donnée ci-dessus, sur le graphique ci-dessous."
-    : "Trace la droite d'équation donnée ci-dessus, sur le graphique ci-dessous.";
-}
+/** Étapes du corrigé (une par écran) : jamais de repère vierge imprimé — l'élève trace sur sa
+ * feuille (même décision que la boîte à moustaches à construire, `boiteMoustaches/exportEvaluation.ts`). */
+const CONSIGNE_TRACE_PAPIER = "Place ces deux points dans un repère orthonormé, puis trace la droite qui les relie, prolongée de part et d'autre.";
 
 function construireEnonceConstructionDroite(exercice: ExerciceConstructionDroite): SectionExercice {
   return {
     enteteFragments: [texte("Équation de la droite : "), latex(formatEnonceLatex(exercice))],
-    enteteHtml: construireSvgConstructionDroite(exercice, false),
-    questions: [{ consigne: [texte(consigneTraceExport(exercice))] }],
+    questions: [{ consigne: [texte(consignePoints(exercice))] }, { consigne: [texte(CONSIGNE_TRACE_PAPIER)] }],
   };
 }
 
@@ -273,6 +271,118 @@ function construireCorrectionConstructionDroite(exercice: ExerciceConstructionDr
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les 2 écrans (deux points entiers, puis placement) sont les étapes d'APPRENTISSAGE : sur papier,
+// l'énoncé donne l'équation et UNE consigne (tracer la droite sur sa feuille). Le corrigé montre
+// les deux points trouvés (étape a) puis la droite attendue (étape b, figure `figureHtml`).
+
+function enoncePapier(exercice: ExerciceConstructionDroite): EnoncePapier {
+  const intro =
+    exercice.variante === "parametrique"
+      ? "Trace, dans un repère orthonormé sur ta feuille, la droite d dont des équations paramétriques sont :"
+      : "Trace, dans un repère orthonormé sur ta feuille, la droite d d'équation :";
+  return { section: { enteteFragments: [texte(intro), latex(formatEnonceLatex(exercice))], questions: [] } };
+}
+
+/** Comment chaque point s'obtient à partir de l'équation (valeur choisie ⇒ coordonnée calculée) —
+ * A est le point de l'instance, B = A + vecteur directeur : tous deux réellement sur la droite. */
+function calculPointLatex(exercice: ExerciceConstructionDroite, nom: string, p: Point, t: number): string {
+  const v = formatValeurGenereeLatex;
+  switch (exercice.variante) {
+    case "parametrique":
+      return `t = ${t} \\Rightarrow ${nom}${formatPointLatex(p)}`;
+    case "implicite":
+      return exercice.vecteur.x === 0 ? `y = ${v(p.y)} \\Rightarrow x = ${v(p.x)} : ${nom}${formatPointLatex(p)}` : `x = ${v(p.x)} \\Rightarrow y = ${v(p.y)} : ${nom}${formatPointLatex(p)}`;
+    case "explicite_y": {
+      const { m, p: o } = exercice.expliciteY!;
+      if (m === 0) return `x = ${v(p.x)} \\Rightarrow y = ${v(o)} : ${nom}${formatPointLatex(p)}`;
+      return `x = ${v(p.x)} \\Rightarrow y = ${v(m)} \\cdot ${p.x < 0 ? `(${v(p.x)})` : v(p.x)} ${o < 0 ? "-" : "+"} ${v(Math.abs(o))} = ${v(p.y)} : ${nom}${formatPointLatex(p)}`;
+    }
+    case "explicite_x": {
+      const { n, q } = exercice.expliciteX!;
+      if (n === 0) return `y = ${v(p.y)} \\Rightarrow x = ${v(q)} : ${nom}${formatPointLatex(p)}`;
+      return `y = ${v(p.y)} \\Rightarrow x = ${v(n)} \\cdot ${p.y < 0 ? `(${v(p.y)})` : v(p.y)} ${q < 0 ? "-" : "+"} ${v(Math.abs(q))} = ${v(p.x)} : ${nom}${formatPointLatex(p)}`;
+    }
+  }
+}
+
+function piege(exercice: ExerciceConstructionDroite): EtapeCorrection {
+  const { vecteur } = exercice;
+  if (vecteur.x === 0) return { label: "Piège", sousQuestion: "b", fragments: [texte("Une équation du type "), latex("x = k"), texte(" représente une droite VERTICALE (tous ses points ont la même abscisse), pas un point de l'axe Ox.")] };
+  if (vecteur.y === 0) return { label: "Piège", sousQuestion: "b", fragments: [texte("Une équation du type "), latex("y = k"), texte(" représente une droite HORIZONTALE (tous ses points ont la même ordonnée), pas un point de l'axe Oy.")] };
+  switch (exercice.variante) {
+    case "parametrique":
+      return { label: "Piège", sousQuestion: "a", fragments: [texte("Une même valeur de t sert pour x ET pour y : on ne choisit pas une valeur de t différente dans chaque équation.")] };
+    case "implicite":
+      return { label: "Piège", sousQuestion: "a", fragments: [texte("Les coefficients a et b de l'équation ne sont pas les coordonnées d'un point de la droite : il faut vérifier que chaque point choisi satisfait l'équation.")] };
+    default:
+      return { label: "Piège", sousQuestion: "a", fragments: [texte("Avec un coefficient fractionnaire, toutes les valeurs ne donnent pas une coordonnée entière : on choisit une valeur multiple du dénominateur, sinon le point est difficile à placer précisément.")] };
+  }
+}
+
+/** Méthode papier (3e personne) — même contenu que l'aide de l'écran (`texteAidePointsNiveau1`). */
+function methodePoints(exercice: ExerciceConstructionDroite): FragmentConsigne[] {
+  switch (exercice.variante) {
+    case "parametrique":
+      return [texte("On donne à t deux valeurs entières distinctes : chacune donne un point (x ; y) de d, avec la MÊME valeur de t dans les deux équations.")];
+    case "implicite":
+      return [texte("On fixe une valeur entière de x (ou de y si c'est plus simple) et on résout l'équation pour trouver l'autre coordonnée ; on recommence avec une autre valeur.")];
+    case "explicite_y":
+      return [texte("On remplace x par une valeur entière et on calcule "), latex("y = mx + p"), texte(" ; si m est une fraction, on prend x multiple de son dénominateur pour que y soit entier.")];
+    case "explicite_x":
+      return [texte("On remplace y par une valeur entière et on calcule "), latex("x = ny + q"), texte(" ; si n est une fraction, on prend y multiple de son dénominateur pour que x soit entier.")];
+  }
+}
+
+function correctionDetaillee(exercice: ExerciceConstructionDroite): EtapeCorrection[] {
+  const { point, vecteur } = exercice;
+  const pointB = secondPoint(point, vecteur);
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: methodePoints(exercice) },
+    { label: "Calcul", sousQuestion: "a", fragments: [latex(calculPointLatex(exercice, "A", point, 0))] },
+    { label: "Calcul", sousQuestion: "a", fragments: [latex(calculPointLatex(exercice, "B", pointB, 1))] },
+    {
+      label: "Conclusion",
+      sousQuestion: "b",
+      fragments: [texte("On place "), latex(`A${formatPointLatex(point)}`), texte(" et "), latex(`B${formatPointLatex(pointB)}`), texte(", puis on trace la droite (AB), prolongée jusqu'aux bords du repère.")],
+      figureHtml: construireSvgConstructionDroite(exercice, true),
+    },
+    piege(exercice),
+  ];
+}
+
+function reponseBreve(exercice: ExerciceConstructionDroite): FragmentConsigne[] {
+  const pointB = secondPoint(exercice.point, exercice.vecteur);
+  return [texte("Droite passant par "), latex(`A${formatPointLatex(exercice.point)}`), texte(" et "), latex(`B${formatPointLatex(pointB)}`), texte(" (tout autre couple de points de d convient).")];
+}
+
+function bareme(exercice: ExerciceConstructionDroite): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Premier point de d correct (coordonnées vérifiant l'équation)")], points: 1 },
+      { sousQuestion: "a", critere: [texte("Second point de d correct, distinct du premier")], points: 1 },
+      { sousQuestion: "b", critere: [texte("Points placés correctement dans le repère")], points: 1 },
+      { sousQuestion: "b", critere: [texte("Droite tracée à la règle et prolongée des deux côtés")], points: 1 },
+    ],
+    erreursFrequentes: [
+      exercice.vecteur.x === 0 || exercice.vecteur.y === 0
+        ? { description: [texte("Droite parallèle à l'autre axe (horizontale et verticale confondues)")], cout: "0 pt sur b)" }
+        : { description: [texte("Point dont les coordonnées ne vérifient pas l'équation (erreur de calcul)")], cout: "−1 par point" },
+      { description: [texte("Segment [AB] tracé au lieu de la droite entière")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Toute construction exacte de la même droite, quels que soient les deux points choisis")]],
+  };
+}
+
+/** ★ droite parallèle à un axe ; ★★★ coefficient fractionnaire (forme explicite) ; ★★ sinon. */
+function difficulte(exercice: ExerciceConstructionDroite): 1 | 2 | 3 {
+  if (exercice.vecteur.x === 0 || exercice.vecteur.y === 0) return 1;
+  const fractionnaire =
+    (exercice.expliciteY !== null && !Number.isInteger(exercice.expliciteY.m)) || (exercice.expliciteX !== null && !Number.isInteger(exercice.expliciteX.n));
+  return fractionnaire ? 3 : 2;
+}
+
 export const adaptateurEvaluationConstructionDroite: AdaptateurFeuilleExercices<ExerciceConstructionDroite> = {
   titreDocument: "Construction graphique — tracer une droite — Évaluation",
   nomFichierBase: "construction-droite",
@@ -281,6 +391,14 @@ export const adaptateurEvaluationConstructionDroite: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceConstructionDroite,
   construireCorrection: construireCorrectionConstructionDroite,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 4,
+  profilInstance: profilConstructionDroite,
+  libelleCasParticulier: LIBELLE_CAS_PARALLELE_AXE,
   // PAS regroupable — consigne dépendante de `variante` (paramétrique vs cartésienne, jamais
   // générique) ET `enteteHtml` (le graphique) utilisé, qui disqualifie `regroupable` à lui seul :
   // voir le commentaire de tête.

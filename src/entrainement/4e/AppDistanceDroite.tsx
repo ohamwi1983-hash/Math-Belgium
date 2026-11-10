@@ -29,6 +29,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -39,6 +40,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionDistanceDroite {
   return demarrerSessionDistanceDroite(REGLAGES_DEMO, genererExerciceDistanceDroite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/distanceDroite/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionDistanceDroite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDistanceDroite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceDistanceDroite, (id) => construireAvecVarianteId(id as VarianteDistanceDroite)));
 }
 
 /** Séquence réelle de phases pour CET exercice — `"choixPoint"` n'a jamais lieu pour la variante
@@ -117,7 +127,7 @@ interface TransitionEnAttente {
 }
 
 export function AppDistanceDroite() {
-  const [etat, setEtat] = useState<EtatSessionDistanceDroite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDistanceDroite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une entrée,
    * dans l'ordre de `sequencePourExercice` (même index que sa puce). */

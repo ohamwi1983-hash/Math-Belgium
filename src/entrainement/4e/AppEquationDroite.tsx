@@ -33,6 +33,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -43,6 +44,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionEquationDroite {
   return demarrerSessionEquationDroite(REGLAGES_DEMO, genererExerciceEquationDroite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/equationDroite/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionEquationDroite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationDroite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationDroite, (id) => construireAvecVarianteId(id as TypeDonneeEntree)));
 }
 
 /** Révélation de l'équation — toujours la vraie référence de l'exercice (`refExpliciteY`/
@@ -154,7 +164,7 @@ function construireReponseAttendue(exercice: ExerciceEquationDroite, phase: Phas
 }
 
 export function AppEquationDroite() {
-  const [etat, setEtat] = useState<EtatSessionEquationDroite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationDroite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une
    * entrée, dans l'ordre de `sequencePourExercice` (même index que sa puce). */

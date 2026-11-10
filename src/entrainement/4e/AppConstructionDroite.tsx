@@ -18,6 +18,7 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import type { ExerciceConstructionDroite } from "./core/constructionDroite.types";
 import type { Point } from "./core/vecteur.types";
 import type { ReponsePoints } from "./moteur/verificationConstructionDroite";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -28,6 +29,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionConstructionDroite {
   return demarrerSessionConstructionDroite(REGLAGES_DEMO, genererExerciceConstructionDroite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/constructionDroite/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionConstructionDroite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionConstructionDroite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceConstructionDroite, (id) => construireAvecVarianteId(id as VarianteConstructionDroite)));
 }
 
 const ORDRE_PHASES: PhaseConstructionDroite[] = ["points", "trace"];
@@ -79,7 +89,7 @@ interface TransitionEnAttente {
 }
 
 export function AppConstructionDroite() {
-  const [etat, setEtat] = useState<EtatSessionConstructionDroite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionConstructionDroite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une
    * entrée, dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

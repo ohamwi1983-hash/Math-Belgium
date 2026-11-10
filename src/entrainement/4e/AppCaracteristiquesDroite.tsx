@@ -19,6 +19,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import type { ReponseCaracteristiques, ReponseChamp, ReponseExtraction } from "./moteur/verificationCaracteristiquesDroite";
 import { formatNombreLatex } from "./ui/formatCaracteristiquesDroite";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine les caractéristiques de cette droite.";
 
@@ -31,6 +32,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionCaracteristiquesDroite {
   return demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, genererExerciceCaracteristiquesDroite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/caracteristiquesDroite/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionCaracteristiquesDroite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCaracteristiquesDroite, (id) => construireAvecVarianteId(id as VarianteCaracteristiquesDroite)));
 }
 
 const ORDRE_PHASES: PhaseCaracteristiquesDroite[] = ["extraction", "caracteristiques"];
@@ -95,7 +105,7 @@ function construireReponseAttendue(exercice: EtatSessionCaracteristiquesDroite["
 }
 
 export function AppCaracteristiquesDroite() {
-  const [etat, setEtat] = useState<EtatSessionCaracteristiquesDroite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCaracteristiquesDroite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une entrée,
    * dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

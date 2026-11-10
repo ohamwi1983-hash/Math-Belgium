@@ -22,6 +22,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -32,6 +33,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionIntersectionDroites {
   return demarrerSessionIntersectionDroites(REGLAGES_DEMO, genererExerciceIntersectionDroites);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/intersectionDroites/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionIntersectionDroites {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionIntersectionDroites(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceIntersectionDroites, (id) => construireAvecVarianteId(id as VarianteIntersectionDroites)));
 }
 
 /** Séquence dépendant de `exercice.conclusion` — "point" uniquement si `conclusion === "secantes"`,
@@ -83,7 +93,7 @@ interface TransitionEnAttente {
 }
 
 export function AppIntersectionDroites() {
-  const [etat, setEtat] = useState<EtatSessionIntersectionDroites>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionIntersectionDroites>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables). */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);

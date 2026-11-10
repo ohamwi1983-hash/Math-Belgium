@@ -1,5 +1,8 @@
 import type { ExerciceCombinaisonVecteurs } from "../../core/combinaisonVecteurs.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne } from "../../ui/formatEquationDroite";
+import { nombreFrLatex } from "../../ui/nombreFr";
+import { LIBELLE_CAS_COMBINAISON, profilCombinaisonVecteurs } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   formatConvertiLatex,
@@ -125,6 +128,93 @@ function construireCorrectionCombinaisonVecteurs(instance: ExerciceCombinaisonVe
   return [fragmentsGroupeReduction(instance), fragmentsGroupeComposantes(instance)];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les deux écrans (réduire l'expression, puis calculer les composantes) sont des étapes
+// d'APPRENTISSAGE : sur papier, l'énoncé garde les données et la seule question « composantes de
+// t » ; la réduction devient l'étape 1 du corrigé. Toutes les expressions viennent des fonctions de
+// l'écran (`ui/formatCombinaisonVecteurs.ts`).
+
+function donneesFragments(instance: ExerciceCombinaisonVecteurs): FragmentConsigne[] {
+  const pointsLatex = formatPointsLatex(instance);
+  const fragments: FragmentConsigne[] = [texte("On donne les vecteurs "), latex(formatVecteursLibresLatex(instance))];
+  if (pointsLatex) fragments.push(texte(", ainsi que les points "), latex(pointsLatex));
+  return fragments;
+}
+
+function enoncePapier(instance: ExerciceCombinaisonVecteurs): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [...donneesFragments(instance), texte(". Calcule les composantes du vecteur "), latex(formatExpressionLatex(instance)), texte(".")],
+      questions: [],
+    },
+  };
+}
+
+function reponseBreve(instance: ExerciceCombinaisonVecteurs): FragmentConsigne[] {
+  return [latex(formatReponseColonneLatex(instance))];
+}
+
+function correctionDetaillee(instance: ExerciceCombinaisonVecteurs): EtapeCorrection[] {
+  const axes = formatSommeAxesLatex(instance);
+  const lignes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: instance.points
+        ? [
+            texte("On distribue les coefficients externes, on remplace "),
+            latex("\\vec{BA}"),
+            texte(" par "),
+            latex("-\\vec{AB}"),
+            texte(", puis on regroupe les vecteurs identiques."),
+          ]
+        : [texte("On distribue les coefficients externes, puis on regroupe les vecteurs identiques.")],
+    },
+    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatDistribueLatex(instance))] },
+  ];
+  if (instance.points) lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [latex(formatConvertiLatex(instance))] });
+  lignes.push(
+    { label: "Réduction", sousQuestion: "a", fragments: [latex(formatEquationReduiteLatex(instance))] },
+    { label: "Substitution", sousQuestion: "b", fragments: [latex(formatSubstitutionLatex(instance))] },
+    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${axes.x} = ${nombreFrLatex(instance.reponse.x)}`)] },
+    { label: "Calcul", sousQuestion: "b", fragments: [latex(`${axes.y} = ${nombreFrLatex(instance.reponse.y)}`)] },
+    { label: "Conclusion", sousQuestion: "b", fragments: reponseBreve(instance) },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments: instance.points
+        ? [latex("\\vec{BA} = -\\vec{AB}"), texte(" : oublier ce changement de signe fausse le regroupement des termes en "), latex("\\vec{AB}"), texte(".")]
+        : [texte("Le coefficient devant une parenthèse multiplie TOUS ses termes, et un signe « − » devant un groupe change le signe de chacun d'eux.")],
+    },
+  );
+  return lignes;
+}
+
+function bareme(instance: ExerciceCombinaisonVecteurs): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Expression réduite : "), latex(formatEquationReduiteLatex(instance))], points: 1.5 },
+      { sousQuestion: "b", critere: [texte("Substitution des composantes de chaque vecteur")], points: 0.5 },
+      { sousQuestion: "b", critere: [texte("Première composante : "), latex(nombreFrLatex(instance.reponse.x))], points: 1 },
+      { sousQuestion: "b", critere: [texte("Seconde composante : "), latex(nombreFrLatex(instance.reponse.y))], points: 1 },
+    ],
+    erreursFrequentes: [
+      instance.points
+        ? { description: [latex("\\vec{BA}"), texte(" traité comme "), latex("\\vec{AB}"), texte(" (signe oublié)")], cout: "−1,5" }
+        : { description: [texte("Coefficient externe distribué sur un seul terme de la parenthèse")], cout: "−1,5" },
+      { description: [texte("Erreur de calcul sur une seule composante")], cout: "−1" },
+    ],
+    reponsesAcceptees: [[texte("Calcul direct des composantes sans réduction préalable, s'il est correct : les points de la réduction sont accordés")]],
+  };
+}
+
+/** ★ sans parenthèses ; ★★ parenthèses ou vecteur répété ; ★★★ avec la paire de points AB/BA. */
+function difficulte(instance: ExerciceCombinaisonVecteurs): 1 | 2 | 3 {
+  if (instance.variante === "plate") return 1;
+  return instance.points ? 3 : 2;
+}
+
 export const adaptateurEvaluationCombinaisonVecteurs: AdaptateurFeuilleExercices<ExerciceCombinaisonVecteurs> = {
   titreDocument: "Calcul de composantes de combinaisons linéaires — Évaluation",
   nomFichierBase: "combinaison-vecteurs-composantes",
@@ -133,6 +223,14 @@ export const adaptateurEvaluationCombinaisonVecteurs: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceCombinaisonVecteurs,
   construireCorrection: construireCorrectionCombinaisonVecteurs,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 5,
+  profilInstance: profilCombinaisonVecteurs,
+  libelleCasParticulier: LIBELLE_CAS_COMBINAISON,
   // Toujours 2 questions substantielles par instance (réduction symbolique, puis calcul numérique),
   // la question a) mentionnant en outre l'expression tirée — jamais `regroupable` (voir le
   // commentaire de tête).

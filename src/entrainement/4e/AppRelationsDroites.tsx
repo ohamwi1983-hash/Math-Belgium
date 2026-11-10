@@ -36,6 +36,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -46,6 +47,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionRelationsDroites {
   return demarrerSessionRelationsDroites(REGLAGES_DEMO, genererExerciceRelationsDroites);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/relationsDroites/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionRelationsDroites {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionRelationsDroites(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceRelationsDroites, (id) => construireAvecVarianteId(id as VarianteRelationsDroites)));
 }
 
 /** Puces de progression — même ordre que la vraie séquence de la famille de l'exercice
@@ -120,7 +130,7 @@ interface TransitionEnAttente {
 }
 
 export function AppRelationsDroites() {
-  const [etat, setEtat] = useState<EtatSessionRelationsDroites>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionRelationsDroites>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une entrée,
    * dans l'ordre de la séquence (même index que sa puce). */

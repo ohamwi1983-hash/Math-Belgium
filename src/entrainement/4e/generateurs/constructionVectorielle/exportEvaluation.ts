@@ -1,6 +1,9 @@
 import type { ExerciceConstructionVectorielle } from "../../core/constructionVectorielle.types";
 import type { Composantes, Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne } from "../../ui/formatEquationDroite";
+import { nombreFrLatex } from "../../ui/nombreFr";
+import { LIBELLE_CAS_CONSTRUCTION, profilConstructionVectorielle } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import { calculerPasGrille } from "../../ui/mafsTransformation";
@@ -296,12 +299,125 @@ function construireCorrectionConstructionVectorielle(exercice: ExerciceConstruct
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Un seul écran. L'énoncé papier garde les points A et B sur leur grille (donnée de l'exercice,
+// sans le vecteur demandé) et la consigne ; la construction attendue est une FIGURE : elle va dans
+// le corrigé (`figureHtml`), jamais dans l'énoncé. Le vecteur demandé est libre (aucune origine
+// imposée) : la figure du corrigé le trace depuis un point d'ancrage quelconque et le dit.
+
+function vecteurDemandeLatex(exercice: ExerciceConstructionVectorielle): string {
+  return `${formatCoefficientTexte(exercice.coefficient)}\\vec{${exercice.labelA}${exercice.labelB}}`;
+}
+
+function colonne(v: { x: number; y: number }): string {
+  return `\\begin{pmatrix} ${nombreFrLatex(v.x)} \\\\ ${nombreFrLatex(v.y)} \\end{pmatrix}`;
+}
+
+/** « de 8 unités vers la droite et de 3 vers le bas » (composante nulle omise). */
+function deplacement(v: { x: number; y: number }): string {
+  const parts: string[] = [];
+  if (v.x !== 0) parts.push(`de ${Math.abs(v.x)} ${Math.abs(v.x) > 1 ? "unités" : "unité"} vers la ${v.x > 0 ? "droite" : "gauche"}`);
+  if (v.y !== 0) parts.push(`de ${Math.abs(v.y)} ${Math.abs(v.y) > 1 ? "unités" : "unité"} vers le ${v.y > 0 ? "haut" : "bas"}`);
+  return parts.join(" et ");
+}
+
+function enoncePapier(exercice: ExerciceConstructionVectorielle): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("On donne les points "),
+        latex(formatTermesDonneesConnuesConstructionLatex(exercice).join(" \\quad ")),
+        texte(" ci-dessous. Construis le vecteur "),
+        latex(vecteurDemandeLatex(exercice)),
+        texte(" à partir du point de ton choix."),
+      ],
+      enteteHtml: construireSvgConstructionVectorielle(exercice, false),
+      questions: [],
+    },
+  };
+}
+
+function reponseBreve(exercice: ExerciceConstructionVectorielle): FragmentConsigne[] {
+  return [latex(`${vecteurDemandeLatex(exercice)} = ${colonne(exercice.cibleComposantes)}`), texte(" (tracé depuis n'importe quel point)")];
+}
+
+function correctionDetaillee(exercice: ExerciceConstructionVectorielle): EtapeCorrection[] {
+  const { coefficient, labelA, labelB } = exercice;
+  const ab = { x: exercice.pointB.x - exercice.pointA.x, y: exercice.pointB.y - exercice.pointA.y };
+  const k = Math.abs(coefficient);
+  return [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [
+        latex(vecteurDemandeLatex(exercice)),
+        texte(` a la même direction que `),
+        latex(`\\vec{${labelA}${labelB}}`),
+        texte(`, ${coefficient > 0 ? "le même sens" : "le sens opposé"} (coefficient ${coefficient > 0 ? "positif" : "négatif"}) et ${k === 1 ? "la même longueur" : `une longueur ${k} fois plus grande`}.`),
+      ],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: "a",
+      fragments: [
+        latex(`\\vec{${labelA}${labelB}} = ${colonne(ab)}`),
+        ...(coefficient === 1 ? [] : [texte(" donc "), latex(`${vecteurDemandeLatex(exercice)} = ${colonne(exercice.cibleComposantes)}`)]),
+        texte(` : depuis le point choisi, on se déplace ${deplacement(exercice.cibleComposantes)}.`),
+      ],
+    },
+    {
+      label: "Construction",
+      sousQuestion: "a",
+      fragments: [texte("Vecteur demandé (en orange), tracé ici depuis un point quelconque : tout autre point de départ convient, seuls comptent la direction, le sens et la longueur.")],
+      figureHtml: construireSvgConstructionVectorielle(exercice, true),
+    },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments:
+        coefficient < 0
+          ? [texte("Le coefficient est négatif : la flèche va dans le sens OPPOSÉ à celui de "), latex(`\\vec{${labelA}${labelB}}`), texte(".")]
+          : [texte("Un vecteur n'a pas de position propre : il n'est pas obligatoire de partir de "), latex(labelA), texte(" ; seuls la direction, le sens et la longueur comptent.")],
+    },
+  ];
+}
+
+function bareme(exercice: ExerciceConstructionVectorielle): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Composantes du vecteur à tracer : "), latex(colonne(exercice.cibleComposantes))], points: 1 },
+      { sousQuestion: "a", critere: [texte("Direction (parallèle à "), latex(`\\vec{${exercice.labelA}${exercice.labelB}}`), texte(")")], points: 1 },
+      { sousQuestion: "a", critere: [texte(`Sens (${exercice.coefficient > 0 ? "même sens" : "sens opposé"})`)], points: 1 },
+      { sousQuestion: "a", critere: [texte("Longueur et flèche correctes")], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Sens non inversé pour un coefficient négatif")], cout: "−1" },
+      { description: [texte("Longueur non multipliée (le vecteur donné recopié tel quel)")], cout: "−1" },
+    ],
+    reponsesAcceptees: [[texte("Tracé correct depuis n'importe quel point de départ")]],
+  };
+}
+
+/** ★ coefficient 1 ou −1 ; ★★ sinon. */
+function difficulte(exercice: ExerciceConstructionVectorielle): 1 | 2 | 3 {
+  return Math.abs(exercice.coefficient) === 1 ? 1 : 2;
+}
+
 export const adaptateurEvaluationConstructionVectorielle: AdaptateurFeuilleExercices<ExerciceConstructionVectorielle> = {
   titreDocument: "Construction graphique de vecteurs — Évaluation",
   nomFichierBase: "construction-vectorielle",
   genererInstance: genererExerciceConstructionVectorielle,
   construireEnonce: construireEnonceConstructionVectorielle,
   construireCorrection: construireCorrectionConstructionVectorielle,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 3,
+  profilInstance: profilConstructionVectorielle,
+  libelleCasParticulier: LIBELLE_CAS_CONSTRUCTION,
   // PAS regroupable — consigne dépendante du coefficient tiré (jamais générique) ET `enteteHtml`
   // (le graphique) utilisé, qui disqualifie `regroupable` à lui seul : voir le commentaire de tête.
 };

@@ -333,9 +333,13 @@ export function formatAideExtractionNiveau2Latex(exercice: ExerciceEquationDroit
       return `\\vec{u} = \\begin{pmatrix} ${d.pointB.x} - ${formatFacteurLatex(d.pointA.x)} \\\\ ${d.pointB.y} - ${formatFacteurLatex(d.pointA.y)} \\end{pmatrix}`;
     case "point_vecteur":
       return `A${formatPointLatex(d.point)} \\quad \\vec{u}${formatVecteurLatex(d.vecteur)}`;
+    // α = 90° : tan(90°) n'existe pas — la droite est perpendiculaire à l'axe, le vecteur
+    // directeur est directement (0 ; 1) (avec Ox) ou (1 ; 0) (avec Oy), jamais « tan(90°) ».
     case "angle_ox":
+      if (d.angleDeg === 90) return `\\alpha = 90^\\circ : \\vec{u} = \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix}`;
       return `\\vec{u} = \\begin{pmatrix} 1 \\\\ \\tan(${d.angleDeg}^\\circ) \\end{pmatrix}`;
     case "angle_oy":
+      if (d.angleDeg === 90) return `\\alpha = 90^\\circ : \\vec{u} = \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}`;
       return `\\vec{u} = \\begin{pmatrix} \\tan(${d.angleDeg}^\\circ) \\\\ 1 \\end{pmatrix}`;
     case "pente":
       return `\\vec{u} = \\begin{pmatrix} 1 \\\\ ${d.pente} \\end{pmatrix}`;
@@ -368,7 +372,9 @@ export function consigneCoefficients(exercice: ExerciceEquationDroite): string {
  * branche "impossible", `promptgen42modificationsv2.md` partie A — la forme implicite de secours
  * y est demandée quelle que soit `exercice.formeCible` réelle, toujours explicite_y/explicite_x). */
 function formatAideCoefficientsImpliciteLatex(point: Point, vecteur: Composantes): string {
-  return `a = ${vecteur.y}, \\quad b = -${formatFacteurLatex(vecteur.x)}, \\quad c = -\\big(a\\cdot ${formatFacteurLatex(point.x)} + b\\cdot ${formatFacteurLatex(point.y)}\\big)`;
+  // « b = −0 » jamais : composante nulle → « b = 0 ».
+  const b = vecteur.x === 0 ? "0" : `-${formatFacteurLatex(vecteur.x)}`;
+  return `a = ${vecteur.y}, \\quad b = ${b}, \\quad c = -\\big(a\\cdot ${formatFacteurLatex(point.x)} + b\\cdot ${formatFacteurLatex(point.y)}\\big)`;
 }
 
 /** Aide niveau 2 — formule substituée avec le point/vecteur CONFIRMÉS, jamais calculée. */

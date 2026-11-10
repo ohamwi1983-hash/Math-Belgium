@@ -14,6 +14,7 @@ import { EtapeLectureCartesienne } from "./components/EtapeLectureCartesienne";
 import { EtapeLectureParametrique } from "./components/EtapeLectureParametrique";
 import { Katex } from "./components/Katex";
 import { formatReponseAttendueLatex } from "./ui/formatLectureGraphiqueDroite";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -24,6 +25,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionLectureGraphiqueDroite {
   return demarrerSessionLectureGraphiqueDroite(REGLAGES_DEMO, genererExerciceLectureGraphiqueDroite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/lectureGraphiqueDroite/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionLectureGraphiqueDroite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLectureGraphiqueDroite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceLectureGraphiqueDroite, (id) => construireAvecVarianteId(id as VarianteLectureGraphiqueDroite)));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -39,7 +49,7 @@ interface TransitionEnAttente {
  * déterminé directement par `exerciceCourant.variante`. Mono-écran : la transition n'est jamais
  * qu'une clôture d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppLectureGraphiqueDroite() {
-  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDroite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDroite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice : entre dans la `key` de l'écran pour qu'aucune saisie de
    * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice » (audit chapitre 7,

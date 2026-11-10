@@ -1,6 +1,6 @@
 import type { ExerciceLectureGraphiqueDroite } from "../../core/lectureGraphiqueDroite.types";
 import type { Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import { RATIO_GRAPHE } from "../../ui/mafsTransformation";
@@ -9,6 +9,7 @@ import { consigneGeneraleLecture, consigneLecture, formatReponseAttendueLatex } 
 import { formatPointLatex, formatVecteurLatex } from "../../ui/formatEquationDroite";
 import { PAS_GRILLE_LECTURE, pointsEntiersVisibles, viewBoxLectureGraphiqueDroite } from "../../ui/lectureGraphiqueDroiteGraph";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLectureGraphiqueDroite } from "./index";
+import { LIBELLE_CAS_PARALLELE_AXE, profilLectureGraphiqueDroite } from "../profilsEvaluation4eCh7Droites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLectureGraphiqueDroite>` pour gen43 (Lecture
@@ -171,7 +172,7 @@ function decouperDroiteDansViewBox(point: Point, vecteur: { x: number; y: number
 /** Grille + droite tracée d'un bord à l'autre du cadre + points à coordonnées entières marqués — même
  * représentation que `LectureGraphiqueDroiteGraph.tsx` à l'écran, jamais l'équation elle-même
  * affichée (c'est justement ce que l'élève doit trouver). */
-function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueDroite): string {
+function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueDroite, etiquettes = false): string {
   const viewBox = viewBoxLectureGraphiqueDroite(exercice);
   const echelle = construireEchelle(viewBox);
   const [depart, arrivee] = decouperDroiteDansViewBox(exercice.point, exercice.vecteur, viewBox);
@@ -179,7 +180,12 @@ function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueD
   const grilleHtml = construireGrilleEtAxesHtml(viewBox, echelle);
   const droiteHtml = `<line x1="${echelle.sx(depart.x).toFixed(1)}" y1="${echelle.sy(depart.y).toFixed(1)}" x2="${echelle.sx(arrivee.x).toFixed(1)}" y2="${echelle.sy(arrivee.y).toFixed(1)}" stroke="${COULEUR_DROITE}" stroke-width="2.4"/>`;
   const pointsHtml = pointsEntiersVisibles(exercice)
-    .map((p) => `<circle cx="${echelle.sx(p.x).toFixed(1)}" cy="${echelle.sy(p.y).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`)
+    .map((p, i) => {
+      const cercle = `<circle cx="${echelle.sx(p.x).toFixed(1)}" cy="${echelle.sy(p.y).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`;
+      // Corrigé : les deux points lus (A = point de référence, B = A + vecteur), étiquetés.
+      const nom = etiquettes ? (i === 1 ? "A" : i === 2 ? "B" : "") : "";
+      return nom ? `${cercle}<text x="${(echelle.sx(p.x) + 6).toFixed(1)}" y="${(echelle.sy(p.y) - 6).toFixed(1)}" font-size="12" font-weight="700" fill="${COULEUR_POINT}">${nom}</text>` : cercle;
+    })
     .join("");
 
   return `<svg width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" viewBox="0 0 ${LARGEUR_SVG} ${HAUTEUR_SVG}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto 14px;border:1px solid #e6e6f0;border-radius:8px;background:#ffffff;">
@@ -249,6 +255,111 @@ function construireCorrectionLectureGraphiqueDroite(exercice: ExerciceLectureGra
   return blocs;
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Un seul écran : l'énoncé papier est le graphique (figure de l'énoncé, gardée) et la consigne. Le
+// corrigé montre la lecture de deux points (même figure, points A et B étiquetés), le vecteur
+// directeur puis l'équation — valeurs issues de l'instance et des mêmes formateurs que l'écran.
+
+function enoncePapier(exercice: ExerciceLectureGraphiqueDroite): EnoncePapier {
+  const consigne =
+    exercice.variante === "cartesienne"
+      ? "Détermine une équation cartésienne de la droite représentée ci-dessous (sous la forme de ton choix)."
+      : "Détermine des équations paramétriques de la droite représentée ci-dessous.";
+  return { section: { enteteFragments: [texte(consigne)], enteteHtml: construireSvgLectureGraphiqueDroite(exercice), questions: [] } };
+}
+
+/** « x − 3 », « x + 2 », « x » — binôme substitué sans double signe. */
+function binome(variable: string, valeur: number): string {
+  if (valeur === 0) return variable;
+  return valeur > 0 ? `${variable} - ${valeur}` : `${variable} + ${-valeur}`;
+}
+
+/** Facteur devant une parenthèse : « 2 », « −3 », « » pour 1, « − » pour −1. */
+function coefficient(valeur: number): string {
+  return valeur === 1 ? "" : valeur === -1 ? "-" : String(valeur);
+}
+
+/** Équation cartésienne substituée y_u·(x − x_A) − x_u·(y − y_A) = 0, termes nuls omis. */
+function substitutionCartesienneLatex(exercice: ExerciceLectureGraphiqueDroite): string {
+  const { point: a, vecteur: v } = exercice;
+  const termes: string[] = [];
+  if (v.y !== 0) termes.push(`${coefficient(v.y)}(${binome("x", a.x)})`);
+  if (v.x !== 0) {
+    const c = -v.x;
+    const corps = `(${binome("y", a.y)})`;
+    termes.push(termes.length === 0 ? `${coefficient(c)}${corps}` : c > 0 ? `+ ${coefficient(c)}${corps}` : `- ${coefficient(-c)}${corps}`);
+  }
+  return `${termes.join(" ")} = 0`;
+}
+
+function pieges(exercice: ExerciceLectureGraphiqueDroite): EtapeCorrection {
+  const { vecteur: v } = exercice;
+  if (v.x === 0 || v.y === 0) {
+    return {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments:
+        v.x === 0
+          ? [texte("Droite verticale : toutes ses abscisses sont égales, son équation est du type "), latex("x = k"), texte(" (pas de pente).")]
+          : [texte("Droite horizontale : toutes ses ordonnées sont égales, son équation est du type "), latex("y = k"), texte(".")],
+    };
+  }
+  return { label: "Piège", sousQuestion: "a", fragments: [texte("Le vecteur directeur se calcule « arrivée moins départ », dans le même ordre pour les deux coordonnées : "), latex("\\vec{u} = \\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}"), texte(".")] };
+}
+
+function correctionDetaillee(exercice: ExerciceLectureGraphiqueDroite): EtapeCorrection[] {
+  const [, pointA, pointB] = pointsEntiersVisibles(exercice);
+  const lignes: EtapeCorrection[] = [
+    {
+      label: "Lecture",
+      sousQuestion: "a",
+      fragments: [texte("Deux points de la droite à coordonnées entières, lus sur le quadrillage : "), latex(`A${formatPointLatex(pointA)}`), texte(" et "), latex(`B${formatPointLatex(pointB)}`), texte(".")],
+      figureHtml: construireSvgLectureGraphiqueDroite(exercice, true),
+    },
+    { label: "Calcul", sousQuestion: "a", fragments: [texte("Vecteur directeur : "), latex(`\\vec{u} = \\vec{AB}${formatVecteurLatex(exercice.vecteur)}`)] },
+  ];
+  if (exercice.variante === "cartesienne") {
+    lignes.push(
+      { label: "Méthode", sousQuestion: "a", fragments: [texte("Une équation cartésienne de la droite de vecteur directeur "), latex("\\vec{u}"), texte(" passant par A s'écrit "), latex("y_{\\vec{u}}\\,(x - x_A) - x_{\\vec{u}}\\,(y - y_A) = 0"), texte(".")] },
+      { label: "Calcul", sousQuestion: "a", fragments: [latex(substitutionCartesienneLatex(exercice))] },
+    );
+  } else {
+    lignes.push({ label: "Méthode", sousQuestion: "a", fragments: [texte("On remplace le point A et le vecteur directeur dans "), latex("\\begin{cases} x = x_A + x_{\\vec{u}}\\,t \\\\ y = y_A + y_{\\vec{u}}\\,t \\end{cases}")] });
+  }
+  lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [latex(formatReponseAttendueLatex(exercice))] }, pieges(exercice));
+  return lignes;
+}
+
+function reponseBreve(exercice: ExerciceLectureGraphiqueDroite): FragmentConsigne[] {
+  return [latex(formatReponseAttendueLatex(exercice))];
+}
+
+function bareme(exercice: ExerciceLectureGraphiqueDroite): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Deux points de la droite lus correctement")], points: 1 },
+      { sousQuestion: "a", critere: [texte("Vecteur directeur : "), latex(`\\vec{u}${formatVecteurLatex(exercice.vecteur)}`), texte(" (ou un multiple non nul)")], points: 1 },
+      { sousQuestion: "a", critere: [texte(exercice.variante === "cartesienne" ? "Point et vecteur remplacés dans l'équation cartésienne" : "Point et vecteur remplacés dans les équations paramétriques")], points: 1 },
+      { sousQuestion: "a", critere: [texte("Équation finale : "), latex(formatReponseAttendueLatex(exercice))], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Coordonnées d'un point lues à l'envers (ordonnée avant abscisse)")], cout: "−1" },
+      { description: [texte("Vecteur directeur de signe faux (soustraction dans le désordre)")], cout: "−1" },
+    ],
+    reponsesAcceptees: [
+      exercice.variante === "cartesienne"
+        ? [texte("Toute équation équivalente, implicite ou explicite (multiple non nul)")]
+        : [texte("Tout autre point de la droite et tout vecteur directeur colinéaire")],
+    ],
+  };
+}
+
+/** ★ droite parallèle à un axe ; ★★ sinon. */
+function difficulte(exercice: ExerciceLectureGraphiqueDroite): 1 | 2 | 3 {
+  return exercice.vecteur.x === 0 || exercice.vecteur.y === 0 ? 1 : 2;
+}
+
 export const adaptateurEvaluationLectureGraphiqueDroite: AdaptateurFeuilleExercices<ExerciceLectureGraphiqueDroite> = {
   titreDocument: "Lecture graphique — équation d'une droite — Évaluation",
   nomFichierBase: "lecture-graphique-droite",
@@ -257,6 +368,14 @@ export const adaptateurEvaluationLectureGraphiqueDroite: AdaptateurFeuilleExerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceLectureGraphiqueDroite,
   construireCorrection: construireCorrectionLectureGraphiqueDroite,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 4,
+  profilInstance: profilLectureGraphiqueDroite,
+  libelleCasParticulier: LIBELLE_CAS_PARALLELE_AXE,
   // PAS regroupable — `enteteHtml` (le graphique) utilisé ET consigne dépendante de la variante
   // (cartésienne/paramétrique) : 2 raisons indépendantes déjà suffisantes chacune, voir le
   // commentaire de tête.

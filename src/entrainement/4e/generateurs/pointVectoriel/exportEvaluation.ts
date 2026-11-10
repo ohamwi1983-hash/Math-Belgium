@@ -1,5 +1,7 @@
 import type { ExercicePointVectoriel } from "../../core/pointVectoriel.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { FragmentConsigne } from "../../ui/formatEquationDroite";
+import { LIBELLE_CAS_ORIGINE, profilPointVectoriel } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consignePointVectoriel,
@@ -77,7 +79,7 @@ function construireEnoncePointVectoriel(instance: ExercicePointVectoriel): Secti
 
   return {
     enteteFragments: [texte("Données : "), latex(formatDonneesConnuesLatex(instance))],
-    questions: [{ consigne: fragmentsConsigne, reponse: { type: "lignes", nombre: 0 } }],
+    questions: [{ consigne: fragmentsConsigne }],
   };
 }
 
@@ -168,6 +170,117 @@ function construireCorrectionPointVectoriel(instance: ExercicePointVectoriel): B
   return correctionRelationCombinaison(instance);
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Un seul écran : l'énoncé papier est celui de l'écran (données + consigne), sans place de réponse.
+// Le corrigé détaille la relation utilisée, le calcul (les fonctions de correction ci-dessus) et
+// la conclusion ; toutes les valeurs viennent de l'instance (`reponse`, calculée à la génération).
+
+function enoncePapier(instance: ExercicePointVectoriel): EnoncePapier {
+  const consigne = consignePointVectoriel(instance);
+  return {
+    section: {
+      enteteFragments: [
+        texte("On donne "),
+        latex(formatDonneesConnuesLatex(instance)),
+        texte(`. ${consigne.avant}`),
+        ...(consigne.latex ? [latex(consigne.latex)] : []),
+        texte(consigne.apres),
+      ],
+      questions: [],
+    },
+  };
+}
+
+function methode(instance: ExercicePointVectoriel): FragmentConsigne[] {
+  if (instance.variante === "translation") {
+    return [texte("L'image d'un point par une translation s'obtient en ajoutant les composantes du vecteur de translation aux coordonnées du point.")];
+  }
+  if (instance.variante === "milieu") {
+    return [texte("Les coordonnées du milieu sont les moyennes des coordonnées des extrémités.")];
+  }
+  if (instance.forme === "pointAPoint") {
+    return [
+      texte("On calcule d'abord les composantes de "),
+      latex(`\\vec{${instance.labelOrigine}${instance.labelConnu}}`),
+      texte(", puis on part de "),
+      latex(instance.labelOrigine),
+      texte(" et on ajoute le vecteur "),
+      latex(`${formatCoefficientLatex(instance.coefficient)}\\vec{${instance.labelOrigine}${instance.labelConnu}}`),
+      texte("."),
+    ];
+  }
+  return [
+    texte("On part de "),
+    latex(instance.labelDepart),
+    texte(" et on ajoute, composante par composante, la combinaison des vecteurs "),
+    latex(`\\vec{${instance.labelU}}`),
+    texte(" et "),
+    latex(`\\vec{${instance.labelV}}`),
+    texte("."),
+  ];
+}
+
+function piege(instance: ExercicePointVectoriel): FragmentConsigne[] {
+  if (instance.variante === "translation") return [texte("On AJOUTE les composantes du vecteur aux coordonnées du point de départ ; une composante négative s'écrit entre parenthèses pour ne pas se tromper de signe.")];
+  if (instance.variante === "milieu") return [texte("On divise la SOMME des coordonnées par 2, pas leur différence : la différence donnerait les composantes du vecteur, pas le milieu.")];
+  if (instance.forme === "pointAPoint") {
+    return [
+      texte("Le vecteur multiplié part de "),
+      latex(instance.labelOrigine),
+      texte(" : il faut ajouter le résultat aux coordonnées de "),
+      latex(instance.labelOrigine),
+      texte(", pas à celles de "),
+      latex(instance.labelConnu),
+      texte("."),
+    ];
+  }
+  return [texte("Chaque coefficient multiplie les DEUX composantes de son vecteur ; un coefficient négatif change le signe de chaque composante.")];
+}
+
+function reponseBreve(instance: ExercicePointVectoriel): FragmentConsigne[] {
+  return [latex(formatPointLatex(instance.pointCherche, instance.reponse))];
+}
+
+function correctionDetaillee(instance: ExercicePointVectoriel): EtapeCorrection[] {
+  const calcul = construireCorrectionPointVectoriel(instance).flatMap((b) => (b.type === "paragraphe" ? b.fragments : []));
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: methode(instance) },
+    { label: "Calcul", sousQuestion: "a", fragments: calcul },
+    { label: "Conclusion", sousQuestion: "a", fragments: reponseBreve(instance) },
+    { label: "Piège", sousQuestion: "a", fragments: piege(instance) },
+  ];
+}
+
+function bareme(instance: ExercicePointVectoriel): BaremeExercice {
+  const libelleMethode: Record<string, string> = {
+    translation: "Relation point de départ + vecteur de translation",
+    milieu: "Formule du milieu (moyenne des coordonnées)",
+    pointAPoint: "Composantes du vecteur connu, puis relation point de départ + multiple du vecteur",
+    combinaisonVecteurs: "Relation point de départ + combinaison des vecteurs, composante par composante",
+  };
+  const cle = instance.variante === "relationGenerale" ? instance.forme : instance.variante;
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte(libelleMethode[cle])], points: 1 },
+      { sousQuestion: "a", critere: [texte("Abscisse : "), latex(`x_{${instance.pointCherche}} = ${formatNombre(instance.reponse.x)}`)], points: 1.5 },
+      { sousQuestion: "a", critere: [texte("Ordonnée : "), latex(`y_{${instance.pointCherche}} = ${formatNombre(instance.reponse.y)}`)], points: 1.5 },
+    ],
+    erreursFrequentes: [
+      instance.variante === "milieu"
+        ? { description: [texte("Différence des coordonnées au lieu de leur somme")], cout: "0 pt aux coordonnées" }
+        : { description: [texte("Erreur de signe sur une composante négative (parenthèses oubliées)")], cout: "−1,5" },
+      { description: [texte("Coordonnées inversées (abscisse et ordonnée échangées)")], cout: "−1" },
+    ],
+    reponsesAcceptees: [[texte("Coordonnées écrites en colonne ou sous la forme d'un couple")]],
+  };
+}
+
+/** ★ translation ou milieu ; ★★ relation générale (coefficient, combinaison de deux vecteurs). */
+function difficulte(instance: ExercicePointVectoriel): 1 | 2 | 3 {
+  return instance.variante === "relationGenerale" ? 2 : 1;
+}
+
 export const adaptateurEvaluationPointVectoriel: AdaptateurFeuilleExercices<ExercicePointVectoriel> = {
   titreDocument: "Point à partir d'une relation vectorielle — Évaluation",
   nomFichierBase: "point-vectoriel",
@@ -176,6 +289,14 @@ export const adaptateurEvaluationPointVectoriel: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnoncePointVectoriel,
   construireCorrection: construireCorrectionPointVectoriel,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 3,
+  profilInstance: profilPointVectoriel,
+  libelleCasParticulier: LIBELLE_CAS_ORIGINE,
   // Consigne toujours dépendante de l'instance (label du point cherché, vecteur/coefficient tiré
   // interpolé dans la phrase elle-même) — jamais générique : voir le commentaire de tête.
 };

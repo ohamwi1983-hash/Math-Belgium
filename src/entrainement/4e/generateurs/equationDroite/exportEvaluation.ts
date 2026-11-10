@@ -1,5 +1,5 @@
 import type { ExerciceEquationDroite } from "../../core/equationDroite.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   consigneCoefficients,
@@ -12,11 +12,14 @@ import {
   formatEquationExpliciteYLatex,
   formatEquationImpliciteLatex,
   formatEtatActuelPointVecteurLatex,
+  formatPointLatex,
+  formatVecteurLatex,
   segmentsAideExtractionNiveau1,
   segmentsConsignePossibiliteCoefficients,
 } from "../../ui/formatEquationDroite";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationDroite } from "./index";
+import { LIBELLE_CAS_PARALLELE_AXE, profilEquationDroite } from "../profilsEvaluation4eCh7Droites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationDroite>` pour gen42 (Équation d'une
@@ -56,9 +59,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationD
  * `formatEquationExpliciteXLatex` (fraction irréductible si non entier, jamais de décimal — même
  * garantie que côté écran).
  *
- * **Aucune zone de réponse vierge** (`reponse: { type: "lignes", nombre: 0 }` sur les 2 questions)
- * — même décision documentée par `generateurs/applicationPhysique/exportEvaluation.ts`/
- * `generateurs/quelAngle/exportEvaluation.ts` : l'élève répond sur une feuille à part.
+ * **Aucune zone de réponse** : l'élève répond sur une feuille à part. Les 2 questions de
+ * `construireEnonce` sont les ÉTAPES du corrigé ; l'énoncé imprimé vient de `enoncePapier`
+ * (refonte `.claude/rules/feuilles-evaluations.md`, voir la section « Papier » plus bas).
  *
  * `regroupable` : NON — 2 questions par instance (jamais 1 seule), et la consigne de la question a)
  * dépend du type de donnée d'entrée (`consigneExtraction`, 5 textes différents selon
@@ -67,8 +70,6 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationD
  * (voir sa doc, `export/genererFeuilleExercices.ts`, et le précédent `anglesAssocies/exportEvaluation.ts`
  * pour la même distinction "plusieurs variantes ≠ regroupable si le texte varie avec l'instance").
  */
-
-const ZONE_SANS_REPONSE = { type: "lignes", nombre: 0 } as const;
 
 function construireEnonceEquationDroite(instance: ExerciceEquationDroite): SectionExercice {
   const questionCoefficients: FragmentConsigne[] =
@@ -79,8 +80,8 @@ function construireEnonceEquationDroite(instance: ExerciceEquationDroite): Secti
   return {
     enteteFragments: [texte("On donne : "), latex(formatEnonceLatex(instance))],
     questions: [
-      { consigne: [texte(consigneExtraction(instance))], reponse: ZONE_SANS_REPONSE },
-      { consigne: questionCoefficients, reponse: ZONE_SANS_REPONSE },
+      { consigne: [texte(consigneExtraction(instance))] },
+      { consigne: questionCoefficients },
     ],
   };
 }
@@ -163,6 +164,142 @@ function construireCorrectionEquationDroite(instance: ExerciceEquationDroite): B
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les 2 écrans (point + vecteur directeur, puis forme demandée) sont les étapes d'APPRENTISSAGE :
+// sur papier, l'énoncé donne la droite (ses données) et UNE consigne — l'équation sous la forme
+// demandée. L'extraction devient l'étape « a » du corrigé, la forme demandée l'étape « b ». Le
+// verdict « forme explicite impossible » (droite verticale pour y = mx + p, horizontale pour
+// x = ny + q) reste à trancher par l'élève : la consigne prévoit toujours les deux issues.
+
+/** Phrase de données, sans aucune méthode : la droite d passe par… */
+function donneesTexte(instance: ExerciceEquationDroite): FragmentConsigne[] {
+  const d = instance.donnees;
+  switch (d.type) {
+    case "deux_points":
+      return [texte("La droite d passe par les points "), latex(`A${formatPointLatex(d.pointA)}`), texte(" et "), latex(`B${formatPointLatex(d.pointB)}`), texte(".")];
+    case "point_vecteur":
+      return [texte("La droite d passe par le point "), latex(`A${formatPointLatex(d.point)}`), texte(" et admet pour vecteur directeur "), latex(`\\vec{u}${formatVecteurLatex(d.vecteur)}`), texte(".")];
+    case "angle_ox":
+      return [texte("La droite d passe par le point "), latex(`A${formatPointLatex(d.point)}`), texte(` et forme un angle de ${d.angleDeg}° avec l'axe Ox.`)];
+    case "angle_oy":
+      return [texte("La droite d passe par le point "), latex(`A${formatPointLatex(d.point)}`), texte(` et forme un angle de ${d.angleDeg}° avec l'axe Oy.`)];
+    case "pente":
+      return [texte("La droite d passe par le point "), latex(`A${formatPointLatex(d.point)}`), texte(" et a pour pente "), latex(`m = ${d.pente}`), texte(".")];
+  }
+}
+
+function consigneGlobale(instance: ExerciceEquationDroite): FragmentConsigne[] {
+  switch (instance.formeCible) {
+    case "parametrique":
+      return [texte("Détermine des équations paramétriques de d.")];
+    case "implicite":
+      return [texte("Détermine une équation cartésienne de d (forme ax + by + c = 0).")];
+    case "explicite_y":
+      return [texte("Si c'est possible, écris l'équation de d sous la forme "), latex("y=mx+p"), texte(" ; sinon, justifie pourquoi et donne une équation cartésienne de d.")];
+    case "explicite_x":
+      return [texte("Si c'est possible, écris l'équation de d sous la forme "), latex("x=ny+q"), texte(" ; sinon, justifie pourquoi et donne une équation cartésienne de d.")];
+  }
+}
+
+function enoncePapier(instance: ExerciceEquationDroite): EnoncePapier {
+  return { section: { enteteFragments: [...donneesTexte(instance), texte(" "), ...consigneGlobale(instance)], questions: [] } };
+}
+
+function estExplicite(instance: ExerciceEquationDroite): boolean {
+  return instance.formeCible === "explicite_y" || instance.formeCible === "explicite_x";
+}
+
+function pieges(instance: ExerciceEquationDroite): EtapeCorrection {
+  if (estExplicite(instance) && !instance.possible) {
+    return instance.formeCible === "explicite_y"
+      ? { label: "Piège", sousQuestion: "b", fragments: [texte("Une droite verticale n'a pas de pente : on ne peut pas l'écrire sous la forme "), latex("y=mx+p"), texte(". Son équation est du type "), latex("x=k"), texte(".")] }
+      : { label: "Piège", sousQuestion: "b", fragments: [texte("Une droite horizontale ne peut pas s'écrire sous la forme "), latex("x=ny+q"), texte(" (y n'y varie pas). Son équation est du type "), latex("y=k"), texte(".")] };
+  }
+  if (instance.donnees.type === "angle_oy") {
+    return { label: "Piège", sousQuestion: "a", fragments: [texte("L'angle est donné avec l'axe Oy, pas avec Ox : le vecteur directeur est "), latex("\\begin{pmatrix} \\tan\\alpha \\\\ 1 \\end{pmatrix}"), texte(", et non "), latex("\\begin{pmatrix} 1 \\\\ \\tan\\alpha \\end{pmatrix}"), texte(".")] };
+  }
+  if (instance.formeCible === "implicite") {
+    return { label: "Piège", sousQuestion: "b", fragments: [texte("Les coefficients a et b ne sont pas les composantes du vecteur directeur : "), latex("a = y_{\\vec{u}}"), texte(" et "), latex("b = -x_{\\vec{u}}"), texte(".")] };
+  }
+  if (instance.formeCible === "parametrique") {
+    return { label: "Piège", sousQuestion: "b", fragments: [texte("Chaque équation paramétrique associe une coordonnée du point à la MÊME composante du vecteur directeur : "), latex("x = x_A + x_{\\vec{u}}\\,t"), texte(", jamais "), latex("x = x_A + y_{\\vec{u}}\\,t"), texte(".")] };
+  }
+  return instance.formeCible === "explicite_y"
+    ? { label: "Piège", sousQuestion: "b", fragments: [texte("La pente est le quotient "), latex("m = \\dfrac{y_{\\vec{u}}}{x_{\\vec{u}}}"), texte(", pas son inverse.")] }
+    : { label: "Piège", sousQuestion: "b", fragments: [texte("Pour la forme "), latex("x=ny+q"), texte(", le coefficient est "), latex("n = \\dfrac{x_{\\vec{u}}}{y_{\\vec{u}}}"), texte(" (l'inverse de la pente).")] };
+}
+
+function correctionDetaillee(instance: ExerciceEquationDroite): EtapeCorrection[] {
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: segmentsAideExtractionNiveau1(instance) },
+  ];
+  if (instance.donnees.type !== "point_vecteur") lignes.push({ label: "Calcul", sousQuestion: "a", fragments: [latex(formatAideExtractionNiveau2Latex(instance))] });
+  lignes.push({ label: "Conclusion", sousQuestion: "a", fragments: [latex(`A${formatEtatActuelPointVecteurLatex(instance)}`)] });
+  if (estExplicite(instance)) {
+    const choix: "possible" | "impossible" = instance.possible ? "possible" : "impossible";
+    lignes.push(
+      { label: "Condition", sousQuestion: "b", fragments: fragmentsJustificationPossibilite(instance) },
+      { label: "Calcul", sousQuestion: "b", fragments: [latex(formatAideNiveau2PossibiliteCoefficientsLatex(instance, choix))] },
+    );
+  } else if (instance.formeCible === "implicite") {
+    lignes.push({ label: "Calcul", sousQuestion: "b", fragments: [latex(formatAideCoefficientsNiveau2Latex(instance))] });
+  } else {
+    lignes.push({ label: "Méthode", sousQuestion: "b", fragments: [texte("On remplace le point et le vecteur directeur dans "), latex(LATEX_GABARIT_PARAMETRIQUE)] });
+  }
+  lignes.push({ label: "Conclusion", sousQuestion: "b", fragments: [latex(equationFinaleLatex(instance))] }, pieges(instance));
+  return lignes;
+}
+
+const LATEX_GABARIT_PARAMETRIQUE = "\\begin{cases} x = x_A + x_{\\vec{u}}\\,t \\\\ y = y_A + y_{\\vec{u}}\\,t \\end{cases}";
+
+function reponseBreve(instance: ExerciceEquationDroite): FragmentConsigne[] {
+  if (estExplicite(instance) && !instance.possible) {
+    const raison = instance.formeCible === "explicite_y" ? "droite verticale, forme y = mx + p impossible ; " : "droite horizontale, forme x = ny + q impossible ; ";
+    return [texte(raison), latex(equationFinaleLatex(instance))];
+  }
+  return [latex(equationFinaleLatex(instance))];
+}
+
+function bareme(instance: ExerciceEquationDroite): BaremeExercice {
+  const extraction = [
+    { sousQuestion: "a", critere: [texte("Un point de d")], points: 0.5 },
+    { sousQuestion: "a", critere: [texte("Un vecteur directeur : "), latex(`\\vec{u}${formatVecteurLatex(instance.vecteur)}`), texte(" (ou un multiple non nul)")], points: 1 },
+  ];
+  const criteresB = estExplicite(instance)
+    ? [
+        { sousQuestion: "b", critere: [texte(`Forme demandée ${instance.possible ? "possible (vecteur directeur non" : "impossible, justifiée (vecteur directeur"} ${instance.formeCible === "explicite_y" ? "vertical" : "horizontal"})`)], points: 0.5 },
+        { sousQuestion: "b", critere: [texte("Coefficients calculés")], points: 1 },
+        { sousQuestion: "b", critere: [texte("Équation finale simplifiée : "), latex(equationFinaleLatex(instance))], points: 1 },
+      ]
+    : [
+        { sousQuestion: "b", critere: [texte("Point et vecteur remplacés dans la bonne forme")], points: 1 },
+        { sousQuestion: "b", critere: [texte("Équation finale : "), latex(equationFinaleLatex(instance))], points: 1.5 },
+      ];
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres: [...extraction, ...criteresB],
+    erreursFrequentes: [
+      instance.donnees.type === "angle_oy"
+        ? { description: [texte("Angle avec Oy traité comme un angle avec Ox")], cout: "0 pt sur a)" }
+        : { description: [texte("Composantes du vecteur directeur inversées ou de signe faux")], cout: "−1" },
+      estExplicite(instance)
+        ? { description: [texte(instance.possible ? "Forme déclarée impossible alors que la droite n'est pas parallèle à l'axe concerné" : "Pente (ou coefficient n) inventée pour une droite parallèle à un axe")], cout: "0 pt sur b)" }
+        : instance.formeCible === "parametrique"
+          ? { description: [texte("Paramètre t oublié, ou « t ∈ ℝ » absent")], cout: "−0,5" }
+          : { description: [texte("Équation juste mais non simplifiée (facteur commun non divisé)")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Toute équation équivalente (multiple non nul ; autre point de d, autre vecteur directeur colinéaire pour les équations paramétriques)")]],
+  };
+}
+
+/** ★ point et vecteur donnés, forme cartésienne ou paramétrique ; ★★★ angle avec Oy ou forme
+ * impossible à reconnaître ; ★★ sinon. */
+function difficulte(instance: ExerciceEquationDroite): 1 | 2 | 3 {
+  if (instance.donnees.type === "point_vecteur" && !estExplicite(instance)) return 1;
+  if (instance.donnees.type === "angle_oy" || (estExplicite(instance) && !instance.possible)) return 3;
+  return 2;
+}
+
 export const adaptateurEvaluationEquationDroite: AdaptateurFeuilleExercices<ExerciceEquationDroite> = {
   titreDocument: "Équation d'une droite — Évaluation",
   nomFichierBase: "equation-droite",
@@ -171,4 +308,12 @@ export const adaptateurEvaluationEquationDroite: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceEquationDroite,
   construireCorrection: construireCorrectionEquationDroite,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 5,
+  profilInstance: profilEquationDroite,
+  libelleCasParticulier: LIBELLE_CAS_PARALLELE_AXE,
 };

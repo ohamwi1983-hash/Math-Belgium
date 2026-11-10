@@ -1,5 +1,14 @@
 import type { ExerciceEquationCercle } from "../../core/equationCercle.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatNombreGraphique } from "../../../export/svgGraph";
 import { RATIO_GRAPHE_CERCLE, viewBoxEquationCercle } from "../../ui/equationCercleGraph";
@@ -12,8 +21,10 @@ import {
   formatEquationAttendueLatex,
   formatEtatActuelCentreLatex,
   formatRayonLatex,
+  LATEX_GABARIT_EQUATION,
 } from "../../ui/formatEquationCercle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercle } from "./index";
+import { PARAMETRES_CENTRE_CERCLE, profilEquationCercle } from "../profilsEvaluation4eCh7Coniques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationCercle>` pour gen49 (Équation d'un cercle
@@ -74,10 +85,10 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationC
  * résolution nouveau, aucune des aides existantes n'exposant de texte à concaténer pour ce cas
  * précis (mêmes principe et raison que `analyseFonction/exportWord.ts`/`cercleTrigonometrique/exportEvaluation.ts`).
  *
- * Aucune zone de réponse vierge (`reponse: { type: "lignes", nombre: 0 }` sur les 3 questions, même
- * décision documentée que `quelAngle/exportEvaluation.ts`/`pointVectoriel/exportEvaluation.ts`) :
- * chaque réponse attendue est une donnée courte (une paire de coordonnées, un nombre, une équation),
- * jamais un calcul à dérouler sur plusieurs lignes.
+ * **Feuille d'exercices / évaluation (refonte papier)** : l'énoncé papier (`enoncePapier`) est le
+ * graphique et la consigne globale « détermine l'équation » ; les 3 écrans (centre, rayon, équation)
+ * deviennent les étapes 1 à 3 du corrigé détaillé, jamais des sous-questions imprimées. Aucune place
+ * de réponse. Tirage équilibré : `profilsEvaluation4eCh7Coniques.ts` (centre sur un axe au choix).
  */
 
 // ============================================================================
@@ -171,7 +182,11 @@ function construireSvgEquationCercle(exercice: ExerciceEquationCercle, options: 
 
   const { centre, rayon, pointMarque } = exercice;
   const cercle = `<circle cx="${sx(centre.x).toFixed(1)}" cy="${sy(centre.y).toFixed(1)}" r="${(rayon * echelle).toFixed(1)}" fill="none" stroke="${COULEUR_CERCLE}" stroke-width="${EPAISSEUR_CERCLE}"/>`;
-  const point = `<circle cx="${sx(pointMarque.x).toFixed(1)}" cy="${sy(pointMarque.y).toFixed(1)}" r="3.2" fill="${COULEUR_POINT}"/>`;
+  // Étiquette « P » : l'énoncé papier et le corrigé nomment ce point (placée côté extérieur du cercle).
+  const versExterieurX = Math.sign(pointMarque.x - centre.x);
+  const versExterieurY = Math.sign(pointMarque.y - centre.y);
+  const etiquetteP = `<text x="${(sx(pointMarque.x) + (versExterieurX >= 0 ? 6 : -6)).toFixed(1)}" y="${(sy(pointMarque.y) + (versExterieurY > 0 ? -6 : 12)).toFixed(1)}" font-size="11" font-weight="700" text-anchor="${versExterieurX >= 0 ? "start" : "end"}" fill="${COULEUR_POINT}">P</text>`;
+  const point = `<circle cx="${sx(pointMarque.x).toFixed(1)}" cy="${sy(pointMarque.y).toFixed(1)}" r="3.2" fill="${COULEUR_POINT}"/>${etiquetteP}`;
 
   const segmentRayon = options.avecRayon ? ligneSvg(sx(centre.x), sy(centre.y), sx(pointMarque.x), sy(pointMarque.y), COULEUR_POINT, EPAISSEUR_SEGMENT, "dashed") : "";
 
@@ -207,60 +222,110 @@ function construireEnonceEquationCercle(exercice: ExerciceEquationCercle): Secti
   return {
     enteteFragments: [texte(CONSIGNE_GENERALE_EQUATION_CERCLE)],
     enteteHtml: construireSvgEquationCercle(exercice),
-    questions: [
-      { consigne: [texte(CONSIGNE_CENTRE)], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(consigneRayon(exercice))], reponse: { type: "lignes", nombre: 0 } },
-      { consigne: [texte(CONSIGNE_EQUATION)], reponse: { type: "lignes", nombre: 0 } },
-    ],
+    questions: [{ consigne: [texte(CONSIGNE_CENTRE)] }, { consigne: [texte(consigneRayon(exercice))] }, { consigne: [texte(CONSIGNE_EQUATION)] }],
+  };
+}
+
+/** Énoncé papier : le graphique et la consigne globale — les 3 écrans deviennent les étapes du
+ * corrigé. Le point marqué est nommé P pour que le corrigé puisse s'y référer. */
+function enoncePapierEquationCercle(exercice: ExerciceEquationCercle): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("Le graphique ci-dessous représente un cercle ; le point marqué P appartient à ce cercle. Détermine l'équation cartésienne de ce cercle, sous la forme non développée "),
+        latex(LATEX_GABARIT_EQUATION),
+        texte("."),
+      ],
+      enteteHtml: construireSvgEquationCercle(exercice),
+      questions: [],
+    },
   };
 }
 
 function construireCorrectionEquationCercle(exercice: ExerciceEquationCercle): BlocCorrection[] {
-  const { variante } = exercice;
-  const blocs: BlocCorrection[] = [{ type: "html", html: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }) }];
+  return [
+    { type: "html", html: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }) },
+    { type: "paragraphe", fragments: [texte("Centre "), latex(`C${formatEtatActuelCentreLatex(exercice)}`), texte(", rayon "), latex(`R = ${formatRayonLatex(exercice)}`), texte(".")] },
+    { type: "paragraphe", fragments: [texte("Équation : "), latex(formatEquationAttendueLatex(exercice)), texte(".")] },
+  ];
+}
 
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte("a) Le centre est le point équidistant de tous les points du cercle — marqué en vert sur le graphique ci-dessus : "),
-      latex(`C${formatEtatActuelCentreLatex(exercice)}`),
-      texte("."),
-    ],
-  });
+function pointLatex(x: number, y: number): string {
+  return `(${x}\\,;\\,${y})`;
+}
 
-  if (variante === "rayon_direct") {
-    blocs.push({
-      type: "paragraphe",
+function difficulteEquationCercle(exercice: ExerciceEquationCercle): 1 | 2 | 3 {
+  return exercice.variante === "rayon_direct" ? 1 : 2;
+}
+
+function reponseBreveEquationCercle(exercice: ExerciceEquationCercle): FragmentConsigne[] {
+  return [latex(formatEquationAttendueLatex(exercice))];
+}
+
+function correctionDetailleeEquationCercle(exercice: ExerciceEquationCercle): EtapeCorrection[] {
+  const { centre, pointMarque } = exercice;
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Le centre est le point situé à égale distance de tous les points du cercle : le milieu du cercle tracé, lu sur les nœuds de la grille.")] },
+    {
+      label: "Lecture",
+      sousQuestion: "a",
+      fragments: [texte("Centre "), latex(`C${formatEtatActuelCentreLatex(exercice)}`), texte(" (croix sur la figure) ; le point marqué est "), latex(`P${pointLatex(pointMarque.x, pointMarque.y)}`), texte(".")],
+      figureHtml: construireSvgEquationCercle(exercice, { avecCentre: true, avecRayon: true }),
+    },
+  ];
+  if (exercice.variante === "rayon_direct") {
+    const horizontal = pointMarque.y === centre.y;
+    lignes.push({
+      label: "Lecture",
+      sousQuestion: "b",
       fragments: [
-        texte(
-          `b) Le point marqué est aligné avec le centre sur la grille (segment orange ci-dessus) : il suffit de compter le nombre de cases qui les séparent — R = ${formatRayonLatex(exercice)}.`,
-        ),
-      ],
-    });
-  } else {
-    const formuleRayon = formatAideRayonNiveau2Latex(exercice) as string;
-    blocs.push({
-      type: "paragraphe",
-      fragments: [
-        texte(
-          "b) Le point marqué n'est pas aligné avec le centre : le rayon se retrouve par le théorème de Pythagore, à partir des écarts horizontal et vertical entre le centre et ce point (segment orange ci-dessus) : ",
-        ),
-        latex(`${formuleRayon} = ${formatRayonLatex(exercice)}`),
+        texte(`P est sur la même ${horizontal ? "horizontale" : "verticale"} que le centre : le rayon se compte en carreaux, `),
+        latex(`R = CP = ${formatRayonLatex(exercice)}`),
+        texte(", donc "),
+        latex(`R^2 = ${exercice.rayonCarre}`),
         texte("."),
       ],
     });
+  } else {
+    lignes.push(
+      { label: "Méthode", sousQuestion: "b", fragments: [texte("P n'est pas aligné avec le centre sur la grille : le rayon est la distance CP, calculée par le théorème de Pythagore à partir des écarts horizontal et vertical.")] },
+      {
+        label: "Calcul",
+        sousQuestion: "b",
+        fragments: [latex(`${formatAideRayonNiveau2Latex(exercice) as string} = \\sqrt{${exercice.rayonCarre}} = ${formatRayonLatex(exercice)}`), texte(", donc "), latex(`R^2 = ${exercice.rayonCarre}`), texte(".")],
+      },
+    );
   }
-
-  blocs.push({
-    type: "paragraphe",
-    fragments: [
-      texte("c) Un cercle de centre (x₀ ; y₀) et de rayon R a pour équation (x−x₀)² + (y−y₀)² = R², non développée, donc : "),
-      latex(formatEquationAttendueLatex(exercice)),
-      texte("."),
-    ],
+  lignes.push(
+    { label: "Méthode", sousQuestion: "c", fragments: [texte("Un cercle de centre "), latex("(x_0\\,;\\,y_0)"), texte(" et de rayon "), latex("R"), texte(" a pour équation "), latex(LATEX_GABARIT_EQUATION), texte(".")] },
+    { label: "Conclusion", sousQuestion: "c", fragments: [latex(formatEquationAttendueLatex(exercice)), texte(".")] },
+  );
+  const negatif = centre.x < 0 ? { variable: "x", valeur: centre.x } : centre.y < 0 ? { variable: "y", valeur: centre.y } : null;
+  lignes.push({
+    label: "Piège",
+    sousQuestion: "c",
+    fragments: negatif
+      ? [texte("Dans la parenthèse on soustrait la coordonnée du centre : "), latex(`${negatif.variable}_0 = ${negatif.valeur}`), texte(" donne "), latex(`(${negatif.variable} + ${-negatif.valeur})^2`), texte(", et le second membre est "), latex("R^2"), texte(", pas R.")]
+      : [texte("Le second membre de l'équation est "), latex(`R^2 = ${exercice.rayonCarre}`), texte(", pas "), latex(`R = ${formatRayonLatex(exercice).split(" \\approx")[0]}`), texte(".")],
   });
+  return lignes;
+}
 
-  return blocs;
+function baremeEquationCercle(exercice: ExerciceEquationCercle): BaremeExercice {
+  const { centre } = exercice;
+  const erreurs: ErreurFrequente[] = [{ description: [texte("Rayon R écrit au second membre au lieu de "), latex("R^2")], cout: "−1" }];
+  if (centre.x !== 0 || centre.y !== 0) erreurs.push({ description: [texte("Signe d'une coordonnée du centre inversé dans la parenthèse")], cout: "−1" });
+  if (exercice.variante === "rayon_indirect") erreurs.push({ description: [texte("Rayon lu « à vue » sur la grille au lieu du théorème de Pythagore")], cout: "−1" });
+  return {
+    reponseFinale: [latex(formatEquationAttendueLatex(exercice))],
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Centre "), latex(formatEtatActuelCentreLatex(exercice))], points: 1 },
+      { sousQuestion: "b", critere: exercice.variante === "rayon_direct" ? [texte("Rayon lu sur la grille : "), latex(`R = ${formatRayonLatex(exercice)}`)] : [texte("Rayon calculé par Pythagore : "), latex(`R^2 = ${exercice.rayonCarre}`)], points: 1 },
+      { sousQuestion: "c", critere: [texte("Équation correcte sous la forme non développée (signes et "), latex("R^2"), texte(")")], points: 2 },
+    ],
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Le rayon peut rester sous forme de racine : seul "), latex(`R^2 = ${exercice.rayonCarre}`), texte(" apparaît dans l'équation")]],
+  };
 }
 
 export const adaptateurEvaluationEquationCercle: AdaptateurFeuilleExercices<ExerciceEquationCercle> = {
@@ -271,8 +336,13 @@ export const adaptateurEvaluationEquationCercle: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceEquationCercle,
   construireCorrection: construireCorrectionEquationCercle,
-  // PAS regroupable : 3 questions par instance (centre/rayon/équation) ET un enteteHtml (le
-  // graphique du cercle) sur chaque instance — les 2 conditions explicitement exclues par la doc de
-  // `AdaptateurFeuilleExercices.regroupable` (`export/genererFeuilleExercices.ts`). Voir le
-  // commentaire de tête de fichier.
+  difficulte: difficulteEquationCercle,
+  reponseBreve: reponseBreveEquationCercle,
+  correctionDetaillee: correctionDetailleeEquationCercle,
+  bareme: baremeEquationCercle,
+  enoncePapier: enoncePapierEquationCercle,
+  dureeMinutes: 5,
+  profilInstance: profilEquationCercle,
+  parametresAuChoix: PARAMETRES_CENTRE_CERCLE,
+  // PAS regroupable : 3 étapes par instance ET un enteteHtml (le graphique du cercle).
 };
