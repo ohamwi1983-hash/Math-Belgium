@@ -131,5 +131,7 @@ export const LIBELLE_CAS_COMPARAISON = "Inclure une question de lecture (effecti
  * graphique : 25 % ; récapitulatif : 0 %) → cas particulier. Médianes, σ, écarts interquartiles
  * jamais égaux entre A et B (0 %). `calcul` sans objet. */
 export function profilComparaisonSeries(e: ExerciceComparaisonSeries): ProfilInstance {
-  return { casParticulier: e.question.type === "seuil" ? "lecture-seuil" : null };
+  // `forme` : le type de question (centrage, dispersion, interprétation…) est imposé identique
+  // d'une série à l'autre, question par question (décision de l'utilisateur).
+  return { casParticulier: e.question.type === "seuil" ? "lecture-seuil" : null, forme: e.question.type };
 }

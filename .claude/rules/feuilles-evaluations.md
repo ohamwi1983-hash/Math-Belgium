@@ -86,6 +86,12 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   cohérentes ou non, une ou deux valeurs de q, nature d'une suite, existe/n'existe pas quand c'est
   la question), filtrer une issue rendrait la réponse prévisible. Est particulier ce qui
   RACCOURCIT la résolution (équation sans solution réglée en une ligne, données directes…).
+- **Même structure dans toutes les séries** : la série A fixe, question par question, le cas
+  particulier et le TYPE de question (`ProfilInstance.forme`, ex. gen38 : centrage / dispersion /
+  interprétation / lecture) ; les autres séries reproduisent cette structure avec d'autres nombres.
+  Paramètres au choix et cas particulier coexistent (gen1 : case « racines irrationnelles » +
+  case « équation incomplète ») ; `parametresNonApplicables` pour une instance où un paramètre est
+  sans objet (racines irrationnelles en mise en évidence généralisée).
 - `calculatriceIndispensable: true` pour un générateur dont toutes les instances exigent la
   calculatrice : le panneau avertit si le professeur choisit « calculatrice interdite ».
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison

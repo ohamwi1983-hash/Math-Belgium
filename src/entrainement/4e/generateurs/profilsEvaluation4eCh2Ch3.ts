@@ -44,10 +44,19 @@ export const LIBELLE_CAS_SECOND_DEGRE = "Inclure un cas particulier (équation i
  * la « mise en évidence généralisée » peut tomber sur une équation incomplète (b = 0 ou c = 0), qui
  * relève alors d'une autre méthode, plus courte. */
 export function profilSecondDegre(e: Exercice): ProfilInstance {
+  const meg = e.categorie === "mise_en_evidence_generalisee";
+  const marqueurs = [meg && (e.enonce.b === 0 || e.enonce.c === 0) && "equation-incomplete", !meg && e.solution.racinesExactes && "racines-rationnelles"].filter(Boolean);
   return {
-    casParticulier: e.categorie === "mise_en_evidence_generalisee" && (e.enonce.b === 0 || e.enonce.c === 0) ? "equation-incomplete" : null,
+    casParticulier: marqueurs.length ? marqueurs.join("+") : null,
+    // La mise en évidence généralisée n'a jamais de racines irrationnelles : la case est sans objet.
+    parametresNonApplicables: meg ? ["racines-rationnelles"] : undefined,
   };
 }
+
+/** Case du panneau (cochée par défaut) : cochée = racines irrationnelles (radical à simplifier),
+ * décochée = racines entières ou rationnelles — pour toutes les questions de la ligne et toutes les
+ * séries (≈ 50 % de chaque dans les quatre premières variantes). */
+export const PARAMETRES_SECOND_DEGRE = [{ id: "racines-rationnelles", label: "Racines irrationnelles (radical à simplifier)" }];
 
 export const LIBELLE_CAS_TRINOME = "Inclure un cas particulier (trinôme incomplet : b = 0 ou c = 0)";
 

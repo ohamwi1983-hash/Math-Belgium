@@ -128,6 +128,12 @@ export interface ProfilInstance {
    * « aucune-solution »…), le même pour toutes les séries d'une même question. */
   casParticulier: string | null;
   calcul?: "exacte" | "calculatrice";
+  /** Type de question quand il est tiré au hasard dans une variante (ex. gen38 : centrage,
+   * dispersion, interprétation) : imposé IDENTIQUE d'une série à l'autre, question par question. */
+  forme?: string;
+  /** Paramètres au choix (`parametresAuChoix`) sans objet pour cette instance (ex. racines
+   * irrationnelles en mise en évidence généralisée) : ignorés par la contrainte des cases. */
+  parametresNonApplicables?: string[];
 }
 
 export interface EnoncePapier {

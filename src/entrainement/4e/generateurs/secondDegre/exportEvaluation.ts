@@ -26,7 +26,7 @@ import {
 } from "../../ui/formatEquation";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSecondDegre, type VarianteSecondDegreId } from "./index";
-import { profilSecondDegre, LIBELLE_CAS_SECOND_DEGRE } from "../profilsEvaluation4eCh2Ch3";
+import { profilSecondDegre, LIBELLE_CAS_SECOND_DEGRE, PARAMETRES_SECOND_DEGRE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<Exercice>` pour gen1 ("Résoudre une équation du second
@@ -440,6 +440,7 @@ function difficulteSecondDegre(instance: Exercice): 1 | 2 | 3 {
 export const adaptateurEvaluationSecondDegre: AdaptateurFeuilleExercices<Exercice> = {
   profilInstance: profilSecondDegre,
   libelleCasParticulier: LIBELLE_CAS_SECOND_DEGRE,
+  parametresAuChoix: PARAMETRES_SECOND_DEGRE,
   titreDocument: "Résoudre une équation du second degré — Évaluation",
   nomFichierBase: "second-degre-methode-rapide",
   genererInstance: genererExerciceSecondDegre,

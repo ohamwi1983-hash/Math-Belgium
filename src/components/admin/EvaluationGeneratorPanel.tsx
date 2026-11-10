@@ -870,7 +870,7 @@ export function EvaluationGeneratorPanel({
                                         </tr>
                                       ) : null
                                     const ligneCas =
-                                      libelleCas && parametres.length === 0 && ligne.nombre > 0 ? (
+                                      libelleCas && ligne.nombre > 0 ? (
                                         <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-cas'}>
                                           <td colSpan={4}>
                                             <label className="admin-eval-checkbox-field">
