@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangleQuelconque.types";
 import { diagnostiquerDonneeManquante } from "../moteur/verificationTriangleQuelconque";
-import { consigneDonneeManquante, estCote, labelChampDonneeManquante, NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE, OPTIONS_UNITE_LONGUEUR, optionsCroquisDonneeManquante, placeholderDonneeManquante, textesAideDonneeManquante, valeursTriangleSketchDonneeManquante } from "../ui/formatTriangleQuelconque";
+import { consigneDonneeManquante, estCote, labelChampDonneeManquante, NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE, OPTIONS_UNITE_LONGUEUR, optionsCroquisDonneeManquante, placeholderDonneeManquante, textesAideDonneeManquante, valeursTriangleSketchDonneeManquante, latexAide2DonneeManquante } from "../ui/formatTriangleQuelconque";
+import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
@@ -87,9 +88,19 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
 
       {textesAide.length > 0 && (
         <div className="triangle-quelconque-aide">
-          {textesAide.map((texteAide) => (
-            <p key={texteAide}>{texteAide}</p>
-          ))}
+          {/* Aide 2 : la formule substituée en KaTeX (jamais écrite au clavier). */}
+          {textesAide.map((texteAide, i) =>
+            i === 1 ? (
+              <div key="formule">
+                <p>Formule à appliquer :</p>
+                {latexAide2DonneeManquante(exercice).map((ligne) => (
+                  <Katex key={ligne} expression={ligne} block />
+                ))}
+              </div>
+            ) : (
+              <p key={texteAide}>{texteAide}</p>
+            ),
+          )}
         </div>
       )}
       {!validation && (

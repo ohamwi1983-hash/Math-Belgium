@@ -185,14 +185,14 @@ function correctionDetailleeAnalyseFonction(instance: ExerciceAnalyseFonction): 
       fragments: [
         latex(positif ? "a > 0" : "a < 0"),
         texte(` : parabole tournée vers le ${positif ? "haut (minimum)" : "bas (maximum)"}. `),
-        latex(`a\\cdot b = ${ab}`),
-        texte(ab === 0 ? " : l'axe de symétrie est l'axe Oy." : ab > 0 ? " > 0 : a et b de même signe, l'axe de symétrie est à gauche de Oy." : " < 0 : a et b de signes contraires, l'axe de symétrie est à droite de Oy."),
+        latex(`a\\cdot b = ${ab}${ab > 0 ? " > 0" : ab < 0 ? " < 0" : ""}`),
+        texte(ab === 0 ? " : l'axe de symétrie est l'axe Oy." : ab > 0 ? " : a et b de même signe, l'axe de symétrie est à gauche de Oy." : " : a et b de signes contraires, l'axe de symétrie est à droite de Oy."),
       ],
     },
     {
       label: "Calcul",
       sousQuestion: L("axeSommet"),
-      fragments: [latex(`x_S = -\\dfrac{b}{2a} = -\\dfrac{${b}}{2\\cdot ${a < 0 ? `(${a})` : a}} = ${nombreLatex(xS)}`), texte(" ; "), latex(`y_S = f\\left(${nombreLatex(xS)}\\right) = ${nombreLatex(yS)}`), texte(".")],
+      fragments: [latex(`x_S = -\\dfrac{b}{2a} = -\\dfrac{${b < 0 ? `(${b})` : b}}{2\\cdot ${a < 0 ? `(${a})` : a}} = ${nombreLatex(xS)}`), texte(" ; "), latex(`y_S = f\\left(${nombreLatex(xS)}\\right) = ${nombreLatex(yS)}`), texte(".")],
     },
     { label: "Conclusion", sousQuestion: L("axeSommet"), fragments: [texte("Axe de symétrie "), latex(`x = ${nombreLatex(xS)}`), texte(", sommet "), latex(`S\\left(${nombreLatex(xS)}\\,;\\,${nombreLatex(yS)}\\right)`), texte(".")] },
     {
@@ -219,7 +219,15 @@ function correctionDetailleeAnalyseFonction(instance: ExerciceAnalyseFonction): 
   lignes.push({
     label: "Tableau",
     sousQuestion: L("tableau"),
-    fragments: [texte(instance.exercice.categorie === "irreductible" ? `Signe constant (celui de a), variation qui change au sommet x = ${nombreTexte(xS)} :` : `Signe de a à l'extérieur des racines, opposé entre elles ; variation qui change au sommet x = ${nombreTexte(xS)} :`)],
+    fragments: [
+      texte(
+        instance.exercice.categorie === "irreductible"
+          ? `Signe constant (celui de a), variation qui change au sommet x = ${nombreTexte(xS)} :`
+          : racinesTriees(instance).length === 1
+            ? `Signe de a partout, sauf en la racine double où f s'annule ; variation qui change au sommet x = ${nombreTexte(xS)} :`
+            : `Signe de a à l'extérieur des racines, opposé entre elles ; variation qui change au sommet x = ${nombreTexte(xS)} :`,
+      ),
+    ],
     figureHtml: tableauHtml(instance),
   });
   lignes.push(piege(instance));

@@ -252,7 +252,7 @@ export function AppCercleTrigonometrique() {
             <EtapeQuadrantCercleTrig
               key={`${numeroExercice}-${etat.phase}`}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={1}
               recapitulatif={recapitulatif}
               onValider={(quadrant) => terminerEtape(soumettreReponseQuadrant(etat, quadrant), libelleQuadrant(quadrant))}
               validation={validation}

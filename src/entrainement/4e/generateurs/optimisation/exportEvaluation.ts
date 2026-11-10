@@ -21,7 +21,6 @@ import {
   formatGrandeurXYLatex,
   formatIsolementLatex,
   segmentsPhraseEnonce,
-  texteAideDomaineNiveau1,
   texteAideSystemeNiveau3,
 } from "../../ui/formatOptimisation";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
@@ -110,8 +109,9 @@ function nomY(e: ExerciceOptimisationModelisation): string | undefined {
   return e.identificationXY?.candidatsY[e.identificationXY.indexCorrectY];
 }
 
-function unite(u: string): string {
-  return u ? ` (en ${u})` : "";
+/** « (en m) » — omis pour une unité de dénombrement déjà dans le nom (« le nombre de bovins »). */
+function unite(u: string, nom: string): string {
+  return u && !nom.includes(u) ? ` (en ${u})` : "";
 }
 
 /** Énoncé commun (papier) : contexte, variable nommée, question finale. */
@@ -119,10 +119,10 @@ function enteteEnonce(e: ExerciceOptimisation, avecConsigne: boolean): FragmentC
   const fragments: FragmentConsigne[] = phraseFragments(e.contexte.phraseEnonce);
   if (e.variante === "modelisation" && e.identificationXY) {
     const y = nomY(e);
-    fragments.push(texte(` On note ${e.contexte.labelVariable} ${e.contexte.nomVariable}${unite(e.contexte.uniteVariable)}${e.contexte.croquis && y ? ` et ${e.contrainte.lettreCherchee} ${y}` : ""}.`));
+    fragments.push(texte(` On note ${e.contexte.labelVariable} ${e.contexte.nomVariable}${unite(e.contexte.uniteVariable, e.contexte.nomVariable)}${e.contexte.croquis && y ? ` et ${e.contrainte.lettreCherchee} ${y}` : ""}.`));
   }
   if (!avecConsigne) return fragments;
-  const atteint = e.contexte.genreGrandeur === "feminin" ? "elle est atteinte" : "il est atteint";
+  const atteint = e.contexte.genreGrandeur === "feminin" ? "est-elle atteinte" : "est-il atteint";
   fragments.push(texte(` ${e.contexte.questionFinale ?? "Quelle est la valeur optimale ?"} Pour quelle valeur de ${e.contexte.labelVariable} ${atteint} ?`));
   if (e.variante === "modelisation") fragments.push(texte(` Justifie en exprimant la grandeur à optimiser en fonction de ${e.contexte.labelVariable} et en précisant le domaine de validité.`));
   return fragments;
@@ -196,14 +196,23 @@ function correctionDetailleeOptimisation(e: ExerciceOptimisation): EtapeCorrecti
       { label: "Isoler", sousQuestion: L("systeme"), fragments: [latex(formatIsolementLatex(e.contrainte, v)), texte(".")] },
       { label: "Substituer", sousQuestion: L("systeme"), fragments: phraseFragments(texteAideSystemeNiveau3(e).replace(/^Expression substituée, non développée : /, "")) },
       { label: "Développer", sousQuestion: L("systeme"), fragments: [latex(`${nomFonction(e)} = ${fonctionLatex(e)}`), texte(".")] },
-      { label: "Domaine", sousQuestion: L("domaine"), fragments: [texte(`${texteAideDomaineNiveau1(e).replace(/^Rappel : /, "").replace(/\.$/, " :")} `), latex(formatDomaineLatex(e.domaine, v)), texte(".")] },
+      {
+        label: "Domaine",
+        sousQuestion: L("domaine"),
+        fragments: [
+          texte(e.famille === "revenuPrix" ? "Deux conditions, une par grandeur du contexte (aucune ne peut devenir négative), combinées : " : `Aucune grandeur du contexte ne peut être négative (ni ${v}, ni `),
+          ...(e.famille === "revenuPrix" ? [] : [latex(formatIsolementLatex(e.contrainte, v)), texte(") : ")]),
+          latex(formatDomaineLatex(e.domaine, v)),
+          texte("."),
+        ],
+      },
     );
   }
   lignes.push({
     label: "Sommet",
     sousQuestion: L("sommet"),
     fragments: [
-      latex(`${v}_S = -\\dfrac{b}{2a} = -\\dfrac{${nombreLatex(e.fonction.b)}}{2\\cdot ${entreParentheses(e.fonction.a)}} = ${nombreLatex(e.sommet.x)}`),
+      latex(`${v}_S = -\\dfrac{b}{2a} = -\\dfrac{${entreParentheses(e.fonction.b)}}{2\\cdot ${entreParentheses(e.fonction.a)}} = ${nombreLatex(e.sommet.x)}`),
       texte(" ; "),
       latex(`f\\left(${nombreLatex(e.sommet.x)}\\right) = ${nombreLatex(e.sommet.y)}`),
       texte(e.fonction.a < 0 ? " (a < 0 : maximum)." : " (a > 0 : minimum)."),
@@ -243,7 +252,7 @@ function piege(e: ExerciceOptimisation): EtapeCorrection {
         ? { label: "Piège", sousQuestion: L("relation"), fragments: [texte("Les côtés adossés à un mur ne sont pas clôturés : ils n'entrent pas dans la longueur de clôture.")] }
         : { label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Les deux dimensions doivent rester positives : le domaine se lit sur la relation, pas sur le sommet.")] };
     case "revenuPrix":
-      return { label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Deux conditions à poser : le prix et le nombre d'acheteurs restent positifs — en oublier une donne un domaine faux.")] };
+      return { label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Deux conditions à poser, une pour chaque grandeur du contexte : en oublier une donne un domaine faux.")] };
     case "sommeDeuxCarres":
       return { label: "Piège", sousQuestion: L("relation"), fragments: [texte("La grandeur n'est pas x·y : elle se calcule avec les carrés des deux parts (aires des formes, ou valeur proportionnelle au carré de la masse).")] };
     case "rectangleInscrit":

@@ -101,6 +101,8 @@ export function soumettreReponseQuadrant(etat: EtatSessionValeursRemarquables, r
 
   const etapeCourante = soumettreEtapeTentatives<Quadrant>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    // Six choix (4 quadrants, 2 axes) : une seule tentative, sinon gagnable par élimination.
+    tentativesMax: 1,
     verifier: (r) => verifierQuadrant(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });

@@ -259,7 +259,7 @@ export function AppTriangleLies() {
               recapitulatif={recapitulatif}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={1}
               niveauAide={etat.niveauAideInterpretation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(indexChoisi) => terminerEtape(soumettreReponseInterpretation(etat, indexChoisi))}

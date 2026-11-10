@@ -11,7 +11,7 @@ import type {
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { formatEquationInequationLatex, formatDomaineTexte, consigneValidation, consignePoserSysteme, texteAidePoserSystemeNiveau2 } from "../../ui/formatEquationInequationSecondDegre";
+import { formatEquationInequationLatex, formatDomaineTexte, consigneValidation, consignePoserSysteme } from "../../ui/formatEquationInequationSecondDegre";
 import { formatFonctionDeveloppeeLatex, segmentsPhraseEnonce } from "../../ui/formatOptimisation";
 import { croquisEquationInequationSvg } from "../croquisPapierSecondDegre";
 import { CATALOGUE_FAMILLES, CATALOGUE_VARIANTES, PAIRES_VALIDES, construireAvecFamilleId, genererExerciceEquationInequationSecondDegre } from "./index";
@@ -147,6 +147,13 @@ function intervalleValideLatex(e: ExerciceEquationInequationSecondDegre): string
   return `${e.base.contexte.labelVariable} \\in ${gauche}${nombreLatex(inf)}\\,;\\,${nombreLatex(sup)}${droite}`;
 }
 
+/** Les deux relations de l'énoncé (périmètre écrit tel quel, seuil avec son symbole) — l'écran les
+ * accepte sous toute forme équivalente ; son aide montre la forme réduite x + y = S, x·y = k. */
+function systemeLatex(e: ExerciceEquationInequationSecondDegre, S: number): string {
+  const somme = e.famille === "perimetreAire" ? `2x + 2y = ${2 * S}` : `x + y = ${S}`;
+  return `\\begin{cases} ${somme} \\\\ x \\cdot y ${symbole(e)} ${nombreLatex(e.k)} \\end{cases}`;
+}
+
 function construireCorrectionEquationInequation(e: ExerciceEquationInequationSecondDegre): BlocCorrection[] {
   return [
     { type: "paragraphe", fragments: [latex(formatEquationInequationLatex(e))] },
@@ -168,8 +175,8 @@ function correctionDetailleeEquationInequation(e: ExerciceEquationInequationSeco
   const v = e.base.contexte.labelVariable;
   const lignes: EtapeCorrection[] = [];
   if (e.voieSysteme && e.systeme) {
-    lignes.push({ label: "Système", sousQuestion: L("systeme"), fragments: [texte(`${e.systeme.label1[0].toUpperCase()}${e.systeme.label1.slice(1)} et ${e.systeme.label2} : `), latex(texteAidePoserSystemeNiveau2(e))] });
     const S = e.systeme.x0 + e.systeme.y0;
+    lignes.push({ label: "Système", sousQuestion: L("systeme"), fragments: [texte(`${e.systeme.label1[0].toUpperCase()}${e.systeme.label1.slice(1)} et ${e.systeme.label2} : `), latex(systemeLatex(e, S))] });
     lignes.push({
       label: "Substituer",
       sousQuestion: L("poser"),
@@ -241,11 +248,11 @@ function baremeEquationInequation(e: ExerciceEquationInequationSecondDegre): Bar
   const v = e.base.contexte.labelVariable;
   const validation = e.variante === "equation" ? [latex(e.racinesValides.map((r) => `${v} = ${nombreLatex(r)}`).join(" \\text{ ou } "))] : [latex(intervalleValideLatex(e))];
   const criteres: CritereBareme[] = [
-    ...(e.voieSysteme ? [{ sousQuestion: L("systeme"), critere: [texte("Système des deux relations : "), latex(texteAidePoserSystemeNiveau2(e))], points: 1 }] : []),
+    ...(e.voieSysteme && e.systeme ? [{ sousQuestion: L("systeme"), critere: [texte("Système des deux relations : "), latex(systemeLatex(e, e.systeme.x0 + e.systeme.y0))], points: 1 }] : []),
     { sousQuestion: L("poser"), critere: [texte(`${e.variante === "equation" ? "Équation" : "Inéquation"} posée : `), latex(formatEquationInequationLatex(e))], points: e.voieSysteme ? 0.5 : 1.5 },
     { sousQuestion: L("resoudre"), critere: [texte("Résolution (discriminant ou factorisation, racines" + (e.variante === "inequation" ? ", signe du trinôme" : "") + ")")], points: 1 },
     { sousQuestion: L("validation"), critere: [texte("Confrontation au domaine : "), ...validation], points: 1 },
-    { sousQuestion: L("conclusion"), critere: [texte("Conclusion rédigée avec l'unité")], points: 0.5 },
+    { sousQuestion: L("conclusion"), critere: [texte(e.base.contexte.uniteGrandeur ? "Conclusion rédigée avec l'unité" : "Conclusion rédigée")], points: 0.5 },
   ];
   const erreurs: ErreurFrequente[] = [
     e.variante === "equation"

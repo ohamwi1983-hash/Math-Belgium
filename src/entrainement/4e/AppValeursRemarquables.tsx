@@ -195,7 +195,7 @@ export function AppValeursRemarquables() {
               key={`${numeroExercice}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={1}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideQuadrantUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}

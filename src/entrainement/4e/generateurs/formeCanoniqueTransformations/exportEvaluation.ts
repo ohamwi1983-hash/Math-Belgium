@@ -35,6 +35,11 @@ import { PARAMETRES_PARABOLE, profilFormeCanoniqueTransformations } from "../pro
  * (coefficients exacts), `evaluerCourbe`/`calculerViewBoxTransformation` (graphique du corrigé).
  */
 
+/** Nombre en TEXTE (« − » typographique). */
+function t(valeur: number): string {
+  return String(valeur).replace("-", "−");
+}
+
 function aSigne(exercice: ExerciceFormeCanoniqueTransformation): number {
   return exercice.sox ? -exercice.ev / exercice.cv : exercice.ev / exercice.cv;
 }
@@ -59,8 +64,11 @@ function nombreLatex(valeur: number): string {
   return m ? `${m[1]}\\dfrac{${m[2]}}{${m[3]}}` : brut;
 }
 
+/** Nombre en petite fraction (`\\tfrac`), entre parenthèses s'il est négatif — pour un nombre placé
+ * DANS une fraction (pas de fraction imbriquée en grand format). */
 function entreParentheses(valeur: number): string {
-  return valeur < 0 ? `\\left(${nombreLatex(valeur)}\\right)` : nombreLatex(valeur);
+  const petit = nombreLatex(valeur).replace("\\dfrac", "\\tfrac");
+  return valeur < 0 ? `\\left(${petit}\\right)` : petit;
 }
 
 function graphe(exercice: ExerciceFormeCanoniqueTransformation): string {
@@ -68,7 +76,7 @@ function graphe(exercice: ExerciceFormeCanoniqueTransformation): string {
   const reference = { p: 0, q: 0, a: 1 };
   const viewBox = calculerViewBoxTransformation(params, reference);
   const largeur = 420;
-  const points: PointMarqueSvg[] = [{ x: params.p, y: params.q, forme: "point", label: `S(${params.p} ; ${params.q})`, labelPosition: params.a > 0 ? "dessous" : "dessus" }];
+  const points: PointMarqueSvg[] = [{ x: params.p, y: params.q, forme: "point", label: `S(${t(params.p)} ; ${t(params.q)})`, labelPosition: params.a > 0 ? "dessous" : "dessus" }];
   return construireSvgFonction((x) => evaluerCourbe(params, x), { xMin: viewBox.x[0], xMax: viewBox.x[1], yMin: viewBox.y[0], yMax: viewBox.y[1] }, {
     largeur,
     hauteur: largeur / RATIO_GRAPHE,
@@ -99,9 +107,9 @@ function construireEnonceFormeCanoniqueTransformations(exercice: ExerciceFormeCa
     enteteFragments: entete(exercice),
     questions: [
       { consigne: [texte("Retrouve les coordonnées du sommet de la parabole, puis écris la forme canonique complète de f(x).")] },
-      { consigne: [texte("Choisis la translation horizontale (TH) à partir de "), latex("y = x^2"), texte(" et écris la fonction obtenue.")] },
-      { consigne: [texte("Choisis l'étirement vertical (EV), la compression verticale (CV) et la symétrie d'axe Ox (SOX), et écris la fonction obtenue.")] },
-      { consigne: [texte("Choisis la translation verticale (TV) et écris la fonction finale.")] },
+      { consigne: [texte("Détermine la translation horizontale (TH) à partir de "), latex("y = x^2"), texte(" et écris la fonction obtenue.")] },
+      { consigne: [texte("Détermine l'étirement ou la compression verticale (rapport EV/CV) et la symétrie d'axe Ox (SOX), et écris la fonction obtenue.")] },
+      { consigne: [texte("Détermine la translation verticale (TV) et écris la fonction finale.")] },
     ],
   };
 }
@@ -116,7 +124,7 @@ function enoncePapierFormeCanoniqueTransformations(exercice: ExerciceFormeCanoni
 
 function construireCorrectionFormeCanoniqueTransformations(exercice: ExerciceFormeCanoniqueTransformation): BlocCorrection[] {
   return [
-    { type: "paragraphe", fragments: [texte(`Sommet : S(${exercice.xS} ; ${exercice.yS}).`)] },
+    { type: "paragraphe", fragments: [texte(`Sommet : S(${t(exercice.xS)} ; ${t(exercice.yS)}).`)] },
     { type: "paragraphe", fragments: [texte("Forme canonique : "), latex(formeCanoniqueLatex(exercice))] },
   ];
 }
@@ -147,7 +155,7 @@ function texteTransformations(exercice: ExerciceFormeCanoniqueTransformation): s
 }
 
 function reponseBreveParQuestion(exercice: ExerciceFormeCanoniqueTransformation): FragmentConsigne[] {
-  return [texte("a) "), latex(formeCanoniqueLatex(exercice)), texte(`, S(${exercice.xS} ; ${exercice.yS}) ; b) ${texteTransformations(exercice)}.`)];
+  return [texte("a) "), latex(formeCanoniqueLatex(exercice)), texte(`, S(${t(exercice.xS)} ; ${t(exercice.yS)}) ; b) ${texteTransformations(exercice)}.`)];
 }
 
 function reponseBreveFormeCanoniqueTransformations(exercice: ExerciceFormeCanoniqueTransformation): FragmentConsigne[] {
@@ -164,13 +172,13 @@ function correctionDetailleeFormeCanoniqueTransformations(exercice: ExerciceForm
     {
       label: "Calcul",
       sousQuestion: "a",
-      fragments: [latex(`a = ${nombreLatex(a)}`), texte(", "), latex(`x_S = -\\dfrac{${nombreLatex(b)}}{2\\cdot ${entreParentheses(a)}} = ${xS}`), texte(", "), latex(`y_S = f(${xS}) = ${yS}`), texte(".")],
+      fragments: [latex(`a = ${nombreLatex(a)}`), texte(", "), latex(`x_S = -\\dfrac{${entreParentheses(b)}}{2\\cdot ${entreParentheses(a)}} = ${xS}`), texte(", "), latex(`y_S = f(${xS}) = ${yS}`), texte(".")],
     },
-    { label: "Conclusion", sousQuestion: "a", fragments: [latex(`\\displaystyle ${formeCanoniqueLatex(exercice)}`), texte(`, sommet S(${xS} ; ${yS}).`)] },
+    { label: "Conclusion", sousQuestion: "a", fragments: [latex(`\\displaystyle ${formeCanoniqueLatex(exercice)}`), texte(`, sommet S(${t(xS)} ; ${t(yS)}).`)] },
     {
       label: "TH",
       sousQuestion: "b",
-      fragments: [texte(`${translation(xS, "horizontale", "la droite", "la gauche")[0].toUpperCase()}${translation(xS, "horizontale", "la droite", "la gauche").slice(1)} (TH = ${xS}) : `), latex(intermediaire("f_1", { numA: 1, denA: 1, p: xS, q: 0 })), texte(".")],
+      fragments: [texte(`${translation(xS, "horizontale", "la droite", "la gauche")[0].toUpperCase()}${translation(xS, "horizontale", "la droite", "la gauche").slice(1)} (TH = ${t(xS)}) : `), latex(intermediaire("f_1", { numA: 1, denA: 1, p: xS, q: 0 })), texte(".")],
     },
     {
       label: "EV/CV/SOX",
@@ -184,7 +192,7 @@ function correctionDetailleeFormeCanoniqueTransformations(exercice: ExerciceForm
     {
       label: "TV",
       sousQuestion: "d",
-      fragments: [texte(`${translation(yS, "verticale", "le haut", "le bas")[0].toUpperCase()}${translation(yS, "verticale", "le haut", "le bas").slice(1)} (TV = ${yS}) : `), latex(`\\displaystyle ${formeCanoniqueLatex(exercice)}`), texte(".")],
+      fragments: [texte(`${translation(yS, "verticale", "le haut", "le bas")[0].toUpperCase()}${translation(yS, "verticale", "le haut", "le bas").slice(1)} (TV = ${t(yS)}) : `), latex(`\\displaystyle ${formeCanoniqueLatex(exercice)}`), texte(".")],
       figureHtml: graphe(exercice),
     },
     {
@@ -203,9 +211,9 @@ function baremeFormeCanoniqueTransformations(exercice: ExerciceFormeCanoniqueTra
   return {
     reponseFinale: reponseBreveParQuestion(exercice),
     criteres: [
-      { sousQuestion: "a", critere: [texte(`Sommet S(${exercice.xS} ; ${exercice.yS}) : `), latex("x_S = -\\dfrac{b}{2a}"), texte(" puis "), latex("y_S = f(x_S)")], points: 1 },
+      { sousQuestion: "a", critere: [texte(`Sommet S(${t(exercice.xS)} ; ${t(exercice.yS)}) : `), latex("x_S = -\\dfrac{b}{2a}"), texte(" puis "), latex("y_S = f(x_S)")], points: 1 },
       { sousQuestion: "a", critere: [texte("Forme canonique "), latex(formeCanoniqueLatex(exercice))], points: 1 },
-      { sousQuestion: "b", critere: [texte(`Translations horizontale (${exercice.xS}) et verticale (${exercice.yS})`)], points: 1 },
+      { sousQuestion: "b", critere: [texte(`Translations horizontale (${t(exercice.xS)}) et verticale (${t(exercice.yS)})`)], points: 1 },
       { sousQuestion: "c", critere: [texte(`${texteFacteur(exercice)[0].toUpperCase()}${texteFacteur(exercice).slice(1)} et ${exercice.sox ? "symétrie d'axe Ox" : "absence de symétrie"}`)], points: 1 },
     ],
     erreursFrequentes: erreurs,

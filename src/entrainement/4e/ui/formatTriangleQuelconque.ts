@@ -24,7 +24,7 @@ import type { ConfigurationTriangleQuelconque, ExerciceTriangleQuelconque, Lettr
 import type { TriangleSketchValeurs } from "./triangleSketch";
 import type { TriangleQuelconqueSketchOptions } from "./triangleQuelconqueSketch";
 import { donneesFormuleAire } from "../moteur/verificationTriangleQuelconque";
-import { nombreFr } from "./nombreFr";
+import { nombreFr, nombreFrLatex } from "./nombreFr";
 
 /** Précision d'affichage du cours (section « Arrondis ») : côtés au centième, angles au dixième —
  * la même que celle que l'élève utilise. Avant l'audit du chapitre 5, côtés au dixième et angles à
@@ -229,6 +229,28 @@ export function texteAide2DonneeManquante(exercice: ExerciceTriangleQuelconque):
   return formuleAlKashiCote(exercice);
 }
 
+/** Même valeur que `formatValeurLettre`, en LaTeX (virgule `{,}`, unité en `\text`, degré `^\circ`) ;
+ * `avecUnite: false` pour les longueurs d'une formule longue (aide affichée sur téléphone). */
+function valeurLettreLatex(exercice: ExerciceTriangleQuelconque, lettre: LettreTriangle, avecUnite = true): string {
+  const valeur = exercice.triangle[lettre];
+  if (!estCote(lettre)) return `${nombreFrLatex(arrondiAngle(valeur))}^\\circ`;
+  return `${nombreFrLatex(arrondiCote(valeur))}${avecUnite ? `\\text{ ${exercice.unite}}` : ""}`;
+}
+
+/** Formule de l'aide 2 (écran 1), en LaTeX, deux lignes (loi, puis loi substituée et résolue pour la
+ * donnée cherchée) — mêmes valeurs que `texteAide2DonneeManquante`,
+ * jamais le résultat (il reste le calcul à faire). Affichée par `EtapeDonneeManquante.tsx`. */
+export function latexAide2DonneeManquante(exercice: ExerciceTriangleQuelconque): string[] {
+  const v = (l: LettreTriangle) => valeurLettreLatex(exercice, l, exercice.configuration === "loiSinus");
+  if (exercice.configuration === "loiSinus") {
+    return [`\\dfrac{BC}{\\sin A} = \\dfrac{AC}{\\sin B}`, `AC = \\dfrac{${v("a")} \\cdot \\sin ${v("B")}}{\\sin ${v("A")}}`];
+  }
+  if (exercice.configuration === "alKashi") {
+    return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos A`, `\\cos A = \\dfrac{${v("b")}^2 + ${v("c")}^2 - ${v("a")}^2}{2 \\cdot ${v("b")} \\cdot ${v("c")}}`];
+  }
+  return [`BC^2 = AC^2 + AB^2 - 2 \\cdot AC \\cdot AB \\cdot \\cos A`, `BC = \\sqrt{${v("b")}^2 + ${v("c")}^2 - 2 \\cdot ${v("b")} \\cdot ${v("c")} \\cdot \\cos ${v("A")}}`];
+}
+
 export const NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE = 2;
 
 const TEXTES_AIDE_DONNEE_MANQUANTE: ((exercice: ExerciceTriangleQuelconque) => string)[] = [
@@ -299,6 +321,12 @@ export function texteAide2Aire(exercice: ExerciceTriangleQuelconque): string {
   const seg1 = SEGMENT_COTE[cote1];
   const seg2 = SEGMENT_COTE[cote2];
   return `Aire = ½ · ${seg1} · ${seg2} · sin(${angleCompris}) = ½ · ${formatValeurLettre(exercice, cote1)} · ${formatValeurLettre(exercice, cote2)} · sin(${formatValeurLettre(exercice, angleCompris)})`;
+}
+
+/** Formule substituée de l'aide 2 (écran 2), en LaTeX — mêmes valeurs que `texteAide2Aire`. */
+export function latexAide2Aire(exercice: ExerciceTriangleQuelconque): string[] {
+  const { cote1, cote2, angleCompris } = donneesFormuleAire(exercice);
+  return [`\\mathcal{A} = \\dfrac{1}{2} \\cdot ${SEGMENT_COTE[cote1]} \\cdot ${SEGMENT_COTE[cote2]} \\cdot \\sin ${angleCompris}`, `\\mathcal{A} = \\dfrac{1}{2} \\cdot ${valeurLettreLatex(exercice, cote1)} \\cdot ${valeurLettreLatex(exercice, cote2)} \\cdot \\sin ${valeurLettreLatex(exercice, angleCompris)}`];
 }
 
 export const NOMBRE_NIVEAUX_AIDE_AIRE = 2;

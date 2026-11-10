@@ -75,8 +75,13 @@ export function soumettreReponse(etat: EtatSessionQuelAngle, reponse: ReponseQue
     throw new Error("soumettreReponse : la session est déjà terminée");
   }
 
+  // Verdict « pas de solution / au moins une solution » : un mauvais verdict clôt l'écran (réponse
+  // révélée) — choix binaire, sinon gagnable par élimination. Verdict juste mais valeurs fausses :
+  // les tentatives restantes servent à corriger les valeurs.
+  const verdictFaux = reponse.aucune !== (etat.exerciceCourant.solutions.length === 0);
   const etapeCourante = soumettreEtapeTentatives<ReponseQuelAngle>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(verdictFaux ? { tentativesMax: 1 } : {}),
     verifier: (r) => verifierReponseQuelAngle(etat.exerciceCourant, r),
     revelerReponse: () => {},
   });

@@ -369,7 +369,7 @@ export function texteAideInterpretationNiveau1(): string {
 
 /** `labelVariable \in [inf ; sup]`, valeurs propres par construction (voir core, en-tête). */
 export function formatDomaineLatex(domaine: DomaineOptimisation, labelVariable: string): string {
-  return `${labelVariable} \\in [${formatNombreLatex(domaine.inf)} ; ${formatNombreLatex(domaine.sup)}]`;
+  return `${labelVariable} \\in [${formatNombreLatex(domaine.inf)}\\,;\\,${formatNombreLatex(domaine.sup)}]`;
 }
 
 function ligneFonction(exercice: ExerciceOptimisation): string {

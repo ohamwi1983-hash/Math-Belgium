@@ -44,7 +44,7 @@ function graphe(exercice: ExerciceTransformationGraphique, estCorrige: boolean):
   const croix = pointUnitaire(params);
   const largeur = estCorrige ? 420 : 320;
   const points: PointMarqueSvg[] = [
-    { x: params.p, y: params.q, forme: "point", label: estCorrige ? `S(${params.p} ; ${params.q})` : undefined, labelPosition: croix.y >= params.q ? "dessous" : "dessus" },
+    { x: params.p, y: params.q, forme: "point", label: estCorrige ? `S(${String(params.p).replace("-", "−")} ; ${String(params.q).replace("-", "−")})` : undefined, labelPosition: croix.y >= params.q ? "dessous" : "dessus" },
     {
       x: croix.x,
       y: croix.y,
@@ -88,8 +88,9 @@ function donneesGraphique(exercice: ExerciceTransformationGraphique): FragmentCo
 
 const PHRASE_GRAPHIQUE = "Le graphique ci-dessous représente une parabole, obtenue en transformant la parabole de référence ";
 
+/** Équation de l'écran, en `\\displaystyle` : la fraction de a reste lisible sur papier. */
 function equationLatex(exercice: ExerciceTransformationGraphique): string {
-  return formatEquationTransformationLatex(exercice);
+  return `\\displaystyle ${formatEquationTransformationLatex(exercice)}`;
 }
 
 function aLatex(exercice: ExerciceTransformationGraphique): string {

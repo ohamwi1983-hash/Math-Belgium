@@ -309,6 +309,8 @@ export function soumettreReponseInterpretation(etat: EtatSessionTriangleLies, in
 
   const etapeCourante = soumettreEtapeTentatives<number | null>(etat.etapeCourante, indexChoisi, {
     ...reglagesEtape(etat),
+    // QCM à 4 options : une seule tentative, sinon gagnable par élimination.
+    tentativesMax: 1,
     verifier: (r) => verifierInterpretation(exerciceCourant, r),
     revelerReponse: () => {},
   });

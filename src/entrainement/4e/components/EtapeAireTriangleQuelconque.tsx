@@ -3,7 +3,8 @@ import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangle
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { diagnostiquerAire } from "../moteur/verificationTriangleQuelconque";
-import { consigneAire, labelChampAire, NOMBRE_NIVEAUX_AIDE_AIRE, OPTIONS_UNITE_AIRE, optionsCroquisAire, placeholderAire, textesAideAire, valeursTriangleSketchAire } from "../ui/formatTriangleQuelconque";
+import { consigneAire, labelChampAire, NOMBRE_NIVEAUX_AIDE_AIRE, OPTIONS_UNITE_AIRE, optionsCroquisAire, placeholderAire, textesAideAire, valeursTriangleSketchAire, latexAide2Aire } from "../ui/formatTriangleQuelconque";
+import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
@@ -86,9 +87,19 @@ export function EtapeAireTriangleQuelconque({
 
       {textesAide.length > 0 && (
         <div className="triangle-quelconque-aide">
-          {textesAide.map((texteAide) => (
-            <p key={texteAide}>{texteAide}</p>
-          ))}
+          {/* Aide 2 : la formule substituée en KaTeX (jamais écrite au clavier). */}
+          {textesAide.map((texteAide, i) =>
+            i === 1 ? (
+              <div key="formule">
+                <p>Formule à appliquer :</p>
+                {latexAide2Aire(exercice).map((ligne) => (
+                  <Katex key={ligne} expression={ligne} block />
+                ))}
+              </div>
+            ) : (
+              <p key={texteAide}>{texteAide}</p>
+            ),
+          )}
         </div>
       )}
       {!validation && (

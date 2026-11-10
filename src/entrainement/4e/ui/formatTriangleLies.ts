@@ -167,7 +167,7 @@ export function consigneCible(exercice: ExerciceTriangleLies): string {
 
 export function texteAideCibleNiveau1(exercice: ExerciceTriangleLies): string {
   if (exercice.grandeurDemandee === "aire") {
-    return "L'aire d'un triangle se calcule avec la formule trigonométrique : Aire = ½ · (côté 1) · (côté 2) · sin(angle compris) — identifie d'abord les 2 côtés et l'angle qui sont réellement connus ou calculables.";
+    return "L'aire d'un triangle est le demi-produit de deux côtés par le sinus de l'angle compris entre eux — identifie d'abord les 2 côtés et l'angle qui sont réellement connus ou calculables.";
   }
   return "Reconnais la formule adaptée aux données disponibles : loi des sinus si tu as 2 angles + 1 côté, loi des cosinus (Al-Kashi) si tu as 2 côtés + l'angle compris.";
 }
