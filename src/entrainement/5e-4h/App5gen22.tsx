@@ -117,13 +117,23 @@ export function App5gen22() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <span className="equation-box-termes">
-            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} block={frag.includes("\\lim_{") || phase === "nommerAsymptotes"} />
-            ))}
-          </span>
-        ),
+        reponseAttendue:
+          phase === "nommerAsymptotes" ? (
+            // Une asymptote par ligne (« AV : x = 2 », « AO : y = 2x − 4 ») — jamais collées sur une ligne.
+            <div>
+              {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+                <div key={i}>
+                  <Katex expression={frag} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <span className="equation-box-termes">
+              {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+                <Katex key={i} expression={frag} block={frag.includes("\\lim_{")} />
+              ))}
+            </span>
+          ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.closTot
