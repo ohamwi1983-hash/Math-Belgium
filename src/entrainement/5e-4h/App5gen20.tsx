@@ -47,6 +47,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
@@ -55,6 +56,15 @@ const OPTIONS_SIGNE_INFINI: [string, string] = ["+∞", "−∞"];
 
 function nouvelleSession(): EtatSessionLimite {
   return demarrerSessionLimite(REGLAGES_DEMO, genererExerciceLimite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/limites/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionLimite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLimite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceLimite, (id) => construireAvecFamilleId(id)));
 }
 
 /** Réponse réellement attendue de la phase qui vient de se clore — même dispatch que l'ancien
@@ -101,7 +111,7 @@ function calculerSegmentsProgression(etat: EtatSessionLimite, aideParPhase: Part
 }
 
 export function App5gen20() {
-  const [etat, setEtat] = useState<EtatSessionLimite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLimite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, à part de
    * `EtatSessionLimite`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e).

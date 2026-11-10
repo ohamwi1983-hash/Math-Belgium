@@ -29,12 +29,22 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionAsymptoteOblique {
   return demarrerSessionAsymptoteOblique(REGLAGES_DEMO, genererExerciceAsymptoteOblique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/asymptoteOblique/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionAsymptoteOblique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionAsymptoteOblique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, () => genererExerciceAsymptoteOblique(), (id) => construireAvecFamilleId(id)));
 }
 
 function reponseAttendueAsymptoteOblique(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique) {
@@ -71,7 +81,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen21() {
-  const [etat, setEtat] = useState<EtatSessionAsymptoteOblique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionAsymptoteOblique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionAsymptoteOblique`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */

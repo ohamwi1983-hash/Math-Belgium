@@ -124,7 +124,8 @@ function formatValeurLatex(valeur: number): string {
   const rendu = formatFractionIrreductible(valeur);
   if (rendu.includes("/")) {
     const [n, d] = rendu.split("/");
-    return `\\dfrac{${n}}{${d}}`;
+    // Signe devant la fraction : −\dfrac{1}{4}, jamais \dfrac{-1}{4}.
+    return n.startsWith("-") ? `-\\dfrac{${n.slice(1)}}{${d}}` : `\\dfrac{${n}}{${d}}`;
   }
   return rendu;
 }

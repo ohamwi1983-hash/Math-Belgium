@@ -1,76 +1,162 @@
 import type { ExerciceAsymptoteOblique } from "../../core5e/asymptoteOblique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneGenerale, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex } from "../../ui5e/formatAsymptoteOblique";
+import { consignePhase, formatFormulePhaseLatex, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex, texteAideNiveau1 } from "../../ui5e/formatAsymptoteOblique";
+import { ordreComplet, type PhaseAsymptoteOblique } from "../../moteur5e/typesAsymptoteOblique";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./index";
+import { LIBELLE_CAS_ASYMPTOTE_OBLIQUE, PARAMETRES_ASYMPTOTE_OBLIQUE, profilAsymptoteOblique } from "../profilsEvaluationLimites20-21";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceAsymptoteOblique>` pour 5gen21 (Asymptote
- * oblique) — feuille d'évaluation. L'écran interactif fait passer par 3 phases par variante
- * (`moteur5e/typesAsymptoteOblique.ts::ordreComplet` — jamais importé ici, voir ci-dessous) : soit
- * diviserEuclidienne → ecrireFormeDeveloppee → conclureEquationAsymptote (variante
- * "divisionEuclidienne"), soit calculerCoefficientA → calculerCoefficientB →
- * conclureEquationAsymptote (variante "viaLimites"). La version papier condense cela en UNE
- * question ("détermine l'équation de l'asymptote oblique, en justifiant") — même principe que
- * gen1/domaineDefinition et gen11/formeCanoniqueFonctionsReference : demander le résultat justifié
- * plutôt que rejouer chaque écran guidé séparément, la technique de justification exigée restant
- * libre (division euclidienne OU passage à la limite), les 2 étant mathématiquement valides pour
- * n'importe quelle instance tirée — `exercice.variante` ne sert donc ici qu'à choisir QUEL corrigé
- * type présenter (les 2 techniques aboutissant à la même équation), jamais à changer la question
- * posée à l'élève.
+ * oblique) — feuille d'exercices et évaluation (méthode : `.claude/rules/feuilles-evaluations.md`).
  *
- * Contrainte explicite de cette tâche : ne JAMAIS importer `moteur5e/` depuis cet adaptateur
- * (règle Couche A/Couche B). Le corrigé n'a donc pas accès à `ordreComplet` — il dispatche
- * directement sur `exercice.variante` (champ `core5e`, pas une notion `moteur5e`) pour savoir
- * quelles phases resynthétiser via `formatReponseAttenduePhaseLatex` (`ui5e/formatAsymptoteOblique.ts`,
- * déjà la fonction utilisée côté écran pour le récapitulatif des réponses attendues) — jamais un
- * calcul recréé indépendamment ici.
+ * Énoncé papier = la fonction et la consigne globale « Détermine l'équation de l'asymptote oblique
+ * de f », qui précise la technique de la variante (division euclidienne, ou calcul de a et b par
+ * les limites) — la variante est le choix du professeur. Les 3 écrans du générateur (division /
+ * forme développée / conclusion, ou a / b / conclusion) passent dans le corrigé (« Étape n —
+ * consigne », phases de `ordreComplet`, mêmes consignes que l'écran).
  *
- * `regroupable: true` — une seule question par instance, consigne GÉNÉRIQUE (`CONSIGNE_GENERALE`,
- * dérivée de `consigneGenerale()` déjà utilisée côté écran + exigence de justification ajoutée pour
- * le papier, aucune valeur tirée interpolée), sans `enteteHtml` : remplit exactement les 3
- * conditions de `AdaptateurFeuilleExercices.regroupable` (voir `export/genererFeuilleExercices.ts`
- * et le précédent direct `generateurs/formeCanoniqueFonctionsReference/exportEvaluation.ts`).
+ * Valeurs : `formatReponseAttenduePhaseLatex` (réponses attendues de l'écran), `formatFormulePhaseLatex`
+ * et `texteAideNiveau1` (méthodes) — jamais recalculées ici.
+ *
+ * `regroupable` : non — l'énoncé papier porte une consigne propre à la variante, et le chemin
+ * regroupé du pipeline n'utilise pas `enoncePapier` (il prendrait la première étape comme consigne).
  */
 
-const CONSIGNE_GENERALE = `${consigneGenerale()} Justifie ta démarche.`;
+const LETTRES = "abcdefgh";
+
+function fragmentsRiches(source: string): FragmentConsigne[] {
+  return source
+    .split("$")
+    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
+    .filter((f) => f.valeur !== "");
+}
+
+function fonctionLatex(exercice: ExerciceAsymptoteOblique): string {
+  return `f(x) = ${formatTermesDonneesLatex(exercice)[0]}`;
+}
+
+/** Consigne d'étape = celle de l'écran, avec le vrai signe moins et sans formule tapée au clavier. */
+function consigneEtape(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique): FragmentConsigne[] {
+  if (phase === "ecrireFormeDeveloppee") return [texte("Écris f(x) sous la forme "), latex("Q(x)+\\dfrac{R(x)}{D(x)}"), texte(".")];
+  return [texte(consignePhase(exercice, phase).replace(/-/g, "−"))];
+}
 
 function construireEnonceAsymptoteOblique(exercice: ExerciceAsymptoteOblique): SectionExercice {
   return {
-    enteteFragments: [texte("On considère la fonction "), latex(`f(x) = ${formatTermesDonneesLatex(exercice)[0]}`), texte(".")],
-    questions: [{ consigne: [texte(CONSIGNE_GENERALE)], reponse: { type: "lignes", nombre: 6 } }],
+    enteteFragments: [texte("On considère la fonction "), latex(fonctionLatex(exercice)), texte(".")],
+    questions: ordreComplet(exercice).map((phase) => ({ consigne: consigneEtape(exercice, phase) })),
   };
 }
 
-/** Corrigé "division euclidienne" — resynthétise Q(x)/R(x), la forme développée de f(x), puis
- * l'équation de l'asymptote, chacune déjà une réponse attendue existante (`formatReponseAttenduePhaseLatex`). */
-function construireCorrectionViaDivision(exercice: ExerciceAsymptoteOblique, equationAsymptote: string): BlocCorrection[] {
-  const [quotient, reste] = formatReponseAttenduePhaseLatex(exercice, "diviserEuclidienne");
-  const [formeDeveloppee] = formatReponseAttenduePhaseLatex(exercice, "ecrireFormeDeveloppee");
-  return [
-    { type: "paragraphe", fragments: [texte("Division euclidienne : "), latex(quotient), texte(", "), latex(reste), texte(".")] },
-    { type: "paragraphe", fragments: [texte("Donc f(x)"), latex(formeDeveloppee), texte(".")] },
-    { type: "paragraphe", fragments: [texte("Équation de l'asymptote oblique : "), latex(equationAsymptote), texte(".")] },
-  ];
+function enoncePapierAsymptoteOblique(exercice: ExerciceAsymptoteOblique): EnoncePapier {
+  const consigne: FragmentConsigne[] =
+    exercice.variante === "divisionEuclidienne"
+      ? [texte("À l'aide de la division euclidienne, détermine l'équation de l'asymptote oblique de f. Justifie ta démarche.")]
+      : [
+          texte("En calculant "),
+          latex("a=\\lim_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}"),
+          texte(" puis "),
+          latex("b=\\lim_{x\\to\\pm\\infty}\\left[f(x)-ax\\right]"),
+          texte(", détermine l'équation de l'asymptote oblique de f. Justifie ta démarche."),
+        ];
+  return {
+    section: { enteteFragments: [texte("On considère la fonction "), latex(fonctionLatex(exercice)), texte(".")], questions: [{ consigne }] },
+    etapesParQuestion: [ordreComplet(exercice).map((_, i) => LETTRES[i])],
+  };
 }
 
-/** Corrigé "via les limites" — resynthétise a=lim f(x)/x puis b=lim[f(x)-ax], puis l'équation de
- * l'asymptote, chacune déjà une réponse attendue existante (`formatReponseAttenduePhaseLatex`). */
-function construireCorrectionViaLimites(exercice: ExerciceAsymptoteOblique, equationAsymptote: string): BlocCorrection[] {
-  const [coeffA] = formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientA");
-  const [coeffB] = formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientB");
-  return [
-    { type: "paragraphe", fragments: [texte("Coefficient a : "), latex(coeffA), texte(".")] },
-    { type: "paragraphe", fragments: [texte("Coefficient b : "), latex(coeffB), texte(".")] },
-    { type: "paragraphe", fragments: [texte("Équation de l'asymptote oblique : "), latex(equationAsymptote), texte(".")] },
-  ];
+function equationLatex(exercice: ExerciceAsymptoteOblique): string {
+  return formatReponseAttenduePhaseLatex(exercice, "conclureEquationAsymptote")[0];
 }
 
+function reponseBreveAsymptoteOblique(exercice: ExerciceAsymptoteOblique): FragmentConsigne[] {
+  return [latex(equationLatex(exercice))];
+}
+
+function methode(phase: PhaseAsymptoteOblique): FragmentConsigne[] {
+  const aide = texteAideNiveau1(phase);
+  return [...fragmentsRiches(aide.texte), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])];
+}
+
+function correctionDetailleeAsymptoteOblique(exercice: ExerciceAsymptoteOblique): EtapeCorrection[] {
+  const division = exercice.variante === "divisionEuclidienne";
+  const conclusion: EtapeCorrection[] = [
+    {
+      label: "Conclusion",
+      sousQuestion: "c",
+      fragments: division
+        ? [texte("Quand x tend vers ±∞, le reste divisé par le dénominateur tend vers 0 : la courbe se rapproche de la droite "), latex(equationLatex(exercice)), texte(".")]
+        : [texte("Avec a et b trouvés, l'asymptote oblique est la droite "), latex(equationLatex(exercice)), texte(".")],
+    },
+    {
+      label: "Piège",
+      sousQuestion: division ? "c" : "b",
+      fragments: division
+        ? [texte("L'asymptote est le quotient seul : le reste disparaît à la limite, il ne figure jamais dans l'équation.")]
+        : [texte("b se calcule avec "), latex("f(x)-ax"), texte(", pas avec f(x) seule : sinon la limite est infinie.")],
+    },
+  ];
+  if (exercice.variante === "divisionEuclidienne") {
+    const [quotient, reste] = formatReponseAttenduePhaseLatex(exercice, "diviserEuclidienne");
+    return [
+      { label: "Méthode", sousQuestion: "a", fragments: methode("diviserEuclidienne") },
+      { label: "Calcul", sousQuestion: "a", fragments: [latex(quotient), texte(" et "), latex(reste), texte(".")] },
+      { label: "Calcul", sousQuestion: "b", fragments: [latex(`f(x)${formatReponseAttenduePhaseLatex(exercice, "ecrireFormeDeveloppee")[0]}`), texte(".")] },
+      ...conclusion,
+    ];
+  }
+  return parEtape([
+    { label: "Méthode", sousQuestion: "a", fragments: [latex(formatFormulePhaseLatex("calculerCoefficientA")), texte(" : rapport des coefficients dominants du numérateur et de x fois le dénominateur.")] },
+    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientA")[0]), texte(".")] },
+    { label: "Méthode", sousQuestion: "b", fragments: [latex(formatFormulePhaseLatex("calculerCoefficientB")), texte(" : on réduit au même dénominateur, puis on compare les termes dominants.")] },
+    { label: "Calcul", sousQuestion: "b", fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "calculerCoefficientB")[0]), texte(".")] },
+    ...conclusion,
+  ]);
+}
+
+/** Lignes dans l'ordre des étapes (une ligne « Piège » se lit sous l'étape qu'elle concerne). */
+function parEtape(lignes: EtapeCorrection[]): EtapeCorrection[] {
+  return lignes.map((l, i) => ({ l, i })).sort((x, y) => (x.l.sousQuestion ?? "a").localeCompare(y.l.sousQuestion ?? "a") || x.i - y.i).map(({ l }) => l);
+}
+
+function baremeAsymptoteOblique(exercice: ExerciceAsymptoteOblique): BaremeExercice {
+  const c = (sousQuestion: string, texteCritere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(texteCritere)], points });
+  const criteres =
+    exercice.variante === "divisionEuclidienne"
+      ? [c("a", "Division euclidienne : quotient et reste corrects", 2), c("b", "f(x) écrite comme quotient + reste / dénominateur", 1), c("c", "Équation de l'asymptote oblique (le quotient seul)", 1)]
+      : [c("a", "Coefficient a (limite de f(x)/x)", 1.5), c("b", "Coefficient b (limite de f(x) − ax)", 1.5), c("c", "Équation de l'asymptote oblique", 1)];
+  return {
+    reponseFinale: reponseBreveAsymptoteOblique(exercice),
+    criteres,
+    erreursFrequentes: [
+      { description: [texte("Inclure le reste dans l'équation de l'asymptote")], cout: "0 pt sur l'équation" },
+      exercice.variante === "divisionEuclidienne"
+        ? { description: [texte("Erreur de signe pendant la division (soustraction d'un terme négatif)")], cout: "−1" }
+        : { description: [texte("Calculer b comme la limite de f(x) au lieu de f(x) − ax")], cout: "0 pt sur b" },
+    ],
+    reponsesAcceptees: [[texte("Équation écrite y = ax + b sous une forme équivalente (termes dans un autre ordre)")]],
+  };
+}
+
+function difficulteAsymptoteOblique(exercice: ExerciceAsymptoteOblique): 1 | 2 | 3 {
+  return exercice.coeffsD.length - 1 === 2 ? 3 : 2;
+}
+
+/** Ancien corrigé (repli, documents Word) : les étapes du corrigé détaillé, en paragraphes. */
 function construireCorrectionAsymptoteOblique(exercice: ExerciceAsymptoteOblique): BlocCorrection[] {
-  const [equationAsymptote] = formatReponseAttenduePhaseLatex(exercice, "conclureEquationAsymptote");
-  return exercice.variante === "divisionEuclidienne"
-    ? construireCorrectionViaDivision(exercice, equationAsymptote)
-    : construireCorrectionViaLimites(exercice, equationAsymptote);
+  return correctionDetailleeAsymptoteOblique(exercice)
+    .filter((l) => l.label !== "Piège")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
 export const adaptateurEvaluationAsymptoteOblique: AdaptateurFeuilleExercices<ExerciceAsymptoteOblique> = {
@@ -81,5 +167,13 @@ export const adaptateurEvaluationAsymptoteOblique: AdaptateurFeuilleExercices<Ex
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceAsymptoteOblique,
   construireCorrection: construireCorrectionAsymptoteOblique,
-  regroupable: true,
+  difficulte: difficulteAsymptoteOblique,
+  reponseBreve: reponseBreveAsymptoteOblique,
+  correctionDetaillee: correctionDetailleeAsymptoteOblique,
+  bareme: baremeAsymptoteOblique,
+  enoncePapier: enoncePapierAsymptoteOblique,
+  dureeMinutes: 8,
+  profilInstance: profilAsymptoteOblique,
+  parametresAuChoix: PARAMETRES_ASYMPTOTE_OBLIQUE,
+  libelleCasParticulier: LIBELLE_CAS_ASYMPTOTE_OBLIQUE,
 };

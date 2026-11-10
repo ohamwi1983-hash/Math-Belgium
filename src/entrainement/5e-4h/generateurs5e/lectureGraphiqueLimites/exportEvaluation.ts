@@ -1,61 +1,29 @@
-import type { ExerciceLectureGraphiqueLimites, SigneInfini } from "../../core5e/lectureGraphiqueLimites.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { ExerciceLectureGraphiqueLimites } from "../../core5e/lectureGraphiqueLimites.types";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
-import {
-  consigneGenerale,
-  consignePhase,
-  formatReponseAttendueCompleterLimitesLatex,
-  formatReponseAttendueNommerAsymptotesLatex,
-  labelAsymptoteLatex,
-  labelComportementLatex,
-} from "../../ui5e/formatLectureGraphiqueLimites";
+import { formatReponseAttendueCompleterLimitesLatex, formatReponseAttendueNommerAsymptotesLatex } from "../../ui5e/formatLectureGraphiqueLimites";
 import { BUFFER_VA, calculerBornesXLimites, calculerViewBoxLectureGraphique, construireMarqueursPointIsole, construirePieces, evaluerPieceMelangee } from "../../ui5e/lectureGraphiqueLimitesCourbe";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "./index";
+import { profilLectureGraphiqueLimites } from "../profilsEvaluationLimites22-23";
 
-// `listeComportements`/`listeAsymptotes` (+ les types `IdComportement`/`CibleComportement`/`SlotComportement`/
-// `IdAsymptote`/`CibleAsymptote`/`SlotAsymptote`) DUPLIQUÉS ici depuis `moteur5e/typesLectureGraphiqueLimites.ts`
+// `listeAsymptotes` (+ les types `IdAsymptote`/`CibleAsymptote`/`SlotAsymptote`) DUPLIQUÉS ici depuis `moteur5e/typesLectureGraphiqueLimites.ts`
 // — `generateurs*/` n'importe JAMAIS `moteur*/` (règle non négociable du CLAUDE.md racine), y compris pour
 // un import de simples types : TypeScript reste structurellement typé, donc ces définitions locales,
 // identiques à celles de `moteur5e`, restent bien assignables aux paramètres de `labelComportementLatex`/
 // `labelAsymptoteLatex` (`ui5e/formatLectureGraphiqueLimites.ts`) sans avoir besoin d'importer les symboles
 // `moteur5e` eux-mêmes. Copie fidèle des fonctions — à resynchroniser si le tirage géométrique de
 // `core5e/lectureGraphiqueLimites.types.ts` change.
-
-type IdComportement = { kind: "va"; index: number; cote: "gauche" | "droit" } | { kind: "infini"; cote: "gauche" | "droit" };
-type CibleComportement = { kind: "infini"; signe: SigneInfini } | { kind: "fini"; valeur: number };
-
-interface SlotComportement {
-  id: IdComportement;
-  cible: CibleComportement;
-}
-
-function listeComportements(exercice: ExerciceLectureGraphiqueLimites): SlotComportement[] {
-  const { infini } = exercice;
-  let cibleInfiniGauche: CibleComportement;
-  let cibleInfiniDroit: CibleComportement;
-  if (infini.type === "horizontale") {
-    cibleInfiniGauche = { kind: "fini", valeur: infini.limiteMoinsInfini };
-    cibleInfiniDroit = { kind: "fini", valeur: infini.limitePlusInfini };
-  } else if (infini.type === "oblique") {
-    const signeDroit: SigneInfini = infini.pente > 0 ? 1 : -1;
-    cibleInfiniDroit = { kind: "infini", signe: signeDroit };
-    cibleInfiniGauche = { kind: "infini", signe: (-signeDroit) as SigneInfini };
-  } else {
-    cibleInfiniGauche = { kind: "infini", signe: infini.signeMoinsInfini };
-    cibleInfiniDroit = { kind: "infini", signe: infini.signePlusInfini };
-  }
-
-  const slots: SlotComportement[] = [{ id: { kind: "infini", cote: "gauche" }, cible: cibleInfiniGauche }];
-  exercice.vas.forEach((va, index) => {
-    const cibleGauche: CibleComportement = va.pointIsoleGauche !== undefined ? { kind: "fini", valeur: va.pointIsoleGauche } : { kind: "infini", signe: va.signeGauche };
-    const cibleDroit: CibleComportement = va.pointIsoleDroit !== undefined ? { kind: "fini", valeur: va.pointIsoleDroit } : { kind: "infini", signe: va.signeDroit };
-    slots.push({ id: { kind: "va", index, cote: "gauche" }, cible: cibleGauche });
-    slots.push({ id: { kind: "va", index, cote: "droit" }, cible: cibleDroit });
-  });
-  slots.push({ id: { kind: "infini", cote: "droit" }, cible: cibleInfiniDroit });
-  return slots;
-}
 
 type IdAsymptote = { kind: "va"; index: number } | { kind: "horizontale"; cote?: "gauche" | "droit" } | { kind: "oblique" };
 type CibleAsymptote = { kind: "verticale"; x: number } | { kind: "horizontale"; y: number } | { kind: "oblique"; pente: number; ordonnee: number };
@@ -182,38 +150,204 @@ function construireSvgLectureGraphiqueLimites(exercice: ExerciceLectureGraphique
   return svg.replace("</svg>", `${construireLignesAsymptotesSvg(exercice, viewBox)}</svg>`);
 }
 
-function construireQuestionsComportements(exercice: ExerciceLectureGraphiqueLimites): QuestionExercice[] {
-  return listeComportements(exercice).map((slot) => ({
-    consigne: [latex(labelComportementLatex(exercice, slot.id))],
-    reponse: { type: "lignes", nombre: 1 },
-  }));
-}
+// ============================================================================
+// Feuilles et évaluations (méthode `.claude/rules/feuilles-evaluations.md`).
+// Énoncé papier = le graphique + UNE consigne globale (lire les limites, puis nommer les
+// asymptotes) : les deux écrans (`completerLimites`, `nommerAsymptotes`) sont les étapes a) et b)
+// du corrigé. La consigne ne révèle ni le nombre d'asymptotes verticales ni leur type (l'écran 1
+// affiche les positions des AV dans ses libellés — sur papier, l'élève les repère lui-même).
+// ============================================================================
 
-function construireQuestionsAsymptotes(exercice: ExerciceLectureGraphiqueLimites): QuestionExercice[] {
-  const slots = listeAsymptotes(exercice);
-  return slots.map((slot) => ({
-    consigne: [latex(labelAsymptoteLatex(slots, slot.id))],
-    reponse: { type: "lignes", nombre: 1 },
-  }));
-}
+const LEGENDE =
+  "Le graphique ci-dessous représente une fonction f (droites en pointillés : asymptotes de la courbe ; point plein : point de la courbe).";
 
-/** Consigne générale — TEXTE PUR (aucun fragment `latex()` mêlé), donc sans risque malgré le
- * `displayMode:true` systématique de `assemblerEvaluationHtml.ts` sur `enteteFragments` (voir l'en-
- * tête du fichier de la tâche : seul un fragment "latex" y est affecté par `displayMode`, un fragment
- * "texte" reste un simple texte échappé — `export/genererFeuilleExercicesHtml.ts::fragmentsVersHtml`).
- * Concatène les 2 consignes de phase (`consignePhase`) SEULEMENT si l'exercice a bien une 2e phase
- * (`nommerAsymptotes` sautée à l'écran quand `listeAsymptotes` est vide — 0 AV + infini "aucune"). */
-function construireConsigneGeneraleTexte(exercice: ExerciceLectureGraphiqueLimites): string {
-  const base = `${consigneGenerale()} ${consignePhase("completerLimites")}`;
-  return listeAsymptotes(exercice).length > 0 ? `${base} ${consignePhase("nommerAsymptotes")}` : base;
+const CONSIGNE_PAPIER =
+  "Lis sur le graphique les limites de f en −∞ et en +∞ et, de part et d'autre de chaque valeur où f n'est pas définie, ses limites à gauche et à droite. Nomme ensuite chaque asymptote de la courbe (verticale, horizontale ou oblique) avec son équation, ou indique qu'il n'y en a aucune.";
+
+function sectionPapierLectureGraphique(exercice: ExerciceLectureGraphiqueLimites): SectionExercice {
+  return {
+    enteteFragments: [texte(LEGENDE)],
+    enteteHtml: construireSvgLectureGraphiqueLimites(exercice),
+    questions: [{ consigne: [texte(CONSIGNE_PAPIER)] }],
+  };
 }
 
 function construireEnonceLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): SectionExercice {
+  return sectionPapierLectureGraphique(exercice);
+}
+
+function enoncePapierLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): EnoncePapier {
+  return { section: sectionPapierLectureGraphique(exercice), etapesParQuestion: [["a", "b"]] };
+}
+
+const COULEUR_LECTURE = "#9a3b12";
+
+function etiquetteSvg(x: number, y: number, contenu: string, ancre: "start" | "middle" | "end"): string {
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9" font-weight="bold" fill="${COULEUR_LECTURE}" text-anchor="${ancre}" stroke="#ffffff" stroke-width="2.5" paint-order="stroke" font-family="Archivo, Arial, Helvetica, sans-serif">${contenu}</text>`;
+}
+
+/** Nombre écrit dans le SVG : virgule décimale et vrai signe moins. */
+function nombreSvg(v: number): string {
+  return String(v).replace(".", ",").replace("-", "−");
+}
+
+function droiteSvg(pente: number, ordonnee: number): string {
+  const p = pente === 1 ? "x" : pente === -1 ? "−x" : `${nombreSvg(pente)}x`;
+  return ordonnee === 0 ? p : `${p} ${ordonnee < 0 ? "−" : "+"} ${nombreSvg(Math.abs(ordonnee))}`;
+}
+
+/** Corrigé : le graphique de l'énoncé, chaque asymptote ÉTIQUETÉE par son équation (même repère pixel
+ * que `construireSvgFonction`, voir `construireLigneAsymptoteSvg`). */
+function construireSvgCorrige(exercice: ExerciceLectureGraphiqueLimites): string {
+  const vb = calculerViewBoxLectureGraphique(exercice);
+  const viewBox: ViewBoxSvg = { xMin: vb.x[0], xMax: vb.x[1], yMin: vb.y[0], yMax: vb.y[1] };
+  const zoneX = LARGEUR_GRAPHE - 2 * MARGE_SVG_LOCALE;
+  const zoneY = HAUTEUR_GRAPHE - 2 * MARGE_SVG_LOCALE;
+  const sx = (x: number) => MARGE_SVG_LOCALE + ((x - viewBox.xMin) / (viewBox.xMax - viewBox.xMin)) * zoneX;
+  const sy = (y: number) => MARGE_SVG_LOCALE + ((viewBox.yMax - y) / (viewBox.yMax - viewBox.yMin)) * zoneY;
+  const etiquettes: string[] = [];
+  exercice.vas.forEach((va, i) => {
+    const X = sx(va.position);
+    const aGauche = X > LARGEUR_GRAPHE - 50;
+    etiquettes.push(etiquetteSvg(aGauche ? X - 4 : X + 4, MARGE_SVG_LOCALE + 12 + 12 * i, `x = ${nombreSvg(va.position)}`, aGauche ? "end" : "start"));
+  });
+  const { infini } = exercice;
+  if (infini.type === "horizontale") {
+    const memes = infini.limitePlusInfini === infini.limiteMoinsInfini;
+    etiquettes.push(etiquetteSvg(LARGEUR_GRAPHE - MARGE_SVG_LOCALE - 3, sy(infini.limitePlusInfini) - 4, `y = ${nombreSvg(infini.limitePlusInfini)}${memes ? "" : " (en +∞)"}`, "end"));
+    if (!memes) etiquettes.push(etiquetteSvg(MARGE_SVG_LOCALE + 3, sy(infini.limiteMoinsInfini) - 4, `y = ${nombreSvg(infini.limiteMoinsInfini)} (en −∞)`, "start"));
+  } else if (infini.type === "oblique") {
+    const etendueY = viewBox.yMax - viewBox.yMin;
+    const xLabel = viewBox.xMin + 0.78 * (viewBox.xMax - viewBox.xMin);
+    const yLabel = Math.min(Math.max(infini.pente * xLabel + infini.ordonnee, viewBox.yMin + 0.08 * etendueY), viewBox.yMax - 0.05 * etendueY);
+    etiquettes.push(etiquetteSvg(sx(xLabel), sy(yLabel) + (infini.pente > 0 ? 12 : -6), `y = ${droiteSvg(infini.pente, infini.ordonnee)}`, "middle"));
+  }
+  return construireSvgLectureGraphiqueLimites(exercice)
+    .replace('class="graphe-limites"', 'class="figure-corrige"')
+    .replace("</svg>", `${etiquettes.join("")}</svg>`);
+}
+
+function aPointIsole(exercice: ExerciceLectureGraphiqueLimites): boolean {
+  return exercice.vas.some((va) => va.pointIsoleGauche !== undefined || va.pointIsoleDroit !== undefined);
+}
+
+function ahDistinctes(exercice: ExerciceLectureGraphiqueLimites): boolean {
+  return exercice.infini.type === "horizontale" && exercice.infini.limitePlusInfini !== exercice.infini.limiteMoinsInfini;
+}
+
+function avSignesIdentiques(exercice: ExerciceLectureGraphiqueLimites): boolean {
+  return exercice.vas.some((va) => va.pointIsoleGauche === undefined && va.pointIsoleDroit === undefined && va.signeGauche === va.signeDroit);
+}
+
+function joindre(latexs: string[], separateur = " ; "): FragmentConsigne[] {
+  return latexs.flatMap((l, i) => [...(i === 0 ? [] : [texte(separateur)]), latex(l)]);
+}
+
+function reponseBreveLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): FragmentConsigne[] {
+  return [...joindre(formatReponseAttendueCompleterLimitesLatex(exercice)), texte(" — "), ...joindre(formatReponseAttendueNommerAsymptotesLatex(exercice))];
+}
+
+function correctionDetailleeLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): EtapeCorrection[] {
+  const { infini } = exercice;
+  const etapes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [
+        texte("En −∞ et en +∞, on lit vers quoi tend f(x) : une valeur finie si la courbe se rapproche d'une droite horizontale, ±∞ sinon. "),
+        texte(
+          exercice.vas.length > 0
+            ? "De part et d'autre d'une valeur où f n'est pas définie, on lit chaque côté séparément : la branche monte (+∞), descend (−∞) ou arrive sur un point plein (limite finie)."
+            : "Ici, la courbe est définie partout : il n'y a que les limites en −∞ et en +∞ à lire.",
+        ),
+      ],
+    },
+    { label: "Lecture", sousQuestion: "a", fragments: joindre(formatReponseAttendueCompleterLimitesLatex(exercice)), figureHtml: construireSvgCorrige(exercice) },
+  ];
+  if (aPointIsole(exercice)) {
+    etapes.push({ label: "Piège", sousQuestion: "a", fragments: [texte("D'un côté de l'asymptote verticale, la courbe arrive sur un point plein : la limite de ce côté est la valeur de ce point, pas ±∞.")] });
+  } else if (avSignesIdentiques(exercice)) {
+    etapes.push({ label: "Piège", sousQuestion: "a", fragments: [texte("Les deux branches partent vers le même infini : les limites à gauche et à droite d'une asymptote verticale n'ont pas forcément des signes opposés.")] });
+  } else if (infini.type === "oblique") {
+    etapes.push({ label: "Piège", sousQuestion: "a", fragments: [texte("En −∞ et en +∞, la courbe suit une droite oblique : la limite est infinie, pas finie.")] });
+  } else if (ahDistinctes(exercice)) {
+    etapes.push({ label: "Piège", sousQuestion: "a", fragments: [texte("Les limites en −∞ et en +∞ sont différentes : on les lit séparément, chacune à son extrémité du graphique.")] });
+  }
+
+  etapes.push({
+    label: "Méthode",
+    sousQuestion: "b",
+    fragments: [
+      texte("Asymptote verticale "),
+      latex("x=a"),
+      texte(" là où la courbe s'envole vers ±∞ ; asymptote horizontale "),
+      latex("y=L"),
+      texte(" pour une limite finie L en −∞ ou en +∞ ; asymptote oblique "),
+      latex("y=ax+b"),
+      texte(" si la courbe se rapproche d'une droite oblique."),
+    ],
+  });
+  if (infini.type === "oblique") {
+    const { pente, ordonnee } = infini;
+    etapes.push({
+      label: "Calcul",
+      sousQuestion: "b",
+      fragments: [
+        texte("La droite passe par "),
+        latex(`(0\\,;\\,${ordonnee})`),
+        texte(" et "),
+        latex(`(1\\,;\\,${pente + ordonnee})`),
+        texte(" : pente "),
+        latex(`a=${pente}`),
+        texte(", ordonnée à l'origine "),
+        latex(`b=${ordonnee}`),
+        texte("."),
+      ],
+    });
+  }
+  etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: joindre(formatReponseAttendueNommerAsymptotesLatex(exercice)) });
+  if (listeAsymptotes(exercice).length === 0) {
+    etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("La courbe part vers ±∞ sans se rapprocher d'aucune droite : il n'y a aucune asymptote.")] });
+  } else if (ahDistinctes(exercice)) {
+    etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("Deux limites finies différentes en −∞ et en +∞ donnent DEUX asymptotes horizontales.")] });
+  } else if (exercice.vas.length > 0) {
+    etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("Une asymptote verticale a une équation de la forme « x = … » (et non « y = … »).")] });
+  }
+  return etapes;
+}
+
+function baremeLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): BaremeExercice {
+  const avecVA = exercice.vas.length > 0;
+  const aucune = listeAsymptotes(exercice).length === 0;
+  const critereAsymptotes = aucune ? "Aucune asymptote (conclusion cohérente avec les limites lues)" : "Chaque asymptote nommée avec son équation, et seulement elles";
+  const criteres: CritereBareme[] = avecVA
+    ? [
+        { sousQuestion: "a", critere: [texte("Limites en −∞ et en +∞")], points: 1 },
+        { sousQuestion: "a", critere: [texte("Limites à gauche et à droite de chaque asymptote verticale")], points: 1.5 },
+        { sousQuestion: "b", critere: [texte(critereAsymptotes)], points: 1.5 },
+      ]
+    : [
+        { sousQuestion: "a", critere: [texte("Limites en −∞ et en +∞")], points: 2 },
+        { sousQuestion: "b", critere: [texte(critereAsymptotes)], points: 2 },
+      ];
+  const erreurs: ErreurFrequente[] = [];
+  if (avecVA) erreurs.push({ description: [texte("Asymptote verticale écrite « y = … » au lieu de « x = … »")], cout: "0 pt sur cette asymptote" });
+  if (aPointIsole(exercice)) erreurs.push({ description: [texte("±∞ annoncé du côté où la courbe arrive sur un point plein")], cout: "0 pt sur cette limite" });
+  if (exercice.infini.type === "oblique") erreurs.push({ description: [texte("Limite finie annoncée en ±∞ alors que la courbe suit une droite oblique")], cout: "0 pt sur ces limites" });
+  if (ahDistinctes(exercice)) erreurs.push({ description: [texte("Une seule asymptote horizontale donnée alors que les limites en −∞ et en +∞ diffèrent")], cout: "−0,5 sur b)" });
+  if (erreurs.length === 0) erreurs.push({ description: [texte("Asymptote horizontale donnée sous la forme « x = … »")], cout: "0 pt sur cette asymptote" });
   return {
-    enteteFragments: [texte(construireConsigneGeneraleTexte(exercice))],
-    enteteHtml: construireSvgLectureGraphiqueLimites(exercice),
-    questions: [...construireQuestionsComportements(exercice), ...construireQuestionsAsymptotes(exercice)],
+    reponseFinale: reponseBreveLectureGraphiqueLimites(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Asymptotes données dans n'importe quel ordre")], [texte("Équation seule (« x = 2 ») sans le sigle AV, AH ou AO")]],
   };
+}
+
+function difficulteLectureGraphiqueLimites(exercice: ExerciceLectureGraphiqueLimites): 1 | 2 | 3 {
+  if (exercice.vas.length >= 2 || aPointIsole(exercice) || (exercice.vas.length > 0 && exercice.infini.type === "oblique")) return 3;
+  if (exercice.vas.length === 1 || exercice.infini.type === "oblique" || ahDistinctes(exercice)) return 2;
+  return 1;
 }
 
 /** RESYNTHÉTISÉE depuis les valeurs déjà connues de l'instance tirée (`formatReponseAttendue*Latex`,
@@ -241,6 +375,13 @@ export const adaptateurEvaluationLectureGraphiqueLimites: AdaptateurFeuilleExerc
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceLectureGraphiqueLimites,
   construireCorrection: construireCorrectionLectureGraphiqueLimites,
+  difficulte: difficulteLectureGraphiqueLimites,
+  reponseBreve: reponseBreveLectureGraphiqueLimites,
+  correctionDetaillee: correctionDetailleeLectureGraphiqueLimites,
+  bareme: baremeLectureGraphiqueLimites,
+  enoncePapier: enoncePapierLectureGraphiqueLimites,
+  dureeMinutes: 8,
+  profilInstance: profilLectureGraphiqueLimites,
   // FAUX : `enteteHtml` (graphique) est utilisé — exclu explicitement par la doc de `regroupable`
   // (`export/genererFeuilleExercices.ts`) — ET la consigne texte varie déjà avec l'instance (nombre de
   // blancs à compléter, 2 à 9 selon le tirage — jamais une consigne générique constante), ET il y a
