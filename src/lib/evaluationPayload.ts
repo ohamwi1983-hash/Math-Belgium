@@ -593,14 +593,28 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$.",
   ],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
+  // label) du bloc d'exemple du cours (`src/content/chapters/4e/fonction-second-degre.ts`).
   'fonction-second-degre': {
   etudier: [
-    "Détermine si la fonction donnée par le tableau de valeurs $x=0,1,2,3,4$ et $f(x)=1,2,5,10,17$ est du premier ou du second degré, en calculant ses accroissements successifs puis les accroissements de ces accroissements.",
-    undefined,
-    undefined,
-    undefined,
+    { cle: 'reconnaître via un tableau', enonce: "Détermine si la fonction donnée par le tableau de valeurs $x=0,1,2,3,4$ et $f(x)=1,2,5,10,17$ est du premier ou du second degré, en calculant ses accroissements successifs puis les accroissements de ces accroissements." },
+    { cle: 'application directe', enonce: "Détermine les coordonnées du sommet de la parabole d'équation $f(x)=2x^2-8x+3$ à l'aide de la formule $x_S=-\\dfrac{b}{2a}$." },
+    { cle: 'cas a > 0', enonce: "Détermine l'ensemble image de la fonction $f(x)=3(x+1)^2-3$, en justifiant à l'aide du sommet de sa parabole et du signe de $a$." },
+    { cle: 'zéros par factorisation', enonce: "Détermine les zéros de la fonction $f(x)=(x-1)(x-4)$ sans développer." },
+  ],
+  transformer: [
+    { cle: 'translations combinées', enonce: "Décris les translations qui transforment le graphe de $y=x^2$ en celui de $y=(x-3)^2+2$, puis calcule l'ordonnée du point d'abscisse 5 de ce graphe." },
+    { cle: 'a = 1', enonce: "Écris la fonction $f(x)=x^2-6x+5$ sous forme canonique en complétant le carré, puis donne les coordonnées du sommet de sa parabole." },
+    { cle: 'a ≠ 1', enonce: "Écris la fonction $f(x)=2x^2-8x+3$ sous forme canonique en complétant le carré (mets d'abord $a$ en évidence sur les termes en $x^2$ et en $x$), puis donne les coordonnées du sommet de sa parabole." },
+  ],
+  utiliser: [
+    { cle: 'enclos', enonce: "Un fermier dispose de 40 m de clôture pour fermer un enclos rectangulaire adossé à un mur (le mur forme un des côtés et n'a pas besoin de clôture). Exprime l'aire $A(x)$ de l'enclos en fonction de la largeur $x$ (en mètres) des deux côtés perpendiculaires au mur, puis détermine le domaine de $x$ imposé par le contexte." },
+    { cle: 'le sommet tombe dans le domaine', enonce: "L'aire d'un enclos vaut $A(x)=-2x^2+40x$ (en m²), avec $x \\in\\ ]0\\,;\\,20[$. Détermine la largeur $x$ qui rend l'aire maximale, puis calcule cette aire maximale." },
+    { cle: 'touche-t-il le sol', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. À quel instant touche-t-il le sol ?" },
+    { cle: 'au-dessus du point de départ', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. Pendant quel intervalle de temps se trouve-t-il au-dessus de son point de départ ?" },
   ],
   },
+
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
   // label) du bloc d'exemple du cours (`src/content/chapters/4e/equations-inequations-second-degre.ts`).
   // Les deux démonstrations de § resoudre ont des labels distincts dans le cours (« … relations de
@@ -670,30 +684,118 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'à partir du pourcentage', enonce: "On veut qu'au moins 95 % des valeurs d'une série se trouvent dans l'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$. À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine la valeur de k à utiliser." },
   ],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
+  // label) du bloc d'exemple du cours (`src/content/chapters/4e/cercle-trigonometrique-triangles.ts`).
+  // Les blocs sans badge ni label (§ remarquables n° 1 et 2, § triangle n° 1) restent appariés par
+  // position : entrée texte simple au même rang.
   'cercle-trigonometrique-triangles': {
+    cercle: [
+      { cle: 'réduire puis situer', enonce: "Pour un angle de 430°, détermine son angle réduit dans $[0°\\,;\\,360°[$, son quadrant, l'angle associé du premier quadrant, puis les signes de son sinus, de son cosinus et de sa tangente." },
+    ],
     identite: [
-      "Énonce l'identité fondamentale $\\cos^2\\theta + \\sin^2\\theta = 1$, valable pour tout angle $\\theta$, et explique comment elle permet de retrouver $\\cos\\theta$ à partir de $\\sin\\theta$ (ou l'inverse).",
-      undefined,
+      { cle: 'Formule', enonce: "Énonce l'identité fondamentale $\\cos^2\\theta + \\sin^2\\theta = 1$, valable pour tout angle $\\theta$, et explique comment elle permet de retrouver $\\cos\\theta$ à partir de $\\sin\\theta$ (ou l'inverse)." },
+      { cle: 'sin θ = 3/5', enonce: "Sachant que $\\sin\\theta = \\dfrac{3}{5}$ et que $\\theta \\in\\ ]90°\\,;\\,180°[$, calcule la valeur exacte de $\\cos\\theta$ et de $\\tan\\theta$." },
+    ],
+    remarquables: [
+      "À l'aide d'un triangle rectangle isocèle dont les côtés de l'angle droit mesurent 1, démontre que $\\sin 45° = \\cos 45° = \\dfrac{\\sqrt{2}}{2}$, puis déduis-en $\\tan 45°$.",
+      "Sachant que $\\sin 60° = \\dfrac{\\sqrt{3}}{2}$, $\\cos 60° = \\dfrac{1}{2}$ et $\\tan 60° = \\sqrt{3}$, déduis-en les valeurs exactes de $\\sin 30°$, $\\cos 30°$ et $\\tan 30°$, en utilisant le fait que 30° et 60° sont les deux angles aigus d'un même triangle rectangle.",
+      { cle: 'quadrant III', enonce: "Calcule la valeur exacte de $\\cos 210°$ sans calculatrice, en passant par l'angle associé du premier quadrant." },
+    ],
+    associes: [
+      { cle: 'à partir de sin 35°', enonce: "Sachant que $\\sin 35° \\approx 0{,}574$ et $\\cos 35° \\approx 0{,}819$, détermine sans calculatrice $\\sin 145°$ et $\\cos 215°$, en nommant la famille d'angles associés utilisée." },
+      { cle: 'enchaîner deux familles', enonce: "Sachant que $\\sin 67° \\approx 0{,}921$ et $\\cos 67° \\approx 0{,}391$, détermine $\\sin 157°$ sans calculatrice, en enchaînant deux familles d'angles associés." },
+    ],
+    equations: [
+      { cle: 'cos α', enonce: "Résous l'équation $\\cos\\alpha = -\\dfrac{1}{2}$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
     ],
     triangle: [
       "Démontre la loi des sinus $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$ en abaissant, dans le triangle $ABC$, la hauteur issue de $C$ jusqu'en $H$ sur $[AB]$.",
-      "Démontre la loi des cosinus $a^2 = b^2+c^2-2bc\\cos\\hat{A}$ en plaçant $A$ à l'origine d'un repère, $B$ sur l'axe horizontal à distance $c$, et $C$ au point $(b\\cos\\hat{A}\\,;\\,b\\sin\\hat{A})$, puis en appliquant le théorème de Pythagore au côté $BC=a$.",
-      "Démontre que l'aire du triangle $ABC$ vaut $\\dfrac{1}{2}bc\\sin\\hat{A}$, en exprimant la hauteur issue de $C$ au-dessus de $[AB]$ sous la forme $b\\sin\\hat{A}$.",
-      undefined,
+      { cle: 'Loi des cosinus', enonce: "Démontre la loi des cosinus $a^2 = b^2+c^2-2bc\\cos\\hat{A}$ en plaçant $A$ à l'origine d'un repère, $B$ sur l'axe horizontal à distance $c$, et $C$ au point $(b\\cos\\hat{A}\\,;\\,b\\sin\\hat{A})$, puis en appliquant le théorème de Pythagore au côté $BC=a$." },
+      { cle: 'Aire', enonce: "Démontre que l'aire du triangle $ABC$ vaut $\\dfrac{1}{2}bc\\sin\\hat{A}$, en exprimant la hauteur issue de $C$ au-dessus de $[AB]$ sous la forme $b\\sin\\hat{A}$." },
+      { cle: 'SAS', enonce: "Dans le triangle $ABC$, on donne $b=8$, $c=6$ et $\\hat{A}=60°$. Calcule le côté $a$, les angles $\\hat{B}$ et $\\hat{C}$, puis l'aire du triangle (longueurs et aire au centième, angles au dixième de degré)." },
+    ],
+    triangulation: [
+      { cle: 'hauteur inaccessible', enonce: "Depuis un point $A$, l'angle d'élévation vers le sommet $S$ d'une tour vaut $\\alpha = 28°$. On s'approche de 40 m de la tour, jusqu'au point $B$ aligné avec $A$ et le pied $F$ de la tour : l'angle d'élévation vaut alors $\\beta = 52°$. Calcule la hauteur de la tour." },
+      { cle: 'deux navires', enonce: "Deux navires quittent le même port $O$ vers les destinations $A$ et $B$, distantes de 40 km. On connaît les angles $\\widehat{OAB} = 50°$ et $\\widehat{OBA} = 60°$. Il reste au premier navire 10 km à parcourir, au second 8 km. Quelle distance sépare alors les deux navires ?" },
     ],
   },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // d'exemple du cours (`src/content/chapters/4e/geometrie-dans-espace.ts`).
+  'geometrie-dans-espace': {
+    position: [
+      { cle: 'cube ABCDEFGH', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, face supérieure $EFGH$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), détermine la position relative de la droite $(AG)$ et du plan $(EFGH)$ en justifiant, puis précise leur éventuel point d'intersection." },
+    ],
+    section: [
+      { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales d'un parallélépipède rectangle. On connaît les points $P$ (sur l'arête avant gauche), $Q$ (sur l'arête avant droite) et $R$ (sur l'arête arrière droite). Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet sur l'arête arrière gauche." },
+    ],
+    ombre: [
+      { cle: 'objet à 2 points', enonce: "Une barre rigide relie les sommets de deux piquets verticaux plantés dans un sol plan. L'ombre d'un autre piquet donne la direction des rayons du soleil. Explique comment construire l'ombre complète de la barre sur le sol, en justifiant la construction." },
+    ],
+  },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
+  // label) du bloc d'exemple du cours (`src/content/chapters/4e/calcul-vectoriel.ts`).
   'calcul-vectoriel': {
+    chasles: [
+      { cle: 'chaîne de 3 vecteurs', enonce: "Réduis la somme $\\vec{AB}+\\vec{BC}+\\vec{CD}$ à un seul vecteur, à l'aide de la relation de Chasles." },
+    ],
+    composantes: [
+      { cle: 'composantes de AB', enonce: "On donne les points $A(2\\,;\\,-1)$ et $B(5\\,;\\,3)$. Calcule les composantes du vecteur $\\vec{AB}$." },
+    ],
+    additionReperes: [
+      { cle: 'somme de deux vecteurs', enonce: "On donne $\\vec{u}\\begin{pmatrix}2\\\\3\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}-1\\\\4\\end{pmatrix}$. Calcule les composantes du vecteur $\\vec{u}+\\vec{v}$." },
+    ],
+    multiplicationReperes: [
+      { cle: 'vecteur nommé', enonce: "On donne $\\vec{u}\\begin{pmatrix}2\\\\-1\\end{pmatrix}$ et les points $A(3\\,;\\,5)$ et $B(6\\,;\\,2)$. Calcule les composantes du vecteur $3\\vec{u}-\\vec{AB}$." },
+    ],
     norme: [
-      "Démontre, à l'aide du théorème de Pythagore, que pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$.",
-      undefined,
+      { cle: 'Pythagore', enonce: "Démontre, à l'aide du théorème de Pythagore, que pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$." },
+      { cle: 'distance entre deux points', enonce: "Calcule la distance entre les points $A(1\\,;\\,1)$ et $B(4\\,;\\,5)$." },
+    ],
+    relation: [
+      { cle: 'translation puis milieu', enonce: "On donne le point $A(1\\,;\\,1)$ et le vecteur $\\vec{u}\\begin{pmatrix}4\\\\2\\end{pmatrix}$. Détermine les coordonnées du point $B$, image de $A$ par la translation de vecteur $\\vec{u}$, puis celles du milieu $M$ de $[AB]$." },
     ],
     colinearite: [
-      undefined,
-      "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$.",
+      { cle: 'alignement', enonce: "Les points $A(0\\,;\\,0)$, $B(2\\,;\\,1)$ et $C(6\\,;\\,3)$ sont-ils alignés ? Justifie à l'aide du critère de colinéarité de deux vecteurs." },
+      { cle: 'déterminant', enonce: "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$." },
     ],
     orthogonalite: [
-      undefined,
-      "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$, en construisant $\\vec{v}$ comme l'image de $\\vec{u}$ par une rotation de 90°.",
+      { cle: 'angle droit', enonce: "On donne $\\vec{AB}\\begin{pmatrix}3\\\\4\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}-4\\\\3\\end{pmatrix}$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie." },
+      { cle: 'cette formule', enonce: "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$, en construisant $\\vec{v}$ comme l'image de $\\vec{u}$ par une rotation de 90°." },
+    ],
+    applications: [
+      { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },
+    ],
+  },
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // d'exemple du cours (`src/content/chapters/4e/geometrie-analytique-plane.ts`). Le premier exemple
+  // de § parabole n'a ni badge ni label : apparié par position (entrée texte simple au rang 0).
+  'geometrie-analytique-plane': {
+    reperer: [
+      { cle: '4 formes', enonce: "La droite $d$ passe par $A(1\\,;\\,1)$ et admet $\\vec{u}\\begin{pmatrix}2\\\\1\\end{pmatrix}$ comme vecteur directeur. Écris-en une équation paramétrique, une équation cartésienne, l'équation explicite en $y$ et l'équation explicite en $x$." },
+    ],
+    caracteristiques: [
+      { cle: 'pente, angles', enonce: "Pour la droite $d : y = \\sqrt{3}\\,x + 2$, détermine sa pente, l'angle qu'elle forme avec l'axe $Ox$, l'angle qu'elle forme avec l'axe $Oy$ et son ordonnée à l'origine." },
+    ],
+    relations: [
+      { cle: 'perpendiculaire par un point', enonce: "Détermine une équation cartésienne et un vecteur directeur de la droite $d'$ perpendiculaire à $d : x-2y+1=0$ et passant par $C(3\\,;\\,-1)$." },
+    ],
+    intersection: [
+      { cle: 'substitution', enonce: "Détermine la position relative des droites $d_1 : x-2y+1=0$ et $d_2 : 2x+y-5=0$ puis, si elles sont sécantes, les coordonnées de leur point d'intersection." },
+    ],
+    distance: [
+      { cle: 'distance point-droite', enonce: "Calcule la distance du point $C(-7\\,;\\,7)$ à la droite $d : 4x-3y-1=0$ sans formule toute faite : construis la perpendiculaire à $d$ passant par $C$, détermine son pied $H$, puis calcule $\\|\\vec{CH}\\|$." },
+    ],
+    cercle: [
+      { cle: 'rayon indirect', enonce: "Écris l'équation du cercle de centre $C(1\\,;\\,1)$ passant par le point $P(4\\,;\\,5)$." },
+      { cle: 'compléter le carré', enonce: "Montre que l'équation $2x^2+2y^2-8x+12y-24=0$ est celle d'un cercle, puis détermine son centre et son rayon." },
+    ],
+    parabole: [
+      "Démontre qu'une parabole de foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et de directrice $y=-\\dfrac{p}{2}$ (avec $p>0$) a pour équation $x^2=2py$, en traduisant l'équidistance d'un point $P(x\\,;\\,y)$ au foyer et à la directrice.",
+      { cle: 'axe vertical', enonce: "Une parabole d'axe vertical a pour sommet $S(1\\,;\\,-1)$ et pour foyer $F(1\\,;\\,1)$. Détermine son paramètre $p$, son équation et l'équation de sa directrice." },
+      { cle: 'équation développée', enonce: "Pour la parabole d'équation $y^2-6y-4x+5=0$, détermine son sommet, son paramètre $p$, son foyer et l'équation de sa directrice." },
+    ],
+    lieux: [
+      { cle: 'cercle', enonce: "Détermine les coordonnées des points d'intersection de la droite $d : y = x$ et du cercle $c : (x-1)^2+y^2=5$." },
     ],
   },
   'trigonometrie': {
@@ -1123,7 +1225,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
