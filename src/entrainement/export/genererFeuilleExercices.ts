@@ -194,8 +194,9 @@ export interface AdaptateurFeuilleExercices<T> {
    * la case « inclure un cas particulier » pour ce générateur. */
   parametresAuChoix?: { id: string; label: string }[];
   /** `true` : TOUTES les instances exigent une calculatrice (aires dans le cercle, modélisation en
-   * contexte…) — la page de conception avertit le professeur s'il choisit « calculatrice interdite ». */
-  calculatriceIndispensable?: boolean;
+   * contexte…) ; liste d'ids de variantes : seulement CES variantes (5gen23 : club, population) — la
+   * page de conception avertit le professeur s'il choisit « calculatrice interdite ». */
+  calculatriceIndispensable?: boolean | string[];
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
    * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
    * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée

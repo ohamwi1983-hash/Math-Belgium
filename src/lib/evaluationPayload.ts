@@ -457,8 +457,10 @@ export function parametresAuChoix(generatorId: IdGenerateurPilote): { id: string
 
 /** `true` si toutes les questions de ce générateur exigent une calculatrice (avertissement du panneau
  * quand le professeur choisit « calculatrice interdite »). */
-export function calculatriceIndispensable(generatorId: IdGenerateurPilote): boolean {
-  return !!EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
+export function calculatriceIndispensable(generatorId: IdGenerateurPilote, variantesChoisies?: string[]): boolean {
+  const valeur = EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
+  if (Array.isArray(valeur)) return (variantesChoisies ?? []).some((v) => valeur.includes(v))
+  return !!valeur
 }
 
 /** Nom lisible d'un générateur (titre de son document, sans « — Évaluation »). */
@@ -757,6 +759,40 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'recurrente-affine': [
     { cle: 'Démonstration — pourquoi L = b/(1−a)', enonce: "Démontre que, si la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) converge, sa limite $L$ vaut nécessairement $L = \\dfrac{b}{1-a}$." },
     { cle: 'dilution répétée', enonce: "Un aquarium contient un produit dont la concentration (en mg/L) suit la récurrence $u_{n+1} = 0{,}7 \\times u_n + 3$, avec $u_1 = 1$ : chaque semaine, 30 % du produit est filtré, puis 3 mg/L sont réintroduits. Justifie que la concentration se stabilise à long terme, et calcule vers quelle valeur." },
+  ],
+  },
+  'limites-asymptotes': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // `exemple`. Les exemples de LECTURE GRAPHIQUE n'ont pas leur graphique sur papier (une question
+  // ouverte ne porte pas de figure) : leurs énoncés DÉCRIVENT la courbe en mots et font traduire
+  // ces observations en limites et en équations d'asymptotes.
+  'limites-calcul': [
+    { cle: 'forme 0/0 — factorisation', enonce: "Calcule $\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$ : vérifie d'abord la forme obtenue en remplaçant $x$ par 2, puis lève l'indétermination." },
+    { cle: 'forme ∞/∞ — mise en évidence du terme dominant', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$ en mettant en évidence le terme dominant au numérateur et au dénominateur." },
+    { cle: 'forme ∞−∞ — expression conjuguée', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(\\sqrt{x^2+1} - x\\right)$ à l'aide de l'expression conjuguée." },
+    { cle: "quand la limite n'existe pas", enonce: "Soit $f(x) = x+3$ si $x \\leq 2$, et $f(x) = x-3$ si $x > 2$. La limite $\\displaystyle\\lim_{x \\to 2} f(x)$ existe-t-elle ? Justifie à l'aide des limites à gauche et à droite." },
+    { cle: 'vraie asymptote verticale', enonce: "Calcule $\\displaystyle\\lim_{x \\to -3^-} \\dfrac{2x-5}{x+3}$ et $\\displaystyle\\lim_{x \\to -3^+} \\dfrac{2x-5}{x+3}$, puis interprète graphiquement le résultat." },
+    { cle: 'point vide — un trou invisible', enonce: "Calcule $\\displaystyle\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3}$, puis décris le graphique de cette fonction au voisinage de $x = -3$." },
+  ],
+  'asymptote-oblique': [
+    { cle: 'asymptote oblique — deux méthodes', enonce: "Soit $f(x) = \\dfrac{x^2-3x+5}{x-1}$. Détermine l'équation de son asymptote oblique par la division euclidienne, puis vérifie-la par le calcul des limites $a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{f(x)}{x}$ et $b = \\displaystyle\\lim_{x \\to +\\infty} \\left(f(x) - ax\\right)$." },
+  ],
+  'lecture-graphique': [
+    { cle: 'lecture directe sur un graphique', enonce: "Sur le graphique d'une fonction $f$, on observe : juste à gauche de $x = 2$, la courbe plonge vers le bas ; juste à droite, elle s'envole vers le haut ; aux deux extrémités, elle s'aplatit sur la droite d'équation $y = 1$. Traduis ces observations par des limites, puis donne les équations des asymptotes." },
+    { cle: 'lecture directe — plusieurs asymptotes verticales', enonce: "Sur le graphique d'une fonction $g$, on observe : en $x = -1$, la courbe s'envole vers le haut à gauche et plonge vers le bas à droite ; en $x = 2$, elle plonge vers le bas à gauche et s'envole vers le haut à droite ; aux deux extrémités, elle s'aplatit sur l'axe des abscisses. Écris toutes les limites correspondantes et les équations des asymptotes." },
+    { cle: "une limite finie d'un seul côté", enonce: "Sur le graphique d'une fonction $h$, on observe : à gauche de $x = 1$, la courbe arrive sur le point plein $(1\\,;2)$ ; à droite de $x = 1$, elle s'envole vers le haut ; vers la droite, elle s'aplatit sur la droite $y = 3$ ; vers la gauche, elle plonge sans fin. Écris les limites en $1^-$, en $1^+$, en $-\\infty$ et en $+\\infty$, puis donne les asymptotes en justifiant pourquoi $x = 1$ en est une." },
+    { cle: 'deux asymptotes horizontales différentes', enonce: "Sur le graphique d'une fonction $k$, on observe que la courbe s'aplatit sur la droite $y = -1$ vers la gauche et sur la droite $y = 3$ vers la droite. Écris les limites de $k$ en $-\\infty$ et en $+\\infty$ et les équations des asymptotes horizontales. Une fonction rationnelle peut-elle avoir ce comportement ? Justifie." },
+  ],
+  'limites-contexte': [
+    { cle: 'coût unitaire', enonce: "Une entreprise a un coût fixe de 240 € et un coût variable de 8 € par unité ; le coût unitaire (en €) vaut $C_u(x) = 8 + \\dfrac{240}{x}$ pour $x \\geq 1$ unités produites. Calcule $\\displaystyle\\lim_{x \\to +\\infty} C_u(x)$ et interprète ce résultat dans le contexte : ce coût unitaire peut-il descendre sous cette valeur ?" },
+    { cle: 'population — régression', enonce: "Une ville compte $P(x) = \\dfrac{5x+13}{x+2}$ milliers d'habitants, $x$ années après un recensement. Écris $P(x)$ sous la forme $b + \\dfrac{a}{x+2}$ par division euclidienne, puis détermine la population à long terme. Augmente-t-elle ou diminue-t-elle ? Justifie." },
+    { cle: 'eau salée', enonce: "Une cuve contient 100 L d'eau pure. On y verse 5 L d'eau salée par minute, à 30 g de sel par litre. Exprime la concentration $C(t)$ du mélange (en g/L) après $t$ minutes, puis détermine vers quelle valeur elle tend. La concentration dépasse-t-elle cette valeur ? Justifie." },
+    { cle: 'club — une asymptote oblique', enonce: "Un club compte $N(x) = 2x + 15 - \\dfrac{8}{x+2}$ centaines d'abonnés, $x$ mois après son ouverture. Détermine l'asymptote oblique de la courbe de $N$, la position de la courbe par rapport à elle, et interprète sa pente dans le contexte." },
+  ],
+  'etude-complete': [
+    { cle: "étude complète d'une fonction rationnelle", enonce: "Soit $f(x) = \\dfrac{x^2-2x-3}{x-1}$. Mène l'étude complète de $f$ : domaine, nature de la valeur exclue (asymptote verticale ou point vide), limites à gauche et à droite, asymptote horizontale ou oblique." },
+    { cle: 'recoupement', enonce: "Soit $f(x) = \\dfrac{x^2+x}{x^2+1}$. Détermine son asymptote horizontale, puis le point où la courbe la recoupe, et la position de la courbe par rapport à cette asymptote." },
+    { cle: 'construction inverse', enonce: "Trouve une fonction rationnelle dont le graphique admet l'asymptote verticale $x = 2$ et l'asymptote horizontale $y = 3$, puis une autre qui admet l'asymptote verticale $x = -1$ et l'asymptote oblique $y = 2x + 1$. Vérifie chaque réponse." },
   ],
   },
   'derivees-applications': {
@@ -1087,7 +1123,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
@@ -2310,9 +2346,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     'limites-contexte': [
       {
         enonce:
-          "Pourquoi une asymptote horizontale en contexte (comme un coût unitaire) représente-t-elle un plancher ou un plafond jamais atteint, plutôt qu'une valeur que le phénomène finit par prendre réellement ?",
+          "Pour le coût unitaire $C_u(x) = 8 + \\dfrac{240}{x}$, pourquoi la valeur limite 8 € est-elle un plancher jamais atteint ? Une courbe ne peut-elle jamais atteindre son asymptote horizontale ?",
         corrige:
-          "Une limite décrit ce dont la fonction se rapproche d'aussi près qu'on veut, sans jamais l'atteindre pour une valeur finie de x, aussi grande soit-elle. Le terme qui s'annule à l'infini (comme $240/x$) reste strictement positif pour tout x fini : la valeur limite n'est donc qu'un idéal théorique vers lequel le phénomène tend, jamais une valeur vraiment prise.",
+          "Ici, le terme $\\dfrac{240}{x}$ tend vers 0 mais reste strictement positif pour tout $x \\geq 1$ : $C_u(x) > 8$, le coût unitaire se rapproche de 8 € sans jamais l'atteindre — un plancher. Ce n'est PAS une règle générale : une courbe peut croiser son asymptote horizontale (par exemple $\\dfrac{x^2+x}{x^2+1}$ vaut exactement 1 en $x = 1$). C'est le signe du terme qui tend vers 0 qui dit si la valeur limite est atteinte ou non.",
       },
       {
         enonce:

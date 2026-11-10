@@ -398,7 +398,16 @@ export function EvaluationGeneratorPanel({
   const pointsParProcessus = ([1, 2, 3] as const).map((p) => lignes.filter((l) => l.processus === p).reduce((t, l) => t + pointsLigne(l), 0))
   /** Lignes choisies dont le générateur exige toujours une calculatrice (avertissement si interdite). */
   const generateursACalculatrice = lignes
-    .filter((l) => l.type === 'exercice' && l.nombre > 0 && l.cle && calculatriceIndispensable(l.cle as IdGenerateurPilote))
+    .filter(
+      (l) =>
+        l.type === 'exercice' &&
+        l.nombre > 0 &&
+        l.cle &&
+        calculatriceIndispensable(
+          l.cle as IdGenerateurPilote,
+          Object.entries(l.parVariante ?? {}).filter(([, n]) => n > 0).map(([v]) => v),
+        ),
+    )
     .map((l) => `« ${nomGenerateur(l.cle as IdGenerateurPilote)} »`)
   const dureeEstimee = Math.max(5, Math.ceil(lignes.filter((l) => l.nombre > 0).reduce((t, l) => t + dureeLigne(l, pointsLigne(l)), 0) / 5) * 5)
 
