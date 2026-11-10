@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "./generateurs5e/lectureGraphiqueLimites";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   demarrerSessionLectureGraphiqueLimites,
@@ -28,6 +29,15 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionLectureGraphiqueLimites {
   return demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, genererExerciceLectureGraphiqueLimites);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export (`exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionLectureGraphiqueLimites {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, () => genererExerciceLectureGraphiqueLimites(), (id) => construireAvecFamilleId(id)));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -57,7 +67,7 @@ function calculerSegmentsProgression(etat: EtatSessionLectureGraphiqueLimites): 
 }
 
 export function App5gen22() {
-  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueLimites>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueLimites>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionLectureGraphiqueLimites`, jamais dans le moteur (même principe que

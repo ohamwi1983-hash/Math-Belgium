@@ -62,12 +62,22 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionEtudeComplete {
   return demarrerSessionEtudeComplete(REGLAGES_DEMO, genererExerciceEtudeComplete);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/etudeComplete/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionEtudeComplete {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEtudeComplete(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, () => genererExerciceEtudeComplete(), (id) => construireAvecFamilleId(id)));
 }
 
 /** Réponse réellement attendue de la phase qui vient de se clore — même dispatch que l'ancien
@@ -118,7 +128,7 @@ function texteBlocAsymptote(bloc: { aucune: true } | { aucune: false; type: "hor
 }
 
 export function App5gen24() {
-  const [etat, setEtat] = useState<EtatSessionEtudeComplete>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEtudeComplete>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionEtudeComplete`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./generateurs5e/limitesContexte";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   consigneGenerale,
   estPhaseQCM,
@@ -58,6 +59,15 @@ function nouvelleSession(): EtatSessionLimitesContexte {
   return demarrerSessionLimitesContexte(REGLAGES_DEMO, genererExerciceLimitesContexte);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le MÊME catalogue que l'adaptateur
+ * d'export (`exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionLimitesContexte {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLimitesContexte(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, () => genererExerciceLimitesContexte(), (id) => construireAvecFamilleId(id)));
+}
+
 /** Réponse réellement attendue de la phase qui vient de se clore — même distinction QCM/LaTeX que
  * l'ancien `ResultatPanelLimitesContexte.tsx` (supprimé, remplacé par la validation inline). */
 function reponseAttendueLimitesContexte(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte) {
@@ -95,7 +105,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen23() {
-  const [etat, setEtat] = useState<EtatSessionLimitesContexte>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLimitesContexte>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionLimitesContexte`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
