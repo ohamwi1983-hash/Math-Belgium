@@ -49,17 +49,37 @@ function motSens(sens: SensOptimisation, genre: GenreGrandeur): string {
   return accordGenre(sens === "max" ? "maximal" : "minimal", genre);
 }
 
-function motSensInverse(sens: SensOptimisation, genre: GenreGrandeur): string {
-  return accordGenre(sens === "max" ? "minimal" : "maximal", genre);
-}
 
 /** Nombre en texte : virgule décimale, « − » typographique, au plus 2 décimales. */
 function nombre(valeur: number): string {
   return String(Math.round(valeur * 100) / 100).replace(".", ",").replace("-", "−");
 }
 
-function phrase(p: ParametresInterpretation, sensTexte: string, valeurGrandeur: number, uniteGrandeur: string, valeurVariable: number): string {
-  return `${capitaliser(p.nomGrandeur)} ${sensTexte} : ${nombre(valeurGrandeur)} ${uniteGrandeur}, ${accordGenre("atteint", p.genreGrandeur)} pour ${p.labelVariable} = ${nombre(valeurVariable)} ${p.uniteVariable}.`;
+/** « l'aire maximale », mais « la valeur minimale de l'aire totale des 2 formes » : derrière un nom
+ * de grandeur qui a un complément (plus de 2 mots), l'adjectif se retrouvait loin de son nom
+ * (« Quelle est l'aire totale des 2 formes minimale ? »). Rend aussi le genre du groupe obtenu
+ * (« valeur » est féminin) pour accorder la suite de la phrase (« atteinte »). */
+export function groupeGrandeurQualifiee(
+  sens: SensOptimisation,
+  nomGrandeur: string,
+  genreGrandeur: GenreGrandeur,
+  options: { avant?: string; apres?: string } = {},
+): { texte: string; genre: GenreGrandeur } {
+  const long = nomGrandeur.trim().split(/\s+/).length > 2 && !nomGrandeur.startsWith("la valeur ");
+  const genre: GenreGrandeur = long ? "feminin" : genreGrandeur;
+  const adjectif = [options.avant, motSens(sens, genre), options.apres].filter(Boolean).join(" ");
+  if (!long) return { texte: `${nomGrandeur} ${adjectif}`, genre };
+  const de = nomGrandeur.startsWith("le ") ? `du ${nomGrandeur.slice(3)}` : nomGrandeur.startsWith("les ") ? `des ${nomGrandeur.slice(4)}` : `de ${nomGrandeur}`;
+  return { texte: `la valeur ${adjectif} ${de}`, genre };
+}
+
+export function grandeurQualifiee(sens: SensOptimisation, nomGrandeur: string, genreGrandeur: GenreGrandeur, options: { avant?: string; apres?: string } = {}): string {
+  return groupeGrandeurQualifiee(sens, nomGrandeur, genreGrandeur, options).texte;
+}
+
+function phrase(p: ParametresInterpretation, sens: SensOptimisation, valeurGrandeur: number, uniteGrandeur: string, valeurVariable: number): string {
+  const groupe = groupeGrandeurQualifiee(sens, p.nomGrandeur, p.genreGrandeur);
+  return `${capitaliser(groupe.texte)} : ${nombre(valeurGrandeur)} ${uniteGrandeur}, ${accordGenre("atteint", groupe.genre)} pour ${p.labelVariable} = ${nombre(valeurVariable)} ${p.uniteVariable}.`;
 }
 
 /** Question finale de l'exercice (ex. "Quelle est l'aire maximale ?"), affichée PERSISTANTE sur
@@ -68,15 +88,16 @@ function phrase(p: ParametresInterpretation, sensTexte: string, valeurGrandeur: 
  * place et portent leur propre question, structurellement différente). "Quel"/"Quelle" s'accorde
  * sur `genreGrandeur`, au même titre que l'adjectif "maximal(e)"/"minimal(e)" (`motSens`). */
 export function formatQuestionFinale(sens: SensOptimisation, nomGrandeur: string, genreGrandeur: GenreGrandeur): string {
-  const quel = genreGrandeur === "feminin" ? "Quelle" : "Quel";
-  return `${quel} est ${nomGrandeur} ${motSens(sens, genreGrandeur)} ?`;
+  const groupe = groupeGrandeurQualifiee(sens, nomGrandeur, genreGrandeur);
+  return `${groupe.genre === "feminin" ? "Quelle" : "Quel"} est ${groupe.texte} ?`;
 }
 
 export function construireOptionsInterpretation(p: ParametresInterpretation): OptionInterpretation[] {
-  const correcte = phrase(p, motSens(p.sens, p.genreGrandeur), p.optimal.y, p.uniteGrandeur, p.optimal.x);
-  const sensInverse = phrase(p, motSensInverse(p.sens, p.genreGrandeur), p.optimal.y, p.uniteGrandeur, p.optimal.x);
-  const uniteFautive = phrase(p, motSens(p.sens, p.genreGrandeur), p.optimal.y, p.uniteGrandeurFautive, p.optimal.x);
-  const variableConfondue = phrase(p, motSens(p.sens, p.genreGrandeur), p.optimal.x, p.uniteGrandeur, p.optimal.y);
+  const inverse: SensOptimisation = p.sens === "max" ? "min" : "max";
+  const correcte = phrase(p, p.sens, p.optimal.y, p.uniteGrandeur, p.optimal.x);
+  const sensInverse = phrase(p, inverse, p.optimal.y, p.uniteGrandeur, p.optimal.x);
+  const uniteFautive = phrase(p, p.sens, p.optimal.y, p.uniteGrandeurFautive, p.optimal.x);
+  const variableConfondue = phrase(p, p.sens, p.optimal.x, p.uniteGrandeur, p.optimal.y);
 
   return melanger([
     { texte: correcte, correcte: true },

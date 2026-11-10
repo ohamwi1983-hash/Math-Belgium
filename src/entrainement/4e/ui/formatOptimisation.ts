@@ -12,9 +12,10 @@ import type {
   ExerciceOptimisationModelisation,
   FamilleOptimisation,
   GenreGrandeur,
-  SensOptimisation,
 } from "../core/optimisation.types";
 import { formatSommeTermes } from "./formatEquation";
+import { formatFractionIrreductible } from "./formatFraction";
+import { grandeurQualifiee } from "../generateurs/optimisation/interpretation";
 import { CATALOGUE_FAMILLES } from "../generateurs/optimisation/index";
 import type { SegmentTexte } from "../components/SegmentsInline";
 
@@ -53,9 +54,6 @@ function accordGenre(mot: string, genre: GenreGrandeur): string {
   return mot.endsWith("el") ? `${mot}le` : `${mot}e`;
 }
 
-function motSensOptimisation(sens: SensOptimisation, genre: GenreGrandeur): string {
-  return accordGenre(sens === "max" ? "maximal" : "minimal", genre);
-}
 
 function demonstratif(genre: GenreGrandeur): string {
   return genre === "feminin" ? "cette" : "ce";
@@ -100,6 +98,27 @@ function arrondi2(valeur: number): number {
  * (`formatEquationInequationSecondDegre.ts`), donc ce correctif le protège aussi — sans aucun
  * changement pour les coefficients déjà entiers (cas de toutes les autres familles). */
 export function formatFonctionDeveloppeeLatex(fonction: CoefficientsQuadratiques, labelVariable: string): string {
+  // Un coefficient qui n'est pas un décimal court (5/48 de « somme répartie en deux ») s'écrit en
+  // fraction exacte : l'arrondi « 0,1 » affichait une autre fonction que celle de l'exercice (et que
+  // celle de la feuille papier, écrite en valeurs exactes).
+  const coefficients = [fonction.a, fonction.b, fonction.c];
+  if (coefficients.some((c) => Math.abs(c * 100 - Math.round(c * 100)) > 1e-9)) {
+    return [
+      { c: fonction.a, s: `${labelVariable}^2` },
+      { c: fonction.b, s: labelVariable },
+      { c: fonction.c, s: "" },
+    ]
+      .filter((t) => Math.abs(t.c) > 1e-12)
+      .map((t, i) => {
+        const abs = Math.abs(t.c);
+        const brut = formatFractionIrreductible(abs);
+        const m = /^(\d+)\/(\d+)$/.exec(brut);
+        const nombre = m ? `\\dfrac{${m[1]}}{${m[2]}}` : formatNombreLatex(abs);
+        const corps = abs === 1 && t.s ? t.s : `${nombre}${t.s}`;
+        return i === 0 ? `${t.c < 0 ? "-" : ""}${corps}` : ` ${t.c < 0 ? "-" : "+"} ${corps}`;
+      })
+      .join("");
+  }
   return formatSommeTermes([
     { valeur: arrondi2(fonction.a), suffixe: `${labelVariable}^2` },
     { valeur: arrondi2(fonction.b), suffixe: labelVariable },
@@ -174,7 +193,7 @@ export function consigneSommet(exercice: ExerciceOptimisation): string {
   if (!genreGrandeur) {
     return "Calcule les coordonnées du sommet de la parabole (arrondi au centième accepté si besoin).";
   }
-  return `Calcule ${nomVariable} qui donne ${nomGrandeur} ${motSensOptimisation(exercice.sens, genreGrandeur)} théorique, et ${demonstratif(genreGrandeur)} ${sansArticle(nomGrandeur)} (arrondi au centième accepté si besoin).`;
+  return `Calcule ${nomVariable} qui donne ${grandeurQualifiee(exercice.sens, nomGrandeur, genreGrandeur, { apres: "théorique" })}, et ${demonstratif(genreGrandeur)} ${sansArticle(nomGrandeur)} (arrondi au centième accepté si besoin).`;
 }
 
 export function consigneDecision(exercice: ExerciceOptimisation): string {
@@ -182,7 +201,7 @@ export function consigneDecision(exercice: ExerciceOptimisation): string {
   if (!genreGrandeur) {
     return "Le sommet appartient-il au domaine de validité ? Donne alors la valeur optimale recherchée (arrondi au centième accepté si besoin).";
   }
-  return `La valeur théorique ${formatDeGrandeur(nomVariable)} (le sommet) appartient-elle au domaine de validité ? Donne alors ${nomGrandeur} réellement ${motSensOptimisation(exercice.sens, genreGrandeur)} (arrondi au centième accepté si besoin).`;
+  return `La valeur théorique ${formatDeGrandeur(nomVariable)} (le sommet) appartient-elle au domaine de validité ? Donne alors ${grandeurQualifiee(exercice.sens, nomGrandeur, genreGrandeur, { avant: "réellement" })} (arrondi au centième accepté si besoin).`;
 }
 
 export function consigneInterpretation(): string {
@@ -344,7 +363,7 @@ export function texteAideDecisionNiveau1(exercice: ExerciceOptimisation): string
   if (!genreGrandeur) {
     return "Rappel : le sommet ne donne l'optimum réel que s'il appartient au domaine de validité — sinon, l'optimum est atteint à l'une des deux bornes du domaine.";
   }
-  return `Rappel : la valeur ${formatDeGrandeur(nomVariable)} au sommet ne donne ${nomGrandeur} réellement ${motSensOptimisation(exercice.sens, genreGrandeur)} que si elle appartient au domaine de validité ${formatDeGrandeur(nomVariable)} — sinon, ${nomGrandeur} ${accordGenre("réel", genreGrandeur)} est ${accordGenre("atteint", genreGrandeur)} à l'une des deux bornes du domaine.`;
+  return `Rappel : la valeur ${formatDeGrandeur(nomVariable)} au sommet ne donne ${grandeurQualifiee(exercice.sens, nomGrandeur, genreGrandeur, { avant: "réellement" })} que si elle appartient au domaine de validité ${formatDeGrandeur(nomVariable)} — sinon, ${nomGrandeur} ${accordGenre("réel", genreGrandeur)} est ${accordGenre("atteint", genreGrandeur)} à l'une des deux bornes du domaine.`;
 }
 
 export function texteAideDecisionNiveau2(exercice: ExerciceOptimisation): string {

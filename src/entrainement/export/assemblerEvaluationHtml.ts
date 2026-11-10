@@ -289,8 +289,10 @@ const STYLE_EVALUATION = `
 .question:has(.correction-bloc) { break-inside: auto; page-break-inside: auto; }
 /* Énoncé : une question à figures plus haute que la place restante (6gen20 : cinq graphiques) se
    coupe ENTRE ses éléments — texte, figure, consigne —, jamais au milieu d'une figure, plutôt que
-   d'être renvoyée entière à la page suivante en laissant une page presque vide sous l'en-tête. */
-.question:has(svg), .ex:has(svg) { break-inside: auto; page-break-inside: auto; }
+   d'être renvoyée entière à la page suivante en laissant une page presque vide sous l'en-tête.
+   Une question à une ou deux figures reste d'un bloc : sinon son texte restait seul en bas de page
+   et sa figure partait à la page suivante (gen8, gen39–41). */
+.question.figures-multiples, .ex.figures-multiples { break-inside: auto; page-break-inside: auto; }
 .question svg, .ex svg { break-inside: avoid; page-break-inside: avoid; }
 .ligne-titre, .etape-titre { break-after: avoid; page-break-after: avoid; }
 .etapes > *, .piege { break-inside: avoid; page-break-inside: avoid; }
@@ -379,6 +381,12 @@ function corpsQuestionHtml(item: ItemEvaluation, pointsSousQ?: Map<string, numbe
     });
   }
   return html;
+}
+
+/** Classe des questions à trois figures ou plus (6gen20 : cinq graphiques) : elles seules peuvent
+ * se couper entre leurs figures (voir la CSS `.figures-multiples`). */
+function classeFigures(corpsHtml: string): string {
+  return (corpsHtml.match(/<svg[\s>]/g) ?? []).length >= 3 ? " figures-multiples" : "";
 }
 
 function figureCorrigeHtml(e: EtapeCorrection): string {
@@ -476,9 +484,10 @@ function exerciceFeuilleHtml(item: ItemEvaluation, numero: number): string {
   const qr = item.code
     ? `<div class="qr-bloc">${qrCodeSvg(item.code.url, 66, `QR code : refaire l'exercice ${numero} en ligne`)}<span>Refaire en ligne<br>avec les aides</span><span class="code">code ${echapperHtml(item.code.code)}</span></div>`
     : "";
-  return `<section class="ex">
+  const corps = corpsQuestionHtml(item);
+  return `<section class="ex${classeFigures(corps)}">
   <div class="ex-tete"><h3>Exercice ${numero}</h3>${etoiles(item.difficulte)}${tag ? `<span class="tag">${echapperHtml(tag)}</span>` : ""}</div>
-  <div class="ex-corps"><div class="ex-texte">${corpsQuestionHtml(item)}</div>${qr}</div>
+  <div class="ex-corps"><div class="ex-texte">${corps}</div>${qr}</div>
 </section>`;
 }
 
@@ -614,7 +623,8 @@ function questionsEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation
         html += `<div class="titre-section">${echapperHtml(item.titreSection)}</div>`;
       }
       const pts = pointsParSousQuestion(item);
-      html += `<section class="question"><div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corpsQuestionHtml(item, pts)}${
+      const corps = corpsQuestionHtml(item, pts);
+      html += `<section class="question${classeFigures(corps)}"><div class="ligne-titre"><span class="num">Question ${numero}</span><span class="pts">${pointsTexte(item.points)}</span></div>${corps}${
         avecCorrection ? `<div class="correction-bloc">${correctionHtml(item)}</div>` : ""
       }</section>`;
     }
