@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 const OPTIONS_SIGNE_INFINI: { id: "1" | "-1"; label: string }[] = [
   { id: "1", label: "+∞" },
@@ -99,8 +100,8 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "limitesGaucheDroite")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "limitesGaucheDroite")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={aide2} /></p>}
         </div>
       )}
       {!validation && (

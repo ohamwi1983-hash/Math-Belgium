@@ -44,6 +44,9 @@ const ORDRE_INFINIE_POINT: PhaseLimite[] = [
   "conclureLimite",
 ];
 const ORDRE_INFINI: PhaseLimite[] = ["reconnaissance", "termeDominant", "simplifierLimiteRef", "evaluerLimiteFinale"];
+/** Degrés égaux : le rapport simplifié des termes dominants EST déjà la limite — l'écran
+ * « evaluerLimiteFinale » faisait seulement recopier ce nombre (décision C, audit 5c4a point 4). */
+const ORDRE_INFINI_DEGRES_EGAUX: PhaseLimite[] = ["reconnaissance", "termeDominant", "simplifierLimiteRef"];
 
 export function ordreComplet(exercice: ExerciceLimite): PhaseLimite[] {
   switch (exercice.famille) {
@@ -54,9 +57,10 @@ export function ordreComplet(exercice: ExerciceLimite): PhaseLimite[] {
     case "limiteInfiniePoint":
       return ORDRE_INFINIE_POINT;
     case "limiteInfini":
-      return ORDRE_INFINI;
+      return exercice.sousCas === "degresEgaux" ? ORDRE_INFINI_DEGRES_EGAUX : ORDRE_INFINI;
   }
 }
+
 
 export function phaseInitiale(exercice: ExerciceLimite): PhaseLimite {
   return ordreComplet(exercice)[0];
@@ -71,6 +75,7 @@ export function phaseApres(exercice: ExerciceLimite, phase: PhaseLimite): PhaseL
 export interface ResultatExerciceLimite {
   exercice: ExerciceLimite;
   scores: Partial<Record<PhaseLimite, number>>;
+  revelees: Partial<Record<PhaseLimite, boolean>>;
 }
 
 export interface EtatSessionLimite {
@@ -81,6 +86,8 @@ export interface EtatSessionLimite {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseLimite, number>>;
+  /** Vrai signal « réponse révélée » par phase close (remplace l'heuristique `score === 0`). */
+  reveleesPartielles: Partial<Record<PhaseLimite, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceLimite[];
   terminee: boolean;

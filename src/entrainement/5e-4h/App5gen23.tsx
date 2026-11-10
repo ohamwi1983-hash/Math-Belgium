@@ -36,7 +36,7 @@ import {
   diagnostiquerEvaluerSeuil,
   diagnostiquerNombreArrondiUnite,
   diagnostiquerNombreExact,
-  diagnostiquerQuotient,
+  diagnostiquerAsymptoteObliqueClub,
   verifierInterpretation,
 } from "./moteur5e/verificationLimitesContexte";
 import type { ExerciceLimitesContexte } from "./core5e/limitesContexte.types";
@@ -104,6 +104,9 @@ export function App5gen23() {
   /** Niveau d'aide RÉELLEMENT utilisé par phase close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseLimitesContexte, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la clé des
+   * écrans, pour que les champs repartent vides même si le nouvel exercice commence au même écran. */
+  const [numeroSession, setNumeroSession] = useState(0);
 
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLimitesContexte) {
     const recap = calculerRecapitulatifLimitesContexte(nouvelEtat);
@@ -135,6 +138,7 @@ export function App5gen23() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setNumeroSession((n) => n + 1);
       setHistorique([]);
       setAideParPhase({});
     } else {
@@ -147,13 +151,14 @@ export function App5gen23() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroSession((n) => n + 1);
     setEtat(demarrerSessionLimitesContexte(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -170,6 +175,7 @@ export function App5gen23() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes en contexte</h1>
+        <p className="app-subtitle">Chapitre 4 — Limites et asymptotes</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -239,7 +245,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 20"]}
+          placeholders={["ex : 12,5"]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseAsymptoteHorizontale(etat, v[0]), v[0])}
           diagnostiquer={(v) => [diagnostiquerNombreExact(v[0], b)]}
@@ -285,7 +291,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 8*5*t/(100+5*t)"]}
+          placeholders={["ex : 4,5t/(12,5+1,5t)"]}
           champsEtroits={[false]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseConstruireC(etat, v[0]), `C(t) = ${v[0]}`)}
@@ -300,7 +306,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 8"]}
+          placeholders={["ex : 2,5"]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseLimiteC(etat, v[0]), `lim = ${v[0]}`)}
           diagnostiquer={(v) => [diagnostiquerNombreExact(v[0], c)]}
@@ -334,7 +340,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 250", "ex : 900"]}
+          placeholders={["ex : 12500", "ex : 12500"]}
           {...propsCommunes}
           onValider={(v) =>
             terminerEtape(soumettreReponseEvaluer(etat, { valeurZero: v[0], valeurX: v[1] }), `f(0) = ${v[0]} ; f(${xEval}) = ${v[1]}`)
@@ -350,7 +356,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 7"]}
+          placeholders={["ex : 45"]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseInequation(etat, v[0]), v[0])}
           diagnostiquer={(v) => [diagnostiquerNombreExact(v[0], moisAttendu)]}
@@ -364,11 +370,11 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 3x+2"]}
+          placeholders={["ex : 7,5x − 2"]}
           champsEtroits={[false]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseAsymptoteObliqueClub(etat, v[0]), `y = ${v[0]}`)}
-          diagnostiquer={(v) => [diagnostiquerQuotient(v[0], a, b)]}
+          diagnostiquer={(v) => [diagnostiquerAsymptoteObliqueClub(v[0], a, b)]}
         />
       );
     }
@@ -379,7 +385,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 300"]}
+          placeholders={["ex : 75"]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseInterpreterPente(etat, v[0]), v[0])}
           diagnostiquer={(v) => [diagnostiquerNombreExact(v[0], a * facteur)]}
@@ -397,7 +403,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase={phase}
           labels={labelsChampsLatex(exercice, phase)}
-          placeholders={["ex : 5", "ex : 10"]}
+          placeholders={["ex : −12", "ex : 2,5"]}
           {...propsCommunes}
           onValider={(v) => terminerEtape(soumettreReponseIdentification(etat, { a: v[0], b: v[1] }), `a = ${v[0]} ; b = ${v[1]}`)}
           diagnostiquer={(v) => [diagnostiquerNombreExact(v[0], a), diagnostiquerNombreExact(v[1], b)]}

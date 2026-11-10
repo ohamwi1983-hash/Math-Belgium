@@ -8,6 +8,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -22,6 +23,9 @@ interface Props {
   onValider: (texte: string) => void;
   placeholder: string;
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Contrôle de FORME avant la soumission : un message (ex. « f(x) recopiée ») refuse la saisie SANS
+   * consommer de tentative ; `null` = la saisie est soumise normalement (décision D). */
+  controleAvantValidation?: (texte: string) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -34,8 +38,9 @@ interface Props {
  * variante "viaLimites" affichent, en plus de la consigne, la formule LaTeX de la limite à calculer
  * (`formatFormulePhaseLatex`) — mode DISPLAY (`block`) obligatoire, notation de limite déjà corrigée
  * sur 5gen20. */
-export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, controleAvantValidation, validation}: Props) {
   const [texte, setTexte] = useState("");
+  const [messageForme, setMessageForme] = useState<string | null>(null);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
@@ -45,6 +50,9 @@ export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees,
 
   function valider() {
     if (texte.trim() === "") return;
+    const message = controleAvantValidation?.(texte) ?? null;
+    setMessageForme(message);
+    if (message) return;
     if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
     onValider(texte);
   }
@@ -74,9 +82,12 @@ export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees,
         </label>
         <input
           type="text"
-          className={`text-input${texteErronee ? " is-erronee" : ""}`}
+          className={`text-input${texteErronee || messageForme ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => {
+            setTexte(e.target.value);
+            setMessageForme(null);
+          }}
           placeholder={placeholder}
         />
       </div>
@@ -87,14 +98,14 @@ export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees,
             const aide1 = texteAideNiveau1(phase);
             return (
               <>
-                <p>{aide1.texte}</p>
+                <p><TexteRiche5e texte={aide1.texte} /></p>
                 {aide1.latex && <Katex expression={aide1.latex} block />}
               </>
             );
           })()}
           {niveauAide >= 2 && (
             <>
-              <p>{aide2.texte}</p>
+              <p><TexteRiche5e texte={aide2.texte} /></p>
               {aide2.latex && <Katex expression={aide2.latex} block />}
             </>
           )}
@@ -106,7 +117,12 @@ export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees,
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageForme && (
+          <p className="alert-error" role="alert">
+            {messageForme}
+          </p>
+        )}
+        {montrerErreurs && !messageForme && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

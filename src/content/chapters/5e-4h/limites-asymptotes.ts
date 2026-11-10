@@ -70,7 +70,7 @@ export const limitesAsymptotes: ChapterContent = {
             extraTicks: [{ value: 0, label: '0' }],
             axisLabel: 'dom f',
             caption:
-              'domaine de f(x)=(x−1)/(x²−x−6) : la droite réelle, sauf les deux points −2 et 3, ' +
+              'domaine de $f(x)=\\dfrac{x-1}{x^2-x-6}$ : la droite réelle, sauf les deux points −2 et 3, ' +
               'qui annulent le dénominateur',
           },
         },
@@ -136,9 +136,9 @@ export const limitesAsymptotes: ChapterContent = {
             '$\\displaystyle\\lim_{x \\to +\\infty} \\sqrt{x} = +\\infty$.',
             'La limite d\'un **polynôme** en ±∞, c\'est la limite de son terme de plus haut ' +
               'degré. Tous les autres termes deviennent négligeables face à lui.',
-            'La limite d\'une **fonction rationnelle** N(x)/D(x) en ±∞ se lit en comparant les ' +
-              'degrés. deg(N)<deg(D) ⟹ 0. deg(N)=deg(D) ⟹ rapport des coefficients dominants. ' +
-              'deg(N)>deg(D) ⟹ limite infinie.',
+            'La limite d\'une **fonction rationnelle** $\\dfrac{N(x)}{D(x)}$ en ±∞ se lit en comparant les ' +
+              'degrés. $\\deg N<\\deg D \\Rightarrow 0$. $\\deg N=\\deg D \\Rightarrow$ rapport des coefficients dominants. ' +
+              '$\\deg N>\\deg D \\Rightarrow$ limite infinie.',
           ],
         },
         {
@@ -228,10 +228,10 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          caption: 'Quotient f/g',
+          caption: 'Quotient f ÷ g',
           headers: ['lim f', 'lim g', 'lim(f/g)'],
           rows: [
-            ['m', 'p≠0', { text: 'm/p', tone: 'good' }],
+            ['m', 'p≠0', { text: '$\\dfrac{m}{p}$', tone: 'good' }],
             ['m≠0', '0', { text: '±∞ (signe à étudier)', tone: 'good' }],
             ['±∞', 'p≠0', { text: '±∞', tone: 'good' }],
             ['0', '0', { text: 'indét. (0/0)', tone: 'bad' }],
@@ -243,7 +243,7 @@ export const limitesAsymptotes: ChapterContent = {
           badge: 'forme 0/0 — factorisation',
           formula: '$\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$',
           steps: [
-            { tag: 'vérifier la forme', text: 'numérateur(2)=4−10+6=0 et dénominateur(2)=2−2=0 → forme 0/0, il faut factoriser' },
+            { tag: 'vérifier la forme', text: 'En $x=2$ : numérateur $2^2-5\\cdot 2+6=0$ et dénominateur $2-2=0$ → forme $\\dfrac{0}{0}$, il faut factoriser' },
             { tag: 'factoriser le numérateur — trouver une racine commune avec le dénominateur', text: '$x^2-5x+6 = (x-2)(x-3)$' },
             { tag: 'simplifier, valable pour x≠2', text: '$\\dfrac{(x-2)(x-3)}{x-2} = x-3$' },
           ],
@@ -259,7 +259,7 @@ export const limitesAsymptotes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
-              'f(x)=(x²−5x+6)/(x−2) — une droite y=x−3 avec un point vide en (2;−1), même ' +
+              '$f(x)=\\dfrac{x^2-5x+6}{x-2}$ — une droite $y=x-3$ avec un point vide en $(2\\,;-1)$, même ' +
               'mécanisme que le point vide vu plus loin',
           },
         },
@@ -289,7 +289,7 @@ export const limitesAsymptotes: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(3x²−5x+1)/(x²+2) — la courbe se rapproche d\'autant plus de y=3 que x augmente, sans jamais l\'atteindre',
+            caption: '$f(x)=\\dfrac{3x^2-5x+1}{x^2+2}$ — la courbe se rapproche d\'autant plus de $y=3$ que x augmente. Elle ne la touche plus pour x>−1 : elle la croise une seule fois, en x=−1, hors de la fenêtre.',
           },
         },
         {
@@ -323,7 +323,7 @@ export const limitesAsymptotes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
-              'f(x)=√(x²+1)−x — la courbe décroît et se rapproche d\'autant plus de 0 (l\'axe des ' +
+              '$f(x)=\\sqrt{x^2+1}-x$ — la courbe décroît et se rapproche d\'autant plus de 0 (l\'axe des ' +
               'x lui-même) que x augmente',
           },
         },
@@ -355,7 +355,7 @@ export const limitesAsymptotes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
-              'f(x)=x+3 si x≤2, f(x)=x−3 si x>2 — un saut en x=2 : la limite à droite (point ' +
+              '$f(x)=x+3$ si $x\\le 2$, $f(x)=x-3$ si $x>2$ — un saut en x=2 : la limite à droite (point ' +
               'vide en −1) ne rejoint pas f(2)=5',
           },
         },
@@ -388,13 +388,13 @@ export const limitesAsymptotes: ChapterContent = {
             {
               tag: 'vérifier la forme — dénominateur nul, numérateur non nul',
               text:
-                'numérateur(−3)=2(−3)−5=−11≠0 et dénominateur(−3)=−3+3=0 → forme $-11/0$. Ce ' +
+                'En $x=-3$ : numérateur $2(-3)-5=-11\\neq 0$ et dénominateur $-3+3=0$ → forme $\\dfrac{-11}{0}$. Ce ' +
                 'n\'est PAS une forme indéterminée : la limite est infinie, il reste à trouver son signe.',
             },
             {
               tag: 'signe du dénominateur de chaque côté de −3',
               text:
-                'x→−3⁻ (ex. x=−3,1) : x+3=−0,1 (négatif) — x→−3⁺ (ex. x=−2,9) : x+3=0,1 (positif)',
+                '$x \\to -3^-$ (ex. $x=-3{,}1$) : $x+3=-0{,}1$ (négatif) — $x \\to -3^+$ (ex. $x=-2{,}9$) : $x+3=0{,}1$ (positif)',
             },
           ],
           result: {
@@ -423,7 +423,7 @@ export const limitesAsymptotes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption:
-              'f(x)=(2x−5)/(x+3) : asymptote verticale x=−3 (+∞ à gauche, −∞ à droite) et ' +
+              '$f(x)=\\dfrac{2x-5}{x+3}$ : asymptote verticale $x=-3$ ($+\\infty$ à gauche, $-\\infty$ à droite) et ' +
               'asymptote horizontale y=2, car deg(N)=deg(D)',
           },
         },
@@ -432,7 +432,7 @@ export const limitesAsymptotes: ChapterContent = {
           badge: 'point vide — un trou invisible sur le graphique',
           formula: '$\\displaystyle\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3}$, puis décris le graphique de cette fonction.',
           steps: [
-            { tag: 'vérifier la forme', text: 'numérateur(−3)=9−9=0, dénominateur(−3)=−3+3=0 → forme 0/0' },
+            { tag: 'vérifier la forme', text: 'En $x=-3$ : numérateur $(-3)^2-9=0$ et dénominateur $-3+3=0$ → forme $\\dfrac{0}{0}$' },
             { tag: 'factoriser le numérateur — différence de carrés', text: '$x^2-9 = (x-3)(x+3)$' },
             { tag: 'simplifier, valable pour x≠−3', text: '$\\dfrac{(x-3)(x+3)}{x+3} = x-3$' },
           ],
@@ -447,7 +447,7 @@ export const limitesAsymptotes: ChapterContent = {
             points: [{ x: -3, y: -6, label: '(−3;−6)', tone: 'good', style: 'open', labelPos: 'left' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x²−9)/(x+3) : une droite y=x−3, avec un point vide en (−3;−6) — invisible à l\'échelle normale, mais bien réel',
+            caption: '$f(x)=\\dfrac{x^2-9}{x+3}$ : une droite $y=x-3$, avec un point vide en $(-3\\,;-6)$ — invisible à l\'échelle normale, mais bien réel',
           },
         },
         {
@@ -502,9 +502,9 @@ export const limitesAsymptotes: ChapterContent = {
           title: 'Limites, reconnaissance et calcul',
           generatorId: '5gen20',
           description: [
-            'Reconnais la nature d\'une limite (finie, infinie, forme indéterminée), puis ' +
-              'calcule-la : factorisation, terme dominant mis en évidence, ou étude de signe, ' +
-              'selon le cas.',
+            'Reconnais la nature d\'une limite (finie, forme k/0 donc infinie, ou forme ' +
+              'indéterminée 0/0 ou ∞/∞), puis calcule-la : factorisation, terme dominant mis en ' +
+              'évidence, ou étude de signe, selon le cas.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 20. Limites, reconnaissance et calcul »',
@@ -516,8 +516,8 @@ export const limitesAsymptotes: ChapterContent = {
       number: 2,
       title: 'Asymptote oblique',
       kicker:
-        'définir une asymptote (AV/AH/AO, cas général) ; y=ax+b, avec a=lim f(x)/x et ' +
-        'b=lim[f(x)−ax] — lien avec le degré de N et D',
+        'définir une asymptote (AV/AH/AO, cas général) ; y = ax + b, avec a = lim f(x)/x et ' +
+        'b = lim (f(x) − ax) — lien avec le degré de N et D',
       blocks: [
         { kind: 'video', title: 'Définir une asymptote : verticale, horizontale, oblique', youtubeId: 'Fa8J6v_n4Pw' },
         { kind: 'video', title: 'Asymptote oblique : comparer les degrés, deux méthodes, piège du reste', youtubeId: 'sVluREzWUF0' },
@@ -529,7 +529,10 @@ export const limitesAsymptotes: ChapterContent = {
             'vite au début, puis de moins en moins vite : elle se rapproche d\'autant plus de ' +
             '20°C que le temps passe, sans jamais descendre en dessous. Une **asymptote ' +
             'horizontale**, c\'est ce genre de plancher (ou de plafond) : une valeur que la ' +
-            'courbe approche d\'aussi près que tu veux, sans jamais l\'atteindre pour de vrai.',
+            'courbe approche d\'aussi près que tu veux, en général sans l\'atteindre. « En ' +
+            'général » seulement : une courbe peut croiser son asymptote, parfois plusieurs fois. ' +
+            'Ce qui compte, c\'est qu\'elle s\'en rapproche indéfiniment aux extrémités (voir ' +
+            'l\'étude complète, section 5).',
         },
         {
           kind: 'definition',
@@ -545,9 +548,9 @@ export const limitesAsymptotes: ChapterContent = {
             'Une **asymptote horizontale (AH)** d\'équation y=b existe si ' +
               '$\\displaystyle\\lim_{x \\to +\\infty} f(x) = b$ ou ' +
               '$\\displaystyle\\lim_{x \\to -\\infty} f(x) = b$.',
-            'Une **asymptote oblique (AO)** d\'équation y=mx+p existe si ' +
-              '$\\displaystyle\\lim_{x \\to +\\infty} [f(x)-(mx+p)] = 0$ ou ' +
-              '$\\displaystyle\\lim_{x \\to -\\infty} [f(x)-(mx+p)] = 0$.',
+            'Une **asymptote oblique (AO)** d\'équation $y=ax+b$ ($a \\neq 0$) existe si ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} [f(x)-(ax+b)] = 0$ ou ' +
+              '$\\displaystyle\\lim_{x \\to -\\infty} [f(x)-(ax+b)] = 0$.',
           ],
         },
         {
@@ -560,8 +563,9 @@ export const limitesAsymptotes: ChapterContent = {
             'vers 200 avant J.-C., dans son grand traité sur les coniques, pour décrire les ' +
             'droites dont s\'approche indéfiniment une hyperbole sans jamais les toucher — ' +
             'exactement l\'idée que tu étudies dans cette section, plus de deux mille ans plus ' +
-            'tard. Le mot a ensuite été repris tel quel pour n\'importe quelle courbe, pas ' +
-            'seulement l\'hyperbole d\'Apollonios.',
+            'tard. Le mot a ensuite été repris pour n\'importe quelle courbe, pas seulement ' +
+            'l\'hyperbole d\'Apollonios — mais pour d\'autres courbes, « ne jamais toucher » ne ' +
+            'tient plus : seul compte le rapprochement indéfini.',
         },
         {
           kind: 'illustrationGroup',
@@ -620,7 +624,7 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Méthode — lien avec le degré, pour une fonction rationnelle N(x)/D(x)',
+          label: 'Méthode — lien avec le degré, pour une fonction rationnelle N(x) ÷ D(x)',
           items: [
             '**deg(N) < deg(D)** ⟹ asymptote HORIZONTALE particulière : **y=0**. a=0 et b=0, la ' +
               'fraction tend directement vers 0.',
@@ -641,8 +645,8 @@ export const limitesAsymptotes: ChapterContent = {
             { tag: 'vérifier la condition de degré', text: 'deg(numérateur)=2, deg(dénominateur)=1, soit exactement 1 de plus → asymptote oblique garantie' },
             { tag: 'méthode 1 — division euclidienne de x²−3x+5 par x−1', text: '$x^2-3x+5 = (x-1)(x-2) + 3$' },
             { tag: 'réécrire f(x)', text: '$f(x) = x-2 + \\dfrac{3}{x-1}$' },
-            { tag: 'méthode 2 — vérification par les limites : a = lim f(x)/x', text: '$a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants x²/x²)' },
-            { tag: 'b = lim[f(x) − x]', text: '$b = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{-2x+5}{x-1} = -2$ (rapport des coefficients dominants −2x/x)' },
+            { tag: 'méthode 2 — vérification par les limites : a = lim f(x)/x', text: '$a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants $x^2/x^2$)' },
+            { tag: 'b = lim (f(x) − x)', text: '$b = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{-2x+5}{x-1} = -2$ (rapport des coefficients dominants $-2x/x$)' },
           ],
           result: { tag: 'asymptote oblique — le quotient SEUL, jamais le reste', text: '$y = x-2$' },
           illustration: {
@@ -659,15 +663,15 @@ export const limitesAsymptotes: ChapterContent = {
             obliqueAsymptotes: [{ a: 1, b: -2, label: 'y=x−2' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x²−3x+5)/(x−1) pour x≥3 — l\'écart avec la droite y=x−2 (qui vaut 3/(x−1)) se réduit à mesure que x grandit',
+            caption: '$f(x)=\\dfrac{x^2-3x+5}{x-1}$ pour $x\\ge 3$ — l\'écart avec la droite $y=x-2$ (il vaut $\\dfrac{3}{x-1}$) se réduit à mesure que x grandit',
           },
         },
         {
           kind: 'piege',
           label: 'Le reste n\'appartient jamais à l\'équation de l\'asymptote',
           text:
-            'Avec $f(x) = x-2 + 3/(x-1)$, l\'erreur classique : écrire l\'asymptote « y = x−2 + ' +
-            '3/(x−1) ». Mais c\'est f(x) elle-même, pas une droite ! L\'asymptote, c\'est ' +
+            'Avec $f(x) = x-2 + \\dfrac{3}{x-1}$, l\'erreur classique : écrire l\'asymptote ' +
+            '« $y = x-2+\\dfrac{3}{x-1}$ ». Mais c\'est f(x) elle-même, pas une droite ! L\'asymptote, c\'est ' +
             'UNIQUEMENT le quotient $x-2$. Le reste, $3/(x-1)$, est justement le terme qui tend ' +
             'vers 0 — celui qui rapproche la courbe de la droite.',
         },
@@ -694,8 +698,8 @@ export const limitesAsymptotes: ChapterContent = {
           title: 'Asymptote oblique',
           generatorId: '5gen21',
           description: [
-            'Détermine l\'équation d\'une asymptote oblique, par division euclidienne ou par la ' +
-              'méthode des limites (a=lim f(x)/x, b=lim[f(x)−ax]) — pour un dénominateur de degré 1 ou 2.',
+            'Détermine l\'équation y = ax + b d\'une asymptote oblique, par division euclidienne ou par la ' +
+              'méthode des limites (a = lim f(x)/x, b = lim (f(x) − ax)) — pour un dénominateur de degré 1 ou 2.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 21. Asymptote oblique »',
@@ -719,11 +723,13 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — ce qu\'il faut repérer sur un graphique',
           items: [
-            'Une droite **VERTICALE** que la courbe longe sans jamais la toucher = asymptote ' +
-              'verticale. La courbe part vers +∞ ou −∞ de CHAQUE côté — pas forcément avec le ' +
-              'même signe des deux côtés.',
-            'Une droite **HORIZONTALE** que la courbe rejoint aux extrémités (x→−∞ et/ou x→+∞) ' +
-              '= asymptote horizontale. La courbe s\'aplatit : sa hauteur ne varie presque plus.',
+            'Une droite **VERTICALE** $x=a$ le long de laquelle la courbe part vers +∞ ou −∞ = ' +
+              'asymptote verticale. Il suffit qu\'elle le fasse d\'UN côté. Le plus souvent, elle ' +
+              'le fait des deux côtés, pas forcément avec le même signe ; mais d\'un côté, la ' +
+              'courbe peut aussi arriver sur une valeur finie (un point isolé, voir plus bas).',
+            'Une droite **HORIZONTALE** que la courbe rejoint aux extrémités ($x \\to -\\infty$ et/ou $x \\to +\\infty$) ' +
+              '= asymptote horizontale. La courbe s\'aplatit : sa hauteur ne varie presque plus. ' +
+              'Ce n\'est pas toujours la même droite des deux côtés : lis −∞ et +∞ séparément.',
             'Une droite **OBLIQUE** (ni horizontale ni verticale) que la courbe rejoint aux ' +
               'extrémités = asymptote oblique. La courbe continue de monter ou de descendre, ' +
               'mais épouse de plus en plus la pente de la droite.',
@@ -857,6 +863,80 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'exemple',
+          badge: 'lecture — une limite finie d\'un seul côté (point isolé)',
+          formula: 'Le graphique ci-dessous représente une fonction $h$. Lis les limites en $x=1$, en $-\\infty$ et en $+\\infty$, puis les asymptotes.',
+          steps: [
+            {
+              tag: 'à gauche de x=1 — la courbe arrive sur le point plein (1;2)',
+              text: '$\\displaystyle\\lim_{x \\to 1^-} h(x) = 2$ : une limite FINIE, et même $h(1)=2$ (point plein) — la courbe ne part pas vers l\'infini de ce côté.',
+            },
+            {
+              tag: 'à droite de x=1 — la courbe s\'envole',
+              text: '$\\displaystyle\\lim_{x \\to 1^+} h(x) = +\\infty$ : c\'est ce côté qui fait de $x=1$ une asymptote verticale.',
+            },
+            {
+              tag: 'aux extrémités — une seule horizontale',
+              text: '$\\displaystyle\\lim_{x \\to +\\infty} h(x) = 3$ (asymptote horizontale $y=3$ à droite) ; $\\displaystyle\\lim_{x \\to -\\infty} h(x) = -\\infty$ (aucune asymptote horizontale à gauche).',
+            },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              '$x=1$ est une asymptote verticale, même si un seul côté diverge : un côté suffit. ' +
+              '$y=3$ est une asymptote horizontale, mais seulement en $+\\infty$.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x + 1, tone: 'accent', xMin: -4, xMax: 1 },
+              { fn: (x) => 3 + 1 / (x - 1), tone: 'accent', xMin: 1.12, xMax: 9 },
+            ],
+            xMin: -4,
+            xMax: 9,
+            xTicks: [1],
+            fixedYRange: { min: -3, max: 9 },
+            verticalAsymptotes: [{ x: 1 }],
+            horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
+            points: [{ x: 1, y: 2, label: '(1;2)', tone: 'accent', style: 'filled', labelPos: 'right' }],
+            textLabels: [{ x: 2.6, y: 8, text: '+∞', tone: 'faint', anchor: 'middle' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'h(x)',
+            caption: 'à gauche de $x=1$, la courbe arrive sur le point plein $(1\,;2)$ ; à droite, elle part vers $+\\infty$ — la droite $x=1$ (pointillée) reste une asymptote verticale',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'lecture — deux asymptotes horizontales différentes',
+          formula: 'Le graphique ci-dessous représente une fonction $k$ (qui n\'est pas une fonction rationnelle). Lis ses limites en $-\\infty$ et en $+\\infty$.',
+          steps: [
+            { tag: 'à gauche — la courbe s\'aplatit sur y=−1', text: '$\\displaystyle\\lim_{x \\to -\\infty} k(x) = -1$' },
+            { tag: 'à droite — la courbe s\'aplatit sur y=3', text: '$\\displaystyle\\lim_{x \\to +\\infty} k(x) = 3$' },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'Deux asymptotes horizontales DIFFÉRENTES : $y=-1$ en $-\\infty$ et $y=3$ en $+\\infty$. ' +
+              'Une fonction rationnelle ne fait jamais ça (ses limites finies en $-\\infty$ et en ' +
+              '$+\\infty$ sont égales), mais d\'autres fonctions, oui : lis toujours les deux côtés séparément.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 1 + (2 * x) / Math.sqrt(x * x + 1), tone: 'accent' }],
+            xMin: -10,
+            xMax: 10,
+            xTicks: [],
+            fixedYRange: { min: -2, max: 4 },
+            horizontalAsymptotes: [
+              { y: -1, label: 'y=−1 (en −∞)' },
+              { y: 3, label: 'y=3 (en +∞)' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'k(x)',
+            caption: 'la courbe rejoint $y=-1$ à gauche et $y=3$ à droite : deux asymptotes horizontales distinctes',
+          },
+        },
+        {
           kind: 'piege',
           label: 'Les deux côtés d\'une même asymptote verticale n\'ont pas forcément le même signe',
           text:
@@ -879,7 +959,8 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen22',
           description: [
             'Lis directement sur un graphique les limites en chaque asymptote verticale (des ' +
-              'deux côtés) et à l\'infini, puis nomme les équations des asymptotes présentes. Aucun calcul.',
+              'deux côtés, y compris une éventuelle limite finie) et en −∞ et +∞, puis nomme le ' +
+              'type et l\'équation de chaque asymptote présente. Aucun calcul.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 22. Limites et asymptotes — lecture graphique »',
@@ -919,7 +1000,7 @@ export const limitesAsymptotes: ChapterContent = {
             tag: 'interprétation',
             text:
               'Le coût unitaire se rapproche d\'autant plus de 8 € que la production augmente. ' +
-              'MAIS il ne descend jamais en dessous : 240/x reste strictement positif pour tout ' +
+              'MAIS il ne descend jamais en dessous : $240/x$ reste strictement positif pour tout ' +
               'x≥1. L\'asymptote horizontale y=8 est donc un plancher, jamais atteint.',
           },
           illustration: {
@@ -937,8 +1018,109 @@ export const limitesAsymptotes: ChapterContent = {
             xAxisLabel: 'x (unités)',
             yAxisLabel: 'Cᵤ(x) (€)',
             caption:
-              'Cᵤ(x)=8+240/x — le coût unitaire décroît et se rapproche d\'autant plus de 8 € ' +
+              '$C_u(x)=8+\\dfrac{240}{x}$ — le coût unitaire décroît et se rapproche d\'autant plus de 8 € ' +
               'que la production augmente, sans jamais l\'atteindre',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — écrire f(x) = b + a/(x+p) par division euclidienne',
+          items: [
+            'Une fonction de la forme $f(x)=\\dfrac{bx+q}{x+p}$ se réécrit en divisant $bx+q$ par ' +
+              '$x+p$ : le quotient est $b$, le reste est $a=q-bp$. Donc $f(x)=b+\\dfrac{a}{x+p}$.',
+            'La **limite à long terme** se lit tout de suite : $\\dfrac{a}{x+p} \\to 0$, donc ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} f(x)=b$ — l\'asymptote horizontale $y=b$.',
+            'Le **sens** aussi (avec $p>0$) : $f(0)-b=\\dfrac{a}{p}$ a le signe de $a$. Si $a>0$, ' +
+              '$f$ part au-dessus de $b$ et descend vers $b$ (régression) ; si $a<0$, $f$ part en dessous ' +
+              'et monte vers $b$ (croissance). C\'est le signe de $a$, pas une intuition, qui tranche.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'population — régression vers une valeur à long terme',
+          formula:
+            'Une ville compte $P(x)=\\dfrac{5x+13}{x+2}$ milliers d\'habitants, $x$ années après ' +
+            'un recensement. Que devient sa population à long terme ? Augmente-t-elle ou diminue-t-elle ?',
+          steps: [
+            { tag: 'division euclidienne de 5x+13 par x+2', text: '$5x+13 = 5(x+2)+3 \\implies P(x) = 5+\\dfrac{3}{x+2}$' },
+            { tag: 'limite à long terme', text: '$\\displaystyle\\lim_{x \\to +\\infty} P(x) = 5+0 = 5$' },
+            { tag: 'sens — a=3 > 0 (et p=2 > 0)', text: '$P(0) = 5+\\dfrac{3}{2} = 6{,}5 > 5$ : la population part au-dessus de 5 et descend vers 5.' },
+          ],
+          result: {
+            tag: 'interprétation',
+            text: 'Régression : la population passe de 6 500 habitants et se rapproche de 5 000 habitants (asymptote horizontale $y=5$).',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 5 + 3 / (x + 2), tone: 'accent' }],
+            xMin: 0,
+            xMax: 30,
+            xTicks: [10, 20, 30],
+            fixedYRange: { min: 4, max: 7 },
+            horizontalAsymptotes: [{ y: 5, label: 'y=5' }],
+            points: [{ x: 0, y: 6.5, label: 'P(0)=6,5', tone: 'accent', labelPos: 'right' }],
+            xAxisLabel: 'x (années)',
+            yAxisLabel: 'P(x) (milliers)',
+            caption: '$P(x)=5+\\dfrac{3}{x+2}$ — la population descend vers 5 000 habitants',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'eau salée — la concentration tend vers celle de la solution ajoutée',
+          formula:
+            'Une cuve contient 100 L d\'eau pure. On y verse 5 L d\'eau salée par minute, à ' +
+            '30 g de sel par litre. Après t minutes, le volume vaut $V(t)=100+5t$ litres et la ' +
+            'masse de sel $Q(t)=30\\cdot 5t=150t$ grammes. Vers quelle concentration tend le mélange ?',
+          steps: [
+            { tag: 'concentration = masse ÷ volume', text: '$C(t) = \\dfrac{Q(t)}{V(t)} = \\dfrac{150t}{100+5t}$ (en g/L)' },
+            { tag: 'limite — degrés égaux, rapport des coefficients dominants', text: '$\\displaystyle\\lim_{t \\to +\\infty} C(t) = \\dfrac{150}{5} = 30$' },
+            { tag: 'division euclidienne — le sens', text: '$150t = 30(5t+100) - 3000 \\implies C(t) = 30 - \\dfrac{3000}{100+5t}$ : toujours en dessous de 30, et de plus en plus proche' },
+          ],
+          result: {
+            tag: 'interprétation',
+            text:
+              'La concentration monte vers 30 g/L, celle de l\'eau salée ajoutée : à long terme, ' +
+              'le volume versé ($5t$) devient très grand devant les 100 L de départ. Un plafond ($y=30$).',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => (150 * t) / (100 + 5 * t), tone: 'accent' }],
+            xMin: 0,
+            xMax: 200,
+            xTicks: [50, 100, 150, 200],
+            fixedYRange: { min: 0, max: 34 },
+            horizontalAsymptotes: [{ y: 30, label: 'y=30' }],
+            xAxisLabel: 't (min)',
+            yAxisLabel: 'C(t) (g/L)',
+            caption: '$C(t)=\\dfrac{150t}{100+5t}$ — la concentration monte vers 30 g/L',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'club — une asymptote oblique en contexte',
+          formula:
+            'Un club compte $N(x)=2x+15-\\dfrac{8}{x+2}$ centaines d\'abonnés, $x$ mois après son ' +
+            'ouverture. Comment évolue le nombre d\'abonnés à long terme ?',
+          steps: [
+            { tag: 'le terme en 8/(x+2) tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[N(x)-(2x+15)\\right] = \\lim_{x \\to +\\infty} -\\dfrac{8}{x+2} = 0$' },
+            { tag: 'asymptote oblique', text: '$y = 2x+15$ — la courbe reste juste en dessous, car $-\\dfrac{8}{x+2} < 0$' },
+            { tag: 'une valeur — après 12 mois', text: '$N(12) = 24+15-\\dfrac{8}{14} \\approx 38{,}43$, soit environ 3 843 abonnés' },
+          ],
+          result: {
+            tag: 'interprétation',
+            text: 'À long terme, le club gagne environ 2 centaines d\'abonnés par mois : la pente de l\'asymptote oblique.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 2 * x + 15 - 8 / (x + 2), tone: 'accent' }],
+            xMin: 0,
+            xMax: 20,
+            xTicks: [5, 10, 15, 20],
+            fixedYRange: { min: 0, max: 60 },
+            obliqueAsymptotes: [{ a: 2, b: 15, label: 'y=2x+15' }],
+            xAxisLabel: 'x (mois)',
+            yAxisLabel: 'N(x) (centaines)',
+            caption: '$N(x)=2x+15-\\dfrac{8}{x+2}$ — la courbe longe la droite $y=2x+15$ par en dessous',
           },
         },
         {
@@ -953,12 +1135,12 @@ export const limitesAsymptotes: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Une asymptote horizontale en contexte = un plafond ou un plancher, jamais atteint',
+          label: 'Une asymptote horizontale en contexte = un plancher ou un plafond',
           text:
-            'Que le phénomène monte vers cette valeur (un plancher, comme ici) ou descende vers ' +
-            'elle (un plafond, ex. une concentration qui se stabilise), la limite donne la ' +
-            'valeur théorique idéale. Elle n\'est jamais réellement atteinte pour un x fini, ' +
-            'aussi grand soit-il.',
+            'Que le phénomène descende vers cette valeur (un **plancher**, comme ici) ou monte ' +
+            'vers elle (un **plafond**, ex. une concentration qui se stabilise), la limite donne ' +
+            'la valeur théorique à long terme. Dans ces modèles, elle n\'est pas atteinte pour un ' +
+            'x fini, aussi grand soit-il : le terme en $1/x$ (ou en $1/(x+p)$) ne s\'annule jamais.',
         },
         {
           kind: 'atelier',
@@ -974,9 +1156,10 @@ export const limitesAsymptotes: ChapterContent = {
           title: 'Limites et asymptotes en contexte',
           generatorId: '5gen23',
           description: [
-            'Traduis une situation concrète — coût de production, concentration, club à ' +
-              'abonnement, population — en limite ou en asymptote horizontale, puis interprète ' +
-              'le résultat dans le contexte.',
+            'Traduis une situation concrète — coût de production, concentration d\'eau salée, ' +
+              'club à abonnement, population — en limite ou en asymptote (horizontale ou oblique), ' +
+              'écris la fonction sous la forme b + a/(x + p) par division euclidienne, puis ' +
+              'interprète le résultat dans le contexte.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 23. Limites et asymptotes en contexte »',
@@ -987,7 +1170,7 @@ export const limitesAsymptotes: ChapterContent = {
       id: 'etude-complete',
       number: 5,
       title: 'Étude complète',
-      kicker: 'domaine → asymptotes verticales → asymptote horizontale/oblique → limites aux bornes → synthèse',
+      kicker: 'domaine → asymptotes verticales → asymptote horizontale/oblique → limites aux bornes → recoupement ; construire une fonction à partir de ses asymptotes',
       blocks: [
         { kind: 'video', title: 'Étude complète d\'une fonction rationnelle : domaine, asymptotes, limites', youtubeId: 'j413TOzZQVM' },
         {
@@ -1008,6 +1191,8 @@ export const limitesAsymptotes: ChapterContent = {
               'l\'infini : horizontale, oblique, ou aucune.',
             'Calcule les limites à CHAQUE borne du domaine : chaque asymptote verticale, des ' +
               'deux côtés, et en ±∞.',
+            'Le cas échéant, cherche si la courbe **recoupe** son asymptote : résous ' +
+              '$f(x)=ax+b$, c\'est-à-dire « le reste de la division euclidienne vaut 0 ».',
             '**Synthétiser** : domaine, équations de toutes les asymptotes, tableau des limites.',
           ],
         },
@@ -1089,7 +1274,86 @@ export const limitesAsymptotes: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x²−2x−3)/(x−1) — asymptote verticale x=1 (+∞ à gauche, −∞ à droite) et asymptote oblique y=x−1',
+            caption: '$f(x)=\\dfrac{x^2-2x-3}{x-1}$ — asymptote verticale $x=1$ ($+\\infty$ à gauche, $-\\infty$ à droite) et asymptote oblique $y=x-1$',
+          },
+        },
+        {
+          kind: 'attention',
+          label: 'Une courbe peut croiser son asymptote horizontale ou oblique',
+          text:
+            'Une asymptote décrit ce qui se passe aux EXTRÉMITÉS ($x \\to \\pm\\infty$) : rien ' +
+            'n\'interdit à la courbe de la traverser ailleurs, une ou plusieurs fois. Seule une ' +
+            'asymptote verticale $x=a$ n\'est jamais traversée par une fonction rationnelle, puisque ' +
+            '$a$ est exclu du domaine.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'recoupement — la courbe croise son asymptote horizontale',
+          formula: '$f(x) = \\dfrac{x^2+x}{x^2+1}$. Détermine son asymptote horizontale, puis le point où la courbe la recoupe.',
+          steps: [
+            { tag: 'domaine', text: '$x^2+1 > 0$ pour tout $x$ : domaine $= \\mathbb{R}$, aucune asymptote verticale' },
+            { tag: 'degrés égaux — rapport des coefficients dominants', text: 'asymptote horizontale $y = \\dfrac{1}{1} = 1$' },
+            { tag: 'division euclidienne — isoler le reste', text: '$x^2+x = 1\\cdot(x^2+1) + (x-1) \\implies f(x) = 1 + \\dfrac{x-1}{x^2+1}$' },
+            { tag: 'recoupement — le reste s\'annule', text: '$f(x) = 1 \\iff \\dfrac{x-1}{x^2+1} = 0 \\iff x = 1$, et $f(1) = 1$' },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'La courbe recoupe son asymptote $y=1$ au point $(1\,;1)$. Elle est au-dessus pour $x>1$ ' +
+              '(reste positif), en dessous pour $x<1$ (reste négatif), et s\'en rapproche quand même ' +
+              'en $-\\infty$ comme en $+\\infty$.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => (x * x + x) / (x * x + 1), tone: 'accent' }],
+            xMin: -8,
+            xMax: 8,
+            xTicks: [1],
+            fixedYRange: { min: -0.6, max: 1.6 },
+            horizontalAsymptotes: [{ y: 1, label: 'y=1' }],
+            points: [{ x: 1, y: 1, label: '(1;1)', tone: 'good', style: 'filled', labelPos: 'above' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption: '$f(x)=\\dfrac{x^2+x}{x^2+1}$ — la courbe croise son asymptote $y=1$ en $(1\,;1)$, puis s\'en rapproche aux deux extrémités',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'construction inverse — une fonction à partir de ses asymptotes',
+          formula:
+            'Trouve une fonction rationnelle dont le graphique admet l\'asymptote verticale $x=2$ et ' +
+            'l\'asymptote horizontale $y=3$. Puis une autre, avec l\'asymptote verticale $x=-1$ et ' +
+            'l\'asymptote oblique $y=2x+1$.',
+          steps: [
+            {
+              tag: 'l\'idée — asymptote + un terme qui diverge en r et s\'éteint à l\'infini',
+              text: 'Le terme $\\dfrac{1}{x-r}$ part vers $\\pm\\infty$ en $x=r$ et tend vers $0$ en $\\pm\\infty$ : on l\'ajoute à l\'équation de l\'asymptote voulue.',
+            },
+            { tag: 'premier cas — AV x=2, AH y=3', text: '$f(x) = 3+\\dfrac{1}{x-2} = \\dfrac{3x-5}{x-2}$' },
+            { tag: 'vérification', text: 'numérateur en $2$ : $3\\cdot 2-5 = 1 \\neq 0$ → vraie asymptote $x=2$ ; degrés égaux, rapport $\\dfrac{3}{1}$ → $y=3$' },
+            { tag: 'second cas — AV x=−1, AO y=2x+1', text: '$g(x) = 2x+1+\\dfrac{1}{x+1} = \\dfrac{2x^2+3x+2}{x+1}$ (numérateur en $-1$ : $2-3+2 = 1 \\neq 0$)' },
+          ],
+          result: {
+            tag: 'à retenir',
+            text:
+              '$f(x) = ax+b+\\dfrac{1}{x-r}$ a pour asymptotes $x=r$ et $y=ax+b$ (horizontale si ' +
+              '$a=0$). La réponse n\'est pas unique : $3+\\dfrac{5}{x-2}$ convient aussi.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: -6, xMax: 1.85 },
+              { fn: (x) => 3 + 1 / (x - 2), tone: 'accent', xMin: 2.15, xMax: 10 },
+            ],
+            xMin: -6,
+            xMax: 10,
+            xTicks: [2],
+            fixedYRange: { min: -4, max: 10 },
+            verticalAsymptotes: [{ x: 2, label: 'x=2' }],
+            horizontalAsymptotes: [{ y: 3, label: 'y=3' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption: '$f(x)=3+\\dfrac{1}{x-2}$ — exactement les deux asymptotes demandées, $x=2$ et $y=3$',
           },
         },
         {
@@ -1105,8 +1369,8 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'astuce',
           label: 'Recouper le résultat par 2 méthodes indépendantes',
           text:
-            'Comme pour l\'asymptote oblique de la section précédente : la division euclidienne ' +
-            'ET la méthode des limites (a=lim f(x)/x, b=lim[f(x)−ax]) doivent toujours retomber ' +
+            'Comme pour l\'asymptote oblique de la section 2 : la division euclidienne ' +
+            'ET la méthode des limites ($a=\\lim f(x)/x$, $b=\\lim\\,[f(x)-ax]$) doivent toujours retomber ' +
             'sur EXACTEMENT la même droite. C\'est un bon moyen de repérer une erreur de calcul avant de conclure.',
         },
         {
@@ -1115,8 +1379,9 @@ export const limitesAsymptotes: ChapterContent = {
           generatorId: '5gen24',
           description: [
             'Mène l\'étude complète d\'une fonction rationnelle : domaine, point vide ou vraie ' +
-              'asymptote verticale, asymptote horizontale ou oblique selon les degrés, limites à ' +
-              'chaque borne, puis synthèse finale.',
+              'asymptote verticale, limites de chaque côté, asymptote horizontale ou oblique ' +
+              '(coefficients a et b) et, le cas échéant, le point où la courbe recoupe son ' +
+              'asymptote. Variante bonus : construire une fonction à partir de ses asymptotes.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 24. Étude complète »',
@@ -1160,6 +1425,14 @@ export const limitesAsymptotes: ChapterContent = {
         ],
       },
       {
+        title: 'Contexte, recoupement, construction',
+        formulas: [
+          { text: '$f(x)=\\dfrac{bx+q}{x+p} = b+\\dfrac{a}{x+p}$', condition: 'division euclidienne : AH y=b ; avec p>0, régression si a>0, croissance si a<0' },
+          { text: 'recoupement : $f(x)=ax+b$', condition: 'là où le reste de la division euclidienne s\'annule' },
+          { text: '$f(x)=ax+b+\\dfrac{1}{x-r}$', condition: 'asymptotes x=r et y=ax+b' },
+        ],
+      },
+      {
         title: 'Degré ↔ asymptote (N/D rationnelle)',
         formulas: [
           { text: 'deg(N) < deg(D)', condition: '$y=0$' },
@@ -1180,20 +1453,24 @@ export const limitesAsymptotes: ChapterContent = {
         'la technique — le tableau des opérations (somme/produit/quotient) donne le résultat ' +
         'direct dans les cas déterminés. f(a) définie ne garantit pas que ' +
         '$\\displaystyle\\lim_{x \\to a} f(x)$ existe : c\'est le cas d\'un saut.',
-      '**Asymptote oblique** — y=ax+b, avec a=lim f(x)/x puis b=lim[f(x)−ax]. C\'est équivalent ' +
+      '**Asymptote oblique** — $y=ax+b$, avec $a=\\lim f(x)/x$ puis $b=\\lim\\,[f(x)-ax]$. C\'est équivalent ' +
         'à la division euclidienne N=D×(ax+b)+reste : le reste ne fait JAMAIS partie de ' +
         'l\'équation de l\'asymptote. Horizontale dès que deg(N)≤deg(D) (y=0 si strictement ' +
         'inférieur) ; oblique non horizontale seulement si deg(N)=deg(D)+1, exactement.',
-      '**Lecture graphique** — asymptote verticale : la courbe part vers ±∞ de chaque côté (les ' +
-        'signes peuvent différer). Asymptote horizontale : droite plate rejointe aux ' +
-        'extrémités. Asymptote oblique : droite penchée rejointe aux extrémités.',
+      '**Lecture graphique** — asymptote verticale : la courbe part vers ±∞ d\'au moins un côté ' +
+        '(les signes peuvent différer ; de l\'autre côté, une limite finie est possible). ' +
+        'Asymptote horizontale : droite plate rejointe aux extrémités, parfois différente en −∞ ' +
+        'et en +∞. Asymptote oblique : droite penchée rejointe aux extrémités.',
       '**Limites en contexte** — le comportement à long terme d\'un phénomène réel se traduit ' +
         'par une limite en +∞. Une asymptote horizontale, c\'est un plafond ou un plancher ' +
-        'théorique, jamais atteint.',
+        'théorique. Écrire $f(x)=b+\\dfrac{a}{x+p}$ (avec $p>0$) par division euclidienne donne à ' +
+        'la fois la valeur à long terme b et le sens : croissance si $a<0$, régression si $a>0$.',
       '**Étude complète** — domaine → point vide ou vraie asymptote verticale (test du ' +
         'numérateur) → comparaison des degrés pour l\'horizontale/l\'oblique → limites à chaque ' +
         'borne → synthèse. Vérifie toujours le numérateur avant de conclure à une vraie ' +
-        'asymptote verticale.',
+        'asymptote verticale. Une courbe peut croiser son asymptote horizontale ou oblique, là ' +
+        'où le reste de la division euclidienne s\'annule. Et à l\'inverse, on sait construire ' +
+        'une fonction à partir de ses asymptotes : $f(x)=ax+b+\\dfrac{1}{x-r}$.',
     ],
     checklist: {
       items: [

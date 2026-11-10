@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
-import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
-import { Katex } from "../components/Katex";
+import { CONSIGNE_GENERALE_ETUDE_COMPLETE, texteAideNiveau1, texteAideNiveau2, consigneCasSpecialTexte } from "../ui5e/formatEtudeComplete";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { ReponseCasSpecial } from "../moteur5e/verificationEtudeComplete";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -54,7 +54,9 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />
-      <Katex expression={consignePhase(exercice, "casSpecial")} block />
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneCasSpecialTexte(exercice)} />
+      </p>
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="etude-complete-cas-special-x">
@@ -66,7 +68,7 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
             className={`text-input${correction && correction.x !== "correct" ? " is-erronee" : ""}`}
             value={texteX}
             onChange={(e) => setTexteX(e.target.value)}
-            placeholder="ex : 3"
+            placeholder="ex : 13/2"
           />
         </div>
         <div className="field field-inline">
@@ -79,15 +81,15 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
             className={`text-input${correction && correction.y !== "correct" ? " is-erronee" : ""}`}
             value={texteY}
             onChange={(e) => setTexteY(e.target.value)}
-            placeholder="ex : 2"
+            placeholder="ex : 41"
           />
         </div>
       </div>
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "casSpecial")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "casSpecial")} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "casSpecial")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "casSpecial")} /></p>}
         </div>
       )}
       {!validation && (

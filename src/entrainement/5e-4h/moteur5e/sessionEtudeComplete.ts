@@ -15,10 +15,10 @@ import {
   diagnostiquerEnsembleNombres,
   diagnostiquerNombre,
   diagnostiquerProprietesConstructionInverse,
-  diagnostiquerQuotient,
   diagnostiquerSimplificationPointVide,
+  diagnostiquerEquationHorizontale,
+  diagnostiquerEquationOblique,
   diagnostiquerValeurOuInfini,
-  verifierConclusionPointVide,
   verifierTypeLimite,
 } from "./verificationEtudeComplete";
 import type { CibleValeurOuInfini, ReponseCasSpecial } from "./verificationEtudeComplete";
@@ -40,8 +40,14 @@ export function demarrerSessionEtudeComplete(reglages: ReglagesSession5e, genera
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur la classification (choix fermé ∞ / 0/0, gagnable par élimination —
+ * audit 5e ch. 4, décision F) ; les autres écrans gardent le réglage de la session. */
+export function tentativesMaxEtudeComplete(phase: PhaseEtudeComplete, reglages: ReglagesSession5e): number {
+  return phase === "typeLimite" ? 1 : reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEtudeComplete): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEtudeComplete(etat.phase, etat.reglages) };
 }
 
 export function activerAideSuivante(etat: EtatSessionEtudeComplete): EtatSessionEtudeComplete {
@@ -118,7 +124,8 @@ export function soumettreReponsePointVideSimplification(etat: EtatSessionEtudeCo
   const ex = exerciceEtude(etat);
   const coeffsM = ex.coeffsM as number[];
   const coeffsDVraie = ex.coeffsDVraie as number[];
-  return soumettreEcran(etat, "pointVideSimplification", texte, (t) => diagnostiquerSimplificationPointVide(t, coeffsM, coeffsDVraie) === "correct");
+  const position = exclusionPointVide(etat).position;
+  return soumettreEcran(etat, "pointVideSimplification", texte, (t) => diagnostiquerSimplificationPointVide(t, coeffsM, coeffsDVraie, position) === "correct");
 }
 
 export function soumettreReponsePointVideLimite(etat: EtatSessionEtudeComplete, texte: string): EtatSessionEtudeComplete {
@@ -126,14 +133,6 @@ export function soumettreReponsePointVideLimite(etat: EtatSessionEtudeComplete, 
   return soumettreEcran(etat, "pointVideLimite", texte, (t) => diagnostiquerNombre(t, cible) === "correct");
 }
 
-export interface ReponseConclusionPointVide {
-  estAV: boolean;
-  appartientDomaine: boolean;
-}
-
-export function soumettreReponsePointVideConclusion(etat: EtatSessionEtudeComplete, reponse: ReponseConclusionPointVide): EtatSessionEtudeComplete {
-  return soumettreEcran(etat, "pointVideConclusion", reponse, (r) => verifierConclusionPointVide(r.estAV, r.appartientDomaine));
-}
 
 // ============================================================================
 // Écrans "limitesGD1"/"limitesGD2" — limites gauche/droite en saisie libre "valeur ou infini",
@@ -277,8 +276,9 @@ export interface ReponseAsymptoteInfini {
 function blocAsymptoteCorrect(bloc: ReponseBlocAsymptote, infini: ComportementInfiniEtude): boolean {
   if (infini.type === "aucune") return bloc.aucune === true;
   if (bloc.aucune) return false;
-  if (infini.type === "horizontale") return bloc.type === "horizontale" && diagnostiquerNombre(bloc.valeur, infini.limite) === "correct";
-  return bloc.type === "oblique" && diagnostiquerQuotient(bloc.equation, infini.pente, infini.ordonnee) === "correct";
+  // Même vérification que l'écran : préfixe « y = » toléré.
+  if (infini.type === "horizontale") return bloc.type === "horizontale" && diagnostiquerEquationHorizontale(bloc.valeur, infini.limite) === "correct";
+  return bloc.type === "oblique" && diagnostiquerEquationOblique(bloc.equation, infini.pente, infini.ordonnee) === "correct";
 }
 
 export function soumettreReponseAsymptoteInfini(etat: EtatSessionEtudeComplete, reponse: ReponseAsymptoteInfini): EtatSessionEtudeComplete {

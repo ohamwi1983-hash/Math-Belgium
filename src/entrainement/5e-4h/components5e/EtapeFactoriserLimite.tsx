@@ -10,6 +10,8 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { estFormeFactorisee } from "../moteur5e/formeSaisieLimites";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceLimite;
@@ -38,6 +40,9 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie équivalente mais pas factorisée (polynôme recopié) : refusée SANS consommer de tentative
+   * (décision D, audit 5c4a point 1). */
+  const [nonFactorise, setNonFactorise] = useState<{ numerateur: boolean; denominateur: boolean } | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = numerateur.trim() !== "" && denominateur.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
@@ -46,6 +51,12 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
 
   function valider() {
     if (!complet) return;
+    const controle = { numerateur: !estFormeFactorisee(numerateur), denominateur: !estFormeFactorisee(denominateur) };
+    if (controle.numerateur || controle.denominateur) {
+      setNonFactorise(controle);
+      return;
+    }
+    setNonFactorise(null);
     const reponse: ReponseFactoriser = { numerateur: [numerateur], denominateur: [denominateur] };
     if (diagnostiquer) {
       const s = diagnostiquer(reponse);
@@ -71,10 +82,13 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         <label className="field-label field-label-minuscule">Numérateur factorisé</label>
         <input
           type="text"
-          className={`text-input${statuts && statuts.numerateur !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${(statuts && statuts.numerateur !== "correct") || nonFactorise?.numerateur ? " is-erronee" : ""}`}
           value={numerateur}
-          onChange={(e) => setNumerateur(e.target.value)}
-          placeholder="ex : 2*(x-3)*(x+5)"
+          onChange={(e) => {
+            setNumerateur(e.target.value);
+            setNonFactorise(null);
+          }}
+          placeholder="ex : 2(x − 7)(x + 9)"
         />
       </div>
 
@@ -83,17 +97,20 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         <label className="field-label field-label-minuscule">Dénominateur factorisé</label>
         <input
           type="text"
-          className={`text-input${statuts && statuts.denominateur !== "correct" ? " is-erronee" : ""}`}
+          className={`text-input${(statuts && statuts.denominateur !== "correct") || nonFactorise?.denominateur ? " is-erronee" : ""}`}
           value={denominateur}
-          onChange={(e) => setDenominateur(e.target.value)}
-          placeholder="ex : (x-3)*(x+5)"
+          onChange={(e) => {
+            setDenominateur(e.target.value);
+            setNonFactorise(null);
+          }}
+          placeholder="ex : (x − 8)(x + 9)"
         />
       </div>
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "factoriser")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "factoriser")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={aide2} /></p>}
         </div>
       )}
       {!validation && (
@@ -102,7 +119,12 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {nonFactorise && (
+          <p className="alert-error" role="alert">
+            Ce n'est pas encore une forme factorisée : écris un produit de facteurs du premier degré (ta saisie ne compte pas comme une tentative).
+          </p>
+        )}
+        {montrerErreurs && !nonFactorise && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

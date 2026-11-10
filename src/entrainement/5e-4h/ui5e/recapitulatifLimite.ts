@@ -28,7 +28,7 @@ export function calculerRecapitulatifLimite(etat: EtatSessionLimite): EntreeReca
   for (const phase of ordreComplet(exercice)) {
     const score = etat.scoresPartiels[phase];
     if (score === undefined) continue;
-    const revele = score === 0;
+    const revele = etat.reveleesPartielles[phase] ?? false;
 
     if (phase === "reconnaissance") {
       entrees.push({

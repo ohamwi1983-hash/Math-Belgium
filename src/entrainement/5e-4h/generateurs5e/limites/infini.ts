@@ -31,13 +31,16 @@ function tirerCoefficients(degre: number, coeffDominant: number): number[] {
  * le tirage aléatoire habituel. */
 export function genererExerciceLimiteInfini(sousCasForce?: "degresEgaux" | "numerateurPlusGrand" | "numerateurPlusPetit"): ExerciceLimiteInfini {
   const direction: "plus" | "moins" = Math.random() < 0.5 ? "plus" : "moins";
-  const degD = entierAleatoire(1, 2);
   const sousCas = sousCasForce ?? tirerSousCas();
+  // « Numérateur plus petit » : toujours un VRAI ∞/∞ (décision de l'utilisateur, audit 5c4a point 2) —
+  // un numérateur constant donnerait k/∞, qui n'est pas une forme indéterminée ; d'où D de degré 2 et
+  // N de degré 1.
+  const degD = sousCas === "numerateurPlusPetit" ? 2 : entierAleatoire(1, 2);
 
   let degN: number;
   if (sousCas === "degresEgaux") degN = degD;
   else if (sousCas === "numerateurPlusGrand") degN = degD + (degD === 2 ? 1 : entierAleatoire(1, 2));
-  else degN = degD === 1 ? 0 : entierAleatoire(0, 1);
+  else degN = 1;
 
   const kN = entierNonNul(6);
   const kD = entierNonNul(6);

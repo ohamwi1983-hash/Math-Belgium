@@ -6,6 +6,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceLimite;
@@ -82,7 +83,7 @@ export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tenta
             <label className="field-label field-label-minuscule">
               <Katex expression={formatBlocDonneesEgalLatex(exercice)} block />
             </label>
-            <input type="text" className="text-input" value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="ex : -1/3" />
+            <input type="text" className="text-input" value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="ex : 13/7" />
           </div>
         )}
 
@@ -111,8 +112,8 @@ export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tenta
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "reconnaissance")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "reconnaissance")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={aide2} /></p>}
         </div>
       )}
       {!validation && (

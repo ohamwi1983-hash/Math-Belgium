@@ -9,6 +9,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesLimites";
 import type { EtatSessionLimite, PhaseLimite, ResultatExerciceLimite } from "./typesLimites";
 import { diagnostiquerFacteurs, diagnostiquerNombre, diagnostiquerRatioDominant, diagnostiquerTermeDominant, verifierReconnaissance, verifierSigne } from "./verificationLimites";
+import { estFormeFactorisee } from "./formeSaisieLimites";
 
 /** Écran "conclureLimite" (famille "limiteInfiniePoint") — 3 options : ±∞ ou "n'existe pas". */
 export type ReponseConclureLimite = 1 | -1 | "nexistepas";
@@ -24,8 +25,8 @@ export function niveauAideMaxLimite(): number {
   return NIVEAU_AIDE_MAX_LIMITE;
 }
 
-function etatInitial(exercice: ExerciceLimite): Pick<EtatSessionLimite, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(exercice: ExerciceLimite): Pick<EtatSessionLimite, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "reveleesPartielles"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, reveleesPartielles: {} };
 }
 
 export function demarrerSessionLimite(reglages: ReglagesSession5e, generateur: () => ExerciceLimite): EtatSessionLimite {
@@ -34,6 +35,16 @@ export function demarrerSessionLimite(reglages: ReglagesSession5e, generateur: (
 
 function reglagesEtape(etat: EtatSessionLimite): ReglagesEtape {
   return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+}
+
+/** Tentatives affichées pour l'écran en cours : 1 sur les écrans à choix fermé (décision F) — sauf
+ * « reconnaissance » d'un nombre réel, où la valeur numérique garde les tentatives du réglage. */
+export function tentativesMaxLimite(etat: EtatSessionLimite): number {
+  const exercice = etat.exerciceCourant;
+  if (etat.phase === "reconnaissance") return exercice.famille === "limiteReelle" ? etat.reglages.tentativesMax : 1;
+  if (etat.phase === "limitesGaucheDroite" || etat.phase === "conclureLimite") return 1;
+  if (etat.phase === "evaluerLimiteFinale" && exercice.famille === "limiteInfini" && exercice.natureLimite === "infinie") return 1;
+  return etat.reglages.tentativesMax;
 }
 
 export function activerAideSuivante(etat: EtatSessionLimite): EtatSessionLimite {
@@ -46,16 +57,22 @@ function cloturerExerciceOuSuivant(etat: EtatSessionLimite, resultat: ResultatEx
   const resultats = [...etat.resultats, resultat];
   const indexExercice = etat.indexExercice + 1;
   if (indexExercice >= etat.reglages.nombreExercices) {
-    return { ...etat, resultats, indexExercice, terminee: true, derniereEtapeRevelee: revele };
+    // Les scores/révélations de la DERNIÈRE phase restent dans l'état terminé : récapitulatif et fiche
+    // de puce du dernier écran (audit 5c4a point 6 : fiche absente ou mal nommée).
+    return { ...etat, resultats, indexExercice, terminee: true, scoresPartiels: resultat.scores, reveleesPartielles: resultat.revelees, derniereEtapeRevelee: revele };
   }
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionLimite, phaseAttendue: PhaseLimite, reponse: T, verifier: (r: T) => boolean): EtatSessionLimite {
+/** `choixFermeFaux` : vrai quand la partie « choix fermé » de la réponse est fausse — l'écran se clôt
+ * alors dès cette tentative (décision F : une seule tentative sur un choix fermé). */
+function soumettreEcran<T>(etat: EtatSessionLimite, phaseAttendue: PhaseLimite, reponse: T, verifier: (r: T) => boolean, choixFermeFaux?: (r: T) => boolean): EtatSessionLimite {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
+  const derniereTentative = choixFermeFaux?.(reponse) ?? false;
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    pointsDeBase: POINTS_DE_BASE,
+    tentativesMax: derniereTentative ? etat.etapeCourante.tentativesUtilisees + 1 : reglagesEtape(etat).tentativesMax,
     verifier,
     revelerReponse: () => {},
   });
@@ -64,12 +81,13 @@ function soumettreEcran<T>(etat: EtatSessionLimite, phaseAttendue: PhaseLimite, 
   const revele = etapeCourante.revelee;
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const reveleesPartielles = { ...etat.reveleesPartielles, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 
   if (phaseSuivante === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelees: reveleesPartielles }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, reveleesPartielles, derniereEtapeRevelee: revele };
 }
 
 // ============================================================================
@@ -100,7 +118,13 @@ function commeInfini(exercice: ExerciceLimite): ExerciceLimiteInfini {
  * "Nombre réel R", même geste) est alors OBLIGATOIRE et fait partie de la même soumission. */
 export function soumettreReponseReconnaissance(etat: EtatSessionLimite, choix: string, valeurTexte?: string): EtatSessionLimite {
   const exercice = etat.exerciceCourant;
-  return soumettreEcran(etat, "reconnaissance", { choix, valeurTexte }, (r) => verifierReconnaissance(r.choix, exercice, r.valeurTexte));
+  return soumettreEcran(
+    etat,
+    "reconnaissance",
+    { choix, valeurTexte },
+    (r) => verifierReconnaissance(r.choix, exercice, r.valeurTexte),
+    (r) => r.choix !== exercice.famille,
+  );
 }
 
 // ============================================================================
@@ -118,7 +142,11 @@ export function soumettreReponseFactoriser(etat: EtatSessionLimite, reponse: Rep
     etat,
     "factoriser",
     reponse,
-    (r) => diagnostiquerFacteurs(r.numerateur, exo.a, exo.kN, exo.p) === "correct" && diagnostiquerFacteurs(r.denominateur, exo.a, exo.kD, exo.q) === "correct",
+    (r) =>
+      diagnostiquerFacteurs(r.numerateur, exo.a, exo.kN, exo.p) === "correct" &&
+      diagnostiquerFacteurs(r.denominateur, exo.a, exo.kD, exo.q) === "correct" &&
+      r.numerateur.every(estFormeFactorisee) &&
+      r.denominateur.every(estFormeFactorisee),
   );
 }
 
@@ -139,7 +167,7 @@ export function soumettreReponseSimplifierEvaluer(etat: EtatSessionLimite, texte
 export function soumettreReponseFactoriserDenominateur(etat: EtatSessionLimite, textes: string[]): EtatSessionLimite {
   const exo = commeInfiniePoint(etat.exerciceCourant);
   const autreRacine = exo.sousCas === "racineDouble" ? exo.a : (exo.q as number);
-  return soumettreEcran(etat, "factoriserDenominateur", textes, (t) => diagnostiquerFacteurs(t, exo.a, exo.kD, autreRacine) === "correct");
+  return soumettreEcran(etat, "factoriserDenominateur", textes, (t) => diagnostiquerFacteurs(t, exo.a, exo.kD, autreRacine) === "correct" && t.every(estFormeFactorisee));
 }
 
 export interface ReponseLimitesGaucheDroite {
@@ -157,6 +185,7 @@ export function soumettreReponseLimitesGaucheDroite(etat: EtatSessionLimite, rep
     "limitesGaucheDroite",
     reponse,
     (r) => verifierSigne(r.gauche, exo.signeLimiteGauche) && verifierSigne(r.droite, exo.signeLimiteDroite),
+    () => true,
   );
 }
 
@@ -166,7 +195,7 @@ export function soumettreReponseLimitesGaucheDroite(etat: EtatSessionLimite, rep
 export function soumettreReponseConclureLimite(etat: EtatSessionLimite, choix: ReponseConclureLimite): EtatSessionLimite {
   const exo = commeInfiniePoint(etat.exerciceCourant);
   const attendu: ReponseConclureLimite = exo.sousCas === "racineSimple" ? "nexistepas" : exo.signeLimiteGauche;
-  return soumettreEcran(etat, "conclureLimite", choix, (c) => c === attendu);
+  return soumettreEcran(etat, "conclureLimite", choix, (c) => c === attendu, () => true);
 }
 
 // ============================================================================
@@ -206,5 +235,5 @@ export function soumettreReponseEvaluerLimiteFinaleSigne(etat: EtatSessionLimite
   const exo = commeInfini(etat.exerciceCourant);
   if (exo.signeLimiteInfinie === undefined) throw new Error("soumettreReponseEvaluerLimiteFinaleSigne : signeLimiteInfinie absent");
   const attendu = exo.signeLimiteInfinie;
-  return soumettreEcran(etat, "evaluerLimiteFinale", choix, (c) => verifierSigne(c, attendu));
+  return soumettreEcran(etat, "evaluerLimiteFinale", choix, (c) => verifierSigne(c, attendu), () => true);
 }

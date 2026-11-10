@@ -7,8 +7,8 @@ import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { listeAsymptotes, listeComportements, phaseApres, phaseInitiale } from "./typesLectureGraphiqueLimites";
-import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites, ResultatExerciceLectureGraphiqueLimites } from "./typesLectureGraphiqueLimites";
-import { diagnostiquerCibleAsymptote, diagnostiquerCibleComportement } from "./verificationLectureGraphiqueLimites";
+import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites, ReponseNommerAsymptotes, ResultatExerciceLectureGraphiqueLimites } from "./typesLectureGraphiqueLimites";
+import { diagnostiquerCibleComportement, diagnostiquerNommerAsymptotes } from "./verificationLectureGraphiqueLimites";
 
 const POINTS_DE_BASE = 100;
 
@@ -35,11 +35,20 @@ function cloturerExerciceOuSuivant(etat: EtatSessionLectureGraphiqueLimites, res
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueLimites, phaseAttendue: PhaseLectureGraphiqueLimites, reponse: T, verifier: (r: T) => boolean): EtatSessionLectureGraphiqueLimites {
+/** `tentativesMaxForce` : 1 pour un verdict fermé faux (« aucune asymptote ») — l'écran se clôt et
+ * révèle la réponse, il ne se gagne jamais par élimination. */
+function soumettreEcran<T>(
+  etat: EtatSessionLectureGraphiqueLimites,
+  phaseAttendue: PhaseLectureGraphiqueLimites,
+  reponse: T,
+  verifier: (r: T) => boolean,
+  tentativesMaxForce?: number,
+): EtatSessionLectureGraphiqueLimites {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMaxForce !== undefined ? { tentativesMax: tentativesMaxForce } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -64,8 +73,11 @@ export function soumettreReponseCompleterLimites(etat: EtatSessionLectureGraphiq
   return soumettreEcran(etat, "completerLimites", textes, (t) => t.length === slots.length && t.every((v, i) => diagnostiquerCibleComportement(v, slots[i].cible) === "correct"));
 }
 
-/** Écran "nommerAsymptotes" — un texte par slot de `listeAsymptotes`, même convention. */
-export function soumettreReponseNommerAsymptotes(etat: EtatSessionLectureGraphiqueLimites, textes: string[]): EtatSessionLectureGraphiqueLimites {
+/** Écran "nommerAsymptotes" — lignes « type + équation » dans n'importe quel ordre, ou « aucune
+ * asymptote » (décision G) : juste ssi l'ensemble des asymptotes nommées est exactement celui du
+ * graphique. Verdict « aucune / au moins une » faux ⟹ écran clos d'emblée. */
+export function soumettreReponseNommerAsymptotes(etat: EtatSessionLectureGraphiqueLimites, reponse: ReponseNommerAsymptotes): EtatSessionLectureGraphiqueLimites {
   const slots = listeAsymptotes(etat.exerciceCourant);
-  return soumettreEcran(etat, "nommerAsymptotes", textes, (t) => t.length === slots.length && t.every((v, i) => diagnostiquerCibleAsymptote(v, slots[i].cible) === "correct"));
+  const diagnostic = diagnostiquerNommerAsymptotes(reponse, slots);
+  return soumettreEcran(etat, "nommerAsymptotes", reponse, () => diagnostic.correct, diagnostic.verdictAucuneFaux ? 1 : undefined);
 }

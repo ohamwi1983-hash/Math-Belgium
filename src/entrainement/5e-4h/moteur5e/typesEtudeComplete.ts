@@ -61,7 +61,10 @@ export function ordreComplet(exercice: ExerciceEtudeComplete): PhaseEtudeComplet
   if (exercice.mode === "constructionInverse") return ["constructionInverse"];
   const ordre: PhaseEtudeComplete[] = ["domaine", "typeLimite"];
   const pointVide = exercice.exclusions.find((e) => e.type === "pointVide");
-  if (pointVide) ordre.push("pointVideSimplification", "pointVideLimite", "pointVideConclusion");
+  // L'ancien écran « Conclusion » du point vide (toujours « Non / Non », devinable) est supprimé
+  // (audit 5e ch. 4, décision I) : sa phrase figure dans le récapitulatif. `pointVideConclusion` reste
+  // dans le type pour l'adaptateur d'évaluation (refonte des feuilles à venir).
+  if (pointVide) ordre.push("pointVideSimplification", "pointVideLimite");
   if (exercice.exclusions[0]?.type !== "pointVide") ordre.push("limitesGD1");
   if (exercice.exclusions[1] && exercice.exclusions[1].type !== "pointVide") ordre.push("limitesGD2");
   ordre.push("av", "infini");

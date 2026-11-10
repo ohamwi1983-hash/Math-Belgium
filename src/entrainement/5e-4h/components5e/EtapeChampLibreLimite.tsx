@@ -9,6 +9,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceLimite;
@@ -58,10 +59,10 @@ export function EtapeChampLibreLimite({ exercice, phase, tentativesUtilisees, te
         }
       />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
-      <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
+      <ApercuExpressionLatex texte={texte} label={labelPhase(phase, exercice)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
-          <Katex expression={labelPhase(phase)} />
+          <Katex expression={labelPhase(phase, exercice)} />
         </label>
         <input
           type="text"
@@ -73,8 +74,8 @@ export function EtapeChampLibreLimite({ exercice, phase, tentativesUtilisees, te
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, phase)} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={aide2} /></p>}
         </div>
       )}
       {!validation && (

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
-import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -9,6 +8,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
@@ -75,8 +75,8 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
       </button>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "domaine")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "domaine")} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "domaine")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "domaine")} /></p>}
         </div>
       )}
       {!validation && (

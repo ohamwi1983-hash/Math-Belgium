@@ -32,7 +32,14 @@ export { diagnostiquerNombre, verifierSigne, diagnostiquerQuotient };
  */
 export type CibleValeurOuInfini = { fini: true; valeur: number } | { fini: false; signe: 1 | -1 };
 
-const REGEX_INFINI = /^([+-]?)(inf|infini|infty)$/;
+const REGEX_INFINI = /^([+-]?)(inf|infini|infty|\\infty|oo)$/;
+
+/** Normalise une saisie « valeur ou infini » : moins typographique « − » (U+2212) et tiret « – »
+ * → « - », symbole « ∞ » → « inf », espaces retirés (audit 5e ch. 4, point 4 : « −∞ », « +∞ », « ∞ »
+ * étaient refusés). */
+function normaliserInfini(texte: string): string {
+  return texte.trim().toLowerCase().replace(/\s+/g, "").replace(/[\u2212\u2013]/g, "-").replace(/∞/g, "inf");
+}
 
 /** Champ libre générique acceptant soit une valeur numérique (entier, décimal, fraction — via
  * `diagnostiquerNombre`), soit la notation "+inf"/"-inf"/"inf" (sans signe = "+inf", convention
@@ -41,7 +48,7 @@ const REGEX_INFINI = /^([+-]?)(inf|infini|infty)$/;
  * inconnu"). Une saisie finie face à une cible infinie (ou l'inverse) est jugée `not_equivalent`
  * (parsing réussi, contenu faux) — jamais `parse_error`, réservé aux erreurs de SYNTAXE. */
 export function diagnostiquerValeurOuInfini(texte: string, cible: CibleValeurOuInfini): StatutVerification {
-  const t = texte.trim().toLowerCase().replace(/\s+/g, "");
+  const t = normaliserInfini(texte);
   const matchInfini = REGEX_INFINI.exec(t);
   if (matchInfini) {
     if (cible.fini) return "not_equivalent";
@@ -64,7 +71,20 @@ function evaluerPolynome(coeffs: number[], x: number): number {
  * mécanisme que `diagnostiquerFormeDeveloppee`, 5gen21), en excluant les points qui annulent
  * `D_vraie` (pôles de la forme simplifiée, où l'expression saisie n'est de toute façon pas définie —
  * ne discriminerait rien). */
-export function diagnostiquerSimplificationPointVide(texte: string, coeffsM: number[], coeffsDVraie: number[]): StatutVerification {
+/** Vrai si la saisie n'est PAS simplifiée : elle n'est pas définie (ou pas finie) au point vide, donc
+ * le facteur commun est encore là — c'est la forme d'origine recopiée (audit 5e ch. 4, 5gen24
+ * point 1 : acceptée dans 43 % des tirages tant que le point vide n'était pas parmi les points
+ * testés). Message dédié, sans consommer de tentative (`EtapeChampsEtudeComplete`). */
+export function estFormeNonSimplifiee(texte: string, positionPointVide: number): boolean {
+  try {
+    return !Number.isFinite(evaluerExpressionGenerale(texte, positionPointVide));
+  } catch {
+    return false;
+  }
+}
+
+export function diagnostiquerSimplificationPointVide(texte: string, coeffsM: number[], coeffsDVraie: number[], positionPointVide?: number): StatutVerification {
+  if (positionPointVide !== undefined && estFormeNonSimplifiee(texte, positionPointVide)) return "not_equivalent";
   const candidats = [0, 1, 2, -1, 3, -2, 4, -3];
   const pointsExclus = candidats.filter((x) => Math.abs(evaluerPolynome(coeffsDVraie, x)) < 1e-9);
   const points = candidats.filter((x) => !pointsExclus.includes(x)).slice(0, 5);
@@ -85,13 +105,6 @@ export function diagnostiquerSimplificationPointVide(texte: string, coeffsM: num
  * DIRECTE au `TypeExclusion` réel, jamais de saisie libre à parser. */
 export function verifierTypeLimite(choix: "infini" | "pointVide", estPointVide: boolean): boolean {
   return (choix === "pointVide") === estPointVide;
-}
-
-/** Écran spécial C "Conclusion" (point vide) — 2 affirmations Oui/Non, TOUJOURS "Non" aux deux pour
- * un vrai point vide (jamais une AV ; toujours exclu du domaine malgré la limite finie — voir
- * `core5e/etudeComplete.types.ts`), jamais de saisie libre à parser. */
-export function verifierConclusionPointVide(estAV: boolean, appartientDomaine: boolean): boolean {
-  return estAV === false && appartientDomaine === false;
 }
 
 /** Écrans "domaine"/"classification" — liste add-as-needed de valeurs numériques, équivalence
@@ -171,33 +184,36 @@ export function diagnostiquerCasSpecial(reponse: ReponseCasSpecial, x: number, y
  */
 export function diagnostiquerProprietesConstructionInverse(texte: string, proprietes: ProprietesConstructionInverse): StatutVerification {
   try {
-    const { racineDenominateur, asymptote } = proprietes;
-    const valeurAuPole = evaluerExpressionGenerale(texte, racineDenominateur);
-    const gauche = evaluerExpressionGenerale(texte, racineDenominateur - 0.001);
-    const droite = evaluerExpressionGenerale(texte, racineDenominateur + 0.001);
-    if (Number.isFinite(valeurAuPole)) return "not_equivalent";
-    if (!Number.isFinite(gauche) || !Number.isFinite(droite)) return "parse_error";
-    if (Math.abs(gauche) < 1000 || Math.abs(droite) < 1000) return "not_equivalent";
-
-    const grand = 1e4;
-    const fGrand = evaluerExpressionGenerale(texte, grand);
-    const fMoinsGrand = evaluerExpressionGenerale(texte, -grand);
-    if (!Number.isFinite(fGrand) || !Number.isFinite(fMoinsGrand)) return "parse_error";
-
-    if (asymptote.type === "horizontale") {
-      if (Math.abs(fGrand - asymptote.limite) > 0.5) return "not_equivalent";
-      if (Math.abs(fMoinsGrand - asymptote.limite) > 0.5) return "not_equivalent";
-      return "correct";
+    const { racineDenominateur: r, asymptote } = proprietes;
+    const f = (x: number) => evaluerExpressionGenerale(texte, x);
+    if (Number.isFinite(f(r))) return "not_equivalent";
+    // Vraie asymptote verticale en r : |f| grandit quand on se rapproche de r, des deux côtés —
+    // rapport des valeurs à ε = 1e-6 et 1e-3 (≈ 1000 pour un pôle simple, 10⁶ pour un double ; ≈ 1
+    // pour un point vide). Plus de seuil absolu : « 3 + 1/(x−2) » vaut −997 en 1,999 et était refusé.
+    for (const cote of [-1, 1]) {
+      const proche = f(r + cote * 1e-6);
+      const loin = f(r + cote * 1e-3);
+      if (!Number.isFinite(proche) || !Number.isFinite(loin)) return "parse_error";
+      if (Math.abs(loin) === 0 || Math.abs(proche) / Math.abs(loin) < 50) return "not_equivalent";
     }
-
-    const treGrand = 2 * grand;
-    const fTresGrand = evaluerExpressionGenerale(texte, treGrand);
-    if (!Number.isFinite(fTresGrand)) return "parse_error";
-    const penteEstimee = (fTresGrand - fGrand) / grand;
-    if (Math.abs(penteEstimee - asymptote.pente) > 0.05) return "not_equivalent";
-    if (Math.abs(fGrand - (asymptote.pente * grand + asymptote.ordonnee)) > 5) return "not_equivalent";
-    if (Math.abs(fMoinsGrand - (asymptote.pente * -grand + asymptote.ordonnee)) > 5) return "not_equivalent";
-    return "correct";
+    const X = 1e4;
+    const valeurs = [X, 2 * X, -X, -2 * X].map(f);
+    if (valeurs.some((v) => !Number.isFinite(v))) return "parse_error";
+    const [fX, f2X, fmX, fm2X] = valeurs;
+    if (asymptote.type === "horizontale") {
+      // Extrapolation de Richardson (le reste en 1/x disparaît) : limite estimée à ±∞.
+      const limPlus = 2 * f2X - fX;
+      const limMoins = 2 * fm2X - fmX;
+      return Math.abs(limPlus - asymptote.limite) <= 0.05 && Math.abs(limMoins - asymptote.limite) <= 0.05 ? "correct" : "not_equivalent";
+    }
+    // Asymptote oblique : pente a puis b = lim (f(x) − a·x), estimé en X = 1e4 et 2e4 (Richardson),
+    // tolérance 0,05 — une AO décalée (y = 2x + 6 au lieu de 2x + 4) est refusée.
+    const a = asymptote.pente;
+    const pente = (f2X - fX) / X;
+    if (Math.abs(pente - a) > 0.05) return "not_equivalent";
+    const bPlus = 2 * (f2X - a * 2 * X) - (fX - a * X);
+    const bMoins = 2 * (fm2X + a * 2 * X) - (fmX + a * X);
+    return Math.abs(bPlus - asymptote.ordonnee) <= 0.05 && Math.abs(bMoins - asymptote.ordonnee) <= 0.05 ? "correct" : "not_equivalent";
   } catch {
     return "parse_error";
   }

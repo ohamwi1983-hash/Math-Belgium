@@ -9,14 +9,14 @@ import {
   soumettreReponseNommerAsymptotes,
 } from "./moteur5e/sessionLectureGraphiqueLimites";
 import { listeAsymptotes, listeComportements, ordreComplet } from "./moteur5e/typesLectureGraphiqueLimites";
-import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites } from "./moteur5e/typesLectureGraphiqueLimites";
-import { diagnostiquerCibleAsymptote, diagnostiquerCibleComportement } from "./moteur5e/verificationLectureGraphiqueLimites";
+import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites, ReponseNommerAsymptotes } from "./moteur5e/typesLectureGraphiqueLimites";
+import { diagnostiquerCibleComportement, diagnostiquerNommerAsymptotes } from "./moteur5e/verificationLectureGraphiqueLimites";
 import type { ExerciceLectureGraphiqueLimites } from "./core5e/lectureGraphiqueLimites.types";
 import { EtapeComportementsLimites } from "./components5e/EtapeComportementsLimites";
 import { EtapeEquationsAsymptotes } from "./components5e/EtapeEquationsAsymptotes";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
-import { formatReponseAttenduePhaseLatex } from "./ui5e/formatLectureGraphiqueLimites";
+import { LIBELLE_PHASE_LECTURE_GRAPHIQUE, LIBELLE_TYPE_ASYMPTOTE, formatReponseAttenduePhaseLatex } from "./ui5e/formatLectureGraphiqueLimites";
 import { calculerRecapitulatifLectureGraphiqueLimites } from "./ui5e/recapitulatifLectureGraphiqueLimites";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -39,9 +39,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — "nommerAsymptotes" est SAUTÉE
- * quand le tirage n'a aucune asymptote à nommer, jamais un `ORDRE_PHASES` fixe à 2 éléments
- * reconstitué à la main : même source que `calculerRecapitulatifLectureGraphiqueLimites`.
+/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` (toujours les 2 écrans depuis l'audit
+ * 5e ch. 4 : « aucune asymptote » se répond à l'écran 2) — même source que
+ * `calculerRecapitulatifLectureGraphiqueLimites`.
  * "courante" pour `etat.phase`, "correcte"/"revele" pour les phases déjà closes
  * (`scoresPartiels[phase]`, 0 ⟺ révélée — exact ici, 5gen22 n'a pas de mécanisme d'aide), "a-venir"
  * au-delà. */
@@ -63,18 +63,22 @@ export function App5gen22() {
    * (voir le commentaire de `calculerSegmentsProgression`). */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Incrémenté à chaque « Générer » / « Nouvel exercice » : la clé d'écran change, les champs se
+   * vident même quand le nouvel exercice recommence au même écran (audit 5e ch. 4). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
+  /** Fiche de l'écran QUI VIENT DE SE CLORE (`etat.phase`, avant la transition) — jamais « la dernière
+   * entrée du récapitulatif », qui peut appartenir à l'exercice suivant. */
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLectureGraphiqueLimites) {
-    const recap = calculerRecapitulatifLectureGraphiqueLimites(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
+    const phaseClose = etat.phase;
+    const revele = nouvelEtat.derniereEtapeRevelee;
     setHistorique((h) => [
       ...h,
       {
-        titre: derniere.libelle,
+        titre: LIBELLE_PHASE_LECTURE_GRAPHIQUE[phaseClose],
         votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+        correcte: !revele,
+        reponseAttendue: revele ? <Katex expression={formatReponseAttenduePhaseLatex(etat.exerciceCourant, phaseClose).join("\\quad ")} /> : undefined,
       },
     ]);
   }
@@ -94,6 +98,7 @@ export function App5gen22() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -103,7 +108,7 @@ export function App5gen22() {
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation = enAttente
@@ -126,6 +131,7 @@ export function App5gen22() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes — lecture graphique</h1>
+        <p className="app-subtitle">Chapitre 4 — Limites et asymptotes</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev
@@ -133,6 +139,7 @@ export function App5gen22() {
         onGenerer={(id) => {
           setEnAttente(null);
           setHistorique([]);
+          setNumeroGeneration((g) => g + 1);
           setEtat(demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
         }}
       />
@@ -157,6 +164,12 @@ export function App5gen22() {
       )}
     </div>
   );
+}
+
+/** Réponse de l'écran 2 en clair pour la fiche des puces (« AV : x = 3 ; AH : y = 2 », ou « Aucune asymptote »). */
+function texteReponseAsymptotes(reponse: ReponseNommerAsymptotes): string {
+  if (reponse.aucune) return "Aucune asymptote";
+  return reponse.lignes.map((l) => `${LIBELLE_TYPE_ASYMPTOTE[l.type].sigle} : ${l.type === "verticale" ? "x" : "y"} = ${l.texte}`).join(" ; ");
 }
 
 interface EcranProps {
@@ -204,8 +217,8 @@ function EcranCourant({
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
-          onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes), textes.join(" ; "))}
-          diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleAsymptote(t, slots[i].cible))}
+          onValider={(reponse) => terminerEtape(soumettreReponseNommerAsymptotes(etat, reponse), texteReponseAsymptotes(reponse))}
+          diagnostiquer={(reponse) => diagnostiquerNommerAsymptotes(reponse, slots)}
           validation={validation}
         />
       );

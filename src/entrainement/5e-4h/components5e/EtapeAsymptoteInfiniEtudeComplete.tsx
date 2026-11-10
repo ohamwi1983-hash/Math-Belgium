@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
-import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 import type { ReponseAsymptoteInfini, ReponseBlocAsymptote } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
@@ -57,14 +57,14 @@ function BlocDirection({
       <p className="prompt-text prompt-text--question-multiple">{titre}</p>
       <div className="options-grid">
         <button type="button" className={etat.choix === "aucune" ? "btn toggle-active" : "btn"} onClick={() => setEtat({ choix: "aucune", valeur: "" })}>
-          Pas de AO ou AH
+          Ni AH ni AO
         </button>
         <button
           type="button"
           className={etat.choix === "horizontale" || etat.choix === "oblique" ? "btn toggle-active" : "btn"}
           onClick={() => setEtat({ choix: etat.choix === "horizontale" || etat.choix === "oblique" ? etat.choix : "horizontale", valeur: etat.valeur })}
         >
-          Une AO ou AH
+          Une AH ou une AO
         </button>
       </div>
       {(etat.choix === "horizontale" || etat.choix === "oblique") && (
@@ -75,13 +75,13 @@ function BlocDirection({
               <option value="oblique">AO</option>
             </select>
           </span>
-          <span className="field-label field-label-minuscule">{etat.choix === "horizontale" ? "AH≡" : "AO≡"}</span>
+          <span className="field-label field-label-minuscule">{etat.choix === "horizontale" ? "AH :" : "AO :"}</span>
           <input
             type="text"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={etat.valeur}
             onChange={(e) => setEtat({ ...etat, valeur: e.target.value })}
-            placeholder={etat.choix === "horizontale" ? "ex : y=-2" : "ex : y=3x-2"}
+            placeholder={etat.choix === "horizontale" ? "ex : y=9" : "ex : y=7x−11"}
           />
         </div>
       )}
@@ -118,8 +118,8 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "asymptoteInfini")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "asymptoteInfini")} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "asymptoteInfini")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "asymptoteInfini")} /></p>}
         </div>
       )}
       {!validation && (

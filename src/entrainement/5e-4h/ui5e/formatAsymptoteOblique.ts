@@ -149,7 +149,8 @@ export function labelPhase(phase: PhaseAsymptoteOblique): string {
     case "calculerCoefficientB":
       return "b=";
     case "conclureEquationAsymptote":
-      return "AO\\equiv";
+      // Notation du cours (« AO : y = ax + b »), plus « AO ≡ » sans y (audit 5c4a, 5gen21 point 2).
+      return "\\text{AO : }y=";
     default:
       return "";
   }
@@ -192,8 +193,8 @@ export function consignePhase(exercice: ExerciceAsymptoteOblique, phase: PhaseAs
 // Aides — niveau 1 (exemple/méthode), niveau 2 (résolution complète de l'exemple).
 // ============================================================================
 
-/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
- * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+/** Aide fragmentée — phrase en RichText (`$…$` = LaTeX en ligne, rendue par `TexteRiche5e` : jamais
+ * de formule tapée au clavier dans le texte), formule display à part. */
 export interface AideFragmentee {
   texte: string;
   latex: string | null;
@@ -214,12 +215,12 @@ export function texteAideNiveau1(phase: PhaseAsymptoteOblique): AideFragmentee {
       };
     case "calculerCoefficientA":
       return {
-        texte: "Exemple avec une fonction différente : pour g(x)=(3x²-5x+1)/(x-2), calcule :",
+        texte: "Exemple avec une autre fonction : pour $g(x)=\\dfrac{3x^2-5x+1}{x-2}$, calcule :",
         latex: "a=\\lim_{x\\to\\pm\\infty} \\dfrac{g(x)}{x}",
       };
     case "calculerCoefficientB":
       return {
-        texte: "Exemple (suite) : pour la même fonction g(x)=(3x²-5x+1)/(x-2), avec a=3 déjà trouvé, calcule :",
+        texte: "Exemple (suite) : pour la même fonction $g$, avec $a=3$ déjà trouvé, calcule :",
         latex: "b=\\lim_{x\\to\\pm\\infty} [g(x)-3x]",
       };
     case "conclureEquationAsymptote":
@@ -238,16 +239,16 @@ export function texteAideNiveau2(phase: PhaseAsymptoteOblique): AideFragmentee {
       return { texte: "Exemple :", latex: "Q(x)=x+6,\\ R(x)=8,\\ D(x)=x-1 \\;\\Rightarrow\\; f(x)=x+6+\\dfrac{8}{x-1}" };
     case "calculerCoefficientA":
       return {
-        texte: "Le rapport des termes dominants donne a=3 :",
-        latex: "\\dfrac{g(x)}{x}=\\dfrac{3x^2-5x+1}{x(x-2)} \\;\\approx\\; \\dfrac{3x^2}{x^2}=3",
+        texte: "On divise par $x$, puis la limite est le rapport des coefficients dominants :",
+        latex: "\\dfrac{g(x)}{x}=\\dfrac{3x^2-5x+1}{x^2-2x} \\quad\\text{et}\\quad \\lim_{x\\to\\pm\\infty}\\dfrac{3x^2-5x+1}{x^2-2x}=\\dfrac{3}{1}=3",
       };
     case "calculerCoefficientB":
       return {
-        texte: "Le rapport des termes dominants donne b=1 :",
-        latex: "g(x)-3x=\\dfrac{3x^2-5x+1}{x-2}-3x=\\dfrac{3x^2-5x+1-3x(x-2)}{x-2}=\\dfrac{x+1}{x-2} \\;\\approx\\; \\dfrac{x}{x}=1",
+        texte: "On réduit au même dénominateur, puis la limite est le rapport des coefficients dominants :",
+        latex: "g(x)-3x=\\dfrac{3x^2-5x+1-3x(x-2)}{x-2}=\\dfrac{x+1}{x-2} \\quad\\text{et}\\quad \\lim_{x\\to\\pm\\infty}\\dfrac{x+1}{x-2}=1",
       };
     case "conclureEquationAsymptote":
-      return { texte: "Exemple :", latex: "\\text{avec quotient } x+6 \\text{ (reste ignoré)} \\;\\Rightarrow\\; AO \\equiv x+6" };
+      return { texte: "Exemple : avec le quotient $x+6$ (le reste disparaît à la limite) :", latex: "\\text{AO : }y=x+6" };
   }
 }
 
@@ -268,7 +269,7 @@ function formatCoefficientBConfirmeLatex(exo: ExerciceAsymptoteOblique): string 
   return `b=${exo.b}`;
 }
 function formatEquationAsymptoteConfirmeeLatex(exo: ExerciceAsymptoteOblique): string {
-  return `AO\\equiv ${formatQuotientLatex(exo.a, exo.b)}`;
+  return `\\text{AO : }y=${formatQuotientLatex(exo.a, exo.b)}`;
 }
 
 export function formatTermesEtatActuelLatex(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymptoteOblique): string[] | null {

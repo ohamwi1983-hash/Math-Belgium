@@ -8,6 +8,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 type Choix = "infini" | "pointVide";
 
@@ -67,8 +68,8 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
                 <option value="" disabled>
                   Choisis…
                 </option>
-                <option value="infini">∞</option>
-                <option value="pointVide">0/0</option>
+                <option value="infini">forme k/0 (limite infinie)</option>
+                <option value="pointVide">forme 0/0</option>
               </select>
             </span>
           </div>
@@ -77,8 +78,8 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "typeLimite")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "typeLimite")} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "typeLimite")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "typeLimite")} /></p>}
         </div>
       )}
       {!validation && (

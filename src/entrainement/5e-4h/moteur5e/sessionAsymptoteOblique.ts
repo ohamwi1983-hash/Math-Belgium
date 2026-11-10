@@ -9,6 +9,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesAsymptoteOblique";
 import type { EtatSessionAsymptoteOblique, PhaseAsymptoteOblique, ResultatExerciceAsymptoteOblique } from "./typesAsymptoteOblique";
 import { diagnostiquerFormeDeveloppee, diagnostiquerNombre, diagnostiquerQuotient } from "./verificationAsymptoteOblique";
+import { estFormeQuotientPlusReste, retirerMembreGauche } from "./formeSaisieLimites";
 
 const POINTS_DE_BASE = 100;
 
@@ -43,7 +44,9 @@ function cloturerExerciceOuSuivant(etat: EtatSessionAsymptoteOblique, resultat: 
   const resultats = [...etat.resultats, resultat];
   const indexExercice = etat.indexExercice + 1;
   if (indexExercice >= etat.reglages.nombreExercices) {
-    return { ...etat, resultats, indexExercice, terminee: true, derniereEtapeRevelee: revele };
+    // Scores et révélations de la DERNIÈRE phase conservés dans l'état terminé (récapitulatif, fiche
+    // de puce du dernier écran — audit 5c4a, 5gen21 point 4).
+    return { ...etat, resultats, indexExercice, terminee: true, scoresPartiels: resultat.scores, revelesPartiels: resultat.revelesPartiels, derniereEtapeRevelee: revele };
   }
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
@@ -81,12 +84,22 @@ export interface ReponseDiviserEuclidienne {
 
 export function soumettreReponseDiviserEuclidienne(etat: EtatSessionAsymptoteOblique, reponse: ReponseDiviserEuclidienne): EtatSessionAsymptoteOblique {
   const { a, b, c } = etat.exerciceCourant;
-  return soumettreEcran(etat, "diviserEuclidienne", reponse, (r) => diagnostiquerQuotient(r.quotient, a, b) === "correct" && diagnostiquerNombre(r.reste, c) === "correct");
+  return soumettreEcran(
+    etat,
+    "diviserEuclidienne",
+    reponse,
+    (r) => diagnostiquerQuotient(retirerMembreGauche(r.quotient), a, b) === "correct" && diagnostiquerNombre(r.reste.replace(/^\s*R\s*\(\s*x\s*\)\s*=\s*/, ""), c) === "correct",
+  );
 }
 
 export function soumettreReponseEcrireFormeDeveloppee(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { a, b, c, coeffsD } = etat.exerciceCourant;
-  return soumettreEcran(etat, "ecrireFormeDeveloppee", texte, (t) => diagnostiquerFormeDeveloppee(t, a, b, c, coeffsD) === "correct");
+  // Forme « quotient + reste/D(x) » exigée : f(x) recopiée en une seule fraction est équivalente mais
+  // ne montre pas le travail demandé (audit 5c4a, 5gen21 point 1 ; décision D).
+  return soumettreEcran(etat, "ecrireFormeDeveloppee", texte, (t) => {
+    const saisie = retirerMembreGauche(t);
+    return diagnostiquerFormeDeveloppee(saisie, a, b, c, coeffsD) === "correct" && estFormeQuotientPlusReste(saisie, a, b);
+  });
 }
 
 // ============================================================================
@@ -109,5 +122,6 @@ export function soumettreReponseCalculerCoefficientB(etat: EtatSessionAsymptoteO
 
 export function soumettreReponseConclureEquationAsymptote(etat: EtatSessionAsymptoteOblique, texte: string): EtatSessionAsymptoteOblique {
   const { a, b } = etat.exerciceCourant;
-  return soumettreEcran(etat, "conclureEquationAsymptote", texte, (t) => diagnostiquerQuotient(t, a, b) === "correct");
+  // « y = 2x − 3 » accepté : le champ affiche déjà « AO : y = » (décision E).
+  return soumettreEcran(etat, "conclureEquationAsymptote", texte, (t) => diagnostiquerQuotient(retirerMembreGauche(t), a, b) === "correct");
 }

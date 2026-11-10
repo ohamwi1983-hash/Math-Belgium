@@ -5,12 +5,18 @@ import { EPAISSEUR_TRAIT_ACCENTUE, EPAISSEUR_TRAIT_DISCRETE, RATIO_GRAPHE, ZOOM_
 import { calculerViewBoxLectureGraphique, construireMarqueursPointIsole, construireSegments } from "../ui5e/lectureGraphiqueLimitesCourbe";
 import { FenetreVisibleXY5e, GrilleAdaptative5e } from "./mafsGraphPartage5e";
 import { useLargeurConteneur } from "../components/useLargeurConteneur";
+import "./lectureGraphiqueLimites.css";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
 }
 
 const COULEUR_COURBE = "#d6336c";
+/** Asymptotes dans une couleur DISTINCTE de la courbe et des axes, pleinement opaques, tracées
+ * par-dessus le quadrillage : une asymptote x = 0 ou y = 0 ne se confond plus avec un axe (audit 5e
+ * ch. 4, point 27). */
+const COULEUR_ASYMPTOTE = "#1971c2";
+const OPACITE_ASYMPTOTE = 0.95;
 const LARGEUR_PAR_DEFAUT = 480;
 const LARGEUR_MIN = 280;
 const LARGEUR_MAX = 560;
@@ -32,8 +38,18 @@ export function LectureGraphiqueLimitesGraph({ exercice }: Props) {
   const { infini } = exercice;
 
   return (
-    <div className="mafs-graph" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-limites">
-      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
+    <div className="mafs-graph graphe-lecture-limites" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-limites">
+      {/* `preserveAspectRatio={false}` : échelles x et y indépendantes — avec le « contain » par défaut de
+          Mafs, une asymptote oblique raide (grande étendue en y) élargissait aussi l'axe des x et écrasait
+          la courbe à 390 px (audit 5e ch. 4, point 26 ; même piège que les graphes de 6e). */}
+      <Mafs
+        width={largeur}
+        height={hauteur}
+        viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }}
+        preserveAspectRatio={false}
+        pan={true}
+        zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
+      >
         <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} />
 
         <FenetreVisibleXY5e largeur={largeur} hauteur={hauteur}>
@@ -45,19 +61,19 @@ export function LectureGraphiqueLimitesGraph({ exercice }: Props) {
         </FenetreVisibleXY5e>
 
         {exercice.vas.map((va, index) => (
-          <Line.PointAngle key={`va-${index}`} point={[va.position, 0]} angle={Math.PI / 2} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
+          <Line.PointAngle key={`va-${index}`} point={[va.position, 0]} angle={Math.PI / 2} color={COULEUR_ASYMPTOTE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE * 1.6} opacity={OPACITE_ASYMPTOTE} />
         ))}
 
         {infini.type === "horizontale" &&
           (infini.limitePlusInfini === infini.limiteMoinsInfini ? (
-            <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
+            <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_ASYMPTOTE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE * 1.6} opacity={OPACITE_ASYMPTOTE} />
           ) : (
             <>
-              <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
-              <Line.PointAngle point={[0, infini.limiteMoinsInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
+              <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_ASYMPTOTE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE * 1.6} opacity={OPACITE_ASYMPTOTE} />
+              <Line.PointAngle point={[0, infini.limiteMoinsInfini]} angle={0} color={COULEUR_ASYMPTOTE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE * 1.6} opacity={OPACITE_ASYMPTOTE} />
             </>
           ))}
-        {infini.type === "oblique" && <Line.PointSlope point={[0, infini.ordonnee]} slope={infini.pente} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />}
+        {infini.type === "oblique" && <Line.PointSlope point={[0, infini.ordonnee]} slope={infini.pente} color={COULEUR_ASYMPTOTE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE * 1.6} opacity={OPACITE_ASYMPTOTE} />}
 
         {marqueurs.map((m, index) => (
           <Point key={index} x={m.x} y={m.y} color={COULEUR_COURBE} />

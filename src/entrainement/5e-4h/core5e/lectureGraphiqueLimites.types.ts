@@ -39,10 +39,23 @@ export type ComportementInfini =
   | { type: "oblique"; pente: number; ordonnee: number }
   | { type: "aucune"; signePlusInfini: SigneInfini; signeMoinsInfini: SigneInfini };
 
+/** Bosse cosmétique (lorentzienne a/(1+((x−c)/w)²), qui s'efface comme 1/x² à l'infini) : donne une
+ * vraie forme à la courbe des tirages SANS asymptote verticale — sinon une AH identique en ±∞ ou une
+ * AO donnait une courbe CONFONDUE avec son asymptote (une droite), et « 0 AV — aucune » n'avait que
+ * 4 énoncés possibles. Ne change aucune limite ni aucune asymptote. */
+export interface BosseCourbe {
+  centre: number;
+  amplitude: number;
+  largeur: number;
+}
+
 export interface ExerciceLectureGraphiqueLimites {
   /** 0, 1 ou 2 éléments, TOUJOURS triés par position croissante. */
   vas: ComportementVA[];
   infini: ComportementInfini;
+  /** Seulement quand `vas` est vide (aucune interaction avec une AV ni un point isolé). Optionnel :
+   * 5gen30 (lecture graphique des dérivées) réutilise ce type et l'ignore. */
+  bosses?: BosseCourbe[];
 }
 
 export type GenerateurExerciceLectureGraphiqueLimites = () => ExerciceLectureGraphiqueLimites;

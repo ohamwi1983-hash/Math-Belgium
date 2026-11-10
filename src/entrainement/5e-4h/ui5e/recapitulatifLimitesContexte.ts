@@ -37,7 +37,7 @@ export function calculerRecapitulatifLimitesContexte(etat: EtatSessionLimitesCon
       continue;
     }
 
-    entrees.push({ libelle, estLatex: true, valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"), revele });
+    entrees.push({ libelle, estLatex: true, valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad "), revele });
   }
 
   return entrees;

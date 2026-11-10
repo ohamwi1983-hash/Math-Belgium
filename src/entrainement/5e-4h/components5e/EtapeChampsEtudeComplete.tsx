@@ -12,6 +12,7 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeComplete;
@@ -29,6 +30,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer?: (valeurs: string[]) => StatutVerification[];
+  /** Contrôle AVANT validation : renvoie un message (sans consommer de tentative) quand la saisie
+   * n'est pas du type demandé — ex. forme non simplifiée à l'écran « Simplification » (audit 5e
+   * ch. 4, décision D). `null` = rien à signaler. */
+  prevalider?: (valeurs: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -39,8 +44,9 @@ interface Props {
  * (1 champ), "AH"/"AO" (1 champ), "casSpecial" (2 champs), "constructionInverse" (1 champ).
  * Calculatrice TOUJOURS présente (contextes réalistes, arithmétique non triviale), sauf sur l'écran
  * "domaine"/"classification" (purement symbolique, gérés par `EtapeListeNombresEtudeComplete`). */
-export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, prevalider, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(labels.map(() => ""));
+  const [messagePrevalidation, setMessagePrevalidation] = useState<string | null>(null);
   const [dernierStatuts, setDernierStatuts] = useState<StatutVerification[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
@@ -48,9 +54,13 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
 
   function modifier(i: number, v: string) {
     setValeurs((arr) => arr.map((x, j) => (j === i ? v : x)));
+    setMessagePrevalidation(null);
   }
   function valider() {
     if (!complet) return;
+    const message = prevalider ? prevalider(valeurs) : null;
+    setMessagePrevalidation(message);
+    if (message) return;
     if (diagnostiquer) setDernierStatuts(diagnostiquer(valeurs));
     onValider(valeurs);
   }
@@ -97,8 +107,8 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, phase)} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, phase)} /></p>}
         </div>
       )}
       {!validation && (
@@ -107,7 +117,12 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messagePrevalidation && (
+          <p className="alert-error" role="alert">
+            {messagePrevalidation}
+          </p>
+        )}
+        {montrerErreurs && !messagePrevalidation && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut ?? dernierStatuts?.find((s) => s !== "correct") ?? "not_equivalent")}
           </p>

@@ -10,6 +10,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceLimite;
@@ -67,7 +68,7 @@ export function EtapeTermeDominant({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${statuts && statuts.numerateur !== "correct" ? " is-erronee" : ""}`}
           value={numerateur}
           onChange={(e) => setNumerateur(e.target.value)}
-          placeholder="ex : 3x^3"
+          placeholder="ex : 8x^4"
         />
       </div>
       <ApercuExpressionLatex texte={denominateur} />
@@ -78,13 +79,13 @@ export function EtapeTermeDominant({ exercice, tentativesUtilisees, tentativesMa
           className={`text-input${statuts && statuts.denominateur !== "correct" ? " is-erronee" : ""}`}
           value={denominateur}
           onChange={(e) => setDenominateur(e.target.value)}
-          placeholder="ex : -2x^2"
+          placeholder="ex : −9x^5"
         />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "termeDominant")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "termeDominant")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={aide2} /></p>}
         </div>
       )}
       {!validation && (

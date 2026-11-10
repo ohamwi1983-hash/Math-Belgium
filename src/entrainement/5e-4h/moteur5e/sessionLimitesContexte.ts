@@ -13,7 +13,7 @@ import {
   diagnostiquerEvaluerSeuil,
   diagnostiquerNombreArrondiUnite,
   diagnostiquerNombreExact,
-  diagnostiquerQuotient,
+  diagnostiquerAsymptoteObliqueClub,
   verifierInterpretation,
 } from "./verificationLimitesContexte";
 import type { ReponseEvaluerSeuil } from "./verificationLimitesContexte";
@@ -54,11 +54,20 @@ function cloturerExerciceOuSuivant(etat: EtatSessionLimitesContexte, resultat: R
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionLimitesContexte, phaseAttendue: PhaseLimitesContexte, reponse: T, verifier: (r: T) => boolean): EtatSessionLimitesContexte {
+/** `tentativesMax` imposé pour CETTE soumission (une seule tentative sur un choix fermé, décision F) —
+ * absent : réglage de la session. */
+function soumettreEcran<T>(
+  etat: EtatSessionLimitesContexte,
+  phaseAttendue: PhaseLimitesContexte,
+  reponse: T,
+  verifier: (r: T) => boolean,
+  tentativesMax?: number,
+): EtatSessionLimitesContexte {
   if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMax !== undefined ? { tentativesMax } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -88,7 +97,7 @@ export function soumettreReponseAsymptoteHorizontale(etat: EtatSessionLimitesCon
 export function soumettreReponseVASens(etat: EtatSessionLimitesContexte, indexChoisi: number | null): EtatSessionLimitesContexte {
   if (etat.exerciceCourant.famille !== "prixRevient") throw new Error("soumettreReponseVASens : famille inattendue");
   const { optionsVASens } = etat.exerciceCourant;
-  return soumettreEcran(etat, "vaSens", indexChoisi, (i) => verifierInterpretation(optionsVASens, i));
+  return soumettreEcran(etat, "vaSens", indexChoisi, (i) => verifierInterpretation(optionsVASens, i), 1);
 }
 
 // ============================================================================
@@ -138,7 +147,7 @@ export function soumettreReponseInequation(etat: EtatSessionLimitesContexte, tex
 export function soumettreReponseAsymptoteObliqueClub(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
   if (etat.exerciceCourant.famille !== "clubLoisirs") throw new Error("soumettreReponseAsymptoteObliqueClub : famille inattendue");
   const { a, b } = etat.exerciceCourant;
-  return soumettreEcran(etat, "asymptoteOblique", texte, (t) => diagnostiquerQuotient(t, a, b) === "correct");
+  return soumettreEcran(etat, "asymptoteOblique", texte, (t) => diagnostiquerAsymptoteObliqueClub(t, a, b) === "correct");
 }
 
 export function soumettreReponseInterpreterPente(etat: EtatSessionLimitesContexte, texte: string): EtatSessionLimitesContexte {
@@ -170,7 +179,7 @@ export function soumettreReponseIdentification(etat: EtatSessionLimitesContexte,
 export function soumettreReponseInterpreterPopulation(etat: EtatSessionLimitesContexte, indexChoisi: number | null): EtatSessionLimitesContexte {
   if (etat.exerciceCourant.famille !== "population") throw new Error("soumettreReponseInterpreterPopulation : famille inattendue");
   const { optionsInterpretation } = etat.exerciceCourant;
-  return soumettreEcran(etat, "interpreter", indexChoisi, (i) => verifierInterpretation(optionsInterpretation, i));
+  return soumettreEcran(etat, "interpreter", indexChoisi, (i) => verifierInterpretation(optionsInterpretation, i), 1);
 }
 
 export function soumettreReponseEvaluerSeuil(etat: EtatSessionLimitesContexte, reponse: ReponseEvaluerSeuil): EtatSessionLimitesContexte {
@@ -178,10 +187,20 @@ export function soumettreReponseEvaluerSeuil(etat: EtatSessionLimitesContexte, r
   const { a, b, p, anneeRef, anneeEval, seuil } = etat.exerciceCourant;
   const x = anneeEval - anneeRef;
   const cible = a / (x + p) + b;
-  return soumettreEcran(etat, "evaluerSeuil", reponse, (r) => {
-    const s = diagnostiquerEvaluerSeuil(r, cible, seuil);
-    return s.valeur === "correct" && s.comparaisonCorrecte;
-  });
+  // Choix « supérieur / inférieur » : un mauvais choix clôt l'écran (réponse révélée) même si la
+  // valeur est juste — choix binaire, sinon gagnable par élimination (décision F). Valeur fausse
+  // mais choix juste : les tentatives restantes servent à corriger la valeur.
+  const comparaisonFausse = !diagnostiquerEvaluerSeuil(reponse, cible, seuil).comparaisonCorrecte;
+  return soumettreEcran(
+    etat,
+    "evaluerSeuil",
+    reponse,
+    (r) => {
+      const s = diagnostiquerEvaluerSeuil(r, cible, seuil);
+      return s.valeur === "correct" && s.comparaisonCorrecte;
+    },
+    comparaisonFausse ? etat.etapeCourante.tentativesUtilisees + 1 : undefined,
+  );
 }
 
 // ============================================================================
@@ -193,5 +212,5 @@ export function soumettreReponseInterpreter(etat: EtatSessionLimitesContexte, in
   if (exercice.famille === "population") return soumettreReponseInterpreterPopulation(etat, indexChoisi);
   if (exercice.famille !== "prixRevient" && exercice.famille !== "eauSalee") throw new Error("soumettreReponseInterpreter : famille inattendue");
   const { optionsInterpretation } = exercice;
-  return soumettreEcran(etat, "interpreter", indexChoisi, (i) => verifierInterpretation(optionsInterpretation, i));
+  return soumettreEcran(etat, "interpreter", indexChoisi, (i) => verifierInterpretation(optionsInterpretation, i), 1);
 }

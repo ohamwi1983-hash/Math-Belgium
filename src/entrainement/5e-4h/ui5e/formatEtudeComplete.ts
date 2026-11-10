@@ -148,6 +148,8 @@ export function formatDenominateurLatex(exercice: ExerciceEtudeCompletePipeline)
   }
   const r1 = p1RacineSiDegre3(exercice) as number;
   const p2 = diviserParFacteurLineaire(exercice.coeffsD, r1);
+  // P2 réduit à un monôme (ex. x²) : écrit devant, sans parenthèses — jamais « (x+2)(x²) ».
+  if (p2.filter((c) => c !== 0).length === 1) return `${formatPolynomeLatexVarie(p2, seed)}${formatFacteurLatex(r1)}`;
   return `${formatFacteurLatex(r1)}(${formatPolynomeLatexVarie(p2, seed)})`;
 }
 
@@ -186,8 +188,16 @@ export function formatLabelLimiteDroiteLatex(position: number): string {
   return `\\lim_{x\\to ${position}^+} f(x)=`;
 }
 
+/** Écran de classification : « en x = r », suivi du choix « forme k/0 (limite infinie) » ou
+ * « forme 0/0 » — jamais « lim f(x) = 0/0 » (une forme indéterminée n'est pas une valeur de limite,
+ * audit 5e ch. 4, point 37). */
 export function formatLabelTypeLimiteLatex(position: number): string {
-  return `\\lim_{x\\to ${position}} f(x)=`;
+  return `\\text{en } x=${position}`;
+}
+
+/** Forme obtenue en remplaçant x par une valeur exclue (classification), en LaTeX. */
+export function formatFormeExclusionLatex(estPointVide: boolean): string {
+  return estPointVide ? "\\text{forme } \\tfrac{0}{0}" : "\\text{forme } \\tfrac{k}{0}\\ \\text{(limite infinie)}";
 }
 
 export function formatLabelCoefDirecteurLatex(cible: "moins-infini" | "plus-infini"): string {
@@ -217,7 +227,7 @@ export function labelPhase(phase: PhaseEtudeComplete): string {
     case "domaine":
       return "Domaine de définition";
     case "typeLimite":
-      return "Classification des limites";
+      return "Forme en chaque valeur exclue";
     case "pointVideSimplification":
       return "Point vide — simplification";
     case "pointVideLimite":
@@ -245,6 +255,11 @@ export function labelPhase(phase: PhaseEtudeComplete): string {
   }
 }
 
+/** Nombre écrit dans une phrase : vrai signe moins. */
+function nombreTexte(v: number): string {
+  return `${v}`.replace("-", "−");
+}
+
 function positionLimitesGD(exercice: ExerciceEtudeCompletePipeline, phase: "limitesGD1" | "limitesGD2"): number {
   const excl = phase === "limitesGD1" ? exercice.exclusions[0] : exercice.exclusions[1];
   return excl.position;
@@ -256,35 +271,30 @@ export function consignePhase(exercice: ExerciceEtudeComplete, phase: PhaseEtude
   }
   const ex = exercice;
   switch (phase) {
-    case "domaine": {
-      const n = ex.exclusions.length;
-      return `Donne ${n === 1 ? "la valeur" : "les valeurs"} à exclure du domaine de définition de f`;
-    }
+    case "domaine":
+      // Neutre : ne révèle pas le nombre de valeurs exclues (audit 5e ch. 4, point 41).
+      return "Donne la ou les valeurs à exclure du domaine de définition de f.";
     case "typeLimite":
-      return "Pour chaque valeur exclue, de quel type de limite s'agit-il ?";
+      return "Pour chaque valeur exclue, quelle forme obtiens-tu en remplaçant x par cette valeur dans f(x) ?";
     case "pointVideSimplification":
       return "Factorise le numérateur et le dénominateur de f, puis simplifie le facteur commun. Écris la forme simplifiée de f(x).";
     case "pointVideLimite": {
       const p = ex.exclusions.find((e) => e.type === "pointVide");
-      return `Calcule la limite de f en x=${p?.position} à l'aide de la forme simplifiée (forme exacte ou décimale arrondie au centième).`;
+      return `Calcule la limite de f en x = ${nombreTexte(p?.position as number)} à l'aide de la forme simplifiée (valeur exacte ou décimale arrondie au centième).`;
     }
-    case "pointVideConclusion":
-      return "Réponds aux deux questions suivantes.";
     case "limitesGD1":
     case "limitesGD2": {
       const position = positionLimitesGD(ex, phase);
-      return `Détermine la limite à GAUCHE puis à DROITE de x=${position} (forme exacte ou décimale arrondie au centième, ou +inf/-inf).`;
+      return `Détermine la limite à gauche puis à droite de x = ${nombreTexte(position)} (écris +inf ou −inf pour une limite infinie).`;
     }
     case "av":
-      return "Donne la ou les équation(s) de la ou des asymptote(s) verticale(s) AV";
+      return "Donne la ou les équations des asymptotes verticales (AV).";
     case "infini":
-      return "Détermine les limites suivantes (forme exacte ou décimale arrondie au centième, ou +inf/-inf).";
     case "coefDirecteur":
-      return "Détermine les limites suivantes (forme exacte ou décimale arrondie au centième, ou +inf/-inf).";
     case "coefB":
-      return "Détermine les limites suivantes (forme exacte ou décimale arrondie au centième, ou +inf/-inf).";
+      return "Détermine les limites suivantes (valeur exacte ou décimale arrondie au centième ; écris +inf ou −inf pour une limite infinie).";
     case "asymptoteInfini":
-      return "Donne la ou les équation(s) de la ou des asymptote(s) (horizontale AH, oblique AO).";
+      return "Donne l'équation de l'asymptote horizontale (AH) ou oblique (AO) de chaque côté, ou indique qu'il n'y en a pas.";
     case "casSpecial": {
       const expression = formatExpressionAsymptoteLatex(ex.infini);
       return `\\text{La courbe de f recoupe réellement son asymptote en un point réel. Résous l'équation } f(x) = ${expression} \\text{ pour trouver les coordonnées de ce point.}`;
@@ -294,36 +304,39 @@ export function consignePhase(exercice: ExerciceEtudeComplete, phase: PhaseEtude
   }
 }
 
+/**
+ * Aides — texte RichText (`$…$` = formule KaTeX en ligne, rendu par `TexteRiche5e`) : une phrase,
+ * puis la formule ; jamais de formule écrite au clavier ni de phrase en mode maths (audit 5e ch. 4,
+ * points 12 et 13 — les aides en `\text{}` display étaient coupées à 390 px).
+ */
 export function texteAideNiveau1(exercice: ExerciceEtudeComplete, phase: PhaseEtudeComplete): string {
   if (exercice.mode === "constructionInverse" || phase === "constructionInverse") {
-    return "Choisis d'abord un dénominateur simple qui s'annule à la bonne valeur (ex. (x-r)), puis ajuste le numérateur pour obtenir l'asymptote demandée.";
+    return "Choisis un dénominateur qui s'annule à la valeur donnée, par exemple $x-r$, puis ajuste le numérateur pour obtenir l'asymptote demandée.";
   }
   switch (phase) {
     case "domaine":
-      return "Une valeur est exclue du domaine si elle annule le DÉNOMINATEUR de f — y compris si elle annule aussi le numérateur (point vide, toujours exclu du domaine).";
+      return "Une valeur est exclue du domaine si elle annule le dénominateur de f — même si elle annule aussi le numérateur (point vide).";
     case "typeLimite":
-      return "Si le numérateur s'annule AUSSI à cette valeur (en plus du dénominateur), c'est une forme 0/0 — sinon la limite est infinie.";
+      return "Remplace x par la valeur exclue. Si le numérateur s'annule aussi, c'est la forme $\\frac{0}{0}$ ; sinon c'est la forme $\\frac{k}{0}$ avec $k\\neq 0$, et la limite est infinie.";
     case "pointVideSimplification":
-      return "Factorise séparément le numérateur et le dénominateur : la valeur exclue doit apparaître comme racine des deux.";
+      return "Factorise séparément le numérateur et le dénominateur : la valeur exclue est une racine des deux, et le facteur commun se simplifie.";
     case "pointVideLimite":
-      return "Remplace x par la valeur exclue dans la forme SIMPLIFIÉE (jamais dans la forme d'origine, qui donnerait 0/0).";
-    case "pointVideConclusion":
-      return "Un point vide (0/0, simplifiable) n'est jamais une asymptote verticale — mais la fonction d'origine reste malgré tout indéfinie à cet endroit.";
+      return "Remplace x par la valeur exclue dans la forme simplifiée — jamais dans la forme d'origine, qui donne $\\frac{0}{0}$.";
     case "limitesGD1":
     case "limitesGD2":
-      return "Piège classique : une racine DOUBLE du dénominateur ne donne jamais deux limites différentes — le signe du dénominateur ne change pas de part et d'autre.";
+      return "Étudie le signe du dénominateur juste avant et juste après la valeur exclue. Piège : avec une racine double, le dénominateur ne change pas de signe, les deux limites sont les mêmes.";
     case "av":
-      return "Un point vide (0/0, simplifiable) n'est PAS une asymptote verticale — seule une exclusion où le dénominateur seul s'annule en est une.";
+      return "Un point vide (forme $\\frac{0}{0}$, simplifiable) n'est pas une asymptote verticale : seule une valeur où le dénominateur seul s'annule en donne une.";
     case "infini":
-      return "Pour une limite à l'infini, ne conserve que les termes de plus haut degré du numérateur et du dénominateur.";
+      return "En $\\pm\\infty$, ne garde que les termes de plus haut degré du numérateur et du dénominateur.";
     case "coefDirecteur":
-      return "a=lim f(x)/x compare le degré du numérateur à celui du dénominateur PLUS 1 : égal → pente finie (AO), supérieur → a infini (aucune asymptote).";
+      return "Le coefficient directeur est la limite suivante : $a=\\lim\\limits_{x\\to\\pm\\infty}\\dfrac{f(x)}{x}$. Compare le degré du numérateur à celui du dénominateur augmenté de 1.";
     case "coefB":
-      return "b=lim(f(x)-a·x) : remplace a par la valeur déjà trouvée à l'écran précédent, réduis au même dénominateur, puis ne conserve que les termes de plus haut degré.";
+      return "L'ordonnée à l'origine est la limite suivante, avec la valeur de a trouvée à l'écran précédent : $b=\\lim\\limits_{x\\to\\pm\\infty}\\big(f(x)-a\\,x\\big)$. Réduis au même dénominateur, puis garde les termes de plus haut degré.";
     case "asymptoteInfini":
-      return "Si lim f(x) est finie, c'est une AH (y=cette valeur). Si lim f(x) est infinie mais a=lim f(x)/x est finie et non nulle, c'est une AO.";
+      return "Si la limite de f en l'infini est finie, c'est une asymptote horizontale $y=\\ell$. Si elle est infinie mais que a est fini et non nul, c'est une asymptote oblique $y=ax+b$.";
     case "casSpecial":
-      return "Pose l'égalité f(x) = asymptote(x), réduis au même dénominateur, puis résous l'équation obtenue au numérateur.";
+      return "Pose l'égalité entre f(x) et l'expression de l'asymptote, réduis au même dénominateur, puis résous l'équation obtenue au numérateur.";
     default:
       return "";
   }
@@ -331,46 +344,50 @@ export function texteAideNiveau1(exercice: ExerciceEtudeComplete, phase: PhaseEt
 
 /**
  * Aide niveau 2 — TOUJOURS un exemple travaillé sur une fonction/un cas DIFFÉRENT de l'exercice
- * affiché, jamais la réponse de l'exercice en cours (`promptcorrectiontransversaleecarts5gen24.md`,
- * point C). Les fonctions/valeurs d'exemple sont choisies HORS de la plage réellement générée par
- * `generateurs5e/etudeComplete/index.ts` (positions d'exclusion dans [-6;6], AH/pente dans [-4;4])
- * pour exclure toute coïncidence, même accidentelle, avec la réponse attendue.
+ * affiché, jamais la réponse de l'exercice en cours. Les valeurs d'exemple sont HORS de la plage
+ * réellement générée (positions d'exclusion dans [−6 ; 6], AH/pente dans [−4 ; 4]).
  */
 export function texteAideNiveau2(exercice: ExerciceEtudeComplete, phase: PhaseEtudeComplete): string {
   if (exercice.mode === "constructionInverse" || phase === "constructionInverse") {
-    return "\\text{Exemple : pour une racine en } x=20 \\text{ et une AH } y=15\\text{, essaie } f(x)=\\dfrac{15x+1}{x-20}.";
+    return "Exemple : pour une racine en $x=20$ et une AH $y=15$, essaie $f(x)=15+\\dfrac{1}{x-20}$ ; pour une AO $y=12x+7$, essaie $f(x)=12x+7+\\dfrac{1}{x-20}$.";
   }
   if (exercice.mode !== "etude") return "";
   switch (phase) {
     case "domaine":
-      return "\\text{Exemple : pour } g(x)=\\dfrac{x+1}{(x-30)(x+20)}\\text{, les valeurs exclues sont } x=30 \\text{ et } x=-20.";
+      return "Exemple : pour $g(x)=\\dfrac{x+1}{(x-30)(x+20)}$, les valeurs exclues sont $30$ et $-20$.";
     case "typeLimite":
-      return "\\text{Exemple : pour } g(x)=\\dfrac{(x-30)(x+1)}{(x-30)(x-50)}\\text{, en } x=30 \\text{ (numérateur ET dénominateur nuls) c'est } 0/0\\text{ ; en } x=50\\text{ (dénominateur seul nul) c'est } \\infty.";
+      return "Exemple : pour $g(x)=\\dfrac{(x-30)(x+1)}{(x-30)(x-50)}$, en $x=30$ le numérateur et le dénominateur sont nuls (forme $\\frac{0}{0}$) ; en $x=50$, seul le dénominateur est nul (forme $\\frac{k}{0}$).";
     case "pointVideSimplification":
-      return "\\text{Exemple : } g(x)=\\dfrac{(x-30)(x+20)}{(x-30)(x-10)} \\text{ se simplifie en } \\dfrac{x+20}{x-10}.";
+      return "Exemple : $g(x)=\\dfrac{(x-30)(x+20)}{(x-30)(x-10)}$ se simplifie en $\\dfrac{x+20}{x-10}$, pour $x\\neq 30$.";
     case "pointVideLimite":
-      return "\\text{Exemple : pour la forme simplifiée } g(x)=\\dfrac{x+20}{x-10}\\text{ évaluée en } x=30\\text{, on obtient } g(30)=2,5.";
-    case "pointVideConclusion":
-      return "\\text{Exemple : pour un point vide en } x=30\\text{, il n'y a pas d'AV en } x=30\\text{, et } x=30 \\text{ n'appartient pas au domaine.}";
+      return "Exemple : la forme simplifiée $\\dfrac{x+20}{x-10}$ évaluée en $x=30$ donne $\\dfrac{50}{20}=2{,}5$.";
     case "limitesGD1":
     case "limitesGD2":
-      return "\\text{Exemple : pour } g(x)=\\dfrac{1}{x-30}\\text{, juste avant } x=30 \\text{ le dénominateur est négatif (limite } -\\infty\\text{), juste après il est positif (limite } +\\infty\\text{).}";
+      return "Exemple : pour $g(x)=\\dfrac{1}{x-30}$, juste avant $30$ le dénominateur est négatif (limite $-\\infty$), juste après il est positif (limite $+\\infty$).";
     case "av":
-      return "\\text{Exemple : si les exclusions sont } x=30\\text{ (vraie AV) et } x=50\\text{ (point vide), alors AV : } x=30 \\text{ seulement.}";
+      return "Exemple : si les valeurs exclues sont $30$ (forme $\\frac{k}{0}$) et $50$ (point vide), la seule asymptote verticale est $x=30$.";
     case "infini":
-      if (exercice.infini.type === "oblique") return "\\text{Exemple : pour } g(x)=\\dfrac{2x^{2}+1}{x-10}\\text{, le reste de la division tend vers 0 : seul le quotient } 2x+20 \\text{ compte pour la limite.}";
-      return "\\text{Exemple : pour } g(x)=\\dfrac{3x^{2}}{x^{2}-10}\\text{, ne conserve que le rapport des termes dominants } \\dfrac{3x^{2}}{x^{2}}=3.";
+      if (exercice.infini.type === "oblique") {
+        return "Exemple : pour $g(x)=\\dfrac{2x^{2}+1}{x-10}$, le quotient des termes dominants est $\\dfrac{2x^{2}}{x}=2x$ : la limite est $+\\infty$ en $+\\infty$ et $-\\infty$ en $-\\infty$.";
+      }
+      return "Exemple : pour $g(x)=\\dfrac{3x^{2}}{x^{2}-10}$, le quotient des termes dominants est $\\dfrac{3x^{2}}{x^{2}}=3$ : la limite vaut $3$.";
     case "coefDirecteur":
-      return "\\text{Exemple : pour } g(x)=\\dfrac{2x^{3}}{x-10}\\text{, a=lim g(x)/x est le rapport des coefficients dominants de } 2x^{3} \\text{ et } x(x-10)\\text{, soit une limite infinie.}";
+      return "Exemple : pour $g(x)=\\dfrac{2x^{3}}{x-10}$, $\\dfrac{g(x)}{x}=\\dfrac{2x^{3}}{x^{2}-10x}$ : le numérateur est de plus haut degré, donc a est infini.";
     case "coefB":
-      return "\\text{Exemple : pour } g(x)=\\dfrac{2x^{2}+1}{x-10}\\text{ (a=2 déjà trouvé), } g(x)-2x=\\dfrac{20x+1}{x-10}\\text{, dont la limite en } \\pm\\infty \\text{ est } 20.";
+      return "Exemple : pour $g(x)=\\dfrac{2x^{2}+1}{x-10}$ et $a=2$, $g(x)-2x=\\dfrac{20x+1}{x-10}$, qui tend vers $20$.";
     case "asymptoteInfini":
-      return "\\text{Exemple : si lim g(x)=15 (finie), AH : } y=15\\text{. Si a=20 et lim(g(x)-20x)=-10, AO : } y=20x-10.";
+      return "Exemple : si la limite de g en l'infini vaut $15$, AH : $y=15$. Si $a=20$ et $b=-10$, AO : $y=20x-10$.";
     case "casSpecial":
-      return "\\text{Exemple : pour } g(x)=x+\\dfrac{x-15}{(x-1)(x-2)} \\text{ (asymptote } y=x\\text{), pose } x+\\dfrac{x-15}{(x-1)(x-2)}=x\\text{, multiplie par } (x-1)(x-2) \\text{ pour obtenir } x-15=0\\text{, donc } x=15.";
+      return "Exemple : pour $g(x)=x+\\dfrac{x-15}{(x-1)(x-2)}$ (asymptote $y=x$), l'égalité $g(x)=x$ donne $\\dfrac{x-15}{(x-1)(x-2)}=0$, donc $x=15$.";
     default:
       return "";
   }
+}
+
+/** Consigne de l'écran « recoupement », en RichText (rendu à l'écran par `TexteRiche5e`). La version
+ * LaTeX de `consignePhase(…, "casSpecial")` reste pour l'adaptateur d'évaluation. */
+export function consigneCasSpecialTexte(exercice: ExerciceEtudeCompletePipeline): string {
+  return `La courbe de f recoupe son asymptote en un point. Résous l'équation $f(x)=${formatExpressionAsymptoteLatex(exercice.infini)}$ pour trouver les coordonnées de ce point.`;
 }
 
 /** Bloc "état actuel" — accumule domaine puis chaque résultat trouvé au fil du pipeline (absent tant
@@ -404,7 +421,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeComplete, pha
       const plus = infini.type === "horizontale" ? `${infini.limite}` : infini.type === "oblique" ? (infini.pente >= 0 ? "+\\infty" : "-\\infty") : infini.signePlusInfini === 1 ? "+\\infty" : "-\\infty";
       termes.push(`\\lim_{x\\to -\\infty} f(x) = ${moins},\\ \\lim_{x\\to +\\infty} f(x) = ${plus}`);
     } else if (p === "typeLimite") {
-      termes.push(ex.exclusions.map((e) => `\\lim_{x\\to ${e.position}} f(x) = ${e.type === "pointVide" ? "0/0" : "\\infty"}`).join(",\\ "));
+      termes.push(ex.exclusions.map((e) => `x=${e.position} :\\ ${formatFormeExclusionLatex(e.type === "pointVide")}`).join(",\\quad "));
     } else if (p === "pointVideSimplification") {
       const point = ex.exclusions.find((e) => e.type === "pointVide");
       if (point && ex.coeffsM && ex.coeffsDVraie) {
@@ -412,9 +429,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeComplete, pha
       }
     } else if (p === "pointVideLimite") {
       const point = ex.exclusions.find((e) => e.type === "pointVide");
-      if (point) termes.push(`\\text{Point retiré : } (${point.position}\\,;\\,${formatValeurLatex(point.valeurPointVide as number)})`);
-    } else if (p === "pointVideConclusion") {
-      termes.push("\\text{Point vide : pas d'AV, hors domaine.}");
+      if (point) termes.push(`\\text{Point retiré : } (${point.position}\\,;\\,${formatValeurLatex(point.valeurPointVide as number)})\\ \\text{— pas d'AV, hors domaine}`);
     } else if (p === "limitesGD1" || p === "limitesGD2") {
       const excl = p === "limitesGD1" ? ex.exclusions[0] : ex.exclusions[1];
       if (excl.type === "vaDouble") termes.push(`\\lim_{x\\to ${excl.position}} f(x) = ${excl.signeGauche === 1 ? "+\\infty" : "-\\infty"}`);
@@ -436,9 +451,12 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeComplete, pha
   return termes;
 }
 
-function formatPenteOrdonnee(pente: number, ordonnee: number): string {
-  const signe = ordonnee >= 0 ? "+" : "-";
-  return `${pente}x${signe}${Math.abs(ordonnee)}`;
+/** ax + b propre : « x », « −x », « 2x », sans « 1x » ni « + 0 » (audit 5e ch. 4, point 36). */
+export function formatPenteOrdonnee(pente: number, ordonnee: number): string {
+  const terme = pente === 0 ? "" : pente === 1 ? "x" : pente === -1 ? "-x" : `${pente}x`;
+  if (terme === "") return `${ordonnee}`;
+  if (ordonnee === 0) return terme;
+  return `${terme}${ordonnee > 0 ? "+" : "-"}${Math.abs(ordonnee)}`;
 }
 
 /** Expression de l'asymptote réellement recoupée (écran "casSpecial"), SANS le préfixe "y=" — pour
@@ -455,12 +473,13 @@ function formatExpressionAsymptoteLatex(infini: ComportementInfiniEtude): string
 // ============================================================================
 
 export function formatProprietesConstructionInverseTexte(proprietes: ProprietesConstructionInverse): string[] {
-  const p1 = `${proprietes.racineDenominateur} est une racine du dénominateur de f (f n'est pas définie en x=${proprietes.racineDenominateur}).`;
+  const r = `${proprietes.racineDenominateur}`.replace("-", "−");
+  const p1 = `${r} est une racine du dénominateur de f (f n'est pas définie en x = ${r}).`;
   const asymptote = proprietes.asymptote;
   const p2 =
     asymptote.type === "horizontale"
-      ? `f admet une asymptote horizontale d'équation y=${asymptote.limite} en +∞ et en −∞ (le degré du numérateur est égal à celui du dénominateur, et le rapport de leurs coefficients dominants vaut ${asymptote.limite}).`
-      : `f admet une asymptote oblique d'équation y=${formatPenteOrdonnee(asymptote.pente, asymptote.ordonnee)} (le degré du numérateur dépasse d'exactement 1 celui du dénominateur).`;
+      ? `f admet une asymptote horizontale d'équation y = ${`${asymptote.limite}`.replace("-", "−")} en +∞ et en −∞ (le degré du numérateur est égal à celui du dénominateur, et le rapport de leurs coefficients dominants vaut ${`${asymptote.limite}`.replace("-", "−")}).`
+      : `f admet une asymptote oblique d'équation y = ${formatPenteOrdonnee(asymptote.pente, asymptote.ordonnee).replace(/-/g, "−")} (le degré du numérateur dépasse d'exactement 1 celui du dénominateur).`;
   return [p1, p2];
 }
 
@@ -488,7 +507,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeCompleteP
     case "domaine":
       return [`\\{${exercice.exclusions.map((e) => e.position).join(",\\ ")}\\}`];
     case "typeLimite":
-      return [exercice.exclusions.map((e) => (e.type === "pointVide" ? "0/0" : "\\infty")).join(",\\ ")];
+      return [exercice.exclusions.map((e) => `x=${e.position} :\\ ${formatFormeExclusionLatex(e.type === "pointVide")}`).join(",\\quad ")];
     case "pointVideSimplification": {
       const p = exercice.exclusions.find((e) => e.type === "pointVide");
       return p && exercice.coeffsM && exercice.coeffsDVraie ? [`\\dfrac{${formatPolynomeLatexVarie(exercice.coeffsM, seedExercice(exercice))}}{${formatPolynomeLatexVarie(exercice.coeffsDVraie, seedExercice(exercice))}}`] : [];
@@ -498,6 +517,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeCompleteP
       return [formatValeurLatex(p?.valeurPointVide as number)];
     }
     case "pointVideConclusion":
+      // Plus d'écran (décision I) — conservé pour l'adaptateur d'évaluation (refonte à venir).
       return ["\\text{Non (pas d'AV) ; Non (hors domaine)}"];
     case "limitesGD1":
     case "limitesGD2": {

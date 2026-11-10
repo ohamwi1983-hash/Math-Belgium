@@ -269,7 +269,8 @@ export function consigneGenerale(): string {
 
 export const LIBELLE_FAMILLE_LIMITE: Record<string, string> = {
   limiteReelle: "Nombre réel ℝ",
-  limiteInfiniePoint: "L'infini ∞",
+  // « L'infini ∞ » se confondait avec x → ∞ (audit 5c4a point 11) : c'est la forme k/0.
+  limiteInfiniePoint: "Forme k/0 (limite infinie)",
   limiteInfini: "∞/∞",
   formeIndeterminee: "0/0",
 };
@@ -296,7 +297,10 @@ export const LIBELLE_PHASE_LIMITE: Record<PhaseLimite, string> = {
   evaluerLimiteFinale: "Évaluer la limite finale",
 };
 
-export function labelPhase(phase: PhaseLimite): string {
+export function labelPhase(phase: PhaseLimite, exercice?: ExerciceLimite): string {
+  // Degrés égaux : le rapport simplifié des termes dominants EST la limite (plus d'écran
+  // « evaluerLimiteFinale » dans ce cas, décision C).
+  if (phase === "simplifierLimiteRef" && exercice?.famille === "limiteInfini" && exercice.sousCas === "degresEgaux") return "\\lim =";
   switch (phase) {
     case "simplifierEvaluer":
     case "evaluerLimiteFinale":
@@ -308,7 +312,10 @@ export function labelPhase(phase: PhaseLimite): string {
   }
 }
 
-export function consignePhase(_exercice: ExerciceLimite, phase: PhaseLimite): string {
+export function consignePhase(exercice: ExerciceLimite, phase: PhaseLimite): string {
+  if (phase === "simplifierLimiteRef" && exercice.famille === "limiteInfini" && exercice.sousCas === "degresEgaux") {
+    return "Simplifie le rapport des 2 termes dominants : tu obtiens la limite.";
+  }
   switch (phase) {
     case "reconnaissance":
       return "De quel type de limite s'agit-il ?";
@@ -332,54 +339,55 @@ export function consignePhase(_exercice: ExerciceLimite, phase: PhaseLimite): st
 }
 
 // ============================================================================
-// Aides — niveau 1 (technique générale), niveau 2 (exemple substitué, jamais la réponse). Aucune
-// des 2 n'est jamais révélatrice de la VRAIE famille sur "reconnaissance" (les 4 catégories sont
-// toujours décrites ensemble, jamais une seule mise en avant).
+// Aides — niveau 1 (méthode), niveau 2 (exemple sur une AUTRE fonction, jamais la réponse). Écrites
+// en RichText (`$…$` = LaTeX en ligne, rendu par `TexteRiche5e`) : plus aucune formule tapée au
+// clavier dans une phrase (audit 5c4a point 10). Aucune n'est révélatrice de la VRAIE famille sur
+// « reconnaissance » (les 4 catégories sont toujours décrites ensemble).
 // ============================================================================
 
 export function texteAideNiveau1(_exercice: ExerciceLimite, phase: PhaseLimite): string {
   switch (phase) {
     case "reconnaissance":
-      return "Remplace x par la cible : un résultat fini → nombre réel. Numérateur non nul, dénominateur nul → limite infinie en un point. Numérateur ET dénominateur nuls (x→a) → forme 0/0. x→±∞ : compare les degrés du numérateur et du dénominateur (forme ∞/∞).";
+      return "Remplace x par la valeur visée. Un résultat fini : c'est un nombre réel. Un numérateur non nul sur un dénominateur nul : forme $k/0$, la limite est infinie. Numérateur et dénominateur nuls : forme $0/0$. Quand $x\\to\\pm\\infty$, numérateur et dénominateur deviennent infinis : forme $\\infty/\\infty$, qu'on lève en comparant les degrés.";
     case "factoriserDenominateur":
-      return "Cherche la valeur a telle que D(a)=0 — c'est la racine à mettre en évidence (simple, ou double si le signe de D(x) est constant des deux côtés de a).";
+      return "Le dénominateur s'annule pour la valeur vers laquelle tend x : si c'est $a$, alors $(x-a)$ est un de ses facteurs. Trouve l'autre facteur (discriminant, ou somme et produit des racines) ; s'il vaut encore $(x-a)$, la racine est double.";
     case "limitesGaucheDroite":
-      return "Détermine le signe du numérateur en a, puis le signe du dénominateur factorisé de chaque côté de a — le signe de chaque limite unilatérale est le produit des deux.";
+      return "Près de $a$, le numérateur garde son signe. Étudie le signe du dénominateur factorisé juste avant $a$ ($x<a$), puis juste après ($x>a$) : le signe de chaque limite est le produit des deux signes.";
     case "conclureLimite":
       return "";
     case "factoriser":
-      return "Cherche la valeur a telle que N(a)=0 ET D(a)=0 — c'est le facteur (x-a) commun à mettre en évidence des deux côtés.";
+      return "Le numérateur et le dénominateur s'annulent tous les deux pour la valeur $a$ vers laquelle tend x : $(x-a)$ est un facteur commun. Écris chacun comme un produit de facteurs du premier degré.";
     case "simplifierEvaluer":
-      return "Une fois le facteur commun simplifié, remplace x par a dans ce qui reste. Piège : si le résultat simplifié s'annule ENCORE en a, la limite n'est pas ce nombre — vérifie qu'il est bien défini en a.";
+      return "Simplifie le facteur commun $(x-a)$, puis remplace x par $a$ dans la fraction qui reste.";
     case "termeDominant":
-      return "Le terme dominant est celui du plus haut degré — c'est lui qui impose le comportement de la fonction quand x devient très grand.";
+      return "Le terme dominant d'un polynôme est son terme de plus haut degré : c'est lui qui impose le comportement quand x devient très grand.";
     case "simplifierLimiteRef":
-      return "Les puissances de x des 2 termes dominants se simplifient entre elles (comme une fraction) — il reste le rapport des coefficients, multiplié par une éventuelle puissance de x restante.";
+      return "Simplifie la fraction des deux termes dominants : les puissances de x se simplifient entre elles, il reste le rapport des coefficients, multiplié par la puissance de x qui subsiste.";
     case "evaluerLimiteFinale":
-      return "Degrés égaux : la limite est le rapport des coefficients dominants. Numérateur de degré plus petit : la limite vaut 0. Numérateur de degré plus grand : la limite est infinie — attention, un degré résultant IMPAIR change de signe entre x→+∞ et x→−∞, un degré PAIR non.";
+      return "Numérateur de degré plus petit : il reste $\\dfrac{k}{x^n}$, qui tend vers 0. Numérateur de degré plus grand : la limite est infinie ; son signe dépend du signe du coefficient et, pour une puissance impaire de x, du sens ($x\\to+\\infty$ ou $x\\to-\\infty$).";
   }
 }
 
 export function texteAideNiveau2(_exercice: ExerciceLimite, phase: PhaseLimite): string {
   switch (phase) {
     case "reconnaissance":
-      return "Exemple : lim(x→2) (3x+1)/(x-5) = -7/3, un nombre réel. lim(x→2) 1/(x-2)² est infinie en x=2. lim(x→2) (x²-4)/(x-2) est 0/0. lim(x→+∞) (2x+1)/(3x-5) compare 2 degrés égaux, ∞/∞.";
+      return "Exemples : $\\lim_{x\\to 2}\\dfrac{3x+1}{x-5}=-\\dfrac{7}{3}$ est un nombre réel ; $\\lim_{x\\to 2}\\dfrac{1}{(x-2)^2}$ est de la forme $k/0$ ; $\\lim_{x\\to 2}\\dfrac{x^2-4}{x-2}$ est de la forme $0/0$ ; $\\lim_{x\\to+\\infty}\\dfrac{2x+1}{3x-5}$ est de la forme $\\infty/\\infty$.";
     case "factoriserDenominateur":
-      return "Exemple : D(x)=x²-4x+4 a une racine double en x=2 (D(x)=(x-2)²) ; D(x)=x²-x-6 a 2 racines distinctes, x=3 et x=-2 (D(x)=(x-3)(x+2)).";
+      return "Exemples : $x^2-4x+4=(x-2)^2$ (racine double) ; $x^2-x-6=(x-3)(x+2)$ (deux racines distinctes).";
     case "limitesGaucheDroite":
-      return "Exemple (différent de l'exercice) : pour lim(x→1) 5/((x-1)(x+3)), N(1)=5>0, constant. Juste avant x=1 : (x-1)<0 et (x+3)>0 donc D(x)<0, limite à gauche = -∞. Juste après x=1 : D(x)>0, limite à droite = +∞.";
+      return "Exemple (autre fonction) : pour $\\lim_{x\\to 1}\\dfrac{5}{(x-1)(x+3)}$, le numérateur vaut $5>0$. Juste avant 1, $(x-1)<0$ et $(x+3)>0$ : le dénominateur est négatif, la limite à gauche vaut $-\\infty$. Juste après 1, il est positif : la limite à droite vaut $+\\infty$.";
     case "conclureLimite":
       return "";
     case "factoriser":
-      return "Exemple : (x²-5x+6)/(x²-x-2) partage la racine x=2 : x²-5x+6=(x-2)(x-3) et x²-x-2=(x-2)(x+1).";
+      return "Exemple : $x^2-5x+6=(x-2)(x-3)$ et $x^2-x-2=(x-2)(x+1)$ ont le facteur commun $(x-2)$.";
     case "simplifierEvaluer":
-      return "Suite de l'exemple : après simplification, (x-3)/(x+1) en x=2 donne (2-3)/(2+1)=-1/3.";
+      return "Suite de l'exemple : après simplification, $\\dfrac{x-3}{x+1}$ en $x=2$ donne $\\dfrac{2-3}{2+1}=-\\dfrac{1}{3}$.";
     case "termeDominant":
-      return "Exemple : dans 3x³-5x+1, le terme dominant est 3x³ ; dans -2x²+7, c'est -2x².";
+      return "Exemple : dans $3x^3-5x+1$, le terme dominant est $3x^3$ ; dans $-2x^2+7$, c'est $-2x^2$.";
     case "simplifierLimiteRef":
-      return "Exemple : -4x²/x² se simplifie en -4 (même degré) ; 2x³/x² se simplifie en 2x (degré résultant 1).";
+      return "Exemples : $\\dfrac{-4x^2}{x^2}=-4$ (même degré) ; $\\dfrac{2x^3}{x^2}=2x$ ; $\\dfrac{3x}{6x^2}=\\dfrac{1}{2x}$.";
     case "evaluerLimiteFinale":
-      return "Exemple : un degré résultant 1 (impair) change de signe entre x→+∞ et x→−∞ ; un degré résultant 2 (pair) donne le même signe des deux côtés.";
+      return "Exemples : quand $x\\to-\\infty$, $2x$ tend vers $-\\infty$ mais $2x^2$ tend vers $+\\infty$ ; $\\dfrac{3}{x}$ tend vers 0.";
   }
 }
 

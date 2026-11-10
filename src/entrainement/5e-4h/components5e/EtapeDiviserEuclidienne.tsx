@@ -9,6 +9,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -72,7 +73,7 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
           className={`text-input${statuts && statuts.quotient !== "correct" ? " is-erronee" : ""}`}
           value={quotient}
           onChange={(e) => setQuotient(e.target.value)}
-          placeholder="ex : 2x-3"
+          placeholder="ex : 7x − 11"
         />
       </div>
       <div className="field field-inline">
@@ -84,7 +85,7 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
           className={`text-input${statuts && statuts.reste !== "correct" ? " is-erronee" : ""}`}
           value={reste}
           onChange={(e) => setReste(e.target.value)}
-          placeholder="ex : 5"
+          placeholder="ex : 9"
         />
       </div>
       <CalculatriceScientifique />
@@ -94,14 +95,14 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
             const aide1 = texteAideNiveau1("diviserEuclidienne");
             return (
               <>
-                <p>{aide1.texte}</p>
+                <p><TexteRiche5e texte={aide1.texte} /></p>
                 {aide1.latex && <Katex expression={aide1.latex} block />}
               </>
             );
           })()}
           {niveauAide >= 2 && (
             <>
-              <p>{aide2.texte}</p>
+              <p><TexteRiche5e texte={aide2.texte} /></p>
               {aide2.latex && <Katex expression={aide2.latex} block />}
             </>
           )}

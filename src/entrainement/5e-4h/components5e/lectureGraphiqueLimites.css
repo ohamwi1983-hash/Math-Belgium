@@ -1,0 +1,47 @@
+/* 5gen22 — « Limites et asymptotes, lecture graphique » (audit 5e ch. 4). Règles propres à ce
+ * générateur, scopées par leurs classes : aucun effet sur les autres graphes Mafs du site. */
+
+/* Le doigt posé sur le graphe fait défiler la page verticalement (Mafs impose `touch-action: none`) ;
+ * le glissement horizontal et le pincement restent au graphe. */
+.entrainement .graphe-lecture-limites .MafsView {
+  touch-action: pan-y;
+}
+
+/* Halo plus large et opaque autour des graduations : l'axe ne barre plus les nombres (« —10— »). */
+.entrainement .graphe-lecture-limites .mafs-shadow {
+  stroke-width: 6px;
+  stroke-opacity: 1;
+}
+
+/* Écran « Nommer les asymptotes » : boutons d'ajout, retrait, case « aucune » — cibles ≥ 44 px. */
+.entrainement .asymptotes-ajout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.entrainement .asymptotes-ajout .btn,
+.entrainement .ligne-asymptote .btn-retirer-asymptote {
+  min-height: 44px;
+}
+
+.entrainement .ligne-asymptote .btn-retirer-asymptote {
+  flex: none;
+  min-width: 44px;
+  padding: 0 12px;
+}
+
+.entrainement .case-aucune-asymptote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.entrainement .case-aucune-asymptote input {
+  width: 20px;
+  height: 20px;
+}

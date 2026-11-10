@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
-import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -10,6 +9,7 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ReponseAV } from "../moteur5e/sessionEtudeComplete";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
@@ -66,7 +66,7 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
       <p className="prompt-text">{consignePhase(exercice, "av")}</p>
       <div className="options-grid">
         <button type="button" className={auMoinsUneAV === false ? "btn toggle-active" : "btn"} onClick={() => setAuMoinsUneAV(false)}>
-          Pas de AV
+          Aucune AV
         </button>
         <button type="button" className={auMoinsUneAV === true ? "btn toggle-active" : "btn"} onClick={() => setAuMoinsUneAV(true)}>
           Au moins une AV
@@ -76,13 +76,13 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
         <div className="contenu-conditionnel">
           {valeurs.map((v, i) => (
             <div key={i} className="field-row">
-              <p className="field-label field-label-minuscule">AV≡</p>
+              <p className="field-label field-label-minuscule">AV :</p>
               <input
                 type="text"
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 value={v}
                 onChange={(e) => modifier(i, e.target.value)}
-                placeholder="ex : x=3"
+                placeholder="ex : x=11"
               />
               {valeurs.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirer(i)}>
@@ -98,8 +98,8 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "av")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "av")} block />}
+          <p><TexteRiche5e texte={texteAideNiveau1(exercice, "av")} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={texteAideNiveau2(exercice, "av")} /></p>}
         </div>
       )}
       {!validation && (

@@ -17,6 +17,7 @@ import {
   soumettreReponseSimplifierEvaluer,
   soumettreReponseSimplifierLimiteRef,
   soumettreReponseTermeDominant,
+  tentativesMaxLimite,
 } from "./moteur5e/sessionLimites";
 import type { ReponseFactoriser, ReponseLimitesGaucheDroite, ReponseTermeDominant } from "./moteur5e/sessionLimites";
 import type { EtatSessionLimite, PhaseLimite } from "./moteur5e/typesLimites";
@@ -39,7 +40,7 @@ import { EtapeLimitesGaucheDroite } from "./components5e/EtapeLimitesGaucheDroit
 import { EtapeReconnaissanceLimite } from "./components5e/EtapeReconnaissanceLimite";
 import { EtapeTermeDominant } from "./components5e/EtapeTermeDominant";
 import { Katex } from "./components/Katex";
-import { LIBELLE_FAMILLE_LIMITE, formatReponseAttenduePhaseLatex, limNecessiteModeDisplay } from "./ui5e/formatLimites";
+import { LIBELLE_FAMILLE_LIMITE, LIBELLE_PHASE_LIMITE, formatReponseAttenduePhaseLatex, limNecessiteModeDisplay } from "./ui5e/formatLimites";
 import { calculerRecapitulatifLimite } from "./ui5e/recapitulatifLimite";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -93,9 +94,8 @@ interface TransitionEnAttente {
 function calculerSegmentsProgression(etat: EtatSessionLimite, aideParPhase: Partial<Record<PhaseLimite, boolean>>): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
-    const score = etat.scoresPartiels[phase];
-    if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.scoresPartiels[phase] === undefined) return "a-venir";
+    if (etat.reveleesPartielles[phase]) return "revele";
     return aideParPhase[phase] ? "aide" : "correcte";
   });
 }
@@ -113,21 +113,21 @@ export function App5gen20() {
    * est remis à 0 à chaque transition (voir le commentaire de `EtatSessionComposerFonctions.niveauAide`,
    * même patron que `App5gen31.tsx::aideParPhase`/`App5gen3.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseLimite, boolean>>>({});
+  /** Compteur de générations : fait partie de la clé d'écran, pour que « Générer » et « Nouvel
+   * exercice » remontent l'écran (champs vides) même quand le nouvel exercice commence par le même
+   * écran (audit 5c4a point 7). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
-  /** Réutilise `calculerRecapitulatifLimite` (même mécanisme que le récapitulatif affiché) pour la
-   * réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du tableau, les
-   * phases se closent dans l'ordre. */
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLimite) {
-    const recap = calculerRecapitulatifLimite(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
+  /** Fiche de la puce : l'écran qui VIENT de se clore (`phaseClose`), jamais la dernière ligne du
+   * récapitulatif (audit 5c4a point 6 : le dernier écran prenait le nom du précédent). */
+  function ajouterHistorique(votreReponse: ReactNode, phaseClose: PhaseLimite, revele: boolean) {
     setHistorique((h) => [
       ...h,
       {
-        titre: derniere.libelle,
+        titre: LIBELLE_PHASE_LIMITE[phaseClose],
         votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+        correcte: !revele,
+        reponseAttendue: revele ? reponseAttendueLimite(etat.exerciceCourant, phaseClose) : undefined,
       },
     ]);
   }
@@ -138,7 +138,7 @@ export function App5gen20() {
   function terminerEtape(nouvelEtat: EtatSessionLimite, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, etat.phase, nouvelEtat.derniereEtapeRevelee);
       if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
@@ -152,6 +152,7 @@ export function App5gen20() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -162,13 +163,14 @@ export function App5gen20() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionLimite(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxLimite(etat);
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -185,6 +187,7 @@ export function App5gen20() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites, reconnaissance et calcul</h1>
+        <p className="app-subtitle">Chapitre 4 — Limites et asymptotes</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -305,7 +308,7 @@ function EcranCourant({
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(texte) => terminerEtape(soumettreReponseSimplifierEvaluer(etat, texte), `lim = ${texte}`)}
-            placeholder="ex : -1/3"
+            placeholder="ex : 13/7"
             diagnostiquer={(t) => diagnostiquerNombre(t, cible)}
             validation={validation}
           />
@@ -420,7 +423,7 @@ function EcranCourant({
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(texte) => terminerEtape(soumettreReponseSimplifierLimiteRef(etat, texte), texte)}
-            placeholder={exo.degreResultat === 0 ? "ex : -4" : "ex : 2x^2"}
+            placeholder={exo.degreResultat === 0 ? "ex : 7/8" : "ex : 7x^4"}
             diagnostiquer={(t) => diagnostiquerRatioDominant(t, exo.ratioCoefficients, exo.degreResultat)}
             validation={validation}
           />
@@ -468,7 +471,7 @@ function EcranCourant({
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(texte) => terminerEtape(soumettreReponseEvaluerLimiteFinaleNumerique(etat, texte), `lim = ${texte}`)}
-            placeholder="ex : 0"
+            placeholder="ex : 2,5"
             diagnostiquer={(t) => diagnostiquerNombre(t, cible)}
             validation={validation}
           />

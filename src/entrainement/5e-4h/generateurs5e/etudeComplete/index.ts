@@ -103,9 +103,49 @@ function tirerConfigInfini(degDVraie: number, forceSousCas?: SousCasInfini, forc
   return { sousCas, avecCasSpecial: eligibleCasSpecial && avecCasSpecial };
 }
 
-export function genererExerciceEtudeComplete(
-  options: { nombreExclusions?: 1 | 2; types?: TypeExclusion[]; sousCasInfini?: SousCasInfini; casSpecial?: boolean } = {},
-): ExerciceEtudeCompletePipeline {
+type OptionsEtude = { nombreExclusions?: 1 | 2; types?: TypeExclusion[]; sousCasInfini?: SousCasInfini; casSpecial?: boolean };
+
+/** Plus grand coefficient (en valeur absolue) du numérateur/dénominateur AFFICHÉS — borne de
+ * lisibilité (audit 5e ch. 4, décision J). */
+function coefficientMax(p: number[]): number {
+  return p.reduce((m, c) => Math.max(m, Math.abs(c)), 0);
+}
+
+/** Dénominateur réduit d'un rationnel M(a)/D(a) (deux entiers). */
+function denominateurReduit(num: number, den: number): number {
+  const pgcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : pgcd(b, a % b));
+  const g = pgcd(Math.round(num), Math.round(den)) || 1;
+  return Math.abs(Math.round(den) / g);
+}
+
+const COEFFICIENT_MAX = 30;
+const COEFFICIENT_MAX_DENOMINATEUR = 40;
+
+/** Exercice lisible (décision J) : coefficients du numérateur ≤ 30 (dénominateur ≤ 40) en valeur
+ * absolue ; valeur du point vide entière ou de dénominateur 2, 4 ou 5 (décimal fini, jamais 31/11). */
+function estLisible(ex: ExerciceEtudeCompletePipeline): boolean {
+  if (coefficientMax(ex.coeffsN) > COEFFICIENT_MAX || coefficientMax(ex.coeffsD) > COEFFICIENT_MAX_DENOMINATEUR) return false;
+  const pointVide = ex.exclusions.find((e) => e.type === "pointVide");
+  if (pointVide && ex.coeffsM && ex.coeffsDVraie) {
+    const d = denominateurReduit(polyEval(ex.coeffsM, pointVide.position), polyEval(ex.coeffsDVraie, pointVide.position));
+    if (![1, 2, 4, 5].includes(d)) return false;
+  }
+  return true;
+}
+
+/** Tirage par rejet sur `estLisible` — toutes les familles restent atteignables (vérifié sur
+ * ≥ 10 000 tirages par famille) ; repli : le tirage le moins chargé rencontré. */
+export function genererExerciceEtudeComplete(options: OptionsEtude = {}): ExerciceEtudeCompletePipeline {
+  let meilleur: ExerciceEtudeCompletePipeline | null = null;
+  for (let essai = 0; essai < 4000; essai++) {
+    const ex = genererExerciceEtudeCompleteBrut(options);
+    if (estLisible(ex)) return ex;
+    if (!meilleur || coefficientMax(ex.coeffsN) < coefficientMax(meilleur.coeffsN)) meilleur = ex;
+  }
+  return meilleur as ExerciceEtudeCompletePipeline;
+}
+
+function genererExerciceEtudeCompleteBrut(options: OptionsEtude): ExerciceEtudeCompletePipeline {
   const nombreExclusions = tirerNombreExclusions(options.nombreExclusions);
   const positions = tirerPositions(nombreExclusions);
   const types = tirerTypes(nombreExclusions, options.types);
@@ -190,14 +230,19 @@ export function genererExerciceEtudeComplete(
   const coeffsM = aUnPointVide ? m : undefined;
   const coeffsDVraie = aUnPointVide ? dVraie : undefined;
 
+  // Limites latérales en une vraie AV r : f = M/D_vraie avec D_vraie = (x−r)^k · Q(x). Le signe
+  // près de r est EXACT, lu sur la factorisation : signe(M(r)/Q(r)) × signe((x−r)^k), soit (−1)^k à
+  // gauche et +1 à droite — plus jamais une évaluation numérique à x = r ± ε, fausse quand le terme
+  // polynomial l'emportait encore sur le pôle (audit 5e ch. 4, 5gen24 point 2).
+  const vraies = exclusionsBrutes.filter((e) => e.type !== "pointVide");
   const exclusions: Exclusion[] = exclusionsBrutes.map((e) => {
     if (e.type === "pointVide") {
       return { position: e.position, type: e.type, valeurPointVide: polyEval(m, e.position) / polyEval(dVraie, e.position) };
     }
-    const epsilon = 0.001;
-    const fGauche = polyEval(coeffsN, e.position - epsilon) / polyEval(coeffsD, e.position - epsilon);
-    const fDroit = polyEval(coeffsN, e.position + epsilon) / polyEval(coeffsD, e.position + epsilon);
-    return { position: e.position, type: e.type, signeGauche: signe(fGauche), signeDroit: signe(fDroit) };
+    const k = e.type === "vaDouble" ? 2 : 1;
+    const q = vraies.filter((o) => o !== e).reduce((acc, o) => acc * (e.position - o.position) ** (o.type === "vaDouble" ? 2 : 1), 1);
+    const signeLocal = signe(polyEval(m, e.position) / q);
+    return { position: e.position, type: e.type, signeGauche: (signeLocal * (k % 2 === 0 ? 1 : -1)) as 1 | -1, signeDroit: signeLocal };
   });
 
   return { mode: "etude", coeffsN, coeffsD, coeffsM, coeffsDVraie, exclusions, infini, casSpecial };

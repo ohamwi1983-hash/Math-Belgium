@@ -21,7 +21,8 @@ import type { ExerciceAsymptoteOblique } from "./core5e/asymptoteOblique.types";
 import { EtapeChampLibreAsymptote } from "./components5e/EtapeChampLibreAsymptote";
 import { EtapeDiviserEuclidienne } from "./components5e/EtapeDiviserEuclidienne";
 import { Katex } from "./components/Katex";
-import { formatReponseAttenduePhaseLatex } from "./ui5e/formatAsymptoteOblique";
+import { LIBELLE_PHASE_ASYMPTOTE_OBLIQUE, formatReponseAttenduePhaseLatex } from "./ui5e/formatAsymptoteOblique";
+import { estFormeQuotientPlusReste, retirerMembreGauche } from "./moteur5e/formeSaisieLimites";
 import { calculerRecapitulatifAsymptoteOblique } from "./ui5e/recapitulatifAsymptoteOblique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -79,18 +80,20 @@ export function App5gen21() {
   /** Niveau d'aide RÉELLEMENT utilisé par phase close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseAsymptoteOblique, boolean>>>({});
+  /** Compteur de générations dans la clé d'écran : « Générer » / « Nouvel exercice » vident les champs
+   * même si le nouvel exercice commence par le même écran (audit 5c4a, 5gen21 point 4). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionAsymptoteOblique) {
-    const recap = calculerRecapitulatifAsymptoteOblique(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
+  /** Fiche de la puce : l'écran qui VIENT de se clore (`phaseClose`), jamais la dernière ligne du
+   * récapitulatif. */
+  function ajouterHistorique(votreReponse: ReactNode, phaseClose: PhaseAsymptoteOblique, revele: boolean) {
     setHistorique((h) => [
       ...h,
       {
-        titre: derniere.libelle,
+        titre: LIBELLE_PHASE_ASYMPTOTE_OBLIQUE[phaseClose],
         votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+        correcte: !revele,
+        reponseAttendue: revele ? reponseAttendueAsymptoteOblique(etat.exerciceCourant, phaseClose) : undefined,
       },
     ]);
   }
@@ -98,7 +101,7 @@ export function App5gen21() {
   function terminerEtape(nouvelEtat: EtatSessionAsymptoteOblique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, etat.phase, nouvelEtat.derniereEtapeRevelee);
       if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
@@ -112,6 +115,7 @@ export function App5gen21() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -122,13 +126,14 @@ export function App5gen21() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionAsymptoteOblique(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -145,6 +150,7 @@ export function App5gen21() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Asymptote oblique</h1>
+        <p className="app-subtitle">Chapitre 4 — Limites et asymptotes</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -214,8 +220,8 @@ function EcranCourant({
             terminerEtape(soumettreReponseDiviserEuclidienne(etat, reponse), `quotient = ${reponse.quotient} ; reste = ${reponse.reste}`)
           }
           diagnostiquer={(r: ReponseDiviserEuclidienne) => ({
-            quotient: diagnostiquerQuotient(r.quotient, a, b),
-            reste: diagnostiquerNombre(r.reste, c),
+            quotient: diagnostiquerQuotient(retirerMembreGauche(r.quotient), a, b),
+            reste: diagnostiquerNombre(r.reste.replace(/^\s*R\s*\(\s*x\s*\)\s*=\s*/, ""), c),
           })}
           validation={validation}
         />
@@ -233,8 +239,15 @@ function EcranCourant({
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseEcrireFormeDeveloppee(etat, texte), texte)}
-          placeholder="ex : 2x-3+5/(x-1)"
-          diagnostiquer={(t) => diagnostiquerFormeDeveloppee(t, a, b, c, coeffsD)}
+          placeholder="ex : 7x − 11 + 9/(x − 8)"
+          diagnostiquer={(t) => diagnostiquerFormeDeveloppee(retirerMembreGauche(t), a, b, c, coeffsD)}
+          controleAvantValidation={(t) => {
+            const saisie = retirerMembreGauche(t);
+            if (diagnostiquerFormeDeveloppee(saisie, a, b, c, coeffsD) !== "correct") return null;
+            return estFormeQuotientPlusReste(saisie, a, b)
+              ? null
+              : "Ce n'est pas encore la forme demandée : écris le quotient, puis le reste divisé par le dénominateur (ta saisie ne compte pas comme une tentative).";
+          }}
           validation={validation}
         />
       );
@@ -251,7 +264,7 @@ function EcranCourant({
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientA(etat, texte), `a = ${texte}`)}
-          placeholder="ex : 2"
+          placeholder="ex : 7"
           diagnostiquer={(t) => diagnostiquerNombre(t, a)}
           validation={validation}
         />
@@ -269,7 +282,7 @@ function EcranCourant({
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientB(etat, texte), `b = ${texte}`)}
-          placeholder="ex : -3"
+          placeholder="ex : −11"
           diagnostiquer={(t) => diagnostiquerNombre(t, b)}
           validation={validation}
         />
@@ -287,8 +300,8 @@ function EcranCourant({
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseConclureEquationAsymptote(etat, texte), texte)}
-          placeholder="ex : 2x-3"
-          diagnostiquer={(t) => diagnostiquerQuotient(t, a, b)}
+          placeholder="ex : 7x − 11"
+          diagnostiquer={(t) => diagnostiquerQuotient(retirerMembreGauche(t), a, b)}
           validation={validation}
         />
       );

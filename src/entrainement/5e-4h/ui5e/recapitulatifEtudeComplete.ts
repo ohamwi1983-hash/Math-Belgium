@@ -44,7 +44,9 @@ export function calculerRecapitulatifEtudeComplete(etat: EtatSessionEtudeComplet
     // fait donc que satisfaire le narrowing TypeScript de `ExerciceEtudeCompletePipeline`.
     if (exercice.mode !== "etude") continue;
 
-    entrees.push({ libelle, estLatex: true, valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"), revele });
+    const valeur = formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad");
+    // L'ancien écran « Conclusion » du point vide est supprimé (décision I) : sa phrase est ici.
+    entrees.push({ libelle, estLatex: true, valeur: phase === "pointVideLimite" ? `${valeur}\\quad\\text{— point vide : pas d'AV, hors domaine}` : valeur, revele });
   }
 
   return entrees;

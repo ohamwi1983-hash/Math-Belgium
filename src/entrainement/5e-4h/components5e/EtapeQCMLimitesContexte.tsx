@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { ExerciceLimitesContexte, OptionInterpretation } from "../core5e/limitesContexte.types";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
-import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhaseRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
 import { Katex } from "../components/Katex";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -36,7 +37,9 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consignePhaseRiche(exercice, phase)} />
+      </p>
 
       <div className="options-grid">
         {options.map((option, index) => (
@@ -54,13 +57,17 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
+          <p>
+            <TexteRiche5e texte={texteAideNiveau1(exercice, phase)} />
+          </p>
           {niveauAide >= 2 &&
             (() => {
               const aide2 = texteAideNiveau2(exercice, phase);
               return (
                 <>
-                  <p>{aide2.texte}</p>
+                  <p>
+                    <TexteRiche5e texte={aide2.texte} />
+                  </p>
                   {aide2.latex && <Katex expression={aide2.latex} block />}
                 </>
               );

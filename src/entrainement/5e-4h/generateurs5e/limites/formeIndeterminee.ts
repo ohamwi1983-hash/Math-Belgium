@@ -8,7 +8,25 @@
 import type { ExerciceLimiteFormeIndeterminee } from "../../core5e/limites.types";
 import { entierAleatoire, entierNonNul, reduireFraction } from "./fraction";
 
+/** Plus grand coefficient (en valeur absolue) des polynômes développés affichés à l'élève. */
+const COEFFICIENT_MAX = 30;
+
+/** Tirages rejetés (audit 5c4a point 3) : p = q (les deux facteurs (x-p) et (x-q) se simplifient
+ * aussi, la fonction simplifiée est constante — 19 % des tirages avant correction) et coefficients
+ * développés au-delà de 30 en valeur absolue (31 %). */
 export function genererExerciceFormeIndeterminee(): ExerciceLimiteFormeIndeterminee {
+  for (let essai = 0; essai < 200; essai++) {
+    const exercice = genererExerciceFormeIndetermineeBrut();
+    const coeffs = [
+      exercice.kN * exercice.a * exercice.p, exercice.kN * (exercice.a + exercice.p), exercice.kN,
+      exercice.kD * exercice.a * exercice.q, exercice.kD * (exercice.a + exercice.q), exercice.kD,
+    ];
+    if (exercice.p !== exercice.q && coeffs.every((c) => Math.abs(c) <= COEFFICIENT_MAX)) return exercice;
+  }
+  return genererExerciceFormeIndetermineeBrut();
+}
+
+function genererExerciceFormeIndetermineeBrut(): ExerciceLimiteFormeIndeterminee {
   const a = entierAleatoire(-4, 4);
 
   // Fraction cible num/den — 50% entier (den=1), sinon den∈{2,3} avec num non multiple de den

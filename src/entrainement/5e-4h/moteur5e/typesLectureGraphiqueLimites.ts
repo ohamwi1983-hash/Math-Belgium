@@ -66,6 +66,20 @@ export interface SlotAsymptote {
   cible: CibleAsymptote;
 }
 
+/** Réponse de l'écran « nommerAsymptotes » de 5gen22 (décision G) : des lignes « type + équation »
+ * ajoutées par l'élève, dans l'ordre qu'il veut, ou la case « aucune asymptote ». */
+export type TypeAsymptote = CibleAsymptote["kind"];
+
+export interface LigneAsymptote {
+  type: TypeAsymptote;
+  texte: string;
+}
+
+export interface ReponseNommerAsymptotes {
+  aucune: boolean;
+  lignes: LigneAsymptote[];
+}
+
 export function listeAsymptotes(exercice: ExerciceLectureGraphiqueLimites): SlotAsymptote[] {
   const slots: SlotAsymptote[] = exercice.vas.map((va, index) => ({ id: { kind: "va", index }, cible: { kind: "verticale", x: va.position } }));
   const { infini } = exercice;
@@ -83,14 +97,13 @@ export function listeAsymptotes(exercice: ExerciceLectureGraphiqueLimites): Slot
 }
 
 // ============================================================================
-// Ordre des écrans — "nommerAsymptotes" SAUTÉ s'il n'y a strictement rien à nommer (0 AV + "aucune"
-// à l'infini : la fonction diverge sans la moindre asymptote, cas rare mais valide).
+// Ordre des écrans — TOUJOURS les deux écrans (audit 5e ch. 4, décision G) : un écran 2 sauté quand
+// il n'y avait aucune asymptote révélait la réponse ; l'élève répond désormais « aucune asymptote ».
 // ============================================================================
 
 export function ordreComplet(exercice: ExerciceLectureGraphiqueLimites): PhaseLectureGraphiqueLimites[] {
-  const phases: PhaseLectureGraphiqueLimites[] = ["completerLimites"];
-  if (listeAsymptotes(exercice).length > 0) phases.push("nommerAsymptotes");
-  return phases;
+  void exercice;
+  return ["completerLimites", "nommerAsymptotes"];
 }
 
 export function phaseInitiale(exercice: ExerciceLectureGraphiqueLimites): PhaseLectureGraphiqueLimites {

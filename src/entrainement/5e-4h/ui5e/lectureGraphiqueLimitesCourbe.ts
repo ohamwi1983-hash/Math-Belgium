@@ -10,7 +10,7 @@
  * continuité pour un point isolé, asymptote horizontale/oblique, ou croissance sans asymptote) —
  * l'un dominant près du bord gauche du morceau, l'autre près du bord droit.
  */
-import type { ComportementVA, ExerciceLectureGraphiqueLimites, SigneInfini } from "../core5e/lectureGraphiqueLimites.types";
+import type { BosseCourbe, ComportementVA, ExerciceLectureGraphiqueLimites, SigneInfini } from "../core5e/lectureGraphiqueLimites.types";
 import { xBordVisibleY } from "../ui/mafsTransformation";
 
 const K_VA = 3; // échelle du gabarit de divergence près d'une AV (cf. BUFFER_VA : valeur ≈ K_VA/BUFFER_VA au bord du domaine de rendu)
@@ -55,6 +55,19 @@ export interface PieceCourbe {
   hiVA: number | null;
   gabaritGauche: Gabarit;
   gabaritDroit: Gabarit;
+  /** Bosses cosmétiques de 5gen22 (`ExerciceLectureGraphiqueLimites.bosses`, tirages sans AV) —
+   * ajoutées par `evaluerPieceMelangee` ; 5gen30 a son propre évaluateur et les ignore. */
+  bosses?: BosseCourbe[];
+}
+
+function valeurBosses(bosses: BosseCourbe[] | undefined, x: number): number {
+  if (!bosses) return 0;
+  let somme = 0;
+  for (const b of bosses) {
+    const u = (x - b.centre) / b.largeur;
+    somme += b.amplitude / (1 + u * u);
+  }
+  return somme;
 }
 
 /** Un morceau PAR intervalle entre bornes consécutives (nombreVA+1 morceaux au total) — jamais un
@@ -77,16 +90,27 @@ export function construirePieces(exercice: ExerciceLectureGraphiqueLimites): Pie
       hiVA: i === n ? null : vas[i].position,
       gabaritGauche: i === 0 ? gabaritInfiniGauche : gabaritCoteDroitVA(vas[i - 1]),
       gabaritDroit: i === n ? gabaritInfiniDroit : gabaritCoteGaucheVA(vas[i]),
+      ...(n === 0 && exercice.bosses?.length ? { bosses: exercice.bosses } : {}),
     });
   }
   return pieces;
 }
 
+/** Sigmoïde NORMALISÉE : poids exactement 1 au bord gauche (t = 0) et 0 au bord droit (t = 1), bornée
+ * au-delà — la courbe rejoint EXACTEMENT un point isolé de continuité (un écart jusqu'à 0,1 unité
+ * subsistait avec la sigmoïde brute, audit 5e ch. 4) et n'est plus que le gabarit divergent au-delà
+ * du bord de rendu d'une AV. Propre à 5gen22 (5gen30 a son propre évaluateur). */
+function poidsGaucheNormalise(t: number): number {
+  const s = (u: number) => 1 / (1 + Math.exp(ALPHA_BLEND * (u - 0.5)));
+  const w = (s(t) - s(1)) / (s(0) - s(1));
+  return Math.min(1, Math.max(0, w));
+}
+
 export function evaluerPieceMelangee(piece: PieceCourbe, loRendu: number, hiRendu: number, x: number): number {
   const largeur = Math.max(hiRendu - loRendu, 1e-6);
   const t = (x - loRendu) / largeur;
-  const poidsGauche = 1 / (1 + Math.exp(ALPHA_BLEND * (t - 0.5)));
-  return poidsGauche * piece.gabaritGauche(x) + (1 - poidsGauche) * piece.gabaritDroit(x);
+  const poidsGauche = poidsGaucheNormalise(t);
+  return poidsGauche * piece.gabaritGauche(x) + (1 - poidsGauche) * piece.gabaritDroit(x) + valeurBosses(piece.bosses, x);
 }
 
 export interface SegmentCourbe {
@@ -96,6 +120,9 @@ export interface SegmentCourbe {
 
 const MARGE_X_BORNES = 4;
 const DEMI_LARGEUR_X_MIN_BORNES = 5;
+/** Sans AV, la courbe porte des bosses près de l'origine : fenêtre plus large pour que l'approche de
+ * l'asymptote (ou la divergence) en ±∞ reste visible au-delà des bosses. */
+const DEMI_LARGEUR_X_MIN_SANS_AV = 8;
 
 /** Bornes X FIXES (ne dépendent que des positions d'AV, jamais du viewport) — même formule que
  * `calculerViewBoxLectureGraphique` ci-dessous (extraite ici pour être réutilisable par
@@ -104,7 +131,7 @@ export function calculerBornesXLimites(exercice: ExerciceLectureGraphiqueLimites
   const positions = exercice.vas.map((va) => va.position);
   const xEtendueMin = Math.min(0, ...positions) - MARGE_X_BORNES;
   const xEtendueMax = Math.max(0, ...positions) + MARGE_X_BORNES;
-  const demiLargeur = Math.max(DEMI_LARGEUR_X_MIN_BORNES, (xEtendueMax - xEtendueMin) / 2);
+  const demiLargeur = Math.max(exercice.vas.length === 0 ? DEMI_LARGEUR_X_MIN_SANS_AV : DEMI_LARGEUR_X_MIN_BORNES, (xEtendueMax - xEtendueMin) / 2);
   const centreX = (xEtendueMin + xEtendueMax) / 2;
   return [centreX - demiLargeur, centreX + demiLargeur];
 }
@@ -200,6 +227,11 @@ export function calculerViewBoxLectureGraphique(exercice: ExerciceLectureGraphiq
   } else if (infini.type === "oblique") {
     valeursNotables.push(infini.pente * xMin + infini.ordonnee, infini.pente * xMax + infini.ordonnee);
   }
+  // Sommet de chaque bosse (tirages sans AV) : la forme de la courbe reste entièrement dans le cadre.
+  if (exercice.vas.length === 0 && exercice.bosses?.length) {
+    const piece = construirePieces(exercice)[0];
+    for (const b of exercice.bosses) valeursNotables.push(evaluerPieceMelangee(piece, xMin, xMax, b.centre));
+  }
 
   let yMax = DEMI_HAUTEUR_Y_DEFAUT;
   let yMin = -DEMI_HAUTEUR_Y_DEFAUT;
@@ -207,5 +239,12 @@ export function calculerViewBoxLectureGraphique(exercice: ExerciceLectureGraphiq
     yMax = Math.max(yMax, v + 2);
     yMin = Math.min(yMin, v - 2);
   }
-  return { x: [xMin, xMax], y: [yMin, yMax] };
+  // Marge autour du cadre (4 % de l'étendue, au moins une demi-unité) : une graduation ne tombe jamais
+  // pile sur un bord, son étiquette n'y est plus coupée (« 10 » au bord gauche, « 6 » en haut — audit
+  // 5e ch. 4). Les bornes FIXES du tracé (`calculerBornesXLimites`) ne changent pas.
+  const margeX = Math.max(0.5, 0.04 * (xMax - xMin));
+  const y0 = Math.floor(yMin);
+  const y1 = Math.ceil(yMax);
+  const margeY = Math.max(0.5, 0.04 * (y1 - y0));
+  return { x: [xMin - margeX, xMax + margeX], y: [y0 - margeY, y1 + margeY] };
 }

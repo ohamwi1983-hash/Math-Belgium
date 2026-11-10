@@ -6,6 +6,7 @@
  * `moteur5e/`.
  */
 import type {
+  BosseCourbe,
   ComportementInfini,
   ComportementVA,
   ExerciceLectureGraphiqueLimites,
@@ -98,11 +99,51 @@ function tirerNombreVA(): number {
   return 1;
 }
 
+/** 1 ou 2 bosses (centres entiers dans [−3 ; 3] distants d'au moins 3, amplitude ±1,5 à ±3, largeur
+ * 0,6 à 1,5) — seulement pour un tirage SANS AV (voir `BosseCourbe`) ; elles s'effacent avant le bord
+ * de la fenêtre (demi-largeur 8), où l'on lit le comportement en ±∞. */
+function tirerBosses(): BosseCourbe[] {
+  const nombre = Math.random() < 0.5 ? 1 : 2;
+  const amplitudes = [1.5, 2, 2.5, 3];
+  const largeurs = [0.6, 0.9, 1.2, 1.5];
+  const bosses: BosseCourbe[] = [];
+  while (bosses.length < nombre) {
+    const centre = entierAleatoire(-3, 3);
+    if (bosses.some((b) => Math.abs(b.centre - centre) < 3)) continue;
+    const amplitude = amplitudes[entierAleatoire(0, amplitudes.length - 1)] * signeAleatoire();
+    bosses.push({ centre, amplitude, largeur: largeurs[entierAleatoire(0, largeurs.length - 1)] });
+  }
+  return bosses;
+}
+
+/** Point isolé jamais à la hauteur d'une asymptote horizontale (il se confondait avec elle sur le
+ * graphique, audit 5e ch. 4) : nouvelle valeur tirée tant qu'il y a égalité. */
+function separerPointsIsolesDesAH(exercice: ExerciceLectureGraphiqueLimites): ExerciceLectureGraphiqueLimites {
+  const { infini } = exercice;
+  if (infini.type !== "horizontale") return exercice;
+  const interdites = [infini.limitePlusInfini, infini.limiteMoinsInfini];
+  const vas = exercice.vas.map((va) => {
+    const copie = { ...va };
+    for (const cote of ["pointIsoleGauche", "pointIsoleDroit"] as const) {
+      if (copie[cote] === undefined) continue;
+      while (interdites.includes(copie[cote] as number)) copie[cote] = entierAleatoire(-4, 4);
+    }
+    return copie;
+  });
+  return { ...exercice, vas };
+}
+
+/** Finalisation commune au tirage libre et au panneau : bosses si aucune AV, points isolés séparés des AH. */
+function finaliser(exercice: ExerciceLectureGraphiqueLimites): ExerciceLectureGraphiqueLimites {
+  const separe = separerPointsIsolesDesAH(exercice);
+  return separe.vas.length === 0 ? { ...separe, bosses: tirerBosses() } : separe;
+}
+
 export function genererExerciceLectureGraphiqueLimites(nombreVAForce?: number): ExerciceLectureGraphiqueLimites {
   const nombreVA = nombreVAForce ?? tirerNombreVA();
   const vas = tirerPositionsVA(nombreVA).map(tirerComportementVA);
   const infini = tirerComportementInfini(nombreVA);
-  return { vas, infini };
+  return finaliser({ vas, infini });
 }
 
 // ============================================================================
@@ -174,6 +215,10 @@ function infiniAucune(): ComportementInfini {
 }
 
 export function construireAvecFamilleId(id: string): ExerciceLectureGraphiqueLimites {
+  return finaliser(construireStructureFamille(id));
+}
+
+function construireStructureFamille(id: string): ExerciceLectureGraphiqueLimites {
   switch (id) {
     case "0va-horizontale":
       return { vas: [], infini: infiniHorizontaleIdentique() };

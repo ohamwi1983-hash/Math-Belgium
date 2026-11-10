@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { ExercicePopulation } from "../core5e/limitesContexte.types";
-import { consignePhase, labelsChampsLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhaseRiche, labelsChampsLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
 import type { ReponseEvaluerSeuil, StatutEvaluerSeuil } from "../moteur5e/verificationLimitesContexte";
 import { Katex } from "../components/Katex";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -45,7 +46,9 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <p className="prompt-text">{consignePhase(exercice, "evaluerSeuil")}</p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consignePhaseRiche(exercice, "evaluerSeuil")} />
+      </p>
 
       <div className="field champ-reponse-latex champ-reponse-latex-etroit">
         <span className="field-label-latex">
@@ -56,7 +59,7 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
           className={`text-input${statuts && statuts.valeur !== "correct" ? " is-erronee" : ""}`}
           value={valeur}
           onChange={(e) => setValeur(e.target.value)}
-          placeholder="ex : 10.23"
+          placeholder="ex : 87,25"
         />
       </div>
 
@@ -80,13 +83,17 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "evaluerSeuil")}</p>
+          <p>
+            <TexteRiche5e texte={texteAideNiveau1(exercice, "evaluerSeuil")} />
+          </p>
           {niveauAide >= 2 &&
             (() => {
               const aide2 = texteAideNiveau2(exercice, "evaluerSeuil");
               return (
                 <>
-                  <p>{aide2.texte}</p>
+                  <p>
+                    <TexteRiche5e texte={aide2.texte} />
+                  </p>
                   {aide2.latex && <Katex expression={aide2.latex} block />}
                 </>
               );
