@@ -145,6 +145,9 @@ Document A4 à largeur fixe (`body` 21 cm, viewport `width=820` : le téléphone
 réagencer ; en impression le body reprend la largeur imprimable). Formules display qui défilent dans
 leur bloc, `overflow-wrap: anywhere` dans les blocs. Corrigé : une question longue se coupe ENTRE deux
 étapes (`.question:has(.correction-bloc)`, `.corr:has(.etape-titre)`), jamais de page blanche.
+Énoncé : une question à une ou deux figures reste d'un bloc (sinon son texte restait seul en bas de
+page) ; seules les questions à trois figures ou plus (`classeFigures` → `.figures-multiples`) se
+coupent entre leurs figures.
 
 ## Vérification avant de pousser
 

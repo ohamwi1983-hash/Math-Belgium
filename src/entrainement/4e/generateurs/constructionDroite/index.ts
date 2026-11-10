@@ -45,9 +45,23 @@ function tirerVecteur(variante: VarianteConstructionDroite): Composantes {
   return { x: tirerComposanteNonNulle(), y: tirerComposanteNonNulle() };
 }
 
+function pgcd(a: number, b: number): number {
+  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
+}
+
+/** Vecteur directeur réduit (composantes premières entre elles) : l'équation donnée s'écrit alors
+ * simplifiée (« x + y − 3 = 0 », jamais « −4x − 4y + 12 = 0 »). Pour la variante cartésienne, le
+ * sens est choisi pour que le coefficient de x (= v.y) soit positif — ou celui de y si a = 0. */
+function vecteurReduit(v: Composantes, variante: VarianteConstructionDroite): Composantes {
+  const d = pgcd(v.x, v.y) || 1;
+  const r = { x: v.x / d, y: v.y / d };
+  const aNegatif = r.y < 0 || (r.y === 0 && -r.x < 0);
+  return variante === "implicite" && aNegatif ? { x: -r.x || 0, y: -r.y || 0 } : r;
+}
+
 export function construireExercice(variante: VarianteConstructionDroite): ExerciceConstructionDroite {
   const point: Point = { x: randomInt(-5, 5), y: randomInt(-5, 5) };
-  const vecteur = tirerVecteur(variante);
+  const vecteur = vecteurReduit(tirerVecteur(variante), variante);
   const referenceImplicite = implicteDepuisPointVecteur(point, vecteur);
 
   return {
