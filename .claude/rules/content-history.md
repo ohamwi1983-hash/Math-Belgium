@@ -2016,3 +2016,33 @@ paths:
   constantes de 5gen17 (0,05 g le grain, 800 Mt, valeur reprise de 5gen17 refondu). Cartes 5gen14/15/16/17/18/19/41 alignées sur le
   comportement final des générateurs (plus de « moyenne géométrique » ni « 0 solution » en 5gen15).
   Vérifié : 0 erreur KaTeX/console, 0 débordement, 0 texte brut `_`/`^`/`$` à 390 et 1280 px.
+
+- **5e (4h), Chapitre 4 — Limites et asymptotes** (`limites-asymptotes`) : corrections issues de
+  l'audit du chapitre (lot A, décisions A–L de l'utilisateur). Notions enseignées pour aligner le
+  cours sur ce que demandent 5gen22–5gen24 : en section 3, un exemple « point isolé » (une limite
+  FINIE d'un côté de l'asymptote verticale, point plein, l'autre côté diverge — un côté suffit) et
+  un exemple « deux asymptotes horizontales différentes » ($1 + 2x/\sqrt{x^2+1}$, $y=-1$ en $-\infty$,
+  $y=3$ en $+\infty$) ; la méthode de lecture dit désormais « lis $-\infty$ et $+\infty$
+  séparément ». En section 4, la méthode « écrire $f(x)=b+\frac{a}{x+p}$ par division euclidienne »
+  (jamais les coefficients indéterminés) et trois exemples courts alignés sur 5gen23 : population
+  $\frac{5x+13}{x+2}=5+\frac{3}{x+2}$ (régression, $a>0$), eau salée $C(t)=\frac{150t}{100+5t}\to30$,
+  club $N(x)=2x+15-\frac{8}{x+2}$ (asymptote oblique en contexte). En section 5, un Attention et un
+  exemple « recoupement » ($\frac{x^2+x}{x^2+1}$ croise $y=1$ en $(1;1)$) et un exemple
+  « construction inverse » ($ax+b+\frac{1}{x-r}$, comme 5gen24). « Jamais atteinte » corrigé
+  partout : une asymptote horizontale/oblique PEUT être croisée ; seule l'asymptote verticale d'une
+  fonction rationnelle ne l'est jamais ; « jamais atteinte » n'est affirmé que pour un modèle
+  précis ($b+a/x$). Astuce plancher/plafond corrigée (descend → plancher, monte → plafond), asymptote
+  oblique notée $y=ax+b$ partout (plus de $y=mx+p$). Formulaire : groupe « Contexte, recoupement,
+  construction ». Cartes 5gen20–24 et 5gen42 alignées sur les générateurs (5gen24 n'est plus une
+  « synthèse finale »). Notation clavier retirée (étapes « numérateur(2)=… », « x→−3⁻ », légendes) ;
+  piège rencontré : la `caption` d'un `featureTable` est rendue en texte BRUT (contrairement à la
+  `caption` d'une illustration) — « Quotient f ÷ g » en Unicode. Les nouveaux blocs `exemple` sont
+  placés APRÈS les exemples existants de chaque section (appariement positionnel des énoncés de
+  démonstration préservé). Quiz 5gen42 : banque entière en `RichText` `$…$` rendue par
+  `TexteRiche5e` (comme 5gen41), 10 V / 10 F par thème, affirmations fausses ou imprécises
+  corrigées (asymptote « jamais touchée », condition d'asymptote verticale « exacte » —
+  contre-exemple $\frac{x-1}{(x-1)^2}$, minimum vs borne inférieure, modèle de mélange hors cours,
+  sens de variation d'une population décidé par le signe de $a$, affirmations « méta » remplacées
+  par des affirmations mathématiques). Vérifié : 561 formules de la banque et 313 du cours en
+  KaTeX `strict: 'error'` sans erreur ; 0 erreur KaTeX/console, 0 débordement, 0 `$`/`^`/`_` brut à
+  390 et 1280 px (cours et les 140 questions du quiz parcourues).
