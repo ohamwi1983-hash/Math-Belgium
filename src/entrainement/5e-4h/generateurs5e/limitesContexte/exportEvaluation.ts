@@ -22,7 +22,7 @@ import {
   texteAideNiveau2,
 } from "../../ui5e/formatLimitesContexte";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./index";
-import { profilLimitesContexte } from "../profilsEvaluationLimites22-23";
+import { profilLimitesContexte, FAMILLES_CALCULATRICE_LIMITES_CONTEXTE } from "../profilsEvaluationLimites22-23";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceLimitesContexte>` pour 5gen23 ("Limites et
@@ -387,6 +387,8 @@ function construireCorrectionLimitesContexte(exercice: ExerciceLimitesContexte):
 }
 
 export const adaptateurEvaluationLimitesContexte: AdaptateurFeuilleExercices<ExerciceLimitesContexte> = {
+  // La famille « club » exige toujours la calculatrice (discriminant non carré) : avertissement du panneau.
+  calculatriceIndispensable: [...FAMILLES_CALCULATRICE_LIMITES_CONTEXTE],
   titreDocument: "Limites et asymptotes en contexte — Évaluation",
   nomFichierBase: "limites-asymptotes-contexte",
   genererInstance: genererExerciceLimitesContexte,

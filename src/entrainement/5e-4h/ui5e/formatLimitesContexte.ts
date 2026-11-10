@@ -54,7 +54,8 @@ export function formatTermesDonneesLatex(exercice: ExerciceLimitesContexte): str
     case "prixRevient":
       return [`C_u(x)=${exercice.b}+\\dfrac{${exercice.a}}{x}`];
     case "eauSalee":
-      return [`V(t)=${exercice.v0}+${exercice.r}t`, `Q(t)=${exercice.c * exercice.r}t`];
+      // Coefficient 1 jamais écrit : « 230+t », pas « 230+1t ».
+      return [`V(t)=${exercice.v0}+${exercice.r === 1 ? "" : exercice.r}t`, `Q(t)=${exercice.c * exercice.r === 1 ? "" : exercice.c * exercice.r}t`];
     case "clubLoisirs": {
       const { a, b, c, d } = exercice;
       return [`f(x)=${formatMonomeLatex(a, 1, true)}${formatMonomeLatex(b, 0, false)}-\\dfrac{${c}}{x${d >= 0 ? "+" : "-"}${Math.abs(d)}}`];
