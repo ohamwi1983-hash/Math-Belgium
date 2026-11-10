@@ -111,7 +111,9 @@ export function Intuition({ block }: { block: Extract<Block, { kind: 'intuition'
  * seule l'image est omise plutôt que de casser le fichier HTML autonome une fois ouvert hors ligne. */
 export function Historique({ block }: { block: Extract<Block, { kind: 'historique' }> }) {
   return (
-    <div className="historique-scroll">
+    // `no-export` (masqué à l'impression ET retiré du chapitre téléchargé) : décision de l'utilisateur, ni « Le sais-tu ? »
+    // ni « À quoi ça sert ? » dans un chapitre imprimé ou téléchargé — seulement à l'écran.
+    <div className="historique-scroll no-export">
       <div className="dowel" aria-hidden="true" />
       <div className="sheet">
         <p className="callout-label">
@@ -148,7 +150,7 @@ export function Historique({ block }: { block: Extract<Block, { kind: 'historiqu
  * `Historique` sur `image`. */
 export function Application({ block }: { block: Extract<Block, { kind: 'application' }> }) {
   return (
-    <div className="callout callout-application">
+    <div className="callout callout-application no-export">
       <p className="callout-label">
         <span className="icon" aria-hidden="true">
           🌍

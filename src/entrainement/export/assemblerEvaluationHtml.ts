@@ -1,5 +1,5 @@
 import type { BaremeExercice, BlocCorrection, EtapeCorrection, FragmentConsigne, SectionExercice } from "./genererFeuilleExercices";
-import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml } from "./genererFeuilleExercicesHtml";
+import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
 
@@ -287,6 +287,11 @@ const STYLE_EVALUATION = `
 /* Corrigé : une question corrigée pas à pas peut dépasser une page — elle se coupe ENTRE deux
    étapes (titre d'étape jamais isolé en bas de page) plutôt que de laisser une page blanche. */
 .question:has(.correction-bloc) { break-inside: auto; page-break-inside: auto; }
+/* Énoncé : une question à figures plus haute que la place restante (6gen20 : cinq graphiques) se
+   coupe ENTRE ses éléments — texte, figure, consigne —, jamais au milieu d'une figure, plutôt que
+   d'être renvoyée entière à la page suivante en laissant une page presque vide sous l'en-tête. */
+.question:has(svg), .ex:has(svg) { break-inside: auto; page-break-inside: auto; }
+.question svg, .ex svg { break-inside: avoid; page-break-inside: avoid; }
 .ligne-titre, .etape-titre { break-after: avoid; page-break-after: avoid; }
 .etapes > *, .piege { break-inside: avoid; page-break-inside: avoid; }
 .figure-corrige-bloc { margin: 6px 0 2px; break-inside: avoid; page-break-inside: avoid; }
@@ -337,7 +342,7 @@ ${police === "amenagee" ? POLICE_AMENAGEE : POLICES_STANDARD}
 ${SCRIPT_IMPRESSION}
 </head>
 <body>
-${corps}
+${grillesLisiblesAImpression(corps)}
 </body>
 </html>`;
 }

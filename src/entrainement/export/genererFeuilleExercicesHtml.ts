@@ -26,6 +26,28 @@ import { obtenirCssKatexAutonome } from "./katexImage";
 /** Exportée pour réutilisation par `assemblerEvaluationHtml.ts` (même raison pour les autres
  * exports additifs ci-dessous : assembler un document hétérogène a besoin des mêmes briques bas
  * niveau que ce pipeline, sans dupliquer leur logique). */
+
+/**
+ * Grilles des figures lisibles À L'IMPRESSION (retour de l'utilisateur : « la grille des graphiques
+ * est à peine visible »). Chaque constructeur de figure a sa propre couleur de grille, un gris très
+ * clair (#d8dee6, #e3e6ea, #e9ecef…) qui disparaît sur papier : tout trait (`stroke`) gris très
+ * clair des SVG du document est foncé en un gris moyen. Le blanc (halos, fonds) et les couleurs
+ * (courbes, lectures) ne sont pas touchés.
+ */
+export const GRIS_GRILLE_IMPRESSION = "#9aa3ae";
+
+export function grillesLisiblesAImpression(html: string): string {
+  return html.replace(/stroke="#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})"/g, (tout, hex: string) => {
+    const plein = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(plein.slice(i, i + 2), 16) / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const gris = max - min < 0.09;
+    return gris && luminance > 0.78 && luminance < 0.97 ? `stroke="${GRIS_GRILLE_IMPRESSION}"` : tout;
+  });
+}
+
 export function echapperHtml(texte: string): string {
   return texte.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -156,10 +178,10 @@ export async function genererFeuilleExercicesHtml<T>(
 </head>
 <body>
 <h1>${titre}</h1>
-${blocsExercices.join('<div class="saut-page"></div>')}
+${grillesLisiblesAImpression(blocsExercices.join('<div class="saut-page"></div>'))}
 <div class="saut-page"></div>
 <h1>Corrections</h1>
-${blocsCorrections.join('<div class="saut-page"></div>')}
+${grillesLisiblesAImpression(blocsCorrections.join('<div class="saut-page"></div>'))}
 </body>
 </html>`;
 
