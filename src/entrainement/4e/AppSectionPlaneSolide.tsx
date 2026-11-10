@@ -32,6 +32,7 @@ import {
   texteReponseLignes,
   texteReponseSegmentDirect,
 } from "./ui/formatSectionPlaneSolide";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine la section plane de ce solide.";
 
@@ -44,6 +45,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionSectionPlaneSolide {
   return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolide);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/sectionPlaneSolide/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionSectionPlaneSolide {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSectionPlaneSolide, (id) => construireAvecVarianteId(id as NomSolide3D)));
 }
 
 /** Libellé de la phase COURANTE (fixe, 4 valeurs) — jamais un indicateur "écran X/N" par exercice,
@@ -104,7 +114,7 @@ function puceDepuisHistorique(entree: EntreeHistoriqueSection): EtatPuceProgress
 }
 
 export function AppSectionPlaneSolide() {
-  const [etat, setEtat] = useState<EtatSessionSectionPlaneSolide>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionSectionPlaneSolide>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Numéro d'exercice — change à CHAQUE nouvel exercice (y compris via le panneau dev), pour que la
    * `key` des écrans remette leur état local à zéro (audit chapitre 8, points 4 et 19). */

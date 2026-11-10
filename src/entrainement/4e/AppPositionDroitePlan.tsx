@@ -34,6 +34,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /** `tentativesMax` n'est qu'un plafond : le nombre réel de tentatives est fixé PAR ÉCRAN par
  * `tentativesMaxEcran` (1 pour la classification — décision H2a, audit chapitre 8). */
@@ -46,6 +47,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionPositionDroitePlan {
   return demarrerSessionPositionDroitePlan(REGLAGES_DEMO, genererExercicePositionDroitePlan);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/positionDroitePlan/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionPositionDroitePlan {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionPositionDroitePlan(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExercicePositionDroitePlan, (id) => construireAvecVarianteId(id as ConclusionPositionDroitePlan)));
 }
 
 /** Ordre d'affichage des puces — toujours linéaire ici, 2 phases fixes. "justification" (dernière
@@ -98,7 +108,7 @@ interface TransitionEnAttente {
 }
 
 export function AppPositionDroitePlan() {
-  const [etat, setEtat] = useState<EtatSessionPositionDroitePlan>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionPositionDroitePlan>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — une entrée par écran clos,
    * même index que sa puce. */

@@ -26,6 +26,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine l'ombre portée au soleil.";
 
@@ -40,6 +41,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionOmbreSoleil {
   return demarrerSessionOmbreSoleil(REGLAGES_DEMO, genererExerciceOmbreSoleil);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions et le même catalogue que l'adaptateur
+ * d'export (`generateurs/ombreSoleil/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionOmbreSoleil {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionOmbreSoleil(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceOmbreSoleil, (id) => construireAvecVarianteId(id as VarianteOmbreSoleil)));
 }
 
 const TITRES_ECRANS: Record<PhaseOmbreSoleil, string> = {
@@ -71,7 +81,7 @@ interface TransitionEnAttente {
 }
 
 export function AppOmbreSoleil() {
-  const [etat, setEtat] = useState<EtatSessionOmbreSoleil>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionOmbreSoleil>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);

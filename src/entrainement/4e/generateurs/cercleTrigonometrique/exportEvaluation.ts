@@ -1,11 +1,12 @@
 import type { ExerciceCercleTrigonometrique, Quadrant, Signe, SigneTan, ValeurAxeTan, VarianteCercleTrigId } from "../../core/cercleTrigonometrique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceCercleTrigLatex, libelleQuadrant } from "../../ui/formatCercleTrigonometrique";
 import { estSurAxe, valeursAxeAttendues } from "../../moteur/verificationCercleTrigonometrique";
 import { libelleValeurAxe } from "../../ui/cycleSigneCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./index";
+import { LIBELLE_CAS_QUADRANT_I, profilCercleTrigonometrique } from "../profilsEvaluation4eCh5";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCercleTrigonometrique>` pour gen14 (Placement et
@@ -153,15 +154,12 @@ function construireEnonceAxe(exercice: ExerciceCercleTrigonometrique): SectionEx
     questions: [
       {
         consigne: [texte("Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?")],
-        reponse: { type: "lignes", nombre: 2 },
       },
       {
         consigne: [texte("Dans quel quadrant (I, II, III ou IV) ou sur quel axe (Ox ou Oy) se trouve cet angle ?")],
-        reponse: { type: "lignes", nombre: 0 },
       },
       {
         consigne: [texte("Donne la valeur exacte de "), latex("\\sin(\\theta)"), texte(", "), latex("\\cos(\\theta)"), texte(" et "), latex("\\tan(\\theta)"), texte(".")],
-        reponse: { type: "tableau", libellesLignes: LIBELLES_LIGNES_SIGNES, nombreColonnes: 1 },
       },
     ],
   };
@@ -196,19 +194,15 @@ function construireEnonceCercleTrigonometrique(exercice: ExerciceCercleTrigonome
     questions: [
       {
         consigne: [texte("Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?")],
-        reponse: { type: "lignes", nombre: 2 },
       },
       {
         consigne: [texte("Dans quel quadrant (I, II, III ou IV) ou sur quel axe (Ox ou Oy) se trouve cet angle ?")],
-        reponse: { type: "lignes", nombre: 0 },
       },
       {
         consigne: [texte("Quel est l'angle du premier quadrant (angle de référence) associé à cet angle ?")],
-        reponse: { type: "lignes", nombre: 1 },
       },
       {
         consigne: [texte("Quel est le signe de "), latex("\\sin(\\theta)"), texte(", "), latex("\\cos(\\theta)"), texte(" et "), latex("\\tan(\\theta)"), texte(" ?")],
-        reponse: { type: "tableau", libellesLignes: LIBELLES_LIGNES_SIGNES, nombreColonnes: 1 },
       },
     ],
   };
@@ -238,6 +232,145 @@ function construireCorrectionCercleTrigonometrique(exercice: ExerciceCercleTrigo
   ];
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les 4 écrans (réduction, quadrant, angle du premier quadrant, signes — 3 sur un axe) sont les
+// étapes d'APPRENTISSAGE du générateur : sur papier, l'énoncé garde l'angle et une consigne globale,
+// les écrans deviennent les étapes « a, b, c, d » du corrigé. Valeurs : les champs de l'instance,
+// calculés une seule fois par `quadrantCalculs.ts` (les mêmes que l'écran).
+
+/** Angle en degrés, LaTeX (signe moins typographique). */
+function deg(angle: number): string {
+  return `${angle}^\\circ`;
+}
+
+function consigneGlobale(exercice: ExerciceCercleTrigonometrique): string {
+  return estSurAxe(exercice)
+    ? "Situe cet angle sur le cercle trigonométrique (angle équivalent entre 0° et 360°, axe sur lequel il se trouve), puis donne la valeur exacte de sin θ, cos θ et tan θ."
+    : "Situe cet angle sur le cercle trigonométrique (angle équivalent entre 0° et 360°, quadrant, angle associé du premier quadrant), puis donne le signe de sin θ, cos θ et tan θ.";
+}
+
+function enoncePapier(exercice: ExerciceCercleTrigonometrique): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [texte("On considère l'angle orienté "), latex(formatEnonceCercleTrigLatex(exercice.angleDepart)), texte(`. ${consigneGlobale(exercice)}`)],
+      questions: [],
+    },
+  };
+}
+
+/** Calcul de réduction en LaTeX : « −200° + 360° = 160° » ou « 750° − 2 × 360° = 30° ». */
+function calculReductionLatex(exercice: ExerciceCercleTrigonometrique): string {
+  const { angleDepart, angleReduit } = exercice;
+  const k = (angleReduit - angleDepart) / 360;
+  const tours = Math.abs(k) > 1 ? `${Math.abs(k)} \\times 360^\\circ` : "360^\\circ";
+  return `${deg(angleDepart)} ${k > 0 ? "+" : "-"} ${tours} = ${deg(angleReduit)}`;
+}
+
+function ligneSignesLatex(exercice: ExerciceCercleTrigonometrique): string {
+  const s = (v: Signe | SigneTan) => (v === "-" ? "-" : v === "+" ? "+" : v === "0" ? "0" : "\\nexists");
+  return `\\sin\\theta : ${s(exercice.signeSin)} \\qquad \\cos\\theta : ${s(exercice.signeCos)} \\qquad \\tan\\theta : ${s(exercice.signeTan)}`;
+}
+
+function valeursAxeLatex(exercice: ExerciceCercleTrigonometrique): string {
+  const v = valeursAxeAttendues(exercice);
+  const l = (x: string) => (x === "-1" ? "-1" : x);
+  const tan = v.tan === "indefini" ? "\\tan\\theta \\text{ n'existe pas}" : `\\tan\\theta = ${l(v.tan)}`;
+  return `\\sin\\theta = ${l(v.sin)} ; \\ \\cos\\theta = ${l(v.cos)} ; \\ ${tan}`;
+}
+
+function correctionDetaillee(exercice: ExerciceCercleTrigonometrique): EtapeCorrection[] {
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Ajouter ou retrancher des tours complets de 360° ne change pas le point sur le cercle.")] },
+    { label: "Calcul", sousQuestion: "a", fragments: [latex(calculReductionLatex(exercice))] },
+    { label: "Conclusion", sousQuestion: "b", fragments: [texte(texteJustificationQuadrant(exercice))] },
+  ];
+  if (estSurAxe(exercice)) {
+    const v = valeursAxeAttendues(exercice);
+    lignes.push(
+      {
+        label: "Méthode",
+        sousQuestion: "c",
+        fragments: [
+          texte("Sur un axe, M(θ) est l'un des points (±1 ; 0) ou (0 ; ±1) : on lit cos θ (abscisse) et sin θ (ordonnée), puis "),
+          latex("\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}"),
+          texte("."),
+        ],
+      },
+      { label: "Conclusion", sousQuestion: "c", fragments: [latex(valeursAxeLatex(exercice))] },
+      {
+        label: "Piège",
+        sousQuestion: "c",
+        fragments: [
+          v.tan === "indefini"
+            ? texte("Sur l'axe Oy, cos θ = 0 : tan θ n'existe pas (division par 0), elle ne vaut ni 0 ni 1.")
+            : texte("Sur l'axe Ox, sin θ = 0 donc tan θ = 0 ; cos θ vaut 1 ou −1 selon le côté, pas toujours 1."),
+        ],
+      },
+    );
+    return lignes;
+  }
+  lignes.push(
+    { label: "Calcul", sousQuestion: "c", fragments: [texte(texteJustificationAnglePremierQuadrant(exercice))] },
+    { label: "Méthode", sousQuestion: "d", fragments: [texte(texteJustificationSignes(exercice))] },
+    { label: "Conclusion", sousQuestion: "d", fragments: [latex(ligneSignesLatex(exercice))] },
+    {
+      label: "Piège",
+      sousQuestion: exercice.quadrant === "I" ? "a" : "c",
+      fragments: [
+        exercice.quadrant === "I"
+          ? texte("Le signe se lit sur l'angle réduit, pas sur l'angle de départ : un angle négatif peut très bien avoir tous ses rapports positifs.")
+          : texte(`Dans le quadrant ${exercice.quadrant}, l'angle du premier quadrant n'est pas l'angle réduit lui-même : il faut passer par la symétrie (180° ou 360°).`),
+      ],
+    },
+  );
+  return lignes;
+}
+
+function reponseBreve(exercice: ExerciceCercleTrigonometrique): FragmentConsigne[] {
+  const debut: FragmentConsigne[] = [latex(`\\theta \\equiv ${deg(exercice.angleReduit)}`), texte(` ; ${libelleQuadrant(exercice.quadrant)}`)];
+  if (estSurAxe(exercice)) return [...debut, texte(" ; "), latex(valeursAxeLatex(exercice))];
+  return [...debut, texte(` ; angle du premier quadrant ${exercice.anglePremierQuadrant}° ; `), latex(ligneSignesLatex(exercice))];
+}
+
+function bareme(exercice: ExerciceCercleTrigonometrique): BaremeExercice {
+  if (estSurAxe(exercice)) {
+    return {
+      reponseFinale: reponseBreve(exercice),
+      criteres: [
+        { sousQuestion: "a", critere: [texte("Angle réduit : "), latex(deg(exercice.angleReduit))], points: 1 },
+        { sousQuestion: "b", critere: [texte(`Axe : ${libelleQuadrant(exercice.quadrant)}`)], points: 1 },
+        { sousQuestion: "c", critere: [texte("Valeurs exactes : "), latex(valeursAxeLatex(exercice))], points: 2 },
+      ],
+      erreursFrequentes: [
+        { description: [texte("Un angle sur un axe classé dans un quadrant")], cout: "0 pt à l'étape 2" },
+        { description: [texte("tan θ = 0 ou 1 sur l'axe Oy (au lieu de « n'existe pas »)")], cout: "−1" },
+      ],
+      reponsesAcceptees: [[texte("Valeurs lues sur un cercle trigonométrique dessiné et justifiées par les coordonnées de M(θ)")]],
+    };
+  }
+  return {
+    reponseFinale: reponseBreve(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Angle réduit : "), latex(deg(exercice.angleReduit))], points: 1 },
+      { sousQuestion: "b", critere: [texte(`Quadrant : ${libelleQuadrant(exercice.quadrant)}`)], points: 0.5 },
+      { sousQuestion: "c", critere: [texte(`Angle du premier quadrant : ${exercice.anglePremierQuadrant}°`)], points: 1 },
+      { sousQuestion: "d", critere: [texte("Les trois signes : "), latex(ligneSignesLatex(exercice))], points: 1.5 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Signes lus sur l'angle de départ (négatif ou ≥ 360°) au lieu de l'angle réduit")], cout: "0 pt aux étapes 2 à 4" },
+      { description: [texte("Angle du premier quadrant confondu avec l'angle réduit")], cout: "0 pt à l'étape 3" },
+      { description: [texte("Un seul signe faux")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Quadrant et signes justifiés par un cercle trigonométrique dessiné")]],
+  };
+}
+
+/** ★ un seul tour de 360° et quadrant I ; ★★ sinon. */
+function difficulte(exercice: ExerciceCercleTrigonometrique): 1 | 2 | 3 {
+  const tours = Math.abs((exercice.angleReduit - exercice.angleDepart) / 360);
+  return tours <= 1 && (exercice.quadrant === "I" || estSurAxe(exercice)) ? 1 : 2;
+}
+
 export const adaptateurEvaluationCercleTrigonometrique: AdaptateurFeuilleExercices<ExerciceCercleTrigonometrique> = {
   titreDocument: "Placement et lecture sur le cercle trigonométrique — Évaluation",
   nomFichierBase: "cercle-trigonometrique",
@@ -246,6 +379,14 @@ export const adaptateurEvaluationCercleTrigonometrique: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as VarianteCercleTrigId),
   construireEnonce: construireEnonceCercleTrigonometrique,
   construireCorrection: construireCorrectionCercleTrigonometrique,
-  // 4 questions par instance (réduction, quadrant, angle du premier quadrant, signes) — jamais 1
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 4,
+  profilInstance: profilCercleTrigonometrique,
+  libelleCasParticulier: LIBELLE_CAS_QUADRANT_I,
+  // 4 étapes par instance (réduction, quadrant, angle du premier quadrant, signes) — jamais 1
   // seule : voir le commentaire de tête (pourquoi pas `regroupable`).
 };
