@@ -25,6 +25,7 @@ import {
   quantitesConnuesJusqua,
 } from "../../ui5e/formatArcsSecteurs";
 import { CATALOGUE_VARIANTES_ARC_SECTEUR, genererArcSecteurAvecVariante, genererExerciceArcSecteur } from "./index";
+import { profilArcSecteur } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceArcSecteur>` pour 5gen6 (Arcs et secteurs) —
@@ -228,6 +229,7 @@ function baremeArcSecteur(exercice: ExerciceArcSecteur): BaremeExercice {
 }
 
 export const adaptateurEvaluationArcSecteur: AdaptateurFeuilleExercices<ExerciceArcSecteur> = {
+  profilInstance: profilArcSecteur,
   titreDocument: "Arcs et secteurs — Évaluation",
   nomFichierBase: "arcs-secteurs",
   genererInstance: genererExerciceArcSecteur,

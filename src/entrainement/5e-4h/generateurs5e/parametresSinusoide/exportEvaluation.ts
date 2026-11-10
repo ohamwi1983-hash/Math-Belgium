@@ -13,6 +13,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { consignePhase, formatAmplitudeAbsolueLatex, formatChampParametreLatex, formatFormuleLatex, formatFrequenceLatex, formatRationnelPiLatex } from "../../ui5e/formatParametresSinusoide";
 import { ORDRE_PHASES_SINUSOIDE, type PhaseParametresSinusoide } from "../../moteur5e/typesParametresSinusoide";
 import { CATALOGUE_FORMES, construireAvecFormeId, genererExerciceParametresSinusoide } from "./index";
+import { profilParametresSinusoide, LIBELLE_CAS_SINUSOIDE } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceParametresSinusoide>` pour 5gen8 (Paramètres d'une
@@ -155,6 +156,8 @@ function difficulteParametresSinusoide(exercice: ExerciceParametresSinusoide): 1
 }
 
 export const adaptateurEvaluationParametresSinusoide: AdaptateurFeuilleExercices<ExerciceParametresSinusoide> = {
+  profilInstance: profilParametresSinusoide,
+  libelleCasParticulier: LIBELLE_CAS_SINUSOIDE,
   titreDocument: "Paramètres d'une fonction sinusoïdale — Évaluation",
   nomFichierBase: "parametres-sinusoide",
   genererInstance: genererExerciceParametresSinusoide,

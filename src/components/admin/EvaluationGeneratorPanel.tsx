@@ -27,6 +27,7 @@ import {
   NIVEAU_NUMERO,
   buildEvaluationUrl,
   catalogueVariantesExercice,
+  libelleCasParticulier,
   construireItemsPayload,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
@@ -330,6 +331,17 @@ export function EvaluationGeneratorPanel({
         const parVariante = { ...l.parVariante, [varianteId]: nombre }
         return { ...l, parVariante, nombre: sommeParVariante(parVariante) }
       }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+  }
+
+  /** Case « inclure un cas particulier » d'UN générateur (ligne `type==='exercice'`). */
+  function mettreAJourCasParticulier(chapitreSlug: string, sectionId: string, generatorId: string, inclure: boolean) {
+    setLignes((prev) =>
+      prev.map((l) =>
+        l.chapitreSlug === chapitreSlug && l.sectionId === sectionId && l.type === 'exercice' && l.cle === generatorId ? { ...l, inclureCasParticulier: inclure } : l,
+      ),
     )
     setUrlGeneree(null)
     setGenereLocalementCompte(null)
@@ -805,7 +817,25 @@ export function EvaluationGeneratorPanel({
                                   if (ligne.type === 'exercice') {
                                     const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
                                     const generateur = generateursPourSection(chapitreCourant.slug, section.id).find((g) => g.generatorId === ligne.cle)
-                                    return catalogue.map((variante) => (
+                                    // Tirage équilibré : seulement des exercices complets, sauf si le professeur
+                                    // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
+                                    const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
+                                    const ligneCas =
+                                      libelleCas && ligne.nombre > 0 ? (
+                                        <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-cas'}>
+                                          <td colSpan={4}>
+                                            <label className="admin-eval-checkbox-field">
+                                              <input
+                                                type="checkbox"
+                                                checked={!!ligne.inclureCasParticulier}
+                                                onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', e.target.checked)}
+                                              />
+                                              {libelleCas}
+                                            </label>
+                                          </td>
+                                        </tr>
+                                      ) : null
+                                    return [...catalogue.map((variante) => (
                                       <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
                                         <td>
                                           {generateur?.label || LABEL_TYPE.exercice} —{' '}
@@ -834,7 +864,7 @@ export function EvaluationGeneratorPanel({
                                           </td>
                                         )}
                                       </tr>
-                                    ))
+                                    )), ligneCas].filter(Boolean)
                                   }
 
                                   const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'

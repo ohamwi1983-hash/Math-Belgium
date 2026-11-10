@@ -40,6 +40,7 @@ import {
 } from "../../ui5e/formatEquationTrigonometrique";
 import { CATALOGUE_FAMILLES_EQUATION_TRIG, construireEquationTrigAvecFamille, genererExerciceEquationTrigonometrique } from "./index";
 import { solutionsDistinctes, unionSolutions } from "./solveur";
+import { profilEquationTrig, LIBELLE_CAS_EQUATIONS } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationTrigonometrique>` pour 5gen10 (Équations
@@ -549,6 +550,8 @@ function difficulte(exercice: ExerciceEquationTrigonometrique): 1 | 2 | 3 {
 }
 
 export const adaptateurEvaluationEquationTrig: AdaptateurFeuilleExercices<ExerciceEquationTrigonometrique> = {
+  profilInstance: profilEquationTrig,
+  libelleCasParticulier: LIBELLE_CAS_EQUATIONS,
   titreDocument: "Équations trigonométriques — Évaluation",
   nomFichierBase: "equations-trigonometriques",
   genererInstance: genererExerciceEquationTrigonometrique,

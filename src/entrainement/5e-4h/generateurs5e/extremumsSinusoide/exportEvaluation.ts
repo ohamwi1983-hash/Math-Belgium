@@ -20,6 +20,7 @@ import {
   latexAideNiveau1Extremums,
 } from "../../ui5e/formatExtremumsSinusoide";
 import { CATALOGUE_FONCTIONS_EXTREMUMS, construireAvecFonction, genererExerciceExtremumsSinusoide, valeurTrigVisee } from "./index";
+import { profilExtremumsSinusoide, LIBELLE_CAS_SINUSOIDE } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceExtremumsSinusoide>` pour 5gen11 (Extremums d'une
@@ -132,6 +133,8 @@ function difficulte(exercice: ExerciceExtremumsSinusoide): 1 | 2 | 3 {
 }
 
 export const adaptateurEvaluationExtremumsSinusoide: AdaptateurFeuilleExercices<ExerciceExtremumsSinusoide> = {
+  profilInstance: profilExtremumsSinusoide,
+  libelleCasParticulier: LIBELLE_CAS_SINUSOIDE,
   titreDocument: "Extremums d'une fonction sinusoïdale — Évaluation",
   nomFichierBase: "extremums-sinusoide",
   genererInstance: genererExerciceExtremumsSinusoide,

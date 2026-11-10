@@ -15,6 +15,7 @@ import type {
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { LIBELLE_PHASE, consignePhase, formatTermesDonneesConstructionLatex, formatTermesReponseAttendueModelisationSinusoide, nombreLatex, texteAideNiveau2 } from "../../ui5e/formatModelisationSinusoide";
 import { CATALOGUE_TECHNIQUES, construireAvecTechnique, genererExerciceModelisationSinusoide } from "./index";
+import { profilModelisationSinusoide, LIBELLE_CAS_MODELISATION } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceModelisationSinusoide>` pour 5gen13 (Modéliser une
@@ -315,6 +316,8 @@ function construireCorrectionModelisationSinusoide(exercice: ExerciceModelisatio
 }
 
 export const adaptateurEvaluationModelisationSinusoide: AdaptateurFeuilleExercices<ExerciceModelisationSinusoide> = {
+  profilInstance: profilModelisationSinusoide,
+  libelleCasParticulier: LIBELLE_CAS_MODELISATION,
   titreDocument: "Modéliser une fonction sinusoïdale en contexte — Évaluation",
   nomFichierBase: "modelisation-sinusoide",
   genererInstance: genererExerciceModelisationSinusoide,

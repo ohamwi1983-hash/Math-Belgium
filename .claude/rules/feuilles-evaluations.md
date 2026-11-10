@@ -58,6 +58,29 @@ Le pipeline (`lib/evaluationLocal.ts::appliquerEnoncePapier`) fait le reste : é
 retiré), critères rattachés à leur étape (`etape`), renvois « 0 pt sur a) et b) » réécrits en « sur
 les étapes 1 et 2 » (ou en lettre de question papier).
 
+## Tirage équilibré des évaluations (décisions de l'utilisateur)
+
+- Par défaut, une ÉVALUATION ne tire que des exercices **complets** (tous les paramètres présents,
+  toutes les étapes à faire) : plus de « sans déphasage », « sans décalage vertical », équation sans
+  solution réglée en une ligne… tirés au hasard. La feuille d'exercices garde toute la variété, les
+  générateurs interactifs aussi.
+- Case **« Inclure un cas particulier »** par générateur (page de conception) : la DERNIÈRE instance
+  de la ligne est alors un cas particulier simple, le **même dans toutes les séries** (fixé par la
+  série A).
+- **Calculatrice interdite** → seulement des valeurs exactes / remarquables ; **autorisée** →
+  seulement des cas qui exigent la calculatrice (pas d'angles ni de valeurs remarquables).
+- Contrat : `profilInstance(instance) → { casParticulier: string | null, calcul?: 'exacte' |
+  'calculatrice' }` + `libelleCasParticulier` (texte de la case). Plusieurs caractéristiques →
+  identifiants joints par « + » (jamais tirés pour la case). Rien d'autre à faire : le pipeline
+  (`evaluationLocal.ts::graineInedite`) cherche une graine dont la PREMIÈRE instance respecte la
+  contrainte — le QR code rouvre donc le même exercice sans changer l'appli. Paliers de repli :
+  contrainte complète → exercice complet (cas introuvable) → sans calculatrice → sans contrainte.
+- Pour chaque chapitre : mesurer (≥ 5 000 tirages par variante) la part des cas particuliers et des
+  cas « calculatrice », écrire le profil, vérifier avec un plan réel (2 séries, calculatrice
+  interdite/autorisée, case cochée ou non). Modèle : `5e-4h/generateurs5e/profilsEvaluationTrigonometrie.ts`.
+- **Durée estimée** : imprimée seulement si le professeur coche « Afficher la durée estimée »
+  (`EnTeteEvaluation.afficherDuree`, défaut : non).
+
 ## Registre et code d'exercice
 
 - Dans `lib/evaluationAdapterRegistry.ts`, envelopper chaque adaptateur du chapitre :

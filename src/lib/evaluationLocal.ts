@@ -1,4 +1,4 @@
-import type { AdaptateurFeuilleExercices, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
+import type { AdaptateurFeuilleExercices, ProfilInstance, BaremeExercice, EnoncePapier, BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import {
   genererEvaluationHtml,
@@ -182,22 +182,69 @@ function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: s
   return { code, url: `${URL_SITE}/entrainement/${entree.chantier}/${generatorId}?code=${code}` }
 }
 
-function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>): number {
-  let graine = tirerGraine()
-  for (let essai = 0; essai < 8; essai++) {
-    let empreinte: string
-    try {
-      empreinte = empreinteSection(generatorId, adaptateur.construireEnonce(tirerInstance(adaptateur, varianteId, graine)))
-    } catch {
-      return graine
+/** Contrainte de TIRAGE ÉQUILIBRÉ d'une instance d'évaluation (décisions de l'utilisateur) :
+ * - `cas` : `'complet'` (défaut) = seulement des instances complètes ; `'particulier'` = un cas
+ *   particulier quelconque (case « inclure un cas particulier » cochée, série A) ; autre chaîne =
+ *   CE cas particulier précis (mêmes questions d'une série à l'autre) ;
+ * - `calculatrice` : interdite → jamais d'instance qui exige la calculatrice ; autorisée →
+ *   seulement des instances qui l'exigent (pas d'angles ni de valeurs remarquables).
+ * Sans `profilInstance` dans l'adaptateur, aucune contrainte (comportement historique). */
+interface ContrainteTirage {
+  cas: 'complet' | 'particulier' | string
+  calculatrice?: 'interdite' | 'autorisee'
+}
+
+function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage, avecCalcul: boolean): boolean {
+  if (contrainte.cas === 'complet' ? profil.casParticulier !== null : contrainte.cas === 'particulier' ? profil.casParticulier === null || profil.casParticulier.includes('+') : profil.casParticulier !== contrainte.cas) return false
+  if (avecCalcul && contrainte.calculatrice === 'interdite' && profil.calcul === 'calculatrice') return false
+  if (avecCalcul && contrainte.calculatrice === 'autorisee' && profil.calcul === 'exacte') return false
+  return true
+}
+
+/** Graine dont la PREMIÈRE instance (celle que rouvre le QR code, `tirerInstance`) respecte la
+ * contrainte et n'a pas encore été imprimée. Recherche par paliers : contrainte complète, puis (cas
+ * particulier introuvable) un exercice complet, puis sans la calculatrice (une variante sans aucun cas « à la calculatrice » ne bloque pas la génération),
+ * puis sans contrainte. Renvoie aussi le cas particulier obtenu, pour l'imposer aux autres séries. */
+function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage): { graine: number; casParticulier: string | null } {
+  const profilDe = adaptateur.profilInstance
+  const paliers: { essais: number; filtre: ((p: ProfilInstance) => boolean) | null }[] =
+    profilDe && contrainte
+      ? [
+          { essais: 400, filtre: (p) => respecteContrainte(p, contrainte, true) },
+          // Cas particulier introuvable (générateur sans ce cas) : exercice complet, calculatrice respectée.
+          ...(contrainte.cas !== 'complet' ? [{ essais: 400, filtre: (p: ProfilInstance) => respecteContrainte(p, { ...contrainte, cas: 'complet' }, true) }] : []),
+          { essais: 400, filtre: (p) => respecteContrainte(p, contrainte, false) },
+          { essais: 8, filtre: null },
+        ]
+      : [{ essais: 8, filtre: null }]
+  let repli: { graine: number; casParticulier: string | null } | null = null
+  for (const palier of paliers) {
+    for (let essai = 0; essai < palier.essais; essai++) {
+      const graine = tirerGraine()
+      let instance: never
+      try {
+        instance = tirerInstance(adaptateur, varianteId, graine)
+      } catch {
+        return { graine, casParticulier: null }
+      }
+      const profil = profilDe ? profilDe(instance) : null
+      if (palier.filtre && profil && !palier.filtre(profil)) continue
+      const resultat = { graine, casParticulier: profil?.casParticulier ?? null }
+      repli ??= resultat
+      let empreinte: string
+      try {
+        empreinte = empreinteSection(generatorId, adaptateur.construireEnonce(instance))
+      } catch {
+        return resultat
+      }
+      if (!dejaVues.has(empreinte)) {
+        dejaVues.add(empreinte)
+        return resultat
+      }
     }
-    if (!dejaVues.has(empreinte)) {
-      dejaVues.add(empreinte)
-      return graine
-    }
-    graine = tirerGraine()
+    if (repli) return repli
   }
-  return graine
+  return repli ?? { graine: tirerGraine(), casParticulier: null }
 }
 
 function melanger<T>(liste: T[]): T[] {
@@ -222,6 +269,8 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
   const nombreSeries = entete.mode === 'exercice' ? 1 : Math.max(1, entete.nombreSeries)
   const dejaVues = new Set(lireHistorique().map((h) => h.empreinte))
   const series: PlanSerie[] = []
+  /** Cas particulier tiré en série A pour un item (« inclure un cas particulier »), imposé aux autres séries. */
+  const casParticulierParItem = new Map<string, string>()
 
   for (let s = 0; s < nombreSeries; s++) {
     const elements: ElementPlan[] = []
@@ -231,8 +280,24 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         const adaptateur = EVALUATION_ADAPTER_REGISTRY[item.exercice.generatorId]
         if (!adaptateur) continue
         const generatorId = item.exercice.generatorId
+        // Tirage équilibré (évaluation seulement ; une feuille d'exercices garde toute la variété) :
+        // instances complètes, sauf la DERNIÈRE de la ligne si « inclure un cas particulier » est
+        // coché — et ce cas particulier est le MÊME dans toutes les séries (fixé par la série A).
+        const equilibre = entete.mode !== 'exercice'
+        const totalLigne = item.exercice.parVariante.reduce((t, v) => t + v.nombre, 0)
+        let rang = 0
         const instances: InstancePlan[] = item.exercice.parVariante.flatMap(({ varianteId, nombre, points }) =>
-          Array.from({ length: nombre }, () => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues) })),
+          Array.from({ length: nombre }, () => {
+            rang++
+            const particulier = equilibre && !!item.exercice!.inclureCasParticulier && rang === totalLigne
+            const cleCas = `${items.indexOf(item)}`
+            const contrainte: ContrainteTirage | undefined = equilibre
+              ? { cas: particulier ? casParticulierParItem.get(cleCas) ?? 'particulier' : 'complet', calculatrice: entete.calculatrice }
+              : undefined
+            const { graine, casParticulier } = graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainte)
+            if (particulier && casParticulier && !casParticulierParItem.has(cleCas)) casParticulierParItem.set(cleCas, casParticulier)
+            return { varianteId, points, graine }
+          }),
         )
         if (instances.length === 0) continue
         if (adaptateur.regroupable && instances.length > 1) elements.push({ ...base, type: 'exercice', generatorId, instances })

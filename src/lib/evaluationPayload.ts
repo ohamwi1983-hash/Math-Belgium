@@ -441,6 +441,13 @@ export function themesPourSection(chapitreSlug: string, sectionId: string): Quiz
  * d'adaptateur du tout). */
 const CATALOGUE_VARIANTE_PAR_DEFAUT: CatalogueVarianteEntree[] = [{ id: 'defaut', label: 'Tirage aléatoire' }]
 
+/** Libellé de la case « inclure un cas particulier » d'un générateur — `null` s'il n'a pas de
+ * profil d'instance (tirage équilibré non disponible, aucune case affichée). */
+export function libelleCasParticulier(generatorId: IdGenerateurPilote): string | null {
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
+  return adaptateur?.profilInstance && adaptateur.libelleCasParticulier ? adaptateur.libelleCasParticulier : null
+}
+
 export function catalogueVariantesExercice(generatorId: IdGenerateurPilote): CatalogueVarianteEntree[] {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
   if (!adaptateur) return []
@@ -3652,6 +3659,9 @@ export interface LigneSelection {
    * catalogue, voir `catalogueVariantesExercice`), pour un contrôle fin plutôt qu'un total tiré au
    * hasard parmi toutes les familles. Absent (ou vide) pour les autres types. */
   parVariante?: Record<string, number>
+  /** Réservé à `type==='exercice'` (évaluation) : case « inclure un cas particulier » — par défaut
+   * seules des instances complètes sont tirées (voir `libelleCasParticulier`). */
+  inclureCasParticulier?: boolean
   /** Points par question. Pour `type==='exercice'`, sert de SEUL repli quand une variante n'a pas
    * encore d'entrée dans `pointsParVariante` (ex. juste après avoir forcé un nombre sur une
    * nouvelle variante) — l'édition réelle du barème passe alors par `pointsParVariante`, jamais
@@ -3672,7 +3682,9 @@ export interface ItemPayload {
   processus: Processus
   titreSection: string
   points: number
-  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[] }
+  /** `inclureCasParticulier` : la dernière instance de la ligne est un cas particulier (tirage
+   * équilibré, voir `AdaptateurFeuilleExercices.profilInstance`) — génération locale seulement. */
+  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[]; inclureCasParticulier?: boolean }
   /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths quand
    * une même page en sert plusieurs (`AppEvaluation6e.tsx`, voir `QuizThemeConfig.quizChapitre`) —
    * absent pour les chapitres à banque unique (4e). */
@@ -3807,7 +3819,13 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
         .filter(([, nombre]) => nombre > 0)
         .map(([varianteId, nombre]) => ({ varianteId, nombre, points: ligne.pointsParVariante?.[varianteId] ?? ligne.points }))
       if (parVariante.length === 0) continue
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante }, section: sectionRef })
+      items.push({
+        processus: ligne.processus,
+        titreSection,
+        points: ligne.points,
+        exercice: { generatorId: config.generatorId, parVariante, inclureCasParticulier: !!ligne.inclureCasParticulier && !!libelleCasParticulier(config.generatorId) },
+        section: sectionRef,
+      })
     } else if (ligne.type === 'vraiFaux') {
       const config = themesPourSection(ligne.chapitreSlug, ligne.sectionId).find((t) => t.quizTheme === ligne.cle)
       if (!config) continue

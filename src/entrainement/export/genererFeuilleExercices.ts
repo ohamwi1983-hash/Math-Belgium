@@ -123,6 +123,13 @@ export interface BaremeExercice {
  * (« Étape n — consigne », suivie de sa résolution), pas dans l'énoncé. Un problème peut garder de
  * VRAIES questions distinctes (`section.questions`, a) b) c)…), chacune couvrant une ou plusieurs
  * étapes. La version aménagée imprime ce MÊME énoncé (seule la mise en page change). */
+export interface ProfilInstance {
+  /** `null` = instance complète ; sinon identifiant court du cas particulier (« sans-dephasage »,
+   * « aucune-solution »…), le même pour toutes les séries d'une même question. */
+  casParticulier: string | null;
+  calcul?: "exacte" | "calculatrice";
+}
+
 export interface EnoncePapier {
   section: SectionExercice;
   /** Pour chaque question de `section.questions`, les lettres (« a », « b »…) des étapes de
@@ -162,6 +169,18 @@ export interface AdaptateurFeuilleExercices<T> {
   enoncePapier?: (instance: T) => EnoncePapier;
   /** Durée indicative d'une instance en évaluation, en minutes (estimation de durée du panneau). */
   dureeMinutes?: number;
+  /** Profil structurel d'une instance, pour le TIRAGE ÉQUILIBRÉ des évaluations (décision de
+   * l'utilisateur, `lib/evaluationLocal.ts::graineInedite`) : par défaut seules les instances
+   * COMPLÈTES sortent (`casParticulier === null` : tous les paramètres présents, toutes les étapes à
+   * faire) ; un cas particulier (sans déphasage, aucune solution, k = 0 ou ±1…) ne sort que si le
+   * professeur coche « inclure un cas particulier » pour la ligne. `calcul` : `'exacte'` = valeurs
+   * remarquables, faisable sans calculatrice ; `'calculatrice'` = exige la calculatrice ; absent =
+   * sans objet. Calculatrice interdite → jamais `'calculatrice'` ; autorisée → jamais `'exacte'`.
+   * Les générateurs d'apprentissage (écran) ne sont PAS concernés : ils gardent toute leur variété. */
+  profilInstance?: (instance: T) => ProfilInstance;
+  /** Libellé de la case du panneau, ex. « Inclure un cas particulier (sans déphasage ou sans
+   * décalage vertical) ». Requis dès que `profilInstance` peut renvoyer un cas particulier. */
+  libelleCasParticulier?: string;
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
    * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
    * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée
