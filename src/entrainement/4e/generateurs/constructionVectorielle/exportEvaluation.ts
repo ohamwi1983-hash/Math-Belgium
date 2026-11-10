@@ -244,7 +244,7 @@ function construireSvgConstructionVectorielle(exercice: ExerciceConstructionVect
   const grilleHtml = construireGrilleEtAxesHtml(viewBox, echelle);
   const abHtml = construireVecteurHtml(exercice.pointA, vecteurAB, `${exercice.labelA}${exercice.labelB}`, COULEUR_AB, echelle);
   const cibleHtml = avecCible
-    ? construireVecteurHtml(ancrage, exercice.cibleComposantes, `${formatCoefficientTexte(exercice.coefficient)}${exercice.labelA}${exercice.labelB}`, COULEUR_CIBLE, echelle)
+    ? construireVecteurHtml(ancrage, exercice.cibleComposantes, `${formatCoefficientTexte(exercice.coefficient).replace("-", "−")}${exercice.labelA}${exercice.labelB}`, COULEUR_CIBLE, echelle)
     : "";
   const pointsHtml = points.map((p) => construirePointHtml(p.point, p.label, echelle)).join("");
 

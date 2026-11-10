@@ -88,6 +88,32 @@ interface Echelle {
   sy: (y: number) => number;
 }
 
+/** Cadre PAPIER : le cadre de l'écran (`viewBoxLectureGraphiqueDroite`) étendu pour contenir l'origine — sur papier, sans
+ * axes ni graduations dans le cadre, les coordonnées des points ne se liraient pas (l'écran, lui,
+ * étend sa vue jusqu'aux axes, `etendreViewBoxPourEtiquettes`). Les unités restent carrées : la
+ * dimension la moins remplie est élargie symétriquement pour garder le rapport de la zone tracée. */
+function cadrePapier(viewBox: ViewBoxTransformation): ViewBoxTransformation {
+  let [xMin, xMax] = viewBox.x;
+  let [yMin, yMax] = viewBox.y;
+  xMin = Math.min(xMin, -1);
+  xMax = Math.max(xMax, 1);
+  yMin = Math.min(yMin, -1);
+  yMax = Math.max(yMax, 1);
+  const rapport = (LARGEUR_SVG - 2 * MARGE_PX) / (HAUTEUR_SVG - 2 * MARGE_PX);
+  const largeur = xMax - xMin;
+  const hauteur = yMax - yMin;
+  if (largeur / hauteur < rapport) {
+    const ajout = (hauteur * rapport - largeur) / 2;
+    xMin -= ajout;
+    xMax += ajout;
+  } else {
+    const ajout = (largeur / rapport - hauteur) / 2;
+    yMin -= ajout;
+    yMax += ajout;
+  }
+  return { x: [xMin, xMax], y: [yMin, yMax] };
+}
+
 function construireEchelle(viewBox: ViewBoxTransformation): Echelle {
   const [xMin, xMax] = viewBox.x;
   const [yMin, yMax] = viewBox.y;
@@ -116,21 +142,22 @@ function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Ech
     const px = echelle.sx(v);
     lignes.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_PX}" x2="${px.toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 13).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 13).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="3" paint-order="stroke">${formatNombreGraphique(v)}</text>`);
     }
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = echelle.sy(v);
     lignes.push(`<line x1="${MARGE_PX}" y1="${py.toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="10" text-anchor="end" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="10" text-anchor="end" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="3" paint-order="stroke">${formatNombreGraphique(v)}</text>`);
     }
   }
 
   const axeX = `<line x1="${MARGE_PX}" y1="${echelle.sy(0).toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${echelle.sy(0).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
   const axeY = `<line x1="${echelle.sx(0).toFixed(1)}" y1="${MARGE_PX}" x2="${echelle.sx(0).toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_AXE}" stroke-width="1.4"/>`;
 
-  return `${lignes.join("")}${axeX}${axeY}${labels.join("")}`;
+  // Graduations APRÈS la droite (marqueur de coupure) : une droite qui passe sur une graduation ne la masque pas.
+  return `${lignes.join("")}${axeX}${axeY}<!--graduations-->${labels.join("")}`;
 }
 
 /** Découpe la droite INFINIE (`point` + direction `vecteur`) aux bords du `viewBox` — méthode des
@@ -173,11 +200,11 @@ function decouperDroiteDansViewBox(point: Point, vecteur: { x: number; y: number
  * représentation que `LectureGraphiqueDroiteGraph.tsx` à l'écran, jamais l'équation elle-même
  * affichée (c'est justement ce que l'élève doit trouver). */
 function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueDroite, etiquettes = false): string {
-  const viewBox = viewBoxLectureGraphiqueDroite(exercice);
+  const viewBox = cadrePapier(viewBoxLectureGraphiqueDroite(exercice));
   const echelle = construireEchelle(viewBox);
   const [depart, arrivee] = decouperDroiteDansViewBox(exercice.point, exercice.vecteur, viewBox);
 
-  const grilleHtml = construireGrilleEtAxesHtml(viewBox, echelle);
+  const [grilleHtml, graduationsHtml] = construireGrilleEtAxesHtml(viewBox, echelle).split("<!--graduations-->");
   const droiteHtml = `<line x1="${echelle.sx(depart.x).toFixed(1)}" y1="${echelle.sy(depart.y).toFixed(1)}" x2="${echelle.sx(arrivee.x).toFixed(1)}" y2="${echelle.sy(arrivee.y).toFixed(1)}" stroke="${COULEUR_DROITE}" stroke-width="2.4"/>`;
   const pointsHtml = pointsEntiersVisibles(exercice)
     .map((p, i) => {
@@ -192,6 +219,7 @@ function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueD
 <rect x="0" y="0" width="${LARGEUR_SVG}" height="${HAUTEUR_SVG}" fill="#ffffff"/>
 ${grilleHtml}
 ${droiteHtml}
+${graduationsHtml}
 ${pointsHtml}
 </svg>`;
 }
