@@ -126,7 +126,11 @@ export function App5gen22() {
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        messageRevele: enAttente.closTot ? "Ce n'était pas la bonne réponse : il y a des asymptotes (ou il n'y en a aucune), ce choix ne se rejoue pas." : undefined,
+        messageRevele: enAttente.closTot
+          ? listeAsymptotes(exercice).length > 0
+            ? "Ce graphique a des asymptotes — le choix « aucune asymptote » ne se rejoue pas."
+            : "Ce graphique n'a aucune asymptote — ce choix ne se rejoue pas."
+          : undefined,
       }
     : null;
 
