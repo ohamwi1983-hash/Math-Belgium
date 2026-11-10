@@ -139,6 +139,13 @@ function formatFractionLatex(f: FractionExacte): string {
  * négative de x (le terme simplifié tend vers 0, "numerateurPlusPetit"). */
 function formatRatioMonomeLatex(f: FractionExacte, degre: number): string {
   if (degre === 0) return formatFractionLatex(f);
+  // Degré négatif (numérateur de plus petit degré) : x au DÉNOMINATEUR, −\dfrac{1}{3x} plutôt que
+  // −\dfrac{1}{3}x^{-1}.
+  if (degre < 0) {
+    const puissance = degre === -1 ? "x" : `x^{${-degre}}`;
+    const signeNegatif = f.num < 0 ? "-" : "";
+    return `${signeNegatif}\\dfrac{${Math.abs(f.num)}}{${f.den === 1 ? "" : f.den}${puissance}}`;
+  }
   const variable = degre === 1 ? "x" : `x^{${degre}}`;
   if (f.den === 1) return formatMonomeIsoleLatex(f.num, degre);
   const signe = f.num < 0 ? "-" : "";

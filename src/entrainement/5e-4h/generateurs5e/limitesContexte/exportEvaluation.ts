@@ -236,7 +236,7 @@ function correctionDetailleeLimitesContexte(exercice: ExerciceLimitesContexte): 
       etapes.push(methode(exercice, "evaluer"), calculAide2(exercice, "evaluer"), conclusionLatex(exercice, "evaluer", ` (${contexte.unitePluriel} réels).`));
       etapes.push(methode(exercice, "inequation"), calculAide2(exercice, "inequation"));
       etapes.push({ label: "Conclusion", sousQuestion: "b", fragments: [latex(`x=${moisAttendu}`), texte(` : le seuil est atteint pour la première fois après ${moisAttendu} mois.`)] });
-      etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("La solution de l'équation n'est pas entière : on prend le premier nombre entier de mois qui la dépasse (arrondi vers le haut), pas l'entier le plus proche.")] });
+      etapes.push({ label: "Piège", sousQuestion: "b", fragments: [texte("On prend le premier nombre entier de mois pour lequel le seuil est atteint (la solution arrondie vers le haut), pas l'entier le plus proche.")] });
       etapes.push(methode(exercice, "asymptoteOblique"), conclusionLatex(exercice, "asymptoteOblique"));
       etapes.push(methode(exercice, "interpreterPente"));
       etapes.push({ label: "Conclusion", sousQuestion: "d", fragments: [latex(`${a}\\times${facteur}=${a * facteur}`), texte(` : à long terme, environ ${a * facteur} ${contexte.unitePluriel} de plus chaque mois.`)] });
