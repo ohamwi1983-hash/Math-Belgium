@@ -16,6 +16,7 @@ import { evaluerFonctionReference, pointUnitaire } from "../../moteur/verificati
 import { formatEquationFonctionReferenceLatex } from "../../ui/formatFonctionsReference";
 import { formatFractionIrreductible } from "../../ui/formatFraction";
 import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFonctionReference } from "./index";
+import { profilFonctionReference, PARAMETRES_TRANSFORMATIONS } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFonctionReference>` pour gen10 (Transformer une
@@ -377,6 +378,8 @@ function baremeFonctionsReference(exercice: ExerciceFonctionReference): BaremeEx
 }
 
 export const adaptateurEvaluationFonctionsReference: AdaptateurFeuilleExercices<ExerciceFonctionReference> = {
+  profilInstance: profilFonctionReference,
+  parametresAuChoix: PARAMETRES_TRANSFORMATIONS,
   titreDocument: "Transformer une fonction de référence — Évaluation",
   nomFichierBase: "fonctions-reference",
   genererInstance: genererExerciceFonctionReference,

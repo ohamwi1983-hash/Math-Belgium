@@ -33,6 +33,7 @@ import {
   xExactD,
 } from "../../ui6e/formatEquationsExpLog";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEquationsExpLog } from "./index";
+import { profilEquationsExpLog, LIBELLE_CAS_EQUATIONS_EXP_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationsExpLog>` pour `6gen14` (Résoudre une
@@ -558,6 +559,8 @@ function enoncePapierEquationsExpLog(exercice: ExerciceEquationsExpLog): EnonceP
 }
 
 export const adaptateurEvaluationEquationsExpLog: AdaptateurFeuilleExercices<ExerciceEquationsExpLog> = {
+  profilInstance: profilEquationsExpLog,
+  libelleCasParticulier: LIBELLE_CAS_EQUATIONS_EXP_LOG,
   titreDocument: "Résoudre une équation exponentielle ou logarithmique — Évaluation",
   nomFichierBase: "equations-exp-log",
   genererInstance: genererExerciceEquationsExpLog,

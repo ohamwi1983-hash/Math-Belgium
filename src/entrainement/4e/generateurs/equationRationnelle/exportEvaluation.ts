@@ -26,6 +26,7 @@ import {
 import { formatEquationDenominateur, formatEquationNumerateur } from "../../ui/formatSimplification";
 import { racinesDistinctes } from "../../moteur/verificationEquationRationnelle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationRationnelle, type VarianteEquationRationnelleId } from "./index";
+import { profilEquationRationnelle, LIBELLE_CAS_EQUATION_RATIONNELLE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationRationnelle>` pour gen4 ("L'inconnue au
@@ -421,6 +422,8 @@ function baremeEquationRationnelle(instance: ExerciceEquationRationnelle): Barem
 }
 
 export const adaptateurEvaluationEquationRationnelle: AdaptateurFeuilleExercices<ExerciceEquationRationnelle> = {
+  profilInstance: profilEquationRationnelle,
+  libelleCasParticulier: LIBELLE_CAS_EQUATION_RATIONNELLE,
   titreDocument: "L'inconnue au dénominateur — Évaluation",
   nomFichierBase: "equation-rationnelle",
   genererInstance: genererExerciceEquationRationnelle,

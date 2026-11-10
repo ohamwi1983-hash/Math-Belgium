@@ -4,6 +4,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { CONSIGNE_GENERALE, consigneEcran, descriptionGraphique, formatEquationBLatex, formatFonctionLatex, ordonneeSecondeMarque } from "../../ui6e/formatDeterminerParametresLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDeterminerParametresLogarithme } from "./index";
 import { construireSvgParametresLogarithme } from "./svgParametresLogarithme";
+import { profilDeterminerParametresLogarithme, PARAMETRES_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDeterminerParametresLogarithme>` pour `6gen18`
@@ -188,6 +189,8 @@ function enoncePapier(exercice: ExerciceDeterminerParametresLogarithme): EnonceP
 }
 
 export const adaptateurEvaluationDeterminerParametresLogarithme: AdaptateurFeuilleExercices<ExerciceDeterminerParametresLogarithme> = {
+  profilInstance: profilDeterminerParametresLogarithme,
+  parametresAuChoix: PARAMETRES_LOG,
   titreDocument: "Paramètres depuis des conditions graphiques — Évaluation",
   nomFichierBase: "determiner-parametres-logarithme",
   genererInstance: genererExerciceDeterminerParametresLogarithme,

@@ -26,6 +26,7 @@ import { calculerViewBoxComparaisonSeries, pointsCourbeCumulee, type PointCourbe
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonSeries } from "./index";
 import { avecVirgulesBelges, segmentEnVirgules, virgulesLatex } from "../../ui/nombreFr";
 import { LABEL_Q1, LABEL_Q2, LABEL_Q3 } from "../../ui/formatBoiteMoustaches";
+import { profilComparaisonSeries, LIBELLE_CAS_COMPARAISON } from "../profilsEvaluationStatistique";
 
 
 /**
@@ -589,6 +590,8 @@ const adaptateurVirgules = avecVirgulesBelges(adaptateurEvaluationComparaisonSer
 
 export const adaptateurEvaluationComparaisonSeries: AdaptateurFeuilleExercices<ExerciceComparaisonSeries> = {
   ...adaptateurVirgules,
+  profilInstance: profilComparaisonSeries,
+  libelleCasParticulier: LIBELLE_CAS_COMPARAISON,
   // Énoncé papier tiré de l'énoncé DÉJÀ en virgules (tableaux et graphique compris).
   enoncePapier: (instance) => {
     const section = adaptateurVirgules.construireEnonce(instance);

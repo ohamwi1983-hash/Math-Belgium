@@ -17,6 +17,7 @@ import {
 import { genererExerciceDispersion } from "./index";
 import { aupresDesPopulationMajuscule } from "../../ui/phrasesContexteStatistique";
 import { avecVirgulesBelges, nombreFrLatex, segmentEnVirgules } from "../../ui/nombreFr";
+import { profilDispersion } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDispersion>` pour gen34 (Paramètres de dispersion —
@@ -310,6 +311,7 @@ const adaptateurEvaluationDispersionBrut: AdaptateurFeuilleExercices<ExerciceDis
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
 export const adaptateurEvaluationDispersion: AdaptateurFeuilleExercices<ExerciceDispersion> = {
   ...avecVirgulesBelges(adaptateurEvaluationDispersionBrut),
+  profilInstance: profilDispersion,
   difficulte: () => 2,
   reponseBreve: reponseBreveDispersion,
   correctionDetaillee: correctionDetailleeDispersion,

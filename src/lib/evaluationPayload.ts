@@ -448,6 +448,25 @@ export function libelleCasParticulier(generatorId: IdGenerateurPilote): string |
   return adaptateur?.profilInstance && adaptateur.libelleCasParticulier ? adaptateur.libelleCasParticulier : null
 }
 
+/** Paramètres que le professeur peut inclure ou non (cases du panneau) — `[]` si le générateur n'en
+ * propose pas. */
+export function parametresAuChoix(generatorId: IdGenerateurPilote): { id: string; label: string }[] {
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
+  return adaptateur?.profilInstance && adaptateur.parametresAuChoix ? adaptateur.parametresAuChoix : []
+}
+
+/** `true` si toutes les questions de ce générateur exigent une calculatrice (avertissement du panneau
+ * quand le professeur choisit « calculatrice interdite »). */
+export function calculatriceIndispensable(generatorId: IdGenerateurPilote): boolean {
+  return !!EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable
+}
+
+/** Nom lisible d'un générateur (titre de son document, sans « — Évaluation »). */
+export function nomGenerateur(generatorId: IdGenerateurPilote): string {
+  const titre = EVALUATION_ADAPTER_REGISTRY[generatorId]?.titreDocument
+  return titre ? titre.replace(/\s*—\s*Évaluation$/, '') : generatorId
+}
+
 export function catalogueVariantesExercice(generatorId: IdGenerateurPilote): CatalogueVarianteEntree[] {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId]
   if (!adaptateur) return []
@@ -3662,6 +3681,9 @@ export interface LigneSelection {
   /** Réservé à `type==='exercice'` (évaluation) : case « inclure un cas particulier » — par défaut
    * seules des instances complètes sont tirées (voir `libelleCasParticulier`). */
   inclureCasParticulier?: boolean
+  /** Réservé à `type==='exercice'` (évaluation) : paramètres DÉCOCHÉS par le professeur (ids de
+   * `parametresAuChoix`) — absents de toutes les instances de la ligne. Vide = tous inclus. */
+  parametresExclus?: string[]
   /** Points par question. Pour `type==='exercice'`, sert de SEUL repli quand une variante n'a pas
    * encore d'entrée dans `pointsParVariante` (ex. juste après avoir forcé un nombre sur une
    * nouvelle variante) — l'édition réelle du barème passe alors par `pointsParVariante`, jamais
@@ -3684,7 +3706,7 @@ export interface ItemPayload {
   points: number
   /** `inclureCasParticulier` : la dernière instance de la ligne est un cas particulier (tirage
    * équilibré, voir `AdaptateurFeuilleExercices.profilInstance`) — génération locale seulement. */
-  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[]; inclureCasParticulier?: boolean }
+  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[]; inclureCasParticulier?: boolean; parametresExclus?: string[] }
   /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths quand
    * une même page en sert plusieurs (`AppEvaluation6e.tsx`, voir `QuizThemeConfig.quizChapitre`) —
    * absent pour les chapitres à banque unique (4e). */
@@ -3823,7 +3845,12 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
         processus: ligne.processus,
         titreSection,
         points: ligne.points,
-        exercice: { generatorId: config.generatorId, parVariante, inclureCasParticulier: !!ligne.inclureCasParticulier && !!libelleCasParticulier(config.generatorId) },
+        exercice: {
+          generatorId: config.generatorId,
+          parVariante,
+          inclureCasParticulier: !!ligne.inclureCasParticulier && !!libelleCasParticulier(config.generatorId),
+          parametresExclus: parametresAuChoix(config.generatorId).length > 0 ? ligne.parametresExclus ?? [] : undefined,
+        },
         section: sectionRef,
       })
     } else if (ligne.type === 'vraiFaux') {

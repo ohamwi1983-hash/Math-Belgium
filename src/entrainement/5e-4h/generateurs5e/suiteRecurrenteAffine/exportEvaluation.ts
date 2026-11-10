@@ -20,6 +20,7 @@ import {
   formatReponseAttenduePhaseLatex,
 } from "../../ui5e/formatSuiteRecurrenteAffine";
 import { CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, construireAvecRegime, genererExerciceSuiteRecurrenteAffine } from "./index";
+import { profilSuiteRecurrenteAffine } from "../profilsEvaluationSuites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSuiteRecurrenteAffine>` pour 5gen19 (Suite
@@ -204,6 +205,7 @@ function difficulteSuiteRecurrenteAffine(exercice: ExerciceSuiteRecurrenteAffine
 }
 
 export const adaptateurEvaluationSuiteRecurrenteAffine: AdaptateurFeuilleExercices<ExerciceSuiteRecurrenteAffine> = {
+  profilInstance: profilSuiteRecurrenteAffine,
   titreDocument: "Suite récurrente affine et régime permanent — Évaluation",
   nomFichierBase: "suite-recurrente-affine",
   genererInstance: genererExerciceSuiteRecurrenteAffine,

@@ -4,6 +4,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatEnonceTexte } from "../../ui/formatTableauFrequences";
 import { genererExerciceTableauFrequences } from "./index";
 import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
+import { profilTableauFrequences } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceTableauFrequences>` pour gen30 (Tableau de
@@ -175,6 +176,7 @@ function enoncePapierTableauFrequences(instance: ExerciceTableauFrequences): Eno
 }
 
 const adaptateurEvaluationTableauFrequencesBrut: AdaptateurFeuilleExercices<ExerciceTableauFrequences> = {
+  profilInstance: profilTableauFrequences,
   titreDocument: "Tableau de fréquences — Évaluation",
   nomFichierBase: "tableau-frequences",
   genererInstance: genererExerciceTableauFrequences,

@@ -75,6 +75,22 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   (`evaluationLocal.ts::graineInedite`) cherche une graine dont la PREMIÈRE instance respecte la
   contrainte — le QR code rouvre donc le même exercice sans changer l'appli. Paliers de repli :
   contrainte complète → exercice complet (cas introuvable) → sans calculatrice → sans contrainte.
+- **Paramètres au choix** (idée de l'utilisateur) : quand les cas particuliers sont des PARAMÈTRES
+  neutres (amplitude 1, pulsation 1, sans déphasage, sans décalage vertical ; translations ou
+  étirement absents ; a = 0, b = ±1…), le panneau propose une case par paramètre (« Paramètres à
+  inclure », toutes cochées) au lieu de la case unique : `parametresAuChoix: { id, label }[]`, `id`
+  = marqueur d'absence du profil. Une case décochée impose l'absence de CE paramètre dans toutes les
+  questions de la ligne et toutes les séries (ensemble exact des absents). Seulement pour des
+  paramètres présents dans TOUTES les variantes du générateur (sinon garder la case unique).
+- **Un verdict n'est jamais un cas particulier** : si la question est de DÉCIDER (données
+  cohérentes ou non, une ou deux valeurs de q, nature d'une suite, existe/n'existe pas quand c'est
+  la question), filtrer une issue rendrait la réponse prévisible. Est particulier ce qui
+  RACCOURCIT la résolution (équation sans solution réglée en une ligne, données directes…).
+- `calculatriceIndispensable: true` pour un générateur dont toutes les instances exigent la
+  calculatrice : le panneau avertit si le professeur choisit « calculatrice interdite ».
+- Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
+  précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
+  question de la ligne qui peut le recevoir (cas propre à une seule variante).
 - Pour chaque chapitre : mesurer (≥ 5 000 tirages par variante) la part des cas particuliers et des
   cas « calculatrice », écrire le profil, vérifier avec un plan réel (2 séries, calculatrice
   interdite/autorisée, case cochée ou non). Modèle : `5e-4h/generateurs5e/profilsEvaluationTrigonometrie.ts`.

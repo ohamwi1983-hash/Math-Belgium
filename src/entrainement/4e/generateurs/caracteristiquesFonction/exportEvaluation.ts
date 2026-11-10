@@ -26,6 +26,7 @@ import {
   valeurNaturelleEnB5,
 } from "../../moteur/verificationCaracteristiquesFonction";
 import { genererExerciceCaracteristiquesFonction } from "./index";
+import { profilCaracteristiquesFonction, LIBELLE_CAS_LECTURE_GRAPHIQUE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCaracteristiquesFonction>` pour gen12 (Lire les
@@ -535,6 +536,8 @@ function difficulteCaracteristiquesFonction(exercice: ExerciceCaracteristiquesFo
 }
 
 export const adaptateurEvaluationCaracteristiquesFonction: AdaptateurFeuilleExercices<ExerciceCaracteristiquesFonction> = {
+  profilInstance: profilCaracteristiquesFonction,
+  libelleCasParticulier: LIBELLE_CAS_LECTURE_GRAPHIQUE,
   titreDocument: "Caractéristiques d'une fonction (lecture graphique) — Évaluation",
   nomFichierBase: "caracteristiques-fonction",
   genererInstance: genererExerciceCaracteristiquesFonction,

@@ -190,12 +190,24 @@ function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: s
  *   seulement des instances qui l'exigent (pas d'angles ni de valeurs remarquables).
  * Sans `profilInstance` dans l'adaptateur, aucune contrainte (comportement historique). */
 interface ContrainteTirage {
-  cas: 'complet' | 'particulier' | string
+  /** Tableau = ensemble EXACT des caractéristiques absentes (paramètres décochés par le professeur,
+   * `parametresAuChoix`) ; `[]` équivaut à `'complet'`. */
+  cas: 'complet' | 'particulier' | string | string[]
   calculatrice?: 'interdite' | 'autorisee'
 }
 
+function casRespecte(casParticulier: string | null, cas: ContrainteTirage['cas']): boolean {
+  if (Array.isArray(cas)) {
+    const presents = casParticulier ? casParticulier.split('+') : []
+    return presents.length === cas.length && cas.every((c) => presents.includes(c))
+  }
+  if (cas === 'complet') return casParticulier === null
+  if (cas === 'particulier') return casParticulier !== null && !casParticulier.includes('+')
+  return casParticulier === cas
+}
+
 function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage, avecCalcul: boolean): boolean {
-  if (contrainte.cas === 'complet' ? profil.casParticulier !== null : contrainte.cas === 'particulier' ? profil.casParticulier === null || profil.casParticulier.includes('+') : profil.casParticulier !== contrainte.cas) return false
+  if (!casRespecte(profil.casParticulier, contrainte.cas)) return false
   if (avecCalcul && contrainte.calculatrice === 'interdite' && profil.calcul === 'calculatrice') return false
   if (avecCalcul && contrainte.calculatrice === 'autorisee' && profil.calcul === 'exacte') return false
   return true
@@ -205,21 +217,29 @@ function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage
  * contrainte et n'a pas encore été imprimée. Recherche par paliers : contrainte complète, puis (cas
  * particulier introuvable) un exercice complet, puis sans la calculatrice (une variante sans aucun cas « à la calculatrice » ne bloque pas la génération),
  * puis sans contrainte. Renvoie aussi le cas particulier obtenu, pour l'imposer aux autres séries. */
-function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage): { graine: number; casParticulier: string | null } {
+function graineInedite(generatorId: string, adaptateur: Adaptateur, varianteId: string, dejaVues: Set<string>, contrainte?: ContrainteTirage, strict = false): { graine: number; casParticulier: string | null } {
   const profilDe = adaptateur.profilInstance
   const paliers: { essais: number; filtre: ((p: ProfilInstance) => boolean) | null }[] =
     profilDe && contrainte
       ? [
-          { essais: 400, filtre: (p) => respecteContrainte(p, contrainte, true) },
+          // Combinaison précise de paramètres (jusqu'à ~1 tirage sur 2 500) : recherche plus longue,
+          // un tirage coûte quelques microsecondes.
+          { essais: 20000, filtre: (p) => respecteContrainte(p, contrainte, true) },
           // Cas particulier introuvable (générateur sans ce cas) : exercice complet, calculatrice respectée.
-          ...(contrainte.cas !== 'complet' ? [{ essais: 400, filtre: (p: ProfilInstance) => respecteContrainte(p, { ...contrainte, cas: 'complet' }, true) }] : []),
-          { essais: 400, filtre: (p) => respecteContrainte(p, contrainte, false) },
+          ...(contrainte.cas !== 'complet' && !(Array.isArray(contrainte.cas) && contrainte.cas.length === 0) ? [{ essais: 20000, filtre: (p: ProfilInstance) => respecteContrainte(p, { ...contrainte, cas: 'complet' }, true) }] : []),
+          { essais: 20000, filtre: (p) => respecteContrainte(p, contrainte, false) },
           { essais: 8, filtre: null },
         ]
       : [{ essais: 8, filtre: null }]
+  // `strict` : seulement le premier palier (recherche d'un cas particulier sur une question précise —
+  // échec = on essaie la question précédente de la ligne, pas de repli coûteux).
+  if (strict) paliers.splice(1)
   let repli: { graine: number; casParticulier: string | null } | null = null
   for (const palier of paliers) {
-    for (let essai = 0; essai < palier.essais; essai++) {
+    // Budget de temps par palier (un tirage coûte de quelques µs à ~1 ms selon le générateur) : les
+    // cas rares (σ entier, combinaison précise de paramètres) sont trouvés sans bloquer le panneau.
+    const fin = Date.now() + (palier.filtre ? 200 : 50)
+    for (let essai = 0; essai < palier.essais && (essai < 8 || Date.now() < fin); essai++) {
       const graine = tirerGraine()
       let instance: never
       try {
@@ -284,21 +304,26 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         // instances complètes, sauf la DERNIÈRE de la ligne si « inclure un cas particulier » est
         // coché — et ce cas particulier est le MÊME dans toutes les séries (fixé par la série A).
         const equilibre = entete.mode !== 'exercice'
-        const totalLigne = item.exercice.parVariante.reduce((t, v) => t + v.nombre, 0)
-        let rang = 0
+        const parametresExclus = adaptateur.parametresAuChoix ? (item.exercice.parametresExclus ?? []).filter((id) => adaptateur.parametresAuChoix!.some((p) => p.id === id)) : null
+        const contrainteDe = (cas: ContrainteTirage['cas']): ContrainteTirage | undefined => (equilibre ? { cas, calculatrice: entete.calculatrice } : undefined)
         const instances: InstancePlan[] = item.exercice.parVariante.flatMap(({ varianteId, nombre, points }) =>
-          Array.from({ length: nombre }, () => {
-            rang++
-            const particulier = equilibre && !!item.exercice!.inclureCasParticulier && rang === totalLigne
-            const cleCas = `${items.indexOf(item)}`
-            const contrainte: ContrainteTirage | undefined = equilibre
-              ? { cas: particulier ? casParticulierParItem.get(cleCas) ?? 'particulier' : 'complet', calculatrice: entete.calculatrice }
-              : undefined
-            const { graine, casParticulier } = graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainte)
-            if (particulier && casParticulier && !casParticulierParItem.has(cleCas)) casParticulierParItem.set(cleCas, casParticulier)
-            return { varianteId, points, graine }
-          }),
+          Array.from({ length: nombre }, () => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(parametresExclus ?? 'complet')).graine })),
         )
+        // « Inclure un cas particulier » : la DERNIÈRE question de la ligne qui PEUT en recevoir un
+        // (un cas propre à une seule variante — ex. mise en évidence généralisée — n'existe pas dans
+        // les autres) ; même cas dans toutes les séries, fixé par la série A.
+        if (equilibre && !parametresExclus && item.exercice.inclureCasParticulier) {
+          const cleCas = `${items.indexOf(item)}`
+          const voulu = casParticulierParItem.get(cleCas) ?? 'particulier'
+          for (let k = instances.length - 1; k >= 0; k--) {
+            const essai = graineInedite(generatorId, adaptateur, instances[k].varianteId, dejaVues, contrainteDe(voulu), true)
+            if (essai.casParticulier && casRespecte(essai.casParticulier, voulu)) {
+              instances[k] = { ...instances[k], graine: essai.graine }
+              if (!casParticulierParItem.has(cleCas)) casParticulierParItem.set(cleCas, essai.casParticulier)
+              break
+            }
+          }
+        }
         if (instances.length === 0) continue
         if (adaptateur.regroupable && instances.length > 1) elements.push({ ...base, type: 'exercice', generatorId, instances })
         else for (const instance of instances) elements.push({ ...base, type: 'exercice', generatorId, instances: [instance] })

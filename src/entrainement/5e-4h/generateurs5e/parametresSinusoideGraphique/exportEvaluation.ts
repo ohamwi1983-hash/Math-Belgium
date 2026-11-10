@@ -15,7 +15,7 @@ import { evaluerY, formatRationnelPiTexte, pasAxeY, positionsTicksX, valeurAmpli
 import { additionnerRationnelPi, diviserParEntier, inverseRationnelPi, multiplierRationnelPi, negatifRationnelPi, reduireRationnelPi, valeurNumerique } from "../parametresSinusoide/rationnelPi";
 import { consignePhase, formatChampParametreGraphiqueLatex, formatMagnitudeAmplitudeLatex, formatRationnelPiLatex, phaseRetenue, phiRetenu } from "../../ui5e/formatParametresSinusoideGraphique";
 import { genererExerciceParametresSinusoideGraphique } from "./index";
-import { profilParametresSinusoideGraphique, LIBELLE_CAS_SINUSOIDE_GRAPHIQUE } from "../profilsEvaluationTrigonometrie";
+import { profilParametresSinusoideGraphique, PARAMETRES_SINUSOIDE_GRAPHIQUE } from "../profilsEvaluationTrigonometrie";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceParametresSinusoideGraphique>` pour 5gen9
@@ -234,7 +234,7 @@ function difficulteParametresSinusoideGraphique(exercice: ExerciceParametresSinu
 
 export const adaptateurEvaluationParametresSinusoideGraphique: AdaptateurFeuilleExercices<ExerciceParametresSinusoideGraphique> = {
   profilInstance: profilParametresSinusoideGraphique,
-  libelleCasParticulier: LIBELLE_CAS_SINUSOIDE_GRAPHIQUE,
+  parametresAuChoix: PARAMETRES_SINUSOIDE_GRAPHIQUE,
   titreDocument: "Paramètres d'une fonction sinusoïdale (graphique) — Évaluation",
   nomFichierBase: "parametres-sinusoide-graphique",
   genererInstance: genererExerciceParametresSinusoideGraphique,

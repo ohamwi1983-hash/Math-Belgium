@@ -12,6 +12,7 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "../../ui/formatEquation";
 import { sommeEtProduitAttendus } from "../../moteur/verificationRelationsRacines";
 import { genererExerciceRelationsRacines } from "./index";
+import { profilRelationsRacines, LIBELLE_CAS_RELATIONS_RACINES } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceRelationsRacines>` pour gen67 (relations entre
@@ -119,6 +120,8 @@ function difficulte(exercice: ExerciceRelationsRacines): 1 | 2 | 3 {
 }
 
 export const adaptateurEvaluationRelationsRacines: AdaptateurFeuilleExercices<ExerciceRelationsRacines> = {
+  profilInstance: profilRelationsRacines,
+  libelleCasParticulier: LIBELLE_CAS_RELATIONS_RACINES,
   titreDocument: "Relations entre racines et coefficients — Évaluation",
   nomFichierBase: "relations-racines-coefficients",
   genererInstance: genererExerciceRelationsRacines,

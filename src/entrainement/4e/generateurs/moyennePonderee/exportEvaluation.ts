@@ -28,6 +28,7 @@ import {
 } from "../../ui/formatMoyennePonderee";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMoyennePonderee } from "./index";
 import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
+import { profilMoyennePonderee } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceMoyennePonderee>` pour gen32 (Moyenne pondérée,
@@ -366,6 +367,7 @@ function enoncePapierMoyennePonderee(instance: ExerciceMoyennePonderee): EnonceP
 }
 
 const adaptateurEvaluationMoyennePondereeBrut: AdaptateurFeuilleExercices<ExerciceMoyennePonderee> = {
+  profilInstance: profilMoyennePonderee,
   titreDocument: "Moyenne pondérée — Évaluation",
   nomFichierBase: "moyenne-ponderee",
   genererInstance: genererExerciceMoyennePonderee,

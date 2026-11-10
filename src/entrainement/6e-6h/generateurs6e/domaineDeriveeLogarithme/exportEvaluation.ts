@@ -15,6 +15,7 @@ import type { PhaseDomaineDeriveeLogarithme } from "../../moteur6e/typesDomaineD
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, reponseAttendueLatex } from "../../ui6e/formatDomaineDeriveeLogarithme";
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDeriveeLogarithme } from "./index";
+import { profilDomaineDeriveeLogarithme, LIBELLE_CAS_DOMAINE_DERIVEE_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDomaineDeriveeLogarithme>` pour `6gen16` (Domaine,
@@ -283,6 +284,8 @@ function enoncePapierDomaineDeriveeLogarithme(exercice: ExerciceDomaineDeriveeLo
 }
 
 export const adaptateurEvaluationDomaineDeriveeLogarithme: AdaptateurFeuilleExercices<ExerciceDomaineDeriveeLogarithme> = {
+  profilInstance: profilDomaineDeriveeLogarithme,
+  libelleCasParticulier: LIBELLE_CAS_DOMAINE_DERIVEE_LOG,
   titreDocument: "Domaine, dérivée et dérivation logarithmique — Évaluation",
   nomFichierBase: "domaine-derivee-logarithme",
   genererInstance: genererExerciceDomaineDeriveeLogarithme,

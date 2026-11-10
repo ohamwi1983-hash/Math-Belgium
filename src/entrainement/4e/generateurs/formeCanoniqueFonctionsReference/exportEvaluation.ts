@@ -21,6 +21,7 @@ import {
 } from "../../ui/formatFormeCanoniqueFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFormeCanoniqueFonctionReference } from "./index";
 import { construireGrapheFonctionReference } from "../fonctionsReference/exportEvaluation";
+import { profilFormeCanonique, PARAMETRES_FORME_CANONIQUE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference>` pour gen11
@@ -296,6 +297,8 @@ function baremeFormeCanoniqueFonctionsReference(exercice: ExerciceFormeCanonique
 }
 
 export const adaptateurEvaluationFormeCanoniqueFonctionsReference: AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference> = {
+  profilInstance: profilFormeCanonique,
+  parametresAuChoix: PARAMETRES_FORME_CANONIQUE,
   titreDocument: "Transformer une fonction de référence — forme canonique — Évaluation",
   nomFichierBase: "forme-canonique-fonctions-reference",
   genererInstance: genererExerciceFormeCanoniqueFonctionReference,

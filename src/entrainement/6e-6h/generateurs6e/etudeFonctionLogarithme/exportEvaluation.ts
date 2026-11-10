@@ -38,6 +38,7 @@ import {
 import type { PhaseEtudeFonctionLogarithme } from "../../moteur6e/typesEtudeFonctionLogarithme";
 import { termeConstanteLatex, trinomeLatex } from "./familles/latex";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./index";
+import { profilEtudeFonctionLogarithme, LIBELLE_CAS_ETUDE_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEtudeFonctionLogarithme>` pour `6gen21` (Étudier
@@ -261,6 +262,8 @@ function enoncePapierEtudeFonctionLogarithme(exercice: ExerciceEtudeFonctionLoga
 }
 
 export const adaptateurEvaluationEtudeFonctionLogarithme: AdaptateurFeuilleExercices<ExerciceEtudeFonctionLogarithme> = {
+  profilInstance: profilEtudeFonctionLogarithme,
+  libelleCasParticulier: LIBELLE_CAS_ETUDE_LOG,
   titreDocument: "Étudier une fonction (synthèse, logarithmes) — Évaluation",
   nomFichierBase: "etude-fonction-logarithme",
   genererInstance: genererExerciceEtudeFonctionLogarithme,

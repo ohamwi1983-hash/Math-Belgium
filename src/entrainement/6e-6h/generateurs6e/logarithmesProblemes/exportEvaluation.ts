@@ -260,6 +260,8 @@ function enoncePapierLogarithmesProblemes(exercice: ExerciceLogarithmesProblemes
 }
 
 export const adaptateurEvaluationLogarithmesProblemes: AdaptateurFeuilleExercices<ExerciceLogarithmesProblemes> = {
+  // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
+  calculatriceIndispensable: true,
   titreDocument: "Logarithmes : problèmes — Évaluation",
   nomFichierBase: "logarithmes-problemes",
   genererInstance: genererExerciceLogarithmesProblemes,

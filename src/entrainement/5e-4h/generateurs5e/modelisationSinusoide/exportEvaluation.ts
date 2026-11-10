@@ -316,6 +316,8 @@ function construireCorrectionModelisationSinusoide(exercice: ExerciceModelisatio
 }
 
 export const adaptateurEvaluationModelisationSinusoide: AdaptateurFeuilleExercices<ExerciceModelisationSinusoide> = {
+  // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
+  calculatriceIndispensable: true,
   profilInstance: profilModelisationSinusoide,
   libelleCasParticulier: LIBELLE_CAS_MODELISATION,
   titreDocument: "Modéliser une fonction sinusoïdale en contexte — Évaluation",

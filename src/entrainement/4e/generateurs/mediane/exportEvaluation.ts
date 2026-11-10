@@ -23,6 +23,7 @@ import {
 import { precisionLecture, seuilLecture, valeurCibleLecture, type ParametreLecture } from "../../moteur/verificationMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./index";
 import { avecVirgulesBelges, nombreFr, nombreFrLatex, segmentEnVirgules } from "../../ui/nombreFr";
+import { profilMediane, LIBELLE_CAS_MEDIANE } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceMediane>` pour gen33 (« Médiane, quartiles et
@@ -577,6 +578,8 @@ const adaptateurEvaluationMedianeBrut: AdaptateurFeuilleExercices<ExerciceMedian
 /** Notation décimale belge (virgule) dans tout l'énoncé et la correction (audit chapitre 4). */
 export const adaptateurEvaluationMediane: AdaptateurFeuilleExercices<ExerciceMediane> = {
   ...avecVirgulesBelges(adaptateurEvaluationMedianeBrut),
+  profilInstance: profilMediane,
+  libelleCasParticulier: LIBELLE_CAS_MEDIANE,
   difficulte: difficulteMediane,
   reponseBreve: (instance) => reponseBreveMediane(instance).map(segmentEnVirgules),
   correctionDetaillee: correctionDetailleeMediane,

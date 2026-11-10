@@ -14,6 +14,7 @@ import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { formatEquationAssocieeLatex, formatInequationLatex } from "../../ui/formatInequation";
 import { enonceSimplifie, facteurCommun, necessiteSimplification } from "../../moteur/simplificationInequation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInequation, type VarianteInequationId } from "./index";
+import { profilInequationTrinome, LIBELLE_CAS_TRINOME } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceInequation>` pour gen2 (tableau de signes d'un
@@ -245,6 +246,8 @@ function difficulteInequations(instance: ExerciceInequation): 1 | 2 | 3 {
 }
 
 export const adaptateurEvaluationInequations: AdaptateurFeuilleExercices<ExerciceInequation> = {
+  profilInstance: profilInequationTrinome,
+  libelleCasParticulier: LIBELLE_CAS_TRINOME,
   titreDocument: "Tableau de signes d'un trinôme du second degré — Évaluation",
   nomFichierBase: "tableau-signes-trinome",
   genererInstance: genererExerciceInequation,

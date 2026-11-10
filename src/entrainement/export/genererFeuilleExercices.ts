@@ -181,6 +181,15 @@ export interface AdaptateurFeuilleExercices<T> {
   /** Libellé de la case du panneau, ex. « Inclure un cas particulier (sans déphasage ou sans
    * décalage vertical) ». Requis dès que `profilInstance` peut renvoyer un cas particulier. */
   libelleCasParticulier?: string;
+  /** Paramètres que le PROFESSEUR choisit d'inclure (cases du panneau, toutes cochées par défaut),
+   * ex. amplitude ≠ 1, décalage vertical, déphasage, pulsation ≠ 1. `id` = identifiant que
+   * `profilInstance` met dans `casParticulier` quand ce paramètre est ABSENT (neutre) ; une case
+   * décochée impose son absence dans toutes les instances de la ligne et toutes les séries. Remplace
+   * la case « inclure un cas particulier » pour ce générateur. */
+  parametresAuChoix?: { id: string; label: string }[];
+  /** `true` : TOUTES les instances exigent une calculatrice (aires dans le cercle, modélisation en
+   * contexte…) — la page de conception avertit le professeur s'il choisit « calculatrice interdite ». */
+  calculatriceIndispensable?: boolean;
   /** `true` ssi ce générateur produit TOUJOURS une seule question par instance, avec une consigne
    * GÉNÉRIQUE (indépendante des valeurs tirées, ex. une constante `CONSIGNE_GENERALE`) — permet à
    * `/admin` de Math-Belgium de regrouper plusieurs instances demandées sous UNE question imprimée

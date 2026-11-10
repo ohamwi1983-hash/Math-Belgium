@@ -29,6 +29,7 @@ import {
 } from "../../ui5e/formatSuiteArithmetique";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteArithmetique } from "./index";
 import type { FamilleSuiteArithmetiqueId } from "./index";
+import { profilSuiteArithmetique, LIBELLE_CAS_ARITHMETIQUE } from "../profilsEvaluationSuites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSuiteArithmetique>` pour 5gen14 (Suites
@@ -437,6 +438,8 @@ function construireCorrectionSuiteArithmetique(exercice: ExerciceSuiteArithmetiq
 }
 
 export const adaptateurEvaluationSuitesArithmetiques: AdaptateurFeuilleExercices<ExerciceSuiteArithmetique> = {
+  profilInstance: profilSuiteArithmetique,
+  libelleCasParticulier: LIBELLE_CAS_ARITHMETIQUE,
   titreDocument: "Suites arithmétiques, formule générale et termes — Évaluation",
   nomFichierBase: "suites-arithmetiques",
   genererInstance: genererExerciceSuiteArithmetique,

@@ -28,6 +28,9 @@ import {
   buildEvaluationUrl,
   catalogueVariantesExercice,
   libelleCasParticulier,
+  parametresAuChoix,
+  calculatriceIndispensable,
+  nomGenerateur,
   construireItemsPayload,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
@@ -347,6 +350,22 @@ export function EvaluationGeneratorPanel({
     setGenereLocalementCompte(null)
   }
 
+  /** Case d'un paramètre au choix (amplitude, déphasage…) d'UN générateur : décochée = paramètre
+   * absent de toutes les questions de la ligne (`LigneSelection.parametresExclus`). */
+  function basculerParametre(chapitreSlug: string, sectionId: string, generatorId: string, parametreId: string, inclure: boolean) {
+    setLignes((prev) =>
+      prev.map((l) => {
+        if (l.chapitreSlug !== chapitreSlug || l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
+        const exclus = new Set(l.parametresExclus ?? [])
+        if (inclure) exclus.delete(parametreId)
+        else exclus.add(parametreId)
+        return { ...l, parametresExclus: [...exclus] }
+      }),
+    )
+    setUrlGeneree(null)
+    setGenereLocalementCompte(null)
+  }
+
   /** Met à jour le barème d'UNE famille/variante précise, pour UN générateur précis (ligne
    * `type==='exercice'`, `cle===generatorId`) — chaque variante peut valoir un nombre de points
    * différent, voir `LigneSelection.pointsParVariante`. */
@@ -377,6 +396,10 @@ export function EvaluationGeneratorPanel({
   const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
   const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
   const pointsParProcessus = ([1, 2, 3] as const).map((p) => lignes.filter((l) => l.processus === p).reduce((t, l) => t + pointsLigne(l), 0))
+  /** Lignes choisies dont le générateur exige toujours une calculatrice (avertissement si interdite). */
+  const generateursACalculatrice = lignes
+    .filter((l) => l.type === 'exercice' && l.nombre > 0 && l.cle && calculatriceIndispensable(l.cle as IdGenerateurPilote))
+    .map((l) => `« ${nomGenerateur(l.cle as IdGenerateurPilote)} »`)
   const dureeEstimee = Math.max(5, Math.ceil(lignes.filter((l) => l.nombre > 0).reduce((t, l) => t + dureeLigne(l, pointsLigne(l)), 0) / 5) * 5)
 
   function nomBase(plan: PlanDocument): string {
@@ -712,6 +735,11 @@ export function EvaluationGeneratorPanel({
           <input id="eval-amenagee" type="checkbox" checked={versionAmenagee} onChange={(e) => setVersionAmenagee(e.target.checked)} />
           Version aménagée en plus
         </label>
+        {!estExercice && calculatrice === 'interdite' && generateursACalculatrice.length > 0 && (
+          <p className="admin-eval-avertissement" role="note">
+            Calculatrice interdite, mais ces exercices demandent une calculatrice par nature (valeurs décimales) : {generateursACalculatrice.join(' ; ')}.
+          </p>
+        )}
         {!estExercice && (
           <label className="admin-eval-checkbox-field" htmlFor="eval-afficher-duree" title={`Imprime « ≈ ${dureeEstimee} minutes » dans l'en-tête de l'évaluation.`}>
             <input id="eval-afficher-duree" type="checkbox" checked={afficherDuree} onChange={(e) => setAfficherDuree(e.target.checked)} />
@@ -820,8 +848,29 @@ export function EvaluationGeneratorPanel({
                                     // Tirage équilibré : seulement des exercices complets, sauf si le professeur
                                     // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
                                     const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
+                                    const parametres = estExercice ? [] : parametresAuChoix(ligne.cle as IdGenerateurPilote)
+                                    const ligneParametres =
+                                      parametres.length > 0 && ligne.nombre > 0 ? (
+                                        <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-parametres'}>
+                                          <td colSpan={4}>
+                                            <div className="admin-eval-cas-contenu">
+                                            <span className="admin-eval-parametres-titre">Paramètres à inclure :</span>
+                                            {parametres.map((p) => (
+                                              <label className="admin-eval-checkbox-field admin-eval-parametre" key={p.id}>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={!(ligne.parametresExclus ?? []).includes(p.id)}
+                                                  onChange={(e) => basculerParametre(chapitreCourant.slug, section.id, ligne.cle ?? '', p.id, e.target.checked)}
+                                                />
+                                                {p.label}
+                                              </label>
+                                            ))}
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      ) : null
                                     const ligneCas =
-                                      libelleCas && ligne.nombre > 0 ? (
+                                      libelleCas && parametres.length === 0 && ligne.nombre > 0 ? (
                                         <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-cas'}>
                                           <td colSpan={4}>
                                             <label className="admin-eval-checkbox-field">
@@ -864,7 +913,7 @@ export function EvaluationGeneratorPanel({
                                           </td>
                                         )}
                                       </tr>
-                                    )), ligneCas].filter(Boolean)
+                                    )), ligneParametres, ligneCas].filter(Boolean)
                                   }
 
                                   const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'

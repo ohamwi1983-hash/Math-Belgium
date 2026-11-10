@@ -30,6 +30,7 @@ import {
   type LigneAide,
 } from "../../ui5e/formatConvergenceSuites";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConvergenceSuite } from "./index";
+import { profilConvergenceSuite } from "../profilsEvaluationSuites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceConvergenceSuite>` pour 5gen16 (Convergence et
@@ -297,6 +298,7 @@ function construireCorrectionConvergenceSuite(exercice: ExerciceConvergenceSuite
 }
 
 export const adaptateurEvaluationConvergenceSuites: AdaptateurFeuilleExercices<ExerciceConvergenceSuite> = {
+  profilInstance: profilConvergenceSuite,
   titreDocument: "Convergence et divergence des suites — Évaluation",
   nomFichierBase: "convergence-suites",
   genererInstance: genererExerciceConvergenceSuite,

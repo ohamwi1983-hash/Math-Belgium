@@ -26,6 +26,7 @@ import {
 import { diviserFractionQ, entierVersFractionQ, puissanceFractionQ, sommeInfinieExisteQ, sommeInfinieQ } from "./fraction";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./index";
 import type { FamilleSuiteGeometriqueId } from "./index";
+import { profilSuiteGeometrique, LIBELLE_CAS_GEOMETRIQUE } from "../profilsEvaluationSuites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSuiteGeometrique>` pour 5gen15 (Suites
@@ -393,6 +394,8 @@ function construireCorrectionSuiteGeometrique(exercice: ExerciceSuiteGeometrique
 }
 
 export const adaptateurEvaluationSuitesGeometriques: AdaptateurFeuilleExercices<ExerciceSuiteGeometrique> = {
+  profilInstance: profilSuiteGeometrique,
+  libelleCasParticulier: LIBELLE_CAS_GEOMETRIQUE,
   titreDocument: "Suites géométriques, formule générale et termes — Évaluation",
   nomFichierBase: "suites-geometriques",
   genererInstance: genererExerciceSuiteGeometrique,

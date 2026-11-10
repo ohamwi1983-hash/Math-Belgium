@@ -21,6 +21,7 @@ import {
   reponseAttendueLatex,
 } from "../../ui6e/formatHyperboliques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques, type VarianteId } from "./index";
+import { profilHyperboliques, LIBELLE_CAS_HYPERBOLIQUES } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceHyperboliques>` pour `6gen19` (Sinus et cosinus
@@ -277,6 +278,8 @@ function enoncePapierHyperboliques(exercice: ExerciceHyperboliques): EnoncePapie
 }
 
 export const adaptateurEvaluationHyperboliques: AdaptateurFeuilleExercices<ExerciceHyperboliques> = {
+  profilInstance: profilHyperboliques,
+  libelleCasParticulier: LIBELLE_CAS_HYPERBOLIQUES,
   titreDocument: "Sinus et cosinus hyperboliques (sh, ch) — Évaluation",
   nomFichierBase: "hyperboliques",
   genererInstance: genererExerciceHyperboliques,

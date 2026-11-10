@@ -24,6 +24,7 @@ import {
 } from "../../ui/formatHistogramme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHistogramme } from "./index";
 import { avecVirgulesBelges, nombreFr, nombreFrLatex } from "../../ui/nombreFr";
+import { profilHistogramme } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceHistogramme>` pour gen31 (Regroupement en classes
@@ -277,6 +278,7 @@ function enoncePapierHistogramme(instance: ExerciceHistogramme): EnoncePapier {
 }
 
 const adaptateurEvaluationHistogrammeBrut: AdaptateurFeuilleExercices<ExerciceHistogramme> = {
+  profilInstance: profilHistogramme,
   titreDocument: "Regroupement en classes et histogramme — Évaluation",
   nomFichierBase: "histogramme",
   genererInstance: genererExerciceHistogramme,

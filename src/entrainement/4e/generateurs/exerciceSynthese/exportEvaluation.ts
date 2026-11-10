@@ -36,6 +36,7 @@ import type { SegmentTexte } from "../../ui/formatDispersion";
 import { formatCinqNombresLatex, LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN } from "../../ui/formatBoiteMoustaches";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSynthese } from "./index";
 import { avecVirgulesBelges, segmentEnVirgules, virgulesLatex } from "../../ui/nombreFr";
+import { profilExerciceSynthese, LIBELLE_CAS_MEDIANE } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceSynthese>` pour gen35 ("Exercice de synthèse",
@@ -598,6 +599,8 @@ function baremeExerciceSynthese(exercice: ExerciceSynthese): BaremeExercice {
 }
 
 const adaptateurEvaluationExerciceSyntheseBrut: AdaptateurFeuilleExercices<ExerciceSynthese> = {
+  profilInstance: profilExerciceSynthese,
+  libelleCasParticulier: LIBELLE_CAS_MEDIANE,
   titreDocument: "Exercice de synthèse — Statistique descriptive — Évaluation",
   nomFichierBase: "exercice-synthese-statistique-descriptive",
   genererInstance: genererExerciceSynthese,

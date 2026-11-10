@@ -40,6 +40,7 @@ import {
   instructionIsolement,
 } from "../../ui/formatCaracteristiquesAlgebriques";
 import { CATALOGUE_VARIANTES, construireNiveau1AvecFamille, genererExerciceCaracteristiquesAlgebriques } from "./index";
+import { profilCaracteristiquesAlgebriques, LIBELLE_CAS_ETUDE_ALGEBRIQUE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCaracteristiquesAlgebriquesNiveau1>` pour gen13
@@ -517,6 +518,8 @@ function enoncePapierCaracteristiquesAlgebriques(instance: ExerciceCaracteristiq
 }
 
 export const adaptateurEvaluationCaracteristiquesAlgebriques: AdaptateurFeuilleExercices<ExerciceCaracteristiquesAlgebriquesNiveau1> = {
+  profilInstance: profilCaracteristiquesAlgebriques,
+  libelleCasParticulier: LIBELLE_CAS_ETUDE_ALGEBRIQUE,
   titreDocument: "Étudier algébriquement une fonction de référence — Évaluation",
   nomFichierBase: "caracteristiques-algebriques",
   genererInstance: genererInstanceNiveau1,

@@ -41,6 +41,7 @@ import {
 import { formatEnsembleReelLatex } from "../../ui6e/formatEnsembleReel";
 import { formatFractionLatex } from "../../ui6e/formatFraction";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationLogarithmique, type IdVarianteInequationLogarithmique } from "./index";
+import { profilInequationsLogarithmiques, LIBELLE_CAS_INEQUATIONS_LOG } from "../profilsEvaluationLogarithmes";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceInequationLogarithmique>` pour `6gen15` (Résoudre
@@ -573,6 +574,8 @@ function enoncePapierInequationsLog(exercice: ExerciceInequationLogarithmique): 
 }
 
 export const adaptateurEvaluationInequationsLogarithmiques: AdaptateurFeuilleExercices<ExerciceInequationLogarithmique> = {
+  profilInstance: profilInequationsLogarithmiques,
+  libelleCasParticulier: LIBELLE_CAS_INEQUATIONS_LOG,
   titreDocument: "Résoudre une inéquation logarithmique — Évaluation",
   nomFichierBase: "inequations-logarithmiques",
   genererInstance: genererExerciceInequationLogarithmique,

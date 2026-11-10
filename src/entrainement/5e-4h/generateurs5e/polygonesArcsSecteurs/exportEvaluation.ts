@@ -210,6 +210,8 @@ function baremePolygonesArcsSecteurs(exercice: ExercicePolygonesArcsSecteurs): B
 }
 
 export const adaptateurEvaluationPolygonesArcsSecteurs: AdaptateurFeuilleExercices<ExercicePolygonesArcsSecteurs> = {
+  // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
+  calculatriceIndispensable: true,
   titreDocument: "Polygones, arcs et secteurs — Évaluation",
   nomFichierBase: "polygones-arcs-secteurs",
   genererInstance: genererExercicePolygonesArcsSecteurs,

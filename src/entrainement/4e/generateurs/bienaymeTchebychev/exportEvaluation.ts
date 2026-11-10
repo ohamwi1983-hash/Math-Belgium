@@ -45,6 +45,7 @@ import {
 } from "../../ui/formatBienaymeTchebychev";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./index";
 import { avecVirgulesBelges, segmentEnVirgules } from "../../ui/nombreFr";
+import { profilBienaymeTchebychev } from "../profilsEvaluationStatistique";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev>` pour gen37 (Inégalité de
@@ -514,6 +515,7 @@ function baremeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): BaremeE
 }
 
 const adaptateurEvaluationBienaymeTchebychevBrut: AdaptateurFeuilleExercices<ExerciceBienaymeTchebychev> = {
+  profilInstance: profilBienaymeTchebychev,
   titreDocument: "Inégalité de Bienaymé-Tchebychev — Évaluation",
   nomFichierBase: "bienayme-tchebychev",
   genererInstance: genererExerciceBienaymeTchebychev,

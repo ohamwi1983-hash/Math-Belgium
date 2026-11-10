@@ -8,8 +8,9 @@
  *   cas qui exigent la calculatrice (`calcul`).
  * Les générateurs interactifs (écran) ne sont pas concernés : ils gardent toute leur variété.
  *
- * Plusieurs caractéristiques à la fois → identifiants joints par « + » (jamais tirés pour la case
- * « inclure un cas particulier », qui ne prend qu'un cas simple).
+ * Plusieurs caractéristiques à la fois → identifiants joints par « + ». Sinusoïdes (5gen8, 5gen9,
+ * 5gen11) : le professeur coche les paramètres à inclure (`parametresAuChoix`) ; les autres
+ * générateurs ont la case « inclure un cas particulier ».
  */
 import type { ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceArcSecteur } from "../core5e/arcsSecteurs.types";
@@ -37,8 +38,17 @@ function amplitudeUn(a: { rationnelle: RationnelLike | null; radicande: unknown 
   return !!a && !a.radicande && estUn(a.rationnelle);
 }
 
-export const LIBELLE_CAS_SINUSOIDE = "Inclure un cas particulier (sans déphasage, sans décalage vertical, amplitude ou pulsation 1)";
-export const LIBELLE_CAS_SINUSOIDE_GRAPHIQUE = "Inclure un cas particulier (sans déphasage, sans décalage vertical ou amplitude 1)";
+/** Paramètres que le professeur choisit d'inclure (cases du panneau, toutes cochées par défaut) :
+ * une case décochée impose ce paramètre NEUTRE dans toutes les questions de la ligne. L'`id` est le
+ * marqueur d'absence renvoyé par le profil. */
+export const PARAMETRES_SINUSOIDE = [
+  { id: "amplitude-1", label: "Amplitude ≠ 1" },
+  { id: "pulsation-1", label: "Pulsation ≠ 1" },
+  { id: "sans-dephasage", label: "Déphasage (décalage horizontal)" },
+  { id: "sans-decalage-vertical", label: "Décalage vertical" },
+];
+/** Lecture graphique (5gen9) : la pulsation se déduit toujours de la période lue, pas de case. */
+export const PARAMETRES_SINUSOIDE_GRAPHIQUE = PARAMETRES_SINUSOIDE.filter((p) => p.id !== "pulsation-1");
 
 /** 5gen8 — paramètres de A·sin(Bx + C) + b (forme développée ou préfactorisée). */
 export function profilParametresSinusoide(e: ExerciceParametresSinusoide): ProfilInstance {

@@ -227,6 +227,8 @@ function difficulteGeometrieCercle(exercice: ExerciceGeometrieCercle): 1 | 2 | 3
 }
 
 export const adaptateurEvaluationGeometrieCercle: AdaptateurFeuilleExercices<ExerciceGeometrieCercle> = {
+  // Toutes les instances exigent une calculatrice (valeurs décimales) : avertissement du panneau.
+  calculatriceIndispensable: true,
   titreDocument: "Problèmes de géométrie du cercle — Évaluation",
   nomFichierBase: "geometrie-cercle",
   genererInstance: genererExerciceGeometrieCercle,
