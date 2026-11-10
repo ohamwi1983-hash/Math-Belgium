@@ -3746,6 +3746,9 @@ export interface EnTeteEvaluation {
   /** Génération locale uniquement : produire aussi la version aménagée (même énoncé, police
    * lisible, une question par page). */
   versionAmenagee?: boolean
+  /** Durée estimée imprimée sur l'évaluation : seulement si le professeur coche la case (défaut :
+   * non affichée). */
+  afficherDuree?: boolean
   /** Génération locale uniquement : surtitre « 6e (6h) · Chapitre 3 », titre du chapitre et adresse
    * de sa page (feuille d'exercices). */
   surtitre?: string

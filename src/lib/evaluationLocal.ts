@@ -550,6 +550,7 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string): EnteteEvalu
     serieLettre,
     afficherTitresSection: entete.afficherTitresSection,
     mode: entete.mode,
+    afficherDuree: entete.afficherDuree,
     surtitre: entete.surtitre,
     titreChapitre: entete.titreChapitre,
     urlChapitre: entete.urlChapitre,

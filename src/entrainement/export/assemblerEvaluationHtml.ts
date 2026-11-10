@@ -74,6 +74,9 @@ export interface EnteteEvaluation {
    * processus restent. */
   afficherTitresSection?: boolean;
   mode?: "evaluation" | "exercice";
+  /** `true` : la durée estimée est imprimée dans le cartouche. Absent/`false` (défaut) : elle ne
+   * l'est pas — décision du professeur, case « Afficher la durée estimée » du panneau. */
+  afficherDuree?: boolean;
   /** Surtitre « 6e (6h) · Chapitre 3 » (feuille d'exercices). */
   surtitre?: string;
   /** Titre du chapitre (« Fonctions logarithmes ») quand un seul chapitre est concerné. */
@@ -570,11 +573,11 @@ export function titreEvaluation(entete: EnteteEvaluation): string {
 }
 
 function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): string {
-  const duree = dureeEstimeeMinutes(items);
+  const duree = entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : "";
   return `<div class="cartouche">
   <div class="g"><span class="surtitre">${echapperHtml(ECOLE_NOM)} · Mathématiques ${echapperHtml(entete.heuresSemaine)}h/sem · ${echapperHtml(PROFESSEUR)}</span>
     <h1>${echapperHtml(titreEvaluation(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
-    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série ${echapperHtml(entete.serieLettre)} · ${duree} minutes · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
+    <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série ${echapperHtml(entete.serieLettre)}${duree} · ${echapperHtml(ECOLE_ADRESSE)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
 </div>`;
 }

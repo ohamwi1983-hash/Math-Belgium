@@ -224,6 +224,8 @@ export function EvaluationGeneratorPanel({
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
   const [afficherTitresSection, setAfficherTitresSection] = useState(false)
   const [versionAmenagee, setVersionAmenagee] = useState(false)
+  // Durée estimée imprimée sur l'évaluation : seulement si le professeur le décide (décoché par défaut).
+  const [afficherDuree, setAfficherDuree] = useState(false)
   /** Dernière génération locale : plan figé (graines) + documents produits. */
   const [planCourant, setPlanCourant] = useState<PlanDocument | null>(null)
   const [documents, setDocuments] = useState<DocumentGenere[]>([])
@@ -446,6 +448,7 @@ export function EvaluationGeneratorPanel({
     setNombreSeries(plan.series.length)
     setAfficherTitresSection(plan.entete.afficherTitresSection)
     setVersionAmenagee(!!plan.entete.versionAmenagee)
+    setAfficherDuree(!!plan.entete.afficherDuree)
     void rendrePlan(plan, false)
   }
 
@@ -495,6 +498,7 @@ export function EvaluationGeneratorPanel({
       afficherTitresSection,
       mode,
       versionAmenagee,
+      afficherDuree: estExercice ? false : afficherDuree,
       surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
       urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
@@ -692,10 +696,16 @@ export function EvaluationGeneratorPanel({
           <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
           Afficher les titres de section
         </label>
-        <label className="admin-eval-checkbox-field" htmlFor="eval-amenagee" title="Police très lisible, une question par page, chaque question découpée en étapes — mêmes questions, même barème.">
+        <label className="admin-eval-checkbox-field" htmlFor="eval-amenagee" title="Même énoncé, police très lisible, grand interligne, une question par page — même barème.">
           <input id="eval-amenagee" type="checkbox" checked={versionAmenagee} onChange={(e) => setVersionAmenagee(e.target.checked)} />
           Version aménagée en plus
         </label>
+        {!estExercice && (
+          <label className="admin-eval-checkbox-field" htmlFor="eval-afficher-duree" title={`Imprime « ≈ ${dureeEstimee} minutes » dans l'en-tête de l'évaluation.`}>
+            <input id="eval-afficher-duree" type="checkbox" checked={afficherDuree} onChange={(e) => setAfficherDuree(e.target.checked)} />
+            Afficher la durée estimée sur l'évaluation
+          </label>
+        )}
       </div>
       {!estExercice && nombreSeries > 1 && (
         <p className="admin-eval-indisponible">

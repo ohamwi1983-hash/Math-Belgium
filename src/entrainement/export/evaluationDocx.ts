@@ -121,7 +121,7 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
   enfants.push(new Paragraph({ children: [new TextRun({ text: titreEvaluation(entete), bold: true, size: 32 })], spacing: { before: 60 } }));
   enfants.push(
     new Paragraph({
-      children: [new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série ${entete.serieLettre} · ${dureeEstimeeMinutes(items)} minutes`, size: 18, color: "4A4F58" })],
+      children: [new TextRun({ text: `${dateEnToutesLettres(entete.date)} · Série ${entete.serieLettre}${entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : ""}`, size: 18, color: "4A4F58" })],
       spacing: { after: 120 },
     }),
   );
