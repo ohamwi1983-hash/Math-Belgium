@@ -1,6 +1,6 @@
 import type { ExerciceConstructionParabole } from "../../core/constructionParabole.types";
 import type { Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { texte } from "../../../export/fragmentsDocx";
 import { calculerViewBoxGrilleTournee, demiPorteeGrilleTournee } from "../../ui/grilleTourneeGraph";
 import type { ViewBoxTransformation } from "../../ui/vecteurGraph";
@@ -37,11 +37,10 @@ import { genererExerciceConstructionParabole } from "./index";
  * rayon r au compas centré en F, tracer la parallèle à d à distance r du côté de F, ce qui donne 2
  * points de la parabole par itération — `verificationConstructionParabole.ts::pointsCiblesIteration`),
  * puis un écran "trace" terminal (relier les 6 points obtenus, d'une extrémité à l'autre de la courbe, pour
- * former la courbe). Sur papier, ces 2 phases deviennent UNE SEULE question qui décrit la méthode
- * complète (répéter la construction cercle/parallèle 3 fois avec des rayons différents, puis relier
- * les 6 points) — jamais 4 questions séparées : contrairement à `simplification`/`analyseFonction`,
- * ici chaque itération n'introduit ni sous-résultat numérique ni nouvelle notion à corriger
- * indépendamment, seulement la répétition du même geste géométrique.
+ * former la courbe). Sur papier (refonte), l'énoncé est la figure et UNE consigne globale
+ * (« construis au moins 6 points, puis trace la parabole ») ; les 4 écrans (3 constructions, le
+ * tracé) deviennent les étapes 1 à 4 du corrigé détaillé, avec la méthode et un exemple de rayon
+ * pour chacune, et la figure complète sous l'étape du tracé.
  *
  * **Représentation papier** : grille (vierge en énoncé) + foyer F + directrice d, exactement comme
  * `ConstructionParaboleGraph`/`GrilleTournee` (`components/mafsGraphPartage.tsx`) les affiche à
@@ -296,19 +295,36 @@ ${constructionHtml}
 </svg>`;
 }
 
-const CONSIGNE_PAPIER =
-  "Construis la parabole de foyer F et de directrice d au compas et à l'équerre, sans aucun calcul de coordonnées : " +
-  "choisis un premier rayon (strictement supérieur à la moitié de la distance de F à d), trace au compas le cercle de " +
-  "centre F et ce rayon, puis à l'équerre la droite parallèle à d, à cette même distance, du côté de F — les 2 points " +
-  "d'intersection appartiennent à la parabole. Répète cette construction pour 2 autres rayons, tous différents du " +
-  "premier (6 points en tout), puis relie les 6 points par une courbe régulière, d'une extrémité à l'autre, le long " +
-  "de la courbe, pour tracer la parabole.";
+/** Consignes des 4 étapes (3 constructions, puis le tracé) — version papier des écrans
+ * (`CONSIGNE_CONSTRUCTION`, écran « trace ») : elles titrent les étapes du corrigé. */
+const ORDINAUX = ["un premier", "un deuxième", "un troisième"];
+const RAYONS = ["r", "r′ différent du premier", "r″ différent des deux premiers"];
+
+function consigneConstruction(numero: number): string {
+  return `Construis ${ORDINAUX[numero]} couple de points : au compas, le cercle de centre F et de rayon ${RAYONS[numero]} ; à l'équerre, la parallèle à d située à cette même distance, du côté de F ; leurs 2 points d'intersection sont sur la parabole.`;
+}
+
+const CONSIGNE_TRACE_PAPIER = "Relie les 6 points obtenus par une courbe régulière, d'une extrémité à l'autre, le long de la courbe.";
 
 function construireEnonceConstructionParabole(exercice: ExerciceConstructionParabole): SectionExercice {
   return {
     enteteFragments: [texte("On donne le foyer F et la directrice d d'une parabole.")],
     enteteHtml: construireSvgConstructionParabole(exercice, false),
-    questions: [{ consigne: [texte(CONSIGNE_PAPIER)] }],
+    questions: [0, 1, 2].map((n) => ({ consigne: [texte(consigneConstruction(n))] })).concat([{ consigne: [texte(CONSIGNE_TRACE_PAPIER)] }]),
+  };
+}
+
+/** Énoncé papier : la figure et la consigne globale, sans la méthode (elle passe dans le corrigé,
+ * étape par étape). */
+function enoncePapierConstructionParabole(exercice: ExerciceConstructionParabole): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("On donne le foyer F et la directrice d d'une parabole. Construis au compas et à l'équerre, sans calcul de coordonnées, au moins 6 points de cette parabole, puis trace-la."),
+      ],
+      enteteHtml: construireSvgConstructionParabole(exercice, false),
+      questions: [],
+    },
   };
 }
 
@@ -319,26 +335,79 @@ function construireCorrectionConstructionParabole(exercice: ExerciceConstruction
       type: "paragraphe",
       fragments: [
         texte(
-          "Principe : un point M appartient à la parabole si et seulement s'il est à la même distance du foyer F et de " +
-            "la directrice d. Pour un rayon r choisi (en bleu ci-dessus, cercle de centre F), les points de la parallèle " +
-            "à d située à distance r de d, du côté de F (en orange, pointillé), sont à la fois à distance r de F ET à " +
-            "distance r de d — ils sont donc exactement sur la parabole. Les 2 points d'intersection cercle/parallèle " +
-            "donnent ainsi 2 points de la courbe à chaque rayon choisi (en vert ci-dessus).",
-        ),
-      ],
-    },
-    {
-      type: "paragraphe",
-      fragments: [
-        texte(
-          "En reliant les points obtenus pour plusieurs rayons, d'une extrémité à l'autre le long de la courbe, on fait apparaître la courbe " +
-            "complète (en vert). Le sommet de la parabole est le point de la courbe le plus proche de la directrice — il " +
-            "se trouve exactement à mi-chemin entre F et d, sur la perpendiculaire à d passant par F, et la parabole " +
-            "s'ouvre du côté du foyer, en s'écartant de la directrice.",
+          "Un point M appartient à la parabole si et seulement s'il est à la même distance du foyer F et de la directrice d : pour chaque rayon r, les 2 points d'intersection du cercle de centre F et de rayon r avec la parallèle à d située à la distance r, du côté de F, conviennent.",
         ),
       ],
     },
   ];
+}
+
+function carreaux(n: number): string {
+  return `${n} carreau${n > 1 ? "x" : ""}`;
+}
+
+function difficulteConstructionParabole(): 1 | 2 | 3 {
+  return 2;
+}
+
+function reponseBreveConstructionParabole(exercice: ExerciceConstructionParabole): FragmentConsigne[] {
+  return [texte(`Parabole passant par les 6 points construits, de sommet situé à mi-chemin entre F et d (à ${carreaux(exercice.foyer.y / 2)} de d), ouverte du côté de F.`)];
+}
+
+function correctionDetailleeConstructionParabole(exercice: ExerciceConstructionParabole): EtapeCorrection[] {
+  const distance = exercice.foyer.y;
+  const rayons = rayonsIllustration(exercice);
+  const lignes: EtapeCorrection[] = [
+    {
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [texte("Un point M est sur la parabole s'il est à la même distance de F et de d. Un point du cercle de centre F et de rayon r est à la distance r de F ; un point de la parallèle à d située à la distance r (du côté de F) est à la distance r de d : leurs points communs conviennent.")],
+    },
+    {
+      label: "Condition",
+      sousQuestion: "a",
+      fragments: [texte(`F est à ${carreaux(distance)} de d : le rayon doit dépasser la moitié de cette distance (r > ${distance / 2}), sinon le cercle ne coupe pas la parallèle.`)],
+    },
+  ];
+  rayons.forEach((r, i) => {
+    lignes.push({
+      label: "Construction",
+      sousQuestion: "abc"[i]!,
+      fragments: [texte(`Par exemple r = ${carreaux(r)} : cercle de centre F et de rayon ${r}, parallèle à d à ${carreaux(r)} de d du côté de F ; 2 points d'intersection.`)],
+    });
+  });
+  lignes.push(
+    {
+      label: "Tracé",
+      sousQuestion: "d",
+      fragments: [texte("On relie les 6 points dans l'ordre, le long de la courbe. Le sommet est à mi-chemin entre F et d, sur la perpendiculaire à d passant par F, et la parabole s'ouvre du côté de F.")],
+      figureHtml: construireSvgConstructionParabole(exercice, true),
+    },
+    {
+      label: "Piège",
+      sousQuestion: "d",
+      fragments: [texte("La parallèle se trace à la distance r de d (pas de F), et toujours du côté de F ; deux rayons différents donnent deux couples de points différents.")],
+    },
+  );
+  return lignes;
+}
+
+function baremeConstructionParabole(): BaremeExercice {
+  return {
+    reponseFinale: [texte("Parabole tracée par au moins 6 points construits (voir la figure du corrigé).")],
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Premier couple de points : cercle de centre F et parallèle à d à la même distance r, du côté de F")], points: 1 },
+      { sousQuestion: "b", critere: [texte("Deuxième couple de points (autre rayon)")], points: 1 },
+      { sousQuestion: "c", critere: [texte("Troisième couple de points (autre rayon)")], points: 1 },
+      { sousQuestion: "d", critere: [texte("Courbe régulière passant par les points, sommet entre F et d, ouverte du côté de F")], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Parallèle tracée à la distance r de F au lieu de d, ou du mauvais côté de d")], cout: "−1 par couple" },
+      { description: [texte("Rayon trop petit (au plus la moitié de la distance de F à d) : aucun point d'intersection")], cout: "−1" },
+      { description: [texte("Points reliés par des segments ou dans le désordre")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Tout choix de rayons valides et distincts")]],
+  };
 }
 
 export const adaptateurEvaluationConstructionParabole: AdaptateurFeuilleExercices<ExerciceConstructionParabole> = {
@@ -347,6 +416,13 @@ export const adaptateurEvaluationConstructionParabole: AdaptateurFeuilleExercice
   genererInstance: genererExerciceConstructionParabole,
   construireEnonce: construireEnonceConstructionParabole,
   construireCorrection: construireCorrectionConstructionParabole,
-  // PAS regroupable — `enteteHtml` (le graphique) est utilisé, ce qui disqualifie `regroupable` à lui
-  // seul, quelle que soit la consigne (voir le commentaire de tête).
+  difficulte: difficulteConstructionParabole,
+  reponseBreve: reponseBreveConstructionParabole,
+  correctionDetaillee: correctionDetailleeConstructionParabole,
+  bareme: baremeConstructionParabole,
+  enoncePapier: enoncePapierConstructionParabole,
+  dureeMinutes: 8,
+  // Pas de profil : aucun paramètre ni cas particulier (foyer à 2 ou 4 carreaux de d, angle de la
+  // grille) — `profilsEvaluation4eCh7Coniques.ts`.
+  // PAS regroupable — `enteteHtml` (le graphique) est utilisé.
 };

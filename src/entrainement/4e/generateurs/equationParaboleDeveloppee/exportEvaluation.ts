@@ -1,5 +1,5 @@
 import type { ExerciceEquationParaboleDeveloppee } from "../../core/equationParaboleDeveloppee.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, ErreurFrequente, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   CONSIGNE_CARACTERISTIQUES,
@@ -12,7 +12,9 @@ import {
   segmentsConsigneCompletion,
   segmentsConsigneRegroupement,
 } from "../../ui/formatEquationParaboleDeveloppee";
+import { formatSommeTermes } from "../../ui/formatEquation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationParaboleDeveloppee } from "./index";
+import { PARAMETRES_PARABOLE_DEVELOPPEE, profilEquationParaboleDeveloppee } from "../profilsEvaluation4eCh7Coniques";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationParaboleDeveloppee>` pour gen52 (Sommet,
@@ -54,56 +56,187 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationP
  * générale de F) — jamais des étapes de résolution complètes à concaténer telles quelles ; la
  * correction ci-dessous rédige donc sa propre phrase de synthèse autour des 3 formes de référence
  * plutôt que de citer ces textes d'aide.
+ *
+ * **Feuille d'exercices / évaluation (refonte papier)** : l'énoncé papier est l'équation et la
+ * consigne globale (sommet, foyer, p, directrice) ; les 3 écrans (regroupement, complétion du carré,
+ * caractéristiques) deviennent les étapes 1 à 3 du corrigé détaillé. Aucune place de réponse.
+ * Tirage équilibré : `profilsEvaluation4eCh7Coniques.ts` (coordonnées du sommet, coefficient a).
  */
-
-function formatNombre(valeur: number): string {
-  return Number.isInteger(valeur) ? String(valeur) : valeur.toFixed(2).replace(/\.?0+$/, "");
-}
 
 function construireEnonceEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): SectionExercice {
   return {
     enteteFragments: [texte("On considère l'équation développée suivante d'une parabole :"), latex(formatEquationDeveloppeeLatex(instance))],
-    questions: [
-      { consigne: segmentsConsigneRegroupement(instance), reponse: { type: "lignes", nombre: 3 } },
-      { consigne: segmentsConsigneCompletion(instance), reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(CONSIGNE_CARACTERISTIQUES)], reponse: { type: "lignes", nombre: 4 } },
-    ],
+    questions: [{ consigne: segmentsConsigneRegroupement(instance) }, { consigne: segmentsConsigneCompletion(instance) }, { consigne: [texte(CONSIGNE_CARACTERISTIQUES)] }],
+  };
+}
+
+/** Énoncé papier : l'équation et la consigne globale (les 3 écrans deviennent les étapes du
+ * corrigé). */
+function enoncePapierEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [
+        texte("Détermine le sommet S, le foyer F, le paramètre p et l'équation de la directrice d de la parabole d'équation "),
+        latex(formatEquationDeveloppeeLatex(instance)),
+        texte("."),
+      ],
+      questions: [],
+    },
   };
 }
 
 function construireCorrectionEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): BlocCorrection[] {
-  const { sommet, foyer, p } = instance;
-
   return [
+    { type: "paragraphe", fragments: [texte("Forme réduite : "), latex(formatCompletionLatex(instance)), texte(".")] },
+    { type: "paragraphe", fragments: caracteristiques(instance) },
+  ];
+}
+
+function variables(instance: ExerciceEquationParaboleDeveloppee): { carre: "x" | "y"; autre: "x" | "y"; sCarre: number; sAutre: number } {
+  const vertical = instance.variante === "vertical";
+  return { carre: vertical ? "x" : "y", autre: vertical ? "y" : "x", sCarre: vertical ? instance.sommet.x : instance.sommet.y, sAutre: vertical ? instance.sommet.y : instance.sommet.x };
+}
+
+function binome(variable: string, valeur: number): string {
+  if (valeur === 0) return variable;
+  return valeur > 0 ? `${variable} - ${valeur}` : `${variable} + ${-valeur}`;
+}
+
+function carreBinome(variable: string, valeur: number): string {
+  return valeur === 0 ? `${variable}^2` : `(${binome(variable, valeur)})^2`;
+}
+
+function caracteristiques(instance: ExerciceEquationParaboleDeveloppee): FragmentConsigne[] {
+  return [
+    latex(`S${formatSommetLatex(instance.sommet)}`),
+    texte(", "),
+    latex(`p = ${instance.p}`),
+    texte(", "),
+    latex(`F${formatFoyerLatex(instance.foyer)}`),
+    texte(", directrice "),
+    latex(formatDirectriceLatex(instance)),
+    texte("."),
+  ];
+}
+
+function difficulteEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): 1 | 2 | 3 {
+  const { sCarre } = variables(instance);
+  if (instance.a !== 1 && sCarre !== 0) return 3;
+  return 2;
+}
+
+function reponseBreveEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): FragmentConsigne[] {
+  return caracteristiques(instance);
+}
+
+function correctionDetailleeEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): EtapeCorrection[] {
+  const { a, p } = instance;
+  const { carre, autre, sCarre, sAutre } = variables(instance);
+  const vertical = instance.variante === "vertical";
+  const prefixe = a === 1 ? "" : String(a);
+  // Second membre après regroupement : −bAutre·autre + c = 2ap·autre + c.
+  const secondMembre = formatSommeTermes([
+    { valeur: -instance.bAutre, suffixe: autre },
+    { valeur: instance.c, suffixe: "" },
+  ]);
+  const apresCompletion = formatSommeTermes([
+    { valeur: 2 * a * p, suffixe: autre },
+    { valeur: instance.c + a * sCarre * sCarre, suffixe: "" },
+  ]);
+  const apresDivision = formatSommeTermes([
+    { valeur: 2 * p, suffixe: autre },
+    { valeur: -2 * p * sAutre, suffixe: "" },
+  ]);
+
+  const lignes: EtapeCorrection[] = [
     {
-      type: "paragraphe",
+      label: "Méthode",
+      sousQuestion: "a",
+      fragments: [texte(`Seul ${carre} est au carré : l'axe de la parabole est ${vertical ? "vertical" : "horizontal"}. On garde les termes en ${carre} dans le premier membre et on passe le reste dans le second.`)],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: "a",
+      fragments: [texte(a === 1 ? "Regroupement : " : `Regroupement, puis mise en évidence du coefficient ${a} : `), latex(formatRegroupementLatex(instance)), texte(".")],
+    },
+  ];
+  if (sCarre !== 0) {
+    lignes.push(
+      { label: "Méthode", sousQuestion: "b", fragments: [texte("On complète le carré : "), latex(`${carre}^2+b${carre}=\\left(${carre}+\\dfrac{b}{2}\\right)^2-\\left(\\dfrac{b}{2}\\right)^2`), texte(".")] },
+      {
+        label: "Calcul",
+        sousQuestion: "b",
+        fragments: [latex(`${a === 1 ? "" : `${a}\\left[`}${carreBinome(carre, sCarre)} - ${Math.abs(sCarre)}^2${a === 1 ? "" : "\\right]"} = ${secondMembre}`), texte(", d'où "), latex(`${prefixe}${carreBinome(carre, sCarre)} = ${apresCompletion}`), texte(".")],
+      },
+    );
+  } else {
+    lignes.push({ label: "Calcul", sousQuestion: "b", fragments: [texte(`Pas de terme du premier degré en ${carre} : le carré est déjà complet, `), latex(`${prefixe}${carre}^2 = ${secondMembre}`), texte(".")] });
+  }
+  lignes.push(
+    {
+      label: "Calcul",
+      sousQuestion: "b",
       fragments: [
-        texte(
-          instance.a === 1
-            ? "a) On isole les termes de la variable au carré dans le premier membre : "
-            : `a) On isole les termes de la variable au carré dans le premier membre, puis on met en évidence leur coefficient ${instance.a} : `,
-        ),
-        latex(formatRegroupementLatex(instance)),
+        ...(a === 1 ? [] : [texte(`On divise par ${a} : `), latex(`${carreBinome(carre, sCarre)} = ${apresDivision}`), texte(", ")]),
+        texte("on met en évidence le coefficient de " + autre + " : "),
+        latex(formatCompletionLatex(instance)),
+        texte(", donc "),
+        latex(`2p = ${2 * p}`),
         texte("."),
       ],
     },
     {
-      type: "paragraphe",
-      fragments: [texte("b) En complétant le carré : "), latex(formatCompletionLatex(instance)), texte(", donc "), latex(`2p = ${2 * instance.p}`), texte(".")],
+      label: "Lecture",
+      sousQuestion: "c",
+      fragments: [texte("Par comparaison avec "), latex(vertical ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)"), texte(" : "), latex(`S${formatSommetLatex(instance.sommet)}`), texte(" et "), latex(`p = ${p}`), texte(".")],
     },
     {
-      type: "paragraphe",
+      label: "Calcul",
+      sousQuestion: "c",
       fragments: [
-        texte("c) On lit directement le sommet S"),
-        latex(formatSommetLatex(sommet)),
-        texte(" dans la forme complétée ci-dessus. Le foyer F"),
-        latex(formatFoyerLatex(foyer)),
-        texte(` se déduit du décalage le long de l'axe (moitié de p) ; le paramètre p (signé) vaut ${formatNombre(p)} ; la droite directrice a pour équation `),
-        latex(formatDirectriceLatex(instance)),
-        texte(" (symétrique de F par rapport à S le long de l'axe)."),
+        texte("Le foyer est à "),
+        latex("\\dfrac{p}{2}"),
+        texte(" du sommet le long de l'axe, la directrice à "),
+        latex("\\dfrac{p}{2}"),
+        texte(" de l'autre côté : "),
+        latex(`F${formatFoyerLatex(instance.foyer)}`),
+        texte(" et "),
+        latex(`d : ${formatDirectriceLatex(instance)}`),
+        texte("."),
       ],
     },
+    {
+      label: "Piège",
+      sousQuestion: "c",
+      fragments:
+        p < 0
+          ? [texte("p est négatif : le foyer est du côté des " + autre + " décroissants ("), latex(`${vertical ? "y_F" : "x_F"} = ${vertical ? instance.foyer.y : instance.foyer.x}`), texte(") et la directrice de l'autre côté du sommet.")]
+          : [texte("Le coefficient de la forme réduite est "), latex("2p"), texte(" : "), latex(`2p = ${2 * p}`), texte(" donne "), latex(`p = ${p}`), texte(", et non "), latex(`p = ${2 * p}`), texte(".")],
+    },
+  );
+  return lignes;
+}
+
+function baremeEquationParaboleDeveloppee(instance: ExerciceEquationParaboleDeveloppee): BaremeExercice {
+  const { sCarre } = variables(instance);
+  const erreurs: ErreurFrequente[] = [
+    { description: [texte("p confondu avec "), latex("2p")], cout: "−1" },
+    { description: [texte("Foyer et directrice échangés de côté (signe de p ignoré)")], cout: "−1" },
   ];
+  if (sCarre !== 0) erreurs.push({ description: [texte("Carré complété sans retrancher "), latex("\\left(\\dfrac{b}{2}\\right)^2"), texte(instance.a === 1 ? "" : ` (ou sans le multiplier par ${instance.a})`)], cout: "−1" });
+  return {
+    reponseFinale: caracteristiques(instance),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Termes regroupés"), texte(instance.a === 1 ? "" : ` et coefficient ${instance.a} mis en évidence`)], points: 1 },
+      { sousQuestion: "b", critere: [texte("Forme réduite "), latex(formatCompletionLatex(instance))], points: 1 },
+      { sousQuestion: "c", critere: [texte("Sommet "), latex(`S${formatSommetLatex(instance.sommet)}`)], points: 0.5 },
+      { sousQuestion: "c", critere: [texte("Paramètre "), latex(`p = ${instance.p}`)], points: 0.5 },
+      { sousQuestion: "c", critere: [texte("Foyer "), latex(`F${formatFoyerLatex(instance.foyer)}`)], points: 0.5 },
+      { sousQuestion: "c", critere: [texte("Directrice "), latex(formatDirectriceLatex(instance))], points: 0.5 },
+    ],
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Toute forme réduite équivalente (coefficient du second membre non factorisé), si S et p en sont correctement déduits")]],
+  };
 }
 
 export const adaptateurEvaluationEquationParaboleDeveloppee: AdaptateurFeuilleExercices<ExerciceEquationParaboleDeveloppee> = {
@@ -114,7 +247,12 @@ export const adaptateurEvaluationEquationParaboleDeveloppee: AdaptateurFeuilleEx
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceEquationParaboleDeveloppee,
   construireCorrection: construireCorrectionEquationParaboleDeveloppee,
-  // 3 questions par instance (regroupement, complétion, caractéristiques), consigne a) adaptative
-  // selon l'orientation (nomme la variable au carré) — jamais 1 question à consigne générique :
-  // voir le commentaire de tête.
+  difficulte: difficulteEquationParaboleDeveloppee,
+  reponseBreve: reponseBreveEquationParaboleDeveloppee,
+  correctionDetaillee: correctionDetailleeEquationParaboleDeveloppee,
+  bareme: baremeEquationParaboleDeveloppee,
+  enoncePapier: enoncePapierEquationParaboleDeveloppee,
+  dureeMinutes: 7,
+  profilInstance: profilEquationParaboleDeveloppee,
+  parametresAuChoix: PARAMETRES_PARABOLE_DEVELOPPEE,
 };

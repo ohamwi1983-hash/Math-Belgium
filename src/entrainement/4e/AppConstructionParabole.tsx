@@ -19,6 +19,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Construis cette parabole au compas et à l'équerre.";
 
@@ -31,6 +32,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionConstructionParabole {
   return demarrerSessionConstructionParabole(REGLAGES_DEMO, genererExerciceConstructionParabole);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération et le même catalogue
+ * que l'adaptateur d'export (`generateurs/constructionParabole/exportEvaluation.ts`) ; la suite de la session
+ * reste un tirage normal. */
+function sessionInitiale(): EtatSessionConstructionParabole {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionConstructionParabole(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceConstructionParabole, undefined));
 }
 
 function calculerSegmentsProgression(etat: EtatSessionConstructionParabole): EtatPuceProgression[] {
@@ -66,7 +77,7 @@ function constructionSaisie(reponse: ReponseConstructionParabole): ReactNode {
 }
 
 export function AppConstructionParabole() {
-  const [etat, setEtat] = useState<EtatSessionConstructionParabole>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionConstructionParabole>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des itérations closes (puces cliquables) — tenue ici, jamais dans
    * le moteur ; une itération close = une entrée, même index que sa puce. L'écran "trace", dernier,

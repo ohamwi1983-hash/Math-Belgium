@@ -14,6 +14,7 @@ import {
 } from "./moteur/sessionColinearite";
 import type { EtatSessionColinearite, PhaseColinearite } from "./moteur/typesColinearite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceColinearite } from "./generateurs/colinearite";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteColinearite } from "./core/colinearite.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeTestColinearite } from "./components/EtapeTestColinearite";
@@ -43,6 +44,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionColinearite {
   return demarrerSessionColinearite(REGLAGES_DEMO, genererExerciceColinearite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionColinearite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionColinearite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceColinearite, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -217,7 +227,7 @@ function calculerSegmentsProgression(etat: EtatSessionColinearite): EtatPuceProg
 }
 
 export function AppColinearite() {
-  const [etat, setEtat] = useState<EtatSessionColinearite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionColinearite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de la séquence (même index que sa puce). */

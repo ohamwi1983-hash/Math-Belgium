@@ -5,6 +5,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionComparaisonVecteurs, soumettreReponseEgalite, soumettreReponseSelection } from "./moteur/sessionComparaisonVecteurs";
 import type { EtatSessionComparaisonVecteurs, PhaseComparaisonVecteurs } from "./moteur/typesComparaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonVecteurs } from "./generateurs/comparaisonVecteurs";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSelectionComparaison } from "./components/EtapeSelectionComparaison";
 import { EtapeEgaliteComparaison } from "./components/EtapeEgaliteComparaison";
@@ -28,6 +29,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionComparaisonVecteurs {
   return demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, genererExerciceComparaisonVecteurs);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionComparaisonVecteurs {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceComparaisonVecteurs, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Coefficient jamais explicite s'il vaut `1`/`-1` — même convention que le reste de la
@@ -93,7 +103,7 @@ function calculerSegmentsProgression(etat: EtatSessionComparaisonVecteurs): Etat
 }
 
 export function AppComparaisonVecteurs() {
-  const [etat, setEtat] = useState<EtatSessionComparaisonVecteurs>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComparaisonVecteurs>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, jamais dans
    * le moteur ; remis à vide à chaque nouvel exercice (patron gen16). */

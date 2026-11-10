@@ -180,6 +180,8 @@ function soumettrePhase<R>(
   phaseAttendue: PhaseOrthogonalite,
   reponse: R,
   verifier: (reponse: R) => boolean,
+  /** Choix fermé gagnable par élimination : une seule tentative (au lieu du réglage de session). */
+  tentativesMax?: number,
 ): EtatSessionOrthogonalite {
   if (etat.terminee || etat.phase !== phaseAttendue) {
     throw new Error(`soumettrePhase(${phaseAttendue}) : la session n'est pas à cette étape`);
@@ -187,6 +189,7 @@ function soumettrePhase<R>(
 
   const etapeCourante = soumettreEtapeTentatives<R>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMax !== undefined ? { tentativesMax } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -254,7 +257,7 @@ export function soumettreReponseTestSommet(etat: EtatSessionOrthogonalite, somme
 export function soumettreReponseConclusionTriangle(etat: EtatSessionOrthogonalite, reponse: ReponseConclusionTriangle): EtatSessionOrthogonalite {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "triangle") throw new Error("soumettreReponseConclusionTriangle : réservé à la variante 'triangle'");
-  return soumettrePhase(etat, "conclusionTriangle", reponse, (r) => verifierConclusionTriangle(exercice, r));
+  return soumettrePhase(etat, "conclusionTriangle", reponse, (r) => verifierConclusionTriangle(exercice, r), 1);
 }
 
 export function soumettreReponseConstructionAvecXTriangle(

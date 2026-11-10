@@ -33,6 +33,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine l'intersection de ces lieux géométriques.";
 
@@ -45,6 +46,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionLieuxGeometriques {
   return demarrerSessionLieuxGeometriques(REGLAGES_DEMO, genererExerciceLieuxGeometriques);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération et le même catalogue
+ * que l'adaptateur d'export (`generateurs/lieuxGeometriques/exportEvaluation.ts`) ; la suite de la session
+ * reste un tirage normal. */
+function sessionInitiale(): EtatSessionLieuxGeometriques {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLieuxGeometriques(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceLieuxGeometriques, (id) => construireAvecVarianteId(id as VarianteLieuxGeometriquesId)));
 }
 
 /** 3 phases fixes (voir `PhaseLieuxGeometriques`). "resolution" (dernière phase) n'a jamais besoin
@@ -123,7 +134,7 @@ interface TransitionEnAttente {
 }
 
 export function AppLieuxGeometriques() {
-  const [etat, setEtat] = useState<EtatSessionLieuxGeometriques>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLieuxGeometriques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

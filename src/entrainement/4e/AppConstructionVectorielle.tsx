@@ -3,6 +3,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionConstructionVectorielle, soumettreReponseConstruction } from "./moteur/sessionConstructionVectorielle";
 import type { EtatSessionConstructionVectorielle } from "./moteur/typesConstructionVectorielle";
 import { genererExerciceConstructionVectorielle } from "./generateurs/constructionVectorielle";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { EtapeConstructionVectorielle } from "./components/EtapeConstructionVectorielle";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
@@ -19,6 +20,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionConstructionVectorielle {
   return demarrerSessionConstructionVectorielle(REGLAGES_DEMO, genererExerciceConstructionVectorielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionConstructionVectorielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionConstructionVectorielle(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceConstructionVectorielle, undefined));
 }
 
 /** Notation matricielle colonne (2×1) — jamais la notation en ligne d'un point (correction
@@ -42,7 +52,7 @@ interface TransitionEnAttente {
 }
 
 export function AppConstructionVectorielle() {
-  const [etat, setEtat] = useState<EtatSessionConstructionVectorielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionConstructionVectorielle>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Compteur d'exercices — `key` de l'étape : un nouvel exercice remonte le composant, donc
    * repart du tracé initial au lieu de garder celui de l'exercice précédent. */

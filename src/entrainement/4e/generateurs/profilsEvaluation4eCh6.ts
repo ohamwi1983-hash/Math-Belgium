@@ -16,6 +16,10 @@ import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.ty
 import type { ExerciceConstructionVectorielle } from "../core/constructionVectorielle.types";
 import type { ExerciceColinearite } from "../core/colinearite.types";
 import type { ExerciceOrthogonalite } from "../core/orthogonalite.types";
+import type { ExerciceNormeDistance } from "../core/normeDistance.types";
+import type { ExerciceReductionVectorielle } from "../core/reductionVectorielle.types";
+import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.types";
+import type { ExerciceApplicationPhysique } from "../core/applicationPhysique.types";
 import { idCanoniqueRef } from "./combinaisonVecteurs";
 
 export const LIBELLE_CAS_ORIGINE = "Inclure un cas particulier (image de l'origine O : ses coordonnées sont celles du vecteur)";
@@ -67,4 +71,41 @@ export function profilColinearite(_e: ExerciceColinearite): ProfilInstance {
  * VERDICTS, jamais filtrés. Solutions en x entières, sans raccourci : aucun cas particulier. */
 export function profilOrthogonalite(_e: ExerciceOrthogonalite): ProfilInstance {
   return { casParticulier: null };
+}
+
+export const LIBELLE_CAS_NORME_ENTIERE = "Inclure un cas particulier (norme entière : aucune racine à simplifier)";
+
+/** gen26 — norme et distance. Variantes « norme d'un vecteur » et « distance » : norme entière
+ * (triplet pythagoricien, ≈ 50 % par construction) → cas particulier (pas de racine à écrire ni à
+ * simplifier). Isocèle ou scalène, rectangle ou non, nombre de solutions (variante « paramètre ») :
+ * des VERDICTS, jamais filtrés. */
+export function profilNormeDistance(e: ExerciceNormeDistance): ProfilInstance {
+  if (e.variante === "vecteur") return { casParticulier: Number.isInteger(Math.sqrt(e.normeCarree)) ? "norme-entiere" : null };
+  if (e.variante === "distance") return { casParticulier: Number.isInteger(Math.sqrt(e.distanceCarree)) ? "norme-entiere" : null };
+  return { casParticulier: null };
+}
+
+/** gen27 — réduction d'une somme de vecteurs sur une figure. 0, 1 ou 2 paires de termes opposés
+ * (k·RS + k·SR, tirées à parts égales : ≈ 33 % sans aucune paire) : paramètre au choix du
+ * professeur, présent dans les 4 figures (case cochée = au moins une paire à éliminer). */
+export const PARAMETRES_REDUCTION = [{ id: "sans-paire-opposee", label: "Paire de termes opposés à éliminer" }];
+
+export function profilReductionVectorielle(e: ExerciceReductionVectorielle): ProfilInstance {
+  const t = e.termes;
+  const paire = t.some((a, i) => t.some((b, j) => j > i && a.origine === b.arrivee && a.arrivee === b.origine && a.coefficient === b.coefficient));
+  return { casParticulier: paire ? null : "sans-paire-opposee" };
+}
+
+/** gen28 — comparaison de vecteurs sur une figure. Qui a la même longueur, direction ou sens que la
+ * référence : des VERDICTS (le nombre de bonnes réponses varie avec la figure), jamais filtrés.
+ * La propriété est la variante : aucun cas particulier. */
+export function profilComparaisonVecteurs(_e: ExerciceComparaisonVecteurs): ProfilInstance {
+  return { casParticulier: null };
+}
+
+/** gen29 — résultante de deux vecteurs (vitesses, forces). Racine, cosinus et arc sinus ou arc
+ * tangente : TOUJOURS la calculatrice (`calculatriceIndispensable`). Direction Nord ou Sud de la
+ * résultante : un VERDICT, jamais filtré. Le contexte (avion, hélicoptère, forces) est neutre. */
+export function profilApplicationPhysique(_e: ExerciceApplicationPhysique): ProfilInstance {
+  return { casParticulier: null, calcul: "calculatrice" };
 }

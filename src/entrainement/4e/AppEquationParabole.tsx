@@ -16,6 +16,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -26,6 +27,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionEquationParabole {
   return demarrerSessionEquationParabole(REGLAGES_DEMO, genererExerciceEquationParabole);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération et le même catalogue
+ * que l'adaptateur d'export (`generateurs/equationParabole/exportEvaluation.ts`) ; la suite de la session
+ * reste un tirage normal. */
+function sessionInitiale(): EtatSessionEquationParabole {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationParabole(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationParabole, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** 2 phases fixes, toujours le même ordre — "equation" (dernière phase) n'a jamais besoin de sa
@@ -77,7 +88,7 @@ function saisieBrute(texte: string): ReactNode {
 }
 
 export function AppEquationParabole() {
-  const [etat, setEtat] = useState<EtatSessionEquationParabole>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationParabole>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

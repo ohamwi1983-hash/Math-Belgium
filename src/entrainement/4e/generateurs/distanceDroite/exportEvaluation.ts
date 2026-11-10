@@ -1,7 +1,7 @@
 import type { ExerciceDistanceDroite, ExerciceDistanceParalleles, ExerciceDistancePoint } from "../../core/distanceDroite.types";
 import type { DroiteImplicite } from "../../core/droite.types";
 import type { Point } from "../../core/vecteur.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   CONSIGNE_DISTANCE_PQ,
@@ -14,12 +14,15 @@ import {
   formatDroiteLatex,
   formatEnonceLatex,
   formatPointLatex,
+  FORMULE_GENERALE_DISTANCE_PQ_LATEX,
   nomDroiteCible,
+  segmentsAideEquationBNiveau1,
   segmentsConsigneEquationB,
   segmentsConsigneGeneraleDistanceDroite,
 } from "../../ui/formatDistanceDroite";
 import { implicteDepuisPointVecteur, intersectionDeuxDroites } from "../droite/geometrieDroite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDistanceDroite } from "./index";
+import { LIBELLE_CAS_PARALLELE_AXE, profilDistanceDroite } from "../profilsEvaluation4eCh7Droites";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceDistanceDroite>` pour gen47 (Distance
@@ -119,37 +122,24 @@ function pointEntierSurDroite(d: DroiteImplicite): Point {
 // générale (`segmentsConsigneGeneraleDistanceDroite`), puis les questions écran par écran.
 // ============================================================================
 
-const QUESTION_DISTANCE_PQ = { consigne: [texte(CONSIGNE_DISTANCE_PQ)], reponse: { type: "lignes", nombre: 2 } as const };
+// Étapes du corrigé (une par écran), sans place de réponse ni tournure de saisie (« fraction
+// acceptée, par exemple 7/2 »).
+const QUESTION_DISTANCE_PQ = { consigne: [texte(CONSIGNE_DISTANCE_PQ.replace(", par exemple 2√5", ""))] };
 
-/** La droite cible porte son vrai nom (`d`, ou `d₁`/`d₂` pour la variante « parallèles » — audit
- * chapitre 7, point 31). */
 function questionEquationB(instance: ExerciceDistanceDroite) {
-  return { consigne: segmentsConsigneEquationB(instance), reponse: { type: "lignes", nombre: 3 } as const };
+  return { consigne: segmentsConsigneEquationB(instance) };
 }
 
 function questionIntersectionQ(instance: ExerciceDistanceDroite) {
-  return { consigne: [texte(consigneIntersectionQ(instance))], reponse: { type: "lignes", nombre: 3 } as const };
+  return { consigne: [texte(consigneIntersectionQ(instance).replace(" (fraction acceptée, par exemple 7/2)", ""))] };
 }
 
 function construireEnonceDistanceDroite(instance: ExerciceDistanceDroite): SectionExercice {
-  // `enteteFragments` est toujours rendu en mode KaTeX "bloc" (`assemblerEvaluationHtml.ts`) : n'y
-  // mettre que le bloc de données lui-même — la consigne générale (`segmentsConsigneGeneraleDistanceDroite`,
-  // des segments texte/latex courts pensés pour un rendu EN LIGNE) est préfixée à la consigne de la
-  // première question à la place, où `question.consigne` est rendu en mode inline.
-  const enteteFragments = [latex(formatEnonceLatex(instance))];
-  const consigneGenerale = segmentsConsigneGeneraleDistanceDroite(instance);
-
-  const questionB = questionEquationB(instance);
+  const enteteFragments = [...segmentsConsigneGeneraleDistanceDroite(instance), texte(" "), latex(formatEnonceLatex(instance))];
   if (estVariantePoint(instance)) {
-    const premiereQuestion = { consigne: [...consigneGenerale, texte(" "), ...questionB.consigne], reponse: questionB.reponse };
-    return { enteteFragments, questions: [premiereQuestion, questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
+    return { enteteFragments, questions: [questionEquationB(instance), questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
   }
-
-  const questionChoixPoint = {
-    consigne: [...consigneGenerale, texte(" "), texte(consigneChoixPoint(instance))],
-    reponse: { type: "lignes", nombre: 1 } as const,
-  };
-  return { enteteFragments, questions: [questionChoixPoint, questionB, questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
+  return { enteteFragments, questions: [{ consigne: [texte(consigneChoixPoint(instance))] }, questionEquationB(instance), questionIntersectionQ(instance), QUESTION_DISTANCE_PQ] };
 }
 
 // ============================================================================
@@ -235,6 +225,114 @@ function construireCorrectionDistanceDroite(instance: ExerciceDistanceDroite): B
   return estVariantePoint(instance) ? construireCorrectionPoint(instance) : construireCorrectionParalleles(instance);
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Les écrans (point de d₁ choisi, perpendiculaire b, pied Q, distance PQ) sont les étapes
+// d'APPRENTISSAGE : sur papier, l'énoncé donne la (les) droite(s) et UNE consigne — la distance,
+// en valeur exacte. Le corrigé reprend la méthode du cours (perpendiculaire, pied, longueur) avec
+// les valeurs de l'instance, et le raccourci quand la droite est horizontale ou verticale.
+
+function enoncePapier(instance: ExerciceDistanceDroite): EnoncePapier {
+  const consigne: FragmentConsigne[] = estVariantePoint(instance)
+    ? [texte("Calcule la distance du point "), latex("P"), texte(" à la droite "), latex("d"), texte(" (valeur exacte).")]
+    : [texte("Les droites "), latex("d_1"), texte(" et "), latex("d_2"), texte(" sont parallèles. Calcule la distance entre ces deux droites (valeur exacte).")];
+  return {
+    section: { enteteFragments: [texte("On donne :"), latex(formatEnonceLatex(instance))], questions: [{ consigne }] },
+    etapesParQuestion: [estVariantePoint(instance) ? ["a", "b", "c"] : ["a", "b", "c", "d"]],
+  };
+}
+
+/** Données de la résolution, identiques pour les deux variantes : point P, droite cible, b, Q. */
+function donneesResolution(instance: ExerciceDistanceDroite): { point: Point; cible: DroiteImplicite; nomCible: string; b: DroiteImplicite; q: Point } {
+  if (estVariantePoint(instance)) return { point: instance.point, cible: instance.d, nomCible: "d", b: instance.bAttendue, q: instance.q };
+  const source = instance.droiteSource === "d1" ? instance.d1 : instance.d2;
+  const cible = instance.droiteSource === "d1" ? instance.d2 : instance.d1;
+  const point = pointEntierSurDroite(source);
+  const b = implicteDepuisPointVecteur(point, instance.vecteurNormal);
+  return { point, cible, nomCible: nomDroiteCible(instance).latex, b, q: intersectionDeuxDroites(b, cible)! };
+}
+
+/** « |x_P − 3| », « |x_P + 2| », « |x_P| » — écart à la constante k, sans double signe. */
+function ecartLatex(terme: string, k: number): string {
+  if (k === 0) return `|${terme}|`;
+  return k > 0 ? `|${terme} - ${k}|` : `|${terme} + ${-k}|`;
+}
+
+function correctionDetaillee(instance: ExerciceDistanceDroite): EtapeCorrection[] {
+  const { point, cible, nomCible, b, q } = donneesResolution(instance);
+  const lettres = estVariantePoint(instance) ? ["a", "b", "c"] : ["b", "c", "d"];
+  const [lB, lQ, lD] = lettres;
+  const lignes: EtapeCorrection[] = [];
+  if (!estVariantePoint(instance)) {
+    const source = instance.droiteSource === "d1" ? "d_1" : "d_2";
+    lignes.push(
+      { label: "Méthode", sousQuestion: "a", fragments: [texte("La distance entre deux droites parallèles est la distance d'un point quelconque de l'une à l'autre. Pour un point de "), latex(source), texte(" à coordonnées entières, on donne à x une valeur qui rend y entier.")] },
+      { label: "Conclusion", sousQuestion: "a", fragments: [texte("Par exemple "), latex(`P${formatPointLatex(point)} \\in ${source}`), texte(".")] },
+    );
+  }
+  const instancePourAide = instance;
+  lignes.push(
+    { label: "Méthode", sousQuestion: lB, fragments: segmentsAideEquationBNiveau1(instancePourAide) },
+    { label: "Calcul", sousQuestion: lB, fragments: [latex(formatAideEquationBNiveau2Latex(cible, nomCible))] },
+    { label: "Conclusion", sousQuestion: lB, fragments: [latex(formatDroiteLatex("b", b))] },
+    { label: "Méthode", sousQuestion: lQ, fragments: [texte("Le pied Q de la perpendiculaire est l'intersection de b et de "), latex(nomCible), texte(" : on résout le système (substitution ou combinaison).")] },
+    { label: "Calcul", sousQuestion: lQ, fragments: [latex(`\\begin{cases} ${formatDroiteLatex("b", b)} \\\\ ${formatDroiteLatex(nomCible, cible)} \\end{cases} \\Rightarrow ${formatAideIntersectionQNiveau2Latex(b, cible)}`)] },
+    { label: "Conclusion", sousQuestion: lQ, fragments: [latex(`Q${formatPointLatex(q)}`)] },
+    { label: "Méthode", sousQuestion: lD, fragments: [texte("La distance cherchée est la longueur PQ : "), latex(FORMULE_GENERALE_DISTANCE_PQ_LATEX), texte(".")] },
+    { label: "Calcul", sousQuestion: lD, fragments: [latex(`PQ = ${formatAideDistancePQNiveau2Latex(point, q)} = ${formatDistanceAttendueLatex(instance.distanceCarree)}`)] },
+  );
+  if (cible.a === 0 || cible.b === 0) {
+    const verticale = cible.b === 0;
+    const k = verticale ? -cible.c / cible.a : -cible.c / cible.b;
+    lignes.push({
+      label: "Raccourci",
+      sousQuestion: lD,
+      fragments: [
+        texte(`${verticale ? "La droite est verticale" : "La droite est horizontale"} : la distance est directement l'écart des ${verticale ? "abscisses" : "ordonnées"}, `),
+        latex(`${ecartLatex(verticale ? "x_P" : "y_P", k)} = ${ecartLatex(String(verticale ? point.x : point.y), k)} = ${formatDistanceAttendueLatex(instance.distanceCarree)}`),
+        texte("."),
+      ],
+    });
+  }
+  lignes.push({
+    label: "Piège",
+    sousQuestion: lB,
+    fragments: [texte("La droite b doit être PERPENDICULAIRE à "), latex(nomCible), texte(" : avec la parallèle passant par P, on ne retrouve jamais le pied de la perpendiculaire et la « distance » obtenue est fausse.")],
+  });
+  return lignes;
+}
+
+function reponseBreve(instance: ExerciceDistanceDroite): FragmentConsigne[] {
+  const nom = estVariantePoint(instance) ? "\\operatorname{dist}(P, d)" : "\\operatorname{dist}(d_1, d_2)";
+  return [latex(`${nom} = ${formatDistanceAttendueLatex(instance.distanceCarree)}`)];
+}
+
+function bareme(instance: ExerciceDistanceDroite): BaremeExercice {
+  const { b, q, nomCible } = donneesResolution(instance);
+  const point = estVariantePoint(instance);
+  const [lB, lQ, lD] = point ? ["a", "b", "c"] : ["b", "c", "d"];
+  const criteres = [
+    ...(point ? [] : [{ sousQuestion: "a", critere: [texte("Point à coordonnées entières de la droite de départ")], points: 0.5 }]),
+    { sousQuestion: lB, critere: [texte("Perpendiculaire b passant par P : "), latex(formatDroiteLatex("b", b))], points: point ? 1.5 : 1 },
+    { sousQuestion: lQ, critere: [texte("Pied de la perpendiculaire : "), latex(`Q${formatPointLatex(q)}`)], points: point ? 1.5 : 1.5 },
+    { sousQuestion: lD, critere: [texte("Distance exacte simplifiée : "), latex(formatDistanceAttendueLatex(instance.distanceCarree))], points: point ? 1 : 1 },
+  ];
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres,
+    erreursFrequentes: [
+      { description: [texte("Droite parallèle à "), latex(nomCible), texte(" au lieu de la perpendiculaire")], cout: `0 pt sur ${lB}) et ${lQ})` },
+      { description: [texte("Radical non simplifié ou valeur approchée seule")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Formule de la distance d'un point à une droite, si elle a été vue au cours, appliquée correctement")]],
+  };
+}
+
+/** ★ droite horizontale ou verticale ; ★★★ distance entre deux parallèles ; ★★ sinon. */
+function difficulte(instance: ExerciceDistanceDroite): 1 | 2 | 3 {
+  if (instance.vecteurNormal.x === 0 || instance.vecteurNormal.y === 0) return 1;
+  return estVariantePoint(instance) ? 2 : 3;
+}
+
 export const adaptateurEvaluationDistanceDroite: AdaptateurFeuilleExercices<ExerciceDistanceDroite> = {
   titreDocument: "Distance point-droite et droite-droite — Évaluation",
   nomFichierBase: "distance-point-droite",
@@ -243,6 +341,14 @@ export const adaptateurEvaluationDistanceDroite: AdaptateurFeuilleExercices<Exer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceDistanceDroite,
   construireCorrection: construireCorrectionDistanceDroite,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 7,
+  profilInstance: profilDistanceDroite,
+  libelleCasParticulier: LIBELLE_CAS_PARALLELE_AXE,
   // PAS `regroupable` : jusqu'à 4 questions substantielles par instance (choixPoint pour
   // "paralleles", equationB, intersectionQ, distancePQ — jamais un unique écran générique par
   // instance), même raison que `simplification/exportEvaluation.ts` (voir son commentaire de tête).

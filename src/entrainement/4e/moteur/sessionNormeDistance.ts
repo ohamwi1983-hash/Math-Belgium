@@ -178,6 +178,8 @@ function soumettrePhase<R>(
   phaseAttendue: PhaseNormeDistance,
   reponse: R,
   verifier: (reponse: R) => boolean,
+  /** Choix fermé gagnable par élimination : une seule tentative (au lieu du réglage de session). */
+  tentativesMax?: number,
 ): EtatSessionNormeDistance {
   if (etat.terminee || etat.phase !== phaseAttendue) {
     throw new Error(`soumettrePhase(${phaseAttendue}) : la session n'est pas à cette étape`);
@@ -185,6 +187,7 @@ function soumettrePhase<R>(
 
   const etapeCourante = soumettreEtapeTentatives<R>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMax !== undefined ? { tentativesMax } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -244,7 +247,7 @@ export function soumettreReponseCalculIsocele(etat: EtatSessionNormeDistance, re
 export function soumettreReponseConclusionIsocele(etat: EtatSessionNormeDistance, reponse: ReponseClassificationIsocele): EtatSessionNormeDistance {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "isocele") throw new Error("soumettreReponseConclusionIsocele : réservé à la variante 'isocele'");
-  return soumettrePhase(etat, "conclusionIsocele", reponse, (r) => verifierConclusionIsocele(exercice, r));
+  return soumettrePhase(etat, "conclusionIsocele", reponse, (r) => verifierConclusionIsocele(exercice, r), 1);
 }
 
 export function soumettreReponseReductionParametreNorme(etat: EtatSessionNormeDistance, texte: string): EtatSessionNormeDistance {
@@ -274,5 +277,5 @@ export function soumettreReponseCalculPythagore(etat: EtatSessionNormeDistance, 
 export function soumettreReponseTestPythagore(etat: EtatSessionNormeDistance, reponse: ReponseTestPythagore): EtatSessionNormeDistance {
   const exercice = etat.exerciceCourant;
   if (exercice.variante !== "pythagore") throw new Error("soumettreReponseTestPythagore : réservé à la variante 'pythagore'");
-  return soumettrePhase(etat, "testPythagore", reponse, (r) => verifierTestPythagore(exercice, r));
+  return soumettrePhase(etat, "testPythagore", reponse, (r) => verifierTestPythagore(exercice, r), 1);
 }

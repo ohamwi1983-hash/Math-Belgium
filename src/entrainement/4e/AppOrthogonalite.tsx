@@ -16,6 +16,7 @@ import {
 import { SEQUENCES } from "./moteur/typesOrthogonalite";
 import type { EtatSessionOrthogonalite, PhaseOrthogonalite, ResultatExerciceOrthogonalite } from "./moteur/typesOrthogonalite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOrthogonalite } from "./generateurs/orthogonalite";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ExerciceOrthogonalite, VarianteOrthogonalite } from "./core/orthogonalite.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeTestOrthogonalite } from "./components/EtapeTestOrthogonalite";
@@ -60,6 +61,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionOrthogonalite {
   return demarrerSessionOrthogonalite(REGLAGES_DEMO, genererExerciceOrthogonalite);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionOrthogonalite {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionOrthogonalite(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceOrthogonalite, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Réutilise `SEQUENCES` (séquence réelle par variante, déjà exposée par `typesOrthogonalite.ts`)
@@ -269,7 +279,7 @@ interface TransitionEnAttente {
 }
 
 export function AppOrthogonalite() {
-  const [etat, setEtat] = useState<EtatSessionOrthogonalite>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionOrthogonalite>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `SEQUENCES` (même index que sa puce). */
@@ -427,7 +437,7 @@ export function AppOrthogonalite() {
             key={`${numeroExercice}-${phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
+            tentativesMax={1}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConclusionTriangle(etat, reponse), saisieConclusion(exercice, reponse))}

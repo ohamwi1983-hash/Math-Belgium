@@ -12,6 +12,7 @@ import {
 } from "./moteur/sessionApplicationPhysique";
 import type { EtatSessionApplicationPhysique, PhaseApplicationPhysique } from "./moteur/typesApplicationPhysique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./generateurs/applicationPhysique";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteApplicationPhysique } from "./core/applicationPhysique.types";
 import {
   calculerRecapitulatifApplicationPhysique,
@@ -39,6 +40,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionApplicationPhysique {
   return demarrerSessionApplicationPhysique(REGLAGES_DEMO, genererExerciceApplicationPhysique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionApplicationPhysique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionApplicationPhysique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceApplicationPhysique, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Loi des cosinus (norme de la résultante) puis loi des sinus (angle de déviation) — deux calculs
@@ -87,7 +97,7 @@ interface TransitionEnAttente {
 }
 
 export function AppApplicationPhysique() {
-  const [etat, setEtat] = useState<EtatSessionApplicationPhysique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionApplicationPhysique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionApplicationPhysique`, jamais dans le moteur : la saisie de
@@ -204,7 +214,7 @@ export function AppApplicationPhysique() {
             key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
+            tentativesMax={1}
             onChoisir={(choix) =>
               terminerEtape(soumettreReponseModelisation(etat, choix), libelleVarianteApplicationPhysique(choix))
             }
@@ -239,7 +249,7 @@ export function AppApplicationPhysique() {
             key={cleEcran}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
+            tentativesMax={1}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
             onValider={(direction) => terminerEtape(soumettreReponseInterpretation(etat, direction))}
             validation={validation}

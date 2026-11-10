@@ -4,6 +4,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
 import type { EtatSessionCombinaisonVecteurs, PhaseCombinaisonVecteurs } from "./moteur/typesCombinaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCombinaisonVecteurs } from "./generateurs/combinaisonVecteurs";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteCombinaisonVecteurs } from "./core/combinaisonVecteurs.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSimplificationCombinaisonVecteurs } from "./components/EtapeSimplificationCombinaisonVecteurs";
@@ -28,6 +29,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionCombinaisonVecteurs {
   return demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, genererExerciceCombinaisonVecteurs);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionCombinaisonVecteurs {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCombinaisonVecteurs, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -65,7 +75,7 @@ interface TransitionEnAttente {
  * voir CLAUDE.md et `core/combinaisonVecteurs.types.ts`).
  */
 export function AppCombinaisonVecteurs() {
-  const [etat, setEtat] = useState<EtatSessionCombinaisonVecteurs>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCombinaisonVecteurs>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionCombinaisonVecteurs`, jamais dans le moteur. Remis à vide à

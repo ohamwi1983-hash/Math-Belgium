@@ -16,7 +16,6 @@ import {
   formatEnonceLatex,
   formatEquationAttendueLatex,
   formatEquationCartesienneAttendueLatex,
-  formatDroiteDonneeLatex,
   formatPointLatex,
   formatRelationAttendueLatex,
   formatVecteurLatex,
@@ -261,7 +260,9 @@ function lignesExtraction(d: DroiteDonneeRelation, nom: "u" | "v", lettre: strin
     sousQuestion: lettre,
     fragments: egal
       ? [texte("Vecteur directeur retenu : "), latex(`\\vec{${nom}}${formatVecteurLatex(retenu)}`), texte(".")]
-      : [texte("On peut prendre le multiple "), latex(`\\vec{${nom}}${formatVecteurLatex(retenu)}`), texte(" (même direction, composantes entières).")],
+      : Number.isInteger(lu.x) && Number.isInteger(lu.y)
+        ? [texte("Tout vecteur colinéaire convient ; on poursuit avec "), latex(`\\vec{${nom}}${formatVecteurLatex(retenu)}`), texte(".")]
+        : [texte("On peut prendre le multiple "), latex(`\\vec{${nom}}${formatVecteurLatex(retenu)}`), texte(" (même direction, composantes entières).")],
   });
   return lignes;
 }

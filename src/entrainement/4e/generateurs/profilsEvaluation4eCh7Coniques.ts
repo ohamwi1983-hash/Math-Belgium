@@ -9,9 +9,9 @@
  * Mesures (5 000 tirages par variante, `scratchpad/refonte-4e-ch7b/mesure.txt`) :
  * - gen49 (centre dans [−4 ; 4]²) : abscisse du centre nulle ≈ 11 %, ordonnée nulle ≈ 11 % (le
  *   binôme se réduit à x² ou y², rien à soustraire). Rayon entier en lecture indirecte (triplet
- *   3-4-5) ≈ 12,5 % : n'abrège rien (R² entre directement dans l'équation) → pas un paramètre.
+ *   3-4-5) ≈ 12 % : n'abrège rien (R² entre directement dans l'équation) → pas un paramètre.
  * - gen50 : coefficient commun k = 1 ≈ 25 % (pas de division), centre à coordonnées entières
- *   (A et B pairs) ≈ 27 % en rayon rationnel, ≈ 23 % en irrationnel. L'équation représente
+ *   (A et B pairs) ≈ 32 % en rayon rationnel, ≈ 24 % en irrationnel. L'équation représente
  *   toujours un cercle (r² > 0 par construction) : aucun verdict « est-ce un cercle ? » à filtrer.
  * - gen51 / gen52 (sommet dans [−3 ; 3]²) : abscisse du sommet nulle ≈ 14 %, ordonnée nulle
  *   ≈ 14 % — en gen52, la coordonnée du sommet le long de la variable au carré nulle supprime la
@@ -20,7 +20,7 @@
  * - gen53 : aucun paramètre (foyer à 2 ou 4 carreaux de la directrice, angle de la grille) → pas
  *   de profil.
  * - gen54 : le nombre de points d'intersection est un VERDICT (et la variante choisie par le
- *   professeur) → jamais un cas particulier. L'orientation de la parabole (droite-parabole) change
+ *   professeur) → jamais un cas particulier. L'orientation de la parabole (droite-parabole, ≈ 50 / 50) change
  *   la substitution (en x ou en y) : c'est la `forme`, reproduite d'une série à l'autre.
  *
  * `calcul` est absent partout : toutes les valeurs sont exactes (rayons sous forme de racine), la

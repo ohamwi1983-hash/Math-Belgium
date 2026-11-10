@@ -177,8 +177,13 @@ export function soumettreReponseResolution(etat: EtatSessionLieuxGeometriques, r
   }
   const exercice = etat.exerciceCourant;
 
+  // Verdict « Aucun / Au moins un » : un mauvais verdict clôt l'écran (réponse révélée) — choix
+  // binaire, sinon gagnable par élimination. Verdict juste mais points faux : les tentatives
+  // restantes servent à corriger les coordonnées.
+  const verdictFaux = reponse.auMoinsUn !== (exercice.nombrePoints !== 0);
   const etapeCourante = soumettreEtapeTentatives<ReponseResolutionLieuxGeometriques>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(verdictFaux ? { tentativesMax: 1 } : {}),
     verifier: (r) => verifierResolution(exercice, r),
     revelerReponse: () => {},
   });

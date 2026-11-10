@@ -350,7 +350,7 @@ export function formatCorrectionCaracteristiquesLatex(exercice: ExerciceCaracter
  * point 8). Point/vecteur : n'importe quel point/multiple est accepté, l'exemple montre seulement
  * qu'une fraction se tape. */
 export const PLACEHOLDER_COORDONNEE = "ex : 7/2";
-export const PLACEHOLDER_COMPOSANTE = "ex : -5";
-export const PLACEHOLDER_PENTE = "ex : -7/5";
+export const PLACEHOLDER_COMPOSANTE = "ex : −5";
+export const PLACEHOLDER_PENTE = "ex : −7/5";
 export const PLACEHOLDER_ANGLE = "ex : 40";
 export const PLACEHOLDER_ORDONNEE = "ex : 11/7";

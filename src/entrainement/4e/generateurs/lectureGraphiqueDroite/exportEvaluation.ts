@@ -74,7 +74,7 @@ import { LIBELLE_CAS_PARALLELE_AXE, profilLectureGraphiqueDroite } from "../prof
  * sur une feuille à part.
  */
 
-const LARGEUR_SVG = 260;
+const LARGEUR_SVG = 360;
 const HAUTEUR_SVG = Math.round(LARGEUR_SVG / RATIO_GRAPHE);
 const MARGE_PX = 20;
 
@@ -116,14 +116,14 @@ function construireGrilleEtAxesHtml(viewBox: ViewBoxTransformation, echelle: Ech
     const px = echelle.sx(v);
     lignes.push(`<line x1="${px.toFixed(1)}" y1="${MARGE_PX}" x2="${px.toFixed(1)}" y2="${HAUTEUR_SVG - MARGE_PX}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 11).toFixed(1)}" font-size="8" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${px.toFixed(1)}" y="${(echelle.sy(0) + 13).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
     }
   }
   for (let v = Math.ceil(yMin / pasY) * pasY; v <= yMax + 1e-9; v += pasY) {
     const py = echelle.sy(v);
     lignes.push(`<line x1="${MARGE_PX}" y1="${py.toFixed(1)}" x2="${LARGEUR_SVG - MARGE_PX}" y2="${py.toFixed(1)}" stroke="${COULEUR_GRILLE}" stroke-width="1"/>`);
     if (Math.abs(v) > 1e-9) {
-      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="8" text-anchor="end" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
+      labels.push(`<text x="${(echelle.sx(0) - 4).toFixed(1)}" y="${(py + 3).toFixed(1)}" font-size="10" text-anchor="end" fill="${COULEUR_AXE}">${formatNombreGraphique(v)}</text>`);
     }
   }
 
@@ -184,7 +184,7 @@ function construireSvgLectureGraphiqueDroite(exercice: ExerciceLectureGraphiqueD
       const cercle = `<circle cx="${echelle.sx(p.x).toFixed(1)}" cy="${echelle.sy(p.y).toFixed(1)}" r="3" fill="${COULEUR_POINT}"/>`;
       // Corrigé : les deux points lus (A = point de référence, B = A + vecteur), étiquetés.
       const nom = etiquettes ? (i === 1 ? "A" : i === 2 ? "B" : "") : "";
-      return nom ? `${cercle}<text x="${(echelle.sx(p.x) + 6).toFixed(1)}" y="${(echelle.sy(p.y) - 6).toFixed(1)}" font-size="12" font-weight="700" fill="${COULEUR_POINT}">${nom}</text>` : cercle;
+      return nom ? `${cercle}<text x="${(echelle.sx(p.x) + 7).toFixed(1)}" y="${(echelle.sy(p.y) + 4).toFixed(1)}" font-size="12" font-weight="700" fill="${COULEUR_POINT}" stroke="#ffffff" stroke-width="3" paint-order="stroke">${nom}</text>` : cercle;
     })
     .join("");
 

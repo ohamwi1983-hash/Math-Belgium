@@ -1,5 +1,6 @@
 import type { ExerciceReductionVectorielle, TermeReduction } from "../../core/reductionVectorielle.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { PARAMETRES_REDUCTION, profilReductionVectorielle } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { calculerGeometrieFigureReduction } from "../../ui/figureReductionSketch";
@@ -179,11 +180,8 @@ function construireEnonceReductionVectorielle(instance: ExerciceReductionVectori
     questions: [
       {
         consigne: [
-          texte('Donne le vecteur réduit sous la forme d\'une paire de lettres désignant 2 points de la figure (ex. "MA" pour '),
-          latex("\\vec{MA}"),
-          texte(")."),
+          texte("Donne le vecteur réduit, désigné par deux points de la figure."),
         ],
-        reponse: { type: "lignes", nombre: 0 },
       },
     ],
   };
@@ -251,6 +249,91 @@ function construireCorrectionReductionVectorielle(instance: ExerciceReductionVec
   return blocs;
 }
 
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Un seul écran. L'énoncé papier garde la figure (donnée), l'expression et la consigne « réduis en
+// un seul vecteur », sans la syntaxe de saisie de l'écran (« paire de lettres »). Le corrigé
+// reprend les annulations puis la chaîne de Chasles (mêmes fonctions que `construireCorrection`).
+
+/** Description de la figure en phrase (le libellé de l'écran, « Hexagone régulier + centre », est un
+ * titre de catalogue). */
+const FIGURE_PAPIER: Record<ExerciceReductionVectorielle["figure"], string> = {
+  hexagone: "un hexagone régulier et son centre",
+  etoile: "une étoile à six branches",
+  trapeze: "un trapèze et ses diagonales",
+  triangleMedianes: "un triangle et ses médianes",
+};
+
+function enoncePapier(instance: ExerciceReductionVectorielle): EnoncePapier {
+  return {
+    section: {
+      enteteFragments: [texte(`On considère la figure ci-dessous (${FIGURE_PAPIER[instance.figure]}). Réduis l'expression suivante en un seul vecteur, désigné par deux points de la figure : `), latex(formatExpressionLatex(instance)), texte(".")],
+      enteteHtml: construireFigureHtml(instance),
+      questions: [],
+    },
+  };
+}
+
+function reponseBreve(instance: ExerciceReductionVectorielle): FragmentConsigne[] {
+  return [latex(`\\vec{${instance.pointDepart}${instance.pointArrivee}}`)];
+}
+
+function correctionDetaillee(instance: ExerciceReductionVectorielle): EtapeCorrection[] {
+  const { termes, pointDepart, pointArrivee } = instance;
+  const { annulations, restants } = detecterAnnulations(termes);
+  const chemin = reconstituerChemin(restants, pointDepart, pointArrivee);
+  const lignes: EtapeCorrection[] = [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("On élimine les termes opposés, on écrit chaque vecteur précédé d'un « − » dans l'autre sens ("), latex("-\\vec{RS} = \\vec{SR}"), texte("), puis on enchaîne les vecteurs bout à bout (relation de Chasles).")] },
+  ];
+  for (const [a, b] of annulations) {
+    lignes.push({ label: "Annulation", sousQuestion: "a", fragments: [latex(`${formatTermeLatex(a, false)} ${formatTermeLatex(b, true)} = \\vec 0`)] });
+  }
+  if (chemin) {
+    lignes.push({ label: "Chasles", sousQuestion: "a", fragments: [latex(`${formatTermesArbitraires(chemin)} = \\vec{${pointDepart}${pointArrivee}}`)] });
+  }
+  lignes.push(
+    { label: "Conclusion", sousQuestion: "a", fragments: [texte("Vecteur réduit : "), latex(`\\vec{${pointDepart}${pointArrivee}}`), texte(" (ou toute autre paire de points de la figure qui représente ce même vecteur).")] },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments: annulations.length > 0
+        ? [texte("Deux termes ne s'annulent que s'ils sont opposés avec le MÊME coefficient : "), latex("2\\vec{RS}+2\\vec{SR} = \\vec 0"), texte(", mais "), latex("2\\vec{RS}+\\vec{SR} = \\vec{RS}"), texte(".")]
+        : [texte("Un terme précédé d'un « − » se réécrit dans l'autre sens avant d'être enchaîné : "), latex("-\\vec{BA} = \\vec{AB}"), texte(".")],
+    },
+  );
+  return lignes;
+}
+
+function bareme(instance: ExerciceReductionVectorielle): BaremeExercice {
+  const { annulations } = detecterAnnulations(instance.termes);
+  const critereFinal = { sousQuestion: "a", critere: [texte("Vecteur réduit : "), latex(`\\vec{${instance.pointDepart}${instance.pointArrivee}}`)], points: 1.5 };
+  const criteres = annulations.length > 0
+    ? [
+        { sousQuestion: "a", critere: [texte("Termes opposés éliminés")], points: 1 },
+        { sousQuestion: "a", critere: [texte("Termes précédés de « − » réécrits dans l'autre sens")], points: 0.5 },
+        { sousQuestion: "a", critere: [texte("Chaîne de Chasles reconstituée")], points: 1 },
+        critereFinal,
+      ]
+    : [
+        { sousQuestion: "a", critere: [texte("Termes précédés de « − » réécrits dans l'autre sens")], points: 1 },
+        { sousQuestion: "a", critere: [texte("Chaîne de Chasles reconstituée")], points: 1.5 },
+        critereFinal,
+      ];
+  return {
+    reponseFinale: reponseBreve(instance),
+    criteres,
+    erreursFrequentes: [
+      { description: [texte("Signe « − » ignoré (vecteur gardé dans le mauvais sens)")], cout: "−1,5" },
+      { description: [texte("Termes de coefficients différents annulés à tort")], cout: "−1" },
+    ],
+    reponsesAcceptees: [[texte("Toute autre paire de points de la figure représentant le même vecteur (même direction, même sens, même longueur)")]],
+  };
+}
+
+/** ★ chaîne de 2 vecteurs sans paire opposée ; ★★ sinon. */
+function difficulte(instance: ExerciceReductionVectorielle): 1 | 2 | 3 {
+  return detecterAnnulations(instance.termes).annulations.length === 0 && instance.termes.length <= 2 ? 1 : 2;
+}
+
 export const adaptateurEvaluationReductionVectorielle: AdaptateurFeuilleExercices<ExerciceReductionVectorielle> = {
   titreDocument: "Réduction d'une somme de vecteurs (Chasles) — Évaluation",
   nomFichierBase: "reduction-vectorielle-chasles",
@@ -259,6 +342,14 @@ export const adaptateurEvaluationReductionVectorielle: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceReductionVectorielle,
   construireCorrection: construireCorrectionReductionVectorielle,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 3,
+  profilInstance: profilReductionVectorielle,
+  parametresAuChoix: PARAMETRES_REDUCTION,
   // PAS regroupable — `enteteHtml` (croquis) présent, disqualifie à lui seul : voir le commentaire de
   // tête.
 };

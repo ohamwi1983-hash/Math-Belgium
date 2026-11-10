@@ -20,6 +20,7 @@ import type { EtatSessionNormeDistance, PhaseNormeDistance, ResultatExerciceNorm
 import type { ExerciceNormeDistance } from "./core/normeDistance.types";
 import type { Composantes } from "./core/vecteur.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDistance } from "./generateurs/normeDistance";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteNormeDistance } from "./core/normeDistance.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { CalculatriceScientifique } from "./components/CalculatriceScientifique";
@@ -60,6 +61,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionNormeDistance {
   return demarrerSessionNormeDistance(REGLAGES_DEMO, genererExerciceNormeDistance);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionNormeDistance {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionNormeDistance(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceNormeDistance, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Réutilise `SEQUENCES` (séquence réelle par variante, déjà exposée par `typesNormeDistance.ts`)
@@ -227,7 +237,7 @@ interface TransitionEnAttente {
 }
 
 export function AppNormeDistance() {
-  const [etat, setEtat] = useState<EtatSessionNormeDistance>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionNormeDistance>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `SEQUENCES` (même index que sa puce). */
@@ -378,7 +388,7 @@ export function AppNormeDistance() {
             key={`${numeroExercice}-${phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
+            tentativesMax={1}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseConclusionIsocele(etat, reponse), libelleClassification(reponse, exercice))}
@@ -442,7 +452,7 @@ export function AppNormeDistance() {
             key={`${numeroExercice}-${phase}`}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
+            tentativesMax={1}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponse) => terminerEtape(soumettreReponseTestPythagore(etat, reponse), libelleSommetPythagore(reponse, exercice))}

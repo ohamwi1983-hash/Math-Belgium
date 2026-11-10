@@ -5,6 +5,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionRelationVectorielle, soumettreReponseCoordonnees, soumettreReponseTraduction } from "./moteur/sessionRelationVectorielle";
 import type { EtatSessionRelationVectorielle, PhaseRelationVectorielle } from "./moteur/typesRelationVectorielle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationVectorielle } from "./generateurs/relationVectorielle";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VarianteRelationVectorielle } from "./core/relationVectorielle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeTranslationVectorielle } from "./components/EtapeTranslationVectorielle";
@@ -31,6 +32,15 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionRelationVectorielle {
   return demarrerSessionRelationVectorielle(REGLAGES_DEMO, genererExerciceRelationVectorielle);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionRelationVectorielle {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionRelationVectorielle(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceRelationVectorielle, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
@@ -74,7 +84,7 @@ interface TransitionEnAttente {
  * générateurs, dont le libellé de bouton diffère aussi ("(guidée)", `src/App.tsx`).
  */
 export function AppRelationVectorielle() {
-  const [etat, setEtat] = useState<EtatSessionRelationVectorielle>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionRelationVectorielle>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionRelationVectorielle`, jamais dans le moteur (voir

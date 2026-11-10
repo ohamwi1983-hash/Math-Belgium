@@ -66,7 +66,7 @@ export function EtapeCoordonneesRelationVectorielle({
           <input
             id="relation-vectorielle-coordonnees-x"
             className={`text-input${xErronee ? " is-erronee" : ""}`}
-            placeholder="ex : 3"
+            placeholder="ex : 2,5"
             value={texteX}
             onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
             onKeyDown={gererKeyDownNumeriqueFraction}
@@ -79,7 +79,7 @@ export function EtapeCoordonneesRelationVectorielle({
           <input
             id="relation-vectorielle-coordonnees-y"
             className={`text-input${yErronee ? " is-erronee" : ""}`}
-            placeholder="ex : -2"
+            placeholder="ex : −1,5"
             value={texteY}
             onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
             onKeyDown={gererKeyDownNumeriqueFraction}

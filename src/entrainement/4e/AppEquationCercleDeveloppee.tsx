@@ -26,6 +26,7 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import type { ExerciceEquationCercleDeveloppee } from "./core/equationCercleDeveloppee.types";
 import { nombreFr } from "./ui/nombreFr";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -36,6 +37,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionEquationCercleDeveloppee {
   return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, genererExerciceEquationCercleDeveloppee);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération et le même catalogue
+ * que l'adaptateur d'export (`generateurs/equationCercleDeveloppee/exportEvaluation.ts`) ; la suite de la session
+ * reste un tirage normal. */
+function sessionInitiale(): EtatSessionEquationCercleDeveloppee {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationCercleDeveloppee, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 const ORDRE_PHASES: PhaseEquationCercleDeveloppee[] = ["regroupement", "completion", "centreRayon"];
@@ -82,7 +93,7 @@ interface TransitionEnAttente {
 }
 
 export function AppEquationCercleDeveloppee() {
-  const [etat, setEtat] = useState<EtatSessionEquationCercleDeveloppee>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationCercleDeveloppee>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — un écran clos = une entrée,
    * dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

@@ -1,5 +1,6 @@
 import type { ExerciceComparaisonVecteurs } from "../../core/comparaisonVecteurs.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, EnoncePapier, EtapeCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { profilComparaisonVecteurs } from "../profilsEvaluation4eCh6";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import type { FragmentConsigne } from "../../ui/formatEquationDroite";
 import { consigneSelection, vecteursAffichesComparaison } from "../../ui/formatComparaisonVecteurs";
@@ -213,52 +214,125 @@ function formatVecteursAttendusLatex(labels: string[]): string {
   return labels.map((label) => `\\vec{${label}}`).join(", ");
 }
 
-function formatEgaliteAttendueLatex(exercice: ExerciceComparaisonVecteurs): string {
-  return `\\vec{${exercice.cibleEgalite}} = ${formatCoefficientLatex(exercice.coefficientEgalite)}\\vec{${exercice.labelReference}}`;
-}
-
 // --- Énoncé / correction ---
 
-function consigneSelectionFragments(exercice: ExerciceComparaisonVecteurs): FragmentConsigne[] {
-  const consigne = consigneSelection(exercice);
-  return [texte(consigne.avant), latex(consigne.latex), texte(consigne.apres)];
-}
-
-/** Recopie mot pour mot le `<p className="prompt-text">` de `EtapeEgaliteComparaison.tsx` (source de
- * vérité pour la formulation exacte vue par l'élève) — pas de formateur exporté équivalent côté
- * `ui/formatComparaisonVecteurs.ts` (seule `consigneSelection`, pour l'étape "sélection", y est
- * exportée), donc recopiée ici plutôt qu'importée. */
-function consigneEgaliteFragments(exercice: ExerciceComparaisonVecteurs): FragmentConsigne[] {
-  return [
-    texte("Écris l'égalité reliant "),
-    latex(`\\vec{${exercice.cibleEgalite}}`),
-    texte(" à "),
-    latex(`\\vec{${exercice.labelReference}}`),
-    texte("."),
-  ];
-}
-
+/** Énoncé = énoncé papier (mêmes deux questions, qui sont aussi les deux étapes du corrigé) : la
+ * consigne d'écran « Sélectionne… » et l'égalité d'un vecteur NOMMÉ (déjà une réponse de a)) ne
+ * conviennent pas au papier — voir la section « Papier » plus bas. */
 function construireEnonceComparaisonVecteurs(instance: ExerciceComparaisonVecteurs): SectionExercice {
-  return {
-    enteteFragments: [
-      texte(
-        "Voici plusieurs vecteurs tracés sur une figure (le quadrillage sert uniquement de repère visuel — seuls comptent la longueur, la direction et le sens de chaque vecteur).",
-      ),
-    ],
-    enteteHtml: construireSvgComparaison(instance, []),
-    questions: [
-      { consigne: consigneSelectionFragments(instance), reponse: { type: "lignes", nombre: 0 } },
-      { consigne: consigneEgaliteFragments(instance), reponse: { type: "lignes", nombre: 0 } },
-    ],
-  };
+  return enoncePapier(instance).section;
 }
 
 function construireCorrectionComparaisonVecteurs(instance: ExerciceComparaisonVecteurs): BlocCorrection[] {
   return [
     { type: "html", html: construireSvgComparaison(instance, instance.labelsCorrects) },
     { type: "paragraphe", fragments: [texte("a) Vecteurs attendus : "), latex(formatVecteursAttendusLatex(instance.labelsCorrects)), texte(".")] },
-    { type: "paragraphe", fragments: [texte("b) Égalité attendue : "), latex(formatEgaliteAttendueLatex(instance)), texte(".")] },
+    { type: "paragraphe", fragments: [texte("b) "), latex(egalitesLatex(instance)), texte(".")] },
   ];
+}
+
+// --- Papier (refonte `.claude/rules/feuilles-evaluations.md`) ---
+// Deux VRAIES questions distinctes, gardées en a) b) : citer les vecteurs qui ont la propriété,
+// puis exprimer chacun de ceux qui sont parallèles à la référence comme un multiple de celle-ci.
+// L'écran demandait l'égalité d'UN vecteur nommé, déjà correct : sur papier, nommer ce vecteur
+// révélerait une réponse de a) — la question b) porte donc sur tous les vecteurs parallèles trouvés
+// (coefficients connus par construction : la référence est un vecteur de base, chaque parallèle en
+// est un multiple `coefficientBase`). La figure (donnée) reste dans l'énoncé ; la figure avec les
+// vecteurs attendus mis en évidence va dans le corrigé.
+
+/** Vecteurs de `labelsCorrects` parallèles à la référence, avec leur coefficient. */
+function egalitesAttendues(exercice: ExerciceComparaisonVecteurs): { label: string; k: number }[] {
+  const ref = exercice.vecteurs.find((v) => v.label === exercice.labelReference)!;
+  return exercice.vecteurs
+    .filter((v) => exercice.labelsCorrects.includes(v.label) && v.indexBase === ref.indexBase)
+    .map((v) => ({ label: v.label, k: v.coefficientBase }));
+}
+
+function egalitesLatex(exercice: ExerciceComparaisonVecteurs): string {
+  return egalitesAttendues(exercice)
+    .map((e) => `\\vec{${e.label}} = ${formatCoefficientLatex(e.k)}\\vec{${exercice.labelReference}}`)
+    .join(" \\qquad ");
+}
+
+function enoncePapier(exercice: ExerciceComparaisonVecteurs): EnoncePapier {
+  const consigne = consigneSelection(exercice);
+  return {
+    section: {
+      enteteFragments: [texte("Voici plusieurs vecteurs tracés sur un quadrillage (seuls comptent la longueur, la direction et le sens de chaque vecteur, pas sa position).")],
+      enteteHtml: construireSvgComparaison(exercice, []),
+      questions: [
+        { consigne: [texte(consigne.avant.replace("Sélectionne", "Cite")), latex(consigne.latex), texte(consigne.apres)] },
+        {
+          consigne: [
+            ...(exercice.propriete === "longueur"
+              ? [texte("Parmi les vecteurs cités, exprime chacun de ceux qui sont parallèles à "), latex(`\\vec{${exercice.labelReference}}`), texte(" sous la forme ")]
+              : [texte("Exprime chacun des vecteurs cités sous la forme ")]),
+            latex(`k\\,\\vec{${exercice.labelReference}}`),
+            texte("."),
+          ],
+        },
+      ],
+    },
+    etapesParQuestion: [["a"], ["b"]],
+    reponseBreve: reponseBreve(exercice),
+  };
+}
+
+function reponseBreve(exercice: ExerciceComparaisonVecteurs): FragmentConsigne[] {
+  return [texte("a) "), latex(formatVecteursAttendusLatex(exercice.labelsCorrects)), texte(" ; b) "), latex(egalitesLatex(exercice))];
+}
+
+const DEFINITION_PROPRIETE: Record<ExerciceComparaisonVecteurs["propriete"], string> = {
+  longueur: "Deux vecteurs ont la même longueur quand leurs normes sont égales, quelles que soient leur direction et leur position : on compare les déplacements horizontal et vertical (au signe près, et en tenant compte d'un éventuel échange).",
+  direction: "Deux vecteurs ont la même direction quand ils sont parallèles (l'un est un multiple de l'autre), quels que soient leur sens et leur longueur.",
+  sens: "Deux vecteurs ont le même sens quand ils sont parallèles ET orientés du même côté : l'un est un multiple POSITIF de l'autre.",
+};
+
+function correctionDetaillee(exercice: ExerciceComparaisonVecteurs): EtapeCorrection[] {
+  const ref = exercice.labelReference;
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte(DEFINITION_PROPRIETE[exercice.propriete])] },
+    {
+      label: "Conclusion",
+      sousQuestion: "a",
+      fragments: [texte("Vecteurs attendus (en couleur sur la figure) : "), latex(formatVecteursAttendusLatex(exercice.labelsCorrects)), texte(".")],
+      figureHtml: construireSvgComparaison(exercice, exercice.labelsCorrects),
+    },
+    { label: "Méthode", sousQuestion: "b", fragments: [texte("Pour un vecteur parallèle, on compare son déplacement à celui de "), latex(`\\vec{${ref}}`), texte(" : le rapport des longueurs donne |k|, le sens donne le signe de k.")] },
+    { label: "Conclusion", sousQuestion: "b", fragments: [latex(egalitesLatex(exercice))] },
+    {
+      label: "Piège",
+      sousQuestion: exercice.propriete === "longueur" ? "a" : "b",
+      fragments: [
+        texte(
+          exercice.propriete === "longueur"
+            ? "Même longueur ne veut pas dire même direction : un vecteur « tourné » de même norme convient aussi."
+            : exercice.propriete === "sens"
+              ? "Un vecteur parallèle mais orienté dans l'autre sens (k négatif) n'a PAS le même sens."
+              : "Un vecteur parallèle orienté dans l'autre sens a la même direction : son coefficient k est négatif.",
+        ),
+      ],
+    },
+  ];
+}
+
+function bareme(exercice: ExerciceComparaisonVecteurs): BaremeExercice {
+  return {
+    reponseFinale: reponseBreve(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Vecteurs cités, sans oubli ni intrus : "), latex(formatVecteursAttendusLatex(exercice.labelsCorrects))], points: 2 },
+      { sousQuestion: "b", critere: [texte("Égalités : "), latex(egalitesLatex(exercice))], points: 2 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Un vecteur oublié ou un intrus")], cout: "−0,5 chacun" },
+      { description: [texte("Signe de k faux (sens opposé non pris en compte)")], cout: "−0,5 par égalité" },
+    ],
+  };
+}
+
+/** ★★ (lecture de figure et coefficients). */
+function difficulte(_exercice: ExerciceComparaisonVecteurs): 1 | 2 | 3 {
+  return 2;
 }
 
 export const adaptateurEvaluationComparaisonVecteurs: AdaptateurFeuilleExercices<ExerciceComparaisonVecteurs> = {
@@ -269,6 +343,13 @@ export const adaptateurEvaluationComparaisonVecteurs: AdaptateurFeuilleExercices
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce: construireEnonceComparaisonVecteurs,
   construireCorrection: construireCorrectionComparaisonVecteurs,
+  difficulte,
+  reponseBreve,
+  correctionDetaillee,
+  bareme,
+  enoncePapier,
+  dureeMinutes: 4,
+  profilInstance: profilComparaisonVecteurs,
   // 2 questions par instance, consigne de (a) dépendante de l'instance, `enteteHtml` (figure) :
   // 3 raisons indépendantes déjà suffisantes chacune — voir le commentaire de tête de fichier.
 };

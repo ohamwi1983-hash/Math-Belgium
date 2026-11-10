@@ -24,6 +24,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -34,6 +35,16 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionEquationParaboleDeveloppee {
   return demarrerSessionEquationParaboleDeveloppee(REGLAGES_DEMO, genererExerciceEquationParaboleDeveloppee);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération et le même catalogue
+ * que l'adaptateur d'export (`generateurs/equationParaboleDeveloppee/exportEvaluation.ts`) ; la suite de la session
+ * reste un tirage normal. */
+function sessionInitiale(): EtatSessionEquationParaboleDeveloppee {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationParaboleDeveloppee(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationParaboleDeveloppee, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
 }
 
 /** 3 phases fixes, toujours le même ordre — "caracteristiques" (dernière phase) n'a jamais besoin
@@ -103,7 +114,7 @@ function saisieBrute(texte: string): ReactNode {
 }
 
 export function AppEquationParaboleDeveloppee() {
-  const [etat, setEtat] = useState<EtatSessionEquationParaboleDeveloppee>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationParaboleDeveloppee>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans clos (puces cliquables) — tenue ici, jamais dans le
    * moteur ; un écran clos = une entrée, dans l'ordre de `ORDRE_PHASES` (même index que sa puce). */

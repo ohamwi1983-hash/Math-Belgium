@@ -130,6 +130,8 @@ export function soumettreReponseModelisation(
 
   const etapeCourante = soumettreEtapeTentatives<VarianteApplicationPhysique>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    // Choix fermé (2 ou 4 options) : une seule tentative, sinon gagnable par élimination.
+    tentativesMax: 1,
     verifier: (c) => verifierModelisation(etat.exerciceCourant, c),
     revelerReponse: () => {},
   });
@@ -207,6 +209,8 @@ export function soumettreReponseInterpretation(etat: EtatSessionApplicationPhysi
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, direction, {
     ...reglagesEtape(etat),
+    // Choix fermé (2 ou 4 options) : une seule tentative, sinon gagnable par élimination.
+    tentativesMax: 1,
     verifier: (d) => verifierInterpretation(etat.exerciceCourant, d),
     revelerReponse: () => {},
   });

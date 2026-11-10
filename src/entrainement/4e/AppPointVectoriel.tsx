@@ -3,6 +3,7 @@ import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionPointVectoriel, soumettreReponseCoordonnees } from "./moteur/sessionPointVectoriel";
 import type { EtatSessionPointVectoriel } from "./moteur/typesPointVectoriel";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVectoriel } from "./generateurs/pointVectoriel";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { VariantePointVectoriel } from "./core/pointVectoriel.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapePointVectoriel } from "./components/EtapePointVectoriel";
@@ -23,6 +24,15 @@ function nouvelleSession(): EtatSessionPointVectoriel {
   return demarrerSessionPointVectoriel(REGLAGES_DEMO, genererExercicePointVectoriel);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`, QR code de la
+ * feuille ou de l'évaluation), son PREMIER exercice est celui de la copie — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur d'export. */
+function sessionInitiale(): EtatSessionPointVectoriel {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionPointVectoriel(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExercicePointVectoriel, (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`. */
@@ -34,7 +44,7 @@ interface TransitionEnAttente {
 /** Pas de `Phase` (comme "Quel angle ?") : un seul écran par exercice. Mono-écran : la transition
  * n'est jamais qu'une clôture d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppPointVectoriel() {
-  const [etat, setEtat] = useState<EtatSessionPointVectoriel>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionPointVectoriel>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : sert de `key` à
    * l'écran, pour que ses champs repartent vides au lieu de garder la saisie précédente. */
