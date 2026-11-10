@@ -29,6 +29,8 @@ import {
   catalogueVariantesExercice,
   libelleCasParticulier,
   parametresAuChoix,
+  reglagesVariante,
+  varianteDeCle,
   calculatriceIndispensable,
   nomGenerateur,
   construireItemsPayload,
@@ -339,31 +341,66 @@ export function EvaluationGeneratorPanel({
     setGenereLocalementCompte(null)
   }
 
-  /** Case « inclure un cas particulier » d'UN générateur (ligne `type==='exercice'`). */
-  function mettreAJourCasParticulier(chapitreSlug: string, sectionId: string, generatorId: string, inclure: boolean) {
-    setLignes((prev) =>
-      prev.map((l) =>
-        l.chapitreSlug === chapitreSlug && l.sectionId === sectionId && l.type === 'exercice' && l.cle === generatorId ? { ...l, inclureCasParticulier: inclure } : l,
-      ),
-    )
+  /** Applique une transformation à LA ligne `type==='exercice'` d'un générateur. */
+  function modifierLigneExercice(chapitreSlug: string, sectionId: string, generatorId: string, f: (l: LigneSelection) => LigneSelection) {
+    setLignes((prev) => prev.map((l) => (l.chapitreSlug === chapitreSlug && l.sectionId === sectionId && l.type === 'exercice' && l.cle === generatorId ? f(l) : l)))
     setUrlGeneree(null)
     setGenereLocalementCompte(null)
   }
 
-  /** Case d'un paramètre au choix (amplitude, déphasage…) d'UN générateur : décochée = paramètre
-   * absent de toutes les questions de la ligne (`LigneSelection.parametresExclus`). */
-  function basculerParametre(chapitreSlug: string, sectionId: string, generatorId: string, parametreId: string, inclure: boolean) {
-    setLignes((prev) =>
-      prev.map((l) => {
-        if (l.chapitreSlug !== chapitreSlug || l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
-        const exclus = new Set(l.parametresExclus ?? [])
-        if (inclure) exclus.delete(parametreId)
-        else exclus.add(parametreId)
-        return { ...l, parametresExclus: [...exclus] }
-      }),
-    )
-    setUrlGeneree(null)
-    setGenereLocalementCompte(null)
+  /** Case « inclure un cas particulier » d'UNE variante (clé de `parVariante`, éventuellement dupliquée). */
+  function mettreAJourCasParticulier(chapitreSlug: string, sectionId: string, generatorId: string, cle: string, inclure: boolean) {
+    modifierLigneExercice(chapitreSlug, sectionId, generatorId, (l) => ({ ...l, casParticulierParVariante: { ...l.casParticulierParVariante, [cle]: inclure } }))
+  }
+
+  /** Case d'un paramètre au choix (amplitude, déphasage…) d'UNE variante : décochée = paramètre absent
+   * des questions de cette variante (`LigneSelection.parametresExclusParVariante`). */
+  function basculerParametre(chapitreSlug: string, sectionId: string, generatorId: string, cle: string, parametreId: string, inclure: boolean) {
+    modifierLigneExercice(chapitreSlug, sectionId, generatorId, (l) => {
+      const exclus = new Set(reglagesVariante(l, cle).parametresExclus)
+      if (inclure) exclus.delete(parametreId)
+      else exclus.add(parametreId)
+      return { ...l, parametresExclusParVariante: { ...l.parametresExclusParVariante, [cle]: [...exclus] } }
+    })
+  }
+
+  /** Duplique une variante pour lui donner d'AUTRES réglages (ex. un graphe avec translation
+   * horizontale et un autre sans, dans la même famille) : nouvelle clé « id~n », 1 question,
+   * mêmes points et mêmes réglages de départ que la variante d'origine. */
+  function dupliquerVariante(chapitreSlug: string, sectionId: string, generatorId: string, cle: string) {
+    modifierLigneExercice(chapitreSlug, sectionId, generatorId, (l) => {
+      const id = varianteDeCle(cle)
+      const existants = Object.keys(l.parVariante ?? {}).filter((k) => varianteDeCle(k) === id)
+      let n = 2
+      while (existants.includes(`${id}~${n}`)) n++
+      const nouvelle = `${id}~${n}`
+      const reglages = reglagesVariante(l, cle)
+      const parVariante = { ...l.parVariante, [nouvelle]: 1 }
+      return {
+        ...l,
+        parVariante,
+        nombre: sommeParVariante(parVariante),
+        pointsParVariante: { ...l.pointsParVariante, [nouvelle]: l.pointsParVariante?.[cle] ?? l.points },
+        parametresExclusParVariante: { ...l.parametresExclusParVariante, [nouvelle]: reglages.parametresExclus },
+        casParticulierParVariante: { ...l.casParticulierParVariante, [nouvelle]: false },
+      }
+    })
+  }
+
+  /** Retire une variante DUPLIQUÉE (et ses réglages). */
+  function retirerVarianteDupliquee(chapitreSlug: string, sectionId: string, generatorId: string, cle: string) {
+    modifierLigneExercice(chapitreSlug, sectionId, generatorId, (l) => {
+      const sans = <T,>(r: Record<string, T> | undefined) => Object.fromEntries(Object.entries(r ?? {}).filter(([k]) => k !== cle)) as Record<string, T>
+      const parVariante = sans(l.parVariante)
+      return {
+        ...l,
+        parVariante,
+        nombre: sommeParVariante(parVariante),
+        pointsParVariante: sans(l.pointsParVariante),
+        parametresExclusParVariante: sans(l.parametresExclusParVariante),
+        casParticulierParVariante: sans(l.casParticulierParVariante),
+      }
+    })
   }
 
   /** Met à jour le barème d'UNE famille/variante précise, pour UN générateur précis (ligne
@@ -405,7 +442,7 @@ export function EvaluationGeneratorPanel({
         l.cle &&
         calculatriceIndispensable(
           l.cle as IdGenerateurPilote,
-          Object.entries(l.parVariante ?? {}).filter(([, n]) => n > 0).map(([v]) => v),
+          Object.entries(l.parVariante ?? {}).filter(([, n]) => n > 0).map(([v]) => varianteDeCle(v)),
         ),
     )
     .map((l) => `« ${nomGenerateur(l.cle as IdGenerateurPilote)} »`)
@@ -858,71 +895,101 @@ export function EvaluationGeneratorPanel({
                                     // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
                                     const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
                                     const parametres = estExercice ? [] : parametresAuChoix(ligne.cle as IdGenerateurPilote)
-                                    const ligneParametres =
-                                      parametres.length > 0 && ligne.nombre > 0 ? (
-                                        <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-parametres'}>
-                                          <td colSpan={4}>
-                                            <div className="admin-eval-cas-contenu">
-                                            <span className="admin-eval-parametres-titre">Paramètres à inclure :</span>
-                                            {parametres.map((p) => (
-                                              <label className="admin-eval-checkbox-field admin-eval-parametre" key={p.id}>
-                                                <input
-                                                  type="checkbox"
-                                                  checked={!(ligne.parametresExclus ?? []).includes(p.id)}
-                                                  onChange={(e) => basculerParametre(chapitreCourant.slug, section.id, ligne.cle ?? '', p.id, e.target.checked)}
-                                                />
-                                                {p.label}
-                                              </label>
-                                            ))}
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      ) : null
-                                    const ligneCas =
-                                      libelleCas && ligne.nombre > 0 ? (
-                                        <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + '-cas'}>
-                                          <td colSpan={4}>
-                                            <label className="admin-eval-checkbox-field">
-                                              <input
-                                                type="checkbox"
-                                                checked={!!ligne.inclureCasParticulier}
-                                                onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', e.target.checked)}
-                                              />
-                                              {libelleCas}
-                                            </label>
-                                          </td>
-                                        </tr>
-                                      ) : null
-                                    return [...catalogue.map((variante) => (
-                                      <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
-                                        <td>
-                                          {generateur?.label || LABEL_TYPE.exercice} —{' '}
-                                          <span className="admin-eval-variante-label">{variante.label}</span>
-                                        </td>
-                                        <td>—</td>
-                                        <td className="admin-eval-col-nombre">
-                                          <Stepper
-                                            valeur={ligne.parVariante?.[variante.id] ?? 0}
-                                            max={MAX_EXERCICE}
-                                            onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, v)}
-                                          />
-                                        </td>
-                                        {!estExercice && (
+                                    // Une ligne par variante du catalogue, plus ses copies (« id~n ») ; sous chaque
+                                    // variante choisie, SES réglages (paramètres à inclure, cas particulier).
+                                    const lignesVariantes = catalogue.flatMap((variante) => {
+                                      const copies = Object.keys(ligne.parVariante ?? {})
+                                        .filter((k) => k !== variante.id && varianteDeCle(k) === variante.id)
+                                        .sort((x, y) => Number(x.split('~')[1]) - Number(y.split('~')[1]))
+                                      return [variante.id, ...copies].map((cle) => ({ cle, variante, copie: cle !== variante.id }))
+                                    })
+                                    return lignesVariantes.flatMap(({ cle, variante, copie }) => {
+                                      const nombreVariante = ligne.parVariante?.[cle] ?? 0
+                                      const reglages = reglagesVariante(ligne, cle)
+                                      const aDesReglages = parametres.length > 0 || !!libelleCas
+                                      const rangees = [
+                                        <tr className="admin-eval-row" key={(ligne.cle ?? '') + cle}>
                                           <td>
-                                            <input
-                                              type="number"
-                                              min={1}
-                                              className="admin-eval-points-input"
-                                              value={ligne.pointsParVariante?.[variante.id] ?? ligne.points}
-                                              onChange={(e) =>
-                                                mettreAJourPointsVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, Number(e.target.value) || 1)
-                                              }
-                                              title={`Points / question pour la variante « ${variante.label} »`}
+                                            {generateur?.label || LABEL_TYPE.exercice} —{' '}
+                                            <span className="admin-eval-variante-label">
+                                              {variante.label}
+                                              {copie ? ` (${cle.split('~')[1]})` : ''}
+                                            </span>
+                                          </td>
+                                          <td>—</td>
+                                          <td className="admin-eval-col-nombre">
+                                            <Stepper
+                                              valeur={nombreVariante}
+                                              max={MAX_EXERCICE}
+                                              onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, v)}
                                             />
                                           </td>
-                                        )}
-                                      </tr>
-                                    )), ligneParametres, ligneCas].filter(Boolean)
+                                          {!estExercice && (
+                                            <td>
+                                              <input
+                                                type="number"
+                                                min={1}
+                                                className="admin-eval-points-input"
+                                                value={ligne.pointsParVariante?.[cle] ?? ligne.points}
+                                                onChange={(e) =>
+                                                  mettreAJourPointsVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, Number(e.target.value) || 1)
+                                                }
+                                                title={`Points / question pour la variante « ${variante.label} »`}
+                                              />
+                                            </td>
+                                          )}
+                                        </tr>,
+                                      ]
+                                      if (aDesReglages && (nombreVariante > 0 || copie)) {
+                                        rangees.push(
+                                          <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + cle + '-reglages'}>
+                                            <td colSpan={4}>
+                                              <div className="admin-eval-cas-contenu">
+                                                {parametres.length > 0 && <span className="admin-eval-parametres-titre">Paramètres à inclure :</span>}
+                                                {parametres.map((p) => (
+                                                  <label className="admin-eval-checkbox-field admin-eval-parametre" key={p.id}>
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={!reglages.parametresExclus.includes(p.id)}
+                                                      onChange={(e) => basculerParametre(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, p.id, e.target.checked)}
+                                                    />
+                                                    {p.label}
+                                                  </label>
+                                                ))}
+                                                {libelleCas && (
+                                                  <label className="admin-eval-checkbox-field">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={reglages.inclureCasParticulier}
+                                                      onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, e.target.checked)}
+                                                    />
+                                                    {libelleCas}
+                                                  </label>
+                                                )}
+                                                <button
+                                                  type="button"
+                                                  className="admin-eval-lien-bouton"
+                                                  onClick={() => dupliquerVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}
+                                                  title="Ajoute la même variante avec d'autres réglages (par exemple avec et sans un paramètre)"
+                                                >
+                                                  + Même variante, autres réglages
+                                                </button>
+                                                {copie && (
+                                                  <button
+                                                    type="button"
+                                                    className="admin-eval-lien-bouton"
+                                                    onClick={() => retirerVarianteDupliquee(chapitreCourant.slug, section.id, ligne.cle ?? '', cle)}
+                                                  >
+                                                    Retirer cette copie
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </td>
+                                          </tr>,
+                                        )
+                                      }
+                                      return rangees
+                                    })
                                   }
 
                                   const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'

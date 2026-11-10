@@ -82,6 +82,14 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   = marqueur d'absence du profil. Une case décochée impose l'absence de CE paramètre dans toutes les
   questions de la ligne et toutes les séries (ensemble exact des absents). Seulement pour des
   paramètres présents dans TOUTES les variantes du générateur (sinon garder la case unique).
+- **Réglages PAR VARIANTE** (décision de l'utilisateur) : les cases « Paramètres à inclure » et
+  « Inclure un cas particulier » sont propres à CHAQUE variante d'un générateur (sous-rangée sous
+  la variante, dès qu'elle a au moins une question). Bouton « + Même variante, autres réglages » :
+  copie la variante (clé « id~2 », « id~3 »… dans `parVariante`, `varianteDeCle` rend l'id réel)
+  pour mettre, dans la même évaluation, un graphe avec translation horizontale et un autre sans.
+  `LigneSelection.parametresExclusParVariante` / `casParticulierParVariante` ; l'ancien réglage de
+  ligne reste lu pour les plans enregistrés (`reglagesVariante`). Le cas particulier va sur la
+  dernière question de SA variante.
 - **Un verdict n'est jamais un cas particulier** : si la question est de DÉCIDER (données
   cohérentes ou non, une ou deux valeurs de q, nature d'une suite, existe/n'existe pas quand c'est
   la question), filtrer une issue rendrait la réponse prévisible. Est particulier ce qui

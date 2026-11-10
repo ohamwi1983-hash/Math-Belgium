@@ -3718,8 +3718,16 @@ export interface LigneSelection {
    * seules des instances complètes sont tirées (voir `libelleCasParticulier`). */
   inclureCasParticulier?: boolean
   /** Réservé à `type==='exercice'` (évaluation) : paramètres DÉCOCHÉS par le professeur (ids de
-   * `parametresAuChoix`) — absents de toutes les instances de la ligne. Vide = tous inclus. */
+   * `parametresAuChoix`) — absents de toutes les instances de la ligne. Vide = tous inclus.
+   * ANCIEN format (une valeur pour toute la ligne), gardé pour relire les plans enregistrés :
+   * remplacé par `parametresExclusParVariante` / `casParticulierParVariante`. */
   parametresExclus?: string[]
+  /** Réglages PAR VARIANTE (clé = celle de `parVariante`, décision de l'utilisateur) : paramètres
+   * décochés pour les questions de CETTE variante. Une variante peut être DUPLIQUÉE pour recevoir
+   * d'autres réglages (clé « id~2 », « id~3 »… — voir `varianteDeCle`). */
+  parametresExclusParVariante?: Record<string, string[]>
+  /** Case « inclure un cas particulier » PAR VARIANTE : la dernière question de cette variante. */
+  casParticulierParVariante?: Record<string, boolean>
   /** Points par question. Pour `type==='exercice'`, sert de SEUL repli quand une variante n'a pas
    * encore d'entrée dans `pointsParVariante` (ex. juste après avoir forcé un nombre sur une
    * nouvelle variante) — l'édition réelle du barème passe alors par `pointsParVariante`, jamais
@@ -3732,6 +3740,24 @@ export interface LigneSelection {
   pointsParVariante?: Record<string, number>
 }
 
+/** Id réel de variante d'une clé de `parVariante` (« carre~2 » → « carre ») : une variante
+ * dupliquée garde son id de catalogue, seuls ses réglages diffèrent. */
+export function varianteDeCle(cle: string): string {
+  const i = cle.indexOf('~')
+  return i < 0 ? cle : cle.slice(0, i)
+}
+
+/** Réglages effectifs d'une clé de variante — les réglages par variante, sinon l'ancien réglage de
+ * ligne (plans enregistrés avant le réglage par variante : la case « cas particulier » de ligne
+ * visait la DERNIÈRE question de la ligne). */
+export function reglagesVariante(ligne: LigneSelection, cle: string): { parametresExclus: string[]; inclureCasParticulier: boolean } {
+  const actives = Object.entries(ligne.parVariante ?? {}).filter(([, n]) => n > 0).map(([c]) => c)
+  return {
+    parametresExclus: ligne.parametresExclusParVariante?.[cle] ?? ligne.parametresExclus ?? [],
+    inclureCasParticulier: ligne.casParticulierParVariante?.[cle] ?? (!!ligne.inclureCasParticulier && actives[actives.length - 1] === cle),
+  }
+}
+
 export function sommeParVariante(parVariante: Record<string, number> | undefined): number {
   return Object.values(parVariante ?? {}).reduce((total, n) => total + n, 0)
 }
@@ -3742,7 +3768,14 @@ export interface ItemPayload {
   points: number
   /** `inclureCasParticulier` : la dernière instance de la ligne est un cas particulier (tirage
    * équilibré, voir `AdaptateurFeuilleExercices.profilInstance`) — génération locale seulement. */
-  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[]; inclureCasParticulier?: boolean; parametresExclus?: string[] }
+  exercice?: {
+    generatorId: IdGenerateurPilote
+    /** Une entrée par variante (ou variante dupliquée), avec SES réglages de tirage équilibré. */
+    parVariante: { varianteId: string; nombre: number; points: number; parametresExclus?: string[]; inclureCasParticulier?: boolean }[]
+    /** Ancien format (réglages de ligne) : encore lu si les entrées n'ont pas leurs propres réglages. */
+    inclureCasParticulier?: boolean
+    parametresExclus?: string[]
+  }
   /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths quand
    * une même page en sert plusieurs (`AppEvaluation6e.tsx`, voir `QuizThemeConfig.quizChapitre`) —
    * absent pour les chapitres à banque unique (4e). */
@@ -3875,18 +3908,22 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
       if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
         .filter(([, nombre]) => nombre > 0)
-        .map(([varianteId, nombre]) => ({ varianteId, nombre, points: ligne.pointsParVariante?.[varianteId] ?? ligne.points }))
+        .map(([cle, nombre]) => {
+          const reglages = reglagesVariante(ligne, cle)
+          return {
+            varianteId: varianteDeCle(cle),
+            nombre,
+            points: ligne.pointsParVariante?.[cle] ?? ligne.points,
+            parametresExclus: parametresAuChoix(config.generatorId).length > 0 ? reglages.parametresExclus : undefined,
+            inclureCasParticulier: reglages.inclureCasParticulier && !!libelleCasParticulier(config.generatorId),
+          }
+        })
       if (parVariante.length === 0) continue
       items.push({
         processus: ligne.processus,
         titreSection,
         points: ligne.points,
-        exercice: {
-          generatorId: config.generatorId,
-          parVariante,
-          inclureCasParticulier: !!ligne.inclureCasParticulier && !!libelleCasParticulier(config.generatorId),
-          parametresExclus: parametresAuChoix(config.generatorId).length > 0 ? ligne.parametresExclus ?? [] : undefined,
-        },
+        exercice: { generatorId: config.generatorId, parVariante },
         section: sectionRef,
       })
     } else if (ligne.type === 'vraiFaux') {

@@ -323,32 +323,43 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         // la série A fixe la structure de chaque question, les autres séries la reproduisent.
         const equilibre = entete.mode !== 'exercice'
         const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
-        const parametresExclus = adaptateur.parametresAuChoix ? (item.exercice.parametresExclus ?? []).filter((id) => idsParametres.includes(id)) : null
-        const contrainteDe = (cas: ContrainteTirage['cas'], forme?: string): ContrainteTirage | undefined =>
+        // Réglages PAR VARIANTE (décision de l'utilisateur) : chaque entrée (variante, éventuellement
+        // dupliquée) a ses paramètres décochés et sa case « cas particulier » ; l'ancien réglage de
+        // ligne (plans enregistrés) s'applique encore aux entrées qui n'ont pas les leurs.
+        const entrees = item.exercice.parVariante.filter((v) => v.nombre > 0)
+        const exclusDe = (e: (typeof entrees)[number]): string[] | null =>
+          adaptateur.parametresAuChoix ? (e.parametresExclus ?? item.exercice!.parametresExclus ?? []).filter((id) => idsParametres.includes(id)) : null
+        const casDe = (e: (typeof entrees)[number], i: number): boolean =>
+          e.inclureCasParticulier ?? (!!item.exercice!.inclureCasParticulier && i === entrees.length - 1)
+        const contrainteDe = (cas: ContrainteTirage['cas'], parametresExclus: string[] | null, forme?: string): ContrainteTirage | undefined =>
           equilibre ? { cas, idsParametres, parametresExclus, forme, calculatrice: entete.calculatrice } : undefined
         const indexItem = items.indexOf(item)
         const structureA = structureParItem.get(indexItem)
-        const variantes = item.exercice.parVariante.flatMap(({ varianteId, nombre, points }) => Array.from({ length: nombre }, () => ({ varianteId, points })))
+        // Une question par instance, avec l'indice de son entrée (pour ses réglages).
+        const questions = entrees.flatMap((e, indexEntree) => Array.from({ length: e.nombre }, () => ({ varianteId: e.varianteId, points: e.points, indexEntree, exclus: exclusDe(e) })))
         let instances: InstancePlan[]
-        if (equilibre && structureA && structureA.length === variantes.length) {
-          instances = variantes.map(({ varianteId, points }, k) => ({
+        if (equilibre && structureA && structureA.length === questions.length) {
+          instances = questions.map(({ varianteId, points, exclus }, k) => ({
             varianteId,
             points,
-            graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(structureA[k].cas ?? 'complet', structureA[k].forme)).graine,
+            graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe(structureA[k].cas ?? 'complet', exclus, structureA[k].forme)).graine,
           }))
         } else {
-          instances = variantes.map(({ varianteId, points }) => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe('complet')).graine }))
-          // « Inclure un cas particulier » : la DERNIÈRE question de la ligne qui PEUT en recevoir un
-          // (un cas propre à une seule variante — ex. mise en évidence généralisée — n'existe pas dans
-          // les autres).
-          if (equilibre && item.exercice.inclureCasParticulier && adaptateur.libelleCasParticulier) {
-            for (let k = instances.length - 1; k >= 0; k--) {
-              const essai = graineInedite(generatorId, adaptateur, instances[k].varianteId, dejaVues, contrainteDe('particulier'), true)
-              if (essai.casParticulier && casRespecte(essai.casParticulier, 'particulier')) {
-                instances[k] = { ...instances[k], graine: essai.graine }
-                break
+          instances = questions.map(({ varianteId, points, exclus }) => ({ varianteId, points, graine: graineInedite(generatorId, adaptateur, varianteId, dejaVues, contrainteDe('complet', exclus)).graine }))
+          // « Inclure un cas particulier » (par variante) : la DERNIÈRE question de CETTE variante qui
+          // peut en recevoir un.
+          if (equilibre && adaptateur.libelleCasParticulier) {
+            entrees.forEach((e, indexEntree) => {
+              if (!casDe(e, indexEntree)) return
+              for (let k = questions.length - 1; k >= 0; k--) {
+                if (questions[k].indexEntree !== indexEntree) continue
+                const essai = graineInedite(generatorId, adaptateur, instances[k].varianteId, dejaVues, contrainteDe('particulier', questions[k].exclus), true)
+                if (essai.casParticulier && casRespecte(essai.casParticulier, 'particulier')) {
+                  instances[k] = { ...instances[k], graine: essai.graine }
+                  break
+                }
               }
-            }
+            })
           }
           if (equilibre && adaptateur.profilInstance) {
             structureParItem.set(

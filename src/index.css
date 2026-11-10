@@ -1294,6 +1294,7 @@ table.feature-table td { white-space: normal; }
 .admin-eval-cas-contenu { display: flex; flex-wrap: wrap; align-items: center; column-gap: 18px; row-gap: 2px; }
 .admin-eval-row-cas .admin-eval-checkbox-field { padding-bottom: 0; }
 .admin-eval-avertissement { flex-basis: 100%; margin: 4px 0 0; padding: 8px 12px; border-left: 3px solid #b45309; background: color-mix(in srgb, #b45309 9%, transparent); font-size: 0.85rem; color: var(--ink); border-radius: 4px; }
+.admin-eval-lien-bouton { border: none; background: none; padding: 4px 2px; min-height: 32px; font: inherit; font-size: 0.85rem; color: var(--accent, #b4541f); text-decoration: underline; cursor: pointer; }
 .admin-eval-parametres-titre { font-size: 0.85rem; color: var(--ink-soft, #5a6070); }
 
 .admin-eval-indisponible {
