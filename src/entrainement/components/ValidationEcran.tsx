@@ -16,6 +16,9 @@ export interface ValidationEtapeProps {
   reponseAttendue?: ReactNode;
   labelSuivant: string;
   onSuivant: () => void;
+  /** Optionnel (rétrocompatible) : message affiché à la place de « Tentatives épuisées — … » quand
+   * l'écran a été clos AVANT d'épuiser les tentatives (verdict fermé faux, qui ne se rejoue pas). */
+  messageRevele?: string;
 }
 
 type Props = ValidationEtapeProps;
@@ -26,11 +29,11 @@ type Props = ValidationEtapeProps;
  * `ResumeSessionXxx` — convention CLAUDE.md, "validation/invalidation avant de passer à l'écran
  * suivant"). Partagé par 4e/5e-4h/6e-6h (comme `BoutonExportWord.tsx`), jamais dupliqué par niveau.
  */
-export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant }: Props) {
+export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele }: Props) {
   return (
     <div className="validation-ecran">
       <p className={revele ? "alert-error" : "alert-success"} role="alert">
-        {revele ? "Tentatives épuisées — ce n'était pas la bonne réponse." : "Bonne réponse !"}
+        {revele ? (messageRevele ?? "Tentatives épuisées — ce n'était pas la bonne réponse.") : "Bonne réponse !"}
       </p>
       {revele && reponseAttendue && (
         <div className="validation-reponse-attendue">

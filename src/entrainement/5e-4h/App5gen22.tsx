@@ -37,6 +37,8 @@ function nouvelleSession(): EtatSessionLectureGraphiqueLimites {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLectureGraphiqueLimites;
   revele: boolean;
+  /** Écran révélé AVANT d'épuiser les tentatives (verdict « aucune asymptote » faux) : message adapté. */
+  closTot: boolean;
 }
 
 /** Une puce par phase de `ordreComplet(etat.exerciceCourant)` (toujours les 2 écrans depuis l'audit
@@ -87,7 +89,8 @@ export function App5gen22() {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const closTot = nouvelEtat.derniereEtapeRevelee && etat.etapeCourante.tentativesUtilisees + 1 < etat.reglages.tentativesMax;
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, closTot });
       return;
     }
     setEtat(nouvelEtat);
@@ -117,12 +120,13 @@ export function App5gen22() {
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} block={frag.includes("\\lim_{")} />
+              <Katex key={i} expression={frag} block={frag.includes("\\lim_{") || phase === "nommerAsymptotes"} />
             ))}
           </span>
         ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
+        messageRevele: enAttente.closTot ? "Ce n'était pas la bonne réponse : il y a des asymptotes (ou il n'y en a aucune), ce choix ne se rejoue pas." : undefined,
       }
     : null;
 
