@@ -676,12 +676,13 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          caption: 'Nombre de zéros de [famille](ax+b) = K, selon le signe de K',
-          headers: ['Famille', 'K < 0', 'K > 0'],
+          caption: 'Nombre de solutions de [famille](ax+b) = K, selon le signe de K',
+          headers: ['Famille', 'K < 0', 'K = 0', 'K > 0'],
           rows: [
-            ['Carrée / Valeur absolue', '0 zéro', '2 zéros'],
-            ['Racine carrée', '0 zéro', '1 zéro'],
-            ['Cube / Racine cubique / Inverse', 'toujours exactement 1 zéro', 'toujours exactement 1 zéro'],
+            ['Carrée / Valeur absolue', '0', '1', '2'],
+            ['Racine carrée', '0', '1', '1'],
+            ['Cube / Racine cubique', '1', '1', '1'],
+            ['Inverse', '1', '0 (1/u ne vaut jamais 0)', '1'],
           ],
         },
         {
@@ -1245,9 +1246,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       {
         title: 'Nombre de zéros de [famille](ax+b) = K',
         formulas: [
-          { text: 'carrée / valeur absolue : $K<0$ → 0 zéro, $K>0$ → 2 zéros' },
-          { text: 'racine carrée : $K<0$ → 0 zéro, $K>0$ → 1 zéro' },
-          { text: 'cube / racine cubique / inverse : toujours exactement 1 zéro' },
+          { text: 'carrée / valeur absolue : $K<0$ → 0 zéro, $K=0$ → 1 zéro, $K>0$ → 2 zéros' },
+          { text: 'racine carrée : $K<0$ → 0 zéro, $K \\geq 0$ → 1 zéro' },
+          { text: 'cube / racine cubique : toujours exactement 1 zéro' },
+          { text: 'inverse : 1 zéro si $K \\neq 0$, aucun si $K = 0$' },
         ],
       },
       {

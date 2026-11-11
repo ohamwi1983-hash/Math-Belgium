@@ -220,7 +220,13 @@
         if (!extreme || mieux(cd.v, extreme.v)) extreme = cd;
       });
       if (meilleur && !(extreme && !extreme.atteint && (estMax ? extreme.v > meilleur.v + 1e-9 : extreme.v < meilleur.v - 1e-9))) {
-        return { existe: true, v: meilleur.v, x: meilleur.x };
+        // Toutes les abscisses où cette valeur est atteinte (ex. f(−3) = f(−1) = 3).
+        var xs = [];
+        cands.forEach(function (cd) {
+          if (cd.atteint && Math.abs(cd.v - meilleur.v) < 1e-9 && !xs.some(function (x) { return Math.abs(x - cd.x) < EPS; })) xs.push(cd.x);
+        });
+        xs.sort(function (u, w) { return u - w; });
+        return { existe: true, v: meilleur.v, x: meilleur.x, xs: xs };
       }
       return { existe: false, limite: extreme };
     }
@@ -601,10 +607,13 @@
       function decrire(res, estMax) {
         var nom = estMax ? "maximum" : "minimum";
         if (res.existe) {
-          var px = xPx(res.x), py = yPx(res.v);
-          svg.appendChild(svgEl("circle", { cx: px, cy: py, r: 5.5, class: estMax ? "point-max" : "point-min" }));
-          self._etiquette(svg, px, py, (estMax ? "max " : "min ") + nombre(res.v).texte, estMax ? "etiquette-max" : "etiquette-min", estMax);
-          return nom + " = " + nombre(res.v).texte + " (en x = " + nombre(res.x).texte + ")";
+          var py = yPx(res.v);
+          res.xs.forEach(function (x) {
+            var px = xPx(x);
+            svg.appendChild(svgEl("circle", { cx: px, cy: py, r: 5.5, class: estMax ? "point-max" : "point-min" }));
+            self._etiquette(svg, px, py, (estMax ? "max " : "min ") + nombre(res.v).texte, estMax ? "etiquette-max" : "etiquette-min", estMax);
+          });
+          return nom + " = " + nombre(res.v).texte + " (en " + res.xs.map(function (x) { return "x = " + nombre(x).texte; }).join(" et en ") + ")";
         }
         var lim = res.limite;
         if (!lim) return "pas de " + nom;

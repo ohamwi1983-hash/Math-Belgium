@@ -142,6 +142,8 @@
     '.etiquette-rate{fill:var(--bad,#b23a3a);}' +
     '.etiquette-vide{font-size:12px;font-weight:600;fill:var(--bad,#b23a3a);font-family:var(--sans,sans-serif);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.legende{text-align:center;font-size:0.82rem;color:var(--ink-soft,#6b6055);margin:0 0 10px;line-height:1.45;}' +
+    '.legende[hidden]{display:none;}' +
     '.verdict{text-align:center;font-size:0.9rem;font-weight:600;margin:0 0 18px;padding:10px 14px;border-radius:var(--radius,3px);color:var(--plan,#5b4ea3);background:var(--surface-2,#faf6f0);}' +
     '.verdict.aucune{color:var(--bad,#b23a3a);}' +
     '.verdict.ok{color:var(--good,#2f7a4f);}' +
@@ -171,6 +173,7 @@
     '</select></div>' +
     '<p class="formule" id="formule" hidden></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<p class="legende" id="legende" hidden></p>' +
     '<p class="verdict" id="verdict" aria-live="polite"></p>' +
     '<div class="controles">' +
     '<div class="curseur" id="bloc-th" hidden><label for="th">TH — translation horizontale</label><div class="curseur-row">' +
@@ -204,6 +207,7 @@
     this._svg = shadow.getElementById("svg");
     this._verdict = shadow.getElementById("verdict");
     this._formule = shadow.getElementById("formule");
+    this._legende = shadow.getElementById("legende");
     this._inputT = shadow.getElementById("t");
     this._valeurT = shadow.getElementById("t-valeur");
     this._inputTh = shadow.getElementById("th");
@@ -342,6 +346,7 @@
     this._blocTh.hidden = !transformee;
     this._blocTv.hidden = !transformee;
     this._formule.hidden = !transformee;
+    this._legende.hidden = !transformee;
     this._valeurT.textContent = formatNombreFr(this._t, 1);
     this._valeurTh.textContent = formatNombreFr(this._th, 1);
     this._valeurTv.textContent = formatNombreFr(this._tv, 1);
@@ -414,6 +419,11 @@
     var f = function (x) { return g(x - th) + tv; };
     var test = testerParite(famille, th, tv);
     this._formule.textContent = texteTransformee(famille, th, tv);
+    this._legende.textContent = def.parite === "paire"
+      ? "S : symétrique de (t ; f(t)) par rapport à l'axe Oy, comme pour " + def.symbole + " (famille paire)."
+      : def.parite === "impaire"
+        ? "S : symétrique de (t ; f(t)) par rapport à l'origine, comme pour " + def.symbole + " (famille impaire)."
+        : "√x n'a pas de symétrique : son domaine n'est pas symétrique, ni avant ni après translation.";
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
@@ -468,7 +478,7 @@
       var pS = self._toPx(win, -t, ySym);
       svg.appendChild(svgEl(ns, "line", { x1: pT2[0].toFixed(2), y1: pT2[1].toFixed(2), x2: pS[0].toFixed(2), y2: pS[1].toFixed(2), class: tombe ? "guide" : "guide-rate" }));
       svg.appendChild(svgEl(ns, "circle", { cx: pS[0].toFixed(2), cy: pS[1].toFixed(2), r: tombe ? 5 : 6, class: tombe ? "point-ok" : "point-rate" }));
-      self._etiquette(svg, ns, pS[0], pS[1], tombe ? "symétrique : sur la courbe" : "symétrique : hors courbe", tombe ? "etiquette-ok" : "etiquette-rate", !tombe && isFinite(fmt_) && fmt_ > ySym);
+      self._etiquette(svg, ns, pS[0], pS[1], tombe ? "S : sur la courbe" : "S : hors courbe", tombe ? "etiquette-ok" : "etiquette-rate", !tombe && isFinite(fmt_) && fmt_ > ySym);
     }
     // Vrai point de la courbe en −t (quand le symétrique ne tombe pas dessus).
     if (!tombe && isFinite(fmt_) && dansY(fmt_) && -t >= win.X_MIN) {
