@@ -767,9 +767,13 @@ export const suites: ChapterContent = {
           tag: 'convergence-suite-widget',
           label: 'Manipule toi-même — les 4 comportements en direct',
           caption:
-            'Bascule entre arithmétique et géométrique, puis fais glisser la raison : passe par ' +
-            'q=−1 pile (les points passent en rouge) pour voir l\'oscillation qui ne diverge PAS ' +
-            'vers l\'infini — à ne surtout pas confondre avec q>1, qui grandit sans borne.',
+            'Bascule entre arithmétique et géométrique, puis fais glisser la raison : passe ' +
+            'par q = −1 pile (points en rouge) pour voir l\'oscillation qui ne tend PAS vers ' +
+            'l\'infini, à ne pas confondre avec q > 1. Coche ensuite « Afficher une bande ε ' +
+            '» : pour une suite convergente, à partir d\'un certain rang N, tous les termes ' +
+            'restent dans la bande autour de la limite — c\'est exactement ce que veut dire ' +
+            '« converger ». Rétrécis ε : N recule, mais il existe toujours. Pour q = −1, ' +
+            'aucune bande étroite ne convient.',
         },
         { kind: 'subheading', text: "La somme infinie d'une suite géométrique" },
         {
@@ -1285,9 +1289,11 @@ export const suites: ChapterContent = {
           tag: 'comparaison-suites-widget',
           label: 'Manipule toi-même — trouve le rang de bascule',
           caption:
-            'Règle les deux villes et observe le balayage sur 20 ans : le widget repère lui-même ' +
-            'le PREMIER rang où B dépasse A, en vérifiant explicitement qu\'au rang précédent ce ' +
-            'n\'était pas encore le cas — exactement la vérification demandée dans l\'Attention.',
+            'Choisis un préréglage (deux villes, intérêts simples contre composés, ou pas ' +
+            'de bascule) et règle les deux suites : le tableau de balayage surligne le ' +
+            'PREMIER rang où B dépasse A, en montrant qu\'au rang précédent ce n\'était pas ' +
+            'encore le cas — la vérification demandée dans l\'Attention. Coche « Je parie ' +
+            'd\'abord » pour proposer une année avant de voir la réponse.',
         },
         {
           kind: 'entrainement',
@@ -1433,10 +1439,14 @@ export const suites: ChapterContent = {
           tag: 'suite-recurrente-affine-widget',
           label: 'Manipule toi-même — le piège de L en direct',
           caption:
-            'Fais glisser a au-delà de 1 (ou en dessous de −1) : la ligne L continue de ' +
-            's\'afficher — la formule donne TOUJOURS un nombre — mais elle bascule en rouge et ' +
-            'les termes s\'en éloignent au lieu de s\'en rapprocher. Repasse sous |a|<1 pour la ' +
-            'voir redevenir un vrai régime permanent (verte).',
+            'Fais glisser a au-delà de 1 (ou en dessous de −1) : la formule donne TOUJOURS ' +
+            'un nombre L, mais la ligne passe en rouge et les termes ne s\'en rapprochent ' +
+            'plus. Pour a = −1, la suite oscille entre deux valeurs sans s\'éloigner ni se ' +
+            'rapprocher. Passe à l\'onglet « Toile d\'araignée » : le point fixe est ' +
+            'l\'intersection des droites y = a·x + b et y = x, et le chemin de la récurrence ' +
+            'forme un escalier (0 < a < 1) ou une spirale (−1 < a < 0) qui s\'y resserre. ' +
+            'Sous le graphique, les écarts vₙ = uₙ − L sont multipliés par a à chaque ' +
+            'étape.',
         },
         {
           kind: 'astuce',

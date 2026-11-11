@@ -2098,3 +2098,27 @@ paths:
   `transformation-8-parametres-widget` gagne un mode Défi (verdict sur les courbes, réglages équivalents
   acceptés) et le suivi de l'image de (1 ; 1) ; `familles-parite-widget` gagne un mode « fonction
   transformée » (TH, TV) qui teste la parité.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`) : audit puis enrichissement validé par l'utilisateur
+  (toutes les recommandations). Corrections : l'astuce du § 6 affirmait « pas de formule fermée » pour
+  uₙ₊₁ = a·uₙ + b (faux : vₙ = uₙ − L est géométrique de raison a, d'où uₙ = L + (u₁ − L)·aⁿ⁻¹ — nouvelle
+  démonstration qui **prouve** la convergence pour |a| < 1, plus « admise ») ; l'exemple de l'aquarium
+  disait « quelle que soit la concentration de départ … sans jamais la dépasser » (faux si u₁ > L) ; la
+  définition géométrique excluait q = 1 alors que le tableau des limites, l'Attention « q = 1 » et le § 6
+  l'utilisent (désormais q ≠ 0, q = 1 = suite constante ; colonne q = 1 ajoutée au tableau des
+  variations) ; graphique exponentiel du § 2 avec un faux plateau (n = 6, 7 posés à 3,7) → vraies valeurs ;
+  vocabulaire « diverger » unifié (= ne pas converger ; q = −1 bornée sans limite, q < −1 |uₙ| → +∞ sans
+  limite) dans le tableau, le formulaire, la checklist et le récap ; emprunt indexé à partir de u₁ (comme
+  tout le chapitre) et tracé jusqu'au remboursement (un point tous les 6 mois). Contenu : r = 0 constante,
+  contre-exemple « n'est pas arithmétique / géométrique » (uₙ = n²), somme de uₚ à uₙ (n − p + 1 termes,
+  exemple u₅ + … + u₂₀ = 616), « Pourcentages : de t % à la raison q » (intérêts simples/composés,
+  wrongRight +10 % puis −10 %), astuce rang n sans base commune → balayage (§ 5), exemple 0,999… = 1,
+  exemple « les carrés emboîtés » (S∞ = 32 cm²) au § 4, graphique arithmétique contre géométrique déplacé
+  du § 4 vers l'introduction du § 5 (rang de bascule 9), exemple « formule explicite de l'aquarium »
+  (u₁₀ ≈ 9,64) et « le seuil de l'emprunt » (L = 60 000 € n'est pas une limite mais un seuil, a > 1).
+  Tous les nouveaux exemples ont leur énoncé clé dans `ENONCES_DEMONSTRATION.suites`. Ateliers :
+  `convergence-suite-widget` gagne une bande ε (rang N), `comparaison-suites-widget` des préréglages
+  (villes, intérêts, pas de bascule), un tableau de balayage et un mode pari, `suite-recurrente-affine-widget`
+  une toile d'araignée et les écarts vₙ ; 6 nouveaux — `gauss-double-echelle-widget` (§ 1),
+  `arithmetique-ou-geometrique-widget` (§ 2), `somme-infinie-zenon-widget` (§ 3), `echiquier-widget`,
+  `fibonacci-nombre-d-or-widget` et `angle-d-or-widget` (§ 4).
