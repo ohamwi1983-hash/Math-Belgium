@@ -28,12 +28,15 @@ export function construireFamilleC_Simple(): ExerciceFamilleC_Problemes {
   return { famille: "C", ...construireBase(), a2: null, b2: null };
 }
 
-/** Variante comparaison — [a2;b2] même longueur que [a;b], position différente (jamais chevauchant
- * exactement le même intervalle, sinon la comparaison est triviale). */
+/** Variante comparaison — [a2;b2] même longueur que [a;b], position différente : placé AVANT
+ * (a2 ≥ 0) ou APRÈS [a;b], avec la même probabilité — la question « quel travail est le plus
+ * grand ? » n'a donc jamais une réponse fixe (audit 6e ch.4). Les deux travaux ne sont jamais égaux
+ * (F(x)=kx strictement croissante, k > 0). */
 export function construireFamilleC_Variante(): ExerciceFamilleC_Problemes {
   const base = construireBase();
   const longueur = base.b - base.a;
-  const a2 = base.b + entierEntre(1, 3); // strictement après [a;b], jamais chevauchant.
+  const avant = Math.random() < 0.5;
+  const a2 = avant ? entierEntre(0, base.a - 1) : base.a + entierEntre(1, 3);
   const b2 = a2 + longueur;
   return { famille: "C", ...base, a2, b2 };
 }

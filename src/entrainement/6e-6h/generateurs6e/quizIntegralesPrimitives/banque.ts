@@ -41,9 +41,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Piège classique : "), latex("\\ln(x)"), texte(" n'est défini que pour "), latex("x>0"), texte(", alors que "), latex("1/x"), texte(" est aussi défini pour "), latex("x<0"), texte(". Il manque la valeur absolue.")],
     },
     {
-      enonce: [latex("\\displaystyle\\int \\dfrac{1}{x}\\,dx = \\ln|x|+C"), texte(", valable pour tout "), latex("x\\neq0"), texte(".")],
+      enonce: [latex("\\displaystyle\\int \\dfrac{1}{x}\\,dx = \\ln|x|+C"), texte(" sur chacun des intervalles "), latex("]-\\infty;0["), texte(" et "), latex("]0;+\\infty["), texte(".")],
       reponse: true,
-      justification: [texte("La valeur absolue étend le domaine de la primitive à "), latex("x<0"), texte(" comme à "), latex("x>0"), texte(", contrairement à "), latex("\\ln(x)"), texte(" seul.")],
+      justification: [texte("La valeur absolue étend la primitive à "), latex("x<0"), texte(" comme à "), latex("x>0"), texte(", contrairement à "), latex("\\ln(x)"), texte(" seul. Comme "), latex("\\mathbb{R}_0"), texte(" n'est pas un intervalle, la constante peut être différente sur chacun des deux intervalles.")],
     },
     {
       enonce: [latex("\\displaystyle\\int e^x\\,dx = e^x+C"), texte(".")],
@@ -76,14 +76,14 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("On vérifie par dérivation : "), latex("(-\\cos(x))'=\\sin(x)"), texte(", conforme.")],
     },
     {
-      enonce: [texte("Une fonction continue sur un intervalle admet une SEULE primitive sur cet intervalle.")],
+      enonce: [latex("\\displaystyle\\int \\cos(3x)\\,dx = \\sin(3x)+C"), texte(".")],
       reponse: false,
-      justification: [texte("Elle en admet une INFINITÉ : toute primitive additionnée d'une constante "), latex("C"), texte(" quelconque en est une autre.")],
+      justification: [texte("Il manque le facteur "), latex("\\tfrac{1}{3}"), texte(" : dériver "), latex("\\sin(3x)"), texte(" donne "), latex("3\\cos(3x)"), texte(". Une primitive de "), latex("f(ax+b)"), texte(" est "), latex("\\tfrac{1}{a}F(ax+b)"), texte(", ici "), latex("\\tfrac{1}{3}\\sin(3x)+C"), texte(".")],
     },
     {
       enonce: [texte("Si "), latex("F"), texte(" et "), latex("G"), texte(" sont deux primitives de "), latex("f"), texte(" sur un même intervalle, alors "), latex("F-G"), texte(" est une fonction constante.")],
       reponse: true,
-      justification: [texte("C'est le théorème central du chapitre : deux primitives d'une même fonction sur un intervalle ne diffèrent que d'une constante additive.")],
+      justification: [texte("C'est la propriété fondamentale des primitives : sur un intervalle, deux primitives d'une même fonction ne diffèrent que d'une constante additive.")],
     },
     {
       enonce: [texte("Pour "), latex("a>0"), texte(", "), latex("a\\neq1"), texte(" : "), latex("\\displaystyle\\int a^x\\,dx = \\dfrac{a^x}{\\ln(a)}+C"), texte(".")],
@@ -111,9 +111,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("La dérivée de "), latex("\\arccos(x)"), texte(" vaut "), latex("-1/\\sqrt{1-x^2}"), texte(" (signe opposé) : "), latex("\\arccos(x)"), texte(" est une primitive de "), latex("-1/\\sqrt{1-x^2}"), texte(", pas de "), latex("1/\\sqrt{1-x^2}"), texte(".")],
     },
     {
-      enonce: [texte("La technique de substitution repose sur la reconnaissance d'une forme "), latex("u'(x)\\cdot f(u(x))"), texte(" dans l'intégrande.")],
+      enonce: [texte("Toute fonction continue sur un intervalle admet des primitives sur cet intervalle.")],
       reponse: true,
-      justification: [texte("Reconnaître qu'un facteur est exactement (à une constante près) la dérivée d'une expression composée ailleurs dans l'intégrande est le principe même de cette technique.")],
+      justification: [texte("C'est un résultat du cours (admis) : la continuité garantit l'existence des primitives — par exemple la fonction aire "), latex("x\\mapsto\\int_a^x f(t)\\,dt"), texte(".")],
     },
     {
       enonce: [latex("\\displaystyle\\int 2x\\cdot e^{x^2}\\,dx = e^{x^2}+C"), texte(".")],
@@ -161,9 +161,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Linéarisation "), latex("\\cos^2(x)=\\tfrac{1+\\cos(2x)}{2}"), texte(", puis primitivation terme à terme. Vérification : "), latex("\\left(\\tfrac{x}{2}+\\tfrac{\\sin(2x)}{4}\\right)'=\\tfrac{1}{2}+\\tfrac{\\cos(2x)}{2}=\\cos^2(x)"), texte(".")],
     },
     {
-      enonce: [latex("\\displaystyle\\int \\dfrac{1}{x^2+4}\\,dx = \\arctan\\!\\left(\\dfrac{x}{2}\\right)+C"), texte(".")],
+      enonce: [latex("\\displaystyle\\int (2x+1)^5\\,dx = \\dfrac{(2x+1)^6}{6}+C"), texte(".")],
       reponse: false,
-      justification: [texte("Dériver "), latex("\\arctan(x/2)"), texte(" donne "), latex("\\dfrac{1/2}{1+x^2/4}=\\dfrac{2}{4+x^2}"), texte(", soit le DOUBLE de l'intégrande. La bonne primitive est "), latex("\\tfrac{1}{2}\\arctan(x/2)+C"), texte(".")],
+      justification: [texte("Dériver "), latex("\\tfrac{(2x+1)^6}{6}"), texte(" donne "), latex("2(2x+1)^5"), texte(", le double de l'intégrande : il faut encore diviser par "), latex("a=2"), texte(". La bonne primitive est "), latex("\\tfrac{(2x+1)^6}{12}+C"), texte(".")],
     },
     {
       enonce: [latex("\\displaystyle\\int \\dfrac{2x+1}{x^2+x+3}\\,dx = \\ln(x^2+x+3)+C"), texte(".")],
@@ -176,9 +176,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Ici "), latex("u'=2x+2"), texte(", alors que le numérateur "), latex("x+1"), texte(" n'en est que la MOITIÉ : il manque le facteur "), latex("1/2"), texte(". La bonne primitive est "), latex("\\tfrac{1}{2}\\ln(x^2+2x+5)+C"), texte(".")],
     },
     {
-      enonce: [texte("Une fraction rationnelle dont le numérateur est de degré supérieur ou égal à celui du dénominateur se décompose directement en éléments simples, sans division préalable.")],
+      enonce: [latex("\\displaystyle\\int \\ln(x)\\,dx = \\dfrac{1}{x}+C"), texte(", sur "), latex("]0;+\\infty["), texte(".")],
       reponse: false,
-      justification: [texte("Une telle fraction est IMPROPRE : il faut d'abord effectuer la division, ce qui donne un quotient polynomial plus un reste. Seul le RESTE (fraction propre) se décompose ensuite en éléments simples.")],
+      justification: [latex("\\tfrac{1}{x}"), texte(" est la DÉRIVÉE de "), latex("\\ln(x)"), texte(", pas une primitive. Une primitive de "), latex("\\ln(x)"), texte(" est "), latex("x\\ln(x)-x"), texte(" (intégration par parties avec "), latex("g'(x)=1"), texte(").")],
     },
     {
       enonce: [texte("Pour "), latex("\\displaystyle\\int \\sqrt{a^2-x^2}\\,dx"), texte(", c'est la substitution "), latex("x=a\\tan(\\theta)"), texte(" qui élimine la racine.")],
@@ -186,9 +186,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Avec "), latex("x=a\\tan(\\theta)"), texte(", "), latex("a^2-a^2\\tan^2(\\theta)"), texte(" ne se simplifie pas. C'est "), latex("x=a\\sin(\\theta)"), texte(" qu'il faut poser : "), latex("a^2-a^2\\sin^2(\\theta)=a^2\\cos^2(\\theta)"), texte(", donc la racine vaut "), latex("a\\cos(\\theta)"), texte(". La substitution "), latex("x=a\\tan(\\theta)"), texte(" est celle adaptée à "), latex("\\sqrt{a^2+x^2}"), texte(".")],
     },
     {
-      enonce: [latex("\\displaystyle\\int \\dfrac{1}{x^2-1}\\,dx = \\dfrac{1}{2}\\ln\\left|\\dfrac{x-1}{x+1}\\right|+C"), texte(".")],
+      enonce: [latex("\\displaystyle\\int \\ln(x)\\,dx = x\\ln(x)-x+C"), texte(", sur "), latex("]0;+\\infty["), texte(".")],
       reponse: true,
-      justification: [texte("Décomposition en éléments simples : "), latex("\\dfrac{1}{x^2-1}=\\dfrac{1}{2}\\left(\\dfrac{1}{x-1}-\\dfrac{1}{x+1}\\right)"), texte(", dont une primitive est "), latex("\\tfrac{1}{2}\\big(\\ln|x-1|-\\ln|x+1|\\big)"), texte(", soit exactement l'expression donnée.")],
+      justification: [texte("Intégration par parties en voyant "), latex("\\ln(x)=\\ln(x)\\cdot1"), texte(" : "), latex("x\\ln(x)-\\int x\\cdot\\tfrac{1}{x}\\,dx=x\\ln(x)-x"), texte(". Vérification : "), latex("\\big(x\\ln(x)-x\\big)'=\\ln(x)+1-1=\\ln(x)"), texte(".")],
     },
     {
       enonce: [latex("\\displaystyle\\int \\sqrt{x}\\,dx = \\dfrac{3}{2}x^{3/2}+C"), texte(".")],
@@ -282,9 +282,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("C'est exactement la terminologie du cours : la primitive générale contient toutes les primitives possibles, une primitive particulière en fixe une seule.")],
     },
     {
-      enonce: [texte("Le terme « solution », dans ce contexte, désigne la même chose que « racine » d'un polynôme intermédiaire.")],
+      enonce: [texte("Si "), latex("F"), texte(" est une primitive de "), latex("\\tfrac{1}{x}"), texte(" sur "), latex("\\mathbb{R}_0"), texte(", alors "), latex("F(x)=\\ln|x|+C"), texte(" avec la même constante "), latex("C"), texte(" de chaque côté de 0.")],
       reponse: false,
-      justification: [texte("Ces deux mots ne sont jamais interchangeables sur cette plateforme : une « racine » est un zéro d'un polynôme intermédiaire, une « solution » résout l'énoncé complet (ici, la valeur de "), latex("C"), texte(" ou l'expression finale de "), latex("F(x)"), texte(").")],
+      justification: [latex("\\mathbb{R}_0"), texte(" n'est pas un intervalle : chaque branche a sa propre constante. Par exemple, "), latex("\\ln|x|+1"), texte(" pour "), latex("x<0"), texte(" et "), latex("\\ln|x|-2"), texte(" pour "), latex("x>0"), texte(" définissent une primitive de "), latex("\\tfrac{1}{x}"), texte(". Une condition initiale ne fixe que la branche où elle est donnée.")],
     },
     {
       enonce: [texte("Deux primitives différentes d'une même fonction, sur le même intervalle, ont des courbes représentatives qui se déduisent l'une de l'autre par une translation verticale.")],
@@ -403,9 +403,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Échanger les bornes inverse le signe de l'intégrale : c'est une propriété directe de "), latex("F(b)-F(a)=-(F(a)-F(b))"), texte(".")],
     },
     {
-      enonce: [texte("Si "), latex("a=b"), texte(", alors "), latex("\\displaystyle\\int_{a}^{b} f(x)\\,dx = 1"), texte(".")],
+      enonce: [texte("La fonction aire "), latex("A(x)=\\displaystyle\\int_{1}^{x} \\dfrac{1}{t}\\,dt"), texte(" vaut 0 en "), latex("x=0"), texte(".")],
       reponse: false,
-      justification: [texte("Quand les deux bornes coïncident, l'intégrale vaut toujours "), latex("0"), texte(" (c'est "), latex("F(a)-F(a)"), texte("), jamais "), latex("1"), texte(".")],
+      justification: [texte("Elle vaut 0 en "), latex("x=1"), texte(" (borne inférieure) : "), latex("A(1)=\\int_1^1\\tfrac{1}{t}\\,dt=0"), texte(". En fait "), latex("A(x)=\\ln(x)"), texte(", qui n'est même pas définie en 0.")],
     },
     {
       enonce: [latex("\\displaystyle\\int_{a}^{a} f(x)\\,dx = 0"), texte(", pour tout réel "), latex("a"), texte(".")],
@@ -448,9 +448,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("C'est la valeur de l'INTÉGRALE elle-même ("), latex("8"), texte(") qui est confondue avec la valeur moyenne — il manque la division par "), latex("b-a=4"), texte(", ce qui donne bien "), latex("2"), texte(", pas "), latex("8"), texte(".")],
     },
     {
-      enonce: [texte("Si l'une des bornes d'une intégrale définie est un paramètre inconnu "), latex("m"), texte(" et que la valeur de l'intégrale est donnée, on peut poser l'équation "), latex("F(b)-F(m)=\\text{valeur donnée}"), texte(" (ou l'équivalent avec "), latex("a"), texte(") puis la résoudre en "), latex("m"), texte(".")],
+      enonce: [texte("Si "), latex("f"), texte(" est continue, la fonction aire "), latex("A(x)=\\displaystyle\\int_{a}^{x} f(t)\\,dt"), texte(" vérifie "), latex("A'(x)=f(x)"), texte(".")],
       reponse: true,
-      justification: [texte("C'est exactement la méthode : le théorème fondamental fournit une expression de l'intégrale en fonction de "), latex("m"), texte(", que l'on égale ensuite à la valeur connue.")],
+      justification: [texte("C'est le théorème fondamental : la fonction aire est la primitive de "), latex("f"), texte(" qui s'annule en "), latex("a"), texte(". On en déduit "), latex("\\int_a^b f(t)\\,dt=F(b)-F(a)"), texte(" pour toute primitive "), latex("F"), texte(".")],
     },
     {
       enonce: [texte("Une équation en "), latex("m"), texte(" obtenue à partir d'une intégrale définie n'admet jamais plus d'une solution.")],
@@ -659,14 +659,14 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("C'est une conséquence directe de la continuité : un changement de signe nécessiterait un passage par zéro, donc une racine supplémentaire entre les deux.")],
     },
     {
-      enonce: [texte("Le résultat d'un calcul d'aire, sur cette plateforme, doit toujours être exprimé sous forme exacte (fraction ou entier), jamais sous forme décimale arrondie.")],
+      enonce: [latex("\\displaystyle\\int_{0}^{2\\pi} \\sin(x)\\,dx=0"), texte(", alors que l'aire comprise entre la courbe de "), latex("\\sin"), texte(" et l'axe des abscisses sur "), latex("[0;2\\pi]"), texte(" vaut 4.")],
       reponse: true,
-      justification: [texte("C'est la convention générale de la plateforme : toute valeur générée reste une fraction irréductible ou un entier exact, jamais un décimal arrondi.")],
+      justification: [texte("Les deux arches se compensent dans l'intégrale signée. Pour l'aire, on découpe en "), latex("\\pi"), texte(" : "), latex("\\int_0^{\\pi}\\sin(x)\\,dx=2"), texte(" et "), latex("\\int_{\\pi}^{2\\pi}\\sin(x)\\,dx=-2"), texte(", d'où une aire de "), latex("2+2=4"), texte(".")],
     },
     {
-      enonce: [texte("Il est permis de laisser le résultat final d'un calcul d'aire sous forme décimale arrondie (par exemple "), latex("10{,}67"), texte("), à condition que l'arrondi soit précis à deux décimales.")],
+      enonce: [texte("L'aire de la région comprise entre les courbes de "), latex("x^3"), texte(" et de "), latex("x"), texte(" vaut "), latex("\\displaystyle\\int_{-1}^{1}\\left(x^3-x\\right)dx"), texte(".")],
       reponse: false,
-      justification: [texte("Aucun arrondi n'est accepté comme réponse générée par la plateforme : la valeur exacte (fraction irréductible ou entier) est toujours exigée, quelle que soit la précision de l'arrondi proposé.")],
+      justification: [texte("Cette intégrale vaut 0 : les courbes se croisent en "), latex("x=0"), texte(", et l'ordre s'inverse. On découpe : "), latex("\\int_{-1}^{0}(x^3-x)\\,dx+\\int_0^1(x-x^3)\\,dx=\\tfrac{1}{4}+\\tfrac{1}{4}=\\tfrac{1}{2}"), texte(".")],
     },
     {
       enonce: [texte("L'aire entre la courbe de "), latex("f(x)=x^2"), texte(" et l'axe des abscisses, sur "), latex("[0;3]"), texte(", vaut "), latex("9"), texte(".")],
@@ -890,9 +890,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [latex("\\pi r^2h"), texte(" est le volume du CYLINDRE de mêmes rayon et hauteur. Le cône n'en occupe que le tiers : "), latex("\\pi r^2h/3"), texte(".")],
     },
     {
-      enonce: [texte("La formule du tronc de cône "), latex("V=\\dfrac{\\pi h}{3}(a^2+ab+b^2)"), texte(" se retrouve par la méthode des disques, appliquée à la droite reliant "), latex("(0;a)"), texte(" à "), latex("(h;b)"), texte(".")],
+      enonce: [texte("Le volume engendré par la rotation, autour de l'axe des abscisses, de la région sous la courbe de "), latex("f(x)=\\sqrt{x}"), texte(" sur "), latex("[0;4]"), texte(" vaut "), latex("8\\pi"), texte(".")],
       reponse: true,
-      justification: [texte("Cette droite a pour équation "), latex("y=\\tfrac{b-a}{h}x+a"), texte(" ; "), latex("\\pi\\int_0^h\\left(\\tfrac{b-a}{h}x+a\\right)^2 dx"), texte(" vaut, après développement et intégration, exactement "), latex("\\tfrac{\\pi h}{3}(a^2+ab+b^2)"), texte(".")],
+      justification: [latex("V=\\pi\\int_0^4\\left(\\sqrt{x}\\right)^2dx=\\pi\\int_0^4 x\\,dx=\\pi\\left[\\tfrac{x^2}{2}\\right]_0^4=8\\pi"), texte(" : le carré fait disparaître la racine (un paraboloïde).")],
     },
     {
       enonce: [texte("Le volume d'une sphère de rayon "), latex("r"), texte(" se retrouve par la méthode des disques appliquée à "), latex("f(x)=\\sqrt{r^2-x^2}"), texte(" sur "), latex("[-r;r]"), texte(", et vaut "), latex("\\dfrac{4\\pi r^3}{3}"), texte(".")],
@@ -971,9 +971,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("L'expression "), latex("1+\\tfrac{9}{4}x"), texte(" est seulement AFFINE en "), latex("x"), texte(", elle ne se factorise en aucun carré parfait — c'est justement le contraste central de ce cas par rapport à d'autres où un carré parfait apparaît.")],
     },
     {
-      enonce: [texte("Il existe des fonctions "), latex("f"), texte(" pour lesquelles l'expression "), latex("1+[f'(x)]^2"), texte(" se simplifie en un CARRÉ PARFAIT sous la racine, ce qui permet de retirer la racine carrée après simplification.")],
+      enonce: [texte("Une ligne polygonale dont les sommets sont sur l'arc est plus courte que l'arc : la somme des longueurs de ses segments approche "), latex("L"), texte(" par valeurs inférieures.")],
       reponse: true,
-      justification: [texte("C'est le cas, par exemple, pour "), latex("f(x)=\\tfrac{1}{2}\\left(\\tfrac{x^{n+1}}{n+1}+\\tfrac{x^{1-n}}{n-1}\\right)"), texte(", construite précisément pour que "), latex("1+[f'(x)]^2"), texte(" soit le carré exact de "), latex("\\tfrac{1}{2}(x^n+x^{-n})"), texte(".")],
+      justification: [texte("Chaque corde est le plus court chemin entre ses deux extrémités, donc plus courte que la portion d'arc correspondante. En multipliant les segments, la somme se rapproche de "), latex("L"), texte(" : c'est l'idée de la formule "), latex("L=\\int_a^b\\sqrt{1+[f'(x)]^2}\\,dx"), texte(".")],
     },
     {
       enonce: [texte("Il n'existe aucune fonction pour laquelle l'expression "), latex("1+[f'(x)]^2"), texte(" soit un carré parfait — la racine carrée reste donc toujours irréductible.")],
@@ -981,14 +981,14 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("C'est faux : certaines fonctions sont spécifiquement construites pour que cette expression soit un carré parfait, permettant de retirer la racine avant d'intégrer.")],
     },
     {
-      enonce: [texte("Lorsqu'un carré parfait apparaît sous la racine dans un calcul de longueur d'arc, il faut le simplifier explicitement (retirer la racine) avant de poursuivre — une réponse qui garde la racine, même mathématiquement équivalente, n'est pas acceptée comme réponse finale à cette étape.")],
+      enonce: [texte("La longueur de l'arc de "), latex("y=x^2"), texte(" entre "), latex("x=0"), texte(" et "), latex("x=1"), texte(" s'écrit "), latex("\\displaystyle\\int_{0}^{1}\\sqrt{1+4x^2}\\,dx"), texte(".")],
       reponse: true,
-      justification: [texte("C'est une étape où l'exercice teste précisément la reconnaissance du carré parfait : une réponse qui reste sous la forme "), latex("\\sqrt{1+[f'(x)]^2}"), texte(" n'a pas fait le travail de simplification demandé, même si elle est numériquement égale à la forme simplifiée.")],
+      justification: [latex("f'(x)=2x"), texte(", donc "), latex("[f'(x)]^2=4x^2"), texte(" : "), latex("L=\\int_0^1\\sqrt{1+4x^2}\\,dx"), texte(". On peut l'approcher numériquement, par exemple par la méthode des trapèzes ("), latex("L\\approx1{,}48"), texte(").")],
     },
     {
-      enonce: [texte("Une réponse qui reste sous la forme "), latex("\\sqrt{1+[f'(x)]^2}"), texte(" sans la simplifier est toujours acceptée, du moment qu'elle est numériquement égale à la forme simplifiée.")],
+      enonce: [texte("Pour "), latex("f(x)=x^2"), texte(", on a "), latex("1+[f'(x)]^2=1+2x^2"), texte(".")],
       reponse: false,
-      justification: [texte("Dans ce cas précis, la simplification STRUCTURELLE (retirer la racine du carré parfait) est explicitement exigée — l'équivalence numérique seule ne suffit pas.")],
+      justification: [latex("f'(x)=2x"), texte(", donc "), latex("[f'(x)]^2=(2x)^2=4x^2"), texte(" : "), latex("1+[f'(x)]^2=1+4x^2"), texte(". Le coefficient 2 se met aussi au carré.")],
     },
     {
       enonce: [texte("Pour calculer "), latex("L=\\displaystyle\\int_{a}^{b}\\sqrt{1+[f'(x)]^2}\\,dx"), texte(" lorsque l'expression sous la racine est affine (par exemple "), latex("1+\\tfrac{9}{4}x"), texte("), on peut intégrer par une substitution "), latex("u=1+\\tfrac{9}{4}x"), texte(" (reconnaissance de la forme "), latex("\\sqrt{u}"), texte(").")],
@@ -1001,9 +1001,9 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("Une substitution "), latex("u=1+\\tfrac{9}{4}x"), texte(" donne au contraire une primitive fermée exacte, "), latex("\\tfrac{8}{27}\\left(1+\\tfrac{9}{4}x\\right)^{3/2}"), texte(" — aucune approximation numérique n'est nécessaire.")],
     },
     {
-      enonce: [texte("Pour certaines longueurs d'arc faisant intervenir une fonction logarithmique ("), latex("f(x)=k\\ln(x)"), texte("), une substitution du type "), latex("t=\\sqrt{x^2+k^2}"), texte(" permet de réécrire l'intégrale de longueur d'arc en une fraction rationnelle en "), latex("t"), texte(".")],
+      enonce: [texte("Pour "), latex("f(x)=\\dfrac{x^2}{2}"), texte(", on a "), latex("1+[f'(x)]^2=1+x^2"), texte(".")],
       reponse: true,
-      justification: [texte("Cette substitution transforme "), latex("\\sqrt{1+[f'(x)]^2}"), texte(" en une expression rationnelle en "), latex("t"), texte(" ("), latex("t^2/(t^2-k^2)"), texte("), techniquement décomposable ensuite en éléments simples.")],
+      justification: [latex("f'(x)=x"), texte(", donc "), latex("[f'(x)]^2=x^2"), texte(" et "), latex("1+[f'(x)]^2=1+x^2"), texte(".")],
     },
     {
       enonce: [texte("Une substitution comme "), latex("t=\\sqrt{x^2+k^2}"), texte(" laisse toujours les bornes d'intégration INCHANGÉES : les nouvelles bornes en "), latex("t"), texte(" sont toujours égales aux anciennes bornes en "), latex("x"), texte(".")],
@@ -1197,14 +1197,14 @@ export const BANQUE_QUIZ_INTEGRALES_PRIMITIVES: Record<VarianteQuizIntegralesPri
       justification: [texte("C'est l'ordre logique : le volume utile est ce qui RESTE une fois la cavité retirée du volume total, donc total moins cavité, jamais l'inverse.")],
     },
     {
-      enonce: [texte("Un volume « par soustraction » s'obtient toujours en ADDITIONNANT les deux volumes concernés, jamais en les soustrayant, malgré son nom.")],
+      enonce: [texte("Si un mobile a pour vitesse "), latex("v(t)=t^2-4t+3"), texte(" sur "), latex("[0;3]"), texte(", la distance qu'il a parcourue est nulle.")],
       reponse: false,
-      justification: [texte("Le nom lui-même l'indique : on SOUSTRAIT le volume retiré du volume total ; les additionner donnerait un résultat sans rapport avec le volume utile réel.")],
+      justification: [texte("C'est son DÉPLACEMENT qui est nul : "), latex("\\int_0^3 v(t)\\,dt=0"), texte(". Mais "), latex("v"), texte(" change de signe en "), latex("t=1"), texte(" : il avance de "), latex("\\tfrac{4}{3}"), texte(" puis recule de "), latex("\\tfrac{4}{3}"), texte(", et la distance parcourue vaut "), latex("\\int_0^3|v(t)|\\,dt=\\tfrac{8}{3}"), texte(".")],
     },
     {
-      enonce: [texte("Un problème contextualisé de calcul intégral (cinématique, économie, géométrie...) réutilise exactement les mêmes techniques de primitivation que les exercices « abstraits » — seule l'interprétation du résultat change.")],
+      enonce: [texte("Entre deux instants "), latex("t_1"), texte(" et "), latex("t_2"), texte(", le déplacement d'un mobile vaut "), latex("\\displaystyle\\int_{t_1}^{t_2} v(t)\\,dt"), texte(" et la distance parcourue "), latex("\\displaystyle\\int_{t_1}^{t_2} |v(t)|\\,dt"), texte(".")],
       reponse: true,
-      justification: [texte("La physique ou le contexte économique ne changent rien aux techniques mathématiques employées (primitives usuelles, substitution...) — ils changent seulement le SENS donné au résultat obtenu.")],
+      justification: [texte("Les deux coïncident tant que "), latex("v\\geq0"), texte(". Dès que "), latex("v"), texte(" change de signe (le mobile recule), on découpe aux instants où "), latex("v"), texte(" s'annule, comme pour une aire.")],
     },
     {
       enonce: [texte("Dans un problème contextualisé, les techniques de primitivation utilisées sont spécifiques au contexte (cinématique, économie...) et différentes de celles utilisées dans un exercice de primitives « pur ».")],

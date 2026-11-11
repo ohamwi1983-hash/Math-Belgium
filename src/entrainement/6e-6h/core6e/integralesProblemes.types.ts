@@ -94,7 +94,9 @@ export interface ExerciceFamilleC_Problemes {
   a: number;
   b: number;
   /** Variante "2 travaux à comparer" (spec) — intervalle [a2;b2] de même longueur (b−a), position
-   * différente. `null` hors variante. */
+   * différente, placé AVANT ou APRÈS [a;b] au hasard (les deux issues « W est le plus grand » /
+   * « W₂ est le plus grand » sont équiprobables — audit 6e ch.4 : l'ancien tirage plaçait toujours
+   * [a2;b2] après, la réponse était fixe). `null` hors variante. */
   a2: number | null;
   b2: number | null;
 }
@@ -181,7 +183,15 @@ export interface ExerciceFamilleG_Soustraction {
    * DIRECTE de `diagnostiquerAEcran3` à l'écran 1 ; ce champ sert l'écran 2 (soustraction) sans
    * dupliquer la formule dans `moteur6e/verificationIntegralesProblemes.ts`. */
   volumeTotalAttendu: number;
-  /** Volume intérieur creux DONNÉ (cylindre), en unités cohérentes avec `volumeTotal`. */
+  /** Trou cylindrique coaxial percé sur TOUTE la longueur [a;b] du solide : rayon ρ = num/den
+   * (EXACT), strictement inférieur au minimum de |f| sur [a;b] (le cylindre tient toujours dans le
+   * solide — audit 6e ch.4 : l'ancien « volume creux » était une fraction aléatoire du volume total,
+   * géométriquement impossible dans 41 % des tirages). */
+  rayonTrouNum: number;
+  rayonTrouDen: number;
+  /** Longueur du trou (= b − a). */
+  longueurTrou: number;
+  /** Volume du trou = π·ρ²·longueur (exact à π près, stocké en `number`). */
   volumeInterieur: number;
 }
 

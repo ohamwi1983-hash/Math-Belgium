@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesProblemes } from "./generateurs6e/integralesProblemes";
 import type { IdVarianteIntegralesProblemes } from "./generateurs6e/integralesProblemes";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesProblemes, soumettreReponseEcran } from "./moteur6e/sessionIntegralesProblemes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesProblemes, soumettreReponseEcran, tentativesMaxEcran } from "./moteur6e/sessionIntegralesProblemes";
 import type { EtatSessionIntegralesProblemes, PhaseIntegralesProblemes } from "./moteur6e/typesIntegralesProblemes";
 import { diagnostiquerEcran } from "./moteur6e/verificationIntegralesProblemes";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
@@ -48,6 +48,10 @@ export function App6gen29() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché — fait partie de la `key` de l'écran pour remonter les champs
+   * (vides) à chaque nouvel exercice, même quand il démarre sur la même phase que le précédent
+   * (audit 6e ch.4 : la saisie persistait après « Générer »). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
    * `calculerRecapitulatifIntegralesProblemes` pour la réponse ATTENDUE. Garde sur le libellé : le
@@ -88,6 +92,7 @@ export function App6gen29() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -99,6 +104,7 @@ export function App6gen29() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionIntegralesProblemes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIntegralesProblemes)));
   }
 
@@ -131,12 +137,25 @@ export function App6gen29() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxEcran(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
     validation,
   };
+
+  /** Réponse lisible pour l'historique des puces : le LIBELLÉ d'une option de choix, jamais sa valeur
+   * interne (« W2 », « taux_moyen »). */
+  const champsCourants = champsEcran(exercice, phase);
+  function reponseLisible(valeurs: string[]): string {
+    return valeurs
+      .map((v, i) => {
+        const champ = champsCourants[i];
+        if (champ?.type !== "choix") return v;
+        return champ.options?.find((o) => o.valeur === v)?.label ?? v;
+      })
+      .join(" ; ");
+  }
 
   return (
     <div className="app-shell">
@@ -150,16 +169,16 @@ export function App6gen29() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifIntegralesProblemes(etat)} />
         <EtapeChampsCalculAires
-          key={phase}
+          key={`${numeroExercice}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
           consigneEcran={consigneEcran(exercice, phase)}
-          champs={champsEcran(exercice, phase)}
+          champs={champsCourants}
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), reponseLisible(valeurs))}
         />
       </main>
 

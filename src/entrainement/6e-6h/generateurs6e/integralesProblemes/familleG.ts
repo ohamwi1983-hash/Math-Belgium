@@ -19,20 +19,40 @@ function entierEntre(min: number, max: number): number {
 
 /** Reproduit localement (Couche A) la même formule que `volumeEntreBornes` de
  * `moteur6e/verificationVolumesRevolution.ts` (Couche B, jamais importée depuis Couche A —
- * CLAUDE.md) : nécessaire ici pour choisir un `volumeInterieur` STRICTEMENT plus petit que le
- * volume total, garanti par construction plutôt que vérifié a posteriori. */
+ * CLAUDE.md). */
 function volumeTotalFamilleA(ex: ReturnType<typeof construireFamilleVolumeA>): number {
   return Math.PI * (ex.primitiveDeveloppeReference(ex.b) - ex.primitiveDeveloppeReference(ex.a));
 }
 
+/** Minimum de |f| sur [a;b], par échantillonnage fin (f continue : polynôme du 1er degré, a·eˣ+b,
+ * a·cos x). */
+function minimumValeurAbsolue(f: (x: number) => number, a: number, b: number): number {
+  let min = Infinity;
+  for (let i = 0; i <= 400; i++) min = Math.min(min, Math.abs(f(a + ((b - a) * i) / 400)));
+  return min;
+}
+
+const RAYONS_TROU: { num: number; den: number }[] = [
+  { num: 1, den: 2 },
+  { num: 1, den: 1 },
+];
+
+/** Trou cylindrique coaxial de rayon ρ percé sur toute la longueur [a;b] : ρ < 0,8·min|f| garantit
+ * que le cylindre tient dans le solide (paroi d'épaisseur non nulle partout) — on retire les courbes
+ * trop proches de l'axe (min|f| < 0,625, qui ne laisse même pas passer ρ = 1/2). */
 export function construireFamilleG_Soustraction(): ExerciceFamilleG_Soustraction {
-  const volumeTotal = construireFamilleVolumeA();
-  const vTotal = volumeTotalFamilleA(volumeTotal);
-  // Volume intérieur creux DONNÉ — une fraction modeste (10% à 40%) du volume total, garanti
-  // strictement plus petit (jamais un volume de matière négatif).
-  const fraction = 0.1 + Math.random() * 0.3;
-  const volumeInterieur = vTotal * fraction;
-  return { famille: "G", sousType: "soustraction", volumeTotal, volumeTotalAttendu: vTotal, volumeInterieur };
+  for (;;) {
+    const volumeTotal = construireFamilleVolumeA();
+    const minF = minimumValeurAbsolue(volumeTotal.fReference, volumeTotal.a, volumeTotal.b);
+    const possibles = RAYONS_TROU.filter((r) => r.num / r.den < 0.8 * minF);
+    if (possibles.length === 0) continue;
+    const { num: rayonTrouNum, den: rayonTrouDen } = possibles[Math.floor(Math.random() * possibles.length)];
+    const longueurTrou = volumeTotal.b - volumeTotal.a;
+    const rho = rayonTrouNum / rayonTrouDen;
+    const volumeInterieur = Math.PI * rho * rho * longueurTrou;
+    const vTotal = volumeTotalFamilleA(volumeTotal);
+    return { famille: "G", sousType: "soustraction", volumeTotal, volumeTotalAttendu: vTotal, rayonTrouNum, rayonTrouDen, longueurTrou, volumeInterieur };
+  }
 }
 
 export function construireFamilleG_Archimede(): ExerciceFamilleG_Archimede {

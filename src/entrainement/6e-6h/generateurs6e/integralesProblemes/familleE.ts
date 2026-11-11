@@ -30,26 +30,39 @@ interface OptionsInterpretation {
   interpretationCorrecte: string;
 }
 
+function melanger<T>(liste: T[]): T[] {
+  const copie = [...liste];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+  }
+  return copie;
+}
+
+/** f(t) est un TAUX (unités/jour, €/jour) : sa valeur moyenne est le TAUX DE VARIATION MOYEN — le
+ * taux constant qui produirait la même variation totale —, jamais le niveau moyen du stock ou du
+ * cours (audit 6e ch.4, erreur d'interprétation corrigée : « niveau moyen » reste un distracteur).
+ * Ordre des options mélangé à chaque tirage (la bonne réponse n'a pas de position fixe). */
 function optionsPourContexte(contexte: ContexteFamilleE): OptionsInterpretation {
   if (contexte === "stock") {
     return {
-      interpretationCorrecte: "moyenne",
-      optionsInterpretation: [
-        { valeur: "moyenne", label: "Le niveau moyen du stock sur toute la période considérée." },
-        { valeur: "final", label: "Le niveau du stock à la toute fin de la période." },
-        { valeur: "maximum", label: "Le niveau maximum jamais atteint par le stock." },
+      interpretationCorrecte: "taux_moyen",
+      optionsInterpretation: melanger([
+        { valeur: "taux_moyen", label: "Le taux de variation moyen du stock (en unités par jour) : le taux constant qui donnerait la même variation totale sur la période." },
+        { valeur: "niveau_moyen", label: "Le niveau moyen du stock sur la période." },
         { valeur: "variation_totale", label: "La variation totale du stock sur la période." },
-      ],
+        { valeur: "final", label: "Le niveau du stock à la fin de la période." },
+      ]),
     };
   }
   return {
-    interpretationCorrecte: "moyenne",
-    optionsInterpretation: [
-      { valeur: "final", label: "Le cours de l'action à la fin de la période." },
-      { valeur: "moyenne", label: "Le cours moyen de l'action sur toute la période considérée." },
-      { valeur: "maximum", label: "Le cours le plus élevé atteint pendant la période." },
+    interpretationCorrecte: "taux_moyen",
+    optionsInterpretation: melanger([
+      { valeur: "taux_moyen", label: "Le taux de variation moyen du cours (en € par jour) : le taux constant qui donnerait la même variation totale sur la période." },
+      { valeur: "niveau_moyen", label: "Le cours moyen de l'action sur la période." },
       { valeur: "variation_totale", label: "La variation totale du cours sur la période." },
-    ],
+      { valeur: "final", label: "Le cours de l'action à la fin de la période." },
+    ]),
   };
 }
 

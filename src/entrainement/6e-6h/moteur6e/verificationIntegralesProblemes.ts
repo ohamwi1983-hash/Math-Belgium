@@ -14,7 +14,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
 import { diagnostiquerPrimitive } from "./verificationCalculPrimitives";
 import { diagnostiquerFinalIntegrale, diagnostiquerValeurMoyenne } from "./verificationIntegralesDefinies";
-import { diagnostiquerAEcran3, diagnostiquerDEcran1 as diagnostiquerVolumeDEcran1 } from "./verificationVolumesRevolution";
 import type { PhaseIntegralesProblemes } from "./typesIntegralesProblemes";
 
 /**
@@ -25,10 +24,9 @@ import type { PhaseIntegralesProblemes } from "./typesIntegralesProblemes";
  * **Réutilisation EXPLICITE de Couche B ↔ Couche B** (libre entre générateurs, CLAUDE.md) :
  * - `diagnostiquerFinalIntegrale`/`diagnostiquerValeurMoyenne` (`moteur6e/verificationIntegralesDefinies.ts`,
  *   6gen25) — famille E, appelées TELLES QUELLES sur `exercice.exerciceMoyenne`.
- * - `diagnostiquerAEcran3` (`moteur6e/verificationVolumesRevolution.ts`, 6gen27 famille A) —
- *   famille G sous-type "soustraction", écran 1 (volume total).
- * - `diagnostiquerDEcran1` (même fichier, 6gen27 famille D) — famille G sous-type "archimede",
- *   écran 1 (volume du paraboloïde).
+ * - Famille G (volumes) : comparaison directe aux volumes précalculés, avec une tolérance RELATIVE
+ *   (`toleranceVolume`) — plus `diagnostiquerAEcran3`/`diagnostiquerDEcran1` de 6gen27, dont la
+ *   tolérance absolue de 0,01 refusait π ≈ 3,14 sur de grands volumes (audit 6e ch.4).
  * - `diagnostiquerPrimitive` (`moteur6e/verificationCalculPrimitives.ts`, 6gen23) — famille G
  *   sous-type "calotte", écran 2 (primitive de l'intégrande développé).
  *
@@ -38,7 +36,12 @@ import type { PhaseIntegralesProblemes } from "./typesIntegralesProblemes";
  */
 
 const TOLERANCE = 0.01;
-const TOLERANCE_LACHE = 0.05; // familles F (résolution numérique) — voir en-tête `familleF.ts`.
+
+/** Volumes (famille G) : un élève qui calcule avec π ≈ 3,14 ou arrondit au centième doit être
+ * accepté — tolérance RELATIVE de 0,1 % (jamais moins que 0,01). */
+function toleranceVolume(reference: number): number {
+  return Math.max(TOLERANCE, 1e-3 * Math.abs(reference));
+}
 
 function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
@@ -98,10 +101,12 @@ export function diagnostiquerCEcran2(exercice: ExerciceFamilleC_Problemes, valeu
 export function diagnostiquerCEcran3(exercice: ExerciceFamilleC_Problemes, valeurs: string[]): StatutVerification {
   return diagnostiquerValeur(valeurs[0], travailRef(exercice.k, exercice.a2 as number, exercice.b2 as number), TOLERANCE);
 }
-/** Écran 4 (variante uniquement) — QCM : les deux travaux sont-ils égaux ? (jamais, F(x)=kx non
- * constante) — comparaison stricte, jamais de `parse_error` (choix, pas de saisie libre). */
-export function diagnostiquerCEcran4(_exercice: ExerciceFamilleC_Problemes, valeurs: string[]): StatutVerification {
-  return valeurs[0] === "different" ? "correct" : "not_equivalent";
+/** Écran 4 (variante uniquement) — QCM : quel travail est le plus grand ? (jamais égaux, F(x)=kx
+ * strictement croissante ; [a2;b2] placé avant OU après [a;b], les deux issues sont possibles). */
+export function diagnostiquerCEcran4(exercice: ExerciceFamilleC_Problemes, valeurs: string[]): StatutVerification {
+  const w1 = travailRef(exercice.k, exercice.a, exercice.b);
+  const w2 = travailRef(exercice.k, exercice.a2 as number, exercice.b2 as number);
+  return valeurs[0] === (w2 > w1 ? "W2" : "W") ? "correct" : "not_equivalent";
 }
 
 // ============================================================================
@@ -142,15 +147,17 @@ export function diagnostiquerEEcran3(exercice: ExerciceFamilleE_Problemes, valeu
 // Famille F — Surplus consommateur.
 // ============================================================================
 
-/** Écran 1 — valeurs=[Q,P], point d'équilibre résolu numériquement (tolérance ÉLARGIE — voir
- * en-tête de fichier et `familleF.ts`). */
+/** Écran 1 — valeurs=[Q,P], point d'équilibre résolu numériquement, demandé « au centième près »
+ * (la consigne le dit) : tolérance 0,01. */
 export function diagnostiquerFEcran1(exercice: ExerciceFamilleF_Problemes, valeurs: string[]): StatutVerification {
-  const sQ = diagnostiquerValeur(valeurs[0], exercice.Q, TOLERANCE_LACHE);
-  const sP = diagnostiquerValeur(valeurs[1], exercice.P, TOLERANCE_LACHE);
+  const sQ = diagnostiquerValeur(valeurs[0], exercice.Q, TOLERANCE);
+  const sP = diagnostiquerValeur(valeurs[1], exercice.P, TOLERANCE);
   return pireStatut(sQ, sP);
 }
+/** Écran 2 — surplus demandé au dixième, calculé avec Q et P arrondis au centième (erreur ≤ 0,005·Q
+ * sur S, d'où la marge proportionnelle à Q). */
 export function diagnostiquerFEcran2(exercice: ExerciceFamilleF_Problemes, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.surplusAttendu, TOLERANCE_LACHE);
+  return diagnostiquerValeur(valeurs[0], exercice.surplusAttendu, 0.05 + 0.006 * exercice.Q);
 }
 
 // ============================================================================
@@ -158,18 +165,20 @@ export function diagnostiquerFEcran2(exercice: ExerciceFamilleF_Problemes, valeu
 // ============================================================================
 
 export function diagnostiquerGSoustractionEcran1(exercice: ExerciceFamilleG_Soustraction, valeurs: string[]): StatutVerification {
-  return diagnostiquerAEcran3(exercice.volumeTotal, valeurs);
+  return diagnostiquerValeur(valeurs[0], exercice.volumeTotalAttendu, toleranceVolume(exercice.volumeTotalAttendu));
 }
 export function diagnostiquerGSoustractionEcran2(exercice: ExerciceFamilleG_Soustraction, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.volumeTotalAttendu - exercice.volumeInterieur, TOLERANCE);
+  const reference = exercice.volumeTotalAttendu - exercice.volumeInterieur;
+  return diagnostiquerValeur(valeurs[0], reference, toleranceVolume(reference));
 }
 
 export function diagnostiquerGArchimedeEcran1(exercice: ExerciceFamilleG_Archimede, valeurs: string[]): StatutVerification {
-  return diagnostiquerVolumeDEcran1(exercice.paraboloide, valeurs);
+  const volume = exercice.paraboloide.volumeParaboloide;
+  return diagnostiquerValeur(valeurs[0], volume, toleranceVolume(volume));
 }
 export function diagnostiquerGArchimedeEcran2(exercice: ExerciceFamilleG_Archimede, valeurs: string[]): StatutVerification {
   const volumeDeplace = (4 / 3) * Math.PI * exercice.r * exercice.r * exercice.r;
-  return diagnostiquerValeur(valeurs[0], volumeDeplace, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], volumeDeplace, toleranceVolume(volumeDeplace));
 }
 export function diagnostiquerGArchimedeEcran3(exercice: ExerciceFamilleG_Archimede, valeurs: string[]): StatutVerification {
   const volumeDeplace = (4 / 3) * Math.PI * exercice.r * exercice.r * exercice.r;
@@ -189,7 +198,7 @@ export function diagnostiquerGCalotteEcran2(exercice: ExerciceFamilleG_Calotte, 
 export function diagnostiquerGCalotteEcran3(exercice: ExerciceFamilleG_Calotte, valeurs: string[]): StatutVerification {
   const F = exercice.primitiveReference;
   const v = Math.PI * (F(exercice.hDemande) - F(0));
-  return diagnostiquerValeur(valeurs[0], v, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], v, toleranceVolume(v));
 }
 
 // ============================================================================

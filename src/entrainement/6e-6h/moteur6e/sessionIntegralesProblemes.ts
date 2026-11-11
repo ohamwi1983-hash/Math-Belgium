@@ -40,8 +40,17 @@ export function demarrerSessionIntegralesProblemes(reglages: ReglagesSession6e, 
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écrans de CHOIX FERMÉ (comparaison des travaux, interprétation de la valeur moyenne) : une seule
+ * tentative — sinon gagnables par élimination (audit 6e ch.4, point 5). Les autres écrans gardent le
+ * réglage de session. */
+const PHASES_CHOIX: PhaseIntegralesProblemes[] = ["cEcran4", "eEcran3"];
+
+export function tentativesMaxEcran(etat: EtatSessionIntegralesProblemes): number {
+  return PHASES_CHOIX.includes(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionIntegralesProblemes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcran(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionIntegralesProblemes): EtatSessionIntegralesProblemes {
