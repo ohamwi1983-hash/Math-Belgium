@@ -633,15 +633,21 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'application directe', enonce: "Détermine les coordonnées du sommet de la parabole d'équation $f(x)=2x^2-8x+3$ à l'aide de la formule $x_S=-\\dfrac{b}{2a}$." },
     { cle: 'cas a > 0', enonce: "Détermine l'ensemble image de la fonction $f(x)=3(x+1)^2-3$, en justifiant à l'aide du sommet de sa parabole et du signe de $a$." },
     { cle: 'zéros par factorisation', enonce: "Détermine les zéros de la fonction $f(x)=(x-1)(x-4)$ sans développer." },
+    { cle: 'lire a, b, c sur un graphique', enonce: "Une parabole est ouverte vers le bas, coupe l'axe des y au point d'ordonnée 3, et son sommet a pour abscisse −1. Détermine le signe des coefficients a, b et c de son équation $f(x) = ax^2 + bx + c$." },
   ],
   transformer: [
     { cle: 'translations combinées', enonce: "Décris les translations qui transforment le graphe de $y=x^2$ en celui de $y=(x-3)^2+2$, puis calcule l'ordonnée du point d'abscisse 5 de ce graphe." },
     { cle: 'a = 1', enonce: "Écris la fonction $f(x)=x^2-6x+5$ sous forme canonique en complétant le carré, puis donne les coordonnées du sommet de sa parabole." },
     { cle: 'a ≠ 1', enonce: "Écris la fonction $f(x)=2x^2-8x+3$ sous forme canonique en complétant le carré (mets d'abord $a$ en évidence sur les termes en $x^2$ et en $x$), puis donne les coordonnées du sommet de sa parabole." },
+    { cle: 'de la forme canonique aux deux autres', enonce: "Écris la fonction $f(x) = 2(x-3)^2 - 8$ sous forme développée, puis sous forme factorisée." },
+    { cle: 'sommet et un point', enonce: "Une parabole a pour sommet $S(2\\,;\\,-1)$ et passe par le point $(0\\,;\\,3)$. Détermine son équation, sous forme canonique puis développée." },
+    { cle: 'deux zéros et un point', enonce: "Une parabole coupe l'axe des x en −1 et en 3, et passe par le point $(1\\,;\\,-8)$. Détermine son équation." },
   ],
   utiliser: [
     { cle: 'enclos', enonce: "Un fermier dispose de 40 m de clôture pour fermer un enclos rectangulaire adossé à un mur (le mur forme un des côtés et n'a pas besoin de clôture). Exprime l'aire $A(x)$ de l'enclos en fonction de la largeur $x$ (en mètres) des deux côtés perpendiculaires au mur, puis détermine le domaine de $x$ imposé par le contexte." },
     { cle: 'le sommet tombe dans le domaine', enonce: "L'aire d'un enclos vaut $A(x)=-2x^2+40x$ (en m²), avec $x \\in\\ ]0\\,;\\,20[$. Détermine la largeur $x$ qui rend l'aire maximale, puis calcule cette aire maximale." },
+    { cle: 'cas 2 — le sommet tombe hors du domaine', enonce: "L'aire d'un enclos vaut $A(x) = -2x^2 + 40x$ (en m²), mais une contrainte impose $x \\in [12\\,;\\,20[$. Détermine l'aire maximale réellement atteignable, en justifiant." },
+    { cle: 'trajectoire — hauteur maximale', enonce: "Un ballon est lancé depuis 25 m de haut ; sa hauteur (en m) après t secondes vaut $h(t) = -5t^2 + 20t + 25$, pour $t \\in [0\\,;\\,5]$. Détermine la hauteur maximale atteinte et l'instant où elle est atteinte." },
   ],
   },
 

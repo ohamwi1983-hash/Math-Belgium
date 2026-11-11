@@ -285,15 +285,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'historique',
-          titre: 'Le savant de Bagdad qui complétait de vrais carrés',
+          titre: 'Un carré, dix racines, trente-neuf : la démonstration en dessin',
           text:
-            'Vers 820, à Bagdad, **Muhammad ibn Mūsā al-Khwārizmī** écrit un traité dont le titre ' +
-            'contient le mot al-jabr — qui a donné notre mot « algèbre ». Il y résout des problèmes ' +
-            'comme « un carré et dix racines égalent trente-neuf » ($x^2 + 10x = 39$) sans aucune ' +
-            'lettre, en complétant un **vrai carré dessiné** : il accole au carré de côté x deux ' +
-            'rectangles, ajoute le petit carré manquant (25), obtient un grand carré d\'aire 64, donc ' +
-            'de côté 8, et conclut x = 3. C\'est exactement la démonstration du discriminant, faite ' +
-            'avec des figures. Son nom, latinisé, a donné le mot « algorithme ».',
+            'Tu as rencontré **al-Khwārizmī** au chapitre 1. Voici comment il résolvait, vers 820, ' +
+            '« un carré et dix racines égalent trente-neuf » ($x^2 + 10x = 39$), sans aucune lettre : ' +
+            'il dessine un carré de côté x, lui accole deux rectangles de largeur 5, puis ajoute le ' +
+            'petit carré manquant, d\'aire 25. Le grand carré obtenu a pour aire 39 + 25 = 64, donc ' +
+            'pour côté 8, et x = 8 − 5 = 3. Remplace 10 par $\\dfrac{b}{a}$ et 39 par $-\\dfrac{c}{a}$ : ' +
+            'c\'est exactement la démonstration du discriminant ci-dessus, faite avec des figures. ' +
+            'La solution négative (−13), elle, n\'avait aucun sens pour lui : une longueur ne peut ' +
+            'pas être négative.',
         },
         {
           kind: 'atelier',

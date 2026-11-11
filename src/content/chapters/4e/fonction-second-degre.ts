@@ -204,6 +204,53 @@ export const fonctionSecondDegre: ChapterContent = {
             'b et c n\'ont **aucune influence** sur le sens d\'ouverture ! Seul le signe de a ' +
             'compte. Un grand c décale juste la courbe — il ne la retourne jamais.',
         },
+        { kind: 'subheading', text: 'Lire les signes de a, b et c sur un graphique' },
+        {
+          kind: 'methode',
+          label: 'Méthode — trois lectures, dans cet ordre',
+          items: [
+            '**a** : la parabole est ouverte vers le haut ? $a > 0$. Vers le bas ? $a < 0$.',
+            '**c** : c\'est l\'**ordonnée à l\'origine**, puisque $f(0) = c$. Regarde où la courbe coupe ' +
+              'l\'axe des y : au-dessus de l\'origine, $c > 0$ ; en dessous, $c < 0$.',
+            '**b** : utilise $x_S = -\\dfrac{b}{2a}$. Si l\'axe de symétrie est à **gauche** de l\'axe des ' +
+              'y ($x_S < 0$), a et b ont le **même** signe ; à droite, des signes **opposés** ; sur l\'axe ' +
+              'des y, $b = 0$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'lire a, b, c sur un graphique',
+          formula: 'Une parabole est ouverte vers le bas, coupe l\'axe des y en 3, et son sommet a pour abscisse −1. Donne le signe de a, b et c.',
+          steps: [
+            { tag: 'ouverture', text: 'ouverte vers le bas : $a < 0$' },
+            { tag: 'ordonnée à l\'origine', text: '$f(0) = c = 3$ : $c > 0$' },
+            { tag: 'axe à gauche', text: '$x_S = -1 < 0$ : a et b ont le même signe, donc $b < 0$ (en effet $-\\dfrac{b}{2a} = -1 \\iff b = 2a$)' },
+          ],
+          result: { tag: 'résultat', text: '$a < 0$, $b < 0$, $c > 0$ — par exemple $f(x) = -x^2 - 2x + 3$' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => -x * x - 2 * x + 3, tone: 'accent', xMin: -3.6, xMax: 1.6 }],
+            xMin: -4,
+            xMax: 2.5,
+            xTicks: [-3, -2, -1, 1, 2],
+            yTicks: [-2, 2, 4],
+            fixedYRange: { min: -3, max: 5 },
+            axisOfSymmetry: { x: -1, label: 'x = −1' },
+            points: [
+              { x: 0, y: 3, label: '(0 ; 3)', tone: 'good', labelPos: 'right' },
+              { x: -1, y: 4, label: 'S', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'ouverte vers le bas (a < 0), coupe Oy en 3 (c > 0), axe à gauche de Oy (b de même signe que a)',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Le signe de b ne se lit **jamais seul** : il dépend aussi de a. Un axe à gauche donne ' +
+            '$b > 0$ si $a > 0$, mais $b < 0$ si $a < 0$.',
+        },
         { kind: 'subheading', text: "Reconnaître une fonction à partir d'un tableau de valeurs" },
         {
           kind: 'para',
@@ -236,6 +283,15 @@ export const fonctionSecondDegre: ChapterContent = {
             },
           ],
         },
+        {
+          kind: 'rappel',
+          label: 'Retrouver a, b et c à partir du tableau (x de 1 en 1)',
+          items: [
+            'Avec un pas de 1, la différence seconde constante vaut **2a** : ici $2 = 2a$, donc $a = 1$. ' +
+              '(En effet, $f(x+1) - f(x) = 2ax + a + b$ augmente de $2a$ quand x augmente de 1.)',
+            '$c = f(0) = 1$, puis $f(1) = a + b + c = 2$ donne $b = 0$ : $f(x) = x^2 + 1$.',
+          ],
+        },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
         {
           kind: 'intuition',
@@ -244,7 +300,8 @@ export const fonctionSecondDegre: ChapterContent = {
             "Un ballon lancé en l'air, un jet d'eau, une balle de basket qui file vers le " +
             'panier : leur trajectoire dessine cette même forme, avec un point culminant, le ' +
             "plus haut atteint. Ce point, c'est exactement le **sommet** de la parabole — un " +
-            'vrai ballon lancé revient d\'ailleurs plus loin dans ce chapitre.',
+            'vrai ballon lancé revient d\'ailleurs à la fin de ce chapitre (section 3), puis au ' +
+            'chapitre 2.',
         },
         {
           kind: 'para',
@@ -300,7 +357,7 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            '$g(x)=ax^2+bx=0$ se résout par mise en évidence de x (chapitre 2) : ' +
+            '$g(x)=ax^2+bx=0$ se résout par mise en évidence de x (vue en 3e) : ' +
             '$x(ax+b)=0 \\iff x_1 = 0$ ou $x_2 = -\\dfrac{b}{a}$ — deux racines, donc deux points ' +
             'de même hauteur (0) ! Exactement la situation de l\'astuce du dessus. Leur milieu ' +
             'donne $x_S$ :',
@@ -679,8 +736,34 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'exemple',
           badge: 'translations combinées',
           formula: '$y = (x-3)^2+2$ (TH de 3, TV de 2)',
-          steps: [],
+          steps: [
+            { tag: 'sommet', text: '$S(3\\,;\\,2)$ : la TH déplace le sommet de 3 vers la droite, la TV de 2 vers le haut' },
+            { tag: 'axe de symétrie', text: '$x = 3$' },
+          ],
           result: { tag: 'image de x = 5', text: '$(5-3)^2+2 = 4+2 = 6$' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x * x, tone: 'faint', xMin: -2.6, xMax: 2.6 },
+              { fn: (x) => (x - 3) * (x - 3) + 2, tone: 'accent', xMin: 0.8, xMax: 5.2 },
+            ],
+            xMin: -3,
+            xMax: 7,
+            xTicks: [-3, -2, -1, 1, 2, 4, 5, 6],
+            yTicks: [-1, 1, 3, 4, 5, 6],
+            points: [
+              { x: 0, y: 0, label: 'S(0 ; 0)', tone: 'good' },
+              { x: 3, y: 2, label: 'S(3 ; 2)', tone: 'accent' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'le sommet passe de (0 ; 0) à (3 ; 2) : la courbe est translatée, sans changer de ' +
+              'forme (a=1 ici)',
+          },
         },
         { kind: 'subheading', text: 'Étirement, compression et symétrie' },
         {
@@ -710,21 +793,25 @@ export const fonctionSecondDegre: ChapterContent = {
             kind: 'curvePlot',
             curves: [
               { fn: (x) => x * x, tone: 'faint', xMin: -2.6, xMax: 2.6 },
-              { fn: (x) => (x - 3) * (x - 3) + 2, tone: 'accent', xMin: 0.8, xMax: 5.2 },
+              { fn: (x) => 2 * x * x, tone: 'accent', xMin: -1.8, xMax: 1.8 },
+              { fn: (x) => 0.5 * x * x, tone: 'good', xMin: -3, xMax: 3 },
+              { fn: (x) => -x * x, tone: 'bad', xMin: -2.2, xMax: 2.2 },
             ],
-            xMin: -3,
-            xMax: 7,
-            xTicks: [-3, -2, -1, 1, 2, 4, 5, 6],
-            yTicks: [-1, 1, 3, 4, 5, 6],
+            xMin: -3.2,
+            xMax: 3.2,
+            xTicks: [-2, -1, 1, 2],
+            yTicks: [-4, -2, 2, 4, 6],
+            fixedYRange: { min: -5, max: 6.5 },
             points: [
-              { x: 0, y: 0, label: 'S(0 ; 0)', tone: 'good' },
-              { x: 3, y: 2, label: 'S(3 ; 2)', tone: 'accent' },
+              { x: 1.6, y: 5.12, label: 'y = 2x²', tone: 'accent', labelPos: 'left' },
+              { x: 3, y: 4.5, label: 'y = 0,5x²', tone: 'good', labelPos: 'below' },
+              { x: 2, y: -4, label: 'y = −x²', tone: 'bad', labelPos: 'right' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'le sommet passe de (0 ; 0) à (3 ; 2) : la courbe est translatée, sans changer de ' +
-              'forme (a=1 ici)',
+              'Même sommet (0 ; 0), même axe : y = 2x² est étirée (EV), y = 0,5x² comprimée (CV), ' +
+              'y = −x² retournée (SOX) — y = x², en gris, sert de référence.',
           },
         },
         {
@@ -732,8 +819,9 @@ export const fonctionSecondDegre: ChapterContent = {
           tag: 'transformations-widget',
           label: 'Manipule toi-même — fais varier TH, EV/CV et TV',
           caption:
-            'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
-            'à l’origine directement sur le graphe, en direct.',
+            'Règle l\'étirement (a négatif retourne la courbe), puis les translations horizontale et ' +
+            'verticale : la parabole se transforme depuis y = x², et la forme canonique se lit en ' +
+            'direct. Coche AS, S ou OAO pour afficher l\'axe, le sommet et l\'ordonnée à l\'origine.',
         },
         {
           kind: 'entrainement',
@@ -819,6 +907,15 @@ export const fonctionSecondDegre: ChapterContent = {
           result: { tag: 'sommet', text: '$S(3\\,;\\,-4)$' },
         },
         {
+          kind: 'atelier',
+          tag: 'completer-le-carre-widget',
+          label: 'Manipule toi-même — pourquoi « compléter le carré » ?',
+          caption:
+            'La méthode porte bien son nom : x² + bx se dessine comme un carré et deux rectangles, et ' +
+            'il manque un petit carré (b/2)² pour obtenir un grand carré de côté x + b/2. C\'est ' +
+            'exactement le « + 9 − 9 » de l\'exemple ci-dessus (b = 6, (6/2)² = 9).',
+        },
+        {
           kind: 'para',
           text:
             'a ≠ 1 ? Alors il faut d\'abord le **mettre en évidence**, sur les deux premiers ' +
@@ -842,6 +939,13 @@ export const fonctionSecondDegre: ChapterContent = {
             'sans multiplier par a.',
         },
         {
+          kind: 'attention',
+          label: 'Attention — lire le sommet sur la forme canonique',
+          text:
+            'Dans $f(x) = 3(x+2)^2 - 1$, le sommet est $S(-2\\,;\\,-1)$, et non $(2\\,;\\,-1)$ : écris ' +
+            '$x + 2 = x - (-2)$. C\'est le même piège du signe que pour la translation horizontale.',
+        },
+        {
           kind: 'historique',
           titre: "Le mathématicien qui a donné son nom à l'algèbre",
           text:
@@ -862,6 +966,48 @@ export const fonctionSecondDegre: ChapterContent = {
               'résolution géométrique d\'équations du second degré. Bibliothèque bodléienne, ' +
               'domaine public.',
           },
+        },
+        { kind: 'subheading', text: 'Trois écritures, trois informations' },
+        {
+          kind: 'featureTable',
+          caption: 'Une même parabole, trois écritures',
+          headers: ['Écriture', 'Forme', 'Ce qu\'elle montre directement'],
+          rows: [
+            ['développée', 'ax² + bx + c', 'l\'ordonnée à l\'origine c, le point (0 ; c)'],
+            ['canonique', 'a(x − x_S)² + y_S', 'le sommet S(x_S ; y_S) et l\'axe x = x_S'],
+            ['factorisée', 'a(x − x₁)(x − x₂)', 'les zéros x₁ et x₂ (seulement s\'il y en a)'],
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'de la forme canonique aux deux autres',
+          formula: 'Écris $f(x) = 2(x-3)^2 - 8$ sous forme développée, puis sous forme factorisée.',
+          steps: [
+            { tag: 'développer', text: '$2(x^2 - 6x + 9) - 8 = 2x^2 - 12x + 10$' },
+            { tag: 'zéros, depuis la forme canonique', text: '$2(x-3)^2 = 8 \\iff (x-3)^2 = 4 \\iff x - 3 = \\pm 2 \\iff x = 1$ ou $x = 5$' },
+          ],
+          result: { tag: 'résultat', text: '$f(x) = 2x^2 - 12x + 10 = 2(x-1)(x-5)$' },
+        },
+        { kind: 'subheading', text: 'Retrouver l\'équation d\'une parabole' },
+        {
+          kind: 'exemple',
+          badge: 'sommet et un point',
+          formula: 'Une parabole a pour sommet $S(2\\,;\\,-1)$ et passe par le point $(0\\,;\\,3)$. Détermine son équation.',
+          steps: [
+            { tag: 'forme canonique avec le sommet', text: '$f(x) = a(x-2)^2 - 1$' },
+            { tag: 'le point donne a', text: '$f(0) = 4a - 1 = 3 \\iff a = 1$' },
+          ],
+          result: { tag: 'résultat', text: '$f(x) = (x-2)^2 - 1 = x^2 - 4x + 3$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux zéros et un point',
+          formula: 'Une parabole coupe l\'axe des x en −1 et en 3, et passe par le point $(1\\,;\\,-8)$. Détermine son équation.',
+          steps: [
+            { tag: 'forme factorisée avec les zéros', text: '$f(x) = a(x+1)(x-3)$' },
+            { tag: 'le point donne a', text: '$f(1) = a \\cdot 2 \\cdot (-2) = -4a = -8 \\iff a = 2$' },
+          ],
+          result: { tag: 'résultat', text: '$f(x) = 2(x+1)(x-3) = 2x^2 - 4x - 6$' },
         },
         {
           kind: 'entrainement',
@@ -964,15 +1110,28 @@ export const fonctionSecondDegre: ChapterContent = {
           result: { tag: 'aire maximale', text: '$A(10) = -200+400 = 200$ m²' },
         },
         {
-          kind: 'astuce',
-          label: 'Astuce — quand le sommet tombe hors du domaine',
-          text:
-            'Imagine une contrainte en plus : $x \\in [12\\,;\\,20[$ (un massif de fleurs ' +
-            'empêche x de descendre sous 12). Le sommet théorique $x=10$ n\'appartient plus au ' +
-            'domaine restreint ! Sur $[12\\,;\\,20[$, la fonction est entièrement ' +
-            '**décroissante** — le sommet est déjà passé. L\'aire maximale est donc à la borne ' +
-            '**gauche** : $A(12) = -288+480 = 192$ m² — moins que les 200 m² d\'avant. Toujours ' +
-            'moins, jamais plus : on s\'est éloigné du sommet théorique.',
+          kind: 'exemple',
+          badge: 'cas 2 — le sommet tombe hors du domaine',
+          formula:
+            'Même enclos, avec une contrainte en plus : un massif de fleurs impose $x \\ge 12$, donc ' +
+            '$x \\in [12\\,;\\,20[$. Quelle est l\'aire maximale ?',
+          steps: [
+            { tag: 'le sommet x = 10 est hors du domaine', text: 'sur $[12\\,;\\,20[$, la fonction est entièrement décroissante : le sommet est déjà passé' },
+            { tag: 'optimum à la borne gauche', text: '$A(12) = -288 + 480 = 192$' },
+          ],
+          result: { tag: 'aire maximale', text: '192 m², atteinte en $x = 12$ — moins que les 200 m² du sommet, jamais plus.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'trajectoire — hauteur maximale',
+          formula:
+            'Un ballon est lancé depuis 25 m de haut ; sa hauteur (en m) après t secondes vaut ' +
+            '$h(t) = -5t^2 + 20t + 25$, pour $t \\in [0\\,;\\,5]$. Quelle hauteur maximale atteint-il, et quand ?',
+          steps: [
+            { tag: 'abscisse du sommet', text: '$t_S = -\\dfrac{20}{2\\cdot(-5)} = 2$, qui appartient au domaine' },
+            { tag: 'ordonnée du sommet', text: '$h(2) = -20 + 40 + 25 = 45$' },
+          ],
+          result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : ce sera au chapitre 2.' },
         },
         {
           kind: 'application',
@@ -1077,6 +1236,8 @@ export const fonctionSecondDegre: ChapterContent = {
         title: 'Coefficients et allure',
         formulas: [
           { text: '$a>0$ → minimum — $a<0$ → maximum' },
+          { text: '$c = f(0)$ : ordonnée à l\'origine' },
+          { text: 'axe à gauche de Oy ⟺ a et b de même signe' },
           { text: '$|a|$ grand → parabole resserrée, $|a|$ proche de 0 → aplatie' },
         ],
       },
@@ -1107,6 +1268,7 @@ export const fonctionSecondDegre: ChapterContent = {
         title: 'Forme canonique et transformations',
         formulas: [
           { text: '$f(x)=a(x-x_S)^2+y_S$' },
+          { text: '$ax^2+bx+c$ (lit c) — $a(x-x_S)^2+y_S$ (lit S) — $a(x-x_1)(x-x_2)$ (lit les zéros)', condition: 'trois écritures' },
           { text: '$y=(x-p)^2+q$ — translation horizontale $p$, verticale $q$' },
           { text: '$|a|>1$ étire, $0<|a|<1$ comprime ; $a<0$ retourne la courbe (SOX)' },
         ],
@@ -1134,6 +1296,8 @@ export const fonctionSecondDegre: ChapterContent = {
         'l\'extérieur : signe de a.',
       '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$. On l\'obtient en complétant le carré. Si ' +
         '$a \\neq 1$, on met a en évidence avant.',
+      '**Trois écritures** — développée (lit c), canonique (lit le sommet), factorisée (lit les ' +
+        'zéros). Pour retrouver une équation : sommet + un point, ou zéros + un point, donnent a.',
       '**En contexte** — modélise (variable → grandeur → domaine de validité). Puis vérifie si ' +
         'le sommet théorique tombe dans ce domaine, avant de conclure à un optimum réel.',
     ],
@@ -1141,6 +1305,8 @@ export const fonctionSecondDegre: ChapterContent = {
       items: [
         "Ai-je développé l'expression, avant de dire que c'est bien une fonction du second degré ?",
         'Ai-je vérifié le signe de a, avant de parler de minimum ou de maximum ?',
+        'Pour lire le signe de b sur un graphique, ai-je tenu compte du signe de a ?',
+        'Dans a(x + 2)² − 1, ai-je bien lu x_S = −2, et non 2 ?',
         'En complétant le carré, ai-je bien redistribué a sur le terme sorti de la parenthèse ?',
         'En contexte, ai-je vérifié chaque solution avec le domaine de validité réel — pas ' +
           'seulement le domaine mathématique ?',
