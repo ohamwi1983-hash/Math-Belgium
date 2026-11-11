@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, construireQuellePrimitive } from "./generateurs6e/quellePrimitive";
 import type { IdVarianteQuellePrimitive } from "./generateurs6e/quellePrimitive";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionQuellePrimitive, soumettreReponseEcran } from "./moteur6e/sessionQuellePrimitive";
@@ -35,6 +36,16 @@ function nouvelleSession(): EtatSessionQuellePrimitive {
   return demarrerSessionQuellePrimitive(REGLAGES_DEMO, construireQuellePrimitive);
 }
 
+/** Premier exercice : celui du QR code d'une feuille (`?code=`), tiré avec les MÊMES fonctions que
+ * l'adaptateur d'export — sinon un exercice libre. */
+function sessionInitiale(): EtatSessionQuellePrimitive {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionQuellePrimitive(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, construireQuellePrimitive, (id) => construireAvecVarianteId(id as IdVarianteQuellePrimitive)),
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -45,7 +56,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen24() {
-  const [etat, setEtat] = useState<EtatSessionQuellePrimitive>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionQuellePrimitive>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

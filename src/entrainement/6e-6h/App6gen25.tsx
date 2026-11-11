@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import type { IdVarianteIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesDefinies, soumettreReponseEcran } from "./moteur6e/sessionIntegralesDefinies";
@@ -35,6 +36,16 @@ function nouvelleSession(): EtatSessionIntegralesDefinies {
   return demarrerSessionIntegralesDefinies(REGLAGES_DEMO, genererExerciceIntegralesDefinies);
 }
 
+/** Premier exercice : celui du QR code d'une feuille (`?code=`), tiré avec les MÊMES fonctions que
+ * l'adaptateur d'export — sinon un exercice libre. */
+function sessionInitiale(): EtatSessionIntegralesDefinies {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionIntegralesDefinies(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceIntegralesDefinies, (id) => construireAvecVarianteId(id as IdVarianteIntegralesDefinies)),
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -45,7 +56,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen25() {
-  const [etat, setEtat] = useState<EtatSessionIntegralesDefinies>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionIntegralesDefinies>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

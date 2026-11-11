@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculPrimitives } from "./generateurs6e/calculPrimitives";
 import type { IdVarianteCalculPrimitives } from "./generateurs6e/calculPrimitives";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculPrimitives, soumettreReponseEcran } from "./moteur6e/sessionCalculPrimitives";
@@ -33,6 +34,16 @@ function nouvelleSession(): EtatSessionCalculPrimitives {
   return demarrerSessionCalculPrimitives(REGLAGES_DEMO, genererExerciceCalculPrimitives);
 }
 
+/** Premier exercice : celui du QR code d'une feuille (`?code=`), tiré avec les MÊMES fonctions que
+ * l'adaptateur d'export — sinon un exercice libre. */
+function sessionInitiale(): EtatSessionCalculPrimitives {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCalculPrimitives(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCalculPrimitives, (id) => construireAvecVarianteId(id as IdVarianteCalculPrimitives)),
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -43,7 +54,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen23() {
-  const [etat, setEtat] = useState<EtatSessionCalculPrimitives>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCalculPrimitives>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur : la saisie de l'élève n'a aucune autre utilité une fois l'écran
