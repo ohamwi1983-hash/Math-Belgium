@@ -18,6 +18,7 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen26` — Calcul d'aires par intégrale (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -33,6 +34,16 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionCalculAires {
   return demarrerSessionCalculAires(REGLAGES_DEMO, genererExerciceCalculAires);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/calculAires/exportEvaluation.ts`) ; la suite de la session reste un tirage
+ * normal. */
+function sessionInitiale(): EtatSessionCalculAires {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCalculAires(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCalculAires, (id) => construireAvecVarianteId(id as IdVarianteCalculAires)));
 }
 
 const ECRANS_RACINES: PhaseCalculAires[] = ["bEcran1", "cEcran1", "dEcran1"];
@@ -51,7 +62,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen26() {
-  const [etat, setEtat] = useState<EtatSessionCalculAires>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionCalculAires>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

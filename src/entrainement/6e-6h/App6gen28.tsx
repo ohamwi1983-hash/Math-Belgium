@@ -16,6 +16,7 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen28` — Longueur d'un arc de courbe (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -32,6 +33,16 @@ function nouvelleSession(): EtatSessionLongueurArc {
   return demarrerSessionCalculLongueurArc(REGLAGES_DEMO, genererExerciceLongueurArc);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/longueurArc/exportEvaluation.ts`) ; la suite de la session reste un tirage
+ * normal. */
+function sessionInitiale(): EtatSessionLongueurArc {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionCalculLongueurArc(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceLongueurArc, (id) => construireAvecVarianteId(id as IdVarianteLongueurArc)));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -42,7 +53,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen28() {
-  const [etat, setEtat] = useState<EtatSessionLongueurArc>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLongueurArc>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

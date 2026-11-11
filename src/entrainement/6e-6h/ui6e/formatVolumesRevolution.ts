@@ -128,7 +128,7 @@ function termeVolumeLatex(t: TermeDeveloppe, premier: boolean): string {
 
 /** Somme de `TermeDeveloppe` en LaTeX — `"0"` si vide (jamais une chaîne vide, qui produirait un
  * groupe KaTeX vide). */
-function sommeVolumeLatex(termes: TermeDeveloppe[]): string {
+export function sommeVolumeLatex(termes: TermeDeveloppe[]): string {
   if (termes.length === 0) return "0";
   return termes.map((t, i) => termeVolumeLatex(t, i === 0)).join("");
 }
@@ -194,7 +194,7 @@ function primitiveTermeVolumeLatex(t: TermeDeveloppe, premier: boolean): string 
 }
 
 /** Primitive complète (constante nulle) d'une somme de `TermeDeveloppe`, en LaTeX. */
-function sommePrimitiveVolumeLatex(termes: TermeDeveloppe[]): string {
+export function sommePrimitiveVolumeLatex(termes: TermeDeveloppe[]): string {
   if (termes.length === 0) return "0";
   return termes.map((t, i) => primitiveTermeVolumeLatex(t, i === 0)).join("");
 }
@@ -347,11 +347,11 @@ function termesSupInf(exercice: ExerciceVolumeC): { sup: ExerciceVolumeC["termes
 
 /** Noms des fonctions du dessus et du dessous, une fois l'ordre confirmé (audit point 19 : plus de
  * « sup(x) »/« inf(x) », noms d'opérateurs). */
-function nomsDessusDessous(exercice: ExerciceVolumeC): { dessus: string; dessous: string } {
+export function nomsDessusDessous(exercice: ExerciceVolumeC): { dessus: string; dessous: string } {
   return exercice.ordre === "fSurG" ? { dessus: "f", dessous: "g" } : { dessus: "g", dessous: "f" };
 }
 
-function differenceCarresLatex(exercice: ExerciceVolumeC): string {
+export function differenceCarresLatex(exercice: ExerciceVolumeC): string {
   const { dessus, dessous } = nomsDessusDessous(exercice);
   return `[${dessus}(x)]^2-[${dessous}(x)]^2`;
 }
@@ -420,7 +420,7 @@ export function aideNiveau2C(exercice: ExerciceVolumeC, phase: PhaseVolumesRevol
 
 /** Coefficient de f(x)=k√x — omis quand k=1 (jamais "1√x"), même convention que tous les autres
  * coefficients de magnitude 1 de ce fichier (`termeVolumeLatex`/`primitiveTermeVolumeLatex`). */
-function kLatexD(exercice: ExerciceVolumeD): string {
+export function kLatexD(exercice: ExerciceVolumeD): string {
   const magnitude = magnitudeFractionLatex(exercice.kNum, exercice.kDen);
   return magnitude === "1" ? "" : magnitude;
 }

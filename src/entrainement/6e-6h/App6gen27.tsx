@@ -18,6 +18,7 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen27` — Volumes de révolution (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -37,6 +38,16 @@ function nouvelleSession(): EtatSessionVolumesRevolution {
   return demarrerSessionVolumesRevolution(REGLAGES_DEMO, genererExerciceVolumesRevolution);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/volumesRevolution/exportEvaluation.ts`) ; la suite de la session reste un tirage
+ * normal. */
+function sessionInitiale(): EtatSessionVolumesRevolution {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionVolumesRevolution(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceVolumesRevolution, (id) => construireAvecVarianteId(id as IdVarianteVolumesRevolution)));
+}
+
 const ECRANS_RACINES: PhaseVolumesRevolution[] = ["bEcran1", "cEcran1"];
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -49,7 +60,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen27() {
-  const [etat, setEtat] = useState<EtatSessionVolumesRevolution>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionVolumesRevolution>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

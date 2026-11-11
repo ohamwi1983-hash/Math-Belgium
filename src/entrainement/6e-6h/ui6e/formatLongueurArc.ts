@@ -84,21 +84,21 @@ function formuleFA(exercice: ExerciceLongueurArcA): string {
   const n = exercice.n;
   return `\\frac{1}{2}\\left(${fracPuissanceX(n + 1, n + 1)}+${fracPuissanceX(1 - n, n - 1)}\\right)`;
 }
-function formuleFPrimeA(exercice: ExerciceLongueurArcA): string {
+export function formuleFPrimeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
     return `\\dfrac{x}{${2 * c}}-${fractionSurXLatex(c, 2)}`;
   }
   return `\\frac{1}{2}\\left(x^{${exercice.n}}-x^{-${exercice.n}}\\right)`;
 }
-function formuleRacineSimplifieeA(exercice: ExerciceLongueurArcA): string {
+export function formuleRacineSimplifieeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
     return `\\dfrac{x}{${2 * c}}+${fractionSurXLatex(c, 2)}`;
   }
   return `\\frac{1}{2}\\left(x^{${exercice.n}}+x^{-${exercice.n}}\\right)`;
 }
-function formuleFPrimeCarreDeveloppeA(exercice: ExerciceLongueurArcA): string {
+export function formuleFPrimeCarreDeveloppeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
     return `\\dfrac{x^2}{${4 * c * c}}-\\dfrac{1}{2}+${fractionSurXLatex(c * c, 4, 2)}`;
@@ -108,7 +108,7 @@ function formuleFPrimeCarreDeveloppeA(exercice: ExerciceLongueurArcA): string {
 }
 
 /** Coefficient c/2 devant ln(x) : « » (c = 2), « 3 »… ou « \\dfrac{1}{2} ». */
-function demiLatex(c: number): string {
+export function demiLatex(c: number): string {
   if (c === 2) return "";
   return c % 2 === 0 ? `${c / 2}` : `\\dfrac{${c}}{2}`;
 }
@@ -195,14 +195,14 @@ export function aideNiveau2A(exercice: ExerciceLongueurArcA, phase: PhaseLongueu
 function formuleFB(k: number): string {
   return k === 1 ? "\\ln(x)" : `${k}\\ln(x)`;
 }
-function formuleIntegrandeEnTB(k: number): string {
+export function formuleIntegrandeEnTB(k: number): string {
   return `\\dfrac{t^{2}}{t^{2}-${k * k}}`;
 }
-function formulePrimitiveEnTB(k: number): string {
+export function formulePrimitiveEnTB(k: number): string {
   return `t+\\dfrac{${k}}{2}\\ln\\left|\\dfrac{t-${k}}{t+${k}}\\right|`;
 }
 /** Borne en x de la famille B, simplifiée : a = √(t₁² − k²) (√16 → 4, √12 → 2√3) — audit point 19. */
-function borneBLatex(t: number, k: number): string {
+export function borneBLatex(t: number, k: number): string {
   return racineLatex(t * t - k * k);
 }
 
@@ -300,18 +300,18 @@ export function aideNiveau2B(exercice: ExerciceLongueurArcB, phase: PhaseLongueu
 // Famille C — √(1 + kx), substitution directe (f(x) = c·x^{3/2}).
 // ============================================================================
 
-function kLatexC(exercice: ExerciceLongueurArcC): string {
+export function kLatexC(exercice: ExerciceLongueurArcC): string {
   return fractionLatex(exercice.kNum, exercice.kDen);
 }
-function unPlusKxLatex(exercice: ExerciceLongueurArcC): string {
+export function unPlusKxLatex(exercice: ExerciceLongueurArcC): string {
   const k = kLatexC(exercice);
   return `1+${k === "1" ? "" : k}x`;
 }
 /** Coefficient 2/(3k) de la primitive (2/(3k))·(1 + kx)^{3/2}. */
-function coefPrimitiveC(exercice: ExerciceLongueurArcC): string {
+export function coefPrimitiveC(exercice: ExerciceLongueurArcC): string {
   return fractionLatex(2 * exercice.kDen, 3 * exercice.kNum);
 }
-function formuleFC(exercice: ExerciceLongueurArcC): string {
+export function formuleFC(exercice: ExerciceLongueurArcC): string {
   const c = fractionLatex(exercice.cNum, exercice.cDen);
   return `${c === "1" ? "" : c}x^{3/2}`;
 }
