@@ -676,6 +676,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'résultat', text: 'd₁ et d₂ sont perpendiculaires' },
         },
         {
+          kind: 'atelier',
+          tag: 'relations-droites-widget',
+          label: 'Manipule toi-même : parallèles, perpendiculaires ou sécantes ?',
+          caption:
+            'Règle les coefficients de d₁ et d₂ : l\'atelier lit un vecteur directeur (−b ; ' +
+            'a) de chaque droite, puis teste le déterminant (parallèles ?) et le produit ' +
+            'scalaire (perpendiculaires ?). Quand les droites sont sécantes, il calcule ' +
+            'leur point d\'intersection pas à pas, par substitution ou par combinaison ' +
+            '(section 5). En mode Défi, trouve la position relative de deux droites en un ' +
+            'seul essai. Le réglage de départ reproduit les exemples des sections 4 et 5.',
+        },
+        {
           kind: 'astuce',
           text:
             '$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ tourné de 90° donne $\\begin{pmatrix} -b ' +
@@ -927,6 +939,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'pied H sur d₂', text: '$1 - t = 2 \\cdot 2t - 4 \\to 5t = 5 \\to t = 1$, H(2 ; 0)' },
           ],
           result: { tag: 'distance', text: '$\\|\\vec{AH}\\| = \\sqrt{2^2 + (-1)^2} = \\sqrt{5} \\approx 2{,}24$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'distance-droite-widget',
+          label: 'Manipule toi-même : la plus courte distance',
+          caption:
+            'Déplace C, ou les points P et R qui fixent d : la perpendiculaire par C, le ' +
+            'pied H et la distance CH se recalculent pas à pas, sans formule toute faite. ' +
+            'Fais glisser Q sur d : CQ est toujours plus long que CH, sauf quand Q arrive ' +
+            'en H. En mode « Deux parallèles », la distance entre d et d′ est celle d\'un ' +
+            'point de d′ à d. Le réglage de départ reproduit le premier exemple de la ' +
+            'section (distance 10).',
         },
         {
           kind: 'application',
