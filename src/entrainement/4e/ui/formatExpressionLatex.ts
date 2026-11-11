@@ -203,6 +203,8 @@ function tokeniser(expression: string): Jeton[] {
     const correspondance: Partial<Record<string, TypeJeton>> = {
       "+": "PLUS",
       "-": "MOINS",
+      // « − » typographique (U+2212, celui des énoncés et des exemples de saisie) : même rôle.
+      "−": "MOINS",
       "*": "FOIS",
       "·": "FOIS",
       "×": "FOIS",
@@ -388,12 +390,19 @@ function latexGroupeSiNecessaire(noeud: Noeud): string {
   return estAtomique(noeud) ? rendu : `\\left(${rendu}\\right)`;
 }
 
-/** Un nombre décimal tapé avec une virgule française ("1,5") est déjà normalisé en point par le
- * tokeniseur — jamais réaffiché avec une virgule (LaTeX/KaTeX attend un point). */
+/** Membre d'une fraction : des parenthèses tapées pour délimiter le numérateur ou le dénominateur
+ * (« 1/(2x+4) ») ne sont pas réaffichées — la barre de fraction les remplace. */
+function membreFractionLatex(noeud: Noeud): string {
+  return noeud.type === "groupe" ? noeudVersLatex(noeud.interieur) : noeudVersLatex(noeud);
+}
+
+/** Un nombre décimal tapé avec une virgule française (« 1,5 ») est normalisé en point par le
+ * tokeniseur, puis réaffiché avec la virgule décimale (« 1{,}5 », jamais « 1.5 » — même convention
+ * que les énoncés et que l'aperçu 5e). */
 function noeudVersLatex(noeud: Noeud): string {
   switch (noeud.type) {
     case "nombre":
-      return noeud.texte;
+      return noeud.texte.replace(".", "{,}");
     case "x":
       return "x";
     case "variable":
@@ -406,7 +415,11 @@ function noeudVersLatex(noeud: Noeud): string {
       return `${noeudVersLatex(noeud.gauche)} ${noeud.operateur} ${noeudVersLatex(noeud.droite)}`;
     case "produit":
       if (noeud.operateur === "/") {
-        return `\\frac{${noeudVersLatex(noeud.gauche)}}{${noeudVersLatex(noeud.droite)}}`;
+        // « -8/27 » : le signe devant la fraction (« −8/27 »), jamais dans le numérateur.
+        if (noeud.gauche.type === "negation") {
+          return `-\\frac{${membreFractionLatex(noeud.gauche.operande)}}{${membreFractionLatex(noeud.droite)}}`;
+        }
+        return `\\frac{${membreFractionLatex(noeud.gauche)}}{${membreFractionLatex(noeud.droite)}}`;
       }
       // Point de multiplication affiché quand l'élève l'a tapé explicitement ("*"/"·"/"×") — jamais
       // avalé silencieusement, l'intention de l'écrire était délibérée. Sinon (multiplication

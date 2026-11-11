@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseEhChSoy } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape2, diagnostiquerEhChSoy, diagnostiquerFonctionFamille, evaluerEhChSoy } from "../moteur/verificationFormeCanoniqueFonctionsReference";
 import { formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
@@ -89,6 +90,7 @@ export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onV
       <button type="button" className={classeCurseur(evaluation.soy) + " btn"} onClick={() => setSoy((v) => !v)}>
         {soy ? "SOY : Oui" : "SOY : Non"}
       </button>
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="ehchsoy-fonction-intermediaire">
           f(x) =

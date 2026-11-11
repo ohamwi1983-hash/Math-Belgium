@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseEvCvSoxFR } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape4, diagnostiquerEvCvSoxFR, diagnostiquerFonctionFamille, evaluerEvCvSoxFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
 import { formatGabaritEtape2Latex, formatGabaritEtape3Latex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
@@ -89,6 +90,7 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
       <button type="button" className={classeCurseur(evaluation.sox) + " btn"} onClick={() => setSox((v) => !v)}>
         {sox ? "SOX : Oui" : "SOX : Non"}
       </button>
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="evcvsox-fr-fonction-intermediaire">
           f(x) =

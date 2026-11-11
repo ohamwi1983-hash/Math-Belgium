@@ -1,10 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Morceau } from "./core/inequation.types";
-import type { ReglagesFamillesFonctionReference } from "./core/fonctionsReference.types";
 import type {
   ExerciceCaracteristiquesAlgebriques,
-  NiveauCaracteristiquesAlgebriques,
   ReponseCE,
   ReponseCondition,
   ReponseDomaine,
@@ -46,21 +44,19 @@ import {
 } from "./moteur/verificationCaracteristiquesAlgebriques";
 import type { EtatSessionCaracteristiquesAlgebriques } from "./moteur/typesCaracteristiquesAlgebriques";
 import {
-  CATALOGUE_VARIANTES,
-  construireNiveau1AvecFamille,
-  construireNiveau2AvecFamille,
-  creerGenerateurCaracteristiquesAlgebriques,
-  genererExerciceCaracteristiquesAlgebriques,
+  CATALOGUE_VARIANTES_FAMILLE_NIVEAU,
+  construireAvecVarianteFamilleNiveau,
+  genererExerciceFamilleNiveauAleatoire,
 } from "./generateurs/caracteristiquesAlgebriques";
-import { FAMILLES } from "./generateurs/fonctionsReference";
 import type { GenerateurExerciceCaracteristiquesAlgebriques } from "./core/caracteristiquesAlgebriques.types";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { CodeExerciceDecode } from "../export/codeExercice";
-import type { FamilleReference } from "./core/fonctionsReference.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifCaracteristiquesAlgebriques } from "./ui/recapitulatifCaracteristiquesAlgebriques";
-import { EtapeReglagesCaracteristiquesAlgebriques } from "./components/EtapeReglagesCaracteristiquesAlgebriques";
+import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EtapeOrdonneeAlgebrique } from "./components/EtapeOrdonneeAlgebrique";
 import { EtapeCE } from "./components/EtapeCE";
 import { EtapeDomaineNiveau1 } from "./components/EtapeDomaineNiveau1";
@@ -85,6 +81,7 @@ import {
   formatOrdonneeExacteLatex,
   formatPariteLabel,
   formatTermesZerosAttendusLatex,
+  formatValeurExacteLatex,
 } from "./ui/formatCaracteristiquesAlgebriques";
 import { formatFractionIrreductible } from "./ui/formatFraction";
 import { formatDomaineLatex } from "./ui/apercuDomaine";
@@ -104,48 +101,37 @@ const REGLAGES_BASE = {
   affichageExplication: true,
 } as const;
 
-/** Démarre (ou redémarre) une session à partir du réglage de sélection des familles et du niveau
- * (`prompt-niveau2caracteristiquesalgebriques.md`) — même principe que `AppFonctionsReference.tsx`
- * (dixième exercice). */
-function demarrer(
-  reglagesFamilles: ReglagesFamillesFonctionReference,
-  niveau: NiveauCaracteristiquesAlgebriques,
-): EtatSessionCaracteristiquesAlgebriques {
-  const nombreExercices =
-    reglagesFamilles.mode === "aleatoire"
-      ? NOMBRE_EXERCICES_ALEATOIRE
-      : Object.values(reglagesFamilles.quantites).reduce((total: number, quantite: number) => total + quantite, 0);
-  const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices };
-  return demarrerSessionCaracteristiquesAlgebriques(reglagesSession, creerGenerateurCaracteristiquesAlgebriques(reglagesFamilles, niveau));
+const REGLAGES_SESSION: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
+
+/** Générateur d'une session : la variante choisie dans le sélecteur (famille ET niveau,
+ * `CATALOGUE_VARIANTES_FAMILLE_NIVEAU`), sinon famille et niveau tirés au hasard. Plus d'écran de
+ * réglages avant le premier exercice (demande de l'utilisateur : le sélecteur de variantes suffit). */
+function generateurPour(varianteId: string | null): GenerateurExerciceCaracteristiquesAlgebriques {
+  return varianteId === null ? genererExerciceFamilleNiveauAleatoire : () => construireAvecVarianteFamilleNiveau(varianteId);
 }
 
-/** Réglages d'une session ouverte par le code d'un exercice imprimé (`?code=XXXXXX`) : tirage
- * aléatoire, niveau 1 — le niveau des feuilles d'exercices et évaluations (voir l'adaptateur
- * `generateurs/caracteristiquesAlgebriques/exportEvaluation.ts`). */
-const REGLAGES_FAMILLES_CODE: ReglagesFamillesFonctionReference = {
-  mode: "aleatoire",
-  quantites: Object.fromEntries(FAMILLES.map((famille) => [famille, 0])) as Record<FamilleReference, number>,
-};
+function demarrer(varianteId: string | null): EtatSessionCaracteristiquesAlgebriques {
+  return demarrerSessionCaracteristiquesAlgebriques(REGLAGES_SESSION, generateurPour(varianteId));
+}
 
 /** Générateur dont le PREMIER exercice est l'instance du code imprimé — tirée avec les MÊMES
- * fonctions que l'adaptateur d'export (`genererInstance` = `genererExerciceCaracteristiquesAlgebriques`,
- * variante = `construireNiveau1AvecFamille`) ; la suite de la session reste un tirage normal. */
+ * fonctions et le MÊME catalogue que l'adaptateur d'export (`genererInstance` =
+ * `genererExerciceFamilleNiveauAleatoire`, variante = `construireAvecVarianteFamilleNiveau`) ; la
+ * suite de la session reste un tirage normal. */
 function generateurDepuisCode(code: CodeExerciceDecode): GenerateurExerciceCaracteristiquesAlgebriques {
-  const suite = creerGenerateurCaracteristiquesAlgebriques(REGLAGES_FAMILLES_CODE, "niveau1");
   let premier = true;
   return () => {
-    if (!premier) return suite();
+    if (!premier) return genererExerciceFamilleNiveauAleatoire();
     premier = false;
-    return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceCaracteristiquesAlgebriques, (id) => construireNiveau1AvecFamille(id as FamilleReference));
+    return genererAvecCode(code, CATALOGUE_VARIANTES_FAMILLE_NIVEAU, genererExerciceFamilleNiveauAleatoire, construireAvecVarianteFamilleNiveau);
   };
 }
 
-/** Session initiale : directement l'exercice imprimé si l'URL porte un code, sinon l'écran de
- * réglages (`null`). */
-function sessionInitiale(): EtatSessionCaracteristiquesAlgebriques | null {
+/** Session initiale : l'exercice imprimé si l'URL porte un code, sinon un tirage aléatoire. */
+function sessionInitiale(): EtatSessionCaracteristiquesAlgebriques {
   const code = lireCodeDepuisUrl();
-  if (!code) return null;
-  return demarrerSessionCaracteristiquesAlgebriques({ ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE }, generateurDepuisCode(code));
+  if (!code) return demarrer(null);
+  return demarrerSessionCaracteristiquesAlgebriques(REGLAGES_SESSION, generateurDepuisCode(code));
 }
 
 /** Séquence de phases pour l'exercice courant — niveau 1 : `ce→domaine→ordonnee→parite→isolement→
@@ -449,27 +435,124 @@ function releveRevelePhase(etatAvant: EtatSessionCaracteristiquesAlgebriques, no
   }
 }
 
+/** Titre de chaque écran dans la fiche des puces cliquables. */
+const TITRE_PHASE: Record<PhaseCaracteristiquesAlgebriques, string> = {
+  ce: "Conditions d'existence",
+  domaine: "Domaine de définition",
+  ordonnee: "Ordonnée à l'origine",
+  parite: "Parité",
+  isolement: "Équation isolée",
+  separation: "Deux équations",
+  debarrasser: "Équation sans la fonction de référence",
+  validite: "Condition de validité",
+  regroupe: "Équation regroupée",
+  resolutionBranches: "Racines des deux branches",
+  validationSolution: "Validation des solutions",
+  zeros: "Zéros",
+};
+
+/** Nombre en LaTeX pour la fiche : valeur exacte (fraction) si elle est rationnelle, sinon arrondi
+ * au millième avec la virgule décimale (une racine non parfaite tapée par l'élève). */
+function valeurLatex(valeur: number): string {
+  const exacte = formatFractionIrreductible(valeur);
+  if (!exacte.includes(".")) return formatValeurExacteLatex(valeur);
+  return `${String(Number(valeur.toFixed(3))).replace(".", "{,}")}`;
+}
+
+/** Saisie libre (équation, expression) rendue comme dans l'aperçu ; texte brut si elle ne se lit pas. */
+function saisieLibre(texte: string): ReactNode {
+  try {
+    return <Katex expression={expressionLibreVersLatex(texte)} />;
+  } catch {
+    return texte;
+  }
+}
+
+/** Réponse de l'élève telle qu'elle a été validée, mise en forme pour la fiche (lecture seule). */
+function formatReponseCE(reponse: ReponseCE): ReactNode {
+  const latexCE = formatCEAttenduesLatex(reponse);
+  return latexCE === null ? "Pas de CE" : <Katex expression={latexCE} />;
+}
+
+function formatReponseDomaine(reponse: ReponseDomaine): ReactNode {
+  const latexDomaine = formatDomaineLatex(reponse.forme, reponse.points.map((p) => formatFractionIrreductible(p)), reponse.intervalles.map(morceauVersEtatFraction));
+  return latexDomaine === null ? "—" : <Katex expression={`\\mathrm{dom}\\,f = ${latexDomaine}`} />;
+}
+
+function formatReponseExistence(reponse: ReponseExistence): ReactNode {
+  return reponse.existe && reponse.valeur !== null ? <Katex expression={`f(0) = ${valeurLatex(reponse.valeur)}`} /> : "n'existe pas";
+}
+
+function formatReponseCondition(reponse: ReponseCondition): ReactNode {
+  if (reponse.forme === "reel") return <Katex expression={"\\mathbb{R}"} />;
+  if (reponse.forme === "vide") return <Katex expression={"\\varnothing"} />;
+  return reponse.intervalle ? <Katex expression={formatConditionLatex(reponse.intervalle)} /> : "—";
+}
+
+function formatReponseZeros(reponse: ReponseZerosCaracteristiques): ReactNode {
+  if (reponse.aucun) return "aucun zéro";
+  return <Katex expression={reponse.valeurs.map((v) => `x = ${valeurLatex(v)}`).join(" \\text{ ; } ")} />;
+}
+
 export function AppCaracteristiquesAlgebriques() {
-  const [etat, setEtat] = useState<EtatSessionCaracteristiquesAlgebriques | null>(sessionInitiale);
-  const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(() => (etat ? REGLAGES_FAMILLES_CODE : null));
-  const [niveau, setNiveau] = useState<NiveauCaracteristiquesAlgebriques>("niveau1");
+  const [etat, setEtat] = useState<EtatSessionCaracteristiquesAlgebriques>(sessionInitiale);
+  /** Variante choisie dans le sélecteur (famille + niveau) — `null` : tirage aléatoire. Une session
+   * terminée redémarre avec le même choix. */
+  const [varianteForcee, setVarianteForcee] = useState<string | null>(null);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Puces cliquables : une entrée par SEGMENT de la barre (même index), construite au moment où
+   * l'écran se clôt — jamais recalculée après coup. Les répétitions de « validation des solutions »
+   * (un seul segment) sont réunies dans la même entrée. Remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<(EntreeHistoriqueEtape | undefined)[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur de génération : remonte les écrans (champs vidés) à chaque « Générer ». */
+  const [generation, setGeneration] = useState(0);
 
-  function commencerSession(reglages: ReglagesFamillesFonctionReference, niveauChoisi: NiveauCaracteristiquesAlgebriques) {
-    setReglagesFamilles(reglages);
-    setNiveau(niveauChoisi);
-    setEtat(demarrer(reglages, niveauChoisi));
-  }
-
-  function onGenererDev(familleId: string) {
+  function onGenererDev(varianteId: string) {
     setEnAttente(null);
-    const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
-    const construireAvecNiveauCourant = niveau === "niveau1" ? construireNiveau1AvecFamille : construireNiveau2AvecFamille;
-    setEtat(demarrerSessionCaracteristiquesAlgebriques(reglagesSession, () => construireAvecNiveauCourant(familleId as FamilleReference)));
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setVarianteForcee(varianteId);
+    setGeneration((g) => g + 1);
+    setEtat(demarrer(varianteId));
   }
 
-  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesAlgebriques) {
+  function ajouterHistorique(votreReponse: ReactNode, revele: boolean) {
     if (!etat) return;
+    const index = sequencePourExercice(etat.exerciceCourant).indexOf(etat.phase);
+    if (index < 0) return;
+    const attendue = reponseAttenduePhase(etat);
+    setHistorique((h) => {
+      const copie = [...h];
+      const existante = copie[index];
+      if (etat.phase === "validationSolution" && existante) {
+        // 2e solution à valider : même segment, réponses mises bout à bout.
+        copie[index] = {
+          titre: existante.titre,
+          votreReponse: (
+            <>
+              {existante.votreReponse}
+              <br />
+              {votreReponse}
+            </>
+          ),
+          correcte: existante.correcte && !revele,
+          reponseAttendue: (
+            <>
+              {existante.reponseAttendue}
+              {existante.reponseAttendue ? <br /> : null}
+              {attendue}
+            </>
+          ),
+        };
+      } else {
+        copie[index] = { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue };
+      }
+      return copie;
+    });
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesAlgebriques, votreReponse?: ReactNode) {
     // "validationSolution" se répète (jusqu'à 2 fois) SANS jamais changer `phase` entre deux
     // répétitions — seule `scoresValidationSolutionExercice` grandit. Chaque répétition ferme
     // néanmoins un véritable écran (droit à `validation`, voir `EtapeValidationSolution.tsx`), donc
@@ -477,7 +560,9 @@ export function AppCaracteristiquesAlgebriques() {
     const validationSolutionAvancee = nouvelEtat.scoresValidationSolutionExercice.length > etat.scoresValidationSolutionExercice.length;
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || validationSolutionAvancee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
+      const revele = releveRevelePhase(etat, nouvelEtat);
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, revele);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -486,33 +571,17 @@ export function AppCaracteristiquesAlgebriques() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
-      // Session ENTIÈREMENT terminée (les N exercices configurés) — redémarre avec les mêmes
-      // réglages (même principe que l'ancien bouton "Recommencer" de
-      // `ResumeSessionCaracteristiquesAlgebriques`) ; `reglagesFamilles` est toujours non nul ici
-      // sauf session forcée par le panneau dev, où l'on retourne à l'écran de réglages.
-      setEtat(reglagesFamilles ? demarrer(reglagesFamilles, niveau) : null);
+      // Session ENTIÈREMENT terminée (les N exercices) — redémarre avec le même choix de variante.
+      setEtat(demarrer(varianteForcee));
     } else {
       setEtat(enAttente.etatSuivant);
     }
+    // Nouvel exercice (dans la session ou nouvelle session) : historique des puces remis à vide.
+    if (enAttente.etatSuivant.terminee || enAttente.etatSuivant.indexExercice !== etat.indexExercice) {
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    }
     setEnAttente(null);
-  }
-
-  if (!etat) {
-    return (
-      <div className="app-shell">
-        <header className="app-header">
-          <p className="app-eyebrow">4e — Entraînement</p>
-          <h1 className="app-title">Caractéristiques algébriques d'une fonction de référence</h1>
-          <p className="app-subtitle">Chapitre 3</p>
-          <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        </header>
-        <main className="card">
-          <div className="card-body">
-            <EtapeReglagesCaracteristiquesAlgebriques onCommencer={commencerSession} onNiveauChange={setNiveau} niveauInitial={niveau} />
-          </div>
-        </main>
-      </div>
-    );
   }
 
   const validation = enAttente
@@ -532,12 +601,12 @@ export function AppCaracteristiquesAlgebriques() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques algébriques d'une fonction de référence</h1>
         <p className="app-subtitle">Chapitre 3</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES_FAMILLE_NIVEAU} onGenerer={onGenererDev} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
-        <div className="card-body">
+        <div className="card-body" key={`${generation}-${etat.indexExercice}`}>
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase === "ordonnee" ? (
@@ -545,7 +614,7 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: ReponseExistence) => terminerEtape(soumettreReponseOrdonnee(etat, reponse))}
+              onValider={(reponse: ReponseExistence) => terminerEtape(soumettreReponseOrdonnee(etat, reponse), formatReponseExistence(reponse))}
               validation={validation}
             />
           ) : etat.phase === "ce" ? (
@@ -555,7 +624,7 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCE}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: ReponseCE) => terminerEtape(soumettreReponseCE(etat, reponse))}
+              onValider={(reponse: ReponseCE) => terminerEtape(soumettreReponseCE(etat, reponse), formatReponseCE(reponse))}
               validation={validation}
             />
           ) : etat.phase === "domaine" ? (
@@ -563,7 +632,7 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: ReponseDomaine) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              onValider={(reponse: ReponseDomaine) => terminerEtape(soumettreReponseDomaine(etat, reponse), formatReponseDomaine(reponse))}
               validation={validation}
             />
           ) : etat.phase === "parite" && etat.exerciceCourant.niveau === "niveau1" ? (
@@ -573,7 +642,7 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideParite}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: ReponseParite) => terminerEtape(soumettreReponseParite(etat, reponse))}
+              onValider={(reponse: ReponseParite) => terminerEtape(soumettreReponseParite(etat, reponse), formatPariteLabel(reponse))}
               validation={validation}
             />
           ) : etat.phase === "isolement" ? (
@@ -583,7 +652,7 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideIsolement}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: string) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseIsolement(etat, reponse), saisieLibre(reponse))}
               validation={validation}
             />
           ) : etat.phase === "separation" ? (
@@ -593,7 +662,14 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSeparation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: ReponseSeparation) => terminerEtape(soumettreReponseSeparation(etat, reponse))}
+              onValider={(reponse: ReponseSeparation) =>
+                terminerEtape(
+                  soumettreReponseSeparation(etat, reponse),
+                  <>
+                    {saisieLibre(reponse.equation1)} ou {saisieLibre(reponse.equation2)}
+                  </>,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "debarrasser" ? (
@@ -603,7 +679,7 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDebarrasser}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: string) => terminerEtape(soumettreReponseDebarrasser(etat, reponse))}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseDebarrasser(etat, reponse), saisieLibre(reponse))}
               validation={validation}
             />
           ) : etat.phase === "validite" && necessiteValidite(etat.exerciceCourant) ? (
@@ -611,7 +687,7 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: ReponseCondition) => terminerEtape(soumettreReponseValidite(etat, reponse))}
+              onValider={(reponse: ReponseCondition) => terminerEtape(soumettreReponseValidite(etat, reponse), formatReponseCondition(reponse))}
               validation={validation}
             />
           ) : etat.phase === "regroupe" && necessiteRegroupe(etat.exerciceCourant) ? (
@@ -619,7 +695,7 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: string) => terminerEtape(soumettreReponseRegroupe(etat, reponse))}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseRegroupe(etat, reponse), saisieLibre(reponse))}
               validation={validation}
             />
           ) : etat.phase === "resolutionBranches" &&
@@ -629,7 +705,12 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: ReponseResolutionBranches) => terminerEtape(soumettreReponseResolutionBranches(etat, reponse))}
+              onValider={(reponse: ReponseResolutionBranches) =>
+                terminerEtape(
+                  soumettreReponseResolutionBranches(etat, reponse),
+                  <Katex expression={`x = ${valeurLatex(reponse.racineBranche1)} \\text{ et } x = ${valeurLatex(reponse.racineBranche2)}`} />,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "validationSolution" && necessiteValidite(etat.exerciceCourant) ? (
@@ -639,7 +720,12 @@ export function AppCaracteristiquesAlgebriques() {
               index={etat.scoresValidationSolutionExercice.length}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse: boolean) => terminerEtape(soumettreReponseValidationSolution(etat, reponse))}
+              onValider={(reponse: boolean) =>
+                terminerEtape(
+                  soumettreReponseValidationSolution(etat, reponse),
+                  `${totalValidationSolution(etat.exerciceCourant) > 1 ? `Solution ${etat.scoresValidationSolutionExercice.length + 1} : ` : ""}${reponse ? "Oui" : "Non"}`,
+                )
+              }
               validation={validation}
             />
           ) : (
@@ -649,12 +735,16 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideZeros}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse: ReponseZerosCaracteristiques) => terminerEtape(soumettreReponseZeros(etat, reponse))}
+              onValider={(reponse: ReponseZerosCaracteristiques) => terminerEtape(soumettreReponseZeros(etat, reponse), formatReponseZeros(reponse))}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]!} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

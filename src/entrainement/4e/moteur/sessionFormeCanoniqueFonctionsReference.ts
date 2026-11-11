@@ -76,6 +76,8 @@ export function soumettreChoixFamilleFR(
 
   const etapeCourante = soumettreEtapeTentatives<FamilleReference>(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    // Choix fermé parmi 6 familles : une seule tentative (sinon gagnable par élimination).
+    tentativesMax: 1,
     verifier: (r) => r === etat.exerciceCourant.famille,
     revelerReponse: () => {},
   });

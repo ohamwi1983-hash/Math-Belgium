@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseThFR } from "../core/formeCanoniqueFonctionsReference.types";
 import { cibleEtape3, diagnostiquerFonctionFamille, diagnostiquerThFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
 import { formatGabaritEtape2Latex, formatGabaritLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
@@ -63,6 +64,7 @@ export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onVali
           <input id="curseur-th-fr" type="range" min={-5} max={5} step={1} value={th} onChange={(e) => setTh(Number(e.target.value))} />
         </label>
       </div>
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="th-fr-fonction-intermediaire">
           f(x) =

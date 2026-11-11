@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseTvFR } from "../core/formeCanoniqueFonctionsReference.types";
 import {
   formatGabaritEtape2Latex,
@@ -78,6 +79,7 @@ export function EtapeTvFR({ exercice, tentativesUtilisees, tentativesMax, onVali
           <input id="curseur-tv-fr" type="range" min={-5} max={5} step={1} value={tv} onChange={(e) => setTv(Number(e.target.value))} />
         </label>
       </div>
+      <ApercuExpressionLatex texte={fonctionIntermediaire} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="tv-fr-fonction-intermediaire">
           f(x) =

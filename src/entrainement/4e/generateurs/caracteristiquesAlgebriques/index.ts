@@ -195,6 +195,47 @@ export const genererExerciceCaracteristiquesAlgebriquesNiveau2: GenerateurExerci
 };
 
 /**
+ * Catalogue unique FAMILLE × NIVEAU (demande de l'utilisateur : le sélecteur de variantes de
+ * l'appli ET des feuilles d'exercices/évaluations doit permettre de choisir une famille ET un
+ * niveau — il ne proposait que la famille, toujours au niveau 1). Les 6 variantes de niveau 1
+ * viennent EN PREMIER, dans l'ordre de `CATALOGUE_VARIANTES` (ids = ceux de l'ancien catalogue, qui
+ * n'était que niveau 1) : un QR code déjà imprimé (indice de variante 0 à 5 + graine) rouvre donc
+ * toujours le même exercice. Les 6 variantes de niveau 2 suivent (id `famille-niveau2`).
+ */
+export interface VarianteFamilleNiveauCaracteristiquesAlgebriques {
+  id: string;
+  label: string;
+}
+
+const LIBELLE_NIVEAU_COURT: Record<NiveauCaracteristiquesAlgebriques, string> = {
+  niveau1: "niveau 1 (k constant)",
+  niveau2: "niveau 2 (k(x) = cx + d)",
+};
+
+export const CATALOGUE_VARIANTES_FAMILLE_NIVEAU: VarianteFamilleNiveauCaracteristiquesAlgebriques[] = [
+  ...CATALOGUE_VARIANTES.map((f) => ({ id: f.id, label: `${f.label} — ${LIBELLE_NIVEAU_COURT.niveau1}` })),
+  ...CATALOGUE_VARIANTES.map((f) => ({ id: `${f.id}-niveau2`, label: `${f.label} — ${LIBELLE_NIVEAU_COURT.niveau2}` })),
+];
+
+/** Famille et niveau d'un id du catalogue ci-dessus (`carre` → niveau 1, `carre-niveau2` → niveau 2). */
+export function decoderVarianteFamilleNiveau(id: string): { famille: FamilleReference; niveau: NiveauCaracteristiquesAlgebriques } {
+  const niveau2 = id.endsWith("-niveau2");
+  return { famille: (niveau2 ? id.slice(0, -"-niveau2".length) : id) as FamilleReference, niveau: niveau2 ? "niveau2" : "niveau1" };
+}
+
+export function construireAvecVarianteFamilleNiveau(id: string): ExerciceCaracteristiquesAlgebriques {
+  const { famille, niveau } = decoderVarianteFamilleNiveau(id);
+  return construireAvecFamilleEtNiveau(famille, niveau);
+}
+
+/** Tirage libre (« Générer » sans variante choisie, première session de l'appli) : famille ET niveau
+ * au hasard. */
+export const genererExerciceFamilleNiveauAleatoire: GenerateurExerciceCaracteristiquesAlgebriques = () => {
+  const famille = FAMILLES[randomInt(0, FAMILLES.length - 1)];
+  return construireAvecFamilleEtNiveau(famille, randomInt(0, 1) === 0 ? "niveau1" : "niveau2");
+};
+
+/**
  * Fabrique de générateur pilotée par le réglage professeur (mode aléatoire/personnalisé) — même
  * principe que `creerGenerateurFonctionReference` (dixième exercice) : `construireFileFamillesMelangee`
  * (générique sur `FamilleReference[]`, aucune dépendance au contrat `ExerciceFonctionReference`) est

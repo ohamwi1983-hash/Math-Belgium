@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { FamilleReference } from "./core/formeCanoniqueFonctionsReference.types";
+import type { ReactNode } from "react";
+import type { ExerciceFormeCanoniqueFonctionReference, FamilleReference } from "./core/formeCanoniqueFonctionsReference.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   demarrerSessionFormeCanoniqueFonctionReference,
@@ -36,6 +37,9 @@ import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { SaisieExpressionLatex } from "./components/SaisieExpressionLatex";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction de référence transformée.";
@@ -65,8 +69,8 @@ function sessionInitiale(): EtatSessionFormeCanoniqueFonctionReference {
 
 /** 6 phases fixes, toujours le même ordre — pas de mécanisme d'aide sur ce générateur (aucun champ
  * `niveauAideXxx` dans `typesFormeCanoniqueFonctionsReference.ts`). "tv" (dernière phase) n'a
- * jamais besoin de sa propre branche "close" : jamais consultée comme phase passée. Puces
- * purement visuelles (pas de `onSegmentClick`). */
+ * jamais besoin de sa propre branche "close" : jamais consultée comme phase passée. Les puces closes
+ * sont cliquables (fiche « Ta réponse » / « Réponse attendue », historique tenu par l'appli). */
 const ORDRE_PHASES: PhaseFormeCanoniqueFonctionReference[] = ["reconnaissance", "canonique", "ehChSoy", "th", "evCvSox", "tv"];
 
 function calculerSegmentsProgression(etat: EtatSessionFormeCanoniqueFonctionReference): EtatPuceProgression[] {
@@ -88,6 +92,44 @@ function calculerSegmentsProgression(etat: EtatSessionFormeCanoniqueFonctionRefe
   });
 }
 
+/** Titre de chaque écran dans la fiche des puces cliquables. */
+const TITRE_PHASE: Record<PhaseFormeCanoniqueFonctionReference, string> = {
+  reconnaissance: "Famille",
+  canonique: "Forme canonique",
+  ehChSoy: "EH, CH et SOY",
+  th: "Translation horizontale",
+  evCvSox: "EV, CV et SOX",
+  tv: "Translation verticale",
+};
+
+/** Réponse attendue d'un écran — la même que celle affichée par `ValidationEcran` à la clôture de
+ * cet écran (mêmes fonctions de formatage), réutilisée par la fiche des puces cliquables. */
+function reponseAttenduePhase(phase: PhaseFormeCanoniqueFonctionReference, exercice: ExerciceFormeCanoniqueFonctionReference): ReactNode {
+  switch (phase) {
+    case "reconnaissance":
+      return <>Famille attendue : {libelleFamille(exercice.famille)}</>;
+    case "canonique":
+      return <Katex expression={formatCibleLatex(exercice.famille, cibleFinale(exercice))} />;
+    case "ehChSoy":
+      return <Katex expression={formatGabaritEtape2Latex(exercice)} />;
+    case "th":
+      return <Katex expression={formatGabaritEtape3Latex(exercice)} />;
+    case "evCvSox":
+      return <Katex expression={formatGabaritEtape4Latex(exercice)} />;
+    case "tv":
+      return <Katex expression={formatGabaritLatex(exercice)} />;
+  }
+}
+
+/** Expression saisie, rendue comme dans l'aperçu sous le champ. */
+function fonctionSaisie(texte: string): ReactNode {
+  return <SaisieExpressionLatex texte={texte} prefixeLatex="f(x) =" />;
+}
+
+function ouiNon(b: boolean): string {
+  return b ? "oui" : "non";
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -100,8 +142,16 @@ interface TransitionEnAttente {
 export function AppFormeCanoniqueFonctionsReference() {
   const [etat, setEtat] = useState<EtatSessionFormeCanoniqueFonctionReference>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, jamais dans
+   * le moteur ; remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur de génération, dans la clé des écrans : un nouvel exercice remonte l'écran (champs vidés). */
+  const [generation, setGeneration] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueFonctionReference) {
+  /** `votreReponse` n'est poussée dans l'historique que lorsque l'écran se clôt réellement (jamais à
+   * chaque essai), et jamais pour "tv" (dernier écran, clôt l'exercice). */
+  function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueFonctionReference, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -116,6 +166,19 @@ export function AppFormeCanoniqueFonctionsReference() {
                 : etat.phase === "evCvSox"
                   ? nouvelEtat.evCvSoxRevele
                   : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tvRevele;
+      if (votreReponse !== undefined && !nouvelEtat.terminee) {
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: TITRE_PHASE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePhase(phaseClose, exerciceClos) : undefined,
+          },
+        ]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -124,12 +187,20 @@ export function AppFormeCanoniqueFonctionsReference() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   function forcerVariante(familleId: string) {
     setEnAttente(null);
+    setGeneration((g) => g + 1);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, () => construireAvecFamille(familleId as FamilleReference)));
   }
 
@@ -138,19 +209,7 @@ export function AppFormeCanoniqueFonctionsReference() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "reconnaissance" ? (
-          <>Famille attendue : {libelleFamille(exercice.famille)}</>
-        ) : etat.phase === "canonique" ? (
-          <Katex expression={formatCibleLatex(exercice.famille, cibleFinale(exercice))} />
-        ) : etat.phase === "ehChSoy" ? (
-          <Katex expression={formatGabaritEtape2Latex(exercice)} />
-        ) : etat.phase === "th" ? (
-          <Katex expression={formatGabaritEtape3Latex(exercice)} />
-        ) : etat.phase === "evCvSox" ? (
-          <Katex expression={formatGabaritEtape4Latex(exercice)} />
-        ) : (
-          <Katex expression={formatGabaritLatex(exercice)} />
-        ),
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePhase(etat.phase, exercice),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -166,52 +225,86 @@ export function AppFormeCanoniqueFonctionsReference() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFormeCanoniqueFR
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              onChoisir={(choix) => terminerEtape(soumettreChoixFamilleFR(etat, choix))}
+              tentativesMax={1}
+              onChoisir={(choix) => terminerEtape(soumettreChoixFamilleFR(etat, choix), libelleFamille(choix))}
               validation={validation}
             />
           ) : etat.phase === "canonique" ? (
             <EtapeCanoniqueFR
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseCanoniqueFR(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCanoniqueFR(etat, reponse), fonctionSaisie(reponse.formeCanonique))}
               validation={validation}
             />
           ) : etat.phase === "ehChSoy" ? (
             <EtapeEhChSoy
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseEhChSoy(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseEhChSoy(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`\\text{EH} = ${reponse.eh}`} />
+                    <Katex expression={`\\text{CH} = ${reponse.ch}`} />
+                    <Katex expression={`\\text{SOY : ${ouiNon(reponse.soy)}}`} />
+                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "th" ? (
             <EtapeThFR
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseThFR(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseThFR(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`\\text{TH} = ${reponse.th}`} />
+                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "evCvSox" ? (
             <EtapeEvCvSoxFR
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseEvCvSoxFR(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseEvCvSoxFR(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`\\text{EV} = ${reponse.ev}`} />
+                    <Katex expression={`\\text{CV} = ${reponse.cv}`} />
+                    <Katex expression={`\\text{SOX : ${ouiNon(reponse.sox)}}`} />
+                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : (
             <EtapeTvFR
+              key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -221,6 +314,10 @@ export function AppFormeCanoniqueFonctionsReference() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

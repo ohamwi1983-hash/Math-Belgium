@@ -3,6 +3,7 @@ import type { ExerciceCaracteristiquesAlgebriques, ReponseExistence } from "../c
 import { diagnostiquerExpressionNumerique, parserExpressionNumerique } from "../moteur/verificationCaracteristiquesAlgebriques";
 import { formatEquationNiveau1Latex, placeholderExpressionNumerique } from "../ui/formatCaracteristiquesAlgebriques";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -65,6 +66,7 @@ export function EtapeOrdonneeAlgebrique({ exercice, tentativesUtilisees, tentati
           Il y en a une
         </button>
       </div>
+      {choix === "existe" && <ApercuExpressionLatex texte={valeur} label="f(0) =" />}
       {choix === "existe" && (
         <div className="field field-inline contenu-conditionnel">
           <label className="field-label field-label-minuscule" htmlFor="caract-alg-ordonnee">

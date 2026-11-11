@@ -286,7 +286,7 @@ export function AppFonctionsReference() {
             <EtapeReconnaissanceFonction
               key={`${generation}-reconnaissance`}
               tentativesUtilisees={etat.etapeReconnaissance.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={1}
               onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix), libelleFamille(choix))}
               validation={validation}
             />

@@ -13,6 +13,7 @@ import {
 import { NIVEAU_AIDE_MAX_ISOLEMENT } from "../moteur/sessionCaracteristiquesAlgebriques";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -76,6 +77,7 @@ export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentative
       ) : (
         <p className="prompt-text">{instructionIsolement(exercice.famille)}</p>
       )}
+      <ApercuExpressionLatex texte={texte} />
       <div className="field field-inline">
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}

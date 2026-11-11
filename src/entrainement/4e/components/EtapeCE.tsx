@@ -38,7 +38,8 @@ interface Props {
  * Étape "conditions d'existence" (spec section 4, point 2) — nombre variable (0 ou plusieurs) :
  * choix binaire "pas de CE"/"ajouter une CE" (même principe que
  * `EtapeZerosCaracteristiques.tsx`, douzième exercice), puis une liste extensible où chaque ligne
- * porte un symbole (`≠`/`>`/`≥`/`<`/`≤`) et une valeur (champ libre, tolérant aux fractions via
+ * porte « x », un symbole choisi dans une liste déroulante (`≠`/`>`/`≥`/`<`/`≤`) et une valeur — le tout sur une
+ * seule ligne, même sur smartphone (champ libre, tolérant aux fractions via
  * `parserNombreOuFraction` — les CE de ce générateur sont souvent des rationnels non entiers, ex.
  * `-1/3`).
  */
@@ -103,25 +104,37 @@ export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, niveauAi
         <div className="liste-morceaux contenu-conditionnel">
           {lignes.map((ligne, index) => (
             <div key={index} className="liste-morceaux-ligne">
-              <div className="options-grid">
-                {SYMBOLES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className={ligne.symbole === s ? "btn toggle-active" : "btn"}
-                    onClick={() => modifierSymbole(index, s)}
+              {/* « x », puis le symbole dans une liste déroulante, puis la valeur — une seule ligne,
+                  même à 360 px (retour de l'utilisateur : plus de rangée de 5 boutons « x ≠ », « x > »…). */}
+              <div className="ce-ligne-champs ce-ligne-compacte">
+                <span className="ce-slot-latex">
+                  <Katex expression="x" />
+                </span>
+                <span className="select-souligne-wrap ce-symbole-wrap">
+                  <select
+                    className={`ce-select${erronee ? " is-erronee" : ""}`}
+                    value={ligne.symbole ?? ""}
+                    onChange={(e) => modifierSymbole(index, e.target.value as SymboleCE)}
+                    aria-label={`Symbole de la CE ${index + 1}`}
                   >
-                    x {s}
-                  </button>
-                ))}
+                    <option value="" disabled>
+                      …
+                    </option>
+                    {SYMBOLES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </span>
+                <input
+                  className={`text-input${erronee ? " is-erronee" : ""}`}
+                  value={ligne.valeurTexte}
+                  onChange={(e) => modifierValeur(index, e.target.value)}
+                  placeholder="ex : 7/9"
+                  aria-label={`Valeur de la CE ${index + 1}`}
+                />
               </div>
-              <input
-                className={`text-input${erronee ? " is-erronee" : ""}`}
-                value={ligne.valeurTexte}
-                onChange={(e) => modifierValeur(index, e.target.value)}
-                placeholder="valeur, ex : -1/3"
-                aria-label={`Valeur de la CE ${index + 1}`}
-              />
               {lignes.length > 1 && (
                 <button
                   type="button"

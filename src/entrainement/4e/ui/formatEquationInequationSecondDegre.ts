@@ -17,7 +17,7 @@ function formatNombre(valeur: number): string {
 }
 
 /** Même nombre en TEXTE (consignes, réponses révélées) : virgule et « − » typographique. */
-function formatNombreTexte(valeur: number): string {
+export function formatNombreTexte(valeur: number): string {
   return formatNombre(valeur).replace("{,}", ",").replace("-", "−");
 }
 

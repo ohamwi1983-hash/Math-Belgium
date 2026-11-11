@@ -5,6 +5,7 @@ import { NIVEAU_AIDE_MAX_DEBARRASSER } from "../moteur/sessionCaracteristiquesAl
 import { formatEquationRechercheZerosLatex, instructionDebarrasser, placeholderDebarrasser, texteAideDebarrasser } from "../ui/formatCaracteristiquesAlgebriques";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -45,6 +46,7 @@ export function EtapeDebarrasser({ exercice, tentativesUtilisees, tentativesMax,
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
       <p className="prompt-text">{instructionDebarrasser(exercice.famille)}</p>
+      <ApercuExpressionLatex texte={texte} />
       <div className="field field-inline">
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}

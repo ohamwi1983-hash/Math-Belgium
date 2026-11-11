@@ -5,6 +5,7 @@ import { NIVEAU_AIDE_MAX_SEPARATION } from "../moteur/sessionCaracteristiquesAlg
 import { formatEquationRechercheZerosLatex, placeholdersSeparation, texteAideSeparation } from "../ui/formatCaracteristiquesAlgebriques";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -52,6 +53,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
       <p className="prompt-text">Sépare l'équation isolée en deux équations.</p>
+      <ApercuExpressionLatex texte={equation1} />
       <div className="field field-inline">
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}
@@ -62,6 +64,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
         />
       </div>
       <p className="prompt-connecteur">ou</p>
+      <ApercuExpressionLatex texte={equation2} />
       <div className="field field-inline">
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import type { ExerciceFormeCanoniqueFonctionReference, ReponseCanoniqueFR } from "../core/formeCanoniqueFonctionsReference.types";
 import { diagnostiquerCanoniqueFR } from "../moteur/verificationFormeCanoniqueFonctionsReference";
 import { formatFormeDepartLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
@@ -42,6 +43,7 @@ export function EtapeCanoniqueFR({ exercice, tentativesUtilisees, tentativesMax,
         <Katex expression={formatFormeDepartLatex(exercice)} block />
       </div>
       <p className="prompt-text">Simplifie cette expression pour obtenir la forme canonique.</p>
+      <ApercuExpressionLatex texte={formeCanonique} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="canonique-fr-forme">
           f(x) =

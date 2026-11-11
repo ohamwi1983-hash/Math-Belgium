@@ -1216,6 +1216,28 @@
  * correctement dimensionnées par la règle générique `.field-row > *` — l'exclusion garantit un
  * comportement rigoureusement inchangé sur ce seul écran, cette règle ne corrigeant que les 5
  * autres où `.ce-slot-latex` est seule à porter l'étiquette. */
+/* Ligne CE compacte de gen13 (« x » + liste déroulante du symbole + valeur) : tient sur UNE ligne à
+ * 360 px, bouton « × » compris — la liste garde une largeur fixe, le champ prend le reste. */
+.entrainement .ce-ligne-compacte {
+  min-width: 0;
+  gap: 8px;
+}
+
+.entrainement .ce-ligne-compacte .ce-symbole-wrap {
+  flex: none;
+  width: 64px;
+}
+
+.entrainement .ce-ligne-compacte .ce-select {
+  font-size: 17px;
+  text-align: center;
+}
+
+.entrainement .ce-ligne-compacte .text-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .entrainement .ce-slot-latex:not(.field-label) {
   flex: none;
   white-space: nowrap;

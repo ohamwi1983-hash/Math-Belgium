@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   demarrerSessionFormeCanoniqueTransformation,
@@ -18,6 +19,11 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { SaisieExpressionLatex } from "./components/SaisieExpressionLatex";
+import { calculerRecapitulatifFormeCanoniqueTransformations } from "./ui/recapitulatifFormeCanoniqueTransformations";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction du second degré.";
 
@@ -48,8 +54,8 @@ const ORDRE_PHASES: PhaseFormeCanoniqueTransformation[] = ["canonique", "th", "e
 /** `tv` (dernière phase) n'a jamais besoin de sa propre branche "close" : une fois l'exercice
  * terminé, un nouveau redémarre à "canonique" (index 0), donc `tv` reste "a-venir" jusqu'à devenir
  * "courante" — jamais consultée en tant que phase passée (même principe que `AppAnalyseFonction`/
- * `AppMethodeRapide`). Puces purement visuelles ici (pas de `onSegmentClick`, comportement explicitement
- * supporté par `ProgressionPuces` sans historique de consultation à câbler). */
+ * `AppMethodeRapide`). Les puces closes sont cliquables (fiche « Ta réponse » / « Réponse attendue »,
+ * historique tenu par l'appli). Ce générateur n'a pas de mécanisme d'aide : jamais « aide ». */
 function calculerSegmentsProgression(etat: EtatSessionFormeCanoniqueTransformation): EtatPuceProgression[] {
   const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
   return ORDRE_PHASES.map((phase, index) => {
@@ -69,16 +75,50 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Expression saisie, rendue comme dans l'aperçu sous le champ. */
+function fonctionSaisie(texte: string): ReactNode {
+  return <SaisieExpressionLatex texte={texte} prefixeLatex="f(x) =" />;
+}
+
 export function AppFormeCanoniqueTransformations() {
   const [etat, setEtat] = useState<EtatSessionFormeCanoniqueTransformation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — tenu ICI, jamais dans
+   * le moteur ; remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+
+  /** Appelé quand un écran se clôt, avec l'état DÉJÀ mis à jour : la réponse attendue est la
+   * dernière entrée du récapitulatif (même source que « Ce qu'on sait déjà »). Jamais pour "tv"
+   * (dernier écran : clôt l'exercice, sa puce n'est jamais consultable). */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionFormeCanoniqueTransformation) {
+    const recap = calculerRecapitulatifFormeCanoniqueTransformations(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (
+          <span className="equation-box-termes">
+            {(derniere.valeurs ?? [derniere.valeur]).map((v, i) => (
+              <Katex key={i} expression={v} />
+            ))}
+          </span>
+        ) : undefined,
+      },
+    ]);
+  }
   /** Compteur de génération, dans la clé des écrans : « Nouvel exercice » remonte l'écran même s'il
    * revient à la même phase (champs vidés). */
   const [generation, setGeneration] = useState(0);
 
-  function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueTransformation) {
+  function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueTransformation, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined && !nouvelEtat.terminee) ajouterHistorique(votreReponse, nouvelEtat);
       const revele =
         etat.phase === "canonique"
           ? nouvelEtat.canoniqueRevele
@@ -95,7 +135,11 @@ export function AppFormeCanoniqueTransformations() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -133,17 +177,27 @@ export function AppFormeCanoniqueTransformations() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <RecapitulatifPanel entrees={calculerRecapitulatifFormeCanoniqueTransformations(etat)} />
           {etat.phase === "canonique" ? (
             <EtapeCanonique
               key={`${generation}-${etat.phase}`}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseCanonique(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseCanonique(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`x_S = ${reponse.xS}`} />
+                    <Katex expression={`y_S = ${reponse.yS}`} />
+                    {fonctionSaisie(reponse.formeCanonique)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "th" ? (
@@ -152,7 +206,15 @@ export function AppFormeCanoniqueTransformations() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseTh(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseTh(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`\\text{TH} = ${reponse.th}`} />
+                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "evCvSox" ? (
@@ -161,7 +223,17 @@ export function AppFormeCanoniqueTransformations() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseEvCvSox(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseEvCvSox(etat, reponse),
+                  <span className="equation-box-termes">
+                    <Katex expression={`\\text{EV} = ${reponse.ev}`} />
+                    <Katex expression={`\\text{CV} = ${reponse.cv}`} />
+                    <Katex expression={`\\text{SOX : ${reponse.sox ? "oui" : "non"}}`} />
+                    {fonctionSaisie(reponse.fonctionIntermediaire)}
+                  </span>,
+                )
+              }
               validation={validation}
             />
           ) : (
@@ -176,6 +248,10 @@ export function AppFormeCanoniqueTransformations() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

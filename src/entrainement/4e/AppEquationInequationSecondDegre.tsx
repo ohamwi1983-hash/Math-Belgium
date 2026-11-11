@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -30,11 +31,14 @@ import { EtapeResoudreEquationInequationSecondDegre } from "./components/EtapeRe
 import { EtapeValidationEquationInequationSecondDegre } from "./components/EtapeValidationEquationInequationSecondDegre";
 import { EtapeInterpretationEquationInequationSecondDegre } from "./components/EtapeInterpretationEquationInequationSecondDegre";
 import { QuestionFinale } from "./components/QuestionFinale";
-import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatValidationAttendueTexte, texteAidePoserSystemeNiveau2 } from "./ui/formatEquationInequationSecondDegre";
+import { formatEquationInequationLatex, formatNombreTexte, formatResolutionAttendueTexte, formatValidationAttendueTexte, texteAidePoserSystemeNiveau2 } from "./ui/formatEquationInequationSecondDegre";
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -79,7 +83,7 @@ function sessionInitiale(): EtatSessionEquationInequationSecondDegre {
 /** Séquence dépendant de `exercice.voieSysteme` (architecture D vs A/B/C — voir
  * `typesEquationInequationSecondDegre.ts`) : "interpretation" (dernière phase des 2 chemins) n'a
  * jamais besoin de sa propre branche "close" ci-dessous — jamais consultée comme phase passée.
- * Puces purement visuelles (pas de `onSegmentClick`). */
+ * Les puces closes sont cliquables (`onSegmentClick` → `FicheReponseEcran`). */
 function sequencePourExercice(exercice: EtatSessionEquationInequationSecondDegre["exerciceCourant"]): PhaseEquationInequationSecondDegre[] {
   return exercice.voieSysteme
     ? ["poserSysteme", "isolerSubstituer", "resoudre", "validation", "interpretation"]
@@ -117,6 +121,60 @@ function calculerSegmentsProgression(etat: EtatSessionEquationInequationSecondDe
   });
 }
 
+type ExerciceCourant = EtatSessionEquationInequationSecondDegre["exerciceCourant"];
+
+/** Saisie libre de l'élève rendue en KaTeX (même conversion que l'aperçu sous le champ) — texte brut
+ * si elle ne se lit pas comme une expression. */
+function saisieLatex(texte: string): ReactNode {
+  try {
+    return <Katex expression={expressionLibreVersLatex(texte)} />;
+  } catch {
+    return texte;
+  }
+}
+
+/** Nombre tapé par l'élève, virgule décimale et « − » typographique. */
+function nombreSaisi(texte: string): string {
+  return texte.trim().replace(".", ",").replace(/^-/, "−");
+}
+
+/** Titre de chaque écran dans la fiche de consultation (mêmes libellés que « Ce qu'on sait déjà »). */
+function titrePhase(exercice: ExerciceCourant, phase: PhaseEquationInequationSecondDegre): string {
+  switch (phase) {
+    case "poserSysteme":
+      return "Système posé";
+    case "isolerSubstituer":
+      return exercice.variante === "equation" ? "Équation réduite" : "Inéquation réduite";
+    case "poserEquationInequation":
+      return exercice.variante === "equation" ? "Équation posée" : "Inéquation posée";
+    case "resoudre":
+      return "Résolution";
+    case "validation":
+      return "Validation";
+    case "interpretation":
+      return "Interprétation";
+  }
+}
+
+/** Réponse attendue d'un écran — la MÊME pour l'écran de validation et pour la fiche de consultation. */
+function reponseAttenduePour(exercice: ExerciceCourant, phase: PhaseEquationInequationSecondDegre): ReactNode {
+  switch (phase) {
+    case "poserSysteme":
+      return <Katex expression={texteAidePoserSystemeNiveau2(exercice)} />;
+    case "isolerSubstituer":
+    case "poserEquationInequation":
+      return <Katex expression={formatEquationInequationLatex(exercice)} />;
+    case "resoudre":
+      return <>{formatResolutionAttendueTexte(exercice)}</>;
+    case "validation":
+      return <>{formatValidationAttendueTexte(exercice)}</>;
+    case "interpretation": {
+      const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
+      return optionCorrecte ? <>{optionCorrecte.texte}</> : undefined;
+    }
+  }
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -132,8 +190,15 @@ export function AppEquationInequationSecondDegre() {
   /** Compteur de génération, dans la clé des écrans : « Générer » ou « Nouvel exercice » remonte
    * l'écran (champs vidés) même s'il reste sur la même phase. */
   const [generation, setGeneration] = useState(0);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — une entrée par écran
+   * clos, dans l'ordre de `sequencePourExercice` (donc au même index que sa puce). Vidé à chaque
+   * nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionEquationInequationSecondDegre) {
+  /** `votreReponse` n'est poussé dans l'historique que lorsque l'écran se clôt réellement (jamais à
+   * chaque essai raté). */
+  function terminerEtape(nouvelEtat: EtatSessionEquationInequationSecondDegre, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele = (() => {
@@ -152,6 +217,14 @@ export function AppEquationInequationSecondDegre() {
             return nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.interpretationRevele;
         }
       })();
+      if (votreReponse !== undefined && etat.phase !== "interpretation") {
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          { titre: titrePhase(exerciceClos, phaseClose), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(exerciceClos, phaseClose) : undefined },
+        ]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -160,7 +233,10 @@ export function AppEquationInequationSecondDegre() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
+      setHistorique([]);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -168,33 +244,18 @@ export function AppEquationInequationSecondDegre() {
   function forcerVariante(id: string) {
     setEnAttente(null);
     setGeneration((g) => g + 1);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionEquationInequationSecondDegre(REGLAGES_DEMO, () => construireDepuisOption(id)));
   }
 
   const exercice = etat.exerciceCourant;
-  const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
-
   const recapitulatif = calculerRecapitulatifEquationInequationSecondDegre(etat);
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
-          switch (etat.phase) {
-            case "poserSysteme":
-              return <Katex expression={texteAidePoserSystemeNiveau2(exercice)} />;
-            case "isolerSubstituer":
-              return <Katex expression={formatEquationInequationLatex(exercice)} />;
-            case "poserEquationInequation":
-              return <Katex expression={formatEquationInequationLatex(exercice)} />;
-            case "resoudre":
-              return <>{formatResolutionAttendueTexte(exercice)}</>;
-            case "validation":
-              return <>{formatValidationAttendueTexte(exercice)}</>;
-            case "interpretation":
-              return optionCorrecte ? <>{optionCorrecte.texte}</> : undefined;
-          }
-        })(),
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePour(exercice, etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -205,12 +266,12 @@ export function AppEquationInequationSecondDegre() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Équations/inéquations du second degré en contexte</h1>
-        <p className="app-subtitle">Chapitre 1</p>
+        <p className="app-subtitle">Chapitre 2</p>
         <SelecteurVarianteDev options={OPTIONS_DEV} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <RecapitulatifPanel entrees={recapitulatif} />
@@ -223,7 +284,15 @@ export function AppEquationInequationSecondDegre() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAidePoserSysteme}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponsePoserSysteme(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponsePoserSysteme(etat, reponse), (
+                  <>
+                    {saisieLatex(reponse.relation1)}
+                    <br />
+                    {saisieLatex(reponse.relation2)}
+                  </>
+                ))
+              }
               validation={validation}
             />
           ) : etat.phase === "isolerSubstituer" ? (
@@ -234,7 +303,7 @@ export function AppEquationInequationSecondDegre() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideIsolerSubstituer}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseIsolerSubstituer(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseIsolerSubstituer(etat, texte), saisieLatex(texte))}
               validation={validation}
             />
           ) : etat.phase === "poserEquationInequation" ? (
@@ -245,7 +314,7 @@ export function AppEquationInequationSecondDegre() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAidePoserEquationInequation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponsePoserEquationInequation(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponsePoserEquationInequation(etat, texte), saisieLatex(texte))}
               validation={validation}
             />
           ) : etat.phase === "resoudre" ? (
@@ -256,7 +325,7 @@ export function AppEquationInequationSecondDegre() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideResoudre}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(valeurs) => terminerEtape(soumettreReponseResoudre(etat, valeurs))}
+              onValider={(valeurs) => terminerEtape(soumettreReponseResoudre(etat, valeurs), valeurs.map((v, i) => `${exercice.base.contexte.labelVariable}${i === 0 ? "₁" : "₂"} = ${nombreSaisi(v)}`).join(" ; "))}
               validation={validation}
             />
           ) : etat.phase === "validation" ? (
@@ -267,8 +336,17 @@ export function AppEquationInequationSecondDegre() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideValidation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValiderEquation={(reponses) => terminerEtape(soumettreReponseValidationEquation(etat, reponses))}
-              onValiderInequation={(reponse) => terminerEtape(soumettreReponseValidationInequation(etat, reponse))}
+              onValiderEquation={(reponses) =>
+                terminerEtape(
+                  soumettreReponseValidationEquation(etat, reponses),
+                  exercice.variante === "equation"
+                    ? exercice.racinesCandidates.map((r, i) => `${exercice.base.contexte.labelVariable} = ${formatNombreTexte(r)} : ${reponses[i] ? "valide" : "rejetée"}`).join(", ")
+                    : undefined,
+                )
+              }
+              onValiderInequation={(reponse) =>
+                terminerEtape(soumettreReponseValidationInequation(etat, reponse), `${exercice.base.contexte.labelVariable} ∈ [${nombreSaisi(reponse.inf)} ; ${nombreSaisi(reponse.sup)}]`)
+              }
               validation={validation}
             />
           ) : etat.phase === "interpretation" ? (
@@ -285,6 +363,10 @@ export function AppEquationInequationSecondDegre() {
           ) : null}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

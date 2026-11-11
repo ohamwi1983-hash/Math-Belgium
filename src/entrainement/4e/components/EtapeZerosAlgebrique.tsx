@@ -5,6 +5,7 @@ import { INSTRUCTION_ZEROS, formatEquationRechercheZerosLatex, placeholderExpres
 import { NIVEAU_AIDE_MAX_ZEROS } from "../moteur/sessionCaracteristiquesAlgebriques";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -100,7 +101,9 @@ export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentatives
       {choix === "auMoinsUn" && (
         <div className="liste-morceaux contenu-conditionnel">
           {valeurs.map((valeur, index) => (
-            <div key={index} className="liste-morceaux-ligne">
+            <div key={index} className="liste-morceaux-zero">
+            <ApercuExpressionLatex texte={valeur} label={`Zéro ${index + 1} :`} />
+            <div className="liste-morceaux-ligne">
               <input
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 value={valeur}
@@ -118,6 +121,7 @@ export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentatives
                   ×
                 </button>
               )}
+            </div>
             </div>
           ))}
           <button type="button" className="btn liste-morceaux-ajouter" onClick={ajouterChamp}>
