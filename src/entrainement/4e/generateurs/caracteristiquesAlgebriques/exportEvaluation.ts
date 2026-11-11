@@ -1,4 +1,4 @@
-import type { ExerciceCaracteristiquesAlgebriquesNiveau1, ReponseDomaine } from "../../core/caracteristiquesAlgebriques.types";
+import type { ExerciceCaracteristiquesAlgebriques, ExerciceCaracteristiquesAlgebriquesNiveau1, ReponseDomaine } from "../../core/caracteristiquesAlgebriques.types";
 import type { FamilleReference } from "../../core/fonctionsReference.types";
 import type { Morceau } from "../../core/inequation.types";
 import type {
@@ -39,14 +39,26 @@ import {
   instructionDebarrasser,
   instructionIsolement,
 } from "../../ui/formatCaracteristiquesAlgebriques";
-import { CATALOGUE_VARIANTES, construireNiveau1AvecFamille, genererExerciceCaracteristiquesAlgebriques } from "./index";
+import { CATALOGUE_VARIANTES_FAMILLE_NIVEAU, construireAvecVarianteFamilleNiveau, genererExerciceFamilleNiveauAleatoire } from "./index";
+import {
+  baremeNiveau2,
+  construireCorrectionNiveau2,
+  construireEnonceNiveau2,
+  correctionDetailleeNiveau2,
+  difficulteNiveau2,
+  enoncePapierNiveau2,
+  reponseBreveNiveau2,
+} from "./exportEvaluationNiveau2";
 import { profilCaracteristiquesAlgebriques, LIBELLE_CAS_ETUDE_ALGEBRIQUE } from "../profilsEvaluation4eCh2Ch3";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCaracteristiquesAlgebriquesNiveau1>` pour gen13
  * (Étudier algébriquement une fonction de référence, chapitre 3 — `AppCaracteristiquesAlgebriques.tsx`).
  *
- * NIVEAU RETENU — niveau 1 uniquement (`k` constant), jamais le niveau 2 (`k(x)=cx+d`) : les deux
+ * NIVEAUX 1 ET 2 (mise à jour : demande de l'utilisateur, le sélecteur de variantes des feuilles doit
+ * proposer la famille ET le niveau — catalogue `CATALOGUE_VARIANTES_FAMILLE_NIVEAU`). Le niveau 2 est
+ * rédigé dans `exportEvaluationNiveau2.ts` ; ce fichier garde le niveau 1 et aiguille selon
+ * `instance.niveau`. Note d'origine, conservée pour l'historique : niveau 1 uniquement, car les deux
  * niveaux ne sont PAS deux étapes progressives d'une même séance (voir
  * `EtapeReglagesCaracteristiquesAlgebriques.tsx`) mais un réglage professeur qui s'applique
  * UNIFORMÉMENT à toute une série (`niveau1` par défaut à l'écran, jamais mélangé — voir
@@ -108,19 +120,6 @@ function formatDomaineAttenduLatex(domaine: ReponseDomaine): string {
     case "intervalles":
       return domaine.intervalles.map(formatMorceauLatex).join(" \\cup ");
   }
-}
-
-/** Toujours niveau 1 (voir la note de tête de fichier) — `genererExerciceCaracteristiquesAlgebriques`
- * (export zéro-argument de `./index`) construit déjà exclusivement des instances niveau 1, cette
- * fonction ne fait que resserrer le type union à `ExerciceCaracteristiquesAlgebriquesNiveau1` pour
- * le contrat `AdaptateurFeuilleExercices<T>` (jamais une seconde logique de tirage de famille
- * dupliquée ici). */
-function genererInstanceNiveau1(): ExerciceCaracteristiquesAlgebriquesNiveau1 {
-  const instance = genererExerciceCaracteristiquesAlgebriques();
-  if (instance.niveau !== "niveau1") {
-    throw new Error("genererInstanceNiveau1 : genererExerciceCaracteristiquesAlgebriques a produit une instance niveau 2 inattendue");
-  }
-  return instance;
 }
 
 function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): SectionExercice {
@@ -517,20 +516,28 @@ function enoncePapierCaracteristiquesAlgebriques(instance: ExerciceCaracteristiq
   };
 }
 
-export const adaptateurEvaluationCaracteristiquesAlgebriques: AdaptateurFeuilleExercices<ExerciceCaracteristiquesAlgebriquesNiveau1> = {
+type Instance = ExerciceCaracteristiquesAlgebriques;
+
+/** Aiguillage niveau 1 / niveau 2 — chaque niveau garde ses propres fonctions (mêmes sources que
+ * l'écran interactif). */
+function selonNiveau<R>(niveau1: (e: ExerciceCaracteristiquesAlgebriquesNiveau1) => R, niveau2: (e: Exclude<Instance, ExerciceCaracteristiquesAlgebriquesNiveau1>) => R) {
+  return (instance: Instance): R => (instance.niveau === "niveau1" ? niveau1(instance) : niveau2(instance));
+}
+
+export const adaptateurEvaluationCaracteristiquesAlgebriques: AdaptateurFeuilleExercices<Instance> = {
   profilInstance: profilCaracteristiquesAlgebriques,
   libelleCasParticulier: LIBELLE_CAS_ETUDE_ALGEBRIQUE,
   titreDocument: "Étudier algébriquement une fonction de référence — Évaluation",
   nomFichierBase: "caracteristiques-algebriques",
-  genererInstance: genererInstanceNiveau1,
-  catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireNiveau1AvecFamille(id as FamilleReference),
-  construireEnonce: construireEnonceCaracteristiquesAlgebriques,
-  construireCorrection: construireCorrectionCaracteristiquesAlgebriques,
-  difficulte: difficulteCaracteristiquesAlgebriques,
-  reponseBreve: reponseBreveCaracteristiquesAlgebriques,
-  correctionDetaillee: correctionDetailleeCaracteristiquesAlgebriques,
-  bareme: baremeCaracteristiquesAlgebriques,
-  enoncePapier: enoncePapierCaracteristiquesAlgebriques,
-  dureeMinutes: 8,
+  genererInstance: genererExerciceFamilleNiveauAleatoire,
+  catalogueVariantes: CATALOGUE_VARIANTES_FAMILLE_NIVEAU,
+  genererInstanceAvecVariante: construireAvecVarianteFamilleNiveau,
+  construireEnonce: selonNiveau(construireEnonceCaracteristiquesAlgebriques, construireEnonceNiveau2),
+  construireCorrection: selonNiveau(construireCorrectionCaracteristiquesAlgebriques, construireCorrectionNiveau2),
+  difficulte: selonNiveau(difficulteCaracteristiquesAlgebriques, difficulteNiveau2),
+  reponseBreve: selonNiveau(reponseBreveCaracteristiquesAlgebriques, reponseBreveNiveau2),
+  correctionDetaillee: selonNiveau(correctionDetailleeCaracteristiquesAlgebriques, correctionDetailleeNiveau2),
+  bareme: selonNiveau(baremeCaracteristiquesAlgebriques, baremeNiveau2),
+  enoncePapier: selonNiveau(enoncePapierCaracteristiquesAlgebriques, enoncePapierNiveau2),
+  dureeMinutes: 10,
 };

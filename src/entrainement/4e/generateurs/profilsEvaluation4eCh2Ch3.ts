@@ -26,7 +26,7 @@ import type { ExerciceRelationsRacines } from "../core/relationsRacines.types";
 import type { ExerciceFonctionReference } from "../core/fonctionsReference.types";
 import type { ExerciceFormeCanoniqueFonctionReference } from "../core/formeCanoniqueFonctionsReference.types";
 import type { ExerciceCaracteristiquesFonction } from "../core/caracteristiquesFonction.types";
-import type { ExerciceCaracteristiquesAlgebriquesNiveau1 } from "../core/caracteristiquesAlgebriques.types";
+import type { ExerciceCaracteristiquesAlgebriques } from "../core/caracteristiquesAlgebriques.types";
 
 function cas(liste: (string | false)[]): string | null {
   const presents = liste.filter((c): c is string => !!c);
@@ -135,8 +135,10 @@ const FAMILLES_PAIRES_POSITIVES = ["carre", "valeur_absolue", "racine_carree"];
 
 /** gen13 — étude algébrique de f(x) = [base](ax + b) + k. Raccourcis : k > 0 pour le carré, la
  * valeur absolue ou la racine carrée (« aucun zéro » en une ligne) ; k = 0 (le zéro se lit
- * directement, ax + b = 0) ; b = 0 (argument ax : parité et zéro immédiats). */
-export function profilCaracteristiquesAlgebriques(e: ExerciceCaracteristiquesAlgebriquesNiveau1): ProfilInstance {
+ * directement, ax + b = 0) ; b = 0 (argument ax : parité et zéro immédiats). Niveau 2 (k(x) = cx + d,
+ * proposé dans les feuilles depuis le catalogue famille × niveau) : aucun raccourci mesuré — « aucun
+ * zéro » s'y obtient par le calcul de Δ ou par la validation (un verdict, jamais filtré). */
+export function profilCaracteristiquesAlgebriques(e: ExerciceCaracteristiquesAlgebriques): ProfilInstance {
   if (e.niveau !== "niveau1") return { casParticulier: null };
   return {
     casParticulier: cas([

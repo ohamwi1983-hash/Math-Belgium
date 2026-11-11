@@ -70,7 +70,9 @@ function ligneValidation(exercice: ExerciceEquationInequationSecondDegre): strin
     return exercice.racinesValides.map((r) => `${label} = ${formatNombre(r)}`).join(" \\text{ ou } ");
   }
   const { inf, sup } = exercice.intervalleValide;
-  return `${label} \\in \\left[ ${formatNombre(inf)} \\, ; \\, ${formatNombre(sup)} \\right]`;
+  const gauche = inf === exercice.intervalleBrut.inf ? "\\left]" : "\\left[";
+  const droite = sup === exercice.intervalleBrut.sup ? "\\right[" : "\\right]";
+  return `${label} \\in ${gauche} ${formatNombre(inf)} \\, ; \\, ${formatNombre(sup)} ${droite}`;
 }
 
 /** État actuel — écran "poserEquationInequation" : fonction+domaine déjà confirmés (écrans 1-3). */
@@ -208,7 +210,12 @@ export function formatValidationAttendueTexte(exercice: ExerciceEquationInequati
     if (exercice.racinesValides.length === 0) return "aucune racine valide";
     return exercice.racinesCandidates.map((r) => `${label} = ${formatNombreTexte(r)} : ${exercice.racinesValides.includes(r) ? "valide" : "rejetée"}`).join(", ");
   }
-  return `${label} ∈ [${formatNombreTexte(exercice.intervalleValide.inf)} ; ${formatNombreTexte(exercice.intervalleValide.sup)}]`;
+  // Borne venant d'une racine de l'inéquation (toujours stricte) : exclue ; borne venant du domaine
+  // de validité : incluse — même règle que le corrigé papier (exportEvaluation.ts).
+  const { inf, sup } = exercice.intervalleValide;
+  const gauche = inf === exercice.intervalleBrut.inf ? "]" : "[";
+  const droite = sup === exercice.intervalleBrut.sup ? "[" : "]";
+  return `${label} ∈ ${gauche}${formatNombreTexte(inf)} ; ${formatNombreTexte(sup)}${droite}`;
 }
 
 // ============================================================================

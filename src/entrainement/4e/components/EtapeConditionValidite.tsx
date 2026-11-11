@@ -67,19 +67,34 @@ export function EtapeConditionValidite({ exercice, tentativesUtilisees, tentativ
       <p className="prompt-text">
         Établis la condition pour que <Katex expression={expressionConditionValiditeLatex(exercice)} /> ≥ 0.
       </p>
-      <div className="options-grid">
-        {SYMBOLES.map((s) => (
-          <button key={s} type="button" className={symbole === s ? "btn toggle-active" : "btn"} onClick={() => setSymbole(s)}>
-            x {s}
-          </button>
-        ))}
-      </div>
-      <div className="field field-inline">
+      {/* « x », le symbole dans une liste déroulante, puis la valeur — une seule ligne, comme l'écran
+          des conditions d'existence (retour de l'utilisateur). */}
+      <div className="ce-ligne-champs ce-ligne-compacte">
+        <span className="ce-slot-latex">
+          <Katex expression="x" />
+        </span>
+        <span className="select-souligne-wrap ce-symbole-wrap">
+          <select
+            className={`ce-select${erronee ? " is-erronee" : ""}`}
+            value={symbole ?? ""}
+            onChange={(e) => setSymbole(e.target.value as SymboleConditionSimple)}
+            aria-label="Symbole de la condition"
+          >
+            <option value="" disabled>
+              …
+            </option>
+            {SYMBOLES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </span>
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}
           value={valeurTexte}
           onChange={(e) => setValeurTexte(e.target.value)}
-          placeholder="valeur, ex : -1/3"
+          placeholder="ex : 7/9"
           aria-label="Valeur seuil de la condition"
         />
       </div>

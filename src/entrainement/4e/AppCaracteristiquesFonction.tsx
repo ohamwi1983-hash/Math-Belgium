@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReponseAsymptotesCaracteristiques, ReponseExistence, ReponseZerosCaracteristiques } from "./core/caracteristiquesFonction.types";
 import type { ExerciceCaracteristiquesFonction } from "./core/caracteristiquesFonction.types";
 import type { Morceau } from "./core/inequation.types";
@@ -42,6 +43,8 @@ import type { EtatListeMorceaux } from "./ui/listeMorceaux";
 import { morceauxCompletsPourSurlignage } from "./ui/surlignageCaracteristiques";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const CONSIGNE_GENERALE = "Lis les caractéristiques de cette fonction sur son graphique.";
 
@@ -66,13 +69,18 @@ function sessionInitiale(): EtatSessionCaracteristiquesFonction {
   return demarrerSessionCaracteristiquesFonction(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceCaracteristiquesFonction, undefined));
 }
 
-/** Arrondi d'affichage (3 décimales) pour une révélation — jamais utilisé pour la vérification elle-même. */
+/** Arrondi d'affichage (3 décimales) pour une révélation — jamais utilisé pour la vérification
+ * elle-même. Virgule décimale et « − » typographique. */
 function formatNombre(valeur: number): string {
-  return `${Number(valeur.toFixed(3))}`;
+  return `${Number(valeur.toFixed(3))}`.replace(".", ",").replace("-", "−");
+}
+
+function formatBorne(borne: Morceau["borneGauche"]): string {
+  return borne === "-inf" ? "−∞" : borne === "+inf" ? "+∞" : formatNombre(borne);
 }
 
 function formatMorceau(m: Morceau): string {
-  return `${m.crochetGauche}${m.borneGauche} ; ${m.borneDroite}${m.crochetDroit}`;
+  return `${m.crochetGauche}${formatBorne(m.borneGauche)} ; ${formatBorne(m.borneDroite)}${m.crochetDroit}`;
 }
 
 function formatDomaineAttendu(exercice: ExerciceCaracteristiquesFonction): string {
@@ -81,7 +89,27 @@ function formatDomaineAttendu(exercice: ExerciceCaracteristiquesFonction): strin
 
 function formatZerosAttendus(exercice: ExerciceCaracteristiquesFonction): string {
   if (exercice.zeros.length === 0) return "aucun";
-  return [...exercice.zeros].sort((a, b) => a - b).join(" ; ");
+  return [...exercice.zeros].sort((a, b) => a - b).map(formatNombre).join(" ; ");
+}
+
+/** Titre de chaque écran dans la fiche des puces cliquables (même ordre que `ORDRE_PHASES`). */
+const TITRE_PHASE: Record<PhaseCaracteristiquesFonction, string> = {
+  domaine: "Domaine de définition",
+  zeros: "Zéros",
+  croissance: "Intervalles de croissance",
+  decroissance: "Intervalles de décroissance",
+  constance: "Intervalles de constance",
+  ordonnee: "Ordonnée à l'origine",
+  valeur: "Image de v",
+  asymptotes: "Asymptotes",
+};
+
+function formatListe(morceaux: Morceau[]): string {
+  return morceaux.length === 0 ? "aucun" : formatMorceaux(morceaux);
+}
+
+function formatExistence(reponse: ReponseExistence): string {
+  return reponse.existe && reponse.valeur !== null ? formatNombre(reponse.valeur) : "n'existe pas";
 }
 
 function formatMorceaux(morceaux: Morceau[]): string {
@@ -143,8 +171,13 @@ function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesFonction):
 export function AppCaracteristiquesFonction() {
   const [etat, setEtat] = useState<EtatSessionCaracteristiquesFonction>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Puces cliquables : une entrée par écran clos (même index que `ORDRE_PHASES`, séquence fixe),
+   * construite au moment où l'écran se clôt — jamais recalculée après coup. Remis à vide à chaque
+   * nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesFonction) {
+  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesFonction, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -163,6 +196,15 @@ export function AppCaracteristiquesFonction() {
                     : etat.phase === "valeur"
                       ? nouvelEtat.valeurRevele
                       : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.asymptotesRevele;
+      if (votreReponse !== undefined) {
+        const index = ORDRE_PHASES.indexOf(etat.phase);
+        const attendue = reponseAttendueTexte(etat.phase);
+        setHistorique((h) => {
+          const copie = [...h];
+          copie[index] = { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue };
+          return copie;
+        });
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -171,36 +213,63 @@ export function AppCaracteristiquesFonction() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee || enAttente.etatSuivant.indexExercice !== etat.indexExercice) {
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
+  /** Réponse attendue de l'écran courant (texte), même contenu que la révélation de `ValidationEcran`. */
+  function reponseAttendueTexte(phase: PhaseCaracteristiquesFonction): string {
+    const ex = etat.exerciceCourant;
+    switch (phase) {
+      case "domaine":
+        return formatDomaineAttendu(ex);
+      case "zeros":
+        return formatZerosAttendus(ex);
+      case "croissance":
+        return formatListe(croissanceAttendueCaracteristiques(ex));
+      case "decroissance":
+        return formatListe(decroissanceAttendueCaracteristiques(ex));
+      case "constance":
+        return formatListe(constanceAttendueCaracteristiques(ex));
+      case "ordonnee":
+        return existeOrdonneeCaracteristiques(ex) ? `f(0) = ${formatNombre(evaluerCourbeCaracteristiques(ex, 0))}` : "n'existe pas";
+      case "valeur":
+        return existeValeurEnVCaracteristiques(ex) ? `f(${formatNombre(ex.v)}) = ${formatNombre(evaluerCourbeCaracteristiques(ex, ex.v))}` : "n'existe pas";
+      case "asymptotes":
+        return `x = ${formatNombre(ex.AV)} ; y = ${formatNombre(ex.L)}`;
+    }
+  }
+
   function validerDomaine(reponse: Morceau[]) {
-    terminerEtape(soumettreReponseDomaine(etat, reponse));
+    terminerEtape(soumettreReponseDomaine(etat, reponse), formatListe(reponse));
   }
 
   function validerZeros(reponse: ReponseZerosCaracteristiques) {
-    terminerEtape(soumettreReponseZeros(etat, reponse));
+    terminerEtape(soumettreReponseZeros(etat, reponse), reponse.aucun ? "aucun" : [...reponse.valeurs].sort((a, b) => a - b).map(formatNombre).join(" ; "));
   }
 
   function validerCroissance(reponse: Morceau[]) {
-    terminerEtape(soumettreReponseCroissance(etat, reponse));
+    terminerEtape(soumettreReponseCroissance(etat, reponse), formatListe(reponse));
   }
 
   function validerDecroissance(reponse: Morceau[]) {
-    terminerEtape(soumettreReponseDecroissance(etat, reponse));
+    terminerEtape(soumettreReponseDecroissance(etat, reponse), formatListe(reponse));
   }
 
   function validerConstance(reponse: Morceau[]) {
-    terminerEtape(soumettreReponseConstance(etat, reponse));
+    terminerEtape(soumettreReponseConstance(etat, reponse), formatListe(reponse));
   }
 
   function validerOrdonnee(reponse: ReponseExistence) {
-    terminerEtape(soumettreReponseOrdonnee(etat, reponse));
+    terminerEtape(soumettreReponseOrdonnee(etat, reponse), reponse.existe ? `f(0) = ${formatExistence(reponse)}` : "n'existe pas");
   }
 
   function validerValeur(reponse: ReponseExistence) {
-    terminerEtape(soumettreReponseValeur(etat, reponse));
+    terminerEtape(soumettreReponseValeur(etat, reponse), reponse.existe ? `f(${formatNombre(etat.exerciceCourant.v)}) = ${formatExistence(reponse)}` : "n'existe pas");
   }
 
   function validerAsymptotes(reponse: ReponseAsymptotesCaracteristiques) {
@@ -271,7 +340,7 @@ export function AppCaracteristiquesFonction() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques d'une fonction (lecture graphique)</h1>
         <p className="app-subtitle">Chapitre 3</p>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -347,6 +416,10 @@ export function AppCaracteristiquesFonction() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
