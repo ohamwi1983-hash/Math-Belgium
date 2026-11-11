@@ -15,6 +15,7 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen29` — Intégrales et primitives : problèmes (chapitre 4, générateur DE CLÔTURE). Même patron
@@ -31,6 +32,18 @@ function nouvelleSession(): EtatSessionIntegralesProblemes {
   return demarrerSessionIntegralesProblemes(REGLAGES_DEMO, genererExerciceIntegralesProblemes);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/integralesProblemes/exportEvaluation.ts`) ; la suite de la session reste
+ * un tirage normal. */
+function sessionInitiale(): EtatSessionIntegralesProblemes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionIntegralesProblemes(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceIntegralesProblemes, (id) => construireAvecVarianteId(id as IdVarianteIntegralesProblemes)),
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -41,7 +54,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen29() {
-  const [etat, setEtat] = useState<EtatSessionIntegralesProblemes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionIntegralesProblemes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme

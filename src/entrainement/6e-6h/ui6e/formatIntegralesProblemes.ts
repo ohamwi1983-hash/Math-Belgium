@@ -59,7 +59,7 @@ function pgcd(a: number, b: number): number {
 
 /** Fraction EXACTE irréductible en LaTeX (jamais de décimal, convention CLAUDE.md) — utilisée pour
  * b (famille D) et k (famille F), tous deux stockés en fraction num/den exacte sur le core. */
-function fractionLatex(num: number, den: number): string {
+export function fractionLatex(num: number, den: number): string {
   let n = num;
   let d = den;
   if (d < 0) {
@@ -84,7 +84,7 @@ function versFraction(x: number): { num: number; den: number } | null {
 
 /** Nombre décimal en LaTeX, virgule décimale (`{,}`), au plus `decimales` chiffres après la
  * virgule, zéros finaux retirés. */
-function decimalLatex(x: number, decimales = 3): string {
+export function decimalLatex(x: number, decimales = 3): string {
   const facteur = 10 ** decimales;
   const arrondi = Math.round(x * facteur) / facteur;
   const texteNombre = (Object.is(arrondi, -0) ? 0 : arrondi).toFixed(decimales).replace(/\.?0+$/, "");
@@ -104,7 +104,7 @@ function approxLatex(x: number): string {
 
 /** Rationnel affiché EXACTEMENT : décimal exact (≤ 3 chiffres) si possible, sinon fraction suivie
  * de sa valeur approchée (« \dfrac{56}{3} \approx 18{,}667 »). */
-function rationnelLatex(x: number): string {
+export function rationnelLatex(x: number): string {
   if (estDecimalExact(x)) return decimalLatex(x);
   const f = versFraction(x);
   if (f === null) return `${approxLatex(x)}`;
@@ -112,7 +112,7 @@ function rationnelLatex(x: number): string {
 }
 
 /** Multiple rationnel de π, EXACT puis approché : « \dfrac{9}{2}\pi \approx 14{,}137 ». */
-function multiplePiLatex(coef: number): string {
+export function multiplePiLatex(coef: number): string {
   const f = versFraction(coef);
   const valeur = decimalLatex(coef * Math.PI);
   if (f === null) return `\\approx ${valeur}`;
@@ -126,7 +126,7 @@ function multiplePiLatex(coef: number): string {
 }
 
 /** Terme affine signé COMPLET a·t+b — jamais un "+0"/"-0" orphelin (b peut être nul). */
-function afficheAffine(coefVar: number, cst: number, variable: string): string {
+export function afficheAffine(coefVar: number, cst: number, variable: string): string {
   const partVar = coefVar === 1 ? variable : coefVar === -1 ? `-${variable}` : `${coefVar}${variable}`;
   if (cst === 0) return partVar;
   return cst > 0 ? `${partVar}+${cst}` : `${partVar}-${Math.abs(cst)}`;
@@ -137,7 +137,7 @@ function afficheAffine(coefVar: number, cst: number, variable: string): string {
  * v(t)/x(t) (famille B), dont certains coefficients (k/2, p, v0...) tombent régulièrement à 0 ou 1
  * pour de petits tirages. `corps=""` pour le terme constant. Jamais de fraction décimale (chaque
  * terme reste `num/den` EXACT, réduit par `fractionLatex`). */
-function sommeAffineExacteLatex(termes: { num: number; den: number; corps: string }[]): string {
+export function sommeAffineExacteLatex(termes: { num: number; den: number; corps: string }[]): string {
   const nonNuls = termes.filter((t) => t.num !== 0);
   if (nonNuls.length === 0) return "0";
   return nonNuls
@@ -173,7 +173,7 @@ function termeVolumeSimpleLatex(t: TermeA, premier: boolean): string {
   }
 }
 
-function sommeVolumeSimpleLatex(termes: TermeA[]): string {
+export function sommeVolumeSimpleLatex(termes: TermeA[]): string {
   if (termes.length === 0) return "0";
   return termes.map((t, i) => termeVolumeSimpleLatex(t, i === 0)).join("");
 }
@@ -262,7 +262,7 @@ export function consigneGeneraleB(exercice: ExerciceFamilleB_Problemes): Fragmen
   return [...debut, texte("l'instant où il atteint la position "), latex(`x=${rationnelExactLatex(exercice.cible as number)}`), texte(" m.")];
 }
 /** Rationnel EXACT seul (fraction), sans valeur approchée — pour une DONNÉE d'énoncé. */
-function rationnelExactLatex(x: number): string {
+export function rationnelExactLatex(x: number): string {
   const f = versFraction(x);
   return f === null ? decimalLatex(x) : fractionLatex(f.num, f.den);
 }
@@ -289,14 +289,14 @@ export function consigneEcranB(exercice: ExerciceFamilleB_Problemes, phase: Phas
   if (exercice.sousType === "evaluer") return [texte("Calcule la position "), latex(`x(${exercice.t1})`), texte(", à partir de "), latex("x(t)"), texte(" obtenue à l'étape 2.")];
   return [texte("Résous "), latex(`x(t)=${rationnelExactLatex(exercice.cible as number)}`), texte(" pour "), latex("t\\geq 0"), texte(", à partir de "), latex("x(t)"), texte(" obtenue à l'étape 2.")];
 }
-function vLatexB(exercice: ExerciceFamilleB_Problemes): string {
+export function vLatexB(exercice: ExerciceFamilleB_Problemes): string {
   return sommeAffineExacteLatex([
     { num: exercice.k, den: 2, corps: "t^2" },
     { num: exercice.p, den: 1, corps: "t" },
     { num: exercice.v0, den: 1, corps: "" },
   ]);
 }
-function xLatexB(exercice: ExerciceFamilleB_Problemes): string {
+export function xLatexB(exercice: ExerciceFamilleB_Problemes): string {
   return sommeAffineExacteLatex([
     { num: exercice.k, den: 6, corps: "t^3" },
     { num: exercice.p, den: 2, corps: "t^2" },
@@ -334,7 +334,7 @@ const OPTIONS_COMPARAISON: OptionChoix[] = [
   { valeur: "egaux", label: "W et W₂ sont égaux" },
 ];
 
-function travailC(k: number, a: number, b: number): number {
+export function travailC(k: number, a: number, b: number): number {
   return (k * (b * b - a * a)) / 2;
 }
 /** Bonne option de l'écran de comparaison (les deux travaux ne sont jamais égaux). */
@@ -416,7 +416,7 @@ export function aideNiveau2C(): AideAvecLatex {
 // Famille D — Coût marginal, total et moyen.
 // ============================================================================
 
-function cLatexD(exercice: ExerciceFamilleD_Problemes): string {
+export function cLatexD(exercice: ExerciceFamilleD_Problemes): string {
   return `${exercice.a}q-${fractionLatex(exercice.bNum, 2 * exercice.bDen)}q^2+${exercice.F0}`;
 }
 export function consigneGeneraleD(exercice: ExerciceFamilleD_Problemes): FragmentConsigne[] {
@@ -485,7 +485,7 @@ export function aideNiveau2D(exercice: ExerciceFamilleD_Problemes, phase: PhaseI
 // Famille E — Valeur moyenne en contexte (réutilise 6gen25 famille C).
 // ============================================================================
 
-function fLatexE(exercice: ExerciceFamilleE_Problemes): string {
+export function fLatexE(exercice: ExerciceFamilleE_Problemes): string {
   const primitive = exercice.exerciceMoyenne.primitive;
   const termes: TermeA[] = primitive.famille === "A" && primitive.sousType === "direct" ? primitive.termes : [];
   if (termes.length === 0) return "0";
@@ -557,7 +557,7 @@ export function aideNiveau2E(): AideAvecLatex {
 // ============================================================================
 
 /** e^{-kx} écrit sans fraction en exposant : e^{-x/5}, e^{-3x/10}. */
-function demandeLatexF(exercice: ExerciceFamilleF_Problemes): string {
+export function demandeLatexF(exercice: ExerciceFamilleF_Problemes): string {
   const g = pgcd(exercice.kNum, exercice.kDen);
   const n = exercice.kNum / g;
   const d = exercice.kDen / g;
@@ -611,6 +611,19 @@ export function aideNiveau2F(exercice: ExerciceFamilleF_Problemes, phase: PhaseI
 // Famille G — Volume de révolution appliqué (3 sous-types).
 // ============================================================================
 
+/** Volume de la pièce G_soustraction : multiple EXACT de π quand f est polynomiale (π·rationnel),
+ * sinon valeur approchée (eˣ, cos x : forme close transcendante). */
+export function volumeSoustractionLatex(exercice: Extract<ExerciceFamilleG_Problemes, { sousType: "soustraction" }>, volume: number): string {
+  if (exercice.volumeTotal.type === "polynomiale" && versFraction(volume / Math.PI) !== null) return `=${multiplePiLatex(volume / Math.PI)}`;
+  return approxLatex(volume);
+}
+
+/** Coefficient k de k·√x (G_archimède) : rien quand k = 1 (jamais « 1\\sqrt{x} »). */
+export function coefRacineLatex(num: number, den: number): string {
+  const c = fractionLatex(num, den);
+  return c === "1" ? "" : c;
+}
+
 function rayonTrouLatex(exercice: Extract<ExerciceFamilleG_Problemes, { sousType: "soustraction" }>): string {
   return fractionLatex(exercice.rayonTrouNum, exercice.rayonTrouDen);
 }
@@ -633,7 +646,7 @@ export function consigneGeneraleG(exercice: ExerciceFamilleG_Problemes): Fragmen
     const p = exercice.paraboloide;
     return [
       texte("Un verre a la forme du solide engendré par la rotation, autour de l'axe des abscisses, de la région sous la courbe de "),
-      latex(`f(x)=${fractionLatex(p.kNum, p.kDen)}\\sqrt{x}`),
+      latex(`f(x)=${coefRacineLatex(p.kNum, p.kDen)}\\sqrt{x}`),
       texte(" pour "),
       latex(`x\\in[0\\,;\\,${p.L}]`),
       texte(". Il est rempli d'eau à ras bord. On y plonge une bille de rayon "),
@@ -663,7 +676,7 @@ export function blocDonneesG(exercice: ExerciceFamilleG_Problemes): string[] {
   }
   if (exercice.sousType === "archimede") {
     const p = exercice.paraboloide;
-    return [`f(x)=${fractionLatex(p.kNum, p.kDen)}\\sqrt{x}`, `[0\\,;\\,L]=[0\\,;\\,${p.L}]`, `r=${decimalLatex(exercice.r)}`];
+    return [`f(x)=${coefRacineLatex(p.kNum, p.kDen)}\\sqrt{x}`, `[0\\,;\\,L]=[0\\,;\\,${p.L}]`, `r=${decimalLatex(exercice.r)}`];
   }
   return [`r=${exercice.r}`, `h=${exercice.hDemande}`];
 }
@@ -692,7 +705,7 @@ export function consigneEcranG(exercice: ExerciceFamilleG_Problemes, phase: Phas
 
 export function etatActuelG(exercice: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
   if (exercice.sousType === "soustraction") {
-    if (phase === "gSoustractionEcran2") return [`V_{\\text{pièce}}${approxLatex(exercice.volumeTotalAttendu)}`];
+    if (phase === "gSoustractionEcran2") return [`V_{\\text{pièce}}${volumeSoustractionLatex(exercice, exercice.volumeTotalAttendu)}`];
     return null;
   }
   if (exercice.sousType === "archimede") {
@@ -974,9 +987,9 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesProb
   }
   // Famille G.
   if (exercice.sousType === "soustraction") {
-    if (phase === "gSoustractionEcran1") return [`V${approxLatex(exercice.volumeTotalAttendu)}`];
+    if (phase === "gSoustractionEcran1") return [`V${volumeSoustractionLatex(exercice, exercice.volumeTotalAttendu)}`];
     const rho = exercice.rayonTrouNum / exercice.rayonTrouDen;
-    return [`V_{\\text{trou}}=${multiplePiLatex(rho * rho * exercice.longueurTrou)}`, `V_{\\text{matière}}${approxLatex(exercice.volumeTotalAttendu - exercice.volumeInterieur)}`];
+    return [`V_{\\text{trou}}=${multiplePiLatex(rho * rho * exercice.longueurTrou)}`, `V_{\\text{matière}}${volumeSoustractionLatex(exercice, exercice.volumeTotalAttendu - exercice.volumeInterieur)}`];
   }
   if (exercice.sousType === "archimede") {
     const coefVerre = exercice.paraboloide.volumeParaboloide / Math.PI;

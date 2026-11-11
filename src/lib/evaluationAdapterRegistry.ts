@@ -321,7 +321,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen26': adaptateurEvaluationCalculAires as unknown as AdaptateurFeuilleExercices<never>,
   '6gen27': adaptateurEvaluationVolumesRevolution as unknown as AdaptateurFeuilleExercices<never>,
   '6gen28': adaptateurEvaluationLongueurArc as unknown as AdaptateurFeuilleExercices<never>,
-  '6gen29': adaptateurEvaluationIntegralesProblemes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen29': versionPapier(adaptateurEvaluationIntegralesProblemes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen34': adaptateurEvaluationNombresComplexes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen35': adaptateurEvaluationAffixesRacines as unknown as AdaptateurFeuilleExercices<never>,
   '6gen36': adaptateurEvaluationEquationsComplexes as unknown as AdaptateurFeuilleExercices<never>,
