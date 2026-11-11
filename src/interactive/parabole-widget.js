@@ -41,7 +41,9 @@
 
   /** « = 1,5 » si la valeur est exacte au centième, « ≈ 1,41 » sinon. */
   function egalOuEnviron(n) {
-    return (estExactAuCentieme(n) ? "= " : "≈ ") + formatNombreFr(n);
+    if (estExactAuCentieme(n)) return "= " + formatNombreFr(n);
+    // Valeur approchée : toujours deux décimales (≈ −1,30 et non ≈ −1,3).
+    return "≈ " + n.toFixed(2).replace(".", ",").replace("-", "−");
   }
 
   /** Arrondit un pas de grille brut vers 1, 2 ou 5 fois une puissance de 10 —
@@ -422,11 +424,13 @@
     else if (z.length === 1) zeros = "un seul (zéro double), x " + egalOuEnviron(z[0]) + " : le sommet est sur l'axe des x.";
     else zeros = "deux, x₁ " + egalOuEnviron(z[0]) + " et x₂ " + egalOuEnviron(z[1]) + ".";
     var yS = c - (b * b) / (4 * a);
-    var bord = formatNombreFr(yS);
+    var exacte = estExactAuCentieme(yS);
+    var bord = exacte ? formatNombreFr(yS) : yS.toFixed(2).replace(".", ",").replace("-", "−");
+    var suffixe = exacte ? "" : " (borne arrondie au centième)";
     if (a > 0) {
-      image = estExactAuCentieme(yS) ? "[" + bord + " ; +∞[" : "[y_S ; +∞[, avec y_S ≈ " + bord;
+      image = "[" + bord + " ; +∞[" + suffixe;
     } else {
-      image = estExactAuCentieme(yS) ? "]−∞ ; " + bord + "]" : "]−∞ ; y_S], avec y_S ≈ " + bord;
+      image = "]−∞ ; " + bord + "]" + suffixe;
     }
     return { zeros: zeros, image: image };
   }
@@ -463,14 +467,14 @@
     var memeSigne = d.a * d.b > 0;
     var lignes = [];
     lignes.push("<p><strong>a " + (d.a > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("a") + " — la parabole est tournée vers le " +
-      (d.a > 0 ? "haut (elle a un minimum)." : "bas (elle a un maximum)."));
+      (d.a > 0 ? "haut (elle a un minimum).</p>" : "bas (elle a un maximum).</p>"));
     lignes.push("<p><strong>c " + (d.c > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("c") + " — c = f(0) : la parabole coupe l'axe des y en (0 ; " +
-      formatNombreFr(d.c) + "), " + (d.c > 0 ? "au-dessus" : "en dessous") + " de l'origine.");
+      formatNombreFr(d.c) + "), " + (d.c > 0 ? "au-dessus" : "en dessous") + " de l'origine.</p>");
     lignes.push("<p><strong>b " + (d.b > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("b") + " — le sommet est à " +
-      (xS < 0 ? "gauche" : "droite") + " de l'axe Oy (x_S = " + formatNombreFr(xS) + "). Comme x_S = −b/(2a), l'axe est à gauche de Oy quand a et b ont le même signe : ici a et b sont de signes " +
-      (memeSigne ? "identiques" : "contraires") + ", donc b est " + signeTexte(d.b) + ".");
+      (xS < 0 ? "gauche" : "droite") + " de l'axe Oy (abscisse du sommet : " + formatNombreFr(xS) + "). Comme cette abscisse vaut −b/(2a), l'axe de symétrie est à gauche de Oy quand a et b ont le même signe : ici a et b sont de signes " +
+      (memeSigne ? "identiques" : "contraires") + ", donc b est " + signeTexte(d.b) + ".</p>");
     lignes.push("<p>La parabole était f(x) = " + formatFonction(d.a, d.b, d.c) + ".</p>");
-    this._correction.innerHTML = lignes.join("</p>");
+    this._correction.innerHTML = lignes.join("");
   };
 
   ParaboleWidgetClass.prototype._rendre = function () {
@@ -526,6 +530,14 @@
     var svg = this._svg;
     svg.innerHTML = "";
     var self = this;
+    // Les courbes sont découpées au cadre du repère (sinon elles débordent dans la marge).
+    var defs = document.createElementNS(ns, "defs");
+    var clip = document.createElementNS(ns, "clipPath");
+    clip.setAttribute("id", "zone-trace");
+    var rectClip = document.createElementNS(ns, "rect");
+    rectClip.setAttribute("x", MARGE); rectClip.setAttribute("y", MARGE);
+    rectClip.setAttribute("width", LARGEUR - 2 * MARGE); rectClip.setAttribute("height", HAUTEUR - 2 * MARGE);
+    clip.appendChild(rectClip); defs.appendChild(clip); svg.appendChild(defs);
 
     var pasX = pasAgreable((X_MAX - X_MIN) / 8);
     var pasY = pasAgreable((Y_MAX - Y_MIN) / 8);
@@ -609,6 +621,7 @@
     var chemin = document.createElementNS(ns, "path");
     chemin.setAttribute("d", d.trim());
     chemin.setAttribute("class", "courbe");
+    chemin.setAttribute("clip-path", "url(#zone-trace)");
     svg.appendChild(chemin);
 
     if (!enDefi && this._checkLineaire.checked) {
@@ -618,6 +631,7 @@
       ligneAB.setAttribute("x1", pL1[0]); ligneAB.setAttribute("y1", pL1[1]);
       ligneAB.setAttribute("x2", pL2[0]); ligneAB.setAttribute("y2", pL2[1]);
       ligneAB.setAttribute("class", "droite-lineaire");
+      ligneAB.setAttribute("clip-path", "url(#zone-trace)");
       svg.appendChild(ligneAB);
     }
 
@@ -685,7 +699,11 @@
       cO.setAttribute("class", "point-oao");
       svg.appendChild(cO);
       var etiqO = document.createElementNS(ns, "text");
-      etiqO.setAttribute("x", ptO[0] + 8); etiqO.setAttribute("y", ptO[1] + 16);
+      // Étiquette du côté opposé au sommet pour ne pas chevaucher « S(… ; …) ».
+      var sommetADroite = !degenere && -b / (2 * a) > 0;
+      etiqO.setAttribute("x", sommetADroite ? ptO[0] - 8 : ptO[0] + 8);
+      etiqO.setAttribute("y", ptO[1] + (a < 0 ? -8 : 16));
+      if (sommetADroite) etiqO.setAttribute("text-anchor", "end");
       etiqO.setAttribute("class", "etiquette");
       etiqO.textContent = "(0 ; " + formatNombreFr(c) + ")";
       svg.appendChild(etiqO);

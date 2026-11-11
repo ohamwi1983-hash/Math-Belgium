@@ -20,7 +20,7 @@
   var SITUATIONS = [
     {
       id: "enclos", nom: "Enclos", a: -2, b: 40, c: 0,
-      v: "x", f: "A", uniteV: "m", uniteF: "m²", grandeur: "l'aire",
+      v: "x", f: "A", uniteV: "m", uniteF: "m²", grandeur: "l'aire", maximal: "maximale",
       min: 0, max: 20, ouvertG: true, ouvertD: true, pas: 0.5, defaut: 8,
       yMax: 220, yPas: 50, xPas: 5, restrictionDefaut: 12,
       formule: "A(x) = x(40 − 2x) = −2x² + 40x",
@@ -28,7 +28,7 @@
     },
     {
       id: "prix", nom: "Prix et revenu", a: -2, b: 80, c: 0,
-      v: "p", f: "R", uniteV: "€", uniteF: "€", grandeur: "le revenu",
+      v: "p", f: "R", uniteV: "€", uniteF: "€", grandeur: "le revenu", maximal: "maximal",
       min: 0, max: 40, ouvertG: true, ouvertD: true, pas: 0.5, defaut: 10,
       yMax: 880, yPas: 200, xPas: 10, restrictionDefaut: 25,
       formule: "R(p) = p(80 − 2p) = −2p² + 80p",
@@ -36,7 +36,7 @@
     },
     {
       id: "trajectoire", nom: "Trajectoire", a: -5, b: 20, c: 25,
-      v: "t", f: "h", uniteV: "s", uniteF: "m", grandeur: "la hauteur",
+      v: "t", f: "h", uniteV: "s", uniteF: "m", grandeur: "la hauteur", maximal: "maximale",
       min: 0, max: 5, ouvertG: false, ouvertD: false, pas: 0.1, defaut: 1,
       yMax: 50, yPas: 10, xPas: 1, restrictionDefaut: 3,
       formule: "h(t) = −5t² + 20t + 25",
@@ -220,7 +220,7 @@
         vOpt = vs; fOpt = fs;
         e.verdict.className = "verdict";
         e.verdict.innerHTML = "Le sommet " + s.v + " = " + nb(vs) + " appartient au domaine : " + s.grandeur +
-          " est maximale au sommet, <b>" + s.f + "(" + nb(vs) + ") = " + nb(fs) + " " + s.uniteF + "</b>." +
+          " est " + s.maximal + " au sommet, <b>" + s.f + "(" + nb(vs) + ") = " + nb(fs) + " " + s.uniteF + "</b>." +
           (this._restreint ? " La restriction ne change rien : le sommet reste dans le domaine." : "");
       } else {
         vOpt = gauche; fOpt = this._f(gauche);
@@ -239,7 +239,7 @@
       svg.innerHTML = "";
       if (s.id === "enclos") {
         // Vue de dessus : mur en haut, deux côtés de largeur x perpendiculaires, un côté de longueur 40 − 2x.
-        var k = 8, longueur = 40 - 2 * v, haut = 30;
+        var k = 6.5, longueur = 40 - 2 * v, haut = 30;
         var lpx = longueur * k, hpx = v * k, x0 = (SCENE_L - lpx) / 2;
         svg.appendChild(svgEl("line", { x1: 20, x2: SCENE_L - 20, y1: haut, y2: haut, class: "mur" }));
         for (var hx = 26; hx < SCENE_L - 20; hx += 12) svg.appendChild(svgEl("line", { x1: hx, x2: hx - 8, y1: haut - 4, y2: haut - 12, class: "hachure" }));
@@ -250,31 +250,38 @@
         if (lpx > 70 && hpx > 30) texte(svg, SCENE_L / 2, haut + hpx / 2 + 4, "A = " + nb(this._f(v)) + " m²", "etiquette", "middle");
       } else if (s.id === "prix") {
         // Deux barres : le prix p et le nombre d'acheteurs q = 80 − 2p ; le revenu est leur produit.
-        var q = 80 - 2 * v, echelle = 4;
-        texte(svg, 20, 30, "prix de vente p", "etiquette");
-        svg.appendChild(svgEl("rect", { x: 150, y: 18, width: v * echelle * 2, height: 18, class: "barre-prix" }));
-        texte(svg, 156 + v * echelle * 2, 32, nb(v) + " €", "etiquette-forte");
-        texte(svg, 20, 78, "acheteurs q = 80 − 2p", "etiquette");
-        svg.appendChild(svgEl("rect", { x: 150, y: 66, width: q * echelle * 0.8, height: 18, class: "barre-q" }));
-        texte(svg, 156 + q * echelle * 0.8, 80, nb(q), "etiquette-forte");
-        texte(svg, SCENE_L / 2, 130, "revenu = prix × acheteurs = " + nb(v) + " × " + nb(q) + " = " + nb(this._f(v)) + " €", "etiquette-forte", "middle");
-        texte(svg, SCENE_L / 2, 160, "un prix plus haut rapporte plus par vente, mais fait fuir des acheteurs", "etiquette", "middle");
+        var q = 80 - 2 * v;
+        texte(svg, 20, 20, "prix de vente p", "etiquette");
+        svg.appendChild(svgEl("rect", { x: 20, y: 27, width: Math.max(v * 8, 1), height: 16, class: "barre-prix" }));
+        texte(svg, 26 + v * 8, 40, nb(v) + " €", "etiquette-forte");
+        texte(svg, 20, 66, "nombre d'acheteurs q = 80 − 2p", "etiquette");
+        svg.appendChild(svgEl("rect", { x: 20, y: 73, width: Math.max(q * 4, 1), height: 16, class: "barre-q" }));
+        texte(svg, 26 + q * 4, 86, nb(q), "etiquette-forte");
+        texte(svg, SCENE_L / 2, 126, "revenu = prix × acheteurs = " + nb(v) + " × " + nb(q) + " = " + nb(this._f(v)) + " €", "etiquette-forte", "middle");
+        texte(svg, SCENE_L / 2, 152, "plus cher : plus par vente,", "etiquette", "middle");
+        texte(svg, SCENE_L / 2, 168, "mais moins d'acheteurs", "etiquette", "middle");
       } else {
-        // Échelle verticale de hauteur et ballon à la hauteur h(t).
-        var sol = SCENE_H - 22, hMax = 50, ech = (sol - 14) / hMax;
-        svg.appendChild(svgEl("line", { x1: 40, x2: SCENE_L - 40, y1: sol, y2: sol, class: "sol" }));
-        svg.appendChild(svgEl("line", { x1: 80, x2: 80, y1: sol, y2: 10, class: "axe" }));
+        // Ballon lancé du haut d'une tour de 25 m : abscisse proportionnelle au temps, trace de la trajectoire.
+        var sol = SCENE_H - 22, ech = (sol - 14) / 50, x0t = 110, kx = 58, self = this;
+        svg.appendChild(svgEl("line", { x1: 20, x2: SCENE_L - 10, y1: sol, y2: sol, class: "sol" }));
+        svg.appendChild(svgEl("rect", { x: x0t - 26, y: sol - 25 * ech, width: 26, height: 25 * ech, class: "mesure" }));
+        svg.appendChild(svgEl("line", { x1: 40, x2: 40, y1: sol, y2: 10, class: "axe" }));
         for (var g = 0; g <= 50; g += 10) {
           var yg = sol - g * ech;
-          svg.appendChild(svgEl("line", { x1: 76, x2: 84, y1: yg, y2: yg, class: "grad" }));
-          texte(svg, 72, yg + 4, nb(g), "etiquette", "end");
+          svg.appendChild(svgEl("line", { x1: 36, x2: 44, y1: yg, y2: yg, class: "grad" }));
+          texte(svg, 32, yg + 4, nb(g), "etiquette", "end");
         }
-        texte(svg, 88, 18, "hauteur (m)", "etiquette");
-        var h = this._f(v), yb = sol - h * ech;
-        svg.appendChild(svgEl("rect", { x: 180, y: sol - 25 * ech, width: 60, height: 25 * ech, class: "mesure" }));
-        texte(svg, 210, sol - 25 * ech - 4, "départ : 25 m", "etiquette", "middle");
-        svg.appendChild(svgEl("circle", { cx: 300, cy: yb, r: 9, class: "ballon" }));
-        texte(svg, 316, yb + 4, "h = " + nb(h) + " m", "etiquette-forte");
+        texte(svg, 48, 16, "hauteur (m)", "etiquette");
+        texte(svg, x0t - 13, sol - 25 * ech - 5, "tour", "etiquette", "middle");
+        var dTr = "";
+        for (var i = 0; i <= 60; i++) {
+          var tt = i / 60 * v;
+          dTr += (i ? "L" : "M") + (x0t + tt * kx).toFixed(1) + " " + (sol - self._f(tt) * ech).toFixed(1) + " ";
+        }
+        if (v > 0) svg.appendChild(svgEl("path", { d: dTr, class: "courbe-hors" }));
+        var h = this._f(v), xb = x0t + v * kx, yb = sol - h * ech;
+        svg.appendChild(svgEl("circle", { cx: xb, cy: yb, r: 8, class: "ballon" }));
+        texte(svg, xb + (v > 3.5 ? -14 : 14), yb + (h < 8 ? -12 : 4), "h = " + nb(h) + " m", "etiquette-forte", v > 3.5 ? "end" : "start");
       }
     }
 
@@ -324,7 +331,7 @@
       if (this._restreint) {
         var pb = this._px(gauche, 0);
         svg.appendChild(svgEl("line", { x1: pb[0], x2: pb[0], y1: o[1], y2: MARGE_H, class: "borne" }));
-        texte(svg, pb[0] + 4, MARGE_H + 10, s.v + " = " + nb(gauche), "etiquette-opt");
+        texte(svg, pb[0] + 4, o[1] - 8, s.v + " ≥ " + nb(gauche), "etiquette-opt");
       }
 
       // sommet
