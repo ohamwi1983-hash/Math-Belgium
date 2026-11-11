@@ -217,6 +217,7 @@
     _etiquetteArc(cx, cy, a1, a2, r, s, classe) {
       var c = this._toPx(cx, cy), am = (a1 + a2) / 2 * D2R;
       var x = c[0] + (r + 14) * Math.cos(am), y = c[1] - (r + 14) * Math.sin(am) + 4;
+      if (Math.abs(a2 - a1) < 16) y -= 10;
       x = Math.max(MARGE + 16, Math.min(LARGEUR - MARGE - 16, x));
       y = Math.max(MARGE + 12, Math.min(HAUTEUR - MARGE - 4, y));
       this._texte(x, y, s, classe);
@@ -252,13 +253,20 @@
         var pp = this._toPx(0.5, p);
         this._texte(pp[0], pp[1] + (m >= 0 ? 15 : -7), "1", "et-plan");
         if (m !== 0) {
-          var pm = this._toPx(1, (p + yHaut) / 2);
-          var mTxt = EXACTS[th] ? EXACTS[th][0] : "≈ " + nbDec(m);
-          this._texte(pm[0] + 7, pm[1] + 4, "m = " + mTxt, "et-plan", "start");
+          var mTxt = EXACTS[th] ? "m = " + EXACTS[th][0] : "m ≈ " + nbDec(m);
+          if (Math.abs(m) < 0.6) {
+            var pq = this._toPx(1, p + m);
+            this._texte(pq[0] + 6, pq[1] + (m > 0 ? -12 : 20), mTxt, "et-plan", "start");
+          } else {
+            var pm = this._toPx(1, (p + yHaut) / 2);
+            this._texte(pm[0] + 7, pm[1] + 4, mTxt, "et-plan", "start");
+          }
         }
         var p0 = this._toPx(0, p);
         this._svg.appendChild(svgEl("circle", { cx: p0[0].toFixed(2), cy: p0[1].toFixed(2), r: 4.5, class: "point" }));
-        this._texte(p0[0] - 8, p0[1] - 8, "(0 ; " + nbDec(p) + ")", "et-ink", "end");
+        // étiquette du point (0 ; p) dans la zone libre : en haut à gauche si m ≥ 0, en haut à droite si m < 0
+        if (m < 0) this._texte(p0[0] + 8, p0[1] - 12, "(0 ; " + nbDec(p) + ")", "et-ink", "start");
+        else this._texte(p0[0] - 8, p0[1] - 8, "(0 ; " + nbDec(p) + ")", "et-ink", "end");
       }
 
       // angle avec Ox : au point d'intersection avec Ox s'il est dans le cadre, sinon au point (0 ; p)
@@ -269,19 +277,26 @@
         this._etiquetteArc(0, 0, 0, 90, 26, "90°", classeEtOx);
       } else if (m !== 0) {
         var x0 = -p / m;
-        if (Math.abs(x0) <= 4) {
+        if (Math.abs(x0) >= 1 && Math.abs(x0) <= 4) {
           this._arc(x0, 0, 0, th, 24, classeOx);
           this._etiquetteArc(x0, 0, 0, th, 24, th + "°", classeEtOx);
         } else {
-          this._segment([0, p], [2.2, p], "parallele", true);
-          this._arc(0, p, 0, th, 24, classeOx);
-          this._etiquetteArc(0, p, 0, th, 24, th + "°", classeEtOx);
+          // Ox est coupé hors du cadre (ou trop près du point (0 ; p)) : on mesure θ avec une parallèle
+          // à Ox (angles correspondants), en un point de la droite situé du côté x < 0, loin de l'escalier
+          var signe = dx > 0 ? -1 : 1, cands = [3, 2.2, 1.5, -3, -2.2, -1.5], xr = 0, yr = p;
+          for (var i = 0; i < cands.length; i++) {
+            var sc = signe * cands[i], xc = sc * dx, yc = p + sc * dy;
+            if (Math.abs(xc) <= 4 && Math.abs(yc) <= 4.2) { xr = xc; yr = yc; break; }
+          }
+          this._segment([xr, yr], [xr + 1.6, yr], "parallele", true);
+          this._arc(xr, yr, 0, th, 24, classeOx);
+          this._etiquetteArc(xr, yr, 0, th, 24, th + "°", classeEtOx);
         }
       }
       // angle avec Oy : au point (0 ; p), de la droite jusqu'à Oy (sens direct)
       if (!verticale && thOyRamene > 0) {
         this._arc(0, p, th, th + thOyRamene, 40, "arc-oy");
-        this._etiquetteArc(0, p, th, th + thOyRamene, 40, thOyRamene + "°", "et-good");
+        if (thOyRamene >= 6) this._etiquetteArc(0, p, th, th + thOyRamene, 40, thOyRamene + "°", "et-good");
       }
 
       this._ecrire(th, p, m, verticale, obtus, thOy, thOyRamene);
@@ -302,8 +317,8 @@
       var mHtml = exact ? exact[1] : "≈ " + nbDec(m);
       h += '<div class="ligne">Pente : <b>m = tan ' + th + '° ' + (exact ? '= ' : '') + mHtml + '</b>' +
         (m === 0 ? ' — droite horizontale' : (m > 0 ? ' — la droite monte' : ' — la droite descend')) + '</div>';
-      h += '<div class="ligne">Angle avec Oy : 90° − ' + th + '° = ' + moins(thOy) + '°' +
-        (thOy < 0 ? ', négatif : on ajoute 180° → <b>' + thOyRamene + '°</b>' : ' → <b>' + thOyRamene + '°</b>') + '</div>';
+      h += '<div class="ligne">Angle avec Oy : 90° − ' + th + '° = ' + (thOy < 0 ? moins(thOy) + '°' : '<b>' + thOy + '°</b>') +
+        (thOy < 0 ? ', négatif : on ajoute 180° → <b>' + thOyRamene + '°</b>' : '') + '</div>';
       h += '<div class="ligne">Ordonnée à l\'origine : <b>p = ' + nbDec(this._e.p) + '</b> (la droite coupe Oy en (0 ; ' + nbDec(this._e.p) + '))</div>';
       // équation y = mx + p
       var terme;

@@ -229,6 +229,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'le construire !',
         },
         {
+          kind: 'atelier',
+          tag: 'droite-formes-widget',
+          label: 'Manipule toi-même : une droite, quatre écritures',
+          caption:
+            'Déplace le point A et l\'extrémité du vecteur directeur u : les quatre ' +
+            'écritures de la droite se mettent à jour en direct. L\'implicite et la ' +
+            'paramétrique existent toujours ; l\'explicite en y devient impossible pour une ' +
+            'droite verticale, l\'explicite en x pour une droite horizontale. Fais glisser t ' +
+            ': le point M = A + t·u parcourt toute la droite, c\'est l\'équation vectorielle ' +
+            'AM = t·u. Le réglage de départ reproduit l\'exemple ci-dessus.',
+        },
+        {
           kind: 'historique',
           titre: "Et si Descartes n'était pas seul ?",
           text:
@@ -499,6 +511,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'angle avec Oy', text: '90° − 63,4° ≈ 26,6°' },
           ],
           result: { tag: "ordonnée à l'origine", text: 'p = −3' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'pente-angle-widget',
+          label: 'Manipule toi-même : pente et angle',
+          caption:
+            'Fais tourner la droite (angle θ avec Ox) et déplace-la (ordonnée à l\'origine ' +
+            'p). La pente m = tan θ se lit sur l\'escalier : on avance de 1, on monte de m. ' +
+            'Une pente négative donne un angle obtus, jamais un angle négatif : la ' +
+            'calculatrice affiche tan⁻¹(m) < 0, il faut ajouter 180°. À 90°, la droite est ' +
+            'verticale et n\'a plus de pente. Le réglage de départ reproduit le premier ' +
+            'exemple de la section (θ = 60°, p = 2).',
         },
         {
           kind: 'entrainement',

@@ -105,6 +105,7 @@
     '.note{font-size:0.85rem;color:var(--ink-soft,#51626f);}' +
     '.alerte{color:var(--bad,#b23a3a);font-weight:700;}' +
     '.controles{display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:620px;margin:0 auto;}' +
+    '.zone{display:flex;flex-direction:column;gap:10px;align-items:stretch;}' +
     '.rangee{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;}' +
     '.libelle{font-size:0.88rem;color:var(--ink-soft,#51626f);font-weight:600;}' +
     '.btn{min-height:44px;min-width:44px;padding:8px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#ccd8e0);background:var(--surface,#fff);color:var(--ink,#182430);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.95rem;}' +
@@ -113,7 +114,7 @@
     '.btn-reset{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);align-self:center;}' +
     '.curseur{display:flex;flex-direction:column;gap:2px;}' +
     '.curseur label{font-size:0.88rem;font-weight:600;color:var(--ink-soft,#51626f);}' +
-    'input[type=range]{width:100%;min-height:44px;accent-color:var(--accent,#b65c1f);}' +
+    'input[type=range]{width:100%;margin:0;min-height:44px;accent-color:var(--accent,#b65c1f);}' +
     '.case{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--line,#ccd8e0);border-radius:var(--radius,3px);background:var(--surface,#fff);font-weight:600;cursor:pointer;align-self:center;}' +
     '.case input{width:20px;height:20px;accent-color:var(--accent,#b65c1f);}' +
     '</style>' +
@@ -123,7 +124,7 @@
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" role="img" aria-label="Cercle dans un repère"></svg></div>' +
     '<div class="lecture" id="lecture" aria-live="polite"></div>' +
     '<div class="controles">' +
-    '<div id="zone-cr" class="controles">' +
+    '<div id="zone-cr" class="zone">' +
     '<div class="rangee"><span class="libelle">Centre C :</span>' +
     '<button class="btn" type="button" data-dx="-1" data-dy="0" aria-label="Centre vers la gauche">←</button>' +
     '<button class="btn" type="button" data-dx="0" data-dy="1" aria-label="Centre vers le haut">↑</button>' +
@@ -135,7 +136,7 @@
     '<button class="btn" type="button" id="p-prec">◀ Point précédent</button>' +
     '<button class="btn" type="button" id="p-suiv">Point suivant ▶</button></div>' +
     '</div>' +
-    '<div id="zone-dev" class="controles" hidden>' +
+    '<div id="zone-dev" class="zone" hidden>' +
     '<div class="curseur"><label for="D" id="label-D">D</label><input type="range" id="D" min="-10" max="10" step="1"></div>' +
     '<div class="curseur"><label for="E" id="label-E">E</label><input type="range" id="E" min="-10" max="10" step="1"></div>' +
     '<div class="curseur"><label for="F" id="label-F">F</label><input type="range" id="F" min="-30" max="30" step="1"></div>' +

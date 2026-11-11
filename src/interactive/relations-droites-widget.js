@@ -116,7 +116,8 @@
         var vVal = v === "x" ? I.x : I.y;
         var h = '<ol class="etapes">';
         h += '<li>Dans ' + noms[i] + ', on isole ' + v + ' : ' + v + ' = ' + expr + '</li>';
-        h += '<li>On remplace dans ' + noms[1 - i] + ' : ' + sub + ' = 0</li>';
+        if (fv !== 0) h += '<li>On remplace dans ' + noms[1 - i] + ' : ' + sub + ' = 0</li>';
+        else h += '<li>' + noms[1 - i] + ' ne contient pas ' + v + ' : on la résout directement.</li>';
         h += '<li>' + termes([[cw, w], [cst, ""]]) + ' = 0, donc ' + w + ' = ' + fracTxt(wVal) + '</li>';
         var remplace = p === 0 ? fracTxt(frac(q, 1))
           : (p === 1 ? "" : p === -1 ? "−" : moins(p) + " · ") + (wVal.d === 1 && wVal.n >= 0 ? fracTxt(wVal) : "(" + fracTxt(wVal) + ")") +
@@ -199,10 +200,10 @@
     '.carte{padding:10px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#f7f9fb);border:1px solid var(--line,#ccd8e0);line-height:1.55;font-size:0.95rem;font-variant-numeric:tabular-nums;}' +
     '.carte-titre{font-weight:700;font-size:0.82rem;color:var(--ink-soft,#51626f);margin-bottom:6px;}' +
     '.eq1{color:var(--accent-ink,#7a3212);font-weight:700;} .eq2{color:var(--plan,#5b4ea3);font-weight:700;}' +
-    '.coefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px;margin-top:6px;}' +
-    '.coef{display:flex;align-items:center;justify-content:space-between;gap:4px;}' +
-    '.coef-nom{font-size:0.9rem;min-width:18px;font-style:italic;}' +
-    '.coef-val{min-width:26px;text-align:center;font-weight:700;}' +
+    '.coefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px;margin-top:6px;}' +
+    '.coef{display:flex;align-items:center;justify-content:space-between;gap:2px;}' +
+    '.coef-nom{font-size:0.9rem;min-width:16px;font-style:italic;}' +
+    '.coef-val{min-width:22px;text-align:center;font-weight:700;}' +
     '.btn{min-height:44px;min-width:44px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--line,#ccd8e0);background:var(--surface,#fff);color:var(--ink,#182430);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.95rem;}' +
     '.btn-pm{padding:0;font-size:1.15rem;}' +
     '.btn[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#b65c1f);color:var(--accent-ink,#7a3212);}' +
@@ -352,13 +353,17 @@
         el("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: cls }, svg);
       });
       // vecteurs directeurs (direction (−b ; a), longueur d'affichage 2,5)
+      var pointes = [null, null];
       droites.forEach(function (d, i) {
-        var base = r.I && Math.abs(val(r.I.x)) <= 6 && Math.abs(val(r.I.y)) <= 6 ? [val(r.I.x), val(r.I.y)] : self._pied(d);
+        var ref = r.I && Math.abs(val(r.I.x)) <= 6 && Math.abs(val(r.I.y)) <= 6 ? [val(r.I.x), val(r.I.y)] : self._pied(d);
         if (r.type === "conf" && i === 1) return;
-        var ux = -d.b, uy = d.a, L = Math.hypot(ux, uy), k = 2.5 / L;
+        var ux = -d.b, uy = d.a, L = Math.hypot(ux, uy), k = 2.5 / L, dec = 1.3 / L;
+        function dedans(x, y) { return x >= X_MIN + 0.3 && x <= X_MAX - 0.3 && y >= Y_MIN + 0.3 && y <= Y_MAX - 0.3; }
+        var base = [ref[0] + ux * dec, ref[1] + uy * dec];
         var x2 = base[0] + ux * k, y2 = base[1] + uy * k;
-        if (x2 < X_MIN || x2 > X_MAX || y2 < Y_MIN || y2 > Y_MAX) { x2 = base[0] - ux * k; y2 = base[1] - uy * k; ux = -ux; uy = -uy; }
+        if (!dedans(x2, y2)) { ux = -ux; uy = -uy; base = [ref[0] + ux * dec, ref[1] + uy * dec]; x2 = base[0] + ux * k; y2 = base[1] + uy * k; }
         var p1 = self._px(base[0], base[1]), p2 = self._px(x2, y2);
+        pointes[i] = [x2, y2];
         el("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], class: "u" + (i + 1), "marker-end": "url(#fu" + (i + 1) + ")" }, svg);
         var tx = p2[0] + (ux * k > 0 ? 6 : -6), ty = p2[1] - 6;
         var t = el("text", { x: tx.toFixed(1), y: ty.toFixed(1), class: "etiq e" + (i + 1), "text-anchor": ux * k > 0 ? "start" : "end" }, svg);
@@ -373,11 +378,14 @@
         if (r.type === "conf" && i === 1) return;
         var s = self._segment(d);
         if (!s) return;
-        var fin = s[0][0] > s[1][0] || (s[0][0] === s[1][0] && s[0][1] > s[1][1]) ? s[0] : s[1];
+        var pt = pointes[i] || pointes[0];
+        var dist0 = pt ? Math.hypot(s[0][0] - pt[0], s[0][1] - pt[1]) : 0, dist1 = pt ? Math.hypot(s[1][0] - pt[0], s[1][1] - pt[1]) : 1;
+        var fin = dist0 > dist1 ? s[0] : s[1];
         var deb = fin === s[0] ? s[1] : s[0];
         var x = fin[0] + (deb[0] - fin[0]) * 0.08, y = fin[1] + (deb[1] - fin[1]) * 0.08;
         var p = self._px(x, y);
-        var t = el("text", { x: (p[0] - 4).toFixed(1), y: (p[1] - 7).toFixed(1), class: "etiq e" + (i + 1), "text-anchor": "end" }, svg);
+        var aGauche = p[0] < LARGEUR / 2;
+        var t = el("text", { x: (p[0] + (aGauche ? 8 : -4)).toFixed(1), y: (p[1] - 7).toFixed(1), class: "etiq e" + (i + 1), "text-anchor": aGauche ? "start" : "end" }, svg);
         t.textContent = i === 0 ? "d₁" : (r.type === "conf" ? "d₁ = d₂" : "d₂");
       });
       if (r.type === "conf") {

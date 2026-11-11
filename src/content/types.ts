@@ -34,6 +34,8 @@ export type InteractiveWidgetTag =
   | 'suite-recurrente-affine-widget'
   | 'convergence-suite-widget'
   | 'comparaison-suites-widget'
+  | 'droite-formes-widget'
+  | 'pente-angle-widget'
   | 'decomposition-vecteur-widget'
   | 'chasles-defi-widget'
   | 'distance-triangle-widget'

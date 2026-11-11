@@ -106,7 +106,7 @@
     '.btn-reset{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);align-self:center;}' +
     '.curseur{display:flex;flex-direction:column;gap:2px;}' +
     '.curseur label{font-size:0.88rem;font-weight:600;color:var(--ink-soft,#51626f);}' +
-    'input[type=range]{width:100%;min-height:44px;accent-color:var(--accent,#b65c1f);}' +
+    'input[type=range]{width:100%;margin:0;min-height:44px;accent-color:var(--accent,#b65c1f);}' +
     '.case{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--line,#ccd8e0);border-radius:var(--radius,3px);background:var(--surface,#fff);font-weight:600;cursor:pointer;align-self:center;}' +
     '.case input{width:20px;height:20px;accent-color:var(--accent,#b65c1f);}' +
     '</style>' +
@@ -162,8 +162,8 @@
         ecoute(b, "click", function () {
           var dx = parseFloat(b.getAttribute("data-dx")), dy = parseFloat(b.getAttribute("data-dy"));
           var E = self._etat;
-          if (self._objet === "F") self._deplacerF(E.F.x + dx, E.F.y + dy);
-          else self._deplacerK(E.k + (E.axe === "v" ? dy : dx));
+          if (self._objet === "F") self._deplacerF(E.F.x + dx, E.F.y + dy, dx, dy);
+          else self._deplacerK(E.k + (E.axe === "v" ? dy : dx), E.axe === "v" ? dy : dx);
         });
       });
       ecoute(sh.getElementById("s"), "input", function (e) { self._etat.s = parseInt(e.target.value, 10); self._rendre(); });
@@ -215,8 +215,10 @@
     // coordonnée du foyer perpendiculaire à la directrice (y si axe vertical)
     _fNormal(F) { return this._etat.axe === "v" ? F.y : F.x; }
 
-    _deplacerF(x, y) {
+    // sautX/sautY : pas d'un bouton flèche — on enjambe alors la directrice au lieu de s'y bloquer
+    _deplacerF(x, y, sautX, sautY) {
       var E = this._etat;
+      if (sautX !== undefined && Math.abs((E.axe === "v" ? y : x) - E.k) < 1e-9) { x += sautX; y += sautY; }
       x = Math.max(BORNE_F.xMin, Math.min(BORNE_F.xMax, x));
       y = Math.max(BORNE_F.yMin, Math.min(BORNE_F.yMax, y));
       if (x === E.F.x && y === E.F.y) return;
@@ -230,8 +232,9 @@
       this._rendre();
     }
 
-    _deplacerK(k) {
+    _deplacerK(k, saut) {
       var E = this._etat;
+      if (saut !== undefined && Math.abs(this._fNormal(E.F) - k) < 1e-9) k += saut;
       k = Math.max(BORNE_K.min, Math.min(BORNE_K.max, k));
       if (k === E.k) return;
       if (Math.abs(this._fNormal(E.F) - k) < 1e-9) {
