@@ -1057,6 +1057,10 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'e^x dx$ : pose', enonce: "Calcule $\\int x \\cdot e^x \\, dx$ par intégration par parties." },
     { cle: '∫ ln(x) dx : le facteur caché 1', enonce: "Calcule $\\int \\ln(x)\\,dx$ sur $]0;+\\infty[$ par intégration par parties." },
     { cle: 'deux intégrations par parties successives', enonce: "Calcule $\\int x^2 \\cdot \\sin(x) \\, dx$ en effectuant deux intégrations par parties successives." },
+    { cle: 'changement de variable x = φ(u)', enonce: "Calcule $\\int x\\sqrt{x+1}\\,dx$ à l'aide du changement de variable $u = x+1$." },
+    { cle: 'puissances de sin et cos', enonce: "Calcule $\\int \\cos^2(x)\\,dx$ et $\\int \\sin^3(x)\\,dx$." },
+    { cle: 'éléments simples', enonce: "Calcule $\\int \\dfrac{1}{x^2-1}\\,dx$ sur $]1;+\\infty[$ en décomposant la fraction en éléments simples." },
+    { cle: 'intégration par parties cyclique', enonce: "Calcule $\\int e^x\\cos(x)\\,dx$ par deux intégrations par parties successives." },
   ],
   conditioninitiale: [
     { cle: 'f(x) = 2x, F(0) = 5', enonce: "Détermine la primitive particulière F de $f(x) = 2x$ telle que $F(0) = 5$." },

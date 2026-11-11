@@ -358,6 +358,66 @@ export const primitivesIntegrales: ChapterContent = {
             },
           ],
         },
+        { kind: 'subheading', text: 'Pour aller plus loin — d\'autres techniques de primitivation' },
+        {
+          kind: 'methode',
+          label: 'Quatre techniques complémentaires',
+          items: [
+            '**Changement de variable x = φ(u)** : quand une expression gêne (une racine, un binôme), pose ' +
+              'u égal à cette expression, exprime x et dx en fonction de u, primitive en u, puis reviens à x.',
+            '**Identités trigonométriques** : $\\cos^2(x) = \\dfrac{1+\\cos(2x)}{2}$ et ' +
+              '$\\sin^2(x) = \\dfrac{1-\\cos(2x)}{2}$ abaissent une puissance paire ; pour une puissance ' +
+              'impaire, isole un facteur $\\sin(x)$ (ou $\\cos(x)$) et remplace le reste avec ' +
+              '$\\sin^2(x) + \\cos^2(x) = 1$.',
+            '**Décomposition en éléments simples** : une fraction $\\dfrac{p(x)}{(x-r_1)(x-r_2)}$ (degré du ' +
+              'numérateur inférieur à 2) s\'écrit $\\dfrac{A}{x-r_1} + \\dfrac{B}{x-r_2}$ ; chaque terme ' +
+              'se primitive en un logarithme. Si le degré du numérateur est trop grand, commence par une ' +
+              'division euclidienne.',
+            '**Intégration par parties « cyclique »** : deux intégrations par parties font réapparaître ' +
+              'l\'intégrale de départ ; on la traite alors comme une inconnue d\'équation.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'changement de variable x = φ(u)',
+          formula: 'Calcule $\\int x\\sqrt{x+1}\\,dx$.',
+          steps: [
+            { tag: 'poser u = x + 1', text: '$x = u - 1$ et $dx = du$, donc $\\int x\\sqrt{x+1}\\,dx = \\int (u-1)\\sqrt{u}\\,du = \\int \\left(u^{3/2} - u^{1/2}\\right)du$' },
+            { tag: 'primitiver en u', text: '$\\dfrac{2}{5}u^{5/2} - \\dfrac{2}{3}u^{3/2} + C$' },
+          ],
+          result: { tag: 'revenir à x', text: '$\\int x\\sqrt{x+1}\\,dx = \\dfrac{2}{5}(x+1)^{5/2} - \\dfrac{2}{3}(x+1)^{3/2} + C$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'puissances de sin et cos',
+          formula: 'Calcule $\\int \\cos^2(x)\\,dx$ et $\\int \\sin^3(x)\\,dx$.',
+          steps: [
+            { tag: 'puissance paire : abaisser le degré', text: '$\\int \\cos^2(x)\\,dx = \\int \\dfrac{1+\\cos(2x)}{2}dx = \\dfrac{x}{2} + \\dfrac{\\sin(2x)}{4} + C$' },
+            { tag: 'puissance impaire : isoler sin(x)', text: '$\\int \\sin^3(x)\\,dx = \\int \\left(1-\\cos^2(x)\\right)\\sin(x)\\,dx$, de la forme $-u\'(1-u^2)$ avec $u = \\cos(x)$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int \\sin^3(x)\\,dx = -\\cos(x) + \\dfrac{\\cos^3(x)}{3} + C$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'éléments simples',
+          formula: 'Calcule $\\int \\dfrac{1}{x^2-1}dx$ sur $]1;+\\infty[$.',
+          steps: [
+            { tag: 'factoriser le dénominateur', text: '$x^2 - 1 = (x-1)(x+1)$, donc on cherche $\\dfrac{1}{x^2-1} = \\dfrac{A}{x-1} + \\dfrac{B}{x+1}$' },
+            { tag: 'identifier A et B', text: '$1 = A(x+1) + B(x-1)$ : en $x = 1$, $A = \\dfrac{1}{2}$ ; en $x = -1$, $B = -\\dfrac{1}{2}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int \\dfrac{1}{x^2-1}dx = \\dfrac{1}{2}\\ln|x-1| - \\dfrac{1}{2}\\ln|x+1| + C = \\dfrac{1}{2}\\ln\\left(\\dfrac{x-1}{x+1}\\right) + C$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'intégration par parties cyclique',
+          formula: 'Calcule $I = \\int e^x\\cos(x)\\,dx$.',
+          steps: [
+            { tag: '1re IPP — f = cos(x), g′ = eˣ', text: '$I = e^x\\cos(x) + \\int e^x\\sin(x)\\,dx$' },
+            { tag: '2e IPP — f = sin(x), g′ = eˣ', text: '$\\int e^x\\sin(x)\\,dx = e^x\\sin(x) - \\int e^x\\cos(x)\\,dx = e^x\\sin(x) - I$' },
+            { tag: 'I réapparaît : résoudre', text: '$I = e^x\\cos(x) + e^x\\sin(x) - I \\implies 2I = e^x\\big(\\sin(x) + \\cos(x)\\big)$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int e^x\\cos(x)\\,dx = \\dfrac{e^x\\big(\\sin(x)+\\cos(x)\\big)}{2} + C$' },
+        },
         {
           kind: 'entrainement',
           title: 'Calcul de primitives',
@@ -1370,6 +1430,9 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'Rotation, autour de l\'axe des abscisses, de la région sous f sur [a;b] (avec f ≥ 0) :',
             '$V = \\pi \\int_a^b [f(x)]^2 dx$',
+            'La formule reste valable si f change de signe sur [a;b] : le carré $[f(x)]^2$ rend le signe ' +
+              'sans effet — la partie de la région située sous l\'axe engendre le même solide que sa ' +
+              'symétrique au-dessus. On parle alors de la région comprise entre la courbe et l\'axe.',
           ],
         },
         {
