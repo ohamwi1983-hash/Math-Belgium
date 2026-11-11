@@ -19,7 +19,7 @@
 
   var MODES = {
     milieu: { label: "Milieu" },
-    relation: { label: "AM⃗ = k·AB⃗" },
+    relation: { label: "<span class=vec>AM</span> = k·<span class=vec>AB</span>" },
     symetrique: { label: "Symétrique" },
   };
   var DEFAUTS = {
@@ -32,7 +32,12 @@
   var BORNES_K12 = { min: -12, max: 24, step: 1 }; // k = k12 / 12
   var CRANS_K = [[0, "0"], [4, "1/3"], [6, "1/2"], [8, "2/3"], [12, "1"]];
 
+  var BORNES_PM = { min: 0, max: 6, step: 0.5 }; // A en mode « Milieu »
+  // Fenêtre fixe PAR MODE (jamais recalculée depuis un curseur), même échelle sur les deux axes :
+  // « Milieu » : B = A + u reste dans [−4 ; 10] ; les deux autres modes atteignent [−7 ; 14].
+  var FENETRES = { milieu: [-5, 11], relation: [-7, 14], symetrique: [-7, 14] };
   var X_MIN = -7, X_MAX = 14, Y_MIN = -7, Y_MAX = 14;
+  function fenetre(mode) { var f = FENETRES[mode]; X_MIN = Y_MIN = f[0]; X_MAX = Y_MAX = f[1]; }
   var LARGEUR = 420, HAUTEUR = 420, MARGE = 28;
   var NS = "http://www.w3.org/2000/svg";
 
@@ -55,6 +60,24 @@
     var g = pgcd(k12, 12), num = k12 / g, den = 12 / g;
     var s = den === 1 ? String(Math.abs(num)) : Math.abs(num) + "/" + den;
     return (num < 0 ? "−" : "") + s;
+  }
+
+  /** Petite flèche de vecteur tracée au-dessus d'un <text> SVG déjà inséré (le caractère combinant
+   * U+20D7 n'est pas rendu par toutes les polices). */
+  function flecheSur(svg, texte, classe) {
+    var bb;
+    try { bb = texte.getBBox(); } catch (e) { return; }
+    if (!bb || !bb.width) return;
+    var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
+    var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l.setAttribute("x1", x1.toFixed(2)); l.setAttribute("x2", (x2 - 3).toFixed(2));
+    l.setAttribute("y1", y.toFixed(2)); l.setAttribute("y2", y.toFixed(2));
+    l.setAttribute("class", "vf " + classe);
+    svg.appendChild(l);
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M" + x2.toFixed(2) + " " + y.toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y - 2.6).toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y + 2.6).toFixed(2) + " Z");
+    p.setAttribute("class", "vf-tete " + classe);
+    svg.appendChild(p);
   }
 
   function svgEl(tag, attrs) {
@@ -95,6 +118,11 @@
     '.et-accent{fill:var(--accent-ink,#7a3212);}' +
     '.et-good{fill:var(--good,#2f7a4f);}' +
     '.et-bad{fill:var(--bad,#b23a3a);}' +
+    '.vec{position:relative;display:inline-block;padding-top:0.18em;line-height:1.1;}' +
+    '.vec::before{content:"";position:absolute;left:0.04em;right:0.12em;top:0.04em;border-top:1.5px solid currentColor;}' +
+    '.vec::after{content:"";position:absolute;right:-0.06em;top:calc(0.04em + 0.75px - 0.21em);border-top:0.21em solid transparent;border-bottom:0.21em solid transparent;border-left:0.34em solid currentColor;}' +
+    '.vf{stroke-width:1.5;}' +
+    '.vf-accent{stroke:var(--accent-ink,#7a3212);fill:var(--accent-ink,#7a3212);}' +
     '.lecture{display:flex;flex-direction:column;gap:6px;margin:0 0 16px;font-variant-numeric:tabular-nums;}' +
     '.ligne{padding:9px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.9rem;line-height:1.5;}' +
     '.ligne b{font-weight:700;}' +
@@ -142,7 +170,7 @@
       var b = document.createElement("button");
       b.type = "button";
       b.setAttribute("data-mode", m);
-      b.textContent = MODES[m].label;
+      b.innerHTML = MODES[m].label;
       self._modes.appendChild(b);
     });
   };
@@ -192,8 +220,9 @@
         et.xu = self._borner(Math.round((pt[0] - et.xA) * 2) / 2, BORNES_U);
         et.yu = self._borner(Math.round((pt[1] - et.yA) * 2) / 2, BORNES_U);
       } else {
-        et["x" + cle] = self._borner(Math.round(pt[0] * 2) / 2, BORNES_P);
-        et["y" + cle] = self._borner(Math.round(pt[1] * 2) / 2, BORNES_P);
+        var bp = self._mode === "milieu" ? BORNES_PM : BORNES_P;
+        et["x" + cle] = self._borner(Math.round(pt[0] * 2) / 2, bp);
+        et["y" + cle] = self._borner(Math.round(pt[1] * 2) / 2, bp);
       }
       self._syncCurseurs();
       self._rendre();
@@ -231,8 +260,8 @@
   MilieuPiegeWidgetClass.prototype._construireControles = function () {
     var et = this._etats[this._mode], h = "";
     if (this._mode === "milieu") {
-      h += this._curseur("xA", "Abscisse de A", BORNES_P, et.xA) + this._curseur("yA", "Ordonnée de A", BORNES_P, et.yA) +
-        this._curseur("xu", "1re composante de u⃗", BORNES_U, et.xu) + this._curseur("yu", "2e composante de u⃗", BORNES_U, et.yu);
+      h += this._curseur("xA", "Abscisse de A", BORNES_PM, et.xA) + this._curseur("yA", "Ordonnée de A", BORNES_PM, et.yA) +
+        this._curseur("xu", "1re composante de <span class=vec>u</span>", BORNES_U, et.xu) + this._curseur("yu", "2e composante de <span class=vec>u</span>", BORNES_U, et.yu);
     } else {
       h += this._curseur("xA", "Abscisse de A", BORNES_P, et.xA) + this._curseur("yA", "Ordonnée de A", BORNES_P, et.yA) +
         this._curseur("xB", "Abscisse de B", BORNES_P, et.xB) + this._curseur("yB", "Ordonnée de B", BORNES_P, et.yB);
@@ -263,6 +292,7 @@
   };
 
   MilieuPiegeWidgetClass.prototype._versMath = function (cx, cy) {
+    fenetre(this._mode);
     var r = this._svg.getBoundingClientRect();
     var sx = (cx - r.left) / r.width * LARGEUR, sy = (cy - r.top) / r.height * HAUTEUR;
     return [
@@ -349,6 +379,7 @@
       var s = sh.getElementById(c + "-valeur");
       if (s) s.textContent = nb(et[c]).texte;
     });
+    fenetre(mode);
     this._fond();
     if (mode === "milieu") this._rendreMilieu(et);
     else if (mode === "relation") this._rendreRelation(et);
@@ -363,17 +394,21 @@
     this._vecteur([xA, yA], [xB, yB], "vec-accent", "fl-accent");
     this._vecteur([0, 0], [xF, yF], "vec-bad", "fl-bad");
     var pA = this._toPx(xA, yA), pB = this._toPx(xB, yB);
-    var et2 = svgEl("text", { x: ((pA[0] + pB[0]) / 2 + 6).toFixed(1), y: ((pA[1] + pB[1]) / 2 + 16).toFixed(1), class: "etiquette et-accent" });
-    et2.textContent = "u⃗";
+    var ddx = pB[0] - pA[0], ddy = pB[1] - pA[1], LL = Math.hypot(ddx, ddy) || 1;
+    var nx = ddy / LL, ny = -ddx / LL; // normale
+    if (ny > 0 || (Math.abs(ny) < 1e-9 && nx > 0)) { nx = -nx; ny = -ny; } // côté haut (ou gauche)
+    var et2 = svgEl("text", { x: (pA[0] + 0.3 * ddx + nx * 13).toFixed(1), y: (pA[1] + 0.3 * ddy + ny * 13 + 4).toFixed(1), "text-anchor": "middle", class: "etiquette et-accent" });
+    et2.textContent = "u";
     this._svg.appendChild(et2);
+    flecheSur(this._svg, et2, "vf-accent");
     this._point(xA, yA, "point-ink", "A", "et-ink", "A");
-    this._point(xB, yB, "point-accent", "B = A + u⃗", "et-accent", "U");
+    this._point(xB, yB, "point-accent", "B", "et-accent", "U");
     this._point(xM, yM, "point-good", "M (vrai milieu)", "et-good", null, -9);
     this._point(xF, yF, "point-bad", "faux « milieu »", "et-bad", null, 20);
     this._lecture.innerHTML =
-      '<div class="ligne">B = A + u⃗ : (' + nb(xA).texte + ' + ' + nbPar(xu) + ' ; ' + nb(yA).texte + ' + ' + nbPar(yu) + ') = <b>(' + nb(xB).texte + ' ; ' + nb(yB).texte + ')</b></div>' +
+      '<div class="ligne">B = A + <span class=vec>u</span> : (' + nb(xA).texte + ' + ' + nbPar(xu) + ' ; ' + nb(yA).texte + ' + ' + nbPar(yu) + ') = <b>(' + nb(xB).texte + ' ; ' + nb(yB).texte + ')</b></div>' +
       '<div class="ligne vrai">Vrai milieu M : ((' + nb(xA).texte + ' + ' + nbPar(xB) + ')/2 ; (' + nb(yA).texte + ' + ' + nbPar(yB) + ')/2) = (' + nb(xM).texte + ' ; ' + nb(yM).texte + ') — la moyenne des coordonnées</div>' +
-      '<div class="ligne faux">Piège — la différence (' + nb(xB).texte + ' − ' + nbPar(xA) + ' ; ' + nb(yB).texte + ' − ' + nbPar(yA) + ') = (' + nb(xF).texte + ' ; ' + nb(yF).texte + ') : ce sont les composantes de u⃗, pas un milieu !</div>';
+      '<div class="ligne faux">Piège — la différence (' + nb(xB).texte + ' − ' + nbPar(xA) + ' ; ' + nb(yB).texte + ' − ' + nbPar(yA) + ') = (' + nb(xF).texte + ' ; ' + nb(yF).texte + ') : ce sont les composantes de <span class=vec>u</span>, pas un milieu !</div>';
   };
 
   MilieuPiegeWidgetClass.prototype._rendreRelation = function (et) {
@@ -405,7 +440,7 @@
     this._point(xB, yB, "point-accent", "B", "et-accent", "B", memeAB ? 20 : undefined);
     this._point(xM, yM, "point-good", "M", "et-good", null);
     var position;
-    if (confondus) position = '<span class="faux">A et B sont confondus : AB⃗ est le vecteur nul, M reste en A quel que soit k.</span>';
+    if (confondus) position = '<span class="faux">A et B sont confondus : <span class=vec>AB</span> est le vecteur nul, M reste en A quel que soit k.</span>';
     else if (k12 === 0) position = "k = 0 : M est en A.";
     else if (k12 === 12) position = "k = 1 : M est en B.";
     else if (k12 === 6) position = "k = 1/2 : M est le milieu de [AB].";
@@ -413,7 +448,7 @@
     else if (k12 > 12) position = "k > 1 : M est sur la droite (AB), au-delà de B.";
     else position = "k < 0 : M est sur la droite (AB), du côté opposé à B par rapport à A.";
     this._lecture.innerHTML =
-      '<div class="ligne">AB⃗ = (' + nb(xB).texte + ' − ' + nbPar(xA) + ' ; ' + nb(yB).texte + ' − ' + nbPar(yA) + ') = (' + nb(dx).texte + ' ; ' + nb(dy).texte + ') et k = ' + kTexte + '</div>' +
+      '<div class="ligne"><span class=vec>AB</span> = (' + nb(xB).texte + ' − ' + nbPar(xA) + ' ; ' + nb(yB).texte + ' − ' + nbPar(yA) + ') = (' + nb(dx).texte + ' ; ' + nb(dy).texte + ') et k = ' + kTexte + '</div>' +
       '<div class="ligne">Abscisse de M : ' + nb(xA).texte + ' + ' + kPar + ' × ' + nbPar(dx) + ' = ' + nbTexte(xM) + '<br>Ordonnée de M : ' + nb(yA).texte + ' + ' + kPar + ' × ' + nbPar(dy) + ' = ' + nbTexte(yM) + '</div>' +
       '<div class="ligne vrai">M(' + nbTexte(xM) + ' ; ' + nbTexte(yM) + ')</div>' +
       '<div class="ligne info">' + position + '</div>';
@@ -433,7 +468,7 @@
     this._point(xB, yB, "point-accent", "B", "et-accent", "B", 20);
     this._point(xS, yS, "point-good", "A′", "et-good", null);
     this._lecture.innerHTML =
-      '<div class="ligne">B est le milieu de [AA′], donc A′ = B + AB⃗ et AB⃗ = BA′⃗.</div>' +
+      '<div class="ligne">B est le milieu de [AA′], donc A′ = B + <span class=vec>AB</span> et <span class=vec>AB</span> = <span class=vec>BA′</span>.</div>' +
       '<div class="ligne">Abscisse de A′ : 2 × ' + nbPar(xB) + ' − ' + nbPar(xA) + ' = ' + nb(xS).texte + '<br>Ordonnée de A′ : 2 × ' + nbPar(yB) + ' − ' + nbPar(yA) + ' = ' + nb(yS).texte + '</div>' +
       '<div class="ligne vrai">A′(' + nb(xS).texte + ' ; ' + nb(yS).texte + ')</div>' +
       '<div class="ligne info">Vérification : milieu de [AA′] = ((' + nb(xA).texte + ' + ' + nbPar(xS) + ')/2 ; (' + nb(yA).texte + ' + ' + nbPar(yS) + ')/2) = (' + nb((xA + xS) / 2).texte + ' ; ' + nb((yA + yS) / 2).texte + ') = B ✓' +

@@ -36,6 +36,7 @@
 
   var STYLE =
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);color:var(--ink,#241f1a);}' +
+    '[hidden]{display:none !important;}' +
     '*{box-sizing:border-box;}' +
     '.vec{display:inline-block;position:relative;font-family:var(--serif,Georgia,serif);font-style:italic;font-weight:700;padding:0 1px;line-height:1;}' +
     '.vec::before{content:"";position:absolute;left:1px;right:3px;top:-0.32em;border-top:1.5px solid currentColor;}' +
@@ -179,7 +180,8 @@
     _etiquette(p, texte, centre, classe) {
       // étiquette poussée vers l'extérieur de la figure (à l'opposé du centre)
       var pp = this._px(p[0], p[1]), pc = this._px(centre[0], centre[1]);
-      var dx = pp[0] - pc[0], dy = pp[1] - pc[1], n = Math.hypot(dx, dy) || 1;
+      var dx = pp[0] - pc[0], dy = pp[1] - pc[1], n = Math.hypot(dx, dy);
+      if (n < 1) { dx = 0; dy = -1; n = 1; } // point au centre (figure aplatie) : étiquette au-dessus
       var x = pp[0] + dx / n * 20, y = pp[1] + dy / n * 18 + 4;
       var ancre = dx / n > 0.35 ? "start" : (dx / n < -0.35 ? "end" : "middle");
       x = Math.max(4, Math.min(LARGEUR - 4, x));
@@ -250,8 +252,13 @@
       var pD = this._px(D[0], D[1]);
       svg.appendChild(el("circle", { cx: pD[0].toFixed(1), cy: pD[1].toFixed(1), r: 6, class: "pt-d" }));
       var self = this;
-      [["A", A], ["B", B], ["C", C]].forEach(function (x) { self._etiquette(x[1], x[0] + couple(x[1]), centre); });
-      this._etiquette(D, "D" + couple(D), centre, "lab-d");
+      var surD = null;
+      [["A", A], ["B", B], ["C", C]].forEach(function (x) {
+        var confondu = x[1][0] === D[0] && x[1][1] === D[1];
+        if (confondu) surD = x[0];
+        self._etiquette(x[1], x[0] + (confondu ? " = D" : "") + couple(x[1]), centre, confondu ? "lab-d" : "");
+      });
+      if (!surD) this._etiquette(D, "D" + couple(D), centre, "lab-d");
       var poignees = { A: this._poignee("A"), B: this._poignee("B"), C: this._poignee("C") };
       if (this._focus) { poignees[this._focus].focus(); this._focus = null; }
       this._rendreLecture();

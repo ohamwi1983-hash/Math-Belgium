@@ -74,7 +74,7 @@
     '.grille{stroke:var(--line,#ccd8e0);stroke-width:0.7;}' +
     '.axe{stroke:var(--ink-soft,#51626f);stroke-width:1.3;}' +
     '.fleche-axe{fill:var(--ink-soft,#51626f);}' +
-    '.graduation{font-size:11px;fill:var(--ink-soft,#51626f);font-family:var(--sans,sans-serif);}' +
+    '.graduation{font-size:11px;fill:var(--ink-soft,#51626f);font-family:var(--sans,sans-serif);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.triangle{fill:var(--accent,#b65c1f);fill-opacity:0.08;stroke:var(--ink,#182430);stroke-width:2;stroke-linejoin:round;}' +
     '.cote-actif{stroke:var(--accent,#b65c1f);stroke-width:4;}' +
     '.jambe{stroke:var(--plan,#5b4ea3);stroke-width:2;stroke-dasharray:6 4;}' +
@@ -84,8 +84,8 @@
     '.point{fill:var(--ink,#182430);}' +
     '.poignee{fill:transparent;cursor:grab;touch-action:none;}' +
     '.poignee-active{fill:var(--accent,#b65c1f);fill-opacity:0.14;}' +
-    '.etiq{font-size:15px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);}' +
-    '.etiq-jambe{font-size:13px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
+    '.etiq{font-size:15px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
+    '.etiq-jambe{font-size:13px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.lecture{display:flex;flex-direction:column;gap:8px;margin:0 0 14px;font-variant-numeric:tabular-nums;}' +
     '.carte{padding:10px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#f7f9fb);border:1px solid var(--line,#ccd8e0);line-height:1.55;font-size:0.95rem;}' +
     '.carte-titre{font-weight:700;font-size:0.82rem;color:var(--ink-soft,#51626f);margin-bottom:4px;}' +
@@ -100,6 +100,7 @@
     '.btn[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#b65c1f);color:var(--accent-ink,#7a3212);}' +
     '.btn:focus-visible{outline:2px solid var(--accent,#b65c1f);outline-offset:2px;}' +
     '.btn-reset{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);}' +
+    '.lecture,.controles,.enonce,.consigne,.options,.correction{max-width:620px;margin-left:auto;margin-right:auto;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" role="img" aria-label="Triangle ABC sur un quadrillage, avec le triangle rectangle de Pythagore du côté choisi"></svg></div>' +
     '<div class="lecture" id="lecture" aria-live="polite"></div>' +
@@ -257,10 +258,16 @@
         el("line", { x1: pH[0], y1: pH[1], x2: pQ[0], y2: pQ[1], class: "jambe" }, svg);
         var sx = dx > 0 ? -1 : 1, sy = dy > 0 ? -1 : 1, c = 10;
         el("path", { d: "M" + (pH[0] + sx * c) + "," + pH[1] + " L" + (pH[0] + sx * c) + "," + (pH[1] + sy * c) + " L" + pH[0] + "," + (pH[1] + sy * c), class: "angle-droit" }, svg);
-        var lx = el("text", { x: ((pP[0] + pH[0]) / 2).toFixed(1), y: (pH[1] + (dy > 0 ? 18 : -8)).toFixed(1), class: "etiq-jambe", "text-anchor": "middle" }, svg);
+        // étiquettes des jambes du côté opposé au troisième sommet (hors du côté étudié)
+        var tiers = NOMS.filter(function (n) { return cote.indexOf(n) < 0; })[0];
+        var pT = this._px(E[tiers].x, E[tiers].y);
+        var gX = pT[0], gY = pT[1];
+        var dessous = gY <= pH[1];
+        var lx = el("text", { x: ((pP[0] + pH[0]) / 2).toFixed(1), y: (pH[1] + (dessous ? 18 : -8)).toFixed(1), class: "etiq-jambe", "text-anchor": "middle" }, svg);
         lx.textContent = "|Δx| = " + Math.abs(dx);
-        var lyX = pH[0] + (dx > 0 ? 8 : -8);
-        var ly = el("text", { x: lyX.toFixed(1), y: ((pH[1] + pQ[1]) / 2 + 4).toFixed(1), class: "etiq-jambe", "text-anchor": dx > 0 ? "start" : "end" }, svg);
+        var aDroite = gX <= pH[0];
+        var lyX = pH[0] + (aDroite ? 8 : -8);
+        var ly = el("text", { x: lyX.toFixed(1), y: (pH[1] + (pQ[1] - pH[1]) * 0.3 + 4).toFixed(1), class: "etiq-jambe", "text-anchor": aDroite ? "start" : "end" }, svg);
         ly.textContent = "|Δy| = " + Math.abs(dy);
       }
 

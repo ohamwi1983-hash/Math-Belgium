@@ -106,7 +106,7 @@
     '.point-proj{fill:var(--surface,#fff);stroke:var(--ink-soft,#51626f);stroke-width:1.5;}' +
     '.poignee{fill:transparent;cursor:grab;touch-action:none;}' +
     '.poignee-active{fill:var(--accent,#b65c1f);fill-opacity:0.12;}' +
-    '.etiq{font-size:14px;font-weight:700;font-family:var(--sans,sans-serif);}' +
+    '.etiq{font-size:14px;font-weight:700;font-family:var(--sans,sans-serif);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.etiq-u{fill:var(--accent,#b65c1f);} .etiq-v{fill:var(--good,#2f7a4f);} .etiq-w{fill:var(--plan,#5b4ea3);} .etiq-ink{fill:var(--ink,#182430);}' +
     '.etiq-fleche{stroke-width:1.4;} .ef-u{stroke:var(--accent,#b65c1f);} .ef-v{stroke:var(--good,#2f7a4f);} .ef-w{stroke:var(--plan,#5b4ea3);}' +
     '.vec{display:inline-block;position:relative;padding-top:0.42em;line-height:1.05;font-style:italic;}' +
@@ -127,6 +127,7 @@
     '.btn[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#b65c1f);color:var(--accent-ink,#7a3212);}' +
     '.btn:focus-visible{outline:2px solid var(--accent,#b65c1f);outline-offset:2px;}' +
     '.btn-reset{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);}' +
+    '.lecture,.controles,.enonce,.consigne,.options,.correction{max-width:620px;margin-left:auto;margin-right:auto;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" role="img" aria-label="Décomposition du vecteur u selon les directions de v et de w"></svg></div>' +
     '<div class="lecture" id="lecture" aria-live="polite"></div>' +
@@ -257,11 +258,12 @@
     }
 
     _etiqOffset(svg, p, d, texte, suffixe) {
-      // place l'étiquette près de l'extrémité p, décalée perpendiculairement à d
-      var b = this._px(p.x, p.y);
+      // étiquette aux 3/5 du vecteur (loin des extrémités, où se croisent les flèches et
+      // les poignées), décalée perpendiculairement, du côté de la normale « gauche »
+      var b = this._px(p.x * 0.6, p.y * 0.6);
       var L = Math.hypot(d.x, d.y) || 1;
       var nx = -d.y / L, ny = d.x / L; // normale (monde)
-      var x = b[0] + nx * 16 + (d.x / L) * 6, y = b[1] - ny * 16 - (d.y / L) * 6 + 5;
+      var x = b[0] + nx * 17, y = b[1] - ny * 17 + 5;
       x = Math.max(16, Math.min(LARGEUR - 16, x));
       y = Math.max(24, Math.min(HAUTEUR - 6, y));
       this._etiqVec(svg, x, y, texte, suffixe);

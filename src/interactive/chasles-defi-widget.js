@@ -64,8 +64,8 @@
       etapes: ["−{RQ} = {QR}, donc l'expression vaut {PQ} + {QR} + {RS}", "{PQ} + {QR} = {PR}", "{PR} + {RS} = {PS}"],
       chaine: [["P", "Q"], ["Q", "R"], ["R", "S"]], res: ["P", "S"], pieges: [["S", "P"], ["Q", "S"], ["P", "R"]] },
     { termes: [["P", "Q", 1], ["Q", "R", 1], ["P", "R", -1]], n: 3,
-      etapes: ["{PQ} + {QR} = {PR}", "{PR} − {PR} = {0}"],
-      chaine: [["P", "Q"], ["Q", "R"]], res: null, pieges: [["P", "R"], ["R", "P"], ["Q", "P"]] },
+      etapes: ["{PQ} + {QR} = {PR}", "{PR} − {PR} = {PR} + {RP} = {PP} = {0} : la chaîne revient à son point de départ"],
+      chaine: [["P", "Q"], ["Q", "R"], ["R", "P"]], res: null, pieges: [["P", "R"], ["R", "P"], ["Q", "P"]] },
     { termes: [["Q", "P", 1], ["Q", "R", -1]], n: 3,
       etapes: ["−{QR} = {RQ}, donc {QP} − {QR} = {QP} + {RQ}", "On réordonne : {RQ} + {QP}", "{RQ} + {QP} = {RP}"],
       chaine: [["R", "Q"], ["Q", "P"]], res: ["R", "P"], pieges: [["P", "R"], ["P", "Q"], ["R", "Q"]] },
@@ -93,7 +93,7 @@
     '.contour{fill:var(--accent,#b65c1f);fill-opacity:0.05;stroke:var(--ink-soft,#51626f);stroke-width:1.6;stroke-linejoin:round;}' +
     '.segment{stroke:var(--ink-soft,#51626f);stroke-width:1;stroke-dasharray:4 4;}' +
     '.point{fill:var(--ink,#182430);}' +
-    '.etiq{font-size:16px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);}' +
+    '.etiq{font-size:16px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.v-chaine{stroke:var(--plan,#5b4ea3);stroke-width:3;} .t-chaine{fill:var(--plan,#5b4ea3);}' +
     '.v-res{stroke:var(--accent,#b65c1f);stroke-width:3.5;stroke-dasharray:8 5;} .t-res{fill:var(--accent,#b65c1f);}' +
     '.nul{fill:none;stroke:var(--accent,#b65c1f);stroke-width:2.5;}' +
@@ -121,10 +121,11 @@
     '.controles{display:flex;justify-content:center;}' +
     '.btn{min-height:44px;min-width:44px;padding:8px 16px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-family:inherit;font-size:0.95rem;}' +
     '.btn:focus-visible{outline:2px solid var(--accent,#b65c1f);outline-offset:2px;}' +
+    '.lecture,.controles,.enonce,.consigne,.options,.correction{max-width:620px;margin-left:auto;margin-right:auto;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" role="img" aria-label="Figure de l\'exercice"></svg></div>' +
     '<div class="enonce" id="enonce"></div>' +
-    '<div class="consigne">Choisis le vecteur égal à cette somme — un seul essai.</div>' +
+    '<div class="consigne">Choisis le vecteur égal à cette expression — un seul essai.</div>' +
     '<div class="options" id="options"></div>' +
     '<div class="correction" id="correction" hidden aria-live="polite"></div>' +
     '<div class="controles"><button class="btn" type="button" id="nouveau">Nouvelle expression</button></div>';

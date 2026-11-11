@@ -42,6 +42,7 @@
 
   var STYLE =
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);color:var(--ink,#241f1a);}' +
+    '[hidden]{display:none !important;}' +
     '*{box-sizing:border-box;}' +
     '.vec{display:inline-block;position:relative;font-family:var(--serif,Georgia,serif);font-style:italic;font-weight:700;padding:0 1px;line-height:1;}' +
     '.vec::before{content:"";position:absolute;left:1px;right:3px;top:-0.32em;border-top:1.5px solid currentColor;}' +
@@ -171,7 +172,7 @@
       if (k !== 0 && k !== 1) {
         var pM = this._px(kab[0], kab[1]);
         svg.appendChild(el("circle", { cx: pM[0].toFixed(1), cy: pM[1].toFixed(1), r: 4.5, class: "pt pt-m" }));
-        this._texte([pM[0] + (k > 0 ? -2 : 4), pM[1] + (k > 0 ? -12 : 20)], "M", "lab " + (k > 0 ? "lab-good" : "lab-bad"), k > 0 ? "end" : "start");
+        this._texte([pM[0] + (k > 0 ? -2 : -9), pM[1] + (k > 0 ? -12 : -6)], "M", "lab " + (k > 0 ? "lab-good" : "lab-bad"), "end");
       }
 
       var lecture = this._sh.getElementById("lecture");

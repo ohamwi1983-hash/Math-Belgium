@@ -157,6 +157,16 @@ export const calculVectoriel: ChapterContent = {
             '$\\vec{AB} = \\vec{DC}$.',
         },
         {
+          kind: 'atelier',
+          tag: 'egalite-parallelogramme-widget',
+          label: 'Manipule toi-même : vecteurs égaux et parallélogramme',
+          caption:
+            'Déplace A, B et C. Si AB = CD, alors ABDC est un parallélogramme : attention à ' +
+            'l\'ordre des lettres, le piège ABCD donne un quadrilatère croisé. En mode « ' +
+            'quatrième sommet », D = C − AB rend ABCD parallélogramme, et ses diagonales ' +
+            'ont le même milieu.',
+        },
+        {
           kind: 'historique',
           titre: 'La formule gravée sur un pont, un jour d\'octobre 1843',
           text:
@@ -269,6 +279,15 @@ export const calculVectoriel: ChapterContent = {
             ['k = −1', 'sens opposé, même longueur (vecteur opposé)'],
             ['k < −1', 'sens opposé, plus long'],
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'multiplication-k-widget',
+          label: 'Manipule toi-même : multiplier par k',
+          caption:
+            'Fais varier k de −3 à 3 : k·AB reste sur la droite (AB). Sa longueur est |k| ' +
+            'fois celle de AB, et son sens s\'inverse quand k devient négatif. Le tableau ' +
+            'surligne le cas en cours, et k = 0 donne le vecteur nul.',
         },
         {
           kind: 'astuce',
@@ -412,6 +431,17 @@ export const calculVectoriel: ChapterContent = {
             'Dans le parallélogramme, deux chemins mènent de O au sommet opposé : $\\vec{u}$ puis ' +
             '$\\vec{v}$, ou $\\vec{v}$ puis $\\vec{u}$. Ils arrivent au même endroit : ' +
             '$\\vec{u} + \\vec{v} = \\vec{v} + \\vec{u}$. L\'ordre ne compte pas.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'somme-vecteurs-widget',
+          label: 'Manipule toi-même : additionner et soustraire',
+          caption:
+            'Fais glisser les extrémités de u et v, puis choisis l\'opération et la méthode. ' +
+            'Bout à bout, la somme va du point de départ au point d\'arrivée ; avec une même ' +
+            'origine, c\'est la diagonale du parallélogramme. Pour u − v, on ajoute l\'opposé ' +
+            '−v. Le calcul se fait composante par composante (section 9), et v + u donne ' +
+            'toujours le même vecteur que u + v.',
         },
         {
           kind: 'application',
@@ -1073,6 +1103,16 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'égaler', text: '$6 - x_D = 4$ et $5 - y_D = 1$, donc $x_D = 2$ et $y_D = 4$' },
           ],
           result: { tag: 'résultat', text: 'D(2 ; 4) — contrôle : $\\vec{AD}$ et $\\vec{BC}$ valent tous deux $\\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'egalite-parallelogramme-widget',
+          label: 'Manipule toi-même : le quatrième sommet',
+          caption:
+            'Passe en mode « quatrième sommet » et déplace A, B et C : D = C − AB se ' +
+            'recalcule composante par composante, et les diagonales de ABCD gardent ' +
+            'toujours le même milieu. Place A(1 ; 1), B(5 ; 2) et C(6 ; 5) pour retrouver ' +
+            'l\'exemple ci-dessus.',
         },
         {
           kind: 'exemple',

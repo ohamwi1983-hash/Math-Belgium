@@ -15,7 +15,7 @@
 
   var DEFAUT = { xu: 2, yu: 3, xv: -1, yv: 4, op: "somme", methode: "triangle" };
   var BORNE = 4; // composantes entières dans [−4 ; 4]
-  var X_MIN = -9, X_MAX = 9, Y_MIN = -9, Y_MAX = 9;
+  var X_MIN = -8, X_MAX = 8, Y_MIN = -8, Y_MAX = 8;
   var LARGEUR = 460, HAUTEUR = 460, MARGE = 18;
   var NS = "http://www.w3.org/2000/svg";
 
@@ -37,6 +37,7 @@
 
   var STYLE =
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);color:var(--ink,#241f1a);}' +
+    '[hidden]{display:none !important;}' +
     '*{box-sizing:border-box;}' +
     '.vec{display:inline-block;position:relative;font-family:var(--serif,Georgia,serif);font-style:italic;font-weight:700;padding:0 1px;line-height:1;}' +
     '.vec::before{content:"";position:absolute;left:1px;right:3px;top:-0.32em;border-top:1.5px solid currentColor;}' +
@@ -147,9 +148,8 @@
           var nv = self._etat[cle] + parseInt(b.getAttribute("data-pas"), 10);
           if (nv < -BORNE || nv > BORNE) return;
           var essai = Object.assign({}, self._etat); essai[cle] = nv;
-          if ((cle === "xu" || cle === "yu") && essai.xu === 0 && essai.yu === 0) return;
-          if ((cle === "xv" || cle === "yv") && essai.xv === 0 && essai.yv === 0) return;
-          self._etat[cle] = nv; self._rendre();
+          if (cle === "xu" || cle === "yu") self._appliquer("u", [essai.xu, essai.yu]);
+          else self._appliquer("v", [essai.xv, essai.yv]);
         });
       });
     }
@@ -206,6 +206,9 @@
       var x = Math.max(-BORNE, Math.min(BORNE, c[0])), y = Math.max(-BORNE, Math.min(BORNE, c[1]));
       if (x === 0 && y === 0) return;
       var s = this._etat;
+      var nu = qui === "u" ? [x, y] : [s.xu, s.yu], nv = qui === "v" ? [x, y] : [s.xv, s.yv];
+      var pts = [[nu[0] + nv[0], nu[1] + nv[1]], [nu[0] - nv[0], nu[1] - nv[1]]];
+      if (pts.some(function (p) { return Math.abs(p[0]) > 7 || Math.abs(p[1]) > 7; })) return;
       if (qui === "u") { if (x === s.xu && y === s.yu) return; s.xu = x; s.yu = y; }
       else { if (x === s.xv && y === s.yv) return; s.xv = x; s.yv = y; }
       this._rendre();
@@ -222,12 +225,18 @@
       this._svg.appendChild(el("line", { x1: pa[0].toFixed(1), y1: pa[1].toFixed(1), x2: pb[0].toFixed(1), y2: pb[1].toFixed(1), class: classe, "marker-end": marqueur ? "url(#" + marqueur + ")" : "" }));
     }
 
-    _etiquette(milieuMath, direction, nom, classe) {
-      // Nom posé à côté du milieu du vecteur, du côté gauche de « direction », assez loin pour ne
-      // jamais toucher le trait ; chaque lettre de vecteur (u, v) reçoit sa propre flèche.
-      var svg = this._svg;
+    _centre(pts) {
+      var x = 0, y = 0;
+      pts.forEach(function (p) { x += p[0]; y += p[1]; });
+      return [x / pts.length, y / pts.length];
+    }
+
+    // Étiquette d'un vecteur de a vers b : à côté du milieu, du côté opposé au centre de la figure
+    // (donc à l'extérieur du triangle ou du parallélogramme) ; une diagonale (bout = true) est
+    // étiquetée juste après sa pointe. Chaque lettre de vecteur reçoit sa propre flèche.
+    _etiq(a, b, nom, classe, centre, bout) {
       var g = el("g", {});
-      svg.appendChild(g);
+      this._svg.appendChild(g);
       var x = 0, morceaux = [];
       for (var i = 0; i < nom.length; i++) {
         var c = nom[i];
@@ -247,12 +256,24 @@
         g.appendChild(el("line", { x1: x1.toFixed(1), y1: yf, x2: (x2 - 3).toFixed(1), y2: yf, class: "fleche-lab s-" + classe }));
         g.appendChild(el("path", { d: "M" + (x2 + 1).toFixed(1) + "," + yf + " l-5,-3 l0,6 z", class: classe }));
       });
-      var p = this._px(milieuMath[0], milieuMath[1]);
-      var dx = direction[0], dy = -direction[1], n = Math.hypot(dx, dy) || 1;
-      var nx = -dy / n, ny = dx / n; // normale choisie par le sens de « direction » (repère écran)
-      var d = (total / 2) * Math.abs(nx) + 11 * Math.abs(ny) + 9;
-      var cx = p[0] + nx * d, cy = p[1] + ny * d;
-      g.setAttribute("transform", "translate(" + (cx - total / 2).toFixed(1) + "," + (cy + 5).toFixed(1) + ")");
+      var pa = this._px(a[0], a[1]), pb = this._px(b[0], b[1]), pc = this._px(centre[0], centre[1]);
+      var dx = pb[0] - pa[0], dy = pb[1] - pa[1], n = Math.hypot(dx, dy) || 1;
+      var ux = dx / n, uy = dy / n;
+      var hw = total / 2, hh = 10;
+      var cx, cy;
+      if (bout) {
+        var dd = hw * Math.abs(ux) + hh * Math.abs(uy) + 14;
+        cx = pb[0] + ux * dd; cy = pb[1] + uy * dd;
+      } else {
+        var mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+        var nx = -uy, ny = ux;
+        if ((mx - pc[0]) * nx + (my - pc[1]) * ny < 0) { nx = -nx; ny = -ny; }
+        var d = hw * Math.abs(nx) + hh * Math.abs(ny) + 8;
+        cx = mx + nx * d; cy = my + ny * d;
+      }
+      cx = Math.max(hw + 4, Math.min(LARGEUR - hw - 4, cx));
+      cy = Math.max(20, Math.min(HAUTEUR - 6, cy));
+      g.setAttribute("transform", "translate(" + (cx - hw).toFixed(1) + "," + (cy + 5).toFixed(1) + ")");
     }
 
     _poignee(pos, qui, classeAnneau) {
@@ -324,9 +345,10 @@
           this._fleche([0, 0], u, "v-u", "p-u");
           this._fleche(u, res, "v-moinsv", "p-v");
           this._fleche([0, 0], res, "v-r", "p-r");
-          this._etiquette([u[0] / 2, u[1] / 2], u, "u", "lab-u");
-          this._etiquette([u[0] + mv[0] / 2, u[1] + mv[1] / 2], mv, "−v", "lab-v");
-          this._etiquette([res[0] / 2, res[1] / 2], [-res[0], -res[1]], "u − v", "lab-r");
+          var ct = this._centre([[0, 0], u, res]);
+          this._etiq([0, 0], u, "u", "lab-u", ct);
+          this._etiq(u, res, "−v", "lab-v", ct);
+          this._etiq([0, 0], res, "u − v", "lab-r", ct);
         } else {
           // même origine : u, v, −v ; parallélogramme sur u et −v ; représentant de l'extrémité de v à celle de u
           var poly = [[0, 0], u, res, mv].map(function (q) { return this._px(q[0], q[1]).map(function (n) { return n.toFixed(1); }).join(","); }, this).join(" ");
@@ -337,10 +359,11 @@
           this._fleche([0, 0], v, "v-v", "p-v");
           this._fleche([0, 0], res, "v-r", "p-r");
           this._fleche(v, u, "v-fantome", "p-r");
-          this._etiquette([u[0] / 2, u[1] / 2], u, "u", "lab-u");
-          this._etiquette([v[0] / 2, v[1] / 2], [-v[0], -v[1]], "v", "lab-v");
-          this._etiquette([mv[0] / 2, mv[1] / 2], mv, "−v", "lab-v");
-          this._etiquette([res[0] / 2, res[1] / 2], [-res[0], -res[1]], "u − v", "lab-r");
+          var cp = this._centre([[0, 0], u, res, mv]);
+          this._etiq([0, 0], u, "u", "lab-u", cp);
+          this._etiq([0, 0], v, "v", "lab-v", [u[0] / 2, u[1] / 2]);
+          this._etiq([0, 0], mv, "−v", "lab-v", cp);
+          this._etiq([0, 0], res, "u − v", "lab-r", cp, true);
         }
       } else if (tri) {
         var premier = s.op === "inverse" ? v : u, second = s.op === "inverse" ? u : v;
@@ -352,9 +375,10 @@
         this._fleche([0, 0], premier, s.op === "inverse" ? "v-v" : "v-u", s.op === "inverse" ? "p-v" : "p-u");
         this._fleche(premier, somme, s.op === "inverse" ? "v-u" : "v-v", s.op === "inverse" ? "p-u" : "p-v");
         this._fleche([0, 0], somme, "v-r", "p-r");
-        this._etiquette([premier[0] / 2, premier[1] / 2], premier, s.op === "inverse" ? "v" : "u", s.op === "inverse" ? "lab-v" : "lab-u");
-        this._etiquette([premier[0] + second[0] / 2, premier[1] + second[1] / 2], second, s.op === "inverse" ? "u" : "v", s.op === "inverse" ? "lab-u" : "lab-v");
-        this._etiquette([somme[0] / 2, somme[1] / 2], [-somme[0], -somme[1]], nomRes, "lab-r");
+        var c3 = s.op === "inverse" ? this._centre([[0, 0], u, somme, v]) : this._centre([[0, 0], premier, somme]);
+        this._etiq([0, 0], premier, s.op === "inverse" ? "v" : "u", s.op === "inverse" ? "lab-v" : "lab-u", c3);
+        this._etiq(premier, somme, s.op === "inverse" ? "u" : "v", s.op === "inverse" ? "lab-u" : "lab-v", c3);
+        this._etiq([0, 0], somme, nomRes, "lab-r", c3, s.op === "inverse");
       } else {
         var pts = [[0, 0], u, somme, v].map(function (q) { return this._px(q[0], q[1]).map(function (n) { return n.toFixed(1); }).join(","); }, this).join(" ");
         svg.appendChild(el("polygon", { points: pts, class: "para" }));
@@ -362,9 +386,10 @@
         this._fleche([0, 0], u, "v-u", "p-u");
         this._fleche([0, 0], v, "v-v", "p-v");
         this._fleche([0, 0], somme, "v-r", "p-r");
-        this._etiquette([u[0] / 2, u[1] / 2], u, "u", "lab-u");
-        this._etiquette([v[0] / 2, v[1] / 2], [-v[0], -v[1]], "v", "lab-v");
-        this._etiquette([somme[0] / 2, somme[1] / 2], [-somme[0], -somme[1]], nomRes, "lab-r");
+        var c4 = this._centre([[0, 0], u, somme, v]);
+        this._etiq([0, 0], u, "u", "lab-u", c4);
+        this._etiq([0, 0], v, "v", "lab-v", c4);
+        this._etiq([0, 0], somme, nomRes, "lab-r", c4, true);
       }
       var lo = el("text", { x: (o[0] - 8).toFixed(1), y: (o[1] + 15).toFixed(1), "text-anchor": "end", class: "lab-o" });
       lo.textContent = "O";

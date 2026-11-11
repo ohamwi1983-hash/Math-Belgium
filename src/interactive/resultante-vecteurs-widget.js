@@ -51,6 +51,24 @@
   function eqv(n, d) { var v = val(n, d); return v.charAt(0) === "≈" ? v : "= " + v; }
   function par(t, n) { return n < 0 ? "(" + t + ")" : t; }
 
+  /** Petite flèche de vecteur tracée au-dessus d'un <text> SVG déjà inséré (le caractère combinant
+   * U+20D7 n'est pas rendu par toutes les polices). */
+  function flecheSur(svg, texte, classe) {
+    var bb;
+    try { bb = texte.getBBox(); } catch (e) { return; }
+    if (!bb || !bb.width) return;
+    var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
+    var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l.setAttribute("x1", x1.toFixed(2)); l.setAttribute("x2", (x2 - 3).toFixed(2));
+    l.setAttribute("y1", y.toFixed(2)); l.setAttribute("y2", y.toFixed(2));
+    l.setAttribute("class", "vf " + classe);
+    svg.appendChild(l);
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M" + x2.toFixed(2) + " " + y.toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y - 2.6).toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y + 2.6).toFixed(2) + " Z");
+    p.setAttribute("class", "vf-tete " + classe);
+    svg.appendChild(p);
+  }
+
   function svgEl(tag, attrs) {
     var el = document.createElementNS(NS, tag);
     for (var key in attrs) el.setAttribute(key, attrs[key]);
@@ -84,6 +102,13 @@
     '.et-f2{fill:var(--attn-ink,#7a5a12);}' +
     '.et-r{fill:var(--accent-ink,#7a3212);}' +
     '.et-plan{fill:var(--plan,#6b4fa0);}' +
+    '.vec{position:relative;display:inline-block;padding-top:0.18em;line-height:1.1;}' +
+    '.vec::before{content:"";position:absolute;left:0.04em;right:0.12em;top:0.04em;border-top:1.5px solid currentColor;}' +
+    '.vec::after{content:"";position:absolute;right:-0.06em;top:calc(0.04em + 0.75px - 0.21em);border-top:0.21em solid transparent;border-bottom:0.21em solid transparent;border-left:0.34em solid currentColor;}' +
+    '.vf{stroke-width:1.5;}' +
+    '.vf-f1{stroke:var(--good,#2f7a4f);fill:var(--good,#2f7a4f);}' +
+    '.vf-f2{stroke:var(--attn-ink,#7a5a12);fill:var(--attn-ink,#7a5a12);}' +
+    '.vf-r{stroke:var(--accent-ink,#7a3212);fill:var(--accent-ink,#7a3212);}' +
     '.lecture{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;font-variant-numeric:tabular-nums;}' +
     '.bloc{padding:10px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.88rem;line-height:1.6;}' +
     '.bloc h4{margin:0 0 4px;font-size:0.78rem;letter-spacing:0.04em;color:var(--ink-soft,#6b6055);font-family:var(--mono,ui-monospace,monospace);font-weight:600;}' +
@@ -230,8 +255,7 @@
     // θ en O (entre F₁ et F₂) ; 180° − θ à l'extrémité de F₁ (angle du triangle opposé à R)
     svg.appendChild(arc(o, 20, 0, th, "arc-theta"));
     svg.appendChild(arc(p1, 16, th, 180, "arc-oppose"));
-    var mil = (th + 180) / 2 * D2R;
-    var eo = svgEl("text", { x: (p1[0] + 26 * Math.cos(mil)).toFixed(2), y: (p1[1] - 26 * Math.sin(mil) + 4).toFixed(2), "text-anchor": "middle", class: "etiquette et-plan" });
+    var eo = svgEl("text", { x: (p1[0] - 6).toFixed(2), y: (o[1] + 16).toFixed(2), "text-anchor": "end", class: "etiquette et-plan" });
     eo.textContent = "180° − θ";
     svg.appendChild(eo);
     var mt = th / 2 * D2R;
@@ -243,14 +267,15 @@
     svg.appendChild(svgEl("line", { x1: o[0].toFixed(2), y1: o[1].toFixed(2), x2: p2[0].toFixed(2), y2: p2[1].toFixed(2), class: "vecteur-f2", "marker-end": "url(#fl-f2)" }));
     svg.appendChild(svgEl("line", { x1: o[0].toFixed(2), y1: o[1].toFixed(2), x2: pR[0].toFixed(2), y2: pR[1].toFixed(2), class: "vecteur-r", "marker-end": "url(#fl-r)" }));
 
-    function etiquette(p, texte, classe, gauche, dy) {
+    function etiquette(p, texte, classe, gauche, dy, classeFleche) {
       var e = svgEl("text", { x: (p[0] + (gauche ? -8 : 8)).toFixed(2), y: (p[1] + dy).toFixed(2), "text-anchor": gauche ? "end" : "start", class: "etiquette " + classe });
       e.textContent = texte;
       svg.appendChild(e);
+      flecheSur(svg, e, classeFleche);
     }
-    etiquette(p1, "F⃗₁", "et-f1", false, 16);
-    etiquette(p2, "F⃗₂", "et-f2", p2[0] < o[0] + 10, -6);
-    etiquette(pR, "R⃗", "et-r", pR[0] > LARGEUR - 40, -6);
+    etiquette(p1, "F₁", "et-f1", false, 18, "vf-f1");
+    etiquette(p2, "F₂", "et-f2", p2[0] < o[0] + 10, -6, "vf-f2");
+    etiquette(pR, "R", "et-r", pR[0] > LARGEUR - 40, -6, "vf-r");
 
     // ---------- lecture ----------
     var sF1 = brut(f1, 0), sF2 = brut(f2, 0), sTh = brut(th, 0);
@@ -258,20 +283,20 @@
     var html = "";
     html += '<div class="bloc"><h4>Loi des cosinus</h4>R² = ' + sF1 + '² + ' + sF2 + '² + 2 × ' + sF1 + ' × ' + sF2 + ' × cos ' + sTh + '° ' +
       eqv(r2, 2) + '<br><span class="res">R ' + eqv(r, 2) + ' N</span></div>';
-    html += '<div class="bloc signe"><h4>Pourquoi « + » et pas « − » ?</h4>Dans le triangle formé par F⃗₁ et le côté opposé du parallélogramme, l\'angle opposé à R⃗ vaut 180° − θ = ' +
+    html += '<div class="bloc signe"><h4>Pourquoi « + » et pas « − » ?</h4>Dans le triangle formé par <span class=vec>F₁</span> et le côté opposé du parallélogramme, l\'angle opposé à <span class=vec>R</span> vaut 180° − θ = ' +
       brut(180 - th, 0) + '°. Al-Kashi donne R² = F₁² + F₂² − 2·F₁·F₂·cos(180° − θ), et comme cos(180° − θ) = −cos θ, le « − » devient « + ».</div>';
-    html += '<div class="bloc"><h4>Par les composantes</h4>F⃗₁(' + sF1 + ' ; 0) et F⃗₂(' + sF2 + ' · cos ' + sTh + '° ; ' + sF2 + ' · sin ' + sTh + '°) = (' +
-      val(f2x, 2) + ' ; ' + val(f2y, 2) + ')<br>R⃗ = F⃗₁ + F⃗₂ = (' + val(rx, 2) + ' ; ' + val(ry, 2) + ')<br>‖R⃗‖ = √(' + par(brut(rx, 2), rx) + '² + ' + brut(ry, 2) + '²) ' +
+    html += '<div class="bloc"><h4>Par les composantes</h4><span class=vec>F₁</span>(' + sF1 + ' ; 0) et <span class=vec>F₂</span>(' + sF2 + ' · cos ' + sTh + '° ; ' + sF2 + ' · sin ' + sTh + '°) = (' +
+      val(f2x, 2) + ' ; ' + val(f2y, 2) + ')<br><span class=vec>R</span> = <span class=vec>F₁</span> + <span class=vec>F₂</span> = (' + val(rx, 2) + ' ; ' + val(ry, 2) + ')<br>‖<span class=vec>R</span>‖ = √(' + par(brut(rx, 2), rx) + '² + ' + brut(ry, 2) + '²) ' +
       eqv(r, 2) + ' N — le même résultat</div>';
     var devTxt = (Math.abs(dev - Math.round(dev * 10) / 10) < 1e-9 ? "" : "≈ ") + fmt(dev, 1) + "°";
     if (obtus) {
       html += '<div class="bloc alerte"><h4>Déviation obtuse</h4>Loi des sinus : sin(déviation) = ' + sF2 + ' × sin ' + sTh + '° / R ≈ ' + fmt(sinDev, 3) +
         ' ; la calculatrice (sin⁻¹) affiche ≈ ' + fmt(alpha0, 1) + '°, un angle aigu.<br>Mais Rₓ ' + eqv(rx, 2) + ' est négatif : la résultante penche vers l\'arrière.<br>' +
-        '<span class="res">Déviation = 180° − ' + fmt(alpha0, 1) + '° ' + devTxt + ' par rapport à F⃗₁</span></div>';
+        '<span class="res">Déviation = 180° − ' + fmt(alpha0, 1) + '° ' + devTxt + ' par rapport à <span class=vec>F₁</span></span></div>';
     } else {
       html += '<div class="bloc"><h4>Déviation</h4>Loi des sinus : sin(déviation) = ' + sF2 + ' × sin ' + sTh + '° / R ≈ ' + fmt(sinDev, 3) + '. ' +
-        (droit ? 'Rₓ = 0 : la résultante est perpendiculaire à F⃗₁.' : 'Rₓ ' + eqv(rx, 2) + ' est positif : la déviation est aiguë.') +
-        '<br><span class="res">Déviation ' + devTxt + ' par rapport à F⃗₁</span></div>';
+        (droit ? 'Rₓ = 0 : la résultante est perpendiculaire à <span class=vec>F₁</span>.' : 'Rₓ ' + eqv(rx, 2) + ' est positif : la déviation est aiguë.') +
+        '<br><span class="res">Déviation ' + devTxt + ' par rapport à <span class=vec>F₁</span></span></div>';
     }
     this._lecture.innerHTML = html;
   };

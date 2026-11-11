@@ -60,7 +60,7 @@
     '.grille{stroke:var(--line,#ccd8e0);stroke-width:0.7;}' +
     '.axe{stroke:var(--ink-soft,#51626f);stroke-width:1.3;}' +
     '.fleche-axe{fill:var(--ink-soft,#51626f);}' +
-    '.graduation{font-size:11px;fill:var(--ink-soft,#51626f);font-family:var(--sans,sans-serif);}' +
+    '.graduation{font-size:11px;fill:var(--ink-soft,#51626f);font-family:var(--sans,sans-serif);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.droite{stroke:var(--ink,#182430);stroke-width:1.6;}' +
     '.v-ab{stroke:var(--accent,#b65c1f);stroke-width:3;} .t-ab{fill:var(--accent,#b65c1f);}' +
     '.v-ba{stroke:var(--plan,#5b4ea3);stroke-width:2.2;} .t-ba{fill:var(--plan,#5b4ea3);}' +
@@ -71,8 +71,8 @@
     '.point-p{fill:var(--surface,#fff);stroke:var(--good,#2f7a4f);stroke-width:2;}' +
     '.poignee{fill:transparent;cursor:grab;touch-action:none;}' +
     '.poignee-active{fill:var(--accent,#b65c1f);fill-opacity:0.14;}' +
-    '.etiq{font-size:15px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);}' +
-    '.etiq-d{font-size:15px;font-weight:700;font-style:italic;fill:var(--ink,#182430);font-family:var(--serif,serif);}' +
+    '.etiq{font-size:15px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
+    '.etiq-d{font-size:15px;font-weight:700;font-style:italic;fill:var(--ink,#182430);font-family:var(--serif,serif);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
     '.vec{display:inline-block;position:relative;padding-top:0.42em;line-height:1.05;}' +
     '.vec::before{content:"";position:absolute;left:0.05em;right:0.3em;top:0.17em;border-top:1.5px solid currentColor;}' +
     '.vec::after{content:"";position:absolute;right:0;top:calc(0.17em - 3.2px);border-left:6px solid currentColor;border-top:3.7px solid transparent;border-bottom:3.7px solid transparent;}' +
@@ -90,6 +90,7 @@
     '.btn[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#b65c1f);color:var(--accent-ink,#7a3212);}' +
     '.btn:focus-visible{outline:2px solid var(--accent,#b65c1f);outline-offset:2px;}' +
     '.btn-reset{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);}' +
+    '.lecture,.controles,.enonce,.consigne,.options,.correction{max-width:620px;margin-left:auto;margin-right:auto;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" role="img" aria-label="Droite d passant par A et B, avec plusieurs de ses vecteurs directeurs"></svg></div>' +
     '<div class="lecture" id="lecture" aria-live="polite"></div>' +
@@ -237,7 +238,11 @@
 
       // droite d (longue, coupée au cadre)
       var L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
-      var d0 = { x: A.x - ux * 40, y: A.y - uy * 40 }, d1 = { x: A.x + ux * 40, y: A.y + uy * 40 };
+      // segment de d coupé au cadre : A + t·(ux ; uy), t ∈ [tMin ; tMax]
+      var tMin = -Infinity, tMax = Infinity;
+      if (ux !== 0) { var a1 = (X_MIN - A.x) / ux, a2 = (X_MAX - A.x) / ux; tMin = Math.max(tMin, Math.min(a1, a2)); tMax = Math.min(tMax, Math.max(a1, a2)); }
+      if (uy !== 0) { var b1 = (Y_MIN - A.y) / uy, b2 = (Y_MAX - A.y) / uy; tMin = Math.max(tMin, Math.min(b1, b2)); tMax = Math.min(tMax, Math.max(b1, b2)); }
+      var d0 = { x: A.x + ux * tMin, y: A.y + uy * tMin }, d1 = { x: A.x + ux * tMax, y: A.y + uy * tMax };
       var q0 = this._px(d0.x, d0.y), q1 = this._px(d1.x, d1.y);
       el("line", { x1: q0[0], y1: q0[1], x2: q1[0], y2: q1[1], class: "droite" }, g);
 
@@ -283,8 +288,9 @@
         t.textContent = c[0];
       });
       // nom de la droite près du bord
-      var bordD = this._px(A.x + ux * 4.2, A.y + uy * 4.2);
-      var td = el("text", { x: Math.max(14, Math.min(LARGEUR - 14, bordD[0] + nx * 14)).toFixed(1), y: Math.max(18, Math.min(HAUTEUR - 8, bordD[1] - ny * 14)).toFixed(1), class: "etiq-d" }, svg);
+      // côté +n, près de l'extrémité « avant » de d : zone libre (BA s'arrête en B)
+      var bordD = this._px(A.x + ux * (tMax - 0.9) + nx * 0.55, A.y + uy * (tMax - 0.9) + ny * 0.55);
+      var td = el("text", { x: Math.max(14, Math.min(LARGEUR - 14, bordD[0])).toFixed(1), y: Math.max(18, Math.min(HAUTEUR - 8, bordD[1] + 5)).toFixed(1), class: "etiq-d", "text-anchor": "middle" }, svg);
       td.textContent = "d";
       [["A", A], ["B", B]].forEach(function (c) {
         var pp = self._px(c[1].x, c[1].y);

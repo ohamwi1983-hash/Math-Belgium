@@ -20,8 +20,8 @@
   var A = { x: 0, y: 0 }, B = { x: 2, y: 1 };
   var EPS = 0.15;
 
-  var X_MIN = -3, X_MAX = 9, Y_MIN = -3, Y_MAX = 7;
-  var LARGEUR = 420, HAUTEUR = 340, MARGE = 32;
+  var X_MIN = -3, X_MAX = 9, Y_MIN = -3, Y_MAX = 9; // carré : même échelle sur les deux axes (angle droit fidèle)
+  var LARGEUR = 420, HAUTEUR = 420, MARGE = 32;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -44,6 +44,24 @@
     if (num === 0) return "0";
     var g = pgcd(num, den); num /= g; den /= g;
     return (num < 0 ? "−" : "") + (den === 1 ? Math.abs(num) : Math.abs(num) + "/" + den);
+  }
+
+  /** Petite flèche de vecteur tracée au-dessus d'un <text> SVG déjà inséré (le caractère combinant
+   * U+20D7 n'est pas rendu par toutes les polices). */
+  function flecheSur(svg, texte, classe) {
+    var bb;
+    try { bb = texte.getBBox(); } catch (e) { return; }
+    if (!bb || !bb.width) return;
+    var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
+    var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l.setAttribute("x1", x1.toFixed(2)); l.setAttribute("x2", (x2 - 3).toFixed(2));
+    l.setAttribute("y1", y.toFixed(2)); l.setAttribute("y2", y.toFixed(2));
+    l.setAttribute("class", "vf " + classe);
+    svg.appendChild(l);
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M" + x2.toFixed(2) + " " + y.toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y - 2.6).toFixed(2) + " L" + (x2 - 5).toFixed(2) + " " + (y + 2.6).toFixed(2) + " Z");
+    p.setAttribute("class", "vf-tete " + classe);
+    svg.appendChild(p);
   }
 
   function svgEl(ns, tag, attrs) {
@@ -78,6 +96,12 @@
     '.point-verifie{fill:var(--good,#2f7a4f);}' +
     '.etiquette{font-size:13px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#241f1a);paint-order:stroke;stroke:var(--surface-2,#faf6f0);stroke-width:3px;stroke-linejoin:round;}' +
     '.etiquette-vec{paint-order:stroke;stroke:var(--surface-2,#faf6f0);stroke-width:3px;stroke-linejoin:round;}' +
+    '.vec{position:relative;display:inline-block;padding-top:0.18em;line-height:1.1;}' +
+    '.vec::before{content:"";position:absolute;left:0.04em;right:0.12em;top:0.04em;border-top:1.5px solid currentColor;}' +
+    '.vec::after{content:"";position:absolute;right:-0.06em;top:calc(0.04em + 0.75px - 0.21em);border-top:0.21em solid transparent;border-bottom:0.21em solid transparent;border-left:0.34em solid currentColor;}' +
+    '.vf{stroke-width:1.5;}' +
+    '.vf-good{stroke:var(--good,#2f7a4f);fill:var(--good,#2f7a4f);}' +
+    '.vf-accent{stroke:var(--accent-ink,#7a3212);fill:var(--accent-ink,#7a3212);}' +
     '.lecture{display:flex;flex-direction:column;gap:6px;margin:0 0 18px;font-variant-numeric:tabular-nums;}' +
     '.ligne-formule{padding:9px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.88rem;line-height:1.5;}' +
     '.ligne-k{padding:9px 12px;border-radius:var(--radius,3px);border:1px solid var(--good,#2f7a4f);font-size:0.9rem;font-weight:700;color:var(--good,#2f7a4f);line-height:1.5;}' +
@@ -230,19 +254,21 @@
       var e = svgEl(ns, "text", { x: (mx + nx * 14).toFixed(2), y: (my + ny * 14 + 4).toFixed(2), "text-anchor": "middle", class: "etiquette-vec " + classe });
       e.textContent = texte;
       svg.appendChild(e);
+      flecheSur(svg, e, classe === "ev-good" ? "vf-good" : "vf-accent");
     }
-    etVec(pA, pB, "AB⃗", "ev-good", 1);
-    if (!cEnA && Math.hypot(pC[0] - pA[0], pC[1] - pA[1]) > 30) etVec(pA, pC, "AC⃗", "ev-accent", -1);
+    etVec(pA, pB, "AB", "ev-good", 1);
+    if (!cEnA && Math.hypot(pC[0] - pA[0], pC[1] - pA[1]) > 30) etVec(pA, pC, "AC", "ev-accent", -1);
 
     [["A", pA, "point"], ["B", pB, "point"], ["C", pC, estVerifie ? "point-verifie" : "point"]].forEach(function (t) {
       svg.appendChild(svgEl(ns, "circle", { cx: t[1][0].toFixed(2), cy: t[1][1].toFixed(2), r: 5, class: t[2] }));
-      var et = svgEl(ns, "text", { x: (t[1][0] + 9).toFixed(2), y: (t[1][1] - 9).toFixed(2), class: "etiquette" });
+      var gauche = t[1][0] > LARGEUR - 40, bas = t[1][1] < 40;
+      var et = svgEl(ns, "text", { x: (t[1][0] + (gauche ? -9 : 9)).toFixed(2), y: (t[1][1] + (bas ? 18 : -9)).toFixed(2), "text-anchor": gauche ? "end" : "start", class: "etiquette" });
       et.textContent = t[0];
       svg.appendChild(et);
     });
 
     var detNul = Math.abs(determinant) < EPS, psNul = Math.abs(produitScalaire) < EPS;
-    var ligneVecteurs = "u⃗ = AB⃗(" + nb(abx) + " ; " + nb(aby) + ") et v⃗ = AC⃗(" + nb(acx) + " ; " + nb(acy) + ")";
+    var ligneVecteurs = "<span class=vec>u</span> = <span class=vec>AB</span>(" + nb(abx) + " ; " + nb(aby) + ") et <span class=vec>v</span> = <span class=vec>AC</span>(" + nb(acx) + " ; " + nb(acy) + ")";
     var ligneColinearite =
       "Déterminant : xᵤ·yᵥ − yᵤ·xᵥ = " + nb(abx) + " × " + nbPar(acy) + " − " + nb(aby) + " × " + nbPar(acx) +
       " = " + nb(determinant) + (detNul ? " → colinéaires : A, B, C alignés" : " ≠ 0 → pas colinéaires");
@@ -255,8 +281,8 @@
       // AB = (2 ; 1) : k = x_AC / x_AB, calculé en demi-unités pour rester exact
       var k = cEnA ? "0" : fraction(Math.round(acx * 2), Math.round(abx * 2));
       extra = '<div class="ligne-k">' + (cEnA
-        ? "C est confondu avec A : AC⃗ est le vecteur nul, colinéaire à tout vecteur (AC⃗ = 0·AB⃗)."
-        : "AC⃗ = k·AB⃗ avec k = " + k + " : (" + nb(acx) + " ; " + nb(acy) + ") = " + k + " × (" + nb(abx) + " ; " + nb(aby) + ")") + '</div>';
+        ? "C est confondu avec A : <span class=vec>AC</span> est le vecteur nul, colinéaire à tout vecteur (<span class=vec>AC</span> = 0·<span class=vec>AB</span>)."
+        : "<span class=vec>AC</span> = k·<span class=vec>AB</span> avec k = " + k + " : (" + nb(acx) + " ; " + nb(acy) + ") = " + k + " × (" + nb(abx) + " ; " + nb(aby) + ")") + '</div>';
     } else if (mode === "orthogonalite") {
       var ab2 = abx * abx + aby * aby, ac2 = acx * acx + acy * acy;
       var bcx = cx - B.x, bcy = cy - B.y, bc2 = bcx * bcx + bcy * bcy;
