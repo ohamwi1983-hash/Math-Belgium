@@ -191,6 +191,17 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           result: { tag: 'résultat', text: 'angle réduit = 280°, quadrant IV, angle du premier quadrant = 80°, cos positif, sin et tan négatifs' },
         },
+        {
+          kind: 'atelier',
+          tag: 'cercle-explorateur-widget',
+          label: 'Manipule toi-même : explore le cercle',
+          caption:
+            'Choisis n\'importe quel angle, même négatif ou au-delà de 360° : la spirale ' +
+            'compte les tours, et le panneau donne l\'angle réduit, le quadrant, l\'angle du ' +
+            'premier quadrant et les signes de sin, cos et tan. Coche la tangente pour lire ' +
+            'tan θ comme une longueur. En mode Défi, trouve le quadrant et les trois signes ' +
+            'du premier coup.',
+        },
         { kind: 'subheading', text: 'Pour aller plus loin — représenter tan θ sur le cercle' },
         {
           kind: 'intuition',
@@ -540,6 +551,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'tan 150° = −√3/3 — sin 315° = −√2/2' },
         },
         {
+          kind: 'atelier',
+          tag: 'valeurs-remarquables-widget',
+          label: 'Manipule toi-même : la famille d\'un angle',
+          caption:
+            'Choisis un angle de référence : ses quatre « cousins » (30°, 150°, 210°, ' +
+            '330°…) ont des sinus, cosinus et tangentes de même valeur absolue — seul le ' +
+            'signe change, selon le quadrant. En mode Défi, retrouve la valeur exacte d\'un ' +
+            'des 16 angles remarquables, en un seul essai.',
+        },
+        {
           kind: 'entrainement',
           title: 'Valeurs remarquables',
           generatorId: 'gen15',
@@ -620,6 +641,17 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '90° à eux deux. Et le côté opposé à l\'un est le côté adjacent à l\'autre ! Le sinus de ' +
             'l\'un est donc le cosinus de l\'autre : sin(90° − θ) = cos θ. La famille complémentaire ' +
             'prolonge à tout angle ce que tu connaissais déjà pour les angles aigus.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'angles-associes-widget',
+          label: 'Manipule toi-même : les quatre miroirs',
+          caption:
+            'Fais varier θ et choisis une famille : M′ est le reflet de M(θ) dans un miroir ' +
+            '— l\'axe vertical pour 180° − θ, l\'axe horizontal pour −θ, le centre O pour ' +
+            '180° + θ, la diagonale y = x pour 90° − θ. Les coordonnées et les trois règles ' +
+            'se mettent à jour en direct ; vérifie aussi que 360° − θ tombe sur le même ' +
+            'point que −θ.',
         },
         {
           kind: 'astuce',

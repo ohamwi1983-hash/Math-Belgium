@@ -2221,3 +2221,25 @@ paths:
   `differences-secondes-widget` (§ 1), `completer-le-carre-widget` (réutilisé du ch. 2),
   `trois-formes-widget`, `parabole-par-points-widget` (mode Défi) (§ 2), `optimisation-enclos-widget`
   (enclos, prix, trajectoire ; domaine restreint) (§ 3).
+
+- **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques** (`cercle-trigonometrique-triangles`) :
+  audit puis enrichissement validé par l'utilisateur (toutes les recommandations). Corrections : ligne
+  tan α = k du formulaire (fausse pour k < 0 ; α₀ désormais défini comme l'angle aigu de rapport |k| sur
+  les trois lignes), rôles pont/cible inversés dans l'exemple de la hauteur inaccessible (ABS = pont,
+  BFS = cible), « angle partagé » réaligné sur gen58 (un seul point O, repère M), récapitulatif de la
+  triangulation (loi des sinus OU Al-Kashi), « cinq angles du premier quadrant » → « entre 0° et 90° »,
+  texte de la charpente aligné sur sa figure (SAS → entrait), sextant (loi des sinus « sphérique »),
+  étiquettes O/A/P de la figure de la tangente, définition de tan θ dès le § 1. § 6 réorganisé en blocs
+  complets (loi des sinus + démonstration + AAS ; cas ambigu + méthode + SSA ; Al-Kashi + démonstration +
+  « pourquoi le cercle était indispensable » + SAS + contrôles + SSS ; aire + Héron ; choisir la loi).
+  Ajouts : angles négatifs / plusieurs tours (§ 1) ; cos²θ = (cos θ)², exemple cos θ = −1/3, partir de
+  tan θ (§ 2) ; angles sur les axes, exemple tan 150° / sin 315°, badges des démonstrations (§ 3) ;
+  360° − θ = −θ, pont avec la 3e, règle de 90° + θ (§ 4) ; droite verticale pour cos, exemples k < 0,
+  sin α = sin 40°, calculatrice (mode degrés, sin⁻¹/cos⁻¹, exemple cos α = 0,3) (§ 5) ; exemples
+  côté partagé (terrain ABCD) et angle partagé (mât) avec figures (§ 7) ; checklist et transition vers
+  la 5e. Énoncés de démonstration entièrement par clé (plus aucune entrée positionnelle). Ateliers :
+  `identite-signe-widget` (mode cos connu, triangle OPM, valeurs exactes),
+  `equation-trig-cas-limite-widget` (α₀ et symétrie, valeurs remarquables),
+  `triangle-cas-ambigu-widget` (calcul pas à pas) ; 6 nouveaux — `cercle-explorateur-widget` (§ 1,
+  défi), `valeurs-remarquables-widget` (§ 3, défi), `angles-associes-widget` (§ 4),
+  `triangle-deformable-widget` et `quelle-loi-widget` (§ 6, défi), `triangulation-widget` (§ 7).
