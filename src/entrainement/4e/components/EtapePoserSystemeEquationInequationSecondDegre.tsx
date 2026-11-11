@@ -14,6 +14,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -48,6 +49,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
       {exercice.base.contexte.croquis && <CroquisEquationInequationSecondDegre croquis={exercice.base.contexte.croquis} />}
       <p className="prompt-text">{consignePoserSysteme()}</p>
 
+      <ApercuExpressionLatex texte={relation1} />
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-systeme-relation1">
           {systeme?.label1 ?? "Relation 1"}
@@ -60,6 +62,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
           onChange={(e) => setRelation1(e.target.value)}
         />
       </div>
+      <ApercuExpressionLatex texte={relation2} />
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-systeme-relation2">
           {systeme?.label2 ?? "Relation 2"}

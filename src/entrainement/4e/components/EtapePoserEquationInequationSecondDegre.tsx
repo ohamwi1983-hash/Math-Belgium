@@ -13,6 +13,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -43,6 +44,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
       />
       {exercice.base.contexte.croquis && <CroquisEquationInequationSecondDegre croquis={exercice.base.contexte.croquis} />}
       <p className="prompt-text">{consignePoserEquationInequation(exercice)}</p>
+      <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-poser">
           {label}

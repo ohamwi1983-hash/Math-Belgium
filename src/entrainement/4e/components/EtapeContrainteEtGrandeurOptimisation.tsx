@@ -12,6 +12,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
@@ -67,6 +68,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
       {exercice.contexte.croquis && <CroquisOptimisation croquis={exercice.contexte.croquis} />}
       <p className="prompt-text">{consigneContrainteEtGrandeur(exercice)}</p>
 
+      <ApercuExpressionLatex texte={texteEquation} />
       <div className="field">
         <label className="field-label" htmlFor="optimisation-contrainte">
           Relation entre {exercice.contexte.labelVariable} et {exercice.contrainte.lettreCherchee}
@@ -80,6 +82,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
         />
       </div>
 
+      <ApercuExpressionLatex texte={texteGrandeur} label={`${exercice.contexte.nomGrandeur} =`} />
       <div className="field">
         <label className="field-label" htmlFor="optimisation-grandeur">
           {exercice.contexte.nomGrandeur} =

@@ -11,7 +11,6 @@ import { calculerRecapitulatifFonctionReference } from "./ui/recapitulatifFoncti
 import { formatEquationFonctionReferenceLatex } from "./ui/formatFonctionsReference";
 import { libelleFamille } from "./ui/famillesReferenceLabels";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
-import { EtapeReglagesFonctionsReference } from "./components/EtapeReglagesFonctionsReference";
 import { EtapeReconnaissanceFonction } from "./components/EtapeReconnaissanceFonction";
 import { EtapeFonctionsReferenceExercice } from "./components/EtapeFonctionsReferenceExercice";
 import { Katex } from "./components/Katex";
@@ -51,8 +50,17 @@ function demarrer(reglagesFamilles: ReglagesFamillesFonctionReference): EtatSess
   return demarrerSessionFonctionReference(reglagesSession, creerGenerateurFonctionReference(reglagesFamilles));
 }
 
-/** Session ouverte par le QR code d'une feuille imprimée (`?code=XXXXXX`) : l'écran de réglages est
- * sauté et le PREMIER exercice est l'instance imprimée — tirée avec les MÊMES fonctions de génération
+/** Réglage de tirage par défaut : uniforme parmi les 6 familles. L'ancien premier écran de réglages
+ * (aléatoire / nombre d'exercices par famille) est supprimé à la demande de l'utilisateur — le
+ * sélecteur de variantes (`SelecteurVarianteDev`, une variante par famille) couvre déjà le choix
+ * d'une famille précise. */
+const REGLAGES_ALEATOIRES: ReglagesFamillesFonctionReference = {
+  mode: "aleatoire",
+  quantites: { carre: 0, cube: 0, racine_carree: 0, racine_cubique: 0, inverse: 0, valeur_absolue: 0 },
+};
+
+/** Session ouverte par le QR code d'une feuille imprimée (`?code=XXXXXX`) : le PREMIER exercice est
+ * l'instance imprimée — tirée avec les MÊMES fonctions de génération
  * que l'adaptateur d'export (`generateurs/fonctionsReference/exportEvaluation.ts`) ; les exercices
  * suivants sont des tirages normaux. `null` sans code dans l'URL. */
 function sessionDepuisCode(): EtatSessionFonctionReference | null {
@@ -142,9 +150,14 @@ function calculerSegmentsProgression(etat: EtatSessionFonctionReference): EtatPu
   ];
 }
 
+/** Première session : l'exercice du QR code s'il y en a un, sinon directement un tirage aléatoire
+ * (plus d'écran de réglages avant le premier exercice). */
+function sessionInitiale(): EtatSessionFonctionReference {
+  return sessionDepuisCode() ?? demarrer(REGLAGES_ALEATOIRES);
+}
+
 export function AppFonctionsReference() {
-  const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(null);
-  const [etat, setEtat] = useState<EtatSessionFonctionReference | null>(sessionDepuisCode);
+  const [etat, setEtat] = useState<EtatSessionFonctionReference>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   /** Curseurs de l'écran "exercice", remontés ici (plutôt que locaux à `EtapeFonctionsReferenceExercice`)
@@ -153,8 +166,11 @@ export function AppFonctionsReference() {
    * comportement que l'ancien `useState` local, remonté à chaque nouvelle occurrence de l'écran
    * "exercice" (après "reconnaissance", jamais en restant sur "exercice" après un essai raté). */
   const [curseurs, setCurseurs] = useState<ReponseCurseursFonctionReference>(CURSEURS_INITIAUX);
-  const [phasePourCurseurs, setPhasePourCurseurs] = useState(etat?.phase ?? null);
-  if (etat && phasePourCurseurs !== etat.phase) {
+  const [phasePourCurseurs, setPhasePourCurseurs] = useState(etat.phase);
+  /** Compteur de génération, dans la clé des écrans : un nouvel exercice (ou une variante forcée)
+   * remonte l'écran même s'il revient à la même phase (champs vidés). */
+  const [generation, setGeneration] = useState(0);
+  if (phasePourCurseurs !== etat.phase) {
     setPhasePourCurseurs(etat.phase);
     setCurseurs(CURSEURS_INITIAUX);
   }
@@ -168,17 +184,12 @@ export function AppFonctionsReference() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function commencerSession(reglages: ReglagesFamillesFonctionReference) {
-    setReglagesFamilles(reglages);
-    setEtat(demarrer(reglages));
-    setHistorique([]);
-    setFicheOuverteIndex(null);
-  }
-
   function onGenererDev(familleId: string) {
     setEnAttente(null);
     const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
     setEtat(demarrerSessionFonctionReference(reglagesSession, () => construireAvecFamille(familleId as FamilleReference)));
+    setGeneration((g) => g + 1);
+    setCurseurs(CURSEURS_INITIAUX);
     setHistorique([]);
     setFicheOuverteIndex(null);
   }
@@ -204,7 +215,6 @@ export function AppFonctionsReference() {
    * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde-fou que
    * `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
   function terminerEtape(nouvelEtat: EtatSessionFonctionReference, votreReponse?: ReactNode) {
-    if (!etat) return;
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       if (votreReponse !== undefined) {
@@ -219,37 +229,18 @@ export function AppFonctionsReference() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
-      // Session ENTIÈREMENT terminée (les N exercices configurés) — redémarre avec les mêmes
-      // réglages (même principe que l'ancien bouton "Recommencer" de
-      // `ResumeSessionFonctionsReference`) ; `reglagesFamilles` est toujours non nul ici sauf
-      // session forcée par le panneau dev, où l'on retourne à l'écran de réglages.
-      setEtat(reglagesFamilles ? demarrer(reglagesFamilles) : null);
+      // Session ENTIÈREMENT terminée (les N exercices) — une nouvelle série aléatoire démarre
+      // directement (plus d'écran de réglages).
+      setEtat(demarrer(REGLAGES_ALEATOIRES));
     } else {
       setEtat(enAttente.etatSuivant);
     }
     if (enAttente.nouvelExercice) {
+      setGeneration((g) => g + 1);
       setHistorique([]);
       setFicheOuverteIndex(null);
     }
     setEnAttente(null);
-  }
-
-  if (!etat) {
-    return (
-      <div className="app-shell">
-        <header className="app-header">
-          <p className="app-eyebrow">4e — Entraînement</p>
-          <h1 className="app-title">Transformations graphiques — fonctions de référence</h1>
-          <p className="app-subtitle">Chapitre 3</p>
-          <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        </header>
-        <main className="card">
-          <div className="card-body">
-            <EtapeReglagesFonctionsReference onCommencer={commencerSession} />
-          </div>
-        </main>
-      </div>
-    );
   }
 
   const validation = enAttente
@@ -293,6 +284,7 @@ export function AppFonctionsReference() {
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={blocDonnees} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction
+              key={`${generation}-reconnaissance`}
               tentativesUtilisees={etat.etapeReconnaissance.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix), libelleFamille(choix))}
@@ -300,6 +292,7 @@ export function AppFonctionsReference() {
             />
           ) : (
             <EtapeFonctionsReferenceExercice
+              key={`${generation}-exercice`}
               exercice={etat.exerciceCourant}
               recapitulatif={calculerRecapitulatifFonctionReference(etat)}
               tentativesEquation={etat.etapeEquation.tentativesUtilisees}

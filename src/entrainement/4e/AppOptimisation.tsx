@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -36,6 +37,11 @@ import {
   libellePositionOptimum,
 } from "./ui/formatOptimisation";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
+import type { ExerciceOptimisation } from "./core/optimisation.types";
+import type { PhaseOptimisation } from "./moteur/typesOptimisation";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -64,8 +70,8 @@ function sessionInitiale(): EtatSessionOptimisation {
  * `etat.niveauAideXxx` que `terminerEtape` ci-dessous. `interpretation` (dernière phase, clôture
  * l'exercice) n'a jamais besoin de sa propre branche "close" : un nouvel exercice redémarre toujours
  * juste après, donc elle reste "a-venir" jusqu'à devenir "courante" — jamais consultée comme passée
- * (même principe que la dernière phase d'`AppAnalyseFonction`/`AppMethodeRapide`). Puces purement
- * visuelles (pas de `onSegmentClick`, comportement explicitement supporté par `ProgressionPuces`). */
+ * (même principe que la dernière phase d'`AppAnalyseFonction`/`AppMethodeRapide`). Les puces closes
+ * sont cliquables (`onSegmentClick` → `FicheReponseEcran`, historique tenu dans `AppOptimisation`). */
 function calculerSegmentsProgression(etat: EtatSessionOptimisation): EtatPuceProgression[] {
   const sequence = sequencePourExercice(etat.exerciceCourant);
   const indexCourant = sequence.indexOf(etat.phase);
@@ -101,6 +107,64 @@ function calculerSegmentsProgression(etat: EtatSessionOptimisation): EtatPucePro
   });
 }
 
+/** Saisie libre de l'élève rendue en KaTeX (même conversion que l'aperçu sous le champ) — texte brut
+ * si elle ne se lit pas comme une expression. */
+function saisieLatex(texte: string): ReactNode {
+  try {
+    return <Katex expression={expressionLibreVersLatex(texte)} />;
+  } catch {
+    return texte;
+  }
+}
+
+/** Choix de l'élève à l'écran « identification » (libellés tels qu'ils étaient proposés). */
+function formatIdentification(exercice: ExerciceOptimisation, reponse: { indexX: number | null; indexY: number | null }): ReactNode {
+  if (exercice.variante !== "modelisation" || !exercice.identificationXY) return null;
+  const id = exercice.identificationXY;
+  return (
+    <>
+      {exercice.contexte.labelVariable} : {reponse.indexX === null ? "—" : id.candidatsX[reponse.indexX]} — {exercice.contrainte.lettreCherchee} :{" "}
+      {reponse.indexY === null ? "—" : id.candidatsY[reponse.indexY]}
+    </>
+  );
+}
+
+/** Titre de chaque écran dans la fiche de consultation (mêmes libellés que « Ce qu'on sait déjà »). */
+const TITRE_PHASE: Record<PhaseOptimisation, string> = {
+  identification: "Identification",
+  contrainteEtGrandeur: "Relation posée",
+  systeme: "Fonction",
+  domaine: "Domaine",
+  sommet: "Sommet",
+  decision: "Optimum",
+  interpretation: "Interprétation",
+};
+
+/** Réponse attendue d'un écran — la MÊME pour l'écran de validation et pour la fiche de consultation. */
+function reponseAttenduePour(exercice: ExerciceOptimisation, phase: PhaseOptimisation): ReactNode {
+  if (phase === "identification" && exercice.variante === "modelisation" && exercice.identificationXY) {
+    const id = exercice.identificationXY;
+    return (
+      <>
+        {exercice.contexte.labelVariable} : {id.candidatsX[id.indexCorrectX]} — {exercice.contrainte.lettreCherchee} : {id.candidatsY[id.indexCorrectY]}
+      </>
+    );
+  }
+  if (phase === "contrainteEtGrandeur" && exercice.variante === "modelisation") return <Katex expression={formatSystemeAccoladeLatex(exercice)} />;
+  if (phase === "systeme" && exercice.variante === "modelisation")
+    return <Katex expression={`\\text{${exercice.contexte.nomGrandeur}} = ${formatFonctionDeveloppeeLatex(exercice.fonction, exercice.contexte.labelVariable)}`} />;
+  if (phase === "domaine" && exercice.variante === "modelisation") return <Katex expression={formatDomaineLatex(exercice.domaine, exercice.contexte.labelVariable)} />;
+  if (phase === "sommet") return <Katex expression={formatSommetAttenduLatex(exercice)} />;
+  if (phase === "decision")
+    return (
+      <>
+        {libellePositionOptimum(exercice)} : <Katex expression={formatOptimalAttenduLatex(exercice)} />
+      </>
+    );
+  if (phase === "interpretation") return exercice.optionsInterpretation.find((option) => option.correcte)?.texte ?? null;
+  return null;
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -116,8 +180,15 @@ export function AppOptimisation() {
   /** Compteur de génération, dans la clé des écrans : « Générer » ou « Nouvel exercice » remonte
    * l'écran (champs vidés) même s'il reste sur la même phase. */
   const [generation, setGeneration] = useState(0);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables) — une entrée par écran
+   * clos, dans l'ordre de `sequencePourExercice` (donc au même index que sa puce). Vidé à chaque
+   * nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionOptimisation) {
+  /** `votreReponse` n'est poussé dans l'historique que lorsque l'écran se clôt réellement (jamais à
+   * chaque essai raté). */
+  function terminerEtape(nouvelEtat: EtatSessionOptimisation, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -134,6 +205,13 @@ export function AppOptimisation() {
                   : etat.phase === "decision"
                     ? nouvelEtat.decisionRevele
                     : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.interpretationRevele;
+      if (votreReponse !== undefined && etat.phase !== "interpretation") {
+        const phaseClose = etat.phase;
+        setHistorique((h) => [
+          ...h,
+          { titre: TITRE_PHASE[phaseClose], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(etat.exerciceCourant, phaseClose) : undefined },
+        ]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -142,7 +220,10 @@ export function AppOptimisation() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
+      setHistorique([]);
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -150,40 +231,17 @@ export function AppOptimisation() {
   function onGenererDev(familleId: string) {
     setEnAttente(null);
     setGeneration((g) => g + 1);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionOptimisation(REGLAGES_DEMO, () => construireAvecFamilleId(familleId as (typeof CATALOGUE_FAMILLES)[number]["id"])));
   }
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
-
   const recapitulatif = calculerRecapitulatifOptimisation(etat);
 
-  const reponseAttendue =
-    phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
-      <>
-        Relation attendue : <Katex expression={formatSystemeAccoladeLatex(exercice)} />
-      </>
-    ) : phase === "systeme" && exercice.variante === "modelisation" ? (
-      <>
-        Réponse attendue : <Katex expression={formatFonctionDeveloppeeLatex(exercice.fonction, exercice.contexte.labelVariable)} />
-      </>
-    ) : phase === "domaine" && exercice.variante === "modelisation" ? (
-      <>
-        Domaine attendu : <Katex expression={formatDomaineLatex(exercice.domaine, exercice.contexte.labelVariable)} />
-      </>
-    ) : phase === "sommet" ? (
-      <>
-        Sommet attendu : <Katex expression={formatSommetAttenduLatex(exercice)} />
-      </>
-    ) : phase === "decision" ? (
-      <>
-        Optimum attendu ({libellePositionOptimum(exercice)}) : <Katex expression={formatOptimalAttenduLatex(exercice)} />
-      </>
-    ) : phase === "interpretation" && optionCorrecte ? (
-      <>Interprétation attendue : {optionCorrecte.texte}</>
-    ) : null;
+  const reponseAttendue = reponseAttenduePour(exercice, phase);
 
   const validation = enAttente
     ? {
@@ -201,7 +259,7 @@ export function AppOptimisation() {
         <h1 className="app-title">Problèmes d'optimisation (fonction du second degré)</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -213,7 +271,7 @@ export function AppOptimisation() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={tentativesMaxCourant(etat)}
-              onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse), formatIdentification(exercice, reponse))}
               validation={validation}
             />
           ) : phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
@@ -224,7 +282,15 @@ export function AppOptimisation() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideContrainteEtGrandeur}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseContrainteEtGrandeur(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseContrainteEtGrandeur(etat, reponse), (
+                  <>
+                    {saisieLatex(reponse.texteEquation)}
+                    <br />
+                    {exercice.contexte.nomGrandeur} = {saisieLatex(reponse.texteGrandeur)}
+                  </>
+                ))
+              }
               validation={validation}
             />
           ) : phase === "systeme" && exercice.variante === "modelisation" ? (
@@ -235,7 +301,7 @@ export function AppOptimisation() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideSysteme}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseSysteme(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseSysteme(etat, texte), <>{exercice.contexte.nomGrandeur} = {saisieLatex(texte)}</>)}
               validation={validation}
             />
           ) : phase === "domaine" && exercice.variante === "modelisation" ? (
@@ -246,7 +312,7 @@ export function AppOptimisation() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideDomaine}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse), <Katex expression={`${exercice.contexte.labelVariable} \\in [${reponse.inf.trim().replace(".", "{,}")}\\,;\\,${reponse.sup.trim().replace(".", "{,}")}]`} />)}
               validation={validation}
             />
           ) : phase === "sommet" ? (
@@ -257,7 +323,7 @@ export function AppOptimisation() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideSommet}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSommet(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSommet(etat, reponse), <>S({reponse.x.trim()} ; {reponse.y.trim()})</>)}
               validation={validation}
             />
           ) : phase === "decision" ? (
@@ -268,7 +334,15 @@ export function AppOptimisation() {
               tentativesMax={tentativesMaxCourant(etat)}
               niveauAide={etat.niveauAideDecision}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDecision(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseDecision(etat, reponse), (
+                  <>
+                    {reponse.dansDomaine ? "Sommet dans le domaine" : "Sommet hors du domaine"}
+                    <br />
+                    Optimum : ({reponse.x.trim()} ; {reponse.y.trim()})
+                  </>
+                ))
+              }
               validation={validation}
             />
           ) : phase === "interpretation" ? (
@@ -285,6 +359,10 @@ export function AppOptimisation() {
           ) : null}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

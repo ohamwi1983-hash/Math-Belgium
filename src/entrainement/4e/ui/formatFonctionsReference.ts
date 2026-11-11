@@ -1,14 +1,23 @@
 import type { ExerciceFonctionReference, FamilleReference } from "../core/fonctionsReference.types";
+import { expressionLibreVersLatex } from "./formatExpressionLatex";
 
 /** Emplacement pas encore renseigné : tiret LaTeX (\_), même convention que
  * formatTransformationsGraphiques.ts (chapitre 1) / apercuIntervalle.ts. */
 const PLACEHOLDER = "\\_";
 
-/** Aperçu en temps réel de l'équation en cours de saisie — reflète tel quel le contenu du champ
- * libre, jamais une saisie figée ni reformatée (même principe que formatTransformationsGraphiques.ts). */
+/** Aperçu en temps réel de l'équation en cours de saisie — même réglage que gen8
+ * (`formatTransformationsGraphiques.ts::formatApercuEquation`, demande de l'utilisateur) : la
+ * saisie passe par `expressionLibreVersLatex` (« / » → vraie fraction, « sqrt(…) » → racine,
+ * « cbrt(…) » → racine cubique, « abs(…) » ou « |…| » → valeur absolue, « ^ » → exposant, virgule
+ * décimale), au lieu d'être recopiée telle quelle dans KaTeX. Texte brut seulement si la saisie est
+ * encore syntaxiquement incomplète (parenthèse pas fermée…), comme gen8. */
 export function formatApercuEquation(equation: string): string {
-  const contenu = equation.trim() === "" ? PLACEHOLDER : equation;
-  return `f(x) = ${contenu}`;
+  if (equation.trim() === "") return `f(x) = ${PLACEHOLDER}`;
+  try {
+    return `f(x) = ${expressionLibreVersLatex(equation)}`;
+  } catch {
+    return `f(x) = ${equation}`;
+  }
 }
 
 /** Texte d'aide (attribut `placeholder`) du champ équation — un exemple par famille, dans une

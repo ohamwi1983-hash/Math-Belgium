@@ -1645,9 +1645,14 @@
  * encore la taille tactile mais suppose déjà ce `display:flex` de base. */
 .entrainement .morceau-row {
   display: flex;
-  flex-wrap: wrap;
+  /* JAMAIS de retour à la ligne (retour de l'utilisateur : « la construction de l'intervalle doit
+   * tenir sur une ligne » sur smartphone) — `wrap` renvoyait la borne droite et le crochet fermant
+   * à la ligne dès 390 px, surtout avec le bouton « × » d'une liste de morceaux à côté. Les champs
+   * de borne rétrécissent (`flex: 1 1 0`, `min-width: 0`) ; les boutons restent à leur taille. */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .entrainement .morceau-row .bracket-btn {
@@ -1667,8 +1672,8 @@
 
 .entrainement .morceau-row .text-input.morceau-input {
   width: auto;
-  flex: 1 1 60px;
-  min-width: 48px;
+  flex: 1 1 0;
+  min-width: 0;
   text-align: center;
 }
 
@@ -1680,13 +1685,35 @@
 }
 
 @media (max-width: 480px) {
+  .entrainement .morceau-row {
+    gap: 4px;
+  }
+
   .entrainement .morceau-row .bracket-btn,
   .entrainement .morceau-row .btn:not(.bracket-btn) {
     position: relative;
-    padding: 6px 5px;
+    padding: 6px 4px;
     min-height: 44px;
-    min-width: 30px;
+    min-width: 28px;
     flex: none;
+  }
+
+  .entrainement .morceau-row .text-input.morceau-input {
+    padding: 10px 4px;
+    font-size: 16px;
+  }
+
+  .entrainement .morceau-separateur {
+    padding: 0;
+  }
+
+  .entrainement .liste-morceaux-ligne {
+    gap: 6px;
+  }
+
+  .entrainement .liste-morceaux-ligne .liste-morceaux-retirer {
+    padding: 8px 6px;
+    min-width: 34px;
   }
 
   .entrainement .morceau-row .bracket-btn::after,
@@ -1716,6 +1743,7 @@
 
 .entrainement .liste-morceaux-ligne .morceau-row {
   flex: 1;
+  min-width: 0;
 }
 
 .entrainement .liste-morceaux-ligne .options-grid {
