@@ -1010,6 +1010,15 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
           result: { tag: 'résultat', text: '$f(x) = 2x^2 - 12x + 10 = 2(x-1)(x-5)$' },
         },
+        {
+          kind: 'atelier',
+          tag: 'trois-formes-widget',
+          label: 'Manipule toi-même — une parabole, trois écritures',
+          caption:
+            'Une même parabole, trois écritures. Règle-la par son sommet ou par ses zéros, ' +
+            'puis clique sur une forme pour voir ce qu\'elle permet de lire directement : c ' +
+            'pour la développée, le sommet pour la canonique, les zéros pour la factorisée.',
+        },
         { kind: 'subheading', text: 'Retrouver l\'équation d\'une parabole' },
         {
           kind: 'exemple',
@@ -1030,6 +1039,15 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'le point donne a', text: '$f(1) = a \\cdot 2 \\cdot (-2) = -4a = -8 \\iff a = 2$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = 2(x+1)(x-3) = 2x^2 - 4x - 6$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'parabole-par-points-widget',
+          label: 'Manipule toi-même — retrouver l\'équation',
+          caption:
+            'Un sommet (ou deux zéros) et un point suffisent pour retrouver l\'équation ' +
+            'd\'une parabole : suis le calcul de a pas à pas. En mode Défi, lis S et P sur ' +
+            'le quadrillage et trouve a du premier coup.',
         },
         {
           kind: 'entrainement',
@@ -1154,6 +1172,15 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'ordonnée du sommet', text: '$h(2) = -20 + 40 + 25 = 45$' },
           ],
           result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : ce sera au chapitre 2.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'optimisation-enclos-widget',
+          label: 'Manipule toi-même — chercher l\'optimum',
+          caption:
+            'Fais varier la largeur, le prix ou le temps et observe la grandeur à optimiser ' +
+            'sur la scène et sur la courbe. Le maximum est au sommet… sauf si le sommet ' +
+            'sort du domaine : restreins le domaine et vois l\'optimum glisser à la borne.',
         },
         {
           kind: 'application',
