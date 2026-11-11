@@ -1,0 +1,1 @@
+import './echiquier-widget.js'

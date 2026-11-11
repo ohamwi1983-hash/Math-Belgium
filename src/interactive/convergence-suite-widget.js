@@ -18,6 +18,8 @@
   var BORNES_Q = { min: -2, max: 2, step: 0.05 };
   var BORNES_U1 = { min: 1, max: 8, step: 1 };
   var N_TERMES = 10;
+  var BORNES_EPS = { min: 0.05, max: 2, step: 0.05 };
+  var DEFAUT_EPS = 1;
 
   // Fenêtre FIXE (jamais recalculée depuis r/q/u1) : couvre l'oscillation q=−1 jusqu'à u1=8
   // ([-8;8]) avec marge ; les croissances rapides (|q|>1, r>0) sortent vite de la fenêtre et sont
@@ -45,7 +47,7 @@
     '*{box-sizing:border-box;}' +
     '.ligne-select{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:12px;}' +
     '.ligne-select label{font-weight:600;color:var(--ink,#241f1a);}' +
-    'select{font:inherit;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}' +
+    'select{font:inherit;min-height:44px;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}' +
     '.formule{text-align:center;font-family:var(--serif,serif);font-style:italic;font-size:1.05rem;font-weight:600;color:var(--ink,#241f1a);margin:0 0 12px;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:14px;}' +
     'svg{width:100%;max-width:460px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
@@ -70,7 +72,19 @@
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
     '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
-    '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
+    '.bande-eps{fill:var(--good,#2f7a4f);fill-opacity:0.13;stroke:none;}' +
+    '.bande-eps-piege{fill:var(--bad,#b23a3a);fill-opacity:0.10;stroke:none;}' +
+    '.bord-eps{stroke:var(--good,#2f7a4f);stroke-width:1;stroke-opacity:0.7;}' +
+    '.bord-eps-piege{stroke:var(--bad,#b23a3a);stroke-width:1;stroke-opacity:0.7;}' +
+    '.point-dans-bande{fill:var(--good,#2f7a4f);}' +
+    '.zone-eps{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);}' +
+    '.case-eps{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:600;color:var(--ink,#241f1a);}' +
+    '.case-eps input{width:22px;height:22px;accent-color:var(--good,#2f7a4f);}' +
+    '.message-eps{margin:0;font-size:0.88rem;font-weight:600;line-height:1.4;}' +
+    '.message-eps-ok{color:var(--good,#2f7a4f);}' +
+    '.message-eps-piege{color:var(--bad,#b23a3a);}' +
+    '.curseur-row input[type="range"]{min-height:44px;}' +
+    '.btn-reset{min-height:44px;margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<div class="ligne-select"><label for="mode">Type de suite</label>' +
@@ -78,6 +92,13 @@
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<p class="verdict" id="verdict"></p>' +
+    '<div class="zone-eps">' +
+    '<label class="case-eps"><input type="checkbox" id="eps-on"> Afficher une bande ε autour de la limite</label>' +
+    '<div class="curseur" id="eps-curseur" hidden><label for="eps">ε — demi-largeur de la bande</label><div class="curseur-row">' +
+    '<input type="range" id="eps" min="' + BORNES_EPS.min + '" max="' + BORNES_EPS.max + '" step="' + BORNES_EPS.step + '" value="' + DEFAUT_EPS + '">' +
+    '<span class="curseur-valeur" id="eps-valeur"></span></div></div>' +
+    '<p class="message-eps" id="eps-message" hidden></p>' +
+    '</div>' +
     '<div class="controles" id="zone-controles"></div>' +
     '<div class="curseur"><label for="u1">u₁</label><div class="curseur-row">' +
     '<input type="range" id="u1" min="' + BORNES_U1.min + '" max="' + BORNES_U1.max + '" step="' + BORNES_U1.step + '" value="' + DEFAUT.u1 + '">' +
@@ -114,14 +135,25 @@
     this._resetBtn = shadow.getElementById("reset");
     this._shadow = shadow;
     this._selectMode.value = this._mode;
+    this._epsOn = false;
+    this._eps = DEFAUT_EPS;
+    this._caseEps = shadow.getElementById("eps-on");
+    this._curseurEps = shadow.getElementById("eps-curseur");
+    this._inputEps = shadow.getElementById("eps");
+    this._valeurEps = shadow.getElementById("eps-valeur");
+    this._messageEps = shadow.getElementById("eps-message");
   };
 
   ConvergenceSuiteWidgetClass.prototype.connectedCallback = function () {
     var self = this;
     this._onChangeMode = function () { self._mode = self._selectMode.value; self._construireControles(); self._rendre(); };
     this._onInputU1 = function () { self._u1 = parseFloat(self._inputU1.value); self._rendre(); };
+    this._onCaseEps = function () { self._epsOn = self._caseEps.checked; self._rendre(); };
+    this._onInputEps = function () { self._eps = parseFloat(self._inputEps.value); self._rendre(); };
     this._onReset = function () {
       self._mode = DEFAUT.mode; self._r = DEFAUT.r; self._q = DEFAUT.q; self._u1 = DEFAUT.u1;
+      self._epsOn = false; self._eps = DEFAUT_EPS;
+      self._caseEps.checked = false; self._inputEps.value = String(DEFAUT_EPS);
       self._selectMode.value = DEFAUT.mode;
       self._inputU1.value = String(DEFAUT.u1);
       self._construireControles();
@@ -130,6 +162,8 @@
     this._selectMode.addEventListener("change", this._onChangeMode);
     this._inputU1.addEventListener("input", this._onInputU1);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._caseEps.addEventListener("change", this._onCaseEps);
+    this._inputEps.addEventListener("input", this._onInputEps);
     this._construireControles();
     this._rendre();
   };
@@ -138,6 +172,8 @@
     this._selectMode.removeEventListener("change", this._onChangeMode);
     this._inputU1.removeEventListener("input", this._onInputU1);
     this._resetBtn.removeEventListener("click", this._onReset);
+    this._caseEps.removeEventListener("change", this._onCaseEps);
+    this._inputEps.removeEventListener("input", this._onInputEps);
     if (this._detacherControles) this._detacherControles();
   };
 
@@ -177,20 +213,20 @@
     if (mode === "arithmetique") {
       var r = this._r;
       for (var i = 1; i < N_TERMES; i++) termes.push(termes[i - 1] + r);
-      this._formule.textContent = "u₁ = " + formatNombreFr(u1, 1) + " ,  u_(n+1) = u_n " + (r >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(r), 1);
+      this._formule.textContent = "u₁ = " + formatNombreFr(u1, 1) + " ,  uₙ₊₁ = uₙ " + (r >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(r), 1);
       estPiege = false;
-      if (Math.abs(r) < EPS) { classe = "r = 0 : suite constante — lim u_n = u₁ = " + formatNombreFr(u1, 2) + "."; limite = u1; }
-      else if (r > 0) { classe = "r > 0 : croissante, sans borne — lim u_n = +∞."; limite = null; }
-      else { classe = "r < 0 : décroissante, sans borne — lim u_n = −∞."; limite = null; }
+      if (Math.abs(r) < EPS) { classe = "r = 0 : suite constante — lim uₙ = u₁ = " + formatNombreFr(u1, 2) + "."; limite = u1; }
+      else if (r > 0) { classe = "r > 0 : croissante, sans borne — lim uₙ = +∞."; limite = null; }
+      else { classe = "r < 0 : décroissante, sans borne — lim uₙ = −∞."; limite = null; }
     } else {
       var q = this._q;
       for (var j = 1; j < N_TERMES; j++) termes.push(termes[j - 1] * q);
-      this._formule.textContent = "u₁ = " + formatNombreFr(u1, 1) + " ,  u_(n+1) = " + formatNombreFr(q, 2) + "·u_n";
-      if (Math.abs(q - 1) < EPS) { classe = "q = 1 : suite constante — lim u_n = u₁ = " + formatNombreFr(u1, 2) + "."; limite = u1; estPiege = false; }
+      this._formule.textContent = "u₁ = " + formatNombreFr(u1, 1) + " ,  uₙ₊₁ = " + formatNombreFr(q, 2) + " · uₙ";
+      if (Math.abs(q - 1) < EPS) { classe = "q = 1 : suite constante — lim uₙ = u₁ = " + formatNombreFr(u1, 2) + "."; limite = u1; estPiege = false; }
       else if (Math.abs(q + 1) < EPS) { classe = "q = −1 : oscille entre u₁ et −u₁ — la limite n'existe PAS (elle ne diverge pas vers l'infini, ne la classe jamais avec q>1 !)"; limite = null; estPiege = true; }
       else if (q < -1) { classe = "q < −1 : oscille, amplitude croissante — la limite n'existe PAS."; limite = null; estPiege = true; }
-      else if (q > 1) { classe = "q > 1 : croissante en valeur absolue — lim u_n = ±∞ (signe de u₁)."; limite = null; estPiege = false; }
-      else { classe = "|q| < 1 : décroissante en valeur absolue — lim u_n = 0."; limite = 0; estPiege = false; }
+      else if (q > 1) { classe = "q > 1 : croissante en valeur absolue — lim uₙ = ±∞ (signe de u₁)."; limite = null; estPiege = false; }
+      else { classe = "|q| < 1 : décroissante en valeur absolue — lim uₙ = 0."; limite = 0; estPiege = false; }
     }
 
     this._valeurU1.textContent = formatNombreFr(u1, 1);
@@ -199,6 +235,42 @@
 
     this._verdict.className = "verdict " + (estPiege ? "verdict-piege" : limite !== null ? "verdict-ok" : "verdict-neutre");
     this._verdict.textContent = classe;
+
+    // ---- Bande ε ----
+    var bande = null; // { centre, piege, N }
+    var oscilleMoinsUn = mode === "geometrique" && Math.abs(this._q + 1) < EPS;
+    this._curseurEps.hidden = !this._epsOn;
+    this._messageEps.hidden = !this._epsOn;
+    this._valeurEps.textContent = formatNombreFr(this._eps, 2);
+    if (this._epsOn) {
+      var eps = this._eps;
+      if (limite !== null) {
+        // Premier rang N à partir duquel |uₙ − L| ≤ ε. Suite constante : N = 1. |q| < 1 :
+        // |uₙ| = |u₁|·|q|ⁿ⁻¹ décroît, donc le premier rang dans la bande est le bon (tous les
+        // suivants y restent).
+        var N = 1, ecart = Math.abs(u1 - limite), qq = mode === "geometrique" ? this._q : 1;
+        if (!(Math.abs(this._r) < EPS && mode === "arithmetique") && !(mode === "geometrique" && Math.abs(qq - 1) < EPS)) {
+          while (ecart > eps + 1e-12 && N < 100000) { ecart = Math.abs(ecart * qq); N++; }
+        }
+        bande = { centre: limite, piege: false, N: N };
+        this._messageEps.className = "message-eps message-eps-ok";
+        this._messageEps.textContent = "À partir du rang N = " + N + ", tous les termes restent dans la bande [" +
+          formatNombreFr(limite - eps, 2) + " ; " + formatNombreFr(limite + eps, 2) + "]" +
+          (N > N_TERMES ? " — c'est au-delà des " + N_TERMES + " rangs affichés." : ".") +
+          " Réduis ε : un tel rang existe toujours, il arrive seulement plus tard.";
+      } else if (oscilleMoinsUn) {
+        bande = { centre: 0, piege: true, N: null };
+        this._messageEps.className = "message-eps message-eps-piege";
+        this._messageEps.textContent = "Aucune bande étroite ne contient tous les termes à partir d'un rang : les termes sautent de u₁ = " +
+          formatNombreFr(u1, 0) + " à −u₁ = " + formatNombreFr(-u1, 0) + ", sans fin. Pas de limite.";
+      } else {
+        this._messageEps.className = "message-eps message-eps-piege";
+        var versInfini = mode === "arithmetique" || this._q > 1;
+        this._messageEps.textContent = versInfini
+          ? "Pas de limite finie : les termes s'éloignent sans borne, aucune bande ne convient."
+          : "Pas de limite : les termes oscillent avec une amplitude croissante, aucune bande ne convient.";
+      }
+    }
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
@@ -218,8 +290,16 @@
     etiqX.textContent = "n";
     svg.appendChild(etiqX);
     var etiqY = svgEl(ns, "text", { x: MARGE_G + 6, y: MARGE_H - 10, class: "etiquette" });
-    etiqY.textContent = "u_n";
+    etiqY.textContent = "uₙ";
     svg.appendChild(etiqY);
+
+    if (bande) {
+      var yHaut = self._toPy(bande.centre + this._eps), yBas = self._toPy(bande.centre - this._eps);
+      svg.appendChild(svgEl(ns, "rect", { x: MARGE_G, y: yHaut.toFixed(2), width: LARGEUR - MARGE_G - MARGE_D, height: Math.max(0, yBas - yHaut).toFixed(2), class: bande.piege ? "bande-eps-piege" : "bande-eps" }));
+      [yHaut, yBas].forEach(function (yy) {
+        svg.appendChild(svgEl(ns, "line", { x1: MARGE_G, x2: LARGEUR - MARGE_D, y1: yy.toFixed(2), y2: yy.toFixed(2), class: bande.piege ? "bord-eps-piege" : "bord-eps" }));
+      });
+    }
 
     if (limite !== null && limite >= Y_MIN && limite <= Y_MAX) {
       var yL = self._toPy(limite);
@@ -242,7 +322,8 @@
       var visible = v >= Y_MIN - 0.01 && v <= Y_MAX + 0.01;
       if (!visible) return;
       var x = self._toPx(i + 1), y = self._toPy(v);
-      svg.appendChild(svgEl(ns, "circle", { cx: x.toFixed(2), cy: y.toFixed(2), r: 4.5, class: estPiege ? "point-piege" : "point-ok" }));
+      var dansBande = bande && !bande.piege && i + 1 >= bande.N;
+      svg.appendChild(svgEl(ns, "circle", { cx: x.toFixed(2), cy: y.toFixed(2), r: 4.5, class: estPiege ? "point-piege" : dansBande ? "point-dans-bande" : "point-ok" }));
       var etN = svgEl(ns, "text", { x: x.toFixed(2), y: (HAUTEUR - MARGE_B + 14).toFixed(2), "text-anchor": "middle", class: "etiquette-n" });
       etN.textContent = String(i + 1);
       svg.appendChild(etN);

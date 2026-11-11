@@ -883,12 +883,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite arithmétique vaut $u_1 = 7$ et son sixième terme vaut $u_6 = 22$. Calcule la raison $r$, puis écris les six premiers termes." },
     { cle: 'Démonstration — la « double échelle »', enonce: "Démontre, à l'aide de la méthode de la « double échelle » — écrire $S_n$ une seconde fois à l'envers, puis additionner les deux lignes colonne par colonne — que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$." },
     { cle: 'somme des 20 premiers termes', enonce: "Calcule la somme des 20 premiers termes d'une suite arithmétique de premier terme $u_1 = 4$ et de raison $r = 3$." },
+    { cle: 'somme de u5 à u20', enonce: "La suite arithmétique $(u_n)$ est définie par $u_n = 3n + 1$. Calcule la somme $u_5 + u_6 + \\ldots + u_{20}$." },
     { cle: 'isoler x entre deux termes', enonce: "Dans une suite arithmétique de raison $r = 2$, on donne $u_3 = 2x+1$ et $u_7 = 5x-3$. Détermine $x$, puis $u_3$ et $u_7$." },
     { cle: 'isoler x dans une somme', enonce: "Une suite arithmétique a pour premier terme $u_1 = x$ et pour raison $r = 3$. La somme de ses 10 premiers termes vaut $S_{10} = 175$. Détermine $x$." },
     { cle: 'isoler le rang n', enonce: "Une suite arithmétique a pour premier terme $u_1 = 5$ et pour raison $r = 3$. Détermine le rang $n$ pour lequel $u_n = 302$." },
   ],
   'suites-geometriques': [
     { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite géométrique vaut $u_1 = \\dfrac{1}{2}$ et son septième terme vaut $u_7 = 32$. Calcule la raison $q$, sachant qu'elle est positive." },
+    { cle: 'Exemple résolu — intérêts simples ou intérêts composés ?', enonce: "Tu places 1 000 € à 4 % par an pendant 10 ans. On note $u_n$ le capital à la fin de la n-ième année. Exprime $u_n$ et calcule $u_{10}$, d'abord avec des intérêts simples (4 % du capital de départ chaque année), puis avec des intérêts composés (4 % du capital déjà atteint chaque année). Compare les deux placements." },
     { cle: 'Démonstration — établir la formule de la somme', enonce: "Démontre, en multipliant $S_n$ par $q$ puis en soustrayant terme à terme les deux égalités obtenues, que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$." },
     { cle: 'somme des 8 premiers termes', enonce: "Calcule la somme des 8 premiers termes d'une suite géométrique de premier terme $u_1 = 3$ et de raison $q = 2$." },
     { cle: 'isoler x entre deux termes', enonce: "Dans une suite géométrique de raison $q = 2$, on donne $u_3 = x+5$ et $u_5 = 3x+8$. Détermine $x$, puis $u_3$ et $u_5$." },
@@ -896,10 +898,12 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'convergence': [
     { cle: 'somme infinie', enonce: "Calcule la somme de tous les termes de la suite géométrique de premier terme $u_1 = 6$ et de raison $q = \\dfrac{1}{3}$ : $6 + 2 + \\dfrac{2}{3} + \\dfrac{2}{9} + \\ldots$ Justifie d'abord que cette somme existe." },
+    { cle: '0,999… = 1', enonce: "Écris le nombre $0{,}999\\ldots$ (une infinité de 9) comme la somme infinie d'une suite géométrique, puis calcule cette somme." },
     { cle: 'degrés égaux', enonce: "Calcule la limite de la suite $u_n = \\dfrac{3n-1}{2n+5}$ quand $n$ tend vers $+\\infty$, en divisant le numérateur et le dénominateur par la plus haute puissance de $n$ du dénominateur." },
   ],
   'problemes-classiques': [
     { cle: "la légende de l'échiquier", enonce: "Une légende raconte qu'un roi veut récompenser l'inventeur du jeu d'échecs. L'inventeur demande un grain de blé sur la première case de l'échiquier, deux sur la deuxième, quatre sur la troisième, et ainsi de suite en doublant à chaque case, jusqu'à la 64ᵉ. Combien de grains de blé cela représente-t-il au total ? Donne la valeur exacte, puis une valeur approchée en notation scientifique." },
+    { cle: 'les carrés emboîtés', enonce: "Un carré a un côté de 4 cm. En joignant les milieux de ses côtés, on obtient un deuxième carré, inscrit dans le premier. On recommence indéfiniment avec chaque nouveau carré. Calcule la somme des aires de tous les carrés." },
   ],
   'comparaison-suites': [
     { cle: 'deux villes, deux croissances', enonce: "En 2020, la ville A compte 50 000 habitants et croît de 2 000 habitants par an (croissance arithmétique). La même année, la ville B compte 30 000 habitants et croît de 8 % par an (croissance géométrique). Détermine, par balayage numérique, le premier rang — puis l'année correspondante — à partir duquel la population de B dépasse celle de A, en vérifiant explicitement que ce n'est pas encore le cas au rang précédent." },
@@ -907,6 +911,9 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'recurrente-affine': [
     { cle: 'Démonstration — pourquoi L = b/(1−a)', enonce: "Démontre que, si la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) converge, sa limite $L$ vaut nécessairement $L = \\dfrac{b}{1-a}$." },
     { cle: 'dilution répétée', enonce: "Un aquarium contient un produit dont la concentration (en mg/L) suit la récurrence $u_{n+1} = 0{,}7 \\times u_n + 3$, avec $u_1 = 1$ : chaque semaine, 30 % du produit est filtré, puis 3 mg/L sont réintroduits. Justifie que la concentration se stabilise à long terme, et calcule vers quelle valeur." },
+    { cle: 'Démonstration — la suite des écarts vₙ = uₙ − L est géométrique', enonce: "On considère la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) et son point fixe $L = \\dfrac{b}{1-a}$. Démontre que la suite des écarts $v_n = u_n - L$ est géométrique de raison $a$, déduis-en une formule explicite de $u_n$, puis justifie que la suite converge vers $L$ lorsque $|a| < 1$." },
+    { cle: "formule explicite de l'aquarium", enonce: "La concentration d'un produit dans un aquarium (en mg/L) suit la récurrence $u_{n+1} = 0{,}7\\times u_n + 3$, avec $u_1 = 1$ ; son régime permanent vaut $L = 10$. Écris $u_n$ en fonction de $n$, puis calcule $u_{10}$." },
+    { cle: "le seuil de l'emprunt", enonce: "Le capital restant dû d'un emprunt (en €) suit la récurrence $u_{n+1} = 1{,}005\\times u_n - 300$ : 0,5 % d'intérêt par mois, mensualités de 300 €. Calcule le point fixe $L$ de la récurrence. Que se passe-t-il si on emprunte exactement $L$ euros ? Moins ? Plus ?" },
   ],
   },
   'limites-asymptotes': {

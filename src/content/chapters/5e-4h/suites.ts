@@ -69,7 +69,8 @@ export const suites: ChapterContent = {
           text:
             'Une suite est **arithmétique** si tu passes d\'un terme au suivant en **ajoutant** ' +
             'toujours le même nombre. Ce nombre s\'appelle la **raison**, notée $r$ (positive ou ' +
-            'négative). Si $r > 0$, la suite est croissante. Si $r < 0$, elle est décroissante.',
+            'négative). Si $r > 0$, la suite est croissante. Si $r < 0$, elle est décroissante. ' +
+            'Si $r = 0$, elle est constante.',
         },
         {
           kind: 'rappel',
@@ -78,6 +79,9 @@ export const suites: ChapterContent = {
             '$u_n = u_1 + (n-1)r$ ($n \\in \\mathbb{N}_0$). Pour vérifier qu\'une suite est ' +
               'arithmétique : calcule $u_n - u_{n-1}$. Si ce résultat est **constant** (toujours ' +
               'le même, quel que soit n), la suite est arithmétique — et ce résultat, c\'est r.',
+            'Pour montrer qu\'une suite n\'est **pas** arithmétique, un seul contre-exemple ' +
+              'suffit : trois termes consécutifs dont les deux différences ne sont pas égales. ' +
+              'Ex. $u_n = n^2$ : $u_1 = 1$, $u_2 = 4$, $u_3 = 9$, et $4 - 1 = 3 \\neq 9 - 4 = 5$.',
           ],
         },
         {
@@ -236,6 +240,28 @@ export const suites: ChapterContent = {
             'dans l\'énoncé. Calcule-le toujours d\'abord, avec la formule générale, avant de ' +
             'l\'utiliser.',
         },
+        {
+          kind: 'attention',
+          label: 'Attention — une somme qui ne commence pas à u₁ : compte les termes',
+          text:
+            'De $u_p$ à $u_n$, il y a $n - p + 1$ termes — pas $n - p$ ! De $u_5$ à $u_{20}$, ' +
+            'il y a 16 termes, pas 15 (comme 16 piquets pour 15 intervalles). La somme vaut ' +
+            'alors : nombre de termes × (premier terme + dernier terme) ÷ 2. ' +
+            'Même réflexe pour une liste de nombres : de 10 à 100 de 2 en 2, il y a ' +
+            '$\\dfrac{100 - 10}{2} + 1 = 46$ nombres pairs.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme de u5 à u20',
+          formula:
+            'La suite arithmétique $(u_n)$ est définie par $u_n = 3n + 1$. Calcule la somme ' +
+            '$u_5 + u_6 + \\ldots + u_{20}$.',
+          steps: [
+            { tag: 'compter les termes — n − p + 1', text: '$20 - 5 + 1 = 16$ termes' },
+            { tag: 'premier et dernier terme', text: '$u_5 = 3\\times5 + 1 = 16$ et $u_{20} = 3\\times20 + 1 = 61$' },
+          ],
+          result: { tag: 'somme', text: '$S = 16 \\times \\dfrac{16 + 61}{2} = 8 \\times 77 = 616$' },
+        },
         { kind: 'subheading', text: 'Retrouver une inconnue : x ou le rang n' },
         {
           kind: 'para',
@@ -330,14 +356,16 @@ export const suites: ChapterContent = {
           text:
             'Une suite est **géométrique** si tu passes d\'un terme au suivant en ' +
             '**multipliant** toujours par le même nombre. Ce nombre s\'appelle la **raison**, ' +
-            'notée $q$ — non nulle, et différente de 1.',
+            'notée $q$ (non nulle). Si $q = 1$, tous les termes sont égaux : la suite est ' +
+            'constante — un cas sans surprise, qu\'il faut seulement écarter dans la formule de ' +
+            'la somme.',
         },
         {
           kind: 'featureTable',
-          headers: ['', '0 < q < 1', 'q > 1', 'q < 0'],
+          headers: ['', '0 < q < 1', 'q = 1', 'q > 1', 'q < 0'],
           rows: [
-            ['u₁ > 0', 'suite décroissante', 'suite croissante', 'suite oscillante'],
-            ['u₁ < 0', 'suite croissante', 'suite décroissante', 'suite oscillante'],
+            ['u₁ > 0', 'décroissante', 'constante', 'croissante', 'oscillante'],
+            ['u₁ < 0', 'croissante', 'constante', 'décroissante', 'oscillante'],
           ],
         },
         {
@@ -347,6 +375,8 @@ export const suites: ChapterContent = {
             '$u_n = u_1 \\times q^{n-1}$. Pour vérifier qu\'une suite est géométrique : calcule ' +
               'le **rapport** entre deux termes consécutifs, $\\dfrac{u_n}{u_{n-1}}$. Si ce ' +
               'rapport est constant, la suite est géométrique — et ce rapport, c\'est q.',
+            'Même principe pour montrer qu\'elle ne l\'est **pas** : deux rapports consécutifs ' +
+              'différents suffisent. Ex. $u_n = n^2$ : $\\dfrac{4}{1} = 4 \\neq \\dfrac{9}{4}$.',
           ],
         },
         {
@@ -388,15 +418,15 @@ export const suites: ChapterContent = {
             curves: [],
             xMin: 0.5, xMax: 7.5,
             xTicks: [1, 2, 3, 4, 5, 6, 7],
-            fixedYRange: { min: 0, max: 3.7 },
+            fixedYRange: { min: 0, max: 8 },
             points: [
               { x: 1, y: 1, label: '', tone: 'accent' },
               { x: 2, y: 1.4, label: '', tone: 'accent' },
               { x: 3, y: 1.96, label: '', tone: 'accent' },
               { x: 4, y: 2.744, label: '', tone: 'accent' },
               { x: 5, y: 3.8416, label: '', tone: 'accent' },
-              { x: 6, y: 3.7, label: '', tone: 'accent' },
-              { x: 7, y: 3.7, label: '(u_n) q=1,4', tone: 'accent', labelPos: 'above' },
+              { x: 6, y: 5.37824, label: '', tone: 'accent' },
+              { x: 7, y: 7.529536, label: '(u_n) q=1,4', tone: 'accent', labelPos: 'left' },
               { x: 1, y: 3.5, label: '', tone: 'bad' },
               { x: 2, y: 2.1, label: '', tone: 'bad' },
               { x: 3, y: 1.26, label: '', tone: 'bad' },
@@ -411,9 +441,73 @@ export const suites: ChapterContent = {
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
             caption:
-              '$(u_n)$ : $u_1=1$, $q=1{,}4$, elle croît (tronquée à partir de $n=6$ pour rester ' +
-              'lisible) — $(v_n)$ : $v_1=3{,}5$, $q=0{,}6$, elle décroît et tend vers 0',
+              '$(u_n)$ : $u_1=1$, $q=1{,}4$, elle croît de plus en plus vite — $(v_n)$ : ' +
+              '$v_1=3{,}5$, $q=0{,}6$, elle décroît et tend vers 0',
           },
+        },
+        { kind: 'subheading', text: 'Pourcentages : de t % à la raison q' },
+        {
+          kind: 'rappel',
+          label: "Pourcentage d'évolution et raison",
+          items: [
+            'Une **hausse** de t % multiplie par $q = 1 + \\dfrac{t}{100}$. Une **baisse** de ' +
+              't % multiplie par $q = 1 - \\dfrac{t}{100}$. Ex. +8 % → $q = 1{,}08$ ; ' +
+              '−15 % → $q = 0{,}85$.',
+            'Un pourcentage **fixe** d\'une quantité qui, elle, change à chaque étape donne une ' +
+              'suite géométrique. Une quantité **fixe** ajoutée à chaque étape donne une suite ' +
+              'arithmétique.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — intérêts simples ou intérêts composés ?',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Tu places 1 000 € à 4 % par an pendant 10 ans. Note $u_n$ le capital à la fin ' +
+                'de la n-ième année. Compare les deux modes de calcul des intérêts.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Intérêts simples** : chaque année, la banque verse 4 % du capital **de ' +
+                'départ**, soit toujours 40 €. Suite arithmétique : $u_1 = 1040$, $r = 40$, ' +
+                'donc $u_n = 1040 + (n-1)\\times40$ et $u_{10} = 1400$ €.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Intérêts composés** : chaque année, la banque verse 4 % du capital **déjà ' +
+                'atteint** — les intérêts produisent à leur tour des intérêts. Suite ' +
+                'géométrique : $u_1 = 1040$, $q = 1{,}04$, donc $u_n = 1040\\times1{,}04^{n-1}$ ' +
+                'et $u_{10} = 1040\\times1{,}04^9 \\approx 1480{,}24$ €.',
+            },
+            {
+              kind: 'featureTable',
+              headers: ['année n', '1', '3', '10'],
+              rows: [
+                ['simples (€)', '1 040', '1 120', '1 400'],
+                ['composés (€)', '1 040', '1 124,86', '1 480,24'],
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux placements sont identiques la première année, puis l\'écart se creuse ' +
+                'de plus en plus vite : c\'est la différence entre une croissance linéaire et une ' +
+                'croissance exponentielle.',
+            },
+          ],
+        },
+        {
+          kind: 'wrongRight',
+          wrongTag: '+10 % puis −10 % : retour au départ ?',
+          wrong: '$+10\\,\\% - 10\\,\\% = 0\\,\\%$, donc le prix revient à sa valeur de départ.',
+          rightTag: 'les coefficients se multiplient',
+          right:
+            '$1{,}10 \\times 0{,}90 = 0{,}99$ : au total, le prix a **baissé de 1 %**. Des ' +
+            'pourcentages successifs se multiplient, ils ne s\'additionnent jamais.',
         },
         { kind: 'subheading', text: 'Moyenne géométrique et somme des termes' },
         {
@@ -520,6 +614,16 @@ export const suites: ChapterContent = {
         },
         {
           kind: 'astuce',
+          label: 'Astuce — et si on ne peut pas réduire à la même base ?',
+          text:
+            'À partir de quel rang $1{,}08^{n-1}$ dépasse-t-il 2 ? Aucune puissance entière de ' +
+            '1,08 ne vaut exactement 2 : la réduction à la même base est impossible. Sans ' +
+            'logarithme, procède par **balayage numérique** — calcule les termes un à un ' +
+            'jusqu\'à la bascule, la méthode de la section 5 : $1{,}08^9 \\approx 1{,}999$, ' +
+            '$1{,}08^{10} \\approx 2{,}159$, donc $n - 1 = 10$ et $n = 11$.',
+        },
+        {
+          kind: 'astuce',
           label: 'Astuce — et si |q| < 1 ?',
           text:
             'Quand $-1 < q < 1$, la formule de la somme reste valable pour n\'importe quel $n$ ' +
@@ -599,6 +703,9 @@ export const suites: ChapterContent = {
           items: [
             'Si $\\lim_{n\\to+\\infty} u_n$ est un nombre réel $a$, la suite **converge** vers ' +
               'a. Si cette limite est infinie, ou si elle n\'existe pas, la suite est **divergente**.',
+            'Attention au vocabulaire : **diverger** veut seulement dire « ne pas converger ». ' +
+              'Une suite divergente peut tendre vers $+\\infty$ ou $-\\infty$, ou n\'avoir ' +
+              'aucune limite (elle oscille).',
           ],
         },
         { kind: 'subheading', text: 'Limite d\'une suite arithmétique — tout dépend du signe de r' },
@@ -619,8 +726,8 @@ export const suites: ChapterContent = {
             ['q = 1', 'suite constante', '$\\lim u_n = u_1$'],
             ['|q| < 1 (q≠0)', 'décroissante en valeur absolue', '$\\lim u_n = 0$'],
             ['q > 1', 'croissante en valeur absolue', '$\\lim u_n = \\pm\\infty$ (signe de $u_1$)'],
-            ['q = −1', 'oscille entre u₁ et −u₁', "n'existe pas (ne diverge pas vers l'infini)"],
-            ['q < −1', 'oscille, amplitude croissante', "n'existe pas"],
+            ['q = −1', 'oscille entre u₁ et −u₁ (bornée)', "n'existe pas — diverge sans tendre vers l'infini"],
+            ['q < −1', 'oscille, |uₙ| grandit sans borne', "n'existe pas — ni +∞, ni −∞"],
           ],
         },
         {
@@ -701,6 +808,23 @@ export const suites: ChapterContent = {
             'Pour $q = 1$, la suite est constante, donc convergente. Mais $S_n = n \\times u_1$ ' +
             'grandit sans borne (si $u_1 \\neq 0$) : la somme infinie n\'existe pas. La condition ' +
             'est bien $|q| < 1$ **strictement** — vérifie-la toujours avant d\'appliquer la formule.',
+        },
+        {
+          kind: 'exemple',
+          badge: '0,999… = 1',
+          formula:
+            'Écris le nombre $0{,}999\\ldots$ (une infinité de 9) comme la somme infinie d\'une ' +
+            'suite géométrique, puis calcule cette somme.',
+          steps: [
+            { tag: 'découper en termes', text: '$0{,}999\\ldots = 0{,}9 + 0{,}09 + 0{,}009 + \\ldots$ : géométrique, $u_1 = 0{,}9$ et $q = 0{,}1$' },
+            { tag: 'vérifier |q| < 1, puis appliquer la formule', text: '$S_\\infty = \\dfrac{0{,}9}{1 - 0{,}1} = \\dfrac{0{,}9}{0{,}9}$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '$0{,}999\\ldots = 1$ : deux écritures du même nombre. De même, ' +
+              '$0{,}2727\\ldots = \\dfrac{0{,}27}{1 - 0{,}01} = \\dfrac{27}{99} = \\dfrac{3}{11}$.',
+          },
         },
         { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
         {
@@ -853,42 +977,32 @@ export const suites: ChapterContent = {
             '**nature**, pas seulement de vitesse.',
         },
         {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [],
-            xMin: 0.5, xMax: 13.7,
-            xTicks: [1, 3, 5, 7, 9, 11],
-            fixedYRange: { min: 0, max: 48 },
-            points: [
-              { x: 1, y: 3, label: '', tone: 'good' },
-              { x: 2, y: 7, label: '', tone: 'good' },
-              { x: 3, y: 11, label: '', tone: 'good' },
-              { x: 4, y: 15, label: '', tone: 'good' },
-              { x: 5, y: 19, label: '', tone: 'good' },
-              { x: 6, y: 23, label: '', tone: 'good' },
-              { x: 7, y: 27, label: '', tone: 'good' },
-              { x: 8, y: 31, label: '', tone: 'good' },
-              { x: 9, y: 35, label: '', tone: 'good' },
-              { x: 10, y: 39, label: '', tone: 'good' },
-              { x: 11, y: 43, label: '', tone: 'good' },
-              { x: 12, y: 47, label: 'u_n arithmétique (r=4)', tone: 'good', labelPos: 'above' },
-              { x: 1, y: 1, label: '', tone: 'accent' },
-              { x: 2, y: 1.6, label: '', tone: 'accent' },
-              { x: 3, y: 2.56, label: '', tone: 'accent' },
-              { x: 4, y: 4.096, label: '', tone: 'accent' },
-              { x: 5, y: 6.554, label: '', tone: 'accent' },
-              { x: 6, y: 10.486, label: '', tone: 'accent' },
-              { x: 7, y: 16.777, label: '', tone: 'accent' },
-              { x: 8, y: 26.844, label: '', tone: 'accent' },
-              { x: 9, y: 42.95, label: 'v_n géométrique (q=1,6)', tone: 'accent', labelPos: 'above' },
-            ],
-            xAxisLabel: 'n',
-            yAxisLabel: '',
-            caption:
-              '$u_n = 3+(n-1)\\times 4$ (points, croissance linéaire) contre ' +
-              '$v_n = 1\\times 1{,}6^{n-1}$ (points en couleur, croissance exponentielle) — $(v_n)$ ' +
-              'rattrape puis dépasse $(u_n)$ dès le rang 9, malgré un départ beaucoup plus lent',
+          kind: 'atelier',
+          tag: 'echiquier-widget',
+          label: 'Manipule toi-même — la légende de l\'échiquier',
+          caption:
+            'Avance case par case : la case n contient 2ⁿ⁻¹ grains, toujours un de plus que ' +
+            'toutes les cases précédentes réunies — d\'où le total 2ⁿ − 1. Suis la masse de ' +
+            'blé : plus d\'un million de grains dès la 20ᵉ case, une tonne dès la 25ᵉ, plus ' +
+            'que la production mondiale annuelle dès la 54ᵉ.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'les carrés emboîtés',
+          formula:
+            'Un carré a un côté de 4 cm. En joignant les milieux de ses côtés, on obtient un ' +
+            'deuxième carré, inscrit dans le premier. On recommence indéfiniment avec chaque ' +
+            'nouveau carré. Calcule la somme des aires de tous les carrés.',
+          steps: [
+            { tag: "l'aire est divisée par 2 à chaque étape", text: 'Les 4 triangles des coins, repliés vers le centre, recouvrent exactement le carré inscrit : il occupe la moitié du carré précédent.' },
+            { tag: 'suite géométrique — u1 = 16, q = 1/2', text: '$u_n = 16\\times\\left(\\dfrac{1}{2}\\right)^{n-1}$ (en cm²), et $|q| = \\dfrac{1}{2} < 1$' },
+            { tag: 'somme infinie', text: '$S_\\infty = \\dfrac{16}{1-\\frac{1}{2}} = \\dfrac{16}{\\frac{1}{2}} = 32$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '32 cm² : une infinité de carrés, et pourtant leur aire totale vaut seulement le ' +
+              'double de celle du premier.',
           },
         },
         { kind: 'subheading', text: "D'autres grands classiques" },
@@ -936,6 +1050,16 @@ export const suites: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'fibonacci-nombre-d-or-widget',
+          label: 'Manipule toi-même — Fibonacci et le nombre d\'or',
+          caption:
+            'Choisis les deux premiers termes, puis applique la règle uₙ₊₂ = uₙ₊₁ + uₙ. Le ' +
+            'rapport de deux termes successifs oscille autour de φ ≈ 1,618, alternativement ' +
+            'au-dessus et en dessous, et s\'en rapproche — quels que soient les deux ' +
+            'premiers termes, sauf s\'ils sont tous les deux nuls.',
+        },
+        {
           kind: 'application',
           titre: 'Pourquoi les tournesols comptent en Fibonacci',
           illustrations: [
@@ -979,6 +1103,17 @@ export const suites: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'angle-d-or-widget',
+          label: 'Manipule toi-même — l\'angle d\'or du tournesol',
+          caption:
+            'Fais varier l\'angle entre deux graines successives. Avec une fraction simple ' +
+            'de tour (90°, 120°, 144°), les graines s\'alignent en rayons et laissent des ' +
+            'vides ; avec l\'angle d\'or (≈ 137,5°), elles remplissent tout le disque. Coche ' +
+            '« Colorer les spirales » : avec 21, 34 ou 55 (des termes de Fibonacci), une ' +
+            'famille de spirales apparaît.',
+        },
+        {
           kind: 'astuce',
           text:
             'Face à un problème « habillé » (contexte historique, géométrique ou concret), la ' +
@@ -1016,6 +1151,45 @@ export const suites: ChapterContent = {
             'dépasse-t-elle l\'autre ? Il n\'existe pas toujours de formule toute faite pour ' +
             'ça. La méthode la plus fiable : un **balayage numérique**. Tu calcules les deux ' +
             'suites terme après terme, jusqu\'à repérer le rang où la condition bascule.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [],
+            xMin: 0.5, xMax: 10.7,
+            xTicks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            fixedYRange: { min: 0, max: 74 },
+            points: [
+              { x: 1, y: 3, label: '', tone: 'good' },
+              { x: 2, y: 7, label: '', tone: 'good' },
+              { x: 3, y: 11, label: '', tone: 'good' },
+              { x: 4, y: 15, label: '', tone: 'good' },
+              { x: 5, y: 19, label: '', tone: 'good' },
+              { x: 6, y: 23, label: '', tone: 'good' },
+              { x: 7, y: 27, label: '', tone: 'good' },
+              { x: 8, y: 31, label: '', tone: 'good' },
+              { x: 9, y: 35, label: '', tone: 'good' },
+              { x: 10, y: 39, label: 'u_n (r=4)', tone: 'good', labelPos: 'below' },
+              { x: 1, y: 1, label: '', tone: 'accent' },
+              { x: 2, y: 1.6, label: '', tone: 'accent' },
+              { x: 3, y: 2.56, label: '', tone: 'accent' },
+              { x: 4, y: 4.096, label: '', tone: 'accent' },
+              { x: 5, y: 6.554, label: '', tone: 'accent' },
+              { x: 6, y: 10.486, label: '', tone: 'accent' },
+              { x: 7, y: 16.777, label: '', tone: 'accent' },
+              { x: 8, y: 26.844, label: '', tone: 'accent' },
+              { x: 9, y: 42.95, label: '', tone: 'accent' },
+              { x: 10, y: 68.719, label: 'v_n (q=1,6)', tone: 'accent', labelPos: 'left' },
+            ],
+            xAxisLabel: 'n',
+            yAxisLabel: '',
+            caption:
+              '$u_n = 3+(n-1)\\times 4$ (points, croissance linéaire) contre ' +
+              '$v_n = 1\\times 1{,}6^{n-1}$ (points en couleur, croissance exponentielle) — rang de ' +
+              'bascule 9 : $u_8 = 31 > v_8 \\approx 26{,}8$, mais $u_9 = 35 < v_9 \\approx 43{,}0$. ' +
+              'Malgré un départ beaucoup plus lent, $(v_n)$ ne sera plus jamais rattrapée.',
+          },
         },
         {
           kind: 'methode',
@@ -1181,7 +1355,7 @@ export const suites: ChapterContent = {
               kind: 'para',
               text:
                 '**1.** Suppose que la suite converge vers une limite $L$ — c\'est ce que ' +
-                'garantit $|a| < 1$ (admis à ce niveau). $(u_{n+1})$ est la même suite que ' +
+                'garantit $|a| < 1$ (démontré juste après). $(u_{n+1})$ est la même suite que ' +
                 '$(u_n)$, juste décalée d\'un rang : elle a donc **la même limite**. ' +
                 '$u_n \\to L$ et $u_{n+1} \\to L$ aussi.',
             },
@@ -1202,8 +1376,9 @@ export const suites: ChapterContent = {
               kind: 'para',
               text:
                 '**Conclusion.** $L = \\dfrac{b}{1-a}$. Cette valeur est la **seule candidate ' +
-                'possible** pour la limite. C\'est la condition $|a| < 1$ (admise, non ' +
-                'démontrée à ce niveau) qui garantit que la suite converge réellement vers elle.',
+                'possible** pour la limite. C\'est la condition $|a| < 1$ qui garantit que la ' +
+                'suite converge réellement vers elle — tu le démontres plus bas, avec la suite ' +
+                'des écarts $v_n = u_n - L$.',
             },
           ],
         },
@@ -1219,9 +1394,10 @@ export const suites: ChapterContent = {
           result: {
             tag: 'résultat',
             text:
-              'L = 10 mg/L. Quelle que soit la concentration de départ, la suite se rapproche ' +
-              'indéfiniment de 10 mg/L sans jamais la dépasser. Ici, en partant de 1, elle y ' +
-              'monte par en dessous.',
+              'L = 10 mg/L. Comme $0 < a < 1$, la suite se rapproche indéfiniment de 10 mg/L ' +
+              'sans jamais l\'atteindre (dès que $u_1 \\neq 10$) : par en dessous si elle part ' +
+              'sous 10, par au-dessus si elle part au-dessus. Ici, en partant de 1, elle y monte ' +
+              'par en dessous.',
           },
           illustration: {
             kind: 'sequencePlot',
@@ -1265,9 +1441,63 @@ export const suites: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Pour calculer les premiers termes après $u_1$, applique la récurrence pas à pas — ' +
-            'il n\'existe pas de formule fermée simple en fonction de n pour cette famille de ' +
-            'suites. $u_2 = a\\times u_1+b$, puis $u_3 = a\\times u_2+b$, et ainsi de suite.',
+            'Pour les premiers termes après $u_1$, applique la récurrence pas à pas : ' +
+            '$u_2 = a\\times u_1+b$, puis $u_3 = a\\times u_2+b$, et ainsi de suite. Pour un ' +
+            'terme lointain ($u_{50}$, par exemple), utilise plutôt la formule explicite ' +
+            'établie ci-dessous.',
+        },
+        { kind: 'subheading', text: 'Une formule explicite grâce à la suite des écarts' },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la suite des écarts vₙ = uₙ − L est géométrique',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1.** Pose $v_n = u_n - L$ : l\'écart entre le terme $u_n$ et le régime ' +
+                'permanent $L$. Comme $L = a\\times L + b$, tu peux remplacer $b$ par $L - aL$ : ' +
+                '$v_{n+1} = u_{n+1} - L = a\\times u_n + L - aL - L = a\\times(u_n - L) = a\\times v_n$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** La suite $(v_n)$ est donc **géométrique** de raison $a$ et de premier ' +
+                'terme $v_1 = u_1 - L$ : $v_n = (u_1 - L)\\times a^{n-1}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Reviens à $u_n = L + v_n$ : $u_n = L + (u_1 - L)\\times a^{n-1}$ — une ' +
+                '**formule explicite**, qui donne n\'importe quel terme sans calculer tous les ' +
+                'précédents.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Si $|a| < 1$, $a^{n-1} \\to 0$ (section 3), donc $v_n \\to 0$ et ' +
+                '$u_n \\to L$ : la convergence est **démontrée**. Si $|a| > 1$ (et $u_1 \\neq L$), ' +
+                '$|v_n|$ grandit sans borne : la suite diverge. Si $a = -1$, l\'écart change de ' +
+                'signe à chaque étape sans rétrécir : la suite oscille entre $u_1$ et $2L - u_1$.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: "formule explicite de l'aquarium",
+          formula:
+            'Reprends l\'aquarium : $u_{n+1} = 0{,}7\\times u_n + 3$, $u_1 = 1$, de régime ' +
+            'permanent $L = 10$. Écris $u_n$ en fonction de $n$, puis calcule $u_{10}$.',
+          steps: [
+            { tag: 'premier écart', text: '$v_1 = u_1 - L = 1 - 10 = -9$, donc $v_n = -9\\times0{,}7^{n-1}$' },
+            { tag: 'formule explicite', text: '$u_n = 10 - 9\\times0{,}7^{n-1}$' },
+            { tag: 'terme de rang 10', text: '$u_{10} = 10 - 9\\times0{,}7^{9} \\approx 10 - 0{,}363$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '$u_{10} \\approx 9{,}64$ mg/L. Chaque semaine, l\'écart au régime permanent est ' +
+              'multiplié par 0,7 : il perd 30 % de sa valeur.',
+          },
         },
         {
           kind: 'application',
@@ -1276,22 +1506,22 @@ export const suites: ChapterContent = {
             {
               kind: 'sequencePlot',
               points: [
-                { n: 0, value: 10000, label: '10 000' },
-                { n: 1, value: 9750, label: '9 750' },
-                { n: 2, value: 9499, label: '9 499' },
-                { n: 3, value: 9246, label: '9 246' },
-                { n: 4, value: 8992, label: '8 992' },
-                { n: 5, value: 8737, label: '8 737' },
+                { n: 1, value: 10000, label: '10 000' },
+                { n: 7, value: 8481, label: '8 481' },
+                { n: 13, value: 6916, label: '6 916' },
+                { n: 19, value: 5304, label: '5 304' },
+                { n: 25, value: 3642, label: '3 642' },
+                { n: 31, value: 1930, label: '1 930' },
+                { n: 37, value: 166, label: '166' },
               ],
               connector: 'straight',
-              stepIndicator: { fromIndex: 0, toIndex: 1, label: '×1,005 − 300' },
-              referenceLine: { value: 0, label: 'u=0' },
-              xAxisLabel: 'mensualité n',
+              xAxisLabel: 'mois n',
               yAxisLabel: 'capital restant dû (€)',
               caption:
                 "Emprunt de 10 000 € à 0,5 % d'intérêt mensuel, remboursé par mensualités de " +
-                '300 € : $u_{n+1}=1{,}005\\times u_n - 300$. Le capital décroît mois après mois ' +
-                'jusqu\'à atteindre 0 — la date de fin de prêt.',
+                '300 € : $u_{n+1}=1{,}005\\times u_n - 300$, avec $u_1 = 10\\,000$ (un point tous les 6 mois). ' +
+                'Le capital décroît de plus en plus vite : il reste 166 € au début du 37e mois, soldés ' +
+                'par une dernière mensualité réduite — la fin du prêt.',
             },
           ],
           text:
@@ -1300,11 +1530,31 @@ export const suites: ChapterContent = {
             'restant dû (un facteur multiplicatif $a$ légèrement supérieur à 1), puis ' +
             'soustrait la mensualité payée (une quantité fixe $b$, négative ici puisqu\'elle ' +
             'réduit la dette) : $u_{n+1} = a\\times u_n + b$, avec $u_n$ le capital restant ' +
-            'dû après $n$ mensualités. Tant que la mensualité est assez élevée pour plus que ' +
+            'dû au début du n-ième mois ($u_1$ = montant emprunté). Tant que la mensualité est assez élevée pour plus que ' +
             'couvrir les intérêts, cette suite décroît et finit par atteindre 0 — c\'est la ' +
             'date de fin de prêt. Les banques utilisent ce calcul, répété mois après mois, ' +
             "pour établir le tableau d'amortissement remis à chaque emprunteur.",
           domaines: ['Finance', 'Économie'],
+        },
+        {
+          kind: 'exemple',
+          badge: "le seuil de l'emprunt",
+          formula:
+            'Pour l\'emprunt ci-dessus, $u_{n+1} = 1{,}005\\times u_n - 300$. Calcule le point ' +
+            'fixe $L$ de la récurrence. Que se passe-t-il si on emprunte exactement $L$ euros ? ' +
+            'Moins ? Plus ?',
+          steps: [
+            { tag: 'point fixe', text: '$L = \\dfrac{b}{1-a} = \\dfrac{-300}{1-1{,}005} = \\dfrac{-300}{-0{,}005} = 60\\,000$' },
+            { tag: 'a = 1,005 > 1 : L n\'est pas une limite', text: "$v_n = u_n - 60\\,000 = (u_1 - 60\\,000)\\times1{,}005^{n-1}$ : l'écart à 60 000 € grandit de 0,5 % chaque mois" },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'À 60 000 € pile, les intérêts du mois (300 €) mangent toute la mensualité : la ' +
+              'dette reste bloquée (suite constante). En dessous (10 000 €), la dette baisse de ' +
+              'plus en plus vite, jusqu\'à 0. Au-dessus, elle grossit sans fin : ce prêt ne ' +
+              'serait jamais remboursé. Ici, $L$ n\'est pas une limite, mais un **seuil**.',
+          },
         },
         {
           kind: 'entrainement',
@@ -1330,6 +1580,7 @@ export const suites: ChapterContent = {
           { text: '$u_n = u_1 + (n-1)r$' },
           { text: '$u_n = u_p + (n-p)r$', condition: 'relation entre deux termes — pour isoler x ou le rang n' },
           { text: '$S_n = \\dfrac{n(u_1+u_n)}{2}$' },
+          { text: '$u_p + \\ldots + u_n = (n-p+1)\\times\\dfrac{u_p+u_n}{2}$', condition: 'somme qui ne commence pas à $u_1$ : $n-p+1$ termes' },
           { text: '$u_n = \\dfrac{u_{n-1}+u_{n+1}}{2}$', condition: 'moyenne arithmétique — pour $n \\ge 2$' },
         ],
       },
@@ -1337,6 +1588,7 @@ export const suites: ChapterContent = {
         title: 'Suite géométrique',
         formulas: [
           { text: '$u_n = u_1 \\times q^{n-1}$' },
+          { text: '$q = 1 + \\dfrac{t}{100}$', condition: 'hausse de t % — baisse de t % : $q = 1 - \\dfrac{t}{100}$' },
           { text: '$u_n = u_p \\times q^{n-p}$', condition: 'relation entre deux termes — rang n : réduire à la même base' },
           { text: '$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$', condition: '$q \\neq 1$' },
           { text: '$S_\\infty = \\dfrac{u_1}{1-q}$', condition: 'somme infinie — seulement si $|q|<1$' },
@@ -1348,8 +1600,10 @@ export const suites: ChapterContent = {
         formulas: [
           { text: '$r>0 \\Rightarrow \\lim u_n = +\\infty$', condition: '$r<0$ donne $-\\infty$, $r=0$ donne $u_1$' },
           { text: '$|q|<1 \\Rightarrow \\lim u_n = 0$' },
+          { text: '$q=1 \\Rightarrow \\lim u_n = u_1$', condition: 'suite constante' },
           { text: '$q>1 \\Rightarrow \\lim u_n = \\pm\\infty$', condition: 'signe de $u_1$' },
-          { text: "$q \\le -1$ — la limite n'existe pas", condition: "oscille, ne diverge jamais vers l'infini" },
+          { text: "$q = -1$ — la limite n'existe pas", condition: 'oscille entre $u_1$ et $-u_1$ : bornée, divergente' },
+          { text: "$q < -1$ — la limite n'existe pas", condition: 'oscille et $|u_n|$ grandit sans borne : ni $+\\infty$, ni $-\\infty$' },
         ],
       },
       {
@@ -1365,6 +1619,7 @@ export const suites: ChapterContent = {
         formulas: [
           { text: '$u_{n+1} = a \\times u_n + b$' },
           { text: '$L = \\dfrac{b}{1-a}$', condition: 'régime permanent — seulement si $|a|<1$ (si $u_1 = L$, suite constante)' },
+          { text: '$u_n = L + (u_1 - L)\\times a^{n-1}$', condition: 'formule explicite — $v_n = u_n - L$ est géométrique de raison $a$' },
         ],
       },
     ],
@@ -1373,29 +1628,31 @@ export const suites: ChapterContent = {
   recap: {
     items: [
       '**Suite arithmétique** — $u_n = u_1 + (n-1)r$. Croissante si $r>0$, décroissante si ' +
-        '$r<0$. Somme $S_n = n(u_1+u_n)/2$. Inconnue x ou rang n : relie deux termes par ' +
+        '$r<0$. Somme $S_n = n(u_1+u_n)/2$ (de $u_p$ à $u_n$ : $n-p+1$ termes). Inconnue x ou rang n : relie deux termes par ' +
         '$u_n = u_p + (n-p)r$, puis résous l\'équation du premier degré.',
-      '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$. Somme $S_n = u_1(1-q^n)/(1-q)$. ' +
+      '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$ ; une évolution de t % donne $q = 1 \\pm t/100$. Somme $S_n = u_1(1-q^n)/(1-q)$. ' +
         'Retrouver q depuis $q^k=a$ ? Vérifie la parité de k (0, 1 ou 2 solutions). Rang n : ' +
         'réduis à la même base. Somme infinie $S_\\infty = u_1/(1-q)$, seulement si $|q|<1$.',
       '**Convergence** — arithmétique : $\\pm\\infty$ selon le signe de r (jamais ' +
-        'convergente, sauf r=0). Géométrique : 0 si $|q|<1$, $\\pm\\infty$ si $q>1$, n\'existe ' +
-        'pas si $q\\leq-1$. Suite $P(n)/Q(n)$ : compare les degrés de P et Q.',
+        'convergente, sauf r=0). Géométrique : 0 si $|q|<1$, $u_1$ si $q=1$, $\\pm\\infty$ si $q>1$, ' +
+        'pas de limite si $q\\leq-1$. Suite $P(n)/Q(n)$ : compare les degrés de P et Q.',
       '**Problèmes classiques** — reconnais d\'abord la nature de la suite (raison additive ' +
         'ou multiplicative), avant de choisir la formule.',
       '**Comparaison de deux suites** — balayage numérique jusqu\'au rang de bascule, en ' +
         'vérifiant que la condition est bien fausse au rang précédent. Traduis toujours le ' +
         'rang trouvé dans l\'unité du contexte.',
       '**Suite récurrente affine** — $u_{n+1}=a\\times u_n+b$. Régime permanent $L=b/(1-a)$, ' +
-        'seulement si $|a|<1$. Sinon, la suite diverge et L n\'existe pas (sauf si $u_1 = L$ : ' +
-        'la suite est alors constante).',
+        'seulement si $|a|<1$. Sinon, la suite diverge et L n\'est pas une limite (sauf si $u_1 = L$ : ' +
+        'la suite est alors constante). Formule explicite : $u_n = L + (u_1-L)\\times a^{n-1}$.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
         'Ai-je bien utilisé (n−1), et non n, dans la formule générale — aussi bien pour une suite arithmétique que géométrique ?',
         'Pour une raison géométrique retrouvée par une racine d\'exposant pair : ai-je considéré les deux solutions possibles, ou vérifié qu\'aucune n\'existe ?',
-        'Pour une limite géométrique : ai-je bien distingué q=−1 (borné, oscillant, pas de limite) de q<−1 (diverge) ?',
+        'Pour une somme de uₚ à uₙ : ai-je compté n − p + 1 termes, et non n − p ?',
+        'Pour un pourcentage : ai-je traduit +t % en q = 1 + t/100 (et −t % en q = 1 − t/100), et multiplié les coefficients successifs au lieu d\'additionner les pourcentages ?',
+        'Pour une limite géométrique : ai-je bien distingué q=−1 (bornée, oscille, pas de limite) de q<−1 (oscille, |uₙ| grandit sans borne, pas de limite non plus) ?',
         'Pour un régime permanent : ai-je vérifié |a|<1 avant de calculer L, et pas seulement après ?',
       ],
     },
