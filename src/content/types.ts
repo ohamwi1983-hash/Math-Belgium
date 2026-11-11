@@ -34,6 +34,8 @@ export type InteractiveWidgetTag =
   | 'suite-recurrente-affine-widget'
   | 'convergence-suite-widget'
   | 'comparaison-suites-widget'
+  | 'positions-cube-widget'
+  | 'cavaliere-reglage-widget'
   | 'parabole-foyer-widget'
   | 'cercle-equation-widget'
   | 'droite-cercle-widget'

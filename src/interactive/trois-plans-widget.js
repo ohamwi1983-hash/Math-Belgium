@@ -87,9 +87,9 @@
       plans: [
         rect([0, 0, 0], [2.2, 0, 0], [0, 2.2, 0]),
         rect([0, 0, 1.3], [2.2, 0, 0], [0, 2.2, 0]),
-        bande([0.15, -0.25], [1.75, 1.55], 2.2, 0)
+        rect([0, 0.15, -0.25], [2.2, 0, 0], [0, 1.6, 1.8])
       ],
-      droites: [[[0.3722, 0, 0], [0.3722, 2.2, 0]], [[1.5278, 0, 1.3], [1.5278, 2.2, 1.3]]],
+      droites: [[[0, 0.3722, 0], [2.2, 0.3722, 0]], [[0, 1.5278, 1.3], [2.2, 1.5278, 1.3]]],
       points: [],
       texte:
         "α et β sont parallèles : ils n'ont aucun point commun. Le plan γ les coupe tous les " +
@@ -250,15 +250,36 @@
         var t = el("text", { x: (q.x + 9).toFixed(1), y: (q.y - 8).toFixed(1), "class": "etiq etiq-noir" }, svg);
         t.textContent = p.nom;
       });
-      // Étiquettes des plans : au sommet projeté le plus éloigné du centre de l'image
+      // Étiquettes des plans : entre le centre du rectangle projeté et l'un de ses coins
+      // (le plus extérieur possible), sans chevaucher une étiquette déjà posée.
+      var posees = cas.points.map(function (p) { var q = proj(p.p); return [q.x, q.y]; });
+      var segs = cas.droites.map(function (d) { var a = proj(d[0]), b2 = proj(d[1]); return [a.x, a.y, b2.x, b2.y]; });
+      function distSeg(x, y, sg) {
+        var vx = sg[2] - sg[0], vy = sg[3] - sg[1], l2 = vx * vx + vy * vy || 1;
+        var t = Math.max(0, Math.min(1, ((x - sg[0]) * vx + (y - sg[1]) * vy) / l2));
+        return Math.hypot(x - (sg[0] + t * vx), y - (sg[1] + t * vy));
+      }
       cas.plans.forEach(function (r, i) {
-        var pr = r.map(proj), best = null, bd = -1;
-        // milieu des deux sommets les plus « extérieurs » pour éviter les coins confondus
-        pr.forEach(function (q) { var dd = Math.pow(q.x - L / 2, 2) + Math.pow(q.y - H / 2, 2); if (dd > bd) { bd = dd; best = q; } });
-        var dx = best.x - L / 2, dy = best.y - H / 2, l = Math.sqrt(dx * dx + dy * dy) || 1;
-        var x = best.x - dx / l * 16, y = best.y - dy / l * 16 + 5;
-        x = Math.max(12, Math.min(L - 12, x)); y = Math.max(16, Math.min(H - 6, y));
-        var t = el("text", { x: x.toFixed(1), y: y.toFixed(1), "class": "etiq " + TONS[i], "text-anchor": "middle" }, svg);
+        var pr = r.map(proj);
+        var cx = pr.reduce(function (s2, q) { return s2 + q.x; }, 0) / 4;
+        var cy = pr.reduce(function (s2, q) { return s2 + q.y; }, 0) / 4;
+        var coins = pr.slice().sort(function (q1, q2) {
+          return (Math.pow(q2.x - L / 2, 2) + Math.pow(q2.y - H / 2, 2)) - (Math.pow(q1.x - L / 2, 2) + Math.pow(q1.y - H / 2, 2));
+        });
+        var choix = null, repli = null, scoreRepli = -1;
+        [0.6, 0.78, 0.42].forEach(function (fac) {
+          for (var j = 0; j < coins.length && !choix; j++) {
+            var x = cx + fac * (coins[j].x - cx), y = cy + fac * (coins[j].y - cy);
+            x = Math.max(12, Math.min(L - 12, x)); y = Math.max(16, Math.min(H - 8, y));
+            var dEtiq = posees.reduce(function (m, o) { return Math.min(m, Math.hypot(o[0] - x, o[1] - y)); }, 1e9);
+            var dLigne = segs.reduce(function (m, sg) { return Math.min(m, distSeg(x, y, sg)); }, 1e9);
+            if (dEtiq > 24 && dLigne > 14) choix = [x, y];
+            else if (Math.min(dEtiq / 24, dLigne / 14) > scoreRepli) { scoreRepli = Math.min(dEtiq / 24, dLigne / 14); repli = [x, y]; }
+          }
+        });
+        if (!choix) choix = repli || [cx, cy];
+        posees.push(choix);
+        var t = el("text", { x: choix[0].toFixed(1), y: (choix[1] + 5).toFixed(1), "class": "etiq " + TONS[i], "text-anchor": "middle" }, svg);
         t.textContent = NOMS[i];
       });
       this._lecture.innerHTML = '<div class="carte"><div class="verdict">' + cas.titre + '</div><div>' + cas.texte + '</div>' +

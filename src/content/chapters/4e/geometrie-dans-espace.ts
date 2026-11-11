@@ -73,6 +73,17 @@ export const geometrieDansEspace: ChapterContent = {
             '(appartenance, parallélisme, intersection) — jamais sur une distance lue à l\'œil.',
         },
         {
+          kind: 'atelier',
+          tag: 'cavaliere-reglage-widget',
+          label: 'Manipule toi-même : régler la perspective cavalière',
+          caption:
+            'Change l\'angle de fuite et le coefficient de réduction des fuyantes : la face ' +
+            'avant reste en vraie grandeur, les faces du dessus et des côtés deviennent des ' +
+            'parallélogrammes, et l\'arête fuyante [BC] n\'est dessinée qu\'à k fois sa vraie ' +
+            'longueur. Avec k = 1, le cube paraît étiré vers l\'arrière ; la convention du ' +
+            'cours est 45° et 0,5.',
+        },
+        {
           kind: 'application',
           titre: 'Comment un jeu vidéo 3D dessine un monde sur ton écran plat',
           illustrations: [
@@ -357,6 +368,18 @@ export const geometrieDansEspace: ChapterContent = {
             { tag: 'pas parallèles', text: 'la parallèle à (AB) passant par C est (CD), qui est dans la base — pas (CG)' },
           ],
           result: { tag: 'résultat', text: '(AB) et (CG) ne sont ni sécantes ni parallèles : elles sont gauches.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'positions-cube-widget',
+          label: 'Manipule toi-même : positions dans le cube',
+          caption:
+            'Choisis deux droites, ou une droite et un plan (section 4), par leurs points ' +
+            'nommés : l\'atelier donne leur position et la justifie, comme dans le cours. Le ' +
+            'point de percée peut tomber hors du solide : le plan est infini. Fais tourner ' +
+            'le cube pour vérifier — deux droites gauches peuvent sembler se croiser sur le ' +
+            'dessin. En mode Défi, réponds d\'après la vue cavalière en un seul essai, puis ' +
+            'tourne le cube pour contrôler.',
         },
       ],
     },

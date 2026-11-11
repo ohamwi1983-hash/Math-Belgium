@@ -27,7 +27,7 @@
     { x: 7.5, y: 1.5, h: 1.5, nom: "3" },
   ];
 
-  function defaut() { return { mode: "soleil", az: 20, alt: 35, lx: 5, ly: 7, lz: 5 }; }
+  function defaut() { return { mode: "soleil", az: 20, alt: 35, lx: 1, ly: 1, lz: 6 }; }
 
   function proj(X, Y, Z) {
     return { x: OX + ECH * (X + K * Y * C45), y: OY - ECH * (Z + K * Y * C45) };
@@ -125,10 +125,10 @@
     '<div class="curseur"><label for="az">Direction</label><input id="az" type="range" min="0" max="350" step="10"><output id="az-v"></output></div>' +
     '<div class="curseur"><label for="alt">Hauteur du soleil</label><input id="alt" type="range" min="25" max="75" step="5"><output id="alt-v"></output></div>' +
     '</div>' +
-    '<div id="ctl-lampe" hidden>' +
-    '<div class="curseur"><label for="lx">Lampe : gauche – droite</label><input id="lx" type="range" min="0" max="10" step="0.5"><output id="lx-v"></output></div>' +
-    '<div class="curseur"><label for="ly">Lampe : avant – arrière</label><input id="ly" type="range" min="0" max="9" step="0.5"><output id="ly-v"></output></div>' +
-    '<div class="curseur"><label for="lz">Hauteur de la lampe</label><input id="lz" type="range" min="1" max="7" step="0.5"><output id="lz-v"></output></div>' +
+    '<div id="ctl-lampe" hidden><div class="note" style="text-align:center">Position de la lampe</div>' +
+    '<div class="curseur"><label for="lx">Gauche – droite</label><input id="lx" type="range" min="0" max="10" step="0.5"><output id="lx-v"></output></div>' +
+    '<div class="curseur"><label for="ly">Avant – arrière</label><input id="ly" type="range" min="0" max="9" step="0.5"><output id="ly-v"></output></div>' +
+    '<div class="curseur"><label for="lz">Hauteur</label><input id="lz" type="range" min="1" max="7" step="0.5"><output id="lz-v"></output></div>' +
     '</div>' +
     '<button class="btn btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>';
@@ -302,7 +302,7 @@
         '<div class="carte"><div class="carte-titre">Lampe : projection centrale</div>' +
         'Les rayons partent tous d\'un même point : les ombres ne sont plus parallèles, elles sont ' +
         '<span class="resultat">concourantes</span> — leurs prolongements (pointillés rouges) passent tous par le pied de la lampe. ' +
-        'Plus un piquet est proche de la lampe ou plus il est haut, plus son ombre s\'allonge.' +
+        'Plus un piquet est loin du pied de la lampe, ou plus il est haut, plus son ombre s\'allonge.' +
         '<ul class="liste">' + lignes + '</ul></div>' +
         '<div class="carte note">Soleil : projection parallèle, ombres parallèles. Lampe : projection centrale, ombres concourantes — ' +
         'comme les fuyantes de la perspective centrale, qui convergent vers un point de fuite.</div>';

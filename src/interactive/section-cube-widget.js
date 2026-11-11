@@ -38,7 +38,7 @@
   var PRESETS = {
     triangle: [["AB", 0.5], ["DA", 0.5], ["AE", 0.5]],
     quadrilatere: [["AE", 0.3], ["BF", 0.55], ["CG", 0.75]],
-    pentagone: [["AE", 0.75], ["BC", 0.5], ["CD", 0.5]],
+    pentagone: [["AB", 0.5], ["AE", 0.5], ["FG", 0.75]],
     hexagone: [["AB", 0.5], ["BF", 0.5], ["FG", 0.5]]
   };
   var YAW0 = -25, PITCH0 = 20;

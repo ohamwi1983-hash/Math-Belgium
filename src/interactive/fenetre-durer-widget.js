@@ -136,12 +136,16 @@
         e.h2 = cible;
         e.message = "";
       } else {
-        // sinon : on garde la hauteur du bâton 2 et on règle sa distance d2 = d1 × h2 / h1
-        var d = e.d1 * e.h2 / e.h1;
-        if (d >= D_MIN - 1e-9 && d <= D_MAX + 1e-9 && Math.abs(Math.round(d * 2) / 2 - d) < 1e-9) {
-          e.d2 = d; e.message = "";
+        // sinon : un couple (distance, hauteur) des curseurs avec h2 / d2 = h1 / d1, le plus proche de d2
+        var meilleur = null;
+        for (var d = D_MIN; d <= D_MAX + 1e-9; d += 0.5) {
+          var h = e.h1 * d / e.d1;
+          if (h < 0.5 - 1e-9 || h > H_MAX + 1e-9 || Math.abs(Math.round(h * 4) / 4 - h) > 1e-9) continue;
+          if (!meilleur || Math.abs(d - e.d2) < Math.abs(meilleur.d - e.d2)) meilleur = { d: d, h: h };
+        }
+        if (meilleur) {
+          e.d2 = meilleur.d; e.h2 = Math.round(meilleur.h * 4) / 4; e.message = "";
         } else {
-          // dernier recours : hauteur la plus proche possible
           e.h2 = Math.min(H_MAX, Math.max(0.5, Math.round(cible * 4) / 4));
           e.message = "Réglage exact impossible avec ces curseurs : la hauteur la plus proche a été choisie.";
         }

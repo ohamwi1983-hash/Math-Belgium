@@ -22,8 +22,8 @@
   var SVGNS = "http://www.w3.org/2000/svg";
   var LARGEUR = 460, HAUTEUR = 330;
   var SOL_Y = 300;
-  // façade avant : rectangle 120 × 80 + pignon de 50
-  var AV = { g: 70, d: 190, bas: SOL_Y, haut: 220, pignon: 170 };
+  // façade avant : rectangle 160 × 100 + pignon de 60
+  var AV = { g: 60, d: 220, bas: SOL_Y, haut: 200, pignon: 140 };
 
   function defaut() { return { horizon: 150, fuite: 340, prof: 30, milieu: false, cavaliere: false }; }
 
@@ -169,7 +169,10 @@
       // sol, horizon, point de fuite
       ligne(svg, { x: 0, y: SOL_Y }, { x: LARGEUR, y: SOL_Y }, "sol");
       ligne(svg, { x: 0, y: F.y }, { x: LARGEUR, y: F.y }, "horizon");
-      var th = el("text", { x: 8, y: F.y - 6, class: "etiq etiq-s" }, svg); th.textContent = "ligne d'horizon";
+      // étiquette de l'horizon du côté opposé au point de fuite : jamais de chevauchement
+      var thG = F.x > LARGEUR / 2;
+      var th = el("text", { x: thG ? 8 : LARGEUR - 8, y: F.y - 6, class: "etiq etiq-s", "text-anchor": thG ? "start" : "end" }, svg);
+      th.textContent = "ligne d'horizon";
 
       // faces colorées
       if (droite) poly(svg, [B, B2, C2, C], "cote");

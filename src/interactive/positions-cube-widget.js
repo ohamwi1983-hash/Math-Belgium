@@ -118,12 +118,12 @@
       if (num > den) {
         var s = "M, sur le prolongement de [" + nx + ny + "], au-delà de " + ny;
         if (num === 2 * den) s += " : " + ny + " est le milieu de [" + nx + "M]";
-        return { nom: "M", txt: s + " — hors du solide", dehors: true };
+        return { nom: "M", txt: s, dehors: true };
       }
       if (num < 0) {
         var s2 = "M, sur le prolongement de [" + nx + ny + "], au-delà de " + nx;
         if (num === -den) s2 += " : " + nx + " est le milieu de [M" + ny + "]";
-        return { nom: "M", txt: s2 + " — hors du solide", dehors: true };
+        return { nom: "M", txt: s2, dehors: true };
       }
     }
     var v = ratVal(M);
@@ -214,17 +214,17 @@
       var dedans = Pin ? L.a : L.b, dehors = Pin ? L.b : L.a;
       just = dedans + " est dans le plan " + nomP + ", mais " + dehors + " n'y est pas : la droite n'est pas incluse, et elle a un point commun avec le plan. Elle est donc sécante, en " + dedans + ".";
     } else {
-      just = "Ni " + L.a + " ni " + L.b + " n'est dans le plan " + nomP + ", et " + L.nom + " n'est parallèle à aucune droite de ce plan : elle le perce en un seul point, " + loc.txt + ". Le plan est infini : le point peut tomber hors du solide.";
+      just = "Ni " + L.a + " ni " + L.b + " n'est dans le plan " + nomP + ", et " + L.nom + " n'est parallèle à aucune droite de ce plan : elle le perce en un seul point, " + loc.txt + "." + (loc.dehors ? " Le plan est infini : le point de percée peut tomber hors du solide dessiné." : "");
     }
     return { cat: "sécante", titre: "Sécante en " + loc.nom, point: M, loc: loc, plan: { V: V, n: n }, justif: just };
   }
 
   // ---------- projection ----------
   var CAV = { k: 0.5, c: Math.cos(Math.PI / 4), s: Math.sin(Math.PI / 4) };
-  function vue(etat) {
+  function vue(etat, C0) {
     if (etat.cav) {
       return {
-        p: function (X) { var x = X[0] - 1, y = X[1] - 1, z = X[2] - 1; return { u: x + CAV.k * CAV.c * y, v: z + CAV.k * CAV.s * y }; },
+        p: function (X) { var x = X[0] - C0[0], y = X[1] - C0[1], z = X[2] - C0[2]; return { u: x + CAV.k * CAV.c * y, v: z + CAV.k * CAV.s * y }; },
         f: [-CAV.k * CAV.c, 1, -CAV.k * CAV.s]
       };
     }
@@ -233,7 +233,7 @@
     var f = [-Math.sin(t) * Math.cos(ph), Math.cos(t) * Math.cos(ph), -Math.sin(ph)];
     var up = [-Math.sin(t) * Math.sin(ph), Math.cos(t) * Math.sin(ph), Math.cos(ph)];
     return {
-      p: function (X) { var d = [X[0] - 1, X[1] - 1, X[2] - 1]; return { u: dot(d, r), v: dot(d, up) }; },
+      p: function (X) { var d = [X[0] - C0[0], X[1] - C0[1], X[2] - C0[2]]; return { u: dot(d, r), v: dot(d, up) }; },
       f: f
     };
   }
@@ -338,7 +338,7 @@
     '.pt-choisi{fill:var(--ink,#182430);stroke:var(--surface-2,#f7f9fb);stroke-width:1.5;}' +
     '.pt-inter{fill:var(--bad,#b23a3a);stroke:var(--surface-2,#f7f9fb);stroke-width:2;}' +
     '.etiq{font-size:14px;font-weight:700;font-family:var(--sans,sans-serif);fill:var(--ink,#182430);paint-order:stroke;stroke:var(--surface-2,#f7f9fb);stroke-width:3.5px;stroke-linejoin:round;}' +
-    '.etiq-n{font-size:12px;font-weight:600;fill:var(--ink-soft,#51626f);}' +
+    '.etiq-n{font-size:13px;font-weight:700;fill:var(--ink-soft,#51626f);}' +
     '.etiq-m{fill:var(--bad,#b23a3a);}' +
     '.rot{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}' +
     '.selection{display:flex;flex-direction:column;gap:8px;align-items:center;margin:0 0 12px;}' +
@@ -358,6 +358,7 @@
     '.choix{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}' +
     '.choix .btn.ok{background:var(--good-soft,#dcefe2);border-color:var(--good,#2f7a4f);color:var(--good,#2f7a4f);}' +
     '.choix .btn.ko{background:var(--bad-soft,#f6dede);border-color:var(--bad,#b23a3a);color:var(--bad,#b23a3a);}' +
+    '.choix .btn.ok:disabled,.choix .btn.ko:disabled{opacity:1;}' +
     '.question{font-weight:600;text-align:center;margin:0 0 10px;line-height:1.5;}' +
     '.bas{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}' +
     '.selection,.carte,.question,.message{max-width:620px;margin-left:auto;margin-right:auto;}' +
@@ -532,14 +533,18 @@
         var L = c[0]; if (!L) return;
         if (montrer) { var r = clipDroite(L.P, L.u, bx); if (r) segs.push([add(L.P, mul(r[0], L.u)), add(L.P, mul(r[1], L.u)), c[1] + "x"]); }
       });
-      // rayon de contenu (fixe pendant la rotation) : tout ce qui est dessiné
-      var R = Math.sqrt(3) + 0.15;
-      var etendre = function (X) { var dd = sub(X, [1, 1, 1]); R = Math.max(R, Math.sqrt(dot(dd, dd)) + 0.08); };
-      poly.forEach(etendre);
-      segs.forEach(function (sg) { etendre(sg[0]); etendre(sg[1]); });
-      if (M && !Mloin) etendre(M);
+      // centre et rayon du contenu (fixes pendant la rotation) : tout ce qui est dessiné
+      var tous = SOMMETS.map(function (c) { return PTS[c]; }).concat(poly);
+      segs.forEach(function (sg) { tous.push(sg[0], sg[1]); });
+      if (M && !Mloin) tous.push(M);
+      var lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+      tous.forEach(function (X) { for (var i = 0; i < 3; i++) { lo[i] = Math.min(lo[i], X[i]); hi[i] = Math.max(hi[i], X[i]); } });
+      var C0 = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2];
+      var R = 0;
+      tous.forEach(function (X) { var dd = sub(X, C0); R = Math.max(R, Math.sqrt(dot(dd, dd))); });
+      R = Math.max(R + 0.12, Math.sqrt(3) + 0.15);
       var echelle = DEMI / (R * 1.12);
-      var V = vue(this._vue);
+      var V = vue(this._vue, C0);
       var P2 = function (X) { var q = V.p(X); return { x: CX + echelle * q.u, y: CY - echelle * q.v }; };
 
       if (poly.length) el("polygon", { points: poly.map(function (X) { var p = P2(X); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" "), "class": "plan" }, svg);
