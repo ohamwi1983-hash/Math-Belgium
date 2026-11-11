@@ -184,12 +184,12 @@
       e.x1Val.textContent = nb(x1);
       e.x2Val.textContent = nb(x2);
       e.formule.textContent = "f(x) = " + factorisee(a, x1, x2);
-      e.developpee.textContent = "f(x) = " + polynome(a, b, c) + "    a = " + nb(a) + " ; b = " + nb(b) + " ; c = " + nb(c);
+      e.developpee.textContent = "développé : f(x) = " + polynome(a, b, c) + " — a = " + nb(a) + ", b = " + nb(b) + ", c = " + nb(c);
       e.s.textContent = nb(S);
       e.p.textContent = nb(P);
 
       // Lecture du signe des racines à partir de S et P (sans les connaître).
-      var equation = "Équation de même racines (à un facteur a près) : " + polynome(1, -S, P) + " = 0.";
+      var equation = "Équation qui a les mêmes racines (à un facteur a près) : " + polynome(1, -S, P) + " = 0.";
       var signe;
       var double = Math.abs(x1 - x2) < 1e-9;
       if (Math.abs(P) < 1e-9) {

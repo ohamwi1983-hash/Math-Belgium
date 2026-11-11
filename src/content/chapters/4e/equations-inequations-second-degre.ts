@@ -294,6 +294,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'de côté 8, et conclut x = 3. C\'est exactement la démonstration du discriminant, faite ' +
             'avec des figures. Son nom, latinisé, a donné le mot « algorithme ».',
         },
+        {
+          kind: 'atelier',
+          tag: 'completer-le-carre-widget',
+          label: 'Manipule toi-même — compléter un vrai carré',
+          caption:
+            'Al-Khwârizmî résolvait x² + bx = c avec un vrai dessin : un carré x², deux ' +
+            'rectangles de largeur b/2, et un coin vide. Appuie sur « Compléter le carré » ' +
+            ': en ajoutant le petit carré (b/2)² des deux côtés, on obtient un grand carré ' +
+            'de côté x + b/2, dont on lit la longueur. C\'est exactement l\'étape « compléter ' +
+            'le carré » de la démonstration du discriminant.',
+        },
         { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
         {
           kind: 'para',
@@ -433,6 +444,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           result: { tag: 'à retenir', text: 'Le signe de P, puis celui de S, suffisent.' },
         },
+        {
+          kind: 'atelier',
+          tag: 'viete-racines-widget',
+          label: 'Manipule toi-même — racines, somme et produit',
+          caption:
+            'Fais glisser les deux racines : la parabole a(x − x₁)(x − x₂) se redessine, ' +
+            'avec S = x₁ + x₂, P = x₁·x₂ et l\'équation x² − Sx + P = 0. Sans calculer les ' +
+            'racines, le signe de P et de S dit déjà si elles sont de même signe ou non. ' +
+            'Quand a + b + c = 0, x = 1 est une racine évidente, et l\'autre vaut c/a.',
+        },
         { kind: 'subheading', text: 'Factoriser un trinôme grâce à ses racines' },
         {
           kind: 'para',
@@ -542,6 +563,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { tag: 'discussion', text: '$\\Delta > 0 \\iff m < -4$ ou $m > 4$ : deux solutions ; $-4 < m < 4$ : aucune solution' },
           ],
           result: { tag: 'résultat', text: 'racine double pour $m = \\pm 4$ ; deux solutions si $|m| > 4$, aucune si $|m| < 4$.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'parametre-m-widget',
+          label: 'Manipule toi-même — faire varier le paramètre',
+          caption:
+            'Fais varier m : la parabole se déplace et le nombre de solutions change. Le ' +
+            'graphique du bas trace Δ en fonction de m ; ses points d\'intersection avec ' +
+            'l\'axe donnent les valeurs de m pour lesquelles l\'équation a une racine double. ' +
+            'Avec mx² + 2x + 1, regarde ce qui se passe en m = 0.',
         },
         {
           kind: 'exemple',
@@ -1056,6 +1087,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'simplification-trou-widget',
+          label: 'Manipule toi-même — le point creux',
+          caption:
+            'La fraction de départ et sa forme simplifiée ont exactement la même courbe… ' +
+            'sauf en x = r, où la première a un trou : simplifier par (x − r) ne rend pas x ' +
+            '= r permis. Coche « Afficher la forme simplifiée seule » : le trou se bouche, ' +
+            'et ce n\'est plus la même fonction. Le préréglage est l\'exemple ci-dessus.',
+        },
+        {
           kind: 'piege',
           label: 'Un carré parfait au dénominateur ne se simplifie jamais complètement',
           text:
@@ -1181,6 +1222,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'deux membres par ce dénominateur commun $(x-2)(x+1)$ : $5(x+1) = 3x - 3 \\iff 2x = -8 \\iff x = -4$. ' +
             'Une équation du **premier** degré, et plus de racine en trop à rejeter. Le produit en croix ' +
             'multiplie par un dénominateur de trop et fait monter le degré.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'racine-etrangere-rationnelle-widget',
+          label: 'Manipule toi-même — d\'où vient la racine étrangère ?',
+          caption:
+            'En haut, les deux membres de l\'équation : leurs points communs sont les vraies ' +
+            'solutions. En bas, l\'équation obtenue par produit en croix accepte aussi une ' +
+            'valeur qui annule un dénominateur, la racine étrangère. Passe à la méthode du ' +
+            'dénominateur commun : dans l\'exemple du cours, l\'équation reste du premier ' +
+            'degré et la racine étrangère n\'apparaît même pas.',
         },
         {
           kind: 'exemple',
@@ -1463,6 +1515,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { tag: 'confronter au domaine', text: '$[8;12]$ est bien inclus dans $]0;20[$' },
           ],
           result: { tag: 'réponse', text: 'un côté compris entre 8 m et 12 m.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'seuil-ballon-widget',
+          label: 'Manipule toi-même — un seuil, un domaine',
+          caption:
+            'Règle le seuil k et choisis le symbole : la résolution s\'affiche (Δ, racines), ' +
+            'et chaque racine est confrontée au domaine du contexte — un temps négatif ou ' +
+            'une largeur impossible est rejeté. Le réglage par défaut retrouve l\'exemple du ' +
+            'ballon : il reste au-dessus de 25 m pour t ∈ ]0 ; 4[ ; la seconde situation ' +
+            'est l\'enclos ci-dessus.',
         },
         {
           kind: 'application',

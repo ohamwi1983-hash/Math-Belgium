@@ -212,8 +212,8 @@
       if (!ens.length) return "∅";
       return ens.map(function (iv) {
         if (Math.abs(iv.hi - iv.lo) < 1e-9) return "{" + nb(iv.lo) + "}";
-        return (iv.loIn ? "[" : "]") + nb(iv.lo) + " ; " + nb(iv.hi) + (iv.hiIn ? "]" : "[");
-      }).join(" ∪ ");
+        return (iv.loIn ? "[" : "]") + nb(iv.lo) + "\u00a0;\u00a0" + nb(iv.hi) + (iv.hiIn ? "]" : "[");
+      }).join("\u00a0∪ ");
     }
 
     _rendre() {
@@ -257,8 +257,10 @@
           : "L'aire vaut exactement " + nb(k) + " m² pour x = " + ens.map(function (iv) { return nb(iv.lo); }).join(" m ou x = ") + " m.")
           : (s.id === "ballon" ? "Le ballon n'est jamais exactement à " + nb(k) + " m pendant son vol." : "Aucune largeur ne donne exactement " + nb(k) + " m².");
       } else {
-        phrase = ens.length ? (s.id === "ballon" ? "Le ballon est " + s.phrase[op] + " " + nb(k) + " m pour t ∈ " + texte + "."
-          : "L'aire est " + s.phrase[op] + " " + nb(k) + " m² pour x ∈ " + texte + ".")
+        var seul = ens.length === 1 && Math.abs(ens[0].hi - ens[0].lo) < 1e-9;
+        var ou = seul ? " = " + nb(ens[0].lo) + (s.id === "ballon" ? " s" : " m") : " ∈ " + texte;
+        phrase = ens.length ? (s.id === "ballon" ? "Le ballon est " + s.phrase[op] + " " + nb(k) + " m pour t" + ou + "."
+          : "L'aire est " + s.phrase[op] + " " + nb(k) + " m² pour x" + ou + ".")
           : (s.id === "ballon" ? "Jamais pendant le vol : aucun instant ne convient." : "Aucune largeur possible ne convient.");
       }
       e.solution.innerHTML = 'S = <span class="s">' + texte + "</span><br>" + phrase;

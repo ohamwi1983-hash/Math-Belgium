@@ -103,17 +103,17 @@
       ce: "x ≠ 3",
       croix: {
         lignes: ["x²(x − 3) = 9(x − 3)", "(x − 3)(x² − 9) = 0, soit (x − 3)²(x + 3) = 0"],
-        poly: function (x) { return (x - 3) * (x - 3) * (x + 3) / 4; },
-        nomPoly: "(x − 3)²(x + 3), divisé par 4 pour la fenêtre",
+        poly: function (x) { return (x - 3) * (x - 3) * (x + 3); },
+        nomPoly: "(x − 3)²(x + 3)",
         racines: [-3, 3],
-        yMin: -20, yMax: 30,
+        yMin: -20, yMax: 40,
       },
       commun: {
         lignes: ["Dénominateur commun : x − 3", "x² = 9", "x² − 9 = 0, soit (x − 3)(x + 3) = 0"],
         poly: function (x) { return x * x - 9; },
         nomPoly: "x² − 9",
         racines: [-3, 3],
-        yMin: -20, yMax: 30,
+        yMin: -20, yMax: 40,
       },
       solutions: [-3],
     },
@@ -337,7 +337,7 @@
         if (y < HAUT.yMin || y > HAUT.yMax) return;
         var ps = self._px(s, y, HAUT.yMin, HAUT.yMax, HAUT.h);
         svg.appendChild(svgEl(ns, "circle", { cx: ps[0].toFixed(2), cy: ps[1].toFixed(2), r: 5, class: "inter" }));
-        var t = svgEl(ns, "text", { x: ps[0] + 8, y: ps[1] - 8, class: "etiq-good" });
+        var t = svgEl(ns, "text", { x: ps[0], y: ps[1] + (y >= 0 ? -12 : 20), "text-anchor": "middle", class: "etiq-good" });
         t.textContent = "x = " + fr(s);
         svg.appendChild(t);
       });
