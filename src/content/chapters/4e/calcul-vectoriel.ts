@@ -1121,11 +1121,14 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'milieu-piege-widget',
-          label: 'Manipule toi-même : milieu contre différence',
+          label: 'Manipule toi-même : placer un point grâce à un vecteur',
           caption:
-            'Fais glisser A et u : B=A+u se recalcule, et le vrai milieu M (vert) reste bien ' +
-            'distinct du point « différence » (rouge) que confond le piège. Le réglage de ' +
-            'départ (A(1;1), u=(4;2)) reproduit exactement l\'exemple ci-dessus.',
+            'Trois façons de placer un point grâce à un vecteur. En mode Milieu, compare le ' +
+            'vrai milieu (la moyenne des coordonnées) au piège de la différence. En mode AM ' +
+            '= k·AB, fais varier k : M glisse sur la droite (AB) — en A pour k = 0, au ' +
+            'milieu pour k = 1/2, en B pour k = 1, au-delà pour k > 1. En mode Symétrique, ' +
+            'B devient le milieu de [AA′]. Le réglage de départ reproduit l\'exemple ' +
+            'ci-dessus.',
         },
         {
           kind: 'exemple',
@@ -1282,9 +1285,11 @@ export const calculVectoriel: ChapterContent = {
           tag: 'test-colinearite-widget',
           label: 'Manipule toi-même : colinéarité ou orthogonalité ?',
           caption:
-            'A(0;0) et B(2;1) sont fixes. Fais glisser C, puis bascule entre les deux tests : ' +
-            'les deux formules sont affichées côte à côte, une seule active. Le réglage de ' +
-            'départ (C(6;3), test colinéarité) reproduit exactement l\'exemple ci-dessus.',
+            'A(0 ; 0) et B(2 ; 1) sont fixes : fais glisser C et bascule entre les deux ' +
+            'tests. Quand le déterminant est nul, l\'atelier donne k tel que AC = k·AB ; ' +
+            'quand le produit scalaire est nul, l\'angle droit apparaît en A et Pythagore se ' +
+            'vérifie. Le réglage de départ (C(6 ; 3)) reproduit le premier exemple de la ' +
+            'section.',
         },
         {
           kind: 'entrainement',
@@ -1766,9 +1771,11 @@ export const calculVectoriel: ChapterContent = {
           tag: 'resultante-vecteurs-widget',
           label: 'Manipule toi-même : la règle du parallélogramme',
           caption:
-            'Fais glisser F₁, F₂ et l\'angle θ entre elles : le parallélogramme, R et la ' +
-            'déviation se recalculent en direct. Le réglage de départ (F₁=50N, F₂=30N, θ=60°) ' +
-            'reproduit exactement l\'exemple ci-dessus.',
+            'Fais varier F₁, F₂ et l\'angle θ : le parallélogramme et la résultante R se ' +
+            'recalculent en direct, par la loi des cosinus et par les composantes. L\'angle ' +
+            '180° − θ, en violet, explique le « + » de la formule. Le bouton « Déviation ' +
+            'obtuse » montre le cas où la calculatrice se trompe d\'angle. Le réglage de ' +
+            'départ reproduit le premier exemple de la section.',
         },
         {
           kind: 'rappel',

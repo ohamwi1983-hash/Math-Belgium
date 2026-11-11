@@ -2243,3 +2243,30 @@ paths:
   `triangle-cas-ambigu-widget` (calcul pas à pas) ; 6 nouveaux — `cercle-explorateur-widget` (§ 1,
   défi), `valeurs-remarquables-widget` (§ 3, défi), `angles-associes-widget` (§ 4),
   `triangle-deformable-widget` et `quelle-loi-widget` (§ 6, défi), `triangulation-widget` (§ 7).
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`) : audit puis enrichissement validé par
+  l'utilisateur (toutes les recommandations). Corrections : kickers des § 8 à 14 en texte brut avec des
+  « _ » visibles (réécrits en mots), flèches manquantes dans la méthode de Chasles et au § 15, texte de
+  l'avion aligné sur sa figure (méthode du triangle), « relation générale qui contient les deux » →
+  « contient le milieu », colinéarité/orthogonalité « opposées » → « très différentes »,
+  « contexte-aware » → « adaptées au contexte », transition finale (ch. 7 nommé), quiz du § 18 situé.
+  Intro : le rappel des composantes (prématuré) remplacé par un pont avec la translation de 3e.
+  Ajouts : vecteur nul, AB = CD ⟺ ABDC parallélogramme + piège de l'ordre des lettres (§ 1) ;
+  AB + BA = 0 (§ 2) ; nul colinéaire à tout (§ 3) ; figure du parallélogramme et commutativité (§ 4) ;
+  piège AB − AC = CB, exemple à réordonner, milieu par Chasles (§ 6) ; méthode de construction et
+  composantes du câble dessinées (§ 7) ; soustraction en repère (§ 9) ; décomposition par système
+  (§ 10) ; distance avec paramètre et nature d'un triangle (§ 11) ; quatrième sommet, symétrique,
+  AM = ⅔·AB (§ 12) ; non aligné et paramètre (§ 13) ; démonstration « Pythagore généralisé » (les deux
+  sens, lien Al-Kashi), triangle par ses sommets, paramètre (§ 14) ; vecteur directeur (1 ; m) de
+  y = mx + p (§ 15) ; ligne « même norme seulement » (§ 16) ; démonstration du « + 2F₁F₂·cos θ » et
+  résultante par les composantes (§ 17) ; formulaire, récap et checklist. Nouveaux énoncés par clé
+  (dont une section `directeur`). Ateliers : `milieu-piege-widget` (modes AM = k·AB et symétrique),
+  `test-colinearite-widget` (k affiché, angle droit + Pythagore), `resultante-vecteurs-widget`
+  (composantes, angle 180° − θ, déviation obtuse corrigée) ; 7 nouveaux — `egalite-parallelogramme-widget`
+  (§ 1 et § 12), `multiplication-k-widget` (§ 3), `somme-vecteurs-widget` (§ 4), `chasles-defi-widget`
+  (§ 6, défi), `decomposition-vecteur-widget` (§ 7), `distance-triangle-widget` (§ 11),
+  `vecteur-directeur-widget` (§ 15). **Piège vérifié** : le caractère combinant U+20D7 (flèche de
+  vecteur) s'affiche en carré vide dans Chromium — les widgets dessinent la flèche en CSS/SVG. **Piège
+  vérifié** : un atelier testé à 390 px de viewport n'a que ~308 px de large dans la page (marges du
+  cadre) — vérifier le débordement interne des Shadow DOM dans la vraie page (grille de réglages de
+  `somme-vecteurs-widget` corrigée : minmax 150 → 200 px).
