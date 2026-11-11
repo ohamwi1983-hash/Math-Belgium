@@ -22,6 +22,28 @@
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
   }
 
+  function nombreCourt(n) {
+    var arrondi = Math.round(n * 100) / 100;
+    if (Math.abs(arrondi) < 1e-12) arrondi = 0;
+    var t = String(arrondi);
+    if (t.indexOf("e") >= 0) t = arrondi.toFixed(2);
+    return t.replace(".", ",").replace("-", "−");
+  }
+
+  function trinomeTexte(a, b, c) {
+    var t = (Math.abs(a - 1) < 1e-9 ? "" : Math.abs(a + 1) < 1e-9 ? "−" : nombreCourt(a)) + "x²";
+    if (Math.abs(b) > 1e-9) t += (b > 0 ? " + " : " − ") + (Math.abs(Math.abs(b) - 1) < 1e-9 ? "" : nombreCourt(Math.abs(b))) + "x";
+    if (Math.abs(c) > 1e-9) t += (c > 0 ? " + " : " − ") + nombreCourt(Math.abs(c));
+    return t;
+  }
+
+  var SYMBOLE_TEXTE = { gt: ">", ge: "≥", lt: "<", le: "≤" };
+
+  function melanger(t) {
+    for (var i = t.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = t[i]; t[i] = t[j]; t[j] = x; }
+    return t;
+  }
+
   function svgEl(ns, tag, attrs) {
     var el = document.createElementNS(ns, tag);
     for (var key in attrs) el.setAttribute(key, attrs[key]);
@@ -35,7 +57,7 @@
     '*{box-sizing:border-box;}' +
     '.formule-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}' +
     '.formule{font-family:var(--serif,serif);font-style:italic;font-size:1.15rem;font-weight:600;color:var(--ink,#241f1a);}' +
-    '.formule-row select{font-family:inherit;font-size:1.1rem;font-weight:700;color:var(--accent-ink,#7a3212);background:var(--surface,#fff);border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:3px 8px;cursor:pointer;}' +
+    '.formule-row select{min-height:44px;font-family:inherit;font-size:1.1rem;font-weight:700;color:var(--accent-ink,#7a3212);background:var(--surface,#fff);border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:3px 8px;cursor:pointer;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:12px;}' +
     'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
@@ -58,12 +80,33 @@
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
-    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;min-height:44px;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
-    '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
+    '.modes{display:flex;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}' +
+    '.modes button,.presets button,.btn-defi,.choix button{min-height:44px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);font-weight:600;font-family:inherit;font-size:0.9rem;cursor:pointer;}' +
+    '.modes button[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);}' +
+    '.presets{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}' +
+    '.message-delta.cas-special{border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--ink,#241f1a);text-align:left;}' +
+    '.defi-symbole{font-family:var(--mono,monospace);font-size:1.1rem;font-weight:700;color:var(--accent-ink,#7a3212);}' +
+    '.consigne-defi{text-align:center;font-size:0.95rem;color:var(--ink,#241f1a);margin:0 0 10px;}' +
+    '.choix{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}' +
+    '@media (max-width:480px){.choix{grid-template-columns:1fr;}}' +
+    '.choix button{font-family:var(--mono,monospace);font-size:0.92rem;text-align:center;}' +
+    '.choix button.juste{background:var(--good-soft,#e3f1e8);border-color:var(--good,#2f7a4f);color:var(--good,#2f7a4f);}' +
+    '.choix button.faux{background:var(--bad-soft,#f6e0df);border-color:var(--bad,#a8322f);color:var(--bad,#a8322f);}' +
+    '.choix button:disabled{cursor:default;opacity:1;}' +
+    '.verdict{text-align:center;font-size:0.92rem;margin:0 0 12px;color:var(--ink,#241f1a);}' +
+    '.btn-defi{display:block;margin:0 auto 14px;background:var(--accent-soft,#f6e2d3);border-color:var(--accent-soft-line,#e8c4a4);color:var(--accent-ink,#7a3212);}' +
+    '.segment-neutre{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
+    '.etiquette-racine{font-size:11.5px;font-weight:600;fill:var(--ink,#241f1a);font-family:var(--mono,monospace);}' +
+    '[hidden]{display:none !important;}' +
+    '.btn-reset{margin-top:2px;min-height:44px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
+    '<div class="modes"><button type="button" id="mode-libre" aria-pressed="true">Libre</button>' +
+    '<button type="button" id="mode-defi" aria-pressed="false">Défi</button></div>' +
     '<div class="formule-row"><span class="formule" id="formule"></span>' +
+    '<span class="defi-symbole" id="defi-symbole" hidden></span>' +
     '<select id="symbole">' +
     '<option value="gt">&gt; 0</option>' +
     '<option value="ge">&ge; 0</option>' +
@@ -71,9 +114,18 @@
     '<option value="le">&le; 0</option>' +
     '</select></div>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<div id="zone-defi" hidden>' +
+    '<p class="consigne-defi">Quel est l\'ensemble-solution de cette inéquation ? Un seul essai.</p>' +
+    '<div class="choix" id="choix"></div>' +
+    '<p class="verdict" id="verdict"></p>' +
+    '<button type="button" class="btn-defi" id="nouveau-defi">Nouveau défi</button>' +
+    '</div>' +
     '<div id="zone-tableau"></div>' +
     '<p class="solution" id="solution"></p>' +
-    '<div class="controles">' +
+    '<div class="controles" id="controles">' +
+    '<div class="presets"><button type="button" data-preset="pos">Exemple Δ &gt; 0</button>' +
+    '<button type="button" data-preset="nul">Exemple Δ = 0</button>' +
+    '<button type="button" data-preset="neg">Exemple Δ &lt; 0</button></div>' +
     '<div class="curseur"><label for="a">a</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
     '<span class="curseur-valeur" id="a-valeur"></span></div></div>' +
@@ -113,7 +165,20 @@
     this._valeurC = shadow.getElementById("c-valeur");
     this._resetBtn = shadow.getElementById("reset");
     this._selectSymbole.value = this._symbole;
+    this._mode = "libre";
+    this._btnLibre = shadow.getElementById("mode-libre");
+    this._btnDefi = shadow.getElementById("mode-defi");
+    this._zoneDefi = shadow.getElementById("zone-defi");
+    this._choix = shadow.getElementById("choix");
+    this._verdict = shadow.getElementById("verdict");
+    this._nouveauDefi = shadow.getElementById("nouveau-defi");
+    this._controles = shadow.getElementById("controles");
+    this._defiSymbole = shadow.getElementById("defi-symbole");
+    this._presets = shadow.querySelectorAll("[data-preset]");
+    this._defi = null;
   };
+
+  var PRESETS = { pos: { a: 1, b: -1, c: -6 }, nul: { a: 1, b: -4, c: 4 }, neg: { a: 1, b: 2, c: 3 } };
 
   SigneTrinomeWidgetClass.prototype.connectedCallback = function () {
     var self = this;
@@ -142,6 +207,19 @@
     this._inputC.addEventListener("input", this._onInputC);
     this._selectSymbole.addEventListener("change", this._onChangeSymbole);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._onPreset = function (e) {
+      var pr = PRESETS[e.currentTarget.getAttribute("data-preset")];
+      self._a = pr.a; self._b = pr.b; self._c = pr.c;
+      self._inputA.value = String(pr.a); self._inputB.value = String(pr.b); self._inputC.value = String(pr.c);
+      self._rendre();
+    };
+    for (var i = 0; i < this._presets.length; i++) this._presets[i].addEventListener("click", this._onPreset);
+    this._onModeLibre = function () { self._changerMode("libre"); };
+    this._onModeDefi = function () { self._changerMode("defi"); };
+    this._onNouveauDefi = function () { self._tirerDefi(); self._rendre(); };
+    this._btnLibre.addEventListener("click", this._onModeLibre);
+    this._btnDefi.addEventListener("click", this._onModeDefi);
+    this._nouveauDefi.addEventListener("click", this._onNouveauDefi);
     this._rendre();
   };
 
@@ -151,6 +229,113 @@
     this._inputC.removeEventListener("input", this._onInputC);
     this._selectSymbole.removeEventListener("change", this._onChangeSymbole);
     this._resetBtn.removeEventListener("click", this._onReset);
+    for (var i = 0; i < this._presets.length; i++) this._presets[i].removeEventListener("click", this._onPreset);
+    this._btnLibre.removeEventListener("click", this._onModeLibre);
+    this._btnDefi.removeEventListener("click", this._onModeDefi);
+    this._nouveauDefi.removeEventListener("click", this._onNouveauDefi);
+  };
+
+  SigneTrinomeWidgetClass.prototype._changerMode = function (mode) {
+    this._mode = mode;
+    this._btnLibre.setAttribute("aria-pressed", mode === "libre" ? "true" : "false");
+    this._btnDefi.setAttribute("aria-pressed", mode === "defi" ? "true" : "false");
+    var defi = mode === "defi";
+    this._zoneDefi.hidden = !defi;
+    this._controles.hidden = defi;
+    this._selectSymbole.hidden = defi;
+    this._defiSymbole.hidden = !defi;
+    if (defi) {
+      this._libreSauve = { a: this._a, b: this._b, c: this._c, symbole: this._symbole };
+      this._tirerDefi();
+    } else if (this._libreSauve) {
+      this._a = this._libreSauve.a; this._b = this._libreSauve.b; this._c = this._libreSauve.c; this._symbole = this._libreSauve.symbole;
+    }
+    this._rendre();
+  };
+
+  // Défi : coefficients entiers, racines entières (Δ > 0, Δ = 0) ou trinôme sans racine (Δ < 0),
+  // symbole tiré ; 4 propositions dont les pièges (crochets inversés, intérieur/extérieur, ℝ \ {r}).
+  SigneTrinomeWidgetClass.prototype._tirerDefi = function () {
+    var alea = function (lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); };
+    var symboles = ["gt", "ge", "lt", "le"];
+    var symbole = symboles[alea(0, 3)];
+    var signeA = Math.random() < 0.5 ? 1 : -1;
+    var type = ["pos", "pos", "nul", "neg"][alea(0, 3)];
+    var a, b, c;
+    if (type === "pos") {
+      var r1 = alea(-4, 3), r2 = r1 + alea(1, 4);
+      a = signeA; b = -signeA * (r1 + r2); c = signeA * r1 * r2;
+    } else if (type === "nul") {
+      var r = alea(-3, 3);
+      a = signeA; b = -2 * signeA * r; c = signeA * r * r;
+    } else {
+      var h = alea(-3, 3), k = alea(1, 4);
+      a = signeA; b = -2 * signeA * h; c = signeA * (h * h + k);
+    }
+    if (Math.abs(c) > 6 || Math.abs(b) > 6) return this._tirerDefi();
+    this._a = a; this._b = b; this._c = c; this._symbole = symbole;
+    this._defi = { type: type, repondu: false, choisi: null };
+    this._defi.options = this._optionsDefi();
+  };
+
+  SigneTrinomeWidgetClass.prototype._optionsDefi = function () {
+    var a = this._a, b = this._b, c = this._c, symbole = this._symbole;
+    var delta = b * b - 4 * a * c;
+    var racines = this._racines(a, b, c);
+    var bonne = this._calculerSolution(a, delta, racines, symbole);
+    var opts = [bonne];
+    var ajoute = function (t) { if (opts.indexOf(t) < 0) opts.push(t); };
+    var inverseLarge = { gt: "ge", ge: "gt", lt: "le", le: "lt" }[symbole];
+    var inverseSens = { gt: "lt", ge: "le", lt: "gt", le: "ge" }[symbole];
+    var inverseTout = { gt: "le", ge: "lt", lt: "ge", le: "gt" }[symbole];
+    if (racines.length === 2) {
+      ajoute(this._calculerSolution(a, delta, racines, inverseLarge));
+      ajoute(this._calculerSolution(a, delta, racines, inverseSens));
+      ajoute(this._calculerSolution(a, delta, racines, inverseTout));
+    } else if (racines.length === 1) {
+      var rt = nombreCourt(racines[0]);
+      ["S = ℝ", "S = ℝ \\ {" + rt + "}", "S = {" + rt + "}", "S = ∅"].forEach(ajoute);
+    } else {
+      var hs = nombreCourt(-b / (2 * a));
+      ["S = ℝ", "S = ∅", "S = ℝ \\ {" + hs + "}", "S = {" + hs + "}"].forEach(ajoute);
+    }
+    return melanger(opts.slice(0, 4));
+  };
+
+  SigneTrinomeWidgetClass.prototype._racines = function (a, b, c) {
+    var delta = b * b - 4 * a * c;
+    if (delta > 1e-9) {
+      var r1 = (-b - Math.sqrt(delta)) / (2 * a), r2 = (-b + Math.sqrt(delta)) / (2 * a);
+      return [Math.min(r1, r2), Math.max(r1, r2)];
+    }
+    if (delta > -1e-9) return [-b / (2 * a)];
+    return [];
+  };
+
+  SigneTrinomeWidgetClass.prototype._rendreDefi = function (a, delta, racines) {
+    var self = this, d = this._defi;
+    var bonne = this._calculerSolution(a, delta, racines, this._symbole);
+    this._choix.innerHTML = "";
+    d.options.forEach(function (opt) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = opt;
+      if (d.repondu) {
+        btn.disabled = true;
+        if (opt === bonne) btn.className = "juste";
+        else if (opt === d.choisi) btn.className = "faux";
+      } else {
+        btn.addEventListener("click", function () { d.repondu = true; d.choisi = opt; self._rendre(); });
+      }
+      self._choix.appendChild(btn);
+    });
+    if (!d.repondu) { this._verdict.textContent = ""; return; }
+    var explication = racines.length === 2
+      ? "Racines " + nombreCourt(racines[0]) + " et " + nombreCourt(racines[1]) + " ; a " + (a > 0 ? "> 0" : "< 0") + " : le trinôme a le signe de a à l'extérieur des racines, le signe opposé entre elles."
+      : racines.length === 1
+        ? "Δ = 0 : racine double " + nombreCourt(racines[0]) + ". Le trinôme a le signe de a partout, et s'annule seulement en ce point."
+        : "Δ < 0 : aucune racine. Le trinôme garde toujours le signe de a (" + (a > 0 ? "positif" : "négatif") + ").";
+    this._verdict.textContent = (d.choisi === bonne ? "Juste ! " : "Pas tout à fait : la bonne réponse est en vert. ") + explication;
   };
 
   SigneTrinomeWidgetClass.prototype._toPx = function (xMath, yMath) {
@@ -200,7 +385,7 @@
   var FORMAT_BORNE = function (v) {
     if (v === -Infinity) return "−∞";
     if (v === Infinity) return "+∞";
-    return formatNombreFr(v, 2);
+    return nombreCourt(v);
   };
 
   // Construit S(symbole) par cas explicites (Δ<0 / Δ=0 / Δ>0 × signe de a × symbole) — pas un
@@ -267,10 +452,12 @@
     var delta = b * b - 4 * a * c;
     var f = function (x) { return a * x * x + b * x + c; };
 
-    this._formule.textContent = "f(x) = " + formatNombreFr(a, 1) + "x² " + (b >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(b), 1) + "x " + (c >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(c), 1);
-    this._valeurA.textContent = formatNombreFr(a, 1);
-    this._valeurB.textContent = formatNombreFr(b, 1);
-    this._valeurC.textContent = formatNombreFr(c, 1);
+    var defi = this._mode === "defi";
+    this._formule.textContent = (defi ? "" : "f(x) = ") + trinomeTexte(a, b, c);
+    this._defiSymbole.textContent = SYMBOLE_TEXTE[this._symbole] + " 0";
+    this._valeurA.textContent = nombreCourt(a);
+    this._valeurB.textContent = nombreCourt(b);
+    this._valeurC.textContent = nombreCourt(c);
 
     var racines = [];
     if (delta > 1e-9) {
@@ -300,24 +487,46 @@
     svg.appendChild(etiqX);
 
     var veutPositif = this._symbole === "gt" || this._symbole === "ge";
-    this._traceCourbeSignee(svg, ns, f, racines, veutPositif);
+    var masquer = defi && this._defi && !this._defi.repondu;
+    if (masquer) this._traceIntervalle(svg, ns, X_MIN, X_MAX, f, "segment-neutre");
+    else this._traceCourbeSignee(svg, ns, f, racines, veutPositif);
     racines.forEach(function (r) {
       if (r < X_MIN || r > X_MAX) return;
       var p = self._toPx(r, 0);
       svg.appendChild(svgEl(ns, "circle", { cx: p[0].toFixed(2), cy: p[1].toFixed(2), r: 4, class: "racine" }));
+      if (defi) {
+        var et = svgEl(ns, "text", { x: p[0].toFixed(2), y: (p[1] + 18).toFixed(2), "text-anchor": "middle", class: "etiquette-racine" });
+        et.textContent = nombreCourt(r);
+        svg.appendChild(et);
+      }
     });
+    if (defi) this._rendreDefi(a, delta, racines);
 
     // Tableau de signes : un message si Δ<0 (rien à cadriller, signe constant), sinon une vraie
     // grille avec une colonne par racine, sur le modèle du site (blanc/valeur/blanc en alternance).
+    var sym = SYMBOLE_TEXTE[this._symbole];
+    var large = this._symbole === "ge" || this._symbole === "le";
     if (delta < -1e-9) {
       this._zoneTableau.innerHTML =
-        '<p class="message-delta">Δ &lt; 0 : aucune racine réelle — le trinôme garde ' +
-        'toujours le signe de a (ici ' + (a > 0 ? 'positif' : 'négatif') + '), quel que soit x.</p>';
+        '<p class="message-delta cas-special"><strong>Cas Δ &lt; 0</strong> : aucune racine réelle — le trinôme garde ' +
+        'toujours le signe de a (ici ' + (a > 0 ? 'positif' : 'négatif') + '), quel que soit x. ' +
+        'Donc f(x) ' + sym + ' 0 est ' + ((a > 0) === veutPositif ? 'vrai pour tout x : S = ℝ.' : 'faux pour tout x : S = ∅.') + '</p>';
+    } else if (delta < 1e-9) {
+      var rr = nombreCourt(racines[0]);
+      var texte;
+      if ((a > 0) === veutPositif) texte = large ? 'vraie partout, y compris en ' + rr + ' (f y vaut 0) : S = ℝ.' : 'vraie partout sauf en ' + rr + ', où f vaut 0 : S = ℝ \\ {' + rr + '}.';
+      else texte = large ? 'vraie seulement en ' + rr + ', où f vaut 0 : S = {' + rr + '}.' : 'jamais vraie : S = ∅.';
+      this._zoneTableau.innerHTML = this._construireTableau(f, racines) +
+        '<p class="message-delta cas-special"><strong>Cas Δ = 0</strong> : racine double ' + rr + '. Le trinôme a le signe de a ' +
+        '(' + (a > 0 ? 'positif' : 'négatif') + ') partout, et s\'annule seulement en ' + rr + '. L\'inéquation f(x) ' + sym + ' 0 est ' + texte + '</p>';
     } else {
       this._zoneTableau.innerHTML = this._construireTableau(f, racines);
     }
 
     this._solution.textContent = this._calculerSolution(a, delta, racines, this._symbole);
+    var cacher = defi && this._defi && !this._defi.repondu;
+    this._zoneTableau.hidden = cacher;
+    this._solution.hidden = cacher;
   };
 
   if (!customElements.get("signe-trinome-widget")) {

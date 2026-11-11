@@ -17,6 +17,10 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizEquationsSecondDegre; label:
   { id: "sommeProduitRacines", label: "Somme et produit des racines" },
   { id: "factorisationGenerale", label: "Factorisation par la méthode générale" },
   { id: "inequations", label: "Inéquations et tableau de signes" },
+  { id: "fractionsRationnelles", label: "Simplifier une fraction rationnelle" },
+  { id: "inconnueDenominateur", label: "L'inconnue au dénominateur" },
+  { id: "inequationsRationnelles", label: "Inéquations rationnelles" },
+  { id: "enContexte", label: "Équations et inéquations en contexte" },
 ];
 
 function tirerQuestion(varianteId: VarianteQuizEquationsSecondDegre): QuestionVraiFaux {

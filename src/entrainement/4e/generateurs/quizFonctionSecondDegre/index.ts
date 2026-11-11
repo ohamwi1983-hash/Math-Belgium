@@ -15,7 +15,6 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizFonctionSecondDegre; label: 
   { id: "racinesFactorisation", label: "Racines par factorisation (sans discriminant)" },
   { id: "domaineImageTableaux", label: "Domaine, image et tableaux" },
   { id: "optimisation", label: "Problèmes d'optimisation" },
-  { id: "equationsContexte", label: "Équations et inéquations en contexte" },
 ];
 
 function tirerQuestion(varianteId: VarianteQuizFonctionSecondDegre): QuestionVraiFaux {

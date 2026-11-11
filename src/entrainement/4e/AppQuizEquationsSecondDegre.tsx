@@ -84,7 +84,7 @@ export function AppQuizEquationsSecondDegre() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 22 à 35 affirmations vrai/faux chacun — révision complète du chapitre, discriminant compris.</p>
+              <p className="result-subtitle">11 thèmes, 22 à 35 affirmations vrai/faux chacun — révision complète du chapitre, discriminant compris.</p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

@@ -20,7 +20,11 @@ export type VarianteQuizEquationsSecondDegre =
   | "demonstration"
   | "sommeProduitRacines"
   | "factorisationGenerale"
-  | "inequations";
+  | "inequations"
+  | "fractionsRationnelles"
+  | "inconnueDenominateur"
+  | "inequationsRationnelles"
+  | "enContexte";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que gen59/gen60). */

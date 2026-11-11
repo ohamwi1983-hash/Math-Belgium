@@ -17,8 +17,7 @@ export type VarianteQuizFonctionSecondDegre =
   | "transformationsGraphiques"
   | "racinesFactorisation"
   | "domaineImageTableaux"
-  | "optimisation"
-  | "equationsContexte";
+  | "optimisation";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que gen59). */
