@@ -2185,3 +2185,22 @@ paths:
   tirage équilibré dans `generateurs6e/*/profilEvaluation.ts`, `calculatriceIndispensable` par variante
   pour 6gen24/25, `versionPapier`, QR code `?code=` dans App6gen23–29) — aucune règle REECRITURES
   nécessaire (textes papier rédigés directement).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
+  audit puis enrichissement validé par l'utilisateur (toutes les recommandations). Corrections : renvoi
+  final (le chapitre 3 est « Fonctions de référence », pas le cercle trigonométrique), « 3 raccourcis +
+  un cas caché » au lieu de « 4 », ligne b = 0 complétée (même signe → aucune solution ; −c/a non carré),
+  Viète valable pour Δ ≥ 0, légende de la rentabilité (zone verte = gain). Contenu : racine évidente
+  (a + b + c = 0), signe des racines par S et P, équation à paramètre m, bicarrée (pour aller plus loin),
+  historique al-Khwārizmī (§ 1) ; tableau de signes, cas Δ < 0 et Δ = 0 (ℝ, ∅, ℝ \ {r}, {r}), x² < 4x à
+  ramener à 0 (§ 2) ; facteur irréductible + pente négative (§ 3) ; facteurs opposés, (x² − 4)/(x + 2)
+  (§ 4) ; dénominateur commun plutôt que produit en croix, S = ∅ (§ 5) ; méthode en 5 étapes, « jamais de
+  produit en croix dans une inéquation », second membre non nul, dénominateur au carré (§ 6) ; enclos
+  (§ 7) ; checklist et formulaire. Quiz gen61 : 4 thèmes ajoutés (fractions rationnelles, inconnue au
+  dénominateur, inéquations rationnelles, en contexte — ce dernier déplacé depuis gen60, qui passe à
+  6 thèmes / 206 affirmations ; gen61 : 11 thèmes / 360), rattachés aux sections dans `evaluationPayload.ts`.
+  Ateliers : `discriminant-racines-widget` (S, P, forme factorisée, sommet à mi-chemin),
+  `signe-trinome-widget` (cas Δ ≤ 0, mode Défi), `signe-produit-widget` (modes Quotient et « Piège :
+  produit en croix », réutilisé au § 6) ; 6 nouveaux — `completer-le-carre-widget`,
+  `viete-racines-widget`, `parametre-m-widget` (§ 1), `simplification-trou-widget` (§ 4),
+  `racine-etrangere-rationnelle-widget` (§ 5), `seuil-ballon-widget` (§ 7).

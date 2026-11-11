@@ -264,9 +264,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           tag: 'discriminant-racines-widget',
           label: 'Manipule toi-même — a, b, c et le discriminant',
           caption:
-            'Fais varier a, b et c : Δ se recalcule en direct, et la parabole change de couleur ' +
-            'selon son signe. Observe combien de fois elle coupe l\'axe des x selon que Δ est ' +
-            'positif, nul ou négatif.',
+            'Fais varier a, b et c : Δ se recalcule en direct et la parabole change de ' +
+            'couleur selon son signe. Quand il y a des racines, regarde S et P (relations ' +
+            'de Viète), la forme factorisée a(x − x₁)(x − x₂), et le sommet, toujours à ' +
+            'mi-chemin des deux racines (xₛ = S/2).',
         },
         {
           kind: 'historique',
@@ -804,9 +805,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           tag: 'signe-trinome-widget',
           label: 'Manipule toi-même — le tableau de signes en direct',
           caption:
-            'Règle a, b et c, choisis le symbole ◇, et regarde le tableau de signes se ' +
-            'construire tout seul sous la parabole colorée — puis l\'ensemble-solution S calculé ' +
-            'avec la bonne notation à crochets.',
+            'Règle a, b et c, choisis le symbole : le tableau de signes et ' +
+            'l\'ensemble-solution se construisent en direct. Les boutons d\'exemple montrent ' +
+            'les cas Δ = 0 et Δ < 0, où S peut valoir ℝ, ∅, ℝ \\ {r} ou {r}. En mode Défi, ' +
+            'trouve S à partir de la parabole : un seul essai.',
         },
         {
           kind: 'application',
@@ -1002,9 +1004,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           tag: 'signe-produit-widget',
           label: 'Manipule toi-même — 2 ou 3 facteurs à la fois',
           caption:
-            'Règle la racine de chaque facteur (active le 3e si besoin) : la grille se construit ' +
-            'ligne par ligne, la courbe du produit se colore en direct, et S se calcule pour le ' +
-            'symbole choisi — reprend par défaut l\'exemple (x−1)·x·(x−3) résolu ci-dessus.',
+            'En mode Produit, règle les racines de 2 ou 3 facteurs : la grille se construit ' +
+            'ligne par ligne, et le réglage par défaut reprend l\'exemple (x − 1)·x·(x − 3). ' +
+            'En mode Quotient, passe un facteur au dénominateur : sa valeur devient ‖, ' +
+            'jamais une solution, même avec ≤ ou ≥ (section 6).',
         },
         {
           kind: 'application',
@@ -1407,6 +1410,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { tag: 'le piège du produit en croix', text: '$x \\le 2(x-1)$ donnerait seulement $x \\ge 2$ : tous les $x < 1$ seraient perdus' },
           ],
           result: { tag: 'solution', text: '$S = ]-\\infty;1[ \\cup [2;+\\infty[$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'signe-produit-widget',
+          label: 'Manipule toi-même — pourquoi pas de produit en croix ?',
+          caption:
+            'Choisis le mode « Piège : produit en croix » : pour x/(x − 1) ≤ 2, la méthode ' +
+            'fausse (multiplier par x − 1) donne [2 ; +∞[, la bonne ]−∞ ; 1[ ∪ [2 ; +∞[. La ' +
+            'bande colorée montre où le dénominateur est négatif : là, le sens de ' +
+            'l\'inégalité aurait dû s\'inverser.',
         },
         {
           kind: 'exemple',
