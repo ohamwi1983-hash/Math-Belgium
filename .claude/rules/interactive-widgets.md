@@ -47,3 +47,20 @@ Correctif : supprimer entièrement la branche `module.exports` de tout fichier d
 garder que `root.X = X;`, et appeler l'IIFE avec `window` directement (jamais le ternaire
 `typeof window !== "undefined" ? window : this`) — ces widgets ne tournent jamais que dans un
 navigateur, la compatibilité Node est une fausse piste ici.
+
+**Figure épinglée pendant la manipulation (`epinglerFigure`, `InteractiveWidget.tsx`)** — retour
+utilisateur : dans la plupart des ateliers, curseurs et boutons sont trop loin du dessin ; en les
+manipulant, on ne voit plus le graphe. Correctif GÉNÉRIQUE (aucun widget modifié) : après montage,
+la plus grande `<svg>` du Shadow DOM est repérée, on remonte jusqu'à son plus grand ancêtre qui ne
+contient encore aucun contrôle (input/button/select/textarea), et cet élément reçoit
+`position: sticky; top: 50px (12px ≥ 760px, pas d'en-tête collant); bottom: 8px` + un fond opaque
+(premier fond non transparent trouvé en remontant). `top` couvre les réglages placés SOUS la figure,
+`bottom` ceux placés AU-DESSUS ; le parent (qui contient les réglages) borne l'épinglage, la figure
+ne sort donc jamais de son atelier. Une figure plus haute que 55 % de l'écran (deux panneaux
+empilés sur téléphone) est réduite par `zoom` ; rien n'est épinglé au-delà de 90 %, ni si l'atelier
+tient déjà à l'écran (< 90 % de la hauteur). Un `MutationObserver` ré-applique quand un widget
+reconstruit son DOM (court-circuit tant que l'élément épinglé est toujours connecté). **Pour un
+NOUVEL atelier** : garder la figure principale dans une `<svg>` et ne PAS mettre de bouton à
+l'intérieur du conteneur direct de la figure (sinon seule la `<svg>` elle-même est épinglée, bornée
+par ce petit conteneur, donc sans effet). Vérification : `scratchpad/test-epingle.cjs` (chaque
+contrôle amené à l'écran → figure entièrement visible et ne recouvrant pas le contrôle).

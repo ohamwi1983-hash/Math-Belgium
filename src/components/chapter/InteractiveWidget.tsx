@@ -154,8 +154,134 @@ export function InteractiveWidget({ tag }: { tag: InteractiveWidgetTag }) {
   useEffect(() => {
     const host = hostRef.current
     if (!ready || !host) return
-    host.replaceChildren(document.createElement(tag))
+    const el = document.createElement(tag)
+    host.replaceChildren(el)
+    return epinglerFigure(el)
   }, [ready, tag])
 
   return <div ref={hostRef} className="widget-host" />
+}
+
+/**
+ * Garde le dessin d'un atelier à l'écran pendant qu'on manipule ses réglages (retour utilisateur :
+ * dans la plupart des ateliers, curseurs et boutons sont trop loin du graphe — en les manipulant, on
+ * ne voit plus le dessin). Plutôt que de remanier ~120 widgets un par un, la plus grande figure SVG
+ * du Shadow DOM est rendue `position: sticky` :
+ * - `top` : elle reste collée en haut de l'écran quand on descend vers des réglages placés EN
+ *   DESSOUS (sous l'en-tête collant mobile, ~40 px) ;
+ * - `bottom` : elle remonte se coller en bas de l'écran quand les réglages sont AU-DESSUS d'elle.
+ * L'élément épinglé est le plus grand ancêtre de la figure qui ne contient encore aucun contrôle
+ * (input/button/select) : son parent contient les réglages, c'est donc lui qui borne l'épinglage
+ * (le dessin ne sort jamais de son atelier). Une figure plus haute que 55 % de l'écran (deux
+ * panneaux empilés sur téléphone) est réduite d'autant ; rien n'est épinglé au-delà de 90 %, ni si
+ * l'atelier entier tient déjà à l'écran. Un
+ * `MutationObserver` ré-applique le réglage quand un widget reconstruit son DOM.
+ */
+const ATTR = 'data-figure-epinglee'
+
+function epinglerFigure(el: HTMLElement): () => void {
+  let raf = 0
+  let observer: MutationObserver | null = null
+  let attente = 0
+
+  const fondOpaque = (depart: Element): string => {
+    let n: Node | null = depart
+    while (n) {
+      if (n instanceof Element) {
+        const bg = getComputedStyle(n).backgroundColor
+        if (bg && bg !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(bg)) return bg
+      }
+      n = n instanceof ShadowRoot ? n.host : n.parentNode
+    }
+    return 'var(--surface, #fff)'
+  }
+
+  const nettoyer = (sr: ShadowRoot) => {
+    sr.querySelectorAll(`[${ATTR}]`).forEach((n) => {
+      const h = n as HTMLElement
+      h.removeAttribute(ATTR)
+      for (const p of ['position', 'top', 'bottom', 'z-index', 'background-color', 'zoom']) h.style.removeProperty(p)
+    })
+  }
+
+  const appliquer = () => {
+    raf = 0
+    const sr = el.shadowRoot
+    if (!sr) return
+    // Mesurer à la taille naturelle : on retire une éventuelle réduction posée au passage précédent.
+    sr.querySelectorAll(`[${ATTR}]`).forEach((n) => (n as HTMLElement).style.removeProperty('zoom'))
+    const svgs = [...sr.querySelectorAll('svg')].filter((s) => {
+      const r = s.getBoundingClientRect()
+      return r.width > 120 && r.height > 80
+    })
+    if (!svgs.length) return nettoyer(sr)
+    svgs.sort((a, b) => {
+      const ra = a.getBoundingClientRect()
+      const rb = b.getBoundingClientRect()
+      return rb.width * rb.height - ra.width * ra.height
+    })
+    let cible: Element = svgs[0]
+    for (;;) {
+      const parent: Element | null = cible.parentElement
+      if (!parent || parent.querySelector('input,button,select,textarea')) break
+      cible = parent
+    }
+    const hFig = cible.getBoundingClientRect().height
+    const hAtelier = el.getBoundingClientRect().height
+    const hEcran = window.innerHeight
+    const deja = sr.querySelector(`[${ATTR}]`)
+    if (cible === sr.firstElementChild && !sr.firstElementChild?.nextElementSibling) {
+      if (deja) nettoyer(sr)
+      return
+    }
+    if (hFig > 0.9 * hEcran || hAtelier < 0.9 * hEcran) {
+      if (deja) nettoyer(sr)
+      return
+    }
+    if (deja && deja !== cible) nettoyer(sr)
+    const h = cible as HTMLElement
+    const haut = window.matchMedia('(max-width: 759.98px)').matches ? 50 : 12
+    h.setAttribute(ATTR, '')
+    h.style.position = 'sticky'
+    h.style.top = `${haut}px`
+    h.style.bottom = '8px'
+    h.style.zIndex = '3'
+    h.style.backgroundColor = fondOpaque(h.parentElement ?? el)
+    if (getComputedStyle(h).display === 'inline') h.style.display = 'block'
+    // Figure double (deux panneaux empilés sur téléphone) : on la réduit pour qu'elle laisse au
+    // moins 45 % de l'écran aux réglages. `zoom` (et non `transform`) réduit aussi la place occupée.
+    const plafond = 0.55 * hEcran
+    if (hFig > plafond) h.style.setProperty('zoom', (plafond / hFig).toFixed(3))
+  }
+
+  const planifier = () => {
+    if (!raf) raf = requestAnimationFrame(appliquer)
+  }
+  // Pendant une manipulation, beaucoup de widgets reconstruisent le contenu de leur SVG à chaque
+  // mouvement de curseur : inutile de tout remesurer tant que l'élément épinglé est toujours là.
+  const surMutation = () => {
+    const deja = el.shadowRoot?.querySelector(`[${ATTR}]`)
+    if (deja && deja.isConnected) return
+    planifier()
+  }
+
+  const brancher = () => {
+    const sr = el.shadowRoot
+    if (!sr) {
+      // Certains widgets attachent leur Shadow DOM un peu après l'insertion.
+      if (attente++ < 20) window.setTimeout(brancher, 50)
+      return
+    }
+    observer = new MutationObserver(surMutation)
+    observer.observe(sr, { childList: true, subtree: true })
+    planifier()
+  }
+
+  brancher()
+  window.addEventListener('resize', planifier)
+  return () => {
+    observer?.disconnect()
+    window.removeEventListener('resize', planifier)
+    if (raf) cancelAnimationFrame(raf)
+  }
 }

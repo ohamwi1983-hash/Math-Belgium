@@ -2312,3 +2312,13 @@ paths:
   la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
   défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
   `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).
+
+- **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
+  curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».
+  Mesuré sur les 125 ateliers montés : contrôles jusqu'à ~1 000 px sous la figure (section-cube,
+  fibonacci…), parfois 300 à 500 px au-dessus (differences-secondes, trois-formes…). Correctif
+  générique dans `InteractiveWidget.tsx` (`epinglerFigure`, voir `.claude/rules/interactive-widgets.md`)
+  plutôt que 120 widgets remaniés. Vérifié par script sur toutes les pages : 390 × 760 → 84 ateliers
+  épinglés, 0 échec (chaque contrôle visible avec la figure entière, sans recouvrement) ; 1280 × 800 →
+  75 épinglés, 0 échec ; les autres tiennent déjà à l'écran, ou n'ont pas de figure SVG (5 : tableaux,
+  arbres HTML).
