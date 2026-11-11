@@ -16,6 +16,7 @@ import {
   lirePlansEnregistres,
   peutGenererLocalement,
   supprimerPlanEnregistre,
+  varianteAdmetCasParticulier,
   type DocumentGenere,
   type PlanDocument,
   type PlanEnregistre,
@@ -906,7 +907,12 @@ export function EvaluationGeneratorPanel({
                                     return lignesVariantes.flatMap(({ cle, variante, copie }) => {
                                       const nombreVariante = ligne.parVariante?.[cle] ?? 0
                                       const reglages = reglagesVariante(ligne, cle)
-                                      const aDesReglages = parametres.length > 0 || !!libelleCas
+                                      // Case « cas particulier » seulement si CETTE variante peut en recevoir un
+                                      // (calculé seulement quand la sous-rangée s'affiche, puis mis en cache).
+                                      const afficherReglages = nombreVariante > 0 || copie
+                                      const libelleCasVariante =
+                                        libelleCas && afficherReglages && varianteAdmetCasParticulier(ligne.cle ?? '', variante.id) ? libelleCas : null
+                                      const aDesReglages = parametres.length > 0 || !!libelleCasVariante
                                       const rangees = [
                                         <tr className="admin-eval-row" key={(ligne.cle ?? '') + cle}>
                                           <td>
@@ -940,7 +946,7 @@ export function EvaluationGeneratorPanel({
                                           )}
                                         </tr>,
                                       ]
-                                      if (aDesReglages && (nombreVariante > 0 || copie)) {
+                                      if (aDesReglages && afficherReglages) {
                                         rangees.push(
                                           <tr className="admin-eval-row admin-eval-row-cas" key={(ligne.cle ?? '') + cle + '-reglages'}>
                                             <td colSpan={4}>
@@ -956,14 +962,14 @@ export function EvaluationGeneratorPanel({
                                                     {p.label}
                                                   </label>
                                                 ))}
-                                                {libelleCas && (
+                                                {libelleCasVariante && (
                                                   <label className="admin-eval-checkbox-field">
                                                     <input
                                                       type="checkbox"
                                                       checked={reglages.inclureCasParticulier}
                                                       onChange={(e) => mettreAJourCasParticulier(chapitreCourant.slug, section.id, ligne.cle ?? '', cle, e.target.checked)}
                                                     />
-                                                    {libelleCas}
+                                                    {libelleCasVariante}
                                                   </label>
                                                 )}
                                                 <button

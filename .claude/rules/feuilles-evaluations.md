@@ -90,6 +90,10 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   `LigneSelection.parametresExclusParVariante` / `casParticulierParVariante` ; l'ancien réglage de
   ligne reste lu pour les plans enregistrés (`reglagesVariante`). Le cas particulier va sur la
   dernière question de SA variante.
+  La case « Inclure un cas particulier » ne s'affiche que sous une variante qui PEUT en recevoir
+  un (`evaluationLocal.ts::varianteAdmetCasParticulier` : même tirage et même budget de 200 ms que
+  le moteur, résultat mis en cache) — ex. gen42 : seulement « angle avec Ox/Oy ». Une variante sans
+  paramètre au choix ni cas possible n'a pas de sous-rangée.
 - **Un verdict n'est jamais un cas particulier** : si la question est de DÉCIDER (données
   cohérentes ou non, une ou deux valeurs de q, nature d'une suite, existe/n'existe pas quand c'est
   la question), filtrer une issue rendrait la réponse prévisible. Est particulier ce qui

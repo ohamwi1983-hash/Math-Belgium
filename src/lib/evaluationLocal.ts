@@ -230,6 +230,34 @@ function respecteContrainte(profil: ProfilInstance, contrainte: ContrainteTirage
   return true
 }
 
+/** Réponses déjà calculées par `varianteAdmetCasParticulier` (« générateur::variante »). */
+const CAS_PARTICULIER_POSSIBLE = new Map<string, boolean>()
+
+/** La variante peut-elle recevoir un cas particulier (case « Inclure un cas particulier ») ? Même
+ * tirage et même budget de temps que `graineInedite` : la réponse est donc celle du moteur — une
+ * variante où il ne trouverait jamais de cas (gen42 « deux points » : le cas « droite parallèle à un
+ * axe » n'existe qu'en « angle ») n'affiche pas la case, qui y serait sans effet. Mis en cache. */
+export function varianteAdmetCasParticulier(generatorId: string, varianteId: string): boolean {
+  const cle = `${generatorId}::${varianteId}`
+  const connu = CAS_PARTICULIER_POSSIBLE.get(cle)
+  if (connu !== undefined) return connu
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId] as Adaptateur | undefined
+  if (!adaptateur?.profilInstance || !adaptateur.libelleCasParticulier) return false
+  const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
+  let trouve = false
+  const fin = Date.now() + 200
+  for (let essai = 0; essai < 20000 && Date.now() < fin && !trouve; essai++) {
+    try {
+      const autres = autresCaracteristiques(adaptateur.profilInstance(tirerInstance(adaptateur, varianteId, tirerGraine())), idsParametres)
+      trouve = casRespecte(autres, 'particulier')
+    } catch {
+      break
+    }
+  }
+  CAS_PARTICULIER_POSSIBLE.set(cle, trouve)
+  return trouve
+}
+
 /** Graine dont la PREMIÈRE instance (celle que rouvre le QR code, `tirerInstance`) respecte la
  * contrainte et n'a pas encore été imprimée. Recherche par paliers : contrainte complète, puis (cas
  * particulier introuvable) un exercice complet, puis sans la calculatrice (une variante sans aucun cas « à la calculatrice » ne bloque pas la génération),
