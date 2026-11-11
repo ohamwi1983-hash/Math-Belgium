@@ -133,7 +133,9 @@ export function construireIntervalleVersNombre(): ExerciceBienaymeTchebychevInte
   const n = tirerN();
   const kAttendu = arrondi2VersLeBas(d / sigma);
   const pourcentAttendu = arrondi2VersLeBas(100 * (1 - 1 / (kAttendu * kAttendu)));
-  const nMinAttendu = arrondiVersLeBas((pourcentAttendu / 100) * n);
+  // Un nombre d'individus est entier : « au moins 18,75 » veut dire « au moins 19 » → arrondi VERS LE HAUT
+  // (décision de l'utilisateur ; reste une garantie vraie, car le pourcentage a déjà été arrondi vers le bas).
+  const nMinAttendu = arrondiVersLeHaut((pourcentAttendu / 100) * n);
   return { variante: "intervalleVersNombre", contexte, xBar, sigma, borneInf, borneSup, n, kAttendu, pourcentAttendu, nMinAttendu };
 }
 

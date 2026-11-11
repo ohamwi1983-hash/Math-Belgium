@@ -1233,8 +1233,10 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Arrondir sans perdre la garantie',
           text:
             'Bienaymé-Tchebychev donne une **garantie** (« au moins… ») : quand tu arrondis, fais-' +
-            'le toujours dans le sens qui la conserve. Un pourcentage minimal ou un nombre minimal ' +
-            'd\'individus s\'arrondit **vers le bas**. Les bornes d\'un intervalle s\'arrondissent ' +
+            'le toujours dans le sens qui la conserve. Un pourcentage minimal s\'arrondit **vers le ' +
+            'bas**. Un nombre minimal d\'individus, lui, s\'arrondit **vers le haut** : c\'est un ' +
+            'entier, donc « au moins 18,75 élèves » veut dire « au moins 19 élèves ». Les bornes ' +
+            'd\'un intervalle s\'arrondissent ' +
             '**vers l\'extérieur** : la borne inférieure vers le bas, la borne supérieure vers le ' +
             'haut. Et k s\'arrondit lui aussi dans le sens qui garde la garantie vraie : vers le ' +
             'bas si tu en déduis un pourcentage, vers le haut si tu en déduis un intervalle.',

@@ -28,13 +28,14 @@ export function arrondiUnite(valeur: number): number {
 }
 
 /** Arrondi VERS LE BAS, à l'unité — jamais promettre plus que ce que l'inégalité garantit
- * (pourcentage minimal final, nombre minimal d'individus). */
+ * (pourcentage minimal final). */
 export function arrondiVersLeBas(valeur: number): number {
   return Math.floor(valeur + EPSILON);
 }
 
-/** Arrondi VERS LE HAUT, à l'unité — jamais promettre un intervalle plus étroit que ce que
- * l'inégalité garantit (borne supérieure d'un intervalle final). */
+/** Arrondi VERS LE HAUT, à l'unité — borne supérieure d'un intervalle final (jamais un intervalle
+ * plus étroit que la garantie), et nombre minimal d'individus (un effectif est entier : « au moins
+ * 18,75 » veut dire « au moins 19 »). */
 export function arrondiVersLeHaut(valeur: number): number {
   return Math.ceil(valeur - EPSILON);
 }

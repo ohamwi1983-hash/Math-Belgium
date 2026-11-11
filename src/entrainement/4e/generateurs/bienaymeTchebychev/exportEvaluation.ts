@@ -26,7 +26,7 @@ import {
   PRECISION_INTERVALLE_FINAL,
   PRECISION_K_PAR_DEFAUT,
   PRECISION_UNITE,
-  PRECISION_UNITE_PAR_DEFAUT,
+  PRECISION_NOMBRE_MINIMAL,
   precisionKDepuisPourcent,
   precisionPourcentDepuisNombre,
   precisionPourcentFinal,
@@ -176,7 +176,7 @@ const CONSIGNE_ETAPE: Record<EtapeBT, (instance: ExerciceBienaymeTchebychev) => 
   kPourcent: (i) => `Calcule k à partir du pourcentage minimal (${precisionKDepuisPourcent(i.variante)}).`,
   pourcentFinal: (i) =>
     `Calcule le pourcentage minimal garanti (${precisionPourcentFinal(i.variante === "intervalleVersNombre" ? "intervalleVersNombre" : "intervalleVersPourcent")}).`,
-  nombreFinal: () => `Déduis le nombre minimal d'individus (${PRECISION_UNITE_PAR_DEFAUT}).`,
+  nombreFinal: () => `Déduis le nombre minimal d'individus (${PRECISION_NOMBRE_MINIMAL}).`,
   pourcentDepuisNombre: (i) => `Convertis le nombre minimal donné en pourcentage de l'effectif (${precisionPourcentDepuisNombre(i.variante)}).`,
   intervalleFinal: () => `Calcule les bornes de l'intervalle (${PRECISION_INTERVALLE_FINAL}).`,
   sigma: () => `Calcule l'écart-type σ (${PRECISION_UNITE}).`,
@@ -264,13 +264,13 @@ function etapePourcentFinal(
 }
 
 /** Étape "nombre minimal d'individus" (V3 uniquement, écran final SANS aide sur l'écran interactif
- * — voir le commentaire de tête) : nMinAttendu = ⌊pourcentAttendu / 100 × n⌋, dupliquant fidèlement
- * `arrondiVersLeBas((pourcentAttendu / 100) * n)` de `generateurs/bienaymeTchebychev/index.ts`. */
+ * — voir le commentaire de tête) : nMinAttendu = ⌈pourcentAttendu / 100 × n⌉, dupliquant fidèlement
+ * `arrondiVersLeHaut((pourcentAttendu / 100) * n)` de `generateurs/bienaymeTchebychev/index.ts`. */
 function etapeNombreFinal(instance: ExerciceBienaymeTchebychevIntervalleVersNombre): FragmentConsigne[] {
   return [
     texte("Nombre minimal d'individus : "),
     latex(`\\dfrac{${formatNombreLatex(instance.pourcentAttendu)}}{100}\\times ${formatNombreLatex(instance.n)}`),
-    texte(` — arrondi vers le bas à l'entier inférieur : ${formatNombreAttenduTexte(instance.nMinAttendu)}.`),
+    texte(` — un nombre d'individus est entier, on arrondit donc à l'entier supérieur : ${formatNombreAttenduTexte(instance.nMinAttendu)}.`),
   ];
 }
 
@@ -454,7 +454,7 @@ const PIEGE_ETAPE: Partial<Record<EtapeBT, string>> = {
   kIntervalle: "k se calcule avec la DEMI-largeur de l'intervalle (distance de x̄ à une borne), pas avec sa largeur totale.",
   pourcentFinal: "La proportion garantie est 1 − 1/k², pas 1 − 1/k ; un minimum garanti s'arrondit vers le BAS.",
   intervalleFinal: "Pour garantir le pourcentage, l'intervalle s'arrondit vers l'EXTÉRIEUR (borne inférieure vers le bas, supérieure vers le haut).",
-  nombreFinal: "Un nombre minimal d'individus s'arrondit vers le bas (on ne peut pas garantir une fraction d'individu).",
+  nombreFinal: "Un nombre d'individus est entier : « au moins 18,75 » veut dire « au moins 19 » — on arrondit vers le haut, pas vers le bas.",
 };
 
 function correctionDetailleeBienaymeTchebychev(instance: ExerciceBienaymeTchebychev): EtapeCorrection[] {
@@ -472,7 +472,7 @@ const LIBELLE_CRITERE: Record<EtapeBT, string> = {
   kIntervalle: "k calculé à partir de l'intervalle, bien arrondi",
   kPourcent: "k calculé à partir du pourcentage (1 − 1/k² = p), bien arrondi",
   pourcentFinal: "Pourcentage minimal 1 − 1/k², arrondi dans le bon sens",
-  nombreFinal: "Nombre minimal d'individus, arrondi vers le bas",
+  nombreFinal: "Nombre minimal d'individus, arrondi vers le haut (entier)",
   pourcentDepuisNombre: "Nombre donné converti en pourcentage de l'effectif",
   intervalleFinal: "Intervalle [x̄ − kσ ; x̄ + kσ], bornes arrondies vers l'extérieur",
   sigma: "σ isolé à partir d'une borne, bien arrondi",

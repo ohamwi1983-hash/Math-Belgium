@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerNombre } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
-import { PRECISION_UNITE_PAR_DEFAUT } from "../ui/formatBienaymeTchebychev";
+import { PRECISION_NOMBRE_MINIMAL } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,7 +28,7 @@ export function EtapeNombreFinal({ exercice, tentativesUtilisees, tentativesMax,
 
   return (
     <div>
-      <p className="prompt-text">Quel est le nombre minimal d'individus garanti ? ({PRECISION_UNITE_PAR_DEFAUT})</p>
+      <p className="prompt-text">Quel est le nombre minimal d'individus garanti ? ({PRECISION_NOMBRE_MINIMAL})</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="bienayme-nombre-final">

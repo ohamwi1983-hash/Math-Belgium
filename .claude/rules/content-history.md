@@ -2076,3 +2076,7 @@ paths:
   `tchebychev-garantie-widget` (§ 7), `deux-courbes-cumulees-widget` (§ 8). Question ouverte à l'utilisateur :
   arrondi du nombre minimal d'individus (gen37 et le piège du chapitre arrondissent vers le bas ; vers le
   haut serait exact et plus fort) — l'exemple du chapitre utilise des nombres qui tombent juste.
+  **Tranché ensuite par l'utilisateur** : un nombre minimal d'individus s'arrondit **vers le haut**
+  (c'est un entier : « au moins 18,75 » veut dire « au moins 19 »). gen37 (`nMinAttendu`, écran, aides,
+  corrigé et barème papier) et le piège « Arrondir sans perdre la garantie » suivent ; un pourcentage
+  minimal reste arrondi vers le bas.

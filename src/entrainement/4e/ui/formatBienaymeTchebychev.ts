@@ -109,13 +109,15 @@ export const PRECISION_K_PAR_EXCES = "arrondi au centième par excès, c'est-à-
 export const PRECISION_POURCENT_INTERMEDIAIRE = "arrondi au centième";
 export const PRECISION_UNITE = "arrondi à l'unité";
 export const PRECISION_UNITE_PAR_DEFAUT = "arrondi à l'unité par défaut, c'est-à-dire vers le bas";
+/** Nombre minimal d'individus : un effectif est entier, « au moins 18,75 » veut dire « au moins 19 ». */
+export const PRECISION_NOMBRE_MINIMAL = "arrondi à l'unité vers le haut : un nombre d'individus est entier";
 export const PRECISION_INTERVALLE_FINAL =
   "bornes arrondies à l'unité vers l'extérieur : la borne inférieure vers le bas, la borne supérieure vers le haut";
 
 /** Rappel commun aux aides des écrans où le sens d'arrondi compte (même règle que le bloc
  * « Arrondir sans perdre la garantie » du cours). */
 export const RAPPEL_ARRONDI_GARANTIE =
-  "On arrondit toujours dans le sens qui conserve la garantie : un pourcentage ou un nombre minimal vers le bas, " +
+  "On arrondit toujours dans le sens qui conserve la garantie : un pourcentage minimal vers le bas, un nombre minimal d'individus vers le haut (c'est un entier : au moins 18,75 veut dire au moins 19), " +
   "les bornes d'un intervalle vers l'extérieur, et k vers le bas si on en déduit un pourcentage, vers le haut si on en déduit un intervalle.";
 
 /** k déduit d'un pourcentage : vers le haut quand il sert à construire un intervalle garanti (V2/V4),
