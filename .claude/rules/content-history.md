@@ -2270,3 +2270,23 @@ paths:
   vérifié** : un atelier testé à 390 px de viewport n'a que ~308 px de large dans la page (marges du
   cadre) — vérifier le débordement interne des Shadow DOM dans la vraie page (grille de réglages de
   `somme-vecteurs-widget` corrigée : minmax 150 → 200 px).
+
+- **4e, Chapitre 7 — Géométrie analytique plane** (`geometrie-analytique-plane`) : audit puis
+  enrichissement validé par l'utilisateur (toutes les recommandations). Corrections : point (1,37 ;
+  0,811) de la figure « 2 points » du § 10 hors de la droite et du cercle (→ 0,611), colonne « Équation »
+  du tableau des lieux sans équation pour la parabole (→ y² = 4(x+2)), notation (a ; b) employée à la fois
+  pour le vecteur normal (§ 1) et pour un vecteur directeur (§ 4) → directeurs notés (α ; β) et règle
+  « directeur de ax + by + c = 0 : (−b ; a) » énoncée au § 1, « point aligné avec le centre » → « sur la
+  même horizontale ou verticale », développement du cercle réécrit (D, E, F), condition de m·m′ = −1
+  (aucune droite verticale ni horizontale) + encadré horizontale/verticale, transition finale (ch. 1 et
+  coniques de 6e), quiz du § 11 situé. Ajouts : lecture directe de m et p (§ 2) ; m = −a/b, p = −c/b,
+  pente négative (135°), angle non remarquable (§ 3) ; parallèle par un point, reconnaître la relation
+  (§ 4) ; parallèles ou confondues, droite paramétrique (§ 5) ; distance entre deux parallèles (§ 6) ;
+  figure des deux parallèles à distance r, médiatrice comme lieu + figure (§ 7) ; second membre ≤ 0
+  (pas de cercle), tangente en un point (§ 8) ; p négatif, lien y = ax² du ch. 1 (p = 1/(2a)) (§ 9) ;
+  droite tangente à une parabole, problème à partir de deux phrases, deux cercles (résout le GPS) (§ 10) ;
+  formulaire et checklist. Énoncés par clé (clé `cercle` du § 10 renommée `droite ∩ cercle`, sinon elle
+  aurait capté tout nouveau bloc contenant « cercle » ; section `notion-lieu` ajoutée). Le chapitre
+  n'avait aucun atelier ; 7 créés — `droite-formes-widget` (§ 1), `pente-angle-widget` (§ 3),
+  `relations-droites-widget` (§ 4, défi), `distance-droite-widget` (§ 6), `cercle-equation-widget`
+  (§ 8), `parabole-foyer-widget` (§ 9), `droite-cercle-widget` (§ 10).

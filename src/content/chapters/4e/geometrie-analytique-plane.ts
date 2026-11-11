@@ -1297,6 +1297,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: 'tangente', text: '$3x + 4y - 32 = 0$ — contrôle : $3 \\cdot 4 + 4 \\cdot 5 - 32 = 0$ ✓' },
         },
         {
+          kind: 'atelier',
+          tag: 'cercle-equation-widget',
+          label: 'Manipule toi-même : centre, rayon et équation',
+          caption:
+            'Règle le centre et le rayon, et regarde l\'équation se développer. Ou pars ' +
+            'd\'une équation développée, et complète les carrés pour retrouver le centre et ' +
+            'le rayon. Attention : si le second membre est négatif, ce n\'est pas un cercle. ' +
+            'L\'option « Tangente » trace en un point P la tangente, perpendiculaire au ' +
+            'rayon [CP], avec son équation.',
+        },
+        {
           kind: 'application',
           titre: 'Trouver sa position grâce à trois cercles',
           image: {
@@ -1581,6 +1592,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "tracer l'allure complète à main levée.",
         },
         {
+          kind: 'atelier',
+          tag: 'parabole-foyer-widget',
+          label: 'Manipule toi-même : foyer et directrice',
+          caption:
+            'Déplace le foyer F et la directrice : la parabole est l\'ensemble des points P ' +
+            'tels que PF = PH, H étant le pied de la perpendiculaire menée de P à la ' +
+            'directrice. Le sommet S est au milieu, et p — le double de l\'écart entre S et ' +
+            'F — est signé : négatif, la parabole s\'ouvre de l\'autre côté. Coche « ' +
+            'Construction au compas » pour voir un cercle de centre F et une parallèle à la ' +
+            'directrice se couper sur la parabole.',
+        },
+        {
           kind: 'entrainement',
           title: 'Équation depuis un graphe',
           generatorId: 'gen51',
@@ -1724,6 +1747,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'deux solutions', text: '$x=2$ ou $x=-1$, puis $y=x$ pour chacune' },
           ],
           result: { tag: "points d'intersection", text: '(2 ; 2) et (−1 ; −1)' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'droite-cercle-widget',
+          label: 'Manipule toi-même : droite et cercle',
+          caption:
+            'Règle le cercle et la droite : en remplaçant y par mx + p dans l\'équation du ' +
+            'cercle, on obtient une équation du second degré. Son discriminant Δ décide de ' +
+            'tout : Δ < 0, aucun point commun ; Δ = 0, la droite est tangente ; Δ > 0, deux ' +
+            'points, dont on calcule les coordonnées. Le réglage de départ reproduit ' +
+            'l\'exemple ci-dessus.',
         },
         {
           kind: 'exemple',
