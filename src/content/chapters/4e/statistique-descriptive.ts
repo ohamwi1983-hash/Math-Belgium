@@ -120,6 +120,45 @@ export const statistiqueDescriptive: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            'Pour représenter une série **discrète**, on trace un **diagramme en bâtons** : un ' +
+            'bâton vertical au-dessus de chaque valeur xᵢ, de hauteur nᵢ. Les bâtons restent ' +
+            '**séparés**, parce que le caractère ne prend que des valeurs isolées (on ne lit jamais ' +
+            '5,5 livres). C\'est la grande différence avec l\'**histogramme** de la section 2 : ses ' +
+            'barres sont **accolées**, parce qu\'elles couvrent des classes, des intervalles qui se ' +
+            'suivent sans trou.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [],
+            shadedRegions: [
+              { from: 2.8, to: 3.2, upper: () => 6, tone: 'accent' },
+              { from: 4.8, to: 5.2, upper: () => 7, tone: 'accent' },
+              { from: 6.8, to: 7.2, upper: () => 4, tone: 'accent' },
+              { from: 11.8, to: 12.2, upper: () => 3, tone: 'accent' },
+            ],
+            points: [
+              { x: 3, y: 6, label: '', tone: 'accent' },
+              { x: 5, y: 7, label: '', tone: 'accent' },
+              { x: 7, y: 4, label: '', tone: 'accent' },
+              { x: 12, y: 3, label: '', tone: 'accent' },
+            ],
+            xMin: 0,
+            xMax: 13.5,
+            xTicks: [3, 5, 7, 12],
+            yTicks: [3, 4, 6, 7],
+            fixedYRange: { min: 0, max: 8.5 },
+            xAxisLabel: 'livres lus',
+            yAxisLabel: 'effectif',
+            caption:
+              'Diagramme en bâtons de la série des livres : un bâton par valeur (3, 5, 7, 12), de ' +
+              'hauteur 6, 7, 4, 3 — les bâtons ne se touchent pas.',
+          },
+        },
+        {
           kind: 'astuce',
           label: 'Vérifier son tableau en un coup d\'œil',
           text:
@@ -182,6 +221,25 @@ export const statistiqueDescriptive: ChapterContent = {
             'sur une frontière appartient toujours à la classe **suivante**. Seule exception : ' +
             'la **toute dernière classe** du tableau inclut aussi sa borne supérieure, pour ne ' +
             'perdre aucune donnée.',
+        },
+        {
+          kind: 'methode',
+          label: 'Choisir ses classes',
+          items: [
+            'Calcule l\'**étendue** de la série : max − min.',
+            'Choisis le **nombre de classes** : en pratique entre 5 et 8. Moins quand il y a peu ' +
+              'de données.',
+            'Divise l\'étendue par ce nombre, puis arrondis **vers le haut** à une valeur « ronde » : ' +
+              'c\'est l\'**amplitude**.',
+            'Fais commencer la première classe à une valeur ronde, inférieure ou égale au minimum.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Sur l\'exemple ci-dessous : min = 0,5 et max = 8, donc étendue = 7,5. Avec seulement ' +
+            '20 données, 4 classes suffisent : 7,5/4 = 1,875, arrondi à **2**. On démarre à 0 : ' +
+            '[0 ; 2[, [2 ; 4[, [4 ; 6[, [6 ; 8].',
         },
         {
           kind: 'exemple',
@@ -338,22 +396,49 @@ export const statistiqueDescriptive: ChapterContent = {
           ],
         },
         {
-          kind: 'methode',
-          label: 'Données regroupées en classes',
-          items: [
-            'Pour des données en classes, on utilise le **centre de chaque classe** comme ' +
-              'représentant de toute la classe. C\'est la moyenne de ses deux bornes. Sur le ' +
-              'même exemple, avec les classes [0;4[/[4;8[/[8;12[/[12;16[ (mêmes effectifs ' +
-              '5/8/4/3) : les centres sont 2/6/10/14, les produits 10, 48, 40, 42, la somme 140 ' +
-              '→ $\\bar{x} = 140/20 = 7$.',
-          ],
-        },
-        {
           kind: 'piege',
           text:
             'Ne fais **jamais** la moyenne des valeurs distinctes seules ! Ici, ça donnerait ' +
             '$(2+6+9+12)/4 = 7{,}25$. Cette erreur ignore complètement les effectifs. Elle ' +
             'donne un résultat faux dès que les effectifs ne sont pas tous égaux.',
+        },
+        {
+          kind: 'methode',
+          label: 'Données regroupées en classes',
+          items: [
+            'On ne connaît plus chaque valeur : on utilise le **centre** de chaque classe, la ' +
+              'moyenne de ses deux bornes. Pour la classe $[a\\,;\\,b[$, c\'est $\\dfrac{a+b}{2}$. Il ' +
+              'représente toute la classe dans le calcul.',
+            'C\'est une **approximation** : on fait comme si toutes les valeurs de la classe ' +
+              'étaient au centre. La vraie moyenne des données brutes peut être un peu différente.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — données en classes',
+          blocks: [
+            {
+              kind: 'featureTable',
+              headers: ['Classe', 'Centre xᵢ', 'nᵢ', 'xᵢ·nᵢ'],
+              rows: [
+                ['[0 ; 4[', '2', '5', '10'],
+                ['[4 ; 8[', '6', '8', '48'],
+                ['[8 ; 12[', '10', '4', '40'],
+                ['[12 ; 16[', '14', '3', '42'],
+              ],
+            },
+            { kind: 'para', text: 'Somme des produits : $10+48+40+42=140$. Effectif total : $n=20$.' },
+            { kind: 'para', text: 'Moyenne : $\\bar{x} = 140/20 = 7$ — une valeur approchée.' },
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Avec les fréquences',
+          text:
+            'Si le tableau donne les **fréquences** fᵢ (en nombre décimal) au lieu des effectifs, la ' +
+            'formule devient $\\bar{x} = \\Sigma(x_i \\cdot f_i)$. Plus besoin de diviser : la somme ' +
+            'des fréquences vaut déjà 1. Sur l\'exemple discret : $2 \\cdot 0{,}25 + 6 \\cdot 0{,}4 + ' +
+            '9 \\cdot 0{,}2 + 12 \\cdot 0{,}15 = 6{,}5$ — la même moyenne.',
         },
         {
           kind: 'historique',
@@ -466,10 +551,92 @@ export const statistiqueDescriptive: ChapterContent = {
             'le dépasse la PREMIÈRE en vert. Avec les réglages par défaut et Q1 sélectionné, tu es ' +
             'exactement dans le cas-piège du texte (cumulé=5=seuil pile).',
         },
+        { kind: 'subheading', text: 'Données en classes : le polygone des effectifs cumulés' },
+        {
+          kind: 'para',
+          text:
+            'Avec des classes, on ne connaît plus chaque valeur. On trace alors le **polygone des ' +
+            'effectifs cumulés**. Chaque point a pour abscisse la **borne supérieure** d\'une ' +
+            'classe, et pour ordonnée l\'effectif cumulé de cette classe : à la fin de la classe ' +
+            '[4 ; 8[, on a déjà compté 13 données. On part de 0, sur la borne inférieure de la ' +
+            'toute première classe. Puis on relie les points par des segments.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Classe', 'nᵢ', 'nᵢ cumulé', 'Point du polygone'],
+          rows: [
+            ['départ', '', '0', '(0 ; 0)'],
+            ['[0 ; 4[', '5', '5', '(4 ; 5)'],
+            ['[4 ; 8[', '8', '13', '(8 ; 13)'],
+            ['[8 ; 12[', '4', '17', '(12 ; 17)'],
+            ['[12 ; 16[', '3', '20', '(16 ; 20)'],
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — lire la médiane sur le polygone',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Seuil de la médiane : $n/2 = 10$. On part de 10 sur l\'axe des effectifs, on va ' +
+                'jusqu\'au polygone, puis on descend sur l\'axe des valeurs.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [
+                  {
+                    fn: (x) => (x <= 4 ? (5 * x) / 4 : x <= 8 ? 5 + 2 * (x - 4) : x <= 12 ? 13 + x - 8 : 17 + (3 * (x - 12)) / 4),
+                    tone: 'accent',
+                    xMin: 0,
+                    xMax: 16,
+                  },
+                ],
+                shadedRegions: [
+                  { from: 4, to: 8, upper: (x) => 5 + 2 * (x - 4), lower: () => 5, tone: 'good' },
+                ],
+                horizontalAsymptotes: [{ y: 10, label: 'seuil 10' }],
+                axisOfSymmetry: { x: 6.5, label: 'médiane ≈ 6,5' },
+                points: [
+                  { x: 4, y: 5, label: '', tone: 'accent' },
+                  { x: 8, y: 13, label: '', tone: 'accent' },
+                  { x: 12, y: 17, label: '', tone: 'accent' },
+                  { x: 16, y: 20, label: '', tone: 'accent' },
+                  { x: 6.5, y: 10, label: '', tone: 'bad' },
+                ],
+                xMin: 0,
+                xMax: 17,
+                xTicks: [4, 6.5, 8, 12, 16],
+                xTickLabels: { 6.5: '6,5' },
+                yTicks: [5, 13, 17, 20],
+                fixedYRange: { min: 0, max: 22 },
+                xAxisLabel: 'valeur',
+                yAxisLabel: 'effectif cumulé',
+                caption:
+                  'Polygone des effectifs cumulés : le seuil 10 coupe le segment de (4 ; 5) à (8 ; 13), ' +
+                  'donc dans la classe [4 ; 8[. On lit médiane ≈ 6,5. Le triangle vert montre la ' +
+                  'proportionnalité utilisée par le calcul juste en dessous.',
+              },
+            },
+            {
+              kind: 'para',
+              text:
+                'Le seuil 10 tombe sur le segment qui relie $(4\\,;\\,5)$ et $(8\\,;\\,13)$ : la médiane ' +
+                'est dans la classe [4 ; 8[. On lit environ **6,5**.',
+            },
+          ],
+        },
         {
           kind: 'methode',
           label: 'Données regroupées en classes : interpolation',
           items: [
+            'La lecture sur le polygone se calcule exactement. Sur le segment de la classe, ' +
+              'l\'effectif cumulé monte de $n_{classe}$ pendant que la valeur avance d\'une ' +
+              'amplitude : c\'est une situation de **proportionnalité** (le triangle vert). Pour ' +
+              'monter de $\\text{seuil} - CF_{avant}$, il faut donc avancer de ' +
+              '$\\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$.',
             'D\'abord, repère la **classe** où le seuil tombe, comme ci-dessus. Ensuite, ' +
               'trouve la valeur exacte par interpolation linéaire le long de cette classe : ' +
               '$\\text{valeur} = L + \\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$. ' +
@@ -493,6 +660,20 @@ export const statistiqueDescriptive: ChapterContent = {
           formula: '1,8 — 1,8 — 2,6 — 2,6 — 2,6 — 2,6 — 2,7 — 2,9 — 3,0 — 3,1 — 3,1 — 3,1 — 3,3 — 3,3 — 3,5 — 3,9 — 4,0 — 4,1 — 4,1 — 4,3',
           steps: [{ tag: 'une fois triée', text: 'la valeur qui revient le plus souvent saute aux yeux : 2,6 apparaît 4 fois, plus qu\'aucune autre' }],
           result: { tag: 'mode', text: '2,6' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'classe modale',
+          formula: 'Classes [0 ; 4[, [4 ; 8[, [8 ; 12[, [12 ; 16[ — effectifs 5, 8, 4, 3',
+          steps: [{ tag: 'plus grand effectif', text: '8, pour la classe [4 ; 8[' }],
+          result: { tag: 'classe modale', text: '[4 ; 8[ — pour des données en classes, le mode est une classe, pas un nombre' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux modes',
+          formula: '2 — 3 — 3 — 3 — 5 — 6 — 7 — 7 — 7 — 9',
+          steps: [{ tag: 'compter', text: '3 et 7 apparaissent chacun 3 fois — aucune autre valeur n\'apparaît autant' }],
+          result: { tag: 'série bimodale', text: 'deux modes : 3 et 7 — une série peut avoir plusieurs modes' },
         },
         {
           kind: 'methode',
@@ -597,13 +778,49 @@ export const statistiqueDescriptive: ChapterContent = {
             '**moustaches**, elles, s\'étendent jusqu\'au minimum et au maximum.',
         },
         {
+          kind: 'para',
+          text:
+            'Reprends la série des sections 3 et 4 (valeurs 2, 6, 9, 12 ; effectifs 5, 8, 4, 3). Tu y ' +
+            'as déjà trouvé les cinq nombres : min = 2, Q1 = 6, médiane = 6, Q3 = 9, max = 12. Il ' +
+            'ne reste qu\'à les placer sur un axe.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'boxPlot',
-            series: [{ min: 2, q1: 5, median: 8, q3: 12, max: 15 }],
+            series: [{ min: 2, q1: 6, median: 6, q3: 9, max: 12 }],
             xAxisLabel: 'x',
-            caption: 'min=2, Q1=5, médiane=8, Q3=12, max=15 — boîte = [Q1;Q3], moustaches jusqu\'aux extrêmes',
+            caption:
+              'La série des sections 3 et 4 : min=2, Q1=6, médiane=6, Q3=9, max=12 — boîte = ' +
+              '[Q1;Q3], moustaches jusqu\'aux extrêmes. Ici, la médiane est collée au bord gauche de la boîte.',
           },
+        },
+        {
+          kind: 'definition',
+          label: 'Écart interquartile',
+          items: [
+            'L\'**écart interquartile** est la largeur de la boîte : $Q_3 - Q_1$.',
+            'Sur l\'exemple : $9 - 6 = 3$. La moitié centrale de la série tient dans un intervalle de ' +
+              'longueur 3.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'La boîte et les moustaches découpent la série en **quatre parties** : moustache ' +
+            'gauche, moitié gauche de la boîte, moitié droite, moustache droite. Chacune contient ' +
+            'environ **25 %** des valeurs — même si leurs longueurs sont très différentes ! Une ' +
+            'partie courte veut dire que ses valeurs sont **serrées**, une partie longue qu\'elles ' +
+            'sont **étalées**.',
+        },
+        {
+          kind: 'astuce',
+          label: 'Lire l\'asymétrie',
+          text:
+            'Si la médiane est au milieu de la boîte et que les moustaches ont la même longueur, la ' +
+            'série est à peu près **symétrique**. Ici, la médiane est collée au bord gauche (Q1 = ' +
+            'médiane = 6) : beaucoup de valeurs sont regroupées à 6, et la partie droite est plus ' +
+            'étalée. La série est **asymétrique**, étirée vers les grandes valeurs.',
         },
         {
           kind: 'methode',
@@ -640,6 +857,17 @@ export const statistiqueDescriptive: ChapterContent = {
             'représentative, parce que les valeurs sont beaucoup plus dispersées autour ' +
             'd\'elle. Sur l\'exemple ci-dessus, la médiane de B (la boîte la plus étroite) est ' +
             'donc la plus représentative des deux.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Le statisticien qui dessinait des boîtes',
+          text:
+            'La boîte à moustaches a été inventée par le statisticien américain **John Tukey**, ' +
+            'vers 1970. Il l\'a rendue célèbre en 1977 dans son livre « Exploratory Data Analysis » ' +
+            '(l\'analyse exploratoire des données). Son idée : avant de se lancer dans de longs ' +
+            'calculs, il faut **regarder** les données, avec des dessins simples qu\'on trace à la ' +
+            'main en quelques minutes. On doit aussi à Tukey le mot « bit », l\'unité ' +
+            'd\'information de l\'informatique.',
         },
         {
           kind: 'entrainement',
@@ -718,6 +946,36 @@ export const statistiqueDescriptive: ChapterContent = {
               'racine carrée de la variance **déjà arrondie à 2 décimales** — jamais depuis le ' +
               'rapport non arrondi. Respecte bien cet ordre : c\'est nécessaire pour retomber ' +
               'exactement sur la valeur vérifiée par le générateur !',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Avec la calculatrice',
+          text:
+            'En mode statistique, ta calculatrice affiche souvent **deux** écarts-types : σx (ou σn) ' +
+            'et sx (ou σn−1). Sur cette plateforme, prends toujours **σx** : il divise par n, comme ' +
+            'la formule de cette section. sx divise par n − 1 et donne une valeur un peu plus ' +
+            'grande — il sert à d\'autres usages, plus tard. Attention aussi : la calculatrice ' +
+            'calcule σx à partir de la variance non arrondie. Pour retomber sur la valeur du ' +
+            'générateur, arrondis d\'abord la variance à 2 décimales, puis prends sa racine.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — la série des sections 3 et 4',
+          blocks: [
+            { kind: 'para', text: 'Moyenne trouvée à la section 3 : $\\bar{x} = 6{,}5$.' },
+            {
+              kind: 'featureTable',
+              headers: ['xᵢ', 'nᵢ', '(xᵢ−x̄)²·nᵢ'],
+              rows: [
+                ['2', '5', '(2−6,5)²×5 = 101,25'],
+                ['6', '8', '(6−6,5)²×8 = 2'],
+                ['9', '4', '(9−6,5)²×4 = 25'],
+                ['12', '3', '(12−6,5)²×3 = 90,75'],
+              ],
+            },
+            { kind: 'para', text: 'Somme : $101{,}25+2+25+90{,}75=219$, $n=20$. Variance : $V = 219/20 = 10{,}95$.' },
+            { kind: 'para', text: 'Écart-type : $\\sqrt{10{,}95} \\approx 3{,}31$.' },
           ],
         },
         {
@@ -875,6 +1133,50 @@ export const statistiqueDescriptive: ChapterContent = {
           result: { tag: 'résultat', text: 'c\'est dans l\'intervalle $[\\bar{x}-\\sqrt{20}\\sigma\\,;\\,\\bar{x}+\\sqrt{20}\\sigma]$ qu\'il y a au moins 95 % des valeurs' },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — 40 élèves, une garantie souvent dépassée',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Une classe de 40 élèves a obtenu une moyenne $\\bar{x}=12$, avec un écart-type ' +
+                '$\\sigma=2$. Au moins combien d\'élèves ont une note entre 8 et 16 ?',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — retrouver k.** L\'intervalle [8 ; 16] s\'écrit ' +
+                '$[12-2 \\cdot 2\\,;\\,12+2 \\cdot 2]$ : on est à 2 écarts-types de la moyenne, donc ' +
+                '$k=2$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — appliquer l\'inégalité.** Au moins $1-1/2^2 = 75\\,\\%$ des élèves sont ' +
+                'dans l\'intervalle : au moins $0{,}75 \\cdot 40 = 30$ élèves.',
+            },
+            { kind: 'para', text: '**Étape 3 — comparer avec la réalité.** Voici les vraies notes de la classe :' },
+            {
+              kind: 'featureTable',
+              headers: ['Note', '6', '10', '12', '14', '18'],
+              rows: [['Effectif', '1', '11', '16', '11', '1']],
+            },
+            {
+              kind: 'para',
+              text:
+                'On vérifie : $\\bar{x} = 480/40 = 12$ et $V = (36+44+0+44+36)/40 = 4$, donc ' +
+                '$\\sigma=2$ ✓. Entre 8 et 16, on trouve $11+16+11 = 38$ élèves, soit 95 % — bien plus ' +
+                'que les 30 garantis.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Bienaymé-Tchebychev ne connaît pas la forme de la série : sa garantie doit marcher ' +
+                'pour **toutes** les séries. C\'est pour ça qu\'elle est souvent pessimiste.',
+            },
+          ],
+        },
+        {
           kind: 'astuce',
           label: 'Retrouver la moyenne',
           text:
@@ -892,6 +1194,17 @@ export const statistiqueDescriptive: ChapterContent = {
             '**vers l\'extérieur** : la borne inférieure vers le bas, la borne supérieure vers le ' +
             'haut. Et k s\'arrondit lui aussi dans le sens qui garde la garantie vraie : vers le ' +
             'bas si tu en déduis un pourcentage, vers le haut si tu en déduis un intervalle.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Deux mathématiciens, une même inégalité',
+          text:
+            'Cette inégalité porte deux noms parce qu\'elle a été trouvée **deux fois**, de façon ' +
+            'indépendante. Le Français **Irénée-Jules Bienaymé** la publie en 1853. Le Russe ' +
+            '**Pafnouti Tchebychev** la redécouvre et la démontre à sa manière en 1867. ' +
+            'Tchebychev a ensuite reconnu que Bienaymé l\'avait trouvée avant lui. Son point fort ' +
+            'n\'a pas changé depuis : elle marche pour n\'importe quelle série, sans rien savoir de ' +
+            'sa forme.',
         },
         {
           kind: 'entrainement',
@@ -927,21 +1240,81 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'illustration',
           illustration: {
-            kind: 'sequencePlot',
-            points: [
-              { n: 0, value: 0, label: '' },
-              { n: 3, value: 6, label: '' },
-              { n: 5, value: 13, label: '' },
-              { n: 7, value: 17, label: '' },
-              { n: 12, value: 20, label: '' },
-              { n: 15, value: 20, label: '' },
+            kind: 'curvePlot',
+            curves: [
+              {
+                fn: (x) => {
+                  const pts: [number, number][] = [[4, 0], [6, 1], [8, 4], [10, 10], [12, 15], [14, 18], [16, 20]]
+                  for (let i = 1; i < pts.length; i++) {
+                    const [x0, y0] = pts[i - 1]
+                    const [x1, y1] = pts[i]
+                    if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0)
+                  }
+                  return 20
+                },
+                tone: 'accent',
+                xMin: 4,
+                xMax: 16,
+              },
+              {
+                fn: (x) => {
+                  const pts: [number, number][] = [[4, 0], [6, 3], [8, 9], [10, 13], [12, 15], [14, 19], [16, 20]]
+                  for (let i = 1; i < pts.length; i++) {
+                    const [x0, y0] = pts[i - 1]
+                    const [x1, y1] = pts[i]
+                    if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0)
+                  }
+                  return 20
+                },
+                tone: 'good',
+                xMin: 4,
+                xMax: 16,
+              },
             ],
-            connector: 'straight',
-            highlightPoint: { index: 3, xLabel: '7', yLabel: '17' },
-            yTicks: [5, 10, 15, 20],
-            xAxisLabel: 'valeur',
+            axisOfSymmetry: { x: 10, label: 'note 10' },
+            horizontalAsymptotes: [{ y: 10 }, { y: 13 }],
+            points: [
+              { x: 10, y: 10, label: '', tone: 'accent' },
+              { x: 10, y: 13, label: '', tone: 'good' },
+            ],
+            textLabels: [
+              { x: 9.2, y: 4.2, text: 'groupe A', tone: 'accent', anchor: 'start' },
+              { x: 6.6, y: 7.6, text: 'groupe B', tone: 'good', anchor: 'end' },
+            ],
+            xMin: 0,
+            xMax: 17,
+            xTicks: [4, 6, 8, 10, 12, 14, 16],
+            yTicks: [5, 10, 13, 15, 20],
+            fixedYRange: { min: 0, max: 22 },
+            xAxisLabel: 'note',
             yAxisLabel: 'effectif cumulé',
-            caption: 'lecture d\'un seuil : à x=7, l\'effectif cumulé lu sur la courbe vaut 17. Même principe pour superposer deux courbes et comparer deux séries',
+            caption:
+              'Notes sur 20 de deux groupes de 20 élèves (effectifs pour les notes 6, 8, 10, 12, 14, 16 : ' +
+              'A = 1, 3, 6, 5, 3, 2 ; B = 3, 6, 4, 2, 4, 1). À la note 10, on lit 10 élèves pour A, ' +
+              'mais 13 pour B : le groupe B compte plus d\'élèves à 10 ou moins.',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Les mêmes séries, résumées par leurs boîtes à moustaches (règle du seuil). Groupe A : ' +
+            'min 6, Q1 = 10, médiane 12, Q3 = 14, max 16. Groupe B : min 6, Q1 = 8, médiane 10, ' +
+            'Q3 = 14, max 16. Le groupe A a la médiane la plus grande **et** la boîte la plus ' +
+            'étroite : il réussit mieux, et de façon plus homogène.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'boxPlot',
+            series: [
+              { label: 'A', min: 6, q1: 10, median: 12, q3: 14, max: 16, tone: 'accent', iqrLabel: 'Q3 − Q1 = 4' },
+              { label: 'B', min: 6, q1: 8, median: 10, q3: 14, max: 16, tone: 'good', iqrLabel: 'Q3 − Q1 = 6' },
+            ],
+            xAxisLabel: 'note',
+            ticks: [4, 6, 8, 10, 12, 14, 16, 18],
+            caption:
+              'Groupe A : médiane 12, écart interquartile 4 — groupe B : médiane 10, écart ' +
+              'interquartile 6. Même minimum et même maximum, mais pas du tout la même répartition.',
           },
         },
         {
@@ -1086,6 +1459,8 @@ export const statistiqueDescriptive: ChapterContent = {
         formulas: [
           { text: '$n_i$ = effectif de $x_i$, $n=\\Sigma n_i$' },
           { text: '$f_i = n_i/n$', condition: 'souvent exprimée en %' },
+          { text: 'centre de la classe $[a\\,;\\,b[$ : $\\dfrac{a+b}{2}$' },
+          { text: 'amplitude de la classe $[a\\,;\\,b[$ : $b-a$' },
         ],
       },
       {
@@ -1093,6 +1468,14 @@ export const statistiqueDescriptive: ChapterContent = {
         formulas: [
           { text: '$\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}$' },
           { text: '$x_i$ = centre de la classe', condition: 'données regroupées en classes' },
+          { text: '$\\bar{x} = \\Sigma(x_i \\cdot f_i)$', condition: 'avec les fréquences en nombre décimal' },
+        ],
+      },
+      {
+        title: 'Boîte à moustaches',
+        formulas: [
+          { text: '5 nombres : min, $Q_1$, médiane, $Q_3$, max' },
+          { text: 'écart interquartile $= Q_3 - Q_1$', condition: 'largeur de la boîte' },
         ],
       },
       {
@@ -1155,10 +1538,15 @@ export const statistiqueDescriptive: ChapterContent = {
         'valeurs distinctes seules.',
       '**Position** — médiane/Q1/Q3 = première valeur dont l\'effectif cumulé dépasse ' +
         '**strictement** le seuil (n/2, n/4, 3n/4). Interpolation linéaire pour des classes.',
+      '**Boîte à moustaches** — 5 nombres : min, Q1, médiane, Q3, max. Écart interquartile = ' +
+        'Q3 − Q1, la largeur de la boîte. Chaque partie contient environ 25 % des valeurs ; une ' +
+        'médiane décentrée signale une série asymétrique.',
       '**Dispersion** — étendue = max−min. Variance = $\\Sigma(x_i-\\bar{x})^2 \\cdot n_i/n$, ' +
         'division par n. Écart-type = √variance, calculé depuis la variance déjà arrondie.',
       '**Bienaymé-Tchebychev** — au moins (1−1/k²)×100% des valeurs dans ' +
         '$[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$, pour k>1 (k=2 → au moins 75%).',
+      '**Comparer deux séries** — centrage (les médianes), dispersion (écart-type ou écart ' +
+        'interquartile), lecture d\'un seuil sur les courbes cumulées, puis une phrase de conclusion.',
     ],
     checklist: {
       items: [
@@ -1168,11 +1556,12 @@ export const statistiqueDescriptive: ChapterContent = {
           'jamais celle qui l\'atteint tout juste ?',
         'Ai-je divisé la somme des carrés d\'écarts par n, pas par n−1 ?',
         'Ai-je calculé l\'écart-type à partir de la variance déjà arrondie ?',
+        'Sur ma calculatrice, ai-je lu σx (division par n), et pas sx ?',
       ],
     },
     forward:
       'Moyenne, médiane et écart-type reviennent tels quels dans le chapitre sur les ' +
-      'statistiques à deux variables et la corrélation. Ce sont les briques de base : tout le ' +
+      'statistiques à deux variables et la corrélation (chapitre 6 de 5e). Ce sont les briques de base : tout le ' +
       'reste s\'appuie dessus.',
   },
 }

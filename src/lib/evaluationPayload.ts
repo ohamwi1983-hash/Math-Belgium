@@ -701,17 +701,23 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   moyenne: [
     { cle: 'données discrètes', enonce: "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$." },
+    { cle: 'données en classes', enonce: "Calcule une valeur approchée de la moyenne d'une série regroupée en classes $[0\\,;\\,4[$, $[4\\,;\\,8[$, $[8\\,;\\,12[$ et $[12\\,;\\,16[$, d'effectifs respectifs 5, 8, 4 et 3, en utilisant le centre de chaque classe." },
   ],
   position: [
     { cle: 'données discrètes, n = 20', enonce: "Détermine la médiane, le premier quartile $Q_1$ et le troisième quartile $Q_3$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$ (effectif total $n=20$), à l'aide de la règle du seuil strictement dépassé sur les effectifs cumulés." },
     { cle: 'liste brute ordonnée', enonce: "Détermine le mode de la série ordonnée suivante : 1,8 ; 1,8 ; 2,6 ; 2,6 ; 2,6 ; 2,6 ; 2,7 ; 2,9 ; 3,0 ; 3,1 ; 3,1 ; 3,1 ; 3,3 ; 3,3 ; 3,5 ; 3,9 ; 4,0 ; 4,1 ; 4,1 ; 4,3." },
+    { cle: 'lire la médiane sur le polygone', enonce: "Une série est regroupée en classes $[0\\,;\\,4[$, $[4\\,;\\,8[$, $[8\\,;\\,12[$ et $[12\\,;\\,16[$, d'effectifs respectifs 5, 8, 4 et 3. Trace le polygone des effectifs cumulés, puis lis graphiquement la médiane." },
+    { cle: 'classe modale', enonce: "Détermine la classe modale d'une série regroupée en classes $[0\\,;\\,4[$, $[4\\,;\\,8[$, $[8\\,;\\,12[$ et $[12\\,;\\,16[$, d'effectifs respectifs 5, 8, 4 et 3." },
+    { cle: 'deux modes', enonce: "Détermine le ou les modes de la série : 2 ; 3 ; 3 ; 3 ; 5 ; 6 ; 7 ; 7 ; 7 ; 9." },
   ],
   dispersion: [
     { cle: 'x̄ donné, n = 24', enonce: "Calcule la variance puis l'écart-type de la série de valeurs $x_i=6,8,12,14$ et d'effectifs respectifs $n_i=5,8,4,7$ (effectif total $n=24$), sachant que $\\bar{x}=10$." },
+    { cle: 'la série des sections 3 et 4', enonce: "Calcule la variance puis l'écart-type de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$, sachant que $\\bar{x}=6{,}5$ (écart-type au centième, à partir de la variance arrondie à 2 décimales)." },
   ],
   tchebychev: [
     { cle: 'k = 2', enonce: "À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine le pourcentage minimal des valeurs d'une série qui se trouvent dans l'intervalle $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$." },
     { cle: 'à partir du pourcentage', enonce: "On veut qu'au moins 95 % des valeurs d'une série se trouvent dans l'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$. À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine la valeur de k à utiliser." },
+    { cle: '40 élèves', enonce: "Une classe de 40 élèves a obtenu une moyenne de 12 avec un écart-type de 2. À l'aide de l'inégalité de Bienaymé-Tchebychev, détermine le nombre minimal d'élèves dont la note est comprise entre 8 et 16." },
   ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le

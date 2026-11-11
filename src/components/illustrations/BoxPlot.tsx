@@ -54,13 +54,24 @@ export function BoxPlot({ series, xAxisLabel, ticks }: Props) {
             )}
             {single && (
               <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" textAnchor="middle">
-                {[
-                  ['min', s.min],
-                  ['Q1', s.q1],
-                  ['méd', s.median],
-                  ['Q3', s.q3],
-                  ['max', s.max],
-                ].map(([lbl, val]) => (
+                {/* Deux des 5 nombres égaux (ex. Q1 = médiane) : une seule étiquette « Q1=méd=6 »,
+                    jamais deux textes superposés au même endroit. */}
+                {(
+                  [
+                    ['min', s.min],
+                    ['Q1', s.q1],
+                    ['méd', s.median],
+                    ['Q3', s.q3],
+                    ['max', s.max],
+                  ] as [string, number][]
+                )
+                  .reduce<[string, number][]>((acc, [lbl, val]) => {
+                    const dernier = acc[acc.length - 1]
+                    if (dernier && dernier[1] === val) dernier[0] = `${dernier[0]}=${lbl}`
+                    else acc.push([lbl, val])
+                    return acc
+                  }, [])
+                  .map(([lbl, val]) => (
                   <g key={lbl}>
                     <line x1={xScale(val as number)} y1={cy - BOX_HALF - 6} x2={xScale(val as number)} y2={axisY} className="svg-faint" strokeWidth="1.2" />
                     <text x={xScale(val as number)} y={axisY + 16}>
