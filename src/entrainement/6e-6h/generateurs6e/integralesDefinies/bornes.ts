@@ -46,31 +46,88 @@ function balayageFin(primitive: ExerciceCalculPrimitives): number[] {
   return points;
 }
 
-/** Choisit 2 bornes DISTINCTES, valides (F finie aux 2 points), a<b — voir en-tête de fichier. */
-export function choisirBornesValides(primitive: ExerciceCalculPrimitives): [number, number] {
-  const magnitudeSure = primitiveEstAMagnitudeSure(primitive);
-  const pool = magnitudeSure ? [...CANDIDATS_ENTIERS, ...CANDIDATS_FRACTIONS] : [...CANDIDATS_FRACTIONS];
-  const valides = pool.filter((x) => estFini(primitive.primitiveReference(x)));
-  const entiers = valides.filter((x) => Number.isInteger(x));
-  let finalPool = entiers.length >= 2 ? entiers : valides;
-  if (finalPool.length < 2) {
-    finalPool = balayageFin(primitive);
+/**
+ * Audit du chapitre 4 (P1) : avec le seul test « F(a) et F(b) finis », 19 à 61 % des tirages de
+ * certaines variantes plaçaient un PÔLE de f entre les bornes (ex. ∫₋₃³ 1/(x−2) dx « calculée »
+ * par ln|1| − ln|5|), une intégrale qui n'existe pas. On vérifie désormais l'intégrande sur TOUT
+ * [a ; b] :
+ * - balayage fin (pas ≤ 0,005) : f finie et |f| < 10⁴ (au-delà, on considère qu'on frôle un pôle) ;
+ * - toutes les fractions p/q (q ≤ 6) de [a ; b], où tombent les pôles des sous-types empruntés ;
+ * - changement de signe entre deux points du balayage : bissection, et pôle si |f| explose ;
+ * - bornes elles-mêmes dans le domaine (arcsin : u strictement entre −1 et 1, sinon f infinie).
+ */
+const SEUIL_POLE = 1e4;
+
+function valeurSure(f: (x: number) => number, x: number): boolean {
+  const v = f(x);
+  return Number.isFinite(v) && Math.abs(v) < SEUIL_POLE;
+}
+
+export function intervalleSansSingularite(primitive: ExerciceCalculPrimitives, a: number, b: number): boolean {
+  const f = primitive.integrandeReference;
+  if (!estFini(primitive.primitiveReference(a)) || !estFini(primitive.primitiveReference(b))) return false;
+  const pas = Math.min(0.005, (b - a) / 400);
+  let precedent = f(a);
+  if (!valeurSure(f, a)) return false;
+  for (let x = a + pas; x < b + pas / 2; x += pas) {
+    const xx = Math.min(x, b);
+    const v = f(xx);
+    if (!Number.isFinite(v) || Math.abs(v) >= SEUIL_POLE) return false;
+    if (v !== 0 && precedent !== 0 && Math.sign(v) !== Math.sign(precedent)) {
+      let g = xx - pas;
+      let d = xx;
+      for (let i = 0; i < 60; i++) {
+        const m = (g + d) / 2;
+        if (Math.sign(f(m)) === Math.sign(precedent)) g = m;
+        else d = m;
+      }
+      if (!valeurSure(f, (g + d) / 2)) return false;
+    }
+    precedent = v;
   }
-  if (finalPool.length < 2) {
+  for (let q = 1; q <= 6; q++) {
+    for (let p = Math.ceil(a * q); p <= Math.floor(b * q); p++) {
+      if (!valeurSure(f, p / q)) return false;
+    }
+  }
+  return true;
+}
+
+export interface OptionsBornes {
+  /** Mode « valeur moyenne » (audit P21) : éviter b − a = 1, qui rend le facteur 1/(b − a) invisible. */
+  eviterLargeurUn?: boolean;
+}
+
+function pairesValides(primitive: ExerciceCalculPrimitives, points: number[]): [number, number][] {
+  const tries = [...new Set(points)].sort((x, y) => x - y);
+  const paires: [number, number][] = [];
+  for (let i = 0; i < tries.length; i++) {
+    for (let j = i + 1; j < tries.length; j++) {
+      if (intervalleSansSingularite(primitive, tries[i], tries[j])) paires.push([tries[i], tries[j]]);
+    }
+  }
+  return paires;
+}
+
+/** Choisit 2 bornes a < b telles que f soit définie et bornée sur tout [a ; b] — voir ci-dessus. */
+export function choisirBornesValides(primitive: ExerciceCalculPrimitives, options: OptionsBornes = {}): [number, number] {
+  const magnitudeSure = primitiveEstAMagnitudeSure(primitive);
+  const entiers = magnitudeSure ? CANDIDATS_ENTIERS.concat([0]) : [];
+  const preferer = (paires: [number, number][]): [number, number][] => {
+    if (!options.eviterLargeurUn) return paires;
+    const larges = paires.filter(([x, y]) => Math.abs(y - x - 1) > 1e-9);
+    return larges.length > 0 ? larges : paires;
+  };
+  let paires = preferer(pairesValides(primitive, entiers));
+  if (paires.length === 0) paires = preferer(pairesValides(primitive, [...entiers, ...CANDIDATS_FRACTIONS, 0]));
+  if (paires.length === 0) {
+    // Filet : balayage fin, limité à une trentaine de points régulièrement espacés.
+    const fins = balayageFin(primitive);
+    const echantillon = fins.filter((_, i) => i % Math.max(1, Math.floor(fins.length / 30)) === 0);
+    paires = preferer(pairesValides(primitive, echantillon));
+  }
+  if (paires.length === 0) {
     throw new Error("choisirBornesValides : impossible de trouver 2 bornes valides pour cet exercice");
   }
-  const x = tirerParmi(finalPool);
-  let y = tirerParmi(finalPool);
-  let tentatives = 0;
-  while (y === x && tentatives < 30) {
-    y = tirerParmi(finalPool);
-    tentatives++;
-  }
-  if (y === x) {
-    // dernier recours : prend un autre élément du pool par index (garanti distinct puisque
-    // finalPool.length>=2).
-    const autre = finalPool.find((v) => v !== x) as number;
-    y = autre;
-  }
-  return x < y ? [x, y] : [y, x];
+  return tirerParmi(paires);
 }

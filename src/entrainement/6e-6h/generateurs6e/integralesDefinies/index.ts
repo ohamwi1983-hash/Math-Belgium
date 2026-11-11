@@ -37,7 +37,7 @@ export function construireIntegraleSimple(primitive: ExerciceCalculPrimitives = 
 }
 
 export function construireIntegraleMoyenne(primitive: ExerciceCalculPrimitives = tirerPrimitiveAutorisee()): ExerciceIntegraleMoyenne {
-  const [a, b] = choisirBornesValides(primitive);
+  const [a, b] = choisirBornesValides(primitive, { eviterLargeurUn: true });
   return { scenario: "moyenne", primitive, a, b };
 }
 

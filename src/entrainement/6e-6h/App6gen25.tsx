@@ -73,7 +73,7 @@ export function App6gen25() {
         votreReponse,
         correcte: !derniere.revele,
         reponseAttendue: derniere.revele ? (
-          <span className="equation-box-termes">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
+          <span className="equation-box-donnees">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
         ) : undefined,
       },
     ]);
@@ -126,7 +126,7 @@ export function App6gen25() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: (
-          <span className="equation-box-termes">
+          <span className="equation-box-donnees">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
               <Katex key={i} expression={frag} />
             ))}

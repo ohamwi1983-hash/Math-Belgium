@@ -102,8 +102,14 @@ function premiereSingularite(f: (x: number) => number, a: number, sens: 1 | -1):
   for (let k = 1; Math.abs(precedent - a) < 10 + 1e-9 && Math.abs(a + k * pas) <= 10; k++) {
     const x = a + k * pas;
     const fx = f(x);
-    if (!finiModere(fx)) {
-      return arrondirBorne(bissection((t) => finiModere(f(t)), precedent, x));
+    // Seule une VRAIE singularité compte (valeur non définie ou infinie) : une croissance rapide
+    // (e^{5x+2}, 5^x) n'est pas un bord du domaine.
+    if (!Number.isFinite(fx)) {
+      // Dépassement de capacité (e^{x³} pour x grand) : infini ici ET un peu plus loin — ce n'est
+      // pas un pôle, on arrête simplement le balayage.
+      const auDela = f(x + 5 * pas);
+      if (!Number.isNaN(fx) && !Number.isNaN(auDela) && !Number.isFinite(auDela)) return null;
+      return arrondirBorne(bissection((t) => Number.isFinite(f(t)), precedent, x));
     }
     if (Math.sign(fx) !== Math.sign(fPrecedent) && fx !== 0 && fPrecedent !== 0) {
       // Zéro ou pôle ? On resserre sur le changement de signe et on regarde |f|.
@@ -115,7 +121,7 @@ function premiereSingularite(f: (x: number) => number, a: number, sens: 1 | -1):
         else d = m;
       }
       const m = (g + d) / 2;
-      if (!finiModere(f(m)) || Math.abs(f(m)) > 1e4) return arrondirBorne(m);
+      if (!Number.isFinite(f(m)) || Math.abs(f(m)) > 1e4) return arrondirBorne(m);
     }
     precedent = x;
     fPrecedent = fx;

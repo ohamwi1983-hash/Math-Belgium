@@ -117,6 +117,7 @@ export function construireParametrePolynomiale(): ExerciceIntegraleParametre {
       m,
       cible: { latex: fractionLatexLocale(numCible, 2), numerique: numCible / 2 },
       solutionsM,
+      solutionsMLatex: solutionsM.length === 1 ? [`${m}`] : [`${m}`, fractionLatexLocale(-2 * c - m * k, k)],
       domaineMTexte: null,
     };
   }
@@ -151,6 +152,16 @@ function construirePrimitiveExponentielle(k: number): ExerciceFamilleB {
   };
 }
 
+/** m = ln(e^{borneFixe} + num/k), écrit exactement : « \ln\left(1+\dfrac{5}{3}\right) » est
+ * réduit en « \ln\left(\dfrac{8}{3}\right) » quand e^{borneFixe} = 1. */
+function lnExactLatex(borneFixe: number, num: number, k: number): string {
+  if (borneFixe === 0) return `\\ln\\left(${fractionLatexLocale(k + num, k)}\\right)`;
+  const puissance = borneFixe === 1 ? "e" : `e^{${borneFixe}}`;
+  const fraction = fractionLatexLocale(num, k);
+  const terme = fraction.startsWith("-") ? ` - ${fraction.slice(1)}` : ` + ${fraction}`;
+  return `\\ln\\left(${puissance}${terme}\\right)`;
+}
+
 export function construireParametreExponentielle(): ExerciceIntegraleParametre {
   const k = tirerEntierNonNul(-3, 3);
   const primitive = construirePrimitiveExponentielle(k);
@@ -176,6 +187,7 @@ export function construireParametreExponentielle(): ExerciceIntegraleParametre {
       m,
       cible: valeurExacteEntiere(cible),
       solutionsM: [m],
+      solutionsMLatex: [lnExactLatex(borneFixe, mEstBorneSuperieure ? cible : -cible, k)],
       domaineMTexte: null,
     };
   }
@@ -214,6 +226,8 @@ function construirePrimitiveTrigonometrique(typeG: "cosU" | "sinU"): ExerciceFam
 /** Oppose une `ValeurExacte` (latex + numérique) — nécessaire pour typeG="sinU" : F(x)=−cos(x), donc
  * F(angle) = −(valeur de la banque BANQUE_ARCCOS, qui donne cos(angle) et non −cos(angle)). */
 function negerValeurExacte(v: ValeurExacte): ValeurExacte {
+  // « 0 » reste « 0 » (audit : la cible affichait « −0 » quand cos(angle) = 0).
+  if (v.latex === "0" || v.numerique === 0) return { latex: "0", numerique: 0 };
   return { latex: v.latex.startsWith("-") ? v.latex.slice(1) : `-${v.latex}`, numerique: -v.numerique };
 }
 
@@ -228,6 +242,8 @@ function combinerCibleLatex(termeM: ValeurExacte, termeFixe: ValeurExacte, mEstB
   // cible = (mEstBorneSuperieure ? termeM − termeFixe : termeFixe − termeM), affichée TELLE QUELLE
   // (non simplifiée en un seul radical — parfaitement acceptable, cf. en-tête de fichier).
   const [gauche, droite] = mEstBorneSuperieure ? [termeM, termeFixe] : [termeFixe, termeM];
+  if (droite.latex === "0") return gauche.latex;
+  if (gauche.latex === "0") return negerValeurExacte(droite).latex;
   const droiteLatex = droite.latex.startsWith("-") ? ` + ${droite.latex.slice(1)}` : ` - ${droite.latex}`;
   return `${gauche.latex}${droiteLatex}`;
 }
@@ -236,7 +252,7 @@ export function construireParametreTrigonometrique(): ExerciceIntegraleParametre
   const typeG = tirerParmi(["cosU", "sinU"] as const);
   const primitive = construirePrimitiveTrigonometrique(typeG);
   const banque = typeG === "cosU" ? BANQUE_ARCSIN : BANQUE_ARCCOS;
-  const domaineMTexte = typeG === "cosU" ? "m appartient à l'intervalle [-π/2 ; π/2]." : "m appartient à l'intervalle [0 ; π].";
+  const domaineMTexte = typeG === "cosU" ? "m appartient à l'intervalle [−π/2 ; π/2]." : "m appartient à l'intervalle [0 ; π].";
 
   for (let tentative = 0; tentative < 50; tentative++) {
     const entreeFixe = tirerParmi(banque);
@@ -258,6 +274,7 @@ export function construireParametreTrigonometrique(): ExerciceIntegraleParametre
       m: entreeM.angle.numerique,
       cible: { latex: combinerCibleLatex(fM, fFixe, mEstBorneSuperieure), numerique: cibleNumerique },
       solutionsM: [entreeM.angle.numerique],
+      solutionsMLatex: [entreeM.angle.latex],
       domaineMTexte,
     };
   }

@@ -4,6 +4,7 @@ import type { PhaseIntegralesDefinies } from "../moteur6e/typesIntegralesDefinie
 import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExercicePrimitive } from "../moteur6e/typesCalculPrimitives";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
+import { coefDevant, decimalLatex, egalExactPuisApproche, valeurExacteLatex } from "./formatMonome";
 import {
   aideNiveau1 as aideNiveau1Primitive,
   aideNiveau2 as aideNiveau2Primitive,
@@ -11,7 +12,7 @@ import {
   champsEcran as champsEcranPrimitive,
   consigneEcran as consigneEcranPrimitive,
   etatActuel as etatActuelPrimitive,
-  formatFractionLatex,
+  formatReponseAttenduePhaseLatex as formatReponseAttenduePhaseLatexPrimitive,
   LIBELLE_PHASE as LIBELLE_PHASE_PRIMITIVE,
   primitiveLatexA,
   primitiveLatexB,
@@ -51,7 +52,7 @@ function primitiveLatexEmpruntee(primitive: ExerciceCalculPrimitives): string {
 }
 
 function formatBorneLatex(x: number): string {
-  return formatFractionLatex(Math.round(x * 4), 4);
+  return valeurExacteLatex(x) ?? decimalLatex(x, 2);
 }
 
 function bornesLatex(exercice: ExerciceIntegralesDefinies): [string, string] {
@@ -91,10 +92,14 @@ function latex(valeur: string): FragmentConsigne {
 // Dispatch commun.
 // ============================================================================
 
+/** Audit P17 : la précision attendue n'était annoncée nulle part. */
+const PRECISION: FragmentConsigne[] = [texte(" Donne chaque résultat sous forme exacte ou arrondi au centième.")];
+const RAPPEL_CONSTANTE: FragmentConsigne[] = [texte(" La constante "), latex("+C"), texte(" est facultative dans la primitive.")];
+
 export function consigneGenerale(exercice: ExerciceIntegralesDefinies): FragmentConsigne[] {
-  if (exercice.scenario === "simple") return [texte("Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous.")];
-  if (exercice.scenario === "moyenne") return [texte("Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle.")];
-  return [texte("Calcule une primitive F de f, puis détermine la ou les valeurs du paramètre m pour lesquelles l'intégrale définie ci-dessous vaut la valeur indiquée.")];
+  if (exercice.scenario === "simple") return [texte("Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous."), ...RAPPEL_CONSTANTE, ...PRECISION];
+  if (exercice.scenario === "moyenne") return [texte("Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle."), ...RAPPEL_CONSTANTE, ...PRECISION];
+  return [texte("Calcule une primitive F de f, puis détermine la ou les valeurs du paramètre m pour lesquelles l'intégrale définie ci-dessous vaut la valeur indiquée."), ...RAPPEL_CONSTANTE, ...PRECISION];
 }
 
 export function blocDonnees(exercice: ExerciceIntegralesDefinies): string[] {
@@ -103,8 +108,14 @@ export function blocDonnees(exercice: ExerciceIntegralesDefinies): string[] {
 
 export function consigneEcran(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): FragmentConsigne[] {
   if (estPhaseEmpruntee(exercice, phase)) return consigneEcranPrimitive(exercice.primitive, phase);
-  if (phase === "finalIntegrale") return [texte("Évalue l'intégrale définie "), latex("F(b)-F(a)"), texte(", à partir de la primitive trouvée à l'étape précédente.")];
-  if (phase === "valeurMoyenne") return [texte("Divise l'intégrale définie trouvée par "), latex("(b-a)"), texte(" pour obtenir la valeur moyenne de f sur cet intervalle.")];
+  if (phase === "finalIntegrale") {
+    const [a, b] = bornesLatex(exercice);
+    return [texte("Évalue l'intégrale définie en calculant "), latex(`F(${b})-F(${a})`), texte(" avec la primitive trouvée à l'étape précédente.")];
+  }
+  if (phase === "valeurMoyenne") {
+    const [a, b] = bornesLatex(exercice);
+    return [texte("Divise l'intégrale trouvée par la longueur de l'intervalle "), latex(`\\left[${a}\\,;${b}\\right]`), texte(" pour obtenir la valeur moyenne de f sur cet intervalle.")];
+  }
   if (phase === "poserEquationM") {
     return [texte("Exprime l'intégrale définie ci-dessus en fonction de m à l'aide de la primitive trouvée, puis pose l'équation égale à la valeur cible indiquée dans les données.")];
   }
@@ -136,49 +147,71 @@ export function etatActuel(exercice: ExerciceIntegralesDefinies, phase: PhaseInt
   }
   if (phase === "valeurMoyenne") {
     const valeur = valeurIntegrale(exercice as ExerciceIntegraleMoyenne);
-    return [...cheminEmprunte, fPrimitive, `\\displaystyle\\int f(x)\\,dx \\approx ${Math.round(valeur * 1000) / 1000}`];
+    const [a, b] = bornesLatex(exercice);
+    return [...cheminEmprunte, fPrimitive, `\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalExactPuisApproche(valeur, 2)}`];
   }
   // "resoudreM"
-  return [...cheminEmprunte, fPrimitive, `\\text{(équation posée à l'étape précédente)}`];
+  const exerciceP = exercice as ExerciceIntegraleParametre;
+  const [gauche, droite] = exerciceP.mEstBorneSuperieure ? ["F(m)", `F(${exerciceP.borneFixeLatex})`] : [`F(${exerciceP.borneFixeLatex})`, "F(m)"];
+  return [...cheminEmprunte, fPrimitive, `${gauche}-${droite}=${exerciceP.cible.latex}`];
 }
 
 export function champsEcran(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): ChampDef[] {
   if (estPhaseEmpruntee(exercice, phase)) return champsEcranPrimitive(exercice.primitive, phase);
-  if (phase === "finalIntegrale") return [{ label: "F(b)−F(a) =", placeholder: "ex : 12 ou e^2-1" }];
-  if (phase === "valeurMoyenne") return [{ label: "Valeur moyenne =", placeholder: "ex : 4" }];
-  if (phase === "poserEquationM") return [{ label: "Équation en m =", placeholder: "ex : k*e^m-k*e^2=7" }];
-  return [{ label: "m =", placeholder: "ex : ln(5) ou 2" }]; // "resoudreM" (rendu par le composant add-as-needed dédié)
+  if (phase === "finalIntegrale") return [{ label: "Valeur de l'intégrale =", placeholder: "ex : 7−ln(9) ou 0,57" }];
+  if (phase === "valeurMoyenne") return [{ label: "Valeur moyenne =", placeholder: "ex : 7/9" }];
+  if (phase === "poserEquationM") return [{ label: "Équation en m =", placeholder: "ex : 7(m^2−9)=8" }];
+  return [{ label: "m =", placeholder: "ex : ln(9)" }]; // "resoudreM" (rendu par le composant add-as-needed dédié)
 }
 
 export function aideNiveau1(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): AideAvecLatex {
   if (estPhaseEmpruntee(exercice, phase)) return aideNiveau1Primitive(exercice.primitive, phase);
-  if (phase === "finalIntegrale") return { texte: "F(b)−F(a) s'obtient en évaluant la primitive trouvée aux 2 bornes, puis en soustrayant (borne supérieure moins borne inférieure).", latex: "F(b)-F(a)" };
-  if (phase === "valeurMoyenne") return { texte: "Valeur moyenne de f sur [a;b] :", latex: "\\bar f = \\dfrac{1}{b-a}\\displaystyle\\int_a^b f(x)\\,dx" };
-  if (phase === "poserEquationM") return { texte: "Identifie précisément quelle borne est FIXE (donnée) et laquelle est m (inconnue) avant d'écrire la différence F(...)−F(...).", latex: "F(\\cdot)-F(\\cdot)" };
+  if (phase === "finalIntegrale") return { texte: "Évalue la primitive à la borne supérieure, puis à la borne inférieure, et soustrais :", latex: "\\displaystyle\\int_a^b f(x)\\,dx=F(b)-F(a)" };
+  if (phase === "valeurMoyenne") return { texte: "Valeur moyenne de f sur [a ; b] :", latex: "\\dfrac{1}{b-a}\\displaystyle\\int_a^b f(x)\\,dx" };
+  if (phase === "poserEquationM") return { texte: "Repère quelle borne est donnée et laquelle est m, puis écris la différence dans le bon ordre (borne supérieure moins borne inférieure) :", latex: "\\displaystyle\\int_a^b f(x)\\,dx=F(b)-F(a)" };
   const technique = (exercice as ExerciceIntegraleParametre).technique;
   const texte =
     technique === "polynomiale"
-      ? "Ramène l'équation à la forme Ax²+Bx+C=0 (second degré) et résous-la."
+      ? "Ramène l'équation à une équation du second degré, puis résous-la :"
       : technique === "exponentielle"
-        ? "Isole le terme en eᵐ, puis applique le logarithme népérien aux 2 membres."
-        : "Isole sin(m) ou cos(m), puis applique arcsin ou arccos (selon le cas) pour revenir à m.";
-  const latex = technique === "polynomiale" ? "Ax^{2}+Bx+C=0" : technique === "exponentielle" ? "e^{m}" : "\\sin(m)\\text{ ou }\\cos(m)";
+        ? "Isole le terme exponentiel, puis applique le logarithme népérien aux deux membres :"
+        : "Isole le sinus ou le cosinus de m, puis reviens à m dans l'intervalle indiqué :";
+  const latex = technique === "polynomiale" ? "am^{2}+bm+c=0" : technique === "exponentielle" ? "e^{m}=A\\iff m=\\ln(A)\\quad(A>0)" : "\\sin(m)=v\\iff m=\\arcsin(v),\\qquad\\cos(m)=v\\iff m=\\arccos(v)";
   return { texte, latex };
 }
 
 export function aideNiveau2(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): AideAvecLatex {
   if (estPhaseEmpruntee(exercice, phase)) return aideNiveau2Primitive(exercice.primitive, phase);
+  if (phase === "finalIntegrale") {
+    const exerciceS = exercice as ExerciceIntegraleSimple | ExerciceIntegraleMoyenne;
+    const [a, b] = bornesLatex(exercice);
+    const fb = exerciceS.primitive.primitiveReference(exerciceS.b);
+    const fa = exerciceS.primitive.primitiveReference(exerciceS.a);
+    const val = (v: number) => valeurExacteLatex(v) ?? decimalLatex(v, 2);
+    return { texte: "Valeurs de la primitive (sans C) aux deux bornes — il reste à soustraire :", latex: `F(${b})=${val(fb)},\\qquad F(${a})=${val(fa)}` };
+  }
   if (phase === "valeurMoyenne") {
     const exerciceM = exercice as ExerciceIntegraleMoyenne;
-    const valeur = Math.round(valeurIntegrale(exerciceM) * 1000) / 1000;
+    const [a, b] = bornesLatex(exercice);
+    const valeur = valeurIntegrale(exerciceM);
+    const valeurLatex = valeurExacteLatex(valeur) ?? decimalLatex(valeur, 2);
     const largeur = formatBorneLatex(exerciceM.b - exerciceM.a);
-    return { texte: "Intégrale déjà trouvée, à diviser par (b−a) — division non encore faite :", latex: `\\dfrac{${valeur}}{${largeur}}` };
+    return { texte: "Intégrale déjà trouvée et longueur de l'intervalle — division non encore faite :", latex: `\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx=${valeurLatex},\\qquad b-a=${largeur}` };
   }
   if (phase === "poserEquationM") {
     const exerciceP = exercice as ExerciceIntegraleParametre;
-    return { texte: "Primitive évaluée à la borne fixe (le terme en m reste à écrire, ainsi que la mise en équation avec la valeur cible) :", latex: `F(${exerciceP.borneFixeLatex})` };
+    const [gauche, droite] = exerciceP.mEstBorneSuperieure ? ["F(m)", `F(${exerciceP.borneFixeLatex})`] : [`F(${exerciceP.borneFixeLatex})`, "F(m)"];
+    return { texte: "Différence à écrire avec la primitive trouvée, puis à égaler à la valeur donnée :", latex: `${gauche}-${droite}=${exerciceP.cible.latex}` };
   }
-  return { texte: "Continue le calcul à partir de l'étape précédente.", latex: null };
+  const exerciceP = exercice as ExerciceIntegraleParametre;
+  if (exerciceP.technique === "polynomiale") return { texte: "Les solutions d'une équation du second degré :", latex: "m=\\dfrac{-b\\pm\\sqrt{b^2-4ac}}{2a}" };
+  if (exerciceP.technique === "exponentielle") {
+    const k = coefDevant(exerciceP.primitive.famille === "B" ? exerciceP.primitive.k : 1);
+    const e0 = `e^{${exerciceP.borneFixeLatex}}`;
+    const difference = exerciceP.mEstBorneSuperieure ? `e^{m}-${e0}` : `${e0}-e^{m}`;
+    return { texte: "Équation posée, à résoudre en isolant l'exponentielle :", latex: `${k}\\left(${difference}\\right)=${exerciceP.cible.latex}` };
+  }
+  return { texte: "Valeurs remarquables utiles :", latex: "\\sin\\dfrac{\\pi}{6}=\\cos\\dfrac{\\pi}{3}=\\dfrac{1}{2},\\quad\\sin\\dfrac{\\pi}{4}=\\cos\\dfrac{\\pi}{4}=\\dfrac{\\sqrt{2}}{2},\\quad\\sin\\dfrac{\\pi}{3}=\\cos\\dfrac{\\pi}{6}=\\dfrac{\\sqrt{3}}{2}" };
 }
 
 export const LIBELLE_PHASE: Record<PhaseIntegralesDefinies, string> = {
@@ -196,23 +229,36 @@ export const LIBELLE_PHASE: Record<PhaseIntegralesDefinies, string> = {
  * TEXTE (ici, `poserEquationM` ci-dessous) est toujours enveloppé en `\text{...}` — jamais passé nu
  * à `<Katex>` (corrigé lors de l'audit transversal chapitre 4, même défaut que 6gen23 ci-dessus). */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): string[] {
-  if (estPhaseEmpruntee(exercice, phase)) {
-    const phasesFinalesEmpruntees: PhaseCalculPrimitives[] = ["aEcranDirect", "aEcran2", "bEcran3", "cEcran4", "gEcran4"];
-    if (phasesFinalesEmpruntees.includes(phase)) return [`F(x)=${primitiveLatexEmpruntee(exercice.primitive)}+C`];
-    return [`\\text{${LIBELLE_PHASE_PRIMITIVE[phase]}}`];
-  }
+  // Écrans empruntés : la VRAIE réponse de l'étape (6gen23), plus seulement son libellé.
+  if (estPhaseEmpruntee(exercice, phase)) return formatReponseAttenduePhaseLatexPrimitive(exercice.primitive, phase);
   if (phase === "finalIntegrale") {
-    const valeur = valeurIntegrale(exercice as ExerciceIntegraleSimple | ExerciceIntegraleMoyenne);
-    return [`\\displaystyle\\int f(x)\\,dx = ${Math.round(valeur * 1000) / 1000}`];
+    const exerciceS = exercice as ExerciceIntegraleSimple | ExerciceIntegraleMoyenne;
+    const [a, b] = bornesLatex(exercice);
+    return [`\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalExactPuisApproche(valeurIntegrale(exerciceS), 2)}`];
   }
   if (phase === "valeurMoyenne") {
     const exerciceM = exercice as ExerciceIntegraleMoyenne;
+    const [a, b] = bornesLatex(exercice);
     const moyenne = valeurIntegrale(exerciceM) / (exerciceM.b - exerciceM.a);
-    return [`\\bar f = ${Math.round(moyenne * 1000) / 1000}`];
+    // Notation du cours (pas \bar f, absente du cours) : la formule elle-même, bornes numériques.
+    const inverse = valeurExacteLatex(1 / (exerciceM.b - exerciceM.a)) ?? `\\dfrac{1}{b-a}`;
+    return [`${inverse === "1" ? "" : inverse}\\displaystyle\\int_{${a}}^{${b}} f(x)\\,dx ${egalExactPuisApproche(moyenne, 2)}`];
   }
   const exerciceP = exercice as ExerciceIntegraleParametre;
-  if (phase === "poserEquationM") return [`\\text{${LIBELLE_PHASE.poserEquationM}}`];
-  return [exerciceP.solutionsM.map((m) => `m=${Math.round(m * 1000) / 1000}`).join(" \\text{ ou } ")];
+  if (phase === "poserEquationM") {
+    const [gauche, droite] = exerciceP.mEstBorneSuperieure ? ["F(m)", `F(${exerciceP.borneFixeLatex})`] : [`F(${exerciceP.borneFixeLatex})`, "F(m)"];
+    return [`${gauche}-${droite}=${exerciceP.cible.latex}`, `F(x)=${primitiveLatexEmpruntee(exerciceP.primitive)}`];
+  }
+  return [
+    exerciceP.solutionsM
+      .map((m, i) => {
+        const exacte = exerciceP.solutionsMLatex?.[i];
+        if (!exacte) return `m ${egalExactPuisApproche(m, 2)}`;
+        const approche = decimalLatex(m, 2);
+        return exacte === approche || /^-?\d+$/.test(exacte) ? `m=${exacte}` : `m=${exacte}\\approx ${approche}`;
+      })
+      .join("\\quad\\text{ou}\\quad "),
+  ];
 }
 
 export const LIBELLE_SCENARIO: Record<ExerciceIntegralesDefinies["scenario"], string> = {

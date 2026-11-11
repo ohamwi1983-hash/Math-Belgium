@@ -1204,7 +1204,9 @@ export function aideNiveau2G(exercice: ExerciceFamilleG, phase: PhaseCalculPrimi
   return { texte: "Décomposition à intégrer :", latex: `f(x)=${decompositionNumeriqueG(exercice)}` };
 }
 function reponseIntermediaireG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives): string[] {
-  if (phase === "gEcran1" && exercice.sousType === "2") return [xPlus(exercice.d), fractionSignee(exercice.e, xPlus(-exercice.r))];
+  // Quotient et reste réunis en une seule égalité (deux fragments isolés « x+2 » et « 3/(x−3) » ne
+  // disaient pas lequel était le quotient).
+  if (phase === "gEcran1" && exercice.sousType === "2") return [`f(x)=${xPlus(exercice.d)}${exercice.e < 0 ? "" : "+"}${fractionSignee(exercice.e, xPlus(-exercice.r))}`];
   if (phase === "gEcran2") return [decompositionPoseeG(exercice)];
   if (phase === "gEcran3") {
     switch (exercice.sousType) {

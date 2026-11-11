@@ -209,6 +209,9 @@ function combinaisonLatex(r0: [number, number], r1: [number, number], constante:
   else termeK = absN === 1 ? `\\dfrac{${constante}}{${d}}` : `\\dfrac{${absN}${constante}}{${d}}`;
   if (r0[0] === 0) return n < 0 ? `-${termeK}` : termeK;
   const debut = fractionLatex(r0[0], r0[1]);
+  // Rationnel négatif et terme irrationnel positif : « 72\sqrt{3} - \dfrac{8}{9} » plutôt que
+  // « -\dfrac{8}{9} + 72\sqrt{3} ».
+  if (r0[0] < 0 && n > 0) return `${termeK} - ${debut.slice(1)}`;
   return n < 0 ? `${debut} - ${termeK}` : `${debut} + ${termeK}`;
 }
 

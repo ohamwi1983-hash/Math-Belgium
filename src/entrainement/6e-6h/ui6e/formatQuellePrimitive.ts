@@ -137,7 +137,9 @@ export function consigneEcranQuellePrimitive(exercice: ExerciceQuellePrimitive, 
       latex("C"),
       texte(" (valeur exacte ou arrondie au centième). Écris ensuite "),
       latex("F(x)"),
-      texte(" en remplaçant C par sa valeur."),
+      texte(" en remplaçant "),
+      latex("C"),
+      texte(" par sa valeur."),
     ];
   }
   return consigneEcranBase(exercice.exerciceBase, phase);
@@ -207,7 +209,7 @@ export function formatReponseAttenduePhaseLatexQuellePrimitive(exercice: Exercic
   if (!estPhaseBase(phase)) {
     const c = cAttendu(exercice);
     const { terme, exact } = termeAdditifC(c);
-    return [`C ${egalExactPuisApproche(c, 2)}`, `F(x)${exact ? "=" : "\\approx"}${primitiveLatexBase(exercice.exerciceBase)}${terme}`];
+    return [`C ${egalExactPuisApproche(c, 2)}`, `F(x)${exact ? "=" : "\\approx "}${primitiveLatexBase(exercice.exerciceBase)}${terme}`];
   }
   return formatReponseAttenduePhaseLatexBase(exercice.exerciceBase, phase);
 }

@@ -5,9 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, construireQuellePrimitiv
 import type { IdVarianteQuellePrimitive } from "./generateurs6e/quellePrimitive";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionQuellePrimitive, soumettreReponseEcran } from "./moteur6e/sessionQuellePrimitive";
 import type { EtatSessionQuellePrimitive, PhaseQuellePrimitive } from "./moteur6e/typesQuellePrimitive";
-import { diagnostiquerEcranQuellePrimitive } from "./moteur6e/verificationQuellePrimitive";
-import { messageSpecifiqueEcran } from "./moteur6e/verificationCalculPrimitives";
-import type { PhaseCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
+import { diagnostiquerEcranQuellePrimitive, messageSpecifiqueQuellePrimitive } from "./moteur6e/verificationQuellePrimitive";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
@@ -75,7 +73,7 @@ export function App6gen24() {
         votreReponse,
         correcte: !derniere.revele,
         reponseAttendue: derniere.revele ? (
-          <span className="equation-box-termes">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
+          <span className="equation-box-donnees">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
         ) : undefined,
       },
     ]);
@@ -131,7 +129,7 @@ export function App6gen24() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: (
-          <span className="equation-box-termes">
+          <span className="equation-box-donnees">
             {formatReponseAttenduePhaseLatexQuellePrimitive(exercice, phase).map((frag, i) => (
               <Katex key={i} expression={frag} />
             ))}
@@ -172,7 +170,7 @@ export function App6gen24() {
           aideNiveau1={aideNiveau1QuellePrimitive(exercice, phase)}
           aideNiveau2={aideNiveau2QuellePrimitive(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcranQuellePrimitive(exercice, phase, valeurs)}
-          messageSpecifique={(valeurs) => messageSpecifiqueEcran(exercice.exerciceBase, phase as PhaseCalculPrimitives, valeurs)}
+          messageSpecifique={(valeurs) => messageSpecifiqueQuellePrimitive(exercice, phase, valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
         />
       </main>

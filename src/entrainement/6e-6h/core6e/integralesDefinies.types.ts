@@ -91,6 +91,9 @@ export interface ExerciceIntegraleParametre extends ExerciceIntegraleDefinieComm
    * (branche principale arcsin/arccos — sans cette restriction explicite, l'équation trigonométrique
    * aurait une infinité de solutions périodiques). `null` sinon. */
   domaineMTexte: string | null;
+  /** Forme EXACTE (LaTeX) de chaque solution, dans le même ordre que `solutionsM` — affichée avant la
+   * valeur approchée (audit P16 : « m ≈ 3.1416 » au lieu de « m = π »). Absent = valeurs décimales. */
+  solutionsMLatex?: string[];
 }
 
 export type ExerciceIntegralesDefinies = ExerciceIntegraleSimple | ExerciceIntegraleMoyenne | ExerciceIntegraleParametre;
