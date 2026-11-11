@@ -676,6 +676,17 @@ export const geometrieDansEspace: ChapterContent = {
             },
           ],
         },
+        {
+          kind: 'atelier',
+          tag: 'trois-plans-widget',
+          label: 'Manipule toi-même : trois plans',
+          caption:
+            'Trois plans sécants deux à deux se coupent suivant des droites qui ne sont ' +
+            'jamais quelconques : elles passent par un même point (le coin d\'une pièce), ou ' +
+            'elles sont parallèles (les faces d\'une barre de Toblerone), ou elles sont ' +
+            'confondues (les pages d\'un livre ouvert). Fais tourner chaque scène pour bien ' +
+            'voir, et compare avec deux plans parallèles coupés par un troisième.',
+        },
       ],
     },
 
@@ -995,6 +1006,19 @@ export const geometrieDansEspace: ChapterContent = {
               'point auxiliaire : (PQ) et (BC) se coupent en I, hors du tétraèdre ; (IR) donne S sur ' +
               '[CD]. Les côtés cachés de la section sont en pointillés',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'section-cube-widget',
+          label: 'Manipule toi-même : la section d\'un cube',
+          caption:
+            'Place trois points P, Q et R sur des arêtes du cube : le plan (PQR) le coupe ' +
+            'suivant un polygone, coloré en orange. Chaque face traversée apporte ' +
+            'exactement deux sommets de la section, donc on obtient un triangle, un ' +
+            'quadrilatère, un pentagone ou un hexagone selon le nombre de faces coupées. ' +
+            'Fais tourner le cube pour voir la section sous tous les angles, puis reviens à ' +
+            'la vue cavalière du cours. Le réglage de départ reproduit l\'exemple « 4 faces ' +
+            'traversées ».',
         },
         {
           kind: 'application',

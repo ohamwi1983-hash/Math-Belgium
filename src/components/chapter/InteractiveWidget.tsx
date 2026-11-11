@@ -34,6 +34,8 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'suite-recurrente-affine-widget': () => import('../../interactive/register-suite-recurrente-affine-widget.js'),
   'convergence-suite-widget': () => import('../../interactive/register-convergence-suite-widget.js'),
   'comparaison-suites-widget': () => import('../../interactive/register-comparaison-suites-widget.js'),
+  'section-cube-widget': () => import('../../interactive/register-section-cube-widget.js'),
+  'trois-plans-widget': () => import('../../interactive/register-trois-plans-widget.js'),
   'ombre-soleil-lampe-widget': () => import('../../interactive/register-ombre-soleil-lampe-widget.js'),
   'point-de-fuite-widget': () => import('../../interactive/register-point-de-fuite-widget.js'),
   'fenetre-durer-widget': () => import('../../interactive/register-fenetre-durer-widget.js'),

@@ -2290,3 +2290,25 @@ paths:
   n'avait aucun atelier ; 7 créés — `droite-formes-widget` (§ 1), `pente-angle-widget` (§ 3),
   `relations-droites-widget` (§ 4, défi), `distance-droite-widget` (§ 6), `cercle-equation-widget`
   (§ 8), `parabole-foyer-widget` (§ 9), `droite-cercle-widget` (§ 10).
+
+- **4e, Chapitre 8 — Géométrie dans l'espace** (`geometrie-dans-espace`) : audit puis enrichissement
+  validé par l'utilisateur (toutes les recommandations). Corrections : « la perspective centrale ne
+  conserve jamais le parallélisme » (4 passages : § 1, § 11, formulaire, récap) → seules les fuyantes
+  convergent, les droites parallèles à la vitre restent parallèles ; trois plans : cas « droite commune »
+  (livre ouvert) oublié et image fausse du 2e cas (trois murs parallèles → faces d'un prisme / Toblerone),
+  figure ajoutée ; application des jeux vidéo rattachée à la perspective centrale (caméra = point) ;
+  Dürer « décrit et popularise » (idée du voile d'Alberti, 1435) ; construction du toit réécrite (faîtage
+  = fuyante, pignon arrière par les diagonales) avec figure ; point de fuite précisé (une direction = un
+  point ; pas de point de fuite pour les parallèles à la vitre) ; jargon « combinaison des directions »
+  (§ 4) → critère du § 7 ; exemple (AG)/(EFGH) justifié par le point commun G ; démonstration par
+  l'absurde annoncée au § 5 enfin rédigée ; « bancale », label « Repère », quiz situé. § 1 allégé (la
+  perspective centrale renvoie aux § 10–11). Ajouts (6 sections n'avaient aucun exemple) : ce qui ne
+  détermine pas un plan (§ 2) ; prouver que (AB) et (CG) sont gauches (§ 3) ; droite parallèle au plan
+  (§ 4) ; (ACGE) coupe deux faces parallèles (§ 5) ; (AFH) ∥ (BDG) (§ 7) ; percée de (AJ) hors du cube
+  (F milieu de [EK]) et intersection (ACGE) ∩ (BDHF) (§ 8) ; section d'un tétraèdre par point
+  auxiliaire + figure construite (§ 9) ; milieu d'une fuyante par les diagonales (§ 11) ; ombre d'une
+  lampe = projection centrale (§ 12). Nouveaux énoncés par clé (sections deux-droites, deux-plans,
+  parallelisme, percee ajoutées). Le chapitre n'avait aucun atelier ; 7 créés (rendu 3D en SVG calculé à
+  la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
+  défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
+  `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).

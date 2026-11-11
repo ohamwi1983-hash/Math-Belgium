@@ -34,6 +34,8 @@ export type InteractiveWidgetTag =
   | 'suite-recurrente-affine-widget'
   | 'convergence-suite-widget'
   | 'comparaison-suites-widget'
+  | 'section-cube-widget'
+  | 'trois-plans-widget'
   | 'ombre-soleil-lampe-widget'
   | 'point-de-fuite-widget'
   | 'fenetre-durer-widget'
