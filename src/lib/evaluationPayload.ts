@@ -1045,43 +1045,67 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   },
   'primitives-integrales': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge
+  // (`exemple`), le label (`exempleLibre`) ou, sans label, un extrait du premier paragraphe.
   primitives: [
-    "Calcule $\\int 2x \\cdot e^{x^2} \\, dx$ en identifiant la forme $u'e^u$ (avec $u(x)=x^2$).",
-    "Démontre la formule d'intégration par parties $\\int f(x) \\cdot g'(x) \\, dx = f(x) \\cdot g(x) - \\int f'(x) \\cdot g(x) \\, dx$ à partir de la dérivée d'un produit.",
-    "Calcule $\\int x \\cdot e^x \\, dx$ par intégration par parties.",
-    "Calcule $\\int x^2 \\cdot \\sin(x) \\, dx$ en effectuant deux intégrations par parties successives.",
+    { cle: 'linéarité', enonce: "Calcule $\\int \\left(3x^2 - \\dfrac{4}{x} + 2\\cos(x)\\right)dx$." },
+    { cle: 'composée affine f(ax + b)', enonce: "Calcule $\\int \\cos(3x)\\,dx$, $\\int e^{2x+1}\\,dx$ et $\\int (2x+1)^5\\,dx$, puis vérifie la dernière primitive en la dérivant." },
+    { cle: 'ici $u(x)=x^2$', enonce: "Calcule $\\int 2x \\cdot e^{x^2} \\, dx$ en identifiant la forme $u'e^u$ (avec $u(x)=x^2$)." },
+    { cle: 'forme u′/u', enonce: "Calcule $\\int \\dfrac{2x}{x^2+1}\\,dx$ et $\\int \\tan(x)\\,dx$ en reconnaissant la forme $\\dfrac{u'}{u}$." },
+    { cle: 'forme u′·uⁿ', enonce: "Calcule $\\int 3x^2\\left(x^3+1\\right)^4dx$." },
+    { cle: "formule de l'intégration par parties", enonce: "Démontre la formule d'intégration par parties $\\int f(x) \\cdot g'(x) \\, dx = f(x) \\cdot g(x) - \\int f'(x) \\cdot g(x) \\, dx$ à partir de la dérivée d'un produit." },
+    { cle: 'e^x dx$ : pose', enonce: "Calcule $\\int x \\cdot e^x \\, dx$ par intégration par parties." },
+    { cle: '∫ ln(x) dx : le facteur caché 1', enonce: "Calcule $\\int \\ln(x)\\,dx$ sur $]0;+\\infty[$ par intégration par parties." },
+    { cle: 'deux intégrations par parties successives', enonce: "Calcule $\\int x^2 \\cdot \\sin(x) \\, dx$ en effectuant deux intégrations par parties successives." },
   ],
   conditioninitiale: [
-    "Détermine la primitive particulière F de $f(x) = 2x$ telle que $F(0) = 5$.",
-    "Détermine la primitive particulière F de $f(x) = \\dfrac{1}{x}$ (pour $x>0$) telle que $F(1) = 2$.",
+    { cle: 'f(x) = 2x, F(0) = 5', enonce: "Détermine la primitive particulière F de $f(x) = 2x$ telle que $F(0) = 5$." },
+    { cle: 'f(x) = 1/x (pour x > 0), F(1) = 2', enonce: "Détermine la primitive particulière F de $f(x) = \\dfrac{1}{x}$ (pour $x>0$) telle que $F(1) = 2$." },
+    { cle: 'un polynôme', enonce: "Détermine la primitive F de $f(x) = 3x^2 - 4x + 1$ telle que $F(2) = 3$." },
+    { cle: 'une fonction trigonométrique', enonce: "Détermine la primitive F de $f(x) = \\cos(x)$ telle que $F(\\pi) = 1$." },
+    { cle: 'une condition pour x < 0', enonce: "Détermine la primitive F de $f(x) = \\dfrac{1}{x}$ sur $]-\\infty;0[$ telle que $F(-1) = 2$." },
   ],
   integralesdefinies: [
-    "Démontre que la valeur de $\\int_a^b f(x)dx$ ne dépend pas du choix de la primitive utilisée pour la calculer.",
-    "Approche $\\int_0^4 x^2 \\, dx$ par la méthode des trapèzes avec 4 sous-intervalles ($\\Delta x=1$), puis compare le résultat à la valeur exacte.",
-    "Démontre que la valeur moyenne d'une fonction f continue sur $[a;b]$ est effectivement atteinte par f en un point de $[a;b]$ (théorème de la moyenne).",
-    "Calcule la valeur moyenne de $f(x) = x$ sur $[0;4]$.",
-    "Détermine $m > 0$ tel que $\\int_0^m 2x \\, dx = 9$.",
+    { cle: 'le résultat ne dépend pas du choix de la primitive', enonce: "Démontre que la valeur de $\\int_a^b f(x)dx$ ne dépend pas du choix de la primitive utilisée pour la calculer." },
+    { cle: 'la fonction aire est une primitive', enonce: "Démontre que, pour f continue, la fonction aire $A(x) = \\int_a^x f(t)dt$ est une primitive de f, puis déduis-en que $\\int_a^b f(x)dx = F(b) - F(a)$ pour toute primitive F de f." },
+    { cle: 'substitution avec changement de bornes', enonce: "Calcule $\\int_1^2 \\dfrac{2x}{x^2+1}\\,dx$ à l'aide de la substitution $u = x^2+1$, en changeant les bornes." },
+    { cle: 'parité', enonce: "Calcule $\\int_{-2}^{2}\\left(x^3 - 5x\\right)dx$ et $\\int_{-1}^{1}\\left(x^2 + 1\\right)dx$ en exploitant la parité des fonctions intégrées." },
+    { cle: 'par la méthode des trapèzes, avec 4 sous-intervalles', enonce: "Approche $\\int_0^4 x^2 \\, dx$ par la méthode des trapèzes avec 4 sous-intervalles ($\\Delta x=1$), puis compare le résultat à la valeur exacte." },
+    { cle: 'théorème de la moyenne', enonce: "Démontre que la valeur moyenne d'une fonction f continue sur $[a;b]$ est effectivement atteinte par f en un point de $[a;b]$ (théorème de la moyenne)." },
+    { cle: 'f(x) = x sur [0;4]', enonce: "Calcule la valeur moyenne de $f(x) = x$ sur $[0;4]$." },
+    { cle: 'valeur moyenne de sin sur [0 ; π]', enonce: "Calcule la valeur moyenne de $f(x) = \\sin(x)$ sur $[0;\\pi]$, puis détermine les points de $[0;\\pi]$ où f atteint cette valeur." },
+    { cle: 'Tu cherches m > 0', enonce: "Détermine $m > 0$ tel que $\\int_0^m 2x \\, dx = 9$." },
   ],
   aires: [
-    "Calcule l'aire comprise entre la courbe de $f(x) = x$ et l'axe des abscisses, sur $[-2;3]$.",
-    "Calcule l'aire de la région comprise entre les courbes $f(x) = x^2$ et $g(x) = 4$.",
-    "Calcule l'aire de la région bordée par $y=x$, $y=6-x$ et l'axe des abscisses.",
-    "Démontre, à l'aide d'une intégrale, que l'aire d'un disque de rayon r vaut $\\pi r^2$.",
+    { cle: 'f(x) = x sur [−2;3]', enonce: "Calcule l'aire comprise entre la courbe de $f(x) = x$ et l'axe des abscisses, sur $[-2;3]$." },
+    { cle: 'sin sur [0 ; 2π]', enonce: "Calcule $\\int_0^{2\\pi}\\sin(x)\\,dx$, puis l'aire comprise entre la courbe de sin et l'axe des abscisses sur $[0;2\\pi]$, et compare les deux nombres." },
+    { cle: 'f(x) = x², g(x) = 4', enonce: "Calcule l'aire de la région comprise entre les courbes $f(x) = x^2$ et $g(x) = 4$." },
+    { cle: 'entre x³ et x', enonce: "Calcule l'aire de la région comprise entre les courbes $f(x) = x^3$ et $g(x) = x$." },
+    { cle: 'sous ln(x) entre 1 et e', enonce: "Calcule l'aire comprise entre la courbe de $\\ln$, l'axe des abscisses et les droites $x = 1$ et $x = e$." },
+    { cle: 'Région bordée par y=x, y=6−x', enonce: "Calcule l'aire de la région bordée par $y=x$, $y=6-x$ et l'axe des abscisses." },
+    { cle: "l'aire d'un disque", enonce: "Démontre, à l'aide d'une intégrale, que l'aire d'un disque de rayon r vaut $\\pi r^2$." },
   ],
   volumes: [
-    "Démontre que le volume engendré par la rotation, autour de l'axe des abscisses, de la région sous une courbe $f\\ge0$ sur $[a;b]$, vaut $V = \\pi\\int_a^b [f(x)]^2 dx$.",
-    "Calcule le volume engendré par la rotation de $f(x) = x$ sur $[0;3]$ autour de l'axe des abscisses.",
-    "Calcule le volume engendré par la rotation, autour de l'axe des abscisses, de la région comprise entre $f(x) = 3$ et $g(x) = x$ sur $[0;3]$.",
-    "Démontre, à l'aide de la méthode des disques, que le volume d'un tronc de cône de hauteur h, de petit rayon a et de grand rayon b vaut $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$.",
+    { cle: "d'où vient le carré", enonce: "Démontre que le volume engendré par la rotation, autour de l'axe des abscisses, de la région sous une courbe $f\\ge0$ sur $[a;b]$, vaut $V = \\pi\\int_a^b [f(x)]^2 dx$." },
+    { cle: 'Rotation de f(x) = x sur [0;3]', enonce: "Calcule le volume engendré par la rotation de $f(x) = x$ sur $[0;3]$ autour de l'axe des abscisses." },
+    { cle: 'la boule', enonce: "Démontre, à l'aide de la méthode des disques, que le volume d'une boule de rayon r vaut $\\dfrac{4}{3}\\pi r^3$." },
+    { cle: 'un paraboloïde', enonce: "Calcule le volume engendré par la rotation de $f(x) = \\sqrt{x}$ sur $[0;4]$ autour de l'axe des abscisses." },
+    { cle: 'f(x) = 3, g(x) = x sur [0;3]', enonce: "Calcule le volume engendré par la rotation, autour de l'axe des abscisses, de la région comprise entre $f(x) = 3$ et $g(x) = x$ sur $[0;3]$." },
+    { cle: 'tronc de cône', enonce: "Démontre, à l'aide de la méthode des disques, que le volume d'un tronc de cône de hauteur h, de petit rayon a et de grand rayon b vaut $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$." },
   ],
   longueurarc: [
-    "Démontre que la longueur d'un arc de courbe $y=f(x)$ entre $x=a$ et $x=b$ vaut $L = \\int_a^b \\sqrt{1+[f'(x)]^2} \\, dx$.",
-    "Calcule la longueur de l'arc de $f(x) = \\dfrac{2}{3}x^{3/2}$ sur $[0;3]$.",
-    "Calcule la longueur de l'arc de $f(x) = \\text{ch}(x)$ sur $[0;a]$, en repérant le carré parfait sous la racine.",
-    "Démontre, à l'aide de la formule de longueur d'arc, que la circonférence d'un cercle de rayon r vaut $2\\pi r$.",
+    { cle: "d'où vient la racine", enonce: "Démontre que la longueur d'un arc de courbe $y=f(x)$ entre $x=a$ et $x=b$ vaut $L = \\int_a^b \\sqrt{1+[f'(x)]^2} \\, dx$." },
+    { cle: 'expression affine sous la racine', enonce: "Calcule la longueur de l'arc de $f(x) = \\dfrac{2}{3}x^{3/2}$ sur $[0;3]$." },
+    { cle: 'un carré parfait sous la racine', enonce: "Calcule la longueur de l'arc de $f(x) = \\text{ch}(x)$ sur $[0;a]$, en repérant le carré parfait sous la racine." },
+    { cle: "quand aucune primitive n'est connue", enonce: "Approche, par la méthode des trapèzes avec 4 sous-intervalles, la longueur de l'arc de $y = x^2$ sur $[0;1]$." },
+    { cle: "la circonférence d'un cercle", enonce: "Démontre, à l'aide de la formule de longueur d'arc, que la circonférence d'un cercle de rayon r vaut $2\\pi r$." },
   ],
   problemes: [
-    "Un mobile a une accélération $a(t) = 2$. Sachant que $v(0) = 3$ et $x(0) = 0$, détermine $v(t)$ puis $x(t)$.",
+    { cle: 'a(t) = 2 (constante)', enonce: "Un mobile a une accélération $a(t) = 2$. Sachant que $v(0) = 3$ et $x(0) = 0$, détermine $v(t)$ puis $x(t)$." },
+    { cle: 'déplacement ou distance parcourue', enonce: "Un mobile se déplace sur une droite avec la vitesse $v(t) = t^2 - 4t + 3$ (en m/s), pour $t \\in [0;3]$. Calcule son déplacement, puis la distance qu'il parcourt." },
+    { cle: 'trapèzes sur des relevés', enonce: "La vitesse d'une voiture est relevée toutes les 10 s : 0 ; 8 ; 13 ; 15 ; 16 m/s (de $t = 0$ à $t = 40$ s). Estime la distance parcourue par la méthode des trapèzes." },
+    { cle: 'débit et volume', enonce: "Une piscine se remplit avec un débit $d(t) = 12 - 0{,}1t$ (en m³/h, t en heures). Calcule le volume d'eau qui entre en 10 heures." },
+    { cle: 'volume par soustraction : un bol', enonce: "Un bol a la forme d'une demi-boule de rayon extérieur 5 cm, creusée d'une demi-boule de rayon 4 cm. Calcule le volume de matière qu'il contient." },
   ],
   },
   'nombres-complexes': {
@@ -1300,7 +1324,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)

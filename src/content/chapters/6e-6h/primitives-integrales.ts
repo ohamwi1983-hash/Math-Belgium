@@ -54,9 +54,10 @@ export const primitivesIntegrales: ChapterContent = {
           label: 'Structure de l\'ensemble des primitives',
           items: [
             'Si F est UNE primitive de f sur I, alors TOUTES les primitives de f sur I sont ' +
-              'exactement les fonctions $x \\mapsto F(x)+C$, où C décrit ℝ. Une fonction admet ' +
-              'donc soit aucune primitive sur I (si elle n\'y est pas continue), soit une ' +
-              '**infinité** — jamais une seule !',
+              'exactement les fonctions $x \\mapsto F(x)+C$, où C décrit ℝ. Une fonction qui ' +
+              'admet une primitive en admet donc une **infinité** — jamais une seule !',
+            'Toute fonction **continue** sur un intervalle y admet des primitives (admis). C\'est ' +
+              'le cas de toutes les fonctions de ce chapitre, sur leur domaine.',
           ],
         },
         {
@@ -89,9 +90,10 @@ export const primitivesIntegrales: ChapterContent = {
           tag: 'famille-primitives-widget',
           label: 'Manipule toi-même — fais glisser C',
           caption:
-            'La courbe se déplace verticalement pendant que le petit segment violet (la tangente ' +
-            'en x=1) reste TOUJOURS à la même pente — exactement l\'idée du texte : le glissement ' +
-            'vertical ne change jamais la dérivée.',
+            'Choisis f et fais glisser C : la courbe se déplace verticalement, mais la ' +
+            'tangente au point marqué garde toujours la même pente, celle donnée par f. ' +
+            'Avec f(x) = 1/x, chaque branche de ln|x| a sa propre constante (C₁ et C₂) : ℝ₀ ' +
+            'n\'est pas un intervalle. Coche « Afficher f » pour voir f en pointillés.',
         },
         {
           kind: 'definition',
@@ -143,6 +145,9 @@ export const primitivesIntegrales: ChapterContent = {
             ['sin(x)', '−cos(x) + C', '—'],
             ['1/(1+x²)', 'arctan(x) + C', '—'],
             ['1/√(1−x²)', 'arcsin(x) + C', 'x ∈ ]−1;1['],
+            ['1/x²', '−1/x + C', 'x ≠ 0'],
+            ['√x', '(2/3)·x√x + C', 'x ≥ 0'],
+            ['1/cos²(x)', 'tan(x) + C', 'cos(x) ≠ 0'],
           ],
         },
         {
@@ -151,7 +156,41 @@ export const primitivesIntegrales: ChapterContent = {
             'La formule $x^n \\to \\dfrac{x^{n+1}}{n+1}$ est **explicitement exclue** pour n = ' +
             '−1 : tu diviserais par 0 ! La primitive de 1/x n\'est jamais une puissance de x, ' +
             'c\'est ln|x|. Piège classique : oublier la valeur absolue — ln(x) seul n\'est ' +
-            'défini que pour x > 0, alors que 1/x l\'est aussi pour x < 0.',
+            'défini que pour x > 0, alors que 1/x l\'est aussi pour x < 0. Et comme ℝ₀ n\'est pas ' +
+            'un intervalle, la constante peut être différente sur $]-\\infty;0[$ et sur $]0;+\\infty[$ ' +
+            '(section 2).',
+        },
+        { kind: 'subheading', text: 'Règles de calcul : linéarité et f(ax + b)' },
+        {
+          kind: 'methode',
+          label: 'Deux règles à appliquer en premier',
+          items: [
+            '**Linéarité** : $\\int \\big(k\\,f(x) + g(x)\\big)dx = k\\int f(x)dx + \\int g(x)dx$ — tu ' +
+              'primitives terme à terme, les constantes multiplicatives restent en facteur.',
+            '**Composée affine** : si F est une primitive de f, une primitive de $f(ax+b)$ ($a \\neq 0$) ' +
+              'est $\\dfrac{1}{a}F(ax+b)$ — le facteur $\\dfrac{1}{a}$ compense la dérivée intérieure a.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'linéarité',
+          formula: 'Calcule $\\int \\left(3x^2 - \\dfrac{4}{x} + 2\\cos(x)\\right)dx$.',
+          steps: [
+            { tag: 'terme à terme', text: '$3\\int x^2dx - 4\\int \\dfrac{1}{x}dx + 2\\int \\cos(x)dx$' },
+            { tag: 'tableau des primitives usuelles', text: '$3\\cdot\\dfrac{x^3}{3} - 4\\ln|x| + 2\\sin(x)$' },
+          ],
+          result: { tag: 'résultat', text: '$x^3 - 4\\ln|x| + 2\\sin(x) + C$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'composée affine f(ax + b)',
+          formula: 'Calcule $\\int \\cos(3x)dx$, $\\int e^{2x+1}dx$ et $\\int (2x+1)^5dx$.',
+          steps: [
+            { tag: 'a = 3', text: '$\\int \\cos(3x)dx = \\dfrac{1}{3}\\sin(3x) + C$' },
+            { tag: 'a = 2', text: '$\\int e^{2x+1}dx = \\dfrac{1}{2}e^{2x+1} + C$' },
+            { tag: 'a = 2, et une primitive de u⁵ est u⁶/6', text: '$\\int (2x+1)^5dx = \\dfrac{1}{2}\\cdot\\dfrac{(2x+1)^6}{6} + C = \\dfrac{(2x+1)^6}{12} + C$' },
+          ],
+          result: { tag: 'vérifier en dérivant', text: '$\\left(\\dfrac{(2x+1)^6}{12}\\right)\' = \\dfrac{6\\cdot2\\,(2x+1)^5}{12} = (2x+1)^5$' },
         },
         { kind: 'subheading', text: 'Technique de substitution — reconnaître une forme u\'·f(u)' },
         {
@@ -184,6 +223,25 @@ export const primitivesIntegrales: ChapterContent = {
             '$2x=u\'(x)$ — il manque le facteur 1/2 ! La bonne primitive est $\\dfrac{1}{2}e^{x^2}+C$.',
         },
         {
+          kind: 'exemple',
+          badge: 'forme u′/u',
+          formula: 'Calcule $\\int \\dfrac{2x}{x^2+1}dx$ et $\\int \\tan(x)dx$.',
+          steps: [
+            { tag: 'u = x² + 1, u′ = 2x — et u > 0', text: '$\\int \\dfrac{2x}{x^2+1}dx = \\ln\\left(x^2+1\\right) + C$' },
+            { tag: 'u = cos(x), u′ = −sin(x) : faire apparaître u′', text: '$\\int \\tan(x)dx = \\int \\dfrac{\\sin(x)}{\\cos(x)}dx = -\\int \\dfrac{-\\sin(x)}{\\cos(x)}dx$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int \\tan(x)dx = -\\ln|\\cos(x)| + C$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'forme u′·uⁿ',
+          formula: 'Calcule $\\int 3x^2\\left(x^3+1\\right)^4dx$.',
+          steps: [
+            { tag: 'u = x³ + 1, u′ = 3x² : la forme u′·u⁴', text: '$\\int u\'\\,u^4 = \\dfrac{u^5}{5} + C$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int 3x^2\\left(x^3+1\\right)^4dx = \\dfrac{\\left(x^3+1\\right)^5}{5} + C$' },
+        },
+        {
           kind: 'astuce',
           label: 'Toujours vérifier',
           text:
@@ -205,7 +263,7 @@ export const primitivesIntegrales: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: 'Démonstration — formule de l\'intégration par parties',
           blocks: [
             { kind: 'para', text: '$(f \\cdot g)\'(x) = f(x) \\cdot g\'(x) + f\'(x) \\cdot g(x)$ — dérivée d\'un produit' },
             {
@@ -247,6 +305,21 @@ export const primitivesIntegrales: ChapterContent = {
             'presque toujours le bon réflexe.',
         },
         {
+          kind: 'exemple',
+          badge: '∫ ln(x) dx : le facteur caché 1',
+          formula: 'Calcule $\\int \\ln(x)dx$ sur $]0;+\\infty[$.',
+          steps: [
+            { tag: 'voir un produit : ln(x) = ln(x) · 1', text: '$f(x) = \\ln(x)$, $f\'(x) = \\dfrac{1}{x}$ ; $g\'(x) = 1$, $g(x) = x$' },
+            { tag: 'intégration par parties', text: '$\\int \\ln(x)dx = x\\ln(x) - \\int x\\cdot\\dfrac{1}{x}dx = x\\ln(x) - \\int 1\\,dx$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '$\\int \\ln(x)dx = x\\ln(x) - x + C$ — tu retrouves la fonction $x\\ln(x) - x$ du chapitre 3, ' +
+              'dont la dérivée était justement $\\ln(x)$.',
+          },
+        },
+        {
           kind: 'exempleLibre',
           label: 'Exemple résolu — deux intégrations par parties successives',
           blocks: [
@@ -260,8 +333,18 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$\\int x^2 \\cdot \\sin(x) dx = -x^2 \\cos(x) + 2\\int x \\cdot \\cos(x) dx = ' +
-                '-x^2\\cos(x) + 2x\\sin(x) + 2\\cos(x) + C$',
+                '**1re IPP** — $f = x^2$ ($f\' = 2x$), $g\' = \\sin(x)$ ($g = -\\cos(x)$) : ' +
+                '$\\int x^2 \\sin(x) dx = -x^2\\cos(x) + \\int 2x\\cos(x) dx$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2e IPP** — $f = 2x$ ($f\' = 2$), $g\' = \\cos(x)$ ($g = \\sin(x)$) : ' +
+                '$\\int 2x\\cos(x) dx = 2x\\sin(x) - \\int 2\\sin(x) dx = 2x\\sin(x) + 2\\cos(x)$.',
+            },
+            {
+              kind: 'para',
+              text: '$\\int x^2 \\cdot \\sin(x) dx = -x^2\\cos(x) + 2x\\sin(x) + 2\\cos(x) + C$',
             },
           ],
         },
@@ -358,6 +441,41 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'un polynôme',
+          formula: 'Détermine la primitive F de $f(x) = 3x^2 - 4x + 1$ telle que $F(2) = 3$.',
+          steps: [
+            { tag: 'primitive générale', text: '$F(x) = x^3 - 2x^2 + x + C$' },
+            { tag: 'condition initiale', text: '$F(2) = 8 - 8 + 2 + C = 2 + C = 3 \\implies C = 1$' },
+          ],
+          result: { tag: 'résultat', text: '$F(x) = x^3 - 2x^2 + x + 1$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une fonction trigonométrique',
+          formula: 'Détermine la primitive F de $f(x) = \\cos(x)$ telle que $F(\\pi) = 1$.',
+          steps: [
+            { tag: 'primitive générale', text: '$F(x) = \\sin(x) + C$' },
+            { tag: 'condition initiale — sin(π) = 0', text: '$F(\\pi) = 0 + C = 1 \\implies C = 1$' },
+          ],
+          result: { tag: 'résultat', text: '$F(x) = \\sin(x) + 1$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une condition pour x < 0',
+          formula: 'Détermine la primitive F de $f(x) = \\dfrac{1}{x}$ sur $]-\\infty;0[$ telle que $F(-1) = 2$.',
+          steps: [
+            { tag: 'sur ]−∞ ; 0[, |x| = −x', text: '$F(x) = \\ln|x| + C = \\ln(-x) + C$' },
+            { tag: 'condition initiale — ln(1) = 0', text: '$F(-1) = \\ln(1) + C = C = 2$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '$F(x) = \\ln(-x) + 2$ sur $]-\\infty;0[$ — cette condition ne dit rien de la branche ' +
+              '$x > 0$, qui garde sa propre constante.',
+          },
+        },
+        {
           kind: 'piege',
           label: 'Piège central de cet exercice',
           text:
@@ -370,17 +488,19 @@ export const primitivesIntegrales: ChapterContent = {
           tag: 'condition-initiale-widget',
           label: 'Manipule toi-même — choisis la bonne piste',
           caption:
-            'Déplace le point (x₀;y₀) : C = y₀−x₀² se résout en direct, et la primitive qui passe ' +
-            'exactement par ce point se distingue des autres (fanées) de la même famille. ' +
-            'Réglages par défaut (1;4) reproduisent exactement l\'illustration ci-dessus (C=3).',
+            'Choisis f puis place le point (x₀ ; y₀) : la constante se calcule en direct ' +
+            'par C = y₀ − F(x₀), et seule la primitive qui passe par ce point s\'allume. ' +
+            'Avec 1/x, un point ne fixe que la branche où il se trouve : l\'autre reste ' +
+            'libre. Les réglages par défaut (f = 2x, point (1 ; 4)) reproduisent ' +
+            'l\'illustration ci-dessus (C = 3).',
         },
         {
           kind: 'astuce',
-          label: 'Deux mots, deux sens',
+          label: 'Vérifier deux fois',
           text:
-            'Une **racine** est un zéro d\'un polynôme intermédiaire ; une **solution** résout ' +
-            'l\'énoncé complet. Ici, la « solution » de l\'équation en C te donne directement ' +
-            'l\'expression finale de F — ces deux mots ne sont jamais interchangeables.',
+            'Une primitive particulière se contrôle en deux gestes : **dérive-la** (tu dois retomber sur ' +
+            'f), puis **remplace x par x₀** (tu dois trouver y₀). Si l\'un des deux échoue, l\'erreur est ' +
+            'dans la primitive générale ou dans le calcul de C.',
         },
         {
           kind: 'application',
@@ -563,6 +683,8 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'Pour f continue sur [a;b] et F une primitive quelconque de f : ' +
               '$\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$.',
+            'Il relie deux mondes : l\'intégrale, définie comme une limite de sommes de rectangles, se ' +
+              'calcule avec une primitive. Il est démontré plus bas, avec la fonction aire.',
           ],
         },
         {
@@ -585,12 +707,94 @@ export const primitivesIntegrales: ChapterContent = {
             '$\\int_a^a f(x)dx = 0 \\qquad \\int_a^b f(x)dx = -\\int_b^a f(x)dx$',
             '$\\int_a^b (f(x)+g(x))dx = \\int_a^b f(x)dx + \\int_a^b g(x)dx \\qquad \\int_a^b k \\cdot f(x)dx = k \\int_a^b f(x)dx$',
             '**Additivité** : $\\int_a^b f(x)dx = \\int_a^c f(x)dx + \\int_c^b f(x)dx$ pour tout c',
-            'L\'intégrale définie est une somme **signée** : son signe suit celui de f sur ' +
-              '[a;b], même si a < b. La variable d\'intégration est **muette** — $\\int_a^b ' +
+            '**Positivité et croissance** : si $f \\ge 0$ sur $[a;b]$ (avec $a < b$), alors ' +
+              '$\\int_a^b f(x)dx \\ge 0$ ; si $f \\le g$ sur $[a;b]$, alors $\\int_a^b f(x)dx \\le \\int_a^b g(x)dx$.',
+            'L\'intégrale définie est une somme **signée** : lorsque $a < b$, son signe suit celui de f ' +
+              'sur [a;b] (si $a > b$, il s\'inverse). La variable d\'intégration est **muette** — $\\int_a^b ' +
               'f(x)dx$ et $\\int_a^b f(t)dt$ désignent exactement le même nombre. C\'est cette ' +
               'additivité qui justifie le découpage aux racines que tu utiliseras pour les ' +
               'aires (section 4).',
           ],
+        },
+        { kind: 'subheading', text: 'La fonction aire : pourquoi une primitive calcule une aire' },
+        {
+          kind: 'definition',
+          label: 'Fonction aire',
+          items: [
+            'Pour f continue sur un intervalle contenant a, la **fonction aire** ' +
+              '$A(x) = \\int_a^x f(t)dt$ mesure l\'aire (signée) accumulée sous la courbe, de a jusqu\'à x. ' +
+              'Elle vaut 0 en a : $A(a) = 0$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la fonction aire est une primitive de f (théorème fondamental)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1.** Prends $h > 0$ petit. Par additivité, $A(x+h) - A(x) = \\int_x^{x+h} f(t)dt$ : ' +
+                'l\'aire d\'une mince bande de largeur h.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** Note $m_h$ et $M_h$ le minimum et le maximum de f sur $[x;x+h]$. Par croissance ' +
+                'de l\'intégrale, la bande est encadrée par deux rectangles : ' +
+                '$m_h \\cdot h \\le A(x+h) - A(x) \\le M_h \\cdot h$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** Divise par $h > 0$ : $m_h \\le \\dfrac{A(x+h) - A(x)}{h} \\le M_h$. Quand $h \\to 0$, ' +
+                'f étant continue, $m_h$ et $M_h$ tendent tous deux vers $f(x)$ : le taux ' +
+                'd\'accroissement aussi. Même raisonnement pour $h < 0$. Donc $A\'(x) = f(x)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** A est **une primitive de f**, celle qui s\'annule en a. Si F est une ' +
+                'primitive quelconque de f, alors $A(x) = F(x) + C$, et $A(a) = 0$ donne $C = -F(a)$. ' +
+                'D\'où $\\int_a^b f(t)dt = A(b) = F(b) - F(a)$ : c\'est le théorème fondamental. ' +
+                '$\\qquad \\blacksquare$',
+            },
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Substitution dans une intégrale définie : changer aussi les bornes',
+          items: [
+            'Quand tu poses $u = u(x)$, les bornes portent sur x : remplace-les par $u(a)$ et $u(b)$ — ' +
+              'ou reviens à la variable x avant d\'évaluer. Les deux voies donnent le même nombre.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'substitution avec changement de bornes',
+          formula: 'Calcule $\\int_1^2 \\dfrac{2x}{x^2+1}dx$.',
+          steps: [
+            { tag: 'poser u = x² + 1 — du = 2x dx', text: 'si $x = 1$, $u = 2$ ; si $x = 2$, $u = 5$' },
+            { tag: 'nouvelle intégrale, nouvelles bornes', text: '$\\int_2^5 \\dfrac{1}{u}du = [\\ln(u)]_2^5 = \\ln(5) - \\ln(2)$' },
+          ],
+          result: { tag: 'résultat', text: '$\\int_1^2 \\dfrac{2x}{x^2+1}dx = \\ln\\left(\\dfrac{5}{2}\\right) \\approx 0{,}916$' },
+        },
+        {
+          kind: 'methode',
+          label: 'Parité : intégrer sur un intervalle symétrique',
+          items: [
+            'Si f est **impaire**, $\\int_{-a}^{a} f(x)dx = 0$ : les deux moitiés se compensent exactement.',
+            'Si f est **paire**, $\\int_{-a}^{a} f(x)dx = 2\\int_0^a f(x)dx$ : les deux moitiés sont égales.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'parité',
+          formula: 'Calcule $\\int_{-2}^{2}\\left(x^3 - 5x\\right)dx$ et $\\int_{-1}^{1}\\left(x^2 + 1\\right)dx$.',
+          steps: [
+            { tag: 'x³ − 5x est impaire', text: '$\\int_{-2}^{2}\\left(x^3 - 5x\\right)dx = 0$, sans aucun calcul' },
+            { tag: 'x² + 1 est paire', text: '$\\int_{-1}^{1}\\left(x^2 + 1\\right)dx = 2\\int_0^1\\left(x^2+1\\right)dx = 2\\left[\\dfrac{x^3}{3} + x\\right]_0^1 = 2\\cdot\\dfrac{4}{3}$' },
+          ],
+          result: { tag: 'résultat', text: '$0$ et $\\dfrac{8}{3}$' },
         },
         { kind: 'subheading', text: 'Pour aller plus loin — approcher numériquement une intégrale : la méthode des trapèzes' },
         {
@@ -640,7 +844,7 @@ export const primitivesIntegrales: ChapterContent = {
               text:
                 'La valeur exacte (théorème fondamental, une primitive de x² est x³/3) vaut ' +
                 '64/3 ≈ 21,33 : l\'approximation par trapèzes (22) surestime légèrement, car la ' +
-                'parabole est **concave vers le haut** — chaque trapèze passe donc au-dessus de la courbe.',
+                'parabole est **convexe (tournée vers le haut)** — chaque trapèze passe donc au-dessus de la courbe.',
             },
           ],
         },
@@ -649,9 +853,10 @@ export const primitivesIntegrales: ChapterContent = {
           tag: 'sommes-riemann-widget',
           label: 'Manipule toi-même — plus n grandit, plus c\'est précis',
           caption:
-            'Bascule entre minorant/majorant/trapèzes et fais grandir n : regarde l\'erreur par ' +
-            'rapport à la valeur exacte (64/3) fondre à mesure que les rectangles ou trapèzes se ' +
-            'resserrent. n=4 en trapèzes reproduit exactement l\'exemple résolu ci-dessus.',
+            'Choisis une fonction et une méthode, puis fais grandir n : l\'encadrement ' +
+            'minorant ≤ I ≤ majorant se resserre autour de la valeur exacte, et l\'erreur ' +
+            'fond. Compare le point milieu et les trapèzes : à n égal, lequel est le plus ' +
+            'précis ? x², n = 4, trapèzes reproduit l\'exemple résolu (22 contre 64/3).',
         },
         { kind: 'subheading', text: 'Valeur moyenne d\'une fonction sur un intervalle' },
         {
@@ -713,6 +918,17 @@ export const primitivesIntegrales: ChapterContent = {
           text:
             'Confondre la valeur de l\'**intégrale** (8, ci-dessus) avec la **valeur moyenne** ' +
             '(2) — il manque la division par b−a ! Ce sont deux nombres différents, jamais interchangeables.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'valeur moyenne de sin sur [0 ; π]',
+          formula: 'Calcule la valeur moyenne de $f(x) = \\sin(x)$ sur $[0;\\pi]$, et trouve où f l\'atteint.',
+          steps: [
+            { tag: 'intégrale', text: '$\\int_0^\\pi \\sin(x)dx = [-\\cos(x)]_0^\\pi = 1 + 1 = 2$' },
+            { tag: 'diviser par la longueur π', text: 'valeur moyenne $= \\dfrac{2}{\\pi} \\approx 0{,}637$' },
+            { tag: 'où est-elle atteinte ?', text: '$\\sin(r) = \\dfrac{2}{\\pi}$ : $r \\approx 0{,}690$ ou $r = \\pi - 0{,}690 \\approx 2{,}451$' },
+          ],
+          result: { tag: 'résultat', text: '$\\dfrac{2}{\\pi}$, atteinte en deux points de $[0;\\pi]$' },
         },
         { kind: 'subheading', text: 'Retrouver un paramètre depuis une intégrale connue' },
         {
@@ -804,6 +1020,16 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'sin sur [0 ; 2π]',
+          formula: 'Compare $\\int_0^{2\\pi}\\sin(x)dx$ et l\'aire comprise entre la courbe de sin et l\'axe des abscisses sur $[0;2\\pi]$.',
+          steps: [
+            { tag: 'intégrale (signée)', text: '$\\int_0^{2\\pi}\\sin(x)dx = [-\\cos(x)]_0^{2\\pi} = -1 + 1 = 0$' },
+            { tag: 'découper en π, où sin s\'annule', text: '$\\int_0^\\pi \\sin(x)dx = 2$ et $\\int_\\pi^{2\\pi}\\sin(x)dx = -2$' },
+          ],
+          result: { tag: 'résultat', text: 'intégrale $= 0$, mais aire $= 2 + 2 = 4$ : les deux arches se compensent dans l\'intégrale.' },
+        },
+        {
           kind: 'application',
           titre: 'Calculer un coût total à partir d\'un coût marginal',
           illustrations: [
@@ -817,7 +1043,7 @@ export const primitivesIntegrales: ChapterContent = {
               textLabels: [{ x: 5.5, y: 4, text: 'aire = 80 €', tone: 'good', anchor: 'middle' }],
               xAxisLabel: 'x (unités)',
               yAxisLabel: 'Cₘ(x) (€)',
-              caption: 'Coût marginal Cₘ(x)=2x+5 : l\'aire entre x=3 et x=8 (80 €) est le coût de production des unités 3 à 8.',
+              caption: 'Coût marginal Cₘ(x)=2x+5 : l\'aire entre x=3 et x=8 (80 €) est le coût supplémentaire pour passer de 3 à 8 unités produites.',
             },
             {
               kind: 'curvePlot',
@@ -837,7 +1063,7 @@ export const primitivesIntegrales: ChapterContent = {
               ],
               xAxisLabel: 'x (quantité)',
               yAxisLabel: 'prix (€)',
-              caption: 'Même principe pour le surplus du consommateur : l\'aire entre la courbe de demande et le prix payé (32) mesure l\'avantage retiré par les acheteurs.',
+              caption: 'Même principe pour le surplus du consommateur : l\'aire entre la courbe de demande et le prix payé (12 €) vaut 32 € — l\'avantage retiré par les acheteurs.',
             },
           ],
           text:
@@ -895,6 +1121,27 @@ export const primitivesIntegrales: ChapterContent = {
             },
             { kind: 'para', text: '$\\text{aire} = \\int_{-2}^{2} (4-x^2)dx = [4x-\\dfrac{x^3}{3}]_{-2}^{2} = \\dfrac{32}{3}$' },
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'entre x³ et x',
+          formula: 'Calcule l\'aire de la région comprise entre les courbes $f(x) = x^3$ et $g(x) = x$.',
+          steps: [
+            { tag: 'intersections', text: '$x^3 = x \\iff x\\left(x^2-1\\right) = 0 \\iff x \\in \\{-1;0;1\\}$' },
+            { tag: 'qui est au-dessus ?', text: '$x^3 \\ge x$ sur $[-1;0]$, $x \\ge x^3$ sur $[0;1]$' },
+            { tag: 'deux intégrales', text: '$\\int_{-1}^{0}\\left(x^3 - x\\right)dx + \\int_0^1\\left(x - x^3\\right)dx = \\dfrac{1}{4} + \\dfrac{1}{4}$' },
+          ],
+          result: { tag: 'résultat', text: 'aire $= \\dfrac{1}{2}$ — alors que $\\int_{-1}^{1}\\left(x^3 - x\\right)dx = 0$.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'sous ln(x) entre 1 et e',
+          formula: 'Calcule l\'aire comprise entre la courbe de $\\ln$, l\'axe des abscisses et les droites $x = 1$ et $x = e$.',
+          steps: [
+            { tag: 'signe — ln(x) ≥ 0 sur [1 ; e]', text: 'aire $= \\int_1^e \\ln(x)dx$' },
+            { tag: 'primitive par parties (section 1)', text: '$[x\\ln(x) - x]_1^e = (e - e) - (0 - 1)$' },
+          ],
+          result: { tag: 'résultat', text: 'aire $= 1$' },
         },
         {
           kind: 'piege',
@@ -992,7 +1239,8 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Substitution $x=r\\sin(\\theta)$, $dx=r\\cos(\\theta)d\\theta$, θ: 0→π/2 — ' +
+                'Substitution $x=r\\sin(\\theta)$, $dx=r\\cos(\\theta)d\\theta$, et les bornes changent ' +
+                '(section 3) : θ: 0→π/2 — ' +
                 'élimine la racine : $\\sqrt{r^2-r^2\\sin^2(\\theta)} = r\\cos(\\theta)$',
             },
             {
@@ -1097,6 +1345,43 @@ export const primitivesIntegrales: ChapterContent = {
             { kind: 'para', text: 'Rotation de f(x) = x sur [0;3] autour de l\'axe des abscisses :' },
             { kind: 'para', text: '$V = \\pi \\int_0^3 x^2 dx = \\pi [\\dfrac{x^3}{3}]_0^3 = 9\\pi$' },
           ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Le cône, retrouvé',
+          text:
+            'Ce solide est un cône de rayon 3 et de hauteur 3. En général, $f(x) = \\dfrac{r}{h}x$ sur ' +
+            '$[0;h]$ donne $V = \\pi\\dfrac{r^2}{h^2}\\cdot\\dfrac{h^3}{3} = \\dfrac{\\pi r^2 h}{3}$ — la formule de ' +
+            'géométrie. Ici, $\\dfrac{\\pi\\cdot 9\\cdot 3}{3} = 9\\pi$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'la boule',
+          formula: 'Démontre que le volume d\'une boule de rayon r vaut $\\dfrac{4}{3}\\pi r^3$.',
+          steps: [
+            { tag: 'la boule naît de la rotation d\'un demi-disque', text: '$f(x) = \\sqrt{r^2 - x^2}$ sur $[-r;r]$, donc $[f(x)]^2 = r^2 - x^2$' },
+            { tag: 'méthode des disques', text: '$V = \\pi\\int_{-r}^{r}\\left(r^2 - x^2\\right)dx = \\pi\\left[r^2x - \\dfrac{x^3}{3}\\right]_{-r}^{r} = \\pi\\left(2r^3 - \\dfrac{2r^3}{3}\\right)$' },
+          ],
+          result: { tag: 'résultat', text: '$V = \\dfrac{4}{3}\\pi r^3$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'un paraboloïde',
+          formula: 'Calcule le volume engendré par la rotation de $f(x) = \\sqrt{x}$ sur $[0;4]$ autour de l\'axe des abscisses.',
+          steps: [
+            { tag: 'le carré fait disparaître la racine', text: '$V = \\pi\\int_0^4 x\\,dx = \\pi\\left[\\dfrac{x^2}{2}\\right]_0^4$' },
+          ],
+          result: { tag: 'résultat', text: '$V = 8\\pi$ — la forme d\'une antenne parabolique ou d\'un phare.' },
+        },
+        {
+          kind: 'historique',
+          titre: 'Kepler, son mariage et les tonneaux de vin',
+          text:
+            'En 1613, **Johannes Kepler** achète du vin pour son mariage. Il s\'étonne que le marchand ' +
+            'mesure le volume de chaque tonneau avec une simple baguette plongée en diagonale par la ' +
+            'bonde. Intrigué, il publie en 1615 la « Nouvelle stéréométrie des tonneaux de vin », où il ' +
+            'calcule des volumes de solides de révolution en les découpant en une infinité de tranches ' +
+            'très fines — l\'idée même de la méthode des disques, un demi-siècle avant Newton et Leibniz.',
         },
         {
           kind: 'application',
@@ -1393,6 +1678,12 @@ export const primitivesIntegrales: ChapterContent = {
                 'Comme ch(x) > 0 toujours, la racine se simplifie directement :',
             },
             { kind: 'para', text: '$L = \\int_0^a \\text{ch}(x) dx = [\\text{sh}(x)]_0^a = \\text{sh}(a)$' },
+            {
+              kind: 'para',
+              text:
+                'C\'est la longueur d\'une chaîne suspendue : la courbe de ch est une chaînette ' +
+                '(chapitre 3).',
+            },
           ],
         },
         {
@@ -1401,6 +1692,26 @@ export const primitivesIntegrales: ChapterContent = {
             'Oublier le « 1+ » ou la racine carrée elle-même sous l\'intégrale — les deux sont ' +
             'TOUJOURS là, quelle que soit la fonction f ! Le signe de f\'(x) n\'a lui aucune ' +
             'incidence : il est élevé au carré.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'quand aucune primitive n\'est connue : y = x²',
+          formula: 'Approche la longueur de l\'arc de $y = x^2$ sur $[0;1]$.',
+          steps: [
+            { tag: 'formule', text: '$L = \\int_0^1 \\sqrt{1 + 4x^2}\\,dx$ — aucune primitive de cette racine n\'est au programme' },
+            { tag: 'trapèzes, 4 sous-intervalles (section 3)', text: '$L \\approx \\dfrac{0{,}25}{2}\\left[1 + \\sqrt{5} + 2\\left(\\sqrt{1{,}25} + \\sqrt{2} + \\sqrt{3{,}25}\\right)\\right] \\approx 1{,}488$' },
+          ],
+          result: { tag: 'résultat', text: '$L \\approx 1{,}49$ (valeur précise : 1,4789…) — la plupart des longueurs d\'arc se calculent ainsi.' },
+        },
+        {
+          kind: 'historique',
+          titre: 'Mesurer une courbe : « impossible », disait Descartes',
+          text:
+            'Dans sa Géométrie (1637), **René Descartes** affirme que le rapport entre une ligne courbe et ' +
+            'une droite n\'est pas connu, « et même ne le peut être par les hommes ». Vingt ans plus tard, ' +
+            'l\'Anglais William Neil (1657) puis le Néerlandais Hendrik van Heuraet (1659) calculent ' +
+            'exactement la longueur d\'un arc de la parabole semi-cubique — la courbe ' +
+            '$y = \\dfrac{2}{3}x^{3/2}$ de l\'exemple résolu ci-dessus, à un facteur près.',
         },
         {
           kind: 'astuce',
@@ -1527,6 +1838,73 @@ export const primitivesIntegrales: ChapterContent = {
             'sa PROPRE constante, déterminée par SA PROPRE condition initiale — jamais partagée entre les deux étapes.',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — déplacement ou distance parcourue ?',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Un mobile se déplace sur une droite avec la vitesse $v(t) = t^2 - 4t + 3 = (t-1)(t-3)$ ' +
+                '(en m/s), pour t entre 0 et 3 s. Calcule son déplacement et la distance parcourue.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Déplacement** : $\\int_0^3 v(t)dt = \\left[\\dfrac{t^3}{3} - 2t^2 + 3t\\right]_0^3 = 9 - 18 + 9 = 0$ — ' +
+                'le mobile revient à son point de départ.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Distance** : v est positive sur $[0;1[$ (il avance) et négative sur $]1;3[$ (il recule). ' +
+                '$\\int_0^1 v(t)dt = \\dfrac{4}{3}$ et $\\int_1^3 v(t)dt = -\\dfrac{4}{3}$, donc la distance vaut ' +
+                '$\\dfrac{4}{3} + \\dfrac{4}{3} = \\dfrac{8}{3} \\approx 2{,}67$ m.',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Déplacement ≠ distance',
+          text:
+            'Le **déplacement** vaut $\\int_a^b v(t)dt$ ; la **distance parcourue** vaut $\\int_a^b |v(t)|dt$. ' +
+            'Dès que v change de signe, découpe aux instants où elle s\'annule — exactement comme pour une ' +
+            'aire (section 4).',
+        },
+        {
+          kind: 'exemple',
+          badge: 'trapèzes sur des relevés',
+          formula:
+            'La vitesse d\'une voiture est relevée toutes les 10 s : 0 ; 8 ; 13 ; 15 ; 16 m/s (de t = 0 à ' +
+            't = 40 s). Estime la distance parcourue.',
+          steps: [
+            { tag: 'aucune formule de v : méthode des trapèzes, Δt = 10', text: '$d \\approx \\dfrac{10}{2}\\left[0 + 16 + 2(8 + 13 + 15)\\right] = 5\\times 88$' },
+          ],
+          result: { tag: 'résultat', text: '$d \\approx 440$ m' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'débit et volume',
+          formula:
+            'Une piscine se remplit avec un débit $d(t) = 12 - 0{,}1t$ (en m³/h, t en heures). Quel volume ' +
+            'd\'eau entre en 10 heures ?',
+          steps: [
+            { tag: 'le volume accumule le débit', text: '$V = \\int_0^{10}(12 - 0{,}1t)dt = \\left[12t - 0{,}05t^2\\right]_0^{10} = 120 - 5$' },
+          ],
+          result: { tag: 'résultat', text: '$V = 115$ m³' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'volume par soustraction : un bol',
+          formula:
+            'Un bol a la forme d\'une demi-boule de rayon extérieur 5 cm, creusée d\'une demi-boule de ' +
+            'rayon 4 cm. Quel volume de matière contient-il ?',
+          steps: [
+            { tag: 'volume d\'une demi-boule (section 5)', text: '$\\dfrac{1}{2}\\cdot\\dfrac{4}{3}\\pi r^3 = \\dfrac{2}{3}\\pi r^3$' },
+            { tag: 'volume total moins cavité', text: '$V = \\dfrac{2}{3}\\pi\\left(5^3 - 4^3\\right) = \\dfrac{2}{3}\\pi\\times 61$' },
+          ],
+          result: { tag: 'résultat', text: '$V = \\dfrac{122\\pi}{3} \\approx 127{,}8$ cm³' },
+        },
+        {
           kind: 'methode',
           label: 'Autres contextes classiques',
           items: [
@@ -1567,7 +1945,8 @@ export const primitivesIntegrales: ChapterContent = {
         title: 'Primitives usuelles',
         formulas: [
           { text: '$\\int x^n dx = \\dfrac{x^{n+1}}{n+1} + C$', condition: '$n \\neq -1$' },
-          { text: '$\\int \\dfrac{1}{x} dx = \\ln|x| + C$' },
+          { text: '$\\int \\dfrac{1}{x} dx = \\ln|x| + C$', condition: 'constante propre à chaque intervalle de ℝ₀' },
+          { text: '$\\int \\ln(x) dx = x\\ln(x) - x + C \\qquad \\int \\dfrac{1}{\\cos^2(x)} dx = \\tan(x) + C$' },
           {
             text: '$\\int e^x dx = e^x + C \\qquad \\int e^{kx} dx = \\dfrac{1}{k}e^{kx} + C$',
             condition: '$k \\neq 0$ pour la seconde',
@@ -1590,6 +1969,8 @@ export const primitivesIntegrales: ChapterContent = {
             condition: 'reconnaître la forme u\'·f(u)',
           },
           { text: '$\\int f(x) \\cdot g\'(x) dx = f(x) \\cdot g(x) - \\int f\'(x) \\cdot g(x) dx$', condition: 'intégration par parties' },
+          { text: '$\\int \\big(k f(x) + g(x)\\big)dx = k\\int f(x)dx + \\int g(x)dx$', condition: 'linéarité' },
+          { text: '$\\int f(ax+b)dx = \\dfrac{1}{a}F(ax+b) + C$', condition: '$a \\neq 0$, F primitive de f' },
         ],
       },
       {
@@ -1605,6 +1986,8 @@ export const primitivesIntegrales: ChapterContent = {
           { text: '$\\int_a^b f(x) dx = F(b) - F(a)$', condition: 'théorème fondamental — F primitive quelconque de f' },
           { text: '$\\int_a^a f(x) dx = 0 \\qquad \\int_a^b f(x) dx = -\\int_b^a f(x) dx$' },
           { text: '$\\int_a^b f(x) dx = \\int_a^c f(x) dx + \\int_c^b f(x) dx$', condition: 'additivité' },
+          { text: '$A(x) = \\int_a^x f(t)dt \\implies A\'(x) = f(x)$', condition: 'fonction aire — f continue' },
+          { text: '$\\int_{-a}^{a} f = 0$ si f impaire $\\qquad \\int_{-a}^{a} f = 2\\int_0^a f$ si f paire' },
           {
             text:
               '$\\int_a^b f(x) dx \\approx \\dfrac{\\Delta x}{2}[f(x_0)+f(x_n)+2(f(x_1)+\\ldots+f(x_{n-1}))]$',
@@ -1626,6 +2009,7 @@ export const primitivesIntegrales: ChapterContent = {
         formulas: [
           { text: '$V = \\pi \\int_a^b [f(x)]^2 dx$', condition: 'méthode des disques' },
           { text: '$V = \\pi \\int_a^b ([f(x)]^2 - [g(x)]^2) dx$', condition: 'méthode des rondelles — $f \\ge g \\ge 0$' },
+          { text: '$V_{\\text{boule}} = \\dfrac{4}{3}\\pi r^3 \\qquad V_{\\text{cône}} = \\dfrac{\\pi r^2 h}{3}$', condition: 'retrouvés par la méthode des disques' },
           { text: '$L = \\int_a^b \\sqrt{1+[f\'(x)]^2} dx$' },
         ],
       },
@@ -1646,12 +2030,24 @@ export const primitivesIntegrales: ChapterContent = {
         ['Volume — rondelles', 'π∫ₐᵇ([f(x)]²−[g(x)]²)dx'],
         ['Longueur d\'arc', '∫ₐᵇ√(1+[f\'(x)]²)dx'],
         ['Cinématique', 'a → v → x, une constante distincte à chaque étape'],
+        ['Déplacement / distance', '∫v(t)dt / ∫|v(t)|dt'],
+      ],
+    },
+    checklist: {
+      label: 'Astuce — avant de rendre ta copie',
+      items: [
+        'Ai-je écrit + C pour une primitive générale, et vérifié ma primitive en la dérivant ?',
+        'Pour f(ax + b), ai-je divisé par a ? Pour une substitution dans une intégrale définie, ai-je changé les bornes ?',
+        'Pour une aire, ai-je découpé aux racines (ou aux intersections) et sommé des valeurs absolues ?',
+        'Pour un volume par rondelles, ai-je soustrait les carrés ([f]² − [g]²) et non élevé la différence au carré ?',
+        'En cinématique, ai-je distingué déplacement (∫v) et distance parcourue (∫|v|) ?',
       ],
     },
     forward:
-      'Un seul théorème — $\\int_a^b f(x)dx = F(b)-F(a)$ — porte toutes les applications de ce ' +
-      'chapitre : aires, volumes, longueurs, valeur moyenne, cinématique. Maîtrise le calcul ' +
-      'de primitives (section 1) : c\'est le socle sur lequel repose tout le reste.',
+      'Un seul théorème — $\\int_a^b f(x)dx = F(b)-F(a)$, démontré grâce à la fonction aire — porte ' +
+      'toutes les applications de ce chapitre : aires, volumes, longueurs, valeur moyenne, ' +
+      'cinématique. Tu le retrouveras au chapitre 8 : une probabilité y devient une aire sous une ' +
+      'courbe de densité.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',
