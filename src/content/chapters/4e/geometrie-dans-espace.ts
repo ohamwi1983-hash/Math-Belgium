@@ -93,8 +93,8 @@ export const geometrieDansEspace: ChapterContent = {
               caption:
                 'Le moteur trace une droite de la caméra vers chaque sommet 3D et calcule le ' +
                 "pixel où cette droite traverse le plan de l'écran — une règle fixe, répétée " +
-                'pour tous les sommets de tous les objets, exactement comme une convention de ' +
-                'dessin appliquée systématiquement.',
+                'pour tous les sommets de tous les objets : c\'est la perspective centrale des ' +
+                'sections 10 et 11.',
             },
           ],
           text:
@@ -104,10 +104,11 @@ export const geometrieDansEspace: ChapterContent = {
             'virtuelle** : il calcule, pour chaque sommet d\'un objet 3D, où cette caméra ' +
             '« voit » ce sommet sur un plan de projection, selon des règles de perspective ' +
             'fixées une fois pour toutes dans le moteur (position de la caméra, angle de vue, ' +
-            'distance de projection). C\'est exactement le principe d\'une convention de ' +
-            'dessin comme la perspective cavalière : une règle fixe et systématique, appliquée ' +
-            'des millions de fois par seconde à chaque sommet de chaque objet 3D du jeu, pour ' +
-            'transformer un monde en trois dimensions en une image plate sur ton écran.',
+            'distance de projection). Tous les rayons partent d\'un même point, l\'œil de la ' +
+            'caméra : c\'est la **perspective centrale** des sections 10 et 11, et non la ' +
+            'cavalière, où l\'on projette parallèlement. Dans les deux cas, une règle fixe et ' +
+            'systématique, appliquée des millions de fois par seconde à chaque sommet de chaque ' +
+            'objet 3D du jeu, transforme un monde en trois dimensions en une image plate.',
           domaines: ['Informatique', 'Jeux vidéo'],
         },
         {
@@ -124,25 +125,14 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La perspective cavalière n'est pas la seule façon de représenter l'espace sur une " +
-            'feuille. Les peintres de la Renaissance ont inventé la **perspective centrale** (ou ' +
-            '« perspective à point de fuite »). Dans cette perspective, toutes les droites ' +
-            'parallèles d\'un même plan horizontal semblent converger vers un seul point : le ' +
-            '**point de fuite**. Il est posé sur une ligne d\'horizon, à hauteur d\'œil. C\'est ' +
-            'exactement l\'effet que produit une route ou une voie ferrée, qui semble se ' +
-            'refermer au loin. Tu retrouves le dispositif et le principe de cette convention dans ' +
-            'les sections 10 et 11 de ce chapitre.',
-        },
-        {
-          kind: 'para',
-          text:
-            'Cette perspective est plus fidèle à la vision humaine : elle imite ce qu\'un ' +
-            'objectif photo ou un œil capture réellement. Mais elle est bien plus lourde à ' +
-            'construire à la main. Il faut placer un ou plusieurs points de fuite avant de tracer ' +
-            "la moindre arête. C'est pourquoi tous les dessins de ce chapitre restent en " +
-            'perspective cavalière. Elle est plus simple à tracer, et elle conserve le ' +
-            'parallélisme des droites : deux arêtes parallèles du solide le restent sur le ' +
-            'dessin. La perspective centrale, elle, ne le fait jamais.',
+            "La perspective cavalière n'est pas la seule façon de dessiner l'espace. Les peintres " +
+            'de la Renaissance ont inventé la **perspective centrale** : les droites qui ' +
+            's\'éloignent de l\'observateur (les **fuyantes**) semblent converger vers un **point de ' +
+            'fuite**, comme les rails d\'une voie ferrée. Plus fidèle à l\'œil, elle est aussi plus ' +
+            'lourde à construire : tu la découvres aux sections 10 et 11. Tous les autres dessins ' +
+            'du chapitre restent en cavalière, qui conserve le parallélisme de **toutes** les ' +
+            'droites — la perspective centrale ne le conserve que pour les droites parallèles à ' +
+            'la vitre, comme les verticales.',
         },
         {
           kind: 'historique',
@@ -191,7 +181,7 @@ export const geometrieDansEspace: ChapterContent = {
             'infinité de plans peuvent encore pivoter — comme les pages d\'un livre qui tournent ' +
             'toutes autour de sa reliure. Un troisième point, à condition qu\'il ne soit **pas** ' +
             'sur cette droite, immobilise un seul de ces plans. C\'est exactement pourquoi un ' +
-            'tabouret à 3 pieds ne bancale jamais, quel que soit le sol, alors qu\'un tabouret à 4 ' +
+            'tabouret à 3 pieds n\'est jamais bancal, quel que soit le sol, alors qu\'un tabouret à 4 ' +
             'pieds peut se mettre à vaciller si un seul pied est un peu plus court que les autres.',
         },
         {
@@ -246,8 +236,16 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'attention',
+          label: 'Ce qui ne détermine pas un plan',
+          text:
+            'Trois points **alignés** ne fixent aucun plan : une infinité de plans passent par la ' +
+            'droite qui les porte. Deux droites **gauches** non plus : aucun plan ne les contient ' +
+            'toutes les deux (section 3).',
+        },
+        {
           kind: 'rappel',
-          label: 'Repère',
+          label: 'À retenir',
           items: [
             "Comme dans le plan, une droite de l'espace reste déterminée par 2 points distincts. " +
               'Un plan se désigne le plus souvent par 3 de ses points : « le plan (ABC) ». Plus ' +
@@ -339,6 +337,27 @@ export const geometrieDansEspace: ChapterContent = {
               'plan.',
           ],
         },
+        {
+          kind: 'methode',
+          label: 'Prouver que deux droites sont gauches',
+          items: [
+            'Montre qu\'elles ne sont **ni sécantes, ni parallèles**.',
+            'Technique classique : l\'une des droites perce un plan qui contient l\'autre en un ' +
+              'seul point — et ce point n\'est pas sur l\'autre droite.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'prouver que deux droites sont gauches',
+          formula: 'Dans le cube ABCDEFGH, montre que (AB) et (CG) sont gauches.',
+          steps: [
+            { tag: 'un plan qui contient (AB)', text: 'le plan de la base (ABC)' },
+            { tag: 'percée', text: '(CG) est verticale : elle n\'est pas incluse dans (ABC) et le perce au seul point C' },
+            { tag: 'pas sécantes', text: 'C n\'est pas sur (AB) : (CG) n\'a donc aucun point commun avec (AB)' },
+            { tag: 'pas parallèles', text: 'la parallèle à (AB) passant par C est (CD), qui est dans la base — pas (CG)' },
+          ],
+          result: { tag: 'résultat', text: '(AB) et (CG) ne sont ni sécantes ni parallèles : elles sont gauches.' },
+        },
       ],
     },
 
@@ -386,9 +405,8 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Méthode — 3 questions, toujours dans cet ordre',
           items: [
             'Les 2 points de la droite appartiennent-ils tous les deux au plan ? Si oui → **incluse**.',
-            'Sinon, pose la question suivante : la direction de la droite est-elle parallèle au ' +
-              'plan ? (c\'est le cas si elle est portée par une combinaison des directions de deux ' +
-              'droites non parallèles du plan) Si oui → **parallèle**. Elle ne rencontre jamais ' +
+            'Sinon, pose la question suivante : la droite est-elle parallèle à **une droite du ' +
+              'plan** (critère de la section 7) ? Si oui → **parallèle**. Elle ne rencontre jamais ' +
               'le plan.',
             'Sinon → **sécante**. Le plan est toujours considéré **infini** — jamais limité aux ' +
               'arêtes dessinées du solide. La droite le coupe donc en un point unique. Ce point ' +
@@ -435,17 +453,26 @@ export const geometrieDansEspace: ChapterContent = {
               text: 'A appartient-il à (EFGH) ? Non : A est un sommet de la base. Donc pas d\'inclusion.',
             },
             {
-              tag: 'question 2 — parallélisme',
+              tag: 'question 2 — un point commun',
               text:
-                'La direction (AG) traverse-t-elle toute la hauteur du cube, de la base au sommet ? ' +
-                'Oui. Elle n\'est portée par aucune direction du plan supérieur. Donc pas de ' +
-                'parallélisme non plus.',
+                'G appartient à la fois à (AG) et à (EFGH). Une droite qui a un point commun avec ' +
+                'un plan, sans y être incluse, ne peut pas lui être parallèle.',
             },
           ],
           result: {
             tag: 'conclusion',
             text: '(AG) est donc sécante à (EFGH). L\'intersection tombe exactement sur le sommet G, déjà nommé sur le solide.',
           },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une droite parallèle au plan',
+          formula: 'Dans le même cube, quelle est la position de (AB) par rapport à (EFGH) ?',
+          steps: [
+            { tag: 'question 1 — inclusion', text: 'A et B sont sur la base, pas sur (EFGH) : pas d\'inclusion.' },
+            { tag: 'question 2 — parallélisme', text: '(AB) est parallèle à (EF) (ABFE est un carré), et (EF) est une droite du plan (EFGH).' },
+          ],
+          result: { tag: 'conclusion', text: '(AB) est parallèle à (EFGH) : elle ne le rencontre jamais.' },
         },
         {
           kind: 'piege',
@@ -523,15 +550,40 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
-          kind: 'rappel',
-          label: 'Pour les curieux — la démonstration par l\'absurde',
-          items: [
-            'Ces deux propriétés se démontrent classiquement **par l\'absurde**. On suppose le ' +
-              'contraire de ce qu\'on veut prouver. Puis on montre que cette supposition contredit ' +
-              'une hypothèse déjà connue — ce qui est impossible. La supposition de départ était ' +
-              'donc fausse, donc la propriété annoncée est vraie. C\'est une technique de ' +
-              'raisonnement à retenir, bien au-delà de la seule géométrie de l\'espace.',
+          kind: 'exempleLibre',
+          label: 'Démonstration par l\'absurde — la propriété 1',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On raisonne **par l\'absurde** : on suppose le contraire de ce qu\'on veut prouver, ' +
+                'et on aboutit à une contradiction. La supposition était donc fausse.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Soit α et α′ deux plans parallèles, et π un plan qui les coupe suivant d et d′. Les ' +
+                'droites d et d′ sont toutes les deux dans π : elles sont coplanaires, donc sécantes ' +
+                'ou parallèles.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Supposons-les sécantes en un point M. M est sur d, donc dans α ; M est sur d′, donc ' +
+                'dans α′. Les plans α et α′ auraient un point commun — impossible, ils sont ' +
+                'parallèles. La supposition est fausse : d et d′ sont **parallèles**.',
+            },
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux plans parallèles coupés par un troisième',
+          formula: 'Dans le cube, le plan (ACGE) coupe la base (ABCD) et la face (EFGH). Que dire de (AC) et de (EG) ?',
+          steps: [
+            { tag: 'deux plans parallèles', text: '(ABCD) et (EFGH) sont deux faces opposées du cube' },
+            { tag: 'les intersections', text: '(ACGE) coupe (ABCD) suivant (AC), et (EFGH) suivant (EG)' },
+          ],
+          result: { tag: 'résultat', text: '(AC) ∥ (EG), par la propriété 1' },
         },
       ],
     },
@@ -540,24 +592,26 @@ export const geometrieDansEspace: ChapterContent = {
       id: 'trois-plans',
       number: 6,
       title: 'Positions de trois plans',
-      kicker: '3 droites d\'intersection, jamais indépendantes les unes des autres',
+      kicker: 'droites d\'intersection sécantes en un point, parallèles, ou confondues',
       blocks: [
         { kind: 'video', title: 'Trois plans, critères de parallélisme et point de percée', youtubeId: 'k6hI1gqH1Eo' },
         {
           kind: 'intuition',
           label: 'Pour visualiser',
           text:
-            'Pense au coin de ta chambre : le sol et deux murs se rencontrent tous les trois ' +
-            '**en un seul point**, l\'angle de la pièce. C\'est exactement le premier cas ' +
-            'ci-dessous. Le second cas, lui, correspondrait à trois murs tous parallèles entre ' +
-            'eux — comme les pages d\'un même classeur, qui ne se touchent jamais.',
+            'Pense au coin de ta chambre : le sol et deux murs se rencontrent **en un seul ' +
+            'point**, l\'angle de la pièce — c\'est le premier cas. Le deuxième, ce sont les ' +
+            'trois faces d\'une barre de Toblerone (un prisme triangulaire) : elles se coupent deux ' +
+            'à deux suivant trois arêtes **parallèles**. Le troisième, ce sont les pages d\'un ' +
+            'livre ouvert : elles passent toutes par **la même droite**, la reliure.',
         },
         {
           kind: 'para',
           text:
-            'Si trois plans sont sécants deux à deux, les trois droites d\'intersection obtenues ' +
-            'ne sont jamais quelconques. Elles sont soit toutes les trois **sécantes en un même ' +
-            'point**, soit toutes les trois **parallèles entre elles**.',
+            'Si trois plans distincts sont sécants deux à deux, les droites d\'intersection ' +
+            'obtenues ne sont jamais quelconques. Elles sont soit toutes les trois **sécantes en ' +
+            'un même point**, soit toutes les trois **parallèles entre elles**, soit **confondues** : ' +
+            'les trois plans ont alors une droite commune.',
         },
         {
           kind: 'illustrationGroup',
@@ -583,7 +637,19 @@ export const geometrieDansEspace: ChapterContent = {
                 { points: [{ x: 65, y: 95 }, { x: 90, y: 20 }], tone: 'good' },
                 { points: [{ x: 110, y: 100 }, { x: 135, y: 25 }], tone: 'attn' },
               ],
-              caption: 'parallèles entre elles',
+              caption: 'parallèles entre elles (prisme)',
+            },
+            {
+              kind: 'planeSketch',
+              width: 150,
+              height: 110,
+              planes: [
+                { points: [{ x: 75, y: 15 }, { x: 75, y: 100 }, { x: 18, y: 88 }, { x: 18, y: 27 }], style: 'plan' },
+                { points: [{ x: 75, y: 15 }, { x: 75, y: 100 }, { x: 132, y: 92 }, { x: 132, y: 31 }], style: 'plan' },
+                { points: [{ x: 75, y: 15 }, { x: 75, y: 100 }, { x: 104, y: 106 }, { x: 104, y: 21 }], style: 'planDashed' },
+              ],
+              lines: [{ points: [{ x: 75, y: 10 }, { x: 75, y: 105 }], tone: 'accent' }],
+              caption: 'une droite commune (livre ouvert)',
             },
           ],
         },
@@ -605,7 +671,7 @@ export const geometrieDansEspace: ChapterContent = {
             '**Droite ∥ plan** — une droite est parallèle à un plan si elle est parallèle à ' +
               '**une droite de ce plan**. Tu as déjà vu ce cas dans la section 4 (le cas « parallèle »).',
             '**Plan ∥ plan** — deux plans sont parallèles si deux droites sécantes du premier ' +
-              'sont parallèles, chacune, à une droite sécante du second.',
+              'sont parallèles à deux droites du second.',
           ],
         },
         {
@@ -616,6 +682,17 @@ export const geometrieDansEspace: ChapterContent = {
             'l\'espace, c\'est toujours prouver un parallélisme entre deux **droites** ! Ce n\'est ' +
             'jamais un parallélisme « au jugé » entre deux plans entiers : un plan ne se compare ' +
             'à un autre qu\'à travers les droites qu\'il contient.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux plans parallèles dans le cube',
+          formula: 'Montre que les plans (AFH) et (BDG) sont parallèles.',
+          steps: [
+            { tag: '1re paire', text: '(FH) ∥ (BD) : BDHF est un rectangle' },
+            { tag: '2e paire', text: '(AF) ∥ (DG) : ADGF est un rectangle' },
+            { tag: 'deux droites sécantes', text: '(FH) et (AF) se coupent en F, dans le plan (AFH)' },
+          ],
+          result: { tag: 'résultat', text: 'deux droites sécantes de (AFH) sont parallèles à deux droites de (BDG) : les plans sont parallèles' },
         },
       ],
     },
@@ -677,6 +754,18 @@ export const geometrieDansEspace: ChapterContent = {
               'problème 2D : d et b sont maintenant coplanaires dans π.',
           ],
         },
+        {
+          kind: 'exemple',
+          badge: 'point de percée hors du solide',
+          formula: 'Dans le cube ABCDEFGH, J est le milieu de [BF]. Trouve le point de percée de (AJ) dans le plan (EFGH).',
+          steps: [
+            { tag: 'plan auxiliaire', text: 'la face avant (ABFE) contient (AJ)' },
+            { tag: 'droite commune', text: '(ABFE) coupe (EFGH) suivant (EF)' },
+            { tag: 'intersection 2D', text: 'dans le plan (ABFE), (AJ) et (EF) se coupent en un point K' },
+            { tag: 'position de K', text: 'les triangles JBA et JFK ont les mêmes angles (opposés par le sommet en J, droits en B et F) et JB = JF : ils sont égaux, donc FK = AB = EF' },
+          ],
+          result: { tag: 'résultat', text: 'K est sur le prolongement de [EF], au-delà de F, avec F milieu de [EK] — en dehors du cube' },
+        },
         { kind: 'subheading', text: 'Intersection de deux plans' },
         {
           kind: 'para',
@@ -695,6 +784,16 @@ export const geometrieDansEspace: ChapterContent = {
               'd\'intersection, en t\'appuyant sur les propriétés connues de la figure ' +
               '(parallélisme, symétrie…).',
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'intersection de deux plans',
+          formula: 'Trouve la droite d\'intersection des plans (ACGE) et (BDHF).',
+          steps: [
+            { tag: '1er point commun', text: 'O, centre de ABCD, est sur (AC) et sur (BD) : il appartient aux deux plans' },
+            { tag: '2e point commun', text: 'O′, centre de EFGH, est sur (EG) et sur (FH) : il appartient lui aussi aux deux plans' },
+          ],
+          result: { tag: 'résultat', text: 'deux points communs distincts suffisent : les plans se coupent suivant la droite verticale (OO′)' },
         },
       ],
     },
@@ -825,6 +924,56 @@ export const geometrieDansEspace: ChapterContent = {
           },
         },
         {
+          kind: 'exemple',
+          badge: 'section d\'un tétraèdre par point auxiliaire',
+          formula: 'Tétraèdre ABCD : P sur [AB], Q sur [AC], R sur [BD]. Construis la section par le plan (PQR).',
+          steps: [
+            { tag: '1 — face ABC, segment direct', text: 'P et Q sont connus → on trace [PQ]' },
+            { tag: '2 — face ABD, segment direct', text: 'P et R sont connus → on trace [PR]' },
+            { tag: '3 — face BCD : un seul point connu (R)', text: 'point auxiliaire : dans le plan (ABC), (PQ) est dans le plan de coupe et (BC) dans le plan (BCD) ; elles se coupent en I, hors du solide' },
+            { tag: '4 — côté de la face BCD', text: 'I est à la fois dans le plan de coupe et dans le plan (BCD) : la droite (IR) porte le côté de section de cette face, et coupe [CD] en S' },
+            { tag: '5 — face ACD, segment direct', text: 'Q et S sont connus → on trace [QS]' },
+          ],
+          result: { tag: 'résultat', text: 'la section est le quadrilatère PQSR : 4 faces traversées, 4 sommets' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'planeSketch',
+            width: 380,
+            height: 205,
+            planes: [
+              { points: [{ x: 85, y: 100 }, { x: 244, y: 148 }, { x: 248.2, y: 166.4 }, { x: 126, y: 150 }], style: 'plan' },
+            ],
+            lines: [
+              { points: [{ x: 140, y: 20 }, { x: 30, y: 180 }, { x: 270, y: 180 }], tone: 'ink', closed: true },
+              { points: [{ x: 140, y: 20 }, { x: 190, y: 130 }], tone: 'faint', dashed: true },
+              { points: [{ x: 30, y: 180 }, { x: 190, y: 130 }], tone: 'faint', dashed: true },
+              { points: [{ x: 270, y: 180 }, { x: 190, y: 130 }], tone: 'faint', dashed: true },
+              { points: [{ x: 85, y: 100 }, { x: 244, y: 148 }], tone: 'accent' },
+              { points: [{ x: 85, y: 100 }, { x: 126, y: 150 }], tone: 'accent', dashed: true },
+              { points: [{ x: 244, y: 148 }, { x: 350, y: 180 }], tone: 'attn', dashed: true },
+              { points: [{ x: 270, y: 180 }, { x: 350, y: 180 }], tone: 'faint', dashed: true },
+              { points: [{ x: 350, y: 180 }, { x: 126, y: 150 }], tone: 'attn', dashed: true },
+              { points: [{ x: 244, y: 148 }, { x: 248.2, y: 166.4 }], tone: 'accent', dashed: true },
+            ],
+            points: [
+              { x: 140, y: 20, label: 'A', tone: 'ink', labelDx: 8, labelDy: -2 },
+              { x: 30, y: 180, label: 'B', tone: 'ink', labelDx: -14, labelDy: 14 },
+              { x: 270, y: 180, label: 'C', tone: 'ink', labelDx: -4, labelDy: 18 },
+              { x: 190, y: 130, label: 'D', tone: 'ink', labelDx: 4, labelDy: -8 },
+              { x: 85, y: 100, label: 'P', tone: 'accent', labelDx: -16, labelDy: 0 },
+              { x: 244, y: 148, label: 'Q', tone: 'accent', labelDx: 6, labelDy: -6 },
+              { x: 126, y: 150, label: 'R', tone: 'accent', labelDx: -6, labelDy: 18 },
+              { x: 248.2, y: 166.4, label: 'S', tone: 'accent', labelDx: -16, labelDy: 6 },
+              { x: 350, y: 180, label: 'I', tone: 'good', labelDx: 6, labelDy: 16 },
+            ],
+            caption:
+              'point auxiliaire : (PQ) et (BC) se coupent en I, hors du tétraèdre ; (IR) donne S sur ' +
+              '[CD]. Les côtés cachés de la section sont en pointillés',
+          },
+        },
+        {
           kind: 'application',
           titre: 'Comment une imprimante 3D construit un objet, tranche par tranche',
           illustrations: [
@@ -881,15 +1030,16 @@ export const geometrieDansEspace: ChapterContent = {
       id: 'fenetre-durer',
       number: 10,
       title: 'La fenêtre de Dürer : le dispositif de la perspective centrale',
-      kicker: 'vision monoculaire à travers une vitre quadrillée — un cadre inventé par Dürer',
+      kicker: 'vision monoculaire à travers une vitre quadrillée — un cadre popularisé par Dürer',
       blocks: [
         { kind: 'video', title: 'Perspective centrale (fenêtre de Dürer, point de fuite) et ombre au soleil', youtubeId: '-hIwnCIyjFU' },
         {
           kind: 'para',
           text:
             'Les peintres de la Renaissance ont élaboré les règles de la perspective centrale à ' +
-            'l\'aide d\'un **perspectographe** : un dispositif inventé par le peintre allemand ' +
-            'Dürer (1471-1528). Sa « fenêtre de Dürer » est composée d\'un cadre en bois et d\'une ' +
+            'l\'aide d\'un **perspectographe**, un dispositif décrit et illustré en 1525 par le ' +
+            'peintre allemand Dürer (1471-1528), sur une idée déjà proposée par Alberti (le ' +
+            '« voile », 1435). La « fenêtre de Dürer » est composée d\'un cadre en bois et d\'une ' +
             'vitre quadrillée, placée devant la scène à représenter.',
         },
         {
@@ -1023,9 +1173,11 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Toutes les droites parallèles d\'un même plan horizontal se coupent en un même ' +
-            'point de cette ligne. On l\'appelle le **point de fuite**. Tu peux l\'imaginer « à ' +
-            'l\'infini » : c\'est le point de concours commun à toute une famille de parallèles.',
+            'Des droites horizontales parallèles entre elles qui s\'éloignent de l\'observateur ' +
+            '(des **fuyantes**) semblent se couper en un même point de cette ligne : leur **point ' +
+            'de fuite**. Chaque direction a son propre point de fuite. Les droites parallèles à la ' +
+            'vitre, elles (les verticales, les horizontales de face), n\'en ont pas : elles restent ' +
+            'parallèles sur le dessin.',
         },
         {
           kind: 'para',
@@ -1036,15 +1188,62 @@ export const geometrieDansEspace: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Exemple de construction — le toit d\'une maison',
+          label: 'Exemple de construction — une maison et son toit',
           items: [
-            'Trace d\'abord le parallélépipède de la maison en perspective à point de fuite, ' +
-              'comme n\'importe quel solide.',
-            'Sur la face avant (le pignon), trace les deux diagonales du rectangle. Leur ' +
-              'intersection donne l\'axe vertical sur lequel se trouve le sommet du toit.',
-            'Place le sommet du toit sur cette verticale, à la hauteur voulue. Les deux pans ' +
-              'du toit rejoignent alors ce sommet depuis les arêtes du faîtage.',
+            'Dessine la façade en vraie grandeur : elle est parallèle à la vitre, donc ses verticales ' +
+              'et ses horizontales restent parallèles.',
+            'Depuis chaque coin de la façade, trace la fuyante vers le point de fuite. Choisis la ' +
+              'profondeur : les coins de la face arrière sont sur ces fuyantes, et cette face arrière ' +
+              'est un rectangle plus petit, lui aussi de face.',
+            'Le sommet S du pignon avant est sur la verticale qui passe par le centre de la façade ' +
+              '(l\'intersection de ses diagonales), à la hauteur voulue.',
+            'Le faîtage est une fuyante : trace-le de S vers le point de fuite. Il coupe la verticale ' +
+              'du centre de la face arrière (trouvé par ses diagonales) au sommet S′ du pignon arrière. ' +
+              'Relie enfin S′ aux coins supérieurs arrière pour fermer le toit.',
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'planeSketch',
+            width: 340,
+            height: 190,
+            lines: [
+              { points: [{ x: 0, y: 50 }, { x: 340, y: 50 }], tone: 'faint', dashed: true },
+              { points: [{ x: 174, y: 128 }, { x: 200, y: 50 }], tone: 'faint', dashed: true },
+              { points: [{ x: 174, y: 89 }, { x: 200, y: 50 }], tone: 'faint', dashed: true },
+              { points: [{ x: 141.5, y: 69.5 }, { x: 200, y: 50 }], tone: 'faint', dashed: true },
+              { points: [{ x: 60, y: 170 }, { x: 160, y: 110 }], tone: 'faint' },
+              { points: [{ x: 160, y: 170 }, { x: 60, y: 110 }], tone: 'faint' },
+              { points: [{ x: 60, y: 170 }, { x: 109, y: 128 }], tone: 'faint', dashed: true },
+              { points: [{ x: 109, y: 128 }, { x: 174, y: 128 }], tone: 'faint', dashed: true },
+              { points: [{ x: 109, y: 128 }, { x: 109, y: 89 }], tone: 'faint', dashed: true },
+              { points: [{ x: 60, y: 170 }, { x: 160, y: 170 }, { x: 160, y: 110 }, { x: 60, y: 110 }], tone: 'ink', closed: true },
+              { points: [{ x: 160, y: 170 }, { x: 174, y: 128 }, { x: 174, y: 89 }, { x: 160, y: 110 }], tone: 'ink' },
+              { points: [{ x: 60, y: 110 }, { x: 110, y: 80 }, { x: 160, y: 110 }], tone: 'accent' },
+              { points: [{ x: 110, y: 80 }, { x: 141.5, y: 69.5 }, { x: 174, y: 89 }], tone: 'accent' },
+            ],
+            points: [
+              { x: 200, y: 50, label: 'point de fuite', tone: 'accent', labelDx: -30, labelDy: -10 },
+              { x: 110, y: 80, label: 'S', tone: 'accent', labelDx: -14, labelDy: -6 },
+              { x: 141.5, y: 69.5, label: 'S′', tone: 'accent', labelDx: -6, labelDy: -10 },
+            ],
+            freeLabels: [{ x: 8, y: 44, text: "ligne d'horizon", tone: 'ink' }],
+            caption:
+              'façade en vraie grandeur, fuyantes vers le point de fuite, faîtage SS′ lui aussi ' +
+              'fuyant ; les verticales restent parallèles',
+          },
+        },
+        {
+          kind: 'astuce',
+          label: 'Trouver le milieu d\'une fuyante',
+          text:
+            'Sur le dessin, le milieu d\'un segment fuyant n\'est **pas** au milieu de sa longueur ' +
+            'dessinée : la partie éloignée paraît plus courte. Trace plutôt les diagonales de la ' +
+            'face qui le contient (un trapèze sur le dessin) : la verticale qui passe par leur ' +
+            'intersection coupe le segment en son vrai milieu. C\'est la « propriété du trapèze » ' +
+            'annoncée plus haut : les diagonales d\'un rectangle se coupent en son centre, et ce ' +
+            'point d\'intersection résiste à la perspective.',
         },
         {
           kind: 'attention',
@@ -1053,8 +1252,8 @@ export const geometrieDansEspace: ChapterContent = {
             'Un même solide dessiné en perspective cavalière et en perspective à point de fuite ' +
             'ne donne jamais le même dessin ! La perspective cavalière conserve le parallélisme ' +
             'des arêtes : deux arêtes parallèles le restent sur le papier. La perspective à point ' +
-            'de fuite, elle, ne le fait jamais — ses arêtes parallèles convergent vers leur point ' +
-            'de fuite commun.',
+            'de fuite ne le conserve que pour les droites parallèles à la vitre ; les fuyantes, ' +
+            'elles, convergent vers leur point de fuite.',
         },
         {
           kind: 'historique',
@@ -1228,6 +1427,18 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'rappel',
+          label: 'Pour aller plus loin — l\'ombre d\'une lampe',
+          items: [
+            'Une lampe éclaire depuis un **point** : ses rayons ne sont plus parallèles, ils partent ' +
+              'tous de la lampe. C\'est une **projection centrale**, comme la perspective des sections ' +
+              '10 et 11, où les rayons partent de l\'œil.',
+            'Conséquence visible : au soleil, les ombres de piquets verticaux sont parallèles entre ' +
+              'elles ; sous un lampadaire, elles partent dans des directions différentes, qui se ' +
+              'rejoignent toutes au pied du lampadaire.',
+          ],
+        },
+        {
           kind: 'application',
           titre: 'Calculer l\'ombre portée d\'un panneau solaire avant de l\'installer',
           text:
@@ -1302,7 +1513,8 @@ export const geometrieDansEspace: ChapterContent = {
             'droite par rapport à un plan, plans/parallélisme/point de percée, section plane, ' +
             'perspective centrale, ombre au soleil. Contrairement au chapitre sur les droites et ' +
             'cercles du plan, aucune affirmation ne porte sur une coordonnée numérique : elles ' +
-            'testent les définitions et le raisonnement géométrique — jamais un calcul chiffré.',
+            'testent les définitions et le raisonnement géométrique — jamais un calcul chiffré. ' +
+            'Le quiz se trouve tout en bas de la page, dans la synthèse.',
         },
       ],
     },
@@ -1334,7 +1546,9 @@ export const geometrieDansEspace: ChapterContent = {
             text: 'Droite ∥ plan : $d \\parallel \\alpha$',
             condition: 'si $d \\parallel$ une droite de $\\alpha$',
           },
-          { text: 'Plan ∥ plan : 2 droites sécantes de l\'un, chacune ∥ à une droite sécante de l\'autre' },
+          { text: 'Plan ∥ plan : 2 droites sécantes de l\'un, ∥ à 2 droites de l\'autre' },
+          { text: 'Droites gauches : ni sécantes, ni parallèles (aucun plan commun)' },
+          { text: 'Trois plans sécants deux à deux : intersections concourantes, parallèles ou confondues' },
         ],
       },
       {
@@ -1353,8 +1567,9 @@ export const geometrieDansEspace: ChapterContent = {
         title: 'Perspective centrale',
         formulas: [
           { text: 'Ligne d\'horizon : à la hauteur de l\'œil (ou de l\'objectif)' },
-          { text: 'Parallèles d\'un même plan horizontal → un même point de fuite, sur la ligne d\'horizon' },
-          { text: 'Ne conserve pas le parallélisme des arêtes (contrairement à la cavalière)' },
+          { text: 'Fuyantes horizontales parallèles entre elles → un même point de fuite, sur la ligne d\'horizon' },
+          { text: 'Les droites parallèles à la vitre restent parallèles ; seules les fuyantes convergent' },
+          { text: 'Milieu d\'une fuyante : par les diagonales de la face qui la contient' },
         ],
       },
       {
@@ -1375,8 +1590,8 @@ export const geometrieDansEspace: ChapterContent = {
     items: [
       'Perspective cavalière — x et z restent à l\'échelle réelle. y part en diagonale à 45°, ' +
         'réduit de moitié. On ne lit jamais une longueur en profondeur à la règle sur le dessin. ' +
-        'La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve pas le ' +
-        'parallélisme — trop lourde à main levée.',
+        'La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve le ' +
+        'parallélisme que des droites parallèles à la vitre — plus lourde à main levée.',
       'Déterminer un plan — 4 façons équivalentes : 3 points non alignés, ou une droite + un ' +
         'point extérieur, ou 2 droites sécantes, ou 2 droites parallèles distinctes. Jamais une ' +
         'équation.',
@@ -1386,8 +1601,8 @@ export const geometrieDansEspace: ChapterContent = {
         'dans le plan ? La direction est-elle parallèle au plan ? Sinon, c\'est sécant. Le plan ' +
         'reste toujours infini — jamais limité au solide dessiné.',
       'Deux plans — parallèles, ou sécants suivant une droite entière (jamais un point isolé). ' +
-        'Trois plans sécants deux à deux donnent 3 droites : soit sécantes en un même point, ' +
-        'soit parallèles entre elles.',
+        'Trois plans sécants deux à deux donnent des droites d\'intersection sécantes en un même ' +
+        'point, parallèles entre elles, ou confondues (une droite commune).',
       'Parallélisme — toujours ramené à une comparaison de directions : droite ∥ droite d\'un ' +
         'plan, ou 2 droites sécantes d\'un plan ∥ 2 droites sécantes de l\'autre.',
       'Point de percée — construis un plan auxiliaire qui contient la droite et qui est sécant ' +
@@ -1399,8 +1614,8 @@ export const geometrieDansEspace: ChapterContent = {
         'coplanaires (ou, sur un parallélépipède, par une parallèle).',
       'Perspective centrale — un dispositif d\'abord (la fenêtre de Dürer, vision monoculaire à ' +
         'travers une vitre quadrillée), puis un principe : toutes les parallèles d\'un même plan ' +
-        'horizontal convergent vers un point de fuite, sur la ligne d\'horizon. Contrairement à ' +
-        'la cavalière, elle ne conserve jamais le parallélisme des arêtes.',
+        'horizontal convergent vers un point de fuite, sur la ligne d\'horizon. Les verticales et ' +
+        'les droites parallèles à la vitre restent parallèles ; seules les fuyantes convergent.',
       'Ombre au soleil — la direction n\'est jamais donnée en nombres : tu la déduis d\'un ' +
         'exemple déjà résolu. La projection est toujours oblique, jamais verticale. Elle est ' +
         'sensible au sens, pas seulement à la direction. Relie les points-ombres pour ' +
@@ -1410,6 +1625,7 @@ export const geometrieDansEspace: ChapterContent = {
       label: 'Avant de rendre ta copie',
       items: [
         'Ai-je bien vérifié les 2 points de la droite avant de conclure à une inclusion ?',
+        'Avant d\'écrire « gauches », ai-je bien exclu « sécantes » et « parallèles » ?',
         'Deux droites qui ne se croisent pas sur mon dessin sont-elles vraiment parallèles, ou ' +
           'simplement gauches ?',
         'Ai-je confondu la projection verticale avec la vraie direction oblique du soleil ?',

@@ -809,12 +809,28 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'geometrie-dans-espace': {
     position: [
       { cle: 'cube ABCDEFGH', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, face supérieure $EFGH$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), détermine la position relative de la droite $(AG)$ et du plan $(EFGH)$ en justifiant, puis précise leur éventuel point d'intersection." },
+      { cle: 'une droite parallèle au plan', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), détermine la position relative de la droite $(AB)$ et du plan $(EFGH)$, en justifiant." },
     ],
     section: [
       { cle: '4 faces traversées', enonce: "Un plan coupe les 4 arêtes verticales d'un parallélépipède rectangle. On connaît les points $P$ (sur l'arête avant gauche), $Q$ (sur l'arête avant droite) et $R$ (sur l'arête arrière droite). Explique comment construire la section du parallélépipède par ce plan, en justifiant chaque côté tracé, en particulier la construction du quatrième sommet sur l'arête arrière gauche." },
+      { cle: 'tétraèdre', enonce: "Dans un tétraèdre $ABCD$, on place $P$ sur $[AB]$, $Q$ sur $[AC]$ et $R$ sur $[BD]$, la droite $(PQ)$ n'étant pas parallèle à $(BC)$. Explique comment construire la section du tétraèdre par le plan $(PQR)$, en justifiant la construction du point auxiliaire." },
     ],
     ombre: [
       { cle: 'objet à 2 points', enonce: "Une barre rigide relie les sommets de deux piquets verticaux plantés dans un sol plan. L'ombre d'un autre piquet donne la direction des rayons du soleil. Explique comment construire l'ombre complète de la barre sur le sol, en justifiant la construction." },
+    ],
+    'deux-droites': [
+      { cle: 'prouver que deux droites sont gauches', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), démontre que les droites $(AB)$ et $(CG)$ sont gauches." },
+    ],
+    'deux-plans': [
+      { cle: "Démonstration par l", enonce: "Démontre par l'absurde que si un plan $\\pi$ coupe deux plans parallèles $\\alpha$ et $\\alpha'$ suivant des droites $d$ et $d'$, alors $d$ et $d'$ sont parallèles." },
+      { cle: 'deux plans parallèles coupés par un troisième', enonce: "Dans le cube $ABCDEFGH$, le plan $(ACGE)$ coupe la base $(ABCD)$ et la face $(EFGH)$. Que peut-on dire des droites $(AC)$ et $(EG)$ ? Justifie." },
+    ],
+    'parallelisme': [
+      { cle: 'deux plans parallèles dans le cube', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$), démontre que les plans $(AFH)$ et $(BDG)$ sont parallèles." },
+    ],
+    'percee': [
+      { cle: 'point de percée hors du solide', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $F$ au-dessus de $B$), $J$ est le milieu de $[BF]$. Construis le point de percée $K$ de la droite $(AJ)$ dans le plan $(EFGH)$ et précise sa position." },
+      { cle: 'intersection de deux plans', enonce: "Dans le cube $ABCDEFGH$, détermine la droite d'intersection des plans $(ACGE)$ et $(BDHF)$." },
     ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge (ou le
