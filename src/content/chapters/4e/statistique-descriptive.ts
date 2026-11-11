@@ -334,6 +334,17 @@ export const statistiqueDescriptive: ChapterContent = {
         },
         {
           kind: 'atelier',
+          tag: 'choix-classes-widget',
+          label: 'Manipule toi-même — combien de classes choisir ?',
+          caption:
+            'Les 40 mêmes temps de trajet, découpés en 2 à 12 classes de même amplitude ' +
+            '(amplitude = étendue / nombre de classes). Trop peu de classes mélangent les ' +
+            'élèves qui viennent à pied et ceux qui prennent le bus ; trop de classes ' +
+            'donnent un histogramme haché, plein de classes presque vides. Cherche le ' +
+            'découpage qui montre le mieux les deux groupes.',
+        },
+        {
+          kind: 'atelier',
           tag: 'frontiere-classe-widget',
           label: 'Manipule toi-même — sur quelle classe tombe x ?',
           caption:
@@ -541,16 +552,6 @@ export const statistiqueDescriptive: ChapterContent = {
             { kind: 'para', text: 'Résultat : min=2, Q1=6, médiane=6, Q3=9, max=12, mode=6 (effectif 8, le plus grand).' },
           ],
         },
-        {
-          kind: 'atelier',
-          tag: 'seuil-cumule-widget',
-          label: 'Manipule toi-même — le piège du seuil en direct',
-          caption:
-            'Choisis médiane/Q1/Q3 et règle les effectifs : la ligne du tableau qui atteint ' +
-            'exactement le seuil se surligne en rouge avec la mention « pas encore ! », celle qui ' +
-            'le dépasse la PREMIÈRE en vert. Avec les réglages par défaut et Q1 sélectionné, tu es ' +
-            'exactement dans le cas-piège du texte (cumulé=5=seuil pile).',
-        },
         { kind: 'subheading', text: 'Données en classes : le polygone des effectifs cumulés' },
         {
           kind: 'para',
@@ -647,6 +648,19 @@ export const statistiqueDescriptive: ChapterContent = {
               '4 + ((10−5)/8)×4 = 6,5.',
           ],
         },
+        {
+          kind: 'atelier',
+          tag: 'seuil-cumule-widget',
+          label: 'Manipule toi-même — le seuil, en valeurs isolées puis en classes',
+          caption:
+            'Deux modes. En valeurs isolées : règle les effectifs ; la ligne du tableau qui ' +
+            'atteint exactement le seuil se surligne en rouge (« pas encore ! »), celle qui ' +
+            'le dépasse la PREMIÈRE en vert — avec Q1 et les réglages par défaut, tu es ' +
+            'dans le cas-piège du texte. En classes : le polygone des effectifs cumulés ' +
+            'apparaît ; suis la ligne du seuil jusqu\'au polygone, puis descends sur l\'axe — ' +
+            'le petit triangle violet est exactement la règle de trois de la formule ' +
+            'd\'interpolation (médiane = 6,5 par défaut).',
+        },
         { kind: 'subheading', text: 'Le mode, sans aucun calcul' },
         {
           kind: 'para',
@@ -688,6 +702,16 @@ export const statistiqueDescriptive: ChapterContent = {
               'est peu représentatif si les effectifs sont trop dispersés, ou s\'il y a ' +
               'plusieurs modes.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'valeur-aberrante-widget',
+          label: 'Manipule toi-même — la valeur aberrante',
+          caption:
+            'Pousse le match exceptionnel vers la droite : la moyenne s\'envole, la médiane ' +
+            '(la 5e valeur dans l\'ordre croissant) ne bouge pas. Le bouton « Match ' +
+            'exceptionnel » retrouve exactement l\'application du basketteur ci-dessous ' +
+            '(moyenne 22,75, médiane 20).',
         },
         {
           kind: 'application',
@@ -821,6 +845,16 @@ export const statistiqueDescriptive: ChapterContent = {
             'série est à peu près **symétrique**. Ici, la médiane est collée au bord gauche (Q1 = ' +
             'médiane = 6) : beaucoup de valeurs sont regroupées à 6, et la partie droite est plus ' +
             'étalée. La série est **asymétrique**, étirée vers les grandes valeurs.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'boite-moustaches-vivante-widget',
+          label: 'Manipule toi-même — une boîte à moustaches vivante',
+          caption:
+            'Déplace les points : la boîte se redessine en direct. Pousse la plus grande ' +
+            'valeur vers la droite : seule la moustache droite s\'allonge, la boîte et la ' +
+            'médiane ne bougent pas. Au départ, tu retrouves la boîte du fil rouge : Q1 = ' +
+            'médiane = 6.',
         },
         {
           kind: 'methode',
@@ -1002,9 +1036,10 @@ export const statistiqueDescriptive: ChapterContent = {
           tag: 'dispersion-comparee-widget',
           label: 'Manipule toi-même — même moyenne, dispersion différente',
           caption:
-            'Fais glisser d : la moyenne x̄=12 reste TOUJOURS fixe (repère violet immobile), ' +
-            'seul l\'écartement des deux valeurs change — variance et écart-type recalculés en ' +
-            'direct. À d=8, tu retrouves exactement l\'exemple du texte (moitié à 4, moitié à 20).',
+            'Déplace les points : x̄, la variance et l\'écart-type se recalculent en direct, ' +
+            'avec la bande x̄ ± σ. Compare les deux réglages : même moyenne 12, mais un ' +
+            'écart-type de 1,1 (série resserrée) contre 8 (moitié à 4, moitié à 20, ' +
+            'l\'exemple du texte).',
         },
         {
           kind: 'application',
@@ -1112,6 +1147,15 @@ export const statistiqueDescriptive: ChapterContent = {
           badge: 'k = 2',
           steps: [{ tag: 'formule', text: '$1 - 1/k^2 = 1 - 1/2^2 = 1 - 1/4 = 3/4$' }],
           result: { tag: 'résultat', text: 'au moins 75 % des valeurs se trouvent dans $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'tchebychev-garantie-widget',
+          label: 'Manipule toi-même — une garantie minimale',
+          caption:
+            'Choisis la forme de la série et fais varier k : le pourcentage réel de valeurs ' +
+            'dans [x̄ − kσ ; x̄ + kσ] ne descend jamais sous le minimum garanti (1 − 1/k²) ' +
+            '× 100 %, quelle que soit la forme — et il le dépasse souvent largement.',
         },
         {
           kind: 'astuce',
@@ -1336,6 +1380,17 @@ export const statistiqueDescriptive: ChapterContent = {
             'Pour répondre à « quel pourcentage se situe entre a et b ? », ne lis jamais ' +
             'l\'intervalle directement sur la courbe ! Lis séparément le cumulé en b et le ' +
             'cumulé en a. Puis **soustrais** les deux : cumulé(b) − cumulé(a).',
+        },
+        {
+          kind: 'atelier',
+          tag: 'deux-courbes-cumulees-widget',
+          label: 'Manipule toi-même — deux séries, deux courbes cumulées',
+          caption:
+            'Les fréquences cumulées de deux séries sur le même graphique. Déplace a : tu ' +
+            'lis, sur chaque courbe, le pourcentage des valeurs inférieures ou égales à a. ' +
+            'Coche « Lire entre a et b » : chaque pourcentage s\'obtient par cumulé(b) − ' +
+            'cumulé(a), jamais d\'un seul coup. Les deux médianes se lisent au seuil de 50 ' +
+            '%.',
         },
         {
           kind: 'application',

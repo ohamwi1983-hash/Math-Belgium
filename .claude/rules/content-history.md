@@ -2058,3 +2058,21 @@ paths:
   compréhension « rejet d'une solution » déplacés avec leurs exemples, synthèse et checklist du
   chapitre 2 complétées. Le quiz gen60 (chapitre 1) garde son thème « équations et inéquations en
   contexte ».
+
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`) : audit puis enrichissement
+  validé par l'utilisateur (toutes les recommandations). Contenu : diagramme en bâtons (§ 1), méthode
+  « Choisir ses classes » (§ 2), tableau des centres, x̄ = Σxᵢfᵢ et moyenne en classes = approximation
+  (§ 3), **polygone des effectifs cumulés** avec lecture graphique de la médiane présentée comme la source
+  de la formule d'interpolation, classe modale, série bimodale (§ 4), boîte du **fil rouge** 2/6/6/9/12
+  (même série qu'aux § 3–4), écart interquartile, lecture des quarts et de l'asymétrie, « Le sais-tu ? »
+  Tukey (§ 5), variance sur la même série en premier exemple (V = 10,95, σ ≈ 3,31) et encadré
+  calculatrice σx/sx (§ 6), exemple concret « 40 élèves » et « Le sais-tu ? » Bienaymé/Tchebychev (§ 7),
+  deux courbes cumulées superposées et deux boîtes (§ 8) ; synthèse (boîte, comparaison), formulaire
+  (centre, amplitude, Q₃ − Q₁), renvoi final « chapitre 6 de 5e ». `BoxPlot.tsx` : étiquettes fusionnées
+  quand deux des cinq nombres sont égaux (rétrocompatible). Ateliers : `seuil-cumule-widget` gagne un mode
+  « Classes » (polygone + triangle d'interpolation) et passe après la méthode d'interpolation ;
+  `dispersion-comparee-widget` réécrit (10 points déplaçables, bande x̄ ± σ) ; 5 nouveaux —
+  `choix-classes-widget` (§ 2), `valeur-aberrante-widget` (§ 4), `boite-moustaches-vivante-widget` (§ 5),
+  `tchebychev-garantie-widget` (§ 7), `deux-courbes-cumulees-widget` (§ 8). Question ouverte à l'utilisateur :
+  arrondi du nombre minimal d'individus (gen37 et le piège du chapitre arrondissent vers le bas ; vers le
+  haut serait exact et plus fort) — l'exemple du chapitre utilise des nombres qui tombent juste.
