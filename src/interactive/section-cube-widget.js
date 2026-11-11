@@ -344,10 +344,13 @@
 
       // Étiquettes des sommets (vers l'extérieur du cube)
       var centre = this._proj([0.5, 0.5, 0.5]);
+      var occupes = [];
       Object.keys(SOMMETS).forEach(function (nom) {
         var q = self._proj(SOMMETS[nom]);
         var dx = q[0] - centre[0], dy = q[1] - centre[1], l = Math.sqrt(dx * dx + dy * dy) || 1;
-        var t = el("text", { x: (q[0] + dx / l * 15).toFixed(1), y: (q[1] + dy / l * 15 + 5).toFixed(1), "class": "etiq", "text-anchor": "middle" }, svg);
+        var x = q[0] + dx / l * 15, y = q[1] + dy / l * 15;
+        occupes.push([x, y]);
+        var t = el("text", { x: x.toFixed(1), y: (y + 5).toFixed(1), "class": "etiq", "text-anchor": "middle" }, svg);
         t.textContent = nom;
       });
 
@@ -366,12 +369,27 @@
       } else {
         donnes.forEach(function (d, j) { etiquetes.push({ p: d, nom: "PQR"[j], donne: true }); });
       }
-      // Les points donnés confondus (même position) ne gardent qu'une étiquette
-      etiquetes.forEach(function (q) {
-        var s = self._proj(q.p);
-        el("circle", { cx: s[0].toFixed(2), cy: s[1].toFixed(2), r: 5, "class": q.donne ? "pt-donne" : "pt-calc" }, svg);
-        var dx = s[0] - centre[0], dy = s[1] - centre[1], l = Math.sqrt(dx * dx + dy * dy) || 1;
-        var t = el("text", { x: (s[0] - dx / l * 14).toFixed(1), y: (s[1] - dy / l * 14 + 5).toFixed(1), "class": "etiq " + (q.donne ? "etiq-donne" : "etiq-calc"), "text-anchor": "middle" }, svg);
+      // Points d'abord (pour que les étiquettes évitent aussi les points)
+      var projetes = etiquetes.map(function (q) { return self._proj(q.p); });
+      projetes.forEach(function (s, j) {
+        el("circle", { cx: s[0].toFixed(2), cy: s[1].toFixed(2), r: 5, "class": etiquetes[j].donne ? "pt-donne" : "pt-calc" }, svg);
+      });
+      // Étiquette : parmi 12 positions autour du point, la plus éloignée des étiquettes déjà
+      // posées (sommets compris) et des autres points, et restant dans le cadre.
+      etiquetes.forEach(function (q, j) {
+        var s = projetes[j], meilleur = null, score = -1;
+        for (var k2 = 0; k2 < 12; k2++) {
+          var ang = k2 * Math.PI / 6;
+          var x = s[0] + Math.cos(ang) * 15, y = s[1] + Math.sin(ang) * 15;
+          if (x < 10 || x > L - 10 || y < 12 || y > H - 8) continue;
+          var m = 1e9;
+          occupes.forEach(function (o) { m = Math.min(m, Math.hypot(o[0] - x, o[1] - y)); });
+          projetes.forEach(function (o, jj) { if (jj !== j) m = Math.min(m, Math.hypot(o[0] - x, o[1] - y) + 4); });
+          if (m > score + 0.5) { score = m; meilleur = [x, y]; }
+        }
+        if (!meilleur) meilleur = [s[0] + 12, s[1] - 10];
+        occupes.push(meilleur);
+        var t = el("text", { x: meilleur[0].toFixed(1), y: (meilleur[1] + 5).toFixed(1), "class": "etiq " + (q.donne ? "etiq-donne" : "etiq-calc"), "text-anchor": "middle" }, svg);
         t.textContent = q.nom;
       });
 

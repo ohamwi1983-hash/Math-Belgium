@@ -263,8 +263,8 @@
           '<div class="carte"><div class="carte-titre">Le milieu en perspective</div>' +
           'Les diagonales de la face latérale (un trapèze sur le dessin) se coupent sur la verticale du ' +
           '<span class="c-g">vrai milieu</span> de la profondeur. Elle tombe à ' + fmt(pct, 0) + ' % de l\'arête dessinée, ' +
-          'en partant de l\'avant — pas à 50 % : le <span class="c-b">faux milieu</span> (moitié de la longueur dessinée) ' +
-          'est trop près de l\'arrière, car la partie lointaine est dessinée plus petite.</div>';
+          'en partant de l\'avant — pas à 50 %. La moitié lointaine est dessinée plus courte que la moitié proche : le ' +
+          '<span class="c-b">faux milieu</span> (moitié de la longueur dessinée) tombe donc trop près de l\'avant.</div>';
       }
       this._lecture.innerHTML = html;
     }

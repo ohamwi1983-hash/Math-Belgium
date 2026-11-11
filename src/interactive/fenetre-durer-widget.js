@@ -16,7 +16,7 @@
    * ================================================================ */
 
   var SVGNS = "http://www.w3.org/2000/svg";
-  var LARGEUR = 460, HAUTEUR = 236;
+  var LARGEUR = 460, HAUTEUR = 246;
   var ECH = 38, OX = 34, OY = 118; // OY : ligne de visée (hauteur de l'œil)
   var DV = 1; // distance œil–vitre (m)
   var H_MAX = 4, D_MIN = 2, D_MAX = 10.5;

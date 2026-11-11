@@ -145,16 +145,16 @@
       [["A", "B"], ["B", "F"], ["F", "E"], ["E", "A"], ["B", "C"], ["C", "G"], ["G", "F"], ["G", "H"], ["H", "E"]].forEach(function (p) { seg(p[0], p[1], "arete"); });
       // arête fuyante mesurée : [BC]
       seg("B", "C", "fuyante");
-      // angle de fuite en B : horizontale de référence + arc
-      var rr = 30;
-      el("line", { x1: S.B.x.toFixed(1), y1: S.B.y.toFixed(1), x2: (S.B.x + rr + 18).toFixed(1), y2: S.B.y.toFixed(1), "class": "repere" }, svg);
-      var ax = S.B.x + rr, ay = S.B.y, bx2 = S.B.x + rr * Math.cos(a), by2 = S.B.y - rr * Math.sin(a);
+      // angle de fuite en F : horizontale de référence + arc
+      var rr = 24;
+      el("line", { x1: S.F.x.toFixed(1), y1: S.F.y.toFixed(1), x2: (S.F.x + rr + 22).toFixed(1), y2: S.F.y.toFixed(1), "class": "repere" }, svg);
+      var ax = S.F.x + rr, ay = S.F.y, bx2 = S.F.x + rr * Math.cos(a), by2 = S.F.y - rr * Math.sin(a);
       el("path", { d: "M " + ax.toFixed(1) + " " + ay.toFixed(1) + " A " + rr + " " + rr + " 0 0 0 " + bx2.toFixed(1) + " " + by2.toFixed(1), "class": "arc" }, svg);
-      var am = a / 2, ta = el("text", { x: (S.B.x + (rr + 12) * Math.cos(am)).toFixed(1), y: (S.B.y - (rr + 12) * Math.sin(am) + 5).toFixed(1), "class": "etiq etiq-a" }, svg);
+      var am = a / 2, ta = el("text", { x: (S.F.x + (rr + 11) * Math.cos(am)).toFixed(1), y: (S.F.y - (rr + 11) * Math.sin(am) + 5).toFixed(1), "class": "etiq etiq-a" }, svg);
       ta.textContent = "α";
-      // étiquette de la fuyante
+      // étiquette de la fuyante [BC], sous l'arête
       var mx = (S.B.x + S.C.x) / 2, my = (S.B.y + S.C.y) / 2;
-      var tf = el("text", { x: (mx + 10).toFixed(1), y: (my + 14).toFixed(1), "class": "etiq etiq-f" }, svg);
+      var tf = el("text", { x: (mx + 16 * Math.sin(a) + 2).toFixed(1), y: (my + 16 * Math.cos(a) + 6).toFixed(1), "class": "etiq etiq-f" }, svg);
       tf.textContent = fmt(k * ly, 2) + " cm";
       // sommets
       var c = { x: (S.A.x + S.G.x) / 2, y: (S.A.y + S.G.y) / 2 };

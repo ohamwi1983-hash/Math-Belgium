@@ -521,21 +521,28 @@
       var M = (sc.v && sc.v.point && montrer) ? ratVal(sc.v.point) : null;
       var Mloin = M && M.some(function (c) { return c < -3 || c > 5; });
       var bx = boite(M && !Mloin ? M : null);
-      // rayon de contenu (fixe pendant la rotation)
-      var R = Math.sqrt(3) * 1.35;
-      [bx.lo, bx.hi].forEach(function () { });
-      var cs = []; for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) for (var c = 0; c < 2; c++) cs.push([a ? bx.hi[0] : bx.lo[0], b ? bx.hi[1] : bx.lo[1], c ? bx.hi[2] : bx.lo[2]]);
-      cs.forEach(function (X) { var dd = sub(X, [1, 1, 1]); R = Math.max(R, Math.sqrt(dot(dd, dd))); });
+      // géométrie à dessiner (calculée avant l'échelle)
+      var poly = [];
+      if (sc.trio) {
+        var Vp = PTS[sc.trio[0]], np = cross(sub(PTS[sc.trio[1]], Vp), sub(PTS[sc.trio[2]], Vp));
+        poly = planBoite(Vp, np, bx);
+      }
+      var segs = [];
+      [[sc.l1, "d1"], [sc.l2, "d2"]].forEach(function (c) {
+        var L = c[0]; if (!L) return;
+        if (montrer) { var r = clipDroite(L.P, L.u, bx); if (r) segs.push([add(L.P, mul(r[0], L.u)), add(L.P, mul(r[1], L.u)), c[1] + "x"]); }
+      });
+      // rayon de contenu (fixe pendant la rotation) : tout ce qui est dessiné
+      var R = Math.sqrt(3) + 0.15;
+      var etendre = function (X) { var dd = sub(X, [1, 1, 1]); R = Math.max(R, Math.sqrt(dot(dd, dd)) + 0.08); };
+      poly.forEach(etendre);
+      segs.forEach(function (sg) { etendre(sg[0]); etendre(sg[1]); });
+      if (M && !Mloin) etendre(M);
       var echelle = DEMI / (R * 1.12);
       var V = vue(this._vue);
       var P2 = function (X) { var q = V.p(X); return { x: CX + echelle * q.u, y: CY - echelle * q.v }; };
 
-      // plan
-      if (sc.trio) {
-        var Vp = PTS[sc.trio[0]], np = cross(sub(PTS[sc.trio[1]], Vp), sub(PTS[sc.trio[2]], Vp));
-        var poly = planBoite(Vp, np, bx);
-        if (poly.length) el("polygon", { points: poly.map(function (X) { var p = P2(X); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" "), "class": "plan" }, svg);
-      }
+      if (poly.length) el("polygon", { points: poly.map(function (X) { var p = P2(X); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" "), "class": "plan" }, svg);
       // arêtes du cube
       var faceVisible = {};
       for (var f in FACES) faceVisible[f] = dot(FACES[f].n, V.f) < 0;
@@ -546,17 +553,9 @@
       visibles.forEach(function (ar) { ligne(PTS[ar[0]], PTS[ar[1]], "arete"); });
 
       // droites
-      var dessinerDroite = function (L, cls) {
-        if (!L) return;
-        var Pf = L.P, u = L.u;
-        if (montrer) {
-          var r = clipDroite(Pf, u, bx);
-          if (r) ligne(add(Pf, mul(r[0], u)), add(Pf, mul(r[1], u)), cls + "x");
-        }
-        ligne(Pf, add(Pf, u), cls);
-      };
-      dessinerDroite(sc.l1, "d1");
-      dessinerDroite(sc.l2, "d2");
+      segs.forEach(function (sg) { ligne(sg[0], sg[1], sg[2]); });
+      if (sc.l1) ligne(sc.l1.P, add(sc.l1.P, sc.l1.u), "d1");
+      if (sc.l2) ligne(sc.l2.P, add(sc.l2.P, sc.l2.u), "d2");
 
       // points et étiquettes
       var ctr = P2([1, 1, 1]);
