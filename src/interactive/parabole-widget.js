@@ -6,6 +6,15 @@
    * Web Component (Shadow DOM) : aucun conflit avec les styles de la page,
    * couleurs empruntées aux variables CSS du chapitre (héritées à travers
    * la frontière du Shadow DOM) pour suivre le thème clair/sombre du lecteur.
+   *
+   * Deux modes :
+   * - « Libre » : curseurs a, b, c, options AS / S / OAO / droite y = bx + c,
+   *   zoom et déplacement ; zéros (0, 1 ou 2) marqués sur l'axe et image
+   *   affichés en direct.
+   * - « Défi des signes » : une parabole tirée au hasard, sans formule ;
+   *   l'élève choisit le signe de a, de b et de c, UN SEUL essai, puis la
+   *   correction justifie chaque signe (ouverture, ordonnée à l'origine,
+   *   position de l'axe x_S = −b/(2a)). Pas de score.
    * ================================================================ */
 
   var DEFAUT = { a: 1, b: 0, c: 0 };
@@ -16,10 +25,23 @@
   var CENTRE_Y = 2, DEMI_X_BASE = 6, DEMI_Y_BASE = 8;
   var ZOOM_MIN = 0.4, ZOOM_MAX = 5, ZOOM_PAS = 1.3;
   var LARGEUR = 560, HAUTEUR = 420, MARGE = 30;
+  var EPS = 1e-9;
 
+  /** Nombre au format français, arrondi au centième (−, virgule). */
   function formatNombreFr(n) {
     var arrondi = Math.round(n * 100) / 100;
+    if (Object.is(arrondi, -0)) arrondi = 0;
     return arrondi.toString().replace(".", ",").replace("-", "−");
+  }
+
+  /** Vrai si n s'écrit exactement avec au plus deux décimales. */
+  function estExactAuCentieme(n) {
+    return Math.abs(n * 100 - Math.round(n * 100)) < 1e-6;
+  }
+
+  /** « = 1,5 » si la valeur est exacte au centième, « ≈ 1,41 » sinon. */
+  function egalOuEnviron(n) {
+    return (estExactAuCentieme(n) ? "= " : "≈ ") + formatNombreFr(n);
   }
 
   /** Arrondit un pas de grille brut vers 1, 2 ou 5 fois une puissance de 10 —
@@ -50,58 +72,128 @@
     return resultat;
   }
 
+  /** Zéros de ax² + bx + c (a ≠ 0), triés : [] si Δ < 0, [r] si Δ = 0, [x₁, x₂] sinon. */
+  function zerosTrinome(a, b, c) {
+    var delta = b * b - 4 * a * c;
+    if (Math.abs(delta) < EPS) return [-b / (2 * a)];
+    if (delta < 0) return [];
+    var r = Math.sqrt(delta);
+    var x1 = (-b - r) / (2 * a), x2 = (-b + r) / (2 * a);
+    return x1 < x2 ? [x1, x2] : [x2, x1];
+  }
+
+  function entierAleatoire(min, max) {
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  /** Parabole du défi : signes de a, b, c tirés uniformément (les 8 combinaisons), valeurs
+   * simples, sommet à gauche ou à droite de l'axe Oy de façon lisible (|x_S| ≥ 0,5) et dans
+   * la fenêtre fixe [−6 ; 6] × [−6 ; 10], ordonnée à l'origine visible. */
+  function tirerParaboleDefi() {
+    var modulesA = [0.5, 1, 2];
+    for (var essai = 0; essai < 500; essai++) {
+      var sa = Math.random() < 0.5 ? 1 : -1;
+      var sb = Math.random() < 0.5 ? 1 : -1;
+      var sc = Math.random() < 0.5 ? 1 : -1;
+      var a = sa * modulesA[entierAleatoire(0, 2)];
+      var b = sb * entierAleatoire(1, 4);
+      var c = sc * entierAleatoire(1, 4);
+      var xS = -b / (2 * a);
+      var yS = c - (b * b) / (4 * a);
+      if (Math.abs(xS) < 0.5 || Math.abs(xS) > 4) continue;
+      if (yS < -5 || yS > 9) continue;
+      if (c < -5 || c > 9) continue;
+      return { a: a, b: b, c: c };
+    }
+    return { a: 1, b: -2, c: -3 };
+  }
+
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
     '<style>' +
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
+    '[hidden]{display:none!important;}' +
+    '.modes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 14px;}' +
+    '.modes button{min-height:44px;padding:8px 16px;border-radius:3px;border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);font-weight:600;font-family:inherit;font-size:.92rem;cursor:pointer;}' +
+    '.modes button[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#a8471f);color:var(--accent-ink,#7a3212);}' +
     '.formule{text-align:center;font-family:var(--serif,serif);font-style:italic;font-size:1.35rem;font-weight:600;color:var(--ink,#241f1a);margin:0 0 14px;min-height:1.7rem;}' +
     '.zoom-bar{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:8px;}' +
-    '.zoom-bar button{width:26px;height:26px;border-radius:3px;border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;}' +
+    '.zoom-bar button{width:44px;height:44px;border-radius:3px;border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;}' +
     '.zoom-bar button:hover:not(:disabled){border-color:var(--accent,#a8471f);background:var(--accent-soft,#f6e2d3);}' +
     '.zoom-bar button:disabled{opacity:.4;cursor:not-allowed;}' +
-    '.zoom-bar .zoom-reset{font-size:13px;}' +
+    '.zoom-bar .zoom-reset{font-size:15px;}' +
     '.zoom-valeur{font-variant-numeric:tabular-nums;font-size:.8rem;color:var(--ink-soft,#6b6055);min-width:38px;text-align:center;}' +
-    '.graphe-zone{display:flex;justify-content:center;margin-bottom:16px;}' +
+    '.graphe-zone{display:flex;justify-content:center;margin-bottom:12px;}' +
     'svg{width:100%;height:auto;max-width:100%;background:var(--surface-2,#faf6f0);border-radius:3px;cursor:grab;touch-action:none;}' +
     'svg.en-deplacement{cursor:grabbing;}' +
+    'svg.fixe{cursor:default;touch-action:auto;}' +
+    '.infos{margin:0 0 14px;padding:10px 12px;border:1px solid var(--line,#e2d8c8);border-radius:3px;background:var(--surface,#fff);font-size:.92rem;color:var(--ink,#241f1a);line-height:1.5;}' +
+    '.infos p{margin:0;}' +
+    '.infos p + p{margin-top:4px;}' +
+    '.infos strong{color:var(--accent-ink,#7a3212);}' +
     '.controles{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;}' +
     '.curseurs{flex:1 1 auto;min-width:220px;}' +
-    '.ligne-curseur{display:grid;grid-template-columns:20px 1fr 52px;align-items:center;gap:10px;margin-bottom:10px;}' +
+    '.ligne-curseur{display:grid;grid-template-columns:20px 1fr 52px;align-items:center;gap:10px;margin-bottom:6px;min-height:44px;}' +
     '.ligne-curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);text-align:center;}' +
-    '.ligne-curseur input[type="range"]{width:100%;accent-color:var(--accent,#a8471f);}' +
+    '.ligne-curseur input[type="range"]{width:100%;min-height:44px;accent-color:var(--accent,#a8471f);}' +
     '.ligne-curseur .valeur{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-soft,#6b6055);font-size:0.92rem;}' +
-    '.btn-reset{margin-top:8px;padding:8px 14px;border-radius:3px;border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;}' +
-    '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
-    '.options{display:flex;flex-direction:column;gap:9px;padding-left:16px;border-left:1px solid var(--line,#e2d8c8);}' +
-    '.options label{display:flex;align-items:center;gap:6px;font-size:0.88rem;color:var(--ink-soft,#6b6055);cursor:pointer;}' +
+    '.btn{min-height:44px;margin-top:8px;padding:8px 14px;border-radius:3px;border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.9rem;font-family:inherit;}' +
+    '.btn:hover:not(:disabled){background:var(--accent-soft-line,#e8c4a4);}' +
+    '.btn:disabled{opacity:.45;cursor:not-allowed;}' +
+    '.options{display:flex;flex-direction:column;gap:2px;padding-left:16px;border-left:1px solid var(--line,#e2d8c8);}' +
+    '.options label{display:flex;align-items:center;gap:8px;min-height:44px;font-size:0.9rem;color:var(--ink-soft,#6b6055);cursor:pointer;}' +
     '.options label.desactive{color:var(--ink-faint,#9c9083);cursor:not-allowed;}' +
-    '.options input{accent-color:var(--accent,#a8471f);}' +
+    '.options input{accent-color:var(--accent,#a8471f);width:18px;height:18px;}' +
     '.math-label{font-family:var(--serif,serif);font-style:italic;}' +
+    '.defi-consigne{margin:0 0 10px;font-size:.95rem;color:var(--ink,#241f1a);text-align:center;}' +
+    '.groupe-signe{display:grid;grid-template-columns:minmax(90px,auto) 1fr;align-items:center;gap:10px;margin-bottom:6px;}' +
+    '.groupe-signe .nom{font-size:.92rem;color:var(--ink,#241f1a);}' +
+    '.groupe-signe .nom i{font-family:var(--serif,serif);font-weight:700;color:var(--accent-ink,#7a3212);}' +
+    '.choix{display:flex;gap:8px;}' +
+    '.choix button{min-width:64px;min-height:44px;border-radius:3px;border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);font-size:1.05rem;font-weight:700;font-family:inherit;cursor:pointer;}' +
+    '.choix button[aria-pressed="true"]{background:var(--accent-soft,#f6e2d3);border-color:var(--accent,#a8471f);color:var(--accent-ink,#7a3212);}' +
+    '.choix button:disabled{cursor:default;}' +
+    '.choix button.juste{background:var(--good-soft,#e2f0e6);border-color:var(--good,#2f7a4f);color:var(--good,#2f7a4f);}' +
+    '.choix button.faux{background:var(--bad-soft,#f6dcdc);border-color:var(--bad,#b3261e);color:var(--bad,#b3261e);}' +
+    '.defi-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}' +
+    '.correction{margin-top:12px;padding:10px 12px;border-radius:3px;border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);font-size:.92rem;line-height:1.5;color:var(--ink,#241f1a);}' +
+    '.correction p{margin:0;}' +
+    '.correction p + p{margin-top:6px;}' +
+    '.correction .ok{color:var(--good,#2f7a4f);font-weight:700;}' +
+    '.correction .ko{color:var(--bad,#b3261e);font-weight:700;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.4;fill:none;}' +
     '.axe-symetrie{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;stroke-dasharray:6 4;}' +
     '.point-sommet{fill:var(--accent,#a8471f);stroke:var(--surface,#fff);stroke-width:1.5;}' +
     '.point-oao{fill:var(--good,#2f7a4f);stroke:var(--surface,#fff);stroke-width:1.5;}' +
+    '.point-zero{fill:var(--surface,#fff);stroke:#3d72b4;stroke-width:2.2;}' +
+    '.etiquette-zero{font-size:11px;fill:#3d72b4;font-family:var(--sans,sans-serif);font-weight:600;}' +
     '.droite-lineaire{stroke:#3d72b4;stroke-width:2.2;}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.graduation{font-size:9.5px;fill:var(--ink-faint,#9c9083);font-family:var(--sans,sans-serif);}' +
     '</style>' +
+    '<div class="modes" role="group" aria-label="Mode de l\'atelier">' +
+    '<button type="button" id="mode-libre" aria-pressed="true">Libre</button>' +
+    '<button type="button" id="mode-defi" aria-pressed="false">Défi des signes</button>' +
+    '</div>' +
     '<p class="formule" id="formule"></p>' +
-    '<div class="zoom-bar">' +
+    '<div class="zoom-bar" id="zoom-bar">' +
     '<button type="button" id="zoom-out" aria-label="Dézoomer">−</button>' +
     '<span class="zoom-valeur" id="zoom-valeur">100 %</span>' +
     '<button type="button" id="zoom-in" aria-label="Zoomer">+</button>' +
     '<button type="button" id="zoom-reset" class="zoom-reset" aria-label="Réinitialiser le zoom">⟲</button>' +
     '</div>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="controles">' +
+    '<div class="infos" id="infos" aria-live="polite"></div>' +
+    '<div class="controles" id="controles">' +
     '<div class="curseurs">' +
     '<div class="ligne-curseur"><label for="a">a</label><input type="range" id="a" min="' + MIN + '" max="' + MAX + '" step="' + STEP + '" value="' + DEFAUT.a + '"><span class="valeur" id="a-valeur"></span></div>' +
     '<div class="ligne-curseur"><label for="b">b</label><input type="range" id="b" min="' + MIN + '" max="' + MAX + '" step="' + STEP + '" value="' + DEFAUT.b + '"><span class="valeur" id="b-valeur"></span></div>' +
     '<div class="ligne-curseur"><label for="c">c</label><input type="range" id="c" min="' + MIN + '" max="' + MAX + '" step="' + STEP + '" value="' + DEFAUT.c + '"><span class="valeur" id="c-valeur"></span></div>' +
-    '<button class="btn-reset" id="reset" type="button">Fonction de référence</button>' +
+    '<button class="btn" id="reset" type="button">Fonction de référence</button>' +
     '</div>' +
     '<div class="options">' +
     '<label id="label-as"><input type="checkbox" id="as"> AS</label>' +
@@ -109,6 +201,17 @@
     '<label id="label-oao"><input type="checkbox" id="oao"> OAO</label>' +
     '<label id="label-lineaire"><input type="checkbox" id="lineaire"> <span class="math-label">y = bx + c</span></label>' +
     '</div>' +
+    '</div>' +
+    '<div class="defi" id="defi" hidden>' +
+    '<p class="defi-consigne">Observe la parabole : quel est le signe de <i>a</i>, de <i>b</i> et de <i>c</i> ? Tu n\'as qu\'un essai.</p>' +
+    '<div class="groupe-signe"><span class="nom">Signe de <i>a</i></span><div class="choix" data-coef="a"><button type="button" data-signe="1" aria-pressed="false" aria-label="a positif">+</button><button type="button" data-signe="-1" aria-pressed="false" aria-label="a négatif">−</button></div></div>' +
+    '<div class="groupe-signe"><span class="nom">Signe de <i>b</i></span><div class="choix" data-coef="b"><button type="button" data-signe="1" aria-pressed="false" aria-label="b positif">+</button><button type="button" data-signe="-1" aria-pressed="false" aria-label="b négatif">−</button></div></div>' +
+    '<div class="groupe-signe"><span class="nom">Signe de <i>c</i></span><div class="choix" data-coef="c"><button type="button" data-signe="1" aria-pressed="false" aria-label="c positif">+</button><button type="button" data-signe="-1" aria-pressed="false" aria-label="c négatif">−</button></div></div>' +
+    '<div class="defi-actions">' +
+    '<button class="btn" id="verifier" type="button" disabled>Vérifier</button>' +
+    '<button class="btn" id="nouvelle" type="button">Nouvelle parabole</button>' +
+    '</div>' +
+    '<div class="correction" id="correction" hidden aria-live="polite"></div>' +
     '</div>';
 
   class ParaboleWidgetClass extends HTMLElement {
@@ -126,8 +229,20 @@
     this._centreX = 0;
     this._centreY = CENTRE_Y;
     this._enDeplacement = false;
+    this._mode = "libre";
+    this._defi = null; // { a, b, c, choix: {a,b,c}, verifie: bool }
     this._svg = shadow.getElementById("svg");
     this._formule = shadow.getElementById("formule");
+    this._infos = shadow.getElementById("infos");
+    this._controles = shadow.getElementById("controles");
+    this._zoomBar = shadow.getElementById("zoom-bar");
+    this._blocDefi = shadow.getElementById("defi");
+    this._correction = shadow.getElementById("correction");
+    this._btnVerifier = shadow.getElementById("verifier");
+    this._btnNouvelle = shadow.getElementById("nouvelle");
+    this._btnModeLibre = shadow.getElementById("mode-libre");
+    this._btnModeDefi = shadow.getElementById("mode-defi");
+    this._groupesChoix = Array.prototype.slice.call(shadow.querySelectorAll(".choix"));
     this._inputA = shadow.getElementById("a");
     this._inputB = shadow.getElementById("b");
     this._inputC = shadow.getElementById("c");
@@ -170,6 +285,7 @@
       self._rendre();
     };
     this._onPointerDown = function (event) {
+      if (self._mode !== "libre") return;
       self._enDeplacement = true;
       self._svg.classList.add("en-deplacement");
       self._svg.setPointerCapture(event.pointerId);
@@ -195,6 +311,24 @@
       self._enDeplacement = false;
       self._svg.classList.remove("en-deplacement");
     };
+    this._onModeLibre = function () { self._changerMode("libre"); };
+    this._onModeDefi = function () { self._changerMode("defi"); };
+    this._onChoix = function (event) {
+      var bouton = event.target.closest("button[data-signe]");
+      if (!bouton || !self._defi || self._defi.verifie) return;
+      var coef = bouton.parentElement.getAttribute("data-coef");
+      self._defi.choix[coef] = parseInt(bouton.getAttribute("data-signe"), 10);
+      self._rendreDefiBoutons();
+    };
+    this._onVerifier = function () {
+      if (!self._defi || self._defi.verifie) return;
+      var ch = self._defi.choix;
+      if (ch.a === 0 || ch.b === 0 || ch.c === 0) return;
+      self._defi.verifie = true;
+      self._rendre();
+    };
+    this._onNouvelle = function () { self._nouveauDefi(); };
+
     this._inputA.addEventListener("input", this._onInput);
     this._inputB.addEventListener("input", this._onInput);
     this._inputC.addEventListener("input", this._onInput);
@@ -210,6 +344,11 @@
     this._svg.addEventListener("pointermove", this._onPointerMove);
     this._svg.addEventListener("pointerup", this._onPointerUp);
     this._svg.addEventListener("pointercancel", this._onPointerUp);
+    this._btnModeLibre.addEventListener("click", this._onModeLibre);
+    this._btnModeDefi.addEventListener("click", this._onModeDefi);
+    this._blocDefi.addEventListener("click", this._onChoix);
+    this._btnVerifier.addEventListener("click", this._onVerifier);
+    this._btnNouvelle.addEventListener("click", this._onNouvelle);
     this._rendre();
   };
 
@@ -229,6 +368,29 @@
     this._svg.removeEventListener("pointermove", this._onPointerMove);
     this._svg.removeEventListener("pointerup", this._onPointerUp);
     this._svg.removeEventListener("pointercancel", this._onPointerUp);
+    this._btnModeLibre.removeEventListener("click", this._onModeLibre);
+    this._btnModeDefi.removeEventListener("click", this._onModeDefi);
+    this._blocDefi.removeEventListener("click", this._onChoix);
+    this._btnVerifier.removeEventListener("click", this._onVerifier);
+    this._btnNouvelle.removeEventListener("click", this._onNouvelle);
+  };
+
+  ParaboleWidgetClass.prototype._changerMode = function (mode) {
+    if (mode === this._mode) return;
+    this._mode = mode;
+    this._btnModeLibre.setAttribute("aria-pressed", mode === "libre" ? "true" : "false");
+    this._btnModeDefi.setAttribute("aria-pressed", mode === "defi" ? "true" : "false");
+    if (mode === "defi" && !this._defi) {
+      this._nouveauDefi();
+      return;
+    }
+    this._rendre();
+  };
+
+  ParaboleWidgetClass.prototype._nouveauDefi = function () {
+    var p = tirerParaboleDefi();
+    this._defi = { a: p.a, b: p.b, c: p.c, choix: { a: 0, b: 0, c: 0 }, verifie: false };
+    this._rendre();
   };
 
   ParaboleWidgetClass.prototype._appliquerZoom = function (nouveauZoom) {
@@ -242,23 +404,119 @@
     return [px, py];
   };
 
-  ParaboleWidgetClass.prototype._rendre = function () {
-    var a = this._a, b = this._b, c = this._c;
-    this._valeurA.textContent = formatNombreFr(a);
-    this._valeurB.textContent = formatNombreFr(b);
-    this._valeurC.textContent = formatNombreFr(c);
-    this._formule.textContent = "f(x) = " + formatFonction(a, b, c);
+  /** Texte des zéros et de l'image pour f(x) = ax² + bx + c (cas a = 0 compris). */
+  function infosZerosImage(a, b, c) {
+    var zeros, image;
+    if (Math.abs(a) < EPS) {
+      if (Math.abs(b) < EPS) {
+        zeros = Math.abs(c) < EPS ? "tous les réels annulent f (f est la fonction nulle)." : "aucun : f est constante et ne s'annule jamais.";
+        image = "{" + formatNombreFr(c) + "}";
+      } else {
+        zeros = "un seul, x " + egalOuEnviron(-c / b) + " (a = 0 : ce n'est plus une parabole, mais une droite).";
+        image = "ℝ";
+      }
+      return { zeros: zeros, image: image };
+    }
+    var z = zerosTrinome(a, b, c);
+    if (z.length === 0) zeros = "aucun : la parabole ne coupe pas l'axe des x (Δ < 0).";
+    else if (z.length === 1) zeros = "un seul (zéro double), x " + egalOuEnviron(z[0]) + " : le sommet est sur l'axe des x.";
+    else zeros = "deux, x₁ " + egalOuEnviron(z[0]) + " et x₂ " + egalOuEnviron(z[1]) + ".";
+    var yS = c - (b * b) / (4 * a);
+    var bord = formatNombreFr(yS);
+    if (a > 0) {
+      image = estExactAuCentieme(yS) ? "[" + bord + " ; +∞[" : "[y_S ; +∞[, avec y_S ≈ " + bord;
+    } else {
+      image = estExactAuCentieme(yS) ? "]−∞ ; " + bord + "]" : "]−∞ ; y_S], avec y_S ≈ " + bord;
+    }
+    return { zeros: zeros, image: image };
+  }
 
-    var degenere = a === 0;
+  ParaboleWidgetClass.prototype._rendreDefiBoutons = function () {
+    var defi = this._defi;
+    this._groupesChoix.forEach(function (groupe) {
+      var coef = groupe.getAttribute("data-coef");
+      var vrai = defi[coef] > 0 ? 1 : -1;
+      Array.prototype.forEach.call(groupe.querySelectorAll("button"), function (bouton) {
+        var signe = parseInt(bouton.getAttribute("data-signe"), 10);
+        bouton.setAttribute("aria-pressed", defi.choix[coef] === signe ? "true" : "false");
+        bouton.disabled = defi.verifie;
+        bouton.classList.remove("juste", "faux");
+        if (defi.verifie) {
+          if (signe === vrai) bouton.classList.add("juste");
+          else if (defi.choix[coef] === signe) bouton.classList.add("faux");
+        }
+      });
+    });
+    var complet = defi.choix.a !== 0 && defi.choix.b !== 0 && defi.choix.c !== 0;
+    this._btnVerifier.disabled = defi.verifie || !complet;
+  };
+
+  ParaboleWidgetClass.prototype._rendreCorrection = function () {
+    var d = this._defi;
+    var ch = d.choix;
+    var xS = -d.b / (2 * d.a);
+    var marque = function (coef) {
+      var vrai = d[coef] > 0 ? 1 : -1;
+      return ch[coef] === vrai ? '<span class="ok">✓ juste</span>' : '<span class="ko">✗ faux</span>';
+    };
+    var signeTexte = function (v) { return v > 0 ? "positif" : "négatif"; };
+    var memeSigne = d.a * d.b > 0;
+    var lignes = [];
+    lignes.push("<p><strong>a " + (d.a > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("a") + " — la parabole est tournée vers le " +
+      (d.a > 0 ? "haut (elle a un minimum)." : "bas (elle a un maximum)."));
+    lignes.push("<p><strong>c " + (d.c > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("c") + " — c = f(0) : la parabole coupe l'axe des y en (0 ; " +
+      formatNombreFr(d.c) + "), " + (d.c > 0 ? "au-dessus" : "en dessous") + " de l'origine.");
+    lignes.push("<p><strong>b " + (d.b > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("b") + " — le sommet est à " +
+      (xS < 0 ? "gauche" : "droite") + " de l'axe Oy (x_S = " + formatNombreFr(xS) + "). Comme x_S = −b/(2a), l'axe est à gauche de Oy quand a et b ont le même signe : ici a et b sont de signes " +
+      (memeSigne ? "identiques" : "contraires") + ", donc b est " + signeTexte(d.b) + ".");
+    lignes.push("<p>La parabole était f(x) = " + formatFonction(d.a, d.b, d.c) + ".</p>");
+    this._correction.innerHTML = lignes.join("</p>");
+  };
+
+  ParaboleWidgetClass.prototype._rendre = function () {
+    var enDefi = this._mode === "defi" && !!this._defi;
+    var a, b, c;
+    if (enDefi) {
+      a = this._defi.a; b = this._defi.b; c = this._defi.c;
+    } else {
+      a = this._a; b = this._b; c = this._c;
+    }
+    var revele = enDefi && this._defi.verifie;
+
+    this._controles.hidden = enDefi;
+    this._zoomBar.hidden = enDefi;
+    this._infos.hidden = enDefi;
+    this._blocDefi.hidden = !enDefi;
+    this._svg.classList.toggle("fixe", enDefi);
+
+    this._valeurA.textContent = formatNombreFr(this._a);
+    this._valeurB.textContent = formatNombreFr(this._b);
+    this._valeurC.textContent = formatNombreFr(this._c);
+
+    if (enDefi) {
+      this._formule.textContent = revele ? "f(x) = " + formatFonction(a, b, c) : "f(x) = ax² + bx + c";
+      this._rendreDefiBoutons();
+      this._correction.hidden = !revele;
+      if (revele) this._rendreCorrection();
+    } else {
+      this._formule.textContent = "f(x) = " + formatFonction(a, b, c);
+      var infos = infosZerosImage(a, b, c);
+      this._infos.innerHTML = "<p><strong>Zéros</strong> : " + infos.zeros + "</p><p><strong>Image</strong> : " + infos.image + "</p>";
+    }
+
+    var degenere = Math.abs(a) < EPS;
     this._labelAS.classList.toggle("desactive", degenere);
     this._labelS.classList.toggle("desactive", degenere);
     this._checkAS.disabled = degenere;
     this._checkS.disabled = degenere;
 
-    var demiX = DEMI_X_BASE * this._zoom;
-    var demiY = DEMI_Y_BASE * this._zoom;
-    this._xMin = this._centreX - demiX; this._xMax = this._centreX + demiX;
-    this._yMin = this._centreY - demiY; this._yMax = this._centreY + demiY;
+    var zoom = enDefi ? 1 : this._zoom;
+    var centreX = enDefi ? 0 : this._centreX;
+    var centreY = enDefi ? CENTRE_Y : this._centreY;
+    var demiX = DEMI_X_BASE * zoom;
+    var demiY = DEMI_Y_BASE * zoom;
+    this._xMin = centreX - demiX; this._xMax = centreX + demiX;
+    this._yMin = centreY - demiY; this._yMax = centreY + demiY;
     this._zoomValeur.textContent = Math.round(100 / this._zoom) + " %";
     this._zoomIn.disabled = this._zoom <= ZOOM_MIN + 1e-9;
     this._zoomOut.disabled = this._zoom >= ZOOM_MAX - 1e-9;
@@ -271,8 +529,10 @@
 
     var pasX = pasAgreable((X_MAX - X_MIN) / 8);
     var pasY = pasAgreable((Y_MAX - Y_MIN) / 8);
-    var origineY0 = self._toPx(0, 0)[1];
-    var origineX0 = self._toPx(0, 0)[0];
+    var origine = self._toPx(0, 0);
+    // L'axe reste visible au bord du cadre quand l'origine sort de la fenêtre (zoom/déplacement).
+    var axeYpx = Math.max(MARGE, Math.min(LARGEUR - MARGE, origine[0]));
+    var axeXpx = Math.max(MARGE, Math.min(HAUTEUR - MARGE, origine[1]));
 
     for (var kx = Math.ceil(X_MIN / pasX); kx * pasX <= X_MAX; kx++) {
       var xVal = kx * pasX;
@@ -284,7 +544,7 @@
       svg.appendChild(lg);
       if (kx !== 0) {
         var etiqGx = document.createElementNS(ns, "text");
-        etiqGx.setAttribute("x", pxg); etiqGx.setAttribute("y", origineY0 + 13);
+        etiqGx.setAttribute("x", pxg); etiqGx.setAttribute("y", axeXpx + 13);
         etiqGx.setAttribute("text-anchor", "middle");
         etiqGx.setAttribute("class", "graduation");
         etiqGx.textContent = formatNombreFr(xVal);
@@ -301,7 +561,7 @@
       svg.appendChild(lg2);
       if (ky !== 0) {
         var etiqGy = document.createElementNS(ns, "text");
-        etiqGy.setAttribute("x", origineX0 - 6); etiqGy.setAttribute("y", pyg + 3);
+        etiqGy.setAttribute("x", axeYpx - 6); etiqGy.setAttribute("y", pyg + 3);
         etiqGy.setAttribute("text-anchor", "end");
         etiqGy.setAttribute("class", "graduation");
         etiqGy.textContent = formatNombreFr(yVal);
@@ -309,24 +569,33 @@
       }
     }
 
-    var origine = self._toPx(0, 0);
     var axeX = document.createElementNS(ns, "line");
     axeX.setAttribute("x1", MARGE); axeX.setAttribute("x2", LARGEUR - MARGE);
-    axeX.setAttribute("y1", origine[1]); axeX.setAttribute("y2", origine[1]);
+    axeX.setAttribute("y1", axeXpx); axeX.setAttribute("y2", axeXpx);
     axeX.setAttribute("class", "axe");
     svg.appendChild(axeX);
     var axeY = document.createElementNS(ns, "line");
-    axeY.setAttribute("x1", origine[0]); axeY.setAttribute("x2", origine[0]);
+    axeY.setAttribute("x1", axeYpx); axeY.setAttribute("x2", axeYpx);
     axeY.setAttribute("y1", MARGE); axeY.setAttribute("y2", HAUTEUR - MARGE);
     axeY.setAttribute("class", "axe");
     svg.appendChild(axeY);
+    // Flèches des axes : vers la droite (x) et vers le haut (y).
+    var flecheX = document.createElementNS(ns, "path");
+    var xf = LARGEUR - MARGE;
+    flecheX.setAttribute("d", "M" + (xf + 7) + " " + axeXpx + " L" + (xf - 3) + " " + (axeXpx - 5) + " L" + (xf - 3) + " " + (axeXpx + 5) + " Z");
+    flecheX.setAttribute("class", "fleche");
+    svg.appendChild(flecheX);
+    var flecheY = document.createElementNS(ns, "path");
+    flecheY.setAttribute("d", "M" + axeYpx + " " + (MARGE - 7) + " L" + (axeYpx - 5) + " " + (MARGE + 3) + " L" + (axeYpx + 5) + " " + (MARGE + 3) + " Z");
+    flecheY.setAttribute("class", "fleche");
+    svg.appendChild(flecheY);
 
     var etiqX = document.createElementNS(ns, "text");
-    etiqX.setAttribute("x", LARGEUR - MARGE + 6); etiqX.setAttribute("y", origine[1] + 4);
+    etiqX.setAttribute("x", LARGEUR - MARGE + 4); etiqX.setAttribute("y", axeXpx + 18);
     etiqX.setAttribute("class", "etiquette"); etiqX.textContent = "x";
     svg.appendChild(etiqX);
     var etiqY = document.createElementNS(ns, "text");
-    etiqY.setAttribute("x", origine[0] + 6); etiqY.setAttribute("y", MARGE - 8);
+    etiqY.setAttribute("x", axeYpx + 9); etiqY.setAttribute("y", MARGE - 6);
     etiqY.setAttribute("class", "etiquette"); etiqY.textContent = "y";
     svg.appendChild(etiqY);
 
@@ -342,7 +611,7 @@
     chemin.setAttribute("class", "courbe");
     svg.appendChild(chemin);
 
-    if (this._checkLineaire.checked) {
+    if (!enDefi && this._checkLineaire.checked) {
       var pL1 = self._toPx(X_MIN, b * X_MIN + c);
       var pL2 = self._toPx(X_MAX, b * X_MAX + c);
       var ligneAB = document.createElementNS(ns, "line");
@@ -352,7 +621,11 @@
       svg.appendChild(ligneAB);
     }
 
-    if (!degenere && this._checkAS.checked) {
+    var montrerAS = enDefi ? revele : (!degenere && this._checkAS.checked);
+    var montrerS = enDefi ? revele : (!degenere && this._checkS.checked);
+    var montrerOAO = enDefi ? revele : this._checkOAO.checked;
+
+    if (montrerAS) {
       var xS = -b / (2 * a);
       if (xS >= X_MIN && xS <= X_MAX) {
         var pxS = self._toPx(xS, 0)[0];
@@ -369,7 +642,26 @@
       }
     }
 
-    if (!degenere && this._checkS.checked) {
+    // Zéros marqués sur l'axe des x (mode libre).
+    if (!enDefi && !degenere) {
+      var zeros = zerosTrinome(a, b, c);
+      zeros.forEach(function (z, k) {
+        if (z < X_MIN || z > X_MAX || 0 < Y_MIN || 0 > Y_MAX) return;
+        var pz = self._toPx(z, 0);
+        var cz = document.createElementNS(ns, "circle");
+        cz.setAttribute("cx", pz[0]); cz.setAttribute("cy", pz[1]); cz.setAttribute("r", 4.5);
+        cz.setAttribute("class", "point-zero");
+        svg.appendChild(cz);
+        var tz = document.createElementNS(ns, "text");
+        tz.setAttribute("x", pz[0]); tz.setAttribute("y", pz[1] - 9);
+        tz.setAttribute("text-anchor", "middle");
+        tz.setAttribute("class", "etiquette-zero");
+        tz.textContent = zeros.length === 1 ? "x₀" : (k === 0 ? "x₁" : "x₂");
+        svg.appendChild(tz);
+      });
+    }
+
+    if (montrerS) {
       var xS2 = -b / (2 * a);
       var yS2 = a * xS2 * xS2 + b * xS2 + c;
       if (xS2 >= X_MIN && xS2 <= X_MAX && yS2 >= Y_MIN && yS2 <= Y_MAX) {
@@ -379,14 +671,14 @@
         cS.setAttribute("class", "point-sommet");
         svg.appendChild(cS);
         var etiqS = document.createElementNS(ns, "text");
-        etiqS.setAttribute("x", ptS[0] + 8); etiqS.setAttribute("y", ptS[1] - 8);
+        etiqS.setAttribute("x", ptS[0] + 8); etiqS.setAttribute("y", ptS[1] + (a > 0 ? 18 : -8));
         etiqS.setAttribute("class", "etiquette");
         etiqS.textContent = "S(" + formatNombreFr(xS2) + " ; " + formatNombreFr(yS2) + ")";
         svg.appendChild(etiqS);
       }
     }
 
-    if (this._checkOAO.checked && c >= Y_MIN && c <= Y_MAX) {
+    if (montrerOAO && c >= Y_MIN && c <= Y_MAX && 0 >= X_MIN && 0 <= X_MAX) {
       var ptO = self._toPx(0, c);
       var cO = document.createElementNS(ns, "circle");
       cO.setAttribute("cx", ptO[0]); cO.setAttribute("cy", ptO[1]); cO.setAttribute("r", 5);
