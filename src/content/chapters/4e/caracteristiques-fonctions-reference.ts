@@ -237,27 +237,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           'tout simplement pas −t.',
       },
       {
-        kind: 'historique',
-        titre: 'Représenter une grandeur qui varie, 300 ans avant Descartes',
-        text:
-          'Au 14e siècle, bien avant l\'invention du repère cartésien, le philosophe et ' +
-          'évêque français **Nicole Oresme** a déjà l\'idée de représenter une grandeur qui ' +
-          'varie (comme une vitesse) par une figure géométrique — sa théorie dite de la ' +
-          '« latitude des formes » utilise des segments verticaux de hauteur variable pour ' +
-          'visualiser comment une quantité évolue, l\'ancêtre lointain du graphique d\'une ' +
-          'fonction. Oresme n\'a ni axes, ni coordonnées numériques au sens moderne, mais ' +
-          'l\'intuition est déjà là : une figure peut représenter un changement, pas ' +
-          'seulement une valeur fixe. Il faudra attendre Descartes, presque 300 ans plus ' +
-          'tard, pour que cette intuition devienne un véritable outil de calcul.',
-        image: {
-          src: '/images/historique/oresme.jpg',
-          alt: 'Miniature représentant Nicole Oresme, Traité de la sphère',
-          caption:
-            'Nicole Oresme (v. 1320–1382), miniature du Traité de la sphère, Bibliothèque ' +
-            'nationale de France, fonds français 565 (v. 1400–1420).',
-        },
-      },
-      {
         kind: 'astuce',
         label: 'Astuce — deux paires de fonctions réciproques',
         text:
@@ -331,6 +310,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           items: [
             '**Domaine** — repère d\'abord toute valeur exclue (point creux, coupure ' +
               'verticale). Décris le reste seulement après.',
+            '**Ensemble image** — les valeurs prises par f : projette la courbe sur l\'axe des ' +
+              'y, puis lis la plus petite et la plus grande ordonnée atteintes.',
             '**Zéros** — les abscisses où la courbe traverse l\'axe des x.',
             '**Variations** — croissante, décroissante ou constante, intervalle par intervalle.',
             '**Ordonnée à l\'origine** — la valeur en x = 0, si elle existe.',
@@ -349,9 +330,36 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'inégalités par cœur avant de savoir répondre d\'un coup d\'œil sur un graphique.',
         },
         {
+          kind: 'historique',
+          titre: 'Représenter une grandeur qui varie, 300 ans avant Descartes',
+          text:
+            'Au 14e siècle, bien avant l\'invention du repère cartésien, le philosophe et ' +
+            'évêque français **Nicole Oresme** a déjà l\'idée de représenter une grandeur qui ' +
+            'varie (comme une vitesse) par une figure géométrique — sa théorie dite de la ' +
+            '« latitude des formes » utilise des segments verticaux de hauteur variable pour ' +
+            'visualiser comment une quantité évolue, l\'ancêtre lointain du graphique d\'une ' +
+            'fonction. Oresme n\'a ni axes, ni coordonnées numériques au sens moderne, mais ' +
+            'l\'intuition est déjà là : une figure peut représenter un changement, pas ' +
+            'seulement une valeur fixe. Il faudra attendre Descartes, presque 300 ans plus ' +
+            'tard, pour que cette intuition devienne un véritable outil de calcul.',
+          image: {
+            src: '/images/historique/oresme.jpg',
+            alt: 'Miniature représentant Nicole Oresme, Traité de la sphère',
+            caption:
+              'Nicole Oresme (v. 1320–1382), miniature du Traité de la sphère, Bibliothèque ' +
+              'nationale de France, fonds français 565 (v. 1400–1420).',
+          },
+        },
+        {
           kind: 'rappel',
           label: 'Définitions précises — le vocabulaire de chaque question',
           items: [
+            '**Image** de a — le réel f(a) ; ordonnée du point de la courbe d\'abscisse a. Un réel ' +
+              'a au plus une image.',
+            '**Antécédent** de k — un réel a tel que f(a) = k ; abscisse d\'un point de la courbe ' +
+              'situé à la hauteur k. Un réel k peut avoir 0, 1 ou plusieurs antécédents.',
+            '**Ensemble image** — im f, l\'ensemble de toutes les images f(x), quand x parcourt le ' +
+              'domaine.',
             '**Zéro** — un réel dont l\'image vaut 0 ; abscisse d\'un point d\'intersection avec l\'axe Ox.',
             '**Ordonnée à l\'origine** — la valeur f(0), si elle existe ; ordonnée du point ' +
               'd\'intersection avec l\'axe Oy.',
@@ -397,27 +405,29 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             points: [
               { x: -1, y: 0, label: 'zéro', tone: 'good', labelPos: 'below' },
               { x: 0, y: 1, label: '', tone: 'bad', style: 'open' },
+              { x: 0, y: 0.5, label: '', tone: 'bad', style: 'open' },
             ],
             fixedYRange: { min: -3, max: 4 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'domaine : ℝ \\ {0 ; 2} — un point creux exclu en x=0 (rond) et une asymptote ' +
-              'verticale en x=2 ; courbe reconstruite à titre illustratif, forme non tirée d\'une ' +
-              'fonction de référence unique',
+              'domaine : ℝ \\ {0 ; 2} — en x=0, la courbe s\'arrête à gauche en (0 ; 1) et repart à ' +
+              'droite de (0 ; 0,5) : deux ronds vides, x=0 est exclu ; asymptote verticale en x=2 ; ' +
+              'courbe reconstruite à titre illustratif, forme non tirée d\'une fonction de référence unique',
           },
         },
         {
           kind: 'attention',
-          label: 'Trois façons différentes d\'être « exclu » en un point',
-          text: 'Un même symbole (un cercle) sur un graphique peut signifier trois choses très différentes :',
+          label: 'Trois symboles à distinguer en un point',
+          text: 'Sur un graphique, un rond peut dire trois choses très différentes :',
           items: [
-            '**Trou** — cercle vide des deux côtés : la valeur est réellement exclue du domaine.',
-            '**Point plein** — cercle plein : la courbe est bien définie et continue en ce ' +
-              'point, rien à signaler.',
-            '**Point redéfini** — cercles vides de part et d\'autre, **plus** un point plein ' +
-              'isolé ailleurs sur la même verticale. Le point appartient bien au domaine, mais ' +
-              'sa valeur ne suit pas la continuité apparente de la courbe.',
+            '**Rond vide** (trou) — la valeur est exclue du domaine : f(a) n\'existe pas. Si la ' +
+              'courbe arrive des deux côtés, il y a un rond vide au bout de chaque morceau.',
+            '**Rond plein** — la valeur appartient au domaine : f(a) existe et se lit à cet endroit. ' +
+              'Ce n\'est pas une exclusion !',
+            '**Point redéfini** — des ronds vides au bout de la courbe, **plus** un rond plein isolé ' +
+              'ailleurs sur la même verticale. La valeur appartient au domaine, mais f(a) n\'est pas ' +
+              'là où la courbe semble aller : c\'est le rond plein qui donne f(a).',
           ],
         },
         {
@@ -427,6 +437,143 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'réponses sont possibles. Soit la valeur demandée **existe** — elle se lit ' +
             'directement sur la courbe. Soit elle **n\'existe pas**, parce que le point tombe ' +
             'justement sur une valeur exclue du domaine.',
+        },
+        { kind: 'subheading', text: 'Résoudre graphiquement une équation ou une inéquation' },
+        {
+          kind: 'para',
+          text:
+            'Pour résoudre $f(x) = k$ sur un graphique, trace la droite horizontale $y = k$. Les ' +
+            'solutions sont les **antécédents** de k : les abscisses des points où la droite coupe ' +
+            'la courbe. Pour $f(x) > k$, cherche les x où la courbe est **au-dessus** de la droite ' +
+            '(en dessous pour $f(x) < k$).',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — résoudre graphiquement f(x) = 2 et f(x) > 2',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'La courbe ci-dessous est celle de $f(x) = (x-1)^2 - 2$, définie sur ℝ (le graphique ' +
+                'n\'en montre qu\'une partie).',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (x) => (x - 1) * (x - 1) - 2, tone: 'accent' }],
+                shadedRegions: [
+                  { from: -1.9, to: -1, upper: (x) => (x - 1) * (x - 1) - 2, lower: () => 2, tone: 'good' },
+                  { from: 3, to: 3.9, upper: (x) => (x - 1) * (x - 1) - 2, lower: () => 2, tone: 'good' },
+                ],
+                testLine: { y: 2, points: [{ x: -1 }, { x: 3 }] },
+                xMin: -2,
+                xMax: 4,
+                xTicks: [-1, 1, 3],
+                yTicks: [-2, 2, 4],
+                fixedYRange: { min: -3, max: 6 },
+                points: [
+                  { x: -1, y: 2, label: '(−1 ; 2)', tone: 'bad', labelPos: 'left' },
+                  { x: 3, y: 2, label: '(3 ; 2)', tone: 'bad', labelPos: 'right' },
+                  { x: 1, y: -2, label: 'min (1 ; −2)', tone: 'good', labelPos: 'below' },
+                ],
+                xAxisLabel: 'x',
+                yAxisLabel: 'y',
+                caption:
+                  'La droite $y=2$ coupe la courbe en $x=-1$ et $x=3$ ; en vert, les zones où la ' +
+                  'courbe est au-dessus de la droite ($f(x) > 2$).',
+              },
+            },
+            { kind: 'para', text: '**f(x) = 2** — la droite $y = 2$ coupe la courbe en $x = -1$ et $x = 3$. Donc $S = \\{-1\\,;\\,3\\}$ : 2 a deux antécédents.' },
+            { kind: 'para', text: '**f(x) > 2** — la courbe est au-dessus de la droite à gauche de $-1$ et à droite de $3$. Donc $S = \\left]-\\infty\\,;\\,-1\\right[ \\cup \\left]3\\,;\\,+\\infty\\right[$, bornes exclues (inégalité stricte).' },
+            { kind: 'para', text: '**Ensemble image** — le point le plus bas est $(1\\,;\\,-2)$, et la courbe monte sans fin des deux côtés : $\\operatorname{im} f = [-2\\,;\\,+\\infty[$.' },
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Les variations lues sur la courbe se résument dans un **tableau de variations** : une ' +
+            'ligne pour x (les bornes et les abscisses où le sens change), une ligne pour f (une ' +
+            'flèche par intervalle, et la valeur aux changements de sens).',
+        },
+        {
+          kind: 'signTable',
+          caption: 'Tableau de variations de f(x) = (x − 1)² − 2, lu sur la courbe (minimum −2 en x = 1)',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '1', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'f',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '↘', tone: 'plain' },
+                { text: '−2', tone: 'zero' },
+                { text: '↗', tone: 'plain' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Même idée pour **comparer deux fonctions** : $f(x) = g(x)$ aux abscisses des points ' +
+            'd\'intersection des deux courbes ; $f(x) > g(x)$ là où la courbe de f est au-dessus ' +
+            'de celle de g.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — comparer deux fonctions sur un graphique',
+          blocks: [
+            {
+              kind: 'para',
+              text: 'Sur le même graphique : $f(x) = (x-1)^2 - 2$ (orange) et $g(x) = x - 1$ (vert).',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [
+                  { fn: (x) => (x - 1) * (x - 1) - 2, tone: 'accent' },
+                  { fn: (x) => x - 1, tone: 'good' },
+                ],
+                shadedRegions: [
+                  { from: -1.6, to: 0, upper: (x) => (x - 1) * (x - 1) - 2, lower: (x) => x - 1, tone: 'accent' },
+                  { from: 3, to: 3.9, upper: (x) => (x - 1) * (x - 1) - 2, lower: (x) => x - 1, tone: 'accent' },
+                ],
+                xMin: -2,
+                xMax: 4,
+                xTicks: [1, 3],
+                yTicks: [-2, 2, 4],
+                fixedYRange: { min: -3, max: 6 },
+                points: [
+                  { x: 0, y: -1, label: '', tone: 'bad' },
+                  { x: 3, y: 2, label: '', tone: 'bad' },
+                ],
+                textLabels: [
+                  { x: 0.15, y: -2.6, text: '(0 ; −1)', tone: 'bad', anchor: 'start' },
+                  { x: 3.1, y: 0.7, text: '(3 ; 2)', tone: 'bad', anchor: 'start' },
+                  { x: -1.35, y: 5.4, text: 'f', tone: 'accent', anchor: 'start' },
+                  { x: 3.9, y: 2, text: 'g', tone: 'good', anchor: 'end' },
+                ],
+                xAxisLabel: 'x',
+                yAxisLabel: 'y',
+                caption:
+                  'Les deux courbes se coupent en $x=0$ et $x=3$ ; en orange, les zones où la courbe ' +
+                  'de f est au-dessus de celle de g ($f(x) > g(x)$).',
+              },
+            },
+            { kind: 'para', text: '**f(x) = g(x)** — les courbes se coupent en $(0\\,;\\,-1)$ et $(3\\,;\\,2)$. Donc $S = \\{0\\,;\\,3\\}$.' },
+            { kind: 'para', text: '**f(x) > g(x)** — la courbe de f est au-dessus de celle de g à gauche de 0 et à droite de 3 : $S = \\left]-\\infty\\,;\\,0\\right[ \\cup \\left]3\\,;\\,+\\infty\\right[$.' },
+          ],
         },
         {
           kind: 'application',
@@ -485,7 +632,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       id: 'algebrique',
       number: 2,
       title: 'Étudier algébriquement une fonction de référence',
-      kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros',
+      kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros, condition de validité',
       blocks: [
         { kind: 'video', title: 'Étudier algébriquement une fonction de référence', youtubeId: '0CERKsS8qiA' },
         {
@@ -545,6 +692,65 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'ou $|P(x)| = K$ (K > 0). Dans les deux cas, il faut séparer en **deux** équations ' +
             'linéaires distinctes — jamais une seule ! Pour le carré : $P(x) = \\sqrt{K}$ et ' +
             '$P(x) = -\\sqrt{K}$. Pour la valeur absolue : $P(x) = K$ et $P(x) = -K$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'valeur absolue — deux équations',
+          formula: '$f(x) = |2x-3| - 5$',
+          steps: [
+            { tag: 'CE', text: 'aucune condition d\'existence : la valeur absolue est définie partout' },
+            { tag: 'domaine', text: 'ℝ' },
+            { tag: 'isolement — résoudre f(x) = 0', text: '$|2x-3| = 5$' },
+            { tag: 'séparer en deux équations', text: '$2x-3 = 5$ ou $2x-3 = -5$' },
+          ],
+          result: { tag: 'zéros', text: '$x = 4$ et $x = -1$' },
+        },
+        { kind: 'subheading', text: 'Quand le membre de droite contient x' },
+        {
+          kind: 'para',
+          text:
+            'Parfois, la fonction s\'écrit $f(x) = [\\text{famille}](ax+b) + (cx+d)$. Après ' +
+            'l\'isolement, le membre de droite n\'est plus un nombre : il contient x. Pour la racine ' +
+            'carrée et la valeur absolue, une étape s\'ajoute alors : la **condition de validité**.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'niveau 2 — racine, membre de droite en x',
+          formula: '$f(x) = \\sqrt{x+2} - x$',
+          steps: [
+            { tag: 'CE', text: '$x+2 \\ge 0 \\iff x \\ge -2$' },
+            { tag: 'domaine', text: '$[-2\\,;\\,+\\infty[$' },
+            { tag: 'isolement — résoudre f(x) = 0', text: '$\\sqrt{x+2} = x$' },
+            { tag: 'condition de validité — une racine carrée est positive ou nulle', text: 'le membre de droite doit l\'être aussi : $x \\ge 0$' },
+            { tag: 'élever au carré et regrouper', text: '$x+2 = x^2 \\iff x^2 - x - 2 = 0$' },
+            { tag: 'solutions candidates', text: '$(x-2)(x+1) = 0 \\to x = 2$ ou $x = -1$' },
+            { tag: 'validation', text: '$x = 2$ vérifie $x \\ge 0$ : gardée. $x = -1$ ne la vérifie pas : rejetée — même si $-1$ est dans le domaine !' },
+          ],
+          result: { tag: 'zéro', text: '$x = 2$ (contrôle : $f(2) = \\sqrt{4} - 2 = 0$)' },
+        },
+        {
+          kind: 'attention',
+          label: 'Élever au carré peut faire apparaître des solutions étrangères',
+          text:
+            'Élever au carré n\'est pas une équivalence : $(-1)^2 = 1^2$, et pourtant $-1 \\neq 1$. ' +
+            'Une candidate qui ne respecte pas la condition de validité vérifie l\'équation élevée au ' +
+            'carré, mais **pas** l\'équation de départ : avec $x = -1$, $\\sqrt{-1+2} = 1$, alors que le ' +
+            'membre de droite vaut $-1$. Confronte **toujours** chaque candidate à la condition de ' +
+            'validité.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'niveau 2 — valeur absolue, membre de droite en x',
+          formula: '$f(x) = |x-3| - 2x$',
+          steps: [
+            { tag: 'CE', text: 'aucune condition d\'existence' },
+            { tag: 'domaine', text: 'ℝ' },
+            { tag: 'isolement — résoudre f(x) = 0', text: '$|x-3| = 2x$' },
+            { tag: 'condition de validité — deux cas selon le signe de x − 3', text: 'si $x \\ge 3$ : $x-3 = 2x$ ; si $x < 3$ : $x-3 = -2x$' },
+            { tag: 'résoudre chaque branche', text: '$x-3 = 2x \\to x = -3$ ; $x-3 = -2x \\to 3x = 3 \\to x = 1$' },
+            { tag: 'validation — chaque racine avec la condition de SA branche', text: '$x = -3$ ne vérifie pas $x \\ge 3$ : rejetée. $x = 1$ vérifie $x < 3$ : gardée.' },
+          ],
+          result: { tag: 'zéro', text: '$x = 1$ (contrôle : $f(1) = |{-2}| - 2 = 0$)' },
         },
         {
           kind: 'historique',
@@ -631,6 +837,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
         },
         {
+          kind: 'attention',
+          label: 'Piège — f(2x) comprime la courbe, il ne l\'étire pas',
+          text:
+            'Multiplier x par 2 **à l\'intérieur**, c\'est parcourir la courbe deux fois plus vite : ' +
+            'ce que $g$ faisait en $x = 4$, $g(2x)$ le fait déjà en $x = 2$. La courbe est donc ' +
+            '**comprimée** horizontalement, de facteur $\\dfrac{1}{2}$ — l\'inverse de ce qu\'on attend. ' +
+            'Exemple : $\\sqrt{x}$ passe par $(4\\,;\\,2)$, et $\\sqrt{2x}$ passe par $(2\\,;\\,2)$ : le ' +
+            'point s\'est rapproché de l\'axe Oy. Avec $f(kx)$, le facteur horizontal est toujours ' +
+            '$\\dfrac{1}{k}$.',
+        },
+        {
           kind: 'astuce',
           label: 'Astuce — le point caractéristique ne bouge qu\'avec TH',
           text:
@@ -667,6 +884,102 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'interchangeables. Seule la racine carrée (domaine à sens unique) donne à SOY un ' +
             'rôle réellement indépendant : il détermine de quel côté du point caractéristique le ' +
             'domaine s\'étend.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — lire les 8 paramètres, puis construire la courbe',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $f(x) = -2\\sqrt{-2(x-1)} + 3$. On la compare à la formule unifiée, avec ' +
+                '$g(x) = \\sqrt{x}$ :',
+            },
+            {
+              kind: 'featureTable',
+              headers: ['Paramètre', 'Valeur', 'Où le lire'],
+              rows: [
+                ['SOY', 'oui', 'le signe − devant 2, à l\'intérieur de la racine'],
+                ['CH / EH', 'CH = 2, EH = 1', 'le facteur 2 qui multiplie (x − 1)'],
+                ['TH', '1', 'x − 1 : TH est toujours soustrait'],
+                ['SOX', 'oui', 'le signe − devant la racine'],
+                ['EV / CV', 'EV = 2, CV = 1', 'le facteur 2 devant la racine'],
+                ['TV', '3', 'le + 3 final'],
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                'Le domaine se lit sous la racine : $-2(x-1) \\ge 0 \\iff x \\le 1$. Le point ' +
+                'caractéristique (le début de la demi-courbe) est en $x = TH = 1$, à la hauteur ' +
+                '$TV = 3$ : $(1\\,;\\,3)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On construit la courbe dans l\'ordre de l\'exercice : d\'abord CH, EH et SOY (à ' +
+                'l\'intérieur), puis TH, puis EV, CV et SOX (à l\'extérieur), et enfin TV. Sur chaque ' +
+                'graphique, la courbe de l\'étape précédente est en gris (à l\'étape 1, la courbe de ' +
+                'départ $\\sqrt{x}$).',
+            },
+            {
+              kind: 'illustrationGroup',
+              items: [
+                {
+                  kind: 'curvePlot',
+                  curves: [{ fn: (x) => Math.sqrt(x), tone: 'faint', xMin: 0, xMax: 2 }, { fn: (x) => Math.sqrt(-2 * x), tone: 'accent', xMin: -4, xMax: 0 }],
+                  xMin: -4,
+                  xMax: 2,
+                  xTicks: [-3, -2, -1, 1],
+                  yTicks: [-4, -2, 2],
+                  fixedYRange: { min: -6, max: 4 },
+                  points: [{ x: 0, y: 0, label: '(0 ; 0)', tone: 'good', labelPos: 'right' }],
+                  xAxisLabel: 'x',
+                  yAxisLabel: 'y',
+                  caption: '1 — CH = 2 et SOY : y = √(−2x)',
+                },
+                {
+                  kind: 'curvePlot',
+                  curves: [{ fn: (x) => Math.sqrt(-2 * x), tone: 'faint', xMin: -4, xMax: 0 }, { fn: (x) => Math.sqrt(-2 * (x - 1)), tone: 'accent', xMin: -3, xMax: 1 }],
+                  xMin: -4,
+                  xMax: 2,
+                  xTicks: [-3, -2, -1, 1],
+                  yTicks: [-4, -2, 2],
+                  fixedYRange: { min: -6, max: 4 },
+                  points: [{ x: 1, y: 0, label: '(1 ; 0)', tone: 'good', labelPos: 'right' }],
+                  xAxisLabel: 'x',
+                  yAxisLabel: 'y',
+                  caption: '2 — TH = 1 : y = √(−2(x − 1))',
+                },
+                {
+                  kind: 'curvePlot',
+                  curves: [{ fn: (x) => Math.sqrt(-2 * (x - 1)), tone: 'faint', xMin: -3, xMax: 1 }, { fn: (x) => -2 * Math.sqrt(-2 * (x - 1)), tone: 'accent', xMin: -3, xMax: 1 }],
+                  xMin: -4,
+                  xMax: 2,
+                  xTicks: [-3, -2, -1, 1],
+                  yTicks: [-4, -2, 2],
+                  fixedYRange: { min: -6, max: 4 },
+                  points: [{ x: 1, y: 0, label: '(1 ; 0)', tone: 'good', labelPos: 'right' }],
+                  xAxisLabel: 'x',
+                  yAxisLabel: 'y',
+                  caption: '3 — EV = 2 et SOX : y = −2√(−2(x − 1))',
+                },
+                {
+                  kind: 'curvePlot',
+                  curves: [{ fn: (x) => -2 * Math.sqrt(-2 * (x - 1)), tone: 'faint', xMin: -3, xMax: 1 }, { fn: (x) => -2 * Math.sqrt(-2 * (x - 1)) + 3, tone: 'accent', xMin: -3, xMax: 1 }],
+                  xMin: -4,
+                  xMax: 2,
+                  xTicks: [-3, -2, -1, 1],
+                  yTicks: [-4, -2, 2],
+                  fixedYRange: { min: -6, max: 4 },
+                  points: [{ x: 1, y: 3, label: '(1 ; 3)', tone: 'good', labelPos: 'right' }],
+                  xAxisLabel: 'x',
+                  yAxisLabel: 'y',
+                  caption: '4 — TV = 3 : y = −2√(−2(x − 1)) + 3',
+                },
+              ],
+            },
+          ],
         },
         {
           kind: 'application',
@@ -769,6 +1082,36 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           result: { tag: 'forme canonique', text: '$f(x) = 2|x-(-3)|$ — TH = −3, EV = 2, TV = 0' },
         },
         {
+          kind: 'exemple',
+          badge: 'racine carrée — coefficient sous la racine',
+          formula: '$f(x) = \\sqrt{4x-8}$',
+          steps: [
+            { tag: '1 — mettre 4 en évidence sous la racine', text: '$4x-8 = 4(x-2)$' },
+            { tag: '2 — le coefficient reste sous la racine', text: '$f(x) = \\sqrt{4(x-2)}$' },
+          ],
+          result: { tag: 'forme canonique', text: '$f(x) = \\sqrt{4(x-2)}$ — CH = 4, TH = 2' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'cube — coefficient de x mis en évidence',
+          formula: '$f(x) = (2x-6)^3$',
+          steps: [
+            { tag: '1 — mettre 2 en évidence dans le cube', text: '$2x-6 = 2(x-3)$' },
+            { tag: '2 — lire les paramètres', text: '$f(x) = \\left(2(x-3)\\right)^3$ : le facteur 2 multiplie $(x-3)$, à l\'intérieur du cube' },
+          ],
+          result: { tag: 'forme canonique', text: '$f(x) = \\left(2(x-3)\\right)^3$ — CH = 2, TH = 3' },
+        },
+        {
+          kind: 'astuce',
+          label: 'Astuce — une même courbe, deux lectures',
+          text:
+            'Mathématiquement, $\\sqrt{4(x-2)} = \\sqrt{4} \\cdot \\sqrt{x-2} = 2\\sqrt{x-2}$ : la même ' +
+            'courbe se lit comme une compression horizontale (CH = 4) **ou** comme un étirement ' +
+            'vertical (EV = 2). De même, $\\left(2(x-3)\\right)^3 = 8(x-3)^3$ : CH = 2 ou EV = 8. Les ' +
+            'deux lectures sont justes ! Dans les exercices de ce chapitre, on garde la lecture ' +
+            '**horizontale** : le coefficient de x, mis en évidence, se lit comme CH (ou EH).',
+        },
+        {
           kind: 'application',
           titre: 'Modéliser l\'effet d\'une taxe sur une courbe d\'offre',
           illustrations: [
@@ -824,7 +1167,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       id: 'revision',
       number: 4,
       title: 'Révision — vrai ou faux',
-      kicker: '140 affirmations, 7 thèmes, tout le chapitre en révision transversale',
+      kicker: '243 affirmations, 7 thèmes, tout le chapitre en révision transversale',
       blocks: [
         { kind: 'video', title: 'Révision vrai ou faux et synthèse du chapitre', youtubeId: '2ox8on-dIaY' },
         {
@@ -876,11 +1219,27 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         ],
       },
       {
+        title: 'Lecture graphique',
+        formulas: [
+          { text: 'image de $a$ : $f(a)$, ordonnée du point de la courbe d\'abscisse $a$' },
+          { text: 'antécédents de $k$ : abscisses des points de la courbe à la hauteur $k$' },
+          { text: '$f(x) > k$ : les $x$ où la courbe est au-dessus de la droite $y = k$' },
+          { text: 'ensemble image : projection de la courbe sur l\'axe des $y$' },
+        ],
+      },
+      {
         title: 'Condition d\'existence (CE) par famille',
         formulas: [
           { text: 'racine carrée : $ax+b \\ge 0$', condition: 'sens inversé si $a<0$' },
           { text: 'inverse : $ax+b \\neq 0$' },
           { text: 'carrée, cube, racine cubique, valeur absolue : aucune CE' },
+        ],
+      },
+      {
+        title: 'Membre de droite en x : condition de validité',
+        formulas: [
+          { text: '$\\sqrt{A} = B$ : $B \\ge 0$, puis $A = B^2$', condition: 'confronter chaque candidate à $B \\ge 0$' },
+          { text: '$|A| = B$ : $A = B$ si $A \\ge 0$, ou $A = -B$ si $A < 0$', condition: 'chaque racine avec la condition de sa branche' },
         ],
       },
       {
@@ -897,6 +1256,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           { text: '$f(x) = SOX \\cdot \\dfrac{EV}{CV} \\cdot g\\left(SOY \\cdot \\dfrac{CH}{EH}\\cdot(x-TH)\\right)+TV$' },
           { text: 'TH toujours soustrait, TV toujours ajouté' },
           { text: 'point caractéristique toujours en $x=TH$' },
+          { text: '$g(kx)$ : facteur $\\dfrac{1}{k}$ horizontalement', condition: 'comprime si $k>1$' },
         ],
       },
       {
@@ -916,15 +1276,19 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
     items: [
       '**6 familles** — carrée (x²), cube (x³), racine carrée (√x, domaine [0;+∞[), racine ' +
         'cubique (∛x), inverse (1/x, domaine privé de 0), valeur absolue (|x|).',
-      '**Lecture graphique** — toujours dans l\'ordre domaine → zéros → variations → ordonnée ' +
-        'à l\'origine → valeur en un point → asymptotes. Distingue bien trou, point plein et ' +
-        'point redéfini.',
+      '**Lecture graphique** — toujours dans l\'ordre domaine → ensemble image → zéros → ' +
+        'variations → ordonnée à l\'origine → valeur en un point → asymptotes. Distingue bien ' +
+        'trou, point plein et point redéfini.',
+      '**Image et antécédent** — l\'image de a se lit à la verticale de a ; les antécédents ' +
+        'de k à la hauteur k. Résoudre $f(x) = k$ ou $f(x) > k$, c\'est comparer la courbe à la ' +
+        'droite $y = k$ (ou à une autre courbe).',
       '**Étude algébrique** — CE selon la famille (aucune, ≠0 pour l\'inverse, ≥0 ou ≤0 selon ' +
         'le signe de a pour la racine carrée), puis isole pour trouver les zéros. Carrée et ' +
-        'valeur absolue se séparent toujours en deux équations.',
+        'valeur absolue se séparent toujours en deux équations. Si le membre de droite contient ' +
+        'x : condition de validité, puis validation de chaque candidate.',
       '**Formule unifiée** — $f(x) = SOX \\cdot (EV/CV) \\cdot g(SOY \\cdot (CH/EH) \\cdot ' +
         '(x-TH)) + TV$. TH est toujours soustrait, TV toujours ajouté. Le point caractéristique ' +
-        'reste toujours en x = TH.',
+        'reste toujours en x = TH. $g(kx)$ comprime horizontalement si $k > 1$ (facteur 1/k).',
       '**Parité et redondance** — SOY est invisible pour une famille paire. SOX et SOY sont ' +
         'interchangeables pour une famille impaire. Seule la racine carrée donne à SOY un rôle ' +
         'vraiment indépendant.',
@@ -934,6 +1298,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         'Ai-je bien identifié la famille avant de chercher la forme canonique ?',
         'Ai-je vérifié le signe de a avant de conclure sur le sens de l\'inégalité de la CE (racine carrée) ?',
         'Ai-je séparé en deux équations pour la carrée/valeur absolue, plutôt qu\'une seule ?',
+        'Si le membre de droite contient x, ai-je confronté chaque candidate à la condition de validité ?',
         'Ai-je lu le domaine en premier, avant les variations, sur une courbe composite ?',
       ],
     },

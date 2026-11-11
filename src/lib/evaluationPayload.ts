@@ -680,11 +680,21 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
   // d'exemple du cours (`src/content/chapters/4e/caracteristiques-fonctions-reference.ts`).
   'caracteristiques-fonctions-reference': {
+    lire: [
+      { cle: 'résoudre graphiquement', enonce: "À l'aide du graphique de la fonction $f(x) = (x-1)^2 - 2$, définie sur ℝ, résous graphiquement $f(x) = 2$ et $f(x) > 2$, puis donne son ensemble image." },
+      { cle: 'comparer deux fonctions', enonce: "On trace sur un même graphique les fonctions $f(x) = (x-1)^2 - 2$ et $g(x) = x - 1$. Résous graphiquement $f(x) = g(x)$ et $f(x) > g(x)$." },
+    ],
     algebrique: [
+      { cle: 'valeur absolue — deux équations', enonce: "Étudie algébriquement la fonction $f(x) = |2x-3| - 5$ : détermine sa condition d'existence, son domaine de définition et ses zéros." },
+      { cle: 'niveau 2 — racine', enonce: "Étudie algébriquement la fonction $f(x) = \\sqrt{x+2} - x$ : détermine sa condition d'existence, son domaine de définition et ses zéros, en posant la condition de validité et en vérifiant chaque solution candidate." },
+      { cle: 'niveau 2 — valeur absolue', enonce: "Étudie algébriquement la fonction $f(x) = |x-3| - 2x$ : détermine sa condition d'existence, son domaine de définition et ses zéros, en distinguant les deux cas selon le signe de $x-3$." },
       { cle: 'inverse', enonce: "Étudie algébriquement la fonction $f(x) = \\dfrac{1}{2x+4} - \\dfrac{1}{3}$ : détermine sa condition d'existence, son domaine de définition et ses zéros." },
       { cle: 'racine carrée', enonce: "Étudie algébriquement la fonction $f(x) = \\sqrt{2x-4} - \\dfrac{1}{2}$ : détermine sa condition d'existence, son domaine de définition et ses zéros." },
     ],
     transformer: [
+      { cle: 'lire les 8 paramètres', enonce: "Pour $f(x) = -2\\sqrt{-2(x-1)} + 3$, identifie les paramètres de la formule unifiée (avec $g(x) = \\sqrt{x}$), détermine le domaine et le point caractéristique, puis construis la courbe étape par étape à partir de $\\sqrt{x}$." },
+      { cle: 'racine carrée — coefficient sous la racine', enonce: "Écris $f(x) = \\sqrt{4x-8}$ sous forme canonique en mettant le coefficient de $x$ en évidence sous la racine, puis donne CH et TH." },
+      { cle: 'cube — coefficient de x', enonce: "Écris $f(x) = (2x-6)^3$ sous forme canonique en mettant le coefficient de $x$ en évidence dans le cube, puis donne CH et TH." },
       { cle: 'inverse, translations', enonce: "Pour $f(x) = \\dfrac{1}{x-3} + 2$, identifie les transformations (TH et TV) appliquées à la fonction de référence $x \\mapsto \\dfrac{1}{x}$, puis donne les équations des asymptotes de son graphique." },
       { cle: 'inverse — division', enonce: "Écris $f(x) = \\dfrac{2x+7}{x+3}$ sous la forme $\\dfrac{1}{x-TH} + TV$ en faisant apparaître $x+3$ au numérateur, puis donne TH et TV." },
       { cle: 'valeur absolue — facteur commun', enonce: "Écris $f(x) = |2x+6|$ sous la forme $EV \\cdot |x-TH| + TV$, puis donne TH, EV et TV." },
