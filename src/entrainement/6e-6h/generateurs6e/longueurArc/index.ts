@@ -14,9 +14,9 @@ export { construireFamilleLongueurArcA, construireFamilleLongueurArcB, construir
 export type IdVarianteLongueurArc = "A" | "B" | "C";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteLongueurArc; label: string }[] = [
-  { id: "A", label: "A — Racine parfaite par construction" },
-  { id: "B", label: "B — Substitution t=√(x²+k²), bornes construites" },
-  { id: "C", label: "C — Cas simple, substitution directe" },
+  { id: "A", label: "A — Racine parfaite par construction (puissances ou logarithme)" },
+  { id: "B", label: "Pour aller plus loin — B — Substitution t = √(x² + k²) et éléments simples" },
+  { id: "C", label: "C — Racine d'une expression du premier degré" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteLongueurArc): ExerciceLongueurArc {

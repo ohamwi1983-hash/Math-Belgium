@@ -23,13 +23,20 @@ import { diagnostiquerEcran as diagnostiquerEcranPrimitive } from "./verificatio
 
 const TOLERANCE = 0.01;
 
+/** Tolérance relative pour les grands nombres (audit P17) : 0,01 en absolu ou 1/10 000 de la valeur.
+ * Une valeur arrondie au centième (précision annoncée dans la consigne) est toujours acceptée. */
+function toleranceRelative(v: number): number {
+  return Math.max(TOLERANCE, 1e-4 * Math.abs(v));
+}
+
 function valeurIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne): number {
   return exercice.primitive.primitiveReference(exercice.b) - exercice.primitive.primitiveReference(exercice.a);
 }
 
 /** Écran "finalIntegrale" (scénarios `simple`/`moyenne`) — valeurs[0] = F(b)−F(a). */
 export function diagnostiquerFinalIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurIntegrale(exercice), TOLERANCE);
+  const v = valeurIntegrale(exercice);
+  return diagnostiquerValeur(valeurs[0], v, toleranceRelative(v));
 }
 export function verifierFinalIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne, valeurs: string[]): boolean {
   return diagnostiquerFinalIntegrale(exercice, valeurs) === "correct";
@@ -39,7 +46,7 @@ export function verifierFinalIntegrale(exercice: ExerciceIntegraleSimple | Exerc
  * de l'intégrale CORRECTE de l'écran précédent (jamais recalculée depuis la saisie élève). */
 export function diagnostiquerValeurMoyenne(exercice: ExerciceIntegraleMoyenne, valeurs: string[]): StatutVerification {
   const moyenne = valeurIntegrale(exercice) / (exercice.b - exercice.a);
-  return diagnostiquerValeur(valeurs[0], moyenne, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], moyenne, toleranceRelative(moyenne));
 }
 export function verifierValeurMoyenne(exercice: ExerciceIntegraleMoyenne, valeurs: string[]): boolean {
   return diagnostiquerValeurMoyenne(exercice, valeurs) === "correct";

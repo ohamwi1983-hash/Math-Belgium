@@ -42,9 +42,10 @@ function construirePuissances(): ExerciceLongueurArcA {
 
 const VALEURS_C = [1, 2, 3] as const;
 
-/** Forme `log` (audit chapitre 4 de 6e, point 24) : f(x) = x²/(4c) − c·ln(x), donc
- * f'(x) = x/(2c) − c/x et 1 + f'(x)² = (x/(2c) + c/x)² — un carré parfait, comme la forme
- * `puissances`. Bornes entières dans [1 ; 5] : la longueur vaut (b² − a²)/(4c) + c·ln(b/a). */
+/** Forme `log` (audit chapitre 4 de 6e, point 24) : f(x) = x²/(4c) − (c/2)·ln(x), donc
+ * f'(x) = x/(2c) − c/(2x) et 1 + f'(x)² = (x/(2c) + c/(2x))² — un carré parfait, comme la forme
+ * `puissances` (le produit des deux termes vaut 1/4). Bornes entières dans [1 ; 5] : la longueur
+ * vaut (b² − a²)/(4c) + (c/2)·ln(b/a). c = 1 donne l'exemple classique x²/4 − ½·ln(x). */
 function construireLog(): ExerciceLongueurArcA {
   const c = tirerParmi(VALEURS_C);
   let a = tirerEntier(1, 5);
@@ -58,10 +59,10 @@ function construireLog(): ExerciceLongueurArcA {
     c,
     a,
     b,
-    fReference: (x) => (x * x) / (4 * c) - c * Math.log(x),
-    fPrimeReference: (x) => x / (2 * c) - c / x,
-    racineSimplifieeReference: (x) => x / (2 * c) + c / x,
-    primitiveReference: (x) => (x * x) / (4 * c) + c * Math.log(x),
+    fReference: (x) => (x * x) / (4 * c) - (c / 2) * Math.log(x),
+    fPrimeReference: (x) => x / (2 * c) - c / (2 * x),
+    racineSimplifieeReference: (x) => x / (2 * c) + c / (2 * x),
+    primitiveReference: (x) => (x * x) / (4 * c) + (c / 2) * Math.log(x),
   };
 }
 

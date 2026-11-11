@@ -70,7 +70,7 @@ function termePolyLatex(t: TermeA, premier: boolean): string {
     case "expX":
       return `${s}${abs === 1 ? "" : abs}e^x`;
     case "invX":
-      return `${s}${abs === 1 ? "" : abs}\\dfrac{1}{x}`;
+      return `${s}\\dfrac{${abs}}{x}`;
     case "cosX":
       return `${s}${abs === 1 ? "" : abs}\\cos(x)`;
     default:

@@ -311,7 +311,16 @@ export function diagnostiquerCEcran1(exercice: ExerciceFamilleC, valeurs: string
 
   const uPrime = exercice.uPrimeReference;
   const echantillonsDx = echantillonsDeux(CANDIDATS_X, CANDIDATS_DERIVEE, "x", "du");
-  const sdx = diagnostiquerExpressionMultiVariable(texteDx, ({ x, du }) => du / uPrime(x), echantillonsDx);
+  let sdx = diagnostiquerExpressionMultiVariable(texteDx, ({ x, du }) => du / uPrime(x), echantillonsDx);
+  if (sdx !== "correct" && avecXDeU) {
+    // dx peut aussi s'écrire en fonction de u (C3 : dx = 2u du, la réponse du cours) — audit : cette
+    // écriture naturelle était refusée comme « expression non reconnue » (variable u inconnue).
+    const xDeU = (exercice as { xDeUReference: (u: number) => number }).xDeUReference;
+    const pointsU = exercice.sousType === "3" ? CANDIDATS_U_POSITIF : CANDIDATS_X_POSITIF;
+    const echantillonsU = echantillonsDeux(pointsU, CANDIDATS_DERIVEE, "u", "du");
+    const enU = diagnostiquerExpressionMultiVariable(texteDx, ({ u, du }) => du / uPrime(xDeU(u)), echantillonsU);
+    if (enU === "correct" || sdx === "parse_error") sdx = enU;
+  }
 
   return pireStatut(su, sx, sdx);
 }
@@ -545,7 +554,10 @@ export function diagnostiquerGEcran2(exercice: ExerciceFamilleG, valeurs: string
       echantillons.push(vars);
     }
   }
-  return diagnostiquerExpressionMultiVariable(valeurs[0], exercice.decompositionReference, echantillons);
+  // « Bx+C » (écriture du cours) : le parseur lit « bx » comme un seul identifiant — on insère le
+  // produit implicite entre un coefficient A/B/C et x avant d'évaluer.
+  const texte = (valeurs[0] ?? "").replace(/(^|[^a-z])([abc])\s*x/gi, "$1$2*x");
+  return diagnostiquerExpressionMultiVariable(texte, exercice.decompositionReference, echantillons);
 }
 export function verifierGEcran2(exercice: ExerciceFamilleG, valeurs: string[]): boolean {
   return diagnostiquerGEcran2(exercice, valeurs) === "correct";

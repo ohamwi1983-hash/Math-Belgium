@@ -1,7 +1,8 @@
 import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleG } from "../core6e/calculPrimitives.types";
 import type { ExerciceQuellePrimitive } from "../core6e/quellePrimitive.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
+import { diagnostiquerValeur } from "./equivalenceExponentielle";
+import { evaluerExpressionExponentielle } from "./expressionExponentielle";
 import type { PhaseQuellePrimitive } from "./typesQuellePrimitive";
 import {
   diagnostiquerAEcran1,
@@ -18,6 +19,7 @@ import {
   diagnostiquerGEcran2,
   diagnostiquerGEcran3,
   diagnostiquerGEcran4,
+  messageSpecifiqueEcran,
 } from "./verificationCalculPrimitives";
 import type { PhaseCalculPrimitives } from "./typesCalculPrimitives";
 
@@ -71,16 +73,61 @@ function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
 }
 
-/** Écran final (nouveau) — voir en-tête de fichier. `valeurs=[C, F(x)]`. */
+/** Tolérance RELATIVE pour les grands nombres (audit P17) : 0,01 en absolu, ou 1/10 000 de la valeur
+ * si elle est plus grande (une valeur arrondie au centième d'un nombre comme 2 981,4 reste juste). */
+function toleranceRelative(v: number): number {
+  return Math.max(TOLERANCE, 1e-4 * Math.abs(v));
+}
+
+/** La saisie contient-elle encore la lettre C (constante non remplacée) ? */
+function contientConstanteLitterale(texte: string): boolean {
+  return /(^|[^a-z])c($|[^a-z])/i.test(texte);
+}
+
+/** Écran final (nouveau) — voir en-tête de fichier. `valeurs=[C, F(x)]`. F(x) n'est comparé que sur
+ * l'intervalle de validité qui contient a (audit décision C : sur une autre branche, la constante
+ * peut être différente — ln|x−2| avec a = 0 ne dit rien de F pour x > 2). */
 export function diagnostiquerEcranFinal(exercice: ExerciceQuellePrimitive, valeurs: string[]): StatutVerification {
   const { exerciceBase, a, b } = exercice;
   const cAttendu = b - exerciceBase.primitiveReference(a);
 
-  const statutC = diagnostiquerValeur(valeurs[0], cAttendu, TOLERANCE);
-  const points = pointsSursPourPrimitive(exerciceBase.primitiveReference);
-  const statutF = diagnostiquerEquivalenceFonction(valeurs[1], (x) => exerciceBase.primitiveReference(x) + cAttendu, points);
+  const statutC = diagnostiquerValeur(valeurs[0], cAttendu, toleranceRelative(cAttendu));
+  if (contientConstanteLitterale(valeurs[1] ?? "")) return statutC === "parse_error" ? "parse_error" : "not_equivalent";
+
+  const gauche = exercice.intervalleGauche ?? -Infinity;
+  const droite = exercice.intervalleDroite ?? Infinity;
+  const points = pointsSursPourPrimitive(exerciceBase.primitiveReference).filter((x) => x > gauche + 0.005 && x < droite - 0.005);
+  const reference = (x: number) => exerciceBase.primitiveReference(x) + cAttendu;
+  let statutF: StatutVerification = "correct";
+  let comparables = 0;
+  for (const x of points) {
+    const attendu = reference(x);
+    if (!Number.isFinite(attendu)) continue;
+    let soumis: number;
+    try {
+      soumis = evaluerExpressionExponentielle(valeurs[1], { x });
+    } catch {
+      statutF = "parse_error";
+      break;
+    }
+    if (!Number.isFinite(soumis) || Math.abs(soumis - attendu) > toleranceRelative(attendu)) {
+      statutF = "not_equivalent";
+      break;
+    }
+    comparables++;
+  }
+  if (statutF === "correct" && comparables < Math.min(3, points.length)) statutF = "parse_error";
 
   return pireStatut(statutC, statutF);
+}
+
+/** Message spécifique de l'écran final (la constante C laissée telle quelle dans F(x)), sinon celui
+ * des écrans empruntés (valeur absolue oubliée). */
+export function messageSpecifiqueQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive, valeurs: string[]): string | null {
+  if (phase === "final") {
+    return contientConstanteLitterale(valeurs[1] ?? "") ? "Dans F(x), remplace la lettre C par la valeur que tu as trouvée." : null;
+  }
+  return messageSpecifiqueEcran(exercice.exerciceBase, phase, valeurs);
 }
 
 /** Dispatcher restreint aux 12 phases A/B/C/G réellement empruntées à 6gen23 — appelle les

@@ -11,6 +11,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { LIBELLE_PHASE, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLongueurArc";
 import { calculerRecapitulatifLongueurArc, calculerSegmentsProgressionLongueurArc } from "./ui6e/recapitulatifLongueurArc";
+import { figureLongueurArcSvg } from "./ui6e/figureLongueurArc";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -48,6 +49,9 @@ export function App6gen28() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché : entre dans la `key` de l'écran, pour que les champs soient
+   * vidés après « Générer » même quand le nouvel exercice commence sur la même phase. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise `calculerRecapitulatifLongueurArc`
    * pour la réponse ATTENDUE. Garde sur le libellé : le dernier écran de l'exercice n'avance jamais
@@ -87,6 +91,7 @@ export function App6gen28() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -98,6 +103,7 @@ export function App6gen28() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionCalculLongueurArc(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteLongueurArc)));
   }
 
@@ -150,7 +156,7 @@ export function App6gen28() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifLongueurArc(etat)} />
         <EtapeChampsLongueurArc
-          key={phase}
+          key={`${numeroExercice}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
@@ -161,6 +167,12 @@ export function App6gen28() {
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
         />
+
+        {enAttente?.etatSuivant.terminee && (
+          <figure style={{ margin: "1rem 0 0", textAlign: "center" }} aria-label="Figure de l'exercice">
+            <div dangerouslySetInnerHTML={{ __html: figureLongueurArcSvg(exercice) }} />
+          </figure>
+        )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

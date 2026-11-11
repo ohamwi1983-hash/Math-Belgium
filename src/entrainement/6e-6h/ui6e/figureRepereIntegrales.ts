@@ -102,6 +102,8 @@ function echapper(s: string): string {
 
 let compteurFigures = 0;
 
+const HALO = `stroke="var(--surface, #ffffff)" stroke-width="3" stroke-linejoin="round" paint-order="stroke"`;
+
 export function repereSvg(o: OptionsRepere): string {
   // Identifiants uniques par figure : plusieurs figures dans un même document (corrigé papier) ne
   // doivent jamais partager un `clipPath`/`marker` de géométrie différente.
@@ -134,25 +136,35 @@ export function repereSvg(o: OptionsRepere): string {
     );
   }
 
-  // Axes fléchés (l'axe vertical en x = 0 s'il est dans la fenêtre, sinon au bord gauche).
-  const xAxeY = o.xMin <= 0 && o.xMax >= 0 ? 0 : o.xMin;
-  const yAxeX = o.yMin <= 0 && o.yMax >= 0 ? 0 : o.yMin;
+  // Axes fléchés : l'axe vertical en x = 0 s'il est dans la fenêtre, sinon au bord le plus proche de
+  // 0 (bord droit quand toute la fenêtre est à gauche de 0 : 6gen26 A, f(x) = a/x sur [−5 ; −2]) ;
+  // idem pour l'axe horizontal.
+  const xAxeY = o.xMin <= 0 && o.xMax >= 0 ? 0 : o.xMax < 0 ? o.xMax : o.xMin;
+  const yAxeX = o.yMin <= 0 && o.yMax >= 0 ? 0 : o.yMax < 0 ? o.yMax : o.yMin;
   morceaux.push(
     `<line x1="${f1(sx(o.xMin))}" y1="${f1(sy(yAxeX))}" x2="${f1(sx(o.xMax) + 10)}" y2="${f1(sy(yAxeX))}" stroke="${COULEURS.doux}" stroke-width="1.1" marker-end="url(#${id}fl)"/>`,
     `<line x1="${f1(sx(xAxeY))}" y1="${f1(sy(o.yMin))}" x2="${f1(sx(xAxeY))}" y2="${f1(sy(o.yMax) - 10)}" stroke="${COULEURS.doux}" stroke-width="1.1" marker-end="url(#${id}fl)"/>`,
     `<text x="${f1(sx(o.xMax) + 6)}" y="${f1(sy(yAxeX) + 15)}" font-size="12" font-style="italic" fill="${COULEURS.doux}" ${POLICE}>x</text>`,
     `<text x="${f1(sx(xAxeY) + 5)}" y="${f1(sy(o.yMax) - 2)}" font-size="12" font-style="italic" fill="${COULEURS.doux}" ${POLICE}>y</text>`,
   );
+  // Les nombres des graduations sont posés en DERNIER, avec un liseré de la couleur du fond : une
+  // courbe ou une ellipse qui passe juste sous l'axe (6gen26 D avec g ≈ 0, ellipses de 6gen27) ne
+  // doit pas les rendre illisibles.
+  const etiquettesGraduations: string[] = [];
   for (const g of o.graduationsX ?? []) {
     morceaux.push(
       `<line x1="${f1(sx(g.x))}" y1="${f1(sy(yAxeX) - 3)}" x2="${f1(sx(g.x))}" y2="${f1(sy(yAxeX) + 3)}" stroke="${COULEURS.doux}" stroke-width="1"/>`,
-      `<text x="${f1(sx(g.x))}" y="${f1(sy(yAxeX) + 15)}" font-size="11" text-anchor="middle" fill="${COULEURS.doux}" ${POLICE}>${echapper(g.etiquette)}</text>`,
+    );
+    etiquettesGraduations.push(
+      `<text x="${f1(sx(g.x))}" y="${f1(sy(yAxeX) + 15)}" font-size="11" text-anchor="middle" fill="${COULEURS.doux}" ${HALO} ${POLICE}>${echapper(g.etiquette)}</text>`,
     );
   }
   for (const g of o.graduationsY ?? []) {
     morceaux.push(
       `<line x1="${f1(sx(xAxeY) - 3)}" y1="${f1(sy(g.y))}" x2="${f1(sx(xAxeY) + 3)}" y2="${f1(sy(g.y))}" stroke="${COULEURS.doux}" stroke-width="1"/>`,
-      `<text x="${f1(sx(xAxeY) - 6)}" y="${f1(sy(g.y) + 4)}" font-size="11" text-anchor="end" fill="${COULEURS.doux}" ${POLICE}>${echapper(g.etiquette)}</text>`,
+    );
+    etiquettesGraduations.push(
+      `<text x="${f1(sx(xAxeY) - 6)}" y="${f1(sy(g.y) + 4)}" font-size="11" text-anchor="end" fill="${COULEURS.doux}" ${HALO} ${POLICE}>${echapper(g.etiquette)}</text>`,
     );
   }
 
@@ -180,6 +192,9 @@ export function repereSvg(o: OptionsRepere): string {
     );
   }
 
+  // Étiquettes des courbes déjà posées : deux courbes qui finissent au même endroit (6gen27 C, f et g
+  // proches) ne doivent pas superposer leurs noms.
+  const etiquettesPosees: { x: number; y: number }[] = [];
   for (const c of o.courbes ?? []) {
     const n = 160;
     const pts: string[] = [];
@@ -196,8 +211,12 @@ export function repereSvg(o: OptionsRepere): string {
     );
     if (c.etiquette && derniere) {
       const yEt = Math.max(o.yMin, Math.min(o.yMax, derniere.y));
+      const xPx = sx(derniere.x) - 4;
+      let yPx = sy(yEt) - 6;
+      while (etiquettesPosees.some((e) => Math.abs(e.x - xPx) < 16 && Math.abs(e.y - yPx) < 13)) yPx += 14;
+      etiquettesPosees.push({ x: xPx, y: yPx });
       morceaux.push(
-        `<text x="${f1(sx(derniere.x) - 4)}" y="${f1(sy(yEt) - 6)}" font-size="12" font-style="italic" text-anchor="end" fill="${c.couleur}" ${POLICE}>${echapper(c.etiquette)}</text>`,
+        `<text x="${f1(xPx)}" y="${f1(yPx)}" font-size="12" font-style="italic" text-anchor="end" fill="${c.couleur}" ${POLICE}>${echapper(c.etiquette)}</text>`,
       );
     }
   }
@@ -218,6 +237,7 @@ export function repereSvg(o: OptionsRepere): string {
     }
   }
 
+  morceaux.push(...etiquettesGraduations);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L} ${H}" width="${L}" height="${H}" style="max-width:100%;height:auto" role="img" aria-label="${echapper(o.libelle)}">${morceaux.join("")}</svg>`;
 }
 

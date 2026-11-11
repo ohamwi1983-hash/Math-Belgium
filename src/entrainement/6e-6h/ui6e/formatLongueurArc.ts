@@ -79,7 +79,7 @@ function longueurLatex(valeur: number, exactLatex?: string | null): string {
 function formuleFA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
-    return `\\dfrac{x^2}{${4 * c}}-${c === 1 ? "" : c}\\ln(x)`;
+    return `\\dfrac{x^2}{${4 * c}}-${demiLatex(c)}\\ln(x)`;
   }
   const n = exercice.n;
   return `\\frac{1}{2}\\left(${fracPuissanceX(n + 1, n + 1)}+${fracPuissanceX(1 - n, n - 1)}\\right)`;
@@ -87,35 +87,60 @@ function formuleFA(exercice: ExerciceLongueurArcA): string {
 function formuleFPrimeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
-    return `\\dfrac{x}{${2 * c}}-\\dfrac{${c}}{x}`;
+    return `\\dfrac{x}{${2 * c}}-${fractionSurXLatex(c, 2)}`;
   }
   return `\\frac{1}{2}\\left(x^{${exercice.n}}-x^{-${exercice.n}}\\right)`;
 }
 function formuleRacineSimplifieeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
-    return `\\dfrac{x}{${2 * c}}+\\dfrac{${c}}{x}`;
+    return `\\dfrac{x}{${2 * c}}+${fractionSurXLatex(c, 2)}`;
   }
   return `\\frac{1}{2}\\left(x^{${exercice.n}}+x^{-${exercice.n}}\\right)`;
 }
 function formuleFPrimeCarreDeveloppeA(exercice: ExerciceLongueurArcA): string {
   if (exercice.forme === "log") {
     const c = exercice.c;
-    return `\\dfrac{x^2}{${4 * c * c}}-1+\\dfrac{${c * c}}{x^2}`;
+    return `\\dfrac{x^2}{${4 * c * c}}-\\dfrac{1}{2}+${fractionSurXLatex(c * c, 4, 2)}`;
   }
   const n = exercice.n;
   return `\\frac{1}{4}\\left(x^{${2 * n}}-2+x^{${-2 * n}}\\right)`;
 }
 
+/** Coefficient c/2 devant ln(x) : « » (c = 2), « 3 »… ou « \\dfrac{1}{2} ». */
+function demiLatex(c: number): string {
+  if (c === 2) return "";
+  return c % 2 === 0 ? `${c / 2}` : `\\dfrac{${c}}{2}`;
+}
+/** Terme num/(den·x^p) réduit : c/(2x) → « \\dfrac{1}{x} » (c = 2), « \\dfrac{3}{2x} »… */
+function fractionSurXLatex(num: number, den: number, puissance = 1): string {
+  const g = pgcdEntiers(num, den);
+  const n = num / g;
+  const d = den / g;
+  const xp = puissance === 1 ? "x" : `x^{${puissance}}`;
+  return `\\dfrac{${n}}{${d === 1 ? "" : d}${xp}}`;
+}
+function pgcdEntiers(a: number, b: number): number {
+  while (b !== 0) [a, b] = [b, a % b];
+  return Math.abs(a) || 1;
+}
+
 /** Longueur exacte de la famille A : rationnelle (forme `puissances`), ou (b² − a²)/(4c) + c·ln(b/a)
  * (forme `log`). */
 function longueurExacteALatex(exercice: ExerciceLongueurArcA): string | null {
-  if (exercice.forme === "puissances") return null; // rationnelle : reconnue par `egalExactPuisApprox`
+  if (exercice.forme === "puissances") {
+    // L = ½[(bⁿ⁺¹ − aⁿ⁺¹)/(n+1) + (bⁿ⁻¹ − aⁿ⁻¹)/((n−1)·aⁿ⁻¹·bⁿ⁻¹)] — fraction calculée en entiers
+    // (les dénominateurs dépassent ce qu'une reconnaissance numérique retrouve).
+    const { a, b, n } = exercice;
+    const p1 = { num: b ** (n + 1) - a ** (n + 1), den: n + 1 };
+    const p2 = { num: b ** (n - 1) - a ** (n - 1), den: (n - 1) * a ** (n - 1) * b ** (n - 1) };
+    return fractionLatex(p1.num * p2.den + p2.num * p1.den, 2 * p1.den * p2.den);
+  }
   const { a, b, c } = exercice;
   const partie = fractionLatex(b * b - a * a, 4 * c);
   const q = fractionLatex(b, a);
   const ln = q.includes("dfrac") ? `\\ln\\left(${q}\\right)` : `\\ln(${q})`;
-  return `${partie}+${c === 1 ? "" : c}${ln}`;
+  return `${partie}+${demiLatex(c)}${ln}`;
 }
 
 export function consigneGeneraleA(): FragmentConsigne[] {
