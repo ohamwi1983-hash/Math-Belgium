@@ -1099,6 +1099,17 @@ export const geometrieDansEspace: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'fenetre-durer-widget',
+          label: 'Manipule toi-même : la fenêtre de Dürer',
+          caption:
+            'Règle la distance et la hauteur de deux bâtons vus à travers la vitre de ' +
+            'Dürer, avec un seul œil. Chaque rayon visuel coupe la vitre : l\'image d\'un ' +
+            'bâton mesure hauteur × (distance œil–vitre) ÷ (distance œil–bâton). Appuie sur ' +
+            '« Même taille apparente » : un bâton deux fois plus loin doit être deux fois ' +
+            'plus grand pour avoir la même image.',
+        },
+        {
           kind: 'para',
           text:
             'Le peintre repère où les lignes de vision, issues de l\'œil, coupent le quadrillage ' +
@@ -1267,6 +1278,18 @@ export const geometrieDansEspace: ChapterContent = {
             'intersection coupe le segment en son vrai milieu. C\'est la « propriété du trapèze » ' +
             'annoncée plus haut : les diagonales d\'un rectangle se coupent en son centre, et ce ' +
             'point d\'intersection résiste à la perspective.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'point-de-fuite-widget',
+          label: 'Manipule toi-même : construire en perspective centrale',
+          caption:
+            'Déplace la ligne d\'horizon et le point de fuite : la maison se redessine en ' +
+            'perspective centrale. Les verticales et les horizontales de la façade restent ' +
+            'parallèles ; seules les fuyantes convergent vers le point de fuite. Le faîtage ' +
+            'est une fuyante, et le pignon arrière se place grâce aux diagonales de la face ' +
+            'arrière. Active « Milieu en perspective » pour voir que le vrai milieu n\'est ' +
+            'pas au milieu du dessin, et compare avec la même maison en cavalière.',
         },
         {
           kind: 'attention',
@@ -1460,6 +1483,18 @@ export const geometrieDansEspace: ChapterContent = {
               'elles ; sous un lampadaire, elles partent dans des directions différentes, qui se ' +
               'rejoignent toutes au pied du lampadaire.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'ombre-soleil-lampe-widget',
+          label: 'Manipule toi-même : soleil ou lampe ?',
+          caption:
+            'Éclaire trois piquets par le soleil, puis par une lampe. Au soleil, les rayons ' +
+            'sont parallèles : les ombres le sont aussi, et chacune est proportionnelle à ' +
+            'la hauteur de son piquet (c\'est une projection parallèle). Avec une lampe, les ' +
+            'rayons partent d\'un même point : les ombres convergent vers le pied de la ' +
+            'lampe (c\'est une projection centrale). Si la lampe est plus basse qu\'un ' +
+            'piquet, l\'ombre de ce piquet ne s\'arrête jamais.',
         },
         {
           kind: 'application',
