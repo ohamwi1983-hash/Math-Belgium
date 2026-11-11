@@ -1581,16 +1581,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'revision',
       number: 8,
       title: 'Révision — vrai ou faux',
-      kicker: '224 affirmations, 7 thèmes, discriminant et relations de Viète inclus',
+      kicker: '360 affirmations, 11 thèmes, de Viète aux inéquations rationnelles',
       blocks: [
         { kind: 'video', title: 'Révision : présentation du quiz et synthèse du chapitre', youtubeId: 'Z7YvxgvtaIM' },
         {
           kind: 'para',
           text:
-            '224 affirmations. 7 thèmes. Ils reprennent tout le chapitre : le vocabulaire, la ' +
+            '360 affirmations. 11 thèmes. Ils reprennent tout le chapitre : le vocabulaire, la ' +
             'résolution sans discriminant, le discriminant Δ, sa démonstration, la somme et le ' +
             'produit des racines, la méthode générale de factorisation, les inéquations et le ' +
-            'tableau de signes. Un seul essai par question. La justification est toujours donnée.',
+            'tableau de signes, les fractions rationnelles, l\'inconnue au dénominateur, les ' +
+            'inéquations rationnelles et les équations en contexte. Un seul essai par question. ' +
+            'La justification est toujours donnée.',
         },
         {
           kind: 'astuce',
@@ -1606,7 +1608,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           title: 'Équations et inéquations du second degré — quiz vrai/faux',
           generatorId: 'gen61',
           description: [
-            'Choisis un thème et teste-toi : 224 affirmations pré-écrites, une seule tentative ' +
+            'Choisis un thème et teste-toi : 360 affirmations pré-écrites, une seule tentative ' +
               'par question, justification toujours révélée.',
           ],
           chantier: '4e',

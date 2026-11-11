@@ -1037,16 +1037,17 @@ export const fonctionSecondDegre: ChapterContent = {
       id: 'revision',
       number: 4,
       title: 'Révision — vrai ou faux',
-      kicker: '140 affirmations, 7 thèmes, tout le chapitre en révision transversale',
+      kicker: '206 affirmations, 6 thèmes, tout le chapitre en révision transversale',
       blocks: [
         { kind: 'video', title: 'Révision : la synthèse du chapitre en 2 minutes', youtubeId: 'vpgVztac-9g' },
         {
           kind: 'para',
           text:
-            '140 affirmations. 7 thèmes. Ils reprennent les 3 parties de ce chapitre : ' +
+            '206 affirmations. 6 thèmes. Ils reprennent les 3 parties de ce chapitre : ' +
             'coefficients et allure, forme canonique et sommet, transformations, racines par ' +
-            'factorisation, domaine/image et tableaux, optimisation, équations et inéquations ' +
-            'en contexte. Un seul essai par question. La justification est toujours donnée.',
+            'factorisation, domaine/image et tableaux, optimisation. Les équations et inéquations ' +
+            'en contexte sont révisées au chapitre 2. Un seul essai par question. La justification ' +
+            'est toujours donnée.',
         },
         {
           kind: 'astuce',
@@ -1060,7 +1061,7 @@ export const fonctionSecondDegre: ChapterContent = {
           title: 'La fonction du second degré — quiz vrai/faux',
           generatorId: 'gen60',
           description: [
-            'Choisis un thème et teste-toi : 140 affirmations pré-écrites, une seule tentative ' +
+            'Choisis un thème et teste-toi : 206 affirmations pré-écrites, une seule tentative ' +
               'par question, justification toujours révélée.',
           ],
           chantier: '4e',
