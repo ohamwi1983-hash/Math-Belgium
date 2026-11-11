@@ -36,8 +36,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'place en partant de l\'axe horizontal positif. On tourne dans le **sens direct** ' +
             '(le sens inverse des aiguilles d\'une montre). On arrive alors sur un point du ' +
             'cercle, noté M(θ). Par définition, M(θ) a pour coordonnées (cos θ ; sin θ).',
-          'Cette plateforme travaille toujours en **degrés** — jamais en radians. Elle réduit ' +
-            'toujours un angle à l\'intervalle [0° ; 360°[.',
+          'Dans ce chapitre, on travaille toujours en **degrés** (les radians arrivent en 5e). ' +
+            'On réduit toujours un angle à l\'intervalle [0° ; 360°[.',
+          'Un angle **négatif** se place en tournant dans l\'autre sens, celui des aiguilles d\'une ' +
+            'montre : −120° arrive au même point que 240°. Un angle **plus grand que 360°** fait ' +
+            'plus d\'un tour : 430° arrive au même point que 70°.',
           'Un angle avec ce sens de rotation s\'appelle un **angle orienté**. C\'est différent ' +
             'd\'un angle géométrique ordinaire : celui-là n\'est qu\'une mesure, sans direction. ' +
             'Sur tous les schémas de ce chapitre, la **flèche** sur l\'arc d\'un angle montre ce ' +
@@ -117,6 +120,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           },
         },
         {
+          kind: 'definition',
+          label: 'La tangente d\'un angle',
+          items: [
+            'Pour tout angle θ tel que $\\cos\\theta \\neq 0$ (donc sauf 90° et 270°), on définit ' +
+              '$\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}$. Son signe est celui d\'un quotient : ' +
+              '**+** si sin θ et cos θ ont le même signe, **−** sinon.',
+          ],
+        },
+        {
           kind: 'featureTable',
           caption: 'Le signe de sin θ, cos θ et tan θ selon le quadrant',
           headers: ['Quadrant', 'sin θ', 'cos θ', 'tan θ'],
@@ -157,6 +169,28 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           result: { tag: 'résultat', text: 'angle réduit = 70°, quadrant I, angle du premier quadrant = 70° (déjà dans le premier quadrant), sin/cos/tan tous positifs' },
         },
+        {
+          kind: 'exemple',
+          badge: 'angle négatif',
+          formula: 'Angle donné : −120°.',
+          steps: [
+            { tag: 'réduire dans [0°;360°[', text: '−120° + 360° = 240°' },
+            { tag: 'quadrant', text: '240° ∈ ]180° ; 270°[ → quadrant III' },
+            { tag: 'angle du premier quadrant', text: '240° − 180° = 60°' },
+          ],
+          result: { tag: 'résultat', text: 'angle réduit = 240°, quadrant III, angle du premier quadrant = 60°, sin et cos négatifs, tan positive' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'plus d\'un tour',
+          formula: 'Angle donné : 1000°.',
+          steps: [
+            { tag: 'retirer des tours complets', text: '1000° − 2 × 360° = 1000° − 720° = 280°' },
+            { tag: 'quadrant', text: '280° ∈ ]270° ; 360°[ → quadrant IV' },
+            { tag: 'angle du premier quadrant', text: '360° − 280° = 80°' },
+          ],
+          result: { tag: 'résultat', text: 'angle réduit = 280°, quadrant IV, angle du premier quadrant = 80°, cos positif, sin et tan négatifs' },
+        },
         { kind: 'subheading', text: 'Pour aller plus loin — représenter tan θ sur le cercle' },
         {
           kind: 'intuition',
@@ -184,7 +218,12 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             points: [{ angle: 45 * D2R, label: 'M', tone: 'accent' }],
             angleArcs: [{ from: 0, to: 45 * D2R, tone: 'accent', radiusPx: 22, arrow: true, label: 'α' }],
             tangentConstruction: { angle: 45 * D2R, label: 'tan α' },
-            freeLabels: [{ x: 1, y: -0.09, text: '1' }],
+            freeLabels: [
+              { x: 1, y: -0.09, text: '1' },
+              { x: -0.1, y: -0.1, text: 'O' },
+              { x: Math.cos(45 * D2R), y: -0.1, text: 'A' },
+              { x: 0.9, y: 1.02, text: 'P' },
+            ],
             caption:
               'α = 45° : OA = cos 45° et AM = sin 45° sont les coordonnées de M. AP = tan 45° ' +
               '= 1 se lit comme une longueur, sur la tangente verticale au cercle.',
@@ -258,6 +297,14 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'attention',
+          label: 'Que veut dire cos²θ ?',
+          text:
+            '$\\cos^2\\theta$ est une écriture abrégée de $(\\cos\\theta)^2$ : on calcule d\'abord ' +
+            'cos θ, puis on élève au carré. Ce n\'est **pas** $\\cos(\\theta^2)$, le cosinus de ' +
+            'l\'angle élevé au carré.',
+        },
+        {
           kind: 'methode',
           items: [
             'Isole le terme cherché : $\\cos^2\\theta = 1-\\sin^2\\theta$ (ou l\'inverse).',
@@ -296,6 +343,35 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'reproduit l\'exemple ci-dessus (sin θ=0,6, quadrant II).',
         },
         {
+          kind: 'exemple',
+          badge: 'cos θ = −1/3, θ ∈ ]180° ; 270°[',
+          steps: [
+            { tag: 'quadrant de θ', text: ']180°;270°[ → quadrant III → sin négatif' },
+            { tag: 'isoler sin²θ', text: '$\\sin^2\\theta = 1 - \\left(-\\dfrac{1}{3}\\right)^2 = 1 - \\dfrac{1}{9} = \\dfrac{8}{9}$' },
+            { tag: 'racine, signe imposé par le quadrant', text: '$\\sin\\theta = -\\sqrt{\\dfrac{8}{9}} = -\\dfrac{2\\sqrt{2}}{3}$' },
+            { tag: 'tan θ', text: '$\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta} = \\dfrac{-2\\sqrt{2}/3}{-1/3} = 2\\sqrt{2}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\sin\\theta = -\\dfrac{2\\sqrt{2}}{3}$ et $\\tan\\theta = 2\\sqrt{2}$' },
+        },
+        { kind: 'subheading', text: 'Pour aller plus loin — partir de tan θ' },
+        {
+          kind: 'para',
+          text:
+            'Divise l\'identité fondamentale par $\\cos^2\\theta$ (non nul) : ' +
+            '$1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}$. Connaissant tan θ, tu obtiens donc ' +
+            '$\\cos^2\\theta$, puis cos θ (signe tranché par le quadrant), puis sin θ = tan θ · cos θ.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'à partir de tan θ = 2, θ ∈ ]180° ; 270°[',
+          steps: [
+            { tag: 'cos²θ', text: '$\\dfrac{1}{\\cos^2\\theta} = 1 + 2^2 = 5$, donc $\\cos^2\\theta = \\dfrac{1}{5}$' },
+            { tag: 'quadrant III → cos négatif', text: '$\\cos\\theta = -\\dfrac{1}{\\sqrt{5}} = -\\dfrac{\\sqrt{5}}{5}$' },
+            { tag: 'sin θ = tan θ · cos θ', text: '$\\sin\\theta = 2 \\cdot \\left(-\\dfrac{\\sqrt{5}}{5}\\right) = -\\dfrac{2\\sqrt{5}}{5}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\cos\\theta = -\\dfrac{\\sqrt{5}}{5}$ et $\\sin\\theta = -\\dfrac{2\\sqrt{5}}{5}$ (les deux négatifs, cohérent avec le quadrant III)' },
+        },
+        {
           kind: 'entrainement',
           title: 'L\'un sans l\'autre',
           generatorId: 'gen16',
@@ -318,7 +394,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Cinq angles du premier quadrant ont des valeurs de sinus, cosinus et tangente ' +
+            'Cinq angles entre 0° et 90° ont des valeurs de sinus, cosinus et tangente ' +
             '**exactes** — pas d\'arrondi ! Ils reviennent tout le temps. Apprends-les par cœur.',
         },
         { kind: 'subheading', text: 'Démonstration — d\'où viennent ces valeurs ?' },
@@ -351,6 +427,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exemple',
+          badge: 'triangle rectangle isocèle — 45°',
           steps: [
             { tag: 'sin 45°', text: 'opposé/hypoténuse = 1/√2 = √2/2' },
             { tag: 'cos 45°', text: 'adjacent/hypoténuse = 1/√2 = √2/2 (les deux côtés sont égaux)' },
@@ -379,6 +456,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'exemple',
+          badge: 'demi-triangle équilatéral — 30° et 60°',
           steps: [{ tag: 'à l\'angle de 60°', text: 'sin 60° = √3/2, cos 60° = 1/2, tan 60° = √3' }],
           result: { tag: 'à l\'angle de 30°', text: 'sin 30° = 1/2, cos 30° = √3/2, tan 30° = 1/√3 = √3/3' },
         },
@@ -394,7 +472,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             kind: 'circleAngles',
             points: [0, 30, 45, 60, 90].map((d) => ({ angle: d * D2R, label: `${d}°`, tone: 'accent' as const })),
             angleArcs: [{ from: 0, to: 90 * D2R, tone: 'accent', radiusPx: 100 }],
-            caption: 'les 5 angles remarquables du quadrant I, tous sur le cercle de rayon 1',
+            caption: 'les 5 angles remarquables entre 0° et 90°, tous sur le cercle de rayon 1',
           },
         },
         {
@@ -429,6 +507,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'featureTable',
+          caption: 'Les angles sur les axes — valeurs lues directement sur le cercle',
+          headers: ['θ', '0°', '90°', '180°', '270°'],
+          rows: [
+            ['sin θ', '0', '1', '0', '−1'],
+            ['cos θ', '1', '0', '−1', '0'],
+            ['tan θ', '0', 'indéfinie', '0', 'indéfinie'],
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'quadrant III',
           steps: [
@@ -438,6 +526,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: 'signe en quadrant III', text: 'cos négatif en quadrant III' },
           ],
           result: { tag: 'résultat', text: 'cos 210° = −√3/2' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'quadrants II et IV',
+          formula: 'Calcule la valeur exacte de tan 150° et de sin 315°.',
+          steps: [
+            { tag: 'tan 150°', text: 'quadrant II, angle du premier quadrant 180° − 150° = 30°, tan 30° = √3/3, tan négative en quadrant II' },
+            { tag: 'sin 315°', text: 'quadrant IV, angle du premier quadrant 360° − 315° = 45°, sin 45° = √2/2, sin négatif en quadrant IV' },
+          ],
+          result: { tag: 'résultat', text: 'tan 150° = −√3/3 — sin 315° = −√2/2' },
         },
         {
           kind: 'entrainement',
@@ -503,6 +601,25 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'rappel',
+          label: '360° − θ, c\'est −θ',
+          items: [
+            '360° − θ et −θ arrivent exactement au même point du cercle (ils diffèrent d\'un tour ' +
+              'complet). Ils suivent donc les règles de la famille « opposé » : ' +
+              '$\\sin(360°-\\theta) = -\\sin\\theta$, $\\cos(360°-\\theta) = \\cos\\theta$. C\'est ' +
+              'cette écriture qu\'on rencontre dans les équations de la section suivante.',
+          ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Ce que tu sais déjà (3e)',
+          text:
+            'Dans un triangle rectangle, les deux angles aigus sont **complémentaires** : ils font ' +
+            '90° à eux deux. Et le côté opposé à l\'un est le côté adjacent à l\'autre ! Le sinus de ' +
+            'l\'un est donc le cosinus de l\'autre : sin(90° − θ) = cos θ. La famille complémentaire ' +
+            'prolonge à tout angle ce que tu connaissais déjà pour les angles aigus.',
+        },
+        {
           kind: 'astuce',
           label: 'Reconnaître la bonne famille',
           text:
@@ -527,6 +644,17 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: '2e famille', text: '23° = 90° − 67° → famille complémentaire, sin et cos s\'échangent → sin 23° = cos 67° ≈ 0,391' },
           ],
           result: { tag: 'résultat', text: 'sin 157° = sin 23° = cos 67° ≈ 0,391' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'retrouver la règle de 90° + θ',
+          formula: 'Exprime sin(90° + θ) et cos(90° + θ) en fonction de sin θ et cos θ, puis applique à θ = 35°.',
+          steps: [
+            { tag: 'réécrire', text: '90° + θ = 180° − (90° − θ)' },
+            { tag: 'famille supplémentaire', text: 'sin(90° + θ) = sin(90° − θ) et cos(90° + θ) = −cos(90° − θ)' },
+            { tag: 'famille complémentaire', text: 'sin(90° − θ) = cos θ et cos(90° − θ) = sin θ' },
+          ],
+          result: { tag: 'résultat', text: 'sin(90° + θ) = cos θ et cos(90° + θ) = −sin θ — par exemple sin 125° = cos 35° ≈ 0,819 et cos 125° = −sin 35° ≈ −0,574' },
         },
         {
           kind: 'entrainement',
@@ -563,7 +691,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'distincts, comme sur la figure ci-dessous. Ces deux points sont les deux solutions ' +
             'de sin α = k. Un seul cas y échappe : quand la droite touche le cercle tout en haut ' +
             'ou tout en bas, comme une tangente — un seul point de contact, donc une seule ' +
-            'solution (le cas limite un peu plus bas).',
+            'solution (le cas limite un peu plus bas). Pour cos α = k, c\'est une droite ' +
+            '**verticale** (x = k) qui coupe le cercle : même raisonnement, les deux points sont ' +
+            'alors symétriques par rapport à l\'axe horizontal.',
         },
         {
           kind: 'illustration',
@@ -619,6 +749,22 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'α = 120° ou α = 240°' },
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: 120 * D2R, label: 'α₁ = 120°', tone: 'accent' },
+              { angle: 240 * D2R, label: 'α₂ = 240°', tone: 'accent' },
+            ],
+            verticalLine: { x: -0.5, label: 'k' },
+            angleArcs: [
+              { from: 120 * D2R, to: 180 * D2R, tone: 'good', radiusPx: 24 },
+              { from: 180 * D2R, to: 240 * D2R, tone: 'good', radiusPx: 24 },
+            ],
+            caption: 'cos α = −0,5 sur [0°;360°[ : la droite verticale x = −0,5 coupe le cercle en 2 points, symétriques par rapport à l\'axe horizontal — α₁ = 180° − 60° = 120° et α₂ = 180° + 60° = 240°',
+          },
+        },
+        {
           kind: 'atelier',
           tag: 'equation-trig-cas-limite-widget',
           label: 'Manipule toi-même : quand 2 solutions deviennent 1',
@@ -626,6 +772,59 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Fais glisser k vers ±1 pour sin ou cos : les deux points se rapprochent puis ' +
             'fusionnent. Passe en mode tan α = k : il y a toujours exactement 2 solutions, ' +
             'quel que soit k. Le réglage de départ (cos α=−0,5) reproduit l\'exemple ci-dessus.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'sin α = −√2/2',
+          steps: [
+            { tag: 'angle de référence', text: 'sin α₀ = √2/2 → α₀ = 45°' },
+            { tag: 'k négatif → quadrants III et IV', text: 'solutions : 180° + 45° = 225° et 360° − 45° = 315°' },
+          ],
+          result: { tag: 'résultat', text: 'α = 225° ou α = 315°' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'tan α = −√3',
+          steps: [
+            { tag: 'angle de référence', text: 'tan α₀ = √3 → α₀ = 60°' },
+            { tag: 'k négatif → quadrants II et IV', text: 'solutions : 180° − 60° = 120° et 360° − 60° = 300° (espacées de 180°)' },
+          ],
+          result: { tag: 'résultat', text: 'α = 120° ou α = 300°' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'sin α = sin 40°',
+          steps: [
+            { tag: 'une solution évidente', text: 'α = 40°' },
+            { tag: 'la seconde, par la famille supplémentaire', text: 'sin(180° − 40°) = sin 40°, donc α = 140° convient aussi' },
+          ],
+          result: { tag: 'résultat', text: 'α = 40° ou α = 140°' },
+        },
+        {
+          kind: 'rappel',
+          label: 'La calculatrice : touches sin⁻¹, cos⁻¹ et tan⁻¹',
+          items: [
+            'Vérifie d\'abord que ta calculatrice est en mode **degrés** (DEG, souvent un petit D à ' +
+              'l\'écran). En mode radians, tous les angles obtenus sont faux.',
+            'Les touches sin⁻¹, cos⁻¹ et tan⁻¹ (parfois notées arcsin, arccos, arctan) ne donnent ' +
+              'qu\'**un seul** angle : entre −90° et 90° pour sin⁻¹ et tan⁻¹, entre 0° et 180° pour ' +
+              'cos⁻¹. La seconde solution, c\'est à toi de la trouver par symétrie, comme dans la ' +
+              'méthode ci-dessus. Un angle négatif renvoyé par sin⁻¹ ou tan⁻¹ se ramène dans ' +
+              '[0° ; 360°[ en ajoutant 360°.',
+            'C\'est aussi ce qui explique un piège de la section suivante : dans un triangle, un ' +
+              'angle est compris entre 0° et 180°. cos⁻¹ couvre tout cet intervalle (une seule ' +
+              'réponse possible) ; sin⁻¹, lui, ne renvoie que l\'angle aigu et « oublie » l\'angle ' +
+              'obtus de même sinus.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'cos α = 0,3, à la calculatrice',
+          steps: [
+            { tag: 'touche cos⁻¹', text: 'cos⁻¹(0,3) ≈ 72,5° : c\'est α₀ (k > 0)' },
+            { tag: 'k positif → quadrants I et IV', text: 'seconde solution : 360° − 72,5° = 287,5°' },
+          ],
+          result: { tag: 'résultat', text: 'α ≈ 72,5° ou α ≈ 287,5°' },
         },
         {
           kind: 'entrainement',
@@ -697,6 +896,77 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'triangles).',
         },
         {
+          kind: 'para',
+          text:
+            'Certains énoncés l\'écrivent sous la forme **réciproque** : ' +
+            '$\\sin \\hat{A}/a = \\sin \\hat{B}/b = \\sin \\hat{C}/c$. C\'est strictement ' +
+            'équivalent — les deux écritures répondent exactement aux mêmes questions.',
+        },
+        { kind: 'subheading', text: 'Démonstration — la loi des sinus' },
+        {
+          kind: 'para',
+          text:
+            'Abaisse la hauteur issue de C, de longueur h. Elle coupe [AB] en un point H. Ça ' +
+            'crée deux triangles rectangles, qui partagent cette hauteur.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'triangleGeneric',
+            A: { x: 80, y: 220 },
+            B: { x: 380, y: 220 },
+            C: { x: 260, y: 50 },
+            heightFromC: { hLabel: 'h', footLabel: 'H' },
+            angleArcsAt: ['A', 'B'],
+            sideLabels: { a: 'a', b: 'b', c: 'c' },
+            caption: 'la hauteur h, commune aux deux triangles rectangles ACH et BCH, relie sin Â et sin B̂',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'démonstration — la loi des sinus',
+          steps: [
+            { tag: 'dans ACH, rectangle en H', text: 'sin Â = CH/AC = h/b, donc h = b sin Â' },
+            { tag: 'dans BCH, rectangle en H', text: 'sin B̂ = CH/BC = h/a, donc h = a sin B̂' },
+            { tag: 'en égalant les deux expressions de h', text: 'a sin B̂ = b sin Â' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'a/sin Â = b/sin B̂. Fais le même raisonnement en abaissant la hauteur depuis un ' +
+              'autre sommet : tu obtiens aussi l\'égalité avec c/sin Ĉ.',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'Et si le triangle est obtus ?',
+          items: [
+            'Le pied H peut alors tomber à l\'extérieur du segment [AB]. Le raisonnement reste ' +
+              'le même. Seule différence : un des angles utilisés dans le triangle rectangle ' +
+              'est le **supplément** de l\'angle du triangle ABC. Comme sin(180°−x) = sin x ' +
+              '(angles associés, section 4), la conclusion finale ne change pas.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'AAS — Â = 40°, B̂ = 75°, c = 10',
+          steps: [
+            { tag: 'troisième angle', text: 'Ĉ = 180° − 40° − 75° = 65°' },
+            { tag: 'côté a — loi des sinus', text: '$a = \\dfrac{c \\cdot \\sin \\hat{A}}{\\sin \\hat{C}} = \\dfrac{10 \\cdot \\sin 40°}{\\sin 65°} \\approx 7{,}09$' },
+            { tag: 'côté b — loi des sinus', text: '$b = \\dfrac{c \\cdot \\sin \\hat{B}}{\\sin \\hat{C}} = \\dfrac{10 \\cdot \\sin 75°}{\\sin 65°} \\approx 10{,}66$' },
+          ],
+          result: { tag: 'résultat', text: 'Ĉ = 65° — a ≈ 7,09 — b ≈ 10,66' },
+        },
+        { kind: 'subheading', text: 'Le cas ambigu (SSA)' },
+        {
+          kind: 'para',
+          text:
+            'Avec 2 côtés et un angle **non compris**, la loi des sinus donne le sinus d\'un ' +
+            'deuxième angle. Mais un sinus ne suffit pas à fixer un angle entre 0° et 180° : ' +
+            'B̂ et 180° − B̂ ont le même sinus (angles supplémentaires, section 4). Il faut donc ' +
+            'tester les deux candidats.',
+        },
+        {
           kind: 'atelier',
           tag: 'triangle-cas-ambigu-widget',
           label: 'Manipule toi-même : le cas ambigu (SSA)',
@@ -706,11 +976,28 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '0, 1 ou 2 triangles possibles.',
         },
         {
-          kind: 'para',
-          text:
-            'Certains énoncés l\'écrivent sous la forme **réciproque** : ' +
-            '$\\sin \\hat{A}/a = \\sin \\hat{B}/b = \\sin \\hat{C}/c$. C\'est strictement ' +
-            'équivalent — les deux écritures répondent exactement aux mêmes questions.',
+          kind: 'methode',
+          label: 'Résoudre le cas ambigu',
+          items: [
+            'Calcule $\\sin \\hat{B} = \\dfrac{b \\cdot \\sin \\hat{A}}{a}$. Si ce nombre dépasse 1 : **aucun** ' +
+              'triangle. S\'il vaut exactement 1 : **un** triangle, rectangle en B.',
+            'Sinon, deux candidats : B̂₁ = sin⁻¹(…), aigu, et B̂₂ = 180° − B̂₁, obtus.',
+            'Garde chaque candidat qui laisse de la place au troisième angle : il faut Â + B̂ < 180°. ' +
+              'B̂₁ convient toujours ; B̂₂ convient seulement si Â + B̂₂ < 180°.',
+            'Pour chaque triangle retenu : Ĉ = 180° − Â − B̂, puis c par la loi des sinus.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'SSA — Â = 30°, b = 8, a = 5 : deux triangles',
+          steps: [
+            { tag: 'sinus de B̂', text: '$\\sin \\hat{B} = \\dfrac{8 \\cdot \\sin 30°}{5} = \\dfrac{4}{5} = 0{,}8$ (inférieur à 1)' },
+            { tag: 'deux candidats', text: 'B̂₁ = sin⁻¹(0,8) ≈ 53,1° et B̂₂ = 180° − 53,1° = 126,9°' },
+            { tag: 'test du second', text: 'Â + B̂₂ = 30° + 126,9° = 156,9° < 180° : il convient aussi' },
+            { tag: 'triangle 1', text: 'Ĉ₁ ≈ 180° − 30° − 53,1° = 96,9°, $c_1 = \\dfrac{5 \\cdot \\sin 96{,}9°}{\\sin 30°} \\approx 9{,}93$' },
+            { tag: 'triangle 2', text: 'Ĉ₂ ≈ 180° − 30° − 126,9° = 23,1°, $c_2 = \\dfrac{5 \\cdot \\sin 23{,}1°}{\\sin 30°} \\approx 3{,}93$' },
+          ],
+          result: { tag: 'résultat', text: 'deux triangles : B̂ ≈ 53,1°, Ĉ ≈ 96,9°, c ≈ 9,93 — ou B̂ ≈ 126,9°, Ĉ ≈ 23,1°, c ≈ 3,93' },
         },
         {
           kind: 'application',
@@ -735,8 +1022,8 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
               caption:
                 "Ce que le sextant mesure concrètement : l'angle h entre l'horizon et un astre " +
                 "visé (ici h ≈ 35°). Cette seule mesure, combinée à l'heure exacte, suffit à " +
-                'reconstruire un triangle sphérique Pôle–Navire–Astre que la loi des sinus ' +
-                'résout pour donner la latitude.',
+                'reconstruire un triangle sphérique Pôle–Navire–Astre, que la version ' +
+                '« sphérique » de la loi des sinus résout pour donner la latitude.',
             },
           ],
           text:
@@ -745,8 +1032,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'astre (le Soleil, une étoile) — exactement comme tu mesures un angle sur le ' +
             'cercle trigonométrique. En combinant cet angle avec l\'heure exacte et des ' +
             'tables astronomiques, le navigateur reconstruit un triangle reliant sa ' +
-            'position, le pôle et l\'astre visé, puis résout ce triangle avec la loi des ' +
-            'sinus pour en déduire sa latitude et sa longitude. Cette méthode, utilisée ' +
+            'position, le pôle et l\'astre visé — un triangle tracé sur la sphère céleste — ' +
+            'puis le résout avec une cousine « sphérique » de la loi des sinus pour en ' +
+            'déduire sa latitude et sa longitude. Cette méthode, utilisée ' +
             'pendant des siècles, a permis de traverser les océans bien avant les satellites.',
           domaines: ['Navigation', 'Astronomie'],
           image: {
@@ -781,95 +1069,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Ou les **3 côtés** (SSS, en isolant le cosinus). Pythagore n\'en est qu\'un cas ' +
             'particulier : si Â = 90°, alors cos Â = 0, et la formule redevient $a^2=b^2+c^2$.',
         },
-        {
-          kind: 'application',
-          titre: 'Calculer les longueurs d\'une charpente de toit',
-          illustrations: [
-            {
-              kind: 'triangleGeneric',
-              A: { x: 60, y: 220 },
-              B: { x: 335.76, y: 220 },
-              C: { x: 197.88, y: 104.3 },
-              angleArcsAt: ['C'],
-              sideLabels: { a: 'a = 3 m', b: 'b = 3 m', c: 'c ≈ 4,6 m' },
-              caption:
-                'Les deux arbalétriers (a et b), déjà coupés à 3 m chacun, forment un angle ' +
-                'de 100° au faîtage (C) — fixé par la pente voulue. La loi des cosinus donne ' +
-                "directement la largeur de l'entrait c = AB à construire en bas : " +
-                'c² = 3²+3²−2×3×3×cos100° ≈ 21,1, donc c ≈ 4,6 m.',
-            },
-          ],
-          text:
-            'Une charpente de toit est un assemblage de triangles — les charpentiers ' +
-            'choisissent cette forme précisément parce qu\'un triangle est rigide ' +
-            '(contrairement à un rectangle, qui peut se déformer). Pour fabriquer chaque ' +
-            'pièce de bois à la bonne longueur AVANT de monter la charpente, il faut ' +
-            'résoudre ces triangles : connaissant la pente du toit (un angle) et la largeur ' +
-            'du bâtiment (un côté), la loi des cosinus donne directement la longueur de ' +
-            'chaque arbalétrier ou entrait, sans avoir à mesurer sur place.',
-          domaines: ['Architecture', 'Construction'],
-          image: {
-            src: '/images/application/charpente.jpg',
-            alt: 'Charpente de toit en bois',
-            caption: 'Charpente de la cathédrale de Greifswald (Allemagne). Photo : WildO, CC BY-SA 4.0, via Wikimedia Commons.',
-          },
-        },
-        { kind: 'subheading', text: 'L\'aire' },
-        {
-          kind: 'para',
-          text: 'Aire = $\\dfrac{1}{2}ab\\sin \\hat{C} = \\dfrac{1}{2}bc\\sin \\hat{A} = \\dfrac{1}{2}ac\\sin \\hat{B}$',
-        },
-        {
-          kind: 'para',
-          text:
-            'Deux côtés et l\'angle compris entre eux suffisent. Pas besoin de construire une ' +
-            'hauteur ! Et les trois écritures donnent bien sûr la même aire.',
-        },
-        { kind: 'subheading', text: 'Démonstration — la loi des sinus' },
-        {
-          kind: 'para',
-          text:
-            'Abaisse la hauteur issue de C, de longueur h. Elle coupe [AB] en un point H. Ça ' +
-            'crée deux triangles rectangles, qui partagent cette hauteur.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'triangleGeneric',
-            A: { x: 80, y: 220 },
-            B: { x: 380, y: 220 },
-            C: { x: 260, y: 50 },
-            heightFromC: { hLabel: 'h', footLabel: 'H' },
-            angleArcsAt: ['A', 'B'],
-            sideLabels: { a: 'a', b: 'b', c: 'c' },
-            caption: 'la hauteur h, commune aux deux triangles rectangles ACH et BCH, relie sin Â et sin B̂',
-          },
-        },
-        {
-          kind: 'exemple',
-          steps: [
-            { tag: 'dans ACH, rectangle en H', text: 'sin Â = CH/AC = h/b, donc h = b sin Â' },
-            { tag: 'dans BCH, rectangle en H', text: 'sin B̂ = CH/BC = h/a, donc h = a sin B̂' },
-            { tag: 'en égalant les deux expressions de h', text: 'a sin B̂ = b sin Â' },
-          ],
-          result: {
-            tag: 'résultat',
-            text:
-              'a/sin Â = b/sin B̂. Fais le même raisonnement en abaissant la hauteur depuis un ' +
-              'autre sommet : tu obtiens aussi l\'égalité avec c/sin Ĉ.',
-          },
-        },
-        {
-          kind: 'rappel',
-          label: 'Et si le triangle est obtus ?',
-          items: [
-            'Le pied H peut alors tomber à l\'extérieur du segment [AB]. Le raisonnement reste ' +
-              'le même. Seule différence : un des angles utilisés dans le triangle rectangle ' +
-              'est le **supplément** de l\'angle du triangle ABC. Comme sin(180°−x) = sin x ' +
-              '(angles associés, section 4), la conclusion finale ne change pas.',
-          ],
-        },
-        { kind: 'subheading', text: 'Démonstration — la loi des cosinus et l\'aire' },
+        { kind: 'subheading', text: 'Démonstration — la loi des cosinus' },
         {
           kind: 'para',
           text:
@@ -910,12 +1110,110 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         {
           kind: 'intuition',
-          label: 'Pourquoi ça marche sans tracer la hauteur ?',
+          label: 'Pourquoi le cercle était indispensable',
           text:
-            'Dans un triangle rectangle, tu sais déjà que sin θ = opposé/hypoténuse, donc ' +
-            'opposé = hypoténuse × sin θ. C\'est exactement ce qui se passe ici : b sin Â, ' +
-            'c\'est la hauteur du triangle ABC issue de C — sinus la calcule directement, sans ' +
-            'avoir besoin de la tracer ni de mesurer quoi que ce soit en plus.',
+            'Dans cette démonstration, rien n\'oblige Â à être aigu. Si Â est obtus, C passe à ' +
+            'gauche de A, et b cos Â devient négatif — exactement comme cos θ dans le quadrant II ' +
+            'du cercle trigonométrique. C\'est la définition de cos par le cercle (section 1) qui ' +
+            'rend la formule valable pour **tous** les triangles. Le terme $-2bc\\cos\\hat{A}$ ' +
+            'corrige Pythagore : il est négatif si Â est aigu ($a^2 < b^2+c^2$), nul si Â est droit, ' +
+            'positif si Â est obtus ($a^2 > b^2+c^2$) — comme pour la charpente plus bas, où ' +
+            'cos 100° < 0.',
+        },
+        {
+          kind: 'piege',
+          label: 'Après Al-Kashi, ne pas retomber dans l\'ambiguïté',
+          text:
+            'Une fois un côté trouvé par Al-Kashi (cas SAS), tu es peut-être tenté de basculer ' +
+            'sur la loi des sinus pour calculer un angle restant. Ne le fais pas ! arcsin ' +
+            'renvoie **deux** angles possibles (un aigu, un obtus), et rien ne dit lequel est ' +
+            'le bon — la calculatrice, elle, ne te montre que l\'aigu. Le plus sûr : réutilise ' +
+            '**Al-Kashi** une seconde fois, résolu en cosinus. cos⁻¹ couvre tout ]0° ; 180°[ : ' +
+            'aucune ambiguïté possible.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'SAS — b = 8, c = 6, Â = 60°',
+          steps: [
+            { tag: 'côté a — Al-Kashi', text: 'a² = 8² + 6² − 2×8×6×cos 60° = 64 + 36 − 48 = 52 → a = √52 ≈ 7,21' },
+            { tag: 'angle B̂ — Al-Kashi, pas la loi des sinus', text: 'cos B̂ = (a² + c² − b²)/(2ac) = (52 + 36 − 64)/(2×7,21×6) ≈ 0,277 → B̂ ≈ 73,9°' },
+            { tag: 'angle Ĉ', text: 'Ĉ = 180° − 60° − 73,9° ≈ 46,1°' },
+            { tag: 'aire', text: 'Aire = ½×8×6×sin 60° ≈ 20,78' },
+          ],
+          result: { tag: 'résultat', text: 'a ≈ 7,21 — B̂ ≈ 73,9° — Ĉ ≈ 46,1° — Aire ≈ 20,78' },
+        },
+        {
+          kind: 'astuce',
+          label: 'Deux contrôles rapides',
+          text: 'Avant de conclure, vérifie la cohérence de tes résultats :',
+          items: [
+            'Le plus grand côté est toujours opposé au plus grand angle (et le plus petit côté au ' +
+              'plus petit angle). Un résultat qui contredit ça cache une erreur.',
+            'L\'angle opposé au **plus petit** côté est forcément aigu : pour lui seul, la loi des ' +
+              'sinus ne présente aucune ambiguïté.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'SSS — a = 7, b = 5, c = 8',
+          steps: [
+            { tag: 'angle Â — Al-Kashi résolue en cosinus', text: '$\\cos \\hat{A} = \\dfrac{b^2+c^2-a^2}{2bc} = \\dfrac{25+64-49}{80} = \\dfrac{40}{80} = \\dfrac{1}{2}$, donc Â = 60°' },
+            { tag: 'angle B̂ — Al-Kashi', text: '$\\cos \\hat{B} = \\dfrac{a^2+c^2-b^2}{2ac} = \\dfrac{49+64-25}{112} = \\dfrac{88}{112} \\approx 0{,}786$, donc B̂ ≈ 38,2°' },
+            { tag: 'angle Ĉ', text: 'Ĉ ≈ 180° − 60° − 38,2° = 81,8°' },
+            { tag: 'contrôle', text: 'le plus grand côté, c = 8, est bien opposé au plus grand angle, Ĉ' },
+          ],
+          result: { tag: 'résultat', text: 'Â = 60° — B̂ ≈ 38,2° — Ĉ ≈ 81,8°' },
+        },
+        {
+          kind: 'application',
+          titre: 'Calculer les longueurs d\'une charpente de toit',
+          illustrations: [
+            {
+              kind: 'triangleGeneric',
+              A: { x: 60, y: 220 },
+              B: { x: 335.76, y: 220 },
+              C: { x: 197.88, y: 104.3 },
+              angleArcsAt: ['C'],
+              sideLabels: { a: 'a = 3 m', b: 'b = 3 m', c: 'c ≈ 4,6 m' },
+              caption:
+                'Les deux arbalétriers (a et b), déjà coupés à 3 m chacun, forment un angle ' +
+                'de 100° au faîtage (C) — fixé par la pente voulue. La loi des cosinus donne ' +
+                "directement la largeur de l'entrait c = AB à construire en bas : " +
+                'c² = 3²+3²−2×3×3×cos100° ≈ 21,1, donc c ≈ 4,6 m.',
+            },
+          ],
+          text:
+            'Une charpente de toit est un assemblage de triangles — les charpentiers ' +
+            'choisissent cette forme précisément parce qu\'un triangle est rigide ' +
+            '(contrairement à un rectangle, qui peut se déformer). Pour fabriquer chaque ' +
+            'pièce de bois à la bonne longueur AVANT de monter la charpente, il faut ' +
+            'résoudre ces triangles : connaissant la longueur des deux arbalétriers et ' +
+            'l\'angle qu\'ils forment au faîtage (fixé par la pente voulue), la loi des cosinus ' +
+            'donne directement la longueur de l\'entrait, sans avoir à mesurer sur place.',
+          domaines: ['Architecture', 'Construction'],
+          image: {
+            src: '/images/application/charpente.jpg',
+            alt: 'Charpente de toit en bois',
+            caption: 'Charpente de la cathédrale de Greifswald (Allemagne). Photo : WildO, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
+        },
+        { kind: 'subheading', text: 'L\'aire' },
+        {
+          kind: 'para',
+          text: 'Aire = $\\dfrac{1}{2}ab\\sin \\hat{C} = \\dfrac{1}{2}bc\\sin \\hat{A} = \\dfrac{1}{2}ac\\sin \\hat{B}$',
+        },
+        {
+          kind: 'para',
+          text:
+            'Deux côtés et l\'angle compris entre eux suffisent. Pas besoin de construire une ' +
+            'hauteur ! Et les trois écritures donnent bien sûr la même aire.',
+        },
+        { kind: 'subheading', text: 'Démonstration — l\'aire' },
+        {
+          kind: 'para',
+          text:
+            'Reprends la figure de la démonstration d\'Al-Kashi, avec A à l\'origine et ' +
+            'C = (b cos Â ; b sin Â).',
         },
         {
           kind: 'exempleLibre',
@@ -931,6 +1229,27 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi ça marche sans tracer la hauteur ?',
+          text:
+            'Dans un triangle rectangle, tu sais déjà que sin θ = opposé/hypoténuse, donc ' +
+            'opposé = hypoténuse × sin θ. C\'est exactement ce qui se passe ici : b sin Â, ' +
+            'c\'est la hauteur du triangle ABC issue de C — sinus la calcule directement, sans ' +
+            'avoir besoin de la tracer ni de mesurer quoi que ce soit en plus.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Pour aller plus loin — la formule de Héron',
+          items: [
+            'Avec les 3 côtés seulement : $\\text{Aire} = \\sqrt{p(p-a)(p-b)(p-c)}$, où ' +
+              '$p = \\dfrac{a+b+c}{2}$ est le demi-périmètre.',
+            'Exemple : a = 7, b = 5, c = 8 donne p = 10 et ' +
+              '$\\text{Aire} = \\sqrt{10 \\cdot 3 \\cdot 5 \\cdot 2} = \\sqrt{300} = 10\\sqrt{3} \\approx 17{,}32$ — ' +
+              'la même valeur que $\\dfrac{1}{2} \\cdot 5 \\cdot 8 \\cdot \\sin 60°$.',
+          ],
+        },
+        { kind: 'subheading', text: 'Choisir la bonne loi' },
+        {
           kind: 'featureTable',
           caption: 'Quelle formule utiliser ?',
           headers: ['Données connues', 'Méthode'],
@@ -940,27 +1259,6 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             ['3 côtés (SSS)', 'Al-Kashi, résolue en cosinus, pour chaque angle voulu'],
             ['2 côtés + angle non compris (SSA)', 'loi des sinus — cas ambigu, vérifier le nombre de solutions'],
           ],
-        },
-        {
-          kind: 'piege',
-          label: 'Après Al-Kashi, ne pas retomber dans l\'ambiguïté',
-          text:
-            'Une fois un côté trouvé par Al-Kashi (cas SAS), tu es peut-être tenté de basculer ' +
-            'sur la loi des sinus pour calculer un angle restant. Ne le fais pas ! arcsin ' +
-            'renvoie **deux** angles possibles (un aigu, un obtus), et rien ne dit lequel est ' +
-            'le bon. Le plus sûr : réutilise **Al-Kashi** une seconde fois, résolu en cosinus. ' +
-            'Cette méthode ne souffre pas de cette ambiguïté sur ]0°;180°[.',
-        },
-        {
-          kind: 'exemple',
-          badge: 'SAS — b = 8, c = 6, Â = 60°',
-          steps: [
-            { tag: 'côté a — Al-Kashi', text: 'a² = 8² + 6² − 2×8×6×cos 60° = 64 + 36 − 48 = 52 → a = √52 ≈ 7,21' },
-            { tag: 'angle B̂ — Al-Kashi, pas la loi des sinus', text: 'cos B̂ = (a² + c² − b²)/(2ac) = (52 + 36 − 64)/(2×7,21×6) ≈ 0,277 → B̂ ≈ 73,9°' },
-            { tag: 'angle Ĉ', text: 'Ĉ = 180° − 60° − 73,9° ≈ 46,1°' },
-            { tag: 'aire', text: 'Aire = ½×8×6×sin 60° ≈ 20,78' },
-          ],
-          result: { tag: 'résultat', text: 'a ≈ 7,21 — B̂ ≈ 73,9° — Ĉ ≈ 46,1° — Aire ≈ 20,78' },
         },
         {
           kind: 'application',
@@ -1024,8 +1322,8 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '**triangulation** contourne ce problème, avec **deux triangles**. D\'abord, un ' +
             'triangle **pont**, entièrement résoluble avec les données de l\'énoncé. Tu en ' +
             'tires un côté ou un angle (parfois plusieurs valeurs). Ces valeurs deviennent des ' +
-            'données du triangle **cible** — toujours quelconque, résolu à la fin par la loi des ' +
-            'sinus ou par Al-Kashi.',
+            'données du triangle **cible** : celui qui contient la grandeur demandée, résolu à ' +
+            'la fin (loi des sinus, Al-Kashi, ou simple trigonométrie s\'il est rectangle).',
         },
         {
           kind: 'intuition',
@@ -1044,9 +1342,10 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
               'par exemple). Calcule sa longueur dans le triangle pont. Utilise-la ensuite ' +
               'comme côté connu du triangle cible, dont les 2 autres angles sont déjà donnés ' +
               'par l\'énoncé.',
-            '**Angle partagé** — deux visées prises depuis un même point donnent un angle du ' +
-              'triangle cible, par leur différence. Une seconde hypothèse propre au contexte ' +
-              '(souvent un angle droit) ferme le triangle.',
+            '**Angle partagé** — depuis un même point O, on vise un repère M de hauteur connue, ' +
+              'puis le sommet T. Le triangle pont OFM, rectangle, donne OM. La différence des deux ' +
+              'visées donne l\'angle en O du triangle cible OMT ; une seconde hypothèse propre au ' +
+              'contexte (la verticalité du support) ferme le triangle.',
             '**Sommet partagé** — les deux triangles ont un sommet commun O, et le même angle ' +
               'en O (deux trajectoires qui partent du même point, par exemple). Dans le triangle ' +
               'pont OAB, calcule l\'angle en O et les deux côtés qui en partent, OA et OB. ' +
@@ -1058,27 +1357,125 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'illustration',
           illustration: {
-            kind: 'triangulation',
-            labels: { A: 'A', B: 'B', F: 'F', S: 'S', distanceLabel: 'd = 40 m', heightLabel: 'h', angleAtA: 'α', angleAtB: 'β' },
+            kind: 'vectorPlane',
+            xMin: -6,
+            xMax: 16.4,
+            yMin: -3,
+            yMax: 18,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 12, y: 0 }, tone: 'faint', arrow: false },
+              { from: { x: 12, y: 0 }, to: { x: 9.395, y: 14.772 }, tone: 'faint', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 9.395, y: 14.772 }, tone: 'accent', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: -3.408, y: 15.323 }, tone: 'good', arrow: false },
+              { from: { x: -3.408, y: 15.323 }, to: { x: 9.395, y: 14.772 }, tone: 'good', arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 12, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 9.395, y: 14.772, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: -3.408, y: 15.323, label: 'D', tone: 'good', labelPos: 'left' },
+              { x: 6, y: 0, label: '12 m', tone: 'ink', labelPos: 'below', node: false },
+              { x: 10.7, y: 7.4, label: '15 m', tone: 'ink', labelPos: 'right', node: false },
+            ],
+            angleArcs: [
+              { cx: 12, cy: 0, fromDeg: 100, toDeg: 180, radiusPx: 20, label: '80°', tone: 'accent' },
+              { cx: 0, cy: 0, fromDeg: 57.54, toDeg: 102.54, radiusPx: 26, label: '45°', tone: 'good' },
+              { cx: 9.395, cy: 14.772, fromDeg: 177.54, toDeg: 237.54, radiusPx: 22, label: '60°', tone: 'good' },
+            ],
             caption:
-              'angle partagé : la différence β−α entre les deux visées donne l\'angle en S du ' +
-              'triangle cible ABS, résolu par la loi des sinus. On repasse ensuite par le ' +
-              'triangle rectangle BFS pour obtenir h.',
+              'côté partagé : la diagonale [AC] (en orange) appartient aux deux triangles. Le ' +
+              'triangle pont ABC (gris) donne AC par Al-Kashi ; le triangle cible ACD (vert) ' +
+              'donne ensuite CD par la loi des sinus.',
           },
         },
         {
           kind: 'exemple',
-          badge: 'hauteur inaccessible, angle partagé',
+          badge: 'terrain ABCD, côté partagé',
+          formula:
+            'Un terrain a la forme du quadrilatère ABCD. La diagonale [AC] le partage en deux ' +
+            'triangles. On mesure AB = 12 m, BC = 15 m et $\\widehat{ABC} = 80°$, ainsi que ' +
+            '$\\widehat{CAD} = 45°$ et $\\widehat{ACD} = 60°$. Calcule la longueur du côté [CD].',
+          steps: [
+            { tag: 'triangle pont ABC — Al-Kashi', text: '$AC^2 = 12^2 + 15^2 - 2 \\times 12 \\times 15 \\times \\cos 80° \\approx 306{,}49$, donc $AC \\approx 17{,}51$ m' },
+            { tag: 'triangle cible ACD — troisième angle', text: '$\\hat{D} = 180° - 45° - 60° = 75°$' },
+            { tag: 'CD — loi des sinus', text: '$CD = \\dfrac{AC \\cdot \\sin 45°}{\\sin 75°} \\approx \\dfrac{17{,}51 \\times 0{,}707}{0{,}966} \\approx 12{,}82$ m' },
+          ],
+          result: { tag: 'résultat', text: 'CD ≈ 12,82 m' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 21.5,
+            yMin: -2,
+            yMax: 21,
+            showAxes: false,
+            vectors: [
+              { from: { x: -1, y: 0 }, to: { x: 20, y: 0 }, tone: 'faint', arrow: false },
+              { from: { x: 16.485, y: 0 }, to: { x: 16.485, y: 19.646 }, tone: 'faint', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 16.485, y: 6 }, tone: 'accent', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 16.485, y: 19.646 }, tone: 'good', arrow: false },
+              { from: { x: 16.485, y: 6 }, to: { x: 16.485, y: 19.646 }, tone: 'good', arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'below' },
+              { x: 16.485, y: 0, label: 'F', tone: 'ink', labelPos: 'below' },
+              { x: 16.485, y: 6, label: 'M', tone: 'accent', labelPos: 'right' },
+              { x: 16.485, y: 19.646, label: 'T', tone: 'good', labelPos: 'right' },
+              { x: 16.485, y: 3, label: '6 m', tone: 'ink', labelPos: 'right', node: false },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 20, radiusPx: 40, label: '20°', tone: 'accent' },
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 50, radiusPx: 72, label: '50°', tone: 'good' },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 16.485, y: 0 }, arm1: { x: 15, y: 0 }, arm2: { x: 16.485, y: 1.5 } }],
+            caption:
+              'angle partagé : depuis O, on vise le repère M (20°) puis le sommet T (50°). Le ' +
+              'triangle pont OFM, rectangle en F, donne OM ; le triangle cible OMT (vert) a un ' +
+              'angle de 50° − 20° = 30° en O.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'mât, angle partagé depuis un seul point',
+          formula:
+            'Depuis un point O, on vise un repère M situé à 6 m de hauteur sur un mât vertical ' +
+            '(angle d\'élévation 20°), puis le sommet T du mât (angle d\'élévation 50°). Calcule ' +
+            'la hauteur totale du mât.',
+          steps: [
+            { tag: 'triangle pont OFM, rectangle en F', text: '$OM = \\dfrac{6}{\\sin 20°} \\approx 17{,}54$ m' },
+            { tag: 'triangle cible OMT — angles', text: 'en O : 50° − 20° = 30° ; en M : 90° + 20° = 110° (F, M, T alignés sur la verticale) ; en T : 180° − 30° − 110° = 40°' },
+            { tag: 'MT — loi des sinus', text: '$MT = \\dfrac{OM \\cdot \\sin 30°}{\\sin 40°} \\approx \\dfrac{17{,}54 \\times 0{,}5}{0{,}643} \\approx 13{,}65$ m' },
+            { tag: 'hauteur totale', text: '6 + 13,65 = 19,65 m' },
+          ],
+          result: { tag: 'résultat', text: 'hauteur du mât ≈ 19,65 m' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'hauteur inaccessible, deux visées depuis deux points',
           formula:
             'Depuis A, l\'angle d\'élévation vers le sommet S vaut α = 28°. On s\'approche de ' +
             'd = 40 m (point B, aligné avec A et le pied F) : l\'angle d\'élévation vaut alors β = 52°.',
           steps: [
-            { tag: 'triangle cible ABS — angle en S', text: 'angle S = β − α = 52° − 28° = 24°' },
+            { tag: 'triangle pont ABS (quelconque) — angle en S', text: 'angle S = β − α = 52° − 28° = 24°' },
             { tag: 'angle en B (dans le triangle ABS)', text: '180° − β = 180° − 52° = 128° (angle en A = α = 28°, somme = 180° ✓)' },
             { tag: 'côté BS — loi des sinus', text: 'BS/sin Â = AB/sin Ŝ → BS = 40×sin 28°/sin 24° ≈ 46,2 m' },
-            { tag: 'triangle pont rectangle BFS', text: 'h = BS×sin β ≈ 46,2×sin 52° ≈ 36,4 m' },
+            { tag: 'triangle cible BFS, rectangle en F', text: 'h = BS×sin β ≈ 46,2×sin 52° ≈ 36,4 m' },
           ],
           result: { tag: 'résultat', text: 'hauteur de la tour ≈ 36,4 m' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'triangulation',
+            labels: { A: 'A', B: 'B', F: 'F', S: 'S', distanceLabel: 'd = 40 m', heightLabel: 'h', angleAtA: 'α', angleAtB: 'β' },
+            caption:
+              'deux visées depuis deux points : la différence β − α donne l\'angle en S du ' +
+              'triangle pont ABS, résolu par la loi des sinus. Le triangle cible BFS, ' +
+              'rectangle, donne ensuite h.',
+          },
         },
         {
           kind: 'illustration',
@@ -1255,18 +1652,21 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           {
             text: '$\\sin\\alpha=k$',
             condition:
-              'solutions $\\alpha_0$ et $180°-\\alpha_0$ si $k>0$ — $180°+\\alpha_0$ et ' +
-              '$360°-\\alpha_0$ si $k<0$',
+              '$\\alpha_0$ : angle aigu tel que $\\sin\\alpha_0 = |k|$ — solutions $\\alpha_0$ et ' +
+              '$180°-\\alpha_0$ si $k>0$, $180°+\\alpha_0$ et $360°-\\alpha_0$ si $k<0$',
           },
           {
             text: '$\\cos\\alpha=k$',
             condition:
-              'solutions $\\alpha_0$ et $360°-\\alpha_0$ si $k>0$ — $180°-\\alpha_0$ et ' +
-              '$180°+\\alpha_0$ si $k<0$',
+              '$\\alpha_0$ : angle aigu tel que $\\cos\\alpha_0 = |k|$ — solutions $\\alpha_0$ et ' +
+              '$360°-\\alpha_0$ si $k>0$, $180°-\\alpha_0$ et $180°+\\alpha_0$ si $k<0$',
           },
           {
             text: '$\\tan\\alpha=k$',
-            condition: 'solutions $\\alpha_0$ et $\\alpha_0+180°$, toujours',
+            condition:
+              '$\\alpha_0$ : angle aigu tel que $\\tan\\alpha_0 = |k|$ — solutions $\\alpha_0$ et ' +
+              '$180°+\\alpha_0$ si $k>0$, $180°-\\alpha_0$ et $360°-\\alpha_0$ si $k<0$ (toujours 2, ' +
+              'espacées de 180°)',
           },
         ],
       },
@@ -1280,6 +1680,10 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           {
             text: '$a^2=b^2+c^2-2bc\\cos\\hat A$',
             condition: 'loi des cosinus (Al-Kashi) — SAS ou SSS',
+          },
+          {
+            text: '$\\cos\\hat A=\\dfrac{b^2+c^2-a^2}{2bc}$',
+            condition: 'Al-Kashi résolue en cosinus — pour un angle',
           },
           { text: '$\\text{Aire}=\\dfrac12\\,bc\\sin\\hat A$' },
         ],
@@ -1299,10 +1703,12 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         'règle de signe sur sin, cos et tan.',
       '**Équations trigonométriques** — en général 2 solutions sur [0°;360°[. Seulement 1 ' +
         'pour sin/cos aux valeurs extrêmes. Toujours 2 pour tan.',
-      '**Triangle quelconque** — loi des sinus (a/sinA=b/sinB=c/sinC) pour AAS/SSA. Loi des ' +
-        'cosinus (a²=b²+c²−2bc·cosA) pour SAS/SSS. Aire = ½ab·sinC.',
+      '**Triangle quelconque** — loi des sinus (a/sinA=b/sinB=c/sinC) pour AAS/SSA (cas ' +
+        'ambigu : tester B̂ et 180° − B̂). Loi des cosinus (a²=b²+c²−2bc·cosA) pour SAS/SSS. ' +
+        'Aire = ½ab·sinC.',
       '**Triangulation** — résous d\'abord le triangle pont. Transfère un côté ou un angle ' +
-        'vers le triangle cible. Résous-le par la loi des sinus.',
+        'vers le triangle cible, celui qui contient la grandeur demandée. Résous-le par la loi ' +
+        'des sinus, par Al-Kashi, ou par la trigonométrie du triangle rectangle.',
     ],
     checklist: {
       items: [
@@ -1310,11 +1716,14 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         'Ai-je gardé le ± en isolant cos θ ou sin θ ? Ai-je tranché le signe grâce au quadrant — jamais par réflexe ?',
         'Après une loi des cosinus, ai-je réutilisé Al-Kashi (pas la loi des sinus) pour l\'angle restant ?',
         'Ma tangente a-t-elle bien exactement 2 solutions sur [0°;360°[, quelle que soit la valeur de k ?',
+        'Ma calculatrice est-elle en mode degrés ? Ai-je cherché moi-même la seconde solution que sin⁻¹ ou cos⁻¹ ne donne pas ?',
+        'Dans le cas SSA, ai-je testé le second candidat 180° − B̂ (il faut Â + B̂ < 180°) ?',
       ],
     },
     forward:
-      'La loi des sinus, la loi des cosinus et le réflexe « quadrant → signe » reviendront ' +
-      'tels quels dans tout futur chapitre de géométrie ou de physique. C\'est le socle de ' +
-      'toute trigonométrie au-delà du triangle rectangle.',
+      'En 5e, le chapitre Trigonométrie reprend ce cercle en radians, en fait des fonctions ' +
+      '(sinusoïdes) et résout les équations sur ℝ tout entier, plus seulement sur [0° ; 360°[. ' +
+      'La loi des sinus, Al-Kashi et le réflexe « quadrant → signe » restent, eux, des outils ' +
+      'de base en géométrie comme en physique (forces, vecteurs, ondes).',
   },
 }
