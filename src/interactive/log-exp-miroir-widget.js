@@ -6,16 +6,21 @@
    * miroir déjà utilisé au chapitre 1 (reciproque-miroir-widget), appliqué
    * ici à expₐ/logₐ avec la base a réglable en continu (pas un sélecteur
    * fermé de fonctions). Point (r;aʳ) sur expₐ, son symétrique (aʳ;r) sur
-   * logₐ, par rapport à y=x. Web Component (Shadow DOM).
+   * logₐ, par rapport à y=x. Case « Afficher les tangentes » : tangente à
+   * expₐ en (r;aʳ), de pente m = aʳ·ln(a), et tangente à logₐ en (aʳ;r), de
+   * pente 1/m — symétriques elles aussi par rapport à y=x. En base e, c'est
+   * la preuve visuelle de (ln x)′ = 1/x. Web Component (Shadow DOM).
    * ================================================================ */
 
   var DEFAUT = { a: 2, r: 0.8 }; // reprend exactement le point (r;s) de l'illustration statique
-  var BORNES_A = { min: 0.3, max: 2.6, step: 0.02 };
+  var BORNES_A = { min: 0.3, max: 3, step: 0.02 };
   var R_MIN = -1.5, R_MAX = 1.5;
   var TAILLE = 340, MARGE = 30;
   // Fenêtre carrée FIXE (jamais recalculée depuis a/r courants, sinon les axes bougent avec le
   // point qu'on est en train de faire glisser). Bornes = pire cas de expₐ(r) sur BORNES_A×[R_MIN,R_MAX] :
   // max≈6,086 en (a=0,3 ; r=−1,5), min≈0,164 en (a=0,3 ; r=1,5) — toujours dans [R_MIN,R_MAX] côté bas.
+  // (a=3 ; r=1,5) donne 3^1,5 ≈ 5,196 : reste dans la fenêtre.
+  var DEMI_LONGUEUR_TANGENTE = 2.4; // demi-longueur (unités du repère) des segments de tangente
   var DOMAINE_MIN = -2.2, DOMAINE_MAX = 6.8;
 
   function formatNombreFr(n, decimales) {
@@ -61,6 +66,19 @@
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
     '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
+    '.options{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px;}' +
+    '.case{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;font-weight:600;font-size:0.92rem;cursor:pointer;color:var(--plan,#5b4ea3);}' +
+    '.case input[type="checkbox"]{width:20px;height:20px;cursor:pointer;accent-color:var(--plan,#5b4ea3);}' +
+    '.btn-e{min-height:44px;padding:8px 16px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.9rem;font-family:inherit;}' +
+    '.btn-e:hover{background:var(--accent-soft-line,#e8c4a4);}' +
+    '.tangente-exp{stroke:var(--good,#2f7a4f);stroke-width:1.8;stroke-dasharray:7 4;}' +
+    '.tangente-log{stroke:var(--accent,#a8471f);stroke-width:1.8;stroke-dasharray:7 4;}' +
+    '.pentes{margin:14px 0 0;padding:10px 12px;border:1px solid var(--line,#e2d8c8);border-left:3px solid var(--plan,#5b4ea3);border-radius:var(--radius,3px);background:var(--surface,#fff);color:var(--ink,#241f1a);font-size:0.92rem;line-height:1.5;}' +
+    '.pentes p{margin:0 0 4px;}' +
+    '.pentes p:last-child{margin-bottom:0;}' +
+    '.pente-exp{color:var(--good,#2f7a4f);font-weight:600;}' +
+    '.pente-log{color:var(--accent-ink,#7a3212);font-weight:600;}' +
+    '.base-e{color:var(--plan,#5b4ea3);font-weight:600;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="curseur"><label for="a">a — base</label><div class="curseur-row">' +
@@ -69,6 +87,11 @@
     '<div class="curseur"><label for="r">r</label><div class="curseur-row">' +
     '<input type="range" id="r" min="' + R_MIN + '" max="' + R_MAX + '" step="0.02" value="' + DEFAUT.r + '">' +
     '<span class="curseur-valeur" id="r-valeur"></span></div></div>' +
+    '<div class="options">' +
+    '<label class="case"><input type="checkbox" id="case-tangentes">Afficher les tangentes</label>' +
+    '<button class="btn-e" id="btn-e" type="button">a = e</button>' +
+    '</div>' +
+    '<div class="pentes" id="pentes" hidden></div>' +
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">point sur expₐ</span><span class="stat-value" id="val-point-exp"></span></div>' +
     '<div class="stat"><span class="stat-label">symétrique sur logₐ</span><span class="stat-value" id="val-point-log"></span></div>' +
@@ -93,6 +116,10 @@
     this._valeurR = shadow.getElementById("r-valeur");
     this._valPointExp = shadow.getElementById("val-point-exp");
     this._valPointLog = shadow.getElementById("val-point-log");
+    this._caseTangentes = shadow.getElementById("case-tangentes");
+    this._btnE = shadow.getElementById("btn-e");
+    this._pentes = shadow.getElementById("pentes");
+    this._tangentes = false;
   };
 
   LogExpMiroirWidgetClass.prototype.connectedCallback = function () {
@@ -105,9 +132,19 @@
         v = v >= self._a ? 1 + BORNES_A.step : 1 - BORNES_A.step;
         self._inputA.value = String(v);
       }
-      self._a = v;
+      // Au pas le plus proche de e (2,72), la base est e exactement : le texte « base e » et les
+      // pentes 1/x restent alors rigoureusement exacts.
+      self._a = Math.abs(v - Math.E) < BORNES_A.step / 2 ? Math.E : v;
       self._rendre();
     };
+    this._onToggleTangentes = function () { self._tangentes = self._caseTangentes.checked; self._rendre(); };
+    this._onBaseE = function () {
+      self._a = Math.E;
+      self._inputA.value = "2.72";
+      self._rendre();
+    };
+    this._caseTangentes.addEventListener("change", this._onToggleTangentes);
+    this._btnE.addEventListener("click", this._onBaseE);
     this._onInputR = function () { self._r = parseFloat(self._inputR.value); self._rendre(); };
     this._inputA.addEventListener("input", this._onInputA);
     this._inputR.addEventListener("input", this._onInputR);
@@ -117,7 +154,24 @@
   LogExpMiroirWidgetClass.prototype.disconnectedCallback = function () {
     this._inputA.removeEventListener("input", this._onInputA);
     this._inputR.removeEventListener("input", this._onInputR);
+    this._caseTangentes.removeEventListener("change", this._onToggleTangentes);
+    this._btnE.removeEventListener("click", this._onBaseE);
   };
+
+  // Découpe le segment [P, Q] à la fenêtre carrée [min ; max]² (Liang–Barsky) — null s'il en sort.
+  function clipSegment(P, Q, min, max) {
+    var dx = Q[0] - P[0], dy = Q[1] - P[1];
+    var t0 = 0, t1 = 1;
+    var p = [-dx, dx, -dy, dy];
+    var q = [P[0] - min, max - P[0], P[1] - min, max - P[1]];
+    for (var i = 0; i < 4; i++) {
+      if (p[i] === 0) { if (q[i] < 0) return null; continue; }
+      var t = q[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return null; if (t > t0) t0 = t; }
+      else { if (t < t0) return null; if (t < t1) t1 = t; }
+    }
+    return [[P[0] + t0 * dx, P[1] + t0 * dy], [P[0] + t1 * dx, P[1] + t1 * dy]];
+  }
 
   LogExpMiroirWidgetClass.prototype._toPx = function (win, xMath, yMath) {
     var px = MARGE + (xMath - win.min) / (win.max - win.min) * (TAILLE - 2 * MARGE);
@@ -166,7 +220,8 @@
     var logA = function (x) { return x > 0 ? Math.log(x) / Math.log(a) : NaN; };
     var s = expA(r);
 
-    this._valeurA.textContent = formatNombreFr(a, 2);
+    var baseE = a === Math.E;
+    this._valeurA.textContent = baseE ? "e ≈ 2,72" : formatNombreFr(a, 2);
     this._valeurR.textContent = formatNombreFr(r, 2);
     this._valPointExp.textContent = "(" + formatNombreFr(r, 2) + " ; " + formatNombreFr(s, 2) + ")";
     this._valPointLog.textContent = "(" + formatNombreFr(s, 2) + " ; " + formatNombreFr(r, 2) + ")";
@@ -198,6 +253,37 @@
     var logXmin = Math.max(0.01, win.min);
     this._traceFonction(svg, ns, win, logXmin, win.max, logA, "courbe-log");
 
+    var m = s * Math.log(a); // pente de expₐ en r : (aˣ)′ = aˣ·ln(a)
+    if (this._tangentes) {
+      // Segment de tangente centré sur (r ; s), de demi-longueur fixe dans la direction (1 ; m) ;
+      // la tangente à logₐ en est l'image par la symétrie (x ; y) ↦ (y ; x).
+      var norme = Math.sqrt(1 + m * m);
+      var ux = DEMI_LONGUEUR_TANGENTE / norme, uy = DEMI_LONGUEUR_TANGENTE * m / norme;
+      var E1 = [r - ux, s - uy], E2 = [r + ux, s + uy];
+      var segExp = clipSegment(E1, E2, win.min, win.max);
+      var segLog = clipSegment([E1[1], E1[0]], [E2[1], E2[0]], win.min, win.max);
+      [[segExp, "tangente-exp"], [segLog, "tangente-log"]].forEach(function (c) {
+        if (!c[0]) return;
+        var q0 = self._toPx(win, c[0][0][0], c[0][0][1]), q1 = self._toPx(win, c[0][1][0], c[0][1][1]);
+        svg.appendChild(svgEl(ns, "line", { x1: q0[0].toFixed(2), y1: q0[1].toFixed(2), x2: q1[0].toFixed(2), y2: q1[1].toFixed(2), class: c[1] }));
+      });
+      var nomBase = baseE ? "e" : formatNombreFr(a, 2);
+      var html = '<p><span class="pente-exp">Pente sur expₐ en x = ' + formatNombreFr(r, 2) + ' : m = aʳ · ln(a) ≈ ' + formatNombreFr(m, 3) + '</span></p>' +
+        '<p><span class="pente-log">Pente sur logₐ en x = ' + formatNombreFr(s, 2) + ' : 1/m ≈ ' + formatNombreFr(1 / m, 3) + '</span></p>' +
+        '<p>Les deux tangentes sont symétriques par rapport à y = x : les pentes sont inverses l\'une de l\'autre' +
+        (a < 1 ? ' (ici toutes deux négatives, car la base ' + nomBase + ' est inférieure à 1).' : '.') + '</p>';
+      if (baseE) {
+        html += '<p class="base-e">Base e : en x = eʳ ≈ ' + formatNombreFr(s, 2) + ', la pente de ln vaut 1/eʳ = 1/x ≈ ' +
+          formatNombreFr(1 / s, 3) + ' : c\'est (ln x)′ = 1/x.</p>';
+      } else {
+        html += '<p>Appuie sur « a = e » : la pente de ln en x devient exactement 1/x.</p>';
+      }
+      this._pentes.innerHTML = html;
+      this._pentes.hidden = false;
+    } else {
+      this._pentes.hidden = true;
+    }
+
     var pExp = self._toPx(win, r, s);
     var pLog = self._toPx(win, s, r);
     svg.appendChild(svgEl(ns, "line", { x1: pExp[0].toFixed(2), y1: pExp[1].toFixed(2), x2: pLog[0].toFixed(2), y2: pLog[1].toFixed(2), class: "guide-miroir" }));
@@ -208,10 +294,10 @@
 
     var yLegende = MARGE + 4;
     var legExp = svgEl(ns, "text", { x: MARGE + 4, y: yLegende, class: "legende legende-exp" });
-    legExp.textContent = formatNombreFr(a, 2) + "ˣ";
+    legExp.textContent = (baseE ? "e" : formatNombreFr(a, 2)) + "ˣ";
     svg.appendChild(legExp);
     var legLog = svgEl(ns, "text", { x: MARGE + 4, y: yLegende + 15, class: "legende legende-log" });
-    legLog.textContent = "logₐ(x)";
+    legLog.textContent = baseE ? "ln(x)" : "logₐ(x)";
     svg.appendChild(legLog);
     var legDiag = svgEl(ns, "text", { x: MARGE + 4, y: yLegende + 30, class: "legende legende-diag" });
     legDiag.textContent = "y = x";

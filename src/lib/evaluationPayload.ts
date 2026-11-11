@@ -973,6 +973,9 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'changement de base pour les logarithmes', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes), en posant $y=\\log_a(x)$ et en appliquant le changement de base pour les exponentielles à l'égalité $a^y=x$." },
     { cle: 'pourquoi ln est exactement log_e', enonce: "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$, en calculant la dérivée de $a^x$ de deux façons différentes — une fois via le changement de base vers $e$, une fois via la formule $(a^x)' = a^x \\cdot \\ln(a)$ déjà connue — puis en identifiant les deux résultats." },
     { cle: 'réécrire une exponentielle avec une base choisie', enonce: "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$." },
+    { cle: 'calculer un logarithme', enonce: "Calcule, sans calculatrice, $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, $\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$, en écrivant chaque argument comme une puissance de la base." },
+    { cle: 'développer un logarithme', enonce: "Développe $\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right)$ pour $x,y,z>0$, à l'aide des propriétés algébriques du logarithme." },
+    { cle: 'réduire en un seul logarithme', enonce: "Écris $2\\ln(3) - \\ln(6) + \\ln(4)$ sous la forme d'un seul logarithme." },
   ],
   equations: [
     { cle: '3^x = 20', enonce: "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième." },
@@ -981,6 +984,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'Démonstration — égalité de deux logarithmes', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$, en démontrant séparément les deux sens de l'équivalence." },
     { cle: 'avec rejet d\'une racine', enonce: "Résous l'équation $\\log_3(6w-1) = \\log_3(-4w^2+3)$ : détermine la condition d'existence, résous l'équation du second degré qui en résulte, puis rejette toute solution qui ne respecte pas la condition d'existence." },
     { cle: 'substitution t = log_a(x)', enonce: "Résous l'équation $(\\ln(x))^2 - \\ln(x) - 2 = 0$ à l'aide de la substitution $t = \\ln(x)$." },
+    { cle: 'deux bases différentes', enonce: "Résous l'équation $2^{x+1} = 3^x$ en appliquant $\\ln$ aux deux membres ; donne la solution exacte et une valeur approchée." },
+    { cle: 'regrouper deux logarithmes, puis vérifier la CE', enonce: "Résous l'équation $\\log_2(x) + \\log_2(x-2) = 3$ en déterminant d'abord la condition d'existence." },
   ],
   inequations: [
     { cle: 'cas 0 < a < 1', enonce: "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$)." },
@@ -989,6 +994,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'base e > 1', enonce: "Résous l'inéquation $\\ln(x) \\le 2$ : détermine le domaine, puis l'ensemble-solution en appliquant $\\exp$ aux deux membres." },
     { cle: 'domaine plus restrictif que la solution', enonce: "Résous l'inéquation $\\ln(x-1) > 0$ : détermine le domaine, résous l'inéquation, et vérifie que l'ensemble-solution obtenu est bien inclus dans le domaine." },
     { cle: 'même inéquation, deux bases différentes', enonce: "Résous l'inéquation $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis résous la même comparaison en base $e$, $\\ln(6w-1) \\ge \\ln(-4w^2+3)$ : détermine chaque fois le domaine et compare les deux ensembles-solutions obtenus." },
+    { cle: 'diviser par un logarithme négatif', enonce: "Détermine le plus petit entier $n$ tel que $0{,}8^n < 0{,}05$, en appliquant $\\ln$ aux deux membres." },
   ],
   derivee: [
     { cle: 'Démonstration de ln\'(x) = 1/x', enonce: "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour $x>0$, en utilisant la formule de dérivation d'une fonction réciproque appliquée à $\\exp$ et $\\ln$, sachant que $\\exp' = \\exp$." },
@@ -997,29 +1003,45 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'dérivée d\'une puissance à exposant variable', enonce: "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$, en réécrivant $(g(x))^{h(x)}$ sous la forme $e^{h(x) \\cdot \\ln(g(x))}$." },
     { cle: 'exposant variable, dérivée logarithmique complète', enonce: "Calcule la dérivée de $f(x) = (1+\\sqrt{x})^{2x}$ pour $x>0$, en passant par l'écriture $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$." },
     { cle: 'Démonstration de logₐ\'(x)', enonce: "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$, en exprimant $\\log_a$ à l'aide de $\\ln$ par changement de base." },
+    { cle: 'ln|x² − 4|', enonce: "Détermine le domaine et la dérivée de $f(x) = \\ln\\left|x^2-4\\right|$, puis décris son comportement près de $x = -2$ et de $x = 2$." },
+    { cle: 'étudier un signe avec ln', enonce: "Étudie les variations de $f(x) = x\\ln(x) - x$ sur $]0;+\\infty[$." },
   ],
   limites: [
     { cle: 'forme indéterminée 0 × (−∞)', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x)$, en identifiant la forme indéterminée et en citant le résultat de croissance comparée qui permet de la lever." },
     { cle: '\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}', enonce: "Calcule $\\displaystyle\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}$, en posant $u=x-1$ et en te ramenant à la limite fondamentale $\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$." },
+    { cle: 'forme ∞ − ∞ : regrouper', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left[\\ln\\left(x^2+1\\right) - 2\\ln(x)\\right]$." },
+    { cle: 'forme ∞ − ∞ : factoriser', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(x - \\ln(x)\\right)$." },
+    { cle: 'une puissance du logarithme', enonce: "Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x}$." },
   ],
   parametres: [
     { cle: 'passe par $(1;4)$', enonce: "Détermine $a$ et $b$ sachant que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(1;4)$ et que sa tangente en $x=1$ a pour pente $3$." },
     { cle: 'point en x = e', enonce: "Sachant que $a=2$ et que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(e;5)$, détermine $b$." },
+    { cle: 'deux points, aucun en x = 1', enonce: "Le graphique de $f(x) = a + b\\ln(x)$ passe par les points $(e;5)$ et $\\left(e^3;11\\right)$. Détermine $a$ et $b$." },
+    { cle: 'une asymptote verticale donnée', enonce: "Le graphique de $f(x) = a + b\\ln(x - c)$ admet la droite $x = 2$ comme asymptote verticale et passe par les points $(3;1)$ et $(e+2;4)$. Détermine $a$, $b$ et $c$." },
   ],
   hyperboliques: [
     { cle: 'vérification numérique', enonce: "Vérifie numériquement l'identité $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ en $x=1$, à partir des valeurs approchées $\\text{ch}(1) \\approx 1{,}5431$ et $\\text{sh}(1) \\approx 1{,}1752$." },
+    { cle: 'Démonstration — ch²(x) − sh²(x) = 1', enonce: "Démontre, à partir des définitions de ch et de sh, que $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ pour tout réel $x$." },
+    { cle: 'la réciproque de sh', enonce: "Démontre que la fonction sh est réciproque et que sa réciproque est $x \\mapsto \\ln\\left(x + \\sqrt{x^2+1}\\right)$, en résolvant $\\text{sh}(y) = x$ à l'aide de la substitution $t = e^y$." },
   ],
   graphique: [
     { cle: '$f(x) = x - \\ln(x)$', enonce: "Étudie le signe de la dérivée de $f(x) = x - \\ln(x)$ sur son domaine $]0;+\\infty[$, et déduis-en la nature et la valeur de son extremum." },
+    { cle: 'lire f′ pour ln(x) − x/2', enonce: "Pour $f(x) = \\ln(x) - \\dfrac{x}{2}$ ($x>0$), étudie le signe et les variations de $f'$, et déduis-en les variations, l'extremum et la concavité de $f$." },
   ],
   etude: [
-    { cle: 'étude complète', enonce: "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, dérivée et extremum, limites aux bornes du domaine et asymptotes." },
+    { cle: 'étude complète', enonce: "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, limites et asymptotes, dérivée, variations et extremum, puis concavité et point d'inflexion." },
+    { cle: 'étude courte de x·ln(x)', enonce: "Étudie la fonction $f(x) = x\\ln(x)$ : domaine, limites aux bornes, variations et extremum, concavité." },
+    { cle: 'étude de ln|x² − 4|', enonce: "Étudie les variations de $f(x) = \\ln\\left|x^2-4\\right|$ : domaine, parité, asymptotes, signe de la dérivée et zéros." },
   ],
   problemes: [
     { cle: 'pH', enonce: "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$." },
     { cle: 'demi-vie radioactive', enonce: "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$." },
     { cle: 'combiner deux niveaux sonores', enonce: "Le niveau sonore vaut $L = 10 \\cdot \\log_{10}(I/I_0)$ dB. Deux machines produisent chacune $60$ dB. Démontre que, lorsqu'elles fonctionnent ensemble, le niveau vaut environ $63$ dB et non $120$ dB." },
     { cle: 'croissance logistique', enonce: "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$." },
+    { cle: 'magnitude et énergie', enonce: "L'énergie $E$ (en joules) libérée par un séisme de magnitude $M$ vérifie $\\log_{10}(E) = 1{,}5M + 4{,}8$. Combien de fois plus d'énergie libère un séisme de magnitude 7 qu'un séisme de magnitude 5 ?" },
+    { cle: 'datation au carbone 14', enonce: "Un os ne contient plus que 30 % du carbone 14 qu'il contenait à la mort de l'animal. Sachant que la demi-vie du carbone 14 vaut 5 730 ans, détermine l'âge de l'os." },
+    { cle: 'temps de doublement', enonce: "Un capital placé à intérêts composés en continu évolue selon $C(t) = C_0\\,e^{rt}$, avec $r = 0{,}035$. Détermine le temps nécessaire pour que le capital double." },
+    { cle: 'un instant précis dans le modèle logistique', enonce: "Pour le modèle logistique $y(t) = \\dfrac{10}{1 + 9e^{-t}}$, détermine l'instant où $y$ atteint la valeur 9." },
   ],
   },
   'primitives-integrales': {

@@ -25,6 +25,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         { kind: 'video', title: 'Propriétés algébriques : produit, quotient, puissance (2/4)', youtubeId: 'nei3-hTjJl4' },
         { kind: 'video', title: 'Changement de base (3/4)', youtubeId: 'tXCMV-nBNVk' },
         { kind: 'video', title: 'Le logarithme népérien ln = log_e (4/4)', youtubeId: 's1JTV94t6D8' },
+        { kind: 'subheading', text: 'Définition : l\'exposant qu\'il faut donner à a' },
         {
           kind: 'intuition',
           label: 'La question que pose un logarithme',
@@ -91,6 +92,25 @@ export const fonctionsLogarithmes: ChapterContent = {
               'démonstrations de ce chapitre, citées par leur numéro, (P1) à (P4).',
           ],
         },
+        {
+          kind: 'exemple',
+          badge: 'calculer un logarithme',
+          formula:
+            'Calcule, sans calculatrice : $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, ' +
+            '$\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$.',
+          steps: [
+            { tag: 'écrire l\'argument comme une puissance de la base', text: '$32 = 2^5$ et $\\dfrac{1}{81} = 3^{-4}$' },
+            { tag: 'une base qui n\'est pas « visible »', text: '$8 = 2^3 = \\left(4^{1/2}\\right)^3 = 4^{3/2}$ et $8 = 2^3 = \\left(\\dfrac{1}{2}\\right)^{-3}$' },
+            { tag: 'puissance de 10', text: '$0{,}001 = 10^{-3}$' },
+          ],
+          result: {
+            tag: 'résultat — lire l\'exposant (P3)',
+            text:
+              '$\\log_2(32) = 5$, $\\log_3\\left(\\dfrac{1}{81}\\right) = -4$, $\\log_4(8) = \\dfrac{3}{2}$, ' +
+              '$\\log_{1/2}(8) = -3$, $\\log_{10}(0{,}001) = -3$.',
+          },
+        },
+        { kind: 'subheading', text: 'Graphique et réciprocité avec expₐ' },
         {
           kind: 'illustration',
           illustration: {
@@ -238,10 +258,13 @@ export const fonctionsLogarithmes: ChapterContent = {
           tag: 'log-exp-miroir-widget',
           label: 'Manipule toi-même — le miroir expₐ / logₐ',
           caption:
-            'Fais glisser r : le point (r;aʳ) sur expₐ a toujours son symétrique (aʳ;r) sur ' +
-            'logₐ, de l\'autre côté de y=x. Fais aussi varier la base a, y compris en dessous ' +
-            'de 1, pour voir que la réciprocité tient quelle que soit la base.',
+            'Fais glisser r : le point (r ; aʳ) sur expₐ a toujours son symétrique (aʳ ; r) ' +
+            'sur logₐ. Coche « Afficher les tangentes » : elles sont symétriques elles ' +
+            'aussi, et leurs pentes sont inverses (m et 1/m). Appuie sur « a = e » : la ' +
+            'pente de ln en x vaut exactement 1/x — c\'est (ln x)′ = 1/x, démontré à la ' +
+            'section 4.',
         },
+        { kind: 'subheading', text: 'Propriétés algébriques' },
         {
           kind: 'intuition',
           label: 'L\'astuce qui a rendu le log indispensable, avant les calculatrices',
@@ -430,6 +453,37 @@ export const fonctionsLogarithmes: ChapterContent = {
             '$a$ — la propriété d\'addition concerne un **produit** $xy$, jamais une somme.',
         },
         {
+          kind: 'exemple',
+          badge: 'développer un logarithme',
+          formula: 'Développe $\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right)$, pour $x,y,z>0$.',
+          steps: [
+            { tag: 'quotient', text: '$\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right) = \\ln\\left(x^3\\sqrt{y}\\right) - \\ln\\left(z^2\\right)$' },
+            { tag: 'produit', text: '$= \\ln\\left(x^3\\right) + \\ln\\left(\\sqrt{y}\\right) - \\ln\\left(z^2\\right)$' },
+          ],
+          result: { tag: 'puissance et racine', text: '$= 3\\ln(x) + \\dfrac{1}{2}\\ln(y) - 2\\ln(z)$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'réduire en un seul logarithme',
+          formula: 'Écris $2\\ln(3) - \\ln(6) + \\ln(4)$ sous la forme d\'un seul logarithme.',
+          steps: [
+            { tag: 'faire rentrer les coefficients (puissance)', text: '$2\\ln(3) = \\ln\\left(3^2\\right) = \\ln(9)$' },
+            { tag: 'regrouper (produit et quotient)', text: '$\\ln(9) - \\ln(6) + \\ln(4) = \\ln\\left(\\dfrac{9\\times4}{6}\\right)$' },
+          ],
+          result: { tag: 'résultat', text: '$2\\ln(3) - \\ln(6) + \\ln(4) = \\ln(6)$' },
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — les propriétés supposent des arguments strictement positifs',
+          text:
+            '$\\ln\\left(x^2\\right) = 2\\ln(x)$ n\'est vrai que si $x > 0$. Or $\\ln\\left(x^2\\right)$ existe pour ' +
+            'tout $x \\neq 0$ : la bonne écriture est $\\ln\\left(x^2\\right) = 2\\ln|x|$. De même, ' +
+            '$\\ln\\big(x(x-3)\\big)$ existe si $x < 0$ ou $x > 3$, alors que $\\ln(x) + \\ln(x-3)$ n\'existe que ' +
+            'si $x > 3$. Regrouper ou séparer des logarithmes peut donc **changer le domaine** — c\'est ' +
+            'l\'origine des solutions parasites de la section 2.',
+        },
+        { kind: 'subheading', text: 'Changement de base' },
+        {
           kind: 'definition',
           label: 'Changement de base — pour les exponentielles',
           items: [
@@ -498,57 +552,11 @@ export const fonctionsLogarithmes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'Changement de base en action : 3^x = 2^(x·log₂3). La hauteur 3, atteinte par 3^x ' +
-              'dès x=1, n\'est atteinte par 2^x qu\'en x=log₂3 ≈ 1,58 — le graphique de 3^x ' +
-              's\'obtient donc à partir de celui de 2^x en divisant toutes les abscisses par ' +
+              'Changement de base en action : $3^x = 2^{x\\log_2 3}$. La hauteur 3, atteinte par $3^x$ ' +
+              'dès x=1, n\'est atteinte par $2^x$ qu\'en $x=\\log_2 3 \\approx 1{,}58$ — le graphique de $3^x$ ' +
+              's\'obtient donc à partir de celui de $2^x$ en divisant toutes les abscisses par ' +
               'log₂3 (soit ≈ ×0,63).',
           },
-        },
-        {
-          kind: 'application',
-          titre: 'Mesurer l\'information en bits avec le logarithme en base 2',
-          image: {
-            src: '/images/application/punchcard.png',
-            alt: 'Carte perforée, chaque trou codant un bit d\'information',
-            caption: 'Une carte perforée : chaque position codait un bit (trou ou pas de trou), l\'unité même que log₂(N) permet de compter. Domaine public.',
-          },
-          illustrations: [
-            {
-              kind: 'vectorPlane',
-              xMin: -0.3,
-              xMax: 7.5,
-              yMin: -0.8,
-              yMax: 3.8,
-              vectors: [
-                { from: { x: 0, y: 3 }, to: { x: 7, y: 3 }, tone: 'accent', arrow: false },
-                { from: { x: 4, y: 2 }, to: { x: 7, y: 2 }, tone: 'accent', arrow: false },
-                { from: { x: 6, y: 1 }, to: { x: 7, y: 1 }, tone: 'accent', arrow: false },
-              ],
-              points: [
-                { x: 7, y: 0, label: 'trouvé !', tone: 'good', labelPos: 'below' },
-                { x: 0, y: 3.35, label: '8 possibilités', tone: 'accent', labelPos: 'right', node: false },
-                { x: 0, y: 2.35, label: '4 restantes — question 1', tone: 'accent', labelPos: 'right', node: false },
-                { x: 0, y: 1.35, label: '2 restantes — question 2', tone: 'accent', labelPos: 'right', node: false },
-              ],
-              caption:
-                'Deviner un chiffre parmi 8 (0 à 7) en demandant à chaque fois « c\'est dans ' +
-                'la moitié haute ou basse ? » : 3 questions suffisent toujours — exactement ' +
-                'log₂(8) = 3 bits.',
-            },
-          ],
-          text:
-            "En informatique, la quantité d'information nécessaire pour distinguer N " +
-            'possibilités égales se mesure en bits par $\\log_2(N)$ — le changement de base ' +
-            'que tu viens de voir est donc utilisé en permanence : ' +
-            '$\\log_2(N) = \\dfrac{\\ln(N)}{\\ln(2)}$. Par exemple, pour coder un chiffre ' +
-            'parmi 8 possibilités (0 à 7), il faut $\\log_2(8)=3$ bits — exactement le ' +
-            'nombre de questions « oui/non » nécessaires pour deviner le bon chiffre en ' +
-            'cherchant par dichotomie (en divisant à chaque fois les possibilités restantes ' +
-            'par 2). Cette idée, formalisée par l\'ingénieur **Claude Shannon** en 1948 dans ' +
-            'sa théorie de l\'information, est au fondement de toute l\'informatique ' +
-            'moderne : compression de fichiers, codes correcteurs d\'erreurs, et taille des ' +
-            'mots mémoire des ordinateurs.',
-          domaines: ['Informatique', 'Théorie de l\'information'],
         },
         {
           kind: 'definition',
@@ -678,6 +686,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             caption: "Henry Briggs (1561–1630), portrait d'époque, inventeur du logarithme décimal.",
           },
         },
+        { kind: 'subheading', text: 'Le logarithme népérien' },
         {
           kind: 'astuce',
           label: 'Le logarithme népérien : le cas particulier a = e',
@@ -857,6 +866,53 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Mesurer l\'information en bits avec le logarithme en base 2',
+          image: {
+            src: '/images/application/punchcard.png',
+            alt: 'Carte perforée, chaque trou codant un bit d\'information',
+            caption: 'Une carte perforée : chaque position codait un bit (trou ou pas de trou), l\'unité même que log₂(N) permet de compter. Domaine public.',
+          },
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.3,
+              xMax: 7.5,
+              yMin: -0.8,
+              yMax: 3.8,
+              vectors: [
+                { from: { x: 0, y: 3 }, to: { x: 7, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 2 }, to: { x: 7, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 6, y: 1 }, to: { x: 7, y: 1 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 7, y: 0, label: 'trouvé !', tone: 'good', labelPos: 'below' },
+                { x: 0, y: 3.35, label: '8 possibilités', tone: 'accent', labelPos: 'right', node: false },
+                { x: 0, y: 2.35, label: '4 restantes — question 1', tone: 'accent', labelPos: 'right', node: false },
+                { x: 0, y: 1.35, label: '2 restantes — question 2', tone: 'accent', labelPos: 'right', node: false },
+              ],
+              caption:
+                'Deviner un chiffre parmi 8 (0 à 7) en demandant à chaque fois « c\'est dans ' +
+                'la moitié haute ou basse ? » : 3 questions suffisent toujours — exactement ' +
+                'log₂(8) = 3 bits.',
+            },
+          ],
+          text:
+            "En informatique, la quantité d'information nécessaire pour distinguer N " +
+            'possibilités égales se mesure en bits par $\\log_2(N)$ — le changement de base ' +
+            'que tu viens de voir est donc utilisé en permanence : ' +
+            '$\\log_2(N) = \\dfrac{\\ln(N)}{\\ln(2)}$. Par exemple, pour coder un chiffre ' +
+            'parmi 8 possibilités (0 à 7), il faut $\\log_2(8)=3$ bits — exactement le ' +
+            'nombre de questions « oui/non » nécessaires pour deviner le bon chiffre en ' +
+            'cherchant par dichotomie (en divisant à chaque fois les possibilités restantes ' +
+            'par 2). Cette idée, formalisée par l\'ingénieur **Claude Shannon** en 1948 dans ' +
+            'sa théorie de l\'information, est au fondement de toute l\'informatique ' +
+            'moderne : compression de fichiers, codes correcteurs d\'erreurs, et taille des ' +
+            'mots mémoire des ordinateurs.',
+          domaines: ['Informatique', 'Théorie de l\'information'],
+        },
+        { kind: 'subheading', text: 'Échelles logarithmiques' },
+        {
           kind: 'astuce',
           label: 'Pour aller plus loin — repère semi-logarithmique',
           text:
@@ -868,6 +924,16 @@ export const fonctionsLogarithmes: ChapterContent = {
             'situe donc en 1, car $\\log_{10}(1)=0$. Ce type de repère représente un ' +
             'phénomène exponentiel par une droite, et permet de comparer des taux de croissance ' +
             'très différents sur un même graphique.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'echelle-semi-log-widget',
+          label: 'Manipule toi-même — repère normal ou semi-logarithmique',
+          caption:
+            'La même croissance exponentielle, dans deux repères. En repère normal, la ' +
+            'courbe se creuse et une série en écrase vite une autre. En repère ' +
+            'semi-logarithmique, chaque série devient une droite, dont la pente donne ' +
+            'directement le taux r. Ajoute une 2ᵉ série pour comparer deux taux.',
         },
         {
           kind: 'historique',
@@ -933,6 +999,26 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'exempleLibre',
           blocks: [{ kind: 'para', text: '$3^x = 20 \\implies x = \\log_3(20) = \\dfrac{\\ln(20)}{\\ln(3)} \\approx 2{,}727$' }],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — deux bases différentes',
+          blocks: [
+            { kind: 'para', text: '$2^{x+1} = 3^x$' },
+            {
+              kind: 'para',
+              text:
+                'Les deux membres sont strictement positifs : applique $\\ln$ aux deux membres, puis ' +
+                'la propriété de la puissance : $(x+1)\\ln(2) = x\\ln(3)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Regroupe les termes en x : $x\\ln(3) - x\\ln(2) = \\ln(2)$, soit ' +
+                '$x\\big(\\ln(3) - \\ln(2)\\big) = \\ln(2)$, donc ' +
+                '$x = \\dfrac{\\ln(2)}{\\ln(3) - \\ln(2)} = \\dfrac{\\ln(2)}{\\ln(3/2)} \\approx 1{,}71$.',
+            },
+          ],
         },
         {
           kind: 'methode',
@@ -1078,6 +1164,27 @@ export const fonctionsLogarithmes: ChapterContent = {
               text:
                 'Seule $w=1/2$ vérifie la CE ($1/6 < 1/2 < \\sqrt{3}/2 \\approx 0{,}87$) ; ' +
                 '$w=-2$ doit être **rejetée**. $S = \\{1/2\\}$.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — regrouper deux logarithmes, puis vérifier la CE',
+          blocks: [
+            { kind: 'para', text: '$\\log_2(x) + \\log_2(x-2) = 3$' },
+            { kind: 'para', text: 'CE : $x > 0$ et $x - 2 > 0$, donc $x > 2$.' },
+            {
+              kind: 'para',
+              text:
+                'Regroupe (logarithme d\'un produit) : $\\log_2\\big(x(x-2)\\big) = 3 \\iff x(x-2) = 2^3 = 8 ' +
+                '\\iff x^2 - 2x - 8 = 0 \\iff (x-4)(x+2) = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '$x = -2$ vérifie l\'équation **regroupée** (car $(-2)(-4) = 8$), mais pas l\'équation de ' +
+                'départ : $\\log_2(-2)$ n\'existe pas. Elle est **rejetée** par la CE. Vérification de ' +
+                '$x = 4$ : $\\log_2(4) + \\log_2(2) = 2 + 1 = 3$. $S = \\{4\\}$.',
             },
           ],
         },
@@ -1356,11 +1463,13 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'inequation-logarithmique-widget',
-          label: 'Manipule toi-même — le même piège, côté logarithme',
+          label: 'Manipule toi-même — domaine d\'abord, solution ensuite',
           caption:
-            'Fais glisser a de part et d\'autre de 1 : regarde S basculer de « x ≥ … » à ' +
-            '« x ≤ … » sans rien changer au symbole ◇ ni à k — les réglages par défaut (a≈e, ' +
-            'k=2) reproduisent presque exactement le côté ln de l\'illustration ci-dessus.',
+            'Fais glisser a de part et d\'autre de 1 : S bascule sans que le symbole ni k ' +
+            'changent. Décale ensuite l\'argument avec c : la zone hachurée est hors ' +
+            'domaine, et la solution (en vert) doit toujours être cherchée dans le domaine ' +
+            '(en violet). Pour 0 < a < 1, le crochet ouvert en c vient du domaine, pas de ' +
+            'l\'inéquation.',
         },
         {
           kind: 'exempleLibre',
@@ -1390,6 +1499,15 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'rappel',
+          label: 'Signe de ln(u) — à connaître par cœur',
+          items: [
+            '$\\ln(u) > 0 \\iff u > 1$ ; $\\ln(u) = 0 \\iff u = 1$ ; $\\ln(u) < 0 \\iff 0 < u < 1$.',
+            'Même chose pour toute base $a > 1$ ; pour $0 < a < 1$, les signes sont échangés. Tu ' +
+              't\'en serviras dans chaque étude de signe (sections 4, 8 et 9).',
+          ],
+        },
+        {
           kind: 'piege',
           label: 'Piège central du chapitre',
           text:
@@ -1409,6 +1527,12 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — même inéquation, deux bases différentes',
           blocks: [
+            {
+              kind: 'para',
+              text:
+                'Résous $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis la même inéquation en base ' +
+                '$e$ : $\\ln(6w-1) \\ge \\ln(-4w^2+3)$.',
+            },
             {
               kind: 'para',
               text:
@@ -1434,6 +1558,33 @@ export const fonctionsLogarithmes: ChapterContent = {
               text:
                 'La **même** équation du second degré donne deux ensembles-solutions ' +
                 '**différents** selon que la base est < 1 ou > 1 — c\'est tout l\'enjeu de ce chapitre.',
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Inéquations exponentielles : attention au signe de ln(a)' },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — diviser par un logarithme négatif',
+          blocks: [
+            { kind: 'para', text: 'À partir de quel entier $n$ a-t-on $0{,}8^n < 0{,}05$ ?' },
+            {
+              kind: 'para',
+              text:
+                'Applique $\\ln$ aux deux membres — $\\ln$ est croissante, le sens est conservé : ' +
+                '$n\\ln(0{,}8) < \\ln(0{,}05)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Or $\\ln(0{,}8) < 0$ (car $0{,}8 < 1$) : diviser par ce nombre **négatif inverse le sens**. ' +
+                '$n > \\dfrac{\\ln(0{,}05)}{\\ln(0{,}8)} \\approx \\dfrac{-2{,}996}{-0{,}223} \\approx 13{,}4$, donc ' +
+                '$n \\ge 14$. Contrôle : $0{,}8^{13} \\approx 0{,}055$ et $0{,}8^{14} \\approx 0{,}044$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'En 5e, sans logarithme, il fallait calculer les termes un à un (balayage numérique) : le ' +
+                'logarithme donne le rang **directement**.',
             },
           ],
         },
@@ -1549,6 +1700,71 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'definition',
+          label: 'Dérivée du logarithme de base a — pour toute base a > 0, a ≠ 1',
+          items: ['$(\\log_a(x))\' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $x \\in ]0;+\\infty[$.'],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration de logₐ\'(x) = 1/(x·ln(a))',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Prends $a>0$, $a \\neq 1$, et $x>0$. Aucun calcul nouveau n\'est nécessaire : ' +
+                'il suffit de ramener $\\log_a$ à $\\ln$, dont la dérivée vient d\'être établie.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** Le changement de base, appliqué avec $b=e$, exprime $\\log_a$ à ' +
+                'partir de $\\ln$ seul :',
+            },
+            { kind: 'para', text: '$\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** Le point clé : $\\ln(a)$ est une **constante** — elle ne dépend ' +
+                'pas de $x$. L\'écriture ci-dessus est donc simplement ' +
+                '$\\dfrac{1}{\\ln(a)} \\cdot \\ln(x)$, un multiple de $\\ln$ par un nombre fixe. ' +
+                'Or $(k \\cdot f)\' = k \\cdot f\'$ pour toute constante $k$ : la constante sort ' +
+                'de la dérivation, et il ne reste qu\'à dériver $\\ln$.',
+            },
+            { kind: 'para', text: '$\\log_a\'(x) = \\dfrac{1}{\\ln(a)} \\cdot \\ln\'(x) = \\dfrac{\\ln\'(x)}{\\ln(a)}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** Remplace $\\ln\'(x)$ par sa valeur $\\dfrac{1}{x}$, démontrée ' +
+                'plus haut :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= \\dfrac{1}{\\ln(a)} \\cdot \\dfrac{1}{x} = \\dfrac{1}{x \\cdot \\ln(a)} ' +
+                '\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Cette formule redonne, sans aucun graphique, tous les résultats de monotonie et ' +
+                'de concavité de la section 1. Comme $x>0$, le signe de $\\log_a\'(x)$ est ' +
+                'exactement celui de $\\ln(a)$ : **positif** si $a>1$ (donc $\\log_a$ ' +
+                'croissante), **négatif** si $0<a<1$ (donc décroissante). En dérivant une ' +
+                'seconde fois, $\\log_a\'\'(x) = \\dfrac{-1}{x^2 \\cdot \\ln(a)}$, de signe ' +
+                '**opposé** : la concavité est tournée vers le bas si $a>1$, vers le haut si ' +
+                '$0<a<1$. Tu retrouves ligne pour ligne le tableau de la section 1.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Vérification sur le cas $a=e$ : $\\ln(e)=1$ par **(P2)**, donc ' +
+                '$\\log_e\'(x) = \\dfrac{1}{x \\cdot 1} = \\dfrac{1}{x}$ — bien la dérivée de ' +
+                '$\\ln$. C\'est exactement ce qui rend la base $e$ commode : elle est **la ' +
+                'seule** pour laquelle le facteur $1/\\ln(a)$ disparaît.',
+            },
+          ],
+        },
+        {
           kind: 'methode',
           label: 'Règle de la chaîne',
           items: [
@@ -1573,6 +1789,31 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text: '$(\\ln(x))\'$ **n\'est pas** x — c\'est $\\dfrac{1}{x}$ ! Confondre la fonction avec sa dérivée est une erreur fréquente sous la pression du temps.',
+        },
+        {
+          kind: 'methode',
+          label: 'Logarithme d\'une valeur absolue',
+          items: [
+            '$(\\ln|x|)\' = \\dfrac{1}{x}$ pour **tout** $x \\neq 0$. Sur $]0;+\\infty[$, c\'est $(\\ln x)\'$. Sur ' +
+              '$]-\\infty;0[$, $\\ln|x| = \\ln(-x)$, de dérivée $\\dfrac{-1}{-x} = \\dfrac{1}{x}$ (règle de la chaîne).',
+            'Plus généralement, $(\\ln|u(x)|)\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) \\neq 0$ — et le domaine ' +
+              'de $\\ln|u|$ est l\'ensemble des x tels que $u(x) \\neq 0$.',
+            'Pont vers le chapitre 4 : lue à l\'envers, $(\\ln|x|)\' = \\dfrac{1}{x}$ dit qu\'une primitive de ' +
+              '$\\dfrac{1}{x}$ est $\\ln|x|$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'ln|x² − 4|',
+          formula:
+            'Détermine le domaine et la dérivée de $f(x) = \\ln\\left|x^2-4\\right|$, puis son comportement ' +
+            'près de $x = -2$ et de $x = 2$.',
+          steps: [
+            { tag: 'domaine — l\'argument doit être non nul', text: '$x^2 - 4 \\neq 0 \\iff x \\neq \\pm2$ : $\\text{dom} f = \\mathbb{R} \\setminus \\{-2;2\\}$' },
+            { tag: 'dérivée — (ln|u|)′ = u′/u', text: '$f\'(x) = \\dfrac{2x}{x^2-4}$' },
+            { tag: 'près de ±2', text: '$\\left|x^2-4\\right| \\to 0^+$, donc $f(x) \\to -\\infty$ : asymptotes verticales $x = -2$ et $x = 2$' },
+          ],
+          result: { tag: 'résultat', text: '$f\'(x) = \\dfrac{2x}{x^2-4}$ sur $\\mathbb{R} \\setminus \\{-2;2\\}$, deux asymptotes verticales' },
         },
         {
           kind: 'methode',
@@ -1603,6 +1844,16 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'étudier un signe avec ln',
+          formula: 'Étudie les variations de $f(x) = x\\ln(x) - x$ sur $]0;+\\infty[$.',
+          steps: [
+            { tag: 'dérivée — règle du produit', text: '$f\'(x) = \\ln(x) + x\\cdot\\dfrac{1}{x} - 1 = \\ln(x)$' },
+            { tag: 'signe de ln (section 3)', text: '$f\'(x) < 0$ sur $]0;1[$ et $f\'(x) > 0$ sur $]1;+\\infty[$' },
+          ],
+          result: { tag: 'résultat', text: 'f décroît puis croît : **minimum en x = 1**, $f(1) = 0 - 1 = -1$.' },
+        },
+        {
           kind: 'application',
           titre: 'Lire un taux de croissance directement sur un graphique économique',
           illustrations: [
@@ -1620,7 +1871,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               xAxisLabel: 't (années)',
               yAxisLabel: 'f(t)',
               caption:
-                'Un chiffre d\'affaires croissant à taux constant de 5%/an : f(t)=100·e^(0,05t). ' +
+                'Un chiffre d\'affaires croissant à taux constant de 5 %/an : $f(t) = 100\\,e^{0{,}05t}$. ' +
                 'Courbe qui se creuse de plus en plus — difficile à lire une pente précise ' +
                 "dessus.",
             },
@@ -1778,71 +2029,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
-          kind: 'definition',
-          label: 'Dérivée du logarithme de base a — pour toute base a > 0, a ≠ 1',
-          items: ['$(\\log_a(x))\' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $x \\in ]0;+\\infty[$.'],
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Démonstration de logₐ\'(x) = 1/(x·ln(a))',
-          blocks: [
-            {
-              kind: 'para',
-              text:
-                'Prends $a>0$, $a \\neq 1$, et $x>0$. Aucun calcul nouveau n\'est nécessaire : ' +
-                'il suffit de ramener $\\log_a$ à $\\ln$, dont la dérivée vient d\'être établie.',
-            },
-            {
-              kind: 'para',
-              text:
-                '**Étape 1.** Le changement de base, appliqué avec $b=e$, exprime $\\log_a$ à ' +
-                'partir de $\\ln$ seul :',
-            },
-            { kind: 'para', text: '$\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$' },
-            {
-              kind: 'para',
-              text:
-                '**Étape 2.** Le point clé : $\\ln(a)$ est une **constante** — elle ne dépend ' +
-                'pas de $x$. L\'écriture ci-dessus est donc simplement ' +
-                '$\\dfrac{1}{\\ln(a)} \\cdot \\ln(x)$, un multiple de $\\ln$ par un nombre fixe. ' +
-                'Or $(k \\cdot f)\' = k \\cdot f\'$ pour toute constante $k$ : la constante sort ' +
-                'de la dérivation, et il ne reste qu\'à dériver $\\ln$.',
-            },
-            { kind: 'para', text: '$\\log_a\'(x) = \\dfrac{1}{\\ln(a)} \\cdot \\ln\'(x) = \\dfrac{\\ln\'(x)}{\\ln(a)}$' },
-            {
-              kind: 'para',
-              text:
-                '**Étape 3.** Remplace $\\ln\'(x)$ par sa valeur $\\dfrac{1}{x}$, démontrée ' +
-                'plus haut :',
-            },
-            {
-              kind: 'para',
-              text:
-                '$= \\dfrac{1}{\\ln(a)} \\cdot \\dfrac{1}{x} = \\dfrac{1}{x \\cdot \\ln(a)} ' +
-                '\\qquad \\blacksquare$',
-            },
-            {
-              kind: 'para',
-              text:
-                'Cette formule redonne, sans aucun graphique, tous les résultats de monotonie et ' +
-                'de concavité de la section 1. Comme $x>0$, le signe de $\\log_a\'(x)$ est ' +
-                'exactement celui de $\\ln(a)$ : **positif** si $a>1$ (donc $\\log_a$ ' +
-                'croissante), **négatif** si $0<a<1$ (donc décroissante). En dérivant une ' +
-                'seconde fois, $\\log_a\'\'(x) = \\dfrac{-1}{x^2 \\cdot \\ln(a)}$, de signe ' +
-                '**opposé** : la concavité est tournée vers le bas si $a>1$, vers le haut si ' +
-                '$0<a<1$. Tu retrouves ligne pour ligne le tableau de la section 1.',
-            },
-            {
-              kind: 'para',
-              text:
-                'Vérification sur le cas $a=e$ : $\\ln(e)=1$ par **(P2)**, donc ' +
-                '$\\log_e\'(x) = \\dfrac{1}{x \\cdot 1} = \\dfrac{1}{x}$ — bien la dérivée de ' +
-                '$\\ln$. C\'est exactement ce qui rend la base $e$ commode : elle est **la ' +
-                'seule** pour laquelle le facteur $1/\\ln(a)$ disparaît.',
-            },
-          ],
-        },
-        {
           kind: 'entrainement',
           title: 'Domaine, dérivée et dérivation logarithmique',
           generatorId: '6gen16',
@@ -1915,8 +2101,18 @@ export const fonctionsLogarithmes: ChapterContent = {
               'carrée reste au-dessus de ln pour tout x>0. La racine cubique, elle, se laisse ' +
               'brièvement dépasser (entre x≈6 et x≈93) — mais finit par repasser devant et ne ' +
               'redescend plus jamais : ln croît plus lentement que √x, que ∛x, et plus ' +
-              'généralement que toute puissance x^k avec k>0, aussi petit soit k.',
+              'généralement que toute puissance $x^k$ avec k>0, aussi petit soit k.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'croissance-comparee-log-widget',
+          label: 'Manipule toi-même — qui finit par gagner ?',
+          caption:
+            'Élargis la fenêtre jusqu\'à 10⁶ et regarde l\'ordre des courbes changer. ∛x se ' +
+            'laisse dépasser par ln x entre 6,4 et 93,4, puis repasse devant pour toujours ' +
+            '; avec xᵏ et k = 0,1, il faut attendre environ 3,4 × 10¹⁵. Sur une fenêtre ' +
+            'bornée, l\'ordre observé peut tromper : seule la limite en +∞ tranche.',
         },
         {
           kind: 'application',
@@ -2074,6 +2270,36 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'forme ∞ − ∞ : regrouper',
+          formula: 'Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left[\\ln\\left(x^2+1\\right) - 2\\ln(x)\\right]$.',
+          steps: [
+            { tag: 'forme indéterminée ∞ − ∞ : regrouper en un seul ln', text: '$\\ln\\left(x^2+1\\right) - 2\\ln(x) = \\ln\\left(\\dfrac{x^2+1}{x^2}\\right) = \\ln\\left(1 + \\dfrac{1}{x^2}\\right)$' },
+            { tag: 'limite de l\'argument', text: '$1 + \\dfrac{1}{x^2} \\to 1$, et $\\ln(1) = 0$' },
+          ],
+          result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left[\\ln\\left(x^2+1\\right) - 2\\ln(x)\\right] = 0$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'forme ∞ − ∞ : factoriser',
+          formula: 'Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\left(x - \\ln(x)\\right)$.',
+          steps: [
+            { tag: 'mettre le terme dominant en évidence', text: '$x - \\ln(x) = x\\left(1 - \\dfrac{\\ln(x)}{x}\\right)$' },
+            { tag: 'croissance comparée (k = 1)', text: '$\\dfrac{\\ln(x)}{x} \\to 0$, donc la parenthèse tend vers 1' },
+          ],
+          result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\left(x - \\ln(x)\\right) = +\\infty$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une puissance du logarithme',
+          formula: 'Calcule $\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x}$.',
+          steps: [
+            { tag: 'faire apparaître une croissance comparée connue', text: '$\\dfrac{(\\ln x)^2}{x} = \\left(\\dfrac{\\ln(x)}{\\sqrt{x}}\\right)^2$' },
+            { tag: 'croissance comparée (k = 1/2)', text: '$\\dfrac{\\ln(x)}{x^{1/2}} \\to 0$' },
+          ],
+          result: { tag: 'résultat', text: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{(\\ln x)^2}{x} = 0^2 = 0$' },
+        },
+        {
           kind: 'piege',
           text:
             '$\\displaystyle\\lim_{x \\to +\\infty} x \\cdot \\ln(x)$ **n\'est pas** une forme ' +
@@ -2170,11 +2396,12 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'parametres-graphiques-widget',
-          label: 'Manipule toi-même — a, b et le piège du point en x=e',
+          label: 'Manipule toi-même — a, b et le piège du point en x = e',
           caption:
-            'Fais varier a et b : le point (1;a) et la tangente de pente b suivent en direct. ' +
-            'Coche « révéler le point en x=e » pour voir pourquoi f(e)=a+b, pas simplement a — ' +
-            'le piège juste en dessous.',
+            'En mode Libre, fais varier a et b : le point (1 ; a) et la tangente de pente b ' +
+            'suivent ; coche « Révéler le point en x = e » pour voir que f(e) = a + b. En ' +
+            'mode Défi, recouvre la courbe en pointillés à partir de deux points pris en x ' +
+            '= e, e² ou 1/e, avec ln(e) = 1, ln(e²) = 2 et ln(1/e) = −1.',
         },
         {
           kind: 'exempleLibre',
@@ -2209,6 +2436,31 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Ne confonds pas le point en x=1 (où $\\ln(1)=0$ annule b, donnant directement a) ' +
             'avec un point en x=e (où $\\ln(e)=1$, donc b intervient bel et bien) — c\'est a+b, ' +
             'pas simplement a !',
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux points, aucun en x = 1',
+          formula:
+            'Le graphique de $f(x) = a + b\\ln(x)$ passe par les points $(e;5)$ et $\\left(e^3;11\\right)$. ' +
+            'Détermine $a$ et $b$.',
+          steps: [
+            { tag: 'traduire chaque point — ln(e) = 1, ln(e³) = 3', text: '$a + b = 5$ et $a + 3b = 11$' },
+            { tag: 'soustraire les deux équations', text: '$2b = 6 \\implies b = 3$, puis $a = 5 - 3 = 2$' },
+          ],
+          result: { tag: 'résultat', text: '$f(x) = 2 + 3\\ln(x)$ — contrôle : $f\\left(e^3\\right) = 2 + 9 = 11$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une asymptote verticale donnée',
+          formula:
+            'Le graphique de $f(x) = a + b\\ln(x - c)$ admet la droite $x = 2$ comme asymptote verticale et ' +
+            'passe par $(3;1)$ et $(e+2;4)$. Détermine $a$, $b$ et $c$.',
+          steps: [
+            { tag: 'asymptote — l\'argument s\'annule en x = c', text: '$c = 2$' },
+            { tag: 'point (3 ; 1) — ln(1) = 0', text: '$f(3) = a + b\\ln(1) = a = 1$' },
+            { tag: 'point (e + 2 ; 4) — ln(e) = 1', text: '$f(e+2) = a + b = 4 \\implies b = 3$' },
+          ],
+          result: { tag: 'résultat', text: '$f(x) = 1 + 3\\ln(x-2)$, définie sur $]2;+\\infty[$' },
         },
         {
           kind: 'astuce',
@@ -2249,6 +2501,14 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: ['$\\text{ch}(x) = \\dfrac{e^x+e^{-x}}{2} \\qquad \\text{sh}(x) = \\dfrac{e^x-e^{-x}}{2}$'],
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi « hyperboliques » ?',
+          text:
+            'Le point $(\\cos t;\\sin t)$ parcourt le cercle d\'équation $x^2 + y^2 = 1$. Le point ' +
+            '$(\\text{ch}\\,t;\\text{sh}\\,t)$, lui, parcourt la branche droite de l\'**hyperbole** ' +
+            '$x^2 - y^2 = 1$ — d\'où le nom. Mais ici, t n\'est pas un angle : rien ne tourne.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
@@ -2277,6 +2537,24 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Démonstration — ch²(x) − sh²(x) = 1',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Développe chaque carré, avec $e^x \\cdot e^{-x} = e^0 = 1$ : ' +
+                '$\\text{ch}^2(x) = \\dfrac{e^{2x} + 2 + e^{-2x}}{4}$ et $\\text{sh}^2(x) = \\dfrac{e^{2x} - 2 + e^{-2x}}{4}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Soustrais : les termes $e^{2x}$ et $e^{-2x}$ disparaissent, il reste ' +
+                '$\\text{ch}^2(x) - \\text{sh}^2(x) = \\dfrac{2 - (-2)}{4} = 1$. $\\qquad \\blacksquare$',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
           label: 'Exemple résolu — vérification numérique',
           blocks: [
             {
@@ -2292,7 +2570,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: [
             '$\\text{sh}\'(x) = \\text{ch}(x) \\qquad \\text{ch}\'(x) = \\text{sh}(x)$',
             'Les deux fonctions **échangent leurs rôles** par dérivation — aucune des deux ne ' +
-              'se reproduit elle-même, à la différence de $e^x$.',
+              'se reproduit elle-même, à la différence de $e^x$. Preuve immédiate : ' +
+              '$\\left(\\dfrac{e^x - e^{-x}}{2}\\right)\' = \\dfrac{e^x + e^{-x}}{2}$, puisque $(e^{-x})\' = -e^{-x}$.',
           ],
         },
         {
@@ -2300,6 +2579,62 @@ export const fonctionsLogarithmes: ChapterContent = {
           text:
             'ch(x) ≥ 1 **toujours** (minimum en x=0) — ne la confonds jamais avec cos, qui ' +
             'oscille entre −1 et 1 ! ch ne devient jamais négative.',
+        },
+        { kind: 'subheading', text: 'Le lien avec le logarithme : la réciproque de sh' },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la réciproque de sh est x ↦ ln(x + √(x² + 1))',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '$\\text{sh}\'(x) = \\text{ch}(x) > 0$ : sh est strictement croissante de $\\mathbb{R}$ dans ' +
+                '$\\mathbb{R}$, donc réciproque. Pour un réel x donné, cherche y tel que $\\text{sh}(y) = x$, ' +
+                'c\'est-à-dire $\\dfrac{e^y - e^{-y}}{2} = x$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Multiplie par $2e^y$ : $e^{2y} - 2x\\,e^y - 1 = 0$. Avec $t = e^y > 0$ (la substitution de la ' +
+                'section 2) : $t^2 - 2xt - 1 = 0$, donc $t = x + \\sqrt{x^2+1}$ ou $t = x - \\sqrt{x^2+1}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Comme $\\sqrt{x^2+1} > |x|$, la seconde racine est négative : **rejetée**, car $t = e^y > 0$. ' +
+                'Il reste $e^y = x + \\sqrt{x^2+1}$, d\'où $y = \\ln\\left(x + \\sqrt{x^2+1}\\right)$. ' +
+                '$\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Cette réciproque s\'appelle **argument sinus hyperbolique** (argsh) : les fonctions ' +
+                'hyperboliques sont bâties avec $\\exp$, leurs réciproques avec $\\ln$.',
+            },
+          ],
+        },
+        {
+          kind: 'application',
+          titre: 'La forme exacte d\'un câble ou d\'une chaîne suspendus',
+          text:
+            'Une chaîne, un câble électrique ou un fil tenu par ses deux extrémités prend la forme d\'une ' +
+            '**chaînette**, d\'équation $y = a\\,\\text{ch}\\left(\\dfrac{x}{a}\\right)$ dans un repère bien ' +
+            'choisi. Galilée pensait que c\'était une parabole ; en 1691, Huygens, Leibniz et Jean ' +
+            'Bernoulli trouvent la vraie réponse, indépendamment. Retournée, la chaînette donne l\'arche ' +
+            'la plus stable sous son propre poids : c\'est la forme de la Gateway Arch de Saint-Louis ' +
+            '(192 m) et de nombreuses voûtes.',
+          domaines: ['Physique', 'Architecture'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'chainette-widget',
+          label: 'Manipule toi-même — chaînette ou parabole ?',
+          caption:
+            'Une chaîne suspendue prend la forme d\'une chaînette, écrite avec ch. Fais ' +
+            'varier la tension : plus la chaîne est détendue, plus elle s\'écarte de la ' +
+            'parabole tracée par les mêmes points (jusqu\'à environ 1 m ici). Retourne-la : ' +
+            'tu obtiens la forme d\'arche la plus stable, celle de la Gateway Arch de ' +
+            'Saint-Louis.',
         },
         {
           kind: 'entrainement',
@@ -2355,11 +2690,41 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'astuce',
+          label: 'Une conséquence utile : ln(x) ≤ x − 1',
+          text:
+            'Le minimum de $f(x) = x - \\ln(x)$ vaut 1, donc $x - \\ln(x) \\ge 1$, soit $\\ln(x) \\le x - 1$ ' +
+            'pour tout $x > 0$, avec égalité seulement en $x = 1$. Géométriquement : la courbe de $\\ln$ ' +
+            'reste sous sa tangente en $(1;0)$, d\'équation $y = x - 1$. En particulier, $\\ln(x) < x$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'lire f′ pour ln(x) − x/2',
+          formula:
+            'Pour $f(x) = \\ln(x) - \\dfrac{x}{2}$ ($x > 0$), étudie le signe et les variations de $f\'$, ' +
+            'et déduis-en l\'allure du graphique de f.',
+          steps: [
+            { tag: 'dérivée', text: '$f\'(x) = \\dfrac{1}{x} - \\dfrac{1}{2} = \\dfrac{2-x}{2x}$' },
+            { tag: 'signe de f′ → variations de f', text: '$f\' > 0$ sur $]0;2[$, $f\' < 0$ sur $]2;+\\infty[$ : maximum en $x = 2$, $f(2) = \\ln(2) - 1 \\approx -0{,}31$' },
+            { tag: 'variations de f′ → concavité de f', text: '$f\'$ est décroissante ($f\'\'(x) = -\\dfrac{1}{x^2} < 0$) : f est concave, sans point d\'inflexion' },
+            { tag: 'bords', text: '$f\' \\to +\\infty$ en $0^+$ (asymptote verticale de f) et $f\' \\to -\\dfrac{1}{2}$ en $+\\infty$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'f monte presque verticalement depuis $-\\infty$, atteint son maximum $\\ln(2) - 1$ en $x = 2$, ' +
+              'puis redescend avec une pente qui se rapproche de $-\\dfrac{1}{2}$.',
+          },
+        },
+        {
           kind: 'methode',
           label: 'À retenir',
           items: [
-            'Une asymptote verticale de f en x→0⁺ s\'accompagne typiquement d\'une dérivée f\' ' +
-              'qui diverge elle aussi (en valeur absolue) au voisinage de ce même point.',
+            '$f\' > 0$ sur un intervalle : f y est croissante ; $f\' < 0$ : f y est décroissante.',
+            '$f\'$ s\'annule en changeant de signe : f a un **extremum** (tangente horizontale).',
+            '$f\'$ atteint un maximum ou un minimum : f change de concavité — **point d\'inflexion**.',
+            'Près d\'une asymptote verticale de f, $|f\'|$ devient très grand : la courbe y devient ' +
+              'presque verticale.',
           ],
         },
         {
@@ -2399,19 +2764,64 @@ export const fonctionsLogarithmes: ChapterContent = {
           label: 'Exemple résolu — étude complète',
           blocks: [
             { kind: 'para', text: '$f(x) = \\dfrac{\\ln(x)}{x}$' },
-            { kind: 'para', text: '**Domaine :** $]0;+\\infty[$ (restriction du logarithme ET du dénominateur, qui coïncident ici).' },
+            { kind: 'para', text: '**1. Domaine :** $]0;+\\infty[$ (restriction du logarithme ET du dénominateur, qui coïncident ici).' },
             {
               kind: 'para',
               text:
-                '**Dérivée :** $f\'(x) = \\dfrac{1-\\ln(x)}{x^2}$, qui s\'annule en x=e (car ' +
-                '$\\ln(e)=1$) $\\implies$ **maximum en x=e**, $f(e) = 1/e \\approx 0{,}368$.',
+                '**2. Limites et asymptotes :** en x→0⁺, $\\ln(x) \\to -\\infty$ divisé par x→0⁺ donne ' +
+                '$f(x) \\to -\\infty$ (asymptote verticale x=0) ; en x→+∞, croissance comparée ' +
+                '$\\implies$ $f(x) \\to 0$ (asymptote horizontale y=0). Zéro : $f(x) = 0 \\iff \\ln(x) = 0 \\iff x = 1$.',
             },
             {
               kind: 'para',
               text:
-                '**Limites :** en x→0⁺, $\\ln(x) \\to -\\infty$ divisé par x→0⁺ donne ' +
-                '$f(x) \\to -\\infty$ (asymptote verticale x=0) ; en x→+∞, croissance comparée ' +
-                '$\\implies$ $f(x) \\to 0$ (asymptote horizontale y=0).',
+                '**3. Dérivée et variations :** $f\'(x) = \\dfrac{\\frac{1}{x}\\cdot x - \\ln(x)}{x^2} = ' +
+                '\\dfrac{1-\\ln(x)}{x^2}$. Son signe est celui de $1 - \\ln(x)$ : positif si $x < e$, nul en ' +
+                '$x = e$, négatif si $x > e$ $\\implies$ **maximum en x=e**, $f(e) = 1/e \\approx 0{,}368$.',
+            },
+            {
+              kind: 'signTable',
+              caption: 'Signe de f′ et variations de f',
+              rows: [
+                {
+                  label: 'x',
+                  cells: [
+                    { text: '0', tone: 'plain' },
+                    { text: '', tone: 'plain' },
+                    { text: 'e', tone: 'zero' },
+                    { text: '', tone: 'plain' },
+                    { text: '+∞', tone: 'plain' },
+                  ],
+                },
+                {
+                  label: 'Signe de f′(x)',
+                  cells: [
+                    { text: '‖', tone: 'indef' },
+                    { text: '+', tone: 'pos' },
+                    { text: '0', tone: 'zero' },
+                    { text: '−', tone: 'neg' },
+                    { text: '', tone: 'plain' },
+                  ],
+                },
+                {
+                  label: 'Variations de f',
+                  cells: [
+                    { text: '−∞', tone: 'plain' },
+                    { text: '↗', tone: 'plain' },
+                    { text: 'max (1/e)', tone: 'zero' },
+                    { text: '↘', tone: 'plain' },
+                    { text: '0', tone: 'plain' },
+                  ],
+                },
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                '**4. Concavité :** $f\'\'(x) = \\dfrac{-\\frac{1}{x}\\cdot x^2 - (1-\\ln(x))\\cdot 2x}{x^4} = ' +
+                '\\dfrac{2\\ln(x) - 3}{x^3}$. Pour $x > 0$, son signe est celui de $2\\ln(x) - 3$ : négatif si ' +
+                '$x < e^{3/2}$ (f concave), positif au-delà (f convexe). **Point d\'inflexion** en ' +
+                '$x = e^{3/2} \\approx 4{,}48$, où $f = \\dfrac{3}{2e^{3/2}} \\approx 0{,}335$.',
             },
           ],
         },
@@ -2426,10 +2836,13 @@ export const fonctionsLogarithmes: ChapterContent = {
             fixedYRange: { min: -3, max: 1 },
             verticalAsymptotes: [{ x: 0, label: 'asymptote x=0' }],
             horizontalAsymptotes: [{ y: 0, label: 'asymptote y=0' }],
-            points: [{ x: E, y: 1 / E, label: 'max (e;1/e)', tone: 'accent', labelPos: 'above' }],
+            points: [
+              { x: E, y: 1 / E, label: 'max (e;1/e)', tone: 'accent', labelPos: 'above' },
+              { x: Math.exp(1.5), y: 1.5 / Math.exp(1.5), label: 'inflexion', tone: 'good', labelPos: 'right' },
+            ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'f(x) = ln(x)/x : maximum en (e;1/e), asymptote verticale x=0, asymptote horizontale y=0 en +∞',
+            caption: 'f(x) = ln(x)/x : maximum en (e;1/e), point d\'inflexion en $x = e^{3/2} \\approx 4{,}48$, asymptote verticale x=0, asymptote horizontale y=0 en +∞',
           },
         },
         {
@@ -2441,13 +2854,45 @@ export const fonctionsLogarithmes: ChapterContent = {
             'ce n\'est pas systématique !',
         },
         {
+          kind: 'exemple',
+          badge: 'étude courte de x·ln(x)',
+          formula: 'Étudie la fonction $f(x) = x\\ln(x)$ : domaine, limites, variations, concavité.',
+          steps: [
+            { tag: 'domaine et limites', text: '$]0;+\\infty[$ ; $\\displaystyle\\lim_{x\\to0^+} x\\ln(x) = 0$ (croissance comparée) et $\\displaystyle\\lim_{x\\to+\\infty} x\\ln(x) = +\\infty$' },
+            { tag: 'dérivée et variations', text: '$f\'(x) = \\ln(x) + 1$, nulle en $x = e^{-1}$ : minimum $f\\left(e^{-1}\\right) = -\\dfrac{1}{e} \\approx -0{,}368$' },
+            { tag: 'concavité', text: '$f\'\'(x) = \\dfrac{1}{x} > 0$ : f est convexe sur tout son domaine' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'La courbe part de l\'origine (sans l\'atteindre : 0 est exclu du domaine), descend jusqu\'à ' +
+              '$\\left(e^{-1};-e^{-1}\\right)$, recoupe l\'axe en $x = 1$, puis monte vers $+\\infty$.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'étude de ln|x² − 4|',
+          formula: 'Étudie les variations de $f(x) = \\ln\\left|x^2 - 4\\right|$ (dérivée calculée à la section 4).',
+          steps: [
+            { tag: 'domaine, parité, asymptotes', text: '$\\mathbb{R}\\setminus\\{-2;2\\}$ ; f est paire ; asymptotes verticales $x = \\pm2$ ($f \\to -\\infty$), et $f \\to +\\infty$ en $\\pm\\infty$' },
+            { tag: 'signe de f′(x) = 2x/(x² − 4)', text: '$f\' < 0$ sur $]-\\infty;-2[$ et $]0;2[$, $f\' > 0$ sur $]-2;0[$ et $]2;+\\infty[$' },
+            { tag: 'zéros — |x² − 4| = 1', text: '$x^2 = 5$ ou $x^2 = 3$ : $x = \\pm\\sqrt{5}$ ou $x = \\pm\\sqrt{3}$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'Maximum local en $x = 0$ : $f(0) = \\ln(4) \\approx 1{,}39$. Entre les asymptotes, la courbe ' +
+              'forme une « bosse » ; à l\'extérieur, deux branches qui montent vers $+\\infty$.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Étudier une fonction (synthèse)',
           generatorId: '6gen21',
           description: [
             'Mène une étude complète en 6 écrans (domaine, limites, asymptotes, variation, ' +
               'extremum, concavité) sur cinq familles logarithmiques — k(ln x + c)/x, ' +
-              '(bx)^(ax) + c, ln|trinôme|, ln(trinôme toujours positif), m(ln x + c/x) — puis ' +
+              '(bx)ᵃˣ + c, ln|trinôme|, ln(trinôme toujours positif), m(ln x + c/x) — puis ' +
               'choisis le bon graphique, en une seule tentative.',
           ],
           chantier: '6e-6h',
@@ -2479,8 +2924,9 @@ export const fonctionsLogarithmes: ChapterContent = {
             "écarts énormes en petits nombres bien lisibles, en transformant un facteur ×10 " +
             "en un simple +1. C'est pour ça que la magnitude de Richter, les décibels ou le pH " +
             "sont tous construits avec un log₁₀ — une magnitude 6 ne représente pas « un peu " +
-            "plus » qu'une magnitude 5, mais un séisme 10 fois plus énergétique, caché derrière " +
-            "un chiffre qui n'augmente, lui, que d'une unité.",
+            "plus » qu'une magnitude 5 : l'amplitude des ondes est 10 fois plus grande, et l'énergie " +
+            "libérée environ 32 fois plus grande, cachées derrière un chiffre qui n'augmente, lui, " +
+            "que d'une unité.",
         },
         {
           kind: 'definition',
@@ -2509,6 +2955,19 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'magnitude et énergie',
+          formula:
+            'L\'énergie E (en joules) libérée par un séisme de magnitude M vérifie ' +
+            '$\\log_{10}(E) = 1{,}5M + 4{,}8$. Combien de fois plus d\'énergie libère un séisme de magnitude 7 ' +
+            'qu\'un séisme de magnitude 5 ?',
+          steps: [
+            { tag: 'écart des logarithmes', text: '$\\log_{10}(E_7) - \\log_{10}(E_5) = 1{,}5\\times(7-5) = 3$' },
+            { tag: 'quotient', text: '$\\log_{10}\\left(\\dfrac{E_7}{E_5}\\right) = 3 \\iff \\dfrac{E_7}{E_5} = 10^3$' },
+          ],
+          result: { tag: 'résultat', text: '1 000 fois plus d\'énergie (et environ 32 fois plus pour un seul degré, car $10^{1{,}5} \\approx 31{,}6$).' },
+        },
+        {
           kind: 'exempleLibre',
           label: 'Exemple résolu — demi-vie radioactive',
           blocks: [
@@ -2533,6 +2992,47 @@ export const fonctionsLogarithmes: ChapterContent = {
                 'jamais de la quantité initiale $N_0$.',
             },
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'datation au carbone 14',
+          formula:
+            'Un os ne contient plus que 30 % du carbone 14 qu\'il contenait à la mort de l\'animal. La ' +
+            'demi-vie du carbone 14 vaut 5 730 ans. Quel est l\'âge de l\'os ?',
+          steps: [
+            { tag: 'constante de désintégration — T = ln(2)/λ', text: '$\\lambda = \\dfrac{\\ln(2)}{5730}$' },
+            { tag: 'il reste 30 %', text: '$e^{-\\lambda t} = 0{,}3 \\iff -\\lambda t = \\ln(0{,}3) \\iff t = \\dfrac{\\ln(1/0{,}3)}{\\lambda} = 5730\\times\\dfrac{\\ln(10/3)}{\\ln(2)}$' },
+          ],
+          result: { tag: 'résultat', text: '$t \\approx 9\\,950$ ans.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'datation-carbone14-widget',
+          label: 'Manipule toi-même — dater un reste organique',
+          caption:
+            'Règle le pourcentage de carbone 14 encore présent : l\'âge se lit sur la courbe ' +
+            'et se calcule en appliquant ln. Chaque palier en pointillés est une demi-vie : ' +
+            'la quantité est divisée par 2 tous les 5 730 ans, quelle que soit la quantité ' +
+            'de départ. Avec 30 %, tu retrouves l\'exemple ci-dessus.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'temps de doublement',
+          formula:
+            'Un capital placé à intérêts composés en continu évolue selon $C(t) = C_0\\,e^{rt}$, avec ' +
+            '$r = 0{,}035$ (3,5 % par an). En combien de temps double-t-il ?',
+          steps: [
+            { tag: 'traduire « double »', text: '$C_0\\,e^{rt} = 2C_0 \\iff e^{rt} = 2$' },
+            { tag: 'appliquer ln', text: '$rt = \\ln(2) \\iff t = \\dfrac{\\ln(2)}{r} = \\dfrac{\\ln(2)}{0{,}035}$' },
+          ],
+          result: { tag: 'résultat', text: '$t \\approx 19{,}8$ ans — indépendant de $C_0$, comme une demi-vie.' },
+        },
+        {
+          kind: 'astuce',
+          label: 'La règle de 70',
+          text:
+            'Comme $\\ln(2) \\approx 0{,}693$, le temps de doublement vaut environ 70 divisé par le taux ' +
+            'exprimé en % : $70 \\div 3{,}5 = 20$ ans. Banquiers, démographes et économistes l\'utilisent de tête.',
         },
         {
           kind: 'exempleLibre',
@@ -2597,6 +3097,16 @@ export const fonctionsLogarithmes: ChapterContent = {
             'démarche qu\'au chapitre 2, désormais menée jusqu\'au bout.',
         },
         {
+          kind: 'exemple',
+          badge: 'un instant précis dans le modèle logistique',
+          formula: 'Pour $y(t) = \\dfrac{10}{1 + 9e^{-t}}$, à quel instant $y$ atteint-il 9 ?',
+          steps: [
+            { tag: 'isoler le terme exponentiel', text: '$1 + 9e^{-t} = \\dfrac{10}{9} \\iff 9e^{-t} = \\dfrac{1}{9} \\iff e^{-t} = \\dfrac{1}{81}$' },
+            { tag: 'appliquer ln', text: '$-t = \\ln\\left(\\dfrac{1}{81}\\right) = -\\ln(81)$' },
+          ],
+          result: { tag: 'résultat', text: '$t = \\ln(81) \\approx 4{,}39$ — deux fois l\'instant d\'inflexion $\\ln(9)$, car $81 = 9^2$.' },
+        },
+        {
           kind: 'entrainement',
           title: 'Logarithmes : problèmes',
           generatorId: '6gen22',
@@ -2646,6 +3156,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           { text: "$(\\ln(x))' = \\dfrac{1}{x}$" },
           { text: "$(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$" },
           { text: "$(\\ln(u(x)))' = \\dfrac{u'(x)}{u(x)}$" },
+          { text: "$(\\ln|u(x)|)' = \\dfrac{u'(x)}{u(x)}$", condition: 'là où $u(x) \\neq 0$ — en particulier $(\\ln|x|)\' = \\dfrac{1}{x}$' },
           {
             text: "$((g(x))^{h(x)})' = \\left(h'(x)\\ln(g(x)) + \\dfrac{h(x)g'(x)}{g(x)}\\right)(g(x))^{h(x)}$",
             condition: 'dérivation logarithmique, exposant variable',
@@ -2668,6 +3179,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             condition: 'pour $a>1$ et tout $k>0$',
           },
           { text: '$a^x > x^n > \\log_b(x)$', condition: 'pour $x$ assez grand, $a>1$, $b>1$, $n>0$' },
+          { text: '$\\displaystyle\\lim_{x \\to 0^+} x\\ln(x) = 0 \\qquad \\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$' },
+          { text: '$\\ln(x) \\le x - 1$', condition: 'pour tout $x>0$ — égalité seulement en $x=1$' },
         ],
       },
       {
@@ -2677,6 +3190,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           { text: '$\\text{ch}^2(x) - \\text{sh}^2(x) = 1$' },
           { text: "$\\text{sh}'(x) = \\text{ch}(x) \\qquad \\text{ch}'(x) = \\text{sh}(x)$" },
           { text: '$T = \\dfrac{\\ln(2)}{\\lambda}$', condition: 'demi-vie, pour $N(t)=N_0 e^{-\\lambda t}$' },
+          { text: '$t = \\dfrac{\\ln(2)}{r}$', condition: 'temps de doublement, pour $C(t)=C_0 e^{rt}$' },
+          { text: '$\\text{argsh}(x) = \\ln\\left(x + \\sqrt{x^2+1}\\right)$', condition: 'réciproque de sh' },
         ],
       },
     ],
@@ -2689,15 +3204,26 @@ export const fonctionsLogarithmes: ChapterContent = {
         ['Domaine', ']0;+∞['],
         ['Valeurs particulières', 'ln(1)=0, ln(e)=1'],
         ['Somme / différence', 'ln(ab)=ln(a)+ln(b)'],
-        ['Dérivée', '1/x'],
+        ['Dérivée', '1/x (et (ln|x|)′ = 1/x pour x ≠ 0)'],
         ['Limite en 0⁺', '−∞'],
         ['Limite en +∞', '+∞ (très lente)'],
       ],
     },
+    checklist: {
+      label: 'Astuce — avant de rendre ta copie',
+      items: [
+        'Ai-je déterminé le domaine (CE) AVANT de résoudre, et confronté chaque solution à la CE de l\'équation de départ ?',
+        'Après avoir regroupé ou séparé des logarithmes, ai-je vérifié que le domaine n\'a pas changé (ln(x²) = 2 ln|x|, pas 2 ln x) ?',
+        'Pour une inéquation, ai-je tenu compte de la base (sens inversé si 0 < a < 1) — et inversé le sens en divisant par ln(a) < 0 ?',
+        'Ai-je évité ln(x + y) = ln(x) + ln(y) ? La propriété porte sur un produit, jamais sur une somme.',
+        'Pour une étude de fonction : domaine, limites et asymptotes, dérivée et variations, concavité — dans cet ordre ?',
+      ],
+    },
     forward:
-      'À retenir : ln et exp se défont mutuellement — équations et inéquations se résolvent ' +
-      'en appliquant l\'une ou l\'autre selon le côté où se trouve l\'inconnue ; ln est ' +
-      'toujours dominée par n\'importe quelle puissance de x en +∞, jamais l\'inverse.',
+      'ln et exp se défont mutuellement, et ln est dominée par toute puissance de x en +∞. Au ' +
+      'chapitre 4, la dérivée $(\\ln|x|)\' = \\dfrac{1}{x}$ se lira à l\'envers : une primitive de ' +
+      '$\\dfrac{1}{x}$ est $\\ln|x|$ — le logarithme reviendra dans toutes les intégrales de la forme ' +
+      '$\\dfrac{u\'}{u}$.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',
