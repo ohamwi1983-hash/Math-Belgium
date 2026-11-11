@@ -1223,6 +1223,10 @@
   gap: 8px;
 }
 
+.entrainement .ce-ligne-compacte .ce-slot-latex:not(.field-label) {
+  font-size: 19px;
+}
+
 .entrainement .ce-ligne-compacte .ce-symbole-wrap {
   flex: none;
   width: 64px;

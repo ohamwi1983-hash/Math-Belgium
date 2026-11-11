@@ -542,8 +542,13 @@ export function formatEquationDebarrasseeLatex(exercice: ExerciceCaracteristique
  * ci-dessus), converti en véritable LaTeX (`versLatex`) plutôt qu'en simple texte "p/q" — pour que
  * le panneau de révélation, comme le reste de l'application, rende ses valeurs via KaTeX.
  */
+/** Dénominateur maximal cherché pour écrire une valeur en fraction exacte : les zéros de la racine
+ * carrée (niveau 1) valent `(K² − b)/a`, dont le dénominateur dépasse souvent 100 (ex. 109/108) — avec
+ * la limite par défaut, ils s'affichaient en décimal bruité (« 1.0092592592592593 »). */
+const DENOMINATEUR_MAX_VALEUR_EXACTE = 5000;
+
 export function formatValeurExacteLatex(valeur: number): string {
-  return versLatex(formatFractionIrreductible(valeur));
+  return versLatex(formatFractionIrreductible(valeur, DENOMINATEUR_MAX_VALEUR_EXACTE));
 }
 
 /** Racine entière exacte de `n` à l'ordre `ordre` (2 ou 3), ou `null` si `n` n'est pas une
@@ -626,6 +631,78 @@ export function formatZerosAttendusLatex(zeros: number[]): string | null {
 export function formatTermesZerosAttendusLatex(zeros: number[]): string[] | null {
   if (zeros.length === 0) return null;
   return zeros.map(formatValeurExacteLatex);
+}
+
+function pgcdEntiers(a: number, b: number): number {
+  return b === 0 ? Math.abs(a) : pgcdEntiers(b, a % b);
+}
+
+/** `n = k²·m` avec `m` sans facteur carré (`n` entier ≥ 0). */
+function racineSimplifiee(n: number): { k: number; m: number } {
+  let k = 1;
+  let m = n;
+  for (let d = 2; d * d <= m; d++) {
+    while (m % (d * d) === 0) {
+      m /= d * d;
+      k *= d;
+    }
+  }
+  return { k, m };
+}
+
+/**
+ * Racines réelles EXACTES de `Ax² + Bx + C = 0` (coefficients entiers), en LaTeX, triées par valeur :
+ * rationnelles (`formatValeurExacteLatex`) si Δ est un carré parfait, sinon `\frac{N \pm K\sqrt{m}}{D}`
+ * réduit (radical simplifié, dénominateur positif). Nécessaire pour les zéros de `P3 = x(Ax²+Bx+C)`
+ * (`cube`/`racine_cubique`, niveau 2, forme 2 — `u` libre) : Δ y est quelconque, et
+ * `formatValeurExacteLatex` affichait alors un décimal bruité (« −0.7071067811865476 »).
+ */
+export function racinesExactesQuadratiqueLatex(A: number, B: number, C: number): { valeur: number; latex: string }[] {
+  const delta = B * B - 4 * A * C;
+  if (delta < 0) return [];
+  const { k, m } = racineSimplifiee(delta);
+  if (m === 1 || delta === 0) {
+    const valeurs = [...new Set([(-B - k) / (2 * A), (-B + k) / (2 * A)])].sort((x, y) => x - y);
+    return valeurs.map((valeur) => ({ valeur, latex: formatValeurExacteLatex(valeur) }));
+  }
+  let N = -B;
+  let K = k;
+  let D = 2 * A;
+  if (D < 0) {
+    N = -N;
+    D = -D;
+  }
+  const g = pgcdEntiers(pgcdEntiers(Math.abs(N), K), D);
+  N /= g;
+  K /= g;
+  D /= g;
+  const radical = K === 1 ? `\\sqrt{${m}}` : `${K}\\sqrt{${m}}`;
+  return ([-1, 1] as const)
+    .map((s) => {
+      const valeur = (N + s * K * Math.sqrt(m)) / D;
+      let latexRacine: string;
+      if (N === 0) {
+        const corps = D === 1 ? radical : `\\frac{${radical}}{${D}}`;
+        latexRacine = s < 0 ? `-${corps}` : corps;
+      } else {
+        const numerateur = `${N} ${s < 0 ? "-" : "+"} ${radical}`;
+        latexRacine = D === 1 ? numerateur : `\\frac{${numerateur}}{${D}}`;
+      }
+      return { valeur, latex: latexRacine };
+    })
+    .sort((x, y) => x.valeur - y.valeur);
+}
+
+/** Zéros en LaTeX EXACT pour un exercice donné : les racines irrationnelles de `x(Ax²+Bx+C)`
+ * (`cube`/`racine_cubique`, niveau 2) s'écrivent avec un radical ; toutes les autres valeurs
+ * restent `formatValeurExacteLatex` (rationnelles par construction). `null` s'il n'y en a aucun. */
+export function termesZerosExactsLatex(exercice: ExerciceCaracteristiquesAlgebriques, valeurs: number[]): string[] | null {
+  if (valeurs.length === 0) return null;
+  const exacts =
+    exercice.niveau === "niveau2" && (exercice.famille === "cube" || exercice.famille === "racine_cubique") && exercice.factorisationP3.type === "avecX"
+      ? [{ valeur: 0, latex: "0" }, ...racinesExactesQuadratiqueLatex(exercice.factorisationP3.quadratique.A, exercice.factorisationP3.quadratique.B, exercice.factorisationP3.quadratique.C)]
+      : [];
+  return valeurs.map((v) => exacts.find((e) => Math.abs(e.valeur - v) < 1e-9)?.latex ?? formatValeurExacteLatex(v));
 }
 
 /* ==========================================================================================

@@ -40,7 +40,7 @@ import {
   formatOrdonneeExacteLatex,
   formatP1Latex,
   formatValeurExacteLatex,
-  formatZerosAttendusLatex,
+  termesZerosExactsLatex,
   instructionIsolement,
   instructionRegroupe,
 } from "../../ui/formatCaracteristiquesAlgebriques";
@@ -122,20 +122,29 @@ function ordonneeFragments(e: ExerciceCaracteristiquesAlgebriquesNiveau2): Fragm
     : [latex(`f(0) = ${ordonnee}`)];
 }
 
-function zerosFragments(zeros: number[]): FragmentConsigne[] {
-  const z = formatZerosAttendusLatex(zeros);
+function zerosFragments(e: ExerciceCaracteristiquesAlgebriquesNiveau2, zeros: number[]): FragmentConsigne[] {
+  const z = zerosLatex(e, zeros);
   return z === null ? [texte("aucun zéro")] : [texte(zeros.length > 1 ? "zéros : " : "zéro : "), latex(z)];
 }
 
-/** Racines des deux membres d'une équation du 2nd degré embarquée (`carre`/`inverse`/`racine_carree`). */
-function equationSecondDegre(e: ExerciceCaracteristiquesAlgebriquesNiveau2): { delta: number | null; irreductible: boolean } | null {
-  if (e.famille !== "carre" && e.famille !== "inverse" && e.famille !== "racine_carree") return null;
-  const { a, b, c } = e.zeros.enonce;
-  return { delta: b * b - 4 * a * c, irreductible: e.zeros.categorie === "irreductible" };
+/** Zéros (définitifs ou candidats) en valeurs EXACTES — radicaux compris (`termesZerosExactsLatex`). */
+function zerosLatex(e: ExerciceCaracteristiquesAlgebriquesNiveau2, zeros: number[]): string | null {
+  const termes = termesZerosExactsLatex(e, zeros);
+  return termes === null ? null : termes.join(" \\text{ ; } ");
 }
 
+/** Racines des deux membres d'une équation du 2nd degré embarquée (`carre`/`inverse`/`racine_carree`). */
+function equationSecondDegre(e: ExerciceCaracteristiquesAlgebriquesNiveau2): { delta: number; casGeneral: boolean; irreductible: boolean } | null {
+  if (e.famille !== "carre" && e.famille !== "inverse" && e.famille !== "racine_carree") return null;
+  const { a, b, c } = e.zeros.enonce;
+  const categorie = e.zeros.categorie;
+  return { delta: b * b - 4 * a * c, casGeneral: categorie === "cas_general" || categorie === "irreductible", irreductible: categorie === "irreductible" };
+}
+
+/** `P3 = x·(Ax²+Bx+C)` (forme « avecX ») ou `P3 = (x²+1)(Ax+B)` (forme « sansX », voir le contrat
+ * `FactorisationP3`). */
 function factorisationP3Latex(f: FactorisationP3): string {
-  if (f.type === "sansX") return `${formatSommeTermes([{ valeur: f.lineaire.A, suffixe: "x" }, { valeur: f.lineaire.B, suffixe: "" }])} = 0`;
+  if (f.type === "sansX") return `\\left(x^2 + 1\\right)\\left(${formatSommeTermes([{ valeur: f.lineaire.A, suffixe: "x" }, { valeur: f.lineaire.B, suffixe: "" }])}\\right) = 0`;
   const { A, B, C } = f.quadratique;
   return `x\\left(${formatSommeTermes([{ valeur: A, suffixe: "x^2" }, { valeur: B, suffixe: "x" }, { valeur: C, suffixe: "" }])}\\right) = 0`;
 }
@@ -205,7 +214,7 @@ export function construireEnonceNiveau2(e: ExerciceCaracteristiquesAlgebriquesNi
 }
 
 export function reponseBreveNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): FragmentConsigne[] {
-  return [...ceFragments(e), texte(" ; "), latex(domaineLatex(e)), texte(" ; "), ...ordonneeFragments(e), texte(" ; "), ...zerosFragments(zerosAttendus(e))];
+  return [...ceFragments(e), texte(" ; "), latex(domaineLatex(e)), texte(" ; "), ...ordonneeFragments(e), texte(" ; "), ...zerosFragments(e, zerosAttendus(e))];
 }
 
 export function difficulteNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): 1 | 2 | 3 {
@@ -286,17 +295,26 @@ export function correctionDetailleeNiveau2(e: ExerciceCaracteristiquesAlgebrique
   // Zéros (candidats pour la racine carrée).
   const sd = equationSecondDegre(e);
   if (sd) {
-    etapes.push({ label: "Méthode", sousQuestion: L("zeros"), fragments: [texte("On résout l'équation du second degré obtenue (méthode rapide si possible, sinon le discriminant).")] });
-    etapes.push({ label: "Calcul", sousQuestion: L("zeros"), fragments: [latex(`\\Delta = b^2 - 4ac = ${sd.delta}`), texte(sd.irreductible ? " : Δ < 0, aucune solution réelle." : "")] });
+    if (sd.casGeneral) {
+      etapes.push({ label: "Méthode", sousQuestion: L("zeros"), fragments: [texte("On résout l'équation du second degré obtenue à l'aide du discriminant.")] });
+      etapes.push({ label: "Calcul", sousQuestion: L("zeros"), fragments: [latex(`\\Delta = b^2 - 4ac = ${sd.delta}`), texte(sd.irreductible ? " : Δ < 0, aucune solution réelle." : "")] });
+    } else {
+      etapes.push({ label: "Méthode", sousQuestion: L("zeros"), fragments: [texte("On résout l'équation du second degré obtenue par une méthode rapide (mise en évidence, différence de deux carrés ou carré parfait), sans discriminant.")] });
+    }
   } else if (e.famille === "cube" || e.famille === "racine_cubique") {
-    etapes.push({ label: "Méthode", sousQuestion: L("zeros"), fragments: [texte("On factorise le membre de gauche (mise en évidence), puis on applique la règle du produit nul.")] });
+    const avecX = e.factorisationP3.type === "avecX";
+    etapes.push({
+      label: "Méthode",
+      sousQuestion: L("zeros"),
+      fragments: [texte(avecX ? "On met x en évidence, puis on applique la règle du produit nul." : "On factorise par groupement ; le facteur x² + 1 n'est jamais nul, seul l'autre facteur peut s'annuler.")],
+    });
     etapes.push({ label: "Calcul", sousQuestion: L("zeros"), fragments: [latex(factorisationP3Latex(e.factorisationP3))] });
   }
   if (e.famille === "racine_carree") {
     const candidats = racinesAValiderRacineCarree(e);
-    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: candidats.length === 0 ? [texte("Aucune solution candidate.")] : [texte("Solutions candidates : "), latex(formatZerosAttendusLatex(candidats) as string)] });
+    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: candidats.length === 0 ? [texte("Aucune solution candidate.")] : [texte("Solutions candidates : "), latex(zerosLatex(e, candidats) as string)] });
   } else if (e.famille !== "valeur_absolue") {
-    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: zerosFragments(zerosAttendus(e)) });
+    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: zerosFragments(e, zerosAttendus(e)) });
   }
 
   // Validation des solutions.
@@ -310,7 +328,7 @@ export function correctionDetailleeNiveau2(e: ExerciceCaracteristiquesAlgebrique
         fragments: [latex(`x = ${formatValeurExacteLatex(candidat)}`), texte(ok ? " respecte " : " ne respecte pas "), latex(formatConditionLatex(r.conditionValidite)), texte(ok ? " : solution retenue." : " : solution rejetée.")],
       });
     }
-    etapes.push({ label: "Conclusion", sousQuestion: L("validation"), fragments: zerosFragments(zerosAttendus(r)) });
+    etapes.push({ label: "Conclusion", sousQuestion: L("validation"), fragments: zerosFragments(r, zerosAttendus(r)) });
   } else if (e.famille === "valeur_absolue") {
     const v = e as ExerciceNiveau2ValeurAbsolue;
     ([0, 1] as const).forEach((index) => {
@@ -322,7 +340,7 @@ export function correctionDetailleeNiveau2(e: ExerciceCaracteristiquesAlgebrique
         fragments: [latex(`x = ${brancheLatex(v, index)}`), texte(ok ? " respecte " : " ne respecte pas "), latex(condition), texte(ok ? " : solution retenue." : " : solution rejetée.")],
       });
     });
-    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: zerosFragments(zerosAttendus(v)) });
+    etapes.push({ label: "Conclusion", sousQuestion: L("zeros"), fragments: zerosFragments(v, zerosAttendus(v)) });
   }
 
   // Piège ciblé.
@@ -362,14 +380,14 @@ export function baremeNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): Ba
       case "cube":
         return [
           { sousQuestion: L("isolement"), critere: [texte("Équation développée et regroupée : "), latex(formatEquationIsoleeLatex(e))], points: 1 },
-          { sousQuestion: L("zeros"), critere: zerosFragments(zeros), points: 1.5 },
+          { sousQuestion: L("zeros"), critere: zerosFragments(e, zeros), points: 1.5 },
         ];
       case "inverse":
       case "racine_cubique":
         return [
           { sousQuestion: L("isolement"), critere: [texte("Équation isolée : "), latex(formatEquationIsoleeLatex(e))], points: 0.5 },
           { sousQuestion: L("regroupe"), critere: [texte("Équation regroupée : "), latex(formatEquationDeveloppeeLatex(e))], points: 1 },
-          { sousQuestion: L("zeros"), critere: zerosFragments(zeros), points: 1 },
+          { sousQuestion: L("zeros"), critere: zerosFragments(e, zeros), points: 1 },
         ];
       case "racine_carree":
         return [
@@ -377,7 +395,7 @@ export function baremeNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): Ba
           { sousQuestion: L("validite"), critere: [texte("Condition de validité : "), latex(formatConditionLatex(e.conditionValidite))], points: 0.5 },
           { sousQuestion: L("regroupe"), critere: [texte("Équation regroupée : "), latex(formatEquationDeveloppeeLatex(e))], points: 0.5 },
           { sousQuestion: L("zeros"), critere: [texte("Solutions candidates")], points: 0.5 },
-          { sousQuestion: L("validation"), critere: [texte("Candidates confrontées à la condition ; "), ...zerosFragments(zeros)], points: 0.5 },
+          { sousQuestion: L("validation"), critere: [texte("Candidates confrontées à la condition ; "), ...zerosFragments(e, zeros)], points: 0.5 },
         ];
       case "valeur_absolue":
         return [
@@ -385,7 +403,7 @@ export function baremeNiveau2(e: ExerciceCaracteristiquesAlgebriquesNiveau2): Ba
           { sousQuestion: L("validite"), critere: [texte("Condition de signe : "), latex(formatConditionLatex(e.conditionValidite))], points: 0.5 },
           { sousQuestion: L("branches"), critere: [texte("Les deux branches résolues")], points: 0.5 },
           { sousQuestion: L("validation"), critere: [texte("Chaque racine confrontée à la condition de sa branche")], points: 0.5 },
-          { sousQuestion: L("zeros"), critere: zerosFragments(zeros), points: 0.5 },
+          { sousQuestion: L("zeros"), critere: zerosFragments(e, zeros), points: 0.5 },
         ];
     }
   })();

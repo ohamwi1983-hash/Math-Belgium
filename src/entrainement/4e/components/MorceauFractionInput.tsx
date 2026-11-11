@@ -58,7 +58,7 @@ export function MorceauFractionInput({ etat, onChange }: Props) {
         onChange={(e) => onChange({ ...etat, borneGaucheMode: "nombre", borneGaucheValeur: e.target.value })}
       />
       <button type="button" className={etat.borneGaucheMode === "-inf" ? "btn toggle-active" : "btn"} onClick={toggleMoinsInfini}>
-        -∞
+        −∞
       </button>
       <span className="morceau-separateur">;</span>
       <button type="button" className={etat.borneDroiteMode === "+inf" ? "btn toggle-active" : "btn"} onClick={togglePlusInfini}>

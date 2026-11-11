@@ -270,7 +270,7 @@ export function EnsembleReelGuideBuilder({ onChange, label, disabled = false, er
                   disabled={disabled}
                   onClick={() => majMorceau(i, m.infMode === "-inf" ? { infMode: "nombre", infValeur: "" } : { infMode: "-inf", infValeur: "" })}
                 >
-                  -∞
+                  −∞
                 </button>
                 <span className="morceau-separateur">;</span>
                 <button

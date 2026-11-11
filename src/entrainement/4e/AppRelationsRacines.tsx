@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -20,10 +20,9 @@ import { EtapeEquationDepuisRacines } from "./components/EtapeEquationDepuisRaci
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./ui/formatEquation";
 import { calculerRecapitulatifRelationsRacines } from "./ui/recapitulatifRelationsRacines";
 import { Katex } from "./components/Katex";
-import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Exploite les relations entre les racines et les coefficients de cette équation.";
@@ -49,22 +48,21 @@ function sessionInitiale(): EtatSessionRelationsRacines {
   return demarrerSessionRelationsRacines(REGLAGES_DEMO, () => genererAvecCode(code, undefined, genererExerciceRelationsRacines, undefined));
 }
 
-/** Même ordre que la vraie séquence des phases (type `PhaseRelationsRacines`). */
-const ORDRE_PHASES: PhaseRelationsRacines[] = ["sommeProduit", "factorisation", "equationDepuisRacines"];
+/** Les 3 écrans existent toujours, dans cet ordre. */
+const NOMBRE_ECRANS = 3;
 
-/** Même heuristique que `calculerSegmentsProgression` de `AppInequation.tsx` — ici les 3 étapes
- * ont toutes un mécanisme d'aide, contrairement à ce générateur-là. */
-function calculerSegmentsProgression(etat: EtatSessionRelationsRacines): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((phase) => {
-    if (phase === etat.phase) return "courante";
-    const score =
-      phase === "sommeProduit" ? etat.scoreSommeProduitExercice : phase === "factorisation" ? etat.scoreFactorisationExercice : null;
-    if (score === null) return "a-venir";
-    const revele = phase === "sommeProduit" ? etat.sommeProduitRevele : etat.factorisationRevele;
-    if (revele) return "revele";
-    const aide = phase === "sommeProduit" ? etat.aideSommeProduitUtilisee : etat.aideFactorisationUtilisee;
-    return aide ? "aide" : "correcte";
-  });
+const TITRES: Record<PhaseRelationsRacines, string> = {
+  sommeProduit: "Somme et produit",
+  factorisation: "Forme factorisée",
+  equationDepuisRacines: "Équation depuis les racines",
+};
+
+function aideEcran(etat: EtatSessionRelationsRacines): boolean {
+  return etat.phase === "sommeProduit"
+    ? etat.aideSommeProduitUtilisee
+    : etat.phase === "factorisation"
+      ? etat.aideFactorisationUtilisee
+      : etat.aideEquationDepuisRacinesUtilisee;
 }
 
 /** État tenu en attente dès qu'un écran se termine — même convention que `AppInequation.tsx`
@@ -77,36 +75,22 @@ interface TransitionEnAttente {
 export function AppRelationsRacines() {
   const [etat, setEtat] = useState<EtatSessionRelationsRacines>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
-  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
-
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionRelationsRacines) {
-    const recap = calculerRecapitulatifRelationsRacines(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: derniere.libelle,
-        votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
-      },
-    ]);
-  }
+  /** Compteur d'exercices : clé de la zone d'étapes, pour que les champs repartent vides à chaque
+   * nouvel exercice même quand il commence par le même écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionRelationsRacines, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined) {
-        ajouterHistorique(votreReponse, nouvelEtat);
-      }
       const revele =
         etat.phase === "sommeProduit"
           ? nouvelEtat.sommeProduitRevele
           : etat.phase === "factorisation"
             ? nouvelEtat.factorisationRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.equationDepuisRacinesRevele;
+      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, aideEcran(etat), <Katex expression={recapDerniereReponse(etat)} />)]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -118,6 +102,8 @@ export function AppRelationsRacines() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -145,7 +131,7 @@ export function AppRelationsRacines() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, NOMBRE_ECRANS, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice
@@ -156,13 +142,14 @@ export function AppRelationsRacines() {
               </div>
             }
           />
+          <Fragment key={numeroExercice}>
           {etat.phase === "sommeProduit" ? (
             <EtapeSommeProduit
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideSommeProduitUtilisee}
               onActiverAide={() => setEtat(activerAideSommeProduit(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSommeProduit(etat, reponse), `S = ${reponse.s} ; P = ${reponse.p}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseSommeProduit(etat, reponse), `S = ${nombreSaisi(reponse.s)} ; P = ${nombreSaisi(reponse.p)}`)}
               validation={validation}
             />
           ) : etat.phase === "factorisation" ? (
@@ -174,7 +161,7 @@ export function AppRelationsRacines() {
               aideActivee={etat.aideFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisation(etat))}
               diagnostiquer={(v) => diagnostiquerFactorisation(v, exercice)}
-              onValider={(reponse) => terminerEtape(soumettreReponseFactorisation(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
               validation={validation}
             />
           ) : (
@@ -186,15 +173,16 @@ export function AppRelationsRacines() {
               aideActivee={etat.aideEquationDepuisRacinesUtilisee}
               onActiverAide={() => setEtat(activerAideEquationDepuisRacines(etat))}
               diagnostiquer={(v) => diagnostiquerEquationDepuisRacines(v, exercice)}
-              onValider={(reponse) => terminerEtape(soumettreReponseEquationDepuisRacines(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseEquationDepuisRacines(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           )}
+          </Fragment>
         </div>
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
-        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
   );
@@ -210,11 +198,16 @@ function recapDerniereReponse(etat: EtatSessionRelationsRacines): string {
   const exercice = etat.exerciceCourant;
   if (etat.phase === "sommeProduit") {
     const [x1, x2] = exercice.racines;
-    return `S = ${x1 + x2} \\quad P = ${x1 * x2}`;
+    return `S = ${nombreLatex(x1 + x2)} \\quad P = ${nombreLatex(x1 * x2)}`;
   }
   if (etat.phase === "factorisation") {
     return `${formatFormeFactoriseeDepuisRacines(exercice.enonce, exercice.racines)} = 0`;
   }
   const [x1, x2] = exercice.racines;
   return `${formatMembreGauche({ a: 1, b: -(x1 + x2), c: x1 * x2 })} = 0`;
+}
+
+/** Nombre en LaTeX : virgule décimale « {,} », arrondi d'affichage contre les artefacts flottants. */
+function nombreLatex(v: number): string {
+  return String(Math.round(v * 1e6) / 1e6).replace(".", "{,}");
 }

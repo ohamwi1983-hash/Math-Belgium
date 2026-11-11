@@ -60,7 +60,7 @@ import { profilCaracteristiquesAlgebriques, LIBELLE_CAS_ETUDE_ALGEBRIQUE } from 
  * rédigé dans `exportEvaluationNiveau2.ts` ; ce fichier garde le niveau 1 et aiguille selon
  * `instance.niveau`. Note d'origine, conservée pour l'historique : niveau 1 uniquement, car les deux
  * niveaux ne sont PAS deux étapes progressives d'une même séance (voir
- * `EtapeReglagesCaracteristiquesAlgebriques.tsx`) mais un réglage professeur qui s'applique
+ * l'ancien écran de réglages, supprimé depuis) mais un réglage professeur qui s'applique
  * UNIFORMÉMENT à toute une série (`niveau1` par défaut à l'écran, jamais mélangé — voir
  * `creerGenerateurCaracteristiquesAlgebriques`) : ce sont deux modes de générateur indépendants,
  * pas un seul exercice à couvrir en plusieurs questions. Le niveau 2 fait en outre diverger la
@@ -129,8 +129,8 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
     ? []
     : [
         necessiteSeparation(instance)
-          ? { consigne: [texte("Sépare l'équation isolée en deux équations.")], reponse: { type: "lignes" as const, nombre: 2 } }
-          : { consigne: [texte(instructionDebarrasser(instance.famille))], reponse: { type: "lignes" as const, nombre: 1 } },
+          ? { consigne: [texte("Sépare l'équation isolée en deux équations.")] }
+          : { consigne: [texte(instructionDebarrasser(instance.famille))] },
       ];
 
   return {
@@ -138,28 +138,22 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
     questions: [
       {
         consigne: [texte("Quelles sont les conditions d'existence de cette fonction ?")],
-        reponse: { type: "lignes", nombre: 2 },
       },
       {
         consigne: [texte("Quel est le domaine de définition de cette fonction ?")],
-        reponse: { type: "lignes", nombre: 1 },
       },
       {
         consigne: [texte("Quelle est l'ordonnée à l'origine de cette fonction ? (forme exacte ; indique si elle n'existe pas.)")],
-        reponse: { type: "lignes", nombre: 1 },
       },
       {
         consigne: [texte("Cette fonction est-elle paire, impaire, ou ni l'une ni l'autre ? Justifie.")],
-        reponse: { type: "lignes", nombre: 1 },
       },
       {
         consigne: [texte(instructionIsolement(instance.famille))],
-        reponse: { type: "lignes", nombre: 1 },
       },
       ...questionsIntermediaires,
       {
         consigne: [texte(INSTRUCTION_ZEROS)],
-        reponse: { type: "lignes", nombre: 2 },
       },
     ],
   };
@@ -456,6 +450,14 @@ function correctionDetailleeCaracteristiquesAlgebriques(instance: ExerciceCaract
     etapes.push({ label: "Piège", sousQuestion: L("parite"), fragments: [texte("La fonction de référence est impaire, mais la constante ajoutée détruit cette imparité.")] });
   } else if (!existeOrdonneeNiveau1(instance)) {
     etapes.push({ label: "Piège", sousQuestion: L("ordonnee"), fragments: [texte("Ne pas calculer f(0) sans vérifier d'abord que 0 appartient au domaine.")] });
+  } else if (famille === "inverse") {
+    etapes.push({ label: "Piège", sousQuestion: L("domaine"), fragments: [texte("La valeur qui annule le dénominateur est exclue du domaine : elle ne peut être ni l'abscisse d'un point du graphique, ni un zéro.")] });
+  } else if (famille === "racine_carree") {
+    etapes.push({ label: "Piège", sousQuestion: L("domaine"), fragments: [texte("Le radicande peut valoir 0 : la borne du domaine est incluse (crochet fermé).")] });
+  } else if (famille === "cube" || famille === "racine_cubique") {
+    etapes.push({ label: "Piège", sousQuestion: L("ce"), fragments: [texte(`${famille === "cube" ? "Le cube" : "La racine cubique"} n'impose aucune condition : ne pas exclure de valeur du domaine.`)] });
+  } else {
+    etapes.push({ label: "Piège", sousQuestion: L("isolement"), fragments: [texte("La constante change de signe en passant dans l'autre membre.")] });
   }
   return etapes;
 }

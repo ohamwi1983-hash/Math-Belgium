@@ -80,7 +80,7 @@ import {
   formatFractionLatex,
   formatOrdonneeExacteLatex,
   formatPariteLabel,
-  formatTermesZerosAttendusLatex,
+  termesZerosExactsLatex,
   formatValeurExacteLatex,
 } from "./ui/formatCaracteristiquesAlgebriques";
 import { formatFractionIrreductible } from "./ui/formatFraction";
@@ -373,7 +373,7 @@ function reponseAttenduePhase(etat: EtatSessionCaracteristiquesAlgebriques): Rea
       );
     }
     case "zeros": {
-      const termes = formatTermesZerosAttendusLatex(zerosAAfficherPourRevelation(exercice));
+      const termes = termesZerosExactsLatex(exercice, zerosAAfficherPourRevelation(exercice));
       return (
         <>
           Zéros attendus :{" "}

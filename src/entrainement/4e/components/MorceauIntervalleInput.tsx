@@ -75,7 +75,7 @@ export function MorceauIntervalleInput({ etat, onChange }: Props) {
         className={etat.borneGaucheMode === "-inf" ? "btn toggle-active" : "btn"}
         onClick={toggleMoinsInfini}
       >
-        -∞
+        −∞
       </button>
       <span className="morceau-separateur">;</span>
       <button

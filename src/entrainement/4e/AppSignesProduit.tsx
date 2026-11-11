@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { Enonce, Exercice } from "./core/generateur.types";
 import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, SolutionEnsembleProduit } from "./core/signesProduit.types";
@@ -46,8 +46,8 @@ import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
 import { necessiteSimplification } from "./moteur/simplificationEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE, libelleCategorie } from "./ui/categorieLabels";
 import { formatSolutionEnsembleProduitLatex } from "./ui/formatSolutionEnsembleProduit";
 import { Katex } from "./components/Katex";
@@ -250,42 +250,43 @@ export function AppSignesProduit() {
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSignesProduit`, jamais dans le moteur (voir
    * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
-  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur d'exercices : clé de la zone d'étapes, pour que les champs repartent vides à chaque
+   * nouvel exercice même quand il commence par le même écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
-  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — la réponse ATTENDUE vient de
-   * l'entrée du récapitulatif produite par l'écran qui se clôt, retrouvée EXPLICITEMENT par sa
-   * phase et la position de son facteur (`entreeRecapPourEcran`) — jamais « la dernière ligne du
-   * récap », qui n'était souvent pas celle de l'écran clos (audit gen5 : fiche d'un autre écran,
-   * parfois « ✓ Correct » pour un écran raté). "grille" a sa propre fonction ci-dessous,
-   * "intervalle" (dernière phase) n'est jamais poussée dans l'historique. */
-  function ajouterHistoriqueDepuisRecap(votreReponse: ReactNode, nouvelEtat: EtatSessionSignesProduit) {
-    const entree = entreeRecapPourEcran(nouvelEtat, etat.phase, etat.indexFacteurExercice);
-    if (!entree) return;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: entree.libelle,
-        votreReponse,
-        correcte: !entree.revele,
-        reponseAttendue: entree.revele ? (entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur) : undefined,
-      },
-    ]);
+  /** Aide utilisée sur l'écran qui se clôt (la racine d'un facteur linéaire et la méthode n'en ont pas). */
+  function aideEcran(): boolean {
+    switch (etat.phase) {
+      case "reductionFacteur":
+        return etat.aideReductionFacteurUtilisee;
+      case "factorisationChamp1":
+        return etat.aideFactorisationChamp1Utilisee;
+      case "factorisationChamp2":
+        return etat.aideFactorisationChamp2Utilisee;
+      case "factorisationFactorisation":
+        return etat.aideFactorisationFactorisationUtilisee;
+      case "signeIrreductible":
+        return etat.aideSigneIrreductibleCourante;
+      case "grille":
+        return etat.aideGrilleTableauUtilisee;
+      case "intervalle":
+        return etat.aideUtilisee;
+      default:
+        return false;
+    }
   }
 
-  /** "grille" n'a pas d'entrée dans `calculerRecapitulatifSignesProduit` (voir son commentaire) —
-   * même donnée que `validation.reponseAttendue` pour cette phase, construite directement depuis
-   * `exerciceCourant.grille`, jamais une seconde source. */
-  function ajouterHistoriqueGrille(votreReponse: ReactNode, nouvelEtat: EtatSessionSignesProduit) {
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: "Tableau de signes",
-        votreReponse,
-        correcte: !nouvelEtat.grilleRevelee,
-        reponseAttendue: nouvelEtat.grilleRevelee ? <>Signe du produit = {nouvelEtat.exerciceCourant.grille.produit.join(" ")}</> : undefined,
-      },
-    ]);
+  /** Titre de la fiche : le libellé de l'entrée de récapitulatif de CET écran (retrouvée par sa phase
+   * et son facteur), sinon un titre propre à la phase — jamais d'écran clos sans fiche (une fiche
+   * manquante décalait toutes les suivantes). */
+  function titreEcran(nouvelEtat: EtatSessionSignesProduit): string {
+    if (etat.phase === "grille") return "Tableau de signes";
+    if (etat.phase === "intervalle") return "Ensemble des solutions";
+    const entree = entreeRecapPourEcran(nouvelEtat, etat.phase, etat.indexFacteurExercice);
+    if (entree) return entree.libelle;
+    return etat.phase === "racineLineaire" ? "Racine du facteur" : etat.phase === "signeIrreductible" ? "Signe du facteur" : "Facteur";
   }
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand la SOUS-ÉTAPE se clôt
@@ -315,14 +316,6 @@ export function AppSignesProduit() {
       return;
     }
 
-    if (votreReponse !== undefined) {
-      if (etat.phase === "grille") {
-        ajouterHistoriqueGrille(votreReponse, nouvelEtat);
-      } else {
-        ajouterHistoriqueDepuisRecap(votreReponse, nouvelEtat);
-      }
-    }
-
     const revele = (() => {
       switch (etat.phase) {
         case "racineLineaire":
@@ -346,6 +339,7 @@ export function AppSignesProduit() {
       }
     })();
 
+    setHistorique((h) => [...h, ecranClos(titreEcran(nouvelEtat), votreReponse, revele, aideEcran(), reponseAttendueEcran(etat.phase, nouvelEtat))]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -354,6 +348,8 @@ export function AppSignesProduit() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -363,6 +359,8 @@ export function AppSignesProduit() {
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionSignesProduit(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSignesProduitId)));
   }
 
@@ -376,29 +374,32 @@ export function AppSignesProduit() {
   const irreductibleCourant = irreductibles[etat.scoresSigneIrreductibleExercice.length];
   const facteurCourant = etat.exerciceCourant.facteurs[etat.indexFacteurExercice];
 
+  /** Réponse attendue de l'écran qui se clôt — la même sur l'écran de validation et dans la fiche. */
+  function reponseAttendueEcran(phase: EtatSessionSignesProduit["phase"], etatApres: EtatSessionSignesProduit): ReactNode {
+    switch (phase) {
+      case "grille":
+        return <>Signe du produit : {etat.exerciceCourant.grille.produit.join(" ").replace(/-/g, "−")}</>;
+      case "intervalle":
+        return <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(etat.exerciceCourant.solution)}`} />;
+      default: {
+        const entree = entreeRecapPourEcran(etatApres, phase, etat.indexFacteurExercice);
+        if (!entree) return undefined;
+        return (
+          <>
+            {entree.libelle} : {entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur}
+          </>
+        );
+      }
+    }
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         // Tous les écrans par facteur (dont réduction/méthode/Δ ou factorisation, sans réponse
         // attendue avant l'audit gen5) : la même entrée que le récapitulatif, retrouvée par la phase
         // et le facteur de l'écran qui se clôt — jamais une seconde source.
-        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
-          switch (etat.phase) {
-            case "grille":
-              return <>Tableau attendu : signe du produit = {etat.exerciceCourant.grille.produit.join(" ")}</>;
-            case "intervalle":
-              return <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(etat.exerciceCourant.solution)}`} />;
-            default: {
-              const entree = entreeRecapPourEcran(enAttente.etatSuivant, etat.phase, etat.indexFacteurExercice);
-              if (!entree) return undefined;
-              return (
-                <>
-                  {entree.libelle} : {entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur}
-                </>
-              );
-            }
-          }
-        })(),
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase, enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -414,7 +415,10 @@ export function AppSignesProduit() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <ProgressionPuces
+          segments={segmentsDepuisHistorique(historique, calculerSegmentsProgression(etat).length, !enAttente)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
 
         <div className="card-body">
           <EnTeteExercice
@@ -427,13 +431,14 @@ export function AppSignesProduit() {
               </div>
             }
           />
+          <Fragment key={numeroExercice}>
           {etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (
             <EtapeRacineLineaire
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel as string}
-              onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine), `x = ${racine}`)}
+              onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine), `x = ${nombreSaisi(Number(racine))}`)}
               validation={validation}
             />
           ) : etat.phase === "reductionFacteur" && facteurCourant?.type === "quadratique_factorisable" ? (
@@ -450,7 +455,7 @@ export function AppSignesProduit() {
               aideActivee={etat.aideReductionFacteurUtilisee}
               texteAide={TEXTE_AIDE_REDUCTION}
               onActiverAide={() => setEtat(activerAideReductionFacteur(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "methodeFacteur" && facteurCourant && facteurCourant.type !== "lineaire" ? (
@@ -483,7 +488,7 @@ export function AppSignesProduit() {
               onValider={(reponse) =>
                 terminerEtape(
                   soumettreReponseFactorisationChamp1(etat, reponse),
-                  factorisable.categorie === "cas_general" ? `Δ = ${reponse}` : `${reponse} = 0`,
+                  factorisable.categorie === "cas_general" ? <>Δ = {saisieEnLatex(reponse)}</> : saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`),
                 )
               }
               validation={validation}
@@ -508,7 +513,7 @@ export function AppSignesProduit() {
                 terminerEtape(
                   soumettreReponseFactorisationChamp2(etat, racines),
                   // "Pas de racine" est transmis comme [NaN, NaN] : jamais « NaN ; NaN » dans la fiche.
-                  racines.every(Number.isFinite) ? racines.join(" ; ") : "Pas de racine",
+                  racines.every(Number.isFinite) ? (racines[0] === racines[1] ? [racines[0]] : racines).map((r) => `x = ${nombreSaisi(r)}`).join(" ; ") : "Pas de racine",
                 )
               }
               validation={validation}
@@ -527,7 +532,7 @@ export function AppSignesProduit() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(factorisable, v)}
               aideActivee={etat.aideFactorisationFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisationFactorisation(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse), `${reponse} = 0`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse), saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))}
               validation={validation}
             />
           ) : etat.phase === "signeIrreductible" && irreductibleCourant ? (
@@ -549,7 +554,7 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideGrilleTableauUtilisee}
               onActiverAide={() => setEtat(activerAideGrilleTableau(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du produit = ${reponse.produit.join(" ")}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du produit : ${reponse.produit.join(" ").replace(/-/g, "−")}`)}
               validation={validation}
             />
           ) : (
@@ -560,15 +565,16 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
               onActiverAide={() => setEtat(activerAideGrilleSolution(etat))}
-              onValider={(reponse: SolutionEnsembleProduit) => terminerEtape(soumettreReponseIntervalle(etat, reponse))}
+              onValider={(reponse: SolutionEnsembleProduit) => terminerEtape(soumettreReponseIntervalle(etat, reponse), <Katex expression={`S = ${formatSolutionEnsembleProduitLatex(reponse)}`} />)}
               validation={validation}
             />
           )}
+          </Fragment>
         </div>
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
-        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
   );

@@ -80,6 +80,21 @@ function phaseInitiale(exercice: Exercice): Phase {
   return phaseApresSimplification(exercice);
 }
 
+/** Écrans RÉELS d'un exercice, dans l'ordre (barre de progression) — mêmes prédicats que les
+ * transitions ci-dessous ; la simplification ne change ni la catégorie ni la forme d'affichage,
+ * donc l'exercice d'origine suffit. "developper" ne suit jamais qu'un isolement. */
+export function phasesExercice(exercice: Exercice): Phase[] {
+  const phases: Phase[] = [];
+  if (necessiteSimplification(exercice)) phases.push("simplification");
+  if (necessiteIsolement(exercice)) {
+    phases.push("isolement");
+    if (necessiteDeveloppement(exercice)) phases.push("developper");
+  }
+  if (necessiteReconnaissance(exercice)) phases.push("reconnaissance");
+  phases.push("champ1", "champ2");
+  return phases;
+}
+
 export function demarrerSession(reglages: ReglagesSession, generateur: GenerateurExercice): EtatSession {
   const exerciceCourant = generateur();
   return {

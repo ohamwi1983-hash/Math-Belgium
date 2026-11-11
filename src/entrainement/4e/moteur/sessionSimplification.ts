@@ -97,6 +97,36 @@ function prochainePhaseApresDenom(exercice: ExerciceSimplification): PhaseSimpli
   return necessiteSimplification(numerateurP2(exercice)) ? "numReduction" : "numReconnaissance";
 }
 
+/** Écrans RÉELS d'un exercice, dans l'ordre (barre de progression) — mêmes prédicats que les
+ * transitions de ce fichier (`phaseInitiale`, `prochainePhaseApresDenom`, choix cas_general des
+ * champs 1/2) ; aucune étape ne modifie l'exercice, donc l'exercice d'origine suffit. */
+export function phasesExercice(exercice: ExerciceSimplification): PhaseSimplification[] {
+  const phases: PhaseSimplification[] = [];
+  const numerateurComplet = (): void => {
+    const num = numerateurP2(exercice);
+    if (necessiteSimplification(num)) phases.push("numReduction");
+    phases.push("numReconnaissance", "numChamp1");
+    if (num.categorie === "cas_general") phases.push("numChamp2", "numFactorisation");
+  };
+  if (exercice.type === "P2/P1") {
+    if (necessiteMiseEnEvidenceP1(denominateurP1(exercice))) phases.push("denomReductionP1");
+    phases.push("ceDirecte");
+    numerateurComplet();
+  } else {
+    const denom = denominateurP2(exercice);
+    if (necessiteSimplification(denom)) phases.push("denomReduction");
+    phases.push("denomReconnaissance", "denomChamp1", "denomChamp2");
+    if (denom.categorie === "cas_general") phases.push("denomFactorisation");
+    if (exercice.type === "P1/P2") {
+      if (necessiteMiseEnEvidenceP1(numerateurP1(exercice))) phases.push("numReductionP1");
+    } else if (exercice.type === "P2/P2") {
+      numerateurComplet();
+    }
+  }
+  phases.push("simplification");
+  return phases;
+}
+
 const ETAT_TRANSITOIRE_VIERGE = {
   scoreDenomReductionExercice: null,
   denomReductionRevele: false,

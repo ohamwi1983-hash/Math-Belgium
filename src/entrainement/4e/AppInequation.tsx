@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -85,6 +85,9 @@ export function AppInequation() {
    * nouvel exercice, comme `enAttente`. */
   const [historique, setHistorique] = useState<EcranClos[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur d'exercices : clé de la zone d'étapes, pour que les champs repartent vides à chaque
+   * nouvel exercice même quand il commence par le même écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Réponse attendue de l'écran qui se clôt — la même que celle de l'écran de validation. */
   function reponseAttendueEcran(phase: PhaseInequation, nouvelEtat: EtatSessionInequation): ReactNode {
@@ -123,6 +126,7 @@ export function AppInequation() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -133,6 +137,7 @@ export function AppInequation() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionInequation(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationId)));
   }
 
@@ -177,6 +182,7 @@ export function AppInequation() {
               </div>
             }
           />
+          <Fragment key={numeroExercice}>
           {etat.phase === "simplification" ? (
             <EtapeSimplificationInequation
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -221,6 +227,7 @@ export function AppInequation() {
               validation={validation}
             />
           )}
+          </Fragment>
         </div>
       </main>
 

@@ -63,3 +63,21 @@ export function saisieEnLatex(texte: string): ReactNode {
 export function nombreTexte(valeur: number): string {
   return String(valeur).replace(".", ",").replace("-", "−");
 }
+
+/** Valeur numérique saisie par l'élève : exacte si c'est un décimal court, sinon arrondie (« ≈ »)
+ * — une racine irrationnelle tapée « sqrt(2) » arrive ici en nombre flottant. */
+export function nombreSaisi(valeur: number): string {
+  if (Math.abs(valeur * 100 - Math.round(valeur * 100)) < 1e-9) return nombreTexte(Math.round(valeur * 100) / 100);
+  return "≈ " + nombreTexte(Math.round(valeur * 100) / 100);
+}
+
+/** Entrée de récapitulatif apparue avec l'écran qui vient de se clore (`null` si l'écran n'en ajoute
+ * pas — dernière étape). Sert au titre de la fiche et, à défaut, à sa réponse attendue. */
+export function entreeAjoutee<T>(avant: readonly T[], apres: readonly T[]): T | null {
+  return apres.length > avant.length ? apres[apres.length - 1]! : null;
+}
+
+/** Valeur d'une entrée de récapitulatif (`estLatex` → KaTeX). */
+export function valeurRecap(entree: { valeur: string; estLatex: boolean }): ReactNode {
+  return entree.estLatex ? <Katex expression={entree.valeur} /> : entree.valeur;
+}

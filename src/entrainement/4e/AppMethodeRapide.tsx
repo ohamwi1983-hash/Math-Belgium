@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -32,10 +32,10 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
 import { libelleCategorie } from "./ui/categorieLabels";
 import { formatEnonceAffichage, formatEnonceLatex, formatEquationIsoleeNonDeveloppee, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
-import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
+import { phasesExercice } from "./moteur/session";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -58,55 +58,38 @@ function sessionInitiale(): EtatSession {
   return demarrerSession(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceSecondDegre, (id) => construireAvecVarianteId(id as VarianteSecondDegreId)));
 }
 
-/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
- * générateur (type `Phase` dans `moteur/types.ts`, et les branches de `terminerEtape` ci-dessous). */
-const ORDRE_PHASES: EtatSession["phase"][] = ["simplification", "isolement", "developper", "reconnaissance", "champ1", "champ2"];
+function titreEcran(phase: EtatSession["phase"], exercice: Exercice): string {
+  switch (phase) {
+    case "simplification":
+      return "Équation simplifiée";
+    case "isolement":
+      return "Équation isolée";
+    case "developper":
+      return "Équation développée";
+    case "reconnaissance":
+      return "Méthode";
+    case "champ1":
+      return exercice.categorie === "cas_general" ? "Discriminant" : "Factorisation";
+    default:
+      return "Solutions";
+  }
+}
 
-/** Même principe que `calculerRecapitulatif` (`ui/recapitulatif.ts`) et que `terminerEtape`
- * ci-dessous pour lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément.
- * `champ2` (dernière phase) n'a pas de champ `scoreXxxExercice` propre : elle clôt toujours
- * immédiatement l'exercice (voir commentaire sur `calculerRecapitulatif`), donc tant qu'elle n'est
- * pas la phase courante elle est forcément "a-venir". */
-function calculerSegmentsProgression(etat: EtatSession): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((phase) => {
-    if (phase === etat.phase) return "courante";
-    const score =
-      phase === "simplification"
-        ? etat.scoreSimplificationExercice
-        : phase === "isolement"
-          ? etat.scoreIsolementExercice
-          : phase === "developper"
-            ? etat.scoreDevelopperExercice
-            : phase === "reconnaissance"
-              ? etat.scoreReconnaissanceExercice
-              : phase === "champ1"
-                ? etat.scoreChampPrincipalExercice
-                : null;
-    if (score === null) return "a-venir";
-    const revele =
-      phase === "simplification"
-        ? etat.simplificationRevele
-        : phase === "isolement"
-          ? etat.isolementRevele
-          : phase === "developper"
-            ? etat.developperRevele
-            : phase === "reconnaissance"
-              ? etat.categorieRevelee
-              : etat.champPrincipalRevele;
-    if (revele) return "revele";
-    // "reconnaissance" n'a aucun mécanisme d'aide (toujours "correcte", jamais "aide").
-    const aideUtilisee =
-      phase === "simplification"
-        ? etat.aideSimplificationUtilisee
-        : phase === "isolement"
-          ? etat.aideIsolementUtilisee
-          : phase === "developper"
-            ? etat.aideDevelopperUtilisee
-            : phase === "champ1"
-              ? etat.aideChamp1Utilisee
-              : false;
-    return aideUtilisee ? "aide" : "correcte";
-  });
+function aideEcran(etat: EtatSession): boolean {
+  switch (etat.phase) {
+    case "simplification":
+      return etat.aideSimplificationUtilisee;
+    case "isolement":
+      return etat.aideIsolementUtilisee;
+    case "developper":
+      return etat.aideDevelopperUtilisee;
+    case "champ1":
+      return etat.aideChamp1Utilisee;
+    case "champ2":
+      return etat.aideZerosUtilisee;
+    default:
+      return false;
+  }
 }
 
 /**
@@ -145,26 +128,11 @@ export function AppMethodeRapide() {
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSession`, jamais dans le moteur (voir AppAnalyseFonction.tsx). Remis à
    * vide à chaque nouvel exercice, comme `enAttente`. */
-  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
-
-  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise `calculerRecapitulatif`
-   * pour la réponse ATTENDUE, la dernière entrée du tableau correspondant toujours à l'étape qui
-   * vient de se clore. */
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSession) {
-    const recap = calculerRecapitulatif(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: derniere.libelle,
-        votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-      },
-    ]);
-  }
+  /** Compteur d'exercices : clé de la zone d'étapes, pour que les champs repartent vides à chaque
+   * nouvel exercice même quand il commence par le même écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
@@ -172,9 +140,6 @@ export function AppMethodeRapide() {
   function terminerEtape(nouvelEtat: EtatSession, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined) {
-        ajouterHistorique(votreReponse, nouvelEtat);
-      }
       const revele =
         etat.phase === "simplification"
           ? nouvelEtat.simplificationRevele
@@ -187,6 +152,7 @@ export function AppMethodeRapide() {
                 : etat.phase === "champ1"
                   ? nouvelEtat.champPrincipalRevele
                   : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.zerosRevele;
+      setHistorique((h) => [...h, ecranClos(titreEcran(etat.phase, etat.exerciceCourant), votreReponse, revele, aideEcran(etat), reponseAttenduePour(etat.phase, nouvelEtat))]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -198,6 +164,8 @@ export function AppMethodeRapide() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -217,6 +185,8 @@ export function AppMethodeRapide() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSession(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSecondDegreId)));
   }
 
@@ -229,8 +199,11 @@ export function AppMethodeRapide() {
    * ici auparavant (bug trouvé par le même audit que gen6/`AppInequationRationnelle.tsx` : le
    * reveal immédiat affichait "✗ Incorrect" sans jamais montrer la réponse attendue, sur TOUS les
    * exercices puisque ces 4 phases ne dépendent d'aucune niveau/variante). */
-  const reponseAttendue =
-    phase === "simplification" ? (
+  /** Réponse attendue d'un écran — la même sur l'écran de validation et dans la fiche de la puce.
+   * Simplification : l'équation RÉDUITE (`etatApres.exerciceCourant`), jamais celle de l'énoncé. */
+  function reponseAttenduePour(phase: EtatSession["phase"], etatApres: EtatSession): ReactNode {
+    const exercice = phase === "simplification" ? etatApres.exerciceCourant : etat.exerciceCourant;
+    return phase === "simplification" ? (
       <>
         Équation simplifiée attendue :{" "}
         <Katex expression={formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel)} />
@@ -254,6 +227,8 @@ export function AppMethodeRapide() {
         ))}
       </span>
     ) : null;
+  }
+  const reponseAttendue = enAttente ? reponseAttenduePour(phase, enAttente.etatSuivant) : null;
 
   const validation = enAttente
     ? {
@@ -274,7 +249,10 @@ export function AppMethodeRapide() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <ProgressionPuces
+          segments={segmentsDepuisHistorique(historique, phasesExercice(etat.exerciceOriginal).length, !enAttente)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
         <div className="card-body">
           <EnTeteExercice
             consigneGenerale={CONSIGNE_GENERALE}
@@ -284,6 +262,7 @@ export function AppMethodeRapide() {
               </div>
             }
           />
+          <Fragment key={numeroExercice}>
           {phase === "simplification" ? (
             <EtapeSimplificationCoefficients
               key={phase}
@@ -292,7 +271,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : phase === "isolement" ? (
@@ -309,7 +288,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : phase === "developper" ? (
@@ -324,7 +303,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
               aideActivee={etat.aideDevelopperUtilisee}
               onActiverAide={() => setEtat(activerAideDevelopper(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : phase === "reconnaissance" ? (
@@ -352,7 +331,7 @@ export function AppMethodeRapide() {
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
               onValider={(reponse) =>
-                terminerEtape(soumettreReponseChamp1(etat, reponse), exercice.categorie === "cas_general" ? `Δ = ${reponse}` : `${reponse} = 0`)
+                terminerEtape(soumettreReponseChamp1(etat, reponse), exercice.categorie === "cas_general" ? <>Δ = {saisieEnLatex(reponse)}</> : saisieEnLatex(reponse.includes("=") ? reponse : `${reponse}=0`))
               }
               validation={validation}
             />
@@ -367,15 +346,16 @@ export function AppMethodeRapide() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideZerosUtilisee}
               onActiverAide={() => setEtat(activerAideZeros(etat))}
-              onValider={(reponse: ReponseZeros) => terminerEtape(soumettreReponseChamp2(etat, reponse))}
+              onValider={(reponse: ReponseZeros) => terminerEtape(soumettreReponseChamp2(etat, reponse), reponse.aucun ? "Pas de solution" : reponse.valeurs.map((v) => `x = ${nombreSaisi(v)}`).join(" ; "))}
               validation={validation}
             />
           )}
+          </Fragment>
         </div>
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
-        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
   );

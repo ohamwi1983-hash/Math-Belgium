@@ -82,6 +82,29 @@ function necessiteFactorisation(exercice: ExerciceEquationRationnelle): boolean 
   return exercice.equationIsolee.enonce.a !== 0;
 }
 
+/** Écrans RÉELS d'un exercice, dans l'ordre (barre de progression) — mêmes prédicats que les
+ * transitions de ce fichier (CE → simplification éventuelle → isolement → résolution → racines
+ * étrangères) ; aucune étape ne modifie l'exercice. */
+export function phasesExercice(exercice: ExerciceEquationRationnelle): EtatSessionEquationRationnelle["phase"][] {
+  const phases: EtatSessionEquationRationnelle["phase"][] = ["ce"];
+  if (necessiteSimplificationRiche(exercice)) {
+    const p2 = p2DeFractionGauche(exercice);
+    if (necessiteReductionCoefficients(p2)) phases.push("simplifierReduction");
+    phases.push("simplifierReconnaissance", "simplifierChamp1", "simplifierChamp2");
+    if (p2.categorie === "cas_general") phases.push("simplifierFactorisation");
+    phases.push("simplifierFraction");
+  } else if (necessiteSimplification(exercice)) {
+    phases.push("simplifier");
+  }
+  phases.push("isolement");
+  if (necessiteFactorisation(exercice)) {
+    if (necessiteReconnaissance(exercice)) phases.push("reconnaissance");
+    phases.push("champ1");
+  }
+  phases.push("champ2", "racinesEtrangeres");
+  return phases;
+}
+
 const ETAT_TRANSITOIRE_VIERGE = {
   scoreCEExercice: null,
   ceRevele: false,

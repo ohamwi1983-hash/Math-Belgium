@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
 import type { ExerciceEquationRationnelle } from "./core/equationRationnelle.types";
@@ -29,6 +29,7 @@ import {
   soumettreReponseSimplifierFactorisation,
   soumettreReponseSimplifierFraction,
   soumettreReponseSimplifierReduction,
+  phasesExercice,
 } from "./moteur/sessionEquationRationnelle";
 import type { EtatSessionEquationRationnelle, PhaseEquationRationnelle } from "./moteur/typesEquationRationnelle";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral, diagnostiquerIsolement } from "./moteur/verification";
@@ -69,10 +70,9 @@ import {
   formatTermesZerosAttendusLatex,
 } from "./ui/formatEquation";
 import { enonceSimplifie, facteurCommun } from "./moteur/simplificationEquation";
-import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreSaisi, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Résous cette équation rationnelle.";
@@ -127,90 +127,6 @@ function sessionInitiale(): EtatSessionEquationRationnelle {
   return demarrerSessionEquationRationnelle(REGLAGES_DEMO, () =>
     genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationRationnelle, (id) => construireAvecVarianteId(id as VarianteEquationRationnelleId)),
   );
-}
-
-/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
- * générateur (type `PhaseEquationRationnelle` dans `moteur/typesEquationRationnelle.ts`, et les
- * branches de `releveRevelePhase`/`terminerEtape` ci-dessous). */
-const ORDRE_PHASES: PhaseEquationRationnelle[] = [
-  "ce",
-  "simplifier",
-  "simplifierReduction",
-  "simplifierReconnaissance",
-  "simplifierChamp1",
-  "simplifierChamp2",
-  "simplifierFactorisation",
-  "simplifierFraction",
-  "isolement",
-  "reconnaissance",
-  "champ1",
-  "champ2",
-  "racinesEtrangeres",
-];
-
-/** Même heuristique que `calculerRecapitulatifEquationRationnelle`
- * (`ui/recapitulatifEquationRationnelle.ts`) et que `releveRevelePhase` ci-dessus pour lire
- * `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. `racinesEtrangeres`
- * (dernière phase) n'a pas de champ `scoreXxxExercice` persisté au niveau de la session (son score
- * n'existe que sur le dernier `resultats[...]`, voir `releveRevelePhase`) : tant qu'elle n'est pas
- * la phase courante elle est forcément "a-venir". */
-function calculerSegmentsProgression(etat: EtatSessionEquationRationnelle): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((phase) => {
-    if (phase === etat.phase) return "courante";
-    const score =
-      phase === "ce"
-        ? etat.scoreCEExercice
-        : phase === "simplifier"
-          ? etat.scoreSimplifierExercice
-          : phase === "simplifierReduction"
-            ? etat.scoreSimplifierReductionExercice
-            : phase === "simplifierReconnaissance"
-              ? etat.scoreSimplifierReconnaissanceExercice
-              : phase === "simplifierChamp1"
-                ? etat.scoreSimplifierChamp1Exercice
-                : phase === "simplifierChamp2"
-                  ? etat.scoreSimplifierChamp2Exercice
-                  : phase === "simplifierFactorisation"
-                    ? etat.scoreSimplifierFactorisationExercice
-                    : phase === "simplifierFraction"
-                      ? etat.scoreSimplifierFractionExercice
-                      : phase === "isolement"
-                        ? etat.scoreIsolementExercice
-                        : phase === "reconnaissance"
-                          ? etat.scoreReconnaissanceExercice
-                          : phase === "champ1"
-                            ? etat.scoreChampPrincipalExercice
-                            : phase === "champ2"
-                              ? etat.scoreRacinesExercice
-                              : null;
-    if (score === null) return "a-venir";
-    const revele =
-      phase === "ce"
-        ? etat.ceRevele
-        : phase === "simplifier"
-          ? etat.simplifierRevele
-          : phase === "simplifierReduction"
-            ? etat.simplifierReductionRevele
-            : phase === "simplifierReconnaissance"
-              ? etat.simplifierCategorieRevelee
-              : phase === "simplifierChamp1"
-                ? etat.simplifierChamp1Revele
-                : phase === "simplifierChamp2"
-                  ? etat.simplifierChamp2Revele
-                  : phase === "simplifierFactorisation"
-                    ? etat.simplifierFactorisationRevele
-                    : phase === "simplifierFraction"
-                      ? etat.simplifierFractionRevele
-                      : phase === "isolement"
-                        ? etat.isolementRevele
-                        : phase === "reconnaissance"
-                          ? etat.categorieRevelee
-                          : phase === "champ1"
-                            ? etat.champPrincipalRevele
-                            : etat.racinesRevele; // champ2
-    if (revele) return "revele";
-    return aideUtiliseePhase(etat, phase) ? "aide" : "correcte";
-  });
 }
 
 /** Lit le flag `aideXxxUtilisee` correspondant à `phase`, jamais recalculé — "simplifier"/
@@ -287,7 +203,7 @@ function titrePhase(etat: EtatSessionEquationRationnelle): string {
  * "Pas de..."), jamais recalculé différemment d'un appelant à l'autre. */
 function formatCoupleSaisi(valeurs: [number, number], prefixe: string, libellePasDe: string): string {
   const uniques = Array.from(new Set(valeurs.filter((v) => !Number.isNaN(v))));
-  return uniques.length === 0 ? libellePasDe : uniques.map((v) => `${prefixe} ${v}`).join(" et ");
+  return uniques.length === 0 ? libellePasDe : uniques.map((v) => `${prefixe} ${nombreSaisi(v)}`).join(" et ");
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -412,7 +328,7 @@ function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
       return (
         <>
           {racinesDistinctes(exercice.equationIsolee.solution.racines)
-            .map((r) => `x = ${r} : ${exercice.ce.includes(r) ? "à rejeter" : "valide"}`)
+            .map((r) => `x = ${nombreSaisi(r)} : ${exercice.ce.includes(r) ? "à rejeter" : "valide"}`)
             .join(" ; ")}
         </>
       );
@@ -466,8 +382,11 @@ export function AppEquationRationnelle() {
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEquationRationnelle`, jamais dans le moteur. Remis à vide à
    * chaque nouvel exercice, comme `enAttente`. */
-  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur d'exercices : clé de la zone d'étapes, pour que les champs repartent vides à chaque
+   * nouvel exercice même quand il commence par le même écran que le précédent. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** Appelé juste avant `terminerEtape`, avec l'état AVANT la transition (`etat`, jamais
    * `nouvelEtat`) — réutilise directement `releveRevelePhase`/`reponseAttenduePhase`, déjà écrites
@@ -475,18 +394,9 @@ export function AppEquationRationnelle() {
    * `etat.exerciceCourant` juste avant transition). `reponseAttenduePhase` renvoie `null` pour
    * "simplifierReduction"/"reconnaissance" (l'ancien panneau n'avait pas de bloc réponse pour ces
    * deux phases) — reproduit à l'identique. */
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEquationRationnelle) {
+  function ajouterHistorique(votreReponse: ReactNode | undefined, nouvelEtat: EtatSessionEquationRationnelle) {
     const revele = releveRevelePhase(etat, nouvelEtat);
-    const reponseAttendue = revele ? reponseAttenduePhase(etat) : null;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: titrePhase(etat),
-        votreReponse,
-        correcte: !revele,
-        reponseAttendue: reponseAttendue ?? undefined,
-      },
-    ]);
+    setHistorique((h) => [...h, ecranClos(titrePhase(etat), votreReponse, revele, aideUtiliseePhase(etat, etat.phase), reponseAttenduePhase(etat) ?? undefined)]);
   }
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
@@ -495,9 +405,7 @@ export function AppEquationRationnelle() {
   function terminerEtape(nouvelEtat: EtatSessionEquationRationnelle, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      if (votreReponse !== undefined) {
-        ajouterHistorique(votreReponse, nouvelEtat);
-      }
+      ajouterHistorique(votreReponse, nouvelEtat);
       setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
       return;
     }
@@ -509,6 +417,8 @@ export function AppEquationRationnelle() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setFicheOuverteIndex(null);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -518,6 +428,8 @@ export function AppEquationRationnelle() {
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setHistorique([]);
+    setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionEquationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationRationnelleId)));
   }
 
@@ -544,7 +456,10 @@ export function AppEquationRationnelle() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <ProgressionPuces
+          segments={segmentsDepuisHistorique(historique, phasesExercice(etat.exerciceCourant).length, !enAttente)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
 
         <div className="card-body">
           <EnTeteExercice
@@ -555,6 +470,7 @@ export function AppEquationRationnelle() {
               </div>
             }
           />
+          <Fragment key={numeroExercice}>
           {etat.phase === "ce" && etat.exerciceCourant.ce.length === 1 ? (
             <EtapeCEDirecte
               tentativesUtilisees={tentativesUtilisees}
@@ -563,7 +479,7 @@ export function AppEquationRationnelle() {
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
               masquerBlocDonnees
               question={QUESTION_CE}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]), `x ≠ ${reponse}`)}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]), `x ≠ ${nombreSaisi(Number(reponse))}`)}
               validation={validation}
             />
           ) : etat.phase === "ce" ? (
@@ -594,7 +510,7 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               diagnostiquer={(reponses) => diagnostiquerSimplifierToutes(etat.exerciceCourant.fractionsSimplifiables, reponses)}
               onValider={(reponses) =>
-                terminerEtape(soumettreReponseSimplifier(etat, reponses), reponses.map((r) => `${r.numerateur}/${r.denominateur}`).join(" ; "))
+                terminerEtape(soumettreReponseSimplifier(etat, reponses), <>{reponses.map((r, i) => <span key={i}>{i > 0 ? " ; " : ""}{saisieEnLatex(`(${r.numerateur})/(${r.denominateur})`)}</span>)}</>)
               }
               validation={validation}
             />
@@ -608,7 +524,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierReduction(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "simplifierReconnaissance" ? (
@@ -633,7 +549,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "simplifierChamp2" ? (
@@ -663,7 +579,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFactorisation(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "simplifierFraction" ? (
@@ -685,7 +601,7 @@ export function AppEquationRationnelle() {
               aideActivee={etat.aideSimplifierFractionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
               onValider={(numerateur, denominateur) =>
-                terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur), `${numerateur}/${denominateur}`)
+                terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur), saisieEnLatex(`(${numerateur})/(${denominateur})`))
               }
               validation={validation}
             />
@@ -701,7 +617,7 @@ export function AppEquationRationnelle() {
               texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "reconnaissance" ? (
@@ -723,7 +639,7 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse), reponse)}
+              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse), saisieEnLatex(reponse))}
               validation={validation}
             />
           ) : etat.phase === "champ2" ? (
@@ -751,15 +667,23 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideRacinesEtrangeresUtilisee}
               onActiverAide={() => setEtat(activerAideRacinesEtrangeres(etat))}
-              onValider={(reponses) => terminerEtape(soumettreReponseRacinesEtrangeres(etat, reponses))}
+              onValider={(reponses) =>
+                terminerEtape(
+                  soumettreReponseRacinesEtrangeres(etat, reponses),
+                  racinesDistinctes(etat.exerciceCourant.equationIsolee.solution.racines)
+                    .map((r, i) => `x = ${nombreSaisi(r)} : ${reponses[i] ? "valide" : "à rejeter"}`)
+                    .join(" ; "),
+                )
+              }
               validation={validation}
             />
           )}
+          </Fragment>
         </div>
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
-        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
   );
