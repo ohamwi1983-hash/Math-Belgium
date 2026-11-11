@@ -2166,3 +2166,22 @@ paths:
   `sommes-riemann-widget` (4 fonctions, point milieu, encadrement) ; 7 nouveaux — `ipp-choix-widget` (§ 1),
   `fonction-aire-widget` et `rectangle-valeur-moyenne-widget` (§ 3), `aire-signee-widget` (§ 4),
   `solide-revolution-widget` (§ 5), `longueur-polygonale-widget` (§ 6), `distance-deplacement-widget` (§ 7).
+
+- **6e (6h), Chapitre 4 — générateurs 6gen23–29 et quiz 6gen67** : audit (3 forks, ≥ 2 000 tirages par
+  variante, quadratures indépendantes) puis corrections validées par l'utilisateur. Erreurs : 6gen25
+  calculait des « intégrales » sur des intervalles contenant un pôle (16 à 59 % des tirages ; bornes
+  désormais contrôlées sur tout [a ; b]) ; 6gen29 E donnait « niveau moyen » pour la moyenne d'un TAUX
+  (→ taux de variation moyen), G_soustraction avait un « cylindre » fictif (→ vrai trou πρ²(b − a)),
+  cible arrondie écrite « = », verre non « plein à ras bord », comparaison toujours « différents ».
+  Bugs communs : « + C » et « π » refusés, champs non vidés après « Générer », choix fermés à 3 essais
+  (→ 1), placeholders égaux à la réponse (jusqu'à 100 %), écrans intermédiaires sans la vraie réponse,
+  champs multiples qui débordaient à 390 px, historique des puces en valeurs internes. Écritures
+  (formateur commun `ui6e/formatMonome.ts`), virgule décimale, valeur exacte puis approchée, précision
+  annoncée et tolérance relative, aides en LaTeX, figures SVG (`ui6e/figure*.ts`) pour aires, volumes,
+  longueurs, intégrales définies, trapèzes et surplus. Décision A : variantes techniques hors cours
+  marquées « Pour aller plus loin — » et sous-partie correspondante ajoutée au § 1 du cours. Quiz :
+  14 affirmations méta / hors programme remplacées (35 par thème conservées). Refonte papier complète des
+  7 générateurs (énoncé papier, corrigé détaillé avec figures, barème, difficulté, durée, profils de
+  tirage équilibré dans `generateurs6e/*/profilEvaluation.ts`, `calculatriceIndispensable` par variante
+  pour 6gen24/25, `versionPapier`, QR code `?code=` dans App6gen23–29) — aucune règle REECRITURES
+  nécessaire (textes papier rédigés directement).
