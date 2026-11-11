@@ -216,14 +216,14 @@
       if (k === "comp") {
         var dd = (R + 22) / Math.SQRT2;
         s += '<line class="miroir" x1="' + (CX - dd) + '" y1="' + (CY + dd) + '" x2="' + (CX + dd) + '" y2="' + (CY - dd) + '"/>';
-        s += '<text class="nom-axe" x="' + (CX + dd + 2) + '" y="' + (CY - dd - 4) + '" text-anchor="end">y = x</text>';
+        s += '<text class="nom-axe" x="' + (CX - dd + 6) + '" y="' + (CY + dd + 4) + '">y = x</text>';
       }
       s += '<line class="axe" x1="' + (CX - AXE) + '" y1="' + CY + '" x2="' + (CX + AXE) + '" y2="' + CY + '" marker-end="url(#fl)"/>';
       s += '<line class="axe" x1="' + CX + '" y1="' + (CY + AXE) + '" x2="' + CX + '" y2="' + (CY - AXE) + '" marker-end="url(#fl)"/>';
       s += '<text class="nom-axe" x="' + (CX + AXE - 2) + '" y="' + (CY + 16) + '" text-anchor="end">cos</text>';
       s += '<text class="nom-axe" x="' + (CX + 8) + '" y="' + (CY - AXE + 10) + '">sin</text>';
       s += '<circle class="cercle" cx="' + CX + '" cy="' + CY + '" r="' + R + '"/>';
-      s += '<text class="nom-axe" x="' + (CX - 12) + '" y="' + (CY + 15) + '">O</text>';
+      s += '<text class="nom-axe" x="' + (k === "comp" ? CX + 5 : CX - 12) + '" y="' + (CY + 15) + '">O</text>';
 
       var M = pt(t, R), P = pt(a2, R);
       // projections

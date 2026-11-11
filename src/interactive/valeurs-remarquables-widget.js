@@ -264,6 +264,8 @@
       var s = "";
       familles.forEach(function (a) {
         var p = pt(a, R), l = pt(a, R + 19);
+        // 0° et 180° : étiquette au-dessus du point, pour laisser la place à la valeur lue sur l'axe
+        if (a === 0 || a === 180) l = [p[0] + (a === 0 ? 8 : -8), p[1] - 14];
         s += '<circle class="pt-fam" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="5"/>';
         s += '<text class="txt-fam" x="' + l[0].toFixed(1) + '" y="' + (l[1] + 4).toFixed(1) + '" text-anchor="middle">' + a + '°</text>';
       });
@@ -277,7 +279,7 @@
       if (fn === "tan") {
         var xt = CX + R;
         s += '<line class="tangente" x1="' + xt + '" y1="8" x2="' + xt + '" y2="' + (TAILLE - 8) + '"/>';
-        s += '<text class="txt-axe" x="' + (xt + 4) + '" y="' + (TAILLE - 12) + '">x = 1</text>';
+        s += '<text class="txt-axe" x="' + (xt - 4) + '" y="22" text-anchor="end">x = 1</text>';
         familles.forEach(function (a) {
           var v = numerique("tan", a);
           if (v === null) return;

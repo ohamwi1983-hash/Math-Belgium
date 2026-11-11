@@ -322,11 +322,11 @@
       s += '<text class="txt-axe" x="' + (CX + 8) + '" y="' + (CY - AXE + 10) + '">sin</text>';
       s += '<text class="txt-axe" x="' + (CX - 12) + '" y="' + (CY + 15) + '">O</text>';
       s += '<circle class="cercle" cx="' + CX + '" cy="' + CY + '" r="' + R + '"/>';
-      var dq = R * 0.78;
-      s += '<text class="txt-q" x="' + (CX + dq) + '" y="' + (CY - dq) + '" text-anchor="middle">I</text>';
-      s += '<text class="txt-q" x="' + (CX - dq) + '" y="' + (CY - dq) + '" text-anchor="middle">II</text>';
-      s += '<text class="txt-q" x="' + (CX - dq) + '" y="' + (CY + dq + 8) + '" text-anchor="middle">III</text>';
-      s += '<text class="txt-q" x="' + (CX + dq) + '" y="' + (CY + dq + 8) + '" text-anchor="middle">IV</text>';
+      var dq = 118;
+      s += '<text class="txt-q" x="' + (CX + dq) + '" y="' + (CY - dq + 4) + '" text-anchor="middle">I</text>';
+      s += '<text class="txt-q" x="' + (CX - dq) + '" y="' + (CY - dq + 4) + '" text-anchor="middle">II</text>';
+      s += '<text class="txt-q" x="' + (CX - dq) + '" y="' + (CY + dq + 4) + '" text-anchor="middle">III</text>';
+      s += '<text class="txt-q" x="' + (CX + dq) + '" y="' + (CY + dq + 4) + '" text-anchor="middle">IV</text>';
       return s;
     }
 
@@ -408,7 +408,10 @@
       e.tbody.innerHTML =
         '<tr><th>signe</th><td class="' + cl(s) + '">' + signeTexte(s) + '</td><td class="' + cl(c) + '">' + signeTexte(c) + '</td><td class="' + cl(t) + '">' + (tanDef ? signeTexte(t) : "—") + '</td></tr>' +
         '<tr><th>valeur</th><td>' + valeur("sin", r) + '</td><td>' + valeur("cos", r) + '</td><td>' + valeur("tan", r) + '</td></tr>';
-      e.coords.innerHTML = "M(" + deg(theta) + ") ≈ (" + nombreFr(c, 3) + " ; " + nombreFr(s, 3) + ")";
+      var vc = valeur("cos", r), vs = valeur("sin", r);
+      e.coords.innerHTML = vc.charAt(0) !== "≈" && vs.charAt(0) !== "≈"
+        ? "M(" + deg(theta) + ") = (" + vc + " ; " + vs + ")"
+        : "M(" + deg(theta) + ") ≈ (" + nombreFr(c, 3) + " ; " + nombreFr(s, 3) + ")";
       if (!avecTan) e.noteTan.textContent = "Coche « Construction de la tangente » pour lire tan θ comme une longueur sur la tangente au cercle en (1 ; 0).";
       else if (!tanDef) e.noteTan.textContent = "tan θ n'est pas définie : la droite (OM) est parallèle à la tangente, elle ne la coupe jamais.";
       else if (Math.abs(R * t) > CY - BORD) e.noteTan.textContent = "La droite (OM) coupe la tangente en P(1 ; tan θ), ici hors du cadre (tan θ ≈ " + nombreFr(t, 2) + ").";
