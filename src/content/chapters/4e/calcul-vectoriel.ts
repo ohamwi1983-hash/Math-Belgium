@@ -37,12 +37,13 @@ export const calculVectoriel: ChapterContent = {
       },
       {
         kind: 'rappel',
-        label: "Rappel — composantes d'un vecteur",
+        label: 'Ce que tu sais déjà (3e) — la translation',
         items: [
-          'Dans un repère, $\\vec{AB}$ a pour composantes ' +
-            '$\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}$. Ce couple de nombres ' +
-            'résume à lui seul la direction, le sens et la longueur du vecteur. Deux vecteurs ' +
-            'sont égaux exactement quand ils ont les mêmes composantes.',
+          'En 3e, tu as déplacé des figures par une **translation** : chaque point glisse de la ' +
+            'même façon — même direction, même sens, même longueur. Ce glissement commun, c\'est ' +
+            'exactement un vecteur.',
+          'On commence par tout faire **sans repère**, avec des flèches et une règle (sections 1 à ' +
+            '7). Les composantes d\'un vecteur dans un repère arrivent ensuite, à la section 8.',
         ],
       },
     ],
@@ -109,6 +110,53 @@ export const calculVectoriel: ChapterContent = {
             'de les dessiner !',
         },
         {
+          kind: 'definition',
+          label: 'Le vecteur nul',
+          items: [
+            'Le vecteur $\\vec{AA}$, qui part d\'un point et y revient, s\'appelle le **vecteur nul**. ' +
+              'On le note $\\vec{0}$. Sa longueur vaut 0, et il n\'a ni direction ni sens.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Comment reconnaître deux vecteurs égaux sur une figure ? Par un parallélogramme : ' +
+            '$\\vec{AB} = \\vec{CD}$ exactement quand **ABDC** est un parallélogramme ' +
+            '(éventuellement aplati, si les quatre points sont alignés).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 5,
+            yMin: -0.5,
+            yMax: 4.4,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'accent' },
+              { from: { x: 1, y: 2.5 }, to: { x: 4, y: 3.5 }, tone: 'accent' },
+              { from: { x: 0, y: 0 }, to: { x: 1, y: 2.5 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 3, y: 1 }, to: { x: 4, y: 3.5 }, tone: 'faint', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 3, y: 1, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 1, y: 2.5, label: 'C', tone: 'ink', labelPos: 'left' },
+              { x: 4, y: 3.5, label: 'D', tone: 'ink', labelPos: 'right' },
+            ],
+            caption: '$\\vec{AB} = \\vec{CD}$ : le quadrilatère ABDC est un parallélogramme',
+          },
+        },
+        {
+          kind: 'piege',
+          label: 'L\'ordre des lettres',
+          text:
+            'Si $\\vec{AB} = \\vec{CD}$, le parallélogramme s\'appelle **ABDC** — on le parcourt ' +
+            'A → B → D → C — et non ABCD. Pour que ABCD soit un parallélogramme, il faut ' +
+            '$\\vec{AB} = \\vec{DC}$.',
+        },
+        {
           kind: 'historique',
           titre: 'La formule gravée sur un pont, un jour d\'octobre 1843',
           text:
@@ -163,6 +211,12 @@ export const calculVectoriel: ChapterContent = {
             ],
             caption: 'même longueur, même direction, sens opposé',
           },
+        },
+        {
+          kind: 'para',
+          text:
+            'Un vecteur suivi de son opposé ramène au point de départ : ' +
+            '$\\vec{AB} + \\vec{BA} = \\vec{AA} = \\vec{0}$. De même, $\\vec{u} + (-\\vec{u}) = \\vec{0}$.',
         },
       ],
     },
@@ -230,7 +284,7 @@ export const calculVectoriel: ChapterContent = {
             'Deux vecteurs sont **colinéaires** quand ils ont la même direction. Ils sont ' +
             'portés par des droites parallèles, ou par la même droite. Trois points sont ' +
             '**alignés** exactement quand deux vecteurs formés à partir de ces points sont ' +
-            'colinéaires.',
+            'colinéaires. Par convention, le vecteur nul est colinéaire à tous les vecteurs.',
         },
         {
           kind: 'intuition',
@@ -326,6 +380,40 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 6,
+            yMin: -0.5,
+            yMax: 5,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'good' },
+              { from: { x: 0, y: 0 }, to: { x: 1.5, y: 3 }, tone: 'attn' },
+              { from: { x: 3, y: 1 }, to: { x: 4.5, y: 4 }, tone: 'faint', dashed: true },
+              { from: { x: 1.5, y: 3 }, to: { x: 4.5, y: 4 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: 4.5, y: 4 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 1.7, y: 0.25, vectorLabel: [{ text: 'u', vector: true }], tone: 'good', node: false },
+              { x: 0.45, y: 1.8, vectorLabel: [{ text: 'v', vector: true }], tone: 'attn', node: false, labelPos: 'left' },
+              { x: 3, y: 2.9, vectorLabel: [{ text: 'u', vector: true }, { text: ' + ' }, { text: 'v', vector: true }], tone: 'accent', node: false, labelPos: 'left' },
+            ],
+            caption:
+              'méthode du parallélogramme : $\\vec{u}$ et $\\vec{v}$ partent du même point ; la somme ' +
+              'est la diagonale issue de ce point',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Dans le parallélogramme, deux chemins mènent de O au sommet opposé : $\\vec{u}$ puis ' +
+            '$\\vec{v}$, ou $\\vec{v}$ puis $\\vec{u}$. Ils arrivent au même endroit : ' +
+            '$\\vec{u} + \\vec{v} = \\vec{v} + \\vec{u}$. L\'ordre ne compte pas.',
+        },
+        {
           kind: 'application',
           titre: 'Calculer la vraie trajectoire d\'un avion dans le vent',
           illustrations: [
@@ -354,8 +442,8 @@ export const calculVectoriel: ChapterContent = {
           text:
             'Un avion ne vole jamais exactement où son pilote le dirige : le vent le pousse ' +
             'de côté. Les pilotes représentent la vitesse propre de l\'avion (par rapport à ' +
-            'l\'air) par un vecteur, et le vent par un second vecteur — la méthode du ' +
-            'parallélogramme de cette section donne alors directement la **trajectoire ' +
+            'l\'air) par un vecteur, et le vent par un second vecteur — l\'addition de cette ' +
+            'section (ici par la méthode du triangle, bout à bout) donne alors directement la **trajectoire ' +
             'réelle au sol** : la somme des deux vecteurs. C\'est exactement ainsi que les ' +
             'plans de vol sont calculés, aujourd\'hui encore assistés par ordinateur : ' +
             'additionner le vecteur vitesse-air et le vecteur vent pour obtenir le vecteur ' +
@@ -459,7 +547,7 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            '$A_1A_2 + A_2A_3 + \\ldots + A_{n-1}A_n = A_1A_n$.',
+            '$\\vec{A_1A_2} + \\vec{A_2A_3} + \\ldots + \\vec{A_{n-1}A_n} = \\vec{A_1A_n}$.',
             'Une chaîne **fermée** (qui revient à son point de départ) se réduit toujours au vecteur nul.',
             'Un vecteur écrit « à l\'envers » ($\\vec{CB}$ au lieu de $\\vec{BC}$) ? ' +
               'Remplace-le d\'abord par son opposé ($-\\vec{BC}$), avant de télescoper.',
@@ -474,6 +562,45 @@ export const calculVectoriel: ChapterContent = {
             { tag: '2e télescopage', text: '$\\vec{AC} + \\vec{CD} = \\vec{AD}$' },
           ],
           result: { tag: 'résultat', text: '$\\vec{AB} + \\vec{BC} + \\vec{CD} = \\vec{AD}$' },
+        },
+        {
+          kind: 'piege',
+          label: 'Une différence de vecteurs de même origine',
+          text:
+            '$\\vec{AB} - \\vec{AC}$ ne vaut **pas** $\\vec{BC}$ ! Retrancher, c\'est ajouter ' +
+            'l\'opposé : $\\vec{AB} - \\vec{AC} = \\vec{AB} + \\vec{CA} = \\vec{CA} + \\vec{AB} = ' +
+            '\\vec{CB}$. Le résultat va de l\'extrémité du vecteur retranché vers celle de l\'autre.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'réordonner et retourner',
+          formula: 'Réduire $\\vec{AB} + \\vec{CD} + \\vec{BC} - \\vec{AD}$.',
+          steps: [
+            { tag: 'réordonner pour que les vecteurs se relaient', text: '$\\vec{AB} + \\vec{BC} + \\vec{CD} - \\vec{AD}$' },
+            { tag: 'télescoper', text: '$\\vec{AB} + \\vec{BC} + \\vec{CD} = \\vec{AD}$' },
+            { tag: 'retrancher, c\'est ajouter l\'opposé', text: '$\\vec{AD} - \\vec{AD} = \\vec{AD} + \\vec{DA} = \\vec{AA}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\vec{AB} + \\vec{CD} + \\vec{BC} - \\vec{AD} = \\vec{0}$ (chaîne fermée)' },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Pour aller plus loin — le milieu par Chasles',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit I le milieu de [AB]. Les vecteurs $\\vec{IA}$ et $\\vec{IB}$ ont la même ' +
+                'longueur, la même direction et des sens contraires : ils sont opposés, donc ' +
+                '$\\vec{IA} + \\vec{IB} = \\vec{0}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour un point M quelconque, insère I par Chasles dans chaque vecteur : ' +
+                '$\\vec{MA} + \\vec{MB} = (\\vec{MI} + \\vec{IA}) + (\\vec{MI} + \\vec{IB}) = ' +
+                '2\\vec{MI} + (\\vec{IA} + \\vec{IB}) = 2\\vec{MI}$.',
+            },
+          ],
         },
         {
           kind: 'entrainement',
@@ -523,6 +650,16 @@ export const calculVectoriel: ChapterContent = {
           },
         },
         {
+          kind: 'methode',
+          label: 'Construire la décomposition',
+          items: [
+            'Trace, à partir de l\'origine de $\\vec{u}$, les deux droites qui portent les directions imposées.',
+            'Par l\'extrémité de $\\vec{u}$, trace les parallèles à ces deux droites.',
+            'Chaque parallèle coupe l\'autre droite en un point : les deux vecteurs obtenus depuis ' +
+              'l\'origine sont $\\vec{v}$ et $\\vec{w}$, et $\\vec{u} = \\vec{v} + \\vec{w}$ (méthode du parallélogramme).',
+          ],
+        },
+        {
           kind: 'historique',
           titre: 'Une théorie trop en avance sur son temps',
           text:
@@ -549,17 +686,19 @@ export const calculVectoriel: ChapterContent = {
               kind: 'vectorPlane',
               xMin: -3,
               xMax: 30,
-              yMin: -3,
+              yMin: -7,
               yMax: 48,
               vectors: [
                 { from: { x: 0, y: 0 }, to: { x: 25, y: 43.3 }, tone: 'accent' },
                 { from: { x: 25, y: 43.3 }, to: { x: 25, y: 0 }, tone: 'faint', dashed: true, arrow: false },
                 { from: { x: 25, y: 43.3 }, to: { x: 0, y: 43.3 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: 0, y: 0 }, to: { x: 25, y: 0 }, tone: 'good' },
+                { from: { x: 0, y: 0 }, to: { x: 0, y: 43.3 }, tone: 'attn' },
               ],
               points: [
                 { x: 25, y: 43.3, vectorLabel: [{ text: 'T = 50 kN', vector: true }], tone: 'accent', labelPos: 'above' },
-                { x: 25, y: 0, label: 'Tx ≈ 25 kN', tone: 'ink', labelPos: 'left', node: false },
-                { x: 0, y: 43.3, label: 'Ty ≈ 43,3 kN', tone: 'ink', labelPos: 'right', node: false },
+                { x: 12.5, y: 0, label: 'Tx ≈ 25 kN', tone: 'good', labelPos: 'below', node: false },
+                { x: 0.5, y: 22, label: 'Ty ≈ 43,3 kN', tone: 'attn', labelPos: 'right', node: false },
               ],
               caption:
                 "Le câble tire avec une tension T = 50 kN, inclinée à 60° sur l'horizontale. " +
@@ -586,7 +725,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'composantes',
       number: 8,
       title: 'Caractériser un vecteur dans un repère : les composantes',
-      kicker: 'AB(x_B−x_A ; y_B−y_A)',
+      kicker: 'arrivée moins départ : deux nombres suffisent',
       blocks: [
         { kind: 'video', title: 'Composantes, addition, multiplication par un réel, norme et distance', youtubeId: '7edwkWKGw0Y' },
         {
@@ -602,7 +741,7 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$ : $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ ' +
               'y_B-y_A \\end{pmatrix}$. Deux vecteurs sont égaux exactement quand ils ont les ' +
-              'mêmes composantes.',
+              'mêmes composantes. Le vecteur nul a pour composantes $\\begin{pmatrix} 0 \\\\ 0 \\end{pmatrix}$.',
           ],
         },
         {
@@ -654,7 +793,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'additionReperes',
       number: 9,
       title: 'Additionner deux vecteurs dans un repère',
-      kicker: 'u + v = (x_u+x_v ; y_u+y_v)',
+      kicker: 'on additionne composante par composante',
       blocks: [
         {
           kind: 'para',
@@ -667,6 +806,7 @@ export const calculVectoriel: ChapterContent = {
           label: 'Méthode',
           items: [
             'En repère — $\\vec{u} + \\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.',
+            'Soustraction — $\\vec{u} - \\vec{v} = \\begin{pmatrix} x_u-x_v \\\\ y_u-y_v \\end{pmatrix}$ : on soustrait composante par composante.',
             'Vecteurs mixtes — un vecteur nommé ($\\vec{u}$) et un vecteur point-à-point ' +
               '($\\vec{AB}$) se combinent librement. Calcule juste leurs composantes séparément d\'abord.',
           ],
@@ -685,7 +825,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'multiplicationReperes',
       number: 10,
       title: 'Multiplier un vecteur par un réel dans un repère',
-      kicker: 'k·u = (k·x_u ; k·y_u)',
+      kicker: 'on multiplie chaque composante par k',
       blocks: [
         {
           kind: 'para',
@@ -721,6 +861,19 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'résultat', text: '$3\\vec{u} - \\vec{AB} = \\begin{pmatrix} 6-3 \\\\ -3-(-3) \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 0 \\end{pmatrix}$' },
         },
         {
+          kind: 'exemple',
+          badge: 'décomposer un vecteur en repère',
+          formula:
+            'Décompose $\\vec{u}\\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix}$ selon ' +
+            '$\\vec{v}\\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix}$ et $\\vec{w}\\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}$ ' +
+            '(section 7, mais par le calcul).',
+          steps: [
+            { tag: 'chercher a et b', text: '$\\vec{u} = a\\vec{v} + b\\vec{w}$ donne $\\begin{pmatrix} 5 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} a + b \\\\ a - b \\end{pmatrix}$' },
+            { tag: 'système', text: '$a + b = 5$ et $a - b = 1$ : en additionnant, $2a = 6$, donc $a = 3$, puis $b = 2$' },
+          ],
+          result: { tag: 'résultat', text: '$\\vec{u} = 3\\vec{v} + 2\\vec{w}$' },
+        },
+        {
           kind: 'entrainement',
           title: 'Composantes de combinaisons linéaires',
           generatorId: 'gen22',
@@ -735,7 +888,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'norme',
       number: 11,
       title: "Norme d'un vecteur et distance entre deux points",
-      kicker: '‖u‖ = √(x_u² + y_u²)',
+      kicker: '‖u‖ = √(x² + y²) — Pythagore dans le repère',
       blocks: [
         {
           kind: 'para',
@@ -771,8 +924,10 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Norme — $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$.',
             'Distance entre deux points — $AB = \\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$.',
-            'Classer un triangle — isocèle : au moins deux côtés ont la même longueur. ' +
-              'Scalène : les trois longueurs sont toutes différentes.',
+            'Classer un triangle — isocèle : au moins deux côtés ont la même longueur ; ' +
+              'équilatéral : les trois ; rectangle : le carré du plus grand côté égale la somme ' +
+              'des carrés des deux autres (réciproque de Pythagore) ; scalène : trois longueurs ' +
+              'toutes différentes.',
           ],
         },
         {
@@ -805,6 +960,28 @@ export const calculVectoriel: ChapterContent = {
           result: { tag: 'distance AB', text: '$\\sqrt{3^2 + 4^2} = \\sqrt{25} = 5$' },
         },
         {
+          kind: 'exemple',
+          badge: 'distance avec un paramètre',
+          formula: 'A(1 ; 2) et B(x ; 6). Pour quelles valeurs de x a-t-on AB = 5 ?',
+          steps: [
+            { tag: 'élever au carré', text: '$AB^2 = (x-1)^2 + (6-2)^2 = 25$' },
+            { tag: 'isoler le carré', text: '$(x-1)^2 = 25 - 16 = 9$' },
+            { tag: 'deux racines', text: '$x - 1 = 3$ ou $x - 1 = -3$' },
+          ],
+          result: { tag: 'résultat', text: '$x = 4$ ou $x = -2$ : deux points B conviennent' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'nature d\'un triangle',
+          formula: 'A(1 ; 1), B(4 ; 2), C(0 ; 4). Quelle est la nature du triangle ABC ?',
+          steps: [
+            { tag: 'carrés des côtés', text: '$AB^2 = 3^2 + 1^2 = 10$, $AC^2 = (-1)^2 + 3^2 = 10$, $BC^2 = (-4)^2 + 2^2 = 20$' },
+            { tag: 'deux côtés égaux', text: '$AB = AC = \\sqrt{10}$ : isocèle en A' },
+            { tag: 'réciproque de Pythagore', text: '$AB^2 + AC^2 = 10 + 10 = 20 = BC^2$ : rectangle en A' },
+          ],
+          result: { tag: 'résultat', text: 'ABC est rectangle isocèle en A ($BC = \\sqrt{20} = 2\\sqrt{5}$)' },
+        },
+        {
           kind: 'entrainement',
           title: 'Norme d\'un vecteur et distance entre 2 points',
           generatorId: 'gen26',
@@ -819,7 +996,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'relation',
       number: 12,
       title: 'Vecteurs, translation et milieu',
-      kicker: 'B = A + u — milieu M = ((x_A+x_B)/2 ; (y_A+y_B)/2)',
+      kicker: 'B = A + u — le milieu est la moyenne des coordonnées',
       blocks: [
         { kind: 'video', title: 'Translation, milieu, colinéarité et alignement par le calcul', youtubeId: '8N9j50tNawQ' },
         {
@@ -828,7 +1005,7 @@ export const calculVectoriel: ChapterContent = {
             'Deux relations reviennent tout le temps entre un vecteur et des points. La ' +
             '**translation** : retrouver un point à partir d\'un autre et d\'un vecteur. Le ' +
             '**milieu** d\'un segment. Il existe une troisième relation, plus générale, qui ' +
-            'contient les deux.',
+            'contient le milieu comme cas particulier.',
         },
         {
           kind: 'illustration',
@@ -887,6 +1064,37 @@ export const calculVectoriel: ChapterContent = {
             'départ (A(1;1), u=(4;2)) reproduit exactement l\'exemple ci-dessus.',
         },
         {
+          kind: 'exemple',
+          badge: 'quatrième sommet d\'un parallélogramme',
+          formula: 'A(1 ; 1), B(5 ; 2), C(6 ; 5). Trouve D pour que ABCD soit un parallélogramme.',
+          steps: [
+            { tag: 'traduire', text: 'ABCD parallélogramme ⟺ $\\vec{AB} = \\vec{DC}$ (section 1)' },
+            { tag: 'composantes', text: '$\\vec{AB}\\begin{pmatrix} 4 \\\\ 1 \\end{pmatrix}$ et $\\vec{DC}\\begin{pmatrix} 6-x_D \\\\ 5-y_D \\end{pmatrix}$' },
+            { tag: 'égaler', text: '$6 - x_D = 4$ et $5 - y_D = 1$, donc $x_D = 2$ et $y_D = 4$' },
+          ],
+          result: { tag: 'résultat', text: 'D(2 ; 4) — contrôle : $\\vec{AD}$ et $\\vec{BC}$ valent tous deux $\\begin{pmatrix} 1 \\\\ 3 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'symétrique d\'un point',
+          formula: 'A(1 ; 2), B(4 ; 3). Trouve A′, le symétrique de A par rapport à B.',
+          steps: [
+            { tag: 'traduire', text: 'B est le milieu de [AA′] : $x_B = \\dfrac{x_A + x_{A\'}}{2}$, donc $x_{A\'} = 2x_B - x_A$ (de même pour y)' },
+            { tag: 'calculer', text: '$x_{A\'} = 2 \\times 4 - 1 = 7$ et $y_{A\'} = 2 \\times 3 - 2 = 4$' },
+          ],
+          result: { tag: 'résultat', text: 'A′(7 ; 4)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'relation générale AM = ⅔·AB',
+          formula: 'A(1 ; 1), B(7 ; 4). Place le point M tel que $\\vec{AM} = \\dfrac{2}{3}\\vec{AB}$.',
+          steps: [
+            { tag: 'composantes de AB', text: '$\\vec{AB}\\begin{pmatrix} 6 \\\\ 3 \\end{pmatrix}$, donc $\\vec{AM} = \\dfrac{2}{3}\\vec{AB}$ a pour composantes $\\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$' },
+            { tag: 'translater A', text: '$x_M = 1 + 4 = 5$ et $y_M = 1 + 2 = 3$' },
+          ],
+          result: { tag: 'résultat', text: 'M(5 ; 3), sur le segment [AB], aux deux tiers à partir de A' },
+        },
+        {
           kind: 'entrainement',
           title: 'Relation vectorielle (guidée)',
           generatorId: 'gen21',
@@ -909,7 +1117,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'colinearite',
       number: 13,
       title: 'Colinéarité de vecteurs et alignement de points',
-      kicker: 'x_u·y_v − y_u·x_v = 0',
+      kicker: 'colinéaires ⟺ déterminant nul',
       blocks: [
         {
           kind: 'para',
@@ -937,6 +1145,26 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'déterminant', text: '$2 \\times 3 - 1 \\times 6 = 6 - 6 = 0$' },
           ],
           result: { tag: 'résultat', text: 'déterminant nul → A, B, C sont alignés ($\\vec{AC} = 3\\vec{AB}$)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'trois points non alignés',
+          formula: 'A(1 ; 2), B(3 ; 3), C(6 ; 5) — alignés ?',
+          steps: [
+            { tag: 'AB et AC', text: '$\\vec{AB}\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix} 5 \\\\ 3 \\end{pmatrix}$' },
+            { tag: 'test', text: '$2 \\times 3 - 1 \\times 5 = 6 - 5 = 1 \\neq 0$' },
+          ],
+          result: { tag: 'résultat', text: 'non nul → A, B, C ne sont pas alignés (même s\'ils en ont l\'air sur un dessin approximatif)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'colinéarité avec un paramètre',
+          formula: 'Pour quelles valeurs de x les vecteurs $\\vec{u}\\begin{pmatrix} 2 \\\\ x \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} x \\\\ 8 \\end{pmatrix}$ sont-ils colinéaires ?',
+          steps: [
+            { tag: 'écrire la condition', text: '$2 \\times 8 - x \\times x = 0$, soit $x^2 = 16$' },
+            { tag: 'résoudre', text: '$x = 4$ ou $x = -4$' },
+          ],
+          result: { tag: 'résultat', text: '$x = 4$ ($\\vec{v} = 2\\vec{u}$) ou $x = -4$ ($\\vec{v} = -2\\vec{u}$)' },
         },
         {
           kind: 'exempleLibre',
@@ -973,7 +1201,7 @@ export const calculVectoriel: ChapterContent = {
           text:
             '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ teste la **colinéarité**. ' +
             '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14). ' +
-            'Ces deux formules se ressemblent, mais attention : elles testent deux relations opposées !',
+            'Ces deux formules se ressemblent, mais attention : elles testent deux relations très différentes !',
         },
         {
           kind: 'atelier',
@@ -999,7 +1227,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'orthogonalite',
       number: 14,
       title: 'Orthogonalité et Pythagore généralisé',
-      kicker: 'x_u·x_v + y_u·y_v = 0',
+      kicker: 'orthogonaux ⟺ produit scalaire nul',
       blocks: [
         { kind: 'video', title: 'Orthogonalité, Pythagore généralisé et vecteur directeur d\'une droite', youtubeId: 'ihkFhTzx3zI' },
         {
@@ -1121,6 +1349,63 @@ export const calculVectoriel: ChapterContent = {
           },
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — Pythagore généralisé',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'La démonstration précédente ne prouve qu\'un sens : « perpendiculaires ⇒ produit ' +
+                'scalaire nul ». Pythagore donne les deux sens d\'un coup. Prends un triangle ABC ' +
+                'avec $\\vec{AB}\\begin{pmatrix} x_1 \\\\ y_1 \\end{pmatrix}$ et ' +
+                '$\\vec{AC}\\begin{pmatrix} x_2 \\\\ y_2 \\end{pmatrix}$. Par Chasles, ' +
+                '$\\vec{BC} = \\vec{AC} - \\vec{AB}$ a pour composantes ' +
+                '$\\begin{pmatrix} x_2-x_1 \\\\ y_2-y_1 \\end{pmatrix}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Développe : $BC^2 = (x_2-x_1)^2 + (y_2-y_1)^2 = (x_1^2+y_1^2) + (x_2^2+y_2^2) - ' +
+                '2(x_1x_2+y_1y_2)$, c\'est-à-dire $BC^2 = AB^2 + AC^2 - 2(x_1x_2+y_1y_2)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'C\'est le **Pythagore généralisé** : on retrouve Pythagore exactement quand le ' +
+                'terme correctif est nul. Par Pythagore et sa réciproque, ABC est rectangle en A ' +
+                '⟺ $BC^2 = AB^2 + AC^2$ ⟺ $x_1x_2 + y_1y_2 = 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour aller plus loin : compare avec Al-Kashi (chapitre 5), ' +
+                '$BC^2 = AB^2 + AC^2 - 2 \\cdot AB \\cdot AC \\cdot \\cos\\hat{A}$. Le produit scalaire ' +
+                'vaut donc $AB \\cdot AC \\cdot \\cos\\hat{A}$ : il est nul exactement quand ' +
+                '$\\cos\\hat{A} = 0$, c\'est-à-dire quand $\\hat{A} = 90°$.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'triangle donné par ses sommets',
+          formula: 'A(1 ; 1), B(4 ; 2), C(0 ; 4). Le triangle ABC est-il rectangle en A ?',
+          steps: [
+            { tag: 'AB et AC', text: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 1 \\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix} -1 \\\\ 3 \\end{pmatrix}$' },
+            { tag: 'produit scalaire', text: '$3 \\times (-1) + 1 \\times 3 = -3 + 3 = 0$' },
+          ],
+          result: { tag: 'résultat', text: 'produit scalaire nul → ABC est rectangle en A (et même isocèle, voir la section 11)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'orthogonalité avec un paramètre',
+          formula: 'Pour quelle valeur de x les vecteurs $\\vec{u}\\begin{pmatrix} x \\\\ 3 \\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix} 4 \\\\ -2 \\end{pmatrix}$ sont-ils orthogonaux ?',
+          steps: [
+            { tag: 'écrire la condition', text: '$x \\times 4 + 3 \\times (-2) = 0$, soit $4x - 6 = 0$' },
+            { tag: 'résoudre', text: '$x = \\dfrac{6}{4} = 1{,}5$' },
+          ],
+          result: { tag: 'résultat', text: '$x = 1{,}5$' },
+        },
+        {
           kind: 'entrainement',
           title: 'Orthogonalité et Pythagore généralisé',
           generatorId: 'gen25',
@@ -1174,18 +1459,29 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'AB, BC, CB… sont tous des vecteurs directeurs de d dès que A, B, C ∈ d.',
+            '$\\vec{AB}$, $\\vec{BC}$, $\\vec{CB}$… sont tous des vecteurs directeurs de d dès que A, B, C ∈ d.',
             'Si une droite EF est parallèle à d, alors $\\vec{EF}$ est aussi un vecteur directeur de d.',
             'Droite parallèle à l\'axe des x (horizontale) — vecteur directeur $\\begin{pmatrix} k \\\\ 0 \\end{pmatrix}$, k ≠ 0.',
             'Droite parallèle à l\'axe des y (verticale) — vecteur directeur $\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, k ≠ 0.',
+            'Droite d\'équation $y = mx + p$ — vecteur directeur $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ : quand x augmente de 1, y augmente de m.',
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'vecteur directeur à partir de l\'équation',
+          formula: 'Donne un vecteur directeur de la droite d : y = 2x − 1.',
+          steps: [
+            { tag: 'deux points de d', text: 'x = 0 donne A(0 ; −1), x = 1 donne B(1 ; 1)' },
+            { tag: 'vecteur AB', text: '$\\vec{AB}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$, c\'est bien $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ avec m = 2' },
+          ],
+          result: { tag: 'résultat', text: '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$ — et tout multiple non nul, comme $\\begin{pmatrix} 2 \\\\ 4 \\end{pmatrix}$ ou $\\begin{pmatrix} -1 \\\\ -2 \\end{pmatrix}$' },
+        },
+        {
           kind: 'rappel',
-          label: 'Rappel — vers le chapitre suivant',
+          label: 'Rappel — vers le chapitre 7',
           items: [
             'Le vecteur directeur sert à décrire une droite par une équation paramétrique ou ' +
-              'cartésienne. Tu le retrouveras au centre du chapitre consacré aux droites.',
+              'cartésienne. Tu le retrouveras au centre du chapitre 7, Géométrie analytique plane.',
           ],
         },
       ],
@@ -1236,6 +1532,7 @@ export const calculVectoriel: ChapterContent = {
             ['Vecteurs opposés (−u)', 'identique', 'identique', 'opposé'],
             ['Colinéaires, même sens (k>0)', 'quelconque', 'identique', 'identique'],
             ['Colinéaires, sens opposé (k<0)', 'quelconque', 'identique', 'opposé'],
+            ['Même norme seulement', 'identique', 'différente', 'sans objet'],
           ],
         },
         {
@@ -1315,6 +1612,28 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — d\'où vient le « + » ?',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Al-Kashi s\'écrit avec un signe **moins**. Pourquoi un **plus** ici ? Dans le ' +
+                'parallélogramme, le triangle formé par $\\vec{F_1}$, le côté parallèle à ' +
+                '$\\vec{F_2}$ et la résultante a pour côtés F₁, F₂ et R. Mais l\'angle de ce ' +
+                'triangle opposé à R n\'est pas θ : c\'est **180° − θ**, car deux angles consécutifs ' +
+                'd\'un parallélogramme sont supplémentaires.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Al-Kashi donne donc $R^2 = F_1^2 + F_2^2 - 2F_1F_2\\cos(180° - \\theta)$. Or ' +
+                '$\\cos(180° - \\theta) = -\\cos\\theta$ (angles associés, chapitre 5). D\'où ' +
+                '$R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$.',
+            },
+          ],
+        },
+        {
           kind: 'exemple',
           badge: 'deux forces',
           formula: 'F₁ = 50 N, F₂ = 30 N, angle entre les deux forces θ = 60°.',
@@ -1341,6 +1660,24 @@ export const calculVectoriel: ChapterContent = {
             'est négatif : la déviation vaut $180° - 73{,}7°$ = 106,3°.',
         },
         {
+          kind: 'exemple',
+          badge: 'résultante par les composantes',
+          formula: 'Reprends F₁ = 50 N, F₂ = 30 N et θ = 60°, avec $\\vec{F_1}$ le long de l\'axe horizontal.',
+          steps: [
+            { tag: 'composantes', text: '$\\vec{F_1}\\begin{pmatrix} 50 \\\\ 0 \\end{pmatrix}$ et $\\vec{F_2}\\begin{pmatrix} 30\\cos 60° \\\\ 30\\sin 60° \\end{pmatrix} \\approx \\begin{pmatrix} 15 \\\\ 25{,}98 \\end{pmatrix}$' },
+            { tag: 'somme', text: '$\\vec{R} \\approx \\begin{pmatrix} 65 \\\\ 25{,}98 \\end{pmatrix}$' },
+            { tag: 'norme', text: '$R \\approx \\sqrt{65^2 + 25{,}98^2} \\approx \\sqrt{4225 + 675} = \\sqrt{4900} = 70$ N' },
+            { tag: 'déviation', text: 'l\'angle dont la tangente vaut $25{,}98/65 \\approx 0{,}400$, soit ≈ 21,8°' },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'mêmes valeurs qu\'avec la loi des cosinus. Avantage : si la première composante de R est ' +
+              'négative, la résultante penche vers l\'arrière et la déviation est obtuse — le piège ' +
+              'ci-dessus se voit d\'un coup d\'œil.',
+          },
+        },
+        {
           kind: 'atelier',
           tag: 'resultante-vecteurs-widget',
           label: 'Manipule toi-même : la règle du parallélogramme',
@@ -1351,7 +1688,7 @@ export const calculVectoriel: ChapterContent = {
         },
         {
           kind: 'rappel',
-          label: 'Rappel — notation contexte-aware',
+          label: 'Rappel — des notations adaptées au contexte',
           items: [
             'La notation suit toujours le contexte. Des forces se notent $\\vec{F_1}$, ' +
               '$\\vec{F_2}$, $\\vec{F_R}$. Des vitesses (par exemple avion et vent) se notent ' +
@@ -1381,7 +1718,8 @@ export const calculVectoriel: ChapterContent = {
           text:
             'Un quiz vrai/faux qui couvre tout le chapitre, générateur par générateur. Un ' +
             'thème par générateur — sauf les deux premiers (relation vectorielle), qui ' +
-            'partagent une seule banque de questions. Ils testent exactement le même contenu mathématique.',
+            'partagent une seule banque de questions. Ils testent exactement le même contenu mathématique. ' +
+            'Le quiz se trouve tout en bas de la page, dans la synthèse.',
         },
       ],
     },
@@ -1403,12 +1741,15 @@ export const calculVectoriel: ChapterContent = {
           { text: '$\\vec{u}+\\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$' },
           { text: '$k \\cdot \\vec{u} = \\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$' },
           { text: '$-\\vec{u} = (-1) \\cdot \\vec{u}$', condition: 'soustraire = ajouter l\'opposé' },
+          { text: '$\\vec{u}-\\vec{v} = \\begin{pmatrix} x_u-x_v \\\\ y_u-y_v \\end{pmatrix}$' },
         ],
       },
       {
         title: 'Relation de Chasles',
         formulas: [
           { text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$', condition: 'chaîne fermée → vecteur nul' },
+          { text: '$\\vec{AB} - \\vec{AC} = \\vec{CB}$' },
+          { text: '$\\vec{AB} = \\vec{CD}$', condition: 'ABDC est un parallélogramme' },
         ],
       },
       {
@@ -1417,6 +1758,7 @@ export const calculVectoriel: ChapterContent = {
           { text: '$x_B=x_A+x_u$, $y_B=y_A+y_u$', condition: 'translation : B = A + u' },
           { text: '$x_M=\\dfrac{x_A+x_B}{2}$, $y_M=\\dfrac{y_A+y_B}{2}$', condition: 'milieu M de [AB]' },
           { text: '$\\vec{AM} = k \\cdot \\vec{AB}$', condition: 'k=1/2 → milieu, k=1 → B, k=0 → A' },
+          { text: '$x_{A\'}=2x_B-x_A$, $y_{A\'}=2y_B-y_A$', condition: 'A′ symétrique de A par rapport à B' },
         ],
       },
       {
@@ -1427,10 +1769,20 @@ export const calculVectoriel: ChapterContent = {
         ],
       },
       {
+        title: 'Vecteur directeur',
+        formulas: [
+          { text: '$\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$', condition: 'droite d\'équation $y = mx + p$' },
+        ],
+      },
+      {
         title: 'Résultante de deux vecteurs',
         formulas: [
           { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs' },
           { text: '$\\dfrac{\\sin(\\text{déviation})}{F_2} = \\dfrac{\\sin\\theta}{R}$' },
+          {
+            text: '$\\vec{R} = \\begin{pmatrix} F_1 + F_2\\cos\\theta \\\\ F_2\\sin\\theta \\end{pmatrix}$',
+            condition: '$\\vec{F_1}$ le long de l\'axe horizontal — méthode par les composantes',
+          },
         ],
       },
     ],
@@ -1438,7 +1790,7 @@ export const calculVectoriel: ChapterContent = {
 
   recap: {
     items: [
-      'Vecteur — direction, sens, longueur. Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours indépendantes du point où tu le dessines.',
+      'Vecteur — direction, sens, longueur. $\\vec{AB} = \\vec{CD}$ ⟺ ABDC est un parallélogramme. Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours indépendantes du point où tu le dessines.',
       'Combiner — addition (triangle ou parallélogramme) et multiplication par un scalaire, ' +
         'composante par composante. k>0 conserve le sens, k<0 l\'inverse. Opposé : ' +
         '$-\\vec{u} = (-1) \\cdot \\vec{u}$. Soustraire, c\'est ajouter l\'opposé.',
@@ -1457,11 +1809,15 @@ export const calculVectoriel: ChapterContent = {
         'Ma norme est-elle bien positive ou nulle, jamais négative ?',
         'Ai-je bien calculé le milieu comme une moyenne, jamais comme une différence de coordonnées ?',
         'Ai-je utilisé la bonne formule — déterminant pour la colinéarité, produit scalaire pour l\'orthogonalité ?',
+        'Ai-je bien écrit $\\vec{AB} - \\vec{AC} = \\vec{CB}$, et non $\\vec{BC}$ ?',
+        'Dans la formule de la résultante, ai-je bien mis « + 2F₁F₂·cos θ » (θ = angle entre les deux vecteurs) ?',
       ],
     },
     forward:
-      "Composantes, norme et produit scalaire reviennent tels quels dès qu'un vecteur a trois " +
-      "dimensions, dans la géométrie de l'espace. Il y a juste une troisième composante en plus.",
+      'Dès le chapitre 7, Géométrie analytique plane, le vecteur directeur sert à écrire les ' +
+      'équations d\'une droite, et colinéarité et orthogonalité deviennent des tests de ' +
+      'parallélisme et de perpendicularité. Composantes, norme et produit scalaire reviendront ' +
+      'aussi, avec une troisième composante, quand on calculera dans l\'espace.',
     entrainement: {
       kind: 'entrainement',
       title: 'Calcul vectoriel — quiz vrai/faux',

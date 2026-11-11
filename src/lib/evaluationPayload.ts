@@ -822,6 +822,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'calcul-vectoriel': {
     chasles: [
       { cle: 'chaîne de 3 vecteurs', enonce: "Réduis la somme $\\vec{AB}+\\vec{BC}+\\vec{CD}$ à un seul vecteur, à l'aide de la relation de Chasles." },
+      { cle: 'réordonner et retourner', enonce: "Réduis l'expression $\\vec{AB}+\\vec{CD}+\\vec{BC}-\\vec{AD}$ à l'aide de la relation de Chasles." },
+      { cle: 'le milieu par Chasles', enonce: "Soit $I$ le milieu de $[AB]$. Démontre que $\\vec{IA}+\\vec{IB}=\\vec{0}$, puis que, pour tout point $M$, $\\vec{MA}+\\vec{MB}=2\\vec{MI}$." },
     ],
     composantes: [
       { cle: 'composantes de AB', enonce: "On donne les points $A(2\\,;\\,-1)$ et $B(5\\,;\\,3)$. Calcule les composantes du vecteur $\\vec{AB}$." },
@@ -831,24 +833,40 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     multiplicationReperes: [
       { cle: 'vecteur nommé', enonce: "On donne $\\vec{u}\\begin{pmatrix}2\\\\-1\\end{pmatrix}$ et les points $A(3\\,;\\,5)$ et $B(6\\,;\\,2)$. Calcule les composantes du vecteur $3\\vec{u}-\\vec{AB}$." },
+      { cle: 'décomposer un vecteur en repère', enonce: "Décompose le vecteur $\\vec{u}\\begin{pmatrix}5\\\\1\\end{pmatrix}$ selon les vecteurs $\\vec{v}\\begin{pmatrix}1\\\\1\\end{pmatrix}$ et $\\vec{w}\\begin{pmatrix}1\\\\-1\\end{pmatrix}$, c'est-à-dire trouve les réels $a$ et $b$ tels que $\\vec{u}=a\\vec{v}+b\\vec{w}$." },
     ],
     norme: [
       { cle: 'Pythagore', enonce: "Démontre, à l'aide du théorème de Pythagore, que pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$." },
       { cle: 'distance entre deux points', enonce: "Calcule la distance entre les points $A(1\\,;\\,1)$ et $B(4\\,;\\,5)$." },
+      { cle: 'distance avec un paramètre', enonce: "On donne les points $A(1\\,;\\,2)$ et $B(x\\,;\\,6)$. Détermine les valeurs de $x$ pour lesquelles $AB = 5$." },
+      { cle: "nature d'un triangle", enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Détermine la nature du triangle $ABC$ en calculant les longueurs de ses côtés." },
     ],
     relation: [
       { cle: 'translation puis milieu', enonce: "On donne le point $A(1\\,;\\,1)$ et le vecteur $\\vec{u}\\begin{pmatrix}4\\\\2\\end{pmatrix}$. Détermine les coordonnées du point $B$, image de $A$ par la translation de vecteur $\\vec{u}$, puis celles du milieu $M$ de $[AB]$." },
+      { cle: "quatrième sommet d'un parallélogramme", enonce: "On donne les points $A(1\\,;\\,1)$, $B(5\\,;\\,2)$ et $C(6\\,;\\,5)$. Détermine les coordonnées du point $D$ tel que $ABCD$ soit un parallélogramme." },
+      { cle: "symétrique d'un point", enonce: "On donne les points $A(1\\,;\\,2)$ et $B(4\\,;\\,3)$. Détermine les coordonnées du point $A'$, symétrique de $A$ par rapport à $B$." },
+      { cle: 'relation générale AM', enonce: "On donne les points $A(1\\,;\\,1)$ et $B(7\\,;\\,4)$. Détermine les coordonnées du point $M$ tel que $\\vec{AM}=\\dfrac{2}{3}\\vec{AB}$." },
     ],
     colinearite: [
       { cle: 'alignement', enonce: "Les points $A(0\\,;\\,0)$, $B(2\\,;\\,1)$ et $C(6\\,;\\,3)$ sont-ils alignés ? Justifie à l'aide du critère de colinéarité de deux vecteurs." },
       { cle: 'déterminant', enonce: "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$." },
+      { cle: 'trois points non alignés', enonce: "Les points $A(1\\,;\\,2)$, $B(3\\,;\\,3)$ et $C(6\\,;\\,5)$ sont-ils alignés ? Justifie par le calcul." },
+      { cle: 'colinéarité avec un paramètre', enonce: "Détermine les valeurs de $x$ pour lesquelles les vecteurs $\\vec{u}\\begin{pmatrix}2\\\\x\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x\\\\8\\end{pmatrix}$ sont colinéaires." },
     ],
     orthogonalite: [
       { cle: 'angle droit', enonce: "On donne $\\vec{AB}\\begin{pmatrix}3\\\\4\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}-4\\\\3\\end{pmatrix}$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie." },
       { cle: 'cette formule', enonce: "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$, en construisant $\\vec{v}$ comme l'image de $\\vec{u}$ par une rotation de 90°." },
+      { cle: 'Pythagore généralisé', enonce: "Dans un triangle $ABC$, on note $\\vec{AB}\\begin{pmatrix}x_1\\\\y_1\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}x_2\\\\y_2\\end{pmatrix}$. Démontre que $BC^2 = AB^2 + AC^2 - 2(x_1x_2+y_1y_2)$, puis déduis-en que $ABC$ est rectangle en $A$ si et seulement si $x_1x_2+y_1y_2=0$." },
+      { cle: 'triangle donné par ses sommets', enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie à l'aide des composantes." },
+      { cle: 'orthogonalité avec un paramètre', enonce: "Détermine la valeur de $x$ pour laquelle les vecteurs $\\vec{u}\\begin{pmatrix}x\\\\3\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}4\\\\-2\\end{pmatrix}$ sont orthogonaux." },
     ],
     applications: [
       { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },
+      { cle: 'le « + »', enonce: "Deux forces $\\vec{F_1}$ et $\\vec{F_2}$ s'appliquent au même point et forment un angle $\\theta$. Démontre, à l'aide de la loi des cosinus et de la règle du parallélogramme, que la norme $R$ de leur résultante vérifie $R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$." },
+      { cle: 'résultante par les composantes', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N forment un angle de 60°. En plaçant $\\vec{F_1}$ le long de l'axe horizontal, calcule les composantes de leur résultante, puis sa norme et l'angle qu'elle forme avec $\\vec{F_1}$." },
+    ],
+    directeur: [
+      { cle: "vecteur directeur à partir de l'équation", enonce: "Donne un vecteur directeur de la droite $d$ d'équation $y = 2x - 1$, puis deux autres vecteurs directeurs de $d$." },
     ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
