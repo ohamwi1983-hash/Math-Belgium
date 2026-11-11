@@ -164,6 +164,17 @@ export const fonctionSecondDegre: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'galilee-trajectoire-widget',
+          label: 'Manipule toi-même — l\'expérience de Galilée',
+          caption:
+            'Lance un objet horizontalement depuis une hauteur h₀ avec une vitesse v, et ' +
+            'observe ses positions toutes les 0,2 s. À l\'horizontale, il avance de pas ' +
+            'réguliers (x = v·t) ; à la verticale, il tombe de plus en plus vite (y = h₀ − ' +
+            '5t²). En combinant les deux mouvements, comme l\'a fait Galilée, on obtient une ' +
+            'parabole.',
+        },
+        {
           kind: 'para',
           text:
             'Le signe et la valeur de a donnent la forme générale de la parabole. Tu le sais ' +
@@ -291,6 +302,17 @@ export const fonctionSecondDegre: ChapterContent = {
               '(En effet, $f(x+1) - f(x) = 2ax + a + b$ augmente de $2a$ quand x augmente de 1.)',
             '$c = f(0) = 1$, puis $f(1) = a + b + c = 2$ donne $b = 0$ : $f(x) = x^2 + 1$.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'differences-secondes-widget',
+          label: 'Manipule toi-même — premier ou second degré ?',
+          caption:
+            'Choisis une fonction ou laisse le hasard décider, puis calcule les différences ' +
+            'premières et secondes de son tableau de valeurs. Des différences premières ' +
+            'constantes signalent une fonction du premier degré ; des différences secondes ' +
+            'constantes, une fonction du second degré. Dans ce cas, la différence seconde ' +
+            'vaut 2a, ce qui permet de retrouver a, puis b et c.',
         },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
         {

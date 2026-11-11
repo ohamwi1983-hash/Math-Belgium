@@ -53,7 +53,7 @@
   function formuleFonction(fn) {
     if (fn.type === "premier") return trinome(0, fn.m, fn.p);
     if (fn.type === "second") return trinome(fn.a, fn.b, fn.c);
-    if (fn.type === "cube") return (fn.k === 1 ? "" : fr(fn.k)) + "x³" + (fn.c ? (fn.c < 0 ? " − " : " + ") + fr(Math.abs(fn.c)) : "");
+    if (fn.type === "cube") return (fn.k === 1 ? "" : fn.k === -1 ? "−" : fr(fn.k)) + "x³" + (fn.c ? (fn.c < 0 ? " − " : " + ") + fr(Math.abs(fn.c)) : "");
     return fn.base + "ˣ";
   }
 
@@ -91,7 +91,7 @@
     '.question{font-size:0.95rem;margin:0 0 10px;color:var(--ink-soft,#6b6055);}' +
     '.formule{font-family:var(--serif,serif);font-style:italic;font-weight:600;color:var(--ink,#241f1a);}' +
     '.table-zone{overflow-x:auto;margin-bottom:12px;}' +
-    'table{border-collapse:collapse;width:100%;min-width:300px;font-variant-numeric:tabular-nums;}' +
+    'table{border-collapse:collapse;width:100%;max-width:640px;min-width:300px;font-variant-numeric:tabular-nums;}' +
     'th,td{border:1px solid var(--line,#e2d8c8);padding:6px 4px;text-align:center;font-size:0.92rem;}' +
     'th{background:var(--surface-2,#faf6f0);font-weight:600;color:var(--ink-soft,#6b6055);white-space:nowrap;}' +
     'td.vide{border:none;}' +
@@ -104,7 +104,7 @@
     '.verdict strong{color:var(--accent-ink,#7a3212);}' +
     '.verdict .ok{color:var(--good,#2f7a4f);font-weight:600;}' +
     '.graphe-zone{margin-top:12px;}' +
-    'svg{width:100%;height:auto;max-width:100%;background:var(--surface-2,#faf6f0);border-radius:3px;}' +
+    'svg{width:100%;height:auto;max-width:560px;display:block;margin:0 auto;background:var(--surface-2,#faf6f0);border-radius:3px;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
     '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +

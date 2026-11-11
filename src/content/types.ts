@@ -34,6 +34,8 @@ export type InteractiveWidgetTag =
   | 'suite-recurrente-affine-widget'
   | 'convergence-suite-widget'
   | 'comparaison-suites-widget'
+  | 'differences-secondes-widget'
+  | 'galilee-trajectoire-widget'
   | 'viete-racines-widget'
   | 'parametre-m-widget'
   | 'seuil-ballon-widget'
