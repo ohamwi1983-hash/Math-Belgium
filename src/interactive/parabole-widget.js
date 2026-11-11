@@ -468,7 +468,7 @@
     var lignes = [];
     lignes.push("<p><strong>a " + (d.a > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("a") + " — la parabole est tournée vers le " +
       (d.a > 0 ? "haut (elle a un minimum).</p>" : "bas (elle a un maximum).</p>"));
-    lignes.push("<p><strong>c " + (d.c > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("c") + " — c = f(0) : la parabole coupe l'axe des y en (0 ; " +
+    lignes.push("<p><strong>c " + (d.c > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("c") + " — c = f(0) : la parabole coupe l'axe des y en (0\u00a0;\u00a0" +
       formatNombreFr(d.c) + "), " + (d.c > 0 ? "au-dessus" : "en dessous") + " de l'origine.</p>");
     lignes.push("<p><strong>b " + (d.b > 0 ? "&gt; 0" : "&lt; 0") + "</strong> " + marque("b") + " — le sommet est à " +
       (xS < 0 ? "gauche" : "droite") + " de l'axe Oy (abscisse du sommet : " + formatNombreFr(xS) + "). Comme cette abscisse vaut −b/(2a), l'axe de symétrie est à gauche de Oy quand a et b ont le même signe : ici a et b sont de signes " +

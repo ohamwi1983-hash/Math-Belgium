@@ -360,7 +360,7 @@
   /** Phrase d'explication de l'étape k (k ≥ 1 : passage de l'étape k − 1 à l'étape k). */
   function phraseEtape(k, a, p, q) {
     if (k === 0) {
-      return "On part de la fonction de référence y = x², de sommet (0 ; 0). Clique sur « Étape suivante ».";
+      return "On part de la fonction de référence y = x², de sommet (0\u00a0;\u00a00). Clique sur « Étape suivante ».";
     }
     if (k === 1) {
       var txtA = formatNombreFr(a);
@@ -371,16 +371,16 @@
         ? "la parabole se resserre (étirement vertical, EV, car |a| > 1)"
         : "la parabole s'aplatit (compression verticale, CV, car |a| < 1)";
       var sox = a < 0 ? " ; comme a est négatif, elle se retourne aussi (symétrie d'axe Ox, SOX)" : "";
-      return "On multiplie les ordonnées par a = " + txtA + " : " + forme + sox + ". Le sommet reste en (0 ; 0).";
+      return "On multiplie les ordonnées par a = " + txtA + " : " + forme + sox + ". Le sommet reste en (0\u00a0;\u00a00).";
     }
     if (k === 2) {
-      if (p === 0) return "TH = 0 : pas de translation horizontale, le sommet reste en (0 ; 0).";
+      if (p === 0) return "TH = 0 : pas de translation horizontale, le sommet reste en (0\u00a0;\u00a00).";
       return "On déplace la courbe de " + formatNombreFr(Math.abs(p)) + " vers la " + (p > 0 ? "droite" : "gauche") +
-        " (translation horizontale) : le sommet passe en (" + formatNombreFr(p) + " ; 0).";
+        " (translation horizontale) : le sommet passe en (" + formatNombreFr(p) + "\u00a0;\u00a00).";
     }
-    if (q === 0) return "TV = 0 : pas de translation verticale, le sommet reste en (" + formatNombreFr(p) + " ; 0).";
+    if (q === 0) return "TV = 0 : pas de translation verticale, le sommet reste en (" + formatNombreFr(p) + "\u00a0;\u00a00).";
     return "On déplace la courbe de " + formatNombreFr(Math.abs(q)) + " vers le " + (q > 0 ? "haut" : "bas") +
-      " (translation verticale) : le sommet arrive en (" + formatNombreFr(p) + " ; " + formatNombreFr(q) + ").";
+      " (translation verticale) : le sommet arrive en (" + formatNombreFr(p) + "\u00a0;\u00a0" + formatNombreFr(q) + ").";
   }
 
   TransformationsWidgetClass.prototype._rendre = function () {
