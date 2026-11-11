@@ -39,6 +39,7 @@ import {
   deriveQuestionsOuvertes,
   estChapitreFonctionnel,
   generateursPourSection,
+  libelleGenerateurPanneau,
   resoudreLevelSlug,
   resoudreNiveauHeures,
   sommeParVariante,
@@ -891,7 +892,6 @@ export function EvaluationGeneratorPanel({
                                 {lignesSection.flatMap((ligne) => {
                                   if (ligne.type === 'exercice') {
                                     const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
-                                    const generateur = generateursPourSection(chapitreCourant.slug, section.id).find((g) => g.generatorId === ligne.cle)
                                     // Tirage équilibré : seulement des exercices complets, sauf si le professeur
                                     // coche « inclure un cas particulier » (évaluation, générateur doté d'un profil).
                                     const libelleCas = estExercice ? null : libelleCasParticulier(ligne.cle as IdGenerateurPilote)
@@ -916,7 +916,7 @@ export function EvaluationGeneratorPanel({
                                       const rangees = [
                                         <tr className="admin-eval-row" key={(ligne.cle ?? '') + cle}>
                                           <td>
-                                            {generateur?.label || LABEL_TYPE.exercice} —{' '}
+                                            {libelleGenerateurPanneau(section, ligne.cle ?? '')} —{' '}
                                             <span className="admin-eval-variante-label">
                                               {variante.label}
                                               {copie ? ` (${cle.split('~')[1]})` : ''}

@@ -239,17 +239,17 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen29', label: '', processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', generatorId: 'gen42', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: 'Lecture graphique (gen43)' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: 'Construction graphique (gen44)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: "Lecture graphique d'une droite (gen43)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: "Construction graphique d'une droite (gen44)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', generatorId: 'gen46', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', generatorId: 'gen48', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: '' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen49', label: 'Forme graphique (gen49)' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen50', label: 'Forme développée (gen50)' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen51', label: 'Forme graphique (gen51)' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: 'Forme développée (gen52)' },
-  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: 'Construction (gen53)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen49', label: "Équation d'un cercle depuis son graphe (gen49)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen50', label: "Centre et rayon d'un cercle depuis l'équation développée (gen50)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen51', label: "Équation d'une parabole depuis son graphe (gen51)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: "Sommet, foyer, paramètre et directrice depuis l'équation développée (gen52)" },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: "Construction graphique d'une parabole (gen53)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: '', processus: 3 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: '' },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
@@ -469,6 +469,32 @@ export function calculatriceIndispensable(generatorId: IdGenerateurPilote, varia
 export function nomGenerateur(generatorId: IdGenerateurPilote): string {
   const titre = EVALUATION_ADAPTER_REGISTRY[generatorId]?.titreDocument
   return titre ? titre.replace(/\s*—\s*Évaluation$/, '') : generatorId
+}
+
+/** Titre de l'exercice tel que le cours l'affiche (bloc `entrainement` de la section, cherché aussi
+ * dans les blocs imbriqués), `null` si la section n'en a pas. */
+function titreEntrainement(blocs: unknown, generatorId: string): string | null {
+  if (!Array.isArray(blocs)) return null
+  for (const bloc of blocs as Record<string, unknown>[]) {
+    if (!bloc || typeof bloc !== 'object') continue
+    if (bloc.kind === 'entrainement' && bloc.generatorId === generatorId && typeof bloc.title === 'string') return bloc.title
+    for (const enfant of [bloc.blocks, bloc.items, bloc.steps]) {
+      const trouve = titreEntrainement(enfant, generatorId)
+      if (trouve) return trouve
+    }
+  }
+  return null
+}
+
+/** Nom d'un générateur dans la page de conception, le même partout (retour de l'utilisateur : le code
+ * « genN » n'apparaissait que dans les sections à plusieurs générateurs) : libellé explicite de
+ * `GENERATEURS_EVALUATION_PILOTE` s'il existe, sinon titre de l'exercice dans le cours, sinon titre
+ * du document ; toujours suivi du code du générateur. Jamais imprimé sur les feuilles. */
+export function libelleGenerateurPanneau(section: ChapterSection, generatorId: string): string {
+  const config = GENERATEURS_EVALUATION_PILOTE.find((g) => g.sectionId === section.id && g.generatorId === generatorId)
+  const explicite = config?.label.replace(/\s*\([^()]*\)\s*$/, '').trim()
+  const base = explicite || titreEntrainement(section.blocks, generatorId) || nomGenerateur(generatorId as IdGenerateurPilote)
+  return base === generatorId ? generatorId : `${base} (${generatorId})`
 }
 
 export function catalogueVariantesExercice(generatorId: IdGenerateurPilote): CatalogueVarianteEntree[] {
