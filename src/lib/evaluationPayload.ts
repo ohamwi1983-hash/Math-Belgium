@@ -656,25 +656,39 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'relations de Viète', enonce: "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$." },
     { cle: 'forme factorisée', enonce: "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$." },
     { cle: 'application directe', enonce: "Écris une équation du second degré de la forme $x^2-Sx+P=0$ dont les solutions sont $x_1=2$ et $x_2=5$, à l'aide de la somme $S$ et du produit $P$ des racines." },
+    { cle: 'racine évidente — a + b + c = 0', enonce: "Résous l'équation $3x^2 - 5x + 2 = 0$ sans calculer le discriminant, en repérant une racine évidente." },
+    { cle: 'signe des racines', enonce: "Sans calculer les racines, détermine leur signe pour l'équation $x^2 - 3x - 10 = 0$, puis pour l'équation $2x^2 + 7x + 3 = 0$." },
+    { cle: 'paramètre m — racine double', enonce: "Détermine les valeurs du réel m pour lesquelles l'équation $x^2 + mx + 4 = 0$ admet une racine double, puis discute le nombre de solutions selon m." },
+    { cle: 'équation bicarrée', enonce: "Résous l'équation $x^4 - 5x^2 + 4 = 0$ à l'aide de la substitution $t = x^2$." },
   ],
   'signe-trinome': [
     { cle: 'symbole large', enonce: "Résous l'inéquation $x^2-x-6 \\geq 0$ en étudiant le signe du trinôme." },
+    { cle: 'Δ < 0 : toujours du signe de a', enonce: "Résous les inéquations $x^2 + x + 1 > 0$ et $x^2 + x + 1 < 0$." },
+    { cle: 'Δ = 0 : nul en un seul point', enonce: "Résous les inéquations $x^2 - 6x + 9 > 0$ et $x^2 - 6x + 9 \\le 0$." },
+    { cle: "ramener à 0 d'abord", enonce: "Résous l'inéquation $x^2 < 4x$." },
   ],
   'signe-produit': [
     { cle: '3 facteurs', enonce: "Étudie le signe du produit $(x-1) \\cdot x \\cdot (x-3)$ à l'aide d'un tableau de signes à 3 facteurs, puis résous l'inéquation $(x-1) \\cdot x \\cdot (x-3) > 0$." },
+    { cle: 'facteur irréductible et facteur de pente négative', enonce: "Résous l'inéquation $(2 - x)\\left(x^2 + 2x + 5\\right) \\ge 0$ à l'aide d'un tableau de signes." },
   ],
   simplifier: [
     { cle: 'racine commune', enonce: "Simplifie la fraction rationnelle $\\dfrac{2x^2-6x}{x^2-x-6}$ : pose ses conditions d'existence, puis factorise le numérateur et le dénominateur." },
+    { cle: 'facteurs opposés', enonce: "Simplifie la fraction rationnelle $\\dfrac{6-2x}{x^2-9}$, en posant ses conditions d'existence." },
+    { cle: 'différence de deux carrés au numérateur', enonce: "Simplifie la fraction rationnelle $\\dfrac{x^2-4}{x+2}$, en posant sa condition d'existence." },
   ],
   'inconnue-denominateur': [
     { cle: 'racine étrangère', enonce: "Résous l'équation $\\dfrac{5}{x-2} = \\dfrac{3x-3}{x^2-x-2}$, en posant d'abord ses conditions d'existence." },
+    { cle: 'toutes les solutions sont rejetées', enonce: "Résous l'équation $\\dfrac{1}{x-2} + \\dfrac{1}{x+2} = \\dfrac{4}{x^2-4}$, en posant d'abord ses conditions d'existence." },
   ],
   'inequations-rationnelles': [
     { cle: 'quotient simple', enonce: "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie." },
+    { cle: 'second membre non nul', enonce: "Résous l'inéquation $\\dfrac{x}{x-1} \\le 2$, en posant la condition d'existence et en construisant un tableau de signes." },
+    { cle: 'dénominateur au carré', enonce: "Résous l'inéquation $\\dfrac{x+3}{(x-1)^2} > 0$." },
   ],
   contexte: [
     { cle: 'touche-t-il le sol', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. À quel instant touche-t-il le sol ?" },
     { cle: 'au-dessus du point de départ', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. Pendant quel intervalle de temps se trouve-t-il au-dessus de son point de départ ?" },
+    { cle: 'un enclos de 40 m de clôture', enonce: "Avec 40 m de clôture, on construit un enclos rectangulaire de côté x (en m), d'aire $A(x) = x(20-x)$, avec $0 < x < 20$. Détermine les valeurs de x pour lesquelles l'aire vaut au moins 96 m²." },
   ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc

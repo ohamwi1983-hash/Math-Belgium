@@ -51,7 +51,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'resoudre',
       number: 1,
       title: 'Résoudre une équation du second degré',
-      kicker: '4 raccourcis à connaître, le discriminant seulement en dernier recours',
+      kicker: '3 raccourcis visibles, un cas caché, le discriminant seulement en dernier recours',
       blocks: [
         { kind: 'video', title: 'Résoudre une équation du second degré (1/3) : les raccourcis avant le discriminant', youtubeId: '6WDdAWpUZW8' },
         { kind: 'video', title: 'Résoudre une équation du second degré (2/3) : le discriminant', youtubeId: 'Vv3ZyYvgF5A' },
@@ -60,8 +60,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'para',
           text:
             'Il y a une méthode qui marche à chaque fois : le discriminant. Mais elle demande ' +
-            'beaucoup de calculs. Avant de l\'utiliser, regarde toujours si tu es dans un des 4 ' +
-            'cas plus rapides ci-dessous.',
+            'beaucoup de calculs. Avant de l\'utiliser, regarde toujours si tu es dans un des 3 ' +
+            'cas plus rapides du tableau ci-dessous — un 4e, caché dans la forme de l\'énoncé, ' +
+            'vient juste après le discriminant.',
         },
         {
           kind: 'intuition',
@@ -79,6 +80,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           rows: [
             ['c = 0 — pas de terme constant', 'tu mets x en évidence'],
             ['b = 0, et a et c de signes opposés', 'différence de deux carrés'],
+            ['b = 0, et a et c de même signe', 'aucune solution : x² = −c/a est négatif'],
             ['b ≠ 0, c = b²/(4a) → Δ = 0', 'c\'est un carré parfait'],
             ['aucune des conditions ci-dessus', 'cas général — le discriminant'],
           ],
@@ -103,6 +105,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           formula: '$2x^2 - 18 = 0$',
           steps: [{ tag: 'différence de deux carrés', text: '$2(x^2-9) = 2(x-3)(x+3) = 0$' }],
           result: { tag: 'solutions', text: '$x = -3$ ou $x = 3$' },
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — quand −c/a n\'est pas un carré',
+          text:
+            'La différence de deux carrés marche toujours, même si les nombres ne « tombent pas ' +
+            'juste » : isole $x^2$. $2x^2 - 5 = 0 \\iff x^2 = \\dfrac{5}{2} \\iff x = \\pm\\sqrt{\\dfrac{5}{2}} = ' +
+            '\\pm\\dfrac{\\sqrt{10}}{2}$. Et si a et c sont de **même signe** ($2x^2 + 5 = 0$), $x^2$ ' +
+            'devrait être négatif : aucune solution, sans le moindre calcul.',
         },
         {
           kind: 'exemple',
@@ -271,6 +282,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'vraies solutions. Il faudra encore plusieurs siècles avant que l\'Europe n\'accepte ' +
             'pleinement ce genre de solutions.',
         },
+        {
+          kind: 'historique',
+          titre: 'Le savant de Bagdad qui complétait de vrais carrés',
+          text:
+            'Vers 820, à Bagdad, **Muhammad ibn Mūsā al-Khwārizmī** écrit un traité dont le titre ' +
+            'contient le mot al-jabr — qui a donné notre mot « algèbre ». Il y résout des problèmes ' +
+            'comme « un carré et dix racines égalent trente-neuf » ($x^2 + 10x = 39$) sans aucune ' +
+            'lettre, en complétant un **vrai carré dessiné** : il accole au carré de côté x deux ' +
+            'rectangles, ajoute le petit carré manquant (25), obtient un grand carré d\'aire 64, donc ' +
+            'de côté 8, et conclut x = 3. C\'est exactement la démonstration du discriminant, faite ' +
+            'avec des figures. Son nom, latinisé, a donné le mot « algorithme ».',
+        },
         { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
         {
           kind: 'para',
@@ -310,7 +333,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'rappel',
           label: 'Relations de Viète',
           items: [
-            'Pour une équation $ax^2+bx+c=0$ ($\\Delta > 0$), la somme des racines vaut ' +
+            'Pour une équation $ax^2+bx+c=0$ ($\\Delta \\geq 0$ ; si $\\Delta = 0$, la racine double ' +
+              'compte deux fois), la somme des racines vaut ' +
               '$x_1+x_2 = -\\dfrac{b}{a}$.',
             'Le produit des racines vaut $x_1 \\cdot x_2 = \\dfrac{c}{a}$.',
           ],
@@ -369,6 +393,45 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             alt: 'Portrait de François Viète',
             caption: 'François Viète (1540–1603), portrait d\'époque.',
           },
+        },
+        { kind: 'subheading', text: 'Deux raccourcis tirés de Viète' },
+        {
+          kind: 'rappel',
+          label: 'Racine évidente',
+          items: [
+            'Si $a + b + c = 0$, alors $x_1 = 1$ est racine (remplace x par 1 : il reste $a + b + c$). ' +
+              'Le produit des racines donne l\'autre : $x_2 = \\dfrac{c}{a}$.',
+            'Si $a - b + c = 0$, alors $x_1 = -1$ est racine, et $x_2 = -\\dfrac{c}{a}$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'racine évidente — a + b + c = 0',
+          formula: 'Résous $3x^2 - 5x + 2 = 0$ sans calculer le discriminant.',
+          steps: [
+            { tag: 'tester a + b + c', text: '$3 - 5 + 2 = 0$ : $x_1 = 1$ est racine' },
+            { tag: 'l\'autre racine par le produit', text: '$x_1 \\cdot x_2 = \\dfrac{c}{a} = \\dfrac{2}{3}$, donc $x_2 = \\dfrac{2}{3}$' },
+          ],
+          result: { tag: 'solutions', text: '$x = 1$ ou $x = \\dfrac{2}{3}$' },
+        },
+        {
+          kind: 'rappel',
+          label: 'Le signe des racines, sans les calculer',
+          items: [
+            'Si $P = \\dfrac{c}{a} < 0$, les deux racines existent et sont de **signes opposés** (inutile ' +
+              'de vérifier Δ : il est forcément positif).',
+            'Si $\\Delta > 0$ et $P > 0$, elles ont le même signe : celui de $S = -\\dfrac{b}{a}$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'signe des racines',
+          formula: 'Sans les calculer, donne le signe des racines de $x^2 - 3x - 10 = 0$, puis de $2x^2 + 7x + 3 = 0$.',
+          steps: [
+            { tag: 'première équation', text: '$P = -10 < 0$ : deux racines de signes opposés (ce sont 5 et −2)' },
+            { tag: 'seconde équation', text: '$\\Delta = 49 - 24 = 25 > 0$, $P = \\dfrac{3}{2} > 0$ et $S = -\\dfrac{7}{2} < 0$ : deux racines négatives (ce sont $-\\dfrac{1}{2}$ et $-3$)' },
+          ],
+          result: { tag: 'à retenir', text: 'Le signe de P, puis celui de S, suffisent.' },
         },
         { kind: 'subheading', text: 'Factoriser un trinôme grâce à ses racines' },
         {
@@ -468,6 +531,28 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           result: { tag: 'équation', text: '$x^2 - 7x + 10 = 0$' },
         },
+        { kind: 'subheading', text: 'Une équation avec un paramètre' },
+        {
+          kind: 'exemple',
+          badge: 'paramètre m — racine double',
+          formula: 'Pour quelles valeurs du réel m l\'équation $x^2 + mx + 4 = 0$ admet-elle une racine double ? Combien de solutions a-t-elle selon m ?',
+          steps: [
+            { tag: 'Δ dépend de m', text: '$\\Delta = m^2 - 4\\cdot1\\cdot4 = m^2 - 16$' },
+            { tag: 'racine double : Δ = 0', text: '$m^2 = 16 \\iff m = 4$ ou $m = -4$ (racine double $x = -2$, puis $x = 2$)' },
+            { tag: 'discussion', text: '$\\Delta > 0 \\iff m < -4$ ou $m > 4$ : deux solutions ; $-4 < m < 4$ : aucune solution' },
+          ],
+          result: { tag: 'résultat', text: 'racine double pour $m = \\pm 4$ ; deux solutions si $|m| > 4$, aucune si $|m| < 4$.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'pour aller plus loin — équation bicarrée',
+          formula: 'Résous $x^4 - 5x^2 + 4 = 0$.',
+          steps: [
+            { tag: 'poser t = x² (avec t ≥ 0)', text: '$t^2 - 5t + 4 = 0$ : $a + b + c = 0$, donc $t = 1$ ou $t = 4$' },
+            { tag: 'revenir à x', text: '$x^2 = 1 \\iff x = \\pm 1$ ; $x^2 = 4 \\iff x = \\pm 2$ — une valeur de t négative aurait été rejetée' },
+          ],
+          result: { tag: 'solutions', text: '$x \\in \\{-2;-1;1;2\\}$' },
+        },
         {
           kind: 'application',
           titre: 'Trouver le seuil de rentabilité d\'une entreprise',
@@ -489,8 +574,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
               yAxisLabel: 'bénéfice B(x) (€)',
               caption:
                 'Exemple avec $B(x)=-x^2+60x-500$ : les deux racines x=10 et x=50 sont les ' +
-                'seuils de rentabilité — l\'entreprise perd de l\'argent en dehors de cet ' +
-                'intervalle (zone verte) et en gagne entre les deux.',
+                'seuils de rentabilité — l\'entreprise gagne de l\'argent entre les deux (zone ' +
+                'verte) et en perd en dehors.',
             },
           ],
           text:
@@ -615,6 +700,66 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             axisLabel: '',
             caption: 'trait plein + rond plein = valeurs incluses dans la solution ]−∞;−2] ∪ [3;+∞[',
           },
+        },
+        {
+          kind: 'signTable',
+          caption: 'Tableau de signes de x² − x − 6 = (x + 2)(x − 3)',
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'plain' },
+                { text: '', tone: 'plain' },
+                { text: '−2', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '3', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'x² − x − 6',
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'Δ < 0 : toujours du signe de a',
+          formula: 'Résous $x^2 + x + 1 > 0$, puis $x^2 + x + 1 < 0$.',
+          steps: [
+            { tag: '1 — racines', text: '$\\Delta = 1 - 4 = -3 < 0$ : aucune racine' },
+            { tag: '2 — signe de a', text: '$a = 1 > 0$ : le trinôme est **toujours** strictement positif' },
+          ],
+          result: { tag: '3 — solutions', text: '$x^2 + x + 1 > 0$ : $S = \\mathbb{R}$ ; $x^2 + x + 1 < 0$ : $S = \\varnothing$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'Δ = 0 : nul en un seul point',
+          formula: 'Résous $x^2 - 6x + 9 > 0$, puis $x^2 - 6x + 9 \\le 0$.',
+          steps: [
+            { tag: '1 — racine double', text: '$x^2 - 6x + 9 = (x-3)^2$ : nul en $x = 3$ seulement' },
+            { tag: '2 — signe de a', text: 'positif partout ailleurs' },
+          ],
+          result: { tag: '3 — solutions', text: '$> 0$ : $S = \\mathbb{R} \\setminus \\{3\\}$ ; $\\le 0$ : $S = \\{3\\}$ (un seul nombre, pas un intervalle)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'ramener à 0 d\'abord',
+          formula: 'Résous $x^2 < 4x$.',
+          steps: [
+            { tag: 'tout passer à gauche', text: '$x^2 - 4x < 0 \\iff x(x-4) < 0$' },
+            { tag: 'racines 0 et 4, a > 0', text: 'le trinôme est négatif entre ses racines' },
+          ],
+          result: { tag: 'solution', text: '$S = ]0;4[$ — surtout pas « $x < 4$ » en divisant par x : x peut être négatif ou nul.' },
         },
         {
           kind: 'astuce',
@@ -812,6 +957,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'racines au tableau.',
         },
         {
+          kind: 'exemple',
+          badge: 'facteur irréductible et facteur de pente négative',
+          formula: 'Résous $(2 - x)\\left(x^2 + 2x + 5\\right) \\ge 0$.',
+          steps: [
+            { tag: 'facteur irréductible', text: '$x^2 + 2x + 5$ : $\\Delta = -16 < 0$, toujours positif — il ne change rien au signe' },
+            { tag: 'facteur de pente négative', text: '$2 - x$ s\'annule en 2 ; il est **positif à gauche** de 2 et négatif à droite (son coefficient de x est −1)' },
+          ],
+          result: { tag: 'solution', text: '$S = ]-\\infty;2]$' },
+        },
+        {
           kind: 'atelier',
           tag: 'signe-produit-widget',
           label: 'Manipule toi-même — 2 ou 3 facteurs à la fois',
@@ -909,6 +1064,33 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'interdit. La fraction ne devient jamais un simple polynôme sur ce facteur.',
         },
         {
+          kind: 'exemple',
+          badge: 'facteurs opposés',
+          formula: 'Simplifie $\\dfrac{6-2x}{x^2-9}$.',
+          steps: [
+            { tag: 'CE', text: '$x \\neq 3$ et $x \\neq -3$' },
+            { tag: 'faire apparaître le même facteur', text: '$6 - 2x = -2(x-3)$ et $x^2 - 9 = (x-3)(x+3)$' },
+          ],
+          result: { tag: 'fraction simplifiée', text: '$\\dfrac{-2(x-3)}{(x-3)(x+3)} = -\\dfrac{2}{x+3}$' },
+        },
+        {
+          kind: 'piege',
+          label: 'Deux facteurs opposés ne se simplifient pas en 1',
+          text:
+            '$\\dfrac{3-x}{x-3} = -1$, et non 1 : $3 - x = -(x - 3)$. Sors le signe moins **avant** de ' +
+            'simplifier, sinon le résultat a le mauvais signe partout.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'différence de deux carrés au numérateur',
+          formula: 'Simplifie $\\dfrac{x^2-4}{x+2}$.',
+          steps: [
+            { tag: 'CE', text: '$x \\neq -2$' },
+            { tag: 'factoriser le numérateur', text: '$x^2 - 4 = (x-2)(x+2)$' },
+          ],
+          result: { tag: 'fraction simplifiée', text: '$x - 2$, pour $x \\neq -2$ — la CE reste écrite à côté' },
+        },
+        {
           kind: 'astuce',
           label: 'Astuce — forme de référence',
           text:
@@ -990,6 +1172,25 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Multiplier en croix, c\'est multiplier les deux membres par les dénominateurs. ' +
             'Mais une de ces expressions peut valoir 0, en $x=2$ ! L\'équation obtenue accepte ' +
             'alors des valeurs que l\'équation de départ refusait déjà.',
+        },
+        {
+          kind: 'astuce',
+          label: 'Astuce — dénominateur commun plutôt que produit en croix',
+          text:
+            'Dans l\'exemple ci-dessus, $x^2 - x - 2 = (x-2)(x+1)$ contient déjà $(x - 2)$. Multiplie les ' +
+            'deux membres par ce dénominateur commun $(x-2)(x+1)$ : $5(x+1) = 3x - 3 \\iff 2x = -8 \\iff x = -4$. ' +
+            'Une équation du **premier** degré, et plus de racine en trop à rejeter. Le produit en croix ' +
+            'multiplie par un dénominateur de trop et fait monter le degré.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'toutes les solutions sont rejetées',
+          formula: 'Résous $\\dfrac{1}{x-2} + \\dfrac{1}{x+2} = \\dfrac{4}{x^2-4}$.',
+          steps: [
+            { tag: 'CE — x² − 4 = (x − 2)(x + 2)', text: '$x \\neq 2$ et $x \\neq -2$' },
+            { tag: 'multiplier par (x − 2)(x + 2)', text: '$(x+2) + (x-2) = 4 \\iff 2x = 4 \\iff x = 2$' },
+          ],
+          result: { tag: 'confrontation à la CE', text: '$x = 2$ est interdit : il ne reste aucune solution, $S = \\varnothing$.' },
         },
         {
           kind: 'astuce',
@@ -1125,6 +1326,47 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'ni nul. Son crochet reste toujours ouvert, quel que soit le symbole de l\'énoncé.',
         },
         {
+          kind: 'methode',
+          label: 'Méthode — inéquation rationnelle',
+          items: [
+            'Pose la CE : chaque dénominateur ≠ 0.',
+            'Passe tout dans le membre de gauche : le second membre doit valoir 0.',
+            'Réduis au même dénominateur, factorise numérateur et dénominateur.',
+            'Tableau de signes : une ligne par facteur, colonne ∄ pour chaque valeur de CE.',
+            'Lis S selon le symbole, en excluant toujours les valeurs de CE.',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Jamais de produit en croix dans une inéquation',
+          text:
+            'Multiplier les deux membres par le dénominateur ne conserve le sens que s\'il est ' +
+            '**positif**. Son signe dépend de x : là où il est négatif, le sens aurait dû s\'inverser, et ' +
+            'le produit en croix fait perdre (ou ajouter) des solutions. Passe toujours par « tout à ' +
+            'gauche » et un tableau de signes.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'second membre non nul',
+          formula: 'Résous $\\dfrac{x}{x-1} \\le 2$.',
+          steps: [
+            { tag: 'CE, puis tout à gauche', text: '$x \\neq 1$ ; $\\dfrac{x}{x-1} - 2 \\le 0 \\iff \\dfrac{x - 2(x-1)}{x-1} \\le 0 \\iff \\dfrac{2-x}{x-1} \\le 0$' },
+            { tag: 'tableau de signes', text: 'quotient négatif pour $x < 1$, positif entre 1 et 2, nul en 2, négatif pour $x > 2$' },
+            { tag: 'le piège du produit en croix', text: '$x \\le 2(x-1)$ donnerait seulement $x \\ge 2$ : tous les $x < 1$ seraient perdus' },
+          ],
+          result: { tag: 'solution', text: '$S = ]-\\infty;1[ \\cup [2;+\\infty[$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'dénominateur au carré',
+          formula: 'Résous $\\dfrac{x+3}{(x-1)^2} > 0$.',
+          steps: [
+            { tag: 'CE', text: '$x \\neq 1$' },
+            { tag: 'le carré est positif', text: '$(x-1)^2 > 0$ pour $x \\neq 1$ : le quotient a le signe de $x + 3$' },
+          ],
+          result: { tag: 'solution', text: '$S = ]-3;1[ \\cup ]1;+\\infty[$ — la valeur 1 reste exclue' },
+        },
+        {
           kind: 'para',
           text:
             'Le second membre n\'est pas 0 ? Le principe reste pareil. Isole-le d\'abord ' +
@@ -1208,6 +1450,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             tag: 'le produit est négatif entre les zéros 0 et 4',
             text: 'le ballon reste au-dessus de 25 m pendant **0 < t < 4 secondes**, avant de redescendre',
           },
+        },
+        {
+          kind: 'exemple',
+          badge: 'un enclos de 40 m de clôture',
+          formula:
+            'Avec 40 m de clôture, on construit un enclos rectangulaire de côté x (en m), d\'aire ' +
+            '$A(x) = x(20-x)$, avec $0 < x < 20$. Pour quelles valeurs de x l\'aire vaut-elle au moins 96 m² ?',
+          steps: [
+            { tag: 'poser l\'inéquation', text: '$x(20-x) \\ge 96 \\iff -x^2 + 20x - 96 \\ge 0 \\iff x^2 - 20x + 96 \\le 0$' },
+            { tag: 'racines', text: '$\\Delta = 400 - 384 = 16$, $x = \\dfrac{20 \\pm 4}{2}$ : 8 et 12 ; le trinôme est négatif entre ses racines' },
+            { tag: 'confronter au domaine', text: '$[8;12]$ est bien inclus dans $]0;20[$' },
+          ],
+          result: { tag: 'réponse', text: 'un côté compris entre 8 m et 12 m.' },
         },
         {
           kind: 'application',
@@ -1322,6 +1577,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             text: '$ax^2+c=0 \\Rightarrow x = \\pm\\sqrt{-c/a}$',
             condition: 'valable seulement si $a$, $c$ de signes opposés',
           },
+          {
+            text: '$a+b+c=0 \\Rightarrow x_1 = 1,\\ x_2 = \\dfrac{c}{a} \\qquad a-b+c=0 \\Rightarrow x_1 = -1,\\ x_2 = -\\dfrac{c}{a}$',
+            condition: 'racine évidente',
+          },
         ],
       },
       {
@@ -1351,7 +1610,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
 
   recap: {
     items: [
-      '**Résoudre** — regarde d\'abord si c=0, ou b=0, ou Δ=0 (carré parfait), ou si une ' +
+      '**Résoudre** — regarde d\'abord si c=0, ou b=0, ou Δ=0 (carré parfait), si a+b+c=0 (racine évidente), ou si une ' +
         'expression identique apparaît des deux côtés. Le discriminant, c\'est pour le cas ' +
         'général — jamais par défaut !',
       '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$. ' +
@@ -1377,11 +1636,14 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         'Ai-je bien mis −b, et pas b, dans la formule du discriminant ?',
         'Ai-je posé la CE sur chaque dénominateur, avant de simplifier ou de multiplier en croix ?',
         'Ai-je vérifié chaque solution trouvée avec la CE ?',
+        'Dans une inéquation rationnelle, ai-je tout passé à gauche au lieu de multiplier en croix ?',
+        'Pour Δ < 0 ou Δ = 0, ai-je écrit S = ℝ, ∅, ℝ \\ {r} ou {r}, selon le symbole ?',
         'En contexte, ai-je rejeté les solutions hors du domaine de validité (temps négatif, longueur trop grande…) ?',
       ],
     },
     forward:
-      'Le discriminant et les racines reviennent au chapitre 3 (cercle trigonométrique), sous ' +
-      'une autre forme. La même règle reste vraie : réfléchis avant de calculer.',
+      'Au chapitre 3 (fonctions de référence), tu résoudras des équations comme ' +
+      '$\\sqrt{x+2} = x$ : en élevant au carré, une équation du second degré apparaît, avec ses ' +
+      'solutions étrangères — la même vigilance que pour l\'inconnue au dénominateur.',
   },
 }
