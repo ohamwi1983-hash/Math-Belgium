@@ -10,8 +10,13 @@ function formatMorceau(morceau: Morceau): string {
   return `${morceau.crochetGauche}${formatBorne(morceau.borneGauche)} ; ${formatBorne(morceau.borneDroite)}${morceau.crochetDroit}`;
 }
 
-/** Représentation texte d'un ensemble-solution, cohérente avec la notation de la saisie guidée. */
+/** Représentation texte d'un ensemble-solution, cohérente avec la notation de la saisie guidée —
+ * « − » typographique et virgule décimale (jamais « [-6 ; 1] »). */
 export function formatSolutionEnsemble(solution: SolutionEnsemble): string {
+  return formatBrut(solution).replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
+}
+
+function formatBrut(solution: SolutionEnsemble): string {
   switch (solution.forme) {
     case "vide":
       return "∅";

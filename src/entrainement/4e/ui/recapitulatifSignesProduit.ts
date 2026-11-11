@@ -5,6 +5,13 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { libelleCategorie } from "./categorieLabels";
 import { formatPolynome } from "./formatSimplification";
 import { formatFormeFactoriseeSignesProduit } from "./formatSignesProduit";
+import { formatFractionIrreductible } from "./formatFraction";
+
+/** Nombre en texte (récapitulatif, fiches) : « − » typographique, fraction irréductible plutôt
+ * qu'un décimal périodique, jamais « -2 » ni « 1.6666666666666667 ». */
+function nombreAffiche(v: number): string {
+  return formatFractionIrreductible(v).replace("-", "−").replace(".", ",");
+}
 
 /** Une entrée du récapitulatif, avec l'écran qui l'a produite — `phase` + position (0-based) du
  * facteur concerné dans `exercice.facteurs`. Sert à retrouver EXACTEMENT l'entrée d'un écran qui
@@ -47,7 +54,7 @@ export function calculerEntreesRecapSignesProduit(etat: EtatSessionSignesProduit
           positionFacteur: position,
           libelle: `Racine du ${nom}`,
           estLatex: false,
-          valeur: String(facteur.polynome.p),
+          valeur: nombreAffiche(facteur.polynome.p),
           revele: etat.racineLineaireRevelees[index],
         });
       }
@@ -86,7 +93,7 @@ export function calculerEntreesRecapSignesProduit(etat: EtatSessionSignesProduit
         const revele = etat.factorisationChamp1Revele;
         entrees.push(
           factorisable.categorie === "cas_general"
-            ? { phase: "factorisationChamp1", positionFacteur: position, libelle: `Δ du ${nom}`, estLatex: false, valeur: `Δ = ${factorisable.solution.delta}`, revele }
+            ? { phase: "factorisationChamp1", positionFacteur: position, libelle: `Δ du ${nom}`, estLatex: false, valeur: `Δ = ${nombreAffiche(factorisable.solution.delta ?? 0)}`, revele }
             : { phase: "factorisationChamp1", positionFacteur: position, libelle: `Forme factorisée du ${nom}`, estLatex: true, valeur: formeFactorisee, revele },
         );
       }
@@ -99,8 +106,8 @@ export function calculerEntreesRecapSignesProduit(etat: EtatSessionSignesProduit
           // Racine double (facteur carré) : une seule valeur, dite double — jamais « 3 ; 3 ».
           valeur:
             factorisable.solution.racines[0] === factorisable.solution.racines[1]
-              ? `${factorisable.solution.racines[0]} (racine double)`
-              : [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
+              ? `${nombreAffiche(factorisable.solution.racines[0])} (racine double)`
+              : [...factorisable.solution.racines].sort((a, b) => a - b).map(nombreAffiche).join(" ; "),
           revele: etat.factorisationChamp2Revele,
         });
       }
