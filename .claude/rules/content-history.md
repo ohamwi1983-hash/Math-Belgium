@@ -2122,3 +2122,26 @@ paths:
   une toile d'araignée et les écarts vₙ ; 6 nouveaux — `gauss-double-echelle-widget` (§ 1),
   `arithmetique-ou-geometrique-widget` (§ 2), `somme-infinie-zenon-widget` (§ 3), `echiquier-widget`,
   `fibonacci-nombre-d-or-widget` et `angle-d-or-widget` (§ 4).
+
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : audit puis enrichissement
+  validé par l'utilisateur (toutes les recommandations). Corrections : l'intuition du § 10 disait qu'une
+  magnitude de plus = « 10 fois plus énergétique » (faux : amplitude × 10, énergie ≈ × 32 — nouvel exemple
+  « magnitude et énergie » avec log₁₀ E = 1,5M + 4,8, la relation de 6gen22) ; l'étude complète du § 9
+  annonçait la concavité sans la faire (désormais domaine → limites → dérivée + tableau de signes →
+  concavité, inflexion en e^(3/2)) ; (ln|u|)′ = u′/u et le domaine de ln|u| enfin énoncés (6gen21 étudie
+  ln|trinôme|) ; application « bits » déplacée après ln (elle invoquait un changement de base pas encore vu) ;
+  énoncé ajouté à « même inéquation, deux bases » ; chapeaux des légendes en LaTeX ; « À retenir » du § 8
+  remplacé par le tableau de lecture f′ ↔ f ; renvoi final vers le chapitre 4 (primitive de 1/x). Structure :
+  6 sous-titres au § 1 (aucun avant), logₐ′ remonté juste après ln′. Contenu : calcul de logarithmes,
+  développer/réduire, piège ln(x²) = 2 ln|x| (§ 1) ; deux bases différentes, regrouper puis vérifier la CE
+  (§ 2) ; signe de ln(u), inéquation exponentielle avec division par ln(0,8) < 0 et lien avec le balayage
+  de 5e (§ 3) ; ln|x² − 4|, étude de signe x ln x − x (§ 4) ; trois limites résolues (§ 5) ; deux exemples de
+  paramètres (§ 6) ; origine du nom (hyperbole), preuve de ch² − sh² = 1 et des dérivées, argsh = ln(x +
+  √(x² + 1)) par la substitution du § 2, application chaînette (§ 7) ; ln x ≤ x − 1, exemple ln x − x/2
+  (§ 8) ; études de x ln x et de ln|x² − 4| (§ 9) ; datation C14, temps de doublement, règle de 70, instant
+  logistique (§ 10) ; checklist et formulaire complétés. Tous les nouveaux exemples ont leur énoncé clé.
+  Ateliers : `log-exp-miroir-widget` (tangentes de pentes m et 1/m, bouton a = e), `inequation-logarithmique-widget`
+  (argument x − c, domaine hachuré), `parametres-graphiques-widget` (mode Défi) ; 7 nouveaux —
+  `regle-a-calcul-widget`, `echelle-semi-log-widget` (§ 1), `solution-parasite-log-widget` (§ 2),
+  `croissance-comparee-log-widget` (§ 5), `chainette-widget` (§ 7), `f-et-fprime-widget` (§ 8),
+  `datation-carbone14-widget` (§ 10).

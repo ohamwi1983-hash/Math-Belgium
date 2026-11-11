@@ -223,6 +223,9 @@
           svg.appendChild(tB);
         } else {
           svg.appendChild(svgEl("line", { x1: X0.toFixed(2), x2: xA1.toFixed(2), y1: yL, y2: yL, class: "long-a" }));
+          var tA10 = svgEl("text", { x: ((X0 + xA1) / 2).toFixed(2), y: yL - 5, "text-anchor": "middle", class: "long-label long-label-a" });
+          tA10.textContent = "log " + fmt(a, 1);
+          svg.appendChild(tA10);
         }
       }
 
