@@ -23,18 +23,48 @@ function tirerBornesDistinctesOrdonnees(): [number, number] {
   return a < b ? [a, b] : [b, a];
 }
 
-export function construireFamilleLongueurArcA(): ExerciceLongueurArcA {
+function construirePuissances(): ExerciceLongueurArcA {
   const n = tirerParmi(VALEURS_N);
   const [a, b] = tirerBornesDistinctesOrdonnees();
   return {
     famille: "A",
+    forme: "puissances",
     n,
+    c: 0,
     a,
     b,
     fReference: (x) => 0.5 * (Math.pow(x, n + 1) / (n + 1) + Math.pow(x, 1 - n) / (n - 1)),
     fPrimeReference: (x) => 0.5 * (Math.pow(x, n) - Math.pow(x, -n)),
     racineSimplifieeReference: (x) => 0.5 * (Math.pow(x, n) + Math.pow(x, -n)),
-    // Primitive de racineSimplifieeReference : ∫x^n dx = x^(n+1)/(n+1), ∫x^(−n) dx = x^(1−n)/(1−n).
     primitiveReference: (x) => 0.5 * (Math.pow(x, n + 1) / (n + 1) + Math.pow(x, 1 - n) / (1 - n)),
   };
+}
+
+const VALEURS_C = [1, 2, 3] as const;
+
+/** Forme `log` (audit chapitre 4 de 6e, point 24) : f(x) = x²/(4c) − c·ln(x), donc
+ * f'(x) = x/(2c) − c/x et 1 + f'(x)² = (x/(2c) + c/x)² — un carré parfait, comme la forme
+ * `puissances`. Bornes entières dans [1 ; 5] : la longueur vaut (b² − a²)/(4c) + c·ln(b/a). */
+function construireLog(): ExerciceLongueurArcA {
+  const c = tirerParmi(VALEURS_C);
+  let a = tirerEntier(1, 5);
+  let b = tirerEntier(1, 5);
+  while (b === a) b = tirerEntier(1, 5);
+  if (a > b) [a, b] = [b, a];
+  return {
+    famille: "A",
+    forme: "log",
+    n: 0,
+    c,
+    a,
+    b,
+    fReference: (x) => (x * x) / (4 * c) - c * Math.log(x),
+    fPrimeReference: (x) => x / (2 * c) - c / x,
+    racineSimplifieeReference: (x) => x / (2 * c) + c / x,
+    primitiveReference: (x) => (x * x) / (4 * c) + c * Math.log(x),
+  };
+}
+
+export function construireFamilleLongueurArcA(): ExerciceLongueurArcA {
+  return Math.random() < 0.5 ? construirePuissances() : construireLog();
 }

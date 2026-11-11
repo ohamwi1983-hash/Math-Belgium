@@ -6,6 +6,8 @@ import type { IdVarianteIntegralesDefinies } from "./generateurs6e/integralesDef
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesDefinies, soumettreReponseEcran } from "./moteur6e/sessionIntegralesDefinies";
 import type { EtatSessionIntegralesDefinies, PhaseIntegralesDefinies } from "./moteur6e/typesIntegralesDefinies";
 import { diagnostiquerEcran } from "./moteur6e/verificationIntegralesDefinies";
+import { messageSpecifiqueEcran } from "./moteur6e/verificationCalculPrimitives";
+import type { PhaseCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { EtapeResoudreMIntegralesDefinies } from "./components6e/EtapeResoudreMIntegralesDefinies";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -50,6 +52,10 @@ export function App6gen25() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché, inclus dans la `key` de l'écran : un nouvel exercice (ou une
+   * variante forcée) qui commence sur la MÊME phase que le précédent remonte ainsi le composant et
+   * vide les champs (audit : la saisie précédente restait affichée après « Générer »). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
    * `calculerRecapitulatifIntegralesDefinies` pour la réponse ATTENDUE. Garde sur le libellé : le
@@ -90,6 +96,7 @@ export function App6gen25() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((k) => k + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -99,6 +106,7 @@ export function App6gen25() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((k) => k + 1);
     setHistorique([]);
     setFicheOuverteIndex(null);
     setEtat(demarrerSessionIntegralesDefinies(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIntegralesDefinies)));
@@ -151,7 +159,7 @@ export function App6gen25() {
         <RecapitulatifPanel entrees={calculerRecapitulatifIntegralesDefinies(etat)} />
         {phase === "resoudreM" && (
           <EtapeResoudreMIntegralesDefinies
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -165,7 +173,7 @@ export function App6gen25() {
         )}
         {phase !== "resoudreM" && (
           <EtapeChampsCalculPrimitives
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -174,6 +182,7 @@ export function App6gen25() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            messageSpecifique={(valeurs) => messageSpecifiqueEcran(exercice.primitive, phase as PhaseCalculPrimitives, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
           />
         )}

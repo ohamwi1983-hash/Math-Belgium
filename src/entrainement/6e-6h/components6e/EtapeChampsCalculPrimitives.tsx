@@ -28,6 +28,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message d'erreur spécifique (ex. « valeur absolue oubliée »), affiché à la place du message
+   * générique quand il s'applique — null sinon. */
+  messageSpecifique?: (valeurs: string[]) => string | null;
 }
 
 /**
@@ -56,10 +59,12 @@ export function EtapeChampsCalculPrimitives({
   onValider,
   diagnostiquer,
   validation,
+  messageSpecifique,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
+  const messageSpecifiqueActuel = montrerErreurs && dernierStatut !== "correct" && messageSpecifique ? messageSpecifique(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
@@ -88,17 +93,20 @@ export function EtapeChampsCalculPrimitives({
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
+      {/* Un champ par ligne, libellé au-dessus (audit P12 : `.field-inline` côte à côte débordait de
+          60 à 190 px à 390 px de large pour les écrans à 2 ou 3 champs). Chaque aperçu LaTeX reste
+          juste au-dessus de SON champ. */}
       {champs.map((champ, i) => (
-        <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />
-      ))}
-      <div className="field-row">
-        {champs.map((champ, i) => (
-          <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
-            <label className="field-label field-label-minuscule">{champ.label}</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} onChange={(e) => changer(i, e.target.value)} />
+        <div key={i}>
+          <ApercuExpressionLatex texte={valeurs[i]} label={champ.label} />
+          <div className="field">
+            <label className="field-label field-label-minuscule" htmlFor={`champ-primitive-${i}`}>
+              {champ.label}
+            </label>
+            <input id={`champ-primitive-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} onChange={(e) => changer(i, e.target.value)} />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>
@@ -119,7 +127,7 @@ export function EtapeChampsCalculPrimitives({
         </button>
         {montrerErreurs && (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            {messageSpecifiqueActuel ? `${messageSpecifiqueActuel} (tentative ${tentativesUtilisees}/${tentativesMax})` : formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>
         )}
         </>

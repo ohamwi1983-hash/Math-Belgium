@@ -6,6 +6,8 @@ import type { IdVarianteQuellePrimitive } from "./generateurs6e/quellePrimitive"
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionQuellePrimitive, soumettreReponseEcran } from "./moteur6e/sessionQuellePrimitive";
 import type { EtatSessionQuellePrimitive, PhaseQuellePrimitive } from "./moteur6e/typesQuellePrimitive";
 import { diagnostiquerEcranQuellePrimitive } from "./moteur6e/verificationQuellePrimitive";
+import { messageSpecifiqueEcran } from "./moteur6e/verificationCalculPrimitives";
+import type { PhaseCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
@@ -52,6 +54,10 @@ export function App6gen24() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché, inclus dans la `key` de l'écran : un nouvel exercice (ou une
+   * variante forcée) qui commence sur la MÊME phase que le précédent remonte ainsi le composant et
+   * vide les champs (audit : la saisie précédente restait affichée après « Générer »). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
    * `calculerRecapitulatifQuellePrimitive` pour la réponse ATTENDUE. Garde sur le libellé : le
@@ -92,6 +98,7 @@ export function App6gen24() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((k) => k + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -101,6 +108,7 @@ export function App6gen24() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((k) => k + 1);
     setHistorique([]);
     setFicheOuverteIndex(null);
     setEtat(demarrerSessionQuellePrimitive(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteQuellePrimitive)));
@@ -155,7 +163,7 @@ export function App6gen24() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifQuellePrimitive(etat)} />
         <EtapeChampsCalculPrimitives
-          key={phase}
+          key={`${numeroExercice}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGeneraleQuellePrimitive()}
           blocDonnees={blocDonneesQuellePrimitive(exercice)}
@@ -164,6 +172,7 @@ export function App6gen24() {
           aideNiveau1={aideNiveau1QuellePrimitive(exercice, phase)}
           aideNiveau2={aideNiveau2QuellePrimitive(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcranQuellePrimitive(exercice, phase, valeurs)}
+          messageSpecifique={(valeurs) => messageSpecifiqueEcran(exercice.exerciceBase, phase as PhaseCalculPrimitives, valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
         />
       </main>

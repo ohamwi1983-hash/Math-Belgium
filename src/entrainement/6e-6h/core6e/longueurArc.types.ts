@@ -35,21 +35,23 @@
  * variable t) et C (écran 2) — voir en-tête de `moteur6e/verificationLongueurArc.ts`.
  */
 
+/** Famille A — 1 + f'(x)² est un carré parfait PAR CONSTRUCTION, sous deux formes (audit chapitre 4
+ * de 6e, point 24 — diversification) :
+ * - `puissances` : f(x) = ½(x^{n+1}/(n+1) + x^{1−n}/(n−1)), n ∈ {2 ; 3 ; 4}, d'où
+ *   √(1 + f'(x)²) = ½(xⁿ + x⁻ⁿ) ;
+ * - `log` : f(x) = x²/(4c) − c·ln(x), c ∈ {1 ; 2 ; 3}, d'où √(1 + f'(x)²) = x/(2c) + c/x. */
 export interface ExerciceLongueurArcA {
   famille: "A";
-  /** n∈{2,3,4} — f(x)=(1/2)[x^(n+1)/(n+1) + x^(1−n)/(n−1)], f'(x)=(1/2)(x^n−x^(−n)). */
+  forme: "puissances" | "log";
+  /** Exposant (forme `puissances`) ; 0 pour la forme `log`. */
   n: number;
+  /** Paramètre c (forme `log`) ; 0 pour la forme `puissances`. */
+  c: number;
   a: number;
   b: number;
-  /** f(x) — donnée dans l'énoncé, l'élève n'a pas à la deviner (spec explicite). */
   fReference: (x: number) => number;
-  /** f'(x) — réponse attendue de l'écran 1. */
   fPrimeReference: (x: number) => number;
-  /** √(1+f'(x)²) SIMPLIFIÉE = (1/2)(x^n+x^(−n)) — réponse attendue de l'écran 2, sous cette forme
-   * SPÉCIFIQUEMENT (pas n'importe quelle forme équivalente — voir en-tête de fichier
-   * `verificationLongueurArc.ts`). */
   racineSimplifieeReference: (x: number) => number;
-  /** Primitive de `racineSimplifieeReference` — sert au calcul de la longueur d'arc, écran 3. */
   primitiveReference: (x: number) => number;
 }
 
@@ -71,15 +73,20 @@ export interface ExerciceLongueurArcB {
   primitiveEnTReference: (t: number) => number;
 }
 
+/** Famille C — f(x) = c·x^{3/2}, donc 1 + f'(x)² = 1 + k·x avec k = 9c²/4, et les bornes choisies
+ * pour que 1 + k·x soit un carré parfait aux deux bornes : la longueur est un nombre RATIONNEL
+ * (audit chapitre 4 de 6e, point 24 — l'ancienne famille n'avait que 6 énoncés). */
 export interface ExerciceLongueurArcC {
   famille: "C";
-  /** f(x)=x^(3/2), f'(x)=(3/2)√x, f'(x)²=(9/4)x. */
+  /** c = cNum / cDen. */
+  cNum: number;
+  cDen: number;
+  /** k = kNum / kDen = 9c²/4. */
+  kNum: number;
+  kDen: number;
   a: number;
   b: number;
-  /** 1+f'(x)² = 1+(9/4)x — AFFINE en x, PAS un carré parfait (contraste avec la famille A, voir
-   * en-tête de fichier). Réponse attendue de l'écran 1. */
   unPlusFPrimeCarreReference: (x: number) => number;
-  /** Primitive de √(1+(9/4)x) = (8/27)·(1+(9/4)x)^(3/2) — réponse attendue de l'écran 2. */
   primitiveReference: (x: number) => number;
 }
 

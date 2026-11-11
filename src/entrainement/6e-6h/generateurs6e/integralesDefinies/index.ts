@@ -75,31 +75,40 @@ const CONSTRUCTEURS_SOUS_TYPE: Record<IdSousTypeEmprunte, () => ExerciceCalculPr
   G4: construireFamilleG4,
 };
 
+const PREFIXE_PLUS_LOIN = "Pour aller plus loin — ";
+
 const LABELS_SOUS_TYPE: Record<IdSousTypeEmprunte, string> = {
   A_direct: "A — Primitive directe",
   A_diviserFraction: "A — Diviser d'abord (fraction)",
   A_diviserProduit: "A — Diviser d'abord (x·√x)",
   B: "B — Fonction composée",
-  C1: "C — Substitution x·√(ax+b)",
+  C1: "Pour aller plus loin — C — Substitution x·√(ax+b)",
   C2: "C — Substitution arctan/arcsin(x)",
-  C3: "C — Substitution √x",
+  C3: "Pour aller plus loin — C — Substitution √x",
   C4: "C — Substitution eˣ+1",
-  G1: "G — Racines réelles distinctes",
-  G2: "G — Fraction impropre",
-  G3: "G — Dénominateur mixte x(x²+1)",
-  G4: "G — Quadratique irréductible",
+  G1: "Pour aller plus loin — G — Racines réelles distinctes",
+  G2: "Pour aller plus loin — G — Fraction impropre",
+  G3: "Pour aller plus loin — G — Dénominateur mixte x(x²+1)",
+  G4: "Pour aller plus loin — G — Quadratique irréductible",
 };
 
 export type IdVarianteIntegralesDefinies = `simple_${IdSousTypeEmprunte}` | `moyenne_${IdSousTypeEmprunte}` | "parametre_polynomiale" | "parametre_exponentielle" | "parametre_trigonometrique";
 
 const SOUS_TYPES: IdSousTypeEmprunte[] = ["A_direct", "A_diviserFraction", "A_diviserProduit", "B", "C1", "C2", "C3", "C4", "G1", "G2", "G3", "G4"];
 
+/** « Pour aller plus loin — » placé EN TÊTE du libellé (décision A de l'audit : repérable d'un coup
+ * d'œil dans le sélecteur), devant le mode (« Simple », « Valeur moyenne »). */
+function libelleAvecNiveau(mode: string, id: IdSousTypeEmprunte): string {
+  const libelle = LABELS_SOUS_TYPE[id];
+  return libelle.startsWith(PREFIXE_PLUS_LOIN) ? `${PREFIXE_PLUS_LOIN}${mode} — ${libelle.slice(PREFIXE_PLUS_LOIN.length)}` : `${mode} — ${libelle}`;
+}
+
 export const CATALOGUE_VARIANTES: { id: IdVarianteIntegralesDefinies; label: string }[] = [
-  ...SOUS_TYPES.map((id) => ({ id: `simple_${id}` as IdVarianteIntegralesDefinies, label: `Simple — ${LABELS_SOUS_TYPE[id]}` })),
+  ...SOUS_TYPES.map((id) => ({ id: `simple_${id}` as IdVarianteIntegralesDefinies, label: libelleAvecNiveau("Simple", id) })),
   { id: "parametre_polynomiale", label: "Paramètre — technique polynomiale (second degré)" },
   { id: "parametre_exponentielle", label: "Paramètre — technique exponentielle" },
   { id: "parametre_trigonometrique", label: "Paramètre — technique trigonométrique" },
-  ...SOUS_TYPES.map((id) => ({ id: `moyenne_${id}` as IdVarianteIntegralesDefinies, label: `Valeur moyenne — ${LABELS_SOUS_TYPE[id]}` })),
+  ...SOUS_TYPES.map((id) => ({ id: `moyenne_${id}` as IdVarianteIntegralesDefinies, label: libelleAvecNiveau("Valeur moyenne", id) })),
 ];
 
 export function construireAvecVarianteId(id: IdVarianteIntegralesDefinies): ExerciceIntegralesDefinies {

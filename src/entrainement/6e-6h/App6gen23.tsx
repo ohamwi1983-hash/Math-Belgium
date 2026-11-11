@@ -5,7 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculPri
 import type { IdVarianteCalculPrimitives } from "./generateurs6e/calculPrimitives";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculPrimitives, soumettreReponseEcran } from "./moteur6e/sessionCalculPrimitives";
 import type { EtatSessionCalculPrimitives, PhaseCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
-import { diagnostiquerEcran } from "./moteur6e/verificationCalculPrimitives";
+import { diagnostiquerEcran, messageSpecifiqueEcran } from "./moteur6e/verificationCalculPrimitives";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
@@ -50,6 +50,10 @@ export function App6gen23() {
    * clos. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché, inclus dans la `key` de l'écran : un nouvel exercice (ou une
+   * variante forcée) qui commence sur la MÊME phase que le précédent remonte ainsi le composant et
+   * vide les champs (audit : la saisie précédente restait affichée après « Générer »). */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` (jamais `nouvelEtat.phase`) — réutilise
    * `calculerRecapitulatifCalculPrimitives` pour la réponse ATTENDUE. Garde sur le libellé : le
@@ -90,6 +94,7 @@ export function App6gen23() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((k) => k + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -99,6 +104,7 @@ export function App6gen23() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setNumeroExercice((k) => k + 1);
     setHistorique([]);
     setFicheOuverteIndex(null);
     setEtat(demarrerSessionCalculPrimitives(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteCalculPrimitives)));
@@ -154,7 +160,7 @@ export function App6gen23() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifCalculPrimitives(etat)} />
         <EtapeChampsCalculPrimitives
-          key={phase}
+          key={`${numeroExercice}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
@@ -163,6 +169,7 @@ export function App6gen23() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          messageSpecifique={(valeurs) => messageSpecifiqueEcran(exercice, phase, valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
         />
       </main>

@@ -36,6 +36,12 @@ import type { PhaseVolumesRevolution } from "./typesVolumesRevolution";
  */
 
 const TOLERANCE = 0.01;
+
+/** Tolérance d'une VALEUR (volume) : 0,01 en absolu, relative (0,05 %) pour les grands nombres —
+ * audit chapitre 4 de 6e, point 17. */
+function toleranceValeur(cible: number): number {
+  return Math.max(TOLERANCE, 5e-4 * Math.abs(cible));
+}
 const CANDIDATS_X = [-2.7, -2.1, -1.6, -1.1, -0.6, -0.35, 0.35, 0.6, 1.1, 1.6, 2.1, 2.7];
 
 /** Champ "choix" (ordre) — jamais de saisie libre, comparaison stricte à la valeur correcte (jamais
@@ -67,7 +73,8 @@ export function verifierAEcran2(exercice: ExerciceVolumeA, valeurs: string[]): b
 }
 
 export function diagnostiquerAEcran3(exercice: ExerciceVolumeA, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], volumeEntreBornes(exercice.a, exercice.b, exercice.primitiveDeveloppeReference), TOLERANCE);
+  const v = volumeEntreBornes(exercice.a, exercice.b, exercice.primitiveDeveloppeReference);
+  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
 }
 export function verifierAEcran3(exercice: ExerciceVolumeA, valeurs: string[]): boolean {
   return diagnostiquerAEcran3(exercice, valeurs) === "correct";
@@ -99,7 +106,8 @@ export function verifierBEcran3(exercice: ExerciceVolumeB, valeurs: string[]): b
 }
 
 export function diagnostiquerBEcran4(exercice: ExerciceVolumeB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference), TOLERANCE);
+  const v = volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
+  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
 }
 export function verifierBEcran4(exercice: ExerciceVolumeB, valeurs: string[]): boolean {
   return diagnostiquerBEcran4(exercice, valeurs) === "correct";
@@ -131,7 +139,8 @@ export function verifierCEcran3(exercice: ExerciceVolumeC, valeurs: string[]): b
 }
 
 export function diagnostiquerCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference), TOLERANCE);
+  const v = volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
+  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
 }
 export function verifierCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): boolean {
   return diagnostiquerCEcran4(exercice, valeurs) === "correct";
@@ -142,14 +151,14 @@ export function verifierCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): b
 // ============================================================================
 
 export function diagnostiquerDEcran1(exercice: ExerciceVolumeD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.volumeParaboloide, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], exercice.volumeParaboloide, toleranceValeur(exercice.volumeParaboloide));
 }
 export function verifierDEcran1(exercice: ExerciceVolumeD, valeurs: string[]): boolean {
   return diagnostiquerDEcran1(exercice, valeurs) === "correct";
 }
 
 export function diagnostiquerDEcran2(exercice: ExerciceVolumeD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.volumeCylindre, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], exercice.volumeCylindre, toleranceValeur(exercice.volumeCylindre));
 }
 export function verifierDEcran2(exercice: ExerciceVolumeD, valeurs: string[]): boolean {
   return diagnostiquerDEcran2(exercice, valeurs) === "correct";

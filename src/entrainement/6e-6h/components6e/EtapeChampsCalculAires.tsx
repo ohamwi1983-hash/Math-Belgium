@@ -87,7 +87,7 @@ export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigne
             </div>
           ) : (
             <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
-              <label className="field-label field-label-minuscule">{champ.label}</label>
+              <label className="field-label field-label-minuscule">{champ.labelLatex ? <Katex expression={champ.labelLatex} /> : champ.label}</label>
               <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} onChange={(e) => changer(i, e.target.value)} />
             </div>
           ),

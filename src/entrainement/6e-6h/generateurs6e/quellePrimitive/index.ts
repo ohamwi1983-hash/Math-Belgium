@@ -16,7 +16,7 @@ import {
   construireFamilleG3,
   construireFamilleG4,
 } from "../calculPrimitives";
-import { choisirPointSur } from "./point";
+import { choisirPointSur, intervalleDeValidite } from "./point";
 
 /**
  * Couche A (6e) — point d'entrée `6gen24`. Réutilise INTÉGRALEMENT les constructeurs Couche A de
@@ -34,14 +34,14 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteQuellePrimitive; label: string
   { id: "A_diviserFraction", label: "A — Diviser d'abord (fraction)" },
   { id: "A_diviserProduit", label: "A — Diviser d'abord (x·√x)" },
   { id: "B", label: "B — Fonction composée, ajustement de coefficient" },
-  { id: "C1", label: "C — Substitution : x·√(ax+b)" },
+  { id: "C1", label: "Pour aller plus loin — C — Substitution : x·√(ax+b)" },
   { id: "C2", label: "C — Substitution : u=arctan/arcsin(x)" },
-  { id: "C3", label: "C — Substitution : u=√x" },
+  { id: "C3", label: "Pour aller plus loin — C — Substitution : u=√x" },
   { id: "C4", label: "C — Substitution : u=e^x+1" },
-  { id: "G1", label: "G — Décomposition : racines réelles distinctes" },
-  { id: "G2", label: "G — Décomposition : fraction impropre" },
-  { id: "G3", label: "G — Décomposition : dénominateur mixte x·(x²+1)" },
-  { id: "G4", label: "G — Décomposition : quadratique irréductible (arctan)" },
+  { id: "G1", label: "Pour aller plus loin — G — Décomposition : racines réelles distinctes" },
+  { id: "G2", label: "Pour aller plus loin — G — Décomposition : fraction impropre" },
+  { id: "G3", label: "Pour aller plus loin — G — Décomposition : dénominateur mixte x·(x²+1)" },
+  { id: "G4", label: "Pour aller plus loin — G — Décomposition : quadratique irréductible (arctan)" },
 ];
 
 const CONSTRUCTEURS_PAR_VARIANTE: Record<IdVarianteQuellePrimitive, () => ExerciceBaseQuellePrimitive> = {
@@ -68,7 +68,15 @@ function completerAvecPoint(exerciceBase: ExerciceBaseQuellePrimitive, overrides
   const point = choisirPointSur(exerciceBase);
   const aNum = overrides?.aNum ?? point.aNum;
   const aDen = overrides?.aDen ?? point.aDen;
-  return { exerciceBase, aNum, aDen, a: aNum / aDen, b: overrides?.b ?? point.b };
+  const a = aNum / aDen;
+  const exercice: ExerciceQuellePrimitive = { exerciceBase, aNum, aDen, a, b: overrides?.b ?? point.b };
+  // Intervalle de validité recalculé si `a` a été imposé (sinon celui du point choisi).
+  const { gauche, droite } = a === point.a ? { gauche: point.intervalleGauche ?? null, droite: point.intervalleDroite ?? null } : intervalleDeValidite(exerciceBase, a);
+  if (gauche !== null || droite !== null) {
+    exercice.intervalleGauche = gauche;
+    exercice.intervalleDroite = droite;
+  }
+  return exercice;
 }
 
 export function construireAvecVarianteId(id: IdVarianteQuellePrimitive, overrides?: { aNum?: number; aDen?: number; b?: number }): ExerciceQuellePrimitive {

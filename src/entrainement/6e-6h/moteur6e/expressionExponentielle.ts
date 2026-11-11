@@ -44,7 +44,11 @@ function normaliserSaisie(texte: string): string {
     .replace(/[·×⋅∙]/g, "*")
     .replace(/÷/g, "/")
     .replace(/²/g, "^2")
-    .replace(/³/g, "^3");
+    .replace(/³/g, "^3")
+    // Audit chapitre 4 de 6e (point 7) : le symbole « π » valait « Caractère inattendu » (seul
+    // « pi » passait). Entouré d'espaces pour rester un jeton isolé : « 2π » → « 2 pi », « πx » →
+    // « pi x » (multiplication implicite), jamais un identifiant collé « pix ».
+    .replace(/π/g, " pi ");
 }
 
 function tokeniser(texte: string): Jeton[] {

@@ -120,7 +120,9 @@ export function construireFamilleADiviserFraction(): ExerciceFamilleA_DiviserFra
 
 export function construireFamilleADiviserProduit(): ExerciceFamilleA_DiviserProduit {
   const c = tirerEntierNonNul(-4, 4);
-  const k = tirerEntier(0, 3);
+  // k ≥ 1 (audit chapitre 4) : k = 0 donnait « x^{0}√x », soit √x seul — la variante « combiner les
+  // exposants » devenait triviale.
+  const k = tirerEntier(1, 3);
   const exposant = k + 0.5;
   return {
     famille: "A",

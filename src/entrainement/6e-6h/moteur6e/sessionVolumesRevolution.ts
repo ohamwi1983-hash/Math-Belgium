@@ -47,8 +47,15 @@ export function demarrerSessionVolumesRevolution(reglages: ReglagesSession6e, ge
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écran à choix fermé (ordre des deux courbes) : UN SEUL essai — audit chapitre 4 de 6e, point 9. */
+const PHASES_CHOIX_FERME: PhaseVolumesRevolution[] = ["cEcran2"];
+
+export function tentativesMaxCourant(etat: EtatSessionVolumesRevolution): number {
+  return PHASES_CHOIX_FERME.includes(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionVolumesRevolution): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionVolumesRevolution): EtatSessionVolumesRevolution {

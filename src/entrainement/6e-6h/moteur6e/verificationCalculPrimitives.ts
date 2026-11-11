@@ -76,6 +76,40 @@ import { evaluerExpressionExponentielle } from "./expressionExponentielle";
 
 const TOLERANCE = 0.01;
 
+/** Retire une constante d'intégration finale « + C » (ou + K, + c, + k) — audit du chapitre 4 :
+ * le cours l'écrit toujours, la refuser comme « expression non reconnue » était une fausse erreur.
+ * Comme la vérification se fait de toute façon à une constante près, l'omettre reste accepté. */
+export function retirerConstanteIntegration(texte: string): string {
+  return texte.replace(/\s*\+\s*[CcKk]\s*$/, "");
+}
+
+/**
+ * Diagnostic dédié « valeur absolue oubliée » (audit P22) : la saisie contient un ln sans valeur
+ * absolue, n'est pas définie en un point où la primitive attendue l'est, mais coïncide avec elle (à
+ * une constante près) partout où les deux sont définies. Renvoie le message à afficher, ou null.
+ */
+export function diagnostiquerValeurAbsolueOubliee(texte: string, referenceCorrecte: (v: number) => number, points: number[], variable: string = "x"): string | null {
+  const brut = retirerConstanteIntegration(texte);
+  if (!/ln/i.test(brut) || /abs|\|/i.test(brut)) return null;
+  const ecarts: number[] = [];
+  let horsDomaine = 0;
+  for (const v of points) {
+    const attendu = referenceCorrecte(v);
+    if (!Number.isFinite(attendu)) continue;
+    let soumis: number;
+    try {
+      soumis = evaluerExpressionExponentielle(brut, { [variable]: v });
+    } catch {
+      return null;
+    }
+    if (!Number.isFinite(soumis)) horsDomaine++;
+    else ecarts.push(soumis - attendu);
+  }
+  if (horsDomaine === 0 || ecarts.length < 2) return null;
+  if (ecarts.some((e) => Math.abs(e - ecarts[0]) > TOLERANCE)) return null;
+  return "Valeur absolue oubliée : ta primitive n'est définie que d'un côté. Écris ln|…| (par exemple ln|x−2|), car la fonction à primitiver est aussi définie de l'autre côté.";
+}
+
 // ============================================================================
 // Briques génériques (voir en-tête de fichier).
 // ============================================================================
@@ -84,6 +118,7 @@ const TOLERANCE = 0.01;
  * `variable`) à `referenceCorrecte` À UNE CONSTANTE ADDITIVE PRÈS : calcule l'écart à chaque point
  * comparable puis vérifie qu'il est LE MÊME PARTOUT (jamais comparé à 0). */
 export function diagnostiquerPrimitive(texte: string, referenceCorrecte: (v: number) => number, points: number[], tolerance: number = TOLERANCE, variable: string = "x"): StatutVerification {
+  texte = retirerConstanteIntegration(texte);
   const ecarts: number[] = [];
   for (const v of points) {
     const attendu = referenceCorrecte(v);
@@ -600,6 +635,33 @@ export function diagnostiquerEcran(exercice: ExerciceCalculPrimitives, phase: Ph
       return diagnostiquerGEcran3(exercice as ExerciceFamilleG, valeurs);
     case "gEcran4":
       return diagnostiquerGEcran4(exercice as ExerciceFamilleG, valeurs);
+  }
+}
+
+/** Message d'erreur SPÉCIFIQUE d'un écran (affiché à la place du message générique), ou null —
+ * aujourd'hui le seul diagnostic « valeur absolue oubliée » des écrans de primitive finale. */
+export function messageSpecifiqueEcran(exercice: ExerciceCalculPrimitives, phase: PhaseCalculPrimitives, valeurs: string[]): string | null {
+  const texte = valeurs[0] ?? "";
+  const ref = (exercice as { primitiveReference?: (x: number) => number }).primitiveReference;
+  if (!ref) return null;
+  switch (phase) {
+    case "aEcranDirect":
+    case "dEcranDirect":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, CANDIDATS_X);
+    case "aEcran2":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, (exercice as ExerciceFamilleA).sousType === "diviserProduit" ? CANDIDATS_X_POSITIF : CANDIDATS_X);
+    case "bEcran3":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, pointsBEcran3(exercice as ExerciceFamilleB));
+    case "cEcran4":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, pointsXPourC(exercice as ExerciceFamilleC));
+    case "dEcran4":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, pointsXPourD(exercice as ExerciceFamilleD_NonDirect));
+    case "fEcran2":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, pointsXPourF(exercice as ExerciceFamilleF));
+    case "gEcran4":
+      return diagnostiquerValeurAbsolueOubliee(texte, ref, pointsXPourG(exercice as ExerciceFamilleG));
+    default:
+      return null;
   }
 }
 

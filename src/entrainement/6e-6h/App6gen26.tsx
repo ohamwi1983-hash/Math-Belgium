@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculAires } from "./generateurs6e/calculAires";
 import type { IdVarianteCalculAires } from "./generateurs6e/calculAires";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculAires, soumettreReponseEcran } from "./moteur6e/sessionCalculAires";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculAires, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionCalculAires";
 import type { EtatSessionCalculAires, PhaseCalculAires } from "./moteur6e/typesCalculAires";
 import { diagnostiquerEcran } from "./moteur6e/verificationCalculAires";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
@@ -12,6 +12,8 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { LIBELLE_PHASE, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCalculAires";
 import { calculerRecapitulatifCalculAires, calculerSegmentsProgressionCalculAires } from "./ui6e/recapitulatifCalculAires";
+import { figureCalculAiresSvg } from "./ui6e/figureCalculAires";
+import { libellesReponse } from "./ui6e/libellesReponse";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -35,7 +37,9 @@ function nouvelleSession(): EtatSessionCalculAires {
 
 const ECRANS_RACINES: PhaseCalculAires[] = ["bEcran1", "cEcran1", "dEcran1"];
 
-const NOMBRE_INITIAL_RACINES: Partial<Record<PhaseCalculAires, number>> = { bEcran1: 2, cEcran1: 3, dEcran1: 2 };
+/** Un seul champ au départ (audit chapitre 4, 6gen26 C) : l'élève ajoute lui-même autant de racines
+ * qu'il en trouve — la consigne n'annonce plus leur nombre. */
+const NOMBRE_INITIAL_RACINES: Partial<Record<PhaseCalculAires, number>> = { bEcran1: 1, cEcran1: 1, dEcran1: 1 };
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -54,6 +58,9 @@ export function App6gen26() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché : entre dans la `key` des écrans, pour que les champs soient
+   * vidés après « Générer » même quand le nouvel exercice commence sur la même phase. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise `calculerRecapitulatifCalculAires`
    * pour la réponse ATTENDUE. Garde sur le libellé : le dernier écran de l'exercice n'avance jamais
@@ -93,6 +100,7 @@ export function App6gen26() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -104,6 +112,7 @@ export function App6gen26() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionCalculAires(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteCalculAires)));
   }
 
@@ -137,7 +146,7 @@ export function App6gen26() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -157,12 +166,12 @@ export function App6gen26() {
         <RecapitulatifPanel entrees={calculerRecapitulatifCalculAires(etat)} />
         {ECRANS_RACINES.includes(phase) && (
           <EtapeRacinesCalculAires
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             consigneEcran={consigneEcran(exercice, phase)}
-            placeholder="ex : 2"
+            placeholder="ex : 9"
             labelAjout="+ Ajouter une racine"
             nombreInitial={NOMBRE_INITIAL_RACINES[phase] ?? 2}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -173,7 +182,7 @@ export function App6gen26() {
 
         {!ECRANS_RACINES.includes(phase) && (
           <EtapeChampsCalculAires
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -182,8 +191,14 @@ export function App6gen26() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), libellesReponse(champsEcran(exercice, phase), valeurs))}
           />
+        )}
+
+        {enAttente?.etatSuivant.terminee && (
+          <figure style={{ margin: "1rem 0 0", textAlign: "center" }} aria-label="Figure de l'exercice">
+            <div dangerouslySetInnerHTML={{ __html: figureCalculAiresSvg(exercice) }} />
+          </figure>
         )}
       </main>
 

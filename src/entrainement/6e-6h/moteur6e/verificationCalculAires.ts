@@ -21,6 +21,13 @@ import type { PhaseCalculAires } from "./typesCalculAires";
 
 const TOLERANCE = 0.01;
 
+/** Tolérance d'une VALEUR (aire) : 0,01 en absolu, mais relative (0,05 %) pour les grands nombres —
+ * audit chapitre 4 de 6e, point 17 : une valeur arrondie au centième doit toujours passer, quelle
+ * que soit sa taille. */
+function toleranceValeur(cible: number): number {
+  return Math.max(TOLERANCE, 5e-4 * Math.abs(cible));
+}
+
 function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
@@ -48,7 +55,8 @@ function aireSurABAvecPrimitive(a: number, b: number, primitiveReference: (x: nu
 }
 
 export function diagnostiquerAEcran2(exercice: ExerciceAireA, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], aireSurABAvecPrimitive(exercice.a, exercice.b, exercice.primitiveReference), TOLERANCE);
+  const aire = aireSurABAvecPrimitive(exercice.a, exercice.b, exercice.primitiveReference);
+  return diagnostiquerValeur(valeurs[0], aire, toleranceValeur(aire));
 }
 export function verifierAEcran2(exercice: ExerciceAireA, valeurs: string[]): boolean {
   return diagnostiquerAEcran2(exercice, valeurs) === "correct";
@@ -73,7 +81,8 @@ export function verifierBEcran2(exercice: ExerciceAireB, valeurs: string[]): boo
 }
 
 export function diagnostiquerBEcran3(exercice: ExerciceAireB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], aireSurABAvecPrimitive(exercice.r1, exercice.r2, exercice.primitiveReference), TOLERANCE);
+  const aire = aireSurABAvecPrimitive(exercice.r1, exercice.r2, exercice.primitiveReference);
+  return diagnostiquerValeur(valeurs[0], aire, toleranceValeur(aire));
 }
 export function verifierBEcran3(exercice: ExerciceAireB, valeurs: string[]): boolean {
   return diagnostiquerBEcran3(exercice, valeurs) === "correct";
@@ -102,7 +111,7 @@ export function verifierCEcran2(exercice: ExerciceAireC, valeurs: string[]): boo
  * corresponde au signe attendu (garde-fou explicite demandé par la spec — voir en-tête de fichier,
  * "cross-check" écran 2/écran 3 de la famille C) : une réponse dont la valeur serait proche de la
  * bonne magnitude mais du mauvais signe est rejetée AVANT même la comparaison de tolérance. */
-function diagnostiquerValeurSigneeC(texte: string, cible: number, signeAttendu: SigneFonction, tolerance: number = TOLERANCE): StatutVerification {
+function diagnostiquerValeurSigneeC(texte: string, cible: number, signeAttendu: SigneFonction, tolerance: number = toleranceValeur(cible)): StatutVerification {
   const v = evaluerValeurExponentielle(texte);
   if (v === null) return "parse_error";
   const signeSoumisCorrespond = signeAttendu === "positif" ? v > 0 : v < 0;
@@ -136,7 +145,7 @@ export function verifierCEcran3(exercice: ExerciceAireC, valeurs: string[]): boo
 export function diagnostiquerCEcran4(exercice: ExerciceAireC, valeurs: string[]): StatutVerification {
   const { iGauche, iDroit } = integralesSousIntervallesC(exercice);
   const aireTotale = Math.abs(iGauche) + Math.abs(iDroit);
-  return diagnostiquerValeur(valeurs[0], aireTotale, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], aireTotale, toleranceValeur(aireTotale));
 }
 export function verifierCEcran4(exercice: ExerciceAireC, valeurs: string[]): boolean {
   return diagnostiquerCEcran4(exercice, valeurs) === "correct";
@@ -172,7 +181,8 @@ export function diagnostiquerDEcran3(exercice: ExerciceAireD, valeurs: string[])
   if (exercice.sousType === "parametre") {
     return diagnostiquerEquivalenceFonction(valeurs[0], exercice.aireDeMReference, CANDIDATS_M_POSITIFS, TOLERANCE, "m");
   }
-  return diagnostiquerValeur(valeurs[0], aireSurABAvecPrimitive(exercice.r1, exercice.r2, exercice.primitiveHReference), TOLERANCE);
+  const aire = aireSurABAvecPrimitive(exercice.r1, exercice.r2, exercice.primitiveHReference);
+  return diagnostiquerValeur(valeurs[0], aire, toleranceValeur(aire));
 }
 export function verifierDEcran3(exercice: ExerciceAireD, valeurs: string[]): boolean {
   return diagnostiquerDEcran3(exercice, valeurs) === "correct";

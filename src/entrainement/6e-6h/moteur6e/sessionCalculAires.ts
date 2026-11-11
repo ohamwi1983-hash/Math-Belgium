@@ -46,8 +46,17 @@ export function demarrerSessionCalculAires(reglages: ReglagesSession6e, generate
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écrans à choix fermé gagnables par élimination (signe f ≥ 0 / f ≤ 0, ordre des deux courbes) :
+ * UN SEUL essai (convention du site, audit chapitre 4 de 6e, point 9) — sinon le 2e essai donne la
+ * réponse à coup sûr. */
+const PHASES_CHOIX_FERME: PhaseCalculAires[] = ["aEcran1", "bEcran2", "cEcran2", "dEcran2"];
+
+export function tentativesMaxCourant(etat: EtatSessionCalculAires): number {
+  return PHASES_CHOIX_FERME.includes(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionCalculAires): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionCalculAires): EtatSessionCalculAires {

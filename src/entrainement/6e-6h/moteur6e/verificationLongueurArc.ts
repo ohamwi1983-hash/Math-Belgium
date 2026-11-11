@@ -52,10 +52,19 @@ import { diagnostiquerPrimitive } from "./verificationCalculPrimitives";
 
 const TOLERANCE = 0.01;
 
+/** Tolérance d'une VALEUR (longueur) : 0,01 en absolu, relative (0,05 %) pour les grands nombres —
+ * audit chapitre 4 de 6e, point 17. */
+function toleranceValeur(cible: number): number {
+  return Math.max(TOLERANCE, 5e-4 * Math.abs(cible));
+}
+
 /** Vrai si `texte` contient une occurrence littérale de "sqrt(" (espaces ignorés, insensible à la
  * casse) — voir en-tête de fichier, "Écran spécial". */
+/** Une saisie « simplifiée » ne doit plus contenir de racine : `sqrt(`, `√` ou `rac(` (tous trois
+ * acceptés par le parseur) — audit chapitre 4 de 6e, point 14 (seul « sqrt( » était détecté). */
 function contientRacineLitterale(texte: string): boolean {
-  return texte.toLowerCase().replace(/\s+/g, "").includes("sqrt(");
+  const t = texte.toLowerCase().replace(/\s+/g, "");
+  return t.includes("sqrt(") || t.includes("√") || /rac\d*\(/.test(t);
 }
 
 // ============================================================================
@@ -85,7 +94,7 @@ export function verifierAEcran2(exercice: ExerciceLongueurArcA, valeurs: string[
 
 export function diagnostiquerAEcran3(exercice: ExerciceLongueurArcA, valeurs: string[]): StatutVerification {
   const longueur = exercice.primitiveReference(exercice.b) - exercice.primitiveReference(exercice.a);
-  return diagnostiquerValeur(valeurs[0], longueur, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], longueur, toleranceValeur(longueur));
 }
 export function verifierAEcran3(exercice: ExerciceLongueurArcA, valeurs: string[]): boolean {
   return diagnostiquerAEcran3(exercice, valeurs) === "correct";
@@ -127,7 +136,7 @@ export function verifierBEcran3(exercice: ExerciceLongueurArcB, valeurs: string[
 
 export function diagnostiquerBEcran4(exercice: ExerciceLongueurArcB, valeurs: string[]): StatutVerification {
   const longueur = exercice.primitiveEnTReference(exercice.t2) - exercice.primitiveEnTReference(exercice.t1);
-  return diagnostiquerValeur(valeurs[0], longueur, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], longueur, toleranceValeur(longueur));
 }
 export function verifierBEcran4(exercice: ExerciceLongueurArcB, valeurs: string[]): boolean {
   return diagnostiquerBEcran4(exercice, valeurs) === "correct";
@@ -161,7 +170,7 @@ export function verifierCEcran2(exercice: ExerciceLongueurArcC, valeurs: string[
  * nécessaire — CONTRASTE explicite avec `diagnostiquerAEcran2` (voir en-tête de fichier). */
 export function diagnostiquerCEcran3(exercice: ExerciceLongueurArcC, valeurs: string[]): StatutVerification {
   const longueur = exercice.primitiveReference(exercice.b) - exercice.primitiveReference(exercice.a);
-  return diagnostiquerValeur(valeurs[0], longueur, TOLERANCE);
+  return diagnostiquerValeur(valeurs[0], longueur, toleranceValeur(longueur));
 }
 export function verifierCEcran3(exercice: ExerciceLongueurArcC, valeurs: string[]): boolean {
   return diagnostiquerCEcran3(exercice, valeurs) === "correct";

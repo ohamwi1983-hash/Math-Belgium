@@ -31,4 +31,10 @@ export interface ExerciceQuellePrimitive {
    * une constante C non entière/fractionnaire issue du calcul est acceptée sans difficulté, la
    * vérification restant symbolique — voir `moteur6e/verificationQuellePrimitive.ts`). */
   b: number;
+  /** Intervalle de validité ]gauche ; droite[ de la condition initiale : le plus grand intervalle
+   * contenant a sur lequel f est définie (audit décision C — quand la primitive a plusieurs
+   * branches, la constante n'est déterminée que sur la branche qui contient a). `null` = infini ;
+   * champs absents = f définie sur ℝ tout entier (rien à préciser). */
+  intervalleGauche?: number | null;
+  intervalleDroite?: number | null;
 }

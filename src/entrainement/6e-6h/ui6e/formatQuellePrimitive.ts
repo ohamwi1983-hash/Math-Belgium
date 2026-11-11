@@ -3,6 +3,7 @@ import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExerciceBase } from "../moteur6e/typesCalculPrimitives";
 import type { PhaseQuellePrimitive } from "../moteur6e/typesQuellePrimitive";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
+import { decimalLatex, egalExactPuisApproche, valeurExacteLatex } from "./formatMonome";
 import {
   LIBELLE_FAMILLE,
   LIBELLE_PHASE as LIBELLE_PHASE_BASE,
@@ -67,26 +68,42 @@ function estPhaseBase(phase: PhaseQuellePrimitive): phase is PhaseCalculPrimitiv
   return phase !== "final";
 }
 
-/** Arrondi d'affichage (4 décimales, zéros de fin retirés) — utilisé UNIQUEMENT pour un nombre
- * RÉSULTAT DE CALCUL (C, valeur de F(x) substituée), jamais pour une valeur générée par la
- * plateforme (a, b — toujours des fractions/entiers exacts, voir `formatFractionLatex`). C peut être
- * irrationnel (famille C/G, ln/arctan en jeu) — spec explicite : "une constante C non entière ou
- * fractionnaire est acceptée sans difficulté". */
-function formatDecimal(v: number): string {
-  const r = Math.round(v * 10000) / 10000;
-  return String(r === 0 ? 0 : r);
+/** C = b − F(a), toujours calculé depuis la référence (jamais depuis une saisie). */
+function cAttendu(exercice: ExerciceQuellePrimitive): number {
+  return exercice.b - exercice.exerciceBase.primitiveReference(exercice.a);
 }
 
-/** Terme additif signé COMPLET (signe + magnitude) pour un nombre DÉCIMAL/irrationnel — jamais le
- * signe seul (voir en-tête de fichier). Renvoie "" si `c` est nul (jamais un "+0" cosmétique). */
-function termeAdditifDecimal(c: number): string {
-  const r = Math.round(c * 10000) / 10000;
-  if (r === 0) return "";
-  return r < 0 ? ` - ${formatDecimal(-r)}` : ` + ${formatDecimal(r)}`;
+/** Terme additif « + C » écrit avec la valeur de C : forme EXACTE si elle est reconnue (audit P16 :
+ * « + 1.6137 » avec un point décimal), sinon décimale arrondie au centième précédée de « ≈ » dans
+ * l'égalité (voir `formatReponseAttenduePhaseLatexQuellePrimitive`). "" si C = 0. */
+function termeAdditifC(c: number): { terme: string; exact: boolean } {
+  const exacte = valeurExacteLatex(c);
+  if (exacte === "0" || Math.abs(c) < 1e-12) return { terme: "", exact: true };
+  if (exacte !== null) {
+    if (exacte.startsWith("-")) return { terme: ` - ${exacte.slice(1)}`, exact: true };
+    return { terme: ` + ${exacte}`, exact: true };
+  }
+  return { terme: c < 0 ? ` - ${decimalLatex(-c, 2)}` : ` + ${decimalLatex(c, 2)}`, exact: false };
 }
 
 function aLatex(exercice: ExerciceQuellePrimitive): string {
   return formatFractionLatex(exercice.aNum, exercice.aDen);
+}
+
+function borneLatex(v: number | null | undefined, cote: "gauche" | "droite"): string {
+  if (v === null || v === undefined) return cote === "gauche" ? "-\\infty" : "+\\infty";
+  return valeurExacteLatex(v) ?? decimalLatex(v, 2);
+}
+
+/** « x ∈ ]p ; q[ » si f n'est pas définie sur ℝ tout entier (audit décision C), sinon null. */
+export function intervalleLatexQuellePrimitive(exercice: ExerciceQuellePrimitive): string | null {
+  if (exercice.intervalleGauche === undefined && exercice.intervalleDroite === undefined) return null;
+  return `x\\in\\,\\left]${borneLatex(exercice.intervalleGauche, "gauche")}\\,;${borneLatex(exercice.intervalleDroite, "droite")}\\right[`;
+}
+
+function conditionLatex(exercice: ExerciceQuellePrimitive): string {
+  const intervalle = intervalleLatexQuellePrimitive(exercice);
+  return `F(${aLatex(exercice)})=${exercice.b}${intervalle ? `,\\qquad ${intervalle}` : ""}`;
 }
 
 // ============================================================================
@@ -94,21 +111,33 @@ function aLatex(exercice: ExerciceQuellePrimitive): string {
 // ============================================================================
 
 export function consigneGeneraleQuellePrimitive(): FragmentConsigne[] {
-  return [texte("Détermine la primitive F de f qui vérifie la condition initiale ci-dessous. Garde la constante C dans tous tes calculs jusqu'à l'étape finale — c'est elle qui te permettra de répondre à la toute dernière question.")];
+  return [
+    texte("Détermine la primitive F de f qui vérifie la condition initiale ci-dessous. Écris d'abord la primitive générale, avec sa constante "),
+    latex("C"),
+    texte(", puis utilise la condition initiale pour trouver "),
+    latex("C"),
+    texte("."),
+  ];
 }
 
 export function blocDonneesQuellePrimitive(exercice: ExerciceQuellePrimitive): string[] {
-  return [...blocDonneesBase(exercice.exerciceBase), `F(${aLatex(exercice)})=${exercice.b}`];
+  return [...blocDonneesBase(exercice.exerciceBase), conditionLatex(exercice)];
 }
 
 export function consigneEcranQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): FragmentConsigne[] {
   if (!estPhaseBase(phase)) {
     return [
-      texte("Substitue "),
-      latex("x=a"),
-      texte(" dans la primitive générale trouvée (C compris), pose l'équation résultante égale à b, puis isole C. Donne la valeur de C, puis l'expression finale de "),
+      texte("Remplace x par "),
+      latex(aLatex(exercice)),
+      texte(" dans "),
+      latex("F(x)+C"),
+      texte(", pose l'égalité avec "),
+      latex(`${exercice.b}`),
+      texte(" et isole "),
+      latex("C"),
+      texte(" (valeur exacte ou arrondie au centième). Écris ensuite "),
       latex("F(x)"),
-      texte(" avec C substituée."),
+      texte(" en remplaçant C par sa valeur."),
     ];
   }
   return consigneEcranBase(exercice.exerciceBase, phase);
@@ -130,7 +159,7 @@ function etatActuelChaineEmpruntee(exerciceBase: ExerciceBaseQuellePrimitive): s
 
 export function etatActuelQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): string[] | null {
   if (!estPhaseBase(phase)) {
-    return [...etatActuelChaineEmpruntee(exercice.exerciceBase), `F(x)=${primitiveLatexBase(exercice.exerciceBase)}+C`, `F(${aLatex(exercice)})=${exercice.b}`];
+    return [...etatActuelChaineEmpruntee(exercice.exerciceBase), `F(x)=${primitiveLatexBase(exercice.exerciceBase)}+C`, conditionLatex(exercice)];
   }
   return etatActuelBase(exercice.exerciceBase, phase);
 }
@@ -138,8 +167,8 @@ export function etatActuelQuellePrimitive(exercice: ExerciceQuellePrimitive, pha
 export function champsQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): ChampDef[] {
   if (!estPhaseBase(phase)) {
     return [
-      { label: "C =", placeholder: "ex : 5/2" },
-      { label: "F(x) =", placeholder: "ex : x²+5/2" },
+      { label: "C =", placeholder: "ex : 7−ln(9)" },
+      { label: "F(x) (avec la valeur de C) =", placeholder: "ex : 9x^7+7−ln(9)" },
     ];
   }
   return champsEcranBase(exercice.exerciceBase, phase);
@@ -147,14 +176,16 @@ export function champsQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: 
 
 export function aideNiveau1QuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): AideAvecLatex {
   if (!estPhaseBase(phase)) {
-    return { texte: "Remplace x par a dans l'expression générale de F(x) (C compris), puis pose cette expression égale à b.", latex: null };
+    return { texte: "Condition initiale à traduire en équation d'inconnue C :", latex: `F(${aLatex(exercice)})=${exercice.b}\\quad\\Longleftrightarrow\\quad \\Big[\\,${primitiveLatexBase(exercice.exerciceBase)}+C\\,\\Big]_{x=${aLatex(exercice)}}=${exercice.b}` };
   }
   return aideNiveau1Base(exercice.exerciceBase, phase);
 }
 
 export function aideNiveau2QuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): AideAvecLatex {
   if (!estPhaseBase(phase)) {
-    return { texte: "Équation à résoudre en C (résolution non faite) :", latex: `F(${aLatex(exercice)})+C=${exercice.b}` };
+    const valeurF = exercice.exerciceBase.primitiveReference(exercice.a);
+    const valeurLatex = valeurExacteLatex(valeurF) ?? decimalLatex(valeurF, 3);
+    return { texte: "Valeur de la primitive (sans C) en ce point — il reste à isoler C :", latex: `${valeurLatex}+C=${exercice.b}` };
   }
   return aideNiveau2Base(exercice.exerciceBase, phase);
 }
@@ -174,8 +205,9 @@ export const LIBELLE_PHASE: Record<PhaseQuellePrimitive, string> = {
  * (CLAUDE.md). */
 export function formatReponseAttenduePhaseLatexQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): string[] {
   if (!estPhaseBase(phase)) {
-    const cExact = exercice.b - exercice.exerciceBase.primitiveReference(exercice.a);
-    return [`C \\approx ${formatDecimal(cExact)}`, `F(x)=${primitiveLatexBase(exercice.exerciceBase)}${termeAdditifDecimal(cExact)}`];
+    const c = cAttendu(exercice);
+    const { terme, exact } = termeAdditifC(c);
+    return [`C ${egalExactPuisApproche(c, 2)}`, `F(x)${exact ? "=" : "\\approx"}${primitiveLatexBase(exercice.exerciceBase)}${terme}`];
   }
   return formatReponseAttenduePhaseLatexBase(exercice.exerciceBase, phase);
 }

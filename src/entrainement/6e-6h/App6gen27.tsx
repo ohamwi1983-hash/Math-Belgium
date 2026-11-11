@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVolumesRevolution } from "./generateurs6e/volumesRevolution";
 import type { IdVarianteVolumesRevolution } from "./generateurs6e/volumesRevolution";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionVolumesRevolution, soumettreReponseEcran } from "./moteur6e/sessionVolumesRevolution";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionVolumesRevolution, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionVolumesRevolution";
 import type { EtatSessionVolumesRevolution, PhaseVolumesRevolution } from "./moteur6e/typesVolumesRevolution";
 import { diagnostiquerEcran } from "./moteur6e/verificationVolumesRevolution";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
@@ -12,6 +12,8 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { LIBELLE_PHASE, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatVolumesRevolution";
 import { calculerRecapitulatifVolumesRevolution, calculerSegmentsProgressionVolumesRevolution } from "./ui6e/recapitulatifVolumesRevolution";
+import { figureVolumesRevolutionSvg } from "./ui6e/figureVolumesRevolution";
+import { libellesReponse } from "./ui6e/libellesReponse";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -54,6 +56,9 @@ export function App6gen27() {
    * `enAttente`. */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Numéro de l'exercice affiché : entre dans la `key` des écrans, pour que les champs soient
+   * vidés après « Générer » même quand le nouvel exercice commence sur la même phase. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
    * `calculerRecapitulatifVolumesRevolution` pour la réponse ATTENDUE. Garde sur le libellé : le
@@ -94,6 +99,7 @@ export function App6gen27() {
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
       setHistorique([]);
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -105,6 +111,7 @@ export function App6gen27() {
     setEnAttente(null);
     setHistorique([]);
     setFicheOuverteIndex(null);
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionVolumesRevolution(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteVolumesRevolution)));
   }
 
@@ -138,7 +145,7 @@ export function App6gen27() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -158,14 +165,14 @@ export function App6gen27() {
         <RecapitulatifPanel entrees={calculerRecapitulatifVolumesRevolution(etat)} />
         {ECRANS_RACINES.includes(phase) && (
           <EtapeRacinesCalculAires
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             consigneEcran={consigneEcran(exercice, phase)}
-            placeholder="ex : 2"
+            placeholder="ex : 9"
             labelAjout="+ Ajouter une valeur"
-            nombreInitial={2}
+            nombreInitial={1}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
@@ -174,7 +181,7 @@ export function App6gen27() {
 
         {!ECRANS_RACINES.includes(phase) && (
           <EtapeChampsCalculAires
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -183,8 +190,14 @@ export function App6gen27() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), libellesReponse(champsEcran(exercice, phase), valeurs))}
           />
+        )}
+
+        {enAttente?.etatSuivant.terminee && (
+          <figure style={{ margin: "1rem 0 0", textAlign: "center" }} aria-label="Figure de l'exercice">
+            <div dangerouslySetInnerHTML={{ __html: figureVolumesRevolutionSvg(exercice) }} />
+          </figure>
         )}
       </main>
 
