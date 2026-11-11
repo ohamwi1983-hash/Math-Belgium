@@ -956,6 +956,16 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'regle-a-calcul-widget',
+          label: 'Manipule toi-même — la règle à calcul',
+          caption:
+            'La règle à calcul transforme une multiplication en addition de longueurs : ' +
+            'chaque nombre N est placé à la distance log N. Place l\'index de la réglette ' +
+            'mobile sous a, puis lis au-dessus de b : log a + log b = log(ab). Si le ' +
+            'produit dépasse 10, on utilise l\'index 10 et on multiplie la lecture par 10.',
+        },
+        {
           kind: 'entrainement',
           title: 'Propriétés du logarithme',
           generatorId: '6gen13',
@@ -1187,6 +1197,17 @@ export const fonctionsLogarithmes: ChapterContent = {
                 '$x = 4$ : $\\log_2(4) + \\log_2(2) = 2 + 1 = 3$. $S = \\{4\\}$.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'solution-parasite-log-widget',
+          label: 'Manipule toi-même — d\'où vient la solution parasite ?',
+          caption:
+            'Compare l\'équation de départ et sa forme regroupée : là où les deux existent, ' +
+            'leurs courbes coïncident. Mais la forme regroupée existe aussi sur une autre ' +
+            'branche, où la droite y = k la coupe une seconde fois : c\'est la solution ' +
+            'parasite. Le domaine de l\'équation de départ suffit à l\'écarter. Le second ' +
+            'onglet compare 2·ln(x) et ln(x²).',
         },
         {
           kind: 'exempleLibre',
@@ -2726,6 +2747,16 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Près d\'une asymptote verticale de f, $|f\'|$ devient très grand : la courbe y devient ' +
               'presque verticale.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'f-et-fprime-widget',
+          label: 'Manipule toi-même — dessiner f′ à partir de f',
+          caption:
+            'Fais glisser le point sur f : la pente de la tangente est reportée sur le ' +
+            'graphique du bas, qui dessine f′ au fur et à mesure. Point dans la bande verte ' +
+            ': f monte ; dans la bande rouge : f descend. Quand f′ s\'annule, f a un ' +
+            'extremum ; quand f′ atteint un extremum, f change de concavité.',
         },
         {
           kind: 'piege',
