@@ -249,7 +249,7 @@
       });
       var p = this._px(milieuMath[0], milieuMath[1]);
       var dx = direction[0], dy = -direction[1], n = Math.hypot(dx, dy) || 1;
-      var nx = dy / n, ny = -dx / n; // normale à gauche du sens de parcours (repère écran)
+      var nx = -dy / n, ny = dx / n; // normale choisie par le sens de « direction » (repère écran)
       var d = (total / 2) * Math.abs(nx) + 11 * Math.abs(ny) + 9;
       var cx = p[0] + nx * d, cy = p[1] + ny * d;
       g.setAttribute("transform", "translate(" + (cx - total / 2).toFixed(1) + "," + (cy + 5).toFixed(1) + ")");

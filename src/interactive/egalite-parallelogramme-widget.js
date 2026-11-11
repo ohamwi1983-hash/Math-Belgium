@@ -162,6 +162,11 @@
 
     _ligne(a, b, attrs) {
       var pa = this._px(a[0], a[1]), pb = this._px(b[0], b[1]);
+      if (attrs.class === "v") {
+        // la pointe ne doit pas disparaître sous le point d'arrivée
+        var dx = pb[0] - pa[0], dy = pb[1] - pa[1], n = Math.hypot(dx, dy);
+        if (n > 12) pb = [pb[0] - dx / n * 8, pb[1] - dy / n * 8];
+      }
       attrs.x1 = pa[0].toFixed(1); attrs.y1 = pa[1].toFixed(1); attrs.x2 = pb[0].toFixed(1); attrs.y2 = pb[1].toFixed(1);
       this._svg.appendChild(el("line", attrs));
     }
