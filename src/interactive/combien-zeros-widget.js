@@ -33,22 +33,23 @@
     { id: "racine", nom: "Racine carrée", ligne: "Racine carrée", g: function (u) { return u >= 0 ? Math.sqrt(u) : null; },
       ecrire: function (s) { return "√(" + s + ")"; },
       resoudre: function (K) { return K < -EPS ? [] : [K * K]; } },
-    { id: "cube", nom: "Cube", ligne: "Cube / Racine cubique / Inverse", g: function (u) { return u * u * u; },
+    { id: "cube", nom: "Cube", ligne: "Cube / Racine cubique", g: function (u) { return u * u * u; },
       ecrire: function (s) { return "(" + s + ")³"; },
       resoudre: function (K) { return [cbrt(K)]; } },
-    { id: "cubique", nom: "Racine cubique", ligne: "Cube / Racine cubique / Inverse", g: cbrt,
+    { id: "cubique", nom: "Racine cubique", ligne: "Cube / Racine cubique", g: cbrt,
       ecrire: function (s) { return "∛(" + s + ")"; },
       resoudre: function (K) { return [K * K * K]; } },
-    { id: "inverse", nom: "Inverse", ligne: "Cube / Racine cubique / Inverse", g: function (u) { return Math.abs(u) < EPS ? null : 1 / u; },
+    { id: "inverse", nom: "Inverse", ligne: "Inverse", g: function (u) { return Math.abs(u) < EPS ? null : 1 / u; },
       ecrire: function (s) { return "1/(" + s + ")"; },
       resoudre: function (K) { return Math.abs(K) < EPS ? [] : [1 / K]; } },
   ];
 
-  // Tableau du chapitre, complété par la colonne K = 0.
+  // Le tableau du chapitre (« Nombre de solutions de [famille](ax+b) = K »), ligne pour ligne.
   var TABLEAU = [
     { ligne: "Carrée / Valeur absolue", neg: "0", nul: "1", pos: "2" },
     { ligne: "Racine carrée", neg: "0", nul: "1", pos: "1" },
-    { ligne: "Cube / Racine cubique / Inverse", neg: "1", nul: "1", nulNote: "inverse : 0", pos: "1" },
+    { ligne: "Cube / Racine cubique", neg: "1", nul: "1", pos: "1" },
+    { ligne: "Inverse", neg: "1", nul: "0", nulNote: "1/u ne vaut jamais 0", pos: "1" },
   ];
 
   function famille(id) { return FAMILLES.filter(function (f) { return f.id === id; })[0]; }
@@ -165,7 +166,7 @@
     '</div>' +
     '<div class="resultat" aria-live="polite"><span class="nombre" id="nombre"></span><span class="valeurs" id="valeurs"></span><p class="message" id="message"></p></div>' +
     '<div class="table-zone"><table><thead><tr><th>Famille</th><th>K &lt; 0</th><th>K = 0</th><th>K &gt; 0</th></tr></thead><tbody id="tableau"></tbody></table></div>' +
-    '<p class="note">Nombre de solutions de [famille](ax + b) = K. La colonne K = 0 complète le tableau du cours.</p>' +
+    '<p class="note">Nombre de solutions de [famille](ax + b) = K — le même tableau que dans le cours.</p>' +
     '<div class="boutons"><button class="btn" id="reset" type="button">Réinitialiser</button></div>';
 
   class CombienZerosWidgetClass extends HTMLElement {

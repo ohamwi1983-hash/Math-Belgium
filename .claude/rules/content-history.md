@@ -2080,3 +2080,21 @@ paths:
   (c'est un entier : « au moins 18,75 » veut dire « au moins 19 »). gen37 (`nMinAttendu`, écran, aides,
   corrigé et barème papier) et le piège « Arrondir sans perdre la garantie » suivent ; un pourcentage
   minimal reste arrondi vers le bas.
+
+- **4e, Chapitre 3 — Caractéristiques d'une fonction et fonctions de référence**
+  (`caracteristiques-fonctions-reference`) : audit puis enrichissement validé par l'utilisateur (toutes
+  les recommandations). § 1 : image, antécédent, ensemble image (dans la méthode de lecture), résolution
+  graphique de f(x) = k et f(x) > k, tableau de variations lu sur une courbe, comparaison f(x) > g(x) ;
+  « Le sais-tu ? » Oresme déplacé de l'intro vers § 1 ; point creux ajouté en (0 ; 0,5) sur la courbe
+  composite ; encadré « Trois symboles à distinguer en un point » (le point plein n'est pas une
+  exclusion). § 2 : valeur absolue au niveau 1, sous-partie « Quand le membre de droite contient x »
+  (niveau 2 de gen13 : condition de validité, solution étrangère), et le tableau du nombre de solutions de
+  [famille](ax+b) = K complété par la colonne K = 0 — l'inverse n'y a AUCUNE solution (le tableau disait
+  « toujours 1 »). § 3 : piège « f(2x) comprime », exemple complet des 8 paramètres construit pas à pas
+  dans l'ordre de gen11, formes canoniques racine carrée et cube, astuce « une même courbe, deux lectures »
+  (gen11 ne retient que la lecture horizontale : l'astuce le dit). Révision : 243 affirmations (le kicker
+  disait 140). Ateliers : 4 nouveaux — `lire-courbe-widget` (§ 1), `combien-zeros-widget` et
+  `solution-etrangere-widget` (§ 2), `pas-a-pas-transformations-widget` (§ 3) ;
+  `transformation-8-parametres-widget` gagne un mode Défi (verdict sur les courbes, réglages équivalents
+  acceptés) et le suivi de l'image de (1 ; 1) ; `familles-parite-widget` gagne un mode « fonction
+  transformée » (TH, TV) qui teste la parité.

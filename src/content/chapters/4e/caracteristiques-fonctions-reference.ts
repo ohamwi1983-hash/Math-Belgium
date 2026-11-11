@@ -231,10 +231,11 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         tag: 'familles-parite-widget',
         label: 'Manipule toi-même — miroir ou demi-tour ?',
         caption:
-          'Choisis une famille et fais glisser t : son symétrique en −t apparaît automatiquement ' +
-          '— miroir vertical (paire) ou symétrie centrale par l\'origine (impaire). Pour la ' +
-          'racine carrée, aucun symétrique n\'apparaît : le domaine à sens unique ne contient ' +
-          'tout simplement pas −t.',
+          'Choisis une famille et observe le symétrique de (t ; f(t)) : miroir vertical ' +
+          '(paire) ou symétrie par l\'origine (impaire) ; pour la racine carrée, aucun ' +
+          'symétrique, son domaine ne contient pas −t. Passe ensuite en mode « Fonction ' +
+          'transformée » : une translation horizontale casse toujours la parité, une ' +
+          'translation verticale casse l\'imparité mais pas la parité.',
       },
       {
         kind: 'astuce',
@@ -576,6 +577,18 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'lire-courbe-widget',
+          label: 'Manipule toi-même — lire une courbe : image, antécédents, inéquation, extremums',
+          caption:
+            'Quatre lectures sur la même courbe. Image : fais glisser la droite x = a et ' +
+            'lis f(a) — ou « n\'existe pas » sur une valeur exclue. Antécédents : fais ' +
+            'glisser la droite y = k et compte les points d\'intersection. Inéquation : ' +
+            'choisis le symbole, l\'ensemble des x solutions se colore sur l\'axe, avec les ' +
+            'bons crochets. Extremums : règle la fenêtre [c ; d] et regarde le maximum et ' +
+            'le minimum changer — ou ne plus exister.',
+        },
+        {
           kind: 'application',
           titre: 'Lire un graphique de population ou d\'épidémie',
           illustrations: [
@@ -686,6 +699,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'combien-zeros-widget',
+          label: 'Manipule toi-même — combien de solutions ?',
+          caption:
+            'Choisis une famille, règle a et b, puis déplace la droite y = K : le nombre de ' +
+            'points d\'intersection — donc de solutions de [famille](ax + b) = K — ne dépend ' +
+            'que de la famille et du signe de K. La case correspondante du tableau ' +
+            'ci-dessus s\'allume.',
+        },
+        {
           kind: 'astuce',
           label: 'Astuce — carrée et valeur absolue se séparent en deux équations',
           text:
@@ -738,6 +761,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'carré, mais **pas** l\'équation de départ : avec $x = -1$, $\\sqrt{-1+2} = 1$, alors que le ' +
             'membre de droite vaut $-1$. Confronte **toujours** chaque candidate à la condition de ' +
             'validité.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'solution-etrangere-widget',
+          label: 'Manipule toi-même — pourquoi vérifier après avoir élevé au carré ?',
+          caption:
+            'À gauche, √(x + 2) et x ne se croisent qu\'une fois. À droite, après élévation ' +
+            'au carré, x + 2 et x² se croisent deux fois : le point en rouge est une ' +
+            'solution étrangère, née du carré. Change de préréglage ou règle p et q : seule ' +
+            'la vérification (ou la condition de validité) permet de l\'écarter.',
         },
         {
           kind: 'exemple',
@@ -983,6 +1016,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'pas-a-pas-transformations-widget',
+          label: 'Manipule toi-même — transformer pas à pas',
+          caption:
+            'Pars de la fonction de référence et applique les paramètres un par un, dans ' +
+            'l\'ordre : CH/EH et SOY, puis TH, puis EV/CV et SOX, puis TV. À chaque étape, ' +
+            'la courbe précédente reste en pointillés : observe ce que chaque paramètre ' +
+            'change, et suis le point caractéristique C et l\'image A du point (1 ; 1). Le ' +
+            'premier préréglage est l\'exemple ci-dessus.',
+        },
+        {
           kind: 'application',
           titre: 'Décaler un signal physique dans le temps ou en intensité',
           illustrations: [
@@ -1025,10 +1069,11 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           tag: 'transformation-8-parametres-widget',
           label: 'Manipule toi-même — les 8 paramètres en direct',
           caption:
-            'Choisis une famille, règle TH/TV/CH·EH/EV·CV et coche SOX/SOY : le point ' +
-            'caractéristique (violet) reste TOUJOURS exactement en x=TH, quoi que tu règles par ' +
-            'ailleurs. Fais glisser TH vers la gauche ou la droite pour vérifier le piège du ' +
-            'signe : la courbe se déplace du MÊME côté que TH, jamais de l\'opposé.',
+            'En mode Libre, choisis une famille, règle TH/TV/CH·EH/EV·CV et coche SOX/SOY : ' +
+            'le point caractéristique (violet) reste toujours en x = TH, et le point A suit ' +
+            'l\'image de (1 ; 1). En mode Défi, recouvre la courbe en pointillés verts avec ' +
+            'les curseurs : plusieurs réglages peuvent donner la même courbe (pense à la ' +
+            'parité).',
         },
         {
           kind: 'entrainement',
