@@ -197,6 +197,17 @@ export const suites: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'gauss-double-echelle-widget',
+          label: 'Manipule toi-même — la double échelle',
+          caption:
+            'Règle n, u₁ et r, puis appuie sur « Assembler » : la même suite écrite à ' +
+            'l\'envers descend d\'un seul bloc et s\'emboîte parfaitement sur l\'escalier, car ' +
+            'chaque colonne vaut u₁ + uₙ. Le rectangle obtenu contient deux fois la somme : ' +
+            '2·Sₙ = n × (u₁ + uₙ). Le bouton « Gauss » refait le calcul du jeune Gauss : 1 ' +
+            '+ 2 + … + 100 = 5 050.',
+        },
+        {
           kind: 'rappel',
           label: "Somme des n premiers termes d'une suite arithmétique",
           items: ['$S_n = \\dfrac{n(u_1+u_n)}{2}$ — n fois la moyenne du premier et du dernier terme.'],
@@ -378,6 +389,17 @@ export const suites: ChapterContent = {
             'Même principe pour montrer qu\'elle ne l\'est **pas** : deux rapports consécutifs ' +
               'différents suffisent. Ex. $u_n = n^2$ : $\\dfrac{4}{1} = 4 \\neq \\dfrac{9}{4}$.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'arithmetique-ou-geometrique-widget',
+          label: 'Manipule toi-même — arithmétique, géométrique, ou ni l\'une ni l\'autre ?',
+          caption:
+            'Cinq termes, une question : arithmétique, géométrique, les deux, ou ni l\'une ' +
+            'ni l\'autre ? Fais calculer les différences et les rapports avant de répondre — ' +
+            'tu n\'as qu\'un essai. Attention aux pièges : les carrés, les nombres ' +
+            'triangulaires ou Fibonacci ont l\'air réguliers sans être ni l\'un ni l\'autre, ' +
+            'et une suite constante est les deux à la fois.',
         },
         {
           kind: 'exemple',
@@ -829,6 +851,17 @@ export const suites: ChapterContent = {
               '$0{,}999\\ldots = 1$ : deux écritures du même nombre. De même, ' +
               '$0{,}2727\\ldots = \\dfrac{0{,}27}{1 - 0{,}01} = \\dfrac{27}{99} = \\dfrac{3}{11}$.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'somme-infinie-zenon-widget',
+          label: 'Manipule toi-même — une infinité de termes, une somme finie',
+          caption:
+            'Choisis u₁ et q, puis ajoute des termes. Le carré représente S∞ : chaque terme ' +
+            'en remplit une part, et ce qui manque est multiplié par q à chaque étape, sans ' +
+            'jamais disparaître. Avec q négatif, les sommes font des allers-retours autour ' +
+            'de S∞ ; avec q ≥ 1, elles ne se stabilisent pas et la somme infinie n\'existe ' +
+            'pas. Le préréglage « 0,999… » montre pourquoi 0,999… = 1.',
         },
         { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
         {
