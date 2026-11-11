@@ -2145,3 +2145,24 @@ paths:
   `regle-a-calcul-widget`, `echelle-semi-log-widget` (§ 1), `solution-parasite-log-widget` (§ 2),
   `croissance-comparee-log-widget` (§ 5), `chainette-widget` (§ 7), `f-et-fprime-widget` (§ 8),
   `datation-carbone14-widget` (§ 10).
+
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : audit puis enrichissement
+  validé par l'utilisateur (toutes les recommandations). Corrections : « aucune primitive si f n'est pas
+  continue » remplacé par le vrai résultat (toute fonction continue sur un intervalle admet des primitives,
+  admis) ; ln|x| : constante propre à chaque intervalle de ℝ₀ ; signe de l'intégrale « même si a < b » →
+  « lorsque a < b » ; astuce hors sujet « racine / solution » remplacée par « vérifier deux fois » ; légendes
+  d'économie (coût pour passer de 3 à 8 unités, surplus 32 € pour un prix de 12 €) ; « convexe (tournée vers
+  le haut) » ; positivité et croissance de l'intégrale énoncées (la démonstration de la moyenne s'en servait).
+  Le théorème fondamental est désormais **démontré** par la fonction aire A(x) = ∫ₐˣ f (encadrement
+  m·h ≤ A(x+h) − A(x) ≤ M·h). Contenu : linéarité et f(ax + b), tableau complété (1/x², √x, 1/cos²), formes
+  u′/u (tan) et u′uⁿ, ∫ ln x par parties, 2e IPP détaillée (§ 1) ; trois conditions initiales dont une pour
+  x < 0 (§ 2) ; substitution avec changement de bornes, parité, valeur moyenne de sin (§ 3) ; sin sur
+  [0 ; 2π], aire entre x³ et x, aire sous ln (§ 4) ; cône retrouvé, boule 4/3·πr³, paraboloïde, historique
+  Kepler (§ 5) ; longueur de y = x² par trapèzes, historique Descartes / Neil / van Heuraet (§ 6) ;
+  déplacement ≠ distance, trapèzes sur relevés, débit, bol par soustraction (§ 7) ; checklist, formulaire,
+  renvoi vers le chapitre 8 (densité). Les énoncés de démonstration passent en appariement **par clé**
+  (chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES`). Ateliers : `famille-primitives-widget` (choix de f, deux
+  constantes pour 1/x), `condition-initiale-widget` (choix de f, calcul de C pas à pas),
+  `sommes-riemann-widget` (4 fonctions, point milieu, encadrement) ; 7 nouveaux — `ipp-choix-widget` (§ 1),
+  `fonction-aire-widget` et `rectangle-valeur-moyenne-widget` (§ 3), `aire-signee-widget` (§ 4),
+  `solide-revolution-widget` (§ 5), `longueur-polygonale-widget` (§ 6), `distance-deplacement-widget` (§ 7).

@@ -31,6 +31,11 @@ export default defineConfig({
         // bâtis par Vite sont tous suffixés par un hash de contenu, donc un déploiement n'entre
         // jamais en collision avec le cache précédent.
         cleanupOutdatedCaches: true,
+        // Le paquet principal contient le texte de TOUS les chapitres (chaptersIndex les importe
+        // statiquement) : il a dépassé la limite par défaut de 2 Mio en novembre 2026, ce qui fait
+        // échouer le build (le fichier ne serait plus précaché, donc plus disponible hors ligne).
+        // Si la limite devait encore être atteinte, charger le contenu des chapitres à la demande.
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),
   ],

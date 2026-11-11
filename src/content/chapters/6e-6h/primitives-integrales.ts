@@ -320,6 +320,16 @@ export const primitivesIntegrales: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'ipp-choix-widget',
+          label: 'Manipule toi-même — quel facteur dériver ?',
+          caption:
+            'Dans ∫ f·g′ dx = f·g − ∫ f′·g dx, tout se joue dans le choix du facteur à ' +
+            'dériver. Choisis-le : l\'intégrale restante devient plus simple, ou plus ' +
+            'compliquée. Tu n\'as qu\'un essai, puis la primitive complète est révélée. ' +
+            'Retiens le réflexe : on dérive la partie qui se simplifie (x → 1, ln x → 1/x).',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Exemple résolu — deux intégrations par parties successives',
           blocks: [
@@ -761,6 +771,17 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'fonction-aire-widget',
+          label: 'Manipule toi-même — la fonction aire',
+          caption:
+            'Fais glisser x : l\'aire hachurée sous f, de a à x, est la valeur A(x), ' +
+            'reportée sur le graphique du bas qui dessine la fonction aire. La pente de A ' +
+            'en x vaut exactement f(x) — c\'est le théorème fondamental : A est une ' +
+            'primitive de f. Coche le zoom : la mince bande A(x + h) − A(x) ressemble de ' +
+            'plus en plus au rectangle f(x)·h.',
+        },
+        {
           kind: 'methode',
           label: 'Substitution dans une intégrale définie : changer aussi les bornes',
           items: [
@@ -930,6 +951,17 @@ export const primitivesIntegrales: ChapterContent = {
           ],
           result: { tag: 'résultat', text: '$\\dfrac{2}{\\pi}$, atteinte en deux points de $[0;\\pi]$' },
         },
+        {
+          kind: 'atelier',
+          tag: 'rectangle-valeur-moyenne-widget',
+          label: 'Manipule toi-même — le rectangle de même aire',
+          caption:
+            'Règle la hauteur m du rectangle jusqu\'à ce que son aire égale celle de la ' +
+            'région sous f : m est alors la valeur moyenne de f sur [a ; b]. Le rectangle ' +
+            'passe au vert et marque les points où f prend exactement cette valeur — ce que ' +
+            'garantit le théorème de la moyenne. Avec sin sur [0 ; π], tu retrouves ' +
+            'l\'exemple ci-dessus.',
+        },
         { kind: 'subheading', text: 'Retrouver un paramètre depuis une intégrale connue' },
         {
           kind: 'exempleLibre',
@@ -1028,6 +1060,17 @@ export const primitivesIntegrales: ChapterContent = {
             { tag: 'découper en π, où sin s\'annule', text: '$\\int_0^\\pi \\sin(x)dx = 2$ et $\\int_\\pi^{2\\pi}\\sin(x)dx = -2$' },
           ],
           result: { tag: 'résultat', text: 'intégrale $= 0$, mais aire $= 2 + 2 = 4$ : les deux arches se compensent dans l\'intégrale.' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'aire-signee-widget',
+          label: 'Manipule toi-même — intégrale ou aire ?',
+          caption:
+            'Règle les bornes a et b : l\'intégrale additionne les parties vertes (au-dessus ' +
+            'de l\'axe) et retranche les rouges, alors que l\'aire additionne toujours des ' +
+            'valeurs positives. Dès que f change de signe entre a et b, les deux nombres ' +
+            'diffèrent : découpe aux racines et additionne les valeurs absolues des ' +
+            'morceaux.',
         },
         {
           kind: 'application',
@@ -1374,6 +1417,17 @@ export const primitivesIntegrales: ChapterContent = {
           result: { tag: 'résultat', text: '$V = 8\\pi$ — la forme d\'une antenne parabolique ou d\'un phare.' },
         },
         {
+          kind: 'atelier',
+          tag: 'solide-revolution-widget',
+          label: 'Manipule toi-même — fais tourner la région',
+          caption:
+            'Fais tourner la région autour de l\'axe des abscisses : chaque tranche ' +
+            'verticale devient un disque de rayon f(x), ou une rondelle quand la région est ' +
+            'bordée par deux courbes. Déplace x pour voir l\'aire de la tranche, π·f(x)² ou ' +
+            'π(f² − g²) : le volume est la somme de toutes ces tranches. Les préréglages ' +
+            'retrouvent le cône (πr²h/3) et la boule (4/3·πr³).',
+        },
+        {
           kind: 'historique',
           titre: 'Kepler, son mariage et les tonneaux de vin',
           text:
@@ -1626,6 +1680,17 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'longueur-polygonale-widget',
+          label: 'Manipule toi-même — mesurer une courbe avec des segments',
+          caption:
+            'Remplace l\'arc par n segments : chacun mesure √(dx² + dy²), par Pythagore. Une ' +
+            'corde est toujours plus courte que l\'arc, donc la somme reste sous L et s\'en ' +
+            'rapproche quand n grandit — c\'est l\'idée de la formule L = ∫√(1 + f′²) dx. ' +
+            'Pour y = x², aucune primitive au programme ne donne L : on l\'approche ' +
+            'numériquement.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Exemple résolu — expression affine sous la racine',
           blocks: [
@@ -1869,6 +1934,17 @@ export const primitivesIntegrales: ChapterContent = {
             'Le **déplacement** vaut $\\int_a^b v(t)dt$ ; la **distance parcourue** vaut $\\int_a^b |v(t)|dt$. ' +
             'Dès que v change de signe, découpe aux instants où elle s\'annule — exactement comme pour une ' +
             'aire (section 4).',
+        },
+        {
+          kind: 'atelier',
+          tag: 'distance-deplacement-widget',
+          label: 'Manipule toi-même — déplacement ou distance ?',
+          caption:
+            'Fais avancer le temps : quand v(t) est positive, la voiture avance ; quand ' +
+            'elle est négative, elle recule. Le déplacement ∫v peut diminuer, et même ' +
+            'revenir à 0, mais la distance parcourue ∫|v| ne fait qu\'augmenter : les deux ' +
+            'compteurs se séparent dès que v change de signe. Le premier préréglage est ' +
+            'l\'exemple ci-dessus.',
         },
         {
           kind: 'exemple',
