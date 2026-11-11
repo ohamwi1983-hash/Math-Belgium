@@ -633,6 +633,17 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'chasles-defi-widget',
+          label: 'Manipule toi-même : le défi Chasles',
+          caption:
+            'Réduis une expression vectorielle sur une figure : il faudra parfois ' +
+            'réordonner les vecteurs, en retourner un ou transformer une soustraction. ' +
+            'Choisis le bon résultat en un seul essai : la correction détaille le ' +
+            'télescopage et dessine la chaîne sur la figure. Attention au piège AB − AC = ' +
+            'CB, et non BC !',
+        },
+        {
           kind: 'entrainement',
           title: 'Réduction d\'une somme de vecteurs (Chasles)',
           generatorId: 'gen27',
@@ -688,6 +699,18 @@ export const calculVectoriel: ChapterContent = {
             'Chaque parallèle coupe l\'autre droite en un point : les deux vecteurs obtenus depuis ' +
               'l\'origine sont $\\vec{v}$ et $\\vec{w}$, et $\\vec{u} = \\vec{v} + \\vec{w}$ (méthode du parallélogramme).',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'decomposition-vecteur-widget',
+          label: 'Manipule toi-même : décomposer un vecteur',
+          caption:
+            'Choisis deux directions (les vecteurs v et w) et un vecteur u, puis déplace ' +
+            'leurs extrémités. Par l\'extrémité de u, les parallèles aux deux directions ' +
+            'construisent le parallélogramme : u = a·v + b·w. Les composantes confirment le ' +
+            'résultat en résolvant un système (section 10). Si v et w sont colinéaires, la ' +
+            'décomposition est impossible. Le réglage de départ est celui de l\'exemple de ' +
+            'la section 10 : u(5 ; 1) = 3·v + 2·w.',
         },
         {
           kind: 'historique',
@@ -1010,6 +1033,17 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'réciproque de Pythagore', text: '$AB^2 + AC^2 = 10 + 10 = 20 = BC^2$ : rectangle en A' },
           ],
           result: { tag: 'résultat', text: 'ABC est rectangle isocèle en A ($BC = \\sqrt{20} = 2\\sqrt{5}$)' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'distance-triangle-widget',
+          label: 'Manipule toi-même : distances et nature d\'un triangle',
+          caption:
+            'Déplace les sommets du triangle sur le quadrillage. Pour le côté choisi, le ' +
+            'triangle rectangle de Pythagore donne la distance exacte, simplifiée si ' +
+            'possible (√20 = 2√5). Compare les trois longueurs : le triangle est-il ' +
+            'isocèle, rectangle (réciproque de Pythagore), rectangle isocèle ou scalène ? ' +
+            'Le réglage de départ est le triangle de l\'exemple, rectangle isocèle en A.',
         },
         {
           kind: 'entrainement',
@@ -1515,6 +1549,16 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'vecteur AB', text: '$\\vec{AB}\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$, c\'est bien $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ avec m = 2' },
           ],
           result: { tag: 'résultat', text: '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$ — et tout multiple non nul, comme $\\begin{pmatrix} 2 \\\\ 4 \\end{pmatrix}$ ou $\\begin{pmatrix} -1 \\\\ -2 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'vecteur-directeur-widget',
+          label: 'Manipule toi-même : les vecteurs directeurs d\'une droite',
+          caption:
+            'Déplace A et B : tous les vecteurs AB, BA, 2·AB… sont des vecteurs directeurs ' +
+            'de la même droite d, donc colinéaires. Le vecteur (1 ; m) se lit directement ' +
+            'sur l\'équation y = mx + p : quand x augmente de 1, y change de m. Essaie aussi ' +
+            'une droite horizontale (m = 0) et une droite verticale (pas de pente).',
         },
         {
           kind: 'rappel',

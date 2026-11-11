@@ -66,7 +66,7 @@
    * U+20D7 n'est pas rendu par toutes les polices). */
   function flecheSur(svg, texte, classe) {
     var bb;
-    try { bb = texte.getBBox(); } catch (e) { return; }
+    try { bb = texte.getBBox(); } catch { return; }
     if (!bb || !bb.width) return;
     var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
     var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -208,7 +208,7 @@
       var p = e.target.closest("[data-poignee]");
       if (!p) return;
       self._glisse = p.getAttribute("data-poignee");
-      try { self._svg.setPointerCapture(e.pointerId); } catch (err) { /* ignoré */ }
+      try { self._svg.setPointerCapture(e.pointerId); } catch { /* ignoré */ }
       e.preventDefault();
     };
     this._onMove = function (e) {

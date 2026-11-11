@@ -23,13 +23,6 @@
   var X_MIN = -3, X_MAX = 9, Y_MIN = -3, Y_MAX = 9; // carré : même échelle sur les deux axes (angle droit fidèle)
   var LARGEUR = 420, HAUTEUR = 420, MARGE = 32;
 
-  function formatNombreFr(n, decimales) {
-    var facteur = Math.pow(10, decimales);
-    var arrondi = Math.round(n * facteur) / facteur;
-    if (Object.is(arrondi, -0)) arrondi = 0;
-    return arrondi.toFixed(decimales).replace(".", ",").replace(/-/g, "−");
-  }
-
   /** Nombre exact (pas 0,5 → au plus 2 décimales) sans zéros inutiles. */
   function nb(n) {
     var r = Math.round(n * 100) / 100;
@@ -50,7 +43,7 @@
    * U+20D7 n'est pas rendu par toutes les polices). */
   function flecheSur(svg, texte, classe) {
     var bb;
-    try { bb = texte.getBBox(); } catch (e) { return; }
+    try { bb = texte.getBBox(); } catch { return; }
     if (!bb || !bb.width) return;
     var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
     var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -113,7 +106,7 @@
     '.ligne-inactive{color:var(--ink-faint,#9c9083);}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
-    '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
+    '.curseur label{font-weight:700;color:var(--accent-ink,#7a3212);font-size:0.9rem;}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
     '.curseur-row input[type="range"]{flex:1 1 auto;min-height:44px;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
@@ -196,8 +189,8 @@
 
   TestColinariteWidgetClass.prototype._rendre = function () {
     var cx = this._cx, cy = this._cy, mode = this._mode;
-    this._valeurCx.textContent = formatNombreFr(cx, 1);
-    this._valeurCy.textContent = formatNombreFr(cy, 1);
+    this._valeurCx.textContent = nb(cx);
+    this._valeurCy.textContent = nb(cy);
 
     Array.prototype.forEach.call(this._modeWrap.querySelectorAll("button"), function (btn) {
       btn.setAttribute("aria-pressed", btn.getAttribute("data-mode") === mode ? "true" : "false");

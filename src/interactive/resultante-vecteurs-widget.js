@@ -55,7 +55,7 @@
    * U+20D7 n'est pas rendu par toutes les polices). */
   function flecheSur(svg, texte, classe) {
     var bb;
-    try { bb = texte.getBBox(); } catch (e) { return; }
+    try { bb = texte.getBBox(); } catch { return; }
     if (!bb || !bb.width) return;
     var y = bb.y + 1.2, x1 = bb.x + 0.5, x2 = bb.x + bb.width + 1.5;
     var l = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -213,7 +213,6 @@
     this._valeurF1.textContent = fmt(f1, 0) + " N";
     this._valeurF2.textContent = fmt(f2, 0) + " N";
     this._valeurTheta.textContent = fmt(th, 0) + "°";
-    var self = this;
     Array.prototype.forEach.call(this._presets.querySelectorAll("button"), function (b) {
       var p = PRESETS[b.getAttribute("data-preset")];
       b.setAttribute("aria-pressed", p.f1 === f1 && p.f2 === f2 && p.theta === th ? "true" : "false");
@@ -279,7 +278,6 @@
 
     // ---------- lecture ----------
     var sF1 = brut(f1, 0), sF2 = brut(f2, 0), sTh = brut(th, 0);
-    var cosT = Math.cos(t);
     var html = "";
     html += '<div class="bloc"><h4>Loi des cosinus</h4>R² = ' + sF1 + '² + ' + sF2 + '² + 2 × ' + sF1 + ' × ' + sF2 + ' × cos ' + sTh + '° ' +
       eqv(r2, 2) + '<br><span class="res">R ' + eqv(r, 2) + ' N</span></div>';
