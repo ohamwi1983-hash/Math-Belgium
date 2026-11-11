@@ -1146,8 +1146,122 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       ],
     },
     {
-      id: 'revision',
+      id: 'contexte',
       number: 7,
+      title: 'Équations et inéquations en contexte',
+      kicker: 'poser, résoudre, confronter chaque solution au domaine de validité',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Au chapitre 1, tu as modélisé une situation concrète par une fonction du second ' +
+            'degré pour en trouver l\'optimum. Avec les méthodes de ce chapitre, tu peux ' +
+            'maintenant répondre à une autre question : **quand** la grandeur atteint-elle, ou ' +
+            'dépasse-t-elle, une valeur donnée ?',
+        },
+        {
+          kind: 'para',
+          text:
+            'Une situation concrète pose souvent une question du genre « à partir de quand… ? » ' +
+            'ou « quand la grandeur atteint-elle exactement… ? ». Ça revient à résoudre :',
+        },
+        {
+          kind: 'list',
+          items: [
+            '$f(x) = k$ — un seuil **atteint exactement** ;',
+            '$f(x) > k$ ou $f(x) < k$ — un seuil **dépassé**, dans un sens ou dans l’autre.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Chaque solution mathématique doit ensuite être confrontée au domaine de validité de ' +
+            'départ. Une racine correcte en calcul peut être **impossible** dans la réalité ! ' +
+            '(un temps négatif, une longueur trop grande…) Il faut alors la rejeter.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Contexte pour les deux exemples suivants. Un ballon est lancé depuis 25 m de haut. ' +
+            'Sa hauteur (en mètres), après t secondes, vaut $h(t) = -5t^2+20t+25$, avec $t \\ge 0$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'équation — à quel instant touche-t-il le sol ?',
+          steps: [{ tag: 'h(t) = 0, factorisée', text: '$-5(t-5)(t+1) = 0 \\to t=5$ ou $t=-1$' }],
+          result: {
+            tag: 'confrontation au domaine t ≥ 0',
+            text: '$t=-1$ est rejeté (un temps négatif n\'existe pas). Il ne reste que **t = 5 secondes**.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'inéquation — au-dessus du point de départ',
+          steps: [
+            {
+              tag: 'h(t) > 25',
+              text:
+                '$-5t^2+20t>0 \\iff -5t(t-4)>0 \\iff t(t-4)<0$ (division par −5, l\'inégalité change de sens)',
+            },
+          ],
+          result: {
+            tag: 'le produit est négatif entre les zéros 0 et 4',
+            text: 'le ballon reste au-dessus de 25 m pendant **0 < t < 4 secondes**, avant de redescendre',
+          },
+        },
+        {
+          kind: 'application',
+          titre: "Calculer où retombe un ballon, un boulet ou une fusée de feu d'artifice",
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => -5 * t * t + 20 * t + 25, tone: 'accent', xMin: 0, xMax: 5 }],
+              shadedRegions: [{ from: 0, to: 4, upper: (t) => -5 * t * t + 20 * t + 25, lower: () => 25, tone: 'good' }],
+              xMin: 0,
+              xMax: 6.8,
+              xTicks: [1, 2, 3, 4, 5],
+              yTicks: [10, 20, 25, 30, 40, 45],
+              points: [
+                { x: 0, y: 25, label: 'départ', tone: 'accent', labelPos: 'left' },
+                { x: 2, y: 45, label: 'sommet (hauteur max)', tone: 'good', labelPos: 'above' },
+                { x: 5, y: 0, label: 't = 5 s, sol', tone: 'bad', labelPos: 'right' },
+              ],
+              xAxisLabel: 't (s)',
+              yAxisLabel: 'h (m)',
+              caption:
+                'La trajectoire $h(t)=-5t^2+20t+25$ du ballon lancé plus haut : le sommet (t=2 ' +
+                's) est la hauteur maximale, le zéro en t=5 s est l\'instant où il touche le ' +
+                'sol, et la zone verte — entre les deux instants où h(t)=25 — est exactement ' +
+                'l\'intervalle $0<t<4$ trouvé dans l\'inéquation ci-dessus.',
+            },
+          ],
+          text:
+            'L\'exemple du ballon ci-dessus n\'est pas qu\'un exercice : c\'est exactement ' +
+            'ainsi qu\'on calcule, en sport ou en pyrotechnie, où et quand un projectile ' +
+            'retombe. Un entraîneur de basket qui étudie la trajectoire idéale d\'un tir, un ' +
+            "ingénieur qui règle la hauteur d'explosion d'une fusée de feu d'artifice, ou un " +
+            'artilleur qui calcule la portée d\'un tir : tous posent la même équation ' +
+            '$h(t) = -\\dfrac{1}{2}gt^2+v_0t+h_0$ (où $g$ est l\'accélération de la pesanteur, ' +
+            '$v_0$ la vitesse initiale et $h_0$ la hauteur de départ), puis cherchent ses ' +
+            'zéros ou son sommet exactement comme tu viens de le faire pour le ballon.',
+          domaines: ['Physique', 'Sport'],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Équations/inéquations en contexte',
+          generatorId: 'gen57',
+          description: [
+            'Pose puis résous une équation ou une inéquation, à partir d’une histoire. Vérifie ' +
+              'chaque solution avec le domaine de validité. Puis interprète le résultat.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 57. Équations/inéquations du second degré en contexte »',
+        },
+      ],
+    },
+    {
+      id: 'revision',
+      number: 8,
       title: 'Révision — vrai ou faux',
       kicker: '224 affirmations, 7 thèmes, discriminant et relations de Viète inclus',
       blocks: [
@@ -1253,6 +1367,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         'pose sur le dénominateur avant de simplifier, jamais après.',
       '**Équation ou inéquation rationnelle** — vérifie chaque solution avec la CE, après ' +
         'résolution. Une valeur de CE est toujours exclue de la solution, même avec un symbole large.',
+      '**En contexte** — traduis la question en $f(x)=k$ (seuil atteint) ou $f(x)>k$, $f(x)<k$ ' +
+        '(seuil dépassé). Puis confronte chaque solution au domaine de validité : une racine juste ' +
+        'en calcul peut être impossible dans la réalité.',
     ],
     checklist: {
       items: [
@@ -1260,6 +1377,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         'Ai-je bien mis −b, et pas b, dans la formule du discriminant ?',
         'Ai-je posé la CE sur chaque dénominateur, avant de simplifier ou de multiplier en croix ?',
         'Ai-je vérifié chaque solution trouvée avec la CE ?',
+        'En contexte, ai-je rejeté les solutions hors du domaine de validité (temps négatif, longueur trop grande…) ?',
       ],
     },
     forward:

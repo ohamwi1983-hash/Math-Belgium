@@ -2046,3 +2046,15 @@ paths:
   par des affirmations mathématiques). Vérifié : 561 formules de la banque et 313 du cours en
   KaTeX `strict: 'error'` sans erreur ; 0 erreur KaTeX/console, 0 débordement, 0 `$`/`^`/`_` brut à
   390 et 1280 px (cours et les 140 questions du quiz parcourues).
+
+- **4e, Chapitres 1 → 2 — gen57 déplacé** (demande de l'utilisateur) : la sous-section
+  « Équations et inéquations en contexte » du chapitre 1 (§ utiliser : paragraphes f(x)=k / f(x)>k,
+  contexte du ballon, 2 exemples résolus, application « où retombe un projectile », carte gen57)
+  devient la section 7 du chapitre 2 (`equations-inequations-second-degre` § `contexte`, la révision
+  passe en 8), précédée d'un paragraphe de transition vers le chapitre 1 ; au chapitre 1, un court
+  renvoi la remplace et le kicker/l'intro de § utiliser ne parlent plus de résolution. Suivis :
+  `registry.ts` (gen57 → chapitre 2), `GENERATEURS_EVALUATION_PILOTE` (gen57 au ch. 2 § contexte,
+  gen55 et gen57 en processus 3 « Transférer »), énoncés de démonstration et question de
+  compréhension « rejet d'une solution » déplacés avec leurs exemples, synthèse et checklist du
+  chapitre 2 complétées. Le quiz gen60 (chapitre 1) garde son thème « équations et inéquations en
+  contexte ».

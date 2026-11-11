@@ -199,8 +199,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
-  { chapitreSlug: 'fonction-second-degre', sectionId: 'utiliser', generatorId: 'gen55', label: "Problèmes d'optimisation (gen55)" },
-  { chapitreSlug: 'fonction-second-degre', sectionId: 'utiliser', generatorId: 'gen57', label: 'Équations et inéquations en contexte (gen57)' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'utiliser', generatorId: 'gen55', label: "Problèmes d'optimisation (gen55)", processus: 3 },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', generatorId: 'gen1', label: 'Résoudre par la méthode la plus rapide (gen1)' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', generatorId: 'gen67', label: 'Relations entre racines et coefficients (gen67)' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'signe-trinome', generatorId: 'gen2', label: '' },
@@ -208,6 +207,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'inconnue-denominateur', generatorId: 'gen4', label: '' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'signe-produit', generatorId: 'gen5', label: '' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'inequations-rationnelles', generatorId: 'gen6', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'contexte', generatorId: 'gen57', label: 'Équations et inéquations en contexte (gen57)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'lire', generatorId: 'gen12', label: '' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', generatorId: 'gen13', label: '' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen10', label: 'Transformations graphiques (gen10)' },
@@ -638,8 +638,6 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   utiliser: [
     { cle: 'enclos', enonce: "Un fermier dispose de 40 m de clôture pour fermer un enclos rectangulaire adossé à un mur (le mur forme un des côtés et n'a pas besoin de clôture). Exprime l'aire $A(x)$ de l'enclos en fonction de la largeur $x$ (en mètres) des deux côtés perpendiculaires au mur, puis détermine le domaine de $x$ imposé par le contexte." },
     { cle: 'le sommet tombe dans le domaine', enonce: "L'aire d'un enclos vaut $A(x)=-2x^2+40x$ (en m²), avec $x \\in\\ ]0\\,;\\,20[$. Détermine la largeur $x$ qui rend l'aire maximale, puis calcule cette aire maximale." },
-    { cle: 'touche-t-il le sol', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. À quel instant touche-t-il le sol ?" },
-    { cle: 'au-dessus du point de départ', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. Pendant quel intervalle de temps se trouve-t-il au-dessus de son point de départ ?" },
   ],
   },
 
@@ -673,6 +671,10 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'inequations-rationnelles': [
     { cle: 'quotient simple', enonce: "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie." },
+  ],
+  contexte: [
+    { cle: 'touche-t-il le sol', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. À quel instant touche-t-il le sol ?" },
+    { cle: 'au-dessus du point de départ', enonce: "Un ballon est lancé vers le haut depuis une hauteur de 25 m ; sa hauteur (en mètres) après $t$ secondes vaut $h(t)=-5t^2+20t+25$. Pendant quel intervalle de temps se trouve-t-il au-dessus de son point de départ ?" },
   ],
   },
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
@@ -1438,12 +1440,6 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Une solution mathématique d'une équation posée en contexte peut être rejetée. Pourquoi, et à quoi correspond ce rejet concrètement ?",
-        corrige:
-          "Résoudre $f(x)=k$ donne des solutions purement mathématiques, sans tenir compte du sens physique de x. Une fois trouvées, chaque solution doit être confrontée au domaine de validité réel de la situation (un temps, une longueur, un prix...). Une racine mathématiquement correcte peut très bien représenter une valeur impossible dans la réalité — un temps négatif, par exemple — et doit alors être rejetée, même si le calcul qui l'a produite était juste.",
-      },
-      {
-        enonce:
           "Quelle différence y a-t-il entre le domaine (mathématique) d'une fonction du second degré et le domaine de validité d'un problème concret qu'elle modélise ?",
         corrige:
           "Le domaine mathématique d'une fonction du second degré est toujours ℝ tout entier, sans exception. Le domaine de validité, lui, ne retient que les valeurs de x qui ont un sens dans la situation réelle modélisée — jamais une longueur négative, par exemple. Les deux ne coïncident donc presque jamais : le domaine de validité est une restriction du domaine mathématique, imposée par le contexte, pas par le calcul.",
@@ -1555,6 +1551,14 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
           "Pour une inéquation comme $\\dfrac{x-2}{x+1}\\ge 3$, pourquoi doit-on tout ramener à un seul membre et un seul dénominateur, plutôt que de raisonner directement sur l'inégalité telle qu'elle est donnée ?",
         corrige:
           "Le signe du dénominateur $(x+1)$ n'est pas connu à l'avance : multiplier directement les deux membres par lui inverserait ou non le sens de l'inégalité selon que x soit plus grand ou plus petit que $-1$, ce qu'on ne sait pas encore. En ramenant tout à un seul quotient comparé à 0, on retrouve une situation où un simple tableau de signes donne la réponse sans jamais avoir à deviner le signe d'une expression inconnue.",
+      },
+    ],
+    contexte: [
+      {
+        enonce:
+          "Une solution mathématique d'une équation posée en contexte peut être rejetée. Pourquoi, et à quoi correspond ce rejet concrètement ?",
+        corrige:
+          "Résoudre $f(x)=k$ donne des solutions purement mathématiques, sans tenir compte du sens physique de x. Une fois trouvées, chaque solution doit être confrontée au domaine de validité réel de la situation (un temps, une longueur, un prix...). Une racine mathématiquement correcte peut très bien représenter une valeur impossible dans la réalité — un temps négatif, par exemple — et doit alors être rejetée, même si le calcul qui l'a produite était juste.",
       },
     ],
   },
