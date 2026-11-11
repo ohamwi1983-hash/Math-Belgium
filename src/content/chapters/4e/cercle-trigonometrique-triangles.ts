@@ -338,9 +338,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           tag: 'identite-signe-widget',
           label: 'Manipule toi-même : le piège du ±',
           caption:
-            'Fais glisser sin θ, puis choisis le quadrant : les deux valeurs candidates de ' +
-            'cos θ sont toujours affichées, une seule est cochée. Le réglage de départ ' +
-            'reproduit l\'exemple ci-dessus (sin θ=0,6, quadrant II).',
+            'Choisis la valeur connue (sin θ ou cos θ), puis le quadrant : l\'identité cos²θ ' +
+            '+ sin²θ = 1 donne toujours deux candidats ±, et seul le quadrant permet de ' +
+            'garder le bon. Le triangle rectangle OPM, d\'hypoténuse 1, montre d\'où vient la ' +
+            'formule. Les boutons donnent des valeurs exactes, et le réglage de départ ' +
+            'reproduit le premier exemple (sin θ = 3/5, quadrant II).',
         },
         {
           kind: 'exemple',
@@ -769,9 +771,12 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           tag: 'equation-trig-cas-limite-widget',
           label: 'Manipule toi-même : quand 2 solutions deviennent 1',
           caption:
-            'Fais glisser k vers ±1 pour sin ou cos : les deux points se rapprochent puis ' +
-            'fusionnent. Passe en mode tan α = k : il y a toujours exactement 2 solutions, ' +
-            'quel que soit k. Le réglage de départ (cos α=−0,5) reproduit l\'exemple ci-dessus.',
+            'Choisis sin, cos ou tan, puis une valeur de k (les boutons donnent les valeurs ' +
+            'remarquables) : l\'atelier trouve l\'angle de référence α₀, puis la symétrie qui ' +
+            'donne les deux solutions. Fais glisser k vers ±1 : pour sin et cos, les deux ' +
+            'solutions fusionnent, puis disparaissent au-delà. Pour tan, il y en a toujours ' +
+            'exactement deux. Le réglage de départ (cos α = −1/2) reproduit l\'exemple ' +
+            'ci-dessus.',
         },
         {
           kind: 'exemple',
@@ -971,9 +976,11 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           tag: 'triangle-cas-ambigu-widget',
           label: 'Manipule toi-même : le cas ambigu (SSA)',
           caption:
-            'A est fixé, le côté b et l\'angle Â placent C. Fais glisser a (le côté opposé à ' +
-            'Â, « swingué » depuis C) : selon sa longueur comparée à h=b·sinÂ et à b, tu obtiens ' +
-            '0, 1 ou 2 triangles possibles.',
+            'A est fixé ; le côté b et l\'angle Â placent C. Fais glisser a, le côté opposé ' +
+            'à Â : selon sa longueur, le cercle de rayon a coupe la base en 0, 1 ou 2 ' +
+            'points. Sous la figure, le calcul par la loi des sinus donne les deux ' +
+            'candidats B̂ et 180° − B̂, puis le test Â + B̂ < 180° qui garde 0, 1 ou 2 ' +
+            'triangles. Le réglage de départ est celui de l\'exemple ci-dessous.',
         },
         {
           kind: 'methode',
@@ -1121,6 +1128,17 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'cos 100° < 0.',
         },
         {
+          kind: 'atelier',
+          tag: 'triangle-deformable-widget',
+          label: 'Manipule toi-même : un triangle qui se déforme',
+          caption:
+            'Fais glisser les sommets du triangle. Les trois rapports a / sin Â, b / sin B̂ ' +
+            'et c / sin Ĉ restent toujours égaux, et égaux au diamètre du cercle ' +
+            'circonscrit. Al-Kashi apparaît comme un Pythagore corrigé : le terme −2bc·cos ' +
+            'Â est négatif si Â est aigu, nul si Â est droit, positif si Â est obtus. Le ' +
+            'réglage de départ est le triangle de l\'exemple SSS (a = 7, b = 5, c = 8).',
+        },
+        {
           kind: 'piege',
           label: 'Après Al-Kashi, ne pas retomber dans l\'ambiguïté',
           text:
@@ -1259,6 +1277,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             ['3 côtés (SSS)', 'Al-Kashi, résolue en cosinus, pour chaque angle voulu'],
             ['2 côtés + angle non compris (SSA)', 'loi des sinus — cas ambigu, vérifier le nombre de solutions'],
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'quelle-loi-widget',
+          label: 'Manipule toi-même : quelle loi ?',
+          caption:
+            'Un triangle, trois données : quelle méthode choisis-tu ? Somme des angles et ' +
+            'loi des sinus, Al-Kashi pour un côté, Al-Kashi résolue en cosinus, ou loi des ' +
+            'sinus avec le cas ambigu. Un seul essai, puis la résolution complète s\'affiche ' +
+            'pas à pas.',
         },
         {
           kind: 'application',
@@ -1476,6 +1504,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
               'triangle pont ABS, résolu par la loi des sinus. Le triangle cible BFS, ' +
               'rectangle, donne ensuite h.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'triangulation-widget',
+          label: 'Manipule toi-même : la triangulation',
+          caption:
+            'Mesure une hauteur inaccessible avec deux triangles liés. Le triangle pont, en ' +
+            'violet, se résout d\'abord avec les données ; il transmet un côté au triangle ' +
+            'cible, en orange, qui contient la grandeur cherchée. Compare les deux ' +
+            'configurations : un seul point d\'observation et un repère de hauteur connue, ' +
+            'ou deux visées depuis deux points. Les réglages de départ reproduisent les ' +
+            'exemples ci-dessus.',
         },
         {
           kind: 'illustration',

@@ -266,6 +266,7 @@
         var p = pt(a, R), l = pt(a, R + 19);
         // 0° et 180° : étiquette au-dessus du point, pour laisser la place à la valeur lue sur l'axe
         if (a === 0 || a === 180) l = [p[0] + (a === 0 ? 8 : -8), p[1] - 14];
+        if (a === 90 || a === 270) l = [p[0] + 20, p[1] + (a === 90 ? -8 : 12)];
         s += '<circle class="pt-fam" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="5"/>';
         s += '<text class="txt-fam" x="' + l[0].toFixed(1) + '" y="' + (l[1] + 4).toFixed(1) + '" text-anchor="middle">' + a + '°</text>';
       });
