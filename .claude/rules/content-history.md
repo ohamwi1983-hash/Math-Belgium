@@ -2204,3 +2204,20 @@ paths:
   produit en croix », réutilisé au § 6) ; 6 nouveaux — `completer-le-carre-widget`,
   `viete-racines-widget`, `parametre-m-widget` (§ 1), `simplification-trou-widget` (§ 4),
   `racine-etrangere-rationnelle-widget` (§ 5), `seuil-ballon-widget` (§ 7).
+
+- **4e, Chapitre 1 — La fonction du second degré** (`fonction-second-degre`) : audit puis enrichissement
+  validé par l'utilisateur (toutes les recommandations). Corrections : renvoi de l'intuition du ballon
+  (section 3 puis chapitre 2), « mise en évidence de x (vue en 3e) », figure des translations déplacée
+  sous « translations combinées » (sommet S(3 ; 2), axe x = 3), légende provisoire de l'atelier des
+  transformations. Contenu : lire les signes de a, b, c sur un graphique (méthode, exemple, piège),
+  retrouver a, b, c depuis un tableau à pas 1 (différence seconde = 2a), courbe d'étirement (x², 2x²,
+  0,5x², −x²), attention « lire le sommet sur la forme canonique » (§ 1–2) ; « Trois écritures, trois
+  informations » (featureTable + passage canonique → développée → factorisée), « Retrouver l'équation
+  d'une parabole » (sommet + point, deux zéros + point) (§ 2) ; cas du sommet hors du domaine (optimum à
+  la borne), trajectoire — hauteur maximale (§ 3) ; formulaire, récapitulatif et checklist. Clés
+  d'énoncés de démonstration ajoutées. Ateliers : `parabole-widget` (zéros et image en direct, mode
+  « Défi des signes » à un essai), `transformations-widget` (formes canonique et développée en direct,
+  mode « Pas à pas » depuis y = x²) ; 6 nouveaux — `galilee-trajectoire-widget`,
+  `differences-secondes-widget` (§ 1), `completer-le-carre-widget` (réutilisé du ch. 2),
+  `trois-formes-widget`, `parabole-par-points-widget` (mode Défi) (§ 2), `optimisation-enclos-widget`
+  (enclos, prix, trajectoire ; domaine restreint) (§ 3).

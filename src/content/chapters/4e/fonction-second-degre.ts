@@ -449,8 +449,11 @@ export const fonctionSecondDegre: ChapterContent = {
           tag: 'parabole-widget',
           label: 'Manipule toi-même — fais varier a, b et c',
           caption:
-            'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
-            'à l’origine directement sur le graphe, en direct.',
+            'Fais varier a, b et c : la parabole, ses zéros et son image se mettent à jour ' +
+            'en direct. Coche AS, S ou OAO pour afficher l\'axe de symétrie, le sommet et ' +
+            'l\'ordonnée à l\'origine. Passe ensuite en mode Défi des signes : retrouve le ' +
+            'signe de a, de b et de c en lisant seulement le graphique — un seul essai, ' +
+            'puis la correction explique chaque signe.',
         },
         { kind: 'subheading', text: 'Domaine et image' },
         {
@@ -841,9 +844,10 @@ export const fonctionSecondDegre: ChapterContent = {
           tag: 'transformations-widget',
           label: 'Manipule toi-même — fais varier TH, EV/CV et TV',
           caption:
-            'Règle l\'étirement (a négatif retourne la courbe), puis les translations horizontale et ' +
-            'verticale : la parabole se transforme depuis y = x², et la forme canonique se lit en ' +
-            'direct. Coche AS, S ou OAO pour afficher l\'axe, le sommet et l\'ordonnée à l\'origine.',
+            'Règle TH, EV/CV (a négatif retourne la courbe) et TV, et compare la forme ' +
+            'canonique a(x − p)² + q avec la forme développée ax² + bx + c. Le mode Pas à ' +
+            'pas reconstruit la parabole depuis y = x², une transformation à la fois, en ' +
+            'suivant le sommet.',
         },
         {
           kind: 'entrainement',
