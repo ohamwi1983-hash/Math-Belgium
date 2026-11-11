@@ -878,27 +878,43 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     caracteristiques: [
       { cle: 'pente, angles', enonce: "Pour la droite $d : y = \\sqrt{3}\\,x + 2$, détermine sa pente, l'angle qu'elle forme avec l'axe $Ox$, l'angle qu'elle forme avec l'axe $Oy$ et son ordonnée à l'origine." },
+      { cle: 'pente négative', enonce: "Pour la droite $d : 2x+2y-3=0$, détermine sa pente, l'angle qu'elle forme avec l'axe $Ox$, l'angle qu'elle forme avec l'axe $Oy$ et son ordonnée à l'origine." },
+      { cle: 'angle non remarquable', enonce: "Pour la droite $d : y = 2x-3$, détermine sa pente, l'angle qu'elle forme avec l'axe $Ox$ et avec l'axe $Oy$ (au dixième de degré), puis son ordonnée à l'origine." },
     ],
     relations: [
       { cle: 'perpendiculaire par un point', enonce: "Détermine une équation cartésienne et un vecteur directeur de la droite $d'$ perpendiculaire à $d : x-2y+1=0$ et passant par $C(3\\,;\\,-1)$." },
+      { cle: 'parallèle par un point', enonce: "Détermine une équation cartésienne de la droite $d'$ parallèle à $d : 3x-y+2=0$ et passant par $A(1\\,;\\,4)$." },
+      { cle: 'reconnaître la relation', enonce: "Les droites $d_1 : y = 2x+1$ et $d_2 : x+2y-4=0$ sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? Justifie." },
     ],
     intersection: [
       { cle: 'substitution', enonce: "Détermine la position relative des droites $d_1 : x-2y+1=0$ et $d_2 : 2x+y-5=0$ puis, si elles sont sécantes, les coordonnées de leur point d'intersection." },
+      { cle: 'parallèles ou confondues', enonce: "Détermine la position relative des droites $d_1 : 2x-4y+2=0$ et $d_2 : x-2y+1=0$, puis celle de $d_2$ et $d_3 : x-2y+5=0$." },
+      { cle: 'une droite sous forme paramétrique', enonce: "Détermine le point d'intersection des droites $d_1 : \\begin{cases} x = 1+2t \\\\ y = 3-t \\end{cases}$ et $d_2 : x+y-6=0$." },
     ],
     distance: [
       { cle: 'distance point-droite', enonce: "Calcule la distance du point $C(-7\\,;\\,7)$ à la droite $d : 4x-3y-1=0$ sans formule toute faite : construis la perpendiculaire à $d$ passant par $C$, détermine son pied $H$, puis calcule $\\|\\vec{CH}\\|$." },
+      { cle: 'distance entre deux droites parallèles', enonce: "Calcule la distance entre les droites parallèles $d_1 : y = 2x+1$ et $d_2 : y = 2x-4$, sans formule toute faite." },
     ],
     cercle: [
       { cle: 'rayon indirect', enonce: "Écris l'équation du cercle de centre $C(1\\,;\\,1)$ passant par le point $P(4\\,;\\,5)$." },
       { cle: 'compléter le carré', enonce: "Montre que l'équation $2x^2+2y^2-8x+12y-24=0$ est celle d'un cercle, puis détermine son centre et son rayon." },
+      { cle: 'un second membre négatif', enonce: "L'équation $x^2+y^2-2x+4y+10=0$ est-elle celle d'un cercle ? Justifie en complétant les carrés." },
+      { cle: 'tangente en un point du cercle', enonce: "Écris une équation de la tangente au cercle $(x-1)^2+(y-1)^2=25$ en son point $P(4\\,;\\,5)$." },
     ],
     parabole: [
       "Démontre qu'une parabole de foyer $F\\left(0\\,;\\,\\dfrac{p}{2}\\right)$ et de directrice $y=-\\dfrac{p}{2}$ (avec $p>0$) a pour équation $x^2=2py$, en traduisant l'équidistance d'un point $P(x\\,;\\,y)$ au foyer et à la directrice.",
       { cle: 'axe vertical', enonce: "Une parabole d'axe vertical a pour sommet $S(1\\,;\\,-1)$ et pour foyer $F(1\\,;\\,1)$. Détermine son paramètre $p$, son équation et l'équation de sa directrice." },
       { cle: 'équation développée', enonce: "Pour la parabole d'équation $y^2-6y-4x+5=0$, détermine son sommet, son paramètre $p$, son foyer et l'équation de sa directrice." },
+      { cle: 'p négatif', enonce: "Une parabole d'axe vertical a pour sommet $S(2\\,;\\,1)$ et pour foyer $F(2\\,;\\,-1)$. Détermine son paramètre $p$, son équation et l'équation de sa directrice." },
     ],
     lieux: [
-      { cle: 'cercle', enonce: "Détermine les coordonnées des points d'intersection de la droite $d : y = x$ et du cercle $c : (x-1)^2+y^2=5$." },
+      { cle: 'droite ∩ cercle', enonce: "Détermine les coordonnées des points d'intersection de la droite $d : y = x$ et du cercle $c : (x-1)^2+y^2=5$." },
+      { cle: 'droite et parabole tangentes', enonce: "Détermine les points communs à la parabole $x^2 = 4y$ et à la droite $y = x-1$. Que peut-on dire de la droite ?" },
+      { cle: 'à partir de deux phrases', enonce: "Détermine les points communs au lieu des points équidistants de $A(0\\,;\\,0)$ et $B(4\\,;\\,0)$, et au lieu des points situés à une distance $\\sqrt{13}$ de l'origine." },
+      { cle: 'deux cercles', enonce: "Détermine les points d'intersection des cercles $x^2+y^2=25$ et $(x-8)^2+y^2=25$." },
+    ],
+    'notion-lieu': [
+      { cle: 'la médiatrice comme lieu', enonce: "Détermine une équation du lieu des points $M(x\\,;\\,y)$ équidistants de $A(1\\,;\\,2)$ et $B(5\\,;\\,4)$, puis reconnais ce lieu." },
     ],
   },
   'trigonometrie': {

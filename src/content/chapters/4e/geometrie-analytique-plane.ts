@@ -162,8 +162,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**Implicite** — $a \\cdot x + b \\cdot y + c = 0$. Le vecteur $\\begin{pmatrix} a ' +
               '\\\\ b \\end{pmatrix}$ est un vecteur **normal** : il est perpendiculaire au ' +
               'vecteur directeur $\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$. Tu peux ' +
-              'prendre $a=-\\beta$, $b=\\alpha$. Cette forme est **toujours possible**, pour ' +
-              "n'importe quelle droite.",
+              'prendre $a=-\\beta$, $b=\\alpha$. Dans l\'autre sens, la droite $ax+by+c=0$ admet ' +
+              'le vecteur directeur $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$ (ou n\'importe quel ' +
+              'multiple non nul, comme $\\begin{pmatrix} b \\\\ -a \\end{pmatrix}$). Cette forme est ' +
+              "**toujours possible**, pour n'importe quelle droite.",
             '**Explicite en y** — $y = m \\cdot x + p$ (m = pente, p = ordonnée à l\'origine). ' +
               '**Impossible** si la droite est verticale, c\'est-à-dire si son vecteur directeur ' +
               'est $\\begin{pmatrix} 0 \\\\ \\beta \\end{pmatrix}$.',
@@ -305,6 +307,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               'primitive $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$',
           },
         },
+        {
+          kind: 'para',
+          text:
+            'Si la droite n\'est pas verticale, tu peux aussi lire directement son équation ' +
+            'explicite $y = mx + p$ : p est l\'ordonnée du point où elle coupe l\'axe Oy, et m se ' +
+            'lit en « escalier » — avance de 1 vers la droite, et compte de combien la droite monte ' +
+            '(m > 0) ou descend (m < 0). Sur la figure : $p = \\frac{1}{2}$ et $m = \\frac{1}{2}$, ' +
+            'donc $y = \\frac{1}{2}x + \\frac{1}{2}$.',
+        },
         { kind: 'subheading', text: 'Tracer une droite depuis son équation' },
         { kind: 'para', text: "Dans l'autre sens, il suffit de trouver deux points, quelle que soit la forme de départ." },
         {
@@ -445,6 +456,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**Angle avec Ox** — $m = \\tan\\theta$, avec θ dans $[0°;180°[$. Pour une verticale, θ = 90° : la pente n\'existe pas, mais l\'angle si.',
             '**Angle avec Oy** — $\\theta_{Oy} = 90° - \\theta_{Ox}$, ramené dans $[0°;180°[$ : si le résultat est négatif, ajoute 180°. Une verticale fait donc 0° avec Oy, une horizontale 90°, et une droite à 135° avec Ox fait 135° avec Oy.',
             "**Ordonnée à l'origine** — p, c'est la valeur de y quand x = 0. C'est le point où la droite coupe Oy. Elle n'existe pas pour une verticale.",
+            '**Depuis l\'implicite** $ax+by+c=0$ (avec $b \\neq 0$) — isole y : $m = -\\frac{a}{b}$ et $p = -\\frac{c}{b}$.',
           ],
         },
         {
@@ -465,6 +477,28 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'Une pente négative correspond à un angle avec Ox **obtus** (entre 90° et 180°) — ' +
             'jamais à un angle négatif ! θ reste toujours mesuré dans $[0°;180°[$, dans le sens ' +
             'trigonométrique depuis le demi-axe positif de Ox.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'pente négative',
+          formula: 'd : 2x + 2y − 3 = 0',
+          steps: [
+            { tag: 'isoler y', text: '$2y = -2x + 3 \\to y = -x + \\frac{3}{2}$ : $m = -1$ et $p = \\frac{3}{2}$' },
+            { tag: 'angle avec Ox', text: '$\\tan\\theta = -1$ ; la calculatrice donne $\\tan^{-1}(-1) = -45°$, hors de $[0°;180°[$ : on ajoute 180°, $\\theta = 135°$ (obtus)' },
+            { tag: 'angle avec Oy', text: '90° − 135° = −45°, négatif : on ajoute 180°, soit 135°' },
+          ],
+          result: { tag: 'résultat', text: 'm = −1, angle avec Ox 135°, angle avec Oy 135°, p = 3/2' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'angle non remarquable',
+          formula: 'd : y = 2x − 3',
+          steps: [
+            { tag: 'pente', text: 'm = 2' },
+            { tag: 'angle avec Ox', text: '$\\tan\\theta = 2 \\to \\theta = \\tan^{-1}(2) \\approx 63{,}4°$ (calculatrice en degrés)' },
+            { tag: 'angle avec Oy', text: '90° − 63,4° ≈ 26,6°' },
+          ],
+          result: { tag: "ordonnée à l'origine", text: 'p = −3' },
         },
         {
           kind: 'entrainement',
@@ -554,10 +588,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Prends deux vecteurs directeurs $\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ ' +
-              "et $\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ :",
-            "**Parallèles** ⟺ déterminant nul : $a \\cdot b' - b \\cdot a' = 0$. En pentes (si les deux existent), ça donne $m = m'$.",
-            "**Perpendiculaires** ⟺ produit scalaire nul : $a \\cdot a' + b \\cdot b' = 0$. En pentes (si les deux existent), ça donne $m \\cdot m' = -1$.",
+            'Prends deux vecteurs directeurs $\\vec{u}\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ ' +
+              "et $\\vec{v}\\begin{pmatrix} \\alpha' \\\\ \\beta' \\end{pmatrix}$ (pour $ax+by+c=0$, prends $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$) :",
+            "**Parallèles** ⟺ déterminant nul : $\\alpha \\cdot \\beta' - \\beta \\cdot \\alpha' = 0$. En pentes (si les deux existent), ça donne $m = m'$.",
+            "**Perpendiculaires** ⟺ produit scalaire nul : $\\alpha \\cdot \\alpha' + \\beta \\cdot \\beta' = 0$. En pentes (si les deux existent), ça donne $m \\cdot m' = -1$.",
           ],
         },
         {
@@ -597,6 +631,27 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           },
         },
         {
+          kind: 'exemple',
+          badge: 'parallèle par un point',
+          formula: 'd : 3x − y + 2 = 0. Trouve la parallèle d′ à d passant par A(1 ; 4).',
+          steps: [
+            { tag: 'même direction', text: 'd′ a le même vecteur directeur, donc les mêmes a et b : $d\' : 3x - y + c = 0$' },
+            { tag: 'A appartient à d′', text: '$3 \\cdot 1 - 4 + c = 0 \\to c = 1$' },
+          ],
+          result: { tag: 'd′', text: '$3x - y + 1 = 0$ — deux parallèles ne diffèrent que par c' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'reconnaître la relation',
+          formula: 'd₁ : y = 2x + 1 et d₂ : x + 2y − 4 = 0 — parallèles, perpendiculaires, ou ni l\'un ni l\'autre ?',
+          steps: [
+            { tag: 'pentes', text: '$m_1 = 2$ ; $d_2 : y = -\\frac{1}{2}x + 2$, donc $m_2 = -\\frac{1}{2}$' },
+            { tag: 'produit', text: '$m_1 \\cdot m_2 = 2 \\cdot \\left(-\\frac{1}{2}\\right) = -1$' },
+            { tag: 'contrôle par les directeurs', text: '$\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix} \\cdot \\begin{pmatrix} -2 \\\\ 1 \\end{pmatrix} = -2 + 2 = 0$ ✓' },
+          ],
+          result: { tag: 'résultat', text: 'd₁ et d₂ sont perpendiculaires' },
+        },
+        {
           kind: 'astuce',
           text:
             '$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ tourné de 90° donne $\\begin{pmatrix} -b ' +
@@ -609,13 +664,23 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Si $\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ et ' +
-            "$\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ sont perpendiculaires, tu peux " +
-            "toujours écrire $\\vec{v} = \\begin{pmatrix} -k \\cdot b \\\\ k \\cdot a \\end{pmatrix}$ " +
-            'pour un certain $k \\neq 0$ (le produit scalaire $a \\cdot (-kb) + b \\cdot (ka) = ' +
-            '0$ est toujours vrai, quel que soit k). Les pentes valent alors $m = \\frac{b}{a}$ ' +
-            "et $m' = \\frac{ka}{-kb} = \\frac{a}{-b}$. Leur produit vaut $m \\cdot m' = " +
-            '\\frac{b}{a} \\cdot \\frac{a}{-b} = -1$, quels que soient a, b et k.',
+            'Si $\\vec{u}\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ et $\\vec{v}$ sont ' +
+            'perpendiculaires, tu peux toujours écrire $\\vec{v} = \\begin{pmatrix} -k \\cdot \\beta ' +
+            '\\\\ k \\cdot \\alpha \\end{pmatrix}$ pour un certain $k \\neq 0$ (le produit scalaire ' +
+            '$\\alpha \\cdot (-k\\beta) + \\beta \\cdot (k\\alpha) = 0$ est toujours vrai, quel que ' +
+            'soit k). Si aucune des deux droites n\'est verticale ni horizontale ($\\alpha \\neq 0$ et ' +
+            '$\\beta \\neq 0$), les pentes valent $m = \\frac{\\beta}{\\alpha}$ et ' +
+            "$m' = \\frac{k\\alpha}{-k\\beta} = -\\frac{\\alpha}{\\beta}$. Leur produit vaut " +
+            "$m \\cdot m' = \\frac{\\beta}{\\alpha} \\cdot \\left(-\\frac{\\alpha}{\\beta}\\right) = -1$.",
+        },
+        {
+          kind: 'attention',
+          label: 'Une horizontale et une verticale',
+          text:
+            'Une droite horizontale (m = 0) et une droite verticale (pas de pente) sont ' +
+            'perpendiculaires, mais « m · m′ = −1 » n\'a alors aucun sens : l\'une des deux pentes ' +
+            'n\'existe pas. Le critère du produit scalaire, lui, marche toujours : ' +
+            '$\\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix} \\cdot \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix} = 0$.',
         },
         {
           kind: 'entrainement',
@@ -723,6 +788,27 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: "point d'intersection", text: '$x = 2 \\cdot \\frac{7}{5} - 1 = \\frac{9}{5}$ → $(\\frac{9}{5} ; \\frac{7}{5})$' },
         },
         {
+          kind: 'exemple',
+          badge: 'parallèles ou confondues ?',
+          formula: 'd₁ : 2x − 4y + 2 = 0, d₂ : x − 2y + 1 = 0 et d₃ : x − 2y + 5 = 0.',
+          steps: [
+            { tag: 'directeurs', text: '$\\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$, $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$, $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ : tous colinéaires, les trois droites sont parallèles ou confondues' },
+            { tag: 'd₁ et d₂', text: 'l\'équation de d₁ est exactement le double de celle de d₂ : mêmes points, droites **confondues**' },
+            { tag: 'd₂ et d₃', text: 'A(1 ; 1) est sur d₂, mais $1 - 2 + 5 = 4 \\neq 0$ : A n\'est pas sur d₃' },
+          ],
+          result: { tag: 'résultat', text: 'd₁ et d₂ confondues ; d₃ parallèle distincte (aucun point commun)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'une droite sous forme paramétrique',
+          formula: '$d_1 : \\begin{cases} x = 1+2t \\\\ y = 3-t \\end{cases}$ et $d_2 : x + y - 6 = 0$.',
+          steps: [
+            { tag: 'remplacer x et y dans d₂', text: '$(1+2t) + (3-t) - 6 = 0 \\to t - 2 = 0 \\to t = 2$' },
+            { tag: 'revenir au point', text: '$x = 1 + 2 \\cdot 2 = 5$ et $y = 3 - 2 = 1$' },
+          ],
+          result: { tag: "point d'intersection", text: '(5 ; 1) — contrôle dans d₂ : 5 + 1 − 6 = 0 ✓' },
+        },
+        {
           kind: 'entrainement',
           title: 'Intersection entre deux droites',
           generatorId: 'gen48',
@@ -806,6 +892,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'Distance d\'un point P à une droite **verticale** $x = k$ : $|x_P - k|$ — un simple écart d\'abscisses.',
             'Distance d\'un point P à une droite **horizontale** $y = k$ : $|y_P - k|$ — un simple écart d\'ordonnées.',
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'distance entre deux droites parallèles',
+          formula: 'd₁ : y = 2x + 1 et d₂ : y = 2x − 4 (même pente : parallèles).',
+          steps: [
+            { tag: 'un point de d₁', text: 'x = 0 donne A(0 ; 1)' },
+            { tag: 'perpendiculaire par A', text: 'directeur de d₁ : $\\begin{pmatrix} 1 \\\\ 2 \\end{pmatrix}$, donc perpendiculaire $\\begin{cases} x = 2t \\\\ y = 1 - t \\end{cases}$' },
+            { tag: 'pied H sur d₂', text: '$1 - t = 2 \\cdot 2t - 4 \\to 5t = 5 \\to t = 1$, H(2 ; 0)' },
+          ],
+          result: { tag: 'distance', text: '$\\|\\vec{AH}\\| = \\sqrt{2^2 + (-1)^2} = \\sqrt{5} \\approx 2{,}24$' },
         },
         {
           kind: 'application',
@@ -926,6 +1023,64 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**À une distance donnée d\'une droite** — le lieu, c\'est la **réunion** de deux droites parallèles à celle-ci (une de chaque côté). Jamais une seule des deux ! Chacune prise isolément ne contient pas tous les points situés à cette distance.',
           ],
         },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1,
+            xMax: 7,
+            yMin: -1.6,
+            yMax: 1.6,
+            showAxes: false,
+            vectors: [
+              { from: { x: -1, y: 0 }, to: { x: 6.6, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: -1, y: 1 }, to: { x: 6.6, y: 1 }, tone: 'accent', arrow: false },
+              { from: { x: -1, y: -1 }, to: { x: 6.6, y: -1 }, tone: 'accent', arrow: false },
+              { from: { x: 3, y: 0 }, to: { x: 3, y: 1 }, tone: 'good' },
+              { from: { x: 3, y: 0 }, to: { x: 3, y: -1 }, tone: 'good' },
+            ],
+            points: [
+              { x: 6.8, y: 0, label: 'd', tone: 'ink', node: false },
+              { x: 3.3, y: 0.5, label: 'r', tone: 'good', node: false },
+              { x: 3.3, y: -0.5, label: 'r', tone: 'good', node: false },
+            ],
+            caption: 'les points à la distance r de d : la réunion des deux parallèles orange, une de chaque côté',
+          },
+        },
+        { kind: 'subheading', text: 'Traduire une phrase en équation : la médiatrice' },
+        {
+          kind: 'exemple',
+          badge: 'la médiatrice comme lieu',
+          formula: 'Trouve l\'équation du lieu des points M(x ; y) équidistants de A(1 ; 2) et B(5 ; 4).',
+          steps: [
+            { tag: 'traduire', text: 'MA = MB ⟺ MA² = MB² : $(x-1)^2 + (y-2)^2 = (x-5)^2 + (y-4)^2$' },
+            { tag: 'développer', text: '$x^2 - 2x + 1 + y^2 - 4y + 4 = x^2 - 10x + 25 + y^2 - 8y + 16$' },
+            { tag: 'les carrés s\'éliminent', text: '$8x + 4y - 36 = 0$, soit $2x + y - 9 = 0$' },
+          ],
+          result: { tag: 'résultat', text: 'une droite, $2x + y - 9 = 0$ : la médiatrice de [AB] — elle passe par le milieu (3 ; 3) et elle est perpendiculaire à $\\vec{AB}\\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 7,
+            yMin: -1,
+            yMax: 6,
+            grid: true,
+            vectors: [
+              { from: { x: 1, y: 2 }, to: { x: 5, y: 4 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 1.6, y: 5.8 }, to: { x: 4.8, y: -0.6 }, tone: 'accent', arrow: false },
+            ],
+            points: [
+              { x: 1, y: 2, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 5, y: 4, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 3, y: 3, label: '(3 ; 3)', tone: 'good', labelPos: 'right' },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 3, y: 3 }, arm1: { x: 5, y: 4 }, arm2: { x: 2.5, y: 4 } }],
+            caption: 'tous les points de la droite orange sont à la même distance de A et de B — et eux seuls',
+          },
+        },
       ],
     },
 
@@ -995,13 +1150,13 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 1.434, y: 2.048, label: 'point marqué', tone: 'good', labelPos: 'right' },
               { x: 0.9, y: 1.2, label: 'r', tone: 'good', node: false },
             ],
-            caption: 'rayon direct si le point marqué est aligné avec le centre, indirect (par Pythagore) sinon',
+            caption: 'rayon lu directement si le point marqué est sur la même horizontale ou la même verticale que le centre ; sinon, calculé par Pythagore',
           },
         },
         {
           kind: 'exemple',
           badge: 'rayon indirect',
-          formula: 'Centre C(1 ; 1), point marqué P(4 ; 5) sur le cercle (non aligné avec C).',
+          formula: 'Centre C(1 ; 1), point marqué P(4 ; 5) sur le cercle (ni sur l\'horizontale ni sur la verticale de C).',
           steps: [{ tag: 'vecteur CP', text: '$\\begin{pmatrix} 4-1 \\\\ 5-1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' }],
           result: { tag: 'équation', text: '$r = \\|\\vec{CP}\\| = \\sqrt{3^2+4^2} = \\sqrt{25} = 5$ → $(x-1)^2+(y-1)^2=25$' },
         },
@@ -1033,10 +1188,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'En développant $(x-a)^2+(y-b)^2=r^2$, tu obtiens une équation de la forme ' +
-            '$k \\cdot x^2 + k \\cdot y^2 + b_x \\cdot x + b_y \\cdot y = c$. Remarque : c\'est ' +
-            '**le même coefficient k devant x² et devant y²**. Retrouver le centre et le rayon, ' +
-            "c'est faire le chemin inverse : regrouper, puis compléter le carré.",
+            'En développant $(x-x_0)^2+(y-y_0)^2=r^2$, tu obtiens une équation de la forme ' +
+            '$x^2 + y^2 + D \\cdot x + E \\cdot y + F = 0$ — parfois multipliée par un nombre k, ' +
+            'ce qui donne **le même coefficient k devant x² et devant y²**. Retrouver le centre et ' +
+            "le rayon, c'est faire le chemin inverse : diviser par k, regrouper, puis compléter le carré.",
         },
         {
           kind: 'attention',
@@ -1063,6 +1218,35 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "Rayon rationnel ou irrationnel — le nombre que tu obtiens au second membre après " +
             "avoir complété le carré n'est pas toujours un carré parfait. Le rayon peut alors " +
             'rester sous forme de racine (par exemple $r = \\sqrt{18} = 3\\sqrt{2}$) — exactement comme une norme de vecteur.',
+        },
+        {
+          kind: 'attention',
+          label: 'Toutes ces équations ne sont pas des cercles',
+          text:
+            'Après avoir complété le carré, regarde le second membre. **Positif** : c\'est r², tu ' +
+            'as bien un cercle. **Nul** : un seul point, le centre. **Négatif** : aucun point du ' +
+            'plan ne convient, car une somme de carrés ne peut jamais être négative.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'un second membre négatif',
+          formula: '$x^2+y^2-2x+4y+10=0$',
+          steps: [
+            { tag: 'regrouper', text: '$(x^2-2x)+(y^2+4y) = -10$' },
+            { tag: 'compléter chaque carré', text: '$(x-1)^2 - 1 + (y+2)^2 - 4 = -10 \\to (x-1)^2+(y+2)^2 = -5$' },
+          ],
+          result: { tag: 'résultat', text: 'impossible : une somme de carrés vaut au moins 0 — aucun point, ce n\'est pas un cercle' },
+        },
+        { kind: 'subheading', text: 'Pour aller plus loin — la tangente en un point du cercle' },
+        {
+          kind: 'exemple',
+          badge: 'tangente en un point du cercle',
+          formula: 'Écris l\'équation de la tangente au cercle $(x-1)^2+(y-1)^2=25$ au point P(4 ; 5).',
+          steps: [
+            { tag: 'propriété', text: 'la tangente en P est perpendiculaire au rayon [CP], avec C(1 ; 1)' },
+            { tag: 'vecteur normal', text: '$\\vec{CP}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ est normal à la tangente : $3(x-4) + 4(y-5) = 0$' },
+          ],
+          result: { tag: 'tangente', text: '$3x + 4y - 32 = 0$ — contrôle : $3 \\cdot 4 + 4 \\cdot 5 - 32 = 0$ ✓' },
         },
         {
           kind: 'application',
@@ -1236,6 +1420,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             "tableau ci-dessus. L'axe horizontal s'obtient en échangeant les rôles de x et y.",
         },
         {
+          kind: 'rappel',
+          label: 'Lien avec le chapitre 1 — la parabole y = ax²',
+          items: [
+            'La courbe de $y = ax^2$ est exactement une parabole d\'axe vertical et de sommet O : ' +
+              '$x^2 = \\frac{1}{a}\\,y$, donc $2p = \\frac{1}{a}$, soit $p = \\frac{1}{2a}$, et son ' +
+              'foyer est $F\\left(0 ; \\frac{1}{4a}\\right)$.',
+            'Pour $y = \\frac{x^2}{4}$ (la figure du début de section), $a = \\frac{1}{4}$ donne ' +
+              '$p = 2$ et $F(0 ; 1)$ : c\'est bien le foyer dessiné. Et si $a < 0$, p est négatif : ' +
+              'la parabole s\'ouvre vers le bas, comme au chapitre 1.',
+          ],
+        },
+        {
           kind: 'piege',
           label: 'Piège — un p négatif inverse foyer et directrice',
           text:
@@ -1252,6 +1448,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             { tag: 'équation', text: '$(x-1)^2 = 2 \\cdot 4 \\cdot (y+1) = 8(y+1)$' },
           ],
           result: { tag: 'directrice', text: '$y = -1-4/2 = -3$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'parabole tournée vers le bas (p négatif)',
+          formula: 'Sommet S(2 ; 1), foyer F(2 ; −1).',
+          steps: [
+            { tag: 'paramètre p', text: '$p = 2(y_F - y_S) = 2(-1-1) = -4$ : négatif, le foyer est sous le sommet, la parabole s\'ouvre vers le bas' },
+            { tag: 'équation', text: '$(x-2)^2 = 2 \\cdot (-4) \\cdot (y-1) = -8(y-1)$' },
+          ],
+          result: { tag: 'directrice', text: '$y = y_S - p/2 = 1 + 2 = 3$, au-dessus du sommet' },
         },
         {
           kind: 'illustration',
@@ -1374,7 +1580,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           rows: [
             ['« les points dont l\'ordonnée est le triple de l\'abscisse »', 'droite', 'y = 3x'],
             ['« les points situés à 5 unités du point (2 ; −3) »', 'cercle', '(x−2)²+(y+3)²=25'],
-            ['« les points équidistants de (−1 ; 0) et de la droite x=−3 »', 'parabole', 'foyer (−1;0), directrice x=−3'],
+            ['« les points équidistants de (−1 ; 0) et de la droite x=−3 »', 'parabole', 'y² = 4(x+2)'],
           ],
         },
         {
@@ -1394,7 +1600,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'La règle « au plus du second degré, donc 0, 1 ou 2 points » vaut quand l\'un des deux lieux ' +
             'est une **droite**. Entre un cercle et une parabole, la substitution mène en général ' +
             'à une équation de degré 4, qui peut avoir jusqu\'à 4 solutions — un cas qui sort du ' +
-            'cadre de ce chapitre.',
+            'cadre de ce chapitre. Entre deux cercles, en revanche, soustraire les deux équations ' +
+            'fait disparaître les carrés et ramène à une droite (voir le dernier exemple).',
         },
         {
           kind: 'illustrationGroup',
@@ -1432,7 +1639,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               circle: { cx: 0, cy: 0, r: 1.5, tone: 'accent' },
               vectors: [{ from: { x: -1.8, y: -0.34 }, to: { x: 1.7, y: 0.71 }, tone: 'good', arrow: false }],
               points: [
-                { x: 1.37, y: 0.811, tone: 'ink', node: true },
+                { x: 1.37, y: 0.611, tone: 'ink', node: true },
                 { x: -1.48, y: -0.244, tone: 'ink', node: true },
               ],
               caption: '2 points — deux solutions distinctes',
@@ -1471,6 +1678,39 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           result: { tag: "points d'intersection", text: '(2 ; 2) et (−1 ; −1)' },
         },
         {
+          kind: 'exemple',
+          badge: 'droite et parabole tangentes',
+          formula: 'Parabole $x^2 = 4y$ et droite $y = x - 1$.',
+          steps: [
+            { tag: 'remplacer y', text: '$x^2 = 4(x-1) \\to x^2 - 4x + 4 = 0 \\to (x-2)^2 = 0$' },
+            { tag: 'une solution double', text: '$x = 2$, puis $y = 2 - 1 = 1$' },
+          ],
+          result: { tag: 'résultat', text: 'un seul point, (2 ; 1) : la droite est tangente à la parabole' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'à partir de deux phrases',
+          formula:
+            '« Les points équidistants de A(0 ; 0) et B(4 ; 0) » et « les points situés à √13 de ' +
+            'l\'origine ». Trouve leurs points communs.',
+          steps: [
+            { tag: '1er lieu : une médiatrice', text: 'la médiatrice de [AB] : la droite $x = 2$' },
+            { tag: '2e lieu : un cercle', text: 'centre (0 ; 0), rayon √13 : $x^2 + y^2 = 13$' },
+            { tag: 'résoudre', text: '$4 + y^2 = 13 \\to y^2 = 9 \\to y = 3$ ou $y = -3$' },
+          ],
+          result: { tag: 'points communs', text: '(2 ; 3) et (2 ; −3)' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'pour aller plus loin — deux cercles (le GPS)',
+          formula: '$x^2+y^2=25$ et $(x-8)^2+y^2=25$ : les satellites 1 et 2 de l\'application GPS (section 8).',
+          steps: [
+            { tag: 'soustraire les équations', text: '$x^2 - (x-8)^2 = 0 \\to 16x - 64 = 0 \\to x = 4$ (les carrés disparaissent : une droite)' },
+            { tag: 'revenir à un cercle', text: '$16 + y^2 = 25 \\to y = 3$ ou $y = -3$' },
+          ],
+          result: { tag: 'résultat', text: '(4 ; 3) et (4 ; −3). Le 3e satellite tranche : seul (4 ; 3) est à √26 ≈ 5,1 de (3 ; 8)' },
+        },
+        {
           kind: 'entrainement',
           title: 'Lieux géométriques',
           generatorId: 'gen54',
@@ -1492,7 +1732,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           text:
             'Un quiz vrai/faux qui couvre les treize générateurs de ce chapitre. Un thème par ' +
             'générateur, sans fusion : contrairement au chapitre sur les vecteurs, chaque ' +
-            "générateur d'ici teste une compétence vraiment distincte.",
+            "générateur d'ici teste une compétence vraiment distincte. Le quiz se trouve tout en " +
+            'bas de la page, dans la synthèse.',
         },
       ],
     },
@@ -1503,7 +1744,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       {
         title: 'Droite : les 4 formes',
         formulas: [
-          { text: '$a \\cdot x + b \\cdot y + c = 0$', condition: 'implicite — toujours possible' },
+          { text: '$a \\cdot x + b \\cdot y + c = 0$', condition: 'implicite — toujours possible ; vecteur directeur $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$' },
           { text: '$y = m \\cdot x + p$', condition: 'explicite en y — impossible si verticale' },
           { text: '$x = n \\cdot y + q$', condition: 'explicite en x — impossible si horizontale' },
           {
@@ -1516,6 +1757,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         title: 'Pente et angles',
         formulas: [
           { text: '$m = \\tan\\theta$', condition: '$\\theta \\in [0°;180°[$' },
+          { text: '$m = -\\dfrac{a}{b}$, $p = -\\dfrac{c}{b}$', condition: 'depuis $ax+by+c=0$, $b \\neq 0$' },
           { text: '$\\theta_{Oy} = 90° - \\theta_{Ox}$', condition: 'ramené dans $[0°;180°[$ (+180° si négatif)' },
         ],
       },
@@ -1523,12 +1765,12 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         title: 'Parallèles et perpendiculaires',
         formulas: [
           {
-            text: '$a \\cdot b\' - b \\cdot a\' = 0$',
+            text: '$\\alpha \\cdot \\beta\' - \\beta \\cdot \\alpha\' = 0$',
             condition: 'parallèles (déterminant nul) — ou $m=m\'$',
           },
           {
-            text: '$a \\cdot a\' + b \\cdot b\' = 0$',
-            condition: 'perpendiculaires (produit scalaire nul) — ou $m \\cdot m\' = -1$',
+            text: '$\\alpha \\cdot \\alpha\' + \\beta \\cdot \\beta\' = 0$',
+            condition: 'perpendiculaires (produit scalaire nul) — ou $m \\cdot m\' = -1$ si aucune droite n\'est verticale ni horizontale',
           },
         ],
       },
@@ -1542,7 +1784,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       {
         title: 'Cercle',
         formulas: [
-          { text: '$(x-x_0)^2+(y-y_0)^2=r^2$', condition: 'centre $(x_0;y_0)$, rayon r' },
+          { text: '$(x-x_0)^2+(y-y_0)^2=r^2$', condition: 'centre $(x_0;y_0)$, rayon r — second membre ≤ 0 : pas de cercle' },
+          { text: '$\\vec{CP} \\cdot \\vec{PM} = 0$', condition: 'tangente en P : perpendiculaire au rayon [CP]' },
         ],
       },
       {
@@ -1550,6 +1793,13 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         formulas: [
           { text: '$(x-x_S)^2=2p(y-y_S)$', condition: 'axe vertical — $p=2(y_F-y_S)$' },
           { text: '$(y-y_S)^2=2p(x-x_S)$', condition: 'axe horizontal — $p=2(x_F-x_S)$' },
+          { text: '$p = \\dfrac{1}{2a}$', condition: 'pour la parabole $y = ax^2$' },
+        ],
+      },
+      {
+        title: 'Lieux géométriques',
+        formulas: [
+          { text: '$MA^2 = MB^2$', condition: 'médiatrice de [AB] — les carrés s\'éliminent, il reste une droite' },
         ],
       },
     ],
@@ -1580,11 +1830,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         'Le p de ma parabole est-il bien signé — jamais une distance donnée en positif par défaut ?',
         'Le coefficient de x² et de y² de mon cercle sont-ils bien identiques avant que je complète le carré ?',
         'Ai-je diagnostiqué le cas (sécantes / parallèles / confondues, 0/1/2 points) avant de me lancer dans un calcul ?',
+        'Après avoir complété le carré, mon second membre est-il bien positif (sinon, ce n\'est pas un cercle) ?',
+        'Ai-je évité « m · m′ = −1 » quand l\'une des deux droites est verticale ou horizontale ?',
       ],
     },
     forward:
-      "Les mêmes équations de droite et de cercle reviennent telles quelles en géométrie de " +
-      "l'espace — avec une troisième coordonnée en plus, et un plan à la place d'une droite.",
+      'La parabole de ce chapitre est aussi celle de la fonction du second degré (chapitre 1). En ' +
+      '6e, les lieux géométriques reviennent avec des paramètres, et la parabole retrouve deux ' +
+      'cousines définies elles aussi par des distances : l\'ellipse et l\'hyperbole (chapitre ' +
+      'sur les coniques).',
     entrainement: {
       kind: 'entrainement',
       title: 'Géométrie analytique plane — quiz vrai/faux',
