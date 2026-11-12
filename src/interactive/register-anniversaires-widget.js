@@ -1,0 +1,1 @@
+import './anniversaires-widget.js'

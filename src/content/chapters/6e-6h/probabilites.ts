@@ -107,14 +107,14 @@ export const probabilites: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le comptage de Galilée, avec les 216 triplets ordonnés de 3 dés équilibrés :',
+            'Le comptage de Galilée, avec les 216 triplets ordonnés de 3 dés équilibrés (entre parenthèses, le nombre d\'ordres possibles pour chaque décomposition) :',
         },
         {
           kind: 'featureTable',
-          headers: ['Somme', 'Décompositions (sans ordre)', 'Triplets ordonnés', 'Probabilité'],
+          headers: ['Somme', 'Décompositions (triplets ordonnés)', 'Probabilité'],
           rows: [
-            ['9', '1+2+6, 1+3+5, 1+4+4, 2+2+5, 2+3+4, 3+3+3', '6+6+3+3+6+1 = 25', '$\\frac{25}{216} \\approx 0{,}116$'],
-            ['10', '1+3+6, 1+4+5, 2+2+6, 2+3+5, 2+4+4, 3+3+4', '6+6+3+6+3+3 = 27', { text: '$\\frac{27}{216} = 0{,}125$', tone: 'good' }],
+            ['9', '1+2+6 (6), 1+3+5 (6), 1+4+4 (3), 2+2+5 (3), 2+3+4 (6), 3+3+3 (1) : 25 triplets', '$\\frac{25}{216} \\approx 0{,}116$'],
+            ['10', '1+3+6 (6), 1+4+5 (6), 2+2+6 (3), 2+3+5 (6), 2+4+4 (3), 3+3+4 (3) : 27 triplets', { text: '$\\frac{27}{216} = 0{,}125$', tone: 'good' }],
           ],
         },
         { kind: 'subheading', text: 'Probabilité expérimentale (fréquentielle) et probabilité théorique (a priori)' },
@@ -200,6 +200,17 @@ export const probabilites: ChapterContent = {
               'encore 30 %, mais il reste sous le seuil de 50 % : on ne peut rien conclure, la ' +
               'fluctuation suffit à l\'expliquer.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'stabilisation-frequences-widget',
+          label: 'Manipule toi-même : la fréquence se stabilise',
+          caption:
+            'Lance une pièce, un dé ou un dé mystère par paquets de 10, 100 ou 1 000 ' +
+            'lancers, et superpose jusqu\'à 5 séries : au début elles s\'écartent beaucoup, ' +
+            'puis l\'entonnoir se resserre autour de la probabilité. Le bandeau calcule ' +
+            'l\'écart relatif et le compare au seuil, qui baisse avec le nombre de lancers. ' +
+            'Démasque le dé mystère pour vérifier ta conclusion.',
         },
         {
           kind: 'application',
@@ -364,7 +375,7 @@ export const probabilites: ChapterContent = {
           label: 'Manipule toi-même : les deux pièges du tableau',
           caption:
             'Fais glisser n(A), n(B) et n(A∩B) (sur N=40 personnes, comme l\'exemple) : le ' +
-            'tableau à double entrée se remplit en direct, avec le calcul correct ET le calcul ' +
+            'tableau à double entrée se remplit en direct, avec le calcul correct et le calcul ' +
             'fauté affichés côte à côte pour les deux pièges ci-dessus.',
         },
         {
@@ -470,11 +481,11 @@ export const probabilites: ChapterContent = {
           kind: 'featureTable',
           headers: ['', 'Incompatibles', 'Indépendants'],
           rows: [
-            ['Définition', '$A$ et $B$ ne peuvent pas se produire ensemble', 'savoir que $B$ est réalisé ne change pas la probabilité de $A$'],
-            ['Test', '$A \\cap B = \\emptyset$, donc $P(A \\cap B) = 0$', '$P(A \\cap B) = P(A) \\times P(B)$'],
-            ['Image (Venn)', 'deux disques séparés', 'deux disques qui se chevauchent, dans la proportion exacte $P(A) \\times P(B)$'],
-            ['Exemple', 'deux dés : « somme = 3 » et « dés égaux »', 'jeu de 52 cartes : « cœur » et « figure »'],
-            ['Piège', 'de probabilités non nulles, ils ne sont jamais indépendants', 'se vérifie par un calcul, jamais à l\'intuition'],
+            ['Sens', '$A$ et $B$ ne peuvent pas se produire ensemble', 'savoir que $B$ est réalisé ne change pas la probabilité de $A$'],
+            ['Test', '$A \\cap B = \\emptyset$, donc $P(A \\cap B) = 0$', '$P(A \\cap B) =$ $P(A) \\times P(B)$'],
+            ['Venn', 'deux disques séparés', 'deux disques qui se chevauchent, dans la proportion exacte $P(A) \\times P(B)$'],
+            ['Exemple', 'deux dés : « somme = 3 » et « dés égaux »', 'jeu de 52 cartes : « cœur » et « figure »'],
+            ['Piège', 'si $P(A)$ et $P(B)$ sont non nulles : jamais indépendants', 'se vérifie par un calcul, jamais à l\'intuition'],
           ],
         },
         {
@@ -540,7 +551,7 @@ export const probabilites: ChapterContent = {
               { fromFirst: 1, label: 'B', prob: '2/7', pathProb: '6/56' },
             ],
             caption:
-              'Urne à 5 boules rouges, 3 bleues (8 au total), 2 tirages successifs SANS remise : la composition change après le 1er tirage.',
+              'Urne à 5 boules rouges, 3 bleues (8 au total), 2 tirages successifs **sans** remise : la composition change après le 1er tirage.',
           },
         },
         {
@@ -633,6 +644,17 @@ export const probabilites: ChapterContent = {
             'La somme des probabilités de **tous** les chemins d\'un arbre vaut toujours 1 (ici, ' +
             'sans remise : 20/56+15/56+15/56+6/56=1). Un excellent moyen de repérer une erreur ' +
             'de calcul avant de répondre !',
+        },
+        {
+          kind: 'atelier',
+          tag: 'arbre-tirages-widget',
+          label: 'Manipule toi-même : l\'arbre des tirages',
+          caption:
+            'Règle la composition de l\'urne, choisis avec ou sans remise, 2 ou 3 tirages : ' +
+            'l\'arbre pondéré se reconstruit. Choisis un événement : ses chemins s\'allument ' +
+            'et leurs probabilités s\'additionnent sous l\'arbre. Le réglage de départ (5 ' +
+            'rouges, 3 bleues, sans remise) reproduit l\'exemple ci-dessus ; passe en « avec ' +
+            'remise » pour voir les branches du 2e tirage redevenir identiques.',
         },
         {
           kind: 'application',
@@ -755,6 +777,17 @@ export const probabilites: ChapterContent = {
           ],
           result: { tag: '', text: '' },
         },
+        {
+          kind: 'atelier',
+          tag: 'deux-des-widget',
+          label: 'Manipule toi-même : la grille des 36 issues',
+          caption:
+            'Choisis un événement (somme, produit, plus grand des deux, écart, au moins un ' +
+            '6) : ses cases s\'allument et la probabilité se lit directement en cases sur ' +
+            '36. L\'histogramme montre que les 11 sommes ne sont pas équiprobables. Le mode ' +
+            '« trois dés » refait le calcul de Galilée : 25 façons d\'obtenir 9 contre 27 ' +
+            'pour 10, sur 216.',
+        },
         { kind: 'subheading', text: 'Dénombrement — permutations et dérangements' },
         {
           kind: 'intuition',
@@ -824,10 +857,14 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          headers: ['Lettres bien placées', '0', '1', '2', '3', '4', 'Total'],
+          headers: ['Lettres bien placées', 'Nombre de répartitions', 'Probabilité'],
           rows: [
-            ['Nombre de répartitions', '9', '8', '6', { text: '0', tone: 'bad' }, '1', '24'],
-            ['Probabilité', '$\\frac{9}{24}=\\frac{3}{8}$', '$\\frac{8}{24}=\\frac{1}{3}$', '$\\frac{6}{24}=\\frac{1}{4}$', '$0$', '$\\frac{1}{24}$', '$1$'],
+            ['0', '9', '$\\frac{9}{24}=\\frac{3}{8}$'],
+            ['1', '8', '$\\frac{8}{24}=\\frac{1}{3}$'],
+            ['2', '6', '$\\frac{6}{24}=\\frac{1}{4}$'],
+            ['3', { text: '0', tone: 'bad' }, '$0$'],
+            ['4', '1', '$\\frac{1}{24}$'],
+            ['Total', '24', '$1$'],
           ],
         },
         {
@@ -841,6 +878,17 @@ export const probabilites: ChapterContent = {
             '$\\frac{1}{e} \\approx 0{,}368$, où $e$ est le nombre du chapitre sur les ' +
             'exponentielles. Que l\'on mélange 6 lettres ou les manteaux de 1 000 invités au ' +
             'vestiaire, la probabilité que personne ne récupère le sien reste d\'environ 37 %.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'derangements-widget',
+          label: 'Manipule toi-même : lettres et enveloppes',
+          caption:
+            'Mélange n lettres dans leurs enveloppes, puis simule 1 000 répartitions : la ' +
+            'fréquence observée de chaque nombre de lettres bien placées rejoint la ' +
+            'probabilité exacte. Fais grandir n : la probabilité qu\'aucune lettre ne soit ' +
+            'bien placée se stabilise presque aussitôt près de 1/e ≈ 0,368. Pour n = 4, ' +
+            'affiche les 9 dérangements.',
         },
         {
           kind: 'entrainement',
@@ -1299,16 +1347,19 @@ export const probabilites: ChapterContent = {
           kind: 'definition',
           label: 'Épreuves répétées et indépendantes : toujours un arbre',
           items: [
-            'Répéter $n$ fois la MÊME épreuve à deux issues (succès de probabilité $p$, échec ' +
+            'Répéter $n$ fois la **même** épreuve à deux issues (succès de probabilité $p$, échec ' +
               '$1-p$), en remettant à chaque fois les conditions à l\'identique, c\'est ' +
-              'exactement l\'arbre de la section 2 — sauf que les DEUX probabilités $p$ et ' +
-              '$1-p$ sont les MÊMES à chaque étage (indépendance : le résultat d\'un tir ' +
+              'exactement l\'arbre de la section 2 — sauf que les **deux** probabilités $p$ et ' +
+              '$1-p$ sont les **mêmes** à chaque étage (indépendance : le résultat d\'un tir ' +
               'n\'affecte jamais le suivant).',
+            'On note $X$ le **nombre de succès** obtenus au cours des $n$ épreuves : $X$ peut ' +
+              'valoir $0, 1, \\ldots, n$, et « $X=k$ » désigne l\'événement « obtenir exactement ' +
+              '$k$ succès ».',
             'Sur un chemin donné, tu multiplies les probabilités étage par étage, comme ' +
-              'toujours. Mais puisque $p$ et $1-p$ sont identiques à chaque étage, DEUX chemins ' +
-              'comptant le MÊME NOMBRE de succès — peu importe à quels étages ils se ' +
-              'produisent — ont exactement la même probabilité. Pour trouver $P$(exactement ' +
-              '$k$ succès), il suffit donc de COMPTER combien de chemins de l\'arbre ' +
+              'toujours. Mais puisque $p$ et $1-p$ sont identiques à chaque étage, **deux** chemins ' +
+              'comptant le **même nombre** de succès — peu importe à quels étages ils se ' +
+              'produisent — ont exactement la même probabilité. Pour trouver $P(X=k)$, il suffit ' +
+              'donc de **compter** combien de chemins de l\'arbre ' +
               'contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune ' +
               'à chacun d\'eux.',
           ],
@@ -1351,7 +1402,7 @@ export const probabilites: ChapterContent = {
                 'Nombre de succès',
                 'Chemins',
                 'Nombre de chemins',
-                'Probabilité de CHAQUE chemin',
+                'Probabilité de chaque chemin',
                 'P(X=k)',
               ],
               rows: [
@@ -1364,7 +1415,7 @@ export const probabilites: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Vérification : 0,027+0,189+0,441+0,343 = 1 EXACTEMENT — les 8 chemins couvrent ' +
+                'Vérification : 0,027+0,189+0,441+0,343 = 1 **exactement** — les 8 chemins couvrent ' +
                 'tous les cas possibles, sans jamais se chevaucher.',
             },
           ],
@@ -1380,7 +1431,7 @@ export const probabilites: ChapterContent = {
                 'succès (probabilité $p$), les $n-k$ autres un échec (probabilité $1-p$). Les épreuves ' +
                 'étant indépendantes, chaque branche garde la même probabilité quel que soit le chemin ' +
                 'déjà parcouru : par la règle du produit (section 2), ce chemin a pour probabilité ' +
-                '$p^k(1-p)^{n-k}$, quel que soit l\'ORDRE des succès et des échecs (l\'ordre des ' +
+                '$p^k(1-p)^{n-k}$, quel que soit l\'**ordre** des succès et des échecs (l\'ordre des ' +
                 'facteurs ne change pas un produit).',
             },
             {
@@ -1395,7 +1446,7 @@ export const probabilites: ChapterContent = {
               kind: 'para',
               text:
                 'D\'où $P(X=k) = N_k \\times p^k(1-p)^{n-k}$. Tout le travail se ramène donc à ' +
-                'COMPTER les chemins à $k$ succès, en énumérant les positions possibles des succès ' +
+                '**compter** les chemins à $k$ succès, en énumérant les positions possibles des succès ' +
                 'parmi les $n$ épreuves — comme dans l\'exemple du tireur ci-dessous.',
             },
             {
@@ -1433,10 +1484,10 @@ export const probabilites: ChapterContent = {
           formula: '',
           steps: [
             {
-              tag: 'seule la POSITION des 2 succès compte',
+              tag: 'seule la position des 2 succès compte',
               text:
                 'Avec 5 tirs, lister les 32 chemins complets serait trop lourd. Mais pour ' +
-                '$P(X=2)$, seule la POSITION des 2 succès parmi les 5 tirs compte : chaque ' +
+                '$P(X=2)$, seule la **position** des 2 succès parmi les 5 tirs compte : chaque ' +
                 'position donne un chemin de probabilité $0{,}3^2 \\times 0{,}7^3$, quelle que soit ' +
                 'la position exacte. Il suffit d\'énumérer ces positions :',
             },
@@ -1453,15 +1504,15 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Oublier de COMPTER le nombre de positions (ici 10), et ne garder qu\'UNE seule ' +
+            'Oublier de **compter** le nombre de positions (ici 10), et ne garder qu\'**une** seule ' +
             'd\'entre elles, donne $0{,}3^2 \\times 0{,}7^3=0{,}03087$ — un résultat 10 fois trop ' +
-            'petit ! Le nombre de chemins n\'est JAMAIS optionnel dès que $0<k<n$.',
+            'petit ! Le nombre de chemins n\'est **jamais** optionnel dès que $0<k<n$.',
         },
         {
           kind: 'methode',
           label: '« Au moins un » : toujours par le complément',
           items: [
-            '$P$(au moins un succès) se calcule par le complément de « aucun succès », JAMAIS ' +
+            '$P$(au moins un succès) se calcule par le complément de « aucun succès », **jamais** ' +
               'en additionnant des probabilités individuelles — ça dépasserait facilement 1 ! ' +
               '$P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.',
             'Avec l\'exemple : $1-0{,}7^5 = 1-0{,}16807 = 0{,}83193$.',
@@ -1470,7 +1521,7 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$P(\\text{au moins 1}) = 5 \\times p = 1{,}5$ est IMPOSSIBLE — une probabilité ne ' +
+            '$P(\\text{au moins 1}) = 5 \\times p = 1{,}5$ est **impossible** — une probabilité ne ' +
             'dépasse jamais 1 ! Cette méthode « additionner les $p$ » est toujours fausse. La ' +
             'seule méthode fiable, c\'est le complément, quelle que soit la valeur de $p$ (il ' +
             'fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
@@ -1497,8 +1548,41 @@ export const probabilites: ChapterContent = {
             footer: '0,168 + 0,832 = 1',
             warning: '✗ 5×0,3 = 1,5 (impossible, >1)',
             caption:
-              '0,168+0,832=1 EXACTEMENT : $P(X=0)$ et $P$(au moins 1) se partagent toute la ' +
+              '0,168+0,832=1 **exactement** : $P(X=0)$ et $P$(au moins 1) se partagent toute la ' +
               'barre — additionner 5×0,3=1,5 dépasserait la barre elle-même.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'combien de lancers pour avoir au moins 95 % de chances ?',
+          formula:
+            'Combien de fois faut-il lancer un dé pour avoir au moins 95 % de chances d\'obtenir ' +
+            'au moins un 6 ? On cherche le plus petit $n$ tel que $1-\\left(\\frac{5}{6}\\right)^n \\geq 0{,}95$.',
+          steps: [
+            {
+              tag: 'isoler la puissance',
+              text:
+                '$1-\\left(\\frac{5}{6}\\right)^n \\geq 0{,}95 \\iff \\left(\\frac{5}{6}\\right)^n \\leq 0{,}05$.',
+            },
+            {
+              tag: 'passer au logarithme',
+              text:
+                'La fonction $\\ln$ est croissante : $n \\ln\\frac{5}{6} \\leq \\ln 0{,}05$. Comme ' +
+                '$\\ln\\frac{5}{6} < 0$, diviser par ce nombre négatif **change le sens** de ' +
+                'l\'inégalité : $n \\geq \\dfrac{\\ln 0{,}05}{\\ln\\frac{5}{6}} \\approx 16{,}4$.',
+            },
+            {
+              tag: 'vérifier',
+              text:
+                '$\\left(\\frac{5}{6}\\right)^{16} \\approx 0{,}054 > 0{,}05$ : 16 lancers ne suffisent ' +
+                'pas ; $\\left(\\frac{5}{6}\\right)^{17} \\approx 0{,}045 \\leq 0{,}05$ : 17 lancers suffisent.',
+            },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              'Il faut au moins 17 lancers. En général, $1-(1-p)^n \\geq 0{,}95 \\iff ' +
+              'n \\geq \\dfrac{\\ln 0{,}05}{\\ln(1-p)}$ — les logarithmes du chapitre 3 au service des probabilités.',
           },
         },
         {
@@ -1521,7 +1605,38 @@ export const probabilites: ChapterContent = {
               'tous les cas possibles, sans jamais se chevaucher.',
           },
         },
-        { kind: 'subheading', text: 'Deux grands classiques : le complément et l\'indépendance' },
+        { kind: 'subheading', text: 'Grands classiques : le complément et l\'indépendance' },
+        {
+          kind: 'exemple',
+          badge: 'les deux paris du chevalier de Méré',
+          formula:
+            'Méré gagnait en pariant sur « au moins un 6 en 4 lancers d\'un dé », et pensait que ' +
+            '« au moins un double six en 24 lancers de deux dés » revenait au même : un double six ' +
+            'est 6 fois plus rare qu\'un 6, et l\'on fait 6 fois plus de lancers ($4 \\times \\frac{1}{6} = ' +
+            '24 \\times \\frac{1}{36} = \\frac{2}{3}$). Il perdait pourtant au second pari.',
+          steps: [
+            {
+              tag: '1er pari',
+              text:
+                'Par le complément : $P$(au moins un 6) $= 1-\\left(\\frac{5}{6}\\right)^4 = ' +
+                '1-\\frac{625}{1296} = \\frac{671}{1296} \\approx 0{,}518$, un peu plus d\'une chance sur deux.',
+            },
+            {
+              tag: '2e pari',
+              text:
+                'Un double six a une probabilité $\\frac{1}{36}$ à chaque lancer de deux dés : ' +
+                '$P$(au moins un double six) $= 1-\\left(\\frac{35}{36}\\right)^{24} \\approx 0{,}491$, ' +
+                'un peu moins d\'une chance sur deux.',
+            },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'Le raisonnement par proportion de Méré est faux : les probabilités ne s\'additionnent ' +
+              'pas d\'un lancer à l\'autre. Il aurait fallu 25 lancers : ' +
+              '$1-\\left(\\frac{35}{36}\\right)^{25} \\approx 0{,}506$.',
+          },
+        },
         {
           kind: 'exemple',
           badge: 'paradoxe des anniversaires',
@@ -1552,6 +1667,16 @@ export const probabilites: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'anniversaires-widget',
+          label: 'Manipule toi-même : le paradoxe des anniversaires',
+          caption:
+            'Fais glisser le nombre de personnes : la courbe montre la probabilité qu\'au ' +
+            'moins deux soient nées le même jour, qui dépasse 0,5 dès 23 personnes. Tire ' +
+            'une classe au hasard pour voir une vraie coïncidence de dates, puis 100 ' +
+            'classes pour comparer la fréquence observée à la probabilité.',
+        },
+        {
           kind: 'exemple',
           badge: 'montage en série ou en parallèle',
           formula:
@@ -1562,13 +1687,13 @@ export const probabilites: ChapterContent = {
               tag: 'en série',
               text:
                 'Le courant traverse les deux composants l\'un après l\'autre : l\'appareil ' +
-                'fonctionne seulement si les DEUX fonctionnent. Par indépendance : ' +
+                'fonctionne seulement si les **deux** fonctionnent. Par indépendance : ' +
                 '$P$(fonctionne) $= 0{,}9 \\times 0{,}8 = 0{,}72$.',
             },
             {
               tag: 'en parallèle',
               text:
-                'Il suffit qu\'UN des deux fonctionne : c\'est un « au moins un », donc par le ' +
+                'Il suffit qu\'**un** des deux fonctionne : c\'est un « au moins un », donc par le ' +
                 'complément. L\'appareil tombe en panne seulement si les deux sont en panne : ' +
                 '$P$(panne) $= 0{,}1 \\times 0{,}2 = 0{,}02$, d\'où $P$(fonctionne) $= 1 - 0{,}02 = 0{,}98$.',
             },
@@ -1576,10 +1701,65 @@ export const probabilites: ChapterContent = {
           result: {
             tag: 'à retenir',
             text:
-              'Série : produit des probabilités de fonctionnement. Parallèle : 1 moins le produit des ' +
-              'probabilités de panne. Jamais l\'un à la place de l\'autre — et additionner ' +
+              'Série : produit des probabilités de fonctionnement, $P(\\text{série fonctionne}) = p_1 \\times p_2$. ' +
+              'Parallèle : 1 moins le produit des probabilités de panne, ' +
+              '$P(\\text{parallèle fonctionne}) = 1-(1-p_1)(1-p_2)$, où $p_1$ et $p_2$ sont les ' +
+              'probabilités de fonctionnement des deux composants. Jamais l\'un à la place de l\'autre — et additionner ' +
               '$0{,}9+0{,}8 = 1{,}7$ ne donne même pas une probabilité.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'fiabilite-montage-widget',
+          label: 'Manipule toi-même : la fiabilité d\'un montage',
+          caption:
+            'Choisis un montage (série, parallèle ou mixte), 2 à 4 composants, et la ' +
+            'probabilité de fonctionnement de chacun : la fiabilité de l\'appareil se ' +
+            'calcule en détail. Tire un appareil pour voir quels composants tombent en ' +
+            'panne, ou simule-en 1 000. Le réglage de départ (0,9 et 0,8) reproduit ' +
+            'l\'exemple ci-dessus.',
+        },
+        { kind: 'subheading', text: 'Pour aller plus loin — le jeu de Monty Hall' },
+        {
+          kind: 'para',
+          text:
+            'Une voiture est cachée derrière l\'une de 3 portes, une chèvre derrière chacune des ' +
+            'deux autres. Tu choisis une porte ; l\'animateur, qui sait où est la voiture, ouvre ' +
+            'une autre porte qui cache une chèvre, puis te propose de changer. En gardant ta porte, ' +
+            'tu gagnes seulement si elle cachait la voiture dès le départ : probabilité ' +
+            '$\\frac{1}{3}$. En changeant, tu gagnes dans **tous** les autres cas, puisque ' +
+            'l\'animateur a éliminé la seule autre chèvre : probabilité $\\frac{2}{3}$. Changer ' +
+            'double tes chances — un résultat qui a déconcerté jusqu\'à des mathématiciens ' +
+            'professionnels. Le générateur « Quand l\'intuition se trompe » le reprend avec 4 ou 5 portes.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'weightedTree',
+            firstLevel: [
+              { label: 'voiture', prob: '1/3' },
+              { label: 'chèvre', prob: '2/3' },
+            ],
+            secondLevel: [
+              { fromFirst: 0, label: 'perdu', prob: '1', pathProb: '1/3' },
+              { fromFirst: 1, label: 'gagné', prob: '1', pathProb: '2/3', highlight: true },
+            ],
+            caption:
+              'Stratégie « changer » : 1er niveau, ce que cache la porte choisie au départ ; 2e niveau, ' +
+              'le résultat après le changement. Si ta porte cachait une chèvre, l\'animateur a ouvert ' +
+              'l\'autre porte à chèvre : changer mène forcément à la voiture.',
+          },
+        },
+        {
+          kind: 'atelier',
+          tag: 'monty-hall-widget',
+          label: 'Manipule toi-même : le jeu de Monty Hall',
+          caption:
+            'Joue une partie : choisis une porte, l\'animateur ouvre une porte à chèvre, ' +
+            'puis garde ou change. Simule ensuite 1 000 parties pour chaque stratégie : ' +
+            'changer gagne environ deux fois sur trois avec 3 portes. Fais varier le nombre ' +
+            'de portes ; la variante « l\'animateur ouvre toutes les autres portes » est un ' +
+            'autre jeu, présenté à part.',
         },
         {
           kind: 'entrainement',
@@ -1630,6 +1810,10 @@ export const probabilites: ChapterContent = {
         formulas: [
           { text: 'probabilité d\'un chemin = produit des probabilités des branches' },
           { text: 'probabilité d\'un événement = somme des probabilités de ses chemins' },
+          {
+            text: '$P(A \\cap B) = P(A) \\times P(B|A)$',
+            condition: 'probabilité d\'un chemin de deux branches',
+          },
           { text: '$n! = n \\times (n-1) \\times \\ldots \\times 1$' },
           { text: 'dérangement : permutation où aucun objet ne reste à sa place — $D(n) \\neq n!$, par exemple $D(4) = 9$' },
         ],
@@ -1655,17 +1839,32 @@ export const probabilites: ChapterContent = {
             text: '$P(A) = \\displaystyle\\sum_i P(A|B_i) \\times P(B_i)$',
             condition: 'sur une partition de $\\Omega$',
           },
-          { text: '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$' },
+          {
+            text: '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$',
+            condition: 'théorème de Bayes — retourner le conditionnement',
+          },
+          {
+            text: '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B|A) \\times P(A) + P(B|\\bar{A}) \\times P(\\bar{A})}$',
+            condition: 'théorème de Bayes, $P(B)$ développée sur la partition $A$, $\\bar{A}$',
+          },
         ],
       },
       {
-        title: 'Épreuves répétées (loi binomiale)',
+        title: 'Épreuves répétées et indépendance',
         formulas: [
           {
             text: '$P(X=k) = N_k \\times p^k(1-p)^{n-k}$',
-            condition: '$N_k$ = nombre de chemins à $k$ succès',
+            condition: '$X$ : nombre de succès en $n$ épreuves ; $N_k$ : nombre de chemins à $k$ succès',
           },
           { text: '$P(\\text{au moins 1 succès}) = 1-(1-p)^n$' },
+          {
+            text: '$P(\\text{série fonctionne}) = p_1 \\times p_2$',
+            condition: 'composants indépendants de probabilités de fonctionnement $p_1$, $p_2$',
+          },
+          {
+            text: '$P(\\text{parallèle fonctionne}) = 1-(1-p_1)(1-p_2)$',
+            condition: 'composants indépendants de probabilités de fonctionnement $p_1$, $p_2$',
+          },
         ],
       },
     ],
@@ -1676,13 +1875,15 @@ export const probabilites: ChapterContent = {
       headers: ['Notion', 'Point clé'],
       rows: [
         ['Probabilité', '$0 \\leq P(A) \\leq 1$ ; équiprobabilité : favorables/possibles'],
+        ['Fréquence', 'se stabilise vers la probabilité (loi des grands nombres) ; l\'écart fluctue en $\\frac{1}{\\sqrt{n}}$'],
         ['Union', '$P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$'],
         ['Complémentaire', '$P(\\bar{A} \\cap \\bar{B})=1-P(A \\cup B)$, jamais $1-P(A)-P(B)$'],
         ['Conditionnement', '$P(A|B)=P(A \\cap B)/P(B) \\neq P(B|A)$'],
         ['Indépendance', '$P(A \\cap B)=P(A) \\times P(B)$ — toujours vérifiée, jamais devinée'],
-        ['Incompatibilité', '$P(A \\cap B)=0 \\Rightarrow$ jamais indépendant'],
+        ['Incompatibilité', '$P(A \\cap B)=0 \\Rightarrow$ jamais indépendants si $P(A)$ et $P(B)$ sont non nulles'],
         ['Arbre pondéré', 'chemin → produit ; événement (plusieurs chemins) → somme'],
-        ['Avec/sans remise', 'avec remise → indépendant ; sans remise → jamais'],
+        ['Diagramme cartésien', 'deux tirages : grille des issues équiprobables (36 pour deux dés ; sans remise, la diagonale disparaît)'],
+        ['Avec/sans remise', 'avec remise : tirages successifs indépendants ; sans remise : le 1er tirage modifie les probabilités du 2e'],
         ['Dérangement', '$D(n) \\neq n!$ ; $D(4)$=9'],
         ['Probabilités totales', '$P(A)=\\sum P(A|B_i) \\times P(B_i)$ sur une partition'],
         ['Théorème de Bayes', '$P(A|B)=P(B|A) \\times P(A)/P(B)$'],
@@ -1690,6 +1891,8 @@ export const probabilites: ChapterContent = {
           'Épreuves répétées',
           'compter les chemins à $k$ succès dans l’arbre, $\\times p^k(1-p)^{n-k}$',
         ],
+        ['Au moins un', '$1-P(\\text{aucun})$, jamais une somme de probabilités'],
+        ['Série / parallèle', 'série : $p_1 \\times p_2$ ; parallèle : $1-(1-p_1)(1-p_2)$'],
       ],
     },
     entrainement: {

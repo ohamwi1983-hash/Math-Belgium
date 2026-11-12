@@ -2603,3 +2603,32 @@ paths:
   parlants, 2 démonstrations (règle du produit ; épreuves répétées par nombre de chemins), §4
   anniversaires et série/parallèle, 18 énoncés par clé (vérifiés), 53 virgules → `{,}`.
   `masquerMembresDeDroite` coupe au premier « = » de niveau 0 (« P(X=k) = … »).
+
+- **6e (6h), Chapitre 6 — Probabilités : audit de contenu appliqué** (accepté en entier).
+  Erreurs : l'historique attribuait à Méré un pari sur des SOMMES de dés — c'est Galilée (3 dés,
+  9 contre 10 : 25/216 contre 27/216) ; Méré : double six en 24 lancers et problème des partis ;
+  contrôle qualité : 80,5 % est le risque d'accepter un lot à 2 défectueuses (règle d'acceptation
+  énoncée), pas « ce qui décide » ; spam : seule la barre « 3 mots » dépasse le seuil ; X défini au
+  §4, « loi binomiale » retiré du formulaire ; « de probabilités non nulles » et P(B) > 0 ajoutés ;
+  « a priori (ou théorique) » au lieu d'« intuitive » ; « sans remise » nuancé (tirages
+  successifs) ; image de l'indépendance remplacée (B ne change pas la proportion de A). Structure :
+  démonstration des trois écritures de l'indépendance au §1, §3 renommé « Probabilités totales et
+  théorème de Bayes » (rappel + exemple « incompatibles, indépendants, ou ni l'un ni l'autre ? »),
+  piège de la partition remonté, synthèse et formulaire complétés (règle du produit, Bayes
+  développé, série/parallèle). Ajouts : loi des grands nombres et fluctuation, « ce dé est-il
+  truqué ? » (règle de 6gen75), météo d'ensemble, tableau incompatibles/indépendants ; D(n) montré
+  (9 dérangements de 4, récurrence, tableau 9/8/6/0/1, limite 1/e) ; grille sans remise (30 cases,
+  texte : `outcomeGrid` ne retire pas de cases) ; maladie rare (1/6 puis 99/124 au 2e test),
+  sensibilité/spécificité ; paradoxe de Méré résolu ; « combien d'essais pour 95 % » par les
+  logarithmes ; Monty Hall avec arbre. Majuscules d'insistance → gras. 7 nouveaux ateliers :
+  `stabilisation-frequences-widget` (séries superposées, dé mystère, règle de 6gen75),
+  `deux-des-widget` (grille 6×6, histogramme des sommes, mode Galilée 3 dés), `arbre-tirages-widget`
+  (urne, avec/sans remise, chemins allumés), `derangements-widget` (simulation, exact, 1/e),
+  `anniversaires-widget`, `fiabilite-montage-widget`, `monty-hall-widget` (règle du cours = 6gen76 ;
+  variante « toutes les autres portes » à part). Améliorés : `binomiale-positions-widget` (plus de
+  C(n;k) ni de « ^ », liste des chemins, mode « au moins k »), `venn-double-entree-widget` (« Sachant
+  B », repère d'indépendance, verdict exact en entiers), `bayes-test-medical-widget` (maladie rare,
+  2e test, vocabulaire, grille de 1 000 points). Vercel : `vercel.json` désactive le déploiement des
+  branches `claude/*` — les sauvegardes WIP avaient épuisé le quota quotidien (« Deployment rate
+  limited »). Vérifié : build propre, page 390 clair/sombre et 1280 (0 débordement, 0 erreur
+  KaTeX, 10 ateliers montés), épinglage ko 0, feuilles réelles du chapitre sans erreur.
