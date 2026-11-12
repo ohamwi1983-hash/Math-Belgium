@@ -1251,6 +1251,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // `exemple` (ou le label de l'`exempleLibre`).
     operationsbase: [
       { cle: 'produit de deux complexes', enonce: "Calcule $(2+i)(3-i)$ et écris le résultat sous la forme $a+bi$." },
+      { cle: 'le calcul de Bombelli', enonce: "Vérifie que $(2+i)^3=2+11i$. Déduis-en que la formule de Cardan $x=\\sqrt[3]{2+\\sqrt{-121}}+\\sqrt[3]{2-\\sqrt{-121}}$ donne la solution réelle $x=4$ de l'équation $x^3=15x+4$." },
       { cle: 'quotient par le conjugué', enonce: "Écris $\\dfrac{1+i}{1-i}$ sous la forme $a+bi$, en multipliant par le conjugué du dénominateur." },
       { cle: 'puissance de i', enonce: "Calcule $i^{2021}$, puis $i^{2022}$, en justifiant à l'aide du cycle des puissances de $i$." },
     ],
@@ -1268,6 +1269,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     formetrigonometrique: [
       { cle: 'le produit additionne les arguments', enonce: "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$) — en développant le produit des deux formes trigonométriques et en reconnaissant les formules d'addition." },
+      { cle: 'passer à la forme exponentielle', enonce: "Écris sous forme exponentielle $z_1=1+i\\sqrt{3}$, $z_2=-1-i$ et $z_3=\\sqrt{3}-i$, en donnant chaque argument dans $]-\\pi\\,;\\pi]$." },
       { cle: 'produit en forme exponentielle', enonce: "Pour $z_1 = 2e^{i\\pi/3}$ et $z_2 = 3e^{i\\pi/6}$, calcule $z_1z_2$ et $\\dfrac{z_1}{z_2}$ sous forme exponentielle, puis écris $z_1z_2$ sous la forme $a+bi$." },
     ],
     formulemoivre: [
@@ -1275,21 +1277,26 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'par récurrence', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$, par récurrence sur $n$, sans utiliser la forme exponentielle $e^{i\\theta}$." },
       { cle: 'cos(2x) et sin(2x)', enonce: "En développant $(\\cos x+i\\sin x)^2$ grâce à la formule de Moivre, retrouve les formules de duplication $\\cos(2x)=\\cos^2x-\\sin^2x$ et $\\sin(2x)=2\\sin x\\cos x$." },
       { cle: 'cos(3x) et sin(3x)', enonce: "En développant $(\\cos x+i\\sin x)^3$ grâce à la formule de Moivre et au binôme de Newton, exprime $\\cos(3x)$ et $\\sin(3x)$ en fonction de $\\cos x$ et $\\sin x$." },
+      { cle: 'linéariser cos²x et cos³x', enonce: "À l'aide des formules d'Euler, linéarise $\\cos^2x$ et $\\cos^3x$, puis déduis-en une primitive de $\\cos^2x$." },
     ],
     racinesniemes: [
       { cle: 'racines quatrièmes et cubiques', enonce: "Détermine les 4 racines quatrièmes de l'unité, puis les 3 racines cubiques de l'unité." },
       { cle: 'pourquoi cette somme est nulle', enonce: "Démontre que, pour tout entier $n\\ge2$, la somme des $n$ racines n-ièmes de l'unité, $\\displaystyle\\sum_{k=0}^{n-1} e^{2ik\\pi/n}$, est nulle." },
+      { cle: 'racines cubiques de −8', enonce: "Détermine les racines cubiques de $-8$ sous forme exponentielle puis algébrique, et retrouve-les à partir de la factorisation $z^3+8=(z+2)(z^2-2z+4)$." },
     ],
     transformationsplan: [
       { cle: "l'addition correspond à une translation", enonce: "Démontre que, pour tout point $M$ d'affixe $z$ et $A$ le point d'affixe $c$, l'application $z \\mapsto z+c$ est la translation de vecteur $\\vec{OA}$." },
       { cle: 'combine rotation et homothétie', enonce: "Démontre que, pour $c$ complexe non nul de module $r$ et d'argument $\\alpha$, l'application $z \\mapsto c(z-z_0)+z_0$ (de centre $\\Omega$ d'affixe $z_0$) combine une rotation de centre $\\Omega$ et d'angle $\\alpha$ avec une homothétie de centre $\\Omega$ et de rapport $r$." },
       { cle: 'classer une transformation', enonce: "Détermine la nature, le centre, l'angle et le rapport de la transformation $z' = (1+i)z + 2$." },
+      { cle: 'composer deux rotations', enonce: "On note $r_1$ la rotation de centre $O$ et d'angle $\\dfrac{\\pi}{2}$, et $r_2$ la rotation de centre $A(1)$ et d'angle $\\dfrac{\\pi}{2}$. Détermine l'écriture complexe, la nature et le centre de $r_2\\circ r_1$, puis de $r_1\\circ r_2$." },
     ],
     trianglescomplexes: [
       { cle: 'OBF est équilatéral', enonce: "Démontre que, pour tout point $B\\neq O$ et $F$ l'image de $B$ par la rotation de centre $O$ et d'angle $\\pi/3$ (c'est-à-dire $F=B\\cdot e^{i\\pi/3}$), le triangle $OBF$ est équilatéral." },
+      { cle: 'reconnaître un triangle équilatéral', enonce: "Soit $A(1)$, $B(3)$ et $C(2+i\\sqrt{3})$. Calcule $\\dfrac{z_C-z_A}{z_B-z_A}$ sous forme exponentielle, puis déduis-en l'angle orienté $(\\overrightarrow{AB},\\overrightarrow{AC})$ et la nature du triangle $ABC$." },
     ],
     problemesavances: [
       { cle: 'z³ réel positif', enonce: "Pour $z = e^{i\\theta}$ avec $\\theta \\in [0\\,;2\\pi[$, détermine les valeurs de $\\theta$ pour lesquelles $z^3$ est un réel positif, puis celles pour lesquelles $z^3$ est un réel négatif." },
+      { cle: 'lieu |z−1| = |z+i|', enonce: "Détermine le lieu des points $M$ d'affixe $z$ tels que $|z-1|=|z+i|$." },
       { cle: 'si |z|=1 alors |z′|=1', enonce: "Démontre que, pour $a$ complexe tel que $|a|\\neq1$, si $|z|=1$ alors $|z'|=1$, où $z'=\\dfrac{z-a}{1-\\bar{a}z}$." },
     ],
   },

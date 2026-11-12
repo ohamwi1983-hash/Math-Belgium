@@ -77,16 +77,20 @@ export const nombresComplexes: ChapterContent = {
           kind: 'historique',
           titre: "Des nombres « impossibles » pour résoudre de vraies équations",
           text:
-            "En 1545, le mathématicien italien **Jérôme Cardan** publie une méthode pour résoudre " +
-            "les équations du troisième degré. En l'appliquant à certains cas, sa formule fait " +
-            "apparaître des racines carrées de nombres négatifs, comme $\\sqrt{-15}$ — des " +
-            "quantités que personne, à l'époque, ne sait interpréter. Cardan les juge inutilisables " +
-            "et les écarte. C'est un autre Italien, **Rafael Bombelli**, qui va plus loin dans son " +
-            'Algebra (1572, page de titre ci-contre) : il montre qu\'en calculant AVEC ces ' +
-            "racines « impossibles » comme si elles obéissaient aux mêmes règles que les autres " +
-            "nombres, elles s'annulent proprement dans le résultat final — qui, lui, est bien un " +
-            "nombre réel. C'est la première preuve que ces nombres, même incompris, sont un outil " +
-            'de calcul valide.',
+            "Vers 1545, le mathématicien italien **Jérôme Cardan** croise deux fois des racines " +
+            "carrées de nombres négatifs. D'abord dans un problème du second degré : partager 10 " +
+            'en deux parts dont le produit vaut 40. Les parts devraient valoir $5+\\sqrt{-15}$ et ' +
+            '$5-\\sqrt{-15}$ — leur somme fait bien 10, et leur produit $25-(-15)=40$ —, mais ' +
+            'Cardan juge ces quantités « aussi subtiles qu\'inutiles ». Ensuite dans sa formule ' +
+            'des équations du troisième degré : appliquée à $x^3=15x+4$, elle donne ' +
+            '$x=\\sqrt[3]{2+\\sqrt{-121}}+\\sqrt[3]{2-\\sqrt{-121}}$, alors que l\'équation a ' +
+            'une solution réelle évidente, $x=4$. C\'est un autre Italien, **Rafael Bombelli**, ' +
+            "qui débloque la situation dans son Algebra (1572, page de titre ci-contre) : en " +
+            'calculant AVEC ces racines « impossibles » comme si elles obéissaient aux règles ' +
+            'habituelles, il montre que les deux racines cubiques valent $2+\\sqrt{-1}$ et ' +
+            '$2-\\sqrt{-1}$, dont la somme vaut… 4. C\'est la première preuve que ces nombres, ' +
+            'même incompris, sont un outil de calcul valide — l\'exemple « le calcul de Bombelli », ' +
+            'plus bas dans cette section, refait son calcul.',
           image: {
             src: '/images/historique/bombelli-algebra.gif',
             alt: "Page de titre de l'Algebra de Rafael Bombelli (1572)",
@@ -120,7 +124,11 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'produit de deux complexes',
           formula: 'Calcule $(2+i)(3-i)$.',
-          steps: [{ tag: 'développer, puis remplacer i²=−1', text: '$(2+i)(3-i) = 6-2i+3i-i^2 = 6+i-(-1)$' }],
+          steps: [
+            { tag: 'développer comme deux binômes', text: '$(2+i)(3-i) = 2\\cdot3-2i+3i-i^2 = 6+i-i^2$' },
+            { tag: 'remplacer i² par −1', text: '$6+i-(-1) = 6+i+1$' },
+            { tag: 'regrouper partie réelle et partie imaginaire', text: '$(6+1)+i = 7+i$' },
+          ],
           result: { tag: 'résultat', text: '$7+i$' },
         },
         {
@@ -128,6 +136,23 @@ export const nombresComplexes: ChapterContent = {
           text:
             '$i^2 = 1$ est FAUX ! Par définition, $i^2=-1$ — c\'est tout l\'intérêt d\'avoir ' +
             'introduit $i$ : donner enfin une racine carrée à un nombre négatif.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'le calcul de Bombelli',
+          formula: 'Vérifie que $(2+i)^3=2+11i$, puis déduis-en une solution réelle de $x^3=15x+4$ à partir de la formule de Cardan $x=\\sqrt[3]{2+\\sqrt{-121}}+\\sqrt[3]{2-\\sqrt{-121}}$.',
+          steps: [
+            { tag: 'développer (2+i)³', text: '$(2+i)^2=4+4i+i^2=3+4i$, puis $(2+i)^3=(3+4i)(2+i)=6+3i+8i+4i^2=2+11i$' },
+            { tag: 'même calcul avec −i', text: '$(2-i)^2=3-4i$, puis $(2-i)^3=(3-4i)(2-i)=6-3i-8i+4i^2=2-11i$' },
+            {
+              tag: 'remplacer dans la formule',
+              text:
+                '$\\sqrt{-121}=11i$, donc la formule demande une racine cubique de $2+11i$ et une de ' +
+                '$2-11i$ : $2+i$ et $2-i$ conviennent, d\'où $x=(2+i)+(2-i)=4$',
+            },
+            { tag: 'vérifier dans l\'équation', text: '$4^3=64$ et $15\\cdot4+4=64\\ \\checkmark$' },
+          ],
+          result: { tag: 'solution réelle', text: '$x=4$ — les parties imaginaires se sont annulées' },
         },
         {
           kind: 'definition',
@@ -189,7 +214,11 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'quotient par le conjugué',
           formula: 'Écris $\\dfrac{1+i}{1-i}$ sous la forme $a+bi$.',
-          steps: [{ tag: 'multiplier par le conjugué du dénominateur', text: '$\\dfrac{1+i}{1-i} = \\dfrac{(1+i)(1+i)}{(1-i)(1+i)} = \\dfrac{2i}{2}$' }],
+          steps: [
+            { tag: 'multiplier par le conjugué du dénominateur', text: '$\\dfrac{1+i}{1-i} = \\dfrac{(1+i)(1+i)}{(1-i)(1+i)}$' },
+            { tag: 'numérateur', text: '$(1+i)^2 = 1+2i+i^2 = 1+2i-1 = 2i$' },
+            { tag: 'dénominateur, devenu réel', text: '$(1-i)(1+i) = 1-i^2 = 1+1 = 2$, d\'où $\\dfrac{2i}{2}$' },
+          ],
           result: { tag: 'résultat', text: '$i$' },
         },
         { kind: 'subheading', text: 'Puissances de i' },
@@ -237,7 +266,10 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'puissance de i',
           formula: 'Calcule $i^{2021}$.',
-          steps: [{ tag: 'décomposer l\'exposant', text: '$2021 = 4 \\times 505 + 1$' }],
+          steps: [
+            { tag: 'division de l\'exposant par 4', text: '$2021 = 4 \\times 505 + 1$ : le reste vaut 1' },
+            { tag: 'faire apparaître i⁴ = 1', text: '$i^{2021} = (i^4)^{505}\\cdot i^1 = 1^{505}\\cdot i$' },
+          ],
           result: { tag: 'résultat', text: '$i^{2021} = i^1 = i$' },
         },
         {
@@ -304,6 +336,40 @@ export const nombresComplexes: ChapterContent = {
           },
         },
         {
+          kind: 'definition',
+          label: 'Conjugué, opposé : deux symétries',
+          items: [
+            'Si $M$ a pour affixe $z$, le point d\'affixe $\\bar{z}$ est le **symétrique** de $M$ ' +
+              '**par rapport à l\'axe réel** : même abscisse, ordonnée opposée.',
+            'Le point d\'affixe $-z$ est le **symétrique** de $M$ **par rapport à l\'origine** $O$, et ' +
+              'celui d\'affixe $-\\bar{z}$ son symétrique par rapport à l\'axe imaginaire.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'complexPlane',
+            xMin: -3,
+            xMax: 3,
+            yMin: -2,
+            yMax: 2,
+            points: [
+              { x: 2, y: 1, label: 'z = 2+i', tone: 'accent', labelPos: 'above' },
+              { x: 2, y: -1, label: '2−i', tone: 'good', labelPos: 'below' },
+              { x: -2, y: -1, label: '−2−i', tone: 'bad', labelPos: 'below' },
+              { x: -2, y: 1, label: '−2+i', tone: 'ink', labelPos: 'above' },
+            ],
+            vectors: [
+              { from: { x: 2, y: 1 }, to: { x: 2, y: -1 }, tone: 'faint', dashed: true },
+              { from: { x: 2, y: 1 }, to: { x: -2, y: -1 }, tone: 'faint', dashed: true },
+              { from: { x: 2, y: 1 }, to: { x: -2, y: 1 }, tone: 'faint', dashed: true },
+            ],
+            caption:
+              'Pour $z=2+i$ : $\\bar{z}=2-i$ (vert, miroir sur l\'axe réel), $-z=-2-i$ (rouge, demi-tour autour ' +
+              'de $O$) et $-\\bar{z}=-2+i$ (noir, miroir sur l\'axe imaginaire).',
+          },
+        },
+        {
           kind: 'methode',
           label: 'Milieu, distance, parallélogramme',
           items: [
@@ -320,7 +386,10 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'distance entre deux points',
           formula: 'Calcule la distance $AB$, pour $z_A=1+2i$ et $z_B=4+6i$.',
-          steps: [{ tag: 'différence des affixes', text: '$z_B-z_A = (4-1)+(6-2)i = 3+4i$' }],
+          steps: [
+            { tag: 'différence des affixes', text: '$z_B-z_A = (4-1)+(6-2)i = 3+4i$' },
+            { tag: 'module = Pythagore', text: '$|3+4i| = \\sqrt{3^2+4^2} = \\sqrt{9+16} = \\sqrt{25}$' },
+          ],
           result: { tag: 'résultat', text: '$AB = \\sqrt{3^2+4^2} = 5$' },
         },
         {
@@ -408,6 +477,16 @@ export const nombresComplexes: ChapterContent = {
             'z_0^2$) — jamais une seule.',
         },
         {
+          kind: 'astuce',
+          label: 'Autre chemin : la forme trigonométrique',
+          text:
+            'Quand $z$ s\'écrit $re^{i\\theta}$ (section 4), ses deux racines carrées sont ' +
+            '$\\pm\\sqrt{r}\\,e^{i\\theta/2}$ : le module prend sa racine carrée, l\'argument est ' +
+            'divisé par 2. Pour $3+4i$, l\'argument n\'est pas remarquable : la méthode du ' +
+            'système reste alors la plus directe. Cette idée se généralise aux racines ' +
+            '$n$-ièmes, à la section 6.',
+        },
+        {
           kind: 'entrainement',
           title: 'Affixes et racines carrées',
           generatorId: '6gen35',
@@ -481,8 +560,15 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'équation à discriminant négatif',
           formula: 'Résous $z^2+2z+5=0$ dans ℂ.',
-          steps: [{ tag: 'discriminant', text: '$\\Delta=2^2-4\\cdot1\\cdot5=4-20=-16$, $\\sqrt{|\\Delta|}=4$' }],
-          result: { tag: 'résultat', text: '$z = \\dfrac{-2\\pm4i}{2} = -1\\pm2i$' },
+          steps: [
+            { tag: 'discriminant', text: '$\\Delta=2^2-4\\cdot1\\cdot5=4-20=-16<0$, et $\\sqrt{|\\Delta|}=\\sqrt{16}=4$' },
+            { tag: 'formule', text: '$z = \\dfrac{-2\\pm4i}{2\\cdot1} = -1\\pm2i$' },
+            {
+              tag: 'vérification par somme et produit',
+              text: '$z_1+z_2=-2=-\\dfrac{b}{a}$ et $z_1z_2=(-1)^2+2^2=5=\\dfrac{c}{a}\\ \\checkmark$',
+            },
+          ],
+          result: { tag: 'résultat', text: '$z_1=-1+2i$ et $z_2=-1-2i$' },
         },
         { kind: 'subheading', text: 'Équations bicarrées' },
         {
@@ -538,6 +624,16 @@ export const nombresComplexes: ChapterContent = {
               'factoriser : $a(z-z_0)(z-\\bar{z}_0)$.',
             'Ce produit redonne bien un polynôme à coefficients RÉELS en $z$, puisque ' +
               '$z_0+\\bar{z}_0$ et $z_0\\cdot\\bar{z}_0$ sont tous deux réels.',
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Vérifier ses solutions : somme et produit',
+          items: [
+            'Les relations de Viète restent vraies dans ℂ : si $z_1$ et $z_2$ sont les deux ' +
+              'solutions de $az^2+bz+c=0$, alors $z_1+z_2=-\\dfrac{b}{a}$ et $z_1z_2=\\dfrac{c}{a}$.',
+            'Deux calculs rapides suffisent donc à contrôler une résolution — c\'est la dernière ' +
+              'étape des deux exemples de cette section.',
           ],
         },
         {
@@ -656,7 +752,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'historique',
-          titre: "La formule qu'Euler jugeait lui-même la plus belle des mathématiques",
+          titre: 'La formule élue la plus belle des mathématiques',
           text:
             'La relation $e^{i\\theta}=\\cos\\theta+i\\sin\\theta$ porte le nom du mathématicien ' +
             'suisse **Leonhard Euler**, qui la publie en 1748. Elle relie trois domaines qui ' +
@@ -685,10 +781,61 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Si $a>0$, $\\arg(z) = \\arctan(b/a)$ directement. Si $a<0$, tu dois AJOUTER (ou ' +
-              'soustraire) $\\pi$ à cette valeur — sinon tu obtiens l\'argument du complexe ' +
-              'opposé, pas celui de $z$.',
+            'Si $a>0$ : $\\arg(z) = \\arctan(b/a)$ directement.',
+            'Si $a<0$ : $\\arg(z) = \\arctan(b/a)+\\pi$ si $b\\ge0$, et $\\arctan(b/a)-\\pi$ si ' +
+              '$b<0$ — sans cette correction, tu obtiendrais l\'argument du complexe opposé $-z$, ' +
+              'pas celui de $z$.',
+            'Si $a=0$ ($z=bi$ imaginaire pur, $b\\ne0$) : $b/a$ n\'existe pas, mais le point est ' +
+              'sur l\'axe imaginaire, donc $\\arg(z)=\\dfrac{\\pi}{2}$ si $b>0$ et ' +
+              '$-\\dfrac{\\pi}{2}$ si $b<0$.',
+            '**Convention** : on donne l\'argument dans $]-\\pi\\,;\\pi]$ (argument principal). ' +
+              'Tout angle qui en diffère d\'un multiple de $2\\pi$ repère le même point.',
           ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Angles remarquables',
+          text:
+            'Les multiples de $\\pi/6$ ou $\\pi/4$ sont dits « remarquables » : leur cosinus et ' +
+            'leur sinus s\'expriment exactement (racines, fractions), sans aucune ' +
+            'approximation décimale — retiens-les, ce sont les angles les plus utiles de tout ' +
+            'le chapitre.',
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Valeurs exactes du cosinus et du sinus des angles remarquables',
+          headers: ['θ', '0', 'π/6', 'π/4', 'π/3', 'π/2'],
+          rows: [
+            ['$\\cos\\theta$', '$1$', '$\\dfrac{\\sqrt{3}}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{1}{2}$', '$0$'],
+            ['$\\sin\\theta$', '$0$', '$\\dfrac{1}{2}$', '$\\dfrac{\\sqrt{2}}{2}$', '$\\dfrac{\\sqrt{3}}{2}$', '$1$'],
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'passer à la forme exponentielle',
+          formula: 'Écris sous forme exponentielle $z_1=1+i\\sqrt{3}$, $z_2=-1-i$ et $z_3=\\sqrt{3}-i$.',
+          steps: [
+            {
+              tag: 'z₁ = 1+i√3 : a > 0',
+              text:
+                '$|z_1|=\\sqrt{1+3}=2$ et $\\arg(z_1)=\\arctan\\sqrt{3}=\\dfrac{\\pi}{3}$ — contrôle : ' +
+                '$\\cos\\dfrac{\\pi}{3}=\\dfrac{1}{2}=\\dfrac{a}{r}$ et $\\sin\\dfrac{\\pi}{3}=\\dfrac{\\sqrt{3}}{2}=\\dfrac{b}{r}$',
+            },
+            {
+              tag: 'z₂ = −1−i : a < 0 et b < 0',
+              text:
+                '$|z_2|=\\sqrt{1+1}=\\sqrt{2}$ ; $\\arctan\\dfrac{-1}{-1}=\\dfrac{\\pi}{4}$, et comme ' +
+                '$a<0$, $b<0$ : $\\arg(z_2)=\\dfrac{\\pi}{4}-\\pi=-\\dfrac{3\\pi}{4}$ (3e quadrant)',
+            },
+            {
+              tag: 'z₃ = √3−i : a > 0',
+              text: '$|z_3|=\\sqrt{3+1}=2$ et $\\arg(z_3)=\\arctan\\dfrac{-1}{\\sqrt{3}}=-\\dfrac{\\pi}{6}$ (4e quadrant)',
+            },
+          ],
+          result: {
+            tag: 'formes exponentielles',
+            text: '$z_1=2e^{i\\pi/3} \\qquad z_2=\\sqrt{2}\\,e^{-3i\\pi/4} \\qquad z_3=2e^{-i\\pi/6}$',
+          },
         },
         {
           kind: 'methode',
@@ -764,8 +911,12 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'produit en forme exponentielle',
           formula: 'Calcule $z_1z_2$, pour $z_1=2e^{i\\pi/3}$ et $z_2=3e^{i\\pi/6}$.',
-          steps: [{ tag: 'multiplier modules et additionner arguments', text: '$z_1z_2 = (2\\times3)e^{i(\\pi/3+\\pi/6)}$' }],
-          result: { tag: 'résultat', text: '$= 6e^{i\\pi/2}$' },
+          steps: [
+            { tag: 'multiplier les modules', text: '$|z_1z_2| = 2\\times3 = 6$' },
+            { tag: 'additionner les arguments', text: '$\\arg(z_1z_2) = \\dfrac{\\pi}{3}+\\dfrac{\\pi}{6} = \\dfrac{2\\pi}{6}+\\dfrac{\\pi}{6} = \\dfrac{\\pi}{2}$' },
+            { tag: 'revenir à la forme algébrique', text: '$6e^{i\\pi/2} = 6\\left(\\cos\\dfrac{\\pi}{2}+i\\sin\\dfrac{\\pi}{2}\\right) = 6(0+i)$' },
+          ],
+          result: { tag: 'résultat', text: '$z_1z_2 = 6e^{i\\pi/2} = 6i$' },
         },
         {
           kind: 'piege',
@@ -782,15 +933,6 @@ export const nombresComplexes: ChapterContent = {
             'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le réglage de ' +
             'départ (r₁=2, θ₁=60°, r₂=3, θ₂=30°) reproduit exactement l\'exemple ci-dessus : ' +
             'z₁z₂ a pour module 6 et pour argument π/2.',
-        },
-        {
-          kind: 'astuce',
-          label: 'Angles remarquables',
-          text:
-            'Les multiples de $\\pi/6$ ou $\\pi/4$ sont dits « remarquables » : leur cosinus et ' +
-            'leur sinus s\'expriment exactement (racines, fractions), sans aucune ' +
-            'approximation décimale — retiens-les, ce sont les angles les plus utiles de tout ' +
-            'le chapitre.',
         },
         {
           kind: 'featureTable',
@@ -972,6 +1114,15 @@ export const nombresComplexes: ChapterContent = {
                 'qu\'elle l\'est au rang $n-1$ ; comme elle est vraie au rang 1, elle est ' +
                 'vraie pour tout entier $n\\ge1$ — c\'est le principe de récurrence.',
             },
+            {
+              kind: 'para',
+              text:
+                '**Et pour les entiers négatifs ?** Pour $n=0$, les deux membres valent 1. Pour $n=-m$ ($m\\ge1$) : ' +
+                '$(\\cos\\theta+i\\sin\\theta)^{-m} = \\dfrac{1}{\\cos(m\\theta)+i\\sin(m\\theta)} = ' +
+                '\\cos(m\\theta)-i\\sin(m\\theta) = \\cos(-m\\theta)+i\\sin(-m\\theta)$ — l\'inverse ' +
+                'd\'un complexe de module 1 est son conjugué ($\\bar{u}=1/u$). La formule vaut donc ' +
+                'bien pour tout entier $n$.',
+            },
           ],
         },
         { kind: 'subheading', text: 'Développer cos(nx) et sin(nx)' },
@@ -1029,38 +1180,90 @@ export const nombresComplexes: ChapterContent = {
             'dépendent que de $n$ et $k$, jamais de l\'angle $x$ — exactement comme dans le ' +
             'développement classique de $(a+b)^n$.',
         },
+        { kind: 'subheading', text: 'Le chemin inverse : linéariser cosⁿx' },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Les formules d\'Euler donnent $\\cos x = \\dfrac{e^{ix}+e^{-ix}}{2}$ et ' +
+              '$\\sin x = \\dfrac{e^{ix}-e^{-ix}}{2i}$ (additionne ou soustrais $e^{ix}$ et $e^{-ix}$).',
+            'Pour **linéariser** $\\cos^nx$ — l\'écrire sans puissance, comme une somme de ' +
+              '$\\cos(kx)$ —, élève cette expression à la puissance $n$ par le binôme de Newton, ' +
+              'puis regroupe les termes deux à deux : $e^{ikx}+e^{-ikx}=2\\cos(kx)$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'linéariser cos²x et cos³x',
+          formula: 'Linéarise $\\cos^2x$ et $\\cos^3x$, puis déduis-en une primitive de $\\cos^2x$.',
+          steps: [
+            {
+              tag: 'cos²x',
+              text:
+                '$\\cos^2x=\\dfrac{(e^{ix}+e^{-ix})^2}{4}=\\dfrac{e^{2ix}+2+e^{-2ix}}{4}=' +
+                '\\dfrac{2\\cos(2x)+2}{4}=\\dfrac{1+\\cos(2x)}{2}$',
+            },
+            {
+              tag: 'cos³x — coefficients 1, 3, 3, 1',
+              text:
+                '$\\cos^3x=\\dfrac{e^{3ix}+3e^{ix}+3e^{-ix}+e^{-3ix}}{8}=\\dfrac{2\\cos(3x)+6\\cos x}{8}=' +
+                '\\dfrac{3\\cos x+\\cos(3x)}{4}$',
+            },
+            {
+              tag: 'intégrer cos²x (chapitre 4)',
+              text: '$\\displaystyle\\int\\cos^2x\\,dx=\\int\\dfrac{1+\\cos(2x)}{2}\\,dx=\\dfrac{x}{2}+\\dfrac{\\sin(2x)}{4}+C$',
+            },
+          ],
+          result: {
+            tag: 'linéarisations',
+            text: '$\\cos^2x=\\dfrac{1+\\cos(2x)}{2} \\qquad \\cos^3x=\\dfrac{3\\cos x+\\cos(3x)}{4}$',
+          },
+        },
+        {
+          kind: 'astuce',
+          label: 'Pourquoi linéariser ?',
+          text:
+            'Une puissance $\\cos^nx$ ne s\'intègre pas directement, alors que $\\cos(kx)$ a une ' +
+            'primitive immédiate, $\\dfrac{\\sin(kx)}{k}$. Linéariser, c\'est exactement l\'outil ' +
+            'qui manquait pour calculer des intégrales comme $\\displaystyle\\int_0^{\\pi}\\cos^2x\\,dx=\\dfrac{\\pi}{2}$ ' +
+            '(chapitre « Intégrales et primitives »).',
+        },
         {
           kind: 'application',
           titre: 'Comprendre si un cycle économique s\'amortit ou s\'amplifie',
           illustrations: [
             {
               kind: 'complexPlane',
-              xMin: -3.3,
-              xMax: 1.4,
-              yMin: -0.5,
-              yMax: 2,
+              xMin: -2.6,
+              xMax: 2.3,
+              yMin: -3,
+              yMax: 1.6,
               vectors: [
-                { from: { x: 0.707, y: 0.707 }, to: { x: 0.53, y: 0.53 }, tone: 'good' },
-                { from: { x: 0.53, y: 0.53 }, to: { x: 0, y: 0.563 }, tone: 'good' },
-                { from: { x: 0, y: 0.563 }, to: { x: -0.298, y: 0.298 }, tone: 'good' },
-                { from: { x: -0.298, y: 0.298 }, to: { x: -0.316, y: 0 }, tone: 'good' },
-                { from: { x: -0.316, y: 0 }, to: { x: -0.168, y: -0.168 }, tone: 'good' },
-                { from: { x: 0.707, y: 0.707 }, to: { x: 0.919, y: 0.919 }, tone: 'bad' },
-                { from: { x: 0.919, y: 0.919 }, to: { x: 0, y: 1.69 }, tone: 'bad' },
-                { from: { x: 0, y: 1.69 }, to: { x: -1.554, y: 1.554 }, tone: 'bad' },
-                { from: { x: -1.554, y: 1.554 }, to: { x: -2.856, y: 0 }, tone: 'bad' },
+                { from: { x: 1, y: 0 }, to: { x: 0.35, y: 0.606 }, tone: 'good' },
+                { from: { x: 0.35, y: 0.606 }, to: { x: -0.245, y: 0.424 }, tone: 'good' },
+                { from: { x: -0.245, y: 0.424 }, to: { x: -0.343, y: 0 }, tone: 'good' },
+                { from: { x: -0.343, y: 0 }, to: { x: -0.12, y: -0.208 }, tone: 'good' },
+                { from: { x: -0.12, y: -0.208 }, to: { x: 0.084, y: -0.146 }, tone: 'good' },
+                { from: { x: 0.084, y: -0.146 }, to: { x: 0.118, y: 0 }, tone: 'good' },
+                { from: { x: 1, y: 0 }, to: { x: 0.625, y: 1.083 }, tone: 'bad' },
+                { from: { x: 0.625, y: 1.083 }, to: { x: -0.781, y: 1.353 }, tone: 'bad' },
+                { from: { x: -0.781, y: 1.353 }, to: { x: -1.953, y: 0 }, tone: 'bad' },
+                { from: { x: -1.953, y: 0 }, to: { x: -1.221, y: -2.114 }, tone: 'bad' },
+                { from: { x: -1.221, y: -2.114 }, to: { x: 1.526, y: -2.643 }, tone: 'bad' },
               ],
               points: [
-                { x: 0.707, y: 0.707, label: 'année 0', tone: 'ink', labelPos: 'right' },
-                { x: -0.168, y: -0.168, label: 'r < 1', tone: 'good', labelPos: 'below' },
-                { x: -2.856, y: 0, label: 'r > 1', tone: 'bad', labelPos: 'right' },
+                { x: 1, y: 0, label: 'année 0', tone: 'ink', labelPos: 'below' },
+                { x: 0.118, y: 0, label: '', tone: 'good' },
+                { x: -0.75, y: -0.45, label: 'r < 1', tone: 'good', node: false },
+                { x: 1.526, y: -2.643, label: 'r > 1', tone: 'bad', labelPos: 'above' },
               ],
               caption:
-                'Deux cycles économiques partis du même point (année 0), dont la racine complexe ' +
-                'a le même argument θ mais un module différent. Chaque année, le point tourne de ' +
-                "θ ET change de taille d'un facteur r : avec r < 1 (vert) il se rapproche peu à " +
-                "peu de l'équilibre (l'origine) ; avec r > 1 (rouge) il s'en éloigne de plus en " +
-                'plus — le cycle explose au lieu de se stabiliser.',
+                'Deux cycles économiques partis du même point (année 0, $z_0=1$), dont la racine ' +
+                'complexe a le même argument $\\theta=\\pi/3$ mais un module différent. Chaque ' +
+                'année, le point est multiplié par $re^{i\\theta}$ : il tourne de $\\theta$ ET change ' +
+                "de taille d'un facteur $r$. Avec $r=0{,}7$ (vert), il s'enroule vers l'équilibre " +
+                "(l'origine) ; avec $r=1{,}25$ (rouge), il s'en éloigne de plus en plus — le cycle " +
+                'explose au lieu de se stabiliser.',
             },
             {
               kind: 'curvePlot',
@@ -1093,7 +1296,7 @@ export const nombresComplexes: ChapterContent = {
               yAxisLabel: 'revenu (écart à la tendance)',
               caption:
                 'Le revenu réel au fil des années — la partie réelle de $r^ne^{in\\theta}$, ' +
-                'mêmes r et θ que ci-dessus — pour les deux cas : la suite à r < 1 (vert) ' +
+                'mêmes $r$ et $\\theta$ que ci-dessus — pour les deux cas : la suite à r < 1 (vert) ' +
                 "oscille en revenant vite près de 0, celle à r > 1 (rouge) oscille avec une " +
                 "amplitude qui grandit d'année en année au lieu de se stabiliser.",
             },
@@ -1202,6 +1405,32 @@ export const nombresComplexes: ChapterContent = {
           text:
             'C\'est une identité classique, valable dès que $n\\ge2$ : géométriquement, leur ' +
             'isobarycentre est le centre du cercle, l\'origine $O$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'racines cubiques de −8',
+          formula: 'Détermine les racines cubiques de $-8$, sous forme exponentielle puis algébrique.',
+          steps: [
+            { tag: 'forme exponentielle de −8', text: '$-8 = 8e^{i\\pi}$ : $r=8$, $\\theta=\\pi$' },
+            {
+              tag: 'appliquer la formule, n = 3',
+              text:
+                '$z_k = \\sqrt[3]{8}\\,e^{i(\\pi+2k\\pi)/3}$ : $z_0=2e^{i\\pi/3}$, $z_1=2e^{i\\pi}$, ' +
+                '$z_2=2e^{5i\\pi/3}=2e^{-i\\pi/3}$',
+            },
+            {
+              tag: 'forme algébrique',
+              text: '$z_0=2\\left(\\dfrac{1}{2}+i\\dfrac{\\sqrt{3}}{2}\\right)=1+i\\sqrt{3}$, $z_1=-2$, $z_2=1-i\\sqrt{3}$',
+            },
+            {
+              tag: 'contrôle par factorisation',
+              text:
+                '$z^3+8=(z+2)(z^2-2z+4)$ : la racine réelle $-2$, puis $z^2-2z+4=0$ ($\\Delta=-12$) ' +
+                'donne $z=\\dfrac{2\\pm2i\\sqrt{3}}{2}=1\\pm i\\sqrt{3}$ — 3 racines pour un degré 3, ' +
+                'comme l\'annonce le théorème fondamental (section 3)',
+            },
+          ],
+          result: { tag: '3 racines — un triangle équilatéral', text: '$1+i\\sqrt{3}, \\quad -2, \\quad 1-i\\sqrt{3}$' },
         },
         {
           kind: 'atelier',
@@ -1425,6 +1654,33 @@ export const nombresComplexes: ChapterContent = {
             'translation ne commutent PAS en général — l\'ordre de composition compte.',
         },
         {
+          kind: 'exemple',
+          badge: 'composer deux rotations de centres différents',
+          formula:
+            '$r_1$ est la rotation de centre $O$ et d\'angle $\\dfrac{\\pi}{2}$, $r_2$ celle de centre ' +
+            '$A(1)$ et d\'angle $\\dfrac{\\pi}{2}$. Détermine $r_2\\circ r_1$ et $r_1\\circ r_2$.',
+          steps: [
+            { tag: 'écritures complexes', text: '$r_1 : z\' = iz \\qquad r_2 : z\' = i(z-1)+1 = iz+1-i$' },
+            {
+              tag: 'r₂ ∘ r₁ : d\'abord r₁',
+              text:
+                '$z\'\' = i(iz)+1-i = -z+1-i$ : multiplicateur $-1=e^{i\\pi}$, rotation d\'angle ' +
+                '$\\dfrac{\\pi}{2}+\\dfrac{\\pi}{2}=\\pi$, de centre $\\dfrac{1-i}{1-(-1)}=\\dfrac{1-i}{2}$',
+            },
+            {
+              tag: 'r₁ ∘ r₂ : d\'abord r₂',
+              text: '$z\'\' = i(iz+1-i) = -z+1+i$ : même angle $\\pi$, mais centre $\\dfrac{1+i}{2}$',
+            },
+          ],
+          result: {
+            tag: 'à retenir',
+            text:
+              'Les angles s\'additionnent (multiplicateur $e^{i\\theta_1}e^{i\\theta_2}$) : la composée ' +
+              'est une rotation d\'angle $\\theta_1+\\theta_2$ si cet angle n\'est pas un multiple de ' +
+              '$2\\pi$, une translation sinon — mais son centre dépend de l\'ordre.',
+          },
+        },
+        {
           kind: 'application',
           titre: 'Faire tourner un objet dans un jeu vidéo ou un bras robotisé',
           illustrations: [
@@ -1530,7 +1786,14 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'definition',
           label: 'Critères par un rapport d\'affixes',
-          items: ['Pour des points $A,B,C$ distincts et des vecteurs non nuls d\'affixes $z_U, z_V$ :'],
+          items: [
+            '**Angle orienté** : pour des points $A,B,C$ distincts, ' +
+              '$(\\overrightarrow{AB},\\overrightarrow{AC}) = \\arg\\left(\\dfrac{z_C-z_A}{z_B-z_A}\\right)$ ' +
+              '(à $2\\pi$ près), et $\\left|\\dfrac{z_C-z_A}{z_B-z_A}\\right| = \\dfrac{AC}{AB}$.',
+            'Les critères ci-dessous en sont des cas particuliers — argument $0$ ou $\\pi$ (rapport ' +
+              'réel), argument $\\pm\\dfrac{\\pi}{2}$ (rapport imaginaire pur). Pour des vecteurs ' +
+              'non nuls d\'affixes $z_U, z_V$ :',
+          ],
         },
         {
           kind: 'featureTable',
@@ -1550,7 +1813,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Triangle isocèle, rectangle, isocèle rectangle',
+          label: 'Triangle isocèle, rectangle, isocèle rectangle, équilatéral',
           items: [
             '$ABC$ est isocèle en $A$ ⟺ $|z_B-z_A| = |z_C-z_A|$ — égalité des MODULES, jamais ' +
               'des complexes eux-mêmes ! (ça forcerait $B=C$).',
@@ -1558,7 +1821,29 @@ export const nombresComplexes: ChapterContent = {
               '(orthogonalité de $AB$ et $AC$).',
             '$ABC$ est isocèle rectangle en $A$ ⟺ $\\dfrac{z_C-z_A}{z_B-z_A} = i$ ou $-i$ : le ' +
               'module 1 donne $AC=AB$, l\'argument $\\pm\\dfrac{\\pi}{2}$ donne l\'angle droit en $A$.',
+            '$ABC$ est équilatéral ⟺ $\\dfrac{z_C-z_A}{z_B-z_A} = e^{i\\pi/3}$ ou $e^{-i\\pi/3}$ : ' +
+              'module 1 ($AC=AB$) et angle $\\pm\\dfrac{\\pi}{3}$ en $A$ — un triangle isocèle dont ' +
+              'l\'angle au sommet vaut $\\dfrac{\\pi}{3}$ a ses trois angles égaux.',
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'reconnaître un triangle équilatéral',
+          formula:
+            'Soit $A(1)$, $B(3)$ et $C(2+i\\sqrt{3})$. Calcule $\\dfrac{z_C-z_A}{z_B-z_A}$ et déduis-en ' +
+            'l\'angle orienté $(\\overrightarrow{AB},\\overrightarrow{AC})$ et la nature du triangle $ABC$.',
+          steps: [
+            { tag: 'différences d\'affixes', text: '$z_C-z_A = 1+i\\sqrt{3}$ et $z_B-z_A = 2$' },
+            {
+              tag: 'rapport sous forme exponentielle',
+              text: '$\\dfrac{1+i\\sqrt{3}}{2} = \\dfrac{1}{2}+i\\dfrac{\\sqrt{3}}{2} = \\cos\\dfrac{\\pi}{3}+i\\sin\\dfrac{\\pi}{3} = e^{i\\pi/3}$',
+            },
+            {
+              tag: 'lire module et argument',
+              text: 'module 1 : $AC=AB$ ; argument $\\dfrac{\\pi}{3}$ : $(\\overrightarrow{AB},\\overrightarrow{AC})=\\dfrac{\\pi}{3}$',
+            },
+          ],
+          result: { tag: 'conclusion', text: '$ABC$ est équilatéral (de côté $AB=2$)' },
         },
         { kind: 'subheading', text: 'Construire un triangle équilatéral par rotation' },
         {
@@ -1656,13 +1941,17 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exemple',
           badge: 'z³ réel positif',
           formula: 'Pour $z=e^{i\\theta}$ avec $\\theta\\in[0;2\\pi[$, trouve les valeurs de $\\theta$ pour lesquelles $z^3$ est un réel positif.',
-          steps: [{ tag: 'condition mod 2π, divisée par n=3', text: '$z^3=e^{3i\\theta}$ réel positif ⟺ $3\\theta \\equiv 0 \\pmod{2\\pi}$ ⟺ $\\theta \\equiv 0 \\ [2\\pi/3]$' }],
+          steps: [
+            { tag: 'Moivre', text: '$z^3=e^{3i\\theta}$, de module 1 et d\'argument $3\\theta$' },
+            { tag: 'réel positif : argument ≡ 0 mod 2π', text: '$3\\theta = 2k\\pi$ ($k\\in\\mathbb{Z}$), donc $\\theta = \\dfrac{2k\\pi}{3}$' },
+            { tag: 'garder θ dans [0 ; 2π[', text: '$k=0,1,2$ conviennent ; $k=3$ redonne $2\\pi$, hors intervalle' },
+          ],
           result: { tag: 'résultat — 3 valeurs', text: '$\\theta \\in \\{0,\\ 2\\pi/3,\\ 4\\pi/3\\}$' },
         },
         {
           kind: 'definition',
           label: 'Lieux géométriques',
-          items: ['Un point $M$ d\'affixe $z$ qui vérifie une condition sur $z-a$ (où $a$ est l\'affixe d\'un point fixe $A$) décrit une courbe simple, selon la nature de cette condition :'],
+          items: ['Un point $M$ d\'affixe $z$ qui vérifie une condition sur $z-a$ (où $a$ est l\'affixe d\'un point fixe $A$, et $b$ celle d\'un point fixe $B$) décrit une courbe simple, selon la nature de cette condition :'],
         },
         {
           kind: 'featureTable',
@@ -1671,6 +1960,7 @@ export const nombresComplexes: ChapterContent = {
             ['$|z-a| = k$ ($k>0$)', 'cercle de centre $A$, rayon $k$'],
             ['$\\arg(z-a) \\equiv \\theta_0 \\pmod{2\\pi}$', 'demi-droite d\'origine $A$ (exclue), d\'angle $\\theta_0$'],
             ['$\\arg(z-a) \\equiv \\theta_0 \\pmod{\\pi}$', 'droite complète passant par $A$ (privée de $A$), de direction $\\theta_0$'],
+            ['$|z-a| = |z-b|$ ($a\\ne b$)', 'médiatrice du segment $[AB]$ : $AM=BM$'],
           ],
         },
         {
@@ -1696,6 +1986,26 @@ export const nombresComplexes: ChapterContent = {
             'DEMI-droite ; « mod $\\pi$ » retient les DEUX à la fois, ce qui forme une droite ' +
             'complète. Prendre « mod $\\pi$ » là où l\'énoncé impose « mod $2\\pi$ » ajoute au ' +
             'lieu la moitié qui ne convient pas !',
+        },
+        {
+          kind: 'exemple',
+          badge: 'lieu |z−1| = |z+i|',
+          formula: 'Détermine le lieu des points $M$ d\'affixe $z$ tels que $|z-1|=|z+i|$.',
+          steps: [
+            {
+              tag: 'lecture géométrique',
+              text: '$|z-1|=AM$ avec $A(1)$, et $|z+i|=|z-(-i)|=BM$ avec $B(-i)$ : $M$ est à égale distance de $A$ et $B$',
+            },
+            {
+              tag: 'contrôle algébrique, z = x+iy',
+              text: '$(x-1)^2+y^2 = x^2+(y+1)^2 \\iff -2x+1 = 2y+1 \\iff y=-x$',
+            },
+            {
+              tag: 'cohérence',
+              text: 'le milieu $\\left(\\dfrac{1}{2};-\\dfrac{1}{2}\\right)$ de $[AB]$ vérifie $y=-x$, et la direction $(1;-1)$ est orthogonale à $\\overrightarrow{AB}(-1;-1)$',
+            },
+          ],
+          result: { tag: 'lieu', text: 'la médiatrice de $[AB]$, la droite d\'équation $y=-x$' },
         },
         { kind: 'subheading', text: 'Une transformation qui conserve le cercle unité' },
         {
@@ -1779,6 +2089,10 @@ export const nombresComplexes: ChapterContent = {
         formulas: [
           { text: '$|z|=\\sqrt{a^2+b^2} \\quad z = r(\\cos\\theta+i\\sin\\theta) = re^{i\\theta}$' },
           {
+            text: '$\\arg(z)=\\arctan\\dfrac{b}{a}$',
+            condition: 'si $a>0$ ; $\\pm\\pi$ si $a<0$ ($+$ si $b\\ge0$) ; $\\pm\\dfrac{\\pi}{2}$ si $a=0$ — dans $]-\\pi\\,;\\pi]$',
+          },
+          {
             text: '$r_1e^{i\\theta_1} \\cdot r_2e^{i\\theta_2} = r_1r_2\\, e^{i(\\theta_1+\\theta_2)}$',
             condition: 'quotient : modules divisés, arguments soustraits',
           },
@@ -1801,7 +2115,9 @@ export const nombresComplexes: ChapterContent = {
           { text: '$z\' = e^{i\\theta}(z-z_0)+z_0$', condition: 'rotation de centre $\\Omega(z_0)$, angle $\\theta$' },
           { text: '$z\' = az+b$', condition: 'similitude — centre $z_0 = b/(1-a)$ si $a\\ne1$' },
           { text: '$\\dfrac{z_C-z_A}{z_B-z_A}$ réel $\\Rightarrow$ alignés, imaginaire pur $\\Rightarrow$ orthogonaux' },
+          { text: '$\\dfrac{z_C-z_A}{z_B-z_A}=e^{\\pm i\\pi/3}$', condition: 'triangle $ABC$ équilatéral' },
           { text: '$|z-a|=k \\Rightarrow$ cercle', condition: 'centre $A$, rayon $k$' },
+          { text: '$|z-a|=|z-b| \\Rightarrow$ médiatrice', condition: 'du segment $[AB]$' },
         ],
       },
     ],
@@ -1815,11 +2131,11 @@ export const nombresComplexes: ChapterContent = {
       '**Racine carrée** — système $x^2-y^2=a$, $2xy=b$, $x^2+y^2=|z|$ — toujours 2 racines opposées.',
       '**Δ<0** — $z = (-b\\pm i\\sqrt{|\\Delta|})/2a$, 2 solutions conjuguées.',
       '**Module, argument** — $|z|=\\sqrt{a^2+b^2}$, $z=re^{i\\theta}$ ; produit → modules ×, arguments +.',
-      '**Moivre** — $(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$.',
+      '**Moivre** — $(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$ ; en sens inverse, Euler linéarise : $\\cos^2x=\\dfrac{1+\\cos(2x)}{2}$.',
       '**Racines n-ièmes** — $z_k = r^{1/n}e^{i(\\theta+2k\\pi)/n}$, $k=0,\\ldots,n-1$ — polygone régulier.',
       '**Transformations** — $z\'=az+b$ : rotation $|a|=1$, homothétie $a$ réel, similitude sinon.',
-      '**Alignement / orthogonalité** — rapport d\'affixes réel ↔ aligné ; imaginaire pur ↔ orthogonal.',
-      '**Lieux géométriques** — $|z-a|=k$ → cercle ; $\\arg(z-a)$ mod $2\\pi$ → demi-droite, mod $\\pi$ → droite.',
+      '**Triangles** — $\\arg\\dfrac{z_C-z_A}{z_B-z_A}$ = angle en $A$ : réel ↔ aligné ; imaginaire pur ↔ orthogonal ; $e^{\\pm i\\pi/3}$ ↔ équilatéral.',
+      '**Lieux géométriques** — $|z-a|=k$ → cercle ; $|z-a|=|z-b|$ → médiatrice ; $\\arg(z-a)$ mod $2\\pi$ → demi-droite, mod $\\pi$ → droite.',
     ],
     checklist: {
       items: [

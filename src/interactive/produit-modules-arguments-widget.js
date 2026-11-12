@@ -27,6 +27,16 @@
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
   }
 
+  // a + bi avec 2 décimales au plus : « 1 + 1,73i », « −3i », « 6 »
+  function complexeFr(z) {
+    var x = Math.abs(z.x) < 0.005 ? 0 : z.x, y = Math.abs(z.y) < 0.005 ? 0 : z.y;
+    function n(v) { return formatNombreFr(v, 2).replace(/,?0+$/, ""); }
+    if (y === 0) return n(x);
+    var mag = Math.abs(y), pi = (Math.abs(mag - 1) < 0.005 ? "" : n(mag)) + "i";
+    if (x === 0) return (y < 0 ? "−" : "") + pi;
+    return n(x) + (y < 0 ? " − " : " + ") + pi;
+  }
+
   function svgEl(ns, tag, attrs) {
     var el = document.createElementNS(ns, tag);
     for (var key in attrs) el.setAttribute(key, attrs[key]);
@@ -66,10 +76,19 @@
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
     '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
+    '.pas-i{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}' +
+    '.pas-i button{padding:8px 16px;border-radius:var(--radius,3px);border:1px solid var(--accent,#a8471f);background:var(--accent,#a8471f);color:#fff;font-weight:700;cursor:pointer;font-size:0.95rem;font-family:inherit;}' +
+    '.pas-i button.secondaire{background:var(--surface,#fff);color:var(--accent-ink,#7a3212);}' +
+    '.cycle-point{fill:var(--ink-faint,#9c9083);}' +
+    '.cycle-cercle{stroke:var(--ink-faint,#9c9083);stroke-width:1;fill:none;stroke-dasharray:3 3;}' +
+    '.quart-tour{stroke:var(--bad,#b23a3a);stroke-width:1.6;fill:none;}' +
+    '.etiquette-cycle{fill:var(--ink-soft,#6b6055);font-weight:600;}' +
+    '[hidden]{display:none!important;}' +
     '</style>' +
     '<div class="mode-row" id="mode">' +
     '<button type="button" data-mode="produit">z₁ × z₂</button>' +
     '<button type="button" data-mode="quotient">z₁ / z₂</button>' +
+    '<button type="button" data-mode="i">× i répété</button>' +
     '</div>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<p class="lecture" id="lecture"></p>' +
@@ -80,12 +99,13 @@
     '<div class="curseur"><label for="theta1">θ₁ = arg(z₁)</label><div class="curseur-row">' +
     '<input type="range" id="theta1" min="' + BORNES_THETA.min + '" max="' + BORNES_THETA.max + '" step="' + BORNES_THETA.step + '" value="' + DEFAUT.theta1 + '">' +
     '<span class="curseur-valeur" id="theta1-valeur"></span></div></div>' +
-    '<div class="curseur"><label for="r2">r₂ = |z₂|</label><div class="curseur-row">' +
+    '<div class="curseur" id="bloc-r2"><label for="r2">r₂ = |z₂|</label><div class="curseur-row">' +
     '<input type="range" id="r2" min="' + BORNES_R.min + '" max="' + BORNES_R.max + '" step="' + BORNES_R.step + '" value="' + DEFAUT.r2 + '">' +
     '<span class="curseur-valeur" id="r2-valeur"></span></div></div>' +
-    '<div class="curseur"><label for="theta2">θ₂ = arg(z₂)</label><div class="curseur-row">' +
+    '<div class="curseur" id="bloc-theta2"><label for="theta2">θ₂ = arg(z₂)</label><div class="curseur-row">' +
     '<input type="range" id="theta2" min="' + BORNES_THETA.min + '" max="' + BORNES_THETA.max + '" step="' + BORNES_THETA.step + '" value="' + DEFAUT.theta2 + '">' +
     '<span class="curseur-valeur" id="theta2-valeur"></span></div></div>' +
+    '<div class="pas-i" id="pas-i" hidden><button type="button" id="fois-i">Multiplier par i</button><button type="button" class="secondaire" id="retour-i">Revenir à z₁</button></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>';
 
@@ -114,6 +134,12 @@
     this._valeurR2 = shadow.getElementById("r2-valeur");
     this._valeurTheta2 = shadow.getElementById("theta2-valeur");
     this._resetBtn = shadow.getElementById("reset");
+    this._blocR2 = shadow.getElementById("bloc-r2");
+    this._blocTheta2 = shadow.getElementById("bloc-theta2");
+    this._pasI = shadow.getElementById("pas-i");
+    this._foisI = shadow.getElementById("fois-i");
+    this._retourI = shadow.getElementById("retour-i");
+    this._k = 0;
   };
 
   ProduitModulesArgumentsWidgetClass.prototype.connectedCallback = function () {
@@ -126,12 +152,14 @@
       var btn = evt.target.closest("button[data-mode]");
       if (!btn) return;
       self._mode = btn.getAttribute("data-mode");
+      self._k = 0;
       self._rendre();
     };
     this._onReset = function () {
       self._r1 = DEFAUT.r1; self._theta1 = DEFAUT.theta1;
       self._r2 = DEFAUT.r2; self._theta2 = DEFAUT.theta2;
       self._mode = DEFAUT.mode;
+      self._k = 0;
       self._inputR1.value = String(DEFAUT.r1);
       self._inputTheta1.value = String(DEFAUT.theta1);
       self._inputR2.value = String(DEFAUT.r2);
@@ -144,6 +172,10 @@
     this._inputTheta2.addEventListener("input", this._onInputTheta2);
     this._modeWrap.addEventListener("click", this._onClickMode);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._onFoisI = function () { self._k += 1; self._rendre(); };
+    this._onRetourI = function () { self._k = 0; self._rendre(); };
+    this._foisI.addEventListener("click", this._onFoisI);
+    this._retourI.addEventListener("click", this._onRetourI);
     this._rendre();
   };
 
@@ -154,6 +186,8 @@
     this._inputTheta2.removeEventListener("input", this._onInputTheta2);
     this._modeWrap.removeEventListener("click", this._onClickMode);
     this._resetBtn.removeEventListener("click", this._onReset);
+    this._foisI.removeEventListener("click", this._onFoisI);
+    this._retourI.removeEventListener("click", this._onRetourI);
   };
 
   ProduitModulesArgumentsWidgetClass.prototype._toPx = function (xMath, yMath) {
@@ -172,6 +206,12 @@
     Array.prototype.forEach.call(this._modeWrap.querySelectorAll("button"), function (btn) {
       btn.className = btn.getAttribute("data-mode") === mode ? "actif" : "";
     });
+
+    var modeI = mode === "i";
+    this._blocR2.hidden = modeI;
+    this._blocTheta2.hidden = modeI;
+    this._pasI.hidden = !modeI;
+    if (modeI) { this._rendreFoisI(); return; }
 
     var theta1 = theta1Deg * D2R, theta2 = theta2Deg * D2R;
     var rRes, thetaResDeg, symbole;
@@ -219,12 +259,67 @@
     dessinerVecteur(z2, "vecteur-z2", "point-z2", "etiquette-z2", "z₂");
     dessinerVecteur(zRes, "vecteur-resultat", "point-resultat", "etiquette-resultat", symbole);
 
+    var ligneAlg = "z₁ = " + complexeFr(z1) + "   ;   z₂ = " + complexeFr(z2) + "   ;   " + symbole + " = " + complexeFr(zRes);
     this._lecture.textContent =
       mode === "produit"
         ? "modules : " + formatNombreFr(r1, 1) + " × " + formatNombreFr(r2, 1) + " = " + formatNombreFr(rRes, 2) +
           "   |   arguments : " + formatNombreFr(theta1Deg, 0) + "° + " + formatNombreFr(theta2Deg, 0) + "° = " + formatNombreFr(((thetaResDeg % 360) + 360) % 360, 0) + "°"
         : "modules : " + formatNombreFr(r1, 1) + " / " + formatNombreFr(r2, 1) + " = " + formatNombreFr(rRes, 2) +
           "   |   arguments : " + formatNombreFr(theta1Deg, 0) + "° − " + formatNombreFr(theta2Deg, 0) + "° = " + formatNombreFr(((thetaResDeg % 360) + 360) % 360, 0) + "°";
+    this._lecture.appendChild(document.createElement("br"));
+    this._lecture.appendChild(document.createTextNode(ligneAlg));
+  };
+
+  // Mode « × i répété » : z₁ multiplié k fois par i — quart de tour à chaque pas, cycle de période 4.
+  ProduitModulesArgumentsWidgetClass.prototype._rendreFoisI = function () {
+    var r1 = this._r1, theta1 = this._theta1 * D2R, k = this._k;
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = this._svg;
+    svg.innerHTML = "";
+    var self = this;
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    var flecheRouge = svgEl(ns, "marker", { id: "fleche-rouge", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    flecheRouge.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "point-resultat" }));
+    defs.appendChild(flecheRouge);
+    svg.appendChild(defs);
+    var origine = self._toPx(0, 0);
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: HAUTEUR - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
+    var unite = (LARGEUR - 2 * MARGE) / (X_MAX - X_MIN);
+    svg.appendChild(svgEl(ns, "circle", { cx: origine[0].toFixed(2), cy: origine[1].toFixed(2), r: (r1 * unite).toFixed(2), class: "cycle-cercle" }));
+    var noms = ["z₁", "z₁·i", "z₁·i²", "z₁·i³"];
+    var courant = k % 4;
+    for (var j = 0; j < 4; j++) {
+      var t = theta1 + j * Math.PI / 2;
+      var pt = { x: r1 * Math.cos(t), y: r1 * Math.sin(t) };
+      var p = self._toPx(pt.x, pt.y);
+      var estCourant = j === courant;
+      if (estCourant) svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), y1: origine[1].toFixed(2), x2: p[0].toFixed(2), y2: p[1].toFixed(2), class: "vecteur-resultat" }));
+      svg.appendChild(svgEl(ns, "circle", { cx: p[0].toFixed(2), cy: p[1].toFixed(2), r: estCourant ? 6 : 4, class: estCourant ? "point-resultat" : (j === 0 ? "point-z1" : "cycle-point") }));
+      var dx = Math.cos(t), dy = -Math.sin(t);
+      var et = svgEl(ns, "text", { x: (p[0] + dx * 16).toFixed(2), y: (p[1] + dy * 16 + 4).toFixed(2), "text-anchor": dx > 0.3 ? "start" : (dx < -0.3 ? "end" : "middle"), class: "etiquette " + (estCourant ? "etiquette-resultat" : "etiquette-cycle") });
+      et.textContent = noms[j];
+      svg.appendChild(et);
+    }
+    if (k > 0) {
+      // quart de tour du point précédent au point courant (arc de rayon r1 + 0,6)
+      var rArc = (r1 + 0.6) * unite;
+      var t0 = theta1 + ((k - 1) % 4) * Math.PI / 2, t1 = t0 + Math.PI / 2;
+      var a0 = [origine[0] + rArc * Math.cos(t0), origine[1] - rArc * Math.sin(t0)];
+      var a1 = [origine[0] + rArc * Math.cos(t1 - 0.12), origine[1] - rArc * Math.sin(t1 - 0.12)];
+      svg.appendChild(svgEl(ns, "path", { d: "M" + a0[0].toFixed(2) + " " + a0[1].toFixed(2) + " A" + rArc.toFixed(2) + " " + rArc.toFixed(2) + " 0 0 0 " + a1[0].toFixed(2) + " " + a1[1].toFixed(2), class: "quart-tour", "marker-end": "url(#fleche-rouge)" }));
+    }
+    var puissances = ["1", "i", "−1", "−i"];
+    var exposant = String(k).split("").map(function (c) { return "⁰¹²³⁴⁵⁶⁷⁸⁹"[parseInt(c, 10)]; }).join("");
+    var zk = { x: r1 * Math.cos(theta1 + courant * Math.PI / 2), y: r1 * Math.sin(theta1 + courant * Math.PI / 2) };
+    var z1 = { x: r1 * Math.cos(theta1), y: r1 * Math.sin(theta1) };
+    this._lecture.textContent = k === 0
+      ? "Départ : z₁ = " + complexeFr(z1) + ". Clique sur « Multiplier par i » : chaque clic fait tourner le point d'un quart de tour (+90°)."
+      : "z₁ · i" + exposant + " = z₁ · " + (courant === 0 ? "1" : "(" + puissances[courant] + ")") + " = " + complexeFr(zk) +
+        "   |   " + k + " quart" + (k > 1 ? "s" : "") + " de tour" + (k >= 4 ? " — i⁴ = 1 : le cycle recommence tous les 4 pas" : "");
   };
 
   if (!customElements.get("produit-modules-arguments-widget")) {
