@@ -14,7 +14,7 @@
    * ================================================================ */
 
   var NS = "http://www.w3.org/2000/svg";
-  var LARGEUR = 420, HAUTEUR = 320, MG = 50, MD = 14, MH = 14, MB = 30;
+  var LARGEUR = 420, HAUTEUR = 320, MG = 50, MD = 22, MH = 14, MB = 30;
   var CRANS = 1000, Z_MAX = 100;
   var BOUTONS = [1, 2, 10, 100];
 

@@ -60,7 +60,7 @@
     '.point-max{fill:var(--good,#2f7a4f);}' +
     '.point-min{fill:var(--bad,#b23a3a);}' +
     '.point-inflexion{fill:var(--plan,#5b4ea3);}' +
-    '.etiquette{font-size:11.5px;font-weight:700;font-family:var(--sans,sans-serif);}' +
+    '.etiquette{font-size:13px;font-weight:700;font-family:var(--sans,sans-serif);}' +
     '.etiquette-max{fill:var(--good,#2f7a4f);}' +
     '.etiquette-min{fill:var(--bad,#b23a3a);}' +
     '.etiquette-inflexion{fill:var(--plan,#5b4ea3);}' +
@@ -171,7 +171,13 @@
     this._valeurK.textContent = formatNombreFr(k, 2);
     var f = function (x) { return x * x * x - 3 * k * x; };
 
-    this._formule.textContent = "f(x) = x³ − 3·" + formatNombreFr(k, 2) + "·x        f'(x) = 3x² − 3·" + formatNombreFr(k, 2);
+    var c = 3 * k;
+    var terme = function (coef, lettre) {
+      if (Math.abs(coef) < 1e-9) return "";
+      var abs = frCourt(Math.abs(coef));
+      return (coef > 0 ? " − " : " + ") + (abs === "1" && lettre ? "" : abs) + lettre;
+    };
+    this._formule.textContent = "f(x) = x³" + terme(c, "x") + "   ;   f'(x) = 3x²" + terme(c, "");
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
@@ -191,11 +197,11 @@
     if (this._concav) {
       self._traceCourbe(svg, ns, f, X_MIN, 0, "courbe courbe-concave");
       self._traceCourbe(svg, ns, f, 0, X_MAX, "courbe courbe-convexe");
-      var pc = self._toPx(-1.9, f(-1.9)), pv = self._toPx(1.9, f(1.9));
-      var ec = svgEl(ns, "text", { x: pc[0].toFixed(2), y: (pc[1] - 14).toFixed(2), "text-anchor": "middle", class: "etiquette etiquette-concave" });
+      var pc = self._toPx(-1.5, 14), pv = self._toPx(1.5, -14);
+      var ec = svgEl(ns, "text", { x: pc[0].toFixed(2), y: pc[1].toFixed(2), "text-anchor": "middle", class: "etiquette etiquette-concave" });
       ec.textContent = "∩ concave";
       svg.appendChild(ec);
-      var ev = svgEl(ns, "text", { x: pv[0].toFixed(2), y: (pv[1] + 22).toFixed(2), "text-anchor": "middle", class: "etiquette etiquette-convexe" });
+      var ev = svgEl(ns, "text", { x: pv[0].toFixed(2), y: pv[1].toFixed(2), "text-anchor": "middle", class: "etiquette etiquette-convexe" });
       ev.textContent = "∪ convexe";
       svg.appendChild(ev);
     } else {
@@ -232,7 +238,7 @@
       var o = self._toPx(0, 0);
       svg.appendChild(svgEl(ns, "circle", { cx: o[0].toFixed(2), cy: o[1].toFixed(2), r: 5, class: "point-inflexion" }));
       if (k > EPSILON_K || k < -EPSILON_K) {
-        var ei = svgEl(ns, "text", { x: (o[0] + 8).toFixed(2), y: (o[1] - 9).toFixed(2), "text-anchor": "start", class: "etiquette etiquette-inflexion" });
+        var ei = svgEl(ns, "text", { x: (o[0] + 8).toFixed(2), y: (o[1] + (k > 0 ? 16 : -9)).toFixed(2), "text-anchor": "start", class: "etiquette etiquette-inflexion" });
         ei.textContent = "PI (0 ; 0)";
         svg.appendChild(ei);
       }
