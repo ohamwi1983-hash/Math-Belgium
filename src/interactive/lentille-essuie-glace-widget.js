@@ -278,10 +278,12 @@
       var ra = 22, q0 = [px0 + ra * Math.cos(a0), py0 - ra * Math.sin(a0)], q1 = [px0 + ra * Math.cos(a1), py0 - ra * Math.sin(a1)];
       svg.appendChild(el("path", { d: "M" + q0[0] + " " + q0[1] + " A" + ra + " " + ra + " 0 " + large + " 1 " + q1[0] + " " + q1[1], class: "arc1" }));
       svg.appendChild(el("text", { x: px0, y: py0 - ra - 6, "text-anchor": "middle", class: "etiq1" }, "θ"));
-      // Étiquettes R et r le long du bras droit (à l'intérieur du cadre).
-      var mR = P((R + r) / 2, a1), mr = P(r / 2, a1);
-      svg.appendChild(el("text", { x: mR[0] + 8, y: mR[1], class: "etiq2" }, "R = " + fr(R, 1)));
-      svg.appendChild(el("text", { x: mr[0] + 8, y: mr[1] + 4, class: "etiq" }, "r = " + fr(r, 1)));
+      // Étiquettes R et r juste à l'intérieur du bras droit (décalées vers l'intérieur du secteur).
+      var dec = Math.min(0.5, th / 3);
+      var mR = P((R + r) / 2, a1 + dec * 0.35);
+      svg.appendChild(el("text", { x: mR[0], y: mR[1] + 4, "text-anchor": "middle", class: "etiq2" }, "R = " + fr(R, 1)));
+      // r : au bout intérieur du bras droit, côté extérieur du secteur (jamais sur l'arc de θ).
+      svg.appendChild(el("text", { x: p1[0] + 6, y: p1[1] + 14, "text-anchor": "start", class: "etiq" }, "r = " + fr(r, 1)));
     }
   }
 

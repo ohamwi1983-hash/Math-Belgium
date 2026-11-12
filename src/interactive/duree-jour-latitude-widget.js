@@ -191,6 +191,7 @@
       if (lat < 0.05) texte += "À l'équateur, l'amplitude est nulle : 12 h toute l'année.";
       else if (polaire) texte += "Au-delà du cercle polaire (66,56°), la formule sature : jour polaire (24 h) en été, nuit polaire (0 h) en hiver — la courbe n'est plus une sinusoïde.";
       else texte += "b reste ≈ 12 h à toutes les latitudes ; c'est l'amplitude A qui grandit avec la latitude.";
+      if (!polaire && lat >= 0.05) texte += " (Réfraction négligée : le jour réel dure environ un quart d'heure de plus.)";
       this._lecture.textContent = texte;
       this._dessiner(lat, j, A);
     }

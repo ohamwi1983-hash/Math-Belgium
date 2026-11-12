@@ -26,6 +26,23 @@
   var ROUE_X0 = 8;
   var T_MAX = 16;
 
+  // Les intervalles d'un tour, recopiés sur le second tour ([T ; 2T]).
+  function deuxTours(tour) {
+    var res = [];
+    [0, T].forEach(function (dec) { tour.forEach(function (iv) { res.push([iv[0] + dec, iv[1] + dec]); }); });
+    return res.filter(function (iv) { return iv[1] - iv[0] > 1e-9; });
+  }
+  // Recolle les intervalles contigus ([6,67 ; 8] ∪ [8 ; 9,33] → [6,67 ; 9,33]).
+  function fusionner(ivs) {
+    var res = [];
+    ivs.slice().sort(function (a, b) { return a[0] - b[0]; }).forEach(function (iv) {
+      var der = res[res.length - 1];
+      if (der && iv[0] <= der[1] + 1e-9) der[1] = Math.max(der[1], iv[1]);
+      else res.push([iv[0], iv[1]]);
+    });
+    return res;
+  }
+
   function h(t) { return A * Math.sin(OMEGA * t + PHI) + B; }
 
   function fr(n, d) {
@@ -81,8 +98,8 @@
     ".borne{fill:var(--accent,#a8471f);}" +
     ".guide{stroke:var(--ink-faint,#c9beae);stroke-width:1;stroke-dasharray:3 3;}" +
     ".depart{fill:var(--plan,#5b4ea3);}" +
-    ".etiq{font-size:12px;fill:var(--ink-soft,#6b6055);}" +
-    ".etiq-seuil{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);}" +
+    ".etiq{font-size:13px;fill:var(--ink-soft,#6b6055);}" +
+    ".etiq-seuil{font-size:14px;font-weight:700;fill:var(--accent-ink,#7a3212);}" +
     ".grad{stroke:var(--ink-soft,#6b6055);stroke-width:1;}" +
     ".lecture{text-align:center;font-size:0.9rem;color:var(--ink,#241f1a);margin:0 0 12px;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);line-height:1.5;}" +
     ".lecture b{color:var(--good,#2f7a4f);}" +
@@ -189,14 +206,13 @@
         else if (m === 1 || m === -1) texte = "Le seuil touche la roue en un seul point : la condition n'est vraie qu'<b>un instant</b> par tour.";
         else texte = "|m| > 1 : h(t) " + signe + " " + fr(y0, 1) + " n'est <b>jamais vraie</b> — la roue ne " + (dessus ? "monte pas si haut" : "descend pas si bas") + ".";
       } else {
-        var parties = [];
-        [0, T].forEach(function (dec) {
-          tour.forEach(function (iv) {
-            var a = iv[0] + dec, b = iv[1] + dec;
-            if (b - a > 1e-9) parties.push("[" + fr(a, 2) + " ; " + fr(b, 2) + "]");
-          });
-        });
-        texte = "sin(u) " + signe + " " + fr(m, 3) + " : sur deux tours, t ∈ <b>" + parties.join(" ∪ ") + "</b> (en min).";
+        var fusion = fusionner(deuxTours(tour));
+        if (fusion.length === 1 && fusion[0][0] <= 1e-9 && fusion[0][1] >= T_MAX - 1e-9) {
+          texte = "sin(u) " + signe + " " + fr(m, 3) + " : <b>toujours vraie</b> (le seuil n'est atteint qu'en un point de la roue) — t ∈ [0 ; 16].";
+        } else {
+          texte = "sin(u) " + signe + " " + fr(m, 3) + " : sur deux tours, t ∈ <b>" +
+            fusion.map(function (iv) { return "[" + fr(iv[0], 2) + " ; " + fr(iv[1], 2) + "]"; }).join(" ∪ ") + "</b> (en min).";
+        }
       }
       this._lecture.innerHTML = texte;
       this._dessiner(y0, m, tour, dessus);
@@ -260,8 +276,7 @@
       });
 
       // Intervalles solutions sur deux tours : bandes + segments sur l'axe t + courbe épaissie.
-      var intervalles = [];
-      [0, T].forEach(function (dec) { tour.forEach(function (iv) { intervalles.push([iv[0] + dec, iv[1] + dec]); }); });
+      var intervalles = fusionner(deuxTours(tour));
       intervalles.forEach(function (iv) {
         var a = pxT(iv[0]), b = pxT(iv[1]);
         if (b - a > 0.5) {
