@@ -2551,3 +2551,28 @@ paths:
   arrondi, h(7) ≈ 16 ≠ 14). Vérifié : collecteurs (≈ 240 000 formules KaTeX strictes, 0 anomalie),
   documents réels 2 graines (0 erreur KaTeX, 0 débordement), `?code=` 62/62, plans à 2 séries,
   `npm run build` propre.
+
+- **5e (4h), Chapitre 1 — Fonctions composées : audit de contenu appliqué** (accepté en entier).
+  Erreurs : coût unitaire c(x) = C(x)/x présenté comme un QUOTIENT, avec une vraie composition
+  économique à la place (ventes ← budget publicitaire, recette ← ventes) ; « hors domaine » (n'existe
+  pas) distingué de « hors portion tracée » (pas lisible), aligné sur le quiz ; sous-titre §1
+  reformulé ; exemple « domaine vide » en double condition (image de g disjointe de dom f, figure) ;
+  unités hors mode math ; rappel « 2 opérations à surveiller, 2 sans danger ». Ajouts : notion
+  d'image (intro, projection sur Oy) ; §1 : √(N/D) avec tableau de signes, N/√D strict avec
+  changement de sens, dénominateur du 2e degré, piège du changement de sens ; §2 : f∘g et g∘f en
+  expressions ; §3 réordonné (substitution → double condition → exemple « substituer puis
+  simplifier » 3/x ∘ 7/(4x+6) = (12x+18)/7 sur ℝ∖{−3/2} → démonstrations, associativité en « Pour
+  aller plus loin ») ; §4 : astuce du report par y = x ; §5 : coût unitaire par système (5gen5 B),
+  bénéfice et seuil de rentabilité avec figure (5gen5 C) ; application « réactions chimiques »
+  retirée (doublon de la chaîne de montage) ; formulaire (+6) et récap alignés ; 7 énoncés par clé.
+  Piège trouvé : « $f…$ \qquad $g…$ » dans un champ `formula` affichait « \qquad » en clair (hors
+  formule) — écrire les deux fonctions dans UNE seule formule.
+  5 nouveaux ateliers : `detecteur-domaine-widget` (§1, bandes par condition, intersection, tableau
+  de signes de N/D, sonde), `constructeur-composees-widget` (§2, briques, échange f∘g ≠ g∘f, défi),
+  `simplification-piege-widget` (§3, formule simplifiée contre vraie composée), `bidon-optimal-widget`
+  (§5, minimum en r = ∛(V/2π), h = 2r), `seuil-rentabilite-widget` (§5, CT/CA/bénéfice, coût unitaire
+  quotient) ; `composition-graphique-widget` (§4) = sous-classe de la machine à composer ouverte en
+  mode « un seul repère + y = x ». Améliorés : `composition-machine-widget` (mode y = x, préréglage
+  « hors portion tracée »), `domaine-composee-widget` (image de l'intérieure en bande, préréglage
+  « simplification piège »). Vérifié : `npm run build` propre, page réelle 390 clair/sombre et
+  1280 : 0 débordement, 0 `$` isolé, 0 erreur KaTeX ; 8 ateliers montés ; figure épinglée 0 ko.

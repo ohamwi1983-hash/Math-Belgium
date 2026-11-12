@@ -355,6 +355,17 @@ export const fonctionsComposees: ChapterContent = {
             'inverserait tout le domaine — c\'est l\'erreur la plus fréquente sur les racines.',
         },
         {
+          kind: 'atelier',
+          tag: 'detecteur-domaine-widget',
+          label: 'Manipule toi-même : le détecteur de domaine',
+          caption:
+            'Choisis une famille et règle les coefficients : chaque condition d\'existence ' +
+            's\'affiche en bande sur sa propre droite graduée, puis leur intersection donne ' +
+            'dom f. Pour √(N/D), le tableau de signes se construit en direct. Déplace x : ' +
+            'f(x) est calculé, ou l\'atelier dit pourquoi c\'est impossible (dénominateur ' +
+            'nul, racine d\'un négatif).',
+        },
+        {
           kind: 'piege',
           text:
             'Une racine **impaire** (cubique, par exemple) ne demande **aucune** condition, même si elle ' +
@@ -431,15 +442,17 @@ export const fonctionsComposees: ChapterContent = {
           tag: 'composition-machine-widget',
           label: 'Manipule toi-même — la machine à composer',
           caption:
-            'Fais glisser a et regarde la valeur « rebondir » d\'un graphe à l\'autre. Choisis ' +
-            'l\'ordre (f∘g) ou (g∘f) pour retrouver, par toi-même, les deux résultats différents ' +
-            'du piège ci-dessus (5 et 9) — puis essaie le préréglage « domaine restreint » pour ' +
-            'voir un cas où la composée « n\'existe pas ».',
+            'Fais glisser a et regarde la valeur « rebondir » d\'un graphe à l\'autre. ' +
+            'Choisis l\'ordre (f∘g) ou (g∘f) pour retrouver les deux résultats du piège ' +
+            'ci-dessus (5 et 9). Le préréglage « hors domaine » montre une composée qui ' +
+            'n\'existe pas ; « hors portion tracée » montre une valeur qui existe mais qu\'on ' +
+            'ne peut pas lire sur le graphique. Essaie aussi le mode « un seul repère + ' +
+            'droite y = x ».',
         },
         {
           kind: 'exemple',
           badge: 'f∘g et g∘f en expressions',
-          formula: '$f(x) = x^2+1$ \\qquad $g(x) = 2x-3$',
+          formula: '$f(x) = x^2+1 \\qquad g(x) = 2x-3$',
           steps: [
             { tag: '(f∘g)(x) : g d’abord, puis f', text: '$f(g(x)) = (2x-3)^2+1 = 4x^2-12x+10$' },
             { tag: '(g∘f)(x) : f d’abord, puis g', text: '$g(f(x)) = 2(x^2+1)-3 = 2x^2-1$' },
@@ -452,6 +465,16 @@ export const fonctionsComposees: ChapterContent = {
             tag: 'deux formules différentes',
             text: '$(f\\circ g)(x) = 4x^2-12x+10 \\ne (g\\circ f)(x) = 2x^2-1$',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'constructeur-composees-widget',
+          label: 'Manipule toi-même : le constructeur de composées',
+          caption:
+            'Ajoute des briques (ax + b, x², x³, √x, ∛x, 1/x, |x|) : la formule h(x) et son ' +
+            'graphe se construisent étage par étage. Échange deux étages avec ↑ ↓ : ' +
+            'l\'ancienne courbe reste en pointillé, et l\'on voit que f∘g ≠ g∘f. En mode ' +
+            'Défi, reconstitue la chaîne qui donne l\'écriture proposée.',
         },
         { kind: 'subheading', text: 'Décomposer : remonter d’une écriture composée vers ses étages' },
         {
@@ -592,7 +615,7 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'substituer, puis simplifier',
-          formula: '$f(x) = \\dfrac{3}{x}$ \\qquad $g(x) = \\dfrac{7}{4x+6}$ — calcule $(f\\circ g)(x)$ et son domaine.',
+          formula: '$f(x) = \\dfrac{3}{x} \\qquad g(x) = \\dfrac{7}{4x+6}$ — calcule $(f\\circ g)(x)$ et son domaine.',
           steps: [
             {
               tag: '(f∘g)(x) = f(g(x)) : on remplace x par g(x) dans f',
@@ -623,6 +646,16 @@ export const fonctionsComposees: ChapterContent = {
             'conditions**, jamais sur la formule simplifiée.',
         },
         {
+          kind: 'atelier',
+          tag: 'simplification-piege-widget',
+          label: 'Manipule toi-même : la simplification qui ment',
+          caption:
+            'La formule simplifiée (pointillés) est calculable partout ; la vraie composée ' +
+            '(trait plein) n\'existe que sur son domaine : morceaux manquants, points creux ' +
+            'aux valeurs exclues. Déplace x pour comparer les deux : on ne lit jamais le ' +
+            'domaine sur la formule simplifiée.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Démonstration — pourquoi dom(f∘g) exige x ∈ dom g ET g(x) ∈ dom f',
           blocks: [
@@ -645,7 +678,7 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'domaine non vide',
-          formula: '$f(x) = \\sqrt{-3x+6}$ \\qquad $g(x) = \\sqrt{-2x+4}$',
+          formula: '$f(x) = \\sqrt{-3x+6} \\qquad g(x) = \\sqrt{-2x+4}$',
           steps: [
             {
               tag: '(g∘f)(x) = g(f(x)), par substitution',
@@ -682,7 +715,7 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'domaine vide',
-          formula: '$f(x) = \\sqrt{x-10}$ \\qquad $g(x) = -x^2$',
+          formula: '$f(x) = \\sqrt{x-10} \\qquad g(x) = -x^2$',
           steps: [
             { tag: '(f∘g)(x) = f(g(x)), par substitution', text: '$f(g(x)) = \\sqrt{-x^2-10}$' },
             { tag: 'condition 1 — x ∈ dom g', text: '$g(x) = -x^2$ existe pour tout réel : $\\operatorname{dom} g = \\mathbb{R}$' },
@@ -738,10 +771,12 @@ export const fonctionsComposees: ChapterContent = {
           tag: 'domaine-composee-widget',
           label: 'Manipule toi-même — la double condition, visualisée',
           caption:
-            'Les 3 droites reprennent les 3 étapes de la méthode : dom de la fonction intérieure, ' +
-            'la condition qui la relie à l\'extérieure, puis leur intersection. Fais glisser x et ' +
-            'regarde le marqueur passer du vert au gris sur chaque ligne selon la condition ' +
-            'vérifiée ou non — reprend les 2 exemples déjà résolus ci-dessus.',
+            'Fais glisser x : le marqueur passe au vert sur chaque droite dont la condition ' +
+            'est vérifiée. La dernière droite est celle des valeurs : l\'image de la ' +
+            'fonction intérieure en orange, le domaine de l\'extérieure en vert. La 2e ' +
+            'condition demande que la valeur tombe dans leur zone commune. Le préréglage « ' +
+            'simplification piège » montre pourquoi on ne lit jamais un domaine sur la ' +
+            'formule simplifiée.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin : l’associativité' },
         {
@@ -835,6 +870,17 @@ export const fonctionsComposees: ChapterContent = {
             '$y = x$. Depuis le point $(a\\,;\\,f(a))$ de $C_f$, une **horizontale** jusqu’à la droite ' +
             '$y = x$ t’amène au point $(f(a)\\,;\\,f(a))$, donc pile à l’abscisse $f(a)$ ; une ' +
             '**verticale** jusqu’à $C_g$ donne alors $g(f(a))$. La diagonale fait le report à ta place.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'composition-graphique-widget',
+          label: 'Manipule toi-même : lire une composée en rebondissant sur y = x',
+          caption:
+            'Les deux courbes sont dans le même repère. Pour (f∘g)(a) : monte de a jusqu\'à ' +
+            'la courbe de g, va à l\'horizontale jusqu\'à la droite y = x (la valeur g(a) ' +
+            'devient une abscisse), puis monte ou descends jusqu\'à la courbe de f et lis ' +
+            'l\'ordonnée. Compare « hors domaine » (n\'existe pas) et « hors portion tracée » ' +
+            '(pas lisible sur ce graphique).',
         },
         { kind: 'illustration', illustration: { kind: 'compositionSchematic' } },
         {
@@ -950,6 +996,16 @@ export const fonctionsComposees: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'bidon-optimal-widget',
+          label: 'Manipule toi-même : le bidon optimal',
+          caption:
+            'Choisis la contenance, puis fais varier le rayon r : le bidon s\'élargit et ' +
+            's\'aplatit, sa hauteur h(r) = V/(πr²) s\'adapte, et le point suit l\'aire totale ' +
+            'A(r) = 2πr² + 2V/r. Le minimum est atteint en r = ∛(V/(2π)) : la hauteur y ' +
+            'égale le diamètre.',
+        },
+        {
           kind: 'para',
           text:
             'Remarque comme la formule de l’aire latérale se **simplifie** une fois qu’on y ' +
@@ -1033,7 +1089,7 @@ export const fonctionsComposees: ChapterContent = {
             { tag: 'vérifier avec le second relevé', text: '$c(40) = 6 + \\dfrac{200}{40} = 11$ ✓' },
             {
               tag: 'coût total : un produit par x, pas une composition',
-              text: '$C(x) = x\\cdot c(x) = 6x + 200$ : 200 € de coût fixe et 6 € par objet',
+              text: '$C(x) = x\\cdot c(x) = 6x + 200$ : 200 € de coût fixe et 6 € par objet',
             },
           ],
           result: {
@@ -1061,7 +1117,7 @@ export const fonctionsComposees: ChapterContent = {
             },
             {
               tag: 'signe de B : coefficient de x² négatif, B est positif entre ses racines',
-              text: '$B(x) > 0 \\iff 20 < x < 80$ ; bénéfice maximal au sommet, $B(50) = 90$ €',
+              text: '$B(x) > 0 \\iff 20 < x < 80$ ; bénéfice maximal au sommet, $B(50) = 90$ €',
             },
           ],
           result: {
@@ -1084,11 +1140,12 @@ export const fonctionsComposees: ChapterContent = {
             fixedYRange: { min: 0, max: 1800 },
             points: [
               { x: 20, y: 320, label: 'seuil : 20 objets', tone: 'accent', labelPos: 'right' },
-              { x: 80, y: 1280, label: '80 objets', tone: 'accent', labelPos: 'below' },
+              { x: 80, y: 1280, label: '', tone: 'accent' },
             ],
             textLabels: [
               { x: 97, y: 1690, text: 'C(x)', tone: 'bad', anchor: 'end' },
               { x: 97, y: 1350, text: 'CA(x)', tone: 'good', anchor: 'end' },
+              { x: 82, y: 1020, text: '80 objets', tone: 'accent', anchor: 'start' },
             ],
             xAxisLabel: 'x (objets)',
             yAxisLabel: 'euros',
@@ -1096,6 +1153,17 @@ export const fonctionsComposees: ChapterContent = {
               'Entre 20 et 80 objets, la droite du chiffre d’affaires passe au-dessus de la courbe du ' +
               'coût total : la zone verte est le bénéfice. Le seuil de rentabilité se lit à la première intersection.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'seuil-rentabilite-widget',
+          label: 'Manipule toi-même : le seuil de rentabilité',
+          caption:
+            'Règle le coût fixe, le coût variable par objet et le prix de vente : CT(x), ' +
+            'CA(x) et le bénéfice B(x) = CA(x) − CT(x) se tracent, et le seuil de ' +
+            'rentabilité est marqué. En dessous, le coût unitaire c(x) = CT(x)/x, un ' +
+            'quotient et non une composition, décroît vers le coût variable et croise le ' +
+            'prix exactement au seuil.',
         },
         {
           kind: 'entrainement',
