@@ -110,10 +110,10 @@ function blocDonneesAPannes(ex: ExerciceFamilleAPannes): string[] {
 }
 
 const LIBELLE_DEMANDE_PANNES: Record<ExerciceFamilleAPannes["demandeEcran2"], string> = {
-  lesDeux: "les deux événements se produisent",
-  aucun: "aucun des deux événements ne se produit",
-  auMoinsUn: "au moins un des deux événements se produit",
-  exactementUn: "exactement un des deux événements se produit",
+  lesDeux: "que les deux événements se produisent",
+  aucun: "qu'aucun des deux événements ne se produise",
+  auMoinsUn: "qu'au moins un des deux événements se produise",
+  exactementUn: "qu'exactement un des deux événements se produise",
 };
 
 const NOTATION_DEMANDE_PANNES: Record<ExerciceFamilleAPannes["demandeEcran2"], string> = {
@@ -133,7 +133,7 @@ function consigneEcranAPannes(ex: ExerciceFamilleAPannes, phase: PhaseIndependan
       txt(` : la probabilité que ${ex.contexte.labelElement1} ${ex.contexte.labelPanneNegatif}, et que ${ex.contexte.labelElement2} ${ex.contexte.labelPanneNegatif}.`),
     ];
   }
-  return [txt(`Calcule la probabilité que ${LIBELLE_DEMANDE_PANNES[ex.demandeEcran2]}.`)];
+  return [txt(`Calcule la probabilité ${LIBELLE_DEMANDE_PANNES[ex.demandeEcran2]}.`)];
 }
 
 function champsAPannes(phase: PhaseIndependanceBayes): ChampDef[] {
