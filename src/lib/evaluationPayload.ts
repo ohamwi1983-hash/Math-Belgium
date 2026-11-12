@@ -285,10 +285,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen29', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', generatorId: '5gen30', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen31', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: '', processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '', processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '', processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '', processus: 3 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -1040,16 +1040,56 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   },
   'derivees-applications': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // `exemple` (ou le label de l'`exempleLibre`). Les exemples de LECTURE GRAPHIQUE n'ont pas leur
+  // graphique sur papier : leurs énoncés DÉCRIVENT la courbe en mots.
+  'definition-derivee': [
+    { cle: 'sur une fonction quadratique', enonce: "Soit $f(x) = x^2 - 3$. Calcule $f'(2)$ par la définition : $f(2)$, puis $f(2+h)$ développé, le taux d'accroissement simplifié, et enfin sa limite quand $h \\to 0$." },
+    { cle: 'sur une fonction rationnelle', enonce: "Soit $f(x) = \\dfrac{2x+1}{x-1}$. Calcule $f'(2)$ par la définition, en simplifiant le taux d'accroissement par $h$ avant de passer à la limite." },
+  ],
+  'tangentes': [
+    { cle: 'tangente en un point donné', enonce: "Soit $f(x) = x^2 - 2x + 1$. Détermine l'équation de la tangente à la courbe de $f$ au point d'abscisse $3$." },
+    { cle: 'double tangence', enonce: "Soit $f(x) = x^4 - 2x^2 + 2x + 1$. Détermine la tangente à la courbe de $f$ au point d'abscisse $1$, puis montre que cette droite est aussi tangente à la courbe en un second point, que tu détermineras." },
+  ],
   'fonction-derivee': [
-    undefined,
-    "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $f(x) = \\dfrac{1}{x}$ (avec $x \\neq 0$), $f'(x) = -\\dfrac{1}{x^2}$, et que pour $f(x) = \\sqrt{x}$ (avec $x \\geq 0$), $f'(x) = \\dfrac{1}{2\\sqrt{x}}$ — en multipliant, pour ce second cas, par l'expression conjuguée.",
-    undefined,
-    undefined,
-    undefined,
+    { cle: 'obtenue directement par la définition', enonce: "Soit $f(x) = 2x^2 - 3x$. Détermine $f'(x)$ à partir de la définition, comme limite du taux d'accroissement $\\dfrac{f(x+h)-f(x)}{h}$." },
+    { cle: 'Démonstration — 1/x et √x', enonce: "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $f(x) = \\dfrac{1}{x}$ (avec $x \\neq 0$), $f'(x) = -\\dfrac{1}{x^2}$, et que pour $f(x) = \\sqrt{x}$ (avec $x > 0$), $f'(x) = \\dfrac{1}{2\\sqrt{x}}$ — en multipliant, pour ce second cas, par l'expression conjuguée." },
+    { cle: 'règle du produit', enonce: "Calcule la dérivée de $f(x) = (2x+1)(x^2-3)$ à l'aide de la règle du produit, puis réduis le résultat." },
+    { cle: 'règle du quotient', enonce: "Calcule la dérivée de $f(x) = \\dfrac{x^2+1}{x-2}$ à l'aide de la règle du quotient, puis réduis le numérateur." },
+    { cle: 'règle de la chaîne', enonce: "Calcule la dérivée de $f(x) = (2x-1)^3$ en identifiant la fonction intérieure et la fonction extérieure." },
+  ],
+  'signe-derivees': [
+    { cle: 'sur une cubique', enonce: "Soit $f(x) = x^3 - 3x$. Étudie le signe de $f'(x)$ et de $f''(x)$, puis déduis-en les variations de $f$, ses extremums locaux et sa concavité (avec l'éventuel point d'inflexion)." },
   ],
   'etude-locale': [
-    "Pour $f(x) = x^3-3x$, dresse le tableau de signes complet de $f'$, déduis-en les variations de $f$, puis classe chaque zéro de $f'$ (maximum local ou minimum local).",
-    undefined,
+    { cle: 'tableau de signes complet', enonce: "Pour $f(x) = x^3 - 3x$, dresse le tableau de signes complet de $f'$, déduis-en les variations de $f$, puis classe chaque zéro de $f'$ (maximum local ou minimum local) en donnant la valeur de $f$." },
+    { cle: 'point critique SANS extremum', enonce: "Soit $f(x) = x^3 + 2$. Montre que $f'(0) = 0$, puis détermine si $f$ admet un extremum en $x = 0$. Justifie par le signe de $f'$." },
+    { cle: 'racines irrationnelles', enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Détermine et classe les extremums locaux de $f$, en donnant leurs abscisses et les valeurs de $f$ sous forme exacte." },
+    { cle: 'domaine et colonnes ∄', enonce: "Soit $f(x) = \\dfrac{4}{(x-1)^2 - 4}$. Détermine le domaine de $f$, calcule $f'(x)$, dresse le tableau de signes de $f'$ (avec les valeurs exclues) et déduis-en les extremums locaux de $f$." },
+    { cle: "tableau de f'' : concavité", enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Calcule $f''(x)$, dresse son tableau de signes et détermine la concavité de $f$ ainsi que les coordonnées de son point d'inflexion." },
+  ],
+  'lecture-graphique-derivees': [
+    { cle: 'lecture directe', enonce: "Le graphique d'une fonction $f$ (sans formule) décroît jusqu'à un point A, croît de A jusqu'à un point B, puis décroît après B. Entre A et B, la courbe a d'abord la forme d'un bol, puis celle d'un dôme, le changement se faisant en un point P. Décris les variations de $f$, ses extremums locaux, le signe de $f'$, sa concavité et le signe de $f''$, puis indique la nature du point P." },
+    { cle: "n'est PAS un extremum", enonce: "Le graphique d'une fonction $f$ (sans formule) croît partout ; en un point C, la tangente à la courbe est horizontale. Que vaut $f'$ en C ? Le point C est-il un extremum ? Justifie à l'aide du signe de $f'$ de part et d'autre de C." },
+  ],
+  'etudier-fonction': [
+    { cle: 'étude complète', enonce: "Soit $f(x) = \\dfrac{x^2-2x+5}{x-1}$. Mène l'étude complète de $f$ : domaine, limites et asymptotes, dérivée et extremums (avec leurs coordonnées), concavité, puis allure du graphique." },
+  ],
+  'optimisation-geometrique': [
+    { cle: 'rectangle de périmètre fixé', enonce: "Un rectangle a un périmètre de 40 m. Détermine ses dimensions pour que son aire soit maximale, en justifiant la nature de l'extremum par un tableau de signes." },
+    { cle: 'affiche avec marges', enonce: "Une affiche contient une zone imprimée rectangulaire de 32 dm², entourée d'une marge de 1 dm à gauche et à droite et de 2 dm en haut et en bas. Détermine les dimensions de la zone imprimée qui rendent la surface totale de l'affiche minimale, et donne cette surface." },
+  ],
+  'contexte-economique': [
+    { cle: 'discret vs dérivée', enonce: "Le coût total de production de $q$ unités vaut $C(q) = q^2 + 4q + 100$ €. Calcule le coût marginal en $q = 10$ de deux façons, $C(11) - C(10)$ et $C'(10)$, puis l'écart en pourcentage entre les deux." },
+    { cle: 'bénéfice maximal', enonce: "Un produit se vend au prix $p(x) = 50 - x$ € l'unité pour $x$ unités vendues ; le coût total vaut $C(x) = x^2 + 10x + 20$ €. Détermine la quantité qui maximise le bénéfice, vérifie que la recette marginale égale alors le coût marginal, et calcule ce bénéfice maximal." },
+    { cle: 'coût moyen minimal', enonce: "Le coût total vaut $C(q) = q^3 - 6q^2 + 20q + 50$ (en centaines d'euros, $q$ en centaines d'unités). Établis l'équation qui donne le minimum du coût moyen $C_M(q) = \\dfrac{C(q)}{q}$, puis approche sa solution par dichotomie à partir de l'intervalle $[4\\,;5]$, en quatre étapes." },
+  ],
+  'extrema-bornes': [
+    { cle: 'intervalle fermé', enonce: "Soit $f(t) = t^3 - 6t^2 + 9t + 2$ sur l'intervalle $[0\\,;5]$. Détermine le maximum absolu et le minimum absolu de $f$ sur cet intervalle, et les valeurs de $t$ où ils sont atteints." },
+  ],
+  'vitesse-position': [
+    { cle: 'position, vitesse, accélération', enonce: "Un mobile a pour position $s(t) = -t^2 + 8t$ (en m, $t$ en s, $t \\in [0\\,;8]$). Détermine sa vitesse et son accélération, l'instant où il s'arrête et sa position à cet instant, puis décris le sens de son mouvement." },
+    { cle: 'atteindre une distance', enonce: "Une voiture déjà lancée a pour position $s(t) = t^2 + 4t$ (en m, $t$ en s) jusqu'à un repère situé à 45 m du départ ; elle roule ensuite à vitesse constante jusqu'à l'arrivée, à 115 m du départ. Quand franchit-elle le repère ? À quelle vitesse (en m/s et en km/h) ? Quand arrive-t-elle ?" },
   ],
   },
   'fonctions-logarithmes': {
@@ -1417,7 +1457,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
@@ -2859,15 +2899,15 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     'definition-derivee': [
       {
         enonce:
-          "Le taux d'accroissement [f(a+h)-f(a)]/h donne toujours 0/0 si on y remplace directement h=0. Pourquoi cela n'empêche-t-il pas f'(a) d'exister ?",
+          "Le taux d'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ donne toujours la forme $\\frac{0}{0}$ si on y remplace directement $h$ par 0. Pourquoi cela n'empêche-t-il pas $f'(a)$ d'exister ?",
         corrige:
-          "Le numérateur f(a+h)−f(a) tend vers 0 EN MÊME TEMPS que le dénominateur h, puisque f(a+h) se rapproche de f(a) quand h→0 — c'est donc une forme indéterminée, pas une preuve que la limite n'existe pas. Simplifier algébriquement AVANT de passer à la limite fait disparaître ce h commun et révèle la vraie valeur limite, qui n'a elle rien d'indéterminé.",
+          "Le numérateur $f(a+h)-f(a)$ tend vers 0 EN MÊME TEMPS que le dénominateur $h$, puisque $f(a+h)$ se rapproche de $f(a)$ quand $h \\to 0$ — c'est donc une forme indéterminée, pas une preuve que la limite n'existe pas. Simplifier algébriquement AVANT de passer à la limite fait disparaître ce h commun et révèle la vraie valeur limite, qui n'a elle rien d'indéterminé.",
       },
       {
         enonce:
-          "Deux sécantes construites avec des valeurs de h différentes (par exemple h=2 et h=0,5) ont des pentes différentes. Pourquoi ces deux pentes se rapprochent-elles forcément de la même valeur quand h se rapproche de 0 ?",
+          "Deux sécantes construites avec des valeurs de h différentes (par exemple $h = 2$ et $h = 0{,}5$) ont des pentes différentes. Pourquoi ces deux pentes se rapprochent-elles forcément de la même valeur quand $h$ se rapproche de 0 ?",
         corrige:
-          "Parce que f'(a) est précisément définie comme LA limite du taux d'accroissement quand h→0 : si cette limite existe, toute suite de valeurs de h tendant vers 0 doit donner des taux d'accroissement qui convergent vers ce même nombre, quel que soit le chemin suivi. Deux choix de h différents ne sont que deux instantanés de cette même convergence, jamais deux processus indépendants.",
+          "Parce que $f'(a)$ est précisément définie comme LA limite du taux d'accroissement quand $h \\to 0$ : si cette limite existe, toute suite de valeurs de $h$ tendant vers 0 doit donner des taux d'accroissement qui convergent vers ce même nombre, quel que soit le chemin suivi. Deux choix de $h$ différents ne sont que deux instantanés de cette même convergence, jamais deux processus indépendants.",
       },
     ],
     tangentes: [
@@ -2875,41 +2915,41 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi la pente d'une tangente en un point ne peut-elle jamais être obtenue en prenant simplement deux points DISTINCTS de la courbe, même très proches l'un de l'autre ?",
         corrige:
-          "Deux points distincts, quelle que soit leur proximité, ne donnent que la pente d'une sécante — une approximation, pas la valeur exacte. La tangente n'est définie que comme la LIMITE de ces sécantes quand le second point vient se confondre avec le premier (h→0) ; tant que les deux points restent séparés, même très proches, on calcule encore un taux d'accroissement, jamais f'(a) lui-même.",
+          "Deux points distincts, quelle que soit leur proximité, ne donnent que la pente d'une sécante — une approximation, pas la valeur exacte. La tangente n'est définie que comme la LIMITE de ces sécantes quand le second point vient se confondre avec le premier ($h \\to 0$) ; tant que les deux points restent séparés, même très proches, on calcule encore un taux d'accroissement, jamais $f'(a)$ lui-même.",
       },
       {
         enonce:
           "Si la tangente en un point a une pente nulle, cela veut-il dire que f est constante autour de ce point ? Justifie à l'aide de l'exemple de la section.",
         corrige:
-          "Non — une tangente horizontale en un seul point n'affirme rien sur le comportement de f ailleurs. f(x)=x²−2x+1 a une tangente horizontale uniquement en x=1, mais elle est strictement décroissante avant ce point et strictement croissante après : elle n'est constante nulle part. Une pente nulle ne décrit que l'instant précis en ce point, jamais un voisinage entier.",
+          "Non — une tangente horizontale en un seul point n'affirme rien sur le comportement de f ailleurs. $f(x) = x^2-2x+1$ a une tangente horizontale uniquement en $x = 1$, mais elle est strictement décroissante avant ce point et strictement croissante après : elle n'est constante nulle part. Une pente nulle ne décrit que l'instant précis en ce point, jamais un voisinage entier.",
       },
     ],
     'fonction-derivee': [
       {
         enonce:
-          "Pourquoi le domaine de dérivabilité d'une fonction peut-il être strictement plus petit que son domaine de définition ? Illustre avec √x.",
+          "Pourquoi le domaine de dérivabilité d'une fonction peut-il être strictement plus petit que son domaine de définition ? Illustre avec $\\sqrt{x}$.",
         corrige:
-          "Une fonction peut être définie en un point sans que sa courbe y ait de tangente bien déterminée — être défini ne garantit pas que la limite du taux d'accroissement existe. √x est bien définie en x=0, mais le taux d'accroissement y tend vers +∞ (la tangente y est verticale) : 0 appartient donc à dom f sans appartenir à dom_d f.",
+          "Une fonction peut être définie en un point sans que sa courbe y ait de tangente bien déterminée — être défini ne garantit pas que la limite du taux d'accroissement existe. $\\sqrt{x}$ est bien définie en $x = 0$, mais le taux d'accroissement y tend vers +∞ (la tangente y est verticale) : 0 appartient donc à $\\text{dom}\\, f$ sans appartenir à $\\text{dom}_d\\, f$.",
       },
       {
         enonce:
-          "Pourquoi (u·v)' n'est-elle pas égale à u'·v' — qu'est-ce que cette erreur ignore dans la façon dont un produit varie ?",
+          "Pourquoi $(u \\cdot v)'$ n'est-elle pas égale à $u' \\cdot v'$ — qu'est-ce que cette erreur ignore dans la façon dont un produit varie ?",
         corrige:
-          "La dérivée d'un produit reçoit une contribution de la variation de u, pondérée par la valeur de v, ET une contribution de la variation de v, pondérée par la valeur de u — exactement ce que traduit u'v+uv'. Multiplier simplement u' et v' ignore ces deux pondérations croisées et ne correspond à aucune décomposition réelle de la variation du produit.",
+          "La dérivée d'un produit reçoit une contribution de la variation de u, pondérée par la valeur de v, ET une contribution de la variation de v, pondérée par la valeur de u — exactement ce que traduit $u'v+uv'$. Multiplier simplement $u'$ et $v'$ ignore ces deux pondérations croisées et ne correspond à aucune décomposition réelle de la variation du produit.",
       },
     ],
     'signe-derivees': [
       {
         enonce:
-          "Pourquoi la condition f'(a)=0 est-elle nécessaire mais pas suffisante pour affirmer que f admet un extremum en a ?",
+          "Pourquoi la condition $f'(a) = 0$ est-elle nécessaire mais pas suffisante pour affirmer que f admet un extremum en a ?",
         corrige:
-          "Elle est nécessaire car un sommet ou un creux a toujours une tangente horizontale — sinon la courbe continuerait encore à monter ou à descendre, donc ne serait pas encore à un extremum. Mais elle n'est pas suffisante : une tangente horizontale peut aussi correspondre à un simple replat où f' s'annule sans changer de signe, la courbe continuant alors dans le même sens. f'(a)=0 seule ne distingue jamais ces deux cas — seul un vrai changement de signe de f' le fait.",
+          "Elle est nécessaire car un sommet ou un creux a toujours une tangente horizontale — sinon la courbe continuerait encore à monter ou à descendre, donc ne serait pas encore à un extremum. Mais elle n'est pas suffisante : une tangente horizontale peut aussi correspondre à un simple replat où $f'$ s'annule sans changer de signe, la courbe continuant alors dans le même sens. $f'(a) = 0$ seule ne distingue jamais ces deux cas — seul un vrai changement de signe de $f'$ le fait.",
       },
       {
         enonce:
           "En quoi un point d'inflexion diffère-t-il fondamentalement d'un extremum local, même si les deux sont des points particuliers de la courbe ?",
         corrige:
-          "Un extremum correspond à un changement de DIRECTION (f' change de signe) : la courbe monte puis redescend, ou l'inverse. Un point d'inflexion correspond à un changement de CONCAVITÉ (f'' change de signe) : la courbe garde le même sens de variation, mais passe d'une forme de bol à une forme de dôme — sa tangente peut même y être oblique, pas forcément horizontale. Les deux notions reposent sur deux dérivées différentes et ne se recouvrent que par coïncidence.",
+          "Un extremum correspond à un changement de DIRECTION ($f'$ change de signe) : la courbe monte puis redescend, ou l'inverse. Un point d'inflexion correspond à un changement de CONCAVITÉ ($f''$ change de signe) : la courbe garde le même sens de variation, mais passe d'une forme de bol à une forme de dôme — sa tangente peut même y être oblique, pas forcément horizontale. Les deux notions reposent sur deux dérivées différentes et ne se recouvrent que par coïncidence.",
       },
     ],
     'etude-locale': [
@@ -2917,11 +2957,11 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi un point critique qui n'est PAS un extremum correspond-il toujours à un point d'inflexion à tangente horizontale, jamais à un autre type de point ?",
         corrige:
-          "Si f' ne change pas de signe en a, f continue de croître (ou de décroître) de part et d'autre — ce n'est donc pas un extremum. Mais la tangente y est horizontale ET le sens de variation ne change pas : la courbe traverse cette tangente au lieu de rebondir sur elle, ce qui est exactement la définition d'une inflexion, ici simplement à pente nulle plutôt qu'oblique.",
+          "Si $f'$ ne change pas de signe en $a$, $f$ continue de croître (ou de décroître) de part et d'autre — ce n'est donc pas un extremum. Mais la tangente y est horizontale ET le sens de variation ne change pas : la courbe traverse cette tangente au lieu de rebondir sur elle, ce qui est exactement la définition d'une inflexion, ici simplement à pente nulle plutôt qu'oblique.",
       },
       {
         enonce:
-          "Si f'(a)=0, suffit-il de regarder le signe de f' d'UN SEUL côté de a pour conclure qu'il y a (ou non) un extremum en a ? Justifie.",
+          "Si $f'(a) = 0$, suffit-il de regarder le signe de $f'$ d'UN SEUL côté de $a$ pour conclure qu'il y a (ou non) un extremum en a ? Justifie.",
         corrige:
           "Non — il faut comparer les DEUX côtés. Connaître le signe d'un seul côté ne renseigne que sur le sens de variation local de ce côté-là ; cela ne dit rien de ce qui se passe de l'autre côté, qui peut aussi bien changer de signe (extremum) que le garder (pas d'extremum). Seule la comparaison des deux côtés permet de trancher.",
       },
@@ -2943,15 +2983,15 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     'etudier-fonction': [
       {
         enonce:
-          "Pourquoi faut-il déterminer le domaine de f AVANT de calculer et d'étudier le signe de f', plutôt qu'à la fin pour simplement vérifier ?",
+          "Pourquoi faut-il déterminer le domaine de f AVANT de calculer et d'étudier le signe de $f'$, plutôt qu'à la fin pour simplement vérifier ?",
         corrige:
-          "Parce que les valeurs exclues du domaine de f sont aussi exclues du domaine de f' — un tableau de signes construit sans cette information risquerait de traiter une valeur interdite comme n'importe quel autre réel, et d'y laisser une flèche de variation enjamber un point où f n'est même pas définie.",
+          "Parce que les valeurs exclues du domaine de f sont aussi exclues du domaine de $f'$ — un tableau de signes construit sans cette information risquerait de traiter une valeur interdite comme n'importe quel autre réel, et d'y laisser une flèche de variation enjamber un point où f n'est même pas définie.",
       },
       {
         enonce:
           "Deux morceaux de courbe séparés par une asymptote verticale semblent parfois se prolonger visuellement l'un dans l'autre. Pourquoi le tableau de variations ne doit-il jamais les relier par une seule flèche ?",
         corrige:
-          "Parce que f n'est tout simplement pas définie au point d'exclusion : il n'existe aucune valeur f(a) à cet endroit, donc aucune continuité réelle entre les deux morceaux, même si leur allure graphique le suggère. Une flèche affirme implicitement que f est définie et monotone sur tout l'intervalle qu'elle couvre — l'étendre par-dessus une valeur exclue affirmerait quelque chose de faux.",
+          "Parce que f n'est tout simplement pas définie au point d'exclusion : il n'existe aucune valeur $f(a)$ à cet endroit, donc aucune continuité réelle entre les deux morceaux, même si leur allure graphique le suggère. Une flèche affirme implicitement que f est définie et monotone sur tout l'intervalle qu'elle couvre — l'étendre par-dessus une valeur exclue affirmerait quelque chose de faux.",
       },
     ],
     'optimisation-geometrique': [
@@ -2963,35 +3003,35 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Trouver x tel que A'(x)=0 suffit-il à garantir que cette valeur donne un MAXIMUM de l'aire plutôt qu'un minimum ? Qu'est-ce qui permet de le confirmer ?",
+          "Trouver x tel que $A'(x) = 0$ suffit-il à garantir que cette valeur donne un MAXIMUM de l'aire plutôt qu'un minimum ? Qu'est-ce qui permet de le confirmer ?",
         corrige:
-          "Non — A'(x)=0 ne donne qu'un point critique, un simple candidat. Il faut ensuite confirmer sa nature, par un tableau de signes de A' autour de ce point ou par le signe de A'' en ce point. Sans cette étape, rien ne distingue mathématiquement un maximum d'un minimum, ou même d'un point critique sans extremum.",
+          "Non — $A'(x) = 0$ ne donne qu'un point critique, un simple candidat. Il faut ensuite confirmer sa nature, par le tableau de signes de $A'$ autour de ce point : $A'$ doit passer de $+$ à $-$ pour un maximum. Sans cette étape, rien ne distingue mathématiquement un maximum d'un minimum, ou même d'un point critique sans extremum.",
       },
     ],
     'contexte-economique': [
       {
         enonce:
-          "Pourquoi la quantité qui maximise la recette R(x) n'est-elle, en général, pas la même que celle qui maximise le bénéfice B(x) ?",
+          "Pourquoi la quantité qui maximise la recette $R(x)$ n'est-elle, en général, pas la même que celle qui maximise le bénéfice $B(x)$ ?",
         corrige:
-          "Maximiser R(x) seule ignore totalement le coût de production, alors que le bénéfice est B(x)=R(x)−C(x). Une quantité peut augmenter la recette tout en augmentant le coût encore plus vite, ce qui diminue le bénéfice net : R'(x)=0 et B'(x)=0 sont deux conditions portant sur deux fonctions différentes, qui n'ont aucune raison de se résoudre pour la même valeur de x.",
+          "Maximiser $R(x)$ seule ignore totalement le coût de production, alors que le bénéfice est $B(x) = R(x)-C(x)$. Une quantité peut augmenter la recette tout en augmentant le coût encore plus vite, ce qui diminue le bénéfice net : $R'(x) = 0$ et $B'(x) = 0$ sont deux conditions portant sur deux fonctions différentes, qui n'ont aucune raison de se résoudre pour la même valeur de x.",
       },
       {
         enonce:
-          "Que représente, en termes économiques, l'écart entre le coût marginal discret C(q+1)−C(q) et la dérivée C'(q) ?",
+          "Que représente, en termes économiques, l'écart entre le coût marginal discret $C(q+1)-C(q)$ et la dérivée $C'(q)$ ?",
         corrige:
-          "C'(q) est une vitesse instantanée de variation du coût exactement au niveau de production q, alors que C(q+1)−C(q) est la variation réelle provoquée par une unité ENTIÈRE supplémentaire — un taux de variation moyen sur tout un intervalle de longueur 1, pas en un seul point. Les deux coïncident seulement dans la limite où l'unité ajoutée serait infinitésimale, ce qu'elle n'est jamais en pratique.",
+          "$C'(q)$ est une vitesse instantanée de variation du coût exactement au niveau de production q, alors que $C(q+1)-C(q)$ est la variation réelle provoquée par une unité ENTIÈRE supplémentaire — un taux de variation moyen sur tout un intervalle de longueur 1, pas en un seul point. Les deux coïncident seulement dans la limite où l'unité ajoutée serait infinitésimale, ce qu'elle n'est jamais en pratique.",
       },
     ],
     'extrema-bornes': [
       {
         enonce:
-          "Pourquoi un maximum absolu sur un intervalle fermé [a;b] peut-il se trouver à une borne, sans que f' s'y annule ?",
+          "Pourquoi un maximum absolu sur un intervalle fermé $[a\\,;b]$ peut-il se trouver à une borne, sans que $f'$ s'y annule ?",
         corrige:
-          "La condition f'(x)=0 ne s'applique qu'aux extremums LOCAUX, atteints à l'intérieur de l'intervalle, où la courbe doit changer de sens des deux côtés. Une borne n'a qu'un seul côté à l'intérieur de l'intervalle : f peut y être encore strictement croissante (ou décroissante) juste avant, sans jamais redescendre après puisqu'il n'y a pas d'« après ». Rien n'exige alors que f' s'y annule pour que ce soit tout de même la plus grande (ou la plus petite) valeur atteinte.",
+          "La condition $f'(x) = 0$ ne s'applique qu'aux extremums LOCAUX, atteints à l'intérieur de l'intervalle, où la courbe doit changer de sens des deux côtés. Une borne n'a qu'un seul côté à l'intérieur de l'intervalle : f peut y être encore strictement croissante (ou décroissante) juste avant, sans jamais redescendre après puisqu'il n'y a pas d'« après ». Rien n'exige alors que $f'$ s'y annule pour que ce soit tout de même la plus grande (ou la plus petite) valeur atteinte.",
       },
       {
         enonce:
-          "Le maximum local trouvé par le tableau de signes de f' est-il nécessairement le maximum absolu de f sur [a;b] ? Justifie.",
+          "Le maximum local trouvé par le tableau de signes de $f'$ est-il nécessairement le maximum absolu de f sur $[a\\,;b]$ ? Justifie.",
         corrige:
           "Non — rien ne le garantit. Le tableau de signes ne renseigne que sur les variations à l'intérieur de l'intervalle ; il ne compare jamais ces valeurs à celles prises aux bornes. Le maximum absolu est le plus grand nombre parmi TOUTES les valeurs candidates réunies — extremums locaux ET valeurs aux deux bornes — un maximum local peut très bien être dépassé par la valeur à une borne.",
       },
@@ -3001,13 +3041,13 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "En quoi la vitesse et l'accélération sont-elles toutes deux des dérivées, mais de nature différente l'une par rapport à l'autre ?",
         corrige:
-          "La vitesse v(t)=s'(t) est la dérivée PREMIÈRE de la position : elle mesure le taux de variation instantané de la position. L'accélération a(t)=v'(t)=s''(t) est la dérivée de la vitesse, donc la dérivée SECONDE de la position : elle mesure le taux de variation de la vitesse elle-même, pas de la position directement. Chacune est une dérivée par rapport au temps, mais appliquée à une grandeur différente.",
+          "La vitesse $v(t) = s'(t)$ est la dérivée PREMIÈRE de la position : elle mesure le taux de variation instantané de la position. L'accélération $a(t) = v'(t) = s''(t)$ est la dérivée de la vitesse, donc la dérivée SECONDE de la position : elle mesure le taux de variation de la vitesse elle-même, pas de la position directement. Chacune est une dérivée par rapport au temps, mais appliquée à une grandeur différente.",
       },
       {
         enonce:
           "Une vitesse négative signifie-t-elle que le mobile ralentit ? Justifie en reliant ta réponse au signe de l'accélération.",
         corrige:
-          "Non — v(t)<0 signifie seulement que le mobile se déplace dans le sens négatif, pas qu'il ralentit. Ralentir signifie que la valeur ABSOLUE de la vitesse diminue, ce qui dépend de la comparaison des signes de v(t) et de a(t) : si les deux sont du même signe, le mobile accélère (même en reculant plus vite) ; s'ils sont de signes opposés, il ralentit. Le signe de v seul ne permet jamais cette conclusion.",
+          "Non — $v(t) < 0$ signifie seulement que le mobile se déplace dans le sens négatif, pas qu'il ralentit. Ralentir signifie que la valeur ABSOLUE de la vitesse diminue, ce qui dépend de la comparaison des signes de $v(t)$ et de $a(t)$ : si les deux sont du même signe, le mobile accélère (même en reculant plus vite) ; s'ils sont de signes opposés, il ralentit. Le signe de v seul ne permet jamais cette conclusion.",
       },
     ],
   },

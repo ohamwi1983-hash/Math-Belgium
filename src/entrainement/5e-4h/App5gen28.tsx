@@ -50,11 +50,21 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionTangente {
   return demarrerSessionTangentes(REGLAGES_DEMO, genererExerciceTangente);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/tangentes/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionTangente {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTangentes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTangente, (id) => construireAvecVarianteId(id)));
 }
 
 // ============================================================================
@@ -108,7 +118,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen28() {
-  const [etat, setEtat] = useState<EtatSessionTangente>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTangente>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionTangente`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */

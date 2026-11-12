@@ -53,11 +53,21 @@ import {
   PLACEHOLDER_VALEUR_F,
   precisionAnnonceeCibles,
 } from "./ui5e/formatEtudeLocale";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionEtudeLocale {
   return demarrerSessionEtudeLocale(REGLAGES_DEMO, genererExerciceEtudeLocale);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/etudeLocale/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionEtudeLocale {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEtudeLocale(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEtudeLocale, (id) => construireAvecVarianteId(id)));
 }
 
 function racinesExtremumsRetenues(exercice: EtatSessionEtudeLocale["exerciceCourant"]): RacineEtudeLocale[] {
@@ -160,7 +170,7 @@ function texteTableauEtudeLocale(reponse: ReponseTableauEtudeLocale): string {
 }
 
 export function App5gen29() {
-  const [etat, setEtat] = useState<EtatSessionEtudeLocale>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEtudeLocale>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionEtudeLocale`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */

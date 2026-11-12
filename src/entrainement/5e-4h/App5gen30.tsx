@@ -35,11 +35,21 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { formatEnteteColonnesTableauFPrime, formatEnteteColonnesTableauFSeconde, formatReponseAttenduePhaseLatex, LIBELLE_ECRAN_LECTURE_GRAPHIQUE_DERIVEES } from "./ui5e/formatLectureGraphiqueDerivees";
 import { LIBELLE_TYPE_ASYMPTOTE } from "./ui5e/formatLectureGraphiqueLimites";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionLectureGraphiqueDerivees {
   return demarrerSessionLectureGraphiqueDerivees(REGLAGES_DEMO, genererExerciceLectureGraphiqueDerivees);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/lectureGraphiqueDerivees/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionLectureGraphiqueDerivees {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionLectureGraphiqueDerivees(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceLectureGraphiqueDerivees, (id) => construireAvecVarianteId(id)));
 }
 
 /** Réponse attendue de l'écran qui vient de se terminer. */
@@ -93,7 +103,7 @@ function texteAsymptotes(reponse: ReponseNommerAsymptotes): string {
 }
 
 export function App5gen30() {
-  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDerivees>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDerivees>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
