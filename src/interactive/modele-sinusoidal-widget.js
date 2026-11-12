@@ -249,10 +249,10 @@
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: px.toFixed(2), y2: py.toFixed(2), class: "rayon" }));
     svg.appendChild(svgEl(ns, "circle", { cx: px.toFixed(2), cy: py.toFixed(2), r: 5.5, class: "point-depart" }));
 
-    var procheHaut = py < C_CY - C_R + 20;
-    var procheBas = py > C_CY + C_R - 20;
-    var dy = procheHaut ? 16 : procheBas ? -10 : -12;
-    var et = svgEl(ns, "text", { x: px.toFixed(2), y: (py + dy).toFixed(2), "text-anchor": "middle", class: "etiquette-depart" });
+    // Étiquette posée À CÔTÉ du point, du côté opposé au centre horizontalement : au-dessus ou
+    // au-dessous du point, elle chevauchait le rayon (départ en bas ou en haut).
+    var aDroite = px >= C_CX;
+    var et = svgEl(ns, "text", { x: (px + (aDroite ? 9 : -9)).toFixed(2), y: (py + 4).toFixed(2), "text-anchor": aDroite ? "start" : "end", class: "etiquette-depart" });
     et.textContent = "t = 0";
     svg.appendChild(et);
   };

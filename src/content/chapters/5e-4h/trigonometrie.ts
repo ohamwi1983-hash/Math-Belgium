@@ -38,7 +38,6 @@ export const trigonometrie: ChapterContent = {
       blocks: [
         { kind: 'video', title: 'Arcs et secteurs (1/3) : encadrer π avec Archimède', youtubeId: 'PDFxI__g9nI' },
         { kind: 'video', title: 'Arcs et secteurs (2/3) : le radian, longueur d\'arc et aire d\'un secteur', youtubeId: 't1kbJB41t6I' },
-        { kind: 'video', title: 'Arcs et secteurs (3/3) : le cercle trigonométrique', youtubeId: '_1kh3SXWfwM' },
         { kind: 'subheading', text: 'Comment encadrer le nombre π ?' },
         {
           kind: 'para',
@@ -151,10 +150,10 @@ export const trigonometrie: ChapterContent = {
           tag: 'archimede-widget',
           label: 'Manipule toi-même — fais varier le nombre de côtés n',
           caption:
-            'Cercle de rayon 1/2 (périmètre = π exactement). Fais glisser le curseur de 3 à 30 ' +
-            'côtés et regarde les deux polygones se resserrer autour du cercle — et les deux ' +
-            "périmètres encadrer π de plus en plus étroitement, exactement comme dans le tableau " +
-            'ci-dessus.',
+            'Fais varier le nombre de côtés n, ou passe en mode doublement pour refaire la ' +
+            'démarche d\'Archimède : 6, 12, 24, 48 puis 96 côtés. Les périmètres inscrit ' +
+            'n·sin(π/n) et circonscrit n·tan(π/n) encadrent π de plus en plus près ; à 96 ' +
+            'côtés, Archimède obtenait 3 + 10/71 < π < 3 + 1/7.',
         },
         {
           kind: 'intuition',
@@ -214,6 +213,16 @@ export const trigonometrie: ChapterContent = {
             angleLabel: 'θ',
             caption: "secteur d'angle θ (radians), de rayon r — arc s en couleur",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'radian-enroule-widget',
+          label: 'Manipule toi-même : le radian, un rayon enroulé',
+          caption:
+            'Fais grandir θ : le rayon r se reporte le long du cercle, un trait coloré par ' +
+            'radian. 1 rad, c\'est un arc de la longueur du rayon ; un tour complet en ' +
+            'contient 2π ≈ 6,28. L\'arc s = r·θ, l\'aire du secteur A = ½·r²·θ et l\'angle en ' +
+            'degrés s\'affichent en direct.',
         },
         {
           kind: 'astuce',
@@ -325,10 +334,11 @@ export const trigonometrie: ChapterContent = {
           tag: 'secteur-segment-widget',
           label: 'Manipule toi-même — secteur, triangle et segment en direct',
           caption:
-            'Fais varier le nombre de côtés n et le rayon r : l\'aire du secteur, celle du ' +
-            'triangle isocèle et leur différence (le segment) se recalculent en direct, ainsi ' +
-            'que la corde AB. En bas, la vérification par l\'astuce ci-dessus (n × segment = ' +
-            'cercle − polygone) reste toujours exacte, quels que soient n et r.',
+            'En mode polygone, n fixe l\'angle au centre θ = 2π/n et la vérification par ' +
+            'l\'astuce ci-dessus (n × segment = cercle − polygone) s\'affiche ; en mode angle ' +
+            'libre, règle θ toi-même. Les aires du secteur, du triangle et du segment se ' +
+            'mettent à jour, et la corde est calculée par la loi des cosinus : AB² = r² + ' +
+            'r² − 2r²·cos θ.',
         },
         {
           kind: 'application',
@@ -513,6 +523,16 @@ export const trigonometrie: ChapterContent = {
             '**son propre** angle au centre — la corde, elle, est la même pour les deux.',
         },
         {
+          kind: 'atelier',
+          tag: 'lentille-essuie-glace-widget',
+          label: 'Manipule toi-même : lentille et essuie-glace',
+          caption:
+            'Lentille : fais varier les rayons et la distance des centres ; la lentille ' +
+            'commune est la somme de deux segments circulaires de même corde c, chacun ' +
+            'calculé avec θ = arccos(1 − c²/(2r²)) puis ½r²(θ − sin θ). Essuie-glace : la ' +
+            'surface balayée est la différence de deux secteurs de même angle, ½θ(R² − r²).',
+        },
+        {
           kind: 'application',
           titre: "Mesurer une distance qu'on ne peut pas atteindre directement",
           image: {
@@ -593,6 +613,7 @@ export const trigonometrie: ChapterContent = {
       title: "Paramètres d'une fonction sinusoïdale",
       kicker: 'f(x) = A sin(ωx+φ) + b — le sens de chaque lettre',
       blocks: [
+        { kind: 'video', title: 'Arcs et secteurs (3/3) : le cercle trigonométrique', youtubeId: '_1kh3SXWfwM' },
         { kind: 'video', title: 'Paramètres d\'une sinusoïde (1/2) : sinus, cosinus, tangente', youtubeId: 'fr8hM_dcfEA' },
         { kind: 'video', title: 'Paramètres d\'une sinusoïde (2/2) : A, ω, φ, b et construction du graphique', youtubeId: 'HUE0XAg5ImY' },
         {
@@ -795,11 +816,9 @@ export const trigonometrie: ChapterContent = {
           tag: 'cercle-trigo-widget',
           label: 'Manipule toi-même — le cercle trigonométrique relié au graphique',
           caption:
-            'Fais avancer le curseur : l\'angle balayé (en violet) tourne sur le cercle pendant ' +
-            'que la courbe se trace au fur et à mesure à droite. Le segment rouge sur le cercle ' +
-            '(sinus, cosinus ou tangente selon le choix) correspond exactement à l\'ordonnée du ' +
-            'point qui avance sur le graphe. Au-delà de 2π, l\'angle continue de tourner : il se ' +
-            'représente comme un ressort qui s\'enroule vers l\'extérieur.',
+            'Fais tourner x : le point parcourt le cercle et la courbe de sin, cos ou tan ' +
+            'se trace en même temps. L\'aimant accroche les angles remarquables (π/6, π/4, ' +
+            'π/3…) et affiche alors les valeurs exactes, comme √3/2 ou √2/2.',
         },
         {
           kind: 'intuition',
@@ -885,10 +904,11 @@ export const trigonometrie: ChapterContent = {
           tag: 'sinusoide-widget',
           label: 'Manipule toi-même — fais varier A, T (ou ω), φ et b',
           caption:
-            'C\'est le problème direct : tu choisis les paramètres, la courbe suit. Le graphe ' +
-            'et les encadrés Maximum/Minimum se mettent à jour en direct. Fais bouger un seul ' +
-            'curseur à la fois pour bien voir l\'effet propre à chaque paramètre, avant de ' +
-            'passer à la construction pas à pas ci-dessous.',
+            'C\'est le problème direct : tu choisis les paramètres, la courbe suit, avec ses ' +
+            'encadrés Maximum/Minimum. Fais bouger un seul curseur à la fois pour voir ' +
+            'l\'effet propre à chaque paramètre. La flèche violette montre le décalage ' +
+            'horizontal réel Φ = −φ/ω, depuis l\'origine jusqu\'au début du motif décalé : ' +
+            'avec ω ≠ 1, φ et Φ ne sont pas égaux.',
         },
         { kind: 'subheading', text: 'Construction pas à pas du graphique' },
         {
@@ -1015,6 +1035,16 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'courbe-mystere-widget',
+          label: 'Manipule toi-même : la courbe mystère',
+          caption:
+            'Une courbe mystère y = A sin(ωx + φ) + b est tracée. Fais glisser le réticule ' +
+            'pour lire son maximum, son minimum et x₀ (il s\'aimante sur ces points), puis ' +
+            'règle A, T, φ et b jusqu\'à ce que ta courbe se superpose exactement à elle. « ' +
+            'Nouvelle courbe » en tire une autre.',
+        },
+        {
           kind: 'attention',
           label: 'Attention — le sens de variation dépend du signe de A',
           text:
@@ -1117,8 +1147,9 @@ export const trigonometrie: ChapterContent = {
             xTicks: [PI / 9, (4 * PI) / 9, (7 * PI) / 9],
             xTickLabels: { [PI / 9]: 'π/9', [(4 * PI) / 9]: '4π/9', [(7 * PI) / 9]: '7π/9' },
             yTicks: [-3, -1, 1],
+            yTickLabels: { [-3]: '−3', [-1]: '−1', [1]: '1' },
             fixedYRange: { min: -3.6, max: 1.8 },
-            horizontalAsymptotes: [{ y: -1, label: 'y = −1' }],
+            horizontalAsymptotes: [{ y: -1 }],
             points: [
               { x: PI / 9, y: 1, label: 'max', tone: 'accent' },
               { x: (4 * PI) / 9, y: -3, label: 'min', tone: 'bad' },
@@ -1143,11 +1174,11 @@ export const trigonometrie: ChapterContent = {
           tag: 'extremums-sinusoide-widget',
           label: 'Manipule toi-même — le lien avec le cercle trigonométrique',
           caption:
-            'Sur le cercle (à gauche), les deux points « max » et « min » restent TOUJOURS à ' +
-            'la même position (à π l\'un de l\'autre), même quand tu règles le déphasage φ ou ' +
-            'la pulsation ω — seule leur TRADUCTION en x (à droite) en dépend. Sur le graphe, ' +
-            'regarde la période effective se diviser par deux quand tu bascules sur « tous ' +
-            'les extremums réunis ».',
+            'Les maximums correspondent toujours à sin u = 1 et les minimums à sin u = −1, ' +
+            'deux points fixes du cercle à π l\'un de l\'autre ; seule leur traduction en x ' +
+            'dépend de ω et φ. Coche « A négatif » : les rôles s\'inversent. La liste donne ' +
+            'le nombre et les abscisses des extremums dans [0 ; 2π], et leurs valeurs b ± ' +
+            '|A|.',
         },
         {
           kind: 'entrainement',
@@ -1323,10 +1354,10 @@ export const trigonometrie: ChapterContent = {
           tag: 'equation-trig-widget',
           label: 'Manipule toi-même — résous trig(ax+b) = c en direct',
           caption:
-            'Choisis sin, cos ou tan, règle a, b et c : le cercle affiche les points-solutions ' +
-            'de u = ax+b (il ne dépend jamais de a ni b — seule la traduction en x, juste en ' +
-            'dessous, en dépend). Fais glisser c au-delà de 1 (sin/cos) pour voir « aucune ' +
-            'solution » apparaître, exactement comme dans l\'Attention ci-dessous.',
+            'Choisis sin, cos ou tan, puis règle a, b (en multiples de π) et le second ' +
+            'membre c. Le cercle ne dépend que de c ; les familles de solutions, et leur ' +
+            'liste dans [0 ; 2π[, dépendent de a et b. Pour tan, les valeurs interdites ' +
+            'sont signalées.',
         },
         {
           kind: 'piege',
@@ -1429,6 +1460,17 @@ export const trigonometrie: ChapterContent = {
           result: { tag: 'résultat', text: '$S = \\{0\\}$' },
         },
         {
+          kind: 'atelier',
+          tag: 'substitution-cos-widget',
+          label: 'Manipule toi-même : t = cos x, garder ou rejeter',
+          caption:
+            'Règle a, b et c (ou choisis une équation) : la parabole en t montre les ' +
+            'racines, la bande verte [−1 ; 1] celles qu\'on garde, les autres sont barrées. ' +
+            'Chaque racine gardée est reportée sur le cercle trigonométrique (droite ' +
+            'verticale pour cos, horizontale pour sin) : on lit les solutions en x dans [0 ' +
+            '; 2π[.',
+        },
+        {
           kind: 'attention',
           label: 'Attention — une racine rejetée n\'est pas une erreur',
           text:
@@ -1485,6 +1527,16 @@ export const trigonometrie: ChapterContent = {
             'Pour $\\tan(A) = -\\tan(B)$, recopier le signe moins à l\'extérieur et écrire ' +
             '$A = B + k\\pi$ : c\'est faux. On écrit d\'abord $-\\tan(B) = \\tan(-B)$, ce qui ' +
             'donne $A = -B + k\\pi$.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'intersections-trig-widget',
+          label: 'Manipule toi-même : les solutions sont des intersections',
+          caption:
+            'Choisis une équation du cours : ses deux membres sont tracés sur [0 ; 2π[ et ' +
+            'chaque point d\'intersection est une solution, avec son abscisse exacte. Le ' +
+            'dernier réglage, sin(x) = c, montre qu\'on a deux solutions en général, une ' +
+            'seule si c = ±1, aucune si |c| > 1.',
         },
         {
           kind: 'attention',
@@ -1642,15 +1694,15 @@ export const trigonometrie: ChapterContent = {
             xMax: 8,
             xTicks: [2, 4, 6, 8],
             yTicks: [2, 17, 32],
-            fixedYRange: { min: 0, max: 36 },
+            fixedYRange: { min: 0, max: 40 },
             points: [
-              { x: 0, y: 24.5, label: 't = 0', tone: 'accent', labelPos: 'right' },
-              { x: 4 / 3, y: 32, label: 'max', tone: 'good', labelPos: 'above' },
+              { x: 0, y: 24.5, label: '', tone: 'accent' },
+              { x: 4 / 3, y: 32, label: 'max', tone: 'good', labelPos: 'right' },
             ],
             xAxisLabel: 't (min)',
             yAxisLabel: 'hauteur (m)',
             caption:
-              'les deux candidats passent par 24,5 m à t = 0 : en vert φ = π/6 (la nacelle monte, ' +
+              'les deux candidats passent par 24,5 m à t = 0 (point orange) : en vert φ = π/6 (la nacelle monte, ' +
               'retenu), en gris φ = 5π/6 (elle descendrait, rejeté)',
           },
         },
@@ -1686,6 +1738,7 @@ export const trigonometrie: ChapterContent = {
               xMax: 365,
               xTicks: [91, 182, 274, 365],
               yTicks: [7.5, 12, 16.5],
+              yTickLabels: { [7.5]: '7,5', [12]: '12', [16.5]: '16,5' },
               fixedYRange: { min: 6, max: 18 },
               points: [
                 { x: 0, y: 7.5, label: 'min : 7,5 h', tone: 'bad', labelPos: 'right' },
@@ -1715,6 +1768,17 @@ export const trigonometrie: ChapterContent = {
             "météorologues et les agriculteurs utilisent ce type de modèle pour prévoir les " +
             "heures d'ensoleillement plusieurs mois à l'avance.",
           domaines: ['Astronomie', 'Climat'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'duree-jour-latitude-widget',
+          label: 'Manipule toi-même : la durée du jour selon la latitude',
+          caption:
+            'Fais varier la latitude : la durée du jour au fil de l\'année est calculée avec ' +
+            'la formule astronomique cos H₀ = −tan(latitude)·tan(δ), et comparée au modèle ' +
+            '12 + A sin(2π(j − 80)/365,24). Partout, b ≈ 12 h ; c\'est l\'amplitude A qui ' +
+            'grandit avec la latitude, jusqu\'au jour et à la nuit polaires au-delà de ' +
+            '66,5°.',
         },
         { kind: 'subheading', text: 'Résoudre une inéquation f(t) ≥ y₀ ou f(t) ≤ y₀' },
         {
@@ -1782,6 +1846,17 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'seuil-grande-roue-widget',
+          label: 'Manipule toi-même : au-dessus du seuil sur la grande roue',
+          caption:
+            'Règle le seuil y₀ : l\'arc de la roue où la nacelle est au-dessus (ou ' +
+            'au-dessous) du seuil s\'allume, et les intervalles de temps correspondants se ' +
+            'colorent sur la courbe h(t) = 15 sin(πt/4 − π/2) + 17, sur deux tours. Le ' +
+            'réglage de départ (y₀ = 24,5 m) reproduit l\'exemple : de 2 min 40 s à 5 min 20 ' +
+            's, soit un tiers du tour.',
+        },
+        {
           kind: 'piege',
           text:
             'Pour $\\sin(u) \\leq m$, garder l\'arc $[\\arcsin(m)\\,;\\pi - \\arcsin(m)]$ : c\'est ' +
@@ -1793,11 +1868,11 @@ export const trigonometrie: ChapterContent = {
           tag: 'modele-sinusoidal-widget',
           label: 'Manipule toi-même — construis le modèle pas à pas',
           caption:
-            'Règle le rayon, la hauteur du centre et la période, puis choisis la position de ' +
-            'départ (t=0) sur la roue — A, b, ω et φ se recalculent en direct exactement selon ' +
-            'la méthode ci-dessus. φ n\'est jamais réglé directement : il est toujours DÉDUIT ' +
-            'de la position choisie, comme dans la méthode. La vérification affichée reprend ' +
-            'l\'astuce du demi-tour plus tard.',
+            'Règle le rayon, la hauteur du centre, la période, puis la hauteur de départ h₀ ' +
+            'et le sens de la nacelle. φ n\'est jamais réglé directement : sin φ = (h₀ − ' +
+            'b)/A donne deux candidats, φ₁ = arcsin m et φ₂ = π − arcsin m, et c\'est le ' +
+            'sens (montée ou descente) qui tranche. Le réglage de départ reproduit ' +
+            'l\'exemple de la grande roue.',
         },
         {
           kind: 'historique',

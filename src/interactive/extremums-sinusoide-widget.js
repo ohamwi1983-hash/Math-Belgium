@@ -239,12 +239,12 @@
     }
 
     svg.appendChild(svgEl(ns, "circle", { cx: pMax.x, cy: pMax.y, r: 5, class: montrerMax ? "point-max" : "point-estompe" }));
-    var etMax = svgEl(ns, "text", { x: pMax.x, y: neg ? pMax.y + 18 : pMax.y - 10, "text-anchor": "middle", class: montrerMax ? "etiquette-max" : "etiquette-estompe" });
+    var etMax = svgEl(ns, "text", { x: pMax.x + 9, y: neg ? pMax.y + 18 : pMax.y - 10, "text-anchor": "start", class: montrerMax ? "etiquette-max" : "etiquette-estompe" });
     etMax.textContent = neg ? "max : sin(u)=−1" : "max : sin(u)=1";
     svg.appendChild(etMax);
 
     svg.appendChild(svgEl(ns, "circle", { cx: pMin.x, cy: pMin.y, r: 5, class: montrerMin ? "point-min" : "point-estompe" }));
-    var etMin = svgEl(ns, "text", { x: pMin.x, y: neg ? pMin.y - 10 : pMin.y + 18, "text-anchor": "middle", class: montrerMin ? "etiquette-min" : "etiquette-estompe" });
+    var etMin = svgEl(ns, "text", { x: pMin.x + 9, y: neg ? pMin.y - 10 : pMin.y + 18, "text-anchor": "start", class: montrerMin ? "etiquette-min" : "etiquette-estompe" });
     etMin.textContent = neg ? "min : sin(u)=1" : "min : sin(u)=−1";
     svg.appendChild(etMin);
   };
