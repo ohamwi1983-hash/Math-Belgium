@@ -34,6 +34,7 @@ export type InteractiveWidgetTag =
   | 'suite-recurrente-affine-widget'
   | 'convergence-suite-widget'
   | 'comparaison-suites-widget'
+  | 'triangle-rapport-affixes-widget'
   | 'operations-plan-complexe-widget'
   | 'racine-carree-complexe-widget'
   | 'racines-qui-se-rencontrent-widget'

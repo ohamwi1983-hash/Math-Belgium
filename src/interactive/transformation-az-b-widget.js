@@ -287,7 +287,7 @@
       var p = this._versMath(e);
       if (!p || Math.hypot(p.x - this._M.x, p.y - this._M.y) > 0.9) return;
       this._glisse = true;
-      try { this._svg.setPointerCapture(e.pointerId); } catch (err) { /* rien */ }
+      try { this._svg.setPointerCapture(e.pointerId); } catch { /* rien */ }
       e.preventDefault();
     }
 
@@ -306,7 +306,7 @@
 
     _fin(e) {
       if (!this._glisse) return;
-      try { this._svg.releasePointerCapture(e.pointerId); } catch (err) { /* rien */ }
+      try { this._svg.releasePointerCapture(e.pointerId); } catch { /* rien */ }
       this._glisse = false;
     }
 

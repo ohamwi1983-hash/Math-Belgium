@@ -232,7 +232,7 @@
       }
       if (!meilleur) return;
       this._glisse = meilleur;
-      try { this._plan.setPointerCapture(e.pointerId); } catch (err) { /* rien */ }
+      try { this._plan.setPointerCapture(e.pointerId); } catch { /* rien */ }
       e.preventDefault();
     }
 
@@ -250,7 +250,7 @@
 
     _fin(e) {
       if (!this._glisse) return;
-      try { this._plan.releasePointerCapture(e.pointerId); } catch (err) { /* rien */ }
+      try { this._plan.releasePointerCapture(e.pointerId); } catch { /* rien */ }
       this._glisse = null;
     }
 

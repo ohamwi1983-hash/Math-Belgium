@@ -969,9 +969,10 @@ export const nombresComplexes: ChapterContent = {
           tag: 'produit-modules-arguments-widget',
           label: 'Manipule toi-même : modules et arguments',
           caption:
-            'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le réglage de ' +
-            'départ (r₁=2, θ₁=60°, r₂=3, θ₂=30°) reproduit exactement l\'exemple ci-dessus : ' +
-            'z₁z₂ a pour module 6 et pour argument π/2.',
+            'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le ' +
+            'réglage de départ (r₁ = 2, θ₁ = 60°, r₂ = 3, θ₂ = 30°) reproduit exactement ' +
+            'l\'exemple ci-dessus : z₁z₂ a pour module 6 et pour argument π/2. Le mode « × i ' +
+            'répété » montre le quart de tour et le cycle 1, i, −1, −i.',
         },
         {
           kind: 'featureTable',
@@ -1487,8 +1488,10 @@ export const nombresComplexes: ChapterContent = {
           tag: 'racines-niemes-widget',
           label: 'Manipule toi-même : n racines, un polygone régulier',
           caption:
-            'Fais glisser n, r et θ. Le réglage de départ (n=4, r=1, θ=0) reproduit exactement ' +
-            'les 4 racines quatrièmes de l\'unité citées plus haut : 1, i, −1, −i.',
+            'Fais glisser n, r et θ. Le réglage de départ (n = 4, r = 1, θ = 0) reproduit ' +
+            'les 4 racines quatrièmes de l\'unité citées plus haut : 1, i, −1, −i. Essaie ' +
+            'les racines cubiques de −8 et de 8i, puis coche « Vérifier » : chaque racine ' +
+            'élevée à la puissance n retombe sur z.',
         },
         {
           kind: 'exempleLibre',
@@ -1663,11 +1666,13 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'transformation-az-b-widget',
-          label: 'Manipule toi-même : classer z′=az+b',
+          label: 'Manipule toi-même : classer et composer z′ = az + b',
           caption:
-            'Fais glisser |a|, arg(a), Re(b), Im(b). Le réglage de départ (|a|=1, arg(a)=90°, ' +
-            'b=0) reproduit exactement le cas z′=iz de l\'astuce ci-dessus : rotation de ' +
-            'centre O et d\'angle π/2.',
+            'Fais glisser |a|, arg(a), Re(b), Im(b). Le réglage de départ (|a| = 1, arg(a) ' +
+            '= 90°, b = 0) reproduit le cas z′ = iz de l\'astuce ci-dessus : rotation de ' +
+            'centre O et d\'angle π/2. Fais glisser M pour voir son image M′, le centre Ω, ' +
+            'l\'angle et le rapport ; le mode « Composer » montre que l\'ordre compte quand ' +
+            'les centres diffèrent.',
         },
         {
           kind: 'definition',
@@ -1875,6 +1880,16 @@ export const nombresComplexes: ChapterContent = {
               'module 1 ($AC=AB$) et angle $\\pm\\dfrac{\\pi}{3}$ en $A$ — un triangle isocèle dont ' +
               'l\'angle au sommet vaut $\\dfrac{\\pi}{3}$ a ses trois angles égaux.',
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'triangle-rapport-affixes-widget',
+          label: 'Manipule toi-même : le triangle et son rapport d\'affixes',
+          caption:
+            'Fais glisser A, B et C : le quotient q = (zC − zA)/(zB − zA) s\'affiche comme ' +
+            'un point. q réel : points alignés ; q imaginaire pur : rectangle en A ; |q| = ' +
+            '1 : isocèle en A ; q = i ou −i : isocèle rectangle ; q = e^(iπ/3) ou e^(−iπ/3) ' +
+            ': équilatéral. Les aimants t\'aident à atteindre ces cas exacts.',
         },
         {
           kind: 'exemple',
