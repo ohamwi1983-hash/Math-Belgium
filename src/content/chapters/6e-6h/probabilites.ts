@@ -856,7 +856,7 @@ export const probabilites: ChapterContent = {
     {
       id: 'independancebayes',
       number: 3,
-      title: 'Indépendance, conditionnement et Bayes',
+      title: 'Probabilités totales et théorème de Bayes',
       kicker: 'P(A|B) = P(B|A)×P(A) / P(B)',
       blocks: [
         { kind: 'video', title: 'Indépendance, conditionnement et Bayes — probabilités totales et théorème de Bayes', youtubeId: 'msDT2q5uV7M' },
@@ -865,7 +865,7 @@ export const probabilites: ChapterContent = {
           label: 'Définition — partition et loi des probabilités totales',
           items: [
             'Une partition de l\'univers, c\'est une famille d\'événements deux à deux ' +
-              'INCOMPATIBLES dont l\'union recouvre l\'univers ENTIER — les deux conditions ' +
+              '**incompatibles** dont l\'union recouvre l\'univers **entier** — les deux conditions ' +
               'comptent, aucune n\'est optionnelle. Si $B_1,\\ldots,B_n$ forment une partition, ' +
               'la loi des probabilités totales donne, pour tout événement $A$ : ' +
               '$P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$.',
@@ -883,6 +883,14 @@ export const probabilites: ChapterContent = {
               'Une partition $B_1,\\ldots,B_4$ de $\\Omega$ : l\'événement $A$ (ombré) traverse ' +
               'les 4 morceaux sans les déborder — sa probabilité totale est la somme de ses 4 tranches.',
           },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Une partition exige que les événements recouvrent **tout** l\'univers, pas seulement ' +
+            'qu\'ils aient une probabilité non nulle. Oublier un morceau de la partition dans ' +
+            'la loi des probabilités totales donne un résultat trop petit — sans aucun signal ' +
+            'd\'erreur visible !',
         },
         {
           kind: 'illustration',
@@ -915,9 +923,12 @@ export const probabilites: ChapterContent = {
           kind: 'definition',
           label: 'Théorème de Bayes',
           items: [
-            '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de RETOURNER un ' +
+            '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de **retourner** un ' +
               'conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$ — utile dès que ' +
               'seule la probabilité « dans le mauvais sens » est directement connue.',
+            'Quand $P(B)$ n\'est pas donnée, on la calcule par la loi des probabilités totales ' +
+              'sur la partition $A$, $\\bar{A}$, ce qui donne la forme développée : ' +
+              '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B|A) \\times P(A) + P(B|\\bar{A}) \\times P(\\bar{A})}$.',
           ],
         },
         {
@@ -973,11 +984,12 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$P(malade|T^+) \\approx 0{,}33$ est TRÈS différent de $P(T^+|malade) = 0{,}9$ ! ' +
-            'Confondre ces deux probabilités conditionnelles, c\'est LE piège central du ' +
-            'théorème de Bayes. Un test « fiable à 90 % » ($P(T^+|malade)$=0,9) ne signifie PAS ' +
+            '$P(malade|T^+) \\approx 0{,}33$ est **très** différent de $P(T^+|malade) = 0{,}9$ ! ' +
+            'Confondre ces deux probabilités conditionnelles, c\'est **le** piège central du ' +
+            'théorème de Bayes. Un test « fiable à 90 % » ($P(T^+|malade)$=0,9) ne signifie **pas** ' +
             'qu\'un résultat positif donne 90 % de chances d\'être malade : tout dépend aussi ' +
-            'de la rareté de la maladie ($P(malade)$=0,1, ici assez rare) et du taux de faux positifs.',
+            'de la proportion de malades ($P(malade)$=0,1 ici) et du taux de faux positifs. Plus la ' +
+            'maladie est rare, plus l\'écart se creuse (exemple plus bas).',
         },
         {
           kind: 'atelier',
@@ -1032,21 +1044,64 @@ export const probabilites: ChapterContent = {
               'pas confondre avec 90/100=0,9.',
           },
         },
+        { kind: 'subheading', text: 'Le vocabulaire des tests, et le cas d\'une maladie rare' },
         {
-          kind: 'piege',
-          text:
-            'Une partition exige que les événements recouvrent TOUT l\'univers, pas seulement ' +
-            'qu\'ils aient une probabilité non nulle. Oublier un morceau de la partition dans ' +
-            'la loi des probabilités totales donne un résultat trop petit — sans aucun signal ' +
-            'd\'erreur visible !',
+          kind: 'definition',
+          label: 'Sensibilité, spécificité, faux positifs',
+          items: [
+            'La **sensibilité** d\'un test, c\'est $P(T^+|\\text{malade})$ : la proportion de ' +
+              'malades que le test détecte. Sa **spécificité**, c\'est $P(T^-|\\text{non malade})$ ' +
+              ': la proportion de personnes saines qu\'il déclare bien négatives. Un **faux ' +
+              'positif** est une personne saine testée positive ; le taux de faux positifs vaut ' +
+              '$P(T^+|\\text{non malade}) = 1 - \\text{spécificité}$.',
+            'Ce que la personne testée veut savoir, c\'est l\'inverse : $P(\\text{malade}|T^+)$, ' +
+              'la **valeur prédictive positive** du test — exactement ce que calcule le théorème ' +
+              'de Bayes. Ces mots figurent sur les notices des autotests vendus en pharmacie.',
+          ],
         },
         {
-          kind: 'methode',
-          label: 'Lire P(A|B) directement dans un tableau à double entrée',
+          kind: 'exemple',
+          badge: 'maladie rare : un test positif, puis un second',
+          formula:
+            'Une maladie touche 1 % de la population. Le test de dépistage a une sensibilité de ' +
+            '99 % et donne 5 % de faux positifs. Une personne est testée positive : quelle est ' +
+            'la probabilité qu\'elle soit malade ?',
+          steps: [
+            {
+              tag: 'probabilités totales',
+              text:
+                '$P(T^+) = 0{,}99 \\times 0{,}01 + 0{,}05 \\times 0{,}99 = 0{,}0099 + 0{,}0495 = 0{,}0594$.',
+            },
+            {
+              tag: 'Bayes',
+              text:
+                '$P(\\text{malade}|T^+) = \\dfrac{0{,}0099}{0{,}0594} = \\dfrac{1}{6} \\approx 0{,}167$ ' +
+                ': malgré un test « fiable à 99 % », un résultat positif ne donne qu\'une chance ' +
+                'sur 6 d\'être malade, car les personnes saines sont 99 fois plus nombreuses.',
+            },
+            {
+              tag: 'un second test positif',
+              text:
+                'La personne refait le test (résultat indépendant du premier, l\'état de santé ' +
+                'étant fixé) et il est encore positif. On repart de $P(\\text{malade}) = \\frac{1}{6}$ : ' +
+                '$P(\\text{malade}|T^+) = \\dfrac{0{,}99 \\times \\frac{1}{6}}{0{,}99 \\times \\frac{1}{6} ' +
+                '+ 0{,}05 \\times \\frac{5}{6}} = \\dfrac{0{,}99}{1{,}24} = \\dfrac{99}{124} \\approx 0{,}80$.',
+            },
+          ],
+          result: {
+            tag: 'à retenir',
+            text:
+              'Un test positif : environ 17 %. Deux tests positifs : environ 80 %. C\'est pourquoi ' +
+              'un dépistage positif est toujours confirmé par un second examen avant tout diagnostic.',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — lire P(A|B) dans un tableau à double entrée',
           items: [
-            'Dans un tableau à double entrée (section 1), $P(A|B)$ se lit directement en ' +
-              'restreignant ton attention à la SEULE ligne (ou colonne) de $B$ : c\'est ' +
-              'l\'effectif de la case $A \\cap B$ divisé par le TOTAL de cette ligne — sans ' +
+            'Comme en section 1, $P(A|B)$ se lit directement dans un tableau à double entrée en ' +
+              'restreignant ton attention à la **seule** ligne (ou colonne) de $B$ : c\'est ' +
+              'l\'effectif de la case $A \\cap B$ divisé par le **total** de cette ligne — sans ' +
               'même repasser par la formule $P(A \\cap B)/P(B)$, puisque diviser numérateur et ' +
               'dénominateur par le même effectif total ne change rien au résultat.',
           ],
@@ -1076,51 +1131,70 @@ export const probabilites: ChapterContent = {
           kind: 'para',
           text:
             'Soit $A$ « l\'élève étudie la guitare » et $B$ « l\'élève est un garçon ». Sachant ' +
-            'qu\'un élève étudie la guitare (tu restes dans la SEULE colonne « Guitare », de ' +
+            'qu\'un élève étudie la guitare (tu restes dans la **seule** colonne « Guitare », de ' +
             'total 28), la probabilité qu\'il soit un garçon vaut $P(B|A) = \\dfrac{15}{28}$.',
         },
         {
-          kind: 'methode',
-          label: 'Indépendance, reformulée avec le conditionnement',
+          kind: 'rappel',
+          label: 'Rappel — incompatibles ou indépendants',
           items: [
-            '$A$ est indépendant de $B$ si et seulement si $P(A|B) = P(A)$ — une ÉGALITÉ, ' +
-              'jamais une inégalité (une inégalité signale au contraire une DÉPENDANCE). Cette ' +
-              'caractérisation est équivalente à celle vue en section 1 ($P(A \\cap B)=P(A) ' +
-              '\\times P(B)$), et se vérifie de la même façon : toujours par un calcul, jamais par intuition.',
+            'Section 1 : $A$ et $B$ sont **incompatibles** si $A \\cap B = \\emptyset$, ' +
+              '**indépendants** si $P(A \\cap B) = P(A) \\times P(B)$ (soit $P(A|B) = P(A)$ quand ' +
+              '$P(B) > 0$). Dans un tableau d\'effectifs, les deux se testent en quelques secondes.',
           ],
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — les trois écritures de l\'indépendance sont équivalentes',
+          label: 'Exemple résolu — incompatibles, indépendants, ou ni l\'un ni l\'autre ?',
           blocks: [
             {
               kind: 'para',
               text:
-                'Tu pars de $P(A|B) = P(A)$ (la définition du cours), soit, par définition de ' +
-                'la probabilité conditionnelle, $\\dfrac{P(A \\cap B)}{P(B)} = P(A)$. En ' +
-                'multipliant les deux membres par $P(B)$ : $P(A \\cap B) = P(A) \\times P(B)$.',
+                'Dans une école de 200 élèves, chaque élève joue au plus d\'un instrument. On note ' +
+                '$A$ « l\'élève fait du sport en club », $G$ « il joue de la guitare », $V$ « il ' +
+                'joue du violon ». On choisit un élève au hasard.',
+            },
+            {
+              kind: 'featureTable',
+              headers: ['', 'Guitare (G)', 'Violon (V)', 'Aucun instrument', 'Total'],
+              rows: [
+                ['Sport (A)', '16', '30', '34', '80'],
+                ['Pas de sport', '24', '30', '66', '120'],
+                ['Total', '40', '60', '100', '200'],
+              ],
             },
             {
               kind: 'para',
               text:
-                'Le même calcul, mené cette fois en isolant $P(B|A)$ au lieu de $P(A|B)$, ' +
-                'montre que $P(A \\cap B)=P(A) \\times P(B)$ entraîne aussi $P(B|A)=P(B)$. Les ' +
-                'trois égalités — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$, ' +
-                '$P(B|A)=P(B)$ — sont donc rigoureusement équivalentes : n\'importe laquelle ' +
-                'peut servir à définir ou à vérifier l\'indépendance. En pratique, c\'est la 2e ' +
-                'forme qui sert de DÉFINITION officielle, car elle reste valable même quand ' +
-                '$P(A)$ ou $P(B)$ vaut 0 (les deux autres formes exigeraient alors une ' +
-                'division par 0, impossible).',
+                'Pour $A$ et $G$ : $P(A \\cap G) = \\frac{16}{200} = 0{,}08$ et ' +
+                '$P(A) \\times P(G) = \\frac{80}{200} \\times \\frac{40}{200} = 0{,}4 \\times 0{,}2 = 0{,}08$ : ' +
+                'l\'égalité est vérifiée, $A$ et $G$ sont **indépendants**. Parmi les guitaristes, ' +
+                '$\\frac{16}{40} = 0{,}4$ font du sport, exactement comme dans toute l\'école.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour $G$ et $V$ : aucun élève ne joue des deux instruments, $G \\cap V = \\emptyset$ : ' +
+                '$G$ et $V$ sont **incompatibles** — et donc pas indépendants, puisque ' +
+                '$P(G) \\times P(V) = 0{,}2 \\times 0{,}3 = 0{,}06 \\neq 0$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Pour $A$ et $V$ : $P(A \\cap V) = \\frac{30}{200} = 0{,}15$, alors que ' +
+                '$P(A) \\times P(V) = 0{,}4 \\times 0{,}3 = 0{,}12$ : ni incompatibles (30 élèves ' +
+                'font les deux), ni indépendants. Parmi les violonistes, ' +
+                '$P(A|V) = \\frac{30}{60} = 0{,}5 > 0{,}4$ : les violonistes font plus souvent du sport.',
             },
           ],
         },
         {
           kind: 'astuce',
-          label: 'Deux probabilités conditionnées par le MÊME événement se complètent',
+          label: 'Deux probabilités conditionnées par le même événement se complètent',
           text:
-            '$P(malade|T^+) + P(\\text{non malade}|T^+) = 1$ TOUJOURS (le même événement ' +
+            '$P(malade|T^+) + P(\\text{non malade}|T^+) = 1$ **toujours** (le même événement ' +
             'conditionne $T^+$ des deux côtés). En revanche, $P(malade|T^+) + ' +
-            'P(malade|\\text{non } T^+)$ n\'a AUCUNE raison de valoir 1 — les deux ' +
+            'P(malade|\\text{non } T^+)$ n\'a **aucune** raison de valoir 1 — les deux ' +
             'probabilités sont conditionnées par des événements différents.',
         },
         {
@@ -1169,13 +1243,13 @@ export const probabilites: ChapterContent = {
               bars: [
                 { label: '0 mot suspect', value: 5, valueLabel: '5 %', tone: 'faint' },
                 { label: '1 mot', value: 40, valueLabel: '40 %', tone: 'faint' },
-                { label: '2 mots', value: 85, valueLabel: '85 %', tone: 'accent' },
+                { label: '2 mots', value: 85, valueLabel: '85 %', tone: 'faint' },
                 { label: '3 mots', value: 98, valueLabel: '98 %', tone: 'accent' },
               ],
               maxValue: 100,
               xAxisLabel: 'mots suspects présents à la fois',
               yAxisLabel: 'P(spam) estimée',
-              caption: 'Plus un message contient de mots suspects à la fois, plus P(spam|message) grimpe — au-delà de 2 mots, elle franchit le seuil (≈90 %) et le message est déplacé automatiquement.',
+              caption: 'Plus un message contient de mots suspects à la fois, plus P(spam|message) grimpe. Le filtre déplace le message quand elle dépasse un seuil, ici 90 % : c\'est le cas avec 3 mots (98 %), pas encore avec 2 (85 %).',
             },
           ],
           text:
@@ -1184,7 +1258,7 @@ export const probabilites: ChapterContent = {
             'avec exactement le même raisonnement. Le filtre connaît $P(mot|spam)$ — la ' +
             'fréquence à laquelle un mot donné (« gratuit », « gagner », « urgent »…) ' +
             'apparaît dans les messages déjà classés comme spam — et veut en déduire ' +
-            '$P(spam|message)$, la probabilité qu\'un NOUVEAU message soit un spam compte ' +
+            '$P(spam|message)$, la probabilité qu\'un **nouveau** message soit un spam compte ' +
             'tenu des mots qu\'il contient : exactement le même retournement de ' +
             'conditionnement que dans cette section. Plus un message contient de mots ' +
             '« suspects » à la fois, plus cette probabilité calculée grimpe, jusqu\'à ' +
