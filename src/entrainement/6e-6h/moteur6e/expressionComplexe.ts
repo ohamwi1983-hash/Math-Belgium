@@ -92,8 +92,22 @@ export function opposeComplexe(a: Complexe): Complexe {
 }
 /** Puissance ENTIÈRE ≥0 (multiplications répétées) — voir en-tête de fichier pour la restriction. */
 export function puissanceEntiereComplexe(base: Complexe, n: number): Complexe {
+  // Exposant borné : une saisie comme « 6^99^51 » bouclait des milliards de fois et figeait le
+  // navigateur (audit 6e ch. 5). Jusqu'à 64 : multiplications répétées (comportement historique,
+  // résultats identiques) ; au-delà : exponentiation rapide ; au-delà de 10⁶ : refus.
+  if (n > 1e6) throw new Error("Exposant trop grand");
   let resultat: Complexe = { re: 1, im: 0 };
-  for (let i = 0; i < n; i++) resultat = multiplierComplexe(resultat, base);
+  if (n <= 64) {
+    for (let i = 0; i < n; i++) resultat = multiplierComplexe(resultat, base);
+    return resultat;
+  }
+  let b = base;
+  let e = n;
+  while (e > 0) {
+    if (e % 2 === 1) resultat = multiplierComplexe(resultat, b);
+    b = multiplierComplexe(b, b);
+    e = Math.floor(e / 2);
+  }
   return resultat;
 }
 

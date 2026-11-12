@@ -79,7 +79,17 @@ export function PlanArgandMini({ points, fleches = [], polygones = [], legende }
     const cx = X(p.x);
     const cy = Y(p.y);
     const aDroite = cx < largeur - 30;
+    // Point d'arrivée d'une flèche : étiquette dans le prolongement de la flèche (jamais sur le trait).
+    const arrivee = fleches.find((f) => f.vers[0] === p.x && f.vers[1] === p.y && (f.de[0] !== p.x || f.de[1] !== p.y));
+    const prolongement: [number, number, "start" | "end"][] = [];
+    if (arrivee) {
+      const dx = X(arrivee.vers[0]) - X(arrivee.de[0]);
+      const dy = Y(arrivee.vers[1]) - Y(arrivee.de[1]);
+      const n = Math.hypot(dx, dy) || 1;
+      prolongement.push([cx + (dx / n) * 10, cy + (dy / n) * 10 + 4, dx >= 0 ? "start" : "end"]);
+    }
     const essais: [number, number, "start" | "end"][] = [
+      ...prolongement,
       [cx + (aDroite ? 6 : -6), cy - 6, aDroite ? "start" : "end"],
       [cx + (aDroite ? 6 : -6), cy + 15, aDroite ? "start" : "end"],
       [cx - (aDroite ? 6 : -6), cy - 6, aDroite ? "end" : "start"],
