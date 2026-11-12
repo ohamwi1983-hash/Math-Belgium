@@ -184,49 +184,128 @@ export function genererExerciceLectureGraphiqueDerivees(): ExerciceLectureGraphi
 }
 
 // ============================================================================
-// Panneau dev — structures représentatives. Les nombres annoncés sont des CIBLES : la parité imposée
-// par les bords ou la place disponible peut ajouter ou retirer un extremum.
+// Panneau dev — chaque variante produit TOUJOURS ce que son libellé annonce : famille d'asymptotes,
+// nombre exact d'extremums et de paliers. Boucle de rejet bornée (nouveau comportement aux bords à
+// chaque essai, la parité imposée par les signes changeant d'un tirage à l'autre), puis repli
+// DÉTERMINISTE : la même construction rejouée avec un générateur pseudo-aléatoire à graine fixe
+// (graine mesurée pour chaque variante, recherche bornée au-delà) — jamais un autre tirage.
 // ============================================================================
 
+/** Nota : avec une AV « signes opposés », une AV « signes identiques » et une asymptote oblique, le
+ * nombre total d'extremums est toujours IMPAIR (parité imposée par les directions aux bords) : la
+ * variante « 2 AV — oblique » annonce donc 1 extremum. */
+interface SpecVariante {
+  famille: string;
+  extremums: number;
+  paliers: number;
+}
+
+const SPECS_VARIANTES: Record<string, SpecVariante> = {
+  "0va-horizontale-0ext-0pi": { famille: "0va-horizontale-distincte", extremums: 0, paliers: 0 },
+  "0va-horizontale-1ext-0pi": { famille: "0va-horizontale", extremums: 1, paliers: 0 },
+  "0va-horizontale-2ext-1pi": { famille: "0va-horizontale", extremums: 2, paliers: 0 },
+  "0va-horizontale-3ext-2pi": { famille: "0va-horizontale-distincte", extremums: 0, paliers: 1 },
+  "0va-oblique-2ext-0pi": { famille: "0va-oblique", extremums: 2, paliers: 0 },
+  "1va-horizontale-1ext-1pi": { famille: "1va-opposes-horizontale", extremums: 1, paliers: 0 },
+  "1va-oblique-2ext-1pi": { famille: "1va-opposes-oblique", extremums: 2, paliers: 0 },
+  "1va-aucune-0ext-0pi": { famille: "1va-aucune", extremums: 0, paliers: 1 },
+  "2va-opposes-horizontale-2ext-2pi": { famille: "2va-opposes-horizontale", extremums: 2, paliers: 0 },
+  "2va-mixte-oblique-3ext-2pi": { famille: "2va-mixte-oblique", extremums: 1, paliers: 0 },
+  "2va-pointIsole-1ext-1pi": { famille: "2va-pointIsole", extremums: 1, paliers: 0 },
+};
+
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
-  { id: "0va-horizontale-0ext-0pi", label: "0 AV — horizontale distincte, monotone" },
+  { id: "0va-horizontale-0ext-0pi", label: "0 AV — horizontale distincte, monotone (aucun extremum)" },
   { id: "0va-horizontale-1ext-0pi", label: "0 AV — horizontale, 1 extremum" },
   { id: "0va-horizontale-2ext-1pi", label: "0 AV — horizontale, 2 extremums" },
-  { id: "0va-horizontale-3ext-2pi", label: "0 AV — horizontale distincte, palier" },
+  { id: "0va-horizontale-3ext-2pi", label: "0 AV — horizontale distincte, 1 palier, aucun extremum" },
   { id: "0va-oblique-2ext-0pi", label: "0 AV — oblique, 2 extremums" },
   { id: "1va-horizontale-1ext-1pi", label: "1 AV — horizontale, 1 extremum" },
   { id: "1va-oblique-2ext-1pi", label: "1 AV — oblique, 2 extremums" },
-  { id: "1va-aucune-0ext-0pi", label: "1 AV — sans asymptote à l'infini, palier" },
+  { id: "1va-aucune-0ext-0pi", label: "1 AV — sans asymptote à l'infini, 1 palier, aucun extremum" },
   { id: "2va-opposes-horizontale-2ext-2pi", label: "2 AV — horizontale, 2 extremums" },
-  { id: "2va-mixte-oblique-3ext-2pi", label: "2 AV — oblique, 2 extremums" },
+  { id: "2va-mixte-oblique-3ext-2pi", label: "2 AV — oblique, 1 extremum" },
   { id: "2va-pointIsole-1ext-1pi", label: "2 AV (point isolé) — 1 extremum" },
 ];
 
-export function construireAvecVarianteId(id: string): ExerciceLectureGraphiqueDerivees {
-  switch (id) {
-    case "0va-horizontale-0ext-0pi":
-      return construireExercice(construireAvecFamilleId("0va-horizontale-distincte"), { extremums: 0, paliers: 0 });
-    case "0va-horizontale-1ext-0pi":
-      return construireExercice(construireAvecFamilleId("0va-horizontale"), { extremums: 1, paliers: 0 });
-    case "0va-horizontale-2ext-1pi":
-      return construireExercice(construireAvecFamilleId("0va-horizontale"), { extremums: 2, paliers: 0 });
-    case "0va-horizontale-3ext-2pi":
-      return construireExercice(construireAvecFamilleId("0va-horizontale-distincte"), { extremums: 0, paliers: 1 });
-    case "0va-oblique-2ext-0pi":
-      return construireExercice(construireAvecFamilleId("0va-oblique"), { extremums: 2, paliers: 0 });
-    case "1va-horizontale-1ext-1pi":
-      return construireExercice(construireAvecFamilleId("1va-opposes-horizontale"), { extremums: 1, paliers: 0 });
-    case "1va-oblique-2ext-1pi":
-      return construireExercice(construireAvecFamilleId("1va-opposes-oblique"), { extremums: 2, paliers: 0 });
-    case "1va-aucune-0ext-0pi":
-      return construireExercice(construireAvecFamilleId("1va-aucune"), { extremums: 0, paliers: 1 });
-    case "2va-opposes-horizontale-2ext-2pi":
-      return construireExercice(construireAvecFamilleId("2va-opposes-horizontale"), { extremums: 2, paliers: 0 });
-    case "2va-mixte-oblique-3ext-2pi":
-      return construireExercice(construireAvecFamilleId("2va-mixte-oblique"), { extremums: 2, paliers: 0 });
-    case "2va-pointIsole-1ext-1pi":
-      return construireExercice(construireAvecFamilleId("2va-pointIsole"), { extremums: 1, paliers: 0 });
-    default:
-      throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
+function conforme(exo: ExerciceLectureGraphiqueDerivees, spec: SpecVariante): boolean {
+  return exo.extrema.length === spec.extremums && exo.paliers.length === spec.paliers;
+}
+
+/** Un essai complet : nouveau comportement aux bords de la famille, puis construction exacte. */
+function essaiVariante(spec: SpecVariante): ExerciceLectureGraphiqueDerivees | null {
+  const asymptotique = recadrerAsymptotique(construireAvecFamilleId(spec.famille));
+  const exo = tenter(asymptotique, { extremums: spec.extremums, paliers: spec.paliers });
+  return exo && conforme(exo, spec) ? exo : null;
+}
+
+/** Générateur pseudo-aléatoire à graine (mulberry32). */
+function mulberry32(graine: number): () => number {
+  let a = graine >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Rejoue `f` avec `Math.random` remplacé par un générateur à graine (5gen22 compris) : résultat
+ * entièrement déterministe. */
+function avecGraine<T>(graine: number, f: () => T): T {
+  const original = Math.random;
+  Math.random = mulberry32(graine);
+  try {
+    return f();
+  } finally {
+    Math.random = original;
   }
+}
+
+/** Graine dont l'essai réussit pour chaque variante (mesurée ; voir le rapport du lot D). */
+const GRAINES_REPLI: Record<string, number> = {
+  "0va-horizontale-0ext-0pi": 1,
+  "0va-horizontale-1ext-0pi": 1,
+  "0va-horizontale-2ext-1pi": 1,
+  "0va-horizontale-3ext-2pi": 1,
+  "0va-oblique-2ext-0pi": 3,
+  "1va-horizontale-1ext-1pi": 2,
+  "1va-oblique-2ext-1pi": 4,
+  "1va-aucune-0ext-0pi": 19,
+  "2va-opposes-horizontale-2ext-2pi": 1686,
+  "2va-mixte-oblique-3ext-2pi": 17,
+  "2va-pointIsole-1ext-1pi": 39,
+};
+
+const TENTATIVES_VARIANTE = 400;
+const GRAINES_MAX = 5000;
+
+/** Première graine (ordre : graine mesurée, puis 1, 2, …, GRAINES_MAX) dont l'essai réussit. */
+export function chercherGraineRepli(id: string): number | null {
+  const spec = SPECS_VARIANTES[id];
+  const premiere = GRAINES_REPLI[id];
+  const graines = premiere !== undefined ? [premiere] : [];
+  for (let g = 1; g <= GRAINES_MAX; g++) if (g !== premiere) graines.push(g);
+  for (const g of graines) if (avecGraine(g, () => essaiVariante(spec))) return g;
+  return null;
+}
+
+/** Repli déterministe : l'essai rejoué avec la graine trouvée (toujours la même instance). */
+export function construireVarianteDeterministe(id: string): ExerciceLectureGraphiqueDerivees | null {
+  const g = chercherGraineRepli(id);
+  return g === null ? null : avecGraine(g, () => essaiVariante(SPECS_VARIANTES[id]));
+}
+
+export function construireAvecVarianteId(id: string): ExerciceLectureGraphiqueDerivees {
+  const spec = SPECS_VARIANTES[id];
+  if (!spec) throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
+  for (let t = 0; t < TENTATIVES_VARIANTE; t++) {
+    const exo = essaiVariante(spec);
+    if (exo) return exo;
+  }
+  motifsRejet["repli déterministe"] = (motifsRejet["repli déterministe"] ?? 0) + 1;
+  const repli = construireVarianteDeterministe(id);
+  if (!repli) throw new Error(`construireAvecVarianteId : aucune construction pour "${id}"`);
+  return repli;
 }

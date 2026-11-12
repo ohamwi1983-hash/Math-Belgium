@@ -2322,3 +2322,36 @@ paths:
   épinglés, 0 échec (chaque contrôle visible avec la figure entière, sans recouvrement) ; 1280 × 800 →
   75 épinglés, 0 échec ; les autres tiennent déjà à l'écran, ou n'ont pas de figure SVG (5 : tableaux,
   arbres HTML).
+
+- **5e (4h), Chapitre 5 — Dérivées et applications** (`derivees-applications`) : corrections issues de
+  l'audit des générateurs (72 points, décisions A–M, toutes suivies ; 6 lots). **Cours** : notions
+  demandées par les générateurs désormais enseignées — tableau de f'' et concavité (∪ convexe / ∩
+  concave, PI), cas rationnel avec colonnes ∄, racines irrationnelles exactes (§5) ; démarche
+  complète avec f'' et coordonnées, dans l'ordre réel de 5gen31 (§7) ; « tangente ≠ sécante »
+  nuancé (localement) + exemple de double tangence (§2) ; point anguleux / rebroussement / tangente
+  verticale (§4) ; nature de l'extremum par le tableau de signes, exemple « marges », sin² = 1 − cos²
+  (§8) ; écart en %, coût marginal minimal (C'' = 0), coût moyen + dichotomie (§9) ; s(t) partout,
+  exemple s(t) = D / racine négative rejetée / × 3,6 / vitesse constante (§11). Badge de §10 qui
+  donnait la réponse renommé. Quiz 5gen43 réécrit (10 V / 10 F par thème, plus de méta-affirmations
+  ni d'épouvantails, mots absolus équilibrés, `TexteRiche5e`). **Générateurs** (conventions : sous-
+  titre « Chapitre 5 — Dérivées et applications », compteur de génération dans la clé d'écran, une
+  seule tentative sur les choix fermés, placeholders hors tirages, aides en LaTeX, virgule) :
+  5gen25 énoncés justes et discriminants, doublons rejetés, extremums visibles ; 5gen26 forme
+  développée/simplifiée exigée (message sans tentative), plus d'écran qui fait recopier m, plus de
+  f constante ; 5gen27 décompositions équivalentes acceptées, plus de f constante ni non
+  simplifiée ; 5gen28 préfixes « y = »/« t = », valeurs exactes exigées, écran de pente en q sans
+  réponse annoncée ; 5gen29 valeurs rationnelles exactes exigées (irrationnelles au centième), puces
+  en nombre fixe (état « sans-objet » de `ProgressionPuces`), a de signe quelconque ; 5gen30 courbe
+  construite par morceaux (asymptotes réelles = annoncées), positions demandées avant les tableaux,
+  paliers, ≤ 3 PI, 6 écrans fixes ; 5gen31 écran « coordonnées », courbe masquée pendant le
+  placement, tolérance 11 px, asymptote horizontale non nulle (`decalage`) ; 5gen32 vraie réponse
+  attendue à chaque écran, trapèze en test entier, schémas SVG, nature par F' en points test,
+  variante cubique hors tirage libre ; 5gen33 tirages économiques réalistes, coût moyen / coût
+  marginal minimal au lieu de l'« extremum du coût total », écran de cohérence supprimé ; 5gen34
+  dérivée comparée exactement, écran « résoudre f'(t) = 0 », tableau borné [0 ; T] (props `bornes`/
+  `variable` de `TableauEtudeLocaleBuilder`/`TableauEtudeLocaleRecap`), quartiques allégées ;
+  5gen35 s(t), écran accélération, contextes réalistes par mobile (b = 0 si « s'élance »).
+  **Piège rencontré** : `join("\\quad")` sans espace produit `\quadf…` (erreur KaTeX dans les fiches
+  des puces) — corrigé en `join(" \\quad ")` dans tous les récapitulatifs 5e et le 4e
+  `recapitulatifEquationRationnelle.ts`. Restes pour la refonte des feuilles : adaptateurs à l'ancien
+  découpage (5gen26 affine, 5gen30, 5gen32 A''), `valeurFLocal` de 5gen31 sans `decalage`.
