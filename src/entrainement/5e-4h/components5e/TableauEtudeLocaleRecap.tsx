@@ -1,6 +1,7 @@
 import type { ColonneTableauEtudeLocale } from "../core5e/etudeLocale.types";
 import type { TableauEtudeLocaleAttendu } from "../moteur5e/verificationEtudeLocale";
-import { libelleLigne2Tableau, libelleSigneTableau } from "../ui5e/formatEtudeLocale";
+import { libelleSigneTableau } from "../ui5e/formatEtudeLocale";
+import { EtiquetteLigne2Tableau, classeDensite } from "./EtiquetteLigne2Tableau";
 import { Katex } from "../components/Katex";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
 
@@ -41,7 +42,7 @@ export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attend
 
   return (
     <div className="grille-signes-scroll">
-      <table className="grille-signes grille-signes-recap">
+      <table className={`grille-signes grille-signes-recap${classeDensite(colonnes.length)}`}>
         <thead>
           <tr>
             <th className="grille-signes-label">{variable}</th>
@@ -74,7 +75,7 @@ export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attend
             <td className="grille-signes-borne" />
             {attendu.ligne2.map((v, j) => (
               <td key={j} className={classeColonne(j)}>
-                {v !== null && libelleLigne2Tableau(v)}
+                {v !== null && <EtiquetteLigne2Tableau valeur={v} />}
               </td>
             ))}
             <td className="grille-signes-borne" />

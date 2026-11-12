@@ -247,7 +247,7 @@ function methodeAssociation(exercice: ExerciceAssociation): FragmentConsigne[] {
 function piegeAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return "Le signe de f' se lit sur la pente de f, pas sur le signe de f : f' est positive là où f MONTE, même si f est négative.";
+      return "Le signe de f' se lit sur la pente de f, pas sur le signe de f : f' est positive là où f monte, même si f est négative.";
     case "grapheVerbal":
       return "Deux énoncés peuvent décrire les mêmes variations : départage-les par la position des extremums et de f(0).";
     case "symbolique":

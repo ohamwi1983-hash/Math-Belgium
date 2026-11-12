@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ColonneTableauEtudeLocale, ValeurLigne2Tableau, ValeurSigneTableau } from "../core5e/etudeLocale.types";
 import type { ReponseTableauEtudeLocale, TableauEtudeLocaleAttendu } from "../moteur5e/verificationEtudeLocale";
 import { libelleLigne2Tableau, libelleSigneTableau } from "../ui5e/formatEtudeLocale";
+import { EtiquetteLigne2Tableau, classeDensite } from "./EtiquetteLigne2Tableau";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -105,7 +106,7 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
   return (
     <div>
       <div className="grille-signes-scroll">
-        <table className="grille-signes">
+        <table className={`grille-signes${classeDensite(n)}`}>
           <thead>
             <tr>
               <th className="grille-signes-label">{variable}</th>
@@ -141,8 +142,8 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
               {colonnes.map((col, j) => (
                 <td key={j} className={col.type === "zone" ? "grille-signes-zone" : "grille-signes-point"}>
                   {col.type !== "exclusion" && (
-                    <button type="button" className={classeLigne2(j)} onClick={() => cyclerCelluleLigne2(j)}>
-                      {libelleLigne2Tableau(ligne2[j])}
+                    <button type="button" className={classeLigne2(j)} onClick={() => cyclerCelluleLigne2(j)} aria-label={libelleLigne2Tableau(ligne2[j])}>
+                      <EtiquetteLigne2Tableau valeur={ligne2[j]} />
                     </button>
                   )}
                 </td>

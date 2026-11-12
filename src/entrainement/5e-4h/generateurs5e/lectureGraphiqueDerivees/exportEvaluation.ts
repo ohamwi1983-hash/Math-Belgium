@@ -62,6 +62,9 @@ const COULEUR_GRILLE = "#e3e7ec";
 const COULEUR_GRILLE_FORTE = "#c5ccd5";
 const COULEUR_AXE = "#495057";
 const COULEUR_ANNOTATION = "#9a3b12";
+// Asymptotes : couleur distincte de l'axe, pour qu'une asymptote confondue avec un axe (x = 0, y = 0)
+// reste visible (pointillés tracés par-dessus l'axe).
+const COULEUR_ASYMPTOTE = "#c2410c";
 let compteurSvg = 0;
 
 /** Nombre écrit dans le SVG : virgule décimale et vrai signe moins. */
@@ -129,7 +132,7 @@ function svgLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees,
     .join("");
 
   const ligne = (x1: number, y1: number, x2: number, y2: number) =>
-    `<line x1="${sx(x1).toFixed(1)}" y1="${sy(y1).toFixed(1)}" x2="${sx(x2).toFixed(1)}" y2="${sy(y2).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.3" stroke-dasharray="5 4" clip-path="url(#${id})"/>`;
+    `<line x1="${sx(x1).toFixed(1)}" y1="${sy(y1).toFixed(1)}" x2="${sx(x2).toFixed(1)}" y2="${sy(y2).toFixed(1)}" stroke="${COULEUR_ASYMPTOTE}" stroke-width="1.4" stroke-dasharray="5 4" clip-path="url(#${id})"/>`;
   const asymptotes: string[] = exercice.asymptotique.vas.map((va) => ligne(va.position, yMin, va.position, yMax));
   const { infini } = exercice.asymptotique;
   if (infini.type === "horizontale") {
@@ -197,7 +200,7 @@ ${annotations.join("")}
 // ============================================================================
 
 const LEGENDE =
-  "Le graphique ci-dessous représente une fonction f (droites en pointillés : asymptotes de la courbe ; point plein : point de la courbe ; quadrillage d'une unité).";
+  "Le graphique ci-dessous représente une fonction f (droites en pointillés orange : asymptotes de la courbe ; point plein : point de la courbe ; quadrillage d'une unité).";
 
 function nombreTexte(v: number): string {
   return String(v).replace(".", ",");

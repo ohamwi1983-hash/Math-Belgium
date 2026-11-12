@@ -333,7 +333,10 @@ function formatDeveloppementConfirmeLatex(exercice: ExerciceDefinitionDerivee, a
  * jamais « (h+1)(−1) » (audit 5c5a, point 14) : le signe est reporté sur le numérateur avant
  * l'appel. */
 function formatCoeffDevantFacteur(coeff: number, facteurLatex: string): string {
-  return coeff === 1 ? facteurLatex : `${coeff}${facteurLatex}`;
+  if (coeff !== 1) return `${coeff}${facteurLatex}`;
+  // Seul au dénominateur, « (h−2) » n'a pas besoin de parenthèses (« (h+1)^2 » les garde).
+  const seul = /^\(([^()]*)\)$/.exec(facteurLatex);
+  return seul ? seul[1] : facteurLatex;
 }
 
 /** Normalise le signe : dénominateur numérique toujours positif, signe porté par le numérateur. */

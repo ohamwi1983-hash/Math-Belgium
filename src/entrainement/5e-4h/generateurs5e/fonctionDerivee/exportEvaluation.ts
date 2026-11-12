@@ -148,6 +148,9 @@ function lignesCalcul(exercice: ExerciceFonctionDerivee): EtapeCorrection[] {
       fragments: [latex(`u'(x)=${formatDeriveeAtomeLatex(facteurs[0])} \\quad v'(x)=${formatDeriveeAtomeLatex(facteurs[1])}`)],
     });
   }
+  if (exercice.famille === "composee") {
+    lignes.push({ label: "Calcul", sousQuestion: l, fragments: [texte("Dérivée de l'intérieure : "), latex(`u'(x)=${exercice.atome.interieurA}`), texte(".")] });
+  }
   lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte(piege(exercice))] });
   lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [latex(formatReponseAttendueCalculerLatex(exercice))] });
   return lignes;

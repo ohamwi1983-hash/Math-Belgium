@@ -1972,6 +1972,57 @@
   }
 }
 
+/* Tableau d'étude locale DENSE (5gen29–31, 5gen34 : au moins 2 colonnes de points, jusqu'à
+ * 5 points et 2 bornes) : sur téléphone, il défilait de 80 à 240 px. Cellules et boutons resserrés
+ * (hauteur tactile de 44 px conservée), libellés longs de la ligne 2 remplacés par leur forme courte
+ * (« max. », « min. », « ni max. ni min. » — composant `EtiquetteLigne2Tableau`), texte autorisé à
+ * passer à la ligne dans les colonnes de points. Rendu seulement. */
+.entrainement .etiquette-courte {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .entrainement .grille-signes--dense .etiquette-longue {
+    display: none;
+  }
+
+  .entrainement .grille-signes--dense .etiquette-courte {
+    display: inline;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense {
+    font-size: 11px;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense th,
+  .entrainement .grille-signes.grille-signes--dense td {
+    padding: 5px 1px;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense .grille-signes-point {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense .grille-signes-borne {
+    min-width: 14px;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense .grille-signes-label {
+    max-width: 60px;
+    font-size: 10.5px;
+    padding-left: 2px;
+    padding-right: 3px;
+  }
+
+  .entrainement .grille-signes.grille-signes--dense .toggle-signe {
+    min-width: 26px;
+    padding: 4px 2px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+}
+
 /* Indice de défilement : le bord droit du tableau s'estompe tant qu'il reste des colonnes à
  * droite, et redevient net une fois tout à droite (ou si rien ne déborde : la timeline de
  * défilement est alors inactive). Amélioration progressive — sans `animation-timeline`, rien ne
