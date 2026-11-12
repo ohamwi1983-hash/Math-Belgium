@@ -101,7 +101,7 @@ export function EtapeListeEquationsComplexes({ consigneGenerale, blocDonnees, co
           <div key={i}>
             <ApercuExpressionLatex texte={ligne} />
             <div className="field-row">
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder="forme a+bi" onChange={(e) => modifierLigne(i, e.target.value)} />
+              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder="a+bi" onChange={(e) => modifierLigne(i, e.target.value)} />
               {lignes.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la valeur ${i + 1}`} onClick={() => retirerLigne(i)}>
                   ×

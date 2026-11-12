@@ -141,7 +141,7 @@ export function consigneEcranA(): FragmentConsigne[] {
   return [texte("Calcule la somme ou différence ci-dessus, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsA(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 
 // ============================================================================
@@ -167,7 +167,7 @@ export function etatActuelB(e: Extract<ExerciceNombresComplexes, { famille: "B" 
   return null;
 }
 export function champsB(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): number {
   return e.sousType === "cube" && phase === "bCubeEcran2" ? 2 : 0;
@@ -208,10 +208,10 @@ export function champsC(phase: PhaseNombresComplexes): ChampDef[] {
   // deux") donne déjà le contexte "développé", inutile de le répéter dans le label du champ.
   if (phase === "cEcran1")
     return [
-      { type: "texte", label: "Numérateur =", placeholder: "forme a+bi" },
-      { type: "texte", label: "Dénominateur =", placeholder: "un réel" },
+      { type: "texte", label: "Numérateur =", placeholder: "a+bi" },
+      { type: "texte", label: "Dénominateur =", placeholder: "réel" },
     ];
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxC(phase: PhaseNombresComplexes): number {
   return phase === "cEcran1" ? 2 : 0;
@@ -239,7 +239,7 @@ export function consigneEcranD(): FragmentConsigne[] {
   return [texte("Calcule ce quotient, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsD(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxD(): number {
   return 2;
@@ -274,10 +274,10 @@ export function etatActuelE(e: Extract<ExerciceNombresComplexes, { famille: "E" 
 export function champsE(phase: PhaseNombresComplexes): ChampDef[] {
   if (phase === "eEcran1")
     return [
-      { type: "texte", label: "1re fraction =", placeholder: "forme a+bi" },
-      { type: "texte", label: "2e fraction =", placeholder: "forme a+bi" },
+      { type: "texte", label: "1re fraction =", placeholder: "a+bi" },
+      { type: "texte", label: "2e fraction =", placeholder: "a+bi" },
     ];
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxE(phase: PhaseNombresComplexes): number {
   return phase === "eEcran1" ? 2 : 0;
@@ -310,8 +310,8 @@ export function etatActuelF(e: Extract<ExerciceNombresComplexes, { famille: "F" 
   return null;
 }
 export function champsF(phase: PhaseNombresComplexes): ChampDef[] {
-  if (phase === "fEcran1") return [{ type: "texte", label: "Quotient interne simplifié =", placeholder: "forme a+bi" }];
-  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
+  if (phase === "fEcran1") return [{ type: "texte", label: "Quotient interne simplifié =", placeholder: "a+bi" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxF(phase: PhaseNombresComplexes): number {
   return phase === "fEcran1" ? 2 : 0;
@@ -348,8 +348,8 @@ export function etatActuelG(e: Extract<ExerciceNombresComplexes, { famille: "G" 
   return null;
 }
 export function champsG(phase: PhaseNombresComplexes): ChampDef[] {
-  if (phase === "gEcran1") return [{ type: "texte", label: "Reste (mod 4) =", placeholder: "un entier" }];
-  return [{ type: "texte", label: "Valeur =", placeholder: "forme a+bi" }];
+  if (phase === "gEcran1") return [{ type: "texte", label: "Reste (mod 4) =", placeholder: "entier" }];
+  return [{ type: "texte", label: "Valeur =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxG(phase: PhaseNombresComplexes): number {
   void phase;

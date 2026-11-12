@@ -132,7 +132,7 @@ export function consigneEcranASans(): FragmentConsigne[] {
   return [texte("Isole "), latex("z"), texte(" (regroupe les termes en "), latex("z"), texte(" d'un côté, les constantes de l'autre), puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function champsASans(): ChampDef[] {
-  return [{ label: "z =", placeholder: "forme a+bi" }];
+  return [{ label: "z =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxASans(): number {
   return 2;
@@ -185,9 +185,9 @@ export function etatActuelAAvec(e: ExerciceFamilleAAvecBarre, phase: PhaseEquati
 export function champsAAvec(phase: PhaseEquationsComplexes): ChampDef[] {
   if (phase === "aAvecEcran1") return [];
   return [
-    { label: "x =", placeholder: "un réel" },
-    { label: "y =", placeholder: "un réel" },
-    { label: "z =", placeholder: "forme a+bi" },
+    { label: "x =", placeholder: "réel" },
+    { label: "y =", placeholder: "réel" },
+    { label: "z =", placeholder: "a+bi" },
   ];
 }
 export function niveauAideMaxAAvec(phase: PhaseEquationsComplexes): number {
@@ -252,7 +252,7 @@ export function etatActuelB(e: ExerciceFamilleB, phase: PhaseEquationsComplexes)
 }
 export function champsB(phase: PhaseEquationsComplexes): ChampDef[] {
   if (phase === "bEcran1") return [];
-  return [{ label: "z =", placeholder: "forme a+bi" }];
+  return [{ label: "z =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxB(phase: PhaseEquationsComplexes): number {
   return phase === "bEcran1" ? 2 : 0;
@@ -291,7 +291,7 @@ export function etatActuelC(e: ExerciceFamilleC, phase: PhaseEquationsComplexes)
   return null;
 }
 export function champsC(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "cEcran1") return [{ label: "Δ =", placeholder: "un réel" }];
+  if (phase === "cEcran1") return [{ label: "Δ =", placeholder: "réel" }];
   return [];
 }
 export function niveauAideMaxC(phase: PhaseEquationsComplexes): number {
@@ -334,7 +334,7 @@ export function etatActuelD(e: ExerciceFamilleD, phase: PhaseEquationsComplexes)
   return null;
 }
 export function champsD(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "dEcran1") return [{ label: "Δ =", placeholder: "forme a+bi" }];
+  if (phase === "dEcran1") return [{ label: "Δ =", placeholder: "a+bi" }];
   return [];
 }
 export function niveauAideMaxD(phase: PhaseEquationsComplexes): number {
@@ -457,12 +457,12 @@ export function etatActuelF(e: ExerciceFamilleF, phase: PhaseEquationsComplexes)
   return null;
 }
 export function champsF(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "fEcran1") return [{ label: "r₁ =", placeholder: "un entier" }];
-  if (phase === "fEcran2") return [{ label: "Quotient (polynôme en z) =", placeholder: "polynôme en z, développé" }];
+  if (phase === "fEcran1") return [{ label: "r₁ =", placeholder: "entier" }];
+  if (phase === "fEcran2") return [{ label: "Quotient (polynôme en z) =", placeholder: "polynôme en z" }];
   if (phase === "fEcran3")
     return [
-      { label: "r₂ =", placeholder: "un entier" },
-      { label: "Quotient (polynôme en z) =", placeholder: "polynôme en z, développé" },
+      { label: "r₂ =", placeholder: "entier" },
+      { label: "Quotient (polynôme en z) =", placeholder: "polynôme en z" },
     ];
   return [];
 }

@@ -176,7 +176,7 @@ export function etatActuelA(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): str
 }
 export function champsA(phase: PhaseRacinesNiemes): ChampDef[] {
   if (phase === "aEcran1") return [{ type: "texte", label: "r =", placeholder: "ex : 7" }, { type: "texte", label: "θ =", placeholder: PH_ANGLE }];
-  if (phase === "aEcran2") return [{ type: "texte", label: "Module des racines =", placeholder: "ex : 7" }, { type: "texte", label: "θₖ (en fonction de k) =", placeholder: "ex : (2pi/5+2k pi)/7" }];
+  if (phase === "aEcran2") return [{ type: "texte", label: "Module =", placeholder: "ex : 7" }, { type: "texte", label: "θₖ =", placeholder: "ex : (2pi/5+2k pi)/7" }];
   return [];
 }
 export function niveauAideMaxA(phase: PhaseRacinesNiemes): number {
@@ -218,7 +218,7 @@ export function etatActuelB(e: ExerciceRacinesB, phase: PhaseRacinesNiemes): str
 }
 export function champsB(phase: PhaseRacinesNiemes): ChampDef[] {
   if (phase === "bEcran1") return [{ type: "texte", label: "r =", placeholder: "ex : sqrt(7)" }, { type: "texte", label: "θ =", placeholder: "ex : atan(7)" }];
-  return [{ type: "texte", label: "Module des racines =", placeholder: "ex : 7^(1/8)" }, { type: "texte", label: "θₖ (en fonction de k) =", placeholder: "ex : (atan(7)+2k pi)/8" }];
+  return [{ type: "texte", label: "Module =", placeholder: "ex : 7^(1/8)" }, { type: "texte", label: "θₖ =", placeholder: "ex : (atan(7)+2k pi)/8" }];
 }
 export function niveauAideMaxB(phase: PhaseRacinesNiemes): number {
   void phase;
@@ -397,14 +397,14 @@ export const LIBELLE_FAMILLE: Record<ExerciceRacinesNiemes["famille"], string> =
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceRacinesNiemes, phase: PhaseRacinesNiemes): string[] {
   switch (exercice.famille) {
     case "A":
-      if (phase === "aEcran1") return [`r=${exercice.r}`, `\\theta=${exercice.angle.latex}`];
-      if (phase === "aEcran2") return [`\\sqrt[${exercice.n}]{${exercice.r}}=${exercice.kModule}`, `\\theta_k=\\frac{${exercice.angle.latex}+2k\\pi}{${exercice.n}}`];
+      if (phase === "aEcran1") return [`r=${exercice.r}\\text{ ;}`, `\\theta=${exercice.angle.latex}`];
+      if (phase === "aEcran2") return [`\\sqrt[${exercice.n}]{${exercice.r}}=${exercice.kModule}\\text{ ;}`, `\\theta_k=\\frac{${exercice.angle.latex}+2k\\pi}{${exercice.n}}`];
       return formatListeRacinesLatex(exercice.racines, "z");
     case "B":
-      if (phase === "bEcran1") return [`r=${formatModuleRadical(exercice.a, exercice.b)}`, egaliteArgument(exercice.angle)];
+      if (phase === "bEcran1") return [`r=${formatModuleRadical(exercice.a, exercice.b)}\\text{ ;}`, egaliteArgument(exercice.angle)];
       // r substitué et valeurs chiffrées (audit 6e ch. 5, points B et 39).
       return [
-        `\\sqrt[${exercice.n}]{${formatModuleRadical(exercice.a, exercice.b)}}\\approx ${decimalVirgule(Math.pow(exercice.r, 1 / exercice.n))}`,
+        `\\sqrt[${exercice.n}]{${formatModuleRadical(exercice.a, exercice.b)}}\\approx ${decimalVirgule(Math.pow(exercice.r, 1 / exercice.n))}\\text{ ;}`,
         `\\theta_k${estArgumentDecimal(exercice.angle) ? "\\approx" : "="}\\frac{${argumentLatex(exercice.angle)}+2k\\pi}{${exercice.n}}`,
       ];
     case "C":

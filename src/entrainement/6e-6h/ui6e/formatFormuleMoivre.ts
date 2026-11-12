@@ -218,7 +218,7 @@ export function etatActuel(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleM
       // Cumule le développement confirmé à l'écran 1 ET la séparation réels/imaginaires confirmée à
       // l'écran 2, du plus ancien au plus récent — jamais seulement l'écran immédiatement précédent
       // (audit transversal "état actuel cumulatif").
-      return [developpementConfirme, `\\text{réels : }${listeReelleLatex(exercice)}`, `\\text{imaginaires : }i\\left(${listeImaginaireReduiteLatex(exercice)}\\right)`];
+      return [developpementConfirme, `\\text{réels : }${listeReelleLatex(exercice)}\\text{ ;}`, `\\text{imaginaires : }i\\left(${listeImaginaireReduiteLatex(exercice)}\\right)`];
   }
 }
 
@@ -328,10 +328,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormuleMoivre,
     case "ecran1":
       return [developpementLatex(exercice)];
     case "ecran2":
-      return [`\\text{réels : }${listeReelleLatex(exercice)}`, `\\text{imaginaires : }${listeImaginaireLatex(exercice)}`];
+      return [`\\text{réels : }${listeReelleLatex(exercice)}\\text{ ;}`, `\\text{imaginaires : }${listeImaginaireLatex(exercice)}`];
     case "ecran3":
       if (exercice.cible !== "standard") return [`${cibleEcran3Latex(exercice)}=${polynomeCosLatex(exercice.polynomeCos)}`];
-      return [`\\cos(${exercice.n}x)=${cosNxLatex(exercice)}`, `\\sin(${exercice.n}x)=${sinNxLatex(exercice)}`];
+      return [`\\cos(${exercice.n}x)=${cosNxLatex(exercice)}\\text{ ;}`, `\\sin(${exercice.n}x)=${sinNxLatex(exercice)}`];
   }
 }
 

@@ -374,8 +374,8 @@ export function etatActuelE(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometri
 export function champsE(phase: PhaseFormeTrigonometrique): ChampDef[] {
   if (phase === "eEcran1") return [{ type: "texte", label: "θ =", placeholder: PH_ANGLE }];
   return [
-    { type: "texte", label: "cos θ =", placeholder: "ex : (sqrt(7)+1)/3" },
-    { type: "texte", label: "sin θ =", placeholder: "ex : (sqrt(7)+1)/3" },
+    { type: "texte", label: "cos θ =", placeholder: "ex : sqrt(7)/3" },
+    { type: "texte", label: "sin θ =", placeholder: "ex : sqrt(7)/3" },
   ];
 }
 export function niveauAideMaxE(phase: PhaseFormeTrigonometrique): number {
@@ -567,7 +567,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormeTrigonome
       return [`n=${exercice.congruence.k}+${exercice.congruence.m}p\\text{, }p\\in\\mathbb{Z}`];
     case "E":
       if (phase === "eEcran1") return [`\\theta=${exercice.angleResultat.latex}`];
-      return [`\\cos\\theta=${exercice.cosResultat.latex}`, `\\sin\\theta=${exercice.sinResultat.latex}`];
+      return [`\\cos\\theta=${exercice.cosResultat.latex}\\text{ ;}`, `\\sin\\theta=${exercice.sinResultat.latex}`];
   }
 }
 

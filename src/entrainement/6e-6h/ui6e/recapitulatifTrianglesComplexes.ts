@@ -15,7 +15,9 @@ export function calculerRecapitulatifTrianglesComplexes(etat: EtatSessionTriangl
   const precedentes = sequence.slice(0, sequence.indexOf(etat.phase));
 
   return precedentes.map((phase: PhaseTrianglesComplexes) => {
-    const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
+    // Une valeur qui finit par un radical (√n) déborde de 2 px de sa boîte KaTeX (queue du
+    // symbole) et déclenchait une barre de défilement dans `.recap-corps` : petite espace finale.
+    const valeurs = formatReponseAttenduePhaseLatex(exercice, phase).map((v) => (/\\sqrt\{[^{}]*\}\}?$/.test(v) ? `${v}\\,` : v));
     const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele };
   });

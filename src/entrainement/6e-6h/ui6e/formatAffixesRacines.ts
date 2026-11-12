@@ -118,8 +118,8 @@ export function consigneEcranA(): FragmentConsigne[] {
 }
 export function champsA(): ChampDef[] {
   return [
-    { type: "texte", label: "z+z̄ =", placeholder: "forme a+bi" },
-    { type: "texte", label: "z−z̄ =", placeholder: "forme a+bi" },
+    { type: "texte", label: "z+z̄ =", placeholder: "a+bi" },
+    { type: "texte", label: "z−z̄ =", placeholder: "a+bi" },
   ];
 }
 export function niveauAideMaxA(): number {
@@ -158,7 +158,8 @@ export function consigneGeneraleB(): FragmentConsigne[] {
   return [texte("A, B, C sont 3 points du plan, donnés par leurs affixes. Détermine l'affixe du point D tel que ABCD (dans cet ordre) soit un parallélogramme.")];
 }
 export function blocDonneesB(e: Extract<ExerciceAffixesRacines, { famille: "B" }>): string[] {
-  return [`z_A=${affixeDemiEntiereLatex(e.reA2, e.imA2)}\\qquad z_B=${affixeDemiEntiereLatex(e.reB2, e.imB2)}\\qquad z_C=${affixeDemiEntiereLatex(e.reC2, e.imC2)}`];
+  // Une affixe par ligne : sur une seule ligne, les 3 affixes débordaient à 390 px.
+  return [`z_A=${affixeDemiEntiereLatex(e.reA2, e.imA2)}`, `z_B=${affixeDemiEntiereLatex(e.reB2, e.imB2)}`, `z_C=${affixeDemiEntiereLatex(e.reC2, e.imC2)}`];
 }
 export function consigneEcranB(phase: PhaseAffixesRacines): FragmentConsigne[] {
   if (phase === "bEcran1") return [texte("Dans le parallélogramme ABCD (sommets dans cet ordre), quelle relation lie les affixes des 4 sommets ?")];
@@ -170,7 +171,7 @@ export function etatActuelB(phase: PhaseAffixesRacines): string[] | null {
 }
 export function champsB(phase: PhaseAffixesRacines): ChampDef[] {
   if (phase === "bEcran1") return [{ type: "choix", label: "Relation" }];
-  return [{ type: "texte", label: "z_D =", placeholder: "forme a+bi" }];
+  return [{ type: "texte", label: "z_D =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxB(phase: PhaseAffixesRacines): number {
   return phase === "bEcran1" ? 2 : 0;
@@ -229,7 +230,7 @@ export function etatActuelC(e: Extract<ExerciceAffixesRacines, { famille: "C" }>
 }
 export function champsC(phase: PhaseAffixesRacines): ChampDef[] {
   if (phase === "cEcran1") return [{ type: "choix", label: "Système" }];
-  if (phase === "cEcran2") return [{ type: "texte", label: "x =", placeholder: "un réel" }];
+  if (phase === "cEcran2") return [{ type: "texte", label: "x =", placeholder: "réel" }];
   return [];
 }
 export function niveauAideMaxC(phase: PhaseAffixesRacines): number {
@@ -255,7 +256,7 @@ export function consigneGeneraleD(): FragmentConsigne[] {
   return [texte("A et B sont 2 points du plan, donnés par leurs affixes. Calcule l'affixe du milieu M de [AB], puis la distance AB.")];
 }
 export function blocDonneesD(e: Extract<ExerciceAffixesRacines, { famille: "D" }>): string[] {
-  return [`z_A=${valeurLatex(e.zA)}\\qquad z_B=${valeurLatex(e.zB)}`];
+  return [`z_A=${valeurLatex(e.zA)}`, `z_B=${valeurLatex(e.zB)}`];
 }
 export function consigneEcranD(phase: PhaseAffixesRacines): FragmentConsigne[] {
   if (phase === "dEcran1") return [texte("Calcule l'affixe du milieu M de [AB], sous la forme "), latex("a+bi"), texte(" (virgule décimale si besoin).")];
@@ -266,10 +267,10 @@ export function etatActuelD(e: Extract<ExerciceAffixesRacines, { famille: "D" }>
   return null;
 }
 export function champsD(phase: PhaseAffixesRacines): ChampDef[] {
-  if (phase === "dEcran1") return [{ type: "texte", label: "z_M =", placeholder: "forme a+bi" }];
+  if (phase === "dEcran1") return [{ type: "texte", label: "z_M =", placeholder: "a+bi" }];
   return [
-    { type: "texte", label: "z_B − z_A =", placeholder: "forme a+bi" },
-    { type: "texte", label: "AB =", placeholder: "un réel positif" },
+    { type: "texte", label: "z_B − z_A =", placeholder: "a+bi" },
+    { type: "texte", label: "AB =", placeholder: "réel positif" },
   ];
 }
 export function niveauAideMaxD(): number {
