@@ -4,8 +4,9 @@
  *
  * Cas particulier (ce qui RACCOURCIT la résolution) : seulement en B « au moins k succès » avec
  * k = 1 — « au moins un succès » se règle en une ligne par l'événement contraire, 1 − (1 − p)ⁿ, sans
- * compter de chemins. k est uniforme dans {1, …, n − 1} avec n ∈ {3, 4, 5} : ≈ 36 % des instances
- * de la variante « B — au moins k succès », ≈ 18 % de la famille B. Aucune autre famille n'a de
+ * compter de chemins. Mesures (5 000 tirages par variante) : la variante « B — au moins k succès »
+ * fixe n = 4, k uniforme dans {1, 2, 3} → 33 % ; en tirage libre (n ∈ {3, 4, 5}) ≈ 18 % de la
+ * famille B. Le vrai/faux de F est vrai dans 49 à 51 % des cas selon le montage. Aucune autre famille n'a de
  * raccourci : A (n entre 4 et 8), C (k = 1 ou 2), E, F et G demandent toujours toutes les étapes ; le
  * vrai/faux de F est un verdict, jamais un cas particulier.
  *

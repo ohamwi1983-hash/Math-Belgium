@@ -82,6 +82,13 @@ function egalSurN(n: number, d: number): string {
   return r === surN(n, d) ? r : `${r}=${surN(n, d)}`;
 }
 
+/** « a/b » non simplifiée suivie de sa valeur (fraction irréductible puis décimal), sans répéter
+ * la fraction quand elle est déjà irréductible. */
+function quotient(n: number, d: number): string {
+  const valeur = proba(n, d);
+  return valeur.startsWith(surN(n, d)) || n % d === 0 ? (n % d === 0 ? `${surN(n, d)}=${valeur}` : valeur) : `${surN(n, d)}=${valeur}`;
+}
+
 function rendre(expr: string): string {
   return katex.renderToString(expr, { throwOnError: false });
 }
@@ -207,7 +214,7 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
 }
 
 function entetePapier(e: Ex): FragmentConsigne[] {
-  return [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(blocDonnees(e).join(",\\quad ")), texte("."), ...consigneGlobale(e)];
+  return [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(`${blocDonnees(e).join(",\\quad ")}.`), ...consigneGlobale(e)];
 }
 
 function figureEnonce(e: Ex): string | undefined {
@@ -217,7 +224,7 @@ function figureEnonce(e: Ex): string | undefined {
 /** Énoncé « par écrans » : ses questions donnent les titres d'étapes du corrigé (« Étape n — … »). */
 function construireEnonce(e: Ex): SectionExercice {
   return {
-    enteteFragments: [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(blocDonnees(e).join(",\\quad ")), texte(".")],
+    enteteFragments: [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(`${blocDonnees(e).join(",\\quad ")}.`)],
     questions: phasesPourExercice(e).map((phase) => ({ consigne: consigneEcran(e, phase) as FragmentConsigne[] })),
   };
 }
@@ -290,12 +297,12 @@ function correctionA2(e: ExerciceFamilleA): EtapeCorrection[] {
     case "condAsachantB":
       return [
         { label: "Méthode", sousQuestion: L, fragments: [texte("On se place dans la colonne "), latex("B"), texte(" : on divise la case "), latex("A\\cap B"), texte(" par le total de cette colonne.")] },
-        { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{${surN(c.AB, N)}}{${surN(e.nB, N)}}=\\dfrac{${c.AB}}{${e.nB}}=${proba(c.AB, e.nB)}`)] },
+        { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{${surN(c.AB, N)}}{${surN(e.nB, N)}}=${quotient(c.AB, e.nB)}`)] },
       ];
     case "condBsachantA":
       return [
         { label: "Méthode", sousQuestion: L, fragments: [texte("On se place dans la ligne "), latex("A"), texte(" : on divise la case "), latex("A\\cap B"), texte(" par le total de cette ligne.")] },
-        { label: "Calcul", sousQuestion: L, fragments: [latex(`P(B|A)=\\dfrac{P(A\\cap B)}{P(A)}=\\dfrac{${surN(c.AB, N)}}{${surN(e.nA, N)}}=\\dfrac{${c.AB}}{${e.nA}}=${proba(c.AB, e.nA)}`)] },
+        { label: "Calcul", sousQuestion: L, fragments: [latex(`P(B|A)=\\dfrac{P(A\\cap B)}{P(A)}=\\dfrac{${surN(c.AB, N)}}{${surN(e.nA, N)}}=${quotient(c.AB, e.nA)}`)] },
       ];
   }
 }
@@ -344,8 +351,8 @@ function correctionA3(e: ExerciceFamilleA): EtapeCorrection[] {
   const d = c.AB * nBb;
   return [
     { label: "Méthode", sousQuestion: L, fragments: [texte("Chaque probabilité conditionnelle se calcule dans sa colonne : la case de la ligne "), latex("A"), texte(" divisée par le total de la colonne.")] },
-    { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|\\overline{B})=\\dfrac{P(A\\cap\\overline{B})}{P(\\overline{B})}=\\dfrac{${c.ABb}}{${nBb}}=${proba(c.ABb, nBb)}`)] },
-    { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{${c.AB}}{${e.nB}}=${proba(c.AB, e.nB)}`)] },
+    { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|\\overline{B})=\\dfrac{P(A\\cap\\overline{B})}{P(\\overline{B})}=\\dfrac{${surN(c.ABb, N)}}{${surN(nBb, N)}}=${quotient(c.ABb, nBb)}`)] },
+    { label: "Calcul", sousQuestion: L, fragments: [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{${surN(c.AB, N)}}{${surN(e.nB, N)}}=${quotient(c.AB, e.nB)}`)] },
     { label: "Vérification", sousQuestion: L, fragments: [texte("Produits en croix : "), latex(`${c.ABb}\\times ${e.nB}=${g}`), texte(comp === "egal" ? " est égal à " : comp === "superieur" ? " est supérieur à " : " est inférieur à "), latex(`${c.AB}\\times ${nBb}=${d}`), texte(".")] },
     {
       label: "Conclusion",
@@ -380,10 +387,10 @@ function correctionB(e: ExerciceFamilleB): EtapeCorrection[] {
   const indep = independantsB(e);
   const lignes: EtapeCorrection[] = [
     { label: "Méthode", sousQuestion: L1, fragments: [texte(`Équiprobabilité : ${univers}. On compte les issues favorables : `), latex("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), texte(".")] },
-    { label: "Calcul", sousQuestion: L1, fragments: [latex(`P(A)=\\dfrac{${nA}}{${N}}=${proba(nA, N)},\\quad P(B)=\\dfrac{${nB}}{${N}}=${proba(nB, N)}`)] },
+    { label: "Calcul", sousQuestion: L1, fragments: [latex(`P(A)=${quotient(nA, N)},\\quad P(B)=${quotient(nB, N)}`)] },
   ];
   if (e.demandeEcran2 === "intersection") {
-    lignes.push({ label: "Calcul", sousQuestion: L2, fragments: [texte(`On compte les issues qui réalisent A et B à la fois : il y en a ${nAB}, donc `), latex(`P(A\\cap B)=\\dfrac{${nAB}}{${N}}=${proba(nAB, N)}`), texte(".")] });
+    lignes.push({ label: "Calcul", sousQuestion: L2, fragments: [texte(`On compte les issues qui réalisent A et B à la fois : il y en a ${nAB}, donc `), latex(`P(A\\cap B)=${quotient(nAB, N)}`), texte(".")] });
   } else {
     lignes.push({ label: "Méthode", sousQuestion: L2, fragments: [texte("Relation d'inclusion-exclusion : "), latex("P(A\\cup B)=P(A)+P(B)-P(A\\cap B)"), texte(`, avec ${nAB} issue${nAB > 1 ? "s" : ""} commune${nAB > 1 ? "s" : ""} à A et B.`)] });
     lignes.push({ label: "Calcul", sousQuestion: L2, fragments: [latex(`P(A\\cup B)=\\dfrac{${nA}}{${N}}+\\dfrac{${nB}}{${N}}-\\dfrac{${nAB}}{${N}}=${proba(nAouB, N)}`)] });
@@ -392,7 +399,7 @@ function correctionB(e: ExerciceFamilleB): EtapeCorrection[] {
   lignes.push({
     label: "Calcul",
     sousQuestion: L3,
-    fragments: nB > 0 ? [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{n(A\\cap B)}{n(B)}=\\dfrac{${nAB}}{${nB}}=${proba(nAB, nB)}`)] : [texte("Sans objet.")],
+    fragments: nB > 0 ? [latex(`P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{n(A\\cap B)}{n(B)}=${quotient(nAB, nB)}`)] : [texte("Sans objet.")],
   });
   lignes.push({ label: "Méthode", sousQuestion: L4, fragments: [latex("A"), texte(" et "), latex("B"), texte(" sont indépendants lorsque "), latex("P(A\\cap B)=P(A)\\cdot P(B)"), texte(" exactement (ou, ce qui revient au même, "), latex("P(A|B)=P(A)"), texte(").")] });
   lignes.push({ label: "Calcul", sousQuestion: L4, fragments: [latex(`P(A)\\cdot P(B)=${frac(nA, N)}\\cdot ${frac(nB, N)}=${frac(nA * nB, N * N)}`), texte(" et "), latex(`P(A\\cap B)=${frac(nAB, N)}`)] });
@@ -425,9 +432,15 @@ function correctionDetaillee(e: Ex): EtapeCorrection[] {
 // Réponse brève, difficulté, barème
 // ============================================================================
 
-function verdictTexte(e: Ex): string {
+/** Verdict de la dernière étape, en minuscules au fil d'une phrase ; la comparaison des
+ * conditionnelles est écrite en LaTeX (son libellé de bouton est en Unicode). */
+function verdict(e: Ex): FragmentConsigne[] {
+  if (e.famille === "A" && e.sousTypeEcran3 === "comparaisonConditionnelle") {
+    const comp = comparaisonConditionnellesA(e);
+    return [latex(`P(A|\\overline{B})${comp === "egal" ? "=" : comp === "superieur" ? ">" : "<"}P(A|B)`)];
+  }
   const phase: PhaseProbabilitesEnsembles = e.famille === "A" ? "aEcran3" : "bEcran4";
-  return libelleChoixCorrect(e, phase) ?? "";
+  return [texte((libelleChoixCorrect(e, phase) ?? "").toLowerCase())];
 }
 
 function reponseBreve(e: Ex): FragmentConsigne[] {
@@ -436,12 +449,12 @@ function reponseBreve(e: Ex): FragmentConsigne[] {
     const c = cases(e);
     const etape1 = e.troisiemeDonnee === "PAetB" ? `P(A\\cup B)=${proba(c.AouB, N)}` : `P(A\\cap B)=${proba(c.AB, N)}`;
     const [etape2] = formatReponseAttenduePhaseLatex(e, "aEcran2");
-    return [latex(etape1), texte(" ; "), latex(etape2), texte(` ; ${verdictTexte(e)}`)];
+    return [latex(etape1), texte(" ; "), latex(etape2), texte(" ; "), ...verdict(e)];
   }
   const [pA, pB] = formatReponseAttenduePhaseLatex(e, "bEcran1");
   const [ope] = formatReponseAttenduePhaseLatex(e, "bEcran2");
   const [cond] = formatReponseAttenduePhaseLatex(e, "bEcran3");
-  return [latex(pA), texte(" ; "), latex(pB), texte(" ; "), latex(ope), texte(" ; "), latex(cond), texte(` ; ${verdictTexte(e).toLowerCase()}`)];
+  return [latex(pA), texte(" ; "), latex(pB), texte(" ; "), latex(ope), texte(" ; "), latex(cond), texte(" ; "), ...verdict(e)];
 }
 
 function difficulte(e: Ex): 1 | 2 | 3 {
@@ -459,15 +472,20 @@ function bareme(e: Ex): BaremeExercice {
     const [L1, L2, L3] = (["aEcran1", "aEcran2", "aEcran3"] as const).map((p) => lettre(e, p));
     const deduit = e.troisiemeDonnee === "PAetB" ? `P(A\\cup B)=${frac(c.AouB, N)}` : `P(A\\cap B)=${frac(c.AB, N)}`;
     const [etape2] = formatReponseAttenduePhaseLatex(e, "aEcran2");
-    const conclusion = e.sousTypeEcran3 === "relation" ? "calcul (ou intersection vide) et conclusion" : "les deux probabilités conditionnelles comparées et conclusion";
+    const critere3: FragmentConsigne[] =
+      e.sousTypeEcran3 !== "relation"
+        ? [texte("Les deux probabilités conditionnelles calculées (dénominateurs "), latex("P(\\overline{B})"), texte(" et "), latex("P(B)"), texte(")")]
+        : relationPaireEcran3(e) === "incompatibles"
+          ? [texte("Intersection reconnue vide : aucune case commune aux deux événements")]
+          : [texte("Probabilité de l'intersection et produit des deux probabilités calculés")];
     return {
       reponseFinale: reponseBreve(e),
       criteres: [
         crit(L1, 0.5, texte("Inclusion-exclusion : "), latex(deduit)),
         crit(L1, 1, texte("Tableau complet : "), latex(`${frac(c.AB, N)},\\ ${frac(c.ABb, N)},\\ ${frac(c.AbB, N)},\\ ${frac(c.AbBb, N)}`)),
         crit(L2, 1, latex(etape2)),
-        crit(L3, 0.5, texte("Probabilités utiles lues dans le tableau")),
-        crit(L3, 1, texte(`Justification (${conclusion}) : ${verdictTexte(e).toLowerCase()}`)),
+        crit(L3, 0.5, ...critere3),
+        crit(L3, 1, texte("Conclusion justifiée : "), ...verdict(e)),
       ],
       erreursFrequentes: [
         { description: [latex("P(A\\cup B)=P(A)+P(B)"), texte(" (intersection oubliée)")], cout: "−0,5" },
@@ -490,7 +508,7 @@ function bareme(e: Ex): BaremeExercice {
       crit(L2, 1, latex(ope)),
       crit(L3, 0.5, latex(cond)),
       crit(L4, 0.5, texte("Produit "), latex("P(A)\\cdot P(B)"), texte(" calculé et comparé à "), latex("P(A\\cap B)")),
-      crit(L4, 1, texte(`Conclusion justifiée : ${verdictTexte(e).toLowerCase()}`)),
+      crit(L4, 1, texte("Conclusion justifiée : "), ...verdict(e)),
     ],
     erreursFrequentes: [
       { description: [texte("Effectifs favorables mal dénombrés (issue oubliée ou comptée deux fois)")], cout: "−0,5" },

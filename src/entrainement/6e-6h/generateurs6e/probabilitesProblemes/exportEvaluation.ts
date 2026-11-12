@@ -83,8 +83,15 @@ function construireEnonce(exercice: ExerciceProbabilitesProblemes): SectionExerc
   const donnees = blocDonnees(exercice);
   return {
     enteteFragments: donnees.length > 0 ? [...consigneGenerale(exercice), t(" Données : "), f(donnees.join(",\\quad ")), t(".")] : consigneGenerale(exercice),
-    questions: phasesPourExercice(exercice).map((phase) => ({ consigne: consigneEcran(exercice, phase) })),
+    questions: phasesPourExercice(exercice).map((phase) => ({ consigne: consigneEtape(exercice, phase) })),
   };
+}
+
+/** Consigne d'une étape (titre « Étape n — … » du corrigé) : celle de l'écran, sauf l'étape 1 de E,
+ * dont la consigne d'écran recopie les 3 informations (déjà dans l'énoncé papier) et parle de champs. */
+function consigneEtape(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
+  if (phase === "eMixteEcran1") return [t("Associe chacune des 3 informations à la bonne probabilité : P(c₁), P(E | c₁) ou P(E | c₂).")];
+  return consigneEcran(exercice, phase);
 }
 
 /** Corrigé historique (pipelines Word/PDF sans corrigé détaillé) : le résultat de chaque étape. */
@@ -112,6 +119,8 @@ function papierA(e: ExerciceFamilleA): EnoncePapier {
   };
 }
 
+const NOM_EPREUVES: Record<string, string> = { tir: "tirs", penalty: "penalties", piece: "répétitions" };
+
 function libelleDemandeB(e: ExerciceFamilleB): string {
   return e.demandeEcran3 === "auMoinsK" ? `d'obtenir au moins ${e.k} succès` : "d'obtenir au moins un succès et au moins un échec";
 }
@@ -119,9 +128,9 @@ function papierB(e: ExerciceFamilleB): EnoncePapier {
   return {
     section: {
       enteteFragments: [
-        t(`${e.contexte.texte} Il y a `),
+        t(`${e.contexte.texte} On considère `),
         f(`n=${e.n}`),
-        t(" épreuves ; à chaque épreuve, la probabilité de succès vaut "),
+        t(` épreuves (${NOM_EPREUVES[e.contexte.id] ?? "répétitions"}) ; à chaque épreuve, la probabilité de succès vaut `),
         f(`p=${nombreLatex(e.p)}`),
         t(`. ${PRECISION}`),
       ],
@@ -166,7 +175,7 @@ function papierF(e: ExerciceFamilleF): EnoncePapier {
   return {
     section: {
       enteteFragments: [
-        t(`${e.contexte.texte} Les 3 composants sont montés comme sur le premier schéma : ${descriptionMontage(e, e.configuration, e.positionMixte)}. Données : `),
+        t(`${e.contexte.texte} Ils sont montés comme sur le premier schéma : ${descriptionMontage(e, e.configuration, e.positionMixte)}. Données : `),
         ...listeFormules(blocDonnees(e)),
         t(`. ${PRECISION_FIABILITE}`),
       ],
@@ -249,6 +258,10 @@ function contenuA(e: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): Conte
   };
 }
 
+function branches(nombre: number): string {
+  return nombre === 1 ? "1 branche" : `${nombre} branches`;
+}
+
 function contenuB(e: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): ContenuEtape {
   if (phase === "bEcran1") {
     const chemins = cheminsAKSucces(e.n, e.k);
@@ -260,7 +273,7 @@ function contenuB(e: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): Conte
   }
   if (phase === "bEcran2") {
     return {
-      methode: [t(`Règle du produit : chacun de ces chemins passe par ${e.k} branches de probabilité p et ${e.n - e.k} branches de probabilité 1 − p, donc ils ont tous la même probabilité ; on additionne ces probabilités, c'est-à-dire qu'on multiplie par le nombre de chemins.`)],
+      methode: [t(`Règle du produit : chacun de ces chemins passe par ${branches(e.k)} de probabilité p et ${branches(e.n - e.k)} de probabilité 1 − p, donc ils ont tous la même probabilité ; on additionne ces probabilités, c'est-à-dire qu'on multiplie par le nombre de chemins.`)],
       calcul: calcul2(e, phase),
       piege: "Oublier de multiplier par le nombre de chemins : un seul chemin ne donne pas « exactement k succès ».",
     };
@@ -280,7 +293,7 @@ function contenuC(e: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): Conte
       const facteurs = [0, 1, 2].map((i) => (c.includes(i) ? nombreLatex(e.p[i]) : `(1-${nombreLatex(e.p[i])})`));
       return `P(\\{${c.map((i) => i + 1).join("\\,;\\,")}\\})=${facteurs.join("\\cdot ")}`;
     });
-    return { methode: aide1(e, phase), calcul: lignes.join("\\qquad "), piege: "Oublier le facteur 1 − pᵢ des éléments non concernés." };
+    return { methode: aide1(e, phase), calcul: `\\begin{gathered}${lignes.join("\\\\")}\\end{gathered}`, piege: "Oublier le facteur 1 − pᵢ des éléments non concernés." };
   }
   return {
     methode: aide1(e, phase),
@@ -292,7 +305,14 @@ function contenuC(e: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): Conte
 function contenuE(e: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): ContenuEtape {
   if (phase === "eMixteEcran1") return { methode: aide1(e, phase) };
   if (phase === "eMixteEcran2") {
-    return { methode: aide1(e, phase), calcul: calcul2(e, phase), figure: arbreBayesSvg(e.base), piege: "Oublier l'un des deux chemins qui mènent à E dans le calcul de P(E)." };
+    // Les 4 chemins et P(E) posés (l'aide de l'écran n'en montre qu'un).
+    const { p, q1, q2 } = e.base;
+    const [P, Q1, Q2] = [p, q1, q2].map((v) => nombreLatex(v));
+    const calcul =
+      `\\begin{gathered}P(c_1\\cap E)=${P}\\cdot ${Q1}\\qquad P(c_1\\cap\\overline{E})=${P}\\cdot(1-${Q1})\\\\` +
+      `P(c_2\\cap E)=(1-${P})\\cdot ${Q2}\\qquad P(c_2\\cap\\overline{E})=(1-${P})\\cdot(1-${Q2})\\\\` +
+      `P(E)=P(c_1\\cap E)+P(c_2\\cap E)\\end{gathered}`;
+    return { methode: aide1(e, phase), calcul, figure: arbreBayesSvg(e.base), piege: "Oublier l'un des deux chemins qui mènent à E dans le calcul de P(E)." };
   }
   return { methode: aide1(e, phase), calcul: calcul2(e, phase), piege: "Confondre P(c₁ | E) avec P(E | c₁), qui est une donnée de l'énoncé." };
 }

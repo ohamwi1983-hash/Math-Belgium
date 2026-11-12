@@ -400,7 +400,7 @@ function etapesD(e: ExerciceFamilleD): EtapeCorrection[] {
   const cible = singulier(couleurD(e, e.couleurCible));
   const autre = e.couleurCible === 0 ? 1 : 0;
   const [, r2, r3, r4] = phasesPourExercice(e).map((ph) => reponse(e, ph)[0]);
-  const deuxieme = e.avecRemise ? "la boule est remise : l'urne est la même qu'au départ" : "il reste une boule de moins, et une de moins de la couleur déjà tirée";
+  const deuxieme = e.avecRemise ? "comme la boule est remise, l'urne est la même qu'au départ" : "il reste une boule de moins, et une de moins de la couleur déjà tirée";
   return [
     { label: "Méthode", sousQuestion: "a", fragments: [t(`Premier tirage : nombre de boules de chaque couleur divisé par le nombre total. Deuxième tirage : ${deuxieme}. Les branches issues d'un même nœud ont une somme égale à 1.`)] },
     {
