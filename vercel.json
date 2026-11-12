@@ -1,4 +1,10 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "claude/new-session-bez93e": false,
+      "claude/**": false
+    }
+  },
   "rewrites": [
     { "source": "/((?!assets/|.*\\.[A-Za-z0-9]+$).*)", "destination": "/index.html" }
   ]
