@@ -310,18 +310,20 @@ function avecGraine<T>(graine: number, f: () => T): T {
 const GRAINES_REPLI: Record<string, number> = {
   "0va-horizontale-0ext-0pi": 1,
   "0va-horizontale-1ext-0pi": 1,
-  "0va-horizontale-2ext-1pi": 1,
+  "0va-horizontale-2ext-1pi": 4,
   "0va-horizontale-3ext-2pi": 1,
   "0va-oblique-2ext-0pi": 3,
-  "1va-horizontale-1ext-1pi": 2,
-  "1va-oblique-2ext-1pi": 4,
-  "1va-aucune-0ext-0pi": 19,
-  "2va-opposes-horizontale-2ext-2pi": 1686,
+  "1va-horizontale-1ext-1pi": 1,
+  "1va-oblique-2ext-1pi": 7,
+  "1va-aucune-0ext-0pi": 2,
+  "2va-opposes-horizontale-2ext-2pi": 75,
   "2va-mixte-oblique-3ext-2pi": 17,
-  "2va-pointIsole-1ext-1pi": 39,
+  "2va-pointIsole-1ext-1pi": 14,
 };
 
-const TENTATIVES_VARIANTE = 400;
+// Un essai coûte ~0,03 ms ; la variante la plus contrainte (2 AV, horizontale, 2 extremums) réussit
+// environ un essai sur 300 : 3 000 essais laissent le repli à environ 1 appel sur 10 000.
+const TENTATIVES_VARIANTE = 3000;
 const GRAINES_MAX = 5000;
 
 /** Première graine (ordre : graine mesurée, puis 1, 2, …, GRAINES_MAX) dont l'essai réussit. */
