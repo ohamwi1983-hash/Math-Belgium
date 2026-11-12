@@ -181,7 +181,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-complexes', sectionId: 'racinesniemes', generatorId: '6gen39', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen40', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'trianglescomplexes', generatorId: '6gen41', label: '' },
-  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: '' },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: '', processus: 3 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen30', label: '' },
   { chapitreSlug: 'probabilites', sectionId: 'tiragesarbres', generatorId: '6gen31', label: '' },
   { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen32', label: '' },
@@ -1247,41 +1247,50 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   },
   'nombres-complexes': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // `exemple` (ou le label de l'`exempleLibre`).
+    operationsbase: [
+      { cle: 'produit de deux complexes', enonce: "Calcule $(2+i)(3-i)$ et écris le résultat sous la forme $a+bi$." },
+      { cle: 'quotient par le conjugué', enonce: "Écris $\\dfrac{1+i}{1-i}$ sous la forme $a+bi$, en multipliant par le conjugué du dénominateur." },
+      { cle: 'puissance de i', enonce: "Calcule $i^{2021}$, puis $i^{2022}$, en justifiant à l'aide du cycle des puissances de $i$." },
+    ],
     affixesracines: [
-      undefined,
-      "Démontre que, pour résoudre $(x+iy)^2=a+bi$ grâce au système $x^2-y^2=a$ et $2xy=b$, élever ces deux équations au carré puis les additionner membre à membre donne la 3e équation $x^2+y^2=\\sqrt{a^2+b^2}$, qui permet de résoudre entièrement le système.",
-      undefined,
-      "Détermine, en détail, les deux racines carrées complexes de $5-12i$.",
+      { cle: 'distance entre deux points', enonce: "Dans le plan d'Argand, $A$ et $B$ ont pour affixes $z_A = 1+2i$ et $z_B = 4+6i$. Calcule la distance $AB$ et l'affixe du milieu de $[AB]$." },
+      { cle: 'pourquoi la 3e équation', enonce: "Démontre que, pour résoudre $(x+iy)^2=a+bi$ grâce au système $x^2-y^2=a$ et $2xy=b$, élever ces deux équations au carré puis les additionner membre à membre donne la 3e équation $x^2+y^2=\\sqrt{a^2+b^2}$, qui permet de résoudre entièrement le système." },
+      { cle: "racine carrée d'un complexe", enonce: "Détermine les deux racines carrées complexes de $3+4i$, en posant $z = x+iy$ et en utilisant le système à trois équations." },
+      { cle: 'racines carrées de 5−12i', enonce: "Détermine, en détail, les deux racines carrées complexes de $5-12i$." },
     ],
     equationscomplexes: [
-      "Démontre que, pour $az^2+bz+c=0$ (avec $a,b,c$ réels, $a \\neq 0$ et $\\Delta<0$), la mise sous forme canonique $a(z+\\dfrac{b}{2a})^2=\\dfrac{\\Delta}{4a^2}$ — valable aussi bien dans $\\mathbb{R}$ que dans $\\mathbb{C}$ — conduit, poursuivie dans $\\mathbb{C}$, aux deux solutions conjuguées $z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$.",
-      undefined,
-      "Résous, dans $\\mathbb{C}$, les deux équations bicarrées $z^4-5z^2+4=0$ et $z^4+5z^2+4=0$, en posant $u=z^2$ dans chacune.",
+      { cle: 'mise sous forme canonique', enonce: "Démontre que, pour $az^2+bz+c=0$ (avec $a,b,c$ réels, $a \\neq 0$ et $\\Delta<0$), la mise sous forme canonique $a(z+\\dfrac{b}{2a})^2=\\dfrac{\\Delta}{4a^2}$ — valable aussi bien dans $\\mathbb{R}$ que dans $\\mathbb{C}$ — conduit, poursuivie dans $\\mathbb{C}$, aux deux solutions conjuguées $z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$." },
+      { cle: 'discriminant négatif', enonce: "Résous $z^2+2z+5=0$ dans $\\mathbb{C}$ et vérifie que les deux solutions sont conjuguées." },
+      { cle: 'deux équations bicarrées', enonce: "Résous, dans $\\mathbb{C}$, les deux équations bicarrées $z^4-5z^2+4=0$ et $z^4+5z^2+4=0$, en posant $u=z^2$ dans chacune." },
+      { cle: 'coefficients complexes', enonce: "Résous $z^2-3z+(3+i)=0$ dans $\\mathbb{C}$ : calcule le discriminant, détermine une racine carrée complexe de ce discriminant, puis les deux solutions, et vérifie-les par leur somme et leur produit." },
     ],
     formetrigonometrique: [
-      "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$) — en développant le produit des deux formes trigonométriques et en reconnaissant les formules d'addition.",
-      undefined,
+      { cle: 'le produit additionne les arguments', enonce: "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$) — en développant le produit des deux formes trigonométriques et en reconnaissant les formules d'addition." },
+      { cle: 'produit en forme exponentielle', enonce: "Pour $z_1 = 2e^{i\\pi/3}$ et $z_2 = 3e^{i\\pi/6}$, calcule $z_1z_2$ et $\\dfrac{z_1}{z_2}$ sous forme exponentielle, puis écris $z_1z_2$ sous la forme $a+bi$." },
     ],
     formulemoivre: [
-      "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier $n$, en passant par la forme exponentielle $e^{i\\theta}$.",
-      "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$, par récurrence sur $n$, sans utiliser la forme exponentielle $e^{i\\theta}$.",
-      "En développant $(\\cos x+i\\sin x)^2$ grâce à la formule de Moivre, retrouve les formules de duplication $\\cos(2x)=\\cos^2x-\\sin^2x$ et $\\sin(2x)=2\\sin x\\cos x$.",
-      "En développant $(\\cos x+i\\sin x)^3$ grâce à la formule de Moivre et au binôme de Newton, exprime $\\cos(3x)$ et $\\sin(3x)$ en fonction de $\\cos x$ et $\\sin x$.",
+      { cle: 'via la forme exponentielle', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier $n$, en passant par la forme exponentielle $e^{i\\theta}$." },
+      { cle: 'par récurrence', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$, par récurrence sur $n$, sans utiliser la forme exponentielle $e^{i\\theta}$." },
+      { cle: 'cos(2x) et sin(2x)', enonce: "En développant $(\\cos x+i\\sin x)^2$ grâce à la formule de Moivre, retrouve les formules de duplication $\\cos(2x)=\\cos^2x-\\sin^2x$ et $\\sin(2x)=2\\sin x\\cos x$." },
+      { cle: 'cos(3x) et sin(3x)', enonce: "En développant $(\\cos x+i\\sin x)^3$ grâce à la formule de Moivre et au binôme de Newton, exprime $\\cos(3x)$ et $\\sin(3x)$ en fonction de $\\cos x$ et $\\sin x$." },
     ],
     racinesniemes: [
-      "Détermine les 4 racines quatrièmes de l'unité, puis les 3 racines cubiques de l'unité.",
-      "Démontre que, pour tout entier $n\\ge2$, la somme des $n$ racines n-ièmes de l'unité, $\\displaystyle\\sum_{k=0}^{n-1} e^{2ik\\pi/n}$, est nulle.",
+      { cle: 'racines quatrièmes et cubiques', enonce: "Détermine les 4 racines quatrièmes de l'unité, puis les 3 racines cubiques de l'unité." },
+      { cle: 'pourquoi cette somme est nulle', enonce: "Démontre que, pour tout entier $n\\ge2$, la somme des $n$ racines n-ièmes de l'unité, $\\displaystyle\\sum_{k=0}^{n-1} e^{2ik\\pi/n}$, est nulle." },
     ],
     transformationsplan: [
-      "Démontre que, pour tout point $M$ d'affixe $z$ et $A$ le point d'affixe $c$, l'application $z \\mapsto z+c$ est la translation de vecteur $\\vec{OA}$.",
-      "Démontre que, pour $c$ complexe non nul de module $r$ et d'argument $\\alpha$, l'application $z \\mapsto c(z-z_0)+z_0$ (de centre $\\Omega$ d'affixe $z_0$) combine une rotation de centre $\\Omega$ et d'angle $\\alpha$ avec une homothétie de centre $\\Omega$ et de rapport $r$.",
+      { cle: "l'addition correspond à une translation", enonce: "Démontre que, pour tout point $M$ d'affixe $z$ et $A$ le point d'affixe $c$, l'application $z \\mapsto z+c$ est la translation de vecteur $\\vec{OA}$." },
+      { cle: 'combine rotation et homothétie', enonce: "Démontre que, pour $c$ complexe non nul de module $r$ et d'argument $\\alpha$, l'application $z \\mapsto c(z-z_0)+z_0$ (de centre $\\Omega$ d'affixe $z_0$) combine une rotation de centre $\\Omega$ et d'angle $\\alpha$ avec une homothétie de centre $\\Omega$ et de rapport $r$." },
+      { cle: 'classer une transformation', enonce: "Détermine la nature, le centre, l'angle et le rapport de la transformation $z' = (1+i)z + 2$." },
     ],
     trianglescomplexes: [
-      "Démontre que, pour tout point $B\\neq O$ et $F$ l'image de $B$ par la rotation de centre $O$ et d'angle $\\pi/3$ (c'est-à-dire $F=B\\cdot e^{i\\pi/3}$), le triangle $OBF$ est équilatéral.",
+      { cle: 'OBF est équilatéral', enonce: "Démontre que, pour tout point $B\\neq O$ et $F$ l'image de $B$ par la rotation de centre $O$ et d'angle $\\pi/3$ (c'est-à-dire $F=B\\cdot e^{i\\pi/3}$), le triangle $OBF$ est équilatéral." },
     ],
     problemesavances: [
-      undefined,
-      "Démontre que, pour $a$ complexe tel que $|a|\\neq1$, si $|z|=1$ alors $|z'|=1$, où $z'=\\dfrac{z-a}{1-\\bar{a}z}$.",
+      { cle: 'z³ réel positif', enonce: "Pour $z = e^{i\\theta}$ avec $\\theta \\in [0\\,;2\\pi[$, détermine les valeurs de $\\theta$ pour lesquelles $z^3$ est un réel positif, puis celles pour lesquelles $z^3$ est un réel négatif." },
+      { cle: 'si |z|=1 alors |z′|=1', enonce: "Démontre que, pour $a$ complexe tel que $|a|\\neq1$, si $|z|=1$ alors $|z'|=1$, où $z'=\\dfrac{z-a}{1-\\bar{a}z}$." },
     ],
   },
   'probabilites': {
@@ -1462,7 +1471,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes']
 
 export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = blocsExemple(section)
