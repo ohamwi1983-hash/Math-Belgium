@@ -2397,3 +2397,28 @@ paths:
   4 svg de 57–71 px, jamais épinglées ; graphes passés à ≥ 80 px de haut (HG 92 → 110). Vérifié :
   0 débordement interne à 308 px, épinglage 390 × 760 et 1280 × 800 sans échec (les 3 non épinglés
   tiennent à l'écran), 0 erreur KaTeX/console, 0 `$` visible.
+
+- **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`) : corrections issues de l'audit
+  des générateurs (68 points, décisions A–M, toutes suivies ; 5 lots). Utilitaire commun
+  `diagnostiquerAngle`/`ecartAngulaire` (`moteur6e/equivalenceExponentielle.ts`) : angles acceptés à
+  2kπ près partout (refus « non réduit » seulement si la consigne exige ]−π ; π], message « en
+  radians » pour une saisie en degrés, sans tentative). Parseur partagé `expressionComplexe.ts` :
+  normalisation additive (« − », « · », « × », « √ », « ² », sqrt) — 93 332 saisies ASCII rejouées
+  sans différence — et exposant borné (« 6^99^51 » figeait le navigateur ; exponentiation rapide
+  au-delà de 64, refus au-delà de 10⁶). Conventions : compteur de génération dans la clé d'écran,
+  parse_error sans tentative, une seule tentative et options mélangées par graine sur les choix
+  fermés, forme réduite exigée (énoncé recopié refusé), placeholders hors tirages, aides en LaTeX,
+  `\arg`. Par générateur : 6gen34 (aide fausse −i/k, réponses non soufflées, nombres bornés) ;
+  6gen35 (méthode du cours x²+y²=√(a²+b²), ±x, famille milieu/distance, parallélogramme entier,
+  `PlanArgandMini`) ; 6gen36 (tirage libre = Δ<0 et bicarrée réels, autres familles en
+  « approfondissement » au sélecteur, r₁ ou r₂) ; 6gen37 (axes ~10 % via option de
+  `tirerZAvecAngleRemarquable`, famille E en π/12 avec cos et sin séparés) ; 6gen38 (recopies
+  refusées, cos³ accepté, 2 variantes nouvelles) ; 6gen39 (ensemble des racines à 2π près,
+  tolérance annoncée, 2√5) ; 6gen40 (famille z′ = az + b, figures) ; 6gen41 (verdicts variables,
+  4 cas de triangles, famille alignés/perpendiculaires, figure montrée seulement APRÈS les verdicts) ;
+  6gen42 (D_reelles résoluble, équations à un multiple près et formes équivalentes, lieux du cours
+  au tirage libre, Thalès/Apollonius en approfondissement, familles pauvres enrichies). Cours :
+  équation à coefficients complexes (§3), parallélogramme (§2), isocèle rectangle (§8), exemple
+  « classer z′ = (1+i)z + 2 » (§7), cartes alignées, badges propres. Quiz 6gen68 réécrit (10 V /
+  10 F par thème, « chapitre 5 »). Catalogues : entrées ajoutées (données seulement, composant du
+  sélecteur intact).

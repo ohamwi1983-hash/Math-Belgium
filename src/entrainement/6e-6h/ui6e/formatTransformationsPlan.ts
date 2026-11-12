@@ -27,7 +27,11 @@ export interface OptionChoix {
 
 export interface ChampDef {
   type: TypeChamp;
+  /** Libellé texte brut (fiche « votre réponse », aperçu). */
   label: string;
+  /** Libellé affiché devant le champ, symboles en KaTeX (audit 6e ch. 5 : « |z_A| = » était
+   * affiché en notation clavier). Ajouté par `champsEcran`. */
+  libelle?: FragmentConsigne[];
   placeholder?: string;
   options?: OptionChoix[];
 }
@@ -308,7 +312,7 @@ export function etatActuelB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan
 }
 
 export function champsB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): ChampDef[] {
-  if (phase === "bEcran1") return [{ type: "texte", label: e.sousType === "somme" ? "z_M =" : "z_P =", placeholder: PLACEHOLDER_AFFIXE }];
+  if (phase === "bEcran1") return [{ type: "texte", label: e.sousType === "somme" ? "Affixe de M =" : "Affixe de P =", placeholder: PLACEHOLDER_AFFIXE }];
   if (e.sousType === "somme") return [{ type: "texte", label: "Vecteur (affixe) =", placeholder: PLACEHOLDER_AFFIXE }];
   return [
     { type: "texte", label: "Rapport =", placeholder: PLACEHOLDER_REEL },
@@ -375,8 +379,8 @@ export function etatActuelC(e: ExerciceTransfoC, phase: PhaseTransformationsPlan
 export function champsC(phase: PhaseTransformationsPlan): ChampDef[] {
   if (phase === "cEcran1")
     return [
-      { type: "texte", label: "|z_A| =", placeholder: PLACEHOLDER_REEL },
-      { type: "texte", label: "|z_B| =", placeholder: PLACEHOLDER_REEL },
+      { type: "texte", label: "Module de A =", placeholder: PLACEHOLDER_REEL },
+      { type: "texte", label: "Module de B =", placeholder: PLACEHOLDER_REEL },
     ];
   if (phase === "cEcran2") return [{ type: "texte", label: "θ =", placeholder: PLACEHOLDER_ANGLE }];
   return []; // cEcran3 : add-as-needed, voir EtapeImagesTransformationsPlan (placeholder PLACEHOLDER_AFFIXE).
@@ -575,7 +579,25 @@ export function etatActuel(exercice: ExerciceTransformationsPlan, phase: PhaseTr
   }
 }
 
+/** Libellés de champ dont un symbole doit être rendu en KaTeX — les autres restent en texte. Le
+ * `label` brut (aperçu de saisie, fiche) est formulé en mots (« Module de A = »), jamais en
+ * notation clavier. */
+const LIBELLES_KATEX: Record<string, FragmentConsigne[]> = {
+  "Affixe de M =": [latexFrag("z_M=")],
+  "Affixe de P =": [latexFrag("z_P=")],
+  "Module de A =": [latexFrag("|z_A|=")],
+  "Module de B =": [latexFrag("|z_B|=")],
+  "θ =": [latexFrag("\\theta=")],
+  "Angle θ =": [texte("Angle "), latexFrag("\\theta=")],
+  "Rapport k =": [texte("Rapport "), latexFrag("k=")],
+  "Centre Ω (affixe) =": [texte("Centre : "), latexFrag("z_\\Omega=")],
+};
+
 export function champsEcran(exercice: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): ChampDef[] {
+  return champsEcranBruts(exercice, phase).map((c) => ({ ...c, libelle: LIBELLES_KATEX[c.label] ?? [texte(c.label)] }));
+}
+
+function champsEcranBruts(exercice: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): ChampDef[] {
   switch (exercice.famille) {
     case "A":
       return champsA(phase);

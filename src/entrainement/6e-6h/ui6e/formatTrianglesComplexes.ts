@@ -19,7 +19,10 @@ export type TypeChamp = "texte";
 
 export interface ChampDef {
   type: TypeChamp;
+  /** Libellé texte brut (fiche « votre réponse », aperçu). */
   label: string;
+  /** Libellé affiché devant le champ, symboles en KaTeX (audit 6e ch. 5). Ajouté par `champsEcran`. */
+  libelle?: FragmentConsigne[];
   placeholder?: string;
 }
 
@@ -388,7 +391,23 @@ export function etatActuel(exercice: ExerciceTrianglesComplexes, phase: PhaseTri
   }
 }
 
+/** Libellé de champ avec ses symboles en KaTeX : longueurs « AB = », angles « Ô (°) = », k, θ, q. */
+function libelleKatex(label: string): FragmentConsigne[] {
+  const longueur = /^([A-Z]{2}) =$/.exec(label);
+  if (longueur) return [latexFrag(`${longueur[1]}=`)];
+  const angleDeg = /^Angle en ([A-Z]) \(°\) =$/.exec(label);
+  if (angleDeg) return [texte("Angle "), latexFrag(`\\widehat{${angleDeg[1]}}`), texte(" (en degrés) =")];
+  if (label === "Rapport k =") return [texte("Rapport "), latexFrag("k=")];
+  if (label === "Angle θ =") return [texte("Angle "), latexFrag("\\theta=")];
+  if (label === "q =") return [latexFrag("q=")];
+  return [texte(label)];
+}
+
 export function champsEcran(exercice: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): ChampDef[] {
+  return champsEcranBruts(exercice, phase).map((c) => ({ ...c, libelle: libelleKatex(c.label) }));
+}
+
+function champsEcranBruts(exercice: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): ChampDef[] {
   switch (exercice.famille) {
     case "A":
       return champsA(phase);

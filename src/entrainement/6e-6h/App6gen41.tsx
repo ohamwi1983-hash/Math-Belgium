@@ -5,7 +5,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTriangles
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTrianglesComplexes, soumettreReponseEcran } from "./moteur6e/sessionTrianglesComplexes";
 import type { EtatSessionTrianglesComplexes } from "./moteur6e/typesTrianglesComplexes";
-import { tentativesMaxPhase } from "./moteur6e/typesTrianglesComplexes";
+import { PHASES_CHOIX_UNIQUE, phasesPourExercice, tentativesMaxPhase } from "./moteur6e/typesTrianglesComplexes";
 import type { ExerciceTrianglesComplexes } from "./core6e/trianglesComplexes.types";
 import { PlanArgandMini } from "./components6e/PlanArgandMini";
 import { diagnostiquerEcran } from "./moteur6e/verificationTrianglesComplexes";
@@ -45,8 +45,10 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 /** Figure d'énoncé (audit 6e ch. 5, décision K) : le triangle étudié dans le plan complexe —
- * familles A à D. Pas de figure pour la famille E : l'alignement ou l'angle droit s'y lirait à
- * l'œil, alors que l'exercice porte précisément sur le critère du quotient. */
+ * familles A à D, affiché SEULEMENT une fois le dernier écran de verdict validé (décision du
+ * coordinateur : isocèle, angle droit, centre ou cohérence se liraient à l'œil sur la figure — voir
+ * `figureVisible` dans le composant). Pas de figure pour la famille E : l'alignement ou l'angle
+ * droit s'y lirait à l'œil, alors que l'exercice porte précisément sur le critère du quotient. */
 function figureEnonce(e: ExerciceTrianglesComplexes) {
   switch (e.famille) {
     case "A":
@@ -148,6 +150,15 @@ export function App6gen41() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  // Figure masquée pendant (et avant) les écrans de verdict : visible à partir de la validation du
+  // DERNIER écran de choix de l'exercice (A : rectangle ? ; B : rectangle ? ; C : conclusion ;
+  // D : cohérence), jamais avant.
+  const sequence = phasesPourExercice(exercice);
+  const verdicts = sequence.filter((p) => PHASES_CHOIX_UNIQUE.includes(p));
+  const indexDernierVerdict = verdicts.length > 0 ? sequence.indexOf(verdicts[verdicts.length - 1]) : -1;
+  const indexPhase = sequence.indexOf(phase);
+  const figureVisible = indexPhase > indexDernierVerdict || (indexPhase === indexDernierVerdict && enAttente !== null);
+
   // Calculatrice flottante — SEUL écran du générateur avec un vrai calcul décimal/irrationnel
   // (famille B écran 4, angles via loi des cosinus : arccos d'un ratio décimal, réponse attendue en
   // degrés, tolérance 0,5° — `moteur6e/verificationTrianglesComplexes.ts`) — mirroir `App6gen9.tsx`
@@ -208,7 +219,7 @@ export function App6gen41() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          figure={figureEnonce(exercice)}
+          figure={figureVisible ? figureEnonce(exercice) : undefined}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           choix={choixEcran(exercice, phase)}

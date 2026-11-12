@@ -29,12 +29,14 @@ const NOMBRE_AUTRES_POINTS_MIN = 2;
 const NOMBRE_AUTRES_POINTS_MAX = 3;
 const PORTEE_AUTRES_POINTS = 5;
 
-function tirerAutresPoints(): AffixeEntiere[] {
+/** `exclus` : A et B — un « autre point » confondu avec A ou B (ex. z_E = z_B) prêtait à confusion
+ * (audit 6e ch. 5, lot D). */
+function tirerAutresPoints(exclus: AffixeEntiere[]): AffixeEntiere[] {
   const n = tirerEntier(NOMBRE_AUTRES_POINTS_MIN, NOMBRE_AUTRES_POINTS_MAX);
   const points: AffixeEntiere[] = [];
   while (points.length < n) {
     const p = tirerAffixeEntiereArbitraire(PORTEE_AUTRES_POINTS);
-    if (points.some((q) => q.a === p.a && q.b === p.b)) continue;
+    if ([...points, ...exclus].some((q) => q.a === p.a && q.b === p.b)) continue;
     points.push(p);
   }
   return points;
@@ -48,7 +50,7 @@ export function construireFamilleC(): ExerciceTransfoC {
   const angleB = additionnerAngles(tireA.angle, axisDelta);
   const angleRotation = additionnerAngles(angleB, tireA.angle, -1);
 
-  const autresPoints = tirerAutresPoints();
+  const autresPoints = tirerAutresPoints([zA, zB]);
   const imagesAutresPoints = autresPoints.map((p) => appliquerRotationAxe(p, angleRotation));
 
   return {

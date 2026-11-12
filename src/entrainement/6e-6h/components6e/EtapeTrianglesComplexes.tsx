@@ -114,7 +114,7 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, figure,
         <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>
           {champs.map((champ, i) => (
             <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
-              <label className="field-label field-label-minuscule">{champ.label}</label>
+              <label className="field-label field-label-minuscule">{champ.libelle ? <RenduFragments fragments={champ.libelle} /> : champ.label}</label>
               <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeursTexte[i]} placeholder={champ.placeholder} onChange={(e) => changerTexte(i, e.target.value)} />
             </div>
           ))}
