@@ -34,6 +34,7 @@
     "<style>" +
     ":host{display:block;font-family:var(--sans,system-ui,sans-serif);}" +
     "*{box-sizing:border-box;}" +
+    "[hidden]{display:none !important;}" +
     ".ligne{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}" +
     ".ligne label{font-weight:600;color:var(--ink,#241f1a);}" +
     "select{font:inherit;max-width:100%;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}" +
@@ -219,8 +220,8 @@
       svg.appendChild(el("line", { x1: X(o2), y1: cy, x2: X(0), y2: Y(-hc), class: "rayon2" }));
       svg.appendChild(el("circle", { cx: X(o1), cy: cy, r: 3.5, class: "centre1" }));
       svg.appendChild(el("circle", { cx: X(o2), cy: cy, r: 3.5, class: "centre2" }));
-      svg.appendChild(el("text", { x: X(o1), y: cy + 16, "text-anchor": "middle", class: "etiq1" }, "O₁"));
-      svg.appendChild(el("text", { x: X(o2), y: cy + 16, "text-anchor": "middle", class: "etiq2" }, "O₂"));
+      svg.appendChild(el("text", { x: X(o1) - 8, y: cy + 18, "text-anchor": "end", class: "etiq1" }, "O₁"));
+      svg.appendChild(el("text", { x: X(o2) + 8, y: cy + 18, "text-anchor": "start", class: "etiq2" }, "O₂"));
       // Petits arcs d'angle au centre.
       function petitArc(ox, sens, th, cls) {
         var ra = 16, mid = sens > 0 ? 0 : Math.PI;

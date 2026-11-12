@@ -63,6 +63,7 @@
     "<style>" +
     ":host{display:block;font-family:var(--sans,system-ui,sans-serif);}" +
     "*{box-sizing:border-box;}" +
+    "[hidden]{display:none !important;}" +
     ".formule{text-align:center;font-family:var(--serif,serif);font-style:italic;font-size:1.02rem;font-weight:600;color:var(--ink,#241f1a);margin:0 0 10px;}" +
     ".figure{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:6px;margin-bottom:12px;}" +
     "svg{width:100%;height:auto;display:block;}" +
@@ -80,7 +81,7 @@
     ".borne{fill:var(--accent,#a8471f);}" +
     ".guide{stroke:var(--ink-faint,#c9beae);stroke-width:1;stroke-dasharray:3 3;}" +
     ".depart{fill:var(--plan,#5b4ea3);}" +
-    ".etiq{font-size:11px;fill:var(--ink-soft,#6b6055);}" +
+    ".etiq{font-size:12px;fill:var(--ink-soft,#6b6055);}" +
     ".etiq-seuil{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);}" +
     ".grad{stroke:var(--ink-soft,#6b6055);stroke-width:1;}" +
     ".lecture{text-align:center;font-size:0.9rem;color:var(--ink,#241f1a);margin:0 0 12px;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);line-height:1.5;}" +
