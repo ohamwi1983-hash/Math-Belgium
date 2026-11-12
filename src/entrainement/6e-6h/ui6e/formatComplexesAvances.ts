@@ -339,7 +339,9 @@ export function consigneGeneraleB(e: ExerciceComplexesB): FragmentConsigne[] {
       texte("M est un point d'affixe "),
       latex("z=x+yi"),
       texte(" qui vérifie simultanément deux conditions : (1) "),
-      latex("\\dfrac{z-q_1}{z-q_2}"),
+      // Dénominateur FIXE q₂−q₁ (≠ 0) : avec (z−q₁)/(z−q₂), q₂ était exclu de la condition (1) alors
+      // qu'il est donné comme point d'intersection. Même droite (q₁q₂), sans point exclu.
+      latex("\\dfrac{z-q_1}{q_2-q_1}"),
       texte(" est un réel ; (2) "),
       latex("z\\cdot\\bar z=k"),
       texte(". Traduis chaque condition, identifie les deux lieux, puis trouve leurs points d'intersection."),

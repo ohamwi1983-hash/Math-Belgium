@@ -18,6 +18,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen37` — Forme trigonométrique, module, argument et opérations (chapitre 7, "Nombres
@@ -34,13 +35,22 @@ function nouvelleSession(): EtatSessionFormeTrigonometrique {
   return demarrerSessionFormeTrigonometrique(REGLAGES_DEMO, genererExerciceFormeTrigonometrique);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/formeTrigonometrique/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionFormeTrigonometrique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionFormeTrigonometrique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceFormeTrigonometrique, (id) => construireAvecVarianteId(id as IdVarianteFormeTrigonometrique)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionFormeTrigonometrique;
   revele: boolean;
 }
 
 export function App6gen37() {
-  const [etat, setEtat] = useState<EtatSessionFormeTrigonometrique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionFormeTrigonometrique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionFormeTrigonometrique`, jamais dans le moteur : la saisie de

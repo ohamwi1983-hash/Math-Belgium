@@ -4,6 +4,16 @@ import type { IdRelationRacineUnite } from "../moteur6e/verificationRacinesNieme
 import { OPTIONS_RELATION_C } from "../moteur6e/verificationRacinesNiemes";
 import type { PhaseRacinesNiemes } from "../moteur6e/typesRacinesNiemes";
 
+
+/** `\\sqrt[n]{x}` lisible : racine carrée sans indice (n = 2). */
+function racineN(n: number, x: string | number): string {
+  return n === 2 ? `\\sqrt{${x}}` : `\\sqrt[${n}]{${x}}`;
+}
+/** θₖ = (θ + 2kπ)/n sans « 0 + » quand l'argument de départ est nul. */
+function thetaK(angleLatex: string, n: number): string {
+  return angleLatex === "0" ? `\\frac{2k\\pi}{${n}}` : `\\frac{${angleLatex}+2k\\pi}{${n}}`;
+}
+
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen39`. Dispatch sur
  * `exercice.famille` PUIS `phase`, mirroir `formatFormeTrigonometrique.ts` (6gen37), jamais importé
@@ -171,7 +181,7 @@ export function etatActuelA(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): str
   // Écran 3 : cumule r/θ (écran 1) ET le module/argument des racines (écran 2), du plus ancien au
   // plus récent — jamais seulement l'écran immédiatement précédent (audit transversal "état actuel
   // cumulatif").
-  if (phase === "aEcran3") return [rThetaConfirmes, `\\text{module des racines : }${e.kModule}`, `\\theta_k=\\frac{${e.angle.latex}+2k\\pi}{${e.n}}\\text{ (confirmés)}`];
+  if (phase === "aEcran3") return [rThetaConfirmes, `\\text{module des racines : }${e.kModule}`, `\\theta_k=${thetaK(e.angle.latex, e.n)}\\text{ (confirmés)}`];
   return null;
 }
 export function champsA(phase: PhaseRacinesNiemes): ChampDef[] {
@@ -188,7 +198,7 @@ export function aideNiveau1A(phase: PhaseRacinesNiemes): AideAvecLatex {
 }
 export function aideNiveau2A(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return { texte: "Module des racines (la formule de l'argument reste à écrire) :", latex: `\\sqrt[${e.n}]{${e.r}}=${e.kModule}` };
+  return { texte: "Module des racines (la formule de l'argument reste à écrire) :", latex: `${racineN(e.n, e.r)}=${e.kModule}` };
 }
 
 // ============================================================================
@@ -232,7 +242,7 @@ export function aideNiveau1B(phase: PhaseRacinesNiemes): AideAvecLatex {
 }
 export function aideNiveau2B(e: ExerciceRacinesB, phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase === "bEcran1") return { texte: "Position du point (a ; b) — l'argument reste à calculer :", latex: quadrantLatex(e.a, e.b) };
-  return { texte: "Module des racines et écart entre deux arguments (la formule reste à écrire) :", latex: `\\sqrt[${e.n}]{${formatModuleRadical(e.a, e.b)}}\\qquad\\frac{2\\pi}{${e.n}}` };
+  return { texte: "Module des racines et écart entre deux arguments (la formule reste à écrire) :", latex: `${racineN(e.n, formatModuleRadical(e.a, e.b))}\\qquad\\frac{2\\pi}{${e.n}}` };
 }
 
 // ============================================================================
@@ -398,13 +408,13 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceRacinesNiemes,
   switch (exercice.famille) {
     case "A":
       if (phase === "aEcran1") return [`r=${exercice.r}\\text{ ;}`, `\\theta=${exercice.angle.latex}`];
-      if (phase === "aEcran2") return [`\\sqrt[${exercice.n}]{${exercice.r}}=${exercice.kModule}\\text{ ;}`, `\\theta_k=\\frac{${exercice.angle.latex}+2k\\pi}{${exercice.n}}`];
+      if (phase === "aEcran2") return [`${racineN(exercice.n, exercice.r)}=${exercice.kModule}\\text{ ;}`, `\\theta_k=${thetaK(exercice.angle.latex, exercice.n)}`];
       return formatListeRacinesLatex(exercice.racines, "z");
     case "B":
       if (phase === "bEcran1") return [`r=${formatModuleRadical(exercice.a, exercice.b)}\\text{ ;}`, egaliteArgument(exercice.angle)];
       // r substitué et valeurs chiffrées (audit 6e ch. 5, points B et 39).
       return [
-        `\\sqrt[${exercice.n}]{${formatModuleRadical(exercice.a, exercice.b)}}\\approx ${decimalVirgule(Math.pow(exercice.r, 1 / exercice.n))}\\text{ ;}`,
+        `${racineN(exercice.n, formatModuleRadical(exercice.a, exercice.b))}\\approx ${decimalVirgule(Math.pow(exercice.r, 1 / exercice.n))}\\text{ ;}`,
         `\\theta_k${estArgumentDecimal(exercice.angle) ? "\\approx" : "="}\\frac{${argumentLatex(exercice.angle)}+2k\\pi}{${exercice.n}}`,
       ];
     case "C":

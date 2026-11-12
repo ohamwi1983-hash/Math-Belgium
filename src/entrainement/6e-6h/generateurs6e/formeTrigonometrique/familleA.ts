@@ -152,7 +152,10 @@ function fracSimplifiee(num: number, den: number): ValeurExacte {
   const g = pgcd(Math.abs(num), den);
   const n = num / g;
   const d = den / g;
-  return { latex: d === 1 ? `${n}` : `\\frac{${n}}{${d}}`, numerique: n / d };
+  // Signe SORTI de la fraction (`-\\frac{1}{2}`, jamais `\\frac{-1}{2}`) : les assembleurs « a + bi »
+  // testent le `-` de tête pour écrire « − » au lieu de « + (−1)/2 ».
+  if (d === 1) return { latex: `${n}`, numerique: n / d };
+  return { latex: `${n < 0 ? "-" : ""}\\frac{${Math.abs(n)}}{${d}}`, numerique: n / d };
 }
 
 function radicalSimplifie(coefNum: number, coefDen: number, radicalLatex: string, radicalNumerique: number): ValeurExacte {

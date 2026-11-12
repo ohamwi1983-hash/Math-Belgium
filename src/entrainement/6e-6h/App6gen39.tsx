@@ -28,6 +28,7 @@ import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen39` — Racines n-ièmes d'un nombre complexe (chapitre 7, "Nombres complexes", après `6gen34`/
@@ -44,13 +45,22 @@ function nouvelleSession(): EtatSessionRacinesNiemes {
   return demarrerSessionRacinesNiemes(REGLAGES_DEMO, genererExerciceRacinesNiemes);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/racinesNiemes/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionRacinesNiemes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionRacinesNiemes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceRacinesNiemes, (id) => construireAvecVarianteId(id as IdVarianteRacinesNiemes)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionRacinesNiemes;
   revele: boolean;
 }
 
 export function App6gen39() {
-  const [etat, setEtat] = useState<EtatSessionRacinesNiemes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionRacinesNiemes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionRacinesNiemes`, jamais dans le moteur : la saisie de l'élève

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTransformationsPlan } from "./generateurs6e/transformationsPlan";
 import type { IdVarianteTransformationsPlan } from "./generateurs6e/transformationsPlan";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTransformationsPlan, soumettreReponseEcran } from "./moteur6e/sessionTransformationsPlan";
 import type { EtatSessionTransformationsPlan } from "./moteur6e/typesTransformationsPlan";
 import { tentativesMaxPhase } from "./moteur6e/typesTransformationsPlan";
@@ -91,13 +92,22 @@ function nouvelleSession(): EtatSessionTransformationsPlan {
   return demarrerSessionTransformationsPlan(REGLAGES_DEMO, genererExerciceTransformationsPlan);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/transformationsPlan/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionTransformationsPlan {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTransformationsPlan(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTransformationsPlan, (id) => construireAvecVarianteId(id as IdVarianteTransformationsPlan)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionTransformationsPlan;
   revele: boolean;
 }
 
 export function App6gen40() {
-  const [etat, setEtat] = useState<EtatSessionTransformationsPlan>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTransformationsPlan>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionTransformationsPlan` (voir `App6gen39.tsx`, même mécanisme). */

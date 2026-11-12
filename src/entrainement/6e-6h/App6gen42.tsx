@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComplexesAvances } from "./generateurs6e/complexesAvances";
 import type { IdVarianteComplexesAvances } from "./generateurs6e/complexesAvances";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionComplexesAvances, soumettreReponseEcran, tentativesMaxEcran } from "./moteur6e/sessionComplexesAvances";
 import type { EtatSessionComplexesAvances } from "./moteur6e/typesComplexesAvances";
 import { diagnostiquerEcran } from "./moteur6e/verificationComplexesAvances";
@@ -53,6 +54,15 @@ function nouvelleSession(): EtatSessionComplexesAvances {
   return demarrerSessionComplexesAvances(REGLAGES_DEMO, genererExerciceComplexesAvances);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/complexesAvances/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionComplexesAvances {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionComplexesAvances(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceComplexesAvances, (id) => construireAvecVarianteId(id as IdVarianteComplexesAvances)));
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -63,7 +73,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen42() {
-  const [etat, setEtat] = useState<EtatSessionComplexesAvances>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComplexesAvances>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionComplexesAvances` (voir `App6gen39.tsx`, même mécanisme). */

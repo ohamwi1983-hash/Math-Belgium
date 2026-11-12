@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTrianglesComplexes, soumettreReponseEcran } from "./moteur6e/sessionTrianglesComplexes";
 import type { EtatSessionTrianglesComplexes } from "./moteur6e/typesTrianglesComplexes";
 import { PHASES_CHOIX_UNIQUE, phasesPourExercice, tentativesMaxPhase } from "./moteur6e/typesTrianglesComplexes";
@@ -81,13 +82,22 @@ function nouvelleSession(): EtatSessionTrianglesComplexes {
   return demarrerSessionTrianglesComplexes(REGLAGES_DEMO, genererExerciceTrianglesComplexes);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/trianglesComplexes/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionTrianglesComplexes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTrianglesComplexes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTrianglesComplexes, (id) => construireAvecVarianteId(id as IdVarianteTrianglesComplexes)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionTrianglesComplexes;
   revele: boolean;
 }
 
 export function App6gen41() {
-  const [etat, setEtat] = useState<EtatSessionTrianglesComplexes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTrianglesComplexes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionTrianglesComplexes` (voir `App6gen39.tsx`, même mécanisme). */

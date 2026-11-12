@@ -564,7 +564,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormeTrigonome
     case "D":
       if (phase === "dEcran1") return [`\\theta=${exercice.z.angle.latex}`];
       if (phase === "dEcran2") return [congruenceLatex(exercice.condition)];
-      return [`n=${exercice.congruence.k}+${exercice.congruence.m}p\\text{, }p\\in\\mathbb{Z}`];
+      return [`n=${exercice.congruence.k === 0 ? "" : `${exercice.congruence.k}+`}${exercice.congruence.m}p,\\ p\\in\\mathbb{Z}`];
     case "E":
       if (phase === "eEcran1") return [`\\theta=${exercice.angleResultat.latex}`];
       return [`\\cos\\theta=${exercice.cosResultat.latex}\\text{ ;}`, `\\sin\\theta=${exercice.sinResultat.latex}`];

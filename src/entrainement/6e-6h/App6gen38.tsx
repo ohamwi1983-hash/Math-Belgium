@@ -17,6 +17,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen38` — Formule de Moivre : développer cos(nx) et sin(nx) (chapitre 7, "Nombres complexes",
@@ -32,13 +33,22 @@ function nouvelleSession(): EtatSessionFormuleMoivre {
   return demarrerSessionFormuleMoivre(REGLAGES_DEMO, genererExerciceFormuleMoivre);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/formuleMoivre/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionFormuleMoivre {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionFormuleMoivre(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceFormuleMoivre, (id) => construireAvecVarianteId(id as IdVarianteFormuleMoivre)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionFormuleMoivre;
   revele: boolean;
 }
 
 export function App6gen38() {
-  const [etat, setEtat] = useState<EtatSessionFormuleMoivre>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionFormuleMoivre>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionFormuleMoivre`, jamais dans le moteur : la saisie de l'élève n'a
