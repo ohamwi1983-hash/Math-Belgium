@@ -9,6 +9,12 @@
    * les 3 droites à la fois, coloré selon que la condition de sa ligne est
    * vérifiée. Reprend les 2 exemples déjà résolus dans le contenu de cette
    * section. Web Component (Shadow DOM).
+   *
+   * 4e droite (audit de contenu 5e ch. 1) : la droite des VALEURS (axe des y) —
+   * l'image de la fonction intérieure en bande orange, le domaine de la
+   * fonction extérieure en bande verte, leur zone commune entourée. Le marqueur
+   * y place la valeur intérieure(x) : la 2e condition devient « la valeur tombe
+   * dans le vert ». Préréglage « simplification piège » : f(t) = t², g(x) = √x.
    * ================================================================ */
 
   var PRESETS = [
@@ -21,6 +27,11 @@
       cond1: function (x) { return -3 * x + 6 >= 0; },           // x ∈ dom(f)  ⟺ x ≤ 2
       cond2: function (x) { return -3 * x + 6 <= 4; },           // f(x) ≤ 2, càd f(x) ∈ dom(g) ⟺ x ≥ 2/3
       resultat: "dom(g∘f) = [2/3 ; 2]",
+      // Droite des valeurs : image de l'intérieure (f ≥ 0) et domaine de l'extérieure (y ≤ 2).
+      fnInt: function (x) { return -3 * x + 6 >= 0 ? Math.sqrt(-3 * x + 6) : NaN; },
+      yMin: -3, yMax: 5,
+      imageInt: function (y) { return y >= 0; },
+      domExt: function (y) { return y <= 2; },
     },
     {
       nom: "domaine vide — (f∘g)(x), f(x)=√(x−10), g(x)=−x²",
@@ -29,12 +40,29 @@
       cond1: function () { return true; },                       // dom(g) = ℝ
       cond2: function () { return false; },                       // −x² ≥ 10 : jamais vrai
       resultat: "dom(f∘g) = ∅",
+      fnInt: function (x) { return -x * x; },
+      yMin: -8, yMax: 14,
+      imageInt: function (y) { return y <= 0; },                  // −x² ≤ 0
+      domExt: function (y) { return y >= 10; },                   // √(y − 10) exige y ≥ 10
+    },
+    {
+      nom: "simplification piège — f(t)=t², g(x)=√x",
+      labelInt: "g", labelExt: "f",
+      xMin: -3, xMax: 5,
+      cond1: function (x) { return x >= 0; },                     // x ∈ dom(g)
+      cond2: function () { return true; },                        // dom(f) = ℝ : aucune contrainte
+      resultat: "dom(f∘g) = [0 ; +∞[ — pas ℝ, même si f(g(x)) se simplifie en x",
+      fnInt: function (x) { return x >= 0 ? Math.sqrt(x) : NaN; },
+      yMin: -3, yMax: 5,
+      imageInt: function (y) { return y >= 0; },
+      domExt: function () { return true; },
     },
   ];
 
   var LARGEUR = 420, MARGE = 40, LIGNE_LARGEUR = LARGEUR - 2 * MARGE;
   var Y_LIGNES = [50, 130, 210];
-  var HAUTEUR = 260;
+  var Y_VALEURS = 312;
+  var HAUTEUR = 352;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -106,7 +134,17 @@
     '.marqueur{stroke:var(--surface,#fff);stroke-width:2;}' +
     '.marqueur.dedans{fill:var(--good,#2f7a4f);}' +
     '.marqueur.dehors{fill:var(--ink-faint,#9c9083);}' +
-    '.resultat{text-align:center;font-family:var(--mono,monospace);font-size:0.98rem;font-weight:700;color:var(--accent-ink,#7a3212);margin:0 0 18px;}' +
+    '.separateur{stroke:var(--line-soft,#ece4d6);stroke-width:1;stroke-dasharray:3 4;}' +
+    '.bande-image{stroke:var(--accent,#a8471f);stroke-width:5;stroke-linecap:round;}' +
+    '.bande-dom{stroke:var(--good,#2f7a4f);stroke-width:5;stroke-linecap:round;}' +
+    '.bande-commune{fill:none;stroke:var(--plan,#5b4ea3);stroke-width:1.6;}' +
+    '.label-image{fill:var(--accent-ink,#7a3212);font-weight:700;}' +
+    '.label-dom{fill:var(--good,#2f7a4f);font-weight:700;}' +
+    '.label-commun{fill:var(--plan,#5b4ea3);font-weight:700;}' +
+    '.marqueur-valeur{stroke:var(--surface,#fff);stroke-width:2;}' +
+    '.marqueur-valeur.dedans{fill:var(--good,#2f7a4f);}' +
+    '.marqueur-valeur.dehors{fill:var(--bad,#a8322f);}' +
+    '.resultat{text-align:center;font-family:var(--mono,monospace);font-size:0.98rem;font-weight:700;color:var(--accent-ink,#7a3212);margin:0 0 18px;overflow-wrap:anywhere;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);text-align:center;}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
@@ -196,6 +234,56 @@
     svg.appendChild(svgEl(ns, "circle", { cx: pxM.toFixed(2), cy: y, r: 6, class: "marqueur " + (dedans ? "dedans" : "dehors") }));
   };
 
+  function pasTicks(etendueMath) {
+    return etendueMath > 12 ? 2 : 1;
+  }
+
+  // Droite des VALEURS : image de l'intérieure (orange, au-dessus), domaine de l'extérieure
+  // (vert, au-dessous), zone commune entourée en violet, et le marqueur intérieure(x).
+  DomaineComposeeWidgetClass.prototype._dessinerValeurs = function (svg, ns, preset, x) {
+    var y = Y_VALEURS, yMin = preset.yMin, yMax = preset.yMax;
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE - 10, x2: LARGEUR - MARGE + 10, y1: Y_VALEURS - 50, y2: Y_VALEURS - 50, class: "separateur" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: y, y2: y, class: "ligne", "marker-end": "url(#fleche)" }));
+    segmentsVrais(preset.imageInt, yMin, yMax).forEach(function (sg) {
+      svg.appendChild(svgEl(ns, "line", { x1: xPx(yMin, yMax, sg[0]).toFixed(2), x2: xPx(yMin, yMax, sg[1]).toFixed(2), y1: y - 7, y2: y - 7, class: "bande-image" }));
+    });
+    segmentsVrais(preset.domExt, yMin, yMax).forEach(function (sg) {
+      svg.appendChild(svgEl(ns, "line", { x1: xPx(yMin, yMax, sg[0]).toFixed(2), x2: xPx(yMin, yMax, sg[1]).toFixed(2), y1: y + 7, y2: y + 7, class: "bande-dom" }));
+    });
+    var commun = function (v) { return preset.imageInt(v) && preset.domExt(v); };
+    segmentsVrais(commun, yMin, yMax).forEach(function (sg) {
+      var p0 = xPx(yMin, yMax, sg[0]), p1 = xPx(yMin, yMax, sg[1]);
+      svg.appendChild(svgEl(ns, "rect", { x: (p0 - 4).toFixed(2), y: y - 13, width: Math.max(8, p1 - p0 + 8).toFixed(2), height: 26, rx: 6, class: "bande-commune" }));
+    });
+    var pas = pasTicks(yMax - yMin);
+    for (var t = Math.ceil(yMin / pas) * pas; t <= yMax; t += pas) {
+      var px = xPx(yMin, yMax, t);
+      svg.appendChild(svgEl(ns, "line", { x1: px.toFixed(2), x2: px.toFixed(2), y1: y - 3, y2: y + 3, class: "tick" }));
+      var lab = svgEl(ns, "text", { x: px.toFixed(2), y: y + 24, "text-anchor": "middle", class: "tick-label" });
+      lab.textContent = formatNombreFr(t, 0);
+      svg.appendChild(lab);
+    }
+    // Titre de la droite, sur deux tspans colorés (pas de légende hors figure).
+    var titre = svgEl(ns, "text", { x: MARGE, y: y - 30, class: "ligne-label" });
+    var a1 = svgEl(ns, "tspan", {}); a1.textContent = "valeurs y : ";
+    var a2 = svgEl(ns, "tspan", { class: "label-image" }); a2.textContent = "image de " + preset.labelInt;
+    var a3 = svgEl(ns, "tspan", {}); a3.textContent = ", ";
+    var a4 = svgEl(ns, "tspan", { class: "label-dom" }); a4.textContent = "dom(" + preset.labelExt + ")";
+    var a5 = svgEl(ns, "tspan", {}); a5.textContent = ", ";
+    var a6 = svgEl(ns, "tspan", { class: "label-commun" }); a6.textContent = "commun";
+    [a1, a2, a3, a4, a5, a6].forEach(function (n) { titre.appendChild(n); });
+    svg.appendChild(titre);
+
+    var v = preset.fnInt(x);
+    if (isFinite(v)) {
+      var vClamp = Math.max(yMin, Math.min(yMax, v));
+      var dedans = preset.domExt(v);
+      svg.appendChild(svgEl(ns, "circle", { cx: xPx(yMin, yMax, vClamp).toFixed(2), cy: y, r: 6, class: "marqueur-valeur " + (dedans ? "dedans" : "dehors") }));
+      return preset.labelInt + "(" + formatNombreFr(x, 2) + ") = " + formatNombreFr(v, 2) + (dedans ? " : dans dom(" + preset.labelExt + ")" : " : hors de dom(" + preset.labelExt + ")");
+    }
+    return preset.labelInt + "(" + formatNombreFr(x, 2) + ") n'existe pas";
+  };
+
   DomaineComposeeWidgetClass.prototype._rendre = function () {
     var preset = PRESETS[this._presetIndex];
     var x = this._x;
@@ -216,7 +304,9 @@
     var intersection = function (v) { return preset.cond1(v) && preset.cond2(v); };
     this._dessinerLigne(svg, ns, Y_LIGNES[2], preset.xMin, preset.xMax, intersection, "intersection = dom(composée)", x);
 
-    this._resultat.textContent = preset.resultat + (intersection(x) ? "  —  x=" + formatNombreFr(x, 2) + " convient" : "  —  x=" + formatNombreFr(x, 2) + " ne convient pas");
+    var noteValeur = this._dessinerValeurs(svg, ns, preset, x);
+
+    this._resultat.textContent = preset.resultat + (intersection(x) ? "  —  x = " + formatNombreFr(x, 2) + " convient" : "  —  x = " + formatNombreFr(x, 2) + " ne convient pas") + "  ·  " + noteValeur;
   };
 
   if (!customElements.get("domaine-composee-widget")) {

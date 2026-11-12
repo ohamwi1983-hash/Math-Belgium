@@ -61,9 +61,32 @@ export const fonctionsComposees: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Deux mots à garder sous la main pour tout le chapitre. Le **domaine de définition** ' +
+          'Trois mots à garder sous la main pour tout le chapitre. Le **domaine de définition** ' +
           '(noté $\\operatorname{dom} f$) : l\'ensemble des x que la machine accepte sans ' +
-          'planter. Le **graphe** $C_f$ : l\'ensemble des points $(x\\,;\\,f(x))$.',
+          'planter. L\'**image** (notée $\\operatorname{Im} f$) : l\'ensemble des valeurs $f(x)$ ' +
+          'réellement atteintes — tout ce qui peut sortir de la machine. Le **graphe** $C_f$ : ' +
+          'l\'ensemble des points $(x\\,;\\,f(x))$. Sur un graphique, $\\operatorname{dom} f$ se ' +
+          'lit en projetant la courbe sur l\'axe des x, et $\\operatorname{Im} f$ en la projetant ' +
+          'sur l\'axe des y.',
+      },
+      {
+        kind: 'illustration',
+        illustration: {
+          kind: 'curvePlot',
+          curves: [{ fn: (x: number) => x * x - 2 * x, tone: 'accent' }],
+          xMin: -2,
+          xMax: 4,
+          xTicks: [-2, -1, 0, 1, 2, 3, 4],
+          yTicks: [-1, 0, 3, 8],
+          fixedYRange: { min: -2, max: 9 },
+          imageBand: { from: -1, direction: 'up', tone: 'good' },
+          points: [{ x: 1, y: -1, label: 'sommet (1 ; −1)', tone: 'accent', labelPos: 'right' }],
+          xAxisLabel: 'x',
+          yAxisLabel: 'y',
+          caption:
+            '$f(x) = x^2 - 2x$ : la projection de la courbe sur l\'axe des y (bande verte) donne ' +
+            '$\\operatorname{Im} f = [-1\\,;\\,+\\infty[$ — aucune sortie de la machine n\'est plus petite que $-1$.',
+        },
       },
       {
         kind: 'para',
@@ -110,7 +133,7 @@ export const fonctionsComposees: ChapterContent = {
         },
         {
           kind: 'rappel',
-          label: 'Rappel — les 4 opérations à surveiller',
+          label: 'Rappel — 2 opérations à surveiller, 2 sans danger',
           items: [
             '**Un dénominateur** : ne doit jamais valoir 0.',
             '**Une racine d’indice pair** (carrée, quatrième…) : le radicande doit être **≥ 0**.',
@@ -174,13 +197,14 @@ export const fonctionsComposees: ChapterContent = {
             caption: 'trait plein = valeurs acceptées — rond vide = point exclu (x = 1)',
           },
         },
-        { kind: 'subheading', text: "Quand l'exclusion tombe au milieu de l'intervalle" },
+        { kind: 'subheading', text: 'Quand la racine borne le domaine des deux côtés' },
         {
           kind: 'para',
           text:
-            "Le cas le plus instructif, c'est quand le point exclu par le dénominateur tombe " +
-            "**à l'intérieur** d'un intervalle déjà borné par une racine — l'intersection produit " +
-            "alors deux morceaux au lieu d'un.",
+            "Ci-dessus, la racine ne bornait le domaine que d'un côté. Ici, elle l'enferme dans un " +
+            "segment **borné des deux côtés** : si le point exclu par le dénominateur tombe " +
+            "**à l'intérieur** de ce segment, il le coupe en deux — vérifie toujours qu'il est bien " +
+            "dedans : s'il tombait à l'extérieur, il n'y aurait rien à retirer.",
         },
         {
           kind: 'exemple',
@@ -211,6 +235,122 @@ export const fonctionsComposees: ChapterContent = {
             axisLabel: 'dom f',
             caption: "l'exclusion x = −1 coupe l'intervalle [−3;3] en deux morceaux",
           },
+        },
+        { kind: 'subheading', text: 'Trois autres formes à reconnaître' },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — une fraction sous une racine : le tableau de signes',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Pour $f(x) = \\sqrt{\\dfrac{x-1}{x+2}}$, il faut que la fraction soit **positive ou ' +
+                'nulle** ET que son dénominateur ne s\'annule pas. On étudie le signe du quotient ' +
+                'grâce aux zéros du numérateur ($x = 1$) et du dénominateur ($x = -2$).',
+            },
+            {
+              kind: 'signTable',
+              caption: 'Signe de (x−1)/(x+2) — la double barre marque la valeur interdite x = −2',
+              rows: [
+                {
+                  label: 'x',
+                  cells: [
+                    { text: '−∞', tone: 'plain' },
+                    { text: '', tone: 'plain' },
+                    { text: '−2', tone: 'plain' },
+                    { text: '', tone: 'plain' },
+                    { text: '1', tone: 'plain' },
+                    { text: '', tone: 'plain' },
+                    { text: '+∞', tone: 'plain' },
+                  ],
+                },
+                {
+                  label: 'x − 1',
+                  cells: [
+                    { text: '', tone: 'plain' },
+                    { text: '−', tone: 'neg' },
+                    { text: '−', tone: 'neg' },
+                    { text: '−', tone: 'neg' },
+                    { text: '0', tone: 'zero' },
+                    { text: '+', tone: 'pos' },
+                    { text: '', tone: 'plain' },
+                  ],
+                },
+                {
+                  label: 'x + 2',
+                  cells: [
+                    { text: '', tone: 'plain' },
+                    { text: '−', tone: 'neg' },
+                    { text: '0', tone: 'zero' },
+                    { text: '+', tone: 'pos' },
+                    { text: '+', tone: 'pos' },
+                    { text: '+', tone: 'pos' },
+                    { text: '', tone: 'plain' },
+                  ],
+                },
+                {
+                  label: '(x − 1)/(x + 2)',
+                  cells: [
+                    { text: '', tone: 'plain' },
+                    { text: '+', tone: 'pos' },
+                    { text: '‖', tone: 'indef' },
+                    { text: '−', tone: 'neg' },
+                    { text: '0', tone: 'zero' },
+                    { text: '+', tone: 'pos' },
+                    { text: '', tone: 'plain' },
+                  ],
+                },
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                'On garde les colonnes « + » et le « 0 » du numérateur, jamais la double barre : ' +
+                '$\\operatorname{dom} f = \\mathopen{]}-\\infty\\,;\\,-2\\mathclose{[}\\ \\cup\\ [1\\,;\\,+\\infty[$. ' +
+                'La borne $1$ est fermée (le quotient y vaut 0, et $\\sqrt{0}$ existe) ; la borne $-2$ ' +
+                'est ouverte (dénominateur nul).',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'racine au dénominateur — condition stricte',
+          formula: '$f(x) = \\dfrac{x+4}{\\sqrt{6-2x}}$',
+          steps: [
+            {
+              tag: 'une seule opération, deux contraintes',
+              text: 'la racine exige $6-2x \\ge 0$, le dénominateur exige $\\sqrt{6-2x} \\ne 0$ : ensemble, $6-2x > 0$',
+            },
+            {
+              tag: 'diviser par −2 : le sens de l’inégalité change',
+              text: '$-2x > -6 \\iff x < 3$',
+            },
+          ],
+          result: {
+            tag: 'dom f — inégalité stricte, 3 est exclu',
+            text: '$\\operatorname{dom} f = \\mathopen{]}-\\infty\\,;\\,3\\mathclose{[}$',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'dénominateur du second degré',
+          formula: '$f(x) = \\dfrac{2x+1}{x^2-5x+6}$',
+          steps: [
+            { tag: 'CE — le dénominateur ne doit pas s’annuler', text: '$x^2-5x+6 \\ne 0$' },
+            { tag: 'discriminant', text: '$\\Delta = (-5)^2 - 4\\cdot1\\cdot6 = 1$' },
+            { tag: 'racines à exclure', text: '$x = \\dfrac{5 \\pm 1}{2}$, soit $x = 2$ et $x = 3$' },
+          ],
+          result: {
+            tag: 'dom f — deux valeurs retirées',
+            text: '$\\operatorname{dom} f = \\mathbb{R}\\setminus\\{2\\,;\\,3\\}$',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Pour résoudre $-2x+6 \\ge 0$, on isole x en divisant par $-2$, un nombre **négatif** : ' +
+            'le sens de l\'inégalité **change**. $-2x \\ge -6 \\iff x \\le 3$. Écrire $x \\ge 3$ ' +
+            'inverserait tout le domaine — c\'est l\'erreur la plus fréquente sur les racines.',
         },
         {
           kind: 'piege',
@@ -293,6 +433,23 @@ export const fonctionsComposees: ChapterContent = {
             'l\'ordre (f∘g) ou (g∘f) pour retrouver, par toi-même, les deux résultats différents ' +
             'du piège ci-dessus (5 et 9) — puis essaie le préréglage « domaine restreint » pour ' +
             'voir un cas où la composée « n\'existe pas ».',
+        },
+        {
+          kind: 'exemple',
+          badge: 'f∘g et g∘f en expressions',
+          formula: '$f(x) = x^2+1$ \\qquad $g(x) = 2x-3$',
+          steps: [
+            { tag: '(f∘g)(x) : g d’abord, puis f', text: '$f(g(x)) = (2x-3)^2+1 = 4x^2-12x+10$' },
+            { tag: '(g∘f)(x) : f d’abord, puis g', text: '$g(f(x)) = 2(x^2+1)-3 = 2x^2-1$' },
+            {
+              tag: 'vérification en x = 1',
+              text: '$f(g(1)) = f(-1) = 2$ et $4-12+10 = 2$ ; $g(f(1)) = g(2) = 1$ et $2-1 = 1$',
+            },
+          ],
+          result: {
+            tag: 'deux formules différentes',
+            text: '$(f\\circ g)(x) = 4x^2-12x+10 \\ne (g\\circ f)(x) = 2x^2-1$',
+          },
         },
         { kind: 'subheading', text: 'Décomposer : remonter d’une écriture composée vers ses étages' },
         {
@@ -421,17 +578,6 @@ export const fonctionsComposees: ChapterContent = {
             'Quand f et g sont données par leur formule, composer revient à **substituer** : partout où ' +
             'g apparaît, on remplace le t de f(t) par l’expression complète de g(x).',
         },
-        {
-          kind: 'exempleLibre',
-          label: 'Démonstration — la composition est associative : (f∘g)∘h = f∘(g∘h)',
-          blocks: [
-            { kind: 'para', text: '**Ce qu\'il faut montrer.** Deux fonctions sont égales si elles ont le même domaine et la même image en chaque point. On compare donc $((f\\circ g)\\circ h)(x)$ et $(f\\circ(g\\circ h))(x)$.' },
-            { kind: 'para', text: '**Étape 1 — le membre de gauche.** On applique la définition $(u\\circ v)(x) = u(v(x))$ avec $u = f\\circ g$ et $v = h$ : $((f\\circ g)\\circ h)(x) = (f\\circ g)(h(x))$. On l\'applique une seconde fois, avec $u = f$ et $v = g$, au nombre $h(x)$ : $(f\\circ g)(h(x)) = f(g(h(x)))$.' },
-            { kind: 'para', text: '**Étape 2 — le membre de droite.** Avec $u = f$ et $v = g\\circ h$ : $(f\\circ(g\\circ h))(x) = f((g\\circ h)(x)) = f(g(h(x)))$.' },
-            { kind: 'para', text: '**Étape 3 — même chaîne, même domaine.** Les deux membres donnent la même chaîne de calcul : h d\'abord, puis g, puis f. Ils existent exactement pour les mêmes x (ceux pour lesquels $h(x)$, puis $g(h(x))$, puis $f(g(h(x)))$ existent). Les deux fonctions sont donc égales : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$. On peut écrire $f\\circ g\\circ h$ sans parenthèses — c\'est exactement ce qu\'on fait en décomposant une écriture en plusieurs étages.' },
-            { kind: 'para', text: '**Attention — associative ne veut pas dire commutative.** L\'**ordre** des fonctions compte toujours ($f\\circ g \\ne g\\circ f$ en général) ; seule la place des parenthèses est sans importance.' },
-          ],
-        },
         { kind: 'subheading', text: 'Le domaine d’une composée : une double condition' },
         {
           kind: 'methode',
@@ -440,6 +586,39 @@ export const fonctionsComposees: ChapterContent = {
             'Il faut ensuite que la valeur $g(x)$ tombe dans $\\operatorname{dom} f$ (sinon f ne peut pas la recevoir).',
             'dom(f∘g) est l’**intersection** des deux conditions.',
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'substituer, puis simplifier',
+          formula: '$f(x) = \\dfrac{3}{x}$ \\qquad $g(x) = \\dfrac{7}{4x+6}$ — calcule $(f\\circ g)(x)$ et son domaine.',
+          steps: [
+            {
+              tag: '(f∘g)(x) = f(g(x)) : on remplace x par g(x) dans f',
+              text: '$f(g(x)) = \\dfrac{3}{\\;\\dfrac{7}{4x+6}\\;}$',
+            },
+            {
+              tag: 'diviser par une fraction, c’est multiplier par son inverse',
+              text: '$f(g(x)) = 3\\cdot\\dfrac{4x+6}{7} = \\dfrac{12x+18}{7}$',
+            },
+            { tag: 'condition 1 — x ∈ dom g', text: '$4x+6 \\ne 0 \\iff x \\ne -\\dfrac{3}{2}$' },
+            {
+              tag: 'condition 2 — g(x) ∈ dom f, c.-à-d. g(x) ≠ 0',
+              text: '$\\dfrac{7}{4x+6} \\ne 0$ pour tout $x$ : le numérateur 7 ne s’annule jamais',
+            },
+          ],
+          result: {
+            tag: 'formule simplifiée ET domaine',
+            text: '$(f\\circ g)(x) = \\dfrac{12x+18}{7}$ sur $\\operatorname{dom}(f\\circ g) = \\mathbb{R}\\setminus\\{-\\tfrac{3}{2}\\}$',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'La formule simplifiée $\\dfrac{12x+18}{7}$ se calcule pour **tout** réel, y compris ' +
+            '$x = -\\tfrac{3}{2}$ — et pourtant $(f\\circ g)(-\\tfrac{3}{2})$ n\'existe pas, puisque ' +
+            '$g(-\\tfrac{3}{2})$ n\'existe pas. Cette exclusion vient de $\\operatorname{dom} g$ et ' +
+            'ne se voit plus dans la formule finale : le domaine se lit toujours sur les **deux ' +
+            'conditions**, jamais sur la formule simplifiée.',
         },
         {
           kind: 'exempleLibre',
@@ -504,20 +683,46 @@ export const fonctionsComposees: ChapterContent = {
           formula: '$f(x) = \\sqrt{x-10}$ \\qquad $g(x) = -x^2$',
           steps: [
             { tag: '(f∘g)(x) = f(g(x)), par substitution', text: '$f(g(x)) = \\sqrt{-x^2-10}$' },
-            { tag: 'condition — le radicande doit être ≥ 0', text: '$-x^2-10 \\ge 0 \\iff x^2 \\le -10$' },
+            { tag: 'condition 1 — x ∈ dom g', text: '$g(x) = -x^2$ existe pour tout réel : $\\operatorname{dom} g = \\mathbb{R}$' },
+            {
+              tag: 'l’image de g',
+              text: '$-x^2 \\le 0$ pour tout $x$, donc $\\operatorname{Im} g = \\mathopen{]}-\\infty\\,;\\,0]$',
+            },
+            {
+              tag: 'condition 2 — g(x) ∈ dom f = [10 ; +∞[',
+              text: '$-x^2 \\ge 10 \\iff x^2 \\le -10$ : impossible, un carré n’est jamais négatif',
+            },
           ],
           result: {
-            tag: 'aucun réel au carré n’est négatif — la condition n’a aucune solution',
+            tag: 'Im g et dom f ne se rencontrent jamais',
             text: '$\\operatorname{dom}(f\\circ g) = \\varnothing$',
             isEmpty: true,
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x: number) => -x * x, tone: 'bad' }],
+            xMin: -4,
+            xMax: 4,
+            xTicks: [-4, -2, 0, 2, 4],
+            yTicks: [-10, 0, 10],
+            fixedYRange: { min: -14, max: 14 },
+            imageBand: { from: 0, direction: 'down', tone: 'bad' },
+            textLabels: [{ x: 3.9, y: 11.5, text: 'dom f : y ≥ 10, jamais atteint', tone: 'ink', anchor: 'end' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'g(x)',
+            caption:
+              '$\\operatorname{Im} g = \\mathopen{]}-\\infty\\,;\\,0]$ (bande rouge) ne rencontre jamais ' +
+              '$\\operatorname{dom} f = [10\\,;\\,+\\infty[$ : aucune valeur $g(x)$ ne peut entrer dans f.',
           },
         },
         {
           kind: 'para',
           text:
-            'Ce n’est pas une erreur de calcul : g(x) = −x² ne prend jamais que des valeurs ' +
+            'Ce n’est pas une erreur de calcul : l’**image** de g ne contient que des valeurs ' +
             'négatives ou nulles, alors que $\\operatorname{dom} f$ exige une valeur d’au moins 10 — ' +
-            'les deux mondes ne se touchent jamais. Une réponse « dom = ∅ » est une réponse tout à fait valable.',
+            'les deux mondes ne se touchent jamais. Retiens le réflexe : la deuxième condition revient ' +
+            'à chercher où l’image de g rencontre $\\operatorname{dom} f$. Une réponse « dom = ∅ » est ' +
+            'une réponse tout à fait valable.',
         },
         {
           kind: 'atelier',
@@ -528,6 +733,18 @@ export const fonctionsComposees: ChapterContent = {
             'la condition qui la relie à l\'extérieure, puis leur intersection. Fais glisser x et ' +
             'regarde le marqueur passer du vert au gris sur chaque ligne selon la condition ' +
             'vérifiée ou non — reprend les 2 exemples déjà résolus ci-dessus.',
+        },
+        { kind: 'subheading', text: 'Pour aller plus loin : l’associativité' },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la composition est associative : (f∘g)∘h = f∘(g∘h)',
+          blocks: [
+            { kind: 'para', text: '**Ce qu\'il faut montrer.** Deux fonctions sont égales si elles ont le même domaine et la même image en chaque point. On compare donc $((f\\circ g)\\circ h)(x)$ et $(f\\circ(g\\circ h))(x)$.' },
+            { kind: 'para', text: '**Étape 1 — le membre de gauche.** On applique la définition $(u\\circ v)(x) = u(v(x))$ avec $u = f\\circ g$ et $v = h$ : $((f\\circ g)\\circ h)(x) = (f\\circ g)(h(x))$. On l\'applique une seconde fois, avec $u = f$ et $v = g$, au nombre $h(x)$ : $(f\\circ g)(h(x)) = f(g(h(x)))$.' },
+            { kind: 'para', text: '**Étape 2 — le membre de droite.** Avec $u = f$ et $v = g\\circ h$ : $(f\\circ(g\\circ h))(x) = f((g\\circ h)(x)) = f(g(h(x)))$.' },
+            { kind: 'para', text: '**Étape 3 — même chaîne, même domaine.** Les deux membres donnent la même chaîne de calcul : h d\'abord, puis g, puis f. Ils existent exactement pour les mêmes x (ceux pour lesquels $h(x)$, puis $g(h(x))$, puis $f(g(h(x)))$ existent). Les deux fonctions sont donc égales : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$. On peut écrire $f\\circ g\\circ h$ sans parenthèses — c\'est exactement ce qu\'on fait en décomposant une écriture en plusieurs étages.' },
+            { kind: 'para', text: '**Attention — associative ne veut pas dire commutative.** L\'**ordre** des fonctions compte toujours ($f\\circ g \\ne g\\circ f$ en général) ; seule la place des parenthèses est sans importance.' },
+          ],
         },
         {
           kind: 'application',
@@ -601,6 +818,15 @@ export const fonctionsComposees: ChapterContent = {
             'ensuite de cette valeur comme un nouveau x, sur l’axe des x du second graphe — verticale, ' +
             'puis horizontale, exactement comme un ballon qui rebondit deux fois.',
         },
+        {
+          kind: 'astuce',
+          label: 'Astuce — le report par la droite y = x',
+          text:
+            'Quand $C_f$ et $C_g$ sont tracées **dans le même repère**, trace aussi la droite ' +
+            '$y = x$. Depuis le point $(a\\,;\\,f(a))$ de $C_f$, une **horizontale** jusqu’à la droite ' +
+            '$y = x$ t’amène au point $(f(a)\\,;\\,f(a))$, donc pile à l’abscisse $f(a)$ ; une ' +
+            '**verticale** jusqu’à $C_g$ donne alors $g(f(a))$. La diagonale fait le report à ta place.',
+        },
         { kind: 'illustration', illustration: { kind: 'compositionSchematic' } },
         {
           kind: 'exemple',
@@ -637,11 +863,13 @@ export const fonctionsComposees: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Attention — l’image n’existe pas toujours',
+          label: 'Attention — hors du domaine ou hors du dessin, ce n’est pas pareil',
           text:
-            'Si la valeur reportée $f(a)$ tombe **en dehors** de la portion visible (ou du domaine réel) ' +
-            'du second graphe, alors $g(f(a))$ n’existe pas. La bonne réponse est « n’existe pas », ' +
-            'jamais une valeur approximative devinée en prolongeant la courbe à l’œil.',
+            'Si la valeur reportée $f(a)$ est **hors du domaine** de g (l’énoncé dit que g n’existe ' +
+            'pas en cette valeur, ou son graphe complet s’arrête avant), alors $g(f(a))$ **n’existe ' +
+            'pas**. Si elle tombe seulement **hors de la portion tracée** alors que g y est définie, ' +
+            '$g(f(a))$ existe bien mais **n’est pas lisible sur ce graphique**. Dans les deux cas, ' +
+            'jamais de valeur devinée en prolongeant la courbe à l’œil.',
         },
         {
           kind: 'entrainement',
@@ -689,7 +917,7 @@ export const fonctionsComposees: ChapterContent = {
               tag: 'isoler h : la hauteur devient une fonction de r',
               text: '$h(r) = \\dfrac{V}{\\pi r^2} = \\dfrac{1000}{\\pi r^2}$',
             },
-            { tag: 'pour r = 3 cm', text: '$h(3) = \\dfrac{1000}{9\\pi} \\approx 35{,}4\\text{ cm}$' },
+            { tag: 'pour r = 3 cm', text: '$h(3) = \\dfrac{1000}{9\\pi} \\approx 35{,}4$ cm' },
             {
               tag: 'l’aire latérale, elle, dépend de r ET de h(r) : une composition',
               text: '$A_{lat}(r) = 2\\pi r \\cdot h(r) = 2\\pi r \\cdot \\dfrac{1000}{\\pi r^2} = \\dfrac{2000}{r}$',
@@ -697,7 +925,7 @@ export const fonctionsComposees: ChapterContent = {
           ],
           result: {
             tag: 'pour r = 3 cm',
-            text: '$A_{lat}(3) = \\dfrac{2000}{3} \\approx 666{,}7\\text{ cm}^2$',
+            text: '$A_{lat}(3) = \\dfrac{2000}{3} \\approx 666{,}7$ cm²',
           },
           illustration: {
             kind: 'functionGraph',
@@ -765,41 +993,100 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Même logique pour une entreprise dont le coût total de production $C(x)$ dépend de la ' +
-            'quantité $x$ fabriquée : le coût **unitaire** (par objet) s’obtient en composant, cette ' +
-            'fois avec une simple division — $c(x) = C(x) / x$. Isoler d’abord la bonne grandeur, ' +
-            'composer ou diviser ensuite : la démarche reste identique à celle du bidon.',
+            'Pour une entreprise dont le coût total de production $C(x)$ dépend de la quantité $x$ ' +
+            'fabriquée, le coût **unitaire** (par objet) vaut $c(x) = \\dfrac{C(x)}{x}$. Attention : ' +
+            'c’est un **quotient** de deux fonctions ($C$ et $x \\mapsto x$), pas une composition — on ' +
+            'divise une sortie par une entrée, on n’enchaîne pas deux machines.',
         },
         {
-          kind: 'application',
-          titre: 'Une chaîne de réactions chimiques, étape par étape',
-          image: {
-            src: '/images/application/glycolysis.png',
-            alt: 'Schéma de la voie métabolique de la glycolyse',
-            caption: 'La glycolyse : une dizaine de réactions enchaînées, chacune transformant le produit de la précédente. Schéma : Yikrazuul, domaine public, via Wikimedia Commons.',
-          },
-          illustrations: [
+          kind: 'para',
+          text:
+            'Une **vraie** composition, en économie : le nombre d’objets vendus dépend du budget ' +
+            'publicitaire $b$ (en centaines d’euros), $q(b) = 50 + 2b$, et la recette dépend du nombre ' +
+            'd’objets vendus, $R(q) = 12q$ (en euros). La recette en fonction du budget est la composée ' +
+            '$(R\\circ q)(b) = R(50+2b) = 600 + 24b$ : la sortie de la première machine (les ventes) ' +
+            'devient l’entrée de la seconde (la recette).',
+        },
+        {
+          kind: 'exemple',
+          badge: 'coût unitaire à partir de deux relevés',
+          formula:
+            'Le coût unitaire d’un objet est modélisé par $c(x) = a + \\dfrac{b}{x}$ (en euros), où $x$ ' +
+            'est le nombre d’objets fabriqués. On relève $c(10) = 26$ et $c(40) = 11$. Détermine $a$ et $b$, ' +
+            'puis le coût total.',
+          steps: [
+            { tag: 'traduire chaque relevé en équation', text: '$a + \\dfrac{b}{10} = 26$ et $a + \\dfrac{b}{40} = 11$' },
             {
-              kind: 'chain',
-              stages: ['glucose', 'glycolyse', 'cycle de Krebs'],
-              highlightIndex: 2,
-              outputLabel: 'ATP produit',
-              caption:
-                'Le produit de la glycolyse devient le réactif du cycle de Krebs — le rendement ' +
-                "global se calcule en composant le rendement de chaque étape, de l'intérieur vers " +
-                "l'extérieur, exactement comme une composition de fonctions.",
+              tag: 'soustraire les deux équations : a disparaît',
+              text: '$\\dfrac{b}{10} - \\dfrac{b}{40} = 15 \\iff \\dfrac{3b}{40} = 15 \\iff b = 200$',
+            },
+            { tag: 'remplacer b dans la première équation', text: '$a = 26 - \\dfrac{200}{10} = 6$' },
+            { tag: 'vérifier avec le second relevé', text: '$c(40) = 6 + \\dfrac{200}{40} = 11$ ✓' },
+            {
+              tag: 'coût total : un produit par x, pas une composition',
+              text: '$C(x) = x\\cdot c(x) = 6x + 200$ : 200 € de coût fixe et 6 € par objet',
             },
           ],
-          text:
-            'En chimie et en biologie, de nombreux processus se déroulent en plusieurs réactions ' +
-            'successives, où le produit de l\'une devient le réactif de la suivante — exactement ' +
-            'une composition de fonctions. C\'est le cas de la respiration cellulaire, qui ' +
-            's\'écrit comme une longue chaîne de réactions enchaînées (la glycolyse, puis le ' +
-            'cycle de Krebs, puis la chaîne respiratoire...), chacune transformant ce que la ' +
-            'précédente a produit. Un biochimiste qui calcule le rendement global d\'une voie ' +
-            'métabolique fait exactement ce que tu fais en section 2 : il compose les rendements ' +
-            'de chaque étage, de l\'intérieur vers l\'extérieur.',
-          domaines: ['Chimie', 'Biologie'],
+          result: {
+            tag: 'modèle',
+            text: '$c(x) = 6 + \\dfrac{200}{x}$ et $C(x) = 6x + 200$',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'bénéfice et seuil de rentabilité',
+          formula:
+            'Une entreprise vend chaque objet 16 €. Son coût total de production vaut ' +
+            '$C(x) = 0{,}1x^2 + 6x + 160$ (en euros, pour $x$ objets). Pour quelles quantités est-elle rentable ?',
+          steps: [
+            { tag: 'chiffre d’affaires', text: '$CA(x) = 16x$' },
+            {
+              tag: 'bénéfice = chiffre d’affaires − coût total',
+              text: '$B(x) = 16x - (0{,}1x^2 + 6x + 160) = -0{,}1x^2 + 10x - 160$',
+            },
+            {
+              tag: 'seuils : B(x) = 0',
+              text:
+                '$x^2 - 100x + 1600 = 0$, $\\Delta = 10\\,000 - 6\\,400 = 3\\,600$, donc ' +
+                '$x = \\dfrac{100 \\pm 60}{2}$ : $x = 20$ ou $x = 80$',
+            },
+            {
+              tag: 'signe de B : coefficient de x² négatif, B est positif entre ses racines',
+              text: '$B(x) > 0 \\iff 20 < x < 80$ ; bénéfice maximal au sommet, $B(50) = 90$ €',
+            },
+          ],
+          result: {
+            tag: 'zone de rentabilité',
+            text: 'entre $20$ et $80$ objets — le seuil de rentabilité est de $20$ objets',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x: number) => 16 * x, tone: 'good' },
+              { fn: (x: number) => 0.1 * x * x + 6 * x + 160, tone: 'bad' },
+            ],
+            shadedRegions: [
+              { from: 20, to: 80, upper: (x: number) => 16 * x, lower: (x: number) => 0.1 * x * x + 6 * x + 160, tone: 'good' },
+            ],
+            xMin: 0,
+            xMax: 100,
+            xTicks: [0, 20, 50, 80, 100],
+            yTicks: [160, 320, 1280],
+            fixedYRange: { min: 0, max: 1800 },
+            points: [
+              { x: 20, y: 320, label: 'seuil : 20 objets', tone: 'accent', labelPos: 'right' },
+              { x: 80, y: 1280, label: '80 objets', tone: 'accent', labelPos: 'left' },
+            ],
+            textLabels: [
+              { x: 97, y: 1690, text: 'C(x)', tone: 'bad', anchor: 'end' },
+              { x: 97, y: 1350, text: 'CA(x)', tone: 'good', anchor: 'end' },
+            ],
+            xAxisLabel: 'x (objets)',
+            yAxisLabel: 'euros',
+            caption:
+              'Entre 20 et 80 objets, la droite du chiffre d’affaires passe au-dessus de la courbe du ' +
+              'coût total : la zone verte est le bénéfice. Le seuil de rentabilité se lit à la première intersection.',
+          },
         },
         {
           kind: 'entrainement',
@@ -807,8 +1094,8 @@ export const fonctionsComposees: ChapterContent = {
           generatorId: '5gen5',
           chantier: '5e-4h',
           description: [
-            'Trois familles de situations concrètes (bidons cylindriques, coût unitaire, coûts d’une entreprise) où il faut isoler une grandeur en fonction d’une autre, puis calculer plusieurs quantités dérivées pour différentes valeurs.',
-            'Même bidon, mêmes formules que l’exemple ci-dessus — à toi de compléter le tableau pour chaque rayon proposé.',
+            'Trois familles de situations concrètes (bidons cylindriques et stocks, coût unitaire, coûts d’une entreprise) où il faut isoler une grandeur en fonction d’une autre, puis la réinjecter ou la comparer.',
+            'Mêmes démarches que les exemples ci-dessus : relevés traduits en équations, système pour un coût unitaire, bénéfice et seuil de rentabilité lu sur un graphique.',
           ],
           whereLabel: '5e (4h) → « 5. Problèmes-contexte »',
         },
@@ -823,6 +1110,8 @@ export const fonctionsComposees: ChapterContent = {
         formulas: [
           { text: 'dénominateur : $D(x) \\neq 0$', condition: 'une seule valeur retirée, jamais un intervalle' },
           { text: "racine d'indice pair : radicande $\\ge 0$", condition: 'inégalité large, le 0 est accepté' },
+          { text: 'racine au dénominateur : radicande $> 0$', condition: 'deux contraintes à la fois (≥ 0 et ≠ 0), donc stricte' },
+          { text: 'diviser une inégalité par un négatif : le sens change', condition: '$-2x \\ge -6 \\iff x \\le 3$' },
           { text: "racine d'indice impair, valeur absolue : aucune CE" },
           { text: 'plusieurs CE : intersection de leurs solutions', condition: 'toutes les conditions à la fois, jamais une union' },
         ],
@@ -841,6 +1130,7 @@ export const fonctionsComposees: ChapterContent = {
           { text: '$\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$', condition: 'les deux conditions à la fois' },
           { text: 'première condition : $x \\in \\operatorname{dom} g$', condition: 'sinon g(x) n’existe même pas' },
           { text: 'deuxième condition : $g(x) \\in \\operatorname{dom} f$', condition: 'la valeur g(x) doit pouvoir être reçue par f' },
+          { text: 'image de g sans point commun avec dom f : la composée n’est définie nulle part', condition: '$\\operatorname{dom}(f\\circ g) = \\varnothing$' },
         ],
       },
       {
@@ -848,6 +1138,7 @@ export const fonctionsComposees: ChapterContent = {
         formulas: [
           { text: '$(g\\circ f)(a) = g(f(a))$', condition: 'lire f(a) sur $C_f$, puis reporter cette valeur sur l’axe des x de $C_g$' },
           { text: "image hors du domaine : $(g\\circ f)(a)$ n'existe pas", condition: 'quand f(a) sort du domaine de g' },
+          { text: 'hors de la portion tracée : pas lisible sur ce graphique', condition: 'g peut y être définie — ce n’est pas « n’existe pas »' },
         ],
       },
       {
@@ -856,6 +1147,8 @@ export const fonctionsComposees: ChapterContent = {
           { text: '$h(r) = \\dfrac{V}{\\pi r^2}$', condition: 'hauteur d’un cylindre de volume V, en fonction de son rayon r' },
           { text: '$A_{lat}(r) = 2\\pi r \\cdot h(r)$', condition: 'aire latérale : h(r) réinjectée, une composition' },
           { text: 'domaine physique : plus restrictif que le domaine mathématique', condition: 'longueurs, durées, quantités positives' },
+          { text: '$c(x) = \\dfrac{C(x)}{x}$', condition: 'coût unitaire : un quotient, pas une composition' },
+          { text: '$B(x) = CA(x) - C(x)$', condition: 'bénéfice ; seuil de rentabilité : la plus petite solution de B(x) = 0' },
         ],
       },
     ],
@@ -863,17 +1156,17 @@ export const fonctionsComposees: ChapterContent = {
 
   recap: {
     items: [
-      '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque, combiner par intersection.',
+      '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque (racine au dénominateur : stricte ; diviser par un négatif : le sens change), combiner par intersection.',
       '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second (comme les chaussettes avant les chaussures) ; l’ordre compte, mais pas la place des parenthèses : (f∘g)∘h = f∘(g∘h).',
       '**Décomposer** — repérer la toute dernière opération effectuée, l’éplucher, recommencer.',
-      '**Domaine d’une composée** — x ∈ dom g, ET g(x) ∈ dom f ; l’intersection peut être bornée, voire vide.',
-      '**Lecture graphique** — deux lectures successives, la sortie de la première devient l’entrée de la seconde ; vérifier que l’image existe.',
-      '**En contexte** — isoler une grandeur en fonction d’une autre avant de la réinjecter ailleurs ; le domaine physique restreint souvent le domaine mathématique.',
+      '**Domaine d’une composée** — x ∈ dom g, ET g(x) ∈ dom f (là où l’image de g rencontre dom f) ; jamais lu sur la formule simplifiée ; l’intersection peut être bornée, voire vide.',
+      '**Lecture graphique** — deux lectures successives, la sortie de la première devient l’entrée de la seconde ; hors du domaine : n’existe pas, hors du dessin : pas lisible.',
+      '**En contexte** — isoler une grandeur en fonction d’une autre avant de la réinjecter ailleurs ; un coût unitaire C(x)/x est un quotient, pas une composition ; le domaine physique restreint souvent le domaine mathématique.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
       items: [
-        'Ai-je vérifié les 4 opérations à risque (dénominateur, racine paire, racine impaire, valeur absolue) une par une ?',
+        'Ai-je repéré les 2 opérations à surveiller (dénominateur, racine paire) — sans poser de condition pour une racine impaire ou une valeur absolue ?',
         'Ai-je bien combiné mes conditions par **intersection**, jamais par union ?',
         'Pour une composée : ai-je vérifié les **deux** domaines — x ∈ dom g, ET g(x) ∈ dom f ?',
         'Pour une lecture graphique : ai-je confirmé que l’image lue existe bien, avant de répondre une valeur ?',

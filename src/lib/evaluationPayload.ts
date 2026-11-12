@@ -1258,14 +1258,19 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     domaine: [
       { cle: 'domaine non borné', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{2x+6}}{x-1}$." },
       { cle: 'exclusion interne', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{9-x^2}}{x+1}$." },
+      { cle: 'une fraction sous une racine', enonce: "Détermine le domaine de définition de $f(x) = \\sqrt{\\dfrac{x-1}{x+2}}$ à l'aide d'un tableau de signes." },
+      { cle: 'racine au dénominateur', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{x+4}{\\sqrt{6-2x}}$." },
+      { cle: 'dénominateur du second degré', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{2x+1}{x^2-5x+6}$." },
     ],
     decomposer: [
       { cle: '3 étages', enonce: "Décompose $h(x) = 5 - \\sqrt[3]{|x|}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
       { cle: '4 étages', enonce: "Décompose $h(x) = \\sqrt{|3x-5|+2}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
+      { cle: 'f∘g et g∘f en expressions', enonce: "Pour $f(x) = x^2+1$ et $g(x) = 2x-3$, écris $(f\\circ g)(x)$ et $(g\\circ f)(x)$, puis vérifie tes deux formules en $x = 1$." },
     ],
     composer: [
       { cle: 'la composition est associative', enonce: "Démontre que la composition de fonctions est associative : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$." },
       { cle: 'pourquoi dom(f∘g) exige', enonce: "Démontre que $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$ : explique pourquoi chacune des deux conditions est nécessaire, puis pourquoi elles suffisent." },
+      { cle: 'substituer, puis simplifier', enonce: "Pour $f(x) = \\dfrac{3}{x}$ et $g(x) = \\dfrac{7}{4x+6}$, écris $(f\\circ g)(x)$ sous forme simplifiée et détermine $\\operatorname{dom}(f\\circ g)$." },
       { cle: 'domaine non vide', enonce: "Pour $f(x) = \\sqrt{-3x+6}$ et $g(x) = \\sqrt{-2x+4}$, écris $(g\\circ f)(x)$ et détermine $\\operatorname{dom}(g\\circ f)$." },
       { cle: 'domaine vide', enonce: "Pour $f(x) = \\sqrt{x-10}$ et $g(x) = -x^2$, écris $(f\\circ g)(x)$ et détermine $\\operatorname{dom}(f\\circ g)$." },
     ],
@@ -1274,6 +1279,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     contexte: [
       { cle: 'un bidon cylindrique', enonce: "Un bidon cylindrique de rayon r et de hauteur h contient $V = 1000$ cm³, avec $V = \\pi r^2 h$. Exprime h en fonction de r, calcule $h(3)$, puis exprime l'aire latérale du bidon en fonction de r seulement." },
+      { cle: 'coût unitaire à partir de deux relevés', enonce: "Le coût unitaire d'un objet est modélisé par $c(x) = a + \\dfrac{b}{x}$ (en euros), où $x$ est le nombre d'objets fabriqués. Sachant que $c(10) = 26$ et $c(40) = 11$, détermine $a$ et $b$, puis exprime le coût total $C(x)$." },
+      { cle: 'bénéfice et seuil de rentabilité', enonce: "Une entreprise vend chaque objet 16 € ; son coût total vaut $C(x) = 0{,}1x^2 + 6x + 160$ (en euros, pour $x$ objets). Détermine les quantités pour lesquelles elle est rentable et son seuil de rentabilité." },
     ],
   },
   'nombres-complexes': {
