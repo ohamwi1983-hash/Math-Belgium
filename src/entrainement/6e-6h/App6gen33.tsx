@@ -19,6 +19,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen33` — Probabilités : problèmes (chapitre 6 de 6e, « Les probabilités », générateur de clôture
@@ -33,13 +34,24 @@ function nouvelleSession(): EtatSessionProbabilitesProblemes {
   return demarrerSessionProbabilitesProblemes(REGLAGES_DEMO, genererExerciceProbabilitesProblemes);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/probabilitesProblemes/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionProbabilitesProblemes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionProbabilitesProblemes(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceProbabilitesProblemes, (id) => construireAvecVarianteId(id as IdVarianteProbabilitesProblemes)),
+  );
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionProbabilitesProblemes;
   revele: boolean;
 }
 
 export function App6gen33() {
-  const [etat, setEtat] = useState<EtatSessionProbabilitesProblemes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionProbabilitesProblemes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionProbabilitesProblemes`, jamais dans le moteur : la saisie de

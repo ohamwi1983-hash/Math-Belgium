@@ -18,6 +18,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen31` — Tirages et arbres (chapitre 6 de 6e, « Les probabilités »). Un seul dispatch piloté par
@@ -33,13 +34,22 @@ function nouvelleSession(): EtatSessionTiragesArbres {
   return demarrerSessionTiragesArbres(REGLAGES_DEMO, genererExerciceTiragesArbres);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/tiragesArbres/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionTiragesArbres {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTiragesArbres(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTiragesArbres, (id) => construireAvecVarianteId(id as IdVarianteTiragesArbres)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionTiragesArbres;
   revele: boolean;
 }
 
 export function App6gen31() {
-  const [etat, setEtat] = useState<EtatSessionTiragesArbres>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionTiragesArbres>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionTiragesArbres`, jamais dans le moteur : la saisie de l'élève n'a

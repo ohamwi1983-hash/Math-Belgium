@@ -18,6 +18,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen30` — Probabilités et ensembles (chapitre 8, "Probabilités", PREMIER générateur de ce
@@ -30,6 +31,15 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionProbabilitesEnsembles {
   return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsembles);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/probabilitesEnsembles/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionProbabilitesEnsembles {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceProbabilitesEnsembles, (id) => construireAvecVarianteId(id as IdVarianteProbabilitesEnsembles)));
 }
 
 /** Réponse attendue d'un écran : libellé du choix correct (texte, écran à choix) puis valeurs ou
@@ -52,7 +62,7 @@ interface TransitionEnAttente {
 }
 
 export function App6gen30() {
-  const [etat, setEtat] = useState<EtatSessionProbabilitesEnsembles>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionProbabilitesEnsembles>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Compteur de tirages : entre dans la `key` des écrans pour vider les champs à chaque nouvel
    * exercice, y compris quand « Générer » relance la MÊME variante (même phase initiale). */

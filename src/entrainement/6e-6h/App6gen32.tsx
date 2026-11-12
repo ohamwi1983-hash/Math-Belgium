@@ -18,6 +18,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 /**
  * `6gen32` — Indépendance, conditionnement et Bayes (chapitre 8, "Probabilités", 3e générateur du
@@ -34,13 +35,22 @@ function nouvelleSession(): EtatSessionIndependanceBayes {
   return demarrerSessionIndependanceBayes(REGLAGES_DEMO, genererExerciceIndependanceBayes);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs6e/independanceBayes/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionIndependanceBayes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionIndependanceBayes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceIndependanceBayes, (id) => construireAvecVarianteId(id as IdVarianteIndependanceBayes)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionIndependanceBayes;
   revele: boolean;
 }
 
 export function App6gen32() {
-  const [etat, setEtat] = useState<EtatSessionIndependanceBayes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionIndependanceBayes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionIndependanceBayes`, jamais dans le moteur : la saisie de

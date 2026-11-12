@@ -16,6 +16,9 @@ import { ciblesEcran } from "../moteur6e/verificationTiragesArbres";
  * - typographie : guillemets « », pas de « boule(s) », pas de majuscules d'insistance, un seul
  *   vocabulaire par contexte (« lettre », « chanson »), réponses attendues en fractions exactes.
  *
+ * Les petites fonctions de calcul exportées (chemins, fractions, comptages) servent aussi à
+ * l'adaptateur papier `generateurs6e/tiragesArbres/exportEvaluation.ts` (une seule source).
+ *
  * Toutes les quantités affichées se recalculent ici en fractions EXACTES (entiers), indépendamment
  * de `generateurs6e/` ; seule l'annonce de précision lit les cibles numériques du moteur.
  */
@@ -55,7 +58,7 @@ const NOMBRES_EN_LETTRES = ["zéro", "une", "deux", "trois", "quatre", "cinq", "
 function enLettres(n: number): string {
   return NOMBRES_EN_LETTRES[n] ?? String(n);
 }
-function singulier(adjectifPluriel: string): string {
+export function singulier(adjectifPluriel: string): string {
   return adjectifPluriel.replace(/s$/, "");
 }
 /** « une boule rouge », « deux boules rouges » (accord, jamais « boule(s) »). */
@@ -77,17 +80,17 @@ function pgcd(a: number, b: number): number {
   return a || 1;
 }
 
-function reduire(f: FractionExacte): FractionExacte {
+export function reduire(f: FractionExacte): FractionExacte {
   const g = pgcd(f.num, f.den);
   return { num: f.num / g, den: f.den / g };
 }
-function somme(...fs: FractionExacte[]): FractionExacte {
+export function somme(...fs: FractionExacte[]): FractionExacte {
   return fs.reduce((acc, f) => reduire({ num: acc.num * f.den + f.num * acc.den, den: acc.den * f.den }), { num: 0, den: 1 });
 }
 function produit(...fs: FractionExacte[]): FractionExacte {
   return fs.reduce((acc, f) => reduire({ num: acc.num * f.num, den: acc.den * f.den }), { num: 1, den: 1 });
 }
-function complement(f: FractionExacte): FractionExacte {
+export function complement(f: FractionExacte): FractionExacte {
   return reduire({ num: f.den - f.num, den: f.den });
 }
 
@@ -98,7 +101,7 @@ export function formatFractionLatex(num: number, den: number): string {
   const r = reduire({ num: Math.abs(num), den: Math.abs(den) });
   return r.den === 1 ? `${signe}${r.num}` : `${signe}\\dfrac{${r.num}}{${r.den}}`;
 }
-function fx(f: FractionExacte): string {
+export function fx(f: FractionExacte): string {
   return formatFractionLatex(f.num, f.den);
 }
 /** Fraction NON réduite (composition de l'urne, lisible sur l'arbre). */
@@ -119,7 +122,7 @@ function champProba(label: string, cible: number | undefined, apercu = true): Ch
 // ============================================================================
 
 /** Branches successives d'un chemin (0 = couleur 1, 1 = couleur 2), en fractions non réduites. */
-function branchesChemin(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): FractionExacte[] {
+export function branchesChemin(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): FractionExacte[] {
   let r1 = n1;
   let r2 = n2;
   return chemin.map((c) => {
@@ -131,10 +134,10 @@ function branchesChemin(n1: number, n2: number, avecRemise: boolean, chemin: rea
     return f;
   });
 }
-function probCheminFraction(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): FractionExacte {
+export function probCheminFraction(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): FractionExacte {
   return produit(...branchesChemin(n1, n2, avecRemise, chemin));
 }
-function produitLatex(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): string {
+export function produitLatex(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): string {
   return branchesChemin(n1, n2, avecRemise, chemin)
     .map((f) => fxBrute(f.num, f.den))
     .join("\\times ");
@@ -152,10 +155,10 @@ function modeTirage(avecRemise: boolean): string {
 // Famille A — k tirages avec/sans remise.
 // ============================================================================
 
-function cheminsEcran3A(ex: ExerciceFamilleA): number[][] {
+export function cheminsEcran3A(ex: ExerciceFamilleA): number[][] {
   return tousLesChemins(ex.k).filter((c) => c.filter((x) => x === 0).length === ex.m);
 }
-function fractionsA(ex: ExerciceFamilleA) {
+export function fractionsA(ex: ExerciceFamilleA) {
   const p1 = probCheminFraction(ex.n1, ex.n2, ex.avecRemise, new Array<number>(ex.k).fill(0));
   const p2 = probCheminFraction(ex.n1, ex.n2, ex.avecRemise, new Array<number>(ex.k).fill(1));
   const p3 = ex.questionEcran3 === "auMoinsUne" ? complement(p2) : somme(...cheminsEcran3A(ex).map((c) => probCheminFraction(ex.n1, ex.n2, ex.avecRemise, c)));
@@ -171,7 +174,7 @@ function blocDonneesA(ex: ExerciceFamilleA): string[] {
   return [`${ex.n1}\\ \\text{${ex.labelCouleur1}}`, `${ex.n2}\\ \\text{${ex.labelCouleur2}}`, `${ex.k}\\ \\text{tirages ${modeTirage(ex.avecRemise)}}`];
 }
 
-function questionEcran3A(ex: ExerciceFamilleA): string {
+export function questionEcran3A(ex: ExerciceFamilleA): string {
   return ex.questionEcran3 === "auMoinsUne" ? `au moins une boule ${singulier(ex.labelCouleur1)}` : `exactement ${boules(ex.m, ex.labelCouleur1)}`;
 }
 
@@ -181,7 +184,7 @@ function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): Fragme
   return [texte(`Calcule la probabilité de tirer ${questionEcran3A(ex)}.`)];
 }
 
-function libelleEcran3A(ex: ExerciceFamilleA): string {
+export function libelleEcran3A(ex: ExerciceFamilleA): string {
   const c = singulier(ex.labelCouleur1);
   return ex.questionEcran3 === "auMoinsUne" ? `au moins une ${c}` : `exactement ${ex.m} ${ex.m > 1 ? ex.labelCouleur1 : c}`;
 }
@@ -235,7 +238,7 @@ function reponseA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): string[] {
 // Famille B — arrangements au hasard.
 // ============================================================================
 
-function factorielle(n: number): number {
+export function factorielle(n: number): number {
   let r = 1;
   for (let i = 2; i <= n; i++) r *= i;
   return r;
@@ -244,18 +247,18 @@ function permutations(n: number): number[][] {
   if (n === 0) return [[]];
   return permutations(n - 1).flatMap((p) => Array.from({ length: n }, (_, i) => [...p.slice(0, i), n - 1, ...p.slice(i)]));
 }
-function compterArrangements(n: number, test: (bienPlaces: number) => boolean): number {
+export function compterArrangements(n: number, test: (bienPlaces: number) => boolean): number {
   return permutations(n).filter((p) => test(p.filter((v, i) => v === i).length)).length;
 }
 /** Nombre de façons de placer r objets sans qu'aucun ne soit à sa place (r ≤ 3 ici). */
-function toutesMalPlacees(r: number): number {
+export function toutesMalPlacees(r: number): number {
   return compterArrangements(r, (b) => b === 0);
 }
-function nombrePaires(n: number): number {
+export function nombrePaires(n: number): number {
   return (n * (n - 1)) / 2;
 }
 
-function objetB(ex: ExerciceFamilleB): { nom: string; noms: string } {
+export function objetB(ex: ExerciceFamilleB): { nom: string; noms: string } {
   return ex.contexte === "lettres" ? { nom: "lettre", noms: "lettres" } : { nom: "chanson", noms: "chansons" };
 }
 function numero(i: number): string {
@@ -301,7 +304,7 @@ function produitFactorielle(n: number): string {
 }
 
 /** Écran 3 : nombre de façons de choisir les objets bien placés, avec sa justification. */
-function choixBienPlaces(ex: ExerciceFamilleB): { nombre: number; justification: string } {
+export function choixBienPlaces(ex: ExerciceFamilleB): { nombre: number; justification: string } {
   const { nom, noms } = objetB(ex);
   const r = ex.n - ex.k;
   if (ex.k === 1) return { nombre: ex.n, justification: `${ex.n} choix pour la ${nom} bien placée` };
@@ -364,15 +367,15 @@ function reponseB(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): string[] {
 
 const MULTIPLES = ["", "", "le double", "le triple", "le quadruple", "le quintuple"];
 
-function facesDe(ex: ExerciceFamilleC): number {
+export function facesDe(ex: ExerciceFamilleC): number {
   return ex.faces ?? 6;
 }
-function probFaceFraction(ex: ExerciceFamilleC, face: number): FractionExacte {
+export function probFaceFraction(ex: ExerciceFamilleC, face: number): FractionExacte {
   if (ex.sousType === "special") return face === ex.faceSpeciale ? ex.p0 : ex.p;
   return face % 2 === 0 ? ex.p : ex.q;
 }
 /** Faces concernées par l'écran 3. */
-function facesEcran3(ex: ExerciceFamilleC): number[] {
+export function facesEcran3(ex: ExerciceFamilleC): number[] {
   const toutes = Array.from({ length: facesDe(ex) }, (_, i) => i + 1);
   const cible = ex.sousType === "special" ? (ex.ecran3Cible ?? "deuxFaces") : ex.ecran3Cible;
   if (cible === "pair") return toutes.filter((f) => f % 2 === 0);
@@ -404,7 +407,7 @@ function blocDonneesC(ex: ExerciceFamilleC): string[] {
   return [de];
 }
 
-function questionEcran3C(ex: ExerciceFamilleC): { phrase: string; label: string; latex: string } {
+export function questionEcran3C(ex: ExerciceFamilleC): { phrase: string; label: string; latex: string } {
   const cible = ex.sousType === "special" ? (ex.ecran3Cible ?? "deuxFaces") : ex.ecran3Cible;
   if (cible === "pair") return { phrase: "obtenir un nombre pair", label: "P(nombre pair) =", latex: "P(\\text{nombre pair})" };
   if (cible === "impair") return { phrase: "obtenir un nombre impair", label: "P(nombre impair) =", latex: "P(\\text{nombre impair})" };
@@ -437,7 +440,7 @@ function champsC(ex: ExerciceFamilleC, phase: PhaseTiragesArbres): ChampDef[] {
   return [champProba(questionEcran3C(ex).label, cibles[0])];
 }
 
-function equationsC(ex: ExerciceFamilleC): string[] {
+export function equationsC(ex: ExerciceFamilleC): string[] {
   const n = facesDe(ex);
   if (ex.sousType === "special") return [`${fx(ex.p0)}+${n - 1}p=1`];
   const h = n / 2;
@@ -495,18 +498,18 @@ export function branchesArbreD(ex: ExerciceFamilleD): FractionExacte[] {
 }
 export const LETTRES_BRANCHES_D = ["a", "b", "c", "d", "e", "f"] as const;
 
-function couleurD(ex: ExerciceFamilleD, c: number): string {
+export function couleurD(ex: ExerciceFamilleD, c: number): string {
   return c === 0 ? ex.labelCouleur1 : ex.labelCouleur2;
 }
 function initialeD(ex: ExerciceFamilleD, c: number): string {
   return c === 0 ? ex.initiale1 : ex.initiale2;
 }
-function phraseCheminD(ex: ExerciceFamilleD): string {
+export function phraseCheminD(ex: ExerciceFamilleD): string {
   const [c1, c2] = ex.chemin;
   if (c1 === c2) return boules(2, couleurD(ex, c1));
   return `une boule ${singulier(couleurD(ex, c1))} puis une boule ${singulier(couleurD(ex, c2))}`;
 }
-function libelleCheminD(ex: ExerciceFamilleD): string {
+export function libelleCheminD(ex: ExerciceFamilleD): string {
   const [c1, c2] = ex.chemin;
   return `${singulier(couleurD(ex, c1))} puis ${singulier(couleurD(ex, c2))}`;
 }

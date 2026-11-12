@@ -104,7 +104,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement (4 chiffres distincts, premier chiffre non nul) vaudrait aussi "),
+        texte("Le nombre de nombres à 4 chiffres tous distincts (choisis parmi 0-9), premier chiffre non nul, vaudrait "),
         latex("10\\times9\\times8\\times7=5040"),
         texte(" si l'on tenait correctement compte de la contrainte."),
       ],
@@ -125,7 +125,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement (3 chiffres distincts, premier chiffre non nul) vaudrait "),
+        texte("Le nombre de nombres à 3 chiffres tous distincts (choisis parmi 0-9), premier chiffre non nul, vaudrait "),
         latex("9\\times8\\times7=504"),
         texte(" si l'on excluait aussi le chiffre 0 des 2ᵉ et 3ᵉ positions."),
       ],
@@ -164,7 +164,14 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ce même "), latex("D=27"), texte(", l'équation "), latex("n^2-3n-54=0"), texte(" admet aussi "), latex("n=-6"),
+        texte("Pour retrouver le nombre "),
+        latex("n"),
+        texte(" de côtés d'un polygone convexe à "),
+        latex("D=27"),
+        texte(" diagonales, l'équation "),
+        latex("n^2-3n-54=0"),
+        texte(" admet aussi "),
+        latex("n=-6"),
         texte(" comme solution valable pour le nombre de côtés du polygone."),
       ],
       reponse: false,
@@ -184,9 +191,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes 7 personnes disposées en COLLIER (rotations ET réflexions équivalentes), il y a aussi "),
+        texte("Pour 7 personnes disposées en COLLIER (rotations ET réflexions équivalentes), il y a "),
         latex("720"),
-        texte(" dispositions distinctes, car un collier revient exactement au même dénombrement qu'une table."),
+        texte(" dispositions distinctes, comme autour d'une table circulaire, car un collier revient exactement au même dénombrement qu'une table."),
       ],
       reponse: false,
       justification: [
@@ -219,7 +226,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Si l'on impose en plus que les 2 lettres de cette plaque soient DIFFÉRENTES (chiffres toujours libres de se répéter), le nombre total de plaques passe à "),
+        texte("Pour une plaque d'immatriculation à 2 lettres (parmi 26) suivies de 3 chiffres (parmi 10), si l'on impose que les 2 lettres soient DIFFÉRENTES (chiffres toujours libres de se répéter), le nombre total de plaques passe à "),
         latex("25\\times25\\times10^3=625\\,000"),
         texte("."),
       ],
@@ -247,7 +254,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes 6 chiffres, autoriser la répétition ne peut que FAIRE DIMINUER le dénombrement, puisqu'il faut ensuite retirer toutes les écritures contenant deux fois le même chiffre."),
+        texte("Pour écrire des nombres à 4 chiffres avec les 6 chiffres 1, 2, 5, 7, 8 et 9, autoriser la répétition ne peut que FAIRE DIMINUER le dénombrement, puisqu'il faut ensuite retirer toutes les écritures contenant deux fois le même chiffre."),
       ],
       reponse: false,
       justification: [
@@ -289,7 +296,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement (3 lettres parmi 5, répétition autorisée, ordre ignoré) vaut "), latex("C_{5}^{3}=10"),
+        texte("Le nombre de groupes de 3 lettres choisies parmi 5, répétition autorisée et ordre ignoré, vaut "),
+        latex("C_{5}^{3}=10"),
         texte(", la répétition ne changeant rien tant que l'ordre est ignoré."),
       ],
       reponse: false,
@@ -342,7 +350,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       enonce: [
         texte("Parmi les 4536 nombres à 4 chiffres tous distincts, ceux qui CONTIENNENT le chiffre 7 sont au nombre de "),
         latex("4536-2688=1848"),
-        texte(", obtenus en retirant du total ceux qui ne le contiennent pas."),
+        texte(", obtenus en retirant du total les 2688 qui ne le contiennent pas."),
       ],
       reponse: true,
       justification: [
@@ -415,7 +423,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour cette même répartition en groupes nommés, il suffirait de calculer "), latex("C_{10}^{5}\\times C_{10}^{3}\\times C_{10}^{2}"),
+        texte("Pour répartir 10 personnes en 3 groupes nommés de tailles 5, 3 et 2, il suffirait de calculer "),
+        latex("C_{10}^{5}\\times C_{10}^{3}\\times C_{10}^{2}"),
         texte(" plutôt que d'utiliser les tailles restantes à chaque étape."),
       ],
       reponse: false,
@@ -435,7 +444,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement (président + 2 vice-présidents) pourrait aussi s'écrire "), latex("C_{10}^{3}"),
+        texte("Le nombre de façons d'élire un président et 2 vice-présidents (interchangeables entre eux) parmi 10 candidats pourrait s'écrire "),
+        latex("C_{10}^{3}"),
         texte(", puisqu'on choisit 3 personnes au total parmi 10."),
       ],
       reponse: false,
@@ -454,7 +464,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       justification: [texte("Les deux choix étant indépendants, on MULTIPLIE le nombre de façons pour chacun : "), latex("28\\times15=420"), texte(".")],
     },
     {
-      enonce: [texte("Ce même dénombrement vaudrait aussi "), latex("C_{8}^{2}+C_{6}^{2}=28+15=43"), texte(", puisque les deux choix sont indépendants.")],
+      enonce: [
+        texte("Un comité de 2 personnes choisies parmi 8 hommes et, indépendamment, de 2 personnes choisies parmi 6 femmes peut se former de "),
+        latex("C_{8}^{2}+C_{6}^{2}=28+15=43"),
+        texte(" façons, puisque les deux choix sont indépendants."),
+      ],
       reponse: false,
       justification: [
         texte("Un ET entre deux choix INDÉPENDANTS se traduit par une MULTIPLICATION, jamais une addition : la bonne valeur est "), latex("420"), texte(", pas "), latex("43"), texte("."),
@@ -470,7 +484,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       justification: [texte("Un OU exclusif entre 2 cas qui ne se recouvrent jamais s'additionne : "), latex("120+455=575"), texte(".")],
     },
     {
-      enonce: [texte("Ce même dénombrement vaudrait "), latex("C_{10}^{3}\\times C_{15}^{3}=120\\times455=54\\,600"), texte(", car il faut combiner les deux choix.")],
+      enonce: [
+        texte("Pour choisir 3 personnes toutes dans le même groupe (soit les 3 parmi un groupe de 10, soit les 3 parmi un groupe de 15), il y a "),
+        latex("C_{10}^{3}\\times C_{15}^{3}=120\\times455=54\\,600"),
+        texte(" façons, car il faut combiner les deux choix."),
+      ],
       reponse: false,
       justification: [
         texte("Il s'agit d'un OU exclusif (jamais les deux groupes en même temps), donc une ADDITION, pas une multiplication : la bonne valeur reste "),
@@ -488,7 +506,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce nombre de 21 dominos correspond aussi à "), latex("C_{6}^{2}=15"),
+        texte("Avec 6 valeurs possibles par face, le nombre de dominos distincts (2 valeurs, répétition possible, ordre ignoré) se réduit aux "),
+        latex("C_{6}^{2}=15"),
         texte(" façons de choisir 2 valeurs différentes, sans qu'il faille ajouter les dominos \"doubles\" (0-0, 1-1, etc.) séparément."),
       ],
       reponse: false,
@@ -507,8 +526,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes 2 dés mais devenus INDISCERNABLES (impossible de dire lequel est lequel), il y a encore "), latex("36"),
-        texte(" résultats distincts possibles, car le nombre de dés ne change pas."),
+        texte("En lançant 2 dés à 6 faces INDISCERNABLES (impossible de dire lequel est lequel), il y a "),
+        latex("36"),
+        texte(" résultats distincts possibles, comme avec des dés discernables, car le nombre de dés ne change pas."),
       ],
       reponse: false,
       justification: [
@@ -517,13 +537,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       ],
     },
     {
-      enonce: [texte("Le nombre de résultats DISCERNABLES (36) est strictement supérieur au nombre de résultats INDISCERNABLES (21) pour ces mêmes 2 dés, car regrouper les cas symétriques réduit le décompte total.")],
+      enonce: [
+        texte("Le nombre de résultats DISCERNABLES (36) est strictement supérieur au nombre de résultats INDISCERNABLES (21) pour 2 dés à 6 faces, car regrouper les cas symétriques réduit le décompte total."),
+      ],
       reponse: true,
       justification: [texte("36 > 21 : fusionner chaque paire symétrique distincte (ex. \"2 puis 5\"/\"5 puis 2\") en un seul résultat indiscernable diminue nécessairement le total.")],
     },
     {
       enonce: [
-        texte("Le rapport entre le nombre discernable (36) et le nombre indiscernable (21) est exactement 2, comme si chaque résultat indiscernable correspondait toujours à exactement 2 résultats discernables."),
+        texte("Pour 2 dés à 6 faces, le rapport entre le nombre de résultats discernables (36) et le nombre de résultats indiscernables (21) est exactement 2, comme si chaque résultat indiscernable correspondait toujours à exactement 2 résultats discernables."),
       ],
       reponse: false,
       justification: [
@@ -541,7 +563,10 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour cette même contrainte (X et Y jamais ensemble), il suffit d'ADDITIONNER "), latex("C_{18}^{4}"), texte(" à "), latex("C_{20}^{6}"),
+        texte("Pour choisir 6 personnes parmi 20 sans que 2 personnes précises X et Y soient jamais choisies ensemble, il suffit d'ADDITIONNER "),
+        latex("C_{18}^{4}"),
+        texte(" à "),
+        latex("C_{20}^{6}"),
         texte(" plutôt que de le soustraire, pour ne pas exclure les cas interdits."),
       ],
       reponse: false,
@@ -551,7 +576,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Avec les mêmes 20 personnes, si l'on impose au contraire que X et Y soient choisis ENSEMBLE ou pas du tout (jamais séparément), le nombre de choix valides pour une sélection de 6 personnes est "),
+        texte("Parmi 20 personnes, si l'on impose que 2 personnes précises X et Y soient choisis ENSEMBLE ou pas du tout (jamais séparément), le nombre de choix valides pour une sélection de 6 personnes est "),
         latex("C_{18}^{4}+C_{18}^{6}=3060+18\\,564=21\\,624"),
         texte("."),
       ],
@@ -560,20 +585,31 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce dénombrement (X et Y ensemble ou absents tous les deux) donne exactement le même résultat, "), latex("35\\,700"),
-        texte(", que la contrainte opposée (X et Y jamais ensemble) de l'affirmation précédente."),
+        texte("Pour choisir 6 personnes parmi 20, la contrainte « X et Y ensemble ou absents tous les deux » donne exactement le même nombre de choix, "),
+        latex("35\\,700"),
+        texte(", que la contrainte opposée « X et Y jamais ensemble »."),
       ],
       reponse: false,
       justification: [texte("Les 2 contraintes donnent des résultats DIFFÉRENTS : "), latex("21\\,624"), texte(" pour \"ensemble ou absents\", contre "), latex("35\\,700"), texte(" pour \"jamais ensemble\".")],
     },
     {
-      enonce: [texte("Le coefficient binomial "), latex("C_{20}^{6}"), texte(" utilisé ci-dessus vaut aussi "), latex("C_{20}^{14}"), texte(", par symétrie "), latex("C_{n}^{k}=C_{n}^{n-k}"), texte(".")],
+      enonce: [
+        texte("Le coefficient binomial "),
+        latex("C_{20}^{6}"),
+        texte(" vaut aussi "),
+        latex("C_{20}^{14}"),
+        texte(", par symétrie "),
+        latex("C_{n}^{k}=C_{n}^{n-k}"),
+        texte("."),
+      ],
       reponse: true,
       justification: [texte("Choisir 6 personnes parmi 20 revient à en LAISSER 14 de côté : les deux dénombrements sont donc rigoureusement égaux.")],
     },
     {
       enonce: [
-        latex("C_{20}^{6}=C_{20}^{6}\\times2"), texte(", car on pourrait choisir les 6 personnes OU les 14 personnes restantes, ce qui doublerait le compte."),
+        texte("Pour choisir 6 personnes parmi 20, "),
+        latex("C_{20}^{6}=C_{20}^{6}\\times2"),
+        texte(", car on pourrait choisir les 6 personnes OU les 14 personnes restantes, ce qui doublerait le compte."),
       ],
       reponse: false,
       justification: [
@@ -597,7 +633,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement s'écrit "), latex("\\dfrac{10!}{4!+4!}=\\dfrac{3\\,628\\,800}{48}=75\\,600"),
+        texte("Le nombre de permutations distinctes des 10 lettres de MISSISSIPI (1 M, 4 I, 4 S, 1 P) s'écrit "),
+        latex("\\dfrac{10!}{4!+4!}=\\dfrac{3\\,628\\,800}{48}=75\\,600"),
         texte(", en additionnant les factorielles des effectifs répétés."),
       ],
       reponse: false,
@@ -608,7 +645,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Le nombre d'ANAGRAMMES du mot MISSISSIPI est donc lui aussi 6300."),
+        texte("Le mot MISSISSIPI admettant 6300 permutations distinctes de ses lettres, son nombre d'ANAGRAMMES vaut lui aussi 6300."),
       ],
       reponse: false,
       justification: [
@@ -628,7 +665,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Si les 10 lettres de MISSISSIPI étaient TOUTES différentes, le nombre de permutations distinctes resterait 6300 : la formule ne dépend que du nombre total de lettres."),
+        texte("Si les 10 lettres de MISSISSIPI étaient TOUTES différentes, le nombre de permutations distinctes resterait 6300 (la valeur obtenue avec ses 4 I et ses 4 S) : la formule ne dépend que du nombre total de lettres."),
       ],
       reponse: false,
       justification: [
@@ -661,7 +698,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même bureau (1 président + 3 vice-présidents parmi 12) se compte "), latex("12\\times C_{11}^{3}=12\\times165=1980"),
+        texte("Un bureau de 1 président et 3 vice-présidents (interchangeables entre eux) choisis parmi 12 candidats se compte "),
+        latex("12\\times C_{11}^{3}=12\\times165=1980"),
         texte(" : le président d'abord, puis les 3 vice-présidents parmi les 11 restants."),
       ],
       reponse: true,
@@ -678,7 +716,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ce même partage 5/7 de 12 personnes, il faut doubler le résultat ("), latex("2\\times792=1584"),
+        texte("Pour partager 12 personnes en 2 groupes complémentaires, l'un de 5 et l'autre de 7, il faut doubler le résultat ("),
+        latex("2\\times792=1584"),
         texte("), les 2 groupes pouvant s'échanger."),
       ],
       reponse: false,
@@ -716,7 +755,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Avec les mêmes 15 personnes et 5 places, si X et Y doivent être pris ENSEMBLE ou pas du tout, il y a "),
+        texte("Pour choisir 5 personnes parmi 15, si 2 personnes précises X et Y doivent être pris ENSEMBLE ou pas du tout, il y a "),
         latex("C_{13}^{3}+C_{13}^{5}=286+1287=1573"),
         texte(" sélections valides."),
       ],
@@ -725,7 +764,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Si l'énoncé précise en plus que les 15 personnes se répartissent en 2 catégories (par exemple 6 juniors et 9 seniors), X et Y étant tous deux juniors, alors le calcul de l'exclusion \"X et Y jamais ensemble\" change et ne vaut plus "),
+        texte("On choisit 5 personnes parmi 15, 2 personnes précises X et Y ne pouvant jamais être choisies ensemble. Si l'on précise en plus que les 15 personnes se répartissent en 2 catégories (par exemple 6 juniors et 9 seniors), X et Y étant tous deux juniors, alors le calcul de l'exclusion \"X et Y jamais ensemble\" change et ne vaut plus "),
         latex("C_{15}^{5}-C_{13}^{3}"),
         texte("."),
       ],
@@ -753,8 +792,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Dans ce développement, le terme général s'écrit plutôt "), latex("T_{k+1}=C_{5}^{k}\\times(2x)^k\\times(-1)^{5-k}"),
-        texte(", avec "), latex("k"), texte(" représentant la puissance de "), latex("x"), texte("."),
+        texte("Dans le développement de "),
+        latex("(2x-1)^5"),
+        texte(", le terme général s'écrit plutôt "),
+        latex("T_{k+1}=C_{5}^{k}\\times(2x)^k\\times(-1)^{5-k}"),
+        texte(", avec "),
+        latex("k"),
+        texte(" représentant la puissance de "),
+        latex("x"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -762,25 +808,58 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       ],
     },
     {
-      enonce: [texte("Le premier terme du développement ("), latex("k=0"), texte(") vaut "), latex("C_{5}^{0}\\times2^5\\times(-1)^0=1\\times32\\times1=32"), texte(".")],
+      enonce: [
+        texte("Le premier terme du développement de "),
+        latex("(2x-1)^5"),
+        texte(" ("),
+        latex("k=0"),
+        texte(") vaut "),
+        latex("C_{5}^{0}\\times2^5\\times(-1)^0=1\\times32\\times1=32"),
+        texte("."),
+      ],
       reponse: true,
       justification: [latex("C_{5}^{0}=1"), texte(", "), latex("2^5=32"), texte(", "), latex("(-1)^0=1"), texte(" : produit "), latex("32"), texte(".")],
     },
     {
       enonce: [
-        texte("Le premier terme du développement ("), latex("k=0"), texte(") vaut "), latex("C_{5}^{0}\\times2^5\\times(-1)^0=-32"),
-        texte(", car "), latex("(-1)^0=-1"), texte("."),
+        texte("Le premier terme du développement de "),
+        latex("(2x-1)^5"),
+        texte(" ("),
+        latex("k=0"),
+        texte(") vaut "),
+        latex("C_{5}^{0}\\times2^5\\times(-1)^0=-32"),
+        texte(", car "),
+        latex("(-1)^0=-1"),
+        texte("."),
       ],
       reponse: false,
       justification: [latex("(-1)^0=1"), texte(", pas "), latex("-1"), texte(" : tout nombre non nul élevé à la puissance 0 vaut 1. Le premier terme vaut donc "), latex("+32"), texte(".")],
     },
     {
-      enonce: [texte("Le terme pour "), latex("k=1"), texte(" vaut "), latex("C_{5}^{1}\\times2^4\\times(-1)^1=5\\times16\\times(-1)=-80"), texte(".")],
+      enonce: [
+        texte("Dans le développement de "),
+        latex("(2x-1)^5"),
+        texte(", le terme pour "),
+        latex("k=1"),
+        texte(" vaut "),
+        latex("C_{5}^{1}\\times2^4\\times(-1)^1=5\\times16\\times(-1)=-80"),
+        texte("."),
+      ],
       reponse: true,
       justification: [latex("5\\times16=80"), texte(", puis "), latex("\\times(-1)=-80"), texte(".")],
     },
     {
-      enonce: [texte("Le terme pour "), latex("k=1"), texte(" vaut "), latex("+80"), texte(", car un exposant impair de "), latex("(-1)"), texte(" donne toujours un résultat positif.")],
+      enonce: [
+        texte("Dans le développement de "),
+        latex("(2x-1)^5"),
+        texte(", le terme pour "),
+        latex("k=1"),
+        texte(" vaut "),
+        latex("+80"),
+        texte(", car un exposant impair de "),
+        latex("(-1)"),
+        texte(" donne toujours un résultat positif."),
+      ],
       reponse: false,
       justification: [texte("C'est l'inverse : un exposant IMPAIR de "), latex("-1"), texte(" donne toujours un résultat NÉGATIF ("), latex("(-1)^1=-1"), texte("), un exposant pair donne un résultat positif.")],
     },
@@ -794,7 +873,12 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même somme, évaluée en "), latex("x=1"), texte(", vaut plutôt "), latex("2^5-1^5=31"),
+        texte("La somme de tous les termes du développement de "),
+        latex("(2x-1)^5"),
+        texte(", évaluée en "),
+        latex("x=1"),
+        texte(", vaut plutôt "),
+        latex("2^5-1^5=31"),
         texte(", car il faudrait soustraire les deux puissances séparément avant de les combiner."),
       ],
       reponse: false,
@@ -808,7 +892,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       justification: [texte("Par symétrie "), latex("C_{n}^{k}=C_{n}^{n-k}"), texte(" : "), latex("C_{5}^{2}=C_{5}^{3}=10"), texte(" (ligne "), latex("1,5,10,10,5,1"), texte(").")],
     },
     {
-      enonce: [texte("Ces mêmes coefficients vérifient plutôt "), latex("C_{5}^{2}=C_{5}^{4}"), texte(", tous deux égaux à "), latex("10"), texte(".")],
+      enonce: [
+        texte("Les coefficients binomiaux de la ligne "),
+        latex("n=5"),
+        texte(" vérifient "),
+        latex("C_{5}^{2}=C_{5}^{4}"),
+        texte(", tous deux égaux à "),
+        latex("10"),
+        texte("."),
+      ],
       reponse: false,
       justification: [latex("C_{5}^{4}=5"), texte(", pas "), latex("10"), texte(" : la symétrie correcte est "), latex("C_{5}^{2}=C_{5}^{3}"), texte(" (car "), latex("5-2=3"), texte(", pas "), latex("4"), texte(").")],
     },
@@ -833,7 +925,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       ],
     },
     {
-      enonce: [texte("Cette même somme vaut plutôt "), latex("5^2=25"), texte(", car il y a 5 termes non triviaux dans le développement.")],
+      enonce: [
+        texte("La somme des coefficients binomiaux de la ligne "),
+        latex("n=5"),
+        texte(" vaut "),
+        latex("5^2=25"),
+        texte(", car il y a 5 termes non triviaux dans le développement."),
+      ],
       reponse: false,
       justification: [texte("Le développement de "), latex("(a+b)^5"), texte(" comporte en réalité 6 termes ("), latex("k=0"), texte(" à "), latex("k=5"), texte("), pas 5, et leur somme vaut "), latex("2^5=32"), texte(", pas "), latex("25"), texte(".")],
     },
@@ -847,8 +945,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette approximation néglige tous les autres termes du développement (ceux en "), latex("\\varepsilon^2,\\varepsilon^3,\\varepsilon^4"),
-        texte("), qui sont TOUS rigoureusement NULS pour "), latex("\\varepsilon=0{,}01"), texte("."),
+        texte("Pour "),
+        latex("\\varepsilon=0{,}01"),
+        texte(", l'approximation "),
+        latex("(1+\\varepsilon)^4\\approx1+4\\varepsilon"),
+        texte(" néglige tous les autres termes du développement (ceux en "),
+        latex("\\varepsilon^2,\\varepsilon^3,\\varepsilon^4"),
+        texte("), qui sont TOUS rigoureusement NULS pour "),
+        latex("\\varepsilon=0{,}01"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -865,8 +970,19 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Dans ce développement, le terme contenant "), latex("x^2"), texte(" correspond plutôt à "), latex("k=2"),
-        texte(" (en associant directement "), latex("k"), texte(" à l'exposant cherché), ce qui donnerait "), latex("C_{5}^{2}\\times2^3\\times(-1)^2=10\\times8\\times1=80"), texte(" comme coefficient de "), latex("x^2"), texte("."),
+        texte("Dans le développement de "),
+        latex("(2x-1)^5"),
+        texte(", le terme contenant "),
+        latex("x^2"),
+        texte(" correspond plutôt à "),
+        latex("k=2"),
+        texte(" (en associant directement "),
+        latex("k"),
+        texte(" à l'exposant cherché), ce qui donnerait "),
+        latex("C_{5}^{2}\\times2^3\\times(-1)^2=10\\times8\\times1=80"),
+        texte(" comme coefficient de "),
+        latex("x^2"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -881,7 +997,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       justification: [texte("Le rang "), latex("k"), texte(" parcourt "), latex("0,1,\\dots,n"), texte(", soit "), latex("n+1"), texte(" valeurs distinctes.")],
     },
     {
-      enonce: [texte("Ce développement comporte exactement 5 termes, autant que l'exposant "), latex("n=5"), texte(" lui-même.")],
+      enonce: [
+        texte("Le développement de "),
+        latex("(2x-1)^5"),
+        texte(" comporte exactement 5 termes, autant que l'exposant "),
+        latex("n=5"),
+        texte(" lui-même."),
+      ],
       reponse: false,
       justification: [texte("Il comporte "), latex("6"), texte(" termes ("), latex("k=0"), texte(" à "), latex("k=5"), texte("), pas "), latex("5"), texte(" — on oublie souvent le terme "), latex("k=0"), texte(".")],
     },
@@ -897,8 +1019,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Dans ce même développement de "), latex("(3x+2)^4"), texte(", le terme CONSTANT (sans "), latex("x"), texte(") vaut "),
-        latex("81"), texte(", obtenu pour "), latex("k=0"), texte("."),
+        texte("Dans le développement de "),
+        latex("(3x+2)^4"),
+        texte(", le terme CONSTANT (sans "),
+        latex("x"),
+        texte(") vaut "),
+        latex("81"),
+        texte(", obtenu pour "),
+        latex("k=0"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -918,8 +1047,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ces coefficients "), latex("81,\\;216,\\;216,\\;96,\\;16"),
-        texte(" se lisent de la même façon dans les deux sens, car les coefficients binomiaux de la ligne "), latex("n=4"), texte(" sont symétriques."),
+        texte("Les coefficients "),
+        latex("81,\\;216,\\;216,\\;96,\\;16"),
+        texte(" du développement de "),
+        latex("(3x+2)^4"),
+        texte(" se lisent de la même façon dans les deux sens, car les coefficients binomiaux de la ligne "),
+        latex("n=4"),
+        texte(" sont symétriques."),
       ],
       reponse: false,
       justification: [
@@ -997,8 +1131,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Parmi ces 16 mots, ceux comportant exactement 2 lettres "), latex("b"), texte(" sont au nombre de "), latex("4\\times3=12"),
-        texte(" (choix de la position du premier "), latex("b"), texte(", puis du second)."),
+        texte("En développant "),
+        latex("(a+b)^4=(a+b)(a+b)(a+b)(a+b)"),
+        texte(" sans rien réduire, on obtient 16 « mots » de 4 lettres ; parmi eux, ceux comportant exactement 2 lettres "),
+        latex("b"),
+        texte(" sont au nombre de "),
+        latex("4\\times3=12"),
+        texte(" (choix de la position du premier "),
+        latex("b"),
+        texte(", puis du second)."),
       ],
       reponse: false,
       justification: [
@@ -1019,8 +1160,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette approximation "), latex("(1+\\varepsilon)^n\\approx1+n\\varepsilon"), texte(" ne s'applique qu'aux valeurs POSITIVES de "),
-        latex("\\varepsilon"), texte(" : pour "), latex("\\varepsilon"), texte(" négatif, les termes négligés changent de signe et ne sont plus négligeables."),
+        texte("L'approximation "),
+        latex("(1+\\varepsilon)^n\\approx1+n\\varepsilon"),
+        texte(" ne s'applique qu'aux valeurs POSITIVES de "),
+        latex("\\varepsilon"),
+        texte(" : pour "),
+        latex("\\varepsilon"),
+        texte(" négatif, les termes négligés changent de signe et ne sont plus négligeables."),
       ],
       reponse: false,
       justification: [
@@ -1049,22 +1195,34 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce nombre de mains 'carré' (224) est le MÊME que le nombre de mains 'brelan' (3 cartes de même hauteur + 2 cartes d'hauteurs différentes entre elles), qui vaut aussi "),
-        latex("224"), texte("."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), le nombre de mains de 5 cartes 'carré' (224) est le MÊME que le nombre de mains 'brelan' (3 cartes de même hauteur + 2 cartes d'hauteurs différentes entre elles), qui vaut aussi "),
+        latex("224"),
+        texte("."),
       ],
       reponse: false,
       justification: [texte("Le brelan vaut en réalité "), latex("10\\,752"), texte(", bien plus que "), latex("224"), texte(" : moins de contraintes (2 cartes libres au lieu d'1 fixée) laisse plus de possibilités.")],
     },
     {
       enonce: [
-        texte("Le nombre de mains 'brelan' ("), latex("3"), texte(" cartes de même hauteur, "), latex("2"), texte(" cartes d'hauteurs différentes entre elles et du brelan) vaut "),
-        latex("32\\times336=10\\,752"), texte("."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), le nombre de mains de 5 cartes 'brelan' ("),
+        latex("3"),
+        texte(" cartes de même hauteur, "),
+        latex("2"),
+        texte(" cartes d'hauteurs différentes entre elles et du brelan) vaut "),
+        latex("32\\times336=10\\,752"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("8 hauteurs × 4 façons de choisir les couleurs du brelan ("), latex("C_{4}^{3}=4"), texte(") = 32, puis "), latex("C_{7}^{2}\\times4\\times4=336"), texte(" pour les 2 cartes restantes.")],
     },
     {
-      enonce: [texte("Ce nombre de mains 'brelan' ("), latex("10\\,752"), texte(") est INFÉRIEUR au nombre de mains 'carré' ("), latex("224"), texte("), car un brelan est une combinaison moins contraignante qu'un carré.")],
+      enonce: [
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), le nombre de mains de 5 cartes 'brelan' ("),
+        latex("10\\,752"),
+        texte(") est INFÉRIEUR au nombre de mains 'carré' ("),
+        latex("224"),
+        texte("), car un brelan est une combinaison moins contraignante qu'un carré."),
+      ],
       reponse: false,
       justification: [
         texte("C'est l'inverse : moins de contraintes donne un décompte PLUS grand, pas plus petit — "), latex("10\\,752>224"), texte("."),
@@ -1072,16 +1230,24 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Le nombre de mains 'paire' ("), latex("2"), texte(" cartes de même hauteur + "), latex("3"), texte(" cartes d'hauteurs toutes différentes entre elles et de la paire) vaut "),
-        latex("107\\,520"), texte(", le plus grand des 4 dénombrements de cette famille (carré, brelan, paire, deux paires)."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), le nombre de mains de 5 cartes 'paire' ("),
+        latex("2"),
+        texte(" cartes de même hauteur + "),
+        latex("3"),
+        texte(" cartes d'hauteurs toutes différentes entre elles et de la paire) vaut "),
+        latex("107\\,520"),
+        texte(", le plus grand des 4 dénombrements de cette famille (carré, brelan, paire, deux paires)."),
       ],
       reponse: true,
       justification: [texte("La contrainte la plus légère (une seule paire imposée, 3 cartes libres) laisse le plus de possibilités parmi ces 4 catégories.")],
     },
     {
       enonce: [
-        texte("Le nombre de mains 'deux paires' (2 paires d'hauteurs différentes + 1 carte d'une 3ᵉ hauteur), qui vaut "), latex("24\\,192"),
-        texte(", est PLUS GRAND que celui des mains 'paire' ("), latex("107\\,520"), texte(")."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), le nombre de mains de 5 cartes 'deux paires' (2 paires d'hauteurs différentes + 1 carte d'une 3ᵉ hauteur), qui vaut "),
+        latex("24\\,192"),
+        texte(", est PLUS GRAND que celui des mains 'paire' ("),
+        latex("107\\,520"),
+        texte(")."),
       ],
       reponse: false,
       justification: [latex("24\\,192<107\\,520"), texte(" : imposer une 2ᵉ paire est une contrainte SUPPLÉMENTAIRE, elle réduit le nombre de mains possibles, pas l'inverse.")],
@@ -1109,14 +1275,17 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Le nombre de triplets ordonnés menant à une somme de 9 est en réalité 27, soit plus que pour une somme de 10 (25) — obtenir 9 serait donc légèrement plus probable."),
+        texte("Avec 3 dés à 6 faces, le nombre de triplets ordonnés menant à une somme de 9 est 27, soit plus que pour une somme de 10 (25) — obtenir 9 serait donc légèrement plus probable."),
       ],
       reponse: false,
       justification: [texte("Les valeurs sont inversées : 9 correspond à 25 triplets ordonnés, 10 à 27 — c'est 10 qui est (légèrement) plus probable, pas 9.")],
     },
     {
       enonce: [
-        texte("Parmi les décompositions de la somme 9, le triplet "), latex("\\{1;2;6\\}"), texte(" (valeurs toutes différentes) admet "), latex("3!=6"),
+        texte("Avec 3 dés, parmi les décompositions de la somme 9, le triplet "),
+        latex("\\{1;2;6\\}"),
+        texte(" (valeurs toutes différentes) admet "),
+        latex("3!=6"),
         texte(" arrangements ordonnés distincts."),
       ],
       reponse: true,
@@ -1124,7 +1293,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Le triplet "), latex("\\{3;3;3\\}"), texte(" (les 3 dés affichent la même valeur), qui donne aussi la somme 9, admet lui aussi 6 arrangements ordonnés distincts, comme n'importe quel triplet."),
+        texte("Avec 3 dés, le triplet "),
+        latex("\\{3;3;3\\}"),
+        texte(" (les 3 dés affichent la même valeur), qui donne aussi la somme 9, admet lui aussi 6 arrangements ordonnés distincts, comme n'importe quel triplet."),
       ],
       reponse: false,
       justification: [
@@ -1140,7 +1311,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
       justification: [texte("C'est le même principe multinomial que pour une répartition de personnes en groupes ("), latex("6gen44"), texte("), appliqué ici à des objets et des boîtes.")],
     },
     {
-      enonce: [texte("Ce même dénombrement vaudrait aussi "), latex("C_{12}^{6}+C_{12}^{4}+C_{12}^{2}"), texte(", en additionnant les choix pour chaque boîte séparément.")],
+      enonce: [
+        texte("Le nombre de répartitions de 12 objets dans 3 boîtes numérotées de tailles fixées 6, 4 et 2 vaudrait "),
+        latex("C_{12}^{6}+C_{12}^{4}+C_{12}^{2}"),
+        texte(", en additionnant les choix pour chaque boîte séparément."),
+      ],
       reponse: false,
       justification: [
         texte("Il faut MULTIPLIER des choix successifs dans le pool RESTANT à chaque étape ("), latex("C_{12}^{6}\\times C_{6}^{4}\\times C_{2}^{2}"),
@@ -1157,7 +1332,8 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dispositif offrirait plutôt "), latex("3^4=81"),
+        texte("Un dispositif à 3 éléments indépendants, chacun réglable sur 4 positions, offrirait "),
+        latex("3^4=81"),
         texte(" configurations distinctes, en élevant le nombre d'éléments à la puissance du nombre de positions."),
       ],
       reponse: false,
@@ -1167,29 +1343,36 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Si les 3 éléments de ce dispositif devaient au contraire occuper 3 positions TOUTES DIFFÉRENTES (parmi les 4 disponibles, sans répétition), le nombre de configurations deviendrait "),
-        latex("A_{4}^{3}=4\\times3\\times2=24"), texte(", strictement inférieur aux 64 configurations avec répétition autorisée."),
+        texte("Pour un dispositif à 3 éléments, chacun réglable sur 4 positions, si les 3 éléments devaient occuper 3 positions TOUTES DIFFÉRENTES (parmi les 4 disponibles, sans répétition), le nombre de configurations deviendrait "),
+        latex("A_{4}^{3}=4\\times3\\times2=24"),
+        texte(", strictement inférieur aux 64 configurations avec répétition autorisée."),
       ],
       reponse: true,
       justification: [texte("Interdire la répétition réduit toujours les possibilités : "), latex("24<64"), texte(".")],
     },
     {
-      enonce: [texte("Ce nombre de configurations sans répétition (24) resterait le même que celui avec répétition (64), car le nombre d'éléments et de positions ne change pas.")],
+      enonce: [
+        texte("Pour un dispositif à 3 éléments réglables chacun sur 4 positions, le nombre de configurations sans répétition (24) resterait le même que celui avec répétition (64), car le nombre d'éléments et de positions ne change pas."),
+      ],
       reponse: false,
       justification: [texte("Le nombre d'éléments/positions ne change pas, mais la CONTRAINTE (répétition permise ou non) change bien le décompte : "), latex("24\\neq64"), texte(".")],
     },
     {
       enonce: [
-        texte("Le nombre total de mains de 5 cartes possibles parmi les 32 cartes du jeu est "), latex("C_{32}^{5}=201\\,376"),
-        texte(", un nombre bien plus grand que chacun des 4 dénombrements spécifiques (carré, brelan, paire, deux paires) étudiés ci-dessus."),
+        texte("Le nombre total de mains de 5 cartes possibles parmi les 32 cartes du jeu est "),
+        latex("C_{32}^{5}=201\\,376"),
+        texte(", un nombre bien plus grand que chacun des 4 dénombrements spécifiques (carré, brelan, paire, deux paires)."),
       ],
       reponse: true,
       justification: [texte("Le total de toutes les mains possibles inclut aussi les mains sans aucune répétition de hauteur, absentes des 4 catégories étudiées : il est nécessairement plus grand que chacune d'elles.")],
     },
     {
       enonce: [
-        texte("Ce nombre total de mains, "), latex("C_{32}^{5}"), texte(", est exactement égal à la somme des 4 dénombrements spécifiques (carré + brelan + paire + deux paires) = "),
-        latex("224+10\\,752+107\\,520+24\\,192=142\\,688"), texte("."),
+        texte("Dans un jeu de 32 cartes, le nombre total de mains de 5 cartes, "),
+        latex("C_{32}^{5}"),
+        texte(", est exactement égal à la somme des 4 dénombrements spécifiques (carré + brelan + paire + deux paires) = "),
+        latex("224+10\\,752+107\\,520+24\\,192=142\\,688"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -1200,16 +1383,25 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     // --- Enrichissement (15 affirmations supplémentaires, nuances non couvertes ci-dessus) ---
     {
       enonce: [
-        texte("Pour les mains 'deux paires', les 2 hauteurs des paires se choisissent par "), latex("C_{8}^{2}=28"),
-        texte(", puis 2 couleurs pour chaque paire ("), latex("6\\times6=36"), texte("), soit "), latex("1008"),
-        texte(" ; la 5ᵉ carte apporte ensuite "), latex("6\\times4=24"), texte(" possibilités, d'où "), latex("1008\\times24=24\\,192"), texte("."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), pour les mains de 5 cartes 'deux paires', les 2 hauteurs des paires se choisissent par "),
+        latex("C_{8}^{2}=28"),
+        texte(", puis 2 couleurs pour chaque paire ("),
+        latex("6\\times6=36"),
+        texte("), soit "),
+        latex("1008"),
+        texte(" ; la 5ᵉ carte apporte ensuite "),
+        latex("6\\times4=24"),
+        texte(" possibilités, d'où "),
+        latex("1008\\times24=24\\,192"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("Les 2 hauteurs déjà utilisées par les paires ne sont plus disponibles pour la 5ᵉ carte : il reste 6 hauteurs × 4 couleurs.")],
     },
     {
       enonce: [
-        texte("Pour ces mêmes mains 'deux paires', les 2 hauteurs des paires se comptent "), latex("8\\times7=56"),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), pour les mains de 5 cartes 'deux paires', les 2 hauteurs des paires se comptent "),
+        latex("8\\times7=56"),
         texte(" : une hauteur pour la première paire, puis une autre pour la seconde."),
       ],
       reponse: false,
@@ -1220,16 +1412,22 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour les mains 'paire', l'étape 1 vaut "), latex("8\\times C_{4}^{2}=48"), texte(" et l'étape 2 "),
-        latex("C_{7}^{3}\\times4^3=35\\times64=2240"), texte(", d'où "), latex("48\\times2240=107\\,520"), texte("."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), pour les mains de 5 cartes 'paire', l'étape 1 vaut "),
+        latex("8\\times C_{4}^{2}=48"),
+        texte(" et l'étape 2 "),
+        latex("C_{7}^{3}\\times4^3=35\\times64=2240"),
+        texte(", d'où "),
+        latex("48\\times2240=107\\,520"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("Hauteur de la paire (8) × 2 couleurs parmi 4, puis 3 hauteurs distinctes parmi les 7 restantes, chacune dans l'une de ses 4 couleurs.")],
     },
     {
       enonce: [
-        texte("Pour ces mêmes mains 'paire', les 3 cartes restantes peuvent se choisir librement parmi les 30 cartes qui ne sont pas de la hauteur de la paire, soit "),
-        latex("C_{30}^{3}=4060"), texte(" possibilités."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), pour les mains de 5 cartes 'paire', les 3 cartes restantes peuvent se choisir librement parmi les 30 cartes qui ne sont pas de la hauteur de la paire, soit "),
+        latex("C_{30}^{3}=4060"),
+        texte(" possibilités."),
       ],
       reponse: false,
       justification: [
@@ -1239,7 +1437,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour les mains 'brelan', l'étape 2 (les 2 cartes restantes) vaut "), latex("C_{7}^{2}\\times4\\times4=21\\times16=336"), texte("."),
+        texte("Dans un jeu de 32 cartes (8 hauteurs × 4 couleurs), pour les mains de 5 cartes 'brelan', l'étape 2 (les 2 cartes restantes) vaut "),
+        latex("C_{7}^{2}\\times4\\times4=21\\times16=336"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("2 hauteurs différentes parmi les 7 encore disponibles, puis une couleur libre pour chacune de ces 2 cartes.")],
@@ -1266,8 +1466,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Chacune des 6 décompositions de la somme 10 admet "), latex("3!=6"), texte(" triplets ordonnés, d'où "),
-        latex("6\\times6=36"), texte(" triplets au total."),
+        texte("Avec 3 dés, chacune des 6 décompositions de la somme 10 admet "),
+        latex("3!=6"),
+        texte(" triplets ordonnés, d'où "),
+        latex("6\\times6=36"),
+        texte(" triplets au total."),
       ],
       reponse: false,
       justification: [
@@ -1277,8 +1480,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour la somme 9, le détail des arrangements s'écrit "), latex("6+6+3+3+6+1=25"),
-        texte(" : le triplet "), latex("\\{3;3;3\\}"), texte(" n'apporte qu'un seul triplet ordonné."),
+        texte("Avec 3 dés, pour la somme 9, le détail des arrangements ordonnés s'écrit "),
+        latex("6+6+3+3+6+1=25"),
+        texte(" : le triplet "),
+        latex("\\{3;3;3\\}"),
+        texte(" n'apporte qu'un seul triplet ordonné."),
       ],
       reponse: true,
       justification: [
@@ -1317,7 +1523,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Ce même dénombrement s'écrit "), latex("\\dfrac{9!}{4!+3!+2!}=\\dfrac{362\\,880}{32}=11\\,340"), texte("."),
+        texte("Le nombre de répartitions de 9 objets dans 3 boîtes numérotées de tailles 4, 3 et 2 s'écrit "),
+        latex("\\dfrac{9!}{4!+3!+2!}=\\dfrac{362\\,880}{32}=11\\,340"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -1361,8 +1569,21 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité s'écrit plutôt "), latex("P(k)=\\dfrac{C_{K}^{k}\\times C_{N-K}^{n-k}}{C_{N}^{k}}"), texte(", avec "), latex("C_{N}^{k}"),
-        texte(" au dénominateur plutôt que "), latex("C_{N}^{n}"), texte("."),
+        texte("Pour un tirage de "),
+        latex("n"),
+        texte(" éléments sans remise dans une population de "),
+        latex("N"),
+        texte(" éléments dont "),
+        latex("K"),
+        texte(" « succès », la probabilité d'obtenir exactement "),
+        latex("k"),
+        texte(" succès s'écrit "),
+        latex("P(k)=\\dfrac{C_{K}^{k}\\times C_{N-K}^{n-k}}{C_{N}^{k}}"),
+        texte(", avec "),
+        latex("C_{N}^{k}"),
+        texte(" au dénominateur plutôt que "),
+        latex("C_{N}^{n}"),
+        texte("."),
       ],
       reponse: false,
       justification: [texte("Le dénominateur doit compter TOUS les tirages possibles de "), latex("n"), texte(" éléments, soit "), latex("C_{N}^{n}"), texte(", jamais "), latex("C_{N}^{k}"), texte("."),
@@ -1378,23 +1599,56 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes valeurs, "), latex("P(2)"), texte(" se calculerait plutôt "), latex("\\dfrac{C_{6}^{2}\\times C_{14}^{3}}{C_{20}^{3}}"),
-        texte(", en utilisant "), latex("n=3"), texte(" par erreur au dénominateur au lieu de "), latex("n=5"), texte("."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", "),
+        latex("P(2)"),
+        texte(" se calculerait plutôt "),
+        latex("\\dfrac{C_{6}^{2}\\times C_{14}^{3}}{C_{20}^{3}}"),
+        texte(", en utilisant "),
+        latex("n=3"),
+        texte(" par erreur au dénominateur au lieu de "),
+        latex("n=5"),
+        texte("."),
       ],
       reponse: false,
       justification: [texte("Le dénominateur doit toujours utiliser le VRAI "), latex("n"), texte(" (ici 5, le nombre d'éléments réellement tirés), jamais une autre valeur substituée par erreur.")],
     },
     {
       enonce: [
-        texte("Pour ces mêmes "), latex("N=20"), texte(", "), latex("K=6"), texte(", "), latex("n=5"), texte(", la probabilité de n'obtenir AUCUN succès ("), latex("k=0"), texte(") vaut "),
-        latex("P(0)=\\dfrac{C_{6}^{0}\\times C_{14}^{5}}{C_{20}^{5}}=\\dfrac{2002}{15\\,504}\\approx0{,}129"), texte("."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", la probabilité de n'obtenir AUCUN succès ("),
+        latex("k=0"),
+        texte(") vaut "),
+        latex("P(0)=\\dfrac{C_{6}^{0}\\times C_{14}^{5}}{C_{20}^{5}}=\\dfrac{2002}{15\\,504}\\approx0{,}129"),
+        texte("."),
       ],
       reponse: true,
       justification: [latex("C_{6}^{0}=1"), texte(", "), latex("C_{14}^{5}=2002"), texte(", d'où "), latex("P(0)=\\dfrac{2002}{15\\,504}\\approx0{,}129"), texte(".")],
     },
     {
       enonce: [
-        texte("Pour cette même probabilité \"aucun succès\", on pourrait remplacer "), latex("C_{6}^{0}"), texte(" par "), latex("C_{6}^{5}"),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", dans "),
+        latex("P(0)=\\dfrac{C_{6}^{0}\\times C_{14}^{5}}{C_{20}^{5}}"),
+        texte(", on pourrait remplacer "),
+        latex("C_{6}^{0}"),
+        texte(" par "),
+        latex("C_{6}^{5}"),
         texte(" sans changer le résultat, puisque les deux valent la même chose par symétrie du triangle de Pascal."),
       ],
       reponse: false,
@@ -1411,7 +1665,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité, (rouge, rouge, bleue) dans cet ordre précis, est la même que celle d'obtenir 2 rouges et 1 bleue dans un ordre QUELCONQUE, puisque les deux questions portent sur les mêmes 3 boules tirées."),
+        texte("Une urne contient 5 boules rouges et 5 boules bleues ; on tire 3 boules successivement sans remise. La probabilité de la séquence (rouge, rouge, bleue), dans cet ordre précis, est la même que celle d'obtenir 2 rouges et 1 bleue dans un ordre QUELCONQUE, puisque les deux questions portent sur les mêmes 3 boules tirées."),
       ],
       reponse: false,
       justification: [
@@ -1421,16 +1675,26 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("La probabilité d'obtenir 2 boules rouges et 1 boule bleue, DANS UN ORDRE QUELCONQUE, vaut "), latex("3\\times\\dfrac{5}{36}=\\dfrac{5}{12}"),
-        texte(", car il existe "), latex("C_{3}^{2}=3"), texte(" façons d'arranger 2 rouges et 1 bleue parmi les 3 tirages."),
+        texte("Une urne contient 5 boules rouges et 5 boules bleues ; on tire 3 boules successivement sans remise. La probabilité d'obtenir 2 boules rouges et 1 boule bleue, DANS UN ORDRE QUELCONQUE, vaut "),
+        latex("3\\times\\dfrac{5}{36}=\\dfrac{5}{12}"),
+        texte(", car il existe "),
+        latex("C_{3}^{2}=3"),
+        texte(" façons d'arranger 2 rouges et 1 bleue parmi les 3 tirages."),
       ],
       reponse: true,
       justification: [texte("3 positions possibles pour la boule bleue unique parmi les 3 tirages, chacune de probabilité "), latex("\\dfrac{5}{36}"), texte(" : "), latex("3\\times\\dfrac{5}{36}=\\dfrac{5}{12}"), texte(".")],
     },
     {
       enonce: [
-        texte("Cette probabilité de "), latex("\\dfrac{5}{12}"), texte(" pourrait aussi se retrouver directement avec la formule hypergéométrique : "),
-        latex("\\dfrac{C_{5}^{2}\\times C_{5}^{1}}{C_{10}^{3}}=\\dfrac{10\\times5}{120}=\\dfrac{50}{120}"), texte(", ce qui se SIMPLIFIE en "), latex("\\dfrac{5}{6}"), texte(", différent de "), latex("\\dfrac{5}{12}"), texte("."),
+        texte("Une urne contient 5 boules rouges et 5 boules bleues ; on tire 3 boules successivement sans remise. La probabilité d'obtenir 2 rouges et 1 bleue dans un ordre quelconque, "),
+        latex("\\dfrac{5}{12}"),
+        texte(", pourrait aussi se retrouver directement avec la formule hypergéométrique : "),
+        latex("\\dfrac{C_{5}^{2}\\times C_{5}^{1}}{C_{10}^{3}}=\\dfrac{10\\times5}{120}=\\dfrac{50}{120}"),
+        texte(", ce qui se SIMPLIFIE en "),
+        latex("\\dfrac{5}{6}"),
+        texte(", différent de "),
+        latex("\\dfrac{5}{12}"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -1447,7 +1711,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette probabilité de "), latex("\\dfrac{2}{15}"), texte(" concerne à la fois la grille principale ET le numéro bonus tiré séparément parmi 5 numéros (dont 1 gagnant), sans qu'il faille recalculer quoi que ce soit pour le bonus."),
+        texte("À un loto, la probabilité de cocher exactement les 2 bons numéros dans une grille principale de 10 numéros (dont 4 gagnants) vaut "),
+        latex("\\dfrac{2}{15}"),
+        texte(". Cette probabilité concerne à la fois la grille principale ET le numéro bonus tiré séparément parmi 5 numéros (dont 1 gagnant), sans qu'il faille recalculer quoi que ce soit pour le bonus."),
       ],
       reponse: false,
       justification: [texte("Le bonus est un tirage INDÉPENDANT distinct : il a sa PROPRE probabilité à calculer séparément, jamais incluse automatiquement dans le calcul de la grille principale.")],
@@ -1461,8 +1727,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("La probabilité de réussir À LA FOIS la grille principale ("), latex("\\dfrac{2}{15}"), texte(") ET le bonus ("), latex("\\dfrac{1}{5}"),
-        texte("), ces deux tirages étant indépendants, s'obtient en les ADDITIONNANT : "), latex("\\dfrac{2}{15}+\\dfrac{1}{5}=\\dfrac{2}{15}+\\dfrac{3}{15}=\\dfrac{5}{15}=\\dfrac{1}{3}"), texte("."),
+        texte("À un loto, la probabilité de réussir À LA FOIS la grille principale ("),
+        latex("\\dfrac{2}{15}"),
+        texte(") ET le bonus ("),
+        latex("\\dfrac{1}{5}"),
+        texte("), ces deux tirages étant indépendants, s'obtient en les ADDITIONNANT : "),
+        latex("\\dfrac{2}{15}+\\dfrac{1}{5}=\\dfrac{2}{15}+\\dfrac{3}{15}=\\dfrac{5}{15}=\\dfrac{1}{3}"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -1472,15 +1743,23 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("La probabilité de réussir à la fois la grille principale ET le bonus, ces 2 tirages étant réellement indépendants, vaut "),
-        latex("\\dfrac{2}{15}\\times\\dfrac{1}{5}=\\dfrac{2}{75}\\approx0{,}027"), texte("."),
+        texte("À un loto où l'on réussit la grille principale avec une probabilité "),
+        latex("\\dfrac{2}{15}"),
+        texte(" et le bonus avec une probabilité "),
+        latex("\\dfrac{1}{5}"),
+        texte(", la probabilité de réussir les deux, ces 2 tirages étant réellement indépendants, vaut "),
+        latex("\\dfrac{2}{15}\\times\\dfrac{1}{5}=\\dfrac{2}{75}\\approx0{,}027"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("Deux événements indépendants réunis par un ET : on multiplie leurs probabilités respectives.")],
     },
     {
       enonce: [
-        texte("Cette probabilité combinée de "), latex("\\dfrac{2}{75}"), texte(" est PLUS GRANDE que la probabilité de réussir la grille principale seule ("), latex("\\dfrac{2}{15}"),
+        texte("À un loto, la probabilité de réussir à la fois la grille principale et le bonus, "),
+        latex("\\dfrac{2}{75}"),
+        texte(", est PLUS GRANDE que la probabilité de réussir la grille principale seule ("),
+        latex("\\dfrac{2}{15}"),
         texte("), car combiner deux événements augmente toujours la probabilité de succès."),
       ],
       reponse: false,
@@ -1496,7 +1775,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même somme ne vaut 1 que si "), latex("K"), texte(" est strictement inférieur à "), latex("N/2"), texte(", sinon elle serait différente de 1."),
+        texte("Pour un tirage hypergéométrique, la somme des probabilités de tous les nombres de succès possibles ne vaut 1 que si "),
+        latex("K"),
+        texte(" est strictement inférieur à "),
+        latex("N/2"),
+        texte(", sinon elle serait différente de 1."),
       ],
       reponse: false,
       justification: [texte("La somme de toutes les probabilités d'une loi vaut TOUJOURS 1, quelle que soit la relation entre "), latex("K"), texte(" et "), latex("N/2"), texte(" — c'est une propriété générale de toute distribution de probabilité.")],
@@ -1522,8 +1805,17 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     // --- Enrichissement (15 affirmations supplémentaires, nuances non couvertes ci-dessus) ---
     {
       enonce: [
-        texte("Toujours pour "), latex("N=20"), texte(", "), latex("K=6"), texte(", "), latex("n=5"), texte(", la valeur la plus probable est "),
-        latex("k=1"), texte(", avec "), latex("P(1)=\\dfrac{C_{6}^{1}\\times C_{14}^{4}}{C_{20}^{5}}=\\dfrac{6\\times1001}{15\\,504}\\approx0{,}387"), texte("."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", la valeur la plus probable est "),
+        latex("k=1"),
+        texte(", avec "),
+        latex("P(1)=\\dfrac{C_{6}^{1}\\times C_{14}^{4}}{C_{20}^{5}}=\\dfrac{6\\times1001}{15\\,504}\\approx0{,}387"),
+        texte("."),
       ],
       reponse: true,
       justification: [
@@ -1534,8 +1826,19 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes "), latex("N=20"), texte(", "), latex("K=6"), texte(", "), latex("n=5"), texte(", la valeur la plus probable est "),
-        latex("k=2"), texte(", puisque 2 est la valeur centrale des 6 possibles ("), latex("k=0"), texte(" à "), latex("5"), texte(")."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", la valeur la plus probable est "),
+        latex("k=2"),
+        texte(", puisque 2 est la valeur centrale des 6 possibles ("),
+        latex("k=0"),
+        texte(" à "),
+        latex("5"),
+        texte(")."),
       ],
       reponse: false,
       justification: [
@@ -1546,15 +1849,33 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes valeurs, le cas \"tous des succès\" ("), latex("k=n=5"), texte(") vaut "),
-        latex("P(5)=\\dfrac{C_{6}^{5}\\times C_{14}^{0}}{C_{20}^{5}}=\\dfrac{6}{15\\,504}\\approx0{,}0004"), texte("."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", le cas \"tous des succès\" ("),
+        latex("k=n=5"),
+        texte(") vaut "),
+        latex("P(5)=\\dfrac{C_{6}^{5}\\times C_{14}^{0}}{C_{20}^{5}}=\\dfrac{6}{15\\,504}\\approx0{,}0004"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("Il ne reste aucun échec à choisir ("), latex("n-k=0"), texte("), donc "), latex("C_{14}^{0}=1"), texte(" : seuls comptent les 6 choix de 5 succès parmi les 6 disponibles.")],
     },
     {
       enonce: [
-        texte("Pour ce même cas "), latex("k=n=5"), texte(", le numérateur s'écrit "), latex("C_{6}^{5}\\times C_{14}^{5}"),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=5"),
+        texte(", dans le cas "),
+        latex("k=n=5"),
+        texte(", le numérateur s'écrit "),
+        latex("C_{6}^{5}\\times C_{14}^{5}"),
         texte(", le second facteur portant toujours sur les 5 éléments tirés."),
       ],
       reponse: false,
@@ -1573,7 +1894,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes "), latex("N=20"), texte(", "), latex("K=6"), texte(", "), latex("n=8"), texte(", la probabilité d'obtenir 7 succès est très petite, mais reste strictement positive."),
+        texte("Pour un tirage hypergéométrique avec "),
+        latex("N=20"),
+        texte(", "),
+        latex("K=6"),
+        texte(", "),
+        latex("n=8"),
+        texte(", la probabilité d'obtenir 7 succès est très petite, mais reste strictement positive."),
       ],
       reponse: false,
       justification: [texte("Elle est rigoureusement NULLE, pas seulement petite : il n'existe que 6 succès dans toute la population, 7 succès sont matériellement impossibles.")],
@@ -1599,15 +1926,20 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour cette même urne, la composition \"2 rouges et 1 bleue\" (ordre libre) vaut "), latex("3\\times\\dfrac{1}{10}=\\dfrac{3}{10}"),
-        texte(", ce que confirme la formule hypergéométrique : "), latex("\\dfrac{C_{4}^{2}\\times C_{6}^{1}}{C_{10}^{3}}=\\dfrac{6\\times6}{120}=\\dfrac{36}{120}=\\dfrac{3}{10}"), texte("."),
+        texte("Une urne contient 4 boules rouges et 6 boules bleues ; on tire 3 boules successivement sans remise. Chaque séquence de 2 rouges et 1 bleue ayant pour probabilité "),
+        latex("\\dfrac{1}{10}"),
+        texte(", la composition \"2 rouges et 1 bleue\" (ordre libre) vaut "),
+        latex("3\\times\\dfrac{1}{10}=\\dfrac{3}{10}"),
+        texte(", ce que confirme la formule hypergéométrique : "),
+        latex("\\dfrac{C_{4}^{2}\\times C_{6}^{1}}{C_{10}^{3}}=\\dfrac{6\\times6}{120}=\\dfrac{36}{120}=\\dfrac{3}{10}"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("Les 3 séquences (RRB, RBR, BRR) ont chacune la probabilité "), latex("\\dfrac{1}{10}"), texte(" : leur somme donne la composition, exactement la valeur hypergéométrique.")],
     },
     {
       enonce: [
-        texte("Pour cette même urne, les 3 séquences menant à \"2 rouges et 1 bleue\" n'ont PAS la même probabilité : celle où la bleue sort en premier est plus probable, l'urne étant alors encore complète."),
+        texte("Une urne contient 4 boules rouges et 6 boules bleues ; on tire 3 boules successivement sans remise. Les 3 séquences menant à \"2 rouges et 1 bleue\" n'ont PAS la même probabilité : celle où la bleue sort en premier est plus probable, l'urne étant alors encore complète."),
       ],
       reponse: false,
       justification: [
@@ -1626,7 +1958,14 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité vaudrait toujours "), latex("\\dfrac{5}{33}"),
+        texte("Dans une grille de "),
+        latex("N=12"),
+        texte(" numéros dont "),
+        latex("K=5"),
+        texte(" sont gagnants, la probabilité que 2 numéros tirés sans remise soient tous deux gagnants vaut "),
+        latex("\\dfrac{5}{33}"),
+        texte(" ; elle vaudrait toujours "),
+        latex("\\dfrac{5}{33}"),
         texte(" si les 2 numéros étaient tirés AVEC remise, le second tirage pouvant répéter le premier."),
       ],
       reponse: false,
@@ -1686,7 +2025,19 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même formule s'écrit plutôt "), latex("P(X=k)=C_{n}^{k}\\times p^{n-k}\\times(1-p)^k"), texte(", en inversant les exposants de "), latex("p"), texte(" et "), latex("(1-p)"), texte("."),
+        texte("Pour "),
+        latex("n"),
+        texte(" épreuves indépendantes de probabilité de succès "),
+        latex("p"),
+        texte(" constante, la probabilité de "),
+        latex("k"),
+        texte(" succès s'écrit "),
+        latex("P(X=k)=C_{n}^{k}\\times p^{n-k}\\times(1-p)^k"),
+        texte(", en inversant les exposants de "),
+        latex("p"),
+        texte(" et "),
+        latex("(1-p)"),
+        texte("."),
       ],
       reponse: false,
       justification: [texte("Les exposants sont inversés : "), latex("p"), texte(" (succès) porte l'exposant "), latex("k"), texte(" (le nombre de succès), et "), latex("(1-p)"), texte(" (échec) l'exposant "), latex("n-k"), texte(", jamais l'inverse.")],
@@ -1701,14 +2052,32 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes valeurs, "), latex("P(X=2)"), texte(" se calculerait plutôt sans le facteur combinatoire "), latex("C_{6}^{2}"),
-        texte(", soit "), latex("0{,}4^2\\times0{,}6^4=0{,}020736"), texte(", en oubliant de compter les différentes positions possibles des 2 succès parmi les 6 tirs."),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), "),
+        latex("P(X=2)"),
+        texte(" se calculerait plutôt sans le facteur combinatoire "),
+        latex("C_{6}^{2}"),
+        texte(", soit "),
+        latex("0{,}4^2\\times0{,}6^4=0{,}020736"),
+        texte(", en oubliant de compter les différentes positions possibles des 2 succès parmi les 6 tirs."),
       ],
       reponse: false,
       justification: [texte("Oublier "), latex("C_{6}^{2}=15"), texte(" donne un résultat 15 fois trop petit : la bonne valeur est "), latex("0{,}31104"), texte(", pas "), latex("0{,}020736"), texte(".")],
     },
     {
       enonce: [
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), "),
         latex("P(X=0)=C_{6}^{0}\\times0{,}4^0\\times0{,}6^6=1\\times1\\times0{,}046656=0{,}046656"),
         texte(" — cette question (\"aucun succès\") relève de la stratégie \"un seul terme\", un calcul direct sans somme ni complément."),
       ],
@@ -1717,7 +2086,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        latex("P(X=0)"), texte(" relève au contraire de la stratégie \"complément\", car il faudrait calculer 1 moins la probabilité d'avoir au moins un succès."),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), "),
+        latex("P(X=0)"),
+        texte(" relève de la stratégie \"complément\", car il faudrait calculer 1 moins la probabilité d'avoir au moins un succès."),
       ],
       reponse: false,
       justification: [
@@ -1726,35 +2103,78 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("P(au moins 1 succès sur les 6 tirs) "), latex("=1-P(X=0)=1-0{,}046656=0{,}953344"),
-        texte(" — c'est la stratégie \"complément\", la plus efficace ici plutôt que de sommer "), latex("P(X=1)"), texte(" à "), latex("P(X=6)"), texte("."),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), P(au moins 1 succès sur les 6 tirs) "),
+        latex("=1-P(X=0)=1-0{,}046656=0{,}953344"),
+        texte(" — c'est la stratégie \"complément\", la plus efficace ici plutôt que de sommer "),
+        latex("P(X=1)"),
+        texte(" à "),
+        latex("P(X=6)"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("\"Au moins 1\" est le complémentaire exact d'\"aucun succès\" : passer par le complément évite de sommer 6 termes.")],
     },
     {
       enonce: [
-        texte("P(au moins 1 succès) se calcule plutôt en additionnant "), latex("P(X=1)"), texte(" seul, car \"au moins 1\" est équivalent à \"exactement 1\" dans ce contexte."),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), P(au moins 1 succès) se calcule plutôt en additionnant "),
+        latex("P(X=1)"),
+        texte(" seul, car \"au moins 1\" est équivalent à \"exactement 1\" dans ce contexte."),
       ],
       reponse: false,
       justification: [texte("\"Au moins 1\" inclut "), latex("X=1,2,3,4,5"), texte(" ET "), latex("6"), texte(", pas seulement "), latex("X=1"), texte(" : ce n'est PAS équivalent à \"exactement 1\".")],
     },
     {
       enonce: [
-        texte("P(au plus 5 succès sur les 6 tirs) "), latex("=1-P(X=6)=1-0{,}004096=0{,}995904"),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), P(au plus 5 succès sur les 6 tirs) "),
+        latex("=1-P(X=6)=1-0{,}004096=0{,}995904"),
         texte(", par la stratégie \"complément\" (le complémentaire de \"au plus n-1\" est \"tous\")."),
       ],
       reponse: true,
       justification: [texte("\"Au plus 5\" (sur 6 possibles) est le complémentaire exact de \"tous réussissent\" ("), latex("X=6"), texte(").")],
     },
     {
-      enonce: [texte("P(au plus 5 succès) se calcule plutôt comme "), latex("1-P(X=0)"), texte(", car \"au plus 5\" est le complémentaire d'\"aucun succès\".")],
+      enonce: [
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), P(au plus 5 succès) se calcule plutôt comme "),
+        latex("1-P(X=0)"),
+        texte(", car \"au plus 5\" est le complémentaire d'\"aucun succès\"."),
+      ],
       reponse: false,
       justification: [texte("Le complémentaire de \"au plus 5\" (sur 6) est \"tous\" ("), latex("X=6"), texte("), pas \"aucun\" ("), latex("X=0"), texte(") — ce sont deux seuils différents.")],
     },
     {
       enonce: [
-        texte("P(au moins 4 succès sur les 6 tirs) "), latex("=P(4)+P(5)+P(6)=0{,}13824+0{,}036864+0{,}004096=0{,}1792"),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), P(au moins 4 succès sur les 6 tirs) "),
+        latex("=P(4)+P(5)+P(6)=0{,}13824+0{,}036864+0{,}004096=0{,}1792"),
         texte(" — ici la stratégie \"somme\" est utilisée (peu de termes à additionner), plutôt que le complément."),
       ],
       reponse: true,
@@ -1762,7 +2182,17 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité \"au moins 4\" vaudrait aussi "), latex("1-P(X=3)"), texte(", en utilisant la stratégie complément avec "), latex("X=3"), texte(" comme seuil."),
+        texte("Pour "),
+        latex("n=6"),
+        texte(" tirs indépendants avec "),
+        latex("p=0{,}4"),
+        texte(" de réussite à chaque tir ("),
+        latex("X"),
+        texte(" : nombre de succès), la probabilité \"au moins 4 succès\" vaudrait "),
+        latex("1-P(X=3)"),
+        texte(", en utilisant la stratégie complément avec "),
+        latex("X=3"),
+        texte(" comme seuil."),
       ],
       reponse: false,
       justification: [
@@ -1772,13 +2202,31 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("La somme de toutes les probabilités "), latex("P(X=0)"), texte(" à "), latex("P(X=6)"), texte(" (les 7 valeurs possibles du nombre de succès) vaut exactement 1, quelle que soit la valeur de "), latex("p"), texte("."),
+        texte("Pour 6 épreuves indépendantes de même probabilité de succès "),
+        latex("p"),
+        texte(", la somme de toutes les probabilités "),
+        latex("P(X=0)"),
+        texte(" à "),
+        latex("P(X=6)"),
+        texte(" (les 7 valeurs possibles du nombre de succès) vaut exactement 1, quelle que soit la valeur de "),
+        latex("p"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("C'est une propriété générale de toute distribution de probabilité : la somme sur tous les cas possibles vaut toujours 1.")],
     },
     {
-      enonce: [texte("Cette somme ne vaut 1 que si "), latex("p=0{,}5"), texte(", car c'est la seule valeur qui rend tous les résultats équiprobables.")],
+      enonce: [
+        texte("Pour 6 épreuves indépendantes de même probabilité de succès "),
+        latex("p"),
+        texte(", la somme des probabilités "),
+        latex("P(X=0)"),
+        texte(" à "),
+        latex("P(X=6)"),
+        texte(" ne vaut 1 que si "),
+        latex("p=0{,}5"),
+        texte(", car c'est la seule valeur qui rend tous les résultats équiprobables."),
+      ],
       reponse: false,
       justification: [texte("La somme vaut 1 pour TOUTE valeur de "), latex("p"), texte(" entre 0 et 1, pas seulement "), latex("0{,}5"), texte(" — l'équiprobabilité entre les résultats n'est d'ailleurs jamais requise pour que leur somme fasse 1.")],
     },
@@ -1792,8 +2240,11 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité se calculerait plutôt "), latex("\\dfrac{1}{9^4}=\\dfrac{1}{6561}"),
-        texte(", en supposant que la probabilité reste "), latex("\\dfrac{1}{9}"), texte(" à chaque tirage."),
+        texte("En tirant successivement, sans remise, 4 lettres parmi 9 lettres toutes différentes, la probabilité d'obtenir un ordre précis donné à l'avance se calculerait "),
+        latex("\\dfrac{1}{9^4}=\\dfrac{1}{6561}"),
+        texte(", en supposant que la probabilité reste "),
+        latex("\\dfrac{1}{9}"),
+        texte(" à chaque tirage."),
       ],
       reponse: false,
       justification: [
@@ -1827,7 +2278,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Avec 9 lettres, augmenter "), latex("k"), texte(" à 5 AUGMENTE la probabilité de deviner la séquence exacte, car il y a alors plus de tirages qui pourraient \"compenser\" une erreur."),
+        texte("En tirant sans remise "),
+        latex("k"),
+        texte(" lettres parmi 9 lettres toutes différentes, passer de "),
+        latex("k=4"),
+        texte(" à "),
+        latex("k=5"),
+        texte(" AUGMENTE la probabilité de deviner la séquence exacte, car il y a alors plus de tirages qui pourraient \"compenser\" une erreur."),
       ],
       reponse: false,
       justification: [
@@ -1851,8 +2308,15 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes "), latex("n=8"), texte(" et "), latex("p=0{,}5"), texte(", la valeur la plus probable est "),
-        latex("k=4"), texte(", avec "), latex("P(X=4)=\\dfrac{70}{256}\\approx0{,}273"), texte("."),
+        texte("Pour "),
+        latex("n=8"),
+        texte(" lancers d'une pièce équilibrée ("),
+        latex("p=0{,}5"),
+        texte("), la valeur la plus probable est "),
+        latex("k=4"),
+        texte(", avec "),
+        latex("P(X=4)=\\dfrac{70}{256}\\approx0{,}273"),
+        texte("."),
       ],
       reponse: true,
       justification: [latex("C_{8}^{4}=70"), texte(" est le plus grand coefficient de la ligne "), latex("n=8"), texte(", donc "), latex("k=4"), texte(" est bien le cas le plus probable.")],
@@ -1870,8 +2334,13 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Toujours pour "), latex("n=8"), texte(" et "), latex("p=0{,}5"), texte(", "),
-        latex("P(\\text{au moins }1)=1-0{,}5^8=\\dfrac{255}{256}\\approx0{,}996"), texte("."),
+        texte("Pour "),
+        latex("n=8"),
+        texte(" lancers d'une pièce équilibrée ("),
+        latex("p=0{,}5"),
+        texte("), "),
+        latex("P(\\text{au moins }1)=1-0{,}5^8=\\dfrac{255}{256}\\approx0{,}996"),
+        texte("."),
       ],
       reponse: true,
       justification: [texte("\"Au moins 1\" est le complémentaire exact d'\"aucun\", dont la probabilité vaut "), latex("\\dfrac{1}{256}"), texte(".")],
@@ -1889,8 +2358,23 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette égalité disparaît dès que "), latex("p\\neq0{,}5"), texte(" : pour "), latex("n=8"), texte(" et "), latex("p=0{,}3"),
-        texte(", "), latex("P(X=3)\\approx0{,}254"), texte(" alors que "), latex("P(X=5)\\approx0{,}047"), texte("."),
+        texte("Pour "),
+        latex("n=8"),
+        texte(" épreuves, l'égalité "),
+        latex("P(X=3)=P(X=5)"),
+        texte(", vraie pour "),
+        latex("p=0{,}5"),
+        texte(", disparaît dès que "),
+        latex("p\\neq0{,}5"),
+        texte(" : pour "),
+        latex("n=8"),
+        texte(" et "),
+        latex("p=0{,}3"),
+        texte(", "),
+        latex("P(X=3)\\approx0{,}254"),
+        texte(" alors que "),
+        latex("P(X=5)\\approx0{,}047"),
+        texte("."),
       ],
       reponse: true,
       justification: [
@@ -1946,8 +2430,9 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes 12 jetons, la probabilité d'obtenir les 3 mêmes jetons dans un ordre QUELCONQUE vaut elle aussi "),
-        latex("\\dfrac{1}{1320}"), texte("."),
+        texte("En tirant successivement, sans remise, 3 jetons parmi 12 tous différents, la probabilité d'obtenir 3 jetons précis dans un ordre QUELCONQUE vaut "),
+        latex("\\dfrac{1}{1320}"),
+        texte(", comme pour un ordre exact donné à l'avance."),
       ],
       reponse: false,
       justification: [
@@ -1966,8 +2451,17 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     },
     {
       enonce: [
-        texte("Cette même probabilité de séquence exacte s'écrit "), latex("\\dfrac{1}{C_{n}^{k}}"), texte(", soit "),
-        latex("\\dfrac{1}{C_{12}^{3}}=\\dfrac{1}{220}"), texte(" pour 12 jetons et "), latex("k=3"), texte("."),
+        texte("La probabilité d'une séquence exacte de "),
+        latex("k"),
+        texte(" éléments tirés sans remise parmi "),
+        latex("n"),
+        texte(" s'écrit "),
+        latex("\\dfrac{1}{C_{n}^{k}}"),
+        texte(", soit "),
+        latex("\\dfrac{1}{C_{12}^{3}}=\\dfrac{1}{220}"),
+        texte(" pour 12 jetons et "),
+        latex("k=3"),
+        texte("."),
       ],
       reponse: false,
       justification: [

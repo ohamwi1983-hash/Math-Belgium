@@ -266,6 +266,7 @@ import { adaptateurEvaluationTiragesArbres } from '../entrainement/6e-6h/generat
 import { adaptateurEvaluationIndependanceBayes } from '../entrainement/6e-6h/generateurs6e/independanceBayes/exportEvaluation'
 import { adaptateurEvaluationProbabilitesProblemes } from '../entrainement/6e-6h/generateurs6e/probabilitesProblemes/exportEvaluation'
 import { adaptateurEvaluationFrequenceProbabilite } from '../entrainement/6e-6h/generateurs6e/frequenceProbabilite/exportEvaluation'
+import { adaptateurEvaluationParadoxesProbabilites } from '../entrainement/6e-6h/generateurs6e/paradoxesProbabilites/exportEvaluation'
 import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrainement/6e-6h/generateurs6e/pointsDroitesRemarquablesTriangle/exportEvaluation'
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
@@ -337,6 +338,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen32': versionPapier(adaptateurEvaluationIndependanceBayes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen33': versionPapier(adaptateurEvaluationProbabilitesProblemes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen75': versionPapier(adaptateurEvaluationFrequenceProbabilite) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen76': versionPapier(adaptateurEvaluationParadoxesProbabilites) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen54': adaptateurEvaluationPointsDroitesRemarquablesTriangle as unknown as AdaptateurFeuilleExercices<never>,
   '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,

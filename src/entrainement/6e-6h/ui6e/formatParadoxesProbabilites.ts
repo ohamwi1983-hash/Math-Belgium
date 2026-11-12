@@ -397,7 +397,7 @@ export function aideNiveau2(e: ExerciceParadoxesProbabilites, phase: PhaseParado
     case "prediction":
       return { texte: "" };
     case "modeliser":
-      if (e.famille === "mere") return { texte: "Pour n essais indépendants qui réussissent chacun avec la probabilité p, la probabilité de n'avoir aucun succès est la suivante (un double six a, lui, une chance sur 36 à chaque lancer de deux dés) :", latex: "(1-p)^{n}" };
+      if (e.famille === "mere") return { texte: "Quand des essais indépendants réussissent chacun avec la même probabilité, la probabilité de n'avoir aucun succès est le produit des probabilités d'échec, autant de fois qu'il y a d'essais (un double six a, lui, une chance sur 36 à chaque lancer de deux dés). Avec 4 essais réussissant chacun avec la probabilité 0,3, par exemple :", latex: "(1-0{,}3)^{4}=0{,}7^{4}" };
       if (e.famille === "montyHall") {
         return e.nPortes === 3
           ? { texte: "Si la voiture n'est pas derrière ta porte, l'animateur est obligé d'ouvrir l'unique autre porte à chèvre : regarde ce qui se cache alors derrière la dernière porte fermée." }
