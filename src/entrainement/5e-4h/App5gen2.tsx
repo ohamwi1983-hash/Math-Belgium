@@ -1,15 +1,11 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecVariante, genererExerciceDecompositionFonction } from "./generateurs5e/decompositionFonction";
+import { CATALOGUE_VARIANTES_DECOMPOSITION, construireAvecVariante, genererExerciceDecompositionFonction } from "./generateurs5e/decompositionFonction";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
-const OPTIONS_PROFONDEUR = [
-  { id: "2", label: "2 couches" },
-  { id: "3", label: "3 couches" },
-  { id: "4", label: "4 couches" },
-  { id: "brute", label: "Couche intérieure polynomiale (a·xⁿ + b·xᵐ)" },
-  { id: "affineFinale", label: "Dernière couche affine" },
-];
+/** Même catalogue que l'adaptateur d'export (le QR code d'une feuille rouvre la même instance). */
+const OPTIONS_PROFONDEUR = CATALOGUE_VARIANTES_DECOMPOSITION;
 import {
   activerAideSuivante,
   demarrerSessionDecompositionFonction,
@@ -30,6 +26,14 @@ function nouvelleSession(): EtatSessionDecompositionFonction {
   return demarrerSessionDecompositionFonction(REGLAGES_DEMO, genererExerciceDecompositionFonction);
 }
 
+/** Première session : `?code=XXXXXX` (QR code d'une feuille) → son premier exercice est l'instance
+ * imprimée, tirée avec les MÊMES fonctions que `generateurs5e/decompositionFonction/exportEvaluation.ts`. */
+function sessionInitiale(): EtatSessionDecompositionFonction {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDecompositionFonction(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES_DECOMPOSITION, genererExerciceDecompositionFonction, construireAvecVariante));
+}
+
 /** État tenu en attente dès que l'écran unique se termine (bonne réponse, ou tentatives épuisées) —
  * `niveauAide` est capturé AVANT la soumission (comme l'ancien `terminerEtape(etat.niveauAide, ...)`) :
  * `nouvelEtat.niveauAide` vaut déjà 0 (exercice suivant) ou l'ancienne valeur (session terminée), jamais
@@ -40,7 +44,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen2() {
-  const [etat, setEtat] = useState<EtatSessionDecompositionFonction>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDecompositionFonction>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : remonte l'écran,
    * donc vide les champs et le dernier message (audit 5e ch. 1, point 12). */

@@ -27,11 +27,21 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDomaineDefinition {
   return demarrerSessionDomaineDefinition(REGLAGES_DEMO, genererExerciceDomaineDefinition);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/domaineDefinition/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionDomaineDefinition {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDomaineDefinition(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceDomaineDefinition, construireAvecFamilleId));
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -148,7 +158,7 @@ function formatReponseResolution(reponse: ReponseResolution): ReactNode {
 }
 
 export function App5gen1() {
-  const [etat, setEtat] = useState<EtatSessionDomaineDefinition>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDomaineDefinition>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   // Compteur de génération — le panneau dev "forcer une variante" peut remplacer `exerciceCourant`
   // sans jamais changer `phase` (toujours "ce" avant ET après, les 6 familles démarrant toutes sur

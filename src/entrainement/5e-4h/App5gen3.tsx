@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import type { CompositionDirigee, ExerciceComposerFonctions, SensComposition } from "./core5e/composerFonctions.types";
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
-import { CATALOGUE_COMBOS, CATALOGUE_SENS, construireAvecCombos, genererExerciceComposerFonctions } from "./generateurs5e/composerFonctions";
+import { CATALOGUE_COMBOS, CATALOGUE_SENS, construireAvecCombos, construireAvecComboSensTire, genererExerciceComposerFonctions } from "./generateurs5e/composerFonctions";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   NIVEAU_AIDE_MAX_COMPOSER_FONCTIONS,
@@ -51,6 +52,14 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionComposerFonctions {
   return demarrerSessionComposerFonctions(REGLAGES_DEMO, genererExerciceComposerFonctions);
+}
+
+/** `?code=` (QR code des feuilles) : rouvre EXACTEMENT l'instance imprimée — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur des feuilles (`composerFonctions/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionComposerFonctions {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionComposerFonctions(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_COMBOS, genererExerciceComposerFonctions, construireAvecComboSensTire));
 }
 
 /** D.1 — panneau dev "forcer une variante" : les 10 combinaisons de familles × 3 sous-variantes de
@@ -134,7 +143,7 @@ function calculerSegmentsProgression(etat: EtatSessionComposerFonctions): EtatPu
 }
 
 export function App5gen3() {
-  const [etat, setEtat] = useState<EtatSessionComposerFonctions>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComposerFonctions>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque « Générer » (variante forcée) et à chaque nouvel exercice : il entre dans la
    * `key` des écrans, pour que les champs soient toujours vidés, même si la phase reste la même. */

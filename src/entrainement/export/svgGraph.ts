@@ -32,8 +32,8 @@ const NB_POINTS_ECHANTILLON = 240;
 
 /** Pas "nombre rond" (1/2/5 × 10^n) visant `CIBLE_DIVISIONS` graduations sur l'étendue donnée —
  * même principe que `GrilleAdaptative` (Mafs) côté écran, réimplémenté ici sans dépendance React. */
-function pasNombreRond(etendue: number): number {
-  const brut = etendue / CIBLE_DIVISIONS;
+function pasNombreRond(etendue: number, divisions: number = CIBLE_DIVISIONS): number {
+  const brut = etendue / divisions;
   const magnitude = 10 ** Math.floor(Math.log10(brut));
   const normalise = brut / magnitude;
   const nice = normalise < 1.5 ? 1 : normalise < 3 ? 2 : normalise < 7 ? 5 : 10;
@@ -107,6 +107,10 @@ export interface OptionsSvgFonction {
   courbesSecondaires?: { evaluer: (x: number) => number | null; couleur?: string; pointilles?: boolean }[];
   /** Légende en haut à gauche, une ligne par courbe (trait d'échantillon + texte). */
   legende?: { texte: string; couleur: string; pointilles?: boolean }[];
+  /** Nombre de graduations visé sur chaque axe (défaut 5) — plus fin pour une LECTURE précise
+   * (5gen5 : minimum de f + g, seuil de rentabilité). */
+  divisionsX?: number;
+  divisionsY?: number;
 }
 
 /** Construit le `<svg>` autonome (axes, grille, courbe échantillonnée) d'UNE fonction réelle. */
@@ -121,8 +125,8 @@ export function construireSvgFonction(evaluer: (x: number) => number | null, vie
   const sx = (x: number) => MARGE + ((x - xMin) / (xMax - xMin)) * zoneX;
   const sy = (y: number) => MARGE + ((yMax - y) / (yMax - yMin)) * zoneY;
 
-  const pasX = pasNombreRond(xMax - xMin);
-  const pasY = pasNombreRond(yMax - yMin);
+  const pasX = pasNombreRond(xMax - xMin, options.divisionsX);
+  const pasY = pasNombreRond(yMax - yMin, options.divisionsY);
 
   const lignesGrilleX: string[] = [];
   const labelsX: string[] = [];

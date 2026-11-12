@@ -677,6 +677,14 @@ export function construireAvecCombos(comboId: string, sens: SensComposition): Ex
   throw new Error(`construireAvecCombos : impossible d'obtenir une instance non dégénérée pour "${comboId}"/"${sens}" après ${TENTATIVES_MAX} tentatives`);
 }
 
+/** Variante forcée des feuilles d'exercices/évaluations (et du `?code=` de l'appli, qui doit
+ * reproduire EXACTEMENT l'instance imprimée) : la combinaison de familles est imposée, le sens est
+ * tiré parmi les 3 (équiprobables) — jamais « les deux » d'office, qui doublait la question. */
+export function construireAvecComboSensTire(comboId: string): ExerciceComposerFonctions {
+  const sens = CATALOGUE_SENS[entierAleatoire(0, CATALOGUE_SENS.length - 1)].id;
+  return construireAvecCombos(comboId, sens);
+}
+
 /** Audit 5e ch. 1, point 25 : retirer un nouveau COMBO à chaque rejet avantageait les combos qui
  * réussissent souvent (rationnelle + rationnelle à 25,5 % au lieu de 10 %). Le combo et le sens sont
  * désormais tirés UNE fois (équiprobables), seuls les coefficients sont retirés

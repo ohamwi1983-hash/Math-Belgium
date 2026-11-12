@@ -318,6 +318,16 @@ export function construireAvecProfondeur(profondeur: 2 | 3 | 4, options: Options
   return derniereTentative.exercice;
 }
 
+/** Catalogue des variantes (sélecteur de l'appli ET adaptateur d'export — même liste, pour que le
+ * QR code d'une feuille rouvre la même instance). */
+export const CATALOGUE_VARIANTES_DECOMPOSITION: { id: string; label: string }[] = [
+  { id: "2", label: "2 couches" },
+  { id: "3", label: "3 couches" },
+  { id: "4", label: "4 couches" },
+  { id: "brute", label: "Couche intérieure polynomiale (a·xⁿ + b·xᵐ)" },
+  { id: "affineFinale", label: "Dernière couche affine" },
+];
+
 /** Variantes forçables par le panneau dev (`SelecteurVarianteDev`) : profondeur « 2 »/« 3 »/« 4 »,
  * ou une forme précise (« brute » : couche intérieure polynomiale ; « affineFinale » : dernière
  * couche affine) à profondeur tirée. */

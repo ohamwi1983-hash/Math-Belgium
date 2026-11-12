@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecRestreinte, genererExerciceComposeeGraphique } from "./generateurs5e/composeeGraphique";
+import { CATALOGUE_RESTREINTE, construireAvecRestreinte, genererExerciceComposeeGraphique } from "./generateurs5e/composeeGraphique";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
 const OPTIONS_RESTREINTE = [
@@ -32,6 +33,16 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionComposeeGraphique {
   return demarrerSessionComposeeGraphique(REGLAGES_DEMO, genererExerciceComposeeGraphique);
+}
+
+/** `?code=` (QR code des feuilles) : rouvre EXACTEMENT l'instance imprimée — même catalogue et mêmes
+ * fonctions de génération que l'adaptateur des feuilles (`composeeGraphique/exportEvaluation.ts`). */
+function sessionInitiale(): EtatSessionComposeeGraphique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionComposeeGraphique(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_RESTREINTE, genererExerciceComposeeGraphique, (id) => construireAvecRestreinte(id as "f" | "g")),
+  );
 }
 
 
@@ -65,7 +76,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen4() {
-  const [etat, setEtat] = useState<EtatSessionComposeeGraphique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionComposeeGraphique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des questions déjà closes (puces cliquables de
    * `ProgressionPuces`) — tenu ICI, à part de `EtatSessionComposeeGraphique`, jamais dans le moteur

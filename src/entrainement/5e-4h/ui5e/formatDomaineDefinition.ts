@@ -47,8 +47,10 @@ function formatBorneLatex(valeur: number | null, infini: string): string {
 }
 
 function formatMorceauLatex(m: MorceauEnsemble): string {
-  const gauche = m.infInclus ? "[" : "]";
-  const droite = m.supInclus ? "]" : "[";
+  // Crochets inversés en délimiteurs explicites : sans \\mathopen/\\mathclose, KaTeX lit « ]−∞ »
+  // comme une soustraction (espaces autour du signe) — même correctif que le quiz 5gen39.
+  const gauche = m.infInclus ? "[" : "\\mathopen{]}";
+  const droite = m.supInclus ? "]" : "\\mathclose{[}";
   return `${gauche}${formatBorneLatex(m.inf, "-\\infty")}\\,;\\,${formatBorneLatex(m.sup, "+\\infty")}${droite}`;
 }
 

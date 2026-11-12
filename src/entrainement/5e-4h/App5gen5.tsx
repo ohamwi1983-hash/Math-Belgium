@@ -2,43 +2,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceProblemeContexte } from "./core5e/problemesContexte.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { genererExerciceProblemeContexte } from "./generateurs5e/problemesContexte";
-import { construireScenarioAConteneur, construireScenarioAStockCommande } from "./generateurs5e/problemesContexte/scenarioA";
-import { construireScenarioBAvecModele } from "./generateurs5e/problemesContexte/scenarioB";
-import { construireScenarioCAvecFormes } from "./generateurs5e/problemesContexte/scenarioC";
-import type { FormeChiffreAffairesC, FormeCoutVariableC } from "./core5e/problemesContexte.types";
+import { CATALOGUE_PROBLEMES_CONTEXTE, construireProblemeContexteAvecVariante, genererExerciceProblemeContexte } from "./generateurs5e/problemesContexte";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
-const LABEL_FORME_CV: Record<FormeCoutVariableC, string> = { racineCarree: "CV=k√x", racineCubique: "CV=k∛x", carre: "CV=kx²", cube: "CV=kx³" };
-const LABEL_FORME_CA: Record<FormeChiffreAffairesC, string> = { affine: "CA=px", racineCarree: "CA=p√x", racineCubique: "CA=p∛x" };
-const FORMES_CV: FormeCoutVariableC[] = ["racineCarree", "racineCubique", "carre", "cube"];
-const FORMES_CA: FormeChiffreAffairesC[] = ["affine", "racineCarree", "racineCubique"];
-
-const GENERATEURS_SCENARIO: Record<string, () => ExerciceProblemeContexte> = {
-  A1: () => construireScenarioAConteneur(),
-  A2: () => construireScenarioAStockCommande(),
-  B1: () => construireScenarioBAvecModele("B1"),
-  B2: () => construireScenarioBAvecModele("B2"),
-  B3: () => construireScenarioBAvecModele("B3"),
-  B4: () => construireScenarioBAvecModele("B4"),
-  B5: () => construireScenarioBAvecModele("B5"),
-};
-const OPTIONS_SCENARIO = [
-  { id: "A1", label: "A1 — bidons cylindriques (k/x vs ax²)" },
-  { id: "A2", label: "A2 — stock/commande (ax+b vs k/x)" },
-  { id: "B1", label: "B1 — coût unitaire cu(x)=a+b/x" },
-  { id: "B2", label: "B2 — coût unitaire cu(x)=a+bx" },
-  { id: "B3", label: "B3 — coût unitaire cu(x)=a+b/x²" },
-  { id: "B4", label: "B4 — coût unitaire cu(x)=a/x+b/x²" },
-  { id: "B5", label: "B5 — coût unitaire cu(x)=ax+b/x" },
-];
-for (const formeCV of FORMES_CV) {
-  for (const formeCA of FORMES_CA) {
-    const id = `C-${formeCV}-${formeCA}`;
-    GENERATEURS_SCENARIO[id] = () => construireScenarioCAvecFormes(formeCV, formeCA);
-    OPTIONS_SCENARIO.push({ id, label: `C — ${LABEL_FORME_CV[formeCV]} / ${LABEL_FORME_CA[formeCA]}` });
-  }
-}
+/** Catalogue PARTAGÉ avec l'adaptateur papier et le `?code=` (même ordre partout). */
+const OPTIONS_SCENARIO = CATALOGUE_PROBLEMES_CONTEXTE;
 import {
   activerAideSuivante,
   demarrerSessionProblemeContexte,
@@ -132,6 +101,17 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionProblemeContexte {
   return demarrerSessionProblemeContexte(REGLAGES_DEMO, genererExerciceProblemeContexte);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/problemesContexte/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionProblemeContexte {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionProblemeContexte(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_PROBLEMES_CONTEXTE, genererExerciceProblemeContexte, construireProblemeContexteAvecVariante),
+  );
 }
 
 function LigneTermes({ termes }: { termes: string[] }) {
@@ -432,7 +412,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen5() {
-  const [etat, setEtat] = useState<EtatSessionProblemeContexte>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionProblemeContexte>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionProblemeContexte`, jamais dans le moteur (même principe que
@@ -495,7 +475,7 @@ export function App5gen5() {
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setFicheOuverteIndex(null);
-    setEtat(demarrerSessionProblemeContexte(REGLAGES_DEMO, GENERATEURS_SCENARIO[id]));
+    setEtat(demarrerSessionProblemeContexte(REGLAGES_DEMO, () => construireProblemeContexteAvecVariante(id)));
   }
 
   const exercice = etat.exerciceCourant;

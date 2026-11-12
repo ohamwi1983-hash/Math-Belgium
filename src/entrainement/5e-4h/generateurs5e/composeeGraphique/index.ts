@@ -102,6 +102,13 @@ export function construireAvecRestreinte(restreinte: "f" | "g"): ExerciceCompose
   throw new Error("construireAvecRestreinte : impossible d'obtenir une instance avec un piège hors domaine après " + TENTATIVES_MAX + " tentatives");
 }
 
+/** Catalogue de variantes partagé par l'adaptateur des feuilles et le `?code=` de l'appli (même
+ * ordre : l'index de variante du code y renvoie). */
+export const CATALOGUE_RESTREINTE: { id: "f" | "g"; label: string }[] = [
+  { id: "f", label: "f restreinte" },
+  { id: "g", label: "g restreinte" },
+];
+
 export function genererExerciceComposeeGraphique(): ExerciceComposeeGraphique {
   return construireAvecRestreinte(choisirParmi(["f", "g"]));
 }
