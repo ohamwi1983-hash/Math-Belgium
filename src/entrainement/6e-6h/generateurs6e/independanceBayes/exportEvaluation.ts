@@ -504,11 +504,6 @@ function methodeTable(t: TableauDouble, type: TypeQuestionTable, ligne: number, 
   }
 }
 
-function piegeTable(type: TypeQuestionTable): FragmentConsigne[] {
-  if (type === "condLigneSachantColonne" || type === "condColonneSachantLigne") return [texte("« On choisit au hasard l'un des … » restreint le groupe : diviser par le total général donnerait la probabilité de l'intersection, pas la probabilité conditionnelle.")];
-  if (type === "jointe") return [texte("Pour une intersection, on divise par le total général, pas par le total de la ligne ou de la colonne (ce serait une probabilité conditionnelle).")];
-  return [texte("Pour une probabilité simple, le numérateur est tout le total de la ligne (ou de la colonne), pas une seule case.")];
-}
 
 function calculTable(t: TableauDouble, type: TypeQuestionTable, ligne: number, colonne: number): FragmentConsigne[] {
   const [num, den] = fractionDepuisTable(t, type, ligne, colonne);
@@ -521,9 +516,6 @@ function reponseTableLatex(t: TableauDouble, type: TypeQuestionTable, ligne: num
   return `p=${fracValeur(num, den)}`;
 }
 
-function difficulteTable(type: TypeQuestionTable): 1 | 2 {
-  return type === "condLigneSachantColonne" || type === "condColonneSachantLigne" ? 2 : 1;
-}
 
 /** Papier (« tableau donné ») : TROIS vraies questions sur le même tableau, de nature différente et
  * jamais annoncée — une probabilité simple (marginale), une intersection (« et »), une conditionnelle
