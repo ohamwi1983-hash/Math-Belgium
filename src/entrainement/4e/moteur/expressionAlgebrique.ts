@@ -17,6 +17,10 @@ interface Jeton {
 }
 
 function tokeniser(expression: string): Jeton[] {
+  // Point de multiplication « . » (notation belge : « (x+2).x ») : décimal seulement entre chiffres
+  // (« 2.5 », « .5 ») ; suivi d'une lettre/parenthèse, ou collé à droite d'une lettre/parenthèse
+  // fermante devant un chiffre, c'est une multiplication.
+  expression = expression.replace(/\.(?=\s*[A-Za-z(√π])/g, "*").replace(/([A-Za-z)\]])\.(?=[0-9])/g, "$1*");
   const jetons: Jeton[] = [];
   let i = 0;
   while (i < expression.length) {

@@ -48,7 +48,14 @@ function normaliserSaisie(texte: string): string {
     // Audit chapitre 4 de 6e (point 7) : le symbole « π » valait « Caractère inattendu » (seul
     // « pi » passait). Entouré d'espaces pour rester un jeton isolé : « 2π » → « 2 pi », « πx » →
     // « pi x » (multiplication implicite), jamais un identifiant collé « pix ».
-    .replace(/π/g, " pi ");
+    .replace(/π/g, " pi ")
+    // Point de multiplication « . » (notation belge courante : « (x+2).x^(-x-2) » donnait « erreur
+    // de lecture »). Un point n'est DÉCIMAL qu'entre un chiffre (ou un début/opérateur) et un
+    // chiffre : « 2.5 », « .5 ». Un point suivi d'une lettre ou d'une parenthèse, ou collé à droite
+    // d'une lettre/parenthèse fermante devant un chiffre, est une multiplication (« 2. » final reste
+    // lu comme avant).
+    .replace(/\.(?=\s*[A-Za-z(])/g, "*")
+    .replace(/([A-Za-z)\]])\.(?=[0-9])/g, "$1*");
 }
 
 function tokeniser(texte: string): Jeton[] {

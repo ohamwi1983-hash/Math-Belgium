@@ -635,6 +635,15 @@ function formeGRejeteeParGarde(exercice: ExerciceDomaineDeriveeLogG, texte: stri
 export function diagnostiquerGIdentifier(exercice: ExerciceDomaineDeriveeLogG, texte: string): StatutVerification {
   const { points } = uvDeG(exercice);
   const statut = equivalent(texte, referenceGIdentifier(exercice), points);
+  // Variante « produit » : f(x) = (x+a)/x^(x+a) réécrite EN ENTIER sous forme de produit
+  // (x+a)·x^(−(x+a)) montre la même reconnaissance que la seule partie puissance demandée — elle
+  // était refusée alors que l'écran l'affichait comme réponse attendue (retour utilisateur). La
+  // simple recopie du quotient d'origine reste refusée : aucune barre de fraction admise.
+  if (statut === "not_equivalent" && exercice.variante === "produit" && !texte.includes("/")) {
+    const { a } = exercice;
+    const fEntiere = (x: number) => (a + x) * referenceGIdentifier(exercice)(x);
+    if (equivalent(texte, fEntiere, points) === "correct") return "correct";
+  }
   if (statut !== "correct") return statut;
   return formeGRejeteeParGarde(exercice, texte) ? "not_equivalent" : "correct";
 }

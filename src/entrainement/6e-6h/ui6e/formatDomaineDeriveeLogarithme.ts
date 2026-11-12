@@ -743,7 +743,9 @@ export function reponseAttendueLatex(exercice: ExerciceDomaineDeriveeLogarithme,
     case "F":
       return phase === "fDerivee" ? `f'(x) = ${deriveeLatexF(exercice)}` : null;
     case "G":
-      if (phase === "gIdentifier") return exercice.variante === "produit" ? `f(x) = (x+${exercice.a})\\cdot ${formeUVLatexG(exercice)}` : `f(x) = ${formeUVLatexG(exercice)}`;
+      // « produit » : l'écran demande la PARTIE PUISSANCE — c'est elle qu'on affiche en premier (la
+      // réponse attendue montrait f entière, ce qui contredisait la vérification).
+      if (phase === "gIdentifier") return exercice.variante === "produit" ? `u(x)^{v(x)} = ${formeUVLatexG(exercice)},\\qquad f(x) = (x+${exercice.a})\\cdot ${formeUVLatexG(exercice)}` : `f(x) = ${formeUVLatexG(exercice)}`;
       if (phase === "gFPrimeSurF") return `\\dfrac{f'(x)}{f(x)} = ${fPrimeSurFLatexG(exercice)}`;
       return phase === "gIsoler" ? `f'(x) = ${fSimplifieeLatexG(exercice)}\\cdot\\left(${fPrimeSurFLatexG(exercice)}\\right)` : null;
   }
