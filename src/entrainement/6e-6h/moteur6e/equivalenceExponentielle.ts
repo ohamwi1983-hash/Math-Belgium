@@ -59,6 +59,34 @@ export function diagnostiquerValeur(texte: string, cible: number, tolerance: num
   return Math.abs(v - cible) <= tolerance ? "correct" : "not_equivalent";
 }
 
+/** Écart entre deux angles (radians) ramené dans ]−π ; π] : 0 ⟺ mêmes angles à 2kπ près. */
+export function ecartAngulaire(a: number, b: number): number {
+  const deuxPi = 2 * Math.PI;
+  let d = (a - b) % deuxPi;
+  if (d <= -Math.PI) d += deuxPi;
+  if (d > Math.PI) d -= deuxPi;
+  return d;
+}
+
+/** Diagnostic d'un ANGLE saisi (radians) : `correct` s'il désigne le même angle que la cible à 2kπ
+ * près (audit 6e ch. 5 : θ + 2π, nθ non réduit, θ dans [0 ; 2π[ étaient refusés). `nonReduit` :
+ * même angle mais hors de ]−π ; π] — à n'utiliser comme refus QUE si la consigne exige cet
+ * intervalle (message sans tentative). `degres` : la saisie vaut la cible convertie en degrés. */
+export function diagnostiquerAngle(
+  texte: string,
+  cible: number,
+  tolerance: number = TOLERANCE_DEFAUT,
+): { statut: StatutVerification; nonReduit: boolean; degres: boolean } {
+  const v = evaluerValeurExponentielle(texte);
+  if (v === null) return { statut: "parse_error", nonReduit: false, degres: false };
+  if (Math.abs(ecartAngulaire(v, cible)) <= tolerance) {
+    return { statut: "correct", nonReduit: v <= -Math.PI + 1e-9 || v > Math.PI + 1e-9, degres: false };
+  }
+  const enDegres = (cible * 180) / Math.PI;
+  const degres = Math.abs(ecartAngulaire((v * Math.PI) / 180, cible)) <= tolerance && Math.abs(v - cible) > tolerance && Math.abs(enDegres) > 1e-9;
+  return { statut: "not_equivalent", nonReduit: false, degres };
+}
+
 /** Compare un ENSEMBLE de textes (valeurs numériques pures) à un ensemble de valeurs cibles —
  * ordre indifférent, gère nativement le cas liste vide (0 solution). */
 export function diagnostiquerEnsembleValeurs(textes: string[], cible: number[], tolerance: number = TOLERANCE_DEFAUT): StatutVerification {
