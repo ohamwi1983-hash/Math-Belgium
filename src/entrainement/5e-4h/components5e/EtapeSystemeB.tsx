@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerEquation1SystemeB, diagnostiquerEquation2SystemeB, diagnostiquerSystemeB, type ReponseSystemeB } from "../moteur5e/verificationProblemesContexte";
-import { consigneSystemeB, texteAideSystemeB1, latexAideSystemeB2, latexCoutTotalB } from "../ui5e/formatProblemesContexte";
+import { consigneSystemeB, texteAideSystemeB1, latexCoutTotalB } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -10,6 +10,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -46,26 +47,25 @@ export function EtapeSystemeB({ exercice, donnees, tentativesUtilisees, tentativ
 
   return (
     <div>
+      {donnees}
+      <p className="prompt-text">{consigneSystemeB()}</p>
       <div className="equation-box">
         <Katex expression={latexCoutTotalB(exercice.modele)} block />
       </div>
-      {donnees}
-      <p className="prompt-text">{consigneSystemeB()}</p>
       <ApercuExpressionLatex texte={equation1} />
       <div className="field">
-        <label className="field-label">Équation pour x={exercice.point1.x} :</label>
-        <input type="text" className={`text-input${equation1Erronee ? " is-erronee" : ""}`} value={equation1} onChange={(e) => setEquation1(e.target.value)} placeholder="ex : 25=a*1+b" />
+        <label className="field-label">Équation pour x = {exercice.point1.x} :</label>
+        <input type="text" className={`text-input${equation1Erronee ? " is-erronee" : ""}`} value={equation1} onChange={(e) => setEquation1(e.target.value)} placeholder="ex : 12*11=11a+b" />
       </div>
       <ApercuExpressionLatex texte={equation2} />
       <div className="field">
-        <label className="field-label">Équation pour x={exercice.point2.x} :</label>
-        <input type="text" className={`text-input${equation2Erronee ? " is-erronee" : ""}`} value={equation2} onChange={(e) => setEquation2(e.target.value)} placeholder="ex : 56=a*7+b" />
+        <label className="field-label">Équation pour x = {exercice.point2.x} :</label>
+        <input type="text" className={`text-input${equation2Erronee ? " is-erronee" : ""}`} value={equation2} onChange={(e) => setEquation2(e.target.value)} placeholder="ex : 30*12=12a+b" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideSystemeB1()}</p>
+          <p><TexteRiche5e texte={texteAideSystemeB1()} /></p>
           <Katex expression={latexCoutTotalB(exercice.modele)} block />
-          {niveauAide >= 2 && <Katex expression={latexAideSystemeB2(exercice)} block />}
         </div>
       )}
       {!validation && (

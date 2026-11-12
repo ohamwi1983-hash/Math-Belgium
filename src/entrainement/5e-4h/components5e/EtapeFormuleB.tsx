@@ -10,6 +10,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -49,7 +50,7 @@ export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesU
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_FORMULE_B}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_FORMULE_B} /></p>
       <ApercuExpressionLatex texte={texte} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">f(x) =</label>
@@ -57,7 +58,7 @@ export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesU
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideFormuleB1()}</p>
+          <p><TexteRiche5e texte={texteAideFormuleB1()} /></p>
           <Katex expression={latexFormuleFB(exercice.modele)} block />
         </div>
       )}

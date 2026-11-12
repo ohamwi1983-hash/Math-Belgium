@@ -7,6 +7,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -38,7 +39,7 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_EGALITE_AIRES_A}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_EGALITE_AIRES_A} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x =</label>
         <input
@@ -50,7 +51,7 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_EGALITE_AIRES_A_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_EGALITE_AIRES_A_1} /></p>
           {niveauAide >= 2 && <Katex expression={latexAideEgaliteAiresA2(exercice)} block />}
         </div>
       )}

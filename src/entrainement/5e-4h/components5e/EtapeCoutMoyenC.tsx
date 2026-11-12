@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -37,8 +38,8 @@ export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentat
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={consigneContexteC()} blocDonnees={donnees} />
-      <p className="prompt-text">{consigneCoutMoyenC(exercice)}</p>
+      <EnTeteExercice consigneGenerale={<TexteRiche5e texte={consigneContexteC(exercice)} />} blocDonnees={donnees} />
+      <p className="prompt-text"><TexteRiche5e texte={consigneCoutMoyenC(exercice)} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CM (€) =</label>
         <input
@@ -50,7 +51,7 @@ export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentat
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_COUT_MOYEN_C_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_COUT_MOYEN_C_1} /></p>
         </div>
       )}
       {!validation && (

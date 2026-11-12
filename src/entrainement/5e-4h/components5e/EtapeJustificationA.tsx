@@ -6,6 +6,7 @@ import { TEXTE_AIDE_JUSTIFICATION_A_1, consigneJustificationA, texteCorrectionJu
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -45,14 +46,14 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{consigneJustificationA()}</p>
+      <p className="prompt-text"><TexteRiche5e texte={consigneJustificationA()} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">h ≈</label>
         <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value.replace(/[^0-9.,-]/g, ""))} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_JUSTIFICATION_A_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_JUSTIFICATION_A_1} /></p>
         </div>
       )}
       {!validation && (
@@ -71,7 +72,7 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
       {validation && <ValidationEcran {...validation} />}
       {aSoumis && (
         <div className="aide-5e">
-          <p>{texteCorrectionJustificationA(exercice, xOptimalRetenu)}</p>
+          <p><TexteRiche5e texte={texteCorrectionJustificationA(exercice, xOptimalRetenu)} /></p>
         </div>
       )}
     </div>

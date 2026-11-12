@@ -5,7 +5,11 @@ import { genererDonneeFonction } from "./familles";
 import type { Formule } from "./familles";
 import { intersecterEnsembles, normaliserEnMorceaux } from "./intervalles";
 import { resoudreConditionSeuil, xTelQueGDansDomF } from "./solveur";
-import { simplifierEnFractionUnique, simplifierLatex } from "../simplificationExpression";
+import { all, create } from "mathjs";
+import type { MathNode } from "mathjs";
+import { simplifierEnFractionUniqueNoeud, simplifierLatex, simplifierNoeud } from "../simplificationExpression";
+
+const math = create(all);
 
 /**
  * `dom(externe ∘ interne)` = `dom(interne) ∩ {x : interne(x) ∈ dom(externe)}` — seule source de
@@ -24,6 +28,203 @@ function formuleComposee(externe: DonneeFonction, interne: DonneeFonction): stri
 
 function latexCompose(externe: DonneeFonction, interne: DonneeFonction): string {
   return externe.corpsLatex.replace(/x/g, `\\left(${interne.corpsLatex}\\right)`);
+}
+
+// ============================================================================
+// Forme de référence AFFICHÉE (aide, état actuel, réponse attendue) — audit 5e ch. 1, point 20 :
+// `rationalize` produisait « −3x/(−6x−4) » ou « (4x√A + √A)/(8x−2) ». On remet le dénominateur à
+// coefficient dominant positif (en changeant le signe des deux membres) et on met en facteur une
+// racine commune à tous les termes d'un numérateur/dénominateur.
+// ============================================================================
+
+function sansParentheses(noeud: MathNode): MathNode {
+  let n = noeud;
+  while (n.type === "ParenthesisNode") n = (n as unknown as { content: MathNode }).content;
+  return n;
+}
+
+function commenceParMoins(noeud: MathNode): boolean {
+  return sansParentheses(noeud).toString().trim().startsWith("-");
+}
+
+function opposer(noeud: MathNode): MathNode {
+  try {
+    return simplifierNoeud(`-(${noeud.toString()})`) as unknown as MathNode;
+  } catch {
+    return new math.OperatorNode("-", "unaryMinus", [new math.ParenthesisNode(noeud)]);
+  }
+}
+
+/** « 4x·√A + √A » → « (4x+1)·√A » quand UNE racine est en facteur de tous les termes (test exact :
+ * le quotient par cette racine, racines rendues opaques, est un polynôme sans elle). */
+function factoriserRacineCommune(noeud: MathNode): MathNode {
+  const n = sansParentheses(noeud);
+  const fn = n.type === "OperatorNode" ? (n as unknown as { fn: string }).fn : null;
+  if (fn !== "add" && fn !== "subtract") return noeud;
+  const atomes = new Map<string, MathNode>();
+  const parTexte = new Map<string, string>();
+  const coquille = n.transform((m) => {
+    if (m.type !== "FunctionNode") return m;
+    const cle = m.toString();
+    let nom = parTexte.get(cle);
+    if (nom === undefined) {
+      nom = `R${parTexte.size}`;
+      parTexte.set(cle, nom);
+      atomes.set(nom, m);
+    }
+    return new math.SymbolNode(nom);
+  });
+  for (const [nom, atome] of atomes) {
+    try {
+      const quotient = math.rationalize(`(${coquille.toString()})/${nom}`) as unknown as MathNode;
+      const texte = quotient.toString();
+      if (texte.includes(nom) || texte.includes("/")) continue;
+      const facteur = quotient.transform((m) => (m.type === "SymbolNode" && atomes.has((m as unknown as { name: string }).name) ? (atomes.get((m as unknown as { name: string }).name) as MathNode) : m));
+      return new math.OperatorNode("*", "multiply", [new math.ParenthesisNode(facteur), atome]);
+    } catch {
+      continue;
+    }
+  }
+  return noeud;
+}
+
+function estDivision(noeud: MathNode): boolean {
+  const n = sansParentheses(noeud);
+  return n.type === "OperatorNode" && (n as unknown as { fn: string }).fn === "divide";
+}
+
+function argsDivision(noeud: MathNode): [MathNode, MathNode] {
+  return (sansParentheses(noeud) as unknown as { args: [MathNode, MathNode] }).args;
+}
+
+function developper(noeud: MathNode): MathNode {
+  try {
+    return simplifierNoeud(noeud.toString()) as unknown as MathNode;
+  } catch {
+    return noeud;
+  }
+}
+
+/** « N/D₁/D₂ » → « N/(D₁·D₂) » et « N/(D₁/D₂) » → « (N·D₂)/D₁ », produits développés : `rationalize`
+ * rend parfois ces fractions étagées quand une racine (symbole opaque) est en jeu. */
+function aplatirDivisions(noeud: MathNode): MathNode {
+  if (!estDivision(noeud)) return noeud;
+  let [num, den] = argsDivision(noeud);
+  num = aplatirDivisions(num);
+  den = aplatirDivisions(den);
+  if (estDivision(num)) {
+    const [a, b] = argsDivision(num);
+    return aplatirDivisions(new math.OperatorNode("/", "divide", [a, developper(new math.OperatorNode("*", "multiply", [new math.ParenthesisNode(b), new math.ParenthesisNode(den)]))]));
+  }
+  if (estDivision(den)) {
+    const [c, d] = argsDivision(den);
+    return aplatirDivisions(new math.OperatorNode("/", "divide", [developper(new math.OperatorNode("*", "multiply", [new math.ParenthesisNode(num), new math.ParenthesisNode(d)])), c]));
+  }
+  return new math.OperatorNode("/", "divide", [num, den]);
+}
+
+/** Une division (à dénominateur variable) encore présente sous une autre division ou dans une
+ * somme : la forme n'est pas regroupée en une seule fraction. */
+function contientFractionInterne(noeud: MathNode, profondeur = 0): boolean {
+  const n = sansParentheses(noeud);
+  if (n.type !== "OperatorNode") return false;
+  const op = n as unknown as { fn: string; args: MathNode[] };
+  if (op.fn === "divide" && profondeur > 0 && op.args[1].filter((m) => m.type === "SymbolNode" && (m as unknown as { name: string }).name === "x").length > 0) return true;
+  return op.args.some((a) => contientFractionInterne(a, profondeur + 1));
+}
+
+function decimalesEnFractions(noeud: MathNode): MathNode {
+  return noeud.transform((m) => {
+    if (m.type === "ConstantNode" && typeof (m as unknown as { value: unknown }).value === "number") {
+      const v = (m as unknown as { value: number }).value;
+      if (!Number.isInteger(v)) {
+        const f = math.fraction(v) as unknown as { s: number; n: number; d: number };
+        return math.parse(`${f.s < 0 ? "-" : ""}${f.n}/${f.d}`);
+      }
+    }
+    return m;
+  });
+}
+
+/** Regroupe en une seule fraction, racines opaques : d'abord leurs ARGUMENTS (récursivement), puis
+ * l'expression elle-même si elle contient encore une fraction interne. `rationalize` échoue sur
+ * certaines écritures (« −3·7/(…) ») : on lui passe d'abord une forme simplifiée par mathjs. */
+function regrouper(noeud: MathNode): MathNode {
+  const atomes = new Map<string, MathNode>();
+  const parTexte = new Map<string, string>();
+  const coquille = sansParentheses(noeud).transform((m) => {
+    if (m.type !== "FunctionNode") return m;
+    const f = m as unknown as { fn: unknown; args: MathNode[] };
+    const atome = new math.FunctionNode(f.fn as never, f.args.map(regrouper));
+    const cle = atome.toString();
+    let nom = parTexte.get(cle);
+    if (nom === undefined) {
+      nom = `R${parTexte.size}`;
+      parTexte.set(cle, nom);
+      atomes.set(nom, atome);
+    }
+    return new math.SymbolNode(nom);
+  });
+  let resultat = coquille;
+  if (contientFractionInterne(coquille)) {
+    for (const source of [coquille.toString(), () => math.simplify(coquille.toString()).toString()]) {
+      try {
+        const texte = typeof source === "string" ? source : source();
+        const r = aplatirDivisions(decimalesEnFractions(math.rationalize(texte) as unknown as MathNode));
+        if (!contientFractionInterne(r)) {
+          resultat = r;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+  }
+  resultat = aplatirDivisions(resultat);
+  return resultat.transform((m) => (m.type === "SymbolNode" && atomes.has((m as unknown as { name: string }).name) ? (atomes.get((m as unknown as { name: string }).name) as MathNode) : m));
+}
+
+function normaliserReference(noeudBrut: MathNode): MathNode {
+  const n = sansParentheses(regrouper(noeudBrut));
+  if (n.type === "OperatorNode" && (n as unknown as { fn: string }).fn === "divide") {
+    let [num, den] = (n as unknown as { args: MathNode[] }).args;
+    if (commenceParMoins(den)) {
+      num = opposer(num);
+      den = opposer(den);
+    }
+    return new math.OperatorNode("/", "divide", [factoriserRacineCommune(num), factoriserRacineCommune(den)]);
+  }
+  return factoriserRacineCommune(n);
+}
+
+/** Même nettoyage que `simplificationExpression.ts` (`\cdot` superflu retiré, `\dfrac`). */
+function nettoyerLatexReference(brut: string): string {
+  return brut
+    .replace(/\\cdot\s*(?=[a-zA-Z\\{(])/g, "")
+    .replace(/\\frac(?![a-zA-Z])/g, "\\dfrac")
+    .replace(/-\s*\\left\(([^()+\-]+?)\\right\)/g, "-$1")
+    .replace(/\{\s+/g, "{")
+    .replace(/\s+\}/g, "}")
+    .replace(/-\s+(?=[a-zA-Z0-9\\])/g, "-")
+    .trim();
+}
+
+/** Forme simplifiée et normalisée, en LaTeX — `null` si mathjs n'interprète pas la formule. */
+export function latexReferenceNormalisee(formule: string): string | null {
+  try {
+    return nettoyerLatexReference(normaliserReference(simplifierEnFractionUniqueNoeud(formule) as unknown as MathNode).toTex());
+  } catch {
+    return null;
+  }
+}
+
+/** Même forme, ÉVALUABLE (utilisée par les contrôles : elle doit passer la vérification de l'écran). */
+export function formuleReferenceNormalisee(formule: string): string | null {
+  try {
+    return normaliserReference(simplifierEnFractionUniqueNoeud(formule) as unknown as MathNode).toString();
+  } catch {
+    return null;
+  }
 }
 
 /** Un domaine "pathologique" (vide, ou réduit à un ou des points isolés de largeur nulle) n'est pas
@@ -195,7 +396,7 @@ function construireDirection(interieure: DonneeFonction, nomInterieure: "f" | "g
     // (`null`) sur toute composition "riche" (racine non résoluble algébriquement), auquel cas
     // `simplifierLatex` (distribue sans regrouper de fraction) prend le relais, avec son propre repli
     // sur la substitution brute si mathjs échoue (jamais d'exception ici, dans un cas comme l'autre).
-    latex: simplifierEnFractionUnique(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure)),
+    latex: latexReferenceNormalisee(formule) ?? simplifierLatex(formule, latexCompose(exterieure, interieure)),
     ...coeur,
   };
 }
@@ -240,16 +441,16 @@ const LABEL_FAMILLE: Record<Formule, string> = {
  * arbitraire pour les combos différents, sans incidence pour les combos même-famille : les 3
  * sous-variantes de sens — f∘g seul/g∘f seul/les deux — laissent de toute façon voir les 2 rôles). */
 export const CATALOGUE_COMBOS: ComboFamilles[] = [
-  { id: "rationnelle+rationnelle", label: `${LABEL_FAMILLE.rationnelle} + ${LABEL_FAMILLE.rationnelle}`, familles: ["rationnelle", "rationnelle"] },
-  { id: "irrationnelleSimple+irrationnelleSimple", label: `${LABEL_FAMILLE.irrationnelleSimple} + ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["irrationnelleSimple", "irrationnelleSimple"] },
-  { id: "racineSurFraction+racineSurFraction", label: `${LABEL_FAMILLE.racineSurFraction} + ${LABEL_FAMILLE.racineSurFraction}`, familles: ["racineSurFraction", "racineSurFraction"] },
-  { id: "fractionSousRacine+fractionSousRacine", label: `${LABEL_FAMILLE.fractionSousRacine} + ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["fractionSousRacine", "fractionSousRacine"] },
-  { id: "rationnelle+irrationnelleSimple", label: `${LABEL_FAMILLE.rationnelle} + ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["rationnelle", "irrationnelleSimple"] },
-  { id: "rationnelle+racineSurFraction", label: `${LABEL_FAMILLE.rationnelle} + ${LABEL_FAMILLE.racineSurFraction}`, familles: ["rationnelle", "racineSurFraction"] },
-  { id: "rationnelle+fractionSousRacine", label: `${LABEL_FAMILLE.rationnelle} + ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["rationnelle", "fractionSousRacine"] },
-  { id: "irrationnelleSimple+racineSurFraction", label: `${LABEL_FAMILLE.irrationnelleSimple} + ${LABEL_FAMILLE.racineSurFraction}`, familles: ["irrationnelleSimple", "racineSurFraction"] },
-  { id: "irrationnelleSimple+fractionSousRacine", label: `${LABEL_FAMILLE.irrationnelleSimple} + ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["irrationnelleSimple", "fractionSousRacine"] },
-  { id: "racineSurFraction+fractionSousRacine", label: `${LABEL_FAMILLE.racineSurFraction} + ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["racineSurFraction", "fractionSousRacine"] },
+  { id: "rationnelle+rationnelle", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.rationnelle}`, familles: ["rationnelle", "rationnelle"] },
+  { id: "irrationnelleSimple+irrationnelleSimple", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["irrationnelleSimple", "irrationnelleSimple"] },
+  { id: "racineSurFraction+racineSurFraction", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["racineSurFraction", "racineSurFraction"] },
+  { id: "fractionSousRacine+fractionSousRacine", label: `f ${LABEL_FAMILLE.fractionSousRacine}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["fractionSousRacine", "fractionSousRacine"] },
+  { id: "rationnelle+irrationnelleSimple", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.irrationnelleSimple}`, familles: ["rationnelle", "irrationnelleSimple"] },
+  { id: "rationnelle+racineSurFraction", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["rationnelle", "racineSurFraction"] },
+  { id: "rationnelle+fractionSousRacine", label: `f ${LABEL_FAMILLE.rationnelle}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["rationnelle", "fractionSousRacine"] },
+  { id: "irrationnelleSimple+racineSurFraction", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.racineSurFraction}`, familles: ["irrationnelleSimple", "racineSurFraction"] },
+  { id: "irrationnelleSimple+fractionSousRacine", label: `f ${LABEL_FAMILLE.irrationnelleSimple}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["irrationnelleSimple", "fractionSousRacine"] },
+  { id: "racineSurFraction+fractionSousRacine", label: `f ${LABEL_FAMILLE.racineSurFraction}, g ${LABEL_FAMILLE.fractionSousRacine}`, familles: ["racineSurFraction", "fractionSousRacine"] },
 ];
 
 export interface OptionSens {
@@ -280,15 +481,19 @@ export function construireAvecCombos(comboId: string, sens: SensComposition): Ex
   throw new Error(`construireAvecCombos : impossible d'obtenir une instance non dégénérée pour "${comboId}"/"${sens}" après ${TENTATIVES_MAX} tentatives`);
 }
 
+/** Audit 5e ch. 1, point 25 : retirer un nouveau COMBO à chaque rejet avantageait les combos qui
+ * réussissent souvent (rationnelle + rationnelle à 25,5 % au lieu de 10 %). Le combo et le sens sont
+ * désormais tirés UNE fois (équiprobables), seuls les coefficients sont retirés
+ * (`construireAvecCombos`). Repli, en cas d'échec improbable après 5 000 essais, sur un autre tirage. */
 export function genererExerciceComposerFonctions(): ExerciceComposerFonctions {
-  for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
+  for (let essai = 0; essai < 20; essai++) {
     const combo = CATALOGUE_COMBOS[entierAleatoire(0, CATALOGUE_COMBOS.length - 1)];
     const sens = CATALOGUE_SENS[entierAleatoire(0, CATALOGUE_SENS.length - 1)].id;
-    const [familleF, familleG] = combo.familles;
-    const f = genererDonneeFonction("f", familleF);
-    const g = genererDonneeFonction("g", familleG);
-    const exercice = construireExercice(f, g, sens);
-    if (exercice !== null) return exercice;
+    try {
+      return construireAvecCombos(combo.id, sens);
+    } catch {
+      continue;
+    }
   }
-  throw new Error("genererExerciceComposerFonctions : impossible d'obtenir une instance non dégénérée après " + TENTATIVES_MAX + " tentatives");
+  throw new Error("genererExerciceComposerFonctions : impossible d'obtenir une instance non dégénérée");
 }

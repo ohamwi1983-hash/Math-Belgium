@@ -8,6 +8,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -39,7 +40,7 @@ export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentatives
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneContexteC()}
+        consigneGenerale={<TexteRiche5e texte={consigneContexteC(exercice)} />}
         blocDonnees={
           <>
             {donnees}
@@ -47,7 +48,7 @@ export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentatives
           </>
         }
       />
-      <p className="prompt-text">{CONSIGNE_SEUIL_C}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_SEUIL_C} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x ≈</label>
         <input
@@ -59,7 +60,7 @@ export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentatives
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_SEUIL_C_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_SEUIL_C_1} /></p>
         </div>
       )}
       {!validation && (

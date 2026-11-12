@@ -10,6 +10,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAReduit;
@@ -45,20 +46,20 @@ export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilis
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{consigneGeneralisationSimpleA(exercice)}</p>
+      <p className="prompt-text"><TexteRiche5e texte={consigneGeneralisationSimpleA(exercice)} /></p>
       <ApercuExpressionLatex texte={f} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">f(x) =</label>
-        <input type="text" className={`text-input${fErronee ? " is-erronee" : ""}`} value={f} onChange={(e) => setF(e.target.value)} placeholder="ex : 2*x+5" />
+        <input type="text" className={`text-input${fErronee ? " is-erronee" : ""}`} value={f} onChange={(e) => setF(e.target.value)} placeholder="ex : 9*x+30" />
       </div>
       <ApercuExpressionLatex texte={g} label="g(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">g(x) =</label>
-        <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 10/x" />
+        <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 1500/x" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideGeneralisationSimpleA1(exercice)}</p>
+          <p><TexteRiche5e texte={texteAideGeneralisationSimpleA1(exercice)} /></p>
         </div>
       )}
       {!validation && (

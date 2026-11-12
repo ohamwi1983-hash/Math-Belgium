@@ -3,13 +3,7 @@ import type { ReactNode } from "react";
 import type { ExerciceProblemeContexte } from "./core5e/problemesContexte.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { genererExerciceProblemeContexte } from "./generateurs5e/problemesContexte";
-import {
-  construireScenarioAConteneur,
-  construireScenarioADeuxParaboles,
-  construireScenarioAIntensiteCable,
-  construireScenarioARacineAffine,
-  construireScenarioAStockCommande,
-} from "./generateurs5e/problemesContexte/scenarioA";
+import { construireScenarioAConteneur, construireScenarioAStockCommande } from "./generateurs5e/problemesContexte/scenarioA";
 import { construireScenarioBAvecModele } from "./generateurs5e/problemesContexte/scenarioB";
 import { construireScenarioCAvecFormes } from "./generateurs5e/problemesContexte/scenarioC";
 import type { FormeChiffreAffairesC, FormeCoutVariableC } from "./core5e/problemesContexte.types";
@@ -23,9 +17,6 @@ const FORMES_CA: FormeChiffreAffairesC[] = ["affine", "racineCarree", "racineCub
 const GENERATEURS_SCENARIO: Record<string, () => ExerciceProblemeContexte> = {
   A1: () => construireScenarioAConteneur(),
   A2: () => construireScenarioAStockCommande(),
-  A3: () => construireScenarioARacineAffine(),
-  A4: () => construireScenarioAIntensiteCable(),
-  A5: () => construireScenarioADeuxParaboles(),
   B1: () => construireScenarioBAvecModele("B1"),
   B2: () => construireScenarioBAvecModele("B2"),
   B3: () => construireScenarioBAvecModele("B3"),
@@ -35,9 +26,6 @@ const GENERATEURS_SCENARIO: Record<string, () => ExerciceProblemeContexte> = {
 const OPTIONS_SCENARIO = [
   { id: "A1", label: "A1 — bidons cylindriques (k/x vs ax²)" },
   { id: "A2", label: "A2 — stock/commande (ax+b vs k/x)" },
-  { id: "A3", label: "A3 — racine/affine (k√x vs b-ax)" },
-  { id: "A4", label: "A4 — intensité/câble (k/x² vs ax)" },
-  { id: "A5", label: "A5 — deux paraboles" },
   { id: "B1", label: "B1 — coût unitaire cu(x)=a+b/x" },
   { id: "B2", label: "B2 — coût unitaire cu(x)=a+bx" },
   { id: "B3", label: "B3 — coût unitaire cu(x)=a+b/x²" },
@@ -82,8 +70,6 @@ import type {
   ResultatScenarioC,
 } from "./moteur5e/typesProblemesContexte";
 import {
-  consigneContexteAReduit,
-  consigneContexteC,
   consigneVolumeA,
   formatTermeABLatex,
   formatTermeBeneficeC,
@@ -104,6 +90,9 @@ import {
   formatTermesTableauA,
 } from "./ui5e/formatProblemesContexte";
 import { BlocContexteB } from "./components5e/BlocContexteB";
+import { BlocContexteAReduit } from "./components5e/BlocContexteAReduit";
+import { TableauContexteC } from "./components5e/TableauContexteC";
+import { TexteRiche5e } from "./components5e/TexteRiche5e";
 import { EtapeBeneficeC } from "./components5e/EtapeBeneficeC";
 import { EtapeCoutMoyenC } from "./components5e/EtapeCoutMoyenC";
 import { EtapeEgaliteAiresA } from "./components5e/EtapeEgaliteAiresA";
@@ -395,7 +384,7 @@ const LIBELLE_PHASE: Record<PhaseProblemeContexte, string> = {
   resolution: "Résolution (a, b)",
   formule: "Formule f(x)",
   evaluation: "Évaluation",
-  lecture: "Lecture graphique (CF, CV, CP, CT)",
+  lecture: "Coût total (tableau)",
   coutMoyen: "Coût moyen",
   reconnaissance: "Reconnaissance CV(x)/CP(x)",
   benefice: "Bénéfice",
@@ -428,7 +417,7 @@ function formatReponseResolutionBTexte(r: ReponseResolutionB): string {
 }
 
 function formatReponseLectureCTexte(r: ReponseLectureC): string {
-  return `CF=${r.cf} ; CV=${r.cv} ; CP=${r.cp} ; CT=${r.ct}`;
+  return `CT = ${String(r.ct).replace(".", ",")}`;
 }
 
 function formatReponseReconnaissanceCTexte(r: ReponseReconnaissanceC): string {
@@ -540,7 +529,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "tableau" && (
             <EtapeTableauA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneVolumeA(exercice)}</div>}
+              donnees={<div className="equation-box"><TexteRiche5e texte={consigneVolumeA(exercice)} /></div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -554,7 +543,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "generalisation" && (
             <EtapeGeneralisationA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneVolumeA(exercice)}</div>}
+              donnees={<div className="equation-box"><TexteRiche5e texte={consigneVolumeA(exercice)} /></div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -567,7 +556,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "egaliteAires" && (
             <EtapeEgaliteAiresA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneVolumeA(exercice)}</div>}
+              donnees={<div className="equation-box"><TexteRiche5e texte={consigneVolumeA(exercice)} /></div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -581,7 +570,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "graphique" && (
             <EtapeGraphiqueA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneVolumeA(exercice)}</div>}
+              donnees={<div className="equation-box"><TexteRiche5e texte={consigneVolumeA(exercice)} /></div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -594,7 +583,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "justification" && etat.xOptimalRetenu !== null && (
             <EtapeJustificationA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneVolumeA(exercice)}</div>}
+              donnees={<div className="equation-box"><TexteRiche5e texte={consigneVolumeA(exercice)} /></div>}
               xOptimalRetenu={etat.xOptimalRetenu}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -612,7 +601,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo !== "kInverseXAxCarre" && etat.phase === "generalisationSimple" && (
             <EtapeGeneralisationSimpleA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteAReduit(exercice)}</div>}
+              donnees={<BlocContexteAReduit exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -625,7 +614,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo !== "kInverseXAxCarre" && etat.phase === "intersectionSimple" && (
             <EtapeIntersectionSimpleA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteAReduit(exercice)}</div>}
+              donnees={<BlocContexteAReduit exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -639,7 +628,7 @@ export function App5gen5() {
           {exercice.scenario === "A" && exercice.combo !== "kInverseXAxCarre" && etat.phase === "extremumSimple" && (
             <EtapeExtremumSimpleA
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteAReduit(exercice)}</div>}
+              donnees={<BlocContexteAReduit exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -711,7 +700,7 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "lecture" && (
             <EtapeLectureC
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteC()}</div>}
+              donnees={<TableauContexteC exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -721,11 +710,11 @@ export function App5gen5() {
               validation={validation}
             />
           )}
-          {exercice.scenario === "C" && etat.phase === "lecture" && exercice.formeCV !== "racineCarree" && <CalculatriceScientifique />}
+          {exercice.scenario === "C" && etat.phase === "lecture" && <CalculatriceScientifique />}
           {exercice.scenario === "C" && etat.phase === "coutMoyen" && (
             <EtapeCoutMoyenC
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteC()}</div>}
+              donnees={<TableauContexteC exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -739,7 +728,7 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "reconnaissance" && (
             <EtapeReconnaissanceC
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteC()}</div>}
+              donnees={<TableauContexteC exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -752,7 +741,7 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "benefice" && (
             <EtapeBeneficeC
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteC()}</div>}
+              donnees={<TableauContexteC exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -762,13 +751,11 @@ export function App5gen5() {
               validation={validation}
             />
           )}
-          {exercice.scenario === "C" && etat.phase === "benefice" && (exercice.formeCV !== "racineCarree" || exercice.formeCA !== "affine") && (
-            <CalculatriceScientifique />
-          )}
+          {exercice.scenario === "C" && etat.phase === "benefice" && <CalculatriceScientifique />}
           {exercice.scenario === "C" && etat.phase === "seuil" && (
             <EtapeSeuilC
               exercice={exercice}
-              donnees={<div className="equation-box">{consigneContexteC()}</div>}
+              donnees={<TableauContexteC exercice={exercice} />}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}

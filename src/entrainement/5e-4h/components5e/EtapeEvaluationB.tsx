@@ -6,6 +6,7 @@ import { TEXTE_AIDE_EVALUATION_B_1, consigneEvaluationB } from "../ui5e/formatPr
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -43,7 +44,7 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{consigneEvaluationB(exercice)}</p>
+      <p className="prompt-text"><TexteRiche5e texte={consigneEvaluationB(exercice)} /></p>
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">f({exercice.xEval1}) =</label>
@@ -56,7 +57,7 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_EVALUATION_B_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_EVALUATION_B_1} /></p>
         </div>
       )}
       {!validation && (

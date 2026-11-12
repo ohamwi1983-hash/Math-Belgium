@@ -6,6 +6,7 @@ import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAReduit;
@@ -35,7 +36,7 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{consigneIntersectionSimpleA()}</p>
+      <p className="prompt-text"><TexteRiche5e texte={consigneIntersectionSimpleA()} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x =</label>
         <input
@@ -47,7 +48,7 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_INTERSECTION_SIMPLE_A_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_INTERSECTION_SIMPLE_A_1} /></p>
         </div>
       )}
       {!validation && (

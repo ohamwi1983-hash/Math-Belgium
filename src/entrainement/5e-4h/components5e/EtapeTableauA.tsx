@@ -6,6 +6,7 @@ import { CONSIGNE_TABLEAU_A, TEXTE_AIDE_TABLEAU_A_1, TEXTE_AIDE_TABLEAU_A_2 } fr
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -47,7 +48,7 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_TABLEAU_A}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_TABLEAU_A} /></p>
       <table className="summary-table-scroll">
         <thead>
           <tr>
@@ -91,8 +92,8 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
       </table>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_TABLEAU_A_1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_TABLEAU_A_2}</p>}
+          <p><TexteRiche5e texte={TEXTE_AIDE_TABLEAU_A_1} /></p>
+          {niveauAide >= 2 && <p><TexteRiche5e texte={TEXTE_AIDE_TABLEAU_A_2} /></p>}
         </div>
       )}
       {!validation && (

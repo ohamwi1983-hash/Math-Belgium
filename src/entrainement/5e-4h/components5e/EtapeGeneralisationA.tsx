@@ -11,17 +11,17 @@ import {
 import {
   CONSIGNE_GENERALISATION_A,
   TEXTE_AIDE_GENERALISATION_A_1,
-  latexAideGeneralisationA2F,
-  latexAideGeneralisationA2G,
-  latexAideGeneralisationA2H,
+  texteAideGeneralisationA2F,
+  texteAideGeneralisationA2G,
+  texteAideGeneralisationA2H,
 } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -61,30 +61,30 @@ export function EtapeGeneralisationA({ exercice, donnees, tentativesUtilisees, t
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_GENERALISATION_A}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_GENERALISATION_A} /></p>
       <ApercuExpressionLatex texte={h} label="h(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">h(x) =</label>
-        <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value)} placeholder="ex : V/(pi*x^2)" />
+        <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value)} placeholder="ex : V/(2*pi*x)" />
       </div>
       <ApercuExpressionLatex texte={f} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">f(x) =</label>
-        <input type="text" className={`text-input${fErronee ? " is-erronee" : ""}`} value={f} onChange={(e) => setF(e.target.value)} placeholder="ex : 2*V/x" />
+        <input type="text" className={`text-input${fErronee ? " is-erronee" : ""}`} value={f} onChange={(e) => setF(e.target.value)} placeholder="ex : 3*V/x^2" />
       </div>
       <ApercuExpressionLatex texte={g} label="g(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">g(x) =</label>
-        <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 2*pi*x^2" />
+        <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 4*pi*x" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_GENERALISATION_A_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_GENERALISATION_A_1} /></p>
           {niveauAide >= 2 && (
             <>
-              <Katex expression={latexAideGeneralisationA2H()} block />
-              <Katex expression={latexAideGeneralisationA2F()} block />
-              <Katex expression={latexAideGeneralisationA2G()} block />
+              <p><TexteRiche5e texte={texteAideGeneralisationA2H()} /></p>
+              <p><TexteRiche5e texte={texteAideGeneralisationA2F()} /></p>
+              <p><TexteRiche5e texte={texteAideGeneralisationA2G()} /></p>
             </>
           )}
         </div>

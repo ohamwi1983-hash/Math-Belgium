@@ -7,6 +7,7 @@ import { ScenarioAGraph } from "./ScenarioAGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -38,7 +39,7 @@ export function EtapeGraphiqueA({ exercice, donnees, tentativesUtilisees, tentat
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_GRAPHIQUE_A}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_GRAPHIQUE_A} /></p>
       <ScenarioAGraph exercice={exercice} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x ≈</label>
@@ -51,7 +52,7 @@ export function EtapeGraphiqueA({ exercice, donnees, tentativesUtilisees, tentat
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_GRAPHIQUE_A_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_GRAPHIQUE_A_1} /></p>
         </div>
       )}
       {!validation && (

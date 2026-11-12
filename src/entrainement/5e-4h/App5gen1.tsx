@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { ExerciceDomaineDefinition, FamilleDomaineDefinition, SlotCE } from "./core5e/domaineDefinition.types";
+import type { ExerciceDomaineDefinition, SlotCE } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDefinition } from "./generateurs5e/domaineDefinition";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -225,7 +225,7 @@ export function App5gen1() {
           setEnAttente(null);
           setHistorique([]);
           setGenerationExercice((g) => g + 1);
-          setEtat(demarrerSessionDomaineDefinition(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleDomaineDefinition)));
+          setEtat(demarrerSessionDomaineDefinition(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
         }}
       />
       <main className="card">

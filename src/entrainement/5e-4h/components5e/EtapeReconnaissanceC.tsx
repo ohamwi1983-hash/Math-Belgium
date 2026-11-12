@@ -16,6 +16,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -53,7 +54,7 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneContexteC()}
+        consigneGenerale={<TexteRiche5e texte={consigneContexteC(exercice)} />}
         blocDonnees={
           <>
             {donnees}
@@ -61,20 +62,20 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
           </>
         }
       />
-      <p className="prompt-text">{CONSIGNE_RECONNAISSANCE_C}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_RECONNAISSANCE_C} /></p>
       <ApercuExpressionLatex texte={cv} label="CV(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CV(x) =</label>
-        <input type="text" className={`text-input${cvErronee ? " is-erronee" : ""}`} value={cv} onChange={(e) => setCv(e.target.value)} placeholder="ex : 5*sqrt(x)" />
+        <input type="text" className={`text-input${cvErronee ? " is-erronee" : ""}`} value={cv} onChange={(e) => setCv(e.target.value)} placeholder="ex : 9*x^4" />
       </div>
       <ApercuExpressionLatex texte={cp} label="CP(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CP(x) =</label>
-        <input type="text" className={`text-input${cpErronee ? " is-erronee" : ""}`} value={cp} onChange={(e) => setCp(e.target.value)} placeholder="ex : 2*x" />
+        <input type="text" className={`text-input${cpErronee ? " is-erronee" : ""}`} value={cp} onChange={(e) => setCp(e.target.value)} placeholder="ex : 12*x" />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideReconnaissanceC1(exercice)}</p>
+          <p><TexteRiche5e texte={texteAideReconnaissanceC1(exercice)} /></p>
         </div>
       )}
       {!validation && (

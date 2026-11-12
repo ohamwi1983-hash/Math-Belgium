@@ -136,6 +136,9 @@ function calculerSegmentsProgression(etat: EtatSessionComposerFonctions): EtatPu
 export function App5gen3() {
   const [etat, setEtat] = useState<EtatSessionComposerFonctions>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque « Générer » (variante forcée) et à chaque nouvel exercice : il entre dans la
+   * `key` des écrans, pour que les champs soient toujours vidés, même si la phase reste la même. */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionComposerFonctions) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -148,6 +151,7 @@ export function App5gen3() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) setGeneration((n) => n + 1);
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -155,6 +159,7 @@ export function App5gen3() {
   function forcerVariante(id: string) {
     setEnAttente(null);
     const [comboId, sensId] = id.split("::") as [string, SensComposition];
+    setGeneration((n) => n + 1);
     setEtat(demarrerSessionComposerFonctions(REGLAGES_DEMO, () => construireAvecCombos(comboId, sensId)));
   }
 
@@ -185,7 +190,7 @@ export function App5gen3() {
           <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase.startsWith("formule") && (
             <EtapeFormuleComposerFonctions
-              key={etat.phase}
+              key={`${generation}-${etat.phase}`}
               consigne={consigneFormule(dir)}
               donnees={donnees}
               placeholder={PLACEHOLDER_FORMULE}
@@ -203,7 +208,7 @@ export function App5gen3() {
           )}
           {etat.phase.startsWith("conditions") && (
             <EtapeConditionsComposerFonctions
-              key={etat.phase}
+              key={`${generation}-${etat.phase}`}
               dir={dir}
               consigne={consigneConditions(dir)}
               donnees={donnees}
@@ -220,7 +225,7 @@ export function App5gen3() {
           )}
           {etat.phase.startsWith("c1") && (
             <EtapeDomaineComposerFonctions
-              key={etat.phase}
+              key={`${generation}-${etat.phase}`}
               consigne={consigneC1(dir)}
               donnees={donnees}
               prefixApercu="x\in"
@@ -238,7 +243,7 @@ export function App5gen3() {
           )}
           {etat.phase.startsWith("c2") && (
             <EtapeDomaineComposerFonctions
-              key={etat.phase}
+              key={`${generation}-${etat.phase}`}
               consigne={consigneC2(dir)}
               donnees={donnees}
               prefixApercu="x\in"
@@ -256,7 +261,7 @@ export function App5gen3() {
           )}
           {etat.phase.startsWith("domaine") && (
             <EtapeDomaineComposerFonctions
-              key={etat.phase}
+              key={`${generation}-${etat.phase}`}
               consigne={consigneDomaine(dir)}
               donnees={donnees}
               prefixApercu={`\\text{dom}(${estPhaseFRondG(etat.phase) ? "f\\circ g" : "g\\circ f"}) =`}

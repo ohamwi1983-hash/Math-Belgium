@@ -1,19 +1,38 @@
 import type { ExerciceDomaineDefinition, FamilleDomaineDefinition } from "../../core5e/domaineDefinition.types";
 import { genererExerciceFractionSousRacine } from "./fractionSousRacine";
-import { genererExerciceIrrationnelleSimple } from "./irrationnelleSimple";
+import { construireIrrationnelleSimple, genererExerciceIrrationnelleSimple } from "./irrationnelleSimple";
 import { genererExercicePasDeCE } from "./pasDeCE";
-import { genererExerciceRacineImpaireDenominateur } from "./racineImpaireDenominateur";
-import { genererExerciceRacineSurFraction } from "./racineSurFraction";
-import { genererExerciceRationnelle } from "./rationnelle";
+import { construireRacineImpaireDenominateur, genererExerciceRacineImpaireDenominateur } from "./racineImpaireDenominateur";
+import { construireRacineSurFraction, genererExerciceRacineSurFraction } from "./racineSurFraction";
+import { construireRationnelleAvecSousCas, genererExerciceRationnelle } from "./rationnelle";
 
-export const CATALOGUE_FAMILLES: { id: FamilleDomaineDefinition; label: string }[] = [
+/** Les 6 familles du tirage pondéré (voir `POIDS`). */
+const FAMILLES: FamilleDomaineDefinition[] = ["rationnelle", "irrationnelleSimple", "racineSurFraction", "fractionSousRacine", "pasDeCE", "racineImpaireDenominateur"];
+
+/** Catalogue du sélecteur de variante : les 6 familles, puis des SOUS-CAS forçables (audit 5e
+ * ch. 1, point 10 — données seulement, composant du sélecteur inchangé). Les sous-cas ne changent
+ * pas le tirage libre, qui reste pondéré par famille. */
+export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "rationnelle", label: "Rationnelle" },
   { id: "irrationnelleSimple", label: "Irrationnelle simple" },
   { id: "racineSurFraction", label: "Racine sur fraction" },
   { id: "fractionSousRacine", label: "Fraction sous racine (bonus)" },
   { id: "pasDeCE", label: "Pas de CE" },
   { id: "racineImpaireDenominateur", label: "Racine impaire au dénominateur" },
+  { id: "rationnelle-jamaisNul", label: "Rationnelle — dénominateur jamais nul" },
+  { id: "irrationnelle-coefNegatif", label: "Irrationnelle — coefficient négatif (sens inversé)" },
+  { id: "racineSurFraction-strict", label: "Racine sur fraction — N/√D (condition stricte)" },
+  { id: "racineSurFraction-exclusionDedans", label: "Racine sur fraction — √N/D, exclusion dans l'intervalle" },
+  { id: "racineImpaire-deltaNegatif", label: "Racine impaire — Δ < 0 (dénominateur jamais nul)" },
 ];
+
+const SOUS_CAS: Record<string, () => ExerciceDomaineDefinition> = {
+  "rationnelle-jamaisNul": () => construireRationnelleAvecSousCas("vacuous"),
+  "irrationnelle-coefNegatif": () => construireIrrationnelleSimple(false, -1),
+  "racineSurFraction-strict": () => construireRacineSurFraction("nSurRacineD", Math.random() < 0.5, false),
+  "racineSurFraction-exclusionDedans": () => construireRacineSurFraction("racineSurD", Math.random() < 0.5, true),
+  "racineImpaire-deltaNegatif": () => construireRacineImpaireDenominateur(2, ([0, 1, 2] as const)[Math.floor(Math.random() * 3)], "discriminantNegatif"),
+};
 
 const CONSTRUCTEURS: Record<FamilleDomaineDefinition, () => ExerciceDomaineDefinition> = {
   rationnelle: genererExerciceRationnelle,
@@ -24,8 +43,10 @@ const CONSTRUCTEURS: Record<FamilleDomaineDefinition, () => ExerciceDomaineDefin
   racineImpaireDenominateur: genererExerciceRacineImpaireDenominateur,
 };
 
-export function construireAvecFamilleId(familleId: FamilleDomaineDefinition): ExerciceDomaineDefinition {
-  return CONSTRUCTEURS[familleId]();
+export function construireAvecFamilleId(familleId: string): ExerciceDomaineDefinition {
+  const sousCas = SOUS_CAS[familleId];
+  if (sousCas) return sousCas();
+  return CONSTRUCTEURS[familleId as FamilleDomaineDefinition]();
 }
 
 /**
@@ -47,11 +68,11 @@ const POIDS_TOTAL = Object.values(POIDS).reduce((s, p) => s + p, 0);
 
 export function tirerFamillePonderee(): FamilleDomaineDefinition {
   let tirage = Math.random() * POIDS_TOTAL;
-  for (const { id } of CATALOGUE_FAMILLES) {
+  for (const id of FAMILLES) {
     tirage -= POIDS[id];
     if (tirage < 0) return id;
   }
-  return CATALOGUE_FAMILLES[CATALOGUE_FAMILLES.length - 1].id;
+  return FAMILLES[FAMILLES.length - 1];
 }
 
 export function genererExerciceDomaineDefinition(): ExerciceDomaineDefinition {

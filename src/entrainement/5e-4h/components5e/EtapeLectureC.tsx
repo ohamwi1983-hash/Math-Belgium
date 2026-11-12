@@ -1,15 +1,9 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import {
-  diagnostiquerCfLectureC,
-  diagnostiquerCpLectureC,
-  diagnostiquerCtLectureC,
-  diagnostiquerCvLectureC,
-  type ReponseLectureC,
-} from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_LECTURE_C_1, consigneContexteC, consigneLectureC } from "../ui5e/formatProblemesContexte";
-import { ScenarioCGraph } from "./ScenarioCGraph";
+import { diagnostiquerCtLectureC, type ReponseLectureC } from "../moteur5e/verificationProblemesContexte";
+import { consigneContexteC, consigneLectureC, texteAideLectureC1 } from "../ui5e/formatProblemesContexte";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -17,8 +11,7 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
-  /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
-   * l'écran (convention transversale : données/graphe → question, jamais l'inverse). */
+  /** Bloc "données" persistant (tableau de valeurs du scénario C) — rendu AVANT la question. */
   donnees: ReactNode;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -32,58 +25,34 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
+/** Écran 1 du scénario C (audit 5e ch. 1) : CT(xLecture) calculé à partir du TABLEAU de valeurs
+ * (affiché dans `donnees`) — plus de lecture graphique de CF/CV/CP au demi-millier près. */
 export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
-  const [cf, setCf] = useState("");
-  const [cv, setCv] = useState("");
-  const [cp, setCp] = useState("");
   const [ct, setCt] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
-  const complet = [cf, cv, cp, ct].every((v) => v.trim() !== "");
-  const cfErronee = montrerErreurs && cf.trim() !== "" && diagnostiquerCfLectureC(exercice, Number(cf.replace(",", "."))) !== "correct";
-  const cvErronee = montrerErreurs && cv.trim() !== "" && diagnostiquerCvLectureC(exercice, Number(cv.replace(",", "."))) !== "correct";
-  const cpErronee = montrerErreurs && cp.trim() !== "" && diagnostiquerCpLectureC(exercice, Number(cp.replace(",", "."))) !== "correct";
-  const ctErronee = montrerErreurs && ct.trim() !== "" && diagnostiquerCtLectureC(exercice, Number(ct.replace(",", "."))) !== "correct";
+  const complet = ct.trim() !== "";
+  const ctErronee = montrerErreurs && complet && diagnostiquerCtLectureC(exercice, Number(ct.replace(",", "."))) !== "correct";
 
   function valider() {
     if (!complet) return;
-    onValider({ cf: Number(cf.replace(",", ".")), cv: Number(cv.replace(",", ".")), cp: Number(cp.replace(",", ".")), ct: Number(ct.replace(",", ".")) });
+    onValider({ ct: Number(ct.replace(",", ".")) });
   }
 
   return (
     <div>
-      <EnTeteExercice
-        consigneGenerale={consigneContexteC()}
-        blocDonnees={
-          <>
-            {donnees}
-            <ScenarioCGraph exercice={exercice} />
-          </>
-        }
-      />
-      <p className="prompt-text">{consigneLectureC(exercice)}</p>
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule">CF =</label>
-          <input type="text" className={`text-input${cfErronee ? " is-erronee" : ""}`} value={cf} onChange={(e) => setCf(e.target.value.replace(/[^0-9.,-]/g, ""))} />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule">CV =</label>
-          <input type="text" className={`text-input${cvErronee ? " is-erronee" : ""}`} value={cv} onChange={(e) => setCv(e.target.value.replace(/[^0-9.,-]/g, ""))} />
-        </div>
-      </div>
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule">CP =</label>
-          <input type="text" className={`text-input${cpErronee ? " is-erronee" : ""}`} value={cp} onChange={(e) => setCp(e.target.value.replace(/[^0-9.,-]/g, ""))} />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule">CT =</label>
-          <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(e.target.value.replace(/[^0-9.,-]/g, ""))} />
-        </div>
+      <EnTeteExercice consigneGenerale={<TexteRiche5e texte={consigneContexteC(exercice)} />} blocDonnees={donnees} />
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneLectureC(exercice)} />
+      </p>
+      <div className="field field-inline">
+        <label className="field-label field-label-minuscule">CT({exercice.xLecture}) =</label>
+        <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(e.target.value.replace(/[^0-9.,-]/g, ""))} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_LECTURE_C_1}</p>
+          <p>
+            <TexteRiche5e texte={texteAideLectureC1(exercice)} />
+          </p>
         </div>
       )}
       {!validation && (

@@ -6,6 +6,7 @@ import { CONSIGNE_RESOLUTION_B, TEXTE_AIDE_RESOLUTION_B_1 } from "../ui5e/format
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -40,7 +41,7 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
   return (
     <div>
       {donnees}
-      <p className="prompt-text">{CONSIGNE_RESOLUTION_B}</p>
+      <p className="prompt-text"><TexteRiche5e texte={CONSIGNE_RESOLUTION_B} /></p>
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">a =</label>
@@ -53,7 +54,7 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{TEXTE_AIDE_RESOLUTION_B_1}</p>
+          <p><TexteRiche5e texte={TEXTE_AIDE_RESOLUTION_B_1} /></p>
         </div>
       )}
       {!validation && (

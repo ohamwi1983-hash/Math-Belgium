@@ -93,7 +93,7 @@ export function calculerRecapitulatifProblemeContexte(etat: EtatSessionProblemeC
     }
   } else {
     if (etat.scoreLectureExercice !== null) {
-      entrees.push(entreeMultiple("Lecture graphique (CF, CV, CP, CT)", formatTermesLectureC(exercice), etat.lectureRevele));
+      entrees.push(entreeMultiple("Coût total (tableau)", formatTermesLectureC(exercice), etat.lectureRevele));
     }
     if (etat.scoreCoutMoyenExercice !== null) {
       entrees.push(entreeUnique("Coût moyen", formatTermeCoutMoyenC(exercice), etat.coutMoyenRevele));
