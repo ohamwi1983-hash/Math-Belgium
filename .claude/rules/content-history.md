@@ -2372,3 +2372,28 @@ paths:
   version dense dès 5 colonnes (lisible à 390 px jusqu'à 12 colonnes). Piège : une chaîne JS
   `"\left…"` à antislash simple perd ses commandes (`\r` devient un retour chariot) — corrigé dans
   `formatAssociation.ts`, aucun autre cas hors attributs JSX (où l'antislash simple est correct).
+
+- **5e (4h), Chapitre 5 — Dérivées et applications** (suite) : audit du contenu puis enrichissement
+  validé (toutes les recommandations). Erreurs corrigées : canette (h = 2r juste dans le modèle,
+  mais une vraie canette a h ≈ 3,5r — fond/couvercle plus épais, explication ajoutée) ; application
+  « sprinteur » (texte contredisant le modèle logistique) remplacée par une épidémie (pic des
+  nouveaux cas = point d'inflexion de N) ; médicament en modèle calculable en 5e (10t/(t²+4), pic
+  t = 2 h) ; rappel « dériver un polynôme dès maintenant » en §2 (les exemples utilisaient les règles
+  de §3) ; √x dérivable pour x > 0 ; règle (k·u)′ ; rappels vides → sous-titres ; tableaux des
+  dérivées de référence et de la chaîne transposés en 2 colonnes (lisibles au téléphone) ; tableau
+  des grandeurs de §11 précisé ; Agnesi (1750, 32 ans) ; Fermat « adégalité » ; §4 renommée « Signe
+  de f′ et de f″ : variations et concavité » ; forward vers la 6e. Ajouts : tableau de convergence
+  des taux (§1), approximation affine (§2), notation de Leibniz (§3), dérivable ⟹ continue (§4),
+  lecture du graphique de f′ (§6), étude complète d'une cubique (§7), boîte sans couvercle (§8),
+  distance de freinage + historique Newton/fluxions (§11) ; 5 énoncés de démonstration par clé
+  (clé « étude complète » renommée « avec asymptote oblique » pour lever l'ambiguïté). Ateliers :
+  7 nouveaux — `secante-tangente-widget` (§1), `zoom-tangente-widget` (§2),
+  `f-fprime-fseconde-widget` (§4, modes « devine f′ » et « lecture inverse »),
+  `boite-carton-widget` et `canette-optimale-widget` (§8), `dichotomie-widget` (§9),
+  `mobile-piste-widget` (§11, freinage) ; 3 améliorés — `point-critique-signe-widget` (tableau de
+  signes en direct, concavité), `recette-benefice-widget` (curseurs a et c, courbe de B),
+  `extrema-bornes-widget` (deux bornes, 3 fonctions, liste des candidats). Piège retrouvé :
+  `epinglerFigure` ne retient qu'une `<svg>` d'au moins 120 × 80 px — `mobile-piste-widget` empilait
+  4 svg de 57–71 px, jamais épinglées ; graphes passés à ≥ 80 px de haut (HG 92 → 110). Vérifié :
+  0 débordement interne à 308 px, épinglage 390 × 760 et 1280 × 800 sans échec (les 3 non épinglés
+  tiennent à l'écran), 0 erreur KaTeX/console, 0 `$` visible.

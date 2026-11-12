@@ -80,7 +80,7 @@
   }
 
   var LP = 400, HP = 74;      // piste
-  var LG = 400, HG = 92;      // chaque graphe
+  var LG = 400, HG = 110;     // chaque graphe (≥ 80 px de haut à 308 px : figure épinglable)
   var MG = 50;
 
   var TEMPLATE = document.createElement("template");

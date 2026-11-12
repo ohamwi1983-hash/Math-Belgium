@@ -108,6 +108,16 @@ export const deriveesApplications: ChapterContent = {
             'c\'est exactement ce que veut dire $f\'(2) = 4$.',
         },
         {
+          kind: 'atelier',
+          tag: 'secante-tangente-widget',
+          label: 'Manipule toi-même : de la sécante à la tangente',
+          caption:
+            'Fais tendre h vers 0, par la droite puis par la gauche : la sécante (AB) ' +
+            'pivote autour de A et le taux d\'accroissement se stabilise. Le tableau garde ' +
+            'les taux des valeurs repères ; coche la tangente pour voir la limite f\'(a). ' +
+            'Essaie aussi x³, 1/x et √x.',
+        },
+        {
           kind: 'methode',
           label: 'Le squelette, valable pour toute fonction',
           items: [
@@ -200,6 +210,15 @@ export const deriveesApplications: ChapterContent = {
             "**tangente**. Elle épouse la courbe de si près, à cet endroit, qu'aucune autre " +
             "droite ne colle mieux : c'est la meilleure approximation de la courbe par une " +
             "droite, juste autour de ce point.",
+        },
+        {
+          kind: 'atelier',
+          tag: 'zoom-tangente-widget',
+          label: 'Manipule toi-même : zoome sur la courbe',
+          caption:
+            'Zoome autour de A : à ×100, la courbe et sa tangente ne se distinguent plus, ' +
+            'c\'est l\'idée même de la tangente. Avec |x| en 0, le coin reste un coin à tout ' +
+            'zoom : pas de tangente unique, f n\'est pas dérivable en 0.',
         },
         {
           kind: 'rappel',
@@ -762,6 +781,17 @@ export const deriveesApplications: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'f-fprime-fseconde-widget',
+          label: 'Manipule toi-même : f, f\' et f\'\' côte à côte',
+          caption:
+            'Fais glisser x : la pente de la tangente à f (violet) est exactement la ' +
+            'hauteur du point sur f\', et le signe de f\'\' donne la forme de f (vert : ' +
+            'convexe ∪, orange : concave ∩). Mode « devine f\' » : esquisse f\' avant de la ' +
+            'révéler ; mode « lecture inverse » : retrouve les variations de f à partir de ' +
+            'f\' seule (comme en section 6).',
+        },
+        {
           kind: 'attention',
           label: 'f\'(a)=0 ne garantit PAS un extremum',
           text:
@@ -1033,9 +1063,10 @@ export const deriveesApplications: ChapterContent = {
           tag: 'point-critique-signe-widget',
           label: 'Manipule toi-même : point critique ou vrai extremum ?',
           caption:
-            'f(x)=x³−3kx : fais glisser k. Pour k>0, f\' change de signe aux deux zéros ' +
-            '(2 vrais extremums, comme l\'exemple ci-dessus en k=1). Pour k=0, f\'(x)=3x² ne ' +
-            'change jamais de signe : point critique SANS extremum.',
+            'f(x) = x³ − 3kx : fais glisser k et suis le tableau de signes de f\'. Pour k > ' +
+            '0, f\' change de signe aux deux zéros (2 vrais extremums) ; pour k = 0, f\'(x) = ' +
+            '3x² ne change jamais de signe : point critique SANS extremum. Coche f\'\' pour ' +
+            'voir la concavité et le point d\'inflexion (0 ; 0).',
         },
         { kind: 'subheading', text: 'Racines irrationnelles, fonction rationnelle, dérivée seconde' },
         {
@@ -1683,6 +1714,16 @@ export const deriveesApplications: ChapterContent = {
           result: { tag: 'résultat', text: 'carrés de 5 cm : boîte de $20 \\times 20 \\times 5$ cm, volume maximal $V(5) = 2000$ cm³' },
         },
         {
+          kind: 'atelier',
+          tag: 'boite-carton-widget',
+          label: 'Manipule toi-même : la boîte en carton',
+          caption:
+            'Fais glisser x : les carrés découpés grandissent, la boîte devient moins large ' +
+            'mais plus haute. Le point suit la courbe V(x) : tant que V\'(x) > 0, le volume ' +
+            'augmente ; il est maximal là où V\'(x) = 0 (x = 5 cm pour le carré de 30 cm, x ' +
+            '≈ 4,04 cm pour une feuille A4).',
+        },
+        {
           kind: 'astuce',
           label: 'Quand la grandeur dépend d\'un angle',
           text:
@@ -1727,6 +1768,15 @@ export const deriveesApplications: ChapterContent = {
             'de la matière. Un bon modèle se critique toujours : il faut alors compter le fond et ' +
             'le couvercle « plus cher » — l\'optimum se déplace vers des canettes plus hautes.',
           domaines: ['Ingénierie', 'Industrie'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'canette-optimale-widget',
+          label: 'Manipule toi-même : la canette optimale',
+          caption:
+            'Pour 330 cm³, fais varier le rayon : l\'aire de métal est minimale quand h = ' +
+            '2r. Coche « fond et couvercle épais » : l\'optimum passe à h = 4r, plus proche ' +
+            'd\'une vraie canette (h/r ≈ 3,5). Un modèle plus réaliste change la réponse.',
         },
         {
           kind: 'entrainement',
@@ -1855,11 +1905,11 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'atelier',
           tag: 'recette-benefice-widget',
-          label: 'Manipule toi-même : Rm=Cm au bénéfice maximal',
+          label: 'Manipule toi-même : Rm = Cm au bénéfice maximal',
           caption:
-            'R(x) et C(x) sont ceux de l\'exemple ci-dessus. Fais glisser x : regarde R\', C\' ' +
-            'se rapprocher (ou s\'éloigner) l\'un de l\'autre, et le verdict changer de sens ' +
-            'selon lequel des deux dépasse l\'autre.',
+            'Fais glisser x pour voir Rm et Cm se croiser au bénéfice maximal. Change le ' +
+            'prix de départ a : l\'optimum x* = (a − 10)/4 se déplace. Change le coût fixe c ' +
+            ': la courbe de B descend, mais x* ne bouge pas.',
         },
         { kind: 'subheading', text: 'Coût moyen minimal — et la dichotomie pour l\'approcher' },
         {
@@ -1908,6 +1958,15 @@ export const deriveesApplications: ChapterContent = {
             tag: 'conclusion',
             text: '$q \\approx 4{,}34$ (à 0,03 près) : le coût moyen est minimal pour environ 434 unités. P passe de − à + : $C_M$ décroît puis croît, c\'est bien un minimum.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'dichotomie-widget',
+          label: 'Manipule toi-même : la dichotomie pas à pas',
+          caption:
+            'Clique « Étape suivante » : l\'intervalle qui contient la racine est coupé en ' +
+            'deux, on garde la moitié où P change de signe. La largeur est divisée par 2 à ' +
+            'chaque étape ; 4 étapes donnent déjà q ≈ 4,34, comme dans l\'exemple.',
         },
         {
           kind: 'entrainement',
@@ -2017,9 +2076,10 @@ export const deriveesApplications: ChapterContent = {
           tag: 'extrema-bornes-widget',
           label: 'Manipule toi-même : le basculement vers la borne',
           caption:
-            'f(t)=t³−6t²+9t+2, comme dans l\'exemple. Fais glisser la borne b : à partir d\'un ' +
-            'certain point (b=4), la valeur à la borne dépasse le maximum local — le maximum ' +
-            'absolu change alors de camp.',
+            'Choisis une fonction, puis déplace les bornes a et b. Le tableau liste tous ' +
+            'les candidats : les extremums locaux à l\'intérieur de [a ; b] et les valeurs ' +
+            'aux deux bornes. Le maximum et le minimum absolus sont simplement le plus ' +
+            'grand et le plus petit de ces nombres — ils peuvent se trouver à une borne.',
         },
         {
           kind: 'entrainement',
@@ -2198,6 +2258,17 @@ export const deriveesApplications: ChapterContent = {
               'vitesse multipliée par 1,5 → distance de freinage multipliée par $2{,}25 = 1{,}5^2$ : elle ' +
               'est proportionnelle au **carré** de la vitesse (sans compter la distance parcourue pendant le temps de réaction).',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'mobile-piste-widget',
+          label: 'Manipule toi-même : le mobile sur sa piste',
+          caption:
+            'Choisis un mouvement et fais avancer le temps : la voiture se déplace pendant ' +
+            'que les points glissent sur s(t), v(t) = s\'(t) et a(t) = v\'(t). Le signe de v ' +
+            'dit si le mobile avance ou recule ; il accélère quand v et a ont le même ' +
+            'signe, il ralentit sinon. En freinage, compare la distance d\'arrêt à 50 et à ' +
+            '70 km/h.',
         },
         {
           kind: 'historique',
