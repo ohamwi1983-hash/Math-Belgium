@@ -22,7 +22,7 @@ export function calculerRecapitulatifParadoxes(etat: EtatSessionParadoxes): Entr
 
 /** « ; » entre deux formules d'une même ligne (le panneau les pose bout à bout). */
 function avecSeparateurs(formules: string[]): string[] {
-  return formules.map((x, i) => (i < formules.length - 1 ? `${x}\;;` : x));
+  return formules.map((x, i) => (i < formules.length - 1 ? `${x}\\;;` : x));
 }
 
 /** Une puce par écran ; la prédiction (non notée) est « sans-objet » une fois close. */
