@@ -109,12 +109,12 @@ function soumettreEcran<T>(etat: EtatSessionEtudeLocale, ecranAttendu: EcranEtud
 }
 
 // ============================================================================
-// Écran "domaine" (rationnelleAvecCE uniquement).
+// Écran "domaine" (toute fonction rationnelle, avec ou sans CE — audit 5e ch. 5).
 // ============================================================================
 
 export function soumettreReponseDomaine(etat: EtatSessionEtudeLocale, reponse: EnsembleReelGuide): EtatSessionEtudeLocale {
   const exercice = etat.exerciceCourant;
-  if (exercice.type !== "rationnelleAvecCE") throw new Error('soumettreReponseDomaine : exercice hors type "rationnelleAvecCE"');
+  if (exercice.type === "polynomiale") throw new Error("soumettreReponseDomaine : exercice polynomial (domaine = ℝ, écran absent)");
   return soumettreEcran(etat, "domaine", reponse, (r) => verifierEnsembleReelGuide(r, domaineAttendu(exercice)));
 }
 

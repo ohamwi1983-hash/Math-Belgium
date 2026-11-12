@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { BoutonAide } from "./BoutonAide";
+import { Katex } from "../components/Katex";
 
 /**
  * Composant RÉUTILISABLE (pas hardcodé sur 5gen31) — placement de points par TAP DIRECT sur un
@@ -18,16 +19,23 @@ import { BoutonAide } from "./BoutonAide";
  * compteur de tentatives, jusqu'à `tentativesMax`, après quoi il est révélé et le point suivant
  * commence).
  *
- * Aide : 1 SEUL niveau (déviation DOCUMENTÉE par rapport au standard 2 niveaux de la plateforme —
- * un niveau suffit ici : la seule aide utile est "voici la zone approximative", il n'y a pas de
- * second niveau d'indication plus poussé pour un point à placer visuellement, contrairement à un
- * champ symbolique où un exemple complet peut s'ajouter à une piste méthodologique). Surlignage de
- * zone (jamais de texte à 2 niveaux classique) — cohérent avec 5gen22/5gen30, repli JUSTIFIÉ par la
- * consigne source elle-même ("PAS de texte à 2 niveaux classique").
+ * Aide : 1 SEUL niveau — une bande verticale à l'abscisse du point (connue depuis les tableaux) :
+ * elle aide à se repérer sans dessiner la réponse (audit 5e ch. 5 : l'ancienne aide traçait un
+ * disque centré sur le point cherché).
+ *
+ * Tolérance exprimée en PIXELS (`TOLERANCE_PIXELS`) : `onTap` reçoit l'échelle (pixels par unité)
+ * du graphe, dont la fenêtre et le repère (non isotrope) changent d'un exercice à l'autre.
  */
 export interface PointCiblePlacement {
   id: string;
   label: string;
+  /** Libellé KaTeX optionnel affiché après `label` (ex. coordonnées du point). */
+  labelLatex?: string;
+  x: number;
+  y: number;
+}
+
+export interface EchellePixels {
   x: number;
   y: number;
 }
@@ -46,7 +54,7 @@ export interface ResumePlacementPointsGraphique {
 }
 
 interface RenderGrapheOptions {
-  onTap: (x: number, y: number) => void;
+  onTap: (x: number, y: number, echelle: EchellePixels) => void;
   pointActif: PointCiblePlacement | null;
   propositionsConfirmees: PointConfirmePlacement[];
   dernierTapRate: { x: number; y: number } | null;
@@ -82,10 +90,10 @@ export function PlacementPointsGraphique({ points, tentativesMax, niveauAide, ni
   const pointActif = indexActif < points.length ? points[indexActif] : null;
   const termine = pointActif === null;
 
-  function onTap(x: number, y: number) {
+  function onTap(x: number, y: number, echelle: EchellePixels) {
     if (!pointActif) return;
-    const dist = Math.hypot(x - pointActif.x, y - pointActif.y);
-    if (dist <= TOLERANCE_AFFICHEE) {
+    const distPixels = Math.hypot((x - pointActif.x) * echelle.x, (y - pointActif.y) * echelle.y);
+    if (distPixels <= TOLERANCE_PIXELS) {
       setConfirmes((c) => [...c, { id: pointActif.id, x: pointActif.x, y: pointActif.y, correct: true }]);
       setIndexActif((i) => i + 1);
       setTentativesPointActif(0);
@@ -113,6 +121,12 @@ export function PlacementPointsGraphique({ points, tentativesMax, niveauAide, ni
       {!termine && (
         <p className="prompt-text">
           Point {indexActif + 1}/{points.length} — {pointActif!.label}
+          {pointActif!.labelLatex && (
+            <>
+              {" "}
+              <Katex expression={pointActif!.labelLatex} />
+            </>
+          )}
         </p>
       )}
       {renderGraphe({
@@ -130,7 +144,7 @@ export function PlacementPointsGraphique({ points, tentativesMax, niveauAide, ni
       {!termine && <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
       {niveauAide >= 1 && !termine && (
         <div className="aide-5e">
-          <p>La zone surlignée sur le graphique indique où se trouve approximativement le point demandé.</p>
+          <p>La bande verte marque l'abscisse du point : vise la hauteur que tu as calculée.</p>
         </div>
       )}
       {termine && (
@@ -142,13 +156,7 @@ export function PlacementPointsGraphique({ points, tentativesMax, niveauAide, ni
   );
 }
 
-/** Tolérance de proximité (unités du graphique) — IDENTIQUE à `TOLERANCE_PLACEMENT_POINT`
- * (`moteur5e/verificationEtudierFonction.ts`, vérité terrain) : dupliquée en constante LOCALE plutôt
- * qu'importée pour garder ce composant RÉUTILISABLE par un futur générateur sans dépendance à
- * 5gen31 — voir CLAUDE.md, "Annonce de précision = tolérance réellement vérifiée" : la valeur reste
- * cohérente avec les tolérances "lecture visuelle" déjà établies (5gen30 : ~0.3-0.5). Un futur
- * appelant qui a besoin d'une tolérance différente n'a qu'à comparer lui-même dans `onValider` — ce
- * composant reste la référence VISUELLE (retour immédiat au tap), la notation finale appartient
- * toujours à l'appelant.
- */
-export const TOLERANCE_AFFICHEE = 0.4;
+/** Tolérance de proximité en PIXELS (≈ 11 px, au doigt comme à la souris) — identique à
+ * `TOLERANCE_PLACEMENT_PIXELS` (`moteur5e/verificationEtudierFonction.ts`), dupliquée pour garder ce
+ * composant réutilisable sans dépendance à 5gen31. */
+export const TOLERANCE_PIXELS = 11;

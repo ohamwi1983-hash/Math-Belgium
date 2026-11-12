@@ -218,26 +218,26 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): AideFragme
       return {
         texte: "Deux exemples :",
         latex:
-          "(x-1)^2-4=0 \\iff (x-1)^2=4 \\iff x=-1 \\text{ ou } x=3 \\;\\Rightarrow\\; \\operatorname{dom} f=\\mathbb{R}\\setminus\\{-1\\,;3\\} \\qquad (x-1)^2+6=0 \\iff (x-1)^2=-6 \\text{ : impossible} \\;\\Rightarrow\\; \\operatorname{dom} f=\\mathbb{R}",
+          "\\begin{aligned} (x-1)^2-4=0 &\\iff x=-1 \\text{ ou } x=3 &&\\Rightarrow\\ \\operatorname{dom} f=\\mathbb{R}\\setminus\\{-1\\,;3\\}\\\\ (x-1)^2+6=0 &\\iff (x-1)^2=-6 &&\\Rightarrow\\ \\operatorname{dom} f=\\mathbb{R} \\end{aligned}",
       };
     case "resoudreFPrime":
-      return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1" };
+      return { texte: "Exemple :", latex: "6x^2-6=0 \\iff x^2=1 \\iff x=-1 \\text{ ou } x=1" };
     case "tableauFPrime":
       return {
         texte: "Exemple : avec une racine double en 0, f' reste positive des deux côtés de 0 ; on écrit « ni l'un ni l'autre » même si f'(0) = 0 :",
         latex: "f'(x)=6x^2",
       };
     case "extremums":
-      return { texte: "Exemple :", latex: "f(x)=2x^3-6x,\\ x=-1 \\;\\Rightarrow\\; f(-1)=2\\cdot(-1)^3-6\\cdot(-1)=-2+6=4" };
+      return { texte: "Exemple, avec f(x) = 2x³ − 6x :", latex: "f(-1)=2\\cdot(-1)^3-6\\cdot(-1)=-2+6=4" };
     case "resoudreFSeconde":
-      return { texte: "Exemple :", latex: "f''(x)=12x=0 \\;\\Rightarrow\\; x=0" };
+      return { texte: "Exemple :", latex: "f''(x)=12x=0 \\iff x=0" };
     case "tableauFSeconde":
       return {
         texte: "Exemple : f'' change de signe en 0 (négative avant, positive après), donc ce point est un point d'inflexion (PI) :",
         latex: "f''(x)=12x",
       };
     case "inflexions":
-      return { texte: "Exemple :", latex: "f(x)=2x^3,\\ x=0 \\;\\Rightarrow\\; f(0)=2\\cdot0^3=0" };
+      return { texte: "Exemple, avec f(x) = 2x³ :", latex: "f(0)=2\\cdot0^3=0" };
   }
 }
 

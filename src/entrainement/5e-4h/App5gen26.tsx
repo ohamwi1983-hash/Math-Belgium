@@ -24,7 +24,7 @@ import {
 import type { ExerciceDefinitionDerivee } from "./core5e/definitionDerivee.types";
 import { EtapeChampLibreDerivee } from "./components5e/EtapeChampLibreDerivee";
 import { EtapeDevelopperDerivee } from "./components5e/EtapeDevelopperDerivee";
-import { formatReponseAttendueEcranLatex, labelLimite, labelQuotient } from "./ui5e/formatDefinitionDerivee";
+import { formatReponseAttendueEcranLatex, labelLimite, labelQuotient, nombreTexte } from "./ui5e/formatDefinitionDerivee";
 import { calculerRecapitulatifDefinitionDerivee } from "./ui5e/recapitulatifDefinitionDerivee";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -219,7 +219,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), `f(${a}) = ${reponse.fA} ; f(${a} + h) = ${reponse.fAH}`)}
+          onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), `f(${nombreTexte(a)}) = ${reponse.fA} ; f(${nombreTexte(a)} + h) = ${reponse.fAH}`)}
           diagnostiquer={(r) => ({ fA: diagnostiquerValeurFA(r.fA, exercice, a), fAH: diagnostiquerDeveloppementH(r.fAH, exercice, a) })}
           controlerForme={(r) => controlerFormeDeveloppement(r.fAH, exercice)}
           validation={validation}
@@ -259,7 +259,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte), `f'(${a}) = ${texte}`)}
+          onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte), `f'(${nombreTexte(a)}) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerLimiteDerivee(t, exercice, a)}
           validation={validation}
         />

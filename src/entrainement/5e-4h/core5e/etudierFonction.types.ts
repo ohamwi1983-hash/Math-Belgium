@@ -54,6 +54,9 @@ export interface ExerciceRationnelleAO {
   classificationFPrime: ClassificationExtremum[];
 }
 
-export type ExerciceEtudierFonction = { famille: "etudeLocale"; noyau: ExerciceEtudeLocale } | ExerciceRationnelleAO;
+/** Branche "etudeLocale" : `decalage` (rationnelles seulement, 0 sinon) translate f verticalement —
+ * f(x) = noyau(x) + decalage — pour que l'asymptote horizontale ne soit pas toujours y = 0 (audit
+ * 5e ch. 5) ; f' et f'' sont inchangées. Absent = 0 (exercices construits avant ce champ). */
+export type ExerciceEtudierFonction = { famille: "etudeLocale"; noyau: ExerciceEtudeLocale; decalage?: number } | ExerciceRationnelleAO;
 
 export type GenerateurExerciceEtudierFonction = () => ExerciceEtudierFonction;

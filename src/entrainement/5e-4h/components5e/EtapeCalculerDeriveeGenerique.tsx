@@ -78,7 +78,7 @@ export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, ten
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 2*x+3"
+          placeholder="ex : 4x^3 + 1"
         />
       </div>
       {niveauAide >= 1 && (

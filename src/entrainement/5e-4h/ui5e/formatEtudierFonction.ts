@@ -11,7 +11,8 @@ import type { EnsembleReelGuide } from "../core5e/domaineDefinition.types";
 import { formatFDeXLatex as formatFDeXLatexEtudeLocale, formatFPrimeDeXLatex as formatFPrimeDeXLatexEtudeLocale, formatFSecondeDeXLatex as formatFSecondeDeXLatexEtudeLocale, formatRacineLatex } from "./formatEtudeLocale";
 import type { EcranEtudierFonction } from "../moteur5e/typesEtudierFonction";
 import type { SlotLimiteEtudierFonction } from "../moteur5e/verificationEtudierFonction";
-import { domaineAttendu, exclusionsCE, listeSlotsLimites, pointsClesEtudierFonction, racinesFPrime, racinesFSeconde } from "../moteur5e/verificationEtudierFonction";
+import { classificationFPrime, decalageVertical, domaineAttendu, exclusionsCE, listeSlotsLimites, pointsClesEtudierFonction, racinesFPrime, racinesFSeconde } from "../moteur5e/verificationEtudierFonction";
+import type { PointCleEtudierFonction } from "../moteur5e/verificationEtudierFonction";
 
 export { formatRacineLatex };
 
@@ -59,7 +60,10 @@ function formatFSecondeDeXLatexRationnelleAO(ex: ExerciceRationnelleAO): string 
 // ============================================================================
 
 export function formatFDeXLatex(exercice: ExerciceEtudierFonction): string {
-  return exercice.famille === "rationnelleAO" ? formatFDeXLatexRationnelleAO(exercice) : formatFDeXLatexEtudeLocale(exercice.noyau);
+  if (exercice.famille === "rationnelleAO") return formatFDeXLatexRationnelleAO(exercice);
+  const d = decalageVertical(exercice);
+  const base = formatFDeXLatexEtudeLocale(exercice.noyau);
+  return d === 0 ? base : `${base}${d > 0 ? "+" : "-"}${Math.abs(d)}`;
 }
 
 export function formatFPrimeDeXLatex(exercice: ExerciceEtudierFonction): string {
@@ -81,7 +85,7 @@ export function formatTermesDonneesLatex(exercice: ExerciceEtudierFonction): str
 // ============================================================================
 
 export const CONSIGNE_GENERALE_ETUDIER_FONCTION =
-  "Étudie complètement la fonction f ci-dessus : domaine, comportement aux bornes, dérivées, tableaux de variations et de concavité, puis place les points clés sur le graphique.";
+  "Étudie complètement la fonction f ci-dessous : domaine, comportement aux bornes, dérivées, tableaux de variations et de concavité, coordonnées des points remarquables, puis place ces points sur un graphique.";
 
 export function questionFinaleEtudierFonction(): string {
   return "Objectif : étude complète de f.";
@@ -99,7 +103,8 @@ export const LIBELLE_ECRAN_ETUDIER_FONCTION: Record<EcranEtudierFonction, string
   calculerFSeconde: "Calcul de f''(x)",
   tableauFSeconde: "Tableau de signes de f'' et concavité",
   recap: "Récapitulatif",
-  graphique: "Graphique — points clés",
+  coordonnees: "Coordonnées des points remarquables",
+  graphique: "Graphique — points remarquables",
 };
 
 export function consigneEcranEtudierFonction(ecran: EcranEtudierFonction): string {
@@ -117,9 +122,11 @@ export function consigneEcranEtudierFonction(ecran: EcranEtudierFonction): strin
     case "tableauFSeconde":
       return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle à chaque zone et à chaque racine.";
     case "recap":
-      return "Voici la synthèse de ton étude — vérifie-la avant de passer au graphique.";
+      return "Voici la synthèse de ton étude : vérifie-la avant de calculer les coordonnées des points remarquables.";
+    case "coordonnees":
+      return "Calcule l'ordonnée de chaque point remarquable (valeur exacte ou arrondie au centième).";
     case "graphique":
-      return "Place chaque point demandé sur le graphique en tapant à l'endroit correspondant.";
+      return "Place chaque point sur le graphique en tapant à l'endroit correspondant ; la courbe apparaîtra une fois tous les points placés.";
   }
 }
 
@@ -132,13 +139,15 @@ export function texteAideNiveau1EtudierFonction(ecran: EcranEtudierFonction): st
     case "calculerFPrime":
       return "Identifie la forme de f (somme, produit, quotient, composée) avant de dériver.";
     case "tableauFPrime":
-      return "PIÈGE : une racine de f' n'est un extremum QUE si le signe de f' change réellement de part et d'autre.";
+      return "Attention : une racine de f' n'est un extremum que si le signe de f' change de part et d'autre.";
     case "calculerFSeconde":
       return "Dérive f'(x) terme à terme, exactement comme à l'écran précédent.";
     case "tableauFSeconde":
-      return "PIÈGE : ne confonds pas variations (issues de f') et concavité (issue de f'') — une racine de f'' n'est un point d'inflexion QUE si le signe change réellement autour d'elle.";
+      return "Attention : ne confonds pas variations (données par f') et concavité (donnée par f''). Une racine de f'' n'est un point d'inflexion que si le signe de f'' change autour d'elle.";
     case "recap":
       return "";
+    case "coordonnees":
+      return "L'ordonnée d'un point de la courbe s'obtient en remplaçant x par son abscisse dans l'expression de f.";
     case "graphique":
       return "Repère d'abord l'abscisse du point demandé sur l'axe des x, puis vise la hauteur correspondante.";
   }
@@ -154,14 +163,14 @@ export interface AideFragmentee {
 export function texteAideNiveau2EtudierFonction(ecran: EcranEtudierFonction): AideFragmentee {
   switch (ecran) {
     case "domaine":
-      return { texte: "Exemple :", latex: "x-3=0 \\iff x=3 \\;\\Rightarrow\\; \\text{domf}=\\mathbb{R}\\setminus\\{3\\}" };
+      return { texte: "Exemple :", latex: "x-3=0 \\iff x=3 \\;\\Rightarrow\\; \\text{dom}\\,f=\\mathbb{R}\\setminus\\{3\\}" };
     case "limites":
       return { texte: "Exemple :", latex: "f(x)=\\dfrac{1}{x-2}, \\text{ en } x\\to2^- \\text{ le dénominateur est négatif proche de } 0 \\;\\Rightarrow\\; f(x)\\to-\\infty" };
     case "calculerFPrime":
       return { texte: "Exemple :", latex: "f(x)=x^3+2x \\;\\Rightarrow\\; f'(x)=3x^2+2" };
     case "tableauFPrime":
       return {
-        texte: "Exemple : (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre' :",
+        texte: "Exemple : f' s'annule en 0 mais reste positive des deux côtés (racine double), donc « ni l'un ni l'autre » :",
         latex: "f'(x)=6x^2",
       };
     case "calculerFSeconde":
@@ -173,6 +182,8 @@ export function texteAideNiveau2EtudierFonction(ecran: EcranEtudierFonction): Ai
       };
     case "recap":
       return { texte: "", latex: null };
+    case "coordonnees":
+      return { texte: "Exemple :", latex: "f(x)=x^3-3x \\;\\Rightarrow\\; f(1)=1-3=-2" };
     case "graphique":
       return { texte: "Utilise les valeurs déjà trouvées dans les écrans précédents (extremums, points d'inflexion) — l'ordonnée à l'origine se calcule avec f(0).", latex: null };
   }
@@ -191,7 +202,7 @@ export function formatLabelSlotLimite(slot: SlotLimiteEtudierFonction): string {
     case "infiniHorizontale":
       return `\\lim_{x\\to \\pm\\infty} f(x)=\\,?`;
     case "infiniOblique":
-      return `\\text{Équation de l'asymptote oblique (}x\\to\\pm\\infty\\text{)}`;
+      return `\\text{AO : }y=\\,?`;
   }
 }
 
@@ -202,7 +213,7 @@ export function formatLabelSlotLimite(slot: SlotLimiteEtudierFonction): string {
 
 export function formatEnsembleReelGuideLatex(ensemble: EnsembleReelGuide): string {
   if (ensemble.forme === "reel") return "\\mathbb{R}";
-  if (ensemble.forme === "prive_points") return `\\mathbb{R} \\setminus \\{${ensemble.points.join("\\,;\\,")}\\}`;
+  if (ensemble.forme === "prive_points") return ensemble.points.length === 0 ? "\\mathbb{R}" : `\\mathbb{R} \\setminus \\{${ensemble.points.join("\\,;\\,")}\\}`;
   return "\\mathbb{R}";
 }
 
@@ -224,72 +235,110 @@ export function formatEnteteColonnesTableauEtudierFonction(exercice: ExerciceEtu
 // Bloc "état actuel" — accumule les faits CONFIRMÉS des écrans déjà traversés.
 // ============================================================================
 
+/** « dom f = … » (jamais « domf » en mode maths, lettres collées). */
+export function formatDomaineLatex(exercice: ExerciceEtudierFonction): string {
+  return `\\text{dom}\\,f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`;
+}
+
+const NATURE_EXTREMUM = { max: "maximum", min: "minimum", ni_lun_ni_lautre: "ni max ni min" } as const;
+
+/** Résumé d'un tableau : nature de chaque racine (« x = 2 : maximum ») ou « aucune racine ». */
+export function formatResumeTableauLatex(exercice: ExerciceEtudierFonction, mode: "fprime" | "fseconde"): string[] {
+  if (mode === "fprime") {
+    const racines = racinesFPrime(exercice);
+    const classes = classificationFPrime(exercice);
+    if (racines.length === 0) return ["\\text{f' ne s'annule pas}"];
+    return racines.map((r, i) => `x=${formatRacineLatex(r)}\\ :\\ \\text{${NATURE_EXTREMUM[classes[i]]}}`);
+  }
+  const racines = racinesFSeconde(exercice);
+  if (racines.length === 0) return ["\\text{aucun point d'inflexion}"];
+  return racines.map((r) => `x=${formatRacineLatex(r)}\\ :\\ \\text{point d'inflexion}`);
+}
+
+/** Coordonnées d'un point remarquable, ordonnée arrondie au centième (virgule décimale). */
+export function formatOrdonneeLatex(y: number): string {
+  const r = Math.round(y * 100) / 100;
+  return (Object.is(r, -0) ? 0 : r).toString().replace(".", "{,}");
+}
+
+export function formatAbscissePointLatex(point: PointCleEtudierFonction): string {
+  return point.racine ? formatRacineLatex(point.racine) : formatOrdonneeLatex(point.x);
+}
+
+/** Libellé du champ de l'écran « coordonnées » : « Maximum : f(2) = ». */
+export function formatLabelCoordonneeLatex(point: PointCleEtudierFonction): string {
+  return `\\text{${point.label} : }f\\left(${formatAbscissePointLatex(point)}\\right)=`;
+}
+
+export function formatCoordonneesLatex(exercice: ExerciceEtudierFonction): string[] {
+  return pointsClesEtudierFonction(exercice).map((p) => `\\text{${p.label} : }\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneeLatex(p.y)}\\right)`);
+}
+
+/** Termes de « Ce qu'on sait déjà » pour UN écran clos — les vraies valeurs, jamais « confirmé ». */
+export function formatTermesEcranLatex(exercice: ExerciceEtudierFonction, ecran: EcranEtudierFonction): string[] {
+  switch (ecran) {
+    case "domaine":
+      return [formatDomaineLatex(exercice)];
+    case "limites":
+    case "calculerFPrime":
+    case "calculerFSeconde":
+      return formatReponseAttenduePhaseLatex(exercice, ecran);
+    case "tableauFPrime":
+      return formatResumeTableauLatex(exercice, "fprime");
+    case "tableauFSeconde":
+      return formatResumeTableauLatex(exercice, "fseconde");
+    case "recap":
+      return [];
+    case "coordonnees":
+      return formatCoordonneesLatex(exercice);
+    case "graphique":
+      return [];
+  }
+}
+
+/** Ancienne interface (flux plat cumulé) conservée pour les appelants existants. */
 export function formatTermesEtatActuelLatex(exercice: ExerciceEtudierFonction, phase: EcranEtudierFonction, ordre: EcranEtudierFonction[]): string[] | null {
   const index = ordre.indexOf(phase);
   if (index <= 0) return null;
-  const termes: string[] = [];
-  for (let i = 0; i < index; i++) {
-    switch (ordre[i]) {
-      case "domaine":
-        termes.push(`domf=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`);
-        break;
-      case "limites":
-        termes.push("Comportement aux bornes : confirmé");
-        break;
-      case "calculerFPrime":
-        termes.push(formatFPrimeDeXLatex(exercice));
-        break;
-      case "tableauFPrime":
-        termes.push("Tableau de f' : confirmé");
-        break;
-      case "calculerFSeconde":
-        termes.push(formatFSecondeDeXLatex(exercice));
-        break;
-      case "tableauFSeconde":
-        termes.push("Tableau de f'' : confirmé");
-        break;
-      case "recap":
-        termes.push("Synthèse consultée");
-        break;
-    }
-  }
+  const termes = ordre.slice(0, index).flatMap((e) => formatTermesEcranLatex(exercice, e));
   return termes.length === 0 ? null : termes;
 }
 
 // ============================================================================
-// Récapitulatif final — réponse ATTENDUE, par écran RÉELLEMENT traversé (hors "recap"/"graphique",
-// gérés séparément par le panneau — "recap" n'a pas de score, "graphique" a son propre affichage
-// par point).
+// Réponse ATTENDUE, par écran.
 // ============================================================================
 
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudierFonction, ecran: EcranEtudierFonction): string[] {
   switch (ecran) {
     case "domaine":
-      return [`domf=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`];
+      return [formatDomaineLatex(exercice)];
     case "limites": {
       const slots = listeSlotsLimites(exercice);
-      return slots.map((slot) => `${formatLabelSlotLimite(slot).replace("=\\,?", "")}${formatLimiteCibleLatex(slot)}`);
+      return slots.map((slot) => `${formatLabelSlotLimite(slot).replace("\\,?", "")}${formatLimiteCibleLatex(slot)}`);
     }
     case "calculerFPrime":
       return [formatFPrimeDeXLatex(exercice)];
     case "tableauFPrime":
-      return ["Voir le tableau ci-dessus"];
+      return formatResumeTableauLatex(exercice, "fprime");
     case "calculerFSeconde":
       return [formatFSecondeDeXLatex(exercice)];
     case "tableauFSeconde":
-      return ["Voir le tableau ci-dessus"];
+      return formatResumeTableauLatex(exercice, "fseconde");
     case "recap":
       return [];
+    case "coordonnees":
+      return formatCoordonneesLatex(exercice);
     case "graphique":
-      return ["Voir le graphique ci-dessus"];
+      return formatCoordonneesLatex(exercice);
   }
 }
 
 export function formatLimiteCibleLatex(slot: SlotLimiteEtudierFonction): string {
   if (slot.kind === "va" || slot.kind === "infiniSigne") return slot.cible === 1 ? "+\\infty" : "-\\infty";
   if (slot.kind === "infiniHorizontale") return `${slot.valeur}`;
+  const terme = slot.pente === 1 ? "x" : slot.pente === -1 ? "-x" : `${slot.pente}x`;
   const b = slot.ordonnee;
-  return `${slot.pente}x${b >= 0 ? "+" : "-"}${Math.abs(b)}`;
+  return b === 0 ? terme : `${terme}${b > 0 ? "+" : "-"}${Math.abs(b)}`;
 }
 
 // ============================================================================
@@ -297,7 +346,6 @@ export function formatLimiteCibleLatex(slot: SlotLimiteEtudierFonction): string 
 // ============================================================================
 
 export function labelPointCle(exercice: ExerciceEtudierFonction, id: string): string {
-  if (id === "origine") return "L'ordonnée à l'origine (f(0))";
   const point = pointsClesEtudierFonction(exercice).find((p) => p.id === id);
-  return point ? `Un point remarquable de f (${id.startsWith("extremum") ? "extremum" : "point d'inflexion"})` : "Un point de f";
+  return point ? `${point.label} (x = ${formatAbscissePointLatex(point).replace("{,}", ",")})` : "Un point de f";
 }

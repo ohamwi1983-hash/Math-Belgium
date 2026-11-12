@@ -41,6 +41,7 @@ import {
 } from "./verificationEtudeLocale";
 import type { TableauEtudeLocaleAttendu } from "./verificationEtudeLocale";
 import { diagnostiquerQuotient } from "./verificationAsymptoteOblique";
+import { retirerPrefixeEquation } from "./verificationLectureGraphiqueLimites";
 import { verifierSigne } from "./verificationLimites";
 
 export { diagnostiquerNombre, verifierSigne, diagnostiquerQuotient, verifierEnsembleReelGuide };
@@ -65,8 +66,13 @@ export function deriveeSecondeFRationnelleAO(exercice: ExerciceRationnelleAO, x:
 // Dispatch unifié sur les 2 branches — évite de répéter le `if` dans chaque fonction ci-dessous.
 // ============================================================================
 
+/** Translation verticale de la branche "etudeLocale" (0 si absente). */
+export function decalageVertical(exercice: ExerciceEtudierFonction): number {
+  return exercice.famille === "etudeLocale" ? (exercice.decalage ?? 0) : 0;
+}
+
 export function valeurF(exercice: ExerciceEtudierFonction, x: number): number {
-  return exercice.famille === "rationnelleAO" ? valeurFRationnelleAO(exercice, x) : valeurFEtudeLocale(exercice.noyau, x);
+  return exercice.famille === "rationnelleAO" ? valeurFRationnelleAO(exercice, x) : valeurFEtudeLocale(exercice.noyau, x) + decalageVertical(exercice);
 }
 
 export function deriveeF(exercice: ExerciceEtudierFonction, x: number): number {
@@ -153,12 +159,12 @@ export function xDesInflexions(exercice: ExerciceEtudierFonction): number[] {
 }
 
 export function valeursFAuxExtremums(exercice: ExerciceEtudierFonction): number[] {
-  if (exercice.famille === "etudeLocale") return valeursFAuxExtremumsEtudeLocale(exercice.noyau);
+  if (exercice.famille === "etudeLocale") return valeursFAuxExtremumsEtudeLocale(exercice.noyau).map((y) => y + decalageVertical(exercice));
   return xDesExtremums(exercice).map((x) => valeurF(exercice, x));
 }
 
 export function valeursFAuxInflexions(exercice: ExerciceEtudierFonction): number[] {
-  return exercice.famille === "etudeLocale" ? valeursFAuxInflexionsEtudeLocale(exercice.noyau) : [];
+  return exercice.famille === "etudeLocale" ? valeursFAuxInflexionsEtudeLocale(exercice.noyau).map((y) => y + decalageVertical(exercice)) : [];
 }
 
 // ============================================================================
@@ -200,7 +206,7 @@ export function listeSlotsLimites(exercice: ExerciceEtudierFonction): SlotLimite
     slots.push({ kind: "infiniSigne", cote: "moins", cible: signeAt(exercice, -GRAND_X) });
     slots.push({ kind: "infiniSigne", cote: "plus", cible: signeAt(exercice, GRAND_X) });
   } else if (type === "horizontale") {
-    slots.push({ kind: "infiniHorizontale", valeur: 0 });
+    slots.push({ kind: "infiniHorizontale", valeur: decalageVertical(exercice) });
   } else {
     const ex = exercice as ExerciceRationnelleAO;
     slots.push({ kind: "infiniOblique", pente: ex.a, ordonnee: ex.b });
@@ -212,10 +218,24 @@ export function listeSlotsLimites(exercice: ExerciceEtudierFonction): SlotLimite
  * libre) pour un slot "horizontale"/"oblique". `null` = pas encore répondu. */
 export type ValeurReponseSlotLimite = 1 | -1 | string | null;
 
+/** Statut d'un slot texte (asymptote horizontale ou oblique) — préfixe « y = » toléré (le libellé
+ * l'affiche, l'élève le recopie souvent). */
+export function diagnostiquerSlotTexteLimite(slot: SlotLimiteEtudierFonction, texte: string): StatutVerification {
+  const t = retirerPrefixeEquation(texte);
+  if (slot.kind === "infiniHorizontale") return diagnostiquerNombre(t, slot.valeur);
+  if (slot.kind === "infiniOblique") return diagnostiquerQuotient(t, slot.pente, slot.ordonnee);
+  return "parse_error";
+}
+
 export function diagnostiquerSlotLimite(slot: SlotLimiteEtudierFonction, valeur: ValeurReponseSlotLimite): boolean {
   if (slot.kind === "va" || slot.kind === "infiniSigne") return valeur === slot.cible;
-  if (slot.kind === "infiniHorizontale") return typeof valeur === "string" && diagnostiquerNombre(valeur, slot.valeur) === "correct";
-  return typeof valeur === "string" && diagnostiquerQuotient(valeur, slot.pente, slot.ordonnee) === "correct";
+  return typeof valeur === "string" && diagnostiquerSlotTexteLimite(slot, valeur) === "correct";
+}
+
+/** L'écran « limites » contient-il un choix fermé (+∞/−∞) ? Alors une seule tentative (sinon il se
+ * gagnerait par élimination). */
+export function limitesContiennentChoixFerme(exercice: ExerciceEtudierFonction): boolean {
+  return listeSlotsLimites(exercice).some((s) => s.kind === "va" || s.kind === "infiniSigne");
 }
 
 export function verifierLimitesEtudierFonction(reponses: ValeurReponseSlotLimite[], slots: SlotLimiteEtudierFonction[]): boolean {
@@ -336,30 +356,55 @@ export function diagnostiquerCalculerFSeconde(texte: string, exercice: ExerciceE
 
 export interface PointCleEtudierFonction {
   id: string;
+  /** Nature du point (pour le libellé) — un point d'abscisse 0 qui est aussi un extremum ou un point
+   * d'inflexion n'est demandé qu'une fois. */
+  nature: "max" | "min" | "ni_lun_ni_lautre" | "inflexion" | "origine";
+  /** Abscisse exacte (affichage) quand elle vient d'une racine de f' ou f''. */
+  racine: RacineEtudeLocale | null;
   label: string;
   x: number;
   y: number;
 }
 
+/** Points remarquables : extremums (et racines doubles de f'), points d'inflexion, puis le point
+ * d'abscisse 0 — DÉDOUBLONNÉS (un point en x = 0 n'est demandé qu'une fois). */
 export function pointsClesEtudierFonction(exercice: ExerciceEtudierFonction): PointCleEtudierFonction[] {
   const points: PointCleEtudierFonction[] = [];
-  const xExtremums = xDesExtremums(exercice);
+  const racinesF = racinesFPrime(exercice);
+  const classes = classificationFPrime(exercice);
   const yExtremums = valeursFAuxExtremums(exercice);
-  xExtremums.forEach((x, i) => points.push({ id: `extremum-${i}`, label: `Point ${points.length + 1}`, x, y: yExtremums[i] }));
-  const xInflexions = xDesInflexions(exercice);
+  xDesExtremums(exercice).forEach((x, i) => {
+    points.push({ id: `extremum-${i}`, nature: classes[i] ?? "ni_lun_ni_lautre", racine: racinesF[i] ?? null, label: "", x, y: yExtremums[i] });
+  });
+  const racinesS = racinesFSeconde(exercice);
   const yInflexions = valeursFAuxInflexions(exercice);
-  xInflexions.forEach((x, i) => points.push({ id: `inflexion-${i}`, label: `Point ${points.length + 1}`, x, y: yInflexions[i] }));
-  points.push({ id: "origine", label: `Point ${points.length + 1}`, x: 0, y: valeurF(exercice, 0) });
-  return points;
+  xDesInflexions(exercice).forEach((x, i) => {
+    if (points.some((p) => Math.abs(p.x - x) < 1e-9)) return;
+    points.push({ id: `inflexion-${i}`, nature: "inflexion", racine: racinesS[i] ?? null, label: "", x, y: yInflexions[i] });
+  });
+  if (!points.some((p) => Math.abs(p.x) < 1e-9)) points.push({ id: "origine", nature: "origine", racine: null, label: "", x: 0, y: valeurF(exercice, 0) });
+  const NOMS = { max: "Maximum", min: "Minimum", ni_lun_ni_lautre: "Point à tangente horizontale", inflexion: "Point d'inflexion", origine: "Point d'abscisse 0" } as const;
+  return points.map((p) => ({ ...p, label: NOMS[p.nature] }));
 }
 
-/** Tolérance de proximité (unités du graphique) — cohérente avec les tolérances "lecture visuelle"
- * déjà établies cette semaine (5gen30 : ~0.3-0.5). Voir CLAUDE.md, "Annonce de précision = tolérance
- * réellement vérifiée" : annoncée dans `ui5e/formatEtudierFonction.ts` comme "à environ 0,4 unité
- * près sur le graphique", exactement cette constante. */
-export const TOLERANCE_PLACEMENT_POINT = 0.4;
+/** Écran « coordonnées » : ordonnée exacte ou arrondie au centième. */
+export const TOLERANCE_COORDONNEE = 0.0051;
 
-export function verifierPointPlace(cible: { x: number; y: number }, propose: { x: number; y: number }): boolean {
-  const dist = Math.hypot(cible.x - propose.x, cible.y - propose.y);
-  return dist <= TOLERANCE_PLACEMENT_POINT;
+export function diagnostiquerOrdonnee(texte: string, cible: number): StatutVerification {
+  const t = retirerPrefixeEquation(texte.replace(/^\s*f\s*\([^)]*\)\s*=\s*/i, "")).trim();
+  if (t === "" || /[a-zA-Z]/.test(t.replace(/sqrt|racine/gi, ""))) return "parse_error";
+  try {
+    const v = evaluerExpressionGenerale(t, 0);
+    if (!Number.isFinite(v)) return "parse_error";
+    return Math.abs(v - cible) <= TOLERANCE_COORDONNEE ? "correct" : "not_equivalent";
+  } catch {
+    return "parse_error";
+  }
+}
+
+/** Placement par tap : tolérance exprimée en PIXELS (≈ 11 px), quelle que soit la fenêtre. */
+export const TOLERANCE_PLACEMENT_PIXELS = 11;
+
+export function verifierPointPlace(cible: { x: number; y: number }, propose: { x: number; y: number }, pixelsParUnite: { x: number; y: number }): boolean {
+  return Math.hypot((cible.x - propose.x) * pixelsParUnite.x, (cible.y - propose.y) * pixelsParUnite.y) <= TOLERANCE_PLACEMENT_PIXELS;
 }

@@ -93,13 +93,21 @@ function tirerCoutDegre3(exact: boolean): { coutTotal: CoutTotalDegre3; minimum:
 
 function construireExerciceADegre(degre: 2 | 3, exactForce?: boolean): ExerciceContexteEconomiqueA {
   const exact = exactForce ?? Math.random() < 0.6;
-  const { coutTotal, minimum } = degre === 2 ? tirerCoutDegre2(exact) : tirerCoutDegre3(exact);
-  const q0 = entierAleatoire(2, 10);
-  const cmDerivee = deriveeCoutTotal(coutTotal, q0);
-  const cmDiscret = valeurCoutTotal(coutTotal, q0 + 1) - valeurCoutTotal(coutTotal, q0);
-  const ecartAbsolu = Math.abs(cmDiscret - cmDerivee);
-  const ecartPourcent = (ecartAbsolu / cmDerivee) * 100;
-  return { famille: "A", coutTotal, q0, cmDiscret, cmDerivee, ecartAbsolu, ecartPourcent, minimum };
+  // Les deux estimations du coût marginal doivent rester PROCHES (écart non nul, au plus 25 %),
+  // comme l'annonce le cours (audit 5e ch. 5, point 23).
+  for (let essai = 0; essai < 200; essai++) {
+    const { coutTotal, minimum } = degre === 2 ? tirerCoutDegre2(exact) : tirerCoutDegre3(exact);
+    const q0 = entierAleatoire(2, 10);
+    const cmDerivee = deriveeCoutTotal(coutTotal, q0);
+    const cmDiscret = valeurCoutTotal(coutTotal, q0 + 1) - valeurCoutTotal(coutTotal, q0);
+    const ecartAbsolu = Math.abs(cmDiscret - cmDerivee);
+    const ecartPourcent = (ecartAbsolu / cmDerivee) * 100;
+    if (ecartAbsolu === 0 || ecartPourcent > 25) continue;
+    return { famille: "A", coutTotal, q0, cmDiscret, cmDerivee, ecartAbsolu, ecartPourcent, minimum };
+  }
+  // Repli déterministe : C_T(q) = q² + 10q + 100, q₀ = 10 (écart 1 sur 30, soit 3,33 %).
+  const coutTotal: CoutTotalDegre2 = { degre: 2, a: 1, b: 10, c: 100 };
+  return { famille: "A", coutTotal, q0: 10, cmDiscret: 31, cmDerivee: 30, ecartAbsolu: 1, ecartPourcent: 100 / 30, minimum: { grandeur: "coutMoyen", q: 10, valeur: 30, exact: true } };
 }
 
 function construireExerciceA(): ExerciceContexteEconomiqueA {

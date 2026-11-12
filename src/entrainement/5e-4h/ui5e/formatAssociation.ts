@@ -54,7 +54,7 @@ export function texteAideNiveau2Association(exercice: ExerciceAssociation): Aide
     case "grapheVerbal":
       return {
         texte:
-          "Compare d'abord le sens de variation et la place des extremums, puis le point où la courbe coupe l'axe des ordonnées. Un point d'inflexion correspond à un changement de concavité, pas à un extremum.",
+          "Pour départager deux énoncés proches : la courbe coupe l'axe des ordonnées en f(0) — au-dessus de l'origine, en dessous, ou à l'origine ? Et de quel côté de cet axe se trouvent ses sommets (ou son point d'inflexion, si elle n'a aucun extremum) ?",
       };
     case "symbolique":
       return { texte: "Exemple : une puissance d'un binôme se dérive avec la règle de la composée :", latex: "\left((2x+1)^2\right)' = 2\cdot 2\cdot(2x+1) = 4(2x+1)" };

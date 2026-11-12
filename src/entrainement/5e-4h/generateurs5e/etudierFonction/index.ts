@@ -1,5 +1,5 @@
 /**
- * Couche A (5e) — génération pour 5gen31 ("Étudier une fonction", CAPSTONE du chapitre "Dérivées et
+ * Couche A (5e) — génération pour 5gen31 ("Étudier une fonction", synthèse du chapitre "Dérivées et
  * applications"). N'importe jamais rien de `moteur5e/`.
  *
  * Branche "etudeLocale" : DÉLÈGUE la génération à 5gen29 (`genererPolynomiale`/`construireRationnelle`,
@@ -31,7 +31,7 @@
  * le même patron que `genererPolynomialeSimple` (5gen29), qui dérive aussi la classification du
  * seul signe de son coefficient dominant.
  */
-import type { ClassificationExtremum, RacineEtudeLocale } from "../../core5e/etudeLocale.types";
+import type { ClassificationExtremum, ExerciceEtudeLocale, RacineEtudeLocale } from "../../core5e/etudeLocale.types";
 import type { ExerciceEtudierFonction, ExerciceRationnelleAO } from "../../core5e/etudierFonction.types";
 import { construireRationnelle, genererPolynomiale } from "../etudeLocale/index";
 import { entierAleatoire, entierNonNul } from "../limites/fraction";
@@ -58,8 +58,19 @@ function genererNoyauEtudeLocaleCapstone() {
   return genererPolynomiale(tirerNature(), "avance");
 }
 
+/** Translation verticale d'une rationnelle (asymptote horizontale y = décalage) : entier non nul de
+ * [−3 ; 3] trois fois sur quatre, sinon 0. Toujours 0 pour une polynomiale. */
+function tirerDecalage(noyau: ExerciceEtudeLocale): number {
+  if (noyau.type === "polynomiale" || Math.random() < 0.25) return 0;
+  return entierNonNul(3);
+}
+
+function avecDecalage(noyau: ExerciceEtudeLocale): ExerciceEtudierFonction {
+  return { famille: "etudeLocale", noyau, decalage: tirerDecalage(noyau) };
+}
+
 export function genererEtudeLocaleCapstone(): ExerciceEtudierFonction {
-  return { famille: "etudeLocale", noyau: genererNoyauEtudeLocaleCapstone() };
+  return avecDecalage(genererNoyauEtudeLocaleCapstone());
 }
 
 // ============================================================================
@@ -142,8 +153,8 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "polynomiale-simple", label: "Polynomiale — racines simples (aucune asymptote)" },
   { id: "polynomiale-double", label: "Polynomiale — racine double (aucune asymptote)" },
   { id: "polynomiale-irrationnelle", label: "Polynomiale — racines irrationnelles (aucune asymptote)" },
-  { id: "rationnelleSansCE", label: "Rationnelle sans CE (AH y=0)" },
-  { id: "rationnelleAvecCE", label: "Rationnelle avec CE (AH y=0 + 2×AV)" },
+  { id: "rationnelleSansCE", label: "Rationnelle sans CE (asymptote horizontale)" },
+  { id: "rationnelleAvecCE", label: "Rationnelle avec CE (asymptote horizontale + 2 AV)" },
   { id: "rationnelleAO-exacte", label: "Rationnelle — asymptote oblique (racines exactes)" },
   { id: "rationnelleAO-irrationnelle", label: "Rationnelle — asymptote oblique (racines irrationnelles)" },
   { id: "rationnelleAO-sansExtremum", label: "Rationnelle — asymptote oblique (aucun extremum)" },
@@ -172,11 +183,11 @@ export function construireAvecVarianteId(id: string): ExerciceEtudierFonction {
     case "polynomiale-irrationnelle":
       return { famille: "etudeLocale", noyau: genererPolynomiale("irrationnelle", "avance") };
     case "rationnelleSansCE":
-      return { famille: "etudeLocale", noyau: construireRationnelle("rationnelleSansCE", "avance") };
+      return avecDecalage(construireRationnelle("rationnelleSansCE", "avance"));
     case "rationnelleAvecCE": {
       for (let essai = 0; essai < NOMBRE_TENTATIVES_REJET_ZERO; essai++) {
         const noyau = construireRationnelle("rationnelleAvecCE", "base");
-        if (!noyau.exclusionsCE.includes(0)) return { famille: "etudeLocale", noyau };
+        if (!noyau.exclusionsCE.includes(0)) return avecDecalage(noyau);
       }
       throw new Error('construireAvecVarianteId : impossible de générer "rationnelleAvecCE" avec f(0) défini');
     }

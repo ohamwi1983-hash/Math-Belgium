@@ -25,7 +25,10 @@ import type { ReponseTableauEtudierFonction, ValeurReponseSlotLimite } from "./v
 import {
   diagnostiquerCalculerFPrime,
   diagnostiquerCalculerFSeconde,
+  diagnostiquerOrdonnee,
   domaineAttendu,
+  limitesContiennentChoixFerme,
+  pointsClesEtudierFonction,
   listeSlotsLimites,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
@@ -83,11 +86,14 @@ function cloturerExerciceOuSuivant(etat: EtatSessionEtudierFonction, resultat: R
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionEtudierFonction, ecranAttendu: EcranEtudierFonction, reponse: T, verifier: (r: T) => boolean): EtatSessionEtudierFonction {
+/** `tentativesMaxForce` : 1 pour un écran à choix fermés (tableaux, limites ±∞) — il ne se gagne
+ * jamais par élimination. */
+function soumettreEcran<T>(etat: EtatSessionEtudierFonction, ecranAttendu: EcranEtudierFonction, reponse: T, verifier: (r: T) => boolean, tentativesMaxForce?: number): EtatSessionEtudierFonction {
   if (etat.terminee || etat.phase !== ecranAttendu) throw new Error(`soumettreEcran : la session n'est pas à l'écran "${ecranAttendu}"`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMaxForce !== undefined ? { tentativesMax: tentativesMaxForce } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -119,7 +125,7 @@ export function soumettreReponseDomaine(etat: EtatSessionEtudierFonction, repons
 
 export function soumettreReponseLimites(etat: EtatSessionEtudierFonction, reponses: ValeurReponseSlotLimite[]): EtatSessionEtudierFonction {
   const slots = listeSlotsLimites(etat.exerciceCourant);
-  return soumettreEcran(etat, "limites", reponses, (r) => verifierLimitesEtudierFonction(r, slots));
+  return soumettreEcran(etat, "limites", reponses, (r) => verifierLimitesEtudierFonction(r, slots), limitesContiennentChoixFerme(etat.exerciceCourant) ? 1 : undefined);
 }
 
 // ============================================================================
@@ -139,11 +145,11 @@ export function soumettreReponseCalculerFSeconde(etat: EtatSessionEtudierFonctio
 // ============================================================================
 
 export function soumettreReponseTableauFPrime(etat: EtatSessionEtudierFonction, reponse: ReponseTableauEtudierFonction): EtatSessionEtudierFonction {
-  return soumettreEcran(etat, "tableauFPrime", reponse, (r) => verifierTableauEtudierFonction(r, tableauFPrimeAttendu(etat.exerciceCourant)));
+  return soumettreEcran(etat, "tableauFPrime", reponse, (r) => verifierTableauEtudierFonction(r, tableauFPrimeAttendu(etat.exerciceCourant)), 1);
 }
 
 export function soumettreReponseTableauFSeconde(etat: EtatSessionEtudierFonction, reponse: ReponseTableauEtudierFonction): EtatSessionEtudierFonction {
-  return soumettreEcran(etat, "tableauFSeconde", reponse, (r) => verifierTableauEtudierFonction(r, tableauFSecondeAttendu(etat.exerciceCourant)));
+  return soumettreEcran(etat, "tableauFSeconde", reponse, (r) => verifierTableauEtudierFonction(r, tableauFSecondeAttendu(etat.exerciceCourant)), 1);
 }
 
 // ============================================================================
@@ -153,8 +159,17 @@ export function soumettreReponseTableauFSeconde(etat: EtatSessionEtudierFonction
 export function avancerRecap(etat: EtatSessionEtudierFonction): EtatSessionEtudierFonction {
   if (etat.terminee || etat.phase !== "recap") throw new Error('avancerRecap : la session n\'est pas à l\'écran "recap"');
   const ecranSuivant = ecranApres(etat.exerciceCourant, "recap");
-  if (ecranSuivant === "termine") throw new Error('avancerRecap : "graphique" doit toujours suivre "recap"');
+  if (ecranSuivant === "termine") throw new Error('avancerRecap : "coordonnees" doit toujours suivre "recap"');
   return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: ecranSuivant };
+}
+
+// ============================================================================
+// Écran "coordonnees" — ordonnée de chaque point remarquable (exacte ou au centième).
+// ============================================================================
+
+export function soumettreReponseCoordonnees(etat: EtatSessionEtudierFonction, reponses: string[]): EtatSessionEtudierFonction {
+  const points = pointsClesEtudierFonction(etat.exerciceCourant);
+  return soumettreEcran(etat, "coordonnees", reponses, (r) => r.length === points.length && r.every((t, i) => diagnostiquerOrdonnee(t, points[i].y) === "correct"));
 }
 
 // ============================================================================

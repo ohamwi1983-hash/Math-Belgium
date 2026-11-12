@@ -103,8 +103,14 @@ export function formatTermesDonneesLatex(exercice: ExerciceDefinitionDerivee): s
   return [formatFDeXLatex(exercice)];
 }
 
+/** Nombre écrit en texte courant : « − » typographique, jamais le trait d'union (audit 5c5a,
+ * point 18). */
+export function nombreTexte(n: number): string {
+  return n < 0 ? `−${Math.abs(n)}` : `${n}`;
+}
+
 export function consigneGenerale(exercice: ExerciceDefinitionDerivee): string {
-  return `Calcule le nombre dérivé f'(${exercice.a}) à partir de sa définition en termes de limite.`;
+  return `Calcule le nombre dérivé f'(${nombreTexte(exercice.a)}) à partir de sa définition en termes de limite.`;
 }
 
 // ============================================================================
@@ -129,8 +135,8 @@ export function questionSpecifiqueEcran(exercice: ExerciceDefinitionDerivee, ecr
   switch (ecran) {
     case "developper":
       return exercice.famille === "affine" || exercice.famille === "quadratique"
-        ? { texteAvant: `Calcule f(${a}), puis écris f(${a} + h) en fonction de h, sous forme développée et réduite.` }
-        : { texteAvant: `Calcule f(${a}), puis écris f(${a} + h) en fonction de h : un seul numérateur et un seul dénominateur, chacun réduit.` };
+        ? { texteAvant: `Calcule f(${nombreTexte(a)}), puis écris f(${nombreTexte(a)} + h) en fonction de h, sous forme développée et réduite.` }
+        : { texteAvant: `Calcule f(${nombreTexte(a)}), puis écris f(${nombreTexte(a)} + h) en fonction de h : un seul numérateur et un seul dénominateur, chacun réduit.` };
     case "quotient":
       return {
         texteAvant: "Donne le taux d'accroissement",
@@ -162,11 +168,11 @@ export function libelleEcran(exercice: ExerciceDefinitionDerivee, ecran: EcranDe
   const a = exercice.a;
   switch (ecran) {
     case "developper":
-      return `f(${a}) et f(${a} + h)`;
+      return `f(${nombreTexte(a)}) et f(${nombreTexte(a)} + h)`;
     case "quotient":
       return "Taux d'accroissement simplifié";
     case "limite":
-      return `f'(${a})`;
+      return `f'(${nombreTexte(a)})`;
   }
 }
 
@@ -255,20 +261,20 @@ export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: Ecr
   if (ecran === "developper") {
     switch (exercice.famille) {
       case "affine":
-        return { texte: "Exemple :", latex: "f(x)=2x+3 \\;\\Rightarrow\\; f(a+h)=2(a+h)+3=2a+2h+3" };
+        return { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=2x+3 \\\\ \\Rightarrow\\; f(a+h)=2(a+h)+3=2a+2h+3 \\end{array}" };
       case "quadratique":
         return {
           texte: "Exemple :",
-          latex: "f(x)=x^2+1,\\ a=5 \\;\\Rightarrow\\; f(5+h)=(5+h)^2+1=25+10h+h^2+1=h^2+10h+26",
+          latex: "\\begin{array}{l} f(x)=x^2+1,\\ a=5 \\\\ \\Rightarrow\\; f(5+h)=(5+h)^2+1 \\\\ =25+10h+h^2+1=h^2+10h+26 \\end{array}",
         };
       case "rationnelleSimple":
         return exercice.expo === 1
-          ? { texte: "Exemple :", latex: "f(x)=\\dfrac{4}{x},\\ a=2 \\;\\Rightarrow\\; f(2+h)=\\dfrac{4}{2+h}" }
-          : { texte: "Exemple :", latex: "f(x)=\\dfrac{4}{x^2},\\ a=2 \\;\\Rightarrow\\; f(2+h)=\\dfrac{4}{(2+h)^2}" };
+          ? { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=\\dfrac{4}{x},\\ a=2 \\\\ \\Rightarrow\\; f(2+h)=\\dfrac{4}{2+h} \\end{array}" }
+          : { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=\\dfrac{4}{x^2},\\ a=2 \\\\ \\Rightarrow\\; f(2+h)=\\dfrac{4}{(2+h)^2} \\end{array}" };
       case "rationnelleLineaire":
         return {
           texte: "Exemple :",
-          latex: "f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\;\\Rightarrow\\; f(3+h)=\\dfrac{(3+h)+1}{(3+h)-2}=\\dfrac{h+4}{h+1}",
+          latex: "\\begin{array}{l} f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\\\ \\Rightarrow\\; f(3+h)=\\dfrac{(3+h)+1}{(3+h)-2} \\\\ =\\dfrac{h+4}{h+1} \\end{array}",
         };
     }
   }
@@ -277,29 +283,29 @@ export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: Ecr
       case "affine":
         return {
           texte: "Exemple :",
-          latex: "f(x)=2x+3,\\ f(a+h)-f(a)=(2a+2h+3)-(2a+3)=2h \\;\\Rightarrow\\; \\dfrac{2h}{h}=2",
+          latex: "\\begin{array}{l} f(x)=2x+3 \\\\ f(a+h)-f(a)=(2a+2h+3)-(2a+3)=2h \\\\ \\Rightarrow\\; \\dfrac{2h}{h}=2 \\end{array}",
         };
       case "quadratique":
         return {
           texte: "Exemple :",
-          latex: "a=5,\\ f(5+h)-f(5)=(h^2+10h+26)-26=h^2+10h=h(h+10) \\;\\Rightarrow\\; \\dfrac{h(h+10)}{h}=h+10",
+          latex: "\\begin{array}{l} a=5:\\ f(5+h)-f(5)=(h^2+10h+26)-26 \\\\ =h^2+10h=h(h+10) \\\\ \\Rightarrow\\; \\dfrac{h(h+10)}{h}=h+10 \\end{array}",
         };
       case "rationnelleSimple":
         return {
           texte: "Exemple :",
           latex:
-            "f(x)=\\dfrac{4}{x},\\ a=2: \\quad \\dfrac{\\frac{4}{2+h}-\\frac{4}{2}}{h} = \\dfrac{\\frac{8-4(2+h)}{2(2+h)}}{h} = \\dfrac{\\frac{-4h}{2(2+h)}}{h} = \\dfrac{-4}{2(2+h)}",
+            "\\begin{array}{l} f(x)=\\dfrac{4}{x},\\ a=2 \\\\ \\dfrac{\\frac{4}{2+h}-\\frac{4}{2}}{h} = \\dfrac{\\frac{8-4(2+h)}{2(2+h)}}{h} \\\\ = \\dfrac{\\frac{-4h}{2(2+h)}}{h} = \\dfrac{-2}{2+h} \\end{array}",
         };
       case "rationnelleLineaire":
         return {
           texte: "Exemple :",
           latex:
-            "f(x)=\\dfrac{x+1}{x-2},\\ a=3: \\quad \\dfrac{\\frac{h+4}{h+1}-4}{h}=\\dfrac{\\frac{h+4-4(h+1)}{h+1}}{h}=\\dfrac{\\frac{-3h}{h+1}}{h}=\\dfrac{-3}{h+1}",
+            "\\begin{array}{l} f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\\\ \\dfrac{\\frac{h+4}{h+1}-4}{h}=\\dfrac{\\frac{h+4-4(h+1)}{h+1}}{h} \\\\ =\\dfrac{\\frac{-3h}{h+1}}{h}=\\dfrac{-3}{h+1} \\end{array}",
         };
     }
   }
   if (exercice.famille === "affine") {
-    return { texte: "Exemple :", latex: "f(x)=2x+3:\\quad \\dfrac{f(a+h)-f(a)}{h}=\\dfrac{2h}{h}=2 \\;\\xrightarrow{h\\to0}\\; f'(a)=2" };
+    return { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=2x+3 \\\\ \\dfrac{f(a+h)-f(a)}{h}=\\dfrac{2h}{h}=2 \\;\\xrightarrow{h\\to0}\\; f'(a)=2 \\end{array}" };
   }
   return { texte: "Exemple : si le quotient simplifié vaut 2a + h, on remplace h par 0 :", latex: "\\lim_{h\\to0}(2a+h)=2a" };
 }

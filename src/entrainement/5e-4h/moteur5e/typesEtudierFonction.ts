@@ -17,20 +17,22 @@
  *   6. "tableauFSeconde"  — TOUJOURS.
  *   7. "recap"            — TOUJOURS, PUREMENT présentationnel (aucune nouvelle question — voir
  *      `sessionEtudierFonction.ts::avancerRecap`, qui n'enregistre AUCUN score pour cet écran).
- *   8. "graphique"         — TOUJOURS, placement de points par tap (voir
- *      `components5e/PlacementPointsGraphique.tsx`), toujours dernier écran.
+ *   8. "coordonnees"      — TOUJOURS : ordonnées des points remarquables (extremums, inflexions, point
+ *      d'abscisse 0), à calculer avant de les placer (audit 5e ch. 5, décision F).
+ *   9. "graphique"        — TOUJOURS, placement des points par tap, courbe MASQUÉE pendant le
+ *      placement (voir `components5e/PlacementPointsGraphique.tsx`), toujours dernier écran.
  */
 import type { ExerciceEtudierFonction } from "../core5e/etudierFonction.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 import { possedeDomaineRestreint } from "./verificationEtudierFonction";
 
-export type EcranEtudierFonction = "domaine" | "limites" | "calculerFPrime" | "tableauFPrime" | "calculerFSeconde" | "tableauFSeconde" | "recap" | "graphique";
+export type EcranEtudierFonction = "domaine" | "limites" | "calculerFPrime" | "tableauFPrime" | "calculerFSeconde" | "tableauFSeconde" | "recap" | "coordonnees" | "graphique";
 
 export function ordreEcransEtudierFonction(exercice: ExerciceEtudierFonction): EcranEtudierFonction[] {
   const ordre: EcranEtudierFonction[] = [];
   if (possedeDomaineRestreint(exercice)) ordre.push("domaine");
-  ordre.push("limites", "calculerFPrime", "tableauFPrime", "calculerFSeconde", "tableauFSeconde", "recap", "graphique");
+  ordre.push("limites", "calculerFPrime", "tableauFPrime", "calculerFSeconde", "tableauFSeconde", "recap", "coordonnees", "graphique");
   return ordre;
 }
 

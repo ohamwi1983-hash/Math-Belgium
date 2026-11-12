@@ -56,7 +56,7 @@ export function EtapeRecapitulatifEtudierFonction({ exercice, onContinuer }: Pro
       <h3>Synthèse de l'étude</h3>
 
       <div className="etat-actuel-box etat-actuel-box-termes">
-        {exclusionsCE(exercice).length > 0 && <Katex expression={`domf=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`} />}
+        {exclusionsCE(exercice).length > 0 && <Katex expression={`\\text{dom}\\,f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`} />}
         {slots.map((slot, i) => {
           const termeLimite = `${formatLabelSlotLimite(slot).replace("=\\,?", "")}${formatLimiteCibleLatex(slot)}`;
           return <Katex key={i} expression={termeLimite} block={termeLimite.includes("\\lim_{")} />;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ExerciceEtudierFonction } from "../core5e/etudierFonction.types";
 import type { SlotLimiteEtudierFonction, ValeurReponseSlotLimite } from "../moteur5e/verificationEtudierFonction";
-import { diagnostiquerSlotLimite, listeSlotsLimites } from "../moteur5e/verificationEtudierFonction";
+import { diagnostiquerSlotLimite, diagnostiquerSlotTexteLimite, listeSlotsLimites } from "../moteur5e/verificationEtudierFonction";
 import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatLabelSlotLimite, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
@@ -55,8 +55,14 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
     setValeurs((arr) => arr.map((v, i) => (i === index ? texte : v)));
   }
 
+  const [illisible, setIllisible] = useState(false);
+
   function valider() {
     if (!complet) return;
+    // Écriture illisible dans un champ (asymptote) : message, pas de tentative consommée.
+    const illisibles = slots.some((slot, i) => !slotEstDeTypeSigne(slot) && typeof valeurs[i] === "string" && diagnostiquerSlotTexteLimite(slot, valeurs[i] as string) === "parse_error");
+    setIllisible(illisibles);
+    if (illisibles) return;
     onValider(valeurs);
   }
 
@@ -91,7 +97,7 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
                   +∞
                 </button>
                 <button type="button" className={`btn${valeurs[i] === -1 ? " toggle-active" : ""}${estErronee(i) ? " is-erronee" : ""}`} onClick={() => modifierSigne(i, -1)}>
-                  -∞
+                  −∞
                 </button>
               </div>
             ) : (
@@ -99,8 +105,13 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
                 type="text"
                 className={`text-input${estErronee(i) ? " is-erronee" : ""}`}
                 value={typeof valeurs[i] === "string" ? (valeurs[i] as string) : ""}
-                onChange={(e) => modifierTexte(i, e.target.value)}
-                placeholder={slot.kind === "infiniHorizontale" ? "ex : 0" : "ex : 2*x+3"}
+                onChange={(e) => {
+                  setIllisible(false);
+                  modifierTexte(i, e.target.value);
+                }}
+                placeholder={slot.kind === "infiniHorizontale" ? "ex : 7,5" : "ex : 5x + 12"}
+                disabled={!!validation}
+                autoComplete="off"
               />
             )}
           </div>
@@ -127,10 +138,16 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible ? (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            Écriture non reconnue : tape un nombre (ex. 7,5) pour une asymptote horizontale, une expression en x (ex. 5x + 12) pour une oblique.
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )
         )}
         </>
       )}

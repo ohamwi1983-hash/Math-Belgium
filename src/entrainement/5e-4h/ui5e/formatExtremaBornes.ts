@@ -145,16 +145,16 @@ export function texteAideNiveau1ExtremaBornes(ecran: EcranExtremaBornes, exercic
 export function texteAideNiveau2ExtremaBornes(ecran: EcranExtremaBornes, exercice?: ExerciceExtremaBornes): AideExtremaBornes {
   switch (ecran) {
     case "deriver":
-      return { texte: "Exemple :", latex: "f(t)=2t^3-6t^2+5 \;\\Longrightarrow\; f'(t)=6t^2-12t" };
+      return { texte: "Exemple :", latex: "f(t)=2t^3-6t^2+5 \\;\\Longrightarrow\\; f'(t)=6t^2-12t" };
     case "racines": {
       if (exercice && exercice.degre === 4) {
         const r1 = exercice.racinesFPrime[0];
         return { texte: `Une racine entière de $f'(t)$ est $t=${r1}$. Divise $f'(t)$ par $(t-${r1})$ avec la méthode de Horner, puis résous l'équation du second degré obtenue.`, latex: null };
       }
-      return { texte: "Exemple :", latex: "6t^2-24t+18=0 \\iff t^2-4t+3=0,\\ \\Delta=4 \;\\Longrightarrow\; t=1 \\text{ ou } t=3" };
+      return { texte: "Exemple :", latex: "6t^2-24t+18=0 \\iff t^2-4t+3=0,\\ \\Delta=4 \\;\\Longrightarrow\\; t=1 \\text{ ou } t=3" };
     }
     case "tableauFPrime":
-      return { texte: "Exemple :", latex: "f'(t)=6t(t-2) : \\quad f'(1)=-6<0,\\ f'(3)=18>0 \;\\Longrightarrow\; \\text{minimum local en } t=2" };
+      return { texte: "Exemple :", latex: "f'(t)=6t(t-2) : \\quad f'(1)=-6<0,\\ f'(3)=18>0 \\;\\Longrightarrow\\; \\text{minimum local en } t=2" };
     case "valeursExtremums":
       return { texte: "Exemple, pour $f(t)=2t^3-6t^2+5$ et un extremum en $t=2$ :", latex: "f(2)=2\\cdot2^3-6\\cdot2^2+5=16-24+5=-3" };
     case "valeursBornes":
@@ -213,7 +213,7 @@ function formatClassificationTexte(c: "max" | "min"): string {
 }
 
 function formatRacinesLatex(exercice: ExerciceExtremaBornes): string[] {
-  return [`f'(t)=0 \iff ${exercice.racinesFPrime.map((t) => `t=${formatEntierLatex(t)}`).join(" \text{ ou } ")}`];
+  return [`f'(t)=0 \\iff ${exercice.racinesFPrime.map((t) => `t=${formatEntierLatex(t)}`).join(" \\text{ ou } ")}`];
 }
 
 function formatRacinesAvecClassificationLatex(exercice: ExerciceExtremaBornes): string[] {

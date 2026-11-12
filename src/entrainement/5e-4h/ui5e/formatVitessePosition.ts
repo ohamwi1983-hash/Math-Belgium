@@ -90,7 +90,7 @@ export function formatTermesDonneesLatex(exercice: ExerciceVitessePosition): str
 
 export function questionFinale(exercice: ExerciceVitessePosition): string {
   return exercice.variante === "A"
-    ? "Trouve le temps mis pour parcourir les D mètres, puis la vitesse atteinte à cet instant, en km/h."
+    ? `Trouve le temps mis pour parcourir les ${exercice.D} m, puis la vitesse atteinte à cet instant, en km/h.`
     : "Trouve le temps total du parcours (les deux segments).";
 }
 

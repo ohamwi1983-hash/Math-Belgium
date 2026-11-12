@@ -141,12 +141,12 @@ export function consigneGenerale(exercice: ExerciceTangente): string {
   switch (exercice.variante) {
     case "pointDonne":
       return exercice.sousFamille === "radicale"
-        ? `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${exercice.a}. Donne des valeurs exactes (racines carrées acceptées).`
-        : `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${exercice.a}.`;
+        ? `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${nombreTexte(exercice.a)}. Donne des valeurs exactes (racines carrées acceptées).`
+        : `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${nombreTexte(exercice.a)}.`;
     case "horizontale":
       return "Détermine les points de la courbe de f où la tangente est horizontale, puis donne leurs coordonnées.";
     case "doubleTangence":
-      return `La tangente t à la courbe de f au point d'abscisse x = ${exercice.p} recoupe la courbe en un second point, d'abscisse q. Détermine q, puis la pente de la courbe en ce point : t y est-elle aussi tangente ?`;
+      return `La tangente t à la courbe de f au point d'abscisse x = ${nombreTexte(exercice.p)} recoupe la courbe en un second point, d'abscisse q. Détermine q, puis la pente de la courbe en ce point : t y est-elle aussi tangente ?`;
   }
 }
 
@@ -200,7 +200,7 @@ export function questionSpecifiqueEcran(exercice: ExerciceTangente, ecran: Ecran
       const a = ex.a;
       return {
         texteAvant: "Calcule",
-        latex: `f(${a}) \text{ puis } f'(${a})`,
+        latex: `f(${a}) \\text{ puis } f'(${a})`,
         texteApres: ex.sousFamille === "radicale" ? "à partir de f(x) et f'(x) données ci-dessus. Donne des valeurs exactes." : "à partir de f(x) et f'(x) données ci-dessus.",
       };
     }
@@ -267,7 +267,7 @@ export function texteAideNiveau1(ecran: EcranTangente, exercice?: ExerciceTangen
     case "substituer":
       return {
         texte: "Deux substitutions indépendantes, aucune dérivation à faire : remplace x par l'abscisse du point dans f(x), puis dans f'(x) donnée.",
-        latex: a !== null ? `f(${a}) \quad \text{et} \quad f'(${a})` : null,
+        latex: a !== null ? `f(${a}) \\quad \\text{et} \\quad f'(${a})` : null,
       };
     case "tangente":
       return {
@@ -287,18 +287,20 @@ export function texteAideNiveau1(ecran: EcranTangente, exercice?: ExerciceTangen
     case "tangenteEnP":
       return {
         texte: "f(x) est déjà développée : dérive chaque terme avec la règle de la puissance, puis remplace x par l'abscisse du point :",
-        latex: p !== null ? `(x^n)'=n\,x^{n-1} \quad\Rightarrow\quad f'(${p})` : "(x^n)'=n\,x^{n-1}",
+        latex: p !== null ? `(x^n)'=n\\,x^{n-1} \\quad\\Rightarrow\\quad f'(${p})` : "(x^n)'=n\\,x^{n-1}",
       };
     case "trouverQ":
       return {
         texte: "La différence entre la courbe et la tangente a une racine double en x = p : elle est divisible par (x − p)². Divise, puis résous le quotient du second degré :",
-        latex: p !== null ? `f(x)-t(x)=(${formatFacteurXMoinsQ(p)})^2\cdot Q(x)` : "f(x)-t(x)=(x-p)^2\cdot Q(x)",
+        latex: p !== null ? `f(x)-t(x)=(${formatFacteurXMoinsQ(p)})^2\\cdot Q(x)` : "f(x)-t(x)=(x-p)^2\\cdot Q(x)",
       };
-    case "verifierPente":
+    case "verifierPente": {
+      const q = exercice?.variante === "doubleTangence" ? exercice.q : null;
       return {
-        texte: "Utilise la dérivée de f trouvée au premier écran et remplace x par q :",
-        latex: "f'(q)",
+        texte: "Reprends la dérivée f'(x) calculée au premier écran et remplace x par l'abscisse du second point :",
+        latex: q !== null ? `f'(${q})` : "f'(q)",
       };
+    }
   }
 }
 
@@ -312,25 +314,25 @@ export interface AideFragmentee {
 export function texteAideNiveau2(ecran: EcranTangente): AideFragmentee {
   switch (ecran) {
     case "substituer":
-      return { texte: "Exemple :", latex: "f(x)=x^2+1,\\ a=2 \\;\\Rightarrow\\; f(2)=2^2+1=5. \\quad \\text{Si } f'(x)=2x \\text{ (donnée)}, \\ f'(2)=2\\cdot2=4" };
+      return { texte: "Exemple :", latex: "f(x)=x^2+1,\\ f'(x)=2x \;\\Rightarrow\; f(2)=5,\\ f'(2)=4" };
     case "tangente":
-      return { texte: "Exemple :", latex: "f(2)=5,\\ f'(2)=4 \\;\\Rightarrow\\; y=5+4(x-2)=5+4x-8=4x-3" };
+      return { texte: "Exemple :", latex: "f(2)=5,\\ f'(2)=4 \;\\Rightarrow\; y=5+4(x-2)=4x-3" };
     case "resoudre":
-      return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1 \\quad \\text{(deux solutions)}" };
+      return { texte: "Exemple :", latex: "6x^2-6=0 \\iff x^2=1 \\iff x=-1 \\text{ ou } x=1" };
     case "coordonnees":
-      return { texte: "Exemple :", latex: "x=1,\\ f(x)=2x^3-6x+1 \\;\\Rightarrow\\; f(1)=2-6+1=-3 \\;\\Rightarrow\\; \\text{le point complet est } (1;-3)" };
+      return { texte: "Exemple, avec f(x) = 2x³ − 6x + 1 :", latex: "x=1 \;\\Rightarrow\; y=f(1)=-3 \;\\Rightarrow\; (1\\,;-3)" };
     case "tangenteEnP":
       return {
         texte: "Exemple :",
-        latex: "f(x)=x^4-4x^3+4x^2+x \\;\\Rightarrow\\; f'(x)=4x^3-12x^2+8x+1 \\;\\Rightarrow\\; f'(0)=1,\\ f(0)=0 \\;\\Rightarrow\\; y=0+1\\cdot(x-0)=x",
+        latex: "\\begin{aligned} f(x)&=x^4-4x^3+4x^2+x\\\\ f'(x)&=4x^3-12x^2+8x+1\\\\ f'(0)&=1,\\ f(0)=0 \;\\Rightarrow\; y=x \\end{aligned}",
       };
     case "trouverQ":
       return {
-        texte: "Exemple :",
-        latex: "f(x)-x=x^4-4x^3+4x^2=x^2(x^2-4x+4)=x^2(x-2)^2 \\;\\Rightarrow\\; \\text{racine double } x=0 \\text{ (c'est } p\\text{) et racine double } x=2 \\text{, donc } q=2",
+        texte: "Exemple, avec la tangente y = x en p = 0 :",
+        latex: "\\begin{aligned} f(x)-x&=x^4-4x^3+4x^2\\\\ &=x^2(x-2)^2 \;\\Rightarrow\; q=2 \\end{aligned}",
       };
     case "verifierPente":
-      return { texte: "Exemple :", latex: "f'(x)=4x^3-12x^2+8x+1 \\;\\Rightarrow\\; f'(2)=4\\cdot8-12\\cdot4+8\\cdot2+1=1" };
+      return { texte: "Exemple :", latex: "\\begin{aligned} f'(x)&=4x^3-12x^2+8x+1\\\\ f'(2)&=32-48+16+1=1 \\end{aligned}" };
   }
 }
 

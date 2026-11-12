@@ -12,6 +12,16 @@ import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
+/** Libellé du champ (LaTeX) en texte simple pour l'aperçu de saisie : « t_2= » → « t₂= »,
+ * « t_{\text{total}}= » → « t total= ». */
+function libelleApercu(latex: string): string {
+  return latex
+    .replace(/\\text\{([^}]*)\}/g, "$1")
+    .replace(/\\ /g, " ")
+    .replace(/_\{?(\d)\}?/g, (_m, d: string) => "₀₁₂₃₄₅₆₇₈₉"[Number(d)])
+    .replace(/_\{([^}]*)\}/g, " $1");
+}
+
 interface Props {
   exercice: ExerciceVitessePosition;
   ecran: EcranVitessePosition;
@@ -73,7 +83,7 @@ export function EtapeChampVitessePosition({
       <p className="prompt-text">
         <TexteRiche5e texte={consigneEcranRiche(exercice, ecran)} />
       </p>
-      <ApercuExpressionLatex texte={texte} label={labelChamp.replace(/_\{?(\d)\}?/g, (_m, d: string) => "₀₁₂₃₄₅₆₇₈₉"[Number(d)]).replace(/\\text\{([^}]*)\}/g, "$1")} />
+      <ApercuExpressionLatex texte={texte} label={libelleApercu(labelChamp)} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
           <Katex expression={labelChamp} />

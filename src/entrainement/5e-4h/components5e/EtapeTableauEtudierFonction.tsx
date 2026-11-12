@@ -25,7 +25,8 @@ interface Props {
  * (5gen29, générique dans son contrat — `colonnes`/`enteteColonnes`/`mode`/`attendu`, aucune
  * dépendance à `ExerciceEtudeLocale`), racines/exclusions déjà connues à la génération (pré-placées
  * en en-tête, jamais résolues par l'élève dans CE générateur — voir tête de fichier de
- * `typesEtudierFonction.ts`). Calculatrice ABSENTE (question structurelle). */
+ * `typesEtudierFonction.ts`). Calculatrice ABSENTE (question structurelle). Choix fermés : UNE seule
+ * tentative (le moteur clôt l'écran ; sinon les cellules marquées se corrigeraient par élimination). */
 export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
@@ -66,7 +67,7 @@ export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilise
         mode={mode}
         attendu={attendu}
         tentativesUtilisees={tentativesUtilisees}
-        tentativesMax={tentativesMax}
+        tentativesMax={Math.min(1, tentativesMax)}
         onValider={onValider}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         validation={validation}

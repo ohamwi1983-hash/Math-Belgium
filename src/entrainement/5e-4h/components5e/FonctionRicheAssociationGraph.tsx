@@ -8,7 +8,8 @@ import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
 import { construireSegmentsExclusionUnique } from "../ui5e/segmentsAssociationAvancee";
 import { FenetreVisibleXY5e, GrilleAdaptative5e } from "./mafsGraphPartage5e";
 
-const LARGEUR = 220;
+// 280 px : à 220 px, les graduations −3, −2, −1 de l'axe horizontal se touchaient (audit 5c5a, point 11).
+const LARGEUR = 280;
 const HAUTEUR = LARGEUR / RATIO_GRAPHE;
 const COULEUR_COURBE = "#1971c2";
 const NOMBRE_ECHANTILLONS = 60;

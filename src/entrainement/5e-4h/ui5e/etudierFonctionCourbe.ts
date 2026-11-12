@@ -6,7 +6,7 @@
  * pour une fonction réelle arbitraire. Nouveau module, léger, générique sur `(x:number)=>number`.
  */
 import type { ExerciceEtudierFonction } from "../core5e/etudierFonction.types";
-import { exclusionsCE, pointsClesEtudierFonction, valeurF } from "../moteur5e/verificationEtudierFonction";
+import { decalageVertical, exclusionsCE, pointsClesEtudierFonction, typeAsymptotique, valeurF } from "../moteur5e/verificationEtudierFonction";
 
 /** Même valeur que `BUFFER_VA` (5gen22/5gen30, `ui5e/lectureGraphiqueLimitesCourbe.ts`) — jamais
  * échantillonner le pôle lui-même. */
@@ -32,47 +32,38 @@ export function construireSegmentsFonctionReelle(evaluer: (x: number) => number,
   return segments;
 }
 
-const MARGE_X = 4;
-const DEMI_LARGEUR_X_MIN = 5;
-const DEMI_HAUTEUR_Y_DEFAUT = 6;
-
-export function calculerBornesX(exclusions: number[]): [number, number] {
-  const positions = exclusions.length > 0 ? exclusions : [0];
-  const xEtendueMin = Math.min(0, ...positions) - MARGE_X;
-  const xEtendueMax = Math.max(0, ...positions) + MARGE_X;
-  const demiLargeur = Math.max(DEMI_LARGEUR_X_MIN, (xEtendueMax - xEtendueMin) / 2);
-  const centreX = (xEtendueMin + xEtendueMax) / 2;
-  return [centreX - demiLargeur, centreX + demiLargeur];
-}
-
 export function construireEvaluateurEtudierFonction(exercice: ExerciceEtudierFonction): (x: number) => number {
   return (x: number) => valeurF(exercice, x);
 }
 
-/** ViewBox — X centré sur les exclusions (`calculerBornesX`), Y étendu pour englober tous les
- * points clés (extremums/PI/f(0)) plus 2 échantillons "sûrs" (loin de toute exclusion) pour capter
- * l'allure générale des branches. */
+/** ViewBox — bornée par les points remarquables (extremums, inflexions, point d'abscisse 0) et les
+ * asymptotes verticales, avec une marge : tous les points à placer sont dans la fenêtre (audit 5e
+ * ch. 5 : des inflexions sortaient de l'ancienne fenêtre, et une fenêtre y de près de 700 unités
+ * écrasait la courbe). Repère NON isotrope (`preserveAspectRatio={false}` dans le graphe). */
 export function calculerViewBoxEtudierFonction(exercice: ExerciceEtudierFonction): { x: [number, number]; y: [number, number] } {
   const exclusions = exclusionsCE(exercice);
-  const [xMin, xMax] = calculerBornesX(exclusions);
-  const f = construireEvaluateurEtudierFonction(exercice);
-
-  const valeursNotables: number[] = pointsClesEtudierFonction(exercice).map((p) => p.y);
-  for (const x of [xMin + 1, xMax - 1]) {
-    if (exclusions.every((e) => Math.abs(x - e) > BUFFER_VA_ETUDIER_FONCTION)) {
-      const y = f(x);
-      if (Number.isFinite(y)) valeursNotables.push(y);
-    }
+  const points = pointsClesEtudierFonction(exercice);
+  const xs = [...points.map((p) => p.x), ...exclusions];
+  let xMin = Math.min(...xs) - 2;
+  let xMax = Math.max(...xs) + 2;
+  if (xMax - xMin < 8) {
+    const c = (xMin + xMax) / 2;
+    xMin = c - 4;
+    xMax = c + 4;
   }
-
-  let yMax = DEMI_HAUTEUR_Y_DEFAUT;
-  let yMin = -DEMI_HAUTEUR_Y_DEFAUT;
-  for (const v of valeursNotables) {
-    if (!Number.isFinite(v)) continue;
-    yMax = Math.max(yMax, v + 2);
-    yMin = Math.min(yMin, v - 2);
+  const ys = points.map((p) => p.y).filter((y) => Number.isFinite(y));
+  if (typeAsymptotique(exercice) === "horizontale") ys.push(decalageVertical(exercice));
+  let yMin = Math.min(...ys);
+  let yMax = Math.max(...ys);
+  const marge = Math.max(1.5, (yMax - yMin) * 0.2);
+  yMin -= marge;
+  yMax += marge;
+  if (yMax - yMin < 6) {
+    const c = (yMin + yMax) / 2;
+    yMin = c - 3;
+    yMax = c + 3;
   }
-  return { x: [xMin, xMax], y: [yMin, yMax] };
+  return { x: [Math.floor(xMin), Math.ceil(xMax)], y: [Math.floor(yMin), Math.ceil(yMax)] };
 }
 
 export function construireSegmentsEtudierFonction(exercice: ExerciceEtudierFonction): SegmentCourbeFonctionReelle[] {

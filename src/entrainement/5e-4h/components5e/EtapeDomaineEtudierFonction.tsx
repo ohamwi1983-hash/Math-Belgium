@@ -42,7 +42,7 @@ export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, ten
       <p className="prompt-text">{consigneEcranEtudierFonction("domaine")}</p>
       <EnsembleReelGuideBuilder
         onValider={onValider}
-        prefixApercu="domf ="
+        prefixApercu="\text{dom}\,f="
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         attendu={domaineAttendu(exercice)}
         apresEchec={montrerErreurs}
