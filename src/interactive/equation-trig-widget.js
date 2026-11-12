@@ -2,8 +2,10 @@
   "use strict";
 
   /* ================================================================
-   * <equation-trig-widget> — atelier interactif : résout trig(ax+b) = k en
-   * direct (sin, cos ou tan), curseurs a, b (en multiples de π), k.
+   * <equation-trig-widget> — atelier interactif : résout trig(ax+b) = c en
+   * direct (sin, cos ou tan), curseurs a, b (en multiples de π), c — le second
+   * membre s'appelle c (audit 5e ch. 2) : k reste l'entier de 2kπ. Liste et
+   * nombre de solutions dans [0 ; 2π[, valeurs interdites de tan marquées.
    * Panneau cercle trigonométrique (u = ax+b) reprenant exactement la
    * convention des illustrations statiques de cette section (points reliés,
    * ligne de repère horizontale/verticale) — le cercle NE DÉPEND JAMAIS de
@@ -25,6 +27,41 @@
     var facteur = Math.pow(10, decimales);
     var arrondi = Math.round(n * facteur) / facteur;
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
+  }
+
+  /** x/π écrit comme fraction p/q (q ≤ 48) si c'en est une à 1e-7 près, sinon chaîne vide. */
+  function fractionPi(x) {
+    var r = x / PI;
+    for (var q = 1; q <= 48; q++) {
+      var pNum = Math.round(r * q);
+      if (Math.abs(r * q - pNum) < 1e-7 * q) {
+        if (pNum === 0) return "0";
+        var g = function (a, b) { return b ? g(b, a % b) : a; };
+        var d = g(Math.abs(pNum), q), n = pNum / d, den = q / d;
+        return (n < 0 ? "−" : "") + (Math.abs(n) === 1 ? "" : Math.abs(n)) + "π" + (den === 1 ? "" : "/" + den);
+      }
+    }
+    return "";
+  }
+
+  function formatX(x) {
+    var f = fractionPi(x);
+    return f || formatNombreFr(x, 3);
+  }
+
+  /** Valeurs x0 + P·k (k ∈ ℤ) dans [0 ; 2π[, triées, sans doublon. */
+  function dansIntervalle(familles, P) {
+    var res = [];
+    familles.forEach(function (x0) {
+      var kMin = Math.ceil((0 - x0) / P - 1e-9), kMax = Math.floor((2 * PI - x0) / P - 1e-9);
+      for (var k = kMin; k <= kMax; k++) {
+        var v = x0 + k * P;
+        if (v < -1e-9 || v >= 2 * PI - 1e-9) continue;
+        if (Math.abs(v) < 1e-9) v = 0;
+        if (!res.some(function (w) { return Math.abs(w - v) < 1e-7; })) res.push(v);
+      }
+    });
+    return res.sort(function (u, w) { return u - w; });
   }
 
   function svgEl(ns, tag, attrs) {
@@ -52,7 +89,12 @@
     '.etiquette-u{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);font-family:var(--sans,sans-serif);}' +
     '.etiquette-repere{font-size:11px;fill:var(--bad,#b23a3a);font-family:var(--sans,sans-serif);}' +
     '.message-vide{font-size:13px;font-weight:600;fill:var(--bad,#b23a3a);font-family:var(--sans,sans-serif);}' +
-    '.solution{text-align:center;font-family:var(--mono,monospace);font-size:0.92rem;font-weight:700;color:var(--accent-ink,#7a3212);margin:0 0 18px;line-height:1.7;}' +
+    '.solution{text-align:center;font-family:var(--mono,monospace);font-size:0.92rem;font-weight:700;color:var(--accent-ink,#7a3212);margin:0 0 10px;line-height:1.7;overflow-wrap:anywhere;}' +
+    '.intervalle{text-align:center;font-size:0.9rem;color:var(--ink,#241f1a);margin:0 0 18px;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);line-height:1.6;overflow-wrap:anywhere;}' +
+    '.intervalle b{color:var(--good,#2f7a4f);}' +
+    '.intervalle .interdit{color:var(--bad,#b23a3a);}' +
+    '.marque-interdite{stroke:var(--bad,#b23a3a);stroke-width:2.2;stroke-linecap:round;}' +
+    '.etiquette-interdite{font-size:10.5px;fill:var(--bad,#b23a3a);font-family:var(--sans,sans-serif);}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
@@ -67,9 +109,10 @@
     '<option value="sin">sin(u)</option>' +
     '<option value="cos">cos(u)</option>' +
     '<option value="tan">tan(u)</option>' +
-    '</select><span class="formule">= k</span></div>' +
+    '</select><span class="formule">= c</span></div>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + C_TAILLE + ' ' + C_TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<p class="solution" id="solution"></p>' +
+    '<p class="intervalle" id="intervalle"></p>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="a">a</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
@@ -77,7 +120,7 @@
     '<div class="curseur"><label for="b">b (multiple de π)</label><div class="curseur-row">' +
     '<input type="range" id="b" min="' + BORNES_B_MULT.min + '" max="' + BORNES_B_MULT.max + '" step="' + BORNES_B_MULT.step + '" value="' + DEFAUT.bMult + '">' +
     '<span class="curseur-valeur" id="b-valeur"></span></div></div>' +
-    '<div class="curseur"><label for="k">k</label><div class="curseur-row">' +
+    '<div class="curseur"><label for="k">c — second membre</label><div class="curseur-row">' +
     '<input type="range" id="k" min="' + BORNES_K_SINCOS.min + '" max="' + BORNES_K_SINCOS.max + '" step="' + BORNES_K_SINCOS.step + '" value="' + DEFAUT.k + '">' +
     '<span class="curseur-valeur" id="k-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
@@ -101,6 +144,7 @@
     this._formule = shadow.getElementById("formule");
     this._selectFn = shadow.getElementById("fn");
     this._solution = shadow.getElementById("solution");
+    this._intervalle = shadow.getElementById("intervalle");
     this._inputA = shadow.getElementById("a");
     this._inputB = shadow.getElementById("b");
     this._inputK = shadow.getElementById("k");
@@ -189,7 +233,7 @@
 
     if (aucuneSolution) {
       var msg = svgEl(ns, "text", { x: C_CX, y: C_CY, "text-anchor": "middle", class: "message-vide" });
-      msg.textContent = "|k| > 1 : aucune solution";
+      msg.textContent = "|c| > 1 : aucune solution";
       svg.appendChild(msg);
       return;
     }
@@ -201,14 +245,26 @@
       var yRepere = C_CY - k * C_R;
       svg.appendChild(svgEl(ns, "line", { x1: C_CX - C_R - 10, x2: C_CX + C_R + 10, y1: yRepere.toFixed(2), y2: yRepere.toFixed(2), class: "repere" }));
       var etRep = svgEl(ns, "text", { x: (C_CX + C_R + 12).toFixed(2), y: (yRepere + 4).toFixed(2), class: "etiquette-repere" });
-      etRep.textContent = "y=k";
+      etRep.textContent = "y=c";
       svg.appendChild(etRep);
     } else if (fn === "cos") {
       var xRepere = C_CX + k * C_R;
       svg.appendChild(svgEl(ns, "line", { x1: xRepere.toFixed(2), x2: xRepere.toFixed(2), y1: C_CY - C_R - 10, y2: C_CY + C_R + 10, class: "repere" }));
       var etRep2 = svgEl(ns, "text", { x: (xRepere + 4).toFixed(2), y: (C_CY - C_R - 14).toFixed(2), "text-anchor": "middle", class: "etiquette-repere" });
-      etRep2.textContent = "x=k";
+      etRep2.textContent = "x=c";
       svg.appendChild(etRep2);
+    }
+
+    if (fn === "tan") {
+      // u = ±π/2 : tan n'est pas définie — les deux points du cercle sont barrés.
+      [PI / 2, -PI / 2].forEach(function (u) {
+        var q = self._pointCercle(u), e = 6;
+        svg.appendChild(svgEl(ns, "line", { x1: q[0] - e, y1: q[1] - e, x2: q[0] + e, y2: q[1] + e, class: "marque-interdite" }));
+        svg.appendChild(svgEl(ns, "line", { x1: q[0] - e, y1: q[1] + e, x2: q[0] + e, y2: q[1] - e, class: "marque-interdite" }));
+        var t = svgEl(ns, "text", { x: q[0] + 10, y: q[1] + (u > 0 ? -6 : 14), class: "etiquette-interdite" });
+        t.textContent = u > 0 ? "π/2 interdit" : "−π/2 interdit";
+        svg.appendChild(t);
+      });
     }
 
     if (points.length === 2) {
@@ -232,6 +288,7 @@
     this._valeurA.textContent = formatNombreFr(a, 1);
     this._valeurB.textContent = formatNombreFr(this._bMult, 2) + "π";
     this._valeurK.textContent = formatNombreFr(k, 2);
+    var familles = [], periode = 2 * PI / a, interdites = [];
 
     var points = [];
     var aucuneSolution = false;
@@ -240,7 +297,7 @@
     if (fn === "sin") {
       if (Math.abs(k) > 1) {
         aucuneSolution = true;
-        texteSolution = "Aucune solution : |k| > 1, or sin(u) ∈ [−1 ; 1].";
+        texteSolution = "Aucune solution : |c| > 1, or sin(u) ∈ [−1 ; 1].";
       } else {
         var alphaS = Math.asin(k);
         points = [
@@ -249,15 +306,16 @@
         ];
         var periodeS = (2 * PI) / a;
         var x1s = (alphaS - b) / a, x2s = (PI - alphaS - b) / a;
+        familles = [x1s, x2s];
         texteSolution =
-          "α = " + formatNombreFr(alphaS, 3) + " rad (asin(k))\n" +
-          "x₁ = " + formatNombreFr(x1s, 3) + " + " + formatNombreFr(periodeS, 3) + "·m\n" +
-          "x₂ = " + formatNombreFr(x2s, 3) + " + " + formatNombreFr(periodeS, 3) + "·m   (m∈ℤ)";
+          "α = arcsin(c) = " + formatNombreFr(alphaS, 3) + " rad\n" +
+          "x₁ = " + formatNombreFr(x1s, 3) + " + " + formatNombreFr(periodeS, 3) + "·k\n" +
+          "x₂ = " + formatNombreFr(x2s, 3) + " + " + formatNombreFr(periodeS, 3) + "·k   (k ∈ ℤ)";
       }
     } else if (fn === "cos") {
       if (Math.abs(k) > 1) {
         aucuneSolution = true;
-        texteSolution = "Aucune solution : |k| > 1, or cos(u) ∈ [−1 ; 1].";
+        texteSolution = "Aucune solution : |c| > 1, or cos(u) ∈ [−1 ; 1].";
       } else {
         var alphaC = Math.acos(k);
         points = [
@@ -266,10 +324,11 @@
         ];
         var periodeC = (2 * PI) / a;
         var x1c = (alphaC - b) / a, x2c = (-alphaC - b) / a;
+        familles = [x1c, x2c];
         texteSolution =
-          "α = " + formatNombreFr(alphaC, 3) + " rad (acos(k))\n" +
-          "x₁ = " + formatNombreFr(x1c, 3) + " + " + formatNombreFr(periodeC, 3) + "·m\n" +
-          "x₂ = " + formatNombreFr(x2c, 3) + " + " + formatNombreFr(periodeC, 3) + "·m   (m∈ℤ)";
+          "α = arccos(c) = " + formatNombreFr(alphaC, 3) + " rad\n" +
+          "x₁ = " + formatNombreFr(x1c, 3) + " + " + formatNombreFr(periodeC, 3) + "·k\n" +
+          "x₂ = " + formatNombreFr(x2c, 3) + " + " + formatNombreFr(periodeC, 3) + "·k   (k ∈ ℤ)";
       }
     } else {
       var alphaT = Math.atan(k);
@@ -279,14 +338,25 @@
       ];
       var periodeT = PI / a;
       var xT = (alphaT - b) / a;
+      familles = [xT];
+      periode = periodeT;
+      interdites = dansIntervalle([(PI / 2 - b) / a], PI / a);
       texteSolution =
-        "α = " + formatNombreFr(alphaT, 3) + " rad (atan(k)) — une seule famille (période π)\n" +
-        "x = " + formatNombreFr(xT, 3) + " + " + formatNombreFr(periodeT, 3) + "·m   (m∈ℤ)";
+        "α = arctan(c) = " + formatNombreFr(alphaT, 3) + " rad — une seule famille (période π/a)\n" +
+        "x = " + formatNombreFr(xT, 3) + " + " + formatNombreFr(periodeT, 3) + "·k   (k ∈ ℤ)";
     }
 
     this._solution.innerHTML = texteSolution.split("\n").map(function (ligne) {
       return "<span>" + ligne.replace(/</g, "&lt;") + "</span>";
     }).join("<br>");
+
+    var sols = aucuneSolution ? [] : dansIntervalle(familles, periode);
+    var html = "Dans [0 ; 2π[ : <b>" + sols.length + " solution" + (sols.length > 1 ? "s" : "") + "</b>" +
+      (sols.length ? " : x ∈ { " + sols.map(formatX).join(" ; ") + " }" : "");
+    if (fn === "tan") {
+      html += '<br><span class="interdit">Valeurs interdites (ax + b = π/2 + kπ) : x ∈ { ' + interdites.map(formatX).join(" ; ") + " }</span>";
+    }
+    this._intervalle.innerHTML = html;
 
     this._dessinerCercle(fn, k, points, aucuneSolution);
   };

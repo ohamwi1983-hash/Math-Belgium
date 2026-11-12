@@ -942,6 +942,9 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'geometrie-cercle': [
     { cle: 'segment circulaire + corde', enonce: "Dans un cercle de centre O et de rayon $r = 10$ cm, deux rayons OA et OB forment un angle $\\theta = \\dfrac{2\\pi}{3}$. Calcule l'aire du segment circulaire délimité par la corde [AB], puis la longueur de cette corde (valeurs approchées au centième)." },
+    { cle: 'essuie-glace — différence de deux secteurs', enonce: "Un essuie-glace pivote d'un angle de $120°$ ; son balai racle la vitre entre $10$ cm et $50$ cm du pivot. Calcule l'aire de la surface balayée (valeur exacte, puis approchée au centième)." },
+    { cle: 'angle au centre à partir de la corde', enonce: "Dans un cercle de rayon $r = 10$ cm, une corde mesure $c = 12$ cm. Calcule l'angle au centre qui intercepte cette corde (en degrés et en radians), puis l'aire du segment circulaire correspondant (valeurs approchées au centième)." },
+    { cle: 'lentille — deux segments circulaires', enonce: "Deux cercles de rayons $r_1 = 10$ cm et $r_2 = 8$ cm se coupent selon une corde commune de longueur $c = 12$ cm ; leurs centres sont de part et d'autre de cette corde. Calcule l'aire de la lentille, la région commune aux deux disques (valeur approchée au centième)." },
   ],
   'parametres': [
     { cle: 'identifier les paramètres', enonce: "On donne $f(x) = 3\\sin(2x - \\dfrac{\\pi}{3}) + 1$. Détermine l'amplitude A (puis le maximum et le minimum de f), la pulsation $\\omega$, la période T, la fréquence, le déphasage $\\varphi$, le décalage horizontal $\\Phi$ et le décalage vertical b." },
@@ -954,14 +957,17 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'maximums, minimums, puis extremums réunis', enonce: "On donne $f(x) = 2\\sin(3x + \\dfrac{\\pi}{6}) - 1$. Détermine séparément les abscisses des maximums, puis celles des minimums, puis tous les extremums réunis ($k \\in \\mathbb{Z}$)." },
   ],
   'equations': [
-    { cle: 'deux familles de solutions', enonce: "Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans $\\mathbb{R}$." },
+    { cle: 'deux familles de solutions', enonce: "Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans $\\mathbb{R}$, puis donne les solutions qui appartiennent à $[0\\,;2\\pi[$." },
+    { cle: 'tangente — une seule famille', enonce: "Résous $\\tan\\left(2x - \\dfrac{\\pi}{3}\\right) = 1$ dans $[0\\,;2\\pi[$." },
     { cle: 'produit nul — réunion des solutions', enonce: "Résous $\\sin(x)\\cdot\\left(2\\cos(x)-1\\right) = 0$ dans $[0\\,;2\\pi[$." },
     { cle: 'à factoriser d\'abord', enonce: "Résous $\\cos^2(x) - \\dfrac{1}{2}\\cos(x) = 0$ dans $[0\\,;2\\pi[$." },
     { cle: 'une racine à rejeter', enonce: "Résous $2\\sin^2(x) - \\cos(x) + 1 = 0$ dans $[0\\,;2\\pi[$." },
+    { cle: 'deux racines gardées', enonce: "Résous $2\\sin^2(x) - 3\\sin(x) + 1 = 0$ dans $[0\\,;2\\pi[$." },
     { cle: 'convertir, puis égaler les arguments', enonce: "Résous $\\cos(2x) = \\sin(x)$ dans $[0\\,;2\\pi[$." },
   ],
   'modeliser': [
     { cle: 'Exemple résolu — une grande roue', enonce: "Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du sol. Elle effectue un tour complet en 8 minutes. À l'instant $t=0$ (l'embarquement), une nacelle se trouve à son point le plus bas. Détermine le modèle complet $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes), en justifiant chaque paramètre, puis vérifie ton résultat en calculant $hauteur(4)$." },
+    { cle: 'départ hors d\'un extremum', enonce: "Une grande roue a un rayon de 15 m ; son centre est à 17 m du sol et elle fait un tour complet en 8 minutes. À l'instant $t = 0$, une nacelle est à $24{,}5$ m du sol et elle monte. Détermine le modèle $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes) : justifie le choix de $\\varphi$ parmi les deux solutions possibles, puis vérifie ton modèle à l'aide du premier maximum." },
     { cle: 'un arc, puis retour à t', enonce: "Une grande roue a un rayon de 15 m, son centre est à 17 m du sol et elle fait un tour complet en 8 minutes ; la hauteur d'une nacelle (en m) est $hauteur(t) = 15\\sin\\left(\\dfrac{\\pi}{4}t - \\dfrac{\\pi}{2}\\right) + 17$, avec $t$ en minutes. Pendant les 8 premières minutes, quand la nacelle est-elle à au moins 24,5 m du sol ? Résous $hauteur(t) \\geq 24{,}5$ pour $t \\in [0\\,;8]$." },
   ],
   },

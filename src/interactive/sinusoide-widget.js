@@ -137,6 +137,11 @@
     '.arc-theta{stroke:var(--plan,#5b4ea3);stroke-width:1.5;fill:none;}' +
     '.vecteur-vert-ligne{stroke:var(--good,#2f7a4f);stroke-width:2.2;stroke-linecap:round;}' +
     '.vecteur-vert-tete{fill:var(--good,#2f7a4f);}' +
+    '.courbe-ref{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:2 4;fill:none;}' +
+    '.fleche-phi{stroke:var(--plan,#5b4ea3);stroke-width:2.4;stroke-linecap:round;}' +
+    '.fleche-phi-tete{fill:var(--plan,#5b4ea3);}' +
+    '.point-debut{fill:var(--surface,#fff);stroke:var(--plan,#5b4ea3);stroke-width:2;}' +
+    '.etiquette-phi{font-size:12px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);paint-order:stroke;stroke:var(--surface-2,#faf6f0);stroke-width:3px;}' +
     '.guide-position{stroke:var(--plan,#5b4ea3);stroke-width:1.2;stroke-dasharray:3 3;}' +
     '.point-position{fill:var(--plan,#5b4ea3);}' +
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:20px;}' +
@@ -169,6 +174,7 @@
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">x</span><span class="stat-value" id="val-x"></span></div>' +
     '<div class="stat"><span class="stat-label">f(x)</span><span class="stat-value" id="val-fx"></span></div>' +
+    '<div class="stat"><span class="stat-label">Φ = −φ/ω</span><span class="stat-value" id="val-phi-dec"></span></div>' +
     '<div class="stat"><span class="stat-label">Maximum</span><span class="stat-value" id="val-max"></span></div>' +
     '<div class="stat"><span class="stat-label">Minimum</span><span class="stat-value" id="val-min"></span></div>' +
     '</div>';
@@ -329,6 +335,8 @@
     svg.appendChild(etAngle);
   };
 
+  SinusoideWidgetClass.prototype._shadowRoot = function () { return this.shadowRoot; };
+
   SinusoideWidgetClass.prototype._rendre = function () {
     var a = this._a, omega = this._omega, phi = this._phi, b = this._b, x = this._x;
     this._valeurA.textContent = formatNombreFr(a, 1);
@@ -343,6 +351,9 @@
     var maxi = b + a, mini = b - a;
     this._valMax.textContent = formatNombreFr(maxi, 1);
     this._valMin.textContent = formatNombreFr(mini, 1);
+    var PhiDec = -phi / omega;
+    if (Math.abs(PhiDec) < 0.005) PhiDec = 0;
+    this._shadowRoot().getElementById("val-phi-dec").textContent = formatNombreFr(PhiDec, 2);
 
     var fx = a * Math.sin(omega * x + phi) + b;
     this._valX.textContent = formatNombreFr(x, 2);
@@ -438,10 +449,32 @@
       var pt = self._toPx(xx, yy);
       d += (i === 0 ? "M" : "L") + pt[0].toFixed(2) + " " + pt[1].toFixed(2) + " ";
     }
+    // Motif NON décalé A sin(ωx) + b, en pointillé discret : la flèche Φ va de son départ (x = 0) au
+    // départ du motif décalé (x = Φ = −φ/ω) — piège φ ≠ Φ rendu visible (φ = 1 avec ω = 2 décale de
+    // −0,5, pas de −1).
+    if (PhiDec !== 0) {
+      var dRef = "";
+      for (var j = 0; j <= n; j++) {
+        var xr = -X_DEMI + (j / n) * (2 * X_DEMI);
+        var pr = self._toPx(xr, a * Math.sin(omega * xr) + b);
+        dRef += (j === 0 ? "M" : "L") + pr[0].toFixed(2) + " " + pr[1].toFixed(2) + " ";
+      }
+      svg.appendChild(svgEl(ns, "path", { d: dRef.trim(), class: "courbe-ref" }));
+    }
     var chemin = document.createElementNS(ns, "path");
     chemin.setAttribute("d", d.trim());
     chemin.setAttribute("class", "courbe");
     svg.appendChild(chemin);
+
+    var pDebut0 = self._toPx(0, b), pDebut = self._toPx(PhiDec, b);
+    if (PhiDec !== 0) {
+      dessinerVecteur(ns, svg, pDebut0[0].toFixed(2), pDebut0[1].toFixed(2), pDebut[0].toFixed(2), pDebut[1].toFixed(2), "fleche-phi", "fleche-phi-tete");
+    }
+    svg.appendChild(svgEl(ns, "circle", { cx: pDebut[0].toFixed(2), cy: pDebut[1].toFixed(2), r: 4.5, class: "point-debut" }));
+    var milieu = (pDebut0[0] + pDebut[0]) / 2;
+    var etPhi = svgEl(ns, "text", { x: Math.max(MARGE + 60, Math.min(LARGEUR - MARGE - 60, milieu)).toFixed(2), y: (pDebut[1] + (b > Y_MAX - 2 ? 18 : -10)).toFixed(2), "text-anchor": "middle", class: "etiquette-phi" });
+    etPhi.textContent = "Φ = −φ/ω = " + formatNombreFr(PhiDec, 2);
+    svg.appendChild(etPhi);
 
     // Point observé (x, f(x)) + guide pointillé vers l'axe des x + vecteur vert de l'axe vers la
     // courbe — relie visuellement ce graphe au panneau cercle (même point, même couleur violette).

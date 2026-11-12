@@ -7,11 +7,14 @@
    * l'aire du secteur OAB, du triangle OAB et du segment circulaire (leur
    * différence), la longueur de la corde AB (loi des cosinus), et VÉRIFIE
    * en direct l'astuce de la section : n × segment = cercle − polygone.
+   * Mode « angle θ libre » (audit 5e ch. 2) : θ de 10° à 350° sans polygone,
+   * corde affichée par la loi des cosinus AB² = r² + r² − 2r²·cos θ.
    * Web Component (Shadow DOM).
    * ================================================================ */
 
   var PI = Math.PI;
-  var DEFAUT = { n: 6, r: 4 };
+  var DEFAUT = { n: 6, r: 4, thetaDeg: 60, mode: "polygone" };
+  var BORNES_THETA = { min: 10, max: 350, step: 5 };
   var BORNES_N = { min: 3, max: 12, step: 1 };
   var BORNES_R = { min: 3, max: 10, step: 0.5 };
 
@@ -58,6 +61,11 @@
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.92rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
     '.verif{text-align:center;font-size:0.86rem;color:var(--ink-soft,#6b6055);margin:0;padding:10px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.verif strong{color:var(--good,#2f7a4f);}' +
+    '[hidden]{display:none!important;}' +
+    '.mode-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}' +
+    '.mode-row label{font-weight:600;color:var(--ink,#241f1a);}' +
+    'select{font:inherit;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}' +
+    '.cosinus{text-align:center;font-size:0.86rem;color:var(--ink,#241f1a);margin:0 0 10px;padding:8px 12px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);background:var(--surface,#fff);overflow-wrap:anywhere;}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
@@ -71,8 +79,15 @@
     // cercle-trigo-widget.js (même piège de taille de remplacement SVG par défaut, invisible ici
     // seulement parce que TAILLE=300 coïncide avec cette valeur par défaut).
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" width="' + TAILLE + '" height="' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<div class="mode-row"><label for="mode">Mode</label><select id="mode">' +
+    '<option value="polygone">polygone régulier à n côtés</option>' +
+    '<option value="libre">angle θ libre</option>' +
+    '</select></div>' +
     '<div class="controles">' +
-    '<div class="curseur"><label for="n">n — nombre de côtés</label><div class="curseur-row">' +
+    '<div class="curseur" id="bloc-theta" hidden><label for="theta">θ — angle au centre (°)</label><div class="curseur-row">' +
+    '<input type="range" id="theta" min="' + BORNES_THETA.min + '" max="' + BORNES_THETA.max + '" step="' + BORNES_THETA.step + '" value="' + DEFAUT.thetaDeg + '">' +
+    '<span class="curseur-valeur" id="theta-valeur"></span></div></div>' +
+    '<div class="curseur" id="bloc-n"><label for="n">n — nombre de côtés</label><div class="curseur-row">' +
     '<input type="range" id="n" min="' + BORNES_N.min + '" max="' + BORNES_N.max + '" step="' + BORNES_N.step + '" value="' + DEFAUT.n + '">' +
     '<span class="curseur-valeur" id="n-valeur"></span></div></div>' +
     '<div class="curseur"><label for="r">r — rayon (cm)</label><div class="curseur-row">' +
@@ -86,6 +101,7 @@
     '<div class="stat"><span class="stat-label">aire segment</span><span class="stat-value" id="val-segment"></span></div>' +
     '<div class="stat"><span class="stat-label">corde AB</span><span class="stat-value" id="val-corde"></span></div>' +
     '</div>' +
+    '<p class="cosinus" id="cosinus"></p>' +
     '<p class="verif" id="verif"></p>';
 
   class SecteurSegmentWidgetClass extends HTMLElement {
@@ -111,6 +127,14 @@
     this._valeurN = shadow.getElementById("n-valeur");
     this._valeurR = shadow.getElementById("r-valeur");
     this._resetBtn = shadow.getElementById("reset");
+    this._mode = DEFAUT.mode;
+    this._thetaDeg = DEFAUT.thetaDeg;
+    this._selectMode = shadow.getElementById("mode");
+    this._inputTheta = shadow.getElementById("theta");
+    this._valeurTheta = shadow.getElementById("theta-valeur");
+    this._blocTheta = shadow.getElementById("bloc-theta");
+    this._blocN = shadow.getElementById("bloc-n");
+    this._cosinus = shadow.getElementById("cosinus");
   };
 
   SecteurSegmentWidgetClass.prototype.connectedCallback = function () {
@@ -118,13 +142,19 @@
     this._onInputN = function () { self._n = parseInt(self._inputN.value, 10); self._rendre(); };
     this._onInputR = function () { self._r = parseFloat(self._inputR.value); self._rendre(); };
     this._onReset = function () {
-      self._n = DEFAUT.n; self._r = DEFAUT.r;
+      self._n = DEFAUT.n; self._r = DEFAUT.r; self._thetaDeg = DEFAUT.thetaDeg; self._mode = DEFAUT.mode;
+      self._selectMode.value = DEFAUT.mode;
+      self._inputTheta.value = String(DEFAUT.thetaDeg);
       self._inputN.value = String(DEFAUT.n);
       self._inputR.value = String(DEFAUT.r);
       self._rendre();
     };
+    this._onInputTheta = function () { self._thetaDeg = parseFloat(self._inputTheta.value); self._rendre(); };
+    this._onMode = function () { self._mode = self._selectMode.value; self._rendre(); };
     this._inputN.addEventListener("input", this._onInputN);
     this._inputR.addEventListener("input", this._onInputR);
+    this._inputTheta.addEventListener("input", this._onInputTheta);
+    this._selectMode.addEventListener("change", this._onMode);
     this._resetBtn.addEventListener("click", this._onReset);
     this._rendre();
   };
@@ -132,11 +162,19 @@
   SecteurSegmentWidgetClass.prototype.disconnectedCallback = function () {
     this._inputN.removeEventListener("input", this._onInputN);
     this._inputR.removeEventListener("input", this._onInputR);
+    this._inputTheta.removeEventListener("input", this._onInputTheta);
+    this._selectMode.removeEventListener("change", this._onMode);
+    this._resetBtn.removeEventListener("click", this._onReset);
   };
 
   SecteurSegmentWidgetClass.prototype._rendre = function () {
     var n = this._n, r = this._r;
-    var theta = (2 * PI) / n;
+    var libre = this._mode === "libre";
+    var theta = libre ? this._thetaDeg * PI / 180 : (2 * PI) / n;
+    var thetaDeg = theta * 180 / PI;
+    this._blocTheta.hidden = !libre;
+    this._blocN.hidden = libre;
+    this._valeurTheta.textContent = formatNombreFr(this._thetaDeg, 0) + "°";
     var C_R = C_R_MIN + ((r - BORNES_R.min) / (BORNES_R.max - BORNES_R.min)) * (C_R_MAX - C_R_MIN);
     var rTheta = (C_R * 22) / 108;
 
@@ -150,15 +188,23 @@
     this._valeurN.textContent = String(n);
     this._valeurR.textContent = formatNombreFr(r, 1) + " cm";
     this._valSecteur.textContent = formatNombreFr(aireSecteur, 2) + " cm²";
-    this._valTriangle.textContent = formatNombreFr(aireTriangle, 2) + " cm²";
+    // θ > 180° : sin θ < 0, le triangle OAB est « de l'autre côté » de la corde — son aire vaut
+    // |½r² sin θ| et le segment (le grand) = secteur + aire du triangle (formule inchangée).
+    this._valTriangle.textContent = formatNombreFr(Math.abs(aireTriangle), 2) + " cm²";
     this._valSegment.textContent = formatNombreFr(aireSegment, 2) + " cm²";
     this._valCorde.textContent = formatNombreFr(corde, 2) + " cm";
 
-    var nSegments = n * aireSegment;
-    var cercleMoinsPolygone = aireCercle - airePolygone;
-    this._verif.innerHTML =
-      "vérification — n × segment = " + formatNombreFr(nSegments, 2) + " cm² ; cercle − polygone = " +
-      formatNombreFr(cercleMoinsPolygone, 2) + " cm² &nbsp;<strong>✓ cohérent</strong>";
+    var degTxt = Math.abs(thetaDeg - Math.round(thetaDeg)) < 1e-9 ? formatNombreFr(thetaDeg, 0) : formatNombreFr(thetaDeg, 2);
+    this._cosinus.textContent = "Loi des cosinus dans OAB : AB² = r² + r² − 2·r·r·cos θ = 2 × " + formatNombreFr(r, 1) + "² × (1 − cos " +
+      degTxt + "°) = " + formatNombreFr(corde * corde, 2) + ", donc AB ≈ " + formatNombreFr(corde, 2) + " cm.";
+    this._verif.hidden = libre;
+    if (!libre) {
+      var nSegments = n * aireSegment;
+      var cercleMoinsPolygone = aireCercle - airePolygone;
+      this._verif.innerHTML =
+        "vérification — n × segment = " + formatNombreFr(nSegments, 2) + " cm² ; cercle − polygone = " +
+        formatNombreFr(cercleMoinsPolygone, 2) + " cm² &nbsp;<strong>✓ cohérent</strong>";
+    }
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
@@ -175,16 +221,19 @@
       var ang = startAngle - i * theta;
       sommets.push([CX + C_R * Math.cos(ang), CY - C_R * Math.sin(ang)]);
     }
-    var dPoly = sommets.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(" ") + " Z";
-    svg.appendChild(svgEl(ns, "path", { d: dPoly, class: "polygone" }));
+    if (!libre) {
+      var dPoly = sommets.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(" ") + " Z";
+      svg.appendChild(svgEl(ns, "path", { d: dPoly, class: "polygone" }));
+    }
+    var grandArc = theta > PI ? 1 : 0;
 
-    var A = sommets[0], B = sommets[1];
+    var A = sommets[0], B = libre ? [CX + C_R * Math.cos(startAngle - theta), CY - C_R * Math.sin(startAngle - theta)] : sommets[1];
     var angleA = startAngle, angleB = startAngle - theta;
 
     // Segment circulaire (entre la corde AB et l'arc AB) rempli en couleur — arc mineur (angle θ)
     // depuis A jusqu'à B, refermé par la corde (Z).
     var dSegment = "M " + A[0].toFixed(2) + " " + A[1].toFixed(2) +
-      " A " + C_R + " " + C_R + " 0 0 1 " + B[0].toFixed(2) + " " + B[1].toFixed(2) + " Z";
+      " A " + C_R + " " + C_R + " 0 " + grandArc + " 1 " + B[0].toFixed(2) + " " + B[1].toFixed(2) + " Z";
     svg.appendChild(svgEl(ns, "path", { d: dSegment, class: "segment-aire" }));
 
     // Rayons OA, OB et corde AB (contour du triangle OAB, en plus du segment déjà rempli).
@@ -196,7 +245,7 @@
     var pThetaA = [CX + rTheta * Math.cos(angleA), CY - rTheta * Math.sin(angleA)];
     var pThetaB = [CX + rTheta * Math.cos(angleB), CY - rTheta * Math.sin(angleB)];
     var dArcTheta = "M " + pThetaA[0].toFixed(2) + " " + pThetaA[1].toFixed(2) +
-      " A " + rTheta + " " + rTheta + " 0 0 1 " + pThetaB[0].toFixed(2) + " " + pThetaB[1].toFixed(2);
+      " A " + rTheta + " " + rTheta + " 0 " + grandArc + " 1 " + pThetaB[0].toFixed(2) + " " + pThetaB[1].toFixed(2);
     svg.appendChild(svgEl(ns, "path", { d: dArcTheta, class: "arc-theta" }));
     var milieuAngle = (angleA + angleB) / 2;
     var pTheta = [CX + (rTheta + 14) * Math.cos(milieuAngle), CY - (rTheta + 14) * Math.sin(milieuAngle)];

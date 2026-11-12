@@ -9,11 +9,13 @@
    * toujours à π l'un de l'autre) — le piège central de la section : la
    * période effective des extremums réunis est divisée par deux. Web
    * Component (Shadow DOM), même langage visuel que cercle-trigo-widget
-   * (2 panneaux SVG côte à côte).
+   * (2 panneaux SVG côte à côte). Audit 5e ch. 2 : bascule A < 0 (un maximum
+   * correspond alors à sin u = −1) et liste des abscisses des extremums dans
+   * [0 ; 2π] avec leur nombre et leur valeur (b ± |A|).
    * ================================================================ */
 
   var DEUX_PI = 2 * Math.PI;
-  var DEFAUT = { a: 2, omega: 1, phi: 0, b: 0, mode: "reunis" };
+  var DEFAUT = { a: 2, omega: 1, phi: 0, b: 0, mode: "reunis", negatif: false };
   var BORNES_A = { min: 1, max: 3, step: 0.5 };
   var BORNES_OMEGA = { min: 0.5, max: 2, step: 0.25 };
   var BORNES_PHI = { min: -Math.PI, max: Math.PI, step: 0.1 };
@@ -72,6 +74,13 @@
     '.stat{flex:1 1 0;min-width:96px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
+    '.bande{fill:var(--plan,#5b4ea3);fill-opacity:0.07;}' +
+    '.etiquette-bande{font-size:10.5px;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
+    '.liste{font-size:0.88rem;color:var(--ink,#241f1a);margin:12px 0 0;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);line-height:1.6;overflow-wrap:anywhere;}' +
+    '.liste .lmax{color:var(--accent-ink,#7a3212);font-weight:700;}' +
+    '.liste .lmin{color:var(--good,#2f7a4f);font-weight:700;}' +
+    '.case{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink,#241f1a);}' +
+    '.case input{accent-color:var(--accent,#a8471f);width:18px;height:18px;}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
@@ -107,11 +116,15 @@
     '<div class="curseur"><label for="b">b — décalage vertical</label><div class="curseur-row">' +
     '<input type="range" id="b" min="' + BORNES_B.min + '" max="' + BORNES_B.max + '" step="' + BORNES_B.step + '" value="' + DEFAUT.b + '">' +
     '<span class="curseur-valeur" id="b-valeur"></span></div></div>' +
+    '<label class="case"><input type="checkbox" id="negatif"> A négatif (f(x) = −|A| sin(ωx + φ) + b)</label>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>' +
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">période effective</span><span class="stat-value" id="val-periode"></span></div>' +
-    '</div>';
+    '<div class="stat"><span class="stat-label">valeur max (b + |A|)</span><span class="stat-value" id="val-vmax"></span></div>' +
+    '<div class="stat"><span class="stat-label">valeur min (b − |A|)</span><span class="stat-value" id="val-vmin"></span></div>' +
+    '</div>' +
+    '<p class="liste" id="liste"></p>';
 
   class ExtremumsSinusoideWidgetClass extends HTMLElement {
     constructor() {
@@ -142,6 +155,11 @@
     this._valeurPhi = shadow.getElementById("phi-valeur");
     this._valeurB = shadow.getElementById("b-valeur");
     this._resetBtn = shadow.getElementById("reset");
+    this._negatif = DEFAUT.negatif;
+    this._caseNegatif = shadow.getElementById("negatif");
+    this._valVmax = shadow.getElementById("val-vmax");
+    this._valVmin = shadow.getElementById("val-vmin");
+    this._liste = shadow.getElementById("liste");
     this._selectMode.value = this._mode;
   };
 
@@ -152,6 +170,7 @@
     this._onInputPhi = function () { self._phi = parseFloat(self._inputPhi.value); self._rendre(); };
     this._onInputB = function () { self._b = parseFloat(self._inputB.value); self._rendre(); };
     this._onChangeMode = function () { self._mode = self._selectMode.value; self._rendre(); };
+    this._onNegatif = function () { self._negatif = self._caseNegatif.checked; self._rendre(); };
     this._onReset = function () {
       self._a = DEFAUT.a; self._omega = DEFAUT.omega; self._phi = DEFAUT.phi; self._b = DEFAUT.b; self._mode = DEFAUT.mode;
       self._inputA.value = String(DEFAUT.a);
@@ -159,6 +178,8 @@
       self._inputPhi.value = String(DEFAUT.phi);
       self._inputB.value = String(DEFAUT.b);
       self._selectMode.value = DEFAUT.mode;
+      self._negatif = DEFAUT.negatif;
+      self._caseNegatif.checked = DEFAUT.negatif;
       self._rendre();
     };
     this._inputA.addEventListener("input", this._onInputA);
@@ -166,6 +187,7 @@
     this._inputPhi.addEventListener("input", this._onInputPhi);
     this._inputB.addEventListener("input", this._onInputB);
     this._selectMode.addEventListener("change", this._onChangeMode);
+    this._caseNegatif.addEventListener("change", this._onNegatif);
     this._resetBtn.addEventListener("click", this._onReset);
     this._rendre();
   };
@@ -176,6 +198,7 @@
     this._inputPhi.removeEventListener("input", this._onInputPhi);
     this._inputB.removeEventListener("input", this._onInputB);
     this._selectMode.removeEventListener("change", this._onChangeMode);
+    this._caseNegatif.removeEventListener("change", this._onNegatif);
     this._resetBtn.removeEventListener("click", this._onReset);
   };
 
@@ -201,8 +224,10 @@
     svg.appendChild(svgEl(ns, "line", { x1: C_CX - C_R - 16, x2: C_CX + C_R + 16, y1: C_CY, y2: C_CY, class: "axe", "marker-end": "url(#fleche)" }));
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, x2: C_CX, y1: C_CY + C_R + 16, y2: C_CY - C_R - 16, class: "axe", "marker-end": "url(#fleche)" }));
 
-    var pMax = { x: C_CX, y: C_CY - C_R };
-    var pMin = { x: C_CX, y: C_CY + C_R };
+    // A < 0 : f est maximale quand sin(u) = −1 (point du bas) et minimale quand sin(u) = 1.
+    var neg = this._negatif;
+    var pMax = neg ? { x: C_CX, y: C_CY + C_R } : { x: C_CX, y: C_CY - C_R };
+    var pMin = neg ? { x: C_CX, y: C_CY - C_R } : { x: C_CX, y: C_CY + C_R };
 
     // Diamètre reliant les deux points quand ils sont réunis : exactement π rad d'écart, jamais
     // plus ni moins — c'est cette moitié de tour qui devient la période effective π/ω en x.
@@ -214,13 +239,13 @@
     }
 
     svg.appendChild(svgEl(ns, "circle", { cx: pMax.x, cy: pMax.y, r: 5, class: montrerMax ? "point-max" : "point-estompe" }));
-    var etMax = svgEl(ns, "text", { x: pMax.x, y: pMax.y - 10, "text-anchor": "middle", class: montrerMax ? "etiquette-max" : "etiquette-estompe" });
-    etMax.textContent = "max : sin(u)=1";
+    var etMax = svgEl(ns, "text", { x: pMax.x, y: neg ? pMax.y + 18 : pMax.y - 10, "text-anchor": "middle", class: montrerMax ? "etiquette-max" : "etiquette-estompe" });
+    etMax.textContent = neg ? "max : sin(u)=−1" : "max : sin(u)=1";
     svg.appendChild(etMax);
 
     svg.appendChild(svgEl(ns, "circle", { cx: pMin.x, cy: pMin.y, r: 5, class: montrerMin ? "point-min" : "point-estompe" }));
-    var etMin = svgEl(ns, "text", { x: pMin.x, y: pMin.y + 18, "text-anchor": "middle", class: montrerMin ? "etiquette-min" : "etiquette-estompe" });
-    etMin.textContent = "min : sin(u)=−1";
+    var etMin = svgEl(ns, "text", { x: pMin.x, y: neg ? pMin.y - 10 : pMin.y + 18, "text-anchor": "middle", class: montrerMin ? "etiquette-min" : "etiquette-estompe" });
+    etMin.textContent = neg ? "min : sin(u)=1" : "min : sin(u)=−1";
     svg.appendChild(etMin);
   };
 
@@ -237,8 +262,16 @@
     var svg = this._svgGraphe;
     svg.innerHTML = "";
     var self = this;
-    var a = this._a, omega = this._omega, phi = this._phi, b = this._b, mode = this._mode;
+    var a = this._negatif ? -this._a : this._a, omega = this._omega, phi = this._phi, b = this._b, mode = this._mode;
+    var neg = this._negatif;
     var f = function (x) { return a * Math.sin(omega * x + phi) + b; };
+
+    // Bande [0 ; 2π] : la fenêtre où l'on dresse la liste des extremums (sous le graphe).
+    var pB0 = self._toPxGraphe(0, Y_MAX), pB1 = self._toPxGraphe(DEUX_PI, Y_MIN);
+    svg.appendChild(svgEl(ns, "rect", { x: pB0[0].toFixed(2), y: pB0[1].toFixed(2), width: (pB1[0] - pB0[0]).toFixed(2), height: (pB1[1] - pB0[1]).toFixed(2), class: "bande" }));
+    var etBande = svgEl(ns, "text", { x: ((pB0[0] + pB1[0]) / 2).toFixed(2), y: (pB0[1] + 11).toFixed(2), "text-anchor": "middle", class: "etiquette-bande" });
+    etBande.textContent = "[0 ; 2π]";
+    svg.appendChild(etBande);
 
     var defs = svgEl(ns, "defs", {});
     var fleche = svgEl(ns, "marker", { id: "fleche2", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
@@ -272,7 +305,8 @@
     var kMin = Math.floor((omega * X_MIN + phi - Math.PI / 2) / Math.PI) - 1;
     var kMax = Math.ceil((omega * X_MAX + phi - Math.PI / 2) / Math.PI) + 1;
     for (var k = kMin; k <= kMax; k++) {
-      var estMax = k % 2 === 0; // k pair -> u=π/2+2mπ (max) ; k impair -> u=3π/2+2mπ (min)
+      // k pair -> u=π/2+2mπ (sin u = 1) ; k impair -> u=3π/2+2mπ (sin u = −1) ; A < 0 inverse les rôles.
+      var estMax = (Math.abs(k) % 2 === 0) !== neg;
       if (mode === "max" && !estMax) continue;
       if (mode === "min" && estMax) continue;
       var xExt = (Math.PI / 2 + k * Math.PI - phi) / omega;
@@ -293,6 +327,26 @@
     this._valeurOmega.textContent = formatNombreFr(omega, 2);
     this._valeurPhi.textContent = formatNombreFr(phi, 2);
     this._valeurB.textContent = formatNombreFr(b, 1);
+
+    var aEff = this._negatif ? -a : a;
+    this._formule.textContent = "f(x) = " + formatNombreFr(aEff, 1) + " sin(" + formatNombreFr(omega, 2) + "x " + (phi >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(phi), 2) + ") " + (b >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(b), 1);
+    this._valVmax.textContent = formatNombreFr(b + a, 1);
+    this._valVmin.textContent = formatNombreFr(b - a, 1);
+
+    // Abscisses des extremums dans [0 ; 2π] : u = ωx + φ = π/2 + kπ.
+    var maxs = [], mins = [];
+    var kLo = Math.floor((phi - Math.PI / 2) / Math.PI) - 1, kHi = Math.ceil((omega * DEUX_PI + phi - Math.PI / 2) / Math.PI) + 1;
+    for (var k = kLo; k <= kHi; k++) {
+      var x = (Math.PI / 2 + k * Math.PI - phi) / omega;
+      if (x < -1e-9 || x > DEUX_PI + 1e-9) continue;
+      var estMax = (Math.abs(k) % 2 === 0) !== this._negatif;
+      (estMax ? maxs : mins).push(Math.abs(x) < 1e-9 ? 0 : x);
+    }
+    var fmt = function (t) { return t.map(function (v) { return formatNombreFr(v, 2); }).join(" ; "); };
+    var lignes = [];
+    if (mode !== "min") lignes.push('<span class="lmax">' + maxs.length + " maximum" + (maxs.length > 1 ? "s" : "") + "</span> (valeur " + formatNombreFr(b + a, 1) + ")" + (maxs.length ? " en x ≈ " + fmt(maxs) : ""));
+    if (mode !== "max") lignes.push('<span class="lmin">' + mins.length + " minimum" + (mins.length > 1 ? "s" : "") + "</span> (valeur " + formatNombreFr(b - a, 1) + ")" + (mins.length ? " en x ≈ " + fmt(mins) : ""));
+    this._liste.innerHTML = "Dans [0 ; 2π] : " + lignes.join("<br>") + (this._negatif ? '<br>A < 0 : un maximum correspond à sin(ωx + φ) = −1.' : "");
 
     var periode = mode === "reunis" ? Math.PI / omega : DEUX_PI / omega;
     this._valPeriode.textContent = formatNombreFr(periode, 2) + (mode === "reunis" ? " (= π/ω)" : " (= 2π/ω)");

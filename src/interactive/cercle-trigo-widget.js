@@ -115,9 +115,44 @@
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
   }
 
+  /** Fraction exacte de π quand x est un multiple de π/12 (à 1e-9 près — c'est le cas après un
+   * aimantage), sinon valeur décimale « 0,25π ». */
+  function fractionPi(x) {
+    var q = Math.round(x / (Math.PI / 12));
+    if (Math.abs(x - q * Math.PI / 12) > 1e-9) return "";
+    if (q === 0) return "0";
+    var g = function (a, b) { return b ? g(b, a % b) : a; };
+    var d = g(Math.abs(q), 12), n = q / d, den = 12 / d;
+    return (n < 0 ? "−" : "") + (Math.abs(n) === 1 ? "" : Math.abs(n)) + "π" + (den === 1 ? "" : "/" + den);
+  }
+
   function formatEnPi(x) {
+    var f = fractionPi(x);
+    if (f) return f;
     var k = x / Math.PI;
     return formatNombreFr(k, 2) + "π";
+  }
+
+  // Aimant (audit 5e ch. 2) : multiples de π/6 et de π/4 dans [0 ; 3π].
+  var ANGLES_REMARQUABLES = (function () {
+    var t = [];
+    for (var q = 0; q <= 36; q++) if (q % 2 === 0 || q % 3 === 0) t.push(q * Math.PI / 12);
+    return t;
+  })();
+  var SEUIL_AIMANT = 0.035;
+
+  /** Valeur exacte de sin/cos/tan en un angle remarquable (chaîne vide si non reconnue). */
+  function valeurExacte(fn, x) {
+    if (!fractionPi(x)) return "";
+    var v = fn === "sin" ? Math.sin(x) : fn === "cos" ? Math.cos(x) : Math.tan(x);
+    if (fn === "tan" && Math.abs(Math.cos(x)) < 1e-9) return "non défini";
+    var table = fn === "tan"
+      ? [[0, "0"], [1 / Math.sqrt(3), "√3/3"], [1, "1"], [Math.sqrt(3), "√3"]]
+      : [[0, "0"], [0.5, "1/2"], [Math.SQRT2 / 2, "√2/2"], [Math.sqrt(3) / 2, "√3/2"], [1, "1"]];
+    for (var i = 0; i < table.length; i++) {
+      if (Math.abs(Math.abs(v) - table[i][0]) < 1e-9) return (v < -1e-12 && table[i][1] !== "0" ? "−" : "") + table[i][1];
+    }
+    return "";
   }
 
   function svgEl(ns, tag, attrs) {
@@ -239,6 +274,8 @@
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
     '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:128px;text-align:right;font-size:0.9rem;}' +
+    '.case{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink,#241f1a);font-size:0.92rem;}' +
+    '.case input{accent-color:var(--accent,#a8471f);width:18px;height:18px;}' +
     '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
@@ -264,6 +301,7 @@
     '<div class="curseur"><label for="x">x — angle balayé</label><div class="curseur-row">' +
     '<input type="range" id="x" min="0" max="' + X_MAX + '" step="0.01" value="' + DEFAUT_X + '">' +
     '<span class="curseur-valeur" id="x-valeur"></span></div></div>' +
+    '<label class="case"><input type="checkbox" id="aimant" checked> Aimant sur les angles remarquables (π/6, π/4…)</label>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>' +
     '<div class="stats">' +
@@ -294,12 +332,26 @@
     this._labelFn = shadow.getElementById("label-fn");
     this._valFn = shadow.getElementById("val-fn");
     this._resetBtn = shadow.getElementById("reset");
+    this._caseAimant = shadow.getElementById("aimant");
   };
 
   CercleTrigoWidgetClass.prototype.connectedCallback = function () {
     var self = this;
     this._onInputX = function () {
-      self._x = parseFloat(self._inputX.value);
+      var nouveau = parseFloat(self._inputX.value);
+      if (self._caseAimant.checked) {
+        // Aimant avec hystérésis : on n'accroche un angle remarquable que si l'on s'en RAPPROCHE —
+        // sinon les flèches du clavier (pas 0,01) ne pourraient jamais en ressortir.
+        for (var i = 0; i < ANGLES_REMARQUABLES.length; i++) {
+          var m = ANGLES_REMARQUABLES[i];
+          if (Math.abs(nouveau - m) < SEUIL_AIMANT && Math.abs(nouveau - m) < Math.abs(self._x - m)) {
+            nouveau = m;
+            self._inputX.value = String(m);
+            break;
+          }
+        }
+      }
+      self._x = nouveau;
       self._rendre();
     };
     this._onChangeFn = function () {
@@ -555,7 +607,10 @@
     if (fn === "tan" && Math.abs(cosX) <= 0.02) {
       this._valFn.textContent = "non défini";
     } else {
-      this._valFn.textContent = formatNombreFr(FN[fn].f(x), 3);
+      var exacte = valeurExacte(fn, x);
+      this._valFn.textContent = exacte && exacte !== "non défini" && !/^−?[01]$/.test(exacte)
+        ? exacte + " ≈ " + formatNombreFr(FN[fn].f(x), 3)
+        : (exacte || formatNombreFr(FN[fn].f(x), 3));
     }
     this._dessinerCercle();
     this._dessinerGraphe();

@@ -4,8 +4,8 @@
   /* ================================================================
    * <modele-sinusoidal-widget> — atelier interactif : construit pas à pas
    * le modèle hauteur(t) = A sin(ωt+φ) + b d'une grande roue, à partir de 4
-   * réglages concrets (rayon r, hauteur du centre h, période T, position de
-   * départ) — reproduit exactement la méthode de la section (A,b depuis les
+   * réglages concrets (rayon r, hauteur du centre h, période T, hauteur de
+   * départ h₀ et sens de rotation) — reproduit exactement la méthode de la section (A,b depuis les
    * extrêmes ; ω depuis T ; φ depuis la condition initiale, jamais réglé
    * directement : il est DÉDUIT de la position de départ choisie). Panneau
    * cercle (position de départ sur la roue) + panneau courbe (hauteur(t)).
@@ -13,23 +13,38 @@
    * ================================================================ */
 
   var DEUX_PI = 2 * Math.PI;
-  var DEFAUT = { r: 15, h: 17, t: 8, position: "bas" };
+  // h0 = hauteur de départ (t = 0), libre entre h − r et h + r ; sens = "monte" ou "descend".
+  // φ n'est JAMAIS réglé directement : sin φ = m = (h0 − b)/A a deux candidats dans ]−π ; π],
+  // φ₁ = arcsin m (cos φ₁ ≥ 0 : la nacelle monte) et φ₂ = π − arcsin m (cos φ₂ ≤ 0 : elle descend).
+  var DEFAUT = { r: 15, h: 17, t: 8, h0: 2, sens: "monte" };
   var BORNES_R = { min: 5, max: 15, step: 1 };
   var BORNES_H = { min: 15, max: 25, step: 1 };
   var BORNES_T = { min: 4, max: 12, step: 1 };
 
-  var PHI_PAR_POSITION = {
-    bas: -Math.PI / 2,
-    haut: Math.PI / 2,
-    montant: 0,
-    descendant: Math.PI,
-  };
-  var LABEL_POSITION = {
-    bas: "point le plus bas",
-    haut: "point le plus haut",
-    montant: "à mi-hauteur, en montant",
-    descendant: "à mi-hauteur, en descendant",
-  };
+  /** Ramène un angle dans ]−π ; π]. */
+  function reduire(phi) {
+    var x = phi;
+    while (x > Math.PI + 1e-12) x -= DEUX_PI;
+    while (x <= -Math.PI + 1e-12) x += DEUX_PI;
+    return x;
+  }
+
+  /** « ≈ −π/2 » quand l'angle est un multiple de π/12 (à 1e-6 près), chaîne vide sinon. */
+  function enPi(x) {
+    var q = Math.round(x / (Math.PI / 12));
+    if (Math.abs(x - q * Math.PI / 12) > 1e-6) return "";
+    if (q === 0) return "0";
+    var g = function (a, b) { return b ? g(b, a % b) : a; };
+    var d = g(Math.abs(q), 12), num = q / d, den = 12 / d;
+    var signe = num < 0 ? "−" : "";
+    var n = Math.abs(num);
+    return signe + (n === 1 ? "" : n) + "π" + (den === 1 ? "" : "/" + den);
+  }
+
+  function formatAngle(x) {
+    var p = enPi(x);
+    return formatNombreFr(x, 3) + (p && p !== "0" ? " (= " + p + ")" : "");
+  }
 
   // --- Panneau cercle (position de départ sur la roue) — même convention d'orientation que
   // cercle-trigo-widget : angle u standard, point = (cx + R cos u, cy − R sin u).
@@ -83,6 +98,11 @@
     '.stat{flex:1 1 78px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
+    '.candidats{display:flex;flex-direction:column;gap:4px;font-size:0.88rem;color:var(--ink,#241f1a);margin:0 0 10px;padding:8px 12px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);background:var(--surface,#fff);}' +
+    '.candidats .retenu{color:var(--good,#2f7a4f);font-weight:700;}' +
+    '.candidats .ecarte{color:var(--ink-faint,#9c9083);text-decoration:line-through;}' +
+    '.candidats .note{color:var(--ink-soft,#6b6055);font-size:0.82rem;}' +
+    '.point-autre{fill:none;stroke:var(--ink-faint,#9c9083);stroke-width:1.6;stroke-dasharray:3 2;}' +
     '.verif{text-align:center;font-size:0.86rem;color:var(--ink-soft,#6b6055);margin:0 0 16px;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
@@ -94,19 +114,18 @@
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<p class="formule" id="formule"></p>' +
-    '<div class="ligne-select"><label for="position">Position de départ (t=0)</label>' +
-    '<select id="position">' +
-    '<option value="bas">point le plus bas</option>' +
-    '<option value="haut">point le plus haut</option>' +
-    '<option value="montant">mi-hauteur, en montant</option>' +
-    '<option value="descendant">mi-hauteur, en descendant</option>' +
+    '<div class="ligne-select"><label for="sens">À t = 0, la nacelle</label>' +
+    '<select id="sens">' +
+    '<option value="monte">monte</option>' +
+    '<option value="descend">descend</option>' +
     '</select></div>' +
     '<div class="panneaux">' +
     '<div><div class="panneau"><svg id="svg-cercle" viewBox="0 0 ' + C_TAILLE + ' ' + C_TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<p class="legende-panneau">position de départ sur la roue</p></div>' +
+    '<p class="legende-panneau">position de départ sur la roue (pointillé : l’autre candidat)</p></div>' +
     '<div><div class="panneau"><svg id="svg-graphe" viewBox="0 0 ' + G_LARGEUR + ' ' + G_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<p class="legende-panneau">hauteur(t)</p></div>' +
     '</div>' +
+    '<div class="candidats" id="candidats"></div>' +
     '<p class="verif" id="verif"></p>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="r">r — rayon (m)</label><div class="curseur-row">' +
@@ -118,6 +137,9 @@
     '<div class="curseur"><label for="t">T — période (min)</label><div class="curseur-row">' +
     '<input type="range" id="t" min="' + BORNES_T.min + '" max="' + BORNES_T.max + '" step="' + BORNES_T.step + '" value="' + DEFAUT.t + '">' +
     '<span class="curseur-valeur" id="t-valeur"></span></div></div>' +
+    '<div class="curseur"><label for="h0">h₀ — hauteur de départ (m)</label><div class="curseur-row">' +
+    '<input type="range" id="h0" min="2" max="32" step="0.5" value="' + DEFAUT.h0 + '">' +
+    '<span class="curseur-valeur" id="h0-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>' +
     '<div class="stats">' +
@@ -140,9 +162,13 @@
     this._r = DEFAUT.r;
     this._h = DEFAUT.h;
     this._t = DEFAUT.t;
-    this._position = DEFAUT.position;
+    this._h0 = DEFAUT.h0;
+    this._sens = DEFAUT.sens;
     this._formule = shadow.getElementById("formule");
-    this._selectPosition = shadow.getElementById("position");
+    this._selectSens = shadow.getElementById("sens");
+    this._inputH0 = shadow.getElementById("h0");
+    this._valeurH0 = shadow.getElementById("h0-valeur");
+    this._candidats = shadow.getElementById("candidats");
     this._svgCercle = shadow.getElementById("svg-cercle");
     this._svgGraphe = shadow.getElementById("svg-graphe");
     this._valA = shadow.getElementById("val-a");
@@ -157,28 +183,33 @@
     this._valeurH = shadow.getElementById("h-valeur");
     this._valeurT = shadow.getElementById("t-valeur");
     this._resetBtn = shadow.getElementById("reset");
-    this._selectPosition.value = this._position;
+    this._selectSens.value = this._sens;
   };
 
   ModeleSinusoidalWidgetClass.prototype.connectedCallback = function () {
     var self = this;
-    this._onInputR = function () { self._r = parseFloat(self._inputR.value); self._rendre(); };
-    this._onInputH = function () { self._h = parseFloat(self._inputH.value); self._rendre(); };
+    this._onInputR = function () { self._r = parseFloat(self._inputR.value); self._bornerH0(); self._rendre(); };
+    this._onInputH = function () { self._h = parseFloat(self._inputH.value); self._bornerH0(); self._rendre(); };
+    this._onInputH0 = function () { self._h0 = parseFloat(self._inputH0.value); self._rendre(); };
     this._onInputT = function () { self._t = parseFloat(self._inputT.value); self._rendre(); };
-    this._onChangePosition = function () { self._position = self._selectPosition.value; self._rendre(); };
+    this._onChangeSens = function () { self._sens = self._selectSens.value; self._rendre(); };
     this._onReset = function () {
-      self._r = DEFAUT.r; self._h = DEFAUT.h; self._t = DEFAUT.t; self._position = DEFAUT.position;
+      self._r = DEFAUT.r; self._h = DEFAUT.h; self._t = DEFAUT.t; self._h0 = DEFAUT.h0; self._sens = DEFAUT.sens;
       self._inputR.value = String(DEFAUT.r);
       self._inputH.value = String(DEFAUT.h);
       self._inputT.value = String(DEFAUT.t);
-      self._selectPosition.value = DEFAUT.position;
+      self._selectSens.value = DEFAUT.sens;
+      self._bornerH0();
+      self._inputH0.value = String(DEFAUT.h0);
       self._rendre();
     };
     this._inputR.addEventListener("input", this._onInputR);
     this._inputH.addEventListener("input", this._onInputH);
     this._inputT.addEventListener("input", this._onInputT);
-    this._selectPosition.addEventListener("change", this._onChangePosition);
+    this._inputH0.addEventListener("input", this._onInputH0);
+    this._selectSens.addEventListener("change", this._onChangeSens);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._bornerH0();
     this._rendre();
   };
 
@@ -186,11 +217,23 @@
     this._inputR.removeEventListener("input", this._onInputR);
     this._inputH.removeEventListener("input", this._onInputH);
     this._inputT.removeEventListener("input", this._onInputT);
-    this._selectPosition.removeEventListener("change", this._onChangePosition);
+    this._inputH0.removeEventListener("input", this._onInputH0);
+    this._selectSens.removeEventListener("change", this._onChangeSens);
     this._resetBtn.removeEventListener("click", this._onReset);
   };
 
-  ModeleSinusoidalWidgetClass.prototype._dessinerCercle = function (phi) {
+  /** Le curseur h0 suit [h − r ; h + r] : ses bornes bougent avec r et h (la fenêtre du graphe, elle,
+   * reste fixe) ; la valeur est ramenée dans l'intervalle si besoin. */
+  ModeleSinusoidalWidgetClass.prototype._bornerH0 = function () {
+    var min = this._h - this._r, max = this._h + this._r;
+    this._inputH0.min = String(min);
+    this._inputH0.max = String(max);
+    if (this._h0 < min) this._h0 = min;
+    if (this._h0 > max) this._h0 = max;
+    this._inputH0.value = String(this._h0);
+  };
+
+  ModeleSinusoidalWidgetClass.prototype._dessinerCercle = function (phi, phiAutre) {
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svgCercle;
     svg.innerHTML = "";
@@ -198,6 +241,9 @@
     svg.appendChild(svgEl(ns, "circle", { cx: C_CX, cy: C_CY, r: C_R, class: "roue" }));
     svg.appendChild(svgEl(ns, "circle", { cx: C_CX, cy: C_CY, r: 3, class: "centre" }));
 
+    if (phiAutre !== null) {
+      svg.appendChild(svgEl(ns, "circle", { cx: (C_CX + C_R * Math.cos(phiAutre)).toFixed(2), cy: (C_CY - C_R * Math.sin(phiAutre)).toFixed(2), r: 5.5, class: "point-autre" }));
+    }
     var px = C_CX + C_R * Math.cos(phi);
     var py = C_CY - C_R * Math.sin(phi);
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: px.toFixed(2), y2: py.toFixed(2), class: "rayon" }));
@@ -276,11 +322,18 @@
   };
 
   ModeleSinusoidalWidgetClass.prototype._rendre = function () {
-    var r = this._r, h = this._h, t = this._t, position = this._position;
-    var A = r, b = h, omega = DEUX_PI / t, phi = PHI_PAR_POSITION[position];
+    var r = this._r, h = this._h, t = this._t, h0 = this._h0, sens = this._sens;
+    var A = r, b = h, omega = DEUX_PI / t;
+    var m = Math.max(-1, Math.min(1, (h0 - b) / A));
+    var phi1 = Math.asin(m);
+    var phi2 = reduire(Math.PI - phi1);
+    var extreme = Math.abs(Math.abs(m) - 1) < 1e-9;
+    var phi = extreme ? phi1 : (sens === "monte" ? phi1 : phi2);
+    var phiAutre = extreme ? null : (sens === "monte" ? phi2 : phi1);
     var f = function (x) { return A * Math.sin(omega * x + phi) + b; };
 
-    this._formule.textContent = "hauteur(t) = " + formatNombreFr(A, 0) + " sin(" + formatNombreFr(omega, 3) + "t " + (phi >= 0 ? "+ " : "− ") + formatNombreFr(Math.abs(phi), 3) + ") + " + formatNombreFr(b, 0);
+    var phiAff = Math.abs(phi) < 5e-4 ? "" : (phi > 0 ? " + " : " − ") + formatNombreFr(Math.abs(phi), 3);
+    this._formule.textContent = "hauteur(t) = " + formatNombreFr(A, 0) + " sin(" + formatNombreFr(omega, 3) + "t" + phiAff + ") + " + formatNombreFr(b, 0);
     this._valA.textContent = formatNombreFr(A, 0) + " m";
     this._valB.textContent = formatNombreFr(b, 0) + " m";
     this._valOmega.textContent = formatNombreFr(omega, 3);
@@ -288,15 +341,28 @@
     this._valeurR.textContent = formatNombreFr(r, 0) + " m";
     this._valeurH.textContent = formatNombreFr(h, 0) + " m";
     this._valeurT.textContent = formatNombreFr(t, 0) + " min";
+    this._valeurH0.textContent = formatNombreFr(h0, 1) + " m";
 
-    // Vérification (astuce de la section) : un demi-tour après le départ (t=T/2), la nacelle est
-    // à l'extrême opposé de celui de t=0.
+    var lignes = [];
+    lignes.push('<span>sin φ = m = (h₀ − b) / A = (' + formatNombreFr(h0, 1) + " − " + formatNombreFr(b, 0) + ") / " + formatNombreFr(A, 0) + " = " + formatNombreFr(m, 3) + "</span>");
+    if (extreme) {
+      lignes.push('<span class="retenu">φ₁ = φ₂ = arcsin m = ' + formatAngle(phi1) + " : les deux candidats coïncident</span>");
+      lignes.push('<span class="note">' + (m < 0 ? "Au point le plus bas, la nacelle ne peut que monter : le sens ne change rien." : "Au point le plus haut, la nacelle ne peut que descendre : le sens ne change rien.") + "</span>");
+    } else {
+      var cl1 = sens === "monte" ? "retenu" : "ecarte", cl2 = sens === "monte" ? "ecarte" : "retenu";
+      lignes.push('<span class="' + cl1 + '">φ₁ = arcsin m = ' + formatAngle(phi1) + (sens === "monte" ? " ← retenu" : "") + "</span>");
+      lignes.push('<span class="' + cl2 + '">φ₂ = π − arcsin m = ' + formatAngle(phi2) + (sens === "descend" ? " ← retenu" : "") + "</span>");
+      lignes.push('<span class="note">' + (sens === "monte" ? "La nacelle monte : la hauteur croît en t = 0, donc cos φ > 0, c'est φ₁." : "La nacelle descend : la hauteur décroît en t = 0, donc cos φ < 0, c'est φ₂.") + "</span>");
+    }
+    this._candidats.innerHTML = lignes.join("");
+
+    // Vérification : hauteur(0) = h₀, et un demi-tour plus tard la nacelle est à la hauteur 2b − h₀.
     var tVerif = t / 2;
     this._verif.textContent =
-      "vérification — départ : " + LABEL_POSITION[position] + " (hauteur(0) = " + formatNombreFr(f(0), 1) +
-      " m) ; un demi-tour plus tard (t=" + formatNombreFr(tVerif, 1) + "), hauteur = " + formatNombreFr(f(tVerif), 1) + " m";
+      "vérification — hauteur(0) = " + formatNombreFr(f(0), 1) + " m (= h₀) ; un demi-tour plus tard (t = " +
+      formatNombreFr(tVerif, 1) + "), hauteur = " + formatNombreFr(f(tVerif), 1) + " m (= 2b − h₀)";
 
-    this._dessinerCercle(phi);
+    this._dessinerCercle(phi, phiAutre);
     this._dessinerGraphe(f, A, b, tVerif);
   };
 
