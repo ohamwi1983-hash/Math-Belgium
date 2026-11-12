@@ -223,7 +223,7 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
   if (e.famille === "A" && e.sousType === "pannes") return [...donneesLatex(`P(A_1)=${dec(e.p1)}`, `P(A_2)=${dec(e.p2)}`), texte(` Calcule la probabilité ${DEMANDE_PANNES_PAPIER[e.demandeEcran2]}.`)];
   if (e.famille === "A") return [...donneesLatex(`P(A)=${dec(e.pA)}`, `P(A\\cup B)=${dec(e.pAouB)}`), texte(" Calcule "), latex("P(B)"), texte(", puis "), latex("P(A|B)"), texte(" et "), latex("P(B|A)"), texte(".")];
   if (e.famille === "B" && e.sousType === "testIndependance") return [texte(" "), ...(consigneEcran(e, "bIndepEcran2") as FragmentConsigne[]), texte(" Justifie.")];
-  if (e.famille === "B" && e.sousType === "tableauDonne") return [texte(" "), ...(consigneEcran(e, "bTableEcran1") as FragmentConsigne[])];
+  if (e.famille === "B" && e.sousType === "tableauDonne") return [texte(" À l'aide du tableau, réponds aux trois questions suivantes.")];
   if (e.famille === "B") {
     const question = (consigneEcran(e, "bReconEcran3") as FragmentConsigne[]).map((f) => (f.type === "texte" ? { ...f, valeur: f.valeur.replace("Utilise le tableau reconstruit. ", "") } : f));
     return [texte(" Calcule l'effectif de chaque case du tableau croisé (lignes et colonnes ci-dessus, avec les totaux), puis réponds à la question suivante. "), ...question];
@@ -260,10 +260,19 @@ function consigneEtape(e: Ex, phase: PhaseIndependanceBayes): FragmentConsigne[]
 
 /** Énoncé « par écrans » : ses questions donnent les titres d'étapes du corrigé (« Étape n — … »). */
 function construireEnonce(e: Ex): SectionExercice {
+  if (e.famille === "B" && e.sousType === "tableauDonne") return { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: questionsTableDonne(e).map((q) => ({ consigne: q.consigne })) };
   return { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: phasesPourExercice(e).map((phase) => ({ consigne: consigneEtape(e, phase) })) };
 }
 
 function enoncePapier(e: Ex): EnoncePapier {
+  if (e.famille === "B" && e.sousType === "tableauDonne") {
+    const qs = questionsTableDonne(e);
+    return {
+      section: { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: qs.map((q) => ({ consigne: q.consigne })) },
+      etapesParQuestion: qs.map((_, i) => [LETTRES[i]]),
+      reponseBreve: reponseBreveTableDonne(e),
+    };
+  }
   return { section: { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: [] } };
 }
 
@@ -516,12 +525,40 @@ function difficulteTable(type: TypeQuestionTable): 1 | 2 {
   return type === "condLigneSachantColonne" || type === "condColonneSachantLigne" ? 2 : 1;
 }
 
+/** Papier (« tableau donné ») : TROIS vraies questions sur le même tableau, de nature différente et
+ * jamais annoncée — une probabilité simple (marginale), une intersection (« et »), une conditionnelle
+ * (« on choisit parmi les … »). Toutes déduites de l'instance, sans nouveau tirage (le QR code rouvre
+ * le même tableau) : la question de l'écran est l'une des trois ; mêmes ligne et colonne cibles. */
+function questionsTableDonne(e: ExerciceFamilleBTableauDonne): { type: TypeQuestionTable; consigne: FragmentConsigne[] }[] {
+  const marginale: TypeQuestionTable = e.typeQuestion === "margColonne" ? "margColonne" : "margLigne";
+  const conditionnelle: TypeQuestionTable = e.typeQuestion === "condColonneSachantLigne" ? "condColonneSachantLigne" : "condLigneSachantColonne";
+  return [marginale, "jointe" as TypeQuestionTable, conditionnelle].map((type) => ({ type, consigne: consigneEcran({ ...e, typeQuestion: type }, "bTableEcran1") as FragmentConsigne[] }));
+}
+
+function reponseBreveTableDonne(e: ExerciceFamilleBTableauDonne): FragmentConsigne[] {
+  const frags: FragmentConsigne[] = [];
+  questionsTableDonne(e).forEach((q, i) => {
+    if (i > 0) frags.push(texte(" ; "));
+    frags.push(texte(`${LETTRES[i]}) `), latex(reponseTableLatex(e.table, q.type, e.ligneCible, e.colonneCible)));
+  });
+  return frags;
+}
+
 function correctionBTable(e: ExerciceFamilleBTableauDonne): EtapeCorrection[] {
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: methodeTable(e.table, e.typeQuestion, e.ligneCible, e.colonneCible), figureHtml: tableauDoubleSvg(e.table, true, "Tableau des effectifs avec les totaux") },
-    { label: "Calcul", sousQuestion: "a", fragments: calculTable(e.table, e.typeQuestion, e.ligneCible, e.colonneCible) },
-    { label: "Piège", fragments: piegeTable(e.typeQuestion) },
-  ];
+  const lignes: EtapeCorrection[] = [];
+  questionsTableDonne(e).forEach((q, i) => {
+    const l = LETTRES[i];
+    lignes.push({ label: "Méthode", sousQuestion: l, fragments: methodeTable(e.table, q.type, e.ligneCible, e.colonneCible), ...(i === 0 ? { figureHtml: tableauDoubleSvg(e.table, true, "Tableau des effectifs avec les totaux") } : {}) });
+    lignes.push({ label: "Calcul", sousQuestion: l, fragments: calculTable(e.table, q.type, e.ligneCible, e.colonneCible) });
+  });
+  const cond = questionsTableDonne(e)[2].type;
+  const groupe = cond === "condLigneSachantColonne" ? `de la colonne « ${e.table.libelleColonnes[e.colonneCible]} »` : `de la ligne « ${e.table.libelleLignes[e.ligneCible]} »`;
+  const [, denCond] = fractionDepuisTable(e.table, cond, e.ligneCible, e.colonneCible);
+  lignes.push({
+    label: "Piège",
+    fragments: [texte(`En c), on ne choisit que parmi les individus ${groupe} : le dénominateur est leur total, `), latex(String(denCond)), texte(", pas le total général "), latex(String(totalTable(e.table))), texte(" (qui donnerait la probabilité de l'intersection, comme en b).")],
+  });
+  return lignes;
 }
 
 function baremeTable(t: TableauDouble, type: TypeQuestionTable, ligne: number, colonne: number, lettreQ: string, poids: [number, number, number]): CritereBareme[] {
@@ -534,10 +571,24 @@ function baremeTable(t: TableauDouble, type: TypeQuestionTable, ligne: number, c
 }
 
 function baremeBTable(e: ExerciceFamilleBTableauDonne): BaremeExercice {
+  const [qa, qb, qc] = questionsTableDonne(e);
+  const f = (q: { type: TypeQuestionTable }) => fractionDepuisTable(e.table, q.type, e.ligneCible, e.colonneCible);
+  const [na, da] = f(qa);
+  const [, db] = f(qb);
+  const [nc, dc] = f(qc);
   return {
-    reponseFinale: [latex(reponseTableLatex(e.table, e.typeQuestion, e.ligneCible, e.colonneCible))],
-    criteres: baremeTable(e.table, e.typeQuestion, e.ligneCible, e.colonneCible, "a", [1.5, 1.5, 1]),
-    erreursFrequentes: [{ description: [texte("Probabilité conditionnelle et probabilité de l'intersection confondues (mauvais dénominateur)")], cout: "−1,5" }],
+    reponseFinale: reponseBreveTableDonne(e),
+    criteres: [
+      crit("a", 1, texte("Total de la ligne (ou colonne) sur le total général : "), latex(fracValeur(na, da))),
+      crit("b", 0.5, texte("Une seule case, sur le total général "), latex(String(db))),
+      crit("b", 1, texte("Résultat : "), latex(reponseTableLatex(e.table, qb.type, e.ligneCible, e.colonneCible).replace(/^p=/, ""))),
+      crit("c", 0.5, texte("Bon groupe de choix : dénominateur "), latex(String(dc))),
+      crit("c", 1, texte("Résultat : "), latex(fracValeur(nc, dc))),
+    ],
+    erreursFrequentes: [
+      { description: [texte("En c), division par le total général (probabilité de l'intersection au lieu de la conditionnelle)")], cout: "0 pt sur c)" },
+      { description: [texte("En a), une seule case prise au lieu du total de la ligne (ou colonne)")], cout: "−0,5" },
+    ],
   };
 }
 
@@ -695,7 +746,7 @@ function difficulte(e: Ex): 1 | 2 | 3 {
   if (e.famille === "A" && e.sousType === "pannes") return e.demandeEcran2 === "lesDeux" ? 1 : e.demandeEcran2 === "exactementUn" ? 3 : 2;
   if (e.famille === "A") return 2;
   if (e.famille === "B" && e.sousType === "testIndependance") return 2;
-  if (e.famille === "B" && e.sousType === "tableauDonne") return difficulteTable(e.typeQuestion);
+  if (e.famille === "B" && e.sousType === "tableauDonne") return 2;
   return 3;
 }
 

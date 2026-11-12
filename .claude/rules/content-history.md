@@ -2576,3 +2576,30 @@ paths:
   « hors portion tracée »), `domaine-composee-widget` (image de l'intérieure en bande, préréglage
   « simplification piège »). Vérifié : `npm run build` propre, page réelle 390 clair/sombre et
   1280 : 0 débordement, 0 `$` isolé, 0 erreur KaTeX ; 8 ateliers montés ; figure épinglée 0 ko.
+
+- **6e (6h), Chapitre 6 — Probabilités : audit des générateurs appliqué** (décisions A–M acceptées).
+  Brique partagée `moteur6e/verificationProbabilites.ts` : `diagnostiquerProbabilite(texte, cible,
+  decimalesMin?)` remplace la tolérance absolue 0,01 (qui acceptait 0,34 pour 1/3, 0 pour 1/120) :
+  écriture exacte, ou décimal arrondi correctement avec ≥ 2 décimales (≥ 3 sous 0,1), ou « 33 % » ;
+  pile au milieu (0,135) seul l'arrondi supérieur (0,14) est juste. Indépendance EXACTE
+  (`TOLERANCE_PROBABILITE` 1e−9, `sontIndependantsEffectifs`) : avec 0,01, « somme = 3 » et « dés
+  égaux » (incompatibles) étaient déclarés indépendants. Générateurs : 6gen30 nouvelle question
+  « incompatibles / indépendants / ni l'un ni l'autre », « égal » possible, écran 1 en vrai tableau,
+  famille B rééquilibrée (≈ 50 % indépendants — avant : jamais sur les dés, 82 % sur les cartes) ;
+  6gen31 famille D « arbre pondéré » (4 écrans), aides par chemins (plus de C(n,k), « loi »), famille
+  C sans équation à recopier ; 6gen32 contextes A ⊂ B supprimés (loterie, capteurs météo), Bayes
+  réaliste, histogramme remplacé par « tester l'indépendance depuis un tableau » ; 6gen33 recentré
+  (géométrique, financier, paramétrique, dérangements retirés ; anniversaires et série/parallèle
+  gardés), comptage des chemins au lieu de C(n,k). Nouveaux : 6gen74 « Arbre, tableau, effectifs »,
+  6gen75 « Fréquence et probabilité » (règle d'écart relatif selon n, sans intervalle de
+  fluctuation), 6gen76 « Quand l'intuition se trompe » (Méré, Monty Hall 3–5 portes, deux enfants ;
+  écran de prédiction non noté). Feuilles : 7 adaptateurs au contrat complet (figures SVG : tableau
+  à double entrée, arbre pondéré, schéma série/parallèle ; inconnues marquées « ? », jamais de case
+  vide ; `?code=` ; verdict jamais cas particulier). Quiz 6gen69 sans C(n,k)/A(n,k) ni grand calcul.
+  Vrai/faux câblés dans les feuilles pour les 7 chapitres de 6e ; piège trouvé : une affirmation
+  tirée SEULE sur une feuille perd le contexte de la précédente (« Toujours dans ce groupe ») —
+  ≈ 380 énoncés rendus autonomes ; et des affirmations portaient sur le CODE des générateurs
+  (quizConiques ≈ 50 : « BigInt », « `.field` »…) — réécrites en mathématiques. Cours : badges
+  parlants, 2 démonstrations (règle du produit ; épreuves répétées par nombre de chemins), §4
+  anniversaires et série/parallèle, 18 énoncés par clé (vérifiés), 53 virgules → `{,}`.
+  `masquerMembresDeDroite` coupe au premier « = » de niveau 0 (« P(X=k) = … »).
