@@ -56,7 +56,7 @@ export function consigneEcran(ecran: EcranLectureGraphiqueDerivees): string {
 export function texteAideNiveau1(ecran: EcranLectureGraphiqueDerivees): string {
   switch (ecran) {
     case "asymptotes":
-      return "Les asymptotes sont tracées en pointillés. Une droite verticale a une équation x = …, une droite horizontale y = …, une droite oblique y = ax + b (lis deux de ses points pour trouver sa pente).";
+      return "Les asymptotes sont tracées en pointillés. Pour une droite verticale, lis l'abscisse où elle coupe l'axe horizontal ; pour une droite horizontale, l'ordonnée où elle coupe l'axe vertical ; pour une oblique, son ordonnée à l'origine et sa pente (lis deux de ses points).";
     case "zerosFPrime":
       return "La tangente est horizontale au sommet d'une bosse, au fond d'un creux, et aussi là où la courbe s'aplatit un instant sans changer de sens (un palier).";
     case "tableauFPrime":
