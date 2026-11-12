@@ -71,7 +71,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec les mêmes effectifs, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A\\cup B)=P(A)+P(B)=\\dfrac{33}{40}"),
         texte(", en additionnant simplement les deux probabilités."),
       ],
@@ -88,9 +94,19 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Toujours dans ce groupe, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(\\overline{A}\\cap\\overline{B})=\\dfrac{13}{40}"),
-        texte(" (ni dans A, ni dans B)."),
+        texte(" (ni dans "),
+        latex("A"),
+        texte(", ni dans "),
+        latex("B"),
+        texte(")."),
       ],
       reponse: true,
       justification: [
@@ -101,7 +117,17 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("La case « ni A ni B » du tableau à double entrée vaut "),
+        texte("Dans le tableau à double entrée d'un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", la case « ni "),
+        latex("A"),
+        texte(" ni "),
+        latex("B"),
+        texte(" » vaut "),
         latex("1-P(A)-P(B)=\\dfrac{7}{40}"),
         texte("."),
       ],
@@ -117,13 +143,20 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
         latex("P(\\overline{A}\\cap\\overline{B})"),
         texte(", qui vaut réellement "),
         latex("\\dfrac{13}{40}"),
-        texte(" (voir affirmation précédente) — la formule correcte est "),
+        texte(" — la formule correcte est "),
         latex("1-P(A\\cup B)"),
         texte("."),
       ],
     },
     {
       enonce: [
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A\\cap\\overline{B})=\\dfrac{12}{40}=0{,}3"),
         texte("."),
       ],
@@ -136,7 +169,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce même groupe, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(\\overline{A}\\cap B)=P(A\\cap\\overline{B})"),
         texte(" : ce sont deux écritures du même événement."),
       ],
@@ -172,23 +211,28 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Ces deux mêmes événements ("),
+        texte("Les événements "),
         latex("A\\cap\\overline{B}"),
         texte(" et "),
         latex("\\overline{A}\\cap B"),
-        texte(") sont donc aussi toujours indépendants, puisqu'ils sont incompatibles."),
+        texte(" étant toujours incompatibles, ils sont aussi toujours indépendants."),
       ],
       reponse: false,
       justification: [
         texte("C'est l'inverse : deux événements incompatibles de probabilités non nulles ne sont jamais indépendants — leur intersection est vide ("),
         latex("P=0"),
-        texte("), alors que le produit de leurs probabilités individuelles ne l'est pas (ici "),
-        latex("\\dfrac{12}{40}\\times\\dfrac{9}{40}\\neq0"),
-        texte(") : incompatibilité et indépendance sont deux notions distinctes, jamais équivalentes."),
+        texte("), alors que le produit de leurs probabilités individuelles ne l'est pas : incompatibilité et indépendance sont deux notions distinctes, jamais équivalentes."),
       ],
     },
     {
       enonce: [
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=\\dfrac{6}{15}=0{,}4"),
         texte("."),
       ],
@@ -201,6 +245,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A|B)=P(B|A)"),
         texte(" car "),
         latex("P(A\\cap B)"),
@@ -221,6 +272,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(B|A)=\\dfrac{1}{3}"),
         texte("."),
       ],
@@ -233,7 +291,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce groupe, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("A"),
         texte(" et "),
         latex("B"),
@@ -307,11 +371,11 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes événements, "),
+        texte("Avec un jeu de 52 cartes, les événements "),
         latex("A"),
-        texte(" et "),
+        texte(" = « tirer un cœur » et "),
         latex("B"),
-        texte(" sont indépendants, car "),
+        texte(" = « tirer une figure (valet, dame ou roi) » sont indépendants, car "),
         latex("P(A)\\times P(B)=\\dfrac{13}{52}\\times\\dfrac{12}{52}=\\dfrac{3}{52}=P(A\\cap B)"),
         texte("."),
       ],
@@ -350,7 +414,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("La probabilité que la somme des deux dés vaille 7 est "),
+        texte("En lançant deux dés à 6 faces, la probabilité que la somme vaille 7 est "),
         latex("\\dfrac{3}{36}"),
         texte(" si on ne compte que les paires "),
         latex("\\{1;6\\},\\{2;5\\},\\{3;4\\}"),
@@ -371,9 +435,17 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans le tableau à double entrée du groupe de 40 personnes ("),
-        latex("n(A)=18,\\ n(B)=15,\\ n(A\\cap B)=6"),
-        texte("), la case « ni A ni B » contient 19 personnes."),
+        texte("Dans le tableau à double entrée d'un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", la case « ni "),
+        latex("A"),
+        texte(" ni "),
+        latex("B"),
+        texte(" » contient 19 personnes."),
       ],
       reponse: false,
       justification: [
@@ -396,7 +468,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans le tableau à double entrée de ce même groupe de 40 personnes, le total de la colonne "),
+        texte("Dans le tableau à double entrée d'un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", le total de la colonne "),
         latex("\\overline{B}"),
         texte(" vaut 25."),
       ],
@@ -411,7 +489,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Toujours dans ce groupe, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A|\\overline{B})=\\dfrac{12}{25}=0{,}48"),
         texte("."),
       ],
@@ -428,7 +512,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce groupe, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A|B)"),
         texte(" et "),
         latex("P(A|\\overline{B})"),
@@ -453,7 +543,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce tableau, "),
+        texte("Dans le tableau à double entrée d'un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(\\overline{A}|B)"),
         texte(" se lit directement en se restreignant à la seule colonne "),
         latex("B"),
@@ -482,7 +578,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce tableau, "),
+        texte("Dans le tableau à double entrée d'un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(A|B)"),
         texte(" s'obtient en divisant l'effectif de la case "),
         latex("A\\cap B"),
@@ -505,7 +607,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Une école de musique compte 60 inscrits, dont 38 filles ; on n'y enseigne que deux instruments, la guitare ou le piano, et chaque élève en suit un seul. Le cours de guitare compte 28 élèves, dont 15 garçons. Alors "),
+        texte("Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève y suit un seul des deux instruments enseignés, la guitare ou le piano, et le cours de guitare compte 28 élèves, dont 15 garçons. Alors "),
         latex("P(\\text{garçon}|\\text{guitare})=\\dfrac{15}{28}"),
         texte("."),
       ],
@@ -518,9 +620,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans cette même école, "),
+        texte("Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève y suit un seul des deux instruments enseignés, la guitare ou le piano, et le cours de guitare compte 28 élèves, dont 15 garçons. Alors "),
         latex("P(\\text{guitare}|\\text{garçon})=\\dfrac{15}{28}"),
-        texte(" également."),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -535,7 +637,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans cette école (guitare ou piano uniquement), le nombre de filles inscrites au piano est 25."),
+        texte("Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève y suit un seul des deux instruments enseignés, la guitare ou le piano, et le cours de guitare compte 28 élèves, dont 15 garçons. Le nombre de filles inscrites au piano est 25."),
       ],
       reponse: true,
       justification: [
@@ -552,7 +654,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans cette école, « être une fille » et « étudier la guitare » sont deux événements indépendants."),
+        texte("Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève y suit un seul des deux instruments enseignés, la guitare ou le piano, et le cours de guitare compte 28 élèves, dont 15 garçons. « Être une fille » et « étudier la guitare » sont deux événements indépendants."),
       ],
       reponse: false,
       justification: [
@@ -630,7 +732,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans le groupe de 40 personnes, "),
+        texte("Dans un groupe de 40 personnes où "),
+        latex("n(A)=18"),
+        texte(", "),
+        latex("n(B)=15"),
+        texte(" et "),
+        latex("n(A\\cap B)=6"),
+        texte(", "),
         latex("P(\\overline{A}\\cup\\overline{B})=\\dfrac{34}{40}"),
         texte("."),
       ],
@@ -705,9 +813,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes 2 tirages mais sans remise cette fois, "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. Pour 2 tirages successifs sans remise, "),
         latex("P(\\text{2 rouges})=\\dfrac{25}{64}"),
-        texte(" également, car la probabilité ne change pas au second tirage."),
+        texte(", comme avec remise, car la probabilité ne change pas au second tirage."),
       ],
       reponse: false,
       justification: [
@@ -720,7 +828,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement sans remise : "),
         latex("P(\\text{2 rouges})=\\dfrac{5}{14}"),
         texte("."),
       ],
@@ -732,7 +840,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, si la première boule tirée est rouge, la probabilité que la seconde le soit aussi devient "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement sans remise. Si la première boule tirée est rouge, la probabilité que la seconde le soit aussi devient "),
         latex("\\dfrac{4}{7}"),
         texte(" (et non plus "),
         latex("\\dfrac{5}{8}"),
@@ -747,7 +855,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec remise, si la première boule tirée est rouge, la probabilité que la seconde le soit aussi reste "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement avec remise. Si la première boule tirée est rouge, la probabilité que la seconde le soit aussi reste "),
         latex("\\dfrac{5}{8}"),
         texte(" seulement si les boules rouges sont majoritaires dans l'urne — sinon elle change."),
       ],
@@ -760,7 +868,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec remise, les 2 tirages sont indépendants, donc "),
+        texte("Lors de 2 tirages successifs avec remise dans une urne contenant des boules rouges, les 2 tirages sont indépendants, donc "),
         latex("P(\\text{2 rouges})=P(\\text{rouge})^2"),
         texte(" directement."),
       ],
@@ -771,7 +879,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, les 2 tirages restent indépendants, puisque l'urne contient toujours au moins une boule de chaque couleur après le premier tirage."),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. Pour 2 tirages successifs sans remise, les 2 tirages restent indépendants, puisque l'urne contient toujours au moins une boule de chaque couleur après le premier tirage."),
       ],
       reponse: false,
       justification: [
@@ -784,8 +892,8 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, "),
-        latex("P(\\text{exactement une rouge sur les 2 tirages})=\\dfrac{15}{28}"),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement sans remise : "),
+        latex("P(\\text{exactement une rouge})=\\dfrac{15}{28}"),
         texte("."),
       ],
       reponse: true,
@@ -797,9 +905,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec remise, "),
-        latex("P(\\text{exactement une rouge sur les 2 tirages})=\\dfrac{15}{28}"),
-        texte(" aussi."),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement avec remise : "),
+        latex("P(\\text{exactement une rouge})=\\dfrac{15}{28}"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -812,8 +920,8 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec remise, "),
-        latex("P(\\text{exactement une rouge sur les 2 tirages})=\\dfrac{15}{32}"),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement avec remise : "),
+        latex("P(\\text{exactement une rouge})=\\dfrac{15}{32}"),
         texte("."),
       ],
       reponse: true,
@@ -824,7 +932,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, en additionnant les probabilités des 4 chemins de l'arbre (RR, RB, BR, BB), on retrouve bien une probabilité totale de 1 : "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement sans remise. En additionnant les probabilités des 4 chemins de l'arbre (RR, RB, BR, BB), on retrouve bien une probabilité totale de 1 : "),
         latex("\\dfrac{20}{56}+\\dfrac{15}{56}+\\dfrac{15}{56}+\\dfrac{6}{56}=1"),
         texte("."),
       ],
@@ -835,8 +943,8 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sans remise, "),
-        latex("P(\\text{au moins une rouge sur les 2 tirages})=\\dfrac{25}{28}"),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 2 boules successivement sans remise : "),
+        latex("P(\\text{au moins une rouge})=\\dfrac{25}{28}"),
         texte("."),
       ],
       reponse: true,
@@ -879,7 +987,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Le nombre de façons d'obtenir un rangement totalement correct (chaque lettre dans la bonne enveloppe) est 4 (une par lettre), donc "),
+        texte("Avec 4 lettres placées au hasard dans 4 enveloppes, il y a 4 rangements totalement corrects (un par lettre), donc "),
         latex("P(\\text{tout correct})=\\dfrac{4}{24}=\\dfrac{1}{6}"),
         texte("."),
       ],
@@ -948,7 +1056,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans la même urne (5 rouges, 3 bleues), on tire cette fois 3 boules successivement sans remise : "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 3 boules successivement sans remise : "),
         latex("P(\\text{3 rouges})=\\dfrac{5}{8}\\times\\dfrac{4}{7}\\times\\dfrac{3}{6}=\\dfrac{5}{28}"),
         texte("."),
       ],
@@ -961,9 +1069,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour ces mêmes 3 tirages mais avec remise, "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. Pour 3 tirages successifs avec remise, "),
         latex("P(\\text{3 rouges})=\\dfrac{5}{28}"),
-        texte(" également."),
+        texte(", comme sans remise."),
       ],
       reponse: false,
       justification: [
@@ -978,7 +1086,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 3 tirages avec remise, "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. On tire 3 boules successivement avec remise : "),
         latex("P(\\text{exactement 1 rouge})=3\\times\\dfrac{5}{8}\\times\\left(\\dfrac{3}{8}\\right)^2=\\dfrac{135}{512}"),
         texte("."),
       ],
@@ -993,7 +1101,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur 3 tirages sans remise, "),
+        texte("Une urne contient 5 boules rouges et 3 boules bleues. Sur 3 tirages sans remise, "),
         latex("P(\\text{exactement 1 rouge})"),
         texte(" vaut encore "),
         latex("3\\times\\dfrac{5}{8}\\times\\left(\\dfrac{3}{8}\\right)^2"),
@@ -1014,7 +1122,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans cette urne de 8 boules dont 3 bleues, en tirant 4 boules sans remise, "),
+        texte("Une urne contient 8 boules dont 3 bleues. En tirant 4 boules sans remise, "),
         latex("P(\\text{4 bleues})=\\left(\\dfrac{3}{8}\\right)^4"),
         texte("."),
       ],
@@ -1070,7 +1178,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes 4 lettres, "),
+        texte("Avec 4 lettres réparties au hasard dans 4 enveloppes, "),
         latex("P(\\text{les lettres n°1 et n°2 arrivent toutes deux au bon endroit})=\\dfrac{1}{4}\\times\\dfrac{1}{4}=\\dfrac{1}{16}"),
         texte("."),
       ],
@@ -1144,9 +1252,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ce dé truqué ("),
+        texte("Un dé est truqué : "),
         latex("P(6)=\\dfrac{1}{2}"),
-        texte(", les 5 autres faces équiprobables), "),
+        texte(", les 5 autres faces étant équiprobables entre elles. Alors "),
         latex("P(\\text{obtenir 6 ou 1})=\\dfrac{1}{2}\\times\\dfrac{1}{10}=\\dfrac{1}{20}"),
         texte("."),
       ],
@@ -1186,7 +1294,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ce même dé (faces paires deux fois plus probables), "),
+        texte("Sur un dé à 6 faces où chaque face paire est deux fois plus probable que chaque face impaire, "),
         latex("P(\\text{obtenir un 2})=2\\times\\dfrac{1}{6}=\\dfrac{1}{3}"),
         texte("."),
       ],
@@ -1246,7 +1354,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes données, "),
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|T^+)=P(T^+|\\text{malade})=0{,}9"),
         texte(" : ce sont deux façons d'écrire la même probabilité."),
       ],
@@ -1263,6 +1377,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|T^+)=\\dfrac{0{,}09}{0{,}27}=\\dfrac{1}{3}"),
         texte("."),
       ],
@@ -1275,6 +1396,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{non malade}|T^+)=\\dfrac{2}{3}"),
         texte("."),
       ],
@@ -1289,7 +1417,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("De façon générale, "),
+        texte("De façon générale, pour un test médical ("),
+        latex("T^+"),
+        texte(" : « test positif »), "),
         latex("P(T^+|\\text{malade})"),
         texte(" et "),
         latex("P(\\text{malade}|T^+)"),
@@ -1297,15 +1427,24 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
       ],
       reponse: false,
       justification: [
-        texte("Rien ne le garantit : c'est précisément le piège classique du théorème de Bayes, illustré ci-dessus ("),
+        texte("Rien ne le garantit : c'est le piège classique du théorème de Bayes. Avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", on obtient "),
+        latex("P(\\text{malade}|T^+)=\\dfrac{1}{3}"),
+        texte(", très loin de "),
         latex("0{,}9"),
-        texte(" contre "),
-        latex("\\dfrac{1}{3}"),
-        texte(") — les deux sens de conditionnement ne coïncident que dans des cas très particuliers."),
+        texte(" : les deux sens de conditionnement ne coïncident que dans des cas très particuliers."),
       ],
     },
     {
       enonce: [
+        texte("Pour un test médical ("),
+        latex("T^+"),
+        texte(" : « test positif »), "),
         latex("P(\\text{malade}|T^+)=\\dfrac{P(T^+|\\text{malade})\\times P(\\text{malade})}{P(T^+)}"),
         texte(" est la formule correcte du théorème de Bayes."),
       ],
@@ -1316,7 +1455,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans cet exemple, "),
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(T^+)=P(T^+|\\text{malade})"),
         texte(" uniquement, car la loi des probabilités totales n'est utile que si on ignore "),
         latex("P(\\text{malade})"),
@@ -1333,6 +1478,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{non }T^+)=1-0{,}9=0{,}1"),
         texte(", puisque le test détecte 90 % des malades."),
       ],
@@ -1350,6 +1502,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|\\text{non }T^+)=\\dfrac{0{,}1\\times0{,}1}{0{,}73}=\\dfrac{1}{73}"),
         texte("."),
       ],
@@ -1366,7 +1525,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour ce test, "),
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|\\text{non }T^+)=\\dfrac{1}{73}"),
         texte(" est plus grande que "),
         latex("P(\\text{malade}|T^+)=\\dfrac{1}{3}"),
@@ -1406,7 +1571,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce cas indépendant, "),
+        texte("Si "),
+        latex("P(A)=0{,}4"),
+        texte(", "),
+        latex("P(B)=0{,}5"),
+        texte(" et "),
+        latex("P(A\\cap B)=0{,}2"),
+        texte(", alors "),
         latex("P(A|B)=P(A)=0{,}4"),
         texte("."),
       ],
@@ -1419,19 +1590,17 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Si à présent "),
+        texte("Si "),
         latex("P(A)=0{,}4"),
         texte(", "),
         latex("P(B)=0{,}5"),
         texte(" et "),
         latex("P(A\\cap B)=0{,}3"),
-        texte(" (au lieu de "),
-        latex("0{,}2"),
-        texte("), alors "),
+        texte(", alors "),
         latex("A"),
         texte(" et "),
         latex("B"),
-        texte(" sont encore indépendants."),
+        texte(" sont indépendants."),
       ],
       reponse: false,
       justification: [
@@ -1448,13 +1617,17 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce second cas ("),
+        texte("Si "),
+        latex("P(A)=0{,}4"),
+        texte(", "),
+        latex("P(B)=0{,}5"),
+        texte(" et "),
         latex("P(A\\cap B)=0{,}3"),
-        texte("), "),
+        texte(", alors "),
         latex("P(A|B)=0{,}6"),
         texte(", différent de "),
         latex("P(A)=0{,}4"),
-        texte(" — signe cohérent que "),
+        texte(" — signe que "),
         latex("A"),
         texte(" et "),
         latex("B"),
@@ -1489,6 +1662,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|T^+)+P(\\text{malade}|\\text{non }T^+)=1"),
         texte(" nécessairement."),
       ],
@@ -1509,6 +1689,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Pour un test médical avec "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", "),
         latex("P(\\text{malade}|T^+)+P(\\text{non malade}|T^+)=1"),
         texte("."),
       ],
@@ -1565,7 +1752,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Le même test médical, raconté en effectifs sur 1000 personnes : 100 malades dont 90 positifs, et 900 non malades dont 180 positifs. Il y a donc 270 positifs au total, et "),
+        texte("Un test médical, raconté en effectifs sur 1000 personnes : 100 malades dont 90 positifs, et 900 non malades dont 180 positifs. Il y a donc 270 positifs au total, et "),
         latex("P(\\text{malade}|T^+)=\\dfrac{90}{270}=\\dfrac{1}{3}"),
         texte("."),
       ],
@@ -1580,7 +1767,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce même comptage sur 1000 personnes, "),
+        texte("Sur 1000 personnes testées, 100 sont malades (dont 90 positifs) et 900 non malades (dont 180 positifs). Alors "),
         latex("P(\\text{malade}|T^+)=\\dfrac{90}{100}=0{,}9"),
         texte(", puisque 90 des 100 malades sont bien détectés positifs."),
       ],
@@ -1597,7 +1784,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce comptage, les faux positifs (180) sont plus nombreux que les vrais positifs (90), ce qui explique qu'un test « fiable à 90 % » laisse "),
+        texte("Sur 1000 personnes testées, 100 sont malades (dont 90 positifs) et 900 non malades (dont 180 positifs). Les faux positifs (180) sont plus nombreux que les vrais positifs (90), ce qui explique qu'un test « fiable à 90 % » laisse "),
         latex("P(\\text{malade}|T^+)"),
         texte(" en dessous de "),
         latex("\\dfrac{1}{2}"),
@@ -1614,19 +1801,19 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Si la maladie était bien plus fréquente, avec "),
-        latex("P(\\text{malade})=0{,}5"),
-        texte(" au lieu de "),
-        latex("0{,}1"),
-        texte(", la valeur de "),
-        latex("P(\\text{malade}|T^+)"),
-        texte(" resterait "),
-        latex("\\dfrac{1}{3}"),
-        texte(", puisque les caractéristiques du test ("),
-        latex("0{,}9"),
+        texte("Pour un test médical avec "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
         texte(" et "),
-        latex("0{,}2"),
-        texte(") n'ont pas changé."),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", on a "),
+        latex("P(\\text{malade}|T^+)=\\dfrac{1}{3}"),
+        texte(" quand "),
+        latex("P(\\text{malade})=0{,}1"),
+        texte(". Si la maladie était bien plus fréquente, avec "),
+        latex("P(\\text{malade})=0{,}5"),
+        texte(", cette valeur resterait "),
+        latex("\\dfrac{1}{3}"),
+        texte(", puisque les caractéristiques du test n'ont pas changé."),
       ],
       reponse: false,
       justification: [
@@ -1643,13 +1830,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec "),
+        texte("Pour un test médical avec "),
         latex("P(\\text{malade})=0{,}5"),
-        texte(" et les mêmes taux "),
-        latex("0{,}9"),
-        texte(" et "),
-        latex("0{,}2"),
         texte(", "),
+        latex("P(T^+|\\text{malade})=0{,}9"),
+        texte(" et "),
+        latex("P(T^+|\\text{non malade})=0{,}2"),
+        texte(", on a "),
         latex("P(\\text{malade}|T^+)=\\dfrac{9}{11}"),
         texte("."),
       ],
@@ -1749,15 +1936,15 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes "),
+        texte("Si "),
         latex("A"),
         texte(" et "),
         latex("B"),
-        texte(" indépendants ("),
+        texte(" sont indépendants avec "),
         latex("P(A)=0{,}4"),
-        texte(", "),
+        texte(" et "),
         latex("P(B)=0{,}5"),
-        texte("), "),
+        texte(", alors "),
         latex("P(A|\\overline{B})=0{,}2"),
         texte(", puisqu'on retire l'intersection à "),
         latex("P(A)"),
@@ -1795,7 +1982,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur cet arbre, "),
+        texte("Sur un arbre à deux causes, "),
         latex("P(\\text{cause}_1|\\text{effet})"),
         texte(" se lit directement sur la branche allant de « cause 1 » vers « effet »."),
       ],
@@ -1823,9 +2010,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce même tableau de 200 clients, "),
-        latex("P(\\text{jeune}|\\text{carte})=0{,}75"),
-        texte(" aussi."),
+        texte("Sur 200 clients, 120 sont des jeunes (dont 90 paient par carte) et 80 des seniors (dont 40 paient par carte). Alors "),
+        latex("P(\\text{jeune}|\\text{carte})=P(\\text{carte}|\\text{jeune})=0{,}75"),
+        texte("."),
       ],
       reponse: false,
       justification: [
@@ -1838,7 +2025,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Dans ce tableau de 200 clients, « être jeune » et « payer par carte » ne sont pas indépendants."),
+        texte("Sur 200 clients, 120 sont des jeunes (dont 90 paient par carte) et 80 des seniors (dont 40 paient par carte). « Être jeune » et « payer par carte » ne sont pas indépendants."),
       ],
       reponse: true,
       justification: [
@@ -1887,7 +2074,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Toujours sur ces 5 tirs, "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
         latex("P(\\text{exactement 2 succès})=0{,}3^2\\times0{,}7^3"),
         texte("."),
       ],
@@ -1898,7 +2087,10 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        latex("P(\\text{aucun succès sur les 5 tirs})=0{,}7^5"),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
+        latex("P(\\text{aucun succès})=0{,}7^5"),
         texte("."),
       ],
       reponse: true,
@@ -1910,7 +2102,10 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        latex("P(\\text{au moins un succès sur les 5 tirs})=1-0{,}7^5"),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
+        latex("P(\\text{au moins un succès})=1-0{,}7^5"),
         texte("."),
       ],
       reponse: true,
@@ -1922,7 +2117,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Toujours sur ces 5 tirs, "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
         latex("P(\\text{au moins un succès})=5\\times0{,}3=1{,}5"),
         texte(", en additionnant simplement la probabilité de chaque tir."),
       ],
@@ -1937,7 +2134,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 5 tirs, les probabilités d'obtenir exactement 0, 1, 2, 3, 4 ou 5 succès ont une somme égale à 1."),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, les probabilités d'obtenir exactement 0, 1, 2, 3, 4 ou 5 succès ont une somme égale à 1."),
       ],
       reponse: true,
       justification: [
@@ -1946,7 +2145,10 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        latex("P(\\text{5 succès sur 5 tirs})=0{,}3\\times5=1{,}5"),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
+        latex("P(\\text{5 succès})=0{,}3\\times5=1{,}5"),
         texte("."),
       ],
       reponse: false,
@@ -1962,7 +2164,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 5 tirs, obtenir 5 succès est moins probable que n'obtenir aucun succès."),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, obtenir 5 succès est moins probable que n'obtenir aucun succès."),
       ],
       reponse: true,
       justification: [
@@ -2003,13 +2207,13 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Avec ces mêmes données (bus "),
+        texte("Un élève va à l'école en bus avec une probabilité "),
         latex("0{,}6"),
-        texte(", retard en bus "),
+        texte(", sinon à vélo ; il arrive en retard avec une probabilité "),
         latex("0{,}1"),
-        texte(", retard à vélo "),
+        texte(" en bus et "),
         latex("0{,}2"),
-        texte("), "),
+        texte(" à vélo. Alors "),
         latex("P(\\text{retard})=0{,}1+0{,}2=0{,}3"),
         texte("."),
       ],
@@ -2079,7 +2283,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces mêmes 3 jours, "),
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, "),
         latex("P(\\text{elle monte les 3 fois})=0{,}6\\times3=1{,}8"),
         texte("."),
       ],
@@ -2096,6 +2302,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, "),
         latex("P(\\text{elle monte les 3 jours})=0{,}6^3=0{,}216"),
         texte("."),
       ],
@@ -2107,6 +2316,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, "),
         latex("P(\\text{elle ne monte aucun des 3 jours})=0{,}4^3=0{,}064"),
         texte("."),
       ],
@@ -2118,9 +2330,15 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 3 jours, "),
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, "),
         latex("P(\\text{au moins une hausse})=0{,}432+0{,}216=0{,}648"),
-        texte(", en additionnant les cas « exactement 2 hausses » et « exactement 3 hausses »."),
+        texte(", somme des probabilités des cas « exactement 2 hausses » ("),
+        latex("0{,}432"),
+        texte(") et « exactement 3 hausses » ("),
+        latex("0{,}216"),
+        texte(")."),
       ],
       reponse: false,
       justification: [
@@ -2135,7 +2353,10 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        latex("P(\\text{au moins une hausse sur les 3 jours})=1-0{,}4^3=0{,}936"),
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, "),
+        latex("P(\\text{au moins une hausse})=1-0{,}4^3=0{,}936"),
         texte("."),
       ],
       reponse: true,
@@ -2147,7 +2368,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Les probabilités d'obtenir exactement 0, 1, 2 ou 3 hausses sur les 3 jours ont une somme égale à 1 : "),
+        texte("Une action en bourse monte avec une probabilité "),
+        latex("0{,}6"),
+        texte(" chaque jour, indépendamment d'un jour à l'autre. Sur 3 jours, les probabilités d'obtenir exactement 0, 1, 2 ou 3 hausses ont une somme égale à 1 : "),
         latex("0{,}064+0{,}288+0{,}432+0{,}216=1"),
         texte("."),
       ],
@@ -2175,9 +2398,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour le même tireur ("),
-        latex("p=0{,}3"),
-        texte(") mais sur 3 tirs seulement, l'arbre complet compte 8 chemins, dont exactement 3 contiennent 2 succès."),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 3 tirs, l'arbre complet compte 8 chemins, dont exactement 3 contiennent 2 succès."),
       ],
       reponse: true,
       justification: [
@@ -2188,9 +2411,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 3 tirs à "),
-        latex("p=0{,}3"),
-        texte(", "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 3 tirs, "),
         latex("P(\\text{exactement 1 succès})=3\\times0{,}3\\times0{,}7^2=0{,}441"),
         texte("."),
       ],
@@ -2205,7 +2428,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Sur ces 3 tirs, deux chemins comportant le même nombre de succès n'ont pas la même probabilité, car l'ordre des succès et des échecs change le produit."),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 3 tirs, deux chemins de l'arbre comportant le même nombre de succès n'ont pas la même probabilité, car l'ordre des succès et des échecs change le produit."),
       ],
       reponse: false,
       justification: [
@@ -2220,9 +2445,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour 5 tirs à "),
-        latex("p=0{,}3"),
-        texte(", "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
         latex("P(\\text{exactement 1 succès})=5\\times0{,}3\\times0{,}7^4"),
         texte("."),
       ],
@@ -2235,10 +2460,10 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour 5 tirs à "),
-        latex("p=0{,}3"),
-        texte(", obtenir exactement 1 succès est moins probable que n'obtenir aucun succès, puisque "),
-        latex("p<0{,}5"),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, obtenir exactement 1 succès est moins probable que n'obtenir aucun succès, puisque "),
+        latex("0{,}3<0{,}5"),
         texte("."),
       ],
       reponse: false,
@@ -2254,9 +2479,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour 5 tirs à "),
-        latex("p=0{,}3"),
-        texte(", "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
         latex("P(\\text{au moins 4 succès})=5\\times0{,}3^4\\times0{,}7+0{,}3^5"),
         texte("."),
       ],
@@ -2271,9 +2496,9 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour 5 tirs à "),
-        latex("p=0{,}3"),
-        texte(", "),
+        texte("Un tireur touche la cible avec une probabilité "),
+        latex("0{,}3"),
+        texte(" à chaque tir, indépendamment d'un tir à l'autre. Sur 5 tirs, "),
         latex("P(\\text{au plus 4 succès})=1-P(\\text{exactement 4 succès})"),
         texte("."),
       ],
@@ -2299,9 +2524,11 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Monter ces deux mêmes composants en parallèle (le système fonctionne dès que l'un des deux fonctionne) ne peut jamais donner une fiabilité supérieure à celle d'un seul composant, soit "),
+        texte("Deux composants indépendants, fiables à "),
         latex("0{,}9"),
-        texte("."),
+        texte(" chacun, montés en parallèle (le système fonctionne dès que l'un des deux fonctionne) ne peuvent jamais donner une fiabilité supérieure à "),
+        latex("0{,}9"),
+        texte(", celle d'un seul composant."),
       ],
       reponse: false,
       justification: [
@@ -2354,7 +2581,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour ces trois amis, la probabilité qu'au moins un récupère son propre manteau vaut "),
+        texte("Trois amis déposent leur manteau au vestiaire, qui les leur rend au hasard (les 6 restitutions possibles sont équiprobables). La probabilité qu'au moins un des trois récupère son propre manteau vaut "),
         latex("\\dfrac{2}{3}"),
         texte("."),
       ],
@@ -2382,7 +2609,7 @@ export const BANQUE_QUIZ_PROBABILITES: Record<VarianteQuizProbabilites, Question
     },
     {
       enonce: [
-        texte("Pour ce joueur, "),
+        texte("Un joueur a 1 chance sur 6 de gagner à chaque partie, indépendamment des autres. "),
         latex("P(\\text{au moins une victoire sur 6 parties})=1-\\left(\\dfrac{5}{6}\\right)^6"),
         texte("."),
       ],

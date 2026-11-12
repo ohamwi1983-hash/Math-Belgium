@@ -78,22 +78,19 @@ export function EtapeParadoxesProbabilites({
       <EnTeteExercice
         consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
-          blocDonnees.length > 0 || figureSvg ? (
-            <>
-              {blocDonnees.length > 0 && (
-                <div className="equation-box">
-                  <div className="equation-box-donnees">
-                    {blocDonnees.map((frag, i) => (
-                      <Katex key={i} expression={frag} block />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {figureSvg && <div className="figure-arbre-paradoxe" style={{ textAlign: "center", marginTop: 8 }} dangerouslySetInnerHTML={{ __html: figureSvg }} />}
-            </>
+          blocDonnees.length > 0 ? (
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} block />
+                ))}
+              </div>
+            </div>
           ) : null
         }
       />
+      {/* Arbre HORS du bandeau teinté de l'énoncé : ses étiquettes ont un halo couleur de carte. */}
+      {figureSvg && <div className="figure-arbre-paradoxe" style={{ textAlign: "center", margin: "12px 0" }} dangerouslySetInnerHTML={{ __html: figureSvg }} />}
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
@@ -104,9 +101,11 @@ export function EtapeParadoxesProbabilites({
         </p>
       )}
       {mode.type === "champs" ? (
-        <div className={`field-row ${mode.champs.length > 3 ? "field-row-wrap" : ""}`}>
+        // Champs EMPILÉS (étiquette au-dessus du champ) : les étiquettes sont des phrases (« Gagner en
+        // changeant, si elle n'y est pas »), `.field-inline` les écrasait et débordait à 390 px.
+        <div>
           {mode.champs.map((champ, i) => (
-            <div className={mode.champs.length > 1 ? "field field-inline" : "field"} key={i}>
+            <div className="field" key={i}>
               <label className="field-label field-label-minuscule">{champ.label}</label>
               <input
                 type="text"

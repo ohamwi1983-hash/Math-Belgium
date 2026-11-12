@@ -15,9 +15,14 @@ export function calculerRecapitulatifParadoxes(etat: EtatSessionParadoxes): Entr
   const entrees: EntreeRecapitulatif[] = [];
   for (const phase of ["modeliser", "calculer"] as const) {
     if (PHASES_PARADOXE.indexOf(phase) >= index) break;
-    entrees.push({ libelle: libellePhase(e, phase), valeur: "", estLatex: true, revele: etat.revelesPartiels[phase] ?? false, valeurs: formatReponseAttenduePhaseLatex(e, phase) });
+    entrees.push({ libelle: libellePhase(e, phase), valeur: "", estLatex: true, revele: etat.revelesPartiels[phase] ?? false, valeurs: avecSeparateurs(formatReponseAttenduePhaseLatex(e, phase)) });
   }
   return entrees;
+}
+
+/** « ; » entre deux formules d'une même ligne (le panneau les pose bout à bout). */
+function avecSeparateurs(formules: string[]): string[] {
+  return formules.map((x, i) => (i < formules.length - 1 ? `${x}\;;` : x));
 }
 
 /** Une puce par écran ; la prédiction (non notée) est « sans-objet » une fois close. */

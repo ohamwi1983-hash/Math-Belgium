@@ -83,9 +83,16 @@ function fractionEtSimplifiee(num: number, den: number): string {
   return g > 1 ? `${fractionLatex(num, den)}=${fractionLatex(num / g, den / g)}` : fractionLatex(num, den);
 }
 
+/** Arrondi « au plus proche, milieu vers le haut » (valeurs positives), insensible à l'erreur de
+ * représentation binaire : 0,2125 donne 0,213 — comme l'exige `diagnostiquerProbabilite`, alors
+ * que `toFixed` donnerait parfois 0,212. */
+export function arrondi(v: number, d: number): number {
+  return Math.round(v * 10 ** d + 1e-9) / 10 ** d;
+}
+
 /** Décimal arrondi à `d` décimales, virgule française (KaTeX si `latex`). */
 export function decimal(v: number, d: number, latex = true): string {
-  const s = (Math.round(v * 10 ** d) / 10 ** d).toFixed(d).replace(/\.?0+$/, "");
+  const s = arrondi(v, d).toFixed(d).replace(/\.?0+$/, "");
   return s.replace(".", latex ? "{,}" : ",");
 }
 
@@ -365,7 +372,8 @@ function frequenceLatex(ex: ExerciceFrequenceProbabilite): string {
   const f = frequenceObservee(ex);
   const g = pgcd(c, ex.n);
   const fraction = g > 1 && ex.n / g < 100 ? `${fractionLatex(c, ex.n)}=${fractionLatex(c / g, ex.n / g)}` : fractionLatex(c, ex.n);
-  return `f=${fraction}${decimalExact(f, 3) ? "=" : "\\approx "}${decimal(f, 3)}`;
+  // Valeur approchée : toujours trois décimales (« ≈ 0,110 », pas « ≈ 0,11 »).
+  return `f=${fraction}${decimalExact(f, 3) ? `=${decimal(f, 3)}` : `\\approx ${arrondi(f, 3).toFixed(3).replace(".", "{,}")}`}`;
 }
 
 /** Écarts relatifs à afficher (en %), au modèle puis — en B — au modèle naïf. */
@@ -385,7 +393,7 @@ const comparaison = (ecart: number, seuil: number) => `\\dfrac{|f-p|}{p}\\approx
 export function conclusionTexte(ex: ExerciceFrequenceProbabilite): string {
   const verdict = verdictAttendu(ex);
   if (ex.famille === "A") return verdict === "compatible" ? "les résultats sont compatibles avec un dé équilibré" : "le dé semble truqué";
-  if (ex.famille === "B") return verdict === "compatible" ? "les résultats confirment le modèle de la grille" : verdict === "piege" ? "les résultats confirment les sommes équiprobables" : "aucun des deux modèles n'est confirmé : les dés semblent truqués";
+  if (ex.famille === "B") return verdict === "compatible" ? "les résultats confirment le modèle de la grille" : verdict === "piege" ? "les résultats confirment les sommes équiprobables" : "aucun des deux modèles n'est confirmé, les dés semblent truqués";
   return verdict === "compatible" ? "l'affirmation est compatible avec les résultats" : "les résultats contredisent l'affirmation";
 }
 

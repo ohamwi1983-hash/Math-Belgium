@@ -365,7 +365,7 @@ function consigneEcranF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes)
   if (phase === "fEcran2") return [texteFrag("Effectue ce calcul : donne la fiabilité du système.")];
   const nouveau = `On monte maintenant les mêmes composants autrement : ${descriptionMontage(ex, ex.configurationAlternative, ex.positionMixteAlternative)}.`;
   if (ex.demandeEcran3 === "comparerValeur") return [texteFrag(`${nouveau} Calcule la fiabilité de ce nouveau montage.`)];
-  return [texteFrag(`${nouveau} Un technicien affirme : « La fiabilité de ce nouveau montage, arrondie à 4 décimales, vaut ${nombreTexte(ex.affirmationValeur ?? 0)}. » Cette affirmation est-elle vraie ou fausse ?`)];
+  return [texteFrag(`${nouveau} Un technicien affirme : « La fiabilité de ce nouveau montage, arrondie à 4 décimales, vaut ${versTexte((ex.affirmationValeur ?? 0).toFixed(4))}. » Cette affirmation est-elle vraie ou fausse ?`)];
 }
 function champsF(phase: PhaseProbabilitesProblemes): ChampDef[] {
   if (phase === "fEcran1") return [{ label: "Calcul de la fiabilité :", placeholder: "calcul avec les données", apercu: true }];
@@ -402,7 +402,7 @@ function reponseF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): stri
   if (phase === "fEcran2") return [egalite("\\text{fiabilité}", valeur)];
   const alternative = valeurAlternativeF(ex);
   if (ex.demandeEcran3 === "comparerValeur") return [egalite("\\text{fiabilité}", alternative)];
-  return [affirmationFEstVraie(ex) ? "\\text{Vrai}" : "\\text{Faux}", egalite("\\text{fiabilité}", alternative)];
+  return [`${affirmationFEstVraie(ex) ? "\\text{Vrai}" : "\\text{Faux}"}\\quad(${egalite("\\text{fiabilité}", alternative)})`];
 }
 
 // ============================================================================

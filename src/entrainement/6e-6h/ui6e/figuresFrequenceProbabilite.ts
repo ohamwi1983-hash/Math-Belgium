@@ -1,6 +1,6 @@
 import type { ExerciceFrequenceProbabilite } from "../core6e/frequenceProbabilite.types";
 import { COULEURS } from "./figureRepereIntegrales";
-import { couplesDeSomme, frequenceObservee, probabiliteModele, probabiliteNaiveB } from "../moteur6e/verificationFrequenceProbabilite";
+import { couplesDeSomme, frequenceObservee, probabiliteModele } from "../moteur6e/verificationFrequenceProbabilite";
 
 /**
  * Figures SVG AUTONOMES de `6gen75` (chaînes de caractères) — utilisées telles quelles par l'appli
@@ -73,8 +73,9 @@ export function svgDiagrammeFrequences(ex: ExerciceFrequenceProbabilite): string
   const d = 10;
   const h = ex.famille === "B" ? 40 : 26;
   const b = ex.famille === "C" ? 48 : 40;
-  const naive = probabiliteNaiveB(ex);
-  const vMax = Math.max(...cats.map((k) => Math.max(k.frequence, k.modele)), naive ?? 0);
+  // Modèle naïf de B, PAR SOMME (1/11) — pas la probabilité naïve de l'événement.
+  const naiveParSomme = ex.famille === "B" ? 1 / 11 : 0;
+  const vMax = Math.max(...cats.map((k) => Math.max(k.frequence, k.modele)), naiveParSomme);
   const pas = vMax > 0.5 ? 0.2 : vMax > 0.25 ? 0.1 : 0.05;
   const yMax = Math.ceil((vMax * 1.08) / pas) * pas;
   const sy = (v: number) => H - b - (v / yMax) * (H - b - h);
@@ -98,9 +99,8 @@ export function svgDiagrammeFrequences(ex: ExerciceFrequenceProbabilite): string
       `<text x="${fmt(xc)}" y="${fmt(sy(0) + 14)}" text-anchor="middle" font-size="${ex.famille === "C" ? 10 : 11}" fill="${COULEURS.encre}">${echapper(k.libelle)}</text>`,
     );
   });
-  if (naive !== null && ex.famille === "B") {
-    const unique = 1 / 11;
-    m.push(`<line x1="${g}" y1="${fmt(sy(unique))}" x2="${L - d}" y2="${fmt(sy(unique))}" stroke="${COULEURS.mauvais}" stroke-width="1.2" stroke-dasharray="5 4"/>`);
+  if (ex.famille === "B") {
+    m.push(`<line x1="${g}" y1="${fmt(sy(naiveParSomme))}" x2="${L - d}" y2="${fmt(sy(naiveParSomme))}" stroke="${COULEURS.mauvais}" stroke-width="1.2" stroke-dasharray="5 4"/>`);
   }
   const titreAxe = ex.famille === "A" ? "face" : ex.famille === "B" ? "somme" : "";
   if (titreAxe) m.push(`<text x="${L - d}" y="${fmt(sy(0) + 28)}" text-anchor="end" font-size="10" fill="${COULEURS.doux}">${titreAxe}</text>`);

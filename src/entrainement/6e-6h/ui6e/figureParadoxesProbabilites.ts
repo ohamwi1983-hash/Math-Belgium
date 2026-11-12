@@ -38,10 +38,9 @@ function etiquetteSvg(x: number, y: number, e: Etiquette, couleur: string): stri
   if (d === 1) return `<text x="${f1(x)}" y="${f1(y + 4)}" font-size="12" text-anchor="middle" fill="${couleur}" ${HALO} ${POLICE}>${n}</text>`;
   const w = Math.max(String(n).length, String(d).length) * 7 + 4;
   return [
-    `<rect x="${f1(x - w / 2 - 2)}" y="${f1(y - 14)}" width="${f1(w + 4)}" height="27" rx="3" fill="var(--surface, #ffffff)" fill-opacity="0.92"/>`,
-    `<text x="${f1(x)}" y="${f1(y - 3)}" font-size="11.5" text-anchor="middle" fill="${couleur}" ${POLICE}>${n}</text>`,
+    `<text x="${f1(x)}" y="${f1(y - 3)}" font-size="11.5" text-anchor="middle" fill="${couleur}" ${HALO} ${POLICE}>${n}</text>`,
     `<line x1="${f1(x - w / 2)}" y1="${f1(y)}" x2="${f1(x + w / 2)}" y2="${f1(y)}" stroke="${couleur}" stroke-width="1"/>`,
-    `<text x="${f1(x)}" y="${f1(y + 11)}" font-size="11.5" text-anchor="middle" fill="${couleur}" ${POLICE}>${d}</text>`,
+    `<text x="${f1(x)}" y="${f1(y + 11)}" font-size="11.5" text-anchor="middle" fill="${couleur}" ${HALO} ${POLICE}>${d}</text>`,
   ].join("");
 }
 
@@ -101,12 +100,12 @@ function arbreMonty(e: ExerciceMontyHall, masquer: boolean): string {
   for (const f of feuilles) {
     const couleur = f.gagne ? COULEURS.bon : COULEURS.mauvais;
     m.push(noeudSvg(x2, f.y, "C", !f.gagne, couleur));
-    m.push(`<text x="${x2 + 14}" y="${f1(f.y + 4)}" font-size="11.5" fill="${couleur}" ${POLICE}>${f.gagne ? "gagné en changeant" : "perdu en changeant"}</text>`);
+    m.push(`<text x="${x2 + 14}" y="${f1(f.y + 4)}" font-size="11.5" fill="${couleur}" ${POLICE}>${f.gagne ? "gagné" : "perdu"}</text>`);
   }
   m.push(`<text x="${x1}" y="12" font-size="10.5" text-anchor="middle" fill="${COULEURS.doux}" ${POLICE}>voiture</text>`);
   m.push(`<text x="${x2}" y="12" font-size="10.5" text-anchor="middle" fill="${COULEURS.doux}" ${POLICE}>en changeant</text>`);
   const hauteur = n === 3 ? 176 : 214;
-  return enveloppe(350, hauteur, m.join(""), `Arbre : la voiture est ou n'est pas derrière ta porte, puis gain ou perte en changeant (${n} portes)`);
+  return enveloppe(300, hauteur, m.join(""), `Arbre : la voiture est ou n'est pas derrière ta porte, puis gain ou perte en changeant (${n} portes)`);
 }
 
 function arbreEnfants(e: ExerciceDeuxEnfants, marquer: boolean): string {

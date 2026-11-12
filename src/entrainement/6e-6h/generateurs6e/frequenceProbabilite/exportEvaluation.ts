@@ -112,7 +112,7 @@ function questionEffectif(e: ExerciceFrequenceProbabilite): FragmentConsigne[] {
   return [
     t("Combien de fois peut-on s'attendre à ce que E se réalise sur "),
     N,
-    t(` nouveaux lancers ? Utilise la probabilité du modèle ${e.famille === "A" ? "du dé équilibré" : "de la grille"} s'il est retenu, sinon la fréquence observée (fraction exacte, sans arrondi).`),
+    t(` nouveaux lancers ? Utilise la probabilité ${e.famille === "A" ? "d'un dé équilibré si ce modèle" : "du modèle de la grille s'il"} est retenu, sinon la fréquence observée (fraction exacte, sans arrondi).`),
   ];
 }
 

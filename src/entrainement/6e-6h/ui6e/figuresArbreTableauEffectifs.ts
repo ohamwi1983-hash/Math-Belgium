@@ -12,12 +12,15 @@ function echapper(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/** Lettre éventuellement surlignée (macron combinant U+0304 dans `ArbreAffichage`) → `<tspan>`
- * avec un vrai trait au-dessus (le macron combinant est mal placé dans certaines polices d'impression). */
-function etiquette(label: string): string {
-  const barre = label.endsWith("̄");
+/** Étiquette d'un nœud : lettre en italique ; une lettre surlignée (macron combinant U+0304 dans
+ * `ArbreAffichage`) reçoit un VRAI trait tracé au-dessus — le macron combinant est décalé dans les
+ * polices du site et d'impression (« C⁻ » au lieu de « C̄ »). */
+function etiquette(label: string, x: number, y: number, police: string): string {
+  const barre = label.endsWith("\u0304");
   const lettre = echapper(barre ? label.slice(0, -1) : label);
-  return barre ? `<tspan text-decoration="overline">${lettre}</tspan>` : lettre;
+  let s = `<text x="${x}" y="${y}" font-size="17" font-style="italic" ${police} fill="${COULEURS.encre}">${lettre}</text>`;
+  if (barre) s += `<line x1="${x + 2}" y1="${y - 14}" x2="${x + 13}" y2="${y - 14}" stroke="${COULEURS.encre}" stroke-width="1.3"/>`;
+  return s;
 }
 
 export function arbreSvg(arbre: ArbreAffichage, libelle: string): string {
@@ -36,18 +39,18 @@ export function arbreSvg(arbre: ArbreAffichage, libelle: string): string {
     s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1[i]}" stroke="${COULEURS.doux}" stroke-width="1.4"/>`;
     const mx = (x0 + x1) / 2;
     const my = (y0 + y1[i]) / 2 + (i === 0 ? -8 : 18);
-    s += `<text x="${mx}" y="${my}" text-anchor="middle" font-size="15" ${police} fill="${proba(b.prob)}">${echapper(b.prob)}</text>`;
+    s += `<text x="${mx}" y="${my}" text-anchor="middle" font-size="16" ${police} fill="${proba(b.prob)}">${echapper(b.prob)}</text>`;
     s += `<circle cx="${x1}" cy="${y1[i]}" r="2.6" fill="${COULEURS.encre}"/>`;
-    s += `<text x="${x1 + 8}" y="${y1[i] - 8}" font-size="16" font-style="italic" ${police} fill="${COULEURS.encre}">${etiquette(b.label)}</text>`;
+    s += etiquette(b.label, x1 + 8, y1[i] - 8, police);
   });
   arbre.secondLevel.forEach((b, i) => {
     const ya = y1[b.fromFirst];
     s += `<line x1="${x1}" y1="${ya}" x2="${x2}" y2="${y2[i]}" stroke="${COULEURS.doux}" stroke-width="1.4"/>`;
     const mx = x1 + (x2 - x1) * 0.6;
     const my = ya + (y2[i] - ya) * 0.6 + (y2[i] < ya ? -7 : 16);
-    s += `<text x="${mx}" y="${my}" text-anchor="middle" font-size="15" ${police} fill="${proba(b.prob)}">${echapper(b.prob)}</text>`;
+    s += `<text x="${mx}" y="${my}" text-anchor="middle" font-size="16" ${police} fill="${proba(b.prob)}">${echapper(b.prob)}</text>`;
     s += `<circle cx="${x2}" cy="${y2[i]}" r="2.6" fill="${COULEURS.encre}"/>`;
-    s += `<text x="${x2 + 9}" y="${y2[i] + 5}" font-size="16" font-style="italic" ${police} fill="${COULEURS.encre}">${etiquette(b.label)}</text>`;
+    s += etiquette(b.label, x2 + 9, y2[i] + 6, police);
   });
   s += `<circle cx="${x0}" cy="${y0}" r="2.6" fill="${COULEURS.encre}"/></svg>`;
   return s;

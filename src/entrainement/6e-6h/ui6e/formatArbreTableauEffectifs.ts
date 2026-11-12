@@ -98,7 +98,7 @@ export function egaliteFraction(f: Fraction): string {
   let s = fractionLatex(f);
   if (d > 1 && simple.den !== 1) s += `=${fractionLatex(simple)}`;
   const v = f.num / f.den;
-  s += decimalExact(f) ? `=${decimalLatex(v)}` : `\\approx${decimalLatex(Math.round(v * 100) / 100)}`;
+  s += decimalExact(f) ? `=${decimalLatex(v)}` : `\\approx${(Math.round(v * 100) / 100).toFixed(2).replace(".", "{,}")}`;
   return s;
 }
 
@@ -270,6 +270,11 @@ export function champsEcran(ex: ExerciceArbreTableauEffectifs, phase: PhaseArbre
 // Aides (sans la réponse : formules générales, exemple hors instance)
 // ============================================================================
 
+/** Deux formules d'aide l'une sous l'autre (lisible à 390 px, jamais coupé à droite). */
+function deuxLignes(a: string, b: string): string {
+  return `\\begin{gathered}${a}\\\\ ${b}\\end{gathered}`;
+}
+
 export function aideNiveau1(ex: ExerciceArbreTableauEffectifs, phase: PhaseArbreTableauEffectifs): AideAvecLatex {
   const { A, B } = lettres(ex);
   switch (phase) {
@@ -277,26 +282,26 @@ export function aideNiveau1(ex: ExerciceArbreTableauEffectifs, phase: PhaseArbre
       if (ex.mode === "tableauPartiel")
         return {
           texte: "Au 1er niveau, on divise un effectif par l'effectif total ; au 2e niveau, on divise par l'effectif du nœud de départ, et non par N :",
-          latex: `P(${A})=\\dfrac{n(${A})}{N},\\qquad P(${B}\\mid ${A})=\\dfrac{n(${A}\\cap ${B})}{n(${A})}`,
+          latex: deuxLignes(`P(${A})=\\dfrac{n(${A})}{N}`, `P(${B}\\mid ${A})=\\dfrac{n(${A}\\cap ${B})}{n(${A})}`),
         };
       return {
         texte: "Les branches qui partent d'un même nœud ont des probabilités de somme 1 :",
-        latex: `P(\\bar{${A}})=1-P(${A}),\\qquad P(\\bar{${B}}\\mid ${A})=1-P(${B}\\mid ${A})`,
+        latex: deuxLignes(`P(\\bar{${A}})=1-P(${A})`, `P(\\bar{${B}}\\mid ${A})=1-P(${B}\\mid ${A})`),
       };
     case "tableau":
       if (ex.mode === "tableauPartiel")
         return {
           texte: "Dans chaque ligne et dans chaque colonne, les deux cases ont pour somme le total :",
-          latex: `n(${A}\\cap ${B})+n(${A}\\cap \\bar{${B}})=n(${A}),\\qquad n(${A})+n(\\bar{${A}})=N`,
+          latex: deuxLignes(`n(${A}\\cap ${B})+n(${A}\\cap \\bar{${B}})=n(${A})`, `n(${A})+n(\\bar{${A}})=N`),
         };
       return {
         texte: "L'effectif d'une case s'obtient en multipliant l'effectif total par les probabilités lues le long du chemin :",
-        latex: `n(${A})=N\\times P(${A}),\\qquad n(${A}\\cap ${B})=N\\times P(${A})\\times P(${B}\\mid ${A})`,
+        latex: deuxLignes(`n(${A})=N\\times P(${A})`, `n(${A}\\cap ${B})=N\\times P(${A})\\times P(${B}\\mid ${A})`),
       };
     case "conditionnelles":
       return {
         texte: "Une probabilité conditionnelle se calcule dans la sous-population de la condition, c'est-à-dire de l'événement écrit après la barre :",
-        latex: `P(${B}\\mid ${A})=\\dfrac{n(${A}\\cap ${B})}{n(${A})},\\qquad P(${A}\\mid ${B})=\\dfrac{n(${A}\\cap ${B})}{n(${B})}`,
+        latex: deuxLignes(`P(${B}\\mid ${A})=\\dfrac{n(${A}\\cap ${B})}{n(${A})}`, `P(${A}\\mid ${B})=\\dfrac{n(${A}\\cap ${B})}{n(${B})}`),
       };
     case "independance":
       return {
@@ -332,7 +337,7 @@ export function aideNiveau2(ex: ExerciceArbreTableauEffectifs, phase: PhaseArbre
         };
       return {
         texte: "Les autres cases se complètent par soustraction, puis les totaux de colonne par addition :",
-        latex: `n(${A}\\cap \\bar{${B}})=n(${A})-n(${A}\\cap ${B}),\\qquad n(${B})=n(${A}\\cap ${B})+n(\\bar{${A}}\\cap ${B})`,
+        latex: deuxLignes(`n(${A}\\cap \\bar{${B}})=n(${A})-n(${A}\\cap ${B})`, `n(${B})=n(${A}\\cap ${B})+n(\\bar{${A}}\\cap ${B})`),
       };
     case "conditionnelles":
       return {

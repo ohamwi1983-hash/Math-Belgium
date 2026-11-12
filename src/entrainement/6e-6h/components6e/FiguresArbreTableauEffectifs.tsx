@@ -1,23 +1,30 @@
-import { WeightedTree } from "../../../components/illustrations/WeightedTree";
 import { Katex } from "../components/Katex";
 import type { ArbreAffichage, EnTeteTableau, TableauEffectifsAffichage } from "../ui6e/formatArbreTableauEffectifs";
+import { arbreSvg } from "../ui6e/figuresArbreTableauEffectifs";
 
 /**
- * Figures de `6gen74` : l'arbre pondéré réutilise le composant des chapitres (`WeightedTree`, mêmes
- * classes `svg-*` du thème, donc clair/sombre suivent la page) ; le tableau d'effectifs reprend la
- * table `.summary-table` des générateurs 6e, avec des champs dans les cases à compléter.
+ * Figures de `6gen74`. L'arbre pondéré est la MÊME figure que sur papier (`ui6e/
+ * figuresArbreTableauEffectifs.ts::arbreSvg`, couleurs `var(--x, #repli)` : clair/sombre suivent la
+ * page), même disposition que `WeightedTree` des chapitres — ce composant n'a pas été repris tel
+ * quel : ses étiquettes sont du texte brut, et le macron combinant de Ā s'y affichait décalé
+ * (« C⁻ »). Le tableau d'effectifs reprend la table `.summary-table` des générateurs 6e, avec des
+ * champs dans les cases à compléter.
  */
 
 export function ArbreEffectifs({ arbre }: { arbre: ArbreAffichage }) {
   return (
-    <div className="figure-arbre-effectifs" style={{ maxWidth: 460, margin: "0.5rem auto" }}>
-      <WeightedTree kind="weightedTree" firstLevel={arbre.firstLevel} secondLevel={arbre.secondLevel} />
-    </div>
+    <div className="figure-arbre-effectifs" dangerouslySetInnerHTML={{ __html: arbreSvg(arbre, "Arbre pondéré") }} />
   );
 }
 
 function EnTete({ entete }: { entete: EnTeteTableau }) {
-  return "latex" in entete ? <Katex expression={entete.latex} /> : <>{entete.texte}</>;
+  return "latex" in entete ? (
+    <span style={{ fontSize: "1.25em", textTransform: "none" }}>
+      <Katex expression={entete.latex} />
+    </span>
+  ) : (
+    <>{entete.texte}</>
+  );
 }
 
 interface PropsTableau {

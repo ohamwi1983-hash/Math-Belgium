@@ -298,10 +298,10 @@ function optionsConclusionCanoniques(e: ExerciceParadoxesProbabilites): Fragment
     case "montyHall": {
       const n = e.nPortes;
       return [
-        [t("Changer : on gagne avec une probabilité de "), l(fractionLatex(n - 1, n * (n - 2), "t"))],
-        [t("Garder : on gagne avec une probabilité de "), l(fractionLatex(1, n, "t"))],
-        [t("C'est indifférent : chaque porte encore fermée a une probabilité de "), l(fractionLatex(1, n - 1, "t"))],
-        [t("Changer : on gagne avec une probabilité de "), l(fractionLatex(1, n - 1, "t"))],
+        [t("Changer : on gagne avec une probabilité de "), l(fractionLatex(n - 1, n * (n - 2)))],
+        [t("Garder : on gagne avec une probabilité de "), l(fractionLatex(1, n))],
+        [t("C'est indifférent : chaque porte encore fermée a une probabilité de "), l(fractionLatex(1, n - 1))],
+        [t("Changer : on gagne avec une probabilité de "), l(fractionLatex(1, n - 1))],
       ];
     }
     case "deuxEnfants": {
@@ -311,17 +311,17 @@ function optionsConclusionCanoniques(e: ExerciceParadoxesProbabilites): Fragment
       const autre = autreSexe(e);
       if (e.information === "auMoinsUn") {
         return [
-          [l("\\frac{1}{3}"), t(` : parmi les trois issues équiprobables ${compat.join(", ")}, seule ${ss} convient`)],
-          [l("\\frac{1}{2}"), t(` : il reste deux compositions, deux ${pluriel(e)} ou ${unSexe(e)} et ${autre}`)],
-          [l("\\frac{1}{4}"), t(` : ${ss} est une issue sur quatre`)],
-          [l("\\frac{2}{3}"), t(` : deux issues sur trois contiennent ${autre}`)],
+          [l("\\dfrac{1}{3}"), t(` : parmi les trois issues équiprobables ${compat.join(", ")}, seule ${ss} convient`)],
+          [l("\\dfrac{1}{2}"), t(` : il reste deux compositions, deux ${pluriel(e)} ou ${unSexe(e)} et ${autre}`)],
+          [l("\\dfrac{1}{4}"), t(` : ${ss} est une issue sur quatre`)],
+          [l("\\dfrac{2}{3}"), t(` : deux issues sur trois contiennent ${autre}`)],
         ];
       }
       return [
-        [l("\\frac{1}{2}"), t(` : il reste ${compat.join(" et ")}, équiprobables`)],
-        [l("\\frac{1}{3}"), t(` : comme avec « au moins ${s === "G" ? "un garçon" : "une fille"} », il reste trois issues`)],
-        [l("\\frac{1}{4}"), t(` : ${ss} est une issue sur quatre`)],
-        [l("\\frac{3}{4}"), t(` : trois issues sur quatre contiennent ${unSexe(e)}`)],
+        [l("\\dfrac{1}{2}"), t(` : il reste ${compat.join(" et ")}, équiprobables`)],
+        [l("\\dfrac{1}{3}"), t(` : comme avec « au moins ${s === "G" ? "un garçon" : "une fille"} », il reste trois issues`)],
+        [l("\\dfrac{1}{4}"), t(` : ${ss} est une issue sur quatre`)],
+        [l("\\dfrac{3}{4}"), t(` : trois issues sur quatre contiennent ${unSexe(e)}`)],
       ];
     }
   }
