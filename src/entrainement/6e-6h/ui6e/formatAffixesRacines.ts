@@ -171,7 +171,7 @@ export function etatActuelB(phase: PhaseAffixesRacines): string[] | null {
 }
 export function champsB(phase: PhaseAffixesRacines): ChampDef[] {
   if (phase === "bEcran1") return [{ type: "choix", label: "Relation" }];
-  return [{ type: "texte", label: "z_D =", placeholder: "a+bi" }];
+  return [{ type: "texte", label: "Affixe de D =", placeholder: "a+bi" }];
 }
 export function niveauAideMaxB(phase: PhaseAffixesRacines): number {
   return phase === "bEcran1" ? 2 : 0;
@@ -267,9 +267,9 @@ export function etatActuelD(e: Extract<ExerciceAffixesRacines, { famille: "D" }>
   return null;
 }
 export function champsD(phase: PhaseAffixesRacines): ChampDef[] {
-  if (phase === "dEcran1") return [{ type: "texte", label: "z_M =", placeholder: "a+bi" }];
+  if (phase === "dEcran1") return [{ type: "texte", label: "Affixe de M =", placeholder: "a+bi" }];
   return [
-    { type: "texte", label: "z_B − z_A =", placeholder: "a+bi" },
+    { type: "texte", label: "zB − zA =", placeholder: "a+bi" },
     { type: "texte", label: "AB =", placeholder: "réel positif" },
   ];
 }

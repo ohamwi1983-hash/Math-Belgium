@@ -21,10 +21,13 @@ const B_MAX = 9;
 const PROBABILITE_CAS_PARTICULIER = 0.1;
 
 export function construireFamilleD(): ExerciceFamilleD {
+  // Décision tirée HORS de la boucle de rejet : sinon les vecteurs courts (cas particulier),
+  // moins souvent rejetés, seraient sur-représentés.
+  const casParticulier = Math.random() < PROBABILITE_CAS_PARTICULIER;
   for (;;) {
     let dx: number;
     let dy: number;
-    if (Math.random() < PROBABILITE_CAS_PARTICULIER) {
+    if (casParticulier) {
       const longueur = tirerEntier(2, 8);
       [dx, dy] = Math.random() < 0.5 ? [longueur, 0] : [0, longueur];
     } else [dx, dy] = tirerParmi(TRIPLETS);

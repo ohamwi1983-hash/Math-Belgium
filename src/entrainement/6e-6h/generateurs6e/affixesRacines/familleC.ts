@@ -26,5 +26,5 @@ export function construireFamilleC(): ExerciceFamilleC {
     { re: xPositif, im: yDeduit },
     { re: -xPositif, im: -yDeduit },
   ];
-  return { famille: "C", x, y, a, b, xPositif, yDeduit, racines, module: x * x + y * y };
+  return { famille: "C", x, y, a, b, xPositif, yDeduit, racines, module: x * x + y * y, graine: Math.floor(Math.random() * 1e9) };
 }

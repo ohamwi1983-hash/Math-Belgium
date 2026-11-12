@@ -124,6 +124,10 @@ export interface ExerciceFamilleC {
    * fois l'écran réussi, pour que la suite (y déduit, racine donnée en aide) parte de SA valeur.
    * Absent : on utilise `xPositif`. */
   xRetenu?: number;
+  /** Graine tirée à la création, pour l'ordre des options de l'écran 1 : la famille n'a que 100
+   * exercices possibles, une graine tirée des seuls paramètres laissait certaines positions de la
+   * bonne option nettement moins fréquentes. */
+  graine?: number;
 }
 
 // ============================================================================

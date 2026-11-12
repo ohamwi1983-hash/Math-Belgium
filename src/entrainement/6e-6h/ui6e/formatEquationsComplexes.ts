@@ -458,11 +458,11 @@ export function etatActuelF(e: ExerciceFamilleF, phase: PhaseEquationsComplexes)
 }
 export function champsF(phase: PhaseEquationsComplexes): ChampDef[] {
   if (phase === "fEcran1") return [{ label: "r₁ =", placeholder: "entier" }];
-  if (phase === "fEcran2") return [{ label: "Quotient (polynôme en z) =", placeholder: "polynôme en z" }];
+  if (phase === "fEcran2") return [{ label: "Quotient =", placeholder: "polynôme en z" }];
   if (phase === "fEcran3")
     return [
       { label: "r₂ =", placeholder: "entier" },
-      { label: "Quotient (polynôme en z) =", placeholder: "polynôme en z" },
+      { label: "Quotient =", placeholder: "polynôme en z" },
     ];
   return [];
 }

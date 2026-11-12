@@ -110,16 +110,26 @@ export function construireFamilleBSimple(sousTypeForce?: SousTypeLieuB): Exercic
   }
 
   if (sousType === "demiDroites") {
-    const candidats = POINTS_REMARQUABLES.filter((pt) => pt.angle.p >= 0);
-    const point = tirerParmi(candidats);
+    // Variété (audit 6e ch. 5 : 9 exercices seulement) : forme « réelle » (z−a)+conj(z−a) = c|z−a|
+    // (cos θ = c/2) ou « imaginaire » (z−a)−conj(z−a) = c·i·|z−a| (sin θ = c/2), origine a = 0 une
+    // fois sur deux, sinon a entier non nul. Angles et c toujours exacts (points remarquables).
+    const forme = tirerParmi(["reelle", "imaginaire"] as const);
+    const origine = Math.random() < 0.5 ? { a: 0, b: 0 } : tirerPointNonNul(-3, 3);
+    if (forme === "reelle") {
+      const point = tirerParmi(POINTS_REMARQUABLES.filter((pt) => pt.angle.p >= 0));
+      const theta0 = point.angle;
+      const cValeur = combinerModuleAngle(2, point.cos);
+      const unSeulRayon = theta0.p === 0 || theta0.p === theta0.q;
+      const angles = unSeulRayon ? [theta0] : [theta0, angleDepuisFraction(-theta0.p, theta0.q)];
+      return { famille: "B", sousType, p1: origine, p2: { a: 0, b: 0 }, forme, c: cValeur.numerique, cLatex: cValeur.latex, poleExclu: null, resultat: { nature: "demiDroite", origine, angles } };
+    }
+    // sin θ0 = c/2 avec θ0 ∈ [−π/2 ; π/2] ; demi-droites θ0 et π − θ0.
+    const point = tirerParmi(POINTS_REMARQUABLES.filter((pt) => 2 * Math.abs(pt.angle.p) <= pt.angle.q));
     const theta0 = point.angle;
-    const cValeur = combinerModuleAngle(2, point.cos);
-    const c = cValeur.numerique;
-    const unSeulRayon = theta0.p === 0 || theta0.p === theta0.q;
-    const angles = unSeulRayon ? [theta0] : [theta0, angleDepuisFraction(-theta0.p, theta0.q)];
-    // p1/p2 sans rôle ici — champs conservés à (0,0) pour uniformité du contrat (jamais lus par
-    // l'écran 1/2 de ce sous-type, voir `ui6e/formatComplexesAvances.ts`).
-    return { famille: "B", sousType, p1: { a: 0, b: 0 }, p2: { a: 0, b: 0 }, c, cLatex: cValeur.latex, poleExclu: null, resultat: { nature: "demiDroite", origine: { a: 0, b: 0 }, angles } };
+    const cValeur = combinerModuleAngle(2, point.sin);
+    const unSeulRayon = 2 * Math.abs(theta0.p) === theta0.q;
+    const angles = unSeulRayon ? [theta0] : [theta0, angleDepuisFraction(theta0.q - theta0.p, theta0.q)];
+    return { famille: "B", sousType, p1: origine, p2: { a: 0, b: 0 }, forme, c: cValeur.numerique, cLatex: cValeur.latex, poleExclu: null, resultat: { nature: "demiDroite", origine, angles } };
   }
 
   if (sousType === "cercleA") {
@@ -145,7 +155,8 @@ export function construireFamilleBSimple(sousTypeForce?: SousTypeLieuB): Exercic
   }
 
   // cercleO
-  const k = tirerEntier(2, 9);
+  // k de 2 à 40 (audit 6e ch. 5 : 8 exercices seulement) — rayon √k toujours exact (radical simplifié).
+  const k = tirerEntier(2, 40);
   const rayonExact = racineRationnelleLatex(k, 1);
   return { famille: "B", sousType, p1: { a: 0, b: 0 }, p2: { a: 0, b: 0 }, k, poleExclu: null, resultat: { nature: "cercle", centre: { a: 0, b: 0 }, rayon: rayonExact.numerique, rayonLatex: rayonExact.latex } };
 }

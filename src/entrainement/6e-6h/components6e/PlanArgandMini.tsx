@@ -72,6 +72,24 @@ export function PlanArgandMini({ points, fleches = [], polygones = [], legende }
   const graduationsY: number[] = [];
   for (let v = Math.ceil(yMin / pas) * pas; v <= yMax; v += pas) if (v !== 0) graduationsY.push(v);
 
+  // Étiquettes : au-dessus à droite par défaut ; si une étiquette déjà placée (ou le « O » de
+  // l'origine) est trop proche, essai en dessous puis à gauche — jamais deux noms superposés.
+  const occupees: [number, number][] = [[X(0) - 8, Y(0) + 12]];
+  const etiquettes = points.map((p) => {
+    const cx = X(p.x);
+    const cy = Y(p.y);
+    const aDroite = cx < largeur - 30;
+    const essais: [number, number, "start" | "end"][] = [
+      [cx + (aDroite ? 6 : -6), cy - 6, aDroite ? "start" : "end"],
+      [cx + (aDroite ? 6 : -6), cy + 15, aDroite ? "start" : "end"],
+      [cx - (aDroite ? 6 : -6), cy - 6, aDroite ? "end" : "start"],
+      [cx - (aDroite ? 6 : -6), cy + 15, aDroite ? "end" : "start"],
+    ];
+    const libre = essais.find(([tx, ty]) => occupees.every(([ox, oy]) => Math.abs(ox - tx) > 16 || Math.abs(oy - ty) > 12)) ?? essais[0];
+    occupees.push([libre[0], libre[1]]);
+    return { cx, cy, tx: libre[0], ty: libre[1], ancre: libre[2], label: p.label, couleur: p.role === "image" ? "var(--color-success)" : "var(--color-primary)" };
+  });
+
   const trait = { stroke: "var(--color-text-muted)", strokeWidth: 1 };
   const grille = { stroke: "var(--color-border)", strokeWidth: 0.6 };
 
@@ -116,18 +134,14 @@ export function PlanArgandMini({ points, fleches = [], polygones = [], legende }
         {fleches.map((f, i) => (
           <line key={`f${i}`} x1={X(f.de[0])} y1={Y(f.de[1])} x2={X(f.vers[0])} y2={Y(f.vers[1])} style={{ stroke: "var(--color-success)", strokeWidth: 1.4, strokeDasharray: "4 3" }} markerEnd="url(#fleche-image-argand)" />
         ))}
-        {points.map((p, i) => {
-          const couleur = p.role === "image" ? "var(--color-success)" : "var(--color-primary)";
-          const aDroite = X(p.x) < largeur - 30;
-          return (
-            <g key={`p${i}`}>
-              <circle cx={X(p.x)} cy={Y(p.y)} r={3.2} style={{ fill: couleur }} />
-              <text x={X(p.x) + (aDroite ? 6 : -6)} y={Y(p.y) - 6} textAnchor={aDroite ? "start" : "end"} style={{ fill: couleur, fontSize: 12, fontStyle: "italic", fontWeight: 600 }}>
-                {p.label}
-              </text>
-            </g>
-          );
-        })}
+        {etiquettes.map((p, i) => (
+          <g key={`p${i}`}>
+            <circle cx={p.cx} cy={p.cy} r={3.2} style={{ fill: p.couleur }} />
+            <text x={p.tx} y={p.ty} textAnchor={p.ancre} style={{ fill: p.couleur, fontSize: 12, fontStyle: "italic", fontWeight: 600 }}>
+              {p.label}
+            </text>
+          </g>
+        ))}
       </svg>
       {legende && <figcaption style={{ fontSize: "0.85em", color: "var(--color-text-muted)" }}>{legende}</figcaption>}
     </figure>

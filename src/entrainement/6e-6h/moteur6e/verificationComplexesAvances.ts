@@ -272,10 +272,19 @@ export function referenceEquationB(exercice: ExerciceComplexesBSimple): { refere
       return { reference: (x, y) => (x - p1.a) ** 2 + (y - p1.b) ** 2 - k * k * ((x - p2.a) ** 2 + (y - p2.b) ** 2), geometrie: { type: "cercle", cx, cy, r } };
     }
     case "demiDroites": {
+      // (z−a)+conj(z−a) = c|z−a| ⟺ 2X = cR ; (z−a)−conj(z−a) = c·i·|z−a| ⟺ 2Y = cR (X = x−a₁…).
       const c = exercice.c as number;
       const resultat = exercice.resultat;
       const angles = resultat.nature === "demiDroite" ? resultat.angles.map((a) => a.numerique) : [];
-      return { reference: (x, y) => 2 * x - c * Math.sqrt(x * x + y * y), geometrie: { type: "rayons", x0: 0, y0: 0, angles } };
+      const imaginaire = exercice.forme === "imaginaire";
+      return {
+        reference: (x, y) => {
+          const X = x - p1.a;
+          const Y = y - p1.b;
+          return 2 * (imaginaire ? Y : X) - c * Math.sqrt(X * X + Y * Y);
+        },
+        geometrie: { type: "rayons", x0: p1.a, y0: p1.b, angles },
+      };
     }
     case "cercleO": {
       const k = exercice.k as number;
@@ -529,17 +538,26 @@ export function diagnostiquerDCoefEcran2(exercice: ExerciceComplexesDCoef, valeu
 // Famille D — "modules simultanés".
 // ============================================================================
 
+/** |z| = 1 et |z| = |z−d| : d = 2p/r → (p ± qi)/r ; d = 2qi/r → (±p + qi)/r. */
+export function solutionsDModules(exercice: ExerciceComplexesDModules): Complexe[] {
+  const { p, q, r } = exercice;
+  return exercice.dImaginaire
+    ? [
+        { re: p / r, im: q / r },
+        { re: -p / r, im: q / r },
+      ]
+    : [
+        { re: p / r, im: q / r },
+        { re: p / r, im: -q / r },
+      ];
+}
+
 export function diagnostiquerDModulesEcran1(exercice: ExerciceComplexesDModules, valeurs: string[]): StatutVerification {
   void exercice;
   return diagnostiquerValeur(valeurs[0] ?? "", 1);
 }
 export function diagnostiquerDModulesEcran2(exercice: ExerciceComplexesDModules, valeurs: string[]): StatutVerification {
-  const { p, q, r } = exercice;
-  const cibles: Complexe[] = [
-    { re: p / r, im: q / r },
-    { re: p / r, im: -q / r },
-  ];
-  return diagnostiquerEnsembleComplexes(valeurs, cibles);
+  return diagnostiquerEnsembleComplexes(valeurs, solutionsDModules(exercice));
 }
 
 export function diagnostiquerEcranD(exercice: ExerciceComplexesD, phase: PhaseComplexesAvances, valeurs: string[]): StatutVerification {

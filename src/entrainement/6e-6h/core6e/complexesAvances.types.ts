@@ -91,6 +91,9 @@ export interface ExerciceComplexesBSimple {
   /** `argument`/`argumentPi` uniquement : l'angle θ de arg(z−a)≡θ (a = `p1`). `cercleA` : a = `p1`,
    * rayon = `k`. */
   theta?: AngleRemarquable;
+  /** demiDroites uniquement : `reelle` → (z−a)+conj(z−a) = c|z−a| (cos θ = c/2) ; `imaginaire` →
+   * (z−a)−conj(z−a) = c·i·|z−a| (sin θ = c/2). Origine a = `p1` (souvent 0). Absent = `reelle`. */
+  forme?: "reelle" | "imaginaire";
   /** demiDroites uniquement (`c` de `z+z̄=c|z|`, valeur numérique). */
   c?: number;
   /** demiDroites uniquement — LaTeX EXACT de `c` (réutilise `combinerModuleAngle`, voir en-tête
@@ -179,6 +182,9 @@ export interface ExerciceComplexesDModules {
   p: number;
   q: number;
   r: number;
+  /** `false` : d = 2p/r réel, solutions (p ± qi)/r. `true` : d = 2qi/r imaginaire pur, solutions
+   * (±p + qi)/r. p et q peuvent être négatifs (variété, audit 6e ch. 5). */
+  dImaginaire?: boolean;
 }
 
 export type ExerciceComplexesD = ExerciceComplexesDRatio | ExerciceComplexesDReelles | ExerciceComplexesDCoef | ExerciceComplexesDModules;

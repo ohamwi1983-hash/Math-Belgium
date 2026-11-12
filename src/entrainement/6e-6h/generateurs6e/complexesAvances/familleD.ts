@@ -138,18 +138,30 @@ export function construireFamilleDCoef(): ExerciceComplexesDCoef {
 // Sous-type "modules simultanés".
 // ============================================================================
 
+/** Triplets pythagoriciens PRIMITIFs (r ≤ 29), dans les deux ordres : les solutions restent
+ * rationnelles. Avec le signe de d et son axe (réel ou imaginaire pur), 40 exercices
+ * distincts (audit 6e ch. 5 : il n'y en avait que 4, dont deux triplets non primitifs redondants). */
 const TRIPLETS_PYTHAGORICIENS: [number, number, number][] = [
   [3, 4, 5],
   [4, 3, 5],
-  [6, 8, 10],
-  [8, 6, 10],
   [5, 12, 13],
   [12, 5, 13],
+  [8, 15, 17],
+  [15, 8, 17],
+  [7, 24, 25],
+  [24, 7, 25],
+  [20, 21, 29],
+  [21, 20, 29],
 ];
 
 export function construireFamilleDModules(): ExerciceComplexesDModules {
-  const [p, q, r] = tirerParmi(TRIPLETS_PYTHAGORICIENS);
-  return { famille: "D", sousType: "modules", p, q, r };
+  const [pAbs, qAbs, r] = tirerParmi(TRIPLETS_PYTHAGORICIENS);
+  const dImaginaire = Math.random() < 0.5;
+  // Seul le signe de la coordonnée portée par d compte (l'autre donne la même paire de solutions).
+  const signe = Math.random() < 0.5 ? 1 : -1;
+  const p = dImaginaire ? pAbs : signe * pAbs;
+  const q = dImaginaire ? signe * qAbs : qAbs;
+  return { famille: "D", sousType: "modules", p, q, r, dImaginaire };
 }
 
 // ============================================================================

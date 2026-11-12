@@ -3,7 +3,7 @@ import type { PhaseComplexesAvances } from "../moteur6e/typesComplexesAvances";
 import { calculerArgument } from "../generateurs6e/formeTrigonometrique/familleA";
 import { racineRationnelleLatex } from "../generateurs6e/complexesAvances/racineRationnelle";
 import { pgcd } from "../generateurs6e/calculPrimitives/aleatoire";
-import { ratioE } from "../moteur6e/verificationComplexesAvances";
+import { ratioE, solutionsDModules } from "../moteur6e/verificationComplexesAvances";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen42`. Dispatch sur
@@ -319,6 +319,16 @@ export function aideNiveau2A(phase: PhaseComplexesAvances): AideAvecLatex {
 // Famille B.
 // ============================================================================
 
+/** Condition des demi-droites : (z−a)+conj(z−a) = c|z−a| ou (z−a)−conj(z−a) = c·i·|z−a| (a = 0 :
+ * z+z̄ = c|z|). `c` : symbole ou valeur LaTeX. */
+function conditionDemiDroites(e: ExerciceComplexesBSimple, c: string): string {
+  const origineO = e.p1.a === 0 && e.p1.b === 0;
+  const w = origineO ? "z" : "(z-a)";
+  const wb = origineO ? "\\bar z" : "\\overline{(z-a)}";
+  const module = origineO ? "|z|" : "|z-a|";
+  return e.forme === "imaginaire" ? `${w}-${wb}=${c}\\,i\\,${module}` : `${w}+${wb}=${c}\\,${module}`;
+}
+
 function angleTheta(e: ExerciceComplexesBSimple): string {
   return e.theta?.latex ?? "0";
 }
@@ -343,8 +353,10 @@ export function consigneGeneraleB(e: ExerciceComplexesB): FragmentConsigne[] {
       return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ p₂) tel que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un imaginaire pur"), fin];
     case "apollonius":
       return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("|z-p_1|=k\\,|z-p_2|"), texte(" (k ≠ 1 donné)"), fin];
-    case "demiDroites":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ 0) tel que "), latex("z+\\bar z=c\\,|z|"), texte(" (c donné)"), fin];
+    case "demiDroites": {
+      const origineO = e.p1.a === 0 && e.p1.b === 0;
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(origineO ? " (z ≠ 0) tel que " : " (z ≠ a) tel que "), latex(conditionDemiDroites(e, "c")), texte(origineO ? " (c donné)" : " (a et c donnés)"), fin];
+    }
     case "cercleO":
       return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("z\\cdot\\bar z=k"), texte(" (k > 0 donné)"), fin];
     case "cercleA":
@@ -365,7 +377,7 @@ export function blocDonneesB(e: ExerciceComplexesB): string[] {
     case "apollonius":
       return [`p_1=${affixeLatex(e.p1)}\\quad p_2=${affixeLatex(e.p2)}\\quad k=${e.k}`];
     case "demiDroites":
-      return [`c=${e.cLatex}`];
+      return e.p1.a === 0 && e.p1.b === 0 ? [`c=${e.cLatex}`] : [`a=${affixeLatex(e.p1)}\\quad c=${e.cLatex}`];
     case "cercleO":
       return [`k=${e.k}`];
     case "cercleA":
@@ -415,7 +427,7 @@ const SUBSTITUTION_B: Record<ExerciceComplexesBSimple["sousType"], string> = {
   droite: "\\dfrac{z-p_1}{z-p_2}\\in\\mathbb{R}\\iff\\operatorname{Im}\\left[(z-p_1)\\,\\overline{(z-p_2)}\\right]=0",
   thales: "\\dfrac{z-p_1}{z-p_2}\\in i\\mathbb{R}\\iff\\operatorname{Re}\\left[(z-p_1)\\,\\overline{(z-p_2)}\\right]=0",
   apollonius: "|z-p_1|^2=k^2\\,|z-p_2|^2",
-  demiDroites: "z+\\bar z=2x\\qquad|z|=\\sqrt{x^2+y^2}",
+  demiDroites: "w+\\bar w=2\\operatorname{Re}w\\qquad w-\\bar w=2i\\operatorname{Im}w\\qquad|w|=\\sqrt{(\\operatorname{Re}w)^2+(\\operatorname{Im}w)^2}",
   cercleO: "z\\cdot\\bar z=(x+yi)(x-yi)",
   cercleA: "|z-a|^2=\\left(x-\\operatorname{Re}a\\right)^2+\\left(y-\\operatorname{Im}a\\right)^2",
   argument: "(z-a)\\,e^{-i\\theta}=\\left[(x-\\operatorname{Re}a)+(y-\\operatorname{Im}a)\\,i\\right](\\cos\\theta-i\\sin\\theta)",
@@ -423,7 +435,8 @@ const SUBSTITUTION_B: Record<ExerciceComplexesBSimple["sousType"], string> = {
 };
 export function aideNiveau2B(e: ExerciceComplexesB, phase: PhaseComplexesAvances): AideAvecLatex {
   if (e.sousType === "intersection" || phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "Substitution amorcée (simplification non faite) :", latex: SUBSTITUTION_B[e.sousType] };
+  const texteAide = e.sousType === "demiDroites" ? "Note w = z − a (w = z si a = 0) : substitution amorcée (simplification non faite) :" : "Substitution amorcée (simplification non faite) :";
+  return { texte: texteAide, latex: SUBSTITUTION_B[e.sousType] };
 }
 
 // Natures toujours proposées à l'écran "lieu structuré" (droite/cercle/demiDroite).
@@ -458,8 +471,14 @@ function equationAttendueB(e: ExerciceComplexesBSimple): string {
       const d2 = (p1.a - p2.a) ** 2 + (p1.b - p2.b) ** 2;
       return `${carreDecale("x", (p1.a - k * k * p2.a) / den)}+${carreDecale("y", (p1.b - k * k * p2.b) / den)}=${fractionLatex(k * k * d2, den * den)}`;
     }
-    case "demiDroites":
-      return e.c === 0 ? "x=0" : `2x=${e.cLatex}\\sqrt{x^2+y^2}`;
+    case "demiDroites": {
+      const X = decale("x", p1.a);
+      const Y = decale("y", p1.b);
+      const lien = e.forme === "imaginaire" ? Y : X;
+      if (e.c === 0) return `${lien}=0`;
+      const gauche = lien.length === 1 ? `2${lien}` : `2\\left(${lien}\\right)`;
+      return `${gauche}=${e.cLatex}\\sqrt{${carreDecale("x", p1.a)}+${carreDecale("y", p1.b)}}`;
+    }
     case "cercleO":
       return `x^2+y^2=${e.k}`;
     case "cercleA":
@@ -597,11 +616,14 @@ export function blocDonneesD(e: ExerciceComplexesD): string[] {
     case "coef":
       return [`z_0=${affixeLatex({ a: e.p, b: e.q })}`];
     case "modules": {
-      const num = 2 * e.p;
-      const g = pgcd(num, e.r);
-      const numReduit = num / g;
-      const denReduit = e.r / g;
-      return [denReduit === 1 ? `d=${numReduit}` : `d=\\frac{${numReduit}}{${denReduit}}`];
+      // d = 2p/r (réel) ou 2qi/r (imaginaire pur), fraction irréductible.
+      const num = 2 * (e.dImaginaire ? e.q : e.p);
+      const g = pgcd(Math.abs(num), e.r);
+      const valeur = fractionLatex(num / g, e.r / g);
+      if (!e.dImaginaire) return [`d=${valeur}`];
+      const signe = valeur.startsWith("-") ? "-" : "";
+      const abs = valeur.replace(/^-/, "");
+      return [`d=${signe}${abs.startsWith("\\frac") ? `${abs}\\,i` : `${abs}i`}`];
     }
   }
 }
@@ -987,7 +1009,7 @@ function reponseD(exercice: ExerciceComplexesD, phase: PhaseComplexesAvances): s
     }
     case "modules":
       if (phase === "dModulesEcran1") return ["|z|=1"];
-      return [affixeLatexRationnel(exercice.p / exercice.r, exercice.q / exercice.r), affixeLatexRationnel(exercice.p / exercice.r, -exercice.q / exercice.r)];
+      return solutionsDModules(exercice).map((z) => affixeLatexRationnel(z.re, z.im));
   }
 }
 

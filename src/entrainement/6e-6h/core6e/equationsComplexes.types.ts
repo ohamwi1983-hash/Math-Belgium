@@ -146,6 +146,9 @@ export interface ExerciceFamilleE {
   racineU2: ValeurComplexe;
   /** Les 4 racines de l'équation en z — piège central : 2 PAR valeur de u, jamais 1. */
   racines: [ValeurComplexe, ValeurComplexe, ValeurComplexe, ValeurComplexe];
+  /** Graine tirée à la création, pour l'ordre des options de l'écran 1 (variante réelle : peu
+   * d'exercices distincts — une graine tirée des seuls paramètres déséquilibrait les positions). */
+  graine?: number;
 }
 
 // ============================================================================

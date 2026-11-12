@@ -131,7 +131,7 @@ function construireFamilleEReelleBrut(): ExerciceFamilleE {
     racineU2,
     { re: -racineU2.re + 0, im: -racineU2.im + 0 },
   ];
-  return { famille: "E", a: aCoef, b, c, u1, u2, racineU1, racineU2, racines };
+  return { famille: "E", a: aCoef, b, c, u1, u2, racineU1, racineU2, racines, graine: Math.floor(Math.random() * 1e9) };
 }
 
 /** Cas particulier (~10 %) : b = 0 (équation z⁴ = k) ; sinon b ≠ 0. */

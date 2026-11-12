@@ -161,7 +161,7 @@ export function App6gen36() {
   }
 
   /** Refus SANS tentative : saisie illisible, forme non réduite, ou (famille F) quotient recopié avec
-   * « / ». Les champs « Quotient (polynôme en z) » ne sont pas des nombres complexes : ignorés par le
+   * « / ». Les champs « Quotient = » (polynôme en z) ne sont pas des nombres complexes : ignorés par le
    * contrôle complexe, contrôlés par `controleQuotientEffectue`. */
   function prevalider(valeurs: string[]): string | null {
     const champs = champsEcran(exercice, phase);

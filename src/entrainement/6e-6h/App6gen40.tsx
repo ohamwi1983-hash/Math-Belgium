@@ -70,7 +70,6 @@ function figureEnonce(exercice: ExerciceTransformationsPlan) {
     return (
       <PlanArgandMini
         points={[
-          { x: 0, y: 0, label: "O" },
           { x: exercice.b.a, y: exercice.b.b, label: "O′", role: "image" },
           { x: 1, y: 0, label: "U" },
           { x: imageU.a, y: imageU.b, label: "U′", role: "image" },
