@@ -24,7 +24,7 @@ const M_MIN = 1;
 const M_MAX = 3;
 const MARGE_P_MIN = 2;
 const MARGE_P_MAX = 6;
-const TENTATIVES_MAX = 500;
+const TENTATIVES_MAX = 2000;
 /** Le seuil doit tomber dans [20 % ; 80 %] de la fenêtre affichée (audit 5e ch. 1 : il tombait
  * TOUJOURS à 15 %, collé au bord gauche, et la réponse « 0 » passait la tolérance). */
 const FRACTION_FENETRE_MIN = 0.2;
@@ -204,8 +204,12 @@ export function construireScenarioCAvecFormes(formeCV: FormeCoutVariableC, forme
       // temps), xMax est dérivé de xSeuil pour GARANTIR par construction qu'il tombe à la fraction
       // basse de la fenêtre — jamais au-delà du sommet, seule vraie contrainte physique.
       xSeuil = bissectionSeuil(f, xVertex);
-      // Position du seuil TIRÉE dans la fenêtre (25 % à 65 %), plafonnée par le sommet du bénéfice.
-      const fraction = 0.25 + Math.random() * 0.4;
+      // Position du seuil TIRÉE dans la fenêtre (25 % à 65 %), plafonnée par le sommet du bénéfice ;
+      // la fenêtre garde au moins 7 unités (2 quantités lisibles x ≥ 4 doivent y tenir).
+      const fractionMax = Math.min(0.65, xSeuil / 7);
+      if (fractionMax < FRACTION_FENETRE_MIN) continue;
+      const fractionMin = Math.min(0.25, fractionMax);
+      const fraction = fractionMin + Math.random() * (fractionMax - fractionMin);
       xMax = Math.min(xVertex, xSeuil / fraction);
     }
     if (xSeuil < xMax * FRACTION_FENETRE_MIN || xSeuil > xMax * FRACTION_FENETRE_MAX) continue;

@@ -13,7 +13,8 @@ import type { ExerciceScenarioB, ModeleCoutUnitaire, PointRevele } from "../../c
 import { CONTEXTES_B1, CONTEXTES_B2, CONTEXTES_B3, CONTEXTES_B4, CONTEXTES_B5 } from "./contextesScenarioB";
 import { entierAleatoire, tirerElement } from "./utils";
 
-const X_CANDIDATS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// x ≥ 2 : « pour x = 1 puces » était agrammatical, et cu(1) = F(1) rendait un relevé trivial.
+const X_CANDIDATS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ECART_MIN_POINTS = 3;
 
 const MODELES: ModeleCoutUnitaire[] = ["B1", "B2", "B3", "B4", "B5"];
