@@ -187,7 +187,7 @@ function ajouterPoly(a: Poly, b: Poly, signe = 1): Poly {
   return nettoyerPoly(Array.from({ length: n }, (_v, i) => (a[i] ?? 0) + signe * (b[i] ?? 0)));
 }
 function multiplierPoly(a: Poly, b: Poly): Poly {
-  const r = new Array(a.length + b.length - 1).fill(0);
+  const r: number[] = Array.from({ length: a.length + b.length - 1 }, () => 0);
   a.forEach((x, i) => b.forEach((y, j) => (r[i + j] += x * y)));
   return nettoyerPoly(r);
 }
@@ -371,7 +371,15 @@ function normaliserReference(noeudBrut: MathNode): MathNode {
 }
 
 function normaliserReferenceSansOrdre(noeudBrut: MathNode): MathNode {
-  const n = sansParentheses(porterSignes(regrouper(noeudBrut)));
+  const regroupe = regrouper(noeudBrut);
+  // Sans racine : fraction rationnelle réduite (coefficients entiers premiers entre eux, facteurs
+  // linéaires communs simplifiés, dénominateur à coefficient dominant positif) — « 14x/(10x+20) »
+  // devient « 7x/(5x+10) ».
+  if (regroupe.filter((m) => m.type === "FunctionNode").length === 0) {
+    const reduite = regrouperRationnelEnX(regroupe);
+    if (reduite !== null) return reduite;
+  }
+  const n = sansParentheses(porterSignes(regroupe));
   if (n.type === "OperatorNode" && (n as unknown as { fn: string }).fn === "divide") {
     let [num, den] = (n as unknown as { args: MathNode[] }).args;
     num = reduireSiSomme(num);
@@ -390,7 +398,7 @@ function nettoyerLatexReference(brut: string): string {
   return brut
     .replace(/\\cdot\s*(?=[a-zA-Z\\{(])/g, "")
     .replace(/\\frac(?![a-zA-Z])/g, "\\dfrac")
-    .replace(/-\s*\\left\(([^()+\-]+?)\\right\)/g, "-$1")
+    .replace(/-\s*\\left\(([^()+-]+?)\\right\)/g, "-$1")
     .replace(/\{\s+/g, "{")
     .replace(/\s+\}/g, "}")
     .replace(/-\s+(?=[a-zA-Z0-9\\])/g, "-")

@@ -2514,3 +2514,23 @@ paths:
   ligne). Vérifié : `npm run build` propre, page réelle 390 clair/sombre et 1280 : 0 débordement,
   0 `$` isolé, 0 erreur KaTeX, 0 NaN ; 14 ateliers montés sans débordement interne ; figure
   épinglée 6 ok / 0 ko à 390 px, 7 ok / 0 ko à 1280 px (les autres tiennent à l'écran).
+
+- **5e (4h), Chapitre 1 — Fonctions composées : corrections des générateurs** (audit 5gen1–5,
+  quiz 5gen39, accepté en entier). 5gen1 : plus de blocage après une erreur de radicande (√N/D),
+  aides de méthode sans symbole ni conclusion, une seule tentative sur l'écran CE, condition
+  toujours vraie « x²+… ≠ 0 » acceptée comme « Aucune CE », `verifierEnsembleReelGuide` devenu
+  ensembliste (ℝ∖{2} ≡ ]−∞;2[∪]2;+∞[ — partagé, n'accepte que des équivalents en plus),
+  « −\dfrac{5}{3} », coefficients négatifs tirés, trinômes sans racine variés, « \operatorname{dom}f ».
+  5gen2 : décomposition triviale refusée (≥ 2 lignes, fonctions de référence, sans identité, message
+  sans perte de tentative), f construite couche par couche (a(…)+b non distribué, termes ordonnés),
+  valeurs absolues redondantes retirées, champs vidés, ∛/÷/variable t acceptés. 5gen3 : toute forme
+  équivalente bien structurée acceptée (forme non simplifiée → message sans perte de tentative),
+  référence normalisée, écran C2 = conditions élevées au carré seulement, aides corrigées, conditions
+  sans ordre imposé, tirage équilibré. 5gen4 : graphes SVG autonomes à grille unitaire fixe,
+  segments droits, extrémités pleines, « − » ; 1 ou 2 questions « n'existe pas », ordre mélangé ;
+  une seule tentative sur le choix d'existence. 5gen5 : A3–A5 retirés (contextes absurdes), A2 avec
+  relevés chiffrés, B en valeurs exactes, C sur tableau de valeurs avec une seule lecture graphique
+  (seuil, tolérance proportionnelle), aides en KaTeX, corrigé papier en b/3 exact. Quiz 5gen39 :
+  140 affirmations en KaTeX, jargon et doublons retirés, 20 par thème (10/10). Contenu : formulaire
+  réécrit (15 formules, conditions descriptives), deux démonstrations (associativité ; pourquoi
+  dom(f∘g) exige x ∈ dom g et g(x) ∈ dom f), énoncés par clé, chapitre vérifié au build.
