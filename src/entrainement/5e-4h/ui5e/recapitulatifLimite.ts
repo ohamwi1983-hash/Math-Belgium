@@ -43,7 +43,7 @@ export function calculerRecapitulatifLimite(etat: EtatSessionLimite): EntreeReca
     entrees.push({
       libelle: LIBELLE_PHASE_LIMITE[phase],
       estLatex: true,
-      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"),
+      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join(" \\quad "),
       revele,
     });
   }

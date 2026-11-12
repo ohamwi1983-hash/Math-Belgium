@@ -56,7 +56,7 @@ function entreeUnique(libelle: string, valeur: string, estLatex: boolean, revele
  * ex. « sin(x)=1,5 sin(x)=−0,5 »). */
 function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): EntreeRecapitulatif {
   const separees = valeurs.map((v, i) => (i < valeurs.length - 1 ? `${v}\\;;` : v));
-  return { libelle, estLatex: true, valeur: valeurs.join("\\quad"), valeurs: separees, revele };
+  return { libelle, estLatex: true, valeur: valeurs.join(" \\quad "), valeurs: separees, revele };
 }
 
 /**

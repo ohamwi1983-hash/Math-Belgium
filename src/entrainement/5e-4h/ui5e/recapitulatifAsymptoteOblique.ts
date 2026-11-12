@@ -30,7 +30,7 @@ export function calculerRecapitulatifAsymptoteOblique(etat: EtatSessionAsymptote
     entrees.push({
       libelle: LIBELLE_PHASE_ASYMPTOTE_OBLIQUE[phase],
       estLatex: true,
-      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"),
+      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join(" \\quad "),
       revele: etat.revelesPartiels[phase] ?? false,
     });
   }

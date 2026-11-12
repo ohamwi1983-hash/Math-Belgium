@@ -27,7 +27,7 @@ export function calculerRecapitulatifLectureGraphiqueLimites(etat: EtatSessionLe
     entrees.push({
       libelle: LIBELLE_PHASE_LECTURE_GRAPHIQUE[phase],
       estLatex: true,
-      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"),
+      valeur: formatReponseAttenduePhaseLatex(exercice, phase).join(" \\quad "),
       revele: etat.revelesPartiels[phase] ?? false,
     });
   }

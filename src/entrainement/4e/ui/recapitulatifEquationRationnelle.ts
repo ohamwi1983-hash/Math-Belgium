@@ -124,7 +124,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
     entrees.push({
       libelle: exercice.fractionsSimplifiables.length === 1 ? "Fraction simplifiée" : "Fractions simplifiées",
       estLatex: true,
-      valeur: valeurs.join("\\quad"),
+      valeur: valeurs.join(" \\quad "),
       valeurs,
       revele: etat.simplifierRevele,
     });

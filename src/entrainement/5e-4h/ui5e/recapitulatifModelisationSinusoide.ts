@@ -37,7 +37,7 @@ export function calculerRecapitulatifModelisationSinusoide(etat: EtatSessionMode
     if (termes.length === 1) {
       entrees.push({ libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: termes[0], revele });
     } else {
-      entrees.push({ libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: termes.join("\\quad"), valeurs: termes, revele });
+      entrees.push({ libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: termes.join(" \\quad "), valeurs: termes, revele });
     }
   }
   return entrees;
