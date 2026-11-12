@@ -315,10 +315,18 @@
         svg.appendChild(svgEl(ns, "line", { x1: p[0].toFixed(2), y1: p[1].toFixed(2), x2: pz[0].toFixed(2), y2: pz[1].toFixed(2), class: "vers-z" }));
       });
       if (dansCadre) svg.appendChild(svgEl(ns, "circle", { cx: pz[0].toFixed(2), cy: pz[1].toFixed(2), r: 6, class: "point-z" }));
-      var gauche = pz[0] > LARGEUR / 2;
-      var etZ = svgEl(ns, "text", { x: (pz[0] + (gauche ? -10 : 10)).toFixed(2), y: (pz[1] + (pz[1] < 40 ? 16 : -10)).toFixed(2), "text-anchor": gauche ? "end" : "start", class: "etiquette etiquette-z" });
-      etZ.textContent = dansCadre ? "z" : "z (hors cadre, |z| = " + formatNombreFr(r, 2).replace(/,00$/, "") + ")";
-      svg.appendChild(etZ);
+      if (dansCadre) {
+        var gauche = pz[0] > LARGEUR / 2;
+        var etZ = svgEl(ns, "text", { x: (pz[0] + (gauche ? -10 : 10)).toFixed(2), y: (pz[1] + (pz[1] < 40 ? 16 : -10)).toFixed(2), "text-anchor": gauche ? "end" : "start", class: "etiquette etiquette-z" });
+        etZ.textContent = "z";
+        svg.appendChild(etZ);
+      } else {
+        // z hors cadre : petit losange au bord, légende fixe en haut à gauche (jamais sur une racine)
+        svg.appendChild(svgEl(ns, "path", { d: "M" + pz[0].toFixed(2) + " " + (pz[1] - 6).toFixed(2) + " l6 6 l-6 6 l-6 -6 Z", class: "point-z" }));
+        var etH = svgEl(ns, "text", { x: 8, y: 16, class: "etiquette etiquette-z" });
+        etH.textContent = "◆ z hors cadre (|z| = " + formatNombreFr(r, 2).replace(/,00$/, "") + ")";
+        svg.appendChild(etH);
+      }
     }
 
     var espacementDeg = 360 / n;

@@ -390,8 +390,8 @@
       this._chemin(img21, "forme-image");
       this._chemin(img12, "forme-image2");
       var memes = Math.hypot(img21[0].x - img12[0].x, img21[0].y - img12[0].y) < 0.02;
-      this._point(img21[0], "point-image", "T₂(T₁(M))", "etiquette-image");
-      if (!memes) this._point(img12[0], "point-image2", "T₁(T₂(M))", "etiquette-image2");
+      this._point(img21[0], "point-image", "M″", "etiquette-image");
+      if (!memes) this._point(img12[0], "point-image2", "M‴", "etiquette-image2");
       this._pointM();
 
       var a = cMul(t1.a, t2.a);
@@ -401,8 +401,8 @@
         " — le même dans les deux ordres (module " + formatNombreFr(cMod(a), 2) + ", argument " +
         formatNombreFr((((t1.angle + t2.angle) % 360) + 360) % 360, 0) + "°).";
       this._centreTexte.textContent =
-        "T₁ puis T₂ : z ↦ " + affine(a, b21) +
-        "   |   T₂ puis T₁ : z ↦ " + affine(a, b12) + "   |   " +
+        "T₁ puis T₂ (point M″, orange) : z ↦ " + affine(a, b21) +
+        "   |   T₂ puis T₁ (point M‴, vert) : z ↦ " + affine(a, b12) + "   |   " +
         (memes ? "Même image : ici, l'ordre ne compte pas (même centre, ou deux translations)." : "Images différentes : l'ordre compte, car les centres diffèrent.");
     }
 
