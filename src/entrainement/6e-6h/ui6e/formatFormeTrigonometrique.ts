@@ -50,6 +50,13 @@ function latex(valeur: string): FragmentConsigne {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Placeholders hors de l'espace des tirages (audit 6e ch. 5, point 11) : r ∈ {1 ; …} sans jamais 5,
+ * aucun argument tiré ne vaut 2π/5, aucun module tiré ne vaut 5√3 — jamais une réponse possible,
+ * jamais de « * » ni de point décimal. */
+const PH_MODULE = "ex : 5";
+const PH_MODULE_RADICAL = "ex : 5sqrt(3)";
+const PH_ANGLE = "ex : 2pi/5";
+
 // ============================================================================
 // Assemblage "a+bi" — voir en-tête de fichier.
 // ============================================================================
@@ -135,12 +142,23 @@ function latexModuleDepuisAngle(r: number, angleQ: number): string {
   return `${Math.round(r)}`;
 }
 
-function decrireQuadrant(a: number, b: number): string {
-  if (a > 0 && b > 0) return "1 (a>0, b>0)";
-  if (a < 0 && b > 0) return "2 (a<0, b>0)";
-  if (a < 0 && b < 0) return "3 (a<0, b<0)";
-  if (a > 0 && b < 0) return "4 (a>0, b<0)";
-  return "sur un axe (a=0 ou b=0)";
+/** Quadrant du point (a ; b), en LaTeX (aides en LaTeX — audit 6e ch. 5, point 12). */
+function quadrantLatex(a: number, b: number): string {
+  if (a > 0 && b > 0) return "\\text{quadrant } 1\\ (a>0,\\ b>0)";
+  if (a < 0 && b > 0) return "\\text{quadrant } 2\\ (a<0,\\ b>0)";
+  if (a < 0 && b < 0) return "\\text{quadrant } 3\\ (a<0,\\ b<0)";
+  if (a > 0 && b < 0) return "\\text{quadrant } 4\\ (a>0,\\ b<0)";
+  return "\\text{sur un axe } (a=0\\text{ ou }b=0)";
+}
+
+/** cos et sin EXACTS d'un angle de la famille de π/4, π/6 ou π/3 (aide 2 de la famille E). */
+function cosSinRemarquableLatex(angle: { q: number; numerique: number }): { cos: string; sin: string } {
+  const signe = (v: number) => (v < 0 ? "-" : "");
+  const c = Math.cos(angle.numerique);
+  const sn = Math.sin(angle.numerique);
+  if (angle.q === 4) return { cos: `${signe(c)}\\frac{\\sqrt{2}}{2}`, sin: `${signe(sn)}\\frac{\\sqrt{2}}{2}` };
+  if (angle.q === 6) return { cos: `${signe(c)}\\frac{\\sqrt{3}}{2}`, sin: `${signe(sn)}\\frac{1}{2}` };
+  return { cos: `${signe(c)}\\frac{1}{2}`, sin: `${signe(sn)}\\frac{\\sqrt{3}}{2}` };
 }
 
 const LIBELLE_CONDITION: Record<ConditionD, string> = {
@@ -151,14 +169,16 @@ const LIBELLE_CONDITION: Record<ConditionD, string> = {
 };
 
 const CIBLE_LATEX_CONDITION: Record<ConditionD, string> = {
-  reelPositif: "0",
-  reelNegatif: "\\pi",
-  imaginairePurPositif: "\\frac{\\pi}{2}",
-  imaginairePurNegatif: "\\frac{3\\pi}{2}",
+  reelPositif: "",
+  reelNegatif: "\\pi+",
+  imaginairePurPositif: "\\frac{\\pi}{2}+",
+  imaginairePurNegatif: "-\\frac{\\pi}{2}+",
 };
 
-function congruenceLatex(condition: ConditionD): string {
-  return `n\\theta\\equiv ${CIBLE_LATEX_CONDITION[condition]}\\ (\\text{mod } 2\\pi)`;
+/** Condition sur nθ écrite « nθ = c + 2pπ » (audit 6e ch. 5, point 32 : la notation ≡ (mod 2π)
+ * n'est pas celle du cours). Exportée pour l'écran de choix et la fiche de réponse. */
+export function congruenceLatex(condition: ConditionD): string {
+  return `n\\theta=${CIBLE_LATEX_CONDITION[condition]}2p\\pi`;
 }
 
 export { LIBELLE_CONDITION };
@@ -168,33 +188,33 @@ export { LIBELLE_CONDITION };
 // ============================================================================
 
 export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("Détermine le module et l'argument du nombre complexe suivant, puis exprime-le sous forme trigonométrique et exponentielle.")];
+  return [texte("Détermine le module r et un argument θ du nombre complexe suivant.")];
 }
 export function blocDonneesA(e: ExerciceFormeTrigA): string[] {
   return [`z=${assembleValeurExacteAPlusBI(e.a, e.b)}`];
 }
 export function consigneEcranA(phase: PhaseFormeTrigonometrique): FragmentConsigne[] {
   if (phase === "aEcran1") return [texte("Calcule le module "), latex("r=\\sqrt{a^2+b^2}"), texte(".")];
-  return [texte("Calcule l'argument θ (attention au quadrant : "), latex("\\arctan(b/a)"), texte(" n'est valable directement que si a>0).")];
+  return [texte("Calcule un argument θ de z, en radians. Attention au quadrant : "), latex("\\arctan\\frac{b}{a}"), texte(" ne convient directement que si "), latex("a>0"), texte(".")];
 }
 export function etatActuelA(e: ExerciceFormeTrigA, phase: PhaseFormeTrigonometrique): string[] | null {
   if (phase === "aEcran2") return [`r=${e.r}\\text{ (confirmé)}`];
   return null;
 }
 export function champsA(phase: PhaseFormeTrigonometrique): ChampDef[] {
-  if (phase === "aEcran1") return [{ type: "texte", label: "r =", placeholder: "ex : 2" }];
-  return [{ type: "texte", label: "θ =", placeholder: "ex : pi/3" }];
+  if (phase === "aEcran1") return [{ type: "texte", label: "r =", placeholder: PH_MODULE }];
+  return [{ type: "texte", label: "θ =", placeholder: PH_ANGLE }];
 }
 export function niveauAideMaxA(phase: PhaseFormeTrigonometrique): number {
   return phase === "aEcran2" ? 2 : 0;
 }
 export function aideNiveau1A(phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return { texte: "arctan(b/a) donne directement le bon angle SEULEMENT si a>0. Si a<0, il faut ajouter ou soustraire π selon le quadrant du point (a;b).", latex: "\\arctan\\left(\\dfrac{b}{a}\\right) \\text{ valide si } a>0" };
+  return { texte: "La formule ci-dessous ne donne directement le bon angle que dans le cas indiqué ; sinon, ajoute ou retire π selon le quadrant du point (a ; b) :", latex: "\\theta=\\arctan\\frac{b}{a}\\quad\\text{si } a>0" };
 }
 export function aideNiveau2A(e: ExerciceFormeTrigA, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return { texte: `Le point (a;b) est situé dans le quadrant ${decrireQuadrant(e.a.numerique, e.b.numerique)} — valeur exacte de l'argument non donnée ici.`, latex: null };
+  return { texte: "Position du point (a ; b) — la valeur de θ reste à trouver :", latex: quadrantLatex(e.a.numerique, e.b.numerique) };
 }
 
 // ============================================================================
@@ -211,9 +231,9 @@ export function blocDonneesB(e: ExerciceFormeTrigB): string[] {
 }
 export function consigneEcranB(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometrique): FragmentConsigne[] {
   if (phase === "bEcran1") return e.sousType === "puissance" ? [texte("Calcule le module et l'argument de z.")] : [texte("Calcule le module et l'argument de chaque facteur séparément.")];
-  if (e.sousType === "produit") return [texte("Combine à partir des valeurs CONFIRMÉES : multiplie les modules, additionne les arguments.")];
-  if (e.sousType === "quotient") return [texte("Combine à partir des valeurs CONFIRMÉES : divise les modules, soustrais les arguments.")];
-  return [texte("Combine à partir des valeurs CONFIRMÉES : élève le module à la puissance n, multiplie l'argument par n.")];
+  if (e.sousType === "produit") return [texte("Combine les valeurs confirmées : multiplie les modules, additionne les arguments.")];
+  if (e.sousType === "quotient") return [texte("Combine les valeurs confirmées : divise les modules, soustrais les arguments.")];
+  return [texte("Combine les valeurs confirmées : élève le module à la puissance n, multiplie l'argument par n.")];
 }
 export function etatActuelB(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometrique): string[] | null {
   if (phase !== "bEcran2") return null;
@@ -221,21 +241,23 @@ export function etatActuelB(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometri
   return [`r_1=${e.z1.r}\\text{, }\\theta_1=${e.z1.angle.latex}\\text{, }r_2=${e.z2.r}\\text{, }\\theta_2=${e.z2.angle.latex}\\text{ (confirmés)}`];
 }
 export function champsB(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometrique): ChampDef[] {
-  if (phase === "bEcran2") return [{ type: "texte", label: "r =", placeholder: "ex : 6" }, { type: "texte", label: "θ =", placeholder: "ex : pi/2" }];
-  if (e.sousType === "puissance") return [{ type: "texte", label: "r =", placeholder: "ex : 2" }, { type: "texte", label: "θ =", placeholder: "ex : pi/4" }];
+  if (phase === "bEcran2") return [{ type: "texte", label: "r =", placeholder: PH_MODULE }, { type: "texte", label: "θ =", placeholder: PH_ANGLE }];
+  if (e.sousType === "puissance") return [{ type: "texte", label: "r =", placeholder: PH_MODULE }, { type: "texte", label: "θ =", placeholder: PH_ANGLE }];
   return [
-    { type: "texte", label: "r₁ =", placeholder: "ex : 2" },
-    { type: "texte", label: "θ₁ =", placeholder: "ex : pi/3" },
-    { type: "texte", label: "r₂ =", placeholder: "ex : 3" },
-    { type: "texte", label: "θ₂ =", placeholder: "ex : pi/4" },
+    { type: "texte", label: "r₁ =", placeholder: PH_MODULE },
+    { type: "texte", label: "θ₁ =", placeholder: PH_ANGLE },
+    { type: "texte", label: "r₂ =", placeholder: "ex : 7" },
+    { type: "texte", label: "θ₂ =", placeholder: "ex : 3pi/5" },
   ];
 }
 export function niveauAideMaxB(phase: PhaseFormeTrigonometrique): number {
   return phase === "bEcran2" ? 2 : 0;
 }
-export function aideNiveau1B(phase: PhaseFormeTrigonometrique): AideAvecLatex {
+export function aideNiveau1B(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;
-  return { texte: "Rappel des 3 propriétés : produit → multiplier les modules et additionner les arguments ; quotient → diviser les modules et soustraire les arguments ; puissance → élever le module à la puissance et multiplier l'argument.", latex: null };
+  if (e.sousType === "produit") return { texte: "Propriétés du produit :", latex: "|z_1z_2|=|z_1|\\,|z_2|\\qquad\\arg(z_1z_2)=\\arg z_1+\\arg z_2" };
+  if (e.sousType === "quotient") return { texte: "Propriétés du quotient :", latex: "\\left|\\frac{z_1}{z_2}\\right|=\\frac{|z_1|}{|z_2|}\\qquad\\arg\\frac{z_1}{z_2}=\\arg z_1-\\arg z_2" };
+  return { texte: "Propriétés de la puissance :", latex: "|z^n|=|z|^n\\qquad\\arg(z^n)=n\\arg z" };
 }
 export function aideNiveau2B(e: ExerciceFormeTrigB, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;
@@ -258,8 +280,8 @@ export function consigneEcranC(phase: PhaseFormeTrigonometrique): FragmentConsig
   // Bug réel corrigé ici (audit LaTeX 6e-6h, lot H) : cette consigne contenait le texte source LaTeX
   // "(r(\cos\theta+i\sin\theta))^n=..." tel quel dans une string brute, affiché avec les backslashes
   // littéraux à l'écran au lieu d'être rendu par KaTeX.
-  if (phase === "cEcran2") return [texte("Applique la formule de De Moivre : "), latex("(r(\\cos\\theta+i\\sin\\theta))^n=r^n(\\cos(n\\theta)+i\\sin(n\\theta))"), texte(" — réduis l'argument modulo 2π si nécessaire.")];
-  return [texte("Reconvertis le résultat CONFIRMÉ à l'étape précédente en forme algébrique a+bi.")];
+  if (phase === "cEcran2") return [texte("Applique la formule de De Moivre : "), latex("(r(\\cos\\theta+i\\sin\\theta))^n=r^n(\\cos(n\\theta)+i\\sin(n\\theta))"), texte(", puis ramène nθ dans l'intervalle "), latex("]-\\pi\\,;\\pi]"), texte(".")];
+  return [texte("Reconvertis le résultat confirmé à l'étape précédente en forme algébrique a+bi.")];
 }
 export function etatActuelC(e: ExerciceFormeTrigC, phase: PhaseFormeTrigonometrique): string[] | null {
   const rThetaConfirmes = `r=${latexModuleDepuisAngle(e.r, e.angle.q)}\\text{, }\\theta=${e.angle.latex}\\text{ (confirmés)}`;
@@ -270,9 +292,9 @@ export function etatActuelC(e: ExerciceFormeTrigC, phase: PhaseFormeTrigonometri
   return null;
 }
 export function champsC(phase: PhaseFormeTrigonometrique): ChampDef[] {
-  if (phase === "cEcran1") return [{ type: "texte", label: "r =", placeholder: "ex : sqrt(2)" }, { type: "texte", label: "θ =", placeholder: "ex : pi/4" }];
-  if (phase === "cEcran2") return [{ type: "texte", label: "rⁿ =", placeholder: "ex : 2" }, { type: "texte", label: "nθ =", placeholder: "ex : pi/2" }];
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 2i" }];
+  if (phase === "cEcran1") return [{ type: "texte", label: "r =", placeholder: PH_MODULE_RADICAL }, { type: "texte", label: "θ =", placeholder: PH_ANGLE }];
+  if (phase === "cEcran2") return [{ type: "texte", label: "rⁿ =", placeholder: PH_MODULE_RADICAL }, { type: "texte", label: "nθ =", placeholder: PH_ANGLE }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 3−2i" }];
 }
 export function niveauAideMaxC(phase: PhaseFormeTrigonometrique): number {
   return phase === "cEcran2" ? 2 : 0;
@@ -283,7 +305,7 @@ export function aideNiveau1C(phase: PhaseFormeTrigonometrique): AideAvecLatex {
 }
 export function aideNiveau2C(e: ExerciceFormeTrigC, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "cEcran2") return AUCUNE_AIDE;
-  return { texte: "nθ calculé, PAS ENCORE réduit modulo 2π :", latex: `n\\theta=${e.n}\\times\\left(${e.angle.latex}\\right)` };
+  return { texte: "Produit à calculer, puis à ramener dans ]−π ; π] :", latex: `n\\theta=${e.n}\\times\\left(${e.angle.latex}\\right)` };
 }
 
 // ============================================================================
@@ -298,8 +320,8 @@ export function blocDonneesD(e: ExerciceFormeTrigD): string[] {
 }
 export function consigneEcranD(phase: PhaseFormeTrigonometrique): FragmentConsigne[] {
   if (phase === "dEcran1") return [texte("Détermine l'argument θ de z.")];
-  if (phase === "dEcran2") return [texte("Pose l'équation de congruence sur nθ (mod 2π) correspondant à la condition demandée.")];
-  return [texte("Résous pour n à partir de l'équation CONFIRMÉE : exprime l'ensemble des solutions sous la forme "), latex("n\\equiv k\\ (\\text{mod }m)"), texte(".")];
+  if (phase === "dEcran2") return [texte("Choisis l'équation sur nθ qui traduit la condition demandée ("), latex("p\\in\\mathbb{Z}"), texte(").")];
+  return [texte("Résous l'équation confirmée : écris les solutions sous la forme "), latex("n=k+m\\,p"), texte(", avec "), latex("p\\in\\mathbb{Z}"), texte(" et m > 0.")];
 }
 export function etatActuelD(e: ExerciceFormeTrigD, phase: PhaseFormeTrigonometrique): string[] | null {
   const thetaConfirme = `\\theta=${e.z.angle.latex}\\text{ (confirmé)}`;
@@ -310,8 +332,8 @@ export function etatActuelD(e: ExerciceFormeTrigD, phase: PhaseFormeTrigonometri
   return null;
 }
 export function champsD(phase: PhaseFormeTrigonometrique): ChampDef[] {
-  if (phase === "dEcran1") return [{ type: "texte", label: "θ =", placeholder: "ex : pi/3" }];
-  if (phase === "dEcran3") return [{ type: "texte", label: "k =", placeholder: "ex : 3" }, { type: "texte", label: "m =", placeholder: "ex : 12" }];
+  if (phase === "dEcran1") return [{ type: "texte", label: "θ =", placeholder: PH_ANGLE }];
+  if (phase === "dEcran3") return [{ type: "texte", label: "k =", placeholder: "ex : 5" }, { type: "texte", label: "m =", placeholder: "ex : 9" }];
   return []; // dEcran2 : écran de CHOIX, aucun champ texte — voir EtapeChoixCongruenceFormeTrigonometrique.
 }
 export function niveauAideMaxD(phase: PhaseFormeTrigonometrique): number {
@@ -319,11 +341,12 @@ export function niveauAideMaxD(phase: PhaseFormeTrigonometrique): number {
 }
 export function aideNiveau1D(phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "dEcran2") return AUCUNE_AIDE;
-  return { texte: "Les 4 conditions possibles sur l'argument (modulo 2π) : réel positif → nθ≡0 ; réel négatif → nθ≡π ; imaginaire pur positif → nθ≡π/2 ; imaginaire pur négatif → nθ≡3π/2.", latex: "n\\theta\\equiv 0,\\ \\pi,\\ \\dfrac{\\pi}{2}\\ \\text{ou}\\ \\dfrac{3\\pi}{2}\\ (\\text{mod } 2\\pi)" };
+  return { texte: "D'après la formule de De Moivre, un argument de zⁿ vaut :", latex: "\\arg(z^n)=n\\theta" };
 }
-export function aideNiveau2D(e: ExerciceFormeTrigD, phase: PhaseFormeTrigonometrique): AideAvecLatex {
+export function aideNiveau2D(phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "dEcran2") return AUCUNE_AIDE;
-  return { texte: `Condition correspondant à "${LIBELLE_CONDITION[e.condition]}" (non résolue) :`, latex: congruenceLatex(e.condition) };
+  // Ne désigne pas la condition de l'exercice : l'élève doit encore faire la correspondance.
+  return { texte: "Argument (à 2pπ près) d'un nombre situé sur chaque demi-axe :", latex: "\\begin{array}{ll}\\text{réel positif} & 0\\\\ \\text{réel négatif} & \\pi\\\\ \\text{imaginaire pur positif} & \\frac{\\pi}{2}\\\\ \\text{imaginaire pur négatif} & -\\frac{\\pi}{2}\\end{array}" };
 }
 
 // ============================================================================
@@ -331,43 +354,46 @@ export function aideNiveau2D(e: ExerciceFormeTrigD, phase: PhaseFormeTrigonometr
 // ============================================================================
 
 export function consigneGeneraleE(): FragmentConsigne[] {
-  return [texte("Déduis les valeurs exactes de cos et sin de l'angle résultant, en comparant 2 calculs du même nombre complexe.")];
+  return [texte("Calcule le même nombre complexe de deux façons pour en déduire les valeurs exactes de cos θ et sin θ, où θ est l'angle obtenu.")];
 }
 export function blocDonneesE(e: ExerciceFormeTrigE): string[] {
   const symbole = e.operation === "produit" ? "\\cdot\\," : "/";
-  return [`z_1=e^{${formatExpIAngle(e.alpha.latex)}}\\quad z_2=e^{${formatExpIAngle(e.beta.latex)}}`, `z_1${symbole}z_2=\\,?`];
+  return [`z_1=e^{${formatExpIAngle(e.alpha.latex)}} \\quad z_2=e^{${formatExpIAngle(e.beta.latex)}}`, `z_1${symbole}z_2=e^{i\\theta}=\\,?`];
 }
-export function consigneEcranE(phase: PhaseFormeTrigonometrique): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Calcule directement le résultat via les exposants (loi des exposants de l'exponentielle complexe).")];
-  if (phase === "eEcran2") return [texte("Calcule le même résultat en substituant cos+isin (conjugué du dénominateur si c'est un quotient), sous forme a+bi.")];
-  return [texte("Égale les 2 formes CONFIRMÉES pour en déduire cos et sin de l'angle résultant.")];
+export function consigneEcranE(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): FragmentConsigne[] {
+  if (phase === "eEcran1") {
+    const loi = e.operation === "produit" ? "e^{i\\alpha}\\cdot e^{i\\beta}=e^{i(\\alpha+\\beta)}" : "\\frac{e^{i\\alpha}}{e^{i\\beta}}=e^{i(\\alpha-\\beta)}";
+    return [texte("Calcule l'angle θ grâce aux propriétés des exposants : "), latex(loi), texte(".")];
+  }
+  return [texte("Développe le même calcul sous forme a+bi : par identification, a = cos θ et b = sin θ. Donne leurs valeurs exactes (avec des racines carrées).")];
 }
 export function etatActuelE(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): string[] | null {
-  const angleResultatConfirme = `\\text{Angle résultant confirmé : }${e.angleResultat.latex}`;
-  if (phase === "eEcran2") return [angleResultatConfirme];
-  // Écran 3 : cumule l'angle résultant (écran 1) ET le développement algébrique (écran 2), du plus
-  // ancien au plus récent — jamais seulement l'écran immédiatement précédent (audit transversal
-  // "état actuel cumulatif").
-  if (phase === "eEcran3") return [angleResultatConfirme, `e^{${formatExpIAngle(e.angleResultat.latex)}}=${assembleAPlusBI(e.aFinal, e.bFinal)}\\text{ (confirmés)}`];
+  if (phase === "eEcran2") return [`\\theta=${e.angleResultat.latex}\\text{ (confirmé)}`];
   return null;
 }
 export function champsE(phase: PhaseFormeTrigonometrique): ChampDef[] {
-  if (phase === "eEcran1") return [{ type: "texte", label: "Angle =", placeholder: "ex : pi" }];
-  if (phase === "eEcran2") return [{ type: "texte", label: "Résultat =", placeholder: "ex : -1" }];
-  return [{ type: "texte", label: "cos =", placeholder: "ex : -1" }, { type: "texte", label: "sin =", placeholder: "ex : 0" }];
+  if (phase === "eEcran1") return [{ type: "texte", label: "θ =", placeholder: PH_ANGLE }];
+  return [
+    { type: "texte", label: "cos θ =", placeholder: "ex : (sqrt(7)+1)/3" },
+    { type: "texte", label: "sin θ =", placeholder: "ex : (sqrt(7)+1)/3" },
+  ];
 }
 export function niveauAideMaxE(phase: PhaseFormeTrigonometrique): number {
   return phase === "eEcran2" ? 2 : 0;
 }
 export function aideNiveau1E(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "eEcran2") return AUCUNE_AIDE;
-  if (e.operation === "quotient") return { texte: "Pour un quotient, multiplie numérateur ET dénominateur par le conjugué du dénominateur.", latex: null };
-  return { texte: "Pour un produit, développe directement (cos α+i sin α)(cos β+i sin β), en utilisant i²=-1.", latex: "(\\cos\\alpha+i\\sin\\alpha)(\\cos\\beta+i\\sin\\beta), \\quad i^2=-1" };
+  if (e.operation === "quotient") return { texte: "Les deux nombres sont de module 1 : diviser par le second revient à multiplier par son conjugué, puis développer avec i² = −1 :", latex: "\\frac{e^{i\\alpha}}{e^{i\\beta}}=(\\cos\\alpha+i\\sin\\alpha)(\\cos\\beta-i\\sin\\beta)" };
+  return { texte: "Développe le produit des formes trigonométriques, avec i² = −1 :", latex: "e^{i\\alpha}\\cdot e^{i\\beta}=(\\cos\\alpha+i\\sin\\alpha)(\\cos\\beta+i\\sin\\beta)" };
 }
 export function aideNiveau2E(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "eEcran2") return AUCUNE_AIDE;
-  const symbole = e.operation === "produit" ? "\\cdot\\," : "/";
-  return { texte: "Développement posé (calcul final non fait) :", latex: `(\\cos(${e.alpha.latex})+i\\sin(${e.alpha.latex}))${symbole}(\\cos(${e.beta.latex})+i\\sin(${e.beta.latex}))` };
+  const a = cosSinRemarquableLatex(e.alpha);
+  const b = cosSinRemarquableLatex(e.beta);
+  return {
+    texte: "Valeurs remarquables à utiliser dans le développement (le calcul reste à faire) :",
+    latex: `\\begin{array}{ll}\\cos(${e.alpha.latex})=${a.cos} & \\sin(${e.alpha.latex})=${a.sin}\\\\ \\cos(${e.beta.latex})=${b.cos} & \\sin(${e.beta.latex})=${b.sin}\\end{array}`,
+  };
 }
 
 // ============================================================================
@@ -415,7 +441,7 @@ export function consigneEcran(exercice: ExerciceFormeTrigonometrique, phase: Pha
     case "D":
       return consigneEcranD(phase);
     case "E":
-      return consigneEcranE(phase);
+      return consigneEcranE(exercice, phase);
   }
 }
 
@@ -469,7 +495,7 @@ export function aideNiveau1(exercice: ExerciceFormeTrigonometrique, phase: Phase
     case "A":
       return aideNiveau1A(phase);
     case "B":
-      return aideNiveau1B(phase);
+      return aideNiveau1B(exercice, phase);
     case "C":
       return aideNiveau1C(phase);
     case "D":
@@ -488,7 +514,7 @@ export function aideNiveau2(exercice: ExerciceFormeTrigonometrique, phase: Phase
     case "C":
       return aideNiveau2C(exercice, phase);
     case "D":
-      return aideNiveau2D(exercice, phase);
+      return aideNiveau2D(phase);
     case "E":
       return aideNiveau2E(exercice, phase);
   }
@@ -503,11 +529,10 @@ export const LIBELLE_PHASE: Record<PhaseFormeTrigonometrique, string> = {
   cEcran2: "Étape 2 (De Moivre)",
   cEcran3: "Étape 3 (forme a+bi)",
   dEcran1: "Étape 1 (argument)",
-  dEcran2: "Étape 2 (congruence posée)",
+  dEcran2: "Étape 2 (équation sur nθ)",
   dEcran3: "Étape 3 (résolution en n)",
-  eEcran1: "Étape 1 (via les exposants)",
-  eEcran2: "Étape 2 (développement algébrique)",
-  eEcran3: "Étape 3 (valeurs exactes déduites)",
+  eEcran1: "Étape 1 (angle via les exposants)",
+  eEcran2: "Étape 2 (cos θ et sin θ par développement)",
 };
 
 export const LIBELLE_FAMILLE: Record<ExerciceFormeTrigonometrique["famille"], string> = {
@@ -539,11 +564,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormeTrigonome
     case "D":
       if (phase === "dEcran1") return [`\\theta=${exercice.z.angle.latex}`];
       if (phase === "dEcran2") return [congruenceLatex(exercice.condition)];
-      return [`n\\equiv ${exercice.congruence.k}\\ (\\text{mod }${exercice.congruence.m})`];
+      return [`n=${exercice.congruence.k}+${exercice.congruence.m}p\\text{, }p\\in\\mathbb{Z}`];
     case "E":
-      if (phase === "eEcran1") return [exercice.angleResultat.latex];
-      if (phase === "eEcran2") return [assembleAPlusBI(exercice.aFinal, exercice.bFinal)];
-      return [`\\cos(${exercice.angleResultat.latex})=${exercice.aFinal}\\text{, }\\sin(${exercice.angleResultat.latex})=${exercice.bFinal}`];
+      if (phase === "eEcran1") return [`\\theta=${exercice.angleResultat.latex}`];
+      return [`\\cos\\theta=${exercice.cosResultat.latex}`, `\\sin\\theta=${exercice.sinResultat.latex}`];
   }
 }
 

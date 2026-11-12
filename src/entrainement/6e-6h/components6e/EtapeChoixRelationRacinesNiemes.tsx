@@ -38,6 +38,16 @@ interface Props {
  */
 export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IdRelationRacineUnite | null>(null);
+  // Ordre mélangé une fois par écran (composant monté avec une clé d'écran) — audit 6e ch. 5,
+  // point 6/F : la bonne relation était toujours le premier bouton.
+  const [options] = useState<IdRelationRacineUnite[]>(() => {
+    const t = [...OPTIONS_RELATION_C];
+    for (let i = t.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [t[i], t[j]] = [t[j], t[i]];
+    }
+    return t;
+  });
   const montrerErreurs = tentativesUtilisees > 0;
 
   function valider() {
@@ -63,7 +73,7 @@ export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees,
         <RenduFragments fragments={consigneEcran} />
       </p>
       <div className="options-grid-compact">
-        {OPTIONS_RELATION_C.map((option) => (
+        {options.map((option) => (
           <button key={option} type="button" className={`btn ${choix === option ? "toggle-active" : ""} ${montrerErreurs && choix === option ? "is-erronee" : ""}`} onClick={() => setChoix(option)}>
             <Katex expression={LIBELLE_RELATION_C[option]} />
           </button>
@@ -89,7 +99,7 @@ export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees,
         </button>
         {montrerErreurs && (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {tentativesMax <= 1 ? "Incorrect." : `Incorrect — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
           </p>
         )}
         </>

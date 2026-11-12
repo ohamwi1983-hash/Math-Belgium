@@ -11,7 +11,15 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
  * du paramètre `exercice`.
  */
 
-export type PhaseTransformationsPlan = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3";
+export type PhaseTransformationsPlan = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran1" | "dEcran2";
+
+/** Écrans de CHOIX FERMÉ (QCM) : UNE seule tentative (audit 6e ch. 5, point 6, décision F) —
+ * plusieurs essais sur 4 options permettraient de trouver la réponse par élimination. */
+export const PHASES_CHOIX_UNIQUE: readonly PhaseTransformationsPlan[] = ["aEcran1", "dEcran1"];
+
+export function tentativesMaxPhase(phase: PhaseTransformationsPlan, tentativesMaxReglage: number): number {
+  return PHASES_CHOIX_UNIQUE.includes(phase) ? 1 : tentativesMaxReglage;
+}
 
 export function phaseInitiale(exercice: ExerciceTransformationsPlan): PhaseTransformationsPlan {
   switch (exercice.famille) {
@@ -21,6 +29,8 @@ export function phaseInitiale(exercice: ExerciceTransformationsPlan): PhaseTrans
       return "bEcran1";
     case "C":
       return "cEcran1";
+    case "D":
+      return "dEcran1";
   }
 }
 
@@ -39,6 +49,10 @@ export function phaseApres(phase: PhaseTransformationsPlan): PhaseTransformation
     case "cEcran2":
       return "cEcran3";
     case "cEcran3":
+      return "termine";
+    case "dEcran1":
+      return "dEcran2";
+    case "dEcran2":
       return "termine";
   }
 }

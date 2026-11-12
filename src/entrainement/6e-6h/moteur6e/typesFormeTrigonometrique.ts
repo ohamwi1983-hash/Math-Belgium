@@ -4,14 +4,14 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 /**
  * Couche B (6e) — types de session pour `6gen37`. 5 familles, longueur de chaîne d'écrans fixe PAR
- * FAMILLE (2 pour A/B, 3 pour C/D/E) — mirroir `typesNombresComplexes.ts` (6gen34) : aucune branche
+ * FAMILLE (2 pour A/B/E, 3 pour C/D — famille E ramenée à 2 écrans, audit 6e ch. 5) — mirroir `typesNombresComplexes.ts` (6gen34) : aucune branche
  * de `phaseApres` ne dépend du sous-type de l'exercice une fois la phase INITIALE déterminée (le
  * sous-type de la famille B ne change ni le nombre d'écrans ni leur enchaînement, seulement le
  * nombre de CHAMPS à l'écran 1 — voir `ui6e/formatFormeTrigonometrique.ts`), donc `phaseApres` n'a
  * pas besoin du paramètre `exercice`.
  */
 
-export type PhaseFormeTrigonometrique = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran1" | "dEcran2" | "dEcran3" | "eEcran1" | "eEcran2" | "eEcran3";
+export type PhaseFormeTrigonometrique = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran1" | "dEcran2" | "dEcran3" | "eEcran1" | "eEcran2";
 
 export function phaseInitiale(exercice: ExerciceFormeTrigonometrique): PhaseFormeTrigonometrique {
   switch (exercice.famille) {
@@ -53,8 +53,6 @@ export function phaseApres(phase: PhaseFormeTrigonometrique): PhaseFormeTrigonom
     case "eEcran1":
       return "eEcran2";
     case "eEcran2":
-      return "eEcran3";
-    case "eEcran3":
       return "termine";
   }
 }

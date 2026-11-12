@@ -1,12 +1,12 @@
 /**
- * Contrat — "Nombres complexes" (quiz vrai/faux), 6gen68, ajout ultérieur au chapitre 7 du
- * chantier 6e (6h) déjà complet (6gen34-42). Même principe que 6gen64 (chapitre 1), 6gen65
- * (chapitre 2), 6gen66 (chapitre 3) et 6gen67 (chapitre 4) — banque de 315 affirmations vrai/faux
- * PRÉ-ÉCRITES (jamais générées procéduralement), 9 thèmes de 35 questions chacun — mais contrat
+ * Contrat — "Nombres complexes" (quiz vrai/faux), 6gen68, chapitre 5 du chantier 6e (6h)
+ * (6gen34-42). Même principe que 6gen64 (chapitre 1), 6gen65 (chapitre 2), 6gen66 (chapitre 3) et
+ * 6gen67 (chapitre 4) — banque d'affirmations vrai/faux PRÉ-ÉCRITES (jamais générées
+ * procéduralement), 9 thèmes de 20 questions (10 vraies / 10 fausses) — mais contrat
  * entièrement indépendant, jamais partagé entre chantiers ni avec 6gen64/65/66/67 (voir CLAUDE.md,
  * "3 chantiers indépendants").
  *
- * Les 9 thèmes reprennent exactement les 9 générateurs déjà établis du chapitre 7 : opérations de
+ * Les 9 thèmes reprennent exactement les 9 générateurs du chapitre 5 : opérations de
  * base et puissances de i (6gen34), affixes et racines carrées (6gen35), équations dans ℂ (6gen36),
  * forme trigonométrique/module/argument (6gen37), formule de Moivre (6gen38), racines n-ièmes
  * (6gen39), transformations du plan (6gen40), propriétés géométriques de triangles (6gen41),

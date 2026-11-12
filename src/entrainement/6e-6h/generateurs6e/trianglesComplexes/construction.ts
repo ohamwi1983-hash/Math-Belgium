@@ -1,4 +1,4 @@
-import type { PointComplexe, SommetTriangle } from "../../core6e/trianglesComplexes.types";
+import type { Longueur, OrdresChoix, PointComplexe, SommetTriangle } from "../../core6e/trianglesComplexes.types";
 import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
 
 /**
@@ -28,21 +28,28 @@ export interface TriangleIsoceleEntier {
   hauteur: number;
 }
 
-export const BANK_ISOCELES: TriangleIsoceleEntier[] = [
-  { cote: 5, base: 6, hauteur: 4 },
-  { cote: 5, base: 8, hauteur: 3 },
-  { cote: 10, base: 12, hauteur: 8 },
-  { cote: 10, base: 16, hauteur: 6 },
-  { cote: 13, base: 10, hauteur: 12 },
-  { cote: 13, base: 24, hauteur: 5 },
-  { cote: 15, base: 18, hauteur: 12 },
-  { cote: 15, base: 24, hauteur: 9 },
-  { cote: 17, base: 16, hauteur: 15 },
-  { cote: 20, base: 32, hauteur: 12 },
-  { cote: 25, base: 14, hauteur: 24 },
-  { cote: 25, base: 40, hauteur: 15 },
-  { cote: 25, base: 48, hauteur: 7 },
+/** Triplets pythagoriciens de référence (c ≤ 30) — source des 2 banques ci-dessous. */
+const TRIPLETS: [number, number, number][] = [
+  [3, 4, 5],
+  [6, 8, 10],
+  [5, 12, 13],
+  [9, 12, 15],
+  [8, 15, 17],
+  [12, 16, 20],
+  [15, 20, 25],
+  [7, 24, 25],
+  [10, 24, 26],
+  [20, 21, 29],
+  [18, 24, 30],
 ];
+
+/** Audit 6e ch. 5, point 45 (variété) : banque DÉRIVÉE des triplets — chaque triplet (a, b, c)
+ * donne 2 isocèles (base 2a / hauteur b, et base 2b / hauteur a), soit 22 formes distinctes au lieu
+ * de 13 écrites à la main. */
+export const BANK_ISOCELES: TriangleIsoceleEntier[] = TRIPLETS.flatMap(([a, b, c]) => [
+  { cote: c, base: 2 * a, hauteur: b },
+  { cote: c, base: 2 * b, hauteur: a },
+]);
 
 /** Triplets pythagoriciens `a<b<c` (`a²+b²=c²`, `a≠b` — donc JAMAIS isocèle) — famille A sous-type
  * "rectangle", famille A garantit l'angle droit sans jamais introduire d'égalité de côtés. */
@@ -135,4 +142,61 @@ export function tirerEtiquettes(): { special: SommetTriangle; autre1: SommetTria
     ["C", "B", "A"],
   ]);
   return { special: ordre[0], autre1: ordre[1], autre2: ordre[2] };
+}
+
+
+// ============================================================================
+// Audit 6e ch. 5 (lot D) — longueurs exactes, permutations d'options.
+// ============================================================================
+
+/** √n simplifié en LaTeX (n entier ≥ 0) : 25 → 5, 8 → 2\\sqrt{2}, 10 → \\sqrt{10}. */
+export function racineLatex(n: number): string {
+  if (n === 0) return "0";
+  let k = 1;
+  let m = n;
+  for (let d = 2; d * d <= m; d++) {
+    while (m % (d * d) === 0) {
+      m /= d * d;
+      k *= d;
+    }
+  }
+  if (m === 1) return `${k}`;
+  return k === 1 ? `\\sqrt{${m}}` : `${k}\\sqrt{${m}}`;
+}
+
+/** Carré de la distance entre 2 points à coordonnées ENTIÈRES — entier exact. */
+export function distanceCarree(p: { re: number; im: number }, q: { re: number; im: number }): number {
+  return (p.re - q.re) ** 2 + (p.im - q.im) ** 2;
+}
+
+/** Longueur exacte entre 2 points entiers : √(carré) simplifié. */
+export function longueurEntre(p: { re: number; im: number }, q: { re: number; im: number }): Longueur {
+  const d2 = distanceCarree(p, q);
+  return { numerique: Math.sqrt(d2), latex: racineLatex(d2) };
+}
+
+/** Permutation uniforme (Fisher–Yates) de 0..n−1. */
+export function tirerPermutation(n: number): number[] {
+  const ordre = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ordre[i], ordre[j]] = [ordre[j], ordre[i]];
+  }
+  return ordre;
+}
+
+/** 2 permutations indépendantes (une par écran de choix). Sur un écran à m < 4 options, l'ordre
+ * relatif des indices 0..m−1 d'une permutation uniforme de 4 reste uniforme. */
+export function tirerOrdres(): OrdresChoix {
+  return [tirerPermutation(4), tirerPermutation(4)];
+}
+
+/** Angle (en degrés) au sommet `s` du triangle (s, p, q) — produit scalaire, coordonnées réelles. */
+export function angleAuSommetDeg(s: { re: number; im: number }, p: { re: number; im: number }, q: { re: number; im: number }): number {
+  const ux = p.re - s.re;
+  const uy = p.im - s.im;
+  const vx = q.re - s.re;
+  const vy = q.im - s.im;
+  const cos = (ux * vx + uy * vy) / (Math.hypot(ux, uy) * Math.hypot(vx, vy));
+  return (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI;
 }

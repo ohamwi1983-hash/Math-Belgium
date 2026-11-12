@@ -3,22 +3,28 @@ import type { VarianteQuizNombresComplexes } from "./core6e/quizNombresComplexes
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { demarrerSessionQuizNombresComplexes, soumettreReponseQuizNombresComplexes } from "./moteur6e/sessionQuizNombresComplexes";
 import type { EtatSessionQuizNombresComplexes, ResultatExerciceQuizNombresComplexes } from "./moteur6e/typesQuizNombresComplexes";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizNombresComplexes";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizNombresComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizNombresComplexes } from "./components6e/EtapeQuestionQuizNombresComplexes";
 import { ResultatPanelQuizNombresComplexes } from "./components6e/ResultatPanelQuizNombresComplexes";
 import { ResumeSessionQuizNombresComplexes } from "./components6e/ResumeSessionQuizNombresComplexes";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizNombresComplexes/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** Une session = toutes les questions du thème choisi (`nombreQuestions`, jamais une constante en
+ * dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est répétée. */
+function reglagesPourTheme(theme: VarianteQuizNombresComplexes): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizNombresComplexes): EtatSessionQuizNombresComplexes {
-  return demarrerSessionQuizNombresComplexes(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizNombresComplexes(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -47,7 +53,7 @@ export function App6gen68() {
     const theme = varianteId as VarianteQuizNombresComplexes;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizNombresComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizNombresComplexes(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -77,7 +83,11 @@ export function App6gen68() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">9 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre 7.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations
+              vrai/faux chacun — révision complète du chapitre 5.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

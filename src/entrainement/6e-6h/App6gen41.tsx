@@ -5,6 +5,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTriangles
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTrianglesComplexes, soumettreReponseEcran } from "./moteur6e/sessionTrianglesComplexes";
 import type { EtatSessionTrianglesComplexes } from "./moteur6e/typesTrianglesComplexes";
+import { tentativesMaxPhase } from "./moteur6e/typesTrianglesComplexes";
+import type { ExerciceTrianglesComplexes } from "./core6e/trianglesComplexes.types";
+import { PlanArgandMini } from "./components6e/PlanArgandMini";
 import { diagnostiquerEcran } from "./moteur6e/verificationTrianglesComplexes";
 import { Katex } from "./components/Katex";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
@@ -41,6 +44,37 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
+/** Figure d'énoncé (audit 6e ch. 5, décision K) : le triangle étudié dans le plan complexe —
+ * familles A à D. Pas de figure pour la famille E : l'alignement ou l'angle droit s'y lirait à
+ * l'œil, alors que l'exercice porte précisément sur le critère du quotient. */
+function figureEnonce(e: ExerciceTrianglesComplexes) {
+  switch (e.famille) {
+    case "A":
+      return <PlanArgandMini points={[{ x: e.A.re, y: e.A.im, label: "A" }, { x: e.B.re, y: e.B.im, label: "B" }, { x: e.C.re, y: e.C.im, label: "C" }]} polygones={[[[e.A.re, e.A.im], [e.B.re, e.B.im], [e.C.re, e.C.im]]]} />;
+    case "B":
+      return <PlanArgandMini points={[{ x: e.O.re, y: e.O.im, label: "O" }, { x: e.A.re, y: e.A.im, label: "A" }, { x: e.B.re, y: e.B.im, label: "B" }]} polygones={[[[e.O.re, e.O.im], [e.A.re, e.A.im], [e.B.re, e.B.im]]]} />;
+    case "C":
+      return (
+        <PlanArgandMini
+          points={[{ x: e.B.re, y: e.B.im, label: "B" }, { x: e.F.re, y: e.F.im, label: "F" }, { x: e.A.re, y: e.A.im, label: "A", role: "image" }]}
+          polygones={[[[0, 0], [e.B.re, e.B.im], [e.F.re, e.F.im]]]}
+        />
+      );
+    case "D":
+      return (
+        <PlanArgandMini
+          points={[{ x: e.A.re, y: e.A.im, label: "A" }, { x: e.B.re, y: e.B.im, label: "B" }, { x: e.C.re, y: e.C.im, label: "C", role: "image" }, { x: e.D.re, y: e.D.im, label: "D", role: "image" }]}
+          polygones={[
+            [[0, 0], [e.A.re, e.A.im], [e.B.re, e.B.im]],
+            [[0, 0], [e.C.re, e.C.im], [e.D.re, e.D.im]],
+          ]}
+        />
+      );
+    case "E":
+      return undefined;
+  }
+}
+
 function nouvelleSession(): EtatSessionTrianglesComplexes {
   return demarrerSessionTrianglesComplexes(REGLAGES_DEMO, genererExerciceTrianglesComplexes);
 }
@@ -58,6 +92,9 @@ export function App6gen41() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur de génération (audit 6e ch. 5, point commun 9) : un nouvel exercice qui recommence
+   * sur la même phase remonte quand même l'écran (champs et choix vidés). */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionTrianglesComplexes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -93,6 +130,7 @@ export function App6gen41() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeFermees([]);
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -103,6 +141,7 @@ export function App6gen41() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeFermees([]);
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionTrianglesComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTrianglesComplexes)));
   }
 
@@ -110,8 +149,8 @@ export function App6gen41() {
   const phase = etat.phase;
 
   // Calculatrice flottante — SEUL écran du générateur avec un vrai calcul décimal/irrationnel
-  // (famille B écran 4, angles via loi des cosinus : arccos d'un ratio décimal, réponse ATTENDUE en
-  // DEGRÉS, tolérance 0.1° — `moteur6e/verificationTrianglesComplexes.ts`) — mirroir `App6gen9.tsx`
+  // (famille B écran 4, angles via loi des cosinus : arccos d'un ratio décimal, réponse attendue en
+  // degrés, tolérance 0,5° — `moteur6e/verificationTrianglesComplexes.ts`) — mirroir `App6gen9.tsx`
   // (`phase === "cEcran3" && <CalculatriceScientifique />`). Mode initial "DEG" (convention
   // transversale "DEG par défaut si applicable au contexte"), jamais le "RAD" par défaut du reste du
   // chantier 6e (contexte historique exponentielles/logarithmes, sans angle en degrés).
@@ -129,7 +168,7 @@ export function App6gen41() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(phase, etat.reglages.tentativesMax),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -165,10 +204,11 @@ export function App6gen41() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifTrianglesComplexes(etat)} />
         <EtapeTrianglesComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
+          figure={figureEnonce(exercice)}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           choix={choixEcran(exercice, phase)}

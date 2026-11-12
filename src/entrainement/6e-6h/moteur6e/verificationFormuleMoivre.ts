@@ -49,6 +49,109 @@ import { diagnostiquerEquivalenceFonction, evaluerExpressionExponentielle } from
  * cos(x) ou sin(x), réduisant le pouvoir discriminant sur les exposants).
  */
 
+// ============================================================================
+// Réécriture locale de la saisie (audit 6e ch. 5, point 33) : `cos^3(x)`, `cos³(x)`, `cos^3 x`,
+// `cos³x` sont des notations usuelles que l'évaluateur partagé ne lit pas (« cos » suivi d'un
+// exposant) — réécrites ICI en `(cos(x))^3` avant évaluation, sans toucher à l'évaluateur commun.
+// ============================================================================
+
+const CHIFFRES_EXPOSANT: Record<string, string> = { "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9" };
+
+/** Indice de la parenthèse fermante associée à `texte[debut] === "("`, ou -1. */
+function parentheseFermante(texte: string, debut: number): number {
+  let profondeur = 0;
+  for (let j = debut; j < texte.length; j++) {
+    if (texte[j] === "(") profondeur++;
+    else if (texte[j] === ")") {
+      profondeur--;
+      if (profondeur === 0) return j;
+    }
+  }
+  return -1;
+}
+
+export function normaliserSaisieMoivre(texte: string): string {
+  // « 3icos(x) », « isin(x) » : i collé à cos/sin se lit i·cos, i·sin (sinon identifiant inconnu).
+  const t = texte.replace(/i(?=cos|sin)/g, "i*").replace(/(cos|sin)\s*([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_m, f: string, e: string) => `${f}^${[...e].map((c) => CHIFFRES_EXPOSANT[c]).join("")}`);
+  const motif = /(cos|sin)\s*\^\s*(\d+)\s*/g;
+  let sortie = "";
+  let reprise = 0;
+  let m: RegExpExecArray | null;
+  while ((m = motif.exec(t)) !== null) {
+    const fin = motif.lastIndex;
+    sortie += t.slice(reprise, m.index);
+    if (t[fin] === "(") {
+      const ferme = parentheseFermante(t, fin);
+      if (ferme === -1) {
+        sortie += m[0];
+        reprise = fin;
+      } else {
+        sortie += `(${m[1]}${t.slice(fin, ferme + 1)})^${m[2]}`;
+        reprise = ferme + 1;
+      }
+    } else if (/[a-z]/.test(t[fin] ?? "")) {
+      sortie += `(${m[1]}(${t[fin]}))^${m[2]}`;
+      reprise = fin + 1;
+    } else {
+      sortie += m[0];
+      reprise = fin;
+    }
+    motif.lastIndex = reprise;
+  }
+  return sortie + t.slice(reprise);
+}
+
+// ============================================================================
+// Recopies refusées SANS tentative (audit 6e ch. 5, point 5/E) : l'évaluation numérique acceptait
+// `(cos(x)+i*sin(x))^n` à l'écran 1 et `cos(nx)`/`sin(nx)` aux écrans 2 et 3, puisque ce sont des
+// expressions ÉGALES à la cible — il faut donc les reconnaître par leur forme.
+// ============================================================================
+
+/** Vrai si un cos/sin porte sur autre chose que x (cos(3x), sin(n*x), cos 4x…). */
+function contientTrigNonX(texte: string): boolean {
+  const motif = /(cos|sin)\s*/g;
+  while (motif.exec(texte) !== null) {
+    const j = motif.lastIndex;
+    const c = texte[j];
+    if (c === "(") {
+      const ferme = parentheseFermante(texte, j);
+      if (ferme === -1) continue;
+      if (texte.slice(j + 1, ferme).replace(/\s+/g, "") !== "x") return true;
+    } else if (c !== undefined && !/^x(?![a-z0-9])/.test(texte.slice(j))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Vrai si un exposant porte sur une parenthèse contenant à la fois i et une somme : la recopie de
+ * (cos x + i sin x)ⁿ. `(i·sin(x))^k`, forme attendue à l'écran 1, n'est PAS visée (pas de somme). */
+function contientPuissanceDeSommeAvecI(texte: string): boolean {
+  for (let j = 0; j < texte.length; j++) {
+    if (texte[j] !== "(") continue;
+    const ferme = parentheseFermante(texte, j);
+    if (ferme === -1) continue;
+    if (!/^\s*\^/.test(texte.slice(ferme + 1))) continue;
+    const contenu = texte.slice(j + 1, ferme);
+    if (!/(^|[^a-z])i([^a-z]|$)/.test(contenu)) continue;
+    let profondeur = 0;
+    for (let q = 0; q < contenu.length; q++) {
+      const c = contenu[q];
+      if (c === "(") profondeur++;
+      else if (c === ")") profondeur--;
+      else if (profondeur === 0 && q > 0 && /[+\-−]/.test(c)) return true;
+    }
+  }
+  return false;
+}
+
+/** Ce qui reste d'une saisie une fois retirés les cos(x)/sin(x) : doit être purement numérique
+ * (coefficients, opérations, exposants) pour un polynôme en cos(x) et sin(x). */
+function resteNonPolynomial(texte: string): boolean {
+  const reste = texte.replace(/(cos|sin)\s*\(\s*x\s*\)/g, "").replace(/(cos|sin)\s+x(?![a-z0-9])/g, "");
+  return /[a-zA-Zπ√]/.test(reste) || /\//.test(reste);
+}
+
 const POINTS_X = [-1.9, -0.6, 0.9, 2.3];
 const POINTS_I = [1.7, -2.3, 0.6];
 const TOLERANCE = 0.01;
@@ -82,7 +185,8 @@ function diagnostiquerEquivalenceFonctionXI(texte: string, reference: (x: number
 // Écran 1 — développement complet, i encore symbolique (non simplifié).
 // ============================================================================
 
-export function diagnostiquerEcran1(exercice: ExerciceFormuleMoivre, valeurs: string[]): StatutVerification {
+export function diagnostiquerEcran1(exercice: ExerciceFormuleMoivre, valeursBrutes: string[]): StatutVerification {
+  const valeurs = valeursBrutes.map(normaliserSaisieMoivre);
   const reference = (x: number, i: number) => exercice.termes.reduce((acc, t) => acc + t.coefBinomial * Math.cos(x) ** t.puissanceCos * (i * Math.sin(x)) ** t.k, 0);
   return diagnostiquerEquivalenceFonctionXI(valeurs[0], reference, POINTS_X, POINTS_I);
 }
@@ -95,7 +199,8 @@ export function verifierEcran1(exercice: ExerciceFormuleMoivre, valeurs: string[
 // facteur) — 2 champs, "parse_error" prioritaire (même convention que familles C/E de 6gen34).
 // ============================================================================
 
-export function diagnostiquerEcran2(exercice: ExerciceFormuleMoivre, valeurs: string[]): StatutVerification {
+export function diagnostiquerEcran2(exercice: ExerciceFormuleMoivre, valeursBrutes: string[]): StatutVerification {
+  const valeurs = valeursBrutes.map(normaliserSaisieMoivre);
   const termesReels = exercice.termes.filter((t) => t.k % 2 === 0);
   const termesImaginaires = exercice.termes.filter((t) => t.k % 2 === 1);
 
@@ -116,7 +221,10 @@ export function verifierEcran2(exercice: ExerciceFormuleMoivre, valeurs: string[
 // Écran 3 — cos(nx) et sin(nx), formes finales (fonctions réelles pures de x, plus de i du tout).
 // ============================================================================
 
-export function diagnostiquerEcran3(exercice: ExerciceFormuleMoivre, valeurs: string[]): StatutVerification {
+export function diagnostiquerEcran3(exercice: ExerciceFormuleMoivre, valeursBrutes: string[]): StatutVerification {
+  const valeurs = valeursBrutes.map(normaliserSaisieMoivre);
+  if (exercice.cible === "cosSeul") return diagnostiquerEquivalenceFonction(valeurs[0], (x) => Math.cos(exercice.n * x), POINTS_X, TOLERANCE);
+  if (exercice.cible === "sinSurSin") return diagnostiquerEquivalenceFonction(valeurs[0], (x) => Math.sin(exercice.n * x) / Math.sin(x), POINTS_X, TOLERANCE);
   const referenceCos = (x: number) => Math.cos(exercice.n * x);
   const referenceSin = (x: number) => Math.sin(exercice.n * x);
   const statutCos = diagnostiquerEquivalenceFonction(valeurs[0], referenceCos, POINTS_X, TOLERANCE);
@@ -146,4 +254,23 @@ export function diagnostiquerEcran(exercice: ExerciceFormuleMoivre, phase: "ecra
 
 export function verifierEcran(exercice: ExerciceFormuleMoivre, phase: "ecran1" | "ecran2" | "ecran3", valeurs: string[]): boolean {
   return diagnostiquerEcran(exercice, phase, valeurs) === "correct";
+}
+
+// ============================================================================
+// Contrôle AVANT soumission — messages qui ne consomment AUCUNE tentative (audit 6e ch. 5, points
+// 5/E et 10).
+// ============================================================================
+
+const SANS_TENTATIVE = " Ta saisie ne compte pas comme une tentative.";
+
+export function controleAvantSoumission(exercice: ExerciceFormuleMoivre, phase: "ecran1" | "ecran2" | "ecran3", valeursBrutes: string[]): string | null {
+  const valeurs = valeursBrutes.map(normaliserSaisieMoivre);
+  if (valeurs.some(contientPuissanceDeSommeAvecI)) return "Développe la puissance avec le binôme de Newton au lieu de recopier (cos(x) + i sin(x))ⁿ." + SANS_TENTATIVE;
+  if (valeurs.some(contientTrigNonX)) return `Exprime le résultat avec cos(x) et sin(x) uniquement : recopier cos(${exercice.n}x) ou sin(${exercice.n}x) ne répond pas à la question.` + SANS_TENTATIVE;
+  if (diagnostiquerEcran(exercice, phase, valeursBrutes) === "parse_error") return "Expression non reconnue — vérifie l'écriture (par exemple 3cos^2(x)sin(x) ou (i sin(x))^2)." + SANS_TENTATIVE;
+  if (phase === "ecran3") {
+    if (exercice.cible !== "standard" && valeurs.some((v) => /sin/.test(v))) return "Exprime le résultat avec cos(x) seulement : remplace sin²(x) par 1 − cos²(x)." + SANS_TENTATIVE;
+    if (valeurs.some(resteNonPolynomial)) return "Écris un polynôme en cos(x) et sin(x) : des nombres, des puissances de cos(x) et de sin(x), sans i ni autre fonction." + SANS_TENTATIVE;
+  }
+  return null;
 }

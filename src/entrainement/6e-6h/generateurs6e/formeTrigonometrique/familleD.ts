@@ -1,6 +1,6 @@
 import type { CongruenceN, ConditionD, ExerciceFormeTrigD } from "../../core6e/formeTrigonometrique.types";
 import { pgcd, tirerParmi } from "../calculPrimitives/aleatoire";
-import { tirerZAvecAngleRemarquable } from "./familleA";
+import { PROBA_AXE_6GEN37, tirerZAvecAngleRemarquable } from "./familleA";
 
 /**
  * Couche A (6e) — génération, famille D ("Trouver n selon une condition sur l'argument") de
@@ -57,7 +57,7 @@ const CP_CQ: Record<ConditionD, [number, number]> = {
 
 export function construireFamilleD(): ExerciceFormeTrigD {
   for (let tentative = 0; tentative < 200; tentative++) {
-    const z = tirerZAvecAngleRemarquable();
+    const z = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
     if (z.angle.p === 0) continue; // θ=0 : z déjà réel positif, condition triviale pour n'importe quel n — sans intérêt pédagogique.
     const condition = tirerParmi(CONDITIONS);
     const [cp, cq] = CP_CQ[condition];

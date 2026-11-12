@@ -1,25 +1,26 @@
 import type { ExerciceFamilleD } from "../../core6e/nombresComplexes.types";
 import { diviserComplexeExact, valeurFraction } from "./fractionComplexe";
-import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerCasParticulier, tirerNonNul } from "./casParticuliers";
 
 /**
- * Couche A (6e) — génération, famille D ("Division par i, cas particulier") de `6gen34`. a,b
- * entiers simples ∈[-6;6], k∈{1,2,3} — k=1 tiré comme le cas LE PLUS FRÉQUENT (spec explicite),
- * via une banque pondérée plutôt qu'un poids ad hoc.
+ * Couche A (6e) — famille D (« Division par ki ») de `6gen34`. k ∈ {1, 2, 4, 5} (plus de k=3 : un
+ * résultat en tiers ne s'écrit pas sans « / ») ; cas particulier (~10 %) : numérateur réel ou
+ * imaginaire pur.
  */
 
-const COEFF_MIN = -6;
 const COEFF_MAX = 6;
-/** k=1 apparaît 3 fois plus souvent que 2 ou 3 (spec : "le cas le plus fréquent"). */
-const BANQUE_K = [1, 1, 1, 2, 3] as const;
+const BANQUE_K = [1, 1, 2, 2, 4, 5] as const;
 
 export function construireFamilleD(): ExerciceFamilleD {
-  const a = tirerEntier(COEFF_MIN, COEFF_MAX);
-  const b = tirerEntier(COEFF_MIN, COEFF_MAX);
+  let a = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+  let b = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+  if (tirerCasParticulier()) {
+    if (Math.random() < 0.5) a = 0;
+    else b = 0;
+  }
   const k = tirerParmi(BANQUE_K);
-
   const { reFrac, imFrac } = diviserComplexeExact({ re: a, im: b }, { re: 0, im: k });
   const resultat = { re: valeurFraction(reFrac), im: valeurFraction(imFrac) };
-
   return { famille: "D", a, b, k, resultat };
 }

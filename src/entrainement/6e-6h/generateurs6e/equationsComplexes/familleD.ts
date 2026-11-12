@@ -1,5 +1,6 @@
 import type { ExerciceFamilleD, ValeurComplexe } from "../../core6e/equationsComplexes.types";
 import { tirerEntier, tirerEntierNonNul } from "../calculPrimitives/aleatoire";
+import { dansLaBorne, tirerDansLaBorne } from "./bornes";
 
 /**
  * Couche A (6e) — génération, famille D ("Quadratique, discriminant complexe non réel") de
@@ -41,7 +42,7 @@ function ajouterGaussien(u: ValeurComplexe, v: ValeurComplexe): ValeurComplexe {
   return { re: u.re + v.re, im: u.im + v.im };
 }
 
-export function construireFamilleD(): ExerciceFamilleD {
+function construireFamilleDBrut(): ExerciceFamilleD {
   const a = tirerEntierNonNul(A_MIN, A_MAX);
   const centre: ValeurComplexe = { re: tirerEntier(CENTRE_MIN, CENTRE_MAX), im: tirerEntier(CENTRE_MIN, CENTRE_MAX) };
   const dx = tirerEntierNonNul(D_MIN, D_MAX);
@@ -62,4 +63,9 @@ export function construireFamilleD(): ExerciceFamilleD {
   const racineDelta2: ValeurComplexe = { re: -a * dx, im: -a * dy };
 
   return { famille: "D", a, b, c, delta, racinesDelta: [racineDelta1, racineDelta2], racines: [z1, z2] };
+}
+
+/** Approfondissement (hors tirage libre) — coefficients et Δ bornés à 100 (audit 6e ch. 5). */
+export function construireFamilleD(): ExerciceFamilleD {
+  return tirerDansLaBorne(construireFamilleDBrut, (e) => dansLaBorne([e.b, e.c, e.delta]));
 }

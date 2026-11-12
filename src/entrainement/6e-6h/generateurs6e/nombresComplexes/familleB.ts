@@ -1,42 +1,50 @@
 import type { ExerciceFamilleB, ExerciceFamilleB_Carre, ExerciceFamilleB_Cube, ExerciceFamilleB_Produit } from "../../core6e/nombresComplexes.types";
 import { multiplierC } from "./arithmetiqueComplexe";
-import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerCasParticulier, tirerNonNul } from "./casParticuliers";
 
 /**
- * Couche A (6e) — génération, famille B ("Multiplication et puissances") de `6gen34`. 3
- * sous-types tirés équiprobablement (`construireFamilleB`) — voir aussi les constructeurs
- * GRANULAIRES par sous-type (mirroir `calculPrimitives`) pour un contrôle fin (`SelecteurVarianteDev`,
- * tests ciblés).
+ * Couche A (6e) — famille B (produit, carré, cube) de `6gen34`. Coefficients non nuls ; ~10 % de cas
+ * particuliers (produit de conjugués → réel, carré de a±ai → imaginaire pur, cube d'un imaginaire
+ * pur). Cube : coefficients bornés à [-3 ; 3] (résultats ≤ 2·27+… ≈ 100 en valeur absolue).
  */
 
-const COEFF_MIN = -6;
 const COEFF_MAX = 6;
-
-function tirerCoef(): number {
-  return tirerEntier(COEFF_MIN, COEFF_MAX);
-}
+const COEFF_MAX_CUBE = 3;
 
 export function construireFamilleBProduit(): ExerciceFamilleB_Produit {
-  const a = tirerCoef();
-  const b = tirerCoef();
-  const c = tirerCoef();
-  const d = tirerCoef();
+  const a = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+  const b = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+  let c: number;
+  let d: number;
+  if (tirerCasParticulier()) {
+    c = a;
+    d = -b;
+  } else {
+    do {
+      c = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+      d = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+    } while ((c === a && d === -b) || a * d + b * c === 0 || a * c - b * d === 0);
+  }
   const resultat = multiplierC({ re: a, im: b }, { re: c, im: d });
   return { famille: "B", sousType: "produit", a, b, c, d, resultat };
 }
 
 export function construireFamilleBCarre(): ExerciceFamilleB_Carre {
-  const a = tirerCoef();
-  const b = tirerCoef();
+  const a = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+  let b: number;
+  if (tirerCasParticulier()) b = Math.random() < 0.5 ? a : -a;
+  else {
+    do b = tirerNonNul(-COEFF_MAX, COEFF_MAX);
+    while (Math.abs(b) === Math.abs(a));
+  }
   const resultat = multiplierC({ re: a, im: b }, { re: a, im: b });
   return { famille: "B", sousType: "carre", a, b, resultat };
 }
 
-/** Écran 1 = (a+bi)² ; écran 2 = ce carré (déjà CORRECT, jamais recalculé depuis la saisie élève —
- * voir `moteur6e/verificationNombresComplexes.ts`) multiplié par (a+bi) = (a+bi)³. */
 export function construireFamilleBCube(): ExerciceFamilleB_Cube {
-  const a = tirerCoef();
-  const b = tirerCoef();
+  const a = tirerCasParticulier() ? 0 : tirerNonNul(-COEFF_MAX_CUBE, COEFF_MAX_CUBE);
+  const b = tirerNonNul(-COEFF_MAX_CUBE, COEFF_MAX_CUBE);
   const carre = multiplierC({ re: a, im: b }, { re: a, im: b });
   const cube = multiplierC(carre, { re: a, im: b });
   return { famille: "B", sousType: "cube", a, b, carre, cube };

@@ -38,8 +38,14 @@ export function demarrerSessionRacinesNiemes(reglages: ReglagesSession6e, genera
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur l'écran à choix fermé `cEcran1` (audit 6e ch. 5, point 6/F : 3 essais
+ * pour 3 boutons permettaient de trouver par élimination). */
+export function tentativesMaxPhase(etat: EtatSessionRacinesNiemes): number {
+  return etat.phase === "cEcran1" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionRacinesNiemes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionRacinesNiemes): EtatSessionRacinesNiemes {

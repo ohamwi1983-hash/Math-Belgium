@@ -1,59 +1,78 @@
-import type { ExerciceFamilleE } from "../../core6e/nombresComplexes.types";
+import type { ExerciceFamilleE, ValeurComplexe } from "../../core6e/nombresComplexes.types";
 import { additionnerFractions, diviserComplexeExact, valeurFraction } from "./fractionComplexe";
-import { tirerEntier } from "../calculPrimitives/aleatoire";
+import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerCasParticulier } from "./casParticuliers";
 
 /**
- * Couche A (6e) — génération, famille E ("Combiner 2 fractions à dénominateurs différents") de
- * `6gen34`. Chaque fraction (a_i+b_i·i)/(c_i+d_i·i) tirée indépendamment (mêmes bornes/contrainte de
- * dénominateur non nul que la famille C, réutilisation Couche A ↔ Couche A) — spec : un facteur
- * commun entre les 2 résultats intermédiaires est SOUHAITÉ dans l'exemple source mais explicitement
- * PAS une exigence stricte du générateur ("sans que ce soit une exigence stricte... accepter aussi
- * les cas sans facteur commun") : un tirage pleinement indépendant satisfait donc la spec telle
- * quelle, sans biais artificiel à maintenir.
+ * Couche A (6e) — famille E (« Combiner 2 fractions ») de `6gen34`. Le dénominateur commun N (norme
+ * des dénominateurs, c²+d²) est tiré D'ABORD dans {2, 5, 10}, puis chaque dénominateur parmi les
+ * entiers de Gauss de norme divisant N (hors 1) : les 2 fractions et leur somme sont des décimaux
+ * courts, et les nombres restent petits (avant : 2 dénominateurs indépendants, jusqu'à 72·72).
+ * Cas particulier (~10 %) : les 2 dénominateurs sont conjugués.
  */
 
-const COEFF_MIN = -6;
-const COEFF_MAX = 6;
+const DENOMINATEURS_PAR_NORME: Record<number, ValeurComplexe[]> = {
+  2: [
+    { re: 1, im: 1 },
+    { re: 1, im: -1 },
+    { re: -1, im: 1 },
+    { re: -1, im: -1 },
+  ],
+  5: [
+    { re: 1, im: 2 },
+    { re: 1, im: -2 },
+    { re: 2, im: 1 },
+    { re: 2, im: -1 },
+    { re: -1, im: 2 },
+    { re: -2, im: 1 },
+  ],
+  10: [
+    { re: 1, im: 3 },
+    { re: 1, im: -3 },
+    { re: 3, im: 1 },
+    { re: 3, im: -1 },
+    { re: -1, im: 3 },
+    { re: -3, im: 1 },
+  ],
+};
+const NORMES_PAR_N: Record<number, number[]> = { 2: [2], 5: [5], 10: [2, 5, 10] };
+const NUM_MAX = 5;
 
-function tirerDenominateurNonNul(): { c: number; d: number } {
-  let c = 0;
-  let d = 0;
-  while (c === 0 && d === 0) {
-    c = tirerEntier(COEFF_MIN, COEFF_MAX);
-    d = tirerEntier(COEFF_MIN, COEFF_MAX);
-  }
-  return { c, d };
-}
-
-function tirerUneFraction(): { a: number; b: number; c: number; d: number; valeur: { re: number; im: number } } {
-  const a = tirerEntier(COEFF_MIN, COEFF_MAX);
-  const b = tirerEntier(COEFF_MIN, COEFF_MAX);
-  const { c, d } = tirerDenominateurNonNul();
-  const { reFrac, imFrac } = diviserComplexeExact({ re: a, im: b }, { re: c, im: d });
-  return { a, b, c, d, valeur: { re: valeurFraction(reFrac), im: valeurFraction(imFrac) } };
+function tirerNumerateur(): ValeurComplexe {
+  let v: ValeurComplexe = { re: 0, im: 0 };
+  while (v.re === 0 && v.im === 0) v = { re: tirerEntier(-NUM_MAX, NUM_MAX), im: tirerEntier(-NUM_MAX, NUM_MAX) };
+  return v;
 }
 
 export function construireFamilleE(): ExerciceFamilleE {
-  const f1 = tirerUneFraction();
-  const f2 = tirerUneFraction();
-
-  const { reFrac: reFrac1, imFrac: imFrac1 } = diviserComplexeExact({ re: f1.a, im: f1.b }, { re: f1.c, im: f1.d });
-  const { reFrac: reFrac2, imFrac: imFrac2 } = diviserComplexeExact({ re: f2.a, im: f2.b }, { re: f2.c, im: f2.d });
-  const sommeRe = additionnerFractions(reFrac1, reFrac2);
-  const sommeIm = additionnerFractions(imFrac1, imFrac2);
-
-  return {
-    famille: "E",
-    a1: f1.a,
-    b1: f1.b,
-    c1: f1.c,
-    d1: f1.d,
-    a2: f2.a,
-    b2: f2.b,
-    c2: f2.c,
-    d2: f2.d,
-    fraction1: f1.valeur,
-    fraction2: f2.valeur,
-    resultat: { re: valeurFraction(sommeRe), im: valeurFraction(sommeIm) },
-  };
+  const N = tirerParmi([2, 5, 10, 10] as const);
+  const conjugues = tirerCasParticulier();
+  for (;;) {
+    const den1 = tirerParmi(DENOMINATEURS_PAR_NORME[tirerParmi(NORMES_PAR_N[N])]);
+    const den2 = conjugues ? { re: den1.re, im: -den1.im } : tirerParmi(DENOMINATEURS_PAR_NORME[tirerParmi(NORMES_PAR_N[N])]);
+    if (!conjugues && den2.re === den1.re && den2.im === -den1.im) continue;
+    const num1 = tirerNumerateur();
+    const num2 = tirerNumerateur();
+    const q1 = diviserComplexeExact(num1, den1);
+    const q2 = diviserComplexeExact(num2, den2);
+    const sommeRe = additionnerFractions(q1.reFrac, q2.reFrac);
+    const sommeIm = additionnerFractions(q1.imFrac, q2.imFrac);
+    const resultat = { re: valeurFraction(sommeRe), im: valeurFraction(sommeIm) };
+    // Hors cas particulier, jamais de somme nulle.
+    if (!conjugues && (resultat.re === 0 && resultat.im === 0)) continue;
+    return {
+      famille: "E",
+      a1: num1.re,
+      b1: num1.im,
+      c1: den1.re,
+      d1: den1.im,
+      a2: num2.re,
+      b2: num2.im,
+      c2: den2.re,
+      d2: den2.im,
+      fraction1: { re: valeurFraction(q1.reFrac), im: valeurFraction(q1.imFrac) },
+      fraction2: { re: valeurFraction(q2.reFrac), im: valeurFraction(q2.imFrac) },
+      resultat,
+    };
+  }
 }

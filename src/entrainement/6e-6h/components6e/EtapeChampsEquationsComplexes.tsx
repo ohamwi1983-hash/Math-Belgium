@@ -34,6 +34,9 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification;
+  /** Contrôle de saisie AVANT soumission (`moteur6e/saisieComplexe.ts`) : un message renvoyé est
+   * affiché et la saisie n'est PAS soumise — aucune tentative consommée. */
+  prevalider?: (valeurs: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -48,19 +51,27 @@ interface Props {
  * (1), fEcran3 (2). Structure d'écran imposée par CLAUDE.md (consigne générale → bloc données →
  * bloc de travail) conservée à l'identique. `App6gen36.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, prevalider, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
+  const [messageSaisie, setMessageSaisie] = useState<string | null>(null);
+  // `parse_error` ne peut plus résulter d'une tentative (refusée avant soumission) : jamais le
+  // message générique « "*" entre un nombre et une variable », faux pour ces saisies.
+  const statutBrut = montrerErreurs ? diagnostiquer(valeurs) : null;
+  const dernierStatut = statutBrut === "parse_error" ? null : statutBrut;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    const refus = prevalider?.(valeurs) ?? null;
+    setMessageSaisie(refus);
+    if (refus) return;
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
+    setMessageSaisie(null);
   }
 
   return (
@@ -107,7 +118,12 @@ export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, c
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageSaisie && (
+          <p className="alert-error" role="alert">
+            {messageSaisie}
+          </p>
+        )}
+        {!messageSaisie && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

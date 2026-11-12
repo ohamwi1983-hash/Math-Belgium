@@ -1,8 +1,9 @@
-import type { AffixeSimple, ExerciceComplexesA, ExerciceComplexesAvances, ExerciceComplexesB, ExerciceComplexesC, ExerciceComplexesD, ExerciceComplexesE, NatureLieu, ParamsLocus } from "../core6e/complexesAvances.types";
+import type { AffixeSimple, ExerciceComplexesA, ExerciceComplexesAvances, ExerciceComplexesB, ExerciceComplexesBSimple, ExerciceComplexesC, ExerciceComplexesD, ExerciceComplexesDReelles, ExerciceComplexesE, NatureLieu } from "../core6e/complexesAvances.types";
 import type { PhaseComplexesAvances } from "../moteur6e/typesComplexesAvances";
 import { calculerArgument } from "../generateurs6e/formeTrigonometrique/familleA";
 import { racineRationnelleLatex } from "../generateurs6e/complexesAvances/racineRationnelle";
 import { pgcd } from "../generateurs6e/calculPrimitives/aleatoire";
+import { ratioE } from "../moteur6e/verificationComplexesAvances";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen42`. Dispatch sur
@@ -48,10 +49,16 @@ export interface AideAvecLatex {
 
 export interface OptionQcm {
   id: string;
+  /** Texte brut (historique des écrans, lecteurs d'écran). */
   label: string;
+  /** Rendu KaTeX de l'option, prioritaire sur `label` à l'écran quand présent. */
+  latex?: string;
 }
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
+
+/** Saisie illisible (parse_error) : message de syntaxe, AUCUNE tentative décomptée (audit 6e ch. 5). */
+export const MESSAGE_SAISIE_ILLISIBLE = "Écriture non reconnue — vérifie ta saisie (parenthèses, opérateurs, virgule décimale). Aucune tentative n'est décomptée.";
 
 // ============================================================================
 // Assemblage "a+bi" — entier (affixeLatex) ou rationnel quelconque (affixeLatexRationnel).
@@ -72,7 +79,8 @@ export function affixeLatex(z: AffixeSimple): string {
  * `generateurs6e/complexesAvances/familleB.ts`) → LaTeX fraction irréductible. */
 function latexRationnel(x: number): string {
   if (Math.abs(x) < 1e-9) return "0";
-  for (let den = 1; den <= 12; den++) {
+  // Jusqu'à 200 : un rapport de 2 entiers de Gauss (famille E) peut avoir un dénominateur 32.
+  for (let den = 1; den <= 200; den++) {
     const num = x * den;
     if (Math.abs(num - Math.round(num)) < 1e-6) {
       let n = Math.round(num);
@@ -102,21 +110,120 @@ export function affixeLatexRationnel(a: number, b: number): string {
 }
 
 // ============================================================================
+// Petits formateurs LaTeX (équations attendues, audit 6e ch. 5 : plus de « équation en x,y »).
+// ============================================================================
+
+/** Fraction irréductible num/den (entiers, den > 0). */
+function fractionLatex(num: number, den: number): string {
+  if (num === 0) return "0";
+  const g = pgcd(Math.abs(num), Math.abs(den)) || 1;
+  const n = num / g;
+  const d = den / g;
+  if (d === 1) return `${n}`;
+  return n < 0 ? `-\\frac{${-n}}{${d}}` : `\\frac{${n}}{${d}}`;
+}
+
+/** Somme de termes coef·variable (coefficients entiers), signes collés, coefficient 1 omis. */
+function lineaire(termes: [number, string][]): string {
+  let s = "";
+  for (const [c, v] of termes) {
+    if (c === 0) continue;
+    const abs = Math.abs(c);
+    const corps = v === "" ? `${abs}` : abs === 1 ? v : `${abs}${v}`;
+    if (s === "") s = c < 0 ? `-${corps}` : corps;
+    else s += c < 0 ? `-${corps}` : `+${corps}`;
+  }
+  return s === "" ? "0" : s;
+}
+
+/** c1·m + c0, écrit « 2−m » plutôt que « −m+2 ». */
+function lineaireConstanteDabord(c1: number, variable: string, c0: number): string {
+  return c1 < 0 && c0 > 0 ? lineaire([[c0, ""], [c1, variable]]) : lineaire([[c1, variable], [c0, ""]]);
+}
+
+/** « x−v » (v rationnel), « x » si v=0. */
+function decale(variable: string, v: number): string {
+  if (Math.abs(v) < 1e-12) return variable;
+  return `${variable}${v > 0 ? "-" : "+"}${latexRationnel(Math.abs(v))}`;
+}
+
+function carreDecale(variable: string, v: number): string {
+  if (Math.abs(v) < 1e-12) return `${variable}^2`;
+  return `\\left(${decale(variable, v)}\\right)^2`;
+}
+
+/** Équation « ax+by+c=0 » de la droite (P1P2), coefficients entiers réduits, premier positif. */
+function equationDroite(p1: AffixeSimple, p2: AffixeSimple): string {
+  let a = p2.b - p1.b;
+  let b = -(p2.a - p1.a);
+  let c = -a * p1.a - b * p1.b;
+  const g = pgcd(pgcd(Math.abs(a), Math.abs(b)), Math.abs(c)) || 1;
+  a /= g;
+  b /= g;
+  c /= g;
+  if (a < 0 || (a === 0 && b < 0)) {
+    a = -a;
+    b = -b;
+    c = -c;
+  }
+  return `${lineaire([
+    [a, "x"],
+    [b, "y"],
+    [c, ""],
+  ])}=0`;
+}
+
+const TANGENTES: [number, string][] = [
+  [0, "0"],
+  [1 / Math.sqrt(3), "\\frac{\\sqrt{3}}{3}"],
+  [1, "1"],
+  [Math.sqrt(3), "\\sqrt{3}"],
+];
+
+/** Droite passant par a, de direction θ (angle remarquable). */
+function equationDroiteDirection(a: AffixeSimple, theta: number): string {
+  const s = Math.sin(theta);
+  const c = Math.cos(theta);
+  if (Math.abs(s) < 1e-9) return `y=${a.b}`;
+  if (Math.abs(c) < 1e-9) return `x=${a.a}`;
+  const t = s / c;
+  const trouve = TANGENTES.find(([v]) => Math.abs(Math.abs(t) - v) < 1e-9);
+  const tAbs = trouve ? trouve[1] : Math.abs(t).toFixed(2).replace(".", "{,}");
+  const facteur = decale("x", a.a);
+  const gauche = decale("y", a.b);
+  if (tAbs === "1") return `${gauche}=${t < 0 ? (facteur === "x" ? "-x" : `-\\left(${facteur}\\right)`) : facteur}`;
+  const droite = facteur === "x" ? `${tAbs}\\,x` : `${tAbs}\\left(${facteur}\\right)`;
+  return `${gauche}=${t < 0 ? "-" : ""}${droite}`;
+}
+
+/** −(coef)·variable, coef complexe entier : « −(2+i)z », « −3z », « +2iz ». */
+function moinsCoefVariable(coef: AffixeSimple, variable: string): string {
+  if (coef.a === 0 && coef.b === 0) return "";
+  if (coef.b === 0) return lineaire([[-coef.a, variable]]).replace(/^(?!-)/, "+");
+  if (coef.a === 0) {
+    const abs = Math.abs(coef.b) === 1 ? "i" : `${Math.abs(coef.b)}i`;
+    return `${coef.b > 0 ? "-" : "+"}${abs}${variable}`;
+  }
+  return `-\\left(${affixeLatex(coef)}\\right)${variable}`;
+}
+
+function tableauLignes(lignes: string[]): string {
+  return lignes.length === 1 ? lignes[0] : `\\begin{array}{l}${lignes.join("\\\\ ")}\\end{array}`;
+}
+
+// ============================================================================
 // Famille A.
 // ============================================================================
 
 export function consigneGeneraleA(e: ExerciceComplexesA): FragmentConsigne[] {
+  void e;
   return [
     latex("z=a+bi"),
-    texte(" est un nombre complexe quelconque (a et b réels). On étudie "),
+    texte(" est un nombre complexe non nul (a et b réels), d'argument "),
+    latex("\\theta"),
+    texte(". On cherche la condition sur a et b pour que "),
     latex("z^n"),
-    texte(` pour `),
-    latex(`n=${e.n}`),
-    texte(", et on cherche la condition sur a et b pour que "),
-    latex("z^n"),
-    texte(" soit un réel strictement supérieur à "),
-    latex(`k=${e.k}`),
-    texte("."),
+    texte(" soit un réel strictement supérieur à k (n et k sont donnés ci-dessous)."),
   ];
 }
 
@@ -125,60 +232,74 @@ export function blocDonneesA(e: ExerciceComplexesA): string[] {
 }
 
 export function consigneEcranA(phase: PhaseComplexesAvances): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Quelle est la condition sur θ (l'argument de z) pour que "), latex("z^n"), texte(" soit un réel STRICTEMENT POSITIF (pas seulement réel) ?")];
-  if (phase === "aEcran2") return [texte("En utilisant la condition CONFIRMÉE sur θ, quelle est la condition correspondante sur a et b ?")];
-  return [texte("En ajoutant la condition sur le module pour que "), latex("z^n"), texte(" dépasse strictement k, quelle est la condition complète finale ?")];
+  if (phase === "aEcran1") return [texte("Quelle condition sur θ garantit que "), latex("z^n"), texte(" est un réel strictement positif, et pas seulement un réel ? (une seule tentative)")];
+  if (phase === "aEcran2") return [texte("Traduis la condition confirmée sur θ en une condition sur a et b. (une seule tentative)")];
+  return [texte("Ajoute la condition sur le module pour que "), latex("z^n"), texte(" dépasse strictement k : quelle est la condition complète ? (une seule tentative)")];
 }
 
-const LIBELLE_CAB: Record<3 | 4, string> = {
-  4: "a=0 OU b=0 (z purement réel OU purement imaginaire, signe quelconque)",
-  3: "(b=0 et a>0) OU (b=√3·a et a<0) OU (b=-√3·a et a<0)",
+const SQRT3 = "\\sqrt{3}\\,a";
+
+function lignesConditionAB(n: 3 | 4): string[] {
+  if (n === 4) return ["a=0\\ \\text{ou}\\ b=0"];
+  return ["(b=0\\text{ et }a>0)", `\\text{ou }(b=${SQRT3}\\text{ et }a<0)`, `\\text{ou }(b=-${SQRT3}\\text{ et }a<0)`];
+}
+
+const TEXTE_CONDITION_AB: Record<3 | 4, string> = {
+  4: "a = 0 ou b = 0",
+  3: "(b = 0 et a > 0) ou (b = √3·a et a < 0) ou (b = −√3·a et a < 0)",
 };
+
+function seuilLatex(e: ExerciceComplexesA): string {
+  return `\\sqrt[${e.n}]{${e.k}}`;
+}
 
 export function optionsEcran1A(n: 3 | 4): OptionQcm[] {
   return [
-    { id: "correct", label: `${n}·θ ≡ 0 (mod 2π)` },
-    { id: "trapReel", label: `${n}·θ ≡ 0 (mod π) — réel, mais pas forcément positif` },
-    { id: "distrSansN", label: `θ ≡ 0 (mod 2π)` },
-    { id: "distrNegatif", label: `${n}·θ ≡ π (mod 2π)` },
+    { id: "correct", label: `${n}θ ≡ 0 (mod 2π)`, latex: `${n}\\theta\\equiv 0\\pmod{2\\pi}` },
+    { id: "trapReel", label: `${n}θ ≡ 0 (mod π)`, latex: `${n}\\theta\\equiv 0\\pmod{\\pi}` },
+    { id: "distrSansN", label: "θ ≡ 0 (mod 2π)", latex: "\\theta\\equiv 0\\pmod{2\\pi}" },
+    { id: "distrNegatif", label: `${n}θ ≡ π (mod 2π)`, latex: `${n}\\theta\\equiv \\pi\\pmod{2\\pi}` },
   ];
 }
 
 export function optionsEcran2A(n: 3 | 4): OptionQcm[] {
   if (n === 4) {
     return [
-      { id: "correct", label: LIBELLE_CAB[4] },
-      { id: "trapReel", label: "a=b OU a=-b (z sur une des 2 bissectrices)" },
-      { id: "distr1", label: "a≠0 ET b≠0" },
-      { id: "distr2", label: "a=0 ET b=0" },
+      { id: "correct", label: TEXTE_CONDITION_AB[4], latex: tableauLignes(lignesConditionAB(4)) },
+      { id: "trapReel", label: "a = b ou a = −b", latex: "a=b\\ \\text{ou}\\ a=-b" },
+      { id: "distr1", label: "a ≠ 0 et b ≠ 0", latex: "a\\neq 0\\ \\text{et}\\ b\\neq 0" },
+      { id: "distr2", label: "a = 0 et b = 0", latex: "a=0\\ \\text{et}\\ b=0" },
     ];
   }
   return [
-    { id: "correct", label: LIBELLE_CAB[3] },
-    { id: "trapReel", label: "b=0 OU b=√3·a OU b=-√3·a (signe de a non précisé)" },
-    { id: "distr1", label: "b=0 et a>0 (uniquement ce cas)" },
-    { id: "distr2", label: "(b=0 et a<0) OU (b=√3·a et a>0) OU (b=-√3·a et a>0)" },
+    { id: "correct", label: TEXTE_CONDITION_AB[3], latex: tableauLignes(lignesConditionAB(3)) },
+    { id: "trapReel", label: "b = 0 ou b = √3·a ou b = −√3·a", latex: `b=0\\ \\text{ou}\\ b=${SQRT3}\\ \\text{ou}\\ b=-${SQRT3}` },
+    { id: "distr1", label: "b = 0 et a > 0", latex: "b=0\\ \\text{et}\\ a>0" },
+    { id: "distr2", label: "(b = 0 et a < 0) ou (b = √3·a et a > 0) ou (b = −√3·a et a > 0)", latex: tableauLignes(["(b=0\\text{ et }a<0)", `\\text{ou }(b=${SQRT3}\\text{ et }a>0)`, `\\text{ou }(b=-${SQRT3}\\text{ et }a>0)`]) },
   ];
 }
 
+function lignesConditionComplete(e: ExerciceComplexesA, comparaison: string): string[] {
+  const cab = lignesConditionAB(e.n);
+  const cabEntoure = cab.length === 1 ? [`(${cab[0]})`] : cab;
+  return [...cabEntoure, `\\text{et }\\sqrt{a^2+b^2}${comparaison}`];
+}
+
 export function optionsEcran3A(e: ExerciceComplexesA): OptionQcm[] {
-  const Cab = LIBELLE_CAB[e.n];
-  const seuil = `k^{1/${e.n}} (= racine ${e.n}-ième de ${e.k})`;
+  const seuil = seuilLatex(e);
+  const cab = TEXTE_CONDITION_AB[e.n];
   return [
-    { id: "correct", label: `${Cab}, ET √(a²+b²) > ${seuil}` },
-    { id: "distr1", label: `${Cab}, ET √(a²+b²) < ${seuil}` },
-    { id: "distr2", label: `√(a²+b²) > ${seuil}  (condition sur a,b oubliée)` },
-    { id: "distr3", label: `${Cab}, ET √(a²+b²) > ${e.k}` },
+    { id: "correct", label: `${cab}, et |z| > racine ${e.n}-ième de ${e.k}`, latex: tableauLignes(lignesConditionComplete(e, `>${seuil}`)) },
+    { id: "distr1", label: `${cab}, et |z| < racine ${e.n}-ième de ${e.k}`, latex: tableauLignes(lignesConditionComplete(e, `<${seuil}`)) },
+    { id: "distr2", label: `|z| > racine ${e.n}-ième de ${e.k}`, latex: `\\sqrt{a^2+b^2}>${seuil}` },
+    { id: "distr3", label: `${cab}, et |z| > ${e.k}`, latex: tableauLignes(lignesConditionComplete(e, `>${e.k}`)) },
   ];
 }
 
 export function etatActuelA(phase: PhaseComplexesAvances): string[] | null {
   const conditionThetaConfirmee = "\\text{Condition sur }\\theta\\text{ confirmée}";
   if (phase === "aEcran2") return [conditionThetaConfirmee];
-  // Écran 3 : cumule la condition sur θ (écran 1) ET la condition sur a,b (écran 2), du plus ancien
-  // au plus récent — jamais seulement l'écran immédiatement précédent (audit transversal "état
-  // actuel cumulatif").
-  if (phase === "aEcran3") return [conditionThetaConfirmee, "\\text{Condition sur }a,b\\text{ confirmée}"];
+  if (phase === "aEcran3") return [conditionThetaConfirmee, "\\text{Condition sur }a\\text{ et }b\\text{ confirmée}"];
   return null;
 }
 
@@ -187,60 +308,56 @@ export function niveauAideMaxA(phase: PhaseComplexesAvances): number {
 }
 export function aideNiveau1A(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "zⁿ réel signifie nθ≡0 (mod π) — mais zⁿ réel POSITIF est plus restrictif : il faut nθ≡0 (mod 2π) EXACTEMENT (pas mod π).", latex: "n\\theta\\equiv 0\\ (\\text{mod }\\pi)\\text{, }n\\theta\\equiv 0\\ (\\text{mod }2\\pi)" };
+  return { texte: "L'argument de zⁿ est nθ. Un réel strictement positif a pour argument 0 (à 2π près), un réel strictement négatif a pour argument π.", latex: "\\arg\\left(z^n\\right)\\equiv n\\,\\arg z\\pmod{2\\pi}" };
 }
 export function aideNiveau2A(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Parmi les valeurs de θ qui donnent un résultat réel (nθ≡0 mod π), une sur deux seulement donne un résultat POSITIF — l'autre moitié donne un résultat réel NÉGATIF (conclusion non donnée).", latex: "n\\theta\\equiv 0\\ (\\text{mod }\\pi)" };
+  return { texte: "zⁿ est réel lorsque nθ est un multiple de π — mais un multiple sur deux donne un réel négatif :", latex: "z^n\\in\\mathbb{R}\\iff n\\theta\\equiv 0\\pmod{\\pi}" };
 }
 
 // ============================================================================
 // Famille B.
 // ============================================================================
 
-const LIBELLE_SOUS_TYPE_B: Record<ExerciceComplexesB["sousType"], string> = {
-  droite: "droite (condition : rapport réel)",
-  thales: "cercle de Thalès (condition : rapport imaginaire pur)",
-  apollonius: "cercle d'Apollonius (condition : rapport de modules)",
-  demiDroites: "demi-droite(s) (condition : z+z̄=c|z|)",
-  cercleO: "cercle centré en O (condition : |z|=k)",
-  intersection: "intersection de 2 lieux",
-};
+function angleTheta(e: ExerciceComplexesBSimple): string {
+  return e.theta?.latex ?? "0";
+}
 
 export function consigneGeneraleB(e: ExerciceComplexesB): FragmentConsigne[] {
   if (e.sousType === "intersection") {
     return [
       texte("M est un point d'affixe "),
       latex("z=x+yi"),
-      texte(". Il vérifie SIMULTANÉMENT 2 conditions : "),
+      texte(" qui vérifie simultanément deux conditions : (1) "),
       latex("\\dfrac{z-q_1}{z-q_2}"),
-      texte(" est un nombre RÉEL (M est sur une droite passant par "),
-      latex("q_1"),
-      texte(" et "),
-      latex("q_2"),
-      texte("), ET "),
+      texte(" est un réel ; (2) "),
       latex("z\\cdot\\bar z=k"),
-      texte(" (M est sur un cercle centré en O). Détermine chaque lieu, puis les points d'intersection."),
+      texte(". Traduis chaque condition, identifie les deux lieux, puis trouve leurs points d'intersection."),
     ];
   }
+  const fin = texte(". Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.");
   switch (e.sousType) {
     case "droite":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(". On sait que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un nombre RÉEL. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).")];
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ p₂) tel que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un réel"), fin];
     case "thales":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(". On sait que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un nombre IMAGINAIRE PUR. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).")];
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ p₂) tel que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un imaginaire pur"), fin];
     case "apollonius":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("|z-p_1|=k\\cdot|z-p_2|"), texte(" (k≠1, donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("|z-p_1|=k\\,|z-p_2|"), texte(" (k ≠ 1 donné)"), fin];
     case "demiDroites":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z≠0) tel que "), latex("z+\\bar z=c\\cdot|z|"), texte(" (c donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ 0) tel que "), latex("z+\\bar z=c\\,|z|"), texte(" (c donné)"), fin];
     case "cercleO":
-      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("z\\cdot\\bar z=k"), texte(" (k donné, k>0). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("z\\cdot\\bar z=k"), texte(" (k > 0 donné)"), fin];
+    case "cercleA":
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("|z-a|=k"), texte(" (a et k > 0 donnés)"), fin];
+    case "argument":
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ a) tel que "), latex("\\arg(z-a)\\equiv\\theta\\pmod{2\\pi}"), texte(" (a et θ donnés)"), fin];
+    case "argumentPi":
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z ≠ a) tel que "), latex("\\arg(z-a)\\equiv\\theta\\pmod{\\pi}"), texte(" (a et θ donnés)"), fin];
   }
 }
 
 export function blocDonneesB(e: ExerciceComplexesB): string[] {
-  if (e.sousType === "intersection") {
-    return [`q_1=${affixeLatex(e.q1)}\\quad q_2=${affixeLatex(e.q2)}\\quad k=${e.kCercleO}`];
-  }
+  if (e.sousType === "intersection") return [`q_1=${affixeLatex(e.q1)}\\quad q_2=${affixeLatex(e.q2)}\\quad k=${e.kCercleO}`];
   switch (e.sousType) {
     case "droite":
     case "thales":
@@ -251,26 +368,33 @@ export function blocDonneesB(e: ExerciceComplexesB): string[] {
       return [`c=${e.cLatex}`];
     case "cercleO":
       return [`k=${e.k}`];
+    case "cercleA":
+      return [`a=${affixeLatex(e.p1)}\\quad k=${e.k}`];
+    case "argument":
+    case "argumentPi":
+      return [`a=${affixeLatex(e.p1)}\\quad \\theta=${angleTheta(e)}`];
   }
 }
 
 export function consigneEcranB(e: ExerciceComplexesB, phase: PhaseComplexesAvances): FragmentConsigne[] {
   if (e.sousType === "intersection") {
-    if (phase === "bInterEcran1") return [texte("Pose l'équation en x,y de la droite ("), latex("q_1,q_2"), texte("), PUIS l'équation en x,y du cercle centré en O (2 champs).")];
-    if (phase === "bInterEcran2") return [texte("Donne les paramètres de chaque lieu CONFIRMÉ ci-dessus : 2 points pour la droite, centre et rayon pour le cercle.")];
-    return [texte("Résous le système des 2 équations CONFIRMÉES pour trouver les points d'intersection.")];
+    if (phase === "bInterEcran1") return [texte("Traduis chacune des deux conditions par une équation en x et y (un champ par condition).")];
+    if (phase === "bInterEcran2") return [texte("À partir des équations confirmées : la condition (1) donne une droite — donnes-en deux points ; la condition (2) donne un cercle — donne son centre et son rayon.")];
+    return [texte("Résous le système des deux équations confirmées : donne les affixes des points d'intersection.")];
   }
-  if (phase === "bEcran1") return [texte("Pose l'équation en x,y correspondant à la condition donnée.")];
-  return [texte("À partir de l'équation CONFIRMÉE, identifie la nature du lieu (droite, cercle, ou demi-droite(s)), puis donne ses paramètres.")];
+  if (phase === "bEcran1") {
+    if (e.sousType === "argument" || e.sousType === "argumentPi") {
+      return [texte("Pose z = x + yi. La condition impose que "), latex("(z-a)\\,e^{-i\\theta}"), texte(" soit un réel : écris l'équation en x et y qui exprime que sa partie imaginaire est nulle.")];
+    }
+    return [texte("Pose z = x + yi et traduis la condition par une équation en x et y.")];
+  }
+  return [texte("À partir de l'équation confirmée et de toute la condition de départ (signe, point exclu…), identifie la nature du lieu, puis donne ses paramètres.")];
 }
 
 export function etatActuelB(e: ExerciceComplexesB, phase: PhaseComplexesAvances): string[] | null {
   if (e.sousType === "intersection") {
-    const equationsConfirmees = "\\text{2 équations confirmées}";
+    const equationsConfirmees = "\\text{Les 2 équations confirmées}";
     if (phase === "bInterEcran2") return [equationsConfirmees];
-    // Écran 3 : cumule les 2 équations (écran 1) ET la droite/le cercle (écran 2), du plus ancien
-    // au plus récent — jamais seulement l'écran immédiatement précédent (audit transversal "état
-    // actuel cumulatif").
     if (phase === "bInterEcran3") return [equationsConfirmees, "\\text{Droite et cercle confirmés}"];
     return null;
   }
@@ -284,15 +408,22 @@ export function niveauAideMaxB(e: ExerciceComplexesB, phase: PhaseComplexesAvanc
 }
 export function aideNiveau1B(e: ExerciceComplexesB, phase: PhaseComplexesAvances): AideAvecLatex {
   if (e.sousType === "intersection" || phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "Pose z=x+yi et substitue dans la condition donnée : réel ⟺ partie imaginaire nulle ; imaginaire pur ⟺ partie réelle nulle ; condition de module ⟺ élève au carré des 2 côtés.", latex: null };
+  return { texte: "Pose z = x + yi et remplace dans la condition. Un nombre est réel quand sa partie imaginaire est nulle, imaginaire pur quand sa partie réelle est nulle ; une égalité de modules s'élève au carré.", latex: "|x+yi|^2=x^2+y^2" };
 }
-const FORMULE_SOUS_TYPE_B: Partial<Record<ExerciceComplexesB["sousType"], string>> = {
-  demiDroites: "z+\\bar z=c|z|",
-  cercleO: "|z|=k",
+/** Aide 2 : substitution amorcée, sans jamais nommer la nature du lieu (audit 6e ch. 5, point 11). */
+const SUBSTITUTION_B: Record<ExerciceComplexesBSimple["sousType"], string> = {
+  droite: "\\dfrac{z-p_1}{z-p_2}\\in\\mathbb{R}\\iff\\operatorname{Im}\\left[(z-p_1)\\,\\overline{(z-p_2)}\\right]=0",
+  thales: "\\dfrac{z-p_1}{z-p_2}\\in i\\mathbb{R}\\iff\\operatorname{Re}\\left[(z-p_1)\\,\\overline{(z-p_2)}\\right]=0",
+  apollonius: "|z-p_1|^2=k^2\\,|z-p_2|^2",
+  demiDroites: "z+\\bar z=2x\\qquad|z|=\\sqrt{x^2+y^2}",
+  cercleO: "z\\cdot\\bar z=(x+yi)(x-yi)",
+  cercleA: "|z-a|^2=\\left(x-\\operatorname{Re}a\\right)^2+\\left(y-\\operatorname{Im}a\\right)^2",
+  argument: "(z-a)\\,e^{-i\\theta}=\\left[(x-\\operatorname{Re}a)+(y-\\operatorname{Im}a)\\,i\\right](\\cos\\theta-i\\sin\\theta)",
+  argumentPi: "(z-a)\\,e^{-i\\theta}=\\left[(x-\\operatorname{Re}a)+(y-\\operatorname{Im}a)\\,i\\right](\\cos\\theta-i\\sin\\theta)",
 };
 export function aideNiveau2B(e: ExerciceComplexesB, phase: PhaseComplexesAvances): AideAvecLatex {
   if (e.sousType === "intersection" || phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: `Sous-type : ${LIBELLE_SOUS_TYPE_B[e.sousType]} — substitution amorcée, simplification non faite.`, latex: FORMULE_SOUS_TYPE_B[e.sousType] ?? null };
+  return { texte: "Substitution amorcée (simplification non faite) :", latex: SUBSTITUTION_B[e.sousType] };
 }
 
 // Natures toujours proposées à l'écran "lieu structuré" (droite/cercle/demiDroite).
@@ -302,77 +433,97 @@ export const NATURES_DISPONIBLES: { id: NatureLieu; label: string }[] = [
   { id: "demiDroite", label: "Demi-droite(s)" },
 ];
 
-function latexParamsLocus(resultat: ParamsLocus): string[] {
-  if (resultat.nature === "droite") return [`\\text{Droite passant par }${affixeLatex(resultat.point1)}\\text{ et }${affixeLatex(resultat.point2)}`];
-  if (resultat.nature === "cercle") return [`\\text{Centre }${affixeLatexRationnel(resultat.centre.a, resultat.centre.b)}\\text{, rayon }${resultat.rayonLatex}`];
-  return resultat.angles.map((a, i) => `\\theta_{${i + 1}}=${a.latex}`);
+function latexParamsLocus(e: ExerciceComplexesBSimple): string[] {
+  const resultat = e.resultat;
+  const pole = e.poleExclu ? [`\\text{Point exclu : }${affixeLatex(e.poleExclu)}`] : [];
+  if (resultat.nature === "droite") return [`\\text{Droite passant par }${affixeLatex(resultat.point1)}\\text{ et }${affixeLatex(resultat.point2)}`, ...pole];
+  if (resultat.nature === "cercle") return [`\\text{Cercle de centre }${affixeLatexRationnel(resultat.centre.a, resultat.centre.b)}\\text{, de rayon }${resultat.rayonLatex}`, ...pole];
+  const angles = resultat.angles.length === 1 ? [`\\theta=${resultat.angles[0].latex}`] : resultat.angles.map((a, i) => `\\theta_{${i + 1}}=${a.latex}`);
+  return [`\\text{Demi-droite(s) d'origine }${affixeLatex(resultat.origine)}\\text{ (exclue)}`, ...angles, ...pole];
+}
+
+/** Équation attendue à l'écran 1 (une forme possible — toute forme équivalente est acceptée). */
+function equationAttendueB(e: ExerciceComplexesBSimple): string {
+  const { p1, p2 } = e;
+  switch (e.sousType) {
+    case "droite":
+      return equationDroite(p1, p2);
+    case "thales": {
+      const d2 = (p1.a - p2.a) ** 2 + (p1.b - p2.b) ** 2;
+      return `${carreDecale("x", (p1.a + p2.a) / 2)}+${carreDecale("y", (p1.b + p2.b) / 2)}=${fractionLatex(d2, 4)}`;
+    }
+    case "apollonius": {
+      const k = e.k as number;
+      const den = 1 - k * k;
+      const d2 = (p1.a - p2.a) ** 2 + (p1.b - p2.b) ** 2;
+      return `${carreDecale("x", (p1.a - k * k * p2.a) / den)}+${carreDecale("y", (p1.b - k * k * p2.b) / den)}=${fractionLatex(k * k * d2, den * den)}`;
+    }
+    case "demiDroites":
+      return e.c === 0 ? "x=0" : `2x=${e.cLatex}\\sqrt{x^2+y^2}`;
+    case "cercleO":
+      return `x^2+y^2=${e.k}`;
+    case "cercleA":
+      return `${carreDecale("x", p1.a)}+${carreDecale("y", p1.b)}=${(e.k as number) ** 2}`;
+    case "argument":
+    case "argumentPi":
+      return equationDroiteDirection(p1, e.theta?.numerique ?? 0);
+  }
 }
 
 // ============================================================================
 // Famille C.
 // ============================================================================
 
-export function consigneGeneraleC(): FragmentConsigne[] {
+function pEtConjugue(e: ExerciceComplexesC): { p: AffixeSimple; pb: AffixeSimple } {
+  return { p: { a: e.a, b: e.b }, pb: { a: e.a, b: -e.b } };
+}
+
+function transformationC(e: ExerciceComplexesC): string {
+  return e.conjugue ? "z'=\\dfrac{z-p}{1-\\bar p z}" : "z'=\\dfrac{z-p}{1-p z}";
+}
+
+export function consigneGeneraleC(e: ExerciceComplexesC): FragmentConsigne[] {
   return [
     texte("z est un point du cercle unité ("),
     latex("|z|=1"),
     texte(", donc "),
     latex("z\\cdot\\bar z=1"),
-    texte("). On considère la transformation "),
-    latex("z'=\\dfrac{z-p}{1-\\bar p z}"),
-    texte(", avec "),
-    latex("p=a+bi"),
-    texte(". On note "),
+    texte(") et "),
+    latex(transformationC(e)),
+    texte(", avec p donné ci-dessous. On note "),
     latex("\\bar z"),
-    texte(' le conjugué de z (à taper "zb" dans les formules). Démontre que '),
-    latex("|z'|=1"),
-    texte(", en développant "),
-    latex("|z-p|^2"),
-    texte(" puis "),
-    latex("|1-\\bar p z|^2"),
-    texte(" SANS jamais poser "),
-    latex("z=x+yi"),
-    texte(" — utilise uniquement "),
-    latex("z\\cdot\\bar z=1"),
-    texte(" et "),
-    latex("z-\\bar z=2i\\cdot\\text{Im}(z)"),
-    texte("."),
+    texte(" le conjugué de z (à taper « zb »). Le point d'affixe z' est-il lui aussi sur le cercle unité ? Développe le carré du module du numérateur, puis du dénominateur, sans poser z = x + yi, puis conclus."),
   ];
 }
 
 export function blocDonneesC(e: ExerciceComplexesC): string[] {
-  return [`p=${e.a}${e.b < 0 ? "" : "+"}${e.b}i`, `z\\cdot\\, \\bar{z}=1`];
+  const { p, pb } = pEtConjugue(e);
+  return [`p=${affixeLatex(p)}\\quad \\bar p=${affixeLatex(pb)}`, transformationC(e)];
 }
 
-export function consigneEcranC(phase: PhaseComplexesAvances): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Développe "), latex("|z-p|^2=(z-p)(\\bar z-\\bar p)"), texte(", en utilisant "), latex("z\\cdot\\bar z=1"), texte(" (donné). Champ : expression simplifiée (en z et zb).")];
-  if (phase === "cEcran2") return [texte("Développe "), latex("|1-\\bar p z|^2=(1-\\bar p z)(1-p\\bar z)"), texte(", en utilisant les mêmes relations. Champ : expression simplifiée (en z et zb).")];
-  return [texte("Conclus : les 2 expressions confirmées sont-elles égales (donc "), latex("|z'|=1"), texte(") ? Et la réciproque (échanger z et z' redonne une transformation analogue) est-elle vraie ?")];
+export function consigneEcranC(e: ExerciceComplexesC, phase: PhaseComplexesAvances): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Développe "), latex("|z-p|^2=(z-p)(\\bar z-\\bar p)"), texte(" sans encore remplacer "), latex("z\\cdot\\bar z"), texte(" par 1 (expression en z et zb).")];
+  if (phase === "cEcran2") {
+    const produit = e.conjugue ? "|1-\\bar p z|^2=(1-\\bar p z)(1-p\\bar z)" : "|1-pz|^2=(1-pz)(1-\\bar p\\bar z)";
+    return [texte("Développe "), latex(produit), texte(" sans encore remplacer "), latex("z\\cdot\\bar z"), texte(" par 1 (expression en z et zb).")];
+  }
+  return [texte("Remplace "), latex("z\\cdot\\bar z"), texte(" par 1 dans les deux développements confirmés et compare-les. Que peux-tu conclure sur "), latex("|z'|"), texte(" ? (une seule tentative)")];
 }
 
-export function etatActuelC(phase: PhaseComplexesAvances): string[] | null {
-  // Écran 2 : montrait null auparavant (aucune trace du développement confirmé à l'écran 1) — bug
-  // trouvé ici (audit transversal "état actuel cumulatif") : dès le 2e écran, la réponse validée de
-  // l'écran précédent doit être visible. Écran 3 : cumule les 2 développements (écrans 1 ET 2), du
-  // plus ancien au plus récent.
-  const numerateurConfirme = "\\text{|z-p|² confirmé}";
+export function etatActuelC(e: ExerciceComplexesC, phase: PhaseComplexesAvances): string[] | null {
+  const numerateurConfirme = "|z-p|^2\\text{ développé}";
   if (phase === "cEcran2") return [numerateurConfirme];
-  if (phase === "cEcran3") return [numerateurConfirme, "\\text{|1-p̄z|² confirmé}"];
+  if (phase === "cEcran3") return [numerateurConfirme, e.conjugue ? "|1-\\bar p z|^2\\text{ développé}" : "|1-pz|^2\\text{ développé}"];
   return null;
 }
 
-export function optionsStatutC(): OptionQcm[] {
+/** Écran 3 : verdict qui dépend de l'exercice (vraie transformation ou contre-exemple). */
+export function optionsConclusionC(): OptionQcm[] {
   return [
-    { id: "correct", label: "Égales — donc |z'|=1" },
-    { id: "distr1", label: "Différentes — donc |z'|≠1 en général" },
-    { id: "distr2", label: "On ne peut pas conclure" },
-  ];
-}
-export function optionsReciproqueC(): OptionQcm[] {
-  return [
-    { id: "correct", label: "Vraie — par symétrie de la transformation (échanger z et z' redonne une forme analogue)" },
-    { id: "distr1", label: "Fausse en général" },
-    { id: "distr2", label: "Vraie seulement si p=0" },
+    // Texte brut (pas de KaTeX) : une phrase doit pouvoir passer à la ligne à 390 px.
+    { id: "egaux", label: "Égaux pour tout z du cercle unité : |z'| = 1" },
+    { id: "differents", label: "Différents en général : |z'| n'est pas toujours égal à 1" },
+    { id: "indecidable", label: "On ne peut pas conclure sans poser z = x + yi" },
   ];
 }
 
@@ -381,16 +532,36 @@ export function niveauAideMaxC(phase: PhaseComplexesAvances): number {
 }
 export function aideNiveau1C(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "Pour tout complexe w, |w|²=w·w̄. Ici z·z̄=1 (donné) — remplace-le dès qu'il apparaît.", latex: "|w|^2=w\\bar w\\text{, }z\\bar z=1" };
+  return { texte: "Pour tout complexe w, |w|² = w·w̄, et le conjugué d'une différence est la différence des conjugués :", latex: "|w|^2=w\\,\\bar w\\qquad\\overline{z-p}=\\bar z-\\bar p" };
 }
 export function aideNiveau2C(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "Développement amorcé (terme en z·z̄ non encore remplacé par 1) :", latex: `(z-p)(\\bar z-\\bar p)=z\\bar z-\\bar p z-p\\bar z+p\\bar p` };
+  return { texte: "Développement amorcé (distributivité, terme par terme) :", latex: "(z-p)(\\bar z-\\bar p)=z\\bar z-z\\bar p-\\cdots" };
 }
 
 // ============================================================================
 // Famille D.
 // ============================================================================
+
+/** Équation de D_reelles avec les valeurs NUMÉRIQUES de A, P, m₀ et k (audit 6e ch. 5, point 1). */
+export function equationDReelles(e: ExerciceComplexesDReelles): string {
+  const A = e.x1 + e.x2;
+  const P = e.x1 * e.x2;
+  const imagZ = lineaireConstanteDabord(-1, "m", e.m0);
+  const coefZ = A === 0 ? `(${imagZ})i` : `${-A}+(${imagZ})i`;
+  const debut = `z^2+\\left(${coefZ}\\right)z`;
+  let fin = "";
+  if (e.k !== 0) {
+    const imagC = lineaireConstanteDabord(e.k, "m", -e.k * e.m0);
+    fin = P === 0 ? `+(${imagC})i` : `+\\left(${P}+(${imagC})i\\right)`;
+  } else if (P !== 0) {
+    fin = P > 0 ? `+${P}` : `${P}`;
+  }
+  // Sur 2 lignes quand le terme constant est complexe : d'un seul tenant, l'équation débordait de
+  // son cadre à 390 px.
+  if (e.k !== 0) return `\\begin{aligned}&${debut}\\\\ &\\qquad{}${fin}=0\\end{aligned}`;
+  return `${debut}${fin}=0`;
+}
 
 export function consigneGeneraleD(e: ExerciceComplexesD): FragmentConsigne[] {
   switch (e.sousType) {
@@ -400,20 +571,20 @@ export function consigneGeneraleD(e: ExerciceComplexesD): FragmentConsigne[] {
         latex("(z+c)^n=k\\cdot z^n"),
         texte(", ce qui équivaut à "),
         latex("\\left(\\dfrac{z+c}{z}\\right)^n=k"),
-        texte(" (pour z≠0). On pose "),
+        texte(" (pour z ≠ 0). On pose "),
         latex("u=\\dfrac{z+c}{z}"),
         texte(" : trouve d'abord toutes les solutions u de "),
         latex("u^n=k"),
-        texte(", PUIS calcule z depuis la solution réelle "),
+        texte(", puis calcule z à partir de la solution réelle "),
         latex("u=m"),
         texte("."),
       ];
     case "reelles":
-      return [texte("L'équation "), latex("z^2+[-A+(m_0-m)i]z+[P+k(m-m_0)i]=0"), texte(" dépend d'un paramètre réel m. Trouve la valeur de m pour laquelle cette équation admet 2 solutions réelles.")];
+      return [texte("L'équation ci-dessous, d'inconnue z, dépend d'un paramètre réel m. Trouve la valeur de m pour laquelle elle admet deux solutions réelles.")];
     case "coef":
-      return [texte("L'équation "), latex("z^2+\\alpha z+\\beta=0"), texte(" a des coefficients α,β réels INCONNUS. On sait qu'elle admet la racine donnée "), latex("z_0"), texte(". Retrouve α et β.")];
+      return [texte("L'équation "), latex("z^2+\\alpha z+\\beta=0"), texte(" a des coefficients α et β réels inconnus. On sait qu'elle admet la racine "), latex("z_0"), texte(" donnée. Retrouve α et β.")];
     case "modules":
-      return [texte("Trouve z tel que "), latex("|z|=|1/z|"), texte(" ET "), latex("|z|=|z-d|"), texte(" (d donné) soient simultanément vérifiées.")];
+      return [texte("Trouve les nombres complexes z tels que "), latex("|z|=\\left|\\dfrac{1}{z}\\right|"), texte(" et "), latex("|z|=|z-d|"), texte(" (d donné).")];
   }
 }
 
@@ -421,16 +592,11 @@ export function blocDonneesD(e: ExerciceComplexesD): string[] {
   switch (e.sousType) {
     case "ratio":
       return [`n=${e.n}\\quad c=${e.c}\\quad k=${e.m}^{${e.n}}=${e.m ** e.n}`];
-    case "reelles": {
-      const A = e.x1 + e.x2;
-      const P = e.x1 * e.x2;
-      return [`A=${A}\\quad P=${P}\\quad m_0\\text{ inconnu}\\quad k=${e.k}`];
-    }
+    case "reelles":
+      return [equationDReelles(e)];
     case "coef":
-      return [`z_0=${e.p}${e.q < 0 ? "" : "+"}${e.q}i`];
+      return [`z_0=${affixeLatex({ a: e.p, b: e.q })}`];
     case "modules": {
-      // d=2p/r réduit à sa forme irréductible (le triplet pythagoricien peut être non primitif,
-      // ex. [6,8,10]=2·[3,4,5] — jamais afficher une fraction non simplifiée, CLAUDE.md).
       const num = 2 * e.p;
       const g = pgcd(num, e.r);
       const numReduit = num / g;
@@ -444,56 +610,65 @@ export function consigneEcranD(e: ExerciceComplexesD, phase: PhaseComplexesAvanc
   switch (e.sousType) {
     case "ratio":
       return phase === "dRatioEcran1"
-        ? [texte(`Trouve les ${e.n} solutions u de `), latex("u^n=k"), texte(" (ajoute une ligne par solution).")]
-        : [texte("Utilise la solution RÉELLE "), latex("u=m"), texte(" (confirmée) pour calculer "), latex("z=\\dfrac{c}{u-1}"), texte(".")];
+        ? [texte(`Trouve les ${e.n} solutions u de `), latex("u^n=k"), texte(" (une ligne par solution).")]
+        : [texte("Utilise la solution réelle confirmée "), latex("u=m"), texte(" pour calculer "), latex("z=\\dfrac{c}{u-1}"), texte(".")];
     case "reelles":
-      if (phase === "dReellesEcran1") return [texte("Substitue "), latex("z=x"), texte(" (réel), sépare l'équation en 2 équations réelles (partie réelle=0, partie imaginaire=0).")];
-      if (phase === "dReellesEcran2") return [texte("À partir des 2 équations CONFIRMÉES, déduis la valeur de m pour laquelle elles partagent les mêmes racines x.")];
-      return [texte("Donne les 2 solutions réelles, pour le m CONFIRMÉ.")];
+      if (phase === "dReellesEcran1") return [texte("Pose "), latex("z=x"), texte(" (x réel) et sépare l'équation en deux équations réelles en x et m : partie réelle = 0 et partie imaginaire = 0.")];
+      if (phase === "dReellesEcran2") return [texte("À partir des deux équations confirmées, déduis la valeur de m pour laquelle elles ont deux racines x communes.")];
+      return [texte("Donne les deux solutions réelles, pour la valeur de m confirmée.")];
     case "coef":
       return phase === "dCoefEcran1"
-        ? [texte("Substitue "), latex("z_0"), texte(" dans le polynôme, développe, sépare en 2 équations (partie réelle=0, partie imaginaire=0) en α et β.")]
-        : [texte("Résous le système CONFIRMÉ pour α et β.")];
+        ? [texte("Remplace z par "), latex("z_0"), texte(", développe et sépare en deux équations en α et β : partie réelle = 0 et partie imaginaire = 0.")]
+        : [texte("Résous le système confirmé.")];
     case "modules":
       return phase === "dModulesEcran1"
-        ? [texte("Déduis |z| depuis "), latex("|z|=|1/z|"), texte(".")]
-        : [texte("Utilise "), latex("|z|=1"), texte(" CONFIRMÉ et "), latex("|z|=|z-d|"), texte(" pour trouver les solutions z (ajoute une ligne par solution).")];
+        ? [texte("Déduis |z| de "), latex("|z|=\\left|\\dfrac{1}{z}\\right|"), texte(".")]
+        : [texte("Utilise "), latex("|z|=1"), texte(" (confirmé) et "), latex("|z|=|z-d|"), texte(" pour trouver les solutions z (une ligne par solution).")];
   }
 }
 
 export function etatActuelD(e: ExerciceComplexesD, phase: PhaseComplexesAvances): string[] | null {
   switch (e.sousType) {
     case "ratio":
-      return phase === "dRatioEcran2" ? ["\\text{Les } n \\text{ solutions } u \\text{ confirmées}"] : null;
+      return phase === "dRatioEcran2" ? [`\\text{Les }${e.n}\\text{ solutions }u\\text{ confirmées}`] : null;
     case "reelles": {
-      const equationsConfirmees = "\\text{2 équations confirmées}";
+      const equationsConfirmees = "\\text{Les 2 équations confirmées}";
       if (phase === "dReellesEcran2") return [equationsConfirmees];
-      // Écran 3 : cumule les 2 équations (écran 1) ET la valeur de m (écran 2), du plus ancien au
-      // plus récent — jamais seulement l'écran immédiatement précédent (audit transversal "état
-      // actuel cumulatif").
       if (phase === "dReellesEcran3") return [equationsConfirmees, `m=${e.m0}\\text{ (confirmé)}`];
       return null;
     }
     case "coef":
-      return phase === "dCoefEcran2" ? ["\\text{2 équations confirmées}"] : null;
+      return phase === "dCoefEcran2" ? ["\\text{Les 2 équations confirmées}"] : null;
     case "modules":
       return phase === "dModulesEcran2" ? ["|z|=1\\text{ (confirmé)}"] : null;
   }
 }
 
+/** Placeholders HORS de l'espace des tirages, sans « * », « zb » ni « sqrt » (audit 6e ch. 5). */
 export function champsD(e: ExerciceComplexesD, phase: PhaseComplexesAvances): ChampDef[] {
   switch (e.sousType) {
     case "ratio":
-      return phase === "dRatioEcran2" ? [{ type: "texte", label: "z =", placeholder: "ex : 3" }] : [];
+      return phase === "dRatioEcran2" ? [{ type: "texte", label: "z =", placeholder: "ex : 7/3" }] : [];
     case "reelles":
-      if (phase === "dReellesEcran1") return [{ type: "texte", label: "Partie réelle = 0 :", placeholder: "ex : x^2-4*x+3=0" }, { type: "texte", label: "Partie imaginaire = 0 :", placeholder: "ex : (m0-m)*(x-k)=0" }];
-      if (phase === "dReellesEcran2") return [{ type: "texte", label: "m =", placeholder: "ex : 2" }];
+      if (phase === "dReellesEcran1")
+        return [
+          { type: "texte", label: "Partie réelle = 0 :", placeholder: "ex : x²+2x−1=0" },
+          { type: "texte", label: "Partie imaginaire = 0 :", placeholder: "ex : 2mx−3=0" },
+        ];
+      if (phase === "dReellesEcran2") return [{ type: "texte", label: "m =", placeholder: "ex : 5/2" }];
       return [];
     case "coef":
-      if (phase === "dCoefEcran1") return [{ type: "texte", label: "Partie réelle = 0 :", placeholder: "ex : p*alpha+beta+c=0" }, { type: "texte", label: "Partie imaginaire = 0 :", placeholder: "ex : q*alpha+d=0" }];
-      return [{ type: "texte", label: "α =", placeholder: "ex : -2" }, { type: "texte", label: "β =", placeholder: "ex : 5" }];
+      if (phase === "dCoefEcran1")
+        return [
+          { type: "texte", label: "Partie réelle = 0 :", placeholder: "ex : 3α+β−7=0" },
+          { type: "texte", label: "Partie imaginaire = 0 :", placeholder: "ex : 2α+5=0" },
+        ];
+      return [
+        { type: "texte", label: "α =", placeholder: "ex : 7" },
+        { type: "texte", label: "β =", placeholder: "ex : 3" },
+      ];
     case "modules":
-      return phase === "dModulesEcran1" ? [{ type: "texte", label: "|z| =", placeholder: "ex : 1" }] : [];
+      return phase === "dModulesEcran1" ? [{ type: "texte", label: "|z| =", placeholder: "ex : 3/2" }] : [];
   }
 }
 
@@ -506,29 +681,28 @@ export function niveauAideMaxD(): number {
 // ============================================================================
 
 export function consigneGeneraleE(): FragmentConsigne[] {
-  return [texte("A, B, C, D sont 4 points donnés par leurs affixes. Détermine si les droites (AB) et (CD) sont parallèles, perpendiculaires, ou ni l'un ni l'autre, en étudiant l'argument du rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(".")];
+  return [texte("A, B, C et D sont quatre points donnés par leurs affixes. Détermine si les droites (AB) et (CD) sont parallèles, perpendiculaires, ou ni l'un ni l'autre, en étudiant l'argument du rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(".")];
 }
 
+/** Deux points par ligne : une seule ligne de 4 affixes débordait à 390 px. */
 export function blocDonneesE(e: ExerciceComplexesE): string[] {
-  return [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}\\quad z_C=${affixeLatex(e.zC)}\\quad z_D=${affixeLatex(e.zD)}`];
+  return [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}`, `z_C=${affixeLatex(e.zC)}\\quad z_D=${affixeLatex(e.zD)}`];
 }
 
 export function consigneEcranE(phase: PhaseComplexesAvances): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Calcule le rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(", sous forme a+bi.")];
-  if (phase === "eEcran2") return [texte("À partir du rapport CONFIRMÉ, détermine son argument.")];
-  return [texte("Conclus : les droites (AB) et (CD) sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ?")];
+  if (phase === "eEcran1") return [texte("Calcule le rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(" sous forme a + bi.")];
+  if (phase === "eEcran2") return [texte("À partir du rapport confirmé, détermine son argument en radians : valeur exacte si c'est un angle remarquable, sinon valeur approchée à 0,01 près (calculatrice autorisée).")];
+  return [texte("Conclus : les droites (AB) et (CD) sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ? (une seule tentative)")];
 }
 
 export function etatActuelE(phase: PhaseComplexesAvances): string[] | null {
   const rapportConfirme = "\\text{Rapport confirmé}";
   if (phase === "eEcran2") return [rapportConfirme];
-  // Écran 3 : cumule le rapport (écran 1) ET l'argument (écran 2), du plus ancien au plus récent —
-  // jamais seulement l'écran immédiatement précédent (audit transversal "état actuel cumulatif").
   if (phase === "eEcran3") return [rapportConfirme, "\\text{Argument confirmé}"];
   return null;
 }
 
-export function optionsStatutE(): { id: string; label: string }[] {
+export function optionsStatutE(): OptionQcm[] {
   return [
     { id: "paralleles", label: "(AB) et (CD) sont parallèles" },
     { id: "perpendiculaires", label: "(AB) et (CD) sont perpendiculaires" },
@@ -541,11 +715,12 @@ export function niveauAideMaxE(phase: PhaseComplexesAvances): number {
 }
 export function aideNiveau1E(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "eEcran3") return AUCUNE_AIDE;
-  return { texte: "(AB) ∥ (CD) ⟺ le rapport des affixes-différences est RÉEL. (AB) ⊥ (CD) ⟺ ce rapport est IMAGINAIRE PUR.", latex: null };
+  return { texte: "(AB) et (CD) sont parallèles lorsque le rapport est réel (argument 0 ou π), perpendiculaires lorsqu'il est imaginaire pur (argument ±π/2).", latex: "\\dfrac{z_D-z_C}{z_B-z_A}\\in\\mathbb{R}\\iff(AB)\\parallel(CD)" };
 }
-export function aideNiveau2E(phase: PhaseComplexesAvances): AideAvecLatex {
+export function aideNiveau2E(e: ExerciceComplexesE, phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "eEcran3") return AUCUNE_AIDE;
-  return { texte: "Partie réelle et partie imaginaire du rapport, rappelées séparément (une des deux est-elle nulle ? conclusion non donnée) :", latex: null };
+  const r = ratioE(e);
+  return { texte: "Parties réelle et imaginaire du rapport confirmé (l'une des deux est-elle nulle ?) :", latex: `\\operatorname{Re}=${latexRationnel(r.re)}\\qquad\\operatorname{Im}=${latexRationnel(r.im)}` };
 }
 
 // ============================================================================
@@ -559,7 +734,7 @@ export function consigneGenerale(exercice: ExerciceComplexesAvances): FragmentCo
     case "B":
       return consigneGeneraleB(exercice);
     case "C":
-      return consigneGeneraleC();
+      return consigneGeneraleC(exercice);
     case "D":
       return consigneGeneraleD(exercice);
     case "E":
@@ -589,7 +764,7 @@ export function consigneEcran(exercice: ExerciceComplexesAvances, phase: PhaseCo
     case "B":
       return consigneEcranB(exercice, phase);
     case "C":
-      return consigneEcranC(phase);
+      return consigneEcranC(exercice, phase);
     case "D":
       return consigneEcranD(exercice, phase);
     case "E":
@@ -604,7 +779,7 @@ export function etatActuel(exercice: ExerciceComplexesAvances, phase: PhaseCompl
     case "B":
       return etatActuelB(exercice, phase);
     case "C":
-      return etatActuelC(phase);
+      return etatActuelC(exercice, phase);
     case "D":
       return etatActuelD(exercice, phase);
     case "E":
@@ -612,25 +787,34 @@ export function etatActuel(exercice: ExerciceComplexesAvances, phase: PhaseCompl
   }
 }
 
-/** Champs texte génériques — UNIQUEMENT pour les écrans NON dédiés (jamais les écrans A (QCM),
- * bEcran2 simple, bInterEcran3, cEcran3, dRatioEcran1, dReellesEcran3, dModulesEcran2, eEcran3 —
- * tous rendus par un composant spécialisé, voir `App6gen42.tsx`). */
+/** Champs texte génériques — UNIQUEMENT pour les écrans NON dédiés (voir `App6gen42.tsx`).
+ * Placeholders hors tirages, sans « * », « zb » ni « sqrt ». */
 export function champsEcran(exercice: ExerciceComplexesAvances, phase: PhaseComplexesAvances): ChampDef[] {
   switch (exercice.famille) {
     case "B":
       if (exercice.sousType === "intersection") {
-        if (phase === "bInterEcran1") return [{ type: "texte", label: "Équation de la droite (x,y) :", placeholder: "ex : y-x=1" }, { type: "texte", label: "Équation du cercle (x,y) :", placeholder: "ex : x^2+y^2=5" }];
-        if (phase === "bInterEcran2") return [{ type: "texte", label: "Point 1 (a+bi) :", placeholder: "ex : 1+2i" }, { type: "texte", label: "Point 2 (a+bi) :", placeholder: "ex : -1-2i" }, { type: "texte", label: "Centre (a+bi) :", placeholder: "ex : 0" }, { type: "texte", label: "Rayon :", placeholder: "ex : sqrt(5)" }];
+        if (phase === "bInterEcran1")
+          return [
+            { type: "texte", label: "Condition (1), équation en x et y :", placeholder: "ex : 3x+5y=1,5" },
+            { type: "texte", label: "Condition (2), équation en x et y :", placeholder: "ex : x²+y²=3" },
+          ];
+        if (phase === "bInterEcran2")
+          return [
+            { type: "texte", label: "Point 1 de la droite (a+bi) :", placeholder: "ex : 1/2+3i" },
+            { type: "texte", label: "Point 2 de la droite (a+bi) :", placeholder: "ex : 5−i/3" },
+            { type: "texte", label: "Centre du cercle (a+bi) :", placeholder: "ex : 2−3i" },
+            { type: "texte", label: "Rayon du cercle :", placeholder: "ex : 2,5" },
+          ];
         return [];
       }
-      return phase === "bEcran1" ? [{ type: "texte", label: "Équation (x,y) :", placeholder: "ex : x^2+y^2=5" }] : [];
+      return phase === "bEcran1" ? [{ type: "texte", label: "Équation en x et y :", placeholder: "ex : 3x+5y=1,5" }] : [];
     case "C":
-      return phase === "cEcran1" || phase === "cEcran2" ? [{ type: "texte", label: "Expression développée :", placeholder: "ex : 1-zb*a-z*a+1" }] : [];
+      return phase === "cEcran1" || phase === "cEcran2" ? [{ type: "texte", label: "Expression développée (en z et zb) :", placeholder: "ex : 5−2z" }] : [];
     case "D":
       return champsD(exercice, phase);
     case "E":
-      if (phase === "eEcran1") return [{ type: "texte", label: "Rapport =", placeholder: "ex : 2-i" }];
-      if (phase === "eEcran2") return [{ type: "texte", label: "Argument =", placeholder: "ex : pi/2" }];
+      if (phase === "eEcran1") return [{ type: "texte", label: "Rapport (a+bi) =", placeholder: "ex : 1/7+5i" }];
+      if (phase === "eEcran2") return [{ type: "texte", label: "Argument (en radians) =", placeholder: "ex : 4pi/11" }];
       return [];
     default:
       return [];
@@ -678,13 +862,13 @@ export function aideNiveau2(exercice: ExerciceComplexesAvances, phase: PhaseComp
     case "D":
       return AUCUNE_AIDE;
     case "E":
-      return aideNiveau2E(phase);
+      return aideNiveau2E(exercice, phase);
   }
 }
 
 export const LIBELLE_PHASE: Record<PhaseComplexesAvances, string> = {
   aEcran1: "Étape 1 (condition sur θ)",
-  aEcran2: "Étape 2 (condition sur a,b)",
+  aEcran2: "Étape 2 (condition sur a et b)",
   aEcran3: "Étape 3 (condition complète)",
   bEcran1: "Étape 1 (équation)",
   bEcran2: "Étape 2 (nature du lieu)",
@@ -694,7 +878,7 @@ export const LIBELLE_PHASE: Record<PhaseComplexesAvances, string> = {
   cEcran1: "Étape 1 (|numérateur|²)",
   cEcran2: "Étape 2 (|dénominateur|²)",
   cEcran3: "Étape 3 (conclusion)",
-  dRatioEcran1: "Étape 1 (racines de uⁿ=k)",
+  dRatioEcran1: "Étape 1 (racines de uⁿ = k)",
   dRatioEcran2: "Étape 2 (z depuis u réel)",
   dReellesEcran1: "Étape 1 (2 équations)",
   dReellesEcran2: "Étape 2 (valeur de m)",
@@ -709,33 +893,38 @@ export const LIBELLE_PHASE: Record<PhaseComplexesAvances, string> = {
 };
 
 export const LIBELLE_FAMILLE: Record<ExerciceComplexesAvances["famille"], string> = {
-  A: "A — Condition pour (a+bi)ⁿ réel positif",
+  A: "A — Condition pour que zⁿ soit un réel positif",
   B: "B — Lieux géométriques",
-  C: "C — Préservation du cercle unité",
+  C: "C — Le cercle unité est-il préservé ?",
   D: "D — Équations avec paramètre(s)",
   E: "E — Parallélisme / perpendicularité",
 };
 
 function reponseA(exercice: ExerciceComplexesA, phase: PhaseComplexesAvances): string[] {
-  if (phase === "aEcran1") return ["n·θ ≡ 0 (mod 2π)"];
-  if (phase === "aEcran2") return [LIBELLE_CAB[exercice.n]];
-  const seuil = `k^{1/${exercice.n}}`;
-  return [`${LIBELLE_CAB[exercice.n]}, ET √(a²+b²) > ${seuil}`];
+  if (phase === "aEcran1") return [`${exercice.n}\\theta\\equiv 0\\pmod{2\\pi}`];
+  if (phase === "aEcran2") return [tableauLignes(lignesConditionAB(exercice.n))];
+  return [tableauLignes(lignesConditionComplete(exercice, `>${seuilLatex(exercice)}`))];
 }
 
 function reponseB(exercice: ExerciceComplexesB, phase: PhaseComplexesAvances): string[] {
   if (exercice.sousType === "intersection") {
-    if (phase === "bInterEcran1") return ["\\text{2 équations en x,y}"];
-    if (phase === "bInterEcran2") return [`\\text{Droite par }${affixeLatex(exercice.q1)}\\text{,}${affixeLatex(exercice.q2)}\\text{ ; cercle centre }0\\text{ rayon }${racineRationnelleLatex(exercice.kCercleO, 1).latex}`];
-    return [`${affixeLatex(exercice.q1)}\\quad\\text{et}\\quad${affixeLatex(exercice.q2)}`];
+    if (phase === "bInterEcran1") return [`(1)\\ ${equationDroite(exercice.q1, exercice.q2)}`, `(2)\\ x^2+y^2=${exercice.kCercleO}`];
+    if (phase === "bInterEcran2") return [`\\text{Droite passant par }${affixeLatex(exercice.q1)}\\text{ et }${affixeLatex(exercice.q2)}`, `\\text{Cercle de centre }0\\text{, de rayon }${racineRationnelleLatex(exercice.kCercleO, 1).latex}`];
+    return [`${affixeLatex(exercice.q1)}\\quad\\text{et}\\quad ${affixeLatex(exercice.q2)}`];
   }
-  if (phase === "bEcran1") return ["\\text{équation en x,y}"];
-  return latexParamsLocus(exercice.resultat);
+  if (phase === "bEcran1") return [equationAttendueB(exercice)];
+  return latexParamsLocus(exercice);
 }
 
-function reponseC(phase: PhaseComplexesAvances): string[] {
-  if (phase === "cEcran1" || phase === "cEcran2") return ["1-\\bar p z-p\\bar z+|p|^2"];
-  return ["\\text{Égales — }|z'|=1\\text{ ; réciproque vraie par symétrie}"];
+function reponseC(exercice: ExerciceComplexesC, phase: PhaseComplexesAvances): string[] {
+  const { p, pb } = pEtConjugue(exercice);
+  const p2 = exercice.a * exercice.a + exercice.b * exercice.b;
+  if (phase === "cEcran1") return [`z\\bar z${moinsCoefVariable(pb, "z")}${moinsCoefVariable(p, "\\bar z")}+${p2}`];
+  if (phase === "cEcran2") {
+    const [c1, c2] = exercice.conjugue ? [pb, p] : [p, pb];
+    return [`1${moinsCoefVariable(c1, "z")}${moinsCoefVariable(c2, "\\bar z")}+${p2}\\,z\\bar z`];
+  }
+  return [exercice.conjugue ? "|z'|=1\\text{ pour tout }z\\text{ du cercle unité}" : "|z'|\\neq 1\\text{ en général}"];
 }
 
 function reponseD(exercice: ExerciceComplexesD, phase: PhaseComplexesAvances): string[] {
@@ -745,36 +934,76 @@ function reponseD(exercice: ExerciceComplexesD, phase: PhaseComplexesAvances): s
         const racines: string[] = [];
         for (let k = 0; k < exercice.n; k++) {
           const angle = (2 * Math.PI * k) / exercice.n;
-          racines.push(affixeLatexRationnel(exercice.m * Math.cos(angle), exercice.m * Math.sin(angle)));
+          const re = exercice.m * Math.cos(angle);
+          const im = exercice.m * Math.sin(angle);
+          // Partie imaginaire en m·√3/2 pour n = 3 ou 6 : écrite avec un radical, jamais en décimal.
+          const imRationnelle = Math.abs(im * 2 - Math.round(im * 2)) < 1e-9;
+          if (imRationnelle || Math.abs(im) < 1e-9) racines.push(affixeLatexRationnel(re, im));
+          else {
+            const coef = Math.round((Math.abs(im) * 2) / Math.sqrt(3));
+            const imLatex = `${im < 0 ? "-" : "+"}${coef === 2 ? "" : `\\frac{${coef}}{2}`}\\sqrt{3}\\,i`;
+            const reLatex = Math.abs(re) < 1e-9 ? "" : latexRationnel(re);
+            racines.push(reLatex === "" ? imLatex.replace(/^\+/, "") : `${reLatex}${imLatex}`);
+          }
         }
         return racines;
       }
       return [`z=${latexRationnel(exercice.c / (exercice.m - 1))}`];
     }
-    case "reelles":
-      if (phase === "dReellesEcran1") return ["\\text{2 équations en x,m}"];
+    case "reelles": {
+      const A = exercice.x1 + exercice.x2;
+      const P = exercice.x1 * exercice.x2;
+      if (phase === "dReellesEcran1")
+        return [
+          `${lineaire([
+            [1, "x^2"],
+            [-A, "x"],
+            [P, ""],
+          ])}=0`,
+          `\\left(${lineaireConstanteDabord(-1, "m", exercice.m0)}\\right)\\left(${decale("x", exercice.k)}\\right)=0`,
+        ];
       if (phase === "dReellesEcran2") return [`m=${exercice.m0}`];
       return [`${exercice.x1}`, `${exercice.x2}`];
-    case "coef":
-      if (phase === "dCoefEcran1") return ["\\text{2 équations en }\\alpha,\\beta"];
-      return [`\\alpha=${-2 * exercice.p}\\quad\\beta=${exercice.p * exercice.p + exercice.q * exercice.q}`];
+    }
+    case "coef": {
+      const { p, q } = exercice;
+      if (phase === "dCoefEcran1") {
+        const reel = `${lineaire([
+          [p, "\\alpha"],
+          [1, "\\beta"],
+          [p * p - q * q, ""],
+        ])}=0`;
+        const imag = `${lineaire([
+          [q, "\\alpha"],
+          [2 * p * q, ""],
+        ])}=0`;
+        const simplifiee = `${lineaire([
+          [1, "\\alpha"],
+          [2 * p, ""],
+        ])}=0`;
+        return [reel, Math.abs(q) === 1 && q > 0 ? imag : `${imag}\\iff ${simplifiee}`];
+      }
+      return [`\\alpha=${-2 * p}\\quad\\beta=${p * p + q * q}`];
+    }
     case "modules":
       if (phase === "dModulesEcran1") return ["|z|=1"];
       return [affixeLatexRationnel(exercice.p / exercice.r, exercice.q / exercice.r), affixeLatexRationnel(exercice.p / exercice.r, -exercice.q / exercice.r)];
   }
 }
 
+/** Argument attendu : valeur exacte si remarquable, sinon décimale À VIRGULE (audit 6e ch. 5). */
+function argumentLatexE(exercice: ExerciceComplexesE): string {
+  const ratio = ratioE(exercice);
+  const angle = calculerArgument(ratio.re, ratio.im);
+  if (angle.q !== 1e6) return angle.latex;
+  return `\\approx ${angle.numerique.toFixed(2).replace(".", "{,}")}`;
+}
+
 function reponseE(exercice: ExerciceComplexesE, phase: PhaseComplexesAvances): string[] {
-  const num: AffixeSimple = { a: exercice.zD.a - exercice.zC.a, b: exercice.zD.b - exercice.zC.b };
-  const den: AffixeSimple = { a: exercice.zB.a - exercice.zA.a, b: exercice.zB.b - exercice.zA.b };
-  const norme = den.a * den.a + den.b * den.b;
-  const ratio = { re: (num.a * den.a + num.b * den.b) / norme, im: (num.b * den.a - num.a * den.b) / norme };
+  const ratio = ratioE(exercice);
   if (phase === "eEcran1") return [affixeLatexRationnel(ratio.re, ratio.im)];
-  if (phase === "eEcran2") {
-    const angle = calculerArgument(ratio.re, ratio.im);
-    return [angle.latex];
-  }
-  const libelles: Record<string, string> = { paralleles: "\\text{parallèles}", perpendiculaires: "\\text{perpendiculaires}", aucun: "\\text{ni l'un ni l'autre}" };
+  if (phase === "eEcran2") return [`\\arg=${argumentLatexE(exercice)}`.replace("=\\approx", "\\approx")];
+  const libelles: Record<string, string> = { paralleles: "\\text{parallèles}", perpendiculaires: "\\text{perpendiculaires}", aucun: "\\text{ni parallèles ni perpendiculaires}" };
   return [libelles[exercice.statut]];
 }
 
@@ -787,11 +1016,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceComplexesAvanc
     case "B":
       return reponseB(exercice, phase);
     case "C":
-      return reponseC(phase);
+      return reponseC(exercice, phase);
     case "D":
       return reponseD(exercice, phase);
     case "E":
       return reponseE(exercice, phase);
   }
 }
-

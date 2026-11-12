@@ -1,4 +1,4 @@
-import type { ExerciceFormuleMoivre, TermeDeveloppementMoivre } from "../../core6e/formuleMoivre.types";
+import type { CibleFormuleMoivre, ExerciceFormuleMoivre, TermeDeveloppementMoivre } from "../../core6e/formuleMoivre.types";
 import { tirerParmi } from "../calculPrimitives/aleatoire";
 import { puissanceDeI } from "../nombresComplexes/familleG";
 
@@ -30,28 +30,54 @@ function construireTermes(n: number): TermeDeveloppementMoivre[] {
   return termes;
 }
 
-/** Construction déterministe (`n` fixé) — utilisée par `CATALOGUE_VARIANTES`/`construireAvecVarianteId`
- * ET comme implémentation par défaut de `genererExerciceFormuleMoivre` (tirage aléatoire de `n` en
- * valeur par défaut, réévalué à CHAQUE appel — pas un tirage figé au chargement du module). */
-export function construireExercice(n: 3 | 4 | 5 | 6 = tirerParmi(VALEURS_N)): ExerciceFormuleMoivre {
-  return { n, termes: construireTermes(n) };
+/** Polynômes de Tchebychev : cos(nx) = Tₙ(cos x), sin(nx)/sin(x) = Uₙ₋₁(cos x) — coefficients
+ * entiers, indice = puissance de cos(x) (récurrence P₍ₖ₊₁₎ = 2c·Pₖ − P₍ₖ₋₁₎). */
+function tchebychev(premier: number[], second: number[], rang: number): number[] {
+  let precedent = premier;
+  let courant = second;
+  if (rang === 0) return premier;
+  for (let k = 1; k < rang; k++) {
+    const suivant = new Array(courant.length + 1).fill(0);
+    courant.forEach((c, i) => (suivant[i + 1] += 2 * c));
+    precedent.forEach((c, i) => (suivant[i] -= c));
+    precedent = courant;
+    courant = suivant;
+  }
+  return courant;
+}
+
+function polynomeCos(n: number, cible: CibleFormuleMoivre): number[] {
+  if (cible === "cosSeul") return tchebychev([1], [0, 1], n);
+  if (cible === "sinSurSin") return tchebychev([1], [0, 2], n - 1);
+  return [];
+}
+
+const CIBLES: CibleFormuleMoivre[] = ["standard", "cosSeul", "sinSurSin"];
+
+/** Construction déterministe (`n` et `cible` fixés) — utilisée par `CATALOGUE_VARIANTES`/
+ * `construireAvecVarianteId`. Sans argument : tirage UNIFORME sur les 12 couples (n, cible). */
+export function construireExercice(n: 3 | 4 | 5 | 6 = tirerParmi(VALEURS_N), cible: CibleFormuleMoivre = tirerParmi(CIBLES)): ExerciceFormuleMoivre {
+  return { n, termes: construireTermes(n), cible, polynomeCos: polynomeCos(n, cible) };
 }
 
 export function genererExerciceFormuleMoivre(): ExerciceFormuleMoivre {
   return construireExercice();
 }
 
-export type IdVarianteFormuleMoivre = "n3" | "n4" | "n5" | "n6";
+export type IdVarianteFormuleMoivre = "n3" | "n4" | "n5" | "n6" | "cosSeul" | "sinSurSin";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteFormuleMoivre; label: string }[] = [
-  { id: "n3", label: "n=3" },
-  { id: "n4", label: "n=4" },
-  { id: "n5", label: "n=5" },
-  { id: "n6", label: "n=6" },
+  { id: "n3", label: "n=3 — cos(3x) et sin(3x)" },
+  { id: "n4", label: "n=4 — cos(4x) et sin(4x)" },
+  { id: "n5", label: "n=5 — cos(5x) et sin(5x)" },
+  { id: "n6", label: "n=6 — cos(6x) et sin(6x)" },
+  { id: "cosSeul", label: "cos(nx) en fonction de cos x seul" },
+  { id: "sinSurSin", label: "sin(nx)/sin x en fonction de cos x seul" },
 ];
 
-const N_PAR_ID: Record<IdVarianteFormuleMoivre, 3 | 4 | 5 | 6> = { n3: 3, n4: 4, n5: 5, n6: 6 };
+const N_PAR_ID: Record<"n3" | "n4" | "n5" | "n6", 3 | 4 | 5 | 6> = { n3: 3, n4: 4, n5: 5, n6: 6 };
 
 export function construireAvecVarianteId(id: IdVarianteFormuleMoivre): ExerciceFormuleMoivre {
-  return construireExercice(N_PAR_ID[id]);
+  if (id === "cosSeul" || id === "sinSurSin") return construireExercice(tirerParmi(VALEURS_N), id);
+  return construireExercice(N_PAR_ID[id], "standard");
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatTransformationsPlan";
@@ -7,14 +8,19 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
+/** Option rendue en LaTeX (`latex`, formules du QCM famille A) OU en texte brut (`label`, natures de
+ * la famille D — jamais de prose en mode math). */
 interface Option {
   id: string;
-  latex: string;
+  latex?: string;
+  label?: string;
 }
 
 interface Props {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
+  /** Figure d'énoncé facultative (petit plan complexe — audit 6e ch. 5, décision K). */
+  figure?: ReactNode;
   consigneEcran: FragmentConsigne[];
   options: Option[];
   aideNiveau1: AideAvecLatex;
@@ -32,13 +38,16 @@ interface Props {
 }
 
 /**
- * Écran GÉNÉRIQUE "choix parmi options rendues en LaTeX" pour `6gen40` — famille A, écran 1
+ * Écran GÉNÉRIQUE "choix parmi options" pour `6gen40` — famille A, écran 1 (formules LaTeX) et
+ * famille D, écran 1 (natures, texte brut). UNE seule tentative (audit 6e ch. 5, point 6 — voir
+ * `tentativesMaxPhase`) : le bloc d'erreur ne s'affiche donc jamais en pratique (écran clos au
+ * premier essai). Famille A, écran 1
  * ("identifier et poser la formule complexe correspondant à la transformation nommée") : un CHOIX
  * véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (convention
  * CLAUDE.md), mirroir `EtapeChoixAffixesRacines.tsx` (6gen35). `App6gen40.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeChoixFormuleTransformationsPlan({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixFormuleTransformationsPlan({ consigneGenerale, blocDonnees, figure, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -58,6 +67,7 @@ export function EtapeChoixFormuleTransformationsPlan({ consigneGenerale, blocDon
                 <Katex key={i} expression={frag} block />
               ))}
             </div>
+            {figure}
           </div>
         }
       />
@@ -67,17 +77,21 @@ export function EtapeChoixFormuleTransformationsPlan({ consigneGenerale, blocDon
       <div className="options-grid-compact">
         {options.map((o) => (
           <button key={o.id} type="button" className={`btn ${choix === o.id ? "toggle-active" : ""} ${montrerErreurs && choix === o.id ? "is-erronee" : ""}`} onClick={() => setChoix(o.id)}>
-            <Katex expression={o.latex} />
+            {o.latex !== undefined ? <Katex expression={o.latex} /> : o.label}
           </button>
         ))}
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p>
+            <RenduFragments fragments={aideNiveau1.texte} />
+          </p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p>
+                <RenduFragments fragments={aideNiveau2.texte} />
+              </p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}

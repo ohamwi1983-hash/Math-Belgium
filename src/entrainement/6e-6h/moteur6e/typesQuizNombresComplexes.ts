@@ -1,6 +1,6 @@
 /**
- * Couche B (6e) — types de session pour "Nombres complexes" (quiz vrai/faux, 6gen68, ajout
- * ultérieur au chapitre 7). Structure identique à 6gen67 (`typesQuizIntegralesPrimitives.ts`) et
+ * Couche B (6e) — types de session pour "Nombres complexes" (quiz vrai/faux, 6gen68,
+ * chapitre 5). Structure identique à 6gen67 (`typesQuizIntegralesPrimitives.ts`) et
  * 6gen66/65 : **mono-écran, une seule tentative** (jamais de `niveauAide` : avec 2 réponses
  * possibles, aucune aide progressive n'a de sens ici — CLAUDE.md, "Aide progressive additive...
  * max=0 → pas de bouton").

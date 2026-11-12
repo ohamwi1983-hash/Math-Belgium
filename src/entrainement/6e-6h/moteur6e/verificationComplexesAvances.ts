@@ -1,63 +1,30 @@
 import type { AffixeSimple, ExerciceComplexesA, ExerciceComplexesAvances, ExerciceComplexesB, ExerciceComplexesBIntersection, ExerciceComplexesBSimple, ExerciceComplexesC, ExerciceComplexesD, ExerciceComplexesDCoef, ExerciceComplexesDModules, ExerciceComplexesDRatio, ExerciceComplexesDReelles, ExerciceComplexesE, NatureLieu } from "../core6e/complexesAvances.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerEnsembleValeurs, diagnostiquerValeur, evaluerExpressionExponentielle, separerEquationTexte } from "./equivalenceExponentielle";
-import { TOLERANCE_COMPLEXE, diagnostiquerComplexe } from "./verificationComplexes";
+import { diagnostiquerAngle, diagnostiquerEnsembleValeurs, diagnostiquerValeur, evaluerExpressionExponentielle, separerEquationTexte } from "./equivalenceExponentielle";
+import { diagnostiquerComplexe } from "./verificationComplexes";
 import type { Complexe } from "./verificationComplexes";
+import { evaluerValeurComplexe } from "./expressionComplexe";
 import { evaluerValeurComplexeAvecVariable } from "./expressionComplexeAvecVariable";
 import type { PhaseComplexesAvances } from "./typesComplexesAvances";
 
 /**
  * Couche B (6e) — vérification propre à `6gen42` (dispatch par famille/écran). N'importe JAMAIS rien
- * de `src/generateurs6e/` (règle non négociable, CLAUDE.md) — voir
- * `generateurs6e/complexesAvances/session.integration.test.ts` pour le seul fichier autorisé Couche
- * A + Couche B ensemble. Réutilise TELLE QUELLE la fondation chapitre 7 : `diagnostiquerComplexe`
- * (`verificationComplexes.ts`, `6gen34`) pour tout champ "affixe a+bi RATIONNEL", `diagnostiquerValeur`/
- * `diagnostiquerEnsembleValeurs` (`equivalenceExponentielle.ts`) pour tout champ réel (module, rayon,
- * angle, `sqrt` accepté nativement).
+ * de `src/generateurs6e/` (règle non négociable, CLAUDE.md).
  *
- * ============================================================================
- * **Famille A — 100% QCM** (voir en-tête `generateurs6e/complexesAvances/familleA.ts`)
- * ============================================================================
- * Même patron que `diagnostiquerAEcran1` (6gen40) : `valeurs[0]==="correct"` sinon
- * `"not_equivalent"` — jamais de `parse_error` possible (bouton, pas de texte libre).
- *
- * ============================================================================
- * **Famille B — équation en x,y (échantillonnage 2 variables) + lieu structuré**
- * ============================================================================
- * Écran "équation" : généralisation À 2 VARIABLES LIBRES de `diagnostiquerEquationDifference`
- * (`equivalenceExponentielle.ts`), même principe que la généralisation à `(x,i)` de
- * `verificationFormuleMoivre.ts` — voir `diagnostiquerEquationDifference2Var` ci-dessous. Écran "lieu
- * structuré" : mirroir `diagnostiquerBEcran2` (`verificationTransformationsPlan.ts`, 6gen40) —
- * `valeurs[0]`=nature choisie, `valeurs[1..]`=paramètres (forme dépendant de la nature CHOISIE, pas
- * de la nature correcte — permet de distinguer un vrai `parse_error` d'un simple mauvais choix de
- * nature), dernier élément = pôle exclu SI `exercice.poleExclu!==null` (toujours demandé dans ce cas,
- * indépendamment de la nature choisie — question de compréhension du piège autonome de la nature
- * choisie).
- *
- * ============================================================================
- * **Famille C — échantillonnage à 1 variable RÉELLE `φ`, z ET son conjugué liés ENSEMBLE**
- * ============================================================================
- * `z=cos φ+i sin φ`, `zb=cos φ-i sin φ` (le nom ASCII `zb` pour z̄, voir en-tête
- * `expressionComplexeAvecVariable.ts`) — le point reste SUR le cercle unité (`zz̄=1` automatiquement
- * vérifié) pour tout `φ`, exactement le contexte de l'énoncé ("étant donné `zz̄=1`"). Écran 3 : QCM
- * combiné statut+réciproque, mirroir `diagnostiquerBEcran2`.
- *
- * ============================================================================
- * **Famille D — 4 sous-types, verrouillés par leur propre contrat de champs** (voir en-tête
- * `generateurs6e/complexesAvances/familleD.ts` pour la dérivation algébrique de chaque sous-type)
- * ============================================================================
- *
- * ============================================================================
- * **Famille E — réutilisation directe de la fondation chapitre 7**
- * ============================================================================
- * Écran 1 : `diagnostiquerComplexe` (rapport toujours RATIONNEL, division de 2 entiers de Gauss).
- * Écran 2 : `diagnostiquerValeur` contre `Math.atan2` calculé ICI localement (JAMAIS
- * `calculerArgument` de `generateurs6e/formeTrigonometrique/familleA.ts` — importer ce module
- * violerait la règle "`moteur6e/` n'importe jamais `generateurs6e/`" ; un simple `Math.atan2` suffit
- * ici, la cible n'a besoin que d'être une VALEUR numérique, jamais d'un LaTeX exact — voir
- * `ui6e/formatComplexesAvances.ts`, qui LUI a le droit de réutiliser `calculerArgument` pour
- * l'affichage du récapitulatif, couche `ui6e/` libre d'importer `generateurs6e/`). Écran 3 : QCM
- * statut, id comparison directe.
+ * Refonte de l'audit 6e ch. 5 (lot E) :
+ * - **Équations en 2 variables** (familles B et D) : acceptées à tout multiple non nul près
+ *   (gauche−droite = λ·référence, λ constant sur tous les points de test) — membres inversés,
+ *   « y = mx + p », équation simplifiée par un facteur (D_coef : par q). À défaut, comparaison des
+ *   ENSEMBLES DE SOLUTIONS (formes avec racines, ex. √(x²+y²) = √k ou |z−p₁| = k|z−p₂| écrit avec
+ *   des racines) : la saisie doit s'annuler sur des points du lieu et garder un rapport de signe
+ *   constant avec la référence hors du lieu (un facteur parasite qui s'annule — équation élevée au
+ *   carré qui ajoute des demi-droites — change ce signe et est refusé).
+ * - **Droite (écran « lieu »)** : tout couple de points DISTINCTS de la droite est accepté.
+ * - **Angles** : comparés à 2π près (`diagnostiquerAngle`), y compris le −0 de `Math.atan2`.
+ * - **Famille C** : les écrans 1 et 2 vérifient deux développements DIFFÉRENTS (sans remplacer zz̄
+ *   par 1), échantillonnés hors du cercle unité ; l'écran 3 a un verdict qui dépend de l'exercice
+ *   (vraie transformation ou contre-exemple).
+ * - **Affixes** : `evaluerValeurComplexe` (√ accepté, « − » typographique, virgule décimale).
  */
 
 const TOLERANCE = 0.01;
@@ -68,51 +35,166 @@ function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
   return "correct";
 }
 
-function diagnostiquerQcm(valeurs: string[]): StatutVerification {
-  return valeurs[0] === "correct" ? "correct" : "not_equivalent";
+function diagnostiquerQcm(valeurs: string[], attendu = "correct"): StatutVerification {
+  return valeurs[0] === attendu ? "correct" : "not_equivalent";
 }
 
-/** Généralisation à 2 variables réelles libres de `diagnostiquerEquationDifference` — mirroir
- * `diagnostiquerEquivalenceFonctionXI` (`verificationFormuleMoivre.ts`), adapté à une ÉQUATION
- * ("A op B", `separerEquationTexte`) plutôt qu'une expression pure. */
-function diagnostiquerEquationDifference2Var(texte: string, nomVar1: string, nomVar2: string, referenceDifference: (v1: number, v2: number) => number, points1: number[], points2: number[], tolerance: number = TOLERANCE): StatutVerification {
-  const separe = separerEquationTexte(texte);
-  if (separe === null) return "parse_error";
-  let comparables = 0;
-  for (const v1 of points1) {
-    for (const v2 of points2) {
-      const attendu = referenceDifference(v1, v2);
-      if (!Number.isFinite(attendu)) continue;
-      let gauche: number;
-      let droite: number;
-      try {
-        gauche = evaluerExpressionExponentielle(separe.gauche, { [nomVar1]: v1, [nomVar2]: v2 });
-        droite = evaluerExpressionExponentielle(separe.droite, { [nomVar1]: v1, [nomVar2]: v2 });
-      } catch {
-        return "parse_error";
-      }
-      const diff = gauche - droite;
-      if (!Number.isFinite(diff)) return "not_equivalent";
-      comparables++;
-      if (Math.abs(diff - attendu) > tolerance) return "not_equivalent";
+/** α/β tapés en lettres grecques → identifiants ASCII du parseur. */
+function normaliserEquation(texte: string): string {
+  return texte.replace(/α/g, " alpha ").replace(/β/g, " beta ");
+}
+
+// ============================================================================
+// Équations en 2 variables : multiple non nul, puis ensemble de solutions.
+// ============================================================================
+
+interface Point2 {
+  u: number;
+  v: number;
+}
+
+type ResultatEvaluation = { ok: true; valeurs: number[] } | { ok: false; statut: StatutVerification };
+
+/** Évalue gauche−droite de l'équation saisie aux points donnés. `parse_error` si la saisie n'est
+ * pas une égalité lisible ; une inégalité est une réponse fausse. */
+function evaluerDifference(texte: string, nomU: string, nomV: string, points: Point2[]): ResultatEvaluation {
+  const separe = separerEquationTexte(normaliserEquation(texte));
+  if (separe === null) return { ok: false, statut: "parse_error" };
+  if (separe.gauche.trim() === "" || separe.droite.trim() === "") return { ok: false, statut: "parse_error" };
+  const valeurs: number[] = [];
+  for (const p of points) {
+    try {
+      const g = evaluerExpressionExponentielle(separe.gauche, { [nomU]: p.u, [nomV]: p.v });
+      const d = evaluerExpressionExponentielle(separe.droite, { [nomU]: p.u, [nomV]: p.v });
+      valeurs.push(g - d);
+    } catch {
+      return { ok: false, statut: "parse_error" };
     }
   }
-  const minimumRequis = Math.min(3, points1.length * points2.length);
-  if (comparables < minimumRequis) return "parse_error";
-  return "correct";
+  if (separe.symbole !== "=") return { ok: false, statut: "not_equivalent" };
+  return { ok: true, valeurs };
 }
 
-/** Ensemble de N affixes (a+bi RATIONNELS), ORDRE INDIFFÉRENT, COMPTE EXACT requis — mirroir
- * `diagnostiquerImagesRotation` (`verificationTransformationsPlan.ts`, 6gen40), répliqué ICI (jamais
- * importé — chaque générateur garde sa propre copie, CLAUDE.md). */
-function diagnostiquerEnsembleComplexes(textes: string[], cibles: Complexe[], tolerance: number = TOLERANCE_COMPLEXE): StatutVerification {
-  if (textes.length !== cibles.length) return "not_equivalent";
+/** gauche−droite = λ·référence pour un même λ≠0 (moindres carrés, tolérance mise à l'échelle). */
+function estMultipleNonNul(diffs: number[], refs: number[], tolerance: number = TOLERANCE): boolean {
+  if (diffs.some((d) => !Number.isFinite(d))) return false;
+  let produit = 0;
+  let carre = 0;
+  for (let i = 0; i < refs.length; i++) {
+    produit += diffs[i] * refs[i];
+    carre += refs[i] * refs[i];
+  }
+  if (carre === 0) return false;
+  const lambda = produit / carre;
+  if (Math.abs(lambda) < 1e-6) return false;
+  const tol = tolerance * Math.max(1, Math.abs(lambda));
+  return diffs.every((d, i) => Math.abs(d - lambda * refs[i]) <= tol);
+}
+
+function grille(us: number[], vs: number[]): Point2[] {
+  return us.flatMap((u) => vs.map((v) => ({ u, v })));
+}
+
+/** Équation en (u,v) acceptée à tout multiple non nul près (familles D : (x,m), (α,β)). */
+function diagnostiquerEquationProportionnelle2Var(texte: string, nomU: string, nomV: string, reference: (u: number, v: number) => number, us: number[], vs: number[]): StatutVerification {
+  const points = grille(us, vs);
+  const r = evaluerDifference(texte, nomU, nomV, points);
+  if (!r.ok) return r.statut;
+  const refs = points.map((p) => reference(p.u, p.v));
+  return estMultipleNonNul(r.valeurs, refs) ? "correct" : "not_equivalent";
+}
+
+/** Géométrie d'un lieu du plan, pour l'échantillonnage « sur le lieu / hors du lieu ». */
+export type GeometrieLieu = { type: "droite"; x0: number; y0: number; dx: number; dy: number } | { type: "cercle"; cx: number; cy: number; r: number } | { type: "rayons"; x0: number; y0: number; angles: number[] };
+
+function distanceAuLieu(g: GeometrieLieu, x: number, y: number): number {
+  if (g.type === "droite") {
+    const n = Math.hypot(g.dx, g.dy);
+    return Math.abs((x - g.x0) * g.dy - (y - g.y0) * g.dx) / n;
+  }
+  if (g.type === "cercle") return Math.abs(Math.hypot(x - g.cx, y - g.cy) - g.r);
+  let d = Infinity;
+  for (const a of g.angles) {
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+    const t = (x - g.x0) * ux + (y - g.y0) * uy;
+    d = Math.min(d, t <= 0 ? Math.hypot(x - g.x0, y - g.y0) : Math.abs((x - g.x0) * uy - (y - g.y0) * ux));
+  }
+  return d;
+}
+
+function pointsSurLieu(g: GeometrieLieu): Point2[] {
+  if (g.type === "droite") {
+    const n = Math.hypot(g.dx, g.dy);
+    return [-2.1, -0.7, 0.9, 2.6].map((t) => ({ u: g.x0 + (t * g.dx) / n, v: g.y0 + (t * g.dy) / n }));
+  }
+  if (g.type === "cercle") return [0.3, 1.9, 3.4, 5.1].map((phi) => ({ u: g.cx + g.r * Math.cos(phi), v: g.cy + g.r * Math.sin(phi) }));
+  return g.angles.flatMap((a) => [0.6, 1.7, 3.2].map((t) => ({ u: g.x0 + t * Math.cos(a), v: g.y0 + t * Math.sin(a) })));
+}
+
+const GRILLE_X = [-4.3, -2.6, -1.1, 0.4, 1.8, 3.3, 4.6];
+const GRILLE_Y = [-3.9, -2.2, -0.8, 0.7, 2.4, 3.8];
+
+/** Hors du lieu : une grille, plus — pour des demi-droites — des points des demi-droites « pièges »
+ * (opposées, symétriques) où s'annule une équation élevée au carré (ex. 4x² = 4(x²+y²), soit y = 0,
+ * pour la seule demi-droite θ = 0). */
+function pointsHorsLieu(g: GeometrieLieu): Point2[] {
+  const pieges: Point2[] =
+    g.type === "rayons"
+      ? g.angles.flatMap((a) => [a + Math.PI, -a, Math.PI - a].flatMap((b) => [0.8, 2.3].map((t) => ({ u: g.x0 + t * Math.cos(b), v: g.y0 + t * Math.sin(b) }))))
+      : [];
+  return [...grille(GRILLE_X, GRILLE_Y), ...pieges].filter((p) => distanceAuLieu(g, p.u, p.v) > 0.25);
+}
+
+function mediane(valeurs: number[]): number {
+  const tri = [...valeurs].sort((a, b) => a - b);
+  return tri[Math.floor(tri.length / 2)] ?? 0;
+}
+
+/**
+ * Équation en (x,y) d'un lieu : correcte si gauche−droite est un multiple non nul de la référence,
+ * OU si elle a le même ensemble de solutions (s'annule sur le lieu, et garde hors du lieu un rapport
+ * de signe constant avec la référence). Exporté pour les scripts de vérification.
+ */
+export function diagnostiquerEquationLieu(texte: string, reference: (x: number, y: number) => number, geometrie: GeometrieLieu): StatutVerification {
+  const sur = pointsSurLieu(geometrie);
+  const hors = pointsHorsLieu(geometrie);
+  const tous = [...hors, ...sur];
+  const r = evaluerDifference(texte, "x", "y", tous);
+  if (!r.ok) return r.statut;
+  const refs = tous.map((p) => reference(p.u, p.v));
+  if (estMultipleNonNul(r.valeurs, refs)) return "correct";
+
+  const fHors = r.valeurs.slice(0, hors.length);
+  const fSur = r.valeurs.slice(hors.length);
+  if (fHors.some((f) => !Number.isFinite(f)) || fSur.some((f) => !Number.isFinite(f))) return "not_equivalent";
+  const rapports = fHors.map((f, i) => f / refs[i]);
+  if (rapports.some((q) => !Number.isFinite(q) || Math.abs(q) < 1e-6)) return "not_equivalent";
+  const signe = Math.sign(rapports[0]);
+  if (rapports.some((q) => Math.sign(q) !== signe)) return "not_equivalent";
+  const echelle = mediane(fHors.map((f) => Math.abs(f)));
+  const tolSur = Math.max(TOLERANCE, TOLERANCE * echelle);
+  return fSur.every((f) => Math.abs(f) <= tolSur) ? "correct" : "not_equivalent";
+}
+
+// ============================================================================
+// Affixes.
+// ============================================================================
+
+function lireComplexe(texte: string): Complexe | null {
+  if (texte.trim() === "") return null;
+  return evaluerValeurComplexe(texte);
+}
+
+/** Ensemble de N affixes, ordre indifférent, compte exact. */
+function diagnostiquerEnsembleComplexes(textes: string[], cibles: Complexe[], tolerance = 1e-6): StatutVerification {
   const valeurs: Complexe[] = [];
   for (const t of textes) {
-    const v = evaluerValeurComplexeAvecVariable(t, {});
+    const v = lireComplexe(t);
     if (v === null) return "parse_error";
     valeurs.push(v);
   }
+  if (valeurs.length !== cibles.length) return "not_equivalent";
   const restantes = [...cibles];
   for (const v of valeurs) {
     const index = restantes.findIndex((c) => Math.abs(c.re - v.re) <= tolerance && Math.abs(c.im - v.im) <= tolerance);
@@ -122,8 +204,34 @@ function diagnostiquerEnsembleComplexes(textes: string[], cibles: Complexe[], to
   return "correct";
 }
 
+/** Deux points DISTINCTS quelconques de la droite (p1, p2) — décision D de l'audit. */
+function diagnostiquerDeuxPointsDeLaDroite(textes: string[], p1: AffixeSimple, p2: AffixeSimple): StatutVerification {
+  const m1 = lireComplexe(textes[0] ?? "");
+  const m2 = lireComplexe(textes[1] ?? "");
+  if (m1 === null || m2 === null) return "parse_error";
+  const dx = p2.a - p1.a;
+  const dy = p2.b - p1.b;
+  const n = Math.hypot(dx, dy);
+  const surDroite = (m: Complexe) => Math.abs((m.re - p1.a) * dy - (m.im - p1.b) * dx) / n <= 1e-6;
+  const distincts = Math.hypot(m1.re - m2.re, m1.im - m2.im) > 1e-6;
+  return surDroite(m1) && surDroite(m2) && distincts ? "correct" : "not_equivalent";
+}
+
+/** Ensemble d'angles (radians) comparés à 2π près, ordre indifférent, compte exact. */
+function diagnostiquerEnsembleAngles(textes: string[], cibles: number[]): StatutVerification {
+  for (const t of textes) if (diagnostiquerAngle(t, 0).statut === "parse_error") return "parse_error";
+  if (textes.length !== cibles.length) return "not_equivalent";
+  const restantes = [...cibles];
+  for (const t of textes) {
+    const index = restantes.findIndex((c) => diagnostiquerAngle(t, c).statut === "correct");
+    if (index === -1) return "not_equivalent";
+    restantes.splice(index, 1);
+  }
+  return "correct";
+}
+
 // ============================================================================
-// Famille A.
+// Famille A — QCM.
 // ============================================================================
 
 export function diagnostiquerAEcran1(exercice: ExerciceComplexesA, valeurs: string[]): StatutVerification {
@@ -143,50 +251,62 @@ export function diagnostiquerAEcran3(exercice: ExerciceComplexesA, valeurs: stri
 // Famille B — sous-types simples.
 // ============================================================================
 
-const POINTS_X = [-2.3, -0.6, 0.9, 1.7];
-const POINTS_Y = [1.4, -1.9, 0.5, 2.1];
-
-function referenceEquationB(exercice: ExerciceComplexesBSimple): (x: number, y: number) => number {
+/** Référence (gauche−droite) et géométrie du lieu « équation » de l'écran 1. Pour `argument`/
+ * `argumentPi`, l'écran 1 demande l'équation « Im((z−a)e^{−iθ}) = 0 » : la droite support. */
+export function referenceEquationB(exercice: ExerciceComplexesBSimple): { reference: (x: number, y: number) => number; geometrie: GeometrieLieu } {
   const { p1, p2 } = exercice;
   switch (exercice.sousType) {
     case "droite":
-      return (x, y) => -(x - p1.a) * (y - p2.b) + (y - p1.b) * (x - p2.a);
-    case "thales":
-      return (x, y) => (x - p1.a) * (x - p2.a) + (y - p1.b) * (y - p2.b);
+      return { reference: (x, y) => -(x - p1.a) * (y - p2.b) + (y - p1.b) * (x - p2.a), geometrie: { type: "droite", x0: p1.a, y0: p1.b, dx: p2.a - p1.a, dy: p2.b - p1.b } };
+    case "thales": {
+      const cx = (p1.a + p2.a) / 2;
+      const cy = (p1.b + p2.b) / 2;
+      return { reference: (x, y) => (x - p1.a) * (x - p2.a) + (y - p1.b) * (y - p2.b), geometrie: { type: "cercle", cx, cy, r: Math.hypot(p1.a - p2.a, p1.b - p2.b) / 2 } };
+    }
     case "apollonius": {
       const k = exercice.k as number;
-      return (x, y) => (x - p1.a) ** 2 + (y - p1.b) ** 2 - k * k * ((x - p2.a) ** 2 + (y - p2.b) ** 2);
+      const d = 1 - k * k;
+      const cx = (p1.a - k * k * p2.a) / d;
+      const cy = (p1.b - k * k * p2.b) / d;
+      const r = (k * Math.hypot(p1.a - p2.a, p1.b - p2.b)) / Math.abs(d);
+      return { reference: (x, y) => (x - p1.a) ** 2 + (y - p1.b) ** 2 - k * k * ((x - p2.a) ** 2 + (y - p2.b) ** 2), geometrie: { type: "cercle", cx, cy, r } };
     }
     case "demiDroites": {
       const c = exercice.c as number;
-      return (x, y) => 2 * x - c * Math.sqrt(x * x + y * y);
+      const resultat = exercice.resultat;
+      const angles = resultat.nature === "demiDroite" ? resultat.angles.map((a) => a.numerique) : [];
+      return { reference: (x, y) => 2 * x - c * Math.sqrt(x * x + y * y), geometrie: { type: "rayons", x0: 0, y0: 0, angles } };
     }
     case "cercleO": {
       const k = exercice.k as number;
-      return (x, y) => x * x + y * y - k;
+      return { reference: (x, y) => x * x + y * y - k, geometrie: { type: "cercle", cx: 0, cy: 0, r: Math.sqrt(k) } };
+    }
+    case "cercleA": {
+      const k = exercice.k as number;
+      return { reference: (x, y) => (x - p1.a) ** 2 + (y - p1.b) ** 2 - k * k, geometrie: { type: "cercle", cx: p1.a, cy: p1.b, r: k } };
+    }
+    case "argument":
+    case "argumentPi": {
+      const t = (exercice.theta as { numerique: number }).numerique;
+      const c = Math.cos(t);
+      const s = Math.sin(t);
+      return { reference: (x, y) => (y - p1.b) * c - (x - p1.a) * s, geometrie: { type: "droite", x0: p1.a, y0: p1.b, dx: c, dy: s } };
     }
   }
 }
 
 export function diagnostiquerBEcran1(exercice: ExerciceComplexesBSimple, valeurs: string[]): StatutVerification {
-  return diagnostiquerEquationDifference2Var(valeurs[0] ?? "", "x", "y", referenceEquationB(exercice), POINTS_X, POINTS_Y);
+  const { reference, geometrie } = referenceEquationB(exercice);
+  return diagnostiquerEquationLieu(valeurs[0] ?? "", reference, geometrie);
 }
 
-/** Vérifie que les paramètres soumis sont au moins PARSABLES dans la forme attendue par la nature
- * CHOISIE (pas forcément la nature correcte) — permet de distinguer un `parse_error` (mauvaise
- * syntaxe) d'un simple mauvais choix de nature (`not_equivalent`), avant toute comparaison de
- * valeur. */
+/** Paramètres parsables dans la forme de la nature CHOISIE (pas forcément la bonne) — distingue un
+ * `parse_error` d'un mauvais choix de nature. demiDroite : [origine, ...angles]. */
 function parametresParsablesPourNature(nature: NatureLieu, params: string[]): boolean {
-  if (nature === "droite") {
-    return evaluerValeurComplexeAvecVariable(params[0] ?? "", {}) !== null && evaluerValeurComplexeAvecVariable(params[1] ?? "", {}) !== null;
-  }
-  if (nature === "cercle") {
-    const centreOk = evaluerValeurComplexeAvecVariable(params[0] ?? "", {}) !== null;
-    const rayonOk = diagnostiquerValeur(params[1] ?? "", 0) !== "parse_error";
-    return centreOk && rayonOk;
-  }
-  // demiDroite — N angles (add-as-needed).
-  return params.every((p) => diagnostiquerValeur(p, 0) !== "parse_error");
+  if (nature === "droite") return lireComplexe(params[0] ?? "") !== null && lireComplexe(params[1] ?? "") !== null;
+  if (nature === "cercle") return lireComplexe(params[0] ?? "") !== null && diagnostiquerValeur(params[1] ?? "", 0) !== "parse_error";
+  if (nature === "demiDroite") return lireComplexe(params[0] ?? "") !== null && params.length > 1 && params.slice(1).every((p) => diagnostiquerAngle(p, 0).statut !== "parse_error");
+  return false;
 }
 
 export function diagnostiquerBEcran2(exercice: ExerciceComplexesBSimple, valeurs: string[]): StatutVerification {
@@ -199,54 +319,51 @@ export function diagnostiquerBEcran2(exercice: ExerciceComplexesBSimple, valeurs
   const statutPole = poleAttendu !== null ? diagnostiquerComplexe(poleTexte ?? "", { re: poleAttendu.a, im: poleAttendu.b }) : "correct";
 
   if (statutParseParams === "parse_error" || statutPole === "parse_error") return "parse_error";
-  if (nature !== exercice.resultat.nature) return "not_equivalent";
+  const resultat = exercice.resultat;
+  if (nature !== resultat.nature) return "not_equivalent";
 
-  // Nature correcte confirmée — comparaison des VALEURS aux vraies cibles.
-  if (exercice.resultat.nature === "droite") {
-    const cibles: Complexe[] = [{ re: exercice.resultat.point1.a, im: exercice.resultat.point1.b }, { re: exercice.resultat.point2.a, im: exercice.resultat.point2.b }];
-    const statutPoints = diagnostiquerEnsembleComplexes(params, cibles);
-    return combinerStatuts(statutPoints, statutPole);
-  }
-  if (exercice.resultat.nature === "cercle") {
-    const statutCentre = diagnostiquerComplexe(params[0] ?? "", { re: exercice.resultat.centre.a, im: exercice.resultat.centre.b });
-    const statutRayon = diagnostiquerValeur(params[1] ?? "", exercice.resultat.rayon);
+  if (resultat.nature === "droite") return combinerStatuts(diagnostiquerDeuxPointsDeLaDroite(params, resultat.point1, resultat.point2), statutPole);
+  if (resultat.nature === "cercle") {
+    const statutCentre = diagnostiquerComplexe(params[0] ?? "", { re: resultat.centre.a, im: resultat.centre.b }, 1e-6);
+    const statutRayon = diagnostiquerValeur(params[1] ?? "", resultat.rayon);
     return combinerStatuts(statutCentre, statutRayon, statutPole);
   }
-  // demiDroite.
-  const cibles = exercice.resultat.angles.map((a) => a.numerique);
-  const statutAngles = diagnostiquerEnsembleValeurs(params, cibles);
-  return combinerStatuts(statutAngles, statutPole);
+  const statutOrigine = diagnostiquerComplexe(params[0] ?? "", { re: resultat.origine.a, im: resultat.origine.b }, 1e-6);
+  const statutAngles = diagnostiquerEnsembleAngles(params.slice(1), resultat.angles.map((a) => a.numerique));
+  return combinerStatuts(statutOrigine, statutAngles, statutPole);
 }
 
 // ============================================================================
 // Famille B — sous-type "intersection".
 // ============================================================================
 
-function referenceEquationDroiteQ(exercice: ExerciceComplexesBIntersection): (x: number, y: number) => number {
-  const { q1, q2 } = exercice;
-  return (x, y) => -(x - q1.a) * (y - q2.b) + (y - q1.b) * (x - q2.a);
-}
-function referenceEquationCercleO(exercice: ExerciceComplexesBIntersection): (x: number, y: number) => number {
-  const k = exercice.kCercleO;
-  return (x, y) => x * x + y * y - k;
+export function referencesIntersection(exercice: ExerciceComplexesBIntersection): { droite: (x: number, y: number) => number; cercle: (x: number, y: number) => number; geometrieDroite: GeometrieLieu; geometrieCercle: GeometrieLieu } {
+  const { q1, q2, kCercleO } = exercice;
+  return {
+    droite: (x, y) => -(x - q1.a) * (y - q2.b) + (y - q1.b) * (x - q2.a),
+    cercle: (x, y) => x * x + y * y - kCercleO,
+    geometrieDroite: { type: "droite", x0: q1.a, y0: q1.b, dx: q2.a - q1.a, dy: q2.b - q1.b },
+    geometrieCercle: { type: "cercle", cx: 0, cy: 0, r: Math.sqrt(kCercleO) },
+  };
 }
 
 export function diagnostiquerBInterEcran1(exercice: ExerciceComplexesBIntersection, valeurs: string[]): StatutVerification {
-  const statutDroite = diagnostiquerEquationDifference2Var(valeurs[0] ?? "", "x", "y", referenceEquationDroiteQ(exercice), POINTS_X, POINTS_Y);
-  const statutCercle = diagnostiquerEquationDifference2Var(valeurs[1] ?? "", "x", "y", referenceEquationCercleO(exercice), POINTS_X, POINTS_Y);
-  return combinerStatuts(statutDroite, statutCercle);
+  const ref = referencesIntersection(exercice);
+  return combinerStatuts(diagnostiquerEquationLieu(valeurs[0] ?? "", ref.droite, ref.geometrieDroite), diagnostiquerEquationLieu(valeurs[1] ?? "", ref.cercle, ref.geometrieCercle));
 }
 
 export function diagnostiquerBInterEcran2(exercice: ExerciceComplexesBIntersection, valeurs: string[]): StatutVerification {
-  const cibles: Complexe[] = [{ re: exercice.q1.a, im: exercice.q1.b }, { re: exercice.q2.a, im: exercice.q2.b }];
-  const statutPoints = diagnostiquerEnsembleComplexes(valeurs.slice(0, 2), cibles);
-  const statutCentre = diagnostiquerComplexe(valeurs[2] ?? "", { re: 0, im: 0 });
+  const statutPoints = diagnostiquerDeuxPointsDeLaDroite(valeurs.slice(0, 2), exercice.q1, exercice.q2);
+  const statutCentre = diagnostiquerComplexe(valeurs[2] ?? "", { re: 0, im: 0 }, 1e-6);
   const statutRayon = diagnostiquerValeur(valeurs[3] ?? "", Math.sqrt(exercice.kCercleO));
   return combinerStatuts(statutPoints, statutCentre, statutRayon);
 }
 
 export function diagnostiquerBInterEcran3(exercice: ExerciceComplexesBIntersection, valeurs: string[]): StatutVerification {
-  const cibles: Complexe[] = [{ re: exercice.q1.a, im: exercice.q1.b }, { re: exercice.q2.a, im: exercice.q2.b }];
+  const cibles: Complexe[] = [
+    { re: exercice.q1.a, im: exercice.q1.b },
+    { re: exercice.q2.a, im: exercice.q2.b },
+  ];
   return diagnostiquerEnsembleComplexes(valeurs, cibles);
 }
 
@@ -261,83 +378,124 @@ export function diagnostiquerEcranB(exercice: ExerciceComplexesB, phase: PhaseCo
 }
 
 // ============================================================================
-// Famille C.
+// Famille C — développements en z et z̄ (noté zb), échantillonnés HORS du cercle unité.
 // ============================================================================
 
-const PHIS_C = [0.4, 1.1, 1.9, 2.6, -0.7, -1.6, -2.4, 3.0, -3.05, 0.05];
-
-/** `1 - p̄z - pz̄ + |p|²` — développement CORRECT de |z-p|² ET de |1-p̄z|² (les deux expressions sont
- * ALGÉBRIQUEMENT IDENTIQUES, voir en-tête `generateurs6e/complexesAvances/familleC.ts` — la même
- * fonction de référence sert donc aux écrans 1 ET 2). */
-function referenceModuleCarreBlaschke(exercice: ExerciceComplexesC, phi: number): number {
-  const { a, b } = exercice;
-  return 1 - 2 * (a * Math.cos(phi) + b * Math.sin(phi)) + (a * a + b * b);
+/** z̄ (z + macron combinant) → zb ; « zzb », « zbz » → produits explicites ; signes typographiques. */
+function normaliserSaisieC(texte: string): string {
+  return texte
+    .replace(/z̄/g, " zb ")
+    .replace(/z̄/g, " zb ")
+    .replace(/[−–]/g, "-")
+    .replace(/[·∙×]/g, "*")
+    .replace(/²/g, "^2")
+    .replace(/[a-zA-Z]+/g, (mot) => {
+      if (!/^(zb|z)+$/.test(mot) || mot === "z" || mot === "zb") return mot;
+      const parties: string[] = [];
+      let reste = mot;
+      while (reste.length > 0) {
+        if (reste.startsWith("zb")) {
+          parties.push("zb");
+          reste = reste.slice(2);
+        } else {
+          parties.push("z");
+          reste = reste.slice(1);
+        }
+      }
+      return parties.join("*");
+    });
 }
 
-function diagnostiquerEquivalenceComplexePhi(texte: string, reference: (phi: number) => number, phis: number[], tolerance: number = TOLERANCE): StatutVerification {
-  let comparables = 0;
-  for (const phi of phis) {
-    const attendu = reference(phi);
-    if (!Number.isFinite(attendu)) continue;
-    const z: Complexe = { re: Math.cos(phi), im: Math.sin(phi) };
-    const zb: Complexe = { re: Math.cos(phi), im: -Math.sin(phi) };
-    const soumis = evaluerValeurComplexeAvecVariable(texte, { z, zb });
+const ECHANTILLONS_C: { r: number; phi: number }[] = [
+  { r: 1, phi: 0.4 },
+  { r: 0.6, phi: 1.1 },
+  { r: 1.7, phi: 1.9 },
+  { r: 1, phi: 2.6 },
+  { r: 0.8, phi: -0.7 },
+  { r: 1.4, phi: -1.6 },
+  { r: 2.1, phi: -2.4 },
+  { r: 0.5, phi: 3.0 },
+];
+
+function mul(a: Complexe, b: Complexe): Complexe {
+  return { re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re };
+}
+
+/** Référence complexe de l'écran C1 (|z−p|² développé, zz̄ NON remplacé) ou C2 (|1−p̄z|² ou, pour
+ * le contre-exemple, |1−pz|²). Exportée pour les scripts de vérification. */
+export function referenceC(exercice: ExerciceComplexesC, phase: "cEcran1" | "cEcran2", z: Complexe, zb: Complexe): Complexe {
+  const p: Complexe = { re: exercice.a, im: exercice.b };
+  const pb: Complexe = { re: exercice.a, im: -exercice.b };
+  const p2 = exercice.a * exercice.a + exercice.b * exercice.b;
+  const zzb = mul(z, zb);
+  if (phase === "cEcran1") {
+    const t1 = mul(pb, z);
+    const t2 = mul(p, zb);
+    return { re: zzb.re - t1.re - t2.re + p2, im: zzb.im - t1.im - t2.im };
+  }
+  const t1 = exercice.conjugue ? mul(pb, z) : mul(p, z);
+  const t2 = exercice.conjugue ? mul(p, zb) : mul(pb, zb);
+  return { re: 1 - t1.re - t2.re + p2 * zzb.re, im: -t1.im - t2.im + p2 * zzb.im };
+}
+
+function diagnostiquerDeveloppementC(exercice: ExerciceComplexesC, phase: "cEcran1" | "cEcran2", texte: string): StatutVerification {
+  const t = normaliserSaisieC(texte);
+  for (const { r, phi } of ECHANTILLONS_C) {
+    const z: Complexe = { re: r * Math.cos(phi), im: r * Math.sin(phi) };
+    const zb: Complexe = { re: z.re, im: -z.im };
+    const soumis = evaluerValeurComplexeAvecVariable(t, { z, zb });
     if (soumis === null) return "parse_error";
     if (!Number.isFinite(soumis.re) || !Number.isFinite(soumis.im)) return "not_equivalent";
-    comparables++;
-    if (Math.abs(soumis.re - attendu) > tolerance || Math.abs(soumis.im) > tolerance) return "not_equivalent";
+    const attendu = referenceC(exercice, phase, z, zb);
+    if (Math.abs(soumis.re - attendu.re) > TOLERANCE || Math.abs(soumis.im - attendu.im) > TOLERANCE) return "not_equivalent";
   }
-  const minimumRequis = Math.min(3, phis.length);
-  if (comparables < minimumRequis) return "parse_error";
   return "correct";
 }
 
 export function diagnostiquerCEcran1(exercice: ExerciceComplexesC, valeurs: string[]): StatutVerification {
-  return diagnostiquerEquivalenceComplexePhi(valeurs[0] ?? "", (phi) => referenceModuleCarreBlaschke(exercice, phi), PHIS_C);
+  return diagnostiquerDeveloppementC(exercice, "cEcran1", valeurs[0] ?? "");
 }
 export function diagnostiquerCEcran2(exercice: ExerciceComplexesC, valeurs: string[]): StatutVerification {
-  return diagnostiquerEquivalenceComplexePhi(valeurs[0] ?? "", (phi) => referenceModuleCarreBlaschke(exercice, phi), PHIS_C);
+  return diagnostiquerDeveloppementC(exercice, "cEcran2", valeurs[0] ?? "");
+}
+/** Écran 3 : id de l'option attendue selon l'exercice (`egaux` pour la vraie transformation,
+ * `differents` pour le contre-exemple). */
+export function idConclusionC(exercice: ExerciceComplexesC): string {
+  return exercice.conjugue ? "egaux" : "differents";
 }
 export function diagnostiquerCEcran3(exercice: ExerciceComplexesC, valeurs: string[]): StatutVerification {
-  void exercice;
-  return combinerStatuts(diagnostiquerQcm([valeurs[0] ?? ""]), diagnostiquerQcm([valeurs[1] ?? ""]));
+  return diagnostiquerQcm(valeurs, idConclusionC(exercice));
 }
 
 // ============================================================================
 // Famille D — "ratio racine n-ième".
 // ============================================================================
 
-function racineExacteEnComplexe(re: number, im: number): Complexe {
-  return { re, im };
-}
-
 export function diagnostiquerDRatioEcran1(exercice: ExerciceComplexesDRatio, valeurs: string[]): StatutVerification {
   const { n, m } = exercice;
   const cibles: Complexe[] = [];
   for (let k = 0; k < n; k++) {
     const angle = (2 * Math.PI * k) / n;
-    cibles.push(racineExacteEnComplexe(m * Math.cos(angle), m * Math.sin(angle)));
+    cibles.push({ re: m * Math.cos(angle), im: m * Math.sin(angle) });
   }
   return diagnostiquerEnsembleComplexes(valeurs, cibles, 1e-6);
 }
 export function diagnostiquerDRatioEcran2(exercice: ExerciceComplexesDRatio, valeurs: string[]): StatutVerification {
-  const z0 = exercice.c / (exercice.m - 1);
-  return diagnostiquerValeur(valeurs[0] ?? "", z0);
+  return diagnostiquerValeur(valeurs[0] ?? "", exercice.c / (exercice.m - 1));
 }
 
 // ============================================================================
 // Famille D — "solutions réelles imposées".
 // ============================================================================
 
+const POINTS_X = [-2.3, -0.6, 0.9, 1.7];
 const POINTS_M = [1.3, -0.8, 2.6, -1.4, 0.4];
 
 export function diagnostiquerDReellesEcran1(exercice: ExerciceComplexesDReelles, valeurs: string[]): StatutVerification {
   const A = exercice.x1 + exercice.x2;
   const P = exercice.x1 * exercice.x2;
-  const referenceReel = (x: number, _m: number) => x * x - A * x + P;
-  const referenceImag = (x: number, m: number) => (exercice.m0 - m) * (x - exercice.k);
-  const statutReel = diagnostiquerEquationDifference2Var(valeurs[0] ?? "", "x", "m", referenceReel, POINTS_X, POINTS_M);
-  const statutImag = diagnostiquerEquationDifference2Var(valeurs[1] ?? "", "x", "m", referenceImag, POINTS_X, POINTS_M);
+  const statutReel = diagnostiquerEquationProportionnelle2Var(valeurs[0] ?? "", "x", "m", (x) => x * x - A * x + P, POINTS_X, POINTS_M);
+  const statutImag = diagnostiquerEquationProportionnelle2Var(valeurs[1] ?? "", "x", "m", (x, m) => (exercice.m0 - m) * (x - exercice.k), POINTS_X, POINTS_M);
   return combinerStatuts(statutReel, statutImag);
 }
 export function diagnostiquerDReellesEcran2(exercice: ExerciceComplexesDReelles, valeurs: string[]): StatutVerification {
@@ -356,10 +514,9 @@ const POINTS_BETA = [1.6, -1.3, 0.4, -2.5];
 
 export function diagnostiquerDCoefEcran1(exercice: ExerciceComplexesDCoef, valeurs: string[]): StatutVerification {
   const { p, q } = exercice;
-  const referenceReel = (alpha: number, beta: number) => p * alpha + beta + (p * p - q * q);
-  const referenceImag = (alpha: number, _beta: number) => q * alpha + 2 * p * q;
-  const statutReel = diagnostiquerEquationDifference2Var(valeurs[0] ?? "", "alpha", "beta", referenceReel, POINTS_ALPHA, POINTS_BETA);
-  const statutImag = diagnostiquerEquationDifference2Var(valeurs[1] ?? "", "alpha", "beta", referenceImag, POINTS_ALPHA, POINTS_BETA);
+  const statutReel = diagnostiquerEquationProportionnelle2Var(valeurs[0] ?? "", "alpha", "beta", (alpha, beta) => p * alpha + beta + (p * p - q * q), POINTS_ALPHA, POINTS_BETA);
+  // Multiple non nul : « qα + 2pq = 0 » aussi bien que sa forme simplifiée par q, « α + 2p = 0 ».
+  const statutImag = diagnostiquerEquationProportionnelle2Var(valeurs[1] ?? "", "alpha", "beta", (alpha) => q * alpha + 2 * p * q, POINTS_ALPHA, POINTS_BETA);
   return combinerStatuts(statutReel, statutImag);
 }
 export function diagnostiquerDCoefEcran2(exercice: ExerciceComplexesDCoef, valeurs: string[]): StatutVerification {
@@ -404,21 +561,23 @@ export function diagnostiquerEcranD(exercice: ExerciceComplexesD, phase: PhaseCo
 // Famille E.
 // ============================================================================
 
-function ratioE(exercice: ExerciceComplexesE): Complexe {
+/** Rapport (z_D−z_C)/(z_B−z_A) — le « −0 » de la partie imaginaire est ramené à 0 (sinon
+ * `Math.atan2` renvoie −π pour un rapport réel négatif). */
+export function ratioE(exercice: ExerciceComplexesE): Complexe {
   const num: AffixeSimple = { a: exercice.zD.a - exercice.zC.a, b: exercice.zD.b - exercice.zC.b };
   const den: AffixeSimple = { a: exercice.zB.a - exercice.zA.a, b: exercice.zB.b - exercice.zA.b };
   const norme = den.a * den.a + den.b * den.b;
-  return { re: (num.a * den.a + num.b * den.b) / norme, im: (num.b * den.a - num.a * den.b) / norme };
+  const re = (num.a * den.a + num.b * den.b) / norme;
+  const im = (num.b * den.a - num.a * den.b) / norme;
+  return { re: re === 0 ? 0 : re, im: im === 0 ? 0 : im };
 }
 
 export function diagnostiquerEEcran1(exercice: ExerciceComplexesE, valeurs: string[]): StatutVerification {
-  const ratio = ratioE(exercice);
-  return diagnostiquerComplexe(valeurs[0] ?? "", ratio);
+  return diagnostiquerComplexe(valeurs[0] ?? "", ratioE(exercice), 1e-6);
 }
 export function diagnostiquerEEcran2(exercice: ExerciceComplexesE, valeurs: string[]): StatutVerification {
   const ratio = ratioE(exercice);
-  const argument = Math.atan2(ratio.im, ratio.re);
-  return diagnostiquerValeur(valeurs[0] ?? "", argument);
+  return diagnostiquerAngle(valeurs[0] ?? "", Math.atan2(ratio.im, ratio.re)).statut;
 }
 export function diagnostiquerEEcran3(exercice: ExerciceComplexesE, valeurs: string[]): StatutVerification {
   return valeurs[0] === exercice.statut ? "correct" : "not_equivalent";

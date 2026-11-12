@@ -2,7 +2,7 @@ import type { ExerciceTrianglesComplexes } from "../core6e/trianglesComplexes.ty
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { phaseApres, phaseInitiale } from "./typesTrianglesComplexes";
+import { phaseApres, phaseInitiale, tentativesMaxPhase } from "./typesTrianglesComplexes";
 import type { EtatSessionTrianglesComplexes, PhaseTrianglesComplexes, ResultatExerciceTrianglesComplexes } from "./typesTrianglesComplexes";
 import { verifierEcran } from "./verificationTrianglesComplexes";
 
@@ -38,7 +38,7 @@ export function demarrerSessionTrianglesComplexes(reglages: ReglagesSession6e, g
 }
 
 function reglagesEtape(etat: EtatSessionTrianglesComplexes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax) };
 }
 
 export function activerAideSuivante(etat: EtatSessionTrianglesComplexes): EtatSessionTrianglesComplexes {

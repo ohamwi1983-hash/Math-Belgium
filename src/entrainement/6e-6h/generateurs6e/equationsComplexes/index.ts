@@ -1,32 +1,31 @@
-import type { ExerciceEquationsComplexes, FamilleEquationsComplexes } from "../../core6e/equationsComplexes.types";
+import type { ExerciceEquationsComplexes } from "../../core6e/equationsComplexes.types";
 import { construireAvecBarre, construireFamilleA, construireSansBarre } from "./familleA";
 import { construireFamilleB } from "./familleB";
 import { construireFamilleC } from "./familleC";
 import { construireFamilleD } from "./familleD";
-import { construireFamilleE } from "./familleE";
+import { construireFamilleE, construireFamilleEComplexe, construireFamilleEReelle } from "./familleE";
 import { construireFamilleF } from "./familleF";
 
-export { construireAvecBarre, construireFamilleA, construireFamilleB, construireFamilleC, construireFamilleD, construireFamilleE, construireFamilleF, construireSansBarre };
+export { construireAvecBarre, construireFamilleA, construireFamilleB, construireFamilleC, construireFamilleD, construireFamilleE, construireFamilleEComplexe, construireFamilleEReelle, construireFamilleF, construireSansBarre };
 
 /**
- * Couche A (6e) — point d'entrée `6gen36` ("Équations dans ℂ", chapitre 7). Tirage à 2 niveaux
- * (mirroir `generateurs6e/nombresComplexes/index.ts`, 6gen34) : la FAMILLE (A à F) est tirée
- * ÉQUIPROBABLE en premier (`genererExerciceEquationsComplexes`), puis le SOUS-TYPE de la famille A
- * (seule famille à en avoir un) est tiré ÉQUIPROBABLE ensuite (`construireFamilleA`) — jamais un
- * tirage uniforme direct parmi les 7 entrées de `CATALOGUE_VARIANTES` (biaiserait les 5 autres
- * familles contre A, qui en a 2).
+ * Couche A (6e) — point d'entrée `6gen36` (« Équations dans ℂ »). Depuis l'audit 6e ch. 5 (point
+ * 25), le tirage libre (`genererExerciceEquationsComplexes`) se limite au cœur du cours : C (second
+ * degré, Δ réel négatif) et E à coefficients réels, équiprobables. A, B, D, F et E à coefficients
+ * complexes sont des variantes « approfondissement », accessibles par le sélecteur (et l'export).
  */
 
-export type IdVarianteEquationsComplexes = "A_sansBarre" | "A_avecBarre" | "B" | "C" | "D" | "E" | "F";
+export type IdVarianteEquationsComplexes = "A_sansBarre" | "A_avecBarre" | "B" | "C" | "D" | "E" | "E_complexe" | "F";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteEquationsComplexes; label: string }[] = [
-  { id: "A_sansBarre", label: "A — Linéaire en z (sans z̄)" },
-  { id: "A_avecBarre", label: "A — Linéaire en z et z̄, en 2 écrans" },
-  { id: "B", label: "B — Équation rationnelle en z" },
-  { id: "C", label: "C — Quadratique, discriminant réel négatif" },
-  { id: "D", label: "D — Quadratique, discriminant complexe" },
-  { id: "E", label: "E — Quartique biquadratique u=z²" },
-  { id: "F", label: "F — Quartique, racines rationnelles et division" },
+  { id: "A_sansBarre", label: "A — Linéaire en z (sans z̄) — approfondissement" },
+  { id: "A_avecBarre", label: "A — Linéaire en z et z̄, en 2 écrans — approfondissement" },
+  { id: "B", label: "B — Équation rationnelle en z — approfondissement" },
+  { id: "C", label: "C — Second degré, discriminant réel négatif" },
+  { id: "D", label: "D — Second degré, discriminant complexe — approfondissement" },
+  { id: "E", label: "E — Bicarrée u=z², coefficients réels" },
+  { id: "E_complexe", label: "E — Bicarrée u=z², coefficients complexes — approfondissement" },
+  { id: "F", label: "F — Quatrième degré, racines rationnelles et division — approfondissement" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteEquationsComplexes): ExerciceEquationsComplexes {
@@ -42,24 +41,17 @@ export function construireAvecVarianteId(id: IdVarianteEquationsComplexes): Exer
     case "D":
       return construireFamilleD();
     case "E":
-      return construireFamilleE();
+      return construireFamilleEReelle();
+    case "E_complexe":
+      return construireFamilleEComplexe();
     case "F":
       return construireFamilleF();
   }
 }
 
-const FAMILLES: FamilleEquationsComplexes[] = ["A", "B", "C", "D", "E", "F"];
-
-const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleEquationsComplexes, () => ExerciceEquationsComplexes> = {
-  A: construireFamilleA,
-  B: construireFamilleB,
-  C: construireFamilleC,
-  D: construireFamilleD,
-  E: construireFamilleE,
-  F: construireFamilleF,
-};
-
+/** Tirage libre (audit 6e ch. 5, point 25) : uniquement C (Δ réel négatif) et E à coefficients
+ * réels — le cœur du cours. A, B, D, F et E complexe restent accessibles par le sélecteur
+ * (« approfondissement ») et par les feuilles d'évaluation. */
 export function genererExerciceEquationsComplexes(): ExerciceEquationsComplexes {
-  const famille = FAMILLES[Math.floor(Math.random() * FAMILLES.length)];
-  return CONSTRUCTEURS_PAR_FAMILLE[famille]();
+  return Math.random() < 0.5 ? construireFamilleC() : construireFamilleEReelle();
 }

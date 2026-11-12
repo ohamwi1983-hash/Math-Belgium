@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRacinesNiemes } from "./generateurs6e/racinesNiemes";
 import type { IdVarianteRacinesNiemes } from "./generateurs6e/racinesNiemes";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionRacinesNiemes, soumettreReponseEcran } from "./moteur6e/sessionRacinesNiemes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionRacinesNiemes, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionRacinesNiemes";
 import type { EtatSessionRacinesNiemes } from "./moteur6e/typesRacinesNiemes";
-import { diagnostiquerEcran } from "./moteur6e/verificationRacinesNiemes";
+import { controleAvantSoumission, diagnostiquerEcran } from "./moteur6e/verificationRacinesNiemes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsRacinesNiemes } from "./components6e/EtapeChampsRacinesNiemes";
 import { EtapeChoixRelationRacinesNiemes } from "./components6e/EtapeChoixRelationRacinesNiemes";
@@ -61,6 +61,8 @@ export function App6gen39() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur de générations, intégré à la clé d'écran (audit 6e ch. 5, point 9). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
    * RÉELLEMENT (même garde `transitionDEcran` qui déclenche déjà `setEnAttente`) — jamais à chaque
@@ -101,6 +103,7 @@ export function App6gen39() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeFermees([]);
@@ -114,6 +117,7 @@ export function App6gen39() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeFermees([]);
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionRacinesNiemes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteRacinesNiemes)));
   }
 
@@ -132,7 +136,7 @@ export function App6gen39() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -172,7 +176,7 @@ export function App6gen39() {
         <RecapitulatifPanel entrees={calculerRecapitulatifRacinesNiemes(etat)} />
         {estEcranChoix && (
           <EtapeChoixRelationRacinesNiemes
-            key={phase}
+            key={`${generation}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -186,7 +190,7 @@ export function App6gen39() {
 
         {estEcranListe && (
           <EtapeListeRacinesNiemes
-            key={phase}
+            key={`${generation}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -195,14 +199,20 @@ export function App6gen39() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
+            controleAvantSoumission={(valeurs) => controleAvantSoumission(exercice, phase, valeurs)}
+            onValider={(valeurs) =>
+              terminerEtape(
+                soumettreReponseEcran(etat, valeurs),
+                Array.from({ length: valeurs.length / 2 }, (_, i) => `racine ${i + 1} : partie réelle ${valeurs[2 * i]}, partie imaginaire ${valeurs[2 * i + 1]}`).join(" ; "),
+              )
+            }
             validation={validation}
           />
         )}
 
         {!estEcranChoix && !estEcranListe && (
           <EtapeChampsRacinesNiemes
-            key={phase}
+            key={`${generation}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -211,6 +221,7 @@ export function App6gen39() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            controleAvantSoumission={(valeurs) => controleAvantSoumission(exercice, phase, valeurs)}
             onValider={(valeurs) =>
               terminerEtape(
                 soumettreReponseEcran(etat, valeurs),

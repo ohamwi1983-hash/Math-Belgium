@@ -2,7 +2,7 @@ import type { ExerciceTransformationsPlan } from "../core6e/transformationsPlan.
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { phaseApres, phaseInitiale } from "./typesTransformationsPlan";
+import { phaseApres, phaseInitiale, tentativesMaxPhase } from "./typesTransformationsPlan";
 import type { EtatSessionTransformationsPlan, PhaseTransformationsPlan, ResultatExerciceTransformationsPlan } from "./typesTransformationsPlan";
 import { verifierEcran } from "./verificationTransformationsPlan";
 
@@ -39,7 +39,7 @@ export function demarrerSessionTransformationsPlan(reglages: ReglagesSession6e, 
 }
 
 function reglagesEtape(etat: EtatSessionTransformationsPlan): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat.phase, etat.reglages.tentativesMax) };
 }
 
 export function activerAideSuivante(etat: EtatSessionTransformationsPlan): EtatSessionTransformationsPlan {

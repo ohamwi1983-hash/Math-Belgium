@@ -216,8 +216,38 @@ export function verifierEEcran3(exercice: ExerciceFamilleE, valeurs: string[]): 
 // Famille F.
 // ============================================================================
 
+/** r₁ OU r₂ accepté (audit 6e ch. 5, point 7) : les 2 racines rationnelles sont aussi « évidentes »
+ * l'une que l'autre ; la session poursuit avec celle saisie (`racineFSaisieEstR2` + `permuterRacinesF`). */
 export function diagnostiquerFEcran1(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
-  return diagnostiquerComplexe(valeurs[0], { re: exercice.r1, im: 0 });
+  const statut = diagnostiquerComplexe(valeurs[0], { re: exercice.r1, im: 0 });
+  if (statut !== "not_equivalent") return statut;
+  return diagnostiquerComplexe(valeurs[0], { re: exercice.r2, im: 0 });
+}
+
+/** Vrai si la saisie de l'écran 1 de la famille F vaut r₂ (et non r₁). */
+export function racineFSaisieEstR2(exercice: ExerciceFamilleF, valeurs: string[]): boolean {
+  return diagnostiquerComplexe(valeurs[0], { re: exercice.r1, im: 0 }) !== "correct" && diagnostiquerComplexe(valeurs[0], { re: exercice.r2, im: 0 }) === "correct";
+}
+
+function quotientSynthetique(coefs: readonly number[], racine: number): number[] {
+  const quotient: number[] = [coefs[0]];
+  for (let i = 1; i < coefs.length - 1; i++) quotient.push(quotient[i - 1] * racine + coefs[i]);
+  return quotient;
+}
+
+/** Même exercice F, r₁ et r₂ PERMUTÉES (quotients recalculés par division synthétique) : la suite de
+ * l'exercice part de la racine saisie par l'élève à l'écran 1. */
+export function permuterRacinesF(e: ExerciceFamilleF): ExerciceFamilleF {
+  const cubique = quotientSynthetique([e.a, e.b, e.c, e.d, e.e], e.r2);
+  const quadratique = quotientSynthetique(cubique, e.r1);
+  return {
+    ...e,
+    r1: e.r2,
+    r2: e.r1,
+    quotientCubique: [cubique[0], cubique[1], cubique[2], cubique[3]],
+    quotientQuadratique: [quadratique[0], quadratique[1], quadratique[2]],
+    racines: [e.racines[1], e.racines[0], e.racines[2], e.racines[3]],
+  };
 }
 export function verifierFEcran1(exercice: ExerciceFamilleF, valeurs: string[]): boolean {
   return diagnostiquerFEcran1(exercice, valeurs) === "correct";

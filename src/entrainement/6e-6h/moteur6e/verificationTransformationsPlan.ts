@@ -1,6 +1,6 @@
-import type { ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransformationsPlan } from "../core6e/transformationsPlan.types";
+import type { ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransfoD, ExerciceTransformationsPlan } from "../core6e/transformationsPlan.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerValeur } from "./equivalenceExponentielle";
+import { diagnostiquerAngle, diagnostiquerValeur } from "./equivalenceExponentielle";
 import { evaluerValeurComplexe } from "./expressionComplexe";
 import { TOLERANCE_COMPLEXE, diagnostiquerComplexe } from "./verificationComplexes";
 import type { Complexe } from "./verificationComplexes";
@@ -28,17 +28,8 @@ import type { PhaseTransformationsPlan } from "./typesTransformationsPlan";
  * `moteur6e/verificationAffixesRacines.ts` (6gen35).
  *
  * ============================================================================
- * **Famille B, écran 2 — champ structuré "type + paramètres", statut combiné documenté ici**
- * ============================================================================
- * Pas de nouveau type `StatutVerification` : le champ structuré (choix `.btn.toggle-active`
- * "translation"/"similitude" PUIS 1 ou 2 champs texte selon le choix, voir
- * `components6e/EtapeTypeParametresTransformationsPlan.tsx`) est encodé dans `valeurs: string[]`
- * comme tous les autres écrans du générateur — `valeurs[0]` = type choisi, `valeurs[1]` (+
- * `valeurs[2]` si similitude) = paramètre(s). `"parse_error"` si le(s) champ(s) paramètre ne
- * peuvent pas être évalués DU TOUT (quel que soit le type choisi) ; `"not_equivalent"` si le type
- * est faux OU si les paramètres, bien qu'évaluables, ne correspondent à AUCUNE des 2 lectures
- * valables (`z_A+z_B` ⟺ translation par `z_B` OU par `z_A` — voir en-tête `familleB.ts` ;
- * `z_A·z_B` ⟺ similitude de rapport/angle ceux de A OU ceux de B) ; `"correct"` sinon.
+ * **Famille B, écran 2 — nature imposée (audit 6e ch. 5, point 41)** : voir `diagnostiquerBEcran2`.
+ * Tous les ANGLES saisis sont comparés à 2kπ près via `diagnostiquerAngle` (point 3).
  */
 
 function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
@@ -67,40 +58,14 @@ export function diagnostiquerBEcran1(exercice: ExerciceTransfoB, valeurs: string
   return diagnostiquerComplexe(valeurs[0], { re: exercice.zResultat.a, im: exercice.zResultat.b });
 }
 
-/** `texte` accepté s'il correspond à `zA` OU `zB` (translation symétrique — voir en-tête
- * `core6e/transformationsPlan.types.ts`/`familleB.ts`). */
-function statutVecteurTranslation(texte: string, exercice: ExerciceTransfoB): StatutVerification {
-  const versA = diagnostiquerComplexe(texte, { re: exercice.zA.a, im: exercice.zA.b });
-  if (versA === "correct") return "correct";
-  if (versA === "parse_error") return "parse_error";
-  return diagnostiquerComplexe(texte, { re: exercice.zB.a, im: exercice.zB.b });
-}
-
-function statutPaireModuleAngle(rapportTexte: string, angleTexte: string, r: number, angleNumerique: number): StatutVerification {
-  const statutR = diagnostiquerValeur(rapportTexte, r);
-  const statutAngle = diagnostiquerValeur(angleTexte, angleNumerique);
-  return combinerStatuts(statutR, statutAngle);
-}
-
-/** `(rapport,angle)` acceptés s'ils correspondent EXACTEMENT à la paire de A OU à la paire de B
- * (jamais un mélange rapport de A + angle de B) — voir en-tête `core6e/transformationsPlan.types.ts`/
- * `familleB.ts`. */
-function statutPaireSimilitude(rapportTexte: string, angleTexte: string, exercice: ExerciceTransfoB): StatutVerification {
-  const versA = statutPaireModuleAngle(rapportTexte, angleTexte, exercice.rA, exercice.angleA.numerique);
-  if (versA === "correct") return "correct";
-  if (versA === "parse_error") return "parse_error";
-  return statutPaireModuleAngle(rapportTexte, angleTexte, exercice.rB, exercice.angleB.numerique);
-}
-
+/** Écran 2 — la nature de la transformation est désormais IMPOSÉE par la consigne (audit 6e ch. 5,
+ * point 41 : demander « translation ou similitude ? » juste après avoir lu le symbole + ou ·
+ * n'évaluait rien) ; la consigne précise aussi le point de départ (M = image de A, P = image de A),
+ * donc une seule lecture est attendue : vecteur z_B (somme), rapport r_B et angle θ_B à 2π près
+ * (produit). `valeurs` : `[vecteur]` ou `[rapport, angle]`. */
 export function diagnostiquerBEcran2(exercice: ExerciceTransfoB, valeurs: string[]): StatutVerification {
-  const typeChoisi = valeurs[0];
-  const typeCorrect = exercice.sousType === "somme" ? "translation" : "similitude";
-
-  const statutParametres = typeChoisi === "translation" ? statutVecteurTranslation(valeurs[1] ?? "", exercice) : statutPaireSimilitude(valeurs[1] ?? "", valeurs[2] ?? "", exercice);
-
-  if (statutParametres === "parse_error") return "parse_error";
-  if (typeChoisi !== typeCorrect) return "not_equivalent";
-  return statutParametres;
+  if (exercice.sousType === "somme") return diagnostiquerComplexe(valeurs[0] ?? "", { re: exercice.zB.a, im: exercice.zB.b });
+  return combinerStatuts(diagnostiquerValeur(valeurs[0] ?? "", exercice.rB), diagnostiquerAngle(valeurs[1] ?? "", exercice.angleB.numerique).statut);
 }
 
 // ============================================================================
@@ -110,8 +75,9 @@ export function diagnostiquerBEcran2(exercice: ExerciceTransfoB, valeurs: string
 export function diagnostiquerCEcran1(exercice: ExerciceTransfoC, valeurs: string[]): StatutVerification {
   return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.moduleCommun), diagnostiquerValeur(valeurs[1], exercice.moduleCommun));
 }
+/** Angle accepté à 2kπ près (audit 6e ch. 5, point 3 : 3π/2 pour −π/2 était refusé). */
 export function diagnostiquerCEcran2(exercice: ExerciceTransfoC, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.angleRotation.numerique);
+  return diagnostiquerAngle(valeurs[0], exercice.angleRotation.numerique).statut;
 }
 
 /**
@@ -121,13 +87,15 @@ export function diagnostiquerCEcran2(exercice: ExerciceTransfoC, valeurs: string
  * correctes, retourne `"not_equivalent"`, JAMAIS `"correct"` en acceptant un sous-ensemble.
  */
 export function diagnostiquerImagesRotation(textes: string[], cibles: Complexe[], tolerance: number = TOLERANCE_COMPLEXE): StatutVerification {
-  if (textes.length !== cibles.length) return "not_equivalent";
+  // Lecture AVANT le contrôle du compte : une écriture illisible reste un `parse_error` (tentative
+  // non décomptée) même si le nombre d'images est incomplet.
   const valeurs: Complexe[] = [];
   for (const t of textes) {
     const v = evaluerValeurComplexe(t);
     if (v === null) return "parse_error";
     valeurs.push(v);
   }
+  if (textes.length !== cibles.length) return "not_equivalent";
   const restantes = [...cibles];
   for (const v of valeurs) {
     const index = restantes.findIndex((c) => Math.abs(c.re - v.re) <= tolerance && Math.abs(c.im - v.im) <= tolerance);
@@ -140,6 +108,27 @@ export function diagnostiquerImagesRotation(textes: string[], cibles: Complexe[]
 export function diagnostiquerCEcran3(exercice: ExerciceTransfoC, valeurs: string[]): StatutVerification {
   const cibles: Complexe[] = exercice.imagesAutresPoints.map((p) => ({ re: p.a, im: p.b }));
   return diagnostiquerImagesRotation(valeurs, cibles);
+}
+
+// ============================================================================
+// Famille D — z′ = az + b (audit 6e ch. 5, point 42).
+// ============================================================================
+
+/** Écran 1 — choix de la nature (identifiant de l'option). */
+export function diagnostiquerDEcran1(exercice: ExerciceTransfoD, valeurs: string[]): StatutVerification {
+  return valeurs[0] === exercice.nature ? "correct" : "not_equivalent";
+}
+
+/** Écran 2 — éléments caractéristiques, champs selon la nature (voir `champsD`) :
+ * translation `[vecteur]` ; rotation `[centre, angle]` ; homothétie `[centre, rapport k]` ;
+ * similitude `[centre, rapport, angle]`. Angles à 2kπ près. */
+export function diagnostiquerDEcran2(exercice: ExerciceTransfoD, valeurs: string[]): StatutVerification {
+  const v = (i: number) => valeurs[i] ?? "";
+  if (exercice.nature === "translation" || exercice.centre === null) return diagnostiquerComplexe(v(0), { re: exercice.b.a, im: exercice.b.b });
+  const statutCentre = diagnostiquerComplexe(v(0), { re: exercice.centre.a, im: exercice.centre.b });
+  if (exercice.nature === "rotation") return combinerStatuts(statutCentre, diagnostiquerAngle(v(1), exercice.angle.numerique).statut);
+  if (exercice.nature === "homothetie") return combinerStatuts(statutCentre, diagnostiquerValeur(v(1), exercice.rapport));
+  return combinerStatuts(statutCentre, diagnostiquerValeur(v(1), exercice.rapport), diagnostiquerAngle(v(2), exercice.angle.numerique).statut);
 }
 
 // ============================================================================
@@ -162,6 +151,10 @@ export function diagnostiquerEcran(exercice: ExerciceTransformationsPlan, phase:
       return diagnostiquerCEcran2(exercice as ExerciceTransfoC, valeurs);
     case "cEcran3":
       return diagnostiquerCEcran3(exercice as ExerciceTransfoC, valeurs);
+    case "dEcran1":
+      return diagnostiquerDEcran1(exercice as ExerciceTransfoD, valeurs);
+    case "dEcran2":
+      return diagnostiquerDEcran2(exercice as ExerciceTransfoD, valeurs);
   }
 }
 

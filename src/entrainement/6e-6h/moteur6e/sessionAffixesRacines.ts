@@ -4,7 +4,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesAffixesRacines";
 import type { EtatSessionAffixesRacines, PhaseAffixesRacines, ResultatExerciceAffixesRacines } from "./typesAffixesRacines";
-import { verifierEcran } from "./verificationAffixesRacines";
+import { verifierEcran, xOpposeSaisi } from "./verificationAffixesRacines";
 
 /**
  * Couche B (6e) — moteur de session pour `6gen35`. N'importe jamais rien de `src/generateurs6e/` —
@@ -21,6 +21,16 @@ const POINTS_DE_BASE = 100;
 /** 2 niveaux d'aide max sur tous les écrans qui en prévoient (spec : écran unique de A, écran 1 de
  * B, écrans 2 et 3 de C — `max=0` pour bEcran2 et cEcran1, voir `ui6e/formatAffixesRacines.ts`). */
 export const NIVEAU_AIDE_MAX = 2;
+
+/** Une seule tentative sur un choix fermé (audit 6e ch. 5, point 6) : avec 3 tentatives sur 4
+ * options, l'élimination suffisait à « réussir » sans comprendre. Saisies libres :
+ * `reglages.tentativesMax`. */
+export const TENTATIVES_CHOIX_FERME = 1;
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseAffixesRacines> = new Set(["bEcran1", "cEcran1"]);
+
+export function tentativesMaxPhase(etat: Pick<EtatSessionAffixesRacines, "phase" | "reglages">): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
+}
 
 function etatInitial(
   exercice: ExerciceAffixesRacines,
@@ -41,7 +51,7 @@ export function demarrerSessionAffixesRacines(reglages: ReglagesSession6e, gener
 }
 
 function reglagesEtape(etat: EtatSessionAffixesRacines): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionAffixesRacines): EtatSessionAffixesRacines {
@@ -72,6 +82,12 @@ export function soumettreReponseEcran(etat: EtatSessionAffixesRacines, valeurs: 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
+  // Famille C, écran 2 : −x est accepté — la suite part de la valeur de l'élève.
+  let exerciceSuivi = exercice;
+  if (!revele && phaseCourante === "cEcran2" && exercice.famille === "C") {
+    const xOppose = xOpposeSaisi(exercice, valeurs);
+    if (xOppose !== null) exerciceSuivi = { ...exercice, xRetenu: xOppose };
+  }
   const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseAffixesRacines, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseAffixesRacines, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
@@ -82,5 +98,5 @@ export function soumettreReponseEcran(etat: EtatSessionAffixesRacines, valeurs: 
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, exerciceCourant: exerciceSuivi, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

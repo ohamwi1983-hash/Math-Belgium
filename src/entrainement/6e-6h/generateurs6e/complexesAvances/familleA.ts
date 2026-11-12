@@ -69,7 +69,9 @@ export function classifierPuissanceReelle(n: number, thetaNumerique: number): "p
 }
 
 const N_POSSIBLES = [3, 4] as const;
-const K_POSSIBLES = [2, 3, 4, 5] as const;
+/** Seuil k de 2 à 20 (audit 6e ch. 5 : avec 4 valeurs seulement, une variante n'offrait que 4
+ * exercices distincts). */
+const K_POSSIBLES: number[] = Array.from({ length: 19 }, (_, i) => i + 2);
 
 export function construireFamilleA(): ExerciceComplexesA {
   const n = tirerParmi(N_POSSIBLES);

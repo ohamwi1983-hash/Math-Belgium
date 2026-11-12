@@ -3,12 +3,11 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComplexesAvances } from "./generateurs6e/complexesAvances";
 import type { IdVarianteComplexesAvances } from "./generateurs6e/complexesAvances";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionComplexesAvances, soumettreReponseEcran } from "./moteur6e/sessionComplexesAvances";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionComplexesAvances, soumettreReponseEcran, tentativesMaxEcran } from "./moteur6e/sessionComplexesAvances";
 import type { EtatSessionComplexesAvances } from "./moteur6e/typesComplexesAvances";
 import { diagnostiquerEcran } from "./moteur6e/verificationComplexesAvances";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeChampsComplexesAvances } from "./components6e/EtapeChampsComplexesAvances";
-import { EtapeConclusionC } from "./components6e/EtapeConclusionC";
 import { EtapeListeComplexesAvances } from "./components6e/EtapeListeComplexesAvances";
 import { EtapeLocusComplexesAvances } from "./components6e/EtapeLocusComplexesAvances";
 import { EtapeQcmComplexesAvances } from "./components6e/EtapeQcmComplexesAvances";
@@ -23,10 +22,10 @@ import {
   optionsEcran1A,
   optionsEcran2A,
   optionsEcran3A,
-  optionsReciproqueC,
-  optionsStatutC,
+  optionsConclusionC,
   optionsStatutE,
   formatReponseAttenduePhaseLatex,
+  type OptionQcm,
   LIBELLE_PHASE,
   NATURES_DISPONIBLES,
   aideNiveau1 as formatAideNiveau1,
@@ -42,9 +41,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `6gen42` — Nombres complexes : problèmes avancés (chapitre 7, "Nombres complexes", 9e et DERNIER
  * générateur de ce chapitre — générateur de CLÔTURE, mirroir 6gen29/6gen33 pour les chapitres 4/8).
  * Dispatcher générique piloté par `ui6e/formatComplexesAvances.ts`/
- * `moteur6e/verificationComplexesAvances.ts`, avec 5 composants dédiés pour les écrans qui ne sont
- * PAS de la saisie libre simple : QCM (familles A et E écran 3), lieu structuré (famille B écran 2,
- * sous-types simples), conclusion à 2 choix (famille C écran 3), liste add-as-needed (bInterEcran3,
+ * `moteur6e/verificationComplexesAvances.ts`, avec des composants dédiés pour les écrans qui ne sont
+ * PAS de la saisie libre simple : QCM à une seule tentative (famille A, écrans 3 des familles C et
+ * E), lieu structuré (famille B écran 2, sous-types simples), liste add-as-needed (bInterEcran3,
  * dRatioEcran1, dReellesEcran3, dModulesEcran2).
  */
 
@@ -71,6 +70,9 @@ export function App6gen42() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Compteur de génération dans la clé des écrans : deux exercices successifs qui commencent par
+   * la même phase remontent bien un écran neuf (audit 6e ch. 5). */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionComplexesAvances, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -106,6 +108,7 @@ export function App6gen42() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeFermees([]);
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -116,6 +119,7 @@ export function App6gen42() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeFermees([]);
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionComplexesAvances(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteComplexesAvances)));
   }
 
@@ -149,7 +153,7 @@ export function App6gen42() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxEcran(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -174,17 +178,28 @@ export function App6gen42() {
   // remarquables exacts (0/π/±π/2), aucun calcul décimal requis pour eux. Mode RAD (défaut du
   // composant) : contexte du chapitre = argument d'un nombre complexe, toujours en radians ici
   // (contrairement à `App6gen41.tsx`, seul écran DEGRÉS du chapitre).
-  const calculatriceVisible = exercice.famille === "E" && exercice.statut === "aucun" && phase === "eEcran2";
+  // Visible sur TOUS les écrans « argument » de la famille E (pas seulement « ni l'un ni l'autre ») :
+  // sinon sa seule présence trahissait la conclusion de l'écran 3.
+  const calculatriceVisible = exercice.famille === "E" && phase === "eEcran2";
+  const cle = `${generation}-${phase}`;
+
+  /** Réponse affichée dans l'historique : rendu KaTeX quand l'option en a un. */
+  function reponseOption(options: OptionQcm[], id: string): ReactNode {
+    const option = options.find((o) => o.id === id);
+    if (!option) return id;
+    return option.latex ? <Katex expression={option.latex} /> : option.label;
+  }
 
   function nombreMaxListe(): number {
     if (estEcranListeDRatio && exercice.famille === "D" && exercice.sousType === "ratio") return exercice.n;
     return 2;
   }
   function placeholderListe(): string {
-    if (estEcranListeDRatio) return "ex : 2";
-    if (estEcranListeDReelles) return "ex : 1";
-    if (estEcranListeDModules) return "ex : 3/5+4i/5";
-    return "ex : 3+2i";
+    // Exemples hors de l'espace des tirages (audit 6e ch. 5).
+    if (estEcranListeDRatio) return "ex : 1/2+i/3";
+    if (estEcranListeDReelles) return "ex : 7/2";
+    if (estEcranListeDModules) return "ex : 2/7−i/7";
+    return "ex : 1/2+3i";
   }
 
   const segmentsBase = calculerSegmentsProgressionComplexesAvances(etat);
@@ -203,7 +218,7 @@ export function App6gen42() {
         <RecapitulatifPanel entrees={calculerRecapitulatifComplexesAvances(etat)} />
         {estEcranQcmA && exercice.famille === "A" && (
           <EtapeQcmComplexesAvances
-            key={phase}
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -211,16 +226,17 @@ export function App6gen42() {
             options={phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
+            melanger
             onValider={(id) => {
               const options = phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice);
-              terminerEtape(soumettreReponseEcran(etat, [id]), options.find((o) => o.id === id)?.label ?? id);
+              terminerEtape(soumettreReponseEcran(etat, [id]), reponseOption(options, id));
             }}
           />
         )}
 
         {estEcranQcmE && (
           <EtapeQcmComplexesAvances
-            key={phase}
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -228,13 +244,13 @@ export function App6gen42() {
             options={optionsStatutE()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), optionsStatutE().find((o) => o.id === id)?.label ?? id)}
+            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), reponseOption(optionsStatutE(), id))}
           />
         )}
 
         {estEcranLocusB && exercice.famille === "B" && "resultat" in exercice && (
           <EtapeLocusComplexesAvances
-            key={phase}
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -251,35 +267,30 @@ export function App6gen42() {
         )}
 
         {estEcranConclusionC && (
-          <EtapeConclusionC
-            key={phase}
+          <EtapeQcmComplexesAvances
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             consigneEcran={consigneEcran(exercice, phase)}
-            optionsStatut={optionsStatutC()}
-            optionsReciproque={optionsReciproqueC()}
+            options={optionsConclusionC()}
+            melanger
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(valeurs) => {
-              const texte = [
-                optionsStatutC().find((o) => o.id === valeurs[0])?.label ?? valeurs[0],
-                optionsReciproqueC().find((o) => o.id === valeurs[1])?.label ?? valeurs[1],
-              ].join(" ; ");
-              terminerEtape(soumettreReponseEcran(etat, valeurs), texte);
-            }}
+            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), reponseOption(optionsConclusionC(), id))}
           />
         )}
 
         {estEcranListe && (
           <EtapeListeComplexesAvances
-            key={phase}
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             consigneEcran={consigneEcran(exercice, phase)}
             nombreMaxLignes={nombreMaxListe()}
             placeholder={placeholderListe()}
+            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
@@ -288,7 +299,7 @@ export function App6gen42() {
 
         {!estEcranDedie && (
           <EtapeChampsComplexesAvances
-            key={phase}
+            key={cle}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}

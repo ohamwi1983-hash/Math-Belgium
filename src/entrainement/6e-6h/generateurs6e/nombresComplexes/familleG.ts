@@ -1,5 +1,5 @@
 import type { ExerciceFamilleG, ValeurComplexe } from "../../core6e/nombresComplexes.types";
-import { tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerEntier } from "../calculPrimitives/aleatoire";
 
 /**
  * Couche A (6e) — génération, famille G ("Puissances de i") de `6gen34`. Exporte `puissanceDeI` et
@@ -40,11 +40,14 @@ export function puissanceDeI(n: number): ValeurComplexe {
   return CYCLE_I[modulo4Mathematique(n)];
 }
 
-const BANQUE_EXPOSANTS_POSITIFS = [2021, 1000, 777, 2024, 999, 501, 1234] as const;
-const BANQUE_EXPOSANTS_NEGATIFS = [-3, -5, -7, -9, -11, -13] as const;
+/** Exposants : positifs dans [10 ; 2999] (75 %), négatifs dans [-40 ; -1] ; avant, une banque fixe de
+ * 7 exposants positifs et 6 négatifs (tous impairs). */
+const EXPOSANT_POSITIF_MIN = 10;
+const EXPOSANT_POSITIF_MAX = 2999;
+const EXPOSANT_NEGATIF_MIN = -40;
 
 export function construireFamilleG(): ExerciceFamilleG {
-  const n = Math.random() < 0.5 ? tirerParmi(BANQUE_EXPOSANTS_POSITIFS) : tirerParmi(BANQUE_EXPOSANTS_NEGATIFS);
+  const n = Math.random() < 0.75 ? tirerEntier(EXPOSANT_POSITIF_MIN, EXPOSANT_POSITIF_MAX) : tirerEntier(EXPOSANT_NEGATIF_MIN, -1);
   const reste = modulo4Mathematique(n);
   const resultat = CYCLE_I[reste];
   return { famille: "G", n, reste, resultat };

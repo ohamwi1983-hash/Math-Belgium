@@ -1,7 +1,7 @@
 import type { ExerciceFormeTrigB, ExerciceFormeTrigB_ProduitQuotient, ExerciceFormeTrigB_Puissance } from "../../core6e/formeTrigonometrique.types";
 import { tirerParmi } from "../calculPrimitives/aleatoire";
 import { additionnerAngles, multiplierAngleParEntier } from "./angles";
-import { tirerZAvecAngleRemarquable } from "./familleA";
+import { PROBA_AXE_6GEN37, tirerZAvecAngleRemarquable } from "./familleA";
 
 /**
  * Couche A (6e) — génération, famille B ("Module et argument via les propriétés") de `6gen37`.
@@ -18,19 +18,20 @@ import { tirerZAvecAngleRemarquable } from "./familleA";
 
 const SOUS_TYPES = ["produit", "quotient", "puissance"] as const;
 const EXPOSANTS_PUISSANCE = [2, 3, 4] as const;
+const RN_MAX = 64;
 
 function memeAngle(a: { p: number; q: number }, b: { p: number; q: number }): boolean {
   return a.p === b.p && a.q === b.q;
 }
 
 export function construireFamilleBProduitQuotient(sousType: "produit" | "quotient"): ExerciceFormeTrigB_ProduitQuotient {
-  const z1 = tirerZAvecAngleRemarquable();
-  let z2 = tirerZAvecAngleRemarquable();
+  const z1 = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
+  let z2 = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
   // Évite un facteur 2 dégénéré (rigoureusement identique à z1, r ET angle) — retirage borné, jamais
   // bloquant (16 angles × 4 modules = 64 combinaisons, collision improbable mais possible).
   let tentatives = 0;
   while (z2.r === z1.r && memeAngle(z2.angle, z1.angle) && tentatives < 20) {
-    z2 = tirerZAvecAngleRemarquable();
+    z2 = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
     tentatives++;
   }
   const rResultat = sousType === "produit" ? z1.r * z2.r : z1.r / z2.r;
@@ -39,8 +40,13 @@ export function construireFamilleBProduitQuotient(sousType: "produit" | "quotien
 }
 
 export function construireFamilleBPuissance(): ExerciceFormeTrigB_Puissance {
-  const z = tirerZAvecAngleRemarquable();
-  const n = tirerParmi(EXPOSANTS_PUISSANCE);
+  // rⁿ ≤ 64 (audit 6e ch. 5 : 4⁴ = 256, 3⁴ = 81 sortaient 16 % du temps) — retirage borné.
+  let z = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
+  let n: number = tirerParmi(EXPOSANTS_PUISSANCE);
+  for (let i = 0; i < 50 && Math.pow(z.r, n) > RN_MAX; i++) {
+    z = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
+    n = tirerParmi(EXPOSANTS_PUISSANCE);
+  }
   const rResultat = Math.pow(z.r, n);
   const angleResultat = multiplierAngleParEntier(z.angle, n);
   return { famille: "B", sousType: "puissance", z, n, rResultat, angleResultat };

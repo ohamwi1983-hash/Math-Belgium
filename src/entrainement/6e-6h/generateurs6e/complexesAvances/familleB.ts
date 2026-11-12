@@ -1,5 +1,5 @@
 import type { AffixeSimple, ExerciceComplexesBIntersection, ExerciceComplexesBSimple, SousTypeLieuB } from "../../core6e/complexesAvances.types";
-import { POINTS_REMARQUABLES, combinerModuleAngle } from "../formeTrigonometrique/familleA";
+import { ANGLES_REMARQUABLES, POINTS_REMARQUABLES, combinerModuleAngle } from "../formeTrigonometrique/familleA";
 import { angleDepuisFraction } from "../formeTrigonometrique/angles";
 import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
 import { racineRationnelleLatex } from "./racineRationnelle";
@@ -76,7 +76,14 @@ function distanceCarree(p1: AffixeSimple, p2: AffixeSimple): number {
   return (p1.a - p2.a) ** 2 + (p1.b - p2.b) ** 2;
 }
 
-const SOUS_TYPES: SousTypeLieuB[] = ["droite", "thales", "apollonius", "demiDroites", "cercleO"];
+/** Sous-types du TIRAGE LIBRE (audit 6e ch. 5, décision H) : les lieux du cours |z−a|=k et
+ * arg(z−a)≡θ (mod 2π / mod π) y entrent ; Thalès et Apollonius deviennent des variantes
+ * d'approfondissement, accessibles seulement par le sélecteur (`construireFamilleBSimple("thales")`). */
+const SOUS_TYPES: SousTypeLieuB[] = ["droite", "demiDroites", "cercleO", "cercleA", "argument", "argumentPi"];
+
+/** arg(z−a)≡θ (mod π) : droite de direction θ. θ multiple de π/4 pour que la droite passe par des
+ * points à coordonnées rationnelles (l'élève doit en donner 2 sous forme a+bi). */
+const ANGLES_DROITE = ANGLES_REMARQUABLES.filter((a) => a.q === 1 || a.q === 2 || a.q === 4);
 
 export function construireFamilleBSimple(sousTypeForce?: SousTypeLieuB): ExerciceComplexesBSimple {
   const sousType = sousTypeForce ?? tirerParmi(SOUS_TYPES);
@@ -112,7 +119,29 @@ export function construireFamilleBSimple(sousTypeForce?: SousTypeLieuB): Exercic
     const angles = unSeulRayon ? [theta0] : [theta0, angleDepuisFraction(-theta0.p, theta0.q)];
     // p1/p2 sans rôle ici — champs conservés à (0,0) pour uniformité du contrat (jamais lus par
     // l'écran 1/2 de ce sous-type, voir `ui6e/formatComplexesAvances.ts`).
-    return { famille: "B", sousType, p1: { a: 0, b: 0 }, p2: { a: 0, b: 0 }, c, cLatex: cValeur.latex, poleExclu: null, resultat: { nature: "demiDroite", angles } };
+    return { famille: "B", sousType, p1: { a: 0, b: 0 }, p2: { a: 0, b: 0 }, c, cLatex: cValeur.latex, poleExclu: null, resultat: { nature: "demiDroite", origine: { a: 0, b: 0 }, angles } };
+  }
+
+  if (sousType === "cercleA") {
+    const a = tirerPointNonNul(-4, 4);
+    const k = tirerEntier(1, 6);
+    return { famille: "B", sousType, p1: a, p2: { a: 0, b: 0 }, k, poleExclu: null, resultat: { nature: "cercle", centre: a, rayon: k, rayonLatex: `${k}` } };
+  }
+
+  if (sousType === "argument") {
+    const a = tirerPointNonNul(-4, 4);
+    const theta = tirerParmi(ANGLES_REMARQUABLES);
+    return { famille: "B", sousType, p1: a, p2: { a: 0, b: 0 }, theta, poleExclu: null, resultat: { nature: "demiDroite", origine: a, angles: [theta] } };
+  }
+
+  if (sousType === "argumentPi") {
+    const a = tirerPointNonNul(-4, 4);
+    const theta = tirerParmi(ANGLES_DROITE);
+    // Second point de la droite : a + (cos θ ; sin θ) mis à l'échelle entière (1, 0), (1, 1), (0, 1)…
+    const dx = Math.round(Math.cos(theta.numerique) * Math.SQRT2);
+    const dy = Math.round(Math.sin(theta.numerique) * Math.SQRT2);
+    const point2 = { a: a.a + dx, b: a.b + dy };
+    return { famille: "B", sousType, p1: a, p2: { a: 0, b: 0 }, theta, poleExclu: a, resultat: { nature: "droite", point1: a, point2 } };
   }
 
   // cercleO
@@ -133,7 +162,7 @@ export function construireFamilleBIntersection(): ExerciceComplexesBIntersection
 
 export type ExerciceFamilleB = ExerciceComplexesBSimple | ExerciceComplexesBIntersection;
 
-const SOUS_TYPES_TOUS: (SousTypeLieuB | "intersection")[] = ["droite", "thales", "apollonius", "demiDroites", "cercleO", "intersection"];
+const SOUS_TYPES_TOUS: (SousTypeLieuB | "intersection")[] = [...SOUS_TYPES, "intersection"];
 
 export function construireFamilleB(): ExerciceFamilleB {
   const sousType = tirerParmi(SOUS_TYPES_TOUS);

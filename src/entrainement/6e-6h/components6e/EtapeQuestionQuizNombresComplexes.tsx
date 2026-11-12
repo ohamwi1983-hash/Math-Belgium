@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { QuestionVraiFaux } from "../core6e/quizNombresComplexes.types";
-import { RenduFragments } from "../components/RenduFragments";
+import { RenduFragmentsQuiz } from "./RenduFragmentsQuiz";
 
 interface Props {
   question: QuestionVraiFaux;
@@ -9,7 +9,7 @@ interface Props {
 
 /** Écran unique du quiz — un choix Vrai/Faux, sans aide ni second essai (une seule tentative, voir
  * `moteur6e/sessionQuizNombresComplexes.ts`). Structure identique à 6gen67 et 6gen66/65. Énoncé
- * rendu via `RenduFragments` (texte/LaTeX mêlés, seule différence réelle avec 6gen64 — voir
+ * rendu via `RenduFragmentsQuiz` (texte/LaTeX mêlés, seule différence réelle avec 6gen64 — voir
  * `core6e/quizNombresComplexes.types.ts`). */
 export function EtapeQuestionQuizNombresComplexes({ question, onValider }: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
@@ -17,7 +17,7 @@ export function EtapeQuestionQuizNombresComplexes({ question, onValider }: Props
   return (
     <div>
       <p className="prompt-text">
-        <RenduFragments fragments={question.enonce} />
+        <RenduFragmentsQuiz fragments={question.enonce} />
       </p>
 
       <div className="options-grid-compact">

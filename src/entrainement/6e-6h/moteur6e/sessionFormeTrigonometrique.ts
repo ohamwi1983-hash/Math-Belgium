@@ -38,8 +38,14 @@ export function demarrerSessionFormeTrigonometrique(reglages: ReglagesSession6e,
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur un écran à choix fermé (audit 6e ch. 5, point 6/F : avec 3 essais sur
+ * 4 boutons, l'élève trouvait par élimination) — `dEcran2` est le seul de ce générateur. */
+export function tentativesMaxPhase(etat: EtatSessionFormeTrigonometrique): number {
+  return etat.phase === "dEcran2" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionFormeTrigonometrique): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionFormeTrigonometrique): EtatSessionFormeTrigonometrique {

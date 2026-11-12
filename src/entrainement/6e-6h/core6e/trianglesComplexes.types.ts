@@ -1,7 +1,7 @@
 /**
  * Couche core (6e) — contrat pour `6gen41` ("Propriétés géométriques de triangles via les nombres
- * complexes", chapitre 7 "Nombres complexes"). 4 familles (A à D), tirage ÉQUIPROBABLE de la
- * famille — voir `generateurs6e/trianglesComplexes/index.ts`.
+ * complexes", chapitre 5 "Nombres complexes"). 5 familles (A à E — E ajoutée par l'audit 6e ch. 5,
+ * point 44), tirage ÉQUIPROBABLE de la famille — voir `generateurs6e/trianglesComplexes/index.ts`.
  *
  * ============================================================================
  * **Représentation d'un point** : `re,im` NUMÉRIQUES exacts (calculés une fois pour toutes à la
@@ -24,6 +24,16 @@
  * de base (loi des cosinus) sont un DÉCIMAL non remarquable par construction (voir en-tête
  * `generateurs6e/trianglesComplexes/familleB.ts`) — vérifiés par TOLÉRANCE décimale plutôt que par
  * égalité exacte, seul écran de tout le chapitre 7 à ce jour dans ce cas.
+ *
+ * ============================================================================
+ * **Audit 6e ch. 5 (lot D) — verdicts jamais constants.** Chaque écran de CHOIX a désormais
+ * plusieurs réponses possibles réellement tirées (famille A : 4 cas équilibrés isocèle / rectangle /
+ * isocèle rectangle / quelconque ; famille B : sommet principal O, A ou B et triangle rectangle ou
+ * non ; famille C : A centre ou milieu d'un côté ; famille D : ≈ 1/3 de contre-exemples
+ * incohérents ; famille E : alignés / perpendiculaires / ni l'un ni l'autre). Les longueurs peuvent
+ * donc être irrationnelles (√n, saisie `sqrt(n)` acceptée) : chaque longueur porte sa forme exacte
+ * LaTeX (`Longueur`). L'ordre d'affichage des options est tiré à la génération (`ordres`).
+ * ============================================================================
  */
 
 export interface PointComplexe {
@@ -32,63 +42,70 @@ export interface PointComplexe {
   latex: string;
 }
 
+/** Longueur ou distance : valeur numérique + forme exacte LaTeX (entier, k√n, fraction de √3…). */
+export interface Longueur {
+  numerique: number;
+  latex: string;
+}
+
+/** Deux permutations de 0..3, une par écran de choix de l'exercice (ordre d'affichage des options,
+ * uniforme — audit 6e ch. 5, point 6). Une option d'indice ≥ au nombre d'options est ignorée. */
+export type OrdresChoix = [number[], number[]];
+
 // ============================================================================
-// Famille A — Démontrer isocèle et/ou rectangle (3 écrans).
+// Famille A — Isocèle, rectangle, les deux ou aucun (3 écrans).
 // ============================================================================
 
 export type SommetTriangle = "A" | "B" | "C";
 /** "aucun" = pas isocèle / pas rectangle — une conclusion valide, jamais un état d'erreur. */
 export type StatutSommet = SommetTriangle | "aucun";
 
-/**
- * 2 sous-types, JAMAIS combinés (voir en-tête de fichier + `docs/historique-6e.md`) : un triangle
- * isocèle non rectangle construit avec des longueurs entières exactes (impossible d'être AUSSI
- * rectangle avec des entiers — voir preuve dans `generateurs6e/trianglesComplexes/construction.ts`),
- * ou un triangle rectangle scalène (via un triplet pythagoricien) donc JAMAIS isocèle. L'énoncé
- * "isocèle et/ou rectangle" du prompt source est ainsi couvert par les 2 branches "et" n'étant tout
- * simplement jamais atteignable avec des longueurs entières.
- */
+/** 4 cas ÉQUIPROBABLES (audit 6e ch. 5, point 43) : isocèle non rectangle (côtés entiers),
+ * rectangle non isocèle (triplet pythagoricien), isocèle rectangle (côtés c et c√2), quelconque. */
+export type SousTypeTrianglesA = "isocele" | "rectangle" | "isoceleRectangle" | "quelconque";
+
 export interface ExerciceTrianglesA {
   famille: "A";
-  sousType: "isocele" | "rectangle";
+  sousType: SousTypeTrianglesA;
   A: PointComplexe;
   B: PointComplexe;
   C: PointComplexe;
-  longueurAB: number;
-  longueurAC: number;
-  longueurBC: number;
-  /** Sommet où le triangle est isocèle (sousType="isocele") ou "aucun" (sousType="rectangle"). */
+  AB: Longueur;
+  AC: Longueur;
+  BC: Longueur;
   sommetIsocele: StatutSommet;
-  /** Sommet de l'angle droit (sousType="rectangle") ou "aucun" (sousType="isocele"). */
   sommetRectangle: StatutSommet;
+  ordres: OrdresChoix;
 }
 
 // ============================================================================
-// Famille B — Triangle isocèle non rectangle, loi des cosinus (4 écrans).
+// Famille B — Triangle isocèle OAB, loi des cosinus (4 écrans).
 // ============================================================================
+
+export type SommetOAB = "O" | "A" | "B";
 
 export interface ExerciceTrianglesB {
   famille: "B";
   O: PointComplexe;
   A: PointComplexe;
   B: PointComplexe;
-  longueurOA: number;
-  longueurOB: number;
-  longueurAB: number;
-  /** Apex TOUJOURS en O par construction (voir en-tête `familleB.ts`). */
-  sommetIsocele: "O";
-  /** TOUJOURS "aucun" par construction (voir en-tête `familleB.ts` — banque filtrée). */
-  sommetRectangle: "aucun";
-  /** Angle à l'apex O, en DEGRÉS — décimal non remarquable par construction (voir en-tête
-   * `familleB.ts`), vérifié par tolérance (voir `moteur6e/verificationTrianglesComplexes.ts`). */
-  angleApexDeg: number;
-  /** Angle de base (en A et en B, ÉGAUX entre eux), en DEGRÉS. */
-  angleBaseDeg: number;
+  OA: Longueur;
+  OB: Longueur;
+  AB: Longueur;
+  /** Sommet principal, tiré parmi O, A, B (était TOUJOURS O — verdict constant). */
+  sommetIsocele: SommetOAB;
+  /** Sommet principal si le triangle est isocèle rectangle, "aucun" sinon (≈ 1 fois sur 2). */
+  sommetRectangle: SommetOAB | "aucun";
+  /** Angles en degrés (décimaux non remarquables, sauf 90/45/45) — vérifiés à 0,5° près. */
+  anglesDeg: Record<SommetOAB, number>;
+  ordres: OrdresChoix;
 }
 
 // ============================================================================
-// Famille C — Triangle équilatéral et point remarquable (2 écrans).
+// Famille C — Triangle équilatéral OBF : A est-il le centre ? (3 écrans).
 // ============================================================================
+
+export type PositionAC = "centre" | "milieuOB" | "milieuOF" | "milieuBF";
 
 export interface ExerciceTrianglesC {
   famille: "C";
@@ -96,11 +113,16 @@ export interface ExerciceTrianglesC {
   B: PointComplexe;
   F: PointComplexe;
   A: PointComplexe;
-  /** Côté du triangle équilatéral OBF — ENTIER exact. */
+  /** Côté du triangle équilatéral OBF — ENTIER pair. */
   cote: number;
-  /** Distance de A (centre) à chaque sommet — cote/√3, IRRATIONNELLE par nature géométrique (voir
-   * en-tête de fichier) ; `latex` porte la forme radicale exacte (ex. "2\\sqrt{3}"). */
-  distanceCentre: { numerique: number; latex: string };
+  /** A = centre (≈ 1 fois sur 2) ou milieu d'un côté — le verdict « équidistant » n'est plus
+   * constant (audit 6e ch. 5, point 6). */
+  positionA: PositionAC;
+  AO: Longueur;
+  AB: Longueur;
+  AF: Longueur;
+  equidistant: boolean;
+  ordres: OrdresChoix;
 }
 
 // ============================================================================
@@ -114,20 +136,42 @@ export interface ExerciceTrianglesD {
   B: PointComplexe;
   C: PointComplexe;
   D: PointComplexe;
-  /** Rapport de la similitude — ENTIER exact (voir en-tête `familleD.ts`). */
+  /** Rapport de la similitude A ↦ C — ENTIER exact. */
   rapport: number;
-  /** Angle de la similitude — multiple de π/2, LaTeX déjà réduit dans (-π;π]. */
+  /** Angle de la similitude A ↦ C — multiple de π/2, LaTeX réduit dans (-π;π]. */
   angleLatex: string;
   angleNumerique: number;
-  /** Multiplicateur k·e^{iθ} sous forme a+bi — TOUJOURS un entier exact (k entier × cos/sin∈{0,±1}). */
+  /** Multiplicateur k·e^{iθ} de A ↦ C sous forme a+bi — entier exact. */
   multiplicateurRe: number;
   multiplicateurIm: number;
+  /** D est-il l'image de B par la MÊME similitude ? Faux ≈ 1 fois sur 3 (contre-exemple). */
+  coherent: boolean;
+  ordres: OrdresChoix;
+}
+
+// ============================================================================
+// Famille E — Alignés, perpendiculaires ou ni l'un ni l'autre (2 écrans).
+// Audit 6e ch. 5, point 44 (décision I) : critère du quotient (z_C − z_A)/(z_B − z_A).
+// ============================================================================
+
+export type PositionE = "alignes" | "perpendiculaires" | "aucun";
+
+export interface ExerciceTrianglesE {
+  famille: "E";
+  A: PointComplexe;
+  B: PointComplexe;
+  C: PointComplexe;
+  /** (z_C − z_A)/(z_B − z_A) — entier de Gauss exact par construction. */
+  quotientRe: number;
+  quotientIm: number;
+  position: PositionE;
+  ordres: OrdresChoix;
 }
 
 // ============================================================================
 // Union globale.
 // ============================================================================
 
-export type ExerciceTrianglesComplexes = ExerciceTrianglesA | ExerciceTrianglesB | ExerciceTrianglesC | ExerciceTrianglesD;
+export type ExerciceTrianglesComplexes = ExerciceTrianglesA | ExerciceTrianglesB | ExerciceTrianglesC | ExerciceTrianglesD | ExerciceTrianglesE;
 
 export type FamilleTrianglesComplexes = ExerciceTrianglesComplexes["famille"];

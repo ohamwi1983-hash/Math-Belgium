@@ -4,7 +4,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesEquationsComplexes";
 import type { EtatSessionEquationsComplexes, PhaseEquationsComplexes, ResultatExerciceEquationsComplexes } from "./typesEquationsComplexes";
-import { verifierEcran } from "./verificationEquationsComplexes";
+import { permuterRacinesF, racineFSaisieEstR2, verifierEcran } from "./verificationEquationsComplexes";
 
 /**
  * Couche B (6e) — moteur de session pour `6gen36`. N'importe jamais rien de `src/generateurs6e/` —
@@ -19,6 +19,15 @@ const POINTS_DE_BASE = 100;
 /** 2 niveaux d'aide max sur tous les écrans qui en prévoient (`max=0` sur les écrans QCM et les
  * écrans purement mécaniques sans aide dédiée — voir `ui6e/formatEquationsComplexes.ts`). */
 export const NIVEAU_AIDE_MAX = 2;
+
+/** Une seule tentative sur un choix fermé (audit 6e ch. 5, point 6) : avec 3 tentatives sur 4
+ * options, l'élimination suffisait. Saisies libres : `reglages.tentativesMax`. */
+export const TENTATIVES_CHOIX_FERME = 1;
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseEquationsComplexes> = new Set(["aAvecEcran1", "bEcran1", "eEcran1"]);
+
+export function tentativesMaxPhase(etat: Pick<EtatSessionEquationsComplexes, "phase" | "reglages">): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
+}
 
 function etatInitial(
   exercice: ExerciceEquationsComplexes,
@@ -42,7 +51,7 @@ export function demarrerSessionEquationsComplexes(reglages: ReglagesSession6e, g
 }
 
 function reglagesEtape(etat: EtatSessionEquationsComplexes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionEquationsComplexes): EtatSessionEquationsComplexes {
@@ -73,6 +82,8 @@ export function soumettreReponseEcran(etat: EtatSessionEquationsComplexes, valeu
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
+  // Famille F, écran 1 : r₂ est accepté — la suite (quotients, état affiché) part de la racine saisie.
+  const exerciceSuivi = !revele && phaseCourante === "fEcran1" && exercice.famille === "F" && racineFSaisieEstR2(exercice, valeurs) ? permuterRacinesF(exercice) : exercice;
   const score = etapeCourante.score as number;
   const scoresPartiels: Partial<Record<PhaseEquationsComplexes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
   const revelesPartiels: Partial<Record<PhaseEquationsComplexes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
@@ -85,6 +96,7 @@ export function soumettreReponseEcran(etat: EtatSessionEquationsComplexes, valeu
 
   return {
     ...etat,
+    exerciceCourant: exerciceSuivi,
     scoresPartiels,
     revelesPartiels,
     etapeCourante: demarrerEtapeTentatives(),

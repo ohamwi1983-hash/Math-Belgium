@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
+import type { StatutVerification } from "../moteur/statutVerification";
+import { MESSAGE_SAISIE_ILLISIBLE } from "../ui6e/formatComplexesAvances";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -21,6 +23,8 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (textes: string[]) => void;
+  /** Saisie illisible (parse_error) : message, aucune tentative décomptée. */
+  diagnostiquer?: (textes: string[]) => StatutVerification;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -40,8 +44,9 @@ interface Props {
  * `EtapeRacinesAffixesRacines.tsx`/6gen35 pour ce même chapitre). Croix rouge `×` pour retirer une
  * ligne, jamais un bouton texte "Retirer". `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxLignes) }, () => ""));
+  const [saisieIllisible, setSaisieIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
 
@@ -50,13 +55,19 @@ export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, cons
     setLignes((arr) => [...arr, ""]);
   }
   function retirerLigne(i: number) {
+    setSaisieIllisible(false);
     setLignes((arr) => arr.filter((_, j) => j !== i));
   }
   function modifierLigne(i: number, valeur: string) {
+    setSaisieIllisible(false);
     setLignes((arr) => arr.map((v, j) => (j === i ? valeur : v)));
   }
   function valider() {
     if (!complet) return;
+    if (diagnostiquer?.(lignes) === "parse_error") {
+      setSaisieIllisible(true);
+      return;
+    }
     onValider(lignes);
   }
 
@@ -79,7 +90,7 @@ export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, cons
       </p>
       {lignes.map((ligne, i) => (
         <div key={i} className="field-row">
-          <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} onChange={(e) => modifierLigne(i, e.target.value)} />
+          <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Valeur ${i + 1}`} className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} disabled={Boolean(validation)} onChange={(e) => modifierLigne(i, e.target.value)} />
           {lignes.length > 1 && (
             <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la ligne ${i + 1}`} onClick={() => retirerLigne(i)}>
               ×
@@ -87,7 +98,7 @@ export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, cons
           )}
         </div>
       ))}
-      {lignes.length < nombreMaxLignes && (
+      {lignes.length < nombreMaxLignes && !validation && (
         <button type="button" className="btn" onClick={ajouterLigne}>
           + Ajouter une valeur
         </button>
@@ -110,10 +121,16 @@ export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, cons
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {saisieIllisible ? (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {MESSAGE_SAISIE_ILLISIBLE}
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )
         )}
         </>
       )}

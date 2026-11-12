@@ -200,18 +200,29 @@ export function combinerModuleAngle(r: number, trig: ValeurExacte): ValeurExacte
 
 const MODULES_SIMPLES = [1, 2, 3, 4] as const;
 
+/** Part de points sur un axe visée en 6gen37 (familles A/B/D) — audit 6e ch. 5. */
+export const PROBA_AXE_6GEN37 = 0.1;
+
 /** Tire un `z=a+bi` "propre" : module entier simple (1-4) × un des 16 angles remarquables —
  * réutilisé par les familles A/B/D de ce générateur (voir CONTRAT DE RÉUTILISATION en en-tête de
  * fichier). */
-export function tirerZAvecAngleRemarquable(): FacteurComplexe {
+export function tirerZAvecAngleRemarquable(options?: { probaAxe?: number }): FacteurComplexe {
   const r = tirerParmi(MODULES_SIMPLES);
-  const point = tirerParmi(POINTS_REMARQUABLES);
+  // `probaAxe` OPTIONNEL (audit 6e ch. 5 : 25 % de points sur les axes en 6gen37, réponse lue sans
+  // calcul) : sans option, tirage uniforme sur les 16 points — comportement inchangé pour tout appel
+  // existant.
+  let pool = POINTS_REMARQUABLES;
+  if (options?.probaAxe !== undefined) {
+    const surAxe = Math.random() < options.probaAxe;
+    pool = POINTS_REMARQUABLES.filter((pt) => (pt.angle.q <= 2) === surAxe);
+  }
+  const point = tirerParmi(pool);
   const a = combinerModuleAngle(r, point.cos);
   const b = combinerModuleAngle(r, point.sin);
   return { r, angle: point.angle, a, b };
 }
 
 export function construireFamilleA(): ExerciceFormeTrigA {
-  const { r, angle: angleTire, a, b } = tirerZAvecAngleRemarquable();
+  const { r, angle: angleTire, a, b } = tirerZAvecAngleRemarquable({ probaAxe: PROBA_AXE_6GEN37 });
   return { famille: "A", r, angle: angleTire, a, b };
 }

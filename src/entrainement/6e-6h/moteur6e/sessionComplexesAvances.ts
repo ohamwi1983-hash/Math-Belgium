@@ -4,7 +4,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesComplexesAvances";
 import type { EtatSessionComplexesAvances, PhaseComplexesAvances, ResultatExerciceComplexesAvances } from "./typesComplexesAvances";
-import { verifierEcran } from "./verificationComplexesAvances";
+import { diagnostiquerEcran, verifierEcran } from "./verificationComplexesAvances";
 
 /**
  * Couche B (6e) — moteur de session pour `6gen42`. N'importe jamais rien de `src/generateurs6e/` —
@@ -35,8 +35,16 @@ export function demarrerSessionComplexesAvances(reglages: ReglagesSession6e, gen
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écrans à choix fermé (QCM) : UNE seule tentative (convention « une tentative pour un choix
+ * fermé », audit 6e ch. 5) — sinon il suffit d'essayer les options une à une. */
+const PHASES_CHOIX_FERME: ReadonlySet<PhaseComplexesAvances> = new Set(["aEcran1", "aEcran2", "aEcran3", "cEcran3", "eEcran3"]);
+
+export function tentativesMaxEcran(etat: EtatSessionComplexesAvances): number {
+  return PHASES_CHOIX_FERME.has(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionComplexesAvances): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcran(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionComplexesAvances): EtatSessionComplexesAvances {
@@ -58,6 +66,9 @@ export function soumettreReponseEcran(etat: EtatSessionComplexesAvances, valeurs
   if (etat.terminee) throw new Error("soumettreReponseEcran : la session est déjà terminée");
   const exercice = etat.exerciceCourant;
   const phaseCourante = etat.phase;
+
+  // Saisie illisible : aucune tentative décomptée (l'écran affiche un message de syntaxe).
+  if (diagnostiquerEcran(exercice, phaseCourante, valeurs) === "parse_error") return { ...etat, derniereTransitionRevelee: false };
 
   const etapeCourante = soumettreEtapeTentatives<string[]>(etat.etapeCourante, valeurs, {
     ...reglagesEtape(etat),

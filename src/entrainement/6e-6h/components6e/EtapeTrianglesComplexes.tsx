@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
@@ -23,6 +24,8 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
+  /** Figure d'énoncé facultative (petit plan complexe — audit 6e ch. 5, décision K). */
+  figure?: ReactNode;
   consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   choix: ChoixDef[];
@@ -47,16 +50,16 @@ interface Props {
  * "Valider" pour l'ensemble (les 2 groupes sont vérifiés ENSEMBLE, un seul statut combiné). La
  * quasi-totalité des écrans de ce générateur n'utilisent que l'un OU l'autre (mirroir
  * `EtapeChampsFormeTrigonometrique.tsx`/`EtapeChoixCongruenceFormeTrigonometrique.tsx`, 6gen37) —
- * SEULE la famille C écran 2 combine les deux (3 distances + 1 choix de conclusion), d'où ce
- * composant unique plutôt que 2 composants séparés. Structure d'écran imposée par CLAUDE.md
+ * Depuis l'audit 6e ch. 5 (lot D), aucun écran ne combine plus les deux (le verdict de
+ * la famille C a son propre écran, une seule tentative), mais le composant reste générique. Structure d'écran imposée par CLAUDE.md
  * (consigne générale → bloc données → état actuel → bloc de travail) conservée à l'identique.
- * `App6gen41.tsx` doit le rendre avec `key={phase}`.
+ * `App6gen41.tsx` doit le rendre avec une `key` qui change à chaque écran ET à chaque nouvel exercice.
  *
  * `valeurs` transmises à `diagnostiquer`/`onValider` = `[...champsTexte, choixSélectionné?]` — le
  * choix (s'il existe) occupe TOUJOURS le DERNIER slot du tableau, convention partagée avec
  * `moteur6e/verificationTrianglesComplexes.ts` (`diagnostiquerCEcran2`, `valeurs[3]`).
  */
-export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, figure, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeursTexte, setValeursTexte] = useState<string[]>(() => champs.map(() => ""));
   const [choixSelectionne, setChoixSelectionne] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -70,12 +73,21 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consign
   const choixFait = choix.length === 0 || choixSelectionne !== null;
   const toutRempli = texteRempli && choixFait;
 
+  /** Écriture illisible : signalée SANS consommer de tentative (audit 6e ch. 5, point commun 10). */
+  const [illisible, setIllisible] = useState(false);
+
   function valider() {
     if (!toutRempli) return;
+    if (champs.length > 0 && diagnostiquer(valeursCompletes()) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
     onValider(valeursCompletes());
   }
 
   function changerTexte(index: number, valeur: string) {
+    setIllisible(false);
     setValeursTexte((prev) => prev.map((v, i) => (i === index ? valeur : v)));
   }
 
@@ -90,6 +102,7 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consign
                 <Katex key={i} expression={frag} block />
               ))}
             </div>
+            {figure}
           </div>
         }
       />
@@ -134,7 +147,12 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consign
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {!illisible && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

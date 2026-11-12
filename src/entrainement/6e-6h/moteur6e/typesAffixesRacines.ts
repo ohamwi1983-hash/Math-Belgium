@@ -9,7 +9,7 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
  * d'exercice, contrairement à la famille B de 6gen34 — aucune famille de 6gen35 n'a de sous-type).
  */
 
-export type PhaseAffixesRacines = "aEcran1" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3";
+export type PhaseAffixesRacines = "aEcran1" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran1" | "dEcran2";
 
 export function phaseInitiale(exercice: ExerciceAffixesRacines): PhaseAffixesRacines {
   switch (exercice.famille) {
@@ -19,6 +19,8 @@ export function phaseInitiale(exercice: ExerciceAffixesRacines): PhaseAffixesRac
       return "bEcran1";
     case "C":
       return "cEcran1";
+    case "D":
+      return "dEcran1";
   }
 }
 
@@ -35,6 +37,10 @@ export function phaseApres(phase: PhaseAffixesRacines): PhaseAffixesRacines | "t
     case "cEcran2":
       return "cEcran3";
     case "cEcran3":
+      return "termine";
+    case "dEcran1":
+      return "dEcran2";
+    case "dEcran2":
       return "termine";
   }
 }

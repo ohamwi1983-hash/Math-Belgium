@@ -96,7 +96,7 @@ export interface ExerciceFamilleB {
  * réelle/imaginaire de (x+yi)²=a+bi). Les 3 distracteurs couvrent les confusions attendues :
  * `permutation` (a et b échangés entre les 2 équations), `signeInverse` (x²+y²=a au lieu de
  * x²-y²=a), `facteurManquant` (xy=b au lieu de 2xy=b, le facteur 2 du double produit oublié). */
-export type IdSystemeRacine = "correct" | "permutation" | "signeInverse" | "facteurManquant";
+export type IdSystemeRacine = "correct" | "permutation" | "signeInverse" | "facteurManquant" | "moduleCarre";
 
 export interface ExerciceFamilleC {
   famille: "C";
@@ -117,13 +117,34 @@ export interface ExerciceFamilleC {
   /** Écran 3 — les 2 racines ±(xPositif+yDeduit·i), même ENSEMBLE que ±(x+yi) quel que soit le
    * signe de x tiré à la génération (voir en-tête de fichier). */
   racines: [ValeurComplexe, ValeurComplexe];
+  /** |a+bi| = √(a²+b²) = x²+y² (entier) — 3e équation de la méthode du cours :
+   * x²−y²=a, 2xy=b, x²+y²=|a+bi|. */
+  module: number;
+  /** x retenu par l'élève à l'écran 2 (x ou −x, les deux sont acceptés) — posé par la session une
+   * fois l'écran réussi, pour que la suite (y déduit, racine donnée en aide) parte de SA valeur.
+   * Absent : on utilise `xPositif`. */
+  xRetenu?: number;
 }
 
 // ============================================================================
 // Union globale.
 // ============================================================================
 
-export type ExerciceAffixesRacines = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC;
+// ============================================================================
+// Famille D — Milieu et distance (2 écrans) — ajoutée par l'audit 6e ch. 5 (point 21) :
+// z_M = (z_A + z_B)/2, puis z_B − z_A et AB = |z_B − z_A| (entier, triplet pythagoricien).
+// ============================================================================
+
+export interface ExerciceFamilleD {
+  famille: "D";
+  zA: ValeurComplexe;
+  zB: ValeurComplexe;
+  milieu: ValeurComplexe;
+  difference: ValeurComplexe;
+  distance: number;
+}
+
+export type ExerciceAffixesRacines = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC | ExerciceFamilleD;
 
 export type FamilleAffixesRacines = ExerciceAffixesRacines["famille"];
 

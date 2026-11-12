@@ -1,36 +1,27 @@
-import type { ExerciceTrianglesA, ExerciceTrianglesB, ExerciceTrianglesC, ExerciceTrianglesD, ExerciceTrianglesComplexes } from "../core6e/trianglesComplexes.types";
-import { diagnostiquerValeur } from "./equivalenceExponentielle";
+import type { ExerciceTrianglesA, ExerciceTrianglesB, ExerciceTrianglesC, ExerciceTrianglesD, ExerciceTrianglesE, ExerciceTrianglesComplexes } from "../core6e/trianglesComplexes.types";
+import { diagnostiquerAngle, diagnostiquerValeur } from "./equivalenceExponentielle";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerComplexe } from "./verificationComplexes";
 import type { PhaseTrianglesComplexes } from "./typesTrianglesComplexes";
 
 /**
- * Tolérance décimale pour l'écran 4 de la famille B (angles via loi des cosinus, jamais
- * remarquables — voir en-tête `generateurs6e/trianglesComplexes/familleB.ts`). Dupliquée ICI
- * (Couche B) plutôt qu'importée de la constante homonyme de `familleB.ts` (Couche A) — la règle
- * non négociable `moteur6e/` n'importe jamais `generateurs6e/` (CLAUDE.md) s'applique aussi aux
- * simples constantes ; les 2 valeurs sont maintenues identiques et vérifiées par
- * `verificationTrianglesComplexes.test.ts`.
+ * Tolérance décimale pour les angles de la famille B (loi des cosinus, angles non remarquables —
+ * voir en-tête `generateurs6e/trianglesComplexes/familleB.ts`). Audit 6e ch. 5, point 7
+ * (décision G) : 0,1° refusait un arrondi au dixième honnête (73,7 pour 73,74) — 0,5°, avec une
+ * consigne « arrondis au dixième de degré ». Dupliquée ICI (Couche B) plutôt qu'importée de la
+ * constante homonyme de `familleB.ts` (Couche A) — `moteur6e/` n'importe jamais `generateurs6e/`.
  */
-const TOLERANCE_ANGLE_DEGRES_PARTAGEE = 0.1;
+export const TOLERANCE_ANGLE_DEGRES_PARTAGEE = 0.5;
 
 /**
  * Couche B (6e) — vérification propre à `6gen41` (dispatch par famille/écran). N'importe JAMAIS
- * rien de `src/generateurs6e/` (règle non négociable, CLAUDE.md) — voir
- * `generateurs6e/trianglesComplexes/session.integration.test.ts` pour le seul fichier autorisé
- * Couche A + Couche B ensemble.
+ * rien de `src/generateurs6e/` (règle non négociable, CLAUDE.md).
  *
- * Réutilise TELLE QUELLE la fondation chapitre 7 : `diagnostiquerComplexe`
- * (`moteur6e/verificationComplexes.ts`, `6gen34`) pour le SEUL champ "a+bi" de ce générateur
- * (famille D écran 3, multiplicateur — TOUJOURS entier, voir en-tête `generateurs6e/
- * trianglesComplexes/familleD.ts`) ; `diagnostiquerValeur` (`moteur6e/equivalenceExponentielle.ts`,
- * chapitre 2) pour TOUT champ réel simple (longueurs, angles, rapport) — accepte nativement
- * `sqrt(...)` (nécessaire pour l'écran 2 de la famille C, seule longueur irrationnelle de ce
- * générateur — voir en-tête `core6e/trianglesComplexes.types.ts`).
- *
- * Les écrans de CHOIX (statut sommet/cohérence) comparent directement l'identifiant sélectionné à
- * la valeur attendue — jamais de `parse_error` possible (bouton, pas de saisie libre), mirroir
- * `diagnostiquerDEcran2` de `verificationFormeTrigonometrique.ts` (6gen37).
+ * `diagnostiquerComplexe` (champs a+bi : multiplicateur D, quotient E) ; `diagnostiquerValeur` pour
+ * tout champ réel (longueurs — `sqrt(n)` accepté —, rapport, angles en degrés) ;
+ * `diagnostiquerAngle` pour l'angle en radians de la famille D (à 2kπ près — audit 6e ch. 5,
+ * point 7). Les écrans de CHOIX comparent l'identifiant sélectionné à la valeur attendue — jamais de
+ * `parse_error` possible (bouton, pas de saisie libre).
  */
 
 function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
@@ -43,77 +34,70 @@ function diagnostiquerChoix(valeur: string, cible: string): StatutVerification {
   return valeur === cible ? "correct" : "not_equivalent";
 }
 
-// ============================================================================
 // Famille A.
-// ============================================================================
-
-export function diagnostiquerAEcran1(exercice: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.longueurAB), diagnostiquerValeur(valeurs[1], exercice.longueurAC), diagnostiquerValeur(valeurs[2], exercice.longueurBC));
+export function diagnostiquerAEcran1(e: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
+  return combinerStatuts(diagnostiquerValeur(valeurs[0], e.AB.numerique), diagnostiquerValeur(valeurs[1], e.AC.numerique), diagnostiquerValeur(valeurs[2], e.BC.numerique));
 }
-export function diagnostiquerAEcran2(exercice: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
-  return diagnostiquerChoix(valeurs[0], exercice.sommetIsocele);
+export function diagnostiquerAEcran2(e: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.sommetIsocele);
 }
-export function diagnostiquerAEcran3(exercice: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
-  return diagnostiquerChoix(valeurs[0], exercice.sommetRectangle);
+export function diagnostiquerAEcran3(e: ExerciceTrianglesA, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.sommetRectangle);
 }
 
-// ============================================================================
 // Famille B.
-// ============================================================================
-
-export function diagnostiquerBEcran1(exercice: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.longueurOA), diagnostiquerValeur(valeurs[1], exercice.longueurOB), diagnostiquerValeur(valeurs[2], exercice.longueurAB));
+export function diagnostiquerBEcran1(e: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
+  return combinerStatuts(diagnostiquerValeur(valeurs[0], e.OA.numerique), diagnostiquerValeur(valeurs[1], e.OB.numerique), diagnostiquerValeur(valeurs[2], e.AB.numerique));
 }
-export function diagnostiquerBEcran2(exercice: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
-  return diagnostiquerChoix(valeurs[0], exercice.sommetIsocele);
+export function diagnostiquerBEcran2(e: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.sommetIsocele);
 }
-export function diagnostiquerBEcran3(exercice: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
-  return diagnostiquerChoix(valeurs[0], exercice.sommetRectangle);
+export function diagnostiquerBEcran3(e: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.sommetRectangle);
 }
-/** Tolérance décimale — SEUL écran du chapitre 7 dans ce cas, voir en-tête `familleB.ts`. */
-export function diagnostiquerBEcran4(exercice: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
+/** Angles en O, A, B (degrés), tolérance 0,5°. */
+export function diagnostiquerBEcran4(e: ExerciceTrianglesB, valeurs: string[]): StatutVerification {
   return combinerStatuts(
-    diagnostiquerValeur(valeurs[0], exercice.angleApexDeg, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
-    diagnostiquerValeur(valeurs[1], exercice.angleBaseDeg, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
-    diagnostiquerValeur(valeurs[2], exercice.angleBaseDeg, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
+    diagnostiquerValeur(valeurs[0], e.anglesDeg.O, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
+    diagnostiquerValeur(valeurs[1], e.anglesDeg.A, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
+    diagnostiquerValeur(valeurs[2], e.anglesDeg.B, TOLERANCE_ANGLE_DEGRES_PARTAGEE),
   );
 }
 
-// ============================================================================
 // Famille C.
-// ============================================================================
-
-export function diagnostiquerCEcran1(exercice: ExerciceTrianglesC, valeurs: string[]): StatutVerification {
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.cote), diagnostiquerValeur(valeurs[1], exercice.cote), diagnostiquerValeur(valeurs[2], exercice.cote));
+export function diagnostiquerCEcran1(e: ExerciceTrianglesC, valeurs: string[]): StatutVerification {
+  return combinerStatuts(diagnostiquerValeur(valeurs[0], e.cote), diagnostiquerValeur(valeurs[1], e.cote), diagnostiquerValeur(valeurs[2], e.cote));
 }
-/** 3 longueurs (radicales, `sqrt(3)` typable — voir en-tête de fichier) + 1 choix de conclusion,
- * TOUJOURS "equidistant" (voir en-tête `familleC.ts`). */
-export function diagnostiquerCEcran2(exercice: ExerciceTrianglesC, valeurs: string[]): StatutVerification {
-  const cible = exercice.distanceCentre.numerique;
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], cible), diagnostiquerValeur(valeurs[1], cible), diagnostiquerValeur(valeurs[2], cible), diagnostiquerChoix(valeurs[3], "equidistant"));
+/** Les 3 distances AO, AB, AF (formes radicales acceptées). */
+export function diagnostiquerCEcran2(e: ExerciceTrianglesC, valeurs: string[]): StatutVerification {
+  return combinerStatuts(diagnostiquerValeur(valeurs[0], e.AO.numerique), diagnostiquerValeur(valeurs[1], e.AB.numerique), diagnostiquerValeur(valeurs[2], e.AF.numerique));
+}
+/** Verdict (écran séparé, une seule tentative) : "equidistant" ou "non". */
+export function diagnostiquerCEcran3(e: ExerciceTrianglesC, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.equidistant ? "equidistant" : "non");
 }
 
-// ============================================================================
 // Famille D.
-// ============================================================================
-
-export function diagnostiquerDEcran1(exercice: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.rapport), diagnostiquerValeur(valeurs[1], exercice.angleNumerique));
+export function diagnostiquerDEcran1(e: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
+  return combinerStatuts(diagnostiquerValeur(valeurs[0], e.rapport), diagnostiquerAngle(valeurs[1], e.angleNumerique).statut);
 }
-/** Toujours "coherent" par construction (C,D construits comme images de A,B par la MÊME
- * similitude) — voir en-tête `familleD.ts` et mission 6gen41 ("aucune variante délibérément
- * incohérente décrite par le prompt source"). */
-export function diagnostiquerDEcran2(_exercice: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
-  return diagnostiquerChoix(valeurs[0], "coherent");
+/** "coherent" si D est l'image de B par la même similitude, "incoherent" sinon (≈ 1 fois sur 3). */
+export function diagnostiquerDEcran2(e: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.coherent ? "coherent" : "incoherent");
 }
-export function diagnostiquerDEcran3(exercice: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
-  return diagnostiquerComplexe(valeurs[0], { re: exercice.multiplicateurRe, im: exercice.multiplicateurIm });
+export function diagnostiquerDEcran3(e: ExerciceTrianglesD, valeurs: string[]): StatutVerification {
+  return diagnostiquerComplexe(valeurs[0], { re: e.multiplicateurRe, im: e.multiplicateurIm });
 }
 
-// ============================================================================
-// Dispatcher générique (mirroir 6gen37).
-// ============================================================================
+// Famille E.
+export function diagnostiquerEEcran1(e: ExerciceTrianglesE, valeurs: string[]): StatutVerification {
+  return diagnostiquerComplexe(valeurs[0], { re: e.quotientRe, im: e.quotientIm });
+}
+export function diagnostiquerEEcran2(e: ExerciceTrianglesE, valeurs: string[]): StatutVerification {
+  return diagnostiquerChoix(valeurs[0], e.position);
+}
 
+// Dispatcher générique.
 export function diagnostiquerEcran(exercice: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes, valeurs: string[]): StatutVerification {
   switch (phase) {
     case "aEcran1":
@@ -134,12 +118,18 @@ export function diagnostiquerEcran(exercice: ExerciceTrianglesComplexes, phase: 
       return diagnostiquerCEcran1(exercice as ExerciceTrianglesC, valeurs);
     case "cEcran2":
       return diagnostiquerCEcran2(exercice as ExerciceTrianglesC, valeurs);
+    case "cEcran3":
+      return diagnostiquerCEcran3(exercice as ExerciceTrianglesC, valeurs);
     case "dEcran1":
       return diagnostiquerDEcran1(exercice as ExerciceTrianglesD, valeurs);
     case "dEcran2":
       return diagnostiquerDEcran2(exercice as ExerciceTrianglesD, valeurs);
     case "dEcran3":
       return diagnostiquerDEcran3(exercice as ExerciceTrianglesD, valeurs);
+    case "eEcran1":
+      return diagnostiquerEEcran1(exercice as ExerciceTrianglesE, valeurs);
+    case "eEcran2":
+      return diagnostiquerEEcran2(exercice as ExerciceTrianglesE, valeurs);
   }
 }
 

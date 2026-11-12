@@ -47,7 +47,10 @@ export interface ExerciceComplexesA {
 // Famille B — Lieux géométriques (2-3 écrans, 6 sous-types dont 1 "intersection").
 // ============================================================================
 
-export type SousTypeLieuB = "droite" | "thales" | "apollonius" | "demiDroites" | "cercleO";
+/** `cercleA` (|z−a|=k), `argument` (arg(z−a)≡θ mod 2π) et `argumentPi` (arg(z−a)≡θ mod π) : lieux du
+ * cours, au tirage libre. `thales`/`apollonius` : variantes d'approfondissement, hors tirage libre
+ * (toujours au sélecteur) — audit 6e ch. 5. */
+export type SousTypeLieuB = "droite" | "thales" | "apollonius" | "demiDroites" | "cercleO" | "cercleA" | "argument" | "argumentPi";
 
 export type NatureLieu = "droite" | "cercle" | "demiDroite";
 
@@ -66,6 +69,8 @@ export interface ParamsLocusCercle {
 }
 export interface ParamsLocusDemiDroite {
   nature: "demiDroite";
+  /** Origine commune des demi-droites (O pour `demiDroites`, a pour `argument`). */
+  origine: AffixeSimple;
   angles: AngleRemarquable[];
 }
 export type ParamsLocus = ParamsLocusDroite | ParamsLocusCercle | ParamsLocusDemiDroite;
@@ -83,6 +88,9 @@ export interface ExerciceComplexesBSimple {
   /** Apollonius (`k` du rapport `|z-p1|=k|z-p2|`, `k≠1`) OU cercleO (`k=rayon²`) — jamais les 2 en
    * même temps (subtypes mutuellement exclusifs). */
   k?: number;
+  /** `argument`/`argumentPi` uniquement : l'angle θ de arg(z−a)≡θ (a = `p1`). `cercleA` : a = `p1`,
+   * rayon = `k`. */
+  theta?: AngleRemarquable;
   /** demiDroites uniquement (`c` de `z+z̄=c|z|`, valeur numérique). */
   c?: number;
   /** demiDroites uniquement — LaTeX EXACT de `c` (réutilise `combinerModuleAngle`, voir en-tête
@@ -123,6 +131,9 @@ export interface ExerciceComplexesC {
   famille: "C";
   a: number;
   b: number;
+  /** `true` : z'=(z−p)/(1−p̄z) (le cercle unité est préservé) ; `false` : contre-exemple
+   * z'=(z−p)/(1−pz), p non réel (|z'|≠1 en général) — le verdict de l'écran 3 n'est plus constant. */
+  conjugue: boolean;
 }
 
 // ============================================================================

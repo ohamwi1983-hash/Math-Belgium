@@ -1,6 +1,6 @@
 import type { AffixeEntiere, ExerciceTransfoA, ParametresTransfoA, SousTypeTransfoA } from "../../core6e/transformationsPlan.types";
 import { tirerParmi } from "../calculPrimitives/aleatoire";
-import { ajouterAffixe, appliquerRotationAxe, multiplierAffixeParEntier, tirerAffixeEntiereArbitraire, tirerAmplitudeHomothetie, tirerAngleAxeNonNul } from "./partage";
+import { ajouterAffixe, appliquerRotationAxe, multiplierAffixeParEntier, tirerAffixeEntiereArbitraire, tirerAmplitudeHomothetie, tirerAngleAxeNonNul, tirerPermutation } from "./partage";
 
 /**
  * Couche A (6e) — génération, famille A ("Image d'un point par une transformation classique ou
@@ -59,5 +59,5 @@ export function construireFamilleA(sousTypeForce?: SousTypeTransfoA): ExerciceTr
   const zP = tirerAffixeEntiereArbitraire(PORTEE_ZP);
   const parametres = construireParametres(sousType);
   const image = calculerImage(zP, parametres);
-  return { famille: "A", zP, parametres, image };
+  return { famille: "A", zP, parametres, image, ordreOptions: tirerPermutation(4) };
 }

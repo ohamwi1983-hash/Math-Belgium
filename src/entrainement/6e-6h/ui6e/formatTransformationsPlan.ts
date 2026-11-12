@@ -1,4 +1,4 @@
-import type { AffixeEntiere, ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransformationsPlan, ParametresTransfoA, SousTypeTransfoA } from "../core6e/transformationsPlan.types";
+import type { AffixeEntiere, ExerciceTransfoA, ExerciceTransfoB, ExerciceTransfoC, ExerciceTransfoD, ExerciceTransformationsPlan, NatureTransfoD, ParametresTransfoA, SousTypeTransfoA } from "../core6e/transformationsPlan.types";
 import type { PhaseTransformationsPlan } from "../moteur6e/typesTransformationsPlan";
 
 /**
@@ -32,12 +32,12 @@ export interface ChampDef {
   options?: OptionChoix[];
 }
 
+/** Aide : texte riche (prose + LaTeX inline — audit 6e ch. 5 : plus aucune formule « au clavier »
+ * du type z_v, e^{iθ} dans la prose) + formule LaTeX affichée en bloc. */
 export interface AideAvecLatex {
-  texte: string;
+  texte: FragmentConsigne[];
   latex: string | null;
 }
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 /** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
  * rendu via `components/RenduFragments.tsx`. */
@@ -49,6 +49,8 @@ function texte(valeur: string): FragmentConsigne {
 function latexFrag(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
+
+const AUCUNE_AIDE: AideAvecLatex = { texte: [], latex: null };
 
 // ============================================================================
 // Assemblage "a+bi" (a,b entiers) — voir en-tête de fichier.
@@ -91,46 +93,36 @@ function moduleLatex(r: number, angleQ: number): string {
 
 /**
  * Description PURE PROSE de la transformation, consommée par `consigneGeneraleA` UNIQUEMENT — texte
- * PLAIN (`<p className="prompt-text">`, jamais `<Katex>`, voir `consigneGeneraleA`), jamais un
- * fragment `blocDonnees` (bug réel rencontré et corrigé : une PREMIÈRE version la plaçait dans
- * `blocDonneesA` sous forme `\text{Transformation : ...}` — 2 bugs en cascade trouvés par inspection
- * visuelle Playwright (jamais par les tests automatisés seuls, CLAUDE.md) : (1) le `\text{}` se
- * refermait AVANT le label — texte français qui fuyait en mode MATH KaTeX, lettres collées sans
- * espaces, syntaxiquement valide donc AUCUNE exception levée ; (2) une fois corrigé pour englober
- * tout le label DANS `\text{}`, un `_` isolé (ex. "z_v") à l'intérieur d'un bloc `\text{...}` lève
- * une VRAIE erreur KaTeX — contrairement au LaTeX standard où `\text{}` est un vrai mode texte,
- * `_`/`^` y restent des caractères spéciaux côté KaTeX, jamais neutralisés sans `\_`/`\^` explicite.
- * Une phrase descriptive complète n'a de toute façon pas sa place dans une formule KaTeX à largeur
- * fixe (débordement horizontal d'`.equation-box`, illisible même une fois la syntaxe corrigée) — fix
- * définitif : texte 100% PLAIN, aucun symbole KaTeX, intégré à la consigne générale (qui, elle,
- * wrap normalement comme tout paragraphe HTML). Voir `docs/historique-6e.md`, section 6gen40.
+ * PLAIN, jamais dans `blocDonnees` (bug historique : `\text{...}` avec `_` isolé → erreur KaTeX, et
+ * débordement d'`.equation-box` — voir `docs/historique-6e.md`, section 6gen40). Plus aucune
+ * majuscule d'insistance (audit 6e ch. 5).
  */
 const LIBELLE_SOUS_TYPE_A: Record<SousTypeTransfoA, string> = {
   translation: "une translation",
   homothetie: "une homothétie de centre O",
   rotation: "une rotation de centre O",
   similitude: "une similitude de centre O (rotation puis homothétie)",
-  rotationTranslation: "une rotation de centre O, SUIVIE d'une translation",
+  rotationTranslation: "une rotation de centre O suivie d'une translation",
 };
 
 export function consigneGeneraleA(e: ExerciceTransfoA): FragmentConsigne[] {
   return [texte("P est un point d'affixe "), latexFrag("z_P"), texte(`. Identifie la formule complexe correspondant à ${LIBELLE_SOUS_TYPE_A[e.parametres.sousType]}, puis calcule l'image de P.`)];
 }
 
+/** Une donnée par ligne (audit 6e ch. 5 : aucune ligne `\quad` qui déborde à 390 px). */
 export function blocDonneesA(e: ExerciceTransfoA): string[] {
   const lignes = [`z_P=${affixeLatex(e.zP)}`];
   const p = e.parametres;
   if (p.sousType === "translation") lignes.push(`z_v=${affixeLatex(p.zV)}`);
   else if (p.sousType === "homothetie") lignes.push(`k=${p.k}`);
   else if (p.sousType === "rotation") lignes.push(`\\theta=${p.angle.latex}`);
-  else if (p.sousType === "similitude") lignes.push(`k=${p.k}\\quad\\theta=${p.angle.latex}`);
-  else lignes.push(`\\theta=${p.angle.latex}\\quad z_v=${affixeLatex(p.zV)}`);
+  else if (p.sousType === "similitude") lignes.push(`k=${p.k}`, `\\theta=${p.angle.latex}`);
+  else lignes.push(`\\theta=${p.angle.latex}`, `z_v=${affixeLatex(p.zV)}`);
   return lignes;
 }
 
 /** Formule CORRECTE, symboles substitués par les valeurs numériques réelles de l'exercice — utilisée
- * pour le "état actuel" de l'écran 2 et le récapitulatif final (jamais pour l'écran 1, un QCM
- * volontairement SYMBOLIQUE — voir `optionsFormuleA`). */
+ * pour le "état actuel" de l'écran 2 (jamais pour l'écran 1, QCM volontairement SYMBOLIQUE). */
 function formuleSubstitueeA(e: ExerciceTransfoA): string {
   const p = e.parametres;
   const zP = affixeLatex(e.zP);
@@ -149,8 +141,8 @@ function formuleSubstitueeA(e: ExerciceTransfoA): string {
 }
 
 export function consigneEcranA(phase: PhaseTransformationsPlan): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Parmi les formules proposées, choisis celle qui correspond EXACTEMENT à cette transformation.")];
-  return [texte("Calcule l'image de P à partir de la formule CONFIRMÉE à l'étape précédente.")];
+  if (phase === "aEcran1") return [texte("Parmi les formules proposées, choisis celle qui correspond exactement à cette transformation (une seule tentative).")];
+  return [texte("Calcule l'image de P à partir de la formule confirmée à l'étape précédente.")];
 }
 
 export function etatActuelA(e: ExerciceTransfoA, phase: PhaseTransformationsPlan): string[] | null {
@@ -158,8 +150,16 @@ export function etatActuelA(e: ExerciceTransfoA, phase: PhaseTransformationsPlan
   return [`${formuleSubstitueeA(e)}\\text{ (formule confirmée)}`];
 }
 
+/** Placeholders HORS de l'espace des tirages (audit 6e ch. 5) : les affixes tirées sont entières,
+ * « 0,5+1,5i » ne peut donc jamais être une réponse (et montre la virgule décimale). */
+const PLACEHOLDER_AFFIXE = "ex : 0,5+1,5i";
+/** Modules/rapports tirés : 1 à 4, k√2 (k ≤ 3), |a| ∈ {√2 ; 2 ; 2√2} — jamais 5. */
+const PLACEHOLDER_REEL = "ex : 5";
+/** Angles tirés : multiples de π/4 — jamais 2π/5. */
+const PLACEHOLDER_ANGLE = "ex : 2pi/5";
+
 export function champsA(phase: PhaseTransformationsPlan): ChampDef[] {
-  if (phase === "aEcran2") return [{ type: "texte", label: "Image de P =", placeholder: "ex : 3+2i" }];
+  if (phase === "aEcran2") return [{ type: "texte", label: "Image de P =", placeholder: PLACEHOLDER_AFFIXE }];
   return []; // aEcran1 : écran de CHOIX (QCM), aucun champ texte — voir EtapeChoixFormuleTransformationsPlan.
 }
 
@@ -168,47 +168,90 @@ export function niveauAideMaxA(phase: PhaseTransformationsPlan): number {
 }
 export function aideNiveau1A(phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Formules complexes de base : translation de vecteur z_v → on ADDITIONNE z_v ; homothétie de rapport k → on MULTIPLIE par k ; rotation d'angle θ → on MULTIPLIE par e^{iθ}.", latex: "z_P+z_v\\qquad k\\cdot\\, z_P\\qquad z_P\\cdot\\, e^{i\\theta}" };
-}
-export function aideNiveau2A(e: ExerciceTransfoA, phase: PhaseTransformationsPlan): AideAvecLatex {
-  if (phase !== "aEcran1") return AUCUNE_AIDE;
-  const p = e.parametres;
-  if (p.sousType === "translation") return { texte: "Ici, une translation SEULE :", latex: "z_P+z_v" };
-  if (p.sousType === "homothetie") return { texte: "Ici, une homothétie SEULE :", latex: "k\\cdot\\, z_P" };
-  if (p.sousType === "rotation") return { texte: "Ici, une rotation SEULE :", latex: "z_P\\cdot\\, e^{i\\theta}" };
-  if (p.sousType === "similitude") return { texte: "Formules de base rappelées séparément (assemblage non fait) :", latex: "k\\cdot\\, z_P\\qquad z_P\\cdot\\, e^{i\\theta}" };
-  return { texte: "Formules de base rappelées séparément (ordre d'application non donné) :", latex: "z_P\\cdot\\, e^{i\\theta}\\qquad z_P+z_v" };
+  return {
+    texte: [
+      texte("Formules complexes de base : une translation de vecteur "),
+      latexFrag("z_v"),
+      texte(" ajoute "),
+      latexFrag("z_v"),
+      texte(" ; une homothétie de centre O et de rapport "),
+      latexFrag("k"),
+      texte(" multiplie par "),
+      latexFrag("k"),
+      texte(" ; une rotation de centre O et d'angle "),
+      latexFrag("\\theta"),
+      texte(" multiplie par "),
+      latexFrag("e^{i\\theta}"),
+      texte("."),
+    ],
+    latex: "z_P+z_v\\qquad k\\cdot\\, z_P\\qquad z_P\\cdot\\, e^{i\\theta}",
+  };
 }
 
 /**
- * QCM famille A, écran 1 — options SYMBOLIQUES (z_P, k, θ, z_v), UNE formule EXACTE (id "correct")
- * parmi 3-4 distracteurs plausibles par sous-type. Le piège central de la spec (ordre des opérations
- * pour une transformation composée) est encodé dans `rotationTranslation` : le distracteur
- * `"ordreInverse"` applique la translation AVANT la rotation — `(z_P+z_v)\cdot e^{i\theta}`, diverge
- * en général de la formule correcte `z_P\cdot e^{i\theta}+z_v` (rotation+homothétie, elles, sont
- * commutatives — même centre O — donc `similitude` n'a pas ce piège d'ordre, seulement des pièges
- * d'opération/signe).
+ * Aide 2 — NE DÉSIGNE PLUS la formule de l'exercice (audit 6e ch. 5, point 40 : « Ici, une
+ * translation seule : z_P+z_v » donnait la réponse du QCM). Elle donne à la place des PROPRIÉTÉS que
+ * l'image doit vérifier, à tester sur chaque option pour éliminer les distracteurs — l'élève fait
+ * lui-même le tri.
  */
-export function optionsFormuleA(sousType: SousTypeTransfoA): { id: string; latex: string }[] {
+export function aideNiveau2A(e: ExerciceTransfoA, phase: PhaseTransformationsPlan): AideAvecLatex {
+  if (phase !== "aEcran1") return AUCUNE_AIDE;
+  switch (e.parametres.sousType) {
+    case "translation":
+      return {
+        texte: [texte("Teste chaque option : une translation de vecteur nul laisse P en place, et le vecteur "), latexFrag("\\overrightarrow{PP'}"), texte(" a pour affixe "), latexFrag("z_v"), texte(" (pas son opposé).")],
+        latex: "z_v=0\\ \\Rightarrow\\ z_{P'}=z_P\\qquad z_{P'}-z_P=z_v",
+      };
+    case "homothetie":
+      return {
+        texte: [texte("Teste chaque option : une homothétie de centre O laisse O fixe et multiplie les distances à O par "), latexFrag("|k|"), texte(".")],
+        latex: "z_P=0\\ \\Rightarrow\\ z_{P'}=0\\qquad |z_{P'}|=|k|\\cdot|z_P|",
+      };
+    case "rotation":
+      return {
+        texte: [texte("Teste chaque option : une rotation de centre O conserve la distance à O et fait tourner P de "), latexFrag("\\theta"), texte(" dans le sens trigonométrique (pas de "), latexFrag("-\\theta"), texte(").")],
+        latex: "|z_{P'}|=|z_P|\\qquad \\arg z_{P'}=\\arg z_P+\\theta",
+      };
+    case "similitude":
+      return {
+        texte: [texte("Teste chaque option : la distance à O est multipliée par "), latexFrag("|k|"), texte(" et P tourne de "), latexFrag("\\theta"), texte(" (pas de "), latexFrag("-\\theta"), texte(") autour de O.")],
+        latex: "z_P=0\\ \\Rightarrow\\ z_{P'}=0\\qquad |z_{P'}|=|k|\\cdot|z_P|",
+      };
+    case "rotationTranslation":
+      return {
+        texte: [texte("L'ordre compte : on tourne d'abord P autour de O, puis on translate. Teste chaque option avec P = O : la rotation laisse O fixe, l'image de O doit donc être le point d'affixe "), latexFrag("z_v"), texte(".")],
+        latex: "z_P=0\\ \\Rightarrow\\ z_{P'}=z_v",
+      };
+  }
+}
+
+/**
+ * QCM famille A, écran 1 — options SYMBOLIQUES (z_P, k, θ, z_v) : liste de RÉFÉRENCE dont l'option
+ * correcte est TOUJOURS l'indice 0, puis réordonnée par `ordre` (permutation tirée à la génération,
+ * `ExerciceTransfoA.ordreOptions` — audit 6e ch. 5, point 6 : la bonne option occupait une position
+ * fixe par sous-type). Le piège central (ordre d'une transformation composée) reste encodé dans
+ * `rotationTranslation` : `(z_P+z_v)\cdot e^{i\theta}` applique la translation AVANT la rotation.
+ */
+function optionsReferenceA(sousType: SousTypeTransfoA): { id: string; latex: string }[] {
   switch (sousType) {
     case "translation":
       return [
-        { id: "sensInverse", latex: "z_v-z_P" },
         { id: "correct", latex: "z_P+z_v" },
+        { id: "sensInverse", latex: "z_v-z_P" },
         { id: "signeInverse", latex: "z_P-z_v" },
         { id: "operationErronee", latex: "z_P\\cdot\\, z_v" },
       ];
     case "homothetie":
       return [
+        { id: "correct", latex: "k\\cdot\\, z_P" },
         { id: "operationErronee", latex: "z_P+k" },
         { id: "operationInverse", latex: "\\dfrac{z_P}{k}" },
-        { id: "correct", latex: "k\\cdot\\, z_P" },
         { id: "puissanceErronee", latex: "z_P^{k}" },
       ];
     case "rotation":
       return [
-        { id: "operationErronee", latex: "z_P+e^{i\\theta}" },
         { id: "correct", latex: "z_P\\cdot\\, e^{i\\theta}" },
+        { id: "operationErronee", latex: "z_P+e^{i\\theta}" },
         { id: "signeInverse", latex: "z_P\\cdot\\, e^{-i\\theta}" },
         { id: "sensInverse", latex: "\\dfrac{e^{i\\theta}}{z_P}" },
       ];
@@ -221,12 +264,18 @@ export function optionsFormuleA(sousType: SousTypeTransfoA): { id: string; latex
       ];
     case "rotationTranslation":
       return [
+        { id: "correct", latex: "z_P\\cdot\\, e^{i\\theta}+z_v" },
         { id: "ordreInverse", latex: "(z_P+z_v)\\cdot\\, e^{i\\theta}" },
         { id: "zvDansRotation", latex: "z_P+z_v\\cdot\\, e^{i\\theta}" },
-        { id: "correct", latex: "z_P\\cdot\\, e^{i\\theta}+z_v" },
         { id: "signeInverse", latex: "z_P\\cdot\\, e^{i\\theta}-z_v" },
       ];
   }
+}
+
+export function optionsFormuleA(sousType: SousTypeTransfoA, ordre?: number[]): { id: string; latex: string }[] {
+  const reference = optionsReferenceA(sousType);
+  if (!ordre || ordre.length !== reference.length) return reference;
+  return ordre.map((i) => reference[i]);
 }
 
 // ============================================================================
@@ -234,20 +283,22 @@ export function optionsFormuleA(sousType: SousTypeTransfoA): { id: string; latex
 // ============================================================================
 
 export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("A et B sont 2 points d'affixes "), latexFrag("z_A"), texte(" et "), latexFrag("z_B"), texte(". Construis le point demandé, puis identifie la transformation géométrique qu'il représente.")];
+  return [texte("A et B sont 2 points d'affixes "), latexFrag("z_A"), texte(" et "), latexFrag("z_B"), texte(". Construis le point demandé, puis donne les éléments de la transformation qui envoie A sur ce point.")];
 }
 
 export function blocDonneesB(e: ExerciceTransfoB): string[] {
   const symbole = e.sousType === "somme" ? "+" : "\\cdot\\,";
   const nomPoint = e.sousType === "somme" ? "M" : "P";
-  return [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}`, `z_{${nomPoint}}=z_A${symbole}z_B=\\,?`];
+  return [`z_A=${affixeLatex(e.zA)}`, `z_B=${affixeLatex(e.zB)}`, `z_{${nomPoint}}=z_A${symbole}z_B=\\,?`];
 }
 
+/** Écran 2 — nature IMPOSÉE et point de départ précisé (audit 6e ch. 5, point 41). */
 export function consigneEcranB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): FragmentConsigne[] {
   if (phase === "bEcran1") {
     return e.sousType === "somme" ? [texte("Calcule "), latexFrag("z_M=z_A+z_B"), texte(".")] : [texte("Calcule "), latexFrag("z_P=z_A\\cdot\\, z_B"), texte(".")];
   }
-  return [texte("À partir du point CONFIRMÉ ci-dessus, identifie la transformation géométrique qu'il représente : choisis le type, puis donne le(s) paramètre(s).")];
+  if (e.sousType === "somme") return [texte("Le point M est l'image du point A par une translation. Donne l'affixe du vecteur de cette translation.")];
+  return [texte("Le point P est l'image du point A par une similitude de centre O. Donne le rapport et l'angle de cette similitude.")];
 }
 
 export function etatActuelB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): string[] | null {
@@ -257,25 +308,38 @@ export function etatActuelB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan
 }
 
 export function champsB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): ChampDef[] {
-  if (phase !== "bEcran1") return [];
-  const label = e.sousType === "somme" ? "z_M =" : "z_P =";
-  return [{ type: "texte", label, placeholder: "ex : 3+2i" }];
+  if (phase === "bEcran1") return [{ type: "texte", label: e.sousType === "somme" ? "z_M =" : "z_P =", placeholder: PLACEHOLDER_AFFIXE }];
+  if (e.sousType === "somme") return [{ type: "texte", label: "Vecteur (affixe) =", placeholder: PLACEHOLDER_AFFIXE }];
+  return [
+    { type: "texte", label: "Rapport =", placeholder: PLACEHOLDER_REEL },
+    { type: "texte", label: "Angle θ =", placeholder: PLACEHOLDER_ANGLE },
+  ];
 }
 
 export function niveauAideMaxB(phase: PhaseTransformationsPlan): number {
   return phase === "bEcran2" ? 2 : 0;
 }
-export function aideNiveau1B(phase: PhaseTransformationsPlan): AideAvecLatex {
+export function aideNiveau1B(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;
-  return { texte: "z_A+z_B est TOUJOURS une translation ; z_A·z_B est TOUJOURS une similitude centrée en O — sans dire encore laquelle correspond à quel point.", latex: "z_A+z_B\\qquad z_A\\cdot\\, z_B" };
+  if (e.sousType === "somme") {
+    return { texte: [texte("Ajouter un même nombre complexe "), latexFrag("c"), texte(" à une affixe revient à translater le point par le vecteur d'affixe "), latexFrag("c"), texte(".")], latex: "z\\ \\longmapsto\\ z+c" };
+  }
+  return {
+    texte: [texte("Multiplier une affixe par un nombre complexe "), latexFrag("c"), texte(" revient à appliquer la similitude de centre O, de rapport "), latexFrag("|c|"), texte(" et d'angle "), latexFrag("\\arg c"), texte(".")],
+    latex: "z\\ \\longmapsto\\ c\\cdot\\, z",
+  };
 }
 export function aideNiveau2B(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;
-  return { texte: "Module et argument de A et de B (lien avec la transformation non fait) :", latex: `r_A=${moduleLatex(e.rA, e.angleA.q)}\\text{, }\\theta_A=${e.angleA.latex}\\text{, }r_B=${moduleLatex(e.rB, e.angleB.q)}\\text{, }\\theta_B=${e.angleB.latex}` };
+  if (e.sousType === "somme") return { texte: [texte("Le nombre ajouté à "), latexFrag("z_A"), texte(" pour obtenir "), latexFrag("z_M"), texte(" :")], latex: "z_M-z_A=\\,?" };
+  return {
+    texte: [texte("Le nombre qui multiplie "), latexFrag("z_A"), texte(" est "), latexFrag("z_B"), texte(" : calcule son module et un de ses arguments.")],
+    latex: `|z_B|=\\sqrt{(${e.zB.a})^2+(${e.zB.b})^2}`,
+  };
 }
 
 // ============================================================================
-// Famille C — Similitude centrée en O, modules égaux.
+// Famille C — Rotation de centre O, modules égaux.
 // ============================================================================
 
 const NOMS_AUTRES_POINTS = ["C", "D", "E"];
@@ -288,24 +352,22 @@ export function consigneGeneraleC(): FragmentConsigne[] {
   return [texte("A et B sont 2 points tels que "), latexFrag("|z_A|=|z_B|"), texte(". Vérifie cette égalité, détermine la rotation de centre O qui transforme A en B, puis applique-la aux autres points donnés.")];
 }
 
+/** Une affixe par ligne (audit 6e ch. 5 : `z_A=…\quad z_B=…` débordait à 390 px). */
 export function blocDonneesC(e: ExerciceTransfoC): string[] {
-  const lignes = [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}`];
+  const lignes = [`z_A=${affixeLatex(e.zA)}`, `z_B=${affixeLatex(e.zB)}`];
   e.autresPoints.forEach((p, i) => lignes.push(`z_{${nomPoint(i)}}=${affixeLatex(p)}`));
   return lignes;
 }
 
 export function consigneEcranC(phase: PhaseTransformationsPlan): FragmentConsigne[] {
   if (phase === "cEcran1") return [texte("Calcule "), latexFrag("|z_A|"), texte(" et "), latexFrag("|z_B|"), texte(" (elles doivent être égales).")];
-  if (phase === "cEcran2") return [texte("À partir de l'égalité CONFIRMÉE, détermine l'angle de la rotation de centre O qui transforme A en B (rapport 1, rotation pure).")];
-  return [texte("Applique la rotation CONFIRMÉE à chacun des autres points donnés pour trouver leurs images.")];
+  if (phase === "cEcran2") return [texte("À partir de l'égalité confirmée, détermine l'angle de la rotation de centre O qui transforme A en B.")];
+  return [texte("Applique la rotation confirmée à chacun des autres points donnés pour trouver leurs images.")];
 }
 
 export function etatActuelC(e: ExerciceTransfoC, phase: PhaseTransformationsPlan): string[] | null {
   const modulesConfirmes = `|z_A|=|z_B|=${moduleLatex(e.moduleCommun, e.angleA.q)}\\text{ (confirmé)}`;
   if (phase === "cEcran2") return [modulesConfirmes];
-  // Écran 3 : cumule les modules égaux (écran 1) ET l'angle de la rotation (écran 2), du plus ancien
-  // au plus récent — jamais seulement l'écran immédiatement précédent (audit transversal "état
-  // actuel cumulatif").
   if (phase === "cEcran3") return [modulesConfirmes, `\\theta=${e.angleRotation.latex}\\text{ (confirmé)}`];
   return null;
 }
@@ -313,23 +375,148 @@ export function etatActuelC(e: ExerciceTransfoC, phase: PhaseTransformationsPlan
 export function champsC(phase: PhaseTransformationsPlan): ChampDef[] {
   if (phase === "cEcran1")
     return [
-      { type: "texte", label: "|z_A| =", placeholder: "ex : sqrt(2)" },
-      { type: "texte", label: "|z_B| =", placeholder: "ex : sqrt(2)" },
+      { type: "texte", label: "|z_A| =", placeholder: PLACEHOLDER_REEL },
+      { type: "texte", label: "|z_B| =", placeholder: PLACEHOLDER_REEL },
     ];
-  if (phase === "cEcran2") return [{ type: "texte", label: "θ =", placeholder: "ex : pi/2" }];
-  return []; // cEcran3 : add-as-needed, voir EtapeImagesTransformationsPlan.
+  if (phase === "cEcran2") return [{ type: "texte", label: "θ =", placeholder: PLACEHOLDER_ANGLE }];
+  return []; // cEcran3 : add-as-needed, voir EtapeImagesTransformationsPlan (placeholder PLACEHOLDER_AFFIXE).
 }
+
+export const PLACEHOLDER_IMAGE = PLACEHOLDER_AFFIXE;
 
 export function niveauAideMaxC(phase: PhaseTransformationsPlan): number {
   return phase === "cEcran2" ? 2 : 0;
 }
 export function aideNiveau1C(phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "cEcran2") return AUCUNE_AIDE;
-  return { texte: "Une similitude centrée en O de rapport 1 est une ROTATION PURE — aucune homothétie associée.", latex: null };
+  return { texte: [texte("Une similitude de centre O de rapport 1 est une rotation : son angle est l'écart entre un argument de "), latexFrag("z_B"), texte(" et un argument de "), latexFrag("z_A"), texte(".")], latex: "\\theta=\\arg z_B-\\arg z_A" };
 }
 export function aideNiveau2C(e: ExerciceTransfoC, phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "cEcran2") return AUCUNE_AIDE;
-  return { texte: "Arguments de A et de B (différence non calculée) :", latex: `\\theta_A=${e.angleA.latex}\\text{, }\\theta_B=${e.angleB.latex}` };
+  return { texte: [texte("Arguments de "), latexFrag("z_A"), texte(" et de "), latexFrag("z_B"), texte(" (différence non calculée) :")], latex: `\\arg z_A=${e.angleA.latex}\\qquad \\arg z_B=${e.angleB.latex}` };
+}
+
+// ============================================================================
+// Famille D — z′ = az + b : nature, centre, angle, rapport (audit 6e ch. 5, point 42).
+// ============================================================================
+
+export const LIBELLE_NATURE_D: Record<NatureTransfoD, string> = {
+  translation: "Translation",
+  rotation: "Rotation",
+  homothetie: "Homothétie",
+  similitude: "Similitude",
+};
+const NATURES_REFERENCE_D: NatureTransfoD[] = ["translation", "rotation", "homothetie", "similitude"];
+
+/** Options de l'écran 1 dans l'ordre tiré à la génération (`ordreNatures`), libellés en texte brut. */
+export function optionsNatureD(e: ExerciceTransfoD): { id: string; label: string }[] {
+  const ordre = e.ordreNatures.length === 4 ? e.ordreNatures : [0, 1, 2, 3];
+  return ordre.map((i) => ({ id: NATURES_REFERENCE_D[i], label: LIBELLE_NATURE_D[NATURES_REFERENCE_D[i]] }));
+}
+
+/** Coefficient de z dans `az + b` : 1 → rien, −1 → « − », réel → « 2 », imaginaire pur → « i »,
+ * « −2i », sinon parenthésé « (1+i) ». */
+function coefficientLatex(a: AffixeEntiere): string {
+  if (a.b === 0) return a.a === 1 ? "" : a.a === -1 ? "-" : `${a.a}`;
+  if (a.a === 0) return a.b === 1 ? "i" : a.b === -1 ? "-i" : `${a.b}i`;
+  return `(${affixeLatex(a)})`;
+}
+
+export function formuleD(e: ExerciceTransfoD): string {
+  const coef = coefficientLatex(e.a);
+  const sep = coef === "" || coef === "-" ? "" : "\\,";
+  const bLatex = affixeLatex(e.b);
+  const terme = bLatex.startsWith("-") ? bLatex : `+${bLatex}`;
+  return `z'=${coef}${sep}z${terme}`;
+}
+
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [
+    texte("La transformation du plan donnée ci-dessous associe au point M d'affixe "),
+    latexFrag("z"),
+    texte(" le point M′ d'affixe "),
+    latexFrag("z'"),
+    texte(". Détermine sa nature, puis ses éléments caractéristiques."),
+  ];
+}
+
+export function blocDonneesD(e: ExerciceTransfoD): string[] {
+  return [formuleD(e)];
+}
+
+export function consigneEcranD(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Choisis la nature de cette transformation (une seule tentative).")];
+  switch (e.nature) {
+    case "translation":
+      return [texte("Donne l'affixe du vecteur de cette translation.")];
+    case "rotation":
+      return [texte("Donne l'affixe du centre Ω (son unique point fixe) et l'angle de cette rotation.")];
+    case "homothetie":
+      return [texte("Donne l'affixe du centre Ω (son unique point fixe) et le rapport "), latexFrag("k"), texte(" de cette homothétie.")];
+    case "similitude":
+      return [texte("Donne l'affixe du centre Ω (son unique point fixe), le rapport et l'angle de cette similitude.")];
+  }
+}
+
+export function etatActuelD(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): string[] | null {
+  if (phase !== "dEcran2") return null;
+  return [`\\text{${LIBELLE_NATURE_D[e.nature]} (confirmée)}`];
+}
+
+export function champsD(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): ChampDef[] {
+  if (phase !== "dEcran2") return [];
+  const centre: ChampDef = { type: "texte", label: "Centre Ω (affixe) =", placeholder: PLACEHOLDER_AFFIXE };
+  switch (e.nature) {
+    case "translation":
+      return [{ type: "texte", label: "Vecteur (affixe) =", placeholder: PLACEHOLDER_AFFIXE }];
+    case "rotation":
+      return [centre, { type: "texte", label: "Angle θ =", placeholder: PLACEHOLDER_ANGLE }];
+    case "homothetie":
+      return [centre, { type: "texte", label: "Rapport k =", placeholder: PLACEHOLDER_REEL }];
+    case "similitude":
+      return [centre, { type: "texte", label: "Rapport =", placeholder: PLACEHOLDER_REEL }, { type: "texte", label: "Angle θ =", placeholder: PLACEHOLDER_ANGLE }];
+  }
+}
+
+export function niveauAideMaxD(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): number {
+  if (phase === "dEcran1") return 2;
+  return e.nature === "translation" ? 1 : 2;
+}
+export function aideNiveau1D(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): AideAvecLatex {
+  if (phase === "dEcran1") {
+    return {
+      texte: [
+        texte("La nature se lit sur le coefficient "),
+        latexFrag("a"),
+        texte(" de "),
+        latexFrag("z'=az+b"),
+        texte(" : translation si "),
+        latexFrag("a=1"),
+        texte(" ; rotation si "),
+        latexFrag("|a|=1"),
+        texte(" et "),
+        latexFrag("a\\neq1"),
+        texte(" ; homothétie si "),
+        latexFrag("a"),
+        texte(" est réel, différent de 0 et de 1 ; similitude dans les autres cas."),
+      ],
+      latex: null,
+    };
+  }
+  if (phase !== "dEcran2") return AUCUNE_AIDE;
+  if (e.nature === "translation") return { texte: [texte("L'écart "), latexFrag("z'-z"), texte(" est le même pour tous les points : c'est l'affixe du vecteur.")], latex: "z'-z=b" };
+  return {
+    texte: [texte("Le centre est l'unique point fixe : résous "), latexFrag("z=az+b"), texte(". Le rapport est "), latexFrag("|a|"), texte(" (le réel "), latexFrag("a"), texte(" lui-même pour une homothétie) et l'angle est un argument de "), latexFrag("a"), texte(".")],
+    latex: "z_\\Omega=\\dfrac{b}{1-a}",
+  };
+}
+export function aideNiveau2D(e: ExerciceTransfoD, phase: PhaseTransformationsPlan): AideAvecLatex {
+  if (phase === "dEcran1") {
+    const mod2 = e.a.a * e.a.a + e.a.b * e.a.b;
+    return { texte: [texte("Le coefficient de "), latexFrag("z"), texte(" et le carré de son module (conclusion non faite) :")], latex: `a=${affixeLatex(e.a)}\\qquad |a|^2=${mod2}` };
+  }
+  if (phase !== "dEcran2" || e.nature === "translation") return AUCUNE_AIDE;
+  return { texte: [texte("Formule du centre, valeurs substituées (division non faite) :")], latex: `z_\\Omega=\\dfrac{${affixeLatex(e.b)}}{1-(${affixeLatex(e.a)})}` };
 }
 
 // ============================================================================
@@ -344,6 +531,8 @@ export function consigneGenerale(exercice: ExerciceTransformationsPlan): Fragmen
       return consigneGeneraleB();
     case "C":
       return consigneGeneraleC();
+    case "D":
+      return consigneGeneraleD();
   }
 }
 
@@ -355,6 +544,8 @@ export function blocDonnees(exercice: ExerciceTransformationsPlan): string[] {
       return blocDonneesB(exercice);
     case "C":
       return blocDonneesC(exercice);
+    case "D":
+      return blocDonneesD(exercice);
   }
 }
 
@@ -366,6 +557,8 @@ export function consigneEcran(exercice: ExerciceTransformationsPlan, phase: Phas
       return consigneEcranB(exercice, phase);
     case "C":
       return consigneEcranC(phase);
+    case "D":
+      return consigneEcranD(exercice, phase);
   }
 }
 
@@ -377,6 +570,8 @@ export function etatActuel(exercice: ExerciceTransformationsPlan, phase: PhaseTr
       return etatActuelB(exercice, phase);
     case "C":
       return etatActuelC(exercice, phase);
+    case "D":
+      return etatActuelD(exercice, phase);
   }
 }
 
@@ -388,6 +583,8 @@ export function champsEcran(exercice: ExerciceTransformationsPlan, phase: PhaseT
       return champsB(exercice, phase);
     case "C":
       return champsC(phase);
+    case "D":
+      return champsD(exercice, phase);
   }
 }
 
@@ -399,6 +596,8 @@ export function niveauAideMaxEcran(exercice: ExerciceTransformationsPlan, phase:
       return niveauAideMaxB(phase);
     case "C":
       return niveauAideMaxC(phase);
+    case "D":
+      return niveauAideMaxD(exercice, phase);
   }
 }
 
@@ -407,9 +606,11 @@ export function aideNiveau1(exercice: ExerciceTransformationsPlan, phase: PhaseT
     case "A":
       return aideNiveau1A(phase);
     case "B":
-      return aideNiveau1B(phase);
+      return aideNiveau1B(exercice, phase);
     case "C":
       return aideNiveau1C(phase);
+    case "D":
+      return aideNiveau1D(exercice, phase);
   }
 }
 
@@ -421,6 +622,8 @@ export function aideNiveau2(exercice: ExerciceTransformationsPlan, phase: PhaseT
       return aideNiveau2B(exercice, phase);
     case "C":
       return aideNiveau2C(exercice, phase);
+    case "D":
+      return aideNiveau2D(exercice, phase);
   }
 }
 
@@ -428,33 +631,42 @@ export const LIBELLE_PHASE: Record<PhaseTransformationsPlan, string> = {
   aEcran1: "Étape 1 (formule)",
   aEcran2: "Étape 2 (image calculée)",
   bEcran1: "Étape 1 (point construit)",
-  bEcran2: "Étape 2 (transformation identifiée)",
+  bEcran2: "Étape 2 (éléments de la transformation)",
   cEcran1: "Étape 1 (modules égaux)",
   cEcran2: "Étape 2 (angle de la rotation)",
   cEcran3: "Étape 3 (images des autres points)",
+  dEcran1: "Étape 1 (nature)",
+  dEcran2: "Étape 2 (éléments caractéristiques)",
 };
 
 export const LIBELLE_FAMILLE: Record<ExerciceTransformationsPlan["famille"], string> = {
   A: "A — Image d'un point par une transformation",
   B: "B — Construire un point, identifier la transformation",
-  C: "C — Similitude centrée en O, modules égaux",
+  C: "C — Rotation de centre O, modules égaux",
+  D: "D — z′ = az + b : nature et éléments caractéristiques",
 };
 
 /** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
+ * recalculée depuis la saisie élève. Un fragment par donnée (aucun `\quad` collé). */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): string[] {
   switch (exercice.famille) {
     case "A":
-      if (phase === "aEcran1") return [optionsFormuleA(exercice.parametres.sousType).find((o) => o.id === "correct")?.latex ?? ""];
+      if (phase === "aEcran1") return [optionsReferenceA(exercice.parametres.sousType)[0].latex];
       return [`z_{P'}=${affixeLatex(exercice.image)}`];
     case "B":
-      if (phase === "bEcran1") return [affixeLatex(exercice.zResultat)];
-      if (exercice.sousType === "somme") return [`\\text{translation, vecteur : }${affixeLatex(exercice.zB)}`];
-      return [`\\text{similitude, rapport : }${moduleLatex(exercice.rB, exercice.angleB.q)}\\text{, angle : }${exercice.angleB.latex}`];
+      if (phase === "bEcran1") return [`z_{${exercice.sousType === "somme" ? "M" : "P"}}=${affixeLatex(exercice.zResultat)}`];
+      if (exercice.sousType === "somme") return [`\\text{vecteur : }${affixeLatex(exercice.zB)}`];
+      return [`\\text{rapport : }${moduleLatex(exercice.rB, exercice.angleB.q)}`, `\\theta=${exercice.angleB.latex}`];
     case "C":
       if (phase === "cEcran1") return [`|z_A|=|z_B|=${moduleLatex(exercice.moduleCommun, exercice.angleA.q)}`];
       if (phase === "cEcran2") return [`\\theta=${exercice.angleRotation.latex}`];
       return exercice.imagesAutresPoints.map((img, i) => `z_{${nomPoint(i)}'}=${affixeLatex(img)}`);
+    case "D":
+      if (phase === "dEcran1") return [`\\text{${LIBELLE_NATURE_D[exercice.nature]}}`];
+      if (exercice.nature === "translation" || exercice.centre === null) return [`\\text{vecteur : }${affixeLatex(exercice.b)}`];
+      if (exercice.nature === "rotation") return [`z_\\Omega=${affixeLatex(exercice.centre)}`, `\\theta=${exercice.angle.latex}`];
+      if (exercice.nature === "homothetie") return [`z_\\Omega=${affixeLatex(exercice.centre)}`, `k=${exercice.rapportLatex}`];
+      return [`z_\\Omega=${affixeLatex(exercice.centre)}`, `\\text{rapport : }${exercice.rapportLatex}`, `\\theta=${exercice.angle.latex}`];
   }
 }
 

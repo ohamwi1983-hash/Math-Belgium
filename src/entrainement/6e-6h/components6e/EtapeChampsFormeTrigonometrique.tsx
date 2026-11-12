@@ -36,6 +36,9 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification;
+  /** Message bloquant qui NE consomme PAS de tentative (saisie illisible, degrés, angle non réduit
+   * alors que la consigne l'exige, valeur approchée) — audit 6e ch. 5, points 3/B et 10. */
+  controleAvantSoumission?: (valeurs: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -50,14 +53,18 @@ interface Props {
  * données → état actuel → bloc de travail) conservée à l'identique. `App6gen37.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controleAvantSoumission, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  const [messageForme, setMessageForme] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    const message = controleAvantSoumission?.(valeurs) ?? null;
+    setMessageForme(message);
+    if (message) return;
     onValider(valeurs);
   }
 
@@ -112,7 +119,12 @@ export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees,
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageForme && (
+          <p className="alert-error" role="alert">
+            {messageForme}
+          </p>
+        )}
+        {!messageForme && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

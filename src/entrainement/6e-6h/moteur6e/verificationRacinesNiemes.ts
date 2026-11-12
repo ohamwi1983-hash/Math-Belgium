@@ -1,6 +1,7 @@
 import type { AngleRemarquable } from "../core6e/formeTrigonometrique.types";
 import type { ExerciceRacinesA, ExerciceRacinesB, ExerciceRacinesC, ExerciceRacinesNiemes, RacineExacte } from "../core6e/racinesNiemes.types";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { diagnostiquerAngle, ecartAngulaire } from "./equivalenceExponentielle";
 import { evaluerExpressionExponentielle, evaluerValeurExponentielle } from "./expressionExponentielle";
 import type { PhaseRacinesNiemes } from "./typesRacinesNiemes";
 
@@ -74,8 +75,35 @@ import type { PhaseRacinesNiemes } from "./typesRacinesNiemes";
  * l'écran ("Module des racines (en k)"/"Argument des racines (en k)").
  */
 
-const TOLERANCE_FORMULE = 1e-6;
-const TOLERANCE_RACINE = 1e-9;
+/** Tolérance ANNONCÉE dans les consignes (audit 6e ch. 5, point 7/G — décision : valeurs exactes OU
+ * décimales à 0,01 près) : racines, module et arguments. */
+const TOLERANCE_FORMULE = 0.01;
+const TOLERANCE_RACINE = 0.01;
+
+/** Argument des racines (écran 2, familles A et B) : ce qui compte est l'ENSEMBLE {θₖ mod 2π},
+ * k = 0, …, n − 1 — (θ + 2π + 2kπ)/n ou (θ + 2kπ)/n avec θ pris dans [0 ; 2π[ décrivent les mêmes
+ * racines et sont acceptés (audit 6e ch. 5, point 7/G). Une constante (ne dépend pas de k) ne
+ * produit qu'une valeur et est refusée. */
+export function diagnostiquerFormuleArguments(texte: string, angle: number, n: number, tolerance: number = TOLERANCE_FORMULE): StatutVerification {
+  const valeurs: number[] = [];
+  for (let k = 0; k < n; k++) {
+    let v: number;
+    try {
+      v = evaluerExpressionExponentielle(texte, { k });
+    } catch {
+      return "parse_error";
+    }
+    if (!Number.isFinite(v)) return "not_equivalent";
+    valeurs.push(v);
+  }
+  const restantes = Array.from({ length: n }, (_, j) => (angle + 2 * j * Math.PI) / n);
+  for (const v of valeurs) {
+    const index = restantes.findIndex((c) => Math.abs(ecartAngulaire(v, c)) <= tolerance);
+    if (index === -1) return "not_equivalent";
+    restantes.splice(index, 1);
+  }
+  return "correct";
+}
 
 /** Généralisation de `diagnostiquerEquivalenceFonction` à un paramètre ENTIER "k" — voir en-tête de
  * fichier. */
@@ -140,13 +168,13 @@ function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
 
 export function diagnostiquerAEcran1(exercice: ExerciceRacinesA, valeurs: string[]): StatutVerification {
   const statutR = diagnostiquerValeurReelle(valeurs[0], exercice.r);
-  const statutTheta = diagnostiquerValeurReelle(valeurs[1], exercice.angle.numerique);
+  const statutTheta = diagnostiquerAngle(valeurs[1], exercice.angle.numerique).statut;
   return combinerStatuts(statutR, statutTheta);
 }
 
 export function diagnostiquerAEcran2(exercice: ExerciceRacinesA, valeurs: string[]): StatutVerification {
   const statutModule = diagnostiquerFormuleEntierK(valeurs[0], () => exercice.kModule, exercice.n);
-  const statutArgument = diagnostiquerFormuleEntierK(valeurs[1], formuleArgumentRacines(exercice.angle, exercice.n), exercice.n);
+  const statutArgument = diagnostiquerFormuleArguments(valeurs[1], exercice.angle.numerique, exercice.n);
   return combinerStatuts(statutModule, statutArgument);
 }
 
@@ -159,14 +187,14 @@ export function diagnostiquerAEcran3(exercice: ExerciceRacinesA, valeurs: string
 // ============================================================================
 
 export function diagnostiquerBEcran1(exercice: ExerciceRacinesB, valeurs: string[]): StatutVerification {
-  const statutR = diagnostiquerValeurReelle(valeurs[0], exercice.r, 1e-6);
-  const statutTheta = diagnostiquerValeurReelle(valeurs[1], exercice.angle.numerique, 1e-6);
+  const statutR = diagnostiquerValeurReelle(valeurs[0], exercice.r);
+  const statutTheta = diagnostiquerAngle(valeurs[1], exercice.angle.numerique).statut;
   return combinerStatuts(statutR, statutTheta);
 }
 
 export function diagnostiquerBEcran2(exercice: ExerciceRacinesB, valeurs: string[]): StatutVerification {
   const statutModule = diagnostiquerFormuleEntierK(valeurs[0], () => Math.pow(exercice.r, 1 / exercice.n), exercice.n);
-  const statutArgument = diagnostiquerFormuleEntierK(valeurs[1], formuleArgumentRacines(exercice.angle, exercice.n), exercice.n);
+  const statutArgument = diagnostiquerFormuleArguments(valeurs[1], exercice.angle.numerique, exercice.n);
   return combinerStatuts(statutModule, statutArgument);
 }
 
@@ -201,7 +229,7 @@ export function diagnostiquerCEcran3(exercice: ExerciceRacinesC, valeurs: string
 // `formeTrigonometrique/familleA.ts`).
 // ============================================================================
 
-function diagnostiquerValeurReelle(texte: string, cible: number, tolerance: number = 1e-6): StatutVerification {
+function diagnostiquerValeurReelle(texte: string, cible: number, tolerance: number = TOLERANCE_FORMULE): StatutVerification {
   const v = evaluerValeurExponentielle(texte);
   if (v === null) return "parse_error";
   return Math.abs(v - cible) <= tolerance ? "correct" : "not_equivalent";
@@ -234,4 +262,22 @@ export function diagnostiquerEcran(exercice: ExerciceRacinesNiemes, phase: Phase
 
 export function verifierEcran(exercice: ExerciceRacinesNiemes, phase: PhaseRacinesNiemes, valeurs: string[]): boolean {
   return diagnostiquerEcran(exercice, phase, valeurs) === "correct";
+}
+
+// ============================================================================
+// Contrôle AVANT soumission — messages qui ne consomment AUCUNE tentative (audit 6e ch. 5, points
+// 3/B et 10) : saisie illisible, argument donné en degrés.
+// ============================================================================
+
+const SANS_TENTATIVE = " Ta saisie ne compte pas comme une tentative.";
+
+export function controleAvantSoumission(exercice: ExerciceRacinesNiemes, phase: PhaseRacinesNiemes, valeurs: string[]): string | null {
+  if (phase === "cEcran1") return null;
+  if (diagnostiquerEcran(exercice, phase, valeurs) === "parse_error") {
+    return "Expression non reconnue — vérifie l'écriture (par exemple sqrt(3)/2, 2pi/3 ou (pi/4+2k pi)/3)." + SANS_TENTATIVE;
+  }
+  if ((phase === "aEcran1" || phase === "bEcran1") && exercice.famille !== "C") {
+    if (diagnostiquerAngle(valeurs[1], exercice.angle.numerique).degres) return "Exprime l'argument en radians (par exemple 60° s'écrit pi/3)." + SANS_TENTATIVE;
+  }
+  return null;
 }

@@ -28,6 +28,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message bloquant qui NE consomme PAS de tentative (recopie de cos(nx)/sin(nx) ou de
+   * (cos x + i sin x)ⁿ, saisie illisible, polynôme exigé) — audit 6e ch. 5, points 5/E et 10. */
+  controleAvantSoumission?: (valeurs: string[]) => string | null;
 }
 
 /**
@@ -38,14 +41,18 @@ interface Props {
  * données → état actuel → bloc de travail) conservée à l'identique. `App6gen38.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeChampsFormuleMoivre({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsFormuleMoivre({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controleAvantSoumission, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  const [messageForme, setMessageForme] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    const message = controleAvantSoumission?.(valeurs) ?? null;
+    setMessageForme(message);
+    if (message) return;
     onValider(valeurs);
   }
 
@@ -102,7 +109,12 @@ export function EtapeChampsFormuleMoivre({ consigneGenerale, blocDonnees, consig
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageForme && (
+          <p className="alert-error" role="alert">
+            {messageForme}
+          </p>
+        )}
+        {!messageForme && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

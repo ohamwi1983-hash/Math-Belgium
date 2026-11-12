@@ -1,5 +1,5 @@
 import type { ResultatExerciceQuizNombresComplexes } from "../moteur6e/typesQuizNombresComplexes";
-import { RenduFragments } from "../components/RenduFragments";
+import { RenduFragmentsQuiz } from "./RenduFragmentsQuiz";
 
 interface Props {
   resultats: ResultatExerciceQuizNombresComplexes[];
@@ -35,7 +35,7 @@ export function ResumeSessionQuizNombresComplexes({ resultats, onRecommencer, on
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>
-                  <RenduFragments fragments={resultat.question.enonce} />
+                  <RenduFragmentsQuiz fragments={resultat.question.enonce} />
                 </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>

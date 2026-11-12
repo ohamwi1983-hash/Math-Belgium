@@ -20,22 +20,37 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (id: string) => void;
+  /** Mélange l'ordre des options une fois, au montage de l'écran (audit 6e ch. 5 : la bonne
+   * réponse était toujours la 1re). */
+  melanger?: boolean;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
 }
 
+function melangerOptions<T>(liste: T[]): T[] {
+  const copie = [...liste];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+  }
+  return copie;
+}
+
 /**
  * Écran GÉNÉRIQUE "choix parmi N options" pour `6gen42` — mirroir
  * `EtapeChoixCongruenceFormeTrigonometrique.tsx` (6gen37), généralisé à un nombre d'options
- * variable. Réutilisé par les 3 écrans QCM de la famille A (`aEcran1/2/3`) et l'écran 3 de la
- * famille E (`eEcran3`) — jamais pour la famille C écran 3, qui a 2 groupes de choix indépendants
- * sur le même écran (`EtapeConclusionC.tsx`). Boutons `.btn.toggle-active`, JAMAIS `.btn-primary`
+ * variable. Réutilisé par les 3 écrans QCM de la famille A (`aEcran1/2/3`) et les écrans 3 des
+ * familles C et E (`cEcran3`, `eEcran3`). Boutons `.btn.toggle-active`, JAMAIS `.btn-primary`
  * (réservé à "Valider", convention CLAUDE.md). `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, melanger = false }: Props) {
   const [choix, setChoix] = useState<string | null>(null);
+  const [ordre] = useState<OptionQcm[]>(() => (melanger ? melangerOptions(options) : options));
+  // Options longues (conditions sur plusieurs lignes, phrases) : une seule colonne, sinon la grille
+  // à 2 colonnes débordait de l'écran à 390 px (audit 6e ch. 5).
+  const uneColonne = options.some((o) => (o.latex ?? "").includes("array") || o.label.length > 34);
   const montrerErreurs = tentativesUtilisees > 0;
 
   function valider() {
@@ -60,10 +75,10 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consig
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <div className="options-grid-compact">
-        {options.map((option) => (
-          <button key={option.id} type="button" className={`btn ${choix === option.id ? "toggle-active" : ""} ${montrerErreurs && choix === option.id ? "is-erronee" : ""}`} onClick={() => setChoix(option.id)}>
-            {option.label}
+      <div className="options-grid-compact" style={uneColonne ? { gridTemplateColumns: "minmax(0, 1fr)" } : undefined}>
+        {ordre.map((option) => (
+          <button key={option.id} type="button" data-option-id={option.id} aria-label={option.label} className={`btn ${choix === option.id ? "toggle-active" : ""} ${montrerErreurs && choix === option.id ? "is-erronee" : ""}`} disabled={Boolean(validation)} onClick={() => setChoix(option.id)}>
+            {option.latex ? <Katex expression={option.latex} /> : option.label}
           </button>
         ))}
       </div>

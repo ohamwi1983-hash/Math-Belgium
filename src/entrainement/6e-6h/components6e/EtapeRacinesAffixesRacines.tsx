@@ -23,6 +23,9 @@ interface Props {
   onActiverAide: () => void;
   onValider: (textes: string[]) => void;
   diagnostiquer: (textes: string[]) => StatutVerification;
+  /** Contrôle de saisie AVANT soumission (`moteur6e/saisieComplexe.ts`) : un message renvoyé est
+   * affiché et la saisie n'est PAS soumise — aucune tentative consommée. */
+  prevalider?: (textes: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -41,24 +44,34 @@ interface Props {
  * lignes (largement suffisant : la cible n'a jamais plus de 2 valeurs, la marge sert seulement à
  * corriger une saisie sans tout effacer). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, prevalider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => ["", ""]);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs ? diagnostiquer(lignes) : null;
+  const [messageSaisie, setMessageSaisie] = useState<string | null>(null);
+  // `parse_error` ne peut plus résulter d'une tentative (refusée avant soumission) : jamais le
+  // message générique « "*" entre un nombre et une variable », faux pour ces saisies.
+  const statutBrut = montrerErreurs ? diagnostiquer(lignes) : null;
+  const dernierStatut = statutBrut === "parse_error" ? null : statutBrut;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
 
   function ajouterLigne() {
     if (lignes.length >= 4) return;
     setLignes((arr) => [...arr, ""]);
+    setMessageSaisie(null);
   }
   function retirerLigne(i: number) {
     setLignes((arr) => arr.filter((_, j) => j !== i));
+    setMessageSaisie(null);
   }
   function modifierLigne(i: number, valeur: string) {
     setLignes((arr) => arr.map((v, j) => (j === i ? valeur : v)));
+    setMessageSaisie(null);
   }
   function valider() {
     if (!complet) return;
+    const refus = prevalider?.(lignes) ?? null;
+    setMessageSaisie(refus);
+    if (refus) return;
     onValider(lignes);
   }
 
@@ -84,7 +97,7 @@ export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, cons
           <div key={i}>
             <ApercuExpressionLatex texte={ligne} />
             <div className="field-row">
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder="ex : 2+i" onChange={(e) => modifierLigne(i, e.target.value)} />
+              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder="forme a+bi" onChange={(e) => modifierLigne(i, e.target.value)} />
               {lignes.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la racine ${i + 1}`} onClick={() => retirerLigne(i)}>
                   ×
@@ -117,7 +130,12 @@ export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, cons
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageSaisie && (
+          <p className="alert-error" role="alert">
+            {messageSaisie}
+          </p>
+        )}
+        {!messageSaisie && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

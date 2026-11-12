@@ -4,6 +4,7 @@ import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { MESSAGE_SAISIE_ILLISIBLE } from "../ui6e/formatComplexesAvances";
 import type { AideAvecLatex, ChampDef, FragmentConsigne } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -49,18 +50,25 @@ interface Props {
  * passent par ce composant. Structure d'écran imposée par CLAUDE.md conservée à l'identique.
  * `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  const [saisieIllisible, setSaisieIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
-  const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.length > 0 && valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    // Saisie illisible : message de syntaxe, AUCUNE tentative décomptée.
+    if (diagnostiquer(valeurs) === "parse_error") {
+      setSaisieIllisible(true);
+      return;
+    }
+    setSaisieIllisible(false);
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
+    setSaisieIllisible(false);
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
   }
 
@@ -81,15 +89,17 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, con
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      {champs.map((champ, i) => champEstCompose(champ) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
-      <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>
-        {champs.map((champ, i) => (
-          <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
-            <label className="field-label field-label-minuscule">{champ.label}</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} onChange={(e) => changer(i, e.target.value)} />
-          </div>
-        ))}
-      </div>
+      {/* Libellé AU-DESSUS du champ, champs empilés (audit 6e ch. 5, point 49 : à 390 px, deux
+          équations côte à côte écrasaient chaque champ à quelques caractères). */}
+      {champs.map((champ, i) => (
+        <div className="field" key={i}>
+          {champEstCompose(champ) && <ApercuExpressionLatex texte={valeurs[i]} label={champ.label} />}
+          <label className="field-label field-label-minuscule" htmlFor={`champ-6gen42-${i}`}>
+            {champ.label}
+          </label>
+          <input id={`champ-6gen42-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={Boolean(validation)} onChange={(e) => changer(i, e.target.value)} />
+        </div>
+      ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>
@@ -108,10 +118,16 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, con
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {saisieIllisible ? (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            {MESSAGE_SAISIE_ILLISIBLE}
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )
         )}
         </>
       )}

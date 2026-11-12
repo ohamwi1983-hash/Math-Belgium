@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAffixesRacines } from "./generateurs6e/affixesRacines";
 import type { IdVarianteAffixesRacines } from "./generateurs6e/affixesRacines";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionAffixesRacines, soumettreReponseEcran } from "./moteur6e/sessionAffixesRacines";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionAffixesRacines, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionAffixesRacines";
+import { graineDepuis, melangerParGraine, prevaliderSaisiesComplexes } from "./moteur6e/saisieComplexe";
+import { PlanArgandMini } from "./components6e/PlanArgandMini";
 import { phasesPourExercice } from "./moteur6e/typesAffixesRacines";
 import type { EtatSessionAffixesRacines, PhaseAffixesRacines } from "./moteur6e/typesAffixesRacines";
 import { diagnostiquerEcran } from "./moteur6e/verificationAffixesRacines";
@@ -53,6 +55,9 @@ export function App6gen35() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseAffixesRacines, boolean>>>({});
+  /** Compteur de génération, inclus dans la `key` de l'écran : deux exercices successifs commençant
+   * par la même phase ne réutilisent plus l'instance React (saisies/messages conservés). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -91,6 +96,7 @@ export function App6gen35() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -101,6 +107,7 @@ export function App6gen35() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionAffixesRacines(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteAffixesRacines)));
   }
 
@@ -119,7 +126,7 @@ export function App6gen35() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -149,23 +156,52 @@ export function App6gen35() {
     validation,
   };
 
+  /** Options d'un choix fermé mélangées par une graine tirée de l'exercice (même ordre pour le même
+   * exercice, bonne réponse plus toujours en 1re position — audit 6e ch. 5, point 6). */
+  function melanger<T>(options: readonly T[]): T[] {
+    return melangerParGraine(options, graineDepuis(exercice, phase));
+  }
+
+  /** Points de l'énoncé dans le plan complexe (familles B et D) — jamais le point cherché. */
+  const figure =
+    exercice.famille === "B" ? (
+      <PlanArgandMini
+        points={[
+          { x: exercice.reA2 / 2, y: exercice.imA2 / 2, label: "A" },
+          { x: exercice.reB2 / 2, y: exercice.imB2 / 2, label: "B" },
+          { x: exercice.reC2 / 2, y: exercice.imC2 / 2, label: "C" },
+        ]}
+        legende="Points A, B et C dans le plan complexe"
+      />
+    ) : exercice.famille === "D" ? (
+      <PlanArgandMini
+        points={[
+          { x: exercice.zA.re, y: exercice.zA.im, label: "A" },
+          { x: exercice.zB.re, y: exercice.zB.im, label: "B" },
+        ]}
+        legende="Points A et B dans le plan complexe"
+      />
+    ) : undefined;
+
   function rendreEcran() {
     if (phase === "bEcran1") {
+      const options = melanger(OPTIONS_RELATION_B);
       return (
         <EtapeChoixAffixesRacines
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
-          options={OPTIONS_RELATION_B}
-          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={OPTIONS_RELATION_B.find((o) => o.id === id)?.latex ?? id} />)}
+          figure={figure}
+          options={options}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={options.find((o) => o.id === id)?.latex ?? id} />)}
         />
       );
     }
     if (phase === "cEcran1" && exercice.famille === "C") {
-      const options = OPTIONS_SYSTEME_C(exercice.a, exercice.b);
+      const options = melanger(OPTIONS_SYSTEME_C(exercice.a, exercice.b, exercice.module));
       return (
         <EtapeChoixAffixesRacines
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           options={options}
@@ -176,21 +212,24 @@ export function App6gen35() {
     if (phase === "cEcran3") {
       return (
         <EtapeRacinesAffixesRacines
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          prevalider={(valeurs) => prevaliderSaisiesComplexes(valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(", "))}
         />
       );
     }
     return (
       <EtapeChampsAffixesRacines
-        key={phase}
+        key={`${generation}-${phase}`}
         {...aideCommun}
         {...ecranCommun}
+        figure={figure}
         champs={champsEcran(exercice, phase)}
         diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+        prevalider={(valeurs) => prevaliderSaisiesComplexes(valeurs)}
         onValider={(valeurs) =>
           terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
         }

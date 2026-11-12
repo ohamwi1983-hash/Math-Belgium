@@ -54,8 +54,16 @@ const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 // ============================================================================
 
 /** Magnitude seule (jamais de signe) — fraction réduite en LaTeX, entier si `den===1`. */
+/** Fraction réduite num/den. Quand elle est décimale (dénominateur de la forme 2^p·5^q), elle est
+ * écrite en décimal avec virgule (`0{,}5`) : la saisie exige une forme réduite sans « / », la réponse
+ * affichée doit donc pouvoir se recopier telle quelle (audit 6e ch. 5, points 5 et 13). */
 function fracLatex(num: number, den: number): string {
-  return den === 1 ? `${num}` : `\\frac{${num}}{${den}}`;
+  if (den === 1) return `${num}`;
+  let reste = den;
+  while (reste % 2 === 0) reste /= 2;
+  while (reste % 5 === 0) reste /= 5;
+  if (reste === 1) return String(Number((num / den).toFixed(6))).replace(".", "{,}");
+  return `\\frac{${num}}{${den}}`;
 }
 
 /** Magnitude d'un COEFFICIENT DE i — comme `fracLatex`, sauf que "1" est omis (convention "i" plutôt
@@ -133,7 +141,7 @@ export function consigneEcranA(): FragmentConsigne[] {
   return [texte("Calcule la somme ou différence ci-dessus, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsA(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 3-2i" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
 }
 
 // ============================================================================
@@ -152,20 +160,20 @@ export function consigneEcranB(e: Extract<ExerciceNombresComplexes, { famille: "
   if (phase === "bProduitEcran1") return [texte("Développe le produit ci-dessus, sous la forme "), latexFrag("a+bi"), texte(".")];
   if (phase === "bCarreEcran1") return [texte("Développe le carré ci-dessus ("), latexFrag("i^2=-1"), texte("), sous la forme "), latexFrag("a+bi"), texte(".")];
   if (phase === "bCubeEcran1") return [texte("Calcule d'abord le carré "), latexFrag("(a+bi)^2"), texte(", sous la forme "), latexFrag("a+bi"), texte(".")];
-  return [texte("Multiplie le carré CONFIRMÉ à l'étape précédente par "), latexFrag(`(${entierComplexeLatex(e.a, e.b)})`), texte(" pour obtenir le cube, sous la forme "), latexFrag("a+bi"), texte(".")];
+  return [texte("Multiplie le carré obtenu à l'étape précédente par "), latexFrag(`(${entierComplexeLatex(e.a, e.b)})`), texte(" pour obtenir le cube, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): string[] | null {
   if (e.sousType === "cube" && phase === "bCubeEcran2") return [`(${entierComplexeLatex(e.a, e.b)})^2=${valeurComplexeLatex(e.carre)}\\text{ (confirmé)}`];
   return null;
 }
 export function champsB(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : -5+12i" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
 }
 export function niveauAideMaxB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): number {
   return e.sousType === "cube" && phase === "bCubeEcran2" ? 2 : 0;
 }
 export function aideNiveau1B(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): AideAvecLatex {
-  if (e.sousType === "cube" && phase === "bCubeEcran2") return { texte: "(a+bi)³=(a+bi)²·(a+bi) — calcule ce produit en 2 étapes plutôt que de développer directement un trinôme au cube.", latex: "(a+bi)^{3}=(a+bi)^{2}\\cdot(a+bi)" };
+  if (e.sousType === "cube" && phase === "bCubeEcran2") return { texte: "Le cube est le carré multiplié encore une fois par le nombre de départ : calcule ce produit plutôt que de développer directement un cube.", latex: "(a+bi)^{3}=(a+bi)^{2}\\cdot(a+bi)" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2B(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): AideAvecLatex {
@@ -184,8 +192,8 @@ export function blocDonneesC(e: Extract<ExerciceNombresComplexes, { famille: "C"
   return [`\\dfrac{${entierComplexeLatex(e.a, e.b)}}{${entierComplexeLatex(e.c, e.d)}}`];
 }
 export function consigneEcranC(phase: PhaseNombresComplexes): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Multiplie le numérateur ET le dénominateur par le conjugué du dénominateur, et développe les deux.")];
-  return [texte("Simplifie sous la forme "), latexFrag("a+bi"), texte(", à partir du numérateur/dénominateur CONFIRMÉS à l'étape précédente.")];
+  if (phase === "cEcran1") return [texte("Multiplie le numérateur et le dénominateur par le conjugué du dénominateur, puis développe les deux.")];
+  return [texte("Simplifie sous la forme "), latexFrag("a+bi"), texte(", à partir du numérateur et du dénominateur obtenus à l'étape précédente.")];
 }
 export function etatActuelC(e: Extract<ExerciceNombresComplexes, { famille: "C" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "cEcran2") return [`\\text{Numérateur confirmé : }${valeurComplexeLatex(e.numerateurDeveloppe)}\\text{, dénominateur confirmé : }${e.denominateurDeveloppe}`];
@@ -200,20 +208,20 @@ export function champsC(phase: PhaseNombresComplexes): ChampDef[] {
   // deux") donne déjà le contexte "développé", inutile de le répéter dans le label du champ.
   if (phase === "cEcran1")
     return [
-      { type: "texte", label: "Numérateur =", placeholder: "ex : 5+3i" },
-      { type: "texte", label: "Dénominateur =", placeholder: "ex : 13" },
+      { type: "texte", label: "Numérateur =", placeholder: "forme a+bi" },
+      { type: "texte", label: "Dénominateur =", placeholder: "un réel" },
     ];
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 0.5+1.5i" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
 }
 export function niveauAideMaxC(phase: PhaseNombresComplexes): number {
   return phase === "cEcran1" ? 2 : 0;
 }
 export function aideNiveau1C(phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Multiplier par le conjugué du dénominateur élimine sa partie imaginaire : (c+di)(c-di)=c²+d², un réel.", latex: "(c+di)(c-di)=c^{2}+d^{2}" };
+  if (phase === "cEcran1") return { texte: "Multiplier par le conjugué du dénominateur élimine sa partie imaginaire : le dénominateur devient un réel.", latex: "(c+di)(c-di)=c^{2}+d^{2}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2C(e: Extract<ExerciceNombresComplexes, { famille: "C" }>, phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Dénominateur déjà développé (réel) — numérateur non développé :", latex: `\\text{dénominateur}=${e.denominateurDeveloppe}` };
+  if (phase === "cEcran1") return { texte: "Produits posés (développements non faits) :", latex: `\\dfrac{(${entierComplexeLatex(e.a, e.b)})(${entierComplexeLatex(e.c, -e.d)})}{(${entierComplexeLatex(e.c, e.d)})(${entierComplexeLatex(e.c, -e.d)})}` };
   return AUCUNE_AIDE;
 }
 
@@ -228,19 +236,19 @@ export function blocDonneesD(e: Extract<ExerciceNombresComplexes, { famille: "D"
   return [`\\dfrac{${entierComplexeLatex(e.a, e.b)}}{${kiLatex(e.k)}}`];
 }
 export function consigneEcranD(): FragmentConsigne[] {
-  return [texte("Diviser par "), latexFrag("i"), texte(" (ou "), latexFrag("ki"), texte(") équivaut à multiplier par "), latexFrag("-i"), texte(" (ou "), latexFrag("-i/k"), texte(") — calcule directement, sous la forme "), latexFrag("a+bi"), texte(".")];
+  return [texte("Calcule ce quotient, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsD(): ChampDef[] {
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 2-i" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
 }
 export function niveauAideMaxD(): number {
   return 2;
 }
 export function aideNiveau1D(): AideAvecLatex {
-  return { texte: "1/i=-i (vérifiable par i×(-i)=-i²=1).", latex: "\\dfrac{1}{i}=-i\\qquad i\\cdot(-i)=-i^{2}=1" };
+  return { texte: "Diviser par i revient à multiplier par -i, car i fois -i vaut 1 :", latex: "\\dfrac{1}{i}=-i\\qquad i\\cdot(-i)=-i^{2}=1" };
 }
 export function aideNiveau2D(e: Extract<ExerciceNombresComplexes, { famille: "D" }>): AideAvecLatex {
-  return { texte: "Expression réécrite comme un produit (calcul final non fait) :", latex: `(${entierComplexeLatex(e.a, e.b)})\\cdot\\left(${e.k === 1 ? "" : `\\dfrac{1}{${e.k}}`}-i\\right)` };
+  return { texte: "Quotient réécrit comme un produit (calcul final non fait) :", latex: `\\dfrac{${entierComplexeLatex(e.a, e.b)}}{${kiLatex(e.k)}}=(${entierComplexeLatex(e.a, e.b)})\\cdot${e.k === 1 ? "(-i)" : `\\dfrac{-i}{${e.k}}`}` };
 }
 
 // ============================================================================
@@ -254,8 +262,8 @@ export function blocDonneesE(e: Extract<ExerciceNombresComplexes, { famille: "E"
   return [`\\dfrac{${entierComplexeLatex(e.a1, e.b1)}}{${entierComplexeLatex(e.c1, e.d1)}}+\\dfrac{${entierComplexeLatex(e.a2, e.b2)}}{${entierComplexeLatex(e.c2, e.d2)}}`];
 }
 export function consigneEcranE(phase: PhaseNombresComplexes): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Mets chaque fraction séparément sous forme "), latexFrag("a+bi"), texte(" (conjugué de chaque dénominateur).")];
-  return [texte("Additionne les 2 résultats CONFIRMÉS à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
+  if (phase === "eEcran1") return [texte("Mets chaque fraction, séparément, sous la forme "), latexFrag("a+bi"), texte(" (conjugué de chaque dénominateur).")];
+  return [texte("Additionne les 2 résultats obtenus à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelE(e: Extract<ExerciceNombresComplexes, { famille: "E" }>, phase: PhaseNombresComplexes): string[] | null {
   // Reconstruit depuis les entiers bruts (`divisionLatex`), JAMAIS depuis `e.fraction1`/`e.fraction2`
@@ -266,16 +274,16 @@ export function etatActuelE(e: Extract<ExerciceNombresComplexes, { famille: "E" 
 export function champsE(phase: PhaseNombresComplexes): ChampDef[] {
   if (phase === "eEcran1")
     return [
-      { type: "texte", label: "1ère fraction =", placeholder: "ex : 1-i" },
-      { type: "texte", label: "2ème fraction =", placeholder: "ex : 1+i" },
+      { type: "texte", label: "1re fraction =", placeholder: "forme a+bi" },
+      { type: "texte", label: "2e fraction =", placeholder: "forme a+bi" },
     ];
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : 2" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi (virgule décimale)" }];
 }
 export function niveauAideMaxE(phase: PhaseNombresComplexes): number {
   return phase === "eEcran1" ? 2 : 0;
 }
 export function aideNiveau1E(phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Traite chaque fraction séparément avec le conjugué de SON propre dénominateur, plutôt que de combiner les 2 fractions sur un dénominateur commun (valide mais beaucoup plus lourd).", latex: null };
+  if (phase === "eEcran1") return { texte: "Traite chaque fraction séparément, avec le conjugué de son propre dénominateur : c'est plus court que de réduire d'abord les 2 fractions au même dénominateur.", latex: "\\dfrac{a+bi}{c+di}=\\dfrac{(a+bi)(c-di)}{c^{2}+d^{2}}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2E(e: Extract<ExerciceNombresComplexes, { famille: "E" }>, phase: PhaseNombresComplexes): AideAvecLatex {
@@ -294,22 +302,22 @@ export function blocDonneesF(e: Extract<ExerciceNombresComplexes, { famille: "F"
   return [`\\left(\\dfrac{${entierComplexeLatex(e.numRe, e.numIm)}}{${entierComplexeLatex(e.c, e.d)}}\\right)^2`];
 }
 export function consigneEcranF(phase: PhaseNombresComplexes): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texte("Simplifie le quotient interne via le conjugué, AVANT toute mise au carré.")];
-  return [texte("Élève au carré le résultat CONFIRMÉ à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
+  if (phase === "fEcran1") return [texte("Simplifie le quotient entre parenthèses (conjugué du dénominateur), avant toute mise au carré.")];
+  return [texte("Élève au carré le résultat obtenu à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelF(e: Extract<ExerciceNombresComplexes, { famille: "F" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "fEcran2") return [`\\text{Quotient simplifié confirmé : }${valeurComplexeLatex(e.quotientSimplifie)}`];
   return null;
 }
 export function champsF(phase: PhaseNombresComplexes): ChampDef[] {
-  if (phase === "fEcran1") return [{ type: "texte", label: "Quotient interne simplifié =", placeholder: "ex : i" }];
-  return [{ type: "texte", label: "Résultat =", placeholder: "ex : -1" }];
+  if (phase === "fEcran1") return [{ type: "texte", label: "Quotient interne simplifié =", placeholder: "forme a+bi" }];
+  return [{ type: "texte", label: "Résultat =", placeholder: "forme a+bi" }];
 }
 export function niveauAideMaxF(phase: PhaseNombresComplexes): number {
   return phase === "fEcran1" ? 2 : 0;
 }
 export function aideNiveau1F(phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Vérifie TOUJOURS si un quotient à l'intérieur d'une puissance peut se simplifier avant de développer quoi que ce soit — développer numérateur² et dénominateur² séparément est bien plus long et risqué.", latex: null };
+  if (phase === "fEcran1") return { texte: "Simplifie d'abord le quotient entre parenthèses : élever séparément au carré le numérateur et le dénominateur est bien plus long.", latex: null };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2F(e: Extract<ExerciceNombresComplexes, { famille: "F" }>, phase: PhaseNombresComplexes): AideAvecLatex {
@@ -333,26 +341,27 @@ export function consigneEcranG(e: Extract<ExerciceNombresComplexes, { famille: "
       ? [texte("Détermine le reste de la division de l'exposant par 4.")]
       : [texte("Convertis l'exposant négatif en une forme équivalente positive, puis réduis modulo 4 (donne le reste, dans "), latexFrag("\\{0,1,2,3\\}"), texte(").")];
   }
-  return [texte("Donne la valeur du cycle "), latexFrag("\\{i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i\\}"), texte(" correspondant au reste CONFIRMÉ à l'étape précédente.")];
+  return [texte("Déduis la valeur de "), latexFrag(`i^{${e.n}}`), texte(" du reste obtenu à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelG(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "gEcran2") return [`\\text{Reste confirmé : }${e.reste}`];
   return null;
 }
 export function champsG(phase: PhaseNombresComplexes): ChampDef[] {
-  if (phase === "gEcran1") return [{ type: "texte", label: "Reste (mod 4) =", placeholder: "ex : 1" }];
-  return [{ type: "texte", label: "Valeur =", placeholder: "ex : i" }];
+  if (phase === "gEcran1") return [{ type: "texte", label: "Reste (mod 4) =", placeholder: "un entier" }];
+  return [{ type: "texte", label: "Valeur =", placeholder: "forme a+bi" }];
 }
 export function niveauAideMaxG(phase: PhaseNombresComplexes): number {
-  return phase === "gEcran1" ? 2 : 0;
+  void phase;
+  return 2;
 }
 export function aideNiveau1G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase !== "gEcran1") return AUCUNE_AIDE;
-  if (e.n < 0) return { texte: "Le cycle des puissances négatives suit le même schéma que les positives, décalé :", latex: "i^{-n}=\\dfrac{1}{i^{n}}\\qquad i^{-1}=-i,\\ i^{-2}=-1,\\ i^{-3}=i,\\ i^{-4}=1" };
-  return { texte: "i a une période de 4 — réduis l'exposant modulo 4 :", latex: "i^{0}=1,\\ i^{1}=i,\\ i^{2}=-1,\\ i^{3}=-i" };
+  if (phase === "gEcran2") return { texte: "Comme la 4e puissance de i vaut 1, la puissance ne dépend que du reste :", latex: `i^{${e.n}}=i^{${e.reste}}` };
+  if (e.n < 0) return { texte: "Les puissances négatives suivent le même cycle de longueur 4 :", latex: "i^{-n}=\\dfrac{1}{i^{n}}\\qquad i^{-1}=-i,\\ i^{-2}=-1,\\ i^{-3}=i,\\ i^{-4}=1" };
+  return { texte: "Les puissances de i se répètent tous les 4 exposants : seul compte le reste de la division de l'exposant par 4.", latex: "i^{4}=1" };
 }
 export function aideNiveau2G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase !== "gEcran1") return AUCUNE_AIDE;
+  if (phase === "gEcran2") return { texte: "Les 4 premières puissances de i :", latex: "i^{0}=1,\\ i^{1}=i,\\ i^{2}=-1,\\ i^{3}=-i" };
   if (e.n < 0) return { texte: "Exposant reformulé comme positif équivalent (valeur finale non donnée) :", latex: `i^{${e.n}}=\\dfrac{1}{i^{${-e.n}}}` };
   const quotient = Math.floor(e.n / 4);
   return { texte: "Décomposition posée (reste non calculé) :", latex: `${e.n}=4\\times ${quotient}+?` };

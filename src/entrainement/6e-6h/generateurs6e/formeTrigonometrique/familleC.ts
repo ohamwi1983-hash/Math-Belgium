@@ -33,7 +33,8 @@ const AMPLITUDES_QUART = [1, 2, 3] as const;
 const SIGNES = [1, -1] as const;
 
 function tirerZDepart(): { a: number; b: number } {
-  const surAxe = tirerParmi([true, false] as const);
+  // Point de départ sur un axe ≈ 15 % (audit 6e ch. 5 : 49,5 %, puissance lue sans calcul).
+  const surAxe = Math.random() < 0.15;
   if (surAxe) {
     const k = tirerParmi(AMPLITUDES_AXE);
     const surReel = tirerParmi([true, false] as const);
@@ -44,12 +45,21 @@ function tirerZDepart(): { a: number; b: number } {
   return { a: k * tirerParmi(SIGNES), b: k * tirerParmi(SIGNES) };
 }
 
+/** |partie réelle| et |partie imaginaire| du résultat bornées (audit 6e ch. 5 : > 200 dans 18 %). */
+const PARTIE_MAX = 100;
+
 export function construireFamilleC(): ExerciceFormeTrigC {
-  const { a, b } = tirerZDepart();
+  let { a, b } = tirerZDepart();
+  let n = tirerEntier(2, 5);
+  let res = puissanceEntiereC({ re: a, im: b }, n);
+  for (let i = 0; i < 100 && (Math.abs(res.re) > PARTIE_MAX || Math.abs(res.im) > PARTIE_MAX); i++) {
+    ({ a, b } = tirerZDepart());
+    n = tirerEntier(2, 5);
+    res = puissanceEntiereC({ re: a, im: b }, n);
+  }
   const r = calculerModule(a, b);
   const angle = calculerArgument(a, b);
-  const n = tirerEntier(2, 5);
-  const { re: aFinal, im: bFinal } = puissanceEntiereC({ re: a, im: b }, n);
+  const { re: aFinal, im: bFinal } = res;
   const rFinal = calculerModule(aFinal, bFinal);
   const angleFinal = calculerArgument(aFinal, bFinal);
   return { famille: "C", a, b, r, angle, n, rFinal, angleFinal, aFinal, bFinal };

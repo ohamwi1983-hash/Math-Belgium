@@ -1,102 +1,111 @@
-import type { ExerciceTrianglesA, PointComplexe, SommetTriangle, StatutSommet } from "../../core6e/trianglesComplexes.types";
-import { calculerModule } from "../formeTrigonometrique/familleA";
-import { tirerParmi } from "../calculPrimitives/aleatoire";
-import { pointEntier, rotation90, tirerEtiquettes, tirerTranslation, tirerTriangleIsocele, tirerTriangleRectangle } from "./construction";
+import type { ExerciceTrianglesA, PointComplexe, SommetTriangle, SousTypeTrianglesA, StatutSommet } from "../../core6e/trianglesComplexes.types";
+import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { distanceCarree, longueurEntre, pointEntier, rotation90, tirerEtiquettes, tirerOrdres, tirerTranslation, tirerTriangleIsocele, tirerTriangleRectangle } from "./construction";
 
 /**
- * Couche A (6e) — génération, famille A ("Démontrer isocèle et/ou rectangle") de `6gen41`, chapitre
- * 7 "Nombres complexes". Réutilise `calculerModule` de `generateurs6e/formeTrigonometrique/
- * familleA.ts` (6gen37, Couche A ↔ Couche A libre) pour PRÉCALCULER les 3 longueurs de côtés —
- * jamais recalculées côté Couche B (voir en-tête `core6e/trianglesComplexes.types.ts`).
+ * Couche A (6e) — génération, famille A (« isocèle, rectangle, les deux ou aucun ») de `6gen41`,
+ * chapitre 5 « Nombres complexes ».
  *
- * 2 sous-types équiprobables (voir en-tête `core6e/trianglesComplexes.types.ts` pour la preuve
- * qu'ils ne peuvent jamais se combiner avec des longueurs entières) :
- * - "isocele" (`construction.ts`, `BANK_ISOCELES`) : 2 côtés égaux au sommet tiré, JAMAIS rectangle.
- * - "rectangle" (`BANK_PYTHAGORE`) : angle droit au sommet tiré, JAMAIS isocèle (triplet a≠b).
- *
- * Les 3 sommets A/B/C sont étiquetés ALÉATOIREMENT sur les 3 rôles géométriques (`tirerEtiquettes`)
- * — l'élève ne doit jamais pouvoir supposer "le sommet particulier est toujours A".
+ * **Audit 6e ch. 5, point 43 (décision I) — 4 cas ÉQUIPROBABLES** (auparavant 2, jamais « isocèle
+ * rectangle » ni « quelconque » : les 2 écrans de verdict n'avaient chacun que 2 réponses liées) :
+ * - "isocele" (`BANK_ISOCELES`) : côtés entiers, isocèle au sommet tiré, jamais rectangle ;
+ * - "rectangle" (`BANK_PYTHAGORE`) : angle droit au sommet tiré, jamais isocèle (a ≠ b) ;
+ * - "isoceleRectangle" : sommet S + (p ; q) et S + (−q ; p) — rotation d'un quart de tour, donc
+ *   SA = SB et angle droit en S ; côtés √(p²+q²) et √(2(p²+q²)) (saisie `sqrt(n)` acceptée) ;
+ * - "quelconque" : 3 points entiers tirés au hasard, rejetés s'ils sont alignés, s'ils ont 2 côtés
+ *   égaux ou si une relation de Pythagore tient (tests EXACTS sur les carrés entiers).
+ * Verdicts : « isocèle » 1 fois sur 2 (réparti sur A, B, C), « rectangle » 1 fois sur 2.
+ * Les étiquettes A/B/C sont attribuées au hasard aux rôles géométriques (`tirerEtiquettes`).
  */
 
-function distance(p1: PointComplexe, p2: PointComplexe): number {
-  return calculerModule(p2.re - p1.re, p2.im - p1.im);
+const SOUS_TYPES: SousTypeTrianglesA[] = ["isocele", "rectangle", "isoceleRectangle", "quelconque"];
+
+function assembler(sousType: SousTypeTrianglesA, points: Record<SommetTriangle, PointComplexe>, sommetIsocele: StatutSommet, sommetRectangle: StatutSommet): ExerciceTrianglesA {
+  const { A, B, C } = points;
+  return { famille: "A", sousType, A, B, C, AB: longueurEntre(A, B), AC: longueurEntre(A, C), BC: longueurEntre(B, C), sommetIsocele, sommetRectangle, ordres: tirerOrdres() };
+}
+
+function placer(special: SommetTriangle, autre1: SommetTriangle, autre2: SommetTriangle, locaux: { x: number; y: number }[]): Record<SommetTriangle, PointComplexe> {
+  const k = tirerParmi([0, 1, 2, 3] as const);
+  const { tx, ty } = tirerTranslation();
+  const [p0, p1, p2] = locaux.map((p) => rotation90(p.x, p.y, k));
+  return {
+    [special]: pointEntier(p0.x + tx, p0.y + ty),
+    [autre1]: pointEntier(p1.x + tx, p1.y + ty),
+    [autre2]: pointEntier(p2.x + tx, p2.y + ty),
+  } as Record<SommetTriangle, PointComplexe>;
 }
 
 function construireIsocele(): ExerciceTrianglesA {
   const { base, hauteur } = tirerTriangleIsocele();
   const { special, autre1, autre2 } = tirerEtiquettes();
-  const k = tirerParmi([0, 1, 2, 3] as const);
-  const { tx, ty } = tirerTranslation();
-
-  // Repère local : apex=(0,hauteur), base gauche=(-base/2,0), base droite=(base/2,0).
-  const localApex = rotation90(0, hauteur, k);
-  const localGauche = rotation90(-base / 2, 0, k);
-  const localDroite = rotation90(base / 2, 0, k);
-
-  const points: Record<SommetTriangle, PointComplexe> = {
-    [special]: pointEntier(localApex.x + tx, localApex.y + ty),
-    [autre1]: pointEntier(localGauche.x + tx, localGauche.y + ty),
-    [autre2]: pointEntier(localDroite.x + tx, localDroite.y + ty),
-  } as Record<SommetTriangle, PointComplexe>;
-
-  const A = points.A;
-  const B = points.B;
-  const C = points.C;
-
-  return {
-    famille: "A",
-    sousType: "isocele",
-    A,
-    B,
-    C,
-    longueurAB: distance(A, B),
-    longueurAC: distance(A, C),
-    longueurBC: distance(B, C),
-    sommetIsocele: special,
-    sommetRectangle: "aucun",
-  };
+  const points = placer(special, autre1, autre2, [
+    { x: 0, y: hauteur },
+    { x: -base / 2, y: 0 },
+    { x: base / 2, y: 0 },
+  ]);
+  return assembler("isocele", points, special, "aucun");
 }
 
 function construireRectangle(): ExerciceTrianglesA {
   const { a, b } = tirerTriangleRectangle();
   const { special, autre1, autre2 } = tirerEtiquettes();
-  const k = tirerParmi([0, 1, 2, 3] as const);
-  const { tx, ty } = tirerTranslation();
-  // Choix aléatoire de la cathète assignée à autre1 (variété — l'énoncé ne privilégie jamais un
-  // ordre a,b fixe).
   const [ca, cb] = tirerParmi([
     [a, b],
     [b, a],
   ]);
-
-  const localDroit = rotation90(0, 0, k);
-  const localLeg1 = rotation90(ca, 0, k);
-  const localLeg2 = rotation90(0, cb, k);
-
-  const points: Record<SommetTriangle, PointComplexe> = {
-    [special]: pointEntier(localDroit.x + tx, localDroit.y + ty),
-    [autre1]: pointEntier(localLeg1.x + tx, localLeg1.y + ty),
-    [autre2]: pointEntier(localLeg2.x + tx, localLeg2.y + ty),
-  } as Record<SommetTriangle, PointComplexe>;
-
-  const A = points.A;
-  const B = points.B;
-  const C = points.C;
-
-  return {
-    famille: "A",
-    sousType: "rectangle",
-    A,
-    B,
-    C,
-    longueurAB: distance(A, B),
-    longueurAC: distance(A, C),
-    longueurBC: distance(B, C),
-    sommetIsocele: "aucun" as StatutSommet,
-    sommetRectangle: special,
-  };
+  const points = placer(special, autre1, autre2, [
+    { x: 0, y: 0 },
+    { x: ca, y: 0 },
+    { x: 0, y: cb },
+  ]);
+  return assembler("rectangle", points, "aucun", special);
 }
 
-export function construireFamilleA(): ExerciceTrianglesA {
-  return tirerParmi(["isocele", "rectangle"] as const) === "isocele" ? construireIsocele() : construireRectangle();
+function construireIsoceleRectangle(): ExerciceTrianglesA {
+  let p = 0;
+  let q = 0;
+  while (p === 0 && q === 0) {
+    p = tirerEntier(1, 6);
+    q = tirerEntier(0, 6);
+  }
+  const { special, autre1, autre2 } = tirerEtiquettes();
+  const points = placer(special, autre1, autre2, [
+    { x: 0, y: 0 },
+    { x: p, y: q },
+    { x: -q, y: p },
+  ]);
+  return assembler("isoceleRectangle", points, special, special);
+}
+
+const PORTEE_QUELCONQUE = 6;
+
+function construireQuelconque(): ExerciceTrianglesA {
+  for (;;) {
+    const tirer = () => pointEntier(tirerEntier(-PORTEE_QUELCONQUE, PORTEE_QUELCONQUE), tirerEntier(-PORTEE_QUELCONQUE, PORTEE_QUELCONQUE));
+    const A = tirer();
+    const B = tirer();
+    const C = tirer();
+    const ab = distanceCarree(A, B);
+    const ac = distanceCarree(A, C);
+    const bc = distanceCarree(B, C);
+    const aire2 = (B.re - A.re) * (C.im - A.im) - (B.im - A.im) * (C.re - A.re);
+    if (aire2 === 0 || Math.abs(aire2) < 6) continue; // alignés ou triangle trop aplati
+    if (ab === ac || ab === bc || ac === bc) continue;
+    if (ab + ac === bc || ab + bc === ac || ac + bc === ab) continue;
+    return assembler("quelconque", { A, B, C }, "aucun", "aucun");
+  }
+}
+
+export function construireFamilleA(sousTypeForce?: SousTypeTrianglesA): ExerciceTrianglesA {
+  switch (sousTypeForce ?? tirerParmi(SOUS_TYPES)) {
+    case "isocele":
+      return construireIsocele();
+    case "rectangle":
+      return construireRectangle();
+    case "isoceleRectangle":
+      return construireIsoceleRectangle();
+    case "quelconque":
+      return construireQuelconque();
+  }
 }

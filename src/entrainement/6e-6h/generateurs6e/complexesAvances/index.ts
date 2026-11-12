@@ -25,6 +25,9 @@ export type IdVarianteComplexesAvances =
   | "B_demiDroites"
   | "B_cercleO"
   | "B_intersection"
+  | "B_cercleA"
+  | "B_argument"
+  | "B_argumentPi"
   | "C"
   | "D_ratio"
   | "D_reelles"
@@ -38,12 +41,15 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteComplexesAvances; label: strin
   { id: "A_n3", label: "A — Condition réel positif (n=3)" },
   { id: "A_n4", label: "A — Condition réel positif (n=4)" },
   { id: "B_droite", label: "B — Lieu : droite" },
-  { id: "B_thales", label: "B — Lieu : cercle de Thalès" },
-  { id: "B_apollonius", label: "B — Lieu : cercle d'Apollonius" },
+  { id: "B_cercleA", label: "B — Lieu : |z − a| = k" },
+  { id: "B_argument", label: "B — Lieu : arg(z − a) ≡ θ (mod 2π)" },
+  { id: "B_argumentPi", label: "B — Lieu : arg(z − a) ≡ θ (mod π)" },
   { id: "B_demiDroites", label: "B — Lieu : demi-droite(s)" },
   { id: "B_cercleO", label: "B — Lieu : cercle centré en O" },
   { id: "B_intersection", label: "B — Intersection de 2 lieux" },
-  { id: "C", label: "C — Préservation du cercle unité (Blaschke)" },
+  { id: "B_thales", label: "B — Approfondissement : cercle de Thalès" },
+  { id: "B_apollonius", label: "B — Approfondissement : cercle d'Apollonius" },
+  { id: "C", label: "C — Le cercle unité est-il préservé ?" },
   { id: "D_ratio", label: "D — Ratio racine n-ième" },
   { id: "D_reelles", label: "D — Solutions réelles imposées" },
   { id: "D_coef", label: "D — Coefficients depuis une racine donnée" },
@@ -71,6 +77,12 @@ export function construireAvecVarianteId(id: IdVarianteComplexesAvances): Exerci
       return construireFamilleBSimple("cercleO");
     case "B_intersection":
       return construireFamilleBIntersection();
+    case "B_cercleA":
+      return construireFamilleBSimple("cercleA");
+    case "B_argument":
+      return construireFamilleBSimple("argument");
+    case "B_argumentPi":
+      return construireFamilleBSimple("argumentPi");
     case "C":
       return construireFamilleC();
     case "D_ratio":
@@ -90,17 +102,24 @@ export function construireAvecVarianteId(id: IdVarianteComplexesAvances): Exerci
   }
 }
 
-const FAMILLES: FamilleComplexesAvances[] = ["A", "B", "C", "D", "E"];
+/** Variantes d'approfondissement : accessibles au sélecteur, jamais au tirage libre (décision H). */
+const HORS_TIRAGE_LIBRE: IdVarianteComplexesAvances[] = ["B_thales", "B_apollonius"];
 
-const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleComplexesAvances, () => ExerciceComplexesAvances> = {
+/** Tirage libre ÉQUIPROBABLE PAR VARIANTE (17 variantes) — et non plus par famille : la famille C
+ * (une seule variante) pèse ainsi ≈ 1/17 du tirage (audit 6e ch. 5, décision J : ≈ 1/16) au lieu de
+ * 1/5, et les lieux du cours (famille B) gardent leur place. */
+const VARIANTES_TIRAGE_LIBRE: IdVarianteComplexesAvances[] = CATALOGUE_VARIANTES.map((v) => v.id).filter((id) => !HORS_TIRAGE_LIBRE.includes(id));
+
+/** Conservé pour les appelants qui tirent une famille précise. */
+export const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleComplexesAvances, () => ExerciceComplexesAvances> = {
   A: construireFamilleA,
   B: construireFamilleB,
-  C: construireFamilleC,
+  C: () => construireFamilleC(),
   D: construireFamilleD,
   E: construireFamilleE,
 };
 
 export function genererExerciceComplexesAvances(): ExerciceComplexesAvances {
-  const famille = FAMILLES[Math.floor(Math.random() * FAMILLES.length)];
-  return CONSTRUCTEURS_PAR_FAMILLE[famille]();
+  const id = VARIANTES_TIRAGE_LIBRE[Math.floor(Math.random() * VARIANTES_TIRAGE_LIBRE.length)];
+  return construireAvecVarianteId(id);
 }

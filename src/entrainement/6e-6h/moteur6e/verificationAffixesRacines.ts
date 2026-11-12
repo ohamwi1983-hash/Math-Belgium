@@ -1,4 +1,4 @@
-import type { ExerciceAffixesRacines, ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, IdRelationParallelogramme, IdSystemeRacine } from "../core6e/affixesRacines.types";
+import type { ExerciceAffixesRacines, ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, IdRelationParallelogramme, IdSystemeRacine } from "../core6e/affixesRacines.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { evaluerValeurComplexe } from "./expressionComplexe";
 import { TOLERANCE_COMPLEXE, diagnostiquerComplexe } from "./verificationComplexes";
@@ -115,7 +115,11 @@ export function verifierCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): 
 
 /** Toujours comparé à `xPositif` RÉEL — indépendant du système choisi à l'écran 1. */
 export function diagnostiquerCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  return diagnostiquerComplexe(valeurs[0], { re: exercice.xPositif, im: 0 });
+  // x ET −x acceptés (audit 6e ch. 5, point 7) : le système admet les 2 couples (x ; y) et (−x ; −y),
+  // qui donnent les 2 mêmes racines ±(x+yi).
+  const statut = diagnostiquerComplexe(valeurs[0], { re: exercice.xPositif, im: 0 });
+  if (statut !== "not_equivalent") return statut;
+  return diagnostiquerComplexe(valeurs[0], { re: -exercice.xPositif, im: 0 });
 }
 export function verifierCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
   return diagnostiquerCEcran2(exercice, valeurs) === "correct";
@@ -135,6 +139,25 @@ export function verifierCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): 
 // Dispatcher générique (mirroir 6gen34).
 // ============================================================================
 
+export function diagnostiquerDEcran1(exercice: ExerciceFamilleD, valeurs: string[]): StatutVerification {
+  return diagnostiquerComplexe(valeurs[0], exercice.milieu);
+}
+export function diagnostiquerDEcran2(exercice: ExerciceFamilleD, valeurs: string[]): StatutVerification {
+  const statutDiff = diagnostiquerComplexe(valeurs[0], exercice.difference);
+  const statutDist = diagnostiquerComplexe(valeurs[1], { re: exercice.distance, im: 0 });
+  if (statutDiff === "parse_error" || statutDist === "parse_error") return "parse_error";
+  if (statutDiff === "not_equivalent" || statutDist === "not_equivalent") return "not_equivalent";
+  return "correct";
+}
+
+/** Valeur de x saisie à l'écran 2 de la famille C si elle vaut −x (accepté) : la session la retient
+ * pour la suite de l'exercice. `null` si la saisie vaut +x ou n'est pas lisible. */
+export function xOpposeSaisi(exercice: ExerciceFamilleC, valeurs: string[]): number | null {
+  const v = evaluerValeurComplexe(valeurs[0]);
+  if (v === null) return null;
+  return Math.abs(v.re + exercice.xPositif) <= TOLERANCE_COMPLEXE && Math.abs(v.im) <= TOLERANCE_COMPLEXE ? -exercice.xPositif : null;
+}
+
 export function diagnostiquerEcran(exercice: ExerciceAffixesRacines, phase: PhaseAffixesRacines, valeurs: string[]): StatutVerification {
   switch (phase) {
     case "aEcran1":
@@ -149,6 +172,10 @@ export function diagnostiquerEcran(exercice: ExerciceAffixesRacines, phase: Phas
       return diagnostiquerCEcran2(exercice as ExerciceFamilleC, valeurs);
     case "cEcran3":
       return diagnostiquerCEcran3(exercice as ExerciceFamilleC, valeurs);
+    case "dEcran1":
+      return diagnostiquerDEcran1(exercice as ExerciceFamilleD, valeurs);
+    case "dEcran2":
+      return diagnostiquerDEcran2(exercice as ExerciceFamilleD, valeurs);
   }
 }
 

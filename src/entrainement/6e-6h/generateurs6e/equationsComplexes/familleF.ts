@@ -1,5 +1,6 @@
 import type { ExerciceFamilleF } from "../../core6e/equationsComplexes.types";
 import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../calculPrimitives/aleatoire";
+import { dansLaBorne, tirerDansLaBorne } from "./bornes";
 
 /**
  * Couche A (6e) — génération, famille F ("Quartique générale, racine rationnelle et division") de
@@ -48,7 +49,7 @@ function resteDivisionSynthetique(coefs: number[], racine: number): number {
   return v;
 }
 
-export function construireFamilleF(): ExerciceFamilleF {
+function construireFamilleFBrut(): ExerciceFamilleF {
   let r1 = 0;
   let r2 = 0;
   do {
@@ -96,3 +97,9 @@ export function construireFamilleF(): ExerciceFamilleF {
 
   return { famille: "F", a, b, c, d, e, r1, r2, p, q, quotientCubique, quotientQuadratique, racines };
 }
+
+/** Approfondissement (hors tirage libre) — coefficients de l'équation bornés à 100 (audit 6e ch. 5). */
+export function construireFamilleF(): ExerciceFamilleF {
+  return tirerDansLaBorne(construireFamilleFBrut, (e) => dansLaBorne([e.a, e.b, e.c, e.d, e.e, ...e.quotientCubique]));
+}
+

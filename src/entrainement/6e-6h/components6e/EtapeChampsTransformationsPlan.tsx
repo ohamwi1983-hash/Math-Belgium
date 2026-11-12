@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
@@ -23,6 +24,8 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
+  /** Figure d'énoncé facultative (petit plan complexe — audit 6e ch. 5, décision K). */
+  figure?: ReactNode;
   consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -43,23 +46,31 @@ interface Props {
 /**
  * Écran GÉNÉRIQUE à N champs texte libre (1 à 2) pour `6gen40` — mirroir
  * `EtapeChampsFormeTrigonometrique.tsx` (6gen37) : tous les écrans à SAISIE LIBRE SIMPLE de ce
- * générateur (aEcran2, bEcran1, cEcran1, cEcran2 — jamais aEcran1/bEcran2/cEcran3, qui ont chacun
- * leur composant dédié) passent par ce composant. Structure d'écran imposée par CLAUDE.md (consigne
+ * générateur (aEcran2, bEcran1, bEcran2, cEcran1, cEcran2, dEcran2 — jamais aEcran1/dEcran1/cEcran3,
+ * qui ont leur composant dédié) passent par ce composant. Structure d'écran imposée par CLAUDE.md (consigne
  * générale → bloc données → état actuel → bloc de travail) conservée à l'identique. `App6gen40.tsx`
  * doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsTransformationsPlan({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsTransformationsPlan({ consigneGenerale, blocDonnees, figure, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
+  /** Écriture illisible : signalée SANS consommer de tentative (audit 6e ch. 5, point commun 10). */
+  const [illisible, setIllisible] = useState(false);
 
   function valider() {
     if (!toutRempli) return;
+    if (diagnostiquer(valeurs) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
+    setIllisible(false);
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
   }
 
@@ -74,6 +85,7 @@ export function EtapeChampsTransformationsPlan({ consigneGenerale, blocDonnees, 
                 <Katex key={i} expression={frag} block />
               ))}
             </div>
+            {figure}
           </div>
         }
       />
@@ -91,11 +103,15 @@ export function EtapeChampsTransformationsPlan({ consigneGenerale, blocDonnees, 
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p>
+            <RenduFragments fragments={aideNiveau1.texte} />
+          </p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p>
+                <RenduFragments fragments={aideNiveau2.texte} />
+              </p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}
@@ -107,7 +123,12 @@ export function EtapeChampsTransformationsPlan({ consigneGenerale, blocDonnees, 
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {!illisible && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

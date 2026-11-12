@@ -122,18 +122,17 @@ export interface ExerciceFormeTrigD {
 }
 
 // ============================================================================
-// Famille E — Déduire des valeurs trigonométriques exactes (3 écrans).
+// Famille E — Déduire des valeurs trigonométriques exactes (2 écrans).
 // ============================================================================
 
 export type OperationE = "produit" | "quotient";
 
 /**
- * `alpha`/`beta` toujours tirés du "quart de famille" {π/4,3π/4,5π/4,7π/4} (voir en-tête
- * `familleE.ts`) — SEUL sous-ensemble d'angles remarquables distincts garantissant, pour LES DEUX
- * opérations (somme ET différence), un angle résultant de type AXE (0,π/2,π,3π/2 — cos/sin∈{0,±1})
- * — indispensable puisque `z1`/`z2` sont de module 1 fixe (aucun `r` disponible pour "absorber" un
- * √2/2 comme en famille C), donc tout résultat de type quart (cos/sin=±√2/2) serait, lui aussi,
- * structurellement impossible à taper en écran 2 (pas de fonction `sqrt` dans l'évaluateur complexe).
+ * Refonte audit 6e ch. 5 (décision E) : un angle de la famille de π/4 et un angle de la famille de
+ * π/6 ou π/3 — l'angle résultant est un multiple IMPAIR de π/12 (π/12, 5π/12, 7π/12…), donc NON
+ * remarquable : cos et sin ne se lisent pas sur le cercle, ils se DÉDUISENT du développement, ce
+ * qui donne son sens à la famille (l'ancienne version ne produisait que des angles sur les axes).
+ * cos/sin sont demandés SÉPARÉMENT (2 champs réels, valeurs exactes de la forme (±√6 ± √2)/4).
  */
 export interface ExerciceFormeTrigE {
   famille: "E";
@@ -141,8 +140,8 @@ export interface ExerciceFormeTrigE {
   alpha: AngleRemarquable;
   beta: AngleRemarquable;
   angleResultat: AngleRemarquable;
-  aFinal: number;
-  bFinal: number;
+  cosResultat: ValeurExacte;
+  sinResultat: ValeurExacte;
 }
 
 // ============================================================================

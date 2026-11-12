@@ -132,13 +132,13 @@ export function consigneEcranASans(): FragmentConsigne[] {
   return [texte("Isole "), latex("z"), texte(" (regroupe les termes en "), latex("z"), texte(" d'un côté, les constantes de l'autre), puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function champsASans(): ChampDef[] {
-  return [{ label: "z =", placeholder: "ex : 2+3i" }];
+  return [{ label: "z =", placeholder: "forme a+bi" }];
 }
 export function niveauAideMaxASans(): number {
   return 2;
 }
 export function aideNiveau1ASans(): AideAvecLatex {
-  return { texte: "Regroupe tous les termes en z d'un côté de l'égalité, toutes les constantes de l'autre — comme pour une équation réelle.", latex: null };
+  return { texte: "Regroupe les termes en z d'un côté de l'égalité et les constantes de l'autre, comme pour une équation réelle, puis divise.", latex: null };
 }
 export function aideNiveau2ASans(e: ExerciceFamilleASansBarre): AideAvecLatex {
   const denom = coteLatex([termeVarComplexe(e.a, "z"), termeVarComplexe({ re: -e.c.re, im: -e.c.im }, "z")]);
@@ -176,25 +176,25 @@ export function blocDonneesAAvec(e: ExerciceFamilleAAvecBarre): string[] {
 export function consigneEcranAAvec(phase: PhaseEquationsComplexes): FragmentConsigne[] {
   if (phase === "aAvecEcran1")
     return [texte("Substitue "), latex("z=x+yi"), texte(" et "), latex("\\bar z=x-yi"), texte(", développe, puis choisis le système de 2 équations réelles obtenu (identification des parties réelle et imaginaire).")];
-  return [texte("Résous le système CONFIRMÉ à l'étape précédente pour "), latex("x"), texte(" et "), latex("y"), texte(", puis donne "), latex("z=x+yi"), texte(".")];
+  return [texte("Résous le système obtenu à l'étape précédente, puis donne "), latex("z=x+yi"), texte(".")];
 }
 export function etatActuelAAvec(e: ExerciceFamilleAAvecBarre, phase: PhaseEquationsComplexes): string[] | null {
-  if (phase === "aAvecEcran2") return [`\\text{Système confirmé : }${equationSystemeALatex(e.a + e.b, "x", e.c)}\\text{, }${equationSystemeALatex(e.a - e.b, "y", e.d)}`];
+  if (phase === "aAvecEcran2") return [`\\text{Système : }${equationSystemeALatex(e.a + e.b, "x", e.c)}\\text{, }${equationSystemeALatex(e.a - e.b, "y", e.d)}`];
   return null;
 }
 export function champsAAvec(phase: PhaseEquationsComplexes): ChampDef[] {
   if (phase === "aAvecEcran1") return [];
   return [
-    { label: "x =", placeholder: "ex : 2" },
-    { label: "y =", placeholder: "ex : 3" },
-    { label: "z =", placeholder: "ex : 2+3i" },
+    { label: "x =", placeholder: "un réel" },
+    { label: "y =", placeholder: "un réel" },
+    { label: "z =", placeholder: "forme a+bi" },
   ];
 }
 export function niveauAideMaxAAvec(phase: PhaseEquationsComplexes): number {
   return phase === "aAvecEcran1" ? 2 : 0;
 }
 export function aideNiveau1AAvec(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "aAvecEcran1") return { texte: "z̄ s'obtient en changeant le signe de la partie imaginaire de z. Une égalité entre 2 complexes équivaut à 2 égalités réelles : parties réelles égales ENTRE ELLES, parties imaginaires égales ENTRE ELLES.", latex: null };
+  if (phase === "aAvecEcran1") return { texte: "Le conjugué change le signe de la partie imaginaire. Deux complexes sont égaux quand leurs parties réelles sont égales et leurs parties imaginaires aussi.", latex: "z=x+yi\\ \\Rightarrow\\ \\bar z=x-yi" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2AAvec(e: ExerciceFamilleAAvecBarre, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -244,21 +244,21 @@ export function blocDonneesB(e: ExerciceFamilleB): string[] {
 }
 export function consigneEcranB(phase: PhaseEquationsComplexes): FragmentConsigne[] {
   if (phase === "bEcran1") return [texte("Multiplie les 2 membres par le dénominateur pour éliminer la fraction, développe, puis choisis l'équation développée correcte.")];
-  return [texte("Isole "), latex("z"), texte(" à partir de l'équation CONFIRMÉE à l'étape précédente, puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
+  return [texte("Isole "), latex("z"), texte(" dans l'équation obtenue à l'étape précédente, puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function etatActuelB(e: ExerciceFamilleB, phase: PhaseEquationsComplexes): string[] | null {
-  if (phase === "bEcran2") return [`\\text{Équation confirmée : }${coteLatex([termeVarReel(e.a, "z"), termeConstanteReelle(e.b)])}=${coteLatex([termeVarComplexe(e.kc, "z"), termeConstanteComplexe(e.kd)])}`];
+  if (phase === "bEcran2") return [`\\text{Équation : }${coteLatex([termeVarReel(e.a, "z"), termeConstanteReelle(e.b)])}=${coteLatex([termeVarComplexe(e.kc, "z"), termeConstanteComplexe(e.kd)])}`];
   return null;
 }
 export function champsB(phase: PhaseEquationsComplexes): ChampDef[] {
   if (phase === "bEcran1") return [];
-  return [{ label: "z =", placeholder: "ex : 1+i" }];
+  return [{ label: "z =", placeholder: "forme a+bi" }];
 }
 export function niveauAideMaxB(phase: PhaseEquationsComplexes): number {
   return phase === "bEcran1" ? 2 : 0;
 }
 export function aideNiveau1B(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Multiplie les 2 membres de l'égalité par (cz+d) pour éliminer la fraction.", latex: null };
+  if (phase === "bEcran1") return { texte: "Multiplie les 2 membres de l'égalité par le dénominateur pour éliminer la fraction.", latex: null };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2B(e: ExerciceFamilleB, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -283,22 +283,22 @@ export function blocDonneesC(e: ExerciceFamilleC): string[] {
   return [equationCLatex(e)];
 }
 export function consigneEcranC(phase: PhaseEquationsComplexes): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Calcule le discriminant "), latex("\\Delta=b^2-4ac"), texte(", et constate qu'il est négatif.")];
-  return [texte("Δ étant négatif, applique la formule quadratique avec "), latex("\\sqrt{\\Delta}=i\\sqrt{|\\Delta|}"), texte(" (Δ CONFIRMÉ à l'étape précédente), et donne les 2 solutions.")];
+  if (phase === "cEcran1") return [texte("Calcule le discriminant "), latex("\\Delta=b^2-4ac"), texte(".")];
+  return [texte("Avec le discriminant obtenu à l'étape précédente, donne les 2 solutions de l'équation.")];
 }
 export function etatActuelC(e: ExerciceFamilleC, phase: PhaseEquationsComplexes): string[] | null {
-  if (phase === "cEcran2") return [`\\text{Δ confirmé : }\\Delta=${e.delta}`];
+  if (phase === "cEcran2") return [`\\Delta=${e.delta}`];
   return null;
 }
 export function champsC(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "cEcran1") return [{ label: "Δ =", placeholder: "ex : -16" }];
+  if (phase === "cEcran1") return [{ label: "Δ =", placeholder: "un réel" }];
   return [];
 }
 export function niveauAideMaxC(phase: PhaseEquationsComplexes): number {
   return phase === "cEcran2" ? 2 : 0;
 }
 export function aideNiveau1C(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "cEcran2") return { texte: "Δ étant négatif, √Δ=i√|Δ| (|Δ| est positif, sa racine carrée réelle existe).", latex: "\\sqrt{\\Delta}=i\\sqrt{|\\Delta|}" };
+  if (phase === "cEcran2") return { texte: "Le discriminant est négatif : ses racines carrées sont imaginaires, et la formule du second degré s'applique comme dans les réels.", latex: "\\sqrt{\\Delta}=i\\sqrt{|\\Delta|}\\qquad z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2C(e: ExerciceFamilleC, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -322,26 +322,26 @@ export function blocDonneesD(e: ExerciceFamilleD): string[] {
 }
 export function consigneEcranD(phase: PhaseEquationsComplexes): FragmentConsigne[] {
   if (phase === "dEcran1") return [texte("Calcule le discriminant "), latex("\\Delta=b^2-4ac"), texte(" (un nombre complexe).")];
-  if (phase === "dEcran2") return [texte("Calcule les 2 racines carrées complexes de Δ CONFIRMÉ à l'étape précédente (même technique qu'une racine carrée de complexe).")];
-  return [texte("Applique la formule quadratique "), latex("z=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(" à partir de √Δ CONFIRMÉ à l'étape précédente, et donne les 2 solutions.")];
+  if (phase === "dEcran2") return [texte("Calcule les 2 racines carrées complexes du discriminant obtenu à l'étape précédente.")];
+  return [texte("Avec les racines carrées du discriminant obtenues à l'étape précédente, donne les 2 solutions de l'équation.")];
 }
 export function etatActuelD(e: ExerciceFamilleD, phase: PhaseEquationsComplexes): string[] | null {
-  const deltaConfirme = `\\text{Δ confirmé : }\\Delta=${entierComplexeLatex(e.delta.re, e.delta.im)}`;
+  const deltaConfirme = `\\Delta=${entierComplexeLatex(e.delta.re, e.delta.im)}`;
   if (phase === "dEcran2") return [deltaConfirme];
   // Écran 3 : cumule Δ (écran 1) ET √Δ (écran 2), du plus ancien au plus récent — jamais seulement
   // l'écran immédiatement précédent (audit transversal "état actuel cumulatif").
-  if (phase === "dEcran3") return [deltaConfirme, `\\text{√Δ confirmé : }${entierComplexeLatex(e.racinesDelta[0].re, e.racinesDelta[0].im)}\\text{ et }${entierComplexeLatex(e.racinesDelta[1].re, e.racinesDelta[1].im)}`];
+  if (phase === "dEcran3") return [deltaConfirme, `\\text{Racines carrées de }\\Delta\\text{ : }${entierComplexeLatex(e.racinesDelta[0].re, e.racinesDelta[0].im)}\\text{ et }${entierComplexeLatex(e.racinesDelta[1].re, e.racinesDelta[1].im)}`];
   return null;
 }
 export function champsD(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "dEcran1") return [{ label: "Δ =", placeholder: "ex : -3+4i" }];
+  if (phase === "dEcran1") return [{ label: "Δ =", placeholder: "forme a+bi" }];
   return [];
 }
 export function niveauAideMaxD(phase: PhaseEquationsComplexes): number {
   return phase === "dEcran2" ? 2 : 0;
 }
 export function aideNiveau1D(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "dEcran2") return { texte: "Pose √Δ=x+yi, élève au carré et identifie : x²-y²=Re(Δ), 2xy=Im(Δ) — un système à résoudre pour x,y entiers.", latex: "\\sqrt{\\Delta}=x+yi,\\quad x^2-y^2=\\operatorname{Re}(\\Delta),\\quad 2xy=\\operatorname{Im}(\\Delta)" };
+  if (phase === "dEcran2") return { texte: "Cherche les racines sous la forme x+yi : élève au carré et identifie les parties réelles, imaginaires et les modules.", latex: "\\sqrt{\\Delta}=x+yi,\\quad x^2-y^2=\\operatorname{Re}(\\Delta),\\quad 2xy=\\operatorname{Im}(\\Delta)" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2D(e: ExerciceFamilleD, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -357,13 +357,23 @@ function equationELatex(e: ExerciceFamilleE): string {
   return `${coteLatex([termeVarComplexe(e.a, "z^4"), termeVarComplexe(e.b, "z^2"), termeConstanteComplexe(e.c)])}=0`;
 }
 
-/** 4 équations en U candidates à l'écran 1. */
+/** 4 équations en u candidates à l'écran 1. */
 export function OPTIONS_EQUATION_E(e: ExerciceFamilleE): { id: IdEquationEnU; latex: string }[] {
+  const oppose = (v: ValeurComplexe): ValeurComplexe => ({ re: -v.re + 0, im: -v.im + 0 });
+  const bNul = e.b.re === 0 && e.b.im === 0;
+  const aEgalC = e.a.re === e.c.re && e.a.im === e.c.im;
   return [
-    { id: "correct", latex: `${coteLatex([termeVarComplexe(e.a, "U^2"), termeVarComplexe(e.b, "U"), termeConstanteComplexe(e.c)])}=0` },
-    { id: "exposantInverse", latex: `${coteLatex([termeVarComplexe(e.a, "U"), termeVarComplexe(e.b, "U^2"), termeConstanteComplexe(e.c)])}=0` },
-    { id: "coefInverses", latex: `${coteLatex([termeVarComplexe(e.c, "U^2"), termeVarComplexe(e.b, "U"), termeConstanteComplexe(e.a)])}=0` },
-    { id: "oublieB", latex: `${coteLatex([termeVarComplexe(e.a, "U^2"), termeConstanteComplexe(e.c)])}=0` },
+    { id: "correct", latex: `${coteLatex([termeVarComplexe(e.a, "u^2"), termeVarComplexe(e.b, "u"), termeConstanteComplexe(e.c)])}=0` },
+    { id: "exposantInverse", latex: `${coteLatex([termeVarComplexe(e.a, "u"), termeVarComplexe(e.b, "u^2"), termeConstanteComplexe(e.c)])}=0` },
+    // Si a = c, échanger a et c redonne la bonne équation : on change alors le signe du terme en u (ou de c si b = 0).
+    aEgalC
+      ? { id: "coefInverses", latex: `${coteLatex([termeVarComplexe(e.a, "u^2"), termeVarComplexe(oppose(e.b), "u"), termeConstanteComplexe(bNul ? oppose(e.c) : e.c)])}=0` }
+      : { id: "coefInverses", latex: `${coteLatex([termeVarComplexe(e.c, "u^2"), termeVarComplexe(e.b, "u"), termeConstanteComplexe(e.a)])}=0` },
+    // Si b = 0, « oublier b » redonne la bonne équation : le distracteur oublie alors le changement de
+    // variable sur le terme constant (c devient c·u).
+    bNul
+      ? { id: "oublieB", latex: `${coteLatex([termeVarComplexe(e.a, "u^2"), termeVarComplexe(e.c, "u")])}=0` }
+      : { id: "oublieB", latex: `${coteLatex([termeVarComplexe(e.a, "u^2"), termeConstanteComplexe(e.c)])}=0` },
   ];
 }
 
@@ -375,23 +385,23 @@ export function blocDonneesE(e: ExerciceFamilleE): string[] {
 }
 export function consigneEcranE(phase: PhaseEquationsComplexes): FragmentConsigne[] {
   if (phase === "eEcran1") return [texte("Pose "), latex("u=z^2"), texte(", réécris l'équation en une équation du second degré en "), latex("u"), texte(", et choisis-la ci-dessous.")];
-  if (phase === "eEcran2") return [texte("Résous l'équation en "), latex("u"), texte(" CONFIRMÉE à l'étape précédente (2 valeurs de "), latex("u"), texte(", potentiellement complexes).")];
-  return [texte("Pour chacune des 2 valeurs de "), latex("u"), texte(" CONFIRMÉES à l'étape précédente, calcule les racines carrées correspondantes "), latex("z=\\pm\\sqrt{u}"), texte(", et donne les 4 solutions.")];
+  if (phase === "eEcran2") return [texte("Résous l'équation en "), latex("u"), texte(" obtenue à l'étape précédente : donne les 2 valeurs de "), latex("u"), texte(".")];
+  return [texte("Pour chacune des 2 valeurs de "), latex("u"), texte(" obtenues à l'étape précédente, cherche les nombres "), latex("z"), texte(" tels que "), latex("z^2=u"), texte(", puis donne les 4 solutions.")];
 }
 export function etatActuelE(e: ExerciceFamilleE, phase: PhaseEquationsComplexes): string[] | null {
-  const equationEnUConfirmee = `\\text{Équation en u confirmée : }${coteLatex([termeVarComplexe(e.a, "U^2"), termeVarComplexe(e.b, "U"), termeConstanteComplexe(e.c)])}=0`;
+  const equationEnUConfirmee = `\\text{Équation en }u\\text{ : }${coteLatex([termeVarComplexe(e.a, "u^2"), termeVarComplexe(e.b, "u"), termeConstanteComplexe(e.c)])}=0`;
   if (phase === "eEcran2") return [equationEnUConfirmee];
   // Écran 3 : cumule l'équation en u (écran 1) ET ses 2 valeurs (écran 2), du plus ancien au plus
   // récent — jamais seulement l'écran immédiatement précédent (audit transversal "état actuel
   // cumulatif").
-  if (phase === "eEcran3") return [equationEnUConfirmee, `\\text{Valeurs de u confirmées : }u_1=${entierComplexeLatex(e.u1.re, e.u1.im)}\\text{, }u_2=${entierComplexeLatex(e.u2.re, e.u2.im)}`];
+  if (phase === "eEcran3") return [equationEnUConfirmee, `u_1=${entierComplexeLatex(e.u1.re, e.u1.im)}\\text{, }u_2=${entierComplexeLatex(e.u2.re, e.u2.im)}`];
   return null;
 }
 export function niveauAideMaxE(phase: PhaseEquationsComplexes): number {
   return phase === "eEcran3" ? 2 : 0;
 }
 export function aideNiveau1E(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "eEcran3") return { texte: "Une équation quartique réductible en u=z² produit jusqu'à 4 racines : 2 valeurs de u, CHACUNE donnant 2 racines opposées en z (z=+√u et z=-√u) — jamais une seule par valeur de u.", latex: "z=\\pm\\sqrt{u}" };
+  if (phase === "eEcran3") return { texte: "Chaque valeur de u non nulle donne 2 solutions opposées en z : 2 valeurs de u donnent donc 4 solutions.", latex: "z^2=u\\iff z=z_0\\ \\text{ ou }\\ z=-z_0\\quad(z_0^2=u)" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2E(e: ExerciceFamilleE, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -426,20 +436,20 @@ export function blocDonneesF(e: ExerciceFamilleF): string[] {
 }
 export function consigneEcranF(phase: PhaseEquationsComplexes): FragmentConsigne[] {
   if (phase === "fEcran1") return [texte("Teste des valeurs candidates simples (diviseurs du terme constant sur diviseurs du coefficient dominant) pour trouver une première racine rationnelle "), latex("r_1"), texte(".")];
-  if (phase === "fEcran2") return [texte("Divise le polynôme par "), latex("(z-r_1)"), texte(" CONFIRMÉ à l'étape précédente — donne le quotient (polynôme du 3e degré).")];
-  if (phase === "fEcran3") return [texte("Trouve une racine rationnelle "), latex("r_2"), texte(" du quotient CONFIRMÉ à l'étape précédente, puis divise à nouveau — donne "), latex("r_2"), texte(" et le quotient (polynôme du 2e degré).")];
-  if (phase === "fEcran4") return [texte("Résous le facteur du second degré CONFIRMÉ à l'étape précédente (discriminant négatif) — donne les 2 racines complexes conjuguées.")];
-  return [texte("Donne l'ensemble complet des 4 solutions de l'équation ("), latex("r_1"), texte(", "), latex("r_2"), texte(", et les 2 racines complexes CONFIRMÉES à l'étape précédente).")];
+  if (phase === "fEcran2") return [texte("Divise le polynôme par "), latex("(z-r_1)"), texte(", avec la racine obtenue à l'étape précédente : donne le quotient (polynôme du 3e degré, développé).")];
+  if (phase === "fEcran3") return [texte("Trouve une racine rationnelle "), latex("r_2"), texte(" du quotient obtenu à l'étape précédente, puis divise à nouveau : donne "), latex("r_2"), texte(" et le nouveau quotient (polynôme du 2e degré, développé).")];
+  if (phase === "fEcran4") return [texte("Résous l'équation du second degré obtenue à l'étape précédente : donne ses 2 solutions.")];
+  return [texte("Donne l'ensemble complet des 4 solutions de l'équation ("), latex("r_1"), texte(", "), latex("r_2"), texte(" et les 2 solutions de l'étape précédente).")];
 }
 export function etatActuelF(e: ExerciceFamilleF, phase: PhaseEquationsComplexes): string[] | null {
   // 5 écrans — chaque ligne ci-dessous est la réponse VALIDÉE d'UN écran ; chaque phase >=2 cumule
   // TOUTES les lignes des écrans précédents, du plus ancien au plus récent, jamais seulement celle
   // de l'écran immédiatement précédent (audit transversal "état actuel cumulatif" — bug trouvé ici :
   // fEcran3/4/5 ne montraient chacun qu'UNE seule ligne, celle de l'écran juste avant).
-  const r1Confirme = `\\text{r}_1\\text{ confirmé : }r_1=${e.r1}`;
-  const quotientCubiqueConfirme = `\\text{Quotient confirmé : }${polynomeLatex(e.quotientCubique, 3)}=0`;
-  const r2EtQuotientConfirmes = `\\text{r}_2\\text{ et quotient confirmés : }r_2=${e.r2}\\text{, }${polynomeLatex(e.quotientQuadratique, 2)}=0`;
-  const racinesComplexesConfirmees = `\\text{Racines complexes confirmées : }${entierComplexeLatex(e.p, e.q)}\\text{, }${entierComplexeLatex(e.p, -e.q)}`;
+  const r1Confirme = `r_1=${e.r1}`;
+  const quotientCubiqueConfirme = `\\text{Quotient : }${polynomeLatex(e.quotientCubique, 3)}`;
+  const r2EtQuotientConfirmes = `r_2=${e.r2}\\text{, quotient : }${polynomeLatex(e.quotientQuadratique, 2)}`;
+  const racinesComplexesConfirmees = `\\text{Solutions complexes : }${entierComplexeLatex(e.p, e.q)}\\text{, }${entierComplexeLatex(e.p, -e.q)}`;
   if (phase === "fEcran2") return [r1Confirme];
   if (phase === "fEcran3") return [r1Confirme, quotientCubiqueConfirme];
   if (phase === "fEcran4") return [r1Confirme, quotientCubiqueConfirme, r2EtQuotientConfirmes];
@@ -447,12 +457,12 @@ export function etatActuelF(e: ExerciceFamilleF, phase: PhaseEquationsComplexes)
   return null;
 }
 export function champsF(phase: PhaseEquationsComplexes): ChampDef[] {
-  if (phase === "fEcran1") return [{ label: "r₁ =", placeholder: "ex : 1" }];
-  if (phase === "fEcran2") return [{ label: "Quotient (polynôme en z) =", placeholder: "ex : z^3+z^2+z+1" }];
+  if (phase === "fEcran1") return [{ label: "r₁ =", placeholder: "un entier" }];
+  if (phase === "fEcran2") return [{ label: "Quotient (polynôme en z) =", placeholder: "polynôme en z, développé" }];
   if (phase === "fEcran3")
     return [
-      { label: "r₂ =", placeholder: "ex : -1" },
-      { label: "Quotient (polynôme en z) =", placeholder: "ex : z^2+1" },
+      { label: "r₂ =", placeholder: "un entier" },
+      { label: "Quotient (polynôme en z) =", placeholder: "polynôme en z, développé" },
     ];
   return [];
 }
@@ -460,7 +470,7 @@ export function niveauAideMaxF(phase: PhaseEquationsComplexes): number {
   return phase === "fEcran1" ? 2 : 0;
 }
 export function aideNiveau1F(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Théorème des racines rationnelles : toute racine rationnelle p/q d'un polynôme à coefficients entiers vérifie p | terme constant et q | coefficient dominant.", latex: null };
+  if (phase === "fEcran1") return { texte: "Une racine entière d'un polynôme à coefficients entiers divise le terme constant : teste ces diviseurs.", latex: "P(r)=0\\ \\Rightarrow\\ r\\ \\text{divise le terme constant}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2F(e: ExerciceFamilleF, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -654,9 +664,9 @@ export const LIBELLE_PHASE: Record<PhaseEquationsComplexes, string> = {
 export const LIBELLE_FAMILLE: Record<ExerciceEquationsComplexes["famille"], string> = {
   A: "A — Linéaire en z (avec ou sans z̄)",
   B: "B — Équation rationnelle en z",
-  C: "C — Quadratique, Δ réel négatif",
-  D: "D — Quadratique, Δ complexe",
-  E: "E — Quartique biquadratique u=z²",
+  C: "C — Second degré, Δ réel négatif",
+  D: "D — Second degré, Δ complexe",
+  E: "E — Bicarrée u=z²",
   F: "F — Quartique, racines rationnelles et division",
 };
 
@@ -684,14 +694,14 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationsCompl
     return [`z_1=${entierComplexeLatex(exercice.racines[0].re, exercice.racines[0].im)}\\text{, }z_2=${entierComplexeLatex(exercice.racines[1].re, exercice.racines[1].im)}`];
   }
   if (exercice.famille === "E") {
-    if (phase === "eEcran1") return [`${coteLatex([termeVarComplexe(exercice.a, "U^2"), termeVarComplexe(exercice.b, "U"), termeConstanteComplexe(exercice.c)])}=0`];
+    if (phase === "eEcran1") return [`${coteLatex([termeVarComplexe(exercice.a, "u^2"), termeVarComplexe(exercice.b, "u"), termeConstanteComplexe(exercice.c)])}=0`];
     if (phase === "eEcran2") return [`u_1=${entierComplexeLatex(exercice.u1.re, exercice.u1.im)}\\text{, }u_2=${entierComplexeLatex(exercice.u2.re, exercice.u2.im)}`];
     return [exercice.racines.map((r) => entierComplexeLatex(r.re, r.im)).join("\\text{, }")];
   }
   // famille F
   if (phase === "fEcran1") return [`r_1=${exercice.r1}`];
-  if (phase === "fEcran2") return [`${polynomeLatex(exercice.quotientCubique, 3)}=0`];
-  if (phase === "fEcran3") return [`r_2=${exercice.r2}\\text{, }${polynomeLatex(exercice.quotientQuadratique, 2)}=0`];
+  if (phase === "fEcran2") return [`\\text{Quotient : }${polynomeLatex(exercice.quotientCubique, 3)}`];
+  if (phase === "fEcran3") return [`r_2=${exercice.r2}\\text{, quotient : }${polynomeLatex(exercice.quotientQuadratique, 2)}`];
   if (phase === "fEcran4") return [`${entierComplexeLatex(exercice.p, exercice.q)}\\text{, }${entierComplexeLatex(exercice.p, -exercice.q)}`];
   return [exercice.racines.map((r) => entierComplexeLatex(r.re, r.im)).join("\\text{, }")];
 }

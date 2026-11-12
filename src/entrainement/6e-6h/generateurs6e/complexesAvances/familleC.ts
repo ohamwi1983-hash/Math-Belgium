@@ -1,5 +1,5 @@
 import type { ExerciceComplexesC } from "../../core6e/complexesAvances.types";
-import { tirerEntierNonNul } from "../calculPrimitives/aleatoire";
+import { tirerEntier } from "../calculPrimitives/aleatoire";
 
 /**
  * Couche A (6e) — génération, famille C ("Préservation du cercle unité par une similitude de
@@ -60,8 +60,17 @@ export function transformeeBlaschke(zRe: number, zIm: number, a: number, b: numb
   };
 }
 
-export function construireFamilleC(): ExerciceComplexesC {
-  const a = tirerEntierNonNul(-BORNE, BORNE);
-  const b = tirerEntierNonNul(-BORNE, BORNE);
-  return { famille: "C", a, b };
+/** `conjugueForce` absent : vraie transformation (le cercle unité est préservé) ou contre-exemple
+ * z'=(z−p)/(1−pz), une chance sur deux (audit 6e ch. 5 : verdict de l'écran 3 jamais constant).
+ * |p|² ≥ 2 (jamais |p|=1, qui annulerait le dénominateur sur le cercle) ; contre-exemple : p non
+ * réel (b≠0), sinon les deux transformations coïncident. */
+export function construireFamilleC(conjugueForce?: boolean): ExerciceComplexesC {
+  const conjugue = conjugueForce ?? Math.random() < 0.5;
+  let a = 0;
+  let b = 0;
+  do {
+    a = tirerEntier(-BORNE, BORNE);
+    b = tirerEntier(-BORNE, BORNE);
+  } while (a * a + b * b < 2 || (!conjugue && b === 0));
+  return { famille: "C", a, b, conjugue };
 }

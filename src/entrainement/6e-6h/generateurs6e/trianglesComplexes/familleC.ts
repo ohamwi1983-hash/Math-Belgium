@@ -1,133 +1,165 @@
-import type { ExerciceTrianglesC, PointComplexe } from "../../core6e/trianglesComplexes.types";
+import type { ExerciceTrianglesC, Longueur, PointComplexe, PositionAC } from "../../core6e/trianglesComplexes.types";
 import { pgcd, tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerOrdres } from "./construction";
 
 /**
- * Couche A (6e) — génération, famille C ("Triangle équilatéral et point remarquable") de `6gen41`.
+ * Couche A (6e) — génération, famille C (« triangle équilatéral OBF : A est-il le centre ? ») de
+ * `6gen41`.
  *
- * ============================================================================
- * **Construction O,B,F — PREUVE algébrique que OBF est équilatéral (demandée explicitement par le
- * prompt de mission)**
- * ============================================================================
- * `O=0`, `B` un affixe quelconque de module `r`, `F=B·e^{iπ/3}` (rotation de 60° AUTOUR DE O) :
- * - `|OF| = |B|·|e^{iπ/3}| = |B|·1 = r = |OB|`.
- * - `|BF| = |F−B| = |B|·|e^{iπ/3}−1|`. Or `|e^{iθ}−1| = 2·sin(θ/2)` (identité standard — corde du
- *   cercle unité), donc `|e^{iπ/3}−1| = 2·sin(π/6) = 2×0.5 = 1` ⟹ `|BF| = r·1 = r`.
- * Donc `|OB|=|OF|=|BF|=r` EXACTEMENT, pour TOUT `B` — équilatéral garanti par construction, preuve
- * indépendante du choix de `B`. Vérifié aussi numériquement sur de nombreux tirages,
- * `familleC.test.ts`.
+ * **Construction** : O = 0, B = r·e^{ikπ/2} (k ∈ {0;1;2;3}), F = B·e^{±iπ/3} (rotation de ±60°
+ * autour de O) — |OB| = |OF| = r et |BF| = r·|e^{±iπ/3} − 1| = r·2 sin(π/6) = r : OBF est
+ * équilatéral pour tout tirage.
  *
- * ============================================================================
- * **`A` (centre) — formule fermée dérivée (voir `docs/historique-6e.md` pour le détail du calcul)**
- * ============================================================================
- * `A = (O+B+F)/3`. En écrivant `B=r·(cosβ,sinβ)` (β = 0/90/180/270°, seule rotation entière — voir
- * `construction.ts`, `rotation90`), un développement trigonométrique direct donne
- * `A = (r/√3)·(cos(β+30°), sin(β+30°))` — un point à `β+30°` (TOUJOURS un angle remarquable puisque
- * β est un multiple de 90°) et de module `r/√3`. Les 4 cas possibles (β=0/90/180/270°) sont donc
- * ÉNUMÉRÉS EXPLICITEMENT ci-dessous (`CAS_PAR_DIRECTION`) plutôt que recalculés par trigonométrie à
- * chaque appel — chaque composante finale est soit un ENTIER (r/2), soit un radical simple en √3
- * (r√3/2 ou r√3/6), jamais un mélange à 2 radicaux différents (`r` choisi multiple de 6 — voir plus
- * bas — pour que ces 2 dénominateurs restent toujours des entiers propres).
+ * **Audit 6e ch. 5, point 6 (décision F) — verdict non constant** : A était TOUJOURS le centre
+ * (écran « équidistant » constant). A est maintenant le centre (≈ 1 fois sur 2 : distances r√3/3)
+ * OU le milieu d'un côté (distances r/2, r/2 et r√3/2 au sommet opposé).
+ * **Point 45 (décision J) — variété** : r ∈ {2;4;…;12} (pair : coordonnées sans demi-entier), 4
+ * directions, 2 orientations → 48 exercices « centre » distincts (auparavant 12 en tout), 192 en
+ * tout.
  *
- * ============================================================================
- * **Écran 2 — distance centre→sommet IRRATIONNELLE, exception délibérée documentée en tête de
- * `core6e/trianglesComplexes.types.ts`** : rayon circonscrit d'un équilatéral de côté `r` entier =
- * `r/√3 = r√3/3`, mathématiquement irrationnel — réutilise le pattern déjà établi par `6gen37`
- * (module tapé sous forme radicale via `moteur6e/equivalenceExponentielle.ts`, qui supporte
- * `sqrt(...)`), jamais un pattern nouveau.
+ * **Coordonnées exactes** : chaque coordonnée vaut (u + v√3)/12 avec u, v ENTIERS (jamais les deux
+ * non nuls ici : B, F, le centre et les milieux n'ont que des coordonnées rationnelles OU multiples
+ * de √3) — LaTeX réduit par `coordonneeLatex`.
  */
 
-const RAYONS = [6, 12, 18] as const;
+const RAYONS = [2, 4, 6, 8, 10, 12] as const;
+const POSITIONS_NON_CENTRE: PositionAC[] = ["milieuOB", "milieuOF", "milieuBF"];
 
-interface Composante {
-  latex: string;
-  numerique: number;
+/** (u + v√3)/12, u et v entiers. */
+interface Coord {
+  u: number;
+  v: number;
 }
 
-function entiere(num: number): Composante {
-  if (num === 0) return { latex: "0", numerique: 0 };
-  return { latex: `${num}`, numerique: num };
-}
-
-/** `(num/den)·√3`, fraction simplifiée — jamais mélangée à un autre radical (voir en-tête). */
-function radicale3(num: number, den: number): Composante {
-  if (num === 0) return { latex: "0", numerique: 0 };
+function fractionLatex(num: number, den: number): string {
   const g = pgcd(Math.abs(num), den);
   const n = num / g;
   const d = den / g;
-  const numerique = (n / d) * Math.sqrt(3);
+  if (d === 1) return `${n}`;
+  return `${n < 0 ? "-" : ""}\\frac{${Math.abs(n)}}{${d}}`;
+}
+
+function radicalLatex(num: number, den: number): string {
+  const g = pgcd(Math.abs(num), den);
+  const n = num / g;
+  const d = den / g;
   const signe = n < 0 ? "-" : "";
-  const magnitude = Math.abs(n) === 1 ? "" : `${Math.abs(n)}`;
-  const radical = `${magnitude}\\sqrt{3}`;
-  return { latex: d === 1 ? `${signe}${radical}` : `\\frac{${signe}${radical}}{${d}}`, numerique };
+  const mag = Math.abs(n) === 1 ? "" : `${Math.abs(n)}`;
+  return d === 1 ? `${signe}${mag}\\sqrt{3}` : `${signe}\\frac{${mag}\\sqrt{3}}{${d}}`;
 }
 
-function assemblerLatex(re: Composante, im: Composante): string {
-  const reZero = re.numerique === 0;
-  const imZero = im.numerique === 0;
-  if (reZero && imZero) return "0";
-  if (imZero) return re.latex;
-  const imNeg = im.latex.startsWith("-");
-  const imMag = imNeg ? im.latex.slice(1) : im.latex;
-  const signe = imNeg ? "-" : "+";
-  if (reZero) return `${imNeg ? "-" : ""}${imMag}i`;
-  return `${re.latex}${signe}${imMag}i`;
+function coordonneeLatex(c: Coord): string {
+  if (c.u === 0 && c.v === 0) return "0";
+  if (c.v === 0) return fractionLatex(c.u, 12);
+  if (c.u === 0) return radicalLatex(c.v, 12);
+  const g = pgcd(pgcd(Math.abs(c.u), Math.abs(c.v)), 12);
+  const u = c.u / g;
+  const v = c.v / g;
+  const d = 12 / g;
+  const vMag = Math.abs(v) === 1 ? "" : `${Math.abs(v)}`;
+  const corps = `${u}${v < 0 ? "-" : "+"}${vMag}\\sqrt{3}`;
+  return d === 1 ? corps : `\\frac{${corps}}{${d}}`;
 }
 
-export function construireFamilleC(): ExerciceTrianglesC {
+function valeur(c: Coord): number {
+  return (c.u + c.v * Math.sqrt(3)) / 12;
+}
+
+function point(x: Coord, y: Coord): PointComplexe {
+  const re = valeur(x);
+  const im = valeur(y);
+  const reL = coordonneeLatex(x);
+  const imL = coordonneeLatex(y);
+  let latex: string;
+  if (reL === "0" && imL === "0") latex = "0";
+  else if (imL === "0") latex = reL;
+  else {
+    const imNeg = imL.startsWith("-");
+    const imMag = imNeg ? imL.slice(1) : imL;
+    const imTerme = imMag === "1" ? "i" : `${imMag}i`;
+    latex = reL === "0" ? `${imNeg ? "-" : ""}${imTerme}` : `${reL}${imNeg ? "-" : "+"}${imTerme}`;
+  }
+  return { re, im, latex };
+}
+
+/** Quart de tour (x, y) → (−y, x), répété k fois. */
+function tourner(x: Coord, y: Coord, k: number): [Coord, Coord] {
+  let a = x;
+  let b = y;
+  for (let i = 0; i < k; i++) [a, b] = [{ u: -b.u, v: -b.v }, a];
+  return [a, b];
+}
+
+function milieu(p: [Coord, Coord], q: [Coord, Coord]): [Coord, Coord] {
+  return [
+    { u: (p[0].u + q[0].u) / 2, v: (p[0].v + q[0].v) / 2 },
+    { u: (p[1].u + q[1].u) / 2, v: (p[1].v + q[1].v) / 2 },
+  ];
+}
+
+function longueurRationnelle(num: number, den: number): Longueur {
+  return { numerique: num / den, latex: fractionLatex(num, den) };
+}
+function longueurRadicale(num: number, den: number): Longueur {
+  return { numerique: (num / den) * Math.sqrt(3), latex: radicalLatex(num, den) };
+}
+
+export function construireFamilleC(positionForcee?: PositionAC): ExerciceTrianglesC {
   const r = tirerParmi(RAYONS);
   const k = tirerParmi([0, 1, 2, 3] as const);
+  const s = tirerParmi([1, -1] as const);
+  const positionA = positionForcee ?? (tirerParmi([true, false] as const) ? "centre" : tirerParmi(POSITIONS_NON_CENTRE));
 
-  // β = k×90°. Formules fermées dérivées en en-tête de fichier, une par direction.
-  let bRe: Composante, bIm: Composante, fRe: Composante, fIm: Composante, aRe: Composante, aIm: Composante;
-  switch (k) {
-    case 0:
-      bRe = entiere(r);
-      bIm = entiere(0);
-      fRe = entiere(r / 2);
-      fIm = radicale3(r, 2);
-      aRe = entiere(r / 2);
-      aIm = radicale3(r, 6);
+  const zero: Coord = { u: 0, v: 0 };
+  const O: [Coord, Coord] = [zero, zero];
+  const B = tourner({ u: 12 * r, v: 0 }, zero, k);
+  const F = tourner({ u: 6 * r, v: 0 }, { u: 0, v: 6 * s * r }, k);
+  const G = tourner({ u: 6 * r, v: 0 }, { u: 0, v: 2 * s * r }, k);
+
+  const moitie = longueurRationnelle(r, 2);
+  const hauteur = longueurRadicale(r, 2);
+  const rayon = longueurRadicale(r, 3);
+  let A: [Coord, Coord];
+  let AO: Longueur;
+  let AB: Longueur;
+  let AF: Longueur;
+  switch (positionA) {
+    case "centre":
+      A = G;
+      AO = AB = AF = rayon;
       break;
-    case 1:
-      bRe = entiere(0);
-      bIm = entiere(r);
-      fRe = radicale3(-r, 2);
-      fIm = entiere(r / 2);
-      aRe = radicale3(-r, 6);
-      aIm = entiere(r / 2);
+    case "milieuOB":
+      A = milieu(O, B);
+      AO = moitie;
+      AB = moitie;
+      AF = hauteur;
       break;
-    case 2:
-      bRe = entiere(-r);
-      bIm = entiere(0);
-      fRe = entiere(-r / 2);
-      fIm = radicale3(-r, 2);
-      aRe = entiere(-r / 2);
-      aIm = radicale3(-r, 6);
+    case "milieuOF":
+      A = milieu(O, F);
+      AO = moitie;
+      AF = moitie;
+      AB = hauteur;
       break;
-    default:
-      bRe = entiere(0);
-      bIm = entiere(-r);
-      fRe = radicale3(r, 2);
-      fIm = entiere(-r / 2);
-      aRe = radicale3(r, 6);
-      aIm = entiere(-r / 2);
+    case "milieuBF":
+      A = milieu(B, F);
+      AB = moitie;
+      AF = moitie;
+      AO = hauteur;
       break;
   }
 
-  const O: PointComplexe = { re: 0, im: 0, latex: "0" };
-  const B: PointComplexe = { re: bRe.numerique, im: bIm.numerique, latex: assemblerLatex(bRe, bIm) };
-  const F: PointComplexe = { re: fRe.numerique, im: fIm.numerique, latex: assemblerLatex(fRe, fIm) };
-  const A: PointComplexe = { re: aRe.numerique, im: aIm.numerique, latex: assemblerLatex(aRe, aIm) };
-
-  const distCentre = radicale3(r, 3); // r/√3 = (r/3)·√3.
-
   return {
     famille: "C",
-    O,
-    B,
-    F,
-    A,
+    O: point(...O),
+    B: point(...B),
+    F: point(...F),
+    A: point(...A),
     cote: r,
-    distanceCentre: { numerique: distCentre.numerique, latex: distCentre.latex },
+    positionA,
+    AO,
+    AB,
+    AF,
+    equidistant: positionA === "centre",
+    ordres: tirerOrdres(),
   };
 }

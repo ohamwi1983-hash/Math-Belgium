@@ -118,7 +118,8 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
+          badge: 'produit de deux complexes',
+          formula: 'Calcule $(2+i)(3-i)$.',
           steps: [{ tag: 'développer, puis remplacer i²=−1', text: '$(2+i)(3-i) = 6-2i+3i-i^2 = 6+i-(-1)$' }],
           result: { tag: 'résultat', text: '$7+i$' },
         },
@@ -186,7 +187,8 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
+          badge: 'quotient par le conjugué',
+          formula: 'Écris $\\dfrac{1+i}{1-i}$ sous la forme $a+bi$.',
           steps: [{ tag: 'multiplier par le conjugué du dénominateur', text: '$\\dfrac{1+i}{1-i} = \\dfrac{(1+i)(1+i)}{(1-i)(1+i)} = \\dfrac{2i}{2}$' }],
           result: { tag: 'résultat', text: '$i$' },
         },
@@ -233,7 +235,8 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
+          badge: 'puissance de i',
+          formula: 'Calcule $i^{2021}$.',
           steps: [{ tag: 'décomposer l\'exposant', text: '$2021 = 4 \\times 505 + 1$' }],
           result: { tag: 'résultat', text: '$i^{2021} = i^1 = i$' },
         },
@@ -302,18 +305,22 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Milieu et distance',
+          label: 'Milieu, distance, parallélogramme',
           items: [
             '$z_M = \\dfrac{z_A+z_B}{2} \\qquad AB = |z_B - z_A|$',
             'La notation $|a+bi| = \\sqrt{a^2+b^2}$ désigne la LONGUEUR du vecteur d\'affixe ' +
               '$a+bi$ — c\'est simplement le théorème de Pythagore, appliqué dans le plan ' +
               'd\'Argand. Tu étudieras cette longueur pour elle-même à la section 4.',
+            '**Parallélogramme** : $ABCD$ (sommets dans cet ordre) est un parallélogramme ⟺ ses ' +
+              'diagonales $[AC]$ et $[BD]$ ont le même milieu ⟺ $z_A+z_C = z_B+z_D$. D\'où le ' +
+              '4e sommet : $z_D = z_A-z_B+z_C$.',
           ],
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
-          steps: [{ tag: 'zB−zA', text: 'Pour $z_A=1+2i$ et $z_B=4+6i$ : $z_B-z_A = 3+4i$' }],
+          badge: 'distance entre deux points',
+          formula: 'Calcule la distance $AB$, pour $z_A=1+2i$ et $z_B=4+6i$.',
+          steps: [{ tag: 'différence des affixes', text: '$z_B-z_A = (4-1)+(6-2)i = 3+4i$' }],
           result: { tag: 'résultat', text: '$AB = \\sqrt{3^2+4^2} = 5$' },
         },
         {
@@ -369,7 +376,8 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu — 3+4i',
+          badge: 'racine carrée d\'un complexe',
+          formula: 'Trouve les racines carrées de $3+4i$.',
           steps: [
             { tag: 'carrés additionnés → 3e équation', text: '$\\sqrt{3^2+4^2}=5$, d\'où le système $x^2-y^2=3,\\ 2xy=4,\\ x^2+y^2=5$' },
             { tag: 'somme / différence', text: 'En additionnant/soustrayant : $x^2=4,\\ y^2=1$, donc $x=\\pm2,\\ y=\\pm1$' },
@@ -403,7 +411,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Affixes et racines carrées',
           generatorId: '6gen35',
-          description: ['Calcule un milieu, une distance, ou les deux racines carrées d\'un nombre complexe grâce au système x²−y², 2xy, somme des carrés.'],
+          description: ['Calcule un milieu ou une distance, trouve le 4e sommet d\'un parallélogramme, ou détermine les deux racines carrées d\'un nombre complexe grâce au système x² − y² = a, 2xy = b, x² + y² = √(a² + b²).'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 35. Affixes et racines carrées »',
         },
@@ -471,8 +479,9 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
-          steps: [{ tag: 'discriminant', text: '$z^2+2z+5=0$ : $\\Delta=4-20=-16$, $\\sqrt{|\\Delta|}=4$' }],
+          badge: 'équation à discriminant négatif',
+          formula: 'Résous $z^2+2z+5=0$ dans ℂ.',
+          steps: [{ tag: 'discriminant', text: '$\\Delta=2^2-4\\cdot1\\cdot5=4-20=-16$, $\\sqrt{|\\Delta|}=4$' }],
           result: { tag: 'résultat', text: '$z = \\dfrac{-2\\pm4i}{2} = -1\\pm2i$' },
         },
         { kind: 'subheading', text: 'Équations bicarrées' },
@@ -494,6 +503,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — deux équations bicarrées',
           blocks: [
             {
               kind: 'para',
@@ -537,11 +547,54 @@ export const nombresComplexes: ChapterContent = {
             'vraiment complexes, rien ne garantit que le conjugué d\'une racine en soit une ' +
             'aussi.',
         },
+        { kind: 'subheading', text: 'Équation du second degré à coefficients complexes' },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Pour $az^2+bz+c=0$ avec $a,b,c$ complexes ($a\\ne0$), calcule $\\Delta=b^2-4ac$ : ' +
+              'c\'est en général un complexe NON RÉEL — ni positif, ni négatif.',
+            'Cherche une racine carrée $\\delta$ de $\\Delta$ (un complexe tel que ' +
+              '$\\delta^2=\\Delta$) par la méthode de la section 2 : système $x^2-y^2$, $2xy$, ' +
+              '$x^2+y^2$.',
+            'Les solutions sont $z=\\dfrac{-b\\pm\\delta}{2a}$ — la même formule que dans ℝ, ' +
+              '$\\delta$ jouant le rôle de $\\sqrt{\\Delta}$. Vérifie-les avec la somme ' +
+              '$z_1+z_2=-\\dfrac{b}{a}$ et le produit $z_1z_2=\\dfrac{c}{a}$.',
+          ],
+        },
+        {
+          kind: 'attention',
+          text:
+            'N\'écris jamais $\\sqrt{\\Delta}$ quand $\\Delta$ est un complexe non réel : le ' +
+            'symbole $\\sqrt{\\phantom{x}}$ est réservé aux réels positifs. Et ne cherche pas ' +
+            'deux solutions conjuguées : avec des coefficients non réels, elles ne le sont en ' +
+            'général pas.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'équation à coefficients complexes',
+          formula: 'Résous $z^2-3z+(3+i)=0$ dans ℂ.',
+          steps: [
+            { tag: 'discriminant', text: '$\\Delta=(-3)^2-4(3+i)=9-12-4i=-3-4i$' },
+            {
+              tag: 'racine carrée de Δ (section 2)',
+              text:
+                '$x^2-y^2=-3$, $2xy=-4$, $x^2+y^2=\\sqrt{(-3)^2+(-4)^2}=5$ : $x^2=1$, $y^2=4$, ' +
+                'et $x$, $y$ de signes opposés car $2xy<0$, d\'où $\\delta=\\pm(1-2i)$',
+            },
+            { tag: 'formule', text: '$z=\\dfrac{3\\pm(1-2i)}{2}$ : $z_1=\\dfrac{4-2i}{2}=2-i$ et $z_2=\\dfrac{2+2i}{2}=1+i$' },
+            {
+              tag: 'vérification par somme et produit',
+              text: '$z_1+z_2=3=-\\dfrac{b}{a}$ et $z_1z_2=(2-i)(1+i)=2+2i-i-i^2=3+i=\\dfrac{c}{a}\\ \\checkmark$',
+            },
+          ],
+          result: { tag: 'solutions', text: '$z_1=2-i$ et $z_2=1+i$' },
+        },
         {
           kind: 'entrainement',
           title: 'Équations dans ℂ',
           generatorId: '6gen36',
-          description: ['Résous une équation du second degré à discriminant négatif, ou une équation bicarrée, dans ℂ.'],
+          description: ['Résous dans ℂ une équation du second degré à discriminant négatif ou une équation bicarrée, à coefficients réels. En approfondissement : équation du premier degré à coefficients complexes (avec z̄), équation rationnelle, équation du second degré à discriminant complexe, équation de degré 4.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 36. Équations dans ℂ »',
         },
@@ -569,7 +622,7 @@ export const nombresComplexes: ChapterContent = {
           items: [
             'Le **module** de $z=a+bi$ est sa distance à l\'origine : $|z| = \\sqrt{a^2+b^2}$, ' +
               'toujours positif ou nul — c\'est la même longueur qu\'à la section 2, pour la ' +
-              'distance $AB=|z_B-z_A|$, qui reçoit ici enfin son nom. L\'**argument** $arg(z)$ ' +
+              'distance $AB=|z_B-z_A|$, qui reçoit ici enfin son nom. L\'**argument** $\\arg(z)$ ' +
               'est l\'angle (à $2\\pi$ près) entre l\'axe des réels positifs et le vecteur ' +
               '$\\vec{OM}$.',
           ],
@@ -632,7 +685,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Si $a>0$, $arg(z) = \\arctan(b/a)$ directement. Si $a<0$, tu dois AJOUTER (ou ' +
+            'Si $a>0$, $\\arg(z) = \\arctan(b/a)$ directement. Si $a<0$, tu dois AJOUTER (ou ' +
               'soustraire) $\\pi$ à cette valeur — sinon tu obtiens l\'argument du complexe ' +
               'opposé, pas celui de $z$.',
           ],
@@ -709,8 +762,9 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
-          steps: [{ tag: 'multiplier modules et additionner arguments', text: 'Pour $z_1=2e^{i\\pi/3}$ et $z_2=3e^{i\\pi/6}$ : $z_1z_2 = (2\\times3)e^{i(\\pi/3+\\pi/6)}$' }],
+          badge: 'produit en forme exponentielle',
+          formula: 'Calcule $z_1z_2$, pour $z_1=2e^{i\\pi/3}$ et $z_2=3e^{i\\pi/6}$.',
+          steps: [{ tag: 'multiplier modules et additionner arguments', text: '$z_1z_2 = (2\\times3)e^{i(\\pi/3+\\pi/6)}$' }],
           result: { tag: 'résultat', text: '$= 6e^{i\\pi/2}$' },
         },
         {
@@ -727,7 +781,7 @@ export const nombresComplexes: ChapterContent = {
           caption:
             'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le réglage de ' +
             'départ (r₁=2, θ₁=60°, r₂=3, θ₂=30°) reproduit exactement l\'exemple ci-dessus : ' +
-            'z₁z₂ = 6e^(iπ/2).',
+            'z₁z₂ a pour module 6 et pour argument π/2.',
         },
         {
           kind: 'astuce',
@@ -743,12 +797,12 @@ export const nombresComplexes: ChapterContent = {
           caption: 'Récapitulatif : effet de chaque opération sur module et argument',
           headers: ['Opération', 'Module', 'Argument (à 2π près)'],
           rows: [
-            ['Conjugué $\\bar{z}$', '$|\\bar{z}|=|z|$', '$arg(\\bar{z})=-arg(z)$'],
-            ['Opposé $-z$', '$|-z|=|z|$', '$arg(-z)=\\pi+arg(z)$'],
-            ['Produit $z_1z_2$', '$|z_1z_2|=|z_1|\\cdot|z_2|$', '$arg(z_1z_2)=arg(z_1)+arg(z_2)$'],
-            ['Inverse $1/z$', '$|1/z|=1/|z|$', '$arg(1/z)=-arg(z)$'],
-            ['Puissance $z^n$', '$|z^n|=|z|^n$', '$arg(z^n)=n\\cdot arg(z)$'],
-            ['Quotient $z_1/z_2$', '$|z_1/z_2|=|z_1|/|z_2|$', '$arg(z_1/z_2)=arg(z_1)-arg(z_2)$'],
+            ['Conjugué $\\bar{z}$', '$|\\bar{z}|=|z|$', '$\\arg(\\bar{z})=-\\arg(z)$'],
+            ['Opposé $-z$', '$|-z|=|z|$', '$\\arg(-z)=\\pi+\\arg(z)$'],
+            ['Produit $z_1z_2$', '$|z_1z_2|=|z_1|\\cdot|z_2|$', '$\\arg(z_1z_2)=\\arg(z_1)+\\arg(z_2)$'],
+            ['Inverse $1/z$', '$|1/z|=1/|z|$', '$\\arg(1/z)=-\\arg(z)$'],
+            ['Puissance $z^n$', '$|z^n|=|z|^n$', '$\\arg(z^n)=n\\cdot \\arg(z)$'],
+            ['Quotient $z_1/z_2$', '$|z_1/z_2|=|z_1|/|z_2|$', '$\\arg(z_1/z_2)=\\arg(z_1)-\\arg(z_2)$'],
           ],
         },
         {
@@ -812,7 +866,7 @@ export const nombresComplexes: ChapterContent = {
             'pure (partie réelle), $X$ est la **réactance** (partie imaginaire), due aux ' +
             "bobines et aux condensateurs. Pour une résistance de $3\\,\\Omega$ en série avec " +
             'une réactance de $4\\,\\Omega$ : $Z=3+4i$, donc $|Z|=\\sqrt{3^2+4^2}=5$ Ω ' +
-            "(l'opposition totale au courant) et $arg(Z)$ vaut environ 53° (le décalage entre " +
+            "(l'opposition totale au courant) et $\\arg(Z)$ vaut environ 53° (le décalage entre " +
             'tension et courant). Sans les complexes, calculer cette combinaison résistance + ' +
             'bobine + condensateur demanderait de refaire de la trigonométrie à chaque étape — ' +
             'ici, une seule addition de complexes suffit.',
@@ -822,7 +876,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Forme trigonométrique, module et argument',
           generatorId: '6gen37',
-          description: ['Calcule module et argument, convertis entre les formes algébrique/trigonométrique/exponentielle, et multiplie/divise des complexes sous forme exponentielle.'],
+          description: ['Calcule module et argument (accepté à 2π près, ou réduit quand l\'énoncé le demande), convertis entre les formes algébrique, trigonométrique et exponentielle, et multiplie ou divise des complexes sous forme exponentielle.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 37. Forme trigonométrique, module et argument »',
         },
@@ -832,7 +886,7 @@ export const nombresComplexes: ChapterContent = {
       id: 'formulemoivre',
       number: 5,
       title: 'Formule de Moivre',
-      kicker: '(cosθ+isinθ)ⁿ = cos(nθ)+isin(nθ)',
+      kicker: '(cos θ + i sin θ)ⁿ = cos(nθ) + i sin(nθ)',
       blocks: [
         { kind: 'video', title: 'Formule de Moivre', youtubeId: 'u4Zek-B6nnk' },
         {
@@ -902,7 +956,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration alternative — par récurrence sur n, sans passer par e^(iθ)',
+          label: 'Démonstration alternative — par récurrence sur n, sans passer par eⁱᶿ',
           blocks: [
             { kind: 'para', text: '$(\\cos\\theta+i\\sin\\theta)^1 = \\cos(1\\cdot\\theta)+i\\sin(1\\cdot\\theta)$ — initialisation : vrai trivialement pour $n=1$' },
             { kind: 'para', text: 'Hérédité — tu supposes la propriété vraie au rang $n-1$ : $(\\cos\\theta+i\\sin\\theta)^{n-1} = \\cos((n-1)\\theta)+i\\sin((n-1)\\theta)$' },
@@ -943,7 +997,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — n=2',
+          label: 'Exemple résolu — développer cos(2x) et sin(2x)',
           blocks: [
             {
               kind: 'para',
@@ -956,7 +1010,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — n=3',
+          label: 'Exemple résolu — développer cos(3x) et sin(3x)',
           blocks: [
             {
               kind: 'para',
@@ -1074,7 +1128,7 @@ export const nombresComplexes: ChapterContent = {
       id: 'racinesniemes',
       number: 6,
       title: 'Racines n-ièmes d\'un nombre complexe',
-      kicker: 'zₖ = r^{1/n}e^{i(θ+2kπ)/n} — polygone régulier',
+      kicker: 'zₖ = ⁿ√r · exp(i(θ + 2kπ)/n) — polygone régulier',
       blocks: [
         { kind: 'video', title: 'Racines n-ièmes d\'un nombre complexe', youtubeId: 'nMCp_ZjrrjQ' },
         {
@@ -1130,6 +1184,7 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Exemple résolu — racines quatrièmes et cubiques de l\'unité',
           blocks: [
             {
               kind: 'para',
@@ -1297,7 +1352,7 @@ export const nombresComplexes: ChapterContent = {
               text:
                 'Le point d\'affixe $zc$ a donc pour module $r\\rho$ (celui de $z$, multiplié ' +
                 'par $r=|c|$) et pour argument $\\theta+\\alpha$ (celui de $z$, augmenté de ' +
-                '$\\alpha=arg(c)$). Ajouter $\\alpha$ à l\'argument SANS toucher au module, ' +
+                '$\\alpha=\\arg(c)$). Ajouter $\\alpha$ à l\'argument SANS toucher au module, ' +
                 'c\'est une rotation de centre $O$ et d\'angle $\\alpha$ ; multiplier ensuite ' +
                 'le module par $r$ SANS toucher à l\'argument, c\'est une homothétie de ' +
                 'centre $O$ et de rapport $r$. Les deux effets se produisent en même temps ' +
@@ -1341,8 +1396,8 @@ export const nombresComplexes: ChapterContent = {
           items: [
             'Une similitude directe s\'écrit $z\' = az+b$, avec $a$ un complexe NON NUL. En ' +
               'écrivant $a = |a|e^{i\\theta}$, tu vois qu\'elle combine une rotation d\'angle ' +
-              '$\\theta = arg(a)$ et une homothétie de rapport $|a|$, de même centre.',
-            '$|a|$ = rapport d\'agrandissement $\\qquad arg(a)$ = angle de rotation',
+              '$\\theta = \\arg(a)$ et une homothétie de rapport $|a|$, de même centre.',
+            '$|a|$ = rapport d\'agrandissement $\\qquad \\arg(a)$ = angle de rotation',
           ],
         },
         {
@@ -1445,10 +1500,21 @@ export const nombresComplexes: ChapterContent = {
           domaines: ['Informatique', 'Robotique', 'Jeux vidéo'],
         },
         {
+          kind: 'exemple',
+          badge: 'classer une transformation z′ = az + b',
+          formula: 'Détermine la nature, le centre, l\'angle et le rapport de la transformation $z\' = (1+i)z + 2$.',
+          steps: [
+            { tag: 'lire a et b', text: '$a = 1+i$ et $b = 2$ : $a \\neq 1$, a n\'est pas réel et $|a| = \\sqrt{2} \\neq 1$ : c\'est une similitude (rotation ET homothétie)' },
+            { tag: 'centre — point fixe', text: '$z_0 = \\dfrac{b}{1-a} = \\dfrac{2}{-i} = \\dfrac{2i}{-i \\cdot i} = 2i$' },
+            { tag: 'angle et rapport', text: '$\\arg(a) = \\arg(1+i) = \\dfrac{\\pi}{4}$ ; $|a| = \\sqrt{2}$' },
+          ],
+          result: { tag: 'résultat', text: 'similitude de centre $\\Omega(2i)$, d\'angle $\\dfrac{\\pi}{4}$ et de rapport $\\sqrt{2}$ : $z\' - 2i = \\sqrt{2}\\,e^{i\\pi/4}(z - 2i)$' },
+        },
+        {
           kind: 'entrainement',
           title: 'Transformations du plan via les nombres complexes',
           generatorId: '6gen40',
-          description: ['Détermine l\'écriture complexe d\'une translation, rotation, homothétie ou similitude — ou retrouve le centre et le type d\'une transformation donnée.'],
+          description: ['Écris une translation, une rotation, une homothétie ou une similitude sous forme complexe — ou, à partir de z′ = az + b, retrouve le type de la transformation, son centre, son angle et son rapport.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 40. Transformations du plan via les nombres complexes »',
         },
@@ -1484,12 +1550,14 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'methode',
-          label: 'Triangle isocèle, rectangle',
+          label: 'Triangle isocèle, rectangle, isocèle rectangle',
           items: [
             '$ABC$ est isocèle en $A$ ⟺ $|z_B-z_A| = |z_C-z_A|$ — égalité des MODULES, jamais ' +
               'des complexes eux-mêmes ! (ça forcerait $B=C$).',
             '$ABC$ est rectangle en $A$ ⟺ $\\dfrac{z_B-z_A}{z_C-z_A}$ imaginaire pur ' +
               '(orthogonalité de $AB$ et $AC$).',
+            '$ABC$ est isocèle rectangle en $A$ ⟺ $\\dfrac{z_C-z_A}{z_B-z_A} = i$ ou $-i$ : le ' +
+              'module 1 donne $AC=AB$, l\'argument $\\pm\\dfrac{\\pi}{2}$ donne l\'angle droit en $A$.',
           ],
         },
         { kind: 'subheading', text: 'Construire un triangle équilatéral par rotation' },
@@ -1553,7 +1621,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Propriétés géométriques de triangles',
           generatorId: '6gen41',
-          description: ['Détermine si des points sont alignés, si des vecteurs sont orthogonaux, ou reconnais un triangle isocèle, rectangle ou équilatéral — à partir de leurs affixes.'],
+          description: ['Montre que des points sont alignés ou que des vecteurs sont orthogonaux grâce à un rapport d\'affixes, et reconnais la nature d\'un triangle (isocèle, rectangle, isocèle rectangle, équilatéral ou quelconque) à partir des affixes de ses sommets.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 41. Propriétés géométriques de triangles »',
         },
@@ -1586,8 +1654,9 @@ export const nombresComplexes: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'Exemple résolu',
-          steps: [{ tag: 'condition mod 2π, divisée par n=3', text: 'Pour $z=e^{i\\theta}$, $\\theta\\in[0;2\\pi[$, $z^3$ réel positif ⟺ $3\\theta \\equiv 0 \\pmod{2\\pi}$' }],
+          badge: 'z³ réel positif',
+          formula: 'Pour $z=e^{i\\theta}$ avec $\\theta\\in[0;2\\pi[$, trouve les valeurs de $\\theta$ pour lesquelles $z^3$ est un réel positif.',
+          steps: [{ tag: 'condition mod 2π, divisée par n=3', text: '$z^3=e^{3i\\theta}$ réel positif ⟺ $3\\theta \\equiv 0 \\pmod{2\\pi}$ ⟺ $\\theta \\equiv 0 \\ [2\\pi/3]$' }],
           result: { tag: 'résultat — 3 valeurs', text: '$\\theta \\in \\{0,\\ 2\\pi/3,\\ 4\\pi/3\\}$' },
         },
         {
@@ -1600,8 +1669,8 @@ export const nombresComplexes: ChapterContent = {
           headers: ['Condition', 'Lieu décrit'],
           rows: [
             ['$|z-a| = k$ ($k>0$)', 'cercle de centre $A$, rayon $k$'],
-            ['$arg(z-a) \\equiv \\theta_0 \\pmod{2\\pi}$', 'demi-droite d\'origine $A$ (exclue), d\'angle $\\theta_0$'],
-            ['$arg(z-a) \\equiv \\theta_0 \\pmod{\\pi}$', 'droite complète passant par $A$ (privée de $A$), de direction $\\theta_0$'],
+            ['$\\arg(z-a) \\equiv \\theta_0 \\pmod{2\\pi}$', 'demi-droite d\'origine $A$ (exclue), d\'angle $\\theta_0$'],
+            ['$\\arg(z-a) \\equiv \\theta_0 \\pmod{\\pi}$', 'droite complète passant par $A$ (privée de $A$), de direction $\\theta_0$'],
           ],
         },
         {
@@ -1616,7 +1685,7 @@ export const nombresComplexes: ChapterContent = {
             points: [{ x: 1, y: 1, label: 'A', tone: 'ink', labelPos: 'left' }],
             vectors: [{ from: { x: 1, y: 1 }, to: { x: 1 + 2.2 * Math.cos((40 * PI) / 180), y: 1 + 2.2 * Math.sin((40 * PI) / 180) }, tone: 'good' }],
             caption:
-              'Cercle $|z-a|=k$ et demi-droite $arg(z-a)\\equiv\\theta_0 \\pmod{2\\pi}$, tous ' +
+              'Cercle $|z-a|=k$ et demi-droite $\\arg(z-a)\\equiv\\theta_0 \\pmod{2\\pi}$, tous ' +
               'deux issus du même point $A$.',
           },
         },
@@ -1663,7 +1732,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Nombres complexes — problèmes avancés',
           generatorId: '6gen42',
-          description: ['Détermine si un nombre complexe élevé à une puissance est réel ou réel positif, décris un lieu géométrique, ou démontre une propriété d\'une transformation complexe.'],
+          description: ['Détermine quand une puissance zⁿ est réelle ou réelle positive, décris un lieu géométrique (cercle |z − a| = k, demi-droite ou droite arg(z − a) ≡ θ), ou démontre une propriété d\'une transformation complexe. En approfondissement : lieux de Thalès et d\'Apollonius.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 42. Nombres complexes — problèmes avancés »',
         },
@@ -1750,7 +1819,7 @@ export const nombresComplexes: ChapterContent = {
       '**Racines n-ièmes** — $z_k = r^{1/n}e^{i(\\theta+2k\\pi)/n}$, $k=0,\\ldots,n-1$ — polygone régulier.',
       '**Transformations** — $z\'=az+b$ : rotation $|a|=1$, homothétie $a$ réel, similitude sinon.',
       '**Alignement / orthogonalité** — rapport d\'affixes réel ↔ aligné ; imaginaire pur ↔ orthogonal.',
-      '**Lieux géométriques** — $|z-a|=k$ → cercle ; $arg(z-a)$ mod $2\\pi$ → demi-droite, mod $\\pi$ → droite.',
+      '**Lieux géométriques** — $|z-a|=k$ → cercle ; $\\arg(z-a)$ mod $2\\pi$ → demi-droite, mod $\\pi$ → droite.',
     ],
     checklist: {
       items: [

@@ -6,7 +6,7 @@ import type { IdVarianteFormuleMoivre } from "./generateurs6e/formuleMoivre";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionFormuleMoivre, soumettreReponseEcran } from "./moteur6e/sessionFormuleMoivre";
 import { phasesPourExercice } from "./moteur6e/typesFormuleMoivre";
 import type { EtatSessionFormuleMoivre, PhaseFormuleMoivre } from "./moteur6e/typesFormuleMoivre";
-import { diagnostiquerEcran } from "./moteur6e/verificationFormuleMoivre";
+import { controleAvantSoumission, diagnostiquerEcran } from "./moteur6e/verificationFormuleMoivre";
 import { Katex } from "./components/Katex";
 import { EtapeChampsFormuleMoivre } from "./components6e/EtapeChampsFormuleMoivre";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -50,6 +50,9 @@ export function App6gen38() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseFormuleMoivre, boolean>>>({});
+  /** Compteur de générations, intégré à la clé d'écran (audit 6e ch. 5, point 9) : sans lui, l'écran 1
+   * du nouvel exercice gardait la saisie de l'écran 1 du précédent (même phase, même clé). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -85,6 +88,7 @@ export function App6gen38() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
@@ -98,6 +102,7 @@ export function App6gen38() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionFormuleMoivre(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteFormuleMoivre)));
   }
 
@@ -156,7 +161,7 @@ export function App6gen38() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifFormuleMoivre(etat)} />
         <EtapeChampsFormuleMoivre
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
@@ -165,8 +170,10 @@ export function App6gen38() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          controleAvantSoumission={(valeurs) => controleAvantSoumission(exercice, phase, valeurs)}
           onValider={(valeurs) =>
-            terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+            // Le libellé se termine déjà par « = » (audit 6e ch. 5 : « … = : … » dans la fiche).
+            terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} ${valeurs[i]}`).join(" ; "))
           }
           validation={validation}
         />

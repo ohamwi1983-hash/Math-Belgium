@@ -3,11 +3,35 @@ import type { ReglagesSession6e } from "../core6e/session6e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 /**
- * Couche B (6e) — types de session pour `6gen41`. 4 familles, longueur de chaîne d'écrans fixe PAR
- * FAMILLE (3 pour A/D, 4 pour B, 2 pour C) — mirroir `typesFormeTrigonometrique.ts` (6gen37).
+ * Couche B (6e) — types de session pour `6gen41`. 5 familles, longueur de chaîne d'écrans fixe PAR
+ * FAMILLE (3 pour A/C/D, 4 pour B, 2 pour E) — mirroir `typesFormeTrigonometrique.ts` (6gen37).
  */
 
-export type PhaseTrianglesComplexes = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4" | "cEcran1" | "cEcran2" | "dEcran1" | "dEcran2" | "dEcran3";
+export type PhaseTrianglesComplexes =
+  | "aEcran1"
+  | "aEcran2"
+  | "aEcran3"
+  | "bEcran1"
+  | "bEcran2"
+  | "bEcran3"
+  | "bEcran4"
+  | "cEcran1"
+  | "cEcran2"
+  | "cEcran3"
+  | "dEcran1"
+  | "dEcran2"
+  | "dEcran3"
+  | "eEcran1"
+  | "eEcran2";
+
+/** Écrans de CHOIX FERMÉ : UNE seule tentative (audit 6e ch. 5, point 6, décision F). Le verdict
+ * de la famille C (équidistant ou non) a été détaché des 3 distances dans son propre écran
+ * (`cEcran3`) pour la même raison. */
+export const PHASES_CHOIX_UNIQUE: readonly PhaseTrianglesComplexes[] = ["aEcran2", "aEcran3", "bEcran2", "bEcran3", "cEcran3", "dEcran2", "eEcran2"];
+
+export function tentativesMaxPhase(phase: PhaseTrianglesComplexes, tentativesMaxReglage: number): number {
+  return PHASES_CHOIX_UNIQUE.includes(phase) ? 1 : tentativesMaxReglage;
+}
 
 export function phaseInitiale(exercice: ExerciceTrianglesComplexes): PhaseTrianglesComplexes {
   switch (exercice.famille) {
@@ -19,6 +43,8 @@ export function phaseInitiale(exercice: ExerciceTrianglesComplexes): PhaseTriang
       return "cEcran1";
     case "D":
       return "dEcran1";
+    case "E":
+      return "eEcran1";
   }
 }
 
@@ -41,12 +67,18 @@ export function phaseApres(phase: PhaseTrianglesComplexes): PhaseTrianglesComple
     case "cEcran1":
       return "cEcran2";
     case "cEcran2":
+      return "cEcran3";
+    case "cEcran3":
       return "termine";
     case "dEcran1":
       return "dEcran2";
     case "dEcran2":
       return "dEcran3";
     case "dEcran3":
+      return "termine";
+    case "eEcran1":
+      return "eEcran2";
+    case "eEcran2":
       return "termine";
   }
 }

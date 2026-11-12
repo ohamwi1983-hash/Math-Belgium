@@ -1,5 +1,6 @@
 import type { ExerciceFamilleE, ValeurComplexe } from "../../core6e/equationsComplexes.types";
-import { tirerEntier, tirerEntierNonNul } from "../calculPrimitives/aleatoire";
+import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../calculPrimitives/aleatoire";
+import { dansLaBorne, tirerDansLaBorne } from "./bornes";
 
 /**
  * Couche A (6e) — génération, famille E ("Quartique biquadratique u=z²") de `6gen36`.
@@ -23,10 +24,10 @@ import { tirerEntier, tirerEntierNonNul } from "../calculPrimitives/aleatoire";
  * l'équation quartique de départ, puisque u=z² substitue directement u²→z⁴, u→z²).
  */
 
-const XY_MIN = -4;
-const XY_MAX = 4;
-const A_MIN = -3;
-const A_MAX = 3;
+const XY_MIN = -3;
+const XY_MAX = 3;
+const A_MIN = -2;
+const A_MAX = 2;
 
 function multiplierGaussien(u: ValeurComplexe, v: ValeurComplexe): ValeurComplexe {
   return { re: u.re * v.re - u.im * v.im, im: u.re * v.im + u.im * v.re };
@@ -53,7 +54,7 @@ function carreDe(x: number, y: number): ValeurComplexe {
   return { re: x * x - y * y, im: 2 * x * y };
 }
 
-export function construireFamilleE(): ExerciceFamilleE {
+function construireFamilleEComplexeBrut(): ExerciceFamilleE {
   const c1 = tirerCoupleXY();
   let c2 = tirerCoupleXY();
   while ((c2.x === c1.x && c2.y === c1.y) || (c2.x === -c1.x && c2.y === -c1.y)) c2 = tirerCoupleXY();
@@ -76,4 +77,70 @@ export function construireFamilleE(): ExerciceFamilleE {
   ];
 
   return { famille: "E", a: aCoef, b, c, u1, u2, racineU1, racineU2, racines };
+}
+
+/** Variante « approfondissement » (hors tirage libre) : coefficients COMPLEXES, bornés à 100. */
+export function construireFamilleEComplexe(): ExerciceFamilleE {
+  return tirerDansLaBorne(construireFamilleEComplexeBrut, (e) => dansLaBorne([e.a, e.b, e.c, e.u1, e.u2]));
+}
+
+/**
+ * Variante du TIRAGE LIBRE (audit 6e ch. 5, point 25) : az⁴ + bz² + c = 0 à coefficients RÉELS,
+ * |b|, |c| ≤ 100 ; b = 0 dans ~10 % des cas seulement.
+ * - 60 % : u₁, u₂ réels distincts parmi ±1, ±4, ±9 — racines réelles (u = s²) ou imaginaires pures
+ *   (u = −s²) ;
+ * - 40 % : u₁ = (x+yi)² et u₂ = (x−yi)² conjugués (x, y non nuls de [-3 ; 3]) — 4 racines ±(x±yi).
+ */
+const CARRES_SIGNES = [-9, -4, -1, 1, 4, 9] as const;
+const A_REELS = [1, 1, 1, -1, 2] as const;
+
+function racineDeCarreSigne(u: number): ValeurComplexe {
+  return u >= 0 ? { re: Math.sqrt(u), im: 0 } : { re: 0, im: Math.sqrt(-u) };
+}
+
+function construireFamilleEReelleBrut(): ExerciceFamilleE {
+  const a = tirerParmi(A_REELS);
+  let racineU1: ValeurComplexe;
+  let racineU2: ValeurComplexe;
+  let u1: ValeurComplexe;
+  let u2: ValeurComplexe;
+  if (Math.random() < 0.6) {
+    const v1 = tirerParmi(CARRES_SIGNES);
+    let v2 = tirerParmi(CARRES_SIGNES);
+    while (v2 === v1) v2 = tirerParmi(CARRES_SIGNES);
+    u1 = { re: v1, im: 0 };
+    u2 = { re: v2, im: 0 };
+    racineU1 = racineDeCarreSigne(v1);
+    racineU2 = racineDeCarreSigne(v2);
+  } else {
+    const x = tirerEntierNonNul(XY_MIN, XY_MAX);
+    const y = tirerEntierNonNul(XY_MIN, XY_MAX);
+    racineU1 = { re: x, im: y };
+    racineU2 = { re: x, im: -y };
+    u1 = carreDe(x, y);
+    u2 = carreDe(x, -y);
+  }
+  const somme = ajouterGaussien(u1, u2);
+  const produit = multiplierGaussien(u1, u2);
+  const aCoef: ValeurComplexe = { re: a, im: 0 };
+  const b: ValeurComplexe = { re: -a * somme.re + 0, im: 0 };
+  const c: ValeurComplexe = { re: a * produit.re + 0, im: 0 };
+  const racines: [ValeurComplexe, ValeurComplexe, ValeurComplexe, ValeurComplexe] = [
+    racineU1,
+    { re: -racineU1.re + 0, im: -racineU1.im + 0 },
+    racineU2,
+    { re: -racineU2.re + 0, im: -racineU2.im + 0 },
+  ];
+  return { famille: "E", a: aCoef, b, c, u1, u2, racineU1, racineU2, racines };
+}
+
+/** Cas particulier (~10 %) : b = 0 (équation z⁴ = k) ; sinon b ≠ 0. */
+export function construireFamilleEReelle(): ExerciceFamilleE {
+  const casParticulier = Math.random() < 0.1;
+  return tirerDansLaBorne(construireFamilleEReelleBrut, (e) => dansLaBorne([e.b, e.c]) && (e.b.re === 0) === casParticulier);
+}
+
+/** Tirage libre : variante réelle. */
+export function construireFamilleE(): ExerciceFamilleE {
+  return construireFamilleEReelle();
 }

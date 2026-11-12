@@ -3,7 +3,7 @@ import { Katex } from "../components/Katex";
 import type { ConditionD } from "../core6e/formeTrigonometrique.types";
 import { OPTIONS_CONDITION_D } from "../moteur6e/verificationFormeTrigonometrique";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatFormeTrigonometrique";
-import { LIBELLE_CONDITION } from "../ui6e/formatFormeTrigonometrique";
+import { congruenceLatex } from "../ui6e/formatFormeTrigonometrique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { RenduFragments } from "../components/RenduFragments";
@@ -29,7 +29,7 @@ interface Props {
 }
 
 /**
- * Écran GÉNÉRIQUE "choix parmi 4 conditions" — famille D, écran 2 UNIQUEMENT (poser l'équation de
+ * Écran GÉNÉRIQUE "choix parmi 4 équations" (une seule tentative, ordre mélangé) — famille D, écran 2 UNIQUEMENT (poser l'équation de
  * congruence correspondant à la condition demandée). Choix véritable présenté à l'élève ⟹ boutons
  * `.btn.toggle-active`, JAMAIS `.btn-primary` (réservé à "Valider", convention CLAUDE.md) — mirroir
  * `EtapeChoixOuiNonExpoProblemes.tsx`, généralisé à 4 options. `OPTIONS_CONDITION_D` (`moteur6e/
@@ -38,6 +38,17 @@ interface Props {
  */
 export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConditionD | null>(null);
+  // Ordre mélangé une fois par écran (composant monté avec une clé d'écran) et libellés réduits à
+  // l'équation : l'ancien libellé « réel positif (nθ≡0) » répétait le mot de l'énoncé et l'ordre
+  // fixe se mémorisait (audit 6e ch. 5, point 6/F).
+  const [options] = useState<ConditionD[]>(() => {
+    const t = [...OPTIONS_CONDITION_D];
+    for (let i = t.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [t[i], t[j]] = [t[j], t[i]];
+    }
+    return t;
+  });
   const montrerErreurs = tentativesUtilisees > 0;
 
   function valider() {
@@ -63,9 +74,9 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blo
         <RenduFragments fragments={consigneEcran} />
       </p>
       <div className="options-grid-compact">
-        {OPTIONS_CONDITION_D.map((option) => (
+        {options.map((option) => (
           <button key={option} type="button" className={`btn ${choix === option ? "toggle-active" : ""} ${montrerErreurs && choix === option ? "is-erronee" : ""}`} onClick={() => setChoix(option)}>
-            {LIBELLE_CONDITION[option]} (nθ≡{option === "reelPositif" ? "0" : option === "reelNegatif" ? "π" : option === "imaginairePurPositif" ? "π/2" : "3π/2"})
+            <Katex expression={congruenceLatex(option)} />
           </button>
         ))}
       </div>
@@ -89,7 +100,7 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blo
         </button>
         {montrerErreurs && (
           <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            {tentativesMax <= 1 ? "Incorrect." : `Incorrect — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
           </p>
         )}
         </>

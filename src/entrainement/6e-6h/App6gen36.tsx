@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsComplexes } from "./generateurs6e/equationsComplexes";
 import type { IdVarianteEquationsComplexes } from "./generateurs6e/equationsComplexes";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionEquationsComplexes, soumettreReponseEcran } from "./moteur6e/sessionEquationsComplexes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionEquationsComplexes, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionEquationsComplexes";
+import { controleQuotientEffectue, graineDepuis, melangerParGraine, prevaliderSaisiesComplexes } from "./moteur6e/saisieComplexe";
 import { phasesPourExercice } from "./moteur6e/typesEquationsComplexes";
 import type { EtatSessionEquationsComplexes, PhaseEquationsComplexes } from "./moteur6e/typesEquationsComplexes";
 import { diagnostiquerEcran } from "./moteur6e/verificationEquationsComplexes";
@@ -53,6 +54,9 @@ export function App6gen36() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseEquationsComplexes, boolean>>>({});
+  /** Compteur de génération, inclus dans la `key` de l'écran : deux exercices successifs commençant
+   * par la même phase ne réutilisent plus l'instance React (saisies/messages conservés). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -91,6 +95,7 @@ export function App6gen36() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -101,6 +106,7 @@ export function App6gen36() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionEquationsComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteEquationsComplexes)));
   }
 
@@ -119,7 +125,7 @@ export function App6gen36() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -149,12 +155,32 @@ export function App6gen36() {
     validation,
   };
 
+  /** Options d'un choix fermé mélangées par une graine tirée de l'exercice (audit 6e ch. 5, point 6). */
+  function melanger<T>(options: readonly T[]): T[] {
+    return melangerParGraine(options, graineDepuis(exercice, phase));
+  }
+
+  /** Refus SANS tentative : saisie illisible, forme non réduite, ou (famille F) quotient recopié avec
+   * « / ». Les champs « Quotient (polynôme en z) » ne sont pas des nombres complexes : ignorés par le
+   * contrôle complexe, contrôlés par `controleQuotientEffectue`. */
+  function prevalider(valeurs: string[]): string | null {
+    const champs = champsEcran(exercice, phase);
+    const indicesPolynome = champs.map((c, i) => (c.label.startsWith("Quotient") ? i : -1)).filter((i) => i >= 0);
+    for (const i of indicesPolynome) {
+      const refus = controleQuotientEffectue(valeurs[i]);
+      if (refus) return refus;
+    }
+    if (indicesPolynome.length > 0 && diagnostiquerEcran(exercice, phase, valeurs) === "parse_error")
+      return "Saisie non reconnue — écris le quotient comme un polynôme développé, par exemple 2z^3-z+4 (et les nombres comme 3 ou -2). Cette saisie ne compte pas comme une tentative.";
+    return prevaliderSaisiesComplexes(valeurs, { ignorer: indicesPolynome });
+  }
+
   function rendreEcran() {
     if (phase === "aAvecEcran1" && exercice.famille === "A" && exercice.sousType === "avecBarre") {
-      const options = OPTIONS_SYSTEME_A(exercice);
+      const options = melanger(OPTIONS_SYSTEME_A(exercice));
       return (
         <EtapeChoixEquationsComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           options={options}
@@ -163,10 +189,10 @@ export function App6gen36() {
       );
     }
     if (phase === "bEcran1" && exercice.famille === "B") {
-      const options = OPTIONS_EQUATION_B(exercice);
+      const options = melanger(OPTIONS_EQUATION_B(exercice));
       return (
         <EtapeChoixEquationsComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           options={options}
@@ -175,10 +201,10 @@ export function App6gen36() {
       );
     }
     if (phase === "eEcran1" && exercice.famille === "E") {
-      const options = OPTIONS_EQUATION_E(exercice);
+      const options = melanger(OPTIONS_EQUATION_E(exercice));
       return (
         <EtapeChoixEquationsComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           options={options}
@@ -190,22 +216,24 @@ export function App6gen36() {
     if (nombreCible > 0) {
       return (
         <EtapeListeEquationsComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           {...ecranCommun}
           nombreCible={nombreCible}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          prevalider={(valeurs) => prevaliderSaisiesComplexes(valeurs)}
           onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(", "))}
         />
       );
     }
     return (
       <EtapeChampsEquationsComplexes
-        key={phase}
+        key={`${generation}-${phase}`}
         {...aideCommun}
         {...ecranCommun}
         champs={champsEcran(exercice, phase)}
         diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+        prevalider={prevalider}
         onValider={(valeurs) =>
           terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
         }

@@ -33,8 +33,21 @@ export interface TermeDeveloppementMoivre {
   imI: number;
 }
 
+/**
+ * Ce que demande l'écran 3 (audit 6e ch. 5, point 34/J — 4 exercices distincts seulement avant) :
+ * - `standard` : cos(nx) ET sin(nx), polynômes en cos(x) et sin(x) ;
+ * - `cosSeul` : cos(nx) en fonction de cos(x) SEULEMENT (sin²(x) = 1 − cos²(x)) ;
+ * - `sinSurSin` : sin(nx)/sin(x) en fonction de cos(x) SEULEMENT.
+ */
+export type CibleFormuleMoivre = "standard" | "cosSeul" | "sinSurSin";
+
 export interface ExerciceFormuleMoivre {
   n: 3 | 4 | 5 | 6;
   /** Longueur n+1, k=0..n dans l'ordre — voir en-tête de fichier. */
   termes: TermeDeveloppementMoivre[];
+  cible: CibleFormuleMoivre;
+  /** Coefficients (indice = puissance de cos(x)) du polynôme en cos(x) attendu à l'écran 3 pour
+   * `cosSeul` (cos(nx)) et `sinSurSin` (sin(nx)/sin(x)) ; vide pour `standard`. Précalculés à la
+   * génération, comme `termes`. */
+  polynomeCos: number[];
 }

@@ -132,3 +132,17 @@ export const AMPLITUDES_HOMOTHETIE = [-3, -2, 2, 3] as const;
 export function tirerAmplitudeHomothetie(): number {
   return tirerParmi(AMPLITUDES_HOMOTHETIE);
 }
+
+// ============================================================================
+// Permutation aléatoire uniforme (Fisher–Yates) — ordre d'affichage des options d'un QCM, tiré UNE
+// FOIS à la génération et stocké sur l'exercice (audit 6e ch. 5, point 6 : la bonne option ne doit
+// jamais occuper une position fixe ; l'ordre reste stable pendant tout l'exercice).
+// ============================================================================
+export function tirerPermutation(n: number): number[] {
+  const ordre = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ordre[i], ordre[j]] = [ordre[j], ordre[i]];
+  }
+  return ordre;
+}

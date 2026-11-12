@@ -5,7 +5,7 @@ import { RenduFragments } from "../components/RenduFragments";
 import type { NatureLieu } from "../core6e/complexesAvances.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { NATURES_DISPONIBLES } from "../ui6e/formatComplexesAvances";
+import { MESSAGE_SAISIE_ILLISIBLE, NATURES_DISPONIBLES } from "../ui6e/formatComplexesAvances";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -41,12 +41,13 @@ const NOMBRE_MAX_ANGLES = 2;
  * D'abord un choix `.btn.toggle-active` parmi `NATURES_DISPONIBLES` (JAMAIS `.btn-primary`,
  * convention CLAUDE.md), PUIS (bloc `.contenu-conditionnel`, révélé seulement après le choix) le(s)
  * champ(s) pertinent(s) : 2 champs "point" (a+bi) pour droite, "centre" (a+bi) + "rayon" (réel) pour
- * cercle, 1 à 2 champs "angle" (réel, add-as-needed) pour demi-droite(s). Si `demandePoleExclu`, un
+ * cercle, "origine" (a+bi) + 1 à 2 champs "angle" (réel, add-as-needed) pour demi-droite(s). Si `demandePoleExclu`, un
  * champ supplémentaire "point exclu" (a+bi) est TOUJOURS demandé une fois une nature choisie — piège
  * transversal de la famille B (droite/cercle de Thalès), voir en-tête
  * `generateurs6e/complexesAvances/familleB.ts`.
  *
- * `valeurs` soumis à `onValider`/`diagnostiquer` : `[nature, ...params, poleTexte?]` — voir
+ * `valeurs` soumis à `onValider`/`diagnostiquer` : `[nature, ...params, poleTexte?]` (demi-droite :
+ * params = `[origine, ...angles]`) — voir
  * `moteur6e/verificationComplexesAvances.ts`, `diagnostiquerBEcran2`. `App6gen42.tsx` doit le rendre
  * avec `key={phase}`.
  */
@@ -56,28 +57,41 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
   const [point2, setPoint2] = useState("");
   const [centre, setCentre] = useState("");
   const [rayon, setRayon] = useState("");
+  const [origine, setOrigine] = useState("");
   const [angles, setAngles] = useState<string[]>([""]);
   const [poleTexte, setPoleTexte] = useState("");
+  const [saisieIllisible, setSaisieIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
 
+  /** demiDroite : [origine, ...angles] — origine O pour z+z̄=c|z|, a pour arg(z−a)≡θ. */
   function paramsPourNature(): string[] {
     if (nature === "droite") return [point1, point2];
     if (nature === "cercle") return [centre, rayon];
-    if (nature === "demiDroite") return angles;
+    if (nature === "demiDroite") return [origine, ...angles];
     return [];
   }
 
-  const valeursActuelles = [nature ?? "", ...paramsPourNature(), ...(demandePoleExclu ? [poleTexte] : [])];
-  const dernierStatut = montrerErreurs ? diagnostiquer(valeursActuelles) : null;
-
   const toutRempli =
     nature !== null &&
-    (nature === "droite" ? point1.trim() !== "" && point2.trim() !== "" : nature === "cercle" ? centre.trim() !== "" && rayon.trim() !== "" : angles.length > 0 && angles.every((a) => a.trim() !== "")) &&
+    (nature === "droite" ? point1.trim() !== "" && point2.trim() !== "" : nature === "cercle" ? centre.trim() !== "" && rayon.trim() !== "" : origine.trim() !== "" && angles.length > 0 && angles.every((a) => a.trim() !== "")) &&
     (!demandePoleExclu || poleTexte.trim() !== "");
 
   function valider() {
     if (!toutRempli || nature === null) return;
-    onValider([nature, ...paramsPourNature(), ...(demandePoleExclu ? [poleTexte] : [])]);
+    const valeurs = [nature, ...paramsPourNature(), ...(demandePoleExclu ? [poleTexte] : [])];
+    if (diagnostiquer(valeurs) === "parse_error") {
+      setSaisieIllisible(true);
+      return;
+    }
+    onValider(valeurs);
+  }
+
+  /** Toute modification efface le message de saisie illisible. */
+  function modifier<T>(setter: (v: T) => void) {
+    return (v: T) => {
+      setSaisieIllisible(false);
+      setter(v);
+    };
   }
 
   function ajouterAngle() {
@@ -85,11 +99,15 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
     setAngles((arr) => [...arr, ""]);
   }
   function retirerAngle(i: number) {
+    setSaisieIllisible(false);
     setAngles((arr) => arr.filter((_, j) => j !== i));
   }
   function modifierAngle(i: number, valeur: string) {
+    setSaisieIllisible(false);
     setAngles((arr) => arr.map((v, j) => (j === i ? valeur : v)));
   }
+  const gele = Boolean(validation);
+  const classeChamp = `text-input ${montrerErreurs ? "is-erronee" : ""}`;
 
   return (
     <div>
@@ -110,54 +128,58 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
       </p>
       <div className="options-grid-compact">
         {NATURES_DISPONIBLES.map((option) => (
-          <button type="button" key={option.id} className={`btn ${nature === option.id ? "toggle-active" : ""} ${montrerErreurs && nature === option.id ? "is-erronee" : ""}`} onClick={() => setNature(option.id)}>
+          <button type="button" key={option.id} className={`btn ${nature === option.id ? "toggle-active" : ""} ${montrerErreurs && nature === option.id ? "is-erronee" : ""}`} disabled={gele} onClick={() => modifier(setNature)(option.id)}>
             {option.label}
           </button>
         ))}
       </div>
 
+      {/* Libellé au-dessus du champ, champs empilés : lisibles à 390 px (audit 6e ch. 5). Exemples
+          hors de l'espace des tirages, sans « sqrt » ni « * ». */}
       {nature === "droite" && (
         <div className="contenu-conditionnel">
-          <ApercuExpressionLatex texte={point1} label="Point 1 (a+bi) =" />
-          <ApercuExpressionLatex texte={point2} label="Point 2 (a+bi) =" />
-          <div className="field-row field-row-wrap">
-            <div className="field field-inline">
-              <label className="field-label field-label-minuscule">Point 1 (a+bi) =</label>
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={point1} placeholder="ex : 1+2i" onChange={(e) => setPoint1(e.target.value)} />
-            </div>
-            <div className="field field-inline">
-              <label className="field-label field-label-minuscule">Point 2 (a+bi) =</label>
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={point2} placeholder="ex : -1-2i" onChange={(e) => setPoint2(e.target.value)} />
-            </div>
+          <div className="field">
+            <ApercuExpressionLatex texte={point1} label="Point 1 (a+bi) =" />
+            <label className="field-label field-label-minuscule">Point 1 de la droite (a+bi) =</label>
+            <input type="text" className={classeChamp} value={point1} placeholder="ex : 1/2+3i" disabled={gele} onChange={(e) => modifier(setPoint1)(e.target.value)} />
+          </div>
+          <div className="field">
+            <ApercuExpressionLatex texte={point2} label="Point 2 (a+bi) =" />
+            <label className="field-label field-label-minuscule">Point 2 de la droite (a+bi) =</label>
+            <input type="text" className={classeChamp} value={point2} placeholder="ex : 5−i/3" disabled={gele} onChange={(e) => modifier(setPoint2)(e.target.value)} />
           </div>
         </div>
       )}
 
       {nature === "cercle" && (
         <div className="contenu-conditionnel">
-          <ApercuExpressionLatex texte={centre} label="Centre (a+bi) =" />
-          <ApercuExpressionLatex texte={rayon} label="Rayon =" />
-          <div className="field-row field-row-wrap">
-            <div className="field field-inline">
-              <label className="field-label field-label-minuscule">Centre (a+bi) =</label>
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={centre} placeholder="ex : 0" onChange={(e) => setCentre(e.target.value)} />
-            </div>
-            <div className="field field-inline">
-              <label className="field-label field-label-minuscule">Rayon =</label>
-              <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={rayon} placeholder="ex : sqrt(5)" onChange={(e) => setRayon(e.target.value)} />
-            </div>
+          <div className="field">
+            <ApercuExpressionLatex texte={centre} label="Centre (a+bi) =" />
+            <label className="field-label field-label-minuscule">Centre (a+bi) =</label>
+            <input type="text" className={classeChamp} value={centre} placeholder="ex : 2/3−i" disabled={gele} onChange={(e) => modifier(setCentre)(e.target.value)} />
+          </div>
+          <div className="field">
+            <ApercuExpressionLatex texte={rayon} label="Rayon =" />
+            <label className="field-label field-label-minuscule">Rayon =</label>
+            <input type="text" className={classeChamp} value={rayon} placeholder="ex : 2,5" disabled={gele} onChange={(e) => modifier(setRayon)(e.target.value)} />
           </div>
         </div>
       )}
 
       {nature === "demiDroite" && (
         <div className="contenu-conditionnel">
+          <div className="field">
+            <ApercuExpressionLatex texte={origine} label="Origine (a+bi) =" />
+            <label className="field-label field-label-minuscule">Origine commune (a+bi) =</label>
+            <input type="text" className={classeChamp} value={origine} placeholder="ex : 2/3+i" disabled={gele} onChange={(e) => modifier(setOrigine)(e.target.value)} />
+          </div>
+          <label className="field-label field-label-minuscule">Angle(s) de direction (radians) =</label>
           {angles.map((a, i) => (
             <div key={i}>
               <ApercuExpressionLatex texte={a} />
               <div className="field-row">
-                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={a} placeholder="ex : pi/3" onChange={(e) => modifierAngle(i, e.target.value)} />
-                {angles.length > 1 && (
+                <input type="text" style={{ flex: "1 1 auto" }} aria-label={`Angle ${i + 1}`} className={classeChamp} value={a} placeholder="ex : 3pi/5" disabled={gele} onChange={(e) => modifierAngle(i, e.target.value)} />
+                {angles.length > 1 && !gele && (
                   <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer l'angle ${i + 1}`} onClick={() => retirerAngle(i)}>
                     ×
                   </button>
@@ -165,7 +187,7 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
               </div>
             </div>
           ))}
-          {angles.length < NOMBRE_MAX_ANGLES && (
+          {angles.length < NOMBRE_MAX_ANGLES && !gele && (
             <button type="button" className="btn" onClick={ajouterAngle}>
               + Ajouter un angle
             </button>
@@ -175,10 +197,10 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
 
       {nature !== null && demandePoleExclu && (
         <div className="contenu-conditionnel">
-          <ApercuExpressionLatex texte={poleTexte} />
           <div className="field">
-            <label className="field-label field-label-minuscule">Point exclu du lieu (le pôle, a+bi) =</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={poleTexte} placeholder="ex : 1-i" onChange={(e) => setPoleTexte(e.target.value)} />
+            <ApercuExpressionLatex texte={poleTexte} />
+            <label className="field-label field-label-minuscule">Point exclu du lieu (a+bi) =</label>
+            <input type="text" className={classeChamp} value={poleTexte} placeholder="ex : 1/2−i" disabled={gele} onChange={(e) => modifier(setPoleTexte)(e.target.value)} />
           </div>
         </div>
       )}
@@ -201,10 +223,16 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {saisieIllisible ? (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            {MESSAGE_SAISIE_ILLISIBLE}
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )
         )}
         </>
       )}

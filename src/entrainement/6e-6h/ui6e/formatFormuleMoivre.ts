@@ -131,6 +131,19 @@ function listeImaginaireLatex(exercice: ExerciceFormuleMoivre): string {
 function sinNxLatex(exercice: ExerciceFormuleMoivre): string {
   return sommeSigneeLatex(termesImaginaires(exercice).map((t) => ({ signe: t.imI, magnitude: magnitudeReelleLatex(t) })));
 }
+/** Polynôme en cos(x) (coefficients par puissance croissante), puissances décroissantes. */
+function polynomeCosLatex(coefs: number[]): string {
+  const termes: { signe: number; magnitude: string }[] = [];
+  for (let p = coefs.length - 1; p >= 0; p--) {
+    const c = coefs[p];
+    if (c === 0) continue;
+    const abs = Math.abs(c);
+    const magnitude = p === 0 ? `${abs}` : combinerFacteurs(coefLatex(abs), cosPuissanceLatex(p));
+    termes.push({ signe: c > 0 ? 1 : -1, magnitude });
+  }
+  return sommeSigneeLatex(termes);
+}
+
 /** `cos(nx)` = exactement la liste réelle de l'écran 2 (déjà la bonne somme). */
 function cosNxLatex(exercice: ExerciceFormuleMoivre): string {
   return listeReelleLatex(exercice);
@@ -141,23 +154,22 @@ function cosNxLatex(exercice: ExerciceFormuleMoivre): string {
 // ============================================================================
 
 export function consigneGenerale(exercice: ExerciceFormuleMoivre): FragmentConsigne[] {
-  return [
-    texte("Formule de Moivre : exprime "),
-    latex(`\\cos(${exercice.n}x)`),
-    texte(" et "),
-    latex(`\\sin(${exercice.n}x)`),
-    texte(" en fonction de "),
-    latex("\\cos(x)"),
-    texte(" et "),
-    latex("\\sin(x)"),
-    texte(", en développant "),
-    latex(`(\\cos(x)+i\\cdot\\sin(x))^{${exercice.n}}`),
-    texte(" par le binôme de Newton."),
-  ];
+  const developper = [texte(", en développant "), latex(`(\\cos(x)+i\\sin(x))^{${exercice.n}}`), texte(" par le binôme de Newton.")];
+  if (exercice.cible === "standard") {
+    return [texte("Formule de Moivre : exprime "), latex(`\\cos(${exercice.n}x)`), texte(" et "), latex(`\\sin(${exercice.n}x)`), texte(" en fonction de "), latex("\\cos(x)"), texte(" et "), latex("\\sin(x)"), ...developper];
+  }
+  return [texte("Formule de Moivre : exprime "), latex(cibleEcran3Latex(exercice)), texte(" en fonction de "), latex("\\cos(x)"), texte(" seulement"), ...developper];
 }
 
+/** Deux lignes (audit 6e ch. 5, point 35 : l'égalité sur une seule ligne était coupée à 390 px). */
 export function blocDonnees(exercice: ExerciceFormuleMoivre): string[] {
-  return [`(\\cos(x)+i\\sin(x))^{${exercice.n}}=\\cos(${exercice.n}x)+i\\sin(${exercice.n}x)`];
+  return [`(\\cos(x)+i\\sin(x))^{${exercice.n}}`, `=\\cos(${exercice.n}x)+i\\sin(${exercice.n}x)`];
+}
+
+/** Ce que l'écran 3 fait exprimer, en LaTeX. */
+function cibleEcran3Latex(exercice: ExerciceFormuleMoivre): string {
+  if (exercice.cible === "sinSurSin") return `\\frac{\\sin(${exercice.n}x)}{\\sin(x)}`;
+  return `\\cos(${exercice.n}x)`;
 }
 
 export function consigneEcran(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre): FragmentConsigne[] {
@@ -166,23 +178,31 @@ export function consigneEcran(exercice: ExerciceFormuleMoivre, phase: PhaseFormu
       return [
         texte("Développe "),
         latex(`(\\cos(x)+i\\cdot\\sin(x))^{${exercice.n}}`),
-        texte(" via le binôme de Newton : liste chaque terme "),
-        latex("C(n,k)\\cdot\\cos^{n-k}(x)\\cdot(i\\cdot\\sin(x))^k"),
-        texte(` pour k=0,...,${exercice.n}, SANS simplifier les puissances de i.`),
+        texte(" par le binôme de Newton : écris la somme des termes "),
+        latex("C_n^k\\cos^{n-k}(x)\\,(i\\sin(x))^k"),
+        texte(" pour "),
+        latex(`k=0,\\ldots,${exercice.n}`),
+        texte(", sans simplifier les puissances de i."),
       ];
     case "ecran2":
       return [
-        texte("Simplifie chaque puissance de i présente dans les termes du développement CONFIRMÉ à l'étape précédente (cycle "),
+        texte("Simplifie chaque puissance de i dans le développement confirmé à l'étape précédente (cycle "),
         latex("i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i"),
-        texte(", périodique de période 4), puis sépare les termes d'indice k PAIR (réels) des termes d'indice k IMPAIR (imaginaires)."),
+        texte(", de période 4), puis sépare les termes d'indice k pair (réels) des termes d'indice k impair (imaginaires)."),
       ];
     case "ecran3":
+      if (exercice.cible === "cosSeul") {
+        return [texte("Écris "), latex(`\\cos(${exercice.n}x)`), texte(" (somme des termes réels confirmés) en fonction de "), latex("\\cos(x)"), texte(" seulement, grâce à "), latex("\\sin^2(x)=1-\\cos^2(x)"), texte(".")];
+      }
+      if (exercice.cible === "sinSurSin") {
+        return [texte("À partir de "), latex(`\\sin(${exercice.n}x)`), texte(" (coefficient de i dans les termes imaginaires confirmés), écris "), latex(cibleEcran3Latex(exercice)), texte(" en fonction de "), latex("\\cos(x)"), texte(" seulement, grâce à "), latex("\\sin^2(x)=1-\\cos^2(x)"), texte(".")];
+      }
       return [
         texte("Écris "),
         latex(`\\cos(${exercice.n}x)`),
-        texte(" (somme des termes réels CONFIRMÉS) et "),
+        texte(" (somme des termes réels confirmés) et "),
         latex(`\\sin(${exercice.n}x)`),
-        texte(" (somme des termes imaginaires CONFIRMÉS, facteur i mis en évidence puis retiré)."),
+        texte(" (somme des termes imaginaires confirmés, facteur i mis en évidence puis retiré)."),
       ];
   }
 }
@@ -198,7 +218,7 @@ export function etatActuel(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleM
       // Cumule le développement confirmé à l'écran 1 ET la séparation réels/imaginaires confirmée à
       // l'écran 2, du plus ancien au plus récent — jamais seulement l'écran immédiatement précédent
       // (audit transversal "état actuel cumulatif").
-      return [developpementConfirme, `\\text{Réels}=${listeReelleLatex(exercice)}\\text{, }\\text{Imaginaires}=i\\left(${listeImaginaireReduiteLatex(exercice)}\\right)`];
+      return [developpementConfirme, `\\text{réels : }${listeReelleLatex(exercice)}`, `\\text{imaginaires : }i\\left(${listeImaginaireReduiteLatex(exercice)}\\right)`];
   }
 }
 
@@ -212,19 +232,24 @@ function listeImaginaireReduiteLatex(exercice: ExerciceFormuleMoivre): string {
 // Champs de saisie.
 // ============================================================================
 
+/** Placeholders hors des tirages (audit 6e ch. 5, point 11) : exemples bâtis sur n = 7, jamais
+ * tiré (n ∈ {3 ; 4 ; 5 ; 6}) — ni « * », ni point décimal, notation usuelle cos^k(x). */
 export function champsEcran(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre): ChampDef[] {
   switch (phase) {
     case "ecran1":
-      return [{ type: "texte", label: "Développement complet (non simplifié) =", placeholder: "ex : 6*cos(x)^4*(i*sin(x))^2 + ..." }];
+      return [{ type: "texte", label: "Développement complet (non simplifié) =", placeholder: "ex : 21cos^5(x)(i sin(x))^2 + …" }];
     case "ecran2":
       return [
-        { type: "texte", label: "Termes réels (k pair) =", placeholder: "ex : cos(x)^4-6*cos(x)^2*sin(x)^2+sin(x)^4" },
-        { type: "texte", label: "Termes imaginaires (k impair), i inclus =", placeholder: "ex : 4i*cos(x)^3*sin(x)-4i*cos(x)*sin(x)^3" },
+        // Libellés courts : l'ancien « Termes imaginaires (k impair), i inclus = » débordait à 390 px.
+        { type: "texte", label: "Termes réels (k pair) =", placeholder: "ex : cos^7(x) − 21cos^5(x)sin^2(x) + …" },
+        { type: "texte", label: "Termes en i (k impair) =", placeholder: "ex : 7i cos^6(x)sin(x) − …" },
       ];
     case "ecran3":
+      if (exercice.cible === "cosSeul") return [{ type: "texte", label: `cos(${exercice.n}x) =`, placeholder: "ex : 64cos^7(x) − 112cos^5(x) + …" }];
+      if (exercice.cible === "sinSurSin") return [{ type: "texte", label: `sin(${exercice.n}x) / sin(x) =`, placeholder: "ex : 64cos^6(x) − 80cos^4(x) + …" }];
       return [
-        { type: "texte", label: `cos(${exercice.n}x) =`, placeholder: "ex : cos(x)^4-6*cos(x)^2*sin(x)^2+sin(x)^4" },
-        { type: "texte", label: `sin(${exercice.n}x) =`, placeholder: "ex : 4*cos(x)^3*sin(x)-4*cos(x)*sin(x)^3" },
+        { type: "texte", label: `cos(${exercice.n}x) =`, placeholder: "ex : cos^7(x) − 21cos^5(x)sin^2(x) + …" },
+        { type: "texte", label: `sin(${exercice.n}x) =`, placeholder: "ex : 7cos^6(x)sin(x) − …" },
       ];
   }
 }
@@ -249,13 +274,16 @@ export function aideNiveau1(exercice: ExerciceFormuleMoivre, phase: PhaseFormule
       return AUCUNE_AIDE;
     case "ecran2":
       return {
-        texte: "Le cycle des puissances de i est périodique de période 4 : i⁰=1, i¹=i, i²=−1, i³=−i, puis ça recommence (i⁴=1, i⁵=i, ...). Applique-le terme à terme, selon la valeur de k de CE terme précis — ne suppose jamais que 'i disparaît' globalement pour la partie imaginaire.",
-        latex: "i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i",
+        texte: "Les puissances de i se répètent tous les 4 exposants ; applique ce cycle à chaque terme, selon son propre k :",
+        latex: "i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i,\\ i^4=1,\\ \\ldots",
       };
     case "ecran3":
+      if (exercice.cible !== "standard") {
+        return { texte: "Remplace chaque puissance paire de sin(x) grâce à la relation ci-dessous, puis développe et regroupe :", latex: "\\sin^2(x)=1-\\cos^2(x)\\qquad\\sin^4(x)=\\left(1-\\cos^2(x)\\right)^2" };
+      }
       return {
-        texte: `cos(${exercice.n}x) est la PARTIE RÉELLE du développement confirmé à l'étape précédente (les termes sans i restant). sin(${exercice.n}x) est le COEFFICIENT de i dans la partie imaginaire (facteur i mis en évidence puis retiré) — jamais la partie imaginaire i comprise.`,
-        latex: null,
+        texte: "Identifie les parties réelles et imaginaires des deux membres de la formule de Moivre :",
+        latex: `\\cos(${exercice.n}x)=\\text{partie réelle}\\qquad\\sin(${exercice.n}x)=\\text{coefficient de } i`,
       };
   }
 }
@@ -268,12 +296,14 @@ export function aideNiveau2(exercice: ExerciceFormuleMoivre, phase: PhaseFormule
       const nbAffiches = Math.min(3, exercice.termes.length);
       const descriptions = exercice.termes.slice(0, nbAffiches).map(descriptionSigneTerme);
       return {
-        texte: `Signes déjà déterminés pour les ${nbAffiches} premiers termes (k=0..${nbAffiches - 1}) — à toi de continuer pour les suivants :`,
+        texte: "Puissances de i déjà simplifiées pour les premiers termes — continue de même pour les suivants :",
         latex: descriptions.join("\\text{, }"),
       };
     }
     case "ecran3":
-      return { texte: `cos(${exercice.n}x) déjà assemblé (partie réelle) — à toi d'assembler sin(${exercice.n}x) avec la même méthode (partie imaginaire, i retiré) :`, latex: `\\cos(${exercice.n}x)=${cosNxLatex(exercice)}` };
+      if (exercice.cible === "cosSeul") return { texte: "Point de départ, à transformer :", latex: `\\cos(${exercice.n}x)=${cosNxLatex(exercice)}` };
+      if (exercice.cible === "sinSurSin") return { texte: "Point de départ : mets sin(x) en évidence dans cette expression, puis transforme le reste :", latex: `\\sin(${exercice.n}x)=${sinNxLatex(exercice)}` };
+      return { texte: "Partie réelle déjà assemblée — assemble de même la partie imaginaire (sans le facteur i) :", latex: `\\cos(${exercice.n}x)=${cosNxLatex(exercice)}` };
   }
 }
 
@@ -298,9 +328,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceFormuleMoivre,
     case "ecran1":
       return [developpementLatex(exercice)];
     case "ecran2":
-      return [`\\text{Réels}=${listeReelleLatex(exercice)}\\text{, }\\text{Imaginaires}=${listeImaginaireLatex(exercice)}`];
+      return [`\\text{réels : }${listeReelleLatex(exercice)}`, `\\text{imaginaires : }${listeImaginaireLatex(exercice)}`];
     case "ecran3":
-      return [`\\cos(${exercice.n}x)=${cosNxLatex(exercice)}\\text{, }\\sin(${exercice.n}x)=${sinNxLatex(exercice)}`];
+      if (exercice.cible !== "standard") return [`${cibleEcran3Latex(exercice)}=${polynomeCosLatex(exercice.polynomeCos)}`];
+      return [`\\cos(${exercice.n}x)=${cosNxLatex(exercice)}`, `\\sin(${exercice.n}x)=${sinNxLatex(exercice)}`];
   }
 }
 

@@ -1,60 +1,88 @@
-import type { ExerciceTrianglesB } from "../../core6e/trianglesComplexes.types";
-import { calculerModule } from "../formeTrigonometrique/familleA";
-import { tirerParmi } from "../calculPrimitives/aleatoire";
-import { pointEntier, rotation90, tirerTranslation, tirerTriangleIsocele } from "./construction";
+import type { ExerciceTrianglesB, PointComplexe, SommetOAB } from "../../core6e/trianglesComplexes.types";
+import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { angleAuSommetDeg, longueurEntre, pointEntier, rotation90, tirerOrdres, tirerTranslation, tirerTriangleIsocele } from "./construction";
 
 /**
- * Couche A (6e) — génération, famille B ("Triangle isocèle non rectangle, loi des cosinus") de
- * `6gen41`. Réutilise EXACTEMENT la même banque de triangles isocèles entiers que la famille A
- * (`tirerTriangleIsocele`, `construction.ts`, Couche A ↔ Couche A) — apex TOUJOURS en O (jamais
- * randomisé sur A/B/C, contrairement à la famille A : O est un nom fixe de ce générateur, pas une
- * étiquette de sommet).
+ * Couche A (6e) — génération, famille B (« triangle isocèle OAB, loi des cosinus ») de `6gen41`.
  *
- * ============================================================================
- * **Angle à l'apex — DÉCIMAL non remarquable par construction, vérifié par TOLÉRANCE**
- * ============================================================================
- * Loi des cosinus : `base² = 2·côté² − 2·côté²·cos(apex)` ⟹ `cos(apex) = 1 − base²/(2·côté²)`.
- * Pour les triplets entiers de `BANK_ISOCELES` (ex. côté=5,base=6 ⟹ cos(apex)=1−36/50=0.28 ⟹
- * apex≈73.74°), cet angle n'est JAMAIS un angle remarquable (30/45/60/90°...) — SEUL écran de tout
- * le chapitre 7 à ce jour où une comparaison DÉCIMALE (tolérance) remplace l'égalité EXACTE
- * habituelle (voir en-tête `core6e/trianglesComplexes.types.ts`). Tolérance choisie : `0.1°` —
- * absorbe un arrondi élève à 1-2 décimales sans jamais confondre 2 apex plausibles distincts (les
- * valeurs de la banque sont espacées de plusieurs degrés).
+ * **Audit 6e ch. 5, point 6 (décision F) — verdicts plus jamais constants** : le sommet principal
+ * était TOUJOURS O (écran 2 = « isocèle en O » à chaque fois) et le triangle JAMAIS rectangle
+ * (écran 3 = « pas rectangle » à chaque fois). Désormais :
+ * - le sommet principal est tiré parmi O, A, B ;
+ * - 1 fois sur 2 le triangle est isocèle RECTANGLE (S + (p ; q), S + (−q ; p) : angles 90°, 45°,
+ *   45°), sinon isocèle non rectangle : moitié dans `BANK_ISOCELES` (côtés entiers), moitié à côtés
+ *   irrationnels (sommet (0 ; h), base (±p ; 0), h ≠ p) — point 45 (décision J) : une quarantaine de
+ *   jeux d'angles distincts au lieu de 10 (les triplets proportionnels donnent des triangles
+ *   semblables, donc les mêmes angles).
+ * Les 3 angles sont calculés par produit scalaire (`angleAuSommetDeg`) — même valeur que la loi des
+ * cosinus attendue de l'élève — et vérifiés à `TOLERANCE_ANGLE_DEGRES` près (consigne : arrondir au
+ * dixième de degré).
  */
-export const TOLERANCE_ANGLE_DEGRES = 0.1;
+export const TOLERANCE_ANGLE_DEGRES = 0.5;
 
-function distance(p1: { re: number; im: number }, p2: { re: number; im: number }): number {
-  return calculerModule(p2.re - p1.re, p2.im - p1.im);
-}
+const SOMMETS: SommetOAB[] = ["O", "A", "B"];
 
-export function construireFamilleB(): ExerciceTrianglesB {
-  const { cote, base, hauteur } = tirerTriangleIsocele();
+export function construireFamilleB(rectangleForce?: boolean): ExerciceTrianglesB {
+  const rectangle = rectangleForce ?? tirerParmi([true, false] as const);
+  const apex = tirerParmi(SOMMETS);
+  const autres = SOMMETS.filter((s) => s !== apex);
+  if (tirerParmi([true, false] as const)) autres.reverse();
+  let locaux: { x: number; y: number }[];
+  if (rectangle) {
+    let p = 0;
+    let q = 0;
+    while (p === 0 && q === 0) {
+      p = tirerEntier(1, 6);
+      q = tirerEntier(0, 6);
+    }
+    locaux = [
+      { x: 0, y: 0 },
+      { x: p, y: q },
+      { x: -q, y: p },
+    ];
+  } else if (tirerParmi([true, false] as const)) {
+    const { base, hauteur } = tirerTriangleIsocele();
+    locaux = [
+      { x: 0, y: hauteur },
+      { x: -base / 2, y: 0 },
+      { x: base / 2, y: 0 },
+    ];
+  } else {
+    // Isocèle à côtés irrationnels : sommet (0 ; h), base (±p ; 0), h ≠ p (sinon angle droit au
+    // sommet). Variété des angles (point 45) : la banque entière n'a que 10 formes d'angles
+    // distinctes (triplets proportionnels = triangles semblables).
+    let demiBase = 0;
+    let hauteur = 0;
+    while (demiBase === hauteur) {
+      demiBase = tirerEntier(1, 5);
+      hauteur = tirerEntier(1, 7);
+    }
+    locaux = [
+      { x: 0, y: hauteur },
+      { x: -demiBase, y: 0 },
+      { x: demiBase, y: 0 },
+    ];
+  }
   const k = tirerParmi([0, 1, 2, 3] as const);
   const { tx, ty } = tirerTranslation();
-
-  const localO = rotation90(0, hauteur, k);
-  const localA = rotation90(-base / 2, 0, k);
-  const localB = rotation90(base / 2, 0, k);
-
-  const O = pointEntier(localO.x + tx, localO.y + ty);
-  const A = pointEntier(localA.x + tx, localA.y + ty);
-  const B = pointEntier(localB.x + tx, localB.y + ty);
-
-  const cosApex = 1 - (base * base) / (2 * cote * cote);
-  const angleApexDeg = (Math.acos(cosApex) * 180) / Math.PI;
-  const angleBaseDeg = (180 - angleApexDeg) / 2;
-
+  const [p0, p1, p2] = locaux.map((p) => rotation90(p.x, p.y, k));
+  const pts = {
+    [apex]: pointEntier(p0.x + tx, p0.y + ty),
+    [autres[0]]: pointEntier(p1.x + tx, p1.y + ty),
+    [autres[1]]: pointEntier(p2.x + tx, p2.y + ty),
+  } as Record<SommetOAB, PointComplexe>;
+  const { O, A, B } = pts;
   return {
     famille: "B",
     O,
     A,
     B,
-    longueurOA: distance(O, A),
-    longueurOB: distance(O, B),
-    longueurAB: distance(A, B),
-    sommetIsocele: "O",
-    sommetRectangle: "aucun",
-    angleApexDeg,
-    angleBaseDeg,
+    OA: longueurEntre(O, A),
+    OB: longueurEntre(O, B),
+    AB: longueurEntre(A, B),
+    sommetIsocele: apex,
+    sommetRectangle: rectangle ? apex : "aucun",
+    anglesDeg: { O: angleAuSommetDeg(O, A, B), A: angleAuSommetDeg(A, O, B), B: angleAuSommetDeg(B, O, A) },
+    ordres: tirerOrdres(),
   };
 }

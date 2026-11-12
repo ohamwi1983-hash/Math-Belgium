@@ -2,18 +2,19 @@ import type { ExerciceTransformationsPlan, FamilleTransformationsPlan } from "..
 import { construireFamilleA } from "./familleA";
 import { construireFamilleB } from "./familleB";
 import { construireFamilleC } from "./familleC";
+import { construireFamilleD } from "./familleD";
 
-export { construireFamilleA, construireFamilleB, construireFamilleC };
+export { construireFamilleA, construireFamilleB, construireFamilleC, construireFamilleD };
 
 /**
  * Couche A (6e) — point d'entrée `6gen40` ("Transformations du plan via les nombres complexes",
- * chapitre 7 "Nombres complexes"). Tirage à 2 niveaux (mirroir `generateurs6e/formeTrigonometrique/
- * index.ts`, 6gen37) : la FAMILLE (A/B/C) est tirée ÉQUIPROBABLE en premier, puis le sous-type des
+ * chapitre 5 "Nombres complexes"). Tirage à 2 niveaux (mirroir `generateurs6e/formeTrigonometrique/
+ * index.ts`, 6gen37) : la FAMILLE (A/B/C/D — D ajoutée par l'audit 6e ch. 5, point 42) est tirée ÉQUIPROBABLE en premier, puis le sous-type des
  * familles A/B (seules à en avoir un) est tiré ÉQUIPROBABLE ensuite, DEDANS `construireFamilleA`/
  * `construireFamilleB` (jamais ici) — famille C n'a pas de sous-type.
  */
 
-export type IdVarianteTransformationsPlan = "A_translation" | "A_homothetie" | "A_rotation" | "A_similitude" | "A_rotationTranslation" | "B_somme" | "B_produit" | "C";
+export type IdVarianteTransformationsPlan = "A_translation" | "A_homothetie" | "A_rotation" | "A_similitude" | "A_rotationTranslation" | "B_somme" | "B_produit" | "C" | "D_translation" | "D_rotation" | "D_homothetie" | "D_similitude";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteTransformationsPlan; label: string }[] = [
   { id: "A_translation", label: "A — Translation" },
@@ -23,7 +24,11 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteTransformationsPlan; label: st
   { id: "A_rotationTranslation", label: "A — Rotation puis translation" },
   { id: "B_somme", label: "B — Somme (translation)" },
   { id: "B_produit", label: "B — Produit (similitude)" },
-  { id: "C", label: "C — Similitude centrée en O, modules égaux" },
+  { id: "C", label: "C — Rotation de centre O, modules égaux" },
+  { id: "D_translation", label: "D — z′ = az + b : translation" },
+  { id: "D_rotation", label: "D — z′ = az + b : rotation de centre Ω" },
+  { id: "D_homothetie", label: "D — z′ = az + b : homothétie de centre Ω" },
+  { id: "D_similitude", label: "D — z′ = az + b : similitude de centre Ω" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteTransformationsPlan): ExerciceTransformationsPlan {
@@ -44,15 +49,24 @@ export function construireAvecVarianteId(id: IdVarianteTransformationsPlan): Exe
       return construireFamilleB("produit");
     case "C":
       return construireFamilleC();
+    case "D_translation":
+      return construireFamilleD("translation");
+    case "D_rotation":
+      return construireFamilleD("rotation");
+    case "D_homothetie":
+      return construireFamilleD("homothetie");
+    case "D_similitude":
+      return construireFamilleD("similitude");
   }
 }
 
-const FAMILLES: FamilleTransformationsPlan[] = ["A", "B", "C"];
+const FAMILLES: FamilleTransformationsPlan[] = ["A", "B", "C", "D"];
 
 const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleTransformationsPlan, () => ExerciceTransformationsPlan> = {
   A: () => construireFamilleA(),
   B: () => construireFamilleB(),
   C: construireFamilleC,
+  D: () => construireFamilleD(),
 };
 
 export function genererExerciceTransformationsPlan(): ExerciceTransformationsPlan {

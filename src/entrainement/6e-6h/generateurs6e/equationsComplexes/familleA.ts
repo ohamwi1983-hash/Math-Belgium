@@ -1,5 +1,6 @@
 import type { ExerciceFamilleA, ExerciceFamilleAAvecBarre, ExerciceFamilleASansBarre, ValeurComplexe } from "../../core6e/equationsComplexes.types";
 import { tirerEntier, tirerEntierNonNul } from "../calculPrimitives/aleatoire";
+import { dansLaBorne, tirerDansLaBorne } from "./bornes";
 
 /**
  * Couche A (6e) — génération, famille A ("Linéaire en z, avec ou sans z̄") de `6gen36`. 2
@@ -53,7 +54,7 @@ function multiplierGaussien(u: ValeurComplexe, v: ValeurComplexe): ValeurComplex
   return { re: u.re * v.re - u.im * v.im, im: u.re * v.im + u.im * v.re };
 }
 
-export function construireSansBarre(): ExerciceFamilleASansBarre {
+function construireSansBarreBrut(): ExerciceFamilleASansBarre {
   const a = tirerGaussienNonNul();
   const b = tirerGaussien();
   let c = tirerGaussienNonNul();
@@ -66,18 +67,27 @@ export function construireSansBarre(): ExerciceFamilleASansBarre {
   return { famille: "A", sousType: "sansBarre", a, b, c, d, z };
 }
 
-export function construireAvecBarre(): ExerciceFamilleAAvecBarre {
+function construireAvecBarreBrut(): ExerciceFamilleAAvecBarre {
   let a = 0;
   let b = 0;
   do {
     a = tirerEntier(AB_MIN, AB_MAX);
     b = tirerEntier(AB_MIN, AB_MAX);
-  } while (a + b === 0 || a - b === 0);
+    // a = 0 ou b = 0 rendait 2 options de l'écran 1 identiques (a+b = a−b) : exclus.
+  } while (a === 0 || b === 0 || a + b === 0 || a - b === 0);
   const x = tirerEntierNonNul(XY_MIN, XY_MAX);
   const y = tirerEntierNonNul(XY_MIN, XY_MAX);
   const c = (a + b) * x;
   const d = (a - b) * y;
   return { famille: "A", sousType: "avecBarre", a, b, c, d, x, y };
+}
+
+/** Approfondissement (hors tirage libre) — nombres de l'énoncé bornés à 100 (audit 6e ch. 5). */
+export function construireSansBarre(): ExerciceFamilleASansBarre {
+  return tirerDansLaBorne(construireSansBarreBrut, (e) => dansLaBorne([e.a, e.b, e.c, e.d]));
+}
+export function construireAvecBarre(): ExerciceFamilleAAvecBarre {
+  return tirerDansLaBorne(construireAvecBarreBrut, (e) => dansLaBorne([e.c, e.d]));
 }
 
 export function construireFamilleA(): ExerciceFamilleA {

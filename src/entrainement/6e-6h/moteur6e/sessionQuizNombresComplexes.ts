@@ -1,6 +1,6 @@
 /**
- * Couche B (6e) — moteur de session pour "Nombres complexes" (quiz vrai/faux, 6gen68, ajout
- * ultérieur au chapitre 7). N'importe jamais rien de `src/generateurs6e/` — voir
+ * Couche B (6e) — moteur de session pour "Nombres complexes" (quiz vrai/faux, 6gen68,
+ * chapitre 5). N'importe jamais rien de `src/generateurs6e/` — voir
  * `sessionQuizNombresComplexes.test.ts` pour la preuve avec un générateur factice, même principe
  * que tous les autres moteurs du projet. Structure identique à 6gen67
  * (`sessionQuizIntegralesPrimitives.ts`) et 6gen66/65.

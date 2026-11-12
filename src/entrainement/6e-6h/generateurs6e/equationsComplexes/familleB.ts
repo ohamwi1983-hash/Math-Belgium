@@ -1,5 +1,6 @@
 import type { ExerciceFamilleB, ValeurComplexe } from "../../core6e/equationsComplexes.types";
 import { tirerEntier, tirerEntierNonNul, tirerParmi } from "../calculPrimitives/aleatoire";
+import { dansLaBorne, tirerDansLaBorne } from "./bornes";
 
 /**
  * Couche A (6e) — génération, famille B ("Équation rationnelle en z") de `6gen36`.
@@ -33,7 +34,7 @@ function multiplierGaussien(u: ValeurComplexe, v: ValeurComplexe): ValeurComplex
   return { re: u.re * v.re - u.im * v.im, im: u.re * v.im + u.im * v.re };
 }
 
-export function construireFamilleB(): ExerciceFamilleB {
+function construireFamilleBBrut(): ExerciceFamilleB {
   const a = tirerEntierNonNul(COEF_MIN, COEF_MAX);
   const c = tirerEntierNonNul(COEF_MIN, COEF_MAX);
   const k: ValeurComplexe = { re: tirerEntier(-4, 4), im: tirerParmi([-1, 1] as const) };
@@ -48,4 +49,11 @@ export function construireFamilleB(): ExerciceFamilleB {
   const kd: ValeurComplexe = { re: k.re * d, im: k.im * d };
 
   return { famille: "B", a, b, c, d, k, kc, kd, z };
+}
+
+/** Approfondissement (hors tirage libre) — nombres de l'énoncé et de l'équation développée bornés à
+ * 100 (audit 6e ch. 5). */
+export function construireFamilleB(): ExerciceFamilleB {
+  // c = 1 ou d = 0 rendaient une option de l'écran 1 identique à la bonne (« oublie c », « oublie d ») : exclus.
+  return tirerDansLaBorne(construireFamilleBBrut, (e) => dansLaBorne([e.b, e.d, e.kc, e.kd]) && e.c !== 1 && e.d !== 0);
 }

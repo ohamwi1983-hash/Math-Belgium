@@ -36,6 +36,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message bloquant qui NE consomme PAS de tentative (saisie illisible, argument en degrés) —
+   * audit 6e ch. 5, points 3/B et 10. */
+  controleAvantSoumission?: (valeurs: string[]) => string | null;
 }
 
 /**
@@ -48,8 +51,9 @@ interface Props {
  * mirroir `EtapeRacinesAffixesRacines.tsx`, 6gen35). `App6gen39.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controleAvantSoumission, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => Array.from({ length: nAttendu }, () => ({ re: "", im: "" })));
+  const [messageForme, setMessageForme] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const aplati = lignes.flatMap((l) => [l.re, l.im]);
   const dernierStatut = montrerErreurs ? diagnostiquer(aplati) : null;
@@ -68,6 +72,9 @@ export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consign
   }
   function valider() {
     if (!complet) return;
+    const message = controleAvantSoumission?.(aplati) ?? null;
+    setMessageForme(message);
+    if (message) return;
     onValider(aplati);
   }
 
@@ -96,11 +103,11 @@ export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consign
             <div className="field-row field-row-wrap">
               <div className="field field-inline">
                 <label className="field-label field-label-minuscule">Partie réelle {i + 1} =</label>
-                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne.re} placeholder="ex : sqrt(2)" onChange={(e) => modifierLigne(i, "re", e.target.value)} />
+                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne.re} placeholder="ex : sqrt(7)/3" onChange={(e) => modifierLigne(i, "re", e.target.value)} />
               </div>
               <div className="field field-inline">
                 <label className="field-label field-label-minuscule">Partie imaginaire {i + 1} =</label>
-                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne.im} placeholder="ex : -sqrt(2)" onChange={(e) => modifierLigne(i, "im", e.target.value)} />
+                <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne.im} placeholder="ex : −sqrt(7)/3" onChange={(e) => modifierLigne(i, "im", e.target.value)} />
               </div>
               {lignes.length > 1 && (
                 <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer la racine ${i + 1}`} onClick={() => retirerLigne(i)}>
@@ -134,7 +141,12 @@ export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consign
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageForme && (
+          <p className="alert-error" role="alert">
+            {messageForme}
+          </p>
+        )}
+        {!messageForme && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

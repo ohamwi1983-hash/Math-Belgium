@@ -1,6 +1,6 @@
 import type { ExerciceTrianglesD, PointComplexe } from "../../core6e/trianglesComplexes.types";
 import { tirerParmi } from "../calculPrimitives/aleatoire";
-import { pointEntier } from "./construction";
+import { pointEntier, tirerOrdres } from "./construction";
 
 /**
  * Couche A (6e) — génération, famille D ("Similitude entre deux triangles") de `6gen41`.
@@ -20,6 +20,13 @@ import { pointEntier } from "./construction";
  * en-tête `core6e/trianglesComplexes.types.ts`). `A`/`B` sont eux-mêmes restreints au même ensemble
  * d'axes pour la même raison : `z_C=k·e^{iθ}·z_A` doit rester un point à coordonnées ENTIÈRES
  * affichables proprement (le produit de 2 valeurs sur l'axe reste sur l'axe).
+ *
+ * **Audit 6e ch. 5 (lot D)** :
+ * - B est sur un axe PERPENDICULAIRE à celui de A (directions voisines) : auparavant B pouvait être
+ *   sur la demi-droite opposée, et O, A, B étaient alors ALIGNÉS (triangle aplati) ;
+ * - point 6 (décision F) : l'écran « cohérence » était toujours « cohérent ». Environ 1 fois sur 3,
+ *   D est désormais l'image de B par une AUTRE similitude (autre rapport ou autre angle) :
+ *   contre-exemple à détecter ; la similitude A ↦ C (écran 3) reste bien définie dans les 2 cas.
  */
 
 const DIRECTIONS = [0, 1, 2, 3] as const;
@@ -66,9 +73,10 @@ function multiplicateurDepuisPas(k: number, pas: number): { re: number; im: numb
   }
 }
 
-export function construireFamilleD(): ExerciceTrianglesD {
+export function construireFamilleD(coherentForce?: boolean): ExerciceTrianglesD {
+  const coherent = coherentForce ?? Math.random() >= 1 / 3;
   const dA = tirerParmi(DIRECTIONS);
-  const dB = tirerParmi(DIRECTIONS.filter((d) => d !== dA));
+  const dB = ((dA + tirerParmi([1, 3] as const)) % 4) as 0 | 1 | 2 | 3;
   const rA = tirerParmi(RAYONS);
   const rB = tirerParmi(RAYONS);
   const rapport = tirerParmi(RAPPORTS);
@@ -78,9 +86,19 @@ export function construireFamilleD(): ExerciceTrianglesD {
   const ptA = directionVersPoint(dA, rA);
   const ptB = directionVersPoint(dB, rB);
   const dC = ((dA + pas) % 4) as 0 | 1 | 2 | 3;
-  const dD = ((dB + pas) % 4) as 0 | 1 | 2 | 3;
   const ptC = directionVersPoint(dC, rA * rapport);
-  const ptD = directionVersPoint(dD, rB * rapport);
+
+  // Similitude appliquée à B : la même (cohérent) ou une autre (autre rapport OU autre angle),
+  // jamais un D confondu avec C.
+  let rapportB = rapport;
+  let pasB = pas;
+  let ptD = directionVersPoint(((dB + pasB) % 4) as 0 | 1 | 2 | 3, rB * rapportB);
+  while (!coherent && ((rapportB === rapport && pasB === pas) || (ptD.re === ptC.re && ptD.im === ptC.im))) {
+    if (tirerParmi([true, false] as const)) rapportB = tirerParmi(RAPPORTS.filter((k) => k !== rapport));
+    else pasB = tirerParmi(PAS_ROTATION.filter((q) => q !== pas));
+    ptD = directionVersPoint(((dB + pasB) % 4) as 0 | 1 | 2 | 3, rB * rapportB);
+    if (rapportB === rapport && pasB === pas) continue;
+  }
 
   const A = pointEntier(ptA.re, ptA.im);
   const B = pointEntier(ptB.re, ptB.im);
@@ -102,5 +120,7 @@ export function construireFamilleD(): ExerciceTrianglesD {
     angleNumerique: angle.numerique,
     multiplicateurRe: multiplicateur.re,
     multiplicateurIm: multiplicateur.im,
+    coherent,
+    ordres: tirerOrdres(),
   };
 }

@@ -1,52 +1,29 @@
 import type { ExerciceFamilleF, ValeurComplexe } from "../../core6e/nombresComplexes.types";
 import { multiplierC } from "./arithmetiqueComplexe";
-import { tirerEntier, tirerParmi } from "../calculPrimitives/aleatoire";
+import { tirerEntier } from "../calculPrimitives/aleatoire";
 
 /**
- * Couche A (6e) — génération, famille F ("Simplifier le quotient avant de développer une
- * puissance") de `6gen34` — PIÈGE CENTRAL du générateur. Construite À L'ENVERS depuis la forme
- * simplifiée CIBLE (spec) : on choisit d'abord `T` (une valeur "simple" — i, -i, ±1, ±2, 1±i, -1±i),
- * puis un dénominateur interne (c+di) NON NUL librement tiré, puis on EN DÉDUIT le numérateur interne
- * `numRe+numIm·i = T·(c+di)` — garantissant PAR CONSTRUCTION ALGÉBRIQUE (jamais par un tirage qui
- * "tombe juste" par chance) que le quotient interne `(numRe+numIm·i)/(c+di)` se simplifie EXACTEMENT
- * en `T`, quels que soient les entiers tirés pour `c,d`.
- *
- * Preuve : `(T·(c+di))/(c+di) = T` trivialement (division exacte par construction). La méthode
- * ATTENDUE de l'élève (multiplier par le conjugué `c-di`) mène au même résultat : `T·(c+di)·(c-di) /
- * ((c+di)(c-di)) = T·(c²+d²) / (c²+d²) = T`.
+ * Couche A (6e) — famille F (« Simplifier le quotient avant de mettre au carré ») de `6gen34`. Le
+ * quotient simplifié q est un entier de Gauss non nul de [-2 ; 2]² (24 valeurs, contre 10 avant),
+ * le dénominateur interne c+di un entier de Gauss non nul de [-3 ; 3]², et le numérateur affiché vaut
+ * q·(c+di) : la simplification est toujours exacte, et q² reste entier (|q²| ≤ 8).
  */
 
-const BANQUE_CIBLES_F: ValeurComplexe[] = [
-  { re: 0, im: 1 },
-  { re: 0, im: -1 },
-  { re: 1, im: 0 },
-  { re: -1, im: 0 },
-  { re: 2, im: 0 },
-  { re: -2, im: 0 },
-  { re: 1, im: 1 },
-  { re: 1, im: -1 },
-  { re: -1, im: 1 },
-  { re: -1, im: -1 },
-];
-
-const DENOM_MIN = -3;
+const Q_MAX = 2;
 const DENOM_MAX = 3;
 
-function tirerDenominateurInterneNonNul(): { c: number; d: number } {
-  let c = 0;
-  let d = 0;
-  while (c === 0 && d === 0) {
-    c = tirerEntier(DENOM_MIN, DENOM_MAX);
-    d = tirerEntier(DENOM_MIN, DENOM_MAX);
-  }
-  return { c, d };
+function tirerGaussienNonNul(max: number): ValeurComplexe {
+  let v: ValeurComplexe = { re: 0, im: 0 };
+  while (v.re === 0 && v.im === 0) v = { re: tirerEntier(-max, max), im: tirerEntier(-max, max) };
+  return v;
 }
 
 export function construireFamilleF(): ExerciceFamilleF {
-  const quotientSimplifie = tirerParmi(BANQUE_CIBLES_F);
-  const { c, d } = tirerDenominateurInterneNonNul();
-  const numerateurInterne = multiplierC(quotientSimplifie, { re: c, im: d });
+  const quotientSimplifie = tirerGaussienNonNul(Q_MAX);
+  let den = tirerGaussienNonNul(DENOM_MAX);
+  // Dénominateur réel (d = 0) : la « simplification » serait une simple division réelle — rare.
+  while (den.im === 0 && Math.random() < 0.8) den = tirerGaussienNonNul(DENOM_MAX);
+  const numerateurInterne = multiplierC(quotientSimplifie, den);
   const resultat = multiplierC(quotientSimplifie, quotientSimplifie);
-
-  return { famille: "F", c, d, numRe: numerateurInterne.re, numIm: numerateurInterne.im, quotientSimplifie, resultat };
+  return { famille: "F", c: den.re, d: den.im, numRe: numerateurInterne.re, numIm: numerateurInterne.im, quotientSimplifie, resultat };
 }

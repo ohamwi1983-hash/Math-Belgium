@@ -258,6 +258,13 @@ class Analyseur {
       this.avancer();
       const nom = t.nom as string;
       if (nom === "i") return { re: 0, im: 1 };
+      if (nom === "sqrt") {
+        // Ajout additif (audit 6e ch. 5) : racine carrée d'un RÉEL ≥ 0 seulement (√2, √(3/4)) —
+        // jamais d'un négatif ni d'un complexe non réel (branche multivaluée, hors convention).
+        const arg = this.atome();
+        if (Math.abs(arg.im) > 1e-12 || arg.re < -1e-12) throw new Error("sqrt : argument réel positif attendu");
+        return { re: Math.sqrt(Math.max(0, arg.re)), im: 0 };
+      }
       throw new Error(`Identifiant inconnu : "${nom}"`);
     }
     throw new Error("Expression invalide");
@@ -267,7 +274,28 @@ class Analyseur {
 /** Lève sur toute erreur de SYNTAXE — voir en-tête de fichier pour la grammaire supportée et la
  * restriction sur `^`. */
 export function evaluerExpressionComplexe(texte: string): Complexe {
-  return new Analyseur(tokeniser(texte)).analyser();
+  return new Analyseur(tokeniser(normaliserSaisieComplexe(texte))).analyser();
+}
+
+/**
+ * Normalisation ADDITIVE de la saisie, avant tokenisation (audit 6e ch. 5 : « −1+i » tapé avec le
+ * signe moins typographique était refusé avec un message faux sur « * », et l'essai perdu). Ne
+ * change le sens d'AUCUNE saisie déjà acceptée : seuls des caractères jusque-là refusés
+ * (« Caractère inattendu ») deviennent lisibles.
+ * - « − » (U+2212), « – » (U+2013) → « - » ;
+ * - « · » (U+00B7), « ∙ » (U+2219), « × » (U+00D7) → « * » ;
+ * - « ² », « ³ » → « ^2 », « ^3 » ;
+ * - « √3 », « √2,5 » → « sqrt(3) », « sqrt(2,5) » ; « √(…) » → « sqrt(…) » (voir `sqrt` dans
+ *   `Analyseur.atome` : racine carrée d'un RÉEL positif ou nul uniquement).
+ */
+export function normaliserSaisieComplexe(texte: string): string {
+  return texte
+    .replace(/[\u2212\u2013]/g, "-")
+    .replace(/[\u00B7\u2219\u00D7]/g, "*")
+    .replace(/\u00B2/g, "^2")
+    .replace(/\u00B3/g, "^3")
+    .replace(/\u221A\s*([0-9]+(?:[.,][0-9]+)?)/g, "sqrt($1)")
+    .replace(/\u221A/g, "sqrt");
 }
 
 /** Variante non levante — `null` sur toute erreur de syntaxe (mirroir

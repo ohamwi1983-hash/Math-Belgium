@@ -2,8 +2,8 @@ import type { AngleRemarquable } from "../../core6e/formeTrigonometrique.types";
 import type { ExerciceRacinesC, RacineExacte } from "../../core6e/racinesNiemes.types";
 import { tirerParmi } from "../calculPrimitives/aleatoire";
 import { additionnerAngles, angleDepuisFraction } from "../formeTrigonometrique/angles";
-import { combinerModuleAngle } from "../formeTrigonometrique/familleA";
-import { pointRemarquablePour, thetasFermesPour } from "./fermeture";
+import { ANGLES_REMARQUABLES, combinerModuleAngle } from "../formeTrigonometrique/familleA";
+import { pointRemarquablePour } from "./fermeture";
 
 /**
  * Couche A (6e) — génération, famille C ("zⁿ=wⁿ, astuce racine de l'unité") de `6gen39`.
@@ -47,9 +47,23 @@ function racineDindice(theta: AngleRemarquable, zeta: RacineExacte, r: number): 
   return { angle, re: combinerModuleAngle(r, point.cos), im: combinerModuleAngle(r, point.sin) };
 }
 
+/** θ admissibles pour la famille C : il suffit que les n solutions w·ζₖ (angles θ + 2kπ/n) restent
+ * remarquables — condition bien plus large que `thetasFermesPour` (qui exige que les racines
+ * n-ièmes DE w le soient, utile à la famille A seulement). Audit 6e ch. 5, point 37 : avec l'ancien
+ * filtre, θ valait 0 ou π dans 67 % des tirages (w = 1 très fréquent). */
+function thetasAdmissiblesC(n: number): AngleRemarquable[] {
+  return ANGLES_REMARQUABLES.filter((theta) => {
+    for (let k = 0; k < n; k++) {
+      const angle = additionnerAngles(theta, angleDepuisFraction(2 * k, n));
+      if (!ANGLES_REMARQUABLES.some((a) => a.p === angle.p && a.q === angle.q)) return false;
+    }
+    return true;
+  });
+}
+
 export function construireFamilleC(): ExerciceRacinesC {
   const n = tirerParmi(N_POSSIBLES);
-  const theta = tirerParmi(thetasFermesPour(n));
+  const theta = tirerParmi(thetasAdmissiblesC(n));
   const r = tirerParmi(R_POSSIBLES);
   const zetas: RacineExacte[] = [];
   for (let k = 0; k < n; k++) zetas.push(zetaDindice(k, n));

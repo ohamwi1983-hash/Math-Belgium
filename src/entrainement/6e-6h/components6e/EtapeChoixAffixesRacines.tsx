@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatAffixesRacines";
@@ -29,6 +30,8 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Figure facultative (ex. points dans le plan complexe) affichée sous le bloc de données. */
+  figure?: ReactNode;
 }
 
 /**
@@ -38,7 +41,7 @@ interface Props {
  * `EtapeStatutGEquationsExpLog.tsx` (6gen14) étendu pour rendre chaque option en KaTeX plutôt qu'en
  * texte brut (les options sont des formules). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation, figure}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -61,6 +64,7 @@ export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, consig
           </div>
         }
       />
+      {figure}
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>

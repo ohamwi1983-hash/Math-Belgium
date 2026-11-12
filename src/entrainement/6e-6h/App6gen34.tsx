@@ -7,6 +7,7 @@ import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionNombresComplexes, 
 import { phasesPourExercice } from "./moteur6e/typesNombresComplexes";
 import type { EtatSessionNombresComplexes, PhaseNombresComplexes } from "./moteur6e/typesNombresComplexes";
 import { diagnostiquerEcran } from "./moteur6e/verificationNombresComplexes";
+import { prevaliderSaisiesComplexes } from "./moteur6e/saisieComplexe";
 import { Katex } from "./components/Katex";
 import { EtapeChampsNombresComplexes } from "./components6e/EtapeChampsNombresComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
@@ -51,6 +52,11 @@ export function App6gen34() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseNombresComplexes, boolean>>>({});
+  /** Compteur de génération : incrémenté à chaque nouvel exercice (bouton « Nouvel exercice » ou
+   * sélecteur de variante) et inclus dans la `key` de l'écran — sans lui, deux exercices successifs
+   * qui commencent par la MÊME phase réutilisaient l'instance React de l'écran (saisies et messages
+   * de l'exercice précédent conservés). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -89,6 +95,7 @@ export function App6gen34() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -99,6 +106,7 @@ export function App6gen34() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionNombresComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteNombresComplexes)));
   }
 
@@ -157,7 +165,7 @@ export function App6gen34() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifNombresComplexes(etat)} />
         <EtapeChampsNombresComplexes
-          key={phase}
+          key={`${generation}-${phase}`}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
@@ -166,6 +174,7 @@ export function App6gen34() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          prevalider={(valeurs) => prevaliderSaisiesComplexes(valeurs)}
           onValider={(valeurs) =>
             terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
           }

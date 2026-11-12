@@ -78,7 +78,10 @@ export interface ExerciceTransfoA {
   parametres: ParametresTransfoA;
   /** Image CORRECTE de P par la transformation — calculée UNE FOIS à la génération, jamais
    * recalculée côté Couche B (moteur6e n'importe jamais generateurs6e). */
-  image: AffixeEntiere;
+  image: AffixeEntiere;  /** Ordre d'affichage des 4 options du QCM de l'écran 1 (permutation de 0..3 appliquée à la liste
+   * de référence de `optionsFormuleA`, dont l'option correcte est TOUJOURS l'indice 0) — tirée à la
+   * génération, uniforme (audit 6e ch. 5, point 6). */
+  ordreOptions: number[];
 }
 
 // ============================================================================
@@ -137,7 +140,34 @@ export interface ExerciceTransfoC {
 // Union globale.
 // ============================================================================
 
-export type ExerciceTransformationsPlan = ExerciceTransfoA | ExerciceTransfoB | ExerciceTransfoC;
+// ============================================================================
+// Famille D — Transformation z′ = az + b : nature, centre, angle, rapport (2 écrans).
+// Audit 6e ch. 5, point 42 (décision I) : translations, rotations, homothéties et similitudes de
+// centre Ω ≠ O, Ω = b/(1 − a) (tableau de classification du cours, § 7).
+// ============================================================================
+
+export type NatureTransfoD = "translation" | "rotation" | "homothetie" | "similitude";
+
+export interface ExerciceTransfoD {
+  famille: "D";
+  nature: NatureTransfoD;
+  /** Coefficient a (entier de Gauss) : 1 (translation), ±i (rotation), réel ∉ {0 ; 1 ; −1}
+   * (homothétie), sinon similitude (−1 exclu : symétrie centrale = rotation d'angle π ET
+   * homothétie de rapport −1, nature ambiguë pour l'élève). */
+  a: AffixeEntiere;
+  b: AffixeEntiere;
+  /** Centre Ω = b/(1 − a), entier, ≠ O — `null` pour une translation (aucun point fixe). */
+  centre: AffixeEntiere | null;
+  /** Rapport : k signé pour une homothétie, |a| pour une similitude, 1 sinon. */
+  rapport: number;
+  rapportLatex: string;
+  /** arg(a), valeur principale — 0 pour une translation, 0 ou π pour une homothétie. */
+  angle: AngleRemarquable;
+  /** Ordre d'affichage des 4 natures (permutation de 0..3 sur `NATURES_D`), uniforme. */
+  ordreNatures: number[];
+}
+
+export type ExerciceTransformationsPlan = ExerciceTransfoA | ExerciceTransfoB | ExerciceTransfoC | ExerciceTransfoD;
 
 export type FamilleTransformationsPlan = ExerciceTransformationsPlan["famille"];
 

@@ -3,15 +3,15 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceFormeTrigonometrique } from "./generateurs6e/formeTrigonometrique";
 import type { IdVarianteFormeTrigonometrique } from "./generateurs6e/formeTrigonometrique";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionFormeTrigonometrique, soumettreReponseEcran } from "./moteur6e/sessionFormeTrigonometrique";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionFormeTrigonometrique, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionFormeTrigonometrique";
 import { phasesPourExercice } from "./moteur6e/typesFormeTrigonometrique";
 import type { EtatSessionFormeTrigonometrique, PhaseFormeTrigonometrique } from "./moteur6e/typesFormeTrigonometrique";
-import { diagnostiquerEcran } from "./moteur6e/verificationFormeTrigonometrique";
+import { controleAvantSoumission, diagnostiquerEcran } from "./moteur6e/verificationFormeTrigonometrique";
 import { Katex } from "./components/Katex";
 import { EtapeChampsFormeTrigonometrique } from "./components6e/EtapeChampsFormeTrigonometrique";
 import { EtapeChoixCongruenceFormeTrigonometrique } from "./components6e/EtapeChoixCongruenceFormeTrigonometrique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { LIBELLE_CONDITION, LIBELLE_PHASE, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormeTrigonometrique";
+import { LIBELLE_PHASE, congruenceLatex, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormeTrigonometrique";
 import { calculerRecapitulatifFormeTrigonometrique, calculerSegmentsProgressionFormeTrigonometrique } from "./ui6e/recapitulatifFormeTrigonometrique";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -52,6 +52,10 @@ export function App6gen37() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseFormeTrigonometrique, boolean>>>({});
+  /** Compteur de générations, intégré à la clé d'écran (audit 6e ch. 5, point 9) : deux exercices
+   * successifs qui commencent par la même phase remontaient sinon le composant avec la saisie et
+   * l'ordre des choix de l'exercice précédent. */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -87,6 +91,7 @@ export function App6gen37() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
@@ -100,6 +105,7 @@ export function App6gen37() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionFormeTrigonometrique(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteFormeTrigonometrique)));
   }
 
@@ -118,7 +124,7 @@ export function App6gen37() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -161,19 +167,19 @@ export function App6gen37() {
         <RecapitulatifPanel entrees={calculerRecapitulatifFormeTrigonometrique(etat)} />
         {estEcranChoixCongruence ? (
           <EtapeChoixCongruenceFormeTrigonometrique
-            key={phase}
+            key={`${generation}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             consigneEcran={consigneEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(condition) => terminerEtape(soumettreReponseEcran(etat, [condition]), LIBELLE_CONDITION[condition])}
+            onValider={(condition) => terminerEtape(soumettreReponseEcran(etat, [condition]), <Katex expression={congruenceLatex(condition)} />)}
             validation={validation}
           />
         ) : (
           <EtapeChampsFormeTrigonometrique
-            key={phase}
+            key={`${generation}-${phase}`}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -182,8 +188,10 @@ export function App6gen37() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            controleAvantSoumission={(valeurs) => controleAvantSoumission(exercice, phase, valeurs)}
             onValider={(valeurs) =>
-              terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+              // Le libellé se termine déjà par « = » : « r = 2 », jamais « r = : 2 » (audit 6e ch. 5).
+              terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} ${valeurs[i]}`).join(" ; "))
             }
             validation={validation}
           />

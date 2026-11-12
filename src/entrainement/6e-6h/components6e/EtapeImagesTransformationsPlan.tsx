@@ -1,7 +1,9 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
+import type { StatutVerification } from "../moteur/statutVerification";
 import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatTransformationsPlan";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -11,8 +13,12 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
+  /** Figure d'énoncé facultative (petit plan complexe — audit 6e ch. 5, décision K). */
+  figure?: ReactNode;
   consigneEcran: FragmentConsigne[];
   nombreMaxPoints: number;
+  placeholder: string;
+  diagnostiquer: (textes: string[]) => StatutVerification;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -41,10 +47,13 @@ interface Props {
  * `EtapeListeEquationsComplexes.tsx`/6gen36 et `EtapeRacinesAffixesRacines.tsx`/6gen35). `App6gen40.
  * tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, consigneEcran, nombreMaxPoints, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, figure, consigneEcran, nombreMaxPoints, placeholder, diagnostiquer, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxPoints) }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
+
+  /** Écriture illisible : signalée SANS consommer de tentative (audit 6e ch. 5, point commun 10). */
+  const [illisible, setIllisible] = useState(false);
 
   function ajouterLigne() {
     if (lignes.length >= nombreMaxPoints) return;
@@ -54,10 +63,16 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
     setLignes((arr) => arr.filter((_, j) => j !== i));
   }
   function modifierLigne(i: number, valeur: string) {
+    setIllisible(false);
     setLignes((arr) => arr.map((v, j) => (j === i ? valeur : v)));
   }
   function valider() {
     if (!complet) return;
+    if (diagnostiquer(lignes) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
     onValider(lignes);
   }
 
@@ -72,6 +87,7 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
                 <Katex key={i} expression={frag} />
               ))}
             </div>
+            {figure}
           </div>
         }
       />
@@ -82,7 +98,7 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />
           <div className="field-row">
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder="ex : 3+2i" onChange={(e) => modifierLigne(i, e.target.value)} />
+            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={ligne} placeholder={placeholder} onChange={(e) => modifierLigne(i, e.target.value)} />
             {lignes.length > 1 && (
               <button type="button" className="btn liste-morceaux-retirer" aria-label={`Retirer l'image ${i + 1}`} onClick={() => retirerLigne(i)}>
                 ×
@@ -98,11 +114,15 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p>
+            <RenduFragments fragments={aideNiveau1.texte} />
+          </p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p>
+                <RenduFragments fragments={aideNiveau2.texte} />
+              </p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}
@@ -114,7 +134,12 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {!illisible && montrerErreurs && (
           <p className="alert-error" role="alert">
             Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
           </p>

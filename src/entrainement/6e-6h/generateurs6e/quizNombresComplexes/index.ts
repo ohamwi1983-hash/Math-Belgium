@@ -1,5 +1,5 @@
 /**
- * Couche A — "Nombres complexes" (quiz vrai/faux), 6gen68, ajout ultérieur au chapitre 7. Tire une
+ * Couche A — "Nombres complexes" (quiz vrai/faux), 6gen68, chapitre 5. Tire une
  * question dans la banque pré-écrite (`banque.ts`) du thème (variante) actif — jamais de génération
  * procédurale, voir `core6e/quizNombresComplexes.types.ts`. Structure identique à 6gen67
  * (`quizIntegralesPrimitives`) et 6gen66/65.
@@ -24,6 +24,19 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizNombresComplexes; label: str
   { id: "trianglesComplexes", label: "Propriétés géométriques de triangles" },
   { id: "complexesAvances", label: "Problèmes avancés" },
 ];
+
+/** Taille réelle de la banque d'un thème — jamais une constante en dur (convention
+ * `.claude/rules/quiz-generators.md`) : une session parcourt exactement toutes les questions du
+ * thème sans répétition. */
+export function nombreQuestions(varianteId: VarianteQuizNombresComplexes): number {
+  return BANQUE_QUIZ_NOMBRES_COMPLEXES[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizNombresComplexes): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_NOMBRES_COMPLEXES[varianteId];
@@ -56,9 +69,10 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizNombresComplexes`) pourrait
- * répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée,
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème
+ * (`nombreQuestions`) : sans cette précaution, le tirage indépendant habituel
+ * (`genererExerciceQuizNombresComplexes`) pourrait répéter une question avant d'avoir couvert les
+ * autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de
  * cette fonction — voir `App6gen68.tsx`, qui en crée une par session démarrée.
  */
