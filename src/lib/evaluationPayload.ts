@@ -1388,22 +1388,34 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   'probabilites': {
+    // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`, audit 6e ch. 6, décision K)
+    // — la clé est le badge (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé
+    // reprend les nombres du cours.
     probabilitesensembles: [
-      "Démontre que, pour deux événements $A$ et $B$ quelconques, $P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$, en décomposant $A$, $B$ et $A \\cup B$ en unions disjointes.",
-      undefined,
-      undefined,
+      { cle: "pourquoi retirer l'intersection", enonce: "Démontre que, pour deux événements $A$ et $B$ quelconques, $P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$, en décomposant $A$, $B$ et $A \\cup B$ en unions disjointes." },
+      { cle: 'inclusion-exclusion sur 40 personnes', enonce: "Dans un groupe de 40 personnes, 18 font partie de $A$, 15 font partie de $B$ et 6 font partie des deux. On choisit une personne au hasard. Calcule $P(A \\cup B)$, puis la probabilité qu'elle ne fasse partie ni de $A$ ni de $B$." },
+      { cle: 'cœur et figure', enonce: "On tire une carte au hasard dans un jeu de 52 cartes. On note $A$ l'événement « tirer un cœur » et $B$ l'événement « tirer une figure ». Les événements $A$ et $B$ sont-ils indépendants ? Justifie par un calcul." },
+    ],
+    tiragesarbres: [
+      { cle: "pourquoi on multiplie le long d'un chemin", enonce: "Démontre, à partir de la définition de la probabilité conditionnelle, que la probabilité d'un chemin d'un arbre pondéré est le produit des probabilités des branches qu'il traverse : $P(A \\cap B) = P(A) \\times P(B|A)$, puis $P(A \\cap B \\cap C) = P(A) \\times P(B|A) \\times P(C|A \\cap B)$." },
+      { cle: 'deux rouges, avec ou sans remise', enonce: "Une urne contient 5 boules rouges et 3 boules bleues. On tire successivement 2 boules. Calcule la probabilité d'obtenir 2 boules rouges, d'abord avec remise, puis sans remise." },
+      { cle: 'somme 5 avec deux dés', enonce: "On lance deux dés équilibrés à 6 faces. À l'aide d'un diagramme cartésien des 36 issues, calcule la probabilité que la somme des deux dés vaille 5." },
+      { cle: '4 lettres, 4 enveloppes', enonce: "On glisse au hasard 4 lettres dans 4 enveloppes adressées, une lettre par enveloppe. Calcule la probabilité que toutes les lettres soient dans la bonne enveloppe, puis qu'aucune ne le soit (sachant que $D(4) = 9$), puis qu'exactement 2 le soient." },
     ],
     independancebayes: [
-      undefined,
-      "Démontre le théorème de Bayes, $P(A|B)=\\dfrac{P(B|A) \\times P(A)}{P(B)}$, à partir de la définition de la probabilité conditionnelle appliquée dans les deux sens de conditionnement.",
-      undefined,
-      undefined,
-      "Démontre que les trois écritures de l'indépendance de $A$ et $B$ — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$ et $P(B|A)=P(B)$ — sont rigoureusement équivalentes.",
+      { cle: 'test médical : probabilités totales', enonce: "Pour un test médical, $P(\\text{malade}) = 0{,}1$, $P(T^+|\\text{malade}) = 0{,}9$ et $P(T^+|\\text{non malade}) = 0{,}2$. Calcule $P(T^+)$ à l'aide de la loi des probabilités totales." },
+      { cle: 'pourquoi la formule fonctionne', enonce: "Démontre le théorème de Bayes, $P(A|B)=\\dfrac{P(B|A) \\times P(A)}{P(B)}$, à partir de la définition de la probabilité conditionnelle appliquée dans les deux sens de conditionnement." },
+      { cle: 'remonter du test à la maladie', enonce: "Pour un test médical, $P(\\text{malade}) = 0{,}1$, $P(T^+|\\text{malade}) = 0{,}9$ et $P(T^+) = 0{,}27$. Calcule la probabilité qu'une personne testée positive soit réellement malade, puis compare-la à $P(T^+|\\text{malade})$." },
+      { cle: 'école de musique', enonce: "Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève suit un seul instrument, le piano ou la guitare. Le professeur de guitare a 28 élèves, dont 15 garçons. Complète le tableau à double entrée de cette situation, puis calcule la probabilité qu'un élève soit un garçon sachant qu'il étudie la guitare." },
+      { cle: "les trois écritures de l'indépendance", enonce: "Démontre que les trois écritures de l'indépendance de $A$ et $B$ — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$ et $P(B|A)=P(B)$ — sont rigoureusement équivalentes." },
     ],
     probabilitesproblemes: [
-      "Pour une répétition de 3 épreuves indépendantes de probabilité de succès $p=0,3$, détermine, en énumérant les 8 chemins complets de l'arbre et en les regroupant par nombre de succès, la distribution complète de $P(X=k)$ pour $k=0,1,2,3$, puis vérifie que leur somme vaut 1.",
-      undefined,
-      undefined,
+      { cle: 'arbre complet à 3 tirs', enonce: "Pour une répétition de 3 épreuves indépendantes de probabilité de succès $p = 0{,}3$, détermine, en énumérant les 8 chemins complets de l'arbre et en les regroupant par nombre de succès, la distribution complète de $P(X=k)$ pour $k = 0, 1, 2, 3$, puis vérifie que leur somme vaut 1." },
+      { cle: 'la formule des épreuves répétées', enonce: "On répète $n$ fois, de façon indépendante, une épreuve dont le succès a une probabilité $p$, et on note $N_k$ le nombre de chemins de l'arbre qui comptent exactement $k$ succès. Démontre que $P(X=k) = N_k \\times p^k(1-p)^{n-k}$." },
+      { cle: 'tireur', enonce: "Un tireur atteint sa cible avec une probabilité $p = 0{,}3$ à chaque tir, les tirs étant indépendants. Il tire 5 fois. En énumérant les positions possibles des 2 succès parmi les 5 tirs, calcule la probabilité qu'il atteigne la cible exactement 2 fois." },
+      { cle: 'action boursière', enonce: "Chaque jour, une action est en hausse avec une probabilité $p = 0{,}6$, indépendamment des autres jours. Sur 3 jours, on note $X$ le nombre de jours de hausse. En comptant les chemins de l'arbre, calcule $P(X=k)$ pour $k = 0, 1, 2, 3$, puis vérifie que la somme de ces probabilités vaut 1." },
+      { cle: 'paradoxe des anniversaires', enonce: "Dans un groupe de 5 personnes, on ignore les années bissextiles et on suppose les 365 jours de naissance équiprobables. Calcule, en passant par l'événement complémentaire, la probabilité qu'au moins deux de ces personnes soient nées le même jour." },
+      { cle: 'montage en série ou en parallèle', enonce: "Un appareil comporte deux composants qui tombent en panne indépendamment : le premier fonctionne avec une probabilité de 0,9, le second avec une probabilité de 0,8. Calcule la probabilité que l'appareil fonctionne si les composants sont montés en série (les deux doivent fonctionner), puis s'ils sont montés en parallèle (il suffit que l'un des deux fonctionne)." },
     ],
   },
   'analyse-combinatoire': {
@@ -1565,7 +1577,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus

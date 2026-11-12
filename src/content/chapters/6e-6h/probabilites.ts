@@ -730,7 +730,7 @@ export const probabilites: ChapterContent = {
             'Pour un test avec $P(malade)$=0,1, $P(T^+|malade)$=0,9 et $P(T^+|\\text{non malade})$=0,2, ' +
             'la loi des probabilités totales (partition « malade »/« non malade ») donne :',
           steps: [],
-          result: { tag: 'résultat', text: '$P(T^+) = 0,9 \\times 0,1 + 0,2 \\times 0,9 = 0,09+0,18 = 0,27$' },
+          result: { tag: 'résultat', text: '$P(T^+) = 0{,}9 \\times 0{,}1 + 0{,}2 \\times 0{,}9 = 0{,}09+0{,}18 = 0{,}27$' },
         },
         {
           kind: 'definition',
@@ -789,12 +789,12 @@ export const probabilites: ChapterContent = {
           badge: 'test médical : remonter du test à la maladie',
           formula: 'Sachant le résultat positif, quelle est la probabilité réelle d\'être malade ?',
           steps: [],
-          result: { tag: 'résultat', text: '$P(malade|T^+) = \\dfrac{P(T^+|malade) \\times P(malade)}{P(T^+)} = \\dfrac{0,9 \\times 0,1}{0,27} = \\dfrac{1}{3}$' },
+          result: { tag: 'résultat', text: '$P(malade|T^+) = \\dfrac{P(T^+|malade) \\times P(malade)}{P(T^+)} = \\dfrac{0{,}9 \\times 0{,}1}{0{,}27} = \\dfrac{1}{3}$' },
         },
         {
           kind: 'piege',
           text:
-            '$P(malade|T^+) \\approx 0,33$ est TRÈS différent de $P(T^+|malade) = 0,9$ ! ' +
+            '$P(malade|T^+) \\approx 0{,}33$ est TRÈS différent de $P(T^+|malade) = 0{,}9$ ! ' +
             'Confondre ces deux probabilités conditionnelles, c\'est LE piège central du ' +
             'théorème de Bayes. Un test « fiable à 90 % » ($P(T^+|malade)$=0,9) ne signifie PAS ' +
             'qu\'un résultat positif donne 90 % de chances d\'être malade : tout dépend aussi ' +
@@ -1102,10 +1102,10 @@ export const probabilites: ChapterContent = {
                 'P(X=k)',
               ],
               rows: [
-                ['3', 'SSS', '1', '$0,3^3=0,027$', '$0,027$'],
-                ['2', 'SSÉ, SÉS, ÉSS', '3', '$0,3^2 \\times 0,7=0,063$', '$3 \\times 0,063=0,189$'],
-                ['1', 'SÉÉ, ÉSÉ, ÉÉS', '3', '$0,3 \\times 0,7^2=0,147$', '$3 \\times 0,147=0,441$'],
-                ['0', 'ÉÉÉ', '1', '$0,7^3=0,343$', '$0,343$'],
+                ['3', 'SSS', '1', '$0{,}3^3=0{,}027$', '$0{,}027$'],
+                ['2', 'SSÉ, SÉS, ÉSS', '3', '$0{,}3^2 \\times 0{,}7=0{,}063$', '$3 \\times 0{,}063=0{,}189$'],
+                ['1', 'SÉÉ, ÉSÉ, ÉÉS', '3', '$0{,}3 \\times 0{,}7^2=0{,}147$', '$3 \\times 0{,}147=0{,}441$'],
+                ['0', 'ÉÉÉ', '1', '$0{,}7^3=0{,}343$', '$0{,}343$'],
               ],
             },
             {
@@ -1184,7 +1184,7 @@ export const probabilites: ChapterContent = {
               text:
                 'Avec 5 tirs, lister les 32 chemins complets serait trop lourd. Mais pour ' +
                 '$P(X=2)$, seule la POSITION des 2 succès parmi les 5 tirs compte : chaque ' +
-                'position donne un chemin de probabilité $0,3^2 \\times 0,7^3$, quelle que soit ' +
+                'position donne un chemin de probabilité $0{,}3^2 \\times 0{,}7^3$, quelle que soit ' +
                 'la position exacte. Il suffit d\'énumérer ces positions :',
             },
             {
@@ -1194,14 +1194,14 @@ export const probabilites: ChapterContent = {
           ],
           result: {
             tag: 'résultat',
-            text: '$P(X=2) = 10 \\times 0,3^2 \\times 0,7^3 = 10 \\times 0,09 \\times 0,343 = 0,3087$',
+            text: '$P(X=2) = 10 \\times 0{,}3^2 \\times 0{,}7^3 = 10 \\times 0{,}09 \\times 0{,}343 = 0{,}3087$',
           },
         },
         {
           kind: 'piege',
           text:
             'Oublier de COMPTER le nombre de positions (ici 10), et ne garder qu\'UNE seule ' +
-            'd\'entre elles, donne $0,3^2 \\times 0,7^3=0,03087$ — un résultat 10 fois trop ' +
+            'd\'entre elles, donne $0{,}3^2 \\times 0{,}7^3=0{,}03087$ — un résultat 10 fois trop ' +
             'petit ! Le nombre de chemins n\'est JAMAIS optionnel dès que $0<k<n$.',
         },
         {
@@ -1211,13 +1211,13 @@ export const probabilites: ChapterContent = {
             '$P$(au moins un succès) se calcule par le complément de « aucun succès », JAMAIS ' +
               'en additionnant des probabilités individuelles — ça dépasserait facilement 1 ! ' +
               '$P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.',
-            'Avec l\'exemple : $1-0,7^5 = 1-0,16807 = 0,83193$.',
+            'Avec l\'exemple : $1-0{,}7^5 = 1-0{,}16807 = 0{,}83193$.',
           ],
         },
         {
           kind: 'piege',
           text:
-            '$P(\\text{au moins 1}) = 5 \\times p = 1,5$ est IMPOSSIBLE — une probabilité ne ' +
+            '$P(\\text{au moins 1}) = 5 \\times p = 1{,}5$ est IMPOSSIBLE — une probabilité ne ' +
             'dépasse jamais 1 ! Cette méthode « additionner les $p$ » est toujours fausse. La ' +
             'seule méthode fiable, c\'est le complément, quelle que soit la valeur de $p$ (il ' +
             'fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
@@ -1252,14 +1252,14 @@ export const probabilites: ChapterContent = {
           kind: 'exemple',
           badge: 'action boursière : 3 jours, p = 0,6',
           formula:
-            'Même principe que l\'arbre à 3 tirs ci-dessus, avec $p=0,6$ (H « hausse ») : ' +
+            'Même principe que l\'arbre à 3 tirs ci-dessus, avec $p=0{,}6$ (H « hausse ») : ' +
             '1 chemin HHH, 3 chemins à 2 hausses (HHB, HBH, BHH), 3 chemins à 1 hausse ' +
             '(HBB, BHB, BBH), 1 chemin BBB.',
           steps: [
-            { tag: 'P(X=0)', text: '$0,4^3=0,064$' },
-            { tag: 'P(X=1)', text: '$3 \\times 0,6 \\times 0,4^2=0,288$' },
-            { tag: 'P(X=2)', text: '$3 \\times 0,6^2 \\times 0,4=0,432$' },
-            { tag: 'P(X=3)', text: '$0,6^3=0,216$' },
+            { tag: 'P(X=0)', text: '$0{,}4^3=0{,}064$' },
+            { tag: 'P(X=1)', text: '$3 \\times 0{,}6 \\times 0{,}4^2=0{,}288$' },
+            { tag: 'P(X=2)', text: '$3 \\times 0{,}6^2 \\times 0{,}4=0{,}432$' },
+            { tag: 'P(X=3)', text: '$0{,}6^3=0{,}216$' },
           ],
           result: {
             tag: 'somme',

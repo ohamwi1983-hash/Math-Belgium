@@ -74,7 +74,7 @@ function tirerBranchesDonnees(): CleBranche[] {
 /** `tableauPartiel` : N et 3 autres cases, tableau complétable de proche en proche (5 cases à
  * trouver), avec au moins une case intérieure donnée (sinon seuls des totaux se complètent). */
 function tirerCellulesDonnees(): CleCellule[] {
-  const autres = ORDRE_CELLULES.filter((c) => c !== "N");
+  const autres: CleCellule[] = ORDRE_CELLULES.filter((c) => c !== "N");
   const interieures: CleCellule[] = ["AB", "AnB", "nAB", "nAnB"];
   for (let essai = 0; essai < 200; essai++) {
     const melange = [...autres].sort(() => Math.random() - 0.5).slice(0, 3);

@@ -32,12 +32,13 @@ interface Props {
 /**
  * Écran GÉNÉRIQUE "choix parmi 2 à N options" pour `6gen30` — généralisation de
  * `EtapeChoixOuiNonExpoProblemes.tsx` (limité à 2 options booléennes) : les 2 écrans à choix de ce
- * générateur (`aEcran3` sous-type comparaison a 3 options, `bEcran4`/`aEcran3` sous-type
- * incompatibilité en ont 2) partagent le même besoin, jamais dupliqué en 2 composants quasi
+ * générateur (`aEcran3`, 3 options : incompatibles / indépendants / ni l'un ni l'autre, ou >, <, = ;
+ * `bEcran4`, 2 options) partagent le même besoin, jamais dupliqué en 2 composants quasi
  * identiques. Choix véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). Même structure d'écran (consigne
  * générale → bloc données → bloc de travail) que `EtapeChampsProbabilitesEnsembles`.
- * `App6gen30.tsx` doit le rendre avec `key={phase}` (remet le choix à zéro à chaque écran). */
+ * `App6gen30.tsx` doit le rendre avec `key={`${generation}-${phase}`}` (remet le choix à zéro à chaque
+ * écran et à chaque nouvel exercice). Une seule tentative (`tentativesMaxPhase`). */
 export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;

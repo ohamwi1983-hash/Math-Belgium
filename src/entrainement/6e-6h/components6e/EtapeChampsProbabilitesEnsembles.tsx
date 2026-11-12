@@ -102,7 +102,7 @@ export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, blocDonnees
       )}
       {tableau && (
         <div className="summary-table-scroll">
-          <table className="summary-table tableau-double-entree-6gen30">
+          <table className="summary-table tableau-double-entree-6gen30" style={{ maxWidth: "34rem" }}>
             <thead>
               <tr>
                 <th scope="col" />

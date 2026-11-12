@@ -190,6 +190,12 @@ function tableauEcran1A(ex: ExerciceFamilleA): TableauSaisie {
   };
 }
 
+/** Plusieurs formules d'une aide, empilées (une par ligne) : jamais côte à côte, ce qui débordait
+ * sur téléphone. */
+function empiler(...formules: string[]): string {
+  return `\\begin{gathered}${formules.join("\\\\")}\\end{gathered}`;
+}
+
 const LATEX_INCLUSION_EXCLUSION = "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)";
 
 function tableauCorrectA(ex: ExerciceFamilleA): string[] {
@@ -263,13 +269,13 @@ function choixA(ex: ExerciceFamilleA): OptionChoix[] {
 }
 
 function aideNiveau1A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: "Rappel : la relation d'inclusion-exclusion, et la lecture du tableau (les deux cases d'une ligne ont pour somme la probabilité de cette ligne, de même pour une colonne).", latex: `${LATEX_INCLUSION_EXCLUSION}\\qquad P(A\\cap B)+P(A\\cap\\overline{B})=P(A)` };
+  if (phase === "aEcran1") return { texte: "Rappel : la relation d'inclusion-exclusion, et la lecture du tableau (les deux cases d'une ligne ont pour somme la probabilité de cette ligne, de même pour une colonne).", latex: empiler(LATEX_INCLUSION_EXCLUSION, "P(A\\cap B)+P(A\\cap\\overline{B})=P(A)") };
   if (phase === "aEcran2") return { texte: "Réutilise les cases du tableau : une probabilité d'intersection se lit dans une case ; une probabilité conditionnelle est le quotient d'une case par le total d'une ligne ou d'une colonne.", latex: null };
   if (ex.sousTypeEcran3 === "relation" && ex.paireEcran3) {
     const [x, y] = ex.paireEcran3;
-    return { texte: "Incompatibles : les deux événements ne peuvent pas se produire en même temps (intersection vide). Indépendants : la probabilité de l'intersection est égale au produit des deux probabilités.", latex: `${latexIntersection(x, y)}=\\varnothing\\qquad\\qquad P(${latexIntersection(x, y)})=P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})` };
+    return { texte: "Incompatibles : les deux événements ne peuvent pas se produire en même temps (intersection vide). Indépendants : la probabilité de l'intersection est égale au produit des deux probabilités.", latex: empiler(`${latexIntersection(x, y)}=\\varnothing`, `P(${latexIntersection(x, y)})=P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})`) };
   }
-  return { texte: "Calcule séparément les deux probabilités conditionnelles avant de les comparer.", latex: "P(A|\\overline{B})=\\dfrac{P(A\\cap\\overline{B})}{P(\\overline{B})}\\qquad P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}" };
+  return { texte: "Calcule séparément les deux probabilités conditionnelles avant de les comparer.", latex: empiler("P(A|\\overline{B})=\\dfrac{P(A\\cap\\overline{B})}{P(\\overline{B})}", "P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}") };
 }
 
 function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): AideAvecLatex {
@@ -298,11 +304,11 @@ function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): 
   }
   if (ex.sousTypeEcran3 === "relation" && ex.paireEcran3) {
     const [x, y] = ex.paireEcran3;
-    return { texte: "Probabilités des deux événements, lues dans le tableau ; il reste à trouver celle de leur intersection, puis à conclure :", latex: `P(${LATEX_EVENEMENT[x]})=${formatFractionLatex(effectifEvenementA(ex, x), N)}\\qquad P(${LATEX_EVENEMENT[y]})=${formatFractionLatex(effectifEvenementA(ex, y), N)}` };
+    return { texte: "Probabilités des deux événements, lues dans le tableau ; il reste à trouver celle de leur intersection, puis à conclure :", latex: empiler(`P(${LATEX_EVENEMENT[x]})=${formatFractionLatex(effectifEvenementA(ex, x), N)}`, `P(${LATEX_EVENEMENT[y]})=${formatFractionLatex(effectifEvenementA(ex, y), N)}`) };
   }
   return {
     texte: "Les deux quotients, valeurs du tableau substituées (divisions non faites) :",
-    latex: `P(A|\\overline{B})=\\dfrac{${formatFractionLatex(nAetBbarA(ex), N)}}{${formatFractionLatex(N - ex.nB, N)}}\\qquad P(A|B)=\\dfrac{${formatFractionLatex(ex.nAetB, N)}}{${fB}}`,
+    latex: empiler(`P(A|\\overline{B})=\\dfrac{${formatFractionLatex(nAetBbarA(ex), N)}}{${formatFractionLatex(N - ex.nB, N)}}`, `P(A|B)=\\dfrac{${formatFractionLatex(ex.nAetB, N)}}{${fB}}`),
   };
 }
 
@@ -320,7 +326,7 @@ function justificationEcran3A(ex: ExerciceFamilleA): string[] {
     const nXY = effectifIntersectionA(ex, x, y);
     const produit = `P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})=${formatFractionLatex(nX, N)}\\cdot ${formatFractionLatex(nY, N)}=${formatFractionLatex(nX * nY, N * N)}`;
     const pInter = `P(${inter})=${formatFractionLatex(nXY, N)}`;
-    return relation === "independants" ? [produit, pInter, `P(${inter})=P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})`] : [`${inter}\\neq\\varnothing`, produit, pInter, `P(${inter})\\neq P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})`];
+    return relation === "independants" ? [produit, pInter, `P(${inter})=P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})`] : [produit, pInter, `P(${inter})\\neq P(${LATEX_EVENEMENT[x]})\\cdot P(${LATEX_EVENEMENT[y]})`];
   }
   const c = comparaisonConditionnellesA(ex);
   const signe = c === "egal" ? "=" : c === "superieur" ? ">" : "<";
@@ -392,8 +398,8 @@ function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): 
       ? { texte: "Écris la probabilité comme un quotient : issues qui réalisent A et B à la fois, sur toutes les issues.", latex: `P(A\\cap B)=\\dfrac{n(A\\cap B)}{${N}}` }
       : { texte: "Effectif de l'intersection, à utiliser dans la relation (calcul non fait) :", latex: `n(A\\cap B)=${ex.countAetB}` };
   }
-  if (phase === "bEcran3") return { texte: "Valeurs connues, quotient non calculé :", latex: `P(A\\cap B)=${formatFractionLatex(ex.countAetB, N)}\\qquad P(B)=${formatFractionLatex(ex.eventB.count, N)}` };
-  return { texte: "Les deux membres, écrits sur le même dénominateur (produits et comparaison non faits) :", latex: `P(A)\\cdot P(B)=\\dfrac{${ex.eventA.count}\\times ${ex.eventB.count}}{${N}^2}\\qquad P(A\\cap B)=\\dfrac{${ex.countAetB}\\times ${N}}{${N}^2}` };
+  if (phase === "bEcran3") return { texte: "Valeurs connues, quotient non calculé :", latex: empiler(`P(A\\cap B)=${formatFractionLatex(ex.countAetB, N)}`, `P(B)=${formatFractionLatex(ex.eventB.count, N)}`) };
+  return { texte: "Les deux membres, écrits sur le même dénominateur (produits et comparaison non faits) :", latex: empiler(`P(A)\\cdot P(B)=\\dfrac{${ex.eventA.count}\\times ${ex.eventB.count}}{${N}^2}`, `P(A\\cap B)=\\dfrac{${ex.countAetB}\\times ${N}}{${N}^2}`) };
 }
 
 function justificationEcran4B(ex: ExerciceFamilleB): string[] {
@@ -457,7 +463,7 @@ export function aideNiveau2(exercice: ExerciceProbabilitesEnsembles, phase: Phas
 export const LIBELLE_PHASE: Record<PhaseProbabilitesEnsembles, string> = {
   aEcran1: "Étape 1 (tableau à double entrée)",
   aEcran2: "Étape 2 (probabilité dérivée)",
-  aEcran3: "Étape 3 (déduction structurelle)",
+  aEcran3: "Étape 3 (conclusion)",
   bEcran1: "Étape 1 (probabilités de base)",
   bEcran2: "Étape 2 (intersection/union)",
   bEcran3: "Étape 3 (probabilité conditionnelle)",

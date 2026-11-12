@@ -13,20 +13,18 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatTiragesArbres";
 import { calculerRecapitulatifTiragesArbres, calculerSegmentsProgressionTiragesArbres } from "./ui6e/recapitulatifTiragesArbres";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ArbrePondereTirages } from "./components6e/ArbrePondereTirages";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
- * `6gen31` — Tirages, arbres et dénombrement (chapitre 8, "Probabilités", DEUXIÈME générateur de ce
- * chapitre — construit sur l'infrastructure fondée par `6gen30`, voir
- * `moteur6e/verificationProbabilites.ts`). Même patron que `App6gen30.tsx` : aucun bloc JSX par
- * famille/écran, un seul dispatch piloté par `ui6e/formatTiragesArbres.ts` (`champsEcran`) et
- * `moteur6e/verificationTiragesArbres.ts` (`diagnostiquerEcran`). Contrairement à `6gen30`, AUCUN
- * écran à choix ici (les 3 familles ne posent que des champs texte libre — numériques ou, pour
- * `cEcran1`, une équation) : un seul composant écran (`EtapeChampsTiragesArbres`), jamais de
- * dispatch `estEcranChoix`.
+ * `6gen31` — Tirages et arbres (chapitre 6 de 6e, « Les probabilités »). Un seul dispatch piloté par
+ * `ui6e/formatTiragesArbres.ts` (`champsEcran`) et `moteur6e/verificationTiragesArbres.ts`
+ * (`diagnostiquerEcran`). AUCUN écran à choix fermé (4 familles, champs texte libre — probabilités
+ * ou, pour `cEcran1`, équations) : un seul composant écran (`EtapeChampsTiragesArbres`). La famille D
+ * (arbre pondéré, audit 6e ch. 6) ajoute l'arbre `ArbrePondereTirages` au-dessus de la consigne.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
@@ -53,6 +51,10 @@ export function App6gen31() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseTiragesArbres, boolean>>>({});
+  /** Compteur de générations : entre dans la `key` de l'écran, pour vider les champs à chaque nouvel
+   * exercice — même quand il commence sur la même phase que le précédent (« Générer » du sélecteur,
+   * « Nouvel exercice »). */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -91,6 +93,7 @@ export function App6gen31() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -101,6 +104,7 @@ export function App6gen31() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionTiragesArbres(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTiragesArbres)));
   }
 
@@ -168,8 +172,13 @@ export function App6gen31() {
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifTiragesArbres(etat)} />
         <EtapeChampsTiragesArbres
-          key={phase}
+          key={`${generation}-${etat.indexExercice}-${phase}`}
           {...propsCommun}
+          illustration={
+            exercice.famille === "D" ? (
+              <ArbrePondereTirages exercice={exercice} probabilitesVisibles={phase !== "dEcran1" || !!enAttente} cheminSurligne={phase === "dEcran2" ? exercice.chemin : null} />
+            ) : undefined
+          }
           champs={champsEcran(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
           onValider={(valeurs) =>

@@ -51,8 +51,10 @@ export interface TableauAffichage {
   cellules: (string | null)[][];
 }
 
-/** Placeholders hors de l'espace de tirage : la règle d'arrondi, jamais une valeur d'exemple. */
-const PLACEHOLDER_PROBA = "exacte, ou arrondie au centième (millième si < 0,1)";
+/** Placeholders hors de l'espace de tirage : la forme attendue, jamais une valeur d'exemple. La
+ * règle d'arrondi est énoncée une fois, à la fin de la consigne générale (`NOTE_ARRONDI`). */
+const PLACEHOLDER_PROBA = "fraction, décimal ou %";
+const NOTE_ARRONDI = " Probabilités : valeur exacte, ou arrondie au centième (au millième si elle est inférieure à 0,1).";
 const PLACEHOLDER_EFFECTIF = "nombre entier";
 
 /** Décimal EXACT (les données sont des décimaux à 4 chiffres au plus), virgule française. */
@@ -357,27 +359,27 @@ function consigneGeneraleBRecon(ex: ExerciceFamilleBReconstruire): FragmentConsi
   return [
     txt(`${ex.contexte.texte} On note `),
     ltx("L_1"),
-    txt(` : « ${l1} », `),
+    txt(` : «\u00a0${l1}\u00a0», `),
     ltx("L_2"),
-    txt(` : « ${l2} », `),
+    txt(` : «\u00a0${l2}\u00a0», `),
     ltx("L_3"),
-    txt(` : « ${l3} », `),
+    txt(` : «\u00a0${l3}\u00a0», `),
     ltx("C_1"),
-    txt(` : « ${c1} » et `),
+    txt(` : «\u00a0${c1}\u00a0» et `),
     ltx("C_2"),
-    txt(` : « ${c2} ». On sait que `),
+    txt(` : «\u00a0${c2}\u00a0». On sait que `),
     ltx("L_1"),
     txt(`, `),
     ltx("L_2"),
     txt(" et "),
     ltx("L_3"),
-    txt(` représentent respectivement ${p1} %, ${p2} % et ${p3} % de l'effectif total ; ${ex.pourcentageReussiteLigne1} % de `),
+    txt(` représentent respectivement ${p1}\u00a0%, ${p2}\u00a0% et ${p3}\u00a0% de l'effectif total ; ${ex.pourcentageReussiteLigne1}\u00a0% de `),
     ltx("L_1"),
-    txt(` et ${ex.pourcentageReussiteLigne2} % de `),
+    txt(` et ${ex.pourcentageReussiteLigne2}\u00a0% de `),
     ltx("L_2"),
     txt(" sont dans "),
     ltx("C_1"),
-    txt(` ; au total, ${ex.pourcentageReussiteGlobale} % de l'effectif est dans `),
+    txt(` ; au total, ${ex.pourcentageReussiteGlobale}\u00a0% de l'effectif est dans `),
     ltx("C_1"),
     txt("."),
   ];
@@ -418,7 +420,7 @@ function tableauEtatActuelBRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseI
 function consigneEcranBRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseIndependanceBayes): FragmentConsigne[] {
   if (phase === "bReconEcran1") return [txt("Traduis les pourcentages en effectifs : le total de chaque ligne, puis les deux cases de la colonne "), ltx("C_1"), txt(" directement calculables.")];
   if (phase === "bReconEcran2") return [txt("Complète les cases restantes par différence : chaque ligne et la colonne "), ltx("C_1"), txt(" doivent redonner leur total.")];
-  return [txt(`Dans le tableau reconstruit : ${questionTable(ex.contexte.descripteurs, ex.typeQuestionFinale, ex.ligneCibleFinale, ex.colonneCibleFinale)}`)];
+  return [txt(`Utilise le tableau reconstruit. ${questionTable(ex.contexte.descripteurs, ex.typeQuestionFinale, ex.ligneCibleFinale, ex.colonneCibleFinale)}`)];
 }
 
 function champsBRecon(phase: PhaseIndependanceBayes): ChampDef[] {
@@ -538,6 +540,10 @@ function reponseC(ex: ExerciceFamilleC, phase: PhaseIndependanceBayes): string[]
 // ============================================================================
 
 export function consigneGenerale(exercice: ExerciceIndependanceBayes): FragmentConsigne[] {
+  return [...consigneGeneraleSansNote(exercice), txt(NOTE_ARRONDI)];
+}
+
+function consigneGeneraleSansNote(exercice: ExerciceIndependanceBayes): FragmentConsigne[] {
   if (exercice.famille === "A") return exercice.sousType === "pannes" ? consigneGeneraleAPannes(exercice) : consigneGeneraleAUnion(exercice);
   if (exercice.famille === "B") {
     if (exercice.sousType === "testIndependance") return consigneGeneraleBIndep(exercice);

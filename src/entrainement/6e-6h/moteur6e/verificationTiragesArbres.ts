@@ -1,4 +1,4 @@
-import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleCParite, ExerciceFamilleCSpecial, ExerciceFamilleD, ExerciceTiragesArbres } from "../core6e/tiragesArbres.types";
+import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, ExerciceTiragesArbres } from "../core6e/tiragesArbres.types";
 import { evaluerExpressionExponentielle } from "./expressionExponentielle";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { PhaseTiragesArbres } from "./typesTiragesArbres";
@@ -347,4 +347,3 @@ export function ciblesEcran(exercice: ExerciceTiragesArbres, phase: PhaseTirages
   }
 }
 
-export type { ExerciceFamilleCParite, ExerciceFamilleCSpecial };

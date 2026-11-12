@@ -31,23 +31,11 @@ interface Props {
 }
 
 /** Écran GÉNÉRIQUE à N champs texte libre pour `6gen33` — même patron que
- * `EtapeChampsProbabilitesEnsembles.tsx`/`EtapeChampsIndependanceBayes.tsx` (6gen30/6gen32), copié
- * plutôt qu'importé (convention du chantier). Couvre la GRANDE majorité des écrans (7 familles) —
- * seuls l'écran "liste" (famille C écran 1) et l'écran "intervalle" (famille E paramétrique écran 3)
- * utilisent un composant dédié (voir `App6gen33.tsx`, dispatch sur `typeEcran`). `App6gen33.tsx` doit
- * le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-/** Candidat à l'aperçu LaTeX en direct (`ApercuExpressionLatex`) : le placeholder montre un calcul
- * (fraction, opérateur, formule) — jamais une simple valeur numérique isolée (la grande majorité des
- * champs de ce générateur attendent une probabilité déjà réduite à un nombre). */
-function champComporteCalcul(placeholder: string | undefined): boolean {
-  if (!placeholder) return false;
-  const corps = placeholder.replace(/^ex\s*:\s*/i, "").trim();
-  if (corps === "" || /^[a-zA-Z]$/.test(corps)) return false;
-  if (/^-?\d+([.,]\d+)?(\s*\([^)]*\))?$/.test(corps)) return false;
-  if (/^-?\d+([.,]\d+)?(\s*,\s*-?\d+([.,]\d+)?)+$/.test(corps)) return false;
-  return true;
-}
-
+ * `EtapeChampsProbabilitesEnsembles.tsx`/`EtapeChampsIndependanceBayes.tsx` (6gen30/6gen32). Couvre
+ * tous les écrans sauf l'écran « liste » (famille C écran 1) et l'écran vrai/faux (famille F écran 3).
+ * `App6gen33.tsx` le rend avec une `key` qui change à chaque écran ET à chaque nouvel exercice (les
+ * champs repartent vides après « Générer »). L'aperçu LaTeX en direct est demandé champ par champ
+ * (`ChampDef.apercu`), jamais déduit du placeholder. */
 export function EtapeChampsProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
@@ -82,7 +70,7 @@ export function EtapeChampsProbabilitesProblemes({ consigneGenerale, blocDonnees
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      {champs.map((champ, i) => (champComporteCalcul(champ.placeholder) ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
+      {champs.map((champ, i) => (champ.apercu ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
       <div className={`field-row ${champs.length >= 3 ? "field-row-wrap" : ""}`}>
         {champs.map((champ, i) => (
           <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>

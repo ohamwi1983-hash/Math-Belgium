@@ -33,7 +33,7 @@ interface Props {
  * `EtapeChoixProbabilitesEnsembles.tsx` (6gen30), copié plutôt qu'importé. SEUL écran de ce
  * générateur à l'utiliser : famille F écran 3, variante "verifierAffirmation" (vrai/faux). Choix
  * véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (réservé à
- * "Valider", CLAUDE.md). `App6gen33.tsx` doit le rendre avec `key={phase}`. */
+ * "Valider", CLAUDE.md). Un seul essai (`tentativesMaxCourant` de `sessionProbabilitesProblemes.ts`). */
 export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;

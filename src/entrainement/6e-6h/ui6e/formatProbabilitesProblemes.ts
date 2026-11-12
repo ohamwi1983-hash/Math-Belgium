@@ -1,36 +1,43 @@
-import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, ExerciceFamilleEMixte, ExerciceFamilleEParametrique, ExerciceFamilleF, ExerciceFamilleGDerangements, ExerciceFamilleGFinancier, ExerciceFamilleGMelange, ExerciceProbabilitesProblemes } from "../core6e/probabilitesProblemes.types";
+import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleEMixte, ExerciceFamilleF, ExerciceFamilleGMelange, ExerciceProbabilitesProblemes } from "../core6e/probabilitesProblemes.types";
 import type { PhaseProbabilitesProblemes } from "../moteur6e/typesProbabilitesProblemes";
 import { bayesEcran3C, branchesArbreC, probabiliteEffetC } from "../moteur6e/verificationIndependanceBayes";
-import { coeffAireTotale, coeffAireZone, configurationsExactementK, probToutesDifferentes, probabiliteConfiguration, probabiliteExactementKFamilleC, probabiliteGlobaleFinancier, probabiliteObjet1, probabiliteTotaleMelange, probabiliteZoneCible, probExactementKBinomiale, produitsCategoriesFinancier, resoudreInequationParametrique, resultatFinancier, valeurConfigurationF, valeurEcran3Binomiale } from "../moteur6e/verificationProbabilitesProblemes";
+import {
+  affirmationFEstVraie,
+  configurationsExactementK,
+  facteursEcran1,
+  nombreCheminsKSucces,
+  probabiliteConfiguration,
+  probabiliteExactementKFamilleC,
+  probabiliteTotaleMelange,
+  probExactementKChemins,
+  probToutesDifferentes,
+  valeurAlternativeF,
+  valeurConfigurationF,
+  valeurEcran3EpreuvesRepetees,
+} from "../moteur6e/verificationProbabilitesProblemes";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage pour `6gen33`. Dispatch sur
- * `exercice.famille` PUIS `exercice.sousType`/`phase` où pertinent, même principe que
- * `formatIndependanceBayes.ts`/`formatTiragesArbres.ts`. Toutes les quantités DÉRIVÉES affichées
- * (état actuel, récapitulatif) réutilisent les fonctions de `moteur6e/
- * verificationProbabilitesProblemes.ts` — JAMAIS recalculées indépendamment ici (CLAUDE.md).
+ * Couche ui (6e) — textes de consigne/aide + formatage pour `6gen33`. Toutes les quantités dérivées
+ * affichées réutilisent les fonctions de `moteur6e/verificationProbabilitesProblemes.ts`.
  *
- * ============================================================================
- * **Piège "signe orphelin" (6gen23) et piège "libellé français brut en mode KaTeX" (6gen32) — voir
- * l'en-tête de `formatIndependanceBayes.ts` pour le détail complet des deux bugs déjà rencontrés et
- * corrigés sur ce chantier (notamment "l'ampouleL1grille" : une phrase française entière passée
- * directement dans un unique appel KaTeX, rendue en lettres italiques collées, sans espaces).**
- * `consigneGenerale`/`consigneEcran` retournent désormais `FragmentConsigne[]` (CLAUDE.md, même
- * convention que `formatProprietesLogarithme.ts`/6gen13) : la prose française reste TOUJOURS un
- * fragment `texte()` séparé, et SEULE une expression symbolique courte (jamais une phrase française
- * entière) devient un fragment `latex()`. **L'invariant réel à respecter n'est donc pas "jamais de
- * KaTeX dans la consigne" (l'ancienne règle, désormais dépassée par `FragmentConsigne`), mais "jamais
- * de clause française multi-mots collée dans un fragment `latex()` sans `\text{}`"** — la
- * construction par fragments séparés empêche structurellement de reproduire le bug historique.
- * `blocDonnees`/`etatActuel` (rendus via `<Katex expression={...} block/>`) gardent la même règle
- * `\text{}` qu'avant. Régression testée dans `formatProbabilitesProblemes.test.ts` (scan de tirages
- * aléatoires des 7 familles).
- * ============================================================================
+ * Règles (audit 6e ch. 6) :
+ * - la prose reste un fragment `texte()` ; seule une expression symbolique courte devient `latex()`
+ *   (dans les blocs KaTeX, les mots sont toujours dans `\text{}`) ;
+ * - pas de majuscules d'insistance, pas de « càd » ;
+ * - placeholders HORS de l'espace de tirage et sans notation clavier (« valeur exacte ou
+ *   arrondie », jamais « ex : 364/365 », qui était la réponse) ;
+ * - récapitulatif (réponses des écrans déjà clos, réutilisées par l'élève) et aides : valeurs
+ *   EXACTES (décimal fini, fraction) ou, à défaut, 6 décimales pour une valeur intermédiaire — jamais
+ *   un arrondi au centième qui, repris par l'élève, ferait refuser la bonne réponse ;
+ * - famille B (décision G) : le nombre de chemins à k succès se compte dans l'arbre ; aucun texte ne
+ *   nomme un coefficient.
  */
 
 export interface ChampDef {
   label: string;
   placeholder: string;
+  /** Aperçu LaTeX en direct de la saisie (champ où un calcul est naturel). */
+  apercu?: boolean;
 }
 export interface AideAvecLatex {
   texte: string;
@@ -41,36 +48,62 @@ export interface OptionChoix {
   label: string;
 }
 
-/** Fragment de consigne mêlant texte français et LaTeX court (CLAUDE.md, convention établie sur
- * `formatProprietesLogarithme.ts`/6gen13, dupliquée ici localement — chaque générateur garde la
- * sienne). Voir l'en-tête de fichier : la prose reste TOUJOURS `texte()`, seule une expression
- * symbolique courte (jamais une phrase française) devient `latex()`. */
+/** Fragment de consigne mêlant texte français et LaTeX court (convention de 6gen13). */
 export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
 
 function texteFrag(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };
 }
-
 function latexFrag(valeur: string): FragmentConsigne {
   return { type: "latex", valeur };
 }
 
-const ANNONCE_TOLERANCE = "(forme exacte ou décimale arrondie au centième)";
-/** Famille A UNIQUEMENT — tolérance resserrée côté vérification (voir `moteur6e/
- * verificationProbabilitesProblemes.ts`, `TOLERANCE_ANNIVERSAIRE`), annoncée fidèlement ici. */
-const ANNONCE_TOLERANCE_A = "(forme exacte ou décimale arrondie au millième)";
+/** Annonce de précision (décision A) — reprise par `diagnostiquerProbabilite`. */
+const PRECISION = "Donne chaque probabilité sous forme exacte (fraction ou calcul) ou arrondie au centième (au millième si elle est inférieure à 0,1).";
+const PRECISION_FIABILITE = "La fiabilité d'un système est la probabilité qu'il fonctionne : donne-la sous forme exacte ou arrondie à 4 décimales.";
+const PLACEHOLDER_PROBA = "valeur exacte ou arrondie";
+const PLACEHOLDER_FIABILITE = "valeur exacte ou à 4 décimales";
 
-function formatDecimalVirgule(v: number): string {
-  return String(Math.round(v * 1000) / 1000).replace(".", "{,}");
+// ============================================================================
+// Nombres et fractions.
+// ============================================================================
+
+/** Écriture décimale EXACTE (au plus 6 décimales), `null` si la valeur n'est pas un décimal court. */
+function decimalExact(v: number): string | null {
+  const arrondi = Math.round(v * 1e6) / 1e6;
+  if (Math.abs(arrondi - v) > 1e-10) return null;
+  return String(Number(arrondi.toFixed(6)));
 }
-function formatDecimalCourt(v: number): string {
-  return String(Math.round(v * 100) / 100).replace(".", "{,}");
+function versLatex(chaine: string): string {
+  return chaine.replace(".", "{,}");
 }
-/** Décimal virgule française pour du texte PROSE brut (`consigneGenerale`/`consigneEcran`, jamais
- * passé par KaTeX) — jamais `{,}` (échappement KaTeX uniquement valide en mode mathématique,
- * afficherait littéralement les accolades dans du texte HTML brut). */
-function formatDecimalTextePlain(v: number): string {
-  return String(Math.round(v * 100) / 100).replace(".", ",");
+function versTexte(chaine: string): string {
+  return chaine.replace(".", ",");
+}
+function arrondiChaine(v: number, decimales: number): string {
+  return String(Number(v.toFixed(decimales)));
+}
+/** Nombre en LaTeX : exact si possible, sinon arrondi (le signe ≈ est géré par `egalite`). */
+function nombreLatex(v: number, decimales = 6): string {
+  return versLatex(decimalExact(v) ?? arrondiChaine(v, decimales));
+}
+/** Nombre en prose : décimal exact attendu (données de l'énoncé). */
+function nombreTexte(v: number): string {
+  return versTexte(decimalExact(v) ?? arrondiChaine(v, 4));
+}
+/** « gauche = valeur » si la valeur est un décimal court, « gauche ≈ valeur arrondie » sinon. */
+function egalite(gauche: string, v: number, decimales = 6): string {
+  return decimalExact(v) !== null ? `${gauche}=${nombreLatex(v)}` : `${gauche}\\approx ${nombreLatex(v, decimales)}`;
+}
+
+function pgcd(a: number, b: number): number {
+  return b === 0 ? Math.abs(a) : pgcd(b, a % b);
+}
+function fractionLatex(num: number, den: number): string {
+  const d = pgcd(num, den);
+  const n = num / d;
+  const m = den / d;
+  return m === 1 ? String(n) : `\\dfrac{${n}}{${m}}`;
 }
 
 // ============================================================================
@@ -78,320 +111,266 @@ function formatDecimalTextePlain(v: number): string {
 // ============================================================================
 
 function consigneGeneraleA(ex: ExerciceFamilleA): FragmentConsigne[] {
-  return [texteFrag(`${ex.n} personnes se trouvent dans une même pièce. On suppose 365 jours possibles pour un anniversaire (années bissextiles ignorées). On veut calculer la probabilité qu'au moins 2 de ces personnes partagent le même jour de naissance.`)];
+  return [
+    texteFrag(
+      `${ex.n} personnes se trouvent dans une même pièce. On suppose les 365 jours de l'année équiprobables pour un anniversaire (on ignore le 29 février). On cherche la probabilité qu'au moins 2 de ces personnes aient leur anniversaire le même jour. ${PRECISION}`,
+    ),
+  ];
 }
 function blocDonneesA(ex: ExerciceFamilleA): string[] {
   return [`n=${ex.n}`];
 }
 function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texteFrag(`Calcule, dans l'ordre, chacun des ${ex.n - 1} facteurs de cette probabilité : pour k=1,...,${ex.n - 1}, la probabilité que la (k+1)-ième personne ait un jour de naissance différent des k précédentes.`)];
-  if (phase === "aEcran2") return [texteFrag("Multiplie tous les facteurs CORRECTS de l'étape précédente pour obtenir P(toutes les personnes ont un jour de naissance différent).")];
-  return [texteFrag("Calcule "), latexFrag("P(\\text{au moins 2 identiques})=1-P(\\text{toutes différentes})"), texteFrag(", à partir de la valeur CORRECTE de l'étape précédente.")];
+  if (phase === "aEcran1") {
+    return [
+      texteFrag("On numérote les personnes. Pour "),
+      latexFrag(`k=1,\\ldots,${ex.n - 1}`),
+      texteFrag(", calcule la probabilité que la personne numéro "),
+      latexFrag("k+1"),
+      texteFrag(" ait un anniversaire différent de ceux des "),
+      latexFrag("k"),
+      texteFrag(" premières, qui sont tous différents. Donne chaque facteur sous forme de fraction ou arrondi à 4 décimales."),
+    ];
+  }
+  if (phase === "aEcran2") return [texteFrag(`Multiplie ces facteurs : tu obtiens la probabilité que les ${ex.n} anniversaires soient tous différents.`)];
+  return [texteFrag("Déduis-en la probabilité qu'au moins 2 personnes aient leur anniversaire le même jour.")];
 }
 function champsA(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "aEcran1") {
-    return Array.from({ length: ex.n - 1 }, (_, i) => ({ label: `Facteur k=${i + 1} =`, placeholder: `ex : ${365 - (i + 1)}/365` }));
-  }
-  if (phase === "aEcran2") return [{ label: "P(toutes différentes) =", placeholder: `ex : 0,973 ${ANNONCE_TOLERANCE_A}` }];
-  return [{ label: "P(au moins 2 identiques) =", placeholder: `ex : 0,027 ${ANNONCE_TOLERANCE_A}` }];
+  if (phase === "aEcran1") return Array.from({ length: ex.n - 1 }, (_, i) => ({ label: `Facteur ${i + 1} =`, placeholder: "fraction ou 4 décimales" }));
+  if (phase === "aEcran2") return [{ label: "P(toutes différentes) =", placeholder: PLACEHOLDER_PROBA, apercu: true }];
+  return [{ label: "P(au moins 2 identiques) =", placeholder: PLACEHOLDER_PROBA, apercu: true }];
 }
-// Correctif transversal (voir `etatActuelEMixte`/`etatActuelB` d'`ExponentiellesProblemes.ts` ci-
-// dessus) : `aEcran3` ne montrait QUE la probabilité confirmée à `aEcran2`, jamais les facteurs
-// confirmés à `aEcran1` — ACCUMULE désormais.
-function etatActuelA(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "aEcran1") return null;
-  const facteurs = Array.from({ length: ex.n - 1 }, (_, i) => `\\dfrac{${365 - (i + 1)}}{365}`);
-  if (phase === "aEcran2") return facteurs;
-  return [...facteurs, `P(\\text{toutes différentes})=${formatDecimalVirgule(probToutesDifferentes(ex.n))}`];
+function facteursLatex(n: number): string[] {
+  return Array.from({ length: n - 1 }, (_, i) => `\\dfrac{${365 - (i + 1)}}{365}`);
+}
+/** P(toutes différentes) sous forme EXACTE compacte : 364·363·…/365^(n−1). */
+function produitExactLatex(n: number): string {
+  const numerateurs = Array.from({ length: n - 1 }, (_, i) => String(365 - (i + 1)));
+  return `\\dfrac{${numerateurs.join("\\cdot ")}}{365^{${n - 1}}}`;
 }
 function aideNiveau1A(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: "Rappel : la 2e personne doit éviter 1 jour déjà pris par la 1re, la 3e doit en éviter 2 (ceux des 2 premières), etc.", latex: null };
-  if (phase === "aEcran2") return { texte: "Multiplie simplement les facteurs entre eux.", latex: null };
-  return { texte: "Rappel : P(au moins un cas contraire) = 1 − P(aucun cas, càd tous différents).", latex: "P(\\text{au moins un cas contraire})=1-P(\\text{aucun cas})" };
+  if (phase === "aEcran1") return { texte: "La 2e personne doit éviter 1 jour déjà pris, la 3e doit en éviter 2, et ainsi de suite.", latex: null };
+  if (phase === "aEcran2") return { texte: "Multiplie les facteurs entre eux.", latex: null };
+  return { texte: "« Au moins 2 anniversaires identiques » est l'événement contraire de « tous différents ».", latex: "P(\\overline{A})=1-P(A)" };
 }
 function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: "Les deux premiers facteurs (les suivants suivent le même principe) :", latex: `\\dfrac{364}{365}\\quad\\dfrac{363}{365}` };
-  if (phase === "aEcran2") return { texte: "Produit à effectuer (facteurs corrects, produit non fait) :", latex: Array.from({ length: ex.n - 1 }, (_, i) => `\\dfrac{${365 - (i + 1)}}{365}`).join("\\cdot ") };
-  return { texte: "Valeur connue, soustraction non faite :", latex: `1-${formatDecimalVirgule(probToutesDifferentes(ex.n))}` };
+  if (phase === "aEcran1") return { texte: "Le premier facteur : la 2e personne doit éviter 1 jour sur 365. Les suivants se construisent de la même façon.", latex: "\\dfrac{365-1}{365}" };
+  if (phase === "aEcran2") return { texte: "Produit à effectuer :", latex: facteursLatex(ex.n).join("\\cdot ") };
+  return { texte: "Soustraction à effectuer :", latex: `1-${produitExactLatex(ex.n)}` };
+}
+function reponseA(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): string[] {
+  if (phase === "aEcran1") return facteursEcran1(ex.n).map((_, i) => `f_{${i + 1}}=\\dfrac{${365 - (i + 1)}}{365}`);
+  // 6 décimales : valeur reprise par l'élève à l'étape 3 (affichée dans le récapitulatif).
+  if (phase === "aEcran2") return [egalite(`P(\\text{toutes différentes})=${produitExactLatex(ex.n)}`, probToutesDifferentes(ex.n))];
+  return [egalite("P(\\text{au moins 2 identiques})", 1 - probToutesDifferentes(ex.n), 4)];
 }
 
 // ============================================================================
-// Famille B — Loi binomiale.
+// Famille B — Épreuves répétées (chemins comptés dans l'arbre).
 // ============================================================================
 
+function cheminLatex(n: number, k: number): string {
+  return Array.from({ length: n }, (_, i) => (i < k ? "\\text{S}" : "\\text{É}")).join("\\,");
+}
+function termeLatex(n: number, p: number, i: number): string {
+  return `${nombreCheminsKSucces(n, i)}\\cdot ${nombreLatex(p)}^{${i}}\\cdot ${nombreLatex(1 - p)}^{${n - i}}`;
+}
 function consigneGeneraleB(ex: ExerciceFamilleB): FragmentConsigne[] {
-  return [texteFrag(ex.contexte.texte)];
+  return [texteFrag(`${ex.contexte.texte} On note n le nombre d'épreuves et p la probabilité de succès à chaque épreuve. ${PRECISION}`)];
 }
 function blocDonneesB(ex: ExerciceFamilleB): string[] {
-  return [`n=${ex.n}`, `p=${formatDecimalCourt(ex.p)}`, `k=${ex.k}`];
+  return [`n=${ex.n}`, `p=${nombreLatex(ex.p)}`];
 }
-const LIBELLE_DEMANDE_B: Record<ExerciceFamilleB["demandeEcran3"], string> = {
-  auMoinsK: "au moins k succès",
-  unDeChaqueResultat: "au moins un succès ET au moins un échec (pas tous identiques)",
-};
 function consigneEcranB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texteFrag(`Pose la formule complète de P(exactement k=${ex.k} succès), COEFFICIENT BINOMIAL C(n,k) INCLUS — calcule C(n,k) toi-même et utilise sa valeur numérique dans l'expression (indique une expression, sans forcément la réduire à l'avance).`)];
-  if (phase === "bEcran2") return [texteFrag("Calcule la valeur de cette probabilité, à partir de la formule CORRECTE de l'étape précédente.")];
-  return [texteFrag(`Calcule P(${LIBELLE_DEMANDE_B[ex.demandeEcran3]}), à partir de la valeur CORRECTE de l'étape précédente.`)];
+  if (phase === "bEcran1") {
+    return [texteFrag(`Dans l'arbre des ${ex.n} épreuves, chaque chemin est une suite de ${ex.n} résultats : succès (S) ou échec (É). Compte, en les énumérant, les chemins qui comportent exactement ${ex.k} succès.`)];
+  }
+  if (phase === "bEcran2") return [texteFrag(`Tous ces chemins ont la même probabilité. Calcule la probabilité d'obtenir exactement ${ex.k} succès.`)];
+  if (ex.demandeEcran3 === "auMoinsK") return [texteFrag(`Calcule la probabilité d'obtenir au moins ${ex.k} succès.`)];
+  return [texteFrag("Calcule la probabilité d'obtenir au moins un succès et au moins un échec.")];
 }
 function champsB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "bEcran1") return [{ label: "Formule (valeur numérique) =", placeholder: "ex : 10*0.3^2*0.7^3" }];
-  if (phase === "bEcran2") return [{ label: "P(exactement k succès) =", placeholder: `ex : 0,13 ${ANNONCE_TOLERANCE}` }];
-  const libelle = ex.demandeEcran3 === "auMoinsK" ? "P(au moins k succès) =" : "P(un de chaque résultat) =";
-  return [{ label: libelle, placeholder: `ex : 0,45 ${ANNONCE_TOLERANCE}` }];
+  if (phase === "bEcran1") return [{ label: `Chemins à ${ex.k} succès :`, placeholder: "nombre entier" }];
+  if (phase === "bEcran2") return [{ label: `P(exactement ${ex.k} succès) =`, placeholder: PLACEHOLDER_PROBA, apercu: true }];
+  const libelle = ex.demandeEcran3 === "auMoinsK" ? `P(au moins ${ex.k} succès) =` : "P(au moins un succès et un échec) =";
+  return [{ label: libelle, placeholder: PLACEHOLDER_PROBA, apercu: true }];
 }
-// Correctif transversal (voir `etatActuelA` ci-dessus) : `bEcran3` ne montrait QUE la valeur
-// confirmée à `bEcran2`, jamais la formule confirmée à `bEcran1` — ACCUMULE.
-function etatActuelB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "bEcran1") return null;
-  const formule = [`C(${ex.n},${ex.k})\\cdot ${formatDecimalCourt(ex.p)}^{${ex.k}}\\cdot(1-${formatDecimalCourt(ex.p)})^{${ex.n - ex.k}}`];
-  if (phase === "bEcran2") return formule;
-  return [...formule, `P(\\text{exactement }${ex.k}\\text{ succès})=${formatDecimalVirgule(probExactementKBinomiale(ex.n, ex.p, ex.k))}`];
-}
-function aideNiveau1B(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Rappel : il existe PLUSIEURS façons d'obtenir exactement k succès parmi n épreuves — le coefficient binomial C(n,k) compte ces façons. L'oublier revient à ne compter qu'UNE seule configuration.", latex: "C(n,k)" };
-  if (phase === "bEcran2") return { texte: "Remplace n, k, p par leurs valeurs dans la formule ci-dessus (état actuel), puis calcule.", latex: null };
-  return { texte: "Une somme de plusieurs termes P(exactement i succès), ou un complément à 1, selon ce qui est le plus rapide à calculer.", latex: "P(\\text{exactement }i\\text{ succès})" };
+function aideNiveau1B(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): AideAvecLatex {
+  if (phase === "bEcran1") return { texte: `Écris chaque chemin comme un mot de ${ex.n} lettres S ou É contenant exactement ${ex.k} fois la lettre S. Procède avec méthode pour n'en oublier aucun et n'en compter aucun deux fois.`, latex: null };
+  if (phase === "bEcran2") return { texte: `Un chemin à ${ex.k} succès passe par ${ex.k} branches de probabilité p et ${ex.n - ex.k} branches de probabilité 1 − p : sa probabilité est le produit de ses branches. Additionne ensuite les probabilités de tous ces chemins.`, latex: `p^{${ex.k}}\\cdot(1-p)^{${ex.n - ex.k}}` };
+  if (ex.demandeEcran3 === "auMoinsK") return { texte: `Additionne les probabilités d'obtenir exactement ${ex.k}, ${ex.k + 1}, …, ${ex.n} succès ; pour chaque nombre de succès, compte les chemins dans l'arbre comme à l'étape 1. L'événement contraire peut être plus rapide.`, latex: null };
+  return { texte: "L'événement contraire de « au moins un succès et au moins un échec » est « que des succès ou que des échecs ».", latex: null };
 }
 function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "La formule complète (coefficient à calculer toi-même) :", latex: "C(n,k)\\cdot p^{k}\\cdot(1-p)^{n-k}" };
-  if (phase === "bEcran2") return { texte: "Valeurs connues, calcul non fait :", latex: `C(${ex.n},${ex.k})\\cdot ${formatDecimalCourt(ex.p)}^{${ex.k}}\\cdot(1-${formatDecimalCourt(ex.p)})^{${ex.n - ex.k}}` };
-  if (ex.demandeEcran3 === "auMoinsK") return { texte: "Somme à effectuer (termes non calculés) :", latex: `\\sum_{i=${ex.k}}^{${ex.n}} C(${ex.n},i)\\cdot p^{i}\\cdot(1-p)^{${ex.n}-i}` };
-  return { texte: "Complément à effectuer (termes non calculés) :", latex: `1-${formatDecimalCourt(ex.p)}^{${ex.n}}-(1-${formatDecimalCourt(ex.p)})^{${ex.n}}` };
+  if (phase === "bEcran1") return { texte: "Par exemple, place d'abord les S le plus à gauche possible, puis déplace-les un à un vers la droite. Premier chemin :", latex: cheminLatex(ex.n, ex.k) };
+  if (phase === "bEcran2") return { texte: "Calcul à effectuer :", latex: termeLatex(ex.n, ex.p, ex.k) };
+  if (ex.demandeEcran3 === "auMoinsK") {
+    const termes: string[] = [];
+    for (let i = ex.k; i <= ex.n; i++) termes.push(termeLatex(ex.n, ex.p, i));
+    return { texte: "Somme à effectuer (chaque nombre de chemins est déjà compté) :", latex: termes.join("+") };
+  }
+  return { texte: "Calcul à effectuer :", latex: `1-${nombreLatex(ex.p)}^{${ex.n}}-${nombreLatex(1 - ex.p)}^{${ex.n}}` };
+}
+function reponseB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): string[] {
+  if (phase === "bEcran1") return [`${nombreCheminsKSucces(ex.n, ex.k)}\\ \\text{chemins}`];
+  if (phase === "bEcran2") return [egalite(`P(\\text{exactement }${ex.k}\\text{ succès})`, probExactementKChemins(ex.n, ex.p, ex.k), 4)];
+  const gauche = ex.demandeEcran3 === "auMoinsK" ? `P(\\text{au moins }${ex.k}\\text{ succès})` : "P(\\text{au moins un succès et un échec})";
+  return [egalite(gauche, valeurEcran3EpreuvesRepetees(ex), 4)];
 }
 
 // ============================================================================
 // Famille C — Indépendants à probabilités différentes.
 // ============================================================================
 
+function nomSingulierC(ex: ExerciceFamilleC): string {
+  return ex.contexte.nomPluriel.replace(/[sx]$/, "");
+}
+function evenementC(ex: ExerciceFamilleC): string {
+  return ex.k === 1 ? `exactement 1 ${nomSingulierC(ex)} ${ex.contexte.evenementSingulier}` : `exactement ${ex.k} ${ex.contexte.nomPluriel} ${ex.contexte.evenementPluriel}`;
+}
+function configurationLatex(c: number[]): string {
+  return `\\{${c.map((i) => i + 1).join("\\,;\\,")}\\}`;
+}
+function configurationTexte(c: number[]): string {
+  return c.map((i) => i + 1).join(" et ");
+}
 function consigneGeneraleC(ex: ExerciceFamilleC): FragmentConsigne[] {
-  return [texteFrag(`${ex.contexte.texte} Élément 1 : ${ex.contexte.labelElements[0]}. Élément 2 : ${ex.contexte.labelElements[1]}. Élément 3 : ${ex.contexte.labelElements[2]}.`)];
+  return [texteFrag(`${ex.contexte.texte} ${PRECISION}`)];
 }
 function blocDonneesC(ex: ExerciceFamilleC): string[] {
-  return ex.contexte.labelElements.map((label, i) => `P(\\text{${label}})=${formatDecimalCourt(ex.p[i])}`);
+  return ex.contexte.labelElements.map((label, i) => `P(\\text{${label} ${ex.contexte.evenementSingulier}})=${nombreLatex(ex.p[i])}`);
 }
 function consigneEcranC(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texteFrag(`Identifie TOUTES les configurations possibles correspondant à "exactement ${ex.k} succès parmi les 3 éléments" — pour chaque configuration, indique quels éléments réussissent (ex : "1,3" signifie que l'élément 1 ET l'élément 3 réussissent, l'élément 2 échoue).`)];
-  if (phase === "cEcran2") return [texteFrag("Calcule la probabilité de chaque configuration CORRECTE de l'étape précédente, SÉPARÉMENT (produit des probabilités individuelles — PAS un facteur binomial commun, les probabilités sont différentes d'un élément à l'autre).")];
-  return [texteFrag("Somme les probabilités CORRECTES de l'étape précédente pour obtenir la probabilité totale.")];
-}
-function placeholderListeC(): string {
-  return "ex : 1,3";
+  if (phase === "cEcran1") {
+    return [texteFrag(`On s'intéresse à l'événement « ${evenementC(ex)} ». Énumère toutes les configurations qui le réalisent : pour chacune, écris les numéros des ${ex.contexte.nomPluriel} qui ${ex.contexte.evenementPluriel} (pas les autres), une configuration par ligne.`)];
+  }
+  if (phase === "cEcran2") return [texteFrag("Calcule séparément la probabilité de chaque configuration : les éléments sont indépendants, multiplie donc, élément par élément, la probabilité de l'événement (élément concerné) ou celle de son contraire (élément non concerné).")];
+  return [texteFrag(`Déduis-en la probabilité de l'événement « ${evenementC(ex)} ».`)];
 }
 function champsC(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "cEcran2") {
-    return configurationsExactementK(ex.k).map((c) => ({ label: `P(réussite : ${c.length === 0 ? "aucun" : c.map((i) => i + 1).join(",")}) =`, placeholder: `ex : 0,08 ${ANNONCE_TOLERANCE}` }));
-  }
-  return [{ label: "Probabilité totale =", placeholder: `ex : 0,4 ${ANNONCE_TOLERANCE}` }];
-}
-// Correctif transversal (voir `etatActuelA`/`etatActuelB` ci-dessus) : `cEcran3` ne montrait QUE
-// les probabilités confirmées à `cEcran2`, jamais la liste des configurations confirmée à
-// `cEcran1` — ACCUMULE.
-function etatActuelC(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "cEcran1") return null;
-  const configurations = configurationsExactementK(ex.k).map((c) => `\\text{Config. }\\{${c.map((i) => i + 1).join(",")}\\}`);
-  if (phase === "cEcran2") return configurations;
-  const probabilites = configurationsExactementK(ex.k).map((c) => `P(\\{${c.map((i) => i + 1).join(",")}\\})=${formatDecimalVirgule(probabiliteConfiguration(ex.p, c))}`);
-  return [...configurations, ...probabilites];
+  if (phase === "cEcran2") return configurationsExactementK(ex.k).map((c) => ({ label: `Configuration « ${configurationTexte(c)} » :`, placeholder: PLACEHOLDER_PROBA }));
+  return [{ label: "Probabilité de l'événement =", placeholder: PLACEHOLDER_PROBA, apercu: true }];
 }
 function aideNiveau1C(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "\"Exactement k succès parmi 3 éléments différents\" correspond à PLUSIEURS configurations distinctes — énumère-les une par une.", latex: null };
-  if (phase === "cEcran2") return { texte: "Chaque configuration a SA PROPRE probabilité — multiplie les probabilités (ou compléments) de chaque élément pour CETTE configuration précise.", latex: null };
-  return { texte: "Additionne simplement les valeurs de l'étape précédente.", latex: null };
+  if (phase === "cEcran1") return { texte: "Plusieurs configurations réalisent cet événement : passe en revue toutes les possibilités, sans en oublier ni en répéter.", latex: null };
+  if (phase === "cEcran2") return { texte: "Chaque configuration a sa propre probabilité : prends la probabilité de chaque élément concerné, le complément à 1 pour chaque élément non concerné, puis multiplie.", latex: null };
+  return { texte: "Les configurations ne peuvent pas se produire en même temps : additionne leurs probabilités.", latex: null };
 }
 function aideNiveau2C(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "cEcran1") {
-    const exemple = configurationsExactementK(ex.k)[0] ?? [];
-    return { texte: "Une configuration donnée en exemple (les autres suivent le même principe) :", latex: `\\{${exemple.map((i) => i + 1).join(",")}\\}` };
-  }
+  if (phase === "cEcran1") return { texte: `Il y a exactement ${configurationsExactementK(ex.k).length} configurations à trouver.`, latex: null };
   if (phase === "cEcran2") {
     const c = configurationsExactementK(ex.k)[0] ?? [];
-    const facteurs = [0, 1, 2].map((i) => (c.includes(i) ? formatDecimalCourt(ex.p[i]) : `(1-${formatDecimalCourt(ex.p[i])})`));
-    return { texte: "Une configuration complète (les autres suivent le même principe) :", latex: facteurs.join("\\cdot ") };
+    const facteurs = [0, 1, 2].map((i) => (c.includes(i) ? nombreLatex(ex.p[i]) : `(1-${nombreLatex(ex.p[i])})`));
+    return { texte: `Pour la configuration « ${configurationTexte(c)} » (les autres se calculent de la même façon) :`, latex: facteurs.join("\\cdot ") };
   }
-  return { texte: "Valeurs connues, somme non faite :", latex: configurationsExactementK(ex.k).map((c) => formatDecimalVirgule(probabiliteConfiguration(ex.p, c))).join("+") };
+  return { texte: "Somme à effectuer :", latex: configurationsExactementK(ex.k).map((c) => nombreLatex(probabiliteConfiguration(ex.p, c))).join("+") };
+}
+function reponseC(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): string[] {
+  const configs = configurationsExactementK(ex.k);
+  if (phase === "cEcran1") return configs.map(configurationLatex);
+  if (phase === "cEcran2") return configs.map((c) => egalite(`P(${configurationLatex(c)})`, probabiliteConfiguration(ex.p, c), 4));
+  return [egalite("P", probabiliteExactementKFamilleC(ex), 4)];
 }
 
 // ============================================================================
-// Famille D — Probabilité géométrique.
+// Famille E — Bayes en problème (données présentées mélangées).
 // ============================================================================
 
-function consigneGeneraleD(ex: ExerciceFamilleD): FragmentConsigne[] {
-  return [texteFrag(`${ex.contexte.texte} Zone 1 (interne) : ${ex.contexte.labelZones[0]}. Zone 2 : ${ex.contexte.labelZones[1]}. Zone 3 (externe) : ${ex.contexte.labelZones[2]}.`)];
-}
-function blocDonneesD(ex: ExerciceFamilleD): string[] {
-  return [`r_1=${ex.r[0]}`, `r_2=${ex.r[1]}`, `r_3=${ex.r[2]}`];
-}
-function libelleZoneCibleD(ex: ExerciceFamilleD): string {
-  return ex.zoneCible.map((z) => ex.contexte.labelZones[z]).join(" ∪ ");
-}
-function consigneEcranD(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texteFrag(`Calcule l'aire de chacune des 3 zones (${ex.contexte.labelZones.join(", ")}), sous la forme d'un coefficient de π (indique seulement ce coefficient — π est sous-entendu). Rappel : l'aire d'un anneau est la différence entre l'aire du grand disque et celle du petit disque.`)];
-  return [texteFrag(`Calcule la probabilité que le point tombe dans : ${libelleZoneCibleD(ex)}, à partir des aires CORRECTES de l'étape précédente.`)];
-}
-function champsD(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "dEcran1") return ex.contexte.labelZones.map((_, i) => ({ label: `Aire zone ${i + 1} (coeff. de π) =`, placeholder: "ex : 12" }));
-  return [{ label: "Probabilité =", placeholder: `ex : 0,4 ${ANNONCE_TOLERANCE}` }];
-}
-function etatActuelD(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "dEcran1") return null;
-  return [0, 1, 2].map((z) => `\\text{${ex.contexte.labelZones[z]}}=${coeffAireZone(ex.r, z)}\\pi`);
-}
-function aideNiveau1D(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "Aire d'un disque de rayon r : πr². Aire d'un anneau : aire du grand disque MOINS aire du petit disque.", latex: "\\pi r^{2}" };
-  return { texte: "Probabilité = aire de la zone concernée / aire totale (le plus grand disque).", latex: null };
-}
-function aideNiveau2D(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "Une des aires déjà calculée (les autres suivent le même principe) :", latex: `\\text{${ex.contexte.labelZones[0]}}=${ex.r[0]}^2\\pi=${coeffAireZone(ex.r, 0)}\\pi` };
-  return { texte: "Valeurs connues, division non faite :", latex: `\\dfrac{${ex.zoneCible.map((z) => coeffAireZone(ex.r, z)).join("+")}}{${coeffAireTotale(ex.r)}}` };
-}
-
-// ============================================================================
-// Famille E — sous-type "mixte".
-// ============================================================================
-
-function phrasesMixte(ex: ExerciceFamilleEMixte["base"]): [string, string, string] {
+function phrasesMixte(base: ExerciceFamilleEMixte["base"]): [string, string, string] {
   return [
-    `Parmi tous les cas, la proportion qui correspond à c₁ est de ${formatDecimalTextePlain(ex.p)}.`,
-    `Si on se limite aux cas où c₁ est vrai, E se produit dans une proportion de ${formatDecimalTextePlain(ex.q1)}.`,
-    `Si on se limite aux cas où c₂ est vrai, E se produit dans une proportion de ${formatDecimalTextePlain(ex.q2)}.`,
+    `Parmi tous les cas, c₁ est vrai dans une proportion de ${nombreTexte(base.p)}.`,
+    `Si on se limite aux cas où c₁ est vrai, E se produit dans une proportion de ${nombreTexte(base.q1)}.`,
+    `Si on se limite aux cas où c₂ est vrai, E se produit dans une proportion de ${nombreTexte(base.q2)}.`,
   ];
 }
 function consigneGeneraleEMixte(ex: ExerciceFamilleEMixte): FragmentConsigne[] {
-  return [texteFrag(`${ex.base.contexte.texte} c₁ : ${ex.base.contexte.labelCause1}. c₂ : ${ex.base.contexte.labelCause2}. E : ${ex.base.contexte.labelEffet}.`)];
-}
-function blocDonneesEMixte(): string[] {
-  return [];
+  const c = ex.base.contexte;
+  return [texteFrag(`${c.texte} On note c₁ : « ${c.labelCause1} », c₂ : « ${c.labelCause2} » et E : « ${c.labelEffet} ». ${PRECISION}`)];
 }
 function consigneEcranEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
   if (phase === "eMixteEcran1") {
     const phrases = phrasesMixte(ex.base);
     const ordre = ex.ordreAffichage.map((i) => phrases[i]);
-    return [texteFrag(`Voici 3 informations, données dans un ordre volontairement mélangé : (1) ${ordre[0]} (2) ${ordre[1]} (3) ${ordre[2]} Identifie correctement à QUELLE probabilité (P(c₁), P(E|c₁) ou P(E|c₂)) correspond chaque information, puis remplis les 3 champs ci-dessous en conséquence — cette étape te servira à construire l'arbre à l'étape suivante.`)];
+    return [texteFrag(`Voici 3 informations, données dans le désordre : (1) ${ordre[0]} (2) ${ordre[1]} (3) ${ordre[2]} Associe chacune à la bonne probabilité — P(c₁), P(E | c₁) ou P(E | c₂) — et complète les 3 champs.`)];
   }
-  if (phase === "eMixteEcran2") return [texteFrag("Construis l'arbre : calcule les 4 probabilités des branches finales, puis P(E) par la formule des probabilités totales, à partir des valeurs CORRECTES de l'étape précédente.")];
-  return [texteFrag("Applique le théorème de Bayes pour calculer la probabilité demandée, à partir de la valeur CORRECTE de l'étape précédente.")];
+  if (phase === "eMixteEcran2") return [texteFrag("Construis l'arbre (d'abord c₁ ou c₂, puis E ou non E) : calcule les probabilités des 4 chemins, puis P(E) par la formule des probabilités totales.")];
+  return [texteFrag(ex.base.demandeEcran3 === "cause1SachantEffet" ? "Calcule la probabilité de c₁ sachant que E s'est produit." : "Calcule la probabilité de c₁ sachant que E ne s'est pas produit.")];
 }
 function champsEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): ChampDef[] {
   if (phase === "eMixteEcran1") {
-    return [
-      { label: "P(c₁) =", placeholder: `ex : 0,2 ${ANNONCE_TOLERANCE}` },
-      { label: "P(E|c₁) =", placeholder: `ex : 0,3 ${ANNONCE_TOLERANCE}` },
-      { label: "P(E|c₂) =", placeholder: `ex : 0,1 ${ANNONCE_TOLERANCE}` },
-    ];
+    return ["P(c₁) =", "P(E | c₁) =", "P(E | c₂) ="].map((label) => ({ label, placeholder: "valeur de l'énoncé" }));
   }
   if (phase === "eMixteEcran2") {
-    return [
-      { label: "P(c₁∩E) =", placeholder: `ex : 0,06 ${ANNONCE_TOLERANCE}` },
-      { label: "P(c₁∩Ē) =", placeholder: `ex : 0,14 ${ANNONCE_TOLERANCE}` },
-      { label: "P(c₂∩E) =", placeholder: `ex : 0,08 ${ANNONCE_TOLERANCE}` },
-      { label: "P(c₂∩Ē) =", placeholder: `ex : 0,72 ${ANNONCE_TOLERANCE}` },
-      { label: "P(E) =", placeholder: `ex : 0,14 ${ANNONCE_TOLERANCE}` },
-    ];
+    return ["P(c₁ ∩ E) =", "P(c₁ ∩ Ē) =", "P(c₂ ∩ E) =", "P(c₂ ∩ Ē) =", "P(E) ="].map((label) => ({ label, placeholder: PLACEHOLDER_PROBA }));
   }
-  const libelle = ex.base.demandeEcran3 === "cause1SachantEffet" ? "P(c₁|E) =" : "P(c₁|Ē) =";
-  return [{ label: libelle, placeholder: `ex : 0,43 ${ANNONCE_TOLERANCE}` }];
+  return [{ label: ex.base.demandeEcran3 === "cause1SachantEffet" ? "P(c₁ | E) =" : "P(c₁ | Ē) =", placeholder: PLACEHOLDER_PROBA, apercu: true }];
 }
-// Correctif transversal (même bug que 6gen1, voir CLAUDE.md/`docs/historique-6e.md`) :
-// `eMixteEcran3` ne montrait QUE les 5 probabilités de l'arbre confirmées à `eMixteEcran2`, jamais
-// les 3 proportions de départ confirmées à `eMixteEcran1` — ACCUMULE désormais, plus ancien en
-// premier.
-function etatActuelEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "eMixteEcran1") return null;
-  const depart = [`P(c_1)=${formatDecimalCourt(ex.base.p)}`, `P(E|c_1)=${formatDecimalCourt(ex.base.q1)}`, `P(E|c_2)=${formatDecimalCourt(ex.base.q2)}`];
-  if (phase === "eMixteEcran2") return depart;
+function donneesEMixteLatex(ex: ExerciceFamilleEMixte): string[] {
+  return [`P(c_1)=${nombreLatex(ex.base.p)}`, `P(E\\mid c_1)=${nombreLatex(ex.base.q1)}`, `P(E\\mid c_2)=${nombreLatex(ex.base.q2)}`];
+}
+function arbreEMixteLatex(ex: ExerciceFamilleEMixte, decimales = 6): string[] {
   const [b1, b2, b3, b4] = branchesArbreC(ex.base);
-  const arbre = [`P(c_1\\cap E)=${formatDecimalCourt(b1)}`, `P(c_1\\cap\\overline{E})=${formatDecimalCourt(b2)}`, `P(c_2\\cap E)=${formatDecimalCourt(b3)}`, `P(c_2\\cap\\overline{E})=${formatDecimalCourt(b4)}`, `P(E)=${formatDecimalCourt(probabiliteEffetC(ex.base))}`];
-  return [...depart, ...arbre];
+  return [
+    egalite("P(c_1\\cap E)", b1, decimales),
+    egalite("P(c_1\\cap\\overline{E})", b2, decimales),
+    egalite("P(c_2\\cap E)", b3, decimales),
+    egalite("P(c_2\\cap\\overline{E})", b4, decimales),
+    egalite("P(E)", probabiliteEffetC(ex.base), decimales),
+  ];
 }
 function aideNiveau1EMixte(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eMixteEcran1") return { texte: "P(c₁) est une proportion GLOBALE (sur tous les cas). P(E|c₁) et P(E|c₂) sont des proportions LIMITÉES à un sous-groupe (« si on se limite à... »).", latex: "P(c_1)\\quad P(E|c_1)\\quad P(E|c_2)" };
-  if (phase === "eMixteEcran2") return { texte: "Chaque branche finale = P(cause) × P(effet ou son contraire | cette cause).", latex: "P(\\text{cause})\\cdot P(\\text{effet ou son contraire}\\mid\\text{cette cause})" };
-  return { texte: "Rappel de la formule de Bayes :", latex: "P(\\text{cause}|\\text{effet})=\\dfrac{P(\\text{effet}|\\text{cause})\\cdot P(\\text{cause})}{P(\\text{effet})}" };
+  if (phase === "eMixteEcran1") return { texte: "P(c₁) porte sur tous les cas ; P(E | c₁) et P(E | c₂) ne portent que sur une partie des cas (« si on se limite à… »).", latex: null };
+  if (phase === "eMixteEcran2") return { texte: "La probabilité d'un chemin est le produit de ses branches ; P(E) est la somme des deux chemins qui mènent à E.", latex: "P(c_1\\cap E)=P(c_1)\\cdot P(E\\mid c_1)" };
+  return { texte: "Probabilité conditionnelle : on se limite aux cas de la condition.", latex: "P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}" };
 }
 function aideNiveau2EMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eMixteEcran1") return { texte: "L'information globale (sans condition) correspond toujours à P(c₁) — identifie-la en premier.", latex: "P(c_1)" };
-  if (phase === "eMixteEcran2") return { texte: "Une branche complète (les 3 autres suivent le même principe) :", latex: `P(c_1\\cap E)=${formatDecimalCourt(ex.base.p)}\\times ${formatDecimalCourt(ex.base.q1)}` };
+  if (phase === "eMixteEcran1") return { texte: "Dans P(E | c₁), c₁ est la condition (le groupe auquel on se limite) et E est ce qu'on observe dans ce groupe.", latex: null };
+  if (phase === "eMixteEcran2") return { texte: "Un chemin (les 3 autres se calculent de la même façon) :", latex: `P(c_1\\cap E)=${nombreLatex(ex.base.p)}\\cdot ${nombreLatex(ex.base.q1)}` };
   const [b1, b2] = branchesArbreC(ex.base);
   const pEffet = probabiliteEffetC(ex.base);
-  const numerateur = ex.base.demandeEcran3 === "cause1SachantEffet" ? b1 : b2;
-  const denominateur = ex.base.demandeEcran3 === "cause1SachantEffet" ? pEffet : 1 - pEffet;
-  return { texte: "Numérateur et dénominateur (valeurs de l'étape précédente), division non faite :", latex: `\\dfrac{${formatDecimalCourt(numerateur)}}{${formatDecimalCourt(denominateur)}}` };
+  const effet = ex.base.demandeEcran3 === "cause1SachantEffet";
+  return { texte: "Division à effectuer (valeurs de l'étape précédente) :", latex: `\\dfrac{${nombreLatex(effet ? b1 : b2)}}{${nombreLatex(effet ? pEffet : 1 - pEffet)}}` };
+}
+function reponseEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): string[] {
+  if (phase === "eMixteEcran1") return donneesEMixteLatex(ex);
+  if (phase === "eMixteEcran2") return arbreEMixteLatex(ex, 4);
+  return [egalite(ex.base.demandeEcran3 === "cause1SachantEffet" ? "P(c_1\\mid E)" : "P(c_1\\mid\\overline{E})", bayesEcran3C(ex.base), 4)];
 }
 
 // ============================================================================
-// Famille E — sous-type "parametrique".
+// Famille F — Montages en série / en parallèle.
 // ============================================================================
 
-function consigneGeneraleEParam(ex: ExerciceFamilleEParametrique): FragmentConsigne[] {
-  return [texteFrag(ex.contexte.texte)];
+function descriptionMontage(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
+  if (configuration === "serie") return "tous en série (le système fonctionne seulement si tous les composants fonctionnent)";
+  if (configuration === "parallele") return "tous en parallèle (le système fonctionne dès qu'au moins un composant fonctionne)";
+  return `« ${ex.contexte.labelComposants[position ?? 0]} » en série avec le groupe formé par les 2 autres, montés en parallèle entre eux`;
 }
-function blocDonneesEParam(ex: ExerciceFamilleEParametrique): string[] {
-  return [`a=P(\\text{test}+\\mid\\text{malade})=${formatDecimalCourt(ex.a)}`, `b=P(\\text{test}+\\mid\\text{non malade})=${formatDecimalCourt(ex.b)}`, `x=P(\\text{malade})\\text{ (inconnue)}`];
+function formuleLatexF(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
+  const [p0, p1, p2] = ex.p.map((v) => nombreLatex(v));
+  if (configuration === "serie") return `${p0}\\cdot ${p1}\\cdot ${p2}`;
+  if (configuration === "parallele") return `1-(1-${p0})(1-${p1})(1-${p2})`;
+  const solo = position ?? 0;
+  const autres = [0, 1, 2].filter((i) => i !== solo);
+  return `${nombreLatex(ex.p[solo])}\\cdot\\left(1-(1-${nombreLatex(ex.p[autres[0]])})(1-${nombreLatex(ex.p[autres[1]])})\\right)`;
 }
-function consigneEcranEParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "eParamEcran1") return [texteFrag("Exprime P(malade∩test+) et P(test+) en fonction de x (utilise x comme variable, et les valeurs numériques de a et b données ci-dessus).")];
-  if (phase === "eParamEcran2") return [texteFrag("Forme "), latexFrag("P(x)=P(\\text{malade}\\mid\\text{test}+)"), texteFrag(" comme fraction rationnelle en x, à partir des expressions CORRECTES de l'étape précédente.")];
-  return [texteFrag("Résous l'inéquation "), latexFrag(`P(x)>${formatDecimalCourt(ex.seuil)}`), texteFrag(" pour "), latexFrag("x\\in\\,]0;1["), texteFrag(", à partir de l'expression CORRECTE de l'étape précédente.")];
-}
-function champsEParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "eParamEcran1") {
-    return [
-      { label: "P(malade∩test+) =", placeholder: `ex : ${ex.a}*x` },
-      { label: "P(test+) =", placeholder: `ex : ${ex.a}*x+${ex.b}*(1-x)` },
-    ];
-  }
-  return [{ label: "P(x) =", placeholder: `ex : (${ex.a}*x)/(${ex.a}*x+${ex.b}*(1-x))` }];
-}
-// Correctif transversal (voir `etatActuelEMixte` ci-dessus) : `eParamEcran3` ne montrait QUE P(x)
-// confirmé à `eParamEcran2`, jamais les 2 expressions confirmées à `eParamEcran1` — ACCUMULE.
-function etatActuelEParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "eParamEcran1") return null;
-  const expressions = [`P(\\text{malade}\\cap\\text{test}+)=${ex.a}x`, `P(\\text{test}+)=${ex.a}x+${ex.b}(1-x)`];
-  if (phase === "eParamEcran2") return expressions;
-  return [...expressions, `P(x)=\\dfrac{${ex.a}x}{${ex.a}x+${ex.b}(1-x)}`];
-}
-function aideNiveau1EParam(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eParamEcran1") return { texte: "P(malade)=x, P(test+|malade)=a, P(test+|non malade)=b (a,b donnés). Utilise la formule des probabilités totales pour P(test+).", latex: "P(\\text{malade})=x,\\ P(\\text{test}+\\mid\\text{malade})=a,\\ P(\\text{test}+\\mid\\text{non malade})=b" };
-  if (phase === "eParamEcran2") return { texte: "Rappel de la formule de Bayes appliquée avec x symbolique à la place d'une valeur numérique :", latex: "P(x)=\\dfrac{P(\\text{malade}\\cap\\text{test}+)}{P(\\text{test}+)}" };
-  return { texte: "Multiplie les deux membres par le dénominateur (toujours positif sur ]0;1[), puis isole x.", latex: "x\\in\\,]0;1[" };
-}
-function aideNiveau2EParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eParamEcran1") return { texte: "Deuxième expression, structure donnée (calcul non fait) :", latex: `${ex.a}\\cdot x+${ex.b}\\cdot(1-x)` };
-  if (phase === "eParamEcran2") return { texte: "Numérateur et dénominateur affichés séparément (fraction non formée) :", latex: `\\text{numérateur}=${ex.a}x\\qquad\\text{dénominateur}=${ex.a}x+${ex.b}(1-x)` };
-  return { texte: "Inéquation avec valeurs substituées (résolution non faite) :", latex: `\\dfrac{${ex.a}x}{${ex.a}x+${ex.b}(1-x)}>${formatDecimalCourt(ex.seuil)}` };
-}
-
-// ============================================================================
-// Famille F — Fiabilité de circuits.
-// ============================================================================
-
-const LIBELLE_CONFIG_F: Record<ExerciceFamilleF["configuration"], (ex: ExerciceFamilleF) => string> = {
-  serie: () => "montés EN SÉRIE : TOUS les composants doivent fonctionner pour que le système fonctionne",
-  parallele: () => "montés EN PARALLÈLE : AU MOINS UN des composants doit fonctionner pour que le système fonctionne",
-  mixte: (ex) => `montés en configuration MIXTE : le composant « ${ex.contexte.labelComposants[ex.positionMixte ?? 0]} » est monté EN SÉRIE avec le groupe formé par les 2 autres composants, eux-mêmes montés EN PARALLÈLE entre eux`,
-};
 function consigneGeneraleF(ex: ExerciceFamilleF): FragmentConsigne[] {
-  return [texteFrag(`${ex.contexte.texte} Les 3 composants (${ex.contexte.labelComposants.join(", ")}) sont ${LIBELLE_CONFIG_F[ex.configuration](ex)}.`)];
+  return [texteFrag(`${ex.contexte.texte} Les 3 composants (${ex.contexte.labelComposants.join(", ")}) sont montés ainsi : ${descriptionMontage(ex, ex.configuration, ex.positionMixte)}. ${PRECISION_FIABILITE}`)];
 }
 function blocDonneesF(ex: ExerciceFamilleF): string[] {
-  return ex.contexte.labelComposants.map((label, i) => `P(\\text{${label} fonctionne})=${formatDecimalCourt(ex.p[i])}`);
+  return ex.contexte.labelComposants.map((label, i) => `P(\\text{${label} fonctionne})=${nombreLatex(ex.p[i])}`);
 }
 function consigneEcranF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texteFrag("Identifie la configuration et pose la formule appropriée de la fiabilité du système, sous forme d'une valeur numérique (calcule-la toi-même à partir des probabilités ci-dessus).")];
-  if (phase === "fEcran2") return [texteFrag("Calcule la valeur de la fiabilité du système, à partir de la formule CORRECTE de l'étape précédente.")];
-  if (ex.demandeEcran3 === "comparerValeur") {
-    const config = ex.configurationAlternative ?? ex.configuration;
-    const position = ex.positionMixteAlternative;
-    const description = config === "mixte" && position !== undefined ? `mixte (« ${ex.contexte.labelComposants[position]} » seul en série, les 2 autres en parallèle)` : config === "serie" ? "tous en série" : "tous en parallèle";
-    return [texteFrag(`Les mêmes 3 composants sont maintenant montés dans une configuration ALTERNATIVE : ${description}. Calcule la fiabilité de cette nouvelle configuration, à partir de la logique CORRECTE des étapes précédentes.`)];
-  }
-  return [texteFrag(`Un technicien affirme : « La fiabilité de ce système est de ${formatDecimalTextePlain(ex.affirmationValeur ?? 0)} ». Cette affirmation est-elle vraie ou fausse (à comparer à la valeur CORRECTE de l'étape précédente) ?`)];
+  if (phase === "fEcran1") return [texteFrag("Pose le calcul de la fiabilité du système à partir des probabilités données (tu peux laisser le calcul non effectué).")];
+  if (phase === "fEcran2") return [texteFrag("Effectue ce calcul : donne la fiabilité du système.")];
+  const nouveau = `On monte maintenant les mêmes composants autrement : ${descriptionMontage(ex, ex.configurationAlternative, ex.positionMixteAlternative)}.`;
+  if (ex.demandeEcran3 === "comparerValeur") return [texteFrag(`${nouveau} Calcule la fiabilité de ce nouveau montage.`)];
+  return [texteFrag(`${nouveau} Un technicien affirme : « La fiabilité de ce nouveau montage, arrondie à 4 décimales, vaut ${nombreTexte(ex.affirmationValeur ?? 0)}. » Cette affirmation est-elle vraie ou fausse ?`)];
 }
 function champsF(phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "fEcran1") return [{ label: "Fiabilité du système (formule) =", placeholder: "ex : 0.8*0.9*0.7" }];
-  if (phase === "fEcran2") return [{ label: "Fiabilité du système =", placeholder: `ex : 0,5 ${ANNONCE_TOLERANCE}` }];
-  return [{ label: "Fiabilité de la configuration alternative =", placeholder: `ex : 0,9 ${ANNONCE_TOLERANCE}` }];
+  if (phase === "fEcran1") return [{ label: "Calcul de la fiabilité :", placeholder: "calcul avec les données", apercu: true }];
+  if (phase === "fEcran2") return [{ label: "Fiabilité du système =", placeholder: PLACEHOLDER_FIABILITE, apercu: true }];
+  return [{ label: "Fiabilité du nouveau montage =", placeholder: PLACEHOLDER_FIABILITE, apercu: true }];
 }
 export function choixEcranF(): OptionChoix[] {
   return [
@@ -399,186 +378,94 @@ export function choixEcranF(): OptionChoix[] {
     { id: "faux", label: "Faux" },
   ];
 }
-function formuleTexteF(ex: ExerciceFamilleF): string {
-  const [p0, p1, p2] = ex.p.map(formatDecimalCourt);
-  if (ex.configuration === "serie") return `${p0}\\times ${p1}\\times ${p2}`;
-  if (ex.configuration === "parallele") return `1-(1-${p0})(1-${p1})(1-${p2})`;
-  const solo = ex.positionMixte ?? 0;
-  const autres = [0, 1, 2].filter((i) => i !== solo);
-  const pSolo = formatDecimalCourt(ex.p[solo]);
-  const pA = formatDecimalCourt(ex.p[autres[0]]);
-  const pB = formatDecimalCourt(ex.p[autres[1]]);
-  return `${pSolo}\\times(1-(1-${pA})(1-${pB}))`;
-}
-// Correctif transversal (voir `etatActuelA`/`etatActuelB`/`etatActuelC` ci-dessus) : `fEcran3` ne
-// montrait QUE la fiabilité confirmée à `fEcran2`, jamais la formule confirmée à `fEcran1` —
-// ACCUMULE.
-function etatActuelF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "fEcran1") return null;
-  const formule = [formuleTexteF(ex)];
-  if (phase === "fEcran2") return formule;
-  return [...formule, `\\text{Fiabilité}=${formatDecimalVirgule(valeurConfigurationF(ex.p, ex.configuration, ex.positionMixte))}`];
-}
-function aideNiveau1F(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Série : produit des probabilités. Parallèle : 1 moins le produit des probabilités de PANNE (1−pᵢ).", latex: "1-p_i" };
-  if (phase === "fEcran2") return { texte: "Remplace chaque probabilité par sa valeur dans la formule ci-dessus (état actuel), puis calcule.", latex: null };
-  return { texte: "Recalcule la fiabilité correcte, compare-la à la valeur affirmée.", latex: null };
+function aideNiveau1F(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): AideAvecLatex {
+  if (phase === "fEcran1") return { texte: "En série, tous les composants doivent fonctionner : on multiplie. En parallèle, le système ne tombe en panne que si tous les composants tombent en panne : on passe par l'événement contraire, avec la probabilité de panne de chaque composant.", latex: "P(\\text{panne})=1-p_i" };
+  if (phase === "fEcran2") return { texte: "Effectue le calcul posé à l'étape précédente.", latex: null };
+  const suite = ex.demandeEcran3 === "verifierAffirmation" ? ", puis compare ton résultat, arrondi à 4 décimales, à la valeur affirmée" : "";
+  return { texte: `Identifie le nouveau montage (série, parallèle ou mixte) et applique la même méthode qu'aux étapes précédentes${suite}.`, latex: null };
 }
 function aideNiveau2F(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "fEcran1") {
-    const solo = ex.positionMixte ?? 0;
-    const autres = [0, 1, 2].filter((i) => i !== solo);
-    if (ex.configuration === "mixte") return { texte: "Décomposition : le groupe en parallèle, PUIS l'assemblage final (formule complète non assemblée) :", latex: `\\text{groupe parallèle}=1-(1-${formatDecimalCourt(ex.p[autres[0]])})(1-${formatDecimalCourt(ex.p[autres[1]])})` };
-    return { texte: "Formule à appliquer (valeurs non substituées) :", latex: ex.configuration === "serie" ? "p_1\\times p_2\\times p_3" : "1-(1-p_1)(1-p_2)(1-p_3)" };
+    if (ex.configuration === "mixte") {
+      const solo = ex.positionMixte ?? 0;
+      const autres = [0, 1, 2].filter((i) => i !== solo);
+      return { texte: "Calcule d'abord la fiabilité du groupe en parallèle, puis assemble-le en série avec le composant seul :", latex: `\\text{groupe}=1-(1-${nombreLatex(ex.p[autres[0]])})(1-${nombreLatex(ex.p[autres[1]])})` };
+    }
+    return { texte: "Formule à appliquer :", latex: ex.configuration === "serie" ? "p_1\\cdot p_2\\cdot p_3" : "1-(1-p_1)(1-p_2)(1-p_3)" };
   }
-  return { texte: "Valeurs connues, calcul non fait :", latex: formuleTexteF(ex) };
+  if (phase === "fEcran2") return { texte: "Calcul à effectuer :", latex: formuleLatexF(ex, ex.configuration, ex.positionMixte) };
+  return { texte: "Calcul à effectuer pour le nouveau montage :", latex: formuleLatexF(ex, ex.configurationAlternative, ex.positionMixteAlternative) };
+}
+function reponseF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): string[] {
+  const valeur = valeurConfigurationF(ex.p, ex.configuration, ex.positionMixte);
+  if (phase === "fEcran1") return [`${formuleLatexF(ex, ex.configuration, ex.positionMixte)}=${nombreLatex(valeur)}`];
+  if (phase === "fEcran2") return [egalite("\\text{fiabilité}", valeur)];
+  const alternative = valeurAlternativeF(ex);
+  if (ex.demandeEcran3 === "comparerValeur") return [egalite("\\text{fiabilité}", alternative)];
+  return [affirmationFEstVraie(ex) ? "\\text{Vrai}" : "\\text{Faux}", egalite("\\text{fiabilité}", alternative)];
 }
 
 // ============================================================================
-// Famille G — sous-type "derangements" (réutilise le vocabulaire de 6gen31 famille B).
+// Famille G — Mélange de deux urnes (probabilités totales).
 // ============================================================================
 
-function consigneGeneraleGDerang(ex: ExerciceFamilleGDerangements): FragmentConsigne[] {
-  return [texteFrag(ex.base.contexte === "lettres" ? "On glisse au hasard 4 lettres dans 4 enveloppes déjà adressées (une lettre par enveloppe)." : "Un lecteur MP3 joue 4 chansons dans un ordre totalement aléatoire.")];
+function evenementGLatex(ex: ExerciceFamilleGMelange): string {
+  return `\\text{face }${ex.base.faceSpeciale}\\text{ ou }${ex.base.autreFace}`;
 }
-function blocDonneesGDerang(ex: ExerciceFamilleGDerangements): string[] {
-  return [`n=${ex.base.n}`];
+function fractionObjet1(ex: ExerciceFamilleGMelange): { num: number; den: number } {
+  const { p0, p } = ex.base;
+  return { num: p0.num * p.den + p.num * p0.den, den: p0.den * p.den };
 }
-function consigneEcranGDerang(ex: ExerciceFamilleGDerangements, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "gDerangEcran1") return [texteFrag(ex.base.demandeEcran1 === "une" ? "Calcule la probabilité qu'UNE position donnée soit correcte." : "Calcule la probabilité que DEUX positions données soient simultanément correctes.")];
-  if (phase === "gDerangEcran2") return [texteFrag("Calcule la probabilité que TOUT l'arrangement soit correct (chaque élément à sa place).")];
-  if (phase === "gDerangEcran3") return [texteFrag(`Calcule la probabilité qu'EXACTEMENT k=${ex.base.k} positions soient correctes (piège : les positions restantes doivent former un DÉRANGEMENT COMPLET, aucune correcte parmi elles).`)];
-  return [texteFrag("Calcule la probabilité qu'AUCUNE position ne soit correcte.")];
-}
-function champsGDerang(phase: PhaseProbabilitesProblemes): ChampDef[] {
-  const labels: Partial<Record<PhaseProbabilitesProblemes, string>> = { gDerangEcran1: "Probabilité =", gDerangEcran2: "P(tout correct) =", gDerangEcran3: "P(exactement k correctes) =", gDerangEcran4: "P(aucune correcte) =" };
-  return [{ label: labels[phase] ?? "Probabilité =", placeholder: `ex : 0,25 ${ANNONCE_TOLERANCE}` }];
-}
-function aideNiveau1GDerang(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gDerangEcran1") return { texte: "P(une position fixée) = 1/n. P(deux positions fixées) = (n-2)!/n!.", latex: "P(\\text{une position fixée})=\\dfrac{1}{n}\\qquad P(\\text{deux positions fixées})=\\dfrac{(n-2)!}{n!}" };
-  if (phase === "gDerangEcran2") return { texte: "Un seul arrangement, parmi n!, est entièrement correct.", latex: "n!" };
-  if (phase === "gDerangEcran3") return { texte: "Choisis quelles k positions sont correctes (C(n,k) façons), PUIS les n-k positions restantes doivent former un dérangement complet.", latex: "C(n,k)" };
-  return { texte: "Utilise directement la table des dérangements D(n).", latex: "D(n)" };
-}
-function aideNiveau2GDerang(): AideAvecLatex {
-  return { texte: "Table des dérangements : D(0)=1, D(1)=0, D(2)=1, D(3)=2, D(4)=9.", latex: "D(0)=1,\\ D(1)=0,\\ D(2)=1,\\ D(3)=2,\\ D(4)=9" };
-}
-
-function factorielleGDerang(n: number): number {
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
-}
-function coefficientBinomialGDerang(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  return factorielleGDerang(n) / (factorielleGDerang(k) * factorielleGDerang(n - k));
-}
-const DERANGEMENTS_G: readonly number[] = [1, 0, 1, 2, 9, 44];
-
-/** Correctif transversal (même bug que `etatActuelA`/`etatActuelB`/`etatActuelC`/`etatActuelF`/
- * `etatActuelGFinancier` ci-dessus, non couvert par l'audit précédent qui n'avait fixé que
- * A/B/C/F/EMixte/EParam/GFinancier) : `etatActuel` renvoyait TOUJOURS `null` pour cette
- * famille/sous-type (4 écrans), quel que soit l'écran — aucune réponse validée n'était jamais
- * affichée, y compris à `gDerangEcran4`. ACCUMULE désormais, plus ancien en premier, même principe
- * que `etatActuelB` de `formatTiragesArbres.ts` (6gen31) dont cette famille réutilise le vocabulaire. */
-function etatActuelGDerang(ex: ExerciceFamilleGDerangements, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "gDerangEcran1") return null;
-  const { n, k, demandeEcran1 } = ex.base;
-  const numPositions = demandeEcran1 === "une" ? 1 : factorielleGDerang(n - 2);
-  const denPositions = demandeEcran1 === "une" ? n : factorielleGDerang(n);
-  const base = [`P(\\text{position(s) fixée(s)})=${formatDecimalCourt(numPositions / denPositions)}`];
-  if (phase === "gDerangEcran2") return base;
-  const avecEcran2 = [...base, `P(\\text{tout correct})=\\dfrac{1}{${n}!}=${formatDecimalCourt(1 / factorielleGDerang(n))}`];
-  if (phase === "gDerangEcran3") return avecEcran2;
-  const numK = coefficientBinomialGDerang(n, k) * DERANGEMENTS_G[n - k];
-  const denK = factorielleGDerang(n);
-  return [...avecEcran2, `P(\\text{exactement }${k})=${formatDecimalCourt(numK / denK)}`];
-}
-
-// ============================================================================
-// Famille G — sous-type "melangeObjets".
-// ============================================================================
-
 function consigneGeneraleGMelange(ex: ExerciceFamilleGMelange): FragmentConsigne[] {
-  return [texteFrag(`${ex.contexteMelange.texte} Le dé de l'urne 1 a une face spéciale n°${ex.base.faceSpeciale} de probabilité CONNUE, les 5 autres faces équiprobables entre elles (probabilité commune INCONNUE, à déterminer).`)];
+  const { faceSpeciale, autreFace } = ex.base;
+  return [
+    texteFrag(
+      `On choisit une urne parmi deux, puis on lance le dé à 6 faces qu'elle contient. Le dé de l'urne 1 est truqué : la face ${faceSpeciale} a une probabilité connue, notée a, et les 5 autres faces ont toutes la même probabilité, notée p, inconnue. On s'intéresse à l'événement « obtenir la face ${faceSpeciale} ou la face ${autreFace} ». ${PRECISION}`,
+    ),
+  ];
 }
 function blocDonneesGMelange(ex: ExerciceFamilleGMelange): string[] {
-  return [`P(\\text{face }${ex.base.faceSpeciale})=\\dfrac{${ex.base.p0.num}}{${ex.base.p0.den}}`, `\\text{Poids de l'urne 1}=${formatDecimalCourt(ex.poidsObjet1)}`, `P(\\text{${ex.contexteMelange.labelEvenement}}\\mid\\text{urne 2})=${formatDecimalCourt(ex.probabiliteAutreObjet)}`];
+  return [
+    `a=P(\\text{face }${ex.base.faceSpeciale}\\mid\\text{urne 1})=${fractionLatex(ex.base.p0.num, ex.base.p0.den)}`,
+    `P(\\text{urne 1})=${nombreLatex(ex.poidsObjet1)}`,
+    `P(${evenementGLatex(ex)}\\mid\\text{urne 2})=${nombreLatex(ex.probabiliteAutreObjet)}`,
+  ];
 }
 function consigneEcranGMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "gMelangeEcran1") return [texteFrag("Pose l'équation traduisant que les 6 probabilités de faces somment à 1 (utilise « a » pour la probabilité de la face spéciale, DÉJÀ connue, et « p » pour la probabilité commune, inconnue, des 5 autres faces).")];
-  if (phase === "gMelangeEcran2") return [texteFrag("Résous cette équation pour trouver p, à partir de l'équation CORRECTE de l'étape précédente.")];
-  if (phase === "gMelangeEcran3") return [texteFrag(`Calcule P(face ${ex.base.faceSpeciale} ∪ face ${ex.base.autreFace}), à partir de p CORRECT.`)];
-  return [texteFrag(`L'urne est choisie au hasard : avec probabilité ${formatDecimalTextePlain(ex.poidsObjet1)}, c'est l'urne 1 (le dé ci-dessus) ; sinon, c'est l'urne 2, pour laquelle P(${ex.contexteMelange.labelEvenement}) est DONNÉE directement ci-dessus. Combine les deux cas via la formule des probabilités totales, à partir de la valeur CORRECTE de l'étape précédente.`)];
+  const { faceSpeciale, autreFace } = ex.base;
+  if (phase === "gMelangeEcran1") return [texteFrag("Écris l'équation qui exprime que les probabilités des 6 faces du dé de l'urne 1 ont pour somme 1 (utilise les lettres a et p).")];
+  if (phase === "gMelangeEcran2") return [texteFrag("Résous cette équation : calcule p.")];
+  if (phase === "gMelangeEcran3") return [texteFrag(`Calcule la probabilité d'obtenir la face ${faceSpeciale} ou la face ${autreFace} avec le dé de l'urne 1.`)];
+  return [texteFrag(`L'urne n'est pas connue : calcule la probabilité d'obtenir la face ${faceSpeciale} ou la face ${autreFace} (formule des probabilités totales).`)];
 }
-function champsGMelange(phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "gMelangeEcran1") return [{ label: "Équation =", placeholder: "ex : 5*p+a=1" }];
-  if (phase === "gMelangeEcran2") return [{ label: "p =", placeholder: `ex : 0,05 ${ANNONCE_TOLERANCE}` }];
-  return [{ label: "Probabilité =", placeholder: `ex : 0,25 ${ANNONCE_TOLERANCE}` }];
+function champsGMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): ChampDef[] {
+  const { faceSpeciale, autreFace } = ex.base;
+  if (phase === "gMelangeEcran1") return [{ label: "Équation :", placeholder: "équation en a et p", apercu: true }];
+  if (phase === "gMelangeEcran2") return [{ label: "p =", placeholder: PLACEHOLDER_PROBA, apercu: true }];
+  if (phase === "gMelangeEcran3") return [{ label: `P(face ${faceSpeciale} ou ${autreFace} | urne 1) =`, placeholder: PLACEHOLDER_PROBA, apercu: true }];
+  return [{ label: `P(face ${faceSpeciale} ou ${autreFace}) =`, placeholder: PLACEHOLDER_PROBA, apercu: true }];
 }
 function aideNiveau1GMelange(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gMelangeEcran1") return { texte: "La somme des probabilités des 6 faces d'un dé vaut toujours 1.", latex: null };
-  if (phase === "gMelangeEcran2") return { texte: "Isole p dans l'équation de l'étape précédente.", latex: null };
-  if (phase === "gMelangeEcran3") return { texte: "Deux faces distinctes : additionne simplement leurs probabilités.", latex: null };
-  return { texte: "Rappel de la formule des probabilités totales :", latex: "\\text{poids}\\times P(\\text{objet1})+(1-\\text{poids})\\times P(\\text{objet2})" };
+  if (phase === "gMelangeEcran1") return { texte: "La somme des probabilités de toutes les faces d'un dé vaut 1.", latex: null };
+  if (phase === "gMelangeEcran2") return { texte: "Remplace a par sa valeur, puis isole p.", latex: null };
+  if (phase === "gMelangeEcran3") return { texte: "Les deux faces ne peuvent pas sortir en même temps : additionne leurs probabilités.", latex: null };
+  return { texte: "Formule des probabilités totales : additionne les deux chemins de l'arbre (choix de l'urne, puis résultat du dé).", latex: "P(F)=P(U_1)\\cdot P(F\\mid U_1)+P(U_2)\\cdot P(F\\mid U_2)" };
 }
 function aideNiveau2GMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gMelangeEcran1") return { texte: "Équation attendue :", latex: "5p+a=1" };
-  if (phase === "gMelangeEcran2") return { texte: "Équation avec a substitué (résolution non faite) :", latex: `5p+\\dfrac{${ex.base.p0.num}}{${ex.base.p0.den}}=1` };
-  if (phase === "gMelangeEcran3") return { texte: "Valeurs connues, somme non faite :", latex: `\\dfrac{${ex.base.p0.num}}{${ex.base.p0.den}}+${formatDecimalVirgule(probabiliteObjet1(ex))}-\\dfrac{${ex.base.p0.num}}{${ex.base.p0.den}}` };
-  return { texte: "Valeurs connues, calcul non fait :", latex: `${formatDecimalCourt(ex.poidsObjet1)}\\times ${formatDecimalCourt(probabiliteObjet1(ex))}+(1-${formatDecimalCourt(ex.poidsObjet1)})\\times ${formatDecimalCourt(ex.probabiliteAutreObjet)}` };
+  const a = fractionLatex(ex.base.p0.num, ex.base.p0.den);
+  const p = fractionLatex(ex.base.p.num, ex.base.p.den);
+  if (phase === "gMelangeEcran1") return { texte: "Une face vaut a, et chacune des 5 autres vaut p.", latex: null };
+  if (phase === "gMelangeEcran2") return { texte: "Équation à résoudre :", latex: `5p+${a}=1` };
+  if (phase === "gMelangeEcran3") return { texte: "Somme à effectuer :", latex: `${a}+${p}` };
+  const f = fractionObjet1(ex);
+  return { texte: "Calcul à effectuer :", latex: `${nombreLatex(ex.poidsObjet1)}\\cdot ${fractionLatex(f.num, f.den)}+${nombreLatex(1 - ex.poidsObjet1)}\\cdot ${nombreLatex(ex.probabiliteAutreObjet)}` };
 }
-
-/** Correctif transversal (même bug que `etatActuelGDerang` ci-dessus, non couvert par l'audit
- * précédent) : `etatActuel` renvoyait TOUJOURS `null` pour cette famille/sous-type (4 écrans), quel
- * que soit l'écran. ACCUMULE désormais, plus ancien en premier. */
-function etatActuelGMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "gMelangeEcran1") return null;
-  const equation = ["5p+a=1"];
-  if (phase === "gMelangeEcran2") return equation;
-  const avecP = [...equation, `p=\\dfrac{${ex.base.p.num}}{${ex.base.p.den}}`];
-  if (phase === "gMelangeEcran3") return avecP;
-  return [...avecP, `P(\\text{face }${ex.base.faceSpeciale}\\cup\\text{face }${ex.base.autreFace})=${formatDecimalVirgule(probabiliteObjet1(ex))}`];
-}
-
-// ============================================================================
-// Famille G — sous-type "financier".
-// ============================================================================
-
-function consigneGeneraleGFinancier(ex: ExerciceFamilleGFinancier): FragmentConsigne[] {
-  return [texteFrag(ex.contexte.texte)];
-}
-function blocDonneesGFinancier(ex: ExerciceFamilleGFinancier): string[] {
-  return [...ex.categories.map((c) => `\\text{${c.label}}: ${Math.round(c.proportion * 100)}\\%\\text{ des clients, taux}=${Math.round(c.taux * 100)}\\%`), `\\text{${ex.contexte.libelleValeur}}=${ex.valeurUnitaire}€`, `N=${ex.nombreTotalIndividus}`];
-}
-function consigneEcranGFinancier(phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  if (phase === "gFinancierEcran1") return [texteFrag("Calcule, pour chaque catégorie, le produit (proportion × taux).")];
-  if (phase === "gFinancierEcran2") return [texteFrag("Somme ces produits pour obtenir la probabilité globale qu'un client achète, à partir des valeurs CORRECTES de l'étape précédente.")];
-  return [texteFrag("Multiplie cette probabilité par la valeur unitaire et le nombre total de clients pour obtenir le résultat financier total attendu, à partir de la valeur CORRECTE de l'étape précédente.")];
-}
-function champsGFinancier(ex: ExerciceFamilleGFinancier, phase: PhaseProbabilitesProblemes): ChampDef[] {
-  if (phase === "gFinancierEcran1") return ex.categories.map((c) => ({ label: `Produit (${c.label}) =`, placeholder: `ex : 0,12 ${ANNONCE_TOLERANCE}` }));
-  if (phase === "gFinancierEcran2") return [{ label: "Probabilité globale =", placeholder: `ex : 0,3 ${ANNONCE_TOLERANCE}` }];
-  return [{ label: "Résultat financier (€) =", placeholder: "ex : 12000" }];
-}
-// Correctif transversal (voir `etatActuelA`/`etatActuelB`/`etatActuelC`/`etatActuelF` ci-dessus) :
-// `gFinancierEcran3` ne montrait QUE la probabilité globale confirmée à `gFinancierEcran2`, jamais
-// les produits par catégorie confirmés à `gFinancierEcran1` — ACCUMULE.
-function etatActuelGFinancier(ex: ExerciceFamilleGFinancier, phase: PhaseProbabilitesProblemes): string[] | null {
-  if (phase === "gFinancierEcran1") return null;
-  const produits = produitsCategoriesFinancier(ex).map((v, i) => `\\text{${ex.categories[i].label}}=${formatDecimalVirgule(v)}`);
-  if (phase === "gFinancierEcran2") return produits;
-  return [...produits, `\\text{Probabilité globale}=${formatDecimalVirgule(probabiliteGlobaleFinancier(ex))}`];
-}
-function aideNiveau1GFinancier(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gFinancierEcran1") return { texte: "Produit = proportion × taux, pour chaque catégorie séparément.", latex: null };
-  if (phase === "gFinancierEcran2") return { texte: "Additionne simplement les produits de l'étape précédente (formule des probabilités totales).", latex: null };
-  return { texte: "Résultat = probabilité globale × valeur unitaire × nombre total de clients.", latex: null };
-}
-function aideNiveau2GFinancier(ex: ExerciceFamilleGFinancier, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gFinancierEcran1") return { texte: "Un exemple complet (les autres catégories suivent le même principe) :", latex: `\\text{${ex.categories[0].label}}=${formatDecimalCourt(ex.categories[0].proportion)}\\times ${formatDecimalCourt(ex.categories[0].taux)}` };
-  if (phase === "gFinancierEcran2") return { texte: "Somme à effectuer (valeurs non additionnées) :", latex: produitsCategoriesFinancier(ex).map(formatDecimalVirgule).join("+") };
-  return { texte: "Produit à effectuer (calcul non fait) :", latex: `${formatDecimalVirgule(probabiliteGlobaleFinancier(ex))}\\times ${ex.valeurUnitaire}\\times ${ex.nombreTotalIndividus}` };
+function reponseGMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): string[] {
+  if (phase === "gMelangeEcran1") return ["5p+a=1"];
+  if (phase === "gMelangeEcran2") return [`p=${fractionLatex(ex.base.p.num, ex.base.p.den)}`];
+  const f = fractionObjet1(ex);
+  if (phase === "gMelangeEcran3") return [`P(${evenementGLatex(ex)}\\mid\\text{urne 1})=${fractionLatex(f.num, f.den)}`];
+  return [egalite(`P(${evenementGLatex(ex)})`, probabiliteTotaleMelange(ex), 4)];
 }
 
 // ============================================================================
@@ -593,16 +480,12 @@ export function consigneGenerale(exercice: ExerciceProbabilitesProblemes): Fragm
       return consigneGeneraleB(exercice);
     case "C":
       return consigneGeneraleC(exercice);
-    case "D":
-      return consigneGeneraleD(exercice);
     case "E":
-      return exercice.sousType === "mixte" ? consigneGeneraleEMixte(exercice) : consigneGeneraleEParam(exercice);
+      return consigneGeneraleEMixte(exercice);
     case "F":
       return consigneGeneraleF(exercice);
     case "G":
-      if (exercice.sousType === "derangements") return consigneGeneraleGDerang(exercice);
-      if (exercice.sousType === "melangeObjets") return consigneGeneraleGMelange(exercice);
-      return consigneGeneraleGFinancier(exercice);
+      return consigneGeneraleGMelange(exercice);
   }
 }
 
@@ -614,16 +497,12 @@ export function blocDonnees(exercice: ExerciceProbabilitesProblemes): string[] {
       return blocDonneesB(exercice);
     case "C":
       return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
     case "E":
-      return exercice.sousType === "mixte" ? blocDonneesEMixte() : blocDonneesEParam(exercice);
+      return [];
     case "F":
       return blocDonneesF(exercice);
     case "G":
-      if (exercice.sousType === "derangements") return blocDonneesGDerang(exercice);
-      if (exercice.sousType === "melangeObjets") return blocDonneesGMelange(exercice);
-      return blocDonneesGFinancier(exercice);
+      return blocDonneesGMelange(exercice);
   }
 }
 
@@ -635,37 +514,12 @@ export function consigneEcran(exercice: ExerciceProbabilitesProblemes, phase: Ph
       return consigneEcranB(exercice, phase);
     case "C":
       return consigneEcranC(exercice, phase);
-    case "D":
-      return consigneEcranD(exercice, phase);
     case "E":
-      return exercice.sousType === "mixte" ? consigneEcranEMixte(exercice, phase) : consigneEcranEParam(exercice, phase);
+      return consigneEcranEMixte(exercice, phase);
     case "F":
       return consigneEcranF(exercice, phase);
     case "G":
-      if (exercice.sousType === "derangements") return consigneEcranGDerang(exercice, phase);
-      if (exercice.sousType === "melangeObjets") return consigneEcranGMelange(exercice, phase);
-      return consigneEcranGFinancier(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-    case "E":
-      return exercice.sousType === "mixte" ? etatActuelEMixte(exercice, phase) : etatActuelEParam(exercice, phase);
-    case "F":
-      return etatActuelF(exercice, phase);
-    case "G":
-      if (exercice.sousType === "derangements") return etatActuelGDerang(exercice, phase);
-      if (exercice.sousType === "melangeObjets") return etatActuelGMelange(exercice, phase);
-      return etatActuelGFinancier(exercice, phase);
+      return consigneEcranGMelange(exercice, phase);
   }
 }
 
@@ -677,26 +531,22 @@ export function champsEcran(exercice: ExerciceProbabilitesProblemes, phase: Phas
       return champsB(exercice, phase);
     case "C":
       return champsC(exercice, phase);
-    case "D":
-      return champsD(exercice, phase);
     case "E":
-      return exercice.sousType === "mixte" ? champsEMixte(exercice, phase) : champsEParam(exercice, phase);
+      return champsEMixte(exercice, phase);
     case "F":
       return champsF(phase);
     case "G":
-      if (exercice.sousType === "derangements") return champsGDerang(phase);
-      if (exercice.sousType === "melangeObjets") return champsGMelange(phase);
-      return champsGFinancier(exercice, phase);
+      return champsGMelange(exercice, phase);
   }
 }
 
-/** Placeholder pour l'écran "liste" (add-as-needed) — SEULEMENT famille C écran 1. */
+/** Placeholder de l'écran « liste » — famille C écran 1 seulement (hors espace de réponse). */
 export function placeholderListe(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): string {
-  if (exercice.famille === "C" && phase === "cEcran1") return placeholderListeC();
+  if (exercice.famille === "C" && phase === "cEcran1") return `numéros des ${exercice.contexte.nomPluriel}`;
   return "";
 }
 
-/** Options de l'écran "choix" — SEULEMENT famille F écran 3, variante "verifierAffirmation". */
+/** Options de l'écran « choix » — famille F écran 3, variante "verifierAffirmation". */
 export function choixEcran(): OptionChoix[] {
   return choixEcranF();
 }
@@ -706,19 +556,15 @@ export function aideNiveau1(exercice: ExerciceProbabilitesProblemes, phase: Phas
     case "A":
       return aideNiveau1A(phase);
     case "B":
-      return aideNiveau1B(phase);
+      return aideNiveau1B(exercice, phase);
     case "C":
       return aideNiveau1C(phase);
-    case "D":
-      return aideNiveau1D(phase);
     case "E":
-      return exercice.sousType === "mixte" ? aideNiveau1EMixte(phase) : aideNiveau1EParam(phase);
+      return aideNiveau1EMixte(phase);
     case "F":
-      return aideNiveau1F(phase);
+      return aideNiveau1F(exercice, phase);
     case "G":
-      if (exercice.sousType === "derangements") return aideNiveau1GDerang(phase);
-      if (exercice.sousType === "melangeObjets") return aideNiveau1GMelange(phase);
-      return aideNiveau1GFinancier(phase);
+      return aideNiveau1GMelange(phase);
   }
 }
 
@@ -730,146 +576,52 @@ export function aideNiveau2(exercice: ExerciceProbabilitesProblemes, phase: Phas
       return aideNiveau2B(exercice, phase);
     case "C":
       return aideNiveau2C(exercice, phase);
-    case "D":
-      return aideNiveau2D(exercice, phase);
     case "E":
-      return exercice.sousType === "mixte" ? aideNiveau2EMixte(exercice, phase) : aideNiveau2EParam(exercice, phase);
+      return aideNiveau2EMixte(exercice, phase);
     case "F":
       return aideNiveau2F(exercice, phase);
     case "G":
-      if (exercice.sousType === "derangements") return aideNiveau2GDerang();
-      if (exercice.sousType === "melangeObjets") return aideNiveau2GMelange(exercice, phase);
-      return aideNiveau2GFinancier(exercice, phase);
+      return aideNiveau2GMelange(exercice, phase);
   }
 }
 
 export const LIBELLE_PHASE: Record<PhaseProbabilitesProblemes, string> = {
   aEcran1: "Étape 1 (facteurs)",
-  aEcran2: "Étape 2 (P(toutes différentes))",
-  aEcran3: "Étape 3 (P(au moins 2 identiques))",
-  bEcran1: "Étape 1 (formule posée)",
-  bEcran2: "Étape 2 (valeur calculée)",
-  bEcran3: "Étape 3 (variante demandée)",
+  aEcran2: "Étape 2 (tous différents)",
+  aEcran3: "Étape 3 (au moins 2 identiques)",
+  bEcran1: "Étape 1 (nombre de chemins)",
+  bEcran2: "Étape 2 (exactement k succès)",
+  bEcran3: "Étape 3 (probabilité demandée)",
   cEcran1: "Étape 1 (configurations)",
-  cEcran2: "Étape 2 (probabilités par configuration)",
-  cEcran3: "Étape 3 (probabilité totale)",
-  dEcran1: "Étape 1 (aires)",
-  dEcran2: "Étape 2 (probabilité)",
-  eMixteEcran1: "Étape 1 (identifier le sens des données)",
+  cEcran2: "Étape 2 (probabilité de chaque configuration)",
+  cEcran3: "Étape 3 (probabilité de l'événement)",
+  eMixteEcran1: "Étape 1 (sens des données)",
   eMixteEcran2: "Étape 2 (arbre et P(E))",
-  eMixteEcran3: "Étape 3 (théorème de Bayes)",
-  eParamEcran1: "Étape 1 (expressions en x)",
-  eParamEcran2: "Étape 2 (fraction rationnelle P(x))",
-  eParamEcran3: "Étape 3 (inéquation résolue)",
-  fEcran1: "Étape 1 (formule posée)",
-  fEcran2: "Étape 2 (valeur calculée)",
-  fEcran3: "Étape 3 (comparaison/vérification)",
-  gDerangEcran1: "Étape 1 (position(s) fixée(s))",
-  gDerangEcran2: "Étape 2 (tout correct)",
-  gDerangEcran3: "Étape 3 (exactement k correctes)",
-  gDerangEcran4: "Étape 4 (aucune correcte)",
+  eMixteEcran3: "Étape 3 (probabilité conditionnelle)",
+  fEcran1: "Étape 1 (calcul posé)",
+  fEcran2: "Étape 2 (fiabilité)",
+  fEcran3: "Étape 3 (autre montage)",
   gMelangeEcran1: "Étape 1 (équation)",
-  gMelangeEcran2: "Étape 2 (résolution)",
-  gMelangeEcran3: "Étape 3 (probabilité composée)",
+  gMelangeEcran2: "Étape 2 (valeur de p)",
+  gMelangeEcran3: "Étape 3 (avec l'urne 1)",
   gMelangeEcran4: "Étape 4 (probabilités totales)",
-  gFinancierEcran1: "Étape 1 (produits par catégorie)",
-  gFinancierEcran2: "Étape 2 (probabilité globale)",
-  gFinancierEcran3: "Étape 3 (résultat financier)",
 };
 
-const LIBELLE_FAMILLE_SOUS_TYPE: Record<string, string> = {
-  A: "A — Paradoxe des anniversaires",
-  B: "B — Loi binomiale",
-  C: "C — Indépendants à probabilités différentes",
-  D: "D — Probabilité géométrique",
-  "E-mixte": "E — Bayes numérique (données mixtes)",
-  "E-parametrique": "E — Bayes paramétrique",
-  F: "F — Fiabilité de circuits",
-  "G-derangements": "G — Réutilisation : dérangements",
-  "G-melangeObjets": "G — Réutilisation : mélange d'objets",
-  "G-financier": "G — Réutilisation : cadre financier",
-};
-
-export function libelleFamilleSousType(exercice: ExerciceProbabilitesProblemes): string {
-  if (exercice.famille === "E") return LIBELLE_FAMILLE_SOUS_TYPE[`E-${exercice.sousType}`];
-  if (exercice.famille === "G") return LIBELLE_FAMILLE_SOUS_TYPE[`G-${exercice.sousType}`];
-  return LIBELLE_FAMILLE_SOUS_TYPE[exercice.famille];
-}
-
-/** Récapitulatif final — réponse CORRECTE de chaque écran, jamais recalculée depuis la saisie
- * élève (CLAUDE.md). */
+/** Réponse correcte de chaque écran (récapitulatif, correction des feuilles) — jamais recalculée
+ * depuis la saisie de l'élève. Valeurs exactes, ou arrondies à 4 décimales avec « ≈ ». */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return facteursEcran1Local(exercice.n).map((f, i) => `f_{${i + 1}}=${formatDecimalVirgule(f)}`);
-    if (phase === "aEcran2") return [`P(\\text{toutes différentes})=${formatDecimalVirgule(probToutesDifferentes(exercice.n))}`];
-    return [`P(\\text{au moins 2 identiques})=${formatDecimalVirgule(1 - probToutesDifferentes(exercice.n))}`];
+  switch (exercice.famille) {
+    case "A":
+      return reponseA(exercice, phase);
+    case "B":
+      return reponseB(exercice, phase);
+    case "C":
+      return reponseC(exercice, phase);
+    case "E":
+      return reponseEMixte(exercice, phase);
+    case "F":
+      return reponseF(exercice, phase);
+    case "G":
+      return reponseGMelange(exercice, phase);
   }
-  if (exercice.famille === "B") {
-    const valeur = probExactementKBinomiale(exercice.n, exercice.p, exercice.k);
-    if (phase === "bEcran1" || phase === "bEcran2") return [`\\text{Réponse}=${formatDecimalCourt(valeur)}`];
-    return [`\\text{Réponse}=${formatDecimalCourt(valeurEcran3Binomiale(exercice))}`];
-  }
-  if (exercice.famille === "C") {
-    const configs = configurationsExactementK(exercice.k);
-    if (phase === "cEcran1") return configs.map((c) => `\\{${c.map((i) => i + 1).join(",")}\\}`);
-    if (phase === "cEcran2") return configs.map((c) => `P(\\{${c.map((i) => i + 1).join(",")}\\})=${formatDecimalCourt(probabiliteConfiguration(exercice.p, c))}`);
-    return [`\\text{Réponse}=${formatDecimalCourt(probabiliteExactementKFamilleC(exercice))}`];
-  }
-  if (exercice.famille === "D") {
-    if (phase === "dEcran1") return [0, 1, 2].map((z) => `\\text{Aire}_{${z + 1}}=${coeffAireZone(exercice.r, z)}\\pi`);
-    return [`\\text{Réponse}=${formatDecimalCourt(probabiliteZoneCible(exercice))}`];
-  }
-  if (exercice.famille === "E" && exercice.sousType === "mixte") {
-    if (phase === "eMixteEcran1") return [`P(c_1)=${formatDecimalCourt(exercice.base.p)}`, `P(E|c_1)=${formatDecimalCourt(exercice.base.q1)}`, `P(E|c_2)=${formatDecimalCourt(exercice.base.q2)}`];
-    if (phase === "eMixteEcran2") {
-      const [b1, b2, b3, b4] = branchesArbreC(exercice.base);
-      return [`P(c_1\\cap E)=${formatDecimalCourt(b1)}`, `P(c_1\\cap\\overline{E})=${formatDecimalCourt(b2)}`, `P(c_2\\cap E)=${formatDecimalCourt(b3)}`, `P(c_2\\cap\\overline{E})=${formatDecimalCourt(b4)}`, `P(E)=${formatDecimalCourt(probabiliteEffetC(exercice.base))}`];
-    }
-    return [`\\text{Réponse}=${formatDecimalCourt(bayesEcran3C(exercice.base))}`];
-  }
-  if (exercice.famille === "E" && exercice.sousType === "parametrique") {
-    if (phase === "eParamEcran1") return [`P(\\text{malade}\\cap\\text{test}+)=${exercice.a}x`, `P(\\text{test}+)=${exercice.a}x+${exercice.b}(1-x)`];
-    if (phase === "eParamEcran2") return [`P(x)=\\dfrac{${exercice.a}x}{${exercice.a}x+${exercice.b}(1-x)}`];
-    const sol = resoudreInequationParametrique(exercice);
-    const borne = sol.morceaux[0].inf as number;
-    return [`x\\in\\left]${formatDecimalCourt(borne)}\\ ;\\ 1\\right[`];
-  }
-  if (exercice.famille === "F") {
-    const valeur = valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte);
-    if (phase === "fEcran1" || phase === "fEcran2") return [`\\text{Fiabilité}=${formatDecimalCourt(valeur)}`];
-    if (exercice.demandeEcran3 === "comparerValeur") {
-      const alt = valeurConfigurationF(exercice.p, exercice.configurationAlternative ?? exercice.configuration, exercice.positionMixteAlternative);
-      return [`\\text{Réponse}=${formatDecimalCourt(alt)}`];
-    }
-    const estVraie = Math.abs((exercice.affirmationValeur ?? 0) - valeur) <= 0.01;
-    return [estVraie ? `\\text{Vrai}` : `\\text{Faux}`];
-  }
-  // Famille G.
-  if (exercice.famille === "G" && exercice.sousType === "derangements") {
-    const { n, k, demandeEcran1 } = exercice.base;
-    const factorielle = (m: number) => Array.from({ length: m }, (_, i) => i + 1).reduce((a, b) => a * b, 1);
-    const coeffBin = (m: number, j: number) => factorielle(m) / (factorielle(j) * factorielle(m - j));
-    const DERANGEMENTS = [1, 0, 1, 2, 9, 44];
-    if (phase === "gDerangEcran1") return [`\\text{Réponse}=${formatDecimalCourt(demandeEcran1 === "une" ? factorielle(n - 1) / factorielle(n) : factorielle(n - 2) / factorielle(n))}`];
-    if (phase === "gDerangEcran2") return [`\\text{Réponse}=${formatDecimalCourt(1 / factorielle(n))}`];
-    if (phase === "gDerangEcran3") return [`\\text{Réponse}=${formatDecimalCourt((coeffBin(n, k) * DERANGEMENTS[n - k]) / factorielle(n))}`];
-    return [`\\text{Réponse}=${formatDecimalCourt(DERANGEMENTS[n] / factorielle(n))}`];
-  }
-  if (exercice.famille === "G" && exercice.sousType === "melangeObjets") {
-    if (phase === "gMelangeEcran1") return ["5p+a=1"];
-    if (phase === "gMelangeEcran2") return [`p=${exercice.base.p.num}/${exercice.base.p.den}`];
-    if (phase === "gMelangeEcran3") return [`\\text{Réponse}=${formatDecimalCourt(probabiliteObjet1(exercice))}`];
-    return [`\\text{Réponse}=${formatDecimalCourt(probabiliteTotaleMelange(exercice))}`];
-  }
-  const g = exercice as Extract<ExerciceProbabilitesProblemes, { famille: "G"; sousType: "financier" }>;
-  if (phase === "gFinancierEcran1") return produitsCategoriesFinancier(g).map((v, i) => `\\text{${g.categories[i].label}}=${formatDecimalCourt(v)}`);
-  if (phase === "gFinancierEcran2") return [`\\text{Réponse}=${formatDecimalCourt(probabiliteGlobaleFinancier(g))}`];
-  return [`\\text{Réponse}=${Math.round(resultatFinancier(g))}€`];
 }
-
-function facteursEcran1Local(n: number): number[] {
-  const facteurs: number[] = [];
-  for (let k = 1; k <= n - 1; k++) facteurs.push((365 - k) / 365);
-  return facteurs;
-}
-

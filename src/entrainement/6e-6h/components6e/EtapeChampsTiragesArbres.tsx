@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -28,6 +29,8 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Figure affichée entre le bloc données et la consigne d'écran (arbre pondéré, famille D). */
+  illustration?: ReactNode;
 }
 
 /**
@@ -38,24 +41,39 @@ interface Props {
  * INDIFFÉREMMENT un champ numérique (la plupart des écrans) ou un champ "équation" texte libre
  * (`cEcran1` de la famille C) — le `diagnostiquer`/`onValider` fournis par l'appelant savent déjà
  * quoi faire de chaque valeur, ce composant reste agnostique du contenu. `App6gen31.tsx` doit le
- * rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-/** Candidat à l'aperçu LaTeX en direct (`ApercuExpressionLatex`) : le placeholder montre un calcul
- * (fraction, opérateur, formule/équation) — jamais une simple valeur numérique isolée (la grande
- * majorité des champs de ce générateur attendent une probabilité déjà réduite à un nombre). */
-function champComporteCalcul(placeholder: string | undefined): boolean {
-  if (!placeholder) return false;
-  const corps = placeholder.replace(/^ex\s*:\s*/i, "").trim();
-  if (corps === "" || /^[a-zA-Z]$/.test(corps)) return false;
-  if (/^-?\d+([.,]\d+)?(\s*\([^)]*\))?$/.test(corps)) return false;
-  if (/^-?\d+([.,]\d+)?(\s*,\s*-?\d+([.,]\d+)?)+$/.test(corps)) return false;
-  return true;
+ * rendre avec une `key` qui change à chaque écran ET à chaque nouvel exercice (remet les champs à
+ * vide, y compris après « Générer » sur la même phase). */
+/** Aperçu LaTeX en direct d'une saisie (expression ou équation), virgule décimale française
+ * (audit 6e ch. 6 : l'aperçu partagé affichait « 0.5 »). Même comportement que
+ * `components/ApercuExpressionLatex` : pendant la frappe, le dernier rendu valide reste affiché,
+ * assombri. */
+function ApercuSaisie({ texte: saisie, label }: { texte: string; label: string }) {
+  const [dernierRenduValide, setDernierRenduValide] = useState<string | null>(null);
+  let renduCourant: string | null;
+  try {
+    renduCourant = saisie.trim() === "" ? null : expressionLibreVersLatex(saisie).replace(/(\d)\.(\d)/g, "$1{,}$2");
+  } catch {
+    renduCourant = null;
+  }
+  useEffect(() => {
+    if (renduCourant !== null) setDernierRenduValide(renduCourant);
+    else if (saisie.trim() === "") setDernierRenduValide(null);
+  }, [renduCourant, saisie]);
+  if (dernierRenduValide === null) return null;
+  return (
+    <div className={`apercu-expression-latex contenu-conditionnel${renduCourant === null ? " apercu-expression-latex-perime" : ""}`}>
+      <span className="apercu-expression-latex-label">{label}</span>
+      <Katex expression={dernierRenduValide} />
+    </div>
+  );
 }
 
-export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation, illustration }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
+  const empiles = champs.some((c) => c.pleineLargeur);
 
   function valider() {
     if (!toutRempli) return;
@@ -80,18 +98,35 @@ export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consig
           </div>
         }
       />
+      {illustration}
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      {champs.map((champ, i) => (champComporteCalcul(champ.placeholder) ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
-      <div className={`field-row ${champs.length > 3 ? "field-row-wrap" : ""}`}>
-        {champs.map((champ, i) => (
-          <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
-            <label className="field-label field-label-minuscule">{champ.label}</label>
-            <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} onChange={(e) => changer(i, e.target.value)} />
+      {empiles ? (
+        champs.map((champ, i) => (
+          <div className="field" key={i}>
+            {champ.apercu && <ApercuSaisie texte={valeurs[i]} label={champ.label} />}
+            <label className="field-label field-label-minuscule" htmlFor={`champ-6gen31-${i}`}>
+              {champ.label}
+            </label>
+            <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        <>
+          {champs.map((champ, i) => (champ.apercu ? <ApercuSaisie key={i} texte={valeurs[i]} label={champ.label} /> : null))}
+          <div className={`field-row ${champs.length > 2 ? "field-row-wrap" : ""}`}>
+            {champs.map((champ, i) => (
+              <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>
+                <label className="field-label field-label-minuscule" htmlFor={`champ-6gen31-${i}`}>
+                  {champ.label}
+                </label>
+                <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

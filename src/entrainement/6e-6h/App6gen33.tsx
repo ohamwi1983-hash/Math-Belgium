@@ -3,32 +3,28 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesProblemes } from "./generateurs6e/probabilitesProblemes";
 import type { IdVarianteProbabilitesProblemes } from "./generateurs6e/probabilitesProblemes";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesProblemes, soumettreReponseEcran } from "./moteur6e/sessionProbabilitesProblemes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesProblemes, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionProbabilitesProblemes";
 import { phasesPourExercice } from "./moteur6e/typesProbabilitesProblemes";
 import type { EtatSessionProbabilitesProblemes, PhaseProbabilitesProblemes } from "./moteur6e/typesProbabilitesProblemes";
 import { diagnostiquerEcran, typeEcran } from "./moteur6e/verificationProbabilitesProblemes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsProbabilitesProblemes } from "./components6e/EtapeChampsProbabilitesProblemes";
 import { EtapeChoixProbabilitesProblemes } from "./components6e/EtapeChoixProbabilitesProblemes";
-import { EtapeIntervalleProbabilitesProblemes } from "./components6e/EtapeIntervalleProbabilitesProblemes";
 import { EtapeListeConfigurationsProbabilitesProblemes } from "./components6e/EtapeListeConfigurationsProbabilitesProblemes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, placeholderListe } from "./ui6e/formatProbabilitesProblemes";
 import { calculerRecapitulatifProbabilitesProblemes, calculerSegmentsProgressionProbabilitesProblemes } from "./ui6e/recapitulatifProbabilitesProblemes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
-import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
- * `6gen33` — Probabilités : problèmes (chapitre 8, "Probabilités", générateur de CLÔTURE du
- * chapitre, après `6gen30`/`6gen31`/`6gen32`). Même patron que `App6gen30.tsx` (dispatch
- * champs/choix) ÉTENDU à 4 types d'écran (`typeEcran` de `moteur6e/
- * verificationProbabilitesProblemes.ts` : "champs"/"liste"/"choix"/"intervalle") — aucun bloc JSX
- * par famille/écran, un seul dispatch piloté par `ui6e/formatProbabilitesProblemes.ts` et
- * `moteur6e/verificationProbabilitesProblemes.ts`.
+ * `6gen33` — Probabilités : problèmes (chapitre 6 de 6e, « Les probabilités », générateur de clôture
+ * du chapitre, après `6gen30`/`6gen31`/`6gen32`). Même patron que `App6gen30.tsx`, avec 3 types
+ * d'écran (`typeEcran` de `moteur6e/verificationProbabilitesProblemes.ts` : "champs"/"liste"/
+ * "choix") — un seul dispatch piloté par `ui6e/formatProbabilitesProblemes.ts`.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
@@ -55,6 +51,9 @@ export function App6gen33() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseProbabilitesProblemes, boolean>>>({});
+  /** Compteur d'exercices : entre dans la `key` des écrans, pour que les champs repartent vides
+   * après « Générer » ou « Nouvel exercice », même si le nouvel exercice démarre sur la même phase. */
+  const [numeroExercice, setNumeroExercice] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -93,6 +92,7 @@ export function App6gen33() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroExercice((n) => n + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -103,6 +103,7 @@ export function App6gen33() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionProbabilitesProblemes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteProbabilitesProblemes)));
   }
 
@@ -120,7 +121,7 @@ export function App6gen33() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -173,7 +174,7 @@ export function App6gen33() {
         <RecapitulatifPanel entrees={calculerRecapitulatifProbabilitesProblemes(etat)} />
         {type === "champs" && (
           <EtapeChampsProbabilitesProblemes
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...propsCommun}
             champs={champsEcran(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
@@ -185,7 +186,7 @@ export function App6gen33() {
 
         {type === "liste" && (
           <EtapeListeConfigurationsProbabilitesProblemes
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...propsCommun}
             placeholder={placeholderListe(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
@@ -195,7 +196,7 @@ export function App6gen33() {
 
         {type === "choix" && (
           <EtapeChoixProbabilitesProblemes
-            key={phase}
+            key={`${numeroExercice}-${phase}`}
             {...propsCommun}
             options={choixEcran()}
             diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])}
@@ -203,15 +204,6 @@ export function App6gen33() {
           />
         )}
 
-        {type === "intervalle" && (
-          <EtapeIntervalleProbabilitesProblemes
-            key={phase}
-            {...propsCommun}
-            onValider={(ensemble) =>
-              terminerEtape(soumettreReponseEcran(etat, [JSON.stringify(ensemble)]), <Katex expression={formatEnsembleReelLatex(ensemble)} />)
-            }
-          />
-        )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

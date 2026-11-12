@@ -53,6 +53,10 @@ function catalogueCartes(): DescripteurEvenement<Carte>[] {
     { categorie: "rang", label: "la carte est un as", predicat: (c) => c.rang === 1 },
     { categorie: "rang", label: `la carte porte la valeur ${valeurAleatoire}`, predicat: (c) => c.rang === valeurAleatoire },
     { categorie: "suite", label: `la carte est un ${LABEL_SUITE[suiteAleatoire]}`, predicat: (c) => c.suite === suiteAleatoire },
+    // Audit 6e ch. 6 : avec les seuls événements ci-dessus, 4 paires sur 5 étaient indépendantes
+    // (réponse quasi prévisible) ; ces deux-ci ne sont indépendantes que de quelques partenaires.
+    { categorie: "paire", label: "la carte porte une valeur paire (2, 4, 6, 8 ou 10)", predicat: (c) => c.rang <= 10 && c.rang % 2 === 0 },
+    { categorie: "figureRouge", label: "la carte est une figure rouge", predicat: (c) => c.rang >= 11 && (c.suite === "coeur" || c.suite === "carreau") },
   ];
 }
 
@@ -76,10 +80,17 @@ function toutesLesPaires(facesParDe: number): JetDes[] {
 function catalogueDes(facesParDe: number): DescripteurEvenement<JetDes>[] {
   const sommeCible = tirerEntier(3, 2 * facesParDe - 1); // évite les extrêmes 2/2n (effectif=1, peu instructif)
   const ecartCible = tirerEntier(0, facesParDe - 2);
+  const valeurPremierDe = tirerEntier(1, facesParDe);
   return [
     { categorie: "somme", label: `la somme des deux dés vaut ${sommeCible}`, predicat: (j) => j.d1 + j.d2 === sommeCible },
     { categorie: "ecart", label: ecartCible === 0 ? "les deux dés affichent la même valeur" : `l'écart entre les deux dés vaut ${ecartCible}`, predicat: (j) => Math.abs(j.d1 - j.d2) === ecartCible },
     { categorie: "parite", label: "la somme des deux dés est paire", predicat: (j) => (j.d1 + j.d2) % 2 === 0 },
+    // Audit 6e ch. 6 : sans événement portant sur UN dé, aucune paire tirée n'était jamais
+    // indépendante (réponse « non indépendants » constante sur les dés). Un événement sur le premier
+    // dé et un sur le second sont indépendants ; « premier dé = k » l'est aussi de « somme paire »,
+    // de « dés égaux » et de « somme = n + 1 », mais pas des autres sommes/écarts.
+    { categorie: "de1", label: `le premier dé affiche ${valeurPremierDe}`, predicat: (j) => j.d1 === valeurPremierDe },
+    { categorie: "de2", label: "le second dé affiche un nombre pair", predicat: (j) => j.d2 % 2 === 0 },
   ];
 }
 

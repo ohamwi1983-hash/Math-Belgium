@@ -31,11 +31,11 @@ interface Props {
 
 /** Écran "liste de configurations" (add-as-needed, taille VARIABLE) pour `6gen33`, famille C écran 1
  * UNIQUEMENT — pattern "pas de X / bouton d'ajout" imposé par CLAUDE.md pour tout ensemble de taille
- * variable choisie par l'élève (ici : combien de configurations distinctes existent pour "exactement
- * k succès parmi 3", l'élève doit le déterminer lui-même). Même mécanique à 3 états que la liste
+ * variable choisie par l'élève (ici : combien de configurations distinctes existent pour « exactement k
+ * éléments concernés parmi 3 », l'élève doit le déterminer lui-même). Même mécanique à 3 états que la liste
  * "prive_points" d'`EnsembleReelGuideBuilder.tsx` (croix rouge `×` pour retirer, jamais un bouton
  * texte "Retirer" — CLAUDE.md), adaptée en écran autonome (son propre bouton "Valider"/aide, pas un
- * sous-composant remonté par `onChange`). `App6gen33.tsx` doit le rendre avec `key={phase}`. */
+ * sous-composant remonté par `onChange`). `App6gen33.tsx` le rend avec une `key` propre à l'écran et à l'exercice. */
 export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;

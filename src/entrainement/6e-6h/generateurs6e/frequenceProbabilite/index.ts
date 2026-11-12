@@ -1,5 +1,5 @@
 import type { AffirmationC, EvenementDe, EvenementSomme, ExerciceFrequenceA, ExerciceFrequenceB, ExerciceFrequenceC, ExerciceFrequenceProbabilite, ObjetC } from "../../core6e/frequenceProbabilite.types";
-import { couplesDeSomme, ecartRelatif, frequenceObservee, probabiliteModele, probabiliteNaiveB, seuilRelatif } from "../../moteur6e/verificationFrequenceProbabilite";
+import { ecartRelatif, frequenceObservee, probabiliteModele, probabiliteNaiveB, seuilRelatif } from "../../moteur6e/verificationFrequenceProbabilite";
 
 /**
  * Couche A (6e) — générateur de `6gen75` « Fréquence et probabilité ». TOUT l'aléa passe par
@@ -180,10 +180,10 @@ export const AFFIRMATIONS_C: AffirmationC[] = [
   { num: 1, den: 10, texte: "une fois sur dix" },
 ];
 
-export function construireFamilleC(compatible: boolean, nForce?: number, objetForce?: ObjetC["id"]): ExerciceFrequenceC {
+export function construireFamilleC(compatible: boolean, nForce?: number): ExerciceFrequenceC {
   for (;;) {
     const n = nForce ?? tirerParmi(N_FAMILLE_C);
-    const choix = objetForce ? OBJETS_C.find((o) => o.objet.id === objetForce) ?? OBJETS_C[0] : tirerParmi(OBJETS_C);
+    const choix = tirerParmi(OBJETS_C);
     const p = Math.round((choix.pMin + Math.random() * (choix.pMax - choix.pMin)) * 100) / 100;
     let effectif = 0;
     for (let i = 0; i < n; i++) if (Math.random() < p) effectif++;
@@ -240,6 +240,3 @@ export function construireAvecVarianteId(id: IdVarianteFrequenceProbabilite): Ex
       return construireFamilleC(false);
   }
 }
-
-/** Réexport pratique pour l'interface (cases de la grille). */
-export { couplesDeSomme };

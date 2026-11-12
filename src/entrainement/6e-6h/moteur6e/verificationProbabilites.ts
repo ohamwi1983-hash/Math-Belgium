@@ -133,5 +133,9 @@ export function diagnostiquerProbabilite(texte: string, cible: number, decimales
   const d = (decimal[1]?.length ?? 0) + (pourcent ? 2 : 0);
   const dMin = decimalesMin ?? (Math.abs(cible) >= 0.1 ? 2 : 3);
   if (d < dMin) return "not_equivalent";
-  return Math.abs(v - cible) <= 0.5 * Math.pow(10, -d) + 1e-12 ? "correct" : "not_equivalent";
+  // Arrondi correct : strictement à moins d'une demi-unité ; pile au milieu (0,135), seul
+  // l'arrondi « au-dessus » (0,14) est accepté, pas 0,13.
+  const demi = 0.5 * Math.pow(10, -d), ecart = v - cible;
+  if (Math.abs(Math.abs(ecart) - demi) <= 1e-12) return ecart > 0 ? "correct" : "not_equivalent";
+  return Math.abs(ecart) < demi ? "correct" : "not_equivalent";
 }
