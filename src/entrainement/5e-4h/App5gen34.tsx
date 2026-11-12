@@ -59,11 +59,21 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionExtremaBornes {
   return demarrerSessionExtremaBornes(REGLAGES_DEMO, genererExerciceExtremaBornes);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/extremaBornes/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionExtremaBornes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionExtremaBornes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, () => genererExerciceExtremaBornes(), (id) => construireAvecVarianteId(id)));
 }
 
 /** Réponse attendue de l'écran qui vient de se terminer — réplique exactement `contenu(ecran)` de
@@ -137,7 +147,7 @@ function formatReponseTableauFPrimeBorneTexte(r: ReponseTableauFPrimeBorne): str
 }
 
 export function App5gen34() {
-  const [etat, setEtat] = useState<EtatSessionExtremaBornes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionExtremaBornes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionExtremaBornes`, jamais dans le moteur (même principe que

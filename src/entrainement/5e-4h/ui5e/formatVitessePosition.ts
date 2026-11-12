@@ -9,16 +9,14 @@
  */
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import { valeurPosition, valeurVitesseExacte } from "../generateurs5e/vitessePosition/index";
-import type { EcranVitessePosition, EcranVitessePositionHerite } from "../moteur5e/typesVitessePosition";
+import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
 import { ordreEcransVitessePosition } from "../moteur5e/typesVitessePosition";
 import type { SegmentTexte } from "../components/SegmentsInline";
 
-/** Écran demandé par un appelant — l'ancien identifiant "evaluerV0" (adaptateur papier, en attente
- * de refonte) est lu comme "acceleration". */
-type EcranDemande = EcranVitessePosition | EcranVitessePositionHerite;
+type EcranDemande = EcranVitessePosition;
 
 function ecranReel(ecran: EcranDemande): EcranVitessePosition {
-  return ecran === "evaluerV0" ? "acceleration" : ecran;
+  return ecran;
 }
 
 // ============================================================================

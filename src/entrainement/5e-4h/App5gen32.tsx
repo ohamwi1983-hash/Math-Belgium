@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./generateurs5e/optimisationGeometrique/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   activerAideSuivante,
   demarrerSessionOptimisation,
@@ -25,6 +26,15 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionOptimisation {
   return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/optimisationGeometrique/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionOptimisation {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionOptimisation(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceOptimisation, (id) => construireAvecVarianteId(id)));
 }
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
@@ -74,7 +84,7 @@ function formatReponsesEcran(exercice: EtatSessionOptimisation["exerciceCourant"
 }
 
 export function App5gen32() {
-  const [etat, setEtat] = useState<EtatSessionOptimisation>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionOptimisation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionOptimisation`, jamais dans le moteur (même principe que

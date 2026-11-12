@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceContexteEconomique } from "./generateurs5e/contexteEconomique/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   activerAideSuivante,
   demarrerSessionContexteEconomique,
@@ -67,6 +68,15 @@ function nouvelleSession(): EtatSessionContexteEconomique {
   return demarrerSessionContexteEconomique(REGLAGES_DEMO, genererExerciceContexteEconomique);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/contexteEconomique/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionContexteEconomique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionContexteEconomique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceContexteEconomique, (id) => construireAvecVarianteId(id)));
+}
+
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
  * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
 interface TransitionEnAttente {
@@ -128,7 +138,7 @@ function formatReponseIterationTexte(r: ReponseIterationDichotomie): string {
 }
 
 export function App5gen33() {
-  const [etat, setEtat] = useState<EtatSessionContexteEconomique>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionContexteEconomique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionContexteEconomique`, jamais dans le moteur (même principe que

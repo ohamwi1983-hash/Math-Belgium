@@ -1,431 +1,403 @@
 import type { ExerciceOptimisation } from "../../core5e/optimisationGeometrique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneGenerale, formatReponseAttendueEcranLatex, formatTermesDonneesLatex } from "../../ui5e/formatOptimisationGeometrique";
-import {
-  CATALOGUE_VARIANTES,
-  alphaOptTrapeze,
-  construireAvecVarianteId,
-  genererExerciceOptimisation,
-  valeurBaseSupTrapeze,
-  valeurFOptimisation,
-  valeurHauteurCylindre,
-  valeurHauteurTrapeze,
-  valeurLienFenetre,
-  valeurLienMarges,
-} from "./index";
+import { consigneGeneraleRiche, formatNombreLatex, formatReponseAttendueEcranLatex, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../../ui5e/formatOptimisationGeometrique";
+import { ordreEcransOptimisation, type EcranOptimisation } from "../../moteur5e/typesOptimisationGeometrique";
+import { conclusionReelle, pointsTest } from "../../moteur5e/verificationOptimisationGeometrique";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./index";
+import { profilOptimisation } from "../profilsEvaluationDerivees31-33";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceOptimisation>` pour 5gen32 ("Optimisation
- * géométrique", `App5gen32.tsx`/`moteur5e/sessionOptimisationGeometrique.ts`) — voir
- * `generateurs/analyseFonction/exportWord.ts` pour le mécanisme générique de référence et
- * `generateurs5e/limitesContexte/exportEvaluation.ts` pour l'exemple direct de condensation d'un
- * déroulé "en contexte narratif" en questions papier (même esprit ici).
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceOptimisation>` pour 5gen32 (« Optimisation
+ * géométrique », chapitre 5 de 5e) — feuille d'exercices et évaluation, selon
+ * `.claude/rules/feuilles-evaluations.md`.
  *
- * **7 familles structurellement disjointes** (`core5e/optimisationGeometrique.types.ts`), toutes
- * couvertes (le catalogue de variantes dev les couvre déjà toutes, et `ExerciceOptimisation` est un
- * type union exhaustif — omettre une famille casserait la compilation `switch`). 6 familles
- * partagent la même séquence d'écrans (`lien→construire→deriver→resoudre→justifier→conclure`,
- * +`application` en bonus rare pour "cylindre") condensée en 2 QUESTIONS PAPIER génériques :
- * - a) fusion `lien+construire+deriver` — isoler la dimension manquante, construire la fonction à
- *   une seule variable, la dériver. Chaîne de calcul continue, même principe que `eauSalee`
- *   (`limitesContexte/exportEvaluation.ts`).
- * - b) fusion `resoudre+justifier+conclure` — résoudre dérivée=0 (rejet de racine justifié si
- *   applicable), étudier le signe pour conclure max/min, donner les valeurs numériques finales.
- * - c) (cylindre, UNIQUEMENT si `avecApplicationNumerique`) — écran bonus `application` isolé,
- *   présent seulement pour cette variante rare (voir `SectionExercice.questions`, longueur
- *   variable selon l'instance — jamais un nombre fixe de questions par famille).
- * La 7e famille, "cubique" (bonus 2, reconstruction d'un polynôme — SANS RAPPORT avec
- * l'optimisation géométrique à proprement parler, voir tête de `core5e/optimisationGeometrique.types.ts`),
- * a sa PROPRE séquence (`coeffsImmediats→relation→resoudreA→expressionFinale`) condensée en 2
- * questions distinctes (a: coefficients immédiats + relation b(a) ; b: résolution de a + expression
- * finale).
- *
- * Contexte narratif/géométrique (`consigneGenerale`) et données d'énoncé (`formatTermesDonneesLatex`)
- * réutilisés TELS QUELS depuis `ui5e/formatOptimisationGeometrique.ts`, jamais reformulés.
- *
- * **Piège `enteteFragments` (toujours rendu en KaTeX `displayMode:true`, `assemblerEvaluationHtml.ts`)** :
- * `formatTermesDonneesLatex` renvoie PLUSIEURS termes courts pour "trapeze" (b, l), "margesA"/
- * "margesB" (T ou A, mh, mv — 3 termes !) et "cubique" (4 termes) — les entrelacer avec du texte en
- * `enteteFragments` (plusieurs fragments `latex()` séparés par des fragments `texte()`) casserait la
- * phrase narrative en blocs disjoints (voir consigne de tâche). On les joint ici en UN SEUL fragment
- * `latex()` (séparés par `,\ ` à l'intérieur d'une unique chaîne KaTeX) plutôt qu'un fragment par
- * terme — `enteteFragments` ne contient donc jamais plus d'UN texte narratif suivi d'UNE formule
- * (même motif "texte + 1-2 formules complètes" que `limitesContexte`/`problemesContexte`), jamais
- * plusieurs fragments latex courts alternés avec du texte.
- *
- * **Formules `lien`/`construire` par famille (correction, questions a)** : recopiées directement du
- * CORPS des fonctions `valeurLienMarges`/`valeurLienFenetre`/`valeurHauteurCylindre`/
- * `valeurFOptimisation` de ce même fichier `index.ts` (jamais re-dérivées indépendamment) — voir
- * chaque bloc `case` ci-dessous pour la correspondance explicite. Les dérivées F'(x) et la
- * résolution F'(x)=0 ont été vérifiées à la main (voir rapport de tâche) pour retomber EXACTEMENT
- * sur `xOpt`/`rOpt`/`alphaOptTrapeze` déjà connus de l'instance — présentées en LaTeX pour la
- * correction, mais jamais utilisées pour recalculer une valeur qui n'existe pas déjà dans
- * l'instance tirée.
- *
- * **Valeurs numériques finales (`conclure`)** RESYNTHÉTISÉES via les fonctions pures déjà utilisées
- * côté écran pour la vérification, répliquées d'identique façon (mais jamais importées) dans
- * `moteur5e/verificationOptimisationGeometrique.ts::diagnostiquerConclureXxx` — même patron que
- * `limitesContexte`. `formatReponseAttendueEcranLatex(exercice, "resoudre")` (`ui5e/`) est réutilisé
- * TEL QUEL pour le récapitulatif de la racine retenue (u/α pour "trapeze", x/r sinon) — seule phase
- * où ce formateur renvoie une valeur concrète pour les familles non-"cubique" (ses autres phases,
- * ex. "conclure", ne renvoient qu'un texte générique "voir bloc état actuel" pensé pour l'écran
- * interactif, inutilisable tel quel sur une feuille imprimée statique). Pour "cubique", ce même
- * formateur renvoie une valeur concrète à CHAQUE phase (coefficients déjà connus) — réutilisé pour
- * les 4 phases sans aucun calcul supplémentaire.
- *
- * **PAS `regroupable`** : 2-3 questions par instance (jamais une seule), ET la consigne dépend de la
- * FAMILLE tirée (7 familles, texte différent), jamais une constante générique indépendante des
- * valeurs/famille tirées — les 2 conditions requises sont violées (même raison que
- * `limitesContexte`/`triangleLies`/`distanceDroite`).
+ * - **Énoncé papier** = la situation (texte de l'écran, `consigneGeneraleRiche`), les données, un
+ *   schéma SVG autonome (`enteteHtml`, mêmes proportions que `components5e/SchemaOptimisation.tsx`)
+ *   et UNE consigne globale (« Détermine … ; justifie la nature de l'extremum ; donne les valeurs
+ *   optimales »). Seule vraie question en plus : le coût du matériau du cylindre (application
+ *   numérique), qui est un second problème.
+ * - **Étapes** = écrans du générateur (`ordreEcransOptimisation`) : lien, fonction, dérivée,
+ *   résolution, signe de F′ en deux points test, conclusion (+ application) — titres « Étape n » du
+ *   corrigé, rédigés pour le papier (rien sur la saisie).
+ * - **Corrigé** tiré des MÊMES fonctions que l'écran (`formatReponseAttendueEcranLatex`, aides,
+ *   `pointsTest`) ; la variable de l'énoncé (α, r) remplace le x imposé par la saisie à l'écran.
+ *   Aucun test par la dérivée seconde : la nature se justifie par le signe de F′ (cours §8).
  */
 
-// ============================================================================
-// Formatage numérique — entier si (quasi) entier, sinon 2 décimales. Jamais un flottant brut.
-// ============================================================================
+const LETTRES = "abcdefgh";
 
-function formatDecimal(valeur: number): string {
-  const arrondi = Math.round(valeur);
-  if (Math.abs(valeur - arrondi) < 1e-6) return `${arrondi}`;
-  return valeur.toFixed(2);
+function lettreDe(exercice: ExerciceOptimisation, ecran: EcranOptimisation): string {
+  return LETTRES[ordreEcransOptimisation(exercice).indexOf(ecran)] ?? "a";
 }
 
-/** Coefficient exact de π si `valeur` en est (quasi) un multiple entier, sinon décimal — utilisé
- * pour les grandeurs de "cylindre"/"fenetre" dont l'objectif optimal reste un multiple exact de π
- * (ex. cylindre : `S_min=6x_{opt}^2\pi`, vérifié par égalité avec `valeurFOptimisation`). */
-function formatAvecPiEventuel(valeur: number): string {
-  const coeff = valeur / Math.PI;
-  const coeffArrondi = Math.round(coeff);
-  if (Math.abs(coeff - coeffArrondi) < 1e-6) {
-    if (coeffArrondi === 0) return "0";
-    if (coeffArrondi === 1) return "\\pi";
-    return `${coeffArrondi}\\pi`;
-  }
-  return formatDecimal(valeur);
+/** `$…$` → fragments texte / LaTeX. */
+function fragmentsRiches(source: string): FragmentConsigne[] {
+  return source
+    .split("$")
+    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
+    .filter((f) => f.valeur !== "");
 }
 
-function variableAffichee(exercice: ExerciceOptimisation): string {
+function variable(exercice: ExerciceOptimisation): string {
   if (exercice.famille === "trapeze") return "\\alpha";
   if (exercice.famille === "fenetreA" || exercice.famille === "fenetreB") return "r";
   return "x";
 }
 
-// ============================================================================
-// En-tête commune (texte narratif TEL QUEL + UN SEUL fragment latex regroupant les données —
-// voir "Piège enteteFragments" en tête de fichier).
-// ============================================================================
+/** L'écran fait saisir x pour α ou r : le papier reprend la variable de l'énoncé. */
+function avecVariable(exercice: ExerciceOptimisation, latexEcran: string): string {
+  const v = variable(exercice);
+  if (v === "x") return latexEcran;
+  return latexEcran.replace(/(?<![A-Za-z\\])x(?![A-Za-z])/g, v === "\\alpha" ? "\\alpha " : "r").replace(/\\alpha \)/g, "\\alpha)").replace(/\\alpha ([,}])/g, "\\alpha$1");
+}
 
-function enteteOptimisation(exercice: ExerciceOptimisation) {
-  const donnees = formatTermesDonneesLatex(exercice).join(",\\ ");
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(donnees)];
+function reponseEcran(exercice: ExerciceOptimisation, ecran: EcranOptimisation): string {
+  return avecVariable(exercice, formatReponseAttendueEcranLatex(exercice, ecran));
+}
+
+function nombreTexte(v: number): string {
+  const arrondi = Math.round(v * 100) / 100;
+  return `${arrondi}`.replace(".", ",");
 }
 
 // ============================================================================
-// Question a) — fusion lien + construire + deriver.
+// Schéma SVG autonome (papier : traits noirs, aucune variable CSS).
 // ============================================================================
 
-const GRANDEUR_OPTIMISEE: Record<Exclude<ExerciceOptimisation["famille"], "trapeze" | "cubique">, string> = {
-  cylindre: "l'aire totale S du cylindre",
-  margesA: "l'aire imprimée",
-  margesB: "l'aire totale de la page",
-  fenetreA: "l'aire de la fenêtre",
-  fenetreB: "le périmètre extérieur de la fenêtre",
-};
+const TRAIT = 'stroke="#212529" stroke-width="2" fill="none"';
+const COTE = 'stroke="#495057" stroke-width="1" stroke-dasharray="4 3" fill="none"';
+const TXT = 'font-size="13" font-style="italic" fill="#212529" font-family="Georgia, Times New Roman, serif"';
 
-function consigneLienConstruireDeriver(exercice: ExerciceOptimisation): string {
-  if (exercice.famille === "trapeze") {
-    return "Exprime la hauteur h et la base supérieure B du trapèze en fonction de l'angle α, construis la fonction A(α) donnant l'aire du trapèze, puis calcule sa dérivée A'(α). Détaille chaque étape.";
-  }
-  if (exercice.famille === "cubique") {
-    return "Donne c et d directement à partir des deux conditions en x=0, puis exprime b en fonction de a à partir de la deuxième tangente horizontale (en x=x₂). Détaille tes calculs.";
-  }
-  const v = variableAffichee(exercice);
-  return `Isole la dimension manquante en fonction de ${v} à partir de la contrainte donnée, construis la fonction à une seule variable donnant ${GRANDEUR_OPTIMISEE[exercice.famille]}, puis calcule sa dérivée. Détaille chaque étape.`;
+function txt(x: number, y: number, contenu: string, ancre = "start"): string {
+  return `<text x="${x}" y="${y}" text-anchor="${ancre}" ${TXT}>${contenu}</text>`;
 }
 
-// ============================================================================
-// Question b) — fusion resoudre + justifier + conclure.
-// ============================================================================
-
-const AVEC_REJET_RACINE: Partial<Record<ExerciceOptimisation["famille"], true>> = { margesA: true, margesB: true, fenetreB: true };
-const NATURE_EXTREMUM: Partial<Record<ExerciceOptimisation["famille"], "maximum" | "minimum">> = {
-  trapeze: "maximum",
-  cylindre: "minimum",
-  margesA: "maximum",
-  margesB: "minimum",
-  fenetreA: "maximum",
-  fenetreB: "minimum",
-};
-
-function consigneResoudreJustifierConclure(exercice: ExerciceOptimisation): string {
-  if (exercice.famille === "trapeze") {
-    return "Pose u=cos(α), résous l'équation dérivée=0 pour u, puis donne α (en degrés). Calcule la dérivée seconde à cette valeur et interprète son signe pour justifier qu'il s'agit d'un maximum. Termine en donnant les valeurs numériques finales (hauteur, base supérieure, aire) dans le contexte de l'énoncé.";
-  }
-  if (exercice.famille === "cubique") {
-    return "Utilise le point de passage supplémentaire donné pour résoudre et trouver a, puis écris l'expression complète de f(x).";
-  }
-  const v = variableAffichee(exercice);
-  const rejet = AVEC_REJET_RACINE[exercice.famille] ? " Si une racine doit être rejetée, justifie ton choix." : "";
-  return `Résous dérivée=0 et donne la valeur de ${v} retenue.${rejet} Étudie le signe de la dérivée avant et après cette valeur pour justifier qu'il s'agit d'un ${NATURE_EXTREMUM[exercice.famille]}, puis donne les valeurs numériques finales dans le contexte de l'énoncé.`;
-}
-
-// ============================================================================
-// Énoncé.
-// ============================================================================
-
-function construireEnonceOptimisation(exercice: ExerciceOptimisation): SectionExercice {
-  const questions = [
-    { consigne: [texte(consigneLienConstruireDeriver(exercice))], reponse: { type: "lignes" as const, nombre: exercice.famille === "cubique" ? 4 : 5 } },
-    { consigne: [texte(consigneResoudreJustifierConclure(exercice))], reponse: { type: "lignes" as const, nombre: exercice.famille === "cubique" ? 3 : 6 } },
-  ];
-  if (exercice.famille === "cylindre" && exercice.avecApplicationNumerique) {
-    questions.push({
-      consigne: [texte(`Utilise les dimensions optimales déjà trouvées pour calculer le coût total du matériau (prix unitaire : ${exercice.prixUnitaireMateriau} €/cm²).`)],
-      reponse: { type: "lignes" as const, nombre: 2 },
-    });
-  }
-  return { enteteFragments: enteteOptimisation(exercice), questions };
-}
-
-// ============================================================================
-// Correction — question a) : formule "lien" (recopiée du corps de `valeurLienMarges`/
-// `valeurLienFenetre`/`valeurHauteurCylindre`, jamais re-dérivée) + fonction objectif F(x).
-// ============================================================================
-
-function correctionLienEtFonction(exercice: ExerciceOptimisation): BlocCorrection {
-  switch (exercice.famille) {
-    case "trapeze":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`h(\\alpha)=${exercice.l}\\sin(\\alpha),\\ B(\\alpha)=${exercice.b}+2\\cdot ${exercice.l}\\cos(\\alpha)`),
-          texte(". Donc "),
-          latex(`A(\\alpha)=\\frac{${exercice.b}+B(\\alpha)}{2}\\cdot h(\\alpha)=${exercice.l}\\cdot ${exercice.b}\\sin(\\alpha)+${exercice.l}^2\\sin(\\alpha)\\cos(\\alpha)`),
-          texte(", d'où "),
-          latex(`A'(\\alpha)=${exercice.l}\\cdot ${exercice.b}\\cos(\\alpha)+${exercice.l}^2(2\\cos^2(\\alpha)-1)`),
-          texte("."),
-        ],
-      };
-    case "cylindre": {
-      const V = `${exercice.coeffV}\\pi`;
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`h(x)=\\frac{V}{\\pi x^2}=\\frac{${V}}{\\pi x^2}=\\frac{${exercice.coeffV}}{x^2}`),
-          texte(", donc "),
-          latex(`S(x)=2\\pi x^2+2\\pi x\\cdot h(x)=2\\pi x^2+\\frac{${2 * exercice.coeffV}\\pi}{x}`),
-          texte(", d'où "),
-          latex(`S'(x)=4\\pi x-\\frac{${2 * exercice.coeffV}\\pi}{x^2}`),
-          texte("."),
-        ],
-      };
-    }
-    case "margesA":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`y(x)=\\frac{T}{x+2m_h}-2m_v=\\frac{${exercice.T}}{x+${2 * exercice.mh}}-${2 * exercice.mv}`),
-          texte(", donc "),
-          latex(`F(x)=x\\cdot y(x)`),
-          texte(", d'où "),
-          latex(`F'(x)=\\frac{2m_h\\cdot T}{(x+2m_h)^2}-2m_v=\\frac{${2 * exercice.mh * (exercice.T as number)}}{(x+${2 * exercice.mh})^2}-${2 * exercice.mv}`),
-          texte("."),
-        ],
-      };
-    case "margesB":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`y(x)=\\frac{A}{x}=\\frac{${exercice.A}}{x}`),
-          texte(", donc "),
-          latex(`F(x)=(x+2m_h)(y(x)+2m_v)`),
-          texte(", d'où "),
-          latex(`F'(x)=2m_v-\\frac{2m_h\\cdot A}{x^2}=${2 * exercice.mv}-\\frac{${2 * exercice.mh * (exercice.A as number)}}{x^2}`),
-          texte("."),
-        ],
-      };
-    case "fenetreA":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`h(r)=\\frac{P-(2+\\pi)r}{2}`),
-          texte(", donc "),
-          latex(`F(r)=2r\\cdot h(r)+\\frac{\\pi r^2}{2}`),
-          texte(", d'où "),
-          latex(`F'(r)=P-(4+\\pi)r`),
-          texte("."),
-        ],
-      };
-    case "fenetreB":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(`h(r)=\\frac{A}{2r}-\\frac{\\pi r}{4}`),
-          texte(", donc "),
-          latex(`F(r)=2r+2h(r)+\\pi r`),
-          texte(", d'où "),
-          latex(`F'(r)=\\left(2+\\frac{\\pi}{2}\\right)-\\frac{A}{r^2}`),
-          texte("."),
-        ],
-      };
-    case "cubique":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("a) "),
-          latex(formatReponseAttendueEcranLatex(exercice, "coeffsImmediats")),
-          texte(". "),
-          latex(formatReponseAttendueEcranLatex(exercice, "relation")),
-          texte("."),
-        ],
-      };
-  }
-}
-
-// ============================================================================
-// Correction — question b) : racine retenue (récap écran, `ui5e/`), signe/nature, valeurs
-// numériques finales (RESYNTHÉTISÉES via les fonctions pures de `index.ts`, jamais recalculées
-// indépendamment).
-// ============================================================================
-
-function correctionResolutionEtConclusion(exercice: ExerciceOptimisation): BlocCorrection {
-  // Bug corrigé par rapport à la source plateforme-maths : la phase "resoudre" n'existe pas pour
-  // "cubique" (sa propre séquence utilise "resoudreA"/"expressionFinale", voir le `case "cubique"`
-  // ci-dessous) — `formatReponseAttendueEcranLatex(exercice, "resoudre")` y plante sur
-  // `opt!.toFixed(2)` (`opt` vaut `null` pour cette famille). `racine` n'est de toute façon jamais
-  // lu par le `case "cubique"`, donc calculé seulement pour les autres familles.
-  const racine = exercice.famille === "cubique" ? "" : formatReponseAttendueEcranLatex(exercice, "resoudre");
+function schemaSvg(exercice: ExerciceOptimisation): string {
+  let corps = "";
   switch (exercice.famille) {
     case "trapeze": {
-      const alphaOpt = alphaOptTrapeze(exercice);
-      const hauteur = valeurHauteurTrapeze(exercice, alphaOpt);
-      const baseSup = valeurBaseSupTrapeze(exercice, alphaOpt);
-      const aire = valeurFOptimisation(exercice, alphaOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(". "),
-          latex(`A''(\\alpha)=-${exercice.l}\\sin(\\alpha)\\cdot B(\\alpha)`),
-          texte(" est TOUJOURS négatif sur ]0;π/2[ (l>0, sin(α)>0, B(α)>0) : c'est un MAXIMUM. Conclusion : "),
-          latex(`h_{opt}\\approx ${formatDecimal(hauteur)},\\ B_{opt}\\approx ${formatDecimal(baseSup)},\\ A_{max}\\approx ${formatDecimal(aire)}`),
-          texte("."),
-        ],
-      };
+      const ax = 100, bx = 160, y0 = 130, dx = 35, dy = 60.6;
+      corps =
+        `<polyline points="${ax - dx},${y0 - dy} ${ax},${y0} ${bx},${y0} ${bx + dx},${y0 - dy}" ${TRAIT}/>` +
+        `<line x1="${ax - dx}" y1="${y0 - dy}" x2="${bx + dx}" y2="${y0 - dy}" ${COTE}/>` +
+        `<line x1="${bx}" y1="${y0}" x2="${bx + 55}" y2="${y0}" ${COTE}/>` +
+        `<line x1="${bx + dx}" y1="${y0 - dy}" x2="${bx + dx}" y2="${y0}" ${COTE}/>` +
+        `<path d="M ${bx + 20} ${y0} A 20 20 0 0 0 ${bx + 10} ${y0 - 17.3}" stroke="#212529" stroke-width="1.2" fill="none"/>` +
+        txt(bx + 24, y0 - 8, "α") +
+        txt((ax + bx) / 2, y0 + 18, "b", "middle") +
+        txt(ax - dx / 2 - 14, y0 - dy / 2 + 4, "l", "middle") +
+        txt(bx + dx / 2 + 12, y0 - dy / 2 - 4, "l", "middle") +
+        txt(bx + dx + 8, y0 - dy / 2 + 4, "h") +
+        txt((ax + bx) / 2, y0 - dy - 8, "B", "middle");
+      break;
     }
     case "cylindre": {
-      const hauteur = valeurHauteurCylindre(exercice, exercice.xOpt);
-      const aire = valeurFOptimisation(exercice, exercice.xOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(" (racine cubique réelle unique, positive — pas de rejet). S' passe de − à + : MINIMUM. Conclusion : "),
-          latex(`h_{opt}=${formatDecimal(hauteur)},\\ S_{min}=${formatAvecPiEventuel(aire)}\\text{ cm}^2`),
-          texte("."),
-        ],
-      };
+      const cx = 130, rx = 45, ry = 12, haut = 35, bas = 135;
+      corps =
+        `<ellipse cx="${cx}" cy="${haut}" rx="${rx}" ry="${ry}" ${TRAIT}/>` +
+        `<line x1="${cx - rx}" y1="${haut}" x2="${cx - rx}" y2="${bas}" ${TRAIT}/>` +
+        `<line x1="${cx + rx}" y1="${haut}" x2="${cx + rx}" y2="${bas}" ${TRAIT}/>` +
+        `<path d="M ${cx - rx} ${bas} A ${rx} ${ry} 0 0 0 ${cx + rx} ${bas}" ${TRAIT}/>` +
+        `<path d="M ${cx - rx} ${bas} A ${rx} ${ry} 0 0 1 ${cx + rx} ${bas}" ${COTE}/>` +
+        `<line x1="${cx}" y1="${haut}" x2="${cx + rx}" y2="${haut}" stroke="#212529" stroke-width="1.2"/>` +
+        `<circle cx="${cx}" cy="${haut}" r="2" fill="#212529"/>` +
+        txt(cx + rx / 2, haut - 4, "x", "middle") +
+        `<line x1="${cx + rx + 14}" y1="${haut}" x2="${cx + rx + 14}" y2="${bas}" ${COTE}/>` +
+        txt(cx + rx + 20, (haut + bas) / 2 + 4, "h");
+      break;
     }
-    case "margesA": {
-      const y = valeurLienMarges(exercice, exercice.xOpt);
-      const aireImprimee = valeurFOptimisation(exercice, exercice.xOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(" (l'autre racine est négative — une longueur ne peut pas être négative, on la rejette). F' passe de + à − : MAXIMUM. Conclusion : "),
-          latex(`y_{opt}=${formatDecimal(y)},\\ A_{imprim\\acute{e}e,max}=${formatDecimal(aireImprimee)}`),
-          texte("."),
-        ],
-      };
-    }
+    case "margesA":
     case "margesB": {
-      const y = valeurLienMarges(exercice, exercice.xOpt);
-      const aireTotale = valeurFOptimisation(exercice, exercice.xOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(" (l'autre racine est négative — une longueur ne peut pas être négative, on la rejette). F' passe de − à + : MINIMUM. Conclusion : "),
-          latex(`y_{opt}=${formatDecimal(y)},\\ T_{min}=${formatDecimal(aireTotale)}`),
-          texte("."),
-        ],
-      };
+      const x0 = 70, y0 = 15, l = 120, h = 140, mh = 22, mv = 18;
+      const m = (x: number, y: number, indice: string) => `<text x="${x}" y="${y}" text-anchor="middle" ${TXT} font-size="11">m<tspan baseline-shift="sub" font-size="8">${indice}</tspan></text>`;
+      corps =
+        `<rect x="${x0}" y="${y0}" width="${l}" height="${h}" ${TRAIT}/>` +
+        `<rect x="${x0 + mh}" y="${y0 + mv}" width="${l - 2 * mh}" height="${h - 2 * mv}" stroke="#212529" stroke-width="1.2" fill="#e9ecef"/>` +
+        txt(x0 + l / 2, y0 + h - mv - 6, "x", "middle") +
+        txt(x0 + l - mh - 12, y0 + h / 2 + 4, "y", "middle") +
+        m(x0 + mh / 2, y0 + h / 2 + 4, "h") +
+        m(x0 + l - mh / 2, y0 + h / 2 + 4, "h") +
+        m(x0 + l / 2, y0 + mv / 2 + 4, "v") +
+        m(x0 + l / 2, y0 + h - mv / 2 + 4, "v");
+      break;
     }
-    case "fenetreA": {
-      const hauteur = valeurLienFenetre(exercice, exercice.rOpt);
-      const aire = valeurFOptimisation(exercice, exercice.rOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(" (racine unique, linéaire — pas de rejet nécessaire). F' passe de + à − : MAXIMUM. Conclusion : "),
-          latex(`h_{opt}\\approx ${formatDecimal(hauteur)},\\ \\text{Aire}_{max}\\approx ${formatDecimal(aire)}`),
-          texte("."),
-        ],
-      };
-    }
+    case "fenetreA":
     case "fenetreB": {
-      const hauteur = valeurLienFenetre(exercice, exercice.rOpt);
-      const perimetre = valeurFOptimisation(exercice, exercice.rOpt);
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(racine),
-          texte(" (l'autre racine est négative — un rayon ne peut pas être négatif, on la rejette). F' passe de − à + : MINIMUM. Conclusion : "),
-          latex(`h_{opt}\\approx ${formatDecimal(hauteur)},\\ P_{min}\\approx ${formatDecimal(perimetre)}`),
-          texte("."),
-        ],
-      };
+      const cx = 130, r = 40, yBase = 150, hRect = 70;
+      const yHaut = yBase - hRect;
+      corps =
+        `<path d="M ${cx - r} ${yHaut} L ${cx - r} ${yBase} L ${cx + r} ${yBase} L ${cx + r} ${yHaut} A ${r} ${r} 0 0 0 ${cx - r} ${yHaut}" ${TRAIT}/>` +
+        `<line x1="${cx - r}" y1="${yHaut}" x2="${cx + r}" y2="${yHaut}" ${COTE}/>` +
+        `<line x1="${cx}" y1="${yHaut}" x2="${(cx + r * Math.cos(Math.PI / 4)).toFixed(1)}" y2="${(yHaut - r * Math.sin(Math.PI / 4)).toFixed(1)}" stroke="#212529" stroke-width="1.2"/>` +
+        `<circle cx="${cx}" cy="${yHaut}" r="2" fill="#212529"/>` +
+        txt(cx + 8, yHaut - 16, "r") +
+        txt(cx + r + 8, (yHaut + yBase) / 2 + 4, "h") +
+        txt(cx, yBase + 16, "2r", "middle");
+      break;
     }
     case "cubique":
-      return {
-        type: "paragraphe",
-        fragments: [
-          texte("b) "),
-          latex(formatReponseAttendueEcranLatex(exercice, "resoudreA")),
-          texte(". "),
-          latex(formatReponseAttendueEcranLatex(exercice, "expressionFinale")),
-          texte("."),
-        ],
-      };
+      return "";
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 172" width="260" height="172" style="display:block;margin:6px auto 0;max-width:100%">${corps}</svg>`;
+}
+
+// ============================================================================
+// Énoncé : situation + données + schéma ; étapes (une par écran) ; consigne globale.
+// ============================================================================
+
+function donneesFragments(exercice: ExerciceOptimisation): FragmentConsigne[] {
+  return [texte(" Données : "), latex(formatTermesDonneesLatex(exercice).join(",\\ ")), texte(".")];
+}
+
+function situationFragments(exercice: ExerciceOptimisation): FragmentConsigne[] {
+  if (exercice.famille === "cubique") {
+    return [texte("On cherche une fonction du troisième degré "), latex("f(x)=ax^3+bx^2+cx+d"), texte(" telle que "), latex(formatTermesDonneesLatex(exercice).join(",\\ ")), texte(".")];
+  }
+  return [...fragmentsRiches(consigneGeneraleRiche(exercice)), ...donneesFragments(exercice)];
+}
+
+const GRANDEUR: Record<Exclude<ExerciceOptimisation["famille"], "cubique">, string> = {
+  trapeze: "l'aire de la section de la gouttière",
+  cylindre: "l'aire totale de la boîte",
+  margesA: "l'aire de la zone imprimée",
+  margesB: "l'aire totale de l'affiche",
+  fenetreA: "l'aire de la fenêtre",
+  fenetreB: "le périmètre de la fenêtre",
+};
+
+function consigneEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation): FragmentConsigne[] {
+  const v = variable(exercice);
+  const f = exercice.famille;
+  switch (ecran) {
+    case "lien":
+      if (f === "trapeze") return fragmentsRiches("Exprime la hauteur $h$ et la grande base $B$ du trapèze en fonction de $\\alpha$.");
+      if (f === "margesA" || f === "margesB") return fragmentsRiches("Exprime la hauteur imprimée $y$ en fonction de $x$ à l'aide de la contrainte.");
+      return fragmentsRiches(`Exprime la hauteur $h$ en fonction de $${v}$ à l'aide de la contrainte.`);
+    case "construire":
+      return fragmentsRiches(`Exprime ${f === "cubique" ? "" : GRANDEUR[f]} en fonction de la seule variable $${v}$ : c'est la fonction $F$ à optimiser.`);
+    case "deriver":
+      return fragmentsRiches(f === "trapeze" ? "Calcule $F'(\\alpha)$, avec $\\alpha$ en radians." : `Calcule $F'(${v})$.`);
+    case "resoudre":
+      if (f === "trapeze") return fragmentsRiches("Résous $F'(\\alpha)=0$ : remplace $\\sin^2\\alpha$ par $1-\\cos^2\\alpha$, pose $u=\\cos\\alpha$ et résous l'équation du deuxième degré obtenue ; donne $\\alpha$ en degrés.");
+      if (f === "margesA" || f === "margesB" || f === "fenetreB") return fragmentsRiches(`Résous $F'(${v})=0$ et justifie la valeur de $${v}$ retenue.`);
+      return fragmentsRiches(`Résous $F'(${v})=0$.`);
+    case "justifier": {
+      const pts = pointsTest(exercice);
+      const u = f === "trapeze" ? "°" : "";
+      return fragmentsRiches(`Calcule $F'$ en $${v}=${formatNombreLatex(pts.affichageAvant)}${u}$ et en $${v}=${formatNombreLatex(pts.affichageApres)}${u}$, puis déduis-en la nature de l'extremum.`);
+    }
+    case "conclure":
+      return [texte("Donne les valeurs optimales dans le contexte de l'énoncé.")];
+    case "application":
+      return [texte("Calcule le coût du matériau de la boîte optimale.")];
+    case "coeffsImmediats":
+      return fragmentsRiches("Détermine $c$ et $d$ à partir des deux conditions en $x=0$.");
+    case "relation":
+      return fragmentsRiches("Exprime $b$ en fonction de $a$ à l'aide de la deuxième tangente horizontale.");
+    case "resoudreA":
+      return fragmentsRiches("Utilise le point de passage restant pour trouver $a$.");
+    case "expressionFinale":
+      return fragmentsRiches("Écris l'expression complète de $f(x)$.");
   }
 }
 
+function construireEnonceOptimisation(exercice: ExerciceOptimisation): SectionExercice {
+  return {
+    enteteFragments: situationFragments(exercice),
+    enteteHtml: schemaSvg(exercice) || undefined,
+    questions: ordreEcransOptimisation(exercice).map((e) => ({ consigne: consigneEtape(exercice, e) })),
+  };
+}
+
+function consigneGlobale(exercice: ExerciceOptimisation): FragmentConsigne[] {
+  const precision = " Donne les valeurs exactes, ou arrondies au centième.";
+  switch (exercice.famille) {
+    case "trapeze":
+      return fragmentsRiches(
+        "Détermine l'angle $\\alpha$ (en degrés, arrondi au degré) qui rend l'aire de la section maximale et justifie qu'il s'agit d'un maximum ; donne alors la hauteur $h$, la grande base $B$ et l'aire maximale. Les calculs se font avec $\\alpha$ en radians ; tu peux utiliser $\\sin^2\\alpha=1-\\cos^2\\alpha$." +
+          precision,
+      );
+    case "cylindre":
+      return fragmentsRiches(`Détermine le rayon $x$ et la hauteur $h$ de la boîte qui utilise le moins de matériau, justifie qu'il s'agit d'un minimum et donne l'aire totale minimale.${precision}`);
+    case "margesA":
+      return fragmentsRiches(`Détermine les dimensions $x$ et $y$ de la zone imprimée qui rendent son aire maximale, justifie la nature de l'extremum et donne cette aire maximale.${precision}`);
+    case "margesB":
+      return fragmentsRiches(`Détermine les dimensions $x$ et $y$ de la zone imprimée qui rendent l'aire totale de l'affiche minimale, justifie la nature de l'extremum et donne cette aire minimale.${precision}`);
+    case "fenetreA":
+      return fragmentsRiches(`Détermine le rayon $r$ et la hauteur $h$ qui rendent l'aire de la fenêtre maximale, justifie la nature de l'extremum et donne cette aire maximale.${precision}`);
+    case "fenetreB":
+      return fragmentsRiches(`Détermine le rayon $r$ et la hauteur $h$ qui rendent le périmètre de la fenêtre minimal, justifie la nature de l'extremum et donne ce périmètre minimal.${precision}`);
+    case "cubique":
+      return fragmentsRiches("Détermine les coefficients $a$, $b$, $c$ et $d$, puis écris $f(x)$.");
+  }
+}
+
+function enoncePapierOptimisation(exercice: ExerciceOptimisation): EnoncePapier {
+  const ordre = ordreEcransOptimisation(exercice);
+  const lettres = ordre.map((_, i) => LETTRES[i]);
+  const application = ordre.includes("application");
+  const section: SectionExercice = {
+    enteteFragments: situationFragments(exercice),
+    enteteHtml: schemaSvg(exercice) || undefined,
+    questions: application
+      ? [
+          { consigne: consigneGlobale(exercice) },
+          {
+            consigne: [
+              texte(`Le matériau coûte ${nombreTexte(exercice.famille === "cylindre" ? (exercice.prixUnitaireMateriau ?? 0) : 0)} € par cm². Calcule le coût du matériau de la boîte optimale, arrondi au centime.`),
+            ],
+          },
+        ]
+      : [{ consigne: consigneGlobale(exercice) }],
+  };
+  return {
+    section,
+    etapesParQuestion: application ? [lettres.slice(0, -1), [lettres[lettres.length - 1]]] : [lettres],
+    reponseBreve: application ? [texte("a) "), ...reponseBreveSansApplication(exercice), texte(" — b) "), latex(reponseEcran(exercice, "application"))] : undefined,
+  };
+}
+
+// ============================================================================
+// Corrigé détaillé.
+// ============================================================================
+
+function aide(exercice: ExerciceOptimisation, ecran: EcranOptimisation, niveau: 1 | 2): FragmentConsigne[] {
+  const a = niveau === 1 ? texteAideNiveau1(exercice, ecran) : texteAideNiveau2(exercice, ecran);
+  if (!a || (a.texte === "" && !a.latex)) return [];
+  const papier = a.texte.replace(/aux écrans précédents/g, "aux étapes précédentes").replace(/des écrans précédents/g, "des étapes précédentes").replace(/à l'écran précédent/g, "à l'étape précédente");
+  const fragments = fragmentsRiches(papier).map((fr) => (fr.type === "latex" ? latex(avecVariable(exercice, fr.valeur)) : fr));
+  return [...fragments, ...(a.latex ? [texte(" "), latex(avecVariable(exercice, a.latex))] : [])];
+}
+
+function lignesEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation): EtapeCorrection[] {
+  const sq = lettreDe(exercice, ecran);
+  const ligne = (label: string, fragments: FragmentConsigne[]): EtapeCorrection[] => (fragments.length === 0 ? [] : [{ label, sousQuestion: sq, fragments }]);
+  const reponse = () => [latex(reponseEcran(exercice, ecran)), texte(".")];
+  const f = exercice.famille;
+  switch (ecran) {
+    case "lien":
+    case "construire":
+      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Calcul", reponse())];
+    case "deriver": {
+      const methodeDerivee =
+        f === "fenetreA"
+          ? fragmentsRiches("$F$ est un polynôme du deuxième degré en $r$ : on dérive terme à terme.")
+          : f === "margesA"
+            ? [...fragmentsRiches("Règle du quotient pour le premier terme, puis dérivée du terme en $x$ :"), texte(" "), latex("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}")]
+            : aide(exercice, ecran, 1);
+      return [...ligne("Méthode", methodeDerivee), ...ligne("Calcul", reponse())];
+    }
+    case "resoudre": {
+      const lignes = [...ligne("Calcul", aide(exercice, ecran, 2)), ...ligne("Conclusion", reponse())];
+      if (f === "margesA" || f === "margesB" || f === "fenetreB") lignes.push(...ligne("Piège", [texte("L'équation a deux solutions opposées : une longueur est positive, on rejette la solution négative.")]));
+      if (f === "trapeze") lignes.push(...ligne("Piège", [texte("On garde la solution u comprise entre 0 et 1 (u = cos α avec 0° < α < 90°).")]));
+      return lignes;
+    }
+    case "justifier": {
+      const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
+      return [
+        ...ligne("Méthode", [texte(nature === "maximum" ? "F′ positive avant l'optimum et négative après : F croît puis décroît." : "F′ négative avant l'optimum et positive après : F décroît puis croît.")]),
+        ...ligne("Conclusion", reponse()),
+      ];
+    }
+    case "conclure":
+      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Conclusion", reponse())];
+    case "application":
+      return [...ligne("Méthode", [texte("Coût = prix au cm² × aire totale minimale (ce n'est pas une nouvelle optimisation).")]), ...ligne("Calcul", reponse())];
+    case "coeffsImmediats":
+    case "relation":
+    case "resoudreA":
+      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Calcul", reponse())];
+    case "expressionFinale":
+      return ligne("Conclusion", reponse());
+  }
+}
+
+function correctionDetailleeOptimisation(exercice: ExerciceOptimisation): EtapeCorrection[] {
+  return ordreEcransOptimisation(exercice).flatMap((e) => lignesEtape(exercice, e));
+}
+
+function reponseBreveSansApplication(exercice: ExerciceOptimisation): FragmentConsigne[] {
+  if (exercice.famille === "cubique") return [latex(reponseEcran(exercice, "expressionFinale"))];
+  const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
+  return [latex(reponseEcran(exercice, "resoudre").replace(/\\ \\text\{\(l'autre[^}]*\}/, "")), texte(` (${nature}) ; `), latex(reponseEcran(exercice, "conclure"))];
+}
+
+function reponseBreveOptimisation(exercice: ExerciceOptimisation): FragmentConsigne[] {
+  const base = reponseBreveSansApplication(exercice);
+  return ordreEcransOptimisation(exercice).includes("application") ? [...base, texte(" ; "), latex(reponseEcran(exercice, "application"))] : base;
+}
+
+function baremeOptimisation(exercice: ExerciceOptimisation): BaremeExercice {
+  const l = (e: EcranOptimisation) => lettreDe(exercice, e);
+  const c = (sousQuestion: string, t: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(t)], points });
+  let criteres: CritereBareme[];
+  if (exercice.famille === "cubique") {
+    criteres = [c(l("coeffsImmediats"), "c et d à partir des conditions en x = 0", 1), c(l("relation"), "b exprimé en fonction de a", 1), c(l("resoudreA"), "a trouvé grâce au point de passage", 1), c(l("expressionFinale"), "Expression complète de f(x)", 1)];
+  } else {
+    const application = ordreEcransOptimisation(exercice).includes("application");
+    criteres = [
+      c(l("lien"), "Contrainte exploitée : une seule variable", 0.5),
+      c(l("construire"), "Fonction F à optimiser", 0.5),
+      c(l("deriver"), "Dérivée F′ correcte", application ? 0.5 : 1),
+      c(l("resoudre"), "Résolution de F′ = 0 et valeur retenue", 1),
+      c(l("justifier"), "Signe de F′ de part et d'autre : nature de l'extremum", 0.5),
+      c(l("conclure"), "Valeurs optimales dans le contexte, avec unités", 0.5),
+      ...(application ? [c(l("application"), "Coût du matériau", 0.5)] : []),
+    ];
+  }
+  const erreurs =
+    exercice.famille === "cubique"
+      ? [{ description: [texte("Oublier que f′(0) = 0 impose c = 0")], cout: "−1" }]
+      : [
+          { description: [texte("Dériver la fonction en gardant deux variables (contrainte non utilisée)")], cout: "0 pt sur la dérivée" },
+          { description: [texte("Annoncer un maximum ou un minimum sans étudier le signe de F′")], cout: "0 pt sur la nature" },
+          ...(exercice.famille === "trapeze" ? [{ description: [texte("Calculer avec la calculatrice en degrés une dérivée établie en radians")], cout: "−0,5" }] : []),
+        ];
+  return {
+    reponseFinale: reponseBreveOptimisation(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte("Valeurs exactes (avec π ou une racine) ou arrondies au centième ; F et F′ sous une forme équivalente")]],
+  };
+}
+
+function difficulteOptimisation(exercice: ExerciceOptimisation): 1 | 2 | 3 {
+  if (exercice.famille === "trapeze" || exercice.famille === "fenetreA" || exercice.famille === "fenetreB") return 3;
+  return 2;
+}
+
+/** Repli (documents Word) : les lignes du corrigé détaillé, en paragraphes. */
 function construireCorrectionOptimisation(exercice: ExerciceOptimisation): BlocCorrection[] {
-  const blocs: BlocCorrection[] = [correctionLienEtFonction(exercice), correctionResolutionEtConclusion(exercice)];
-  if (exercice.famille === "cylindre" && exercice.avecApplicationNumerique) {
-    const cout = (exercice.prixUnitaireMateriau ?? 0) * valeurFOptimisation(exercice, exercice.xOpt);
-    blocs.push({ type: "paragraphe", fragments: [texte("c) "), latex(`\\text{Coût}=${exercice.prixUnitaireMateriau}\\times ${formatAvecPiEventuel(valeurFOptimisation(exercice, exercice.xOpt))}\\approx ${formatDecimal(cout)}\\text{ €}`)] });
-  }
-  return blocs;
+  return correctionDetailleeOptimisation(exercice)
+    .filter((l) => l.label !== "Piège")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
-
-// ============================================================================
-// Export.
-// ============================================================================
 
 export const adaptateurEvaluationOptimisationGeometrique: AdaptateurFeuilleExercices<ExerciceOptimisation> = {
-  titreDocument: "Optimisation géométrique — Évaluation",
-  nomFichierBase: "optimisation-geometrique",
+  titreDocument: "Optimisation géométrique — Dérivées et applications — Évaluation",
+  nomFichierBase: "optimisation-geometrique-derivees-applications",
   genererInstance: genererExerciceOptimisation,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceOptimisation,
   construireCorrection: construireCorrectionOptimisation,
-  // PAS regroupable — 2-3 questions par instance (jamais une seule) ET consigne dépendante de la
-  // famille tirée (7 familles, texte différent), jamais une constante générique : voir tête de
-  // fichier.
+  difficulte: difficulteOptimisation,
+  reponseBreve: reponseBreveOptimisation,
+  correctionDetaillee: correctionDetailleeOptimisation,
+  bareme: baremeOptimisation,
+  enoncePapier: enoncePapierOptimisation,
+  dureeMinutes: 15,
+  profilInstance: profilOptimisation,
+  calculatriceIndispensable: ["cylindre-application"],
 };

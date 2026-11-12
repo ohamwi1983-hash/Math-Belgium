@@ -47,6 +47,7 @@ import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { ReponseResoudre } from "./moteur5e/verificationVitessePosition";
@@ -55,6 +56,15 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionVitessePosition {
   return demarrerSessionVitessePosition(REGLAGES_DEMO, genererExerciceVitessePosition);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/vitessePosition/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionVitessePosition {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionVitessePosition(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, () => genererExerciceVitessePosition(), (id) => construireAvecVarianteId(id)));
 }
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
@@ -86,7 +96,7 @@ function formatReponseResoudreTexte(r: ReponseResoudre): string {
 }
 
 export function App5gen35() {
-  const [etat, setEtat] = useState<EtatSessionVitessePosition>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionVitessePosition>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionVitessePosition`, jamais dans le moteur (même principe que

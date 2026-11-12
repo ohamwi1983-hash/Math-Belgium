@@ -81,7 +81,8 @@ export function construireSvgTableauVariations(d: DonneesTableauVariations, vale
   d.abscisses.forEach((_, i) => {
     if (d.zeros[i]) {
       s += texte(xNoeud(i), y1 + hLigne2 / 2 + 5, "0");
-      s += `<line x1="${xNoeud(i)}" y1="${y1}" x2="${xNoeud(i)}" y2="${y2}" stroke="${DOUX}" stroke-width="0.8" stroke-dasharray="3 3"/>`;
+      const yMilieu = y1 + hLigne2 / 2;
+      for (const [ya, yb] of [[y1, yMilieu - 8], [yMilieu + 8, y2]]) s += `<line x1="${xNoeud(i)}" y1="${ya}" x2="${xNoeud(i)}" y2="${yb}" stroke="${DOUX}" stroke-width="0.8" stroke-dasharray="3 3"/>`;
     }
   });
   d.signes.forEach((signe, i) => (s += texte((xNoeud(i) + xNoeud(i + 1)) / 2, y1 + hLigne2 / 2 + 5, signe, { taille: 15 })));

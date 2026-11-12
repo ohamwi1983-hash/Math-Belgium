@@ -7,107 +7,65 @@ import type {
   ExerciceAssociationSymbolique,
   PolynomeAssociation,
 } from "../../core5e/association.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { texte } from "../../../export/fragmentsDocx";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/fragmentsDocx";
 import { echapperHtml } from "../../../export/genererFeuilleExercicesHtml";
 import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
 import { consigneAssociation } from "../../ui5e/formatAssociation";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation } from "./index";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, formeCubique, genererExerciceAssociation } from "./index";
+import { profilAssociation } from "../profilsEvaluationDerivees25-27";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceAssociation>` pour 5gen25 ("Association
- * graphique/mots ↔ signe de f'/f''", premier générateur du chapitre "Dérivées et applications") —
- * feuille d'évaluation.
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceAssociation>` pour 5gen25 (Association
+ * graphique/mots ↔ signe de f'/f'') — feuille d'exercices et évaluation (méthode :
+ * `.claude/rules/feuilles-evaluations.md`).
  *
- * L'écran interactif (`App5gen25.tsx`, `components5e/ComposantAssociation.tsx`) est un JEU
- * D'ASSOCIATION : `n` éléments NUMÉROTÉS (1..n) affichés avec leur rendu riche (graphique/LaTeX),
- * `n` candidats LETTRÉS (A, B, C…) affichés à côté, l'élève choisissant pour chaque numéro la lettre
- * du candidat qui lui correspond via un `<select>` — jamais de glisser-déposer. Traduction papier
- * naturelle (voir tâche) : les candidats lettrés et les éléments numérotés sont affichés UNE SEULE
- * FOIS en tête de l'exercice (`enteteHtml`, comme le graphique unique de
- * `lectureGraphiqueLimites/exportEvaluation.ts`), puis CHAQUE élément numéroté devient une question
- * lettrée a)/b)/c)… « Élément i : quelle lettre lui correspond ? » avec une simple ligne de réponse
- * (la lettre écrite à la main) — jamais un `<select>` sur papier.
+ * L'écran est un jeu d'association : n éléments numérotés (graphes de f, ou fonctions f) et n
+ * candidats lettrés (graphes de f', énoncés, ou dérivées). Énoncé papier = les deux listes (en tête,
+ * `enteteHtml`) + UNE consigne globale « Associe chaque élément numéroté à sa lettre » — jamais une
+ * question par élément, aucune ligne de réponse. Graphes de 210 × 150 px en grille de 3 colonnes
+ * (lisibles sur A4) ; énoncés verbaux en liste pleine largeur ; fonctions et dérivées en deux
+ * colonnes (tableau, KaTeX).
  *
- * **3 familles gérées** (`grapheDerivee`, `grapheVerbal`, `symbolique` — les seules produites par
- * `genererExerciceAssociation`, voir `generateurs5e/association/index.ts::POIDS`). La famille
- * `grapheDeriveeAvancee` (accessible UNIQUEMENT via le panneau dev/le sélecteur de variante, jamais
- * tirée par défaut) introduit des points anguleux/de rebroussement/tangentes verticales et des
- * asymptotes/discontinuités/points vides sur f ET f' — un moteur de tracé SVG imprimé fidèle à ces
- * comportements pathologiques (buffers de coupure asymétriques par caractéristique, cohérents avec
- * `evaluerFonctionRiche`/`evaluerDeriveeFonctionRiche` de `generateurs5e/association/index.ts`)
- * dépasserait largement le cadre de cette tâche (adaptateur pour 5gen25 uniquement). Exclue ici :
- * `CATALOGUE_VARIANTES_EXPORT` ci-dessous filtre les entrées `grapheDeriveeAvancee-*` du catalogue
- * complet du générateur, et `construireEnteteHtmlAssociation` lève explicitement si jamais appelée
- * sur cette famille (ne peut pas arriver via ce fichier, mais rend l'exclusion vérifiable/explicite
- * plutôt que silencieuse).
+ * Corrigé : la correspondance, puis une ligne de justification par élément tirée de la forme de la
+ * cubique (`formeCubique` : extremums, f(0), sens de variation — la même source que l'énoncé
+ * verbal) ou de la dérivée elle-même (famille symbolique).
  *
- * **Candidats/éléments graphiques** : réutilise `export/svgGraph.ts::construireSvgFonction` (déjà le
- * moteur de tracé imprimé générique de la plateforme, voir `lectureGraphiqueLimites/exportEvaluation.ts`)
- * avec `evaluerPolynome` (Couche A ↔ Couche A, `generateurs5e/domaineDefinition/polynome.ts`) — même
- * domaine fixe `[-4;4]` et même cadrage vertical par échantillonnage (marge 15%) que
- * `components5e/PolynomeAssociationGraph.tsx` (fonction interne non exportée, et de toute façon
- * `generateurs5e/` n'importe jamais un composant React — DUPLIQUÉE ici en pur JS,
- * `calculerViewBoxPolynomeAssociation`). Grille `.grille-graphes-cyclo` (CSS déjà écrite côté
- * `assemblerEvaluationHtml.ts`, réutilisée telle quelle par tous les QCM graphiques 6e — voir
- * `export/svgGraphCyclo.ts` — nom historique "cyclo" mais générique) : 2 colonnes, `page-break-inside:
- * avoid`.
+ * La famille « A avancée » (points anguleux, asymptotes… — sélecteur seulement, jamais tirée
+ * librement) reste hors export : `CATALOGUE_VARIANTES_EXPORT_ASSOCIATION` la filtre. L'appli lit le
+ * `?code=` avec CE catalogue (indice de variante relatif à lui).
  *
- * **Candidats/éléments non graphiques** (énoncés verbaux de la famille B, expressions LaTeX de la
- * famille C) : aucun mécanisme existant sur la plateforme ne les dispose en grille lettrée (les
- * adaptateurs QCM graphiques 6e ne connaissent que des SVG). `construireCarteTexteAssociation`
- * construit donc une carte HTML minimale (bordure, étiquette, contenu) au même gabarit visuel que les
- * cartes SVG, texte échappé via `echapperHtml` (`export/genererFeuilleExercicesHtml.ts`, déjà exportée
- * pour réutilisation hors de ce fichier) ou rendu KaTeX via `katex.renderToString` — LE MÊME appel que
- * celui déjà utilisé par le pipeline HTML générique (`genererFeuilleExercicesHtml.ts::fragmentsVersHtml`),
- * simplement invoqué ici directement pour composer une grille plutôt qu'un paragraphe. `displayMode:true`
- * choisi délibérément (formule seule dans sa carte, jamais mêlée à du texte environnant — aucun risque
- * du piège `enteteFragments`/`displayMode` documenté pour l'étape 3 de la tâche, qui ne concerne QUE
- * `SectionExercice.enteteFragments`, jamais un rendu HTML construit à la main dans `enteteHtml`).
- *
- * **Consigne générale RÉÉCRITE pour le papier** : `CONSIGNE_GENERALE_ASSOCIATION`
- * (`ui5e/formatAssociation.ts`) mentionne littéralement « en choisissant la bonne lettre dans chaque
- * menu déroulant » — un `<select>` HTML n'existe pas sur une feuille imprimée. Cette constante a été
- * écrite uniquement pour l'écran (jamais anticipée pour un export papier, contrairement à
- * `consigneGenerale()`/`consignePhase()` de `ui5e/formatLectureGraphiqueLimites.ts`, déjà génériques).
- * `consigneAssociation(exercice)` (texte PAR FAMILLE, aucune référence UI) reste, elle, réutilisée
- * TELLE QUELLE — c'est `CONSIGNE_GENERALE_ASSOCIATION_PAPIER` ci-dessous, propre à ce fichier, qui la
- * remplace pour la partie générique.
- *
- * **`construireCorrection` RESYNTHÉTISÉE** depuis `ordreLettres` (déjà connu de l'instance tirée) via
- * `lettreCorrecte` (`core5e/association.types.ts`, pure, commune aux 3 familles) — jamais recalculée
- * indépendamment, jamais un import de `moteur5e/verificationAssociation.ts` (règle Couche A/Couche B).
- * Texte seul (« Élément i → lettre X »), sans redessiner le graphique — même décision que
- * `lectureGraphiqueLimites/exportEvaluation.ts` (le corrigé texte suffit, le graphique reste visible
- * plus haut sur la copie imprimée elle-même, ou via `questionCorrectionHtml`/`corpsQuestionHtml` qui
- * réaffiche l'énoncé complet dans le pipeline `/admin`).
- *
- * **`regroupable` = `false`** (explicite) : ce générateur produit TOUJOURS plusieurs questions par
- * instance (`n` ∈ [3;5], jamais 1 seule) ET utilise `enteteHtml` pour 2 des 3 familles — les 2 conditions
- * d'exclusion de la doc de `AdaptateurFeuilleExercices.regroupable` sont réunies.
+ * `regroupable` : non (plusieurs éléments et `enteteHtml`).
  */
 
 const LETTRES = "ABCDEFGH";
+const LETTRES_ETAPES = "abcdefgh";
 const X_MIN_ASSOCIATION = -4;
 const X_MAX_ASSOCIATION = 4;
-const TAILLE_CARTE_ASSOCIATION = 150;
+const LARGEUR_GRAPHE = 210;
+const HAUTEUR_GRAPHE = 150;
 
-const CONSIGNE_GENERALE_ASSOCIATION_PAPIER =
-  "Associe chaque élément numéroté au candidat lettré qui lui correspond : écris la lettre correspondante en face de chaque numéro.";
+const CONSIGNE_GLOBALE = "Associe chaque élément numéroté à la lettre qui lui correspond.";
 
-/** Catalogue exposé par cet adaptateur — sous-ensemble de `CATALOGUE_FAMILLES`
- * (`generateurs5e/association/index.ts`), sans les 7 entrées `grapheDeriveeAvancee-*` (voir le
- * commentaire de tête du fichier pour la justification de cette exclusion). */
+/** Catalogue exposé par cet adaptateur — `CATALOGUE_FAMILLES` sans les entrées « A avancé ». */
 export const CATALOGUE_VARIANTES_EXPORT_ASSOCIATION = CATALOGUE_FAMILLES.filter((entree) => !entree.id.startsWith("grapheDeriveeAvancee"));
 
 // ============================================================================
-// Cartes graphiques (familles A et B — graphiques de polynômes cubiques).
+// Graphes (familles A et B).
 // ============================================================================
 
-/** DUPLIQUÉE depuis `calculerYMinMax` de `components5e/PolynomeAssociationGraph.tsx` (fonction
- * interne non exportée, et `generateurs5e/` n'importe de toute façon jamais un composant React) —
- * même domaine fixe `[-4;4]`, même marge 15%, pour reproduire le cadrage déjà vu à l'écran. */
+/** Même cadrage que l'écran (`components5e/PolynomeAssociationGraph.tsx`) : fenêtre [−4 ; 4],
+ * hauteur par échantillonnage avec 15 % de marge. */
 function calculerViewBoxPolynomeAssociation(coeffs: PolynomeAssociation): ViewBoxSvg {
   let yMin = Infinity;
   let yMax = -Infinity;
@@ -122,116 +80,213 @@ function calculerViewBoxPolynomeAssociation(coeffs: PolynomeAssociation): ViewBo
 }
 
 function construireSvgPolynomeAssociation(coeffs: PolynomeAssociation, etiquette: string): string {
-  const viewBox = calculerViewBoxPolynomeAssociation(coeffs);
-  return construireSvgFonction((x) => evaluerPolynome(coeffs, x), viewBox, {
-    largeur: TAILLE_CARTE_ASSOCIATION,
-    hauteur: TAILLE_CARTE_ASSOCIATION,
+  return construireSvgFonction((x) => evaluerPolynome(coeffs, x), calculerViewBoxPolynomeAssociation(coeffs), {
+    largeur: LARGEUR_GRAPHE,
+    hauteur: HAUTEUR_GRAPHE,
     classe: "graphe-cyclo",
     lettre: etiquette,
   });
 }
 
-// ============================================================================
-// Cartes non graphiques (énoncés verbaux — famille B — et LaTeX — famille C).
-// ============================================================================
-
-/** Carte HTML minimale au même gabarit visuel que les cartes SVG (`TAILLE_CARTE_ASSOCIATION`) —
- * aucun mécanisme de grille lettrée existant sur la plateforme ne gère un contenu non graphique (voir
- * commentaire de tête du fichier). */
-function construireCarteTexteAssociation(contenuHtml: string, etiquette: string): string {
-  return (
-    `<div class="graphe-cyclo" style="border:1px solid #adb5bd;border-radius:3px;padding:6px 8px;` +
-    `width:${TAILLE_CARTE_ASSOCIATION}px;min-height:${TAILLE_CARTE_ASSOCIATION}px;box-sizing:border-box;` +
-    `font-size:9pt;display:flex;flex-direction:column;">` +
-    `<span style="font-weight:bold;font-size:12px;">${etiquette}</span>` +
-    `<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;">${contenuHtml}</div>` +
-    `</div>`
-  );
+/** Grille de 3 colonnes (3 × 210 px + écarts < 680 px, largeur imprimable A4). */
+function grilleGraphes(svgs: string[]): string {
+  return `<div class="grille-graphes-association" style="display:grid;grid-template-columns:repeat(3,auto);gap:10px;justify-content:center;margin:0.4em 0 0.8em;break-inside:avoid;">${svgs.join("")}</div>`;
 }
 
-/** Même appel que `genererFeuilleExercicesHtml.ts::fragmentsVersHtml` pour un fragment `latex` —
- * `displayMode:true` : une formule seule dans sa carte, jamais mêlée à du texte environnant (le piège
- * `enteteFragments`/`displayMode` de l'étape 3 de la tâche ne concerne que
- * `SectionExercice.enteteFragments`, jamais un rendu HTML construit à la main dans `enteteHtml`). */
-function rendreLatexCarte(expression: string): string {
-  return katex.renderToString(expression, { throwOnError: false, displayMode: true });
+function titreListe(titre: string): string {
+  return `<p style="margin:0.6em 0 0.2em;"><strong>${echapperHtml(titre)}</strong></p>`;
 }
 
-function construireGrilleHtml(cartes: string[]): string {
-  return `<div class="grille-graphes-cyclo">${cartes.join("")}</div>`;
+function rendreLatex(expression: string): string {
+  return katex.renderToString(`\\displaystyle ${expression}`, { throwOnError: false });
 }
 
 // ============================================================================
-// Entête (candidats lettrés + éléments numérotés) par famille.
+// En-tête (éléments numérotés + candidats lettrés) par famille.
 // ============================================================================
 
-function construireEnteteHtmlGrapheDerivee(exercice: ExerciceAssociationGrapheDerivee): string {
-  const candidats = exercice.ordreLettres.map((numeroSource, j) => construireSvgPolynomeAssociation(derivee(exercice.fonctions[numeroSource]), LETTRES[j] ?? String(j + 1)));
+function enteteHtmlGrapheDerivee(exercice: ExerciceAssociationGrapheDerivee): string {
   const elements = exercice.fonctions.map((coeffs, i) => construireSvgPolynomeAssociation(coeffs, String(i + 1)));
-  return `<p><strong>Candidats — graphiques de f' :</strong></p>${construireGrilleHtml(candidats)}<p><strong>Éléments — graphiques de f :</strong></p>${construireGrilleHtml(elements)}`;
+  const candidats = exercice.ordreLettres.map((source, j) => construireSvgPolynomeAssociation(derivee(exercice.fonctions[source]), LETTRES[j] ?? String(j + 1)));
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
-function construireEnteteHtmlGrapheVerbal(exercice: ExerciceAssociationGrapheVerbal): string {
-  // `enonces[j]` décrit déjà `fonctions[ordreLettres[j]]` (contrat `core5e/association.types.ts`) —
-  // directement indexé par position de lettre `j`, aucune indirection supplémentaire nécessaire.
-  const candidats = exercice.enonces.map((enonce, j) => construireCarteTexteAssociation(echapperHtml(enonce), LETTRES[j] ?? String(j + 1)));
+function enteteHtmlGrapheVerbal(exercice: ExerciceAssociationGrapheVerbal): string {
   const elements = exercice.fonctions.map((coeffs, i) => construireSvgPolynomeAssociation(coeffs, String(i + 1)));
-  return `<p><strong>Candidats — énoncés :</strong></p>${construireGrilleHtml(candidats)}<p><strong>Éléments — graphiques de f :</strong></p>${construireGrilleHtml(elements)}`;
+  // `enonces[j]` décrit `fonctions[ordreLettres[j]]` (contrat `core5e/association.types.ts`).
+  const candidats = exercice.enonces
+    .map((enonce, j) => `<li style="margin:0.25em 0;"><strong>${LETTRES[j] ?? j + 1}.</strong> ${echapperHtml(enonce)}</li>`)
+    .join("");
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Énoncés (lettrés)")}<ul style="list-style:none;padding-left:0;margin:0.2em 0 0.6em;">${candidats}</ul>`;
 }
 
-function construireEnteteHtmlSymbolique(exercice: ExerciceAssociationSymbolique): string {
-  // `gLatex[j]` est déjà la dérivée de `fLatex[ordreLettres[j]]` — directement indexé par position de
-  // lettre `j`, même remarque que pour `enonces` ci-dessus.
-  const candidats = exercice.gLatex.map((expression, j) => construireCarteTexteAssociation(rendreLatexCarte(expression), LETTRES[j] ?? String(j + 1)));
-  const elements = exercice.fLatex.map((expression, i) => construireCarteTexteAssociation(rendreLatexCarte(expression), String(i + 1)));
-  return `<p><strong>Candidats — dérivées :</strong></p>${construireGrilleHtml(candidats)}<p><strong>Éléments — fonctions :</strong></p>${construireGrilleHtml(elements)}`;
+function enteteHtmlSymbolique(exercice: ExerciceAssociationSymbolique): string {
+  const n = exercice.fLatex.length;
+  const lignes = Array.from({ length: n }, (_, i) => {
+    const f = `<td style="padding:6px 18px 6px 0;vertical-align:middle;"><strong>${i + 1}.</strong>&nbsp; ${rendreLatex(`f(x)=${exercice.fLatex[i]}`)}</td>`;
+    // `gLatex[j]` est la dérivée de `fLatex[ordreLettres[j]]`.
+    const g = `<td style="padding:6px 0 6px 18px;vertical-align:middle;border-left:1px solid #adb5bd;"><strong>${LETTRES[i] ?? i + 1}.</strong>&nbsp; ${rendreLatex(exercice.gLatex[i])}</td>`;
+    return `<tr>${f}${g}</tr>`;
+  }).join("");
+  return `<table class="table-association" style="border-collapse:collapse;margin:0.4em auto 0.8em;"><thead><tr><th style="text-align:left;padding:0 18px 4px 0;">Fonctions (numérotées)</th><th style="text-align:left;padding:0 0 4px 18px;">Dérivées (lettrées)</th></tr></thead><tbody>${lignes}</tbody></table>`;
 }
 
 function construireEnteteHtmlAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return construireEnteteHtmlGrapheDerivee(exercice);
+      return enteteHtmlGrapheDerivee(exercice);
     case "grapheVerbal":
-      return construireEnteteHtmlGrapheVerbal(exercice);
+      return enteteHtmlGrapheVerbal(exercice);
     case "symbolique":
-      return construireEnteteHtmlSymbolique(exercice);
+      return enteteHtmlSymbolique(exercice);
     case "grapheDeriveeAvancee":
-      // Ne peut pas arriver via cet adaptateur (voir commentaire de tête) — `genererInstance`/
-      // `genererInstanceAvecVariante` de l'adaptateur exporté ci-dessous ne produisent jamais cette
-      // famille. Exclusion rendue explicite/vérifiable plutôt que silencieuse.
-      throw new Error("Famille 'grapheDeriveeAvancee' non prise en charge par l'export papier de 5gen25 — voir le commentaire de tête d'exportEvaluation.ts.");
+      // Hors export (catalogue filtré, jamais tirée librement) — exclusion explicite.
+      throw new Error("Famille « A avancée » non prise en charge par l'export papier de 5gen25.");
   }
 }
 
 // ============================================================================
-// Questions (une par élément numéroté) + correction.
+// Énoncé.
 // ============================================================================
 
-function construireQuestionsAssociation(n: number): QuestionExercice[] {
-  return Array.from({ length: n }, (_, i) => ({
-    consigne: [texte(`Élément ${i + 1} : quelle lettre lui correspond ?`)],
-    reponse: { type: "lignes", nombre: 1 },
-  }));
+function enteteTexte(exercice: ExerciceAssociation): FragmentConsigne[] {
+  return [texte(consigneAssociation(exercice))];
 }
 
+/** Une seule étape à l'écran (l'association) : une seule question. */
 function construireEnonceAssociation(exercice: ExerciceAssociation): SectionExercice {
-  const n = nombreElementsAssociation(exercice);
+  return { enteteFragments: enteteTexte(exercice), enteteHtml: construireEnteteHtmlAssociation(exercice), questions: [{ consigne: [texte(CONSIGNE_GLOBALE)] }] };
+}
+
+function enoncePapierAssociation(exercice: ExerciceAssociation): EnoncePapier {
   return {
-    enteteFragments: [texte(`${CONSIGNE_GENERALE_ASSOCIATION_PAPIER} ${consigneAssociation(exercice)}`)],
-    enteteHtml: construireEnteteHtmlAssociation(exercice),
-    questions: construireQuestionsAssociation(n),
+    // `consigneAssociation` dit déjà quoi associer à quoi : seule la forme de la réponse s'ajoute.
+    section: { enteteFragments: [...enteteTexte(exercice), texte(" Donne ta réponse sous la forme « 1 → … ; 2 → … ».")], enteteHtml: construireEnteteHtmlAssociation(exercice), questions: [] },
   };
 }
 
-/** RESYNTHÉTISÉE depuis `ordreLettres` (déjà connu de l'instance tirée) via `lettreCorrecte`
- * (`core5e/association.types.ts`, pure, commune aux 3 familles) — jamais recalculée indépendamment,
- * aucun import de `moteur5e/verificationAssociation.ts`. */
-function construireCorrectionAssociation(exercice: ExerciceAssociation): BlocCorrection[] {
+// ============================================================================
+// Réponse, corrigé, barème.
+// ============================================================================
+
+function lettreDe(exercice: ExerciceAssociation, i: number): string {
+  return LETTRES[lettreCorrecte(exercice.ordreLettres, i)] ?? "?";
+}
+
+function correspondance(exercice: ExerciceAssociation): string {
+  return Array.from({ length: nombreElementsAssociation(exercice) }, (_, i) => `${i + 1} → ${lettreDe(exercice, i)}`).join(" ; ");
+}
+
+function reponseBreveAssociation(exercice: ExerciceAssociation): FragmentConsigne[] {
+  return [texte(correspondance(exercice))];
+}
+
+/** Nombre au dixième, virgule décimale et « − » typographique. */
+function dixieme(x: number): string {
+  const v = Math.round(x * 10) / 10;
+  const s = (Object.is(v, -0) ? 0 : v).toFixed(1).replace(/\.0$/, "").replace(".", ",");
+  return s.replace(/^-/, "−");
+}
+
+function justificationGrapheDerivee(coeffs: PolynomeAssociation): string {
+  const forme = formeCubique(coeffs);
+  if (forme.extremums) {
+    const [r1, r2] = forme.extremums;
+    return forme.signe > 0
+      ? `f croît, décroît puis croît (extremums en x ≈ ${dixieme(r1)} et x ≈ ${dixieme(r2)}) : f' est positive, s'annule en ${dixieme(r1)}, négative, s'annule en ${dixieme(r2)}, puis positive.`
+      : `f décroît, croît puis décroît (extremums en x ≈ ${dixieme(r1)} et x ≈ ${dixieme(r2)}) : f' est négative, s'annule en ${dixieme(r1)}, positive, s'annule en ${dixieme(r2)}, puis négative.`;
+  }
+  return forme.signe > 0
+    ? `f est croissante sur tout le graphique : f' reste positive ; elle est la plus petite en x ≈ ${dixieme(forme.inflexion)}, là où f a son point d'inflexion.`
+    : `f est décroissante sur tout le graphique : f' reste négative ; elle est la plus grande en x ≈ ${dixieme(forme.inflexion)}, là où f a son point d'inflexion.`;
+}
+
+function justificationGrapheVerbal(coeffs: PolynomeAssociation): string {
+  const forme = formeCubique(coeffs);
+  const ordonnee = Math.abs(forme.f0) < 1e-9 ? "la courbe passe par l'origine" : forme.f0 > 0 ? "la courbe coupe l'axe des ordonnées au-dessus de l'origine" : "la courbe coupe l'axe des ordonnées en dessous de l'origine";
+  if (forme.extremums) {
+    const [r1, r2] = forme.extremums;
+    const premier = forme.signe > 0 ? "maximum" : "minimum";
+    const second = forme.signe > 0 ? "minimum" : "maximum";
+    return `${premier} en x ≈ ${dixieme(r1)}, ${second} en x ≈ ${dixieme(r2)} ; ${ordonnee}.`;
+  }
+  return `${forme.signe > 0 ? "croissante" : "décroissante"} partout, point d'inflexion en x ≈ ${dixieme(forme.inflexion)} ; ${ordonnee}.`;
+}
+
+const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+function ligneElement(exercice: ExerciceAssociation, i: number): EtapeCorrection {
+  const label = `${i + 1} → ${lettreDe(exercice, i)}`;
+  switch (exercice.famille) {
+    case "grapheDerivee":
+      return { label, sousQuestion: "a", fragments: [texte(justificationGrapheDerivee(exercice.fonctions[i]))] };
+    case "grapheVerbal":
+      return { label, sousQuestion: "a", fragments: [texte(majuscule(justificationGrapheVerbal(exercice.fonctions[i])))] };
+    case "symbolique": {
+      const j = lettreCorrecte(exercice.ordreLettres, i);
+      return { label, sousQuestion: "a", fragments: [texte("En dérivant, on obtient "), latex(`f'(x)=${exercice.gLatex[j]}`), texte(".")] };
+    }
+    case "grapheDeriveeAvancee":
+      return { label, sousQuestion: "a", fragments: [] };
+  }
+}
+
+function methodeAssociation(exercice: ExerciceAssociation): FragmentConsigne[] {
+  switch (exercice.famille) {
+    case "grapheDerivee":
+      return [texte("Là où f croît, f' est positive (au-dessus de l'axe des x) ; là où f décroît, f' est négative ; en un extremum de f, f' s'annule en changeant de signe.")];
+    case "grapheVerbal":
+      return [texte("On lit sur chaque graphique le sens de variation, la position des extremums (ou du point d'inflexion) par rapport à l'axe des ordonnées et l'endroit où la courbe coupe cet axe.")];
+    case "symbolique":
+      return [texte("On dérive chaque fonction : une puissance de x, un produit de deux facteurs du premier degré (règle du produit) ou une puissance de ax + b (règle de la chaîne) :"), texte(" "), latex("\\big((ax+b)^n\\big)'=n\\,a\\,(ax+b)^{n-1}")];
+    case "grapheDeriveeAvancee":
+      return [];
+  }
+}
+
+function piegeAssociation(exercice: ExerciceAssociation): string {
+  switch (exercice.famille) {
+    case "grapheDerivee":
+      return "Le signe de f' se lit sur la pente de f, pas sur le signe de f : f' est positive là où f MONTE, même si f est négative.";
+    case "grapheVerbal":
+      return "Deux énoncés peuvent décrire les mêmes variations : départage-les par la position des extremums et de f(0).";
+    case "symbolique":
+      return "Pour une puissance de ax + b, ne pas oublier de multiplier par a (la dérivée de l'intérieure).";
+    case "grapheDeriveeAvancee":
+      return "";
+  }
+}
+
+function correctionDetailleeAssociation(exercice: ExerciceAssociation): EtapeCorrection[] {
   const n = nombreElementsAssociation(exercice);
-  return Array.from({ length: n }, (_, i) => {
-    const lettre = LETTRES[lettreCorrecte(exercice.ordreLettres, i)] ?? "?";
-    return { type: "paragraphe", fragments: [texte(`Élément ${i + 1} → lettre ${lettre}.`)] } as BlocCorrection;
-  });
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: methodeAssociation(exercice) },
+    ...Array.from({ length: n }, (_, i) => ligneElement(exercice, i)),
+    { label: "Piège", sousQuestion: "a", fragments: [texte(piegeAssociation(exercice))] },
+    { label: "Conclusion", sousQuestion: "a", fragments: [texte(correspondance(exercice))] },
+  ];
+}
+
+function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
+  const n = nombreElementsAssociation(exercice);
+  const criteres: CritereBareme[] = Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à la lettre ${lettreDe(exercice, i)}`)], points: 4 / n }));
+  return {
+    reponseFinale: reponseBreveAssociation(exercice),
+    criteres,
+    erreursFrequentes: [{ description: [texte(piegeAssociation(exercice))], cout: "0 pt sur l'élément concerné" }],
+    reponsesAcceptees: [[texte("Correspondance donnée sous toute forme lisible (liste, flèches, tableau)")]],
+  };
+}
+
+function difficulteAssociation(exercice: ExerciceAssociation): 1 | 2 | 3 {
+  return nombreElementsAssociation(exercice) >= 4 ? 3 : 2;
+}
+
+/** Ancien corrigé (repli, documents Word). */
+function construireCorrectionAssociation(exercice: ExerciceAssociation): BlocCorrection[] {
+  return correctionDetailleeAssociation(exercice)
+    .filter((l) => l.label !== "Piège" && l.label !== "Méthode")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
 export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<ExerciceAssociation> = {
@@ -242,8 +297,12 @@ export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceAssociation,
   construireCorrection: construireCorrectionAssociation,
-  // Toujours plusieurs questions par instance (n ∈ [3;5]) ET `enteteHtml` utilisé pour 2 des 3
-  // familles — les 2 conditions d'exclusion de la doc de `regroupable` sont réunies (voir
-  // `export/genererFeuilleExercices.ts`). Laissé explicite pour documenter la décision.
+  difficulte: difficulteAssociation,
+  reponseBreve: reponseBreveAssociation,
+  correctionDetaillee: correctionDetailleeAssociation,
+  bareme: baremeAssociation,
+  enoncePapier: enoncePapierAssociation,
+  dureeMinutes: 6,
+  profilInstance: profilAssociation,
   regroupable: false,
 };

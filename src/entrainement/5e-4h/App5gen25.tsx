@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation } from "./generateurs5e/association/index";
+import { CATALOGUE_VARIANTES_EXPORT_ASSOCIATION } from "./generateurs5e/association/exportEvaluation";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -32,6 +34,15 @@ const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 function nouvelleSession(): EtatSessionAssociation {
   return demarrerSessionAssociation(REGLAGES_DEMO, genererExerciceAssociation);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/association/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionAssociation {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionAssociation(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES_EXPORT_ASSOCIATION, genererExerciceAssociation, (id) => construireAvecFamilleId(id)));
 }
 
 /** Réponse réellement attendue de l'exercice qui vient de se clore — même dispatch par élément
@@ -77,7 +88,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen25() {
-  const [etat, setEtat] = useState<EtatSessionAssociation>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionAssociation>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Incrémenté à chaque nouvel exercice : entre dans la clé d'écran, pour que les menus
    * reviennent à « Choisis… » même quand la famille ne change pas. */

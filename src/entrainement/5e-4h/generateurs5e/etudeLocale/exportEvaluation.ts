@@ -1,192 +1,258 @@
-import type { ExerciceEtudeLocale } from "../../core5e/etudeLocale.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { ExerciceEtudeLocale, ValeurLigne2Tableau, ValeurSigneTableau } from "../../core5e/etudeLocale.types";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
+import {
+  consigneEcranEtudeLocale,
+  formatEnteteColonnesTableau,
+  formatReponseAttenduePhaseLatex,
+  formatTermesDonneesLatex,
+  texteAideNiveau1EtudeLocale,
+} from "../../ui5e/formatEtudeLocale";
+import { ordreEcransEtudeLocale, type EcranEtudeLocale } from "../../moteur5e/typesEtudeLocale";
+import { tableauFPrimeAttendu, tableauFSecondeAttendu, type TableauEtudeLocaleAttendu } from "../../moteur5e/verificationEtudeLocale";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale } from "./index";
-import { CONSIGNE_GENERALE_ETUDE_LOCALE, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex } from "../../ui5e/formatEtudeLocale";
+import { profilEtudeLocale } from "../profilsEvaluationDerivees28-30";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceEtudeLocale>` pour 5gen29 ("Étude locale
- * (extremums et points critiques)", 6e générateur du chapitre "Dérivées et applications",
- * `App5gen29.tsx`) — voir `generateurs5e/etudeComplete/exportEvaluation.ts` pour la méthodologie de
- * consolidation écrans→questions papier appliquée ci-dessous, et
- * `generateurs5e/limites/exportEvaluation.ts` pour la convention exacte du namespace 5e.
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceEtudeLocale>` pour 5gen29 (Étude locale) — feuille
+ * d'exercices et évaluation (méthode : `.claude/rules/feuilles-evaluations.md`).
  *
- * **`f(x)`/`f'(x)`[/`f''(x)`] affichées UNE SEULE FOIS en tête de l'exercice** (`enteteFragments`),
- * jamais répétées question par question — comme à l'écran (`f'(x) et, si nécessaire, f''(x) te sont
- * DONNÉES`, jamais à dériver, voir `CONSIGNE_GENERALE_ETUDE_LOCALE`). ⚠️ Piège `enteteFragments`
- * (toujours rendu en mode KaTeX `displayMode:true` par `assemblerEvaluationHtml.ts`) : ce
- * générateur a POTENTIELLEMENT 3 expressions à afficher (f/f'/f'' si `niveau==="avance"`) — au lieu
- * de 3 fragments `latex()` courts entrelacés (le piège), elles sont jointes en **UN SEUL** fragment
- * `latex()` via `formatTermesDonneesLatex(exercice).join(" \\quad ")` (même patron que
- * `generateurs5e/limites/exportEvaluation.ts::construireCorrectionLimite`, qui joint plusieurs
- * termes d'une même étape avec `" \\quad "` DANS un seul appel `latex()`). Précédé d'UN SEUL
- * fragment `texte()` (la consigne générale) — texte + UN SEUL bloc LaTeX, jamais plusieurs.
- * `question.consigne`/`BlocCorrection.paragraphe` n'ont PAS cette contrainte (rendus inline, jamais
- * `displayMode:true` par défaut) : on y mélange librement texte et plusieurs fragments LaTeX courts.
- *
- * **Consolidation du pipeline (jusqu'à 7 écrans, `moteur5e/typesEtudeLocale.ts::ordreEcransEtudeLocale`)
- * en 1 ou 2 questions papier — jamais une question par micro-écran :**
- * - a) TOUJOURS présente — condense "domaine" (UNIQUEMENT si `rationnelleAvecCE`, sinon la phrase
- *   est simplement omise) + "resoudreFPrime" + "tableauFPrime" + "extremums" en UNE consigne :
- *   « [Détermine le domaine de définition de f,] calcule les zéros de f'(x), dresse le tableau de
- *   signes de f' (…), puis identifie les éventuels extremums de f, en justifiant. » La consigne
- *   reste volontairement **"éventuels"** — valide aussi bien quand il existe 0, 1 ou 2 extremums
- *   réels (ex. racine DOUBLE de f', `genererPolynomialeDouble` : aucun extremum, uniquement
- *   "ni l'un ni l'autre") : PIÈGE central du générateur explicitement rappelé dans la consigne
- *   elle-même (jamais supposé qu'un zéro de f' est automatiquement un extremum).
- * - b) UNIQUEMENT si `exercice.niveau==="avance"` — condense "resoudreFSeconde"+"tableauFSeconde"+
- *   "inflexions" en une seconde consigne symétrique, sur f''/la concavité/les points d'inflexion,
- *   avec le même rappel du piège (racine de f'' sans changement de signe réel ⟹ pas de PI).
- *
- * Décision volontaire : PAS de question séparée pour "domaine" (1 seule phrase de plus, jamais un
- * écran assez riche pour mériter sa propre question — contrairement à `etudeComplete`, où le domaine
- * porte une distinction point vide/exclusion réelle nettement plus substantielle).
- *
- * **Corrections RESYNTHÉTISÉES depuis les valeurs déjà connues de l'instance, jamais recalculées
- * indépendamment** — chaque bloc réutilise `formatReponseAttenduePhaseLatex` (`ui5e/formatEtudeLocale.ts`),
- * la fonction déjà écrite pour révéler la réponse attendue de CHAQUE écran côté session interactive
- * — jamais une seconde implémentation des dérivées/racines/classifications (qui vivent dans
- * `moteur5e/verificationEtudeLocale.ts`, JAMAIS importé ici, ni aucun autre symbole de `moteur5e/` —
- * couche A/couche B, règle non négociable du CLAUDE.md racine). Les écrans réellement présents pour
- * une instance donnée (domaine ? extremums ? niveau avancé ?) sont déterminés en relisant
- * directement les champs déjà connus de `exercice` (`type`, `niveau`, `classificationFPrime`,
- * `classificationFSeconde`) — même patron que `etudeComplete/exportEvaluation.ts`, qui relit
- * `exercice.exclusions`/`exercice.casSpecial` plutôt que d'importer la fonction équivalente de
- * `moteur5e/typesEtudeComplete.ts`.
- *
- * **PAS `regroupable`** (voir la doc de `AdaptateurFeuilleExercices.regroupable`,
- * `export/genererFeuilleExercices.ts`) : le nombre de questions par instance VARIE (1 si
- * `niveau==="base"`, 2 si `"avance"`) et la consigne de la question a) elle-même varie selon
- * l'instance (phrase "domaine" ajoutée UNIQUEMENT pour `rationnelleAvecCE`) — les 2 conditions
- * d'activation ("TOUJOURS une seule question, consigne GÉNÉRIQUE indépendante des valeurs tirées")
- * sont donc violées, comme pour `etudeComplete`. `regroupable` reste `false`/absent.
+ * Énoncé papier = f, f' (et f'' au niveau avancé) DONNÉES, comme à l'écran, et UNE consigne
+ * globale : domaine (fonction rationnelle), zéros de f', signe de f' et variations, extremums
+ * (abscisse, nature, valeur) ; au niveau avancé, la même chose pour f'' (concavité, points
+ * d'inflexion). Aucun rappel de méthode dans l'énoncé (le piège « zéro sans changement de signe »
+ * est dans le corrigé). Les écrans du générateur (`ordreEcransEtudeLocale`) sont les étapes du
+ * corrigé ; les tableaux de signes y sont dessinés (`tableauSignesEtudeLatex`, à partir de
+ * `tableauFPrimeAttendu`/`tableauFSecondeAttendu`, la MÊME source que la vérification de l'écran).
  */
 
-function hasDomaine(exercice: ExerciceEtudeLocale): boolean {
-  return exercice.type === "rationnelleAvecCE";
-}
-
-function hasExtremums(exercice: ExerciceEtudeLocale): boolean {
-  return exercice.classificationFPrime.some((c) => c !== "ni_lun_ni_lautre");
-}
-
-function isAvance(exercice: ExerciceEtudeLocale): boolean {
-  return exercice.niveau === "avance";
-}
-
-function hasInflexions(exercice: ExerciceEtudeLocale): boolean {
-  return exercice.classificationFSeconde.some((c) => c === "pi");
-}
+const LETTRES = "abcdefgh";
 
 // ============================================================================
-// Question a) — f'(x), tableau de signes, extremums éventuels (TOUJOURS présente).
+// Tableau de signes en LaTeX (réutilisé par 5gen30, `lectureGraphiqueDerivees/exportEvaluation.ts`).
 // ============================================================================
 
-function consigneQuestionFPrime(exercice: ExerciceEtudeLocale): FragmentConsigne[] {
-  const phraseDomaine = hasDomaine(exercice) ? "Détermine le domaine de définition de f, puis c" : "C";
+function signeLatex(v: ValeurSigneTableau): string {
+  return v === "∄" ? "\\|" : v;
+}
+
+function ligne2Latex(v: ValeurLigne2Tableau | null): string {
+  switch (v) {
+    case null:
+      return "\\|";
+    case "↗":
+      return "\\nearrow";
+    case "↘":
+      return "\\searrow";
+    case "∪":
+      return "\\cup";
+    case "∩":
+      return "\\cap";
+    case "max":
+      return "\\text{max}";
+    case "min":
+      return "\\text{min}";
+    case "ni_lun_ni_lautre":
+      return "\\text{ni max ni min}";
+    case "pi":
+      return "\\text{PI}";
+    case "pas_de_pi":
+      return "\\text{pas de PI}";
+  }
+}
+
+/** Tableau (environnement `array`) : ligne x (−∞, en-têtes des colonnes, +∞), ligne du signe de la
+ * dérivée, ligne des variations (f') ou de la concavité (f'') de f. `entetes` : une entrée par
+ * colonne de `attendu` (« » pour une zone). */
+export function tableauSignesEtudeLatex(attendu: TableauEtudeLocaleAttendu, entetes: string[], mode: "fprime" | "fseconde"): string {
+  const n = attendu.colonnes.length;
+  const ligne = (libelle: string, cellules: string[]) => [libelle, "", ...cellules, ""].join(" & ");
   return [
-    texte(
-      `${phraseDomaine}alcule les éventuels zéros de f'(x), dresse le tableau de signes de f' sur ce domaine (variations de f qui en découlent), puis identifie les éventuels extremums de f (avec leur valeur f(x)), en justifiant. ATTENTION : un zéro de f' où le signe NE change PAS de part et d'autre n'est ni un maximum ni un minimum — vérifie TOUJOURS les deux côtés de chaque zéro.`,
-    ),
-  ];
-}
-
-function correctionQuestionFPrime(exercice: ExerciceEtudeLocale, lettre: string): BlocCorrection[] {
-  const fragments: FragmentConsigne[] = [texte(`${lettre}) `)];
-
-  if (hasDomaine(exercice)) {
-    fragments.push(texte("Domaine : "), latex(formatReponseAttenduePhaseLatex(exercice, "domaine")[0]), texte(". "));
-  }
-
-  fragments.push(texte("Zéros de f'(x) : "), latex(formatReponseAttenduePhaseLatex(exercice, "resoudreFPrime")[0]), texte("."));
-
-  const classification = formatReponseAttenduePhaseLatex(exercice, "tableauFPrime");
-  fragments.push(texte(" Tableau de signes de f' — classification de chaque zéro : "));
-  classification.forEach((c, i) => {
-    if (i > 0) fragments.push(texte(" ; "));
-    fragments.push(latex(c));
-  });
-  fragments.push(texte("."));
-
-  if (hasExtremums(exercice)) {
-    const valeurs = formatReponseAttenduePhaseLatex(exercice, "extremums");
-    fragments.push(texte(" Valeur de f aux extremums retenus : "));
-    valeurs.forEach((v, i) => {
-      if (i > 0) fragments.push(texte(" ; "));
-      fragments.push(latex(v));
-    });
-    fragments.push(texte("."));
-  } else {
-    fragments.push(texte(" Aucun zéro de f' ne donne lieu à un changement de signe réel : f n'a AUCUN extremum."));
-  }
-
-  return [{ type: "paragraphe", fragments }];
+    `\\begin{array}{c|${"c".repeat(n + 2)}}`,
+    `${ligne("x", entetes).replace(/^x &  &/, "x & -\\infty &").replace(/ & $/, " & +\\infty")} \\\\ \\hline`,
+    `${ligne(mode === "fprime" ? "f'(x)" : "f''(x)", attendu.signes.map(signeLatex))} \\\\ \\hline`,
+    `${ligne("f(x)", attendu.ligne2.map(ligne2Latex))}`,
+    "\\end{array}",
+  ].join(" ");
 }
 
 // ============================================================================
-// Question b) — f''(x), tableau de signes, points d'inflexion éventuels (UNIQUEMENT si "avance").
+// Énoncé.
 // ============================================================================
 
-function consigneQuestionFSeconde(): FragmentConsigne[] {
-  return [
-    texte(
-      "Calcule les éventuels zéros de f''(x), dresse le tableau de signes de f'' (concavité de f qui en découle), puis identifie les éventuels points d'inflexion de f (avec leur valeur f(x)), en justifiant. ATTENTION : un zéro de f'' où le signe NE change PAS de part et d'autre n'est PAS un point d'inflexion — vérifie TOUJOURS les deux côtés de chaque zéro.",
-    ),
-  ];
+function entete(exercice: ExerciceEtudeLocale): FragmentConsigne[] {
+  const avance = exercice.niveau === "avance";
+  return [texte(avance ? "On considère la fonction f ; ses dérivées f' et f'' sont données : " : "On considère la fonction f ; sa dérivée f' est donnée : "), latex(formatTermesDonneesLatex(exercice).join(" \\quad "))];
 }
 
-function correctionQuestionFSeconde(exercice: ExerciceEtudeLocale, lettre: string): BlocCorrection[] {
-  const fragments: FragmentConsigne[] = [texte(`${lettre}) `)];
-
-  fragments.push(texte("Zéros de f''(x) : "), latex(formatReponseAttenduePhaseLatex(exercice, "resoudreFSeconde")[0]), texte("."));
-
-  const classification = formatReponseAttenduePhaseLatex(exercice, "tableauFSeconde");
-  fragments.push(texte(" Tableau de signes de f'' — classification de chaque zéro : "));
-  classification.forEach((c, i) => {
-    if (i > 0) fragments.push(texte(" ; "));
-    fragments.push(latex(c));
-  });
-  fragments.push(texte("."));
-
-  if (hasInflexions(exercice)) {
-    const valeurs = formatReponseAttenduePhaseLatex(exercice, "inflexions");
-    fragments.push(texte(" Valeur de f aux points d'inflexion retenus : "));
-    valeurs.forEach((v, i) => {
-      if (i > 0) fragments.push(texte(" ; "));
-      fragments.push(latex(v));
-    });
-    fragments.push(texte("."));
-  } else {
-    fragments.push(texte(" Aucun zéro de f'' ne donne lieu à un changement de signe réel : f n'a AUCUN point d'inflexion."));
-  }
-
-  return [{ type: "paragraphe", fragments }];
+function consigneEtape(ecran: EcranEtudeLocale): FragmentConsigne[] {
+  return [texte(consigneEcranEtudeLocale(ecran).replace("Complète le tableau", "Dresse le tableau"))];
 }
-
-// ============================================================================
-// Assemblage.
-// ============================================================================
-
-const LETTRES = "ab";
 
 function construireEnonceEtudeLocale(exercice: ExerciceEtudeLocale): SectionExercice {
-  const questions: SectionExercice["questions"] = [{ consigne: consigneQuestionFPrime(exercice), reponse: { type: "lignes", nombre: 8 } }];
-  if (isAvance(exercice)) {
-    questions.push({ consigne: consigneQuestionFSeconde(), reponse: { type: "lignes", nombre: 7 } });
-  }
+  return { enteteFragments: entete(exercice), questions: ordreEcransEtudeLocale(exercice).map((ecran) => ({ consigne: consigneEtape(ecran) })) };
+}
+
+function irrationnelle(exercice: ExerciceEtudeLocale): boolean {
+  return exercice.type === "polynomiale" && exercice.natureRacines === "irrationnelle";
+}
+
+function consignePapier(exercice: ExerciceEtudeLocale): string {
+  const domaine = exercice.type !== "polynomiale" ? "Détermine le domaine de définition de f. " : "";
+  const fPrime = "Recherche les zéros de f', étudie le signe de f' et les variations de f, puis détermine les éventuels extremums de f (abscisse, nature et valeur).";
+  const fSeconde = exercice.niveau === "avance" ? " Étudie de même le signe de f'' et la concavité de f, puis détermine ses éventuels points d'inflexion (abscisse et valeur)." : "";
+  const precision = irrationnelle(exercice) ? " Donne les abscisses en valeur exacte ; les valeurs de f peuvent être arrondies au centième." : " Donne des valeurs exactes.";
+  return `${domaine}${fPrime}${fSeconde}${precision}`;
+}
+
+function enoncePapierEtudeLocale(exercice: ExerciceEtudeLocale): EnoncePapier {
   return {
-    enteteFragments: [texte(`${CONSIGNE_GENERALE_ETUDE_LOCALE} `), latex(formatTermesDonneesLatex(exercice).join(" \\quad "))],
-    questions,
+    section: { enteteFragments: entete(exercice), questions: [{ consigne: [texte(consignePapier(exercice))] }] },
+    etapesParQuestion: [ordreEcransEtudeLocale(exercice).map((_, i) => LETTRES[i])],
   };
 }
 
-function construireCorrectionEtudeLocale(exercice: ExerciceEtudeLocale): BlocCorrection[] {
-  const blocs: BlocCorrection[] = [...correctionQuestionFPrime(exercice, LETTRES[0])];
-  if (isAvance(exercice)) {
-    blocs.push(...correctionQuestionFSeconde(exercice, LETTRES[1]));
+// ============================================================================
+// Réponse brève, corrigé, barème.
+// ============================================================================
+
+function joindre(latexs: string[], separateur = " ; "): FragmentConsigne[] {
+  return latexs.flatMap((l, i) => [...(i === 0 ? [] : [texte(separateur)]), latex(l)]);
+}
+
+function aExtremums(exercice: ExerciceEtudeLocale): boolean {
+  return exercice.classificationFPrime.some((c) => c !== "ni_lun_ni_lautre");
+}
+
+function aInflexions(exercice: ExerciceEtudeLocale): boolean {
+  return exercice.classificationFSeconde.some((c) => c === "pi");
+}
+
+function reponseBreveEtudeLocale(exercice: ExerciceEtudeLocale): FragmentConsigne[] {
+  const fragments: FragmentConsigne[] = aExtremums(exercice) ? joindre(formatReponseAttenduePhaseLatex(exercice, "extremums")) : [texte("aucun extremum")];
+  const natures = formatReponseAttenduePhaseLatex(exercice, "tableauFPrime");
+  fragments.push(texte(" ("), ...joindre(natures), texte(")"));
+  if (exercice.niveau === "avance") {
+    fragments.push(texte(" — "), ...(aInflexions(exercice) ? joindre(formatReponseAttenduePhaseLatex(exercice, "inflexions")) : [texte("aucun point d'inflexion")]));
   }
-  return blocs;
+  return fragments;
+}
+
+function methode(exercice: ExerciceEtudeLocale, ecran: EcranEtudeLocale, sousQuestion: string): EtapeCorrection {
+  const aide = texteAideNiveau1EtudeLocale(ecran, exercice);
+  return { label: "Méthode", sousQuestion, fragments: [texte(aide.texte), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])] };
+}
+
+function tableau(exercice: ExerciceEtudeLocale, mode: "fprime" | "fseconde"): string {
+  const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
+  return tableauSignesEtudeLatex(attendu, formatEnteteColonnesTableau(exercice, attendu.colonnes, mode), mode);
+}
+
+function correctionDetailleeEtudeLocale(exercice: ExerciceEtudeLocale): EtapeCorrection[] {
+  const ordre = ordreEcransEtudeLocale(exercice);
+  const L = (e: EcranEtudeLocale) => LETTRES[ordre.indexOf(e)];
+  const lignes: EtapeCorrection[] = [];
+  for (const ecran of ordre) {
+    const l = L(ecran);
+    switch (ecran) {
+      case "domaine":
+        lignes.push(methode(exercice, ecran, l), { label: "Conclusion", sousQuestion: l, fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "domaine")[0])] });
+        break;
+      case "resoudreFPrime":
+      case "resoudreFSeconde":
+        lignes.push(methode(exercice, ecran, l), { label: "Calcul", sousQuestion: l, fragments: [latex(formatReponseAttenduePhaseLatex(exercice, ecran)[0])] });
+        break;
+      case "tableauFPrime":
+        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableau(exercice, "fprime"))] });
+        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [...joindre(formatReponseAttenduePhaseLatex(exercice, "tableauFPrime")), ...(aExtremums(exercice) ? [] : [texte(" : f n'a aucun extremum.")])] });
+        lignes.push({
+          label: "Piège",
+          sousQuestion: l,
+          fragments: exercice.classificationFPrime.includes("ni_lun_ni_lautre")
+            ? [texte("f' s'annule sans changer de signe (racine double) : ce point n'est ni un maximum ni un minimum.")]
+            : [texte("Un zéro de f' n'est un extremum que si f' change de signe de part et d'autre : on le vérifie dans le tableau, jamais par principe.")],
+        });
+        break;
+      case "extremums":
+      case "inflexions":
+        lignes.push(methode(exercice, ecran, l), { label: "Calcul", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
+        break;
+      case "tableauFSeconde":
+        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableau(exercice, "fseconde"))] });
+        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [...joindre(formatReponseAttenduePhaseLatex(exercice, "tableauFSeconde")), ...(aInflexions(exercice) ? [] : [texte(" : f n'a aucun point d'inflexion.")])] });
+        if (exercice.classificationFSeconde.includes("pas_de_pi")) {
+          lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte("f'' s'annule sans changer de signe : la concavité ne change pas, ce n'est pas un point d'inflexion.")] });
+        }
+        break;
+    }
+  }
+  return lignes;
+}
+
+const POIDS_ECRAN: Record<EcranEtudeLocale, number> = { domaine: 0.5, resoudreFPrime: 2, tableauFPrime: 2, extremums: 1.5, resoudreFSeconde: 2, tableauFSeconde: 2, inflexions: 1.5 };
+
+const CRITERE_ECRAN: Record<EcranEtudeLocale, string> = {
+  domaine: "Domaine de définition",
+  resoudreFPrime: "Zéros de f' (toutes les solutions)",
+  tableauFPrime: "Tableau de signes de f', variations et nature de chaque zéro",
+  extremums: "Valeur de f en chaque extremum",
+  resoudreFSeconde: "Zéros de f''",
+  tableauFSeconde: "Tableau de signes de f'', concavité et points d'inflexion",
+  inflexions: "Valeur de f en chaque point d'inflexion",
+};
+
+/** Poids ramenés à un total de 4, au demi-point, aucun critère sous 0,5 (plus forts restes). */
+export function repartirSurQuatre(poids: number[]): number[] {
+  const total = poids.reduce((t, p) => t + p, 0);
+  const brut = poids.map((p) => (p / total) * 8); // en demi-points
+  const unites = brut.map((b) => Math.max(1, Math.floor(b)));
+  let reste = 8 - unites.reduce((t, u) => t + u, 0);
+  const ordre = brut.map((b, i) => ({ i, r: b - Math.floor(b) })).sort((a, b) => b.r - a.r || poids[b.i] - poids[a.i]);
+  for (let k = 0; reste > 0; k = (k + 1) % ordre.length, reste--) unites[ordre[k].i]++;
+  for (let k = ordre.length - 1; reste < 0; k = (k - 1 + ordre.length) % ordre.length) {
+    if (unites[ordre[k].i] > 1) {
+      unites[ordre[k].i]--;
+      reste++;
+    }
+  }
+  return unites.map((u) => u / 2);
+}
+
+function baremeEtudeLocale(exercice: ExerciceEtudeLocale): BaremeExercice {
+  const ordre = ordreEcransEtudeLocale(exercice);
+  const points = repartirSurQuatre(ordre.map((e) => POIDS_ECRAN[e]));
+  const criteres: CritereBareme[] = ordre.map((e, i) => ({ sousQuestion: LETTRES[i], critere: [texte(CRITERE_ECRAN[e])], points: points[i] }));
+  const erreurs: ErreurFrequente[] = [{ description: [texte("Un zéro de f' déclaré extremum sans vérifier le changement de signe")], cout: "0 pt sur la nature de ce point" }];
+  erreurs.push({ description: [texte("Valeur de l'extremum calculée avec f' au lieu de f")], cout: "0 pt sur cette valeur" });
+  if (exercice.type === "rationnelleAvecCE") erreurs.push({ description: [texte("Valeurs interdites oubliées dans le tableau de signes")], cout: "−0,5" });
+  return {
+    reponseFinale: reponseBreveEtudeLocale(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: irrationnelle(exercice) ? [[texte("Valeurs de f arrondies au centième")]] : [[texte("Fractions non simplifiées ou décimaux exacts équivalents")]],
+  };
+}
+
+function difficulteEtudeLocale(exercice: ExerciceEtudeLocale): 1 | 2 | 3 {
+  if (exercice.type === "polynomiale" && exercice.natureRacines !== "irrationnelle" && exercice.niveau === "base") return 2;
+  return 3;
+}
+
+/** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, en paragraphes. */
+function construireCorrectionEtudeLocale(exercice: ExerciceEtudeLocale): BlocCorrection[] {
+  return correctionDetailleeEtudeLocale(exercice)
+    .filter((l) => l.label !== "Piège" && l.label !== "Méthode")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
 export const adaptateurEvaluationEtudeLocale: AdaptateurFeuilleExercices<ExerciceEtudeLocale> = {
@@ -197,4 +263,13 @@ export const adaptateurEvaluationEtudeLocale: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceEtudeLocale,
   construireCorrection: construireCorrectionEtudeLocale,
+  difficulte: difficulteEtudeLocale,
+  reponseBreve: reponseBreveEtudeLocale,
+  correctionDetaillee: correctionDetailleeEtudeLocale,
+  bareme: baremeEtudeLocale,
+  enoncePapier: enoncePapierEtudeLocale,
+  dureeMinutes: 12,
+  profilInstance: profilEtudeLocale,
+  calculatriceIndispensable: ["polynomiale-irrationnelle-base", "polynomiale-irrationnelle-avance"],
+  regroupable: false,
 };

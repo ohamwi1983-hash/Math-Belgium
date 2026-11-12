@@ -4,6 +4,7 @@ import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudierFonction } from "./generateurs5e/etudierFonction/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
   activerAideSuivante,
   avancerRecap,
@@ -63,6 +64,15 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionEtudierFonction {
   return demarrerSessionEtudierFonction(REGLAGES_DEMO, genererExerciceEtudierFonction);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/etudierFonction/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionEtudierFonction {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEtudierFonction(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEtudierFonction, (id) => construireAvecVarianteId(id)));
 }
 
 interface Bilan {
@@ -147,7 +157,7 @@ interface TransitionEnAttente {
 }
 
 export function App5gen31() {
-  const [etat, setEtat] = useState<EtatSessionEtudierFonction>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEtudierFonction>(sessionInitiale);
   const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<string, { niveauAide: number; revele: boolean }>>>({});
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —

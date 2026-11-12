@@ -17,11 +17,6 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 export type EcranVitessePosition = "derivee" | "acceleration" | "resoudre" | "rejet" | "vitessePointe" | "conversion" | "segmentConstant" | "tempsTotal";
 
-/** Ancien identifiant de l'écran "acceleration", encore lu par l'adaptateur papier
- * (`generateurs5e/vitessePosition/exportEvaluation.ts`) jusqu'à la refonte des feuilles — les
- * fonctions de formatage le traitent comme "acceleration". */
-export type EcranVitessePositionHerite = "evaluerV0";
-
 /** Séquence COMPLÈTE et FIXE d'écrans pour une variante donnée — A : 6 écrans, B : 7 écrans. */
 export function ordreEcransVitessePosition(exercice: ExerciceVitessePosition): EcranVitessePosition[] {
   const commun: EcranVitessePosition[] = ["derivee", "acceleration", "resoudre", "rejet", "vitessePointe"];

@@ -1,287 +1,345 @@
+import type { ExerciceContexteEconomique, ExerciceContexteEconomiqueBonus } from "../../core5e/contexteEconomique.types";
 import type {
-  ExerciceContexteEconomique,
-  ExerciceContexteEconomiqueA,
-  ExerciceContexteEconomiqueB,
-  ExerciceContexteEconomiqueBonus,
-} from "../../core5e/contexteEconomique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import type { FragmentConsigne } from "../../../export/genererFeuilleExercices";
-import { consigneEcran, formatNombreLatex, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex, precisionRacineApprochee, PRECISION_EXTREMUM } from "../../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatNombreTexte, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex, texteAideNiveau1 } from "../../ui5e/formatContexteEconomique";
+import { ordreEcransContexteEconomique, type EcranContexteEconomique } from "../../moteur5e/typesContexteEconomique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceContexteEconomique } from "./index";
+import { profilContexteEconomique } from "../profilsEvaluationDerivees31-33";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceContexteEconomique>` pour 5gen33 ("Contexte
- * économique", `App5gen33.tsx`/`moteur5e/sessionContexteEconomique.ts`) — voir
- * `generateurs5e/limitesContexte/exportEvaluation.ts` pour le précédent direct (même esprit
- * "problème en contexte narratif économique/condensation d'un déroulé multi-écrans").
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceContexteEconomique>` pour 5gen33 (« Contexte
+ * économique », chapitre 5 de 5e) — feuille d'exercices et évaluation, selon
+ * `.claude/rules/feuilles-evaluations.md`.
  *
- * **3 familles STRUCTURELLEMENT DISJOINTES** (voir `core5e/contexteEconomique.types.ts`), chacune
- * condensée séparément depuis la séquence RÉELLE d'écrans de `App5gen33.tsx` :
- * - "A" (coût marginal, 5 écrans : `coutMarginalDiscret`→`deriveeSymbolique`→`deriveeValeur`→
- *   `comparaisonEcart`→`extremum`) → 2 questions papier : a) les 3 premiers écrans (calcul discret,
- *   dérivée symbolique, dérivée évaluée) PUIS la comparaison (écart absolu/%) ; b) l'étude
- *   d'extremum. **Écueil évité** : le texte RÉEL de `consigneEcran(exercice,"comparaisonEcart")`
- *   incruste déjà les valeurs numériques CONFIRMÉES de `cmDiscret`/`cmDerivee` (légitime à l'écran,
- *   où l'élève les a déjà validées aux écrans précédents) — le reprendre tel quel dans une question
- *   papier FUSIONNÉE aurait donné la réponse des 2 sous-calculs précédents avant même que l'élève ne
- *   les résolve. La consigne a) reformule donc cette dernière partie en clair ("compare les deux
- *   résultats obtenus"), sans aucune valeur incrustée — seul endroit de ce fichier où le texte d'un
- *   écran n'est PAS repris tel quel (tous les autres fragments de consigne le sont, verbatim,
- *   `consigneEcran` étant déjà le texte affiché en `<p>` brut par `EtapeChamps*CE.tsx`, jamais rendu
- *   KaTeX, donc directement réutilisable comme fragment `texte()`).
- * - "B" (bénéfice maximum via égalité des marginales, 8 écrans : `recetteTotale`→`marginales`→
- *   `resoudreEgaliteMarginales`→`beneficeFormule`→`beneficeDerivee`→`tableauSigneBenefice`→
- *   `confirmationCoherence`→`beneficeMaximum`) → 2 questions papier : a) développer R_T(x), dériver
- *   coût/recette, résoudre l'égalité des marginales (rejeter la racine négative) ; b) développer
- *   B(x), dériver, signe de B' et cohérence avec a), calculer le bénéfice maximum. **Piège
- *   pédagogique du générateur préservé explicitement** (le cœur de 5gen33/famille B, voir
- *   `confirmationCoherence` dans `ui5e/formatContexteEconomique.ts` et son aide niveau 2) : le
- *   bénéfice est maximal à l'égalité des marginales (C'_T(x)=R'_T(x)), PAS à l'endroit où la recette
- *   seule serait maximale (R'_T(x)=0, une autre valeur de x en général) — reformulé dans un
- *   paragraphe de correction dédié, en plus de la resynthèse des réponses attendues.
- * - "bonus" (dichotomie sur le coût moyen, 6 écrans : `poserEquationReduite`→`iteration0..3`→
- *   `racineApprochee`) → **3 questions papier** (seule famille à en compter 3, pas 2 — dérogation
- *   documentée : les 4 itérations de dichotomie sont un bloc de calcul répétitif à part entière,
- *   naturellement un TABLEAU `ZoneReponse`/`BlocCorrection` dédié — même convention que
- *   `generateurs5e/comparaisonSuites/exportEvaluation.ts` — jamais fusionnables avec la question
- *   sur l'équation réduite ni avec la conclusion finale sans perdre la lisibilité du tableau) :
- *   a) poser/développer l'équation réduite P(q)=0 ; b) les 4 itérations (milieu, signe, sous-
- *   intervalle conservé) sous forme de tableau ; c) la racine approchée finale, avec la tolérance
- *   RÉELLEMENT codée (`toleranceFinale`, via `precisionRacineApprochee`, jamais une tolérance
- *   inventée — voir CLAUDE.md, "Annonce de précision").
- *
- * Entête (`enteteFragments`, TOUJOURS rendu en mode KaTeX "bloc" par `assemblerEvaluationHtml.ts` —
- * voir le piège documenté en tête de `generateurs/distanceDroite/exportEvaluation.ts`) : reprend
- * `formatTermesDonneesLatex` TEL QUEL (2 formules COMPLÈTES par famille, jamais des fragments courts
- * mêlés au texte), précédé d'une phrase d'introduction minimale et factuelle — ce générateur n'a
- * PAS de texte narratif dédié façon "histoire" (contrairement à `limitesContexte`, qui a
- * `formatContexteTexte`) : son "contexte économique" est déjà entièrement porté par le vocabulaire
- * mathématique lui-même (coût total, prix, coût/recette marginale), repris à l'identique de celui
- * déjà utilisé côté écran (`consigneGenerale`/`consigneEcran`), jamais un habillage narratif inventé
- * pour ce fichier — même principe que l'entête minimal de
- * `generateurs5e/asymptoteOblique/exportEvaluation.ts` ("On considère la fonction f(x)=…").
- *
- * **Correction RESYNTHÉTISÉE** depuis les valeurs déjà connues de l'instance tirée, via
- * `formatReponseAttenduePhaseLatex` — déjà la fonction utilisée côté écran pour le récapitulatif
- * (bloc "état actuel") — jamais recalculée indépendamment ici.
- *
- * `catalogueVariantes`/`genererInstanceAvecVariante` réutilisent tel quel le catalogue de scénarios
- * déjà exposé par `generateurs5e/contexteEconomique/index.ts` pour le panneau dev
- * (`CATALOGUE_VARIANTES`/`construireAvecVarianteId` : 2 sous-cas de la famille A par degré/existence
- * d'extremum, la famille B, le bonus).
- *
- * **PAS `regroupable`** : 2 (familles A/B) ou 3 (bonus) questions par instance selon la famille —
- * jamais UNE seule question constante pour toute instance —, ET des consignes qui dépendent des
- * valeurs tirées dans plusieurs cas (ex. `precisionRacineApprochee(exercice)` pour le bonus). Les 2
- * conditions requises par `AdaptateurFeuilleExercices.regroupable` sont donc violées, même raison
- * que `generateurs5e/limitesContexte/exportEvaluation.ts`/`generateurs5e/comparaisonSuites/exportEvaluation.ts`.
- *
- * **Couche A/Couche B — AUCUNE exception** : ce fichier n'importe RIEN de `src/moteur5e/`. Les
- * écrans (`"coutMarginalDiscret"`, `"extremum"`, `"resoudreEgaliteMarginales"`, `"iteration0"`…) sont
- * passés à `consigneEcran`/`formatReponseAttenduePhaseLatex` comme de simples LITTÉRAUX de chaîne :
- * TypeScript les valide par typage contextuel contre le paramètre `EcranContexteEconomique` déjà
- * déclaré dans la signature IMPORTÉE de ces fonctions (`ui5e/formatContexteEconomique.ts`), sans
- * jamais avoir besoin d'importer ce type lui-même ici — même technique que
- * `generateurs5e/limitesContexte/exportEvaluation.ts` avec `PhaseLimitesContexte`.
+ * - **Énoncé papier** = la situation (texte de l'écran, `consigneGenerale`), les données, et les
+ *   VRAIES questions du problème : famille A — a) comparer les deux estimations du coût marginal,
+ *   b) le minimum demandé (coût moyen ou coût marginal) ; famille B — a) la quantité qui rend le
+ *   bénéfice maximal, justifiée, b) ce bénéfice maximal ; dichotomie — une seule consigne. Plus de
+ *   renvoi à un écran (« l'étape 'Égalité des marginales' »), plus de TeX brut.
+ * - **Étapes** = écrans du générateur (`ordreEcransContexteEconomique`), titres « Étape n » du
+ *   corrigé, rédigés pour le papier.
+ * - **Corrigé** tiré des MÊMES fonctions que l'écran (`formatReponseAttenduePhaseLatex`, aides) ;
+ *   la dichotomie est résumée par un tableau des quatre étapes (`figureHtml`).
  */
 
-// ============================================================================
-// Entête — factuel, vocabulaire déjà utilisé côté écran, jamais de narration inventée.
-// ============================================================================
+const LETTRES = "abcdefgh";
 
-function construireEnteteContexteEconomique(exercice: ExerciceContexteEconomique): FragmentConsigne[] {
-  const [formule1, formule2] = formatTermesDonneesLatex(exercice);
-  if (exercice.famille === "A") {
-    return [texte("On considère un coût total de production "), latex(formule1), texte(" (en euros, pour q unités), avec "), latex(formule2), texte(".")];
-  }
-  if (exercice.famille === "B") {
-    return [texte("On considère un prix unitaire "), latex(formule1), texte(" et un coût total de production "), latex(formule2), texte(" (x = quantité produite et vendue).")];
-  }
-  return [texte("On considère un coût total de production "), latex(formule1), texte(". "), latex(formule2), texte(".")];
+function lettreDe(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
+  return LETTRES[ordreEcransContexteEconomique(exercice).indexOf(ecran)] ?? "a";
+}
+
+function fragmentsRiches(source: string): FragmentConsigne[] {
+  return source
+    .split("$")
+    .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau)))
+    .filter((f) => f.valeur !== "");
+}
+
+function joindre(valeurs: string[], separateur = " ; "): FragmentConsigne[] {
+  return valeurs.flatMap((v, i) => (i === 0 ? [latex(v)] : [texte(separateur), latex(v)]));
+}
+
+function attendu(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string[] {
+  return formatReponseAttenduePhaseLatex(exercice, ecran);
 }
 
 // ============================================================================
 // Énoncé.
 // ============================================================================
 
-function construireEnonceA(exercice: ExerciceContexteEconomiqueA): SectionExercice {
-  const consigneA = `${consigneEcran(exercice, "coutMarginalDiscret")} ${consigneEcran(exercice, "deriveeSymbolique")} ${consigneEcran(exercice, "deriveeValeur")} Compare les deux résultats obtenus (l'approximation discrète et l'approximation exacte) : calcule l'écart absolu, puis l'écart en pourcentage (par rapport à la valeur exacte).`;
-  const consigneB = `${consigneEcran(exercice, "extremum")} ${PRECISION_EXTREMUM}`;
-  return {
-    enteteFragments: construireEnteteContexteEconomique(exercice),
-    questions: [
-      { consigne: [texte(consigneA)], reponse: { type: "lignes", nombre: 6 } },
-      { consigne: [texte(consigneB)], reponse: { type: "lignes", nombre: 3 } },
-    ],
-  };
+function situationFragments(exercice: ExerciceContexteEconomique): FragmentConsigne[] {
+  return [...fragmentsRiches(consigneGenerale(exercice)), texte(" Données : "), latex(formatTermesDonneesLatex(exercice).join(",\\ ")), texte(".")];
 }
 
-function construireEnonceB(exercice: ExerciceContexteEconomiqueB): SectionExercice {
-  const consigneA = `${consigneEcran(exercice, "recetteTotale")} ${consigneEcran(exercice, "marginales")} ${consigneEcran(exercice, "resoudreEgaliteMarginales")}`;
-  const consigneB = `${consigneEcran(exercice, "beneficeFormule")} ${consigneEcran(exercice, "beneficeDerivee")} ${consigneEcran(exercice, "tableauSigneBenefice")} ${consigneEcran(exercice, "confirmationCoherence")} Justifie ta réponse. ${consigneEcran(exercice, "beneficeMaximum")}`;
-  return {
-    enteteFragments: construireEnteteContexteEconomique(exercice),
-    questions: [
-      { consigne: [texte(consigneA)], reponse: { type: "lignes", nombre: 6 } },
-      { consigne: [texte(consigneB)], reponse: { type: "lignes", nombre: 8 } },
-    ],
-  };
-}
-
-function construireEnonceBonus(exercice: ExerciceContexteEconomiqueBonus): SectionExercice {
-  const consigneA = consigneEcran(exercice, "poserEquationReduite");
-  const consigneB = `Effectue 4 itérations de dichotomie à partir de l'intervalle de départ donné : ${consigneEcran(exercice, "iteration0")}`;
-  const consigneC = `${consigneEcran(exercice, "racineApprochee")} ${precisionRacineApprochee(exercice)}`;
-  return {
-    enteteFragments: construireEnteteContexteEconomique(exercice),
-    questions: [
-      { consigne: [texte(consigneA)], reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(consigneB)], reponse: { type: "tableau", libellesLignes: ["Milieu", "Signe de P(milieu)", "Sous-intervalle conservé"], nombreColonnes: 4 } },
-      { consigne: [texte(consigneC)], reponse: { type: "lignes", nombre: 2 } },
-    ],
-  };
+function consigneEtape(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): FragmentConsigne[] {
+  switch (ecran) {
+    case "coutMarginalDiscret":
+      return fragmentsRiches("Calcule l'estimation par différence $C_T(q_0+1)-C_T(q_0)$.");
+    case "deriveeSymbolique":
+      return fragmentsRiches("Calcule la dérivée $C'_T(q)$.");
+    case "deriveeValeur":
+      return fragmentsRiches("Calcule l'estimation par la dérivée $C'_T(q_0)$.");
+    case "comparaisonEcart":
+      return [texte("Calcule l'écart absolu entre les deux estimations, puis l'écart en pourcentage de l'estimation par la dérivée.")];
+    case "extremum":
+      if (exercice.famille === "A" && exercice.minimum.grandeur === "coutMarginal") return fragmentsRiches("Calcule $C''_T(q)$, résous $C''_T(q)=0$, puis calcule le coût marginal minimal.");
+      return fragmentsRiches("Écris $C_M(q)=\\dfrac{C_T(q)}{q}$, résous $C'_M(q)=0$, puis calcule le coût moyen minimal.");
+    case "recetteTotale":
+      return fragmentsRiches("Calcule la recette totale $R_T(x)=x\\cdot p(x)$.");
+    case "marginales":
+      return fragmentsRiches("Calcule le coût marginal $C'_T(x)$ et la recette marginale $R'_T(x)$.");
+    case "resoudreEgaliteMarginales":
+      return fragmentsRiches("Résous $C'_T(x)=R'_T(x)$ et retiens la solution qui convient.");
+    case "beneficeFormule":
+      return fragmentsRiches("Calcule le bénéfice $B(x)=R_T(x)-C_T(x)$.");
+    case "beneficeDerivee":
+      return fragmentsRiches("Calcule $B'(x)$.");
+    case "tableauSigneBenefice":
+      return fragmentsRiches(`${consigneEcranRiche(exercice, ecran)} Conclus sur la nature de l'extremum.`);
+    case "confirmationCoherence":
+      return [];
+    case "beneficeMaximum":
+      return [texte("Calcule le bénéfice pour la quantité retenue.")];
+    case "poserEquationReduite":
+      return fragmentsRiches("Développe et réduis $q\\cdot C'_T(q)-C_T(q)$ : c'est $P(q)$.");
+    case "iteration0":
+    case "iteration1":
+    case "iteration2":
+    case "iteration3":
+      return fragmentsRiches(`Dichotomie, itération ${Number(ecran.slice(-1)) + 1} : calcule le milieu de l'intervalle, le signe de $P$ en ce milieu, et garde le sous-intervalle qui contient la solution.`);
+    case "racineApprochee":
+      return fragmentsRiches("Donne une valeur approchée de la solution de $P(q)=0$.");
+  }
 }
 
 function construireEnonceContexteEconomique(exercice: ExerciceContexteEconomique): SectionExercice {
-  if (exercice.famille === "A") return construireEnonceA(exercice);
-  if (exercice.famille === "B") return construireEnonceB(exercice);
-  return construireEnonceBonus(exercice);
+  return { enteteFragments: situationFragments(exercice), questions: ordreEcransContexteEconomique(exercice).map((e) => ({ consigne: consigneEtape(exercice, e) })) };
+}
+
+const PRECISION = " Donne les valeurs exactes, ou arrondies au centième.";
+
+function enoncePapierContexteEconomique(exercice: ExerciceContexteEconomique): EnoncePapier {
+  const lettres = ordreEcransContexteEconomique(exercice).map((_, i) => LETTRES[i]);
+  if (exercice.famille === "A") {
+    const minimum =
+      exercice.minimum.grandeur === "coutMoyen"
+        ? fragmentsRiches(`Détermine la production $q$ qui rend le coût moyen $C_M(q)=\\dfrac{C_T(q)}{q}$ minimal, puis la valeur de ce coût moyen minimal.${PRECISION}`)
+        : fragmentsRiches(`Détermine la production $q$ qui rend le coût marginal $C'_T(q)$ minimal, puis la valeur de ce coût marginal minimal.${PRECISION}`);
+    return {
+      section: {
+        enteteFragments: situationFragments(exercice),
+        questions: [
+          {
+            consigne: fragmentsRiches(
+              `Calcule le coût marginal en $q_0=${exercice.q0}$ par la différence, puis par la dérivée. Compare ces deux estimations : écart absolu, puis écart en pourcentage de l'estimation par la dérivée (arrondi au centième).`,
+            ),
+          },
+          { consigne: minimum },
+        ],
+      },
+      etapesParQuestion: [lettres.slice(0, 4), [lettres[4]]],
+      reponseBreve: reponseBreveContexteEconomique(exercice, true),
+    };
+  }
+  if (exercice.famille === "B") {
+    return {
+      section: {
+        enteteFragments: situationFragments(exercice),
+        questions: [
+          { consigne: fragmentsRiches("Détermine la quantité $x$ qui rend le bénéfice maximal : résous l'égalité du coût marginal et de la recette marginale, puis justifie qu'il s'agit d'un maximum par le signe de $B'$.") },
+          { consigne: [texte("Calcule ce bénéfice maximal, en centaines d'euros.")] },
+        ],
+      },
+      etapesParQuestion: [lettres.slice(0, -1), [lettres[lettres.length - 1]]],
+      reponseBreve: reponseBreveContexteEconomique(exercice, true),
+    };
+  }
+  return {
+    section: {
+      enteteFragments: situationFragments(exercice),
+      questions: [
+        {
+          consigne: fragmentsRiches(
+            `Écris la condition $C_M(q)=C'_T(q)$ sous la forme $P(q)=0$, avec $P$ un polynôme réduit. Effectue ensuite quatre étapes de dichotomie à partir de l'intervalle de départ, puis donne une valeur approchée de la production qui rend le coût moyen minimal (à ${formatNombreTexte(exercice.toleranceFinale)} près).`,
+          ),
+        },
+      ],
+    },
+    etapesParQuestion: [lettres],
+  };
 }
 
 // ============================================================================
-// Correction — resynthétisée depuis les valeurs déjà connues de l'instance, jamais recalculée.
+// Corrigé détaillé.
 // ============================================================================
 
-/** Joint un tableau de fragments LaTeX déjà formatés (`formatReponseAttenduePhaseLatex`) avec un
- * séparateur textuel — utilisé pour les écrans à 1 ou 2 réponses (extremum, marginales…). */
-function joindreLatex(valeurs: string[], separateur = " ; "): FragmentConsigne[] {
-  return valeurs.flatMap((v, i) => (i === 0 ? [latex(v)] : [texte(separateur), latex(v)]));
+const STYLE_TABLE = 'style="border-collapse:collapse;margin:4px 0;font-size:13px;font-family:Archivo, Arial, Helvetica, sans-serif"';
+const STYLE_CASE = 'style="border:1px solid #868e96;padding:3px 8px;text-align:center"';
+const STYLE_ENTETE = 'style="border:1px solid #868e96;padding:3px 8px;text-align:center;background:#f1f3f5"';
+
+function formatNombreLatexLocal(v: number): string {
+  return nombreTexte(v).replace(",", "{,}").replace("−", "-");
 }
 
-function construireCorrectionA(exercice: ExerciceContexteEconomiqueA): BlocCorrection[] {
-  const [cmDiscret] = formatReponseAttenduePhaseLatex(exercice, "coutMarginalDiscret");
-  const [deriveeSymbolique] = formatReponseAttenduePhaseLatex(exercice, "deriveeSymbolique");
-  const [deriveeValeur] = formatReponseAttenduePhaseLatex(exercice, "deriveeValeur");
-  const [ecartAbsolu, ecartPourcent] = formatReponseAttenduePhaseLatex(exercice, "comparaisonEcart");
-  const extremum = formatReponseAttenduePhaseLatex(exercice, "extremum");
-  return [
-    {
-      type: "paragraphe",
-      fragments: [
-        texte("a) "),
-        latex(cmDiscret),
-        texte(", "),
-        latex(deriveeSymbolique),
-        texte(", "),
-        latex(deriveeValeur),
-        texte(" — "),
-        latex(ecartAbsolu),
-        texte(", "),
-        latex(ecartPourcent),
-        texte("."),
-      ],
-    },
-    { type: "paragraphe", fragments: [texte("b) "), ...joindreLatex(extremum), texte(".")] },
-  ];
+function nombreTexte(v: number): string {
+  return formatNombreTexte(v);
 }
 
-function construireCorrectionB(exercice: ExerciceContexteEconomiqueB): BlocCorrection[] {
-  const [recetteTotale] = formatReponseAttenduePhaseLatex(exercice, "recetteTotale");
-  const [coutMarginal, recetteMarginale] = formatReponseAttenduePhaseLatex(exercice, "marginales");
-  const [racineRetenue, racineRejetee] = formatReponseAttenduePhaseLatex(exercice, "resoudreEgaliteMarginales");
-  const [beneficeFormule] = formatReponseAttenduePhaseLatex(exercice, "beneficeFormule");
-  const [beneficeDerivee] = formatReponseAttenduePhaseLatex(exercice, "beneficeDerivee");
-  const [signeAvant, signeApres] = formatReponseAttenduePhaseLatex(exercice, "tableauSigneBenefice");
-  const [coherence] = formatReponseAttenduePhaseLatex(exercice, "confirmationCoherence");
-  const [beneficeMaximum] = formatReponseAttenduePhaseLatex(exercice, "beneficeMaximum");
-  return [
-    {
-      type: "paragraphe",
-      fragments: [
-        texte("a) "),
-        latex(recetteTotale),
-        texte(" ; "),
-        latex(coutMarginal),
-        texte(", "),
-        latex(recetteMarginale),
-        texte(" — égalité des marginales : "),
-        latex(racineRetenue),
-        texte(", "),
-        latex(racineRejetee),
-        texte("."),
-      ],
-    },
-    {
-      type: "paragraphe",
-      fragments: [
-        texte("b) "),
-        latex(beneficeFormule),
-        texte(", "),
-        latex(beneficeDerivee),
-        texte(" — "),
-        latex(signeAvant),
-        texte(", "),
-        latex(signeApres),
-        texte(" ⟹ maximum ("),
-        latex(coherence),
-        texte(") — "),
-        latex(beneficeMaximum),
-        texte("."),
-      ],
-    },
-    {
-      type: "paragraphe",
-      fragments: [
-        texte(
-          "Piège à éviter : le bénéfice est maximal là où les marginales s'égalisent (C'_T(x)=R'_T(x)), jamais là où la recette seule serait maximale (R'_T(x)=0 donnerait en général une autre valeur de x).",
-        ),
-      ],
-    },
-  ];
+function tableauDichotomieHtml(exercice: ExerciceContexteEconomiqueBonus): string {
+  const lignes = exercice.iterations.map((it, i) => {
+    const garde = it.garderCote === "gauche" ? [it.gauche, it.milieu] : [it.milieu, it.droite];
+    const cases = [`${i + 1}`, `[${nombreTexte(it.gauche)} ; ${nombreTexte(it.droite)}]`, nombreTexte(it.milieu), it.signeMilieu > 0 ? "+" : "−", `[${nombreTexte(garde[0])} ; ${nombreTexte(garde[1])}]`];
+    return `<tr>${cases.map((c) => `<td ${STYLE_CASE}>${c}</td>`).join("")}</tr>`;
+  });
+  const tetes = ["Étape", "Intervalle", "Milieu m", "Signe de P(m)", "Intervalle gardé"].map((t) => `<th ${STYLE_ENTETE}>${t}</th>`).join("");
+  return `<table ${STYLE_TABLE}><thead><tr>${tetes}</tr></thead><tbody>${lignes.join("")}</tbody></table>`;
 }
 
-function construireCorrectionBonus(exercice: ExerciceContexteEconomiqueBonus): BlocCorrection[] {
-  const [equationReduite] = formatReponseAttenduePhaseLatex(exercice, "poserEquationReduite");
-  const [racineApprochee] = formatReponseAttenduePhaseLatex(exercice, "racineApprochee");
-  return [
-    { type: "paragraphe", fragments: [texte("a) "), latex(equationReduite), texte(".")] },
-    {
-      type: "tableau",
-      libellesLignes: ["Milieu", "Signe de P(milieu)", "Sous-intervalle conservé"],
-      valeursParLigne: [
-        exercice.iterations.map((it) => formatNombreLatex(it.milieu)),
-        exercice.iterations.map((it) => (it.signeMilieu > 0 ? "P > 0" : "P < 0")),
-        exercice.iterations.map((it) =>
-          it.garderCote === "gauche"
-            ? `[${formatNombreLatex(it.gauche)} ; ${formatNombreLatex(it.milieu)}]`
-            : `[${formatNombreLatex(it.milieu)} ; ${formatNombreLatex(it.droite)}]`,
-        ),
-      ],
-    },
-    { type: "paragraphe", fragments: [texte("c) "), latex(racineApprochee), texte(` (réponse acceptée à ${exercice.toleranceFinale.toFixed(2)} près).`)] },
-  ];
+function methode(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): FragmentConsigne[] {
+  const a = texteAideNiveau1(ecran, exercice);
+  return [...fragmentsRiches(a.texte), ...(a.latex ? [texte(" "), latex(a.latex)] : [])];
 }
 
+function lignesEtape(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): EtapeCorrection[] {
+  const sq = lettreDe(exercice, ecran);
+  const l = (label: string, fragments: FragmentConsigne[], figureHtml?: string): EtapeCorrection => ({ label, sousQuestion: sq, fragments, ...(figureHtml ? { figureHtml } : {}) });
+  const valeurs = (suffixe = ".") => [...joindre(attendu(exercice, ecran)), texte(suffixe)];
+  switch (ecran) {
+    case "coutMarginalDiscret":
+      return [l("Calcul", valeurs(" €."))];
+    case "deriveeSymbolique":
+      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
+    case "deriveeValeur":
+      return [l("Calcul", valeurs(" €."))];
+    case "comparaisonEcart":
+      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs()), l("Piège", [texte("L'écart en pourcentage se rapporte à l'estimation par la dérivée, pas à l'estimation par différence.")])];
+    case "extremum": {
+      const coutMoyen = exercice.famille === "A" && exercice.minimum.grandeur === "coutMoyen";
+      return [
+        l("Méthode", methode(exercice, ecran)),
+        l("Conclusion", valeurs(" €.")),
+        l("Piège", coutMoyen ? [texte("On dérive le coût MOYEN (le coût total divisé par q), pas le coût total, qui croît toujours.")] : [texte("On dérive le coût marginal C′ (donc C″ = 0), pas le coût total, qui croît toujours.")]),
+      ];
+    }
+    case "recetteTotale":
+    case "marginales":
+    case "beneficeFormule":
+    case "beneficeDerivee":
+      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
+    case "resoudreEgaliteMarginales":
+      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs()), l("Piège", [texte("Une quantité produite est positive : la solution négative est rejetée.")])];
+    case "tableauSigneBenefice":
+      return [l("Méthode", [texte("B′ positive avant la quantité retenue et négative après : B croît puis décroît.")]), l("Conclusion", valeurs())];
+    case "confirmationCoherence":
+      return [];
+    case "beneficeMaximum":
+      return [l("Méthode", methode(exercice, ecran)), l("Conclusion", [...joindre(attendu(exercice, ecran)), texte(" centaines d'euros.")]), l("Piège", [texte("On remplace x dans B(x), pas dans B′(x).")])];
+    case "poserEquationReduite":
+      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
+    case "iteration0":
+    case "iteration1":
+    case "iteration2":
+      return [l("Calcul", valeurs())];
+    case "iteration3":
+      return [l("Calcul", valeurs(), exercice.famille === "bonus" ? tableauDichotomieHtml(exercice) : undefined)];
+    case "racineApprochee": {
+      if (exercice.famille !== "bonus") return [l("Conclusion", valeurs())];
+      const der = exercice.iterations[exercice.iterations.length - 1];
+      const [g, d] = der.garderCote === "gauche" ? [der.gauche, der.milieu] : [der.milieu, der.droite];
+      return [
+        l("Méthode", methode(exercice, ecran)),
+        l("Conclusion", [latex(`q\\approx\\dfrac{${formatNombreLatexLocal(g)}+${formatNombreLatexLocal(d)}}{2}=${formatNombreLatexLocal((g + d) / 2)}`), texte(" (la solution vaut environ "), ...joindre(attendu(exercice, ecran).map((t) => t.replace("q\\approx", ""))), texte(")."), ]),
+      ];
+    }
+  }
+}
+
+function correctionDetailleeContexteEconomique(exercice: ExerciceContexteEconomique): EtapeCorrection[] {
+  return ordreEcransContexteEconomique(exercice).flatMap((e) => lignesEtape(exercice, e));
+}
+
+function reponseBreveContexteEconomique(exercice: ExerciceContexteEconomique, parQuestion = false): FragmentConsigne[] {
+  const prefixe = (lettre: string) => (parQuestion ? [texte(`${lettre}) `)] : []);
+  if (exercice.famille === "A") {
+    return [
+      ...prefixe("a"),
+      latex(attendu(exercice, "coutMarginalDiscret")[0]),
+      texte(" € ; "),
+      latex(attendu(exercice, "deriveeValeur")[0]),
+      texte(" € ; "),
+      ...joindre(attendu(exercice, "comparaisonEcart"), ", "),
+      texte(" — "),
+      ...prefixe("b"),
+      ...joindre(attendu(exercice, "extremum"), ", "),
+      texte(" €"),
+    ];
+  }
+  if (exercice.famille === "B") {
+    return [...prefixe("a"), latex(attendu(exercice, "resoudreEgaliteMarginales")[0]), texte(" — "), ...prefixe("b"), latex(attendu(exercice, "beneficeMaximum")[0]), texte(" centaines d'euros")];
+  }
+  return [latex(attendu(exercice, "poserEquationReduite")[0]), texte(" ; "), latex(attendu(exercice, "racineApprochee")[0])];
+}
+
+function baremeContexteEconomique(exercice: ExerciceContexteEconomique): BaremeExercice {
+  const l = (e: EcranContexteEconomique) => lettreDe(exercice, e);
+  const c = (sousQuestion: string, t: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(t)], points });
+  if (exercice.famille === "A") {
+    return {
+      reponseFinale: reponseBreveContexteEconomique(exercice, true),
+      criteres: [
+        c(l("coutMarginalDiscret"), "Coût marginal par différence", 0.5),
+        c(l("deriveeSymbolique"), "Dérivée du coût total", 0.5),
+        c(l("deriveeValeur"), "Coût marginal par la dérivée", 0.5),
+        c(l("comparaisonEcart"), "Écart absolu et écart en pourcentage", 1),
+        c(l("extremum"), exercice.minimum.grandeur === "coutMoyen" ? "Production et coût moyen minimal" : "Production et coût marginal minimal", 1.5),
+      ],
+      erreursFrequentes: [
+        { description: [texte("Rapporter l'écart à l'estimation par différence au lieu de la dérivée")], cout: "−0,5" },
+        { description: [texte("Chercher l'extremum du coût total au lieu du coût moyen ou marginal")], cout: "0 pt sur le minimum" },
+      ],
+      reponsesAcceptees: [[texte("Valeurs exactes ou arrondies au centième ; écart en % avec ou sans le symbole %")]],
+    };
+  }
+  if (exercice.famille === "B") {
+    return {
+      reponseFinale: reponseBreveContexteEconomique(exercice, true),
+      criteres: [
+        c(l("recetteTotale"), "Recette totale", 0.5),
+        c(l("marginales"), "Coût marginal et recette marginale", 0.5),
+        c(l("resoudreEgaliteMarginales"), "Égalité des marginales résolue, solution négative rejetée", 1),
+        c(l("beneficeFormule"), "Bénéfice B(x) et sa dérivée", 0.5),
+        c(l("tableauSigneBenefice"), "Signe de B′ de part et d'autre : maximum", 0.5),
+        c(l("beneficeMaximum"), "Bénéfice maximal", 1),
+      ],
+      erreursFrequentes: [
+        { description: [texte("Maximiser la recette (R′ = 0) au lieu du bénéfice")], cout: `0 pt sur ${l("resoudreEgaliteMarginales")})` },
+        { description: [texte("Remplacer x dans B′(x) au lieu de B(x) pour le bénéfice maximal")], cout: `0 pt sur ${l("beneficeMaximum")})` },
+      ],
+      reponsesAcceptees: [[texte("Polynômes sous une forme équivalente (termes dans un autre ordre)")]],
+    };
+  }
+  return {
+    reponseFinale: reponseBreveContexteEconomique(exercice),
+    criteres: [c(l("poserEquationReduite"), "P(q) développé et réduit", 1), c(l("iteration0"), "Quatre étapes de dichotomie correctes (milieu, signe, intervalle gardé)", 2), c(l("racineApprochee"), "Valeur approchée de la solution", 1)],
+    erreursFrequentes: [{ description: [texte("Garder le sous-intervalle où P ne change pas de signe")], cout: "−0,5 par étape" }],
+    reponsesAcceptees: [[texte(`Toute valeur du dernier intervalle (à ${formatNombreTexte(exercice.toleranceFinale)} près)`)]],
+  };
+}
+
+function difficulteContexteEconomique(exercice: ExerciceContexteEconomique): 1 | 2 | 3 {
+  return exercice.famille === "A" ? 2 : 3;
+}
+
+/** Repli (documents Word) : les lignes du corrigé détaillé, en paragraphes. */
 function construireCorrectionContexteEconomique(exercice: ExerciceContexteEconomique): BlocCorrection[] {
-  if (exercice.famille === "A") return construireCorrectionA(exercice);
-  if (exercice.famille === "B") return construireCorrectionB(exercice);
-  return construireCorrectionBonus(exercice);
+  return correctionDetailleeContexteEconomique(exercice)
+    .filter((l) => l.label !== "Piège")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
-
-// ============================================================================
-// Adaptateur.
-// ============================================================================
 
 export const adaptateurEvaluationContexteEconomique: AdaptateurFeuilleExercices<ExerciceContexteEconomique> = {
-  titreDocument: "Contexte économique — Évaluation",
-  nomFichierBase: "contexte-economique",
+  titreDocument: "Contexte économique — Dérivées et applications — Évaluation",
+  nomFichierBase: "contexte-economique-derivees-applications",
   genererInstance: genererExerciceContexteEconomique,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceContexteEconomique,
   construireCorrection: construireCorrectionContexteEconomique,
-  // PAS regroupable — 2 (familles A/B) ou 3 (bonus) questions par instance selon la famille, jamais
-  // UNE constante, et consignes dépendantes des valeurs tirées (ex. tolérance du bonus) — voir le
-  // commentaire de tête.
+  difficulte: difficulteContexteEconomique,
+  reponseBreve: (exercice) => reponseBreveContexteEconomique(exercice),
+  correctionDetaillee: correctionDetailleeContexteEconomique,
+  bareme: baremeContexteEconomique,
+  enoncePapier: enoncePapierContexteEconomique,
+  dureeMinutes: 15,
+  profilInstance: profilContexteEconomique,
+  calculatriceIndispensable: ["A-degre3-sans-extremum", "bonus"],
 };

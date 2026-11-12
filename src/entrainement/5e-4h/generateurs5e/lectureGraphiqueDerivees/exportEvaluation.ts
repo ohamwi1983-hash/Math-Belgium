@@ -1,251 +1,352 @@
-import type { ExerciceLectureGraphiqueLimites } from "../../core5e/lectureGraphiqueLimites.types";
 import type { ExerciceLectureGraphiqueDerivees } from "../../core5e/lectureGraphiqueDerivees.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type {
+  AdaptateurFeuilleExercices,
+  BaremeExercice,
+  BlocCorrection,
+  CritereBareme,
+  EnoncePapier,
+  ErreurFrequente,
+  EtapeCorrection,
+  FragmentConsigne,
+  SectionExercice,
+} from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
-import { consigneGenerale, formatReponseAttenduePhaseLatex, questionFinale } from "../../ui5e/formatLectureGraphiqueDerivees";
-import { labelAsymptoteLatex } from "../../ui5e/formatLectureGraphiqueLimites";
 import {
-  calculerViewBoxLectureGraphiqueDerivees,
-  construireDomainesPieces,
-  construireEvaluateurCourbeDerivees,
-  construireMarqueursPointIsole,
-} from "../../ui5e/lectureGraphiqueDeriveesCourbe";
+  consigneEcran,
+  formatEnteteColonnesTableauFPrime,
+  formatEnteteColonnesTableauFSeconde,
+  formatReponseAttenduePhaseLatex,
+  texteAideNiveau1,
+} from "../../ui5e/formatLectureGraphiqueDerivees";
+import { calculerViewBoxLectureGraphiqueDerivees, construireMarqueursPointIsole, construireSegmentsDerivees } from "../../ui5e/lectureGraphiqueDeriveesCourbe";
+import { ecransParcourus, type EcranLectureGraphiqueDerivees } from "../../moteur5e/typesLectureGraphiqueDerivees";
+import { listeAsymptotes } from "../../moteur5e/typesLectureGraphiqueLimites";
+import {
+  pointsTangenteHorizontale,
+  tableauFPrimeAttendu,
+  tableauFSecondeAttendu,
+  TOLERANCE_POSITION_INFLEXION,
+  TOLERANCE_POSITION_TANGENTE,
+  TOLERANCE_VALEUR_EXTREMUM,
+} from "../../moteur5e/verificationLectureGraphiqueDerivees";
+import { repartirSurQuatre, tableauSignesEtudeLatex } from "../etudeLocale/exportEvaluation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLectureGraphiqueDerivees } from "./index";
-
-// `IdAsymptote`/`CibleAsymptote`/`SlotAsymptote`/`listeAsymptotes` DUPLIQUÉS ici depuis
-// `moteur5e/typesLectureGraphiqueLimites.ts` — `generateurs*/` n'importe JAMAIS `moteur*/` (règle
-// non négociable du CLAUDE.md racine), y compris pour un simple calcul de LISTE de slots (TypeScript
-// reste structurellement typé : cette réplique locale reste assignable à `labelAsymptoteLatex`,
-// `ui5e/formatLectureGraphiqueLimites.ts`, sans importer les symboles `moteur5e` eux-mêmes). Copie
-// FIDÈLE de la même fonction déjà dupliquée par `lectureGraphiqueLimites/exportEvaluation.ts` (même
-// sous-objet `exercice.asymptotique : ExerciceLectureGraphiqueLimites`, même 5gen22 en amont) — à
-// resynchroniser avec l'original si `typesLectureGraphiqueLimites.ts` change. Seule `listeAsymptotes`
-// est nécessaire ici (jamais `listeComportements`, propre à l'écran "completerLimites" de 5gen22,
-// absent de 5gen30).
-type IdAsymptote = { kind: "va"; index: number } | { kind: "horizontale"; cote?: "gauche" | "droit" } | { kind: "oblique" };
-type CibleAsymptote = { kind: "verticale"; x: number } | { kind: "horizontale"; y: number } | { kind: "oblique"; pente: number; ordonnee: number };
-
-interface SlotAsymptote {
-  id: IdAsymptote;
-  cible: CibleAsymptote;
-}
-
-function listeAsymptotes(asymptotique: ExerciceLectureGraphiqueLimites): SlotAsymptote[] {
-  const slots: SlotAsymptote[] = asymptotique.vas.map((va, index) => ({ id: { kind: "va", index }, cible: { kind: "verticale", x: va.position } }));
-  const { infini } = asymptotique;
-  if (infini.type === "horizontale") {
-    if (infini.limitePlusInfini === infini.limiteMoinsInfini) {
-      slots.push({ id: { kind: "horizontale" }, cible: { kind: "horizontale", y: infini.limitePlusInfini } });
-    } else {
-      slots.push({ id: { kind: "horizontale", cote: "gauche" }, cible: { kind: "horizontale", y: infini.limiteMoinsInfini } });
-      slots.push({ id: { kind: "horizontale", cote: "droit" }, cible: { kind: "horizontale", y: infini.limitePlusInfini } });
-    }
-  } else if (infini.type === "oblique") {
-    slots.push({ id: { kind: "oblique" }, cible: { kind: "oblique", pente: infini.pente, ordonnee: infini.ordonnee } });
-  }
-  return slots;
-}
+import { profilLectureGraphiqueDerivees } from "../profilsEvaluationDerivees28-30";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceLectureGraphiqueDerivees>` pour 5gen30 ("Lecture
- * graphique — dérivées et applications") — feuille d'évaluation, DERNIER générateur du chapitre
- * "Dérivées et applications".
+ * Adaptateur `AdaptateurFeuilleExercices<ExerciceLectureGraphiqueDerivees>` pour 5gen30 (Lecture
+ * graphique — dérivées et applications) — feuille d'exercices et évaluation (méthode :
+ * `.claude/rules/feuilles-evaluations.md`).
  *
- * Écran interactif = jusqu'à 5 phases séquentielles sur LE MÊME graphique (`asymptotes` si présentes,
- * `tableauFPrime` TOUJOURS, `extremums` si présents, `tableauFSeconde` TOUJOURS, `inflexions` si
- * présents — voir `moteur5e/typesLectureGraphiqueDerivees.ts::ordreEcransLectureGraphiqueDerivees`,
- * jamais importé ici, condition répliquée localement par simple test de longueur des tableaux déjà
- * connus de l'instance). Condensées ici en UNE seule question papier par "paire" d'écrans
- * apparentée : le graphique une fois (`enteteHtml`), puis au plus 3 groupes de blancs — a) une ligne
- * par asymptote (comme 5gen22), b) le comportement des extrema (abscisse/nature/ordonnée, SEULEMENT
- * si `exercice.extrema.length>0`), c) l'abscisse des points d'inflexion (SEULEMENT si
- * `exercice.inflexions.length>0`).
- *
- * **Simplification DÉLIBÉRÉE vs l'écran** : les phases `tableauFPrime`/`tableauFSeconde` (tableau de
- * signes de f'/f'' complet, avec zones/racines/exclusions — `moteur5e/verificationLectureGraphiqueDerivees.ts`)
- * ne sont PAS reconstruites sous forme de tableau imprimé indépendant : leur contenu utile pour une
- * feuille papier (nature de chaque extremum ⇒ signe de f' de part et d'autre ; existence d'un point
- * d'inflexion ⇒ changement de concavité) est absorbé dans les questions b)/c) ci-dessus, dont la
- * correction réutilise TEL QUEL `formatReponseAttenduePhaseLatex(exercice, "tableauFPrime"|"tableauFSeconde")`
- * (`ui5e/formatLectureGraphiqueDerivees.ts`, même formateur que le récapitulatif final interactif).
- * Reconstruire le tableau zones/racines/exclusions complet (`construireTableauDerivees`,
- * moteur5e) aurait exigé de dupliquer une algorithmique bien plus lourde que la simple liste de
- * slots dupliquée ci-dessus, pour un gain d'exactitude marginal sur une feuille imprimée (où
- * l'élève lit directement le nombre/la position des extrema/PI sur le graphique, jamais une
- * colonne "exclusion" abstraite). Cas limite couvert explicitement : si l'instance n'a NI asymptote
- * NI extremum NI PI (ex. famille `0va-aucune` + 0 extremum + 0 PI, tirage rare mais possible en
- * production, `genererExerciceLectureGraphiqueDerivees`), `construireQuestionsDerivees`/
- * `construireCorrectionLectureGraphiqueDerivees` ci-dessous retombent sur UNE question de repli
- * (jamais un `questions: []` vide) — vrai PAR CONSTRUCTION dans ce cas précis (0 extremum ⇒ f' ne
- * change jamais de signe ⇒ f est monotone sur toute la portion affichée, un seul morceau puisque 0
- * AV), donc une simple inférence logique sur des comptes déjà connus, jamais une valeur recalculée
- * indépendamment.
- *
- * Graphique : `enteteHtml`, un unique `<svg>` construit via `construireSvgFonction`
- * (`export/svgGraph.ts`, RÉUTILISÉ tel quel) — jamais `enteteFragments` pour le graphique lui-même
- * (même réserve que `lectureGraphiqueLimites/exportEvaluation.ts`, voir sa doc de tête). La
- * fonction évaluée et le viewBox RÉUTILISENT DIRECTEMENT (Couche présentation ↔ Couche présentation,
- * légitime — seul `moteur5e/` est interdit depuis les fichiers `generateurs5e/`) `ui5e/lectureGraphiqueDeriveesCourbe.ts` :
- * `calculerViewBoxLectureGraphiqueDerivees` (borne Y sur asymptotes/extrema/PI RÉELS, comme
- * `LectureGraphiqueDeriveesGraph.tsx`), `construireEvaluateurCourbeDerivees` (baseTrend+bumps, LA
- * MÊME évaluation que la vérité terrain stockée sur l'instance) et `construireMarqueursPointIsole`.
- * `construireEvaluerGrapheDerivees` ci-dessous ajoute la SEULE chose que cet évaluateur "plein"
- * n'a pas nativement (il a un repli "morceau le plus proche" hors domaine, utile pour ne jamais
- * planter, mais qui NE COUPE PAS visuellement au niveau d'une AV) : un test d'appartenance aux
- * morceaux `construireDomainesPieces` (déjà exclus d'un buffer autour de chaque AV), renvoyant
- * `null` en dehors — exactement le même patron que `construireEvaluerGrapheLimites` de
- * `lectureGraphiqueLimites/exportEvaluation.ts`, sans dupliquer la moindre formule mathématique
- * (aucune primitive/gabarit réécrit ici, seulement un filtre de domaine autour de fonctions déjà
- * pures et déjà réutilisées).
- *
- * Asymptotes dessinées en pointillés, EXACTEMENT le même post-traitement SVG que
- * `lectureGraphiqueLimites/exportEvaluation.ts` (`construireLigneAsymptoteSvg`/
- * `construireLignesAsymptotesSvg`, dupliqués ici car `construireSvgFonction` n'a nul paramètre pour
- * des lignes arbitraires et que ni `MARGE` ni la transformation données→pixels interne ne sont
- * exportées par `svgGraph.ts`) — appliqué à `exercice.asymptotique`, structurellement identique au
- * sous-objet déjà traité par 5gen22.
+ * Le graphique EST l'énoncé : dessiné ici (`svgLectureGraphiqueDerivees`) avec un quadrillage d'une
+ * unité (lecture à 0,3 près annoncée), à partir des MÊMES morceaux de courbe que l'écran
+ * (`construireSegmentsDerivees` : les branches sont prolongées jusqu'au bord du cadre près d'une
+ * asymptote verticale, la divergence reste visible). Consigne globale qui ne révèle ni le nombre ni
+ * le type d'asymptotes, ni l'existence d'extremums ou de points d'inflexion (« éventuels »). Les 6
+ * écrans du générateur (`ecransParcourus` : asymptotes, tangentes horizontales, tableau de f',
+ * valeurs des extremums, points d'inflexion, tableau de f'') sont les étapes du corrigé ; le corrigé
+ * montre le graphique annoté (asymptotes nommées, extremums, paliers, points d'inflexion) et les deux
+ * tableaux de signes (`tableauFPrimeAttendu`/`tableauFSecondeAttendu`, la source de l'écran).
  */
 
-const LARGEUR_GRAPHE = 300;
-const HAUTEUR_GRAPHE = 240;
-// Dupliqué depuis `MARGE` de `export/svgGraph.ts` (non exportée) — UNIQUEMENT pour repositionner les
-// lignes d'asymptote au même repère pixel que la courbe déjà tracée par `construireSvgFonction`.
-const MARGE_SVG_LOCALE = 10;
-const COULEUR_ASYMPTOTE = "#495057";
+const LETTRES = "abcdefgh";
 
-function construireLigneAsymptoteSvg(x1: number, y1: number, x2: number, y2: number, viewBox: ViewBoxSvg): string {
-  const zoneX = LARGEUR_GRAPHE - 2 * MARGE_SVG_LOCALE;
-  const zoneY = HAUTEUR_GRAPHE - 2 * MARGE_SVG_LOCALE;
-  const sx = (x: number) => MARGE_SVG_LOCALE + ((x - viewBox.xMin) / (viewBox.xMax - viewBox.xMin)) * zoneX;
-  const sy = (y: number) => MARGE_SVG_LOCALE + ((viewBox.yMax - y) / (viewBox.yMax - viewBox.yMin)) * zoneY;
-  return `<line x1="${sx(x1).toFixed(1)}" y1="${sy(y1).toFixed(1)}" x2="${sx(x2).toFixed(1)}" y2="${sy(y2).toFixed(1)}" stroke="${COULEUR_ASYMPTOTE}" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.6"/>`;
+// ============================================================================
+// Graphique (énoncé et corrigé).
+// ============================================================================
+
+const LARGEUR = 440;
+const MARGE = 22;
+const COULEUR_COURBE = "#1971c2";
+const COULEUR_GRILLE = "#e3e7ec";
+const COULEUR_GRILLE_FORTE = "#c5ccd5";
+const COULEUR_AXE = "#495057";
+const COULEUR_ANNOTATION = "#9a3b12";
+let compteurSvg = 0;
+
+/** Nombre écrit dans le SVG : virgule décimale et vrai signe moins. */
+function nombreSvg(v: number): string {
+  const r = Math.round(v * 10) / 10;
+  return String(Object.is(r, -0) ? 0 : r).replace(".", ",").replace("-", "−");
 }
 
-function construireLignesAsymptotesSvg(asymptotique: ExerciceLectureGraphiqueLimites, viewBox: ViewBoxSvg): string {
-  const lignes: string[] = asymptotique.vas.map((va) => construireLigneAsymptoteSvg(va.position, viewBox.yMin, va.position, viewBox.yMax, viewBox));
-  const { infini } = asymptotique;
+function droiteSvg(pente: number, ordonnee: number): string {
+  const p = pente === 1 ? "x" : pente === -1 ? "−x" : `${nombreSvg(pente)}x`;
+  return ordonnee === 0 ? p : `${p} ${ordonnee < 0 ? "−" : "+"} ${nombreSvg(Math.abs(ordonnee))}`;
+}
+
+function etiquette(x: number, y: number, contenu: string, ancre: "start" | "middle" | "end", couleur = COULEUR_ANNOTATION): string {
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="10" font-weight="bold" fill="${couleur}" text-anchor="${ancre}" stroke="#ffffff" stroke-width="3" paint-order="stroke" font-family="Archivo, Arial, Helvetica, sans-serif">${contenu}</text>`;
+}
+
+function svgLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees, annoter: boolean): string {
+  const vb = calculerViewBoxLectureGraphiqueDerivees(exercice);
+  const [xMin, xMax] = vb.x;
+  const [yMin, yMax] = vb.y;
+  const ux = (LARGEUR - 2 * MARGE) / (xMax - xMin);
+  const uy = Math.min(22, Math.max(14, 300 / (yMax - yMin)));
+  const hauteur = Math.round((yMax - yMin) * uy + 2 * MARGE);
+  const sx = (x: number) => MARGE + (x - xMin) * ux;
+  const sy = (y: number) => MARGE + (yMax - y) * uy;
+  const id = `clip-lgd-${++compteurSvg}`;
+  const pasLabelY = yMax - yMin > 12 ? 2 : 1;
+
+  const grille: string[] = [];
+  const labels: string[] = [];
+  for (let v = Math.ceil(xMin); v <= xMax; v++) {
+    const forte = v % 2 === 0;
+    grille.push(`<line x1="${sx(v).toFixed(1)}" y1="${MARGE}" x2="${sx(v).toFixed(1)}" y2="${hauteur - MARGE}" stroke="${forte ? COULEUR_GRILLE_FORTE : COULEUR_GRILLE}" stroke-width="${forte ? 0.8 : 0.6}"/>`);
+    if (forte && v !== 0) labels.push(`<text x="${sx(v).toFixed(1)}" y="${(sy(0) + 12).toFixed(1)}" font-size="9" text-anchor="middle" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="2.5" paint-order="stroke">${nombreSvg(v)}</text>`);
+  }
+  for (let v = Math.ceil(yMin); v <= yMax; v++) {
+    const forte = v % pasLabelY === 0;
+    grille.push(`<line x1="${MARGE}" y1="${sy(v).toFixed(1)}" x2="${LARGEUR - MARGE}" y2="${sy(v).toFixed(1)}" stroke="${forte && pasLabelY === 2 ? COULEUR_GRILLE_FORTE : COULEUR_GRILLE}" stroke-width="0.6"/>`);
+    if (forte && v !== 0) labels.push(`<text x="${(sx(0) - 5).toFixed(1)}" y="${(sy(v) + 3).toFixed(1)}" font-size="9" text-anchor="end" fill="${COULEUR_AXE}" stroke="#ffffff" stroke-width="2.5" paint-order="stroke">${nombreSvg(v)}</text>`);
+  }
+  const fleche = (x1: number, y1: number, x2: number, y2: number) =>
+    `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.3" marker-end="url(#${id}-fleche)"/>`;
+  const axes = fleche(MARGE - 4, sy(0), LARGEUR - MARGE + 8, sy(0)) + fleche(sx(0), hauteur - MARGE + 4, sx(0), MARGE - 8);
+  const nomsAxes =
+    `<text x="${LARGEUR - MARGE + 6}" y="${(sy(0) - 6).toFixed(1)}" font-size="10" font-style="italic" text-anchor="end" fill="${COULEUR_AXE}">x</text>` +
+    `<text x="${(sx(0) + 6).toFixed(1)}" y="${MARGE - 2}" font-size="10" font-style="italic" fill="${COULEUR_AXE}">y</text>`;
+
+  // Courbe : une branche par domaine, prolongée jusqu'au bord VISIBLE près d'une AV (même fonction
+  // que l'écran), découpée au cadre par un clipPath.
+  const chemins = construireSegmentsDerivees(exercice, xMin, xMax, [yMin, yMax])
+    .map((seg) => {
+      const [lo, hi] = seg.domaine;
+      const n = 400;
+      const pts: string[] = [];
+      for (let i = 0; i <= n; i++) {
+        const x = lo + ((hi - lo) * i) / n;
+        const y = seg.evaluer(x);
+        if (!Number.isFinite(y)) continue;
+        const yBorne = Math.max(yMin - 2, Math.min(yMax + 2, y));
+        pts.push(`${sx(x).toFixed(1)},${sy(yBorne).toFixed(1)}`);
+      }
+      return pts.length > 1 ? `<path d="M ${pts.join(" L ")}" fill="none" stroke="${COULEUR_COURBE}" stroke-width="2.2" stroke-linejoin="round" clip-path="url(#${id})"/>` : "";
+    })
+    .join("");
+
+  const ligne = (x1: number, y1: number, x2: number, y2: number) =>
+    `<line x1="${sx(x1).toFixed(1)}" y1="${sy(y1).toFixed(1)}" x2="${sx(x2).toFixed(1)}" y2="${sy(y2).toFixed(1)}" stroke="${COULEUR_AXE}" stroke-width="1.3" stroke-dasharray="5 4" clip-path="url(#${id})"/>`;
+  const asymptotes: string[] = exercice.asymptotique.vas.map((va) => ligne(va.position, yMin, va.position, yMax));
+  const { infini } = exercice.asymptotique;
   if (infini.type === "horizontale") {
     const valeurs = infini.limitePlusInfini === infini.limiteMoinsInfini ? [infini.limitePlusInfini] : [infini.limitePlusInfini, infini.limiteMoinsInfini];
-    for (const y of valeurs) lignes.push(construireLigneAsymptoteSvg(viewBox.xMin, y, viewBox.xMax, y, viewBox));
+    for (const y of valeurs) asymptotes.push(ligne(xMin, y, xMax, y));
   } else if (infini.type === "oblique") {
-    lignes.push(construireLigneAsymptoteSvg(viewBox.xMin, infini.pente * viewBox.xMin + infini.ordonnee, viewBox.xMax, infini.pente * viewBox.xMax + infini.ordonnee, viewBox));
+    asymptotes.push(ligne(xMin, infini.pente * xMin + infini.ordonnee, xMax, infini.pente * xMax + infini.ordonnee));
   }
-  return lignes.join("");
-}
 
-/** Voir l'en-tête de fichier — filtre de domaine autour de `construireEvaluateurCourbeDerivees`
- * (`ui5e/lectureGraphiqueDeriveesCourbe.ts`, RÉUTILISÉ tel quel), jamais une réécriture de la
- * courbe elle-même. */
-function construireEvaluerGrapheDerivees(exercice: ExerciceLectureGraphiqueDerivees, xMin: number, xMax: number): (x: number) => number | null {
-  const domaines = construireDomainesPieces(exercice.asymptotique, xMin, xMax);
-  const f = construireEvaluateurCourbeDerivees(exercice, xMin, xMax);
-  return (x) => (domaines.some((d) => x >= d.lo && x <= d.hi) ? f(x) : null);
-}
+  const pointsIsoles = construireMarqueursPointIsole(exercice)
+    .map((m) => `<circle cx="${sx(m.x).toFixed(1)}" cy="${sy(m.y).toFixed(1)}" r="3.6" fill="${COULEUR_COURBE}"/>`)
+    .join("");
 
-function construireSvgLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): string {
-  const vb = calculerViewBoxLectureGraphiqueDerivees(exercice);
-  const viewBox: ViewBoxSvg = { xMin: vb.x[0], xMax: vb.x[1], yMin: vb.y[0], yMax: vb.y[1] };
-  const points = construireMarqueursPointIsole(exercice).map((m) => ({ x: m.x, y: m.y }));
-  const svg = construireSvgFonction(construireEvaluerGrapheDerivees(exercice, vb.x[0], vb.x[1]), viewBox, {
-    largeur: LARGEUR_GRAPHE,
-    hauteur: HAUTEUR_GRAPHE,
-    classe: "graphe-derivees",
-    points,
-  });
-  // Post-traitement (voir l'en-tête de fichier) : réinséré APRÈS la courbe/les points, donc rendu
-  // par-dessus, comme `LectureGraphiqueDeriveesGraph.tsx` (dashed, opacité réduite).
-  return svg.replace("</svg>", `${construireLignesAsymptotesSvg(exercice.asymptotique, viewBox)}</svg>`);
+  const annotations: string[] = [];
+  if (annoter) {
+    exercice.asymptotique.vas.forEach((va, i) => {
+      const X = sx(va.position);
+      const aGauche = X > LARGEUR - 70;
+      annotations.push(etiquette(aGauche ? X - 4 : X + 4, MARGE + 12 + 13 * i, `x = ${nombreSvg(va.position)}`, aGauche ? "end" : "start"));
+    });
+    if (infini.type === "horizontale") {
+      const memes = infini.limitePlusInfini === infini.limiteMoinsInfini;
+      annotations.push(etiquette(LARGEUR - MARGE - 3, sy(infini.limitePlusInfini) - 5, `y = ${nombreSvg(infini.limitePlusInfini)}${memes ? "" : " (en +∞)"}`, "end"));
+      if (!memes) annotations.push(etiquette(MARGE + 3, sy(infini.limiteMoinsInfini) - 5, `y = ${nombreSvg(infini.limiteMoinsInfini)} (en −∞)`, "start"));
+    } else if (infini.type === "oblique") {
+      const xL = xMin + 0.82 * (xMax - xMin);
+      const yL = Math.min(Math.max(infini.pente * xL + infini.ordonnee, yMin + 1), yMax - 1);
+      annotations.push(etiquette(sx(xL), sy(yL) + (infini.pente > 0 ? 14 : -7), `y = ${droiteSvg(infini.pente, infini.ordonnee)}`, "middle"));
+    }
+    for (const p of pointsTangenteHorizontale(exercice)) {
+      const nom = p.classification === "max" ? "max" : p.classification === "min" ? "min" : "palier";
+      const dessus = p.classification !== "min";
+      annotations.push(`<circle cx="${sx(p.position).toFixed(1)}" cy="${sy(p.valeur).toFixed(1)}" r="3.4" fill="${COULEUR_ANNOTATION}"/>`);
+      // Près de l'axe des ordonnées, l'étiquette part sur le côté (elle masquerait les graduations).
+      const presAxe = Math.abs(sx(p.position) - sx(0)) < 45;
+      const ancre = presAxe ? (p.position >= 0 ? "start" : "end") : "middle";
+      const dx = presAxe ? (p.position >= 0 ? 6 : -6) : 0;
+      annotations.push(etiquette(sx(p.position) + dx, sy(p.valeur) + (dessus ? -8 : 16), `${nom} (${nombreSvg(p.position)} ; ${nombreSvg(p.valeur)})`, ancre));
+    }
+    const positionsPaliers = exercice.paliers.map((p) => p.position);
+    for (const pi of exercice.inflexions) {
+      if (positionsPaliers.some((x) => Math.abs(x - pi.position) < 1e-6)) continue;
+      const X = sx(pi.position);
+      const Y = sy(pi.valeur);
+      annotations.push(`<rect x="${(X - 3.2).toFixed(1)}" y="${(Y - 3.2).toFixed(1)}" width="6.4" height="6.4" fill="#ffffff" stroke="${COULEUR_ANNOTATION}" stroke-width="1.6"/>`);
+      annotations.push(etiquette(X + 7, Y + 4, `PI x ≈ ${nombreSvg(pi.position)}`, "start"));
+    }
+  }
+
+  return `<svg class="${annoter ? "figure-corrige" : "graphe-derivees"}" width="${LARGEUR}" height="${hauteur}" viewBox="0 0 ${LARGEUR} ${hauteur}" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%;height:auto;margin:0.4em auto">
+<defs><clipPath id="${id}"><rect x="${MARGE}" y="${MARGE}" width="${LARGEUR - 2 * MARGE}" height="${hauteur - 2 * MARGE}"/></clipPath><marker id="${id}-fleche" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${COULEUR_AXE}"/></marker></defs>
+<rect x="0" y="0" width="${LARGEUR}" height="${hauteur}" fill="#ffffff"/>
+${grille.join("")}
+${axes}${nomsAxes}
+${asymptotes.join("")}
+${chemins}${pointsIsoles}
+${labels.join("")}
+${annotations.join("")}
+<rect x="0.5" y="0.5" width="${LARGEUR - 1}" height="${hauteur - 1}" fill="none" stroke="#adb5bd" stroke-width="1"/>
+</svg>`;
 }
 
 // ============================================================================
-// Questions — voir l'en-tête de fichier pour le choix de granularité (un groupe de blancs par
-// "paire" d'écrans apparentée, jamais un par phase interactive individuelle).
+// Énoncé.
 // ============================================================================
 
-function construireQuestionsAsymptotes(asymptotique: ExerciceLectureGraphiqueLimites): QuestionExercice[] {
-  const slots = listeAsymptotes(asymptotique);
-  return slots.map((slot) => ({
-    consigne: [latex(labelAsymptoteLatex(slots, slot.id))],
-    reponse: { type: "lignes", nombre: 1 },
-  }));
+const LEGENDE =
+  "Le graphique ci-dessous représente une fonction f (droites en pointillés : asymptotes de la courbe ; point plein : point de la courbe ; quadrillage d'une unité).";
+
+function nombreTexte(v: number): string {
+  return String(v).replace(".", ",");
 }
 
-function construireQuestionExtrema(exercice: ExerciceLectureGraphiqueDerivees): QuestionExercice {
-  return {
-    consigne: [
-      texte(
-        "Pour CHAQUE extremum repéré sur le graphique (là où la tangente est horizontale), indique, dans l'ordre : son abscisse approximative, sa nature (MAX ou min), puis son ordonnée approximative.",
-      ),
-    ],
-    reponse: { type: "lignes", nombre: exercice.extrema.length },
-  };
-}
+const CONSIGNE_PAPIER =
+  "Par lecture du graphique : nomme les éventuelles asymptotes de la courbe (verticale, horizontale ou oblique) avec leur équation ; donne l'abscisse de chaque point où la tangente est horizontale ; dresse le tableau de signes de f' et les variations de f, puis donne la valeur de chaque extremum ; donne l'abscisse de chaque point d'inflexion ; dresse le tableau de signes de f'' et la concavité de f. " +
+  (TOLERANCE_POSITION_TANGENTE === TOLERANCE_VALEUR_EXTREMUM
+    ? `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée (à ${nombreTexte(TOLERANCE_POSITION_INFLEXION)} près pour les points d'inflexion).`
+    : `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée pour les abscisses et à ${nombreTexte(TOLERANCE_VALEUR_EXTREMUM)} près pour les valeurs (à ${nombreTexte(TOLERANCE_POSITION_INFLEXION)} près pour les points d'inflexion).`);
 
-function construireQuestionInflexions(exercice: ExerciceLectureGraphiqueDerivees): QuestionExercice {
-  return {
-    consigne: [texte("Pour CHAQUE point d'inflexion repéré sur le graphique (là où la concavité change), donne son abscisse approximative.")],
-    reponse: { type: "lignes", nombre: exercice.inflexions.length },
-  };
-}
-
-/** Question de repli — voir l'en-tête de fichier ("Cas limite couvert explicitement") : uniquement
- * atteinte si NI asymptote NI extremum NI PI, cas où `f` est monotone par construction sur toute la
- * portion affichée. */
-function construireQuestionRepli(): QuestionExercice {
-  return {
-    consigne: [texte("Cette fonction ne présente ni asymptote nommable, ni extremum, ni point d'inflexion sur la portion représentée : décris si f est croissante ou décroissante en observant directement le sens de la courbe.")],
-    reponse: { type: "lignes", nombre: 2 },
-  };
-}
-
-function construireQuestionsDerivees(exercice: ExerciceLectureGraphiqueDerivees): QuestionExercice[] {
-  const questions: QuestionExercice[] = [...construireQuestionsAsymptotes(exercice.asymptotique)];
-  if (exercice.extrema.length > 0) questions.push(construireQuestionExtrema(exercice));
-  if (exercice.inflexions.length > 0) questions.push(construireQuestionInflexions(exercice));
-  if (questions.length === 0) questions.push(construireQuestionRepli());
-  return questions;
+/** Consigne d'étape = celle de l'écran, sans les tournures d'interface (« coche… », « Complète… »). */
+function consigneEtape(ecran: EcranLectureGraphiqueDerivees): FragmentConsigne[] {
+  const t = consigneEcran(ecran)
+    .replace(/S'il n'y en a aucune, coche « [^»]+ »\./, "S'il n'y en a aucune, indique-le.")
+    .replace(/S'il n'y en a aucun, coche « [^»]+ »\./, "S'il n'y en a aucun, indique-le.")
+    .replace("Complète le tableau", "Dresse le tableau")
+    .replace("du graphique", "de la courbe");
+  return [texte(t)];
 }
 
 function construireEnonceLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): SectionExercice {
   return {
-    enteteFragments: [texte(`${consigneGenerale()} ${questionFinale(exercice)}`)],
-    enteteHtml: construireSvgLectureGraphiqueDerivees(exercice),
-    questions: construireQuestionsDerivees(exercice),
+    enteteFragments: [texte(LEGENDE)],
+    enteteHtml: svgLectureGraphiqueDerivees(exercice, false),
+    questions: ecransParcourus(exercice).map((ecran) => ({ consigne: consigneEtape(ecran) })),
   };
 }
 
-/** RESYNTHÉTISÉE depuis les valeurs déjà connues de l'instance tirée (`formatReponseAttenduePhaseLatex`,
- * `ui5e/formatLectureGraphiqueDerivees.ts` — le MÊME formateur qui alimente déjà le récapitulatif
- * final interactif, `ResumeSessionLectureGraphiqueDerivees`) — jamais recalculée indépendamment ici.
- * Un paragraphe par ligne renvoyée par le formateur, dans l'ordre : asymptotes, puis nature+valeur
- * des extrema (2 formateurs concaténés — voir l'en-tête de fichier), puis position des PI. */
+function enoncePapierLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): EnoncePapier {
+  return {
+    section: { enteteFragments: [texte(LEGENDE)], enteteHtml: svgLectureGraphiqueDerivees(exercice, false), questions: [{ consigne: [texte(CONSIGNE_PAPIER)] }] },
+    etapesParQuestion: [ecransParcourus(exercice).map((_, i) => LETTRES[i])],
+  };
+}
+
+// ============================================================================
+// Réponse brève, corrigé, barème.
+// ============================================================================
+
+function joindre(latexs: string[], separateur = " ; "): FragmentConsigne[] {
+  return latexs.flatMap((l, i) => [...(i === 0 ? [] : [texte(separateur)]), latex(l)]);
+}
+
+function reponseBreveLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): FragmentConsigne[] {
+  return [
+    ...joindre(formatReponseAttenduePhaseLatex(exercice, "asymptotes")),
+    texte(" — "),
+    ...(exercice.extrema.length > 0 ? joindre(formatReponseAttenduePhaseLatex(exercice, "extremums")) : [texte("aucun extremum")]),
+    texte(" — points d'inflexion : "),
+    ...joindre(formatReponseAttenduePhaseLatex(exercice, "inflexions")),
+  ];
+}
+
+function methode(ecran: EcranLectureGraphiqueDerivees, sousQuestion: string): EtapeCorrection {
+  return { label: "Méthode", sousQuestion, fragments: [texte(texteAideNiveau1(ecran))] };
+}
+
+function correctionDetailleeLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): EtapeCorrection[] {
+  const ordre = ecransParcourus(exercice);
+  const L = (e: EcranLectureGraphiqueDerivees) => LETTRES[ordre.indexOf(e)];
+  const lignes: EtapeCorrection[] = [];
+  for (const ecran of ordre) {
+    const l = L(ecran);
+    switch (ecran) {
+      case "asymptotes":
+        lignes.push(methode(ecran, l), {
+          label: "Lecture",
+          sousQuestion: l,
+          fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)),
+          figureHtml: svgLectureGraphiqueDerivees(exercice, true),
+        });
+        if (listeAsymptotes(exercice.asymptotique).length === 0) {
+          lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte("Les branches partent vers ±∞ sans se rapprocher d'aucune droite : il n'y a pas d'asymptote.")] });
+        } else if (exercice.asymptotique.vas.length > 0) {
+          lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte("Une asymptote verticale a une équation de la forme « x = … », pas « y = … ».")] });
+        }
+        break;
+      case "zerosFPrime":
+      case "inflexions":
+        lignes.push(methode(ecran, l), { label: "Lecture", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
+        break;
+      case "tableauFPrime": {
+        const attendu = tableauFPrimeAttendu(exercice);
+        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableauSignesEtudeLatex(attendu, formatEnteteColonnesTableauFPrime(exercice, attendu.colonnes), "fprime"))] });
+        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
+        lignes.push({
+          label: "Piège",
+          sousQuestion: l,
+          fragments:
+            exercice.paliers.length > 0
+              ? [texte("En un palier, la tangente est horizontale mais la courbe garde le même sens : ce n'est ni un maximum ni un minimum.")]
+              : [texte("Le signe de f' se lit sur le sens de variation de la courbe (elle monte : f' > 0), pas sur sa position au-dessus ou au-dessous de l'axe des abscisses.")],
+        });
+        break;
+      }
+      case "extremums":
+        lignes.push(methode(ecran, l), { label: "Lecture", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
+        break;
+      case "tableauFSeconde": {
+        const attendu = tableauFSecondeAttendu(exercice);
+        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableauSignesEtudeLatex(attendu, formatEnteteColonnesTableauFSeconde(exercice, attendu.colonnes), "fseconde"))] });
+        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
+        break;
+      }
+    }
+  }
+  return lignes;
+}
+
+const POIDS_ECRAN: Record<EcranLectureGraphiqueDerivees, number> = { asymptotes: 1, zerosFPrime: 0.5, tableauFPrime: 1, extremums: 0.5, inflexions: 0.5, tableauFSeconde: 0.5 };
+
+const CRITERE_ECRAN: Record<EcranLectureGraphiqueDerivees, string> = {
+  asymptotes: "Asymptotes nommées avec leur équation (ou aucune)",
+  zerosFPrime: "Abscisses des points à tangente horizontale",
+  tableauFPrime: "Tableau de signes de f', variations et nature de chaque point",
+  extremums: "Valeur de chaque extremum",
+  inflexions: "Abscisses des points d'inflexion",
+  tableauFSeconde: "Tableau de signes de f'' et concavité",
+};
+
+function baremeLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): BaremeExercice {
+  const ordre = ecransParcourus(exercice);
+  const points = repartirSurQuatre(ordre.map((e) => POIDS_ECRAN[e]));
+  const criteres: CritereBareme[] = ordre.map((e, i) => ({ sousQuestion: LETTRES[i], critere: [texte(CRITERE_ECRAN[e])], points: points[i] }));
+  const erreurs: ErreurFrequente[] = [];
+  if (exercice.asymptotique.vas.length > 0) erreurs.push({ description: [texte("Asymptote verticale écrite « y = … » au lieu de « x = … »")], cout: "0 pt sur cette asymptote" });
+  if (exercice.paliers.length > 0) erreurs.push({ description: [texte("Palier classé maximum ou minimum")], cout: "0 pt sur la nature de ce point" });
+  erreurs.push({ description: [texte("Valeurs interdites (asymptotes verticales) oubliées dans les tableaux de signes")], cout: "−0,5" });
+  return {
+    reponseFinale: reponseBreveLectureGraphiqueDerivees(exercice),
+    criteres,
+    erreursFrequentes: erreurs,
+    reponsesAcceptees: [[texte(`Lectures à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près (abscisses, valeurs) et à ${nombreTexte(TOLERANCE_POSITION_INFLEXION)} près (points d'inflexion)`)], [texte("Asymptotes dans n'importe quel ordre")]],
+  };
+}
+
+function difficulteLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): 1 | 2 | 3 {
+  const { vas, infini } = exercice.asymptotique;
+  const pointIsole = vas.some((va) => va.pointIsoleGauche !== undefined || va.pointIsoleDroit !== undefined);
+  if (vas.length >= 2 || pointIsole || exercice.paliers.length > 0 || (vas.length > 0 && infini.type === "oblique")) return 3;
+  return 2;
+}
+
+/** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, en paragraphes. */
 function construireCorrectionLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): BlocCorrection[] {
-  const blocs: BlocCorrection[] = [];
-
-  if (listeAsymptotes(exercice.asymptotique).length > 0) {
-    blocs.push(...formatReponseAttenduePhaseLatex(exercice, "asymptotes").map((expr) => ({ type: "paragraphe" as const, fragments: [latex(expr)] })));
-  }
-  if (exercice.extrema.length > 0) {
-    blocs.push(...formatReponseAttenduePhaseLatex(exercice, "tableauFPrime").map((expr) => ({ type: "paragraphe" as const, fragments: [latex(expr)] })));
-    blocs.push(...formatReponseAttenduePhaseLatex(exercice, "extremums").map((expr) => ({ type: "paragraphe" as const, fragments: [latex(expr)] })));
-  }
-  if (exercice.inflexions.length > 0) {
-    blocs.push(...formatReponseAttenduePhaseLatex(exercice, "inflexions").map((expr) => ({ type: "paragraphe" as const, fragments: [latex(expr)] })));
-  }
-
-  if (blocs.length === 0) {
-    blocs.push({
-      type: "paragraphe",
-      fragments: [
-        texte(
-          "Il suffit d'observer le sens de la courbe : elle est monotone (toujours croissante ou toujours décroissante) sur toute la portion affichée, puisqu'aucun extremum n'y est présent.",
-        ),
-      ],
-    });
-  }
-
-  return blocs;
+  return correctionDetailleeLectureGraphiqueDerivees(exercice)
+    .filter((l) => l.label !== "Piège" && l.label !== "Méthode")
+    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
 }
 
 export const adaptateurEvaluationLectureGraphiqueDerivees: AdaptateurFeuilleExercices<ExerciceLectureGraphiqueDerivees> = {
@@ -256,12 +357,13 @@ export const adaptateurEvaluationLectureGraphiqueDerivees: AdaptateurFeuilleExer
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceLectureGraphiqueDerivees,
   construireCorrection: construireCorrectionLectureGraphiqueDerivees,
-  // FAUX, comme `lectureGraphiqueLimites/exportEvaluation.ts` : `enteteHtml` (graphique) est utilisé
-  // — exclu explicitement par la doc de `regroupable` (`export/genererFeuilleExercices.ts`) — ET la
-  // consigne texte varie déjà avec l'instance (`questionFinale`, dont le nombre de parties varie
-  // selon extrema/inflexions présents), ET il y a potentiellement plusieurs questions par instance
-  // (asymptotes + extrema + inflexions) : les 3 conditions d'exclusion du mécanisme sont réunies,
-  // `regroupable` reste donc à sa valeur par défaut `false`/absent — laissé explicite ici pour
-  // documenter la décision plutôt que de l'omettre silencieusement.
+  difficulte: difficulteLectureGraphiqueDerivees,
+  reponseBreve: reponseBreveLectureGraphiqueDerivees,
+  correctionDetaillee: correctionDetailleeLectureGraphiqueDerivees,
+  bareme: baremeLectureGraphiqueDerivees,
+  enoncePapier: enoncePapierLectureGraphiqueDerivees,
+  dureeMinutes: 12,
+  profilInstance: profilLectureGraphiqueDerivees,
+  // Graphique (`enteteHtml`) : pas de regroupement.
   regroupable: false,
 };

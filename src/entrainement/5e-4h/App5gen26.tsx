@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDefinitionDerivee } from "./generateurs5e/definitionDerivee/index";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -40,6 +41,15 @@ function nouvelleSession(): EtatSessionDefinitionDerivee {
   return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, genererExerciceDefinitionDerivee);
 }
 
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/definitionDerivee/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionDefinitionDerivee {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceDefinitionDerivee, (id) => construireAvecFamilleId(id)));
+}
+
 function reponseAttendueDefinitionDerivee(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee) {
   return (
     <span className="equation-box-termes">
@@ -73,7 +83,7 @@ function calculerSegmentsProgression(
 }
 
 export function App5gen26() {
-  const [etat, setEtat] = useState<EtatSessionDefinitionDerivee>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionDefinitionDerivee>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionDefinitionDerivee`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
