@@ -311,7 +311,7 @@ function enonceA1(e: ExA1): { entete: FragmentConsigne[]; html: string; question
   return {
     entete: [
       ...riche(
-        `On fabrique ${e.contexte.nomObjetIndefini} en forme de cylindre, de rayon $x$ et de hauteur $h$ (en cm), dont la contenance est fixée à $V = ${e.volumeCm3}$ cm³ ($V = \\pi x^2 h$). On note $f(x)$ l'aire latérale et $g(x)$ l'aire des deux bases, en cm². Le graphique ci-dessous représente $f$, $g$ et $f + g$.`,
+        `On fabrique ${e.contexte.nomObjetIndefini}${e.contexte.nomObjetIndefini.includes("cylindre") ? "" : " en forme de cylindre"}, de rayon $x$ et de hauteur $h$ (en cm), dont la contenance est fixée à $V = ${e.volumeCm3}$ cm³ ($V = \\pi x^2 h$). On note $f(x)$ l'aire latérale et $g(x)$ l'aire des deux bases, en cm². Le graphique ci-dessous représente $f$, $g$ et $f + g$.`,
       ),
     ],
     html: grapheA1(e, false),

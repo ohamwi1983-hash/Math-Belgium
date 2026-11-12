@@ -24,8 +24,10 @@ function formatBorneLatex(valeur: number | null, infini: string, maxDenominateur
 }
 
 function formatMorceauLatex(m: MorceauIntervalle, maxDenominateur?: number): string {
-  const gauche = m.infInclus ? "[" : "]";
-  const droite = m.supInclus ? "]" : "[";
+  // Crochets inversés en délimiteurs explicites : sans `\mathopen`, KaTeX espace « ]−∞ » comme
+  // une soustraction (crochet fermant suivi d'un moins binaire).
+  const gauche = m.infInclus ? "[" : "\\mathopen{]}";
+  const droite = m.supInclus ? "]" : "\\mathclose{[}";
   return `${gauche}${formatBorneLatex(m.inf, "-\\infty", maxDenominateur)}\\,;\\,${formatBorneLatex(m.sup, "+\\infty", maxDenominateur)}${droite}`;
 }
 
