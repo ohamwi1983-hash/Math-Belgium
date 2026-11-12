@@ -48,9 +48,9 @@
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
     '.formule{text-align:center;font-family:var(--serif,serif);font-style:italic;font-size:1.1rem;font-weight:600;color:var(--ink,#241f1a);margin:0 0 12px;}' +
-    '.ligne-select{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:14px;}' +
+    '.ligne-select{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;margin-bottom:14px;}' +
     '.ligne-select label{font-weight:600;color:var(--ink,#241f1a);}' +
-    'select{font:inherit;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}' +
+    'select{max-width:100%;min-width:0;font:inherit;padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink,#241f1a);}' +
     '.panneaux{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:14px;}' +
     '.panneau{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:6px;}' +
     '#svg-cercle{width:100%;max-width:220px;height:auto;display:block;}' +
@@ -73,7 +73,7 @@
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 0;min-width:96px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
-    '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
+    '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;font-size:clamp(0.8rem,3.4vw,0.98rem);}' +
     '.bande{fill:var(--plan,#5b4ea3);fill-opacity:0.07;}' +
     '.etiquette-bande{font-size:10.5px;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.liste{font-size:0.88rem;color:var(--ink,#241f1a);margin:12px 0 0;padding:8px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);line-height:1.6;overflow-wrap:anywhere;}' +

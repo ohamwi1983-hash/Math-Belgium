@@ -2481,3 +2481,36 @@ paths:
   énoncés OK), page réelle en 390 clair/sombre et 1280 : 0 débordement, 0 `$` isolé, 0 erreur
   KaTeX, 0 NaN, 10 ateliers montés sans débordement interne ; figure épinglée : 5 ok, 0 ko
   (les 5 autres ateliers tiennent à l'écran, pas d'épinglage requis).
+
+- **5e (4h), Chapitre 2 — Trigonométrie : audit de contenu appliqué** (accepté en entier).
+  Erreurs : angle d'Archimède (l'angle au centre vaut 360°/n, sa moitié α = 180°/n intervient dans
+  le triangle rectangle) ; application du théodolite → loi des sinus (vue en 4e) ; collision de
+  notations (second membre noté c, k ∈ ℤ conservé, « ici a joue le rôle de ω et b celui de φ »,
+  2π/ω en §6 — titre et whereLabel de la carte 5gen10 intacts ; c désigne aussi la corde en §3,
+  comme dans 5gen12, sections distinctes) ; rappel d'arcsin ; durée du jour (≈ 365,24 j, b ≈ 12 h à
+  toutes les latitudes, modèle affiché en sinus, déplacée en §8) ; « − » typographique dans les
+  étiquettes ; figure §6 graduée (π/9, 4π/9, 7π/9, axe des y, min en `bad`) ; Fourier nuancé
+  (preuve de Dirichlet, 1829) ; récap tourné vers la 6e ; carte du quiz 5gen40 alignée sur ses 7
+  thèmes. Structure : pont « le point qui tourne trace la courbe » et rappel du cercle
+  trigonométrique (16 angles, tableau, Hipparque, vidéo « Arcs et secteurs (3/3) ») déplacés de §1
+  en ouverture de §4 ; `secteur-segment-widget` en §2, `sinusoide-widget` en §4 (problème direct) ;
+  tableau « Quelle méthode ? » en tête de §7. Contenu aligné sur les générateurs : essuie-glace,
+  corde → angle θ = arccos(1 − c²/(2r²)), lentille (§3, 5gen12) ; A < 0 (§4, §6) ; φ par le
+  maximum, réduction et vérification (§5) ; valeurs b ± |A| et liste des extremums dans [0 ; 2π]
+  (§6) ; solutions dans [0 ; 2π[, exemple tangente, second degré à deux racines gardées (§7) ;
+  départ hors extremum, deux candidats φ départagés par le sens de variation (§8) ; formulaire et
+  récap complétés ; 6 nouveaux énoncés de démonstration par clé.
+  7 nouveaux ateliers : `radian-enroule-widget` (§1), `lentille-essuie-glace-widget` (§3),
+  `courbe-mystere-widget` (§5, aucun score), `substitution-cos-widget` et
+  `intersections-trig-widget` (§7), `seuil-grande-roue-widget` et `duree-jour-latitude-widget`
+  (§8 ; formule cos H₀ = −tan(lat)·tan(δ), sans réfraction : 16 h 17 à Bruxelles au solstice, le
+  widget le signale). 7 ateliers améliorés : modele-sinusoidal (h₀ libre + sens, deux candidats φ),
+  sinusoide (flèche Φ = −φ/ω), equation-trig (second membre c, solutions dans [0 ; 2π[, valeurs
+  interdites de tan), archimede (mode doublement 6 → 96, graphe des bornes), secteur-segment (angle
+  libre, corde par la loi des cosinus), extremums-sinusoide (A < 0, liste dans [0 ; 2π]),
+  cercle-trigo (aimant sur les angles remarquables, valeurs exactes). Correctifs d'intégration :
+  étiquettes « max/min » décalées de l'axe vertical et « t = 0 » posée à côté du point ; sélecteurs
+  d'archimede et d'extremums qui débordaient de 9 et 18 px à 390 px (`max-width:100%`, retour à la
+  ligne). Vérifié : `npm run build` propre, page réelle 390 clair/sombre et 1280 : 0 débordement,
+  0 `$` isolé, 0 erreur KaTeX, 0 NaN ; 14 ateliers montés sans débordement interne ; figure
+  épinglée 6 ok / 0 ko à 390 px, 7 ok / 0 ko à 1280 px (les autres tiennent à l'écran).
