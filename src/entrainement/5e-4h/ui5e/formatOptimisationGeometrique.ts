@@ -91,34 +91,43 @@ function variableAffichee(exercice: ExerciceOptimisation): string {
   return "x";
 }
 
-/** Nom de la variable en texte brut (consignes en prose). */
-function variableTexte(exercice: ExerciceOptimisation): string {
-  if (exercice.famille === "trapeze") return "α";
-  if (exercice.famille === "fenetreA" || exercice.famille === "fenetreB") return "r";
-  return "x";
-}
-
 // ============================================================================
 // Consigne générale, bloc de données, question finale persistante — par famille.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceOptimisation): string {
+/** Texte brut (dollars retirés) — pour l'ancien adaptateur papier, en attendant sa refonte. */
+function versTexteBrut(riche: string): string {
+  return riche
+    .replace(/\\alpha/g, "α")
+    .replace(/\\cos/g, "cos")
+    .replace(/\\sin/g, "sin")
+    .replace(/\\,|\\ /g, " ")
+    .replace(/\$/g, "");
+}
+
+/** Énoncé de la situation, en `RichText` (`$…$`), rendu par `TexteRiche5e` (audit 5e ch. 5 : plus
+ * de prose en mode maths ni de notation brute « m_h »). */
+export function consigneGeneraleRiche(exercice: ExerciceOptimisation): string {
   switch (exercice.famille) {
     case "trapeze":
-      return "Une gouttière a un fond de largeur b et deux bords de longueur l, relevés vers l'extérieur d'un angle α par rapport à l'horizontale (0° < α < 90°, voir le schéma). Sa section est un trapèze isocèle de petite base b, de grande base B et de hauteur h. On cherche l'angle α qui rend l'aire de cette section maximale.";
+      return "Une gouttière a un fond de largeur $b$ et deux bords de longueur $l$, relevés vers l'extérieur d'un angle $\\alpha$ par rapport à l'horizontale ($0° < \\alpha < 90°$, voir le schéma). Sa section est un trapèze isocèle de petite base $b$, de grande base $B$ et de hauteur $h$. On cherche l'angle $\\alpha$ qui rend l'aire de cette section maximale.";
     case "cylindre":
-      return "Une boîte cylindrique fermée (fond et couvercle compris) de rayon x et de hauteur h doit contenir un volume V fixé. On cherche le rayon x qui rend minimale la quantité de matériau, c'est-à-dire l'aire totale de la boîte.";
+      return "Une boîte cylindrique fermée (fond et couvercle compris) de rayon $x$ et de hauteur $h$ doit contenir un volume $V$ fixé. On cherche le rayon $x$ qui rend minimale la quantité de matériau, c'est-à-dire l'aire totale de la boîte.";
     case "margesA":
-      return "Une affiche rectangulaire comporte une zone imprimée de largeur x et de hauteur y, entourée de marges : à gauche et à droite, une marge de largeur m_h ; en haut et en bas, une marge de hauteur m_v (voir le schéma). L'aire totale de l'affiche (zone imprimée et marges) est fixée. On cherche la largeur x qui rend l'aire de la zone imprimée maximale.";
+      return "Une affiche rectangulaire comporte une zone imprimée de largeur $x$ et de hauteur $y$, entourée de marges : à gauche et à droite, une marge de largeur $m_h$ ; en haut et en bas, une marge de hauteur $m_v$ (voir le schéma). L'aire totale de l'affiche (zone imprimée et marges) est fixée. On cherche la largeur $x$ qui rend l'aire de la zone imprimée maximale.";
     case "margesB":
-      return "Une affiche rectangulaire comporte une zone imprimée de largeur x et de hauteur y, entourée de marges : à gauche et à droite, une marge de largeur m_h ; en haut et en bas, une marge de hauteur m_v (voir le schéma). L'aire de la zone imprimée est fixée. On cherche la largeur x qui rend l'aire totale de l'affiche minimale.";
+      return "Une affiche rectangulaire comporte une zone imprimée de largeur $x$ et de hauteur $y$, entourée de marges : à gauche et à droite, une marge de largeur $m_h$ ; en haut et en bas, une marge de hauteur $m_v$ (voir le schéma). L'aire de la zone imprimée est fixée. On cherche la largeur $x$ qui rend l'aire totale de l'affiche minimale.";
     case "fenetreA":
-      return "Une fenêtre a la forme d'un rectangle (largeur 2r, hauteur h) surmonté d'un demi-cercle de rayon r (voir le schéma). Le périmètre extérieur de la fenêtre est fixé. On cherche le rayon r qui rend l'aire de la fenêtre maximale.";
+      return "Une fenêtre a la forme d'un rectangle (largeur $2r$, hauteur $h$) surmonté d'un demi-cercle de rayon $r$ (voir le schéma). Le périmètre extérieur de la fenêtre est fixé. On cherche le rayon $r$ qui rend l'aire de la fenêtre maximale.";
     case "fenetreB":
-      return "Une fenêtre a la forme d'un rectangle (largeur 2r, hauteur h) surmonté d'un demi-cercle de rayon r (voir le schéma). L'aire de la fenêtre est fixée. On cherche le rayon r qui rend le périmètre extérieur de la fenêtre minimal.";
+      return "Une fenêtre a la forme d'un rectangle (largeur $2r$, hauteur $h$) surmonté d'un demi-cercle de rayon $r$ (voir le schéma). L'aire de la fenêtre est fixée. On cherche le rayon $r$ qui rend le périmètre extérieur de la fenêtre minimal.";
     case "cubique":
-      return "On reconstruit une fonction du troisième degré f(x) = ax³ + bx² + cx + d coefficient par coefficient, à partir des conditions données.";
+      return "On reconstruit une fonction du troisième degré $f(x)=ax^3+bx^2+cx+d$ coefficient par coefficient, à partir des conditions données.";
   }
+}
+
+export function consigneGenerale(exercice: ExerciceOptimisation): string {
+  return versTexteBrut(consigneGeneraleRiche(exercice));
 }
 
 export function formatTermesDonneesLatex(exercice: ExerciceOptimisation): string[] {
@@ -140,22 +149,24 @@ export function formatTermesDonneesLatex(exercice: ExerciceOptimisation): string
   }
 }
 
+/** Objectif persistant, en `RichText` (prose hors du mode maths : une phrase en \\text{} ne se
+ * coupait pas et débordait à 390 px). */
 export function questionFinale(exercice: ExerciceOptimisation): string {
   switch (exercice.famille) {
     case "trapeze":
-      return "\\text{Trouver l'angle } \\alpha \\text{ qui rend l'aire de la section maximale.}";
+      return "trouver l'angle $\\alpha$ qui rend l'aire de la section maximale.";
     case "cylindre":
-      return "\\text{Trouver le rayon } x \\text{ qui rend l'aire totale de la boîte minimale.}";
+      return "trouver le rayon $x$ qui rend l'aire totale de la boîte minimale.";
     case "margesA":
-      return "\\text{Trouver la largeur } x \\text{ qui rend l'aire imprimée maximale.}";
+      return "trouver la largeur $x$ qui rend l'aire imprimée maximale.";
     case "margesB":
-      return "\\text{Trouver la largeur } x \\text{ qui rend l'aire totale minimale.}";
+      return "trouver la largeur $x$ qui rend l'aire totale minimale.";
     case "fenetreA":
-      return "\\text{Trouver le rayon } r \\text{ qui rend l'aire de la fenêtre maximale.}";
+      return "trouver le rayon $r$ qui rend l'aire de la fenêtre maximale.";
     case "fenetreB":
-      return "\\text{Trouver le rayon } r \\text{ qui rend le périmètre de la fenêtre minimal.}";
+      return "trouver le rayon $r$ qui rend le périmètre de la fenêtre minimal.";
     case "cubique":
-      return "\\text{Reconstruire } f(x)=ax^3+bx^2+cx+d.";
+      return "reconstruire $f(x)=ax^3+bx^2+cx+d$.";
   }
 }
 
@@ -209,40 +220,45 @@ export const PRECISION_POINTS_TEST = "Une valeur arrondie au centième suffit : 
 // Consigne par écran.
 // ============================================================================
 
-export function consigneEcran(exercice: ExerciceOptimisation, phase: EcranOptimisation): string {
-  const v = variableTexte(exercice);
+export function consigneEcranRiche(exercice: ExerciceOptimisation, phase: EcranOptimisation): string {
+  const v = `$${variableAffichee(exercice)}$`;
   switch (phase) {
     case "lien":
-      if (exercice.famille === "trapeze") return "Exprime la hauteur h et la grande base B du trapèze en fonction de α (écris x à la place de α dans tes réponses).";
-      if (exercice.famille === "margesA" || exercice.famille === "margesB") return "Isole la hauteur imprimée y en fonction de x à partir de la contrainte donnée.";
-      return `Isole la hauteur h en fonction de ${v} à partir de la contrainte donnée${v === "r" ? " (écris x à la place de r dans ta réponse)" : ""}.`;
+      if (exercice.famille === "trapeze") return "Exprime la hauteur $h$ et la grande base $B$ du trapèze en fonction de $\\alpha$ (écris $x$ à la place de $\\alpha$ dans tes réponses).";
+      if (exercice.famille === "margesA" || exercice.famille === "margesB") return "Isole la hauteur imprimée $y$ en fonction de $x$ à partir de la contrainte donnée.";
+      return `Isole la hauteur $h$ en fonction de ${v} à partir de la contrainte donnée${v === "$r$" ? " (écris $x$ à la place de $r$ dans ta réponse)" : ""}.`;
     case "construire":
-      return `Exprime ${grandeurOptimisee(exercice)} en fonction de la seule variable ${v} : c'est la fonction F à optimiser${v !== "x" ? ` (écris x à la place de ${v})` : ""}.`;
+      return `Exprime ${grandeurOptimisee(exercice)} en fonction de la seule variable ${v} : c'est la fonction $F$ à optimiser${v !== "$x$" ? ` (écris $x$ à la place de ${v})` : ""}.`;
     case "deriver":
-      if (exercice.famille === "trapeze") return "Calcule la dérivée F'(x), avec x (c'est-à-dire α) en radians.";
-      return "Calcule la dérivée F'(x).";
+      if (exercice.famille === "trapeze") return "Calcule la dérivée $F'(x)$, avec $x$ (c'est-à-dire $\\alpha$) en radians.";
+      return "Calcule la dérivée $F'(x)$.";
     case "resoudre":
-      if (exercice.famille === "trapeze") return "Résous F'(x) = 0 : remplace sin² par 1 − cos², pose u = cos α et résous l'équation du deuxième degré obtenue. Donne u (valeur exacte ou arrondie au centième), puis α en degrés, arrondi au degré.";
-      if (exercice.famille === "margesA" || exercice.famille === "margesB" || exercice.famille === "fenetreB") return `Résous F'(x) = 0 et donne la valeur de ${v} retenue, puis justifie le rejet de l'autre solution. ${PRECISION_CENTIEME}`;
-      return `Résous F'(x) = 0 et donne la valeur de ${v}. ${PRECISION_CENTIEME}`;
+      if (exercice.famille === "trapeze") return "Résous $F'(x)=0$ : remplace $\\sin^2 x$ par $1-\\cos^2 x$, pose $u=\\cos\\alpha$ et résous l'équation du deuxième degré obtenue. Donne $u$ (valeur exacte ou arrondie au centième), puis $\\alpha$ en degrés, arrondi au degré.";
+      if (exercice.famille === "margesA" || exercice.famille === "margesB" || exercice.famille === "fenetreB") return `Résous $F'(x)=0$ et donne la valeur de ${v} retenue, puis justifie le rejet de l'autre solution. ${PRECISION_CENTIEME}`;
+      return `Résous $F'(x)=0$ et donne la valeur de ${v}. ${PRECISION_CENTIEME}`;
     case "justifier": {
       const pts = pointsTest(exercice);
       const unite = exercice.famille === "trapeze" ? "°" : "";
-      return `Calcule F' en ${v} = ${formatNombreTexte(pts.affichageAvant)}${unite} (avant l'optimum) et en ${v} = ${formatNombreTexte(pts.affichageApres)}${unite} (après), puis déduis-en la nature de l'extremum (un seul essai pour la nature). ${PRECISION_POINTS_TEST}`;
+      return `Calcule $F'$ en ${v.slice(0, -1)}=${formatNombreLatex(pts.affichageAvant)}${unite}$ (avant l'optimum) et en ${v.slice(0, -1)}=${formatNombreLatex(pts.affichageApres)}${unite}$ (après), puis déduis-en la nature de l'extremum (un seul essai pour la nature). ${PRECISION_POINTS_TEST}`;
     }
     case "conclure":
       return `Donne les valeurs optimales dans le contexte de l'énoncé. ${PRECISION_CENTIEME}`;
     case "application":
       return `Le matériau coûte ${formatNombreTexte(exercice.famille === "cylindre" ? (exercice.prixUnitaireMateriau ?? 0) : 0)} € par cm². Calcule le coût du matériau de la boîte optimale, arrondi au centime.`;
     case "coeffsImmediats":
-      return "Donne c et d directement, à partir des deux conditions en x = 0.";
+      return "Donne $c$ et $d$ directement, à partir des deux conditions en $x=0$.";
     case "relation":
-      return "Exprime b en fonction de a à partir de la deuxième tangente horizontale (écris a dans ta réponse).";
+      return "Exprime $b$ en fonction de $a$ à partir de la deuxième tangente horizontale (écris $a$ dans ta réponse).";
     case "resoudreA":
-      return "Utilise le point de passage supplémentaire pour trouver a.";
+      return "Utilise le point de passage supplémentaire pour trouver $a$.";
     case "expressionFinale":
-      return "Écris l'expression complète de f(x).";
+      return "Écris l'expression complète de $f(x)$.";
   }
+}
+
+/** Texte brut (ancien adaptateur papier, en attendant sa refonte). */
+export function consigneEcran(exercice: ExerciceOptimisation, phase: EcranOptimisation): string {
+  return versTexteBrut(consigneEcranRiche(exercice, phase)).replace(/\{,\}/g, ",");
 }
 
 /** Nombre en texte brut (virgule décimale). */
@@ -391,11 +407,11 @@ export function texteAideNiveau1(exercice: ExerciceOptimisation, phase: EcranOpt
         case "trapeze":
           return { texte: "Dans le triangle rectangle formé par un côté oblique, la hauteur et sa projection sur la grande base :", latex: "h=l\\sin\\alpha \\qquad \\text{projection}=l\\cos\\alpha" };
         case "cylindre":
-          return { texte: "Le volume d'un cylindre de rayon x et de hauteur h vaut :", latex: "V=\\pi x^2 h" };
+          return { texte: "Le volume d'un cylindre de rayon $x$ et de hauteur $h$ vaut :", latex: "V=\\pi x^2 h" };
         case "margesA":
-          return { texte: "Les dimensions totales de l'affiche sont x + 2m_h et y + 2m_v, donc :", latex: "T=(x+2m_h)(y+2m_v)" };
+          return { texte: "Les dimensions totales de l'affiche sont $x+2m_h$ et $y+2m_v$, donc :", latex: "T=(x+2m_h)(y+2m_v)" };
         case "margesB":
-          return { texte: "La zone imprimée est un rectangle de dimensions x et y :", latex: "A=x\\,y" };
+          return { texte: "La zone imprimée est un rectangle de dimensions $x$ et $y$ :", latex: "A=x\\,y" };
         case "fenetreA":
           return { texte: "Le périmètre extérieur comprend la base, les deux côtés verticaux et le demi-cercle :", latex: "P=2r+2h+\\pi r" };
         case "fenetreB":
@@ -411,36 +427,36 @@ export function texteAideNiveau1(exercice: ExerciceOptimisation, phase: EcranOpt
         case "cylindre":
           return { texte: "L'aire totale comprend les deux disques et la surface latérale :", latex: "S=2\\pi x^2+2\\pi x\\,h" };
         case "margesA":
-          return { texte: "L'aire imprimée vaut x·y ; remplace y par l'expression trouvée à l'écran précédent.", latex: null };
+          return { texte: "L'aire imprimée vaut $x\\cdot y$ ; remplace $y$ par l'expression trouvée à l'écran précédent.", latex: null };
         case "margesB":
-          return { texte: "L'aire totale vaut le produit des dimensions totales ; remplace y par l'expression trouvée :", latex: "(x+2m_h)(y+2m_v)" };
+          return { texte: "L'aire totale vaut le produit des dimensions totales ; remplace $y$ par l'expression trouvée :", latex: "(x+2m_h)(y+2m_v)" };
         case "fenetreA":
-          return { texte: "Remplace h dans la formule de l'aire :", latex: "\\text{Aire}=2r\\,h+\\dfrac{\\pi r^2}{2}" };
+          return { texte: "Remplace $h$ dans la formule de l'aire :", latex: "\\text{Aire}=2r\\,h+\\dfrac{\\pi r^2}{2}" };
         case "fenetreB":
-          return { texte: "Remplace h dans la formule du périmètre :", latex: "P=2r+2h+\\pi r" };
+          return { texte: "Remplace $h$ dans la formule du périmètre :", latex: "P=2r+2h+\\pi r" };
         case "cubique":
           return { texte: "", latex: null };
       }
       break;
     case "deriver":
-      if (exercice.famille === "trapeze") return { texte: "Développe puis dérive terme à terme, avec la règle du produit pour sin x · cos x :", latex: "(\\sin x)'=\\cos x \\qquad (\\cos x)'=-\\sin x" };
-      return { texte: "Dérive terme à terme ; pour un terme en 1/x ou 1/x², utilise :", latex: "\\left(\\dfrac{k}{x}\\right)'=-\\dfrac{k}{x^2} \\qquad \\left(\\dfrac{k}{x^2}\\right)'=-\\dfrac{2k}{x^3}" };
+      if (exercice.famille === "trapeze") return { texte: "Développe puis dérive terme à terme, avec la règle du produit pour $\\sin x\\cdot\\cos x$ :", latex: "(\\sin x)'=\\cos x \\qquad (\\cos x)'=-\\sin x" };
+      return { texte: "Dérive terme à terme ; pour un terme en $\\dfrac{1}{x}$ ou $\\dfrac{1}{x^2}$, utilise :", latex: "\\left(\\dfrac{k}{x}\\right)'=-\\dfrac{k}{x^2} \\qquad \\left(\\dfrac{k}{x^2}\\right)'=-\\dfrac{2k}{x^3}" };
     case "resoudre":
-      if (exercice.famille === "trapeze") return { texte: "Remplace sin² x par 1 − cos² x pour n'avoir plus que des cosinus, puis pose u = cos x :", latex: "\\sin^2 x=1-\\cos^2 x" };
-      if (exercice.famille === "fenetreA") return { texte: "F'(x) est une expression du premier degré : isole x.", latex: null };
+      if (exercice.famille === "trapeze") return { texte: "Remplace $\\sin^2 x$ par $1-\\cos^2 x$ pour n'avoir plus que des cosinus, puis pose $u=\\cos x$ :", latex: "\\sin^2 x=1-\\cos^2 x" };
+      if (exercice.famille === "fenetreA") return { texte: "$F'(x)$ est une expression du premier degré : isole $x$.", latex: null };
       return { texte: "Réduis au même dénominateur ou isole le terme en x, puis extrais la racine. Une longueur ne peut pas être négative.", latex: null };
     case "justifier":
-      return { texte: "Si F' est positive avant l'optimum et négative après, F passe par un maximum ; dans le cas contraire, par un minimum.", latex: null };
+      return { texte: "Si $F'$ est positive avant l'optimum et négative après, $F$ passe par un maximum ; dans le cas contraire, par un minimum.", latex: null };
     case "conclure":
       return { texte: "Remplace la variable par sa valeur optimale dans les expressions des écrans précédents.", latex: null };
     case "application":
       return { texte: "Ce n'est pas une nouvelle optimisation : multiplie le prix au cm² par l'aire minimale trouvée.", latex: null };
     case "coeffsImmediats":
-      return { texte: "f(0) donne directement d ; comme f'(x) = 3ax² + 2bx + c, la condition f'(0) = 0 donne directement c.", latex: null };
+      return { texte: "$f(0)$ donne directement $d$ ; comme $f'(x)=3ax^2+2bx+c$, la condition $f'(0)=0$ donne directement $c$.", latex: null };
     case "relation":
-      return { texte: "Calcule f'(x), remplace c par 0 et x par x₂, puis isole b (on peut simplifier par x₂, non nul) :", latex: "f'(x)=3ax^2+2bx+c" };
+      return { texte: "Calcule $f'(x)$, remplace $c$ par $0$ et $x$ par $x_2$, puis isole $b$ (on peut simplifier par $x_2$, non nul) :", latex: "f'(x)=3ax^2+2bx+c" };
     case "resoudreA":
-      return { texte: "Remplace b (en fonction de a), c = 0 et d dans la condition de passage, puis résous l'équation du premier degré en a.", latex: null };
+      return { texte: "Remplace $b$ (en fonction de $a$), $c=0$ et $d$ dans la condition de passage, puis résous l'équation du premier degré en $a$.", latex: null };
     case "expressionFinale":
       return { texte: "Rassemble les quatre coefficients trouvés aux écrans précédents.", latex: null };
   }
@@ -470,39 +486,39 @@ export function texteAideNiveau2(exercice: ExerciceOptimisation, phase: EcranOpt
     case "construire":
       return { texte: "Après substitution, il ne doit plus rester qu'une seule variable : vérifie qu'aucune autre inconnue n'apparaît.", latex: null };
     case "deriver":
-      return { texte: "Vérifie ta dérivée terme par terme, en particulier le signe des termes en 1/x.", latex: null };
+      return { texte: "Vérifie ta dérivée terme par terme, en particulier le signe des termes en $\\dfrac{1}{x}$.", latex: null };
     case "resoudre":
       switch (exercice.famille) {
         case "trapeze":
-          return { texte: "On obtient une équation du deuxième degré en u (garde la solution comprise entre 0 et 1) :", latex: `${2 * exercice.l}u^2+${exercice.b}u-${exercice.l}=0` };
+          return { texte: "On obtient une équation du deuxième degré en $u$ (garde la solution comprise entre $0$ et $1$) :", latex: `${2 * exercice.l}u^2+${exercice.b}u-${exercice.l}=0` };
         case "cylindre":
-          return { texte: "F'(x) = 0 donne :", latex: `4\\pi x^3=${2 * exercice.coeffV}\\pi` };
+          return { texte: "$F'(x)=0$ donne :", latex: `4\\pi x^3=${2 * exercice.coeffV}\\pi` };
         case "margesA":
-          return { texte: "F'(x) = 0 donne :", latex: `(x+${2 * exercice.mh})^2=\\dfrac{${2 * exercice.mh * (exercice.T as number)}}{${2 * exercice.mv}}` };
+          return { texte: "$F'(x)=0$ donne :", latex: `(x+${2 * exercice.mh})^2=\\dfrac{${2 * exercice.mh * (exercice.T as number)}}{${2 * exercice.mv}}` };
         case "margesB":
-          return { texte: "F'(x) = 0 donne :", latex: `${2 * exercice.mv}\\,x^2=${2 * exercice.mh * (exercice.A as number)}` };
+          return { texte: "$F'(x)=0$ donne :", latex: `${2 * exercice.mv}\\,x^2=${2 * exercice.mh * (exercice.A as number)}` };
         case "fenetreA":
-          return { texte: "F'(x) = 0 donne :", latex: `(4+\\pi)\\,x=${formatValeurAvecPiLatex(exercice.P!)}` };
+          return { texte: "$F'(x)=0$ donne :", latex: `(4+\\pi)\\,x=${formatValeurAvecPiLatex(exercice.P!)}` };
         case "fenetreB":
-          return { texte: "F'(x) = 0 donne :", latex: `\\left(2+\\dfrac{\\pi}{2}\\right)x^2=${formatValeurAvecPiLatex(exercice.A!)}` };
+          return { texte: "$F'(x)=0$ donne :", latex: `\\left(2+\\dfrac{\\pi}{2}\\right)x^2=${formatValeurAvecPiLatex(exercice.A!)}` };
         case "cubique":
           return null;
       }
       break;
     case "justifier":
-      return { texte: "Remplace x par chaque point test dans ton expression de F'(x)" + (exercice.famille === "trapeze" ? " (calculatrice en degrés : seule la valeur de cos et de sin compte)." : "."), latex: null };
+      return { texte: "Remplace $x$ par chaque point test dans ton expression de $F'(x)$" + (exercice.famille === "trapeze" ? " (calculatrice en degrés : seule la valeur du cosinus et du sinus compte)." : "."), latex: null };
     case "conclure":
       return { texte: "Les unités : une longueur en cm ou dm, une aire en cm² ou dm².", latex: null };
     case "application":
       return { texte: "Coût = prix au cm² × aire minimale.", latex: null };
     case "coeffsImmediats":
-      return { texte: "La tangente en x = 0 est horizontale : la pente f'(0) est nulle.", latex: null };
+      return { texte: "La tangente en $x=0$ est horizontale : la pente $f'(0)$ est nulle.", latex: null };
     case "relation":
-      return exercice.famille === "cubique" ? { texte: "Avec c = 0 et x₂ :", latex: `3a\\cdot(${exercice.x2})^2+2b\\cdot(${exercice.x2})=0` } : null;
+      return exercice.famille === "cubique" ? { texte: "Avec $c=0$ et $x_2$ :", latex: `3a\\cdot(${exercice.x2})^2+2b\\cdot(${exercice.x2})=0` } : null;
     case "resoudreA":
       return exercice.famille === "cubique" ? { texte: "La condition de passage s'écrit :", latex: `a\\cdot(${exercice.x3})^3+b\\cdot(${exercice.x3})^2+${exercice.d < 0 ? `(${exercice.d})` : exercice.d}=${exercice.y3}` } : null;
     case "expressionFinale":
-      return { texte: "Le coefficient c est nul : le terme en x n'apparaît pas.", latex: null };
+      return { texte: "Le coefficient $c$ est nul : le terme en $x$ n'apparaît pas.", latex: null };
   }
   return null;
 }

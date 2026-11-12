@@ -3,7 +3,8 @@ import type { ExerciceOptimisation } from "../core5e/optimisationGeometrique.typ
 import type { EcranOptimisation } from "../moteur5e/typesOptimisationGeometrique";
 import { CHAMPS_CHOIX_FERME, diagnostiquerEcran } from "../moteur5e/verificationOptimisationGeometrique";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { champsEcran, consigneEcran, consigneGenerale, formatTermesDonneesLatex, LIBELLE_ECRAN, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatOptimisationGeometrique";
+import { champsEcran, consigneEcranRiche, consigneGeneraleRiche, formatTermesDonneesLatex, LIBELLE_ECRAN, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatOptimisationGeometrique";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -74,7 +75,7 @@ export function EtapeGeneriqueOptimisation({ exercice, phase, tentativesUtilisee
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale(exercice)}
+        consigneGenerale={<TexteRiche5e texte={consigneGeneraleRiche(exercice)} />}
         blocDonnees={
           <>
             <div className="equation-box equation-box-donnees">
@@ -87,10 +88,10 @@ export function EtapeGeneriqueOptimisation({ exercice, phase, tentativesUtilisee
         }
       />
       <p className="prompt-text">
-        Objectif : <Katex expression={questionFinale(exercice)} />
+        Objectif : <TexteRiche5e texte={questionFinale(exercice)} />
       </p>
       <p className="prompt-text">
-        <strong>{LIBELLE_ECRAN[phase]}</strong> — {consigneEcran(exercice, phase)}
+        <strong>{LIBELLE_ECRAN[phase]}</strong> — <TexteRiche5e texte={consigneEcranRiche(exercice, phase)} />
       </p>
       {champs.map((champ) => {
         const erronee = statuts !== null && statuts[champ.id] !== undefined && statuts[champ.id] !== "correct";
@@ -137,11 +138,17 @@ export function EtapeGeneriqueOptimisation({ exercice, phase, tentativesUtilisee
       {avecCalculatrice && <CalculatriceScientifique />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {aide1.texte && <p>{aide1.texte}</p>}
+          {aide1.texte && (
+            <p>
+              <TexteRiche5e texte={aide1.texte} />
+            </p>
+          )}
           {aide1.latex && <Katex expression={aide1.latex} block />}
           {niveauAide >= 2 && aide2 && (
             <>
-              <p>{aide2.texte}</p>
+              <p>
+                <TexteRiche5e texte={aide2.texte} />
+              </p>
               {aide2.latex && <Katex expression={aide2.latex} block />}
             </>
           )}
