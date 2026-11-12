@@ -48,8 +48,9 @@ function etiquetteSvg(e: EtiquetteFigure, x: number, y: number, taille: number, 
 export interface TableauFigure {
   enTetesLignes: EtiquetteFigure[];
   enTetesColonnes: EtiquetteFigure[];
-  /** Valeurs déjà formatées (`""` = case vide). */
-  cellules: string[][];
+  /** Valeurs déjà formatées ; `null` = case inconnue, affichée « ? » (discret) — jamais une case
+   * vide, qui passerait pour une place de réponse (règle « pas de place de réponse »). */
+  cellules: (string | null)[][];
   /** Dernière ligne / dernière colonne = totaux (en gras). */
   avecTotaux?: boolean;
 }
@@ -60,7 +61,7 @@ export function tableauSvg(t: TableauFigure, libelle: string): string {
   const hLigne = 28;
   const pad = 12;
   const largeurPremiere = Math.max(40, ...t.enTetesLignes.map((e) => largeurEtiquette(e, taille) + 2 * pad));
-  const largeursColonnes = t.enTetesColonnes.map((e, j) => Math.max(52, largeurEtiquette(e, taille) + 2 * pad, ...t.cellules.map((l) => largeurTexte(l[j] ?? "", taille) + 2 * pad)));
+  const largeursColonnes = t.enTetesColonnes.map((e, j) => Math.max(52, largeurEtiquette(e, taille) + 2 * pad, ...t.cellules.map((l) => largeurTexte(l[j] ?? "?", taille) + 2 * pad)));
   const W = Math.ceil(largeurPremiere + largeursColonnes.reduce((a, b) => a + b, 0)) + 2;
   const H = hLigne * (t.enTetesLignes.length + 1) + 2;
   const xs = [1, 1 + largeurPremiere];
@@ -77,7 +78,8 @@ export function tableauSvg(t: TableauFigure, libelle: string): string {
     s += etiquetteSvg(e, (xs[0] + xs[1]) / 2, base(i + 1), taille, t.avecTotaux === true && i === nl - 1);
     t.cellules[i].forEach((v, j) => {
       const total = t.avecTotaux === true && (i === nl - 1 || j === nc - 1);
-      s += `<text x="${(xs[j + 1] + xs[j + 2]) / 2}" y="${base(i + 1)}" text-anchor="middle" font-size="${taille}" ${POLICE}${total ? ` font-weight="bold"` : ""} fill="${ENCRE}">${echapper(v)}</text>`;
+      const inconnue = v === null;
+      s += `<text x="${(xs[j + 1] + xs[j + 2]) / 2}" y="${base(i + 1)}" text-anchor="middle" font-size="${taille}" ${POLICE}${total && !inconnue ? ` font-weight="bold"` : ""} fill="${inconnue ? DOUX : ENCRE}">${inconnue ? "?" : echapper(v)}</text>`;
     });
   });
   return `${s}</svg>`;

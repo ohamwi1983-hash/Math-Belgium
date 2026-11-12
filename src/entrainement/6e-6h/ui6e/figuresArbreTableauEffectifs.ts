@@ -62,7 +62,8 @@ function enTeteHtml(e: TableauEffectifsAffichage["enTetesLignes"][number]): stri
   return m ? `<i><span style="text-decoration:overline">${echapper(m[1])}</span></i>` : `<i>${echapper(e.latex)}</i>`;
 }
 
-/** Tableau d'effectifs en HTML (cases inconnues laissées vides). */
+/** Tableau d'effectifs en HTML : une case inconnue affiche « ? » (discret), jamais une case vide
+ * qui passerait pour une place de réponse (règle utilisateur). */
 export function tableauHtml(tableau: TableauEffectifsAffichage): string {
   const bord = "border:1px solid #888;padding:0.3em 0.8em;text-align:center;min-width:3.2em";
   let h = `<table style="border-collapse:collapse;margin:0.4em auto;font-variant-numeric:tabular-nums"><tr><th style="${bord}"></th>`;
@@ -70,7 +71,7 @@ export function tableauHtml(tableau: TableauEffectifsAffichage): string {
   h += "</tr>";
   tableau.cellules.forEach((ligne, i) => {
     h += `<tr><th style="${bord}">${enTeteHtml(tableau.enTetesLignes[i])}</th>`;
-    for (const cel of ligne) h += `<td style="${bord}">${cel.valeur === null ? "" : echapper(cel.valeur)}</td>`;
+    for (const cel of ligne) h += `<td style="${bord}">${cel.valeur === null ? '<span style="color:#8a8f98">?</span>' : echapper(cel.valeur)}</td>`;
     h += "</tr>";
   });
   return `${h}</table>`;

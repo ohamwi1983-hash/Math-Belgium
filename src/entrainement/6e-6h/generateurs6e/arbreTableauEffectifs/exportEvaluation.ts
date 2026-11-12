@@ -95,8 +95,8 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
     e.mode === "pourcentages"
       ? `Représente la situation par un arbre pondéré, puis construis ${effectifs}. Calcule ensuite `
       : e.mode === "arbrePartiel"
-        ? `Complète l'arbre pondéré, puis construis ${effectifs}. Calcule ensuite `
-        : "Complète le tableau des effectifs, puis représente la situation par un arbre pondéré. Calcule ensuite ";
+        ? `Calcule les probabilités inconnues (« ? ») de l'arbre pondéré, puis construis ${effectifs}. Calcule ensuite `
+        : "Calcule les effectifs inconnus (« ? ») du tableau, puis représente la situation par un arbre pondéré. Calcule ensuite ";
   return [
     texte(` ${debut}`),
     latex(latexPBsachantA(e)),
@@ -110,8 +110,16 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
   ];
 }
 
+/** Sur papier, rien n'est « à compléter » (pas de place de réponse, règle utilisateur) : les
+ * branches inconnues sont marquées « ? » sur la figure. */
+function situationPapier(e: Ex): FragmentConsigne[] {
+  return (consigneGenerale(e) as FragmentConsigne[]).map((f) =>
+    f.type === "texte" ? { ...f, valeur: f.valeur.replace("certaines branches sont à compléter", "les probabilités inconnues sont marquées « ? »") } : f,
+  );
+}
+
 function entetePapier(e: Ex): FragmentConsigne[] {
-  return [...(consigneGenerale(e) as FragmentConsigne[]), ...donneesEnClair(e), ...consigneGlobale(e)];
+  return [...situationPapier(e), ...donneesEnClair(e), ...consigneGlobale(e)];
 }
 
 /** Énoncé « par écrans » : ses questions donnent les titres d'étapes du corrigé (« Étape n — … »). */

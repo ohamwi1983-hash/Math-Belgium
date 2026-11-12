@@ -22,7 +22,7 @@ import type {
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIndependanceBayes";
 import { arbreSvg, tableauSvg, type EtiquetteFigure } from "../../ui6e/figuresIndependanceBayes";
-import { phasesPourExercice } from "../../moteur6e/typesIndependanceBayes";
+import { phasesPourExercice, type PhaseIndependanceBayes } from "../../moteur6e/typesIndependanceBayes";
 import {
   branchesArbreC,
   cellule00Reconstruire,
@@ -226,7 +226,7 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
   if (e.famille === "B" && e.sousType === "tableauDonne") return [texte(" "), ...(consigneEcran(e, "bTableEcran1") as FragmentConsigne[])];
   if (e.famille === "B") {
     const question = (consigneEcran(e, "bReconEcran3") as FragmentConsigne[]).map((f) => (f.type === "texte" ? { ...f, valeur: f.valeur.replace("Utilise le tableau reconstruit. ", "") } : f));
-    return [texte(" Construis le tableau des effectifs (avec les totaux), puis réponds à la question suivante. "), ...question];
+    return [texte(" Calcule l'effectif de chaque case du tableau croisé (lignes et colonnes ci-dessus, avec les totaux), puis réponds à la question suivante. "), ...question];
   }
   return [
     ...donneesLatex(`P(c_1)=${dec(e.p)}`, `P(E|c_1)=${dec(e.q1)}`, `P(E|c_2)=${dec(e.q2)}`),
@@ -251,9 +251,16 @@ function figureEnonce(e: Ex): string | undefined {
   return undefined;
 }
 
+/** Consigne d'un écran, titre d'étape du corrigé : celle de l'écran, sauf la demande des pannes,
+ * réécrite au subjonctif avec élision (« qu'aucun des deux événements ne se produise »). */
+function consigneEtape(e: Ex, phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (e.famille === "A" && e.sousType === "pannes" && phase === "aPannesEcran2") return [texte(`Calcule la probabilité ${DEMANDE_PANNES_PAPIER[e.demandeEcran2]}.`)];
+  return consigneEcran(e, phase) as FragmentConsigne[];
+}
+
 /** Énoncé « par écrans » : ses questions donnent les titres d'étapes du corrigé (« Étape n — … »). */
 function construireEnonce(e: Ex): SectionExercice {
-  return { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: phasesPourExercice(e).map((phase) => ({ consigne: consigneEcran(e, phase) as FragmentConsigne[] })) };
+  return { enteteFragments: entetePapier(e), enteteHtml: figureEnonce(e), questions: phasesPourExercice(e).map((phase) => ({ consigne: consigneEtape(e, phase) })) };
 }
 
 function enoncePapier(e: Ex): EnoncePapier {

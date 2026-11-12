@@ -54,7 +54,7 @@ function lettre(e: Ex, phase: PhaseProbabilitesEnsembles): string {
 }
 
 /** Même règle que `diagnostiquerProbabilite` et que la consigne des écrans de saisie. */
-const PRECISION = " Donne chaque probabilité sous forme exacte, ou décimale arrondie au centième (au millième si elle est inférieure à 0,1).";
+const PRECISION = " Donne chaque probabilité sous forme exacte, ou décimale arrondie au centième (au millième si elle est inférieure à 0,1), ou en pourcentage.";
 
 const LATEX_EVENEMENT: Record<EvenementTableauA, string> = {
   A: "A",
@@ -108,7 +108,8 @@ function cases(e: ExerciceFamilleA) {
 const BORD = "border:1px solid #888;padding:0.35em 0.9em;text-align:center;min-width:3.6em";
 
 /** Tableau à double entrée des probabilités (lignes A, Ā, total ; colonnes B, B̄, total). `null` =
- * case vide (à compléter). */
+ * valeur inconnue, marquée « ? » (discret) — jamais une case vide, qui passerait pour une place de
+ * réponse (règle utilisateur). */
 function tableauProbabilitesHtml(valeurs: (string | null)[][]): string {
   const entetes = ["B", "\\overline{B}", "\\text{Total}"];
   const lignes = ["A", "\\overline{A}", "\\text{Total}"];
@@ -117,13 +118,13 @@ function tableauProbabilitesHtml(valeurs: (string | null)[][]): string {
   h += "</tr>";
   valeurs.forEach((ligne, i) => {
     h += `<tr><th style="${BORD}">${rendre(lignes[i])}</th>`;
-    for (const v of ligne) h += `<td style="${BORD}">${v === null ? "" : rendre(v)}</td>`;
+    for (const v of ligne) h += `<td style="${BORD}">${v === null ? '<span style="color:#8a8f98">?</span>' : rendre(v)}</td>`;
     h += "</tr>";
   });
   return `${h}</table>`;
 }
 
-/** Tableau de l'ÉNONCÉ : P(A), P(B), le total 1 et la case donnée (A∩B ou Ā∩B̄) ; le reste vide. */
+/** Tableau de l'ÉNONCÉ : P(A), P(B), le total 1 et la case donnée (A∩B ou Ā∩B̄) ; le reste « ? ». */
 function tableauEnonceA(e: ExerciceFamilleA): string {
   const N = e.denominateur;
   const c = cases(e);
@@ -203,10 +204,10 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
   if (e.famille === "A") {
     const debut: FragmentConsigne[] =
       e.troisiemeDonnee === "PAetB"
-        ? [texte(" Calcule "), latex("P(A\\cup B)"), texte(", puis complète le tableau à double entrée des probabilités.")]
+        ? [texte(" Calcule "), latex("P(A\\cup B)"), texte(", puis les probabilités inconnues (« ? ») du tableau à double entrée.")]
         : e.troisiemeDonnee === "PAouB"
-          ? [texte(" Déduis-en "), latex("P(A\\cap B)"), texte(", puis complète le tableau à double entrée des probabilités.")]
-          : [texte(" Déduis-en "), latex("P(A\\cup B)"), texte(" puis "), latex("P(A\\cap B)"), texte(", et complète le tableau à double entrée des probabilités.")];
+          ? [texte(" Déduis-en "), latex("P(A\\cap B)"), texte(", puis calcule les probabilités inconnues (« ? ») du tableau à double entrée.")]
+          : [texte(" Déduis-en "), latex("P(A\\cup B)"), texte(" puis "), latex("P(A\\cap B)"), texte(", et calcule les probabilités inconnues (« ? ») du tableau à double entrée.")];
     return [...debut, texte(" Calcule ensuite "), latex(latexDemandeA(e)), texte("."), ...questionEtape3(e), texte(PRECISION)];
   }
   const ope = e.demandeEcran2 === "intersection" ? "P(A\\cap B)" : "P(A\\cup B)";
