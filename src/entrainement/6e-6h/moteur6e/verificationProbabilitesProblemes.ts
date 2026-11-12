@@ -1,58 +1,43 @@
-import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
-import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, ExerciceFamilleEMixte, ExerciceFamilleEParametrique, ExerciceFamilleF, ExerciceFamilleGDerangements, ExerciceFamilleGFinancier, ExerciceFamilleGMelange, ExerciceProbabilitesProblemes } from "../core6e/probabilitesProblemes.types";
+import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleEMixte, ExerciceFamilleF, ExerciceFamilleGMelange, ExerciceProbabilitesProblemes } from "../core6e/probabilitesProblemes.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { PhaseProbabilitesProblemes } from "./typesProbabilitesProblemes";
-import { diagnostiquerEquivalenceFonction } from "./equivalenceExponentielle";
-import { diagnostiquerValeur } from "./verificationProbabilites";
-import { verifierEnsembleReelGuide } from "./verificationEnsembleReel";
-import { diagnostiquerCEcran1 as diagnostiquerMelangeEcran1, diagnostiquerCEcran2 as diagnostiquerMelangeEcran2, diagnostiquerCEcran3 as diagnostiquerMelangeEcran3, diagnostiquerBEcran1 as diagnostiquerDerangEcran1, diagnostiquerBEcran2 as diagnostiquerDerangEcran2, diagnostiquerBEcran3 as diagnostiquerDerangEcran3, diagnostiquerBEcran4 as diagnostiquerDerangEcran4 } from "./verificationTiragesArbres";
+import { evaluerValeurExponentielle } from "./expressionExponentielle";
+import { diagnostiquerProbabilite } from "./verificationProbabilites";
+import { diagnostiquerCEcran1 as diagnostiquerMelangeEcran1 } from "./verificationTiragesArbres";
 import { bayesEcran3C, branchesArbreC, probabiliteEffetC } from "./verificationIndependanceBayes";
 
 /**
- * Couche B (6e) — vérification propre à `6gen33`. N'importe JAMAIS rien de `src/generateurs6e/`
- * (règle non négociable, CLAUDE.md) — voir `verificationProbabilitesProblemes.test.ts` (fixtures
- * locales factices) et `generateurs6e/probabilitesProblemes/session.integration.test.ts` (seul
- * fichier autorisé Couche A + Couche B) pour la preuve.
+ * Couche B (6e) — vérification propre à `6gen33`. N'importe jamais rien de `src/generateurs6e/`.
  *
- * ============================================================================
- * **RÉUTILISATION Couche B ↔ Couche B (libre au sein du chantier 6e — CLAUDE.md)**
- * ============================================================================
- * - `diagnostiquerValeur` (statut fraction/décimal) — réexportée depuis `moteur6e/
- *   verificationProbabilites.ts` (module PARTAGÉ chapitre 8, fondé par 6gen30).
- * - `diagnostiquerEquivalenceFonction` — réutilisée depuis `moteur6e/equivalenceExponentielle.ts`
- *   (module partagé chapitre 2, technique d'échantillonnage numérique déjà établie) pour famille E
- *   sous-type "parametrique" (expressions en x).
- * - `verifierEnsembleReelGuide` — réutilisée depuis `moteur6e/verificationEnsembleReel.ts` pour
- *   famille E sous-type "parametrique" écran 3 (intervalle solution de l'inéquation).
- * - `diagnostiquerBEcran1..4`/`diagnostiquerCEcran1..3` — réutilisées TELLES QUELLES depuis
- *   `moteur6e/verificationTiragesArbres.ts` (6gen31) pour famille G sous-types "derangements"/
- *   "melangeObjets" (spec : "aucune adaptation nécessaire").
- * - `branchesArbreC`/`probabiliteEffetC`/`bayesEcran3C` — réutilisées TELLES QUELLES depuis
- *   `moteur6e/verificationIndependanceBayes.ts` (6gen32) pour famille E sous-type "mixte".
- * Tout le reste (familles A/B/C/D/F, écrans propres à G) est RECALCULÉ ici indépendamment de
- * `generateurs6e/probabilitesProblemes/*.ts` (même principe que `verificationIndependanceBayes.ts`/
- * `verificationTiragesArbres.ts`).
+ * Audit 6e ch. 6 (décision A) : TOUTE probabilité saisie passe par `diagnostiquerProbabilite`
+ * (`moteur6e/verificationProbabilites.ts`) — forme exacte (fraction, calcul) acceptée, sinon un
+ * décimal ou un pourcentage qui est l'arrondi CORRECT de la valeur, avec au moins 2 décimales (3 si
+ * la valeur est inférieure à 0,1). Plus aucune tolérance absolue de 0,01 (qui acceptait 0,34 pour
+ * 1/3). Précision minimale relevée à 4 décimales (`decimalesMin`) pour :
+ * - les facteurs (365−k)/365 de la famille A (deux facteurs voisins ne diffèrent que de 1/365) ;
+ * - toute fiabilité de la famille F (série/parallèle : valeurs très proches de 1).
  *
- * ============================================================================
- * **Convention de signature — tous les écrans prennent `string[]`**, y compris les écrans à choix
- * (`valeurs=[choixId]`, même convention que `6gen30`) ET l'écran "intervalle" de famille E
- * paramétrique écran 3 (`valeurs=[JSON.stringify(EnsembleReelGuide)]` — sérialisation choisie pour
- * garder `sessionProbabilitesProblemes.ts`/`etapeTentatives.ts` génériques sur `string[]`, jamais un
- * second chemin de soumission parallèle pour un seul écran).
- * ============================================================================
+ * Réutilisations Couche B ↔ Couche B :
+ * - `branchesArbreC`/`probabiliteEffetC`/`bayesEcran3C` (6gen32) pour la famille E ;
+ * - `diagnostiquerCEcran1` de `verificationTiragesArbres.ts` (6gen31, équation 5p + a = 1 vérifiée
+ *   symboliquement) pour l'écran 1 de la famille G — les écrans 2 et 3 (des probabilités) sont
+ *   recalculés ici pour passer par `diagnostiquerProbabilite`.
+ *
+ * Convention de signature : tous les écrans prennent `string[]`, y compris l'écran à choix
+ * (`valeurs=[choixId]`).
  */
 
-const TOLERANCE = 0.01;
-/** Tolérance resserrée, famille A UNIQUEMENT — les facteurs (365-k)/365 consécutifs ne sont écartés
- * que d'environ 1/365≈0,0027 : la tolérance par défaut (0,01) confondrait deux facteurs ADJACENTS
- * distincts (accepterait à tort un facteur décalé d'un rang). `0,001` reste largement au-dessus de
- * l'imprécision d'une saisie décimale à quelques chiffres, tout en restant sous l'écart minimal réel
- * entre facteurs. */
-const TOLERANCE_ANNIVERSAIRE = 0.001;
+/** Précision minimale (nombre de décimales) des facteurs (365−k)/365 et des fiabilités. */
+export const DECIMALES_FACTEURS_ANNIVERSAIRE = 4;
+export const DECIMALES_FIABILITE = 4;
 
 function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
+}
+
+function proba(texte: string | undefined, cible: number, decimalesMin?: number): StatutVerification {
+  return diagnostiquerProbabilite(texte ?? "", cible, decimalesMin);
 }
 
 // ============================================================================
@@ -71,93 +56,71 @@ export function probToutesDifferentes(n: number): number {
   return facteursEcran1(n).reduce((acc, f) => acc * f, 1);
 }
 
-/** Écran 1 — `valeurs = [facteur_1, ..., facteur_{n-1}]`, TOUJOURS dans cet ordre. */
+/** Écran 1 — `valeurs = [facteur_1, ..., facteur_{n-1}]`, dans cet ordre. */
 export function diagnostiquerAEcran1(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
   const attendus = facteursEcran1(exercice.n);
   if (valeurs.length !== attendus.length) return "not_equivalent";
-  return pireStatut(...attendus.map((cible, i) => diagnostiquerValeur(valeurs[i], cible, TOLERANCE_ANNIVERSAIRE)));
+  return pireStatut(...attendus.map((cible, i) => proba(valeurs[i], cible, DECIMALES_FACTEURS_ANNIVERSAIRE)));
 }
-export function verifierAEcran1(exercice: ExerciceFamilleA, valeurs: string[]): boolean {
-  return diagnostiquerAEcran1(exercice, valeurs) === "correct";
-}
-
 /** Écran 2 — `valeurs = [valeur]`. */
 export function diagnostiquerAEcran2(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probToutesDifferentes(exercice.n), TOLERANCE_ANNIVERSAIRE);
+  return proba(valeurs[0], probToutesDifferentes(exercice.n));
 }
-export function verifierAEcran2(exercice: ExerciceFamilleA, valeurs: string[]): boolean {
-  return diagnostiquerAEcran2(exercice, valeurs) === "correct";
-}
-
 /** Écran 3 — `valeurs = [valeur]`. */
 export function diagnostiquerAEcran3(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], 1 - probToutesDifferentes(exercice.n), TOLERANCE_ANNIVERSAIRE);
-}
-export function verifierAEcran3(exercice: ExerciceFamilleA, valeurs: string[]): boolean {
-  return diagnostiquerAEcran3(exercice, valeurs) === "correct";
+  return proba(valeurs[0], 1 - probToutesDifferentes(exercice.n));
 }
 
 // ============================================================================
-// Famille B — Loi binomiale.
+// Famille B — Épreuves répétées (décision G : chemins comptés dans l'arbre, jamais C(n,k)).
 // ============================================================================
 
-function factorielle(n: number): number {
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
+/** Nombre de chemins de l'arbre à exactement k succès, par énumération des 2ⁿ chemins (n ≤ 5). */
+export function nombreCheminsKSucces(n: number, k: number): number {
+  let total = 0;
+  for (let chemin = 0; chemin < 2 ** n; chemin++) {
+    let succes = 0;
+    for (let i = 0; i < n; i++) if ((chemin >> i) & 1) succes++;
+    if (succes === k) total++;
+  }
+  return total;
 }
-function coefficientBinomial(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  return factorielle(n) / (factorielle(k) * factorielle(n - k));
-}
-export function probExactementKBinomiale(n: number, p: number, k: number): number {
-  return coefficientBinomial(n, k) * p ** k * (1 - p) ** (n - k);
+export function probExactementKChemins(n: number, p: number, k: number): number {
+  return nombreCheminsKSucces(n, k) * p ** k * (1 - p) ** (n - k);
 }
 function probAuMoinsK(n: number, p: number, k: number): number {
   let somme = 0;
-  for (let i = k; i <= n; i++) somme += probExactementKBinomiale(n, p, i);
+  for (let i = k; i <= n; i++) somme += probExactementKChemins(n, p, i);
   return somme;
 }
 function probUnDeChaqueResultat(n: number, p: number): number {
   return 1 - p ** n - (1 - p) ** n;
 }
-export function valeurEcran3Binomiale(exercice: ExerciceFamilleB): number {
+export function valeurEcran3EpreuvesRepetees(exercice: ExerciceFamilleB): number {
   return exercice.demandeEcran3 === "auMoinsK" ? probAuMoinsK(exercice.n, exercice.p, exercice.k) : probUnDeChaqueResultat(exercice.n, exercice.p);
 }
 
-/** Écran 1 — `valeurs = [formule posée, ÉVALUÉE numériquement]` — jamais de vérification symbolique
- * de sa FORME : évaluer numériquement suffit à intercepter le piège central (coefficient binomial
- * oublié change la valeur numérique). `valeurs = [texte]`. */
+/** Écran 1 — `valeurs = [nombre de chemins]` : un entier (un calcul qui donne cet entier est accepté). */
 export function diagnostiquerBEcran1(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probExactementKBinomiale(exercice.n, exercice.p, exercice.k), TOLERANCE);
+  const v = evaluerValeurExponentielle((valeurs[0] ?? "").trim());
+  if (v === null) return "parse_error";
+  return Math.abs(v - nombreCheminsKSucces(exercice.n, exercice.k)) < 1e-9 ? "correct" : "not_equivalent";
 }
-export function verifierBEcran1(exercice: ExerciceFamilleB, valeurs: string[]): boolean {
-  return diagnostiquerBEcran1(exercice, valeurs) === "correct";
-}
-
 /** Écran 2 — `valeurs = [valeur]`. */
 export function diagnostiquerBEcran2(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probExactementKBinomiale(exercice.n, exercice.p, exercice.k), TOLERANCE);
+  return proba(valeurs[0], probExactementKChemins(exercice.n, exercice.p, exercice.k));
 }
-export function verifierBEcran2(exercice: ExerciceFamilleB, valeurs: string[]): boolean {
-  return diagnostiquerBEcran2(exercice, valeurs) === "correct";
-}
-
 /** Écran 3 — `valeurs = [valeur]`. */
 export function diagnostiquerBEcran3(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurEcran3Binomiale(exercice), TOLERANCE);
-}
-export function verifierBEcran3(exercice: ExerciceFamilleB, valeurs: string[]): boolean {
-  return diagnostiquerBEcran3(exercice, valeurs) === "correct";
+  return proba(valeurs[0], valeurEcran3EpreuvesRepetees(exercice));
 }
 
 // ============================================================================
 // Famille C — Indépendants à probabilités différentes.
 // ============================================================================
 
-/** Toutes les configurations de taille `k` — DUPLIQUÉE de `generateurs6e/probabilitesProblemes/
- * familleC.ts` (jamais importée, règle non négociable). Exportée : réutilisée par
- * `ui6e/formatProbabilitesProblemes.ts` (libellés des champs de l'écran 2, même ordre canonique). */
+/** Toutes les configurations de taille `k` (indices 0-based) — ordre canonique. Exportée :
+ * réutilisée par `ui6e/formatProbabilitesProblemes.ts`. */
 export function configurationsExactementK(k: number): number[][] {
   const toutes: number[][] = [[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]];
   return toutes.filter((c) => c.length === k);
@@ -171,7 +134,7 @@ export function probabiliteExactementKFamilleC(exercice: ExerciceFamilleC): numb
   return configurationsExactementK(exercice.k).reduce((acc, c) => acc + probabiliteConfiguration(exercice.p, c), 0);
 }
 
-/** Parse un descriptif de configuration texte libre (ex. "1,3" ou "13") en indices 0-based triés —
+/** Parse un descriptif de configuration (ex. « 1 et 3 », « 1;3 », « 13 ») en indices 0-based triés —
  * `null` si aucun chiffre 1/2/3 reconnu. */
 function parserConfigurationTexte(texte: string): number[] | null {
   const chiffres = texte.match(/[123]/g);
@@ -182,9 +145,8 @@ function memeConfiguration(a: number[], b: number[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-/** Écran 1 — écran "liste" (add-as-needed, taille variable) : `valeurs` = une entrée texte par
- * configuration proposée par l'élève, ORDRE INDIFFÉRENT — comparée comme un ENSEMBLE de
- * configurations (ni manquante, ni surnuméraire, ni dupliquée) à `configurationsExactementK(k)`. */
+/** Écran 1 — écran « liste » : une entrée par configuration, ordre indifférent, comparée comme un
+ * ensemble (ni manquante, ni surnuméraire, ni dupliquée). */
 export function diagnostiquerCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
   const attendues = configurationsExactementK(exercice.k);
   const parsees: number[][] = [];
@@ -202,169 +164,38 @@ export function diagnostiquerCEcran1(exercice: ExerciceFamilleC, valeurs: string
   }
   return "correct";
 }
-export function verifierCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
-  return diagnostiquerCEcran1(exercice, valeurs) === "correct";
-}
-
-/** Écran 2 — `valeurs = [P(config_1), ..., P(config_m)]`, TOUJOURS dans l'ordre canonique de
- * `configurationsExactementK(k)`. Piège central : chaque configuration vérifiée avec SES PROPRES
- * probabilités (produit), jamais un facteur binomial commun. */
+/** Écran 2 — `valeurs = [P(config_1), ..., P(config_m)]`, dans l'ordre canonique. */
 export function diagnostiquerCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
   const configs = configurationsExactementK(exercice.k);
   if (valeurs.length !== configs.length) return "not_equivalent";
-  return pireStatut(...configs.map((c, i) => diagnostiquerValeur(valeurs[i], probabiliteConfiguration(exercice.p, c), TOLERANCE)));
+  return pireStatut(...configs.map((c, i) => proba(valeurs[i], probabiliteConfiguration(exercice.p, c))));
 }
-export function verifierCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
-  return diagnostiquerCEcran2(exercice, valeurs) === "correct";
-}
-
 /** Écran 3 — `valeurs = [valeur]`. */
 export function diagnostiquerCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteExactementKFamilleC(exercice), TOLERANCE);
-}
-export function verifierCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
-  return diagnostiquerCEcran3(exercice, valeurs) === "correct";
+  return proba(valeurs[0], probabiliteExactementKFamilleC(exercice));
 }
 
 // ============================================================================
-// Famille D — Probabilité géométrique.
+// Famille E — Bayes en problème (réutilise `verificationIndependanceBayes.ts`, 6gen32).
 // ============================================================================
 
-export function coeffAireZone(r: [number, number, number], zone: number): number {
-  if (zone === 0) return r[0] ** 2;
-  if (zone === 1) return r[1] ** 2 - r[0] ** 2;
-  return r[2] ** 2 - r[1] ** 2;
-}
-export function coeffAireTotale(r: [number, number, number]): number {
-  return r[2] ** 2;
-}
-export function probabiliteZoneCible(exercice: ExerciceFamilleD): number {
-  const numerateur = exercice.zoneCible.reduce((acc, z) => acc + coeffAireZone(exercice.r, z), 0);
-  return numerateur / coeffAireTotale(exercice.r);
-}
-
-/** Écran 1 — `valeurs = [aire zone0, aire zone1, aire zone2]` (coefficients ENTIERS de π), TOUJOURS
- * dans cet ordre (disque interne, anneau2, anneau3). */
-export function diagnostiquerDEcran1(exercice: ExerciceFamilleD, valeurs: string[]): StatutVerification {
-  return pireStatut(...[0, 1, 2].map((zone) => diagnostiquerValeur(valeurs[zone], coeffAireZone(exercice.r, zone), TOLERANCE)));
-}
-export function verifierDEcran1(exercice: ExerciceFamilleD, valeurs: string[]): boolean {
-  return diagnostiquerDEcran1(exercice, valeurs) === "correct";
-}
-
-/** Écran 2 — `valeurs = [valeur]`. */
-export function diagnostiquerDEcran2(exercice: ExerciceFamilleD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteZoneCible(exercice), TOLERANCE);
-}
-export function verifierDEcran2(exercice: ExerciceFamilleD, valeurs: string[]): boolean {
-  return diagnostiquerDEcran2(exercice, valeurs) === "correct";
-}
-
-// ============================================================================
-// Famille E — sous-type "mixte" (réutilise `verificationIndependanceBayes.ts`, 6gen32).
-// ============================================================================
-
-/** Écran 1 — identifier le SENS de chaque donnée présentée (mélangée à l'écran) : `valeurs =
- * [P(c1), P(E|c1), P(E|c2)]`, TOUJOURS dans cet ordre symbolique (indépendant de l'ordre
- * d'affichage — c'est justement ce que l'élève doit reconstituer). */
+/** Écran 1 — `valeurs = [P(c1), P(E|c1), P(E|c2)]`, dans cet ordre symbolique. */
 export function diagnostiquerEMixteEcran1(exercice: ExerciceFamilleEMixte, valeurs: string[]): StatutVerification {
   const { p, q1, q2 } = exercice.base;
-  return pireStatut(diagnostiquerValeur(valeurs[0], p, TOLERANCE), diagnostiquerValeur(valeurs[1], q1, TOLERANCE), diagnostiquerValeur(valeurs[2], q2, TOLERANCE));
+  return pireStatut(proba(valeurs[0], p), proba(valeurs[1], q1), proba(valeurs[2], q2));
 }
-export function verifierEMixteEcran1(exercice: ExerciceFamilleEMixte, valeurs: string[]): boolean {
-  return diagnostiquerEMixteEcran1(exercice, valeurs) === "correct";
-}
-
 /** Écran 2 — `valeurs = [P(c1∩E), P(c1∩Ē), P(c2∩E), P(c2∩Ē), P(E)]`. */
 export function diagnostiquerEMixteEcran2(exercice: ExerciceFamilleEMixte, valeurs: string[]): StatutVerification {
-  const [b1, b2, b3, b4] = branchesArbreC(exercice.base);
-  const pEffet = probabiliteEffetC(exercice.base);
-  return pireStatut(diagnostiquerValeur(valeurs[0], b1, TOLERANCE), diagnostiquerValeur(valeurs[1], b2, TOLERANCE), diagnostiquerValeur(valeurs[2], b3, TOLERANCE), diagnostiquerValeur(valeurs[3], b4, TOLERANCE), diagnostiquerValeur(valeurs[4], pEffet, TOLERANCE));
+  const cibles = [...branchesArbreC(exercice.base), probabiliteEffetC(exercice.base)];
+  return pireStatut(...cibles.map((c, i) => proba(valeurs[i], c)));
 }
-export function verifierEMixteEcran2(exercice: ExerciceFamilleEMixte, valeurs: string[]): boolean {
-  return diagnostiquerEMixteEcran2(exercice, valeurs) === "correct";
-}
-
 /** Écran 3 — `valeurs = [valeur]`. */
 export function diagnostiquerEMixteEcran3(exercice: ExerciceFamilleEMixte, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], bayesEcran3C(exercice.base), TOLERANCE);
-}
-export function verifierEMixteEcran3(exercice: ExerciceFamilleEMixte, valeurs: string[]): boolean {
-  return diagnostiquerEMixteEcran3(exercice, valeurs) === "correct";
+  return proba(valeurs[0], bayesEcran3C(exercice.base));
 }
 
 // ============================================================================
-// Famille E — sous-type "parametrique".
-// ============================================================================
-
-const POINTS_ECHANTILLONNAGE_X = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-
-export function pTestPositifDeX(a: number, b: number, x: number): number {
-  return a * x + b * (1 - x);
-}
-export function pXBayes(a: number, b: number, x: number): number {
-  return (a * x) / pTestPositifDeX(a, b, x);
-}
-
-/** Écran 1 — `valeurs = [expr P(malade∩test+), expr P(test+)]`, expressions en x, vérifiées par
- * échantillonnage numérique (`diagnostiquerEquivalenceFonction`, technique partagée chapitre 2). */
-export function diagnostiquerEParamEcran1(exercice: ExerciceFamilleEParametrique, valeurs: string[]): StatutVerification {
-  const { a, b } = exercice;
-  const statut1 = diagnostiquerEquivalenceFonction(valeurs[0], (x) => a * x, POINTS_ECHANTILLONNAGE_X, TOLERANCE);
-  const statut2 = diagnostiquerEquivalenceFonction(valeurs[1], (x) => pTestPositifDeX(a, b, x), POINTS_ECHANTILLONNAGE_X, TOLERANCE);
-  return pireStatut(statut1, statut2);
-}
-export function verifierEParamEcran1(exercice: ExerciceFamilleEParametrique, valeurs: string[]): boolean {
-  return diagnostiquerEParamEcran1(exercice, valeurs) === "correct";
-}
-
-/** Écran 2 — `valeurs = [expr P(x)]`, expression rationnelle en x. */
-export function diagnostiquerEParamEcran2(exercice: ExerciceFamilleEParametrique, valeurs: string[]): StatutVerification {
-  const { a, b } = exercice;
-  return diagnostiquerEquivalenceFonction(valeurs[0], (x) => pXBayes(a, b, x), POINTS_ECHANTILLONNAGE_X, TOLERANCE);
-}
-export function verifierEParamEcran2(exercice: ExerciceFamilleEParametrique, valeurs: string[]): boolean {
-  return diagnostiquerEParamEcran2(exercice, valeurs) === "correct";
-}
-
-/** Borne de l'inéquation P(x)>seuil — voir en-tête de `generateurs6e/probabilitesProblemes/
- * familleE.ts` (`borneInterieure`, dupliquée ici). P(x) est TOUJOURS STRICTEMENT CROISSANTE en x sur
- * ]0,1[ dès lors que a>b (garanti à la construction) : la solution est donc TOUJOURS l'intervalle
- * ouvert (borne, 1), jamais l'autre sens — aucun test de signe supplémentaire nécessaire. */
-export function borneInequationParametrique(a: number, b: number, seuil: number): number {
-  const coeffX = a - seuil * (a - b);
-  return (seuil * b) / coeffX;
-}
-
-/** Solution EXACTE de l'inéquation, sous la forme `EnsembleReelGuide` déjà partagée 5e/6e
- * (`core6e/ensembleReel.types.ts`) — LE composant/vérification "intervalle" déjà existant réutilisé
- * tel quel pour cet écran (voir `verifierEnsembleReelGuide` importée en tête de fichier). */
-export function resoudreInequationParametrique(exercice: ExerciceFamilleEParametrique): EnsembleReelGuide {
-  const borne = borneInequationParametrique(exercice.a, exercice.b, exercice.seuil);
-  return { forme: "intervalles", points: [], morceaux: [{ inf: borne, sup: 1, infInclus: false, supInclus: false }] };
-}
-
-function estEnsembleReelGuide(valeur: unknown): valeur is EnsembleReelGuide {
-  return typeof valeur === "object" && valeur !== null && typeof (valeur as { forme?: unknown }).forme === "string";
-}
-
-/** Écran 3 — `valeurs = [JSON.stringify(EnsembleReelGuide)]` (voir en-tête de fichier). */
-export function diagnostiquerEParamEcran3(exercice: ExerciceFamilleEParametrique, valeurs: string[]): StatutVerification {
-  let saisie: unknown;
-  try {
-    saisie = JSON.parse(valeurs[0]);
-  } catch {
-    return "parse_error";
-  }
-  if (!estEnsembleReelGuide(saisie)) return "parse_error";
-  return verifierEnsembleReelGuide(saisie, resoudreInequationParametrique(exercice)) ? "correct" : "not_equivalent";
-}
-export function verifierEParamEcran3(exercice: ExerciceFamilleEParametrique, valeurs: string[]): boolean {
-  return diagnostiquerEParamEcran3(exercice, valeurs) === "correct";
-}
-
-// ============================================================================
-// Famille F — Fiabilité de circuits.
+// Famille F — Montages en série / en parallèle (fiabilité, 4 décimales).
 // ============================================================================
 
 export function valeurConfigurationF(p: [number, number, number], configuration: "serie" | "parallele" | "mixte", positionMixte?: 0 | 1 | 2): number {
@@ -374,131 +205,78 @@ export function valeurConfigurationF(p: [number, number, number], configuration:
   const autres = [0, 1, 2].filter((i) => i !== solo);
   return p[solo] * (1 - (1 - p[autres[0]]) * (1 - p[autres[1]]));
 }
+export function valeurAlternativeF(exercice: ExerciceFamilleF): number {
+  return valeurConfigurationF(exercice.p, exercice.configurationAlternative, exercice.positionMixteAlternative);
+}
+/** L'affirmation (arrondie à 4 décimales) est vraie ssi c'est l'arrondi correct de la fiabilité
+ * de la configuration alternative. */
+export function affirmationFEstVraie(exercice: ExerciceFamilleF): boolean {
+  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurAlternativeF(exercice)) <= 0.5e-4 + 1e-12;
+}
 
-/** Écran 1 — `valeurs = [formule posée, ÉVALUÉE numériquement]` — même principe que famille B écran
- * 1 (piège "série/parallèle confondus" intercepté car cela change la valeur numérique). */
+/** Écran 1 — `valeurs = [calcul posé]` (une expression, évaluée). */
 export function diagnostiquerFEcran1(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte), TOLERANCE);
+  return proba(valeurs[0], valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte), DECIMALES_FIABILITE);
 }
-export function verifierFEcran1(exercice: ExerciceFamilleF, valeurs: string[]): boolean {
-  return diagnostiquerFEcran1(exercice, valeurs) === "correct";
-}
-
 /** Écran 2 — `valeurs = [valeur]`. */
 export function diagnostiquerFEcran2(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte), TOLERANCE);
+  return proba(valeurs[0], valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte), DECIMALES_FIABILITE);
 }
-export function verifierFEcran2(exercice: ExerciceFamilleF, valeurs: string[]): boolean {
-  return diagnostiquerFEcran2(exercice, valeurs) === "correct";
-}
-
-/** Écran 3, variante "comparerValeur" — `valeurs = [valeur]`, fiabilité de la configuration
- * ALTERNATIVE. */
+/** Écran 3, variante "comparerValeur" — `valeurs = [valeur]`. */
 export function diagnostiquerFEcran3Comparer(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
-  const config = exercice.configurationAlternative ?? exercice.configuration;
-  return diagnostiquerValeur(valeurs[0], valeurConfigurationF(exercice.p, config, exercice.positionMixteAlternative), TOLERANCE);
+  return proba(valeurs[0], valeurAlternativeF(exercice), DECIMALES_FIABILITE);
 }
 /** Écran 3, variante "verifierAffirmation" — `valeurs = [choixId]`, `choixId∈{"vrai","faux"}`. */
 export function diagnostiquerFEcran3Verifier(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
-  const valeurCorrecte = valeurConfigurationF(exercice.p, exercice.configuration, exercice.positionMixte);
-  const estVraie = Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurCorrecte) <= TOLERANCE;
-  return valeurs[0] === (estVraie ? "vrai" : "faux") ? "correct" : "not_equivalent";
+  return valeurs[0] === (affirmationFEstVraie(exercice) ? "vrai" : "faux") ? "correct" : "not_equivalent";
 }
 export function diagnostiquerFEcran3(exercice: ExerciceFamilleF, valeurs: string[]): StatutVerification {
   return exercice.demandeEcran3 === "comparerValeur" ? diagnostiquerFEcran3Comparer(exercice, valeurs) : diagnostiquerFEcran3Verifier(exercice, valeurs);
 }
-export function verifierFEcran3(exercice: ExerciceFamilleF, valeurs: string[]): boolean {
-  return diagnostiquerFEcran3(exercice, valeurs) === "correct";
-}
 
 // ============================================================================
-// Famille G — sous-type "derangements" (réutilise `verificationTiragesArbres.ts`, 6gen31, TEL QUEL).
+// Famille G — Mélange de deux urnes (probabilités totales).
 // ============================================================================
 
-export function diagnostiquerGDerangEcran1(exercice: ExerciceFamilleGDerangements, valeurs: string[]): StatutVerification {
-  return diagnostiquerDerangEcran1(exercice.base, valeurs);
+export function probabiliteFaceOrdinaire(exercice: ExerciceFamilleGMelange): number {
+  return exercice.base.p.num / exercice.base.p.den;
 }
-export function diagnostiquerGDerangEcran2(exercice: ExerciceFamilleGDerangements, valeurs: string[]): StatutVerification {
-  return diagnostiquerDerangEcran2(exercice.base, valeurs);
-}
-export function diagnostiquerGDerangEcran3(exercice: ExerciceFamilleGDerangements, valeurs: string[]): StatutVerification {
-  return diagnostiquerDerangEcran3(exercice.base, valeurs);
-}
-export function diagnostiquerGDerangEcran4(exercice: ExerciceFamilleGDerangements, valeurs: string[]): StatutVerification {
-  return diagnostiquerDerangEcran4(exercice.base, valeurs);
-}
-
-// ============================================================================
-// Famille G — sous-type "melangeObjets" (réutilise `verificationTiragesArbres.ts`, 6gen31, écrans
-// 1-3 TELS QUELS ; écran 4 nouveau — probabilités totales).
-// ============================================================================
-
-export function diagnostiquerGMelangeEcran1(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
-  return diagnostiquerMelangeEcran1(exercice.base, valeurs);
-}
-export function diagnostiquerGMelangeEcran2(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
-  return diagnostiquerMelangeEcran2(exercice.base, valeurs);
-}
-export function diagnostiquerGMelangeEcran3(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
-  return diagnostiquerMelangeEcran3(exercice.base, valeurs);
-}
-
-/** Écran 3 de `base` = P(faceSpeciale ∪ autreFace) = p0+p — recalculé localement depuis les champs
- * déjà connus de `exercice.base` (jamais stocké figé). */
+/** P(face spéciale ou autre face | urne 1) = a + p. */
 export function probabiliteObjet1(exercice: ExerciceFamilleGMelange): number {
-  const { p0, p } = exercice.base;
-  return p0.num / p0.den + p.num / p.den;
+  const { p0 } = exercice.base;
+  return p0.num / p0.den + probabiliteFaceOrdinaire(exercice);
 }
 export function probabiliteTotaleMelange(exercice: ExerciceFamilleGMelange): number {
   return exercice.poidsObjet1 * probabiliteObjet1(exercice) + (1 - exercice.poidsObjet1) * exercice.probabiliteAutreObjet;
 }
+
+/** Écran 1 — `valeurs = [équation]` (5p + a = 1, vérifiée symboliquement par 6gen31). */
+export function diagnostiquerGMelangeEcran1(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
+  return diagnostiquerMelangeEcran1(exercice.base, valeurs);
+}
+/** Écran 2 — `valeurs = [p]`. */
+export function diagnostiquerGMelangeEcran2(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
+  return proba(valeurs[0], probabiliteFaceOrdinaire(exercice));
+}
+/** Écran 3 — `valeurs = [valeur]`. */
+export function diagnostiquerGMelangeEcran3(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
+  return proba(valeurs[0], probabiliteObjet1(exercice));
+}
 /** Écran 4 — `valeurs = [valeur]`. */
 export function diagnostiquerGMelangeEcran4(exercice: ExerciceFamilleGMelange, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteTotaleMelange(exercice), TOLERANCE);
+  return proba(valeurs[0], probabiliteTotaleMelange(exercice));
 }
 
 // ============================================================================
-// Famille G — sous-type "financier".
+// Dispatcher générique + classification des écrans.
 // ============================================================================
 
-export function produitsCategoriesFinancier(exercice: ExerciceFamilleGFinancier): number[] {
-  return exercice.categories.map((c) => c.proportion * c.taux);
-}
-export function probabiliteGlobaleFinancier(exercice: ExerciceFamilleGFinancier): number {
-  return produitsCategoriesFinancier(exercice).reduce((a, b) => a + b, 0);
-}
-export function resultatFinancier(exercice: ExerciceFamilleGFinancier): number {
-  return probabiliteGlobaleFinancier(exercice) * exercice.valeurUnitaire * exercice.nombreTotalIndividus;
-}
+export type TypeEcranProbabilitesProblemes = "champs" | "liste" | "choix";
 
-/** Écran 1 — `valeurs = [produit_cat1, ..., produit_catN]`, TOUJOURS dans l'ordre de
- * `exercice.categories`. */
-export function diagnostiquerGFinancierEcran1(exercice: ExerciceFamilleGFinancier, valeurs: string[]): StatutVerification {
-  const produits = produitsCategoriesFinancier(exercice);
-  if (valeurs.length !== produits.length) return "not_equivalent";
-  return pireStatut(...produits.map((v, i) => diagnostiquerValeur(valeurs[i], v, TOLERANCE)));
-}
-/** Écran 2 — `valeurs = [valeur]`. */
-export function diagnostiquerGFinancierEcran2(exercice: ExerciceFamilleGFinancier, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteGlobaleFinancier(exercice), TOLERANCE);
-}
-/** Écran 3 — `valeurs = [valeur]` (tolérance élargie : montant financier potentiellement grand). */
-export function diagnostiquerGFinancierEcran3(exercice: ExerciceFamilleGFinancier, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], resultatFinancier(exercice), 1);
-}
-
-// ============================================================================
-// Dispatcher générique + classification des écrans (type de saisie attendu par écran).
-// ============================================================================
-
-export type TypeEcranProbabilitesProblemes = "champs" | "liste" | "choix" | "intervalle";
-
-/** `"liste"` (add-as-needed) : famille C écran 1. `"choix"` (vrai/faux) : famille F écran 3, variante
- * "verifierAffirmation" UNIQUEMENT. `"intervalle"` : famille E paramétrique écran 3. `"champs"`
- * partout ailleurs. */
+/** `"liste"` : famille C écran 1. `"choix"` (vrai/faux) : famille F écran 3, variante
+ * "verifierAffirmation". `"champs"` partout ailleurs. */
 export function typeEcran(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): TypeEcranProbabilitesProblemes {
   if (phase === "cEcran1") return "liste";
-  if (phase === "eParamEcran3") return "intervalle";
   if (phase === "fEcran3" && exercice.famille === "F" && exercice.demandeEcran3 === "verifierAffirmation") return "choix";
   return "champs";
 }
@@ -523,36 +301,18 @@ export function diagnostiquerEcran(exercice: ExerciceProbabilitesProblemes, phas
       return diagnostiquerCEcran2(exercice as ExerciceFamilleC, valeurs);
     case "cEcran3":
       return diagnostiquerCEcran3(exercice as ExerciceFamilleC, valeurs);
-    case "dEcran1":
-      return diagnostiquerDEcran1(exercice as ExerciceFamilleD, valeurs);
-    case "dEcran2":
-      return diagnostiquerDEcran2(exercice as ExerciceFamilleD, valeurs);
     case "eMixteEcran1":
       return diagnostiquerEMixteEcran1(exercice as ExerciceFamilleEMixte, valeurs);
     case "eMixteEcran2":
       return diagnostiquerEMixteEcran2(exercice as ExerciceFamilleEMixte, valeurs);
     case "eMixteEcran3":
       return diagnostiquerEMixteEcran3(exercice as ExerciceFamilleEMixte, valeurs);
-    case "eParamEcran1":
-      return diagnostiquerEParamEcran1(exercice as ExerciceFamilleEParametrique, valeurs);
-    case "eParamEcran2":
-      return diagnostiquerEParamEcran2(exercice as ExerciceFamilleEParametrique, valeurs);
-    case "eParamEcran3":
-      return diagnostiquerEParamEcran3(exercice as ExerciceFamilleEParametrique, valeurs);
     case "fEcran1":
       return diagnostiquerFEcran1(exercice as ExerciceFamilleF, valeurs);
     case "fEcran2":
       return diagnostiquerFEcran2(exercice as ExerciceFamilleF, valeurs);
     case "fEcran3":
       return diagnostiquerFEcran3(exercice as ExerciceFamilleF, valeurs);
-    case "gDerangEcran1":
-      return diagnostiquerGDerangEcran1(exercice as ExerciceFamilleGDerangements, valeurs);
-    case "gDerangEcran2":
-      return diagnostiquerGDerangEcran2(exercice as ExerciceFamilleGDerangements, valeurs);
-    case "gDerangEcran3":
-      return diagnostiquerGDerangEcran3(exercice as ExerciceFamilleGDerangements, valeurs);
-    case "gDerangEcran4":
-      return diagnostiquerGDerangEcran4(exercice as ExerciceFamilleGDerangements, valeurs);
     case "gMelangeEcran1":
       return diagnostiquerGMelangeEcran1(exercice as ExerciceFamilleGMelange, valeurs);
     case "gMelangeEcran2":
@@ -561,12 +321,6 @@ export function diagnostiquerEcran(exercice: ExerciceProbabilitesProblemes, phas
       return diagnostiquerGMelangeEcran3(exercice as ExerciceFamilleGMelange, valeurs);
     case "gMelangeEcran4":
       return diagnostiquerGMelangeEcran4(exercice as ExerciceFamilleGMelange, valeurs);
-    case "gFinancierEcran1":
-      return diagnostiquerGFinancierEcran1(exercice as ExerciceFamilleGFinancier, valeurs);
-    case "gFinancierEcran2":
-      return diagnostiquerGFinancierEcran2(exercice as ExerciceFamilleGFinancier, valeurs);
-    case "gFinancierEcran3":
-      return diagnostiquerGFinancierEcran3(exercice as ExerciceFamilleGFinancier, valeurs);
   }
 }
 

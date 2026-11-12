@@ -29,28 +29,16 @@ export type PhaseProbabilitesProblemes =
   | "cEcran1"
   | "cEcran2"
   | "cEcran3"
-  | "dEcran1"
-  | "dEcran2"
   | "eMixteEcran1"
   | "eMixteEcran2"
   | "eMixteEcran3"
-  | "eParamEcran1"
-  | "eParamEcran2"
-  | "eParamEcran3"
   | "fEcran1"
   | "fEcran2"
   | "fEcran3"
-  | "gDerangEcran1"
-  | "gDerangEcran2"
-  | "gDerangEcran3"
-  | "gDerangEcran4"
   | "gMelangeEcran1"
   | "gMelangeEcran2"
   | "gMelangeEcran3"
-  | "gMelangeEcran4"
-  | "gFinancierEcran1"
-  | "gFinancierEcran2"
-  | "gFinancierEcran3";
+  | "gMelangeEcran4";
 
 export function phaseInitiale(exercice: ExerciceProbabilitesProblemes): PhaseProbabilitesProblemes {
   switch (exercice.famille) {
@@ -60,16 +48,12 @@ export function phaseInitiale(exercice: ExerciceProbabilitesProblemes): PhasePro
       return "bEcran1";
     case "C":
       return "cEcran1";
-    case "D":
-      return "dEcran1";
     case "E":
-      return exercice.sousType === "mixte" ? "eMixteEcran1" : "eParamEcran1";
+      return "eMixteEcran1";
     case "F":
       return "fEcran1";
     case "G":
-      if (exercice.sousType === "derangements") return "gDerangEcran1";
-      if (exercice.sousType === "melangeObjets") return "gMelangeEcran1";
-      return "gFinancierEcran1";
+      return "gMelangeEcran1";
   }
 }
 
@@ -93,35 +77,17 @@ export function phaseApres(phase: PhaseProbabilitesProblemes): PhaseProbabilites
       return "cEcran3";
     case "cEcran3":
       return "termine";
-    case "dEcran1":
-      return "dEcran2";
-    case "dEcran2":
-      return "termine";
     case "eMixteEcran1":
       return "eMixteEcran2";
     case "eMixteEcran2":
       return "eMixteEcran3";
     case "eMixteEcran3":
       return "termine";
-    case "eParamEcran1":
-      return "eParamEcran2";
-    case "eParamEcran2":
-      return "eParamEcran3";
-    case "eParamEcran3":
-      return "termine";
     case "fEcran1":
       return "fEcran2";
     case "fEcran2":
       return "fEcran3";
     case "fEcran3":
-      return "termine";
-    case "gDerangEcran1":
-      return "gDerangEcran2";
-    case "gDerangEcran2":
-      return "gDerangEcran3";
-    case "gDerangEcran3":
-      return "gDerangEcran4";
-    case "gDerangEcran4":
       return "termine";
     case "gMelangeEcran1":
       return "gMelangeEcran2";
@@ -130,12 +96,6 @@ export function phaseApres(phase: PhaseProbabilitesProblemes): PhaseProbabilites
     case "gMelangeEcran3":
       return "gMelangeEcran4";
     case "gMelangeEcran4":
-      return "termine";
-    case "gFinancierEcran1":
-      return "gFinancierEcran2";
-    case "gFinancierEcran2":
-      return "gFinancierEcran3";
-    case "gFinancierEcran3":
       return "termine";
   }
 }

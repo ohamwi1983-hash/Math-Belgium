@@ -56,15 +56,25 @@ export type TroisiemeDonneeFamilleA = "PAetB" | "PAouB" | "PniAniB";
  * probabilité conditionnelle se déclinant elle-même dans les 2 sens possibles). */
 export type DemandeEcran2FamilleA = "AetBbar" | "AbaretB" | "condAsachantB" | "condBsachantA";
 
-/** Sous-type de la question de déduction structurelle de l'écran 3 (spec : "soit reconnaître...
- * soit comparer..."). `"incompatibilite"` : A∩B̄ et Ā∩B sont TOUJOURS incompatibles, quels que
- * soient nA/nB/nAetB — un fait LOGIQUE (A vrai vs A faux, contradiction directe), jamais un calcul
- * numérique ; la réponse correcte est donc structurellement invariante (voir
- * `verificationProbabilitesEnsembles.ts`). `"comparaisonConditionnelle"` : compare P(A|B̄) à P(A|B)
- * — un résultat NUMÉRIQUE qui dépend des paramètres tirés, généralement différent (la génération
- * réessaie tant que l'écart est trop proche de 0, voir `generateurs6e/probabilitesEnsembles/
- * familleA.ts`). */
-export type SousTypeEcran3FamilleA = "incompatibilite" | "comparaisonConditionnelle";
+/** Sous-type de la question de déduction structurelle de l'écran 3.
+ * `"relation"` (audit 6e ch. 6, décision C — remplace l'ancien `"incompatibilite"`, dont la réponse
+ * était TOUJOURS « incompatibles ») : deux événements construits sur le tableau (`paireEcran3`) sont-ils
+ * incompatibles, indépendants, ou ni l'un ni l'autre ? La réponse dépend de la paire ET des effectifs
+ * (voir `relationPaireEcran3` dans `verificationProbabilitesEnsembles.ts`) ; « incompatibles ET
+ * indépendants » n'arrive que si l'un des deux est de probabilité nulle, exclu ici (les 4 cases du
+ * tableau sont toujours non vides).
+ * `"comparaisonConditionnelle"` : compare P(A|B̄) à P(A|B) — égales exactement quand A et B sont
+ * indépendants (cas désormais tiré, voir `familleA.ts`), sinon d'écart au moins 0,05. */
+export type SousTypeEcran3FamilleA = "relation" | "comparaisonConditionnelle";
+
+/** Les 4 cases du tableau à double entrée. */
+export type CaseTableauA = "AB" | "ABbar" | "AbarB" | "AbarBbar";
+
+/** Événement lisible sur le tableau : A, Ā, B, B̄, ou l'une des 4 intersections (une case). */
+export type EvenementTableauA = "A" | "Abar" | "B" | "Bbar" | "AetB" | "AetBbar" | "AbaretB" | "AbaretBbar";
+
+/** Réponse de l'écran 3 « relation ». */
+export type RelationEcran3A = "incompatibles" | "independants" | "ni_l_un_ni_l_autre";
 
 export interface ExerciceFamilleA {
   famille: "A";
@@ -82,6 +92,8 @@ export interface ExerciceFamilleA {
   troisiemeDonnee: TroisiemeDonneeFamilleA;
   demandeEcran2: DemandeEcran2FamilleA;
   sousTypeEcran3: SousTypeEcran3FamilleA;
+  /** Paire d'événements de l'écran 3 « relation » ; `null` pour « comparaisonConditionnelle ». */
+  paireEcran3: readonly [EvenementTableauA, EvenementTableauA] | null;
 }
 
 // ============================================================================

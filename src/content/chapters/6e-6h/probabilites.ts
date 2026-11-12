@@ -252,7 +252,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu',
+          badge: 'inclusion-exclusion sur 40 personnes',
           formula: 'Dans un groupe de 40 personnes, $n(A)$=18, $n(B)$=15, $n(A \\cap B)$=6 :',
           steps: [],
           result: { tag: 'résultat', text: '$P(A \\cup B) = \\frac{18}{40} + \\frac{15}{40} - \\frac{6}{40} = \\frac{27}{40}$' },
@@ -351,7 +351,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — jeu de 52 cartes',
+          badge: 'jeu de 52 cartes : cœur et figure',
           formula:
             '$A$ = « tirer un cœur » ($P(A)$=13/52), $B$ = « tirer une figure » ($P(B)$=12/52). ' +
             'Il y a exactement 3 figures de cœur, donc $P(A \\cap B)$=3/52.',
@@ -385,6 +385,17 @@ export const probabilites: ChapterContent = {
           description: ['Combine union, intersection, complémentaire et tableau à double entrée sur des situations variées.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 30. Probabilités et ensembles »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Fréquence et probabilité',
+          generatorId: '6gen75',
+          description: [
+            'Confronte un modèle à des données simulées : dé équilibré ou truqué, somme de deux dés, ' +
+              'objet sans modèle a priori dont la probabilité ne peut qu\'être estimée par une fréquence.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 75. Fréquence et probabilité »',
         },
       ],
     },
@@ -432,6 +443,45 @@ export const probabilites: ChapterContent = {
             'branches, jamais en les additionnant ! C\'est l\'inverse pour la probabilité d\'un ' +
             'ÉVÉNEMENT (plusieurs chemins) : elle s\'obtient en ADDITIONNANT.',
         },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi on multiplie le long d\'un chemin',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Sur un arbre à deux étages, la 1re branche d\'un chemin porte $P(A)$. La 2e branche ' +
+                'part du nœud $A$ : elle porte la probabilité de $B$ **sachant** que $A$ est déjà ' +
+                'réalisé, c\'est-à-dire $P(B|A)$ (section 1). Par définition de la probabilité ' +
+                'conditionnelle, $P(B|A) = \\dfrac{P(A \\cap B)}{P(A)}$ ; en multipliant les deux ' +
+                'membres par $P(A)$ : $P(A \\cap B) = P(A) \\times P(B|A)$. La probabilité du chemin ' +
+                'est bien le produit de ses deux branches.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Avec un 3e étage, la même définition, appliquée à $C$ sachant $A \\cap B$, donne ' +
+                '$P(A \\cap B \\cap C) = P(A \\cap B) \\times P(C|A \\cap B) = P(A) \\times P(B|A) ' +
+                '\\times P(C|A \\cap B)$ : chaque étage ajoute un facteur, quelle que soit la ' +
+                'profondeur de l\'arbre.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Contrôle par dénombrement sur l\'urne ci-dessus (5 rouges, 3 bleues, sans remise) : ' +
+                'il y a $8 \\times 7 = 56$ tirages ordonnés équiprobables, dont $5 \\times 4 = 20$ ' +
+                'donnent rouge puis rouge. Donc $P(RR) = \\dfrac{20}{56}$, exactement ' +
+                '$\\dfrac{5}{8} \\times \\dfrac{4}{7}$ : le produit des deux branches.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Enfin, deux chemins différents se séparent forcément à un étage : ils sont ' +
+                'INCOMPATIBLES. La probabilité d\'un événement atteint par plusieurs chemins est donc ' +
+                'la SOMME des probabilités de ces chemins — la seconde règle de lecture de l\'arbre.',
+            },
+          ],
+        },
         { kind: 'subheading', text: 'Avec ou sans remise : tout change' },
         {
           kind: 'methode',
@@ -443,7 +493,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — P(2 rouges)',
+          badge: 'deux rouges, avec ou sans remise',
           formula: '',
           steps: [
             { tag: 'avec remise', text: '$P(RR) = (5/8)^2 = 25/64$ (indépendance)' },
@@ -558,7 +608,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu',
+          badge: 'somme 5 avec deux dés',
           formula: '',
           steps: [],
           result: {
@@ -590,7 +640,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — 4 lettres, 4 enveloppes',
+          badge: '4 lettres, 4 enveloppes : dérangements',
           formula: '',
           steps: [
             { tag: 'total', text: '4!=24 répartitions possibles au total' },
@@ -675,7 +725,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — test médical',
+          badge: 'test médical : probabilités totales',
           formula:
             'Pour un test avec $P(malade)$=0,1, $P(T^+|malade)$=0,9 et $P(T^+|\\text{non malade})$=0,2, ' +
             'la loi des probabilités totales (partition « malade »/« non malade ») donne :',
@@ -736,7 +786,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — remonter du test à la maladie',
+          badge: 'test médical : remonter du test à la maladie',
           formula: 'Sachant le résultat positif, quelle est la probabilité réelle d\'être malade ?',
           steps: [],
           result: { tag: 'résultat', text: '$P(malade|T^+) = \\dfrac{P(T^+|malade) \\times P(malade)}{P(T^+)} = \\dfrac{0,9 \\times 0,1}{0,27} = \\dfrac{1}{3}$' },
@@ -824,7 +874,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — école de musique',
+          badge: 'école de musique : lecture dans un tableau',
           formula:
             'Une école propose piano et guitare ; elle compte 60 inscrits dont 38 filles, et ' +
             'chaque élève ne suit qu\'un seul instrument. Le professeur de guitare a 28 élèves, ' +
@@ -971,6 +1021,17 @@ export const probabilites: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 32. Indépendance, conditionnement et Bayes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Arbre, tableau, effectifs',
+          generatorId: '6gen74',
+          description: [
+            'Une même situation écrite de trois façons — pourcentages, arbre pondéré, tableau ' +
+              'd\'effectifs — puis P(B|A) et P(A|B) sur les mêmes données, et l\'indépendance vérifiée.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 74. Arbre, tableau, effectifs »',
+        },
       ],
     },
 
@@ -1023,7 +1084,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — arbre complet à 3 tirs, p=0,3',
+          label: 'Exemple résolu — arbre complet à 3 tirs, p = 0,3',
           blocks: [
             {
               kind: 'para',
@@ -1056,6 +1117,44 @@ export const probabilites: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la formule des épreuves répétées',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Un chemin de l\'arbre est une suite de $n$ branches : $k$ d\'entre elles portent un ' +
+                'succès (probabilité $p$), les $n-k$ autres un échec (probabilité $1-p$). Les épreuves ' +
+                'étant indépendantes, chaque branche garde la même probabilité quel que soit le chemin ' +
+                'déjà parcouru : par la règle du produit (section 2), ce chemin a pour probabilité ' +
+                '$p^k(1-p)^{n-k}$, quel que soit l\'ORDRE des succès et des échecs (l\'ordre des ' +
+                'facteurs ne change pas un produit).',
+            },
+            {
+              kind: 'para',
+              text:
+                'On note $N_k$ le nombre de chemins qui comptent exactement $k$ succès. L\'événement ' +
+                '« $X=k$ » est réalisé par ces $N_k$ chemins, et par eux seuls. Deux chemins ' +
+                'différents sont incompatibles : par la règle de la somme, $P(X=k)$ est la somme de ' +
+                '$N_k$ probabilités toutes égales à $p^k(1-p)^{n-k}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'D\'où $P(X=k) = N_k \\times p^k(1-p)^{n-k}$. Tout le travail se ramène donc à ' +
+                'COMPTER les chemins à $k$ succès, en énumérant les positions possibles des succès ' +
+                'parmi les $n$ épreuves — comme dans l\'exemple du tireur ci-dessous.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Contrôle avec l\'arbre à 3 tirs ci-dessus : $N_0 = 1$, $N_1 = 3$, $N_2 = 3$, ' +
+                '$N_3 = 1$, soit $1+3+3+1 = 8 = 2^3$ chemins en tout. Chaque chemin est compté une ' +
+                'et une seule fois : la somme des $P(X=k)$ vaut bien 1.',
+            },
+          ],
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'categoricalBarChart',
@@ -1077,7 +1176,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — tireur, n=5, p=0,3',
+          badge: 'tireur : 2 succès sur 5 tirs, p = 0,3',
           formula: '',
           steps: [
             {
@@ -1151,7 +1250,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'exemple résolu — action boursière, n=3, p=0,6',
+          badge: 'action boursière : 3 jours, p = 0,6',
           formula:
             'Même principe que l\'arbre à 3 tirs ci-dessus, avec $p=0,6$ (H « hausse ») : ' +
             '1 chemin HHH, 3 chemins à 2 hausses (HHB, HBH, BHH), 3 chemins à 1 hausse ' +
@@ -1169,6 +1268,66 @@ export const probabilites: ChapterContent = {
               'tous les cas possibles, sans jamais se chevaucher.',
           },
         },
+        { kind: 'subheading', text: 'Deux grands classiques : le complément et l\'indépendance' },
+        {
+          kind: 'exemple',
+          badge: 'paradoxe des anniversaires',
+          formula:
+            'Dans un groupe de 5 personnes, quelle est la probabilité qu\'au moins deux soient nées ' +
+            'le même jour ? (On ignore les années bissextiles : 365 jours équiprobables.)',
+          steps: [
+            {
+              tag: 'passer au complément',
+              text:
+                '« Au moins deux nées le même jour » a pour complément « les 5 anniversaires sont ' +
+                'tous différents » : un seul cas à calculer, au lieu de toutes les coïncidences possibles.',
+            },
+            {
+              tag: 'personne après personne',
+              text:
+                'La 1re personne peut être née n\'importe quel jour ; la 2e doit éviter 1 jour ' +
+                '($\\frac{364}{365}$), la 3e en éviter 2 ($\\frac{363}{365}$), et ainsi de suite. ' +
+                'Règle du produit sur ce chemin : $P$(tous différents) $= \\frac{364}{365} \\times ' +
+                '\\frac{363}{365} \\times \\frac{362}{365} \\times \\frac{361}{365} \\approx 0{,}9729$.',
+            },
+          ],
+          result: {
+            tag: 'résultat',
+            text:
+              '$P$(au moins deux le même jour) $= 1 - 0{,}9729 \\approx 0{,}0271$. Le même calcul ' +
+              'avec 23 personnes donne déjà environ $0{,}507$ : plus d\'une chance sur deux !',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'montage en série ou en parallèle',
+          formula:
+            'Un appareil comporte deux composants qui tombent en panne indépendamment l\'un de ' +
+            'l\'autre : le 1er fonctionne avec une probabilité 0,9, le 2e avec une probabilité 0,8.',
+          steps: [
+            {
+              tag: 'en série',
+              text:
+                'Le courant traverse les deux composants l\'un après l\'autre : l\'appareil ' +
+                'fonctionne seulement si les DEUX fonctionnent. Par indépendance : ' +
+                '$P$(fonctionne) $= 0{,}9 \\times 0{,}8 = 0{,}72$.',
+            },
+            {
+              tag: 'en parallèle',
+              text:
+                'Il suffit qu\'UN des deux fonctionne : c\'est un « au moins un », donc par le ' +
+                'complément. L\'appareil tombe en panne seulement si les deux sont en panne : ' +
+                '$P$(panne) $= 0{,}1 \\times 0{,}2 = 0{,}02$, d\'où $P$(fonctionne) $= 1 - 0{,}02 = 0{,}98$.',
+            },
+          ],
+          result: {
+            tag: 'à retenir',
+            text:
+              'Série : produit des probabilités de fonctionnement. Parallèle : 1 moins le produit des ' +
+              'probabilités de panne. Jamais l\'un à la place de l\'autre — et additionner ' +
+              '$0{,}9+0{,}8 = 1{,}7$ ne donne même pas une probabilité.',
+          },
+        },
         {
           kind: 'entrainement',
           title: 'Probabilités — problèmes',
@@ -1179,6 +1338,17 @@ export const probabilites: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 33. Probabilités — problèmes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Quand l\'intuition se trompe',
+          generatorId: '6gen76',
+          description: [
+            'Trois paradoxes classiques — les paris du chevalier de Méré, le jeu de Monty Hall, ' +
+              'les deux enfants — où le calcul contredit l\'intuition.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 76. Quand l\'intuition se trompe »',
         },
       ],
     },
@@ -1191,8 +1361,8 @@ export const probabilites: ChapterContent = {
         formulas: [
           { text: '$0 \\le P(A) \\le 1$' },
           {
-            text: '(cas favorables) / (cas possibles)',
-            condition: 'seulement en équiprobabilité',
+            text: '$P(A) = \\dfrac{n(A)}{n(\\Omega)}$',
+            condition: 'issues équiprobables — $n(A)$ : cas favorables, $n(\\Omega)$ : cas possibles',
           },
           { text: '$P(\\bar{A}) = 1-P(A)$' },
           { text: '$P(A \\cup B) = P(A)+P(B)-P(A \\cap B)$' },
@@ -1208,7 +1378,7 @@ export const probabilites: ChapterContent = {
           { text: 'probabilité d\'un chemin = produit des probabilités des branches' },
           { text: 'probabilité d\'un événement = somme des probabilités de ses chemins' },
           { text: '$n! = n \\times (n-1) \\times \\ldots \\times 1$' },
-          { text: '$D(n) \\neq n!$', condition: 'dérangement — aucun objet à sa place' },
+          { text: 'dérangement : permutation où aucun objet ne reste à sa place — $D(n) \\neq n!$, par exemple $D(4) = 9$' },
         ],
       },
       {
@@ -1219,7 +1389,10 @@ export const probabilites: ChapterContent = {
             text: '$P(A \\cap B) = P(A) \\times P(B)$',
             condition: '$A$, $B$ indépendants',
           },
-          { text: 'incompatible ($P(A \\cap B)=0$) ⇒ jamais indépendant' },
+          {
+            text: '$A$, $B$ incompatibles et de probabilités non nulles ⟹ $A$, $B$ jamais indépendants',
+            condition: 'car $P(A \\cap B) = 0 \\neq P(A) \\times P(B)$',
+          },
         ],
       },
       {

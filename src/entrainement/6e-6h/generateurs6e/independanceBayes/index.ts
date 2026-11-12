@@ -1,6 +1,6 @@
 import type { ExerciceIndependanceBayes } from "../../core6e/independanceBayes.types";
 import { construireFamilleAPannes, construireFamilleAUnion, genererFamilleA } from "./familleA";
-import { construireFamilleBHistogramme, construireFamilleBReconstruire, construireFamilleBTableauDonne, genererFamilleB } from "./familleB";
+import { construireFamilleBReconstruire, construireFamilleBTableauDonne, construireFamilleBTestIndependance, genererFamilleB } from "./familleB";
 import { construireFamilleC, genererFamilleC } from "./familleC";
 
 /**
@@ -22,20 +22,20 @@ export function genererExerciceIndependanceBayes(): ExerciceIndependanceBayes {
 
 /** Identifiants de variante forcée — granularité "ce qui change la structure de la question" (même
  * principe que `6gen30`), jamais un identifiant par tirage numérique individuel. */
-export type IdVarianteIndependanceBayes = "A-pannes-lesDeux" | "A-pannes-aucun" | "A-pannes-auMoinsUn" | "A-pannes-exactementUn" | "A-union" | "B-histogramme-inferieur" | "B-histogramme-auMoins" | "B-tableauDonne" | "B-reconstruire" | "C-causeSachantEffet" | "C-causeSachantPasEffet";
+export type IdVarianteIndependanceBayes = "A-pannes-lesDeux" | "A-pannes-aucun" | "A-pannes-auMoinsUn" | "A-pannes-exactementUn" | "A-union" | "B-independance-produit" | "B-independance-conditionnelle" | "B-tableauDonne" | "B-reconstruire" | "C-causeSachantEffet" | "C-causeSachantPasEffet";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteIndependanceBayes; label: string }[] = [
   { id: "A-pannes-lesDeux", label: "A — pannes, écran 2 : les deux se produisent" },
   { id: "A-pannes-aucun", label: "A — pannes, écran 2 : aucun ne se produit" },
   { id: "A-pannes-auMoinsUn", label: "A — pannes, écran 2 : au moins un se produit" },
   { id: "A-pannes-exactementUn", label: "A — pannes, écran 2 : exactement un (double indépendance)" },
-  { id: "A-union", label: "A — P(A), P(A∪B) donnés, indépendance" },
-  { id: "B-histogramme-inferieur", label: "B — histogramme, P(X < cible)" },
-  { id: "B-histogramme-auMoins", label: "B — histogramme, P(X ≥ cible)" },
+  { id: "A-union", label: "A — P(A) et P(A ∪ B) donnés, indépendance" },
+  { id: "B-independance-produit", label: "B — tableau : indépendance, P(A ∩ B) comparé à P(A)·P(B)" },
+  { id: "B-independance-conditionnelle", label: "B — tableau : indépendance, P(A | B) comparé à P(A)" },
   { id: "B-tableauDonne", label: "B — grand tableau donné (lecture)" },
   { id: "B-reconstruire", label: "B — reconstruire un tableau depuis des %" },
-  { id: "C-causeSachantEffet", label: "C — Bayes, P(cause1|effet)" },
-  { id: "C-causeSachantPasEffet", label: "C — Bayes, P(cause1|pas effet)" },
+  { id: "C-causeSachantEffet", label: "C — Bayes, P(c₁ | E)" },
+  { id: "C-causeSachantPasEffet", label: "C — Bayes, P(c₁ | Ē)" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteIndependanceBayes): ExerciceIndependanceBayes {
@@ -50,10 +50,10 @@ export function construireAvecVarianteId(id: IdVarianteIndependanceBayes): Exerc
       return construireFamilleAPannes("exactementUn");
     case "A-union":
       return construireFamilleAUnion();
-    case "B-histogramme-inferieur":
-      return construireFamilleBHistogramme("inferieur");
-    case "B-histogramme-auMoins":
-      return construireFamilleBHistogramme("auMoins");
+    case "B-independance-produit":
+      return construireFamilleBTestIndependance("produit");
+    case "B-independance-conditionnelle":
+      return construireFamilleBTestIndependance("conditionnelle");
     case "B-tableauDonne":
       return construireFamilleBTableauDonne(tirerParmi(["jointe", "margLigne", "margColonne", "condLigneSachantColonne", "condColonneSachantLigne"] as const));
     case "B-reconstruire":

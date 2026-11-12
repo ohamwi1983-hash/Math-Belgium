@@ -1,8 +1,10 @@
 import type { ContexteFamilleB, DemandeEcran3FamilleB, ExerciceFamilleB } from "../../core6e/probabilitesProblemes.types";
 
 /**
- * Couche A (6e) — génération famille B ("Loi binomiale") pour `6gen33`. n épreuves identiques
- * indépendantes (n∈{3,4,5}), probabilité de succès p DONNÉE.
+ * Couche A (6e) — génération famille B (« épreuves répétées ») pour `6gen33`. n épreuves identiques
+ * et indépendantes (n∈{3,4,5}), probabilité de succès p donnée. Audit 6e ch. 6 (décision G) : le
+ * cours ne connaît pas C(n,k) — le nombre de chemins à k succès se COMPTE dans l'arbre, par
+ * énumération (n ≤ 5). Aucun texte de ce générateur ne nomme un coefficient.
  */
 
 function tirerParmi<T>(candidats: readonly T[]): T {
@@ -39,24 +41,23 @@ export function genererFamilleB(): ExerciceFamilleB {
 // Calculs purs — réutilisés par les TESTS de ce fichier (voir `familleA.ts`, même principe).
 // ============================================================================
 
-function factorielle(n: number): number {
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
+/** Nombre de chemins de l'arbre (suites de n résultats S/É) comportant exactement k succès —
+ * compté par ÉNUMÉRATION des 2ⁿ chemins (n ≤ 5), comme l'élève le fait dans l'arbre. */
+export function nombreCheminsKSucces(n: number, k: number): number {
+  let total = 0;
+  for (let chemin = 0; chemin < 2 ** n; chemin++) {
+    let succes = 0;
+    for (let i = 0; i < n; i++) if ((chemin >> i) & 1) succes++;
+    if (succes === k) total++;
+  }
+  return total;
 }
 
-export function coefficientBinomial(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  return factorielle(n) / (factorielle(k) * factorielle(n - k));
-}
-
-/** Écrans 1/2 — P(exactement k succès) = C(n,k)·p^k·(1-p)^(n-k). Piège central de la spec : oublier
- * C(n,k) (compter une seule configuration au lieu de toutes celles menant à "exactement k succès"). */
+/** Écran 2 — P(exactement k succès) = (nombre de chemins)·p^k·(1−p)^(n−k). */
 export function probExactementK(n: number, p: number, k: number): number {
-  return coefficientBinomial(n, k) * p ** k * (1 - p) ** (n - k);
+  return nombreCheminsKSucces(n, k) * p ** k * (1 - p) ** (n - k);
 }
 
-/** Écran 3, variante "auMoinsK" — somme des termes de k à n. */
 export function probAuMoinsK(n: number, p: number, k: number): number {
   let somme = 0;
   for (let i = k; i <= n; i++) somme += probExactementK(n, p, i);

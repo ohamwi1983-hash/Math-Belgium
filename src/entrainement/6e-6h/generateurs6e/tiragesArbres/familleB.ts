@@ -1,4 +1,4 @@
-import type { ContexteFamilleB, DemandeEcran1FamilleB, ExerciceFamilleB } from "../../core6e/tiragesArbres.types";
+import type { ContexteFamilleB, DemandeEcran1FamilleB, DemandeEcran4FamilleB, ExerciceFamilleB } from "../../core6e/tiragesArbres.types";
 
 /**
  * Couche A (6e) — génération famille B ("Permutations et dérangements") pour `6gen31`. n éléments
@@ -48,18 +48,28 @@ function tirerPositionsDistinctes(n: number, count: number): number[] {
 }
 
 /** Construction déterministe (`n`/`demandeEcran1` fixés, tout le reste tiré au hasard) — utilisée
- * par `CATALOGUE_VARIANTES`/`construireAvecVarianteId`. `k` (écran 3) tiré dans 1..n-2 (spec :
- * "jamais n−1, structurellement impossible"). */
+ * par `CATALOGUE_VARIANTES`/`construireAvecVarianteId` et par `6gen33` (famille G, n = 4).
+ * Audit 6e ch. 6 :
+ * - « deux positions fixées » est remplacé par « une » quand n = 3 (c'est alors « tout est bien
+ *   placé », la question de l'écran 2) ;
+ * - k (écran 3) vérifie 1 ≤ k ≤ n − 2 ET n − k ≤ 3 : les objets restants, tous mal placés, se
+ *   comptent sur un petit arbre (1 façon pour 2 objets, 2 pour 3) — jamais les 9 façons de mal
+ *   placer 4 objets, ni une formule de dénombrement du chapitre suivant ;
+ * - écran 4 : « aucune bien placée » pour n ≤ 4, « au moins 3 bien placées » pour n = 5 (44
+ *   arrangements sans point fixe sur 120 ne se comptent pas raisonnablement à la main). */
 export function construireFamilleB(n: number, demandeEcran1: DemandeEcran1FamilleB): ExerciceFamilleB {
   const contexte = tirerParmi(CONTEXTES_B);
-  const positionsEcran1 = tirerPositionsDistinctes(n, demandeEcran1 === "une" ? 1 : 2);
-  const k = tirerEntier(1, n - 2);
-  return { famille: "B", n, contexte, demandeEcran1, positionsEcran1, k };
+  const demande: DemandeEcran1FamilleB = n <= 3 ? "une" : demandeEcran1;
+  const positionsEcran1 = tirerPositionsDistinctes(n, demande === "une" ? 1 : 2).sort((x, y) => x - y);
+  const k = tirerEntier(Math.max(1, n - 3), n - 2);
+  const demandeEcran4: DemandeEcran4FamilleB = n >= 5 ? "auMoinsTrois" : "aucune";
+  return { famille: "B", n, contexte, demandeEcran1: demande, positionsEcran1, k, demandeEcran4 };
 }
 
-/** Tirage ÉQUIPROBABLE de `n` ET de `demandeEcran1`. */
+/** Tirage de `n` puis de `demandeEcran1` (« deux » seulement si n ≥ 4). */
 export function genererFamilleB(): ExerciceFamilleB {
-  return construireFamilleB(tirerParmi(N_B), tirerParmi(["une", "deux"] as const));
+  const n = tirerParmi(N_B);
+  return construireFamilleB(n, n <= 3 ? "une" : tirerParmi(["une", "deux"] as const));
 }
 
 // ============================================================================
@@ -91,4 +101,12 @@ export function probExactementKCorrectes(n: number, k: number): number {
 /** Écran 4 — P(aucune position correcte) = D(n)/n!. */
 export function probAucuneCorrecte(n: number): number {
   return derangement(n) / factorielle(n);
+}
+
+/** Écran 4, n = 5 — P(au moins 3 bien placées) = P(exactement 3) + P(exactement 5) (exactement 4
+ * est impossible). */
+export function probAuMoinsTroisCorrectes(n: number): number {
+  let total = 0;
+  for (let j = 3; j <= n; j++) total += probExactementKCorrectes(n, j);
+  return total;
 }

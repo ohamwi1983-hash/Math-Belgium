@@ -3,8 +3,14 @@ import type { ContexteFamilleC, DemandeEcran3FamilleC, ExerciceFamilleC } from "
 /**
  * Couche A (6e) — génération famille C ("Arbre de probabilité et théorème de Bayes") pour `6gen32`.
  * Deux causes (p, 1−p), probabilité conditionnelle d'un effet sachant chaque cause (q1, q2) — valeurs
- * DÉCIMALES directement (voir en-tête de `core6e/independanceBayes.types.ts`), reprenant EXACTEMENT
- * les ensembles de la spec.
+ * DÉCIMALES directement (voir en-tête de `core6e/independanceBayes.types.ts`).
+ *
+ * Audit 6e ch. 6 : q1 et q2 étaient tirés dans {0,1 ; … ; 0,4} — un « test » qui ne détecte le défaut
+ * qu'une fois sur 5 et donne autant de faux positifs n'a aucun sens. Désormais q1 ∈ [0,7 ; 0,99]
+ * (sensibilité) et q2 ∈ [0,01 ; 0,3] (faux positifs).
+ *
+ * **Réutilisé par `6gen33`** (famille E « mixte », `generateurs6e/probabilitesProblemes/familleE.ts`) :
+ * garder les signatures exportées `construireFamilleC(demandeEcran3)` et `genererFamilleC()`.
  */
 
 function tirerParmi<T>(candidats: readonly T[]): T {
@@ -20,14 +26,17 @@ const CONTEXTES_C: readonly ContexteFamilleC[] = [
 /** p∈{0,1; 0,15; 0,2; 0,25} — spec. */
 const CANDIDATS_P: readonly number[] = [0.1, 0.15, 0.2, 0.25];
 
-/** q1,q2∈{0,1; ...; 0,4} — spec (pas de 0,05, 7 valeurs). */
-const CANDIDATS_Q: readonly number[] = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4];
+/** q1 = P(effet | cause1) ∈ [0,7 ; 0,99] — sensibilité d'un test réaliste. */
+const CANDIDATS_Q1: readonly number[] = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98, 0.99];
+
+/** q2 = P(effet | cause2) ∈ [0,01 ; 0,3] — taux de faux positifs. */
+const CANDIDATS_Q2: readonly number[] = [0.01, 0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3];
 
 /** Écart minimal exigé entre le résultat de Bayes (écran 3) et la valeur "piège" (le sens
  * inversé de la conditionnelle — confondre P(cause1|effet) avec P(effet|cause1)=q1, ou
  * P(cause1|pas effet) avec P(pas effet|cause1)=1−q1) — garantit que le piège documenté par la spec
  * (écran 3) reste TOUJOURS détectable par la vérification, jamais une coïncidence numérique où les
- * deux quantités se retrouveraient accidentellement égales à la tolérance (0,01) près. Retirage
+ * deux quantités se retrouveraient accidentellement proches. Retirage
  * borné (200 tentatives) si l'écart est trop faible — même patron que `ECART_MINIMAL_CONDITIONNELLES`
  * de `6gen30` familleA.ts. */
 const ECART_MINIMAL_BAYES = 0.05;
@@ -50,10 +59,8 @@ function valeurPiegeSensInverse(q1: number, demandeEcran3: DemandeEcran3FamilleC
 export function construireFamilleC(demandeEcran3: DemandeEcran3FamilleC): ExerciceFamilleC {
   for (let tentative = 0; tentative < 200; tentative++) {
     const p = tirerParmi(CANDIDATS_P);
-    const q1 = tirerParmi(CANDIDATS_Q);
-    let q2 = tirerParmi(CANDIDATS_Q);
-    for (let essai = 0; essai < 20 && q2 === q1; essai++) q2 = tirerParmi(CANDIDATS_Q);
-    if (q2 === q1) continue;
+    const q1 = tirerParmi(CANDIDATS_Q1);
+    const q2 = tirerParmi(CANDIDATS_Q2);
     const bayes = resultatBayes(p, q1, q2, demandeEcran3);
     const piege = valeurPiegeSensInverse(q1, demandeEcran3);
     if (Math.abs(bayes - piege) < ECART_MINIMAL_BAYES) continue;

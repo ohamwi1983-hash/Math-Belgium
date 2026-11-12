@@ -4,18 +4,18 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 /**
  * Couche B (6e) — types de session pour `6gen32`. 3 familles, chaîne d'écrans de longueur FIXE par
- * FAMILLE+SOUS-TYPE (A/pannes:2, A/union:3, B/histogramme:2, B/tableauDonne:1, B/reconstruire:3,
+ * FAMILLE+SOUS-TYPE (A/pannes:2, A/union:3, B/testIndependance:2, B/tableauDonne:1, B/reconstruire:3,
  * C:3) — `phaseInitiale` dispatche donc sur `exercice.famille` PUIS `exercice.sousType` où
  * pertinent. Même patron générique `phasesPourExercice` que `typesProbabilitesEnsembles.ts`
  * (6gen30), gardé pour la cohérence transversale du chapitre.
  */
 
-export type PhaseIndependanceBayes = "aPannesEcran1" | "aPannesEcran2" | "aUnionEcran1" | "aUnionEcran2" | "aUnionEcran3" | "bHistoEcran1" | "bHistoEcran2" | "bTableEcran1" | "bReconEcran1" | "bReconEcran2" | "bReconEcran3" | "cEcran1" | "cEcran2" | "cEcran3";
+export type PhaseIndependanceBayes = "aPannesEcran1" | "aPannesEcran2" | "aUnionEcran1" | "aUnionEcran2" | "aUnionEcran3" | "bIndepEcran1" | "bIndepEcran2" | "bTableEcran1" | "bReconEcran1" | "bReconEcran2" | "bReconEcran3" | "cEcran1" | "cEcran2" | "cEcran3";
 
 export function phaseInitiale(exercice: ExerciceIndependanceBayes): PhaseIndependanceBayes {
   if (exercice.famille === "A") return exercice.sousType === "pannes" ? "aPannesEcran1" : "aUnionEcran1";
   if (exercice.famille === "B") {
-    if (exercice.sousType === "histogramme") return "bHistoEcran1";
+    if (exercice.sousType === "testIndependance") return "bIndepEcran1";
     if (exercice.sousType === "tableauDonne") return "bTableEcran1";
     return "bReconEcran1";
   }
@@ -34,9 +34,9 @@ export function phaseApres(phase: PhaseIndependanceBayes): PhaseIndependanceBaye
       return "aUnionEcran3";
     case "aUnionEcran3":
       return "termine";
-    case "bHistoEcran1":
-      return "bHistoEcran2";
-    case "bHistoEcran2":
+    case "bIndepEcran1":
+      return "bIndepEcran2";
+    case "bIndepEcran2":
       return "termine";
     case "bTableEcran1":
       return "termine";

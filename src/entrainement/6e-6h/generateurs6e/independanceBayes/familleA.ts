@@ -22,8 +22,8 @@ const CONTEXTES_PANNES: readonly ContextePannes[] = [
 ];
 
 /** p1/p2 — un ensemble de probabilités "réalistes" pour un taux de panne/défaut (spec : deux
- * probabilités simples données). Toujours des décimales à 2 chiffres au plus (cohérent avec la
- * tolérance 0,01 de vérification, `moteur6e/verificationProbabilites.ts`). */
+ * probabilités simples données). Toujours des décimales à 2 chiffres au plus : tous les résultats
+ * (produits, compléments) restent des décimaux exacts à 4 chiffres au plus. */
 const CANDIDATS_P_PANNES: readonly number[] = [0.1, 0.15, 0.2, 0.25, 0.3];
 
 const DEMANDES_ECRAN2_PANNES: readonly DemandeEcran2Pannes[] = ["lesDeux", "aucun", "auMoinsUn", "exactementUn"];
@@ -50,8 +50,11 @@ export function genererFamilleAPannes(): ExerciceFamilleAPannes {
 
 const CONTEXTES_UNION: readonly ContexteUnion[] = [
   { id: "promotions", texte: "Dans un magasin, on interroge un client au hasard parmi la clientèle d'une semaine. A : le client profite d'une promotion sur les vêtements. B : le client profite d'une promotion sur les chaussures. On admet que A et B sont indépendants." },
-  { id: "capteursMeteo", texte: "Une station météo dispose de deux capteurs indépendants. A : le capteur de température déclenche une alerte. B : au moins un capteur de la station déclenche une alerte. On admet que A et B sont indépendants." },
-  { id: "loterie", texte: "Un joueur participe à deux jeux de hasard indépendants organisés le même jour. A : il gagne au premier jeu. B : il gagne au moins un des deux jeux. On admet que A et B sont indépendants." },
+  // Audit 6e ch. 6 (décision E) : les anciens contextes « capteursMeteo » et « loterie » définissaient
+  // B comme « au moins un des deux… », donc A ⊂ B — incompatible avec l'indépendance affirmée (on
+  // aurait P(A∩B) = P(A) ≠ P(A)·P(B)). Réécrits avec deux événements VRAIMENT distincts.
+  { id: "capteursMeteo", texte: "Une station météo dispose de deux capteurs qui fonctionnent indépendamment l'un de l'autre. A : le capteur de température déclenche une alerte. B : le capteur de vent déclenche une alerte. On admet que A et B sont indépendants." },
+  { id: "deuxJeux", texte: "Un joueur participe à deux jeux de hasard indépendants organisés le même jour. A : il gagne au premier jeu. B : il gagne au second jeu. On admet que A et B sont indépendants." },
 ];
 
 const CANDIDATS_P_UNION: readonly number[] = [0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5];

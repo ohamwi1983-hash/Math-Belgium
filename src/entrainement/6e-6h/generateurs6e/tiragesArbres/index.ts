@@ -1,12 +1,12 @@
 import type { ExerciceTiragesArbres } from "../../core6e/tiragesArbres.types";
 import { construireFamilleA, genererFamilleA } from "./familleA";
 import { construireFamilleB, genererFamilleB } from "./familleB";
-import { construireFamilleCParite, construireFamilleCSpecial, genererFamilleC } from "./familleC";
+import { genererFamilleC, genererFamilleCParite, genererFamilleCSpecial } from "./familleC";
+import { construireFamilleD, genererFamilleD } from "./familleD";
 
 /**
- * Couche A (6e) — point d'entrée pour `6gen31`. Tirage ÉQUIPROBABLE de la famille (A/B/C, spec :
- * "Tirage aléatoire d'1 famille parmi 3 (A, B, C, équiprobable)"), chaque famille tirant ensuite son
- * propre contexte/sous-type en interne (voir `familleA.ts`/`familleB.ts`/`familleC.ts`).
+ * Couche A (6e) — point d'entrée pour `6gen31`. Tirage ÉQUIPROBABLE de la famille (A, B, C, D),
+ * chaque famille tirant ensuite son propre contexte/sous-type en interne.
  */
 
 function tirerParmi<T>(candidats: readonly T[]): T {
@@ -14,19 +14,18 @@ function tirerParmi<T>(candidats: readonly T[]): T {
 }
 
 export function genererExerciceTiragesArbres(): ExerciceTiragesArbres {
-  const famille = tirerParmi(["A", "B", "C"] as const);
+  const famille = tirerParmi(["A", "B", "C", "D"] as const);
   if (famille === "A") return genererFamilleA();
   if (famille === "B") return genererFamilleB();
-  return genererFamilleC();
+  if (famille === "C") return genererFamilleC();
+  return genererFamilleD();
 }
 
-/** Identifiants de variante forcée — granularité "ce qui change la structure de la question",
- * jamais un identifiant par tirage numérique individuel (même convention que 6gen30, voir
- * `generateurs6e/probabilitesEnsembles/index.ts`).
- * Famille A : croise `avecRemise` (2 valeurs) et `k` (2 valeurs) = 4 entrées.
- * Famille B : croise `n` (3 valeurs) et `demandeEcran1` (2 valeurs) = 6 entrées.
- * Famille C : sous-type "special" (1 entrée, m/k restent aléatoires) + sous-type "parite" croisé
- * avec `ecran3Cible` (3 valeurs) = 4 entrées. */
+/** Identifiants de variante forcée — granularité « ce qui change la structure de la question » ;
+ * tout le reste (effectifs, couleurs, question de l'écran 3, nombre de faces, rapport r…) est tiré au
+ * hasard À L'INTÉRIEUR de la variante (audit 6e ch. 6 : une variante forcée ne fige plus un tirage).
+ * `B-n3-deux` n'est plus proposé (deux positions fixées sur 3 ⟺ tout est bien placé) mais reste
+ * accepté pour les plans d'évaluation déjà enregistrés (il donne alors « une position »). */
 export type IdVarianteTiragesArbres =
   | "A-avecRemise-k2"
   | "A-avecRemise-k3"
@@ -41,23 +40,26 @@ export type IdVarianteTiragesArbres =
   | "C-special"
   | "C-parite-pair"
   | "C-parite-impair"
-  | "C-parite-sousEnsemble";
+  | "C-parite-sousEnsemble"
+  | "D-avecRemise"
+  | "D-sansRemise";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteTiragesArbres; label: string }[] = [
-  { id: "A-avecRemise-k2", label: "A — avec remise, k=2" },
-  { id: "A-avecRemise-k3", label: "A — avec remise, k=3" },
-  { id: "A-sansRemise-k2", label: "A — sans remise, k=2" },
-  { id: "A-sansRemise-k3", label: "A — sans remise, k=3" },
-  { id: "B-n3-une", label: "B — n=3, une position fixée" },
-  { id: "B-n3-deux", label: "B — n=3, deux positions fixées" },
-  { id: "B-n4-une", label: "B — n=4, une position fixée" },
-  { id: "B-n4-deux", label: "B — n=4, deux positions fixées" },
-  { id: "B-n5-une", label: "B — n=5, une position fixée" },
-  { id: "B-n5-deux", label: "B — n=5, deux positions fixées" },
-  { id: "C-special", label: "C — une face fixée p0" },
-  { id: "C-parite-pair", label: "C — parité, écran 3 = P(pair)" },
-  { id: "C-parite-impair", label: "C — parité, écran 3 = P(impair)" },
-  { id: "C-parite-sousEnsemble", label: "C — parité, écran 3 = sous-ensemble" },
+  { id: "A-avecRemise-k2", label: "A — 2 tirages avec remise" },
+  { id: "A-avecRemise-k3", label: "A — 3 tirages avec remise" },
+  { id: "A-sansRemise-k2", label: "A — 2 tirages sans remise" },
+  { id: "A-sansRemise-k3", label: "A — 3 tirages sans remise" },
+  { id: "B-n3-une", label: "B — 3 objets" },
+  { id: "B-n4-une", label: "B — 4 objets, une position donnée" },
+  { id: "B-n4-deux", label: "B — 4 objets, deux positions données" },
+  { id: "B-n5-une", label: "B — 5 objets, une position donnée" },
+  { id: "B-n5-deux", label: "B — 5 objets, deux positions données" },
+  { id: "C-special", label: "C — dé truqué, une face connue" },
+  { id: "C-parite-pair", label: "C — dé truqué pair/impair, P(pair)" },
+  { id: "C-parite-impair", label: "C — dé truqué pair/impair, P(impair)" },
+  { id: "C-parite-sousEnsemble", label: "C — dé truqué pair/impair, quelques faces" },
+  { id: "D-avecRemise", label: "D — arbre pondéré, avec remise" },
+  { id: "D-sansRemise", label: "D — arbre pondéré, sans remise" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteTiragesArbres): ExerciceTiragesArbres {
@@ -71,9 +73,8 @@ export function construireAvecVarianteId(id: IdVarianteTiragesArbres): ExerciceT
     case "A-sansRemise-k3":
       return construireFamilleA(false, 3);
     case "B-n3-une":
-      return construireFamilleB(3, "une");
     case "B-n3-deux":
-      return construireFamilleB(3, "deux");
+      return construireFamilleB(3, "une");
     case "B-n4-une":
       return construireFamilleB(4, "une");
     case "B-n4-deux":
@@ -83,12 +84,16 @@ export function construireAvecVarianteId(id: IdVarianteTiragesArbres): ExerciceT
     case "B-n5-deux":
       return construireFamilleB(5, "deux");
     case "C-special":
-      return construireFamilleCSpecial(6, 2);
+      return genererFamilleCSpecial();
     case "C-parite-pair":
-      return construireFamilleCParite(2, "pair");
+      return genererFamilleCParite("pair");
     case "C-parite-impair":
-      return construireFamilleCParite(2, "impair");
+      return genererFamilleCParite("impair");
     case "C-parite-sousEnsemble":
-      return construireFamilleCParite(2, "sousEnsemble");
+      return genererFamilleCParite("sousEnsemble");
+    case "D-avecRemise":
+      return construireFamilleD(true);
+    case "D-sansRemise":
+      return construireFamilleD(false);
   }
 }

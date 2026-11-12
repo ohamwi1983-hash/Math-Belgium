@@ -1,28 +1,24 @@
 import type { ContexteFamilleC as ContexteBayesNumerique, ExerciceFamilleC as ExerciceBayesNumerique } from "./independanceBayes.types";
-import type { ContexteFamilleB as ContexteDerangements, ExerciceFamilleB as ExerciceDerangements, ExerciceFamilleCSpecial as ExerciceDeMelange } from "./tiragesArbres.types";
+import type { ExerciceFamilleCSpecial as ExerciceDeMelange } from "./tiragesArbres.types";
 
 /**
- * Couche core (6e) — contrat pour `6gen33` ("Probabilités : problèmes", chapitre 8 "Probabilités",
- * générateur de CLÔTURE du chapitre — après `6gen30`/`6gen31`/`6gen32`). Tirage ÉQUIPROBABLE d'1
- * famille parmi 7 (A à G), puis d'un contexte/sous-type au sein de la famille (voir
+ * Couche core (6e) — contrat pour `6gen33` ("Probabilités : problèmes", chapitre 6 de 6e, générateur
+ * de clôture du chapitre — après `6gen30`/`6gen31`/`6gen32`). Tirage équiprobable d'1 famille parmi
+ * 6 (A, B, C, E, F, G), puis d'un contexte au sein de la famille (voir
  * `generateurs6e/probabilitesProblemes/index.ts`).
  *
- * ============================================================================
- * **RÉUTILISATION EXPLICITE (Couche core ↔ Couche core, libre)**
- * ============================================================================
- * - Famille E, sous-type "mixte" : réutilise TEL QUEL le contrat `ExerciceFamilleC`/`ContexteFamilleC`
- *   de `core6e/independanceBayes.types.ts` (6gen32) comme `base` — mêmes champs `p`/`q1`/`q2`/
- *   `contexte`/`demandeEcran3`, jamais réimplémenté.
- * - Famille G, sous-type "derangements" : réutilise TEL QUEL le contrat `ExerciceFamilleB`/
- *   `ContexteFamilleB` de `core6e/tiragesArbres.types.ts` (6gen31, n∈{3,4,5}) comme `base`, avec
- *   `n=4` fixé (spec : "aucune adaptation nécessaire, juste une instance de plus").
- * - Famille G, sous-type "melangeObjets" : réutilise TEL QUEL `ExerciceFamilleCSpecial` de
- *   `core6e/tiragesArbres.types.ts` (6gen31, dé truqué "special") comme `base`.
- * Toutes les probabilités NOUVELLES à ce générateur sont stockées en `number` décimal (même
- * convention que `core6e/independanceBayes.types.ts` : donnée de départ directement décimale dans la
- * spec, jamais un dénominateur commun naturel) — vérifiées à tolérance 0,01 par `diagnostiquerValeur`
- * (`moteur6e/verificationProbabilites.ts`, chapitre 8), SAUF famille A (tolérance resserrée, voir
- * `generateurs6e/probabilitesProblemes/familleA.ts`, en-tête).
+ * Audit 6e ch. 6 (décision F, recentrage partiel) : la probabilité géométrique (ancienne famille D),
+ * le Bayes paramétrique (E-paramétrique), le cadre financier et les dérangements (doublon de 6gen31)
+ * ont été RETIRÉS — hors du cours du chapitre. Les lettres des familles restantes sont conservées.
+ *
+ * Réutilisations (Couche core ↔ Couche core) :
+ * - Famille E (Bayes en problème, données mélangées) : `ExerciceFamilleC` de
+ *   `core6e/independanceBayes.types.ts` (6gen32) comme `base`.
+ * - Famille G (mélange d'objets) : `ExerciceFamilleCSpecial` de `core6e/tiragesArbres.types.ts`
+ *   (6gen31, dé truqué à une face spéciale, 6 faces) comme `base`.
+ * Toute probabilité saisie est vérifiée par `diagnostiquerProbabilite` (`moteur6e/
+ * verificationProbabilites.ts`, décision A) : forme exacte, ou arrondi correct au centième (au
+ * millième sous 0,1) ; 4 décimales au minimum pour une fiabilité et pour les facteurs (365−k)/365.
  */
 
 // ============================================================================
@@ -36,7 +32,7 @@ export interface ExerciceFamilleA {
 }
 
 // ============================================================================
-// Famille B — Loi binomiale.
+// Famille B — Épreuves répétées (nombre de chemins compté dans l'arbre, décision G).
 // ============================================================================
 
 export interface ContexteFamilleB {
@@ -47,8 +43,8 @@ export interface ContexteFamilleB {
   labelSucces: string;
 }
 
-/** Écran 3 — 2 variantes (spec) : somme des queues de la binomiale, ou complément à "tous
- * identiques" (ni tout succès, ni tout échec). */
+/** Écran 3 — 2 variantes : « au moins k succès » (somme sur les nombres de succès), ou complément
+ * de « tous identiques » (ni tout succès, ni tout échec). */
 export type DemandeEcran3FamilleB = "auMoinsK" | "unDeChaqueResultat";
 
 export interface ExerciceFamilleB {
@@ -71,46 +67,28 @@ export interface ExerciceFamilleB {
 export interface ContexteFamilleC {
   id: string;
   texte: string;
-  /** 3 libellés courts (ex. "Machine 1", "Feu A") — jamais des phrases complètes, réutilisés en
-   * KaTeX (`P(\\text{...})`) donc toujours entourés de `\\text{}` côté `ui6e/formatProbabilitesProblemes.ts`. */
+  /** 3 libellés courts NUMÉROTÉS 1 à 3 (ex. "Machine 1", "Feu 2") — la saisie de l'écran 1 se fait
+   * par numéros. Réutilisés en KaTeX (`P(\\text{...})`), toujours entourés de `\\text{}`. */
   labelElements: [string, string, string];
+  /** Nom des éléments au pluriel (« machines », « feux »). */
+  nomPluriel: string;
+  /** Événement étudié, verbe accordé au singulier et au pluriel (« tombe en panne » / « tombent en
+   * panne », « est au vert » / « sont au vert ») — jamais le mot « succès » pour une panne. */
+  evenementSingulier: string;
+  evenementPluriel: string;
 }
 
 export interface ExerciceFamilleC {
   famille: "C";
   contexte: ContexteFamilleC;
-  /** p1,p2,p3 — probabilités de "succès" DISTINCTES (jamais de loi binomiale applicable, spec). */
+  /** p1,p2,p3 — probabilités DISTINCTES de l'événement étudié pour chaque élément. */
   p: [number, number, number];
-  /** Nombre de succès demandé, k∈{0,1,2,3}. */
+  /** Nombre d'éléments concernés par l'événement, k∈{1,2}. */
   k: number;
 }
 
 // ============================================================================
-// Famille D — Probabilité géométrique (zones concentriques).
-// ============================================================================
-
-export interface ContexteFamilleD {
-  id: string;
-  texte: string;
-  /** Libellés des 3 zones (disque interne, anneau2, anneau3), courts, entourés de `\\text{}` en
-   * KaTeX (même convention que `labelElements` ci-dessus). */
-  labelZones: [string, string, string];
-}
-
-export interface ExerciceFamilleD {
-  famille: "D";
-  contexte: ContexteFamilleD;
-  /** Rayons entiers, r1<r2<r3 (le disque interne a pour rayon r1, l'anneau2 est bordé par r1/r2, etc). */
-  r: [number, number, number];
-  /** Indices (0=disque interne,1=anneau2,2=anneau3) des zones dont l'aire est SOMMÉE au numérateur
-   * de la probabilité demandée à l'écran 2 — toujours des indices CONTIGUS depuis 0 (ex. [0], [0,1]) :
-   * une probabilité géométrique concentrique naturelle est toujours "dans le disque de rayon ≤ rᵢ",
-   * jamais une zone isolée non contiguë au centre. */
-  zoneCible: number[];
-}
-
-// ============================================================================
-// Famille E — Bayes numérique (données mixtes) et Bayes paramétrique.
+// Famille E — Bayes en problème (données présentées mélangées).
 // ============================================================================
 
 export interface ExerciceFamilleEMixte {
@@ -126,19 +104,7 @@ export interface ExerciceFamilleEMixte {
   ordreAffichage: [number, number, number];
 }
 
-export interface ExerciceFamilleEParametrique {
-  famille: "E";
-  sousType: "parametrique";
-  contexte: { texte: string };
-  /** P(test positif | malade) — DONNÉ numériquement, 0<a<1. */
-  a: number;
-  /** P(test positif | non malade) — DONNÉ numériquement, 0<b<1, b≠a. */
-  b: number;
-  /** Seuil de l'inéquation P(x)>seuil demandée à l'écran 3, 0<seuil<1. */
-  seuil: number;
-}
-
-export type ExerciceFamilleE = ExerciceFamilleEMixte | ExerciceFamilleEParametrique;
+export type ExerciceFamilleE = ExerciceFamilleEMixte;
 
 // ============================================================================
 // Famille F — Fiabilité de circuits.
@@ -146,8 +112,8 @@ export type ExerciceFamilleE = ExerciceFamilleEMixte | ExerciceFamilleEParametri
 
 export type ConfigurationFamilleF = "serie" | "parallele" | "mixte";
 
-/** Écran 3 — 2 variantes (spec) : comparer à une configuration alternative (valeur numérique), ou
- * juger une affirmation donnée (vrai/faux). */
+/** Écran 3 — 2 variantes, toutes deux sur une configuration ALTERNATIVE (mêmes composants) : en
+ * calculer la fiabilité, ou juger une affirmation chiffrée à son sujet (vrai/faux, un seul essai). */
 export type DemandeEcran3FamilleF = "comparerValeur" | "verifierAffirmation";
 
 export interface ContexteFamilleF {
@@ -166,29 +132,20 @@ export interface ExerciceFamilleF {
    * `configuration==="mixte"`, index dans `p`. */
   positionMixte?: 0 | 1 | 2;
   demandeEcran3: DemandeEcran3FamilleF;
-  /** Configuration ALTERNATIVE comparée à l'écran 3 (mêmes composants, position/agencement
-   * différent) — présente SEULEMENT si `demandeEcran3==="comparerValeur"`. */
-  configurationAlternative?: ConfigurationFamilleF;
+  /** Configuration ALTERNATIVE de l'écran 3 (mêmes composants, agencement différent). */
+  configurationAlternative: ConfigurationFamilleF;
   positionMixteAlternative?: 0 | 1 | 2;
-  /** Valeur affirmée à juger (vrai/faux) — présente SEULEMENT si
-   * `demandeEcran3==="verifierAffirmation"`. */
+  /** Valeur affirmée (arrondie à 4 décimales) pour la fiabilité de la configuration alternative —
+   * présente SEULEMENT si `demandeEcran3==="verifierAffirmation"`. Vraie ssi c'est l'arrondi correct
+   * à 4 décimales ; fausse = valeur obtenue en confondant série et parallèle. */
   affirmationValeur?: number;
 }
 
 // ============================================================================
-// Famille G — Réutilisations étendues (3 sous-types).
+// Famille G — Mélange d'objets (probabilités totales).
 // ============================================================================
 
-/** Sous-type 1 — réutilise INTÉGRALEMENT `6gen31` famille B (dérangements), n=4 fixé (spec :
- * "aucune adaptation nécessaire, juste une instance de plus dans la même famille") — 4 écrans repris
- * TELS QUELS (positions fixées / tout correct / exactement k correctes / aucune correcte). */
-export interface ExerciceFamilleGDerangements {
-  famille: "G";
-  sousType: "derangements";
-  base: ExerciceDerangements;
-}
-
-/** Sous-type 2 — réutilise `6gen31` famille C sous-type "special" (dé truqué à une face spéciale)
+/** Réutilise `6gen31` famille C sous-type "special" (dé truqué à une face spéciale)
  * comme `base` (3 écrans repris TELS QUELS), PUIS ajoute une couche de probabilités totales : cet
  * objet (le dé truqué) est choisi au hasard avec probabilité `poidsObjet1` parmi 2 objets, l'AUTRE
  * objet ayant sa propre probabilité (DONNÉE, pas à recalculer) pour le MÊME événement composé — écran
@@ -197,7 +154,7 @@ export interface ExerciceFamilleGMelange {
   famille: "G";
   sousType: "melangeObjets";
   base: ExerciceDeMelange;
-  contexteMelange: { texte: string; labelObjet1: string; labelObjet2: string; labelEvenement: string };
+  contexteMelange: { texte: string; labelObjet1: string; labelObjet2: string };
   /** P(choisir l'objet 1), 0<poidsObjet1<1. */
   poidsObjet1: number;
   /** P(événement composé de `base` écran 3 | objet 2) — DONNÉE directement, distincte de la valeur
@@ -205,34 +162,13 @@ export interface ExerciceFamilleGMelange {
   probabiliteAutreObjet: number;
 }
 
-/** Sous-type 3 — cadre financier, 3 écrans (spec). */
-export interface CategorieFinanciere {
-  id: string;
-  label: string;
-  /** Proportion de la population dans cette catégorie, 0<proportion<1, somme des catégories = 1. */
-  proportion: number;
-  /** Taux de "succès" (ex. taux de vente d'une extension de garantie) dans cette catégorie, 0<taux<1. */
-  taux: number;
-}
-
-export interface ExerciceFamilleGFinancier {
-  famille: "G";
-  sousType: "financier";
-  contexte: { texte: string; libelleValeur: string };
-  /** 2 ou 3 catégories, proportions sommant exactement à 1. */
-  categories: CategorieFinanciere[];
-  /** Valeur unitaire d'un "succès" (ex. commission en €). */
-  valeurUnitaire: number;
-  nombreTotalIndividus: number;
-}
-
-export type ExerciceFamilleG = ExerciceFamilleGDerangements | ExerciceFamilleGMelange | ExerciceFamilleGFinancier;
+export type ExerciceFamilleG = ExerciceFamilleGMelange;
 
 // ============================================================================
 // Union globale.
 // ============================================================================
 
-export type ExerciceProbabilitesProblemes = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC | ExerciceFamilleD | ExerciceFamilleE | ExerciceFamilleF | ExerciceFamilleG;
+export type ExerciceProbabilitesProblemes = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC | ExerciceFamilleE | ExerciceFamilleF | ExerciceFamilleG;
 
 export type FamilleProbabilitesProblemes = ExerciceProbabilitesProblemes["famille"];
 
@@ -241,4 +177,4 @@ export type GenerateurExerciceProbabilitesProblemes = () => ExerciceProbabilites
 // Réexports pratiques (types réutilisés tels quels, voir en-tête) — pour que
 // `generateurs6e/probabilitesProblemes/*` n'ait jamais à importer directement
 // `independanceBayes.types`/`tiragesArbres.types` en plus de CE fichier.
-export type { ContexteBayesNumerique, ContexteDerangements, ExerciceBayesNumerique, ExerciceDeMelange, ExerciceDerangements };
+export type { ContexteBayesNumerique, ExerciceBayesNumerique, ExerciceDeMelange };

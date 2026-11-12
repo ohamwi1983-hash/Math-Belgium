@@ -38,8 +38,20 @@ export function demarrerSessionIndependanceBayes(reglages: ReglagesSession6e, ge
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écrans à choix fermé (incompatibles / indépendants / ni l'un ni l'autre) : UN SEUL essai
+ * (convention du site) — sinon l'élimination donne la réponse au 2e ou 3e essai. */
+const PHASES_CHOIX_FERME: PhaseIndependanceBayes[] = ["bIndepEcran2"];
+
+export function estPhaseChoix(phase: PhaseIndependanceBayes): boolean {
+  return PHASES_CHOIX_FERME.includes(phase);
+}
+
+export function tentativesMaxCourant(etat: EtatSessionIndependanceBayes): number {
+  return estPhaseChoix(etat.phase) ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionIndependanceBayes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionIndependanceBayes): EtatSessionIndependanceBayes {

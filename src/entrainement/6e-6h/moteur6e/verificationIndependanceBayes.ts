@@ -1,29 +1,27 @@
-import type { ExerciceFamilleAPannes, ExerciceFamilleAUnion, ExerciceFamilleBHistogramme, ExerciceFamilleBReconstruire, ExerciceFamilleBTableauDonne, ExerciceFamilleC, ExerciceIndependanceBayes, TableauDouble, TypeQuestionTable } from "../core6e/independanceBayes.types";
+import type { ExerciceFamilleAPannes, ExerciceFamilleAUnion, ExerciceFamilleBReconstruire, ExerciceFamilleBTestIndependance, ExerciceFamilleBTableauDonne, ExerciceFamilleC, ExerciceIndependanceBayes, TableauDouble, TypeQuestionTable, VerdictTestIndependance } from "../core6e/independanceBayes.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { PhaseIndependanceBayes } from "./typesIndependanceBayes";
-import { diagnostiquerValeur } from "./verificationProbabilites";
+import { diagnostiquerProbabilite, diagnostiquerValeur, sontIndependantsEffectifs } from "./verificationProbabilites";
 
 /**
  * Couche B (6e) — vérification propre à `6gen32`. N'importe JAMAIS rien de `src/generateurs6e/`
- * (règle non négociable, CLAUDE.md) — voir `verificationIndependanceBayes.test.ts` (fixtures locales
- * factices) et `generateurs6e/independanceBayes/session.integration.test.ts` (seul fichier autorisé
- * Couche A + Couche B) pour la preuve. Consomme `moteur6e/verificationProbabilites.ts`
- * (`diagnostiquerValeur`, module PARTAGÉ chapitre 8 fondé par `6gen30`) pour TOUT champ de
- * probabilité en texte libre — convention imposée par la spec ("réutilise le statut de réponse
- * fraction/décimal de 6gen30").
+ * (règle non négociable, CLAUDE.md).
  *
- * ============================================================================
- * **Convention de signature — tous les écrans prennent `string[]`** (même convention que
- * `verificationProbabilitesEnsembles.ts`, 6gen30) : un dispatcher générique unique
- * (`diagnostiquerEcran(exercice, phase, valeurs)`). Ce générateur n'a AUCUN écran à choix
- * (`.btn.toggle-active`) — toutes les réponses sont des valeurs numériques en champ libre (voir
- * `ui6e/formatIndependanceBayes.ts`, en-tête) — donc `diagnostiquerValeur` couvre l'intégralité des
- * champs de ce fichier, jamais un statut de choix bespoke comme `6gen30` en avait besoin pour ses 2
- * écrans à choix. Chaque fonction documente l'ORDRE exact des champs de son écran.
- * ============================================================================
+ * Toute PROBABILITÉ saisie passe par `diagnostiquerProbabilite` (`moteur6e/verificationProbabilites.ts`,
+ * audit 6e ch. 6, décision A) : valeur exacte (fraction, produit…), décimal correctement arrondi
+ * (2 décimales, 3 si la probabilité est inférieure à 0,1) ou pourcentage (« 15 % »). Plus de
+ * tolérance absolue de 0,01 (qui acceptait 0,02 pour 0,015). Les EFFECTIFS (tableau à reconstruire)
+ * sont des entiers comparés exactement (`diagnostiquerEffectif`).
+ *
+ * Signature commune : tous les écrans prennent `string[]` (dispatcher `diagnostiquerEcran`). Seul
+ * écran à CHOIX : `bIndepEcran2` (`valeurs[0]` = identifiant du verdict, voir
+ * `VerdictTestIndependance`).
  */
 
-const TOLERANCE = 0.01;
+/** Effectif entier : comparaison EXACTE (jamais « à peu près »). */
+function diagnostiquerEffectif(texte: string, cible: number): StatutVerification {
+  return diagnostiquerValeur(texte, cible, 1e-9);
+}
 
 function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
@@ -59,7 +57,7 @@ export function valeurEcran2Pannes(ex: ExerciceFamilleAPannes): number {
 
 /** Écran 1 — `valeurs = [P(élément 1 ne tombe pas en panne), P(élément 2 ne tombe pas en panne)]`. */
 export function diagnostiquerAPannesEcran1(exercice: ExerciceFamilleAPannes, valeurs: string[]): StatutVerification {
-  return pireStatut(diagnostiquerValeur(valeurs[0], complement1(exercice), TOLERANCE), diagnostiquerValeur(valeurs[1], complement2(exercice), TOLERANCE));
+  return pireStatut(diagnostiquerProbabilite(valeurs[0], complement1(exercice)), diagnostiquerProbabilite(valeurs[1], complement2(exercice)));
 }
 export function verifierAPannesEcran1(exercice: ExerciceFamilleAPannes, valeurs: string[]): boolean {
   return diagnostiquerAPannesEcran1(exercice, valeurs) === "correct";
@@ -67,7 +65,7 @@ export function verifierAPannesEcran1(exercice: ExerciceFamilleAPannes, valeurs:
 
 /** Écran 2 — `valeurs = [valeur]`, la combinaison demandée par `exercice.demandeEcran2`. */
 export function diagnostiquerAPannesEcran2(exercice: ExerciceFamilleAPannes, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurEcran2Pannes(exercice), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], valeurEcran2Pannes(exercice));
 }
 export function verifierAPannesEcran2(exercice: ExerciceFamilleAPannes, valeurs: string[]): boolean {
   return diagnostiquerAPannesEcran2(exercice, valeurs) === "correct";
@@ -85,7 +83,7 @@ export function pBDeduitUnion(ex: ExerciceFamilleAUnion): number {
 
 /** Écran 1 — `valeurs = [P(Ā)]`. */
 export function diagnostiquerAUnionEcran1(exercice: ExerciceFamilleAUnion, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], 1 - exercice.pA, TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], 1 - exercice.pA);
 }
 export function verifierAUnionEcran1(exercice: ExerciceFamilleAUnion, valeurs: string[]): boolean {
   return diagnostiquerAUnionEcran1(exercice, valeurs) === "correct";
@@ -93,7 +91,7 @@ export function verifierAUnionEcran1(exercice: ExerciceFamilleAUnion, valeurs: s
 
 /** Écran 2 — `valeurs = [P(B)]`. */
 export function diagnostiquerAUnionEcran2(exercice: ExerciceFamilleAUnion, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], pBDeduitUnion(exercice), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], pBDeduitUnion(exercice));
 }
 export function verifierAUnionEcran2(exercice: ExerciceFamilleAUnion, valeurs: string[]): boolean {
   return diagnostiquerAUnionEcran2(exercice, valeurs) === "correct";
@@ -107,53 +105,55 @@ export function verifierAUnionEcran2(exercice: ExerciceFamilleAUnion, valeurs: s
  * identiques), jamais une seule des deux formes acceptée par accident (voir
  * `verificationIndependanceBayes.test.ts`, "le raccourci EST le calcul complet"). */
 export function diagnostiquerAUnionEcran3(exercice: ExerciceFamilleAUnion, valeurs: string[]): StatutVerification {
-  return pireStatut(diagnostiquerValeur(valeurs[0], exercice.pA, TOLERANCE), diagnostiquerValeur(valeurs[1], pBDeduitUnion(exercice), TOLERANCE));
+  return pireStatut(diagnostiquerProbabilite(valeurs[0], exercice.pA), diagnostiquerProbabilite(valeurs[1], pBDeduitUnion(exercice)));
 }
 export function verifierAUnionEcran3(exercice: ExerciceFamilleAUnion, valeurs: string[]): boolean {
   return diagnostiquerAUnionEcran3(exercice, valeurs) === "correct";
 }
 
 // ============================================================================
-// Famille B — sous-type "histogramme".
+// Famille B — sous-type "testIndependance" (tableau 2×2).
 // ============================================================================
 
-/** Proportion d'interpolation de la classe cible — spec : distance depuis le début de la classe /
- * largeur de la classe. */
-export function proportionHistogramme(ex: ExerciceFamilleBHistogramme): number {
-  const classe = ex.classes[ex.indexClasseCible];
-  return (ex.cible - classe.debut) / (classe.fin - classe.debut);
+export interface EffectifsTest {
+  n: number;
+  nA: number;
+  nB: number;
+  nAetB: number;
 }
 
-function totalEffectifHistogramme(ex: ExerciceFamilleBHistogramme): number {
-  return ex.classes.reduce((acc, c) => acc + c.effectif, 0);
+export function effectifsTest(ex: ExerciceFamilleBTestIndependance): EffectifsTest {
+  const [[x, y], [z, t]] = ex.cellules;
+  return { n: x + y + z + t, nA: x + y, nB: x + z, nAetB: x };
 }
 
-/** Probabilité totale demandée — combine la portion interpolée de la classe cible et les classes
- * entières pertinentes, à partir de la proportion CORRECTE (recalculée ici, jamais depuis la saisie
- * élève). */
-export function valeurEcran2Histogramme(ex: ExerciceFamilleBHistogramme): number {
-  const classe = ex.classes[ex.indexClasseCible];
-  const proportion = proportionHistogramme(ex);
-  const avant = ex.classes.slice(0, ex.indexClasseCible).reduce((acc, c) => acc + c.effectif, 0);
-  const compteAvant = avant + proportion * classe.effectif;
-  const total = totalEffectifHistogramme(ex);
-  return ex.demande === "inferieur" ? compteAvant / total : (total - compteAvant) / total;
+/** Verdict EXACT, sur les effectifs entiers (jamais à une tolérance près) : incompatibles ⟺
+ * n(A∩B) = 0 ; indépendants ⟺ n(A∩B)·n = n(A)·n(B). */
+export function verdictTestIndependance(ex: ExerciceFamilleBTestIndependance): VerdictTestIndependance {
+  const { n, nA, nB, nAetB } = effectifsTest(ex);
+  if (nAetB === 0) return "incompatibles";
+  return sontIndependantsEffectifs(nA, nB, nAetB, n) ? "independants" : "ni";
 }
 
-/** Écran 1 — `valeurs = [proportion]`. */
-export function diagnostiquerBHistoEcran1(exercice: ExerciceFamilleBHistogramme, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], proportionHistogramme(exercice), TOLERANCE);
+/** Écran 1 — méthode "produit" : `valeurs = [P(A), P(B), P(A∩B)]` ; méthode "conditionnelle" :
+ * `valeurs = [P(A), P(A|B)]`. */
+export function diagnostiquerBIndepEcran1(exercice: ExerciceFamilleBTestIndependance, valeurs: string[]): StatutVerification {
+  const { n, nA, nB, nAetB } = effectifsTest(exercice);
+  if (exercice.methode === "produit") {
+    return pireStatut(diagnostiquerProbabilite(valeurs[0], nA / n), diagnostiquerProbabilite(valeurs[1], nB / n), diagnostiquerProbabilite(valeurs[2], nAetB / n));
+  }
+  return pireStatut(diagnostiquerProbabilite(valeurs[0], nA / n), diagnostiquerProbabilite(valeurs[1], nAetB / nB));
 }
-export function verifierBHistoEcran1(exercice: ExerciceFamilleBHistogramme, valeurs: string[]): boolean {
-  return diagnostiquerBHistoEcran1(exercice, valeurs) === "correct";
+export function verifierBIndepEcran1(exercice: ExerciceFamilleBTestIndependance, valeurs: string[]): boolean {
+  return diagnostiquerBIndepEcran1(exercice, valeurs) === "correct";
 }
 
-/** Écran 2 — `valeurs = [valeur]`, à partir de la proportion CORRECTE (recalculée). */
-export function diagnostiquerBHistoEcran2(exercice: ExerciceFamilleBHistogramme, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], valeurEcran2Histogramme(exercice), TOLERANCE);
+/** Écran 2 (choix fermé, UN essai) — `valeurs = [verdict]`. */
+export function diagnostiquerBIndepEcran2(exercice: ExerciceFamilleBTestIndependance, valeurs: string[]): StatutVerification {
+  return valeurs[0] === verdictTestIndependance(exercice) ? "correct" : "not_equivalent";
 }
-export function verifierBHistoEcran2(exercice: ExerciceFamilleBHistogramme, valeurs: string[]): boolean {
-  return diagnostiquerBHistoEcran2(exercice, valeurs) === "correct";
+export function verifierBIndepEcran2(exercice: ExerciceFamilleBTestIndependance, valeurs: string[]): boolean {
+  return diagnostiquerBIndepEcran2(exercice, valeurs) === "correct";
 }
 
 // ============================================================================
@@ -189,9 +189,26 @@ export function probabiliteDepuisTable(t: TableauDouble, type: TypeQuestionTable
   }
 }
 
+/** Même probabilité que `probabiliteDepuisTable`, sous forme [numérateur, dénominateur] d'effectifs
+ * entiers — pour un affichage exact (récapitulatif) plutôt qu'un décimal arrondi. */
+export function fractionDepuisTable(t: TableauDouble, type: TypeQuestionTable, ligne: number, colonne: number): [number, number] {
+  switch (type) {
+    case "jointe":
+      return [t.cellules[ligne][colonne], totalTable(t)];
+    case "margLigne":
+      return [totalLigneTable(t, ligne), totalTable(t)];
+    case "margColonne":
+      return [totalColonneTable(t, colonne), totalTable(t)];
+    case "condLigneSachantColonne":
+      return [t.cellules[ligne][colonne], totalColonneTable(t, colonne)];
+    case "condColonneSachantLigne":
+      return [t.cellules[ligne][colonne], totalLigneTable(t, ligne)];
+  }
+}
+
 /** Écran unique — `valeurs = [valeur]`. */
 export function diagnostiquerBTableEcran1(exercice: ExerciceFamilleBTableauDonne, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteDepuisTable(exercice.table, exercice.typeQuestion, exercice.ligneCible, exercice.colonneCible), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], probabiliteDepuisTable(exercice.table, exercice.typeQuestion, exercice.ligneCible, exercice.colonneCible));
 }
 export function verifierBTableEcran1(exercice: ExerciceFamilleBTableauDonne, valeurs: string[]): boolean {
   return diagnostiquerBTableEcran1(exercice, valeurs) === "correct";
@@ -234,7 +251,7 @@ export function tableCompleteReconstruire(ex: ExerciceFamilleBReconstruire): Tab
  * pour la convention exacte, TOUJOURS dans cet ordre). */
 export function diagnostiquerBReconEcran1(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): StatutVerification {
   const [r0, r1, r2] = totauxLigneReconstruire(exercice);
-  return pireStatut(diagnostiquerValeur(valeurs[0], r0, TOLERANCE), diagnostiquerValeur(valeurs[1], r1, TOLERANCE), diagnostiquerValeur(valeurs[2], r2, TOLERANCE), diagnostiquerValeur(valeurs[3], cellule00Reconstruire(exercice), TOLERANCE), diagnostiquerValeur(valeurs[4], cellule10Reconstruire(exercice), TOLERANCE));
+  return pireStatut(diagnostiquerEffectif(valeurs[0], r0), diagnostiquerEffectif(valeurs[1], r1), diagnostiquerEffectif(valeurs[2], r2), diagnostiquerEffectif(valeurs[3], cellule00Reconstruire(exercice)), diagnostiquerEffectif(valeurs[4], cellule10Reconstruire(exercice)));
 }
 export function verifierBReconEcran1(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): boolean {
   return diagnostiquerBReconEcran1(exercice, valeurs) === "correct";
@@ -245,7 +262,7 @@ export function verifierBReconEcran1(exercice: ExerciceFamilleBReconstruire, val
  * CELLULE PAR CELLULE (spec). */
 export function diagnostiquerBReconEcran2(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): StatutVerification {
   const table = tableCompleteReconstruire(exercice);
-  return pireStatut(diagnostiquerValeur(valeurs[0], cellule20Reconstruire(exercice), TOLERANCE), diagnostiquerValeur(valeurs[1], table.cellules[0][1], TOLERANCE), diagnostiquerValeur(valeurs[2], table.cellules[1][1], TOLERANCE), diagnostiquerValeur(valeurs[3], table.cellules[2][1], TOLERANCE));
+  return pireStatut(diagnostiquerEffectif(valeurs[0], cellule20Reconstruire(exercice)), diagnostiquerEffectif(valeurs[1], table.cellules[0][1]), diagnostiquerEffectif(valeurs[2], table.cellules[1][1]), diagnostiquerEffectif(valeurs[3], table.cellules[2][1]));
 }
 export function verifierBReconEcran2(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): boolean {
   return diagnostiquerBReconEcran2(exercice, valeurs) === "correct";
@@ -255,7 +272,7 @@ export function verifierBReconEcran2(exercice: ExerciceFamilleBReconstruire, val
  * `probabiliteDepuisTable` (même contrat `TypeQuestionTable` que "tableauDonne", jamais réimplémenté). */
 export function diagnostiquerBReconEcran3(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): StatutVerification {
   const table = tableCompleteReconstruire(exercice);
-  return diagnostiquerValeur(valeurs[0], probabiliteDepuisTable(table, exercice.typeQuestionFinale, exercice.ligneCibleFinale, exercice.colonneCibleFinale), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], probabiliteDepuisTable(table, exercice.typeQuestionFinale, exercice.ligneCibleFinale, exercice.colonneCibleFinale));
 }
 export function verifierBReconEcran3(exercice: ExerciceFamilleBReconstruire, valeurs: string[]): boolean {
   return diagnostiquerBReconEcran3(exercice, valeurs) === "correct";
@@ -287,7 +304,7 @@ export function bayesEcran3C(ex: ExerciceFamilleC): number {
 /** Écran 1 — `valeurs = [P(cause1∩effet), P(cause1∩pas effet), P(cause2∩effet), P(cause2∩pas effet)]`. */
 export function diagnostiquerCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
   const branches = branchesArbreC(exercice);
-  return pireStatut(...branches.map((b, i) => diagnostiquerValeur(valeurs[i], b, TOLERANCE)));
+  return pireStatut(...branches.map((b, i) => diagnostiquerProbabilite(valeurs[i], b)));
 }
 export function verifierCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
   return diagnostiquerCEcran1(exercice, valeurs) === "correct";
@@ -295,7 +312,7 @@ export function verifierCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): 
 
 /** Écran 2 — `valeurs = [P(effet)]`. */
 export function diagnostiquerCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteEffetC(exercice), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], probabiliteEffetC(exercice));
 }
 export function verifierCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
   return diagnostiquerCEcran2(exercice, valeurs) === "correct";
@@ -303,7 +320,7 @@ export function verifierCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): 
 
 /** Écran 3 — `valeurs = [valeur]`, le résultat de Bayes. */
 export function diagnostiquerCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], bayesEcran3C(exercice), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], bayesEcran3C(exercice));
 }
 export function verifierCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): boolean {
   return diagnostiquerCEcran3(exercice, valeurs) === "correct";
@@ -325,10 +342,10 @@ export function diagnostiquerEcran(exercice: ExerciceIndependanceBayes, phase: P
       return diagnostiquerAUnionEcran2(exercice as ExerciceFamilleAUnion, valeurs);
     case "aUnionEcran3":
       return diagnostiquerAUnionEcran3(exercice as ExerciceFamilleAUnion, valeurs);
-    case "bHistoEcran1":
-      return diagnostiquerBHistoEcran1(exercice as ExerciceFamilleBHistogramme, valeurs);
-    case "bHistoEcran2":
-      return diagnostiquerBHistoEcran2(exercice as ExerciceFamilleBHistogramme, valeurs);
+    case "bIndepEcran1":
+      return diagnostiquerBIndepEcran1(exercice as ExerciceFamilleBTestIndependance, valeurs);
+    case "bIndepEcran2":
+      return diagnostiquerBIndepEcran2(exercice as ExerciceFamilleBTestIndependance, valeurs);
     case "bTableEcran1":
       return diagnostiquerBTableEcran1(exercice as ExerciceFamilleBTableauDonne, valeurs);
     case "bReconEcran1":

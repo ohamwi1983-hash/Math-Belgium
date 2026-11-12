@@ -84,7 +84,7 @@ export type IdGenerateurPilote =
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42'
-  | '6gen30' | '6gen31' | '6gen32' | '6gen33'
+  | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67'
@@ -182,10 +182,15 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', generatorId: '6gen40', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'trianglescomplexes', generatorId: '6gen41', label: '' },
   { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', generatorId: '6gen42', label: '', processus: 3 },
-  { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen30', label: '' },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen30', label: 'Probabilités et ensembles (6gen30)' },
+  // Audit 6e ch. 6 : 6gen75 (fréquence et probabilité), 6gen74 (arbre, tableau, effectifs) et
+  // 6gen76 (paradoxes, processus 3) ; 6gen33 mobilise plusieurs notions combinées → processus 3.
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen75', label: 'Fréquence et probabilité (6gen75)' },
   { chapitreSlug: 'probabilites', sectionId: 'tiragesarbres', generatorId: '6gen31', label: '' },
-  { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen32', label: '' },
-  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen33', label: '' },
+  { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen32', label: 'Indépendance et Bayes (6gen32)' },
+  { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen74', label: 'Arbre, tableau, effectifs (6gen74)' },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen33', label: 'Problèmes de probabilités (6gen33)', processus: 3 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen76', label: 'Paradoxes (6gen76)', processus: 3 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', generatorId: '6gen54', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: '' },
@@ -318,6 +323,51 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'graphique', quizTheme: 'graphiqueDeriveeLogarithme', label: '', quizChapitre: 3 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', quizTheme: 'etudeFonctionLogarithme', label: '', quizChapitre: 3 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', quizTheme: 'logarithmesProblemes', label: '', quizChapitre: 3 },
+  // Audit 6e ch. 6 (décision J) : les 7 banques vrai/faux de 6e déjà chargées par
+  // `lib/banquesVraiFaux.ts` mais jamais câblées ici — un thème par générateur, donc par section.
+  // `quizChapitre` = numéro du chapitre (sert seulement à l'URL plateforme-maths) ; omis pour les
+  // chapitres 9 et 10, hors du type `ChapitreFonctionnel` (1–8) et sans page distante.
+  { chapitreSlug: 'primitives-integrales', sectionId: 'primitives', quizTheme: 'calculPrimitives', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'conditioninitiale', quizTheme: 'quellePrimitive', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'integralesdefinies', quizTheme: 'integralesDefinies', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'aires', quizTheme: 'calculAires', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'volumes', quizTheme: 'volumesRevolution', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'longueurarc', quizTheme: 'longueurArc', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'problemes', quizTheme: 'integralesProblemes', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'operationsbase', quizTheme: 'operationsBase', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'affixesracines', quizTheme: 'affixesRacines', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'equationscomplexes', quizTheme: 'equationsComplexes', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'formetrigonometrique', quizTheme: 'formeTrigonometrique', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'formulemoivre', quizTheme: 'formuleMoivre', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'racinesniemes', quizTheme: 'racinesNiemes', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'transformationsplan', quizTheme: 'transformationsPlan', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'trianglescomplexes', quizTheme: 'trianglesComplexes', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'nombres-complexes', sectionId: 'problemesavances', quizTheme: 'complexesAvances', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', quizTheme: 'probabilitesEnsembles', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'probabilites', sectionId: 'tiragesarbres', quizTheme: 'tiragesArbres', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'probabilites', sectionId: 'independancebayes', quizTheme: 'independanceBayes', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', quizTheme: 'probabilitesProblemes', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementfondamental', quizTheme: 'denombrementFondamental', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', quizTheme: 'denombrementCombine', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', quizTheme: 'binomeNewton', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', quizTheme: 'denombrementProblemes', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'probabilitehypergeometrique', quizTheme: 'probabiliteHypergeometrique', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', quizTheme: 'binomialeSequence', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', quizTheme: 'variablesDiscretesEsperance', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', quizTheme: 'loiBinomiale', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', quizTheme: 'loiNormale', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', quizTheme: 'extensionsBinomialeNormaleBayes', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', quizTheme: 'loiPoisson', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', quizTheme: 'pointsDroitesRemarquablesTriangle', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', quizTheme: 'cercles', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', quizTheme: 'lieuxGeometriquesParametres', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', quizTheme: 'methodeGeneratrices', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'identifier', quizTheme: 'identificationConiques', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'excentricite', quizTheme: 'equationDepuisCaracteristiques', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'airefocale', quizTheme: 'aireExcentriciteConique', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'intersection', quizTheme: 'intersectionsConiques', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'tangentes', quizTheme: 'tangentesConique', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'optique', quizTheme: 'proprietesOptiquesConiques', label: '' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'coefficientsAllure', label: 'Coefficients, concavité et allure' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'racinesFactorisation', label: 'Racines par factorisation' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
@@ -1575,12 +1625,26 @@ interface FormuleRattachee {
 /** « $s = r\theta$ » → « $s = \ldots$ » : on donne le membre de gauche, l'élève écrit le reste.
  * `null` dès qu'un morceau n'a pas de « = » (rien à masquer proprement : l'énoncé retombe alors sur
  * le titre du groupe du formulaire). */
+/** Position du premier « = » au NIVEAU 0 (hors (), [], {}) : « P(X=k) = … » coupe au second « = »,
+ * pas dans l'argument (audit 6e ch. 6, décision L). « \left( » / « \right) » comptent comme des
+ * parenthèses ordinaires ; « \{ » / « \} » aussi. −1 s'il n'y en a pas. */
+function premierEgalNiveauZero(maths: string): number {
+  let profondeur = 0
+  for (let i = 0; i < maths.length; i++) {
+    const c = maths[i]
+    if (c === '(' || c === '[' || c === '{') profondeur++
+    else if (c === ')' || c === ']' || c === '}') profondeur = Math.max(0, profondeur - 1)
+    else if (c === '=' && profondeur === 0) return i
+  }
+  return -1
+}
+
 function masquerMembresDeDroite(texte: string): string | null {
   let toutMasque = true
   const resultat = texte.replace(/\$([^$]+)\$/g, (_tout: string, maths: string) => {
     const morceaux = maths.split(/\\qquad|\\quad/)
     const masques = morceaux.map((m) => {
-      const i = m.indexOf('=')
+      const i = premierEgalNiveauZero(m)
       if (i < 0) {
         toutMasque = false
         return m

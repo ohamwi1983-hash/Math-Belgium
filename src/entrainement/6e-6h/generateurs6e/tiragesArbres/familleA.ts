@@ -1,4 +1,4 @@
-import type { ExerciceFamilleA } from "../../core6e/tiragesArbres.types";
+import type { ExerciceFamilleA, QuestionEcran3FamilleA } from "../../core6e/tiragesArbres.types";
 
 /**
  * Couche A (6e) — génération famille A ("Tirages avec/sans remise") pour `6gen31`. Urne à 2
@@ -25,18 +25,18 @@ function tirerParmi<T>(candidats: readonly T[]): T {
 }
 
 /** Construction déterministe (`avecRemise`/`k` fixés, tout le reste tiré au hasard) — utilisée par
- * `CATALOGUE_VARIANTES`/`construireAvecVarianteId` (convention permanente). `m` tiré STRICTEMENT
- * entre 0 et k (0 < m < k, spec) — jamais m=0 ni m=k, déjà couverts par l'écran 2 "toutes même
- * couleur" (voir `core6e/tiragesArbres.types.ts`, doc de `ExerciceFamilleA.m`). */
-export function construireFamilleA(avecRemise: boolean, k: number): ExerciceFamilleA {
+ * `CATALOGUE_VARIANTES`/`construireAvecVarianteId`. Écran 3 (audit 6e ch. 6, variété) : « exactement
+ * m » (0 < m < k) ou « au moins une » (par l'événement contraire), tiré au hasard si non imposé. */
+export function construireFamilleA(avecRemise: boolean, k: number, questionEcran3?: QuestionEcran3FamilleA): ExerciceFamilleA {
   const n1 = tirerParmi(EFFECTIFS_A);
   const n2 = tirerParmi(EFFECTIFS_A);
   const [labelCouleur1, labelCouleur2] = tirerParmi(LABELS_COULEURS);
-  const m = k === 2 ? 1 : tirerEntier(1, k - 1);
-  return { famille: "A", n1, n2, labelCouleur1, labelCouleur2, k, avecRemise, m };
+  const m = tirerEntier(1, k - 1);
+  const question = questionEcran3 ?? tirerParmi(["exactement", "auMoinsUne"] as const);
+  return { famille: "A", n1, n2, labelCouleur1, labelCouleur2, k, avecRemise, m, questionEcran3: question };
 }
 
-/** Tirage ÉQUIPROBABLE de `avecRemise` ET de `k` (spec : "avec/sans remise tiré", "k∈{2,3}"). */
+/** Tirage ÉQUIPROBABLE de `avecRemise` ET de `k`. */
 export function genererFamilleA(): ExerciceFamilleA {
   return construireFamilleA(Math.random() < 0.5, tirerParmi(K_A));
 }
@@ -71,6 +71,7 @@ export function probMemeCouleur(nCouleur: number, nAutre: number, k: number, ave
 /** P("exactement m boules de couleur 1"), écran 3 — LA formule dépend du mode de tirage (piège
  * central de la spec, jamais interchangeable). */
 export function probExactementM(ex: ExerciceFamilleA): number {
+  if (ex.questionEcran3 === "auMoinsUne") return 1 - probMemeCouleur(ex.n2, ex.n1, ex.k, ex.avecRemise);
   const n = ex.n1 + ex.n2;
   if (ex.avecRemise) {
     const p = ex.n1 / n;

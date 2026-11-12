@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
 import type { IdVarianteProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesEnsembles, soumettreReponseEcran } from "./moteur6e/sessionProbabilitesEnsembles";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesEnsembles, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionProbabilitesEnsembles";
 import { phasesPourExercice } from "./moteur6e/typesProbabilitesEnsembles";
 import type { EtatSessionProbabilitesEnsembles, PhaseProbabilitesEnsembles } from "./moteur6e/typesProbabilitesEnsembles";
 import { diagnostiquerEcran } from "./moteur6e/verificationProbabilitesEnsembles";
@@ -11,7 +11,7 @@ import { Katex } from "./components/Katex";
 import { EtapeChampsProbabilitesEnsembles } from "./components6e/EtapeChampsProbabilitesEnsembles";
 import { EtapeChoixProbabilitesEnsembles } from "./components6e/EtapeChoixProbabilitesEnsembles";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, estEcranChoix, formatReponseAttenduePhaseLatex } from "./ui6e/formatProbabilitesEnsembles";
+import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, estEcranChoix, formatReponseAttenduePhaseLatex, libelleChoixCorrect, tableauEcran } from "./ui6e/formatProbabilitesEnsembles";
 import { calculerRecapitulatifProbabilitesEnsembles, calculerSegmentsProgressionProbabilitesEnsembles } from "./ui6e/recapitulatifProbabilitesEnsembles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -32,6 +32,20 @@ function nouvelleSession(): EtatSessionProbabilitesEnsembles {
   return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsembles);
 }
 
+/** Réponse attendue d'un écran : libellé du choix correct (texte, écran à choix) puis valeurs ou
+ * justification en KaTeX. */
+function ReponseAttendue({ exercice, phase }: { exercice: EtatSessionProbabilitesEnsembles["exerciceCourant"]; phase: PhaseProbabilitesEnsembles }) {
+  const libelle = libelleChoixCorrect(exercice, phase);
+  return (
+    <span className="equation-box-termes">
+      {libelle && <strong>{libelle}</strong>}
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionProbabilitesEnsembles;
   revele: boolean;
@@ -40,6 +54,9 @@ interface TransitionEnAttente {
 export function App6gen30() {
   const [etat, setEtat] = useState<EtatSessionProbabilitesEnsembles>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Compteur de tirages : entre dans la `key` des écrans pour vider les champs à chaque nouvel
+   * exercice, y compris quand « Générer » relance la MÊME variante (même phase initiale). */
+  const [generation, setGeneration] = useState(0);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionProbabilitesEnsembles`, jamais dans le moteur : la saisie de
    * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
@@ -66,13 +83,7 @@ export function App6gen30() {
             titre: LIBELLE_PHASE[phaseFermee],
             votreReponse,
             correcte: !revele,
-            reponseAttendue: revele ? (
-              <span className="equation-box-termes">
-                {formatReponseAttenduePhaseLatex(exercice, phaseFermee).map((frag, i) => (
-                  <Katex key={i} expression={frag} />
-                ))}
-              </span>
-            ) : undefined,
+            reponseAttendue: revele ? <ReponseAttendue exercice={exercice} phase={phaseFermee} /> : undefined,
           },
         ]);
       }
@@ -86,6 +97,7 @@ export function App6gen30() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
       setEtat(nouvelleSession());
+      setGeneration((g) => g + 1);
       setHistorique([]);
       setAideParPhase({});
     } else {
@@ -96,6 +108,7 @@ export function App6gen30() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setGeneration((g) => g + 1);
     setHistorique([]);
     setAideParPhase({});
     setEtat(demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteProbabilitesEnsembles)));
@@ -115,7 +128,7 @@ export function App6gen30() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxPhase(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -124,13 +137,7 @@ export function App6gen30() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <span className="equation-box-termes">
-            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </span>
-        ),
+        reponseAttendue: <ReponseAttendue exercice={exercice} phase={phase} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -166,7 +173,7 @@ export function App6gen30() {
         <RecapitulatifPanel entrees={calculerRecapitulatifProbabilitesEnsembles(etat)} />
         {estEcranChoix(phase) ? (
           <EtapeChoixProbabilitesEnsembles
-            key={phase}
+            key={`${generation}-${phase}`}
             {...propsCommun}
             options={choixEcran(exercice, phase)}
             diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])}
@@ -176,9 +183,10 @@ export function App6gen30() {
           />
         ) : (
           <EtapeChampsProbabilitesEnsembles
-            key={phase}
+            key={`${generation}-${phase}`}
             {...propsCommun}
             champs={champsEcran(exercice, phase)}
+            tableau={tableauEcran(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             onValider={(valeurs) =>
               terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))

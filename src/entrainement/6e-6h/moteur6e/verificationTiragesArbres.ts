@@ -1,37 +1,31 @@
-import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceTiragesArbres } from "../core6e/tiragesArbres.types";
+import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleCParite, ExerciceFamilleCSpecial, ExerciceFamilleD, ExerciceTiragesArbres } from "../core6e/tiragesArbres.types";
 import { evaluerExpressionExponentielle } from "./expressionExponentielle";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { PhaseTiragesArbres } from "./typesTiragesArbres";
-import { diagnostiquerValeur } from "./verificationProbabilites";
+import { diagnostiquerProbabilite } from "./verificationProbabilites";
 
 /**
- * Couche B (6e) — vérification propre à `6gen31` (tirages avec/sans remise, permutations et
- * dérangements, dé truqué). N'importe JAMAIS rien de `src/generateurs6e/` (règle non négociable,
- * CLAUDE.md) — toutes les quantités sont RECALCULÉES ici, indépendamment de
- * `generateurs6e/tiragesArbres/*.ts` (même principe que `verificationProbabilitesEnsembles.ts`,
- * 6gen30) — voir `generateurs6e/tiragesArbres/session.integration.test.ts` (seul fichier autorisé
- * Couche A + Couche B) pour la preuve. `diagnostiquerValeur` (statut fraction/décimal, tolérance
- * 0,01) est réutilisée telle quelle depuis `moteur6e/verificationProbabilites.ts` (module PARTAGÉ du
- * chapitre 8, contrat documenté dans son en-tête) pour TOUTE valeur numérique de ce fichier — jamais
- * un wrapper spécifique réécrit ici.
+ * Couche B (6e) — vérification propre à `6gen31` (tirages et arbres). N'importe JAMAIS rien de
+ * `generateurs6e/` : toutes les quantités sont RECALCULÉES ici, par énumération des chemins de
+ * l'arbre (familles A et D) ou des arrangements (famille B, n ≤ 5) — jamais par une formule de
+ * dénombrement du chapitre suivant.
  *
- * ============================================================================
- * **Convention de signature — tous les écrans prennent `string[]`** (même convention que
- * `verificationProbabilitesEnsembles.ts`). Chaque fonction documente l'ORDRE exact des champs de son
- * écran.
- * ============================================================================
+ * **Toute probabilité saisie passe par `diagnostiquerProbabilite`** (audit 6e ch. 6, décision A) :
+ * écriture exacte acceptée (fraction, produit, somme…), décimal accepté seulement s'il est
+ * l'arrondi correct avec au moins 2 décimales (3 si la probabilité est inférieure à 0,1),
+ * pourcentage accepté. L'ancienne tolérance absolue de 0,01 acceptait « 0 » pour 1/120.
+ *
+ * **Réutilisé par `6gen33`** (famille G) : `diagnostiquerBEcran1..4` et `diagnostiquerCEcran1..3`
+ * (dé à 6 faces, sous-type "special", équation `a + 5p = 1` où `a` désigne P(face spéciale)) — les
+ * champs optionnels absents redonnent l'ancien comportement (voir `core6e/tiragesArbres.types.ts`).
+ *
+ * Convention : chaque écran prend `string[]`, dans l'ordre des champs documenté sur sa fonction.
  */
-
-const TOLERANCE = 0.01;
 
 function pireStatut(...statuts: StatutVerification[]): StatutVerification {
   if (statuts.some((s) => s === "parse_error")) return "parse_error";
   return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
 }
-
-// ============================================================================
-// Famille A — Tirages avec/sans remise.
-// ============================================================================
 
 function factorielle(n: number): number {
   let r = 1;
@@ -39,98 +33,136 @@ function factorielle(n: number): number {
   return r;
 }
 
-function coefficientBinomial(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  return factorielle(n) / (factorielle(k) * factorielle(n - k));
+// ============================================================================
+// Familles A et D — chemins d'un arbre de tirages dans une urne à 2 couleurs.
+// ============================================================================
+
+/** Probabilité d'un chemin (suite de couleurs 0/1) : produit des probabilités des branches. */
+function probChemin(n1: number, n2: number, avecRemise: boolean, chemin: readonly number[]): number {
+  let r1 = n1;
+  let r2 = n2;
+  let produit = 1;
+  for (const c of chemin) {
+    const total = r1 + r2;
+    produit *= (c === 0 ? r1 : r2) / total;
+    if (!avecRemise) {
+      if (c === 0) r1--;
+      else r2--;
+    }
+  }
+  return produit;
+}
+
+/** Tous les chemins d'un arbre à k niveaux. */
+function tousLesChemins(k: number): number[][] {
+  let chemins: number[][] = [[]];
+  for (let i = 0; i < k; i++) chemins = chemins.flatMap((c) => [[...c, 0], [...c, 1]]);
+  return chemins;
+}
+
+/** Somme des chemins à `m` tirages de la couleur 0. */
+function probExactementCouleur0(n1: number, n2: number, avecRemise: boolean, k: number, m: number): number {
+  return tousLesChemins(k)
+    .filter((c) => c.filter((x) => x === 0).length === m)
+    .reduce((acc, c) => acc + probChemin(n1, n2, avecRemise, c), 0);
 }
 
 /** P(k tirages de la couleur d'effectif `nCouleur`, l'autre couleur ayant `nAutre`). */
 function probMemeCouleur(nCouleur: number, nAutre: number, k: number, avecRemise: boolean): number {
-  const n = nCouleur + nAutre;
-  if (avecRemise) return Math.pow(nCouleur / n, k);
-  let produit = 1;
-  for (let i = 0; i < k; i++) produit *= (nCouleur - i) / (n - i);
-  return produit;
+  return probChemin(nCouleur, nAutre, avecRemise, new Array<number>(k).fill(0));
 }
 
-/** P("exactement m boules de couleur 1") — LA formule dépend du mode de tirage (piège central de la
- * spec : appliquer la formule "avec remise" — indépendance, binomiale — à un tirage sans remise, ou
- * l'inverse, ne donne JAMAIS le même résultat). */
-function probExactementM(ex: ExerciceFamilleA): number {
-  const n = ex.n1 + ex.n2;
-  if (ex.avecRemise) {
-    const p = ex.n1 / n;
-    return coefficientBinomial(ex.k, ex.m) * Math.pow(p, ex.m) * Math.pow(1 - p, ex.k - ex.m);
-  }
-  return (coefficientBinomial(ex.n1, ex.m) * coefficientBinomial(ex.n2, ex.k - ex.m)) / coefficientBinomial(n, ex.k);
+/** Écran 3 de la famille A : « exactement m » (somme de chemins) ou « au moins une » (contraire). */
+function probEcran3A(ex: ExerciceFamilleA): number {
+  if (ex.questionEcran3 === "auMoinsUne") return 1 - probMemeCouleur(ex.n2, ex.n1, ex.k, ex.avecRemise);
+  return probExactementCouleur0(ex.n1, ex.n2, ex.avecRemise, ex.k, ex.m);
 }
 
-/** Écran 1 — `valeurs = [P(k tirages couleur1), P(k tirages couleur2)]`, TOUJOURS dans cet ordre
- * (couleur 1 puis couleur 2). */
+/** Écran 1 — `valeurs = [P(k couleur 1), P(k couleur 2)]`. */
 export function diagnostiquerAEcran1(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
   const p1 = probMemeCouleur(exercice.n1, exercice.n2, exercice.k, exercice.avecRemise);
   const p2 = probMemeCouleur(exercice.n2, exercice.n1, exercice.k, exercice.avecRemise);
-  return pireStatut(diagnostiquerValeur(valeurs[0], p1, TOLERANCE), diagnostiquerValeur(valeurs[1], p2, TOLERANCE));
+  return pireStatut(diagnostiquerProbabilite(valeurs[0], p1), diagnostiquerProbabilite(valeurs[1], p2));
 }
 
-/** Écran 2 — `valeurs = [valeur]`, somme des 2 valeurs CORRECTES de l'écran 1 (jamais recalculée
- * depuis la saisie élève). */
+/** Écran 2 — `valeurs = [P(même couleur)]`. */
 export function diagnostiquerAEcran2(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
   const p1 = probMemeCouleur(exercice.n1, exercice.n2, exercice.k, exercice.avecRemise);
   const p2 = probMemeCouleur(exercice.n2, exercice.n1, exercice.k, exercice.avecRemise);
-  return diagnostiquerValeur(valeurs[0], p1 + p2, TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], p1 + p2);
 }
 
-/** Écran 3 — `valeurs = [valeur]`, P("exactement m boules de couleur 1"). */
+/** Écran 3 — `valeurs = [valeur]`. */
 export function diagnostiquerAEcran3(exercice: ExerciceFamilleA, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probExactementM(exercice), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], probEcran3A(exercice));
+}
+
+/** Les 6 branches de l'arbre de la famille D, dans l'ordre des champs a…f : 1er tirage (couleur 1,
+ * couleur 2), puis 2e tirage après la couleur 1 (couleur 1, couleur 2), puis après la couleur 2. */
+function branchesD(ex: ExerciceFamilleD): number[] {
+  const n = ex.n1 + ex.n2;
+  if (ex.avecRemise) return [ex.n1 / n, ex.n2 / n, ex.n1 / n, ex.n2 / n, ex.n1 / n, ex.n2 / n];
+  return [ex.n1 / n, ex.n2 / n, (ex.n1 - 1) / (n - 1), ex.n2 / (n - 1), ex.n1 / (n - 1), (ex.n2 - 1) / (n - 1)];
+}
+
+function cibleD(ex: ExerciceFamilleD, phase: "dEcran2" | "dEcran3" | "dEcran4"): number {
+  if (phase === "dEcran2") return probChemin(ex.n1, ex.n2, ex.avecRemise, ex.chemin);
+  if (phase === "dEcran3") return probChemin(ex.n1, ex.n2, ex.avecRemise, [0, 1]) + probChemin(ex.n1, ex.n2, ex.avecRemise, [1, 0]);
+  const autre = ex.couleurCible === 0 ? 1 : 0;
+  return 1 - probChemin(ex.n1, ex.n2, ex.avecRemise, [autre, autre]);
+}
+
+/** Écran D1 — `valeurs = [a, b, c, d, e, f]` (voir `branchesD`). */
+export function diagnostiquerDEcran1(exercice: ExerciceFamilleD, valeurs: string[]): StatutVerification {
+  const cibles = branchesD(exercice);
+  return pireStatut(...cibles.map((c, i) => diagnostiquerProbabilite(valeurs[i] ?? "", c)));
+}
+
+/** Écrans D2 (chemin), D3 (exactement une), D4 (au moins une) — `valeurs = [valeur]`. */
+export function diagnostiquerDEcranValeur(exercice: ExerciceFamilleD, phase: "dEcran2" | "dEcran3" | "dEcran4", valeurs: string[]): StatutVerification {
+  return diagnostiquerProbabilite(valeurs[0], cibleD(exercice, phase));
 }
 
 // ============================================================================
-// Famille B — Permutations et dérangements.
+// Famille B — arrangements au hasard de n objets numérotés (n ≤ 5 : énumération directe).
 // ============================================================================
 
-/** Table des dérangements — voir `generateurs6e/tiragesArbres/familleB.ts` pour la justification
- * complète (D(0..4) fournis par la spec, D(5)=44 ajouté — nécessaire à l'écran 4 pour n=5).
- * DUPLIQUÉE ici (jamais importée de `generateurs6e/`, règle non négociable — voir en-tête de
- * fichier). */
-const DERANGEMENTS: readonly number[] = [1, 0, 1, 2, 9, 44];
-
-function derangement(n: number): number {
-  return DERANGEMENTS[n];
+function permutations(n: number): number[][] {
+  if (n === 0) return [[]];
+  return permutations(n - 1).flatMap((p) => Array.from({ length: n }, (_, i) => [...p.slice(0, i), n - 1, ...p.slice(i)]));
 }
 
-/** Écran 1 — `valeurs = [valeur]`. P(une position fixée) = 1/n ; P(deux positions fixées) =
- * (n-2)!/n!. */
+/** Nombre d'arrangements dont le nombre d'objets bien placés vérifie `test`. */
+function compterArrangements(n: number, test: (bienPlaces: number) => boolean): number {
+  return permutations(n).filter((p) => test(p.filter((v, i) => v === i).length)).length;
+}
+
+/** Écran 1 — `valeurs = [valeur]`. Une position donnée : 1/n ; deux : 1/(n(n − 1)). */
 export function diagnostiquerBEcran1(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  const cible = exercice.demandeEcran1 === "une" ? factorielle(exercice.n - 1) / factorielle(exercice.n) : factorielle(exercice.n - 2) / factorielle(exercice.n);
-  return diagnostiquerValeur(valeurs[0], cible, TOLERANCE);
+  const cible = exercice.demandeEcran1 === "une" ? 1 / exercice.n : 1 / (exercice.n * (exercice.n - 1));
+  return diagnostiquerProbabilite(valeurs[0], cible);
 }
 
-/** Écran 2 — `valeurs = [valeur]`. P(arrangement entièrement correct) = 1/n!. */
+/** Écran 2 — `valeurs = [valeur]`. Tout bien placé : 1/n!. */
 export function diagnostiquerBEcran2(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], 1 / factorielle(exercice.n), TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], 1 / factorielle(exercice.n));
 }
 
-/** Écran 3 — `valeurs = [valeur]`. P(exactement k positions correctes) = C(n,k)·D(n-k)/n! — piège :
- * les n-k positions restantes doivent former un DÉRANGEMENT COMPLET (aucune correcte parmi elles),
- * jamais un simple "au moins une incorrecte" ou une absence de contrainte (spec). */
+/** Écran 3 — `valeurs = [valeur]`. Exactement k bien placés. */
 export function diagnostiquerBEcran3(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  const cible = (coefficientBinomial(exercice.n, exercice.k) * derangement(exercice.n - exercice.k)) / factorielle(exercice.n);
-  return diagnostiquerValeur(valeurs[0], cible, TOLERANCE);
+  return diagnostiquerProbabilite(valeurs[0], compterArrangements(exercice.n, (b) => b === exercice.k) / factorielle(exercice.n));
 }
 
-/** Écran 4 — `valeurs = [valeur]`. P(aucune position correcte) = D(n)/n!. */
+/** Écran 4 — `valeurs = [valeur]`. Aucun bien placé, ou (n = 5) au moins 3 bien placés. */
 export function diagnostiquerBEcran4(exercice: ExerciceFamilleB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], derangement(exercice.n) / factorielle(exercice.n), TOLERANCE);
+  const test = exercice.demandeEcran4 === "auMoinsTrois" ? (b: number) => b >= 3 : (b: number) => b === 0;
+  return diagnostiquerProbabilite(valeurs[0], compterArrangements(exercice.n, test) / factorielle(exercice.n));
 }
 
 // ============================================================================
-// Famille C — Distributions non uniformes, dé truqué.
+// Famille C — dé truqué.
 // ============================================================================
 
-/** Évalue `texte` avec `variables` — `null` sur toute erreur de syntaxe OU résultat non fini
- * (jamais une exception qui remonterait à l'appelant). */
 function evaluerSafe(texte: string, variables: Record<string, number>): number | null {
   try {
     const v = evaluerExpressionExponentielle(texte, variables);
@@ -144,20 +176,13 @@ const TOLERANCE_CIBLE_NULLE = 1e-6;
 const TOLERANCE_RATIO = 1e-4;
 const NOMBRE_MIN_POINTS_COMPARABLES = 3;
 
-/** Vérifie qu'une ÉQUATION texte libre (`"gauche=droite"`) est algébriquement ÉQUIVALENTE à la
- * relation `cible(vars)=0` — accepte n'importe quelle reformulation (réordonnée, mise à l'échelle
- * par un facteur non nul, y compris négatif), même principe que
- * `verificationEquationCercle.ts`/`diagnostiquerEquivalenceQuadratiqueXY` (moteur→moteur du 4e,
- * PAS importée — chantiers indépendants, CLAUDE.md — mais même technique de vérification par
- * échantillonnage de plusieurs points, répliquée ici pour ce chantier). `echantillons` : plusieurs
- * jeux de valeurs `{variable: nombre}` — PAS nécessairement une solution du système (on teste
- * l'IDENTITÉ algébrique de l'équation, pas sa résolution). */
+/** Une ÉQUATION libre (« gauche=droite ») est-elle équivalente à `cible(vars) = 0` ? Accepte toute
+ * reformulation (réordonnée, multipliée par un facteur non nul) : on compare gauche − droite à
+ * cible sur plusieurs points, à un facteur constant près. */
 function diagnostiquerEquationSymbolique(texte: string, echantillons: Record<string, number>[], cible: (vars: Record<string, number>) => number): StatutVerification {
-  const indexEgal = texte.indexOf("=");
-  if (indexEgal === -1) return "parse_error";
-  const gauche = texte.slice(0, indexEgal);
-  const droite = texte.slice(indexEgal + 1);
-
+  const morceaux = texte.split("=");
+  if (morceaux.length !== 2) return "parse_error";
+  const [gauche, droite] = morceaux;
   const points: { soumis: number; cible: number }[] = [];
   for (const vars of echantillons) {
     const valeurCible = cible(vars);
@@ -168,7 +193,6 @@ function diagnostiquerEquationSymbolique(texte: string, echantillons: Record<str
     points.push({ soumis: g - d, cible: valeurCible });
   }
   if (points.length < NOMBRE_MIN_POINTS_COMPARABLES) return "parse_error";
-
   const ratio = points[0]!.soumis / points[0]!.cible;
   if (!Number.isFinite(ratio) || Math.abs(ratio) < TOLERANCE_CIBLE_NULLE) return "not_equivalent";
   for (const { soumis, cible: valeurCible } of points) {
@@ -187,66 +211,72 @@ const ECHANTILLONS_PQ: readonly [number, number][] = [
   [0.19, 0.23],
 ];
 
-function p0Valeur(ex: Extract<ExerciceFamilleC, { sousType: "special" }>): number {
-  return ex.p0.num / ex.p0.den;
+function valeur(f: { num: number; den: number }): number {
+  return f.num / f.den;
 }
-function pValeurSpecial(ex: Extract<ExerciceFamilleC, { sousType: "special" }>): number {
-  return ex.p.num / ex.p.den;
-}
-function pValeurParite(ex: Extract<ExerciceFamilleC, { sousType: "parite" }>): number {
-  return ex.p.num / ex.p.den;
-}
-function qValeurParite(ex: Extract<ExerciceFamilleC, { sousType: "parite" }>): number {
-  return ex.q.num / ex.q.den;
+function facesDe(ex: ExerciceFamilleC): number {
+  return ex.faces ?? 6;
 }
 
-/** Écran 1 — sous-type "special" : `valeurs = [équation somme totale]` ("a+5p=1" ou toute
- * reformulation équivalente ; `a` désigne P(faceSpéciale)=p0, un NOMBRE connu, substituable
- * littéralement ou laissé symbolique — les deux formes sont acceptées, `a` est de toute façon lié
- * dans `variables`). **`a` et non `p0`** — le tokeniseur d'`expressionExponentielle.ts` ne consomme
- * QUE des lettres dans un identifiant (`/[a-zA-Z]/`, jamais de chiffre après la première lettre) :
- * "p0" s'y tokenise comme l'identifiant "p" PUIS le nombre "0" (multiplication implicite,
- * "p0"→"p×0"), jamais comme un seul identifiant — piège trouvé par TDD (voir
- * `verificationTiragesArbres.test.ts`, rouge avant ce choix de nom), contourné en choisissant un nom
- * de variable sans chiffre plutôt qu'en touchant le tokeniseur partagé (chapitre 2, 6gen6-6gen19).
- * Sous-type "parite" : `valeurs = [équation contrainte p=r·q, équation somme totale 3p+3q=1]`,
- * TOUJOURS dans cet ordre (contrainte spécifique de l'énoncé PUIS somme totale). */
+/** Probabilité de chaque face du dé, faces 1..N. */
+function probabilitesFaces(ex: ExerciceFamilleC): number[] {
+  const n = facesDe(ex);
+  return Array.from({ length: n }, (_, i) => {
+    const face = i + 1;
+    if (ex.sousType === "special") return face === ex.faceSpeciale ? valeur(ex.p0) : valeur(ex.p);
+    return face % 2 === 0 ? valeur(ex.p) : valeur(ex.q);
+  });
+}
+
+function probFaces(ex: ExerciceFamilleC, test: (face: number) => boolean): number {
+  return probabilitesFaces(ex).reduce((acc, p, i) => (test(i + 1) ? acc + p : acc), 0);
+}
+
+/** Écran 1. Sous-type "special" : `valeurs = [équation de normalisation]`, en p (la probabilité
+ * connue s'écrit en nombre ; la lettre `a` reste acceptée pour 6gen33). Sous-type "parite" :
+ * `valeurs = [équation, équation]`, DANS N'IMPORTE QUEL ORDRE (relation traduite de la phrase,
+ * équation de normalisation). */
 export function diagnostiquerCEcran1(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
+  const n = facesDe(exercice);
   if (exercice.sousType === "special") {
-    const aVal = p0Valeur(exercice);
+    const aVal = valeur(exercice.p0);
     const echantillons = ECHANTILLONS_P.map((p) => ({ p, a: aVal }));
-    return diagnostiquerEquationSymbolique(valeurs[0], echantillons, (vars) => 5 * vars.p + vars.a - 1);
+    return diagnostiquerEquationSymbolique(valeurs[0], echantillons, (vars) => (n - 1) * vars.p + vars.a - 1);
   }
+  const h = n / 2;
   const r = exercice.r;
-  const echantillons = ECHANTILLONS_PQ.map(([p, q]) => ({ p, q, r }));
-  const statutContrainte = diagnostiquerEquationSymbolique(valeurs[0], echantillons, (vars) => vars.p - vars.r * vars.q);
-  const statutSomme = diagnostiquerEquationSymbolique(valeurs[1], echantillons, (vars) => 3 * vars.p + 3 * vars.q - 1);
-  return pireStatut(statutContrainte, statutSomme);
+  const echantillons = ECHANTILLONS_PQ.map(([p, q]) => ({ p, q }));
+  const relation = (texte: string) =>
+    diagnostiquerEquationSymbolique(texte, echantillons, (v) => ((exercice.plusProbable ?? "pair") === "pair" ? v.p - r * v.q : v.q - r * v.p));
+  const somme = (texte: string) => diagnostiquerEquationSymbolique(texte, echantillons, (v) => h * v.p + h * v.q - 1);
+  const ordre1 = pireStatut(relation(valeurs[0]), somme(valeurs[1]));
+  const ordre2 = pireStatut(somme(valeurs[0]), relation(valeurs[1]));
+  if (ordre1 === "correct" || ordre2 === "correct") return "correct";
+  return ordre1 === "parse_error" && ordre2 === "parse_error" ? "parse_error" : "not_equivalent";
 }
 
-/** Écran 2 — sous-type "special" : `valeurs = [p]`. Sous-type "parite" : `valeurs = [p, q]`
- * (TOUJOURS dans cet ordre). */
+/** Écran 2 — "special" : `valeurs = [p]` ; "parite" : `valeurs = [p, q]`. */
 export function diagnostiquerCEcran2(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  if (exercice.sousType === "special") {
-    return diagnostiquerValeur(valeurs[0], pValeurSpecial(exercice), TOLERANCE);
-  }
-  return pireStatut(diagnostiquerValeur(valeurs[0], pValeurParite(exercice), TOLERANCE), diagnostiquerValeur(valeurs[1], qValeurParite(exercice), TOLERANCE));
+  if (exercice.sousType === "special") return diagnostiquerProbabilite(valeurs[0], valeur(exercice.p));
+  return pireStatut(diagnostiquerProbabilite(valeurs[0], valeur(exercice.p)), diagnostiquerProbabilite(valeurs[1], valeur(exercice.q)));
 }
 
-/** Écran 3 — `valeurs = [valeur]`, probabilité composée à partir des valeurs CORRECTES de l'écran
- * 2 (jamais recalculée depuis la saisie élève). Sous-type "special" : P(faceSpeciale ∪ autreFace) =
- * p0+p. Sous-type "parite" : P(pair)=3p, P(impair)=3q, ou une probabilité sur `sousEnsemble`. */
-export function diagnostiquerCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
-  if (exercice.sousType === "special") {
-    return diagnostiquerValeur(valeurs[0], p0Valeur(exercice) + pValeurSpecial(exercice), TOLERANCE);
+function cibleCEcran3(ex: ExerciceFamilleC): number {
+  if (ex.sousType === "special") {
+    const cible = ex.ecran3Cible ?? "deuxFaces";
+    if (cible === "pair") return probFaces(ex, (f) => f % 2 === 0);
+    if (cible === "impair") return probFaces(ex, (f) => f % 2 === 1);
+    return valeur(ex.p0) + valeur(ex.p);
   }
-  const pVal = pValeurParite(exercice);
-  const qVal = qValeurParite(exercice);
-  if (exercice.ecran3Cible === "pair") return diagnostiquerValeur(valeurs[0], 3 * pVal, TOLERANCE);
-  if (exercice.ecran3Cible === "impair") return diagnostiquerValeur(valeurs[0], 3 * qVal, TOLERANCE);
-  const faces = exercice.sousEnsemble ?? [];
-  const cible = faces.reduce((acc, f) => acc + (f % 2 === 0 ? pVal : qVal), 0);
-  return diagnostiquerValeur(valeurs[0], cible, TOLERANCE);
+  if (ex.ecran3Cible === "pair") return probFaces(ex, (f) => f % 2 === 0);
+  if (ex.ecran3Cible === "impair") return probFaces(ex, (f) => f % 2 === 1);
+  const faces = ex.sousEnsemble ?? [];
+  return probFaces(ex, (f) => faces.includes(f));
+}
+
+/** Écran 3 — `valeurs = [valeur]`. */
+export function diagnostiquerCEcran3(exercice: ExerciceFamilleC, valeurs: string[]): StatutVerification {
+  return diagnostiquerProbabilite(valeurs[0], cibleCEcran3(exercice));
 }
 
 // ============================================================================
@@ -275,6 +305,12 @@ export function diagnostiquerEcran(exercice: ExerciceTiragesArbres, phase: Phase
       return diagnostiquerCEcran2(exercice as ExerciceFamilleC, valeurs);
     case "cEcran3":
       return diagnostiquerCEcran3(exercice as ExerciceFamilleC, valeurs);
+    case "dEcran1":
+      return diagnostiquerDEcran1(exercice as ExerciceFamilleD, valeurs);
+    case "dEcran2":
+    case "dEcran3":
+    case "dEcran4":
+      return diagnostiquerDEcranValeur(exercice as ExerciceFamilleD, phase, valeurs);
   }
 }
 
@@ -282,6 +318,33 @@ export function verifierEcran(exercice: ExerciceTiragesArbres, phase: PhaseTirag
   return diagnostiquerEcran(exercice, phase, valeurs) === "correct";
 }
 
-// Réexport — quantités dérivées utiles à `ui6e/formatTiragesArbres.ts` (affichage/récapitulatif),
-// jamais recalculées indépendamment là-bas (CLAUDE.md).
-export { coefficientBinomial, derangement, factorielle, p0Valeur, pValeurParite, pValeurSpecial, probExactementM, probMemeCouleur, qValeurParite };
+/** Valeur(s) EXACTE(S) attendue(s) à un écran de probabilité (nombres) — sert à l'annonce de
+ * précision des champs (centième ou millième selon la valeur, même règle que
+ * `diagnostiquerProbabilite`) et aux tests. `null` pour un écran d'équations (C1). */
+export function ciblesEcran(exercice: ExerciceTiragesArbres, phase: PhaseTiragesArbres): number[] | null {
+  switch (exercice.famille) {
+    case "A": {
+      const p1 = probMemeCouleur(exercice.n1, exercice.n2, exercice.k, exercice.avecRemise);
+      const p2 = probMemeCouleur(exercice.n2, exercice.n1, exercice.k, exercice.avecRemise);
+      if (phase === "aEcran1") return [p1, p2];
+      if (phase === "aEcran2") return [p1 + p2];
+      return [probEcran3A(exercice)];
+    }
+    case "B": {
+      const n = exercice.n;
+      if (phase === "bEcran1") return [exercice.demandeEcran1 === "une" ? 1 / n : 1 / (n * (n - 1))];
+      if (phase === "bEcran2") return [1 / factorielle(n)];
+      if (phase === "bEcran3") return [compterArrangements(n, (b) => b === exercice.k) / factorielle(n)];
+      return [compterArrangements(n, exercice.demandeEcran4 === "auMoinsTrois" ? (b) => b >= 3 : (b) => b === 0) / factorielle(n)];
+    }
+    case "C":
+      if (phase === "cEcran1") return null;
+      if (phase === "cEcran2") return exercice.sousType === "special" ? [valeur(exercice.p)] : [valeur(exercice.p), valeur(exercice.q)];
+      return [cibleCEcran3(exercice)];
+    case "D":
+      if (phase === "dEcran1") return branchesD(exercice);
+      return [cibleD(exercice, phase as "dEcran2" | "dEcran3" | "dEcran4")];
+  }
+}
+
+export type { ExerciceFamilleCParite, ExerciceFamilleCSpecial };

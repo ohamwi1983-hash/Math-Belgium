@@ -1,23 +1,24 @@
 /**
- * Couche core (6e) — contrat pour `6gen31` ("Tirages, arbres et dénombrement", chapitre 8
- * "Probabilités", DEUXIÈME générateur de ce chapitre, construit sur l'infrastructure fondée par
- * `6gen30` — voir `moteur6e/verificationProbabilites.ts` pour le contrat de réutilisation exact
- * (`diagnostiquerValeur`, réponse fraction/décimal). 3 familles (A, B, C), tirage ÉQUIPROBABLE de
- * la famille (spec : "Tirage aléatoire d'1 famille parmi 3 (A, B, C, équiprobable)"), chaque
- * famille tirant ensuite son propre contexte/sous-type en interne (voir
- * `generateurs6e/tiragesArbres/{familleA,familleB,familleC}.ts`).
+ * Couche core (6e) — contrat pour `6gen31` (« Tirages et arbres », chapitre « Les probabilités »).
+ * 4 familles, tirage équiprobable de la famille, chaque famille tirant ensuite son propre
+ * contexte/sous-type en interne (voir `generateurs6e/tiragesArbres/famille{A,B,C,D}.ts`).
  *
- * ============================================================================
  * Toutes les valeurs numériques générées restent des ENTIERS exacts ou des `FractionExacte`
- * (numérateur/dénominateur entiers, PAS nécessairement déjà réduite — même convention que
- * `core6e/probabilitesEnsembles.types.ts`, réduite seulement à l'affichage/la vérification, jamais
- * stockée réduite ni stockée en flottant — CLAUDE.md, "fraction irréductible, jamais de décimal").
- * ============================================================================
+ * (pas nécessairement réduites — réduites seulement à l'affichage, jamais stockées en flottant).
+ *
+ * **Contrat partagé avec `6gen33`** (famille G) : `ExerciceFamilleB` (via `construireFamilleB(4, …)`)
+ * et `ExerciceFamilleCSpecial` (via `construireFamilleCSpecial(m, k)`, dé à 6 faces) y sont réutilisés
+ * tels quels avec les vérificateurs `diagnostiquerBEcran1..4` / `diagnostiquerCEcran1..3`. Les champs
+ * ajoutés par l'audit 6e ch. 6 sont donc OPTIONNELS, et leur absence redonne l'ancien comportement.
  */
 
 // ============================================================================
-// Famille A — Tirages avec/sans remise dans une urne à 2 couleurs.
+// Famille A — k tirages successifs avec/sans remise dans une urne à 2 couleurs.
 // ============================================================================
+
+/** Question de l'écran 3 : « exactement m boules de la couleur 1 » (somme de chemins de même
+ * probabilité) ou « au moins une boule de la couleur 1 » (par l'événement contraire). */
+export type QuestionEcran3FamilleA = "exactement" | "auMoinsUne";
 
 export interface ExerciceFamilleA {
   famille: "A";
@@ -25,89 +26,118 @@ export interface ExerciceFamilleA {
   n1: number;
   /** Effectif de la couleur 2, 4 ≤ n2 ≤ 7. */
   n2: number;
+  /** Adjectif au féminin pluriel (« rouges »). */
   labelCouleur1: string;
   labelCouleur2: string;
   /** Nombre de tirages successifs, k ∈ {2,3}. */
   k: number;
   avecRemise: boolean;
-  /** Pour l'écran 3 ("exactement m boules de couleur 1") — TOUJOURS 0 < m < k (jamais m=0 ni m=k,
-   * déjà couverts par l'écran 2 "toutes même couleur"). */
+  /** Écran 3, question « exactement » : 0 < m < k. */
   m: number;
+  /** Absent = « exactement » (ancien comportement). */
+  questionEcran3?: QuestionEcran3FamilleA;
 }
 
 // ============================================================================
-// Famille B — Permutations et dérangements.
+// Famille B — Arrangements au hasard (lettres dans des enveloppes, playlist).
 // ============================================================================
 
 export type ContexteFamilleB = "lettres" | "chansons";
 
-/** Écran 1 — position UNE fixée, ou DEUX positions fixées simultanément (spec : "P(une position
- * donnée fixée), ou P(deux positions données fixées simultanément)"). */
 export type DemandeEcran1FamilleB = "une" | "deux";
+
+/** Écran 4 : « aucune bien placée » (n ≤ 4, dénombrable sur l'arbre ou par le contraire) ou
+ * « au moins 3 bien placées » (n = 5 : somme de cas incompatibles). */
+export type DemandeEcran4FamilleB = "aucune" | "auMoinsTrois";
 
 export interface ExerciceFamilleB {
   famille: "B";
-  /** n ∈ {3,4,5} — nombre d'éléments (lettres/enveloppes ou chansons/positions). */
+  /** n ∈ {3,4,5}. */
   n: number;
   contexte: ContexteFamilleB;
+  /** « deux » jamais pour n = 3 (deux positions fixées ⟺ tout est bien placé). */
   demandeEcran1: DemandeEcran1FamilleB;
-  /** Position(s) fixée(s) présentée(s) à l'écran 1 — longueur 1 si `demandeEcran1==="une"`,
-   * longueur 2 (distinctes) si `"deux"`. Purement narratif : la VALEUR de la probabilité ne dépend
-   * que de `n` (symétrie des positions), jamais de laquelle est choisie. */
   positionsEcran1: number[];
-  /** k pour l'écran 3 ("exactement k positions correctes") — TOUJOURS 1 ≤ k ≤ n-2 (jamais n-1,
-   * structurellement impossible : spec). */
+  /** Écran 3 : exactement k bien placées, 1 ≤ k ≤ n − 2, et n − k ≤ 3 (les autres, tous mal placés,
+   * se comptent sur un petit arbre : 1 façon pour 2 objets, 2 façons pour 3). */
   k: number;
+  /** Absent = « aucune » (ancien comportement). */
+  demandeEcran4?: DemandeEcran4FamilleB;
 }
 
 // ============================================================================
-// Famille C — Distributions non uniformes, dé truqué.
+// Famille C — Dé truqué (distribution non uniforme).
 // ============================================================================
 
-/** Fraction exacte, PAS nécessairement réduite au stockage (voir en-tête de fichier). */
 export interface FractionExacte {
   num: number;
   den: number;
 }
 
-/** Sous-type (1) — une face `faceSpeciale` a une probabilité FIXÉE `p0` (donnée numérique connue),
- * les 5 autres faces sont équiprobables entre elles (probabilité `p` chacune, INCONNUE — c'est elle
- * qui est résolue à l'écran 2). `p0` et `p` liées par construction : `p0 + 5·p = 1` exactement (voir
- * `generateurs6e/tiragesArbres/familleC.ts`, `genererFamilleCSpecial`). */
+/** Nombre de faces du dé (4, 6 ou 8). */
+export type NombreFacesDe = 4 | 6 | 8;
+
+export type CibleEcran3Special = "deuxFaces" | "pair" | "impair";
+
 export interface ExerciceFamilleCSpecial {
   famille: "C";
   sousType: "special";
-  /** Face 1..6 dont la probabilité `p0` est directement donnée par l'énoncé. */
   faceSpeciale: number;
+  /** P(face spéciale), connue. */
   p0: FractionExacte;
-  /** Probabilité INCONNUE, commune aux 5 autres faces — résolue à l'écran 2. */
+  /** Probabilité commune des autres faces, inconnue. */
   p: FractionExacte;
-  /** Face (≠ `faceSpeciale`) utilisée à l'écran 3 pour former la probabilité composée
-   * P(faceSpeciale ∪ autreFace) = p0 + p. */
   autreFace: number;
+  /** Absent = 6. */
+  faces?: NombreFacesDe;
+  /** Absent = « deuxFaces » (P(face spéciale ou autre face)). */
+  ecran3Cible?: CibleEcran3Special;
 }
 
-/** Sous-type (2) — les 3 faces paires sont équiprobables entre elles (probabilité `p` chacune), les
- * 3 faces impaires équiprobables entre elles (probabilité `q` chacune), reliées par `p = r·q`
- * (r ∈ {2,3}, DONNÉ par l'énoncé) — les 2 inconnues `p`,`q` sont résolues à l'écran 2. */
 export interface ExerciceFamilleCParite {
   famille: "C";
   sousType: "parite";
-  r: 2 | 3;
+  /** Rapport entre les deux probabilités, r ∈ {2,3,4,5}. */
+  r: number;
+  /** Quelles faces sont r fois plus probables (absent = « pair » : p = r·q). */
+  plusProbable?: "pair" | "impair";
+  /** Probabilité de chaque face paire. */
   p: FractionExacte;
+  /** Probabilité de chaque face impaire. */
   q: FractionExacte;
-  /** Quelle probabilité composée l'écran 3 demande — "pair"/"impair" (les 2 cas nommés par la
-   * spec), ou une probabilité sur un sous-ensemble spécifique de faces (`sousEnsemble`, alors
-   * non-`undefined`). */
+  /** Absent = 6. */
+  faces?: NombreFacesDe;
   ecran3Cible: "pair" | "impair" | "sousEnsemble";
-  /** Faces du sous-ensemble (2 ou 3 faces distinctes de 1..6) — présent SEULEMENT si
-   * `ecran3Cible==="sousEnsemble"`. */
   sousEnsemble?: number[];
 }
 
 export type ExerciceFamilleC = ExerciceFamilleCSpecial | ExerciceFamilleCParite;
 
-export type ExerciceTiragesArbres = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC;
+// ============================================================================
+// Famille D — Arbre pondéré à 2 niveaux (2 tirages dans une urne, avec/sans remise).
+// ============================================================================
+
+/** 0 = couleur 1, 1 = couleur 2. */
+export type CouleurTirage = 0 | 1;
+
+export interface ExerciceFamilleD {
+  famille: "D";
+  /** 2 ≤ n1, n2 ≤ 6. */
+  n1: number;
+  n2: number;
+  labelCouleur1: string;
+  labelCouleur2: string;
+  /** Initiale (majuscule) portée sur l'arbre, distincte pour les 2 couleurs. */
+  initiale1: string;
+  initiale2: string;
+  avecRemise: boolean;
+  /** Écran 2 : le chemin (1er tirage, 2e tirage) dont on calcule la probabilité. */
+  chemin: [CouleurTirage, CouleurTirage];
+  /** Écrans 3–4 : la couleur dont on parle (« exactement une boule … », « au moins une boule … »). */
+  couleurCible: CouleurTirage;
+}
+
+export type ExerciceTiragesArbres = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC | ExerciceFamilleD;
 
 export type FamilleTiragesArbres = ExerciceTiragesArbres["famille"];
 

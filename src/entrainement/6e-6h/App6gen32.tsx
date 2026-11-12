@@ -3,14 +3,15 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIndependanceBayes } from "./generateurs6e/independanceBayes";
 import type { IdVarianteIndependanceBayes } from "./generateurs6e/independanceBayes";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIndependanceBayes, soumettreReponseEcran } from "./moteur6e/sessionIndependanceBayes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIndependanceBayes, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionIndependanceBayes";
 import { phasesPourExercice } from "./moteur6e/typesIndependanceBayes";
 import type { EtatSessionIndependanceBayes, PhaseIndependanceBayes } from "./moteur6e/typesIndependanceBayes";
 import { diagnostiquerEcran } from "./moteur6e/verificationIndependanceBayes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsIndependanceBayes } from "./components6e/EtapeChampsIndependanceBayes";
+import { EtapeChoixIndependanceBayes } from "./components6e/EtapeChoixIndependanceBayes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, tableauDonnees } from "./ui6e/formatIndependanceBayes";
+import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, estEcranChoix, formatReponseAttenduePhaseLatex, tableauDonnees, tableauEtatActuel } from "./ui6e/formatIndependanceBayes";
 import { calculerRecapitulatifIndependanceBayes, calculerSegmentsProgressionIndependanceBayes } from "./ui6e/recapitulatifIndependanceBayes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -22,9 +23,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
  * `6gen32` — Indépendance, conditionnement et Bayes (chapitre 8, "Probabilités", 3e générateur du
  * chapitre après `6gen30`). Même patron que `App6gen30.tsx` : aucun bloc JSX par famille/écran, un
  * seul dispatch piloté par `ui6e/formatIndependanceBayes.ts` et `moteur6e/
- * verificationIndependanceBayes.ts` (`diagnostiquerEcran`). AUCUN écran à choix dans ce générateur
- * (voir en-tête de `ui6e/formatIndependanceBayes.ts`) — un seul composant écran suffit
- * (`EtapeChampsIndependanceBayes`), jamais de dispatch choix/champs comme `App6gen30.tsx`.
+ * verificationIndependanceBayes.ts` (`diagnostiquerEcran`). Un seul écran à choix (`bIndepEcran2`,
+ * une tentative) rendu par `EtapeChoixIndependanceBayes` ; tous les autres par
+ * `EtapeChampsIndependanceBayes`.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
@@ -51,6 +52,9 @@ export function App6gen32() {
    * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
    * `historique`. */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseIndependanceBayes, boolean>>>({});
+  /** Compteur de générations : entre dans la `key` de l'écran, pour que les champs repartent VIDES
+   * après « Générer » ou « Nouvel exercice », même si la nouvelle phase porte le même nom. */
+  const [generation, setGeneration] = useState(0);
 
   /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
    * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
@@ -89,6 +93,7 @@ export function App6gen32() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -99,6 +104,7 @@ export function App6gen32() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setGeneration((g) => g + 1);
     setEtat(demarrerSessionIndependanceBayes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIndependanceBayes)));
   }
 
@@ -116,7 +122,7 @@ export function App6gen32() {
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxCourant(etat),
     niveauAide: etat.niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
@@ -140,7 +146,7 @@ export function App6gen32() {
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    tableauDonnees: tableauDonnees(exercice),
+    tableauDonnees: tableauDonnees(exercice) ?? tableauEtatActuel(exercice, phase),
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -166,15 +172,27 @@ export function App6gen32() {
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifIndependanceBayes(etat)} />
-        <EtapeChampsIndependanceBayes
-          key={phase}
-          {...propsCommun}
-          champs={champsEcran(exercice, phase)}
-          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) =>
-            terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
-          }
-        />
+        {estEcranChoix(phase) ? (
+          <EtapeChoixIndependanceBayes
+            key={`${generation}-${etat.indexExercice}-${phase}`}
+            {...propsCommun}
+            options={choixEcran(exercice, phase)}
+            diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])}
+            onValider={(choixId) =>
+              terminerEtape(soumettreReponseEcran(etat, [choixId]), choixEcran(exercice, phase).find((o) => o.id === choixId)?.label ?? choixId)
+            }
+          />
+        ) : (
+          <EtapeChampsIndependanceBayes
+            key={`${generation}-${etat.indexExercice}-${phase}`}
+            {...propsCommun}
+            champs={champsEcran(exercice, phase)}
+            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            onValider={(valeurs) =>
+              terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+            }
+          />
+        )}
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

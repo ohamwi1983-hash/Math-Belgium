@@ -59,29 +59,29 @@ function configurationAlternativePour(configuration: ConfigurationFamilleF): Con
 
 /** Construction déterministe (`configuration`/`demandeEcran3` fixés) — utilisée par
  * `CATALOGUE_VARIANTES`/`construireAvecVarianteId`. */
+/** Arrondi à 4 décimales (précision annoncée pour une fiabilité). */
+function arrondi4(v: number): number {
+  return Math.round(v * 10000) / 10000;
+}
+
 export function construireFamilleF(configuration: ConfigurationFamilleF, demandeEcran3: DemandeEcran3FamilleF): ExerciceFamilleF {
   const contexte = tirerParmi(CONTEXTES_F);
   const p = tirerProbabilites();
   const positionMixte: 0 | 1 | 2 | undefined = configuration === "mixte" ? tirerParmi([0, 1, 2] as const) : undefined;
+  // L'écran 3 porte TOUJOURS sur une configuration alternative : juger une affirmation sur la
+  // configuration de l'énoncé serait immédiat, sa fiabilité étant déjà affichée (état actuel).
+  const configurationAlternative = configurationAlternativePour(configuration);
+  const positionMixteAlt = configurationAlternative === "mixte" && positionMixte !== undefined ? positionMixteAlternative(positionMixte) : undefined;
+  const base: ExerciceFamilleF = { famille: "F", contexte, p, configuration, positionMixte, demandeEcran3, configurationAlternative, positionMixteAlternative: positionMixteAlt };
+  if (demandeEcran3 === "comparerValeur") return base;
 
-  const base: ExerciceFamilleF = { famille: "F", contexte, p, configuration, positionMixte, demandeEcran3 };
-
-  if (demandeEcran3 === "comparerValeur") {
-    const configurationAlternative = configurationAlternativePour(configuration);
-    const positionMixteAlt = configurationAlternative === "mixte" ? tirerParmi([0, 1, 2] as const) : configuration === "mixte" && positionMixte !== undefined ? positionMixteAlternative(positionMixte) : undefined;
-    return { ...base, configurationAlternative, positionMixteAlternative: positionMixteAlt };
-  }
-
-  // "verifierAffirmation" — une fois sur deux, l'affirmation reprend la valeur CORRECTE (arrondie),
-  // l'autre fois la valeur obtenue par la formule INVERSÉE (piège série/parallèle) — jamais la même
-  // moitié à chaque appel (spec : l'élève doit vraiment JUGER, pas deviner un motif fixe).
-  const valeurCorrecte = valeurConfiguration(p, configuration, positionMixte);
-  const valeurFausse = valeurAvecFormuleInversee(p, configuration);
-  // Garde : si la formule inversée retombe (par coïncidence numérique) trop près de la valeur
-  // correcte, ce n'est plus un piège détectable — on retient alors la valeur correcte (jamais un
-  // "faux" indétectable présenté comme tel).
+  // "verifierAffirmation" — une fois sur deux, l'affirmation est l'arrondi CORRECT (4 décimales) de
+  // la fiabilité alternative, l'autre fois la valeur obtenue en confondant série et parallèle.
+  const valeurCorrecte = valeurConfiguration(p, configurationAlternative, positionMixteAlt);
+  const valeurFausse = valeurAvecFormuleInversee(p, configurationAlternative);
+  // Garde : un « faux » trop proche du vrai ne serait plus un piège détectable.
   const ecartSuffisant = Math.abs(valeurFausse - valeurCorrecte) >= 0.02;
-  const affirmationValeur = Math.random() < 0.5 || !ecartSuffisant ? valeurCorrecte : valeurFausse;
+  const affirmationValeur = arrondi4(Math.random() < 0.5 || !ecartSuffisant ? valeurCorrecte : valeurFausse);
   return { ...base, affirmationValeur };
 }
 
@@ -101,7 +101,6 @@ export function valeurEcran3Comparaison(exercice: ExerciceFamilleF): number {
 }
 
 /** Écran 3, variante "verifierAffirmation" — l'affirmation est-elle vraie (à tolérance près) ? */
-export function affirmationEstVraie(exercice: ExerciceFamilleF, tolerance = 0.01): boolean {
-  const valeurCorrecte = valeurConfiguration(exercice.p, exercice.configuration, exercice.positionMixte);
-  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurCorrecte) <= tolerance;
+export function affirmationEstVraie(exercice: ExerciceFamilleF): boolean {
+  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurEcran3Comparaison(exercice)) <= 0.5e-4 + 1e-12;
 }

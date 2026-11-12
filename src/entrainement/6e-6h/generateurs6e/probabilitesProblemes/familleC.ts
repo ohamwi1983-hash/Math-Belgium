@@ -10,8 +10,8 @@ import type { ContexteFamilleC, ExerciceFamilleC } from "../../core6e/probabilit
  * "aire"/"volume" — trouvé en revue indépendante sur ce générateur) — voir `ECART_MINIMAL_PIEGE`
  * ci-dessous. La spec attend que la valeur binomiale NAÏVE (coefficient binomial appliqué à une
  * probabilité MOYENNÉE p̄=(p1+p2+p3)/3, piège central de cette famille) soit détectable comme
- * INCORRECTE par `diagnostiquerValeur` (tolérance chapitre 8, 0,01 — `TOLERANCE_PROBABILITE`,
- * `moteur6e/verificationProbabilites.ts`). Sans garde-fou, un balayage exhaustif de l'espace
+ * INCORRECTE (vérification d'origine à 0,01 près ; depuis l'audit 6e ch. 6, `diagnostiquerProbabilite`
+ * n'accepte plus que la forme exacte ou l'arrondi correct, la marge reste donc largement suffisante). Sans garde-fou, un balayage exhaustif de l'espace
  * `CANDIDATS_P` (210 triplets distincts × 2 valeurs de k = 420 combinaisons) montre que 144/420
  * (34%) ont un écart < 0,01 entre la vraie somme et la valeur du piège — pour plus d'un tirage sur
  * trois, la formule binomiale naïve (piège que cet écran est censé faire échouer) aurait été
@@ -30,8 +30,22 @@ function tirerParmi<T>(candidats: readonly T[]): T {
 }
 
 const CONTEXTES_C: readonly ContexteFamilleC[] = [
-  { id: "machines", texte: "Une usine possède 3 machines fonctionnant de manière indépendante. Chaque machine a sa propre probabilité de tomber en panne au cours d'une journée.", labelElements: ["Machine 1", "Machine 2", "Machine 3"] },
-  { id: "feux", texte: "Un automobiliste traverse 3 feux de signalisation, chacun étant au vert ou au rouge de manière indépendante (2 états simplifiés). Chaque feu a sa propre probabilité d'être au vert.", labelElements: ["Feu A", "Feu B", "Feu C"] },
+  {
+    id: "machines",
+    texte: "Une usine possède 3 machines qui fonctionnent de manière indépendante. Chaque machine a sa propre probabilité de tomber en panne au cours d'une journée.",
+    labelElements: ["Machine 1", "Machine 2", "Machine 3"],
+    nomPluriel: "machines",
+    evenementSingulier: "tombe en panne",
+    evenementPluriel: "tombent en panne",
+  },
+  {
+    id: "feux",
+    texte: "Un automobiliste passe 3 feux de signalisation, chacun au vert ou au rouge, de manière indépendante. Chaque feu a sa propre probabilité d'être au vert à son passage.",
+    labelElements: ["Feu 1", "Feu 2", "Feu 3"],
+    nomPluriel: "feux",
+    evenementSingulier: "est au vert",
+    evenementPluriel: "sont au vert",
+  },
 ];
 
 /** Exportée : réutilisée par le balayage exhaustif de `familleC.test.ts` (garde-fou de

@@ -4,7 +4,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesProbabilitesProblemes";
 import type { EtatSessionProbabilitesProblemes, PhaseProbabilitesProblemes, ResultatExerciceProbabilitesProblemes } from "./typesProbabilitesProblemes";
-import { verifierEcran } from "./verificationProbabilitesProblemes";
+import { typeEcran, verifierEcran } from "./verificationProbabilitesProblemes";
 
 /**
  * Couche B (6e) — moteur de session pour `6gen33`. N'importe jamais rien de `src/generateurs6e/` —
@@ -12,7 +12,7 @@ import { verifierEcran } from "./verificationProbabilitesProblemes";
  * `generateurs6e/probabilitesProblemes/session.integration.test.ts` pour la preuve. Même patron que
  * `sessionIndependanceBayes.ts`/`sessionTiragesArbres.ts` : `soumettreReponseEcran(etat, valeurs:
  * string[])` UNIQUE, `etat.phase` porte déjà l'information de "quel écran", `verifierEcran` sait déjà
- * quoi vérifier (y compris pour les écrans "liste"/"choix"/"intervalle", tous sérialisés en
+ * quoi vérifier (y compris pour les écrans "liste"/"choix", tous sérialisés en
  * `string[]` — voir `verificationProbabilitesProblemes.ts`, en-tête).
  */
 
@@ -39,8 +39,14 @@ export function demarrerSessionProbabilitesProblemes(reglages: ReglagesSession6e
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Écran à choix fermé (vrai/faux de la famille F) : UN SEUL essai (convention du site, même motif
+ * que `sessionCalculAires.ts`) — sinon le 2e essai donne la réponse à coup sûr. */
+export function tentativesMaxCourant(etat: EtatSessionProbabilitesProblemes): number {
+  return typeEcran(etat.exerciceCourant, etat.phase) === "choix" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionProbabilitesProblemes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxCourant(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionProbabilitesProblemes): EtatSessionProbabilitesProblemes {

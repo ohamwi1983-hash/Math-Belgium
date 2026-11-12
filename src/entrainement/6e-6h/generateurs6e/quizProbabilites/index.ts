@@ -1,5 +1,5 @@
 /**
- * Couche A — "Probabilités" (quiz vrai/faux), 6gen69, ajout ultérieur au chapitre 8. Tire une
+ * Couche A — "Probabilités" (quiz vrai/faux), 6gen69, ajout ultérieur au chapitre 6. Tire une
  * question dans la banque pré-écrite (`banque.ts`) du thème (variante) actif — jamais de génération
  * procédurale, voir `core6e/quizProbabilites.types.ts`. Structure identique à 6gen68
  * (`quizNombresComplexes`) et 6gen67/66/65/64.

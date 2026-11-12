@@ -34,7 +34,7 @@ interface Props {
  * `ui6e/formatIndependanceBayes.ts`, `TableauAffichage`). Réutilise `.summary-table`/
  * `.summary-table-scroll` (`App.css`, déjà utilisées app-wide pour le récapitulatif final) — aucune
  * classe CSS nouvelle. */
-function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
+export function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
   return (
     <div className="summary-table-scroll">
       <table className="summary-table">
@@ -64,11 +64,9 @@ function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
 /** Écran GÉNÉRIQUE à N champs texte libre (1 à 5) pour `6gen32` — même patron que
  * `EtapeChampsProbabilitesEnsembles.tsx` (6gen30), copié plutôt qu'importé (chaque générateur garde
  * son propre écran, voir CLAUDE.md). Étend le patron avec une table OPTIONNELLE en lecture seule
- * (`tableauDonnees`, famille B) — structure d'écran imposée par CLAUDE.md (consigne générale →
- * bloc données [+ table] → bloc de travail) conservée à l'identique. AUCUN écran à choix dans ce
- * générateur (voir en-tête de
- * `ui6e/formatIndependanceBayes.ts`) — un seul composant écran suffit, jamais de variante "choix".
- * `App6gen32.tsx` doit le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
+ * (`tableauDonnees`, famille B). L'unique écran à choix (`bIndepEcran2`) est rendu par
+ * `EtapeChoixIndependanceBayes`. `App6gen32.tsx` le rend avec une `key` qui change à chaque écran ET
+ * à chaque nouvel exercice (« Générer », « Nouvel exercice ») : les champs repartent vides. */
 export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, tableauDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
@@ -90,13 +88,15 @@ export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, ta
         consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <>
-            <div className="equation-box">
-              <div className="equation-box-donnees">
-                {blocDonnees.map((frag, i) => (
-                  <Katex key={i} expression={frag} block />
-                ))}
+            {blocDonnees.length > 0 && (
+              <div className="equation-box">
+                <div className="equation-box-donnees">
+                  {blocDonnees.map((frag, i) => (
+                    <Katex key={i} expression={frag} block />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             {tableauDonnees && <TableAffichage tableau={tableauDonnees} />}
           </>
         }

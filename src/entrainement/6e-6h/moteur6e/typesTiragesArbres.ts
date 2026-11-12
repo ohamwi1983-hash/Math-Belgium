@@ -10,12 +10,13 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
  * l'identique pour la cohérence transversale du chapitre 8.
  */
 
-export type PhaseTiragesArbres = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4" | "cEcran1" | "cEcran2" | "cEcran3";
+export type PhaseTiragesArbres = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4" | "cEcran1" | "cEcran2" | "cEcran3" | "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4";
 
 export function phaseInitiale(exercice: ExerciceTiragesArbres): PhaseTiragesArbres {
   if (exercice.famille === "A") return "aEcran1";
   if (exercice.famille === "B") return "bEcran1";
-  return "cEcran1";
+  if (exercice.famille === "C") return "cEcran1";
+  return "dEcran1";
 }
 
 export function phaseApres(phase: PhaseTiragesArbres): PhaseTiragesArbres | "termine" {
@@ -39,6 +40,14 @@ export function phaseApres(phase: PhaseTiragesArbres): PhaseTiragesArbres | "ter
     case "cEcran2":
       return "cEcran3";
     case "cEcran3":
+      return "termine";
+    case "dEcran1":
+      return "dEcran2";
+    case "dEcran2":
+      return "dEcran3";
+    case "dEcran3":
+      return "dEcran4";
+    case "dEcran4":
       return "termine";
   }
 }

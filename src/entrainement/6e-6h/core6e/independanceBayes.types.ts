@@ -17,12 +17,11 @@
  * donc fidèlement la donnée de l'énoncé, affichée avec la MÊME notation décimale que la spec
  * (`ui6e/formatIndependanceBayes.ts`, `formatDecimalVirgule`) — jamais une fausse précision
  * fractionnaire inventée pour l'occasion. La vérification (`moteur6e/verificationIndependanceBayes.ts`)
- * compare ces `number` à tolérance 0,01 (`moteur6e/verificationProbabilites.ts`,
- * `diagnostiquerValeur`) — largement au-dessus de l'imprécision flottante réelle (~1e-15) d'une
- * poignée de multiplications/divisions entre décimaux à 2 chiffres, jamais un risque de confusion.
- * Seule exception : famille B, sous-types "tableauDonne"/"tableauReconstruire" — leurs cellules SONT
- * des effectifs entiers sur une population commune (comme `6gen30`), donc stockées/vérifiées comme
- * telles (`number` mais toujours entier par construction, jamais de flottant réellement fractionnaire).
+ * passe par `diagnostiquerProbabilite` (`moteur6e/verificationProbabilites.ts`, audit 6e ch. 6,
+ * décision A) : valeur exacte, ou décimal CORRECTEMENT arrondi (2 décimales, 3 sous 0,1), ou
+ * pourcentage — plus de tolérance absolue de 0,01.
+ * Exception : famille B (tableaux) — leurs cellules SONT des effectifs entiers sur une population
+ * commune (comme `6gen30`), donc stockées/vérifiées comme telles.
  *
  * ============================================================================
  * **CONTRAT DE RÉUTILISATION — lire avant de modifier ce fichier**
@@ -91,35 +90,54 @@ export interface ExerciceFamilleAUnion {
 export type ExerciceFamilleA = ExerciceFamilleAPannes | ExerciceFamilleAUnion;
 
 // ============================================================================
-// Famille B — Lire un tableau ou un histogramme de données réelles.
+// Famille B — Lire un tableau à double entrée de données réelles.
 // ============================================================================
 
-export type SousTypeFamilleB = "histogramme" | "tableauDonne" | "tableauReconstruire";
+/** Audit 6e ch. 6 : l'ancien sous-type « histogramme avec interpolation » (hors cours) a été
+ * REMPLACÉ par « testIndependance » (tester l'indépendance depuis un tableau à double entrée). */
+export type SousTypeFamilleB = "testIndependance" | "tableauDonne" | "tableauReconstruire";
 
-/** Une classe d'un histogramme groupé — `debut`/`fin` bornent l'intervalle [début, fin[,
- * `effectif` son effectif entier. Classes toujours CONTIGUËS et de même largeur (voir
- * `generateurs6e/independanceBayes/familleB.ts`). */
-export interface ClasseHistogramme {
-  debut: number;
-  fin: number;
-  effectif: number;
+/** Comment l'élève teste l'indépendance : P(A∩B) comparé à P(A)·P(B), ou P(A|B) comparé à P(A). */
+export type MethodeTestIndependance = "produit" | "conditionnelle";
+
+/** Ce que montrent les effectifs — dérivé des cellules (`verdictTestIndependance`), jamais saisi :
+ * incompatibles ⟺ n(A∩B) = 0 ; indépendants ⟺ n(A∩B)·n = n(A)·n(B) (égalité EXACTE). Les deux à la
+ * fois exigerait P(A) = 0 ou P(B) = 0, exclu par construction (toutes les marges sont > 0). */
+export type VerdictTestIndependance = "incompatibles" | "independants" | "ni";
+
+export interface ContexteTestIndependance {
+  id: string;
+  /** Phrase d'introduction, sans la définition de A et B. */
+  texte: string;
+  /** Définition de A (prose) : « l'élève pratique un sport en club ». */
+  definitionA: string;
+  definitionB: string;
 }
 
-export type DemandeHistogramme = "inferieur" | "auMoins";
-
-export interface ExerciceFamilleBHistogramme {
+export interface ExerciceFamilleBTestIndependance {
   famille: "B";
-  sousType: "histogramme";
-  contexte: { texte: string; variable: string; unite: string };
-  /** Classes contiguës, ordonnées, effectif toujours multiple de la largeur commune des classes
-   * (garantit un effectif interpolé toujours entier — voir en-tête de `familleB.ts`). */
-  classes: ClasseHistogramme[];
-  /** Index de la classe dans laquelle tombe `cible` (dans `classes`). */
-  indexClasseCible: number;
-  /** Valeur cible — STRICTEMENT à l'intérieur de `classes[indexClasseCible]` (jamais sur une borne,
-   * spec). */
-  cible: number;
-  demande: DemandeHistogramme;
+  sousType: "testIndependance";
+  contexte: ContexteTestIndependance;
+  /** Effectifs entiers, TOUJOURS dans cet ordre : [[n(A∩B), n(A∩B̄)], [n(Ā∩B), n(Ā∩B̄)]]. */
+  cellules: [[number, number], [number, number]];
+  methode: MethodeTestIndependance;
+}
+
+/** Comment parler d'une ligne ou d'une colonne d'un tableau à double entrée dans une consigne qui
+ * n'annonce PAS la nature de la probabilité (audit 6e ch. 6) : `sujet` se place après « qu'il »
+ * (subjonctif, « soit de niveau faible »), `groupe` après « parmi les » (« élèves de niveau faible »). */
+export interface DescripteurModalite {
+  sujet: string;
+  groupe: string;
+}
+
+export interface DescripteursTable {
+  /** « un élève », « un client »… */
+  individu: string;
+  /** Pronom sujet accordé à `individu` : « il »/« elle ». */
+  pronom: string;
+  lignes: DescripteurModalite[];
+  colonnes: DescripteurModalite[];
 }
 
 /** Type de probabilité demandée à partir d'un tableau à double entrée déjà connu — le piège central
@@ -142,7 +160,7 @@ export interface TableauDouble {
 export interface ExerciceFamilleBTableauDonne {
   famille: "B";
   sousType: "tableauDonne";
-  contexte: { texte: string };
+  contexte: { texte: string; descripteurs: DescripteursTable };
   /** Table déjà COMPLÈTE — rien à reconstruire, seulement à lire (contrairement à
    * `ExerciceFamilleBReconstruire`). Taille fixe 3×3 (voir `familleB.ts`). */
   table: TableauDouble;
@@ -167,7 +185,7 @@ export interface ExerciceFamilleBTableauDonne {
 export interface ExerciceFamilleBReconstruire {
   famille: "B";
   sousType: "tableauReconstruire";
-  contexte: { texte: string; libelleLignes: [string, string, string]; libelleColonnes: [string, string] };
+  contexte: { texte: string; libelleLignes: [string, string, string]; libelleColonnes: [string, string]; descripteurs: DescripteursTable };
   /** N — population totale, toujours choisie pour que TOUTES les cellules dérivées soient des
    * entiers exacts (voir `familleB.ts`, contrainte de génération). */
   total: number;
@@ -187,7 +205,7 @@ export interface ExerciceFamilleBReconstruire {
   colonneCibleFinale: number;
 }
 
-export type ExerciceFamilleB = ExerciceFamilleBHistogramme | ExerciceFamilleBTableauDonne | ExerciceFamilleBReconstruire;
+export type ExerciceFamilleB = ExerciceFamilleBTestIndependance | ExerciceFamilleBTableauDonne | ExerciceFamilleBReconstruire;
 
 // ============================================================================
 // Famille C — Arbre de probabilité et théorème de Bayes.
@@ -210,9 +228,9 @@ export interface ExerciceFamilleC {
   contexte: ContexteFamilleC;
   /** P(cause1) — p∈{0,1; 0,15; 0,2; 0,25} (spec). P(cause2) = 1−p, jamais stocké séparément. */
   p: number;
-  /** P(effet | cause1) — q1∈{0,1;...;0,4} (spec), toujours ≠ q2. */
+  /** P(effet | cause1) — un test réaliste (audit 6e ch. 6) : q1 ∈ [0,7 ; 0,99] (sensibilité). */
   q1: number;
-  /** P(effet | cause2) — q2∈{0,1;...;0,4} (spec), toujours ≠ q1. */
+  /** P(effet | cause2) — q2 ∈ [0,01 ; 0,3] (faux positifs), donc toujours < q1. */
   q2: number;
   demandeEcran3: DemandeEcran3FamilleC;
 }

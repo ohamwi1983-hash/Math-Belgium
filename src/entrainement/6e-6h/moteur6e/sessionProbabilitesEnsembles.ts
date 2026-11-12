@@ -2,7 +2,7 @@ import type { ExerciceProbabilitesEnsembles } from "../core6e/probabilitesEnsemb
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { phaseApres, phaseInitiale } from "./typesProbabilitesEnsembles";
+import { estPhaseChoix, phaseApres, phaseInitiale } from "./typesProbabilitesEnsembles";
 import type { EtatSessionProbabilitesEnsembles, PhaseProbabilitesEnsembles, ResultatExerciceProbabilitesEnsembles } from "./typesProbabilitesEnsembles";
 import { verifierEcran } from "./verificationProbabilitesEnsembles";
 
@@ -38,8 +38,16 @@ export function demarrerSessionProbabilitesEnsembles(reglages: ReglagesSession6e
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur un écran à choix fermé (sinon l'élimination suffit à « réussir ») ;
+ * `reglages.tentativesMax` sur les saisies libres. */
+export const TENTATIVES_CHOIX_FERME = 1;
+
+export function tentativesMaxPhase(etat: Pick<EtatSessionProbabilitesEnsembles, "phase" | "reglages">): number {
+  return estPhaseChoix(etat.phase) ? TENTATIVES_CHOIX_FERME : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionProbabilitesEnsembles): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxPhase(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionProbabilitesEnsembles): EtatSessionProbabilitesEnsembles {

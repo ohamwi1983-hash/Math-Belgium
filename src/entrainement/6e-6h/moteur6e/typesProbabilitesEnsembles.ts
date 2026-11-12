@@ -13,6 +13,11 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 export type PhaseProbabilitesEnsembles = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4";
 
+/** Écrans à CHOIX FERMÉ (boutons) : `aEcran3`, `bEcran4`. */
+export function estPhaseChoix(phase: PhaseProbabilitesEnsembles): boolean {
+  return phase === "aEcran3" || phase === "bEcran4";
+}
+
 export function phaseInitiale(exercice: ExerciceProbabilitesEnsembles): PhaseProbabilitesEnsembles {
   return exercice.famille === "A" ? "aEcran1" : "bEcran1";
 }
