@@ -36,10 +36,11 @@ export const probabilites: ChapterContent = {
           label: 'Définition — expérience aléatoire',
           items: [
             'Une expérience aléatoire, tu peux la répéter autant de fois que tu veux, dans les ' +
-              'mêmes conditions. Tu connais à l\'avance TOUS les résultats possibles — mais ' +
-              'jamais lequel va sortir, à cause du hasard. L\'ensemble de tous les résultats ' +
-              'possibles s\'appelle l\'univers, noté $\\Omega$. Le résultat que tu observes ' +
-              'réellement est une issue.',
+              'mêmes conditions. Tu connais à l\'avance **tous** les résultats possibles — mais ' +
+              'jamais lequel va sortir, à cause du hasard. Chacun de ces résultats possibles est ' +
+              'une issue ; l\'ensemble de toutes les issues s\'appelle l\'univers, noté ' +
+              '$\\Omega$. L\'issue que tu observes réellement, à la fin de l\'expérience, est ' +
+              'le résultat obtenu.',
           ],
         },
         {
@@ -48,9 +49,9 @@ export const probabilites: ChapterContent = {
           items: [
             'Un événement, c\'est n\'importe quel sous-ensemble de $\\Omega$ — souvent décrit ' +
               'par une phrase, réalisée dès que le résultat obtenu lui est favorable. Un ' +
-              'événement réduit à UN SEUL résultat est un événement élémentaire. L\'événement ' +
+              'événement réduit à **un seul** résultat est un événement élémentaire. L\'événement ' +
               'impossible ($\\emptyset$) ne se réalise jamais ; l\'événement certain ($\\Omega$) ' +
-              'se réalise toujours. Deux événements qui se partagent TOUS les résultats ' +
+              'se réalise toujours. Deux événements qui se partagent **tous** les résultats ' +
               'possibles, sans en avoir aucun en commun, sont des événements contraires : le ' +
               'contraire de $A$ se note $\\bar{A}$, avec $A \\cup \\bar{A} = \\Omega$ et ' +
               '$A \\cap \\bar{A} = \\emptyset$.',
@@ -62,7 +63,7 @@ export const probabilites: ChapterContent = {
           items: [
             '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$, ' +
               '$P(\\Omega)=1$ (certitude), $P(\\emptyset)=0$ (impossibilité), ' +
-              '$P(\\bar{A})=1-P(A)$ (contraire). En situation d\'ÉQUIPROBABILITÉ (tous les ' +
+              '$P(\\bar{A})=1-P(A)$ (contraire). En situation d\'**équiprobabilité** (tous les ' +
               'résultats également probables), c\'est simple : $P(A)$ = (nombre de cas ' +
               'favorables) / (nombre de cas possibles).',
           ],
@@ -72,44 +73,61 @@ export const probabilites: ChapterContent = {
           label: "Piège classique — vérifier l'équiprobabilité avant de compter",
           text:
             'Au lancer de 2 dés, $\\Omega=\\{2,3,\\ldots,12\\}$ (les 11 sommes possibles) — mais ' +
-            'ces 11 résultats NE SONT PAS équiprobables ! Un total de 2 ne s\'obtient que par ' +
-            '(1;1), une seule façon. Un total de 9 s\'obtient par (3;6), (4;5), (5;4), (6;3) — ' +
-            '4 façons. $P$(total=9) est donc PLUS GRANDE que $P$(total=2), jamais 1/11 dans les ' +
-            'deux cas. La formule « favorables/possibles » n\'est valable QUE si les résultats ' +
-            'sont équiprobables — toujours à vérifier avant de compter.',
+            'ces 11 résultats **ne sont pas** équiprobables ! Un total de 2 ne s\'obtient que par ' +
+            '(1;1), une seule façon sur 36. Un total de 9 s\'obtient par (3;6), (4;5), (5;4), ' +
+            '(6;3) — 4 façons. $P$(total=9) $= \\frac{4}{36}$ est donc **plus grande** que ' +
+            '$P$(total=2) $= \\frac{1}{36}$, et aucune des deux ne vaut $\\frac{1}{11}$. La formule ' +
+            '« favorables/possibles » n\'est valable **que** si les résultats sont équiprobables — ' +
+            'toujours à vérifier avant de compter.',
         },
         {
           kind: 'historique',
-          titre: 'Une question de jeu de dés qui a fondé toute une science',
+          titre: 'Des jeux de dés qui ont fondé toute une science',
           text:
-            'En 1654, le chevalier de Méré, un joueur passionné, pose à **Blaise Pascal** ' +
-            'une question qui le trouble : pourquoi perd-il systématiquement de l\'argent ' +
-            'sur un pari qu\'il pensait équitable, impliquant justement des sommes de dés ' +
-            'comme celle ci-dessus ? Pascal en discute par lettres avec **Pierre de ' +
-            'Fermat**, et leur correspondance de 1654 est aujourd\'hui considérée comme ' +
-            'l\'acte de naissance de la théorie des probabilités comme discipline ' +
-            'mathématique rigoureuse — avant eux, on raisonnait sur le hasard de façon ' +
-            'intuitive, souvent fausse, jamais avec une méthode de calcul systématique. ' +
-            'Leur idée centrale est exactement celle du piège ci-dessus : compter ' +
-            'soigneusement TOUTES les combinaisons possibles, sans en oublier ni en ' +
-            'recompter aucune.',
+            'Vers 1620, des joueurs florentins interrogent **Galilée** : avec 3 dés, les sommes 9 ' +
+            'et 10 s\'écrivent chacune de 6 façons (sans tenir compte de l\'ordre), et pourtant ' +
+            'le 10 sort plus souvent. Galilée compte les 216 triplets **ordonnés** (1er, 2e, 3e ' +
+            'dé) : 25 donnent 9, 27 donnent 10 — exactement le piège ci-dessus, les décompositions ' +
+            'n\'étant pas équiprobables. En 1654, le chevalier de Méré, un joueur passionné, pose à ' +
+            '**Blaise Pascal** deux questions : pourquoi parier sur « au moins un 6 en 4 lancers ' +
+            'd\'un dé » le fait gagner, alors que « au moins un double six en 24 lancers de deux ' +
+            'dés », qu\'il croyait équivalent, le fait perdre (résolu en section 4) ? Et comment ' +
+            'partager équitablement la mise d\'une partie interrompue avant la fin (le « problème ' +
+            'des partis ») ? Pascal en discute par lettres avec **Pierre de Fermat** : leur ' +
+            'correspondance de 1654 est aujourd\'hui considérée comme l\'acte de naissance de la ' +
+            'théorie des probabilités comme discipline mathématique rigoureuse. Leur idée ' +
+            'centrale : compter soigneusement **toutes** les issues équiprobables, sans en oublier ' +
+            'ni en recompter aucune.',
           image: {
             src: '/images/historique/pascal.jpg',
             alt: 'Portrait de Blaise Pascal',
             caption: 'Blaise Pascal (1623–1662), portrait conservé au château de Versailles.',
           },
         },
-        { kind: 'subheading', text: 'Probabilité expérimentale (fréquentielle) et probabilité a priori' },
+        {
+          kind: 'para',
+          text:
+            'Le comptage de Galilée, avec les 216 triplets ordonnés de 3 dés équilibrés :',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Somme', 'Décompositions (sans ordre)', 'Triplets ordonnés', 'Probabilité'],
+          rows: [
+            ['9', '1+2+6, 1+3+5, 1+4+4, 2+2+5, 2+3+4, 3+3+3', '6+6+3+3+6+1 = 25', '$\\frac{25}{216} \\approx 0{,}116$'],
+            ['10', '1+3+6, 1+4+5, 2+2+6, 2+3+5, 2+4+4, 3+3+4', '6+6+3+6+3+3 = 27', { text: '$\\frac{27}{216} = 0{,}125$', tone: 'good' }],
+          ],
+        },
+        { kind: 'subheading', text: 'Probabilité expérimentale (fréquentielle) et probabilité théorique (a priori)' },
         {
           kind: 'definition',
           label: 'Deux façons d\'obtenir une probabilité',
           items: [
-            'La probabilité a priori (ou intuitive) se calcule SANS rien expérimenter, juste ' +
-              'par un raisonnement d\'équiprobabilité (comme ci-dessus). La probabilité ' +
-              'expérimentale (ou fréquentielle) fonctionne à l\'inverse : tu répètes ' +
-              'l\'expérience un très grand nombre de fois, et la FRÉQUENCE relative de ' +
-              'l\'événement se stabilise autour d\'une valeur limite — c\'est cette valeur que ' +
-              'tu retiens comme probabilité.',
+            'La probabilité théorique (ou a priori) se calcule **sans** rien expérimenter, à ' +
+              'partir d\'un modèle — le plus souvent un raisonnement d\'équiprobabilité (comme ' +
+              'ci-dessus). La probabilité expérimentale (ou fréquentielle) fonctionne à l\'inverse ' +
+              ': tu répètes l\'expérience un très grand nombre de fois, et la **fréquence** ' +
+              'relative de l\'événement se stabilise autour d\'une valeur — c\'est cette valeur ' +
+              'que tu retiens comme probabilité.',
           ],
         },
         {
@@ -136,10 +154,52 @@ export const probabilites: ChapterContent = {
           kind: 'astuce',
           label: 'Les deux méthodes doivent converger',
           text:
-            'Pour une pièce ou un dé bien équilibrés, la probabilité a priori (1/2, 1/6, …) et ' +
+            'Pour une pièce ou un dé bien équilibrés, la probabilité théorique (1/2, 1/6, …) et ' +
             'la probabilité expérimentale (mesurée en répétant l\'expérience) convergent vers ' +
             'la même valeur. C\'est même comme ça qu\'on détecte un dé ou une pièce truqués : ' +
-            'la fréquence observée ne se stabilise PAS autour de la valeur a priori attendue.',
+            'la fréquence observée ne se stabilise **pas** autour de la valeur théorique attendue.',
+        },
+        {
+          kind: 'definition',
+          label: 'Loi des grands nombres et fluctuation',
+          items: [
+            'Plus on répète l\'expérience, plus la fréquence observée a de chances d\'être proche ' +
+              'de la probabilité : c\'est la **loi des grands nombres**, démontrée par Jacob ' +
+              'Bernoulli (section 4). Mais la fréquence ne tombe jamais pile sur la probabilité : ' +
+              'elle **fluctue** d\'une série d\'essais à l\'autre.',
+            'Cette fluctuation diminue lentement : l\'écart typique entre la fréquence et la ' +
+              'probabilité est proportionnel à $\\frac{1}{\\sqrt{n}}$, où $n$ est le nombre ' +
+              'd\'essais. Pour diviser cet écart par 2, il faut 4 fois plus d\'essais ; pour le ' +
+              'diviser par 10, 100 fois plus. Un petit écart sur 10 000 lancers est donc bien ' +
+              'plus inquiétant que le même écart sur 60 lancers.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'ce dé est-il truqué ?',
+          formula:
+            'On lance un dé 600 fois et on obtient 130 fois le 6. Règle de décision : l\'écart ' +
+            'entre une fréquence $f$ et une probabilité $p$ est jugé significatif quand l\'écart ' +
+            'relatif $\\frac{|f-p|}{p}$ dépasse 50 % pour moins de 100 essais, 25 % de 100 à 400 ' +
+            'essais, 18 % de 401 à 1 000 essais, et 12 % au-delà.',
+          steps: [
+            { tag: 'modèle', text: 'Dé équilibré : $p = \\frac{1}{6}$.' },
+            { tag: 'fréquence', text: '$f = \\frac{130}{600} = \\frac{13}{60} \\approx 0{,}217$.' },
+            {
+              tag: 'écart relatif',
+              text:
+                '$\\frac{|f-p|}{p} = \\frac{\\frac{13}{60}-\\frac{10}{60}}{\\frac{10}{60}} = ' +
+                '\\frac{3}{10} = 30\\,\\%$, supérieur au seuil de 18 % pour 600 essais.',
+            },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'L\'écart est significatif : ce dé est très probablement truqué. Avec 13 fois le 6 ' +
+              'sur seulement 60 lancers — exactement la même fréquence —, l\'écart relatif vaut ' +
+              'encore 30 %, mais il reste sous le seuil de 50 % : on ne peut rien conclure, la ' +
+              'fluctuation suffit à l\'expliquer.',
+          },
         },
         {
           kind: 'application',
@@ -177,25 +237,29 @@ export const probabilites: ChapterContent = {
           ],
           text:
             'Quand un bulletin météo annonce « 70 % de chances de pluie demain », ce ' +
-            'chiffre n\'est presque jamais une probabilité a priori calculée par un ' +
+            'chiffre n\'est presque jamais une probabilité théorique calculée par un ' +
             'raisonnement d\'équiprobabilité — il n\'y a pas de « cas favorables » à ' +
-            'compter pour la pluie ! C\'est une probabilité EXPÉRIMENTALE (fréquentielle), ' +
+            'compter pour la pluie ! C\'est une probabilité **expérimentale** (fréquentielle), ' +
             'exactement comme celle de cette section : les services météorologiques ' +
             'recherchent, dans leurs immenses bases de données historiques, toutes les ' +
             'journées passées où les conditions atmosphériques (pression, humidité, ' +
             'température, vents) ressemblaient à celles prévues pour demain, puis ' +
-            'calculent la FRÉQUENCE à laquelle il a réellement plu ce jour-là. Plus la ' +
+            'calculent la **fréquence** à laquelle il a réellement plu ce jour-là. Plus la ' +
             'base de données est grande et les situations comparées précisément, plus ' +
             'cette fréquence s\'approche de la vraie probabilité — exactement le principe ' +
-            'de stabilisation de la fréquence que tu viens de voir.',
+            'de stabilisation de la fréquence que tu viens de voir. Aujourd\'hui, ce chiffre ' +
+            'vient aussi souvent d\'une **prévision d\'ensemble** : le modèle météo est lancé ' +
+            'une cinquantaine de fois, avec des conditions de départ très légèrement ' +
+            'différentes ; si 35 des 50 simulations donnent de la pluie, on annonce ' +
+            '35/50 = 70 %. C\'est encore une fréquence, mais calculée sur des simulations.',
           domaines: ['Météorologie', 'Statistique'],
         },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
         {
           kind: 'illustrationGroup',
           items: [
-            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'UN AU MOINS des deux se réalise.' },
-            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', caption: '« A et B » = $A \\cap B$ : réalisé seulement si les DEUX se réalisent en même temps.' },
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'**un au moins** des deux se réalise.' },
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', caption: '« A et B » = $A \\cap B$ : réalisé seulement si les **deux** se réalisent en même temps.' },
           ],
         },
         {
@@ -217,9 +281,9 @@ export const probabilites: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Tu additionnes les deux probabilités, puis tu RETIRES l\'intersection — sinon elle ' +
+            'Tu additionnes les deux probabilités, puis tu **retires** l\'intersection — sinon elle ' +
             'est comptée deux fois (une fois dans $P(A)$, une fois dans $P(B)$). Cas ' +
-            'particulier : si $A$ et $B$ sont INCOMPATIBLES ($P(A \\cap B)=0$), la formule se ' +
+            'particulier : si $A$ et $B$ sont **incompatibles** ($P(A \\cap B)=0$), la formule se ' +
             'simplifie en loi de la somme : $P(A \\cup B)=P(A)+P(B)$.',
         },
         {
@@ -260,7 +324,7 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Additionner $P(A)+P(B)$ SANS retirer $P(A \\cap B)$ donne 33/40 ici — FAUX ! Les 6 ' +
+            'Additionner $P(A)+P(B)$ **sans** retirer $P(A \\cap B)$ donne 33/40 ici — **faux** ! Les 6 ' +
             'personnes de l\'intersection sont comptées deux fois. La bonne valeur reste 27/40.',
         },
         { kind: 'subheading', text: 'Tableau à double entrée et complémentaire' },
@@ -290,7 +354,7 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'La case « ni $A$ ni $B$ » vaut $1-P(A \\cup B)$, JAMAIS $1-P(A)-P(B)$ — cette ' +
+            'La case « ni $A$ ni $B$ » vaut $1-P(A \\cup B)$, **jamais** $1-P(A)-P(B)$ — cette ' +
             'dernière formule oublie que $A$ et $B$ se chevauchent ! Ici : 1−27/40=13/40, pas ' +
             '1−18/40−15/40=7/40.',
         },
@@ -308,15 +372,15 @@ export const probabilites: ChapterContent = {
           label: 'Conditionner, c\'est zoomer',
           text:
             '$P(A|B)$, c\'est zoomer sur le seul monde où $B$ est déjà vrai : tu oublies ' +
-            'temporairement tout le reste de $\\Omega$, et tu recalcules une proportion À ' +
-            'L\'INTÉRIEUR de $B$ uniquement. C\'est exactement ce qui change entre $P(A)$ et ' +
+            'temporairement tout le reste de $\\Omega$, et tu recalcules une proportion ' +
+            '**à l\'intérieur** de $B$ uniquement. C\'est exactement ce qui change entre $P(A)$ et ' +
             '$P(A|B)$ — le dénominateur passe du total $N$ au seul total de $B$.',
         },
         {
           kind: 'methode',
           label: 'Probabilité conditionnelle',
           items: [
-            'La probabilité de $A$ SACHANT $B$ (tu sais déjà que $B$ est réalisé) se note ' +
+            'La probabilité de $A$ **sachant** $B$ (tu sais déjà que $B$ est réalisé) se note ' +
               '$P(A|B)$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$.',
             'Avec l\'exemple : $P(A|B)$ = 6/15 = 0,4, alors que $P(B|A)$ = 6/18 = 1/3. Le ' +
               'numérateur est le même — mais pas le dénominateur !',
@@ -326,27 +390,54 @@ export const probabilites: ChapterContent = {
           kind: 'piege',
           text:
             '$P(A|B) \\neq P(B|A)$ en général ! Confondre les deux sens de conditionnement, ' +
-            'c\'est L\'erreur la plus fréquente de tout ce chapitre — elle revient dans chaque section.',
+            'c\'est **l\'erreur** la plus fréquente de tout ce chapitre — elle revient dans chaque section.',
         },
         { kind: 'subheading', text: 'Indépendance' },
         {
           kind: 'intuition',
-          label: 'Pourquoi on multiplie',
+          label: 'B ne change pas la proportion de A',
           text:
-            'Choisir une tenue, c\'est 4 hauts × 3 bas = 12 tenues possibles, parce que chaque ' +
-            'haut se combine avec chaque bas, sans restriction. Le même principe vaut pour deux ' +
-            'événements indépendants : chaque issue de $A$ rencontre chaque issue de $B$, sans ' +
-            'qu\'aucune ne soit favorisée ou exclue — d\'où la multiplication des probabilités, ' +
-            '$P(A \\cap B) = P(A) \\times P(B)$.',
+            'Dans un jeu de 52 cartes, les cœurs représentent $\\frac{13}{52} = \\frac{1}{4}$ du ' +
+            'jeu. Zoome maintenant sur les seules figures (12 cartes) : 3 sont des cœurs, soit ' +
+            'encore $\\frac{3}{12} = \\frac{1}{4}$. Savoir que la carte est une figure ne change ' +
+            '**pas** la proportion de cœurs : c\'est exactement ça, l\'indépendance. Conditionner ' +
+            'par $B$ (zoomer sur $B$) laisse la probabilité de $A$ inchangée, $P(A|B) = P(A)$ ; ' +
+            'en multipliant par $P(B)$, on obtient la forme pratique $P(A \\cap B) = P(A) \\times P(B)$.',
         },
         {
           kind: 'definition',
           label: 'Définition — événements indépendants',
           items: [
-            '$A$ et $B$ sont indépendants si l\'un n\'influence pas l\'autre : ' +
-              '$P(A \\cap B) = P(A) \\times P(B) \\iff P(A|B) = P(A)$.',
+            '$A$ et $B$ sont indépendants si $P(A \\cap B) = P(A) \\times P(B)$. Lorsque ' +
+              '$P(B) > 0$, c\'est équivalent à $P(A|B) = P(A)$ : savoir que $B$ est réalisé ne ' +
+              'change pas la probabilité de $A$.',
             'Dans l\'exemple des 40 personnes : $P(A) \\times P(B)$ = 0,45×0,375 = 0,16875, ' +
-              'différent de $P(A \\cap B)$=0,15 — $A$ et $B$ ne sont donc PAS indépendants ici.',
+              'différent de $P(A \\cap B)$=0,15 — $A$ et $B$ ne sont donc **pas** indépendants ici.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — les trois écritures de l\'indépendance sont équivalentes',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Supposons $P(B) > 0$ et $P(A|B) = P(A)$. Par définition de la probabilité ' +
+                'conditionnelle, $\\dfrac{P(A \\cap B)}{P(B)} = P(A)$ ; en multipliant les deux ' +
+                'membres par $P(B)$ : $P(A \\cap B) = P(A) \\times P(B)$. Réciproquement, si ' +
+                '$P(A \\cap B) = P(A) \\times P(B)$, diviser par $P(B) > 0$ redonne $P(A|B) = P(A)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le même calcul, mené cette fois avec $P(A) > 0$ en isolant $P(B|A)$, montre que ' +
+                '$P(A \\cap B)=P(A) \\times P(B)$ équivaut aussi à $P(B|A)=P(B)$. Les trois ' +
+                'égalités — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$, $P(B|A)=P(B)$ — sont ' +
+                'donc équivalentes dès que $P(A)$ et $P(B)$ ne sont pas nulles : n\'importe laquelle ' +
+                'peut servir à vérifier l\'indépendance. C\'est la 2e forme qui sert de ' +
+                '**définition**, car elle garde un sens même quand $P(A)$ ou $P(B)$ vaut 0 (les deux ' +
+                'autres exigeraient alors une division par 0, impossible).',
+            },
           ],
         },
         {
@@ -356,25 +447,41 @@ export const probabilites: ChapterContent = {
             '$A$ = « tirer un cœur » ($P(A)$=13/52), $B$ = « tirer une figure » ($P(B)$=12/52). ' +
             'Il y a exactement 3 figures de cœur, donc $P(A \\cap B)$=3/52.',
           steps: [{ tag: 'test d\'indépendance', text: '$P(A) \\times P(B) = \\frac{13}{52} \\times \\frac{12}{52} = \\frac{3}{52} = P(A \\cap B)$' }],
-          result: { tag: 'résultat', text: '$A$ et $B$ SONT indépendants — un résultat que seul le calcul confirme, jamais l\'intuition.' },
+          result: { tag: 'résultat', text: '$A$ et $B$ **sont** indépendants — un résultat que seul le calcul confirme, jamais l\'intuition.' },
         },
         {
           kind: 'piege',
           label: 'Piège classique — incompatibilité ≠ indépendance',
           text:
-            'Deux événements INCOMPATIBLES ($A \\cap B=\\emptyset$, ils ne peuvent jamais se ' +
-            'produire ensemble) et de probabilités non nulles ne sont JAMAIS indépendants ! ' +
+            'Deux événements **incompatibles** ($A \\cap B=\\emptyset$, ils ne peuvent jamais se ' +
+            'produire ensemble) et de probabilités non nulles ne sont **jamais** indépendants ! ' +
             '$P(A \\cap B)$=0 alors que $P(A) \\times P(B)>0$ : l\'égalité échoue toujours. Les ' +
-            'événements $A \\cap \\bar{B}$ et $\\bar{A} \\cap B$, par exemple, sont TOUJOURS ' +
+            'événements $A \\cap \\bar{B}$ et $\\bar{A} \\cap B$, par exemple, sont **toujours** ' +
             'incompatibles (un élément ne peut pas à la fois appartenir à $A$ et ne pas y ' +
-            'appartenir) — donc jamais indépendants non plus. Incompatibilité et indépendance ' +
-            'sont deux notions bien distinctes, jamais équivalentes.',
+            'appartenir) — donc jamais indépendants non plus, dès qu\'ils sont tous deux de ' +
+            'probabilités non nulles. Incompatibilité et indépendance sont deux notions bien ' +
+            'distinctes, jamais équivalentes.',
+        },
+        {
+          kind: 'para',
+          text: 'Pour ne plus confondre les deux notions :',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['', 'Incompatibles', 'Indépendants'],
+          rows: [
+            ['Définition', '$A$ et $B$ ne peuvent pas se produire ensemble', 'savoir que $B$ est réalisé ne change pas la probabilité de $A$'],
+            ['Test', '$A \\cap B = \\emptyset$, donc $P(A \\cap B) = 0$', '$P(A \\cap B) = P(A) \\times P(B)$'],
+            ['Image (Venn)', 'deux disques séparés', 'deux disques qui se chevauchent, dans la proportion exacte $P(A) \\times P(B)$'],
+            ['Exemple', 'deux dés : « somme = 3 » et « dés égaux »', 'jeu de 52 cartes : « cœur » et « figure »'],
+            ['Piège', 'de probabilités non nulles, ils ne sont jamais indépendants', 'se vérifie par un calcul, jamais à l\'intuition'],
+          ],
         },
         {
           kind: 'astuce',
           label: 'L\'indépendance se vérifie, elle ne se devine jamais',
           text:
-            'Pour savoir si deux événements sont indépendants, compare toujours NUMÉRIQUEMENT ' +
+            'Pour savoir si deux événements sont indépendants, compare toujours **numériquement** ' +
             '$P(A \\cap B)$ et $P(A) \\times P(B)$ — jamais à une simple impression. L\'exemple ' +
             'des cartes ci-dessus est justement un cas où l\'intuition ne suffit pas.',
         },

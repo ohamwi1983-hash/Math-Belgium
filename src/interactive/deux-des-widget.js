@@ -272,7 +272,8 @@
       s.getElementById("note").textContent =
         "Les joueurs qui écrivaient à Galilée comptaient 6 décompositions pour chacune des deux sommes. Mais une décomposition " +
         "aux trois faces différentes (1 + 2 + 6) donne 6 issues ordonnées, deux faces égales (1 + 4 + 4) seulement 3, trois faces " +
-        "égales (3 + 3 + 3) une seule : on compte les 6 × 6 × 6 = 216 issues équiprobables, pas les décompositions.";
+        "égales (3 + 3 + 3) une seule : on compte les 6 × 6 × 6 = 216 issues équiprobables, pas les décompositions. " +
+        "Dans la grille des deux premiers dés, chaque case indique la face du 3e dé qui complète la somme à 9 (en vert) ou à 10 (en orange).";
       var colonne = function (somme, liste, total, classe) {
         return '<div class="colonne ' + classe + '"><h4>Somme ' + somme + "</h4><ul>" +
           liste.map(function (d) { return "<li><span>" + d.a + " + " + d.b + " + " + d.c + "</span><span>" + d.facons + " façon" + (d.facons > 1 ? "s" : "") + "</span></li>"; }).join("") +
@@ -306,7 +307,6 @@
       svg.appendChild(svgEl("line", { x1: x0, y1: y0, x2: x0, y2: 6, class: "axe", "marker-end": "url(#fl)" }));
       svg.appendChild(svgEl("text", { x: GW - GD, y: GH - 8, "text-anchor": "end", class: "titre-axe" }, "1er dé"));
       svg.appendChild(svgEl("text", { x: 14, y: (GHAUT + y0) / 2, "text-anchor": "middle", class: "titre-axe", transform: "rotate(-90 14 " + (GHAUT + y0) / 2 + ")" }, "2e dé"));
-      svg.appendChild(svgEl("text", { x: GW / 2 + GG / 2, y: GH - 22, "text-anchor": "middle", class: "grad" }, ""));
     }
 
     _dessinerHisto3() {

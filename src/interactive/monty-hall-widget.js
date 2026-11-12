@@ -82,6 +82,7 @@
     ".porte{fill:var(--plan-soft,#e9e5f5);stroke:var(--plan,#5b4ea3);stroke-width:1.6;}" +
     ".porte.choisie{stroke:var(--accent,#a8471f);stroke-width:3.2;}" +
     ".porte.ouverte{fill:var(--surface,#fffdf9);stroke:var(--line,#ddd2c0);stroke-dasharray:4 3;}" +
+    ".porte.ouverte.choisie{stroke:var(--accent,#a8471f);stroke-width:3.2;stroke-dasharray:none;}" +
     ".porte.gagnee{fill:var(--good-soft,#e2f0e7);stroke:var(--good,#2f7a4f);stroke-width:3.2;}" +
     ".num{font-family:var(--mono,monospace);font-size:13px;font-weight:600;fill:var(--plan-ink,#463c86);text-anchor:middle;}" +
     ".lot{font-family:var(--sans,sans-serif);font-size:11px;font-weight:600;text-anchor:middle;}" +

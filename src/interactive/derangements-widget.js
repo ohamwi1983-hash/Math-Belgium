@@ -26,6 +26,9 @@
     return s.replace(".", ",").replace("-", "−");
   }
 
+  // Entier avec une espace pour séparer les milliers (14 833, 1 000).
+  function entier(x) { return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+
   function svgEl(tag, attrs) {
     var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
     for (var k in attrs) el.setAttribute(k, attrs[k]);
@@ -121,7 +124,7 @@
     ".table-zone{overflow-x:auto;margin:0 0 10px;}" +
     "table{border-collapse:collapse;margin:0 auto;font-size:0.84rem;font-variant-numeric:tabular-nums;}" +
     "th,td{border:1px solid var(--line,#ddd2c0);padding:4px 8px;text-align:center;white-space:nowrap;}" +
-    "th{background:var(--surface-2,#faf6f0);font-weight:600;}" +
+    "th{background:var(--surface-2,#faf6f0);font-weight:600;white-space:normal;max-width:120px;line-height:1.25;}" +
     "td.zero{color:var(--bad,#a8322f);}" +
     ".controles{display:flex;flex-direction:column;gap:10px;}" +
     ".curseur{display:flex;align-items:center;gap:10px;font-size:0.88rem;}" +
@@ -134,7 +137,7 @@
     "button.principal{background:var(--accent,#a8471f);border-color:var(--accent,#a8471f);color:#fff;}" +
     ".liste{margin:4px 0 0;padding:8px 10px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);font-size:0.86rem;line-height:1.6;}" +
     ".liste code{font-family:var(--mono,monospace);font-size:0.95rem;background:var(--surface,#fff);border:1px solid var(--line-soft,#ece4d6);padding:1px 5px;border-radius:3px;margin:0 3px;display:inline-block;}" +
-    "@media (max-width:480px){.curseur label{flex-basis:110px;font-size:0.8rem;}}" +
+    "@media (max-width:480px){.curseur label{flex-basis:110px;font-size:0.8rem;}table{font-size:0.78rem;}th,td{padding:3px 5px;}}" +
     "</style>" +
     '<div class="figure"><svg id="svg" viewBox="0 0 ' + L + " " + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Répartition des lettres et distribution du nombre de lettres bien placées"></svg></div>' +
     '<p class="resume" id="resume"></p>' +
@@ -203,8 +206,6 @@
 
     _melanger() {
       this._perm = permutationAleatoire(this._n);
-      this._obs[nombreBienPlacees(this._perm)]++;
-      this._total++;
       this._rendre();
     }
 
@@ -219,9 +220,9 @@
       var nf = factorielle(n), ex = effectifsExacts(n);
       s.getElementById("n-v").textContent = String(n);
       var p0 = ex[0] / nf;
-      s.getElementById("p0").textContent = ex[0] + "/" + nf + " ≈ " + nombreFr(p0, 4);
+      s.getElementById("p0").textContent = entier(ex[0]) + "/" + entier(nf) + " ≈ " + nombreFr(p0, 4);
       s.getElementById("inv-e").textContent = "≈ " + nombreFr(1 / Math.E, 4);
-      s.getElementById("nb-sim").textContent = this._total.toLocaleString("fr-FR").replace(/ /g, " ");
+      s.getElementById("nb-sim").textContent = entier(this._total);
 
       var resume = s.getElementById("resume");
       if (this._perm) {
@@ -232,16 +233,13 @@
         resume.textContent = "Clique sur « Mélanger » pour glisser les " + n + " lettres au hasard dans les enveloppes.";
       }
 
-      // Tableau : k | effectif exact | probabilité exacte | fréquence observée
-      var lignes = "<tr><th>lettres bien placées</th>";
-      for (var k = 0; k <= n; k++) lignes += "<th>" + k + "</th>";
-      lignes += "</tr><tr><th>répartitions (sur " + nf + ")</th>";
-      for (k = 0; k <= n; k++) lignes += '<td class="' + (ex[k] === 0 ? "zero" : "") + '">' + ex[k] + "</td>";
-      lignes += "</tr><tr><th>probabilité exacte</th>";
-      for (k = 0; k <= n; k++) lignes += '<td class="' + (ex[k] === 0 ? "zero" : "") + '">' + nombreFr(ex[k] / nf, 3) + "</td>";
-      lignes += "</tr><tr><th>fréquence observée</th>";
-      for (k = 0; k <= n; k++) lignes += "<td>" + (this._total ? nombreFr(this._obs[k] / this._total, 3) : "—") + "</td>";
-      lignes += "</tr>";
+      // Tableau (une ligne par k) : effectif exact sur n!, probabilité exacte, fréquence observée.
+      var lignes = "<tr><th>bien placées</th><th>répartitions (sur " + entier(nf) + ")</th><th>probabilité exacte</th><th>fréquence observée</th></tr>";
+      for (var k = 0; k <= n; k++) {
+        var z = ex[k] === 0 ? ' class="zero"' : "";
+        lignes += "<tr><td>" + k + "</td><td" + z + ">" + entier(ex[k]) + "</td><td" + z + ">" + nombreFr(ex[k] / nf, 3) +
+          "</td><td>" + (this._total ? nombreFr(this._obs[k] / this._total, 3) : "—") + "</td></tr>";
+      }
       s.getElementById("table").innerHTML = lignes;
 
       this._dessiner(n, nf, ex);

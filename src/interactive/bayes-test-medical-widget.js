@@ -37,6 +37,7 @@
     if (Object.is(arrondi, -0)) arrondi = 0;
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
   }
+  function pgcd(a, b) { while (b) { var t = a % b; a = b; b = t; } return a || 1; }
   /** Nombre avec au plus `d` décimales, zéros inutiles retirés (« 0,5 », « 10 », « 9,9 »). */
   function court(n, d) {
     var t = formatNombreFr(n, d);
@@ -243,10 +244,15 @@
     }
 
     var ecart = Math.abs(pTm - pMaladeSachantTplus);
+    // Fraction EXACTE de P(malade|T⁺) : prévalence au demi-pour-cent, sensibilité et faux positifs au
+    // pour-cent → numérateur et dénominateur entiers (en 1/20 000).
+    var a1 = Math.round(this._pMalade * 2) * Math.round(this._pTm);
+    var b1 = a1 + Math.round(200 - this._pMalade * 2) * Math.round(this._pTn);
+    var g1 = pgcd(a1, b1), fr1 = b1 > 0 && b1 / g1 <= 1000 ? " = " + (a1 / g1) + "/" + (b1 / g1) : "";
     var lignes =
       '<div class="ligne-contraste ligne-donnee">Sensibilité : P(T⁺|malade) = ' + court(this._pTm, 1) + ' % (donnée du test)</div>' +
       '<div class="ligne-contraste ligne-donnee">P(T⁺) = ' + court(this._pTm, 1) + ' % × ' + court(this._pMalade, 1) + ' % + ' + court(this._pTn, 1) + ' % × ' + court(100 - this._pMalade, 1) + ' % = ' + court(pTplus * 100, 2) + ' %</div>' +
-      '<div class="ligne-contraste ligne-calculee">P(malade|T⁺) = ' + court(maladesTplus, 1) + '/' + court(totalTplus, 1) + ' ≈ ' + formatNombreFr(pMaladeSachantTplus * 100, 1) + ' %' +
+      '<div class="ligne-contraste ligne-calculee">P(malade|T⁺) = ' + court(maladesTplus, 2) + '/' + court(totalTplus, 2) + fr1 + ' ≈ ' + formatNombreFr(pMaladeSachantTplus * 100, 1) + ' %' +
       (ecart > 0.1 ? ' — très différent de P(T⁺|malade) !' : ' — proche de P(T⁺|malade) ici') + '</div>';
 
     if (this._second.checked) {
@@ -254,9 +260,11 @@
       var p1 = pMaladeSachantTplus;
       var num = p1 * pTm, den = p1 * pTm + (1 - p1) * pTn;
       var p2 = den > 0 ? num / den : 0;
+      var a2 = (a1 / g1) * Math.round(this._pTm), b2 = a2 + (b1 / g1 - a1 / g1) * Math.round(this._pTn);
+      var g2 = pgcd(a2, b2), fr2 = b2 > 0 && b2 / g2 <= 1000 && fr1 ? " = " + (a2 / g2) + "/" + (b2 / g2) : "";
       lignes += '<div class="ligne-contraste ligne-second">2e test positif : on repart avec P(malade) = ' + formatNombreFr(p1 * 100, 1) + ' %, d\'où ' +
         'P(malade|T⁺T⁺) = ' + court(this._pTm, 1) + ' % × ' + formatNombreFr(p1 * 100, 1) + ' % / (' + court(this._pTm, 1) + ' % × ' + formatNombreFr(p1 * 100, 1) + ' % + ' +
-        court(this._pTn, 1) + ' % × ' + formatNombreFr((1 - p1) * 100, 1) + ' %) ≈ ' + formatNombreFr(p2 * 100, 1) + ' %</div>';
+        court(this._pTn, 1) + ' % × ' + formatNombreFr((1 - p1) * 100, 1) + ' %)' + fr2 + ' ≈ ' + formatNombreFr(p2 * 100, 1) + ' %</div>';
     }
     this._contraste.innerHTML = lignes;
   };

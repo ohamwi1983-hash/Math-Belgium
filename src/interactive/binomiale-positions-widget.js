@@ -191,7 +191,7 @@
   BinomialePositionsWidgetClass.prototype._rendre = function () {
     var n = this._n, p = this._p, k = this._k;
     this._valeurN.textContent = String(n);
-    this._valeurP.textContent = formatNombreFr(p, 2);
+    this._valeurP.textContent = formatNombreFr(p, 2).replace(/(,\d*?)0+$/, "$1").replace(/,$/, "");
     var auMoins = this._mode === "auMoins";
     Array.prototype.forEach.call(this._modeZone.querySelectorAll("button"), function (b) {
       b.className = b.getAttribute("data-mode") === (auMoins ? "auMoins" : "exactement") ? "actif" : "";
@@ -255,6 +255,11 @@
       if (n - kk > 0) facteurs.push(n - kk === 1 ? qS : puissance(qS, n - kk));
       return facteurs.length ? facteurs.join(" × ") : "1";
     }
+    /* « = 0,3087 » si la valeur s'écrit exactement avec 4 décimales, sinon « ≈ 0,3087 ». */
+    function egal(v) {
+      var exact = Math.abs(v * 1e4 - Math.round(v * 1e4)) < 1e-9;
+      return exact ? "= " + formatNombreFr(v, 4).replace(/(,\d*?)0+$/, "$1").replace(/,$/, "") : "≈ " + formatNombreFr(v, 4);
+    }
     var probaUnChemin = Math.pow(p, k) * Math.pow(q, n - k);
     var probaXk = nb * probaUnChemin;
     var pAuMoinsUn = 1 - Math.pow(q, n);
@@ -263,31 +268,32 @@
 
     if (!auMoins) {
       html +=
-        '<div class="ligne-formule ligne-vrai">Chemins de l\'arbre à ' + k + ' succès parmi ' + n + ' tirages : ' + nb +
-        ' → P(X = ' + k + ') = ' + nb + ' × ' + produitChemin(k) + ' = ' + formatNombreFr(probaXk, 4) + '</div>';
+        '<div class="ligne-formule ligne-vrai">Chemins de l\'arbre à ' + k + ' succès parmi ' + n + (n > 1 ? ' tirages : ' : ' tirage : ') + nb +
+        ' → P(X = ' + k + ') = ' + nb + ' × ' + produitChemin(k) + ' ' + egal(probaXk) + '</div>';
       if (n <= 5) {
         html += '<div class="ligne-formule chemins">' + cheminsASucces(n, k).map(function (c) { return "<span>" + c + "</span>"; }).join("") + '</div>';
       }
       if (nb > 1) {
-        html += '<div class="ligne-formule ligne-faux">✗ Piège — oublier de compter les chemins : ' + produitChemin(k) + ' = ' +
-          formatNombreFr(probaUnChemin, 4) + ' (' + nb + ' fois trop petit !)</div>';
+        html += '<div class="ligne-formule ligne-faux">✗ Piège — oublier de compter les chemins : ' + produitChemin(k) + ' ' +
+          egal(probaUnChemin) + ' (' + nb + ' fois trop petit !)</div>';
       }
     } else {
       var somme = 0, termes = [];
-      for (var j = k; j <= n; j++) { somme += probas[j]; termes.push(formatNombreFr(probas[j], 4)); }
+      var exacts = true;
+      for (var j = k; j <= n; j++) { somme += probas[j]; termes.push(formatNombreFr(probas[j], 4)); if (egal(probas[j]).charAt(0) !== "=") exacts = false; }
       html +=
         '<div class="ligne-formule ligne-vrai">P(X ≥ ' + k + ') = ' + (k === n ? "P(X = " + n + ")" : "P(X = " + k + ") + … + P(X = " + n + ")") +
-        ' = ' + termes.join(" + ") + ' = ' + formatNombreFr(somme, 4) + '</div>';
+        (exacts ? ' = ' : ' ≈ ') + termes.join(" + ") + ' ' + (exacts ? egal(somme) : '≈ ' + formatNombreFr(somme, 4)) + '</div>';
       if (k > 0) {
         var compl = 0;
         for (var j2 = 0; j2 < k; j2++) compl += probas[j2];
-        html += '<div class="ligne-formule">Par le complément : 1 − P(X ≤ ' + (k - 1) + ') = 1 − ' + formatNombreFr(compl, 4) + ' = ' + formatNombreFr(1 - compl, 4) + '</div>';
+        html += '<div class="ligne-formule">Par le complément : 1 − P(X ≤ ' + (k - 1) + ') ' + egal(compl).charAt(0) + ' 1 − ' + formatNombreFr(compl, 4) + ' ' + egal(1 - compl) + '</div>';
       }
     }
     html +=
-      '<div class="ligne-formule ligne-vrai">P(au moins 1 succès) = 1 − P(X = 0) = 1 − ' + (n === 1 ? qS : puissance(qS, n)) + ' = ' + formatNombreFr(pAuMoinsUn, 4) + '</div>' +
-      '<div class="ligne-formule ligne-faux">✗ Piège — additionner les p : n × p = ' + n + ' × ' + pS + ' = ' + formatNombreFr(pAuMoinsUnFaux, 2) +
-      (pAuMoinsUnFaux > 1 ? ' (impossible, dépasse 1 !)' : ' — différent de ' + formatNombreFr(pAuMoinsUn, 4)) + '</div>';
+      '<div class="ligne-formule ligne-vrai">P(au moins 1 succès) = 1 − P(X = 0) = 1 − ' + (n === 1 ? qS : puissance(qS, n)) + ' ' + egal(pAuMoinsUn) + '</div>' +
+      '<div class="ligne-formule ligne-faux">✗ Piège — additionner les p : n × p = ' + n + ' × ' + pS + ' = ' + court(pAuMoinsUnFaux) +
+      (pAuMoinsUnFaux > 1 ? ' (impossible, dépasse 1 !)' : ' — différent de ' + formatNombreFr(pAuMoinsUn, 4).replace(/(,\d*?)0+$/, "$1").replace(/,$/, "")) + '</div>';
     this._lecture.innerHTML = html;
   };
 
