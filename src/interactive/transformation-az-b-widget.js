@@ -58,6 +58,20 @@
     return /[ ]/.test(t) ? "(" + t + ")" : t;
   }
 
+  // « a·z + b » lisible : z, −z, i·z, (1 + i)·z ; b nul omis, b réel négatif « − 3 ».
+  function affine(a, b) {
+    var ax = Math.abs(a.x) < 0.005 ? 0 : a.x, ay = Math.abs(a.y) < 0.005 ? 0 : a.y;
+    var tete;
+    if (ay === 0 && Math.abs(ax - 1) < 0.005) tete = "z";
+    else if (ay === 0 && Math.abs(ax + 1) < 0.005) tete = "−z";
+    else tete = entreParentheses(a) + "·z";
+    var bx = Math.abs(b.x) < 0.005 ? 0 : b.x, by = Math.abs(b.y) < 0.005 ? 0 : b.y;
+    if (bx === 0 && by === 0) return tete;
+    if (by === 0) return tete + (bx < 0 ? " − " : " + ") + court(Math.abs(bx));
+    if (bx === 0) return tete + (by < 0 ? " − " : " + ") + complexeFr({ x: 0, y: Math.abs(by) });
+    return tete + " + " + "(" + complexeFr(b) + ")";
+  }
+
   function svgEl(tag, attrs) {
     var el = document.createElementNS(NS, tag);
     for (var key in attrs) el.setAttribute(key, attrs[key]);
@@ -327,7 +341,7 @@
       var forme = FORME_REL.map(function (d) { return cAdd(M, d); });
 
       if (!composer) {
-        this._formule.textContent = "z′ = " + entreParentheses(t1.a) + "·z + " + entreParentheses(t1.b);
+        this._formule.textContent = "z′ = " + affine(t1.a, t1.b);
         var image = forme.map(function (z) { return appliquer(t1, z); });
         var Mp = image[0];
         if (t1.centre) this._dessinerCentreEtAngle(t1, M, Mp, "centre", "Ω");
@@ -360,9 +374,9 @@
       // ----- mode composer -----
       var t2 = analyser(this._etat.t2);
       this._formule.innerHTML = "";
-      this._formule.appendChild(document.createTextNode("T₁ : z′ = " + entreParentheses(t1.a) + "·z + " + entreParentheses(t1.b)));
+      this._formule.appendChild(document.createTextNode("T₁ : z′ = " + affine(t1.a, t1.b)));
       this._formule.appendChild(document.createElement("br"));
-      this._formule.appendChild(document.createTextNode("T₂ : z′ = " + entreParentheses(t2.a) + "·z + " + entreParentheses(t2.b)));
+      this._formule.appendChild(document.createTextNode("T₂ : z′ = " + affine(t2.a, t2.b)));
 
       var inter1 = forme.map(function (z) { return appliquer(t1, z); });
       var img21 = inter1.map(function (z) { return appliquer(t2, z); }); // T₁ puis T₂
@@ -387,8 +401,8 @@
         " — le même dans les deux ordres (module " + formatNombreFr(cMod(a), 2) + ", argument " +
         formatNombreFr((((t1.angle + t2.angle) % 360) + 360) % 360, 0) + "°).";
       this._centreTexte.textContent =
-        "T₁ puis T₂ : z ↦ " + entreParentheses(a) + "·z + " + entreParentheses(b21) +
-        "   |   T₂ puis T₁ : z ↦ " + entreParentheses(a) + "·z + " + entreParentheses(b12) + "   |   " +
+        "T₁ puis T₂ : z ↦ " + affine(a, b21) +
+        "   |   T₂ puis T₁ : z ↦ " + affine(a, b12) + "   |   " +
         (memes ? "Même image : ici, l'ordre ne compte pas (même centre, ou deux translations)." : "Images différentes : l'ordre compte, car les centres diffèrent.");
     }
 

@@ -337,7 +337,7 @@
         var px = mod * Math.cos(arg), py = mod * Math.sin(arg);
         var ecart = Math.hypot(px - zPt.x, py - zPt.y);
         var argDeg = ((Math.round(angleDeg * n) % 360) + 360) % 360;
-        txt += " → z" + indice(i) + exposant(n) + " : argument " + formatNombreFr(angleDeg, 1) + "° × " + n + " = " + formatNombreFr(angleDeg * n, 0) + "°" +
+        txt += " → z" + indice(i) + exposant(n) + " : argument " + formatNombreFr(angleDeg, 1).replace(/,0$/, "") + "° × " + n + " = " + formatNombreFr(angleDeg * n, 0) + "°" +
           (argDeg !== Math.round(thetaDeg) % 360 ? " ≡ " + argDeg + "°" : "") + " → " + (zExact ? zExact : approxTexte(px, py)) +
           (ecart < 1e-6 * Math.max(1, r) ? ' <span class="ok">✓ = z</span>' : "");
       }
