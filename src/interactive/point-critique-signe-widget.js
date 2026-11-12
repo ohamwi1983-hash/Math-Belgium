@@ -238,7 +238,7 @@
       var o = self._toPx(0, 0);
       svg.appendChild(svgEl(ns, "circle", { cx: o[0].toFixed(2), cy: o[1].toFixed(2), r: 5, class: "point-inflexion" }));
       if (k > EPSILON_K || k < -EPSILON_K) {
-        var ei = svgEl(ns, "text", { x: (o[0] + 8).toFixed(2), y: (o[1] + (k > 0 ? 16 : -9)).toFixed(2), "text-anchor": "start", class: "etiquette etiquette-inflexion" });
+        var ei = svgEl(ns, "text", { x: (o[0] + (k > 0 ? -8 : 8)).toFixed(2), y: (o[1] + (k > 0 ? 17 : -9)).toFixed(2), "text-anchor": k > 0 ? "end" : "start", class: "etiquette etiquette-inflexion" });
         ei.textContent = "PI (0 ; 0)";
         svg.appendChild(ei);
       }

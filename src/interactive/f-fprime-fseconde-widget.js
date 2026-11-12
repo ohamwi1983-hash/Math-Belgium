@@ -450,7 +450,7 @@
     _masque(svg, ns, i, texte) {
       var h0 = this._haut(i);
       svg.appendChild(svgEl(ns, "rect", { x: M_G, y: h0 + M_H - 2, width: LARGEUR - M_G - M_D, height: HAUT_PANNEAU - M_H - M_B + 4, rx: 4, class: "masque" }));
-      var t = svgEl(ns, "text", { x: ((M_G + LARGEUR - M_D) / 2).toFixed(2), y: (h0 + HAUT_PANNEAU / 2 + 4).toFixed(2), "text-anchor": "middle", class: "masque-txt" });
+      var t = svgEl(ns, "text", { x: ((M_G + LARGEUR - M_D) / 2).toFixed(2), y: (h0 + 34).toFixed(2), "text-anchor": "middle", class: "masque-txt" });
       t.textContent = texte;
       svg.appendChild(t);
     }

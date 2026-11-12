@@ -239,7 +239,7 @@
       var y0 = this._py(0);
       svg.appendChild(svgEl(ns, "line", { x1: M_G - 4, x2: LARGEUR - M_D + 4, y1: y0.toFixed(2), y2: y0.toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
       svg.appendChild(svgEl(ns, "line", { x1: M_G, x2: M_G, y1: HAUTEUR - M_B + 4, y2: M_H - 6, class: "axe", "marker-end": "url(#fleche)" }));
-      var etP = svgEl(ns, "text", { x: M_G + 4, y: M_H + 4, class: "grad-txt" });
+      var etP = svgEl(ns, "text", { x: M_G + 8, y: M_H + 6, class: "grad-txt" });
       etP.textContent = "P";
       svg.appendChild(etP);
       this._graduationsX(svg, ns, y0);
@@ -278,7 +278,7 @@
         if (xt < M_G + 6) continue;
         svg.appendChild(svgEl(ns, "line", { x1: xt.toFixed(2), x2: xt.toFixed(2), y1: (y0 - 3).toFixed(2), y2: (y0 + 3).toFixed(2), class: "graduation" }));
         var txt = svgEl(ns, "text", { x: xt.toFixed(2), y: (y0 - 6).toFixed(2), "text-anchor": "middle", class: "grad-txt" });
-        txt.textContent = formatNombreFr(t, dec);
+        txt.textContent = formatNombreFr(t, dec).replace(/(,\d*?)0+$/, "$1").replace(/,$/, "");
         svg.appendChild(txt);
       }
     }
