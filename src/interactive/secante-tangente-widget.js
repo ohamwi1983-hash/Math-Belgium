@@ -332,14 +332,16 @@
       // Lecture : formule substituée
       var dec = Math.abs(h) < 0.1 ? 3 : 2;
       var aTxt = fr(a, 2), xb = fr(a + h, dec + 1);
-      var fbTxt = (estExact(fb) ? "" : "≈ ") + fr(fb, 4);
+      // f(a+h) avec 6 décimales au plus : « = » si la valeur affichée est exacte, sinon « ≈ ».
+      var fbExact = Math.abs(fb * 1e6 - Math.round(fb * 1e6)) < 1e-6;
+      var fbTxt = fr(fb, 6);
       var faTxt = fr(fa, 4);
       var tauxTxt = (estExact(taux) ? "= " : "≈ ") + fr(taux, 4);
       var lecture = s.getElementById("lecture");
       lecture.innerHTML =
         '<div class="ligne-taux">taux = ' +
         '<span class="frac"><span>f(' + xb + ') − f(' + aTxt + ')</span><span>' + fr(h, dec) + '</span></span>' +
-        ' = <span class="frac"><span>' + fbTxt.replace("≈ ", "") + ' − ' + faTxt + '</span><span>' + fr(h, dec) + '</span></span> ' +
+        (fbExact ? ' = ' : ' ≈ ') + '<span class="frac"><span>' + fbTxt + ' − ' + faTxt + '</span><span>' + fr(h, dec) + '</span></span> ' +
         '<span class="resultat">' + tauxTxt + '</span></div>' +
         '<p class="limite" id="limite"></p>';
       var lim = lecture.querySelector("#limite");

@@ -84,7 +84,7 @@
     '*{box-sizing:border-box;}' +
     '.formule{text-align:center;font-size:0.9rem;color:var(--ink,#241f1a);margin:0 0 10px;font-weight:600;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:10px;}' +
-    'svg{width:100%;max-width:400px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
+    'svg{width:100%;max-width:330px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.cadre{fill:none;stroke:var(--line,#d9cfc2);stroke-width:1;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.2;}' +
     '.fleche{fill:var(--ink-soft,#6b6055);}' +

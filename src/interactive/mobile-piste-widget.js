@@ -289,8 +289,9 @@
     this._rendreGraphe(this._svgV, "v", m.v, m.fen.v, "courbe-v", "v (m/s)", "var(--good,#2f7a4f)", t);
     this._rendreGraphe(this._svgA, "a", m.a, m.fen.a, "courbe-a", "a (m/s²)", "var(--plan,#5b4b8a)", t);
 
-    this._etat.textContent = "t = " + formatNombreFr(t, 2) + " s : s ≈ " + formatNombreFr(s, 1) + " m ; v ≈ " +
-      formatNombreFr(v, 1) + " m/s (" + formatNombreFr(v * 3.6, 1) + " km/h) ; a = " + formatNombreFr(a, 1) + " m/s²";
+    function egal(val) { return Math.abs(val * 10 - Math.round(val * 10)) < 1e-6 ? " = " : " ≈ "; }
+    this._etat.textContent = "t = " + formatNombreFr(t, 2) + " s : s" + egal(s) + formatNombreFr(s, 1) + " m ; v" + egal(v) +
+      formatNombreFr(v, 1) + " m/s (" + formatNombreFr(v * 3.6, 1) + " km/h) ; a" + egal(a) + formatNombreFr(a, 1) + " m/s²";
 
     var eps = 1e-6;
     if (Math.abs(v) < eps) { this._sens.className = "pastille neutre"; this._sens.textContent = "à l'arrêt (v = 0)"; }
@@ -419,11 +420,15 @@
       }
     }
     // Courbe.
-    var d = "", n = 160;
+    // Une discontinuité (saut de a à l'arrêt du freinage) n'est jamais reliée par un trait vertical.
+    var d = "", n = 160, yPrec = null;
     for (var i = 0; i <= n; i++) {
       var ti = i / n * m.tMax;
-      var p = P(ti, Math.max(yMin, Math.min(yMax, fn(ti))));
-      d += (i === 0 ? "M" : "L") + p[0].toFixed(2) + " " + p[1].toFixed(2) + " ";
+      var yi = Math.max(yMin, Math.min(yMax, fn(ti)));
+      var p = P(ti, yi);
+      var saut = yPrec !== null && Math.abs(yi - yPrec) > 0.25 * (yMax - yMin);
+      d += (i === 0 || saut ? "M" : "L") + p[0].toFixed(2) + " " + p[1].toFixed(2) + " ";
+      yPrec = yi;
     }
     svg.appendChild(svgEl(ns, "path", { d: d.trim(), class: classe }));
     // Curseur de temps et point courant.
