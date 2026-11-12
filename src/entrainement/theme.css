@@ -1981,6 +1981,18 @@
   display: none;
 }
 
+/* Sur grand écran aussi, un libellé long (« ni l'un ni l'autre ») passe à la ligne dans sa colonne
+ * de point plutôt que d'élargir tout le tableau. */
+.entrainement .grille-signes.grille-signes--dense .grille-signes-point {
+  white-space: normal;
+}
+
+.entrainement .grille-signes.grille-signes--dense .grille-signes-point .toggle-signe {
+  max-width: 6.5em;
+  white-space: normal;
+  line-height: 1.15;
+}
+
 @media (max-width: 520px) {
   .entrainement .grille-signes--dense .etiquette-longue {
     display: none;
@@ -1996,7 +2008,7 @@
 
   .entrainement .grille-signes.grille-signes--dense th,
   .entrainement .grille-signes.grille-signes--dense td {
-    padding: 5px 1px;
+    padding: 5px 0;
   }
 
   .entrainement .grille-signes.grille-signes--dense .grille-signes-point {
@@ -2009,15 +2021,18 @@
   }
 
   .entrainement .grille-signes.grille-signes--dense .grille-signes-label {
-    max-width: 60px;
-    font-size: 10.5px;
+    max-width: 56px;
+    font-size: 10px;
+    overflow-wrap: normal;
+    word-break: normal;
     padding-left: 2px;
     padding-right: 3px;
   }
 
   .entrainement .grille-signes.grille-signes--dense .toggle-signe {
-    min-width: 26px;
-    padding: 4px 2px;
+    min-width: 24px;
+    padding: 4px 1px;
+    font-size: 10.5px;
     white-space: normal;
     line-height: 1.15;
   }
