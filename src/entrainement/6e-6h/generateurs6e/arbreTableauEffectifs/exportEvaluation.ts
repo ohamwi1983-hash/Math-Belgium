@@ -41,7 +41,7 @@ import {
 } from "../../ui6e/formatArbreTableauEffectifs";
 import { arbreSvg, tableauHtml } from "../../ui6e/figuresArbreTableauEffectifs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceArbreTableauEffectifs, type IdVarianteArbreTableauEffectifs } from "./index";
-import { LIBELLE_CAS_ARBRE_TABLEAU, profilArbreTableauEffectifs } from "../profilsEvaluationProbabilites74";
+import { profilArbreTableauEffectifs } from "../profilsEvaluationProbabilites74";
 
 /**
  * Adaptateur feuille d'exercices / évaluation de `6gen74` (« Arbre, tableau, effectifs : une
@@ -371,7 +371,6 @@ function bareme(e: Ex): BaremeExercice {
 
 export const adaptateurEvaluationArbreTableauEffectifs: AdaptateurFeuilleExercices<ExerciceArbreTableauEffectifs> = {
   profilInstance: profilArbreTableauEffectifs,
-  libelleCasParticulier: LIBELLE_CAS_ARBRE_TABLEAU,
   titreDocument: "Arbre, tableau, effectifs : une situation, trois écritures — Évaluation",
   nomFichierBase: "arbre-tableau-effectifs",
   genererInstance: genererExerciceArbreTableauEffectifs,

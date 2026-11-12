@@ -109,7 +109,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
         latex("B"),
         texte(" de signes OPPOSÉS, le cas "),
         latex("C=0"),
-        texte(" décrit lui aussi un unique point."),
+        texte(" décrit un unique point."),
       ],
       reponse: false,
       justification: [
@@ -431,7 +431,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même forme « racine isolée », c'est le signe du coefficient "),
+        texte("Dans la forme « racine isolée » ("),
+        latex("v_{\\text{isolée}}=k\\pm m\\sqrt{\\cdots}"),
+        texte("), c'est le signe du coefficient "),
         latex("m"),
         texte(" devant la racine qui distingue ellipse et hyperbole, pas le signe sous la racine."),
       ],
@@ -446,7 +448,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette forme « racine isolée », le coefficient "),
+        texte("Dans la forme « racine isolée » ("),
+        latex("v_{\\text{isolée}}=k\\pm m\\sqrt{\\cdots}"),
+        texte("), le coefficient "),
         latex("m"),
         texte(" devant la racine n'est jamais égal à "),
         latex("1"),
@@ -467,7 +471,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette forme « racine isolée », le coefficient "),
+        texte("Dans la forme « racine isolée » ("),
+        latex("v_{\\text{isolée}}=k\\pm m\\sqrt{\\cdots}"),
+        texte("), le coefficient "),
         latex("m"),
         texte(" peut valoir exactement "),
         latex("1"),
@@ -905,11 +911,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même configuration (sommet "),
+        texte("Quand un sommet "),
         latex("S"),
-        texte(" et foyer "),
+        texte(" d'une ellipse est donné sur un axe et un foyer "),
         latex("F"),
-        texte(" sur des axes perpendiculaires), le sommet "),
+        texte(" sur l'axe perpendiculaire, le sommet "),
         latex("S"),
         texte(" donné détermine directement "),
         latex("a"),
@@ -947,7 +953,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette configuration « 2 sommets », l'axe est horizontal si et seulement si le sommet sur l'axe des "),
+        texte("Dans la configuration « 2 sommets » (une ellipse dont on donne les 2 sommets sur des axes perpendiculaires), l'axe est horizontal si et seulement si le sommet sur l'axe des "),
         latex("y"),
         texte(" est le plus grand des deux."),
       ],
@@ -1131,7 +1137,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même construction, le rapport donné par la pente de l'asymptote vaut toujours "),
+        texte("Pour construire une hyperbole depuis une asymptote et son sommet, le rapport donné par la pente de l'asymptote vaut toujours "),
         latex("b/a"),
         texte(", quel que soit l'axe transverse choisi."),
       ],
@@ -1171,7 +1177,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour ces mêmes sous-types, "),
+        texte("Pour construire une hyperbole depuis son foyer ou sa distance focale, "),
         latex("a"),
         texte(", "),
         latex("b"),
@@ -1207,7 +1213,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Sur ces mêmes étapes à plusieurs champs de choix, les champs sont affichés côte à côte en ligne pour gagner de la place à l'écran."),
+        texte("Sur les étapes à plusieurs champs de choix, les champs sont affichés côte à côte en ligne pour gagner de la place à l'écran."),
       ],
       reponse: false,
       justification: [
@@ -1781,7 +1787,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Ces 2 sous-types aboutissent à 2 valeurs d'excentricité différentes, car ce sont 2 conditions géométriques non équivalentes."),
+        texte("Les 2 sous-types « abscisse du foyer parallèle » et « angle droit au sommet secondaire » aboutissent à 2 valeurs d'excentricité différentes, car ce sont 2 conditions géométriques non équivalentes."),
       ],
       reponse: false,
       justification: [
@@ -1821,7 +1827,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans ce sous-type, l'excentricité "),
+        texte("Dans le sous-type « distance entre les directrices », l'excentricité "),
         latex("e=\\frac{1}{\\sqrt k}"),
         texte(" est toujours un nombre rationnel exact, quel que soit l'entier "),
         latex("k"),
@@ -1923,7 +1929,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même famille, "),
+        texte("Dans la famille du rayon focal ("),
+        latex("|PF|=k\\cdot|PF'|"),
+        texte(" pour un point "),
+        latex("P"),
+        texte(" d'une ellipse), "),
         latex("|PF|"),
         texte(" et "),
         latex("|PF'|"),
@@ -1944,9 +1954,13 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour un point "),
+        latex("P"),
+        texte(" d'une ellipse vérifiant "),
+        latex("|PF|=k\\cdot|PF'|"),
+        texte(" avec "),
         latex("k>1"),
-        texte(" tiré, "),
+        texte(", "),
         latex("|PF|"),
         texte(" doit rester dans l'intervalle "),
         latex("[a-c;a+c]"),
@@ -1969,7 +1983,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour un point "),
+        latex("P"),
+        texte(" d'une ellipse vérifiant "),
+        latex("|PF|=k\\cdot|PF'|"),
+        texte(" avec "),
         latex("k>1"),
         texte(", "),
         latex("|PF|"),
@@ -2015,10 +2033,10 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour une ellipse de demi-grand axe "),
         latex("a=6"),
-        texte(" et "),
-        latex("k=2"),
+        texte(" et un rapport "),
+        latex("k=\\frac{|PF|}{|PF'|}=2"),
         texte(", on obtient "),
         latex("|PF|=6"),
         texte(" et "),
@@ -2042,10 +2060,18 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
       enonce: [
         texte("Pour l'ellipse "),
         latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(", de foyers "),
+        latex("F"),
         texte(" et "),
-        latex("k=\\frac32"),
+        latex("F'"),
+        texte(", et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=\\frac32|PF'|"),
         texte(", le cosinus de l'angle en "),
         latex("P"),
+        texte(" du triangle "),
+        latex("FPF'"),
         texte(" vaut exactement "),
         latex("\\frac13"),
         texte("."),
@@ -2066,13 +2092,17 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Avec ces mêmes données ("),
-        latex("a=5"),
-        texte(", "),
-        latex("b=4"),
-        texte(", "),
-        latex("k=\\frac32"),
-        texte("), l'aire du triangle "),
+        texte("Pour l'ellipse "),
+        latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(", de foyers "),
+        latex("F"),
+        texte(" et "),
+        latex("F'"),
+        texte(", et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=\\frac32|PF'|"),
+        texte(", l'aire du triangle "),
         latex("FPF'"),
         texte(" vaut "),
         latex("12"),
@@ -2094,12 +2124,18 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour une ellipse de demi-axes "),
         latex("a=4"),
-        texte(", "),
-        latex("b=3"),
         texte(" et "),
-        latex("k=3"),
+        latex("b=3"),
+        texte(", de foyers "),
+        latex("F"),
+        texte(" et "),
+        latex("F'"),
+        texte(", et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=3|PF'|"),
         texte(", l'angle "),
         latex("FPF'"),
         texte(" vaut exactement "),
@@ -2146,12 +2182,18 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour une ellipse de demi-axes "),
         latex("a=6"),
-        texte(", "),
-        latex("b=4"),
         texte(" et "),
-        latex("k=2"),
+        latex("b=4"),
+        texte(", de foyers "),
+        latex("F"),
+        texte(" et "),
+        latex("F'"),
+        texte(", et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=2|PF'|"),
         texte(", l'angle "),
         latex("FPF'"),
         texte(" est exactement droit et l'aire du triangle vaut "),
@@ -2174,12 +2216,18 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour une ellipse de demi-axes "),
         latex("a=4"),
-        texte(", "),
-        latex("b=3"),
         texte(" et "),
-        latex("k=3"),
+        latex("b=3"),
+        texte(", de foyers "),
+        latex("F"),
+        texte(" et "),
+        latex("F'"),
+        texte(", et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=3|PF'|"),
         texte(", l'aire du triangle "),
         latex("FPF'"),
         texte(" vaut "),
@@ -2203,7 +2251,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("La condition "),
+        texte("Pour une ellipse, la condition "),
         latex("b=c"),
         texte(" se traduit par "),
         latex("a^2=2c^2"),
@@ -2223,7 +2271,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("La condition « l'angle "),
+        texte("Pour une ellipse, la condition « l'angle "),
         latex("FBF'"),
         texte(" est droit en un sommet "),
         latex("B"),
@@ -2292,9 +2340,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Si la distance entre les directrices d'une conique à centre vaut "),
+        latex("k"),
+        texte(" fois la distance entre ses foyers, alors pour "),
         latex("k=9"),
-        texte(", l'excentricité vaut "),
+        texte(" l'excentricité vaut "),
         latex("\\frac13"),
         texte(" ; et pour tout entier "),
         latex("k\\geq2"),
@@ -2318,9 +2368,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Si les directrices d'une conique à centre sont séparées par la même distance que ses foyers ("),
         latex("k=1"),
-        texte(" (directrices et foyers séparés par la même distance), on obtient "),
+        texte("), on obtient "),
         latex("e=1"),
         texte(" et la conique reste une ellipse."),
       ],
@@ -2336,14 +2386,16 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
+        texte("Pour une ellipse de demi-axes "),
         latex("a=5"),
-        texte(", "),
+        texte(" et "),
         latex("b=4"),
         texte(" (donc "),
         latex("c=3"),
-        texte(") et "),
-        latex("k=\\frac32"),
+        texte(") et un point "),
+        latex("P"),
+        texte(" de l'ellipse tel que "),
+        latex("|PF|=\\frac32|PF'|"),
         texte(", les 2 longueurs "),
         latex("|PF|=6"),
         texte(" et "),
@@ -2580,7 +2632,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même technique, "),
+        texte("Dans la technique de la combinaison linéaire (un cercle obtenu comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de 2 coniques), "),
         latex("C_1"),
         texte(" est une conique générale à centre, avec des termes en "),
         latex("x^2"),
@@ -2633,7 +2687,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette technique, les coefficients "),
+        texte("Dans la technique de la combinaison linéaire (un cercle obtenu comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de 2 coniques), les coefficients "),
         latex("A_2"),
         texte(" et "),
         latex("B_2"),
@@ -2656,7 +2712,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette technique, rien n'empêche "),
+        texte("Dans la technique de la combinaison linéaire (un cercle obtenu comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de 2 coniques), rien n'empêche "),
         latex("A_2=B_2"),
         texte(", auquel cas "),
         latex("C_2"),
@@ -2730,9 +2788,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même ellipse, la droite horizontale "),
+        texte("Pour l'ellipse "),
+        latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(", la droite horizontale "),
         latex("y=\\frac{16}{5}"),
-        texte(" lui est TANGENTE."),
+        texte(" est TANGENTE."),
       ],
       reponse: false,
       justification: [
@@ -2792,11 +2852,15 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("En doublant l'ordonnée à l'origine de cette tangente (on passe de "),
+        texte("La droite "),
+        latex("3x+5y=25"),
+        texte(" est tangente à l'ellipse "),
+        latex("16x^2+25y^2=400"),
+        texte(". En doublant son ordonnée à l'origine (on passe de "),
         latex("3x+5y=25"),
         texte(" à "),
         latex("3x+5y=50"),
-        texte("), on obtient une droite qui coupe encore l'ellipse en 2 points."),
+        texte("), on obtient une droite qui coupe l'ellipse en 2 points."),
       ],
       reponse: false,
       justification: [
@@ -2931,7 +2995,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
       enonce: [
         texte("La droite "),
         latex("y=x+8"),
-        texte(" coupe elle aussi le cercle "),
+        texte(" coupe le cercle "),
         latex("x^2+y^2=25"),
         texte(" en 2 points."),
       ],
@@ -2972,19 +3036,17 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour "),
-        latex("C_2"),
-        texte(" de coefficients "),
+        texte("Pour obtenir un cercle comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de "),
+        latex("C_1:\\;y=x^2+b_1x+c_1"),
+        texte(" et d'une conique "),
+        latex("C_2:\\;A_2x^2+B_2y^2+\\dots=0"),
+        texte(", avec "),
         latex("A_2=3"),
         texte(" et "),
         latex("B_2=5"),
-        texte(" (avec "),
-        latex("C_1"),
-        texte(" de coefficient "),
-        latex("1"),
-        texte(" en "),
-        latex("x^2"),
-        texte("), le couple "),
+        texte(", le couple "),
         latex("(\\lambda;\\mu)=(1;1)"),
         texte(" suffit à égaliser les coefficients de "),
         latex("x^2"),
@@ -3013,7 +3075,13 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Avec "),
+        texte("Pour obtenir un cercle comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de "),
+        latex("C_1:\\;y=x^2+b_1x+c_1"),
+        texte(" et d'une conique "),
+        latex("C_2:\\;A_2x^2+B_2y^2+\\dots=0"),
+        texte(", avec "),
         latex("A_2=1"),
         texte(" et "),
         latex("B_2=4"),
@@ -3039,7 +3107,13 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Avec "),
+        texte("Pour obtenir un cercle comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de "),
+        latex("C_1:\\;y=x^2+b_1x+c_1"),
+        texte(" et d'une conique "),
+        latex("C_2:\\;A_2x^2+B_2y^2+\\dots=0"),
+        texte(", avec "),
         latex("A_2=4"),
         texte(" et "),
         latex("B_2=1"),
@@ -3073,7 +3147,13 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Une fois "),
+        texte("Pour obtenir un cercle comme combinaison "),
+        latex("\\lambda C_1+\\mu C_2"),
+        texte(" de "),
+        latex("C_1:\\;y=x^2+b_1x+c_1"),
+        texte(" et d'une conique "),
+        latex("C_2:\\;A_2x^2+B_2y^2+\\dots=0"),
+        texte(", une fois "),
         latex("\\lambda=B_2-A_2"),
         texte(" et "),
         latex("\\mu=1"),
@@ -3121,7 +3201,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Cette même famille fonctionne aussi bien pour une ellipse que pour une hyperbole, le piège « aucune solution » se produisant dans les 2 cas."),
+        texte("La famille « tangentes parallèles à une pente donnée » fonctionne aussi bien pour une ellipse que pour une hyperbole, le piège « aucune solution » se produisant dans les 2 cas."),
       ],
       reponse: false,
       justification: [
@@ -3141,7 +3221,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Cette même famille fonctionne aussi bien pour une hyperbole que pour une ellipse, avec exactement le même vocabulaire intérieur/extérieur dans les 2 cas."),
+        texte("La famille « tangentes depuis un point donné » fonctionne aussi bien pour une hyperbole que pour une ellipse, avec exactement le même vocabulaire intérieur/extérieur dans les 2 cas."),
       ],
       reponse: false,
       justification: [
@@ -3171,7 +3251,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("La condition de tangence pour cette même conique donne directement "),
+        texte("Pour la conique à centre "),
+        latex("A\\cdot x^2+B\\cdot y^2=M"),
+        texte(" et une droite "),
+        latex("y=mx+k"),
+        texte(", la condition de tangence donne directement "),
         latex("k=\\frac{M(A+Bm^2)}{AB}"),
         texte(", sans élévation au carré."),
       ],
@@ -3203,7 +3287,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même famille, il existe toujours au moins une tangente réelle, quelle que soit la pente "),
+        texte("Pour les tangentes de pente donnée "),
+        latex("m"),
+        texte(" à une hyperbole, il existe toujours au moins une tangente réelle, quelle que soit la pente "),
         latex("m"),
         texte(" demandée."),
       ],
@@ -3241,7 +3327,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même famille, un point "),
+        texte("Pour les tangentes à une ellipse issues d'un point donné, un point "),
         latex("P"),
         texte(" situé à l'INTÉRIEUR de l'ellipse admet toujours 2 tangentes réelles issues de "),
         latex("P"),
@@ -3277,9 +3363,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Cette même famille utilise exactement la même formule "),
+        texte("Pour construire une conique depuis un point de passage et une tangente "),
+        latex("y=mx+k"),
+        texte(", la même formule "),
         latex("k^2=a^2m^2+b^2"),
-        texte(" pour une ellipse et pour une hyperbole."),
+        texte(" vaut pour une ellipse et pour une hyperbole."),
       ],
       reponse: false,
       justification: [
@@ -3319,7 +3407,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même famille, la droite de référence passe toujours par le centre de la conique, ce qui simplifie le calcul des distances."),
+        texte("Dans la famille qui compare 2 tangentes à une droite de référence, la droite de référence passe toujours par le centre de la conique, ce qui simplifie le calcul des distances."),
       ],
       reponse: false,
       justification: [
@@ -3434,7 +3522,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même hyperbole, la pente "),
+        texte("Pour l'hyperbole "),
+        latex("\\frac{x^2}{9}-\\frac{y^2}{16}=1"),
+        texte(", la pente "),
         latex("\\frac43"),
         texte(" (celle des asymptotes) admet 2 tangentes réelles."),
       ],
@@ -3586,7 +3676,9 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même ellipse et le point "),
+        texte("Pour l'ellipse "),
+        latex("x^2+4y^2=16"),
+        texte(" et le point "),
         latex("P(1;1)"),
         texte(", "),
         latex("\\Delta=1+4-16=-11<0"),
@@ -3746,7 +3838,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Dans cette même famille, "),
+        texte("Dans la famille « construire une conique depuis un point de passage et une tangente », "),
         latex("P"),
         texte(" et "),
         latex("Q"),
@@ -3881,7 +3973,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Ce générateur réutilise directement le point du latus rectum du générateur des intersections droite-conique, exactement comme dans ce générateur précédent."),
+        texte("Ce générateur réutilise directement le point du latus rectum du générateur des intersections droite-conique."),
       ],
       reponse: false,
       justification: [
@@ -3890,7 +3982,7 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour contourner ce problème, ce générateur construit d'abord une droite auxiliaire passant par un SOMMET de la conique (toujours situé sur la courbe), puis en déduit un second point rationnel exact, avant de tracer le vrai rayon incident."),
+        texte("Pour éviter qu'un rayon construit depuis le point du « latus rectum » ne donne une droite réfléchie verticale dégénérée, ce générateur construit d'abord une droite auxiliaire passant par un SOMMET de la conique (toujours situé sur la courbe), puis en déduit un second point rationnel exact, avant de tracer le vrai rayon incident."),
       ],
       reponse: true,
       justification: [
@@ -3969,7 +4061,13 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Sur ce même exemple, la méthode « propriété focale » et la méthode classique donnent 2 pentes différentes pour le rayon réfléchi, la propriété focale n'étant qu'une approximation."),
+        texte("Sur l'exemple de l'ellipse "),
+        latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(" (foyers "),
+        latex("F(-3;0)"),
+        texte(" et "),
+        latex("F'(3;0)"),
+        texte("), la méthode « propriété focale » et la méthode classique donnent 2 pentes différentes pour le rayon réfléchi, la propriété focale n'étant qu'une approximation."),
       ],
       reponse: false,
       justification: [
@@ -4047,7 +4145,15 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("Pour cette même ellipse, le rayon réfléchi en "),
+        texte("Pour l'ellipse "),
+        latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(" (foyers "),
+        latex("F(-3;0)"),
+        texte(" et "),
+        latex("F'(3;0)"),
+        texte("), le rayon issu de "),
+        latex("F"),
+        texte(" et réfléchi en "),
         latex("R\\left(4;\\frac{12}{5}\\right)"),
         texte(" a la même pente que le rayon incident, soit "),
         latex("\\frac{12}{35}"),
@@ -4097,7 +4203,11 @@ export const BANQUE_QUIZ_CONIQUES: Record<VarianteQuizConiques, QuestionVraiFaux
     },
     {
       enonce: [
-        texte("En "),
+        texte("Pour un rayon issu du foyer "),
+        latex("F(-3;0)"),
+        texte(" de l'ellipse "),
+        latex("\\frac{x^2}{25}+\\frac{y^2}{16}=1"),
+        texte(" et réfléchi en "),
         latex("R\\left(4;\\frac{12}{5}\\right)"),
         texte(", l'angle du rayon incident avec la tangente diffère de l'angle du rayon réfléchi avec cette même tangente."),
       ],

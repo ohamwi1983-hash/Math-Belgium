@@ -59,8 +59,8 @@ function latexFrag(valeur: string): FragmentConsigne {
 }
 
 /** Annonce de précision (décision A) — reprise par `diagnostiquerProbabilite`. */
-const PRECISION = "Donne chaque probabilité sous forme exacte (fraction ou calcul) ou arrondie au centième (au millième si elle est inférieure à 0,1).";
-const PRECISION_FIABILITE = "La fiabilité d'un système est la probabilité qu'il fonctionne : donne-la sous forme exacte ou arrondie à 4 décimales.";
+export const PRECISION = "Donne chaque probabilité sous forme exacte (fraction ou calcul) ou arrondie au centième (au millième si elle est inférieure à 0,1).";
+export const PRECISION_FIABILITE = "La fiabilité d'un système est la probabilité qu'il fonctionne : donne-la sous forme exacte ou arrondie à 4 décimales.";
 const PLACEHOLDER_PROBA = "valeur exacte ou arrondie";
 const PLACEHOLDER_FIABILITE = "valeur exacte ou à 4 décimales";
 
@@ -84,7 +84,7 @@ function arrondiChaine(v: number, decimales: number): string {
   return String(Number(v.toFixed(decimales)));
 }
 /** Nombre en LaTeX : exact si possible, sinon arrondi (le signe ≈ est géré par `egalite`). */
-function nombreLatex(v: number, decimales = 6): string {
+export function nombreLatex(v: number, decimales = 6): string {
   return versLatex(decimalExact(v) ?? arrondiChaine(v, decimales));
 }
 /** Nombre en prose : décimal exact attendu (données de l'énoncé). */
@@ -92,14 +92,14 @@ function nombreTexte(v: number): string {
   return versTexte(decimalExact(v) ?? arrondiChaine(v, 4));
 }
 /** « gauche = valeur » si la valeur est un décimal court, « gauche ≈ valeur arrondie » sinon. */
-function egalite(gauche: string, v: number, decimales = 6): string {
+export function egalite(gauche: string, v: number, decimales = 6): string {
   return decimalExact(v) !== null ? `${gauche}=${nombreLatex(v)}` : `${gauche}\\approx ${nombreLatex(v, decimales)}`;
 }
 
 function pgcd(a: number, b: number): number {
   return b === 0 ? Math.abs(a) : pgcd(b, a % b);
 }
-function fractionLatex(num: number, den: number): string {
+export function fractionLatex(num: number, den: number): string {
   const d = pgcd(num, den);
   const n = num / d;
   const m = den / d;
@@ -225,7 +225,7 @@ function reponseB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): stri
 function nomSingulierC(ex: ExerciceFamilleC): string {
   return ex.contexte.nomPluriel.replace(/[sx]$/, "");
 }
-function evenementC(ex: ExerciceFamilleC): string {
+export function evenementC(ex: ExerciceFamilleC): string {
   return ex.k === 1 ? `exactement 1 ${nomSingulierC(ex)} ${ex.contexte.evenementSingulier}` : `exactement ${ex.k} ${ex.contexte.nomPluriel} ${ex.contexte.evenementPluriel}`;
 }
 function configurationLatex(c: number[]): string {
@@ -276,7 +276,7 @@ function reponseC(ex: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): stri
 // Famille E — Bayes en problème (données présentées mélangées).
 // ============================================================================
 
-function phrasesMixte(base: ExerciceFamilleEMixte["base"]): [string, string, string] {
+export function phrasesMixte(base: ExerciceFamilleEMixte["base"]): [string, string, string] {
   return [
     `Parmi tous les cas, c₁ est vrai dans une proportion de ${nombreTexte(base.p)}.`,
     `Si on se limite aux cas où c₁ est vrai, E se produit dans une proportion de ${nombreTexte(base.q1)}.`,
@@ -341,12 +341,12 @@ function reponseEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProble
 // Famille F — Montages en série / en parallèle.
 // ============================================================================
 
-function descriptionMontage(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
+export function descriptionMontage(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
   if (configuration === "serie") return "tous en série (le système fonctionne seulement si tous les composants fonctionnent)";
   if (configuration === "parallele") return "tous en parallèle (le système fonctionne dès qu'au moins un composant fonctionne)";
   return `« ${ex.contexte.labelComposants[position ?? 0]} » en série avec le groupe formé par les 2 autres, montés en parallèle entre eux`;
 }
-function formuleLatexF(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
+export function formuleLatexF(ex: ExerciceFamilleF, configuration: ExerciceFamilleF["configuration"], position: 0 | 1 | 2 | undefined): string {
   const [p0, p1, p2] = ex.p.map((v) => nombreLatex(v));
   if (configuration === "serie") return `${p0}\\cdot ${p1}\\cdot ${p2}`;
   if (configuration === "parallele") return `1-(1-${p0})(1-${p1})(1-${p2})`;

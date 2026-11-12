@@ -21,8 +21,9 @@
 import type { ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceArbreTableauEffectifs } from "../core6e/arbreTableauEffectifs.types";
 
-export const LIBELLE_CAS_ARBRE_TABLEAU = "Inclure un cas particulier (deux événements indépendants)";
 
 export function profilArbreTableauEffectifs(e: ExerciceArbreTableauEffectifs): ProfilInstance {
-  return { casParticulier: e.independant ? "independance" : null, forme: e.mode };
+  // Un verdict (indépendants ou non) n'est jamais un cas particulier : sinon la réponse de
+  // l'étape 4 deviendrait prévisible dans une évaluation par défaut.
+  return { casParticulier: null, forme: e.mode };
 }

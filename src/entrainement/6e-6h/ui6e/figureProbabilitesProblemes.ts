@@ -99,11 +99,6 @@ export function deuxSchemasHtml(gauche: { svg: string; legende: string }, droite
 // Famille B — arbre des chemins des épreuves répétées.
 // ============================================================================
 
-function motChemin(chemin: number, n: number): string {
-  let mot = "";
-  for (let i = n - 1; i >= 0; i--) mot += (chemin >> i) & 1 ? "S" : "É";
-  return mot;
-}
 function nombreS(mot: string): number {
   return [...mot].filter((c) => c === "S").length;
 }
@@ -115,7 +110,7 @@ export function arbreCheminsSvg(n: number, k: number, p: string, q: string): str
   const titre = `Arbre des ${n} épreuves : chemins à exactement ${k} succès`;
   const legendeBranches = `Branche S : probabilité ${p} ; branche É : probabilité ${q}. En gras : les chemins à exactement ${k} succès.`;
   if (n >= 5) {
-    const mots = Array.from({ length: 2 ** n }, (_, i) => motChemin(2 ** n - 1 - i, n));
+    const mots = Array.from({ length: 2 ** n }, (_, i) => motCheminDepuisRang(i, n));
     const cellules = mots
       .map((m) => {
         const bon = nombreS(m) === k;
@@ -164,6 +159,10 @@ export function arbreCheminsSvg(n: number, k: number, p: string, q: string): str
   }
   s += `<text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="11" ${POLICE} fill="${GRIS}">${echapper(legendeBranches)}</text>`;
   return s + "</svg>";
+}
+/** Les chemins (mots en S/É) à exactement k succès, dans l'ordre de l'arbre (S en haut). */
+export function cheminsAKSucces(n: number, k: number): string[] {
+  return Array.from({ length: 2 ** n }, (_, j) => motCheminDepuisRang(j, n)).filter((m) => nombreS(m) === k);
 }
 /** Mot du j-ième chemin de haut en bas (S en haut à chaque nœud). */
 function motCheminDepuisRang(j: number, n: number): string {
