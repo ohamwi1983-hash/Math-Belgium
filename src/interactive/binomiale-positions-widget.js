@@ -3,15 +3,18 @@
 
   /* ================================================================
    * <binomiale-positions-widget> — atelier interactif : n (curseur
-   * entier), p (curseur), k (sélecteur) — barres de la distribution
-   * P(X=k) recalculées en direct, k courant surligné. Matérialise en
-   * direct les DEUX pièges de la section : oublier de compter le
-   * nombre de POSITIONS (chemins) C(n,k) donne un résultat n fois trop
-   * petit ; et P(au moins 1) ne s'obtient JAMAIS en additionnant les p
-   * (qui peut dépasser 1, impossible), toujours par le complément.
+   * entier), p (curseur), k (sélecteur), mode « exactement k » ou
+   * « au moins k » — barres de la distribution P(X=k) recalculées en
+   * direct, barre(s) concernée(s) surlignée(s). X = nombre de succès.
+   * Matérialise les DEUX pièges de la section : oublier de compter les
+   * chemins à k succès de l'arbre donne un résultat N fois trop petit
+   * (N = nombre de ces chemins) ; et P(au moins 1) ne s'obtient jamais
+   * en additionnant les p (qui peut dépasser 1), toujours par le
+   * complément. Pour n ≤ 5, les chemins à k succès sont listés (S/É).
+   * Aucune notation du chapitre suivant (analyse combinatoire) : le
+   * nombre de chemins est obtenu en les comptant.
    * Réglage par défaut (n=5, p=0,3, k=2) reproduit exactement l'exemple
-   * résolu : P(X=2)=0,3087 via 10 positions. Web Component (Shadow
-   * DOM).
+   * résolu : P(X=2)=0,3087 via 10 chemins. Web Component (Shadow DOM).
    * ================================================================ */
 
   var DEFAUT = { n: 5, p: 0.3, k: 2 };
@@ -27,12 +30,41 @@
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
   }
 
-  function combinaison(n, k) {
+  /* Chemins de l'arbre à n étages contenant exactement k succès, sous forme
+   * de mots en S (succès) / É (échec), dans l'ordre de lecture de l'arbre
+   * (S avant É à chaque étage). */
+  function cheminsASucces(n, k) {
+    var res = [];
+    (function construire(prefixe, restants, succes) {
+      if (succes > k || succes + restants < k) return;
+      if (restants === 0) { res.push(prefixe); return; }
+      construire(prefixe + "S", restants - 1, succes + 1);
+      construire(prefixe + "É", restants - 1, succes);
+    })("", n, 0);
+    return res;
+  }
+
+  /* Nombre de chemins à k succès : comptage étage par étage (chaque chemin à
+   * k succès sur n étages finit par S — il en avait k−1 sur n−1 étages — ou
+   * par É — il en avait k), sans formule toute faite. */
+  function nombreChemins(n, k) {
     if (k < 0 || k > n) return 0;
-    k = Math.min(k, n - k);
-    var resultat = 1;
-    for (var i = 0; i < k; i++) resultat = (resultat * (n - i)) / (i + 1);
-    return Math.round(resultat);
+    var ligne = [1];
+    for (var e = 1; e <= n; e++) {
+      var suivante = [];
+      for (var j = 0; j <= e; j++) suivante.push((ligne[j - 1] || 0) + (ligne[j] || 0));
+      ligne = suivante;
+    }
+    return ligne[k];
+  }
+
+  var EXPOSANTS = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  function exposant(n) {
+    return String(n).split("").map(function (c) { return EXPOSANTS[c]; }).join("");
+  }
+  /* « base puissance e » en exposant Unicode (jamais de « ^ »). */
+  function puissance(base, e) {
+    return base + exposant(e);
   }
 
   function svgEl(ns, tag, attrs) {
@@ -57,6 +89,11 @@
     '.k-select{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}' +
     '.k-select button{padding:6px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink-soft,#6b6055);font-weight:700;cursor:pointer;font-size:0.86rem;font-family:inherit;}' +
     '.k-select button.actif{background:var(--accent,#a8471f);border-color:var(--accent,#a8471f);color:#fff;}' +
+    '.mode{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}' +
+    '.mode button{padding:6px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#e2d8c8);background:var(--surface,#fff);color:var(--ink-soft,#6b6055);font-weight:600;cursor:pointer;font-size:0.86rem;font-family:inherit;}' +
+    '.mode button.actif{background:var(--plan-soft,#ece8f7);border-color:var(--plan,#5b4ea3);color:var(--plan-ink,#463c86);}' +
+    '.chemins{font-family:var(--mono,monospace);font-size:0.82rem;line-height:1.7;word-break:break-word;}' +
+    '.chemins span{display:inline-block;margin:0 8px 0 0;}' +
     '.lecture{display:flex;flex-direction:column;gap:6px;margin:0 0 18px;font-variant-numeric:tabular-nums;}' +
     '.ligne-formule{padding:9px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.85rem;}' +
     '.ligne-vrai{font-weight:700;color:var(--good,#2f7a4f);}' +
@@ -71,6 +108,10 @@
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<div class="mode" id="mode">' +
+    '<button type="button" data-mode="exactement" class="actif">exactement k succès</button>' +
+    '<button type="button" data-mode="auMoins">au moins k succès</button>' +
+    '</div>' +
     '<div class="k-select" id="kselect"></div>' +
     '<div class="lecture" id="lecture"></div>' +
     '<div class="controles">' +
@@ -93,7 +134,8 @@
   BinomialePositionsWidgetClass.prototype._init = function () {
     var shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(TEMPLATE.content.cloneNode(true));
-    this._n = DEFAUT.n; this._p = DEFAUT.p; this._k = DEFAUT.k;
+    this._n = DEFAUT.n; this._p = DEFAUT.p; this._k = DEFAUT.k; this._mode = "exactement";
+    this._modeZone = shadow.getElementById("mode");
     this._svg = shadow.getElementById("svg");
     this._kSelect = shadow.getElementById("kselect");
     this._lecture = shadow.getElementById("lecture");
@@ -118,8 +160,14 @@
       self._k = parseInt(btn.getAttribute("data-k"), 10);
       self._rendre();
     };
+    this._onClickMode = function (evt) {
+      var btn = evt.target.closest("button[data-mode]");
+      if (!btn) return;
+      self._mode = btn.getAttribute("data-mode");
+      self._rendre();
+    };
     this._onReset = function () {
-      self._n = DEFAUT.n; self._p = DEFAUT.p; self._k = DEFAUT.k;
+      self._n = DEFAUT.n; self._p = DEFAUT.p; self._k = DEFAUT.k; self._mode = "exactement";
       self._inputN.value = String(DEFAUT.n);
       self._inputP.value = String(DEFAUT.p);
       self._rendre();
@@ -127,6 +175,7 @@
     this._inputN.addEventListener("input", this._onInputN);
     this._inputP.addEventListener("input", this._onInputP);
     this._kSelect.addEventListener("click", this._onClickK);
+    this._modeZone.addEventListener("click", this._onClickMode);
     this._resetBtn.addEventListener("click", this._onReset);
     this._rendre();
   };
@@ -135,6 +184,7 @@
     this._inputN.removeEventListener("input", this._onInputN);
     this._inputP.removeEventListener("input", this._onInputP);
     this._kSelect.removeEventListener("click", this._onClickK);
+    this._modeZone.removeEventListener("click", this._onClickMode);
     this._resetBtn.removeEventListener("click", this._onReset);
   };
 
@@ -142,6 +192,10 @@
     var n = this._n, p = this._p, k = this._k;
     this._valeurN.textContent = String(n);
     this._valeurP.textContent = formatNombreFr(p, 2);
+    var auMoins = this._mode === "auMoins";
+    Array.prototype.forEach.call(this._modeZone.querySelectorAll("button"), function (b) {
+      b.className = b.getAttribute("data-mode") === (auMoins ? "auMoins" : "exactement") ? "actif" : "";
+    });
 
     var boutonsK = "";
     for (var i = 0; i <= n; i++) {
@@ -151,7 +205,7 @@
 
     var probas = [];
     for (var kk = 0; kk <= n; kk++) {
-      var c = combinaison(n, kk);
+      var c = nombreChemins(n, kk);
       probas.push(c * Math.pow(p, kk) * Math.pow(1 - p, n - kk));
     }
 
@@ -181,7 +235,7 @@
         y: (origineY - hauteurBarre).toFixed(2),
         width: largeurBarre.toFixed(2),
         height: hauteurBarre.toFixed(2),
-        class: kk === k ? "barre-active" : "barre",
+        class: (auMoins ? kk >= k : kk === k) ? "barre-active" : "barre",
       }));
       var etVal = svgEl(ns, "text", { x: centreX.toFixed(2), y: (origineY - hauteurBarre - 6).toFixed(2), "text-anchor": "middle", class: "etiquette-barre" });
       etVal.textContent = formatNombreFr(proba, 3);
@@ -191,17 +245,50 @@
       svg.appendChild(etK);
     });
 
-    var cnk = combinaison(n, k);
-    var probaUnChemin = Math.pow(p, k) * Math.pow(1 - p, n - k);
-    var probaXk = cnk * probaUnChemin;
-    var pAuMoinsUn = 1 - Math.pow(1 - p, n);
+    var nb = nombreChemins(n, k);
+    var q = 1 - p;
+    function court(v) { return formatNombreFr(v, 2).replace(/(,\d*?)0+$/, "$1").replace(/,$/, ""); }
+    var pS = court(p), qS = court(q);
+    function produitChemin(kk) {
+      var facteurs = [];
+      if (kk > 0) facteurs.push(kk === 1 ? pS : puissance(pS, kk));
+      if (n - kk > 0) facteurs.push(n - kk === 1 ? qS : puissance(qS, n - kk));
+      return facteurs.length ? facteurs.join(" × ") : "1";
+    }
+    var probaUnChemin = Math.pow(p, k) * Math.pow(q, n - k);
+    var probaXk = nb * probaUnChemin;
+    var pAuMoinsUn = 1 - Math.pow(q, n);
     var pAuMoinsUnFaux = n * p;
+    var html = "";
 
-    this._lecture.innerHTML =
-      '<div class="ligne-formule ligne-vrai">Positions pour k=' + k + ' succès parmi n=' + n + ' : C(' + n + ';' + k + ')=' + cnk + ' → P(X=' + k + ') = ' + cnk + '×' + formatNombreFr(p, 2) + '^' + k + '×' + formatNombreFr(1 - p, 2) + '^' + (n - k) + ' = ' + formatNombreFr(probaXk, 4) + '</div>' +
-      '<div class="ligne-formule ligne-faux">✗ Piège — oublier les positions : ' + formatNombreFr(p, 2) + '^' + k + '×' + formatNombreFr(1 - p, 2) + '^' + (n - k) + ' = ' + formatNombreFr(probaUnChemin, 4) + ' (' + cnk + ' fois trop petit !)</div>' +
-      '<div class="ligne-formule ligne-vrai">P(au moins 1 succès) = 1 − (1−p)ⁿ = 1 − ' + formatNombreFr(1 - p, 2) + '^' + n + ' = ' + formatNombreFr(pAuMoinsUn, 4) + '</div>' +
-      '<div class="ligne-formule ligne-faux">✗ Piège — additionner les p : n×p = ' + n + '×' + formatNombreFr(p, 2) + ' = ' + formatNombreFr(pAuMoinsUnFaux, 2) + (pAuMoinsUnFaux > 1 ? ' (IMPOSSIBLE, dépasse 1 !)' : ' — différent de ' + formatNombreFr(pAuMoinsUn, 4)) + '</div>';
+    if (!auMoins) {
+      html +=
+        '<div class="ligne-formule ligne-vrai">Chemins de l\'arbre à ' + k + ' succès parmi ' + n + ' tirages : ' + nb +
+        ' → P(X = ' + k + ') = ' + nb + ' × ' + produitChemin(k) + ' = ' + formatNombreFr(probaXk, 4) + '</div>';
+      if (n <= 5) {
+        html += '<div class="ligne-formule chemins">' + cheminsASucces(n, k).map(function (c) { return "<span>" + c + "</span>"; }).join("") + '</div>';
+      }
+      if (nb > 1) {
+        html += '<div class="ligne-formule ligne-faux">✗ Piège — oublier de compter les chemins : ' + produitChemin(k) + ' = ' +
+          formatNombreFr(probaUnChemin, 4) + ' (' + nb + ' fois trop petit !)</div>';
+      }
+    } else {
+      var somme = 0, termes = [];
+      for (var j = k; j <= n; j++) { somme += probas[j]; termes.push(formatNombreFr(probas[j], 4)); }
+      html +=
+        '<div class="ligne-formule ligne-vrai">P(X ≥ ' + k + ') = ' + (k === n ? "P(X = " + n + ")" : "P(X = " + k + ") + … + P(X = " + n + ")") +
+        ' = ' + termes.join(" + ") + ' = ' + formatNombreFr(somme, 4) + '</div>';
+      if (k > 0) {
+        var compl = 0;
+        for (var j2 = 0; j2 < k; j2++) compl += probas[j2];
+        html += '<div class="ligne-formule">Par le complément : 1 − P(X ≤ ' + (k - 1) + ') = 1 − ' + formatNombreFr(compl, 4) + ' = ' + formatNombreFr(1 - compl, 4) + '</div>';
+      }
+    }
+    html +=
+      '<div class="ligne-formule ligne-vrai">P(au moins 1 succès) = 1 − P(X = 0) = 1 − ' + (n === 1 ? qS : puissance(qS, n)) + ' = ' + formatNombreFr(pAuMoinsUn, 4) + '</div>' +
+      '<div class="ligne-formule ligne-faux">✗ Piège — additionner les p : n × p = ' + n + ' × ' + pS + ' = ' + formatNombreFr(pAuMoinsUnFaux, 2) +
+      (pAuMoinsUnFaux > 1 ? ' (impossible, dépasse 1 !)' : ' — différent de ' + formatNombreFr(pAuMoinsUn, 4)) + '</div>';
+    this._lecture.innerHTML = html;
   };
 
   if (!customElements.get("binomiale-positions-widget")) {

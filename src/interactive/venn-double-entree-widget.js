@@ -12,6 +12,11 @@
    * 12/9/13. Pas de repère cartésien — widget purement tabulaire
    * (comme `seuil-cumule-widget`/`frontiere-classe-widget`). Web
    * Component (Shadow DOM).
+   * Ajouts (audit 6e ch. 6) : interrupteur « Sachant B » (tout le
+   * tableau est grisé sauf la colonne B, P(A|B) affiché à côté de
+   * P(A) : conditionner, c'est zoomer), repère « indépendance » sous le
+   * curseur n(A∩B) en n(A)·n(B)/N, et verdict exact en entiers :
+   * incompatibles / indépendants / ni l'un ni l'autre.
    * ================================================================ */
 
   var N = 40;
@@ -19,6 +24,19 @@
   var BORNES_AB = { min: 0, max: N, step: 1 };
 
   function svgSafeInt(n) { return Math.round(n); }
+  function pgcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+  function nombreFr(x, d) {
+    var r = Math.round(x * Math.pow(10, d)) / Math.pow(10, d);
+    var t = r.toFixed(d).replace(/0+$/, "").replace(/\.$/, "");
+    return t.replace(".", ",").replace("-", "−");
+  }
+  /** « 6/15 = 2/5 = 0,4 » ou « 5/12 ≈ 0,417 » (fraction, forme irréductible si différente, puis décimal). */
+  function fractionEtDecimal(num, den) {
+    var g = pgcd(num, den), txt = num + "/" + den;
+    if (g > 1 && num !== 0) txt += " = " + (num / g) + "/" + (den / g);
+    var v = num / den, exact = Math.abs(v * 1000 - Math.round(v * 1000)) < 1e-9;
+    return txt + (exact ? " = " : " ≈ ") + nombreFr(v, 3);
+  }
 
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
@@ -31,6 +49,21 @@
     'th{background:var(--surface-2,#faf6f0);font-family:var(--serif,serif);font-style:italic;}' +
     'td.deduit{color:var(--good,#2f7a4f);font-weight:700;background:var(--surface-2,#faf6f0);}' +
     'td.donne{font-weight:700;color:var(--ink,#241f1a);}' +
+    'table.zoom td.hors,table.zoom th.hors{opacity:0.22;}' +
+    'table.zoom td.dans{outline:2px solid var(--accent,#a8471f);outline-offset:-2px;}' +
+    '.zoom-row{display:flex;justify-content:center;margin:0 0 10px;}' +
+    '.btn-zoom{padding:7px 14px;border-radius:999px;border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--surface,#fff);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;}' +
+    '.btn-zoom[aria-pressed="true"]{background:var(--accent,#a8471f);border-color:var(--accent,#a8471f);color:var(--surface,#fff);}' +
+    '.ligne-zoom{color:var(--accent-ink,#7a3212);font-weight:700;}' +
+    '.verdict{padding:9px 12px;border-radius:var(--radius,3px);font-size:0.9rem;font-weight:700;border:1px solid var(--line,#e2d8c8);}' +
+    '.verdict-indep{color:var(--good,#2f7a4f);border-color:var(--good,#2f7a4f);}' +
+    '.verdict-incomp{color:var(--bad,#b23a3a);border-color:var(--bad,#b23a3a);}' +
+    '.verdict-ni{color:var(--ink-soft,#6b6055);}' +
+    '.reperes{position:relative;height:30px;margin:0 8px;}' +
+    '.repere{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:0.72rem;color:var(--good,#2f7a4f);white-space:nowrap;font-variant-numeric:tabular-nums;}' +
+    '.repere::before{content:"";width:2px;height:9px;background:var(--good,#2f7a4f);margin-bottom:2px;}' +
+    '.repere.gauche{transform:none;align-items:flex-start;}' +
+    '.repere.droite{transform:translateX(-100%);align-items:flex-end;}' +
     '.lecture{display:flex;flex-direction:column;gap:6px;margin:0 0 18px;font-variant-numeric:tabular-nums;}' +
     '.ligne-formule{padding:9px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.86rem;}' +
     '.ligne-vrai{font-weight:700;color:var(--good,#2f7a4f);}' +
@@ -44,6 +77,7 @@
     '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
+    '<div class="zoom-row"><button class="btn-zoom" id="zoom" type="button" aria-pressed="false">Sachant B</button></div>' +
     '<div class="table-zone"><table id="table"></table></div>' +
     '<div class="lecture" id="lecture"></div>' +
     '<div class="controles">' +
@@ -55,7 +89,8 @@
     '<span class="curseur-valeur" id="nb-valeur"></span></div></div>' +
     '<div class="curseur"><label for="nab">n(A∩B)</label><div class="curseur-row">' +
     '<input type="range" id="nab" min="0" max="' + Math.min(DEFAUT.nA, DEFAUT.nB) + '" step="1" value="' + DEFAUT.nAB + '">' +
-    '<span class="curseur-valeur" id="nab-valeur"></span></div></div>' +
+    '<span class="curseur-valeur" id="nab-valeur"></span></div>' +
+    '<div class="curseur-row"><div class="reperes" id="reperes" style="flex:1 1 auto"></div><span class="curseur-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>';
 
@@ -79,6 +114,9 @@
     this._valeurNb = shadow.getElementById("nb-valeur");
     this._valeurNab = shadow.getElementById("nab-valeur");
     this._resetBtn = shadow.getElementById("reset");
+    this._zoomBtn = shadow.getElementById("zoom");
+    this._reperes = shadow.getElementById("reperes");
+    this._zoom = false;
   };
 
   VennDoubleEntreeWidgetClass.prototype.connectedCallback = function () {
@@ -106,6 +144,8 @@
     this._inputNb.addEventListener("input", this._onInputNb);
     this._inputNab.addEventListener("input", this._onInputNab);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._onZoom = function () { self._zoom = !self._zoom; self._rendre(); };
+    this._zoomBtn.addEventListener("click", this._onZoom);
     this._rendre();
   };
 
@@ -114,6 +154,7 @@
     this._inputNb.removeEventListener("input", this._onInputNb);
     this._inputNab.removeEventListener("input", this._onInputNab);
     this._resetBtn.removeEventListener("click", this._onReset);
+    this._zoomBtn.removeEventListener("click", this._onZoom);
   };
 
   VennDoubleEntreeWidgetClass.prototype._clampNab = function () {
@@ -137,13 +178,54 @@
     var sommeSansRetrait = nA + nB;
     var niFaux = N - nA - nB;
 
+    // « Sachant B » : seule la colonne B reste lisible (on « zoome » sur le monde où B est vrai).
+    var zB = this._zoom ? " dans" : "", zH = this._zoom ? " hors" : "";
+    this._zoomBtn.setAttribute("aria-pressed", this._zoom ? "true" : "false");
+    this._table.className = this._zoom ? "zoom" : "";
     this._table.innerHTML =
-      "<tr><th></th><th>B</th><th>B̄</th><th>Total</th></tr>" +
-      "<tr><th>A</th><td class=\"donne\">" + nAB + "</td><td class=\"deduit\">" + aSeul + "</td><td class=\"deduit\">" + nA + "</td></tr>" +
-      "<tr><th>Ā</th><td class=\"deduit\">" + bSeul + "</td><td class=\"deduit\">" + ni + "</td><td class=\"deduit\">" + (N - nA) + "</td></tr>" +
-      "<tr><th>Total</th><td class=\"donne\">" + nB + "</td><td class=\"deduit\">" + (N - nB) + "</td><td class=\"donne\">" + N + "</td></tr>";
+      "<tr><th class=\"" + zH + "\"></th><th>B</th><th class=\"" + zH + "\">B̄</th><th class=\"" + zH + "\">Total</th></tr>" +
+      "<tr><th>A</th><td class=\"donne" + zB + "\">" + nAB + "</td><td class=\"deduit" + zH + "\">" + aSeul + "</td><td class=\"deduit" + zH + "\">" + nA + "</td></tr>" +
+      "<tr><th>Ā</th><td class=\"deduit" + zB + "\">" + bSeul + "</td><td class=\"deduit" + zH + "\">" + ni + "</td><td class=\"deduit" + zH + "\">" + (N - nA) + "</td></tr>" +
+      "<tr><th>Total</th><td class=\"donne" + zB + "\">" + nB + "</td><td class=\"deduit" + zH + "\">" + (N - nB) + "</td><td class=\"donne" + zH + "\">" + N + "</td></tr>";
 
-    this._lecture.innerHTML =
+    // Repère « indépendance » sous le curseur n(A∩B) : n(A∩B) = n(A)·n(B)/N.
+    var maxAB = Math.min(nA, nB);
+    var produit = nA * nB, cible = produit / N;
+    var entier = produit % N === 0;
+    if (maxAB > 0) {
+      var pct = (cible / maxAB) * 100;
+      var cote = pct < 18 ? " gauche" : pct > 82 ? " droite" : "";
+      this._reperes.innerHTML = '<span class="repere' + cote + '" style="left:' + pct.toFixed(2) + '%">indépendance : ' +
+        (entier ? String(cible) : nombreFr(cible, 2) + " (jamais exactement atteint)") + '</span>';
+    } else {
+      this._reperes.innerHTML = "";
+    }
+
+    // Verdict EXACT, en entiers.
+    var verdict;
+    if (nA === 0 || nB === 0) {
+      verdict = '<div class="verdict verdict-ni">Un des deux événements est impossible (probabilité nulle) : A et B sont à la fois incompatibles et indépendants — le seul cas où les deux vont ensemble.</div>';
+    } else if (nAB === 0) {
+      verdict = '<div class="verdict verdict-incomp">A et B sont incompatibles (n(A∩B) = 0) — donc pas indépendants : 0 ≠ ' + nA + ' × ' + nB + ' / ' + N + '.</div>';
+    } else if (nAB * N === produit) {
+      verdict = '<div class="verdict verdict-indep">A et B sont indépendants : n(A∩B) × N = ' + nAB + ' × ' + N + ' = ' + (nAB * N) + ' = ' + nA + ' × ' + nB + ' = n(A) × n(B).</div>';
+    } else {
+      verdict = '<div class="verdict verdict-ni">Ni incompatibles, ni indépendants : n(A∩B) × N = ' + (nAB * N) + ' ≠ ' + produit + ' = n(A) × n(B).</div>';
+    }
+
+    var zoomLigne = "";
+    if (this._zoom) {
+      if (nB === 0) {
+        zoomLigne = '<div class="ligne-formule ligne-zoom">Sachant B : B est impossible, P(A|B) n\'est pas défini.</div>';
+      } else {
+        var cmp = nAB * N === produit ? "la même proportion qu\'avant : savoir que B est réalisé ne change rien (indépendance)"
+          : nAB * N > produit ? "plus que P(A) : B rend A plus probable" : "moins que P(A) : B rend A moins probable";
+        zoomLigne = '<div class="ligne-formule ligne-zoom">Sachant B, on ne regarde que la colonne B : P(A|B) = n(A∩B)/n(B) = ' +
+          fractionEtDecimal(nAB, nB) + ', contre P(A) = ' + fractionEtDecimal(nA, N) + ' — ' + cmp + '.</div>';
+      }
+    }
+
+    this._lecture.innerHTML = zoomLigne + verdict +
       '<div class="ligne-formule ligne-vrai">P(A∪B) = ' + nA + '/' + N + ' + ' + nB + '/' + N + ' − ' + nAB + '/' + N + ' = ' + union + '/' + N + ' (formule correcte, intersection retirée)</div>' +
       '<div class="ligne-formule ligne-faux">✗ Piège — additionner sans retirer : ' + nA + '/' + N + ' + ' + nB + '/' + N + ' = ' + sommeSansRetrait + '/' + N + (sommeSansRetrait > N ? ' (dépasse même N !)' : ' — différent de ' + union + '/' + N) + '</div>' +
       '<div class="ligne-formule ligne-vrai">« ni A ni B » = 1 − ' + union + '/' + N + ' = ' + ni + '/' + N + ' (via le complémentaire de A∪B)</div>' +
