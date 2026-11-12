@@ -7,11 +7,11 @@
  * reste de la plateforme : seules de minuscules primitives génériques traversent la frontière de
  * chantier, jamais un module de vérification entier.
  */
-import type { ExerciceScenarioA, ExerciceScenarioAConteneur, ExerciceScenarioB, ExerciceScenarioC, FormeChiffreAffairesC, FormeCoutVariableC, LigneTableauScenarioA, ModeleCoutUnitaire, PointRevele } from "../core5e/problemesContexte.types";
+import type { ExerciceScenarioA, ExerciceScenarioAConteneur, ExerciceScenarioB, ExerciceScenarioC, FormeCoutVariableC, LigneTableauScenarioA, ModeleCoutUnitaire, PointRevele } from "../core5e/problemesContexte.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 
-/** Sous-ensemble réduit de `ExerciceScenarioA` (combos 2-5, jamais le combo "kInverseXAxCarre"). */
+/** Sous-ensemble réduit de `ExerciceScenarioA` (combo `stockCommande`, jamais "kInverseXAxCarre"). */
 type ExerciceScenarioAReduit = Exclude<ExerciceScenarioA, { combo: "kInverseXAxCarre" }>;
 
 /** Répliqué depuis `moteur/verificationApplicationPhysique.ts::diagnostiquerCalculArrondi` — voir
@@ -83,23 +83,6 @@ function coutVariableLocal(formeCV: FormeCoutVariableC, k: number, x: number): n
 function coutProportionnelLocal(m: number, x: number): number {
   return m * x;
 }
-function coutTotalLocal(cf: number, formeCV: FormeCoutVariableC, k: number, m: number, x: number): number {
-  return cf + coutVariableLocal(formeCV, k, x) + coutProportionnelLocal(m, x);
-}
-function chiffreAffairesLocal(formeCA: FormeChiffreAffairesC, p: number, x: number): number {
-  switch (formeCA) {
-    case "affine":
-      return p * x;
-    case "racineCarree":
-      return p * Math.sqrt(x);
-    case "racineCubique":
-      return p * Math.cbrt(x);
-  }
-}
-function beneficeLocal(cf: number, formeCV: FormeCoutVariableC, k: number, m: number, formeCA: FormeChiffreAffairesC, p: number, x: number): number {
-  return chiffreAffairesLocal(formeCA, p, x) - coutTotalLocal(cf, formeCV, k, m, x);
-}
-
 /** Tolérance élargie pour toute LECTURE GRAPHIQUE ou estimation (jamais un calcul exact) —
  * relative (10%) + plancher absolu (1.5), pour rester généreux aussi bien sur une petite grandeur
  * (rayon en cm) qu'une grande (quantité de production). */
@@ -292,33 +275,15 @@ export function diagnostiquerCelluleTableauA(exercice: ExerciceScenarioAConteneu
 }
 
 // ============================================================================
-// Scénario A, combos réduits (2-5) — f/g GÉNÉRIQUES sur les 4 combos via `fDeXLocal`/`gDeXLocal`
-// (répliqué depuis `generateurs5e/problemesContexte/scenarioA.ts`, jamais importé).
+// Scénario A, combo réduit `stockCommande` — f(x)=ax+b, g(x)=k/x (répliqué depuis
+// `generateurs5e/problemesContexte/scenarioA.ts`, jamais importé).
 // ============================================================================
 
 function fDeXLocal(exercice: ExerciceScenarioAReduit, x: number): number {
-  switch (exercice.combo) {
-    case "stockCommande":
-      return exercice.a * x + exercice.b;
-    case "racineAffine":
-      return exercice.k * Math.sqrt(x);
-    case "intensiteCable":
-      return exercice.k / (x * x);
-    case "deuxParaboles":
-      return exercice.a1 * x * x + exercice.b1 * x + exercice.c1;
-  }
+  return exercice.a * x + exercice.b;
 }
 function gDeXLocal(exercice: ExerciceScenarioAReduit, x: number): number {
-  switch (exercice.combo) {
-    case "stockCommande":
-      return exercice.k / x;
-    case "racineAffine":
-      return exercice.b - exercice.a * x;
-    case "intensiteCable":
-      return exercice.a * x;
-    case "deuxParaboles":
-      return exercice.a2 * x * x + exercice.b2 * x + exercice.c2;
-  }
+  return exercice.k / x;
 }
 
 export interface ReponseGeneralisationSimpleA {
@@ -438,45 +403,46 @@ export function verifierEvaluationB(exercice: ExerciceScenarioB, aRetenu: number
 // Scénario C
 // ============================================================================
 
+/** Écran 1 (audit 5e ch. 1) : CT(xLecture) calculé à partir du TABLEAU de valeurs (CF + CV + CP),
+ * plus quatre lectures graphiques au demi-millier près. Les valeurs affichées font foi : la somme
+ * est exacte, tolérance au centième. */
 export interface ReponseLectureC {
-  cf: number;
-  cv: number;
-  cp: number;
   ct: number;
 }
 
-/** Un champ diagnostiqué INDÉPENDAMMENT (A.2, is-erronee par champ) — `diagnostiquerLectureC` les
- * combine pour le score global, jamais l'inverse. */
-export function diagnostiquerCfLectureC(exercice: ExerciceScenarioC, cf: number): StatutVerification {
-  return statutNumerique(cf, exercice.cf, TOLERANCE_ARRONDI);
+const TOLERANCE_CENTIEME = 0.015;
+
+function ligneTableauC(exercice: ExerciceScenarioC, x: number) {
+  const ligne = exercice.tableau.find((l) => l.x === x);
+  if (!ligne) throw new Error(`ligneTableauC : x=${x} absent du tableau`);
+  return ligne;
 }
-export function diagnostiquerCvLectureC(exercice: ExerciceScenarioC, cv: number): StatutVerification {
-  return statutNumerique(cv, coutVariableLocal(exercice.formeCV, exercice.k, exercice.xLecture), TOLERANCE_ARRONDI);
+
+/** CT(x) tel qu'il se calcule à partir du tableau affiché (milliers d'euros). */
+export function coutTotalTableauC(exercice: ExerciceScenarioC, x: number): number {
+  const ligne = ligneTableauC(exercice, x);
+  return Math.round((exercice.cf + ligne.cv + ligne.cp) * 100) / 100;
 }
-export function diagnostiquerCpLectureC(exercice: ExerciceScenarioC, cp: number): StatutVerification {
-  return statutNumerique(cp, coutProportionnelLocal(exercice.m, exercice.xLecture), TOLERANCE_ARRONDI);
-}
+
 export function diagnostiquerCtLectureC(exercice: ExerciceScenarioC, ct: number): StatutVerification {
-  return statutNumerique(ct, coutTotalLocal(exercice.cf, exercice.formeCV, exercice.k, exercice.m, exercice.xLecture), TOLERANCE_ARRONDI);
+  return statutNumerique(ct, coutTotalTableauC(exercice, exercice.xLecture), TOLERANCE_CENTIEME);
 }
 export function diagnostiquerLectureC(exercice: ExerciceScenarioC, reponse: ReponseLectureC): StatutVerification {
-  return combinerStatuts(
-    diagnostiquerCfLectureC(exercice, reponse.cf),
-    diagnostiquerCvLectureC(exercice, reponse.cv),
-    diagnostiquerCpLectureC(exercice, reponse.cp),
-    diagnostiquerCtLectureC(exercice, reponse.ct),
-  );
+  return diagnostiquerCtLectureC(exercice, reponse.ct);
 }
 export function verifierLectureC(exercice: ExerciceScenarioC, reponse: ReponseLectureC): boolean {
   return diagnostiquerLectureC(exercice, reponse) === "correct";
 }
 
+/** Coût moyen attendu, en EUROS (CT en milliers d'euros ×1000, puis ÷x) — CT exact du tableau. */
+export function coutMoyenAttenduC(exercice: ExerciceScenarioC): number {
+  return (coutTotalTableauC(exercice, exercice.xLecture) * 1000) / exercice.xLecture;
+}
+
 /** Piège de conversion d'unité (spec explicite) : CT est en MILLIERS d'euros, CM doit être en
- * EUROS — ×1000 avant de diviser par x. */
+ * EUROS. Tolérance ±1 € (un arrondi à l'euro est accepté). */
 export function diagnostiquerCoutMoyenC(exercice: ExerciceScenarioC, reponse: number): StatutVerification {
-  const ct = coutTotalLocal(exercice.cf, exercice.formeCV, exercice.k, exercice.m, exercice.xLecture);
-  const cmAttendu = (ct * 1000) / exercice.xLecture;
-  return statutNumerique(reponse, cmAttendu, TOLERANCE_ARRONDI);
+  return statutNumerique(reponse, coutMoyenAttenduC(exercice), 1);
 }
 export function verifierCoutMoyenC(exercice: ExerciceScenarioC, reponse: number): boolean {
   return diagnostiquerCoutMoyenC(exercice, reponse) === "correct";
@@ -500,16 +466,27 @@ export function verifierReconnaissanceC(exercice: ExerciceScenarioC, reponse: Re
   return diagnostiquerReconnaissanceC(exercice, reponse) === "correct";
 }
 
+/** Bénéfice CA − CT à xBenefice, à partir du TABLEAU (CA y figure — audit 5e ch. 1 : CA n'était
+ * jamais donné), en milliers d'euros. */
+export function beneficeAttenduC(exercice: ExerciceScenarioC): number {
+  const ligne = ligneTableauC(exercice, exercice.xBenefice);
+  return Math.round((ligne.ca - coutTotalTableauC(exercice, exercice.xBenefice)) * 100) / 100;
+}
 export function diagnostiquerBeneficeC(exercice: ExerciceScenarioC, reponse: number): StatutVerification {
-  const attendu = beneficeLocal(exercice.cf, exercice.formeCV, exercice.k, exercice.m, exercice.formeCA, exercice.p, exercice.xBenefice);
-  return statutNumerique(reponse, attendu, TOLERANCE_ARRONDI);
+  return statutNumerique(reponse, beneficeAttenduC(exercice), TOLERANCE_CENTIEME);
 }
 export function verifierBeneficeC(exercice: ExerciceScenarioC, reponse: number): boolean {
   return diagnostiquerBeneficeC(exercice, reponse) === "correct";
 }
 
+/** Seule vraie lecture graphique du scénario C : tolérance PROPORTIONNELLE à la fenêtre affichée
+ * (5 % de xMax, au moins 0,5) — l'ancienne tolérance (≥ 1,5 ou 10 % du seuil) acceptait « 0 » quand
+ * le seuil valait ≈ 1,3. Le seuil tombant dans [20 % ; 80 %] de la fenêtre, 0 n'est jamais accepté. */
+export function toleranceSeuilC(exercice: ExerciceScenarioC): number {
+  return Math.max(0.5, exercice.xMax * 0.05);
+}
 export function diagnostiquerSeuilC(exercice: ExerciceScenarioC, reponse: number): StatutVerification {
-  return statutNumerique(reponse, exercice.xSeuil, toleranceLarge(exercice.xSeuil));
+  return statutNumerique(reponse, exercice.xSeuil, toleranceSeuilC(exercice));
 }
 export function verifierSeuilC(exercice: ExerciceScenarioC, reponse: number): boolean {
   return diagnostiquerSeuilC(exercice, reponse) === "correct";

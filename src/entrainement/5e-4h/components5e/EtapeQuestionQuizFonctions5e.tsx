@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { QuestionVraiFaux5e } from "../core5e/quizFonctions5e.types";
+import { TexteQuizFonctions5e } from "./TexteQuizFonctions5e";
 
 interface Props {
   question: QuestionVraiFaux5e;
@@ -14,7 +15,9 @@ export function EtapeQuestionQuizFonctions5e({ question, onValider }: Props) {
 
   return (
     <div>
-      <p className="prompt-text">{question.enonce}</p>
+      <p className="prompt-text">
+        <TexteQuizFonctions5e texte={question.enonce} />
+      </p>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === true ? " toggle-active" : ""}`} onClick={() => setChoix(true)}>

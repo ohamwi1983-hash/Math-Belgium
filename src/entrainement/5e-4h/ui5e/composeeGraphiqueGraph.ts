@@ -28,14 +28,14 @@ export interface CouleursGrapheComposee {
   axe: string;
   /** Point révélé par l'aide et ses pointillés. */
   aide: string;
-  /** Fond du disque blanc derrière les étiquettes (lisibilité sur le quadrillage). */
+  /** Fond du graphe, et liseré derrière les étiquettes (lisibilité sur le quadrillage). */
   fond: string;
 }
 
 /** Couleurs de l'écran : jetons du thème (clair et sombre). */
 export const COULEURS_ECRAN_F: CouleursGrapheComposee = {
   courbe: "var(--sky, #2f6fb0)",
-  grille: "var(--line-soft, #dfe7ec)",
+  grille: "var(--line, #c9d4db)",
   axe: "var(--ink-soft, #51626f)",
   aide: "var(--plan, #5b4ea3)",
   fond: "var(--surface, #ffffff)",
@@ -81,6 +81,9 @@ export function svgGrapheComposee(courbe: CourbeGraphique, options: OptionsGraph
   const parties: string[] = [];
   const x0 = px(0);
   const y0 = py(0);
+
+  // Fond propre au graphe (le bloc d'énoncé est teinté : sans fond, le quadrillage s'y perdait).
+  parties.push(`<rect x="1" y="1" width="${COTE - 2}" height="${COTE - 2}" rx="6" fill="${couleurs.fond}" stroke="${couleurs.grille}" stroke-width="1"/>`);
 
   // Quadrillage : une ligne par unité.
   for (let k = X_MIN_CADRE; k <= X_MAX_CADRE; k++) {

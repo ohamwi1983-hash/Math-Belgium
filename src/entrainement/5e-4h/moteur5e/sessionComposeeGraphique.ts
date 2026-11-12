@@ -66,8 +66,13 @@ export function soumettreReponseQuestion(etat: EtatSessionComposeeGraphique, rep
   const exercice = etat.exerciceCourant;
   const question = questionCourante(exercice, etat.indexQuestion);
 
+  // Le choix « Existe / N'existe pas » est un choix FERMÉ : une seule tentative (règle du site, audit
+  // du chapitre 1 de 5e, décision D). Un mauvais choix clôt la question ; les tentatives restantes ne
+  // servent qu'à la VALEUR, une fois l'existence bien choisie.
+  const choixExistenceFaux = reponse.resultatExiste !== question.resultatExiste;
   const etapeCourante = soumettreEtapeTentatives<ReponseQuestionComposeeGraphique>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(choixExistenceFaux ? { tentativesMax: 1 } : {}),
     verifier: (r) => verifierReponseQuestion(question, r),
     revelerReponse: () => {},
   });

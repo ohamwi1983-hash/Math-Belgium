@@ -7,16 +7,15 @@
  */
 
 // ============================================================================
-// Scénario A — intersection de 2 familles de fonctions f(x)=g(x), extremum de (f+g). 5 COMBOS
-// possibles pour la nature de f/g — voir `generateurs5e/problemesContexte/scenarioA.ts`. Le combo
-// de référence (`kInverseXAxCarre`, bidons cylindriques V=πr²h) garde son flux complet à 5 écrans
-// (tableau → généralisation → égalité des aires → graphique → justification, seul combo avec une
-// GRANDEUR LIÉE physique — le diamètre égale la hauteur au rayon optimal) ; les 4 autres combos
-// utilisent un flux réduit à 3 écrans (généralisation → intersection → extremum, jamais de grandeur
-// liée artificielle — voir CLAUDE.md section 5gen5).
+// Scénario A — intersection de 2 familles de fonctions f(x)=g(x), extremum de (f+g). 2 COMBOS
+// (audit 5e ch. 1, décision I : les combos k√x/b−ax, k/x²/ax et « deux paraboles » ont été RETIRÉS —
+// leurs contextes additionnaient des grandeurs de nature différente, (f+g) n'y avait aucun sens).
+// Le combo de référence (`kInverseXAxCarre`, bidons cylindriques V=πr²h) garde son flux complet à
+// 5 écrans ; `stockCommande` utilise un flux réduit à 3 écrans (généralisation → intersection →
+// extremum), avec un tableau de relevés chiffrés qui permet d'écrire f et g.
 // ============================================================================
 
-export type ComboScenarioA = "kInverseXAxCarre" | "stockCommande" | "racineAffine" | "intensiteCable" | "deuxParaboles";
+export type ComboScenarioA = "kInverseXAxCarre" | "stockCommande";
 
 export interface LigneTableauScenarioA {
   r: number;
@@ -26,7 +25,7 @@ export interface LigneTableauScenarioA {
 }
 
 /** Contexte narratif du combo de référence — un objet cylindrique concret (bassin de 10 entrées,
- * jamais partagé avec les 4 autres combos). `nomObjetIndefini`/`nomObjetDefini` PRÉ-ÉCRITS avec leur
+ * jamais partagé avec l'autre combo). `nomObjetIndefini`/`nomObjetDefini` PRÉ-ÉCRITS avec leur
  * article déjà accordé (ex. "une boîte de conserve" / "la boîte de conserve") — jamais d'accord
  * grammatical recalculé au runtime (convention transversale, voir CLAUDE.md). */
 export interface ContexteConteneurA {
@@ -35,10 +34,10 @@ export interface ContexteConteneurA {
   nomObjetDefini: string;
 }
 
-/** Contexte narratif des 4 combos "réduits" (2-5) — un bassin de 10 entrées PAR combo (jamais
- * partagé entre eux). `intro` mentionne f et g en toutes lettres (jamais recomposée depuis des
- * fragments séparés) ; `labelF`/`labelG` sont des groupes nominaux courts réutilisés dans les
- * consignes/aides suivantes ; `unite` est l'unité de la variable x. */
+/** Contexte narratif du combo réduit `stockCommande` — bassin de 10 entrées. `intro` mentionne f et
+ * g en toutes lettres (jamais recomposée depuis des fragments séparés) ; `labelF`/`labelG` sont des
+ * groupes nominaux courts réutilisés dans les consignes/aides suivantes ; `unite` est l'unité de la
+ * variable x. */
 export interface ContexteReduitA {
   id: string;
   intro: string;
@@ -73,6 +72,10 @@ export interface ExerciceScenarioAStockCommande extends ExerciceScenarioABase {
   a: number;
   b: number;
   k: number;
+  /** 2 relevés chiffrés (x, f(x), g(x)) affichés à l'élève — SEULE source pour écrire f et g (audit
+   * 5e ch. 1 : l'écran demandait f(x) et g(x) sans aucun nombre). x ≠ xIntersection (sinon le
+   * relevé donnerait directement la réponse de l'écran suivant), valeurs entières. */
+  releves: { x: number; f: number; g: number }[];
   xIntersection: number;
   xExtremum: number;
   /** borne supérieure du domaine affiché — calculée à la génération (voir
@@ -80,53 +83,7 @@ export interface ExerciceScenarioAStockCommande extends ExerciceScenarioABase {
   xMax: number;
 }
 
-/** Combo 3 — f(x)=k√x (croissante, concave) vs g(x)=b-ax (décroissante affine) — (f+g) admet un
- * maximum unique par construction (concavité stricte). */
-export interface ExerciceScenarioARacineAffine extends ExerciceScenarioABase {
-  combo: "racineAffine";
-  contexte: ContexteReduitA;
-  k: number;
-  a: number;
-  b: number;
-  xIntersection: number;
-  xExtremum: number;
-  xMax: number;
-}
-
-/** Combo 4 — f(x)=k/x² (intensité, décroissante convexe) vs g(x)=ax (coût de câble, croissant) —
- * (f+g) admet un minimum unique par construction. */
-export interface ExerciceScenarioAIntensiteCable extends ExerciceScenarioABase {
-  combo: "intensiteCable";
-  contexte: ContexteReduitA;
-  k: number;
-  a: number;
-  xIntersection: number;
-  xExtremum: number;
-  xMax: number;
-}
-
-/** Combo 5 — 2 paraboles f(x)=a1x²+b1x+c1, g(x)=a2x²+b2x+c2 (a1,a2>0, même sens d'ouverture) —
- * (f+g) est elle-même une parabole (a1+a2>0), extremum = son sommet. */
-export interface ExerciceScenarioADeuxParaboles extends ExerciceScenarioABase {
-  combo: "deuxParaboles";
-  contexte: ContexteReduitA;
-  a1: number;
-  b1: number;
-  c1: number;
-  a2: number;
-  b2: number;
-  c2: number;
-  xIntersection: number;
-  xExtremum: number;
-  xMax: number;
-}
-
-export type ExerciceScenarioA =
-  | ExerciceScenarioAConteneur
-  | ExerciceScenarioAStockCommande
-  | ExerciceScenarioARacineAffine
-  | ExerciceScenarioAIntensiteCable
-  | ExerciceScenarioADeuxParaboles;
+export type ExerciceScenarioA = ExerciceScenarioAConteneur | ExerciceScenarioAStockCommande;
 
 // ============================================================================
 // Scénario B — Coût unitaire de production (cu(x)·x = F(x), système à 2 points). 5 MODÈLES
@@ -149,7 +106,8 @@ export interface ContexteScenarioB {
 
 export interface PointRevele {
   x: number;
-  /** coût unitaire (déjà arrondi à l'entier, bruit réaliste du tableau source). */
+  /** coût unitaire EXACT (au plus 2 décimales — audit 5e ch. 1 : l'ancien arrondi à l'entier
+   * faisait résoudre le système vers des a/b faux, parfois négatifs ou nuls). */
   coutUnitaire: number;
 }
 
@@ -159,12 +117,11 @@ export interface ExerciceScenarioB {
   contexte: ContexteScenarioB;
   point1: PointRevele;
   point2: PointRevele;
-  /** a/b "vrais" (tirés à la génération — jamais montrés à l'élève, la donnée visible reste les 2
-   * points révélés + les valeurs qu'il calcule lui-même). */
+  /** a/b tirés à la génération (entiers strictement positifs) — jamais montrés à l'élève. */
   aVrai: number;
   bVrai: number;
-  /** a/b arrondis attendus — dérivés de la résolution du système à partir des 2 points RÉVÉLÉS
-   * (donc potentiellement différents de aVrai/bVrai, bruit de l'arrondi du tableau source). */
+  /** a/b attendus — les points révélés étant EXACTS, le système redonne exactement aVrai/bVrai
+   * (champs conservés sous ce nom pour l'écran « résolution » et la feuille papier). */
   aArrondiAttendu: number;
   bArrondiAttendu: number;
   /** 2 valeurs d'évaluation finale (écran 4), différentes de point1.x/point2.x. */
@@ -173,13 +130,25 @@ export interface ExerciceScenarioB {
 }
 
 // ============================================================================
-// Scénario C — Coûts d'une entreprise (CF, CV(x), CP=mx, CT, CA(x)). 2 dimensions tirées
+// Scénario C — Coûts d'une entreprise (CF, CV(x), CP=mx, CT, CA(x)). Les données chiffrées viennent
+// d'un TABLEAU de valeurs ; le graphe ne sert plus qu'à reconnaître l'allure de CV/CP et à lire le
+// seuil de rentabilité (seule vraie lecture graphique). 2 dimensions tirées
 // indépendamment : CV parmi 4 formes (racineCarree/racineCubique/carre/cube), CA parmi 3 formes
 // (affine/racineCarree/racineCubique) — 12 combinaisons, voir `generateurs5e/problemesContexte/scenarioC.ts`.
 // ============================================================================
 
 export type FormeCoutVariableC = "racineCarree" | "racineCubique" | "carre" | "cube";
 export type FormeChiffreAffairesC = "affine" | "racineCarree" | "racineCubique";
+
+/** Une ligne du tableau de valeurs du scénario C (milliers d'euros, valeurs ARRONDIES au centième
+ * telles qu'affichées — elles font foi pour la vérification, audit 5e ch. 1 : plus de lectures
+ * graphiques au demi-millier près). */
+export interface LigneTableauC {
+  x: number;
+  cv: number;
+  cp: number;
+  ca: number;
+}
 
 export interface ExerciceScenarioC {
   scenario: "C";
@@ -197,6 +166,9 @@ export interface ExerciceScenarioC {
   xBenefice: number;
   /** seuil de rentabilité CA(x)=CT(x) — racine positive, calculée analytiquement. */
   xSeuil: number;
+  /** Tableau de valeurs affiché (x = 1, xLecture, xBenefice, triés) — CF n'y figure pas (constant,
+   * donné à part). */
+  tableau: LigneTableauC[];
 }
 
 export type ExerciceProblemeContexte = ExerciceScenarioA | ExerciceScenarioB | ExerciceScenarioC;

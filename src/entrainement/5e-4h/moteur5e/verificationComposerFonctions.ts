@@ -5,9 +5,8 @@
  * référence déjà calculée à la génération (`dir.formule`), jamais une comparaison à "la"
  * décomposition canonique. Écrans "c1"/"c2"/"domaine" : réutilisent DIRECTEMENT
  * `verifierEnsembleReelGuide` (`verificationDomaineDefinition.ts`, 5gen1, moteur→moteur — même
- * chantier, import explicitement autorisé). Écran "conditions" (riche uniquement) : comparaison
- * structurée position-par-position (`dir.conditions`, ordre FIXE et déjà connu, jamais une liste
- * add-as-needed — voir `core5e/composerFonctions.types.ts`).
+ * chantier, import explicitement autorisé). Écran "conditions" (riche uniquement) : nombre de lignes
+ * FIXE (`dir.conditions.length`), comparaison sans tenir compte de l'ordre des lignes.
  */
 import { all, create } from "mathjs";
 import type { MathNode } from "mathjs";

@@ -10,6 +10,7 @@ import {
   niveauAideMaxCE,
   niveauAideMaxDomf,
   soumettreReponseCE,
+  TENTATIVES_ECRAN_CE,
   soumettreReponseDomf,
   soumettreReponseResolution,
 } from "./moteur5e/sessionDomaineDefinition";
@@ -20,7 +21,7 @@ import { EtapeCEDomaineDefinition } from "./components5e/EtapeCEDomaineDefinitio
 import { EtapeResolutionDomaineDefinition } from "./components5e/EtapeResolutionDomaineDefinition";
 import { EtapeDomfDomaineDefinition } from "./components5e/EtapeDomfDomaineDefinition";
 import { GrilleQuotientDomfRecap } from "./components5e/GrilleQuotientDomfRecap";
-import { formatCEAttendueLatex, formatDomfLatex, formatEnsembleReelLatex, formatResolutionAttendueLatex } from "./ui5e/formatDomaineDefinition";
+import { formatConditionsLatex, formatConditionsToujoursVraiesLatex, formatDomfLatex, formatEnsembleReelLatex, formatResolutionAttendueLatex } from "./ui5e/formatDomaineDefinition";
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -45,11 +46,31 @@ interface TransitionEnAttente {
 /** Reproduit exactement ce que `ResultatPanelDomaineDefinition` affichait pour UNE phase donnée,
  * scopé à l'exercice/phase qui vient juste de se terminer (`etat.exerciceCourant`/`etat.phase`,
  * jamais `enAttente.etatSuivant`). */
+/** Fragments LaTeX reliés par « et » écrit en TEXTE (jamais de prose en mode math). */
+function joindreParEt(termes: string[]): ReactNode {
+  return termes.map((t, i) => (
+    <span key={i}>
+      {i > 0 && " et "}
+      <Katex expression={t} />
+    </span>
+  ));
+}
+
 function reponseAttenduePhase(exercice: ExerciceDomaineDefinition, phase: PhaseDomaineDefinition): ReactNode {
-  if (phase === "ce") return <Katex expression={formatCEAttendueLatex(exercice)} />;
+  if (phase === "ce") {
+    if (exercice.aucuneCE) {
+      const toujoursVraies = formatConditionsToujoursVraiesLatex(exercice);
+      return toujoursVraies.length > 0 ? (
+        <>Aucune CE (ou {joindreParEt(toujoursVraies)}, condition toujours vraie)</>
+      ) : (
+        <>Aucune CE</>
+      );
+    }
+    return joindreParEt(formatConditionsLatex(exercice));
+  }
   if (phase === "resolution") {
     if (exercice.famille === "fractionSousRacine") return <GrilleQuotientDomfRecap exercice={exercice} />;
-    return <Katex expression={formatResolutionAttendueLatex(exercice) ?? ""} />;
+    return joindreParEt(formatResolutionAttendueLatex(exercice) ?? []);
   }
   return <Katex expression={formatDomfLatex(exercice.domf)} />;
 }
@@ -121,7 +142,7 @@ function formatReponseResolution(reponse: ReponseResolution): ReactNode {
     return `N : ${reponse.grille.ligneNumerateur.join(" ")} ; D : ${reponse.grille.ligneDenominateur.join(" ")} ; Q : ${reponse.grille.ligneQuotient.join(" ")}`;
   }
   if (reponse.famille === "racineSurFraction") {
-    return <Katex expression={`x\\in ${formatEnsembleReelLatex(reponse.radicande)} \\text{ et } x\\in ${formatEnsembleReelLatex(reponse.denominateur)}`} />;
+    return joindreParEt([`x\\in ${formatEnsembleReelLatex(reponse.radicande)}`, `x\\in ${formatEnsembleReelLatex(reponse.denominateur)}`]);
   }
   return <Katex expression={`x\\in ${formatEnsembleReelLatex(reponse.ensemble)}`} />;
 }
@@ -214,7 +235,7 @@ export function App5gen1() {
               key={generationExercice}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
+              tentativesMax={TENTATIVES_ECRAN_CE}
               niveauAide={etat.niveauAideCE}
               niveauAideMax={niveauAideMaxCE(exercice)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}

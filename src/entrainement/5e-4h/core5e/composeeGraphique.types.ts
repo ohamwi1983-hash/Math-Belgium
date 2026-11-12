@@ -12,13 +12,10 @@
  * de référence... gen10)". Structurellement incompatible avec la contrainte ci-dessus : aucune des 6
  * familles du catalogue gen10 (x², x³, √x, ∛x, 1/x, |x|) ne produit une image ENTIÈRE à chaque
  * abscisse entière du domaine visible sans restreindre ce domaine à quelques points isolés (√x/∛x/
- * 1/x en particulier). Le SYMPTÔME visé par E.6 ("allure de polygone des effectifs") est traité
- * directement — voir `ui5e/composeeGraphiqueGraph.ts::pointsLissesCourbe` (spline de Catmull-Rom
- * passant exactement par les mêmes nœuds, RENDU seulement, jamais les données) et
- * `components5e/CourbeGraph.tsx` (trait `EPAISSEUR_TRAIT_ACCENTUE`, la courbe étant l'élément
- * principal de l'écran — retour utilisateur direct après la réduction initiale à `_STANDARD` de
- * la Partie E, jugée trop fine) — sans jamais réintroduire de risque d'incohérence entre
- * coordonnées lues et coordonnées interrogées.
+ * 1/x en particulier). Rendu (audit du chapitre 1 de 5e, décision G) : segments DROITS entre nœuds
+ * entiers sur un quadrillage FIXE à 1 unité (`ui5e/composeeGraphiqueGraph.ts::svgGrapheComposee`) —
+ * l'ancienne spline de Catmull-Rom dépassait entre les nœuds (faux extremums, sortie de cadre) et la
+ * grille adaptative (1 carré = 5 unités) empêchait toute lecture exacte.
  */
 
 export interface PointGraphique {

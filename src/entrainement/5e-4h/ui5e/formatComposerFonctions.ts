@@ -32,14 +32,20 @@ export function consigneFormule(dir: CompositionDirigee): string {
   return `Écris l'expression de (${ext}∘${int})(x) = ${ext}(${int}(x)), simplifiée au maximum.`;
 }
 
-export const PLACEHOLDER_FORMULE = "ex : sqrt(2x-4)";
+/** Indique seulement la SYNTAXE (racine, quotient) — aucune expression de l'espace de tirage. */
+export const PLACEHOLDER_FORMULE = "écris l'expression, ex. sqrt(…) ou (…)/(…)";
 
 export function texteAideFormuleNiveau1(dir: CompositionDirigee): string {
   return `Remplace chaque x de ${nomExterieure(dir)}(x) par ${dir.nomInterieure}(x), puis simplifie si possible.`;
 }
 
+/** Audit 5e ch. 1, point 22 : l'aide 2 donnait la forme simplifiée attendue. Elle montre désormais
+ * la SUBSTITUTION brute (chaque x de l'extérieure remplacé par l'intérieure), simplification à faire. */
 export function latexAideFormuleNiveau2(dir: CompositionDirigee): string {
-  return `(${nomExterieure(dir)}\\circ ${dir.nomInterieure})(x) = ${dir.latex}`;
+  const ext = nomExterieure(dir);
+  const int = dir.nomInterieure;
+  const substitution = dir.exterieure.corpsLatex.replace(/x/g, `\\left(${dir.interieure.corpsLatex}\\right)`);
+  return `(${ext}\\circ ${int})(x) = ${ext}\\big(${int}(x)\\big) = ${substitution}`;
 }
 
 // ============================================================================
@@ -94,7 +100,7 @@ function argumentSousRacineLatex(f: FonctionComposable): string | null {
 /** Libellé partagé entre l'aide de C1/C2 et le bloc "état actuel" (bug 2), pour rester cohérent
  * d'un écran à l'autre. */
 function libelleDomainePropre(dir: CompositionDirigee): string {
-  return `\\text{domaine propre de } ${dir.nomInterieure}`;
+  return `\\text{dom}(${dir.nomInterieure})`;
 }
 
 export function consigneC1(dir: CompositionDirigee): string {
@@ -128,23 +134,31 @@ export function latexAideC1Niveau2(dir: CompositionDirigee): string | null {
 // interne), seule l'AIDE affichée à l'élève diffère.
 // ============================================================================
 
+/** Audit 5e ch. 1, décision F : l'écran attend l'ensemble des x qui vérifient la ou les conditions
+ * une fois élevées au carré — SANS l'intersection avec dom(intérieure), faite à l'écran suivant. */
 export function consigneC2(dir: CompositionDirigee): string {
-  const pluriel = dir.conditions.length > 1;
-  return `Élève ${pluriel ? "chaque condition" : "la condition"} de l'écran précédent au carré, résous ${pluriel ? "chacune" : "-la"}, puis combine ${pluriel ? "les 2 résultats (toujours par ET)" : "le résultat avec le domaine de " + dir.nomInterieure}.`;
+  if (dir.conditions.length > 1) {
+    return "Élève chaque condition de l'écran précédent au carré, résous chacune, puis donne les x qui vérifient les 2 à la fois (l'intersection avec le domaine se fait à l'écran suivant).";
+  }
+  return "Élève la condition de l'écran précédent au carré et résous-la (l'intersection avec le domaine se fait à l'écran suivant).";
 }
 
 export function texteAideC2Niveau1(dir: CompositionDirigee): string {
   const f = dir.interieure.fonction;
+  const int = dir.nomInterieure;
   if (f.type === "racineSurFraction") {
-    return "Ici, g(x) est un quotient (racine carrée divisée par une expression) : son signe dépend du dénominateur, distingue 2 cas. Là où le dénominateur est positif, élever au carré ne change pas le sens de la condition. Là où il est négatif, la condition est automatiquement vraie ou fausse (une racine carrée est toujours ≥ 0, jamais inférieure à un nombre négatif) — inutile de résoudre quoi que ce soit sur le radicande dans ce cas.";
+    return `Ici, ${int}(x) est un quotient (racine carrée divisée par une expression) : son signe dépend du dénominateur, distingue 2 cas. Là où le dénominateur est positif, élever au carré ne change pas le sens de la condition. Là où il est négatif, ${int}(x) est négatif : la condition est alors automatiquement vraie ou fausse, sans rien résoudre.`;
   }
-  return "Le seuil de chaque condition est toujours strictement positif ici : g(x) est directement une racine carrée, donc toujours ≥ 0 — élever au carré ne change jamais le sens de la condition (aucun cas particulier à distinguer).";
+  return `Le seuil de chaque condition est strictement positif et ${int}(x) est une racine carrée, donc toujours ≥ 0 : élever au carré ne change pas le sens de la condition.`;
 }
 
 export function latexAideC2Niveau2(dir: CompositionDirigee): string | null {
   const f = dir.interieure.fonction;
   if (f.type === "racineSurFraction") {
-    return `\\begin{gathered} \\text{si } ${formatPolynomeLatex(f.denominateur)} > 0 : \\text{même sens, élève au carré} \\\\ \\text{si } ${formatPolynomeLatex(f.denominateur)} < 0 : \\text{condition automatiquement vraie ou fausse} \\end{gathered}`;
+    const den = formatPolynomeLatex(f.denominateur);
+    const rad = formatPolynomeLatex(f.radicande);
+    const casPositif = dir.conditions.map((c) => `${rad} ${LATEX_COMPARATEUR[c.comparateur]} ${formatValeurLatex(c.seuil * c.seuil)}\\left(${den}\\right)^2`).join(",\\quad ");
+    return `\\begin{gathered} ${den} > 0 \\;:\\quad ${casPositif} \\\\ ${den} < 0 \\;:\\quad ${dir.nomInterieure}(x) \\leq 0 \\end{gathered}`;
   }
   const argument = argumentSousRacineLatex(f);
   if (argument === null) return null;
@@ -169,7 +183,9 @@ export function texteAideDomaineNiveau1(dir: CompositionDirigee): string {
 
 export function latexAideDomaineNiveau2(dir: CompositionDirigee): string {
   if (dir.riche && dir.domaineApresCarre !== null) {
-    return `\\begin{gathered} ${libelleDomainePropre(dir)} : ${formatEnsembleReelLatex(dir.interieure.domaine)} \\\\ \\text{après mise au carré} : ${formatEnsembleReelLatex(dir.domaineApresCarre)} \\end{gathered}`;
+    const ext = nomExterieure(dir);
+    const int = dir.nomInterieure;
+    return `\\text{dom}(${ext}\\circ ${int}) = \\text{dom}(${int}) \\cap \\{\\, x : ${int}(x) \\in \\text{dom}(${ext}) \\,\\}`;
   }
   return `\\text{dom}(${dir.nomInterieure}) = ${formatEnsembleReelLatex(dir.interieure.domaine)} \\qquad \\text{dom}(${nomExterieure(dir)}) = ${formatEnsembleReelLatex(dir.exterieure.domaine)}`;
 }
@@ -213,7 +229,7 @@ export function formatTermesEtatActuelComposerFonctions(exercice: ExerciceCompos
     } else if (phase.startsWith("c1") && memeDirection) {
       termes.push(...formatTermesDomaineAvecPrefixe(`${libelleDomainePropre(dir)} =`, dir.interieure.domaine));
     } else if (phase.startsWith("c2") && memeDirection && dir.domaineApresCarre !== null) {
-      termes.push(...formatTermesDomaineAvecPrefixe(`\\text{après mise au carré} =`, dir.domaineApresCarre));
+      termes.push(...formatTermesDomaineAvecPrefixe(`${formatTermesConditionsLatex(dir).join(",\\ ")} \\iff x \\in`, dir.domaineApresCarre));
     } else if (phase.startsWith("domaine")) {
       termes.push(...formatTermesDomaineAvecPrefixe(`\\text{dom}(${nom}) =`, dir.domaine));
     }

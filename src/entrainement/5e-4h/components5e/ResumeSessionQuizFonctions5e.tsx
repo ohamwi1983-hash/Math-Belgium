@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizFonctions5e } from "../moteur5e/typesQuizFonctions5e";
+import { TexteQuizFonctions5e } from "./TexteQuizFonctions5e";
 
 interface Props {
   resultats: ResultatExerciceQuizFonctions5e[];
@@ -37,7 +38,9 @@ export function ResumeSessionQuizFonctions5e({ resultats, onRecommencer, onChang
             {resultats.map((resultat, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{resultat.question.enonce}</td>
+                <td>
+                  <TexteQuizFonctions5e texte={resultat.question.enonce} />
+                </td>
                 <td>{libelleVraiFaux(resultat.reponseChoisie)}</td>
                 <td>{resultat.score === 100 ? "✓" : "✗"}</td>
               </tr>

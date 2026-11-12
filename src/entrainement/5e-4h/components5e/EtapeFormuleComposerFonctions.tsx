@@ -15,7 +15,8 @@ import { EnTeteExercice } from "./EnTeteExercice";
  * qui ne connaît que le statut à 3 valeurs partagé par toute la plateforme) : la réponse est
  * mathématiquement juste, il ne manque qu'une simplification, piste concrète sans jamais révéler la
  * forme attendue. */
-const MESSAGE_CORRECT_NON_SIMPLIFIE = "Ta réponse est mathématiquement correcte, mais elle n'est pas encore simplifiée au maximum — développe/réduis l'expression avant de valider.";
+const MESSAGE_CORRECT_NON_SIMPLIFIE =
+  "Ta réponse est correcte, mais pas encore simplifiée au maximum : écris une seule fraction (pas de fraction dans une fraction), développe et regroupe les termes semblables. Cette tentative ne compte pas.";
 
 interface Props {
   /** Consigne SPÉCIFIQUE à cet écran (ex. "Écris l'expression de (f∘g)(x)...") — rendue APRÈS le
@@ -69,7 +70,9 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerificationFormuleSimplifiee | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  /** Une réponse équivalente mais pas simplifiée ne consomme pas de tentative (décision E) : son
+   * message s'affiche donc aussi quand `tentativesUtilisees` vaut encore 0. */
+  const montrerErreurs = tentativesUtilisees > 0 || dernierStatut === "correct_non_simplifie";
   /** Recalculé à CHAQUE rendu depuis la saisie actuelle (jamais depuis `dernierStatut`, figé à la
    * dernière soumission) — même convention que le pattern de référence 4e (A.2). */
   const texteErronee = montrerErreurs && diagnostiquer !== undefined && diagnostiquer(texte) !== "correct";

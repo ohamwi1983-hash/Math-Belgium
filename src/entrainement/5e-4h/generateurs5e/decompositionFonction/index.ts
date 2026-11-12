@@ -87,11 +87,14 @@ function tirerProfondeur(): number {
 /** Jamais l'identité (a=1, b=0) — une couche « x ↦ x » ne décompose rien. Si l'argument est une
  * SOMME (`argumentEstSomme`), a=1 est aussi exclu : « (2x^2 - 3x) + 4 » se lirait comme un simple
  * polynôme, la structure a(…)+b doit rester visible (audit 5e ch. 1, décision C). */
-function tirerParametresAffine(argumentEstSomme = false): ParametresCouche {
+function tirerParametresAffine(argumentEstSomme = false, coucheInterieure = false): ParametresCouche {
   for (;;) {
     const a = entierNonNulAleatoire(-3, 3);
     const b = entierAleatoire(-9, 9);
     if (a === 1 && b === 0) continue;
+    // Couche INTÉRIEURE ax (b = 0) suivie d'une puissance, d'une racine, d'un inverse ou d'une
+    // valeur absolue : le facteur sort (|2x| = 2|x|, 1/(−x) = −1/x), la couche est absorbable.
+    if (coucheInterieure && b === 0) continue;
     if (argumentEstSomme && a === 1) continue;
     return { a, b };
   }
@@ -266,7 +269,7 @@ function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4, options: OptionsC
     const poolNonAffine = couchesDisponibles(dejaUtilisees);
     const pool: TypeCoucheCatalogue[] = profondeur === 2 && finaleEstAffine ? poolNonAffine : ["affine", ...poolNonAffine];
     const typeCouche1 = choisirParmi(pool);
-    ajouterCouche(typeCouche1, false, typeCouche1 === "affine" ? tirerParametresAffine() : {});
+    ajouterCouche(typeCouche1, false, typeCouche1 === "affine" ? tirerParametresAffine(false, true) : {});
   }
 
   for (let i = 1; i < profondeur - 1; i++) {

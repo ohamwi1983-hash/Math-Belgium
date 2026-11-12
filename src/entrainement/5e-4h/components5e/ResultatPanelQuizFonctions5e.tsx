@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizFonctions5e } from "../moteur5e/typesQuizFonctions5e";
+import { TexteQuizFonctions5e } from "./TexteQuizFonctions5e";
 
 interface Props {
   resultat: ResultatExerciceQuizFonctions5e;
@@ -27,7 +28,9 @@ export function ResultatPanelQuizFonctions5e({ resultat, labelBouton, onContinue
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <TexteQuizFonctions5e texte={resultat.question.enonce} />
+      </p>
       <ul className="score-list">
         <li className="score-item">
           <span>Ta réponse</span>
@@ -43,7 +46,9 @@ export function ResultatPanelQuizFonctions5e({ resultat, labelBouton, onContinue
         </li>
       </ul>
       <div className="aide-5e">
-        <p>{resultat.question.justification}</p>
+        <p>
+          <TexteQuizFonctions5e texte={resultat.question.justification} />
+        </p>
       </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}

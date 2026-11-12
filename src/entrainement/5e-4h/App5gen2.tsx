@@ -1,12 +1,14 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { construireAvecProfondeur, genererExerciceDecompositionFonction } from "./generateurs5e/decompositionFonction";
+import { construireAvecVariante, genererExerciceDecompositionFonction } from "./generateurs5e/decompositionFonction";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 
 const OPTIONS_PROFONDEUR = [
   { id: "2", label: "2 couches" },
   { id: "3", label: "3 couches" },
   { id: "4", label: "4 couches" },
+  { id: "brute", label: "Couche intérieure polynomiale (a·xⁿ + b·xᵐ)" },
+  { id: "affineFinale", label: "Dernière couche affine" },
 ];
 import {
   activerAideSuivante,
@@ -14,7 +16,7 @@ import {
   niveauAideMaxDecomposition,
   soumettreReponseDecomposition,
 } from "./moteur5e/sessionDecompositionFonction";
-import { diagnostiquerDecomposition } from "./moteur5e/verificationDecompositionFonction";
+import { diagnostiquerDecomposition, reconstruitSansDecomposer } from "./moteur5e/verificationDecompositionFonction";
 import type { EtatSessionDecompositionFonction } from "./moteur5e/typesDecompositionFonction";
 import { EtapeDecompositionFonction } from "./components5e/EtapeDecompositionFonction";
 import { Katex } from "./components/Katex";
@@ -40,6 +42,9 @@ interface TransitionEnAttente {
 export function App5gen2() {
   const [etat, setEtat] = useState<EtatSessionDecompositionFonction>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : remonte l'écran,
+   * donc vide les champs et le dernier message (audit 5e ch. 1, point 12). */
+  const [generation, setGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionDecompositionFonction) {
     if (nouvelEtat.resultats.length > etat.resultats.length) {
@@ -53,11 +58,13 @@ export function App5gen2() {
     if (!enAttente) return;
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
+    setGeneration((g) => g + 1);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
-    setEtat(demarrerSessionDecompositionFonction(REGLAGES_DEMO, () => construireAvecProfondeur(Number(id) as 2 | 3 | 4)));
+    setEtat(demarrerSessionDecompositionFonction(REGLAGES_DEMO, () => construireAvecVariante(id)));
+    setGeneration((g) => g + 1);
   }
 
   const niveauAideMax = niveauAideMaxDecomposition(etat.exerciceCourant);
@@ -95,6 +102,7 @@ export function App5gen2() {
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeDecompositionFonction
+            key={generation}
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -103,6 +111,7 @@ export function App5gen2() {
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(lignes) => terminerEtape(soumettreReponseDecomposition(etat, lignes))}
             diagnostiquer={(lignes) => diagnostiquerDecomposition(etat.exerciceCourant, lignes)}
+            motifStructure={(lignes) => reconstruitSansDecomposer(etat.exerciceCourant, lignes)}
             validation={validation}
           />
         </div>

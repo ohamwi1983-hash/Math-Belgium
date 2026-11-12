@@ -15,7 +15,7 @@
  * affichée, jamais deux, et on retire tant que ce n'est pas le cas (même logique que la fenêtre
  * lisible déjà en place).
  */
-import type { ExerciceScenarioC, FormeChiffreAffairesC, FormeCoutVariableC } from "../../core5e/problemesContexte.types";
+import type { ExerciceScenarioC, FormeChiffreAffairesC, FormeCoutVariableC, LigneTableauC } from "../../core5e/problemesContexte.types";
 import { entierAleatoire, tirerElement } from "./utils";
 
 const CF_MIN = 20;
@@ -25,7 +25,10 @@ const M_MAX = 3;
 const MARGE_P_MIN = 2;
 const MARGE_P_MAX = 6;
 const TENTATIVES_MAX = 500;
-const FRACTION_FENETRE_LISIBLE = 0.15;
+/** Le seuil doit tomber dans [20 % ; 80 %] de la fenêtre affichée (audit 5e ch. 1 : il tombait
+ * TOUJOURS à 15 %, collé au bord gauche, et la réponse « 0 » passait la tolérance). */
+const FRACTION_FENETRE_MIN = 0.2;
+const FRACTION_FENETRE_MAX = 0.8;
 
 const FORMES_CV: FormeCoutVariableC[] = ["racineCarree", "racineCubique", "carre", "cube"];
 const FORMES_CA: FormeChiffreAffairesC[] = ["affine", "racineCarree", "racineCubique"];
@@ -164,6 +167,17 @@ function tirerDeuxDistincts(candidats: number[]): [number, number] {
   return [candidats[i], candidats[j]];
 }
 
+const arrondiCentieme = (v: number) => Math.round(v * 100) / 100;
+
+/** Tableau de valeurs affiché (audit 5e ch. 1 : les données chiffrées viennent d'un tableau, plus de
+ * lectures graphiques au demi-millier près) — x = 1 donne directement k et m (CV(1) = k, CP(1) = m).
+ * Valeurs arrondies au centième, celles-là font foi. */
+export function construireTableauC(formeCV: FormeCoutVariableC, formeCA: FormeChiffreAffairesC, k: number, m: number, p: number, xs: number[]): LigneTableauC[] {
+  return [...new Set(xs)]
+    .sort((a, b) => a - b)
+    .map((x) => ({ x, cv: arrondiCentieme(coutVariable(formeCV, k, x)), cp: arrondiCentieme(coutProportionnel(m, x)), ca: arrondiCentieme(chiffreAffaires(formeCA, p, x)) }));
+}
+
 export function construireScenarioCAvecFormes(formeCV: FormeCoutVariableC, formeCA: FormeChiffreAffairesC): ExerciceScenarioC {
   for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
     const cf = entierAleatoire(CF_MIN, CF_MAX);
@@ -190,15 +204,18 @@ export function construireScenarioCAvecFormes(formeCV: FormeCoutVariableC, forme
       // temps), xMax est dérivé de xSeuil pour GARANTIR par construction qu'il tombe à la fraction
       // basse de la fenêtre — jamais au-delà du sommet, seule vraie contrainte physique.
       xSeuil = bissectionSeuil(f, xVertex);
-      xMax = Math.min(xVertex, xSeuil / FRACTION_FENETRE_LISIBLE);
+      // Position du seuil TIRÉE dans la fenêtre (25 % à 65 %), plafonnée par le sommet du bénéfice.
+      const fraction = 0.25 + Math.random() * 0.4;
+      xMax = Math.min(xVertex, xSeuil / fraction);
     }
-    if (xSeuil < xMax * FRACTION_FENETRE_LISIBLE || xSeuil > xMax * (1 - FRACTION_FENETRE_LISIBLE)) continue;
+    if (xSeuil < xMax * FRACTION_FENETRE_MIN || xSeuil > xMax * FRACTION_FENETRE_MAX) continue;
 
     const candidats = candidatsLisibles(formeCV, xMax);
     if (candidats.length < 2) continue;
     const [xLecture, xBenefice] = tirerDeuxDistincts(candidats);
+    const tableau = construireTableauC(formeCV, formeCA, k, m, p, [1, xLecture, xBenefice]);
 
-    return { scenario: "C", formeCV, formeCA, cf, k, m, p, xMax, xLecture, xBenefice, xSeuil };
+    return { scenario: "C", formeCV, formeCA, cf, k, m, p, xMax, xLecture, xBenefice, xSeuil, tableau };
   }
   throw new Error(`construireScenarioCAvecFormes(${formeCV},${formeCA}) : aucun tirage valide trouvé après ${TENTATIVES_MAX} tentatives.`);
 }

@@ -4,8 +4,8 @@
  * un générateur factice.
  *
  * Séquence DYNAMIQUE (D.4, voir `typesComposerFonctions.ts::ordreComplet`) — remplace l'ancienne
- * séquence fixe à 5 écrans. Aide progressive additive par écran (-20 pts/niveau), même mécanique
- * que le reste de la plateforme, plafond UNIFORME sur les 5 formes d'écran possibles (pas de raison
+ * séquence fixe à 5 écrans. Aide progressive additive par écran, même mécanique
+ * que le reste de la plateforme (aucun point affiché), plafond UNIFORME sur les 5 formes d'écran possibles (pas de raison
  * de varier par nom de phase désormais que la séquence elle-même varie). Réutilise
  * `demarrerEtapeTentatives`/`soumettreEtapeTentatives` (cross-chantier, déjà établi).
  */
@@ -17,7 +17,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import type { EtatSessionComposerFonctions, PhaseComposerFonctions, ResultatExerciceComposerFonctions } from "./typesComposerFonctions";
 import { ordreComplet } from "./typesComposerFonctions";
 import type { ReponseCondition } from "./verificationComposerFonctions";
-import { verifierC1Direction, verifierC2Direction, verifierConditionsDirection, verifierDomaineDirection, verifierFormuleDirectionSimplifiee } from "./verificationComposerFonctions";
+import { diagnostiquerFormuleDirectionSimplifiee, verifierC1Direction, verifierC2Direction, verifierConditionsDirection, verifierDomaineDirection, verifierFormuleDirectionSimplifiee } from "./verificationComposerFonctions";
 
 const POINTS_DE_BASE = 100;
 
@@ -104,13 +104,15 @@ function soumettreGenerique<T>(etat: EtatSessionComposerFonctions, prefixeAttend
   return apresPhase({ ...etat, etapeCourante }, score, etapeCourante.revelee);
 }
 
-/** Utilise le palier COMPLET (numérique + "simplifiée au maximum",
- * `verifierFormuleDirectionSimplifiee`) — une réponse mathématiquement correcte mais pas simplifiée
- * (`correct_non_simplifie`, `verificationComposerFonctions.ts`) compte comme INCORRECTE ici : la
- * tentative est consommée, le score pénalisé comme pour toute réponse fausse, l'élève ne peut pas
- * avancer sans réellement simplifier. `EtapeFormuleComposerFonctions.tsx` seul distingue ce cas
- * (message dédié) via `diagnostiquerFormuleDirectionSimplifiee`, appelé séparément côté présentation. */
+/** Palier COMPLET (numérique + « simplifiée au maximum », `verifierFormuleDirectionSimplifiee`).
+ * Audit 5e ch. 1, décision E : une réponse ÉQUIVALENTE mais pas encore simplifiée
+ * (`correct_non_simplifie`) NE consomme PAS de tentative — l'état est rendu inchangé et
+ * `EtapeFormuleComposerFonctions.tsx` affiche un message dédié. Seule une réponse fausse ou illisible
+ * consomme une tentative. */
 export function soumettreReponseFormule(etat: EtatSessionComposerFonctions, texte: string): EtatSessionComposerFonctions {
+  if (!etat.terminee && etat.phase.startsWith("formule") && diagnostiquerFormuleDirectionSimplifiee(direction(etat.exerciceCourant, etat.phase), texte) === "correct_non_simplifie") {
+    return etat;
+  }
   return soumettreGenerique(etat, "formule", texte, verifierFormuleDirectionSimplifiee);
 }
 

@@ -45,6 +45,15 @@ export function formatPolynomeLatex(coeffs: Polynome, variable = "x"): string {
 }
 
 /** Polynôme du 1er degré ax+b — coefficients ascendants [b, a]. */
+/** Trinôme unitaire SANS racine réelle, toujours > 0 : (x−h)² + c développé (c ≥ 1), h tiré
+ * dans [−3 ; 3] — « x² − 2x + 5 », pas seulement « x² + c » (audit 5e ch. 1, point 9 : il faut
+ * parfois calculer Δ pour voir que l'expression ne s'annule jamais). */
+export function polynomeSansRacineReelle(): Polynome {
+  const h = Math.floor(Math.random() * 7) - 3;
+  const c = 1 + Math.floor(Math.random() * 6);
+  return [h * h + c, -2 * h, 1];
+}
+
 export function polynomeLineaire(a: number, b: number): Polynome {
   return [b, a];
 }

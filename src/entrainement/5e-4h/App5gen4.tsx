@@ -15,11 +15,12 @@ import {
   soumettreReponseQuestion,
 } from "./moteur5e/sessionComposeeGraphique";
 import type { EtatSessionComposeeGraphique } from "./moteur5e/typesComposeeGraphique";
+import type { QuestionComposeeGraphique } from "./core5e/composeeGraphique.types";
 import { diagnostiquerReponseQuestion } from "./moteur5e/verificationComposeeGraphique";
 import type { ReponseQuestionComposeeGraphique } from "./moteur5e/verificationComposeeGraphique";
 import { PaireGraphesComposeeGraphique } from "./components5e/PaireGraphesComposeeGraphique";
 import { EtapeQuestionComposeeGraphique } from "./components5e/EtapeQuestionComposeeGraphique";
-import { labelChampResultat, nomInterne } from "./ui5e/formatComposeeGraphique";
+import { nomInterne, texteResultat } from "./ui5e/formatComposeeGraphique";
 import { calculerRecapitulatifComposeeGraphique } from "./ui5e/recapitulatifComposeeGraphique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -33,9 +34,6 @@ function nouvelleSession(): EtatSessionComposeeGraphique {
   return demarrerSessionComposeeGraphique(REGLAGES_DEMO, genererExerciceComposeeGraphique);
 }
 
-function formatResultatAttendu(resultatAttendu: number | null): string {
-  return resultatAttendu === null ? "n'existe pas" : String(resultatAttendu);
-}
 
 /** Une puce par question de l'exercice courant — "courante" pour `indexQuestion`, "correcte"/"revele"
  * pour les questions déjà closes (`resultatsQuestionsExercice`, un élément par question close, dans
@@ -53,10 +51,9 @@ function calculerSegmentsProgression(
   });
 }
 
-/** Format court de la réponse de l'élève — même structure que `formatResultatAttendu` (réponse
- * ATTENDUE) ci-dessus. */
-function formatReponseQuestionTexte(reponse: ReponseQuestionComposeeGraphique): string {
-  return reponse.resultatExiste ? reponse.resultatValeur ?? "?" : "n'existe pas";
+/** Réponse de l'élève rédigée comme la réponse attendue (« f(g(−7)) n'existe pas », « f(g(−7)) = 3 »). */
+function formatReponseQuestionTexte(question: QuestionComposeeGraphique, reponse: ReponseQuestionComposeeGraphique): string {
+  return texteResultat(question, reponse.resultatExiste ? (reponse.resultatValeur ?? "?").replace(/-/g, "−") : null);
 }
 
 /** État tenu en attente dès qu'une question se termine (bonne réponse, ou tentatives épuisées) —
@@ -76,6 +73,9 @@ export function App5gen4() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParQuestion, setAideUtiliseeParQuestion] = useState<Partial<Record<number, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la `key` de
+   * l'écran pour vider choix et champ — `indexQuestion` seul valait 0 avant et après. */
+  const [generation, setGeneration] = useState(0);
 
   /** Réutilise `calculerRecapitulatifComposeeGraphique` (même mécanisme que `RecapitulatifPanel`)
    * pour la réponse ATTENDUE : la question qui vient de se clore est toujours la DERNIÈRE entrée du
@@ -117,6 +117,7 @@ export function App5gen4() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParQuestion({});
@@ -128,6 +129,7 @@ export function App5gen4() {
   }
 
   function forcerVariante(id: string) {
+    setGeneration((g) => g + 1);
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParQuestion({});
@@ -144,11 +146,7 @@ export function App5gen4() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <span>
-            {labelChampResultat(question)} {formatResultatAttendu(question.resultatAttendu)}
-          </span>
-        ),
+        reponseAttendue: <span>{texteResultat(question, question.resultatAttendu)}</span>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -172,7 +170,7 @@ export function App5gen4() {
             Question {etat.indexQuestion + 1}/{exercice.questions.length}
           </p>
           <EtapeQuestionComposeeGraphique
-            key={etat.indexQuestion}
+            key={`${generation}-${etat.indexQuestion}`}
             question={question}
             donnees={<PaireGraphesComposeeGraphique exercice={exercice} pointRevele={pointRevele} />}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -183,9 +181,7 @@ export function App5gen4() {
             onValider={(reponse) =>
               terminerEtape(
                 soumettreReponseQuestion(etat, reponse),
-                <>
-                  {labelChampResultat(question)} {formatReponseQuestionTexte(reponse)}
-                </>,
+                <>{formatReponseQuestionTexte(question, reponse)}</>,
               )
             }
             diagnostiquer={(reponse) => diagnostiquerReponseQuestion(question, reponse)}

@@ -49,7 +49,7 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizFonctions5e`) pourrait
  * répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de

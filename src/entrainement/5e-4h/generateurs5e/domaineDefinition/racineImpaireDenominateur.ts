@@ -1,6 +1,6 @@
 import type { ExerciceRacineImpaireDenominateur, SlotCE, SousCasDenominateurQuadratique } from "../../core5e/domaineDefinition.types";
 import { choisirParmi, deuxEntiersDistincts, entierAleatoire, entierNonNulAleatoire, signeAleatoire } from "./aleatoire";
-import { formatPolynomeLatex, polynomeCarreParfait, polynomeLineaire, polynomeQuadratiqueDepuisRacines } from "./polynome";
+import { formatPolynomeLatex, polynomeCarreParfait, polynomeLineaire, polynomeQuadratiqueDepuisRacines, polynomeSansRacineReelle } from "./polynome";
 import { ensemblePrivePoints, ensembleReel } from "./resolutionSigne";
 
 const INDICES_IMPAIRS = [3, 5];
@@ -21,7 +21,7 @@ interface Denominateur {
 }
 
 function construireDenominateurDegre1(): Denominateur {
-  const a = entierNonNulAleatoire(1, 3);
+  const a = entierNonNulAleatoire(-3, 3);
   const b = entierAleatoire(-9, 9);
   const coeffs = polynomeLineaire(a, b);
   return { coeffs, latex: formatPolynomeLatex(coeffs), domf: ensemblePrivePoints([-b / a]), aucuneCE: false, sousCasDegre2: null };
@@ -38,10 +38,9 @@ function construireDenominateurDegre2(sousCas: SousCasDenominateurQuadratique): 
     const coeffs = polynomeCarreParfait(signeAleatoire(), r);
     return { coeffs, latex: formatPolynomeLatex(coeffs), domf: ensemblePrivePoints([r]), aucuneCE: false, sousCasDegre2: sousCas };
   }
-  // discriminantNegatif — forme x²+c (c>0, discriminant -4c<0) : D(x) toujours strictement positif,
+  // discriminantNegatif — (x−h)²+c développé (c>0, Δ<0) : D(x) toujours strictement positif,
   // jamais nul sur R ⇒ CE structurellement "toujours vraie" (principe unifié 1.10).
-  const c = entierAleatoire(1, 9);
-  const coeffs = [c, 0, 1];
+  const coeffs = polynomeSansRacineReelle();
   return { coeffs, latex: formatPolynomeLatex(coeffs), domf: ensembleReel(), aucuneCE: true, sousCasDegre2: sousCas };
 }
 
@@ -61,8 +60,12 @@ function construireNumerateur(degre: 0 | 1 | 2): Numerateur {
   return { latex: formatPolynomeLatex(polynomeQuadratiqueDepuisRacines(signeAleatoire(), r1, r2)), degre };
 }
 
-export function construireRacineImpaireDenominateur(denominateurDegre: 1 | 2, numerateurDegre: 0 | 1 | 2): ExerciceRacineImpaireDenominateur {
-  const den = denominateurDegre === 1 ? construireDenominateurDegre1() : construireDenominateurDegre2(choisirParmi(SOUS_CAS_DEGRE2));
+export function construireRacineImpaireDenominateur(
+  denominateurDegre: 1 | 2,
+  numerateurDegre: 0 | 1 | 2,
+  sousCasForce?: SousCasDenominateurQuadratique,
+): ExerciceRacineImpaireDenominateur {
+  const den = denominateurDegre === 1 ? construireDenominateurDegre1() : construireDenominateurDegre2(sousCasForce ?? choisirParmi(SOUS_CAS_DEGRE2));
   const num = construireNumerateur(numerateurDegre);
   const indice = choisirParmi(INDICES_IMPAIRS);
 

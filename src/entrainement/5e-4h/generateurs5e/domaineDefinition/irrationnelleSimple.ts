@@ -10,8 +10,10 @@ function fLatexIrrationnelleSimple(radicandeLatex: string): string {
   return `f(x) = ${k}\\sqrt{${radicandeLatex}}`;
 }
 
-function construireLineaire(): ExerciceIrrationnelleSimple {
-  const a = entierNonNulAleatoire(1, 3);
+/** Coefficient de x tiré dans [−3 ; 3]∖{0} (audit 5e ch. 1, point 7) : avec a < 0, le sens de
+ * l'inégalité change (« −2x + 6 ≥ 0 ⇔ x ≤ 3 »), le piège classique de cette résolution. */
+function construireLineaire(signeForce?: 1 | -1): ExerciceIrrationnelleSimple {
+  const a = signeForce === undefined ? entierNonNulAleatoire(-3, 3) : signeForce * entierNonNulAleatoire(1, 3);
   const b = entierAleatoire(-9, 9);
   const coeffs = polynomeLineaire(a, b);
   const latex = formatPolynomeLatex(coeffs);
@@ -46,8 +48,8 @@ function construireQuadratique(): ExerciceIrrationnelleSimple {
   };
 }
 
-export function construireIrrationnelleSimple(quadratique: boolean): ExerciceIrrationnelleSimple {
-  return quadratique ? construireQuadratique() : construireLineaire();
+export function construireIrrationnelleSimple(quadratique: boolean, signeForce?: 1 | -1): ExerciceIrrationnelleSimple {
+  return quadratique ? construireQuadratique() : construireLineaire(signeForce);
 }
 
 export function genererExerciceIrrationnelleSimple(): ExerciceIrrationnelleSimple {

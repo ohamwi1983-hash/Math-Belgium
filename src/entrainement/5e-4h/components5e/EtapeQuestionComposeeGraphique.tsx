@@ -48,6 +48,9 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
   const [resultatValeur, setResultatValeur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
+  // Après une tentative ratée, l'existence était forcément bien choisie (un mauvais choix clôt la
+  // question) : le choix est figé, seule la valeur reste à corriger.
+  const existenceFigee = tentativesUtilisees > 0;
 
   const complet = resultatExiste !== null && (!resultatExiste || resultatValeur.trim() !== "");
   /** Recalculé à chaque rendu depuis la saisie actuelle (jamais depuis `dernierStatut`, figé à la
@@ -74,10 +77,10 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
       <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE} blocDonnees={donnees} />
       <p className="prompt-text">{consigneQuestion(question)}</p>
       <div className="options-grid">
-        <button type="button" className={`btn ${resultatExiste === false ? "toggle-active" : ""}`} onClick={() => setResultatExiste(false)}>
+        <button type="button" className={`btn ${resultatExiste === false ? "toggle-active" : ""}`} disabled={existenceFigee || !!validation} onClick={() => setResultatExiste(false)}>
           N'existe pas
         </button>
-        <button type="button" className={`btn ${resultatExiste === true ? "toggle-active" : ""}`} onClick={() => setResultatExiste(true)}>
+        <button type="button" className={`btn ${resultatExiste === true ? "toggle-active" : ""}`} disabled={existenceFigee || !!validation} onClick={() => setResultatExiste(true)}>
           Existe
         </button>
       </div>
@@ -89,6 +92,7 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
               type="text"
               className={`text-input${resultatValeurErronee ? " is-erronee" : ""}`}
               value={resultatValeur}
+              disabled={!!validation}
               onChange={(e) => setResultatValeur(e.target.value)}
             />
           </div>

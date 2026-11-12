@@ -1,9 +1,10 @@
 import type { EtatSessionComposeeGraphique } from "../moteur5e/typesComposeeGraphique";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { labelChampResultat } from "./formatComposeeGraphique";
+import { imageCherchee } from "./formatComposeeGraphique";
+import { nombreTypo } from "./composeeGraphiqueGraph";
 
 function formatResultatAttendu(resultatAttendu: number | null): string {
-  return resultatAttendu === null ? "n'existe pas" : String(resultatAttendu);
+  return resultatAttendu === null ? "n'existe pas" : nombreTypo(resultatAttendu);
 }
 
 /**
@@ -15,7 +16,7 @@ function formatResultatAttendu(resultatAttendu: number | null): string {
  */
 export function calculerRecapitulatifComposeeGraphique(etat: EtatSessionComposeeGraphique): EntreeRecapitulatif[] {
   return etat.resultatsQuestionsExercice.map((resultat, index) => ({
-    libelle: `Question ${index + 1} — ${labelChampResultat(resultat.question)}`,
+    libelle: `Question ${index + 1} — ${imageCherchee(resultat.question)}`,
     estLatex: false,
     valeur: formatResultatAttendu(resultat.question.resultatAttendu),
     revele: resultat.revele,

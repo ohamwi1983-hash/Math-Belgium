@@ -13,32 +13,39 @@ function numerateurConstant(): string {
  * tombe délibérément dedans ou dehors de sa zone solution — jamais un tirage indépendant suivi
  * d'une vérification a posteriori, qui biaiserait la répartition 50/50 exigée par la spec.
  *
- * Simplification assumée pour cette première livraison (signalée explicitement) : le signe
- * directeur de N(x) est fixé (a=1 en linéaire, a=-1 en quadratique — solution toujours "vers la
- * droite"/"intervalle borné") plutôt que tiré aléatoirement, pour garder la construction de la
- * cible tractable ; D(x) reste toujours linéaire (jamais la variante cubique à mise en évidence
- * mentionnée dans la spec).
+ * Le signe directeur de N(x) est TIRÉ (audit 5e ch. 1, point 7) : en linéaire, a < 0 renverse le
+ * sens (« −2x + 6 ≥ 0 ⇔ x ≤ 3 ») ; en quadratique, a > 0 donne une solution « à l'extérieur des
+ * racines ». La position de `d` (dedans/dehors) est construite en conséquence. D(x) reste
+ * linéaire.
  */
 function construireLineaire(d: number, dedans: boolean): { coeffs: number[]; latex: string; resolution: EnsembleReelGuide } {
   const offset = entierAleatoire(1, 5);
-  const seuil = dedans ? d - offset : d + offset;
-  const coeffs = polynomeLineaire(1, -seuil);
-  return { coeffs, latex: formatPolynomeLatex(coeffs), resolution: resoudreLineaireSigne(1, -seuil, "≥") };
+  const signe = signeAleatoire();
+  const k = entierNonNulAleatoire(1, 2);
+  // signe > 0 : solution [seuil ; +∞[ ; signe < 0 : ]−∞ ; seuil].
+  const seuil = (signe > 0) === dedans ? d - offset : d + offset;
+  const a = signe * k;
+  const coeffs = polynomeLineaire(a, -a * seuil);
+  return { coeffs, latex: formatPolynomeLatex(coeffs), resolution: resoudreLineaireSigne(a, -a * seuil, "≥") };
 }
 
 function construireQuadratique(d: number, dedans: boolean): { coeffs: number[]; latex: string; resolution: EnsembleReelGuide } {
   const offset1 = entierAleatoire(1, 4);
   const offset2 = entierAleatoire(1, 4);
-  const [rmin, rmax] = dedans ? [d - offset1, d + offset2] : [d + offset1, d + offset1 + offset2];
-  const coeffs = polynomeQuadratiqueDepuisRacines(-1, rmin, rmax);
-  return { coeffs, latex: formatPolynomeLatex(coeffs), resolution: resoudreQuadratiqueSigne(-1, rmin, rmax, "≥") };
+  const signe = signeAleatoire();
+  // signe < 0 : solution [rmin ; rmax] ; signe > 0 : extérieur des racines. `d` est mis
+  // strictement entre les racines (ou strictement d'un côté) selon ce qu'on veut obtenir.
+  const entreLesRacines = (signe < 0) === dedans;
+  const [rmin, rmax] = entreLesRacines ? [d - offset1, d + offset2] : [d + offset1, d + offset1 + offset2];
+  const coeffs = polynomeQuadratiqueDepuisRacines(signe, rmin, rmax);
+  return { coeffs, latex: formatPolynomeLatex(coeffs), resolution: resoudreQuadratiqueSigne(signe, rmin, rmax, "≥") };
 }
 
 /** D(x) > 0 STRICT, D EST le radicande (sous-variante "nSurRacineD", point 7) — jamais une valeur
  * particulière exclue à construire, contrairement à `construireLineaire`/`construireQuadratique`
  * (qui ciblent une exclusion de dénominateur SÉPARÉE du radicande) : ici il n'y a qu'UNE condition. */
 function construireLineaireStrict(): { coeffs: number[]; latex: string; resolution: EnsembleReelGuide } {
-  const a = entierNonNulAleatoire(1, 3);
+  const a = entierNonNulAleatoire(-3, 3);
   const b = entierAleatoire(-9, 9);
   const coeffs = polynomeLineaire(a, b);
   return { coeffs, latex: formatPolynomeLatex(coeffs), resolution: resoudreLineaireSigne(a, b, ">") };

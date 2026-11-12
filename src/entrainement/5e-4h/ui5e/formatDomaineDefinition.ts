@@ -31,7 +31,10 @@ export function formatValeurLatex(valeur: number): string {
   const rendu = formatFractionIrreductible(valeur);
   if (rendu.includes("/")) {
     const [n, d] = rendu.split("/");
-    return `\\dfrac{${n}}{${d}}`;
+    // Signe SORTI de la fraction (audit 5e ch. 1, point 6) : « −\\dfrac{5}{3} », jamais
+    // « \\dfrac{-5}{3} ».
+    const negatif = n.startsWith("-");
+    return `${negatif ? "-" : ""}\\dfrac{${negatif ? n.slice(1) : n}}{${d}}`;
   }
   // Aucune fraction "propre" trouvée (borne réellement irrationnelle — possible pour 5gen3, une
   // composition élevant au carré peut faire apparaître une racine non exacte) : repli sur une
@@ -60,8 +63,11 @@ export function formatEnsembleReelLatex(ensemble: EnsembleReelGuide): string {
   return ensemble.morceaux.map(formatMorceauLatex).join(" \\cup ");
 }
 
+/** « dom f = … » — `\\operatorname{dom}` (romain, espacé), jamais « domf » lu d·o·m·f en italique
+ * (audit 5e ch. 1, point 8). Signature inchangée : aussi utilisée par 5gen3 et les feuilles. */
+export const LATEX_DOM_F = "\\operatorname{dom}f";
 export function formatDomfLatex(ensemble: EnsembleReelGuide): string {
-  return `domf = ${formatEnsembleReelLatex(ensemble)}`;
+  return `${LATEX_DOM_F} = ${formatEnsembleReelLatex(ensemble)}`;
 }
 
 /** Rendu "bloc fitter" — un fragment KaTeX par morceau (le symbole `\cup` porté par tous les
@@ -111,13 +117,19 @@ export function formatCEAttendueLatex(exercice: ExerciceDomaineDefinition): stri
   return slotsExercice(exercice).map(formatSlotConditionLatex).join(" \\text{ et } ");
 }
 
-/** Version "bloc fitter" (point 1.3) — un fragment par ligne de CE, jamais un unique bloc "et"-joint
- * non-wrappable pour les familles à 2 CE (`racineSurFraction`/"racineSurD"). */
-export function formatTermesCEAttendueLatex(exercice: ExerciceDomaineDefinition): string[] {
-  if (exercice.aucuneCE) return ["\\text{Aucune CE}"];
-  const slots = slotsExercice(exercice);
-  if (slots.length <= 1) return [formatCEAttendueLatex(exercice)];
-  return slots.map((s, i) => formatSlotConditionLatex(s) + (i < slots.length - 1 ? " \\text{ et }" : ""));
+/** Une condition par fragment, en LaTeX PUR (aucune prose en mode math : le « et » qui les relie
+ * est écrit en texte par l'appelant). Vide quand l'exercice n'a aucune CE. */
+export function formatConditionsLatex(exercice: ExerciceDomaineDefinition): string[] {
+  if (exercice.aucuneCE) return [];
+  return slotsExercice(exercice).map(formatSlotConditionLatex);
+}
+
+/** Conditions TOUJOURS VRAIES d'un exercice « sans CE » qui a pourtant un dénominateur ou un
+ * radicande (ex. « x²+2 ≠ 0 ») — acceptées comme réponse (décision A, audit 5e ch. 1). Vide pour
+ * « pasDeCE » ou pour un exercice qui a de vraies CE. */
+export function formatConditionsToujoursVraiesLatex(exercice: ExerciceDomaineDefinition): string[] {
+  if (!exercice.aucuneCE) return [];
+  return slotsExercice(exercice).map(formatSlotConditionLatex);
 }
 
 /**
@@ -128,22 +140,31 @@ export function formatTermesCEAttendueLatex(exercice: ExerciceDomaineDefinition)
  * exclure) — jamais de texte dédié par famille pour ce cas, non spécifié par la spec. `pasDeCE`
  * n'a JAMAIS d'aide (retourne toujours `[]`, spécifique à cette famille, point 4).
  */
+const AIDE_REPERER = "Quelles opérations de f(x) ne sont pas possibles pour tous les réels ?";
+const AIDE_DIVISION_RACINE = "Cherche une division (que doit vérifier le dénominateur ?) et une racine d'indice pair (que doit vérifier le radicande ?).";
+
+/**
+ * Aides de MÉTHODE (audit 5e ch. 1, point 2) : elles orientent vers les opérations à surveiller,
+ * jamais vers le symbole à choisir ni vers la conclusion (« aucune CE »). Le nombre de paliers suit
+ * `niveauAideMaxCE`. `pasDeCE` n'a jamais d'aide.
+ */
 export function texteAideCE(exercice: ExerciceDomaineDefinition): string[] {
   if (exercice.famille === "pasDeCE") return [];
-  if (exercice.aucuneCE) return ["Cette expression est toujours définie : il n'y a aucune valeur de x à exclure."];
+  if (exercice.aucuneCE) {
+    const verifier = "Repère l'expression qui pourrait poser problème, puis demande-toi si elle peut réellement prendre une valeur interdite pour un réel x.";
+    return exercice.famille === "racineSurFraction" ? [AIDE_REPERER, verifier] : [verifier];
+  }
   switch (exercice.famille) {
     case "rationnelle":
-      return ["Il n'y a qu'une seule condition d'existence."];
-    case "irrationnelleSimple":
-      return ["Le radicande ≥ 0."];
     case "racineImpaireDenominateur":
-      return ["Dénominateur ≠ 0."];
+    case "irrationnelleSimple":
+      return [AIDE_REPERER];
     case "fractionSousRacine":
-      return ["Radicande ≥ 0.", "Dénominateur ≠ 0."];
+      return [AIDE_REPERER, AIDE_DIVISION_RACINE];
     case "racineSurFraction":
       return exercice.structure === "nSurRacineD"
-        ? ["Le radicande doit être positif ou nul.", "Ce radicande est aussi le dénominateur de la fraction."]
-        : ["Le radicande ≥ 0.", "Dénominateur ≠ 0."];
+        ? [AIDE_REPERER, "Ici, la racine est elle-même au dénominateur : la même expression doit respecter deux contraintes à la fois."]
+        : [AIDE_REPERER, AIDE_DIVISION_RACINE];
   }
 }
 
@@ -152,12 +173,11 @@ export function texteAideCE(exercice: ExerciceDomaineDefinition): string[] {
 // l'exercice (jamais de la saisie brute de l'élève, même convention que le reste du projet).
 // ============================================================================
 
-/** État actuel sur les écrans "resolution"/"domf" — la CE déjà écrite à l'écran 1 (ou "CE : /" si
- * le gate a répondu "Aucune CE"). Bloc fitter appliqué (point 1.3). */
+/** État actuel sur les écrans "resolution"/"domf" — les CE justes, une par fragment (LaTeX pur ;
+ * le libellé « CE : » et le « et » sont écrits en texte par le composant). Vide si l'exercice n'a
+ * aucune CE (le composant écrit alors « aucune »). */
 export function formatTermesEtatActuelCELatex(exercice: ExerciceDomaineDefinition): string[] {
-  if (exercice.aucuneCE) return ["\\text{CE : } /"];
-  const termes = formatTermesCEAttendueLatex(exercice);
-  return termes.map((t, i) => (i === 0 ? `\\text{CE : } ${t}` : t));
+  return formatConditionsLatex(exercice);
 }
 
 // ============================================================================
@@ -186,11 +206,11 @@ export function calculerAideGrilleDomf(grille: GrilleQuotientDomf, racines: numb
  * pour "fractionSousRacine" (son écran "resolution" est un TABLEAU, pas une expression, rendu à
  * part via `GrilleQuotientDomfRecap` par l'appelant) et pour toute famille sans écran "resolution"
  * séparé (voir `phaseApresCE`, moteur5e/typesDomaineDefinition.ts). */
-export function formatResolutionAttendueLatex(exercice: ExerciceDomaineDefinition): string | null {
+export function formatResolutionAttendueLatex(exercice: ExerciceDomaineDefinition): string[] | null {
   if (exercice.famille === "racineSurFraction" && exercice.structure === "racineSurD") {
     const partieN = formatEnsembleReelLatex(exercice.resolutionRadicande);
     const d = exercice.resolutionDenominateur;
-    return `x\\in ${partieN} \\text{ et } x\\neq ${d === null ? "?" : formatValeurLatex(d)}`;
+    return [`x\\in ${partieN}`, `x\\neq ${d === null ? "?" : formatValeurLatex(d)}`];
   }
   return null;
 }

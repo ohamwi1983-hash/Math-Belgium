@@ -1,6 +1,6 @@
 import type { ExerciceRationnelle, SlotCE, SousCasRationnelle } from "../../core5e/domaineDefinition.types";
 import { choisirParmi, deuxEntiersDistincts, entierAleatoire, entierNonNulAleatoire } from "./aleatoire";
-import { formatFacteurLineaireLatex, formatPolynomeLatex, multiplierPolynomes, polynomeCarreParfait, polynomeLineaire, polynomeQuadratiqueDepuisRacines, reduireNumerateurConstant } from "./polynome";
+import { formatFacteurLineaireLatex, formatPolynomeLatex, multiplierPolynomes, polynomeCarreParfait, polynomeLineaire, polynomeQuadratiqueDepuisRacines, polynomeSansRacineReelle, reduireNumerateurConstant } from "./polynome";
 import { ensemblePrivePoints, ensembleReel } from "./resolutionSigne";
 
 export const SOUS_CAS_RATIONNELLE: SousCasRationnelle[] = ["lineaireSimple", "quadratiqueFactorisable", "carreParfait", "factoriseAvecCarre", "vacuous"];
@@ -33,7 +33,7 @@ function slotDenominateur(latex: string, coeffs: number[]): SlotCE {
  * une constante) — réduit par PGCD avant affichage (A.7, voir `reduireNumerateurConstant`), sinon
  * ~11% des tirages affichaient une fraction non réduite (ex. 6/(3x+9) au lieu de 2/(x+3)). */
 function construireLineaireSimple(): ExerciceRationnelle {
-  const a = entierNonNulAleatoire(1, 3);
+  const a = entierNonNulAleatoire(-3, 3);
   const b = entierAleatoire(-9, 9);
   const { numerateur, denominateur: coeffs } = reduireNumerateurConstant(entierNonNulAleatoire(1, 9), polynomeLineaire(a, b));
   const denLatex = formatPolynomeLatex(coeffs);
@@ -98,8 +98,7 @@ function construireFactoriseAvecCarre(): ExerciceRationnelle {
 }
 
 function construireVacuous(): ExerciceRationnelle {
-  const c = entierAleatoire(1, 9);
-  const coeffs = [c, 0, 1];
+  const coeffs = polynomeSansRacineReelle();
   const denLatex = formatPolynomeLatex(coeffs);
   const resolution = ensembleReel();
   return {
@@ -109,7 +108,7 @@ function construireVacuous(): ExerciceRationnelle {
     slots: [slotDenominateur(denLatex, coeffs)],
     resolution,
     domf: resolution,
-    // Dénominateur toujours >0 (forme x²+c, c>0) — CE structurellement "toujours vraie", gate="Aucune
+    // Dénominateur toujours >0 ((x−h)²+c, c>0) — CE structurellement "toujours vraie", gate="Aucune
     // CE" dès l'écran 1, conformément au principe unifié 1.10 (voir CLAUDE.md section 5gen1).
     aucuneCE: true,
   };

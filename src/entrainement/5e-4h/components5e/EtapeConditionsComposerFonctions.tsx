@@ -75,12 +75,11 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
 
   const valeurs = lignes.map((l) => parserNombreOuFraction(l.seuil));
   const complet = lignes.every((l, i) => l.comparateur !== null && valeurs[i] !== null);
-  /** Chaque ligne compare son PROPRE seuil à `dir.conditions[i].seuil` (même index, même ordre que
-   * la construction initiale de `lignes`) — champ diagnostiqué indépendamment de la ligne voisine
-   * (A.2), recalculé à chaque rendu depuis la saisie actuelle. Le comparateur (select) reste hors
-   * périmètre A.2 (pas un champ de saisie libre). */
+  /** Audit 5e ch. 1, point 24 : l'ordre des lignes ne compte plus — un seuil est juste s'il est celui
+   * d'UNE des conditions attendues (recalculé à chaque rendu depuis la saisie actuelle). */
   function seuilErronee(i: number): boolean {
-    return montrerErreurs && (valeurs[i] === null || Math.abs((valeurs[i] as number) - dir.conditions[i].seuil) >= TOLERANCE_SEUIL);
+    const v = valeurs[i];
+    return montrerErreurs && (v === null || !dir.conditions.some((c) => Math.abs(v - c.seuil) < TOLERANCE_SEUIL));
   }
 
   function valider() {
@@ -113,7 +112,7 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
           <input
             type="text"
             className={`text-input${seuilErronee(i) ? " is-erronee" : ""}`}
-            placeholder="valeur"
+            placeholder="nombre"
             value={ligne.seuil}
             onChange={(e) => modifierSeuil(i, e.target.value)}
           />

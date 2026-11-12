@@ -4,7 +4,7 @@ import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { GrilleQuotientDomfRecap } from "./GrilleQuotientDomfRecap";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, calculerAideGrilleDomf, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
+import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, calculerAideGrilleDomf, formatTermesEtatActuelCELatex, LATEX_DOM_F } from "../ui5e/formatDomaineDefinition";
 import { Katex } from "../components/Katex";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -36,15 +36,20 @@ export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tent
     <div>
       <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
       <div className="etat-actuel-box etat-actuel-box-termes">
+        <span>CE :</span>
+        {termesEtatActuel.length === 0 && <span>aucune</span>}
         {termesEtatActuel.map((t, i) => (
-          <Katex key={i} expression={t} />
+          <span key={i}>
+            {i > 0 && "et "}
+            <Katex expression={t} />
+          </span>
         ))}
       </div>
       {aFractionSousRacine && <GrilleQuotientDomfRecap exercice={exercice} highlight={highlight} />}
-      <p className="prompt-text">Exprime le domaine de définition de f, domf, en notation ensembliste.</p>
+      <p className="prompt-text">Exprime le domaine de définition de f en notation ensembliste.</p>
       <EnsembleReelGuideBuilder
         onValider={onValider}
-        prefixApercu="domf ="
+        prefixApercu={`${LATEX_DOM_F} =`}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         attendu={exercice.domf}
         apresEchec={montrerErreurs}

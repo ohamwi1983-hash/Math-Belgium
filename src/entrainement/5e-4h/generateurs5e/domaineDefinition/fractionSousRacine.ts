@@ -2,7 +2,7 @@ import type { EnsembleReelGuide, ExerciceFractionSousRacine, GrilleQuotientDomf,
 import type { ValeurCellule } from "../../core/signesProduit.types";
 import type { ValeurCelluleQuotient } from "../../core/inequationRationnelle.types";
 import { choisirParmi, deuxEntiersDistincts, entierAleatoire, entierNonNulAleatoire } from "./aleatoire";
-import { formatPolynomeLatex, polynomeLineaire, polynomeQuadratiqueDepuisRacines, signeCellule } from "./polynome";
+import { formatPolynomeLatex, polynomeLineaire, polynomeQuadratiqueDepuisRacines, polynomeSansRacineReelle, signeCellule } from "./polynome";
 import { ensembleReel } from "./resolutionSigne";
 
 const SOUS_VARIANTES: SousVarianteFractionSousRacine[] = ["N1D1", "N2D1", "N1D2", "N2D2"];
@@ -41,8 +41,7 @@ function construireFacteur(degre: 1 | 2, eviter: number[], sansRacineReelle: boo
     return { coeffs, latex: formatPolynomeLatex(coeffs), racinesReelles: [r] };
   }
   if (sansRacineReelle) {
-    const c = entierAleatoire(1, 9);
-    const coeffs = [c, 0, 1];
+    const coeffs = polynomeSansRacineReelle();
     return { coeffs, latex: formatPolynomeLatex(coeffs), racinesReelles: [] };
   }
   let r1 = 0;

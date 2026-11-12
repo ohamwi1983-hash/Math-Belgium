@@ -4,11 +4,10 @@
  * coefficients de a/b dans F(x)=a·coeffA(x)+b·coeffB(x) (coût TOTAL), d'où cu(x)=F(x)/x. Cette seule
  * paire de fonctions couvre les 5 modèles sans dupliquer la logique de résolution/génération 5 fois.
  *
- * Le coût TOTAL "vrai" F(x)=aVrai·coeffA(x)+bVrai·coeffB(x) n'est jamais montré à l'élève ; le coût
- * UNITAIRE théorique cu(x)=F(x)/x est arrondi à l'entier à 2 valeurs de x avant révélation —
- * reproduit le bruit réaliste d'un tableau source, si bien que le système reconstruit par l'élève à
- * partir des 2 points révélés peut légitimement résoudre vers un couple (a,b) légèrement différent
- * de (aVrai,bVrai).
+ * Les coûts unitaires révélés sont EXACTS (au plus 2 décimales — audit 5e ch. 1 : l'ancien arrondi à
+ * l'entier faisait résoudre le système vers des (a, b) faux, négatifs ou nuls dans 14 % des B4). Le
+ * tirage rejette donc tout couple de points dont le coût unitaire n'a pas une écriture décimale
+ * courte ; le système de l'élève redonne alors exactement (aVrai, bVrai), entiers positifs.
  */
 import type { ExerciceScenarioB, ModeleCoutUnitaire, PointRevele } from "../../core5e/problemesContexte.types";
 import { CONTEXTES_B1, CONTEXTES_B2, CONTEXTES_B3, CONTEXTES_B4, CONTEXTES_B5 } from "./contextesScenarioB";
@@ -59,7 +58,7 @@ export function coutUnitaireTheorique(modele: ModeleCoutUnitaire, a: number, b: 
   return coutTotalTheorique(modele, a, b, x) / x;
 }
 
-/** Résout {F(x1)=cu1·x1, F(x2)=cu2·x2} pour (a,b) — à partir des points RÉVÉLÉS (arrondis), via
+/** Résout {F(x1)=cu1·x1, F(x2)=cu2·x2} pour (a,b) — à partir des points RÉVÉLÉS (exacts), via
  * Cramer sur la base (coeffA,coeffB) du modèle — généralise l'ancienne résolution câblée en dur sur
  * la seule forme cu(x)=a+b/x (B1). */
 export function resoudreSystemeScenarioB(modele: ModeleCoutUnitaire, point1: PointRevele, point2: PointRevele): { a: number; b: number } {
@@ -123,30 +122,35 @@ function tirerDeuxEvaluationsDistinctes(exclus: number[]): [number, number] {
   return [disponibles[i], disponibles[j]];
 }
 
+/** Coût unitaire si son écriture décimale EXACTE a au plus 2 décimales, sinon `null` (ex. 26,5 ✓,
+ * 12,333… ✗). */
+function coutUnitaireExact(modele: ModeleCoutUnitaire, a: number, b: number, x: number): number | null {
+  const cu = coutUnitaireTheorique(modele, a, b, x);
+  const centiemes = Math.round(cu * 100);
+  return Math.abs(cu * 100 - centiemes) < 1e-7 ? centiemes / 100 : null;
+}
+
+const TENTATIVES_MAX = 2000;
+
 export function construireScenarioBAvecModele(modele: ModeleCoutUnitaire): ExerciceScenarioB {
   const contexte = tirerElement(contextesDuModele(modele));
-  const { aVrai, bVrai } = tirerAB(modele);
-  const [x1, x2] = tirerDeuxPointsEcartes();
+  for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
+    const { aVrai, bVrai } = tirerAB(modele);
+    const [x1, x2] = tirerDeuxPointsEcartes();
+    const cu1 = coutUnitaireExact(modele, aVrai, bVrai, x1);
+    const cu2 = coutUnitaireExact(modele, aVrai, bVrai, x2);
+    if (cu1 === null || cu2 === null) continue;
 
-  const point1: PointRevele = { x: x1, coutUnitaire: Math.round(coutUnitaireTheorique(modele, aVrai, bVrai, x1)) };
-  const point2: PointRevele = { x: x2, coutUnitaire: Math.round(coutUnitaireTheorique(modele, aVrai, bVrai, x2)) };
+    const point1: PointRevele = { x: x1, coutUnitaire: cu1 };
+    const point2: PointRevele = { x: x2, coutUnitaire: cu2 };
+    const { a, b } = resoudreSystemeScenarioB(modele, point1, point2);
+    // Garde-fou : les points étant exacts, le système redonne (aVrai, bVrai).
+    if (Math.abs(a - aVrai) > 1e-6 || Math.abs(b - bVrai) > 1e-6) continue;
+    const [xEval1, xEval2] = tirerDeuxEvaluationsDistinctes([x1, x2]);
 
-  const { a, b } = resoudreSystemeScenarioB(modele, point1, point2);
-  const [xEval1, xEval2] = tirerDeuxEvaluationsDistinctes([x1, x2]);
-
-  return {
-    scenario: "B",
-    modele,
-    contexte,
-    point1,
-    point2,
-    aVrai,
-    bVrai,
-    aArrondiAttendu: Math.round(a),
-    bArrondiAttendu: Math.round(b),
-    xEval1,
-    xEval2,
-  };
+    return { scenario: "B", modele, contexte, point1, point2, aVrai, bVrai, aArrondiAttendu: aVrai, bArrondiAttendu: bVrai, xEval1, xEval2 };
+  }
+  throw new Error(`construireScenarioBAvecModele(${modele}) : aucun tirage exact trouvé après ${TENTATIVES_MAX} tentatives.`);
 }
 
 export function genererExerciceScenarioB(): ExerciceScenarioB {

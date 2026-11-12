@@ -7,6 +7,7 @@ import { GrilleQuotientDomfBuilder } from "./GrilleQuotientDomfBuilder";
 import { Katex } from "../components/Katex";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, formatEnsembleReelLatex, formatSlotConditionLatex, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
+import { verifierEnsembleReelGuide } from "../moteur5e/verificationDomaineDefinition";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -23,15 +24,9 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
+/** « CE : » et « et » en TEXTE, conditions en LaTeX pur (jamais de prose en mode math). */
 function EtatActuelCE({ exercice }: { exercice: ExerciceDomaineDefinition }) {
-  const termes = formatTermesEtatActuelCELatex(exercice);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
+  return <EtatActuelLignes termes={formatTermesEtatActuelCELatex(exercice)} />;
 }
 
 /** Bloc "état actuel" SCOPÉ à une seule ligne LaTeX libre (B.0.2, promptcorrectionsregroupees.md)
@@ -40,8 +35,13 @@ function EtatActuelCE({ exercice }: { exercice: ExerciceDomaineDefinition }) {
 function EtatActuelLignes({ termes }: { termes: string[] }) {
   return (
     <div className="etat-actuel-box etat-actuel-box-termes">
+      <span>CE :</span>
+      {termes.length === 0 && <span>aucune</span>}
       {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
+        <span key={i}>
+          {i > 0 && "et "}
+          <Katex expression={t} />
+        </span>
       ))}
     </div>
   );
@@ -90,7 +90,7 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
       <p className="prompt-text">Résous la condition d'existence.</p>
       <EnsembleReelGuideBuilder
         onValider={(ensemble) => onValider({ famille, ensemble })}
-        prefixApercu="CE : x\in"
+        prefixApercu="x\in"
         attendu={exercice.resolution}
         apresEchec={montrerErreurs}
         validation={validation}
@@ -151,38 +151,54 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
   const attenduDenominateur: EnsembleReelGuide | undefined =
     exercice.resolutionDenominateur !== null ? { forme: "prive_points", points: [exercice.resolutionDenominateur], morceaux: [] } : undefined;
 
+  /** Audit 5e ch. 1, point 1 : le radicande est vérifié SEUL avant de passer au dénominateur. Faux →
+   * la tentative est consommée tout de suite (soumission avec un dénominateur vide, toujours faux)
+   * et l'écran RESTE sur le radicande, que l'élève peut corriger ; juste → on passe au dénominateur,
+   * et l'encadré montre la valeur juste. Avant, un radicande faux bloquait l'élève sur la 2e
+   * sous-étape, sans moyen de le corriger. */
+  function validerRadicande(ensemble: EnsembleReelGuide) {
+    if (verifierEnsembleReelGuide(ensemble, exercice.resolutionRadicande)) {
+      setRadicande(ensemble);
+      return;
+    }
+    onValider({ famille: "racineSurFraction", radicande: ensemble, denominateur: { forme: "intervalles", points: [], morceaux: [] } });
+  }
+
   if (radicande === null) {
     return (
       <div>
-        <EtatActuelLignes termes={[`\\text{CE : } ${formatSlotConditionLatex(slotRadicande)}`]} />
-        <p className="prompt-text">Résous d'abord la condition du radicande (N(x) ≥ 0).</p>
+        <EtatActuelLignes termes={[formatSlotConditionLatex(slotRadicande)]} />
+        <p className="prompt-text">Résous d'abord la condition du radicande.</p>
         <EnsembleReelGuideBuilder
           key="radicande"
-          onValider={setRadicande}
-          prefixApercu="CE : x\in"
+          onValider={validerRadicande}
+          prefixApercu="x\in"
           attendu={exercice.resolutionRadicande}
           apresEchec={montrerErreurs}
           validation={validation}
         />
+        {!validation && montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
       </div>
     );
   }
 
   return (
     <div>
-      <EtatActuelLignes
-        termes={[`\\text{CE : } x\\in ${formatEnsembleReelLatex(radicande)} \\text{ et }`, formatSlotConditionLatex(slotDenominateur)]}
-      />
+      <EtatActuelLignes termes={[`x\\in ${formatEnsembleReelLatex(exercice.resolutionRadicande)}`, formatSlotConditionLatex(slotDenominateur)]} />
       <p className="prompt-text">Résous maintenant la condition du dénominateur (valeur exclue).</p>
       <EnsembleReelGuideBuilder
         key="denominateur"
         onValider={(denominateur) => onValider({ famille: "racineSurFraction", radicande, denominateur })}
-        prefixApercu="CE : x\in"
+        prefixApercu="x\in"
         attendu={attenduDenominateur}
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {montrerErreurs && (
+      {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
           Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
         </p>

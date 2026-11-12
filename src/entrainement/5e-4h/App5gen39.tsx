@@ -4,21 +4,21 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { demarrerSessionQuizFonctions5e, soumettreReponseQuizFonctions5e } from "./moteur5e/sessionQuizFonctions5e";
 import type { EtatSessionQuizFonctions5e, ResultatExerciceQuizFonctions5e } from "./moteur5e/typesQuizFonctions5e";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs5e/quizFonctions5e/index";
+import { BANQUE_QUIZ_FONCTIONS_5E } from "./generateurs5e/quizFonctions5e/banque";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctions5e } from "./components5e/EtapeQuestionQuizFonctions5e";
 import { ResultatPanelQuizFonctions5e } from "./components5e/ResultatPanelQuizFonctions5e";
 import { ResumeSessionQuizFonctions5e } from "./components5e/ResumeSessionQuizFonctions5e";
 
-/** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
- * `generateurs5e/quizFonctions5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 20 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession5e = {
-  nombreExercices: 20,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille RÉELLE de la banque du thème (`.claude/rules/quiz-generators.md`,
+ * piège du nombre fixe) : couplé à `creerGenerateurSansRepetition`, une session parcourt toutes les
+ * affirmations du thème choisi sans jamais en répéter une, même si la banque change de taille. */
+function reglagesPour(theme: VarianteQuizFonctions5e): ReglagesSession5e {
+  return { nombreExercices: BANQUE_QUIZ_FONCTIONS_5E[theme].length, tentativesMax: 1 };
+}
 
 function nouvelleSession(theme: VarianteQuizFonctions5e): EtatSessionQuizFonctions5e {
-  return demarrerSessionQuizFonctions5e(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizFonctions5e(reglagesPour(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** 5gen39 — "Fonctions : rappels et compléments" (quiz vrai/faux), chapitre 1, réplique mécanique
@@ -50,7 +50,7 @@ export function App5gen39() {
     const theme = varianteId as VarianteQuizFonctions5e;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizFonctions5e(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizFonctions5e(reglagesPour(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
