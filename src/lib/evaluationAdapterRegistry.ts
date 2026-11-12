@@ -174,11 +174,11 @@ import { adaptateurEvaluationExtremaBornes } from '../entrainement/5e-4h/generat
 import { adaptateurEvaluationVitessePosition } from '../entrainement/5e-4h/generateurs5e/vitessePosition/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExercices<never>> = {
-  '5gen1': adaptateurEvaluationDomaineDefinition as unknown as AdaptateurFeuilleExercices<never>,
-  '5gen2': adaptateurEvaluationDecompositionFonction as unknown as AdaptateurFeuilleExercices<never>,
-  '5gen3': adaptateurEvaluationComposerFonctions as unknown as AdaptateurFeuilleExercices<never>,
-  '5gen4': adaptateurEvaluationComposeeGraphique as unknown as AdaptateurFeuilleExercices<never>,
-  '5gen5': adaptateurEvaluationProblemesContexte as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen1': versionPapier(adaptateurEvaluationDomaineDefinition) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen2': versionPapier(adaptateurEvaluationDecompositionFonction) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen3': versionPapier(adaptateurEvaluationComposerFonctions) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen4': versionPapier(adaptateurEvaluationComposeeGraphique) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen5': versionPapier(adaptateurEvaluationProblemesContexte) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen6': versionPapier(adaptateurEvaluationArcSecteur) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen7': versionPapier(adaptateurEvaluationPolygonesArcsSecteurs) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen8': versionPapier(adaptateurEvaluationParametresSinusoide) as unknown as AdaptateurFeuilleExercices<never>,
