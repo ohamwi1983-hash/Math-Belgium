@@ -194,7 +194,7 @@ export const BANQUE_QUIZ_FONCTIONS_5E: Record<VarianteQuizFonctions5e, QuestionV
     q(true, "Si $50$ objets coûtent au total $400$ €, le coût unitaire est de $8$ € par objet.", "$400\\div 50=8$."),
     q(false, "Si le coût unitaire vaut $\\dfrac{C(x)}{x}$, doubler la quantité produite divise toujours le coût unitaire par $2$.", "Faux : seulement si le coût total est fixe ; avec $C(x)=10x$, le coût unitaire reste $10$ € quelle que soit la quantité."),
     q(true, "Si $10$ objets coûtent $300$ € et $30$ objets $500$ €, le coût total augmente de $10$ € par objet supplémentaire.", "$\\dfrac{500-300}{30-10}=\\dfrac{200}{20}=10$."),
-    q(false, "Avec ces mêmes données ($300$ € pour $10$ objets, $500$ € pour $30$ objets), le coût fixe vaut $300$ €.", "Faux : avec $C(x)=10x+b$ et $C(10)=300$, on trouve $b=200$ ; le coût fixe vaut $200$ €."),
+    q(false, "Si $10$ objets coûtent $300$ € et $30$ objets $500$ €, avec un coût total affine, le coût fixe vaut $300$ €.", "Faux : avec $C(x)=10x+b$ et $C(10)=300$, on trouve $b=200$ ; le coût fixe vaut $200$ €."),
     q(true, "Le coût total se décompose en un coût fixe et un coût variable, qui dépend de la quantité produite.", "C'est la structure d'une fonction de coût total."),
     q(true, "Le seuil de rentabilité est la quantité pour laquelle la recette égale le coût total.", "C'est la quantité où le bénéfice est nul : en dessous on perd de l'argent, au-dessus on en gagne."),
     q(false, "Le seuil de rentabilité est la quantité pour laquelle le bénéfice est maximal.", "Faux : au seuil de rentabilité, le bénéfice est nul, pas maximal."),

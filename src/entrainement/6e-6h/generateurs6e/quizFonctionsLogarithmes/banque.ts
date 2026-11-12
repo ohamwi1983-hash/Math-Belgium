@@ -1537,7 +1537,15 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
       justification: [texte("Résoudre "), latex("1-\\ln(x)=0"), texte(" donne "), latex("x=e"), texte(", pas "), latex("x=1"), texte(" (qui annulerait plutôt "), latex("\\ln(x)"), texte(" lui-même, pas "), latex("1-\\ln(x)"), texte(").")],
     },
     {
-      enonce: [texte("Pour "), latex("f(x)=\\dfrac{\\ln(x)}{x}"), texte(", ce point critique "), latex("x=e"), texte(" correspond à un MAXIMUM, avec "), latex("f(e)=1/e"), texte(".")],
+      enonce: [
+        texte("Pour "),
+        latex("f(x)=\\dfrac{\\ln(x)}{x}"),
+        texte(", le point critique "),
+        latex("x=e"),
+        texte(" correspond à un MAXIMUM, avec "),
+        latex("f(e)=1/e"),
+        texte("."),
+      ],
       reponse: true,
       justification: [texte("Le signe de "), latex("f'"), texte(" passe de positif ("), latex("x<e"), texte(") à négatif ("), latex("x>e"), texte(") : c'est un maximum, et "), latex("f(e)=\\ln(e)/e=1/e"), texte(".")],
     },

@@ -589,7 +589,13 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        texte("Dans cette démonstration, le facteur "),
+        texte("Pour démontrer que "),
+        latex("f'(x)=f'(0)\\cdot a^x"),
+        texte(" quand "),
+        latex("f(x)=a^x"),
+        texte(", à partir du taux d'accroissement "),
+        latex("a^x\\cdot\\frac{a^h-1}{h}"),
+        texte(", le facteur "),
         latex("a^x"),
         texte(" doit rester à l'intérieur de la limite quand "),
         latex("h\\to0"),
@@ -1194,9 +1200,22 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("La somme d'éléments tous positifs (ou nuls) ne peut être nulle que si chacun d'eux l'est ; deux termes exponentiels ne sont jamais nuls.")],
     },
     {
-      enonce: [texte("Résoudre une équation exponentielle de ce chapitre nécessite systématiquement d'utiliser un logarithme.")],
+      enonce: [
+        texte("L'équation "),
+        latex("4^x=8"),
+        texte(" ne peut se résoudre qu'à l'aide d'un logarithme."),
+      ],
       reponse: false,
-      justification: [texte("Ces équations se résolvent par identification de même base ou par substitution, sans jamais recourir à un logarithme.")],
+      justification: [
+        latex("4^x=2^{2x}"),
+        texte(" et "),
+        latex("8=2^3"),
+        texte(" : en identifiant les exposants, "),
+        latex("2x=3"),
+        texte(", soit "),
+        latex("x=\\frac{3}{2}"),
+        texte(" — aucun logarithme n'est nécessaire."),
+      ],
     },
     {
       enonce: [texte("Poser "), latex("t = \\text{base}^x"), texte(" est une technique valide pour transformer une équation exponentielle en équation du second degré en "), latex("t"), texte(".")],
@@ -1821,9 +1840,22 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       ],
     },
     {
-      enonce: [texte("Une inéquation exponentielle nécessite l'usage d'un logarithme pour être résolue dans ce chapitre.")],
+      enonce: [
+        texte("L'inéquation "),
+        latex("3^{x+1}<9"),
+        texte(" ne peut se résoudre qu'à l'aide d'un logarithme."),
+      ],
       reponse: false,
-      justification: [texte("Ces inéquations se résolvent par comparaison de bases ou tableau de signes, sans jamais recourir à un logarithme à ce stade.")],
+      justification: [
+        latex("9=3^2"),
+        texte(" et la base 3 est supérieure à 1 : "),
+        latex("3^{x+1}<3^2"),
+        texte(" équivaut à "),
+        latex("x+1<2"),
+        texte(", soit "),
+        latex("x<1"),
+        texte(" — sans logarithme."),
+      ],
     },
     {
       enonce: [latex("2^{x-1}\\geq8"), texte(" équivaut à "), latex("x\\geq4"), texte(".")],
@@ -2123,9 +2155,11 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        texte("Pour cette même fonction "),
+        texte("Pour la fonction "),
         latex("f(x) = a\\cdot x\\cdot e^x"),
-        texte(", le point d'inflexion se situe toujours en "),
+        texte(" ("),
+        latex("a\\neq0"),
+        texte("), le point d'inflexion se situe toujours en "),
         latex("x = -2"),
         texte(", quel que soit le signe de "),
         latex("a"),
@@ -2358,9 +2392,15 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
     },
     {
       enonce: [
-        texte("Pour cette même fonction "),
+        texte("Pour "),
         latex("f(x)=\\text{base}^{mx+n}-c\\cdot x"),
-        texte(", l'unique point où "),
+        texte(" (avec "),
+        latex("\\text{base}>1"),
+        texte(", "),
+        latex("m>0"),
+        texte(", "),
+        latex("c>0"),
+        texte("), l'unique point où "),
         latex("f'"),
         texte(" s'annule est un MAXIMUM."),
       ],
@@ -2392,14 +2432,27 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("C'est l'ordre standard : chaque étape s'appuie sur les précédentes — les asymptotes sur les limites, la concavité sur la dérivée seconde.")],
     },
     {
-      enonce: [texte("Étudier le signe de "), latex("f"), texte(" est inutile dans ce chapitre, puisqu'une exponentielle est toujours strictement positive.")],
+      enonce: [
+        texte("La fonction "),
+        latex("f(x)=(x-2)\\,e^x"),
+        texte(" est strictement positive sur "),
+        latex("\\mathbb{R}"),
+        texte(", puisqu'une exponentielle est toujours strictement positive."),
+      ],
       reponse: false,
       justification: [
-        texte("La fonction étudiée n'est presque jamais une exponentielle pure : "),
-        latex("f(x)=x\\cdot e^x"),
-        texte(" change bien de signe en "),
-        latex("x=0"),
-        texte("."),
+        latex("e^x>0"),
+        texte(", donc "),
+        latex("f(x)"),
+        texte(" a le signe de "),
+        latex("x-2"),
+        texte(" : "),
+        latex("f"),
+        texte(" est négative pour "),
+        latex("x<2"),
+        texte(", nulle en "),
+        latex("x=2"),
+        texte(" et positive ensuite."),
       ],
     },
     {
@@ -2568,9 +2621,15 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("Isoler le temps "), latex("t"), texte(" dans une expression exponentielle demande souvent d'utiliser un logarithme, en pratique via la calculatrice scientifique.")],
     },
     {
-      enonce: [texte("Dans les problèmes concrets de ce chapitre, les valeurs numériques données sont toujours des valeurs exactes, jamais arrondies.")],
+      enonce: [
+        texte("Une population de 1000 bactéries qui double toutes les heures compte 3000 bactéries après 2 heures."),
+      ],
       reponse: false,
-      justification: [texte("Beaucoup de contextes concrets (population, temps...) donnent des valeurs mesurées, arrondies, avec une tolérance de vérification adaptée.")],
+      justification: [
+        texte("Après 2 heures : "),
+        latex("1000\\cdot2^2=4000"),
+        texte(". Doubler deux fois multiplie par 4, pas par 3."),
+      ],
     },
     {
       enonce: [texte("Un résultat arrondi dans un contexte réel doit néanmoins être calculé en interne à partir de la valeur exacte, avant d'être arrondi pour l'affichage.")],
@@ -2578,9 +2637,17 @@ export const BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES: Record<VarianteQuizFonctionsE
       justification: [texte("Le calcul se fait toujours sur la valeur exacte ; l'arrondi n'intervient qu'au moment de l'affichage ou de la comparaison finale.")],
     },
     {
-      enonce: [texte("La tolérance de vérification d'une réponse dans un problème concret est toujours exactement la même que dans un exercice purement algébrique du chapitre.")],
+      enonce: [
+        texte("Une quantité qui diminue de 10 % par an a diminué de 20 % au bout de 2 ans."),
+      ],
       reponse: false,
-      justification: [texte("La tolérance est adaptée au contexte : plus large pour une grandeur réelle arrondie que pour un résultat algébrique exact.")],
+      justification: [
+        texte("Chaque année, la quantité est multipliée par "),
+        latex("0{,}9"),
+        texte(" : "),
+        latex("0{,}9^2=0{,}81"),
+        texte(", soit une baisse de 19 %, pas 20 %. Les pourcentages successifs se multiplient, ils ne s'additionnent pas."),
+      ],
     },
     {
       enonce: [texte("Un contexte concret (population, radioactivité, épidémie...) ne change jamais la structure mathématique sous-jacente du modèle exponentiel utilisé.")],
