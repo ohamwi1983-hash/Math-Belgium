@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsComplexes } from "./generateurs6e/equationsComplexes";
 import type { IdVarianteEquationsComplexes } from "./generateurs6e/equationsComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionEquationsComplexes, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionEquationsComplexes";
@@ -36,13 +37,22 @@ function nouvelleSession(): EtatSessionEquationsComplexes {
   return demarrerSessionEquationsComplexes(REGLAGES_DEMO, genererExerciceEquationsComplexes);
 }
 
+/** Première session : si l'URL porte `?code=` (QR code / code d'une feuille d'exercices ou d'une
+ * évaluation), rejoue EXACTEMENT l'instance imprimée — même catalogue et mêmes fonctions de tirage
+ * que l'adaptateur (`generateurs6e/…/exportEvaluation.ts`), voir `export/codeExercice.ts`. */
+function sessionInitiale(): EtatSessionEquationsComplexes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionEquationsComplexes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceEquationsComplexes, (id) => construireAvecVarianteId(id as IdVarianteEquationsComplexes)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionEquationsComplexes;
   revele: boolean;
 }
 
 export function App6gen36() {
-  const [etat, setEtat] = useState<EtatSessionEquationsComplexes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionEquationsComplexes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionEquationsComplexes`, jamais dans le moteur : la saisie de

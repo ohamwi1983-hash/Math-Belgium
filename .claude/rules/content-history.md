@@ -2422,3 +2422,30 @@ paths:
   « classer z′ = (1+i)z + 2 » (§7), cartes alignées, badges propres. Quiz 6gen68 réécrit (10 V /
   10 F par thème, « chapitre 5 »). Catalogues : entrées ajoutées (données seulement, composant du
   sélecteur intact).
+
+- **6e (6h), Chapitre 5 — Nombres complexes : refonte des feuilles et évaluations (6gen34–42)**,
+  décision M de l'audit des générateurs, après les corrections des lots A–E. Les 9 adaptateurs
+  `exportEvaluation.ts` suivent tout le contrat de `.claude/rules/feuilles-evaluations.md` :
+  énoncé papier = données + consigne globale (plus de « en posant », « isole z », QCM d'écran ni
+  verdict annoncé), étapes d'écran → « Étape n » du corrigé, ligne Piège, barème 4 pts sans critère
+  < 0,5, figures en `figureHtml` du corrigé seulement (parallélogramme/milieu 6gen35, point z 6gen37,
+  polygone des racines 6gen39, points/images 6gen40, triangle après les verdicts 6gen41, lieux
+  6gen42 — plan complexe partagé `generateurs6e/figuresPlanComplexe40-42.ts`), `versionPapier(...)`
+  pour les 9, `?code=` dans les 9 applis (sélecteurs intacts), 6gen42 en processus 3.
+  Profils de tirage équilibré : `profilsEvaluationComplexes34-36.ts` (`calcul` absent, convention
+  de `profilsEvaluationLogarithmes.ts` — avec `'exacte'`, une évaluation « calculatrice autorisée »
+  ne tirait plus aucun cas particulier), `…37-39.ts` (6gen38 : `forme` = cible SEULE ; avec n + cible,
+  chaque série recevait exactement les douze mêmes exercices), `…40-42.ts` (verdicts de 6gen41 C/D
+  dans `forme`, aucun cas particulier). Calculatrice indispensable : 6gen39 B, 6gen41 B.
+  Démonstrations du chapitre réécrites PAR CLÉ dans `ENONCES_DEMONSTRATION['nombres-complexes']`
+  (25 exemples, dont le nouvel exemple « classer une transformation z′ = az + b ») et chapitre ajouté
+  à `CHAPITRES_ENONCES_VERIFIES`.
+  Correctifs trouvés pendant la refonte : 6gen42 B « intersection » — la condition (1)
+  (z−q₁)/(z−q₂) réel excluait q₂, pourtant donné comme point d'intersection → (z−q₁)/(q₂−q₁) réel
+  (même droite, sans point exclu) ; `fracSimplifiee` (6gen37/39) sort le signe de la fraction
+  (« +(−1)/2 i » à l'écran) ; racines n-ièmes : √ sans indice 2 et θₖ = 2kπ/n sans « 0 + » ;
+  congruence « n = 8p » sans « 0 + » ; 6gen36 : coefficient imaginaire pur « iz »/« −5iz », plus
+  « (i)z ». Reste à l'écran (lignes LaTeX seules) : « \text{réels : } » de 6gen38, corrigé sur papier.
+  Vérifié : collecteurs (≈ 154 000 formules KaTeX strictes, 0 anomalie), documents réels des 9
+  générateurs (2 graines, modes exercice/évaluation, aménagée) — 0 erreur KaTeX, 0 débordement à
+  680 px et 1 280 px ; `?code=` rouvre l'instance (69/69) ; `npm run build` propre.

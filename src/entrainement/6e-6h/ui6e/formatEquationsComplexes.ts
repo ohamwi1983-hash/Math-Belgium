@@ -71,6 +71,8 @@ function termeVarComplexe(v: ValeurComplexe, variableLatex: string): string | nu
     if (v.re === -1) return `-${variableLatex}`;
     return `${v.re}${variableLatex}`;
   }
+  // Imaginaire pur : « iz », « −5iz » — jamais « (i)z » ni « (−5i)z ».
+  if (v.re === 0) return `${v.im === 1 ? "" : v.im === -1 ? "-" : v.im}i${variableLatex}`;
   return `(${entierComplexeLatex(v.re, v.im)})${variableLatex}`;
 }
 

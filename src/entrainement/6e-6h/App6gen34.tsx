@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNombresComplexes } from "./generateurs6e/nombresComplexes";
 import type { IdVarianteNombresComplexes } from "./generateurs6e/nombresComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionNombresComplexes, soumettreReponseEcran } from "./moteur6e/sessionNombresComplexes";
@@ -34,13 +35,22 @@ function nouvelleSession(): EtatSessionNombresComplexes {
   return demarrerSessionNombresComplexes(REGLAGES_DEMO, genererExerciceNombresComplexes);
 }
 
+/** Première session : si l'URL porte `?code=` (QR code / code d'une feuille d'exercices ou d'une
+ * évaluation), rejoue EXACTEMENT l'instance imprimée — même catalogue et mêmes fonctions de tirage
+ * que l'adaptateur (`generateurs6e/…/exportEvaluation.ts`), voir `export/codeExercice.ts`. */
+function sessionInitiale(): EtatSessionNombresComplexes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionNombresComplexes(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceNombresComplexes, (id) => construireAvecVarianteId(id as IdVarianteNombresComplexes)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionNombresComplexes;
   revele: boolean;
 }
 
 export function App6gen34() {
-  const [etat, setEtat] = useState<EtatSessionNombresComplexes>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionNombresComplexes>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionNombresComplexes`, jamais dans le moteur : la saisie de l'élève

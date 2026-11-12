@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAffixesRacines } from "./generateurs6e/affixesRacines";
 import type { IdVarianteAffixesRacines } from "./generateurs6e/affixesRacines";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionAffixesRacines, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionAffixesRacines";
@@ -37,13 +38,22 @@ function nouvelleSession(): EtatSessionAffixesRacines {
   return demarrerSessionAffixesRacines(REGLAGES_DEMO, genererExerciceAffixesRacines);
 }
 
+/** Première session : si l'URL porte `?code=` (QR code / code d'une feuille d'exercices ou d'une
+ * évaluation), rejoue EXACTEMENT l'instance imprimée — même catalogue et mêmes fonctions de tirage
+ * que l'adaptateur (`generateurs6e/…/exportEvaluation.ts`), voir `export/codeExercice.ts`. */
+function sessionInitiale(): EtatSessionAffixesRacines {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionAffixesRacines(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceAffixesRacines, (id) => construireAvecVarianteId(id as IdVarianteAffixesRacines)));
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionAffixesRacines;
   revele: boolean;
 }
 
 export function App6gen35() {
-  const [etat, setEtat] = useState<EtatSessionAffixesRacines>(nouvelleSession);
+  const [etat, setEtat] = useState<EtatSessionAffixesRacines>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionAffixesRacines`, jamais dans le moteur : la saisie de l'élève
