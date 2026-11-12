@@ -64,16 +64,18 @@
   }
 
   // ---------- Écriture ----------
-  // Expression = { txt, niveau } — niveau : "x" (la variable seule), "primaire"
-  // (puissance, racine, valeur absolue), "produit" (coefficient, quotient), "somme".
+  // Expression = { txt, niveau } — niveau : "x" (la variable seule), "delimite" (valeur
+  // absolue : ses barres suffisent, jamais de parenthèses en plus), "primaire" (puissance,
+  // racine), "produit" (coefficient, quotient), "somme".
   function entre(u) { return "(" + u.txt + ")"; }
+  function nu(u) { return u.niveau === "x" || u.niveau === "delimite"; }
 
   function ecrire(brique, u) {
     switch (brique.type) {
       case "affine": {
         var a = brique.a, b = brique.b, coeff;
         if (a === 1 && b === 0) return u;
-        var noyau = u.niveau === "x" || u.niveau === "primaire" ? u.txt : entre(u);
+        var noyau = nu(u) || u.niveau === "primaire" ? u.txt : entre(u);
         if (a === 1) coeff = noyau;
         else if (a === -1) coeff = "−" + noyau;
         else coeff = nombreFr(a) + noyau;
@@ -82,17 +84,17 @@
         return { txt: coeff + signe + nombreFr(Math.abs(b)), niveau: "somme" };
       }
       case "carre":
-        return { txt: (u.niveau === "x" ? u.txt : entre(u)) + "²", niveau: "primaire" };
+        return { txt: (nu(u) ? u.txt : entre(u)) + "²", niveau: "primaire" };
       case "cube":
-        return { txt: (u.niveau === "x" ? u.txt : entre(u)) + "³", niveau: "primaire" };
+        return { txt: (nu(u) ? u.txt : entre(u)) + "³", niveau: "primaire" };
       case "racine":
-        return { txt: "√" + (u.niveau === "x" ? u.txt : entre(u)), niveau: "primaire" };
+        return { txt: "√" + (nu(u) ? u.txt : entre(u)), niveau: "primaire" };
       case "racine3":
-        return { txt: "∛" + (u.niveau === "x" ? u.txt : entre(u)), niveau: "primaire" };
+        return { txt: "∛" + (nu(u) ? u.txt : entre(u)), niveau: "primaire" };
       case "inverse":
-        return { txt: "1/" + (u.niveau === "x" || u.niveau === "primaire" ? u.txt : entre(u)), niveau: "produit" };
+        return { txt: "1/" + (nu(u) || u.niveau === "primaire" ? u.txt : entre(u)), niveau: "produit" };
       case "abs":
-        return { txt: "|" + u.txt + "|", niveau: "primaire" };
+        return { txt: "|" + u.txt + "|", niveau: "delimite" };
     }
     return u;
   }

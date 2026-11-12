@@ -121,7 +121,7 @@
       s.getElementById("x-v").textContent = nombreFr(xs, 0);
       var marge = p - cv;
       s.getElementById("formules").innerHTML =
-        '<span class="ct">CT(x) = ' + nombreFr(CF, 0) + " + " + nombreFr(cv, 2) + "x</span>   " +
+        '<span class="ct">CT(x) = ' + (CF === 0 ? "" : nombreFr(CF, 0) + " + ") + nombreFr(cv, 2) + "x</span>   " +
         '<span class="ca">CA(x) = ' + nombreFr(p, 2) + "x</span>   " +
         '<span class="b">B(x) = CA(x) − CT(x) = ' + expressionBenefice(marge, CF) + "</span>";
       var seuil = marge > 0 ? CF / marge : null;
@@ -137,9 +137,9 @@
         verdict.className = "verdict ok";
         var entier = Math.abs(seuil - Math.round(seuil)) < 1e-9;
         verdict.textContent = "Seuil de rentabilité : x = CF/(p − cv) = " + nombreFr(seuil, 1) +
+          (seuil > X_MAX ? " (hors du graphique)" : "") +
           (entier ? " — B(" + nombreFr(seuil, 0) + ") = 0, rentable à partir de " + nombreFr(seuil + 1, 0) + " objets."
-            : " — rentable à partir de " + nombreFr(Math.ceil(seuil), 0) + " objets.") +
-          (seuil > X_MAX ? " (hors du graphique)" : "");
+            : " — rentable à partir de " + nombreFr(Math.ceil(seuil), 0) + " objets.");
       }
       var CT = CF + cv * xs, CA = p * xs;
       s.getElementById("sonde-txt").textContent =
