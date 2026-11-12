@@ -304,12 +304,9 @@
         tk.textContent = String(k);
         svg.appendChild(tk);
       }
-      // Repère 1/e sur la colonne « 0 bien placée »
+      // Repère 1/e sur la colonne « 0 bien placée » (légende à part, pour ne jamais chevaucher les barres)
       var cx0 = px0 + pasCol * 0.5;
-      svg.appendChild(svgEl("line", { x1: cx0 - bw - 6, x2: cx0 + bw + 6, y1: py(1 / Math.E), y2: py(1 / Math.E), class: "repere-e" }));
-      var te = svgEl("text", { x: cx0 + bw + 9, y: py(1 / Math.E) + 3.5, class: "txt-e" });
-      te.textContent = "1/e ≈ 0,368";
-      svg.appendChild(te);
+      svg.appendChild(svgEl("line", { x1: cx0 - bw - 5, x2: cx0 + bw + 5, y1: py(1 / Math.E), y2: py(1 / Math.E), class: "repere-e" }));
       // Axes
       svg.appendChild(svgEl("line", { x1: px0, x2: px1 + 6, y1: bas, y2: bas, class: "axe", "marker-end": "url(#fl)" }));
       svg.appendChild(svgEl("line", { x1: px0, x2: px0, y1: bas, y2: HAUT - 12, class: "axe", "marker-end": "url(#fl)" }));
@@ -327,6 +324,10 @@
       var l2 = svgEl("text", { x: lx, y: HAUT + 16, "text-anchor": "end", class: "leg leg-obs" });
       l2.textContent = this._total ? "■ fréquence observée" : "fréquence observée : lance une simulation";
       svg.appendChild(l2);
+      svg.appendChild(svgEl("line", { x1: lx - 92, x2: lx - 78, y1: HAUT + 26, y2: HAUT + 26, class: "repere-e" }));
+      var l3 = svgEl("text", { x: lx, y: HAUT + 30, "text-anchor": "end", class: "txt-e" });
+      l3.textContent = "1/e ≈ 0,368";
+      svg.appendChild(l3);
     }
   }
 

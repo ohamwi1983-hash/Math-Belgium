@@ -84,9 +84,9 @@
     '.grille{display:grid;grid-template-columns:repeat(40,1fr);gap:1px;}' +
     '.pt{aspect-ratio:1;border-radius:50%;}' +
     '.pt-mp{background:var(--accent,#a8471f);}' +
-    '.pt-mn{background:var(--accent-soft-line,#e8c4a4);}' +
+    '.pt-mn{background:var(--accent,#a8471f);opacity:0.35;}' +
     '.pt-np{background:var(--good,#2f7a4f);}' +
-    '.pt-nn{background:var(--good-soft,#cfe8da);}' +
+    '.pt-nn{background:var(--good,#2f7a4f);opacity:0.3;}' +
     '.legende{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;margin-top:8px;font-size:0.76rem;color:var(--ink-soft,#6b6055);font-variant-numeric:tabular-nums;}' +
     '.legende span{display:inline-flex;align-items:center;gap:5px;}' +
     '.legende i{display:inline-block;width:10px;height:10px;border-radius:50%;}' +

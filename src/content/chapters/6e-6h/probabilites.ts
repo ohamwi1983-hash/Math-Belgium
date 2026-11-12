@@ -520,8 +520,8 @@ export const probabilites: ChapterContent = {
           items: [
             'Un arbre pondéré représente une suite d\'épreuves : chaque branche porte la ' +
               'probabilité de passer d\'un nœud à l\'autre. Deux règles suffisent pour le lire : ' +
-              'la probabilité d\'un CHEMIN, c\'est le produit des probabilités des branches ' +
-              'traversées ; la probabilité d\'un ÉVÉNEMENT, c\'est la somme des probabilités ' +
+              'la probabilité d\'un **chemin**, c\'est le produit des probabilités des branches ' +
+              'traversées ; la probabilité d\'un **événement**, c\'est la somme des probabilités ' +
               'des chemins qui y mènent (loi des probabilités totales).',
           ],
         },
@@ -546,9 +546,9 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'La probabilité d\'un CHEMIN s\'obtient en MULTIPLIANT les probabilités des ' +
+            'La probabilité d\'un **chemin** s\'obtient en **multipliant** les probabilités des ' +
             'branches, jamais en les additionnant ! C\'est l\'inverse pour la probabilité d\'un ' +
-            'ÉVÉNEMENT (plusieurs chemins) : elle s\'obtient en ADDITIONNANT.',
+            '**événement** (plusieurs chemins) : elle s\'obtient en **additionnant**.',
         },
         {
           kind: 'exempleLibre',
@@ -584,8 +584,8 @@ export const probabilites: ChapterContent = {
               kind: 'para',
               text:
                 'Enfin, deux chemins différents se séparent forcément à un étage : ils sont ' +
-                'INCOMPATIBLES. La probabilité d\'un événement atteint par plusieurs chemins est donc ' +
-                'la SOMME des probabilités de ces chemins — la seconde règle de lecture de l\'arbre.',
+                '**incompatibles**. La probabilité d\'un événement atteint par plusieurs chemins est donc ' +
+                'la **somme** des probabilités de ces chemins — la seconde règle de lecture de l\'arbre.',
             },
           ],
         },
@@ -594,8 +594,9 @@ export const probabilites: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Avec remise : l\'urne retrouve toujours sa composition initiale — les tirages sont INDÉPENDANTS.',
-            'Sans remise : la composition change après chaque tirage — les tirages ne sont JAMAIS indépendants.',
+            'Avec remise : l\'urne retrouve toujours sa composition initiale — les tirages successifs sont **indépendants**.',
+            'Sans remise : la composition change après chaque tirage — les tirages successifs ne sont ' +
+              '**pas** indépendants : le résultat du 1er tirage modifie les probabilités du 2e.',
           ],
         },
         {
@@ -611,7 +612,7 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Utiliser la même probabilité 5/8 au second tirage SANS remise, comme si de rien ' +
+            'Utiliser la même probabilité 5/8 au second tirage **sans** remise, comme si de rien ' +
             'n\'était, c\'est l\'erreur la plus fréquente de cette section ! La bonne valeur, ' +
             '4/7, se lit directement sur la 2e branche de l\'arbre.',
         },
@@ -629,7 +630,7 @@ export const probabilites: ChapterContent = {
           kind: 'astuce',
           label: 'Vérifier que les chemins couvrent tout',
           text:
-            'La somme des probabilités de TOUS les chemins d\'un arbre vaut toujours 1 (ici, ' +
+            'La somme des probabilités de **tous** les chemins d\'un arbre vaut toujours 1 (ici, ' +
             'sans remise : 20/56+15/56+15/56+6/56=1). Un excellent moyen de repérer une erreur ' +
             'de calcul avant de répondre !',
         },
@@ -657,31 +658,34 @@ export const probabilites: ChapterContent = {
                 { fromFirst: 1, label: 'D', prob: '2/19', pathProb: '36/380' },
                 { fromFirst: 1, label: 'B', prob: '17/19', pathProb: '306/380', highlight: true },
               ],
-              caption: 'Lot de 20 pièces (2 défectueuses D, 18 bonnes B) : échantillon de 2 pièces SANS remise. Le chemin BB (en évidence) donne P(0 défectueuse)=306/380 ≈ 80,5 %.',
+              caption: 'Lot de 20 pièces (2 défectueuses D, 18 bonnes B) : échantillon de 2 pièces **sans** remise. Le chemin BB (en évidence) donne P(0 défectueuse)=306/380 ≈ 80,5 %.',
             },
             {
               kind: 'complementBar',
-              headline: 'Décision sur le lot de 20 pièces',
+              headline: 'Un lot qui contient 2 pièces défectueuses sur 20',
               parts: [
-                { fraction: 306 / 380, label: 'accepté', tone: 'accent' },
+                { fraction: 306 / 380, label: 'accepté quand même', tone: 'accent' },
                 { fraction: 74 / 380, label: 'rejeté', tone: 'faint' },
               ],
               footer: '≈80,5 % + ≈19,5 % = 1',
-              caption: 'C\'est directement cette probabilité qui décide si le lot entier est accepté ou rejeté — sans avoir dû tester les 20 pièces.',
+              caption: 'Règle : le lot est accepté si l\'échantillon de 2 pièces ne contient aucune pièce défectueuse. Ce mauvais lot passe donc le contrôle environ 4 fois sur 5 : c\'est le risque d\'accepter un lot défectueux, que l\'on réduit en prélevant un échantillon plus grand.',
             },
           ],
           text:
-            'Une usine ne peut pas tester TOUS les produits qu\'elle fabrique pour vérifier ' +
+            'Une usine ne peut pas tester **tous** les produits qu\'elle fabrique pour vérifier ' +
             'qu\'ils fonctionnent — certains tests sont destructifs (faire éclater une ' +
             'ampoule pour vérifier sa résistance, par exemple), et tester toute la ' +
             'production reviendrait à ne plus rien avoir à vendre ! Les ingénieurs qualité ' +
-            'prélèvent donc un échantillon dans un lot, SANS remise, exactement comme les ' +
-            'tirages de cette section : chaque pièce retirée change légèrement la ' +
-            'proportion de pièces défectueuses restantes dans le lot, donc la probabilité ' +
-            'de tomber sur une pièce défectueuse au tirage suivant. En calculant la ' +
-            'probabilité de trouver 0, 1 ou plusieurs pièces défectueuses dans un petit ' +
-            'échantillon, ils décident si le lot ENTIER peut être accepté ou doit être ' +
-            'rejeté — sans jamais avoir dû tout tester.',
+            'prélèvent donc un échantillon dans un lot, **sans** remise, exactement comme les ' +
+            'tirages de cette section, et appliquent une règle de décision fixée à l\'avance : ' +
+            'ici, le lot est **accepté si l\'échantillon de 2 pièces ne contient aucune pièce ' +
+            'défectueuse**, rejeté sinon. L\'arbre permet alors d\'évaluer le risque de cette ' +
+            'règle : un lot qui contient 2 pièces défectueuses sur 20 est accepté quand même avec ' +
+            'une probabilité de $\\frac{306}{380} \\approx 80{,}5\\,\\%$ — le contrôle laisse ' +
+            'passer ce mauvais lot 4 fois sur 5 ! Avec un échantillon de 4 pièces, ce risque ' +
+            'tombe à $\\frac{18}{20} \\times \\frac{17}{19} \\times \\frac{16}{18} \\times ' +
+            '\\frac{15}{17} = \\frac{240}{380} \\approx 63\\,\\%$ : choisir la taille de ' +
+            'l\'échantillon, c\'est choisir le risque qu\'on accepte de courir.',
           domaines: ['Industrie', 'Contrôle qualité'],
         },
         { kind: 'subheading', text: 'Une autre façon de dénombrer : le diagramme cartésien' },
@@ -689,11 +693,11 @@ export const probabilites: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Quand une expérience combine 2 tirages INDÉPENDANTS à résultats numériques (2 dés, ' +
+            'Quand une expérience combine 2 tirages **indépendants** à résultats numériques (2 dés, ' +
               'par exemple), tu peux représenter les $n \\times m$ issues comme des points ' +
               'd\'une grille : le résultat du 1er tirage en abscisse, celui du 2e en ordonnée. ' +
               'Chaque point de la grille est une issue équiprobable — il suffit alors de ' +
-              'COMPTER les points qui satisfont la condition cherchée.',
+              '**compter** les points qui satisfont la condition cherchée.',
           ],
         },
         {
@@ -725,6 +729,32 @@ export const probabilites: ChapterContent = {
               '(2;3), (3;2), (4;1). D\'où $P$(somme=5) = 4/36 = 1/9.',
           },
         },
+        {
+          kind: 'exemple',
+          badge: 'deux cartes sans remise : la grille perd sa diagonale',
+          formula:
+            'On tire successivement, sans remise, 2 cartes parmi 6 cartes numérotées de 1 à 6. ' +
+            'Le même nombre ne peut plus sortir deux fois : les 6 cases de la diagonale de la ' +
+            'grille, (1;1), (2;2), …, (6;6), disparaissent, et il reste $6 \\times 5 = 30$ ' +
+            'couples équiprobables.',
+          steps: [
+            {
+              tag: 'somme 7',
+              text:
+                'Les 6 couples (1;6), (2;5), (3;4), (4;3), (5;2), (6;1) sont tous hors de la ' +
+                'diagonale : $P$(somme=7) $= \\frac{6}{30} = \\frac{1}{5}$, contre ' +
+                '$\\frac{6}{36} = \\frac{1}{6}$ avec deux dés.',
+            },
+            {
+              tag: 'somme 8',
+              text:
+                'Avec deux dés, 5 couples donnent 8 : (2;6), (3;5), (4;4), (5;3), (6;2). Sans ' +
+                'remise, (4;4) est impossible : $P$(somme=8) $= \\frac{4}{30} = \\frac{2}{15}$, ' +
+                'contre $\\frac{5}{36}$ avec deux dés.',
+            },
+          ],
+          result: { tag: '', text: '' },
+        },
         { kind: 'subheading', text: 'Dénombrement — permutations et dérangements' },
         {
           kind: 'intuition',
@@ -739,10 +769,25 @@ export const probabilites: ChapterContent = {
           kind: 'definition',
           label: 'Définition',
           items: [
-            'Le nombre de façons de ranger $n$ objets distincts (une PERMUTATION) vaut ' +
+            'Le nombre de façons de ranger $n$ objets distincts (une **permutation**) vaut ' +
               '$n! = n \\times (n-1) \\times \\ldots \\times 1$. Un dérangement, c\'est une ' +
-              'permutation où AUCUN objet ne reste à sa place initiale ; leur nombre se note ' +
+              'permutation où **aucun** objet ne reste à sa place initiale ; leur nombre se note ' +
               '$D(n)$ — et $D(n) \\neq n!$ (par exemple $D(4)$=9, très différent de 4!=24).',
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Compter les dérangements',
+          items: [
+            'Avec 2 objets, une seule façon : les échanger, $D(2) = 1$. Avec 3 objets, on écrit ' +
+              'chaque rangement comme la liste des objets placés en positions 1, 2, 3 : seuls ' +
+              '231 et 312 ne laissent aucun objet à sa place, $D(3) = 2$.',
+            'Avec 4 objets, les 9 dérangements de 1234 sont : 2143, 2341, 2413, 3142, 3412, ' +
+              '3421, 4123, 4312, 4321. Vérifie : dans chacun, le chiffre en position $i$ n\'est ' +
+              'jamais $i$.',
+            'Au-delà, on utilise la relation $D(n) = (n-1)\\left(D(n-1) + D(n-2)\\right)$ : ' +
+              '$D(4) = 3 \\times (2+1) = 9$, $D(5) = 4 \\times (9+2) = 44$, ' +
+              '$D(6) = 5 \\times (44+9) = 265$.',
           ],
         },
         {
@@ -751,7 +796,7 @@ export const probabilites: ChapterContent = {
           formula: '',
           steps: [
             { tag: 'total', text: '4!=24 répartitions possibles au total' },
-            { tag: 'tout correct', text: 'une seule est ENTIÈREMENT correcte, donc $P$(tout correct)=1/24' },
+            { tag: 'tout correct', text: 'une seule est **entièrement** correcte, donc $P$(tout correct)=1/24' },
             { tag: 'aucune correcte', text: '$P = D(4)/4! = 9/24 = 3/8$' },
             {
               tag: 'exactement 2 correctes',
@@ -767,8 +812,35 @@ export const probabilites: ChapterContent = {
           kind: 'piege',
           text:
             '« Exactement 3 lettres sur 4 à la bonne place », c\'est structurellement ' +
-            'IMPOSSIBLE (probabilité nulle) ! Si 3 lettres sont bien placées, la 4e l\'est ' +
+            '**impossible** (probabilité nulle) ! Si 3 lettres sont bien placées, la 4e l\'est ' +
             'forcément aussi — il ne reste qu\'une seule enveloppe pour une seule lettre.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Les 24 répartitions des 4 lettres, classées selon le nombre de lettres bien placées. ' +
+            'Pour exactement 1 lettre bien placée : 4 choix de cette lettre, puis les 3 autres ' +
+            'forment un dérangement, $4 \\times D(3) = 8$ façons.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Lettres bien placées', '0', '1', '2', '3', '4', 'Total'],
+          rows: [
+            ['Nombre de répartitions', '9', '8', '6', { text: '0', tone: 'bad' }, '1', '24'],
+            ['Probabilité', '$\\frac{9}{24}=\\frac{3}{8}$', '$\\frac{8}{24}=\\frac{1}{3}$', '$\\frac{6}{24}=\\frac{1}{4}$', '$0$', '$\\frac{1}{24}$', '$1$'],
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Pour aller plus loin — le retour du nombre e',
+          text:
+            'La probabilité qu\'aucune lettre ne soit bien placée vaut $\\frac{D(n)}{n!}$ : ' +
+            '$\\frac{1}{2} = 0{,}5$ pour 2 lettres, $\\frac{2}{6} \\approx 0{,}333$ pour 3, ' +
+            '$\\frac{9}{24} = 0{,}375$ pour 4, $\\frac{44}{120} \\approx 0{,}367$ pour 5, ' +
+            '$\\frac{265}{720} \\approx 0{,}368$ pour 6 — et elle se stabilise vers ' +
+            '$\\frac{1}{e} \\approx 0{,}368$, où $e$ est le nombre du chapitre sur les ' +
+            'exponentielles. Que l\'on mélange 6 lettres ou les manteaux de 1 000 invités au ' +
+            'vestiaire, la probabilité que personne ne récupère le sien reste d\'environ 37 %.',
         },
         {
           kind: 'entrainement',

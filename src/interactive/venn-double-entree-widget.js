@@ -59,11 +59,9 @@
     '.verdict-indep{color:var(--good,#2f7a4f);border-color:var(--good,#2f7a4f);}' +
     '.verdict-incomp{color:var(--bad,#b23a3a);border-color:var(--bad,#b23a3a);}' +
     '.verdict-ni{color:var(--ink-soft,#6b6055);}' +
-    '.reperes{position:relative;height:30px;margin:0 8px;}' +
-    '.repere{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:0.72rem;color:var(--good,#2f7a4f);white-space:nowrap;font-variant-numeric:tabular-nums;}' +
-    '.repere::before{content:"";width:2px;height:9px;background:var(--good,#2f7a4f);margin-bottom:2px;}' +
-    '.repere.gauche{transform:none;align-items:flex-start;}' +
-    '.repere.droite{transform:translateX(-100%);align-items:flex-end;}' +
+    '.reperes{position:relative;height:10px;margin:0 8px;}' +
+    '.repere{position:absolute;top:0;width:2px;height:10px;background:var(--good,#2f7a4f);transform:translateX(-1px);}' +
+    '.repere-texte{font-size:0.76rem;color:var(--good,#2f7a4f);font-variant-numeric:tabular-nums;text-align:center;}' +
     '.lecture{display:flex;flex-direction:column;gap:6px;margin:0 0 18px;font-variant-numeric:tabular-nums;}' +
     '.ligne-formule{padding:9px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#faf6f0);font-size:0.86rem;}' +
     '.ligne-vrai{font-weight:700;color:var(--good,#2f7a4f);}' +
@@ -90,7 +88,8 @@
     '<div class="curseur"><label for="nab">n(A∩B)</label><div class="curseur-row">' +
     '<input type="range" id="nab" min="0" max="' + Math.min(DEFAUT.nA, DEFAUT.nB) + '" step="1" value="' + DEFAUT.nAB + '">' +
     '<span class="curseur-valeur" id="nab-valeur"></span></div>' +
-    '<div class="curseur-row"><div class="reperes" id="reperes" style="flex:1 1 auto"></div><span class="curseur-valeur"></span></div></div>' +
+    '<div class="curseur-row"><div class="reperes" id="reperes" style="flex:1 1 auto"></div><span class="curseur-valeur"></span></div>' +
+    '<div class="repere-texte" id="repere-texte"></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
     '</div>';
 
@@ -116,6 +115,7 @@
     this._resetBtn = shadow.getElementById("reset");
     this._zoomBtn = shadow.getElementById("zoom");
     this._reperes = shadow.getElementById("reperes");
+    this._repereTexte = shadow.getElementById("repere-texte");
     this._zoom = false;
   };
 
@@ -194,11 +194,12 @@
     var entier = produit % N === 0;
     if (maxAB > 0) {
       var pct = (cible / maxAB) * 100;
-      var cote = pct < 18 ? " gauche" : pct > 82 ? " droite" : "";
-      this._reperes.innerHTML = '<span class="repere' + cote + '" style="left:' + pct.toFixed(2) + '%">indépendance : ' +
-        (entier ? String(cible) : nombreFr(cible, 2) + " (jamais exactement atteint)") + '</span>';
+      this._reperes.innerHTML = '<span class="repere" style="left:' + pct.toFixed(2) + '%"></span>';
+      this._repereTexte.textContent = "▲ repère « indépendance » : n(A∩B) = n(A) × n(B) / N = " +
+        (entier ? String(cible) : nombreFr(cible, 2) + " (jamais exactement atteint, n(A∩B) est entier)");
     } else {
       this._reperes.innerHTML = "";
+      this._repereTexte.textContent = "";
     }
 
     // Verdict EXACT, en entiers.
