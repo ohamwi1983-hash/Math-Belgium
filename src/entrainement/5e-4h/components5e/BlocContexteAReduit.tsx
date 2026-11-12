@@ -13,9 +13,9 @@ export function BlocContexteAReduit({ exercice }: { exercice: ExerciceScenarioAR
       <table className="summary-table">
         <thead>
           <tr>
-            <th>x ({exercice.contexte.unite})</th>
-            <th>f(x) (€)</th>
-            <th>g(x) (€)</th>
+            <th style={{ textTransform: "none" }}>x ({exercice.contexte.unite})</th>
+            <th style={{ textTransform: "none" }}>f(x) (€)</th>
+            <th style={{ textTransform: "none" }}>g(x) (€)</th>
           </tr>
         </thead>
         <tbody>

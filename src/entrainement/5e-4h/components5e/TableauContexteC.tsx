@@ -9,10 +9,10 @@ export function TableauContexteC({ exercice }: { exercice: ExerciceScenarioC }) 
       <table className="summary-table">
         <thead>
           <tr>
-            <th>x</th>
-            <th>CV(x)</th>
-            <th>CP(x)</th>
-            <th>CA(x)</th>
+            <th style={{ textTransform: "none" }}>x</th>
+            <th style={{ textTransform: "none" }}>CV(x)</th>
+            <th style={{ textTransform: "none" }}>CP(x)</th>
+            <th style={{ textTransform: "none" }}>CA(x)</th>
           </tr>
         </thead>
         <tbody>

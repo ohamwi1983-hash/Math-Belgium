@@ -55,37 +55,74 @@ function opposer(noeud: MathNode): MathNode {
   }
 }
 
-/** « 4x·√A + √A » → « (4x+1)·√A » quand UNE racine est en facteur de tous les termes (test exact :
- * le quotient par cette racine, racines rendues opaques, est un polynôme sans elle). */
-function factoriserRacineCommune(noeud: MathNode): MathNode {
+/** Termes signés d'une somme (« a − b + c » → [+a, −b, +c]). */
+function termesSignes(noeud: MathNode, signe: 1 | -1 = 1): { signe: 1 | -1; terme: MathNode }[] {
   const n = sansParentheses(noeud);
-  const fn = n.type === "OperatorNode" ? (n as unknown as { fn: string }).fn : null;
-  if (fn !== "add" && fn !== "subtract") return noeud;
-  const atomes = new Map<string, MathNode>();
-  const parTexte = new Map<string, string>();
-  const coquille = n.transform((m) => {
-    if (m.type !== "FunctionNode") return m;
-    const cle = m.toString();
-    let nom = parTexte.get(cle);
-    if (nom === undefined) {
-      nom = `R${parTexte.size}`;
-      parTexte.set(cle, nom);
-      atomes.set(nom, m);
-    }
-    return new math.SymbolNode(nom);
+  if (n.type === "OperatorNode") {
+    const op = n as unknown as { fn: string; args: MathNode[] };
+    if (op.fn === "add") return [...termesSignes(op.args[0], signe), ...termesSignes(op.args[1], signe)];
+    if (op.fn === "subtract") return [...termesSignes(op.args[0], signe), ...termesSignes(op.args[1], (-signe) as 1 | -1)];
+    if (op.fn === "unaryMinus") return termesSignes(op.args[0], (-signe) as 1 | -1);
+  }
+  return [{ signe, terme: n }];
+}
+
+/** Le terme privé de UN facteur égal à `cle` (texte de la racine), ou `null` s'il ne l'a pas en facteur. */
+function retirerFacteur(terme: MathNode, cle: string): MathNode | null {
+  const t = sansParentheses(terme);
+  if (t.toString() === cle) return new math.ConstantNode(1);
+  if (t.type !== "OperatorNode") return null;
+  const op = t as unknown as { fn: string; args: MathNode[] };
+  if (op.fn === "unaryMinus") {
+    const r = retirerFacteur(op.args[0], cle);
+    return r === null ? null : new math.OperatorNode("-", "unaryMinus", [r]);
+  }
+  if (op.fn === "multiply") {
+    const [a, b] = op.args;
+    const ra = retirerFacteur(a, cle);
+    if (ra !== null) return new math.OperatorNode("*", "multiply", [ra, b]);
+    const rb = retirerFacteur(b, cle);
+    if (rb !== null) return new math.OperatorNode("*", "multiply", [a, rb]);
+  }
+  return null;
+}
+
+/** « 4x·√A + √A » → « (4x+1)·√A » quand UNE même racine est en facteur de TOUS les termes. */
+function factoriserRacineCommune(noeud: MathNode): MathNode {
+  const termes = termesSignes(noeud);
+  if (termes.length < 2) return noeud;
+  const racines = new Map<string, MathNode>();
+  noeud.traverse((m) => {
+    if (m.type === "FunctionNode") racines.set(m.toString(), m);
   });
-  for (const [nom, atome] of atomes) {
-    try {
-      const quotient = math.rationalize(`(${coquille.toString()})/${nom}`) as unknown as MathNode;
-      const texte = quotient.toString();
-      if (texte.includes(nom) || texte.includes("/")) continue;
-      const facteur = quotient.transform((m) => (m.type === "SymbolNode" && atomes.has((m as unknown as { name: string }).name) ? (atomes.get((m as unknown as { name: string }).name) as MathNode) : m));
-      return new math.OperatorNode("*", "multiply", [new math.ParenthesisNode(facteur), atome]);
-    } catch {
-      continue;
-    }
+  for (const [cle, racine] of racines) {
+    const restes = termes.map((t) => ({ signe: t.signe, reste: retirerFacteur(t.terme, cle) }));
+    if (restes.some((r) => r.reste === null)) continue;
+    const somme = restes.map((r) => `${r.signe < 0 ? "-" : "+"}(${(r.reste as MathNode).toString()})`).join(" ");
+    const facteur = developper(math.parse(somme));
+    if (facteur.toString().includes(cle)) continue;
+    return new math.OperatorNode("*", "multiply", [new math.ParenthesisNode(facteur), racine]);
   }
   return noeud;
+}
+
+/** Signe porté par la fraction plutôt que par son dénominateur : « −(20/(6−2x)) » → « 20/(2x−6) »,
+ * « −a/(−b) » → « a/b » ; appliqué partout (y compris sous les racines). */
+function porterSignes(noeud: MathNode): MathNode {
+  return noeud.transform((m) => {
+    const n = sansParentheses(m);
+    if (n.type !== "OperatorNode") return m;
+    const op = n as unknown as { fn: string; args: MathNode[] };
+    if (op.fn === "unaryMinus" && estDivision(op.args[0])) {
+      const [a, b] = argsDivision(op.args[0]);
+      if (commenceParMoins(b)) return new math.OperatorNode("/", "divide", [porterSignes(a), porterSignes(opposer(b))]);
+    }
+    if (op.fn === "divide") {
+      const [a, b] = op.args;
+      if (commenceParMoins(b)) return new math.OperatorNode("/", "divide", [porterSignes(opposer(a)), porterSignes(opposer(b))]);
+    }
+    return m;
+  });
 }
 
 function estDivision(noeud: MathNode): boolean {
@@ -251,7 +288,7 @@ function regrouperRationnelEnX(noeud: MathNode): MathNode | null {
   f = entiersCommuns(f);
   if (f.den[f.den.length - 1] < 0) f = { num: f.num.map((c) => -c), den: f.den.map((c) => -c) };
   if (f.den.length === 1 && f.den[0] === 1) return math.parse(polyEnTexte(f.num));
-  return math.parse(`(${polyEnTexte(f.num)})/(${polyEnTexte(f.den)})`);
+  return new math.OperatorNode("/", "divide", [math.parse(polyEnTexte(f.num)), math.parse(polyEnTexte(f.den))]);
 }
 
 function decimalesEnFractions(noeud: MathNode): MathNode {
@@ -306,10 +343,39 @@ function regrouper(noeud: MathNode): MathNode {
   return resultat.transform((m) => (m.type === "SymbolNode" && atomes.has((m as unknown as { name: string }).name) ? (atomes.get((m as unknown as { name: string }).name) as MathNode) : m));
 }
 
+/** Somme dont des termes semblables (ou des constantes) restent à regrouper : on la développe. */
+function reduireSiSomme(noeud: MathNode): MathNode {
+  return termesSignes(noeud).length >= 2 ? developper(noeud) : noeud;
+}
+
+/** Ordre d'écriture d'un produit : nombre, puis lettres/puissances, puis racines (« 3x√A », jamais
+ * « √A·x »). Mathématiquement neutre. */
+function ordonnerProduits(noeud: MathNode): MathNode {
+  return noeud.transform((m) => {
+    if (m.type !== "OperatorNode" || (m as unknown as { fn: string }).fn !== "multiply") return m;
+    const facteurs: MathNode[] = [];
+    const aplatir = (x: MathNode) => {
+      const y = x.type === "OperatorNode" && (x as unknown as { fn: string }).fn === "multiply" ? x : null;
+      if (y) (y as unknown as { args: MathNode[] }).args.forEach(aplatir);
+      else facteurs.push(x);
+    };
+    aplatir(m);
+    const rang = (x: MathNode) => (x.type === "ConstantNode" ? 0 : x.type === "FunctionNode" ? 2 : 1);
+    const tries = facteurs.map((f) => (f.type === "OperatorNode" || f.type === "FunctionNode" ? ordonnerProduits(f) : f)).sort((a, b) => rang(a) - rang(b));
+    return tries.slice(1).reduce((acc, f) => new math.OperatorNode("*", "multiply", [acc, f]), tries[0]);
+  });
+}
+
 function normaliserReference(noeudBrut: MathNode): MathNode {
-  const n = sansParentheses(regrouper(noeudBrut));
+  return ordonnerProduits(normaliserReferenceSansOrdre(noeudBrut));
+}
+
+function normaliserReferenceSansOrdre(noeudBrut: MathNode): MathNode {
+  const n = sansParentheses(porterSignes(regrouper(noeudBrut)));
   if (n.type === "OperatorNode" && (n as unknown as { fn: string }).fn === "divide") {
     let [num, den] = (n as unknown as { args: MathNode[] }).args;
+    num = reduireSiSomme(num);
+    den = reduireSiSomme(den);
     if (commenceParMoins(den)) {
       num = opposer(num);
       den = opposer(den);
