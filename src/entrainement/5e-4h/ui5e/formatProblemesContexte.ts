@@ -75,12 +75,15 @@ export function consigneJustificationA(): string {
   return "Calcule la hauteur $h$ au rayon optimal que tu as lu sur le graphique (arrondis à l'unité).";
 }
 export const TEXTE_AIDE_JUSTIFICATION_A_1 = "Réutilise la formule $h(x) = \\dfrac{V}{\\pi x^2}$ avec le $x$ que tu as lu sur le graphique précédent.";
-export function texteCorrectionJustificationA(exercice: ExerciceScenarioAConteneur, xOptimalRetenu: number): string {
-  const x = arrondi(xOptimalRetenu, 0);
-  const diametre = arrondi(2 * xOptimalRetenu, 0);
-  const h = arrondi(exercice.volumeCm3 / (Math.PI * xOptimalRetenu * xOptimalRetenu), 0);
+export function texteCorrectionJustificationA(exercice: ExerciceScenarioAConteneur, _xOptimalRetenu: number): string {
+  // Rayon optimal EXACT x = ∛(V/(2π)) — jamais le rayon arrondi retenu à l'écran précédent : avec
+  // x arrondi (ex. 7 pour V = 2500), h(7) ≈ 16 et 2x = 14 ne « coïncident » pas (retour du lot
+  // de refonte des feuilles).
+  const xExact = Math.cbrt(exercice.volumeCm3 / (2 * Math.PI));
+  const virgule = (v: number) => v.toFixed(1).replace(".", "{,}");
+  const h = exercice.volumeCm3 / (Math.PI * xExact * xExact);
   return (
-    `Correction de référence : au rayon optimal $x \\approx ${x}$ cm, la hauteur vaut $h \\approx ${h}$ cm et le diamètre vaut $2x \\approx ${diametre}$ cm — les deux coïncident. ` +
+    `Correction de référence : au rayon optimal exact $x = \\sqrt[3]{\\dfrac{V}{2\\pi}} \\approx ${virgule(xExact)}$ cm, la hauteur vaut $h \\approx ${virgule(h)}$ cm et le diamètre vaut $2x \\approx ${virgule(2 * xExact)}$ cm — les deux coïncident. ` +
     "Algébriquement : au minimum de $f+g$, $x^3 = \\dfrac{V}{2\\pi}$, donc $V = 2\\pi x^3$ ; en substituant dans $h(x) = \\dfrac{V}{\\pi x^2}$, on obtient " +
     "$h(x) = \\dfrac{2\\pi x^3}{\\pi x^2} = 2x$ : exactement le diamètre, quelle que soit la contenance $V$."
   );

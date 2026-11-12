@@ -2534,3 +2534,20 @@ paths:
   140 affirmations en KaTeX, jargon et doublons retirés, 20 par thème (10/10). Contenu : formulaire
   réécrit (15 formules, conditions descriptives), deux démonstrations (associativité ; pourquoi
   dom(f∘g) exige x ∈ dom g et g(x) ∈ dom f), énoncés par clé, chapitre vérifié au build.
+
+- **5e (4h), Chapitre 1 — refonte des feuilles et évaluations (5gen1–5)**, décision K. Les 5
+  adaptateurs suivent tout le contrat (`feuilles-evaluations.md`) : énoncé papier = données +
+  consigne globale (5gen4 : « Calcule, si elles existent, les valeurs suivantes », graphes
+  `svgGrapheComposee` à grille unitaire dans l'énoncé ; 5gen5 : scénarios A1, A2, B1–B5 et les 12
+  combinaisons de C, relevés en tableau), corrigés en « Étape n » (5gen1 : chaque condition puis
+  intersection, tableau de signes au corrigé ; 5gen3 : substitution, deux conditions,
+  \operatorname{dom}(f∘g) ; 5gen4 : « g(f(5)) n'existe pas » sans « = »), ligne Piège, barème 4 sans
+  critère < 0,5, durée, `versionPapier`, `?code=` dans les 5 applis (catalogues partagés app ↔
+  adaptateur), profils `profilsEvaluationFonctions1-2.ts`, `…3-4.ts`, `…5.ts` (cas particuliers 5gen1 :
+  « pas de CE », « condition toujours vraie » ; 5gen5 A1 calculatrice indispensable). `svgGraph.ts`
+  gagne `divisionsX`/`divisionsY` (ajout pur). Crochets inversés en `\mathopen{]}`/`\mathclose{[}`
+  à la source dans `formatEnsembleReelLatex` (5e et 6e) : KaTeX espaçait « ]−∞ » comme une
+  soustraction. Correction d'écran 5gen5 A1 : h = 2x montré au rayon optimal EXACT ∛(V/2π) (au rayon
+  arrondi, h(7) ≈ 16 ≠ 14). Vérifié : collecteurs (≈ 240 000 formules KaTeX strictes, 0 anomalie),
+  documents réels 2 graines (0 erreur KaTeX, 0 débordement), `?code=` 62/62, plans à 2 séries,
+  `npm run build` propre.
