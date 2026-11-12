@@ -2449,3 +2449,35 @@ paths:
   Vérifié : collecteurs (≈ 154 000 formules KaTeX strictes, 0 anomalie), documents réels des 9
   générateurs (2 graines, modes exercice/évaluation, aménagée) — 0 erreur KaTeX, 0 débordement à
   680 px et 1 280 px ; `?code=` rouvre l'instance (69/69) ; `npm run build` propre.
+
+- **6e (6h), Chapitre 5 — Nombres complexes : contenu + ateliers** (audit de contenu accepté en
+  entier). Erreurs corrigées : historique Cardan/Bombelli (√−15 vient du problème du 2nd degré
+  « partager 10 en deux parts de produit 40 » ; le 3e degré x³ = 15x + 4 est l'épisode de Bombelli,
+  avec un nouvel exemple « le calcul de Bombelli » (2+i)³ = 2+11i) ; titre Euler (« élue la plus
+  belle », pas « jugée par Euler lui-même ») ; méthode de l'argument (a < 0 : +π si b ≥ 0, −π si
+  b < 0 ; a = 0 : ±π/2 ; convention ]−π ; π]) ; figure du cycle économique recalculée avec
+  zₙ₊₁ = r·e^{iπ/3}·zₙ (le premier pas ne tournait pas) ; Moivre pour n ≤ 0. Les 7 exemples à une
+  seule étape sont détaillés en 2–4 étapes. Ajouts : symétries z̄/−z avec figure et racine carrée
+  par √r·e^{iθ/2} (§2), vérification par somme/produit (§3), tableau des angles remarquables et
+  exemple algébrique → exponentielle 1+i√3 / −1−i / √3−i (§4), linéarisation cos²x et cos³x
+  jusqu'à la primitive de cos²x (§5), racines cubiques de −8 reliées à z³+8 = (z+2)(z²−2z+4) (§6),
+  composition de deux rotations de centres différents (§7), angle orienté arg((z_C−z_A)/(z_B−z_A))
+  et test équilatéral e^{±iπ/3} avec exemple (§8), médiatrice |z−a| = |z−b| et exemple
+  |z−1| = |z+i| → y = −x (§9) ; formulaire et récapitulatif complétés ; 7 nouveaux énoncés de
+  démonstration par clé. Choix assumés : la figure des symétries étiquette les points par leur
+  valeur (2−i, −2−i…) car la barre de « z̄ » se plaçait mal dans la police des figures ; la
+  linéarisation n'est pas au formulaire (aucun générateur ne la demande).
+  7 nouveaux ateliers : `operations-plan-complexe-widget` (§1, z et w déplaçables, z+w, z−w, z̄,
+  −z, 1/z, z·w, ×i), `racine-carree-complexe-widget` (§2, un tour de z = un demi-tour des racines),
+  `racines-qui-se-rencontrent-widget` (§3, racines de z²+bz+c qui se rejoignent quand Δ = 0 puis
+  repartent conjuguées), `euler-cercle-widget` (§4, aimant en θ = π), `spirale-puissances-widget`
+  (§5, r < 1 / r = 1 / r > 1, version manipulable du cycle économique), `triangle-rapport-affixes-widget`
+  (§8, quotient q affiché, 5 verdicts, aimants indispensables : aucun triangle équilatéral n'a ses
+  3 sommets à coordonnées entières), `lieux-complexes-widget` (§9, mod 2π vs mod π, médiatrice).
+  3 ateliers améliorés : `produit-modules-arguments-widget` (mode « × i répété », formes a+bi),
+  `racines-niemes-widget` (formes exactes, case « Vérifier », préréglages −8 et 8i, `^` affichés
+  supprimés), `transformation-az-b-widget` (réécrit : M déplaçable et M′, Ω/angle/rapport, mode
+  « Composer » montrant que l'ordre compte). Vérifié : `npm run build` propre (vérificateur des
+  énoncés OK), page réelle en 390 clair/sombre et 1280 : 0 débordement, 0 `$` isolé, 0 erreur
+  KaTeX, 0 NaN, 10 ateliers montés sans débordement interne ; figure épinglée : 5 ok, 0 ko
+  (les 5 autres ateliers tiennent à l'écran, pas d'épinglage requis).
