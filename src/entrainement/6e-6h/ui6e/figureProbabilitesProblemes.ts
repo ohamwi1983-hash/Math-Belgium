@@ -103,7 +103,7 @@ function nombreS(mot: string): number {
   return [...mot].filter((c) => c === "S").length;
 }
 
-/** Arbre des 2ⁿ chemins (n ≤ 4), racine à gauche, S en haut et É en bas à chaque nœud ; les
+/** Arbre des 2ⁿ chemins (n ≤ 4, HTML : SVG + légende qui peut passer à la ligne), racine à gauche, S en haut et É en bas à chaque nœud ; les
  * chemins à exactement `k` succès sont tracés en trait épais et leur mot est en gras. Pour n = 5,
  * la liste des 32 chemins (mêmes conventions). */
 export function arbreCheminsSvg(n: number, k: number, p: string, q: string): string {
@@ -126,7 +126,7 @@ export function arbreCheminsSvg(n: number, k: number, p: string, q: string): str
   const feuilles = 2 ** n;
   const pas = n <= 3 ? 26 : 17;
   const W = 420;
-  const H = feuilles * pas + 34;
+  const H = feuilles * pas + 20;
   const xNiveau = (i: number) => 18 + (i * 250) / n;
   const yFeuille = (j: number) => 14 + j * pas + pas / 2;
   const yNoeud = (niveau: number, indice: number) => {
@@ -148,7 +148,9 @@ export function arbreCheminsSvg(n: number, k: number, p: string, q: string): str
         const x2 = xNiveau(niveau + 1);
         const y2 = yNoeud(niveau + 1, enfant);
         s += `<line x1="${nb(x1)}" y1="${nb(y1)}" x2="${nb(x2)}" y2="${nb(y2)}" stroke="${utile ? NOIR : "#999"}" stroke-width="${utile ? 2.2 : 1}"/>`;
-        s += `<text x="${nb(x2 - 9)}" y="${nb(y2 + (branche === 0 ? -4 : 11))}" text-anchor="end" font-size="${n <= 3 ? 12 : 10}" ${POLICE} fill="${GRIS}">${branche === 0 ? "S" : "É"}</text>`;
+        // Lettre de la branche près du nœud d'arrivée — sauf au dernier niveau, où le mot de la
+        // feuille la donne déjà (et où les feuilles, trop serrées, la feraient chevaucher).
+        if (niveau < n - 1) s += `<text x="${nb(x2 - 9)}" y="${nb(y2 + (branche === 0 ? -4 : 13))}" text-anchor="end" font-size="12" ${POLICE} fill="${GRIS}">${branche === 0 ? "S" : "É"}</text>`;
       }
     }
   }
@@ -157,8 +159,7 @@ export function arbreCheminsSvg(n: number, k: number, p: string, q: string): str
     const bon = nombreS(mot) === k;
     s += `<text x="${nb(xNiveau(n) + 8)}" y="${nb(yFeuille(j) + 4)}" font-size="${n <= 3 ? 13 : 11}" ${POLICE} fill="${bon ? NOIR : GRIS}"${bon ? ' font-weight="700"' : ""}>${mot}${bon ? "  ←" : ""}</text>`;
   }
-  s += `<text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="11" ${POLICE} fill="${GRIS}">${echapper(legendeBranches)}</text>`;
-  return s + "</svg>";
+  return `<div>${s}</svg><p style="text-align:center;font-size:0.88em;color:${GRIS};margin:0.2em 0 0">${echapper(legendeBranches)}</p></div>`;
 }
 /** Les chemins (mots en S/É) à exactement k succès, dans l'ordre de l'arbre (S en haut). */
 export function cheminsAKSucces(n: number, k: number): string[] {
