@@ -18,6 +18,8 @@ type ExerciceScenarioAReduit = Exclude<ExerciceScenarioA, { combo: "kInverseXAxC
  * CLAUDE.md, section gen29 : "répliquer ce patron... plutôt que d'inventer une troisième
  * convention". Tolérance absolue fixe, accepte indifféremment une réponse arrondie ou plus précise. */
 export const TOLERANCE_ARRONDI = 0.5;
+/** Calcul exact sur des données affichées au centième (sommes, système à solutions entières). */
+const TOLERANCE_CENTIEME = 0.015;
 
 // ============================================================================
 // Petites fonctions pures DUPLIQUÉES depuis `generateurs5e/problemesContexte/scenarioA.ts` et
@@ -361,11 +363,12 @@ export interface ReponseResolutionB {
   b: number;
 }
 
+/** a et b sont des entiers EXACTS (relevés exacts — audit 5e ch. 1) : tolérance au centième. */
 export function diagnostiquerAResolutionB(exercice: ExerciceScenarioB, a: number): StatutVerification {
-  return statutNumerique(a, exercice.aArrondiAttendu, TOLERANCE_ARRONDI);
+  return statutNumerique(a, exercice.aArrondiAttendu, TOLERANCE_CENTIEME);
 }
 export function diagnostiquerBResolutionB(exercice: ExerciceScenarioB, b: number): StatutVerification {
-  return statutNumerique(b, exercice.bArrondiAttendu, TOLERANCE_ARRONDI);
+  return statutNumerique(b, exercice.bArrondiAttendu, TOLERANCE_CENTIEME);
 }
 export function verifierResolutionB(exercice: ExerciceScenarioB, reponse: ReponseResolutionB): boolean {
   return diagnostiquerAResolutionB(exercice, reponse.a) === "correct" && diagnostiquerBResolutionB(exercice, reponse.b) === "correct";
@@ -410,7 +413,6 @@ export interface ReponseLectureC {
   ct: number;
 }
 
-const TOLERANCE_CENTIEME = 0.015;
 
 function ligneTableauC(exercice: ExerciceScenarioC, x: number) {
   const ligne = exercice.tableau.find((l) => l.x === x);

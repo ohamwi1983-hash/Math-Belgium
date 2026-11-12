@@ -70,7 +70,7 @@ export function calculerRecapitulatifProblemeContexte(etat: EtatSessionProblemeC
     }
     if (etat.scoreGraphiqueExercice !== null && etat.xOptimalRetenu !== null) {
       entrees.push(
-        entreeUnique("Rayon optimal (lecture graphique)", `x\\approx${arrondi(etat.xOptimalRetenu)} \\ \\text{(rayon optimal retenu)}`, etat.graphiqueRevele),
+        entreeUnique("Rayon optimal (lecture graphique)", `x\\approx${arrondi(etat.xOptimalRetenu)}`, etat.graphiqueRevele),
       );
     }
   } else if (exercice.scenario === "A") {

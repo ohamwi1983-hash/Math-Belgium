@@ -133,6 +133,127 @@ function contientFractionInterne(noeud: MathNode, profondeur = 0): boolean {
   return op.args.some((a) => contientFractionInterne(a, profondeur + 1));
 }
 
+// --- Repli quand `math.rationalize` échoue (« Operator / invalid » sur « (3 − 6/(2−x))/(6/(2−x) − 5) »,
+// bug de mathjs) : fraction rationnelle en x seulement, calculée à la main (polynômes à coefficients
+// rationnels, facteurs linéaires communs simplifiés). Jamais utilisé quand une racine est présente.
+
+type Poly = number[]; // coefficients croissants
+type FractionRationnelle = { num: Poly; den: Poly };
+
+function nettoyerPoly(p: Poly): Poly {
+  const q = p.map((c) => (Math.abs(c) < 1e-12 ? 0 : c));
+  while (q.length > 1 && q[q.length - 1] === 0) q.pop();
+  return q;
+}
+function ajouterPoly(a: Poly, b: Poly, signe = 1): Poly {
+  const n = Math.max(a.length, b.length);
+  return nettoyerPoly(Array.from({ length: n }, (_v, i) => (a[i] ?? 0) + signe * (b[i] ?? 0)));
+}
+function multiplierPoly(a: Poly, b: Poly): Poly {
+  const r = new Array(a.length + b.length - 1).fill(0);
+  a.forEach((x, i) => b.forEach((y, j) => (r[i + j] += x * y)));
+  return nettoyerPoly(r);
+}
+function fractionDe(noeud: MathNode): FractionRationnelle | null {
+  const n = sansParentheses(noeud);
+  if (n.type === "ConstantNode") {
+    const v = Number((n as unknown as { value: unknown }).value);
+    return Number.isFinite(v) ? { num: [v], den: [1] } : null;
+  }
+  if (n.type === "SymbolNode") return (n as unknown as { name: string }).name === "x" ? { num: [0, 1], den: [1] } : null;
+  if (n.type !== "OperatorNode") return null;
+  const op = n as unknown as { fn: string; args: MathNode[] };
+  const a = fractionDe(op.args[0]);
+  if (a === null) return null;
+  if (op.fn === "unaryMinus") return { num: a.num.map((c) => -c), den: a.den };
+  if (op.fn === "unaryPlus") return a;
+  if (op.fn === "pow") {
+    const e = sansParentheses(op.args[1]);
+    const k = e.type === "ConstantNode" ? Number((e as unknown as { value: unknown }).value) : NaN;
+    if (!Number.isInteger(k) || k < 0 || k > 6) return null;
+    let r: FractionRationnelle = { num: [1], den: [1] };
+    for (let i = 0; i < k; i++) r = { num: multiplierPoly(r.num, a.num), den: multiplierPoly(r.den, a.den) };
+    return r;
+  }
+  const b = fractionDe(op.args[1]);
+  if (b === null) return null;
+  if (op.fn === "add" || op.fn === "subtract") {
+    const signe = op.fn === "add" ? 1 : -1;
+    return { num: ajouterPoly(multiplierPoly(a.num, b.den), multiplierPoly(b.num, a.den), signe), den: multiplierPoly(a.den, b.den) };
+  }
+  if (op.fn === "multiply") return { num: multiplierPoly(a.num, b.num), den: multiplierPoly(a.den, b.den) };
+  if (op.fn === "divide") return { num: multiplierPoly(a.num, b.den), den: multiplierPoly(a.den, b.num) };
+  return null;
+}
+function evaluerPoly(p: Poly, x: number): number {
+  return p.reduceRight((acc, c) => acc * x + c, 0);
+}
+/** Division par (x − r) (Horner), r racine. */
+function diviserParRacine(p: Poly, r: number): Poly {
+  const q: number[] = [];
+  let reste = 0;
+  for (let i = p.length - 1; i >= 1; i--) {
+    reste = p[i] + reste * r;
+    q.unshift(reste);
+  }
+  return nettoyerPoly(q);
+}
+function racinesReelles(p: Poly): number[] {
+  if (p.length === 2) return [-p[0] / p[1]];
+  if (p.length === 3) {
+    const [c, b, a] = p;
+    const d = b * b - 4 * a * c;
+    if (d < -1e-12) return [];
+    const s = Math.sqrt(Math.max(0, d));
+    return [(-b - s) / (2 * a), (-b + s) / (2 * a)];
+  }
+  return [];
+}
+/** Coefficients rationnels → entiers premiers entre eux (même facteur appliqué aux deux membres). */
+function entiersCommuns(f: FractionRationnelle): FractionRationnelle {
+  const tous = [...f.num, ...f.den].filter((c) => c !== 0);
+  let multiplicateur = 1;
+  for (const c of tous) {
+    for (let q = 1; q <= 1000; q++) {
+      if (Math.abs(c * multiplicateur * q - Math.round(c * multiplicateur * q)) < 1e-9) {
+        multiplicateur *= q;
+        break;
+      }
+    }
+  }
+  const num = f.num.map((c) => Math.round(c * multiplicateur));
+  const den = f.den.map((c) => Math.round(c * multiplicateur));
+  const pgcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : pgcd(b, a % b));
+  const g = [...num, ...den].filter((c) => c !== 0).reduce((acc, c) => pgcd(acc, c), 0) || 1;
+  return { num: num.map((c) => c / g), den: den.map((c) => c / g) };
+}
+function polyEnTexte(p: Poly): string {
+  const termes: string[] = [];
+  for (let k = p.length - 1; k >= 0; k--) {
+    const c = p[k];
+    if (c === 0) continue;
+    const abs = Math.abs(c);
+    const partieX = k === 0 ? "" : k === 1 ? "x" : `x^${k}`;
+    const coef = partieX === "" ? `${abs}` : abs === 1 ? "" : `${abs}*`;
+    termes.push(`${c < 0 ? "-" : termes.length ? "+" : ""}${coef}${partieX}`);
+  }
+  return termes.length ? termes.join(" ").replace(/\s+/g, "") : "0";
+}
+function regrouperRationnelEnX(noeud: MathNode): MathNode | null {
+  const f0 = fractionDe(noeud);
+  if (f0 === null || f0.den.every((c) => c === 0)) return null;
+  let f: FractionRationnelle = { num: nettoyerPoly(f0.num), den: nettoyerPoly(f0.den) };
+  for (let tour = 0; tour < 4; tour++) {
+    const r = racinesReelles(f.den).find((x) => Math.abs(evaluerPoly(f.num, x)) < 1e-9 && f.num.length > 1);
+    if (r === undefined) break;
+    f = { num: diviserParRacine(f.num, r), den: diviserParRacine(f.den, r) };
+  }
+  f = entiersCommuns(f);
+  if (f.den[f.den.length - 1] < 0) f = { num: f.num.map((c) => -c), den: f.den.map((c) => -c) };
+  if (f.den.length === 1 && f.den[0] === 1) return math.parse(polyEnTexte(f.num));
+  return math.parse(`(${polyEnTexte(f.num)})/(${polyEnTexte(f.den)})`);
+}
+
 function decimalesEnFractions(noeud: MathNode): MathNode {
   return noeud.transform((m) => {
     if (m.type === "ConstantNode" && typeof (m as unknown as { value: unknown }).value === "number") {
@@ -179,6 +300,7 @@ function regrouper(noeud: MathNode): MathNode {
         continue;
       }
     }
+    if (contientFractionInterne(resultat) && atomes.size === 0) resultat = regrouperRationnelEnX(coquille) ?? resultat;
   }
   resultat = aplatirDivisions(resultat);
   return resultat.transform((m) => (m.type === "SymbolNode" && atomes.has((m as unknown as { name: string }).name) ? (atomes.get((m as unknown as { name: string }).name) as MathNode) : m));

@@ -36,11 +36,10 @@ export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tent
     <div>
       <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
       <div className="etat-actuel-box etat-actuel-box-termes">
-        <span>CE :</span>
-        {termesEtatActuel.length === 0 && <span>aucune</span>}
+        {termesEtatActuel.length === 0 && <span>CE : aucune</span>}
         {termesEtatActuel.map((t, i) => (
           <span key={i}>
-            {i > 0 && "et "}
+            {i === 0 ? "CE : " : "et "}
             <Katex expression={t} />
           </span>
         ))}

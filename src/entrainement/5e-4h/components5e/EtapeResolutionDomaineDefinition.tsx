@@ -35,11 +35,10 @@ function EtatActuelCE({ exercice }: { exercice: ExerciceDomaineDefinition }) {
 function EtatActuelLignes({ termes }: { termes: string[] }) {
   return (
     <div className="etat-actuel-box etat-actuel-box-termes">
-      <span>CE :</span>
-      {termes.length === 0 && <span>aucune</span>}
+      {termes.length === 0 && <span>CE : aucune</span>}
       {termes.map((t, i) => (
         <span key={i}>
-          {i > 0 && "et "}
+          {i === 0 ? "CE : " : "et "}
           <Katex expression={t} />
         </span>
       ))}
