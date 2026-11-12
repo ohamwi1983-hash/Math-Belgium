@@ -14,7 +14,7 @@
    * ================================================================ */
 
   var NS = "http://www.w3.org/2000/svg";
-  var LARGEUR = 420, HAUTEUR = 320, MG = 44, MD = 14, MH = 14, MB = 30;
+  var LARGEUR = 420, HAUTEUR = 320, MG = 50, MD = 14, MH = 14, MB = 30;
   var CRANS = 1000, Z_MAX = 100;
   var BOUTONS = [1, 2, 10, 100];
 
@@ -71,12 +71,12 @@
     '.grille{stroke:var(--line,#ccd8e0);stroke-width:0.7;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
     '.fleche{fill:var(--ink-soft,#6b6055);}' +
-    '.grad{font-size:10.5px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);font-variant-numeric:tabular-nums;}' +
+    '.grad{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);font-variant-numeric:tabular-nums;}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
     '.tangente{stroke:var(--good,#2f7a4f);stroke-width:2;stroke-dasharray:7 5;}' +
     '.pointA{fill:var(--ink,#241f1a);}' +
-    '.etq{font-size:12.5px;font-weight:700;fill:var(--ink,#241f1a);font-family:var(--sans,sans-serif);}' +
-    '.zoom-etq{font-size:12px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
+    '.etq{font-size:14px;font-weight:700;fill:var(--ink,#241f1a);font-family:var(--sans,sans-serif);}' +
+    '.zoom-etq{font-size:13px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.lecture{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:10px 12px;margin:0 0 14px;font-size:0.93rem;line-height:1.5;}' +
     '.lecture p{margin:0 0 6px;}' +
     '.lecture p:last-child{margin:0;}' +
@@ -162,7 +162,7 @@
       var gx = function (x) { return MG + (x - xMin) / (xMax - xMin) * (LARGEUR - MG - MD); };
       var gy = function (y) { return HAUTEUR - MB - (y - yMin) / (yMax - yMin) * (HAUTEUR - MH - MB); };
 
-      var zTxt = z < 9.95 ? fr(z, 1) : fr(z, 0);
+      var zTxt = (z < 9.95 ? fr(z, 1) : fr(z, 0)).replace(/,0$/, "");
       s.getElementById("z-valeur").textContent = "×" + zTxt;
       Array.prototype.forEach.call(s.getElementById("boutons").children, function (b) {
         b.classList.toggle("actif", Math.abs(parseFloat(b.dataset.z) - z) < 1e-6);
@@ -224,7 +224,7 @@
       var etA = el("text", { x: pA[0] + 9, y: pA[1] + 17, class: "etq" });
       etA.textContent = "A";
       g.appendChild(etA);
-      var ez = el("text", { x: LARGEUR - MD - 6, y: MH + 16, "text-anchor": "end", class: "zoom-etq" });
+      var ez = el("text", { x: LARGEUR - MD - 8, y: MH + 18, "text-anchor": "end", class: "zoom-etq" });
       ez.textContent = "zoom ×" + zTxt;
       svg.appendChild(ez);
 

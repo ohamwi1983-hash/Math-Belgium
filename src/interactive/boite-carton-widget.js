@@ -46,7 +46,7 @@
 
   var LH = 400, HH = 190;   // vue haute : patron (gauche) + boîte (droite)
   var LC = 400, HC = 210;   // courbe V(x)
-  var MC = 36;
+  var MC = 42;
 
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
@@ -89,7 +89,7 @@
     '.curseur{display:flex;flex-direction:column;gap:4px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;min-height:44px;}' +
-    '.curseur-row input[type="range"]{flex:1 1 auto;min-width:0;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;min-width:0;height:44px;margin:0;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:66px;text-align:right;font-size:0.92rem;}' +
     '</style>' +
     '<p class="formule" id="formule"></p>' +
@@ -281,6 +281,15 @@
       var tg = svgEl(ns, "text", { x: pg[0], y: pg[1] + 15, "text-anchor": "middle", class: "grad" });
       tg.textContent = formatNombreFr(g, 0);
       svg.appendChild(tg);
+    }
+    // Graduations en V : tous les 500 cm³ (carré) ou 250 cm³ (A4).
+    var pasV = F.l >= 30 ? 500 : 250;
+    for (var gv = pasV; gv < yMaxF; gv += pasV) {
+      var pv = toPx(0, gv);
+      svg.appendChild(svgEl(ns, "line", { x1: pv[0] - 4, y1: pv[1], x2: pv[0], y2: pv[1], class: "axe" }));
+      var tv = svgEl(ns, "text", { x: pv[0] - 6, y: pv[1] + 4, "text-anchor": "end", class: "grad" });
+      tv.textContent = formatNombreFr(gv, 0);
+      svg.appendChild(tv);
     }
     // Courbe V sur ]0 ; l/2[.
     var d = "";

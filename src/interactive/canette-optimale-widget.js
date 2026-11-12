@@ -16,7 +16,7 @@
   var NS = "http://www.w3.org/2000/svg";
   var V = 330;
   var LARGEUR = 440, HAUTEUR = 300;
-  var ECHELLE = 9, SOL = 272, CX = 76;
+  var ECHELLE = 8.6, SOL = 266, CX = 86;
   var GX0 = 196, GX1 = 428, GY0 = 268, GY1 = 22;
   var R_MIN_G = 1.5, R_MAX_G = 6.3, A_MIN_G = 200, A_MAX_G = 600;
   var VRAIE = { r: 3.3, h: 11.5 };
@@ -50,21 +50,22 @@
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
     '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.grille{stroke:var(--line,#ccd8e0);stroke-width:0.7;}' +
-    '.grad{font-size:11px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.titre-axe{font-size:11px;font-weight:700;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.grad{font-size:13px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.titre-axe{font-size:13px;font-weight:700;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.sol{stroke:var(--ink-soft,#6b6055);stroke-width:1;}' +
     '.boite{fill:var(--accent-soft,#f6e2d3);stroke:var(--accent,#a8471f);stroke-width:2;}' +
     '.boite-epaisse{stroke-width:4;}' +
+    '.cote-ligne{stroke:var(--accent-ink,#7a3212);stroke-width:1.2;}' +
     '.vraie{fill:none;stroke:var(--ink-soft,#6b6055);stroke-width:1.3;stroke-dasharray:4 3;}' +
-    '.cote{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);font-family:var(--sans,sans-serif);}' +
-    '.cote-vraie{font-size:10.5px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.cote{font-size:13.5px;font-weight:700;fill:var(--accent-ink,#7a3212);font-family:var(--sans,sans-serif);}' +
+    '.cote-vraie{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.4;fill:none;}' +
     '.courbe-cout{stroke:var(--sky,#2f6fb0);}' +
     '.courbe-pale{stroke-width:1.4;stroke-dasharray:5 4;opacity:0.6;}' +
     '.pt{fill:var(--accent,#a8471f);}' +
     '.pt-cout{fill:var(--sky,#2f6fb0);}' +
     '.pt-min{fill:var(--good,#2f7a4f);}' +
-    '.etq-min{font-size:11px;font-weight:700;fill:var(--good,#2f7a4f);font-family:var(--sans,sans-serif);}' +
+    '.etq-min{font-size:13px;font-weight:700;fill:var(--good,#2f7a4f);font-family:var(--sans,sans-serif);}' +
     '.lecture{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:10px 12px;margin:0 0 14px;font-size:0.93rem;line-height:1.55;font-variant-numeric:tabular-nums;}' +
     '.lecture p{margin:0 0 6px;}' +
     '.lecture p:last-child{margin:0;}' +
@@ -160,11 +161,18 @@
       var tv = el("text", { x: CX + VRAIE.r * ECHELLE + 3, y: hautVraie - 4, class: "cote-vraie" });
       tv.textContent = "vraie 33 cl";
       svg.appendChild(tv);
-      var ch = el("text", { x: 6, y: Math.max(14, hautCan - 8), class: "cote" });
-      ch.textContent = "h = " + fr(h, 2) + " cm";
+      // Cote verticale de h à gauche de la canette (texte tourné), cote de r sous le sol
+      var xc = Math.max(20, CX - r * ECHELLE - 9);
+      svg.appendChild(el("line", { x1: xc, x2: xc, y1: hautCan, y2: SOL, class: "cote-ligne" }));
+      svg.appendChild(el("line", { x1: xc - 4, x2: xc + 4, y1: hautCan, y2: hautCan, class: "cote-ligne" }));
+      svg.appendChild(el("line", { x1: xc - 4, x2: xc + 4, y1: SOL, y2: SOL, class: "cote-ligne" }));
+      var yh = (hautCan + SOL) / 2;
+      var ch = el("text", { x: xc - 6, y: yh, "text-anchor": "middle", class: "cote", transform: "rotate(-90 " + (xc - 6) + " " + yh + ")" });
+      ch.textContent = "h = " + fr(h, 1);
       svg.appendChild(ch);
-      var cr = el("text", { x: CX, y: SOL + 18, "text-anchor": "middle", class: "cote" });
-      cr.textContent = "r = " + fr(r, 2) + " cm";
+      svg.appendChild(el("line", { x1: CX, x2: CX + r * ECHELLE, y1: SOL + 6, y2: SOL + 6, class: "cote-ligne" }));
+      var cr = el("text", { x: CX + r * ECHELLE / 2, y: SOL + 22, "text-anchor": "middle", class: "cote" });
+      cr.textContent = "r = " + fr(r, 2);
       svg.appendChild(cr);
 
       /* ---- Panneau 2 : aire (ou coût) en fonction de r ---- */

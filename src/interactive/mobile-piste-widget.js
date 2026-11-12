@@ -81,7 +81,7 @@
 
   var LP = 400, HP = 74;      // piste
   var LG = 400, HG = 92;      // chaque graphe
-  var MG = 40;
+  var MG = 50;
 
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
@@ -125,7 +125,7 @@
     '.curseur{display:flex;flex-direction:column;gap:4px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
     '.curseur-row{display:flex;align-items:center;gap:10px;min-height:44px;}' +
-    '.curseur-row input[type="range"]{flex:1 1 auto;min-width:0;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;min-width:0;height:44px;margin:0;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:60px;text-align:right;font-size:0.92rem;}' +
     '.freinage[hidden]{display:none;}' +
     '.freinage{display:flex;flex-direction:column;gap:8px;}' +
@@ -322,7 +322,7 @@
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svgPiste, m = this._m;
     svg.innerHTML = "";
-    var x0 = 22, x1 = LP - 22, yRoute = 46;
+    var x0 = 42, x1 = LP - 24, yRoute = 46;
     function px(sm) { return x0 + Math.max(0, Math.min(m.piste, sm)) / m.piste * (x1 - x0); }
     svg.appendChild(svgEl(ns, "rect", { x: x0 - 6, y: yRoute, width: x1 - x0 + 12, height: 8, class: "route" }));
     for (var g = 0; g <= m.piste + 1e-9; g += m.gradPiste) {
@@ -388,7 +388,7 @@
     var yAxe = yMin <= 0 && yMax >= 0 ? P(0, 0)[1] : yB;
     svg.appendChild(svgEl(ns, "line", { x1: xG, y1: yAxe, x2: LG - 6, y2: yAxe, class: "axe", "marker-end": "url(#fleche-" + id + ")" }));
     svg.appendChild(svgEl(ns, "line", { x1: xG, y1: yB + 2, x2: xG, y2: 3, class: "axe", "marker-end": "url(#fleche-" + id + ")" }));
-    var tn = svgEl(ns, "text", { x: 4, y: 14, class: "nom-axe" });
+    var tn = svgEl(ns, "text", { x: 12, y: (yH + yB) / 2, "text-anchor": "middle", class: "nom-axe", transform: "rotate(-90 12 " + ((yH + yB) / 2) + ")" });
     tn.textContent = nom;
     svg.appendChild(tn);
     var tt = svgEl(ns, "text", { x: LG - 8, y: yAxe - 4, "text-anchor": "end", class: "nom-axe" });

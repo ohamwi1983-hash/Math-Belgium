@@ -69,17 +69,17 @@
     '.verdict-inflexion{color:var(--plan,#5b4ea3);background:var(--surface-2,#faf6f0);}' +
     '.verdict-aucun{color:var(--accent-ink,#7a3212);background:var(--surface-2,#faf6f0);}' +
     '.tables{display:flex;flex-direction:column;gap:10px;margin:0 0 18px;}' +
-    'table{width:100%;border-collapse:collapse;font-size:0.88rem;font-variant-numeric:tabular-nums;table-layout:fixed;}' +
+    'table{width:100%;border-collapse:collapse;font-size:0.88rem;font-variant-numeric:tabular-nums;}' +
     'th,td{border:1px solid var(--line,#ccd8e0);padding:6px 2px;text-align:center;overflow-wrap:anywhere;}' +
     'th{background:var(--surface-2,#faf6f0);font-weight:700;}' +
-    'td.lib,th.lib{width:22%;font-weight:700;background:var(--surface-2,#faf6f0);}' +
+    'td.lib,th.lib{font-weight:700;background:var(--surface-2,#faf6f0);}' +
     '.zero{font-weight:700;}' +
     '.plus{color:var(--good,#2f7a4f);font-weight:700;}' +
     '.moins{color:var(--bad,#b23a3a);font-weight:700;}' +
     '.fl{font-size:1.15rem;line-height:1;}' +
     '.nat{font-size:0.78rem;font-weight:700;}' +
-    '.nat-max{color:var(--good,#2f7a4f);}' +
-    '.nat-min{color:var(--bad,#b23a3a);}' +
+    '.nat-max{color:var(--good,#2f7a4f);white-space:nowrap;}' +
+    '.nat-min{color:var(--bad,#b23a3a);white-space:nowrap;}' +
     '.nat-ni{color:var(--plan,#5b4ea3);}' +
     '.conc{font-size:1.1rem;font-weight:700;}' +
     '.conc-moins{color:var(--rose,#b23a7a);}' +
@@ -90,9 +90,9 @@
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
-    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;min-width:0;height:44px;accent-color:var(--accent,#a8471f);}' +
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
-    '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
+    '.btn-reset{margin-top:2px;padding:8px 14px;min-height:44px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<p class="formule" id="formule"></p>' +
