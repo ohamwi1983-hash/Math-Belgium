@@ -71,7 +71,8 @@ export function calculerViewBoxLectureGraphiqueDerivees(exercice: ExerciceLectur
   let yMax = Math.max(3, ...valeurs) + 1.5;
   yMin = Math.max(yMin, -11);
   yMax = Math.min(yMax, 11);
-  return { x: [xMin, xMax], y: [Math.floor(yMin), Math.ceil(yMax)] };
+  // Petite marge en x : les graduations ±8 ne sont plus rognées au bord du cadre.
+  return { x: [xMin - 0.6, xMax + 0.6], y: [Math.floor(yMin), Math.ceil(yMax)] };
 }
 
 export interface MarqueurPointIsole {

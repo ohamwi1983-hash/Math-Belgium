@@ -28,6 +28,7 @@ import type {
 import type { EnsembleReelGuide } from "../core5e/domaineDefinition.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "./verificationAsymptoteOblique";
+import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import { verifierEnsembleReelGuide } from "./verificationDomaineDefinition";
 
 export { diagnostiquerNombre, verifierEnsembleReelGuide };
@@ -143,6 +144,96 @@ export function valeursFAuxExtremums(exercice: ExerciceEtudeLocale): number[] {
 
 export function valeursFAuxInflexions(exercice: ExerciceEtudeLocale): number[] {
   return xDesInflexions(exercice).map((x) => valeurFEtudeLocale(exercice, x));
+}
+
+// ============================================================================
+// Cibles numériques avec EXACTITUDE (audit 5e ch. 5, décision I, 5gen29) : une valeur attendue
+// RATIONNELLE (racine exacte, valeur de f affichée en fraction) exige la valeur exacte — fraction
+// ou décimal exact ; une valeur IRRATIONNELLE reste acceptée arrondie au centième (ou exacte).
+// Fonctions ADDITIONNELLES : `diagnostiquerChampParmiCibles`/`verifierEnsembleNumerique` (0,01
+// partout) restent inchangées pour leurs autres utilisateurs.
+// ============================================================================
+
+export interface CibleNumerique {
+  valeur: number;
+  /** true ⟹ valeur rationnelle : seule la valeur exacte est acceptée. */
+  exacte: boolean;
+}
+
+function evaluerSaisie(texte: string): number | null {
+  try {
+    const v = evaluerExpressionGenerale(texte.replace(/[\u2212\u2013\u2014]/g, "-"), 0);
+    return Number.isFinite(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function egaleCible(v: number, cible: CibleNumerique): boolean {
+  const ecart = Math.abs(v - cible.valeur);
+  return cible.exacte ? ecart <= 1e-9 * Math.max(1, Math.abs(cible.valeur)) : ecart <= 0.01;
+}
+
+export function diagnostiquerChampParmiCiblesExactes(texte: string, cibles: CibleNumerique[]): StatutVerification {
+  const v = evaluerSaisie(texte);
+  if (v === null || cibles.length === 0) return "parse_error";
+  return cibles.some((c) => egaleCible(v, c)) ? "correct" : "not_equivalent";
+}
+
+/** ENSEMBLE exact, ordre indifférent (appariement glouton, ≤ 2 cibles dans ce générateur). */
+export function verifierEnsembleNumeriqueExact(reponses: string[], cibles: CibleNumerique[]): boolean {
+  if (reponses.length !== cibles.length) return false;
+  const restantes = [...cibles];
+  for (const rep of reponses) {
+    const v = evaluerSaisie(rep);
+    if (v === null) return false;
+    const idx = restantes.findIndex((c) => egaleCible(v, c));
+    if (idx === -1) return false;
+    restantes.splice(idx, 1);
+  }
+  return true;
+}
+
+/** Vrai si une saisie est un ARRONDI d'une cible rationnelle (« −0,11 » pour −1/9) : signalé sans
+ * consommer de tentative, avec « donne la valeur exacte ». */
+export function contientArrondiRationnel(reponses: string[], cibles: CibleNumerique[]): boolean {
+  return reponses.some((rep) => {
+    const v = evaluerSaisie(rep);
+    if (v === null || cibles.some((c) => egaleCible(v, c))) return false;
+    return cibles.some((c) => c.exacte && Math.abs(v - c.valeur) <= Math.max(0.02, 0.01 * Math.abs(c.valeur)));
+  });
+}
+
+function ciblesRacines(racines: RacineEtudeLocale[]): CibleNumerique[] {
+  return racines.map((r) => ({ valeur: valeurNumeriqueRacineEtudeLocale(r), exacte: r.exact }));
+}
+
+export function ciblesRacinesFPrime(exercice: ExerciceEtudeLocale): CibleNumerique[] {
+  return ciblesRacines(exercice.racinesFPrime);
+}
+
+export function ciblesRacinesFSeconde(exercice: ExerciceEtudeLocale): CibleNumerique[] {
+  return ciblesRacines(exercice.racinesFSeconde);
+}
+
+/** Valeur de f rationnelle ⟺ fonction rationnelle c/((x−e)²+k) (c/k ou 3c/(4k), même en un point
+ * irrationnel) ou polynôme en un point rationnel. */
+function ciblesValeursF(exercice: ExerciceEtudeLocale, racines: RacineEtudeLocale[], retenue: (i: number) => boolean): CibleNumerique[] {
+  const out: CibleNumerique[] = [];
+  racines.forEach((r, i) => {
+    if (!retenue(i)) return;
+    const x = valeurNumeriqueRacineEtudeLocale(r);
+    out.push({ valeur: valeurFEtudeLocale(exercice, x), exacte: exercice.type !== "polynomiale" || r.exact });
+  });
+  return out;
+}
+
+export function ciblesValeursExtremums(exercice: ExerciceEtudeLocale): CibleNumerique[] {
+  return ciblesValeursF(exercice, exercice.racinesFPrime, (i) => exercice.classificationFPrime[i] !== "ni_lun_ni_lautre");
+}
+
+export function ciblesValeursInflexions(exercice: ExerciceEtudeLocale): CibleNumerique[] {
+  return ciblesValeursF(exercice, exercice.racinesFSeconde, (i) => exercice.classificationFSeconde[i] === "pi");
 }
 
 // ============================================================================

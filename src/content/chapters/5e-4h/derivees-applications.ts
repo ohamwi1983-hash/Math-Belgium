@@ -1567,6 +1567,9 @@ export const deriveesApplications: ChapterContent = {
               'pratique, deux façons de l\'estimer : la version DISCRÈTE C(q+1)−C(q) — le coût ' +
               'réel de la (q+1)-ième unité — et la version CONTINUE C\'(q) — la dérivée, la ' +
               'pente instantanée. Les deux sont PROCHES, mais pas identiques.',
+            'Le coût marginal $C\'(q)$ est lui-même une fonction de q : il est **minimal** là où ' +
+              'sa propre dérivée $C\'\'(q)$ s\'annule en passant de − à +. Pour un coût de degré 3, ' +
+              '$C\'\'(q)$ est du premier degré : une seule équation à résoudre.',
           ],
         },
         {

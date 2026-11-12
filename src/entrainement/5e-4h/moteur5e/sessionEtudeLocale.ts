@@ -16,13 +16,13 @@ import type { EcranEtudeLocale, EtatSessionEtudeLocale, ResultatExerciceEtudeLoc
 import type { ReponseTableauEtudeLocale } from "./verificationEtudeLocale";
 import {
   domaineAttendu,
-  racinesFPrimeNumeriques,
-  racinesFSecondeNumeriques,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
-  valeursFAuxExtremums,
-  valeursFAuxInflexions,
-  verifierEnsembleNumerique,
+  ciblesRacinesFPrime,
+  ciblesRacinesFSeconde,
+  ciblesValeursExtremums,
+  ciblesValeursInflexions,
+  verifierEnsembleNumeriqueExact,
   verifierEnsembleReelGuide,
   verifierTableauEtudeLocale,
 } from "./verificationEtudeLocale";
@@ -123,13 +123,13 @@ export function soumettreReponseDomaine(etat: EtatSessionEtudeLocale, reponse: E
 // ============================================================================
 
 export function soumettreReponseResoudreFPrime(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
-  return soumettreEcran(etat, "resoudreFPrime", reponses, (r) => verifierEnsembleNumerique(r, racinesFPrimeNumeriques(etat.exerciceCourant)));
+  return soumettreEcran(etat, "resoudreFPrime", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesRacinesFPrime(etat.exerciceCourant)));
 }
 
 export function soumettreReponseResoudreFSeconde(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
   const exercice = etat.exerciceCourant;
   if (exercice.niveau !== "avance") throw new Error('soumettreReponseResoudreFSeconde : exercice hors niveau "avance"');
-  return soumettreEcran(etat, "resoudreFSeconde", reponses, (r) => verifierEnsembleNumerique(r, racinesFSecondeNumeriques(exercice)));
+  return soumettreEcran(etat, "resoudreFSeconde", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesRacinesFSeconde(exercice)));
 }
 
 // ============================================================================
@@ -152,9 +152,9 @@ export function soumettreReponseTableauFSeconde(etat: EtatSessionEtudeLocale, re
 // ============================================================================
 
 export function soumettreReponseExtremums(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
-  return soumettreEcran(etat, "extremums", reponses, (r) => verifierEnsembleNumerique(r, valeursFAuxExtremums(etat.exerciceCourant)));
+  return soumettreEcran(etat, "extremums", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesValeursExtremums(etat.exerciceCourant)));
 }
 
 export function soumettreReponseInflexions(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
-  return soumettreEcran(etat, "inflexions", reponses, (r) => verifierEnsembleNumerique(r, valeursFAuxInflexions(etat.exerciceCourant)));
+  return soumettreEcran(etat, "inflexions", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesValeursInflexions(etat.exerciceCourant)));
 }

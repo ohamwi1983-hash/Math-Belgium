@@ -35,6 +35,9 @@ interface Props {
   /** Diagnostic PAR CHAMP — correct si la valeur saisie correspond à N'IMPORTE LAQUELLE des cibles
    * attendues (ensemble, ordre indifférent). */
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Contrôle de FORME avant soumission (saisie illisible, arrondi d'une valeur rationnelle) :
+   * renvoie le message à afficher, la tentative n'est PAS décomptée (audit 5e ch. 5, décision I). */
+  controlerSaisie?: (reponses: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -60,11 +63,13 @@ export function EtapeZerosDeriveeEtudeLocale({
   onActiverAide,
   onValider,
   diagnostiquer,
+  controlerSaisie,
   validation,
 }: Props) {
   const [choix, setChoix] = useState<"aucun" | "au_moins_un" | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [avertissement, setAvertissement] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const complet = choix === "aucun" || (choix === "au_moins_un" && valeurs.length > 0 && valeurs.every((v) => v.trim() !== ""));
@@ -88,6 +93,9 @@ export function EtapeZerosDeriveeEtudeLocale({
   function valider() {
     if (!complet) return;
     const reponses = choix === "aucun" ? [] : valeurs;
+    const message = controlerSaisie && reponses.length > 0 ? controlerSaisie(reponses) : null;
+    setAvertissement(message);
+    if (message) return;
     setDernierStatut(choix === "au_moins_un" && diagnostiquer ? (valeurs.map((v) => diagnostiquer(v)).find((s) => s !== "correct") ?? "correct") : null);
     onValider(reponses);
   }
@@ -172,7 +180,12 @@ export function EtapeZerosDeriveeEtudeLocale({
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {avertissement && (
+          <p className="alert-error" role="alert">
+            {avertissement}
+          </p>
+        )}
+        {montrerErreurs && !avertissement && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

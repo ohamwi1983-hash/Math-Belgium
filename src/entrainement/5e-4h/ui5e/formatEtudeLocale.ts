@@ -17,6 +17,7 @@ import { valeurFEtudeLocale, valeurNumeriqueRacineEtudeLocale } from "../generat
 import type { EcranEtudeLocale } from "../moteur5e/typesEtudeLocale";
 import { ordreEcransEtudeLocale } from "../moteur5e/typesEtudeLocale";
 import { domaineAttendu, xDesExtremums, xDesInflexions } from "../moteur5e/verificationEtudeLocale";
+import type { CibleNumerique } from "../moteur5e/verificationEtudeLocale";
 
 // ============================================================================
 // Fragments LaTeX de bas niveau.
@@ -262,11 +263,12 @@ export function placeholdersChampsRacines(nb: number): string[] {
 /** Exemple des champs « valeur de f » — hors de l'espace des tirages (aucune valeur en septièmes). */
 export const PLACEHOLDER_VALEUR_F = "ex : −2/7";
 
-/** Précision annoncée UNIQUEMENT quand AU MOINS une des racines attendues est irrationnelle (voir
- * CLAUDE.md, "Annonce de précision = tolérance réellement vérifiée") — jamais affichée pour un
- * champ dont toutes les racines cibles sont exactes. */
-export function precisionAnnonceeRacines(racines: RacineEtudeLocale[]): string | null {
-  return racines.some((r) => !r.exact) ? "(arrondi au centième accepté si besoin)" : null;
+/** Annonce = tolérance réellement vérifiée (CLAUDE.md) : valeurs RATIONNELLES ⟹ valeur exacte
+ * exigée (audit 5e ch. 5, décision I) ; valeurs IRRATIONNELLES ⟹ arrondi au centième accepté. */
+export function precisionAnnonceeCibles(cibles: CibleNumerique[]): string | null {
+  if (cibles.length === 0) return null;
+  if (cibles.every((c) => c.exacte)) return "Donne la valeur exacte (fraction ou décimal exact).";
+  return "(arrondi au centième accepté, ou valeur exacte)";
 }
 
 /** Labels EXPLICITES "f(x)=" pour les écrans extremums/inflexions — l'abscisse est déjà connue
@@ -277,16 +279,6 @@ export function labelsChampsValeurF(racines: RacineEtudeLocale[]): string[] {
 
 export function placeholdersChampsValeurF(): string[] {
   return [PLACEHOLDER_VALEUR_F];
-}
-
-export function precisionAnnonceeValeursF(exercice: ExerciceEtudeLocale, racines: RacineEtudeLocale[]): string | null {
-  // f(x) évaluée en un point IRRATIONNEL est généralement elle-même irrationnelle (famille
-  // rationnelle : f(x)=c/D(x), D(x) déjà irrationnel en ce point) — même annonce que pour une
-  // racine irrationnelle. Pour la famille "polynomiale", cette situation ne se produit jamais (le
-  // seul point d'inflexion "avancé" est toujours rationnel, voir generateurs5e/etudeLocale) mais le
-  // calcul reste générique, jamais supposé.
-  void exercice;
-  return precisionAnnonceeRacines(racines);
 }
 
 // ============================================================================

@@ -21,14 +21,16 @@ import {
 import type { EcranEtudeLocale, EtatSessionEtudeLocale } from "./moteur5e/typesEtudeLocale";
 import { ordreEcransEtudeLocale, structureFixeEtudeLocale } from "./moteur5e/typesEtudeLocale";
 import {
-  diagnostiquerChampParmiCibles,
-  racinesFPrimeNumeriques,
-  racinesFSecondeNumeriques,
+  ciblesRacinesFPrime,
+  ciblesRacinesFSeconde,
+  ciblesValeursExtremums,
+  ciblesValeursInflexions,
+  contientArrondiRationnel,
+  diagnostiquerChampParmiCiblesExactes,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
-  valeursFAuxExtremums,
-  valeursFAuxInflexions,
 } from "./moteur5e/verificationEtudeLocale";
+import type { CibleNumerique } from "./moteur5e/verificationEtudeLocale";
 import type { ReponseTableauEtudeLocale } from "./moteur5e/verificationEtudeLocale";
 import { formatTermesEnsembleReelLatex } from "./ui5e/formatDomaineDefinition";
 import { EtapeDomaineEtudeLocale } from "./components5e/EtapeDomaineEtudeLocale";
@@ -49,8 +51,7 @@ import {
   formatReponseAttenduePhaseLatex,
   labelsChampsValeurF,
   PLACEHOLDER_VALEUR_F,
-  precisionAnnonceeRacines,
-  precisionAnnonceeValeursF,
+  precisionAnnonceeCibles,
 } from "./ui5e/formatEtudeLocale";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
@@ -85,6 +86,16 @@ function reponseAttendueEtudeLocale(exercice: EtatSessionEtudeLocale["exerciceCo
       ))}
     </span>
   );
+}
+
+const MESSAGE_ILLISIBLE = "Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).";
+const MESSAGE_ARRONDI = "Valeur arrondie : donne la valeur exacte (fraction ou décimal exact). Cette tentative n'est pas décomptée.";
+
+/** Contrôle de FORME avant soumission (saisie illisible, arrondi d'une valeur rationnelle) : la
+ * tentative n'est pas décomptée (audit 5e ch. 5, décision I). */
+function controlerSaisieNumerique(reponses: string[], cibles: CibleNumerique[]): string | null {
+  if (reponses.some((t) => diagnostiquerChampParmiCiblesExactes(t, cibles) === "parse_error")) return MESSAGE_ILLISIBLE;
+  return contientArrondiRationnel(reponses, cibles) ? MESSAGE_ARRONDI : null;
 }
 
 interface TransitionEnAttente {
@@ -297,14 +308,15 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={exercice}
           phase="resoudreFPrime"
-          precisionAnnoncee={precisionAnnonceeRacines(exercice.racinesFPrime)}
+          precisionAnnoncee={precisionAnnonceeCibles(ciblesRacinesFPrime(exercice))}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseResoudreFPrime(etat, reponses), reponses.join(" ; "))}
-          diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, racinesFPrimeNumeriques(exercice))}
+          diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesRacinesFPrime(exercice))}
+          controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesRacinesFPrime(exercice))}
           validation={validation}
         />
       );
@@ -335,14 +347,15 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           phase="extremums"
           labels={labelsChampsValeurF(racines)}
           placeholders={racines.map(() => PLACEHOLDER_VALEUR_F)}
-          precisionAnnoncee={precisionAnnonceeValeursF(exercice, racines)}
+          precisionAnnoncee={precisionAnnonceeCibles(ciblesValeursExtremums(exercice))}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses), reponses.join(" ; "))}
-          diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, valeursFAuxExtremums(exercice))}
+          diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesValeursExtremums(exercice))}
+          controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesValeursExtremums(exercice))}
           validation={validation}
         />
       );
@@ -354,14 +367,15 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={exercice}
           phase="resoudreFSeconde"
-          precisionAnnoncee={precisionAnnonceeRacines(exercice.racinesFSeconde)}
+          precisionAnnoncee={precisionAnnonceeCibles(ciblesRacinesFSeconde(exercice))}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseResoudreFSeconde(etat, reponses), reponses.join(" ; "))}
-          diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, racinesFSecondeNumeriques(exercice))}
+          diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesRacinesFSeconde(exercice))}
+          controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesRacinesFSeconde(exercice))}
           validation={validation}
         />
       );
@@ -392,14 +406,15 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           phase="inflexions"
           labels={labelsChampsValeurF(racines)}
           placeholders={racines.map(() => PLACEHOLDER_VALEUR_F)}
-          precisionAnnoncee={precisionAnnonceeValeursF(exercice, racines)}
+          precisionAnnoncee={precisionAnnonceeCibles(ciblesValeursInflexions(exercice))}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses), reponses.join(" ; "))}
-          diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, valeursFAuxInflexions(exercice))}
+          diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesValeursInflexions(exercice))}
+          controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesValeursInflexions(exercice))}
           validation={validation}
         />
       );
