@@ -12,17 +12,28 @@
    * C=220, B=180, Rm=Cm=30). Web Component (Shadow DOM).
    * ================================================================ */
 
-  var DEFAUT_X = 10;
+  var DEFAUT_X = 10, DEFAUT_A = 50, DEFAUT_C = 20;
   var BORNES_X = { min: 0, max: 20, step: 0.1 };
+  var BORNES_A = { min: 30, max: 70, step: 1 };
+  var BORNES_C = { min: 0, max: 200, step: 5 };
   var TOLERANCE_MARGINALES = 1;
 
-  var X_MIN = -1, X_MAX = 21, Y_MIN = -10, Y_MAX = 650;
-  var LARGEUR = 420, HAUTEUR = 300, MARGE_G = 44, MARGE_D = 20, MARGE_H = 18, MARGE_B = 34;
+  /* Fenêtres FIXES couvrant tous les réglages (a ≤ 70, c ≤ 200, x ≤ 20) :
+   * R(x) ≤ 20·(70 − 20) = 1000 et C(20) ≤ 800 ; B(x) ∈ [−600 ; 450]. */
+  var X_MIN = -1, X_MAX = 21;
+  var Y_MIN = -40, Y_MAX = 1060;
+  var YB_MIN = -640, YB_MAX = 500;
+  var LARGEUR = 420, H_HAUT = 250, ECART = 12, H_BAS = 138;
+  var HAUTEUR = H_HAUT + ECART + H_BAS;
+  var MARGE_G = 46, MARGE_D = 20, MARGE_H = 16, MARGE_B = 14;
 
-  function R(x) { return 50 * x - x * x; }
-  function C(x) { return x * x + 10 * x + 20; }
-  function Rp(x) { return 50 - 2 * x; }
+  var A = DEFAUT_A, CF = DEFAUT_C;
+  function R(x) { return x * (A - x); }
+  function C(x) { return x * x + 10 * x + CF; }
+  function B(x) { return R(x) - C(x); }
+  function Rp(x) { return A - 2 * x; }
   function Cp(x) { return 2 * x + 10; }
+  function xOptimal() { return (A - 10) / 4; }
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);

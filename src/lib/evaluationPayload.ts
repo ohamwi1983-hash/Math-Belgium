@@ -1049,6 +1049,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'tangentes': [
     { cle: 'tangente en un point donné', enonce: "Soit $f(x) = x^2 - 2x + 1$. Détermine l'équation de la tangente à la courbe de $f$ au point d'abscisse $3$." },
+    { cle: 'approximation affine', enonce: "Estime $1{,}02^3$ sans calculatrice à l'aide de la tangente à la courbe de $f(x) = x^3$ au point d'abscisse $1$, puis compare à la valeur exacte." },
     { cle: 'double tangence', enonce: "Soit $f(x) = x^4 - 2x^2 + 2x + 1$. Détermine la tangente à la courbe de $f$ au point d'abscisse $1$, puis montre que cette droite est aussi tangente à la courbe en un second point, que tu détermineras." },
   ],
   'fonction-derivee': [
@@ -1070,13 +1071,16 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'lecture-graphique-derivees': [
     { cle: 'lecture directe', enonce: "Le graphique d'une fonction $f$ (sans formule) décroît jusqu'à un point A, croît de A jusqu'à un point B, puis décroît après B. Entre A et B, la courbe a d'abord la forme d'un bol, puis celle d'un dôme, le changement se faisant en un point P. Décris les variations de $f$, ses extremums locaux, le signe de $f'$, sa concavité et le signe de $f''$, puis indique la nature du point P." },
+    { cle: "lire le graphique de f'", enonce: "On connaît seulement le graphique de la dérivée : $f'(x) = x^2 - x - 2$, une parabole qui coupe l'axe des abscisses en $-1$ et en $2$ et atteint son minimum en $x = \\frac{1}{2}$. Sans chercher $f$, détermine ses variations, ses extremums locaux, sa concavité et l'abscisse de son point d'inflexion." },
     { cle: "n'est PAS un extremum", enonce: "Le graphique d'une fonction $f$ (sans formule) croît partout ; en un point C, la tangente à la courbe est horizontale. Que vaut $f'$ en C ? Le point C est-il un extremum ? Justifie à l'aide du signe de $f'$ de part et d'autre de C." },
   ],
   'etudier-fonction': [
-    { cle: 'étude complète', enonce: "Soit $f(x) = \\dfrac{x^2-2x+5}{x-1}$. Mène l'étude complète de $f$ : domaine, limites et asymptotes, dérivée et extremums (avec leurs coordonnées), concavité, puis allure du graphique." },
+    { cle: 'fonction polynomiale', enonce: "Soit $f(x) = x^3 - 3x^2 + 4$. Mène l'étude complète de $f$ : domaine et limites, dérivée et extremums, concavité et point d'inflexion, points d'intersection avec les axes, puis allure du graphique." },
+    { cle: 'avec asymptote oblique', enonce: "Soit $f(x) = \\dfrac{x^2-2x+5}{x-1}$. Mène l'étude complète de $f$ : domaine, limites et asymptotes, dérivée et extremums (avec leurs coordonnées), concavité, puis allure du graphique." },
   ],
   'optimisation-geometrique': [
     { cle: 'rectangle de périmètre fixé', enonce: "Un rectangle a un périmètre de 40 m. Détermine ses dimensions pour que son aire soit maximale, en justifiant la nature de l'extremum par un tableau de signes." },
+    { cle: 'boîte sans couvercle', enonce: "Dans un carton carré de 30 cm de côté, on découpe un carré de côté $x$ à chaque coin, puis on relève les bords pour former une boîte sans couvercle. Détermine $x$ pour que le volume de la boîte soit maximal, en justifiant la nature de l'extremum, et calcule ce volume." },
     { cle: 'affiche avec marges', enonce: "Une affiche contient une zone imprimée rectangulaire de 32 dm², entourée d'une marge de 1 dm à gauche et à droite et de 2 dm en haut et en bas. Détermine les dimensions de la zone imprimée qui rendent la surface totale de l'affiche minimale, et donne cette surface." },
   ],
   'contexte-economique': [
@@ -1089,6 +1093,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'vitesse-position': [
     { cle: 'position, vitesse, accélération', enonce: "Un mobile a pour position $s(t) = -t^2 + 8t$ (en m, $t$ en s, $t \\in [0\\,;8]$). Détermine sa vitesse et son accélération, l'instant où il s'arrête et sa position à cet instant, puis décris le sens de son mouvement." },
+    { cle: 'distance de freinage', enonce: "Une voiture roulant à 14 m/s freine avec une décélération constante de 7 m/s² : sa position depuis le début du freinage vaut $s(t) = 14t - 3{,}5t^2$ (en m, $t$ en s). Détermine l'instant de l'arrêt et la distance de freinage, puis refais le calcul pour une vitesse initiale de 21 m/s. Que constates-tu ?" },
     { cle: 'atteindre une distance', enonce: "Une voiture déjà lancée a pour position $s(t) = t^2 + 4t$ (en m, $t$ en s) jusqu'à un repère situé à 45 m du départ ; elle roule ensuite à vitesse constante jusqu'à l'arrivée, à 115 m du départ. Quand franchit-elle le repère ? À quelle vitesse (en m/s et en km/h) ? Quand arrive-t-elle ?" },
   ],
   },

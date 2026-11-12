@@ -1,0 +1,1 @@
+import './dichotomie-widget.js'

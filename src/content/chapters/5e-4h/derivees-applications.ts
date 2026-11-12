@@ -85,6 +85,29 @@ export const deriveesApplications: ChapterContent = {
           },
         },
         {
+          kind: 'para',
+          text:
+            'Pour **voir** la limite se former, calcule ce taux pour des valeurs de h de plus en ' +
+            'plus petites, des deux côtés de 0 (ici, le taux simplifié vaut $4+h$) :',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['h', 'taux d\'accroissement'],
+          rows: [
+            ['$1$', '$\\dfrac{f(3)-f(2)}{1} = 5$'],
+            ['$0{,}1$', '$4{,}1$'],
+            ['$0{,}01$', '$4{,}01$'],
+            ['$-0{,}01$', '$3{,}99$'],
+            ['$-0{,}1$', '$3{,}9$'],
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Les taux se rapprochent de 4 par au-dessus ($h > 0$) comme par en dessous ($h < 0$) : ' +
+            'c\'est exactement ce que veut dire $f\'(2) = 4$.',
+        },
+        {
           kind: 'methode',
           label: 'Le squelette, valable pour toute fonction',
           items: [
@@ -132,7 +155,7 @@ export const deriveesApplications: ChapterContent = {
           titre: 'Le vrai premier inventeur de la dérivée ?',
           text:
             "Bien avant Newton et Leibniz, le juriste et mathématicien français **Pierre de " +
-            "Fermat** développe dans les années 1630 une méthode, qu'il appelle « adéquation », " +
+            "Fermat** développe dans les années 1630 une méthode, qu'il appelle « adégalité » (adaequalitas), " +
             "pour trouver le maximum ou le minimum d'une courbe — et, au passage, sa tangente " +
             'en un point. Son idée ressemble étonnamment à celle de cette section : il compare ' +
             "la valeur de f en un point a à sa valeur en a+h, simplifie, puis fait disparaître " +
@@ -185,6 +208,16 @@ export const deriveesApplications: ChapterContent = {
             'La tangente à la courbe de f, au point d\'abscisse a, c\'est la droite qui passe ' +
               'par (a;f(a)) avec pour pente f\'(a). Sa pente EST le nombre dérivé — c\'est même ' +
               'sa définition (section 1) : $y = f(a) + f\'(a)(x-a)$.',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Pour dériver un polynôme dès maintenant',
+          items: [
+            'Dérive terme à terme avec $(x^n)\' = n\\,x^{n-1}$, $(k \\cdot u)\' = k \\cdot u\'$ et ' +
+              '$(u+v)\' = u\'+v\'$ — ces règles sont démontrées et complétées en section 3. ' +
+              'Exemple : $(x^2-2x+1)\' = 2x-2$. Tu peux toujours contrôler une valeur $f\'(a)$ ' +
+              'par la définition (section 1).',
           ],
         },
         {
@@ -295,6 +328,29 @@ export const deriveesApplications: ChapterContent = {
             'racine (au moins) double : tu peux donc diviser par $(x-a)^2$. Le quotient donne les ' +
             'autres points communs. Un point commun q n\'est un point de tangence que si, en plus, ' +
             '$f\'(q)$ est égal à la pente de la droite.',
+        },
+        { kind: 'subheading', text: 'La tangente, meilleure approximation de la courbe' },
+        {
+          kind: 'rappel',
+          label: 'Rappel — approximation affine',
+          items: [
+            'Près de a, la courbe et sa tangente se confondent. Pour h petit : ' +
+              '$f(a+h) \\approx f(a) + f\'(a)\\,h$. C\'est la tangente qui sert de « règle » ' +
+              'pour estimer f juste à côté d\'un point connu.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'approximation affine d\'une puissance',
+          formula: 'Estime $1{,}02^3$ sans calculatrice, à l\'aide de la tangente à $f(x) = x^3$ en $a = 1$.',
+          steps: [
+            { tag: 'valeur et pente en a = 1', text: '$f(1) = 1$ ; $f\'(x) = 3x^2 \\implies f\'(1) = 3$' },
+            { tag: 'approximation avec h = 0,02', text: '$f(1{,}02) \\approx f(1) + f\'(1) \\cdot 0{,}02 = 1 + 0{,}06 = 1{,}06$' },
+          ],
+          result: {
+            tag: 'contrôle',
+            text: 'la valeur exacte vaut $1{,}061208$ : l\'erreur est d\'environ $0{,}001$, d\'autant plus petite que h est petit.',
+          },
         },
         {
           kind: 'historique',
@@ -409,15 +465,19 @@ export const deriveesApplications: ChapterContent = {
             ],
           ],
         },
-        {
-          kind: 'rappel',
-          label: 'Rappel — dérivées de référence',
-          items: [],
-        },
+        { kind: 'subheading', text: 'Dérivées de référence' },
         {
           kind: 'featureTable',
-          headers: ['f(x)', 'xⁿ', '√x', '1/x', 'sin x', 'cos x', 'tan x', 'constante k'],
-          rows: [['f\'(x)', '$n\\,x^{n-1}$', '$\\dfrac{1}{2\\sqrt{x}}$', '$-\\dfrac{1}{x^2}$', '$\\cos x$', '$-\\sin x$', '$\\dfrac{1}{\\cos^2 x}$', '$0$']],
+          headers: ['f(x)', "f'(x)"],
+          rows: [
+            ['$x^n$', '$n\\,x^{n-1}$'],
+            ['$\\sqrt{x}$ (dérivable pour $x > 0$)', '$\\dfrac{1}{2\\sqrt{x}}$'],
+            ['$\\dfrac{1}{x}$', '$-\\dfrac{1}{x^2}$'],
+            ['$\\sin x$', '$\\cos x$'],
+            ['$\\cos x$', '$-\\sin x$'],
+            ['$\\tan x$', '$\\dfrac{1}{\\cos^2 x}$'],
+            ['$k$ (constante)', '$0$'],
+          ],
         },
         {
           kind: 'exempleLibre',
@@ -438,7 +498,7 @@ export const deriveesApplications: ChapterContent = {
                 '$\\dfrac{1/(x+h) - 1/x}{h} = \\dfrac{x-(x+h)}{h \\cdot x(x+h)} = \\dfrac{-h}{h \\cdot x(x+h)} = \\dfrac{-1}{x(x+h)}$',
             },
             { kind: 'para', text: 'Passe à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-1}{x(x+h)} = -\\dfrac{1}{x^2}$' },
-            { kind: 'para', text: '**b.** $f(x) = \\sqrt{x}$ ($x \\in \\mathbb{R}^+$)' },
+            { kind: 'para', text: '**b.** $f(x) = \\sqrt{x}$ ($x > 0$ : en 0, on diviserait par $\\sqrt{0}$ — la tangente y est verticale)' },
             {
               kind: 'para',
               text:
@@ -455,10 +515,12 @@ export const deriveesApplications: ChapterContent = {
             },
           ],
         },
+        { kind: 'subheading', text: 'Règles de calcul' },
         {
           kind: 'methode',
-          label: 'Les 4 règles de calcul',
+          label: 'Les 5 règles de calcul',
           items: [
+            '**Constante en facteur** — $(k \\cdot u)\' = k \\cdot u\'$ (exemple : $(5x^3)\' = 15x^2$).',
             '**Somme** — $(u+v)\' = u\'+v\'$ (chaque terme se dérive indépendamment).',
             '**Produit** — $(u \\cdot v)\' = u\'v + uv\'$.',
             '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (l\'ordre compte dans le numérateur : u\' EN PREMIER).',
@@ -466,15 +528,18 @@ export const deriveesApplications: ChapterContent = {
               'l\'extérieur vers l\'intérieur », puis multiplie par la dérivée de l\'intérieur.',
           ],
         },
-        {
-          kind: 'rappel',
-          label: 'La règle de la chaîne, cas particuliers courants (u = fonction dérivable de x)',
-          items: [],
-        },
+        { kind: 'subheading', text: 'La règle de la chaîne : cas particuliers courants' },
         {
           kind: 'featureTable',
-          headers: ['f(x)', 'uⁿ', '1/u', '√u', 'sin u', 'cos u', 'tan u'],
-          rows: [['f\'(x)', '$n\\,u^{n-1} \\cdot u\'$', '$-\\dfrac{u\'}{u^2}$', '$\\dfrac{u\'}{2\\sqrt{u}}$', '$u\' \\cos u$', '$-u\' \\sin u$', '$\\dfrac{u\'}{\\cos^2 u}$']],
+          headers: ['f(x) — u fonction dérivable de x', "f'(x)"],
+          rows: [
+            ['$u^n$', "$n\\,u^{n-1} \\cdot u'$"],
+            ['$\\dfrac{1}{u}$', "$-\\dfrac{u'}{u^2}$"],
+            ['$\\sqrt{u}$ (avec $u > 0$)', "$\\dfrac{u'}{2\\sqrt{u}}$"],
+            ['$\\sin u$', "$u' \\cos u$"],
+            ['$\\cos u$', "$-u' \\sin u$"],
+            ['$\\tan u$', "$\\dfrac{u'}{\\cos^2 u}$"],
+          ],
         },
         {
           kind: 'para',
@@ -483,6 +548,15 @@ export const deriveesApplications: ChapterContent = {
             '$g(u)=u^n$, donc $g\'(u)=n\\,u^{n-1}$, et $f\'(x)=u\'(x) \\cdot g\'(u(x))=n\\,u^{n-1} \\cdot u\'$. Chaque colonne ' +
             'du tableau n\'est qu\'une application de cette même règle, avec une « extérieure » ' +
             'g différente à chaque fois.',
+        },
+        {
+          kind: 'para',
+          text:
+            '**Une autre notation.** Leibniz écrivait la dérivée $\\dfrac{dy}{dx}$ : un « tout petit ' +
+            'écart de y » divisé par un « tout petit écart de x » — le taux d\'accroissement, à la ' +
+            'limite. La règle de la chaîne s\'y lit presque comme une simplification de fractions : ' +
+            '$\\dfrac{dy}{dx} = \\dfrac{dy}{du} \\cdot \\dfrac{du}{dx}$. Tu retrouveras cette ' +
+            'notation en physique.',
         },
         {
           kind: 'exemple',
@@ -577,7 +651,7 @@ export const deriveesApplications: ChapterContent = {
             'quotient, composée) que tu viens d\'apprendre, organisées pour la première fois ' +
             "comme un vrai cours structuré plutôt qu'une collection d'articles de recherche " +
             "épars. L'ouvrage est traduit dans plusieurs langues et utilisé dans toute " +
-            "l'Europe pendant des décennies. Agnesi devient ainsi, à 30 ans, la première femme " +
+            "l'Europe pendant des décennies. En 1750, à 32 ans, Agnesi devient la première femme " +
             'nommée professeure de mathématiques dans une université — à Bologne, bien ' +
             "qu'elle n'y ait finalement jamais enseigné, préférant se consacrer à des œuvres " +
             'caritatives.',
@@ -603,7 +677,7 @@ export const deriveesApplications: ChapterContent = {
     {
       id: 'signe-derivees',
       number: 4,
-      title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
+      title: 'Signe de f\' et de f\'\' : variations et concavité',
       kicker: 'signe de f\' ⟺ sens de variation ; signe de f\'\' ⟺ concavité ; point d\'inflexion',
       blocks: [
         { kind: 'video', title: 'Signe de f\' et de f\'\' : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
@@ -719,6 +793,8 @@ export const deriveesApplications: ChapterContent = {
               'd\'accroissement tend vers $\\pm\\infty$, donc f\'(a) n\'existe pas (une droite ' +
               'verticale n\'a pas de pente). Exemple : $\\sqrt[3]{x}$ en 0. À ne pas confondre ' +
               'avec une tangente horizontale, où f\'(a) = 0.',
+            '**Dérivable ⟹ continue** — si f\'(a) existe, la courbe ne fait pas de saut en a. ' +
+              'L\'inverse est faux : $|x|$ est continue en 0 (pas de saut) mais n\'y est pas dérivable.',
           ],
         },
         {
@@ -764,56 +840,54 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'application',
-          titre: 'Trouver le moment où un sprinteur accélère le plus',
+          titre: "Trouver le moment où une épidémie progresse le plus vite",
           illustrations: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: (t) => 10.5 / (1 + Math.exp(-1.2 * (t - 1.5))), tone: 'accent' }],
+              curves: [{ fn: (t) => 10 / (1 + Math.exp(-1.2 * (t - 5))), tone: 'accent' }],
               xMin: 0,
-              xMax: 6,
-              xTicks: [1.5, 3, 4.5, 6],
-              yTicks: [5.25, 10.5],
-              points: [{ x: 1.5, y: 5.25, label: "point d'inflexion", tone: 'good', labelPos: 'right' }],
-              xAxisLabel: 'temps (s)',
-              yAxisLabel: 'vitesse v(t) (m/s)',
+              xMax: 10,
+              xTicks: [5, 10],
+              yTicks: [5, 10],
+              points: [{ x: 5, y: 5, label: "point d'inflexion", tone: 'good', labelPos: 'right' }],
+              xAxisLabel: 'temps (semaines)',
+              yAxisLabel: 'personnes touchées N(t) (milliers)',
               caption:
-                "La vitesse v(t) : elle accélère fort au début, puis de moins en moins — le " +
-                "point d'inflexion (en t=1,5 s) est exactement l'instant où l'accélération " +
-                'bascule de « croissante » à « décroissante ».',
+                "Le nombre total de personnes touchées N(t) : la courbe monte de plus en plus vite " +
+                "(convexe), puis de moins en moins vite (concave) — le point d'inflexion, en t = 5 " +
+                'semaines, est le moment où l\'épidémie progresse le plus vite.',
             },
             {
               kind: 'curvePlot',
               curves: [
                 {
-                  fn: (t) => (10.5 * 1.2 * Math.exp(-1.2 * (t - 1.5))) / Math.pow(1 + Math.exp(-1.2 * (t - 1.5)), 2),
+                  fn: (t) => (12 * Math.exp(-1.2 * (t - 5))) / Math.pow(1 + Math.exp(-1.2 * (t - 5)), 2),
                   tone: 'good',
                 },
               ],
               xMin: 0,
-              xMax: 6,
-              xTicks: [1.5, 3, 4.5, 6],
-              yTicks: [3.15],
-              points: [{ x: 1.5, y: 3.15, label: 'accélération MAXIMALE', tone: 'good', labelPos: 'above' }],
-              xAxisLabel: 'temps (s)',
-              yAxisLabel: "accélération v'(t) (m/s²)",
+              xMax: 10,
+              xTicks: [5, 10],
+              yTicks: [3],
+              points: [{ x: 5, y: 3, label: 'pic des nouveaux cas', tone: 'good', labelPos: 'above' }],
+              xAxisLabel: 'temps (semaines)',
+              yAxisLabel: "nouveaux cas N'(t) (milliers par semaine)",
               caption:
-                "L'accélération v'(t) : c'est bien son MAXIMUM qui tombe en t=1,5 s — le même " +
-                'instant que le point d\'inflexion de v(t) ci-dessus, lu cette fois comme un ' +
-                "sommet sur la courbe de v' plutôt que comme une bascule sur la courbe de v.",
+                "Les nouveaux cas N'(t) : leur MAXIMUM tombe en t = 5 semaines — le même instant que " +
+                "le point d'inflexion de N(t), lu cette fois comme un sommet sur la courbe de N'.",
             },
           ],
           text:
-            "Un sprinteur au 100 m ne court pas à vitesse constante : il accélère fortement au " +
-            "départ, puis son accélération diminue progressivement jusqu'à ce qu'il atteigne " +
-            'sa vitesse maximale (où l\'accélération devient nulle). Si $v(t)$ est sa vitesse, ' +
-            "son accélération est $v'(t)$ — et le moment où cette accélération est " +
-            'elle-même MAXIMALE (où $v$ croît le plus vite) correspond exactement à un point ' +
-            "d'inflexion de la courbe de vitesse, repéré par le signe de $v''(t)$, la même " +
-            "lecture que tu viens de faire sur f' et f''. Les biomécaniciens sportifs " +
-            'utilisent précisément cette analyse, à partir de données de capture de ' +
-            "mouvement, pour identifier la phase où un athlète développe le plus de " +
-            'puissance — et ajuster son entraînement en conséquence.',
-          domaines: ['Sport', 'Biomécanique'],
+            "Pendant une épidémie, le nombre total de personnes touchées $N(t)$ augmente d'abord " +
+            'lentement, puis de plus en plus vite, avant de ralentir quand une grande partie de la ' +
+            "population est immunisée : c'est une courbe en S. Le nombre de **nouveaux cas** par " +
+            "semaine est sa dérivée $N'(t)$. Le moment où ces nouveaux cas sont les plus nombreux " +
+            "(le « pic » de l'épidémie) est donc un maximum de $N'$, c'est-à-dire un point " +
+            "d'inflexion de $N$, repéré par le changement de signe de $N''(t)$ — la même lecture " +
+            "que tu viens de faire sur f' et f''. Les épidémiologistes surveillent précisément ce " +
+            "point : tant que $N''(t) > 0$, l'épidémie accélère ; dès que $N''(t) < 0$, elle " +
+            "ralentit, même si le nombre total de cas continue d'augmenter.",
+          domaines: ['Santé publique', 'Biologie'],
         },
         {
           kind: 'entrainement',
@@ -1130,18 +1204,19 @@ export const deriveesApplications: ChapterContent = {
           illustrations: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: (t) => 5 * t * Math.exp(-0.5 * t), tone: 'accent' }],
+              curves: [{ fn: (t) => (10 * t) / (t * t + 4), tone: 'accent' }],
               xMin: 0,
               xMax: 12,
               xTicks: [2, 4, 6, 8, 10, 12],
-              yTicks: [3.68],
-              points: [{ x: 2, y: 3.68, label: 'pic — concentration max', tone: 'good', labelPos: 'above' }],
+              yTicks: [2.5],
+              fixedYRange: { min: 0, max: 3 },
+              points: [{ x: 2, y: 2.5, label: 'pic — concentration max', tone: 'good', labelPos: 'above' }],
               xAxisLabel: 'temps depuis la prise (h)',
               yAxisLabel: 'concentration C(t)',
               caption:
-                "Modèle $C(t)=5t\\,e^{-0{,}5t}$ : la concentration monte pendant l'absorption, " +
-                "atteint son pic en t=2 h (où $C'(t)=0$ ET change de signe), puis redescend " +
-                "pendant l'élimination — exactement un extremum local de C.",
+                "Modèle simplifié $C(t)=\\dfrac{10t}{t^2+4}$ : par la règle du quotient, " +
+                "$C'(t)=\\dfrac{10(4-t^2)}{(t^2+4)^2}$, qui s'annule en t = 2 h et passe de + à − : " +
+                "pic de concentration $C(2)=2{,}5$, puis élimination.",
             },
           ],
           text:
@@ -1285,6 +1360,52 @@ export const deriveesApplications: ChapterContent = {
             'd\'en oublier un.',
         },
         {
+          kind: 'exemple',
+          badge: "lire le graphique de f' pour retrouver f",
+          formula:
+            "Le graphique ci-dessous est celui de la DÉRIVÉE $f'(x) = x^2-x-2$, une parabole qui " +
+            "coupe l'axe en $-1$ et en $2$. Sans chercher f, déduis-en les variations de f, ses " +
+            'extremums et sa concavité.',
+          steps: [
+            {
+              tag: "signe de f' — courbe au-dessus ou en dessous de l'axe",
+              text: "$f' > 0$ sur $]-\\infty\\,;-1[$ et sur $]2\\,;+\\infty[$ ; $f' < 0$ sur $]-1\\,;2[$",
+            },
+            {
+              tag: 'variations de f',
+              text: "f croît, décroît, puis croît : maximum local en $x = -1$, minimum local en $x = 2$ (f' y change de signe)",
+            },
+            {
+              tag: "concavité — f' descend ou monte",
+              text: "$f'$ décroît avant son sommet $x = \\frac{1}{2}$ et croît après : $f'' < 0$ puis $f'' > 0$, donc f est concave puis convexe",
+            },
+          ],
+          result: {
+            tag: "point d'inflexion",
+            text:
+              "en $x = \\frac{1}{2}$, là où le graphique de $f'$ atteint son minimum. À retenir : un " +
+              "**zéro** de $f'$ donne un extremum de f, un **extremum** de $f'$ donne un point d'inflexion de f.",
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => x * x - x - 2, tone: 'good' }],
+            xMin: -2.5,
+            xMax: 3.5,
+            xTicks: [-1, 0.5, 2],
+            fixedYRange: { min: -3, max: 5 },
+            points: [
+              { x: -1, y: 0, label: '−1', tone: 'accent', labelPos: 'above' },
+              { x: 2, y: 0, label: '2', tone: 'accent', labelPos: 'above' },
+              { x: 0.5, y: -2.25, label: "minimum de f'", tone: 'good', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: "f'(x)",
+            caption:
+              "Attention : c'est le graphique de f' (pas de f). Ses zéros donnent les extremums de f, " +
+              "son minimum le point d'inflexion de f.",
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Lecture graphique — dérivées et applications',
           generatorId: '5gen30',
@@ -1400,6 +1521,56 @@ export const deriveesApplications: ChapterContent = {
             'n\'ajoute que f\', f\'\' et leurs tableaux de signes, par-dessus ce que tu sais déjà.',
         },
         {
+          kind: 'exemple',
+          badge: 'étude complète — fonction polynomiale (cubique)',
+          formula: '$f(x) = x^3 - 3x^2 + 4$. Mène l\'étude complète de f.',
+          steps: [
+            {
+              tag: 'domaine et limites',
+              text:
+                '$\\text{dom}\\, f = \\mathbb{R}$ (polynôme) : aucune asymptote verticale ; ' +
+                '$\\displaystyle\\lim_{x \\to -\\infty} f(x) = -\\infty$ et $\\displaystyle\\lim_{x \\to +\\infty} f(x) = +\\infty$ ' +
+                '(terme dominant $x^3$) : ni asymptote horizontale ni oblique',
+            },
+            {
+              tag: 'dérivée et signe',
+              text: "$f'(x) = 3x^2-6x = 3x(x-2)$ : $f' > 0$ sur $]-\\infty\\,;0[$, $f' < 0$ sur $]0\\,;2[$, $f' > 0$ sur $]2\\,;+\\infty[$",
+            },
+            { tag: 'extremums', text: 'maximum local $(0\\,;4)$, minimum local $(2\\,;0)$' },
+            {
+              tag: 'dérivée seconde et concavité',
+              text: "$f''(x) = 6x-6$ : concave sur $]-\\infty\\,;1[$, convexe sur $]1\\,;+\\infty[$ ; point d'inflexion $(1\\,;2)$",
+            },
+            {
+              tag: 'points sur les axes',
+              text:
+                '$f(-1) = -1-3+4 = 0$ et $f(2) = 0$ : $f(x) = (x+1)(x-2)^2$. La courbe coupe l\'axe en $-1$ ' +
+                'et le touche en $2$ (racine double : tangente horizontale), et coupe l\'axe des ordonnées en $(0\\,;4)$',
+            },
+          ],
+          result: {
+            tag: 'synthèse',
+            text: "f croît jusqu'à $(0\\,;4)$, décroît jusqu'à $(2\\,;0)$, puis croît ; inflexion en $(1\\,;2)$ ; aucune asymptote.",
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => x * x * x - 3 * x * x + 4, tone: 'accent' }],
+            xMin: -1.6,
+            xMax: 3.4,
+            xTicks: [-1, 1, 2],
+            fixedYRange: { min: -2, max: 6 },
+            points: [
+              { x: 0, y: 4, label: 'max (0;4)', tone: 'accent', labelPos: 'above' },
+              { x: 2, y: 0, label: 'min (2;0)', tone: 'accent', labelPos: 'below' },
+              { x: 1, y: 2, label: 'PI (1;2)', tone: 'good', labelPos: 'right' },
+              { x: -1, y: 0, label: '', tone: 'accent' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'f(x) = x³ − 3x² + 4 : maximum (0;4), minimum (2;0) sur l\'axe (racine double), point d\'inflexion (1;2).',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Étudier une fonction',
           generatorId: '5gen31',
@@ -1494,6 +1665,24 @@ export const deriveesApplications: ChapterContent = {
           },
         },
         {
+          kind: 'exemple',
+          badge: 'boîte sans couvercle — volume maximal',
+          formula:
+            'Dans un carton carré de 30 cm de côté, on découpe un carré de côté x à chaque coin, puis ' +
+            'on relève les bords pour former une boîte sans couvercle. Quelle valeur de x rend le ' +
+            'volume maximal ?',
+          steps: [
+            { tag: 'dimensions et domaine', text: 'base carrée de côté $30-2x$, hauteur $x$, avec $x \\in \\,]0\\,;15[$' },
+            { tag: 'volume en fonction de x seul', text: '$V(x) = x(30-2x)^2$' },
+            {
+              tag: "dériver (règle du produit) et résoudre V'(x) = 0",
+              text: "$V'(x) = (30-2x)^2 + x \\cdot 2(30-2x)(-2) = (30-2x)(30-6x)$ : $V'(x) = 0 \\iff x = 15$ (hors du domaine) ou $x = 5$",
+            },
+            { tag: "nature — tableau de signes de V'", text: "$V' > 0$ sur $]0\\,;5[$ et $V' < 0$ sur $]5\\,;15[$ : maximum en $x = 5$" },
+          ],
+          result: { tag: 'résultat', text: 'carrés de 5 cm : boîte de $20 \\times 20 \\times 5$ cm, volume maximal $V(5) = 2000$ cm³' },
+        },
+        {
           kind: 'astuce',
           label: 'Quand la grandeur dépend d\'un angle',
           text:
@@ -1518,9 +1707,9 @@ export const deriveesApplications: ChapterContent = {
               yAxisLabel: 'aire totale (cm²)',
               caption:
                 'Pour un volume fixé à 330 cm³, $A(r)=2\\pi r^2+\\frac{660}{r}$ (base+couvercle+paroi, ' +
-                'hauteur éliminée via la contrainte de volume) atteint son minimum en r≈3,75 cm ' +
-                '— et donne alors h≈2r, le rapport que la plupart des canettes du commerce ' +
-                'respectent de près.',
+                'hauteur éliminée via la contrainte de volume) atteint son minimum en r ≈ 3,75 cm, ' +
+                'avec h = 2r ≈ 7,5 cm. Une vraie canette de 33 cl est plus haute : r ≈ 3,3 cm, ' +
+                'h ≈ 11,5 cm, soit h ≈ 3,5r.',
             },
           ],
           text:
@@ -1532,9 +1721,11 @@ export const deriveesApplications: ChapterContent = {
             'volume reste constant, exactement le même principe que l\'exemple du rectangle ' +
             "ci-dessus, mais appliqué à un solide. En exprimant l'aire en fonction d'une " +
             'seule variable (le rayon, grâce à la contrainte de volume) puis en dérivant, les ' +
-            'ingénieurs trouvent le rapport hauteur/rayon optimal — c\'est ce calcul qui ' +
-            'explique pourquoi la plupart des canettes du commerce ont des proportions très ' +
-            'proches les unes des autres.',
+            'ingénieurs trouvent le rapport hauteur/rayon optimal : h = 2r si le métal a partout ' +
+            'la même épaisseur. Les vraies canettes sont pourtant plus hautes (h ≈ 3,5r) : leur ' +
+            'fond et leur couvercle sont bien plus épais que la paroi, et le sertissage consomme ' +
+            'de la matière. Un bon modèle se critique toujours : il faut alors compter le fond et ' +
+            'le couvercle « plus cher » — l\'optimum se déplace vers des canettes plus hautes.',
           domaines: ['Ingénierie', 'Industrie'],
         },
         {
@@ -1930,8 +2121,8 @@ export const deriveesApplications: ChapterContent = {
             ['Distance parcourue', 'temps', 'vitesse instantanée'],
             ['Volume', 'temps', 'débit'],
             ['Coût de production', 'quantité produite', 'coût marginal (section 9)'],
-            ['Concentration d\'un réactif', 'temps', 'vitesse de réaction'],
-            ['Longueur d\'une barre métallique', 'température', 'coefficient de dilatation'],
+            ['Concentration d\'un produit de réaction', 'temps', 'vitesse de réaction (pour un réactif, l\'opposé de la dérivée : sa concentration diminue)'],
+            ['Longueur d\'une barre métallique', 'température', 'allongement par degré : $\\alpha \\cdot L_0$ (α = coefficient de dilatation)'],
           ],
         },
         {
@@ -1989,6 +2180,40 @@ export const deriveesApplications: ChapterContent = {
             'sprinteur atteint environ 10 m/s, soit 36 km/h.',
         },
         {
+          kind: 'exemple',
+          badge: 'distance de freinage',
+          formula:
+            'Une voiture roule à 14 m/s (environ 50 km/h) quand elle freine, avec une décélération ' +
+            'constante de 7 m/s² : depuis le début du freinage, sa position vaut $s(t) = 14t - 3{,}5t^2$ ' +
+            '(en m, t en s). Quelle distance parcourt-elle avant de s\'arrêter ? Et si elle roulait à 21 m/s (environ 75 km/h) ?',
+          steps: [
+            { tag: 'vitesse et accélération', text: "$v(t) = s'(t) = 14 - 7t$ ; $a(t) = -7$ m/s² : $v > 0$ et $a < 0$, la voiture ralentit" },
+            { tag: 'arrêt — quand v(t) = 0', text: '$14 - 7t = 0 \\iff t = 2$ s' },
+            { tag: 'distance de freinage', text: '$s(2) = 28 - 14 = 14$ m' },
+            { tag: 'même freinage à 21 m/s', text: '$s(t) = 21t - 3{,}5t^2$ ; $v(t) = 21 - 7t = 0 \\iff t = 3$ s ; $s(3) = 63 - 31{,}5 = 31{,}5$ m' },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'vitesse multipliée par 1,5 → distance de freinage multipliée par $2{,}25 = 1{,}5^2$ : elle ' +
+              'est proportionnelle au **carré** de la vitesse (sans compter la distance parcourue pendant le temps de réaction).',
+          },
+        },
+        {
+          kind: 'historique',
+          titre: 'Newton et les « fluxions » : la dérivée est née de la vitesse',
+          text:
+            'En 1665-1666, l\'université de Cambridge est fermée par la peste. Réfugié dans la ferme ' +
+            'familiale, le jeune **Isaac Newton** met au point sa « méthode des fluxions » : il voit ' +
+            'chaque grandeur comme une quantité qui « coule » avec le temps (une fluente), et sa ' +
+            'vitesse de variation comme sa « fluxion », notée par un point au-dessus de la lettre. ' +
+            'C\'est exactement $v(t) = s\'(t)$ : pour Newton, la dérivée est d\'abord une vitesse. ' +
+            'Une dizaine d\'années plus tard, **Gottfried Wilhelm Leibniz** invente de son côté la ' +
+            'notation $\\frac{dy}{dx}$ (publiée en 1684), celle que l\'on utilise encore. La querelle ' +
+            'sur la paternité du calcul différentiel opposera les deux savants, et leurs partisans, ' +
+            'pendant des décennies.',
+        },
+        {
           kind: 'entrainement',
           title: 'Vitesse et position',
           generatorId: '5gen35',
@@ -2012,6 +2237,7 @@ export const deriveesApplications: ChapterContent = {
           { text: '$f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$' },
           { text: '$y = f(a) + f\'(a)(x-a)$', condition: 'équation de la tangente en x=a' },
           { text: '$f\'(a) = 0$', condition: 'tangente horizontale en x=a' },
+          { text: '$f(a+h) \\approx f(a) + f\'(a)\\,h$', condition: 'approximation affine, pour h petit' },
           { text: '$f(x) - t(x) = (x-a)^2 \\cdot Q(x)$', condition: 'polynôme : racine double au point de contact a ; une racine double de Q donne un second point de tangence' },
         ],
       },
@@ -2039,7 +2265,7 @@ export const deriveesApplications: ChapterContent = {
       {
         title: 'Règles de calcul',
         formulas: [
-          { text: '$(u+v)\' = u\'+v\'$' },
+          { text: '$(k \\cdot u)\' = k \\cdot u\' \\quad (u+v)\' = u\'+v\'$' },
           { text: '$(uv)\' = u\'v+uv\'$' },
           { text: '$\\left(\\dfrac{u}{v}\\right)\' = \\dfrac{u\'v-uv\'}{v^2}$' },
           { text: '$f(x)=g(u(x)) \\Rightarrow f\'(x) = u\'(x) \\cdot g\'(u(x))$' },
@@ -2076,7 +2302,7 @@ export const deriveesApplications: ChapterContent = {
         'h→0 (chapitre précédent). C\'est la pente de la tangente en a.',
       '**Tangente** — $y=f(a)+f\'(a)(x-a)$. Horizontale ⟺ $f\'(a)=0$. Localement, elle ne touche ' +
         'la courbe qu\'au point de contact, mais elle peut la recouper plus loin — et une même ' +
-        'droite peut être tangente en deux points.',
+        'droite peut être tangente en deux points. Près de a, elle approche f : $f(a+h) \\approx f(a)+f\'(a)\\,h$.',
       '**Fonction dérivée** — règles de la somme, du produit ($u\'v+uv\'$), du quotient ' +
         '($\\frac{u\'v-uv\'}{v^2}$) et de la chaîne ($u\'(x) \\cdot g\'(u(x))$). Jamais ' +
         '$(uv)\'=u\'v\'$ ni $\\left(\\frac{u}{v}\\right)\'=\\frac{u\'}{v\'}$ !',
@@ -2104,9 +2330,9 @@ export const deriveesApplications: ChapterContent = {
       ],
     },
     forward:
-      'La dérivée seconde et l\'étude de concavité, posées ici (section 4), annoncent une ' +
-      'lecture plus fine des courbes. Les techniques de limites et d\'asymptotes du chapitre ' +
-      'précédent, elles, reviennent à chaque étude complète — les deux chapitres se répondent directement.',
+      'En 6e, tu dériveras de nouvelles fonctions — exponentielles $a^x$ et $e^x$, logarithmes — avec ' +
+      'exactement les mêmes règles, puis tu feras le chemin inverse : retrouver une fonction à partir ' +
+      'de sa dérivée (primitives), ce qui permet de calculer des aires (intégrales).',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',
