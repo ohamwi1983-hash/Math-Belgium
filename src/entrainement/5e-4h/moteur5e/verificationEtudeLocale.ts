@@ -63,6 +63,9 @@ export function deriveeSecondeEtudeLocale(exercice: ExerciceEtudeLocale, x: numb
 // ============================================================================
 
 export function domaineAttendu(exercice: ExerciceEtudeLocale): EnsembleReelGuide {
+  // Aucune valeur interdite ⟹ ℝ (forme "reel") — jamais « ℝ privé de {} » (audit 5e ch. 5 :
+  // 5gen29 pose désormais l'écran domaine pour TOUTE fonction rationnelle, avec ou sans CE).
+  if (exercice.exclusionsCE.length === 0) return { forme: "reel", points: [], morceaux: [] };
   return { forme: "prive_points", points: [...exercice.exclusionsCE].sort((a, b) => a - b), morceaux: [] };
 }
 

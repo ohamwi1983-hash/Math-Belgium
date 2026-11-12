@@ -53,8 +53,14 @@ export function demarrerSessionEtudeLocale(reglages: ReglagesSession5e, generate
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur les tableaux de signes : choix fermés, sinon gagnés par élimination
+ * (audit 5e ch. 5, décision D). Les champs libres gardent `reglages.tentativesMax`. */
+export function tentativesMaxEcranEtudeLocale(etat: EtatSessionEtudeLocale): number {
+  return etat.phase === "tableauFPrime" || etat.phase === "tableauFSeconde" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionEtudeLocale): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcranEtudeLocale(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionEtudeLocale): EtatSessionEtudeLocale {

@@ -45,16 +45,17 @@ export function deriveeFExtremaBornes(exercice: ExerciceExtremaBornes, t: number
 }
 
 // ============================================================================
-// Écran "deriver" — champ symbolique f'(t), différence finie centrée de `valeurFExtremaBornes`
-// (JAMAIS une 2e formule symbolique dérivée à la main côté moteur), même technique que
-// `diagnostiquerCalculerDerivee` (`verificationFonctionDerivee.ts`, 5gen27). Variable "t" (jamais
-// "x") — substitution textuelle AVANT délégation à `evaluerExpressionGenerale` (qui ne reconnaît
-// que "x" comme identifiant de variable).
+// Écran "deriver" — champ symbolique f'(t), comparé à la dérivée EXACTE (coefficients de
+// `derivativeCoeffs`, réplique locale) en plusieurs points de ]0;T[. Tolérance ABSOLUE minuscule,
+// relative à l'ordre de grandeur (1e-6) : un polynôme de degré ≤ 3 est déterminé par 4 points, et
+// deux polynômes distincts à coefficients entiers diffèrent d'au moins une unité quelque part —
+// l'ancienne tolérance de 1 % laissait passer une erreur de ±1 sur le terme constant de f'
+// (22,6 % des quartiques, audit 5c5d point 1). Variable "t" (jamais "x") — substitution textuelle
+// AVANT délégation à `evaluerExpressionGenerale` (qui ne reconnaît que "x").
 // ============================================================================
 
-const EPS_DIFFERENCE_FINIE = 1e-4;
-const TOLERANCE = 1e-2;
-const MIN_POINTS_VALIDES = 3;
+const TOLERANCE_RELATIVE_DERIVEE = 1e-6;
+const MIN_POINTS_VALIDES = 4;
 const MAGNITUDE_MAX_PLAUSIBLE = 1e9;
 
 function pointValide(v: number): boolean {
@@ -70,33 +71,62 @@ function evaluerSubstitueT(texte: string, tValeur: number): number {
   return evaluerExpressionGenerale(substitue, 0);
 }
 
-function deriveeParDifferenceFinie(exercice: ExerciceExtremaBornes, t: number): number | null {
-  const gauche = valeurFExtremaBornes(exercice, t - EPS_DIFFERENCE_FINIE);
-  const droite = valeurFExtremaBornes(exercice, t + EPS_DIFFERENCE_FINIE);
-  if (!pointValide(gauche) || !pointValide(droite)) return null;
-  return (droite - gauche) / (2 * EPS_DIFFERENCE_FINIE);
-}
-
 export function diagnostiquerCalculerDeriveeBorne(texte: string, exercice: ExerciceExtremaBornes): StatutVerification {
   try {
-    let auMoinsUnPoint = false;
     let nbValides = 0;
     for (const frac of FRACTIONS_T) {
       const t = frac * exercice.T;
-      const cible = deriveeParDifferenceFinie(exercice, t);
-      if (cible === null || !pointValide(cible)) continue;
-      nbValides++;
-      auMoinsUnPoint = true;
+      const cible = deriveeFExtremaBornes(exercice, t);
+      if (!pointValide(cible)) continue;
       const valeurEntree = evaluerSubstitueT(texte, t);
       if (!Number.isFinite(valeurEntree)) return "parse_error";
-      const ecart = Math.abs(valeurEntree - cible);
-      const toleranceRelative = Math.max(TOLERANCE, Math.abs(cible) * TOLERANCE);
-      if (ecart > toleranceRelative) return "not_equivalent";
+      nbValides++;
+      const tolerance = TOLERANCE_RELATIVE_DERIVEE * Math.max(1, Math.abs(cible));
+      if (Math.abs(valeurEntree - cible) > tolerance) return "not_equivalent";
     }
-    return auMoinsUnPoint && nbValides >= MIN_POINTS_VALIDES ? "correct" : "parse_error";
+    return nbValides >= MIN_POINTS_VALIDES ? "correct" : "parse_error";
   } catch {
     return "parse_error";
   }
+}
+
+// ============================================================================
+// Écran "racines" — solutions de f'(t)=0, vérifiées comme un ENSEMBLE (ordre indifférent). Un
+// champ vide ou une même solution saisie deux fois est signalé SANS consommer de tentative
+// (`controlerSaisieRacinesBorne`, appelé par l'écran avant toute soumission).
+// ============================================================================
+
+/** Nombre de solutions attendues = degré de f' (toutes réelles, distinctes et dans ]0;T[ par
+ * construction) — le nombre de champs ne révèle donc rien que l'élève ne sache déjà. */
+export function nombreRacinesAttenduesBorne(exercice: ExerciceExtremaBornes): number {
+  return exercice.racinesFPrime.length;
+}
+
+export function diagnostiquerRacineBorne(texte: string, exercice: ExerciceExtremaBornes): StatutVerification {
+  return diagnostiquerChampParmiCiblesBorne(texte, exercice.racinesFPrime);
+}
+
+/** Contrôle de forme AVANT soumission : `"manque"` si un champ est vide, `"doublon"` si deux champs
+ * donnent la même valeur — l'écran affiche alors un message sans consommer de tentative. */
+export function controlerSaisieRacinesBorne(reponses: string[]): "ok" | "manque" | "doublon" {
+  if (reponses.some((r) => r.trim() === "")) return "manque";
+  const valeurs: number[] = [];
+  for (const r of reponses) {
+    try {
+      const v = evaluerExpressionGenerale(r.replace(/,/g, "."), 0);
+      if (Number.isFinite(v)) {
+        if (valeurs.some((w) => Math.abs(w - v) < 1e-9)) return "doublon";
+        valeurs.push(v);
+      }
+    } catch {
+      // saisie illisible : la vérification normale la refusera
+    }
+  }
+  return "ok";
+}
+
+export function verifierRacinesBorne(reponses: string[], exercice: ExerciceExtremaBornes): boolean {
+  return verifierEnsembleNumeriqueBorne(reponses, exercice.racinesFPrime);
 }
 
 // ============================================================================

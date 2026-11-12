@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
-import { consigneEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
+import { consigneEcranRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -14,6 +15,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 interface Props {
   exercice: ExerciceVitessePosition;
   ecran: EcranVitessePosition;
+  /** Libellé du champ, en LaTeX (ex. « v(t)= »). */
   labelChamp: string;
   placeholder: string;
   /** Calculatrice affichée UNIQUEMENT sur les champs numériques — jamais sur "derivee" (champ
@@ -32,9 +34,9 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran générique à UN SEUL champ texte libre — réutilisé par 6 des 7 écrans de 5gen35
- * ("derivee", "evaluerV0", "vitessePointe", "conversion", "segmentConstant", "tempsTotal") ; seul
- * "resoudre" (2 racines + QCM justification) a besoin d'un composant dédié
+/** Écran générique à UN SEUL champ texte libre — réutilisé par 6 des 8 écrans de 5gen35
+ * ("derivee", "acceleration", "vitessePointe", "conversion", "segmentConstant", "tempsTotal") ; seuls
+ * "resoudre" (2 racines) et "rejet" (QCM) ont besoin d'un composant dédié
  * (`EtapeResoudreVitessePosition.tsx`). `key` obligatoire côté appelant (React réutiliserait sinon
  * la même instance entre 2 écrans/exercices) — même patron que `EtapeChampUniqueTangente.tsx`
  * (5gen28). */
@@ -58,7 +60,7 @@ export function EtapeChampVitessePosition({
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aide2 = texteAideNiveau2(ecran);
+  const aides = niveauAide >= 2 ? [texteAideNiveau1(ecran), texteAideNiveau2(ecran)] : niveauAide >= 1 ? [texteAideNiveau1(ecran)] : [];
 
   function valider() {
     if (texte.trim() === "") return;
@@ -68,10 +70,14 @@ export function EtapeChampVitessePosition({
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcran(exercice, ecran)}</p>
-      <ApercuExpressionLatex texte={texte} label={labelChamp} />
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranRiche(exercice, ecran)} />
+      </p>
+      <ApercuExpressionLatex texte={texte} label={labelChamp.replace(/_\{?(\d)\}?/g, (_m, d: string) => "₀₁₂₃₄₅₆₇₈₉"[Number(d)]).replace(/\\text\{([^}]*)\}/g, "$1")} />
       <div className="field field-inline">
-        <label className="field-label field-label-minuscule">{labelChamp}</label>
+        <label className="field-label field-label-minuscule">
+          <Katex expression={labelChamp} />
+        </label>
         <input
           type="text"
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
@@ -81,15 +87,16 @@ export function EtapeChampVitessePosition({
         />
       </div>
       {avecCalculatrice && <CalculatriceScientifique />}
-      {niveauAide >= 1 && (
+      {aides.length > 0 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(ecran)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
+          {aides.map((aide, i) => (
+            <div key={i}>
+              <p>
+                <TexteRiche5e texte={aide.texte} />
+              </p>
+              {aide.latex && <Katex expression={aide.latex} block />}
+            </div>
+          ))}
         </div>
       )}
       {!validation && (

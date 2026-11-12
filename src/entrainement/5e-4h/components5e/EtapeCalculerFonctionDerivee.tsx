@@ -70,7 +70,7 @@ export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesU
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 2*x+cos(x)"
+          placeholder="ex : 6x^5 − sin(x)"
         />
       </div>
       {niveauAide >= 1 && (

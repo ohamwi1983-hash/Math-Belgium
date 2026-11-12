@@ -103,10 +103,10 @@ export function formatTermesDonneesLatex(exercice: ExerciceEtudeLocale): string[
 // ============================================================================
 
 export const CONSIGNE_GENERALE_ETUDE_LOCALE =
-  "f'(x) et, si nécessaire, f''(x) te sont DONNÉES (jamais à dériver toi-même) — étudie les points critiques de f à partir de ces informations.";
+  "Les dérivées f'(x) et, si besoin, f''(x) sont données : inutile de dériver. Étudie les points critiques de f à partir de ces expressions.";
 
 export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string {
-  return exercice.niveau === "avance" ? "Objectif : localiser tous les extremums ET tous les points d'inflexion de f." : "Objectif : localiser tous les extremums de f.";
+  return exercice.niveau === "avance" ? "Objectif : localiser tous les extremums et tous les points d'inflexion de f." : "Objectif : localiser tous les extremums de f.";
 }
 
 // ============================================================================
@@ -130,38 +130,78 @@ export function consigneEcranEtudeLocale(ecran: EcranEtudeLocale): string {
     case "resoudreFPrime":
       return "Calcule les éventuels zéros de f'(x).";
     case "tableauFPrime":
-      return "Complète le tableau de signes de f'(x), puis les variations de f qui en découlent à chaque zone et à chaque zéro de f'(x).";
+      return "Complète le tableau de signes de f'(x), puis les variations de f qui en découlent dans chaque zone et en chaque zéro de f'(x).";
     case "extremums":
-      return "Pour CHAQUE zéro de f'(x) classé MAX ou min au tableau précédent, calcule f(x).";
+      return "Pour chaque zéro de f'(x) classé maximum ou minimum au tableau précédent, calcule f(x).";
     case "resoudreFSeconde":
       return "Calcule les éventuels zéros de f''(x).";
     case "tableauFSeconde":
-      return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle à chaque zone et à chaque zéro de f''(x).";
+      return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle dans chaque zone et en chaque zéro de f''(x).";
     case "inflexions":
-      return "Pour CHAQUE point classé PI (point d'inflexion) au tableau précédent, calcule f(x).";
+      return "Pour chaque point classé PI (point d'inflexion) au tableau précédent, calcule f(x).";
   }
 }
 
+/** Légende des symboles du tableau, affichée sous la grille (audit 5e ch. 5, point 38) : « ∪ » se
+ * confond sinon avec la réunion d'ensembles, et « PI » n'est défini nulle part à l'écran. */
+export function legendeTableauEtudeLocale(mode: "fprime" | "fseconde"): string {
+  return mode === "fprime"
+    ? "↗ : f croissante · ↘ : f décroissante · « ni l'un ni l'autre » : f' s'annule sans changer de signe."
+    : "∪ : f convexe (tournée vers le haut) · ∩ : f concave (tournée vers le bas) · PI : point d'inflexion.";
+}
+
 // ============================================================================
-// Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse).
+// Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse). Texte en
+// français terminé par « : » et formule en LaTeX à part (aucune formule écrite au clavier, audit
+// 5e ch. 5, points 9–14) ; valeurs de CET exercice substituées quand elles sont connues.
 // ============================================================================
 
-export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale): string {
+function formatEquationDomaineLatex(exercice: ExerciceEtudeLocale): string | null {
+  if (exercice.type === "polynomiale") return null;
+  const { e, k } = exercice;
+  const carre = e === 0 ? "x^2" : `(${formatDenominateurInterieurLatex(e)})^2`;
+  return `${formatDLatex(e, k)}=0 \\iff ${carre}=${-k}`;
+}
+
+export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale, exercice?: ExerciceEtudeLocale): AideFragmentee {
   switch (ecran) {
-    case "domaine":
-      return "Résous (x-e)²+k=0, c'est-à-dire (x-e)²=-k — ne conserve que les solutions RÉELLES.";
+    case "domaine": {
+      const equation = exercice ? formatEquationDomaineLatex(exercice) : null;
+      return {
+        texte: "Cherche les valeurs qui annulent le dénominateur ; un carré n'est jamais négatif, donc ne garde que les solutions réelles :",
+        latex: equation,
+      };
+    }
     case "resoudreFPrime":
-      return "Selon la famille de f, f'(x)=0 peut être une équation du second degré (1 ou 2 solutions) ou une simple égalité linéaire (1 seule solution).";
+      return {
+        texte: "Selon la fonction, cette équation est du second degré (une ou deux solutions) ou du premier degré (une seule solution) :",
+        latex: "f'(x)=0",
+      };
     case "tableauFPrime":
-      return "PIÈGE CENTRAL : une racine DOUBLE de f' touche zéro SANS que le signe change autour d'elle — ce point n'est NI un maximum NI un minimum. Compare toujours le signe juste avant ET juste après chaque racine avant de conclure.";
+      return {
+        texte: "Piège : une racine double de f' l'annule sans que son signe change ; ce point n'est alors ni un maximum ni un minimum. Compare toujours le signe juste avant et juste après chaque zéro.",
+        latex: null,
+      };
     case "extremums":
-      return "Substitue l'abscisse directement dans f(x) — jamais dans f'(x), qui ne donne que la pente, pas la hauteur.";
+      return {
+        texte: "Remplace x par l'abscisse dans f(x) — pas dans f'(x), qui ne donne que la pente :",
+        latex: "f(x_0)",
+      };
     case "resoudreFSeconde":
-      return "f''(x)=0 se résout exactement comme f'(x)=0 — mais porte sur la CONCAVITÉ de f, jamais sur ses variations.";
+      return {
+        texte: "Même démarche que pour f', mais cette équation renseigne sur la concavité de f, pas sur ses variations :",
+        latex: "f''(x)=0",
+      };
     case "tableauFSeconde":
-      return "PIÈGE : ne confonds pas le rôle de f' (variations/extremums de f) et celui de f'' (concavité/points d'inflexion) — une racine de f''(x)=0 n'est un VRAI point d'inflexion que si le signe de f'' change réellement autour d'elle, exactement comme pour f' et les extremums.";
+      return {
+        texte: "Piège : f' renseigne sur les variations, f'' sur la concavité. Un zéro de f'' n'est un point d'inflexion que si le signe de f'' change de part et d'autre.",
+        latex: null,
+      };
     case "inflexions":
-      return "Substitue l'abscisse du point d'inflexion dans f(x) — jamais dans f''(x).";
+      return {
+        texte: "Remplace x par l'abscisse du point d'inflexion dans f(x) — pas dans f''(x) :",
+        latex: "f(x_0)",
+      };
   }
 }
 
@@ -175,12 +215,16 @@ export interface AideFragmentee {
 export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): AideFragmentee {
   switch (ecran) {
     case "domaine":
-      return { texte: "Exemple :", latex: "(x-1)^2-4=0 \\iff (x-1)^2=4 \\iff x-1=\\pm2 \\iff x=-1 \\text{ ou } x=3 \\;\\Rightarrow\\; \\text{domf}=\\mathbb{R}\\setminus\\{-1;3\\}" };
+      return {
+        texte: "Deux exemples :",
+        latex:
+          "(x-1)^2-4=0 \\iff (x-1)^2=4 \\iff x=-1 \\text{ ou } x=3 \\;\\Rightarrow\\; \\operatorname{dom} f=\\mathbb{R}\\setminus\\{-1\\,;3\\} \\qquad (x-1)^2+6=0 \\iff (x-1)^2=-6 \\text{ : impossible} \\;\\Rightarrow\\; \\operatorname{dom} f=\\mathbb{R}",
+      };
     case "resoudreFPrime":
       return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1" };
     case "tableauFPrime":
       return {
-        texte: "Exemple : (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre', même si f'(0)=0 :",
+        texte: "Exemple : avec une racine double en 0, f' reste positive des deux côtés de 0 ; on écrit « ni l'un ni l'autre » même si f'(0) = 0 :",
         latex: "f'(x)=6x^2",
       };
     case "extremums":
@@ -189,7 +233,7 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): AideFragme
       return { texte: "Exemple :", latex: "f''(x)=12x=0 \\;\\Rightarrow\\; x=0" };
     case "tableauFSeconde":
       return {
-        texte: "Exemple : change bien de signe en x=0 (négative avant, positive après) — c'est un vrai point d'inflexion (PI) :",
+        texte: "Exemple : f'' change de signe en 0 (négative avant, positive après), donc ce point est un point d'inflexion (PI) :",
         latex: "f''(x)=12x",
       };
     case "inflexions":
@@ -208,12 +252,15 @@ export function labelsChampsRacines(nb: number): string[] {
   return Array.from({ length: nb }, (_, i) => `x_${i + 1}=`);
 }
 
-const EXEMPLES_RACINES = [-1, 1, -2, 2, -3, 3];
+/** Exemples HORS de l'espace des tirages (aucune racine en septièmes ni en √7 n'est produite). */
+const EXEMPLES_RACINES = ["2/7", "1 + √7", "−3/7"];
 
 export function placeholdersChampsRacines(nb: number): string[] {
-  if (nb <= 1) return ["ex : 2"];
-  return Array.from({ length: nb }, (_, i) => `ex : ${EXEMPLES_RACINES[i] ?? i + 1}`);
+  return Array.from({ length: Math.max(1, nb) }, (_, i) => `ex : ${EXEMPLES_RACINES[i % EXEMPLES_RACINES.length]}`);
 }
+
+/** Exemple des champs « valeur de f » — hors de l'espace des tirages (aucune valeur en septièmes). */
+export const PLACEHOLDER_VALEUR_F = "ex : −2/7";
 
 /** Précision annoncée UNIQUEMENT quand AU MOINS une des racines attendues est irrationnelle (voir
  * CLAUDE.md, "Annonce de précision = tolérance réellement vérifiée") — jamais affichée pour un
@@ -229,7 +276,7 @@ export function labelsChampsValeurF(racines: RacineEtudeLocale[]): string[] {
 }
 
 export function placeholdersChampsValeurF(): string[] {
-  return ["ex : 4"];
+  return [PLACEHOLDER_VALEUR_F];
 }
 
 export function precisionAnnonceeValeursF(exercice: ExerciceEtudeLocale, racines: RacineEtudeLocale[]): string | null {
@@ -261,9 +308,9 @@ export function formatEnsembleReelGuideLatex(ensemble: EnsembleReelGuide): strin
 function formatClassificationExtremumTexte(c: ClassificationExtremum): string {
   switch (c) {
     case "max":
-      return "MAX";
+      return "maximum";
     case "min":
-      return "min";
+      return "minimum";
     case "ni_lun_ni_lautre":
       return "ni l'un ni l'autre";
   }
@@ -300,20 +347,71 @@ function formatLignesRacinesEtatActuel(entete: string, racines: RacineEtudeLocal
 }
 
 function formatValeursFLatex(exercice: ExerciceEtudeLocale, xs: number[]): string[] {
-  return xs.map((x) => `f(${formatRacineDepuisNombreLatex(exercice, x)})=${formatNombreLatex(valeurFEtudeLocale(exercice, x))}`);
+  return xs.map((x) => {
+    const racine = racineDepuisNombre(exercice, x);
+    const abscisse = racine ? formatRacineLatex(racine) : formatNombreLatex(x);
+    return `f(${abscisse})=${racine ? formatValeurExacteFLatex(exercice, racine) : formatNombreLatex(valeurFEtudeLocale(exercice, x))}`;
+  });
 }
 
 /** Retrouve la racine STOCKÉE (donc son écriture exacte/irrationnelle) correspondant à une valeur
  * numérique `x` déjà connue — jamais reconstruite depuis `x` seul (perdrait la forme exacte). */
-function formatRacineDepuisNombreLatex(exercice: ExerciceEtudeLocale, x: number): string {
-  const toutes = [...exercice.racinesFPrime, ...exercice.racinesFSeconde];
-  const trouvee = toutes.find((r) => Math.abs(valeurNumeriqueRacineEtudeLocale(r) - x) < 1e-6);
-  return trouvee ? formatRacineLatex(trouvee) : formatNombreLatex(x);
+function racineDepuisNombre(exercice: ExerciceEtudeLocale, x: number): RacineEtudeLocale | undefined {
+  return [...exercice.racinesFPrime, ...exercice.racinesFSeconde].find((r) => Math.abs(valeurNumeriqueRacineEtudeLocale(r) - x) < 1e-6);
 }
 
+function pgcd(a: number, b: number): number {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b) [a, b] = [b, a % b];
+  return a || 1;
+}
+
+/** Fraction exacte réduite en LaTeX : « 3 », « -\dfrac{1}{9} ». */
+function formatFractionLatex(num: number, den: number): string {
+  const g = pgcd(num, den);
+  let n = num / g;
+  let d = den / g;
+  if (d < 0) {
+    n = -n;
+    d = -d;
+  }
+  if (d === 1) return `${n}`;
+  return n < 0 ? `-\\dfrac{${-n}}{${d}}` : `\\dfrac{${n}}{${d}}`;
+}
+
+/**
+ * Valeur EXACTE de f en une racine stockée (audit 5e ch. 5, décision I : plus de « −0.11 » pour
+ * −1/9) — toutes les valeurs de ce générateur ont une forme exacte :
+ * - polynomiale, x = p/q : f(x) = (a·p³ + b·p²q + c·pq² + d·q³)/q³ ;
+ * - polynomiale, x = e + s√r (zéros de f' = 3a(x−e)² − 3ar) : f(x) = f(e) − 2ar·s·√r ;
+ * - rationnelle c/((x−e)² + k) : en x = e, c/k ; en x = e ± √(k/3), 3c/(4k).
+ * Une valeur irrationnelle est suivie de sa valeur approchée (virgule décimale).
+ */
+function formatValeurExacteFLatex(exercice: ExerciceEtudeLocale, racine: RacineEtudeLocale): string {
+  if (exercice.type === "polynomiale") {
+    const { a, b, c, d } = exercice;
+    if (racine.exact) {
+      const { num: p, den: q } = racine.valeur;
+      return formatFractionLatex(a * p ** 3 + b * p * p * q + c * p * q * q + d * q ** 3, q ** 3);
+    }
+    const e = racine.centre;
+    const r = racine.radicande;
+    const fe = a * e ** 3 + b * e * e + c * e + d;
+    const coeffRacine = -2 * a * r * racine.signe;
+    const partieRacine = `${Math.abs(coeffRacine) === 1 ? "" : Math.abs(coeffRacine)}\\sqrt{${r}}`;
+    const exacte = fe === 0 ? `${coeffRacine < 0 ? "-" : ""}${partieRacine}` : `${fe}${coeffRacine < 0 ? "-" : "+"}${partieRacine}`;
+    return `${exacte}\\approx ${formatNombreLatex(valeurFEtudeLocale(exercice, valeurNumeriqueRacineEtudeLocale(racine)))}`;
+  }
+  const { c, k } = exercice;
+  return racine.exact ? formatFractionLatex(c, k) : formatFractionLatex(3 * c, 4 * k);
+}
+
+/** Nombre décimal arrondi au centième, virgule décimale (« 3{,}72 »). */
 function formatNombreLatex(v: number): string {
+  if (Number.isInteger(v)) return `${v}`;
   const arrondi = Math.round(v * 100) / 100;
-  return Number.isInteger(v) ? `${v}` : `${arrondi}`;
+  return `${arrondi}`.replace(".", "{,}");
 }
 
 // ============================================================================
@@ -330,7 +428,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeLocale, phase
   for (let i = 0; i < index; i++) {
     switch (ordre[i]) {
       case "domaine":
-        termes.push(`domf=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`);
+        termes.push(`\\operatorname{dom} f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`);
         break;
       case "resoudreFPrime":
         termes.push(...formatLignesRacinesEtatActuel("f'(x)=0", exercice.racinesFPrime));
@@ -362,7 +460,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeLocale, phase
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeLocale, ecran: EcranEtudeLocale): string[] {
   switch (ecran) {
     case "domaine":
-      return [`domf=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`];
+      return [`\\operatorname{dom} f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`];
     case "resoudreFPrime":
       return [formatRacinesSimpleLatex(exercice.racinesFPrime)];
     case "tableauFPrime":
@@ -390,9 +488,9 @@ export function libelleLigne2Tableau(v: ValeurLigne2Tableau | null): string {
   if (v === null) return "?";
   switch (v) {
     case "max":
-      return "MAX";
+      return "maximum";
     case "min":
-      return "min";
+      return "minimum";
     case "ni_lun_ni_lautre":
       return "ni l'un ni l'autre";
     case "pi":

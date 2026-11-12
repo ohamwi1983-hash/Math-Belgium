@@ -6,10 +6,11 @@ import { calculerViewBoxLectureGraphiqueDerivees, calculerZoneSurlignage, constr
 import type { ZoneSurlignage } from "../ui5e/lectureGraphiqueDeriveesCourbe";
 import { FenetreVisibleXY5e, GrilleAdaptative5e } from "./mafsGraphPartage5e";
 import { useLargeurConteneur } from "../components/useLargeurConteneur";
+import "./lectureGraphiqueLimites.css";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
-  /** Aide VISUELLE (niveau 1, jamais de texte) — surligne la zone concernée par le champ actif. */
+  /** Aide VISUELLE — surligne une bande autour d'un point déjà connu. */
   surlignage?: ZoneSurlignage | null;
 }
 
@@ -20,11 +21,10 @@ const LARGEUR_MIN = 280;
 const LARGEUR_MAX = 560;
 
 /**
- * Graphe Mafs pour 5gen30 ("Lecture graphique — dérivées et applications") — courbe PROCÉDURALE
- * (`ui5e/lectureGraphiqueDeriveesCourbe.ts`, baseTrend + bumps), jamais l'ancien composant 5gen22
- * réutilisé tel quel : la fonction rendue ici a des extrema/points d'inflexion intérieurs que
- * 5gen22 ne sait pas produire. Aucun marqueur d'extremum/PI dessiné explicitement — l'élève doit
- * les LIRE sur la forme de la courbe elle-même, jamais les recevoir tout faits.
+ * Graphe Mafs pour 5gen30. Fenêtre x FIXE ([−8 ; 8]) et repère NON isotrope
+ * (`preserveAspectRatio={false}`) : sans cela, Mafs élargissait la fenêtre x jusqu'à ±25 sur grand
+ * écran (audit 5e ch. 5). Aucun marqueur d'extremum ni de point d'inflexion : l'élève les lit sur la
+ * forme de la courbe. Le doigt fait défiler la page verticalement (règle CSS de 5gen22 réutilisée).
  */
 export function LectureGraphiqueDeriveesGraph({ exercice, surlignage }: Props) {
   const [wrapperRef, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
@@ -33,12 +33,12 @@ export function LectureGraphiqueDeriveesGraph({ exercice, surlignage }: Props) {
 
   const viewBox = calculerViewBoxLectureGraphiqueDerivees(exercice);
   const marqueurs = construireMarqueursPointIsole(exercice);
-  const zoneBande = surlignage ? calculerZoneSurlignage(exercice, surlignage, viewBox.x) : null;
+  const zoneBande = surlignage ? calculerZoneSurlignage(exercice, surlignage) : null;
   const { infini } = exercice.asymptotique;
 
   return (
-    <div className="mafs-graph" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-derivees">
-      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
+    <div className="mafs-graph graphe-lecture-limites" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-derivees">
+      <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
         <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} />
 
         {zoneBande && (
@@ -67,15 +67,10 @@ export function LectureGraphiqueDeriveesGraph({ exercice, surlignage }: Props) {
           <Line.PointAngle key={`va-${index}`} point={[va.position, 0]} angle={Math.PI / 2} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
         ))}
 
-        {infini.type === "horizontale" &&
-          (infini.limitePlusInfini === infini.limiteMoinsInfini ? (
-            <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
-          ) : (
-            <>
-              <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
-              <Line.PointAngle point={[0, infini.limiteMoinsInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
-            </>
-          ))}
+        {infini.type === "horizontale" && <Line.PointAngle point={[0, infini.limitePlusInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />}
+        {infini.type === "horizontale" && infini.limiteMoinsInfini !== infini.limitePlusInfini && (
+          <Line.PointAngle point={[0, infini.limiteMoinsInfini]} angle={0} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />
+        )}
         {infini.type === "oblique" && <Line.PointSlope point={[0, infini.ordonnee]} slope={infini.pente} color={COULEUR_COURBE} style="dashed" weight={EPAISSEUR_TRAIT_DISCRETE} opacity={0.5} />}
 
         {marqueurs.map((m, index) => (

@@ -61,6 +61,7 @@ export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilise
               key={option.type}
               type="button"
               className={`btn${actif ? " toggle-active" : ""}${erronee && actif ? " is-erronee" : ""}`}
+              disabled={!!validation}
               onClick={() => setChoix(option.type)}
             >
               {option.label}

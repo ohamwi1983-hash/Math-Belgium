@@ -109,7 +109,15 @@ export function EtapeChampsNumeriquesEtudeLocale({
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1EtudeLocale(phase, exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 &&
             (() => {
               const aide2 = texteAideNiveau2EtudeLocale(phase);

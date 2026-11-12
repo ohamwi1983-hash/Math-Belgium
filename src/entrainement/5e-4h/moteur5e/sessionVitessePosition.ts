@@ -13,13 +13,14 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { ecranApres, ecranInitial } from "./typesVitessePosition";
 import type { EcranVitessePosition, EtatSessionVitessePosition, ResultatExerciceVitessePosition } from "./typesVitessePosition";
 import {
+  diagnostiquerAcceleration,
   diagnostiquerConversionKmh,
   diagnostiquerDeriveeVitesse,
-  diagnostiquerEvaluerV0,
   diagnostiquerSegmentConstant,
   diagnostiquerTempsTotal,
   diagnostiquerVitessePointe,
   verifierEcranResoudre,
+  verifierJustificationRejet,
 } from "./verificationVitessePosition";
 import type { ReponseResoudre } from "./verificationVitessePosition";
 
@@ -42,8 +43,13 @@ export function demarrerSessionVitessePosition(reglages: ReglagesSession5e, gene
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur le QCM « rejet » (choix fermé, décision D de l'audit). */
+export function tentativesMaxEcranVitessePosition(etat: EtatSessionVitessePosition): number {
+  return etat.phase === "rejet" ? 1 : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionVitessePosition): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcranVitessePosition(etat) };
 }
 
 export function activerAideSuivante(etat: EtatSessionVitessePosition): EtatSessionVitessePosition {
@@ -84,8 +90,8 @@ function soumettreEcran<T>(etat: EtatSessionVitessePosition, ecranAttendu: Ecran
 }
 
 // ============================================================================
-// Écrans communs A/B — "derivee" (v(t)=e'(t), symbolique), "evaluerV0" (v(t0), numérique),
-// "resoudre" (2 racines + justification), "vitessePointe" (v(tCible), numérique).
+// Écrans communs A/B — "derivee" (v(t)=s'(t), symbolique), "acceleration" (a(t)=v'(t)),
+// "resoudre" (2 racines), "rejet" (QCM, une tentative), "vitessePointe" (v(tCible), numérique).
 // ============================================================================
 
 export function soumettreReponseDerivee(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
@@ -93,14 +99,19 @@ export function soumettreReponseDerivee(etat: EtatSessionVitessePosition, texte:
   return soumettreEcran(etat, "derivee", texte, (t) => diagnostiquerDeriveeVitesse(t, exercice) === "correct");
 }
 
-export function soumettreReponseEvaluerV0(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
+export function soumettreReponseAcceleration(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
-  return soumettreEcran(etat, "evaluerV0", texte, (t) => diagnostiquerEvaluerV0(t, exercice) === "correct");
+  return soumettreEcran(etat, "acceleration", texte, (t) => diagnostiquerAcceleration(t, exercice) === "correct");
 }
 
 export function soumettreReponseResoudre(etat: EtatSessionVitessePosition, reponse: ReponseResoudre): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
   return soumettreEcran(etat, "resoudre", reponse, (r) => verifierEcranResoudre(r, exercice));
+}
+
+export function soumettreReponseRejet(etat: EtatSessionVitessePosition, indexChoisi: number): EtatSessionVitessePosition {
+  const exercice = etat.exerciceCourant;
+  return soumettreEcran(etat, "rejet", indexChoisi, (i) => verifierJustificationRejet(i, exercice));
 }
 
 export function soumettreReponseVitessePointe(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {

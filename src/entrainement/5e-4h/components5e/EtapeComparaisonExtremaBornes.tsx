@@ -8,6 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { TexteRiche5e } from "./TexteRiche5e";
+import { AideExtremaBornesBloc } from "./AideExtremaBornesBloc";
 
 interface Props {
   exercice: ExerciceExtremaBornes;
@@ -59,9 +61,13 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcranExtremaBornes("comparaison")}</p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranExtremaBornes("comparaison", exercice)} />
+      </p>
 
-      <p className="prompt-text prompt-text--question-multiple">Quelle valeur est le MAXIMUM absolu de f sur [0;T] ?</p>
+      <p className="prompt-text prompt-text--question-multiple">
+        <TexteRiche5e texte={`Maximum absolu de $f$ sur $[0\\,;\\,${exercice.T}]$ :`} />
+      </p>
       <div className="options-grid">
         {candidats.map((c, i) => (
           <button type="button" key={`max-${i}`} className={classeBouton("max", i)} onClick={() => setIndexMax(i)}>
@@ -70,7 +76,9 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
         ))}
       </div>
 
-      <p className="prompt-text prompt-text--question-multiple">Quelle valeur est le MINIMUM absolu de f sur [0;T] ?</p>
+      <p className="prompt-text prompt-text--question-multiple">
+        <TexteRiche5e texte={`Minimum absolu de $f$ sur $[0\\,;\\,${exercice.T}]$ :`} />
+      </p>
       <div className="options-grid">
         {candidats.map((c, i) => (
           <button type="button" key={`min-${i}`} className={classeBouton("min", i)} onClick={() => setIndexMin(i)}>
@@ -79,12 +87,7 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
         ))}
       </div>
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes("comparaison")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("comparaison")}</p>}
-        </div>
-      )}
+      <AideExtremaBornesBloc niveauAide={niveauAide} niveau1={texteAideNiveau1ExtremaBornes("comparaison", exercice)} niveau2={texteAideNiveau2ExtremaBornes("comparaison", exercice)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import type { ExerciceContexteEconomique } from "../core5e/contexteEconomique.types";
 import type { EcranContexteEconomique } from "../moteur5e/typesContexteEconomique";
-import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
-import { QuestionFinale } from "../components/QuestionFinale";
+import { TexteRiche5e } from "./TexteRiche5e";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -59,6 +59,8 @@ export function EtapeChampsNumeriquesCE({
     setValeurs(new Array(nb).fill(""));
   }, [nb]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 5). */
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -70,16 +72,21 @@ export function EtapeChampsNumeriquesCE({
   function valider() {
     if (!complet) return;
     const s = diagnostiquer(valeurs);
+    if (s.some((x) => x === "parse_error")) {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
     setDernierStatut(s.find((x) => x !== "correct") ?? "correct");
     onValider(valeurs);
   }
 
-  const consigne = precisionAnnoncee ? `${consigneEcran(exercice, ecran)} ${precisionAnnoncee}` : consigneEcran(exercice, ecran);
+  const consigne = precisionAnnoncee ? `${consigneEcranRiche(exercice, ecran)} ${precisionAnnoncee}` : consigneEcranRiche(exercice, ecran);
 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale(exercice)}
+        consigneGenerale={<TexteRiche5e texte={consigneGenerale(exercice)} />}
         blocDonnees={
           <div className="equation-box equation-box-donnees">
             {formatTermesDonneesLatex(exercice).map((frag, i) => (
@@ -88,8 +95,12 @@ export function EtapeChampsNumeriquesCE({
           </div>
         }
       />
-      <QuestionFinale question={questionFinale(exercice)} />
-      <p className="prompt-text">{consigne}</p>
+      <p className="question-finale">
+        <TexteRiche5e texte={questionFinale(exercice)} />
+      </p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigne} />
+      </p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">
           <label className="field-label field-label-minuscule">
@@ -108,7 +119,7 @@ export function EtapeChampsNumeriquesCE({
       {niveauAide >= 1 && (
         <div className="aide-5e">
           {(() => {
-            const aide1 = texteAideNiveau1(ecran);
+            const aide1 = texteAideNiveau1(ecran, exercice);
             return (
               <>
                 <p>{aide1.texte}</p>
@@ -134,7 +145,12 @@ export function EtapeChampsNumeriquesCE({
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {ecritureIllisible && (
+          <p className="alert-error" role="alert">
+            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+          </p>
+        )}
+        {!ecritureIllisible && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

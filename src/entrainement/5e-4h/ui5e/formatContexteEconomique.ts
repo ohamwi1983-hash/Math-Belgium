@@ -1,6 +1,11 @@
 /**
  * Couche présentation (5e) — consignes/labels/aides/LaTeX pour 5gen33 ("Contexte économique").
  * Dépend librement des couches inférieures (jamais l'inverse).
+ *
+ * Consignes, objectif et énoncé en `RichText` (`$…$` = LaTeX en ligne, rendu par `TexteRiche5e`)
+ * — plus de notation clavier ni de TeX brut à l'écran (audit 5e ch. 5, point 58). `consigneEcran`
+ * reste une version TEXTE BRUT (dollars retirés) pour l'ancien adaptateur papier, en attendant sa
+ * refonte ; les écrans utilisent `consigneEcranRiche`.
  */
 import type { CoutTotalA, CoutTotalDegre3, ExerciceContexteEconomique, ExerciceContexteEconomiqueA, ExerciceContexteEconomiqueB, ExerciceContexteEconomiqueBonus } from "../core5e/contexteEconomique.types";
 import type { EcranContexteEconomique } from "../moteur5e/typesContexteEconomique";
@@ -30,33 +35,58 @@ export function formatCoutTotalLatex(c: CoutTotalA | CoutTotalDegre3, symbole: s
   return c.degre === 2 ? formatPolynomeVarLatex([c.c, c.b, c.a], symbole) : formatPolynomeVarLatex([c.d, c.c, c.b, c.a], symbole);
 }
 
-/** C'_T(q) — dérivée du coût total, formatée directement depuis ses coefficients fermés (jamais
- * en construisant un `CoutTotalA` factice). */
+/** C'_T(q) — dérivée du coût total, formatée directement depuis ses coefficients fermés. */
 export function formatDeriveeCoutTotalLatex(c: CoutTotalA, symbole: string): string {
   return c.degre === 2 ? formatPolynomeVarLatex([c.b, 2 * c.a], symbole) : formatPolynomeVarLatex([c.c, 2 * c.b, 3 * c.a], symbole);
 }
 
-/** Nombre affiché "propre" — jamais de décimale superflue (entier affiché sans virgule). */
+/** Nombre en LaTeX, notation française : entier tel quel, sinon arrondi (4 décimales au plus,
+ * zéros inutiles retirés) avec une virgule `{,}`. */
 export function formatNombreLatex(v: number): string {
   if (Number.isInteger(v)) return `${v}`;
   const arrondi = Math.round(v * 10000) / 10000;
-  return `${arrondi}`;
+  return `${arrondi}`.replace(".", "{,}");
+}
+
+/** Même nombre en texte brut (boutons, prose) : virgule décimale. */
+export function formatNombreTexte(v: number): string {
+  if (Number.isInteger(v)) return `${v}`;
+  const arrondi = Math.round(v * 10000) / 10000;
+  return `${arrondi}`.replace(".", ",").replace("-", "−");
+}
+
+/** Arrondi au centième, notation française (LaTeX). */
+function formatCentiemeLatex(v: number): string {
+  const arrondi = Math.round(v * 100) / 100;
+  if (Math.abs(arrondi - Math.round(arrondi)) < 1e-9) return `${Math.round(arrondi)}`;
+  return arrondi.toFixed(2).replace(/0$/, "").replace(".", "{,}");
+}
+
+function egalOuEnviron(v: number): string {
+  return Math.abs(v - Math.round(v)) < 1e-9 ? "=" : "\\approx";
 }
 
 // ============================================================================
-// Consigne générale + objectif persistant.
+// Consigne générale + objectif persistant (RichText).
 // ============================================================================
 
 export function consigneGenerale(exercice: ExerciceContexteEconomique): string {
-  if (exercice.famille === "A") return "Calcule toi-même toutes les dérivées nécessaires (jamais données) pour comparer coût marginal DISCRET et coût marginal EXACT.";
-  if (exercice.famille === "B") return "Calcule toi-même toutes les dérivées nécessaires (jamais données) pour situer le bénéfice maximum.";
-  return "Résous l'équation réduite par approximations successives (dichotomie) — aucune forme factorisée simple n'existe ici.";
+  if (exercice.famille === "A") {
+    return "Une entreprise fabrique $q$ unités d'un produit ; son coût total de production, en euros, vaut $C_T(q)$. Le coût marginal en $q_0$ (coût de l'unité supplémentaire) peut s'estimer de deux façons : par la différence $C_T(q_0+1)-C_T(q_0)$, ou par la dérivée $C'_T(q_0)$.";
+  }
+  if (exercice.famille === "B") {
+    return "Une entreprise fabrique et vend $x$ centaines d'objets. Le prix de vente unitaire $p(x)$, en euros, diminue quand la quantité augmente ; le coût total de production vaut $C_T(x)$, en centaines d'euros. La recette totale est $R_T(x)=x\\cdot p(x)$ et le bénéfice $B(x)=R_T(x)-C_T(x)$.";
+  }
+  return "Une entreprise fabrique $q$ unités ; son coût total vaut $C_T(q)$ euros. Le coût moyen $C_M(q)=\\dfrac{C_T(q)}{q}$ est minimal quand il est égal au coût marginal $C'_T(q)$. Cette condition mène à une équation qu'on ne sait pas résoudre exactement : on approche sa solution par dichotomie.";
 }
 
 export function questionFinale(exercice: ExerciceContexteEconomique): string {
-  if (exercice.famille === "A") return `Objectif : comparer le coût marginal discret et le coût marginal exact en q=${exercice.q0}, puis étudier l'existence d'un extremum de C_T.`;
-  if (exercice.famille === "B") return "Objectif : déterminer la quantité qui maximise le bénéfice, puis la valeur de ce bénéfice maximum.";
-  return "Objectif : approcher la racine de l'équation réduite par dichotomie.";
+  if (exercice.famille === "A") {
+    const fin = exercice.minimum.grandeur === "coutMoyen" ? "la production qui rend le coût moyen minimal" : "la production qui rend le coût marginal minimal";
+    return `Objectif : comparer les deux estimations du coût marginal en $q_0=${exercice.q0}$, puis trouver ${fin}.`;
+  }
+  if (exercice.famille === "B") return "Objectif : trouver la quantité qui rend le bénéfice maximal, puis la valeur de ce bénéfice maximal.";
+  return "Objectif : approcher par dichotomie la production qui rend le coût moyen minimal.";
 }
 
 // ============================================================================
@@ -74,71 +104,96 @@ export function formatTermesDonneesLatex(exercice: ExerciceContexteEconomique): 
 // ============================================================================
 
 export const LIBELLE_ECRAN_CONTEXTE_ECONOMIQUE: Record<EcranContexteEconomique, string> = {
-  coutMarginalDiscret: "Coût marginal discret",
-  deriveeSymbolique: "Coût marginal exact — expression",
-  deriveeValeur: "Coût marginal exact — valeur",
-  comparaisonEcart: "Comparaison des 2 approximations",
-  extremum: "Extremum de C_T",
+  coutMarginalDiscret: "Coût marginal par différence",
+  deriveeSymbolique: "Coût marginal par la dérivée — expression",
+  deriveeValeur: "Coût marginal par la dérivée — valeur",
+  comparaisonEcart: "Comparaison des deux estimations",
+  extremum: "Minimum économique",
   recetteTotale: "Recette totale",
   marginales: "Coût marginal et recette marginale",
   resoudreEgaliteMarginales: "Égalité des marginales",
-  beneficeFormule: "Bénéfice — formule",
-  beneficeDerivee: "Bénéfice — dérivée et signe",
-  tableauSigneBenefice: "Tableau de signes de B'",
-  confirmationCoherence: "Cohérence avec l'étape précédente",
-  beneficeMaximum: "Valeur du bénéfice maximum",
+  beneficeFormule: "Bénéfice — expression",
+  beneficeDerivee: "Bénéfice — dérivée",
+  tableauSigneBenefice: "Signe de B'",
+  confirmationCoherence: "Cohérence avec l'égalité des marginales",
+  beneficeMaximum: "Bénéfice maximal",
   poserEquationReduite: "Équation réduite",
-  iteration0: "Dichotomie — itération 1",
-  iteration1: "Dichotomie — itération 2",
-  iteration2: "Dichotomie — itération 3",
-  iteration3: "Dichotomie — itération 4",
-  racineApprochee: "Racine approchée",
+  iteration0: "Dichotomie — étape 1",
+  iteration1: "Dichotomie — étape 2",
+  iteration2: "Dichotomie — étape 3",
+  iteration3: "Dichotomie — étape 4",
+  racineApprochee: "Solution approchée",
 };
 
-export function consigneEcran(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
+/** Libellé du dernier écran de la famille A selon le minimum demandé. */
+export function libelleEcran(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
+  if (ecran === "extremum" && exercice.famille === "A") return exercice.minimum.grandeur === "coutMoyen" ? "Coût moyen minimal" : "Coût marginal minimal";
+  return LIBELLE_ECRAN_CONTEXTE_ECONOMIQUE[ecran];
+}
+
+export const PRECISION_CENTIEME = "Donne la valeur exacte, ou arrondie au centième.";
+
+export function consigneEcranRiche(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return "Calcule C_m(q_0)=C_T(q_0+1)-C_T(q_0), l'approximation DISCRÈTE du coût marginal.";
+      return "Calcule l'estimation par différence du coût marginal : $C_T(q_0+1)-C_T(q_0)$.";
     case "deriveeSymbolique":
-      return "Calcule C'_T(q) — dérive C_T toi-même.";
+      return "Calcule la dérivée $C'_T(q)$.";
     case "deriveeValeur":
-      return "Évalue C'_T(q_0), l'approximation EXACTE (par la dérivée) du coût marginal.";
+      return "Calcule l'estimation par la dérivée : $C'_T(q_0)$.";
     case "comparaisonEcart": {
       const ex = exercice as ExerciceContexteEconomiqueA;
-      return `Compare les 2 résultats obtenus (C_m(${ex.q0})=${ex.cmDiscret} et C'_T(${ex.q0})=${ex.cmDerivee}) : écart absolu, puis écart en pourcentage.`;
+      return `Compare les deux estimations ($${formatNombreLatex(ex.cmDiscret)}$ € par différence, $${formatNombreLatex(ex.cmDerivee)}$ € par la dérivée) : écart absolu, puis écart en pourcentage de l'estimation par la dérivée. Écart en pourcentage arrondi au centième.`;
     }
-    case "extremum":
-      return "C_T admet-elle un extremum ? Résous C'_T(q)=0 et conclus.";
+    case "extremum": {
+      const ex = exercice as ExerciceContexteEconomiqueA;
+      if (ex.minimum.grandeur === "coutMoyen") {
+        return `Le coût moyen est $C_M(q)=\\dfrac{C_T(q)}{q}$. Détermine la production $q$ qui le rend minimal (annule $C'_M(q)$), puis la valeur de ce coût moyen minimal. ${PRECISION_CENTIEME}`;
+      }
+      return `Le coût marginal $C'_T(q)$ est minimal là où sa propre dérivée $C''_T(q)$ s'annule. Détermine cette production $q$, puis la valeur du coût marginal minimal. ${PRECISION_CENTIEME}`;
+    }
     case "recetteTotale":
-      return "R_T(x)=p(x)\\cdot x — développe.";
+      return "Calcule la recette totale $R_T(x)=x\\cdot p(x)$ (forme développée).";
     case "marginales":
-      return "Calcule C'_T(x) (coût marginal) ET R'_T(x) (recette marginale) — dérive chacune toi-même.";
+      return "Calcule le coût marginal $C'_T(x)$ et la recette marginale $R'_T(x)$.";
     case "resoudreEgaliteMarginales":
-      return "Résous C'_T(x)=R'_T(x) (2 solutions), puis choisis celle qui correspond à une quantité produite physiquement valable.";
+      return "Résous $C'_T(x)=R'_T(x)$ (deux solutions), puis donne la quantité retenue.";
     case "beneficeFormule":
-      return "B(x)=R_T(x)-C_T(x) — développe.";
+      return "Calcule le bénéfice $B(x)=R_T(x)-C_T(x)$ (forme développée).";
     case "beneficeDerivee":
-      return "Calcule B'(x) — dérive B toi-même.";
-    case "tableauSigneBenefice":
-      return "Détermine le signe de B'(x) de part et d'autre de la solution retenue à l'étape précédente.";
+      return "Calcule la dérivée $B'(x)$.";
+    case "tableauSigneBenefice": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return `Pour connaître le signe de $B'$ de part et d'autre de la quantité retenue, calcule $B'(${ex.pointTestAvant})$ et $B'(${ex.pointTestApres})$.`;
+    }
     case "confirmationCoherence":
-      return "Le maximum de B se situe-t-il à la MÊME valeur de x que la solution retenue à l'étape 'Égalité des marginales' ?";
+      return "Vérifie que le maximum de $B$ est atteint en la quantité retenue à l'égalité des marginales.";
     case "beneficeMaximum":
-      return "Calcule la valeur du bénéfice maximum, B(x) à la valeur de x retenue.";
+      return "Calcule le bénéfice maximal : la valeur de $B(x)$ pour la quantité retenue.";
     case "poserEquationReduite":
-      return "L'équation C_m(q)=C_M(q) (coût marginal = coût moyen) équivaut à q\\cdot C'_T(q)-C_T(q)=0 — pose et développe cette équation réduite P(q)=0.";
+      return "L'égalité $C'_T(q)=C_M(q)$ équivaut à $q\\cdot C'_T(q)-C_T(q)=0$. Développe et réduis le membre de gauche : c'est $P(q)$.";
     case "iteration0":
     case "iteration1":
     case "iteration2":
     case "iteration3":
-      return "Calcule le milieu de l'intervalle courant, détermine le signe de P en ce milieu, puis choisis le sous-intervalle qui contient la racine.";
+      return "Calcule le milieu de l'intervalle courant et le signe de $P$ en ce milieu, puis choisis le sous-intervalle qui contient la solution (un seul essai pour le signe et le sous-intervalle).";
     case "racineApprochee":
-      return "D'après les 4 itérations, donne une valeur approchée de la racine de P.";
+      return "D'après les quatre étapes, donne une valeur approchée de la solution de $P(q)=0$.";
   }
 }
 
+/** Version TEXTE BRUT de la consigne d'écran (ancien adaptateur papier, en attendant sa refonte) :
+ * dollars retirés, quelques commandes LaTeX remplacées par leur équivalent Unicode. */
+export function consigneEcran(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
+  return consigneEcranRiche(exercice, ecran)
+    .replace(/\\dfrac\{([^}]*)\}\{([^}]*)\}/g, "$1/$2")
+    .replace(/\\cdot/g, "·")
+    .replace(/\{,\}/g, ",")
+    .replace(/\$/g, "");
+}
+
 // ============================================================================
-// Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse).
+// Aides — niveau 1 (méthode), niveau 2 (exemple proche ou équation substituée, jamais la réponse).
 // ============================================================================
 
 /** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
@@ -148,100 +203,89 @@ export interface AideFragmentee {
   latex: string | null;
 }
 
-export function texteAideNiveau1(ecran: EcranContexteEconomique): AideFragmentee {
+export function texteAideNiveau1(ecran: EcranContexteEconomique, exercice?: ExerciceContexteEconomique): AideFragmentee {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return { texte: "C_m(q_0) est une DIFFÉRENCE de 2 valeurs de C_T — jamais une dérivée à ce stade.", latex: null };
+      return { texte: "C'est une différence de deux valeurs du coût total, sans dérivée :", latex: "C_T(q_0+1)-C_T(q_0)" };
     case "deriveeSymbolique":
-      return { texte: "Dérive terme à terme :", latex: "\\dfrac{d}{dq}\\left(a\\,q^n\\right)=n\\,a\\,q^{n-1}" };
+      return { texte: "Dérive terme à terme :", latex: "\\left(a\\,q^n\\right)'=n\\,a\\,q^{n-1}" };
     case "deriveeValeur":
-      return { texte: "Remplace q par q_0 dans l'expression de C'_T(q) que tu viens de trouver.", latex: null };
+      return { texte: "Remplace q par q₀ dans l'expression de la dérivée que tu viens de trouver.", latex: null };
     case "comparaisonEcart":
-      return { texte: "L'écart en % se calcule TOUJOURS par rapport à la valeur EXACTE (la dérivée), jamais par rapport à l'approximation discrète.", latex: null };
+      return { texte: "L'écart en pourcentage se calcule par rapport à l'estimation par la dérivée :", latex: "\\text{écart en \\%}=\\dfrac{\\text{écart absolu}}{C'_T(q_0)}\\times 100" };
     case "extremum":
-      return { texte: "PIÈGE : ne conclus jamais trop vite à un extremum — pour un coût cubique, vérifie le signe du discriminant Δ de C'_T avant de conclure.", latex: null };
+      if (exercice && exercice.famille === "A" && exercice.minimum.grandeur === "coutMarginal") {
+        return { texte: "Dérive le coût marginal, puis résous :", latex: "C''_T(q)=0" };
+      }
+      return { texte: "Écris le coût moyen comme une somme, dérive-le, puis résous :", latex: "C_M(q)=\\dfrac{C_T(q)}{q} \\qquad C'_M(q)=0" };
     case "recetteTotale":
-      return { texte: "Distribue x sur chaque terme de p(x).", latex: null };
+      return { texte: "Multiplie chaque terme du prix par x.", latex: null };
     case "marginales":
-      return { texte: "Le coût/la recette MARGINALE, c'est la DÉRIVÉE du coût/de la recette TOTALE — jamais le coût/la recette moyen(ne).", latex: null };
+      return { texte: "Le coût marginal et la recette marginale sont les dérivées du coût total et de la recette totale.", latex: null };
     case "resoudreEgaliteMarginales":
-      return { texte: "PIÈGE : ne te contente jamais d'ignorer la racine négative — une quantité produite x doit être STRICTEMENT positive.", latex: null };
+      return { texte: "Ramène tout dans un membre et résous l'équation du deuxième degré. Une quantité produite est positive.", latex: null };
     case "beneficeFormule":
-      return { texte: "N'oublie pas la parenthèse : le signe '-' se distribue sur TOUS les termes de C_T :", latex: "B(x)=R_T(x)-C_T(x)" };
+      return { texte: "Le signe « − » se distribue sur tous les termes du coût total :", latex: "B(x)=R_T(x)-C_T(x)" };
     case "beneficeDerivee":
-      return { texte: "Tu as déjà calculé ces 2 dérivées à l'étape précédente :", latex: "B'(x)=R'_T(x)-C'_T(x)" };
+      return { texte: "Tu as déjà calculé les deux dérivées :", latex: "B'(x)=R'_T(x)-C'_T(x)" };
     case "tableauSigneBenefice":
-      return { texte: "Le bénéfice est maximal là où B' passe du + au -.", latex: null };
+      return { texte: "Remplace x par chaque point test dans ton expression de B'(x).", latex: null };
     case "confirmationCoherence":
-      return { texte: "PIÈGE : vérifie que le x où B'(x)=0 est bien EXACTEMENT le même que celui trouvé en résolvant Cm(x)=Rm(x) — ce n'est jamais une coïncidence.", latex: null };
+      return { texte: "B'(x) = 0 équivaut à R'_T(x) = C'_T(x).", latex: null };
     case "beneficeMaximum":
-      return { texte: "Substitue directement la valeur de x dans B(x) — jamais dans B'(x).", latex: null };
+      return { texte: "Remplace x par la quantité retenue dans B(x), pas dans B'(x).", latex: null };
     case "poserEquationReduite":
-      return { texte: "Distribue q dans C'_T(q), puis soustrais C_T(q) terme à terme — plusieurs termes s'annulent.", latex: null };
+      return { texte: "Distribue q dans la dérivée, puis soustrais le coût total terme à terme : le terme en q disparaît.", latex: null };
     case "iteration0":
     case "iteration1":
     case "iteration2":
     case "iteration3":
-      return { texte: "PIÈGE documenté : le sous-intervalle à conserver est celui où P change de signe entre la borne et le milieu — pas l'inverse.", latex: null };
+      return { texte: "On garde le sous-intervalle aux bornes duquel P prend des signes contraires.", latex: null };
     case "racineApprochee":
-      return { texte: "Le milieu du dernier intervalle obtenu est une bonne approximation de la racine.", latex: null };
+      return { texte: "Le milieu du dernier intervalle obtenu est une bonne approximation de la solution.", latex: null };
   }
 }
 
 export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): AideFragmentee {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q \\;\\Rightarrow\\; C_m(2)=C_T(3)-C_T(2)=(9+9)-(4+6)=18-10=8" };
+      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q+10 \\;\\Rightarrow\\; C_T(3)-C_T(2)=28-20=8" };
     case "deriveeSymbolique":
-      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q \\;\\Rightarrow\\; C'_T(q)=2q+3" };
+      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q+10 \\;\\Rightarrow\\; C'_T(q)=2q+3" };
     case "deriveeValeur":
-      return { texte: "Exemple :", latex: "C'_T(q)=2q+3,\\ q_0=2 \\;\\Rightarrow\\; C'_T(2)=2\\cdot2+3=7" };
+      return { texte: "Exemple :", latex: "C'_T(q)=2q+3,\\ q_0=2 \\;\\Rightarrow\\; C'_T(2)=7" };
     case "comparaisonEcart":
-      return {
-        texte: "Exemple :",
-        latex: "\\text{discret}=8,\\ \\text{exact}=7 \\;\\Rightarrow\\; \\text{écart absolu}=1,\\ \\text{écart en \\%}=\\dfrac{1}{7}\\times100\\approx14.29\\%",
-      };
+      return { texte: "Exemple :", latex: "8 \\text{ et } 7 \\;\\Rightarrow\\; \\text{écart absolu}=1,\\ \\text{écart en \\%}=\\dfrac{1}{7}\\times100\\approx14{,}29\\ \\%" };
     case "extremum": {
       const ex = exercice as ExerciceContexteEconomiqueA;
-      return ex.coutTotal.degre === 2
-        ? {
-            texte: "En degré 2, C'_T(q) est TOUJOURS linéaire — elle a TOUJOURS exactement une racine, jamais 'pas d'extremum' :",
-            latex: "C'_T(q)=2aq+b",
-          }
-        : {
-            texte: "Exemple :",
-            latex:
-              "C'_T(q)=3q^2-2q+5 \\;\\Rightarrow\\; \\Delta=(-2)^2-4\\cdot3\\cdot5=4-60=-56<0 \\quad \\text{(aucune racine réelle, donc pas d'extremum)}",
-          };
+      if (ex.minimum.grandeur === "coutMarginal") {
+        return { texte: "Avec les données, la dérivée du coût marginal vaut :", latex: `C''_T(q)=${formatPolynomeVarLatex([2 * (ex.coutTotal as CoutTotalDegre3).b, 6 * ex.coutTotal.a], "q")}` };
+      }
+      const c = ex.coutTotal;
+      return { texte: "Avec les données :", latex: `C_M(q)=${c.a === 1 ? "" : c.a}q+${c.b}+\\dfrac{${c.degre === 2 ? c.c : 0}}{q}` };
     }
     case "recetteTotale":
-      return { texte: "Exemple :", latex: "p(x)=2x+5 \\;\\Rightarrow\\; R_T(x)=(2x+5)x=2x^2+5x" };
+      return { texte: "Exemple :", latex: "p(x)=50-2x \\;\\Rightarrow\\; R_T(x)=(50-2x)\\,x=50x-2x^2" };
     case "marginales":
-      return { texte: "Exemple :", latex: "C_T(x)=x^3-2x,\\ R_T(x)=2x^2+5x \\;\\Rightarrow\\; C'_T(x)=3x^2-2,\\ R'_T(x)=4x+5" };
-    case "resoudreEgaliteMarginales":
-      return {
-        texte: "Exemple :",
-        latex:
-          "3x^2-2=4x+5 \\iff 3x^2-4x-7=0 \\iff x=\\dfrac{7}{3} \\text{ ou } x=-1 \\quad \\text{(on retient } x=\\tfrac{7}{3}\\text{, production positive)}",
-      };
+      return { texte: "Exemple :", latex: "C_T(x)=x^3+2x+5,\\ R_T(x)=50x-2x^2 \\;\\Rightarrow\\; C'_T(x)=3x^2+2,\\ R'_T(x)=50-4x" };
+    case "resoudreEgaliteMarginales": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return { texte: "Avec les données, l'égalité s'écrit :", latex: `${formatPolynomeVarLatex([ex.c, 2 * ex.b, 3 * ex.a], "x")}=${formatPolynomeVarLatex([ex.k, 2 * ex.m], "x")}` };
+    }
     case "beneficeFormule":
-      return { texte: "Exemple :", latex: "R_T(x)=2x^2+5x,\\ C_T(x)=x^3-2x \\;\\Rightarrow\\; B(x)=2x^2+5x-x^3+2x=-x^3+2x^2+7x" };
+      return { texte: "Exemple :", latex: "R_T(x)=50x-2x^2,\\ C_T(x)=x^3+2x+5 \\;\\Rightarrow\\; B(x)=-x^3-2x^2+48x-5" };
     case "beneficeDerivee":
-      return { texte: "Exemple :", latex: "B(x)=-x^3+2x^2+7x \\;\\Rightarrow\\; B'(x)=-3x^2+4x+7" };
+      return { texte: "Exemple :", latex: "B(x)=-x^3-2x^2+48x-5 \\;\\Rightarrow\\; B'(x)=-3x^2-4x+48" };
     case "tableauSigneBenefice":
-      return {
-        texte: "Exemple :",
-        latex: "B' \\text{ positive avant la solution retenue (B croît), négative après (B décroît)} \\;\\Rightarrow\\; \\text{maximum en cette solution}",
-      };
+      return { texte: "Si B' est positive avant la quantité retenue et négative après, B croît puis décroît : le bénéfice y est maximal.", latex: null };
     case "confirmationCoherence":
-      return { texte: "C'est un fait mathématique garanti par construction :", latex: "C_m(x)-R_m(x) = -B'(x)" };
+      return { texte: "C'est toujours le cas :", latex: "B'(x)=R'_T(x)-C'_T(x)" };
     case "beneficeMaximum":
-      return { texte: "Exemple :", latex: "B(x)=-x^3+2x^2+7x,\\ x=\\dfrac{7}{3} \\;\\Rightarrow\\; \\text{calcule chaque terme puis additionne}" };
+      return { texte: "Calcule séparément la recette et le coût pour cette quantité, puis fais la différence.", latex: null };
     case "poserEquationReduite":
       return {
         texte: "Exemple :",
-        latex:
-          "C_T(q)=q^3+2q^2+5,\\ C'_T(q)=3q^2+4q \\;\\Rightarrow\\; P(q)=q(3q^2+4q)-(q^3+2q^2+5)=3q^3+4q^2-q^3-2q^2-5=2q^3+2q^2-5",
+        latex: "C_T(q)=q^3+2q^2+4q+5 \\;\\Rightarrow\\; P(q)=q(3q^2+4q+4)-(q^3+2q^2+4q+5)=2q^3+2q^2-5",
       };
     case "iteration0":
     case "iteration1":
@@ -249,13 +293,10 @@ export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: Ec
     case "iteration3": {
       const ex = exercice as ExerciceContexteEconomiqueBonus;
       const it = ex.iterations[["iteration0", "iteration1", "iteration2", "iteration3"].indexOf(ecran)];
-      return {
-        texte: "Ici :",
-        latex: `\\text{milieu}=\\dfrac{${formatNombreLatex(it.gauche)}+${formatNombreLatex(it.droite)}}{2}=${formatNombreLatex(it.milieu)}`,
-      };
+      return { texte: "Le milieu se calcule ainsi (il reste à évaluer P en ce point) :", latex: `\\dfrac{${formatNombreLatex(it.gauche)}+${formatNombreLatex(it.droite)}}{2}` };
     }
     case "racineApprochee":
-      return { texte: "La précision annoncée correspond exactement à la largeur du dernier intervalle obtenu après les 4 itérations.", latex: null };
+      return { texte: "La précision annoncée est la demi-largeur du dernier intervalle obtenu.", latex: null };
   }
 }
 
@@ -274,8 +315,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceContexteEconomique
 }
 
 // ============================================================================
-// Récapitulatif final — réponse ATTENDUE, par écran RÉELLEMENT traversé. Réutilisée aussi pour le
-// bloc "état actuel" (accumulation ci-dessus).
+// Réponse ATTENDUE, par écran (récapitulatif, bannière de validation, fiche des puces).
 // ============================================================================
 
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string[] {
@@ -287,16 +327,18 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceContexteEconom
 function formatReponseAttendueA(exercice: ExerciceContexteEconomiqueA, ecran: EcranContexteEconomique): string[] {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return [`C_m(${exercice.q0})=${formatNombreLatex(exercice.cmDiscret)}`];
+      return [`C_T(${exercice.q0 + 1})-C_T(${exercice.q0})=${formatNombreLatex(exercice.cmDiscret)}`];
     case "deriveeSymbolique":
       return [`C'_T(q)=${formatDeriveeCoutTotalLatex(exercice.coutTotal, "q")}`];
     case "deriveeValeur":
       return [`C'_T(${exercice.q0})=${formatNombreLatex(exercice.cmDerivee)}`];
     case "comparaisonEcart":
-      return [`\\text{écart absolu}=${formatNombreLatex(exercice.ecartAbsolu)}`, `\\text{écart}\\approx${formatNombreLatex(Math.round(exercice.ecartPourcent * 100) / 100)}\\%`];
-    case "extremum":
-      if (!exercice.extremumExiste) return ["\\text{pas d'extremum}"];
-      return exercice.extrema.map((e) => `q=${formatNombreLatex(e.position)} \\Rightarrow \\text{${e.nature === "max" ? "MAX" : "min"}}`);
+      return [`\\text{écart absolu}=${formatNombreLatex(exercice.ecartAbsolu)}`, `\\text{écart}${egalOuEnviron(exercice.ecartPourcent * 100)}${formatCentiemeLatex(exercice.ecartPourcent)}\\ \\%`];
+    case "extremum": {
+      const { q, valeur, grandeur } = exercice.minimum;
+      const nom = grandeur === "coutMoyen" ? `C_M` : `C'_T`;
+      return [`q${egalOuEnviron(q)}${formatCentiemeLatex(q)}`, `${nom}(q)_{\\min}${egalOuEnviron(valeur)}${formatCentiemeLatex(valeur)}`];
+    }
     default:
       return [];
   }
@@ -308,19 +350,20 @@ function formatReponseAttendueB(exercice: ExerciceContexteEconomiqueB, ecran: Ec
   const RmLatex = formatPolynomeVarLatex([exercice.k, 2 * exercice.m], "x");
   const BLatex = formatPolynomeVarLatex([-exercice.d, exercice.k - exercice.c, exercice.m - exercice.b, -exercice.a], "x");
   const BPrimeLatex = formatPolynomeVarLatex([exercice.k - exercice.c, 2 * (exercice.m - exercice.b), -3 * exercice.a], "x");
+  const bPrime = (x: number) => 2 * exercice.m * x + exercice.k - (3 * exercice.a * x * x + 2 * exercice.b * x + exercice.c);
   switch (ecran) {
     case "recetteTotale":
       return [`R_T(x)=${RT}`];
     case "marginales":
       return [`C'_T(x)=${CmLatex}`, `R'_T(x)=${RmLatex}`];
     case "resoudreEgaliteMarginales":
-      return [`x=${exercice.xOpt} \\text{ (retenue)}`, `x=${exercice.xNeg} \\text{ (rejetée)}`];
+      return [`x=${exercice.xOpt} \\text{ (retenue)}`, `x=${exercice.xNeg} \\text{ (rejetée : quantité négative)}`];
     case "beneficeFormule":
       return [`B(x)=${BLatex}`];
     case "beneficeDerivee":
       return [`B'(x)=${BPrimeLatex}`];
     case "tableauSigneBenefice":
-      return [`B'(x)>0 \\text{ pour } 0<x<${exercice.xOpt}`, `B'(x)<0 \\text{ pour } x>${exercice.xOpt}`];
+      return [`B'(${exercice.pointTestAvant})=${bPrime(exercice.pointTestAvant)}>0`, `B'(${exercice.pointTestApres})=${bPrime(exercice.pointTestApres)}<0`, `\\text{B croît puis décroît : maximum en } x=${exercice.xOpt}`];
     case "confirmationCoherence":
       return [`\\text{oui, même } x=${exercice.xOpt}`];
     case "beneficeMaximum":
@@ -340,7 +383,7 @@ function formatReponseAttendueBonus(exercice: ExerciceContexteEconomiqueBonus, e
   const indexIt = NOMS_ECRANS_ITERATION.indexOf(ecran);
   if (indexIt !== -1) {
     const it = exercice.iterations[indexIt];
-    return [`\\text{milieu}=${formatNombreLatex(it.milieu)}`, `P(\\text{milieu})${it.signeMilieu > 0 ? ">0" : "<0"}`, `\\text{on garde } [${formatNombreLatex(it.garderCote === "gauche" ? it.gauche : it.milieu)}\\,;\\,${formatNombreLatex(it.garderCote === "gauche" ? it.milieu : it.droite)}]`];
+    return [`\\text{milieu}=${formatNombreLatex(it.milieu)}`, `P(${formatNombreLatex(it.milieu)})${it.signeMilieu > 0 ? ">0" : "<0"}`, `\\text{on garde } [${formatNombreLatex(it.garderCote === "gauche" ? it.gauche : it.milieu)}\\,;\\,${formatNombreLatex(it.garderCote === "gauche" ? it.milieu : it.droite)}]`];
   }
   if (ecran === "racineApprochee") return [`q\\approx${formatNombreLatex(Math.round(exercice.racineApprochee * 10000) / 10000)}`];
   return [];
@@ -350,9 +393,10 @@ function formatReponseAttendueBonus(exercice: ExerciceContexteEconomiqueBonus, e
 // Précision annoncée — TOUJOURS identique à la tolérance réellement codée (voir CLAUDE.md).
 // ============================================================================
 
-export const PRECISION_ECART_POURCENT = "(arrondi au centième accepté si besoin)";
-export const PRECISION_EXTREMUM = "(arrondi au centième accepté si besoin)";
+export const PRECISION_ECART_POURCENT = "";
+/** Conservé pour l'ancien adaptateur papier (le texte de précision est déjà dans la consigne). */
+export const PRECISION_EXTREMUM = "";
 
 export function precisionRacineApprochee(exercice: ExerciceContexteEconomiqueBonus): string {
-  return `(réponse acceptée à ${exercice.toleranceFinale.toFixed(2)} près)`;
+  return `(réponse acceptée à ${formatNombreTexte(exercice.toleranceFinale)} près)`;
 }

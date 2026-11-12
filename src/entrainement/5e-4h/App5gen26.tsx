@@ -12,8 +12,10 @@ import {
   soumettreReponseQuotient,
 } from "./moteur5e/sessionDefinitionDerivee";
 import type { EcranDefinitionDerivee, EtatSessionDefinitionDerivee } from "./moteur5e/typesDefinitionDerivee";
-import { ORDRE_COMPLET } from "./moteur5e/typesDefinitionDerivee";
+import { ordreEcrans } from "./moteur5e/typesDefinitionDerivee";
 import {
+  controlerFormeDeveloppement,
+  controlerFormeQuotient,
   diagnostiquerDeveloppementH,
   diagnostiquerLimiteDerivee,
   diagnostiquerQuotientH,
@@ -53,9 +55,6 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Ordre d'affichage des puces de progression — séquence FIXE à 3 écrans (`ORDRE_COMPLET`, voir
- * `moteur5e/typesDefinitionDerivee.ts`). */
-const ORDRE_PHASES: EcranDefinitionDerivee[] = ORDRE_COMPLET;
 
 /** Même source que `calculerRecapitulatifDefinitionDerivee` (`revelesPartiels[ecran]`) — jamais
  * une valeur recalculée séparément. */
@@ -63,7 +62,8 @@ function calculerSegmentsProgression(
   etat: EtatSessionDefinitionDerivee,
   aideParPhase: Partial<Record<EcranDefinitionDerivee, boolean>>,
 ): EtatPuceProgression[] {
-  return ORDRE_PHASES.map((ecran) => {
+  // Ordre des puces : 3 écrans, ou 2 pour la famille affine (`ordreEcrans`).
+  return ordreEcrans(etat.exerciceCourant).map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
@@ -82,6 +82,9 @@ export function App5gen26() {
   /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranDefinitionDerivee, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice : entre dans la clé d'écran, pour que les champs se
+   * vident même quand l'écran garde la même phase. */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionDefinitionDerivee) {
     const recap = calculerRecapitulatifDefinitionDerivee(nouvelEtat);
@@ -115,6 +118,7 @@ export function App5gen26() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -125,13 +129,14 @@ export function App5gen26() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionDefinitionDerivee(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
   const validation: ValidationEtapeProps | null = enAttente
@@ -148,6 +153,7 @@ export function App5gen26() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Calculer f'(a) par la définition</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -213,8 +219,9 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), `f(a) = ${reponse.fA} ; f(a+h) = ${reponse.fAH}`)}
+          onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), `f(${a}) = ${reponse.fA} ; f(${a} + h) = ${reponse.fAH}`)}
           diagnostiquer={(r) => ({ fA: diagnostiquerValeurFA(r.fA, exercice, a), fAH: diagnostiquerDeveloppementH(r.fAH, exercice, a) })}
+          controlerForme={(r) => controlerFormeDeveloppement(r.fAH, exercice)}
           validation={validation}
         />
       );
@@ -226,7 +233,7 @@ function EcranCourant({
           exercice={exercice}
           ecran="quotient"
           labelChamp={labelQuotient(a)}
-          placeholder="ex : 2*a+h"
+          placeholder="ex : 0,5h − 3"
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -234,6 +241,7 @@ function EcranCourant({
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseQuotient(etat, texte), texte)}
           diagnostiquer={(t) => diagnostiquerQuotientH(t, exercice, a)}
+          controlerForme={controlerFormeQuotient}
           validation={validation}
         />
       );
@@ -245,13 +253,13 @@ function EcranCourant({
           exercice={exercice}
           ecran="limite"
           labelChamp={labelLimite(a)}
-          placeholder="ex : 3"
+          placeholder="ex : 0,2"
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte), `f'(a) = ${texte}`)}
+          onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte), `f'(${a}) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerLimiteDerivee(t, exercice, a)}
           validation={validation}
         />

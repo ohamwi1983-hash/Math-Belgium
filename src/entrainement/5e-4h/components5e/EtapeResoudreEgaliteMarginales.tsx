@@ -1,15 +1,15 @@
 import { useState } from "react";
 import type { ExerciceContexteEconomiqueB } from "../core5e/contexteEconomique.types";
 import type { ReponseEgaliteMarginales } from "../moteur5e/verificationContexteEconomique";
-import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
-import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
@@ -20,37 +20,53 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseEgaliteMarginales) => void;
   diagnostiquerRacine: (texte: string) => StatutVerification;
+  diagnostiquerRetenue: (texte: string) => StatutVerification;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+   * champ, remplace "Valider" par le bloc `ValidationEcran`. */
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "resoudreEgaliteMarginales" — 2 champs numériques (les 2 racines de Cm(x)=Rm(x), ordre
- * indifférent), PUIS un choix EXPLICITE "positive"/"négative" (jamais les 2 valeurs numériques
- * elles-mêmes en libellé de bouton — cela révèlerait les racines avant même que l'élève les ait
- * calculées, voir `verificationContexteEconomique.ts::ReponseEgaliteMarginales`). Le rappel du
- * domaine économique (x>0) est affiché en clair — c'est le RAISONNEMENT qui doit être explicite,
- * jamais un indice sur la valeur. */
-export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, validation}: Props) {
+/** Écran "resoudreEgaliteMarginales" — 2 champs numériques (les 2 solutions de C'_T(x) = R'_T(x),
+ * ordre indifférent), PUIS la quantité retenue, SAISIE (audit 5e ch. 5 : le bouton « solution
+ * positive / négative » avait toujours la même bonne réponse). Une saisie illisible n'est pas
+ * décomptée. */
+export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, diagnostiquerRetenue, validation }: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
-  const [choix, setChoix] = useState<"positive" | "negative" | null>(null);
+  const [retenue, setRetenue] = useState("");
+  const [ecritureIllisible, setEcritureIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
-  const complet = racine1.trim() !== "" && racine2.trim() !== "" && choix !== null;
-  const apresEchec = tentativesUtilisees > 0;
-  const statut1 = apresEchec ? diagnostiquerRacine(racine1) : null;
-  const statut2 = apresEchec ? diagnostiquerRacine(racine2) : null;
+  const complet = racine1.trim() !== "" && racine2.trim() !== "" && retenue.trim() !== "";
+  const statut1 = montrerErreurs ? diagnostiquerRacine(racine1) : null;
+  const statut2 = montrerErreurs ? diagnostiquerRacine(racine2) : null;
+  const statut3 = montrerErreurs ? diagnostiquerRetenue(retenue) : null;
 
   function valider() {
     if (!complet) return;
-    onValider({ racines: [racine1, racine2], choix: choix as "positive" | "negative" });
+    if ([racine1, racine2].some((t) => diagnostiquerRacine(t) === "parse_error") || diagnostiquerRetenue(retenue) === "parse_error") {
+      setEcritureIllisible(true);
+      return;
+    }
+    setEcritureIllisible(false);
+    onValider({ racines: [racine1, racine2], retenue });
   }
+
+  const champ = (label: string, valeur: string, modifier: (v: string) => void, statut: StatutVerification | null, placeholder: string) => (
+    <div className="field field-inline">
+      <label className="field-label field-label-minuscule">
+        <Katex expression={label} />
+      </label>
+      <input type="text" className={`text-input${statut && statut !== "correct" ? " is-erronee" : ""}`} value={valeur} onChange={(e) => modifier(e.target.value)} placeholder={placeholder} disabled={Boolean(validation)} />
+    </div>
+  );
+
+  const aide1 = texteAideNiveau1("resoudreEgaliteMarginales", exercice);
+  const aide2 = texteAideNiveau2(exercice, "resoudreEgaliteMarginales");
 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale(exercice)}
+        consigneGenerale={<TexteRiche5e texte={consigneGenerale(exercice)} />}
         blocDonnees={
           <div className="equation-box equation-box-donnees">
             {formatTermesDonneesLatex(exercice).map((frag, i) => (
@@ -59,67 +75,46 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
           </div>
         }
       />
-      <QuestionFinale question={questionFinale(exercice)} />
-      <p className="prompt-text prompt-text--question-multiple">{consigneEcran(exercice, "resoudreEgaliteMarginales")}</p>
-
-      <div className="field field-inline">
-        <label className="field-label field-label-minuscule">
-          <Katex expression="x_1=" />
-        </label>
-        <input type="text" className={`text-input${statut1 && statut1 !== "correct" ? " is-erronee" : ""}`} value={racine1} onChange={(e) => setRacine1(e.target.value)} placeholder="ex : 3" />
-      </div>
-      <div className="field field-inline">
-        <label className="field-label field-label-minuscule">
-          <Katex expression="x_2=" />
-        </label>
-        <input type="text" className={`text-input${statut2 && statut2 !== "correct" ? " is-erronee" : ""}`} value={racine2} onChange={(e) => setRacine2(e.target.value)} placeholder="ex : -2" />
-      </div>
-
-      <p className="prompt-text prompt-text--question-multiple">Rappel : x représente une quantité produite — laquelle des 2 solutions est physiquement valable ?</p>
-      <div className="options-grid-compact">
-        <button type="button" className={`btn${choix === "positive" ? " toggle-active" : ""}`} onClick={() => setChoix("positive")}>
-          La solution positive (x&gt;0)
-        </button>
-        <button type="button" className={`btn${choix === "negative" ? " toggle-active" : ""}${montrerErreurs && choix === "negative" ? " is-erronee" : ""}`} onClick={() => setChoix("negative")}>
-          La solution négative (x&lt;0)
-        </button>
-      </div>
+      <p className="question-finale">
+        <TexteRiche5e texte={questionFinale(exercice)} />
+      </p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranRiche(exercice, "resoudreEgaliteMarginales")} />
+      </p>
+      {champ("x_1=", racine1, setRacine1, statut1, "ex : 0,5")}
+      {champ("x_2=", racine2, setRacine2, statut2, "ex : −0,5")}
+      <p className="prompt-text">Quelle solution correspond à une quantité produite possible ?</p>
+      {champ("x_{\\text{retenue}}=", retenue, setRetenue, statut3, "ex : 0,5")}
 
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1("resoudreEgaliteMarginales");
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, "resoudreEgaliteMarginales");
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
+          <p>{aide1.texte}</p>
+          {aide1.latex && <Katex expression={aide1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
         </div>
       )}
       {!validation && (
         <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+            Valider
+          </button>
+          {ecritureIllisible && (
+            <p className="alert-error" role="alert">
+              Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
+            </p>
+          )}
+          {!ecritureIllisible && montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
         </>
       )}
       {validation && <ValidationEcran {...validation} />}

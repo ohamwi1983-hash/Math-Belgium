@@ -7,6 +7,7 @@ import {
   activerAideSuivante,
   demarrerSessionFonctionDerivee,
   niveauAideMaxFonctionDerivee,
+  TENTATIVES_RECONNAISSANCE,
   soumettreReponseCalculer,
   soumettreReponseDecomposerComposee,
   soumettreReponseDecomposerUV,
@@ -17,8 +18,7 @@ import {
   diagnostiquerCalculerDerivee,
   diagnostiquerChampExterieur,
   diagnostiquerChampInterieur,
-  diagnostiquerChampU,
-  diagnostiquerChampV,
+  diagnostiquerChampsUV,
 } from "./moteur5e/verificationFonctionDerivee";
 import type { ExerciceFonctionDerivee, TypeDerivee } from "./core5e/fonctionDerivee.types";
 import { EtapeReconnaissanceFonctionDerivee } from "./components5e/EtapeReconnaissanceFonctionDerivee";
@@ -99,6 +99,9 @@ export function App5gen27() {
   /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranFonctionDerivee, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice : entre dans la clé d'écran, pour que champs et choix
+   * reviennent à vide même quand la phase ne change pas. */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionFonctionDerivee) {
     const recap = calculerRecapitulatifFonctionDerivee(nouvelEtat);
@@ -132,6 +135,7 @@ export function App5gen27() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -142,13 +146,14 @@ export function App5gen27() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionFonctionDerivee(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = etat.phase === "reconnaissance" ? TENTATIVES_RECONNAISSANCE : etat.reglages.tentativesMax;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation: ValidationEtapeProps | null = enAttente
     ? {
@@ -164,6 +169,7 @@ export function App5gen27() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Fonction dérivée</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -246,7 +252,10 @@ function EcranCourant({
             onValider={(reponse) =>
               terminerEtape(soumettreReponseDecomposerUV(etat, { u: reponse.champ1, v: reponse.champ2 }), `u = ${reponse.champ1} ; v = ${reponse.champ2}`)
             }
-            diagnostiquer={(r) => ({ champ1: diagnostiquerChampU(r.champ1, exercice), champ2: diagnostiquerChampV(r.champ2, exercice) })}
+            diagnostiquer={(r) => {
+              const d = diagnostiquerChampsUV({ u: r.champ1, v: r.champ2 }, exercice);
+              return { champ1: d.u, champ2: d.v };
+            }}
             validation={validation}
           />
         );

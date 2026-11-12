@@ -2,180 +2,100 @@
  * Couche B (5e) — vérification pour 5gen30 ("Lecture graphique — dérivées et applications").
  * N'importe jamais rien de `src/generateurs5e/`.
  *
- * Réplique LOCALEMENT (jamais importée) la construction de courbe de
- * `generateurs5e/lectureGraphiqueDerivees/courbeNumerique.ts` — même raison que
- * `moteur5e/verificationEtudeLocale.ts` réplique les évaluateurs de `generateurs5e/etudeLocale/`.
- * N'a besoin ICI que d'évaluer le SIGNE de f'/f'' en quelques points représentatifs (jamais de
- * balayer pour trouver de nouveaux zéros — les positions sont déjà connues, stockées comme vérité
- * terrain dans `exercice.extrema`/`exercice.inflexions`).
+ * Réplique LOCALEMENT (jamais importée) les formules de dérivée des morceaux de
+ * `generateurs5e/lectureGraphiqueDerivees/courbeNumerique.ts` — seul le SIGNE de f'/f'' dans chaque
+ * zone d'un tableau est nécessaire ici ; les positions (extremums, paliers, points d'inflexion) sont
+ * la vérité terrain stockée dans l'exercice.
  *
- * Réutilise DIRECTEMENT (Couche B ↔ Couche B, légitime) :
- * - `listeAsymptotes`/`diagnostiquerCibleAsymptote` (5gen22) pour l'écran "asymptotes", appliqués
- *   au sous-objet `exercice.asymptotique`.
- * - `TableauEtudeLocaleAttendu`/`ReponseTableauEtudeLocale`/`tableauEstComplet`/
- *   `verifierTableauEtudeLocale` (5gen29) — génériques, AUCUNE référence à `ExerciceEtudeLocale`,
- *   réutilisables tel quel pour le tableau étendu de CE générateur.
+ * Réutilise DIRECTEMENT (Couche B ↔ Couche B) l'écran « nommer les asymptotes » de 5gen22
+ * (`listeAsymptotes`, `diagnostiquerNommerAsymptotes`) et les tableaux de 5gen29
+ * (`tableauEstComplet`, `verifierTableauEtudeLocale`).
  */
-import type { ComportementVA, ExerciceLectureGraphiqueLimites, SigneInfini } from "../core5e/lectureGraphiqueLimites.types";
-import type { BumpExtremumDerivees, BumpInflexionDerivees, ExerciceLectureGraphiqueDerivees, ExtremumLectureGraphiqueDerivees, InflexionLectureGraphiqueDerivees } from "../core5e/lectureGraphiqueDerivees.types";
+import type { ExerciceLectureGraphiqueDerivees, MorceauCourbeDerivees } from "../core5e/lectureGraphiqueDerivees.types";
 import type { ColonneTableauEtudeLocale, ValeurLigne2Tableau, ValeurSigneTableau } from "../core5e/etudeLocale.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { listeAsymptotes } from "./typesLectureGraphiqueLimites";
-import { diagnostiquerCibleAsymptote } from "./verificationLectureGraphiqueLimites";
+import { diagnostiquerNommerAsymptotes, retirerPrefixeEquation } from "./verificationLectureGraphiqueLimites";
 import type { ReponseTableauEtudeLocale, TableauEtudeLocaleAttendu } from "./verificationEtudeLocale";
 import { tableauEstComplet, verifierTableauEtudeLocale } from "./verificationEtudeLocale";
 
-export { listeAsymptotes, diagnostiquerCibleAsymptote, tableauEstComplet, verifierTableauEtudeLocale };
+export { listeAsymptotes, diagnostiquerNommerAsymptotes, tableauEstComplet, verifierTableauEtudeLocale };
 export type { ReponseTableauEtudeLocale, TableauEtudeLocaleAttendu };
 
 // ============================================================================
-// Réplique locale de `generateurs5e/lectureGraphiqueDerivees/courbeNumerique.ts` — jamais importée
-// (règle non négociable moteur5e ↔ generateurs5e). Voir le fichier source pour la justification de
-// chaque constante/formule.
+// Réplique locale des dérivées des morceaux (voir `courbeNumerique.ts`).
 // ============================================================================
 
-const K_VA = 3;
-const K_AUCUNE = 0.15;
-const PENTE_POINT_ISOLE = 0.15;
-const ALPHA_BLEND_DERIVEES = 2;
-const BUFFER_VA_DERIVEES = 0.35;
-
-type Gabarit = (x: number) => number;
-
-function gabaritDivergenceDepuisDroite(a: number, signe: SigneInfini): Gabarit {
-  return (x) => (signe * K_VA) / (x - a);
-}
-function gabaritDivergenceDepuisGauche(a: number, signe: SigneInfini): Gabarit {
-  return (x) => (signe * K_VA) / (a - x);
-}
-function gabaritPointIsole(a: number, valeur: number): Gabarit {
-  return (x) => valeur + PENTE_POINT_ISOLE * (x - a);
-}
-function gabaritHorizontale(limite: number): Gabarit {
-  return () => limite;
-}
-function gabaritOblique(pente: number, ordonnee: number): Gabarit {
-  return (x) => pente * x + ordonnee;
-}
-function gabaritAucune(signe: SigneInfini, xRef: number): Gabarit {
-  return (x) => signe * K_AUCUNE * (x - xRef) * (x - xRef);
-}
-function gabaritCoteDroitVA(va: ComportementVA): Gabarit {
-  return va.pointIsoleDroit !== undefined ? gabaritPointIsole(va.position, va.pointIsoleDroit) : gabaritDivergenceDepuisDroite(va.position, va.signeDroit);
-}
-function gabaritCoteGaucheVA(va: ComportementVA): Gabarit {
-  return va.pointIsoleGauche !== undefined ? gabaritPointIsole(va.position, va.pointIsoleGauche) : gabaritDivergenceDepuisGauche(va.position, va.signeGauche);
-}
-
-interface PieceCourbeDerivees {
-  loVA: number | null;
-  hiVA: number | null;
-  gabaritGauche: Gabarit;
-  gabaritDroit: Gabarit;
-}
-
-function construirePiecesDerivees(exercice: ExerciceLectureGraphiqueLimites): PieceCourbeDerivees[] {
-  const { vas, infini } = exercice;
-  const n = vas.length;
-  const xRefGauche = n > 0 ? vas[0].position : 0;
-  const xRefDroit = n > 0 ? vas[n - 1].position : 0;
-  const gabaritInfiniGauche: Gabarit =
-    infini.type === "horizontale" ? gabaritHorizontale(infini.limiteMoinsInfini) : infini.type === "oblique" ? gabaritOblique(infini.pente, infini.ordonnee) : gabaritAucune(infini.signeMoinsInfini, xRefGauche);
-  const gabaritInfiniDroit: Gabarit =
-    infini.type === "horizontale" ? gabaritHorizontale(infini.limitePlusInfini) : infini.type === "oblique" ? gabaritOblique(infini.pente, infini.ordonnee) : gabaritAucune(infini.signePlusInfini, xRefDroit);
-  const pieces: PieceCourbeDerivees[] = [];
-  for (let i = 0; i <= n; i++) {
-    pieces.push({
-      loVA: i === 0 ? null : vas[i - 1].position,
-      hiVA: i === n ? null : vas[i].position,
-      gabaritGauche: i === 0 ? gabaritInfiniGauche : gabaritCoteDroitVA(vas[i - 1]),
-      gabaritDroit: i === n ? gabaritInfiniDroit : gabaritCoteGaucheVA(vas[i]),
-    });
+function deriveeMorceau(m: MorceauCourbeDerivees, x: number): number {
+  switch (m.kind) {
+    case "hermite": {
+      const h = m.x1 - m.x0;
+      const t = (x - m.x0) / h;
+      const t2 = t * t;
+      return ((6 * t2 - 6 * t) * m.y0) / h + (3 * t2 - 4 * t + 1) * m.s0 + ((-6 * t2 + 6 * t) * m.y1) / h + (3 * t2 - 2 * t) * m.s1;
+    }
+    case "expo":
+      return m.pente + m.c * m.k * Math.exp(m.k * (x - m.xRef));
+    case "divergence":
+      return -m.coef / (x - m.a) ** 2;
+    case "parabole":
+      return 2 * m.coef * (x - m.sommet);
+    case "quadratique":
+      return m.m + 2 * m.b * (x - m.a);
   }
-  return pieces;
 }
 
-function evaluerPieceMelangeeDerivees(piece: PieceCourbeDerivees, loRendu: number, hiRendu: number, x: number): number {
-  const largeur = Math.max(hiRendu - loRendu, 1e-6);
-  const t = (x - loRendu) / largeur;
-  const poidsGauche = 1 / (1 + Math.exp(ALPHA_BLEND_DERIVEES * (t - 0.5)));
-  return poidsGauche * piece.gabaritGauche(x) + (1 - poidsGauche) * piece.gabaritDroit(x);
-}
-
-const MARGE_X = 4;
-const DEMI_LARGEUR_X_MIN = 5;
-
-function calculerBornesXDerivees(asymptotique: ExerciceLectureGraphiqueLimites): [number, number] {
-  const positions = asymptotique.vas.map((va) => va.position);
-  const xEtendueMin = Math.min(0, ...positions) - MARGE_X;
-  const xEtendueMax = Math.max(0, ...positions) + MARGE_X;
-  const demiLargeur = Math.max(DEMI_LARGEUR_X_MIN, (xEtendueMax - xEtendueMin) / 2);
-  const centreX = (xEtendueMin + xEtendueMax) / 2;
-  return [centreX - demiLargeur, centreX + demiLargeur];
-}
-
-interface PieceDomaineDerivees {
-  lo: number;
-  hi: number;
-  piece: PieceCourbeDerivees;
-}
-
-function construireDomainesPieces(asymptotique: ExerciceLectureGraphiqueLimites, xMin: number, xMax: number): PieceDomaineDerivees[] {
-  return construirePiecesDerivees(asymptotique).map((piece) => ({
-    lo: piece.loVA === null ? xMin : piece.loVA + BUFFER_VA_DERIVEES,
-    hi: piece.hiVA === null ? xMax : piece.hiVA - BUFFER_VA_DERIVEES,
-    piece,
-  }));
-}
-
-function evaluerBaseTrendSurDomaines(domaines: PieceDomaineDerivees[], x: number): number {
-  for (const d of domaines) {
-    if (x >= d.lo && x <= d.hi) return evaluerPieceMelangeeDerivees(d.piece, d.lo, d.hi, x);
+function deriveeSecondeMorceau(m: MorceauCourbeDerivees, x: number): number {
+  switch (m.kind) {
+    case "hermite": {
+      const h = m.x1 - m.x0;
+      const t = (x - m.x0) / h;
+      return (((12 * t - 6) * m.y0) / h + (6 * t - 4) * m.s0 + ((-12 * t + 6) * m.y1) / h + (6 * t - 2) * m.s1) / h;
+    }
+    case "expo":
+      return m.c * m.k * m.k * Math.exp(m.k * (x - m.xRef));
+    case "divergence":
+      return (2 * m.coef) / (x - m.a) ** 3;
+    case "parabole":
+    case "quadratique":
+      return 2 * (m.kind === "parabole" ? m.coef : m.b);
   }
-  let meilleur = domaines[0];
-  let meilleureDistance = Infinity;
-  for (const d of domaines) {
-    const dist = x < d.lo ? d.lo - x : x > d.hi ? x - d.hi : 0;
-    if (dist < meilleureDistance) {
-      meilleureDistance = dist;
-      meilleur = d;
+}
+
+function morceauEn(morceaux: MorceauCourbeDerivees[], x: number): MorceauCourbeDerivees {
+  let meilleur = morceaux[0];
+  let distance = Infinity;
+  for (const m of morceaux) {
+    if (x >= m.x0 && x <= m.x1) return m;
+    const d = x < m.x0 ? m.x0 - x : x - m.x1;
+    if (d < distance) {
+      distance = d;
+      meilleur = m;
     }
   }
-  return evaluerPieceMelangeeDerivees(meilleur.piece, meilleur.lo, meilleur.hi, x);
-}
-
-function bumpExtremumValeur(bump: BumpExtremumDerivees, x: number): number {
-  const u = (x - bump.positionNominale) / bump.largeur;
-  return bump.amplitude * Math.exp(-u * u);
-}
-function bumpInflexionValeur(bump: BumpInflexionDerivees, x: number): number {
-  return bump.amplitude * Math.tanh((x - bump.positionNominale) / bump.largeur);
-}
-
-function construireEvaluateurCourbeDerivees(exercice: ExerciceLectureGraphiqueDerivees, xMin: number, xMax: number): (x: number) => number {
-  const domaines = construireDomainesPieces(exercice.asymptotique, xMin, xMax);
-  return (x: number) => {
-    let v = evaluerBaseTrendSurDomaines(domaines, x);
-    for (const b of exercice.bumpsExtremum) v += bumpExtremumValeur(b, x);
-    for (const b of exercice.bumpsInflexion) v += bumpInflexionValeur(b, x);
-    return v;
-  };
-}
-
-const H_DERIVEE = 1e-2;
-function deriveeNumerique(f: (x: number) => number, x: number): number {
-  return (f(x + H_DERIVEE) - f(x - H_DERIVEE)) / (2 * H_DERIVEE);
-}
-function deriveeSecondeNumerique(f: (x: number) => number, x: number): number {
-  return (f(x + H_DERIVEE) - 2 * f(x) + f(x - H_DERIVEE)) / (H_DERIVEE * H_DERIVEE);
+  return meilleur;
 }
 
 // ============================================================================
-// Tableau de signes étendu (écrans "tableauFPrime"/"tableauFSeconde") — même algorithme que
-// `construireTableauAttendu` (5gen29), adapté à des positions déjà connues (nombres bruts, jamais
-// une `RacineEtudeLocale` exacte/irrationnelle — ici les positions viennent d'une LECTURE
-// graphique approximative, pas d'une résolution algébrique).
+// Points où f' s'annule (extremums + paliers) — vérité terrain triée.
+// ============================================================================
+
+export interface PointTangenteHorizontale {
+  position: number;
+  valeur: number;
+  classification: "max" | "min" | "ni_lun_ni_lautre";
+}
+
+export function pointsTangenteHorizontale(exercice: ExerciceLectureGraphiqueDerivees): PointTangenteHorizontale[] {
+  return [
+    ...exercice.extrema.map((e) => ({ position: e.position, valeur: e.valeur, classification: e.classification })),
+    ...exercice.paliers.map((p) => ({ position: p.position, valeur: p.valeur, classification: "ni_lun_ni_lautre" as const })),
+  ].sort((a, b) => a.position - b.position);
+}
+
+// ============================================================================
+// Tableaux de signes (colonnes : points où f' (resp. f'') s'annule + AV).
 // ============================================================================
 
 function representantsZones(valeursTriees: number[]): number[] {
@@ -186,32 +106,28 @@ function representantsZones(valeursTriees: number[]): number[] {
   return reps;
 }
 
-function construireTableauDerivees(
-  positionsMarqueurs: number[],
+function construireTableau(
+  positions: number[],
   classification: ValeurLigne2Tableau[],
   exclusions: number[],
   evaluer: (x: number) => number,
   symboles: { positif: ValeurLigne2Tableau; negatif: ValeurLigne2Tableau },
 ): TableauEtudeLocaleAttendu {
   const marqueurs: { valeur: number; colonne: ColonneTableauEtudeLocale }[] = [
-    ...positionsMarqueurs.map((v, i) => ({ valeur: v, colonne: { type: "racine" as const, index: i } })),
+    ...positions.map((v, i) => ({ valeur: v, colonne: { type: "racine" as const, index: i } })),
     ...exclusions.map((v, i) => ({ valeur: v, colonne: { type: "exclusion" as const, index: i } })),
   ];
   marqueurs.sort((a, b) => a.valeur - b.valeur);
-  const valeursTriees = marqueurs.map((m) => m.valeur);
-  const reps = representantsZones(valeursTriees);
-
+  const reps = representantsZones(marqueurs.map((m) => m.valeur));
   const colonnes: ColonneTableauEtudeLocale[] = [];
   const signes: ValeurSigneTableau[] = [];
   const ligne2: (ValeurLigne2Tableau | null)[] = [];
-
-  function pousserZone(indexRep: number) {
-    const signe: ValeurSigneTableau = evaluer(reps[indexRep]) > 0 ? "+" : "-";
+  const pousserZone = (i: number) => {
+    const signe: ValeurSigneTableau = evaluer(reps[i]) > 0 ? "+" : "-";
     colonnes.push({ type: "zone", index: -1 });
     signes.push(signe);
     ligne2.push(signe === "+" ? symboles.positif : symboles.negatif);
-  }
-
+  };
   marqueurs.forEach((m, i) => {
     pousserZone(i);
     colonnes.push(m.colonne);
@@ -224,104 +140,99 @@ function construireTableauDerivees(
     }
   });
   pousserZone(reps.length - 1);
-
   return { colonnes, signes, ligne2 };
 }
 
-function classificationExtrema(extrema: ExtremumLectureGraphiqueDerivees[]): ValeurLigne2Tableau[] {
-  return extrema.map((e) => e.classification);
-}
-function classificationInflexions(inflexions: InflexionLectureGraphiqueDerivees[]): ValeurLigne2Tableau[] {
-  return inflexions.map((p) => p.classification);
-}
-
 export function tableauFPrimeAttendu(exercice: ExerciceLectureGraphiqueDerivees): TableauEtudeLocaleAttendu {
-  const [xMin, xMax] = calculerBornesXDerivees(exercice.asymptotique);
-  const f = construireEvaluateurCourbeDerivees(exercice, xMin, xMax);
-  const exclusions = exercice.asymptotique.vas.map((va) => va.position);
-  return construireTableauDerivees(
-    exercice.extrema.map((e) => e.position),
-    classificationExtrema(exercice.extrema),
-    exclusions,
-    (x) => deriveeNumerique(f, x),
+  const points = pointsTangenteHorizontale(exercice);
+  return construireTableau(
+    points.map((p) => p.position),
+    points.map((p) => p.classification),
+    exercice.asymptotique.vas.map((va) => va.position),
+    (x) => deriveeMorceau(morceauEn(exercice.morceaux, x), x),
     { positif: "↗", negatif: "↘" },
   );
 }
 
 export function tableauFSecondeAttendu(exercice: ExerciceLectureGraphiqueDerivees): TableauEtudeLocaleAttendu {
-  const [xMin, xMax] = calculerBornesXDerivees(exercice.asymptotique);
-  const f = construireEvaluateurCourbeDerivees(exercice, xMin, xMax);
-  const exclusions = exercice.asymptotique.vas.map((va) => va.position);
-  return construireTableauDerivees(
+  return construireTableau(
     exercice.inflexions.map((p) => p.position),
-    classificationInflexions(exercice.inflexions),
-    exclusions,
-    (x) => deriveeSecondeNumerique(f, x),
+    exercice.inflexions.map(() => "pi" as const),
+    exercice.asymptotique.vas.map((va) => va.position),
+    (x) => deriveeSecondeMorceau(morceauEn(exercice.morceaux, x), x),
     { positif: "∪", negatif: "∩" },
   );
 }
 
 // ============================================================================
-// Écrans "extremums"/"inflexions" — champs numériques à TOLÉRANCE LARGE, explicitement distincte
-// de la tolérance stricte utilisée ailleurs sur la plateforme pour une valeur CALCULÉE (voir
-// CLAUDE.md, "Annonce de précision = tolérance réellement vérifiée") : ici l'élève LIT une
-// coordonnée approximative sur un graphique, jamais ne la calcule.
+// Lectures numériques — tolérances annoncées à l'écran (lecture sur un graphique quadrillé).
 // ============================================================================
 
-/** Ordonnée d'un extremum — lecture graphique, tolérance calée sur le pas de grille Mafs typique
- * (±0,35, cf. `TOLERANCE_VALEUR_EXTREMUM`). */
-export const TOLERANCE_VALEUR_EXTREMUM = 0.35;
-/** Abscisse d'un point d'inflexion — encore plus tolérant qu'un extremum : une estimation visuelle
- * de point d'inflexion est intrinsèquement plus imprécise (le changement de concavité est bien
- * moins net à l'œil qu'un sommet/creux), cf. `TOLERANCE_POSITION_INFLEXION`. */
-export const TOLERANCE_POSITION_INFLEXION = 0.65;
+/** Abscisse d'un point à tangente horizontale (points clés placés sur la grille 0,5). */
+export const TOLERANCE_POSITION_TANGENTE = 0.3;
+/** Abscisse d'un point d'inflexion (changement de courbure moins net à l'œil). */
+export const TOLERANCE_POSITION_INFLEXION = 0.5;
+/** Ordonnée d'un extremum. */
+export const TOLERANCE_VALEUR_EXTREMUM = 0.3;
 
-function diagnostiquerValeurTolerance(texte: string, cible: number, tolerance: number): StatutVerification {
+/** Nombre lu : préfixe « x = », « y = », « f(…) = » ou « ≈ » toléré ; une lettre restante est une
+ * écriture illisible (jamais évaluée en x = 0). */
+export function lireNombre(texte: string): number | null {
+  const t = retirerPrefixeEquation(texte.replace(/^\s*f\s*\([^)]*\)\s*[=≈]\s*/i, "").replace(/≈/g, "")).trim();
+  if (t === "" || /[a-zA-Z]/.test(t)) return null;
   try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
-    if (!Number.isFinite(valeur)) return "parse_error";
-    return Math.abs(valeur - cible) <= tolerance ? "correct" : "not_equivalent";
+    const v = evaluerExpressionGenerale(t, 0);
+    return Number.isFinite(v) ? v : null;
   } catch {
-    return "parse_error";
+    return null;
   }
+}
+
+export function diagnostiquerValeurTolerance(texte: string, cible: number, tolerance: number): StatutVerification {
+  const v = lireNombre(texte);
+  if (v === null) return "parse_error";
+  return Math.abs(v - cible) <= tolerance + 1e-9 ? "correct" : "not_equivalent";
 }
 
 export function diagnostiquerValeurExtremum(texte: string, cible: number): StatutVerification {
   return diagnostiquerValeurTolerance(texte, cible, TOLERANCE_VALEUR_EXTREMUM);
 }
-export function diagnostiquerPositionInflexion(texte: string, cible: number): StatutVerification {
-  return diagnostiquerValeurTolerance(texte, cible, TOLERANCE_POSITION_INFLEXION);
+
+/** Réponse « liste d'abscisses » : lignes libres (ordre indifférent) ou « aucun ». */
+export interface ReponseListeAbscisses {
+  aucun: boolean;
+  valeurs: string[];
 }
 
-/** Vérification COMBINÉE — ENSEMBLE exact (ordre indifférent), même patron que
- * `verifierEnsembleNumerique` (5gen29), générique jusqu'à un petit nombre de cibles — la vérité
- * terrain (`exercice.extrema`/`exercice.inflexions`) ne dépasse JAMAIS `CAP_EXTREMA`/`CAP_INFLEXIONS`
- * (5 chacun, voir `generateurs5e/lectureGraphiqueDerivees/index.ts::construireExerciceBorne`), même
- * si le nombre CIBLÉ à la génération reste, lui, dans {0-3 extrema, 0-2 PI}. */
-export function verifierEnsembleValeurs(reponses: string[], cibles: number[], diagnostiquer: (texte: string, cible: number) => StatutVerification): boolean {
-  if (reponses.length !== cibles.length) return false;
-  const restantes = [...cibles];
-  for (const rep of reponses) {
-    const idx = restantes.findIndex((v) => diagnostiquer(rep, v) === "correct");
-    if (idx === -1) return false;
-    restantes.splice(idx, 1);
-  }
-  return restantes.length === 0;
+export interface DiagnosticListeAbscisses {
+  /** Un statut par ligne (appariement glouton : une ligne correcte consomme une cible). */
+  statuts: StatutVerification[];
+  correct: boolean;
+  /** « Aucun » coché à tort, ou l'inverse : verdict fermé faux, l'écran se clôt. */
+  verdictAucunFaux: boolean;
+  /** Au moins une ligne illisible : pas de tentative consommée. */
+  illisible: boolean;
 }
 
-/** Diagnostic PAR CHAMP — correct si la valeur saisie correspond à N'IMPORTE LAQUELLE des cibles
- * (surlignage rouge individuel). */
-export function diagnostiquerChampParmiCiblesExtremum(texte: string, cibles: number[]): StatutVerification {
-  if (cibles.length === 0) return "parse_error";
-  const base = diagnostiquerValeurExtremum(texte, cibles[0]);
-  if (base === "parse_error") return "parse_error";
-  if (base === "correct") return "correct";
-  return cibles.some((c) => diagnostiquerValeurExtremum(texte, c) === "correct") ? "correct" : "not_equivalent";
+export function diagnostiquerListeAbscisses(reponse: ReponseListeAbscisses, cibles: number[], tolerance: number): DiagnosticListeAbscisses {
+  const aucunAttendu = cibles.length === 0;
+  if (reponse.aucun) return { statuts: [], correct: aucunAttendu, verdictAucunFaux: !aucunAttendu, illisible: false };
+  const utilisees = new Set<number>();
+  const statuts = reponse.valeurs.map((texte): StatutVerification => {
+    const v = lireNombre(texte);
+    if (v === null) return "parse_error";
+    const i = cibles.findIndex((c, k) => !utilisees.has(k) && Math.abs(v - c) <= tolerance + 1e-9);
+    if (i === -1) return "not_equivalent";
+    utilisees.add(i);
+    return "correct";
+  });
+  const correct = !aucunAttendu && reponse.valeurs.length === cibles.length && statuts.every((s) => s === "correct");
+  return { statuts, correct, verdictAucunFaux: aucunAttendu, illisible: statuts.includes("parse_error") };
 }
-export function diagnostiquerChampParmiCiblesInflexion(texte: string, cibles: number[]): StatutVerification {
-  if (cibles.length === 0) return "parse_error";
-  const base = diagnostiquerPositionInflexion(texte, cibles[0]);
-  if (base === "parse_error") return "parse_error";
-  if (base === "correct") return "correct";
-  return cibles.some((c) => diagnostiquerPositionInflexion(texte, c) === "correct") ? "correct" : "not_equivalent";
+
+export function positionsTangenteHorizontale(exercice: ExerciceLectureGraphiqueDerivees): number[] {
+  return pointsTangenteHorizontale(exercice).map((p) => p.position);
+}
+export function positionsInflexions(exercice: ExerciceLectureGraphiqueDerivees): number[] {
+  return exercice.inflexions.map((p) => p.position);
 }

@@ -38,7 +38,7 @@ export function calculerRecapitulatifFonctionDerivee(etat: EtatSessionFonctionDe
       entrees.push({
         libelle: LIBELLE_ECRAN.decomposer,
         estLatex: true,
-        valeur: valeurs.join("\\quad"),
+        valeur: valeurs.join(" \\quad "),
         ...(valeurs.length > 1 ? { valeurs } : {}),
         revele: etat.revelesPartiels[ecran] ?? false,
       });

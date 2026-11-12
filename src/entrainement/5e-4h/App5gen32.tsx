@@ -55,20 +55,22 @@ function calculerSegmentsProgression(
   });
 }
 
-/** Format court de la réponse de l'élève pour UN écran — même structure que
- * `calculerRecapitulatifOptimisation` (ui5e/recapitulatifOptimisation.ts), réutilisée ici TELLE
- * QUELLE plutôt que recopiée séparément : un terme "label=valeur" par champ rempli, séparés par
- * `\quad`. */
-function formatReponsesEcranLatex(exercice: EtatSessionOptimisation["exerciceCourant"], ecran: EcranOptimisation, reponses: Record<string, string>): string {
-  const valeurs: string[] = [];
+/** Réponse de l'élève pour UN écran, pour la fiche des puces : libellé en KaTeX, saisie en texte
+ * brut (une saisie fausse ou incomplète, ex. « 2x^ », ne doit jamais produire d'erreur KaTeX). */
+function formatReponsesEcran(exercice: EtatSessionOptimisation["exerciceCourant"], ecran: EcranOptimisation, reponses: Record<string, string>): ReactNode {
+  const morceaux: ReactNode[] = [];
   for (const champ of champsEcran(exercice, ecran)) {
     const valeur = reponses[champ.id];
     if (valeur === undefined || valeur === "") continue;
-    const labelPropre = champ.label.replace(/=$/, "");
     const valeurAffichee = champ.kind === "choix" ? (champ.options.find((o) => o.id === valeur)?.label ?? valeur) : valeur;
-    valeurs.push(`${labelPropre}=${champ.kind === "choix" ? `\\text{${valeurAffichee}}` : valeurAffichee}`);
+    morceaux.push(
+      <span key={champ.id} style={{ marginRight: "1em", display: "inline-block" }}>
+        {champ.kind === "texte" ? <Katex expression={champ.label} /> : `${champ.label} : `}
+        {champ.kind === "texte" ? ` ${valeurAffichee}` : valeurAffichee}
+      </span>,
+    );
   }
-  return valeurs.join("\\quad");
+  return <>{morceaux}</>;
 }
 
 export function App5gen32() {
@@ -80,6 +82,9 @@ export function App5gen32() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice », variante forcée) : fait partie de la
+   * clé d'écran, donc les champs repartent vides même si la phase et l'index sont identiques. */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   /** Réponse ATTENDUE : jamais `calculerRecapitulatifOptimisation` (qui réaffiche la dernière
    * réponse SOUMISE par l'élève, pas la vraie réponse — voir son commentaire de tête de fichier,
@@ -124,6 +129,7 @@ export function App5gen32() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setNumeroGeneration((n) => n + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -135,6 +141,7 @@ export function App5gen32() {
   }
 
   function forcerVariante(id: string) {
+    setNumeroGeneration((n) => n + 1);
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
@@ -145,7 +152,7 @@ export function App5gen32() {
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const niveauAideMax = niveauAideMaxOptimisation();
 
   const validation = enAttente
@@ -162,6 +169,7 @@ export function App5gen32() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Optimisation géométrique</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -181,7 +189,7 @@ export function App5gen32() {
             niveauAideMax={niveauAideMax}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponses) =>
-              terminerEtape(soumettreReponseEcran(etat, reponses), <Katex expression={formatReponsesEcranLatex(exercice, etat.phase, reponses)} />)
+              terminerEtape(soumettreReponseEcran(etat, reponses), formatReponsesEcran(exercice, etat.phase, reponses))
             }
             validation={validation}
           />

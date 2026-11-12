@@ -57,15 +57,143 @@ function tirerNombreElements(force?: number): number {
 }
 
 // ============================================================================
-// Fonctions polynomiales partagées (familles A et B) — cubiques a≠0, coefficients petits.
+// Fonctions polynomiales partagées (familles A et B) — cubiques construites par leur FORME
+// (audit 5c5a, point 20) : extremums placés dans [−3 ; 3] avec une amplitude qui occupe une part
+// lisible de la fenêtre [−4 ; 4], ou cubique monotone à courbure visible. Les coefficients ne sont
+// jamais affichés (seuls les graphes le sont) : ils peuvent être décimaux.
 // ============================================================================
 
+const X_FENETRE = 4;
+
+/** Caractéristiques lisibles d'une cubique — sert à la fois à rédiger l'énoncé verbal (famille B)
+ * et à rejeter deux éléments indiscernables (familles A et B). */
+export interface FormeCubique {
+  /** Signe du coefficient dominant. */
+  signe: 1 | -1;
+  /** Abscisses des deux extremums, triées — absent pour une cubique monotone. */
+  extremums?: [number, number];
+  /** Abscisse du point d'inflexion. */
+  inflexion: number;
+  /** Ordonnée à l'origine f(0). */
+  f0: number;
+}
+
+function etendueSurFenetre(coeffs: PolynomeAssociation): { min: number; max: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i <= 160; i++) {
+    const x = -X_FENETRE + (2 * X_FENETRE * i) / 160;
+    const y = evaluerPolynome(coeffs, x);
+    if (y < min) min = y;
+    if (y > max) max = y;
+  }
+  return { min, max };
+}
+
+function demiEntier(min: number, max: number): number {
+  return entierAleatoire(min * 2, max * 2) / 2;
+}
+
+/** Cubique à deux extremums en r1 < r2 : f'(x) = 3a(x − r1)(x − r2). Rejet tant que la « bosse »
+ * entre les deux extremums n'occupe pas au moins 30 % de la hauteur de la fenêtre. */
+function tirerCubiqueDeuxExtremums(): PolynomeAssociation {
+  for (let essai = 0; essai < 400; essai++) {
+    const r1 = demiEntier(-3, 2);
+    const r2 = demiEntier(-2, 3);
+    if (r2 - r1 < 2.5) continue;
+    if (Math.abs(r1) < 0.5 || Math.abs(r2) < 0.5) continue;
+    const a = [-1, -0.5, 0.5, 1][entierAleatoire(0, 3)];
+    const sans = [0, 3 * a * r1 * r2, -1.5 * a * (r1 + r2), a];
+    const amplitude = Math.abs(evaluerPolynome(sans, r1) - evaluerPolynome(sans, r2));
+    const { min, max } = etendueSurFenetre(sans);
+    if (amplitude < 0.3 * (max - min)) continue;
+    return [choisirOrdonneeOrigine(max - min), sans[1], sans[2], sans[3]];
+  }
+  return [2, -12, 0, 1]; // x³ − 12x + 2 : extremums en ±2, toujours lisible
+}
+
+/** Cubique monotone : f'(x) = 3a((x − m)² + q), q > 0 — inflexion en m, palier « adouci » visible. */
+function tirerCubiqueMonotone(): PolynomeAssociation {
+  for (let essai = 0; essai < 400; essai++) {
+    const m = demiEntier(-2, 2);
+    if (Math.abs(m) < 1 && m !== 0) continue;
+    const q = [0.5, 1, 1.5][entierAleatoire(0, 2)];
+    const a = [-1, -0.5, 0.5, 1][entierAleatoire(0, 3)];
+    // a((x−m)³ + 3q(x−m)) développé, sans terme constant (ajouté ensuite).
+    const sans = [0, a * (3 * m * m + 3 * q), -3 * a * m, a];
+    const { min, max } = etendueSurFenetre(sans);
+    if (max - min <= 0) continue;
+    return [choisirOrdonneeOrigine(max - min), sans[1], sans[2], sans[3]];
+  }
+  return [1, 3, 0, 1];
+}
+
+/** Ordonnée à l'origine nettement au-dessus, en dessous, ou exactement à l'origine (un tiers des
+ * cas chacun) — pour que « coupe l'axe des ordonnées au-dessus de l'origine » se lise sur le
+ * graphe. */
+function choisirOrdonneeOrigine(etendue: number): number {
+  const signe = entierAleatoire(-1, 1);
+  if (signe === 0) return 0;
+  const valeur = Math.max(1, Math.round(etendue * (0.12 + 0.18 * Math.random())));
+  return signe * valeur;
+}
+
 function genererCubique(): PolynomeAssociation {
-  const a = entierNonNul(-2, 2);
-  const b = entierAleatoire(-3, 3);
-  const c = entierAleatoire(-5, 5);
-  const d = entierAleatoire(-3, 3);
-  return [d, c, b, a];
+  return Math.random() < 0.7 ? tirerCubiqueDeuxExtremums() : tirerCubiqueMonotone();
+}
+
+/** Racines réelles distinctes de Ax²+Bx+C, triées — tableau vide si discriminant ≤ 0. */
+function racinesQuadratique(A: number, B: number, C: number): number[] {
+  const disc = B * B - 4 * A * C;
+  if (disc <= 1e-9) return [];
+  const sq = Math.sqrt(disc);
+  return [(-B - sq) / (2 * A), (-B + sq) / (2 * A)].sort((x, y) => x - y);
+}
+
+export function formeCubique(coeffs: PolynomeAssociation): FormeCubique {
+  const [d, c, b, a] = coeffs;
+  const racines = racinesQuadratique(3 * a, 2 * b, c);
+  return {
+    signe: a > 0 ? 1 : -1,
+    extremums: racines.length === 2 ? [racines[0], racines[1]] : undefined,
+    inflexion: -b / (3 * a),
+    f0: d,
+  };
+}
+
+function signeLisible(x: number): -1 | 0 | 1 {
+  if (Math.abs(x) < 1e-9) return 0;
+  return x > 0 ? 1 : -1;
+}
+
+/** Signature de ce que l'énoncé verbal décrit (famille B) — deux éléments de même signature
+ * auraient le même énoncé : rejetés au tirage. */
+function signatureVerbale(forme: FormeCubique): string {
+  const position = forme.extremums ? `${signeLisible(forme.extremums[0])}${signeLisible(forme.extremums[1])}` : `i${signeLisible(forme.inflexion)}`;
+  return `${forme.signe}|${position}|${signeLisible(forme.f0)}`;
+}
+
+/** Signature de la dérivée (famille A) — deux f de même f' (ou de f' indiscernables : mêmes zéros
+ * et même sens) sont rejetées au tirage. */
+function signatureDerivee(coeffs: PolynomeAssociation): string {
+  const forme = formeCubique(coeffs);
+  const position = forme.extremums ? forme.extremums.map((r) => r.toFixed(2)).join(";") : `m${forme.inflexion.toFixed(2)}`;
+  return `${forme.signe}|${position}`;
+}
+
+function tirerCubiquesDistinctes(n: number, signature: (c: PolynomeAssociation) => string): PolynomeAssociation[] {
+  const resultat: PolynomeAssociation[] = [];
+  const vues = new Set<string>();
+  let essais = 0;
+  while (resultat.length < n) {
+    const c = genererCubique();
+    const sig = signature(c);
+    essais += 1;
+    if (vues.has(sig) && essais < 2000) continue;
+    vues.add(sig);
+    resultat.push(c);
+  }
+  return resultat;
 }
 
 /** Dérivée d'un polynôme (coefficients ascendants) — formule puissance terme à terme. */
@@ -81,7 +209,7 @@ export function derivee(coeffs: PolynomeAssociation): PolynomeAssociation {
 
 export function genererExerciceGrapheDerivee(nombreForce?: number): ExerciceAssociationGrapheDerivee {
   const n = tirerNombreElements(nombreForce);
-  const fonctions = Array.from({ length: n }, () => genererCubique());
+  const fonctions = tirerCubiquesDistinctes(n, signatureDerivee);
   return { famille: "grapheDerivee", fonctions, ordreLettres: tirerDerangement(n) };
 }
 
@@ -205,51 +333,52 @@ export function genererExerciceGrapheDeriveeAvancee(nombreForce?: number, caract
 // Famille B — graphique de f ↔ énoncé verbal.
 // ============================================================================
 
-/** Racines réelles distinctes de Ax²+Bx+C, triées — tableau vide si discriminant ≤0 (aucun
- * changement de signe réel, y compris le cas limite d'une racine double, rarissime avec des
- * coefficients entiers petits, traité comme "pas de changement de signe" — mathématiquement
- * correct dans les deux cas). */
-function racinesQuadratique(A: number, B: number, C: number): number[] {
-  const disc = B * B - 4 * A * C;
-  if (disc <= 1e-9) return [];
-  const sq = Math.sqrt(disc);
-  return [(-B - sq) / (2 * A), (-B + sq) / (2 * A)].sort((x, y) => x - y);
+function cote(x: number): string {
+  return x < 0 ? "à gauche de l'axe des ordonnées" : "à droite de l'axe des ordonnées";
 }
 
-const GABARITS_MONOTONE = [
-  (sens: string) => `Cette fonction est ${sens} sur tout son domaine, sans jamais changer de sens de variation.`,
-  (sens: string) => `f ${sens === "croissante" ? "croît" : "décroît"} continuellement de gauche à droite du graphique.`,
-];
+/** Énoncé verbal DISCRIMINANT (audit 5c5a, points 1 à 3) : sens de variation complet et juste
+ * selon le signe de a, position des extremums (ou du point d'inflexion pour une cubique monotone)
+ * par rapport à l'axe des ordonnées, position de f(0) — puis la concavité. Deux éléments d'un même
+ * exercice n'ont jamais la même description (`signatureVerbale`). */
+export function genererEnonceVerbal(coeffs: PolynomeAssociation): string {
+  const forme = formeCubique(coeffs);
+  const croissanteDabord = forme.signe > 0;
+  const phrases: string[] = [];
 
-const GABARITS_DEUX_EXTREMA = [
-  (premier: string, second: string) => `En parcourant le graphique de gauche à droite, f ${premier} d'abord, puis ${second}, puis recroît.`,
-  (premier: string, second: string) => `La fonction présente deux extremums : elle ${premier} jusqu'au premier, puis ${second} jusqu'au second.`,
-];
-
-const GABARITS_CONCAVITE = [
-  (avant: string, apres: string) => `Sa concavité change une seule fois : ${avant} avant le point d'inflexion, ${apres} après.`,
-  (avant: string, apres: string) => `La courbe est ${avant} puis ${apres}, avec un point d'inflexion entre les deux.`,
-];
-
-function genererEnonceVerbal(coeffs: PolynomeAssociation): string {
-  const [, c, b, a] = coeffs;
-  const racines = racinesQuadratique(3 * a, 2 * b, c);
-  const concaveApres = a > 0; // f''(x)=6ax+2b : négatif avant x0, positif après, si a>0
-  const texteConcavite = melanger(GABARITS_CONCAVITE)[0](concaveApres ? "concave (tournée vers le bas)" : "convexe (tournée vers le haut)", concaveApres ? "convexe (tournée vers le haut)" : "concave (tournée vers le bas)");
-
-  if (racines.length === 0) {
-    const sens = a > 0 ? "croissante" : "décroissante";
-    return `${melanger(GABARITS_MONOTONE)[0](sens)} ${texteConcavite}`;
+  if (forme.extremums) {
+    const [r1, r2] = forme.extremums;
+    phrases.push(
+      croissanteDabord
+        ? "De gauche à droite, f croît jusqu'à un maximum, décroît jusqu'à un minimum, puis croît à nouveau."
+        : "De gauche à droite, f décroît jusqu'à un minimum, croît jusqu'à un maximum, puis décroît à nouveau.",
+    );
+    const premier = croissanteDabord ? "maximum" : "minimum";
+    const second = croissanteDabord ? "minimum" : "maximum";
+    if (r1 < 0 && r2 < 0) phrases.push("Ses deux extremums sont situés à gauche de l'axe des ordonnées.");
+    else if (r1 > 0 && r2 > 0) phrases.push("Ses deux extremums sont situés à droite de l'axe des ordonnées.");
+    else phrases.push(`Son ${premier} est ${cote(r1)}, son ${second} ${cote(r2)}.`);
+  } else {
+    phrases.push(croissanteDabord ? "f est croissante sur tout le graphique, sans aucun extremum." : "f est décroissante sur tout le graphique, sans aucun extremum.");
+    const i = signeLisible(forme.inflexion);
+    phrases.push(i === 0 ? "Son point d'inflexion est sur l'axe des ordonnées." : `Son point d'inflexion est ${cote(forme.inflexion)}.`);
   }
 
-  const premier = a > 0 ? "croît jusqu'à un maximum" : "décroît jusqu'à un minimum";
-  const second = a > 0 ? "décroît jusqu'à un minimum" : "croît jusqu'à un maximum";
-  return `${melanger(GABARITS_DEUX_EXTREMA)[0](premier, second)} ${texteConcavite}`;
+  const s0 = signeLisible(forme.f0);
+  phrases.push(
+    s0 === 0
+      ? "Sa courbe passe par l'origine du repère."
+      : s0 > 0
+        ? "Sa courbe coupe l'axe des ordonnées au-dessus de l'origine."
+        : "Sa courbe coupe l'axe des ordonnées en dessous de l'origine.",
+  );
+  phrases.push(croissanteDabord ? "Elle est concave (tournée vers le bas) puis convexe (tournée vers le haut)." : "Elle est convexe (tournée vers le haut) puis concave (tournée vers le bas).");
+  return phrases.join(" ");
 }
 
 export function genererExerciceGrapheVerbal(nombreForce?: number): ExerciceAssociationGrapheVerbal {
   const n = tirerNombreElements(nombreForce);
-  const fonctions = Array.from({ length: n }, () => genererCubique());
+  const fonctions = tirerCubiquesDistinctes(n, (c) => signatureVerbale(formeCubique(c)));
   const ordreLettres = tirerDerangement(n);
   const enonces = ordreLettres.map((i) => genererEnonceVerbal(fonctions[i]));
   return { famille: "grapheVerbal", fonctions, enonces, ordreLettres };
@@ -290,8 +419,14 @@ function parentheserSiComposite(lin: string): string {
 function genererPaireProduit(): PaireSymbolique {
   const a = entierNonNul(-3, 3);
   const b = entierAleatoire(-4, 4);
-  const c = entierNonNul(-3, 3);
-  const d = entierAleatoire(-4, 4);
+  let c = entierNonNul(-3, 3);
+  let d = entierAleatoire(-4, 4);
+  // Jamais un facteur multiplié par lui-même (ou par un multiple de lui-même) : ce serait un
+  // carré déguisé (audit 5c5a, point 4).
+  while (a * d === b * c) {
+    c = entierNonNul(-3, 3);
+    d = entierAleatoire(-4, 4);
+  }
   const lin1 = formatPolynomeLatex([b, a]);
   const lin2 = formatPolynomeLatex([d, c]);
   const derive = formatPolynomeLatex([a * d + b * c, 2 * a * c]);
@@ -318,7 +453,13 @@ const GENERATEURS_PAIRE_SYMBOLIQUE = [genererPaireMonomiale, genererPaireProduit
 
 export function genererExerciceSymbolique(nombreForce?: number): ExerciceAssociationSymbolique {
   const n = tirerNombreElements(nombreForce);
-  const paires = Array.from({ length: n }, () => GENERATEURS_PAIRE_SYMBOLIQUE[entierAleatoire(0, GENERATEURS_PAIRE_SYMBOLIQUE.length - 1)]());
+  // Jamais deux dérivées identiques ni deux f identiques dans un même exercice (audit 5c5a, point 4).
+  const paires: PaireSymbolique[] = [];
+  for (let essai = 0; paires.length < n; essai++) {
+    const p = GENERATEURS_PAIRE_SYMBOLIQUE[entierAleatoire(0, GENERATEURS_PAIRE_SYMBOLIQUE.length - 1)]();
+    if (essai < 500 && paires.some((q) => q.gLatex === p.gLatex || q.fLatex === p.fLatex)) continue;
+    paires.push(p);
+  }
   const fLatex = paires.map((p) => p.fLatex);
   const ordreLettres = tirerDerangement(n);
   const gLatex = ordreLettres.map((i) => paires[i].gLatex);

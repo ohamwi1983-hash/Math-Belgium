@@ -1,76 +1,70 @@
 /**
- * Couche core (5e) — contrat pour 5gen30 ("Lecture graphique — dérivées et applications"), 6e et
- * DERNIER générateur du chapitre "Dérivées et applications". Lecture graphique PURE (aucun calcul) :
- * un graphique de f est affiché, l'élève lit directement asymptotes/extrema/signe de f'/f''/
- * concavité/points d'inflexion. Type pur, aucune logique — voir
- * `generateurs5e/lectureGraphiqueDerivees/` pour la génération (y compris le calcul de la vérité
- * terrain par balayage numérique) et `ui5e/lectureGraphiqueDeriveesCourbe.ts` pour le rendu.
+ * Couche core (5e) — contrat pour 5gen30 ("Lecture graphique — dérivées et applications"). Lecture
+ * graphique PURE (aucun calcul) : un graphique de f est affiché, l'élève lit directement asymptotes,
+ * points où f' s'annule, signe de f'/f'', valeurs des extremums, points d'inflexion. Type pur, aucune
+ * logique — voir `generateurs5e/lectureGraphiqueDerivees/` pour la construction.
  *
- * f(x) = baseTrend(x) + Σ bumpExtremum_i(x) + Σ bumpInflexion_j(x) — `baseTrend` contrôle SEULEMENT
- * le comportement aux bords (même mécanisme que 5gen22, sous-objet `asymptotique`, réutilisé
- * directement), les bumps (gaussiennes pour les extrema, tanh pour les points d'inflexion)
- * contrôlent les positions INTÉRIEURES. Les positions NOMINALES des bumps
- * (`bumpsExtremum[i].positionNominale`...) servent UNIQUEMENT à reconstruire la MÊME courbe de
- * façon déterministe — JAMAIS utilisées directement comme vérité terrain : `extrema`/`inflexions`
- * sont la VRAIE position/valeur/classification, retrouvées par balayage numérique de la courbe
- * RÉELLEMENT construite (voir CLAUDE.md, "vérification par cohérence interne").
- *
- * **Fait vérifié empiriquement, à connaître avant de lire `generateurs5e/lectureGraphiqueDerivees/`** :
- * `extrema`/`inflexions` peuvent légitimement contenir PLUS d'entrées que de bumps placés — le
- * mélange sigmoïde hérité de 5gen22 (`baseTrend`, construction morceau-par-morceau) introduit assez
- * souvent son propre point critique "organique" dans la zone de transition entre 2 gabarits
- * différents, invisible/sans conséquence pour 5gen22 (qui ne teste jamais l'intérieur d'un morceau,
- * "cosmétique et libre" par design) mais qui DOIT être pris en compte ici, où le nombre
- * d'extrema/PI doit rester exactement ce qui est réellement affiché. Le générateur ne les filtre
- * JAMAIS : ils sont intégrés à la vérité terrain comme n'importe quel autre point trouvé par
- * balayage — voir l'en-tête de `generateurs5e/lectureGraphiqueDerivees/courbeNumerique.ts` pour le
- * détail de l'investigation et le paramètre ajusté en conséquence (ALPHA_BLEND_DERIVEES).
+ * **Refonte (audit 5e ch. 5, lot D)** : l'ancienne courbe « fond + bosses » (gaussiennes, tanh)
+ * changeait les limites en ±∞ (la courbe ne tendait pas vers l'asymptote tracée dans 43,6 % des
+ * tirages), produisait des fonctions constantes et des points « organiques » imprévisibles. La courbe
+ * est désormais construite MORCEAU PAR MORCEAU, entièrement maîtrisée :
+ *   - aux extrémités de chaque branche, un GABARIT exact du comportement annoncé (approche
+ *     exponentielle de l'asymptote horizontale ou oblique, divergence c/(x − a) près d'une asymptote
+ *     verticale, parabole quand il n'y a pas d'asymptote, petite quadratique vers un point isolé) ;
+ *   - entre les deux, une suite de segments d'Hermite cubiques passant par des POINTS CLÉS à
+ *     tangente horizontale (maximums, minimums, paliers), raccordés aux gabarits en valeur ET en pente.
+ * La vérité terrain (extremums, paliers, points d'inflexion) est connue par construction et
+ * re-contrôlée par balayage de f' et f'' (formules exactes de chaque morceau).
  */
 import type { ExerciceLectureGraphiqueLimites } from "./lectureGraphiqueLimites.types";
 
-export interface BumpExtremumDerivees {
-  positionNominale: number;
-  /** Signé — >0 produit un MAX local, <0 un MIN local (vérifié empiriquement, jamais supposé par
-   * intuition — voir `courbeNumerique.test.ts`). Magnitude dans [2,4]. */
-  amplitude: number;
-  /** Dans [0.7,0.9]. */
-  largeur: number;
-}
-
-export interface BumpInflexionDerivees {
-  positionNominale: number;
-  /** Signé — le signe ne change que l'orientation visuelle locale (∪→∩ ou l'inverse) autour du
-   * point, jamais la NATURE (toujours un vrai point d'inflexion : la dérivée de tanh, sech², ne
-   * s'annule jamais). Magnitude dans [1.5,2.5]. */
-  amplitude: number;
-  /** Dans [0.6,0.8]. */
-  largeur: number;
-}
+/** Un morceau de courbe, défini sur [x0 ; x1] (x0 < x1). Les formules sont aussi valables au-delà
+ * (prolongement utilisé pour les représentants de zones des tableaux de signes). */
+export type MorceauCourbeDerivees =
+  /** Hermite cubique : valeurs y0/y1 et pentes s0/s1 aux bornes. */
+  | { kind: "hermite"; x0: number; x1: number; y0: number; y1: number; s0: number; s1: number }
+  /** pente·x + ordonnee + c·e^{k(x − xRef)} — approche d'une asymptote horizontale (pente = 0) ou
+   * oblique ; k > 0 à gauche (le terme s'efface en −∞), k < 0 à droite. */
+  | { kind: "expo"; x0: number; x1: number; pente: number; ordonnee: number; c: number; k: number; xRef: number }
+  /** coef/(x − a) — divergence près d'une asymptote verticale x = a. */
+  | { kind: "divergence"; x0: number; x1: number; a: number; coef: number }
+  /** coef·(x − sommet)² + ordonnee — branche infinie sans asymptote (sommet hors du morceau). */
+  | { kind: "parabole"; x0: number; x1: number; coef: number; sommet: number; ordonnee: number }
+  /** v + m(x − a) + b(x − a)² — branche qui aboutit au point isolé (a ; v). */
+  | { kind: "quadratique"; x0: number; x1: number; a: number; v: number; m: number; b: number };
 
 export interface ExtremumLectureGraphiqueDerivees {
-  /** Position RÉELLE, trouvée par balayage numérique — jamais la position nominale d'un bump. */
   position: number;
-  /** f(position), RÉELLE (évaluée sur la courbe complète, base + tous les bumps). */
   valeur: number;
   classification: "max" | "min";
 }
 
+/** Point où f' s'annule SANS changer de signe (tangente horizontale, ni maximum ni minimum) — c'est
+ * aussi un point d'inflexion. */
+export interface PalierLectureGraphiqueDerivees {
+  position: number;
+  valeur: number;
+}
+
 export interface InflexionLectureGraphiqueDerivees {
   position: number;
-  /** Toujours "pi" ici — contrairement à 5gen29, chaque point trouvé par balayage EST par
-   * construction un vrai changement de signe de f'', jamais un cas dégénéré à exclure. */
+  valeur: number;
   classification: "pi";
 }
 
 export interface ExerciceLectureGraphiqueDerivees {
-  /** Comportement aux bords (AV + limite à l'infini) — réutilise TEL QUEL le contrat de 5gen22,
-   * généré par `genererExerciceLectureGraphiqueLimites()` (Couche A ↔ Couche A). */
+  /** Comportement aux bords (AV + infini) — contrat de 5gen22, positions d'AV recadrées pour la
+   * fenêtre fixe de ce générateur. */
   asymptotique: ExerciceLectureGraphiqueLimites;
-  bumpsExtremum: BumpExtremumDerivees[];
-  bumpsInflexion: BumpInflexionDerivees[];
+  /** Fenêtre x FIXE du graphique. */
+  bornesX: [number, number];
+  /** Morceaux triés par x croissant ; jamais de morceau à cheval sur une asymptote verticale. */
+  morceaux: MorceauCourbeDerivees[];
   /** Vérité terrain — triée par position croissante. */
   extrema: ExtremumLectureGraphiqueDerivees[];
   /** Vérité terrain — triée par position croissante. */
+  paliers: PalierLectureGraphiqueDerivees[];
+  /** Vérité terrain (paliers compris) — triée par position croissante. */
   inflexions: InflexionLectureGraphiqueDerivees[];
 }
 

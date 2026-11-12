@@ -55,9 +55,16 @@ interface Props {
    * par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/invalidation avant de passer à
    * l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Bornes du domaine affichées aux deux extrémités de l'en-tête (LaTeX) — défaut −∞ / +∞.
+   * Ex. 5gen34 : domaine fermé [0 ; T], bornes « 0 » et « T ». Optionnel, rétrocompatible. */
+  bornes?: { gauche: string; droite: string };
+  /** Nom de la variable en tête de la première ligne — défaut « x » (5gen34 : « t »). */
+  variable?: string;
 }
 
-export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, attendu, tentativesUtilisees, tentativesMax, onValider, contenuAvantValider, validation }: Props) {
+const BORNES_PAR_DEFAUT = { gauche: "-\\infty", droite: "+\\infty" };
+
+export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, attendu, tentativesUtilisees, tentativesMax, onValider, contenuAvantValider, validation, bornes = BORNES_PAR_DEFAUT, variable = "x" }: Props) {
   const n = colonnes.length;
   const [signes, setSignes] = useState<(ValeurSigneTableau | null)[]>(() => Array(n).fill(null));
   const [ligne2, setLigne2] = useState<(ValeurLigne2Tableau | null)[]>(() => Array(n).fill(null));
@@ -101,9 +108,9 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
         <table className="grille-signes">
           <thead>
             <tr>
-              <th className="grille-signes-label">x</th>
+              <th className="grille-signes-label">{variable}</th>
               <th className="grille-signes-borne">
-                <Katex expression="-\infty" />
+                <Katex expression={bornes.gauche} />
               </th>
               {colonnes.map((col, j) => (
                 <th key={j} className={col.type === "zone" ? "grille-signes-zone" : "grille-signes-point"}>
@@ -111,7 +118,7 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
                 </th>
               ))}
               <th className="grille-signes-borne">
-                <Katex expression="+\infty" />
+                <Katex expression={bornes.droite} />
               </th>
             </tr>
           </thead>

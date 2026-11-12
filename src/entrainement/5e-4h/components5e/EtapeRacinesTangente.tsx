@@ -21,6 +21,10 @@ interface Props {
   /** Diagnostic PAR CHAMP — correct si la valeur saisie correspond à N'IMPORTE LAQUELLE des
    * racines attendues (ensemble, ordre indifférent — voir `verifierRacinesHorizontale`). */
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Contrôle de FORME avant soumission (saisie illisible, valeur arrondie, valeur répétée,
+   * solution manquante) : renvoie le message à afficher, et la tentative n'est PAS décomptée
+   * (audit 5e ch. 5, points 6, 32, 33). `null` = soumission normale. */
+  controlerSaisie?: (reponse: string[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -33,9 +37,10 @@ interface Props {
  * dynamiques : 1 champ → "x=" ; 2+ champs → "x_1=","x_2=",... Vérifiée comme un ENSEMBLE, ordre
  * indifférent (`verifierRacinesHorizontale`, longueur mismatch déjà gérée génériquement). Calculatrice
  * PRÉSENTE (résolution/vérification numérique). */
-export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controlerSaisie, validation }: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [avertissement, setAvertissement] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.length > 0 && valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -56,6 +61,9 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
   }
   function valider() {
     if (!complet) return;
+    const message = controlerSaisie ? controlerSaisie(valeurs) : null;
+    setAvertissement(message);
+    if (message) return;
     if (diagnostiquer) setDernierStatut(valeurs.map((v) => diagnostiquer(v)).find((s) => s !== "correct") ?? "correct");
     onValider(valeurs);
   }
@@ -72,7 +80,9 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
           </div>
         }
       />
-      <p className="prompt-text">{question.texteAvant}</p>
+      <p className="prompt-text">
+        {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
+      </p>
       {valeurs.map((v, i) => (
         <div key={i} className="field-row">
           <label className="field-label field-label-minuscule">
@@ -98,7 +108,15 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("resoudre")}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1("resoudre", exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 && (
             <>
               <p>{aide2.texte}</p>
@@ -113,7 +131,12 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {avertissement && (
+          <p className="alert-error" role="alert">
+            {avertissement}
+          </p>
+        )}
+        {montrerErreurs && !avertissement && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

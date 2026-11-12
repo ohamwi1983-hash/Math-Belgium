@@ -10,15 +10,64 @@
  * contrairement à `verificationFonctionDerivee.ts` (5gen27) qui doit gérer des familles bien plus
  * variées : ici c'est un simple polynôme déjà développé, la formule fermée est directe.
  *
- * Réutilise DIRECTEMENT `diagnostiquerNombre` (5gen21, Couche B↔B) pour tout champ "nombre exact"
- * — même patron que `verificationDefinitionDerivee.ts` (5gen26).
+ * Tout champ numérique est comparé EXACTEMENT (`diagnostiquerNombre` local, 1e-6) — audit 5e ch. 5,
+ * décision I : l'ancienne tolérance 0,01 de 5gen21 acceptait « 4,47 » pour 2√5 à l'écran f(a), puis
+ * l'équation de tangente arrondie était refusée (1e-3).
  */
 import type { ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne } from "../core5e/tangentes.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerNombre } from "./verificationAsymptoteOblique";
 
-export { diagnostiquerNombre };
+// ============================================================================
+// Valeurs EXACTES (audit 5e ch. 5, décision I) : f(a), f'(a), racines, coordonnées et équations
+// sont comparées à 1e-6 près — une valeur approchée (« 4,47 » pour 2√5) n'est plus acceptée à un
+// écran puis refusée au suivant. Une valeur approchée PROCHE est signalée par un message dédié
+// (`estValeurApprochee`), sans consommer de tentative.
+// ============================================================================
+
+const TOLERANCE_EXACTE = 1e-6;
+
+function egalExact(valeur: number, cible: number): boolean {
+  return Math.abs(valeur - cible) <= TOLERANCE_EXACTE * Math.max(1, Math.abs(cible));
+}
+
+function normaliserSignes(texte: string): string {
+  return texte.replace(/[\u2212\u2013\u2014]/g, "-");
+}
+
+/** Nombre EXACT (√, fractions, « − », virgule acceptés par `evaluerExpressionGenerale`). */
+export function diagnostiquerNombre(texte: string, cible: number): StatutVerification {
+  try {
+    const valeur = evaluerExpressionGenerale(normaliserSignes(texte), 0);
+    if (!Number.isFinite(valeur)) return "parse_error";
+    return egalExact(valeur, cible) ? "correct" : "not_equivalent";
+  } catch {
+    return "parse_error";
+  }
+}
+
+/** Vrai si la saisie est lisible, FAUSSE, mais à moins de 1 % (ou 0,02) de la cible : c'est une
+ * valeur arrondie alors qu'une valeur exacte est demandée. */
+export function estValeurApprochee(texte: string, cible: number): boolean {
+  try {
+    const valeur = evaluerExpressionGenerale(normaliserSignes(texte), 0);
+    if (!Number.isFinite(valeur) || egalExact(valeur, cible)) return false;
+    return Math.abs(valeur - cible) <= Math.max(0.02, 0.01 * Math.abs(cible));
+  } catch {
+    return false;
+  }
+}
+
+/** Préfixe recopié depuis l'étiquette ou la consigne (« y = … », « t = … », « t ≡ … ») — retiré
+ * avant l'évaluation : c'est la même réponse (audit 5e ch. 5, point 6). */
+export function retirerPrefixeTangente(texte: string): string {
+  return normaliserSignes(texte)
+    .trim()
+    .replace(/^t\s*_?\s*(\{[^}]*\}|\([^)]*\))?\s*(≡|=)\s*/i, "")
+    .replace(/^y\s*=\s*/i, "")
+    .trim();
+}
+
 
 // ============================================================================
 // Réplique locale de la Couche A — jamais importée.
@@ -67,16 +116,37 @@ export function deriveeFDoubleTangence(exercice: ExerciceTangenteDoubleTangence,
 
 const POINTS_ECHANTILLON = [0, 1, 2, -1, 3, -2];
 
-function diagnostiquerExpressionEnX(texte: string, cible: (x: number) => number): StatutVerification {
+function diagnostiquerExpressionEnX(texteBrut: string, cible: (x: number) => number): StatutVerification {
+  const texte = retirerPrefixeTangente(texteBrut);
+  if (texte === "") return "parse_error";
   try {
     for (const x of POINTS_ECHANTILLON) {
       const valeurEntree = evaluerExpressionGenerale(texte, x);
       if (!Number.isFinite(valeurEntree)) return "parse_error";
-      if (Math.abs(valeurEntree - cible(x)) > 1e-3) return "not_equivalent";
+      if (!egalExact(valeurEntree, cible(x))) return "not_equivalent";
     }
     return "correct";
   } catch {
     return "parse_error";
+  }
+}
+
+/** Même idée que `estValeurApprochee`, pour une équation de droite : lisible, fausse, mais proche
+ * en chaque point d'échantillon (pente/ordonnée arrondies). */
+function estExpressionApprochee(texteBrut: string, cible: (x: number) => number): boolean {
+  const texte = retirerPrefixeTangente(texteBrut);
+  try {
+    let exacte = true;
+    for (const x of POINTS_ECHANTILLON) {
+      const valeur = evaluerExpressionGenerale(texte, x);
+      const c = cible(x);
+      if (!Number.isFinite(valeur)) return false;
+      if (!egalExact(valeur, c)) exacte = false;
+      if (Math.abs(valeur - c) > Math.max(0.05, 0.01 * Math.abs(c))) return false;
+    }
+    return !exacte;
+  } catch {
+    return false;
   }
 }
 
@@ -93,11 +163,24 @@ export function diagnostiquerFPrimeAPointDonne(texte: string, exercice: Exercice
   return diagnostiquerNombre(texte, deriveeFPointDonne(exercice, exercice.a));
 }
 
-export function diagnostiquerEquationTangentePointDonne(texte: string, exercice: ExerciceTangentePointDonne): StatutVerification {
+function cibleTangentePointDonne(exercice: ExerciceTangentePointDonne): (x: number) => number {
   const a = exercice.a;
   const fA = valeurFPointDonne(exercice, a);
   const fPrimeA = deriveeFPointDonne(exercice, a);
-  return diagnostiquerExpressionEnX(texte, (x) => fPrimeA * (x - a) + fA);
+  return (x) => fA + fPrimeA * (x - a);
+}
+
+export function diagnostiquerEquationTangentePointDonne(texte: string, exercice: ExerciceTangentePointDonne): StatutVerification {
+  return diagnostiquerExpressionEnX(texte, cibleTangentePointDonne(exercice));
+}
+
+export function equationTangentePointDonneApprochee(texte: string, exercice: ExerciceTangentePointDonne): boolean {
+  return estExpressionApprochee(texte, cibleTangentePointDonne(exercice));
+}
+
+/** Écran "substituer" : f(a) ou f'(a) saisie comme une valeur arrondie. */
+export function substitutionApprochee(reponse: { fA: string; fPrimeA: string }, exercice: ExerciceTangentePointDonne): boolean {
+  return estValeurApprochee(reponse.fA, valeurFPointDonne(exercice, exercice.a)) || estValeurApprochee(reponse.fPrimeA, deriveeFPointDonne(exercice, exercice.a));
 }
 
 // ============================================================================
@@ -123,6 +206,30 @@ export function verifierRacinesHorizontale(reponses: string[], exercice: Exercic
   const direct = diagnostiquerNombre(reponses[0], racines[0]) === "correct" && diagnostiquerNombre(reponses[1], racines[1]) === "correct";
   if (direct) return true;
   return diagnostiquerNombre(reponses[0], racines[1]) === "correct" && diagnostiquerNombre(reponses[1], racines[0]) === "correct";
+}
+
+/** Problème de FORME d'une liste de solutions, signalé sans consommer de tentative (audit 5e
+ * ch. 5, point 33) : « doublon » (la même valeur deux fois — une racine double ne s'écrit qu'une
+ * fois), « incomplet » (toutes les valeurs saisies sont justes mais il en manque). `null` = la
+ * saisie est soumise normalement. */
+export type ProblemeListe = "doublon" | "incomplet" | null;
+
+function valeurLisible(texte: string): number | null {
+  try {
+    const v = evaluerExpressionGenerale(normaliserSignes(texte), 0);
+    return Number.isFinite(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function problemeListeRacines(reponses: string[], exercice: ExerciceTangenteHorizontale): ProblemeListe {
+  const valeurs = reponses.map(valeurLisible);
+  if (valeurs.some((v) => v === null)) return null;
+  const nums = valeurs as number[];
+  for (let i = 0; i < nums.length; i++) for (let j = i + 1; j < nums.length; j++) if (egalExact(nums[i], nums[j])) return "doublon";
+  const toutesJustes = nums.every((v) => exercice.racines.some((r) => egalExact(v, r)));
+  return toutesJustes && nums.length < exercice.racines.length ? "incomplet" : null;
 }
 
 /** Point saisi comme 2 CHAMPS SÉPARÉS (x, y côte à côte) — convention établie sur 5gen24
@@ -163,6 +270,22 @@ function pointCorrespond(reponse: PointSaisi, cible: { x: number; y: number }): 
   return diagnostiquerNombre(reponse.x, cible.x) === "correct" && diagnostiquerNombre(reponse.y, cible.y) === "correct";
 }
 
+export function problemeListePoints(reponses: PointSaisi[], exercice: ExerciceTangenteHorizontale): ProblemeListe {
+  const xs = reponses.map((p) => valeurLisible(p.x));
+  const ys = reponses.map((p) => valeurLisible(p.y));
+  if (xs.some((v) => v === null) || ys.some((v) => v === null)) return null;
+  for (let i = 0; i < xs.length; i++) for (let j = i + 1; j < xs.length; j++) if (egalExact(xs[i] as number, xs[j] as number) && egalExact(ys[i] as number, ys[j] as number)) return "doublon";
+  const cibles = pointsCiblesHorizontale(exercice);
+  const tousJustes = reponses.every((p) => cibles.some((c) => pointCorrespond(p, c)));
+  return tousJustes && reponses.length < cibles.length ? "incomplet" : null;
+}
+
+/** Valeur arrondie saisie là où une valeur exacte est demandée (x ou y d'un point). */
+export function pointsApproches(reponses: PointSaisi[], exercice: ExerciceTangenteHorizontale): boolean {
+  const cibles = pointsCiblesHorizontale(exercice);
+  return reponses.some((p) => cibles.some((c) => estValeurApprochee(p.x, c.x) || estValeurApprochee(p.y, c.y)));
+}
+
 export function verifierCoordonneesHorizontale(reponses: PointSaisi[], exercice: ExerciceTangenteHorizontale): boolean {
   const cibles = pointsCiblesHorizontale(exercice);
   if (reponses.length !== cibles.length) return false;
@@ -186,7 +309,7 @@ export function diagnostiquerEquationTangenteP(texte: string, exercice: Exercice
   const p = exercice.p;
   const fP = valeurFDoubleTangence(exercice, p);
   const fPrimeP = deriveeFDoubleTangence(exercice, p);
-  return diagnostiquerExpressionEnX(texte, (x) => fPrimeP * (x - p) + fP);
+  return diagnostiquerExpressionEnX(texte, (x) => fP + fPrimeP * (x - p));
 }
 
 export function diagnostiquerQ(texte: string, exercice: ExerciceTangenteDoubleTangence): StatutVerification {

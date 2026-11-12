@@ -173,27 +173,123 @@ function diagnostiquerExpressionEnU(texte: string, cibleEnU: (u: number) => numb
 // `ui5e/formatFonctionDerivee.ts`).
 // ============================================================================
 
+/** Cible d'une décomposition u·v ou u/v : facteurs de référence (à une constante multiplicative
+ * près — le coefficient peut être porté par u ou par v, audit 5c5a point 23, décision K) et
+ * opération qui doit redonner f. `refU` absent : u doit être une constante non nulle (lecture
+ * « quotient » de 1/trig² ou de k/(ax+b)ⁿ). */
 interface CibleUV {
-  cibleU: (x: number) => number;
-  cibleV: (x: number) => number;
+  refU: ((x: number) => number) | null;
+  refV: (x: number) => number;
+  operation: "produit" | "quotient";
   tolereEchange: boolean;
 }
 
 function cibleDecompositionUV(exercice: ExerciceFonctionDerivee): CibleUV | null {
-  if (exercice.famille === "produit") return { cibleU: (x) => valeurAtome(exercice.atome1, x), cibleV: (x) => valeurAtome(exercice.atome2, x), tolereEchange: true };
-  if (exercice.famille === "quotient" && !exercice.ambigu) return { cibleU: (x) => valeurAtome(exercice.atome1, x), cibleV: (x) => valeurAtome(exercice.atome2, x), tolereEchange: false };
+  if (exercice.famille === "produit") return { refU: (x) => valeurAtome(exercice.atome1, x), refV: (x) => valeurAtome(exercice.atome2, x), operation: "produit", tolereEchange: true };
+  if (exercice.famille === "quotient" && !exercice.ambigu) return { refU: (x) => valeurAtome(exercice.atome1, x), refV: (x) => valeurAtome(exercice.atome2, x), operation: "quotient", tolereEchange: false };
   if (exercice.famille === "quotient" && exercice.ambigu) {
     return {
-      cibleU: () => 1,
-      cibleV: (x) => {
+      refU: null,
+      refV: (x) => {
         const u = exercice.a * x + exercice.b;
         const t = exercice.trig === "sin" ? Math.sin(u) : Math.cos(u);
         return t * t;
       },
+      operation: "quotient",
       tolereEchange: false,
     };
   }
+  if (exercice.famille === "composee" && exercice.atome.noyau.type === "monome" && exercice.atome.noyau.exposant < 0) {
+    const { interieurA, interieurB } = exercice.atome;
+    const n = -exercice.atome.noyau.exposant;
+    return { refU: null, refV: (x) => Math.pow(interieurA * x + interieurB, n), operation: "quotient", tolereEchange: false };
+  }
   return null;
+}
+
+/** Valeurs de l'expression saisie aux points de `CANDIDATS_X` où la référence est exploitable —
+ * `null` si la saisie est illisible. */
+function echantillonner(texte: string, ref: (x: number) => number): { x: number; saisie: number; ref: number }[] | null {
+  const points: { x: number; saisie: number; ref: number }[] = [];
+  for (const x of CANDIDATS_X) {
+    let r: number;
+    try {
+      r = ref(x);
+    } catch {
+      continue;
+    }
+    if (!pointValide(r) || Math.abs(r) < 1e-9) continue;
+    let v: number;
+    try {
+      v = evaluerRadians(texte, x);
+    } catch {
+      return null;
+    }
+    if (!Number.isFinite(v)) return null;
+    points.push({ x, saisie: v, ref: r });
+  }
+  return points.length >= MIN_POINTS_VALIDES ? points : null;
+}
+
+/** La saisie est-elle `λ × ref` pour une constante λ ≠ 0 ? Renvoie λ, `null` sinon. */
+function facteurProportionnalite(texte: string, ref: (x: number) => number): number | null | "illisible" {
+  const points = echantillonner(texte, ref);
+  if (points === null) return "illisible";
+  const lambda = points[0].saisie / points[0].ref;
+  if (!Number.isFinite(lambda) || Math.abs(lambda) < 1e-9) return null;
+  const ok = points.every((p) => Math.abs(p.saisie - lambda * p.ref) <= Math.max(TOLERANCE, Math.abs(lambda * p.ref) * TOLERANCE));
+  return ok ? lambda : null;
+}
+
+/** Constante non nulle (u d'une lecture « numérateur constant ») : renvoie sa valeur. */
+function valeurConstante(texte: string): number | null | "illisible" {
+  return facteurProportionnalite(texte, () => 1);
+}
+
+type StatutChampUV = StatutVerification;
+
+/** Statut d'un champ seul : facteur de la bonne forme (à une constante près). */
+function statutFacteur(texte: string, ref: ((x: number) => number) | null): StatutChampUV {
+  const lambda = ref === null ? valeurConstante(texte) : facteurProportionnalite(texte, ref);
+  if (lambda === "illisible") return "parse_error";
+  return lambda === null ? "not_equivalent" : "correct";
+}
+
+/** (u, v) donne-t-il f, avec u ∝ refU et v ∝ refV ? */
+function paireValide(u: string, v: string, refU: ((x: number) => number) | null, refV: (x: number) => number, operation: "produit" | "quotient"): boolean {
+  const lu = refU === null ? valeurConstante(u) : facteurProportionnalite(u, refU);
+  const lv = facteurProportionnalite(v, refV);
+  if (typeof lu !== "number" || typeof lv !== "number") return false;
+  // u·v = (λu·refU)(λv·refV) = λu·λv·f ; u/v = (λu/λv)·f (refU absent : refU ≡ 1, f = 1/refV × k).
+  if (operation === "produit") return Math.abs(lu * lv - 1) < 1e-6;
+  return true; // la cohérence du coefficient est vérifiée par `quotientRedonneF`.
+}
+
+function quotientRedonneF(u: string, v: string, exercice: ExerciceFonctionDerivee): boolean {
+  try {
+    let n = 0;
+    for (const x of CANDIDATS_X) {
+      const f = valeurFonction(exercice, x);
+      if (!pointValide(f)) continue;
+      const q = evaluerRadians(u, x) / evaluerRadians(v, x);
+      if (!Number.isFinite(q)) continue;
+      if (Math.abs(q - f) > Math.max(TOLERANCE, Math.abs(f) * TOLERANCE)) return false;
+      n++;
+    }
+    return n >= MIN_POINTS_VALIDES;
+  } catch {
+    return false;
+  }
+}
+
+/** Décomposition u/v ou u·v valable : chaque facteur a la bonne forme (constante multiplicative
+ * libre) et l'ensemble redonne exactement f. */
+function decompositionUVValide(u: string, v: string, exercice: ExerciceFonctionDerivee, cible: CibleUV): boolean {
+  if (cible.operation === "produit") {
+    if (cible.refU === null) return false;
+    return paireValide(u, v, cible.refU, cible.refV, "produit") || (cible.tolereEchange && paireValide(u, v, cible.refV, cible.refU, "produit"));
+  }
+  return paireValide(u, v, cible.refU, cible.refV, "quotient") && quotientRedonneF(u, v, exercice);
 }
 
 interface CibleComposee {
@@ -221,22 +317,41 @@ function cibleDecompositionComposee(exercice: ExerciceFonctionDerivee, typeReten
 // Diagnostics exposés — par champ (UI, surlignage rouge) et combinés (moteur, notation).
 // ============================================================================
 
+/** Statuts des deux champs u et v, pour le surlignage : les deux sont justes si la paire est
+ * valable ; sinon chaque champ est jugé sur sa forme, et si les deux formes sont bonnes mais que
+ * leurs coefficients ne redonnent pas f, c'est v qui est marqué. */
+export function diagnostiquerChampsUV(reponse: { u: string; v: string }, exercice: ExerciceFonctionDerivee): { u: StatutVerification; v: StatutVerification } {
+  const cible = cibleDecompositionUV(exercice);
+  if (!cible) return { u: "parse_error", v: "parse_error" };
+  if (decompositionUVValide(reponse.u, reponse.v, exercice, cible)) return { u: "correct", v: "correct" };
+  let su = statutFacteur(reponse.u, cible.refU);
+  let sv = statutFacteur(reponse.v, cible.refV);
+  if (cible.tolereEchange && (su !== "correct" || sv !== "correct")) {
+    const su2 = statutFacteur(reponse.u, cible.refV);
+    const sv2 = statutFacteur(reponse.v, cible.refU);
+    if (su2 === "correct" && sv2 === "correct") {
+      su = su2;
+      sv = sv2;
+    }
+  }
+  if (su === "correct" && sv === "correct") sv = "not_equivalent";
+  return { u: su, v: sv };
+}
+
 export function diagnostiquerChampU(texte: string, exercice: ExerciceFonctionDerivee): StatutVerification {
   const cible = cibleDecompositionUV(exercice);
   if (!cible) return "parse_error";
-  const direct = diagnostiquerExpressionEnX(texte, cible.cibleU);
+  const direct = statutFacteur(texte, cible.refU);
   if (direct === "correct" || !cible.tolereEchange) return direct;
-  const swap = diagnostiquerExpressionEnX(texte, cible.cibleV);
-  return swap === "correct" ? "correct" : direct;
+  return statutFacteur(texte, cible.refV) === "correct" ? "correct" : direct;
 }
 
 export function diagnostiquerChampV(texte: string, exercice: ExerciceFonctionDerivee): StatutVerification {
   const cible = cibleDecompositionUV(exercice);
   if (!cible) return "parse_error";
-  const direct = diagnostiquerExpressionEnX(texte, cible.cibleV);
-  if (direct === "correct" || !cible.tolereEchange) return direct;
-  const swap = diagnostiquerExpressionEnX(texte, cible.cibleU);
-  return swap === "correct" ? "correct" : direct;
+  const direct = statutFacteur(texte, cible.refV);
+  if (direct === "correct" || !cible.tolereEchange || cible.refU === null) return direct;
+  return statutFacteur(texte, cible.refU) === "correct" ? "correct" : direct;
 }
 
 export function diagnostiquerChampInterieur(texte: string, exercice: ExerciceFonctionDerivee, typeRetenu: TypeDerivee): StatutVerification {
@@ -251,15 +366,13 @@ export function diagnostiquerChampExterieur(texte: string, exercice: ExerciceFon
   return diagnostiquerExpressionEnU(texte, cible.cibleExterieur);
 }
 
-/** Vérification combinée u+v — true ssi (u,v) correspond dans l'ordre, OU (si `tolereEchange`)
- * dans l'ordre échangé. */
+/** Vérification combinée u+v — vraie ssi chaque facteur a la bonne forme (coefficient porté par
+ * u ou par v, au choix de l'élève), l'ensemble redonnant exactement f ; ordre libre pour un
+ * produit, imposé pour un quotient. */
 export function verifierDecompositionUV(reponse: { u: string; v: string }, exercice: ExerciceFonctionDerivee): boolean {
   const cible = cibleDecompositionUV(exercice);
   if (!cible) return false;
-  const direct = diagnostiquerExpressionEnX(reponse.u, cible.cibleU) === "correct" && diagnostiquerExpressionEnX(reponse.v, cible.cibleV) === "correct";
-  if (direct) return true;
-  if (!cible.tolereEchange) return false;
-  return diagnostiquerExpressionEnX(reponse.u, cible.cibleV) === "correct" && diagnostiquerExpressionEnX(reponse.v, cible.cibleU) === "correct";
+  return decompositionUVValide(reponse.u, reponse.v, exercice, cible);
 }
 
 export function verifierDecompositionComposee(reponse: { interieur: string; exterieur: string }, exercice: ExerciceFonctionDerivee, typeRetenu: TypeDerivee): boolean {

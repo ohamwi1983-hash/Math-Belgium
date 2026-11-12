@@ -37,7 +37,8 @@ function plage(min: number, max: number): number[] {
 export function genererAffine(): ExerciceDefinitionDeriveeAffine {
   const m = entierNonNul(4);
   const p = entierAleatoire(-5, 5);
-  const a = tirerUn(plage(-5, 5));
+  // a = 0 exclu (audit 5c5a, point 17) : « f(0 + h) » n'exerce pas la substitution.
+  const a = tirerUn(plage(-5, 5).filter((v) => v !== 0));
   return { famille: "affine", m, p, a };
 }
 
@@ -48,7 +49,8 @@ export function genererAffine(): ExerciceDefinitionDeriveeAffine {
 export function genererQuadratique(): ExerciceDefinitionDeriveeQuadratique {
   const m = entierNonNul(3);
   const p = entierAleatoire(-5, 5);
-  const a = tirerUn(plage(-4, 4));
+  // a = 0 exclu : f'(0) = 0 sans aucun calcul (audit 5c5a, point 17).
+  const a = tirerUn(plage(-4, 4).filter((v) => v !== 0));
   return { famille: "quadratique", m, p, a };
 }
 
@@ -71,9 +73,12 @@ export function genererRationnelleSimple(): ExerciceDefinitionDeriveeRationnelle
 
 export function genererRationnelleLineaire(): ExerciceDefinitionDeriveeRationnelleLineaire {
   const m = entierNonNul(4);
-  const p = entierAleatoire(-5, 5);
   const q = entierAleatoire(-4, 4);
-  const candidatsA = [q - 3, q - 2, q - 1, q + 1, q + 2, q + 3];
+  // mq + p ≠ 0 : sinon f(x) = (mx + p)/(x − q) vaut m partout (fonction constante, f' = 0 —
+  // audit 5c5a, point 8).
+  let p = entierAleatoire(-5, 5);
+  while (m * q + p === 0) p = entierAleatoire(-5, 5);
+  const candidatsA = [q - 3, q - 2, q - 1, q + 1, q + 2, q + 3].filter((v) => v !== 0);
   const a = tirerUn(candidatsA);
   return { famille: "rationnelleLineaire", m, p, q, a };
 }

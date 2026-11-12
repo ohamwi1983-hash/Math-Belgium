@@ -1,170 +1,172 @@
 /**
- * Couche présentation (5e) — consignes/libellés/formatage pour 5gen30 ("Lecture graphique —
- * dérivées et applications"). Pas de "bloc de données" KaTeX classique — la donnée EST le
- * graphique (`LectureGraphiqueDeriveesGraph`), affiché en tête de CHAQUE écran.
+ * Couche présentation (5e) — consignes, libellés et formatage pour 5gen30 ("Lecture graphique —
+ * dérivées et applications"). La donnée EST le graphique (`LectureGraphiqueDeriveesGraph`), affiché
+ * en tête de chaque écran.
  */
-import type { ExerciceLectureGraphiqueDerivees, ExtremumLectureGraphiqueDerivees, InflexionLectureGraphiqueDerivees } from "../core5e/lectureGraphiqueDerivees.types";
+import type { ExerciceLectureGraphiqueDerivees } from "../core5e/lectureGraphiqueDerivees.types";
 import type { EcranLectureGraphiqueDerivees } from "../moteur5e/typesLectureGraphiqueDerivees";
-import { ordreEcransLectureGraphiqueDerivees } from "../moteur5e/typesLectureGraphiqueDerivees";
-import { tableauFPrimeAttendu, tableauFSecondeAttendu, TOLERANCE_POSITION_INFLEXION, TOLERANCE_VALEUR_EXTREMUM } from "../moteur5e/verificationLectureGraphiqueDerivees";
+import { ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES, ecranSansObjet } from "../moteur5e/typesLectureGraphiqueDerivees";
+import type { CibleAsymptote, SlotAsymptote } from "../moteur5e/typesLectureGraphiqueLimites";
 import { listeAsymptotes } from "../moteur5e/typesLectureGraphiqueLimites";
-import { formatCibleAsymptoteLatex, labelAsymptoteLatex } from "./formatLectureGraphiqueLimites";
-import { libelleLigne2Tableau } from "./formatEtudeLocale";
+import {
+  pointsTangenteHorizontale,
+  TOLERANCE_POSITION_INFLEXION,
+  TOLERANCE_POSITION_TANGENTE,
+  TOLERANCE_VALEUR_EXTREMUM,
+} from "../moteur5e/verificationLectureGraphiqueDerivees";
+import { labelAsymptoteLatex } from "./formatLectureGraphiqueLimites";
 
 export function consigneGenerale(): string {
-  return "Lis les informations directement sur le graphique — aucun calcul n'est nécessaire.";
+  return "Lis les informations directement sur le graphique de f : aucun calcul n'est nécessaire.";
 }
 
-export function questionFinale(exercice: ExerciceLectureGraphiqueDerivees): string {
-  const parties = ["les asymptotes"];
-  parties.push("les variations de f");
-  if (exercice.extrema.length > 0) parties.push("ses extrema");
-  parties.push("la concavité de f");
-  if (exercice.inflexions.length > 0) parties.push("ses points d'inflexion");
-  return `Objectif : identifier ${parties.join(", ")} à partir du graphique.`;
+/** Toujours la même phrase, quelle que soit la courbe (elle ne doit rien révéler). */
+export function questionFinale(_exercice?: ExerciceLectureGraphiqueDerivees): string {
+  return "Objectif : lire sur le graphique les asymptotes, les variations et les extremums de f, sa concavité et ses points d'inflexion.";
 }
 
 export const LIBELLE_ECRAN_LECTURE_GRAPHIQUE_DERIVEES: Record<EcranLectureGraphiqueDerivees, string> = {
   asymptotes: "Asymptotes",
+  zerosFPrime: "Tangentes horizontales",
   tableauFPrime: "Signe de f' et variations",
-  extremums: "Valeur des extrema",
+  extremums: "Valeur des extremums",
+  inflexions: "Points d'inflexion",
   tableauFSeconde: "Signe de f'' et concavité",
-  inflexions: "Abscisse des points d'inflexion",
 };
 
 export function consigneEcran(ecran: EcranLectureGraphiqueDerivees): string {
   switch (ecran) {
     case "asymptotes":
-      return "Donne l'équation de chaque asymptote présente sur le graphique.";
+      return "Nomme chaque asymptote du graphique (verticale, horizontale ou oblique) et donne son équation. S'il n'y en a aucune, coche « Aucune asymptote ».";
+    case "zerosFPrime":
+      return "Donne l'abscisse de chaque point où la tangente à la courbe est horizontale (f'(x) = 0). S'il n'y en a aucun, coche « Aucun point ».";
     case "tableauFPrime":
-      return "Complète le tableau de signes de f'(x), puis les variations de f qui en découlent — lis-les directement sur le graphique.";
+      return "Complète le tableau de signes de f'(x), puis les variations de f.";
     case "extremums":
-      return "Pour CHAQUE extremum repéré sur le graphique, lis sa valeur (ordonnée) le plus précisément possible.";
-    case "tableauFSeconde":
-      return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle — lis-la directement sur le graphique.";
+      return "Lis la valeur de f en chaque extremum.";
     case "inflexions":
-      return "Pour CHAQUE point d'inflexion repéré sur le graphique, lis son abscisse le plus précisément possible.";
+      return "Donne l'abscisse de chaque point d'inflexion de la courbe. S'il n'y en a aucun, coche « Aucun point ».";
+    case "tableauFSeconde":
+      return "Complète le tableau de signes de f''(x), puis la concavité de f.";
   }
 }
 
-/** Aide textuelle — UNIQUEMENT pour les écrans "tableauFPrime"/"tableauFSeconde" (repli textuel
- * documenté : le mécanisme de cellule active de `TableauEtudeLocaleBuilder` — générique, partagé
- * avec 5gen29 — n'expose aucun callback de focus, câbler un surlignage visuel dessus aurait exigé
- * de modifier ce composant partagé ; les écrans "asymptotes"/"extremums"/"inflexions" restent, eux,
- * en aide PUREMENT visuelle — surlignage du graphique, voir `zoneSurlignageEcran` ci-dessous — un
- * seul niveau, cohérent avec `NIVEAU_AIDE_MAX_LECTURE_GRAPHIQUE_DERIVEES=1`). */
-export function texteAideNiveau1(ecran: "tableauFPrime" | "tableauFSeconde"): string {
-  if (ecran === "tableauFPrime")
-    return "f' est positive là où la courbe MONTE (↗), négative là où elle DESCEND (↘) — un extremum est le point où la courbe change de sens.";
-  return "f'' est positive là où la courbe est concave vers le HAUT (∪, comme un bol), négative là où elle est concave vers le BAS (∩, comme une colline) — un point d'inflexion est où la concavité change.";
+/** Aide de niveau 1 — texte (les écrans « liste d'abscisses » n'ont pas d'aide visuelle : elle
+ * montrerait la réponse). */
+export function texteAideNiveau1(ecran: EcranLectureGraphiqueDerivees): string {
+  switch (ecran) {
+    case "asymptotes":
+      return "Les asymptotes sont tracées en pointillés. Une droite verticale a une équation x = …, une droite horizontale y = …, une droite oblique y = ax + b (lis deux de ses points pour trouver sa pente).";
+    case "zerosFPrime":
+      return "La tangente est horizontale au sommet d'une bosse, au fond d'un creux, et aussi là où la courbe s'aplatit un instant sans changer de sens (un palier).";
+    case "tableauFPrime":
+      return "f' est positive là où la courbe monte (↗), négative là où elle descend (↘). En un point où f' s'annule : maximum si la courbe passe de ↗ à ↘, minimum si elle passe de ↘ à ↗, ni l'un ni l'autre si elle garde le même sens.";
+    case "extremums":
+      return "La valeur d'un extremum est l'ordonnée du sommet (ou du fond) : lis-la sur l'axe vertical, à hauteur du point.";
+    case "inflexions":
+      return "Un point d'inflexion est un point où la courbe passe de ∪ (en forme de bol) à ∩ (en forme de colline), ou l'inverse. Entre une bosse et un creux voisins, il y en a toujours un.";
+    case "tableauFSeconde":
+      return "f'' est positive là où la courbe est tournée vers le haut (∪), négative là où elle est tournée vers le bas (∩). Chaque point d'inflexion sépare deux zones de signes contraires.";
+  }
 }
 
 // ============================================================================
-// Labels — extrema/inflexions, ordinaux (gauche→droite, jamais l'abscisse exacte : c'est
-// précisément ce que l'élève doit estimer visuellement, jamais une donnée fournie).
+// Nombres et libellés.
 // ============================================================================
 
-function ordinalFr(n: number): string {
-  return n === 1 ? "1er" : `${n}e`;
+/** Arrondi au dixième, virgule décimale, moins typographique (LaTeX). */
+export function formatNombreLatex(v: number): string {
+  const r = Math.round(v * 10) / 10;
+  const s = (Object.is(r, -0) ? 0 : r).toString().replace(".", "{,}");
+  return s;
 }
 
-export function labelsChampsExtremums(extrema: ExtremumLectureGraphiqueDerivees[]): string[] {
-  return extrema.map((_, i) => `y_{${ordinalFr(i + 1)}}=`);
+function formatNombreTexte(v: number): string {
+  return formatNombreLatex(v).replace("{,}", ",").replace("-", "−");
 }
-export function labelsChampsInflexions(inflexions: InflexionLectureGraphiqueDerivees[]): string[] {
-  return inflexions.map((_, i) => `x_{${ordinalFr(i + 1)}}=`);
+
+/** Équation d'asymptote (virgule décimale : pente ±0,5 possible). */
+export function formatCibleAsymptoteLatex(cible: CibleAsymptote): string {
+  if (cible.kind === "verticale") return formatNombreLatex(cible.x);
+  if (cible.kind === "horizontale") return formatNombreLatex(cible.y);
+  const p = cible.pente;
+  const terme = p === 1 ? "x" : p === -1 ? "-x" : `${formatNombreLatex(p)}x`;
+  const o = cible.ordonnee;
+  return o === 0 ? terme : `${terme}${o > 0 ? "+" : "-"}${formatNombreLatex(Math.abs(o))}`;
+}
+
+function equationsAsymptotesLatex(slots: SlotAsymptote[]): string[] {
+  return slots.map((s) => `${labelAsymptoteLatex(slots, s.id)}${formatCibleAsymptoteLatex(s.cible)}`);
+}
+
+/** Libellé du champ de valeur d'un extremum : « f(−2) ≈ » (la position est connue depuis le tableau). */
+export function labelsChampsExtremums(exercice: ExerciceLectureGraphiqueDerivees): string[] {
+  return exercice.extrema.map((e) => `f(${formatNombreLatex(e.position)})\\approx`);
 }
 
 export function precisionAnnonceeExtremum(): string {
-  return `(valeur approximative — toute lecture à environ ${TOLERANCE_VALEUR_EXTREMUM} près est acceptée)`;
+  return `Une lecture à ${formatNombreTexte(TOLERANCE_VALEUR_EXTREMUM)} près est acceptée.`;
 }
-export function precisionAnnonceeInflexion(): string {
-  return `(abscisse approximative — toute estimation à environ ${TOLERANCE_POSITION_INFLEXION} près est acceptée, une lecture précise de point d'inflexion étant intrinsèquement difficile)`;
-}
-
-// ============================================================================
-// Tableau étendu — en-têtes de colonnes ("racine" → position lue, pas de forme exacte puisque lue
-// sur un graphique ; "exclusion" → position de l'AV).
-// ============================================================================
-
-function formatNombreAxeLatex(v: number): string {
-  return `${Math.round(v * 10) / 10}`;
+export function precisionAnnoncee(ecran: "zerosFPrime" | "inflexions"): string {
+  const t = ecran === "zerosFPrime" ? TOLERANCE_POSITION_TANGENTE : TOLERANCE_POSITION_INFLEXION;
+  return `Une lecture à ${formatNombreTexte(t)} près est acceptée.`;
 }
 
+/** En-têtes des colonnes des tableaux : position de chaque point (déjà validée à l'écran précédent)
+ * ou de chaque AV. */
 export function formatEnteteColonnesTableauFPrime(exercice: ExerciceLectureGraphiqueDerivees, colonnes: { type: "zone" | "racine" | "exclusion"; index: number }[]): string[] {
+  const points = pointsTangenteHorizontale(exercice);
   return colonnes.map((col) => {
-    if (col.type === "racine") return formatNombreAxeLatex(exercice.extrema[col.index].position);
-    if (col.type === "exclusion") return formatNombreAxeLatex(exercice.asymptotique.vas[col.index].position);
+    if (col.type === "racine") return formatNombreLatex(points[col.index].position);
+    if (col.type === "exclusion") return formatNombreLatex(exercice.asymptotique.vas[col.index].position);
     return "";
   });
 }
 export function formatEnteteColonnesTableauFSeconde(exercice: ExerciceLectureGraphiqueDerivees, colonnes: { type: "zone" | "racine" | "exclusion"; index: number }[]): string[] {
   return colonnes.map((col) => {
-    if (col.type === "racine") return formatNombreAxeLatex(exercice.inflexions[col.index].position);
-    if (col.type === "exclusion") return formatNombreAxeLatex(exercice.asymptotique.vas[col.index].position);
+    if (col.type === "racine") return formatNombreLatex(exercice.inflexions[col.index].position);
+    if (col.type === "exclusion") return formatNombreLatex(exercice.asymptotique.vas[col.index].position);
     return "";
   });
 }
 
-// ============================================================================
-// Bloc "état actuel" — accumule les faits CONFIRMÉS des écrans déjà traversés pour CET exercice.
-// ============================================================================
-
-export function formatTermesEtatActuelLatex(exercice: ExerciceLectureGraphiqueDerivees, phase: EcranLectureGraphiqueDerivees): string[] | null {
-  const ordre = ordreEcransLectureGraphiqueDerivees(exercice);
-  const index = ordre.indexOf(phase);
-  if (index <= 0) return null;
-
-  const termes: string[] = [];
-  for (let i = 0; i < index; i++) {
-    switch (ordre[i]) {
-      case "asymptotes": {
-        const slots = listeAsymptotes(exercice.asymptotique);
-        termes.push(...slots.map((s) => `${labelAsymptoteLatex(slots, s.id)}${formatCibleAsymptoteLatex(s.cible)}`));
-        break;
-      }
-      case "tableauFPrime": {
-        const attendu = tableauFPrimeAttendu(exercice);
-        attendu.colonnes.forEach((col, j) => {
-          if (col.type === "racine") termes.push(`x=${formatNombreAxeLatex(exercice.extrema[col.index].position)} \\Rightarrow \\text{${libelleLigne2Tableau(attendu.ligne2[j])}}`);
-        });
-        break;
-      }
-      case "extremums":
-        termes.push(...exercice.extrema.map((e, k) => `y_{${ordinalFr(k + 1)}}=${formatNombreAxeLatex(e.valeur)}`));
-        break;
-      case "tableauFSeconde": {
-        const attendu = tableauFSecondeAttendu(exercice);
-        attendu.colonnes.forEach((col) => {
-          if (col.type === "racine") termes.push(`x=${formatNombreAxeLatex(exercice.inflexions[col.index].position)} \\Rightarrow \\text{PI}`);
-        });
-        break;
-      }
-      case "inflexions":
-        termes.push(...exercice.inflexions.map((p, k) => `x_{${ordinalFr(k + 1)}}=${formatNombreAxeLatex(p.position)}`));
-        break;
-    }
-  }
-  return termes.length === 0 ? null : termes;
-}
+const NATURE_TEXTE = { max: "maximum", min: "minimum", ni_lun_ni_lautre: "palier (ni max ni min)" } as const;
 
 // ============================================================================
-// Récapitulatif final — réponse ATTENDUE, par écran RÉELLEMENT traversé.
+// Réponse ATTENDUE d'un écran (validation, récapitulatif, corrigé papier).
 // ============================================================================
 
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceLectureGraphiqueDerivees, ecran: EcranLectureGraphiqueDerivees): string[] {
   switch (ecran) {
     case "asymptotes": {
       const slots = listeAsymptotes(exercice.asymptotique);
-      return slots.map((s) => `${labelAsymptoteLatex(slots, s.id)}${formatCibleAsymptoteLatex(s.cible)}`);
+      return slots.length === 0 ? ["\\text{aucune asymptote}"] : equationsAsymptotesLatex(slots);
     }
-    case "tableauFPrime":
-      return exercice.extrema.map((e, i) => `${ordinalFr(i + 1)}\\text{ extremum : }x\\approx${formatNombreAxeLatex(e.position)} \\Rightarrow \\text{${e.classification === "max" ? "MAX" : "min"}}`);
+    case "zerosFPrime": {
+      const points = pointsTangenteHorizontale(exercice);
+      return points.length === 0 ? ["\\text{aucun point}"] : [`x\\approx ${points.map((p) => formatNombreLatex(p.position)).join("\\ ;\\ ")}`];
+    }
+    case "tableauFPrime": {
+      const points = pointsTangenteHorizontale(exercice);
+      if (points.length === 0) return ["\\text{f' ne s'annule pas : f est monotone sur chaque intervalle}"];
+      return points.map((p) => `x\\approx ${formatNombreLatex(p.position)}\\ :\\ \\text{${NATURE_TEXTE[p.classification]}}`);
+    }
     case "extremums":
-      return exercice.extrema.map((e, i) => `y_{${ordinalFr(i + 1)}}\\approx${formatNombreAxeLatex(e.valeur)}`);
-    case "tableauFSeconde":
-      return exercice.inflexions.map((p, i) => `${ordinalFr(i + 1)}\\text{ PI : }x\\approx${formatNombreAxeLatex(p.position)}`);
+      return exercice.extrema.map((e) => `f(${formatNombreLatex(e.position)})\\approx ${formatNombreLatex(e.valeur)}\\ \\text{(${e.classification === "max" ? "maximum" : "minimum"})}`);
     case "inflexions":
-      return exercice.inflexions.map((p, i) => `x_{${ordinalFr(i + 1)}}\\approx${formatNombreAxeLatex(p.position)}`);
+      return exercice.inflexions.length === 0 ? ["\\text{aucun point d'inflexion}"] : [`x\\approx ${exercice.inflexions.map((p) => formatNombreLatex(p.position)).join("\\ ;\\ ")}`];
+    case "tableauFSeconde":
+      if (exercice.inflexions.length === 0) return ["\\text{f'' ne s'annule pas : la concavité ne change pas sur chaque intervalle}"];
+      return exercice.inflexions.map((p) => `x\\approx ${formatNombreLatex(p.position)}\\ :\\ \\text{point d'inflexion}`);
   }
+}
+
+/** « Ce qu'on sait déjà » : termes des écrans déjà parcourus avant `phase` (écrans sans objet exclus). */
+export function formatTermesParEcran(exercice: ExerciceLectureGraphiqueDerivees, phase: EcranLectureGraphiqueDerivees | "termine"): { ecran: EcranLectureGraphiqueDerivees; termes: string[] }[] {
+  const ordre = ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES;
+  const fin = phase === "termine" ? ordre.length : ordre.indexOf(phase);
+  return ordre
+    .slice(0, fin)
+    .filter((e) => !ecranSansObjet(exercice, e))
+    .map((ecran) => ({ ecran, termes: formatReponseAttenduePhaseLatex(exercice, ecran) }));
 }

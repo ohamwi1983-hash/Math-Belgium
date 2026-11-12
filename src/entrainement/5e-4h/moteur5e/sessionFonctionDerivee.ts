@@ -19,6 +19,9 @@ const POINTS_DE_BASE = 100;
 /** Convention STANDARD de la plateforme (2 niveaux d'aide sur tout écran). */
 export const NIVEAU_AIDE_MAX_FONCTION_DERIVEE = 2;
 
+/** Choix fermé à 4 boutons : une seule tentative. */
+export const TENTATIVES_RECONNAISSANCE = 1;
+
 export function niveauAideMaxFonctionDerivee(): number {
   return NIVEAU_AIDE_MAX_FONCTION_DERIVEE;
 }
@@ -95,8 +98,11 @@ function terminerEcranEtAvancer(
 export function soumettreReponseReconnaissance(etat: EtatSessionFonctionDerivee, choix: TypeDerivee): EtatSessionFonctionDerivee {
   if (etat.terminee || etat.phase !== "reconnaissance") throw new Error('soumettreReponseReconnaissance : la session n\'est pas à l\'écran "reconnaissance"');
   const exercice = etat.exerciceCourant;
+  // Une seule tentative : avec 4 boutons, plusieurs essais permettraient de trouver le type par
+  // élimination (audit 5c5a, point 26).
   const etapeCourante = soumettreEtapeTentatives(etat.etapeCourante, choix, {
     ...reglagesEtape(etat),
+    tentativesMax: TENTATIVES_RECONNAISSANCE,
     verifier: (c: TypeDerivee) => exercice.typesAcceptes.includes(c),
     revelerReponse: () => {},
   });

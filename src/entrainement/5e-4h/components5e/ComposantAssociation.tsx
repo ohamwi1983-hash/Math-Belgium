@@ -29,7 +29,8 @@ interface Props {
   /** Diagnostic PAR LIGNE — un booléen par élément numéroté, jamais un seul global. */
   diagnostiquer?: (choixParItem: ChoixLigne[]) => boolean[];
   texteAideNiveau1: string;
-  texteAideNiveau2?: string;
+  /** Phrase d'aide de niveau 2 et formule éventuelle, rendue à part (jamais de prose en KaTeX). */
+  aideNiveau2?: { texte: string; latex?: string };
   /** Option additionnelle ajoutée à CHAQUE menu déroulant, en plus des lettres — ex. "f' n'existe
    * pas ici" (5gen25, famille A avancée). Absente par défaut, comportement historique inchangé
    * pour toute réutilisation future de ce composant sans cette option. */
@@ -65,7 +66,7 @@ export function ComposantAssociation({
   onValider,
   diagnostiquer,
   texteAideNiveau1,
-  texteAideNiveau2,
+  aideNiveau2,
   libelleOptionSupplementaire,
   validation,
 }: Props) {
@@ -111,6 +112,7 @@ export function ComposantAssociation({
               className={`ce-select${correction && correction[i] === false ? " is-erronee" : ""}`}
               aria-label={`Lettre correspondant à l'élément ${i + 1}`}
               value={choix[i] ?? ""}
+              disabled={!!validation}
               onChange={(e) => modifier(i, e.target.value)}
             >
               <option value="" disabled>
@@ -129,7 +131,8 @@ export function ComposantAssociation({
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && texteAideNiveau2 && <Katex expression={texteAideNiveau2} block />}
+          {niveauAide >= 2 && aideNiveau2 && <p>{aideNiveau2.texte}</p>}
+          {niveauAide >= 2 && aideNiveau2?.latex && <Katex expression={aideNiveau2.latex} block />}
         </div>
       )}
       {!validation && (

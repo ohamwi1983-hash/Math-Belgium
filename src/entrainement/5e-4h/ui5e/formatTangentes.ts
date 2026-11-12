@@ -10,7 +10,7 @@
  * (`prompt5gen28variantesabc.md`). Aucune ligne "Objectif : ..." (redondante avec les
  * consignes/questions ci-dessous, supprimée partout).
  */
-import type { ExerciceTangente, ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne } from "../core5e/tangentes.types";
+import type { ExerciceTangente, ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne, ExerciceTangentePointDonneRadicale } from "../core5e/tangentes.types";
 import { deriveeFDoubleTangence, deriveeFPointDonne, valeurFDoubleTangence, valeurFHorizontale, valeurFPointDonne } from "../generateurs5e/tangentes/index";
 import { reduireFraction } from "../generateurs5e/limites/fraction";
 import type { EcranTangente } from "../moteur5e/typesTangentes";
@@ -140,11 +140,13 @@ export function formatTermesDonneesLatex(exercice: ExerciceTangente): string[] {
 export function consigneGenerale(exercice: ExerciceTangente): string {
   switch (exercice.variante) {
     case "pointDonne":
-      return `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x=${exercice.a}`;
+      return exercice.sousFamille === "radicale"
+        ? `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${exercice.a}. Donne des valeurs exactes (racines carrées acceptées).`
+        : `Détermine l'équation de la tangente à la courbe de f au point d'abscisse x = ${exercice.a}.`;
     case "horizontale":
-      return "Détermine le(s) point(s) où la tangente à la courbe de f est HORIZONTALE, puis donne les coordonnées du/des point(s) de tangence.";
+      return "Détermine les points de la courbe de f où la tangente est horizontale, puis donne leurs coordonnées.";
     case "doubleTangence":
-      return `La tangente t en x=${exercice.p} touche une SECONDE fois la courbe de f, en un point d'abscisse q à déterminer. Vérifie que ce deuxième point est une tangence, pas une simple intersection.`;
+      return `La tangente t à la courbe de f au point d'abscisse x = ${exercice.p} recoupe la courbe en un second point, d'abscisse q. Détermine q, puis la pente de la courbe en ce point : t y est-elle aussi tangente ?`;
   }
 }
 
@@ -155,12 +157,25 @@ export function consigneGenerale(exercice: ExerciceTangente): string {
 export const LIBELLE_ECRAN: Record<EcranTangente, string> = {
   substituer: "f(a) et f'(a)",
   tangente: "Équation de la tangente",
-  resoudre: "Résoudre f'(x)=0",
-  coordonnees: "Point(s) de tangence",
+  resoudre: "Résoudre f'(x) = 0",
+  coordonnees: "Points de tangence",
   tangenteEnP: "f'(p) et tangente en p",
   trouverQ: "Le second point q",
-  verifierPente: "Vérifier la pente en q",
+  verifierPente: "Pente en q",
 };
+
+/** Libellé d'écran avec les valeurs CONNUES substituées (« f(3) et f'(3) ») — fiches des puces et
+ * « Ce qu'on sait déjà » (audit 5e ch. 5, points 9–14). */
+export function libelleEcranTangente(exercice: ExerciceTangente, ecran: EcranTangente): string {
+  if (ecran === "substituer" && exercice.variante === "pointDonne") return `f(${nombreTexte(exercice.a)}) et f'(${nombreTexte(exercice.a)})`;
+  if (ecran === "tangenteEnP" && exercice.variante === "doubleTangence") return `f'(${nombreTexte(exercice.p)}) et tangente en x = ${nombreTexte(exercice.p)}`;
+  return LIBELLE_ECRAN[ecran];
+}
+
+/** Nombre en texte brut avec le « − » typographique. */
+function nombreTexte(n: number): string {
+  return n < 0 ? `−${Math.abs(n)}` : `${n}`;
+}
 
 // ============================================================================
 // Question spécifique par écran — texte + (pour "tangente"/"trouverQ") un fragment LaTeX central à
@@ -181,20 +196,25 @@ export interface QuestionSpecifique {
 export function questionSpecifiqueEcran(exercice: ExerciceTangente, ecran: EcranTangente): QuestionSpecifique {
   switch (ecran) {
     case "substituer": {
-      const a = (exercice as ExerciceTangentePointDonne).a;
-      return { texteAvant: `Calcule f(${a}), puis f'(${a}) où f(x) et f'(x) sont données ci-dessus.` };
+      const ex = exercice as ExerciceTangentePointDonne;
+      const a = ex.a;
+      return {
+        texteAvant: "Calcule",
+        latex: `f(${a}) \text{ puis } f'(${a})`,
+        texteApres: ex.sousFamille === "radicale" ? "à partir de f(x) et f'(x) données ci-dessus. Donne des valeurs exactes." : "à partir de f(x) et f'(x) données ci-dessus.",
+      };
     }
     case "tangente": {
       const a = (exercice as ExerciceTangentePointDonne).a;
-      return { texteAvant: "Donne l'équation de la tangente", latex: `t_{x=${a}}`, texteApres: "sous la forme y=mx+p" };
+      return { texteAvant: "Donne l'équation de la tangente", latex: `t_{x=${a}}`, texteApres: "(par exemple sous la forme y = mx + p)." };
     }
     case "resoudre":
-      return { texteAvant: "Résous f'(x)=0 et donne la/les solutions." };
+      return { texteAvant: "Résous l'équation", latex: "f'(x)=0", texteApres: "et donne chaque solution." };
     case "coordonnees":
-      return { texteAvant: "Pour chaque abscisse x trouvée, calcule l'ordonnée correspondante y=f(x) et donne le POINT COMPLET sous la forme (x;y)." };
+      return { texteAvant: "Pour chaque solution trouvée, calcule l'ordonnée", latex: "y=f(x)", texteApres: "et donne le point de tangence complet (x ; y)." };
     case "tangenteEnP": {
       const p = (exercice as ExerciceTangenteDoubleTangence).p;
-      return { texteAvant: `Calcule f'(${p}), puis écris l'équation de la tangente au point d'abscisse x=${p}.` };
+      return { texteAvant: "Calcule", latex: `f'(${p})`, texteApres: `puis écris l'équation de la tangente au point d'abscisse x = ${nombreTexte(p)}.` };
     }
     case "trouverQ": {
       const ex = exercice as ExerciceTangenteDoubleTangence;
@@ -202,12 +222,12 @@ export function questionSpecifiqueEcran(exercice: ExerciceTangente, ecran: Ecran
       return {
         texteAvant: "L'équation",
         latex: `f(x)=${rhs}`,
-        texteApres: `admet deux solutions dont une en x=${ex.p} et une autre en x=q, trouve q.`,
+        texteApres: `admet la solution x = ${nombreTexte(ex.p)} et une seconde solution x = q. Trouve q.`,
       };
     }
     case "verifierPente": {
       const ex = exercice as ExerciceTangenteDoubleTangence;
-      return { texteAvant: `Calcule f'(${ex.q}) pour confirmer une VRAIE double tangence (pas une simple intersection), cette pente doit être identique à f'(${ex.p}).` };
+      return { texteAvant: "Calcule la pente de la courbe au second point :", latex: `f'(${ex.q})` };
     }
   }
 }
@@ -238,22 +258,47 @@ export function labelFPrimeP(p: number): string {
 // Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse).
 // ============================================================================
 
-export function texteAideNiveau1(ecran: EcranTangente): string {
+/** Aide de niveau 1 — phrase terminée par « : » et formule en LaTeX à part (aucune formule écrite
+ * au clavier dans le texte, audit 5e ch. 5, points 9–14). Valeurs connues substituées. */
+export function texteAideNiveau1(ecran: EcranTangente, exercice?: ExerciceTangente): AideFragmentee {
+  const a = exercice?.variante === "pointDonne" ? exercice.a : null;
+  const p = exercice?.variante === "doubleTangence" ? exercice.p : null;
   switch (ecran) {
     case "substituer":
-      return "Remplace x PAR a dans f(x) pour obtenir f(a), puis x PAR a dans f'(x) (donnée) pour obtenir f'(a) — 2 substitutions indépendantes, pas de dérivation à faire ici.";
+      return {
+        texte: "Deux substitutions indépendantes, aucune dérivation à faire : remplace x par l'abscisse du point dans f(x), puis dans f'(x) donnée.",
+        latex: a !== null ? `f(${a}) \quad \text{et} \quad f'(${a})` : null,
+      };
     case "tangente":
-      return "y=f'(a)(x-a)+f(a) — distribue f'(a) sur (x-a) AVANT d'ajouter f(a), piège classique : une erreur de signe en distribuant si a ou f'(a) est négatif.";
+      return {
+        texte: "Applique la formule du cours, puis distribue la pente sur la parenthèse avant d'ajouter l'ordonnée (attention aux signes) :",
+        latex: a !== null ? `y=f(${a})+f'(${a})(${formatFacteurXMoinsQ(a)})` : "y=f(a)+f'(a)(x-a)",
+      };
     case "resoudre":
-      return "f'(x)=0 est une équation du second degré (ou plus simple) — pense à chercher TOUTES les solutions, il peut y en avoir une SEULE (racine double) ou DEUX.";
+      return {
+        texte: "La tangente est horizontale là où la pente est nulle. Cette équation du second degré peut avoir deux solutions, ou une seule (racine double) :",
+        latex: "f'(x)=0",
+      };
     case "coordonnees":
-      return "Piège fréquent : donner seulement l'abscisse trouvée à l'écran précédent. Un point de tangence a TOUJOURS 2 coordonnées — calcule aussi l'ordonnée y=f(x) pour chaque abscisse.";
+      return {
+        texte: "Piège fréquent : ne donner que l'abscisse. Un point de tangence a deux coordonnées ; pour chaque solution, calcule aussi :",
+        latex: "y=f(x)",
+      };
     case "tangenteEnP":
-      return "f(x) est déjà développé : dérive chaque terme séparément avec la règle de puissance (xⁿ)'=n·xⁿ⁻¹, additionne, puis substitue x=p pour obtenir f'(p).";
+      return {
+        texte: "f(x) est déjà développée : dérive chaque terme avec la règle de la puissance, puis remplace x par l'abscisse du point :",
+        latex: p !== null ? `(x^n)'=n\,x^{n-1} \quad\Rightarrow\quad f'(${p})` : "(x^n)'=n\,x^{n-1}",
+      };
     case "trouverQ":
-      return "f(x)-tangente(x) est un polynôme qui s'annule DEUX FOIS en x=p (racine double) — factorise-le pour repérer l'autre racine double, q.";
+      return {
+        texte: "La différence entre la courbe et la tangente a une racine double en x = p : elle est divisible par (x − p)². Divise, puis résous le quotient du second degré :",
+        latex: p !== null ? `f(x)-t(x)=(${formatFacteurXMoinsQ(p)})^2\cdot Q(x)` : "f(x)-t(x)=(x-p)^2\cdot Q(x)",
+      };
     case "verifierPente":
-      return "Ne conclus pas trop vite : un point d'intersection n'est pas forcément un point de TANGENCE. Calcule f'(q) et compare-le à f'(p) — l'égalité des deux pentes est ce qui confirme la double tangence.";
+      return {
+        texte: "Utilise la dérivée de f trouvée au premier écran et remplace x par q :",
+        latex: "f'(q)",
+      };
   }
 }
 
@@ -269,7 +314,7 @@ export function texteAideNiveau2(ecran: EcranTangente): AideFragmentee {
     case "substituer":
       return { texte: "Exemple :", latex: "f(x)=x^2+1,\\ a=2 \\;\\Rightarrow\\; f(2)=2^2+1=5. \\quad \\text{Si } f'(x)=2x \\text{ (donnée)}, \\ f'(2)=2\\cdot2=4" };
     case "tangente":
-      return { texte: "Exemple :", latex: "a=2,\\ f(a)=5,\\ f'(a)=4 \\;\\Rightarrow\\; y=4(x-2)+5=4x-8+5=4x-3" };
+      return { texte: "Exemple :", latex: "f(2)=5,\\ f'(2)=4 \\;\\Rightarrow\\; y=5+4(x-2)=5+4x-8=4x-3" };
     case "resoudre":
       return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1 \\quad \\text{(deux solutions)}" };
     case "coordonnees":
@@ -277,15 +322,15 @@ export function texteAideNiveau2(ecran: EcranTangente): AideFragmentee {
     case "tangenteEnP":
       return {
         texte: "Exemple :",
-        latex: "f(x)=x^4-4x^3+4x^2+x,\\ f'(x)=4x^3-12x^2+8x+1, \\text{ en } p=0: f'(0)=1,\\ f(0)=0 \\;\\Rightarrow\\; \\text{tangente } y=1\\cdot(x-0)+0=x",
+        latex: "f(x)=x^4-4x^3+4x^2+x \\;\\Rightarrow\\; f'(x)=4x^3-12x^2+8x+1 \\;\\Rightarrow\\; f'(0)=1,\\ f(0)=0 \\;\\Rightarrow\\; y=0+1\\cdot(x-0)=x",
       };
     case "trouverQ":
       return {
         texte: "Exemple :",
-        latex: "f(x)-x=x^4-4x^3+4x^2=x^2(x-2)^2 \\;\\Rightarrow\\; \\text{racine double en } x=0 \\text{ (connue, } p\\text{) et racine double en } x=2,\\ \\text{donc } q=2",
+        latex: "f(x)-x=x^4-4x^3+4x^2=x^2(x^2-4x+4)=x^2(x-2)^2 \\;\\Rightarrow\\; \\text{racine double } x=0 \\text{ (c'est } p\\text{) et racine double } x=2 \\text{, donc } q=2",
       };
     case "verifierPente":
-      return { texte: "Exemple : (calculé à l'écran précédent) — si f'(2) vaut aussi 1, la double tangence est confirmée :", latex: "f'(0)=1" };
+      return { texte: "Exemple :", latex: "f'(x)=4x^3-12x^2+8x+1 \\;\\Rightarrow\\; f'(2)=4\\cdot8-12\\cdot4+8\\cdot2+1=1" };
   }
 }
 
@@ -299,12 +344,15 @@ export function labelsChampsRacines(nb: number): string[] {
   return Array.from({ length: nb }, (_, i) => `x_${i + 1}=`);
 }
 
-const EXEMPLES_RACINES = [-1, 1, -2, 2, -3, 3];
+/** Exemples HORS de l'espace des tirages (racines entières) : jamais une vraie réponse. */
+const EXEMPLES_RACINES = ["1,5", "−2,5", "0,5", "−0,5"];
 
 export function placeholdersChampsRacines(nb: number): string[] {
-  if (nb <= 1) return ["ex : 2"];
-  return Array.from({ length: nb }, (_, i) => `ex : ${EXEMPLES_RACINES[i] ?? i + 1}`);
+  return Array.from({ length: Math.max(1, nb) }, (_, i) => `ex : ${EXEMPLES_RACINES[i % EXEMPLES_RACINES.length]}`);
 }
+
+/** Exemple du champ d'équation de tangente — pente 1,5 et ordonnée 0,5, jamais tirées. */
+export const PLACEHOLDER_EQUATION_TANGENTE = "ex : 1,5x + 0,5";
 
 /** "Point :" (1 seul point) ou "Point 1 :"/"Point 2 :"/... (plusieurs) — label texte SIMPLE
  * précédant les 2 champs x/y séparés d'une ligne (jamais de KaTeX, pas un fragment mathématique). */
@@ -339,11 +387,49 @@ function formatAdditionSigneeLatex(termeLatex: string): string {
   return termeLatex.startsWith("-") ? termeLatex : `+${termeLatex}`;
 }
 
+/** Droite y = m·x + p à coefficients ENTIERS, bien écrite : jamais « 1x », « −1x », « 0x », « + 0 »
+ * (audit 5e ch. 5, point 34). */
+function formatDroiteEntiereLatex(m: number, p: number): string {
+  let out = "";
+  if (m !== 0) out = m === 1 ? "x" : m === -1 ? "-x" : `${m}x`;
+  if (p !== 0 || out === "") out += out === "" ? `${p}` : p > 0 ? `+${p}` : `${p}`;
+  return `y=${out}`;
+}
+
+/** k·√r avec k = n/d réduit : « \sqrt{5} », « -3\sqrt{5} », « \dfrac{3\sqrt{5}}{10} ». */
+function formatMultipleRacineLatex(n: number, d: number, r: number): string {
+  if (n === 0) return "0";
+  const { num, den } = reduireFraction(n, d);
+  const signe = num < 0 ? "-" : "";
+  const absNum = Math.abs(num);
+  const racine = `\\sqrt{${r}}`;
+  const numerateur = absNum === 1 ? racine : `${absNum}${racine}`;
+  return den === 1 ? `${signe}${numerateur}` : `${signe}\\dfrac{${numerateur}}{${den}}`;
+}
+
+/** Tangente de la sous-famille radicale : forme du cours y = f(a) + f'(a)(x − a), puis forme
+ * développée y = mx + p à coefficients exacts rationalisés. Avec r = m·a + p (radicande en a) :
+ * pente = c·m/(2√r) = (c·m/(2r))·√r et ordonnée à l'origine = c(2r − m·a)/(2r)·√r. */
+function formatTangenteRadicaleLatex(exercice: ExerciceTangentePointDonneRadicale): string {
+  const { coeff, m, a } = exercice;
+  const r = m * a + exercice.p;
+  const fALatex = formatValeurRadicaleLatex(coeff, r);
+  const pentePointLatex = formatDeriveeRadicaleLatex(coeff, m, r);
+  const formeCours = a === 0 ? `y=${fALatex}${formatAdditionSigneeLatex(`${pentePointLatex}\\,x`)}` : `y=${fALatex}${formatAdditionSigneeLatex(`${pentePointLatex}(${formatFacteurXMoinsQ(a)})`)}`;
+  if (a === 0) return formeCours;
+  const pente = formatMultipleRacineLatex(coeff * m, 2 * r, r);
+  const ordonnee = formatMultipleRacineLatex(coeff * (2 * r - m * a), 2 * r, r);
+  const terme1 = pente.startsWith("-") ? `-${pente.slice(1)}\\,x` : `${pente}\\,x`;
+  const developpee = ordonnee === "0" ? terme1 : `${terme1}${formatAdditionSigneeLatex(ordonnee)}`;
+  return `${formeCours}=${developpee}`;
+}
+
 function formatTangenteConfirmeePointDonneLatex(exercice: ExerciceTangentePointDonne): string {
   const a = exercice.a;
-  const fALatex = formatFAConfirmeeLatex(exercice).replace(`f(${a})=`, "");
-  const fPrimeALatex = formatFPrimeAConfirmeeLatex(exercice).replace(`f'(${a})=`, "");
-  return `y=${fPrimeALatex}(${formatFacteurXMoinsQ(a)})${formatAdditionSigneeLatex(fALatex)}`;
+  if (exercice.sousFamille === "radicale") return formatTangenteRadicaleLatex(exercice);
+  const fA = valeurFPointDonne(exercice, a);
+  const fPrimeA = deriveeFPointDonne(exercice, a);
+  return formatDroiteEntiereLatex(fPrimeA, fA - fPrimeA * a);
 }
 
 function formatRacinesConfirmeesLatex(exercice: ExerciceTangenteHorizontale): string {
@@ -362,7 +448,7 @@ function formatTangenteConfirmeeDoubleTangenceLatex(exercice: ExerciceTangenteDo
   const p = exercice.p;
   const fP = valeurFDoubleTangence(exercice, p);
   const fPrimeP = deriveeFDoubleTangence(exercice, p);
-  return `y=${fPrimeP}(${formatFacteurXMoinsQ(p)})${formatAdditionSigneeLatex(`${fP}`)}`;
+  return formatDroiteEntiereLatex(fPrimeP, fP - fPrimeP * p);
 }
 
 function formatQConfirmeLatex(exercice: ExerciceTangenteDoubleTangence): string {
@@ -371,6 +457,12 @@ function formatQConfirmeLatex(exercice: ExerciceTangenteDoubleTangence): string 
 
 function formatFPrimeQConfirmeeLatex(exercice: ExerciceTangenteDoubleTangence): string {
   return `f'(${exercice.q})=${deriveeFDoubleTangence(exercice, exercice.q)}`;
+}
+
+/** Conclusion affichée APRÈS validation de l'écran « pente en q » (jamais annoncée dans la
+ * question — audit 5e ch. 5, décision B) : même pente qu'en p, donc t est aussi tangente en q. */
+function formatConclusionDoubleTangenceLatex(exercice: ExerciceTangenteDoubleTangence): string {
+  return `f'(${exercice.q})=f'(${exercice.p}) \\;\\Rightarrow\\; \\text{la droite } t \\text{ est aussi tangente en } x=${exercice.q} \\text{ (double tangence)}`;
 }
 
 // ============================================================================
@@ -392,7 +484,7 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceTangente, phase: E
   // doubleTangence : 3 écrans, accumulation progressive. "t_{x=p}\equiv..." cohérent avec le label
   // du champ d'équation sur l'écran "tangenteEnP" (jamais "\text{tangente : }...").
   const tangenteLatex = formatTangenteConfirmeeDoubleTangenceLatex(exercice);
-  const termes = [formatFPrimePConfirmeeLatex(exercice), `t_{x=${exercice.p}}\\equiv${rhsDeTangente(tangenteLatex)}`];
+  const termes = [formatFPrimePConfirmeeLatex(exercice), `t_{x=${exercice.p}}\\equiv ${rhsDeTangente(tangenteLatex)}`];
   if (index >= 2) termes.push(formatQConfirmeLatex(exercice));
   return termes;
 }
@@ -420,7 +512,9 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceTangente, ecra
     }
     case "trouverQ":
       return [formatQConfirmeLatex(exercice as ExerciceTangenteDoubleTangence)];
-    case "verifierPente":
-      return [formatFPrimeQConfirmeeLatex(exercice as ExerciceTangenteDoubleTangence)];
+    case "verifierPente": {
+      const ex = exercice as ExerciceTangenteDoubleTangence;
+      return [formatFPrimeQConfirmeeLatex(ex), formatConclusionDoubleTangenceLatex(ex)];
+    }
   }
 }

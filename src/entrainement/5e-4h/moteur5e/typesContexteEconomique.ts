@@ -19,6 +19,9 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 export type EcranContexteEconomiqueA = "coutMarginalDiscret" | "deriveeSymbolique" | "deriveeValeur" | "comparaisonEcart" | "extremum";
 
+/** "confirmationCoherence" n'est plus un écran (toujours « oui » par construction, audit 5e ch. 5,
+ * décision B) : l'identifiant reste dans le type pour l'ancien adaptateur papier, en attendant sa
+ * refonte. "extremum" désigne désormais le minimum économique (coût moyen ou marginal minimal). */
 export type EcranContexteEconomiqueB =
   | "recetteTotale"
   | "marginales"
@@ -41,7 +44,6 @@ const ORDRE_B: EcranContexteEconomiqueB[] = [
   "beneficeFormule",
   "beneficeDerivee",
   "tableauSigneBenefice",
-  "confirmationCoherence",
   "beneficeMaximum",
 ];
 const ORDRE_BONUS: EcranContexteEconomiqueBonus[] = ["poserEquationReduite", "iteration0", "iteration1", "iteration2", "iteration3", "racineApprochee"];

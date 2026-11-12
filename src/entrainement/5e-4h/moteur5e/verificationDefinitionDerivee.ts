@@ -116,3 +116,65 @@ export function diagnostiquerValeurFA(texte: string, exercice: ExerciceDefinitio
 export function diagnostiquerLimiteDerivee(texte: string, exercice: ExerciceDefinitionDerivee, a: number): StatutVerification {
   return diagnostiquerNombre(texte, valeurDeriveeExacte(exercice, a));
 }
+
+// ============================================================================
+// Contrôles de FORME (audit 5c5a, point 12, décision C) — appelés AVANT la validation par les
+// écrans : un message ciblé, sans consommer de tentative, quand l'expression recopiée de l'énoncé
+// (f(a+h) non développé, taux d'accroissement non simplifié) serait sinon acceptée par la seule
+// équivalence numérique.
+// ============================================================================
+
+/** Groupes parenthésés de premier niveau, avec ce qui les entoure — `null` si le parenthésage est
+ * déséquilibré (laissé à la vérification, qui renverra parse_error). */
+function groupesParentheses(texte: string): { profondeurMax: number; groupes: { avant: string; apres: string }[] } | null {
+  const t = texte.replace(/\s+/g, "");
+  let profondeur = 0;
+  let profondeurMax = 0;
+  let debut = -1;
+  const groupes: { avant: string; apres: string }[] = [];
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (c === "(") {
+      if (profondeur === 0) debut = i;
+      profondeur += 1;
+      profondeurMax = Math.max(profondeurMax, profondeur);
+    } else if (c === ")") {
+      profondeur -= 1;
+      if (profondeur < 0) return null;
+      if (profondeur === 0) groupes.push({ avant: t[debut - 1] ?? "", apres: t[i + 1] ?? "" });
+    }
+  }
+  return profondeur === 0 ? { profondeurMax, groupes } : null;
+}
+
+export const MESSAGE_FORME_DEVELOPPEMENT_POLYNOME = "Développe complètement f(a + h) : il ne doit plus rester de parenthèses.";
+export const MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE =
+  "Réduis f(a + h) : écris un seul numérateur et un seul dénominateur, chacun développé et réduit (sans parenthèses à l'intérieur).";
+export const MESSAGE_FORME_QUOTIENT =
+  "Simplifie encore le taux d'accroissement : il ne doit plus rester de facteur h à simplifier, l'expression doit pouvoir être calculée pour h = 0.";
+
+/** f(a+h) « développé » :
+ * - familles polynomiales : aucune parenthèse ;
+ * - familles rationnelles : au plus un niveau de parenthèses, chaque groupe étant un numérateur
+ *   (suivi de « / ») ou un dénominateur (précédé de « / »), éventuellement élevé au carré. */
+export function controlerFormeDeveloppement(texte: string, exercice: ExerciceDefinitionDerivee): string | null {
+  const analyse = groupesParentheses(texte);
+  if (analyse === null) return null;
+  if (exercice.famille === "affine" || exercice.famille === "quadratique") {
+    return analyse.profondeurMax === 0 ? null : MESSAGE_FORME_DEVELOPPEMENT_POLYNOME;
+  }
+  if (analyse.profondeurMax > 1) return MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE;
+  const groupesValides = analyse.groupes.every((g) => g.apres === "/" || g.avant === "/");
+  return groupesValides ? null : MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE;
+}
+
+/** Taux d'accroissement « simplifié » : plus de facteur h au dénominateur qui annulerait le
+ * quotient en h = 0 — l'expression saisie doit être calculable (finie) pour h = 0. */
+export function controlerFormeQuotient(texte: string): string | null {
+  try {
+    const v = evaluerExpressionGenerale(substituerHParX(texte), 0);
+    return Number.isFinite(v) ? null : MESSAGE_FORME_QUOTIENT;
+  } catch {
+    return null;
+  }
+}

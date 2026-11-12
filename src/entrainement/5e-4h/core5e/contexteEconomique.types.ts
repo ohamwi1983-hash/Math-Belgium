@@ -1,14 +1,17 @@
 /**
  * Couche core (5e) — contrat pour 5gen33 ("Contexte économique"), chapitre "Dérivées et
  * applications". 3 sous-générateurs STRUCTURELLEMENT DISJOINTS, jamais mélangés dans un même
- * exercice :
- *   - famille "A" — coût marginal : approximation discrète vs dérivée, coût total polynomial
- *     degré 2 OU 3, sous-cas "extremum existe / n'existe pas" tiré indépendamment du degré.
- *   - famille "B" — bénéfice maximum via égalité des marginales, prix affine × coût cubique,
- *     construite "à l'envers" à partir des 2 racines désirées de Cm(x)=Rm(x).
+ * exercice. Tous les tirages sont RÉALISTES (audit 5e ch. 5, décision G) : coût fixe > 0, coût
+ * total et coût marginal > 0 pour q ≥ 0, prix positif sur le domaine, bénéfice maximal > 0.
+ *   - famille "A" — coût marginal : approximation discrète vs dérivée (écart absolu et en %), puis
+ *     un minimum économique : coût MOYEN minimal (coût de degré 2) ou coût MARGINAL minimal (coût de
+ *     degré 3). Plus aucun « extremum du coût total » (un coût total réaliste est croissant).
+ *   - famille "B" — bénéfice maximum via égalité des marginales, prix p(x) = k − m·x (m > 0) ×
+ *     coût cubique, construite "à l'envers" à partir des 2 racines désirées de C'_T(x) = R'_T(x).
  *   - famille "bonus" (fréquence rare) — greffée sur le CONTEXTE de la famille A (coût total
- *     cubique), résolution par dichotomie de l'équation réduite P(q)=q·C'_T(q)-C_T(q)=0
- *     (équivalente à C_m(q)=C_M(q), coût marginal = coût moyen).
+ *     cubique réaliste), résolution par dichotomie de l'équation réduite P(q)=q·C'_T(q)-C_T(q)=0
+ *     (équivalente à C_m(q)=C_M(q), coût marginal = coût moyen : production qui minimise le coût
+ *     moyen).
  *
  * Type pur, aucune logique — construction "à l'envers"/formules fermées en Couche A
  * (`generateurs5e/contexteEconomique/index.ts`).
@@ -35,9 +38,14 @@ export interface CoutTotalDegre3 {
 
 export type CoutTotalA = CoutTotalDegre2 | CoutTotalDegre3;
 
-export interface ExtremumCoutTotal {
-  position: number;
-  nature: "max" | "min";
+/** Minimum économique demandé au dernier écran de la famille A : coût moyen minimal (coût de
+ * degré 2 : q = √(c/a), C_M = 2√(ac) + b) ou coût marginal minimal (coût de degré 3 : q = −b/(3a),
+ * C'_T(q) = c − b²/(3a)). `exact` : q et la valeur sont entiers (régime sans calculatrice). */
+export interface MinimumEconomiqueA {
+  grandeur: "coutMoyen" | "coutMarginal";
+  q: number;
+  valeur: number;
+  exact: boolean;
 }
 
 export interface ExerciceContexteEconomiqueA {
@@ -53,13 +61,8 @@ export interface ExerciceContexteEconomiqueA {
   /** ecartAbsolu / |cmDerivee| * 100 — PAS exact en général, seul champ de la famille A à
    * annoncer une précision décimale (voir CLAUDE.md, "Annonce de précision"). */
   ecartPourcent: number;
-  /** Sous-cas tiré INDÉPENDAMMENT du degré — degré 2 : toujours true (C'_T linéaire, une seule
-   * racine toujours). Degré 3 : dépend du signe de Δ=4b²-12ac. */
-  extremumExiste: boolean;
-  /** [] si !extremumExiste ; longueur 1 (degré 2, ou degré 3 à racine double — jamais généré
-   * délibérément) ou 2 (degré 3, Δ>0) sinon. Positions/natures JAMAIS filtrées par signe — la
-   * consigne ne restreint pas au domaine q>0 pour ce sous-cas (contrairement à la famille B). */
-  extrema: ExtremumCoutTotal[];
+  /** Dernier écran : coût moyen minimal (degré 2) ou coût marginal minimal (degré 3). */
+  minimum: MinimumEconomiqueA;
 }
 
 // ============================================================================
@@ -68,7 +71,7 @@ export interface ExerciceContexteEconomiqueA {
 
 export interface ExerciceContexteEconomiqueB {
   famille: "B";
-  /** p(x) = m x + k (prix). */
+  /** p(x) = m x + k (prix), m < 0 et k > 0 : prix décroissant, positif sur le domaine. */
   m: number;
   k: number;
   /** C_T(x) = a x³ + b x² + c x + d (coût), a > 0 (garantit que x_opt, racine positive de
@@ -83,8 +86,12 @@ export interface ExerciceContexteEconomiqueB {
   /** Racine négative de la même équation — à rejeter explicitement (production négative
    * impossible). */
   xNeg: number;
-  /** B(xOpt) = R_T(xOpt) - C_T(xOpt), exact (coefficients et xOpt entiers par construction). */
+  /** B(xOpt) = R_T(xOpt) - C_T(xOpt), exact (coefficients et xOpt entiers par construction), > 0. */
   beneficeMax: number;
+  /** Points test entiers de part et d'autre de xOpt (0 < avant < xOpt < apres), pour le signe de
+   * B' (valeurs de B' demandées à l'élève, audit 5e ch. 5, décision B). */
+  pointTestAvant: number;
+  pointTestApres: number;
 }
 
 // ============================================================================

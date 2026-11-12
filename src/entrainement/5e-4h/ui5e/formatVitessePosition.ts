@@ -1,30 +1,50 @@
 /**
  * Couche présentation (5e) — consignes/labels/aides/LaTeX pour 5gen35 ("Vitesse et position").
  * Dépend librement des couches inférieures (jamais l'inverse) : réutilise `valeurPosition`/
- * `valeurVitesseExacte` (`generateurs5e/vitessePosition/index.ts`), même patron que
- * `formatTangentes.ts` réutilisant les évaluateurs de la Couche A.
+ * `valeurVitesseExacte` (`generateurs5e/vitessePosition/index.ts`).
+ *
+ * Notation s(t) PARTOUT (distance parcourue, comme le cours §11) ; v(t) = s'(t) ; a(t) = v'(t).
+ * Consignes et aides écran en `$…$` (rendues par `TexteRiche5e`) — `consigneEcran` en donne une
+ * version texte (Unicode, sans `$`) pour l'adaptateur papier. Nombres à virgule décimale.
  */
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import { valeurPosition, valeurVitesseExacte } from "../generateurs5e/vitessePosition/index";
-import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
+import type { EcranVitessePosition, EcranVitessePositionHerite } from "../moteur5e/typesVitessePosition";
 import { ordreEcransVitessePosition } from "../moteur5e/typesVitessePosition";
 import type { SegmentTexte } from "../components/SegmentsInline";
 
+/** Écran demandé par un appelant — l'ancien identifiant "evaluerV0" (adaptateur papier, en attente
+ * de refonte) est lu comme "acceleration". */
+type EcranDemande = EcranVitessePosition | EcranVitessePositionHerite;
+
+function ecranReel(ecran: EcranDemande): EcranVitessePosition {
+  return ecran === "evaluerV0" ? "acceleration" : ecran;
+}
+
 // ============================================================================
-// Fragments LaTeX de bas niveau.
+// Nombres et fragments LaTeX de bas niveau.
 // ============================================================================
 
-/** e(t) = (a/2)t² + b·t, jamais un coefficient "1" superflu (a=2 → a/2=1 → "t²", pas "1t²") ni un
- * terme "+0t" — a∈{1,2} garantit a/2 ∈ {0,5 ; 1}, jamais de division moins simple. */
+/** Nombre à virgule décimale, au plus `decimales` chiffres significatifs après la virgule (zéros
+ * finaux retirés), « − » typographique. */
+export function formatNombreFr(v: number, decimales = 2): string {
+  const arrondi = Number(v.toFixed(decimales));
+  const texte = String(Math.abs(arrondi)).replace(".", "{,}");
+  return arrondi < 0 ? `-${texte}` : texte;
+}
+
+function estEntierOuUnDixieme(v: number): boolean {
+  return Math.abs(v * 10 - Math.round(v * 10)) < 1e-9;
+}
+
+/** s(t) = (a/2)t² + b·t — a∈{1,2} : « ½t² » ou « t² », jamais de terme « +0t ». */
 export function formatPositionLatex(a: number, b: number): string {
   const termeT2 = a === 2 ? "t^2" : "\\dfrac{1}{2}t^2";
   const termeT = b === 0 ? "" : b === 1 ? "+t" : `+${b}t`;
-  return `e(t)=${termeT2}${termeT}`;
+  return `s(t)=${termeT2}${termeT}`;
 }
 
-/** v(t) = a·t + b — jamais de coefficient "1" superflu ni de terme "+0" (b toujours ≥0 par
- * construction : jamais de signe négatif à gérer, contrairement à `formatPolynomeVarLatex`,
- * `formatTangentes.ts`). */
+/** v(t) = a·t + b — jamais de coefficient « 1 » ni de terme « +0 ». */
 export function formatVitesseLatex(a: number, b: number): string {
   const termeT = a === 1 ? "t" : `${a}t`;
   return b === 0 ? termeT : `${termeT}+${b}`;
@@ -35,12 +55,7 @@ function formatVDeTLatex(exercice: ExerciceVitessePosition): string {
 }
 
 // ============================================================================
-// Énoncé narratif — "prose + fragments KaTeX courts" (jamais un unique bloc `\text{...}`) : réplique
-// locale du motif `segmentsPhraseEnonce` (`ui/formatOptimisation.ts`, 4e) — jamais importée telle
-// quelle depuis un fichier 4e (réplication délibérée, même esprit que les évaluateurs numériques
-// répliqués entre générateurs/moteur sur ce chantier). `SegmentsInline`/`Katex` (`src/components/`)
-// restent, eux, réutilisés directement : infrastructure de présentation générique déjà partagée
-// entre les 3 chantiers (aucune logique domaine-spécifique).
+// Énoncé narratif — "prose + fragments KaTeX courts".
 // ============================================================================
 const REGEX_DOLLAR = /\$([^$]+)\$/g;
 
@@ -58,31 +73,25 @@ export function segmentsEnonce(phrase: string): SegmentTexte[] {
   return segments;
 }
 
-/** Phrase narrative complète (contexte + e(t) + distance(s)) — persistante sur tous les écrans de
- * l'exercice. */
+/** Phrase narrative complète (contexte + s(t) + distance(s)) — persistante sur tous les écrans. */
 export function phraseEnonce(exercice: ExerciceVitessePosition): string {
-  const eLatex = formatPositionLatex(exercice.a, exercice.b);
-  return exercice.variante === "A" ? exercice.contexte.phraseA(eLatex, exercice.D) : exercice.contexte.phraseB(eLatex, exercice.distanceCible, exercice.D);
+  const sLatex = formatPositionLatex(exercice.a, exercice.b);
+  return exercice.variante === "A"
+    ? exercice.contexte.phraseA(sLatex, exercice.D, exercice.b)
+    : exercice.contexte.phraseB(sLatex, exercice.distanceCible, exercice.D, exercice.b);
 }
 
-/** Bloc de données structuré — chaque donnée sur sa propre ligne (convention CLAUDE.md,
- * "plusieurs données distinctes → chacune sur sa propre ligne"). */
+/** Bloc de données structuré — chaque donnée sur sa propre ligne. */
 export function formatTermesDonneesLatex(exercice: ExerciceVitessePosition): string[] {
-  const eLatex = formatPositionLatex(exercice.a, exercice.b);
-  const termes = [eLatex];
-  if (exercice.variante === "A") {
-    termes.push(`D=${exercice.D}\\text{ m}`);
-  } else {
-    termes.push(`D_1=${exercice.distanceCible}\\text{ m}`, `D=${exercice.D}\\text{ m}`);
-  }
-  termes.push(`t_0=${exercice.t0}\\text{ s}`);
-  return termes;
+  const sLatex = formatPositionLatex(exercice.a, exercice.b);
+  if (exercice.variante === "A") return [sLatex, `D=${exercice.D}\\text{ m}`];
+  return [sLatex, `D_1=${exercice.distanceCible}\\text{ m}`, `D=${exercice.D}\\text{ m (distance totale)}`];
 }
 
 export function questionFinale(exercice: ExerciceVitessePosition): string {
   return exercice.variante === "A"
-    ? "Trouve le temps total de la course, puis la vitesse d'arrivée (en km/h)."
-    : "Trouve le temps total du parcours complet (les 2 segments).";
+    ? "Trouve le temps mis pour parcourir les D mètres, puis la vitesse atteinte à cet instant, en km/h."
+    : "Trouve le temps total du parcours (les deux segments).";
 }
 
 // ============================================================================
@@ -90,105 +99,114 @@ export function questionFinale(exercice: ExerciceVitessePosition): string {
 // ============================================================================
 
 export const LIBELLE_ECRAN: Record<EcranVitessePosition, string> = {
-  derivee: "v(t)=e'(t)",
-  evaluerV0: "v(t₀)",
-  resoudre: "Résoudre l'équation (racines + justification)",
-  vitessePointe: "Vitesse de pointe",
+  derivee: "Vitesse v(t) = s'(t)",
+  acceleration: "Accélération a(t) = v'(t)",
+  resoudre: "Solutions de l'équation",
+  rejet: "Solution rejetée",
+  vitessePointe: "Vitesse atteinte",
   conversion: "Conversion en km/h",
   segmentConstant: "Temps du second segment",
   tempsTotal: "Temps total du parcours",
 };
 
-export function consigneEcran(exercice: ExerciceVitessePosition, ecran: EcranVitessePosition): string {
+/** Consigne ÉCRAN (formules en `$…$`, rendue par `TexteRiche5e`). */
+export function consigneEcranRiche(exercice: ExerciceVitessePosition, ecranDemande: EcranDemande): string {
+  const ecran = ecranReel(ecranDemande);
   switch (ecran) {
     case "derivee":
-      return "Dérive e(t) pour obtenir la fonction vitesse v(t)=e'(t).";
-    case "evaluerV0":
-      return "Évalue v(t₀) : remplace t par t₀ dans v(t).";
+      return "Dérive $s(t)$ pour obtenir la fonction vitesse $v(t)=s'(t)$, en m/s.";
+    case "acceleration":
+      return "L'accélération est la dérivée de la vitesse : calcule $a(t)=v'(t)$, en m/s².";
     case "resoudre": {
-      const cible = exercice.variante === "A" ? "D" : "D₁";
-      return `Résous l'équation e(t)=${cible} — c'est une équation du SECOND DEGRÉ, elle admet DEUX solutions mathématiques. Indique les deux, puis choisis la bonne justification pour le rejet de l'une d'elles.`;
+      const cible = exercice.variante === "A" ? `D=${exercice.D}` : `D_1=${exercice.distanceCible}`;
+      const membre = exercice.variante === "A" ? `${exercice.D}` : `${exercice.distanceCible}`;
+      return `Résous l'équation $s(t)=${membre}$ (avec $${cible}$ m) : c'est une équation du second degré, donne ses deux solutions.`;
     }
+    case "rejet":
+      return "Une seule des deux solutions convient dans ce contexte. Pourquoi l'autre est-elle rejetée ? Une seule tentative.";
     case "vitessePointe":
-      return "Calcule la vitesse de pointe : évalue v (PAS e) au temps que tu viens de trouver — une valeur PONCTUELLE, pas une moyenne.";
+      return "Calcule la vitesse atteinte à l'instant que tu viens de trouver : évalue $v$ (et non $s$) en cet instant. C'est une vitesse instantanée, pas une vitesse moyenne.";
     case "conversion":
-      return "Convertis cette vitesse de m/s en km/h (×3,6) — (une valeur approchée est acceptée, à environ 1 % près).";
+      return "Convertis cette vitesse de m/s en km/h.";
     case "segmentConstant":
-      return "CHANGEMENT DE MODÈLE : sur le segment restant, la vitesse reste CONSTANTE, égale à la vitesse de pointe calculée à l'écran précédent — e(t) ne s'applique plus ici. Calcule le temps t₂=D₂/v (une valeur approchée est acceptée, à environ 1 % près).";
+      return "Changement de modèle : sur le segment restant, la vitesse reste constante, égale à la vitesse atteinte à la fin de l'accélération, et $s(t)$ ne s'applique plus. Calcule la longueur $D_2$ de ce segment, puis le temps $t_2=\\dfrac{D_2}{v}$ (arrondi au dixième).";
     case "tempsTotal":
-      return "Additionne le temps du premier segment (trouvé à l'écran « Résoudre ») et le temps du second segment t₂ pour obtenir le temps total du parcours (une valeur approchée est acceptée, à environ 1 % près).";
+      return "Additionne la durée du premier segment (la solution retenue de l'équation) et $t_2$ pour obtenir le temps total du parcours (arrondi au dixième).";
   }
 }
 
-// ============================================================================
-// Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse).
-// ============================================================================
-
-export function texteAideNiveau1(ecran: EcranVitessePosition): string {
-  switch (ecran) {
-    case "derivee":
-      return "e(t) est un simple polynôme du second degré en t — dérive terme à terme avec la règle de puissance (tⁿ)'=n·tⁿ⁻¹, exactement comme pour une fonction en x.";
-    case "evaluerV0":
-      return "v(t) est la formule que tu viens de trouver à l'écran précédent — remplace SEULEMENT t par t₀, aucun autre calcul.";
-    case "resoudre":
-      return "Une équation du second degré a en général DEUX solutions. Ici, une seule a un sens PHYSIQUE (un temps ne peut pas être négatif) — il faut l'identifier et REJETER l'autre EXPLICITEMENT, jamais l'ignorer silencieusement en ne donnant que la bonne réponse.";
-    case "vitessePointe":
-      return "Piège fréquent : confondre la vitesse de pointe (une valeur de v(t) en un instant précis) avec une vitesse MOYENNE sur tout le trajet (distance totale ÷ temps total) — ce n'est PAS ce qui est demandé ici.";
-    case "conversion":
-      return "1 m/s = 3,6 km/h (3600 s dans une heure, 1000 m dans un km : 3600/1000=3,6) — multiplie la vitesse en m/s par 3,6.";
-    case "segmentConstant":
-      return "Sur ce segment, le mobile n'accélère plus : sa vitesse est CONSTANTE, donc distance = vitesse × temps, soit t₂=D₂/v — e(t) et sa dérivée n'ont plus aucun rôle ici, c'est un changement de modèle, pas seulement un nouveau calcul.";
-    case "tempsTotal":
-      return "Le temps total est simplement la SOMME des durées des 2 segments — pas besoin de recalculer quoi que ce soit d'autre.";
-  }
+/** Version TEXTE (Unicode, sans `$`) de la consigne — lue par l'adaptateur papier. */
+export function consigneEcran(exercice: ExerciceVitessePosition, ecran: EcranDemande): string {
+  return consigneEcranRiche(exercice, ecran)
+    .replace(/\\dfrac\{([^}]*)\}\{([^}]*)\}/g, "$1/$2")
+    .replace(/_1/g, "₁")
+    .replace(/_2/g, "₂")
+    .replace(/\$/g, "");
 }
 
-/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
- * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+// ============================================================================
+// Aides — texte en prose (formules courtes en `$…$`) + formule display éventuelle.
+// ============================================================================
+
 export interface AideFragmentee {
   texte: string;
   latex: string | null;
 }
 
-export function texteAideNiveau2(ecran: EcranVitessePosition): AideFragmentee {
+export function texteAideNiveau1(ecranDemande: EcranDemande): AideFragmentee {
+  const ecran = ecranReel(ecranDemande);
   switch (ecran) {
     case "derivee":
-      return { texte: "Exemple :", latex: "e(t)=t^2+3t \\;\\Rightarrow\\; v(t)=e'(t)=2t+3" };
-    case "evaluerV0":
-      return { texte: "Exemple :", latex: "v(t)=2t+3,\\ t_0=2 \\;\\Rightarrow\\; v(2)=2\\cdot2+3=7" };
+      return { texte: "$s(t)$ est un polynôme du second degré en $t$ : dérive-le terme à terme, comme une fonction en $x$.", latex: "\\left(t^{n}\\right)'=n\\,t^{n-1}" };
+    case "acceleration":
+      return { texte: "Dérive $v(t)$, la formule trouvée à l'écran précédent : la dérivée d'un terme constant est nulle.", latex: null };
     case "resoudre":
-      return {
-        texte: "Exemple :",
-        latex: "t^2+3t=40 \\iff t^2+3t-40=0 \\;\\Rightarrow\\; t=5 \\text{ ou } t=-8 \\quad \\text{(seul } t=5 \\text{ est retenu, temps positif)}",
-      };
+      return { texte: "Ramène l'équation à la forme $at^2+bt+c=0$ (tous les termes à gauche), puis calcule le discriminant :", latex: "\\Delta=b^2-4ac \\qquad t=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}" };
+    case "rejet":
+      return { texte: "Relis ce que représente la variable $t$ dans l'énoncé : à partir de quel instant est-elle comptée ?", latex: null };
     case "vitessePointe":
-      return { texte: "Exemple :", latex: "v(t)=2t+3,\\ \\text{temps retenu } t=5 \\;\\Rightarrow\\; v(5)=2\\cdot5+3=13\\ \\text{(m/s)}" };
+      return { texte: "La vitesse à un instant précis s'obtient en remplaçant $t$ par cet instant dans $v(t)$. La vitesse moyenne (distance ÷ durée) n'est pas demandée.", latex: null };
     case "conversion":
-      return { texte: "Exemple :", latex: "13\\ \\text{m/s} \\times 3{,}6 = 46{,}8\\ \\text{km/h}" };
+      return { texte: "1 m/s, c'est 3 600 m en une heure, soit 3,6 km/h :", latex: "v_{\\text{km/h}}=v_{\\text{m/s}}\\times3{,}6" };
     case "segmentConstant":
-      return { texte: "Exemple :", latex: "D_2=44\\ \\text{m},\\ v=6\\ \\text{m/s} \\;\\Rightarrow\\; t_2=\\dfrac{44}{6}\\approx7{,}33\\ \\text{s}" };
+      return { texte: "À vitesse constante, distance = vitesse × durée, donc la durée vaut la distance divisée par la vitesse :", latex: "D_2=D-D_1 \\qquad t_2=\\dfrac{D_2}{v}" };
     case "tempsTotal":
-      return { texte: "Exemple :", latex: "t_1=4\\ \\text{s},\\ t_2\\approx7{,}33\\ \\text{s} \\;\\Rightarrow\\; \\text{temps total}\\approx11{,}33\\ \\text{s}" };
+      return { texte: "Le temps total est la somme des durées des deux segments :", latex: "t_{\\text{total}}=t_1+t_2" };
+  }
+}
+
+export function texteAideNiveau2(ecranDemande: EcranDemande): AideFragmentee {
+  const ecran = ecranReel(ecranDemande);
+  switch (ecran) {
+    case "derivee":
+      return { texte: "Exemple :", latex: "s(t)=\\dfrac{3}{2}t^2+7t \\;\\Rightarrow\\; v(t)=s'(t)=3t+7" };
+    case "acceleration":
+      return { texte: "Exemple :", latex: "v(t)=3t+7 \\;\\Rightarrow\\; a(t)=v'(t)=3\\ \\text{m/s}^2" };
+    case "resoudre":
+      return { texte: "Exemple :", latex: "t^2+3t=40 \\iff t^2+3t-40=0,\\ \\Delta=169 \\;\\Rightarrow\\; t=5 \\text{ ou } t=-8" };
+    case "rejet":
+      return { texte: "L'équation est juste et ses deux solutions la vérifient : seule l'une d'elles a un sens physique ici.", latex: null };
+    case "vitessePointe":
+      return { texte: "Exemple :", latex: "v(t)=3t+7,\\ t=5 \\;\\Rightarrow\\; v(5)=3\\cdot5+7=22\\ \\text{m/s}" };
+    case "conversion":
+      return { texte: "Exemple :", latex: "13\\ \\text{m/s}\\times3{,}6=46{,}8\\ \\text{km/h}" };
+    case "segmentConstant":
+      return { texte: "Exemple :", latex: "D_2=150-24=126\\ \\text{m},\\ v=9\\ \\text{m/s} \\;\\Rightarrow\\; t_2=\\dfrac{126}{9}=14\\ \\text{s}" };
+    case "tempsTotal":
+      return { texte: "Exemple :", latex: "t_1=4\\ \\text{s},\\ t_2\\approx7{,}3\\ \\text{s} \\;\\Rightarrow\\; t_{\\text{total}}\\approx11{,}3\\ \\text{s}" };
   }
 }
 
 // ============================================================================
-// QCM justification — libellé de la consigne (l'écran affiche `exercice.optionsRejetRacine`
-// directement, ordre déjà mélangé à la construction).
+// Valeurs CONFIRMÉES — formes canoniques (état actuel + récapitulatif), virgule décimale.
 // ============================================================================
 
-/** JAMAIS de valeur numérique de `racineRejetee` dans ce texte — l'élève doit encore la TROUVER
- * lui-même dans les 2 champs juste au-dessus ; la révéler ici court-circuiterait cette étape. */
-export function consigneJustification(): string {
-  return "Une des deux solutions que tu viens de trouver est négative. Pourquoi la rejette-t-on ?";
+function vAtCible(exercice: ExerciceVitessePosition): number {
+  return valeurVitesseExacte(exercice, exercice.tCible);
 }
 
-// ============================================================================
-// Valeurs CONFIRMÉES — formes canoniques (état actuel + récapitulatif).
-// ============================================================================
-
-function formatV0ConfirmeLatex(exercice: ExerciceVitessePosition): string {
-  return `v(t_0)=${valeurVitesseExacte(exercice, exercice.t0)}`;
+function formatAccelerationConfirmeeLatex(exercice: ExerciceVitessePosition): string {
+  return `a(t)=${exercice.a}\\text{ m/s}^2 \\;(>0\\text{ : la vitesse augmente})`;
 }
 
 function formatRacineRetenueConfirmeeLatex(exercice: ExerciceVitessePosition): string {
@@ -199,17 +217,17 @@ function formatRacineRejeteeConfirmeeLatex(exercice: ExerciceVitessePosition): s
   return `t=${exercice.racineRejetee}\\text{ (rejetée)}`;
 }
 
-function formatVitessePointeConfirmeeLatex(exercice: ExerciceVitessePosition): string {
-  return `v(${exercice.tCible})=${valeurVitesseExacte(exercice, exercice.tCible)}\\text{ m/s}`;
+function formatRejetConfirmeLatex(exercice: ExerciceVitessePosition): string {
+  return `t=${exercice.racineRejetee}<0\\text{ : le temps est compté à partir du départ}`;
 }
 
-function vAtCible(exercice: ExerciceVitessePosition): number {
-  return valeurVitesseExacte(exercice, exercice.tCible);
+function formatVitessePointeConfirmeeLatex(exercice: ExerciceVitessePosition): string {
+  return `v(${exercice.tCible})=${vAtCible(exercice)}\\text{ m/s}`;
 }
 
 function formatConversionConfirmeeLatex(exercice: ExerciceVitessePosition): string {
   const kmh = vAtCible(exercice) * 3.6;
-  return `\\approx ${kmh.toFixed(2)}\\text{ km/h}`;
+  return `${vAtCible(exercice)}\\times3{,}6=${formatNombreFr(kmh, 1)}\\text{ km/h}`;
 }
 
 function t2Exact(exercice: ExerciceVitessePosition): number {
@@ -217,44 +235,44 @@ function t2Exact(exercice: ExerciceVitessePosition): number {
   return exercice.D2 / vAtCible(exercice);
 }
 
+function formatAuDixiemeLatex(v: number): string {
+  return `${estEntierOuUnDixieme(v) ? "=" : "\\approx"}${formatNombreFr(v, 1)}`;
+}
+
 function formatSegmentConstantConfirmeLatex(exercice: ExerciceVitessePosition): string {
-  return `t_2\\approx ${t2Exact(exercice).toFixed(2)}\\text{ s}`;
+  if (exercice.variante !== "B") throw new Error("formatSegmentConstantConfirmeLatex : exercice hors variante B");
+  return `t_2=\\dfrac{${exercice.D2}}{${vAtCible(exercice)}}${formatAuDixiemeLatex(t2Exact(exercice))}\\text{ s}`;
 }
 
 function formatTempsTotalConfirmeLatex(exercice: ExerciceVitessePosition): string {
-  return `t_{total}\\approx ${(exercice.tCible + t2Exact(exercice)).toFixed(2)}\\text{ s}`;
+  return `t_{\\text{total}}${formatAuDixiemeLatex(exercice.tCible + t2Exact(exercice))}\\text{ s}`;
 }
 
-/** Bloc "état actuel" — rappelle les valeurs CONFIRMÉES des écrans déjà traversés pour CET
- * exercice (jamais dérivé de la saisie brute de l'élève), `null` sur le premier écran. */
+/** Bloc "état actuel" — valeurs CONFIRMÉES des écrans déjà traversés, `null` sur le premier écran. */
 export function formatTermesEtatActuelLatex(exercice: ExerciceVitessePosition, ecran: EcranVitessePosition): string[] | null {
   const ordre = ordreEcransVitessePosition(exercice);
   const index = ordre.indexOf(ecran);
   if (index <= 0) return null;
-
-  const termes = [formatVDeTLatex(exercice)];
-  if (index >= 2) termes.push(formatV0ConfirmeLatex(exercice));
-  if (index >= 3) termes.push(formatRacineRetenueConfirmeeLatex(exercice), formatRacineRejeteeConfirmeeLatex(exercice));
-  if (index >= 4) termes.push(formatVitessePointeConfirmeeLatex(exercice));
-  // Variante A s'arrête à l'écran "conversion" (index 4, dernier écran) : rien à afficher après —
-  // aucun écran suivant n'existe pour montrer une conversion déjà confirmée. Variante B continue
-  // avec "tempsTotal" (index 5), qui doit voir le temps du 2e segment déjà confirmé.
-  if (exercice.variante === "B" && index >= 5) termes.push(formatSegmentConstantConfirmeLatex(exercice));
+  const termes: string[] = [];
+  for (const precedent of ordre.slice(0, index)) termes.push(...formatReponseAttenduePhaseLatex(exercice, precedent));
   return termes;
 }
 
 // ============================================================================
-// Récapitulatif final — réponse ATTENDUE, par écran RÉELLEMENT traversé.
+// Réponse ATTENDUE, par écran.
 // ============================================================================
 
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceVitessePosition, ecran: EcranVitessePosition): string[] {
+export function formatReponseAttenduePhaseLatex(exercice: ExerciceVitessePosition, ecranDemande: EcranDemande): string[] {
+  const ecran = ecranReel(ecranDemande);
   switch (ecran) {
     case "derivee":
       return [formatVDeTLatex(exercice)];
-    case "evaluerV0":
-      return [formatV0ConfirmeLatex(exercice)];
+    case "acceleration":
+      return [formatAccelerationConfirmeeLatex(exercice)];
     case "resoudre":
       return [formatRacineRetenueConfirmeeLatex(exercice), formatRacineRejeteeConfirmeeLatex(exercice)];
+    case "rejet":
+      return [formatRejetConfirmeLatex(exercice)];
     case "vitessePointe":
       return [formatVitessePointeConfirmeeLatex(exercice)];
     case "conversion":
@@ -266,8 +284,4 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceVitessePositio
   }
 }
 
-// ============================================================================
-// Réexport pratique — `valeurPosition` sert au débogage/tests de la couche présentation, jamais
-// utilisée pour VÉRIFIER une réponse élève ici (ça, c'est `moteur5e/verificationVitessePosition.ts`).
-// ============================================================================
 export { valeurPosition };

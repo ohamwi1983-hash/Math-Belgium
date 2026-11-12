@@ -9,9 +9,21 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { ecranApres, ecranInitial } from "./typesLectureGraphiqueDerivees";
 import type { EcranLectureGraphiqueDerivees, EtatSessionLectureGraphiqueDerivees, ResultatExerciceLectureGraphiqueDerivees } from "./typesLectureGraphiqueDerivees";
 import { listeAsymptotes } from "./typesLectureGraphiqueLimites";
-import { diagnostiquerCibleAsymptote } from "./verificationLectureGraphiqueLimites";
+import type { ReponseNommerAsymptotes } from "./typesLectureGraphiqueLimites";
 import type { ReponseTableauEtudeLocale } from "./verificationEtudeLocale";
-import { tableauFPrimeAttendu, tableauFSecondeAttendu, verifierEnsembleValeurs, verifierTableauEtudeLocale, diagnostiquerValeurExtremum, diagnostiquerPositionInflexion } from "./verificationLectureGraphiqueDerivees";
+import type { ReponseListeAbscisses } from "./verificationLectureGraphiqueDerivees";
+import {
+  diagnostiquerListeAbscisses,
+  diagnostiquerNommerAsymptotes,
+  diagnostiquerValeurExtremum,
+  positionsInflexions,
+  positionsTangenteHorizontale,
+  tableauFPrimeAttendu,
+  tableauFSecondeAttendu,
+  TOLERANCE_POSITION_INFLEXION,
+  TOLERANCE_POSITION_TANGENTE,
+  verifierTableauEtudeLocale,
+} from "./verificationLectureGraphiqueDerivees";
 
 const POINTS_DE_BASE = 100;
 
@@ -58,11 +70,14 @@ function cloturerExerciceOuSuivant(etat: EtatSessionLectureGraphiqueDerivees, re
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueDerivees, ecranAttendu: EcranLectureGraphiqueDerivees, reponse: T, verifier: (r: T) => boolean): EtatSessionLectureGraphiqueDerivees {
+/** `tentativesMaxForce` : 1 pour un choix fermé (tableaux) ou un verdict « aucun » faux — l'écran se
+ * clôt et révèle la réponse, il ne se gagne jamais par élimination. */
+function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueDerivees, ecranAttendu: EcranLectureGraphiqueDerivees, reponse: T, verifier: (r: T) => boolean, tentativesMaxForce?: number): EtatSessionLectureGraphiqueDerivees {
   if (etat.terminee || etat.phase !== ecranAttendu) throw new Error(`soumettreEcran : la session n'est pas à l'écran "${ecranAttendu}"`);
 
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    ...(tentativesMaxForce !== undefined ? { tentativesMax: tentativesMaxForce } : {}),
     verifier,
     revelerReponse: () => {},
   });
@@ -89,38 +104,45 @@ function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueDerivees, ecranAtten
 }
 
 // ============================================================================
-// Écran "asymptotes" — reprend le patron de 5gen22 (`listeAsymptotes`/`diagnostiquerCibleAsymptote`)
-// appliqué au sous-objet `exercice.asymptotique`.
+// Écran "asymptotes" — lignes « type + équation » libres (patron de 5gen22, décision G du ch. 4).
 // ============================================================================
 
-export function soumettreReponseAsymptotes(etat: EtatSessionLectureGraphiqueDerivees, textes: string[]): EtatSessionLectureGraphiqueDerivees {
-  const slots = listeAsymptotes(etat.exerciceCourant.asymptotique);
-  return soumettreEcran(etat, "asymptotes", textes, (t) => t.length === slots.length && t.every((v, i) => diagnostiquerCibleAsymptote(v, slots[i].cible) === "correct"));
+export function soumettreReponseAsymptotes(etat: EtatSessionLectureGraphiqueDerivees, reponse: ReponseNommerAsymptotes): EtatSessionLectureGraphiqueDerivees {
+  const diagnostic = diagnostiquerNommerAsymptotes(reponse, listeAsymptotes(etat.exerciceCourant.asymptotique));
+  return soumettreEcran(etat, "asymptotes", reponse, () => diagnostic.correct, diagnostic.verdictAucuneFaux ? 1 : undefined);
 }
 
 // ============================================================================
-// Écrans "tableauFPrime"/"tableauFSeconde" — grille étendue, notation combinée.
+// Écrans "zerosFPrime"/"inflexions" — liste d'abscisses lues (ordre libre) ou « aucun ».
+// ============================================================================
+
+export function soumettreReponseZerosFPrime(etat: EtatSessionLectureGraphiqueDerivees, reponse: ReponseListeAbscisses): EtatSessionLectureGraphiqueDerivees {
+  const diagnostic = diagnostiquerListeAbscisses(reponse, positionsTangenteHorizontale(etat.exerciceCourant), TOLERANCE_POSITION_TANGENTE);
+  return soumettreEcran(etat, "zerosFPrime", reponse, () => diagnostic.correct, diagnostic.verdictAucunFaux ? 1 : undefined);
+}
+
+export function soumettreReponseInflexions(etat: EtatSessionLectureGraphiqueDerivees, reponse: ReponseListeAbscisses): EtatSessionLectureGraphiqueDerivees {
+  const diagnostic = diagnostiquerListeAbscisses(reponse, positionsInflexions(etat.exerciceCourant), TOLERANCE_POSITION_INFLEXION);
+  return soumettreEcran(etat, "inflexions", reponse, () => diagnostic.correct, diagnostic.verdictAucunFaux ? 1 : undefined);
+}
+
+// ============================================================================
+// Écrans "tableauFPrime"/"tableauFSeconde" — choix fermés : UNE seule tentative.
 // ============================================================================
 
 export function soumettreReponseTableauFPrime(etat: EtatSessionLectureGraphiqueDerivees, reponse: ReponseTableauEtudeLocale): EtatSessionLectureGraphiqueDerivees {
-  return soumettreEcran(etat, "tableauFPrime", reponse, (r) => verifierTableauEtudeLocale(r, tableauFPrimeAttendu(etat.exerciceCourant)));
+  return soumettreEcran(etat, "tableauFPrime", reponse, (r) => verifierTableauEtudeLocale(r, tableauFPrimeAttendu(etat.exerciceCourant)), 1);
 }
 
 export function soumettreReponseTableauFSeconde(etat: EtatSessionLectureGraphiqueDerivees, reponse: ReponseTableauEtudeLocale): EtatSessionLectureGraphiqueDerivees {
-  return soumettreEcran(etat, "tableauFSeconde", reponse, (r) => verifierTableauEtudeLocale(r, tableauFSecondeAttendu(etat.exerciceCourant)));
+  return soumettreEcran(etat, "tableauFSeconde", reponse, (r) => verifierTableauEtudeLocale(r, tableauFSecondeAttendu(etat.exerciceCourant)), 1);
 }
 
 // ============================================================================
-// Écrans "extremums"/"inflexions" — valeur/abscisse lues, tolérance large (voir
-// `verificationLectureGraphiqueDerivees.ts`).
+// Écran "extremums" — ordonnée de chaque extremum (position connue depuis le tableau de f').
 // ============================================================================
 
 export function soumettreReponseExtremums(etat: EtatSessionLectureGraphiqueDerivees, reponses: string[]): EtatSessionLectureGraphiqueDerivees {
   const cibles = etat.exerciceCourant.extrema.map((e) => e.valeur);
-  return soumettreEcran(etat, "extremums", reponses, (r) => verifierEnsembleValeurs(r, cibles, diagnostiquerValeurExtremum));
-}
-
-export function soumettreReponseInflexions(etat: EtatSessionLectureGraphiqueDerivees, reponses: string[]): EtatSessionLectureGraphiqueDerivees {
-  const cibles = etat.exerciceCourant.inflexions.map((p) => p.position);
-  return soumettreEcran(etat, "inflexions", reponses, (r) => verifierEnsembleValeurs(r, cibles, diagnostiquerPositionInflexion));
+  return soumettreEcran(etat, "extremums", reponses, (r) => r.length === cibles.length && r.every((t, i) => diagnostiquerValeurExtremum(t, cibles[i]) === "correct"));
 }

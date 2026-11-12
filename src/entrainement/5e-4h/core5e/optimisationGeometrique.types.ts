@@ -1,39 +1,33 @@
 /**
- * Couche core (5e) — contrat pour 5gen32 ("Optimisation géométrique"), 8e générateur du chapitre
- * "Dérivées et applications". Contrairement à 5gen29/5gen31, f'(x) n'est JAMAIS fournie : l'élève
- * la calcule lui-même à l'écran "deriver" (vérifiée par différence finie centrée, voir
- * `moteur5e/verificationOptimisationGeometrique.ts`). 4 familles STRUCTURELLEMENT DISJOINTES à
- * fréquence comparable (~22% chacune) + 2 variantes bonus RARES (poids réduit) :
+ * Couche core (5e) — contrat pour 5gen32 ("Optimisation géométrique"), chapitre "Dérivées et
+ * applications". f'(x) n'est JAMAIS fournie : l'élève la calcule lui-même à l'écran "deriver"
+ * (vérifiée par différence finie centrée, voir `moteur5e/verificationOptimisationGeometrique.ts`).
+ * 6 familles d'optimisation STRUCTURELLEMENT DISJOINTES dans le tirage libre + 1 variante
+ * "cubique" accessible SEULEMENT par le sélecteur de variantes (audit 5e ch. 5, décision H) :
  *
- *   - "trapeze"   (famille A) — aire d'un trapèze isocèle en fonction de l'angle α (RADIANS,
- *     convention documentée ci-dessous) ; TOUJOURS un maximum (A''<0 partout sur ]0;π/2[) ;
- *     justifiée par le SIGNE DE A'' évalué numériquement (jamais un tableau de signes classique).
- *   - "cylindre"  (famille B) — aire totale d'un cylindre à volume fixé, minimisée en x=rayon ;
- *     tableau de signes classique. Support d'une variante bonus RARE greffée uniquement ici :
- *     `avecApplicationNumerique` ajoute un écran "application" après "conclure" (substitution
- *     numérique dans les dimensions optimales déjà trouvées, jamais une 2e optimisation).
- *   - "margesA"/"margesB" (famille C, 2 sous-parties MIROIR) — rectangle imprimé entouré de marges
- *     `mh`/`mv` distinctes ; "margesA" = aire totale T fixée → maximiser l'aire imprimée ;
- *     "margesB" = aire imprimée A fixée → minimiser l'aire totale. Racine ±k, rejet explicite de la
- *     racine négative (justification à choix).
- *   - "fenetreA"/"fenetreB" (famille D, 2 sous-parties MIROIR) — fenêtre rectangle+demi-cercle ;
- *     "fenetreA" = périmètre P fixé → maximiser l'aire (racine UNIQUE, linéaire, pas de rejet) ;
- *     "fenetreB" = aire A fixée → minimiser le périmètre (racine ±k, rejet explicite). Racines
- *     IRRATIONNELLES dans les 2 sous-parties — précision annoncée + tolérance réellement codée
- *     (voir CLAUDE.md, "Annonce de précision = tolérance réellement vérifiée").
- *   - "cubique" (variante bonus 2, RARE, générateur SÉPARÉ dans le même catalogue) — reconstruction
- *     d'un polynôme cubique coefficient par coefficient à partir de conditions en langage naturel
- *     (2 tangentes horizontales + 2 points de passage). Aucun rapport avec l'optimisation
- *     géométrique à proprement parler, regroupée ici uniquement parce que la consigne de tâche la
- *     rattache au même catalogue de variantes dev.
+ *   - "trapeze"   (famille A) — aire d'un trapèze isocèle en fonction de l'angle α (RADIANS pour
+ *     les calculs, degrés pour la réponse finale — convention ci-dessous) ; TOUJOURS un maximum.
+ *     Nature justifiée, comme partout, par le SIGNE DE A' en deux points test (plus de test A'').
+ *     A'(α)=0 se ramène à 2l·u²+b·u−l=0 (u=cos α) par sin²α = 1 − cos²α (jamais cos 2α).
+ *   - "cylindre"  (famille B) — aire totale d'un cylindre à volume fixé V = coeffV·π, minimisée en
+ *     x = rayon. `avecApplicationNumerique` ajoute un écran "application" (coût du matériau).
+ *   - "margesA"/"margesB" (famille C) — page dont la zone imprimée (x × y) est entourée de marges
+ *     gauche/droite de largeur m_h et haut/bas de hauteur m_v ; "margesA" = aire totale T fixée →
+ *     maximiser l'aire imprimée ; "margesB" = aire imprimée A fixée → minimiser l'aire totale.
+ *   - "fenetreA"/"fenetreB" (famille D) — fenêtre rectangle (largeur 2r, hauteur h) surmontée
+ *     d'un demi-cercle de rayon r ; "fenetreA" = périmètre P fixé → maximiser l'aire ; "fenetreB" =
+ *     aire A fixée → minimiser le périmètre.
+ *   - "cubique" (variante du sélecteur, hors tirage libre) — reconstruction d'un polynôme cubique
+ *     à partir de conditions en langage naturel (ce n'est pas de l'optimisation).
  *
- * Convention RADIANS (famille "trapeze" uniquement, seule famille trigonométrique) : α est
- * manipulé en RADIANS de bout en bout (domaine ]0;π/2[), MÊME SI le domaine est parfois affiché à
- * l'élève avec la notation "]0°;90°[" dans l'énoncé narratif (contexte géométrique familier) — la
- * dérivation d/dα[sin α]=cos α n'est vraie qu'en radians (voir `moteur/verificationFonctionDerivee.ts`
- * dont l'évaluateur `evaluerRadians` est répliqué ici pour la même raison). Les champs de réponse
- * numériques (angle α_opt) acceptent une valeur en DEGRÉS (plus lisible pour l'élève), convertie en
- * interne — jamais mélangée avec les calculs de dérivée, qui restent en radians.
+ * Deux régimes par famille (audit 5e ch. 5, décision H) : données « exactes » (optimum entier ou
+ * fraction simple, construit à l'envers) OU données « calculatrice » (données entières tirées
+ * librement, optimum irrationnel à arrondir au centième). Les deux régimes partagent EXACTEMENT les
+ * mêmes formules — seule la donnée d'énoncé change.
+ *
+ * Convention RADIANS (famille "trapeze") : α est manipulé en RADIANS dans A(α), A'(α) (la règle
+ * (sin x)' = cos x n'est vraie qu'en radians) ; l'angle optimal et les points test sont donnés en
+ * DEGRÉS (plus lisible), convertis en interne.
  */
 import type { FractionExacte } from "./limites.types";
 
@@ -53,21 +47,22 @@ export interface ExerciceTrapeze {
   b: number;
   /** Côté latéral (entier tiré). */
   l: number;
-  /** u = cos(α_opt), fraction EXACTE simple choisie EN PREMIER ("construction à l'envers") — voir
-   * `generateurs5e/optimisationGeometrique/index.ts::construireTrapeze`. */
-  u: FractionExacte;
+  /** u = cos(α_opt) : fraction EXACTE simple choisie EN PREMIER ("construction à l'envers") dans
+   * le régime exact, `null` dans le régime calculatrice (u irrationnel, racine positive de
+   * 2l·u²+b·u−l=0) — voir `generateurs5e/optimisationGeometrique/index.ts::construireTrapeze`. */
+  u: FractionExacte | null;
 }
 
 export interface ExerciceCylindre {
   famille: "cylindre";
-  /** x_opt (rayon optimal), entier choisi EN PREMIER. */
+  /** x_opt (rayon optimal) = ∛(coeffV/2) — entier dans le régime exact, irrationnel sinon. */
   xOpt: number;
-  /** V = coeffV·π (coeffV = 2·x_opt³, TOUJOURS entier). */
+  /** V = coeffV·π cm³, coeffV TOUJOURS entier (= 2·x_opt³ dans le régime exact). */
   coeffV: number;
   /** Variante bonus RARE — écran "application" additionnel après "conclure". */
   avecApplicationNumerique: boolean;
-  /** Prix au cm² de matériau (variante bonus uniquement) — coût = prixUnitaire × aire totale
-   * minimale, substitution numérique simple, jamais une 2e optimisation. */
+  /** Prix du matériau en € par cm² (variante bonus uniquement, quelques centimes) — coût =
+   * prixUnitaire × aire totale minimale, substitution numérique simple, jamais une 2e optimisation. */
   prixUnitaireMateriau?: number;
 }
 
@@ -79,8 +74,8 @@ export interface ExerciceMarges {
   T?: number;
   /** Aire imprimée FIXÉE (donnée d'énoncé), uniquement pour "margesB". */
   A?: number;
-  /** x_opt (largeur imprimée optimale), entier choisi EN PREMIER — voir Couche A pour la dérivation
-   * de T/A à partir de x_opt,mh,mv ("construction à l'envers"). */
+  /** x_opt (largeur imprimée optimale) — entier choisi EN PREMIER dans le régime exact (T/A dérivés
+   * "à l'envers"), irrationnel dans le régime calculatrice (T/A entiers tirés librement). */
   xOpt: number;
 }
 
@@ -90,15 +85,15 @@ export interface ExerciceFenetre {
   P?: ValeurAvecPi;
   /** Aire FIXÉE, uniquement pour "fenetreB". */
   A?: ValeurAvecPi;
-  /** r_opt (rayon optimal), entier choisi EN PREMIER — IRRATIONNEL du point de vue de l'élève qui
-   * le recalcule depuis P/A (voir tête de fichier `generateurs5e/optimisationGeometrique/index.ts`). */
+  /** r_opt (rayon optimal) — entier dans le régime exact (P/A donnés en fonction de π), irrationnel
+   * dans le régime calculatrice (P/A entiers). */
   rOpt: number;
 }
 
 export interface ExerciceCubique {
   famille: "cubique";
   a: number;
-  /** b=-3·a·x2/2, dérivé — TOUJOURS entier (x2 retiré au tirage sinon, boucle bornée). */
+  /** b=-3·a·x2/2, dérivé — TOUJOURS entier (x2 tiré pair). */
   b: number;
   /** x₂≠0, 2e abscisse à tangente horizontale (donnée d'énoncé). */
   x2: number;

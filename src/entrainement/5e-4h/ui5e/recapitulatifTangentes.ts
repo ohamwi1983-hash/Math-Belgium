@@ -1,7 +1,7 @@
 import type { EtatSessionTangente } from "../moteur5e/typesTangentes";
 import { ordreEcransTangente } from "../moteur5e/typesTangentes";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatReponseAttenduePhaseLatex, LIBELLE_ECRAN } from "./formatTangentes";
+import { formatReponseAttenduePhaseLatex, libelleEcranTangente } from "./formatTangentes";
 
 /**
  * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen28). Icône (✓/✗)
@@ -25,9 +25,9 @@ export function calculerRecapitulatifTangentes(etat: EtatSessionTangente): Entre
     if (score === undefined) continue;
     const valeurs = formatReponseAttenduePhaseLatex(exercice, ecran);
     entrees.push({
-      libelle: LIBELLE_ECRAN[ecran],
+      libelle: libelleEcranTangente(exercice, ecran),
       estLatex: true,
-      valeur: valeurs.join("\\quad"),
+      valeur: valeurs.join(" \\quad "),
       ...(valeurs.length > 1 ? { valeurs } : {}),
       revele: etat.revelesPartiels[ecran] ?? false,
     });

@@ -11,13 +11,12 @@ import {
   soumettreReponseBeneficeFormule,
   soumettreReponseBeneficeMaximum,
   soumettreReponseComparaisonEcart,
-  soumettreReponseConfirmationCoherence,
   soumettreReponseCoutMarginalDiscret,
   soumettreReponseDeriveeSymbolique,
   soumettreReponseDeriveeValeur,
   soumettreReponseEgaliteMarginales,
-  soumettreReponseExtremum,
   soumettreReponseIteration,
+  soumettreReponseMinimum,
   soumettreReponseMarginales,
   soumettreReponsePoserEquationReduite,
   soumettreReponseRacineApprochee,
@@ -38,13 +37,15 @@ import {
   diagnostiquerEcartPourcent,
   diagnostiquerEquationReduite,
   diagnostiquerMilieuIteration,
-  diagnostiquerPositionExtremumParmiCibles,
+  diagnostiquerMinimumQ,
+  diagnostiquerMinimumValeur,
   diagnostiquerRacineApprochee,
   diagnostiquerRacineMarginale,
+  diagnostiquerRacineRetenue,
   diagnostiquerRecetteMarginale,
   diagnostiquerRecetteTotale,
 } from "./moteur5e/verificationContexteEconomique";
-import { formatReponseAttenduePhaseLatex, LIBELLE_ECRAN_CONTEXTE_ECONOMIQUE, PRECISION_ECART_POURCENT, precisionRacineApprochee } from "./ui5e/formatContexteEconomique";
+import { formatReponseAttenduePhaseLatex, libelleEcran, precisionRacineApprochee } from "./ui5e/formatContexteEconomique";
 import { calculerRecapitulatifContexteEconomique } from "./ui5e/recapitulatifContexteEconomique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -53,13 +54,11 @@ import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
-import type { ReponseEgaliteMarginales, ReponseExtremum, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./moteur5e/verificationContexteEconomique";
+import type { ReponseEgaliteMarginales, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./moteur5e/verificationContexteEconomique";
 import { EtapeChampsLibresCE } from "./components5e/EtapeChampsLibresCE";
 import { EtapeChampsNumeriquesCE } from "./components5e/EtapeChampsNumeriquesCE";
-import { EtapeExtremumCoutTotal } from "./components5e/EtapeExtremumCoutTotal";
 import { EtapeResoudreEgaliteMarginales } from "./components5e/EtapeResoudreEgaliteMarginales";
 import { EtapeTableauSigneBenefice } from "./components5e/EtapeTableauSigneBenefice";
-import { EtapeConfirmationCoherence } from "./components5e/EtapeConfirmationCoherence";
 import { EtapeIterationDichotomie } from "./components5e/EtapeIterationDichotomie";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
@@ -101,27 +100,31 @@ function calculerSegmentsProgression(
 // style "label=valeur" que `formatReponseAttenduePhaseLatex` (ui5e/formatContexteEconomique.ts).
 // ============================================================================
 
-/** Écrans à champs (numériques ou libres) — `labels` est le MÊME tableau que celui déjà passé en
- * prop `labels` au composant, jamais reconstruit séparément. */
-function formatReponseChampsLatex(labels: string[], valeurs: string[]): string {
-  return labels.map((label, i) => `${label}${valeurs[i] ?? "?"}`).join("\\quad");
+/** Réponse de l'élève pour la fiche des puces : libellés en KaTeX, saisies en texte brut (une
+ * saisie fausse ou incomplète ne doit jamais produire d'erreur KaTeX). */
+function formatReponseChamps(labels: string[], valeurs: string[]): ReactNode {
+  return (
+    <>
+      {labels.map((label, i) => (
+        <span key={i} style={{ marginRight: "1em", display: "inline-block" }}>
+          <Katex expression={label} /> {valeurs[i] ?? "?"}
+        </span>
+      ))}
+    </>
+  );
 }
 
-function formatReponseExtremumTexte(r: ReponseExtremum): string {
-  if (r.type === "aucun") return "pas d'extremum";
-  return r.extrema.map((e) => `q=${e.position} (${e.nature === "max" ? "MAX" : "min"})`).join(" ; ");
+function formatReponseEgaliteMarginalesTexte(r: ReponseEgaliteMarginales): ReactNode {
+  return formatReponseChamps(["x_1=", "x_2=", "x_{\\text{retenue}}="], [r.racines[0], r.racines[1], r.retenue]);
 }
 
-function formatReponseEgaliteMarginalesTexte(r: ReponseEgaliteMarginales): string {
-  return `racines : ${r.racines[0]} ; ${r.racines[1]} — x_opt = racine ${r.choix === "positive" ? "positive" : "négative"}`;
-}
-
-function formatReponseTableauSigneBeneficeTexte(r: ReponseTableauSigneBenefice): string {
-  return `avant : ${r.zoneAvant > 0 ? "+" : "-"} ; après : ${r.zoneApres > 0 ? "+" : "-"}`;
+function formatReponseTableauSigneBenefice(exercice: EtatSessionContexteEconomique["exerciceCourant"], r: ReponseTableauSigneBenefice): ReactNode {
+  if (exercice.famille !== "B") return null;
+  return formatReponseChamps([`B'(${exercice.pointTestAvant})=`, `B'(${exercice.pointTestApres})=`], [r.avant, r.apres]);
 }
 
 function formatReponseIterationTexte(r: ReponseIterationDichotomie): string {
-  return `milieu = ${r.milieu} ; signe : ${r.signe > 0 ? "+" : "-"} ; on garde [${r.garder}]`;
+  return `milieu = ${r.milieu} ; signe de P au milieu : ${r.signe > 0 ? "+" : "−"} ; on garde la partie ${r.garder === "gauche" ? "de gauche" : "de droite"}`;
 }
 
 export function App5gen33() {
@@ -133,6 +136,8 @@ export function App5gen33() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice : fait partie de la clé d'écran (champs remis à zéro). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   /** Réutilise `formatReponseAttenduePhaseLatex` — même source de vérité que
    * `calculerRecapitulatifContexteEconomique`/le bloc `validation` ci-dessous pour l'écran COURANT
@@ -141,7 +146,7 @@ export function App5gen33() {
     setHistorique((h) => [
       ...h,
       {
-        titre: LIBELLE_ECRAN_CONTEXTE_ECONOMIQUE[ecranClos],
+        titre: libelleEcran(nouvelEtat.exerciceCourant, ecranClos),
         votreReponse,
         correcte: !nouvelEtat.derniereEtapeRevelee,
         reponseAttendue: nouvelEtat.derniereEtapeRevelee ? (
@@ -177,6 +182,7 @@ export function App5gen33() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setNumeroGeneration((n) => n + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -188,6 +194,7 @@ export function App5gen33() {
   }
 
   function forcerVariante(id: string) {
+    setNumeroGeneration((n) => n + 1);
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
@@ -198,7 +205,7 @@ export function App5gen33() {
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
@@ -220,6 +227,7 @@ export function App5gen33() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Contexte économique</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -276,14 +284,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 12"]}
+            placeholders={["ex : 0,5"]}
             precisionAnnoncee={null}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseCoutMarginalDiscret(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseCoutMarginalDiscret(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerCoutMarginalDiscret(r[0], exercice)]}
             validation={validation}
           />
@@ -297,13 +305,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 4q-3"]}
+            placeholders={["ex : 4q − 3"]}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseDeriveeSymbolique(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseDeriveeSymbolique(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerDeriveeSymboliqueA(r[0], exercice)]}
             validation={validation}
           />
@@ -317,14 +325,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 13"]}
+            placeholders={["ex : 0,5"]}
             precisionAnnoncee={null}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseDeriveeValeur(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseDeriveeValeur(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerDeriveeValeur(r[0], exercice)]}
             validation={validation}
           />
@@ -338,36 +346,42 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 2", "ex : 15.38"]}
-            precisionAnnoncee={PRECISION_ECART_POURCENT}
+            placeholders={["ex : 0,5", "ex : 0,25"]}
+            precisionAnnoncee={null}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(r) =>
-              terminerEtape(soumettreReponseComparaisonEcart(etat, { ecartAbsolu: r[0], ecartPourcent: r[1] }), <Katex expression={formatReponseChampsLatex(labels, r)} />)
+              terminerEtape(soumettreReponseComparaisonEcart(etat, { ecartAbsolu: r[0], ecartPourcent: r[1] }), formatReponseChamps(labels, r))
             }
             diagnostiquer={(r) => [diagnostiquerEcartAbsolu(r[0], exercice), diagnostiquerEcartPourcent(r[1], exercice)]}
             validation={validation}
           />
         );
       }
-      case "extremum":
+      case "extremum": {
+        const labels = ["q=", exercice.minimum.grandeur === "coutMoyen" ? "C_M(q)_{\\min}=" : "C'_T(q)_{\\min}="];
         return (
-          <EtapeExtremumCoutTotal
+          <EtapeChampsNumeriquesCE
             key={cleEcran}
             exercice={exercice}
+            ecran={phase}
+            labels={labels}
+            placeholders={["ex : 0,5", "ex : 0,5"]}
+            precisionAnnoncee={null}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseExtremum(etat, r), formatReponseExtremumTexte(r))}
-            diagnostiquerPosition={(t) => diagnostiquerPositionExtremumParmiCibles(t, exercice)}
+            onValider={(r) => terminerEtape(soumettreReponseMinimum(etat, { q: r[0], valeur: r[1] }), formatReponseChamps(labels, r))}
+            diagnostiquer={(r) => [diagnostiquerMinimumQ(r[0], exercice), diagnostiquerMinimumValeur(r[1], exercice)]}
             validation={validation}
           />
         );
+      }
       default:
         return null;
     }
@@ -383,13 +397,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 3x^2+2x"]}
+            placeholders={["ex : 3x² + 2x"]}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseRecetteTotale(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseRecetteTotale(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerRecetteTotale(r[0], exercice)]}
             validation={validation}
           />
@@ -403,14 +417,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 3x^2-2", "ex : 4x+5"]}
+            placeholders={["ex : 3x² − 2", "ex : 4x + 5"]}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(r) =>
-              terminerEtape(soumettreReponseMarginales(etat, { coutMarginal: r[0], recetteMarginale: r[1] }), <Katex expression={formatReponseChampsLatex(labels, r)} />)
+              terminerEtape(soumettreReponseMarginales(etat, { coutMarginal: r[0], recetteMarginale: r[1] }), formatReponseChamps(labels, r))
             }
             diagnostiquer={(r) => [diagnostiquerCoutMarginalB(r[0], exercice), diagnostiquerRecetteMarginale(r[1], exercice)]}
             validation={validation}
@@ -429,6 +443,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseEgaliteMarginales(etat, r), formatReponseEgaliteMarginalesTexte(r))}
             diagnostiquerRacine={(t) => diagnostiquerRacineMarginale(t, exercice)}
+            diagnostiquerRetenue={(t) => diagnostiquerRacineRetenue(t, exercice)}
             validation={validation}
           />
         );
@@ -440,13 +455,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : -x^3+2x^2+7x"]}
+            placeholders={["ex : −x³ + 2x² + 7x"]}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseBeneficeFormule(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseBeneficeFormule(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerBeneficeFormule(r[0], exercice)]}
             validation={validation}
           />
@@ -460,13 +475,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : -3x^2+4x+7"]}
+            placeholders={["ex : −3x² + 4x + 7"]}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseBeneficeDerivee(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseBeneficeDerivee(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerBeneficeDerivee(r[0], exercice)]}
             validation={validation}
           />
@@ -482,21 +497,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseTableauSigneBenefice(etat, r), formatReponseTableauSigneBeneficeTexte(r))}
-            validation={validation}
-          />
-        );
-      case "confirmationCoherence":
-        return (
-          <EtapeConfirmationCoherence
-            key={cleEcran}
-            exercice={exercice}
-            tentativesUtilisees={tentativesUtilisees}
-            tentativesMax={tentativesMax}
-            niveauAide={etat.niveauAide}
-            niveauAideMax={niveauAideMax}
-            onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseConfirmationCoherence(etat, r), r ? "Oui, cohérent" : "Non, pas cohérent")}
+            onValider={(r) => terminerEtape(soumettreReponseTableauSigneBenefice(etat, r), formatReponseTableauSigneBenefice(exercice, r))}
             validation={validation}
           />
         );
@@ -508,14 +509,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             exercice={exercice}
             ecran={phase}
             labels={labels}
-            placeholders={["ex : 24"]}
+            placeholders={["ex : 0,5"]}
             precisionAnnoncee={null}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(r) => terminerEtape(soumettreReponseBeneficeMaximum(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+            onValider={(r) => terminerEtape(soumettreReponseBeneficeMaximum(etat, r[0]), formatReponseChamps(labels, r))}
             diagnostiquer={(r) => [diagnostiquerBeneficeMaximum(r[0], exercice)]}
             validation={validation}
           />
@@ -536,13 +537,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           ecran={phase}
           labels={labels}
-          placeholders={["ex : 2q^3+2q^2-12"]}
+          placeholders={["ex : 3q³ + q² − 4"]}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(r) => terminerEtape(soumettreReponsePoserEquationReduite(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+          onValider={(r) => terminerEtape(soumettreReponsePoserEquationReduite(etat, r[0]), formatReponseChamps(labels, r))}
           diagnostiquer={(r) => [diagnostiquerEquationReduite(r[0], exercice)]}
           validation={validation}
         />
@@ -579,14 +580,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           ecran={phase}
           labels={labels}
-          placeholders={["ex : 1.31"]}
+          placeholders={["valeur approchée"]}
           precisionAnnoncee={precisionRacineApprochee(exercice)}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(r) => terminerEtape(soumettreReponseRacineApprochee(etat, r[0]), <Katex expression={formatReponseChampsLatex(labels, r)} />)}
+          onValider={(r) => terminerEtape(soumettreReponseRacineApprochee(etat, r[0]), formatReponseChamps(labels, r))}
           diagnostiquer={(r) => [diagnostiquerRacineApprochee(r[0], exercice)]}
           validation={validation}
         />

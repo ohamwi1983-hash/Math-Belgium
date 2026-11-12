@@ -1,4 +1,7 @@
-export type EtatPuceProgression = "correcte" | "aide" | "revele" | "courante" | "a-venir";
+/** "sans-objet" (audit 5e ch. 5, décision J) : écran prévu par la structure FIXE du niveau mais
+ * sans objet pour CET exercice (ex. aucun extremum à évaluer) — affiché seulement une fois atteint,
+ * pour que le nombre de puces ne révèle jamais la structure dès le premier écran. Compté comme clos. */
+export type EtatPuceProgression = "correcte" | "aide" | "revele" | "courante" | "a-venir" | "sans-objet";
 
 interface Props {
   /** Une entrée par étape de l'exercice, DANS L'ORDRE où elles se déroulent — chaque appelant la
@@ -27,7 +30,7 @@ interface Props {
  */
 export function ProgressionPuces({ segments, onSegmentClick }: Props) {
   if (segments.length === 0) return null;
-  const nbClotures = segments.filter((etat) => etat === "correcte" || etat === "aide" || etat === "revele").length;
+  const nbClotures = segments.filter((etat) => etat === "correcte" || etat === "aide" || etat === "revele" || etat === "sans-objet").length;
   const pourcentage = Math.round((nbClotures / segments.length) * 100);
 
   return (

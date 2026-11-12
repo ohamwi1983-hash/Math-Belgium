@@ -20,7 +20,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "domaine" — UNIQUEMENT `rationnelleAvecCE` (domaine=ℝ sinon, écran sauté). Réutilise
+/** Écran "domaine" — toute fonction rationnelle, avec ou sans valeur interdite (audit 5e ch. 5). Réutilise
  * DIRECTEMENT `EnsembleReelGuideBuilder` (Couche B↔B partagée 5e/6e), jamais réimplémenté.
  * Calculatrice ABSENTE (question symbolique/structurelle). */
 export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
@@ -42,7 +42,7 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
       <p className="prompt-text">{consigneEcranEtudeLocale("domaine")}</p>
       <EnsembleReelGuideBuilder
         onValider={onValider}
-        prefixApercu="domf ="
+        prefixApercu="dom f ="
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         attendu={domaineAttendu(exercice)}
         apresEchec={montrerErreurs}
@@ -50,7 +50,15 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
       />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1EtudeLocale("domaine")}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1EtudeLocale("domaine", exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 &&
             (() => {
               const aide2 = texteAideNiveau2EtudeLocale("domaine");

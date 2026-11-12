@@ -8,7 +8,14 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesDefinitionDerivee";
 import type { EcranDefinitionDerivee, EtatSessionDefinitionDerivee, ResultatExerciceDefinitionDerivee } from "./typesDefinitionDerivee";
-import { diagnostiquerDeveloppementH, diagnostiquerLimiteDerivee, diagnostiquerQuotientH, diagnostiquerValeurFA } from "./verificationDefinitionDerivee";
+import {
+  controlerFormeDeveloppement,
+  controlerFormeQuotient,
+  diagnostiquerDeveloppementH,
+  diagnostiquerLimiteDerivee,
+  diagnostiquerQuotientH,
+  diagnostiquerValeurFA,
+} from "./verificationDefinitionDerivee";
 
 const POINTS_DE_BASE = 100;
 
@@ -62,7 +69,7 @@ function soumettreEcran<T>(etat: EtatSessionDefinitionDerivee, ecranAttendu: Ecr
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
   const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
-  const phaseSuivante = phaseApres(etat.phase);
+  const phaseSuivante = phaseApres(etat.phase, etat.exerciceCourant);
 
   if (phaseSuivante === "termine") {
     return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
@@ -86,7 +93,10 @@ export function soumettreReponseDevelopper(etat: EtatSessionDefinitionDerivee, r
     etat,
     "developper",
     reponse,
-    (r) => diagnostiquerValeurFA(r.fA, exercice, a) === "correct" && diagnostiquerDeveloppementH(r.fAH, exercice, a) === "correct",
+    (r) =>
+      diagnostiquerValeurFA(r.fA, exercice, a) === "correct" &&
+      diagnostiquerDeveloppementH(r.fAH, exercice, a) === "correct" &&
+      controlerFormeDeveloppement(r.fAH, exercice) === null,
   );
 }
 
@@ -97,7 +107,7 @@ export function soumettreReponseDevelopper(etat: EtatSessionDefinitionDerivee, r
 export function soumettreReponseQuotient(etat: EtatSessionDefinitionDerivee, texte: string): EtatSessionDefinitionDerivee {
   const exercice = etat.exerciceCourant;
   const a = exercice.a;
-  return soumettreEcran(etat, "quotient", texte, (t) => diagnostiquerQuotientH(t, exercice, a) === "correct");
+  return soumettreEcran(etat, "quotient", texte, (t) => diagnostiquerQuotientH(t, exercice, a) === "correct" && controlerFormeQuotient(t) === null);
 }
 
 // ============================================================================

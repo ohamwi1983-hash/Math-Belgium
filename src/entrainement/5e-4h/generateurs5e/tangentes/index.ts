@@ -21,49 +21,43 @@ import type {
 } from "../../core5e/tangentes.types";
 import { entierAleatoire, entierNonNul } from "../limites/fraction";
 
-function melanger<T>(arr: T[]): T[] {
-  const copie = [...arr];
-  for (let i = copie.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copie[i], copie[j]] = [copie[j], copie[i]];
-  }
-  return copie;
-}
-
-function plage(min: number, max: number): number[] {
-  const out: number[] = [];
-  for (let i = min; i <= max; i++) out.push(i);
-  return out;
-}
-
-/** 2 valeurs DISTINCTES tirées parmi `candidats` (≥2 éléments) — mélange puis prend les 2
- * premières, garantissant la distinction sans rejet/régénération (même patron que
- * `generateurs5e/definitionDerivee/index.ts::tirerDeuxDistincts`). */
-function tirerDeuxDistincts(candidats: number[]): [number, number] {
-  const melange = melanger(candidats);
-  return [melange[0], melange[1]];
-}
-
 // ============================================================================
 // Variante A — "pointDonne". 2 sous-familles à fréquence comparable.
 // ============================================================================
 
-/** Degré 2 ou 3, coefficients ascendants |coeff|≤5, coefficient de tête non nul. */
-export function genererPointDonnePolynomiale(): ExerciceTangentePointDonnePolynomiale {
-  const degre = Math.random() < 0.5 ? 2 : 3;
-  const coeffs: number[] = [];
-  for (let i = 0; i < degre; i++) coeffs.push(entierAleatoire(-5, 5));
-  coeffs.push(entierNonNul(5));
-  const a = entierAleatoire(-4, 4);
-  return { variante: "pointDonne", sousFamille: "polynomiale", coeffs, a };
+/** Abscisse du point : 0 rarement (≈ 1 fois sur 12), sinon un entier non nul de [−3 ; 3] — a = 0
+ * raccourcissait la substitution dans 11 à 14 % des tirages (audit 5e ch. 5, point 37). */
+function tirerAbscisse(): number {
+  return Math.random() < 1 / 12 ? 0 : entierNonNul(3);
 }
 
+/** Valeurs affichées raisonnables : |f(a)| et |f'(a)| ≤ 60 (audit 5e ch. 5, point 37 — jusqu'à
+ * 425 auparavant). */
+const BORNE_VALEURS = 60;
+
+/** Degré 2 ou 3, coefficients ascendants |coeff|≤5, coefficient de tête non nul. */
+export function genererPointDonnePolynomiale(): ExerciceTangentePointDonnePolynomiale {
+  for (;;) {
+    const degre = Math.random() < 0.5 ? 2 : 3;
+    const coeffs: number[] = [];
+    for (let i = 0; i < degre; i++) coeffs.push(entierAleatoire(-5, 5));
+    coeffs.push(entierNonNul(5));
+    const a = tirerAbscisse();
+    const exercice: ExerciceTangentePointDonnePolynomiale = { variante: "pointDonne", sousFamille: "polynomiale", coeffs, a };
+    if (Math.abs(valeurFPointDonne(exercice, a)) <= BORNE_VALEURS && Math.abs(deriveeFPointDonne(exercice, a)) <= BORNE_VALEURS) return exercice;
+  }
+}
+
+/** Radicandes NON carrés parfaits : f(a) et f'(a) sont des valeurs exactes avec une racine carrée
+ * irréductible (plus de « √4 » non simplifié — audit 5e ch. 5, point 34). */
+const RADICANDES_TANGENTE = [2, 3, 5, 6];
+
 /** f(x)=coeff·√(m·x+p) — `a` tiré en premier, `p` DÉDUIT pour que m·a+p tombe exactement sur un
- * entier positif ∈[2,6] (marge de domaine garantie par construction, jamais un rejet). */
+ * radicande non carré (marge de domaine garantie par construction, jamais un rejet). */
 export function genererPointDonneRadicale(): ExerciceTangentePointDonneRadicale {
-  const a = entierAleatoire(-3, 3);
+  const a = tirerAbscisse();
   const m = entierNonNul(3);
-  const radicandeCible = entierAleatoire(2, 6);
+  const radicandeCible = RADICANDES_TANGENTE[entierAleatoire(0, RADICANDES_TANGENTE.length - 1)];
   const p = radicandeCible - m * a;
   const coeff = entierNonNul(4);
   return { variante: "pointDonne", sousFamille: "radicale", coeff, m, p, a };
@@ -96,14 +90,31 @@ function construireHorizontaleAvecRacines(racines: number[]): ExerciceTangenteHo
   return { variante: "horizontale", a, b, c, d, racines };
 }
 
+/** Racine 0 rarement (elle annule c et raccourcit le calcul — 14 à 29,5 % des tirages avant
+ * l'audit 5e ch. 5, point 37). */
+function tirerRacine(): number {
+  return Math.random() < 1 / 20 ? 0 : entierNonNul(3);
+}
+
+function ordonneesRaisonnables(exercice: ExerciceTangenteHorizontale): boolean {
+  return exercice.racines.every((r) => Math.abs(valeurFHorizontale(exercice, r)) <= BORNE_VALEURS);
+}
+
 export function genererHorizontaleRacineDouble(): ExerciceTangenteHorizontale {
-  const r = entierAleatoire(-3, 3);
-  return construireHorizontaleAvecRacines([r]);
+  for (;;) {
+    const exercice = construireHorizontaleAvecRacines([tirerRacine()]);
+    if (ordonneesRaisonnables(exercice)) return exercice;
+  }
 }
 
 export function genererHorizontaleRacinesDistinctes(): ExerciceTangenteHorizontale {
-  const [r1, r2] = tirerDeuxDistincts(plage(-3, 3));
-  return construireHorizontaleAvecRacines([r1, r2]);
+  for (;;) {
+    const r1 = tirerRacine();
+    let r2 = tirerRacine();
+    while (r2 === r1) r2 = tirerRacine();
+    const exercice = construireHorizontaleAvecRacines([r1, r2]);
+    if (ordonneesRaisonnables(exercice)) return exercice;
+  }
 }
 
 export function genererHorizontale(): ExerciceTangenteHorizontale {
@@ -127,19 +138,27 @@ export function multiplierPolynomes(p: number[], q: number[]): number[] {
   return resultat;
 }
 
-const K_CANDIDATS = [1, -1, 2, -2];
+const K_CANDIDATS = [1, -1, 1, -1, 2, -2];
+
+/** Coefficients du quartique développé bornés (|eᵢ| ≤ 40 — jusqu'à 165 avant l'audit 5e ch. 5,
+ * point 37) ; p = 0 et pente nulle (m = 0) deviennent rares (≈ 14,5 % chacun auparavant). */
+const BORNE_COEFFS_QUARTIQUE = 40;
 
 export function genererDoubleTangence(): ExerciceTangenteDoubleTangence {
-  const m = entierAleatoire(-3, 3);
-  const c = entierAleatoire(-3, 3);
-  const [p, q] = tirerDeuxDistincts(plage(-3, 3));
-  const k = K_CANDIDATS[entierAleatoire(0, K_CANDIDATS.length - 1)];
-  const quadP = [p * p, -2 * p, 1]; // (x-p)² ascendant
-  const quadQ = [q * q, -2 * q, 1]; // (x-q)² ascendant
-  const quartique = multiplierPolynomes(quadP, quadQ).map((v) => v * k);
-  quartique[0] += c;
-  quartique[1] += m;
-  return { variante: "doubleTangence", coeffs: quartique, p, q };
+  for (;;) {
+    const m = Math.random() < 1 / 20 ? 0 : entierNonNul(3);
+    const c = entierAleatoire(-3, 3);
+    const p = Math.random() < 1 / 20 ? 0 : entierNonNul(2);
+    let q = entierAleatoire(-3, 3);
+    while (q === p) q = entierAleatoire(-3, 3);
+    const k = K_CANDIDATS[entierAleatoire(0, K_CANDIDATS.length - 1)];
+    const quadP = [p * p, -2 * p, 1]; // (x-p)² ascendant
+    const quadQ = [q * q, -2 * q, 1]; // (x-q)² ascendant
+    const quartique = multiplierPolynomes(quadP, quadQ).map((v) => v * k);
+    quartique[0] += c;
+    quartique[1] += m;
+    if (quartique.every((v) => Math.abs(v) <= BORNE_COEFFS_QUARTIQUE)) return { variante: "doubleTangence", coeffs: quartique, p, q };
+  }
 }
 
 // ============================================================================

@@ -8,9 +8,18 @@ import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiveau2ExtremaBornes } from "../ui5e/formatExtremaBornes";
+import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
+import { TexteRiche5e } from "./TexteRiche5e";
+import { AideExtremaBornesBloc } from "./AideExtremaBornesBloc";
 
 interface Props {
   phase: EcranExtremaBornes;
+  exercice: ExerciceExtremaBornes;
+  /** Contrôle de forme AVANT soumission (écran « racines » : champ vide, doublon) — renvoie un
+   * message affiché SANS consommer de tentative, ou `null` si la saisie peut être soumise. */
+  controlerAvantSoumission?: (valeurs: string[]) => string | null;
+  /** Calculatrice affichée (défaut : oui) — inutile pour résoudre f'(t)=0 (valeurs entières). */
+  avecCalculatrice?: boolean;
   labels: string[];
   placeholders: string[];
   tentativesUtilisees: number;
@@ -35,30 +44,39 @@ interface Props {
  * resynchronisation dès le départ (voir CLAUDE.md : piège de troncature d'état déjà rencontré 2
  * fois cette semaine sur ce patron de composant à N champs). Calculatrice PRÉSENTE (valeur décimale
  * calculée à la main, même si toujours entière ici par construction — convention transversale). */
-export function EtapeChampsNumeriquesExtremaBornes({ phase, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsNumeriquesExtremaBornes({ phase, exercice, controlerAvantSoumission, avecCalculatrice = true, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
   useEffect(() => {
     setValeurs(new Array(nb).fill(""));
   }, [nb]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [messageForme, setMessageForme] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
-  const complet = valeurs.every((v) => v.trim() !== "");
+  const complet = controlerAvantSoumission ? valeurs.some((v) => v.trim() !== "") : valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
-  const statuts = apresEchec && diagnostiquer && complet ? valeurs.map((v) => diagnostiquer(v)) : null;
+  const statuts = apresEchec && diagnostiquer && valeurs.every((v) => v.trim() !== "") ? valeurs.map((v) => diagnostiquer(v)) : null;
 
   function modifier(i: number, valeur: string) {
+    setMessageForme(null);
     setValeurs((arr) => arr.map((v, j) => (j === i ? valeur : v)));
   }
   function valider() {
     if (!complet) return;
+    const message = controlerAvantSoumission?.(valeurs) ?? null;
+    if (message) {
+      setMessageForme(message);
+      return;
+    }
     if (diagnostiquer) setDernierStatut(valeurs.map((v) => diagnostiquer(v)).find((s) => s !== "correct") ?? "correct");
     onValider(valeurs);
   }
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcranExtremaBornes(phase)}</p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranExtremaBornes(phase, exercice)} />
+      </p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">
           <label className="field-label field-label-minuscule">
@@ -73,23 +91,24 @@ export function EtapeChampsNumeriquesExtremaBornes({ phase, labels, placeholders
           />
         </div>
       ))}
-      <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes(phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes(phase)}</p>}
-        </div>
-      )}
+      {avecCalculatrice && <CalculatriceScientifique />}
+      <AideExtremaBornesBloc niveauAide={niveauAide} niveau1={texteAideNiveau1ExtremaBornes(phase, exercice)} niveau2={texteAideNiveau2ExtremaBornes(phase, exercice)} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageForme ? (
           <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            {messageForme}
           </p>
+        ) : (
+          montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            </p>
+          )
         )}
         </>
       )}

@@ -122,51 +122,70 @@ function finaliserPolynomiale(
   return { type: "polynomiale", niveau, natureRacines: nature, a, b, c, d, racinesFPrime, classificationFPrime, racinesFSeconde, classificationFSeconde, exclusionsCE: [] };
 }
 
+/** Valeurs de f aux points critiques (zéros de f' et de f'') bornées : |f| ≤ 25 (audit 5e ch. 5,
+ * point 39 — jusqu'à 85,72 auparavant). Tirage par rejet, toujours rapide (> 30 % d'acceptation). */
+const BORNE_VALEURS_F = 25;
+
+function valeursRaisonnables(exercice: ExerciceEtudeLocalePolynomiale): boolean {
+  const xs = [...exercice.racinesFPrime, ...exercice.racinesFSeconde].map(valeurNumeriqueRacineEtudeLocale);
+  return xs.every((x) => Math.abs(valeurFEtudeLocale(exercice, x)) <= BORNE_VALEURS_F);
+}
+
 /** 2 racines DISTINCTES rationnelles (ici entières). 3a>0 : f' change de + à - en r1 (MAX) puis de
  * - à + en r2 (min) ; 3a<0 : l'inverse. */
 export function genererPolynomialeSimple(niveau: NiveauEtudeLocale): ExerciceEtudeLocalePolynomiale {
-  const a = A_COEF[entierAleatoire(0, A_COEF.length - 1)];
-  const [x1, x2] = tirerDeuxDistincts(plage(-3, 3));
-  const r1 = Math.min(x1, x2);
-  const r2 = Math.max(x1, x2);
-  const b = (-3 * a * (r1 + r2)) / 2;
-  const c = 3 * a * r1 * r2;
-  const d = entierAleatoire(-5, 5);
-  const classePetite: ClassificationExtremum = a > 0 ? "max" : "min";
-  const classeGrande: ClassificationExtremum = a > 0 ? "min" : "max";
-  return finaliserPolynomiale("simple", a, b, c, d, [racineExacteEntiere(r1), racineExacteEntiere(r2)], [classePetite, classeGrande], niveau);
+  for (;;) {
+    const a = A_COEF[entierAleatoire(0, A_COEF.length - 1)];
+    const [x1, x2] = tirerDeuxDistincts(plage(-3, 3));
+    const r1 = Math.min(x1, x2);
+    const r2 = Math.max(x1, x2);
+    const b = (-3 * a * (r1 + r2)) / 2;
+    const c = 3 * a * r1 * r2;
+    const d = entierAleatoire(-5, 5);
+    const classePetite: ClassificationExtremum = a > 0 ? "max" : "min";
+    const classeGrande: ClassificationExtremum = a > 0 ? "min" : "max";
+    const exercice = finaliserPolynomiale("simple", a, b, c, d, [racineExacteEntiere(r1), racineExacteEntiere(r2)], [classePetite, classeGrande], niveau);
+    if (valeursRaisonnables(exercice)) return exercice;
+  }
 }
 
 /** 1 racine DOUBLE — f' TOUCHE zéro sans changer de signe : jamais un extremum, TOUJOURS
  * "ni_lun_ni_lautre" — le piège central de ce générateur. */
 export function genererPolynomialeDouble(niveau: NiveauEtudeLocale): ExerciceEtudeLocalePolynomiale {
-  const a = A_COEF[entierAleatoire(0, A_COEF.length - 1)];
-  const r = entierAleatoire(-3, 3);
-  const b = -3 * a * r;
-  const c = 3 * a * r * r;
-  const d = entierAleatoire(-5, 5);
-  return finaliserPolynomiale("double", a, b, c, d, [racineExacteEntiere(r)], ["ni_lun_ni_lautre"], niveau);
+  for (;;) {
+    const a = A_COEF[entierAleatoire(0, A_COEF.length - 1)];
+    const r = entierAleatoire(-3, 3);
+    const b = -3 * a * r;
+    const c = 3 * a * r * r;
+    const d = entierAleatoire(-5, 5);
+    const exercice = finaliserPolynomiale("double", a, b, c, d, [racineExacteEntiere(r)], ["ni_lun_ni_lautre"], niveau);
+    if (valeursRaisonnables(exercice)) return exercice;
+  }
 }
 
-/** Radicandes non-carrés-parfaits (2,3,5,6,7,8) — garantit des racines IRRATIONNELLES à coup sûr,
- * jamais une régénération. */
-const RADICANDES_NON_CARRES = [2, 3, 5, 6, 7, 8];
+/** Radicandes non-carrés-parfaits (2,3,5,6,7) — garantit des racines IRRATIONNELLES à coup sûr. */
+const RADICANDES_NON_CARRES = [2, 3, 5, 6, 7];
 
-/** 2 racines IRRATIONNELLES symétriques autour d'un centre entier `e` — f'(x)=3a(x-e)²-m,
- * `a>0` strictement (nécessaire pour que le radicande m/(3a) reste positif, voir tête de fichier).
- * Même comportement de signe que "simple" (3a>0 ⟹ petite racine=MAX, grande=min), car `a` est ici
- * toujours positif. */
+/** 2 racines IRRATIONNELLES symétriques autour d'un centre entier `e` — f'(x)=3a(x-e)²-m avec
+ * m=3a·radicande (de même signe que a, pour que le radicande reste positif). `a` est tiré
+ * POSITIF OU NÉGATIF (audit 5e ch. 5 : auparavant toujours a>0, donc toujours un maximum puis un
+ * minimum) : 3a>0 ⟹ petite racine=MAX, grande=min ; 3a<0 ⟹ l'inverse. Réutilisé tel quel par
+ * 5gen31 (`generateurs5e/etudierFonction`), qui lit la classification stockée. */
 export function genererPolynomialeIrrationnelle(niveau: NiveauEtudeLocale): ExerciceEtudeLocalePolynomiale {
-  const a = entierAleatoire(1, 2);
-  const e = entierAleatoire(-3, 3);
-  const radicande = RADICANDES_NON_CARRES[entierAleatoire(0, RADICANDES_NON_CARRES.length - 1)];
-  const m = 3 * a * radicande;
-  const b = -3 * a * e;
-  const c = 3 * a * e * e - m;
-  const d = entierAleatoire(-5, 5);
-  const petite: RacineEtudeLocale = { exact: false, centre: e, radicande, signe: -1 };
-  const grande: RacineEtudeLocale = { exact: false, centre: e, radicande, signe: 1 };
-  return finaliserPolynomiale("irrationnelle", a, b, c, d, [petite, grande], ["max", "min"], niveau);
+  for (;;) {
+    const a = [-2, -1, 1, 2][entierAleatoire(0, 3)];
+    const e = entierAleatoire(-2, 2);
+    const radicande = RADICANDES_NON_CARRES[entierAleatoire(0, RADICANDES_NON_CARRES.length - 1)];
+    const m = 3 * a * radicande;
+    const b = -3 * a * e;
+    const c = 3 * a * e * e - m;
+    const d = entierAleatoire(-5, 5);
+    const petite: RacineEtudeLocale = { exact: false, centre: e, radicande, signe: -1 };
+    const grande: RacineEtudeLocale = { exact: false, centre: e, radicande, signe: 1 };
+    const classes: ClassificationExtremum[] = a > 0 ? ["max", "min"] : ["min", "max"];
+    const exercice = finaliserPolynomiale("irrationnelle", a, b, c, d, [petite, grande], classes, niveau);
+    if (valeursRaisonnables(exercice)) return exercice;
+  }
 }
 
 export function genererPolynomiale(nature: NatureRacinesEtudeLocale, niveau: NiveauEtudeLocale): ExerciceEtudeLocalePolynomiale {

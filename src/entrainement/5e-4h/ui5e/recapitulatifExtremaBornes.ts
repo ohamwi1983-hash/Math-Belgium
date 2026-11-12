@@ -5,7 +5,8 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 
 const LIBELLE_PHASE: Record<EcranExtremaBornes, string> = {
   deriver: "Dérivée f'(t)",
-  tableauFPrime: "Racines de f'(t)=0",
+  racines: "Solutions de f'(t) = 0",
+  tableauFPrime: "Nature des extremums locaux",
   valeursExtremums: "Valeurs aux extremums",
   valeursBornes: "Valeurs aux bornes",
   comparaison: "Comparaison",

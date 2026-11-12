@@ -213,6 +213,13 @@
   background: var(--color-primary);
 }
 
+/* Écran sans objet pour cet exercice (structure fixe du niveau, voir `EtatPuceProgression`) :
+ * hachures neutres, ni réussite ni échec. */
+.entrainement .progression-puce-sans-objet {
+  background: repeating-linear-gradient(135deg, var(--color-border) 0 4px, var(--color-text-muted) 4px 6px);
+  opacity: 0.6;
+}
+
 /* Puce "correcte"/"revele" rendue comme <button> (voir `ProgressionPuces.onSegmentClick`) — même
  * couleur que sa variante <span>, juste une affordance de clic en plus (jamais un changement de
  * couleur, qui romprait la lecture rapide des puces non cliquables encore majoritaires sur le

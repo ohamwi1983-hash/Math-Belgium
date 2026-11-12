@@ -16,11 +16,10 @@
  *
  * Écran "deriver" : différence finie CENTRÉE de `valeurFOptimisation` (jamais une 2e formule
  * symbolique côté moteur) — même technique que `deriveeParDifferenceFinie`
- * (`verificationFonctionDerivee.ts`, 5gen27). Écran "justifier" (mode "tableau") : signe RÉEL de la
- * différence finie avant/après la racine, jamais une formule fermée mémorisée — garantit que le
- * signe attendu reste cohérent avec `valeurFOptimisation` même si un paramètre de famille change un
- * jour. Écran "justifier" (mode "signeSeconde", famille "trapeze" uniquement) : différence finie du
- * 2e ordre.
+ * (`verificationFonctionDerivee.ts`, 5gen27). Écran "justifier" (toutes les familles, trapèze
+ * compris — plus de test par A'', audit 5e ch. 5, décision A) : l'élève calcule F' en deux points
+ * test « ronds » de part et d'autre de l'optimum (`pointsTest`), puis choisit la nature (UNE seule
+ * tentative sur ce choix, voir `sessionOptimisationGeometrique.ts`).
  *
  * Famille "trapeze" — α en RADIANS (voir `core5e/optimisationGeometrique.types.ts`) : `sin`/`cos`
  * interceptés et évalués en radians AVANT délégation à `evaluerExpressionGenerale` (câblé en
@@ -45,8 +44,12 @@ export function valeurHauteurTrapeze(ex: ExerciceTrapeze, alpha: number): number
 export function valeurBaseSupTrapeze(ex: ExerciceTrapeze, alpha: number): number {
   return ex.b + 2 * ex.l * Math.cos(alpha);
 }
+export function uOptTrapeze(ex: ExerciceTrapeze): number {
+  if (ex.u) return ex.u.num / ex.u.den;
+  return (-ex.b + Math.sqrt(ex.b * ex.b + 8 * ex.l * ex.l)) / (4 * ex.l);
+}
 export function alphaOptTrapeze(ex: ExerciceTrapeze): number {
-  return Math.acos(ex.u.num / ex.u.den);
+  return Math.acos(uOptTrapeze(ex));
 }
 export function valeurHauteurCylindre(ex: ExerciceCylindre, x: number): number {
   const V = ex.coeffV * Math.PI;
@@ -171,7 +174,9 @@ function pointValide(v: number): boolean {
 
 export function diagnostiquerNombreTolerant(texte: string, cible: number, tolerance: number): StatutVerification {
   try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
+    // « x = 4 », « h = 3,46 » : un préfixe « nom = » recopié depuis le libellé est ignoré.
+    const sansPrefixe = texte.includes("=") ? texte.slice(texte.lastIndexOf("=") + 1) : texte;
+    const valeur = evaluerExpressionGenerale(sansPrefixe, 0);
     if (!Number.isFinite(valeur)) return "parse_error";
     return Math.abs(valeur - cible) <= tolerance ? "correct" : "not_equivalent";
   } catch {
@@ -242,16 +247,6 @@ export function deriveeParDifferenceFinie(ex: ExerciceOptimisation, x: number): 
   return (droite - gauche) / (2 * EPS_DIFFERENCE_FINIE);
 }
 
-const H_DIFFERENCE_SECONDE = 1e-3;
-
-export function deriveeSecondeParDifferenceFinie(ex: ExerciceOptimisation, x: number): number | null {
-  const gauche = valeurFOptimisation(ex, x - H_DIFFERENCE_SECONDE);
-  const centre = valeurFOptimisation(ex, x);
-  const droite = valeurFOptimisation(ex, x + H_DIFFERENCE_SECONDE);
-  if (!pointValide(gauche) || !pointValide(centre) || !pointValide(droite)) return null;
-  return (droite - 2 * centre + gauche) / (H_DIFFERENCE_SECONDE * H_DIFFERENCE_SECONDE);
-}
-
 /** Vérifie le champ symbolique "dérivée" par différence finie centrée de `valeurFOptimisation`,
  * échantillonnée sur `pointsEchantillonDomaine`. */
 export function diagnostiquerDerivee(texte: string, ex: ExerciceOptimisation): StatutVerification {
@@ -289,8 +284,8 @@ export function xOptimal(ex: ExerciceOptimisation): number {
   }
 }
 
-/** Bornes du domaine physique (x borné supérieurement pour "fenetreA"/"fenetreB", jamais ailleurs)
- * — utilisées pour placer un point "avant"/"après" x_opt qui reste dans le domaine. */
+/** Bornes du domaine physique (x borné supérieurement pour "trapeze" et "fenetreA"/"fenetreB") —
+ * utilisées pour placer les points test, qui doivent rester dans le domaine. */
 function bornesDomaine(ex: ExerciceOptimisation): { min: number; max: number } {
   switch (ex.famille) {
     case "trapeze":
@@ -303,37 +298,65 @@ function bornesDomaine(ex: ExerciceOptimisation): { min: number; max: number } {
       const A = valeurNumeriqueAvecPi(ex.A as ValeurAvecPi);
       return { min: 0, max: Math.sqrt((2 * A) / Math.PI) };
     }
+    case "margesA":
+      return { min: 0, max: (ex.T as number) / (2 * ex.mv) - 2 * ex.mh };
     default:
       return { min: 0, max: Infinity };
   }
 }
 
-export function pointAvantApres(ex: ExerciceOptimisation): { avant: number; apres: number } {
-  const opt = xOptimal(ex);
-  const { min, max } = bornesDomaine(ex);
-  const avant = opt - 0.4 * (opt - min);
-  const apres = Number.isFinite(max) ? opt + 0.4 * (max - opt) : opt * 1.6;
-  return { avant, apres };
+/** Deux points test « ronds » de part et d'autre de l'optimum, dans le domaine : `avant`/`apres`
+ * dans l'unité de calcul (radians pour le trapèze), `affichageAvant`/`affichageApres` dans l'unité
+ * montrée à l'élève (degrés pour le trapèze, sinon identiques). */
+export interface PointsTest {
+  avant: number;
+  apres: number;
+  affichageAvant: number;
+  affichageApres: number;
 }
 
-export type SigneChoix = "+" | "-";
+export function pointsTest(ex: ExerciceOptimisation): PointsTest {
+  if (ex.famille === "trapeze") {
+    const optDeg = (alphaOptTrapeze(ex) * 180) / Math.PI;
+    let avantDeg = Math.floor((optDeg - 3) / 10) * 10;
+    if (avantDeg < 10) avantDeg = 10;
+    let apresDeg = Math.ceil((optDeg + 3) / 10) * 10;
+    if (apresDeg >= 90) apresDeg = 85;
+    return { avant: (avantDeg * Math.PI) / 180, apres: (apresDeg * Math.PI) / 180, affichageAvant: avantDeg, affichageApres: apresDeg };
+  }
+  const opt = xOptimal(ex);
+  const { min, max } = bornesDomaine(ex);
+  for (const pas of [1, 0.5, 0.25, 0.1]) {
+    let avant = Math.floor((opt - 1e-9) / pas) * pas;
+    if (opt - avant < 0.2 * pas) avant -= pas;
+    let apres = Math.ceil((opt + 1e-9) / pas) * pas;
+    if (apres - opt < 0.2 * pas) apres += pas;
+    avant = Math.round(avant * 100) / 100;
+    apres = Math.round(apres * 100) / 100;
+    if (avant > min + 1e-9 && apres < max - 1e-9) return { avant, apres, affichageAvant: avant, affichageApres: apres };
+  }
+  const avant = (min + opt) / 2;
+  const apres = Number.isFinite(max) ? (opt + max) / 2 : opt * 1.5;
+  return { avant, apres, affichageAvant: avant, affichageApres: apres };
+}
 
-export function signeReelAvantApres(ex: ExerciceOptimisation): { avant: SigneChoix; apres: SigneChoix } {
-  const { avant, apres } = pointAvantApres(ex);
-  const dAvant = deriveeParDifferenceFinie(ex, avant) ?? 0;
-  const dApres = deriveeParDifferenceFinie(ex, apres) ?? 0;
-  return { avant: dAvant >= 0 ? "+" : "-", apres: dApres >= 0 ? "+" : "-" };
+/** Valeurs EXACTES (à la différence finie près) de F' aux deux points test. */
+export function valeursDeriveePointsTest(ex: ExerciceOptimisation): { avant: number; apres: number } {
+  const { avant, apres } = pointsTest(ex);
+  return { avant: deriveeParDifferenceFinie(ex, avant) ?? 0, apres: deriveeParDifferenceFinie(ex, apres) ?? 0 };
 }
 
 export type ConclusionExtremum = "max" | "min";
 
 export function conclusionReelle(ex: ExerciceOptimisation): ConclusionExtremum {
-  if (ex.famille === "trapeze") {
-    const seconde = deriveeSecondeParDifferenceFinie(ex, alphaOptTrapeze(ex)) ?? -1;
-    return seconde < 0 ? "max" : "min";
-  }
-  const { avant, apres } = signeReelAvantApres(ex);
-  return avant === "+" && apres === "-" ? "max" : "min";
+  const { avant, apres } = valeursDeriveePointsTest(ex);
+  return avant > 0 && apres < 0 ? "max" : "min";
+}
+
+/** Valeur de F' saisie à un point test : seul son SIGNE sert à conclure, la valeur est acceptée à
+ * 1 % près (annoncé : « valeurs arrondies au centième acceptées »). */
+export function diagnostiquerValeurPointTest(texte: string, cible: number): StatutVerification {
+  return diagnostiquerNombreTolerant(texte, cible, 0.011 + 0.01 * Math.abs(cible));
 }
 
 // ============================================================================
@@ -397,35 +420,50 @@ export function justificationCorrecteId(): string {
   return "positive_longueur";
 }
 
+/** Précisions ANNONCÉES à l'écran (`ui5e/formatOptimisationGeometrique.ts::PRECISION_*`) — les
+ * tolérances ci-dessous les couvrent exactement (valeur exacte, ou arrondi au centième ; α arrondi
+ * au degré). */
+const TOL_CENTIEME = 0.0051;
+const TOL_DEGRE = 0.51;
+
 export function diagnostiquerRacineTrapezeU(texte: string, ex: ExerciceTrapeze): StatutVerification {
-  return diagnostiquerNombreTolerant(texte, ex.u.num / ex.u.den, 1e-4);
+  return diagnostiquerNombreTolerant(texte, uOptTrapeze(ex), TOL_CENTIEME);
 }
+/** α arrondi au degré, éventuellement calculé à partir de u déjà arrondi au centième : l'arrondi de
+ * u déplace α d'au plus 0,0051/sin α radian, ajouté à la demi-unité d'arrondi. */
+function toleranceAlphaDegres(ex: ExerciceTrapeze): number {
+  return TOL_DEGRE + ((TOL_CENTIEME / Math.sin(alphaOptTrapeze(ex))) * 180) / Math.PI;
+}
+
 export function diagnostiquerRacineTrapezeAlphaDegres(texte: string, ex: ExerciceTrapeze): StatutVerification {
   const cibleDegres = (alphaOptTrapeze(ex) * 180) / Math.PI;
-  return diagnostiquerNombreTolerant(texte, cibleDegres, 0.5);
+  return diagnostiquerNombreTolerant(texte, cibleDegres, toleranceAlphaDegres(ex));
 }
 
 export function diagnostiquerRacine(texte: string, ex: ExerciceOptimisation): StatutVerification {
-  const cible = xOptimal(ex);
-  const toleranceRoundedFamilies: ExerciceOptimisation["famille"][] = ["fenetreA", "fenetreB"];
-  const tol = toleranceRoundedFamilies.includes(ex.famille) ? 0.01 : 1e-3;
-  return diagnostiquerNombreTolerant(texte, cible, tol);
+  return diagnostiquerNombreTolerant(texte, xOptimal(ex), TOL_CENTIEME);
+}
+
+/** Tolérance d'une dimension calculée à partir de l'optimum ARRONDI (au centième, ou au degré pour
+ * l'angle du trapèze) : arrondi propre + propagation de l'arrondi de l'optimum. */
+function toleranceDimension(fn: (x: number) => number, xOpt: number, ecartOptimum: number): number {
+  const h = 1e-5;
+  const pente = Math.abs((fn(xOpt + h) - fn(xOpt - h)) / (2 * h));
+  return TOL_CENTIEME + 1.1 * pente * ecartOptimum + 1e-9;
+}
+
+/** Tolérance de la valeur optimale (F'(x_opt) = 0 : l'arrondi de l'optimum n'a qu'un effet du 2e
+ * ordre ; on couvre l'arrondi des dimensions intermédiaires par 0,5 % de la valeur). */
+function toleranceObjectif(valeur: number): number {
+  return 0.011 + 0.005 * Math.abs(valeur);
 }
 
 // ============================================================================
-// Écran "justifier".
+// Écran "justifier" — valeurs de F' aux points test, puis nature (un seul essai sur le choix).
 // ============================================================================
 
-export function diagnostiquerSigne(texte: string, attendu: SigneChoix): StatutVerification {
-  return texte === attendu ? "correct" : "not_equivalent";
-}
 export function diagnostiquerConclusion(texte: string, ex: ExerciceOptimisation): StatutVerification {
   return texte === conclusionReelle(ex) ? "correct" : "not_equivalent";
-}
-export function diagnostiquerSecondeTrapeze(texte: string, ex: ExerciceTrapeze): StatutVerification {
-  const cible = deriveeSecondeParDifferenceFinie(ex, alphaOptTrapeze(ex)) ?? 0;
-  const tol = Math.max(0.1, Math.abs(cible) * 0.03);
-  return diagnostiquerNombreTolerant(texte, cible, tol);
 }
 
 // ============================================================================
@@ -434,31 +472,36 @@ export function diagnostiquerSecondeTrapeze(texte: string, ex: ExerciceTrapeze):
 
 export function diagnostiquerConclureTrapeze(reponses: { hauteur: string; baseSup: string; aire: string }, ex: ExerciceTrapeze): Record<string, StatutVerification> {
   const alphaOpt = alphaOptTrapeze(ex);
+  const ecartAngle = (toleranceAlphaDegres(ex) * Math.PI) / 180;
+  const aire = valeurFOptimisation(ex, alphaOpt);
   return {
-    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurHauteurTrapeze(ex, alphaOpt), 0.01),
-    baseSup: diagnostiquerNombreTolerant(reponses.baseSup, valeurBaseSupTrapeze(ex, alphaOpt), 1e-3),
-    aire: diagnostiquerNombreTolerant(reponses.aire, valeurFOptimisation(ex, alphaOpt), 0.01),
+    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurHauteurTrapeze(ex, alphaOpt), toleranceDimension((a) => valeurHauteurTrapeze(ex, a), alphaOpt, ecartAngle)),
+    baseSup: diagnostiquerNombreTolerant(reponses.baseSup, valeurBaseSupTrapeze(ex, alphaOpt), toleranceDimension((a) => valeurBaseSupTrapeze(ex, a), alphaOpt, ecartAngle)),
+    aire: diagnostiquerNombreTolerant(reponses.aire, aire, toleranceObjectif(aire) + 0.01 * Math.abs(aire)),
   };
 }
 
 export function diagnostiquerConclureCylindre(reponses: { hauteur: string; aire: string }, ex: ExerciceCylindre): Record<string, StatutVerification> {
+  const aire = valeurFOptimisation(ex, ex.xOpt);
   return {
-    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurHauteurCylindre(ex, ex.xOpt), 1e-3),
-    aire: diagnostiquerNombreTolerant(reponses.aire, valeurFOptimisation(ex, ex.xOpt), 0.01),
+    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurHauteurCylindre(ex, ex.xOpt), toleranceDimension((x) => valeurHauteurCylindre(ex, x), ex.xOpt, TOL_CENTIEME)),
+    aire: diagnostiquerNombreTolerant(reponses.aire, aire, toleranceObjectif(aire)),
   };
 }
 
 export function diagnostiquerConclureMarges(reponses: { y: string; aire: string }, ex: ExerciceMarges): Record<string, StatutVerification> {
+  const aire = valeurFOptimisation(ex, ex.xOpt);
   return {
-    y: diagnostiquerNombreTolerant(reponses.y, valeurLienMarges(ex, ex.xOpt), 1e-3),
-    aire: diagnostiquerNombreTolerant(reponses.aire, valeurFOptimisation(ex, ex.xOpt), 1e-3),
+    y: diagnostiquerNombreTolerant(reponses.y, valeurLienMarges(ex, ex.xOpt), toleranceDimension((x) => valeurLienMarges(ex, x), ex.xOpt, TOL_CENTIEME)),
+    aire: diagnostiquerNombreTolerant(reponses.aire, aire, toleranceObjectif(aire)),
   };
 }
 
 export function diagnostiquerConclureFenetre(reponses: { hauteur: string; objectif: string }, ex: ExerciceFenetre): Record<string, StatutVerification> {
+  const objectif = valeurFOptimisation(ex, ex.rOpt);
   return {
-    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurLienFenetre(ex, ex.rOpt), 0.01),
-    objectif: diagnostiquerNombreTolerant(reponses.objectif, valeurFOptimisation(ex, ex.rOpt), 0.01),
+    hauteur: diagnostiquerNombreTolerant(reponses.hauteur, valeurLienFenetre(ex, ex.rOpt), toleranceDimension((r) => valeurLienFenetre(ex, r), ex.rOpt, TOL_CENTIEME)),
+    objectif: diagnostiquerNombreTolerant(reponses.objectif, objectif, toleranceObjectif(objectif)),
   };
 }
 
@@ -472,9 +515,10 @@ export function coutOptimalCylindre(ex: ExerciceCylindre): number {
   return (ex.prixUnitaireMateriau ?? 0) * aireOptimale;
 }
 
+/** Annoncé « arrondi au centime » ; l'arrondi de S_min au centième n'a qu'un effet négligeable. */
 export function diagnostiquerApplicationCylindre(texte: string, ex: ExerciceCylindre): StatutVerification {
   const cible = coutOptimalCylindre(ex);
-  return diagnostiquerNombreTolerant(texte, cible, Math.max(0.05, Math.abs(cible) * 0.01));
+  return diagnostiquerNombreTolerant(texte, cible, TOL_CENTIEME + 0.002 * Math.abs(cible));
 }
 
 // ============================================================================
@@ -538,13 +582,10 @@ export function diagnostiquerEcran(ex: ExerciceOptimisation, phase: EcranOptimis
       return out;
     }
     case "justifier": {
-      if (ex.famille === "trapeze") {
-        return { Aseconde: diagnostiquerSecondeTrapeze(r("Aseconde"), ex), conclusion: diagnostiquerConclusion(r("conclusion"), ex) };
-      }
-      const { avant, apres } = signeReelAvantApres(ex);
+      const valeurs = valeursDeriveePointsTest(ex);
       return {
-        signeAvant: diagnostiquerSigne(r("signeAvant"), avant),
-        signeApres: diagnostiquerSigne(r("signeApres"), apres),
+        deriveeAvant: diagnostiquerValeurPointTest(r("deriveeAvant"), valeurs.avant),
+        deriveeApres: diagnostiquerValeurPointTest(r("deriveeApres"), valeurs.apres),
         conclusion: diagnostiquerConclusion(r("conclusion"), ex),
       };
     }
@@ -585,6 +626,16 @@ export function diagnostiquerEcran(ex: ExerciceOptimisation, phase: EcranOptimis
     case "expressionFinale":
       return { f: ex.famille === "cubique" ? diagnostiquerExpressionFinaleCubique(r("f"), ex) : "parse_error" };
   }
+}
+
+/** Identifiants des champs à CHOIX FERMÉ (boutons) — un seul essai sur ces choix (audit 5e ch. 5,
+ * point 11) : un choix faux clôt l'écran (`sessionOptimisationGeometrique.ts`), et l'écran gèle le
+ * choix après la première validation (`EtapeGeneriqueOptimisation.tsx`). */
+export const CHAMPS_CHOIX_FERME = ["justification", "conclusion"];
+
+export function choixFermeErrone(ex: ExerciceOptimisation, phase: EcranOptimisation, reponses: Record<string, string>): boolean {
+  const statuts = diagnostiquerEcran(ex, phase, reponses);
+  return CHAMPS_CHOIX_FERME.some((id) => statuts[id] !== undefined && statuts[id] !== "correct");
 }
 
 export function verifierEcran(ex: ExerciceOptimisation, phase: EcranOptimisation, reponses: Record<string, string>): boolean {

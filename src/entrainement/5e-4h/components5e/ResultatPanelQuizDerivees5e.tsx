@@ -1,4 +1,5 @@
 import type { ResultatExerciceQuizDerivees5e } from "../moteur5e/typesQuizDerivees5e";
+import { TexteRiche5e } from "./TexteRiche5e";
 
 interface Props {
   resultat: ResultatExerciceQuizDerivees5e;
@@ -28,7 +29,9 @@ export function ResultatPanelQuizDerivees5e({ resultat, labelBouton, onContinuer
   return (
     <div>
       <h2 className="result-title">{correct ? "Bonne réponse !" : "Mauvaise réponse"}</h2>
-      <p className="result-subtitle">{resultat.question.enonce}</p>
+      <p className="result-subtitle">
+        <TexteRiche5e texte={resultat.question.enonce} />
+      </p>
       <ul className="score-list">
         <li className="score-item">
           <span>Ta réponse</span>
@@ -44,7 +47,9 @@ export function ResultatPanelQuizDerivees5e({ resultat, labelBouton, onContinuer
         </li>
       </ul>
       <div className="aide-5e">
-        <p>{resultat.question.justification}</p>
+        <p>
+          <TexteRiche5e texte={resultat.question.justification} />
+        </p>
       </div>
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {labelBouton}

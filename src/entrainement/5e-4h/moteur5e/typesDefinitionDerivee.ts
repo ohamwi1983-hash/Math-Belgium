@@ -20,9 +20,19 @@ export function phaseInitiale(): EcranDefinitionDerivee {
   return ORDRE_COMPLET[0];
 }
 
-export function phaseApres(phase: EcranDefinitionDerivee): EcranDefinitionDerivee | "termine" {
-  const index = ORDRE_COMPLET.indexOf(phase);
-  return index + 1 < ORDRE_COMPLET.length ? ORDRE_COMPLET[index + 1] : "termine";
+/** Famille affine : le taux d'accroissement vaut toujours m, l'écran « quotient » ferait donc
+ * recopier la réponse de l'écran « limite » (audit 5c5a, point 27, décision B) — on saute
+ * directement de « developper » à « limite », où l'élève donne f'(a) en partant de la définition. */
+export const ORDRE_AFFINE: EcranDefinitionDerivee[] = ["developper", "limite"];
+
+export function ordreEcrans(exercice: ExerciceDefinitionDerivee): EcranDefinitionDerivee[] {
+  return exercice.famille === "affine" ? ORDRE_AFFINE : ORDRE_COMPLET;
+}
+
+export function phaseApres(phase: EcranDefinitionDerivee, exercice?: ExerciceDefinitionDerivee): EcranDefinitionDerivee | "termine" {
+  const ordre = exercice ? ordreEcrans(exercice) : ORDRE_COMPLET;
+  const index = ordre.indexOf(phase);
+  return index + 1 < ordre.length ? ordre[index + 1] : "termine";
 }
 
 export interface ResultatExerciceDefinitionDerivee {

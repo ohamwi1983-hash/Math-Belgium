@@ -24,7 +24,9 @@ import { FonctionRicheAssociationGraph } from "./components5e/FonctionRicheAssoc
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
+/** Une seule tentative : avec autant de menus que de lettres, plusieurs essais permettraient de
+ * trouver l'association par élimination (audit 5c5a, point 8). */
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 1 };
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -77,6 +79,9 @@ interface TransitionEnAttente {
 export function App5gen25() {
   const [etat, setEtat] = useState<EtatSessionAssociation>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Incrémenté à chaque nouvel exercice : entre dans la clé d'écran, pour que les menus
+   * reviennent à « Choisis… » même quand la famille ne change pas. */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionAssociation) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
@@ -91,11 +96,13 @@ export function App5gen25() {
     if (!enAttente) return;
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
+    setNumeroGeneration((g) => g + 1);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
     setEtat(demarrerSessionAssociation(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+    setNumeroGeneration((g) => g + 1);
   }
 
   const exercice = etat.exerciceCourant;
@@ -103,7 +110,7 @@ export function App5gen25() {
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAideMax = niveauAideMaxAssociation();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
-  const cleEcran = `${etat.indexExercice}-${exercice.famille}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${exercice.famille}`;
 
   const validation: ValidationEtapeProps | null = enAttente
     ? {
@@ -139,6 +146,7 @@ export function App5gen25() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Association graphique/mots ↔ signe de f'/f''</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -160,7 +168,7 @@ export function App5gen25() {
               diagnostiquerLignes(exercice.ordreLettres, choix, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined)
             }
             texteAideNiveau1={texteAideNiveau1Association(exercice)}
-            texteAideNiveau2={texteAideNiveau2Association(exercice)}
+            aideNiveau2={texteAideNiveau2Association(exercice)}
             libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
             validation={validation}
           />

@@ -12,11 +12,18 @@ interface Props {
   /** Aide (niveau 2) — colonnes à surligner en vert, absent tant que l'aide n'est pas activée.
    * Même principe que `GrilleQuotientDomfRecap.tsx` (5gen1). */
   highlight?: boolean[];
+  /** Bornes du domaine (LaTeX), défaut −∞ / +∞ — même prop optionnelle que
+   * `TableauEtudeLocaleBuilder` (5gen34 : domaine fermé [0 ; T]). */
+  bornes?: { gauche: string; droite: string };
+  /** Nom de la variable en tête de ligne — défaut « x ». */
+  variable?: string;
 }
+
+const BORNES_PAR_DEFAUT = { gauche: "-\\infty", droite: "+\\infty" };
 
 /** Rappel en lecture seule du tableau déjà complété — élément du bloc "état actuel" (écrans
  * ultérieurs) et du récapitulatif final. Jamais interactif (aucun cycle au clic). */
-export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attendu, highlight }: Props) {
+export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attendu, highlight, bornes = BORNES_PAR_DEFAUT, variable = "x" }: Props) {
   const libelleLigne2 = mode === "fprime" ? "Variations de f" : "Concavité de f";
   // Convention transversale "aide de lecture" (docs/conventions-transversales.md) : run de
   // colonnes surlignées consécutives fusionné en un rectangle continu (positionRunAide.ts) + ligne
@@ -37,9 +44,9 @@ export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attend
       <table className="grille-signes grille-signes-recap">
         <thead>
           <tr>
-            <th className="grille-signes-label">x</th>
+            <th className="grille-signes-label">{variable}</th>
             <th className="grille-signes-borne">
-              <Katex expression="-\infty" />
+              <Katex expression={bornes.gauche} />
             </th>
             {colonnes.map((_, j) => (
               <th key={j} className={classeColonne(j)}>
@@ -47,7 +54,7 @@ export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attend
               </th>
             ))}
             <th className="grille-signes-borne">
-              <Katex expression="+\infty" />
+              <Katex expression={bornes.droite} />
             </th>
           </tr>
         </thead>

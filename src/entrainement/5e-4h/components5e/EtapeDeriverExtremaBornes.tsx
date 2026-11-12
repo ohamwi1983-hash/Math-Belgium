@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiveau2ExtremaBornes } from "../ui5e/formatExtremaBornes";
 import { Katex } from "../components/Katex";
+import { TexteRiche5e } from "./TexteRiche5e";
+import { AideExtremaBornesBloc } from "./AideExtremaBornesBloc";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -41,7 +43,9 @@ export function EtapeDeriverExtremaBornes({ tentativesUtilisees, tentativesMax, 
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcranExtremaBornes("deriver")}</p>
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranExtremaBornes("deriver")} />
+      </p>
       <ApercuExpressionLatex texte={texte} label="f'(t)=" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
@@ -52,15 +56,10 @@ export function EtapeDeriverExtremaBornes({ tentativesUtilisees, tentativesMax, 
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
-          placeholder="ex : 3*t^2-6*t"
+          placeholder="ex : 5t² − 2t + 1"
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes("deriver")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("deriver")}</p>}
-        </div>
-      )}
+      <AideExtremaBornesBloc niveauAide={niveauAide} niveau1={texteAideNiveau1ExtremaBornes("deriver")} niveau2={texteAideNiveau2ExtremaBornes("deriver")} />
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />

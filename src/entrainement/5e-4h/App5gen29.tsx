@@ -16,9 +16,10 @@ import {
   soumettreReponseResoudreFSeconde,
   soumettreReponseTableauFPrime,
   soumettreReponseTableauFSeconde,
+  tentativesMaxEcranEtudeLocale,
 } from "./moteur5e/sessionEtudeLocale";
 import type { EcranEtudeLocale, EtatSessionEtudeLocale } from "./moteur5e/typesEtudeLocale";
-import { ordreEcransEtudeLocale } from "./moteur5e/typesEtudeLocale";
+import { ordreEcransEtudeLocale, structureFixeEtudeLocale } from "./moteur5e/typesEtudeLocale";
 import {
   diagnostiquerChampParmiCibles,
   racinesFPrimeNumeriques,
@@ -47,6 +48,7 @@ import {
   formatEnteteColonnesTableau,
   formatReponseAttenduePhaseLatex,
   labelsChampsValeurF,
+  PLACEHOLDER_VALEUR_F,
   precisionAnnonceeRacines,
   precisionAnnonceeValeursF,
 } from "./ui5e/formatEtudeLocale";
@@ -90,25 +92,37 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Puces de progression — séquence RÉELLEMENT parcourue par CET exercice (`ordreEcransEtudeLocale`,
- * 2 à 7 écrans selon `exercice.type`/`exercice.niveau`/le nombre de vrais extremums-PI — jamais la
- * liste complète des 7 écrans possibles, "domaine"/"resoudreFSeconde"/"tableauFSeconde"/"inflexions"
- * étant souvent sautés). Icône "revele" pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis
- * `etapeCourante.revelee` à la clôture de chaque écran (`sessionEtudeLocale.ts::soumettreEcran`) —
- * jamais `scoresPartiels[ecran] === 0` (point A, balayage générique) : la pénalité d'aide de ce
- * générateur était soustraite (avant le retrait des pénalités) APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
- * fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée". */
+/** Puces de progression — structure FIXE (`structureFixeEtudeLocale`, déduite du type de f et de
+ * la présence de f'', donc de ce que l'élève voit déjà) : leur nombre ne révèle plus la structure
+ * (2 puces = racine double…) dès le premier écran (audit 5e ch. 5, décision J). Un écran prévu mais
+ * sans objet pour cet exercice (aucun extremum à évaluer) n'apparaît comme « sans-objet » qu'une
+ * fois dépassé — ou dès la validation du dernier écran réel (`exerciceTermine`). Icône "revele"
+ * pilotée par `etat.revelesPartiels[ecran]` (jamais `scoresPartiels[ecran] === 0`, point A). */
 function calculerSegmentsProgression(
   etat: EtatSessionEtudeLocale,
   aideParPhase: Partial<Record<EcranEtudeLocale, boolean>>,
+  exerciceTermine: boolean,
 ): EtatPuceProgression[] {
-  return ordreEcransEtudeLocale(etat.exerciceCourant).map((ecran) => {
+  const structure = structureFixeEtudeLocale(etat.exerciceCourant);
+  const reels = ordreEcransEtudeLocale(etat.exerciceCourant);
+  const indexCourant = structure.indexOf(etat.phase);
+  return structure.map((ecran, i) => {
+    if (!reels.includes(ecran)) return i < indexCourant || exerciceTermine ? "sans-objet" : "a-venir";
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
     if (etat.revelesPartiels[ecran]) return "revele";
     return aideParPhase[ecran] ? "aide" : "correcte";
   });
+}
+
+/** Index dans l'historique (écrans RÉELLEMENT clos, dans l'ordre) d'une puce de la structure fixe —
+ * `null` pour une puce sans objet. */
+function indexHistoriquePourPuce(etat: EtatSessionEtudeLocale, indexPuce: number): number | null {
+  const ecran = structureFixeEtudeLocale(etat.exerciceCourant)[indexPuce];
+  const reels = ordreEcransEtudeLocale(etat.exerciceCourant);
+  const i = reels.indexOf(ecran);
+  return i === -1 ? null : i;
 }
 
 /** Texte court pour un ensemble réel saisi par l'élève (écran "domaine") — réutilise
@@ -144,6 +158,9 @@ export function App5gen29() {
   /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranEtudeLocale, boolean>>>({});
+  /** Compteur de génération dans la clé d'écran : les champs repartent vides après « Nouvel
+   * exercice » ou « Générer » (même patron que `App5gen20.tsx`). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEtudeLocale) {
     const recap = calculerRecapitulatifEtudeLocale(nouvelEtat);
@@ -177,6 +194,7 @@ export function App5gen29() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -187,13 +205,14 @@ export function App5gen29() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionEtudeLocale(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxEcranEtudeLocale(etat);
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation: ValidationEtapeProps | null = enAttente
     ? {
@@ -209,7 +228,11 @@ export function App5gen29() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude locale (extremums et points critiques)</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideParPhase, enAttente?.etatSuivant.terminee ?? false)}
+          onSegmentClick={(index) => setFicheOuverteIndex(indexHistoriquePourPuce(etat, index))}
+        />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
@@ -311,7 +334,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase="extremums"
           labels={labelsChampsValeurF(racines)}
-          placeholders={racines.map(() => "ex : 4")}
+          placeholders={racines.map(() => PLACEHOLDER_VALEUR_F)}
           precisionAnnoncee={precisionAnnonceeValeursF(exercice, racines)}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -368,7 +391,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           phase="inflexions"
           labels={labelsChampsValeurF(racines)}
-          placeholders={racines.map(() => "ex : 4")}
+          placeholders={racines.map(() => PLACEHOLDER_VALEUR_F)}
           precisionAnnoncee={precisionAnnonceeValeursF(exercice, racines)}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}

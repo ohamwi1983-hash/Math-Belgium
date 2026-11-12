@@ -22,6 +22,10 @@ interface Props {
   /** Diagnostic PAR CHAMP (x et y indépendamment) — correct si la composante saisie correspond à
    * N'IMPORTE LEQUEL des points de tangence attendus (ensemble, ordre indifférent). */
   diagnostiquer?: (point: PointSaisi) => { x: StatutVerification; y: StatutVerification };
+  /** Contrôle de FORME avant soumission (saisie illisible, valeur arrondie, valeur répétée,
+   * solution manquante) : renvoie le message à afficher, et la tentative n'est PAS décomptée
+   * (audit 5e ch. 5, points 6, 32, 33). `null` = soumission normale. */
+  controlerSaisie?: (reponse: PointSaisi[]) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -34,9 +38,10 @@ interface Props {
  * `prompt5gen28variantesabc.md`. Labels dynamiques "Point :" (1 point) / "Point 1 :","Point 2 :"...
  * (plusieurs). Vérifiée comme un ENSEMBLE, ordre indifférent (`verifierCoordonneesHorizontale`).
  * Calculatrice PRÉSENTE (calcul de l'ordonnée f(x)). */
-export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controlerSaisie, validation }: Props) {
   const [points, setPoints] = useState<PointSaisi[]>([{ x: "", y: "" }]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [avertissement, setAvertissement] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = points.length > 0 && points.every((p) => p.x.trim() !== "" && p.y.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
@@ -58,6 +63,9 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
   }
   function valider() {
     if (!complet) return;
+    const message = controlerSaisie ? controlerSaisie(points) : null;
+    setAvertissement(message);
+    if (message) return;
     if (diagnostiquer) {
       const tous = points.map((p) => diagnostiquer(p));
       const pire = tous.flatMap((s) => [s.x, s.y]).find((s) => s !== "correct") ?? "correct";
@@ -78,7 +86,9 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
           </div>
         }
       />
-      <p className="prompt-text">{question.texteAvant}</p>
+      <p className="prompt-text">
+        {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
+      </p>
       {points.map((p, i) => {
         const statut = statuts ? statuts[i] : null;
         return (
@@ -95,7 +105,7 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
                   className={`text-input${statut && statut.x !== "correct" ? " is-erronee" : ""}`}
                   value={p.x}
                   onChange={(e) => modifierX(i, e.target.value)}
-                  placeholder="ex : 2"
+                  placeholder="ex : 1,5"
                 />
               </div>
               <div className="field field-inline">
@@ -108,7 +118,7 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
                   className={`text-input${statut && statut.y !== "correct" ? " is-erronee" : ""}`}
                   value={p.y}
                   onChange={(e) => modifierY(i, e.target.value)}
-                  placeholder="ex : 5"
+                  placeholder="ex : −0,5"
                 />
               </div>
               {points.length > 1 && (
@@ -126,7 +136,15 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("coordonnees")}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1("coordonnees", exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 && (
             <>
               <p>{aide2.texte}</p>
@@ -141,7 +159,12 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {avertissement && (
+          <p className="alert-error" role="alert">
+            {avertissement}
+          </p>
+        )}
+        {montrerErreurs && !avertissement && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

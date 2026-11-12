@@ -19,7 +19,6 @@ import type {
   ExerciceContexteEconomiqueA,
   ExerciceContexteEconomiqueB,
   ExerciceContexteEconomiqueBonus,
-  ExtremumCoutTotal,
 } from "../core5e/contexteEconomique.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -117,7 +116,10 @@ function diagnostiquerDeriveeEnX(texte: string, valeurFn: (x: number) => number)
 
 export function diagnostiquerNombre(texte: string, cible: number, tolerance: number): StatutVerification {
   try {
-    const valeur = evaluerExpressionGenerale(texte, 0);
+    // « q = 4 » : préfixe recopié ignoré ; « 14,29 % » : symbole % final accepté (audit 5e ch. 5,
+    // point 57).
+    const sansPrefixe = texte.includes("=") ? texte.slice(texte.lastIndexOf("=") + 1) : texte;
+    const valeur = evaluerExpressionGenerale(sansPrefixe.replace(/%\s*$/, ""), 0);
     if (!Number.isFinite(valeur)) return "parse_error";
     return Math.abs(valeur - cible) <= tolerance ? "correct" : "not_equivalent";
   } catch {
@@ -126,6 +128,8 @@ export function diagnostiquerNombre(texte: string, cible: number, tolerance: num
 }
 
 const TOLERANCE_STANDARD = 0.01;
+/** Précision annoncée « valeur exacte ou arrondie au centième » : couvre un arrondi au centième. */
+const TOLERANCE_CENTIEME = 0.0051;
 
 // ============================================================================
 // Famille A.
@@ -150,39 +154,23 @@ export function diagnostiquerEcartAbsolu(texte: string, exercice: ExerciceContex
 /** Seul champ de la famille A à annoncer une précision décimale explicite — voir CLAUDE.md,
  * "Annonce de précision = tolérance réellement vérifiée". */
 export function diagnostiquerEcartPourcent(texte: string, exercice: ExerciceContexteEconomiqueA): StatutVerification {
-  return diagnostiquerNombre(texte, exercice.ecartPourcent, TOLERANCE_STANDARD);
+  return diagnostiquerNombre(texte, exercice.ecartPourcent, TOLERANCE_CENTIEME);
 }
 
-export type ReponseExtremum = { type: "aucun" } | { type: "existe"; extrema: { position: string; nature: "max" | "min" }[] };
-
-export function diagnostiquerPositionExtremum(texte: string, cible: number): StatutVerification {
-  return diagnostiquerNombre(texte, cible, TOLERANCE_STANDARD);
+/** Dernier écran de la famille A — production q du minimum (coût moyen ou coût marginal), valeur
+ * exacte ou arrondie au centième. */
+export function diagnostiquerMinimumQ(texte: string, exercice: ExerciceContexteEconomiqueA): StatutVerification {
+  return diagnostiquerNombre(texte, exercice.minimum.q, TOLERANCE_CENTIEME);
 }
 
-/** Diagnostic PAR CHAMP (surlignage rouge individuel) — correct si la valeur saisie correspond à
- * L'UNE des positions attendues, peu importe laquelle (même patron que
- * `diagnostiquerChampParmiCibles`, 5gen29). */
-export function diagnostiquerPositionExtremumParmiCibles(texte: string, exercice: ExerciceContexteEconomiqueA): StatutVerification {
-  if (exercice.extrema.length === 0) return "parse_error";
-  const base = diagnostiquerPositionExtremum(texte, exercice.extrema[0].position);
-  if (base === "correct") return "correct";
-  return exercice.extrema.some((e) => diagnostiquerPositionExtremum(texte, e.position) === "correct") ? "correct" : base;
+/** Valeur du minimum : tolérance couvrant l'arrondi au centième ET le calcul fait avec q arrondi
+ * (au minimum, la dérivée est nulle : l'effet de l'arrondi de q est du deuxième ordre). */
+export function diagnostiquerMinimumValeur(texte: string, exercice: ExerciceContexteEconomiqueA): StatutVerification {
+  return diagnostiquerNombre(texte, exercice.minimum.valeur, TOLERANCE_CENTIEME + 0.002 * Math.abs(exercice.minimum.valeur));
 }
 
-/** Vérification COMBINÉE (notation) — type ("aucun"/"existe") ET, si "existe", ENSEMBLE
- * position+nature apparié (ordre indifférent, même patron que `verifierEnsembleNumerique`,
- * 5gen29). */
-export function verifierExtremum(reponse: ReponseExtremum, exercice: ExerciceContexteEconomiqueA): boolean {
-  if (reponse.type === "aucun") return !exercice.extremumExiste;
-  if (!exercice.extremumExiste) return false;
-  if (reponse.extrema.length !== exercice.extrema.length) return false;
-  const restantes = [...exercice.extrema];
-  for (const r of reponse.extrema) {
-    const i = restantes.findIndex((cible: ExtremumCoutTotal) => diagnostiquerPositionExtremum(r.position, cible.position) === "correct" && r.nature === cible.nature);
-    if (i === -1) return false;
-    restantes.splice(i, 1);
-  }
-  return true;
+export function verifierMinimum(reponse: { q: string; valeur: string }, exercice: ExerciceContexteEconomiqueA): boolean {
+  return diagnostiquerMinimumQ(reponse.q, exercice) === "correct" && diagnostiquerMinimumValeur(reponse.valeur, exercice) === "correct";
 }
 
 // ============================================================================
@@ -209,15 +197,11 @@ export function diagnostiquerBeneficeDerivee(texte: string, exercice: ExerciceCo
   return diagnostiquerDeriveeEnX(texte, (x) => valeurB(exercice, x));
 }
 
+/** Écran « égalité des marginales » : les 2 solutions (ordre indifférent) puis la quantité retenue,
+ * SAISIE (plus de bouton « positive / négative » dont la bonne réponse était toujours la même). */
 export interface ReponseEgaliteMarginales {
   racines: [string, string];
-  /** Choix SÉMANTIQUE ("positive"/"négative"), jamais une valeur numérique littérale — un bouton
-   * affichant directement x_opt/x_neg fuirait les 2 racines avant même que l'élève ait résolu
-   * l'équation lui-même (les 2 champs `racines` ci-dessus). x_opt est TOUJOURS la racine positive
-   * par construction (voir `core5e/contexteEconomique.types.ts`), donc "positive" est toujours la
-   * bonne réponse — mais le choix reste un acte EXPLICITE de l'élève, jamais déduit du signe de sa
-   * propre saisie. */
-  choix: "positive" | "negative";
+  retenue: string;
 }
 
 export function diagnostiquerRacineMarginale(texte: string, exercice: ExerciceContexteEconomiqueB): StatutVerification {
@@ -227,36 +211,37 @@ export function diagnostiquerRacineMarginale(texte: string, exercice: ExerciceCo
   return surXNeg === "correct" ? "correct" : surXOpt;
 }
 
+export function diagnostiquerRacineRetenue(texte: string, exercice: ExerciceContexteEconomiqueB): StatutVerification {
+  return diagnostiquerNombre(texte, exercice.xOpt, TOLERANCE_STANDARD);
+}
+
 export function verifierEgaliteMarginales(reponse: ReponseEgaliteMarginales, exercice: ExerciceContexteEconomiqueB): boolean {
   const [r1, r2] = reponse.racines;
   const direct = diagnostiquerNombre(r1, exercice.xOpt, TOLERANCE_STANDARD) === "correct" && diagnostiquerNombre(r2, exercice.xNeg, TOLERANCE_STANDARD) === "correct";
   const inverse = diagnostiquerNombre(r1, exercice.xNeg, TOLERANCE_STANDARD) === "correct" && diagnostiquerNombre(r2, exercice.xOpt, TOLERANCE_STANDARD) === "correct";
-  const ensembleCorrect = direct || inverse;
-  return ensembleCorrect && reponse.choix === "positive";
+  return (direct || inverse) && diagnostiquerRacineRetenue(reponse.retenue, exercice) === "correct";
 }
 
+/** B'(x) aux deux points test entiers (valeurs exactes : coefficients entiers). */
+export function valeursBPrimePointsTest(exercice: ExerciceContexteEconomiqueB): { avant: number; apres: number } {
+  const bPrime = (x: number) => 2 * exercice.m * x + exercice.k - (3 * exercice.a * x * x + 2 * exercice.b * x + exercice.c);
+  return { avant: bPrime(exercice.pointTestAvant), apres: bPrime(exercice.pointTestApres) };
+}
+
+/** Écran « signe de B' » : les valeurs de B' aux deux points test (plus de choix « + / − » dont la
+ * réponse était toujours « + puis − », audit 5e ch. 5, point 55). */
 export interface ReponseTableauSigneBenefice {
-  zoneAvant: 1 | -1;
-  zoneApres: 1 | -1;
+  avant: string;
+  apres: string;
 }
 
-/** Attendu TOUJOURS le même motif (+ avant x_opt, - après) — conséquence structurelle de
- * `a>0` garanti à la construction (voir `generateurs5e/contexteEconomique/index.ts`), jamais
- * recalculé ici depuis les coefficients (vérité terrain déjà garantie mathématiquement par
- * construction — même esprit que `docs/historique-5e-derivees.md`, cohérence Cm-Rm/B'). */
-export function tableauSigneBeneficeAttendu(): ReponseTableauSigneBenefice {
-  return { zoneAvant: 1, zoneApres: -1 };
+export function diagnostiquerBPrimePointTest(texte: string, cible: number): StatutVerification {
+  return diagnostiquerNombre(texte, cible, TOLERANCE_STANDARD);
 }
 
-export function verifierTableauSigneBenefice(reponse: ReponseTableauSigneBenefice): boolean {
-  const attendu = tableauSigneBeneficeAttendu();
-  return reponse.zoneAvant === attendu.zoneAvant && reponse.zoneApres === attendu.zoneApres;
-}
-
-/** Toujours vrai par construction (`Cm(x)-Rm(x) ≡ -B'(x)` exactement) — l'écran demande
- * néanmoins une confirmation EXPLICITE à l'élève (jamais supposée). */
-export function verifierConfirmationCoherence(reponse: boolean): boolean {
-  return reponse === true;
+export function verifierTableauSigneBenefice(reponse: ReponseTableauSigneBenefice, exercice: ExerciceContexteEconomiqueB): boolean {
+  const v = valeursBPrimePointsTest(exercice);
+  return diagnostiquerBPrimePointTest(reponse.avant, v.avant) === "correct" && diagnostiquerBPrimePointTest(reponse.apres, v.apres) === "correct";
 }
 
 export function diagnostiquerBeneficeMaximum(texte: string, exercice: ExerciceContexteEconomiqueB): StatutVerification {
@@ -281,6 +266,13 @@ const TOLERANCE_MILIEU = 1e-6;
 
 export function diagnostiquerMilieuIteration(texte: string, milieuAttendu: number): StatutVerification {
   return diagnostiquerNombre(texte, milieuAttendu, TOLERANCE_MILIEU);
+}
+
+/** Un choix fermé (signe, sous-intervalle) faux clôt l'écran : un seul essai (audit 5e ch. 5,
+ * point 11). */
+export function choixIterationErrone(reponse: ReponseIterationDichotomie, exercice: ExerciceContexteEconomiqueBonus, index: number): boolean {
+  const attendu = exercice.iterations[index];
+  return reponse.signe !== attendu.signeMilieu || reponse.garder !== attendu.garderCote;
 }
 
 export function verifierIterationDichotomie(reponse: ReponseIterationDichotomie, exercice: ExerciceContexteEconomiqueBonus, index: number): boolean {

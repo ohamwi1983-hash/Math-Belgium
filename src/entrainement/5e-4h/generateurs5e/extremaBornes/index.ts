@@ -106,36 +106,32 @@ type Signature = Signature2 | Signature3;
  * IMPAIRE autour de r2 (f'(r2+u)=4A·u·(u²-g²), impaire en u), donc son intégrale F(r2+u)-F(r2) est
  * PAIRE en u : f(r1) et f(r3) (les 2 racines de MÊME classification, "outer" du triplet) seraient
  * alors TOUJOURS mathématiquement ÉGALES, quels que soient `r1`/T choisis ensuite — un cas
- * d'ambiguïté STRUCTURELLE (jamais résolue par la recherche de marges, voir `candidatsUniques`),
- * démontré par calcul direct et confirmé empiriquement (`index.test.ts`). Écarter cette symétrie
- * dès le tirage, avec un repli déterministe borné plutôt qu'un rejet illimité.
- */
+ * d'ambiguïté STRUCTURELLE (jamais résolue par la recherche de marges, voir `candidatsUniques`).
+ * Écarts dans 1..3 (allègement, décision L de l'audit : T ≤ 8 pour les quartiques). */
 function tirerEcartsDistincts(): [number, number] {
-  const g1 = entierAleatoire(2, 4);
-  let g2 = entierAleatoire(2, 4);
-  for (let tentative = 0; g2 === g1 && tentative < 10; tentative++) g2 = entierAleatoire(2, 4);
-  if (g2 === g1) g2 = g1 === 4 ? 2 : g1 + 1;
+  const g1 = entierAleatoire(1, 3);
+  let g2 = entierAleatoire(1, 3);
+  for (let tentative = 0; g2 === g1 && tentative < 10; tentative++) g2 = entierAleatoire(1, 3);
+  if (g2 === g1) g2 = g1 === 3 ? 1 : g1 + 1;
   return [g1, g2];
 }
 
-const A_MAGNITUDES = [-4, -2, 2, 4];
-const M_MAGNITUDES_POSITIFS = [1, 2, 3];
-const M_MAGNITUDES_NEGATIFS = [-1, -2, -3];
-
 /** Pour 3 racines, le signe de `m` détermine le motif (min,max,min si m>0 — `casMin` alors
  * TOUJOURS "local", seul `casMax` est tunable — ou max,min,max si m<0, symétrique) — voir tête de
- * fichier. Choisi selon `cible` plutôt que tiré au hasard : viser `casMax="borne"` exige m>0,
- * viser `casMin="borne"` exige m<0 ; pour "local-local" (les 2 motifs conviennent), tiré au hasard. */
+ * fichier. Choisi selon `cible` plutôt que tiré au hasard. |m| = 1 seulement (allègement : A = ±3,
+ * coefficients bornés). Pour 2 racines, `a` = ±1 quand r1+r2 est pair (écart pair), sinon ±2 (b
+ * entier). */
 function tirerSignature(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }): Signature {
   if (nbRacines === 2) {
-    const a = A_MAGNITUDES[entierAleatoire(0, A_MAGNITUDES.length - 1)];
-    return { nbRacines: 2, a, gap: entierAleatoire(2, 4) };
+    const gap = entierAleatoire(2, 5);
+    const magnitude = gap % 2 === 0 && Math.random() < 0.5 ? 1 : 2;
+    const a = Math.random() < 0.5 ? magnitude : -magnitude;
+    return { nbRacines: 2, a, gap };
   }
   const [g1, g2] = tirerEcartsDistincts();
-  let poolM = Math.random() < 0.5 ? M_MAGNITUDES_POSITIFS : M_MAGNITUDES_NEGATIFS;
-  if (cible.casMax === "borne") poolM = M_MAGNITUDES_POSITIFS;
-  else if (cible.casMin === "borne") poolM = M_MAGNITUDES_NEGATIFS;
-  const m = poolM[entierAleatoire(0, poolM.length - 1)];
+  let m = Math.random() < 0.5 ? 1 : -1;
+  if (cible.casMax === "borne") m = 1;
+  else if (cible.casMin === "borne") m = -1;
   return { nbRacines: 3, m, g1, g2 };
 }
 
@@ -201,14 +197,13 @@ function calculerCas(coeffs: number[], racines: number[], classification: Classi
 // index.test.ts, mais le repli reste défensif).
 // ============================================================================
 
-const MARGES_GAUCHE = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15];
-const MARGES_DROITE = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 18];
-const T_MIN = 6;
-// "Raisonnable" (voir tâche, ex. 6 à 24) est un exemple, pas un plafond dur — une marge GAUCHE
-// grande pousse aussi `rDernier` (donc T) vers le haut avant même d'ajouter la marge DROITE ; un
-// plafond trop serré empêche parfois la recherche d'atteindre certaines combinaisons. 30 reste
-// "réaliste" pour un contexte en heures/jours tout en laissant assez de marge à la recherche.
-const T_MAX = 30;
+const MARGES_GAUCHE = [1, 2, 3, 4, 5, 6];
+const MARGES_DROITE = [1, 2, 3, 4, 5, 6];
+const T_MIN = 5;
+/** Allègement (décision L) : T ≤ 8 pour les quartiques (3 racines), T ≤ 12 pour les cubiques —
+ * valeurs à évaluer raisonnables, coefficients bornés par `COEFF_MAX`. */
+const T_MAX_PAR_NB_RACINES: Record<2 | 3, number> = { 2: 12, 3: 8 };
+const COEFF_MAX = 200;
 
 interface FormeTrouvee {
   coeffsSansConstante: number[];
@@ -217,31 +212,31 @@ interface FormeTrouvee {
   T: number;
 }
 
-/** Cherche (r1,T) réalisant EXACTEMENT `cible` pour UNE signature donnée — `null` si aucune
- * combinaison de la grille n'y parvient (peut arriver : pour une signature donnée, la pente peut
- * être trop raide pour qu'une marge minimale (=1) suffise à rester "local", ou trop douce pour
- * jamais dépasser un extremum local même à la marge maximale — voir `genererExerciceExtremaBornes`,
- * qui retire alors une signature FRAÎCHE plutôt que d'insister sur celle-ci). `repli`, la 1ère
- * combinaison valide (candidats uniques) rencontrée quel que soit le cas obtenu, est renvoyée en
- * 2e élément pour servir de filet de sécurité au niveau appelant. */
+/** Cherche TOUTES les combinaisons (r1,T) réalisant EXACTEMENT `cible` pour UNE signature donnée,
+ * et en tire une au hasard (variété : la 1re de la grille donnait toujours le même T). `repli` : une
+ * combinaison valide (candidats uniques) quel que soit le cas obtenu, filet de sécurité. */
 function rechercherForme(signature: Signature, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }): { exact: FormeTrouvee | null; repli: FormeTrouvee | null } {
   let repli: FormeTrouvee | null = null;
+  const exacts: FormeTrouvee[] = [];
+  const tMax = T_MAX_PAR_NB_RACINES[signature.nbRacines];
   for (const margeGauche of MARGES_GAUCHE) {
     const r1 = margeGauche;
     const { coeffs, racines } = construireFormeSansConstante(signature, r1);
+    if (coeffs.some((c) => Math.abs(c) > COEFF_MAX)) continue;
     const classification = classifierExtrema(coeffs, racines);
     const rDernier = racines[racines.length - 1];
     for (const margeDroite of MARGES_DROITE) {
       const T = rDernier + margeDroite;
-      if (T < T_MIN || T > T_MAX) continue;
+      if (T < T_MIN || T > tMax) continue;
       const cas = calculerCas(coeffs, racines, classification, T);
       if (!cas.candidatsUniques) continue;
       const forme: FormeTrouvee = { coeffsSansConstante: coeffs, racines, classification, T };
       if (repli === null) repli = forme;
-      if (cas.casMax === cible.casMax && cas.casMin === cible.casMin) return { exact: forme, repli };
+      if (cas.casMax === cible.casMax && cas.casMin === cible.casMin) exacts.push(forme);
     }
   }
-  return { exact: null, repli };
+  const exact = exacts.length > 0 ? exacts[entierAleatoire(0, exacts.length - 1)] : null;
+  return { exact, repli };
 }
 
 // ============================================================================
@@ -274,9 +269,9 @@ function choisirConstante(coeffsSansConstante: number[], racines: number[], T: n
  * trop raide ou trop douce pour CETTE signature précise) ; une AUTRE signature (autre écart entre
  * racines, autre magnitude de coefficient) y parvient presque toujours — vérifié empiriquement sur
  * 500+ tirages, voir `index.test.ts`. */
-const MAX_SIGNATURES_ESSAYEES = 25;
+const MAX_SIGNATURES_ESSAYEES = 60;
 
-function trouverFormeAvecCible(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }): FormeTrouvee {
+function trouverFormeAvecCible(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }, nbRacinesLibre = false): FormeTrouvee {
   let repliGlobal: FormeTrouvee | null = null;
   for (let tentative = 0; tentative < MAX_SIGNATURES_ESSAYEES; tentative++) {
     const signature = tirerSignature(nbRacines, cible);
@@ -284,6 +279,9 @@ function trouverFormeAvecCible(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu
     if (exact) return exact;
     if (repliGlobal === null && repli !== null) repliGlobal = repli;
   }
+  // Avec T ≤ 8, une quartique atteint difficilement « max local ET min local » : si le nombre de
+  // racines n'était pas imposé, on bascule sur une cubique plutôt que d'accepter un autre cas.
+  if (nbRacinesLibre && nbRacines === 3) return trouverFormeAvecCible(2, cible);
   // Repli déterministe — jamais atteint en pratique (voir index.test.ts), mais borné et toujours
   // défini : `repliGlobal` est déjà garanti non-null dès la 1ère signature testée (une signature
   // "simple" — écarts distincts, marge=1 — a systématiquement des candidats uniques).
@@ -302,12 +300,13 @@ export function genererExerciceExtremaBornes(
   // — jamais visé avec ce nombre de racines, même si explicitement forcé par un appelant.
   const impose3Impossible = cible.casMax === "borne" && cible.casMin === "borne";
   const nbRacines = impose3Impossible ? 2 : (nbRacinesForce ?? (Math.random() < 0.5 ? 2 : 3));
-  const forme = trouverFormeAvecCible(nbRacines, cible);
+  const forme = trouverFormeAvecCible(nbRacines, cible, nbRacinesForce === undefined && !impose3Impossible);
   const d = choisirConstante(forme.coeffsSansConstante, forme.racines, forme.T);
   const coeffs = [...forme.coeffsSansConstante];
   coeffs[0] = d;
+  const valeurMax = Math.max(...[0, forme.T, ...forme.racines].map((t) => evalPoly(coeffs, t)));
   return {
-    contexte: contexteForce ?? tirerContexte(),
+    contexte: contexteForce ?? tirerContexte(valeurMax),
     T: forme.T,
     coeffs,
     degre: nbRacines === 2 ? 3 : 4,
@@ -328,19 +327,20 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "max-borne-min-borne", label: "Max à une borne — min à une borne (2 racines)" },
 ];
 
+/** Contexte tiré au hasard (compatible avec l'ordre de grandeur des valeurs, `tirerContexte`) —
+ * plus jamais forcé au n° 0 (audit 5c5d point 6). */
 export function construireAvecVarianteId(id: string): ExerciceExtremaBornes {
-  const contexte = CONTEXTES_EXTREMA_BORNES[0];
   switch (id) {
     case "max-local-min-local":
-      return genererExerciceExtremaBornes({ casMax: "local", casMin: "local" }, 2, contexte);
+      return genererExerciceExtremaBornes({ casMax: "local", casMin: "local" }, 2);
     case "max-local-min-borne":
-      return genererExerciceExtremaBornes({ casMax: "local", casMin: "borne" }, 3, contexte);
+      return genererExerciceExtremaBornes({ casMax: "local", casMin: "borne" }, 3);
     case "max-borne-min-local":
-      return genererExerciceExtremaBornes({ casMax: "borne", casMin: "local" }, 3, contexte);
+      return genererExerciceExtremaBornes({ casMax: "borne", casMin: "local" }, 3);
     case "max-borne-min-borne":
       // Impossible avec 3 racines (voir tête de fichier) — TOUJOURS 2 racines pour ce cas,
       // indépendamment de ce que `nbRacinesForce` demanderait.
-      return genererExerciceExtremaBornes({ casMax: "borne", casMin: "borne" }, 2, contexte);
+      return genererExerciceExtremaBornes({ casMax: "borne", casMin: "borne" }, 2);
     default:
       throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
   }

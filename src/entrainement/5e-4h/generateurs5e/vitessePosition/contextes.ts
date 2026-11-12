@@ -1,80 +1,120 @@
 /**
- * Couche A (5e) — banque de contextes narratifs pour 5gen35 ("Vitesse et position"), patron
- * "banque de contextes" déjà établi ailleurs sur la plateforme (ex. `generateurs/
- * bienaymeTchebychev/contextes.ts` en 4e). Chaque entrée porte 2 fonctions de phrase (variante A/
- * variante B) plutôt qu'un jeu de champs grammaticaux à recombiner — même esprit que les "SKINS"
- * de `generateurs/equationInequationSecondDegre/familles/distanceFreinage.ts` : une phrase
- * d'énoncé COMPLÈTE par contexte, pas un gabarit générique qui finirait par sonner mécanique sur
- * 7 sujets aussi différents (course à pied, natation, cyclisme...).
+ * Couche A (5e) — banque de contextes narratifs pour 5gen35 ("Vitesse et position"). Chaque entrée
+ * porte 2 fonctions de phrase (variante A / variante B) plutôt qu'un gabarit générique, et ses
+ * propres bornes RÉALISTES (audit 5c5d point 13, décision G) : vitesse atteinte (`vMin`/`vMax`, en
+ * m/s), accélérations plausibles (`aValeurs`), vitesse initiale (`bValeurs` — `[0]` dès que le texte
+ * dit « s'élance » ou « démarre ») et distances totales de la variante B (`distancesTotalesB`).
  *
- * Unités FIXÉES m/s pour tous les contextes (voir `core5e/vitessePosition.types.ts`, en-tête de
- * `ContexteVitessePosition`) — nécessaire pour que la conversion ×3,6 de l'écran "conversion"
- * (variante A) soit correcte sur CHAQUE contexte, jamais reconfigurable par entrée.
+ * La nageuse a été retirée : avec une accélération d'au moins 1 m/s² (contrainte arithmétique du
+ * générateur, racine rejetée entière), elle atteint sa vitesse plafond (≈ 2 m/s) en 2 s et 2 m, ce
+ * qui ne donne aucun énoncé crédible. Unités FIXÉES à m/s pour la conversion ×3,6.
+ *
+ * Variante B : la distance TOTALE est toujours dite explicitement (« longue de D m au total », « à
+ * D m du départ ») pour qu'elle ne se lise jamais comme la distance restante (audit point 15).
  */
 import type { ContexteVitessePosition } from "../../core5e/vitessePosition.types";
+
+function lance(b: number, masculin: boolean): string {
+  return `déjà lancé${masculin ? "" : "e"} à ${b} m/s`;
+}
 
 export const CONTEXTES_VITESSE_POSITION: ContexteVitessePosition[] = [
   {
     id: "sprint",
     sujet: "le sprinteur",
     pronom: "il",
-    phraseA: (eLatex, D) =>
-      `Un sprinteur s'élance sur une piste rectiligne. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à franchir la ligne d'arrivée, à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Un sprinteur s'élance sur une piste rectiligne : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à un repère situé à ${D1} m, où il cesse d'accélérer. Il termine ensuite la course, longue de ${D} m au total, à vitesse constante.`,
-  },
-  {
-    id: "natation",
-    sujet: "la nageuse",
-    pronom: "elle",
-    phraseA: (eLatex, D) =>
-      `Une nageuse s'élance dans le grand bassin. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à toucher le mur, à ${D} m du plot de départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Une nageuse s'élance dans le grand bassin : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à une bouée de repère située à ${D1} m, où elle cesse d'accélérer. Elle termine ensuite les ${D} m de l'épreuve à vitesse constante.`,
+    vMin: 6,
+    vMax: 11,
+    aValeurs: [1, 2],
+    bValeurs: [0],
+    distancesTotalesB: [60, 100],
+    phraseA: (sLatex, D) =>
+      `Un sprinteur s'élance sur une piste rectiligne. Pendant sa phase d'accélération, la distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un repère situé à ${D} m du départ.`,
+    phraseB: (sLatex, D1, D) =>
+      `Un sprinteur s'élance sur une piste rectiligne. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un repère situé à ${D1} m du départ, où il cesse d'accélérer. Il termine ensuite la course, longue de ${D} m au total, à vitesse constante.`,
   },
   {
     id: "cyclisme",
     sujet: "la cycliste",
     pronom: "elle",
-    phraseA: (eLatex, D) =>
-      `Une cycliste s'élance au départ d'un contre-la-montre. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à la ligne d'arrivée, à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Une cycliste s'élance au départ d'un contre-la-montre : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'au sommet d'une côte situé à ${D1} m, où elle cesse d'accélérer. Elle termine ensuite les ${D} m de l'épreuve à vitesse constante, en descente.`,
+    vMin: 8,
+    vMax: 18,
+    aValeurs: [1, 2],
+    bValeurs: [2, 3, 4],
+    distancesTotalesB: [200, 250, 300],
+    phraseA: (sLatex, D, b) =>
+      `Une cycliste, ${lance(b, false)}, franchit la ligne de départ d'un sprint sur le plat puis accélère. La distance qu'elle a parcourue depuis la ligne après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un repère situé à ${D} m de la ligne.`,
+    phraseB: (sLatex, D1, D, b) =>
+      `Une cycliste, ${lance(b, false)}, franchit la ligne de départ d'un sprint sur le plat. La distance qu'elle a parcourue depuis la ligne après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un repère situé à ${D1} m, où elle cesse d'accélérer. Elle maintient ensuite sa vitesse jusqu'à l'arrivée, à ${D} m de la ligne de départ.`,
   },
   {
     id: "patinage",
     sujet: "le patineur",
     pronom: "il",
-    phraseA: (eLatex, D) =>
-      `Un patineur de vitesse s'élance sur l'anneau de glace. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à la ligne d'arrivée, à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Un patineur de vitesse s'élance sur l'anneau de glace : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à un repère situé à ${D1} m, où il cesse d'accélérer. Il termine ensuite les ${D} m de la course à vitesse constante.`,
+    vMin: 6,
+    vMax: 14,
+    aValeurs: [1, 2],
+    bValeurs: [0],
+    distancesTotalesB: [100, 500],
+    phraseA: (sLatex, D) =>
+      `Un patineur de vitesse s'élance sur l'anneau de glace. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un repère situé à ${D} m du départ.`,
+    phraseB: (sLatex, D1, D) =>
+      `Un patineur de vitesse s'élance sur l'anneau de glace. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un repère situé à ${D1} m, où il cesse d'accélérer. Il termine ensuite la course, longue de ${D} m au total, à vitesse constante.`,
   },
   {
     id: "aviron",
     sujet: "la rameuse",
     pronom: "elle",
-    phraseA: (eLatex, D) =>
-      `Une rameuse s'élance au départ d'une course d'aviron. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à la ligne d'arrivée, à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Une rameuse s'élance au départ d'une course d'aviron : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à une bouée de repère située à ${D1} m, où elle cesse d'accélérer. Elle termine ensuite le parcours de ${D} m à vitesse constante.`,
+    vMin: 3,
+    vMax: 6,
+    aValeurs: [1, 2],
+    bValeurs: [0],
+    distancesTotalesB: [100, 250, 500],
+    phraseA: (sLatex, D) =>
+      `Une rameuse s'élance au départ d'une course d'aviron. La distance qu'elle a parcourue après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à une bouée située à ${D} m du départ.`,
+    phraseB: (sLatex, D1, D) =>
+      `Une rameuse s'élance au départ d'une course d'aviron. La distance qu'elle a parcourue après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à une bouée située à ${D1} m, où elle cesse d'accélérer. Elle termine ensuite la course, longue de ${D} m au total, à vitesse constante.`,
   },
   {
     id: "voitureEssai",
-    sujet: "le pilote",
-    pronom: "il",
-    phraseA: (eLatex, D) =>
-      `Une voiture de course s'élance sur une piste d'essai rectiligne. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à un radar situé à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Une voiture de course s'élance sur une piste d'essai rectiligne : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à un repère situé à ${D1} m, où le pilote cesse d'accélérer. Il maintient ensuite une vitesse constante jusqu'à un second radar, à ${D} m du départ.`,
+    sujet: "la voiture",
+    pronom: "elle",
+    vMin: 10,
+    vMax: 30,
+    aValeurs: [1, 2],
+    bValeurs: [3, 4, 5],
+    distancesTotalesB: [200, 300, 400],
+    phraseA: (sLatex, D, b) =>
+      `Sur une piste d'essai rectiligne, une voiture ${lance(b, false)} passe un premier radar puis accélère. La distance qu'elle a parcourue depuis ce radar après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un second radar situé ${D} m plus loin.`,
+    phraseB: (sLatex, D1, D, b) =>
+      `Sur une piste d'essai rectiligne, une voiture ${lance(b, false)} passe un premier radar puis accélère. La distance qu'elle a parcourue depuis ce radar après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un repère situé à ${D1} m, où la pilote cesse d'accélérer. Elle roule ensuite à vitesse constante jusqu'à un second radar, à ${D} m du premier.`,
   },
   {
     id: "skiFond",
     sujet: "le skieur",
     pronom: "il",
-    phraseA: (eLatex, D) =>
-      `Un skieur de fond s'élance sur une piste rectiligne. Sa distance parcourue en fonction du temps (t en s) vaut $${eLatex}$ (e(t) en m), jusqu'à la ligne d'arrivée, à ${D} m du départ.`,
-    phraseB: (eLatex, D1, D) =>
-      `Un skieur de fond s'élance sur une piste rectiligne : sa distance parcourue vaut $${eLatex}$ (t en s, e(t) en m) jusqu'à un panneau situé à ${D1} m, où il cesse d'accélérer. Il termine ensuite les ${D} m de la piste à vitesse constante.`,
+    vMin: 4,
+    vMax: 8,
+    aValeurs: [1, 2],
+    bValeurs: [0],
+    distancesTotalesB: [100, 200],
+    phraseA: (sLatex, D) =>
+      `Un skieur de fond s'élance sur une piste rectiligne et plate. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un panneau situé à ${D} m du départ.`,
+    phraseB: (sLatex, D1, D) =>
+      `Un skieur de fond s'élance sur une piste rectiligne et plate. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un panneau situé à ${D1} m, où il cesse d'accélérer. Il termine ensuite la piste, longue de ${D} m au total, à vitesse constante.`,
+  },
+  {
+    id: "tram",
+    sujet: "le tram",
+    pronom: "il",
+    vMin: 4,
+    vMax: 12,
+    aValeurs: [1],
+    bValeurs: [0],
+    distancesTotalesB: [200, 300],
+    phraseA: (sLatex, D) =>
+      `Un tram démarre d'un arrêt sur une voie rectiligne. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m), jusqu'à un carrefour situé à ${D} m de l'arrêt.`,
+    phraseB: (sLatex, D1, D) =>
+      `Un tram démarre d'un arrêt sur une voie rectiligne. La distance qu'il a parcourue après $t$ secondes vaut $${sLatex}$ (en m) jusqu'à un poteau situé à ${D1} m, où il cesse d'accélérer. Il roule ensuite à vitesse constante jusqu'à l'arrêt suivant, à ${D} m du premier.`,
   },
 ];

@@ -12,7 +12,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { ecranApres, ecranInitial, indexIteration } from "./typesContexteEconomique";
 import type { EcranContexteEconomique, EtatSessionContexteEconomique, ResultatExerciceContexteEconomique } from "./typesContexteEconomique";
-import type { ReponseEgaliteMarginales, ReponseExtremum, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./verificationContexteEconomique";
+import type { ReponseEgaliteMarginales, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./verificationContexteEconomique";
 import {
   diagnostiquerBeneficeDerivee,
   diagnostiquerBeneficeFormule,
@@ -27,10 +27,10 @@ import {
   diagnostiquerRacineApprochee,
   diagnostiquerRecetteMarginale,
   diagnostiquerRecetteTotale,
-  verifierConfirmationCoherence,
+  choixIterationErrone,
   verifierEgaliteMarginales,
-  verifierExtremum,
   verifierIterationDichotomie,
+  verifierMinimum,
   verifierTableauSigneBenefice,
 } from "./verificationContexteEconomique";
 
@@ -72,11 +72,15 @@ function cloturerExerciceOuSuivant(etat: EtatSessionContexteEconomique, resultat
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
 }
 
-function soumettreEcran<T>(etat: EtatSessionContexteEconomique, ecranAttendu: EcranContexteEconomique, reponse: T, verifier: (r: T) => boolean): EtatSessionContexteEconomique {
+/** `choixFermeErrone` : un choix fermé (boutons) faux clôt l'écran tout de suite — un seul essai sur
+ * un choix qui se gagnerait par élimination (audit 5e ch. 5, point 11). */
+function soumettreEcran<T>(etat: EtatSessionContexteEconomique, ecranAttendu: EcranContexteEconomique, reponse: T, verifier: (r: T) => boolean, choixFermeErrone = false): EtatSessionContexteEconomique {
   if (etat.terminee || etat.phase !== ecranAttendu) throw new Error(`soumettreEcran : la session n'est pas à l'écran "${ecranAttendu}"`);
 
+  const reglages = reglagesEtape(etat);
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
-    ...reglagesEtape(etat),
+    ...reglages,
+    tentativesMax: choixFermeErrone ? 1 : reglages.tentativesMax,
     verifier,
     revelerReponse: () => {},
   });
@@ -125,8 +129,10 @@ export function soumettreReponseComparaisonEcart(etat: EtatSessionContexteEconom
   );
 }
 
-export function soumettreReponseExtremum(etat: EtatSessionContexteEconomique, reponse: ReponseExtremum): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "extremum", reponse, (r) => verifierExtremum(r, exerciceA(etat)));
+/** Écran "extremum" (identifiant conservé) : coût moyen minimal (degré 2) ou coût marginal minimal
+ * (degré 3). */
+export function soumettreReponseMinimum(etat: EtatSessionContexteEconomique, reponse: { q: string; valeur: string }): EtatSessionContexteEconomique {
+  return soumettreEcran(etat, "extremum", reponse, (r) => verifierMinimum(r, exerciceA(etat)));
 }
 
 // ============================================================================
@@ -165,11 +171,7 @@ export function soumettreReponseBeneficeDerivee(etat: EtatSessionContexteEconomi
 }
 
 export function soumettreReponseTableauSigneBenefice(etat: EtatSessionContexteEconomique, reponse: ReponseTableauSigneBenefice): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "tableauSigneBenefice", reponse, (r) => verifierTableauSigneBenefice(r));
-}
-
-export function soumettreReponseConfirmationCoherence(etat: EtatSessionContexteEconomique, reponse: boolean): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "confirmationCoherence", reponse, (r) => verifierConfirmationCoherence(r));
+  return soumettreEcran(etat, "tableauSigneBenefice", reponse, (r) => verifierTableauSigneBenefice(r, exerciceB(etat)));
 }
 
 export function soumettreReponseBeneficeMaximum(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
@@ -193,7 +195,7 @@ export function soumettreReponsePoserEquationReduite(etat: EtatSessionContexteEc
 export function soumettreReponseIteration(etat: EtatSessionContexteEconomique, reponse: ReponseIterationDichotomie): EtatSessionContexteEconomique {
   const ecran = etat.phase;
   const index = indexIteration(ecran);
-  return soumettreEcran(etat, ecran, reponse, (r) => verifierIterationDichotomie(r, exerciceBonus(etat), index));
+  return soumettreEcran(etat, ecran, reponse, (r) => verifierIterationDichotomie(r, exerciceBonus(etat), index), choixIterationErrone(reponse, exerciceBonus(etat), index));
 }
 
 export function soumettreReponseRacineApprochee(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {

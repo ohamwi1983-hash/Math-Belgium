@@ -8,7 +8,7 @@
  * `moteur5e/typesTangentes.ts::ordreEcransTangente` (5gen28).
  *
  * 7 écrans possibles, dans cet ordre fixe quand ils sont présents :
- *   1. "domaine"        — UNIQUEMENT "rationnelleAvecCE" (domaine=ℝ sinon, écran sauté).
+ *   1. "domaine"        — toute fonction rationnelle (avec ou sans CE), jamais une polynomiale.
  *   2. "resoudreFPrime"  — toujours.
  *   3. "tableauFPrime"   — toujours.
  *   4. "extremums"       — sauté si AUCUNE racine de f' n'est un vrai extremum (ex. polynomiale
@@ -38,9 +38,23 @@ export function nombreInflexions(exercice: ExerciceEtudeLocale): number {
   return exercice.classificationFSeconde.filter((c) => c === "pi").length;
 }
 
+/** Structure FIXE des écrans, déduite de ce que l'élève voit déjà (type de f, présence de f'') —
+ * jamais de la réponse : sert aux puces de progression, dont le nombre ne doit pas révéler la
+ * structure (racine double ⟹ écran « extremums » sans objet, etc. — audit 5e ch. 5, décision J).
+ * Un écran de cette liste absent d'`ordreEcransEtudeLocale` est « sans objet » pour cet exercice. */
+export function structureFixeEtudeLocale(exercice: ExerciceEtudeLocale): EcranEtudeLocale[] {
+  const ecrans: EcranEtudeLocale[] = [];
+  if (exercice.type !== "polynomiale") ecrans.push("domaine");
+  ecrans.push("resoudreFPrime", "tableauFPrime", "extremums");
+  if (exercice.niveau === "avance") ecrans.push("resoudreFSeconde", "tableauFSeconde", "inflexions");
+  return ecrans;
+}
+
 export function ordreEcransEtudeLocale(exercice: ExerciceEtudeLocale): EcranEtudeLocale[] {
   const ecrans: EcranEtudeLocale[] = [];
-  if (exercice.type === "rationnelleAvecCE") ecrans.push("domaine");
+  // Écran domaine pour TOUTE fonction rationnelle (avec OU sans CE) : décider s'il existe des
+  // valeurs interdites fait partie du raisonnement (audit 5e ch. 5, décision J).
+  if (exercice.type !== "polynomiale") ecrans.push("domaine");
   ecrans.push("resoudreFPrime", "tableauFPrime");
   if (nombreExtremums(exercice) > 0) ecrans.push("extremums");
   if (exercice.niveau === "avance") {

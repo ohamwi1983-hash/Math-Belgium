@@ -10,7 +10,7 @@
  * AVANT tout câblage — voir la tâche, "ne fais pas confiance à mon algèbre sans vérification" —
  * puis testée sur les tirages ENTIERS réels de ce générateur dans `index.test.ts`) :
  *
- * e(t) = (a/2)t² + b·t = D  ⟺  a·t² + 2b·t - 2D = 0 (équation multipliée par 2, coefficients
+ * s(t) = (a/2)t² + b·t = D  ⟺  a·t² + 2b·t - 2D = 0 (équation multipliée par 2, coefficients
  * entiers). Construction "à l'envers" : `tCible` (le temps recherché) et `a`,`b` sont choisis EN
  * PREMIER, puis D = (a/2)·tCible² + b·tCible est DÉRIVÉ — garantit que tCible est UNE racine
  * exacte de l'équation. Par les relations coefficients-racines d'une équation du second degré
@@ -50,12 +50,12 @@ import { CONTEXTES_VITESSE_POSITION } from "./contextes";
 // importée), à `moteur5e/verificationVitessePosition.ts` (règle non négociable CLAUDE.md).
 // ============================================================================
 
-/** e(t) = (a/2)t² + b·t — position. */
+/** s(t) = (a/2)t² + b·t — distance parcourue. */
 export function valeurPosition(exercice: ExerciceVitessePosition, t: number): number {
   return (exercice.a / 2) * t * t + exercice.b * t;
 }
 
-/** v(t) = e'(t) = a·t + b — vitesse, formule EXACTE (jamais demandée en formule à l'élève : c'est
+/** v(t) = s'(t) = a·t + b — vitesse, formule EXACTE (jamais demandée en formule à l'élève : c'est
  * ce que l'écran "derivee" lui fait dériver lui-même ; réutilisée ici uniquement pour évaluer une
  * valeur numérique aux écrans suivants). */
 export function valeurVitesseExacte(exercice: ExerciceVitessePosition, t: number): number {
@@ -79,41 +79,53 @@ function tirerContexte(): ContexteVitessePosition {
   return CONTEXTES_VITESSE_POSITION[entierAleatoire(0, CONTEXTES_VITESSE_POSITION.length - 1)];
 }
 
-function tirerA(): 1 | 2 {
-  return entierAleatoire(0, 1) === 0 ? 1 : 2;
+interface Combinaison {
+  a: 1 | 2;
+  b: number;
+  tCible: number;
 }
 
-/** tCible entier — pair OBLIGATOIREMENT si a=1 (garantit D entier, voir preuve en en-tête), libre
- * si a=2. `borneMax` distingue la variante A (tTotal, plage large) de la variante B (t1, point de
- * passage intermédiaire, plage plus resserrée pour laisser de la place au segment restant). */
-function tirerTCible(a: 1 | 2, borneMin: number, borneMax: number): number {
-  if (a === 2) return entierAleatoire(borneMin, borneMax);
-  const min = borneMin % 2 === 0 ? borneMin : borneMin + 1;
-  const max = borneMax % 2 === 0 ? borneMax : borneMax - 1;
-  const nbPairs = (max - min) / 2 + 1;
-  return min + 2 * entierAleatoire(0, nbPairs - 1);
+/** Toutes les combinaisons (a, b, tCible) RÉALISTES pour un contexte : a ∈ `aValeurs`,
+ * b ∈ `bValeurs`, tCible entier dans [tMin ; tMax] (pair si a = 1 : D entier, voir l'en-tête),
+ * vitesse atteinte a·tCible + b dans [vMin ; vMax] (audit 5c5d point 13). */
+function combinaisonsRealistes(contexte: ContexteVitessePosition, tMin: number, tMax: number): Combinaison[] {
+  const combinaisons: Combinaison[] = [];
+  for (const a of contexte.aValeurs) {
+    for (const b of contexte.bValeurs) {
+      for (let t = tMin; t <= tMax; t++) {
+        if (a === 1 && t % 2 !== 0) continue;
+        const v = a * t + b;
+        if (v < contexte.vMin || v > contexte.vMax) continue;
+        combinaisons.push({ a, b, tCible: t });
+      }
+    }
+  }
+  return combinaisons;
 }
 
-/** t0 — entier ou décimal simple (multiple de 0,5), STRICTEMENT dans ]0,borne[ (borne = tCible :
- * fin du régime quadratique, seul domaine où v(t)=e'(t) a un sens — voir CLAUDE.md variante B,
- * "changement de modèle"). Nécessite borne≥2 (toujours vrai : tCible≥3 par construction). */
-function tirerT0(borne: number): number {
-  const base = entierAleatoire(1, borne - 1);
-  const avecDemi = Math.random() < 0.4 && base + 0.5 < borne;
-  return avecDemi ? base + 0.5 : base;
+/** Tire un contexte qui admet au moins une combinaison réaliste dans la plage de temps voulue,
+ * puis une combinaison au hasard (boucle bornée : chaque contexte de la banque en admet). */
+function tirerContexteEtCombinaison(tMin: number, tMax: number): { contexte: ContexteVitessePosition; combinaison: Combinaison } {
+  for (let essai = 0; essai < 50; essai++) {
+    const contexte = tirerContexte();
+    const combinaisons = combinaisonsRealistes(contexte, tMin, tMax);
+    if (combinaisons.length > 0) return { contexte, combinaison: combinaisons[entierAleatoire(0, combinaisons.length - 1)] };
+  }
+  const contexte = CONTEXTES_VITESSE_POSITION[0];
+  return { contexte, combinaison: combinaisonsRealistes(contexte, tMin, tMax)[0] };
 }
 
 // ============================================================================
-// QCM "pourquoi rejette-t-on la racine négative" — 4 options CONTEXTE-INDÉPENDANTES (aucune ne
-// référence de valeur numérique précise), ordre mélangé À LA CONSTRUCTION, fixe pour l'instance —
-// même motif que `optionsInterpretation`/`optionsVASens` (core5e/limitesContexte.types.ts).
+// QCM "pourquoi rejette-t-on l'autre solution" — 4 options de longueur comparable, toutes
+// plausibles (aucune option absurde), la bonne n'est jamais repérable à sa longueur (audit 5c5d
+// point 16). Ordre mélangé À LA CONSTRUCTION, fixe pour l'instance.
 // ============================================================================
 
 const OPTIONS_REJET_BASE: OptionJustification[] = [
-  { texte: "Parce qu'un temps ne peut pas être négatif : cette solution n'a pas de sens dans ce contexte.", correcte: true },
-  { texte: "Parce que cette solution n'est pas un nombre entier.", correcte: false },
-  { texte: "Parce que cette solution est trop petite comparée à la durée totale attendue.", correcte: false },
-  { texte: "Parce qu'une équation du second degré ne peut avoir qu'une seule solution mathématique.", correcte: false },
+  { texte: "Elle est négative, or le temps est compté à partir du départ.", correcte: true },
+  { texte: "Elle est négative, or une distance parcourue est toujours positive.", correcte: false },
+  { texte: "Elle est la plus petite, or on garde toujours la plus grande.", correcte: false },
+  { texte: "Elle ne vérifie pas l'équation de départ, contrairement à l'autre.", correcte: false },
 ];
 
 function construireOptionsRejetRacine(): OptionJustification[] {
@@ -121,44 +133,36 @@ function construireOptionsRejetRacine(): OptionJustification[] {
 }
 
 // ============================================================================
-// Variante A — "course simple" : une seule équation à résoudre, e(t)=D (distance totale).
+// Variante A — "course simple" : une seule équation à résoudre, s(t)=D.
 // ============================================================================
 
 const A_TCIBLE_MIN = 4;
 const A_TCIBLE_MAX = 10;
-const A_B_MAX = 5;
 
 export function genererVitessePositionA(): ExerciceVitessePositionA {
-  const contexte = tirerContexte();
-  const a = tirerA();
-  const b = entierAleatoire(0, A_B_MAX);
-  const tCible = tirerTCible(a, A_TCIBLE_MIN, A_TCIBLE_MAX);
+  const { contexte, combinaison } = tirerContexteEtCombinaison(A_TCIBLE_MIN, A_TCIBLE_MAX);
+  const { a, b, tCible } = combinaison;
   const D = (a / 2) * tCible * tCible + b * tCible;
   const racineRejetee = -((2 * b) / a) - tCible;
-  const t0 = tirerT0(tCible);
-  return { variante: "A", contexte, a, b, D, t0, distanceCible: D, tCible, racineRejetee, optionsRejetRacine: construireOptionsRejetRacine() };
+  return { variante: "A", contexte, a, b, D, distanceCible: D, tCible, racineRejetee, optionsRejetRacine: construireOptionsRejetRacine() };
 }
 
 // ============================================================================
-// Variante B — "course en segments" : e(t)=D1 (distance INTERMÉDIAIRE) résolue en premier, puis
-// changement de modèle explicite (vitesse constante sur le segment restant D2=D-D1).
+// Variante B — "course en segments" : s(t)=D1 résolue en premier, puis changement de modèle
+// explicite (vitesse constante sur le segment restant D2=D-D1). D est une distance totale
+// réaliste du contexte (60 m, 100 m, 500 m…), strictement supérieure à D1 + 10.
 // ============================================================================
 
 const B_TCIBLE_MIN = 3;
 const B_TCIBLE_MAX = 7;
-const B_B_MAX = 5;
-const B_D_SUPPLEMENT_MIN = 15;
-const B_D_SUPPLEMENT_MAX = 60;
 
 export function genererVitessePositionB(): ExerciceVitessePositionB {
-  const contexte = tirerContexte();
-  const a = tirerA();
-  const b = entierAleatoire(0, B_B_MAX);
-  const tCible = tirerTCible(a, B_TCIBLE_MIN, B_TCIBLE_MAX);
+  const { contexte, combinaison } = tirerContexteEtCombinaison(B_TCIBLE_MIN, B_TCIBLE_MAX);
+  const { a, b, tCible } = combinaison;
   const D1 = (a / 2) * tCible * tCible + b * tCible;
   const racineRejetee = -((2 * b) / a) - tCible;
-  const t0 = tirerT0(tCible);
-  const D = D1 + entierAleatoire(B_D_SUPPLEMENT_MIN, B_D_SUPPLEMENT_MAX);
+  const totaux = contexte.distancesTotalesB.filter((d) => d >= D1 + 10);
+  const D = totaux.length > 0 ? totaux[entierAleatoire(0, totaux.length - 1)] : D1 + 50;
   const D2 = D - D1;
   return {
     variante: "B",
@@ -166,7 +170,6 @@ export function genererVitessePositionB(): ExerciceVitessePositionB {
     a,
     b,
     D,
-    t0,
     distanceCible: D1,
     tCible,
     racineRejetee,

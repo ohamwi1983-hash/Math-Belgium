@@ -1,41 +1,47 @@
 /**
- * Couche B (5e) — types + dérivation pure pour 5gen30 ("Lecture graphique — dérivées et
+ * Couche B (5e) — types + ordre des écrans pour 5gen30 ("Lecture graphique — dérivées et
  * applications"). N'importe jamais rien de `src/generateurs5e/`.
  *
- * Séquence FIXE dès le tirage (dépend uniquement de champs déjà connus à la génération : présence
- * d'asymptotes à nommer, nombre d'extrema/PI réellement trouvés) — aucune branche réactive
- * dépendant d'une réponse élève, même patron que `typesEtudeLocale.ts` (5gen29) :
- *
- *   1. "asymptotes"     — sauté si strictement rien à nommer (0 AV + infini "aucune" des 2 côtés).
- *   2. "tableauFPrime"  — TOUJOURS présent (même à 0 extremum, une seule zone ↗ ou ↘ reste une
- *      info valide à lire).
- *   3. "extremums"      — sauté si 0 extremum.
- *   4. "tableauFSeconde"— TOUJOURS présent, même logique.
- *   5. "inflexions"     — sauté si 0 PI.
+ * Séquence FIXE de 6 écrans pour TOUS les exercices (audit 5e ch. 5, décision J : le nombre d'écrans
+ * ne révèle plus la structure du graphique) :
+ *   1. "asymptotes"      — l'élève nomme chaque asymptote (ou coche « aucune »).
+ *   2. "zerosFPrime"     — abscisses des points où f' s'annule (tangente horizontale), ou « aucun ».
+ *   3. "tableauFPrime"   — signe de f' et variations (colonnes = points de l'écran 2 + AV).
+ *   4. "extremums"       — ordonnée de chaque extremum ; SANS OBJET s'il n'y en a pas (écran sauté,
+ *      sa puce ne le dit qu'une fois atteinte : le tableau de l'écran 3 l'a déjà montré).
+ *   5. "inflexions"      — abscisses des points d'inflexion, ou « aucun ».
+ *   6. "tableauFSeconde" — signe de f'' et concavité (colonnes = points de l'écran 5 + AV).
+ * Les positions sont demandées AVANT les tableaux : les en-têtes des tableaux ne les révèlent plus.
  */
 import type { ExerciceLectureGraphiqueDerivees } from "../core5e/lectureGraphiqueDerivees.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
-import { listeAsymptotes } from "./typesLectureGraphiqueLimites";
 
-export type EcranLectureGraphiqueDerivees = "asymptotes" | "tableauFPrime" | "extremums" | "tableauFSeconde" | "inflexions";
+export type EcranLectureGraphiqueDerivees = "asymptotes" | "zerosFPrime" | "tableauFPrime" | "extremums" | "inflexions" | "tableauFSeconde";
 
-export function ordreEcransLectureGraphiqueDerivees(exercice: ExerciceLectureGraphiqueDerivees): EcranLectureGraphiqueDerivees[] {
-  const ecrans: EcranLectureGraphiqueDerivees[] = [];
-  if (listeAsymptotes(exercice.asymptotique).length > 0) ecrans.push("asymptotes");
-  ecrans.push("tableauFPrime");
-  if (exercice.extrema.length > 0) ecrans.push("extremums");
-  ecrans.push("tableauFSeconde");
-  if (exercice.inflexions.length > 0) ecrans.push("inflexions");
-  return ecrans;
+export const ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES: EcranLectureGraphiqueDerivees[] = ["asymptotes", "zerosFPrime", "tableauFPrime", "extremums", "inflexions", "tableauFSeconde"];
+
+/** Ordre FIXE (6 écrans, puces comprises). */
+export function ordreEcransLectureGraphiqueDerivees(_exercice?: ExerciceLectureGraphiqueDerivees): EcranLectureGraphiqueDerivees[] {
+  return ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES;
+}
+
+/** Écrans sans objet pour CET exercice (sautés, puce « sans objet » une fois atteints). */
+export function ecranSansObjet(exercice: ExerciceLectureGraphiqueDerivees, ecran: EcranLectureGraphiqueDerivees): boolean {
+  return ecran === "extremums" && exercice.extrema.length === 0;
+}
+
+/** Écrans réellement parcourus (ordre fixe moins les écrans sans objet). */
+export function ecransParcourus(exercice: ExerciceLectureGraphiqueDerivees): EcranLectureGraphiqueDerivees[] {
+  return ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES.filter((e) => !ecranSansObjet(exercice, e));
 }
 
 export function ecranInitial(exercice: ExerciceLectureGraphiqueDerivees): EcranLectureGraphiqueDerivees {
-  return ordreEcransLectureGraphiqueDerivees(exercice)[0];
+  return ecransParcourus(exercice)[0];
 }
 
 export function ecranApres(exercice: ExerciceLectureGraphiqueDerivees, ecran: EcranLectureGraphiqueDerivees): EcranLectureGraphiqueDerivees | "termine" {
-  const ordre = ordreEcransLectureGraphiqueDerivees(exercice);
+  const ordre = ecransParcourus(exercice);
   const index = ordre.indexOf(ecran);
   return index + 1 < ordre.length ? ordre[index + 1] : "termine";
 }

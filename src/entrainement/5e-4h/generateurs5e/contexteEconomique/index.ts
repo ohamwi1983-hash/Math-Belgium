@@ -2,23 +2,19 @@
  * Couche A (5e) — génération pour 5gen33 ("Contexte économique"). N'importe jamais rien de
  * `src/moteur5e/`. Contrat : `core5e/contexteEconomique.types.ts`.
  *
- * 3 familles STRUCTURELLEMENT DISJOINTES (jamais de "type" commun au-delà de `famille`) :
- *   - "A" (~46%) — coût marginal (approximation discrète vs dérivée), degré 2 ou 3 tiré 50/50,
- *     sous-cas "extremum existe/n'existe pas" tiré INDÉPENDAMMENT du degré (toujours vrai en
- *     degré 2 — C'_T linéaire, une seule racine toujours ; ~70%/~30% en degré 3 selon le signe de
- *     Δ=4b²-12ac, vérifié empiriquement sur 2000 tirages, voir `index.test.ts`).
- *   - "B" (~46%) — bénéfice maximum via égalité des marginales, construite "à l'envers" à partir
- *     des 2 racines DÉSIRÉES (x_opt>0, x_neg<0) de Cm(x)=Rm(x).
- *   - "bonus" (~8%, rare) — greffée sur le CONTEXTE de la famille A (coût cubique), résolution par
- *     dichotomie de P(q)=q·C'_T(q)-C_T(q)=0 (⟺ Cm(q)=CM(q)), racine délibérément non simple.
+ * Tous les tirages sont RÉALISTES (audit 5e ch. 5, décision G) : coût fixe > 0, coût total et coût
+ * marginal strictement positifs pour q ≥ 0 (coût croissant), prix positif et décroissant sur le
+ * domaine, bénéfice maximal > 0, optimum dans le domaine.
+ *   - "A" (~46 %) — coût marginal (approximation discrète vs dérivée), degré 2 ou 3 tiré 50/50,
+ *     puis coût moyen minimal (degré 2) ou coût marginal minimal (degré 3) ; régime exact (valeurs
+ *     entières) ou calculatrice.
+ *   - "B" (~46 %) — bénéfice maximum via égalité des marginales, construite "à l'envers" à partir
+ *     des 2 racines DÉSIRÉES (x_opt > 0, x_neg < 0) de C'_T(x) = R'_T(x).
+ *   - "bonus" (~8 %, rare) — coût cubique réaliste, résolution par dichotomie de
+ *     P(q) = q·C'_T(q) − C_T(q) = 0 (⟺ coût marginal = coût moyen), racine non rationnelle.
  *
- * `a` du coût cubique de la famille B est TOUJOURS > 0 — nécessaire pour que x_opt (la racine
- * POSITIVE retenue de Cm=Rm) soit un MAXIMUM de B, pas un minimum : B'(x) = R'_T(x)-C'_T(x) a pour
- * coefficient dominant -3a ; a>0 ⟹ parabole vers le bas ⟹ B' passe de + à - en x_opt (le plus
- * grand des 2 racines, x_opt>0>x_neg) ⟹ x_opt est bien un maximum local de B. Vérifié
- * empiriquement (signe de B' de part et d'autre de x_opt) avant câblage, voir `index.test.ts`.
- * `a` de la famille A (indépendante) reste signé (positif ou négatif) — plus de variété dans la
- * nature (max/min) du sous-cas "extremum", jamais contraint par la même exigence.
+ * `a` du coût cubique de la famille B est TOUJOURS > 0 : B'(x) = R'_T(x) − C'_T(x) =
+ * −3a(x − x_opt)(x − x_neg) passe de + à − en x_opt, qui est donc bien un MAXIMUM de B.
  */
 import type {
   CoutTotalA,
@@ -28,19 +24,13 @@ import type {
   ExerciceContexteEconomiqueA,
   ExerciceContexteEconomiqueB,
   ExerciceContexteEconomiqueBonus,
-  ExtremumCoutTotal,
   IterationDichotomie,
+  MinimumEconomiqueA,
 } from "../../core5e/contexteEconomique.types";
 import { NB_ITERATIONS_DICHOTOMIE } from "../../core5e/contexteEconomique.types";
 
 function entierAleatoire(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/** Entier non nul dans [-max,-min] ∪ [min,max] — signe tiré 50/50. */
-function entierSigneNonNul(min: number, max: number): number {
-  const magnitude = entierAleatoire(min, max);
-  return Math.random() < 0.5 ? magnitude : -magnitude;
 }
 
 // ============================================================================
@@ -55,105 +45,65 @@ export function deriveeCoutTotal(c: CoutTotalA, q: number): number {
   return c.degre === 2 ? 2 * c.a * q + c.b : 3 * c.a * q * q + 2 * c.b * q + c.c;
 }
 
-/** Sonde de signe de part et d'autre de `position` (racine connue de C'_T=0) pour classifier
- * max/min — robuste quel que soit le signe du coefficient dominant, jamais une formule figée par
- * cas. Même principe que le "changement de signe réel" déjà en place pour 5gen29
- * (`generateurs5e/etudeLocale/index.ts`), réimplémenté ici (Couche A propre à ce générateur). */
-function natureExtremum(c: CoutTotalA, position: number): "max" | "min" {
-  const EPS = 1e-3;
-  const avant = deriveeCoutTotal(c, position - EPS);
-  const apres = deriveeCoutTotal(c, position + EPS);
-  return avant > 0 && apres < 0 ? "max" : "min";
-}
-
 // ============================================================================
-// Famille A — construction.
+// Famille A — construction (coûts réalistes, audit 5e ch. 5, décision G).
 // ============================================================================
 
-function tirerCoutTotalDegre2(): CoutTotalDegre2 {
-  return { degre: 2, a: entierSigneNonNul(1, 3), b: entierAleatoire(-10, 10), c: entierAleatoire(-10, 10) };
+function estCarreParfait(n: number): boolean {
+  const r = Math.round(Math.sqrt(n));
+  return r * r === n;
 }
 
-function tirerCoutTotalDegre3(): CoutTotalDegre3 {
-  return { degre: 3, a: entierSigneNonNul(1, 3), b: entierAleatoire(-8, 8), c: entierAleatoire(-8, 8), d: entierAleatoire(-10, 10) };
-}
-
-/** Racines de C'_T(q)=0, TOUJOURS triées croissant — vide si `!extremumExiste`. Position/nature
- * JAMAIS filtrées par signe (contrairement à la famille B) : la consigne de ce sous-cas ne
- * restreint pas au domaine q>0. */
-function racinesEtNatureExtremum(c: CoutTotalA): { existe: boolean; extrema: ExtremumCoutTotal[] } {
-  if (c.degre === 2) {
-    const position = -c.b / (2 * c.a);
-    return { existe: true, extrema: [{ position, nature: natureExtremum(c, position) }] };
+/** Degré 2 : C_T(q) = a q² + b q + c (a, b, c > 0 : coût croissant, coût fixe c). Coût moyen
+ * C_M(q) = a q + b + c/q, minimal en q = √(c/a), où il vaut 2√(ac) + b. Régime exact : c = a·k². */
+function tirerCoutDegre2(exact: boolean): { coutTotal: CoutTotalDegre2; minimum: MinimumEconomiqueA } {
+  const a = entierAleatoire(1, 3);
+  const b = entierAleatoire(2, 30);
+  let c: number;
+  if (exact) {
+    const k = entierAleatoire(3, 12);
+    c = a * k * k;
+  } else {
+    do {
+      c = entierAleatoire(20, 300);
+    } while (c % a === 0 && estCarreParfait(c / a));
   }
-  const A = 3 * c.a;
-  const B = 2 * c.b;
-  const C = c.c;
-  const delta = B * B - 4 * A * C;
-  if (delta <= 0) return { existe: false, extrema: [] };
-  const racine = Math.sqrt(delta);
-  const positions = [(-B - racine) / (2 * A), (-B + racine) / (2 * A)].sort((p, q) => p - q);
-  return { existe: true, extrema: positions.map((position) => ({ position, nature: natureExtremum(c, position) })) };
+  const q = Math.sqrt(c / a);
+  return { coutTotal: { degre: 2, a, b, c }, minimum: { grandeur: "coutMoyen", q, valeur: 2 * Math.sqrt(a * c) + b, exact } };
 }
 
-const TENTATIVES_MAX_CONSTRUCTION = 200;
-
-function construireExerciceA(): ExerciceContexteEconomiqueA {
-  for (let tentative = 0; tentative < TENTATIVES_MAX_CONSTRUCTION; tentative++) {
-    const coutTotal: CoutTotalA = Math.random() < 0.5 ? tirerCoutTotalDegre2() : tirerCoutTotalDegre3();
-    const q0 = entierAleatoire(1, 8);
-    const cmDerivee = deriveeCoutTotal(coutTotal, q0);
-    if (cmDerivee === 0) continue;
-    if (coutTotal.degre === 3) {
-      const delta = 4 * coutTotal.b * coutTotal.b - 12 * coutTotal.a * coutTotal.c;
-      if (delta === 0) continue; // racine double dégénérée, exclue délibérément (voir types)
-    }
-    const cmDiscret = valeurCoutTotal(coutTotal, q0 + 1) - valeurCoutTotal(coutTotal, q0);
-    const ecartAbsolu = Math.abs(cmDiscret - cmDerivee);
-    const ecartPourcent = (ecartAbsolu / Math.abs(cmDerivee)) * 100;
-    const { existe, extrema } = racinesEtNatureExtremum(coutTotal);
-    return { famille: "A", coutTotal, q0, cmDiscret, cmDerivee, ecartAbsolu, ecartPourcent, extremumExiste: existe, extrema };
+/** Degré 3 : C_T(q) = a q³ + b q² + c q + d avec a > 0, b < 0, d > 0 et b² < 3ac (C'_T > 0
+ * partout : coût croissant). Coût marginal C'_T minimal en q = −b/(3a), où il vaut c − b²/(3a).
+ * Régime exact : b multiple de 3a. */
+function tirerCoutDegre3(exact: boolean): { coutTotal: CoutTotalDegre3; minimum: MinimumEconomiqueA } {
+  const a = entierAleatoire(1, 2);
+  let b: number;
+  if (exact) {
+    b = -3 * a * entierAleatoire(2, 8);
+  } else {
+    do {
+      b = -entierAleatoire(4, 24 * a);
+    } while (b % (3 * a) === 0);
   }
-  // Repli déterministe (jamais atteint en pratique — TENTATIVES_MAX_CONSTRUCTION largement
-  // suffisant vu les fréquences empiriques, voir index.test.ts).
-  const coutTotal: CoutTotalDegre2 = { degre: 2, a: 1, b: -4, c: 3 };
-  const q0 = 2;
+  const c = Math.ceil((b * b) / (3 * a) + 1e-9) + entierAleatoire(2, 40);
+  const d = entierAleatoire(20, 200);
+  const q = -b / (3 * a);
+  return { coutTotal: { degre: 3, a, b, c, d }, minimum: { grandeur: "coutMarginal", q, valeur: c - (b * b) / (3 * a), exact } };
+}
+
+function construireExerciceADegre(degre: 2 | 3, exactForce?: boolean): ExerciceContexteEconomiqueA {
+  const exact = exactForce ?? Math.random() < 0.6;
+  const { coutTotal, minimum } = degre === 2 ? tirerCoutDegre2(exact) : tirerCoutDegre3(exact);
+  const q0 = entierAleatoire(2, 10);
   const cmDerivee = deriveeCoutTotal(coutTotal, q0);
   const cmDiscret = valeurCoutTotal(coutTotal, q0 + 1) - valeurCoutTotal(coutTotal, q0);
-  const { existe, extrema } = racinesEtNatureExtremum(coutTotal);
-  return {
-    famille: "A",
-    coutTotal,
-    q0,
-    cmDiscret,
-    cmDerivee,
-    ecartAbsolu: Math.abs(cmDiscret - cmDerivee),
-    ecartPourcent: (Math.abs(cmDiscret - cmDerivee) / Math.abs(cmDerivee)) * 100,
-    extremumExiste: existe,
-    extrema,
-  };
+  const ecartAbsolu = Math.abs(cmDiscret - cmDerivee);
+  const ecartPourcent = (ecartAbsolu / cmDerivee) * 100;
+  return { famille: "A", coutTotal, q0, cmDiscret, cmDerivee, ecartAbsolu, ecartPourcent, minimum };
 }
 
-/** Force le degré ET (en degré 3) le sous-cas "extremum existe"/"n'existe pas" — utilisé par le
- * panneau dev. Boucle bornée + repli sur un tirage libre du bon degré si la sous-condition n'est
- * jamais atteinte (n'arrive jamais en pratique, fréquences ~30%/~70%). */
-function construireExerciceADegre(degre: 2 | 3, extremumExiste?: boolean): ExerciceContexteEconomiqueA {
-  for (let tentative = 0; tentative < TENTATIVES_MAX_CONSTRUCTION; tentative++) {
-    const coutTotal: CoutTotalA = degre === 2 ? tirerCoutTotalDegre2() : tirerCoutTotalDegre3();
-    const q0 = entierAleatoire(1, 8);
-    const cmDerivee = deriveeCoutTotal(coutTotal, q0);
-    if (cmDerivee === 0) continue;
-    if (coutTotal.degre === 3) {
-      const delta = 4 * coutTotal.b * coutTotal.b - 12 * coutTotal.a * coutTotal.c;
-      if (delta === 0) continue;
-    }
-    const { existe, extrema } = racinesEtNatureExtremum(coutTotal);
-    if (extremumExiste !== undefined && existe !== extremumExiste) continue;
-    const cmDiscret = valeurCoutTotal(coutTotal, q0 + 1) - valeurCoutTotal(coutTotal, q0);
-    const ecartAbsolu = Math.abs(cmDiscret - cmDerivee);
-    return { famille: "A", coutTotal, q0, cmDiscret, cmDerivee, ecartAbsolu, ecartPourcent: (ecartAbsolu / Math.abs(cmDerivee)) * 100, extremumExiste: existe, extrema };
-  }
-  return construireExerciceA();
+function construireExerciceA(): ExerciceContexteEconomiqueA {
+  return construireExerciceADegre(Math.random() < 0.5 ? 2 : 3);
 }
 
 // ============================================================================
@@ -167,31 +117,35 @@ function construireExerciceADegre(degre: 2 | 3, extremumExiste?: boolean): Exerc
 // ============================================================================
 
 function construireExerciceB(): ExerciceContexteEconomiqueB {
-  for (let tentative = 0; tentative < TENTATIVES_MAX_CONSTRUCTION; tentative++) {
-    const a = entierAleatoire(1, 3);
-    const xOpt = entierAleatoire(1, 6);
-    const xNeg = -entierAleatoire(1, 6);
-    const m = entierSigneNonNul(1, 5);
-    const k = entierAleatoire(-10, 10);
-    const bBrut = m - (3 * a * (xOpt + xNeg)) / 2;
+  for (let tentative = 0; tentative < 2000; tentative++) {
+    const a = entierAleatoire(1, 2);
+    const xOpt = entierAleatoire(2, 9);
+    const xNeg = -entierAleatoire(1, 5);
+    const pente = entierAleatoire(1, 6); // p(x) = k − pente·x
+    const bBrut = -(3 * a * (xOpt + xNeg)) / 2 - pente;
     if (!Number.isInteger(bBrut)) continue;
     const b = bBrut;
+    // c = k + 3a·x_opt·x_neg > 0 ⟹ k > 3a·x_opt·|x_neg|.
+    const kMin = 3 * a * xOpt * -xNeg + 1;
+    const k = kMin + entierAleatoire(0, 60);
     const c = k + 3 * a * xOpt * xNeg;
-    const d = entierAleatoire(-10, 10);
-    const beneficeMax = (m * xOpt * xOpt + k * xOpt) - (a * xOpt ** 3 + b * xOpt * xOpt + c * xOpt + d);
-    return { famille: "B", m, k, a, b, c, d, xOpt, xNeg, beneficeMax };
+    if (c <= 0) continue;
+    if (b < 0 && b * b >= 3 * a * c) continue; // C'_T > 0 pour x ≥ 0
+    if (k - pente * xOpt <= 0) continue; // prix positif à l'optimum
+    const rtOpt = k * xOpt - pente * xOpt * xOpt;
+    const ctSansFixe = a * xOpt ** 3 + b * xOpt * xOpt + c * xOpt;
+    const margeMax = rtOpt - ctSansFixe;
+    if (margeMax < 10) continue;
+    const d = entierAleatoire(5, Math.min(150, margeMax - 5));
+    const beneficeMax = rtOpt - (ctSansFixe + d);
+    if (beneficeMax <= 0) continue;
+    const pointTestAvant = xOpt >= 3 ? xOpt - 2 : 1;
+    const pointTestApres = xOpt + 1;
+    if (pointTestAvant >= xOpt) continue;
+    return { famille: "B", m: -pente, k, a, b, c, d, xOpt, xNeg, beneficeMax, pointTestAvant, pointTestApres };
   }
-  // Repli déterministe (jamais atteint en pratique — ~2/3 des tirages donnent b entier direct).
-  const a = 1;
-  const xOpt = 2;
-  const xNeg = -2;
-  const m = 3;
-  const k = 5;
-  const b = m - (3 * a * (xOpt + xNeg)) / 2;
-  const c = k + 3 * a * xOpt * xNeg;
-  const d = 4;
-  const beneficeMax = (m * xOpt * xOpt + k * xOpt) - (a * xOpt ** 3 + b * xOpt * xOpt + c * xOpt + d);
-  return { famille: "B", m, k, a, b, c, d, xOpt, xNeg, beneficeMax };
+  // Repli déterministe (vérifié réaliste) : p(x) = 60 − 2x, C_T(x) = x³ − 3x² + 18x + 20.
+  return { famille: "B", m: -2, k: 60, a: 1, b: -3, c: 18, d: 20, xOpt: 4, xNeg: -3, beneficeMax: 60 * 4 - 2 * 16 - (64 - 48 + 72 + 20), pointTestAvant: 2, pointTestApres: 5 };
 }
 
 // ============================================================================
@@ -248,6 +202,7 @@ function chercherIntervalleSigneOppose(c: CoutTotalDegre3): { gauche: number; dr
   return null;
 }
 
+const TENTATIVES_MAX_CONSTRUCTION = 200;
 const ITERATIONS_INTERNES_RACINE = 60;
 
 function racineParDichotomieInterne(c: CoutTotalDegre3, gauche: number, droite: number): number {
@@ -285,7 +240,11 @@ function precalculerIterations(c: CoutTotalDegre3, gauche: number, droite: numbe
 
 function construireExerciceBonus(): ExerciceContexteEconomiqueBonus {
   for (let tentative = 0; tentative < TENTATIVES_MAX_CONSTRUCTION; tentative++) {
-    const coutTotal: CoutTotalDegre3 = { degre: 3, a: entierAleatoire(1, 2), b: entierAleatoire(-5, 5), c: entierAleatoire(-8, 8), d: entierAleatoire(5, 30) };
+    const a = entierAleatoire(1, 2);
+    const b = entierAleatoire(-6, 6);
+    // Coût réaliste : c > b²/(3a) (coût marginal toujours positif) ; P ne dépend pas de c.
+    const c = Math.floor((b * b) / (3 * a)) + entierAleatoire(1, 20);
+    const coutTotal: CoutTotalDegre3 = { degre: 3, a, b, c, d: entierAleatoire(5, 30) };
     const intervalle = chercherIntervalleSigneOppose(coutTotal);
     if (!intervalle) continue;
     if (possedeRacineRationnelleSimple(coutTotal)) continue;
@@ -301,7 +260,7 @@ function construireExerciceBonus(): ExerciceContexteEconomiqueBonus {
   }
   // Repli déterministe (jamais atteint en pratique — 100% de réussite sur 500 tirages simulés,
   // voir index.test.ts).
-  const coutTotal: CoutTotalDegre3 = { degre: 3, a: 1, b: 2, c: -3, d: 12 };
+  const coutTotal: CoutTotalDegre3 = { degre: 3, a: 1, b: 2, c: 5, d: 12 };
   const racineApprochee = racineParDichotomieInterne(coutTotal, 1, 2);
   const { iterations, borneFinaleGauche, borneFinaleDroite } = precalculerIterations(coutTotal, 1, 2);
   const demiLargeurFinale = Math.abs(borneFinaleDroite - borneFinaleGauche) / 2;
@@ -319,14 +278,14 @@ export function genererExerciceContexteEconomique(): ExerciceContexteEconomique 
 }
 
 // ============================================================================
-// Panneau dev — variantes forcées : famille A (degré 2), famille A degré 3 (extremum existe /
-// n'existe pas), famille B, bonus.
+// Panneau dev — variantes forcées (identifiants inchangés, libellés à jour) : famille A degré 2,
+// famille A degré 3 en valeurs exactes / à la calculatrice, famille B, bonus.
 // ============================================================================
 
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
-  { id: "A-degre2", label: "Famille A — coût degré 2" },
-  { id: "A-degre3-extremum", label: "Famille A — coût degré 3, extremum existe" },
-  { id: "A-degre3-sans-extremum", label: "Famille A — coût degré 3, pas d'extremum" },
+  { id: "A-degre2", label: "Famille A — coût degré 2 (coût moyen minimal)" },
+  { id: "A-degre3-extremum", label: "Famille A — coût degré 3 (coût marginal minimal, valeurs exactes)" },
+  { id: "A-degre3-sans-extremum", label: "Famille A — coût degré 3 (coût marginal minimal, calculatrice)" },
   { id: "B", label: "Famille B — bénéfice maximum" },
   { id: "bonus", label: "Bonus — dichotomie (coût moyen)" },
 ];

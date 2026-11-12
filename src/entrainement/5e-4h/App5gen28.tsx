@@ -4,7 +4,7 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import type { ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne } from "./core5e/tangentes.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangente } from "./generateurs5e/tangentes/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
-import { formatReponseAttenduePhaseLatex, labelTangenteEquiv } from "./ui5e/formatTangentes";
+import { formatReponseAttenduePhaseLatex, labelTangenteEquiv, PLACEHOLDER_EQUATION_TANGENTE } from "./ui5e/formatTangentes";
 import {
   activerAideSuivante,
   demarrerSessionTangentes,
@@ -29,7 +29,14 @@ import {
   diagnostiquerFPrimeQ,
   diagnostiquerQ,
   diagnostiquerRacineChamp,
+  equationTangentePointDonneApprochee,
+  estValeurApprochee,
+  pointsApproches,
+  problemeListePoints,
+  problemeListeRacines,
+  substitutionApprochee,
 } from "./moteur5e/verificationTangentes";
+import type { StatutVerification } from "./moteur/statutVerification";
 import { EtapeSubstituerTangente } from "./components5e/EtapeSubstituerTangente";
 import { EtapeChampUniqueTangente } from "./components5e/EtapeChampUniqueTangente";
 import { EtapeRacinesTangente } from "./components5e/EtapeRacinesTangente";
@@ -48,6 +55,25 @@ const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 
 
 function nouvelleSession(): EtatSessionTangente {
   return demarrerSessionTangentes(REGLAGES_DEMO, genererExerciceTangente);
+}
+
+// ============================================================================
+// Contrôles de FORME avant soumission — la tentative n'est pas décomptée (audit 5e ch. 5, points 6,
+// 32, 33).
+// ============================================================================
+
+const MESSAGE_ILLISIBLE = "Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).";
+const MESSAGE_ARRONDI = "Valeur arrondie : donne la valeur exacte (racines carrées et fractions acceptées). Cette tentative n'est pas décomptée.";
+const MESSAGE_DOUBLON = "Valeur répétée : chaque solution ne s'écrit qu'une fois, même une racine double. Cette tentative n'est pas décomptée.";
+const MESSAGE_INCOMPLET = "Tes valeurs sont justes, mais il manque une solution. Cette tentative n'est pas décomptée.";
+
+function contientIllisible(statuts: StatutVerification[]): boolean {
+  return statuts.includes("parse_error");
+}
+
+/** `-3` → « −3 » (texte brut des fiches). */
+function nombreTexte(n: number): string {
+  return n < 0 ? `−${Math.abs(n)}` : `${n}`;
 }
 
 function reponseAttendueTangentes(exercice: EtatSessionTangente["exerciceCourant"], phase: EcranTangente) {
@@ -91,6 +117,9 @@ export function App5gen28() {
   /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
    * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
   const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranTangente, boolean>>>({});
+  /** Compteur de génération dans la clé d'écran : les champs repartent vides après « Nouvel
+   * exercice » ou « Générer » (même patron que `App5gen20.tsx`). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionTangente) {
     const recap = calculerRecapitulatifTangentes(nouvelEtat);
@@ -124,6 +153,7 @@ export function App5gen28() {
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideParPhase({});
+      setNumeroGeneration((g) => g + 1);
     } else {
       setEtat(enAttente.etatSuivant);
     }
@@ -134,13 +164,14 @@ export function App5gen28() {
     setEnAttente(null);
     setHistorique([]);
     setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionTangentes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation: ValidationEtapeProps | null = enAttente
     ? {
@@ -156,6 +187,7 @@ export function App5gen28() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Tangentes</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
@@ -211,8 +243,14 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseSubstituer(etat, reponse), `f(a) = ${reponse.fA} ; f'(a) = ${reponse.fPrimeA}`)}
+          onValider={(reponse) =>
+            terminerEtape(soumettreReponseSubstituer(etat, reponse), `f(${nombreTexte(ex.a)}) = ${reponse.fA} ; f'(${nombreTexte(ex.a)}) = ${reponse.fPrimeA}`)
+          }
           diagnostiquer={(r) => ({ fA: diagnostiquerFAPointDonne(r.fA, ex), fPrimeA: diagnostiquerFPrimeAPointDonne(r.fPrimeA, ex) })}
+          controlerSaisie={(r) => {
+            if (contientIllisible([diagnostiquerFAPointDonne(r.fA, ex), diagnostiquerFPrimeAPointDonne(r.fPrimeA, ex)])) return MESSAGE_ILLISIBLE;
+            return substitutionApprochee(r, ex) ? MESSAGE_ARRONDI : null;
+          }}
           validation={validation}
         />
       );
@@ -226,7 +264,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={ex}
           phase="tangente"
           labelChamp={labelTangenteEquiv(ex.a)}
-          placeholder="ex : y=4*x-3"
+          placeholder={PLACEHOLDER_EQUATION_TANGENTE}
           avecCalculatrice={false}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -235,6 +273,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseTangentePointDonne(etat, texte), texte)}
           diagnostiquer={(t) => diagnostiquerEquationTangentePointDonne(t, ex)}
+          estApprochee={(t) => equationTangentePointDonneApprochee(t, ex)}
           validation={validation}
         />
       );
@@ -253,6 +292,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseResoudre(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerRacineChamp(t, ex)}
+          controlerSaisie={(reponses) => {
+            if (contientIllisible(reponses.map((t) => diagnostiquerRacineChamp(t, ex)))) return MESSAGE_ILLISIBLE;
+            const probleme = problemeListeRacines(reponses, ex);
+            if (probleme === "doublon") return MESSAGE_DOUBLON;
+            if (probleme === "incomplet") return MESSAGE_INCOMPLET;
+            return reponses.some((t) => ex.racines.some((r) => estValeurApprochee(t, r))) ? MESSAGE_ARRONDI : null;
+          }}
           validation={validation}
         />
       );
@@ -273,6 +319,13 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             terminerEtape(soumettreReponseCoordonnees(etat, reponses), reponses.map((p) => `(${p.x} ; ${p.y})`).join(" ; "))
           }
           diagnostiquer={(point) => diagnostiquerCoordonneeChamp(point, ex)}
+          controlerSaisie={(points) => {
+            if (contientIllisible(points.flatMap((pt) => { const d = diagnostiquerCoordonneeChamp(pt, ex); return [d.x, d.y]; }))) return MESSAGE_ILLISIBLE;
+            const probleme = problemeListePoints(points, ex);
+            if (probleme === "doublon") return MESSAGE_DOUBLON.replace("chaque solution", "chaque point");
+            if (probleme === "incomplet") return MESSAGE_INCOMPLET.replace("une solution", "un point");
+            return pointsApproches(points, ex) ? MESSAGE_ARRONDI : null;
+          }}
           validation={validation}
         />
       );
@@ -290,9 +343,12 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponse) =>
-            terminerEtape(soumettreReponseTangenteEnP(etat, reponse), `f'(p) = ${reponse.fPrimeP} ; tangente : ${reponse.tangente}`)
+            terminerEtape(soumettreReponseTangenteEnP(etat, reponse), `f'(${nombreTexte(ex.p)}) = ${reponse.fPrimeP} ; tangente : ${reponse.tangente}`)
           }
           diagnostiquer={(r) => ({ fPrimeP: diagnostiquerFPrimeP(r.fPrimeP, ex), tangente: diagnostiquerEquationTangenteP(r.tangente, ex) })}
+          controlerSaisie={(r) =>
+            contientIllisible([diagnostiquerFPrimeP(r.fPrimeP, ex), diagnostiquerEquationTangenteP(r.tangente, ex)]) ? MESSAGE_ILLISIBLE : null
+          }
           validation={validation}
         />
       );
@@ -306,7 +362,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={ex}
           phase="trouverQ"
           labelChamp="q="
-          placeholder="ex : 2"
+          placeholder="ex : 0,5"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -327,15 +383,15 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={ex}
           phase="verifierPente"
-          labelChamp="f'(q)="
-          placeholder="ex : 1"
+          labelChamp={`f'(${ex.q})=`}
+          placeholder="ex : 0,5"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseVerifierPente(etat, texte), `f'(q) = ${texte}`)}
+          onValider={(texte) => terminerEtape(soumettreReponseVerifierPente(etat, texte), `f'(${nombreTexte(ex.q)}) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerFPrimeQ(t, ex)}
           validation={validation}
         />

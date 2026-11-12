@@ -22,6 +22,9 @@ export interface ContexteExtremaBornes {
   variableDef: string;
   /** Unité de la variable temporelle, ex. "heures". */
   uniteTemps: string;
+  /** Plus grande valeur plausible de la grandeur dans ce contexte — le tirage ne retient le
+   * contexte que si toutes les valeurs de f sur [0 ; T] restent en dessous (réalisme). */
+  valeurMax: number;
 }
 
 /** Le piège central du générateur : un extremum ABSOLU peut être un extremum LOCAL de f, ou une
@@ -38,7 +41,7 @@ export type ClassificationExtremumBorne = "max" | "min";
  * 5gen29/5gen28, jamais résolu puis vérifié). */
 export interface ExerciceExtremaBornes {
   contexte: ContexteExtremaBornes;
-  /** Borne supérieure du domaine [0;T], entier (≈6 à 24). */
+  /** Borne supérieure du domaine [0;T], entier (5 à 12 ; ≤ 8 pour les quartiques). */
   T: number;
   /** Coefficients de f(t), ASCENDANTS (coeffs[i] = coefficient de t^i) — longueur `degre+1`,
    * `coeffs[0]` = constante d (ou e), toujours un entier exact (comme tous les autres coefficients

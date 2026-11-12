@@ -25,12 +25,6 @@ function formatFractionLatex(f: FractionExacte): string {
   return `${signe}\\dfrac{${Math.abs(f.num)}}{${f.den}}`;
 }
 
-/** "n" ou "(n)" — parenthésage systématique d'un nombre négatif utilisé comme facteur, pour
- * éviter toute ambiguïté visuelle avec l'opérateur qui précède. */
-function formatFacteurSigne(n: number): string {
-  return n < 0 ? `(${n})` : `${n}`;
-}
-
 /** "h", "h+c" ou "h-|c|" — h plus une constante entière. */
 function formatHPlusConstante(c: number): string {
   if (c === 0) return "h";
@@ -80,20 +74,6 @@ function formatFractionAvecFacteurLatex(coeff: number, facteurLatex: string, den
 function reduireCoeffs(numerateur: number, denomCoeff: number): { num: number; denomCoeff: number } {
   const g = pgcd(numerateur, denomCoeff);
   return { num: numerateur / g, denomCoeff: denomCoeff / g };
-}
-
-/** "(lineaireLatex)" seul si le coefficient vaut 1 (implicite), "-(} " si -1, sinon
- * "coeff(lineaireLatex)" — jamais un "1(...)" littéral après réduction. */
-function formatFacteurCoeffLineaire(coeff: number, lineaireLatex: string): string {
-  const facteur = `(${lineaireLatex})`;
-  if (coeff === 1) return facteur;
-  if (coeff === -1) return `-${facteur}`;
-  return `${formatFacteurSigne(coeff)}${facteur}`;
-}
-
-/** "(n)" sauf si n=1 (facteur neutre, omis entièrement) — jamais "(1)" littéral après réduction. */
-function formatFacteurEntierOptionnel(n: number): string {
-  return n === 1 ? "" : `(${n})`;
 }
 
 function formatFacteurXMoinsQ(q: number): string {
@@ -148,7 +128,9 @@ export function questionSpecifiqueEcran(exercice: ExerciceDefinitionDerivee, ecr
   const a = exercice.a;
   switch (ecran) {
     case "developper":
-      return { texteAvant: `Calcule f(${a}), puis développe f(${a}+h) exprimé en fonction de h.` };
+      return exercice.famille === "affine" || exercice.famille === "quadratique"
+        ? { texteAvant: `Calcule f(${a}), puis écris f(${a} + h) en fonction de h, sous forme développée et réduite.` }
+        : { texteAvant: `Calcule f(${a}), puis écris f(${a} + h) en fonction de h : un seul numérateur et un seul dénominateur, chacun réduit.` };
     case "quotient":
       return {
         texteAvant: "Donne le taux d'accroissement",
@@ -156,10 +138,11 @@ export function questionSpecifiqueEcran(exercice: ExerciceDefinitionDerivee, ecr
         texteApres: "en le simplifiant au maximum.",
       };
     case "limite":
-      return {
-        texteAvant: "Calcul",
-        latex: `f'(${a})=\\displaystyle\\lim_{h \\to 0}(${formatQuotientConfirmeLatex(exercice, a)})`,
-      };
+      // Famille affine : pas d'écran « quotient » (il ferait recopier m) — l'élève part de la
+      // définition elle-même.
+      return exercice.famille === "affine"
+        ? { texteAvant: "Calcule", latex: `f'(${a})=\\displaystyle\\lim_{h \\to 0}\\dfrac{f(${a}+h)-f(${a})}{h}`, texteApres: "." }
+        : { texteAvant: "Calcule", latex: `f'(${a})=\\displaystyle\\lim_{h \\to 0}\\left(${formatQuotientConfirmeLatex(exercice, a)}\\right)`, texteApres: "." };
   }
 }
 
@@ -172,6 +155,20 @@ export const LIBELLE_ECRAN: Record<EcranDefinitionDerivee, string> = {
   quotient: "Quotient simplifié",
   limite: "f'(a)",
 };
+
+/** Libellé d'écran avec la valeur de a substituée (récapitulatif, fiches des puces) — jamais
+ * « f(a) » générique quand a est connu (audit 5c5a, point 16). */
+export function libelleEcran(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): string {
+  const a = exercice.a;
+  switch (ecran) {
+    case "developper":
+      return `f(${a}) et f(${a} + h)`;
+    case "quotient":
+      return "Taux d'accroissement simplifié";
+    case "limite":
+      return `f'(${a})`;
+  }
+}
 
 export function labelFA(a: number): string {
   return `f(${a})=`;
@@ -210,16 +207,16 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
         return { texte: "Développe simplement, aucun terme au carré ici :", latex: "f(a+h)=m(a+h)+p=ma+mh+p" };
       case "quadratique":
         return {
-          texte: "Développe AVANT de multiplier par m et de distribuer. Piège : oublier le terme croisé 2ah, ou une erreur de signe si m est négatif.",
+          texte: "Développe d'abord le carré, puis multiplie par m. Piège : oublier le terme croisé 2ah, ou une erreur de signe si m est négatif :",
           latex: "f(a+h)=m(a+h)^2+p, \\quad (a+h)^2=a^2+2ah+h^2",
         };
       case "rationnelleSimple":
         return exercice.expo === 1
-          ? { texte: "Ne développe rien, garde le dénominateur (a+h) tel quel pour l'instant :", latex: "f(a+h)=\\dfrac{k}{a+h}" }
-          : { texte: "Ne développe rien, garde le dénominateur (a+h)² tel quel pour l'instant :", latex: "f(a+h)=\\dfrac{k}{(a+h)^2}" };
+          ? { texte: "Remplace x par a + h : le numérateur ne change pas, le dénominateur devient a + h, que tu peux garder tel quel :", latex: "f(a+h)=\\dfrac{k}{a+h}" }
+          : { texte: "Remplace x par a + h : le numérateur ne change pas, le dénominateur devient le carré de a + h :", latex: "f(a+h)=\\dfrac{k}{(a+h)^2}" };
       case "rationnelleLineaire":
         return {
-          texte: "Développe seulement le numérateur, garde (a+h)-q au dénominateur :",
+          texte: "Remplace x par a + h au numérateur et au dénominateur, puis réduis chacun des deux :",
           latex: "f(a+h)=\\dfrac{m(a+h)+p}{(a+h)-q}",
         };
     }
@@ -230,22 +227,28 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
         return { texte: "Le h se simplifie directement, sans reste :", latex: "\\dfrac{f(a+h)-f(a)}{h}=\\dfrac{mh}{h}=m" };
       case "quadratique":
         return {
-          texte: "Factorise h au numérateur de f(a+h)-f(a) AVANT de diviser par h — il doit rester ceci une fois le h du dénominateur simplifié :",
+          texte: "Mets h en évidence au numérateur de f(a + h) − f(a) avant de diviser par h. Une fois le h simplifié, il doit rester :",
           latex: "2ma+mh",
         };
       case "rationnelleSimple":
         return {
-          texte: "Mets f(a+h)-f(a) au MÊME DÉNOMINATEUR avant de diviser par h — sinon impossible de factoriser le h au numérateur pour le simplifier.",
+          texte: "Mets f(a + h) − f(a) au même dénominateur avant de diviser par h — sinon impossible de mettre h en évidence au numérateur pour le simplifier.",
           latex: null,
         };
       case "rationnelleLineaire":
         return {
-          texte: "Mets f(a+h)-f(a) au même dénominateur avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui s'annule avec le h du dénominateur du quotient :",
+          texte: "Mets f(a + h) − f(a) au même dénominateur avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui se simplifie avec le h du quotient. Dénominateur commun :",
           latex: "(a+h-q)(a-q)",
         };
     }
   }
-  return { texte: "Dans le quotient simplifié, il n'y a plus de h au dénominateur — remplace directement h par 0 pour obtenir f'(a).", latex: null };
+  if (exercice.famille === "affine") {
+    return { texte: "Calcule f(a + h) − f(a) : les termes sans h s'annulent, il ne reste qu'un multiple de h, qui se simplifie avec le h du dénominateur.", latex: null };
+  }
+  return {
+    texte: "Dans le quotient simplifié, il ne reste plus de facteur h qui annulerait le dénominateur : remplace directement h par 0 pour obtenir f'(a).",
+    latex: null,
+  };
 }
 
 export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): AideFragmentee {
@@ -289,12 +292,16 @@ export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: Ecr
         };
       case "rationnelleLineaire":
         return {
-          texte: "Exemple : le numérateur mis au même dénominateur se réduit toujours à une constante × h — c'est CE h-là qui se simplifie avec le h du dénominateur du quotient.",
-          latex: null,
+          texte: "Exemple :",
+          latex:
+            "f(x)=\\dfrac{x+1}{x-2},\\ a=3: \\quad \\dfrac{\\frac{h+4}{h+1}-4}{h}=\\dfrac{\\frac{h+4-4(h+1)}{h+1}}{h}=\\dfrac{\\frac{-3h}{h+1}}{h}=\\dfrac{-3}{h+1}",
         };
     }
   }
-  return { texte: "Exemple :", latex: "\\text{quotient simplifié}=2a+h \\;\\xrightarrow{h\\to0}\\; f'(a)=2a" };
+  if (exercice.famille === "affine") {
+    return { texte: "Exemple :", latex: "f(x)=2x+3:\\quad \\dfrac{f(a+h)-f(a)}{h}=\\dfrac{2h}{h}=2 \\;\\xrightarrow{h\\to0}\\; f'(a)=2" };
+  }
+  return { texte: "Exemple : si le quotient simplifié vaut 2a + h, on remplace h par 0 :", latex: "\\lim_{h\\to0}(2a+h)=2a" };
 }
 
 // ============================================================================
@@ -316,6 +323,18 @@ function formatDeveloppementConfirmeLatex(exercice: ExerciceDefinitionDerivee, a
   }
 }
 
+/** Coefficient numérique écrit DEVANT un facteur entre parenthèses (« 2(h+1) », « (h+1) » si 1) —
+ * jamais « (h+1)(−1) » (audit 5c5a, point 14) : le signe est reporté sur le numérateur avant
+ * l'appel. */
+function formatCoeffDevantFacteur(coeff: number, facteurLatex: string): string {
+  return coeff === 1 ? facteurLatex : `${coeff}${facteurLatex}`;
+}
+
+/** Normalise le signe : dénominateur numérique toujours positif, signe porté par le numérateur. */
+function signeAuNumerateur(num: number, denomCoeff: number): { num: number; denomCoeff: number } {
+  return denomCoeff < 0 ? { num: -num, denomCoeff: -denomCoeff } : { num, denomCoeff };
+}
+
 function formatQuotientConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
   switch (exercice.famille) {
     case "affine":
@@ -324,38 +343,38 @@ function formatQuotientConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: num
       return formatPolynomeHLatex([2 * exercice.m * a, exercice.m]);
     case "rationnelleSimple": {
       if (exercice.expo === 1) {
-        const { num, denomCoeff } = reduireCoeffs(-exercice.k, a);
-        return formatFractionAvecFacteurLatex(num, "", formatFacteurCoeffLineaire(denomCoeff, formatHPlusConstante(a)));
+        const reduit = reduireCoeffs(-exercice.k, a);
+        const { num, denomCoeff } = signeAuNumerateur(reduit.num, reduit.denomCoeff);
+        return formatFractionAvecFacteurLatex(num, "", formatCoeffDevantFacteur(denomCoeff, `(${formatHPlusConstante(a)})`));
       }
       const { num, denomCoeff } = reduireCoeffs(-exercice.k, a * a);
       const numFacteur = `(${formatPolynomeHLatex([2 * a, 1])})`;
-      const denLatex = denomCoeff === 1 ? `(${formatHPlusConstante(a)})^2` : `${denomCoeff}(${formatHPlusConstante(a)})^2`;
-      return formatFractionAvecFacteurLatex(num, numFacteur, denLatex);
+      return formatFractionAvecFacteurLatex(num, numFacteur, formatCoeffDevantFacteur(denomCoeff, `(${formatHPlusConstante(a)})^2`));
     }
     case "rationnelleLineaire": {
       const numConst = -(exercice.m * exercice.q + exercice.p);
       const denomCoeffRaw = a - exercice.q;
-      const { num, denomCoeff } = reduireCoeffs(numConst, denomCoeffRaw);
-      const denomLatex = `(${formatHPlusConstante(denomCoeffRaw)})${formatFacteurEntierOptionnel(denomCoeff)}`;
-      return formatFractionAvecFacteurLatex(num, "", denomLatex);
+      const reduit = reduireCoeffs(numConst, denomCoeffRaw);
+      const { num, denomCoeff } = signeAuNumerateur(reduit.num, reduit.denomCoeff);
+      return formatFractionAvecFacteurLatex(num, "", formatCoeffDevantFacteur(denomCoeff, `(${formatHPlusConstante(denomCoeffRaw)})`));
     }
   }
 }
 
 function formatFAConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
-  return `f(a)=${formatFractionLatex(valeurExacte(exercice, a))}`;
+  return `f(${a})=${formatFractionLatex(valeurExacte(exercice, a))}`;
 }
 
 function formatDeveloppementEtatActuelLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
-  return `f(a+h)=${formatDeveloppementConfirmeLatex(exercice, a)}`;
+  return `f(${a}+h)=${formatDeveloppementConfirmeLatex(exercice, a)}`;
 }
 
 function formatQuotientEtatActuelLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
-  return `\\dfrac{f(a+h)-f(a)}{h}=${formatQuotientConfirmeLatex(exercice, a)}`;
+  return `\\dfrac{f(${a}+h)-f(${a})}{h}=${formatQuotientConfirmeLatex(exercice, a)}`;
 }
 
 function formatLimiteConfirmeeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
-  return `f'(a)=${formatFractionLatex(deriveeExacte(exercice, a))}`;
+  return `f'(${a})=${formatFractionLatex(deriveeExacte(exercice, a))}`;
 }
 
 // ============================================================================
@@ -366,8 +385,8 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceDefinitionDerivee,
   const indexEcran = ORDRE_COMPLET.indexOf(ecran);
   if (indexEcran === 0) return null;
   const a = exercice.a;
-  const termes: string[] = [formatFAConfirmeLatex(exercice, a), formatDeveloppementEtatActuelLatex(exercice, a)];
-  if (indexEcran >= 2) termes.push(formatQuotientEtatActuelLatex(exercice, a));
+  const termes: string[] = [`${formatFAConfirmeLatex(exercice, a)}\\,;`, formatDeveloppementEtatActuelLatex(exercice, a)];
+  if (indexEcran >= 2 && exercice.famille !== "affine") termes.push(formatQuotientEtatActuelLatex(exercice, a));
   return termes;
 }
 
@@ -379,7 +398,8 @@ export function formatReponseAttendueEcranLatex(exercice: ExerciceDefinitionDeri
   const a = exercice.a;
   switch (ecran) {
     case "developper":
-      return [formatFAConfirmeLatex(exercice, a), formatDeveloppementEtatActuelLatex(exercice, a)];
+      // Point-virgule après f(a) : les deux égalités ne se lisent jamais comme un produit.
+      return [`${formatFAConfirmeLatex(exercice, a)}\\,;`, formatDeveloppementEtatActuelLatex(exercice, a)];
     case "quotient":
       return [formatQuotientEtatActuelLatex(exercice, a)];
     case "limite":

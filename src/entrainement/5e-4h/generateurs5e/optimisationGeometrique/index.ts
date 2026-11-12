@@ -1,21 +1,18 @@
 /**
- * Couche A (5e) — génération pour 5gen32 ("Optimisation géométrique"), 8e générateur du chapitre
- * "Dérivées et applications". 4 familles STRUCTURELLEMENT DISJOINTES tirées à fréquence comparable
- * (~22% chacune) + 2 variantes bonus RARES (poids réduit, voir `POIDS_FAMILLE`) — voir
- * `core5e/optimisationGeometrique.types.ts` pour le contrat complet et la convention RADIANS
- * (famille "trapeze"). N'importe jamais rien de `moteur5e/`.
+ * Couche A (5e) — génération pour 5gen32 ("Optimisation géométrique"), chapitre "Dérivées et
+ * applications". 6 familles d'optimisation (trapèze, cylindre, marges ×2, fenêtre ×2) dans le
+ * tirage libre ; la variante "cubique" n'est accessible que par le sélecteur (audit 5e ch. 5,
+ * décision H). Contrat complet et convention RADIANS : `core5e/optimisationGeometrique.types.ts`.
+ * N'importe jamais rien de `moteur5e/`.
  *
- * Toutes les familles sont construites "à l'envers" : le résultat optimal (x_opt/α_opt) est choisi
- * EN PREMIER, les données d'énoncé (b,l / V / T,A,mh,mv / P,A) sont DÉRIVÉES ensuite pour que ce
- * résultat tombe exactement juste — jamais un tirage-puis-rejet des données elles-mêmes.
+ * Deux régimes par famille : « exact » (optimum entier ou fraction simple choisi EN PREMIER, données
+ * dérivées à l'envers) et « calculatrice » (données entières tirées librement, optimum irrationnel).
  *
  * Chaque fonction objectif `valeurFOptimisation` est calculée par COMPOSITION à partir de la
- * quantité "isolée" (`valeurLienOptimisation`/`valeurHauteurTrapeze`+`valeurBaseSupTrapeze`) plutôt
- * que par une formule développée mémorisée séparément — cohérence interne : la même donnée
- * (mh,mv,T,A,P...) traverse tous les écrans sans jamais être re-dérivée d'une valeur déjà
- * approximée. Les formules développées visées par la tâche (ex. S(x)=2πx²+2V/x) sont revérifiées
- * PAR ÉGALITÉ NUMÉRIQUE avec cette composition dans `index.test.ts` (elles doivent coïncider
- * partout, pas seulement au point optimal).
+ * quantité "isolée" (`valeurLienMarges`/`valeurLienFenetre`/`valeurHauteurCylindre`/
+ * `valeurHauteurTrapeze`+`valeurBaseSupTrapeze`) plutôt que par une formule développée mémorisée
+ * séparément ; les formules développées affichées (`ui5e/formatOptimisationGeometrique.ts`) sont
+ * revérifiées par égalité numérique avec cette composition (scripts de l'audit 5e ch. 5).
  */
 import type {
   ExerciceCubique,
@@ -34,39 +31,68 @@ export function valeurNumeriqueAvecPi(v: ValeurAvecPi): number {
 }
 
 // ============================================================================
-// Famille "trapeze" — construction "à l'envers" : l (entier) ET u=cos(α_opt) (fraction simple)
-// choisis EN PREMIER, b=l(1-2u²)/u dérivé, retenu SEULEMENT si entier positif raisonnable.
+// Régimes "exact" / "calculatrice" (audit 5e ch. 5, décision H) — dans le régime exact, l'optimum
+// est construit à l'envers (entier ou fraction simple) ; dans le régime calculatrice, les données
+// sont des entiers tirés librement et l'optimum est irrationnel (arrondi au centième).
 // ============================================================================
 
-const FRACTIONS_U: { num: number; den: number }[] = [
-  { num: 1, den: 2 },
-  { num: 1, den: 3 },
-  { num: 2, den: 3 },
-  { num: 1, den: 4 },
-  { num: 3, den: 4 },
-  { num: 1, den: 5 },
-  { num: 2, den: 5 },
-  { num: 3, den: 5 },
-  { num: 4, den: 5 },
-];
-const L_CANDIDATS_TRAPEZE = [2, 3, 4, 5, 6, 7, 8];
-const MAX_ESSAIS_TRAPEZE = 300;
-const B_MAX_TRAPEZE = 25;
+const PART_REGIME_EXACT = 0.55;
 
-export function construireTrapeze(): ExerciceTrapeze {
-  for (let essai = 0; essai < MAX_ESSAIS_TRAPEZE; essai++) {
-    const l = L_CANDIDATS_TRAPEZE[entierAleatoire(0, L_CANDIDATS_TRAPEZE.length - 1)];
-    const frac = FRACTIONS_U[entierAleatoire(0, FRACTIONS_U.length - 1)];
-    const u = frac.num / frac.den;
-    const bNum = l * (1 - 2 * u * u);
-    const bDen = u;
-    const b = bNum / bDen;
-    if (Number.isInteger(b) && b >= 1 && b <= B_MAX_TRAPEZE) {
-      return { famille: "trapeze", b, l, u: reduireFraction(frac.num, frac.den) };
+function regimeExact(force?: boolean): boolean {
+  return force ?? Math.random() < PART_REGIME_EXACT;
+}
+
+// ============================================================================
+// Famille "trapeze" — A(α) = (b + l·cos α)·l·sin α ; A'(α) = 0 ⟺ 2l·u² + b·u − l = 0 (u = cos α,
+// via sin²α = 1 − cos²α). Régime exact : u = n/d choisi EN PREMIER, b = l(d² − 2n²)/(n·d) retenu
+// seulement si c'est un entier — test en arithmétique ENTIÈRE (un test flottant
+// `Number.isInteger(l(1−2u²)/u)` échouait pour u = 1/3, 2/3, 1/5…, audit 5e ch. 5, point 3).
+// ============================================================================
+
+const FRACTIONS_U: { num: number; den: number }[] = [];
+for (let den = 2; den <= 6; den++) {
+  for (let num = 1; num < den; num++) {
+    const pgcd = (a: number, b: number): number => (b === 0 ? a : pgcd(b, a % b));
+    if (pgcd(num, den) === 1) FRACTIONS_U.push({ num, den });
+  }
+}
+const L_MIN_TRAPEZE = 2;
+const L_MAX_TRAPEZE = 12;
+const B_MAX_TRAPEZE = 30;
+
+/** Toutes les combinaisons exactes (l, u = n/d) qui donnent une base b entière dans [1 ; 30] —
+ * calculées une fois (24 combinaisons). */
+const COMBINAISONS_TRAPEZE_EXACTES: { l: number; b: number; u: { num: number; den: number } }[] = (() => {
+  const out: { l: number; b: number; u: { num: number; den: number } }[] = [];
+  for (let l = L_MIN_TRAPEZE; l <= L_MAX_TRAPEZE; l++) {
+    for (const u of FRACTIONS_U) {
+      const numerateur = l * (u.den * u.den - 2 * u.num * u.num);
+      if (numerateur % (u.num * u.den) !== 0) continue;
+      const b = numerateur / (u.num * u.den);
+      if (b >= 1 && b <= B_MAX_TRAPEZE) out.push({ l, b, u });
     }
   }
-  // Repli déterministe — combinaison connue valide (voir tête de fichier, vérifiée numériquement).
-  return { famille: "trapeze", b: 4, l: 4, u: { num: 1, den: 2 } };
+  return out;
+})();
+
+/** u = cos(α_opt), racine positive de 2l·u² + b·u − l = 0. */
+export function uOptTrapeze(ex: ExerciceTrapeze): number {
+  if (ex.u) return ex.u.num / ex.u.den;
+  return (-ex.b + Math.sqrt(ex.b * ex.b + 8 * ex.l * ex.l)) / (4 * ex.l);
+}
+
+export function construireTrapeze(exactForce?: boolean): ExerciceTrapeze {
+  if (regimeExact(exactForce)) {
+    const c = COMBINAISONS_TRAPEZE_EXACTES[entierAleatoire(0, COMBINAISONS_TRAPEZE_EXACTES.length - 1)];
+    return { famille: "trapeze", b: c.b, l: c.l, u: reduireFraction(c.u.num, c.u.den) };
+  }
+  for (let essai = 0; essai < 200; essai++) {
+    const l = entierAleatoire(3, 10);
+    const b = entierAleatoire(2, 20);
+    if (COMBINAISONS_TRAPEZE_EXACTES.some((c) => c.l === l && c.b === b)) continue;
+    return { famille: "trapeze", b, l, u: null };
+  }
+  return { famille: "trapeze", b: 5, l: 4, u: null };
 }
 
 export function valeurHauteurTrapeze(ex: ExerciceTrapeze, alpha: number): number {
@@ -78,20 +104,32 @@ export function valeurBaseSupTrapeze(ex: ExerciceTrapeze, alpha: number): number
 }
 
 export function alphaOptTrapeze(ex: ExerciceTrapeze): number {
-  return Math.acos(ex.u.num / ex.u.den);
+  return Math.acos(uOptTrapeze(ex));
 }
 
 // ============================================================================
-// Famille "cylindre" — x_opt (entier) choisi EN PREMIER, V=2π·x_opt³ dérivé (coeffV=2·x_opt³).
+// Famille "cylindre" — V = coeffV·π ; S(x) = 2πx² + 2coeffV·π/x ; S'(x) = 0 ⟺ x³ = coeffV/2.
+// Régime exact : x_opt entier choisi EN PREMIER (coeffV = 2·x_opt³). Régime calculatrice : coeffV
+// entier quelconque (x_opt = ∛(coeffV/2) irrationnel).
 // ============================================================================
 
 const AVEC_APPLICATION_POIDS = 0.12; // rare
+const PRIX_CENTIMES_PAR_CM2 = [1, 2, 3, 4, 5];
 
-export function construireCylindre(avecApplicationForcee?: boolean): ExerciceCylindre {
-  const xOpt = entierAleatoire(2, 6);
-  const coeffV = 2 * xOpt ** 3;
+export function construireCylindre(avecApplicationForcee?: boolean, exactForce?: boolean): ExerciceCylindre {
+  let xOpt: number;
+  let coeffV: number;
+  if (regimeExact(exactForce)) {
+    xOpt = entierAleatoire(2, 8);
+    coeffV = 2 * xOpt ** 3;
+  } else {
+    do {
+      coeffV = 10 * entierAleatoire(3, 100);
+    } while (Number.isInteger(Math.round(Math.cbrt(coeffV / 2) * 1e9) / 1e9));
+    xOpt = Math.cbrt(coeffV / 2);
+  }
   const avecApplicationNumerique = avecApplicationForcee ?? Math.random() < AVEC_APPLICATION_POIDS;
-  const prixUnitaireMateriau = avecApplicationNumerique ? entierAleatoire(2, 9) : undefined;
+  const prixUnitaireMateriau = avecApplicationNumerique ? PRIX_CENTIMES_PAR_CM2[entierAleatoire(0, PRIX_CENTIMES_PAR_CM2.length - 1)] / 100 : undefined;
   return { famille: "cylindre", xOpt, coeffV, avecApplicationNumerique, prixUnitaireMateriau };
 }
 
@@ -101,36 +139,51 @@ export function valeurHauteurCylindre(ex: ExerciceCylindre, x: number): number {
 }
 
 // ============================================================================
-// Famille "marges" (C, 2 sous-parties) — x_opt (entier), mh, mv (entiers distincts) choisis EN
-// PREMIER ; T (margesA) ou A (margesB) dérivé — boucle bornée + repli déterministe (mh=1 divise
-// toujours proprement).
+// Famille "marges" — largeur totale x + 2m_h, hauteur totale y + 2m_v.
+// margesA (aire totale T fixée) : x_opt = √(m_h·T/m_v) − 2m_h ; margesB (aire imprimée A fixée) :
+// x_opt = √(m_h·A/m_v). Régime exact : x_opt entier choisi EN PREMIER, T/A dérivé ; régime
+// calculatrice : T/A entier tiré librement (dimensions d'une page, en cm).
 // ============================================================================
 
-const MAX_ESSAIS_MARGES = 200;
+const MAX_ESSAIS_MARGES = 400;
 
-export function construireMargesA(): ExerciceMarges {
+export function construireMargesA(exactForce?: boolean): ExerciceMarges {
+  const exact = regimeExact(exactForce);
   for (let essai = 0; essai < MAX_ESSAIS_MARGES; essai++) {
-    const xOpt = entierAleatoire(2, 6);
     const mh = entierAleatoire(1, 4);
     const mv = entierAleatoire(1, 4);
     if (mh === mv) continue;
-    const T = (mv * (xOpt + 2 * mh) ** 2) / mh;
-    if (Number.isInteger(T) && T > 0 && T <= 500) {
-      return { famille: "margesA", mh, mv, T, xOpt };
+    if (exact) {
+      const xOpt = entierAleatoire(4, 20);
+      const T = (mv * (xOpt + 2 * mh) ** 2) / mh;
+      if (Number.isInteger(T) && T >= 60 && T <= 900 && valeurLienMarges({ famille: "margesA", mh, mv, T, xOpt }, xOpt) > 0) {
+        return { famille: "margesA", mh, mv, T, xOpt };
+      }
+    } else {
+      const T = 10 * entierAleatoire(10, 80);
+      const xOpt = Math.sqrt((mh * T) / mv) - 2 * mh;
+      if (Number.isInteger(Math.round(xOpt * 1e9) / 1e9)) continue;
+      if (xOpt >= 2 && valeurLienMarges({ famille: "margesA", mh, mv, T, xOpt }, xOpt) >= 2) return { famille: "margesA", mh, mv, T, xOpt };
     }
   }
-  return { famille: "margesA", mh: 1, mv: 3, T: 108, xOpt: 4 };
+  return { famille: "margesA", mh: 1, mv: 3, T: 300, xOpt: 8 };
 }
 
-export function construireMargesB(): ExerciceMarges {
+export function construireMargesB(exactForce?: boolean): ExerciceMarges {
+  const exact = regimeExact(exactForce);
   for (let essai = 0; essai < MAX_ESSAIS_MARGES; essai++) {
-    const xOpt = entierAleatoire(2, 6);
     const mh = entierAleatoire(1, 4);
     const mv = entierAleatoire(1, 4);
     if (mh === mv) continue;
-    const A = (mv * xOpt * xOpt) / mh;
-    if (Number.isInteger(A) && A > 0 && A <= 500) {
-      return { famille: "margesB", mh, mv, A, xOpt };
+    if (exact) {
+      const xOpt = entierAleatoire(4, 20);
+      const A = (mv * xOpt * xOpt) / mh;
+      if (Number.isInteger(A) && A >= 30 && A <= 700) return { famille: "margesB", mh, mv, A, xOpt };
+    } else {
+      const A = 10 * entierAleatoire(5, 60);
+      const xOpt = Math.sqrt((mh * A) / mv);
+      if (Number.isInteger(Math.round(xOpt * 1e9) / 1e9)) continue;
+      if (xOpt >= 2) return { famille: "margesB", mh, mv, A, xOpt };
     }
   }
   return { famille: "margesB", mh: 1, mv: 3, A: 48, xOpt: 4 };
@@ -148,23 +201,27 @@ export function valeurLienMarges(ex: ExerciceMarges, x: number): number {
 }
 
 // ============================================================================
-// Famille "fenetre" (D, 2 sous-parties) — r_opt (entier, PAIR pour fenetreB — voir tête de fichier
-// core5e, garde le coefficient de π entier) choisi EN PREMIER, P (fenetreA) ou A (fenetreB) dérivé
-// exactement en fonction de π.
+// Famille "fenetre" — fenetreA : P = (4 + π)·r_opt ; fenetreB : A = (2 + π/2)·r_opt².
+// Régime exact : r_opt entier choisi EN PREMIER, P/A donné en fonction de π ; régime
+// calculatrice : P/A entier (en dm, dm²), r_opt irrationnel.
 // ============================================================================
 
-export function construireFenetreA(): ExerciceFenetre {
-  const rOpt = entierAleatoire(2, 6);
-  const P: ValeurAvecPi = { rationnel: 4 * rOpt, coeffPi: rOpt };
-  return { famille: "fenetreA", P, rOpt };
+export function construireFenetreA(exactForce?: boolean): ExerciceFenetre {
+  if (regimeExact(exactForce)) {
+    const rOpt = entierAleatoire(2, 9);
+    return { famille: "fenetreA", P: { rationnel: 4 * rOpt, coeffPi: rOpt }, rOpt };
+  }
+  const P = entierAleatoire(8, 45);
+  return { famille: "fenetreA", P: { rationnel: P, coeffPi: 0 }, rOpt: P / (4 + Math.PI) };
 }
 
-const R_OPT_PAIRS_FENETRE_B = [2, 4, 6];
-
-export function construireFenetreB(): ExerciceFenetre {
-  const rOpt = R_OPT_PAIRS_FENETRE_B[entierAleatoire(0, R_OPT_PAIRS_FENETRE_B.length - 1)];
-  const A: ValeurAvecPi = { rationnel: 2 * rOpt * rOpt, coeffPi: (rOpt * rOpt) / 2 };
-  return { famille: "fenetreB", A, rOpt };
+export function construireFenetreB(exactForce?: boolean): ExerciceFenetre {
+  if (regimeExact(exactForce)) {
+    const rOpt = entierAleatoire(2, 8);
+    return { famille: "fenetreB", A: { rationnel: 2 * rOpt * rOpt, coeffPi: (rOpt * rOpt) / 2 }, rOpt };
+  }
+  const A = entierAleatoire(10, 120);
+  return { famille: "fenetreB", A: { rationnel: A, coeffPi: 0 }, rOpt: Math.sqrt(A / (2 + Math.PI / 2)) };
 }
 
 /** h(r) — hauteur du rectangle isolée depuis la contrainte (périmètre P fixé, fenetreA) ou (aire A
@@ -261,7 +318,9 @@ const POIDS_FAMILLE: Record<FamilleOptimisation, number> = {
   margesB: 11,
   fenetreA: 11,
   fenetreB: 11,
-  cubique: 12, // bonus 2, poids réduit mais non négligeable pour rester testable en dev
+  // Hors du tirage libre (audit 5e ch. 5, décision H) : ce n'est pas de l'optimisation. Toujours
+  // accessible par le sélecteur de variantes (`CATALOGUE_VARIANTES`).
+  cubique: 0,
 };
 const TOTAL_POIDS_FAMILLE = Object.values(POIDS_FAMILLE).reduce((a, b) => a + b, 0);
 
@@ -298,14 +357,14 @@ export function genererExerciceOptimisation(): ExerciceOptimisation {
 }
 
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
-  { id: "trapeze", label: "A. Trapèze isocèle (angle α, signe de A'')" },
+  { id: "trapeze", label: "A. Trapèze isocèle (angle α, signe de A')" },
   { id: "cylindre", label: "B. Cylindre à volume fixé" },
   { id: "cylindre-application", label: "B. Cylindre — bonus application numérique" },
   { id: "margesA", label: "C(a). Marges — aire totale fixée, maximiser l'aire imprimée" },
   { id: "margesB", label: "C(b). Marges — aire imprimée fixée, minimiser l'aire totale" },
   { id: "fenetreA", label: "D(a). Fenêtre — périmètre fixé, maximiser l'aire" },
   { id: "fenetreB", label: "D(b). Fenêtre — aire fixée, minimiser le périmètre" },
-  { id: "cubique", label: "Bonus 2. Reconstruction d'un polynôme cubique" },
+  { id: "cubique", label: "Hors tirage. Reconstruction d'un polynôme cubique" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceOptimisation {

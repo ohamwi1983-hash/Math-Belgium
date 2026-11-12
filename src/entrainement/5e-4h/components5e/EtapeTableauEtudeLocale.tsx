@@ -1,7 +1,7 @@
 import type { ExerciceEtudeLocale } from "../core5e/etudeLocale.types";
 import type { ReponseTableauEtudeLocale } from "../moteur5e/verificationEtudeLocale";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verificationEtudeLocale";
-import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatEnteteColonnesTableau, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
+import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatEnteteColonnesTableau, formatTermesDonneesLatex, legendeTableauEtudeLocale, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -45,7 +45,15 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
       <p className="prompt-text">{consigneEcranEtudeLocale(phase)}</p>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1EtudeLocale(phase, exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 &&
             (() => {
               const aide2 = texteAideNiveau2EtudeLocale(phase);
@@ -58,6 +66,7 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
             })()}
         </div>
       )}
+      <p style={{ fontSize: "0.85em", color: "var(--color-text-muted)", margin: "0.25rem 0 0.5rem" }}>{legendeTableauEtudeLocale(mode)}</p>
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}

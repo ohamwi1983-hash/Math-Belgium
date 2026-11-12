@@ -44,77 +44,126 @@ export function formatDomaineLatex(exercice: ExerciceExtremaBornes): string {
   return `t\\in[0\\,;\\,${exercice.T}]`;
 }
 
+/** Intervalle en texte (Unicode, sans LaTeX) — pour les chaînes rendues en texte brut. */
+function intervalleTexte(exercice?: ExerciceExtremaBornes): string {
+  return exercice ? `[0 ; ${exercice.T}]` : "[0 ; T]";
+}
+
 // ============================================================================
 // Consigne générale + objectif persistant (`QuestionFinale`).
 // ============================================================================
 
+/** Version TEXTE (Unicode, sans `$`) — lue par l'adaptateur papier (`exportEvaluation.ts`). */
 export function consigneGeneraleExtremaBornes(exercice: ExerciceExtremaBornes): string {
   const { grandeur, unite, variableDef, uniteTemps } = exercice.contexte;
-  return `f(t) modélise ${grandeur} (en ${unite}), où t est ${variableDef} (en ${uniteTemps}) — valable UNIQUEMENT sur t∈[0;${exercice.T}].`;
+  return `f(t) modélise ${grandeur} (en ${unite}), où t est ${variableDef} (en ${uniteTemps}). Le modèle n'est valable que sur l'intervalle ${intervalleTexte(exercice)}.`;
 }
 
-export function questionFinaleExtremaBornes(): string {
-  return "Objectif : déterminer le MAXIMUM absolu ET le MINIMUM absolu de f sur [0;T] — attention, ce n'est pas forcément un extremum local !";
+/** Version ÉCRAN — même phrase, formules en `$…$` (rendue par `TexteRiche5e`). */
+export function consigneGeneraleExtremaBornesRiche(exercice: ExerciceExtremaBornes): string {
+  const { grandeur, unite, variableDef, uniteTemps } = exercice.contexte;
+  return `$f(t)$ modélise ${grandeur} (en ${unite}), où $t$ est ${variableDef} (en ${uniteTemps}). Le modèle n'est valable que sur l'intervalle $[0\\,;\\,${exercice.T}]$.`;
+}
+
+/** Texte brut (bandeau `QuestionFinale`) — l'intervalle réel quand l'exercice est connu. */
+export function questionFinaleExtremaBornes(exercice?: ExerciceExtremaBornes): string {
+  return `Objectif : déterminer le maximum absolu et le minimum absolu de f sur ${intervalleTexte(exercice)} — attention, ce n'est pas forcément un extremum local.`;
 }
 
 // ============================================================================
-// Libellés/consignes par écran.
+// Libellés/consignes par écran — consignes en `$…$` (rendues par `TexteRiche5e`).
 // ============================================================================
 
 export const LIBELLE_ECRAN_EXTREMA_BORNES: Record<EcranExtremaBornes, string> = {
   deriver: "Calculer f'(t)",
-  tableauFPrime: "Résoudre f'(t)=0 et tableau de signes",
+  racines: "Résoudre f'(t) = 0",
+  tableauFPrime: "Tableau de signes de f'",
   valeursExtremums: "Valeur de f à chaque extremum local",
-  valeursBornes: "Valeur de f aux 2 bornes",
+  valeursBornes: "Valeur de f aux deux bornes",
   comparaison: "Maximum et minimum absolus",
 };
 
-export function consigneEcranExtremaBornes(ecran: EcranExtremaBornes): string {
+export function consigneEcranExtremaBornes(ecran: EcranExtremaBornes, exercice?: ExerciceExtremaBornes): string {
+  const intervalle = exercice ? `$[0\\,;\\,${exercice.T}]$` : "$[0\\,;\\,T]$";
   switch (ecran) {
     case "deriver":
-      return "Calcule f'(t).";
+      return "Calcule $f'(t)$.";
+    case "racines":
+      return `Résous l'équation $f'(t)=0$ et donne ses solutions dans l'intervalle ${intervalle} (une par champ, dans l'ordre que tu veux).`;
     case "tableauFPrime":
-      return "f'(t)=0 admet les racines indiquées en en-tête du tableau (vérifie-le en résolvant f'(t)=0 au brouillon) — complète le tableau de signes de f' et les variations de f qui en découlent, pour identifier chaque extremum local (MAX ou min).";
+      return `Complète le tableau de signes de $f'$ sur ${intervalle} et les variations de $f$ qui en découlent : chaque solution de $f'(t)=0$ est-elle un maximum local, un minimum local ou ni l'un ni l'autre ?`;
     case "valeursExtremums":
-      return "Pour CHAQUE extremum local trouvé au tableau précédent, calcule f(t).";
+      return "Calcule la valeur de $f$ en chaque extremum local trouvé dans le tableau.";
     case "valeursBornes":
-      return "Calcule f(0) et f(T) — les 2 valeurs de f AUX BORNES du domaine.";
+      return exercice ? `Calcule $f(0)$ et $f(${exercice.T})$, les valeurs de $f$ aux deux bornes de l'intervalle.` : "Calcule les valeurs de $f$ aux deux bornes de l'intervalle.";
     case "comparaison":
-      return "Parmi TOUTES les valeurs ci-dessus (extrema locaux ET bornes), identifie laquelle est le MAXIMUM absolu de f sur [0;T], et laquelle est le MINIMUM absolu.";
+      return `Parmi toutes les valeurs ci-dessus (extremums locaux et bornes), laquelle est le maximum absolu de $f$ sur ${intervalle}, et laquelle est le minimum absolu ? Une seule tentative.`;
   }
 }
 
 // ============================================================================
-// Aides — niveau 1 (technique/piège), niveau 2 (exemple concret).
+// Aides — niveau 1 (technique/piège), niveau 2 (exemple concret). Texte en prose (formules en
+// `$…$`, rendu `TexteRiche5e`) + formule display éventuelle (`latex`, rendue en bloc) : jamais de
+// formule écrite au clavier.
 // ============================================================================
 
-export function texteAideNiveau1ExtremaBornes(ecran: EcranExtremaBornes): string {
+export interface AideExtremaBornes {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau1ExtremaBornes(ecran: EcranExtremaBornes, exercice?: ExerciceExtremaBornes): AideExtremaBornes {
   switch (ecran) {
     case "deriver":
-      return "Dérive terme à terme : la dérivée de a·tⁿ est n·a·tⁿ⁻¹.";
+      return { texte: "Dérive terme à terme :", latex: "\\left(a\\,t^{n}\\right)'=n\\,a\\,t^{n-1}" };
+    case "racines": {
+      const degreFPrime = exercice ? exercice.degre - 1 : 2;
+      return degreFPrime === 2
+        ? { texte: "$f'(t)$ est du second degré : calcule son discriminant, puis ses deux racines.", latex: "t=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}" }
+        : {
+            texte: "$f'(t)$ est du troisième degré : mets d'abord le coefficient de $t^3$ en évidence, cherche une racine entière parmi les diviseurs du terme constant restant, puis factorise par la méthode de Horner.",
+            latex: null,
+          };
+    }
     case "tableauFPrime":
-      return "f'(t)=0 se résout comme d'habitude (facteur commun, ou identification aux racines). Vérifie ensuite le signe de f' juste avant et juste après chaque racine — c'est ce changement de signe qui détermine MAX ou min.";
+      return {
+        texte: "Choisis une valeur de $t$ dans chaque intervalle et calcule le signe de $f'$. Un passage de + à − donne un maximum local, de − à + un minimum local.",
+        latex: null,
+      };
     case "valeursExtremums":
-      return "Substitue l'abscisse directement dans f(t) — jamais dans f'(t), qui ne donne que la pente, pas la hauteur.";
+      return { texte: "Remplace $t$ par l'abscisse de l'extremum dans $f(t)$, pas dans $f'(t)$ : la dérivée donne la pente, pas la valeur de la grandeur.", latex: null };
     case "valeursBornes":
-      return "t=0 et t=T sont les 2 extrémités du domaine — substitue-les directement dans f(t), même si ce ne sont pas des racines de f'.";
+      return { texte: "Les bornes de l'intervalle ne sont pas des solutions de $f'(t)=0$ : remplace quand même $t$ par chacune d'elles dans $f(t)$.", latex: null };
     case "comparaison":
-      return "PIÈGE CENTRAL : le domaine [0;T] est FERMÉ ET BORNÉ. Le maximum (ou le minimum) absolu de f n'est PAS forcément un extremum local — il peut très bien se trouver à une des 2 bornes (t=0 ou t=T). Compare TOUTES les valeurs (extrema locaux + f(0) + f(T)) avant de conclure, jamais seulement le premier extremum trouvé au tableau.";
+      return {
+        texte: `L'intervalle est fermé et borné : le maximum (ou le minimum) absolu peut être un extremum local, ou bien se trouver à une borne ($t=0$ ou $t=${exercice ? exercice.T : "T"}$). Compare toutes les valeurs avant de conclure.`,
+        latex: null,
+      };
   }
 }
 
-export function texteAideNiveau2ExtremaBornes(ecran: EcranExtremaBornes): string {
+export function texteAideNiveau2ExtremaBornes(ecran: EcranExtremaBornes, exercice?: ExerciceExtremaBornes): AideExtremaBornes {
   switch (ecran) {
     case "deriver":
-      return "Exemple : f(t)=2t³-6t²+5 ⟹ f'(t)=6t²-12t.";
+      return { texte: "Exemple :", latex: "f(t)=2t^3-6t^2+5 \;\\Longrightarrow\; f'(t)=6t^2-12t" };
+    case "racines": {
+      if (exercice && exercice.degre === 4) {
+        const r1 = exercice.racinesFPrime[0];
+        return { texte: `Une racine entière de $f'(t)$ est $t=${r1}$. Divise $f'(t)$ par $(t-${r1})$ avec la méthode de Horner, puis résous l'équation du second degré obtenue.`, latex: null };
+      }
+      return { texte: "Exemple :", latex: "6t^2-24t+18=0 \\iff t^2-4t+3=0,\\ \\Delta=4 \;\\Longrightarrow\; t=1 \\text{ ou } t=3" };
+    }
     case "tableauFPrime":
-      return "Exemple : f'(t)=6t(t-2)=0 ⟹ t=0 ou t=2 (ne retiens que celles strictement entre 0 et T). f' passe de - à + en une racine ⟹ minimum ; de + à - ⟹ maximum.";
+      return { texte: "Exemple :", latex: "f'(t)=6t(t-2) : \\quad f'(1)=-6<0,\\ f'(3)=18>0 \;\\Longrightarrow\; \\text{minimum local en } t=2" };
     case "valeursExtremums":
-      return "Exemple : pour f(t)=2t³-6t²+5 et t=2 (trouvé au tableau), f(2)=2·2³-6·2²+5=16-24+5=-3.";
+      return { texte: "Exemple, pour $f(t)=2t^3-6t^2+5$ et un extremum en $t=2$ :", latex: "f(2)=2\\cdot2^3-6\\cdot2^2+5=16-24+5=-3" };
     case "valeursBornes":
-      return "Exemple : pour le même f, sur [0;5] : f(0)=2·0-6·0+5=5 et f(5)=2·125-6·25+5=255-150+5=110.";
+      return { texte: "Exemple, pour le même $f$ sur $[0\\,;\\,5]$ :", latex: "f(0)=5 \\qquad f(5)=2\\cdot125-6\\cdot25+5=105" };
     case "comparaison":
-      return "Exemple CONCRET du piège : un exercice donne 1 seul extremum local, un MAXIMUM valant 8 (en t=3). Beaucoup d'élèves répondent alors directement '8 est le maximum absolu' sans vérifier les bornes — mais si f(T)=15 à la borne T, c'est 15 qui est le VRAI maximum absolu, pas 8 : 8 n'est qu'un maximum LOCAL, dépassé par la valeur à la borne.";
+      return {
+        texte: "Exemple du piège : les extremums locaux valent 8 (maximum local) et 2 (minimum local), mais $f(T)=15$. Le maximum absolu est alors 15, atteint à la borne : 8 n'est qu'un maximum local.",
+        latex: null,
+      };
   }
 }
 
@@ -130,8 +179,10 @@ export function labelsChampsExtremums(exercice: ExerciceExtremaBornes): string[]
   return exercice.racinesFPrime.map((t) => `f(${formatEntierLatex(t)})=`);
 }
 
+/** Exemples hors de l'espace des tirages (valeurs toujours entières ≥ 5 par construction) : une
+ * valeur décimale négative ne peut jamais être une réponse. */
 export function placeholdersChampsExtremums(): string[] {
-  return ["ex : 12"];
+  return ["ex : −2,5"];
 }
 
 export function labelsChampsBornes(exercice: ExerciceExtremaBornes): string[] {
@@ -139,7 +190,17 @@ export function labelsChampsBornes(exercice: ExerciceExtremaBornes): string[] {
 }
 
 export function placeholdersChampsBornes(): string[] {
-  return ["ex : 5"];
+  return ["ex : −1,5"];
+}
+
+export function labelsChampsRacines(exercice: ExerciceExtremaBornes): string[] {
+  return exercice.racinesFPrime.map((_, i) => `t_{${i + 1}}=`);
+}
+
+/** Racines toujours entières et positives par construction : un exemple décimal négatif ne peut
+ * jamais être une solution. */
+export function placeholdersChampsRacines(): string[] {
+  return ["ex : −0,5"];
 }
 
 // ============================================================================
@@ -148,7 +209,11 @@ export function placeholdersChampsBornes(): string[] {
 // ============================================================================
 
 function formatClassificationTexte(c: "max" | "min"): string {
-  return c === "max" ? "MAX" : "min";
+  return c === "max" ? "maximum local" : "minimum local";
+}
+
+function formatRacinesLatex(exercice: ExerciceExtremaBornes): string[] {
+  return [`f'(t)=0 \iff ${exercice.racinesFPrime.map((t) => `t=${formatEntierLatex(t)}`).join(" \text{ ou } ")}`];
 }
 
 function formatRacinesAvecClassificationLatex(exercice: ExerciceExtremaBornes): string[] {
@@ -172,6 +237,9 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceExtremaBornes, pha
     switch (ORDRE_ECRANS_EXTREMA_BORNES[i]) {
       case "deriver":
         termes.push(formatFPrimeDeTLatex(exercice));
+        break;
+      case "racines":
+        termes.push(...formatRacinesLatex(exercice));
         break;
       case "tableauFPrime":
         termes.push(...formatRacinesAvecClassificationLatex(exercice));
@@ -197,6 +265,8 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceExtremaBornes,
   switch (ecran) {
     case "deriver":
       return [formatFPrimeDeTLatex(exercice)];
+    case "racines":
+      return formatRacinesLatex(exercice);
     case "tableauFPrime":
       return formatRacinesAvecClassificationLatex(exercice);
     case "valeursExtremums":

@@ -23,6 +23,9 @@ interface Props {
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Contrôle de forme AVANT validation (quotient simplifié) : renvoie un message, et la saisie
+   * n'est alors PAS soumise — aucune tentative consommée. */
+  controlerForme?: (texte: string) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -37,9 +40,11 @@ interface Props {
  * Question spécifique rendue en 3 morceaux (`texteAvant`/`latex`/`texteApres`,
  * `questionSpecifiqueEcran`) — le fragment central passe par `<Katex>` (fraction/limite empilée,
  * jamais un texte plat avec crochets). */
-export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controlerForme, validation }: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Message affiché sans consommer de tentative : saisie illisible, ou forme non simplifiée. */
+  const [messageAvantValidation, setMessageAvantValidation] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
@@ -48,7 +53,20 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    if (diagnostiquer) {
+      const statut = diagnostiquer(texte);
+      if (statut === "parse_error") {
+        setMessageAvantValidation(formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error"));
+        return;
+      }
+      setDernierStatut(statut);
+    }
+    const message = controlerForme ? controlerForme(texte) : null;
+    if (message) {
+      setMessageAvantValidation(message);
+      return;
+    }
+    setMessageAvantValidation(null);
     onValider(texte);
   }
 
@@ -67,7 +85,9 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
       <p className="prompt-text">
         {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
       </p>
-      <ApercuExpressionLatex texte={texte} label={labelChamp} />
+      {/* L'aperçu affiche son libellé en texte brut : on ne lui passe jamais un libellé LaTeX
+          (« \dfrac{…} » visible, écran du taux d'accroissement). */}
+      <ApercuExpressionLatex texte={texte} label={labelChamp.includes("\\") ? undefined : labelChamp} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
           <Katex expression={labelChamp} />
@@ -76,7 +96,10 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
           type="text"
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => {
+            setTexte(e.target.value);
+            setMessageAvantValidation(null);
+          }}
           placeholder={placeholder}
         />
       </div>
@@ -105,7 +128,12 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
         <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageAvantValidation && (
+          <p className="alert-error" role="alert">
+            {messageAvantValidation}
+          </p>
+        )}
+        {montrerErreurs && !messageAvantValidation && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

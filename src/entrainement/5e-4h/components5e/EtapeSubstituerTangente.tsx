@@ -20,6 +20,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseSubstituer) => void;
   diagnostiquer?: (reponse: ReponseSubstituer) => { fA: StatutVerification; fPrimeA: StatutVerification };
+  /** Contrôle de FORME avant soumission (saisie illisible, valeur arrondie, valeur répétée,
+   * solution manquante) : renvoie le message à afficher, et la tentative n'est PAS décomptée
+   * (audit 5e ch. 5, points 6, 32, 33). `null` = soumission normale. */
+  controlerSaisie?: (reponse: ReponseSubstituer) => string | null;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -31,10 +35,11 @@ interface Props {
  * INDÉPENDAMMENT pour l'affichage mais notés comme UNE SEULE tentative combinée — même patron que
  * `EtapeDevelopperDerivee.tsx` (5gen26). Calculatrice PRÉSENTE : substitution numérique, valeur
  * potentiellement irrationnelle (sous-famille radicale). */
-export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controlerSaisie, validation }: Props) {
   const [fA, setFA] = useState("");
   const [fPrimeA, setFPrimeA] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [avertissement, setAvertissement] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = fA.trim() !== "" && fPrimeA.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
@@ -45,6 +50,9 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
   function valider() {
     if (!complet) return;
     const reponse: ReponseSubstituer = { fA, fPrimeA };
+    const message = controlerSaisie ? controlerSaisie(reponse) : null;
+    setAvertissement(message);
+    if (message) return;
     if (diagnostiquer) {
       const s = diagnostiquer(reponse);
       setDernierStatut(s.fA !== "correct" ? s.fA : s.fPrimeA);
@@ -64,7 +72,9 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
           </div>
         }
       />
-      <p className="prompt-text">{question.texteAvant}</p>
+      <p className="prompt-text">
+        {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
+      </p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
           <Katex expression={labelFAPointDonne(exercice.a)} />
@@ -74,7 +84,7 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
           className={`text-input${statuts && statuts.fA !== "correct" ? " is-erronee" : ""}`}
           value={fA}
           onChange={(e) => setFA(e.target.value)}
-          placeholder="ex : 5"
+          placeholder="ex : 1,5"
         />
       </div>
       <div className="field field-inline">
@@ -86,13 +96,21 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
           className={`text-input${statuts && statuts.fPrimeA !== "correct" ? " is-erronee" : ""}`}
           value={fPrimeA}
           onChange={(e) => setFPrimeA(e.target.value)}
-          placeholder="ex : 4"
+          placeholder="ex : −0,5"
         />
       </div>
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("substituer")}</p>
+          {(() => {
+            const aide1 = texteAideNiveau1("substituer", exercice);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
           {niveauAide >= 2 && (
             <>
               <p>{aide2.texte}</p>
@@ -107,7 +125,12 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {avertissement && (
+          <p className="alert-error" role="alert">
+            {avertissement}
+          </p>
+        )}
+        {montrerErreurs && !avertissement && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

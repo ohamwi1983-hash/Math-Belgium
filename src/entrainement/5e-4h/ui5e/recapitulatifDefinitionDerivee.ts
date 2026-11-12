@@ -1,7 +1,7 @@
 import type { EtatSessionDefinitionDerivee } from "../moteur5e/typesDefinitionDerivee";
-import { ORDRE_COMPLET } from "../moteur5e/typesDefinitionDerivee";
+import { ordreEcrans } from "../moteur5e/typesDefinitionDerivee";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { formatReponseAttendueEcranLatex, LIBELLE_ECRAN } from "./formatDefinitionDerivee";
+import { formatReponseAttendueEcranLatex, libelleEcran } from "./formatDefinitionDerivee";
 
 /**
  * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen26). Icône (✓/✗)
@@ -16,15 +16,15 @@ export function calculerRecapitulatifDefinitionDerivee(etat: EtatSessionDefiniti
   const exercice = etat.exerciceCourant;
   const entrees: EntreeRecapitulatif[] = [];
 
-  for (const ecran of ORDRE_COMPLET) {
+  for (const ecran of ordreEcrans(exercice)) {
     if (ecran === etat.phase) break;
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) continue;
     const valeurs = formatReponseAttendueEcranLatex(exercice, ecran);
     entrees.push({
-      libelle: LIBELLE_ECRAN[ecran],
+      libelle: libelleEcran(exercice, ecran),
       estLatex: true,
-      valeur: valeurs.join("\\quad"),
+      valeur: valeurs.join(" \\quad "),
       ...(valeurs.length > 1 ? { valeurs } : {}),
       revele: etat.revelesPartiels[ecran] ?? false,
     });

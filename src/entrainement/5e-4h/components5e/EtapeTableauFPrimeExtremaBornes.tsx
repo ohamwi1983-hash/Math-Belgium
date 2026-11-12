@@ -5,6 +5,8 @@ import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiv
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
+import { TexteRiche5e } from "./TexteRiche5e";
+import { AideExtremaBornesBloc } from "./AideExtremaBornesBloc";
 
 interface Props {
   exercice: ExerciceExtremaBornes;
@@ -17,31 +19,27 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "tableauFPrime" — RÉUTILISE `TableauEtudeLocaleBuilder` (5gen29) TEL QUEL, mode "fprime",
+/** Écran "tableauFPrime" — RÉUTILISE `TableauEtudeLocaleBuilder` (5gen29), mode "fprime",
  * colonnes zone/racine UNIQUEMENT (jamais de colonne exclusion : le domaine [0;T] est fermé/borné,
- * sans CE). Écart documenté et pré-autorisé : le composant partagé affiche encore les bornes
- * `-∞`/`+∞` en en-tête (convention historique de 5gen29, domaine non borné) — ce générateur-ci a un
- * domaine RÉELLEMENT borné (0 et T), mais la réutilisation "telle quelle" du composant est
- * explicitement demandée plutôt qu'une fourche de comportement ; les vraies bornes t=0/t=T et
- * leurs valeurs sont traitées à l'écran suivant ("valeursBornes"), jamais confondues avec ces
- * marqueurs `±∞` génériques du tableau. Calculatrice ABSENTE (question structurelle/qualitative). */
+ * sans CE). Bornes RÉELLES 0 et T en en-tête (prop `bornes`, audit 5c5d point 2 : les ±∞
+ * contredisaient le piège central), variable « t ». Les racines viennent de l'écran « racines »
+ * (déjà vérifié). Une seule tentative (choix fermé, `tentativesMax` = 1 côté moteur). */
 export function EtapeTableauFPrimeExtremaBornes({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const attendu = tableauFPrimeBorneAttendu(exercice);
   const enteteColonnes = attendu.colonnes.map((col) => (col.type === "racine" ? `${exercice.racinesFPrime[col.index]}` : ""));
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcranExtremaBornes("tableauFPrime")}</p>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes("tableauFPrime")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("tableauFPrime")}</p>}
-        </div>
-      )}
+      <p className="prompt-text">
+        <TexteRiche5e texte={consigneEcranExtremaBornes("tableauFPrime", exercice)} />
+      </p>
+      <AideExtremaBornesBloc niveauAide={niveauAide} niveau1={texteAideNiveau1ExtremaBornes("tableauFPrime", exercice)} niveau2={texteAideNiveau2ExtremaBornes("tableauFPrime", exercice)} />
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}
         mode="fprime"
+        bornes={{ gauche: "0", droite: `${exercice.T}` }}
+        variable="t"
         attendu={attendu}
         tentativesUtilisees={tentativesUtilisees}
         tentativesMax={tentativesMax}

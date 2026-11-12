@@ -4,19 +4,27 @@
  *
  * Séquence d'écrans FIXE dès le tirage, dépend UNIQUEMENT de `exercice.variante` — même patron
  * que `ordreEcransTangente` (5gen28) : jamais une branche réactive dépendant d'une réponse élève.
- * Les 3 premiers écrans ("derivee"/"evaluerV0"/"resoudre") puis "vitessePointe" sont ENTIÈREMENT
- * partagés entre A et B (mêmes composants, mêmes vérifications, opérant sur les champs génériques
- * `distanceCible`/`tCible`/`racineRejetee` du contrat) — seule B ajoute 2 écrans après.
+ * Les 5 premiers écrans ("derivee", "acceleration", "resoudre", "rejet", "vitessePointe") sont
+ * ENTIÈREMENT partagés entre A et B (champs génériques `distanceCible`/`tCible`/`racineRejetee`) —
+ * seule B ajoute 2 écrans après. "acceleration" (a(t) = v'(t)) remplace l'ancien "evaluerV0", qui
+ * ne répondait à aucune question de l'énoncé (audit 5c5d point 14) ; "rejet" (QCM, UNE tentative)
+ * est séparé de "resoudre" (2 champs, 3 tentatives) pour qu'un choix fermé ne se gagne jamais par
+ * élimination (décision D).
  */
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type EcranVitessePosition = "derivee" | "evaluerV0" | "resoudre" | "vitessePointe" | "conversion" | "segmentConstant" | "tempsTotal";
+export type EcranVitessePosition = "derivee" | "acceleration" | "resoudre" | "rejet" | "vitessePointe" | "conversion" | "segmentConstant" | "tempsTotal";
 
-/** Séquence COMPLÈTE et FIXE d'écrans pour une variante donnée — A : 5 écrans, B : 6 écrans. */
+/** Ancien identifiant de l'écran "acceleration", encore lu par l'adaptateur papier
+ * (`generateurs5e/vitessePosition/exportEvaluation.ts`) jusqu'à la refonte des feuilles — les
+ * fonctions de formatage le traitent comme "acceleration". */
+export type EcranVitessePositionHerite = "evaluerV0";
+
+/** Séquence COMPLÈTE et FIXE d'écrans pour une variante donnée — A : 6 écrans, B : 7 écrans. */
 export function ordreEcransVitessePosition(exercice: ExerciceVitessePosition): EcranVitessePosition[] {
-  const commun: EcranVitessePosition[] = ["derivee", "evaluerV0", "resoudre", "vitessePointe"];
+  const commun: EcranVitessePosition[] = ["derivee", "acceleration", "resoudre", "rejet", "vitessePointe"];
   return exercice.variante === "A" ? [...commun, "conversion"] : [...commun, "segmentConstant", "tempsTotal"];
 }
 
@@ -32,7 +40,7 @@ export function ecranApres(exercice: ExerciceVitessePosition, ecran: EcranVitess
 
 export interface ResultatExerciceVitessePosition {
   exercice: ExerciceVitessePosition;
-  /** Indexé par écran RÉELLEMENT traversé — 5 clés (A) ou 6 clés (B), selon
+  /** Indexé par écran RÉELLEMENT traversé — 6 clés (A) ou 7 clés (B), selon
    * `ordreEcransVitessePosition`. */
   scores: Partial<Record<EcranVitessePosition, number>>;
 }

@@ -7,20 +7,22 @@ import {
   activerAideSuivante,
   demarrerSessionVitessePosition,
   niveauAideMaxVitessePosition,
+  soumettreReponseAcceleration,
   soumettreReponseConversion,
   soumettreReponseDerivee,
-  soumettreReponseEvaluerV0,
+  soumettreReponseRejet,
   soumettreReponseResoudre,
   soumettreReponseSegmentConstant,
   soumettreReponseTempsTotal,
   soumettreReponseVitessePointe,
+  tentativesMaxEcranVitessePosition,
 } from "./moteur5e/sessionVitessePosition";
 import type { EcranVitessePosition, EtatSessionVitessePosition } from "./moteur5e/typesVitessePosition";
 import { ordreEcransVitessePosition } from "./moteur5e/typesVitessePosition";
 import {
+  diagnostiquerAcceleration,
   diagnostiquerConversionKmh,
   diagnostiquerDeriveeVitesse,
-  diagnostiquerEvaluerV0,
   diagnostiquerRacineChamp,
   diagnostiquerSegmentConstant,
   diagnostiquerTempsTotal,
@@ -28,6 +30,7 @@ import {
 } from "./moteur5e/verificationVitessePosition";
 import { EtapeChampVitessePosition } from "./components5e/EtapeChampVitessePosition";
 import { EtapeResoudreVitessePosition } from "./components5e/EtapeResoudreVitessePosition";
+import { EtapeRejetVitessePosition } from "./components5e/EtapeRejetVitessePosition";
 import {
   formatReponseAttenduePhaseLatex,
   formatTermesDonneesLatex,
@@ -63,7 +66,7 @@ interface TransitionEnAttente {
 
 /** Même source que `calculerRecapitulatifVitessePosition` (`etat.revelesPartiels[ecran]`, jamais
  * `scoresPartiels[ecran] === 0` — point A, balayage générique) — `ordreEcransVitessePosition(exercice)`
- * donne la séquence RÉELLE (5 écrans pour la variante "A", 6 pour "B", fixée dès le tirage). */
+ * donne la séquence RÉELLE (6 écrans pour la variante "A", 7 pour "B", fixée dès le tirage). */
 function calculerSegmentsProgression(
   etat: EtatSessionVitessePosition,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
@@ -77,11 +80,9 @@ function calculerSegmentsProgression(
   });
 }
 
-/** Format court de la réponse de l'élève à l'écran "resoudre" — mêmes données que
- * `ReponseResoudre` (2 racines + justification du rejet d'une des deux). */
-function formatReponseResoudreTexte(exercice: EtatSessionVitessePosition["exerciceCourant"], r: ReponseResoudre): string {
-  const justification = r.justificationIndex !== null ? exercice.optionsRejetRacine[r.justificationIndex].texte : "?";
-  return `racines : ${r.racines[0]} ; ${r.racines[1]} — justification : ${justification}`;
+/** Format court de la réponse de l'élève à l'écran "resoudre" (les 2 racines). */
+function formatReponseResoudreTexte(r: ReponseResoudre): string {
+  return `solutions : ${r.racines[0]} ; ${r.racines[1]}`;
 }
 
 export function App5gen35() {
@@ -93,6 +94,8 @@ export function App5gen35() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
+  /** Compteur de génération dans la clé d'écran : champs vides après « Générer » (convention). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   /** Réutilise `calculerRecapitulatifVitessePosition` (même mécanisme que `RecapitulatifPanel`)
    * pour la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du
@@ -134,6 +137,7 @@ export function App5gen35() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setNumeroGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -149,13 +153,14 @@ export function App5gen35() {
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setFicheOuverteIndex(null);
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionVitessePosition(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxEcranVitessePosition(etat);
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
@@ -177,6 +182,7 @@ export function App5gen35() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Vitesse et position</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -244,7 +250,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           ecran="derivee"
           labelChamp="v(t)="
-          placeholder="ex : 2*t+3"
+          placeholder="ex : 3t + 0,5"
           avecCalculatrice={false}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -257,22 +263,22 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         />
       );
 
-    case "evaluerV0":
+    case "acceleration":
       return (
         <EtapeChampVitessePosition
           key={cleEcran}
           exercice={exercice}
-          ecran="evaluerV0"
-          labelChamp="v(t₀)="
-          placeholder="ex : 7"
-          avecCalculatrice={true}
+          ecran="acceleration"
+          labelChamp="a(t)="
+          placeholder="ex : 0,5"
+          avecCalculatrice={false}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseEvaluerV0(etat, texte), `v(t₀) = ${texte}`)}
-          diagnostiquer={(t) => diagnostiquerEvaluerV0(t, exercice)}
+          onValider={(texte) => terminerEtape(soumettreReponseAcceleration(etat, texte), `a(t) = ${texte}`)}
+          diagnostiquer={(t) => diagnostiquerAcceleration(t, exercice)}
           validation={validation}
         />
       );
@@ -287,8 +293,21 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseResoudre(etat, reponse), formatReponseResoudreTexte(exercice, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseResoudre(etat, reponse), formatReponseResoudreTexte(reponse))}
           diagnostiquerRacine={(t) => diagnostiquerRacineChamp(t, exercice)}
+          validation={validation}
+        />
+      );
+
+    case "rejet":
+      return (
+        <EtapeRejetVitessePosition
+          key={cleEcran}
+          exercice={exercice}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={niveauAideMax}
+          onActiverAide={onActiverAide}
+          onValider={(index) => terminerEtape(soumettreReponseRejet(etat, index), exercice.optionsRejetRacine[index].texte)}
           validation={validation}
         />
       );
@@ -300,7 +319,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           exercice={exercice}
           ecran="vitessePointe"
           labelChamp="v="
-          placeholder="ex : 13"
+          placeholder="ex : 7,5"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -319,8 +338,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={exercice}
           ecran="conversion"
-          labelChamp="v (km/h) ="
-          placeholder="ex : 46.8"
+          labelChamp={"v\\ (\\text{km/h})="}
+          placeholder="ex : 50"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -339,8 +358,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={exercice}
           ecran="segmentConstant"
-          labelChamp="t₂ ="
-          placeholder="ex : 7.33"
+          labelChamp="t_2="
+          placeholder="arrondi au dixième"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
@@ -359,8 +378,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           key={cleEcran}
           exercice={exercice}
           ecran="tempsTotal"
-          labelChamp="t total ="
-          placeholder="ex : 11.33"
+          labelChamp={"t_{\\text{total}}="}
+          placeholder="arrondi au dixième"
           avecCalculatrice={true}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}

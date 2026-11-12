@@ -13,7 +13,6 @@ interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
   phase: "tableauFPrime" | "tableauFSeconde";
   tentativesUtilisees: number;
-  tentativesMax: number;
   niveauAide: number;
   niveauAideMax: number;
   onActiverAide: () => void;
@@ -21,24 +20,18 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écrans "tableauFPrime"/"tableauFSeconde" — réutilise TEL QUEL `TableauEtudeLocaleBuilder`
- * (5gen29) : racines/exclusions PRÉ-PLACÉES en en-tête (positions déjà connues, lues sur le
- * graphique — ici l'élève ne fait QUE cliquer pour cycler signe/variations, jamais de saisie de
- * position, contrairement à 5gen29 où l'élève RÉSOUT f'(x)=0). Aide TEXTUELLE (repli documenté,
- * voir `ui5e/formatLectureGraphiqueDerivees.ts::texteAideNiveau1`) — le mécanisme de cellule
- * active du tableau, générique/partagé avec 5gen29, n'expose aucun callback de focus exploitable
- * pour un surlignage visuel du graphique sans le modifier. */
-export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+/** Écrans « tableau de f' » / « tableau de f'' » — `TableauEtudeLocaleBuilder` (5gen29). Les colonnes
+ * sont les points validés à l'écran précédent (tangentes horizontales, resp. points d'inflexion) et
+ * les AV ; l'élève choisit signes, variations ou concavité. Choix fermés : UNE seule tentative
+ * (sinon les cellules marquées en rouge se corrigeraient par élimination). */
+export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativesUtilisees, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = mode === "fprime" ? formatEnteteColonnesTableauFPrime(exercice, attendu.colonnes) : formatEnteteColonnesTableauFSeconde(exercice, attendu.colonnes);
 
   return (
     <div>
-      <EnTeteExercice
-        consigneGenerale={consigneGenerale()}
-        blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} />}
-      />
+      <EnTeteExercice consigneGenerale={consigneGenerale()} blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} />} />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigneEcran(phase)}</p>
       {niveauAide >= 1 && (
@@ -52,7 +45,7 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativ
         mode={mode}
         attendu={attendu}
         tentativesUtilisees={tentativesUtilisees}
-        tentativesMax={tentativesMax}
+        tentativesMax={1}
         onValider={onValider}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         validation={validation}

@@ -11,7 +11,7 @@ import type { ExerciceOptimisation } from "../core5e/optimisationGeometrique.typ
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { verifierEcran } from "./verificationOptimisationGeometrique";
+import { choixFermeErrone, verifierEcran } from "./verificationOptimisationGeometrique";
 import { ecranApres, ecranInitial } from "./typesOptimisationGeometrique";
 import type { EcranOptimisation, EtatSessionOptimisation, ResultatExerciceOptimisation } from "./typesOptimisationGeometrique";
 
@@ -72,8 +72,12 @@ export function soumettreReponseEcran(etat: EtatSessionOptimisation, reponses: R
   const phaseCourante: EcranOptimisation = etat.phase;
   const exercice = etat.exerciceCourant;
 
+  // Un choix fermé faux clôt l'écran tout de suite (un seul essai sur un choix qui se gagnerait par
+  // élimination) ; les champs à saisie libre gardent leurs tentatives.
+  const reglages = reglagesEtape(etat);
   const etapeCourante = soumettreEtapeTentatives<Record<string, string>>(etat.etapeCourante, reponses, {
-    ...reglagesEtape(etat),
+    ...reglages,
+    tentativesMax: choixFermeErrone(exercice, phaseCourante, reponses) ? 1 : reglages.tentativesMax,
     verifier: (r) => verifierEcran(exercice, phaseCourante, r),
     revelerReponse: () => {},
   });

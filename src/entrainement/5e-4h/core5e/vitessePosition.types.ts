@@ -2,16 +2,16 @@
  * Couche core (5e) — contrat pour 5gen35 ("Vitesse et position"), DERNIER générateur du chapitre
  * "Dérivées et applications" (5e), à la suite de 5gen25-5gen34. Type pur, aucune logique.
  *
- * Principe : e(t) = (a/2)·t² + b·t, une fonction de POSITION quadratique (accélération constante
- * depuis un départ arrêté si b=0, ou déjà lancé à une vitesse initiale b si b>0). v(t)=e'(t) est la
+ * Principe : s(t) = (a/2)·t² + b·t, une fonction de POSITION quadratique (accélération constante
+ * depuis un départ arrêté si b=0, ou déjà lancé à une vitesse initiale b si b>0). v(t)=s'(t) est la
  * VITESSE — jamais fournie, l'élève dérive lui-même (compétence déjà acquise en 5gen27, réinvestie
  * ici en contexte).
  *
  * 2 variantes STRUCTURELLEMENT DISJOINTES (union discriminée par `variante`), une seule tirée par
  * exercice :
- * - "A" ("course simple") — 5 écrans, une seule équation à résoudre (e(t)=D, distance totale).
+ * - "A" ("course simple") — 5 écrans, une seule équation à résoudre (s(t)=D, distance totale).
  * - "B" ("course en segments") — 6 écrans : mêmes 2 premiers écrans que A, puis résolution de
- *   e(t)=D1 (distance INTERMÉDIAIRE) suivie d'un changement de modèle explicite (vitesse constante
+ *   s(t)=D1 (distance INTERMÉDIAIRE) suivie d'un changement de modèle explicite (vitesse constante
  *   sur le segment restant D2=D-D1) — voir `generateurs5e/vitessePosition/index.ts` pour la preuve
  *   arithmétique complète de la construction "à l'envers".
  *
@@ -35,27 +35,39 @@ export interface OptionJustification {
   correcte: boolean;
 }
 
-/** Un contexte narratif de la banque (course, natation, cyclisme...) — voir
+/** Un contexte narratif de la banque (sprint, cyclisme, aviron...) — voir
  * `generateurs5e/vitessePosition/contextes.ts`. Unités FIXÉES à m/s pour tous les contextes
  * (jamais variables d'un contexte à l'autre) : la conversion ×3,6 de l'écran "conversion"
- * (variante A) n'est correcte QUE pour une vitesse exprimée en m/s au départ. */
+ * (variante A) n'est correcte QUE pour une vitesse exprimée en m/s au départ.
+ *
+ * Réalisme (audit 5c5d point 13, décision G) : chaque contexte borne la vitesse atteinte
+ * (`vMin`/`vMax`), fixe les accélérations plausibles (`aValeurs`) et les vitesses initiales
+ * (`bValeurs` — `[0]` quand le texte dit « s'élance » / « démarre »), et propose des distances
+ * totales réalistes pour la variante B. */
 export interface ContexteVitessePosition {
   id: string;
-  /** Sujet grammatical singulier (ex. "le coureur", "la nageuse") — utilisé dans les phrases
-   * secondaires (consignes d'écran), jamais dans l'énoncé principal (déjà autoporteur). */
+  /** Sujet grammatical singulier (ex. "le sprinteur", "la rameuse"). */
   sujet: string;
   pronom: "il" | "elle";
-  /** Phrase d'énoncé complète, variante A — reçoit e(t) déjà formaté en LaTeX et la distance
-   * totale D (entier, en m). */
-  phraseA: (eLatex: string, D: number) => string;
-  /** Phrase d'énoncé complète, variante B — reçoit e(t), la distance intermédiaire D1 (point de
-   * passage) et la distance totale D (D1 < D, tous deux en m). */
-  phraseB: (eLatex: string, D1: number, D: number) => string;
+  /** Vitesse atteinte à la fin de la phase d'accélération (m/s), bornes plausibles. */
+  vMin: number;
+  vMax: number;
+  /** Accélérations possibles (m/s²) — 1 ou 2 (garantit une racine rejetée entière). */
+  aValeurs: (1 | 2)[];
+  /** Vitesses initiales possibles (m/s) — `[0]` pour un départ arrêté. */
+  bValeurs: number[];
+  /** Distances totales réalistes (m) pour la variante B. */
+  distancesTotalesB: number[];
+  /** Phrase d'énoncé complète, variante A — reçoit s(t) formaté en LaTeX, la distance D (m) et la
+   * vitesse initiale b (m/s, 0 pour un départ arrêté). */
+  phraseA: (sLatex: string, D: number, b: number) => string;
+  /** Phrase d'énoncé complète, variante B — s(t), distance intermédiaire D1, distance totale D. */
+  phraseB: (sLatex: string, D1: number, D: number, b: number) => string;
 }
 
 interface ExerciceVitessePositionCommun {
   contexte: ContexteVitessePosition;
-  /** Coefficient de e(t)=(a/2)t²+bt — toujours 1 ou 2 (garantit `racineRejetee` TOUJOURS entière,
+  /** Coefficient de s(t)=(a/2)t²+bt — toujours 1 ou 2 (garantit `racineRejetee` TOUJOURS entière,
    * voir index.ts pour la preuve : 2b/a est entier dans les deux cas). */
   a: 1 | 2;
   /** Vitesse initiale (t=0) — 0 (départ arrêté) ou entier positif (déjà lancé). */
@@ -64,14 +76,10 @@ interface ExerciceVitessePositionCommun {
    * Pour la variante A, `distanceCible === D` (l'unique équation à résoudre porte sur la distance
    * totale). Pour la variante B, `distanceCible` est la distance INTERMÉDIAIRE D1 < D. */
   D: number;
-  /** Temps donné pour l'écran "evaluerV0" (0 < t0 < borne du régime quadratique — `tCible` pour A,
-   * `tCible` aussi pour B puisque c'est la fin du régime accéléré). Entier ou décimal simple
-   * (multiple de 0,5). */
-  t0: number;
-  /** Distance dont l'équation e(t)=distanceCible doit être résolue à l'écran "resoudre" — D pour
+  /** Distance dont l'équation s(t)=distanceCible doit être résolue à l'écran "resoudre" — D pour
    * la variante A, D1 (< D) pour la variante B. */
   distanceCible: number;
-  /** Racine POSITIVE exacte de e(t)=distanceCible — vérité terrain, JAMAIS recalculée en résolvant
+  /** Racine POSITIVE exacte de s(t)=distanceCible — vérité terrain, JAMAIS recalculée en résolvant
    * l'équation une seconde fois côté vérification. t_total pour A, t1 (temps du point de passage)
    * pour B. */
   tCible: number;
@@ -89,7 +97,7 @@ export interface ExerciceVitessePositionA extends ExerciceVitessePositionCommun 
 }
 
 /** Variante B — après le point de passage à `tCible` (renommé "t1" dans les consignes/aides), le
- * segment restant D2=D-distanceCible est parcouru à VITESSE CONSTANTE égale à v(tCible) — e(t) est
+ * segment restant D2=D-distanceCible est parcouru à VITESSE CONSTANTE égale à v(tCible) — s(t) est
  * ABANDONNÉE pour ce segment (changement de modèle explicite, pas seulement calculatoire — voir
  * CLAUDE.md/la tâche). */
 export interface ExerciceVitessePositionB extends ExerciceVitessePositionCommun {

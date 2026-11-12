@@ -8,7 +8,9 @@ import {
   niveauAideMaxExtremaBornes,
   soumettreReponseComparaisonBorne,
   soumettreReponseDeriverBorne,
+  soumettreReponseRacinesBorne,
   soumettreReponseTableauFPrimeBorne,
+  tentativesMaxEcranExtremaBornes,
   soumettreReponseValeursBornes,
   soumettreReponseValeursExtremumsBorne,
 } from "./moteur5e/sessionExtremaBornes";
@@ -16,7 +18,9 @@ import { ORDRE_ECRANS_EXTREMA_BORNES } from "./moteur5e/typesExtremaBornes";
 import type { EcranExtremaBornes, EtatSessionExtremaBornes } from "./moteur5e/typesExtremaBornes";
 import {
   candidatsComparaisonBorne,
+  controlerSaisieRacinesBorne,
   diagnostiquerCalculerDeriveeBorne,
+  diagnostiquerRacineBorne,
   diagnostiquerChampParmiCiblesBorne,
   indexMaxAbsoluBorne,
   indexMinAbsoluBorne,
@@ -34,15 +38,18 @@ import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import { calculerRecapitulatifExtremaBornes } from "./ui5e/recapitulatifExtremaBornes";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { TexteRiche5e } from "./components5e/TexteRiche5e";
 import {
-  consigneGeneraleExtremaBornes,
+  consigneGeneraleExtremaBornesRiche,
   formatDomaineLatex,
   formatFDeTLatex,
   formatReponseAttenduePhaseLatex,
   labelsChampsBornes,
   labelsChampsExtremums,
+  labelsChampsRacines,
   placeholdersChampsBornes,
   placeholdersChampsExtremums,
+  placeholdersChampsRacines,
   questionFinaleExtremaBornes,
 } from "./ui5e/formatExtremaBornes";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
@@ -65,7 +72,16 @@ function reponseAttendueEcran(exercice: EtatSessionExtremaBornes["exerciceCouran
   if (ecran === "tableauFPrime") {
     const attendu = tableauFPrimeBorneAttendu(exercice);
     const enteteColonnes = attendu.colonnes.map((col) => (col.type === "racine" ? `${exercice.racinesFPrime[col.index]}` : ""));
-    return <TableauEtudeLocaleRecap colonnes={attendu.colonnes} enteteColonnes={enteteColonnes} mode="fprime" attendu={attendu} />;
+    return (
+      <TableauEtudeLocaleRecap
+        colonnes={attendu.colonnes}
+        enteteColonnes={enteteColonnes}
+        mode="fprime"
+        attendu={attendu}
+        bornes={{ gauche: "0", droite: `${exercice.T}` }}
+        variable="t"
+      />
+    );
   }
   const candidats = candidatsComparaisonBorne(exercice);
   const candidatMax = candidats[indexMaxAbsoluBorne(exercice)];
@@ -86,7 +102,7 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Ordre d'affichage des puces de progression — séquence FIXE à 5 écrans
+/** Ordre d'affichage des puces de progression — séquence FIXE à 6 écrans
  * (`ORDRE_ECRANS_EXTREMA_BORNES`, `moteur5e/typesExtremaBornes.ts`), jamais de saut pour ce
  * générateur (contrairement à 5gen29/30/31). Icône "revele" pilotée par
  * `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
@@ -113,7 +129,7 @@ function calculerSegmentsProgression(
 // ============================================================================
 
 function formatReponseChampsLatex(labels: string[], valeurs: string[]): string {
-  return labels.map((label, i) => `${label}${valeurs[i] ?? "?"}`).join("\\quad");
+  return labels.map((label, i) => `${label}${valeurs[i] ?? "?"}`).join(" \\quad ");
 }
 
 function formatReponseTableauFPrimeBorneTexte(r: ReponseTableauFPrimeBorne): string {
@@ -129,6 +145,9 @@ export function App5gen34() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
+  /** Compteur de génération dans la clé d'écran : les champs repartent vides après « Générer »,
+   * même quand la variante et l'écran sont identiques (convention, App5gen20). */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   /** Réutilise `calculerRecapitulatifExtremaBornes` (même mécanisme que `RecapitulatifPanel`) pour
    * la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du tableau, les
@@ -169,6 +188,7 @@ export function App5gen34() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      setNumeroGeneration((g) => g + 1);
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -184,13 +204,14 @@ export function App5gen34() {
     setHistorique([]);
     setAideUtiliseeParPhase({});
     setFicheOuverteIndex(null);
+    setNumeroGeneration((g) => g + 1);
     setEtat(demarrerSessionExtremaBornes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
-  const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const tentativesMax = tentativesMaxEcranExtremaBornes(etat);
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
   const validation = enAttente
     ? {
@@ -206,6 +227,7 @@ export function App5gen34() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extrema en contexte borné</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
           onSegmentClick={(index) => setFicheOuverteIndex(index)}
@@ -215,14 +237,14 @@ export function App5gen34() {
       <main className="card">
         <div className="card-body">
           <EnTeteExercice
-            consigneGenerale={consigneGeneraleExtremaBornes(exercice)}
+            consigneGenerale={<TexteRiche5e texte={consigneGeneraleExtremaBornesRiche(exercice)} />}
             blocDonnees={
               <>
                 <div className="equation-box equation-box-donnees">
                   <Katex expression={formatFDeTLatex(exercice)} />
                   <Katex expression={formatDomaineLatex(exercice)} />
                 </div>
-                <QuestionFinale question={questionFinaleExtremaBornes()} />
+                <QuestionFinale question={questionFinaleExtremaBornes(exercice)} />
               </>
             }
           />
@@ -280,6 +302,34 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         />
       );
 
+    case "racines": {
+      const labels = labelsChampsRacines(exercice);
+      return (
+        <EtapeChampsNumeriquesExtremaBornes
+          key={cleEcran}
+          phase="racines"
+          exercice={exercice}
+          labels={labels}
+          placeholders={placeholdersChampsRacines()}
+          avecCalculatrice={false}
+          controlerAvantSoumission={(valeurs) => {
+            const controle = controlerSaisieRacinesBorne(valeurs);
+            if (controle === "manque") return `Il manque une solution : l'équation f'(t) = 0 en a ${labels.length} dans l'intervalle, remplis tous les champs.`;
+            if (controle === "doublon") return "Tu as écrit deux fois la même solution : chaque champ doit contenir une solution différente.";
+            return null;
+          }}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={niveauAideMax}
+          onActiverAide={onActiverAide}
+          onValider={(reponses) => terminerEtape(soumettreReponseRacinesBorne(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)}
+          diagnostiquer={(t) => diagnostiquerRacineBorne(t, exercice)}
+          validation={validation}
+        />
+      );
+    }
+
     case "tableauFPrime":
       return (
         <EtapeTableauFPrimeExtremaBornes
@@ -301,6 +351,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
           phase="valeursExtremums"
+          exercice={exercice}
           labels={labels}
           placeholders={placeholdersChampsExtremums()}
           tentativesUtilisees={tentativesUtilisees}
@@ -323,6 +374,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
           phase="valeursBornes"
+          exercice={exercice}
           labels={labels}
           placeholders={placeholdersChampsBornes()}
           tentativesUtilisees={tentativesUtilisees}

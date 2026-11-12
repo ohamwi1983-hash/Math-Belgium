@@ -2,7 +2,7 @@
  * Couche B (5e) — moteur de session pour 5gen34 ("Extrema en contexte borné"). N'importe jamais
  * rien de `src/generateurs5e/`.
  *
- * Séquence FIXE (5 écrans, TOUJOURS présents, voir `typesExtremaBornes.ts`) — aucune branche
+ * Séquence FIXE (6 écrans, TOUJOURS présents, voir `typesExtremaBornes.ts`) — aucune branche
  * réactive dépendant d'une réponse élève, même patron que `sessionEtudeLocale.ts`/`sessionTangentes.ts`.
  */
 import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
@@ -20,6 +20,7 @@ import {
   verifierEnsembleNumeriqueBorne,
   verifierTableauFPrimeBorne,
   tableauFPrimeBorneAttendu,
+  verifierRacinesBorne,
 } from "./verificationExtremaBornes";
 
 const POINTS_DE_BASE = 100;
@@ -48,8 +49,15 @@ export function demarrerSessionExtremaBornes(reglages: ReglagesSession5e, genera
   return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
 }
 
+/** Une seule tentative sur les choix fermés qui se gagnent par élimination (tableau de signes,
+ * comparaison des candidats — décision D de l'audit) ; les champs libres gardent le réglage. */
+export function tentativesMaxEcranExtremaBornes(etat: EtatSessionExtremaBornes): number {
+  if (etat.phase === "tableauFPrime" || etat.phase === "comparaison") return 1;
+  return etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionExtremaBornes): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcranExtremaBornes(etat) };
 }
 
 export function activerAideSuivanteExtremaBornes(etat: EtatSessionExtremaBornes): EtatSessionExtremaBornes {
@@ -103,6 +111,14 @@ function soumettreEcran<T>(etat: EtatSessionExtremaBornes, ecranAttendu: EcranEx
 
 export function soumettreReponseDeriverBorne(etat: EtatSessionExtremaBornes, texte: string): EtatSessionExtremaBornes {
   return soumettreEcran(etat, "deriver", texte, (t) => diagnostiquerCalculerDeriveeBorne(t, etat.exerciceCourant) === "correct");
+}
+
+// ============================================================================
+// Écran "racines" — solutions de f'(t)=0, ensemble de valeurs (ordre indifférent).
+// ============================================================================
+
+export function soumettreReponseRacinesBorne(etat: EtatSessionExtremaBornes, reponses: string[]): EtatSessionExtremaBornes {
+  return soumettreEcran(etat, "racines", reponses, (r) => verifierRacinesBorne(r, etat.exerciceCourant));
 }
 
 // ============================================================================

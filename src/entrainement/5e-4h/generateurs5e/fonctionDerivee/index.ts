@@ -279,9 +279,23 @@ function atomesIdentiques(a: AtomeDerivable, b: AtomeDerivable): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+/** Même « forme » (même noyau, même exposant ou même fonction trigonométrique, même intérieure) :
+ * leur quotient est une constante (f constante, audit 5c5a point 21) et leur produit un carré
+ * déguisé — rejeté au tirage, pas seulement deux atomes strictement identiques. */
+function atomesMemeForme(a: AtomeDerivable, b: AtomeDerivable): boolean {
+  return JSON.stringify({ ...a, coeff: 0 }) === JSON.stringify({ ...b, coeff: 0 });
+}
+
+/** Deux puissances de x (intérieure triviale) : leur produit ou leur quotient se simplifie en une
+ * seule puissance — l'élève qui simplifie répondrait « règle de base » (audit 5c5a, point 22). */
+function deuxPuissancesDeX(a: AtomeDerivable, b: AtomeDerivable): boolean {
+  const puissance = (t: AtomeDerivable) => t.noyau.type === "monome" && t.interieurA === 1 && t.interieurB === 0;
+  return puissance(a) && puissance(b);
+}
+
 function genererDeuxAtomesFacteurs(tauxTrig: number, forcerTrig?: boolean): [AtomeDerivable, AtomeDerivable] {
   const avecTrig = forcerTrig ?? Math.random() < tauxTrig;
-  for (let essai = 0; essai < 20; essai++) {
+  for (let essai = 0; essai < 200; essai++) {
     let atomes: [AtomeDerivable, AtomeDerivable];
     if (!avecTrig) {
       atomes = [atomeFacteurNonTrig(), atomeFacteurNonTrig()];
@@ -290,10 +304,13 @@ function genererDeuxAtomesFacteurs(tauxTrig: number, forcerTrig?: boolean): [Ato
       atomes = [atomeFacteurNonTrig(), atomeFacteurNonTrig()];
       atomes[positionTrig] = atomeFacteurTrig();
     }
-    if (!atomesIdentiques(atomes[0], atomes[1])) return atomes;
+    if (!atomesIdentiques(atomes[0], atomes[1]) && !atomesMemeForme(atomes[0], atomes[1]) && !deuxPuissancesDeX(atomes[0], atomes[1])) return atomes;
   }
-  // Filet de sécurité théorique — jamais atteint en pratique.
-  return [atomeFacteurNonTrig(), { ...atomeFacteurNonTrig(), coeff: 1 }];
+  // Filet de sécurité théorique — jamais atteint en pratique : x² et √x, toujours valides.
+  return [
+    { noyau: { type: "monome", exposant: 2 }, coeff: 1, interieurA: 1, interieurB: 0 },
+    { noyau: { type: "racine" }, coeff: 1, interieurA: 1, interieurB: 0 },
+  ];
 }
 
 /** Fusionne les coefficients de 2 facteurs d'un produit u·v en UN SEUL coefficient combiné,
@@ -351,10 +368,28 @@ export function genererProduit(options?: { forcerTrig?: boolean }): ExerciceFonc
 
 const TAUX_AMBIGU_QUOTIENT = 0.22;
 
+function pgcdEntiers(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) [x, y] = [y, x % y];
+  return x || 1;
+}
+
+/** Coefficients du numérateur et du dénominateur réduits entre eux, signe porté par le numérateur
+ * — jamais « 3x²/(−3√x) » (audit 5c5a, point 22). */
+function reduireCoefficientsQuotient(atome1: AtomeDerivable, atome2: AtomeDerivable): [AtomeDerivable, AtomeDerivable] {
+  const g = pgcdEntiers(atome1.coeff, atome2.coeff);
+  const signe = atome2.coeff < 0 ? -1 : 1;
+  return [
+    { ...atome1, coeff: (signe * atome1.coeff) / g },
+    { ...atome2, coeff: (signe * atome2.coeff) / g },
+  ];
+}
+
 function genererQuotientOrdinaire(forcerTrig?: boolean): ExerciceFonctionDeriveeQuotient {
   return genererAvecRejet(
     () => {
-      const [atome1, atome2] = genererDeuxAtomesFacteurs(TAUX_TRIG_PRODUIT_QUOTIENT, forcerTrig);
+      const [atome1, atome2] = reduireCoefficientsQuotient(...genererDeuxAtomesFacteurs(TAUX_TRIG_PRODUIT_QUOTIENT, forcerTrig));
       return {
         famille: "quotient" as const,
         ambigu: false as const,
@@ -378,7 +413,7 @@ function genererQuotientAmbigu(): ExerciceFonctionDeriveeQuotient {
       const b = entierAleatoire(-3, 3);
       const inner = formatPolynomeLatex([b, a], "x");
       const trigCmd = trig === "sin" ? "\\sin" : "\\cos";
-      const vLatex = `${trigCmd}(${inner})^{2}`;
+      const vLatex = `${trigCmd}^{2}(${inner})`;
       const interieurLatex = `${trigCmd}(${inner})`;
       const exterieurLatexEnU = "\\dfrac{1}{u^{2}}";
       return {
@@ -427,6 +462,21 @@ export function genererComposee(options?: { forcerTrig?: boolean }): ExerciceFon
     () => {
       const noyau = options?.forcerTrig === true ? noyauTrig() : options?.forcerTrig === false ? noyauNonTrigComposee() : noyauComposee();
       const atome: AtomeDerivable = { noyau, coeff: entierNonNul(4), ...interieurNonTrivial() };
+      // k/(ax+b)ⁿ se lit AUSSI comme un quotient (numérateur constant k) : les deux lectures
+      // sont acceptées (audit 5c5a, point 24, décision K).
+      if (noyau.type === "monome" && noyau.exposant < 0) {
+        const inner = formatInterieurLatex(atome);
+        const vLatex = noyau.exposant === -1 ? inner : `(${inner})^{${-noyau.exposant}}`;
+        return {
+          famille: "composee" as const,
+          atome,
+          typesAcceptes: ["composee", "quotient"] as TypeDerivee[],
+          decompositions: {
+            composee: decompositionComposeeDepuisAtome(atome),
+            quotient: { type: "produitOuQuotient" as const, uLatex: `${atome.coeff}`, vLatex, tolereEchangeUV: false },
+          },
+        };
+      }
       return { famille: "composee" as const, atome, typesAcceptes: ["composee"] as TypeDerivee[], decompositions: { composee: decompositionComposeeDepuisAtome(atome) } };
     },
     (ex, x) => valeurFonction(ex, x),
@@ -470,7 +520,10 @@ function formatCoeffNoyauLatex(noyau: NoyauDerivable, coeff: number, argLatex: s
         return `${signe}${coeffAffiche}${puissance(n)}`;
       }
       const coeffAffiche = abs === 1 ? "1" : `${abs}`;
-      return `${signe}\\dfrac{${coeffAffiche}}{${puissance(-n)}}`;
+      // Exposant 1 au dénominateur d'une fraction : pas de parenthèses (« 3/(−3x+2) » s'écrit
+      // \dfrac{3}{-3x+2}, audit 5c5a point 25).
+      const denominateur = n === -1 ? argLatex : puissance(-n);
+      return `${signe}\\dfrac{${coeffAffiche}}{${denominateur}}`;
     }
     case "racine": {
       const coeffAffiche = abs === 1 ? "" : `${abs}`;
@@ -544,7 +597,7 @@ export function formatFDeXLatex(exercice: ExerciceFonctionDerivee): string {
       if (exercice.ambigu) {
         const inner = formatPolynomeLatex([exercice.b, exercice.a], "x");
         const trigCmd = exercice.trig === "sin" ? "\\sin" : "\\cos";
-        return `f(x)=\\dfrac{1}{${trigCmd}(${inner})^{2}}`;
+        return `f(x)=\\dfrac{1}{${trigCmd}^{2}(${inner})}`;
       }
       return `f(x)=\\dfrac{${formatAtomeLatex(exercice.atome1)}}{${formatAtomeLatex(exercice.atome2)}}`;
     }
@@ -616,10 +669,10 @@ function formatDeriveeAmbigueLatex(exercice: { trig: "sin" | "cos"; a: number; b
   const coeff2a = 2 * exercice.a;
   if (exercice.trig === "cos") {
     const signe = coeff2a < 0 ? "-" : "";
-    return `${signe}\\dfrac{${Math.abs(coeff2a)}\\sin(${inner})}{\\cos(${inner})^{3}}`;
+    return `${signe}\\dfrac{${Math.abs(coeff2a)}\\sin(${inner})}{\\cos^{3}(${inner})}`;
   }
   const signe = coeff2a > 0 ? "-" : "";
-  return `${signe}\\dfrac{${Math.abs(coeff2a)}\\cos(${inner})}{\\sin(${inner})^{3}}`;
+  return `${signe}\\dfrac{${Math.abs(coeff2a)}\\cos(${inner})}{\\sin^{3}(${inner})}`;
 }
 
 export function formatDeriveeFDeXLatex(exercice: ExerciceFonctionDerivee): string {
