@@ -10,10 +10,13 @@
  *   `calcul` : une quartique (3 racines de f', Horner, valeurs jusqu'à quelques milliers) exige la
  *   calculatrice ; une cubique (f' du second degré, valeurs entières modestes) se traite à la main.
  *   Les variantes « max local — min à une borne » et « max à une borne — min local » sont TOUJOURS
- *   des quartiques.
+ *   des quartiques (37 % des tirages libres ; 23 polynômes distincts à la constante près dans
+ *   chacune de ces deux variantes, 24 en « max local — min local »).
  * - 5gen35 : la vitesse initiale nulle (« s'élance », « démarre ») ramène l'équation s(t) = D à
  *   t² = k, sans discriminant : paramètre au choix « vitesse initiale », présent dans les deux
- *   variantes. `forme` = variante (A : une course ; B : deux segments). `calcul` : A toujours exact
+ *   variantes. Le type de départ est tiré à 50/50 et TOUS les contextes ont les deux récits
+ *   (« s'élance / démarre » ⇔ b = 0, « déjà lancé » ⇔ b > 0) : b = 0 dans 49 à 51 % des tirages
+ *   de chaque contexte. `forme` = variante (A : une course ; B : deux segments). `calcul` : A toujours exact
  *   (racines entières, conversion × 3,6) ; B exact seulement si t₂ = D₂ / v tombe juste au dixième.
  */
 import type { ProfilInstance } from "../../export/genererFeuilleExercices";

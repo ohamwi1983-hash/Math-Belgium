@@ -96,7 +96,10 @@ interface Signature2 {
 }
 interface Signature3 {
   nbRacines: 3;
-  m: number;
+  /** Facteur dominant de f' : f'(t) = K(t−r1)(t−r2)(t−r3). |K| ∈ {4, 8, …, 24} — coefficients de f
+   * entiers dès que K est multiple de 12, ou multiple de 4 avec r1+r2+r3 divisible par 3 (testé
+   * dans la recherche, forme écartée sinon). Le signe de K fixe le motif. */
+  K: number;
   g1: number;
   g2: number;
 }
@@ -107,32 +110,39 @@ type Signature = Signature2 | Signature3;
  * PAIRE en u : f(r1) et f(r3) (les 2 racines de MÊME classification, "outer" du triplet) seraient
  * alors TOUJOURS mathématiquement ÉGALES, quels que soient `r1`/T choisis ensuite — un cas
  * d'ambiguïté STRUCTURELLE (jamais résolue par la recherche de marges, voir `candidatsUniques`).
- * Écarts dans 1..3 (allègement, décision L de l'audit : T ≤ 8 pour les quartiques). */
+ * Écarts dans 1..5 (T ≤ 9 pour les quartiques, coefficients ≤ 300 et valeurs ≤ ~3 000 filtrés
+ * par la recherche). */
 function tirerEcartsDistincts(): [number, number] {
-  const g1 = entierAleatoire(1, 3);
-  let g2 = entierAleatoire(1, 3);
-  for (let tentative = 0; g2 === g1 && tentative < 10; tentative++) g2 = entierAleatoire(1, 3);
-  if (g2 === g1) g2 = g1 === 3 ? 1 : g1 + 1;
+  const g1 = entierAleatoire(1, 5);
+  let g2 = entierAleatoire(1, 5);
+  for (let tentative = 0; g2 === g1 && tentative < 10; tentative++) g2 = entierAleatoire(1, 5);
+  if (g2 === g1) g2 = g1 === 5 ? 1 : g1 + 1;
   return [g1, g2];
 }
 
-/** Pour 3 racines, le signe de `m` détermine le motif (min,max,min si m>0 — `casMin` alors
- * TOUJOURS "local", seul `casMax` est tunable — ou max,min,max si m<0, symétrique) — voir tête de
- * fichier. Choisi selon `cible` plutôt que tiré au hasard. |m| = 1 seulement (allègement : A = ±3,
- * coefficients bornés). Pour 2 racines, `a` = ±1 quand r1+r2 est pair (écart pair), sinon ±2 (b
- * entier). */
+/** |K| multiple de 4 (coefficient dominant K/4 de 1 à 6) — variété des quartiques : avec T ≤ 9,
+ * les cas « une borne bat un extremum local » n'admettent qu'une vingtaine de configurations de
+ * racines ; faire varier K les multiplie (≥ 20 polynômes distincts par variante quartique). */
+const MAGNITUDES_K = [4, 8, 12, 16, 20, 24];
+
+/** Pour 3 racines, le signe de `K` détermine le motif (min,max,min si K>0 — `casMin` alors
+ * TOUJOURS "local", seul `casMax` est tunable — ou max,min,max si K<0, symétrique) — voir tête de
+ * fichier. Choisi selon `cible` plutôt que tiré au hasard. Pour 2 racines, `a` ∈ {±1, ±2, ±3}
+ * (±1 et ±3 seulement si l'écart est pair, pour que b = −3a(r1+r2)/2 soit entier). */
 function tirerSignature(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }): Signature {
   if (nbRacines === 2) {
-    const gap = entierAleatoire(2, 5);
-    const magnitude = gap % 2 === 0 && Math.random() < 0.5 ? 1 : 2;
+    const gap = entierAleatoire(1, 6);
+    const magnitudes = gap % 2 === 0 ? [1, 2, 3] : [2];
+    const magnitude = magnitudes[entierAleatoire(0, magnitudes.length - 1)];
     const a = Math.random() < 0.5 ? magnitude : -magnitude;
     return { nbRacines: 2, a, gap };
   }
   const [g1, g2] = tirerEcartsDistincts();
-  let m = Math.random() < 0.5 ? 1 : -1;
-  if (cible.casMax === "borne") m = 1;
-  else if (cible.casMin === "borne") m = -1;
-  return { nbRacines: 3, m, g1, g2 };
+  let signe = Math.random() < 0.5 ? 1 : -1;
+  if (cible.casMax === "borne") signe = 1;
+  else if (cible.casMin === "borne") signe = -1;
+  const K = signe * MAGNITUDES_K[entierAleatoire(0, MAGNITUDES_K.length - 1)];
+  return { nbRacines: 3, K, g1, g2 };
 }
 
 /** Coefficients ASCENDANTS SANS la constante (coeffs[0]=0 — la constante n'affecte jamais quel cas
@@ -145,16 +155,18 @@ function construireFormeSansConstante(signature: Signature, r1: number): { coeff
     const c = 3 * a * r1 * r2;
     return { coeffs: [0, c, b, a], racines: [r1, r2] };
   }
-  const { m, g1, g2 } = signature;
-  const A = 3 * m;
+  const { K, g1, g2 } = signature;
   const r2 = r1 + g1;
   const r3 = r2 + g2;
   const somme = r1 + r2 + r3;
   const sommePaires = r1 * r2 + r1 * r3 + r2 * r3;
   const produit = r1 * r2 * r3;
-  const B = -4 * m * somme;
-  const C = 6 * m * sommePaires;
-  const D = -12 * m * produit;
+  // f(t) = K·[t⁴/4 − S·t³/3 + P·t²/2 − Π·t] — coefficients entiers vérifiés par l'appelant
+  // (`coefficientsEntiers`) : K/4, K·S/3, K·P/2 doivent l'être.
+  const A = K / 4;
+  const B = (-K * somme) / 3;
+  const C = (K * sommePaires) / 2;
+  const D = -K * produit;
   return { coeffs: [0, D, C, B, A], racines: [r1, r2, r3] };
 }
 
@@ -197,13 +209,16 @@ function calculerCas(coeffs: number[], racines: number[], classification: Classi
 // index.test.ts, mais le repli reste défensif).
 // ============================================================================
 
-const MARGES_GAUCHE = [1, 2, 3, 4, 5, 6];
+const MARGES_GAUCHE = [1, 2, 3, 4, 5, 6, 7];
 const MARGES_DROITE = [1, 2, 3, 4, 5, 6];
 const T_MIN = 5;
 /** Allègement (décision L) : T ≤ 8 pour les quartiques (3 racines), T ≤ 12 pour les cubiques —
  * valeurs à évaluer raisonnables, coefficients bornés par `COEFF_MAX`. */
-const T_MAX_PAR_NB_RACINES: Record<2 | 3, number> = { 2: 12, 3: 8 };
-const COEFF_MAX = 200;
+const T_MAX_PAR_NB_RACINES: Record<2 | 3, number> = { 2: 12, 3: 9 };
+const COEFF_MAX = 300;
+/** Écart maximal entre les valeurs de f aux candidats (avant la constante, qui ajoute 5 à 20) :
+ * les valeurs à calculer restent ≤ ~3 000. */
+const AMPLITUDE_VALEURS_MAX = 2980;
 
 interface FormeTrouvee {
   coeffsSansConstante: number[];
@@ -222,7 +237,7 @@ function rechercherForme(signature: Signature, cible: { casMax: CasBorneAbsolu; 
   for (const margeGauche of MARGES_GAUCHE) {
     const r1 = margeGauche;
     const { coeffs, racines } = construireFormeSansConstante(signature, r1);
-    if (coeffs.some((c) => Math.abs(c) > COEFF_MAX)) continue;
+    if (coeffs.some((c) => !Number.isInteger(c) || Math.abs(c) > COEFF_MAX)) continue;
     const classification = classifierExtrema(coeffs, racines);
     const rDernier = racines[racines.length - 1];
     for (const margeDroite of MARGES_DROITE) {
@@ -230,6 +245,8 @@ function rechercherForme(signature: Signature, cible: { casMax: CasBorneAbsolu; 
       if (T < T_MIN || T > tMax) continue;
       const cas = calculerCas(coeffs, racines, classification, T);
       if (!cas.candidatsUniques) continue;
+      const valeurs = [0, T, ...racines].map((t) => evalPoly(coeffs, t));
+      if (Math.max(...valeurs) - Math.min(...valeurs) > AMPLITUDE_VALEURS_MAX) continue;
       const forme: FormeTrouvee = { coeffsSansConstante: coeffs, racines, classification, T };
       if (repli === null) repli = forme;
       if (cas.casMax === cible.casMax && cas.casMin === cible.casMin) exacts.push(forme);
@@ -269,7 +286,7 @@ function choisirConstante(coeffsSansConstante: number[], racines: number[], T: n
  * trop raide ou trop douce pour CETTE signature précise) ; une AUTRE signature (autre écart entre
  * racines, autre magnitude de coefficient) y parvient presque toujours — vérifié empiriquement sur
  * 500+ tirages, voir `index.test.ts`. */
-const MAX_SIGNATURES_ESSAYEES = 60;
+const MAX_SIGNATURES_ESSAYEES = 250;
 
 function trouverFormeAvecCible(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu; casMin: CasBorneAbsolu }, nbRacinesLibre = false): FormeTrouvee {
   let repliGlobal: FormeTrouvee | null = null;
@@ -286,7 +303,11 @@ function trouverFormeAvecCible(nbRacines: 2 | 3, cible: { casMax: CasBorneAbsolu
   // défini : `repliGlobal` est déjà garanti non-null dès la 1ère signature testée (une signature
   // "simple" — écarts distincts, marge=1 — a systématiquement des candidats uniques).
   if (repliGlobal) return repliGlobal;
-  const { coeffs, racines } = construireFormeSansConstante(tirerSignature(nbRacines, cible), 1);
+  const signatureRepli = tirerSignature(nbRacines, cible);
+  // K multiple de 12 : coefficients entiers quelles que soient les racines.
+  if (signatureRepli.nbRacines === 3) signatureRepli.K = Math.sign(signatureRepli.K) * 12;
+  if (signatureRepli.nbRacines === 2) signatureRepli.a = Math.sign(signatureRepli.a) * 2;
+  const { coeffs, racines } = construireFormeSansConstante(signatureRepli, 1);
   return { coeffsSansConstante: coeffs, racines, classification: classifierExtrema(coeffs, racines), T: Math.max(T_MIN, racines[racines.length - 1] + 1) };
 }
 

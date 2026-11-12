@@ -103,12 +103,14 @@ function combinaisonsRealistes(contexte: ContexteVitessePosition, tMin: number, 
   return combinaisons;
 }
 
-/** Tire un contexte qui admet au moins une combinaison réaliste dans la plage de temps voulue,
- * puis une combinaison au hasard (boucle bornée : chaque contexte de la banque en admet). */
+/** Tire le type de départ (arrêté b = 0 / déjà lancé b > 0) à 50/50, puis un contexte qui admet
+ * au moins une combinaison réaliste de ce type dans la plage de temps voulue, puis une combinaison
+ * au hasard (boucle bornée : chaque contexte de la banque admet les deux types). */
 function tirerContexteEtCombinaison(tMin: number, tMax: number): { contexte: ContexteVitessePosition; combinaison: Combinaison } {
+  const lance = Math.random() < 0.5;
   for (let essai = 0; essai < 50; essai++) {
     const contexte = tirerContexte();
-    const combinaisons = combinaisonsRealistes(contexte, tMin, tMax);
+    const combinaisons = combinaisonsRealistes(contexte, tMin, tMax).filter((c) => (c.b > 0) === lance);
     if (combinaisons.length > 0) return { contexte, combinaison: combinaisons[entierAleatoire(0, combinaisons.length - 1)] };
   }
   const contexte = CONTEXTES_VITESSE_POSITION[0];

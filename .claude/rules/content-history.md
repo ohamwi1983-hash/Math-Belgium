@@ -2355,3 +2355,20 @@ paths:
   des puces) — corrigé en `join(" \\quad ")` dans tous les récapitulatifs 5e et le 4e
   `recapitulatifEquationRationnelle.ts`. Restes pour la refonte des feuilles : adaptateurs à l'ancien
   découpage (5gen26 affine, 5gen30, 5gen32 A''), `valeurFLocal` de 5gen31 sans `decalage`.
+
+- **5e (4h), Chapitre 5 — Dérivées et applications** (suite) : refonte des feuilles d'exercices et
+  évaluations (méthode `feuilles-evaluations.md`, 4 lots). Les 11 adaptateurs (5gen25–35) remplissent
+  tout le contrat (difficulté, réponse brève, corrigé « Étape n » avec ligne « Piège », barème sur 4,
+  `enoncePapier`, durée, `profilInstance`), sans place de réponse ; `versionPapier` dans le registre ;
+  `?code=` lu par les 11 applis (mêmes fonctions/catalogue que l'adaptateur — 5gen25 : catalogue
+  filtré `CATALOGUE_VARIANTES_EXPORT_ASSOCIATION`). Figures du corrigé : tableaux de signes (KaTeX,
+  ou SVG générique `export5e/svgTableauVariations.ts`), graphe annoté de 5gen30/5gen31, schémas SVG
+  de 5gen32 dans l'énoncé. Profils : `profilsEvaluationDerivees25-27/28-30/31-33/34-35.ts` ;
+  calculatrice indispensable pour 5gen29 irrationnelles, 5gen31 (3 variantes), 5gen32
+  cylindre-application, 5gen33 A-degré3-sans-extremum et dichotomie, 5gen34 variantes quartiques ;
+  paramètre au choix « vitesse initiale non nulle » (5gen35, récits « déjà lancé » pour les 7
+  contextes). 5gen32–35 en processus 3. Démonstrations : 23 énoncés appariés PAR CLÉ, chapitre ajouté à
+  `CHAPITRES_ENONCES_VERIFIES` ; questions de compréhension en KaTeX. `TableauEtudeLocaleBuilder` :
+  version dense dès 5 colonnes (lisible à 390 px jusqu'à 12 colonnes). Piège : une chaîne JS
+  `"\left…"` à antislash simple perd ses commandes (`\r` devient un retour chariot) — corrigé dans
+  `formatAssociation.ts`, aucun autre cas hors attributs JSX (où l'antislash simple est correct).
