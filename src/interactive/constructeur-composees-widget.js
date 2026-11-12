@@ -76,7 +76,8 @@
         var a = brique.a, b = brique.b, coeff;
         if (a === 1 && b === 0) return u;
         var noyau = nu(u) || u.niveau === "primaire" ? u.txt : entre(u);
-        if (a === 1) coeff = noyau;
+        if (u.inverse && a !== 1) coeff = (a < 0 ? "−" : "") + nombreFr(Math.abs(a)) + u.txt.slice(1); // 3·(1/x) s'écrit 3/x
+        else if (a === 1) coeff = noyau;
         else if (a === -1) coeff = "−" + noyau;
         else coeff = nombreFr(a) + noyau;
         if (b === 0) return { txt: coeff, niveau: "produit" };
@@ -92,7 +93,7 @@
       case "racine3":
         return { txt: "∛" + (nu(u) ? u.txt : entre(u)), niveau: "primaire" };
       case "inverse":
-        return { txt: "1/" + (nu(u) || u.niveau === "primaire" ? u.txt : entre(u)), niveau: "produit" };
+        return { txt: "1/" + (nu(u) || u.niveau === "primaire" ? u.txt : entre(u)), niveau: "produit", inverse: true };
       case "abs":
         return { txt: "|" + u.txt + "|", niveau: "delimite" };
     }

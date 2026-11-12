@@ -79,12 +79,14 @@ export const fonctionsComposees: ChapterContent = {
           xTicks: [-2, -1, 0, 1, 2, 3, 4],
           yTicks: [-1, 0, 3, 8],
           fixedYRange: { min: -2, max: 9 },
-          imageBand: { from: -1, direction: 'up', tone: 'good' },
+          // Projection de la courbe sur l'axe des y : bande colorée posée SUR l'axe (`imageBand` ne
+          // trace qu'un fond grisé pleine largeur, sans couleur).
+          shadedRegions: [{ from: -0.07, to: 0.07, upper: () => 9, lower: () => -1, tone: 'good' }],
           points: [{ x: 1, y: -1, label: 'sommet (1 ; −1)', tone: 'accent', labelPos: 'right' }],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
           caption:
-            '$f(x) = x^2 - 2x$ : la projection de la courbe sur l\'axe des y (bande verte) donne ' +
+            '$f(x) = x^2 - 2x$ : la projection de la courbe sur l\'axe des y (bande verte posée sur l\'axe) donne ' +
             '$\\operatorname{Im} f = [-1\\,;\\,+\\infty[$ — aucune sortie de la machine n\'est plus petite que $-1$.',
         },
       },
@@ -706,13 +708,20 @@ export const fonctionsComposees: ChapterContent = {
             xTicks: [-4, -2, 0, 2, 4],
             yTicks: [-10, 0, 10],
             fixedYRange: { min: -14, max: 14 },
-            imageBand: { from: 0, direction: 'down', tone: 'bad' },
-            textLabels: [{ x: 3.9, y: 11.5, text: 'dom f : y ≥ 10, jamais atteint', tone: 'ink', anchor: 'end' }],
+            shadedRegions: [
+              { from: -0.1, to: 0.1, upper: () => 0, lower: () => -14, tone: 'bad' },
+              { from: -0.1, to: 0.1, upper: () => 14, lower: () => 10, tone: 'good' },
+            ],
+            textLabels: [
+              { x: -0.35, y: 11.5, text: 'dom f', tone: 'good', anchor: 'end' },
+              { x: -0.35, y: -7, text: 'Im g', tone: 'bad', anchor: 'end' },
+            ],
             xAxisLabel: 'x',
             yAxisLabel: 'g(x)',
             caption:
-              '$\\operatorname{Im} g = \\mathopen{]}-\\infty\\,;\\,0]$ (bande rouge) ne rencontre jamais ' +
-              '$\\operatorname{dom} f = [10\\,;\\,+\\infty[$ : aucune valeur $g(x)$ ne peut entrer dans f.',
+              'Sur l\'axe des y : $\\operatorname{Im} g = \\mathopen{]}-\\infty\\,;\\,0]$ (bande rouge) ne ' +
+              'rencontre jamais $\\operatorname{dom} f = [10\\,;\\,+\\infty[$ (bande verte) : aucune valeur ' +
+              '$g(x)$ ne peut entrer dans f.',
           },
         },
         {
@@ -1036,7 +1045,7 @@ export const fonctionsComposees: ChapterContent = {
           kind: 'exemple',
           badge: 'bénéfice et seuil de rentabilité',
           formula:
-            'Une entreprise vend chaque objet 16 €. Son coût total de production vaut ' +
+            'Une entreprise vend chaque objet 16 €. Son coût total de production vaut ' +
             '$C(x) = 0{,}1x^2 + 6x + 160$ (en euros, pour $x$ objets). Pour quelles quantités est-elle rentable ?',
           steps: [
             { tag: 'chiffre d’affaires', text: '$CA(x) = 16x$' },
@@ -1075,7 +1084,7 @@ export const fonctionsComposees: ChapterContent = {
             fixedYRange: { min: 0, max: 1800 },
             points: [
               { x: 20, y: 320, label: 'seuil : 20 objets', tone: 'accent', labelPos: 'right' },
-              { x: 80, y: 1280, label: '80 objets', tone: 'accent', labelPos: 'left' },
+              { x: 80, y: 1280, label: '80 objets', tone: 'accent', labelPos: 'below' },
             ],
             textLabels: [
               { x: 97, y: 1690, text: 'C(x)', tone: 'bad', anchor: 'end' },
