@@ -367,7 +367,8 @@ export interface PointCleEtudierFonction {
 }
 
 /** Points remarquables : extremums (et racines doubles de f'), points d'inflexion, puis le point
- * d'abscisse 0 — DÉDOUBLONNÉS (un point en x = 0 n'est demandé qu'une fois). */
+ * d'abscisse 0 — DÉDOUBLONNÉS (le point d'abscisse 0 n'est ajouté que si aucun autre point n'est à
+ * moins de 0,75 unité de l'axe des y). */
 export function pointsClesEtudierFonction(exercice: ExerciceEtudierFonction): PointCleEtudierFonction[] {
   const points: PointCleEtudierFonction[] = [];
   const racinesF = racinesFPrime(exercice);
@@ -382,7 +383,8 @@ export function pointsClesEtudierFonction(exercice: ExerciceEtudierFonction): Po
     if (points.some((p) => Math.abs(p.x - x) < 1e-9)) return;
     points.push({ id: `inflexion-${i}`, nature: "inflexion", racine: racinesS[i] ?? null, label: "", x, y: yInflexions[i] });
   });
-  if (!points.some((p) => Math.abs(p.x) < 1e-9)) points.push({ id: "origine", nature: "origine", racine: null, label: "", x: 0, y: valeurF(exercice, 0) });
+  // Le point d'abscisse 0 n'apporte rien s'il se confond presque avec un point déjà demandé.
+  if (!points.some((p) => Math.abs(p.x) < 0.75)) points.push({ id: "origine", nature: "origine", racine: null, label: "", x: 0, y: valeurF(exercice, 0) });
   const NOMS = { max: "Maximum", min: "Minimum", ni_lun_ni_lautre: "Point à tangente horizontale", inflexion: "Point d'inflexion", origine: "Point d'abscisse 0" } as const;
   return points.map((p) => ({ ...p, label: NOMS[p.nature] }));
 }

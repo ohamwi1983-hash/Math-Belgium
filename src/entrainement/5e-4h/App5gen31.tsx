@@ -12,6 +12,7 @@ import {
   niveauAideMaxGraphique,
   soumettreReponseCalculerFPrime,
   soumettreReponseCalculerFSeconde,
+  soumettreReponseCoordonnees,
   soumettreReponseDomaine,
   soumettreReponseGraphique,
   soumettreReponseLimites,
@@ -25,6 +26,8 @@ import {
   diagnostiquerCalculerFSeconde,
   listeSlotsLimites,
   pointsClesEtudierFonction,
+  tableauFPrimeAttendu,
+  tableauFSecondeAttendu,
 } from "./moteur5e/verificationEtudierFonction";
 import type { ReponseTableauEtudierFonction, ValeurReponseSlotLimite } from "./moteur5e/verificationEtudierFonction";
 import { EtapeDomaineEtudierFonction } from "./components5e/EtapeDomaineEtudierFonction";
@@ -32,13 +35,24 @@ import { EtapeLimitesEtudierFonction } from "./components5e/EtapeLimitesEtudierF
 import { EtapeCalculerDeriveeGenerique } from "./components5e/EtapeCalculerDeriveeGenerique";
 import { EtapeTableauEtudierFonction } from "./components5e/EtapeTableauEtudierFonction";
 import { EtapeRecapitulatifEtudierFonction } from "./components5e/EtapeRecapitulatifEtudierFonction";
+import { EtapeCoordonneesEtudierFonction } from "./components5e/EtapeCoordonneesEtudierFonction";
+import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { PlacementPointsGraphique } from "./components5e/PlacementPointsGraphique";
 import { EtudierFonctionGraph } from "./components5e/EtudierFonctionGraph";
 import { ResultatPanelEtudierFonction } from "./components5e/ResultatPanelEtudierFonction";
 import { ResumeSessionEtudierFonction } from "./components5e/ResumeSessionEtudierFonction";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import { calculerRecapitulatifEtudierFonction } from "./ui5e/recapitulatifEtudierFonction";
-import { formatEnsembleReelGuideLatex, formatLabelSlotLimite } from "./ui5e/formatEtudierFonction";
+import {
+  formatAbscissePointLatex,
+  formatEnsembleReelGuideLatex,
+  formatEnteteColonnesTableauEtudierFonction,
+  formatLabelSlotLimite,
+  formatOrdonneeLatex,
+  formatReponseAttenduePhaseLatex,
+  LIBELLE_ECRAN_ETUDIER_FONCTION,
+} from "./ui5e/formatEtudierFonction";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -104,11 +118,32 @@ function formatValeurReponseLimiteLatex(valeur: ValeurReponseSlotLimite): string
 
 function formatReponseLimitesLatex(exercice: EtatSessionEtudierFonction["exerciceCourant"], reponses: ValeurReponseSlotLimite[]): string {
   const slots = listeSlotsLimites(exercice);
-  return slots.map((slot, i) => `${formatLabelSlotLimite(slot).replace("=\\,?", "")}=${formatValeurReponseLimiteLatex(reponses[i])}`).join("\\;;\\;");
+  return slots.map((slot, i) => `${formatLabelSlotLimite(slot).replace("\\,?", "")}${formatValeurReponseLimiteLatex(reponses[i])}`).join("\\;;\\;");
 }
 
 function formatReponseTableauTexte(reponse: ReponseTableauEtudierFonction): string {
   return `signes : ${reponse.signes.map((v) => v ?? "×").join(" ")} ; ${reponse.ligne2.map((v) => v ?? "×").join(" ")}`;
+}
+
+/** Réponse attendue d'un écran (validation et fiches) : tableau en lecture seule, ou formules. */
+function reponseAttenduePhase(exercice: EtatSessionEtudierFonction["exerciceCourant"], ecran: EcranEtudierFonction): ReactNode {
+  if (ecran === "tableauFPrime" || ecran === "tableauFSeconde") {
+    const mode = ecran === "tableauFPrime" ? "fprime" : "fseconde";
+    const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
+    return <TableauEtudeLocaleRecap colonnes={attendu.colonnes} enteteColonnes={formatEnteteColonnesTableauEtudierFonction(exercice, attendu.colonnes, mode)} mode={mode} attendu={attendu} />;
+  }
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, ecran).map((frag, i) => (
+        <Katex key={i} expression={frag} block={frag.includes("\\lim_{")} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEtudierFonction;
+  revele: boolean;
 }
 
 export function App5gen31() {
@@ -121,39 +156,21 @@ export function App5gen31() {
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  /** Réutilise `calculerRecapitulatifEtudierFonction` (même mécanisme que `RecapitulatifPanel`) pour
-   * la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du tableau, les
-   * écrans se closent dans l'ordre (voir `ordreEcransEtudierFonction`). */
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEtudierFonction) {
-    const recap = calculerRecapitulatifEtudierFonction(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
+  /** Compteur de générations : entre dans la clé d'écran, tout « Générer » repart de champs vides. */
+  const [numeroGeneration, setNumeroGeneration] = useState(0);
+  /** Écran clos en attente de « Écran suivant » (bloc `ValidationEcran`, réponse attendue affichée). */
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+
+  function ajouterHistorique(ecran: EcranEtudierFonction, votreReponse: ReactNode, nouvelEtat: EtatSessionEtudierFonction) {
+    const revele = nouvelEtat.revelesPartiels[ecran] ?? false;
     setHistorique((h) => [
       ...h,
-      {
-        titre: derniere.libelle,
-        votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
-      },
+      { titre: LIBELLE_ECRAN_ETUDIER_FONCTION[ecran], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.exerciceCourant, ecran) : undefined },
     ]);
   }
 
-  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'écran se clôt
-   * RÉELLEMENT — jamais à chaque clic sur "Valider". Tant qu'il reste des tentatives,
-   * `soumettreEcran` (moteur) renvoie `{...etat, etapeCourante}` SANS faire avancer `phase` (voir
-   * `sessionEtudierFonction.ts`), donc `nouvelEtat.phase === etat.phase` : c'est le garde utilisé
-   * ici, même principe que le garde `transitionDEcran` d'`AppAnalyseFonction.tsx` (4e), adapté à une
-   * architecture qui n'a pas de palier `enAttente`/`ValidationEcran` intermédiaire (ce fichier
-   * applique la transition d'écran immédiatement). Le dernier écran ("graphique") ne doit JAMAIS
-   * être poussé : il n'est jamais consultable (les puces disparaissent dès que l'exercice se
-   * termine) — ses appelants n'appellent `terminerEtape` qu'avec un seul argument, comme pour
-   * "tableauSignes" dans la référence 4e. */
-  function terminerEtape(nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode) {
-    if (nouvelEtat.phase !== etat.phase && votreReponse !== undefined) {
-      ajouterHistorique(votreReponse, nouvelEtat);
-    }
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
+  function appliquer(nouvelEtat: EtatSessionEtudierFonction, ecranClos: EcranEtudierFonction, niveauAide: number) {
+    const miseAJour = { ...aideParPhase, [ecranClos]: { niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
     if (nouvelEtat.resultats.length > etat.resultats.length) {
       setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
       setAideParPhase({});
@@ -165,13 +182,44 @@ export function App5gen31() {
     setEtat(nouvelEtat);
   }
 
-  /** Écran "recap" — jamais noté (`avancerRecap`, pas de `soumettreEcran`), donc jamais câblé via
-   * `terminerEtape` ; poussé dans l'historique séparément ici, avec le même libellé que
-   * `formatTermesEtatActuelLatex` utilise déjà pour cet écran ("Synthèse consultée") — toujours
-   * "correcte" (aucune question, donc jamais révélée). */
+  /** Un écran qui se clôt passe par le bloc `ValidationEcran` (réponse attendue, « Écran suivant ») ;
+   * une tentative ratée non finale reste sur l'écran. Le dernier écran (« graphique ») a son propre
+   * bouton « Continuer » et n'est jamais poussé dans l'historique. */
+  function terminerEtape(nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode) {
+    const clos = nouvelEtat.phase !== etat.phase || nouvelEtat.resultats.length > etat.resultats.length;
+    if (!clos) {
+      setEtat(nouvelEtat);
+      return;
+    }
+    if (votreReponse !== undefined) ajouterHistorique(etat.phase, votreReponse, nouvelEtat);
+    if (etat.phase === "graphique") {
+      appliquer(nouvelEtat, etat.phase, etat.niveauAide);
+      return;
+    }
+    setAideParPhase((m) => ({ ...m, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } }));
+    setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    appliquer(enAttente.etatSuivant, etat.phase, etat.niveauAide);
+    setEnAttente(null);
+  }
+
+  /** Écran « recap » — sans question : on passe directement aux coordonnées. */
   function continuerRecap() {
     const nouvelEtat = avancerRecap(etat);
-    ajouterHistorique("Synthèse consultée", nouvelEtat);
+    ajouterHistorique("recap", "Synthèse consultée", nouvelEtat);
+    setEtat(nouvelEtat);
+  }
+
+  function repartir(nouvelEtat: EtatSessionEtudierFonction) {
+    setDernierBilan(null);
+    setAideParPhase({});
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+    setEnAttente(null);
+    setNumeroGeneration((n) => n + 1);
     setEtat(nouvelEtat);
   }
 
@@ -179,26 +227,25 @@ export function App5gen31() {
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+  const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
+  const validation: ValidationEtapeProps | null = enAttente
+    ? { revele: enAttente.revele, reponseAttendue: reponseAttenduePhase(exercice, etat.phase), labelSuivant: "Écran suivant", onSuivant: passerEcranSuivant }
+    : null;
+  const etatPuces = enAttente ? enAttente.etatSuivant : etat;
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction</h1>
+        <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         {enCoursDeSession && (
-          <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+          <ProgressionPuces segments={calculerSegmentsProgression(etatPuces, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         )}
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_VARIANTES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setAideParPhase({});
-          setHistorique([]);
-          setFicheOuverteIndex(null);
-          setEtat(demarrerSessionEtudierFonction(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
-        }}
+        onGenerer={(id) => repartir(demarrerSessionEtudierFonction(REGLAGES_DEMO, () => construireAvecVarianteId(id)))}
       />
       <main className="card">
         <div className="card-body">
@@ -214,6 +261,7 @@ export function App5gen31() {
               terminerEtape={terminerEtape}
               setEtat={setEtat}
               continuerRecap={continuerRecap}
+              validation={validation}
             />
           )}
           {dernierBilan && (
@@ -227,11 +275,7 @@ export function App5gen31() {
           {etat.terminee && !dernierBilan && (
             <ResumeSessionEtudierFonction
               resultats={etat.resultats}
-              onRecommencer={() => {
-                setEtat(nouvelleSession());
-                setHistorique([]);
-                setFicheOuverteIndex(null);
-              }}
+              onRecommencer={() => repartir(nouvelleSession())}
             />
           )}{" "}
         </div>
@@ -254,9 +298,10 @@ interface EcranProps {
   terminerEtape: (nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionEtudierFonction) => void;
   continuerRecap: () => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, continuerRecap }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, continuerRecap, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxEtudierFonction();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -271,8 +316,9 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(reponse: EnsembleReelGuide) =>
-            terminerEtape(soumettreReponseDomaine(etat, reponse), <Katex expression={`domf=${formatEnsembleReelGuideLatex(reponse)}`} />)
+            terminerEtape(soumettreReponseDomaine(etat, reponse), <Katex expression={`\\text{dom}\\,f=${formatEnsembleReelGuideLatex(reponse)}`} />)
           }
         />
       );
@@ -288,6 +334,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(reponses: ValeurReponseSlotLimite[]) =>
             terminerEtape(soumettreReponseLimites(etat, reponses), <Katex expression={formatReponseLimitesLatex(exercice, reponses)} />)
           }
@@ -306,6 +353,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerFPrime(etat, texte), `f'(x) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerCalculerFPrime(t, exercice)}
         />
@@ -322,6 +370,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse), formatReponseTableauTexte(reponse))}
         />
       );
@@ -338,6 +387,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerFSeconde(etat, texte), `f''(x) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerCalculerFSeconde(t, exercice)}
         />
@@ -354,20 +404,40 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          validation={validation}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse), formatReponseTableauTexte(reponse))}
         />
       );
 
     case "recap":
+      return <EtapeRecapitulatifEtudierFonction key={cleEcran} exercice={exercice} onContinuer={continuerRecap} />;
+
+    case "coordonnees":
       return (
-        <EtapeRecapitulatifEtudierFonction key={cleEcran} exercice={exercice} onContinuer={continuerRecap} />
+        <EtapeCoordonneesEtudierFonction
+          key={cleEcran}
+          exercice={exercice}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={niveauAideMax}
+          onActiverAide={onActiverAide}
+          validation={validation}
+          onValider={(reponses) => terminerEtape(soumettreReponseCoordonnees(etat, reponses), reponses.join(" ; "))}
+        />
       );
 
     case "graphique": {
-      const points = pointsClesEtudierFonction(exercice);
+      const points = pointsClesEtudierFonction(exercice).map((p) => ({
+        id: p.id,
+        label: p.label,
+        labelLatex: `\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneeLatex(p.y)}\\right)`,
+        x: p.x,
+        y: p.y,
+      }));
       return (
         <div key={cleEcran}>
-          <p className="prompt-text">Place chaque point demandé sur le graphique en tapant à l'endroit correspondant.</p>
+          <p className="prompt-text">Place chaque point sur le graphique en tapant à l'endroit correspondant ; la courbe apparaîtra une fois tous les points placés.</p>
           <PlacementPointsGraphique
             points={points}
             tentativesMax={tentativesMax}
@@ -381,7 +451,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
                 onTap={onTap}
                 propositionsConfirmees={propositionsConfirmees}
                 dernierTapRate={dernierTapRate}
-                zoneAide={zoneAideActive && pointActif ? { x: pointActif.x, y: pointActif.y } : null}
+                abscisseAide={zoneAideActive && pointActif ? pointActif.x : null}
+                afficherCourbe={pointActif === null}
               />
             )}
           />
