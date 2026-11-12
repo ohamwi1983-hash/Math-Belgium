@@ -1,5 +1,6 @@
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerValeur } from "./equivalenceExponentielle";
+import { evaluerValeurExponentielle } from "./expressionExponentielle";
 
 /**
  * Couche B (6e) — module PARTAGÉ, chapitre 8 "Probabilités". Fondé par `6gen30` ("Probabilités et
@@ -66,7 +67,11 @@ import { diagnostiquerValeur } from "./equivalenceExponentielle";
  * (`ui/messageErreur.ts`) que le reste de la plateforme).
  */
 
-const TOLERANCE_PROBABILITE = 0.01;
+/** Audit 6e ch. 6 (décision B) : l'indépendance est une ÉGALITÉ EXACTE, jamais « à 0,01 près » —
+ * avec 0,01, « somme = 3 » et « dés égaux » (INCOMPATIBLES, P(A∩B) = 0) étaient déclarés
+ * indépendants. Les probabilités passées ici sont calculées à partir d'effectifs entiers : seule
+ * l'erreur flottante (≈ 1e−16) reste à absorber. */
+const TOLERANCE_PROBABILITE = 1e-9;
 
 /** Statut d'indépendance réclamé par l'élève (bouton `.btn.toggle-active`, jamais un champ texte
  * libre — voir en-tête de fichier). Nouveau statut introduit par ce chapitre, destiné à être
@@ -97,5 +102,36 @@ export function verifierIndependance(pA: number, pB: number, pAetB: number, repo
   return diagnostiquerIndependance(pA, pB, pAetB, reponseElève, tolerance) === "correct";
 }
 
-// Réexport direct — voir en-tête ("aucun wrapper spécifique aux probabilités n'a été créé").
+// Réexport direct — voir en-tête. NE PLUS l'utiliser pour une réponse de probabilité : préférer
+// `diagnostiquerProbabilite` ci-dessous (audit 6e ch. 6, décision A).
 export { diagnostiquerValeur };
+
+/** Indépendance par les EFFECTIFS ENTIERS (équiprobabilité) : n(A∩B)·n(Ω) = n(A)·n(B). */
+export function sontIndependantsEffectifs(nA: number, nB: number, nAetB: number, nOmega: number): boolean {
+  return nAetB * nOmega === nA * nB;
+}
+
+/**
+ * Diagnostic d'une réponse de PROBABILITÉ (audit 6e ch. 6, décision A) — remplace la tolérance
+ * absolue de 0,01, qui acceptait 0,34 pour 1/3, 0,02 pour 1/36 ou « 0 » pour 1/120. Accepté :
+ * - toute écriture EXACTE (fraction, produit, quotient… évalué à 1e−9 près de la cible) ;
+ * - un DÉCIMAL écrit avec d décimales (d ≥ 2 si la cible vaut au moins 0,1, d ≥ 3 sinon) qui est
+ *   l'arrondi correct de la cible : |valeur − cible| ≤ ½·10⁻ᵈ ;
+ * - un POURCENTAGE (« 33 % », « 33,3% ») : même règle, sur la valeur divisée par 100.
+ * `decimalesMin` force un minimum (ex. 4 pour une fiabilité annoncée à 4 décimales).
+ */
+export function diagnostiquerProbabilite(texte: string, cible: number, decimalesMin?: number): StatutVerification {
+  const brut = texte.trim();
+  const pourcent = /%\s*$/.test(brut);
+  const sansPourcent = pourcent ? brut.replace(/%\s*$/, "").trim() : brut;
+  const v0 = evaluerValeurExponentielle(sansPourcent);
+  if (v0 === null) return "parse_error";
+  const v = pourcent ? v0 / 100 : v0;
+  if (Math.abs(v - cible) <= 1e-9) return "correct";
+  const decimal = /^-?\d+(?:[.,](\d+))?$/.exec(sansPourcent.replace(/\s+/g, ""));
+  if (!decimal) return "not_equivalent";
+  const d = (decimal[1]?.length ?? 0) + (pourcent ? 2 : 0);
+  const dMin = decimalesMin ?? (Math.abs(cible) >= 0.1 ? 2 : 3);
+  if (d < dMin) return "not_equivalent";
+  return Math.abs(v - cible) <= 0.5 * Math.pow(10, -d) + 1e-12 ? "correct" : "not_equivalent";
+}
