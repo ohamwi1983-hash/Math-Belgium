@@ -59,9 +59,10 @@ function configurationAlternativePour(configuration: ConfigurationFamilleF): Con
 
 /** Construction déterministe (`configuration`/`demandeEcran3` fixés) — utilisée par
  * `CATALOGUE_VARIANTES`/`construireAvecVarianteId`. */
-/** Arrondi à 4 décimales (précision annoncée pour une fiabilité). */
+/** Arrondi à 4 décimales (précision annoncée pour une fiabilité), au plus proche, la demie vers le
+ * haut — le `1e-7` absorbe l'erreur flottante (0,75·0,95·0,9 = 0,64124999… en binaire ⟶ 0,6413). */
 function arrondi4(v: number): number {
-  return Math.round(v * 10000) / 10000;
+  return Math.round(v * 10000 + 1e-7) / 10000;
 }
 
 export function construireFamilleF(configuration: ConfigurationFamilleF, demandeEcran3: DemandeEcran3FamilleF): ExerciceFamilleF {
@@ -102,5 +103,5 @@ export function valeurEcran3Comparaison(exercice: ExerciceFamilleF): number {
 
 /** Écran 3, variante "verifierAffirmation" — l'affirmation est-elle vraie (à tolérance près) ? */
 export function affirmationEstVraie(exercice: ExerciceFamilleF): boolean {
-  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurEcran3Comparaison(exercice)) <= 0.5e-4 + 1e-12;
+  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - arrondi4(valeurEcran3Comparaison(exercice))) < 1e-9;
 }

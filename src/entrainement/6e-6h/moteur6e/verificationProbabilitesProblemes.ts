@@ -208,10 +208,11 @@ export function valeurConfigurationF(p: [number, number, number], configuration:
 export function valeurAlternativeF(exercice: ExerciceFamilleF): number {
   return valeurConfigurationF(exercice.p, exercice.configurationAlternative, exercice.positionMixteAlternative);
 }
-/** L'affirmation (arrondie à 4 décimales) est vraie ssi c'est l'arrondi correct de la fiabilité
- * de la configuration alternative. */
+/** L'affirmation (arrondie à 4 décimales) est vraie ssi c'est l'arrondi correct — au plus proche,
+ * la demie vers le haut, comme `diagnostiquerProbabilite` — de la fiabilité alternative. */
 export function affirmationFEstVraie(exercice: ExerciceFamilleF): boolean {
-  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - valeurAlternativeF(exercice)) <= 0.5e-4 + 1e-12;
+  const arrondi = Math.round(valeurAlternativeF(exercice) * 10000 + 1e-7) / 10000;
+  return Math.abs((exercice.affirmationValeur ?? Number.NaN) - arrondi) < 1e-9;
 }
 
 /** Écran 1 — `valeurs = [calcul posé]` (une expression, évaluée). */
