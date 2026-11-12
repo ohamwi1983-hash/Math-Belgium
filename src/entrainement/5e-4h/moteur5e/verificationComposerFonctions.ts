@@ -95,315 +95,164 @@ export function verifierFormuleDirection(dir: CompositionDirigee, texte: string)
 }
 
 // ============================================================================
-// 2e palier de vérification — "correcte MAIS pas simplifiée au maximum" (écran "formule"
-// uniquement). `StatutVerification` (3 valeurs, `moteur/statutVerification.ts`) est un type PARTAGÉ
-// par toute la plateforme — ne jamais l'élargir à une 4e valeur (obligerait tout `switch` exhaustif
-// existant, sur tous les chantiers, à traiter un cas qui ne concerne QUE cet écran). Statut LOCAL à
-// 4 valeurs, consommé UNIQUEMENT par `EtapeFormuleComposerFonctions.tsx` (message affiché) et par
-// `verifierFormuleDirectionSimplifiee` ci-dessous (gate score/avancement) — jamais ailleurs.
-//
-// Principe : `dir.formule` (texte évaluable) est déjà la référence numérique existante ; `dir.latex`
-// (construit via `simplifierLatex`, `generateurs5e/simplificationExpression.ts`) en est la forme
-// LaTeX déjà simplifiée au sens de la plateforme — mais ce module (Couche B, `moteur5e/`) ne peut
-// JAMAIS importer `generateurs5e/simplificationExpression.ts` (règle non négociable CLAUDE.md,
-// "moteur*/ n'importe jamais generateurs*/ et vice versa") : le ruleset mathjs "distribue, jamais ne
-// re-factorise" est donc DUPLIQUÉ ici à l'identique plutôt qu'importé — même principe déjà appliqué
-// à `ComparateurSeuil` (`core5e/composerFonctions.types.ts`, dupliqué depuis `solveur.ts` pour la
-// même raison d'architecture).
-//
-// Détecter "correct mais pas simplifié" exige plus qu'une comparaison de chaînes brutes : "2x+3" et
-// "3+2x" sont TOUS LES DEUX pleinement simplifiés, seulement écrits dans un ordre différent — une
-// comparaison naïve (chaîne brute, ou même `simplify(...).toString()` des deux côtés : vérifié
-// empiriquement que mathjs ne trie PAS toujours les termes d'une somme de façon cohérente au-delà de
-// 2 termes) les distinguerait à tort. `canonicaliser()` ci-dessous résout ce problème EN PLUS de la
-// simplification mathjs : aplatit les chaînes +/- et */ commutatives en listes de termes/facteurs,
-// leur donne un signe normalisé, puis les TRIE par leur représentation textuelle avant de
-// reconstruire l'arbre — deux expressions algébriquement identiques mais écrites dans un ordre
-// différent produisent alors TOUJOURS la même chaîne canonique, quel que soit le nombre de termes.
-//
-// Le test décisif : canonicaliser(texte élève BRUT, sans passer par simplify) contre canonicaliser
-// (simplify(dir.formule)) (la référence, déjà réduite). Si les deux chaînes coïncident, l'élève a
-// écrit une forme déjà pleinement développée/réduite (à un simple réordonnancement commutatif près)
-// — "correct". Si elles diffèrent alors que le palier 1 (numérique) a déjà validé l'équivalence
-// mathématique, l'élève a laissé quelque chose à distribuer/regrouper/réduire — "correct_non_simplifie".
+// 2e palier — « simplifiée au maximum » (audit 5e ch. 1, décision E). L'ancienne version exigeait la
+// forme CANONIQUE produite par mathjs : « (12x+18)/7 », « 6(2x+3)/7 » ou « 3x/(6x+4) » étaient
+// refusées alors qu'elles sont parfaitement simplifiées. Désormais, toute forme ÉQUIVALENTE (palier 1,
+// numérique) et BIEN STRUCTURÉE est acceptée :
+//   - pas de fraction dans une fraction (numérateur/dénominateur sans fraction à dénominateur variable) ;
+//   - pas de « fraction ± terme » : une somme ne contient aucun terme à dénominateur variable ;
+//   - pas de produit non développé à l'intérieur d'une somme (« 2(x+1) + 3 ») ;
+//   - termes semblables regroupés (« 2x + 3x + 1 » refusée) ;
+//   - même exigence, récursivement, sous chaque racine (une racine d'UNE fraction reste admise : c'est
+//     la forme même de la famille « fraction sous racine »).
+// Une forme équivalente qui ne respecte pas ce critère est `correct_non_simplifie` : message dédié,
+// SANS consommer de tentative (`soumettreReponseFormule`, `sessionComposerFonctions.ts`).
+// `StatutVerification` (3 valeurs, partagé par toute la plateforme) n'est jamais élargi : ce statut à
+// 4 valeurs reste local à cet écran.
 // ============================================================================
 
 const mathSimplification = create(all);
 
-/** Même ruleset que `generateurs5e/simplificationExpression.ts::REGLES_SIMPLIFICATION` — voir sa
- * doc-string pour la justification empirique complète (retrait des règles de re-factorisation/
- * collecte de puissance, ajout de 4 règles de distribution explicites, abandon délibéré du
- * regroupement fraction±terme qui fait exploser la recherche de point fixe de mathjs sur certaines
- * compositions riches de ce même générateur). Indices figés pour la version de mathjs pinnée
- * (`package.json`) — dupliqués ici plutôt qu'importés, voir la note d'architecture ci-dessus. */
-const INDICES_REGLES_EXCLUES = new Set([15, 16, 17, 18, 19, 20, 21, 23, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]);
-const REGLES_SIMPLIFICATION = mathSimplification.simplify.rules.filter((_regle: unknown, index: number) => !INDICES_REGLES_EXCLUES.has(index)).concat([
-  "n1*(n2+n3) -> n1*n2 + n1*n3",
-  "n1*(n2-n3) -> n1*n2 - n1*n3",
-  "(n1+n2)*n3 -> n1*n3 + n2*n3",
-  "(n1-n2)*n3 -> n1*n3 - n2*n3",
-]);
-
-/** Aplatit une chaîne +/- (traverse `ParenthesisNode`/`unaryMinus`/`subtract`/`add` imbriqués,
- * jamais une simple paire) en une liste de termes signés, chacun déjà `canonicaliser()`é —
- * nécessaire pour trier des sommes de 3 termes ou plus (voir note d'en-tête : mathjs seul n'y
- * parvient pas de façon fiable). */
-function aplatirSomme(noeud: MathNode, signe: 1 | -1): { signe: 1 | -1; noeud: MathNode }[] {
-  if (noeud.type === "ParenthesisNode") return aplatirSomme((noeud as unknown as { content: MathNode }).content, signe);
-  if (noeud.type === "OperatorNode") {
-    const op = noeud as unknown as { fn: string; args: MathNode[] };
-    if (op.fn === "add") return [...aplatirSomme(op.args[0], signe), ...aplatirSomme(op.args[1], signe)];
-    if (op.fn === "subtract") return [...aplatirSomme(op.args[0], signe), ...aplatirSomme(op.args[1], (-signe as 1 | -1))];
-    if (op.fn === "unaryMinus") return aplatirSomme(op.args[0], (-signe as 1 | -1));
-  }
-  return [{ signe, noeud: canonicaliser(noeud) }];
-}
-
-/** Aplatit une chaîne * commutative (jamais à travers une division, non-commutative — voir
- * `canonicaliser()`, branche "divide"). */
-function aplatirProduit(noeud: MathNode): MathNode[] {
-  if (noeud.type === "ParenthesisNode") return aplatirProduit((noeud as unknown as { content: MathNode }).content);
-  if (noeud.type === "OperatorNode" && (noeud as unknown as { fn: string }).fn === "multiply") {
-    const op = noeud as unknown as { args: MathNode[] };
-    return [...aplatirProduit(op.args[0]), ...aplatirProduit(op.args[1])];
-  }
-  return [canonicaliser(noeud)];
-}
-
-/** Extrait un éventuel signe "-" porté par `noeud` lui-même (négation explicite, constante
- * négative, ou 1er facteur négatif d'un produit) — sans ça, un terme comme "-2*x" garderait son
- * signe "collé" au facteur 2 au lieu d'être hissé au niveau du terme de la somme, désynchronisant le
- * tri des cas comme "-2x+5" (brut) vs "5-2x" (mathjs, qui préfère parfois `unaryMinus(2*x)`). */
-function extraireSigne(noeud: MathNode): { noeud: MathNode; signe: 1 | -1 } {
-  if (noeud.type === "OperatorNode" && (noeud as unknown as { fn: string }).fn === "unaryMinus") {
-    const interieur = extraireSigne((noeud as unknown as { args: MathNode[] }).args[0]);
-    return { noeud: interieur.noeud, signe: (-interieur.signe as 1 | -1) };
-  }
-  if (noeud.type === "ConstantNode" && typeof (noeud as unknown as { value: unknown }).value === "number" && ((noeud as unknown as { value: number }).value as number) < 0) {
-    const valeur = (noeud as unknown as { value: number }).value;
-    return { noeud: new mathSimplification.ConstantNode(-valeur), signe: -1 };
-  }
-  if (noeud.type === "OperatorNode" && (noeud as unknown as { fn: string }).fn === "multiply") {
-    const op = noeud as unknown as { args: MathNode[] };
-    const gauche = extraireSigne(op.args[0]);
-    if (gauche.signe < 0) return { noeud: new mathSimplification.OperatorNode("*", "multiply", [gauche.noeud, op.args[1]]), signe: -1 };
-  }
-  return { noeud, signe: 1 };
-}
-
-/**
- * Canonicalisation structurelle — reconstruit `noeud` en triant chaque chaîne +/- et chaque chaîne
- * * commutative par la représentation textuelle de ses termes/facteurs (`.toString()`, déjà
- * déterministe), pour que 2 expressions algébriquement identiques mais écrites/simplifiées dans un
- * ordre différent produisent TOUJOURS la même chaîne finale. Division/puissance/fonctions :
- * jamais réordonnées (non commutatives), seulement descendues récursivement.
- */
-function canonicaliser(noeud: MathNode): MathNode {
-  if (noeud.type === "ParenthesisNode") return canonicaliser((noeud as unknown as { content: MathNode }).content);
-  const op = noeud as unknown as { fn?: string; args?: MathNode[]; op?: string; implicit?: boolean };
-  if (noeud.type === "OperatorNode" && (op.fn === "add" || op.fn === "subtract" || op.fn === "unaryMinus")) {
-    const termes = aplatirSomme(noeud, 1).map((t) => {
-      const extrait = extraireSigne(t.noeud);
-      return { noeud: extrait.noeud, signe: (t.signe * extrait.signe) as 1 | -1 };
-    });
-    const tries = termes.map((t) => ({ ...t, cle: t.noeud.toString() })).sort((a, b) => (a.cle < b.cle ? -1 : a.cle > b.cle ? 1 : 0));
-    let resultat: MathNode = tries[0].signe < 0 ? new mathSimplification.OperatorNode("-", "unaryMinus", [tries[0].noeud]) : tries[0].noeud;
-    for (let i = 1; i < tries.length; i++) {
-      const t = tries[i];
-      resultat = new mathSimplification.OperatorNode(t.signe < 0 ? "-" : "+", t.signe < 0 ? "subtract" : "add", [resultat, t.noeud]);
-    }
-    return resultat;
-  }
-  if (noeud.type === "OperatorNode" && op.fn === "multiply") {
-    const facteurs = aplatirProduit(noeud)
-      .map((f) => ({ noeud: f, cle: f.toString() }))
-      .sort((a, b) => (a.cle < b.cle ? -1 : a.cle > b.cle ? 1 : 0));
-    let resultat = facteurs[0].noeud;
-    for (let i = 1; i < facteurs.length; i++) resultat = new mathSimplification.OperatorNode("*", "multiply", [resultat, facteurs[i].noeud]);
-    return resultat;
-  }
-  if (noeud.type === "OperatorNode" && op.args) {
-    return new mathSimplification.OperatorNode(op.op as never, op.fn as never, op.args.map(canonicaliser), op.implicit);
-  }
-  if (noeud.type === "FunctionNode") {
-    const f = noeud as unknown as { fn: unknown; args: MathNode[] };
-    return new mathSimplification.FunctionNode(f.fn as never, f.args.map(canonicaliser));
-  }
-  return noeud;
-}
-
-/** Convertit une saisie élève dans une syntaxe mathjs-compatible sans changer le sens de
- * l'expression : exposants unicode (²/³, tolérés par `evaluerExpressionGenerale`, jamais par
- * mathjs), virgule décimale française, alias sqrt (seule fonction réellement utilisée par les 4
- * familles composables — jamais `cbrt`/`abs`, absentes de ce générateur). */
+/** Saisie élève → syntaxe mathjs (sans changer le sens) : « − », « · », « × », « ÷ », « √ »,
+ * exposants unicode, virgule décimale, point de multiplication « . » (décimal seulement entre
+ * chiffres), « racine(…) », et « x(…) » (mathjs y verrait un appel de fonction x). */
 function normaliserPourMathjs(texte: string): string {
   return texte
+    .replace(/[−–]/g, "-")
+    .replace(/[·×⋅∙]/g, "*")
+    .replace(/÷/g, "/")
+    .replace(/√\s*(\(|\d+(?:[.,]\d+)?|[a-zA-Z]+)/g, (_tout: string, cible: string) => (cible === "(" ? "sqrt(" : `sqrt(${cible})`))
+    .replace(/√/g, "sqrt")
     .replace(/²/g, "^2")
     .replace(/³/g, "^3")
     .replace(/(\d),(\d)/g, "$1.$2")
+    .replace(/\.(?=\s*[A-Za-z(])/g, "*")
+    .replace(/([A-Za-z)\]])\.(?=[0-9])/g, "$1*")
     .replace(/\bracinecarree\b/gi, "sqrt")
-    .replace(/\bracine\b/gi, "sqrt");
+    .replace(/\bracine\b/gi, "sqrt")
+    .replace(/\bx\s*\(/g, "x*(");
 }
 
-/** Forme canonique de la version PLEINEMENT SIMPLIFIÉE (mathjs + `canonicaliser`) d'une expression
- * évaluable — `null` si mathjs ne parvient pas à l'interpréter (jamais d'exception remontée). */
-function formeCanoniqueSimplifiee(formuleEvaluable: string): string | null {
-  try {
-    return canonicaliser(mathSimplification.simplify(formuleEvaluable, REGLES_SIMPLIFICATION) as unknown as MathNode).toString();
-  } catch {
-    return null;
-  }
+type NoeudOperateur = { fn: string; args: MathNode[] };
+
+function sansParentheses(noeud: MathNode): MathNode {
+  let n = noeud;
+  while (n.type === "ParenthesisNode") n = (n as unknown as { content: MathNode }).content;
+  return n;
 }
 
-/** Forme canonique de l'expression BRUTE (réordonnancement commutatif seulement, AUCUNE
- * simplification algébrique) — comparée à `formeCanoniqueSimplifiee` de la référence, c'est ce qui
- * distingue "déjà simplifiée, juste réordonnée" (les deux coïncident) de "encore à
- * distribuer/réduire" (elles diffèrent). `null` si mathjs ne parvient pas à parser (jamais
- * d'exception). */
-function formeCanoniqueBrute(formuleEvaluable: string): string | null {
-  try {
-    return canonicaliser(mathSimplification.parse(formuleEvaluable)).toString();
-  } catch {
-    return null;
-  }
+function fonctionOperateur(noeud: MathNode): string | null {
+  return noeud.type === "OperatorNode" ? (noeud as unknown as NoeudOperateur).fn : null;
 }
 
-/** Statut LOCAL à 4 valeurs — voir la note d'architecture en tête de cette section pour la raison
- * pour laquelle `StatutVerification` (3 valeurs, partagé par toute la plateforme) n'est jamais
- * élargi. `correct_non_simplifie` : le palier 1 (numérique, `diagnostiquerFormuleDirection`) a
- * validé l'équivalence mathématique, mais la forme canonique brute de la saisie élève ne coïncide
- * pas avec la forme canonique simplifiée de `dir.formule` — reste à développer/regrouper/réduire. */
-export type StatutVerificationFormuleSimplifiee = "correct" | "correct_non_simplifie" | "not_equivalent" | "parse_error";
-
-type NoeudAppel = { fn: unknown; args: MathNode[] };
-type NoeudOperateurGenerique = { op: unknown; fn: unknown; args: MathNode[]; implicit?: boolean };
-type NoeudParenthese = { content: MathNode };
-type NoeudSymbole = { name: string };
-
-/** Extrait chaque appel de fonction (sqrt — seule fonction utilisée par les 4 familles composables)
- * en un symbole opaque frais, en fusionnant D'ABORD récursivement son propre argument — même
- * algorithme que `generateurs5e/simplificationExpression.ts::extraireAtomes` (dupliqué ici pour la
- * même raison d'architecture que `REGLES_SIMPLIFICATION` plus haut : `moteur5e/` ne peut jamais
- * importer `generateurs5e/`). Déduplique par texte (`atomesParTexte`) : un même sous-arbre
- * irrationnel réapparaissant 2 fois (ex. `g(x)` substitué à la fois dans le numérateur et le
- * dénominateur d'une extérieure `racineSurFraction`) réutilise le même symbole. */
-function extraireAtomes(noeud: MathNode, atomes: Map<string, MathNode>, atomesParTexte: Map<string, string>, compteur: { n: number }): MathNode {
-  if (noeud.type === "FunctionNode") {
-    const appel = noeud as unknown as NoeudAppel;
-    const argsFusionnes = appel.args.map((a) => fusionnerAtomesRecursif(a));
-    const noeudAtome = new mathSimplification.FunctionNode(appel.fn as never, argsFusionnes);
-    const cle = noeudAtome.toString();
-    let symbole = atomesParTexte.get(cle);
-    if (symbole === undefined) {
-      symbole = `R${compteur.n++}`;
-      atomesParTexte.set(cle, symbole);
-      atomes.set(symbole, noeudAtome);
-    }
-    return new mathSimplification.SymbolNode(symbole);
-  }
-  if (noeud.type === "ParenthesisNode") return extraireAtomes((noeud as unknown as NoeudParenthese).content, atomes, atomesParTexte, compteur);
-  if (noeud.type === "OperatorNode") {
-    const op = noeud as unknown as NoeudOperateurGenerique;
-    return new mathSimplification.OperatorNode(op.op as never, op.fn as never, op.args.map((a) => extraireAtomes(a, atomes, atomesParTexte, compteur)), op.implicit);
-  }
-  return noeud;
+function dependDeX(noeud: MathNode): boolean {
+  return noeud.filter((n) => n.type === "SymbolNode" && (n as unknown as { name: string }).name === "x").length > 0;
 }
 
-/** Réinjecte chaque symbole opaque par son atome d'origine — inverse d'`extraireAtomes`. */
-function substituerAtomes(noeud: MathNode, atomes: Map<string, MathNode>): MathNode {
-  if (noeud.type === "SymbolNode") {
-    const original = atomes.get((noeud as unknown as NoeudSymbole).name);
-    return original ?? noeud;
-  }
-  if (noeud.type === "ParenthesisNode") return new mathSimplification.ParenthesisNode(substituerAtomes((noeud as unknown as NoeudParenthese).content, atomes));
-  if (noeud.type === "OperatorNode") {
-    const op = noeud as unknown as NoeudOperateurGenerique;
-    return new mathSimplification.OperatorNode(op.op as never, op.fn as never, op.args.map((a) => substituerAtomes(a, atomes)), op.implicit);
-  }
-  if (noeud.type === "FunctionNode") {
-    const appel = noeud as unknown as NoeudAppel;
-    return new mathSimplification.FunctionNode(appel.fn as never, appel.args.map((a) => substituerAtomes(a, atomes)));
-  }
-  return noeud;
+/** Une division dont le dénominateur dépend de x, cherchée SANS entrer dans les arguments d'une
+ * fonction (une racine est vérifiée séparément, récursivement). */
+function contientFractionVariable(noeud: MathNode): boolean {
+  const n = sansParentheses(noeud);
+  if (n.type === "FunctionNode") return false;
+  if (n.type !== "OperatorNode") return false;
+  const op = n as unknown as NoeudOperateur;
+  if (op.fn === "divide" && dependDeX(op.args[1])) return true;
+  return op.args.some(contientFractionVariable);
 }
 
-/** `math.rationalize()` calcule en interne certaines étapes avec des nombres flottants natifs plutôt
- * qu'en arithmétique exacte (bug réel signalé, capture d'écran 5gen3 : coefficients comme
- * `2.2222222222222223` au lieu de `20/9`) — voir `generateurs5e/simplificationExpression.ts::
- * remplacerDecimalesParFractions` (dupliquée ici, même raison d'architecture que le reste de ce
- * fichier) pour la justification complète du correctif (`math.fraction()` sur chaque `ConstantNode`
- * décimal, jamais un second appel à `rationalize`). Indispensable ICI en particulier : cette fonction
- * alimente `formeCanoniqueFractionUnique`, la RÉFÉRENCE de comparaison de `diagnostiquerFormuleDirectionSimplifiee`
- * — sans ce correctif, la référence contiendrait du bruit décimal jamais reproductible à l'identique
- * par une saisie élève en fraction exacte (`dir.latex`, déjà corrigée côté générateurs), comptant à
- * tort une réponse pourtant maximalement simplifiée comme `correct_non_simplifie`. */
-function remplacerDecimalesParFractions(noeud: MathNode): MathNode {
+function termesSomme(noeud: MathNode): MathNode[] {
+  const n = sansParentheses(noeud);
+  const fn = fonctionOperateur(n);
+  if (fn === "add" || fn === "subtract") return (n as unknown as NoeudOperateur).args.flatMap(termesSomme);
+  if (fn === "unaryMinus" || fn === "unaryPlus") return termesSomme((n as unknown as NoeudOperateur).args[0]);
+  return [n];
+}
+
+function estSomme(noeud: MathNode): boolean {
+  return termesSomme(noeud).length >= 2;
+}
+
+/** Un terme de somme qui contient encore une somme en FACTEUR (produit ou puissance d'une somme,
+ * hors racine) : « 2(x+1) », « (x+1)² », « −(x−3) » dans une somme — rien n'a été développé. */
+function contientSommeEnFacteur(terme: MathNode): boolean {
+  const n = sansParentheses(terme);
+  const fn = fonctionOperateur(n);
+  if (fn === "multiply") return (n as unknown as NoeudOperateur).args.some((a) => estSomme(a) || contientSommeEnFacteur(a));
+  if (fn === "pow") return estSomme((n as unknown as NoeudOperateur).args[0]);
+  if (fn === "divide") {
+    const [num] = (n as unknown as NoeudOperateur).args;
+    return contientSommeEnFacteur(num) || (fonctionOperateur(sansParentheses(num)) === "multiply" && estSomme(num));
+  }
+  return false;
+}
+
+/** Remplace chaque appel de fonction (racine) par un symbole opaque, dédupliqué par son texte. */
+function coquilleSansFonctions(noeud: MathNode): MathNode {
+  const parTexte = new Map<string, string>();
   return noeud.transform((n) => {
-    if (n.type === "ConstantNode" && typeof (n as unknown as { value: unknown }).value === "number") {
-      const valeur = (n as unknown as { value: number }).value;
-      if (!Number.isInteger(valeur)) {
-        const f = mathSimplification.fraction(valeur);
-        return mathSimplification.parse(`${f.s < 0 ? "-" : ""}${f.n}/${f.d}`);
-      }
+    if (n.type !== "FunctionNode") return n;
+    const cle = n.toString();
+    let nom = parTexte.get(cle);
+    if (nom === undefined) {
+      nom = `R${parTexte.size}`;
+      parTexte.set(cle, nom);
     }
-    return n;
+    return new mathSimplification.SymbolNode(nom);
   });
 }
 
-/** Cœur récursif — sépare `noeud` en une coquille rationnelle (fusionnée via `math.rationalize`,
- * jamais bloquée par un appel de fonction irrésolu), corrige ses coefficients décimaux en fractions
- * exactes (`remplacerDecimalesParFractions`), puis réinjecte les atomes irrationnels tels quels ; ne
- * lève jamais (repli sur la coquille non fusionnée si `rationalize` échoue malgré l'absence de tout
- * appel de fonction). Voir `simplifierEnFractionUnique` (fichier jumeau côté générateurs) pour la
- * justification complète. */
-function fusionnerAtomesRecursif(noeud: MathNode): MathNode {
-  const atomes = new Map<string, MathNode>();
-  const atomesParTexte = new Map<string, string>();
-  const coquille = extraireAtomes(noeud, atomes, atomesParTexte, { n: 0 });
-  let rationalisee: MathNode;
+/** Termes semblables regroupés : une fois développée et réduite (racines opaques), la somme ne doit
+ * pas avoir MOINS de termes que la somme écrite. Ne pénalise jamais si mathjs échoue. */
+function termesRegroupes(somme: MathNode, nombreTermesEcrits: number): boolean {
   try {
-    rationalisee = remplacerDecimalesParFractions(mathSimplification.rationalize(coquille.toString()) as unknown as MathNode);
+    const reduite = mathSimplification.rationalize(coquilleSansFonctions(somme).toString()) as unknown as MathNode;
+    const r = sansParentheses(reduite);
+    const numerateur = fonctionOperateur(r) === "divide" ? (r as unknown as NoeudOperateur).args[0] : r;
+    return termesSomme(numerateur).length >= nombreTermesEcrits;
   } catch {
-    rationalisee = coquille;
+    return true;
   }
-  return substituerAtomes(rationalisee, atomes);
 }
 
-/** Forme canonique via `fusionnerAtomesRecursif` (regroupement en UNE fraction à travers tout appel
- * sqrt traité comme opaque) — RÉFÉRENCE PRIORITAIRE pour `diagnostiquerFormuleDirectionSimplifiee`
- * ci-dessous : même algorithme que `generateurs5e/simplificationExpression.ts::simplifierEnFractionUnique`
- * (dupliqué ici, même raison d'architecture que `REGLES_SIMPLIFICATION` plus haut), qui construit
- * `dir.latex` — la forme montrée à l'élève (aide niveau 2 ET bloc "état actuel"). Sans cette
- * référence, un élève qui recopie l'aide niveau 2 (désormais une fraction unique regroupée, y compris
- * pour une composition "riche" dès qu'une structure de fraction l'entoure) serait à tort compté
- * "correct_non_simplifie", la comparaison ci-dessous restant sur l'ancienne forme non regroupée.
- * `null` uniquement si `formuleEvaluable` elle-même n'est pas interprétable par mathjs — dans ce cas
- * seulement, `formeCanoniqueSimplifiee` (sans regroupement de fraction) reste la référence, exactement
- * comme `dir.latex` retombe sur `simplifierLatex`. */
-function formeCanoniqueFractionUnique(formuleEvaluable: string): string | null {
-  try {
-    return canonicaliser(fusionnerAtomesRecursif(mathSimplification.parse(formuleEvaluable))).toString();
-  } catch {
-    return null;
+/** Critère de structure de la décision E (voir l'en-tête de cette section). */
+export function estFormeBienStructuree(noeud: MathNode): boolean {
+  const n = sansParentheses(noeud);
+  if (n.type === "FunctionNode") return (n as unknown as { args: MathNode[] }).args.every(estFormeBienStructuree);
+  if (n.type !== "OperatorNode") return true;
+  const op = n as unknown as NoeudOperateur;
+  if (op.fn === "divide") {
+    const [num, den] = op.args;
+    if (contientFractionVariable(num) || contientFractionVariable(den)) return false;
+    return estFormeBienStructuree(num) && estFormeBienStructuree(den);
   }
+  const termes = termesSomme(n);
+  if (termes.length >= 2) {
+    if (termes.some(contientFractionVariable)) return false;
+    if (termes.some(contientSommeEnFacteur)) return false;
+    if (!termesRegroupes(n, termes.length)) return false;
+    return termes.every(estFormeBienStructuree);
+  }
+  return op.args.every(estFormeBienStructuree);
 }
+
+/** Statut LOCAL à 4 valeurs (voir l'en-tête de cette section). */
+export type StatutVerificationFormuleSimplifiee = "correct" | "correct_non_simplifie" | "not_equivalent" | "parse_error";
 
 export function diagnostiquerFormuleDirectionSimplifiee(dir: CompositionDirigee, texte: string): StatutVerificationFormuleSimplifiee {
   const statutNumerique = diagnostiquerFormuleDirection(dir, texte);
   if (statutNumerique !== "correct") return statutNumerique;
-  const formeReference = formeCanoniqueFractionUnique(dir.formule) ?? formeCanoniqueSimplifiee(dir.formule);
-  const formeSoumise = formeCanoniqueBrute(normaliserPourMathjs(texte));
-  // Impossible de déterminer la forme canonique d'un des deux côtés (mathjs ne parvient pas à
-  // parser une syntaxe pourtant acceptée par `evaluerExpressionGenerale`, ex. une notation exotique
-  // du palier 1) : ne JAMAIS pénaliser l'élève pour une limitation de CE palier — reste "correct".
-  if (formeReference === null || formeSoumise === null) return "correct";
-  return formeReference === formeSoumise ? "correct" : "correct_non_simplifie";
+  let noeud: MathNode;
+  try {
+    noeud = mathSimplification.parse(normaliserPourMathjs(texte));
+  } catch {
+    // Syntaxe acceptée par le palier 1 mais pas par mathjs : on ne pénalise jamais l'élève pour une
+    // limite de CE palier.
+    return "correct";
+  }
+  return estFormeBienStructuree(noeud) ? "correct" : "correct_non_simplifie";
 }
 
-/** Consommée par `soumettreReponseFormule` (`sessionComposerFonctions.ts`) — `correct_non_simplifie`
- * compte comme INCORRECT pour le score/l'avancement (l'élève ne doit pas pouvoir avancer tant que sa
- * réponse n'est pas réellement simplifiée), seul `EtapeFormuleComposerFonctions.tsx` distingue ce
- * cas pour afficher un message dédié. */
+/** `correct` seulement si équivalente ET bien structurée. */
 export function verifierFormuleDirectionSimplifiee(dir: CompositionDirigee, texte: string): boolean {
   return diagnostiquerFormuleDirectionSimplifiee(dir, texte) === "correct";
 }
@@ -420,9 +269,23 @@ export interface ReponseCondition {
  * tolérance que `verifierConditionsDirection`, jamais dupliquée. */
 export const TOLERANCE_SEUIL = 0.01;
 
+/** Une ligne de réponse qui correspond à UNE des conditions attendues (comparateur et seuil). */
+export function ligneConditionCorrespond(dir: CompositionDirigee, ligne: ReponseCondition, indexAttendu: number): boolean {
+  const c = dir.conditions[indexAttendu];
+  return ligne.comparateur === c.comparateur && Math.abs(ligne.seuil - c.seuil) < TOLERANCE_SEUIL;
+}
+
+/** Audit 5e ch. 1, point 24 : les 2 lignes portent la même étiquette « g(x) » — l'ordre de saisie ne
+ * compte plus (appariement sans remise). */
 export function verifierConditionsDirection(dir: CompositionDirigee, reponse: ReponseCondition[]): boolean {
   if (reponse.length !== dir.conditions.length) return false;
-  return dir.conditions.every((c, i) => reponse[i].comparateur === c.comparateur && Math.abs(reponse[i].seuil - c.seuil) < TOLERANCE_SEUIL);
+  const utilisees = new Set<number>();
+  return reponse.every((ligne) => {
+    const i = dir.conditions.findIndex((_c, k) => !utilisees.has(k) && ligneConditionCorrespond(dir, ligne, k));
+    if (i < 0) return false;
+    utilisees.add(i);
+    return true;
+  });
 }
 
 export function verifierC1Direction(dir: CompositionDirigee, reponse: EnsembleReelGuide): boolean {

@@ -3451,6 +3451,20 @@
   text-align: center;
 }
 
+/* 5gen4 : les deux graphes côte à côte dès que la place le permet, l'un sous l'autre sur téléphone.
+   Taille plafonnée pour que le quadrillage à 1 unité reste lisible sans dominer l'écran. */
+.entrainement .paire-graphes-composee {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 8px 0 12px;
+}
+
+.entrainement .courbe-graph-svg {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
 /* Calculatrice scientifique flottante (`CalculatriceScientifique.tsx`, 4e/5e-4h/6e-6h) —
  * bouton pilule fixe en bas à droite, modale centrée au clic (fond ombré, fermeture au
  * clic en dehors via `.calculatrice-overlay`). Jetons du site partout (mêmes teintes que

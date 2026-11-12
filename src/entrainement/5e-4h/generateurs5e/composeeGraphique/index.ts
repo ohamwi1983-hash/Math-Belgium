@@ -26,52 +26,54 @@ function versQuestion(c: Candidat): QuestionComposeeGraphique {
   return { composition: c.composition, a: c.a, bAttendu: c.bAttendu, resultatExiste: c.resultatExiste, resultatAttendu: c.resultatAttendu };
 }
 
+/** Mélange de Fisher-Yates (copie). */
+function melanger<T>(t: T[]): T[] {
+  const r = [...t];
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = entierAleatoire(0, i);
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+
+/** Au plus ce nombre de questions « n'existe pas » par exercice (audit du chapitre 1 de 5e,
+ * décision H : 14 % des exercices en avaient 4 sur 4). */
+export const MAX_HORS_DOMAINE = 2;
+
 /**
- * Sélectionne 4-5 questions parmi tous les candidats — garantit AU MOINS une question hors domaine
- * et les 2 sens de composition représentés (jamais un tirage purement aléatoire qui pourrait
- * produire zéro piège ou un seul sens par hasard, contrainte explicite de la spec). Retourne `null`
- * si aucun candidat hors domaine n'existe (l'appelant reroll alors les courbes elles-mêmes).
+ * Sélectionne 4-5 questions : 1 ou 2 hors domaine (« n'existe pas »), le reste avec un résultat qui
+ * existe, les 2 sens de composition représentés, puis l'ORDRE est mélangé (le piège était toujours en
+ * question 1). Retourne `null` si les courbes ne permettent pas ce dosage (l'appelant tire alors
+ * d'autres courbes).
  */
 function selectionnerQuestions(candidatsFRondG: Candidat[], candidatsGRondF: Candidat[]): QuestionComposeeGraphique[] | null {
   const tous = [...candidatsFRondG, ...candidatsGRondF];
-  const horsDomaine = tous.filter((c) => !c.resultatExiste);
+  const horsDomaine = melanger(tous.filter((c) => !c.resultatExiste));
+  const existants = melanger(tous.filter((c) => c.resultatExiste));
   if (horsDomaine.length === 0) return null;
 
   const nombreTotal = entierAleatoire(4, 5);
-  const dejaChoisis = new Set<string>();
-  const questions: Candidat[] = [];
+  const nombreHors = Math.min(entierAleatoire(1, MAX_HORS_DOMAINE), horsDomaine.length);
+  const questions: Candidat[] = horsDomaine.slice(0, nombreHors);
+  const pris = new Set<Candidat>(questions);
 
-  function cle(c: Candidat): string {
-    return `${c.composition}:${c.a}`;
-  }
-  function ajouter(c: Candidat) {
-    dejaChoisis.add(cle(c));
+  // Chaque sens absent des questions hors domaine reçoit une question dont le résultat existe.
+  for (const sens of ["fRondG", "gRondF"] as Composition[]) {
+    if (questions.some((q) => q.composition === sens)) continue;
+    const c = existants.find((e) => e.composition === sens && !pris.has(e));
+    if (!c) return null;
     questions.push(c);
+    pris.add(c);
   }
-
-  ajouter(choisirParmi(horsDomaine));
-
-  const restants = () => tous.filter((c) => !dejaChoisis.has(cle(c)));
-
-  while (questions.length < nombreTotal) {
-    const dispo = restants();
-    if (dispo.length === 0) break;
-    ajouter(choisirParmi(dispo));
-  }
-
-  // Garantit les 2 sens représentés — force un échange si un seul sens est présent.
-  const sensPresents = new Set(questions.map((q) => q.composition));
-  if (sensPresents.size < 2) {
-    const sensManquant: Composition = questions[0].composition === "fRondG" ? "gRondF" : "fRondG";
-    const candidatManquant = tous.find((c) => c.composition === sensManquant && !dejaChoisis.has(cle(c)));
-    if (candidatManquant) {
-      // remplace la DERNIÈRE question qui n'est pas le piège hors-domaine obligatoire (index 0)
-      const indexRemplace = questions.length > 1 ? questions.length - 1 : -1;
-      if (indexRemplace >= 0) questions[indexRemplace] = candidatManquant;
+  for (const c of existants) {
+    if (questions.length >= nombreTotal) break;
+    if (!pris.has(c)) {
+      questions.push(c);
+      pris.add(c);
     }
   }
-
-  return questions.map(versQuestion);
+  if (questions.length < 4) return null;
+  return melanger(questions).map(versQuestion);
 }
 
 const TENTATIVES_MAX = 100;

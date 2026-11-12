@@ -46,14 +46,23 @@ function symboleEffectifPourSlot(symboles: SymboleCE[]): SymboleCE | null {
  * différent, toujours actif, hors du champ de cette règle.
  */
 export function verifierCE(exercice: ExerciceDomaineDefinition, reponse: ReponseCE): boolean {
+  const attendues: SlotCE[] = exercice.famille === "pasDeCE" ? [] : exercice.slots;
   if (exercice.aucuneCE) {
-    return reponse.aucuneCE === true;
+    if (reponse.aucuneCE) return true;
+    // Décision utilisateur (audit 5e ch. 1, décision A) : une condition TOUJOURS VRAIE écrite
+    // explicitement (« x²+2 ≠ 0 », dénominateur à Δ<0…) est elle aussi juste — c'est l'écriture
+    // usuelle en classe ; le domaine qui suit vaut alors ℝ. Seulement s'il existe un vrai slot
+    // (jamais pour « pasDeCE », où aucune opération ne porte de condition).
+    return attendues.length > 0 && lignesCorrespondentAuxSlots(attendues, reponse.lignes);
   }
   if (reponse.aucuneCE) return false;
-  const attendues: SlotCE[] = exercice.famille === "pasDeCE" ? [] : exercice.slots;
+  return lignesCorrespondentAuxSlots(attendues, reponse.lignes);
+}
+
+function lignesCorrespondentAuxSlots(attendues: SlotCE[], lignes: { slotId: string; symbole: SymboleCE }[]): boolean {
 
   const lignesParSlot = new Map<string, SymboleCE[]>();
-  for (const ligne of reponse.lignes) {
+  for (const ligne of lignes) {
     const arr = lignesParSlot.get(ligne.slotId) ?? [];
     arr.push(ligne.symbole);
     lignesParSlot.set(ligne.slotId, arr);
@@ -102,16 +111,70 @@ function trierMorceaux(morceaux: MorceauEnsemble[]): MorceauEnsemble[] {
   return [...morceaux].sort((a, b) => (a.inf ?? -Infinity) - (b.inf ?? -Infinity));
 }
 
-export function verifierEnsembleReelGuide(saisie: EnsembleReelGuide, attendu: EnsembleReelGuide): boolean {
-  if (saisie.forme !== attendu.forme) return false;
-  if (attendu.forme === "reel") return true;
-  if (attendu.forme === "prive_points") {
-    const a = [...attendu.points].sort((x, y) => x - y);
-    const s = [...saisie.points].sort((x, y) => x - y);
-    return a.length === s.length && a.every((v, i) => Math.abs(v - s[i]) < 1e-6);
+/** Un ensemble, quelle que soit sa FORME (ℝ, ℝ privé de points, réunion d'intervalles), réécrit en
+ * réunion d'intervalles disjointes, triées et fusionnées — forme canonique unique. */
+function versIntervallesCanoniques(ensemble: EnsembleReelGuide): MorceauEnsemble[] {
+  let morceaux: MorceauEnsemble[];
+  if (ensemble.forme === "reel") {
+    morceaux = [{ inf: null, sup: null, infInclus: false, supInclus: false }];
+  } else if (ensemble.forme === "prive_points") {
+    const points = [...new Set(ensemble.points)].sort((x, y) => x - y);
+    morceaux = [];
+    let gauche: number | null = null;
+    for (const p of points) {
+      morceaux.push({ inf: gauche, sup: p, infInclus: false, supInclus: false });
+      gauche = p;
+    }
+    morceaux.push({ inf: gauche, sup: null, infInclus: false, supInclus: false });
+  } else {
+    morceaux = ensemble.morceaux.map((m) => ({ ...m }));
   }
-  const a = trierMorceaux(attendu.morceaux);
-  const s = trierMorceaux(saisie.morceaux);
+  // Bornes infinies jamais « incluses » ; morceaux vides (inf > sup, ou point ouvert) retirés.
+  const nettoyes = morceaux
+    .map((m) => ({ ...m, infInclus: m.inf === null ? false : m.infInclus, supInclus: m.sup === null ? false : m.supInclus }))
+    .filter((m) => {
+      if (m.inf === null || m.sup === null) return true;
+      if (m.inf > m.sup + 1e-9) return false;
+      if (Math.abs(m.inf - m.sup) < 1e-9) return m.infInclus && m.supInclus;
+      return true;
+    });
+  const tries = trierMorceaux(nettoyes);
+  const fusion: MorceauEnsemble[] = [];
+  for (const m of tries) {
+    const dernier = fusion[fusion.length - 1];
+    if (!dernier) {
+      fusion.push({ ...m });
+      continue;
+    }
+    if (dernier.sup === null) continue; // le dernier morceau couvre déjà tout ce qui suit
+    const debutM = m.inf === null ? -Infinity : m.inf;
+    const chevauche = debutM < dernier.sup - 1e-9 || (Math.abs(debutM - dernier.sup) < 1e-9 && (dernier.supInclus || m.infInclus));
+    if (!chevauche) {
+      fusion.push({ ...m });
+      continue;
+    }
+    if (m.sup === null) {
+      dernier.sup = null;
+      dernier.supInclus = false;
+    } else if (m.sup > dernier.sup + 1e-9) {
+      dernier.sup = m.sup;
+      dernier.supInclus = m.supInclus;
+    } else if (Math.abs(m.sup - dernier.sup) < 1e-9) {
+      dernier.supInclus = dernier.supInclus || m.supInclus;
+    }
+  }
+  return fusion;
+}
+
+/**
+ * Comparaison ENSEMBLISTE, indépendante de la forme choisie (audit 5e ch. 1, point 5) :
+ * « ]−∞ ; 2[ ∪ ]2 ; +∞[ » et « ℝ ∖ {2} », ou « ]−∞ ; +∞[ » et « ℝ », désignent le même ensemble
+ * et sont donc tous deux justes. Bornes comparées à 1e-6 près. Partagée par 5gen1, 5gen3 et les
+ * écrans « domaine » de l'étude locale et de l'étude de fonction.
+ */
+export function verifierEnsembleReelGuide(saisie: EnsembleReelGuide, attendu: EnsembleReelGuide): boolean {
+  const a = versIntervallesCanoniques(attendu);
+  const s = versIntervallesCanoniques(saisie);
   return a.length === s.length && a.every((m, i) => memeMorceau(m, s[i]));
 }
 

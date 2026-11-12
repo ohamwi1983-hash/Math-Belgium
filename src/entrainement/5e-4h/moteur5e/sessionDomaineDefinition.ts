@@ -22,6 +22,9 @@ import type { ReponseCE, ReponseResolutionRacineSurFraction } from "./verificati
 
 const POINTS_DE_BASE = 100;
 
+/** Écran « CE » : choix fermés, une seule tentative. */
+export const TENTATIVES_ECRAN_CE = 1;
+
 export { niveauAideMaxCE, niveauAideMaxDomf, niveauAideMaxResolution };
 
 export type ReponseResolution =
@@ -93,6 +96,9 @@ export function soumettreReponseCE(etat: EtatSessionDomaineDefinition, reponse: 
 
   const etapeCourante = soumettreEtapeTentatives<ReponseCE>(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
+    // Écran de CHOIX FERMÉS (gate, expression, symbole) : une seule tentative (règle du site,
+    // audit 5e ch. 1, décision D) — les 3 tentatives restent pour les saisies d'ensembles.
+    tentativesMax: TENTATIVES_ECRAN_CE,
     verifier: (r) => verifierCE(exercice, r),
     revelerReponse: () => {},
   });

@@ -1252,6 +1252,30 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'volume par soustraction : un bol', enonce: "Un bol a la forme d'une demi-boule de rayon extérieur 5 cm, creusée d'une demi-boule de rayon 4 cm. Calcule le volume de matière qu'il contient." },
   ],
   },
+  'fonctions-composees': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
+  // `exemple` (ou le label de l'`exempleLibre`).
+    domaine: [
+      { cle: 'domaine non borné', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{2x+6}}{x-1}$." },
+      { cle: 'exclusion interne', enonce: "Détermine le domaine de définition de $f(x) = \\dfrac{\\sqrt{9-x^2}}{x+1}$." },
+    ],
+    decomposer: [
+      { cle: '3 étages', enonce: "Décompose $h(x) = 5 - \\sqrt[3]{|x|}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
+      { cle: '4 étages', enonce: "Décompose $h(x) = \\sqrt{|3x-5|+2}$ en une suite de fonctions de référence, de l'intérieur vers l'extérieur." },
+    ],
+    composer: [
+      { cle: 'la composition est associative', enonce: "Démontre que la composition de fonctions est associative : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$." },
+      { cle: 'pourquoi dom(f∘g) exige', enonce: "Démontre que $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$ : explique pourquoi chacune des deux conditions est nécessaire, puis pourquoi elles suffisent." },
+      { cle: 'domaine non vide', enonce: "Pour $f(x) = \\sqrt{-3x+6}$ et $g(x) = \\sqrt{-2x+4}$, écris $(g\\circ f)(x)$ et détermine $\\operatorname{dom}(g\\circ f)$." },
+      { cle: 'domaine vide', enonce: "Pour $f(x) = \\sqrt{x-10}$ et $g(x) = -x^2$, écris $(f\\circ g)(x)$ et détermine $\\operatorname{dom}(f\\circ g)$." },
+    ],
+    graphique: [
+      { cle: 'lecture pas à pas', enonce: "À partir des graphes de f et de g, calcule $(g\\circ f)(2)$ en détaillant les deux lectures successives." },
+    ],
+    contexte: [
+      { cle: 'un bidon cylindrique', enonce: "Un bidon cylindrique de rayon r et de hauteur h contient $V = 1000$ cm³, avec $V = \\pi r^2 h$. Exprime h en fonction de r, calcule $h(3)$, puis exprime l'aire latérale du bidon en fonction de r seulement." },
+    ],
+  },
   'nombres-complexes': {
   // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est le badge du bloc
   // `exemple` (ou le label de l'`exempleLibre`).
@@ -1484,7 +1508,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-logarithmes', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus

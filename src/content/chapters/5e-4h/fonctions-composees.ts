@@ -421,6 +421,17 @@ export const fonctionsComposees: ChapterContent = {
             'Quand f et g sont données par leur formule, composer revient à **substituer** : partout où ' +
             'g apparaît, on remplace le t de f(t) par l’expression complète de g(x).',
         },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la composition est associative : (f∘g)∘h = f∘(g∘h)',
+          blocks: [
+            { kind: 'para', text: '**Ce qu\'il faut montrer.** Deux fonctions sont égales si elles ont le même domaine et la même image en chaque point. On compare donc $((f\\circ g)\\circ h)(x)$ et $(f\\circ(g\\circ h))(x)$.' },
+            { kind: 'para', text: '**Étape 1 — le membre de gauche.** On applique la définition $(u\\circ v)(x) = u(v(x))$ avec $u = f\\circ g$ et $v = h$ : $((f\\circ g)\\circ h)(x) = (f\\circ g)(h(x))$. On l\'applique une seconde fois, avec $u = f$ et $v = g$, au nombre $h(x)$ : $(f\\circ g)(h(x)) = f(g(h(x)))$.' },
+            { kind: 'para', text: '**Étape 2 — le membre de droite.** Avec $u = f$ et $v = g\\circ h$ : $(f\\circ(g\\circ h))(x) = f((g\\circ h)(x)) = f(g(h(x)))$.' },
+            { kind: 'para', text: '**Étape 3 — même chaîne, même domaine.** Les deux membres donnent la même chaîne de calcul : h d\'abord, puis g, puis f. Ils existent exactement pour les mêmes x (ceux pour lesquels $h(x)$, puis $g(h(x))$, puis $f(g(h(x)))$ existent). Les deux fonctions sont donc égales : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$. On peut écrire $f\\circ g\\circ h$ sans parenthèses — c\'est exactement ce qu\'on fait en décomposant une écriture en plusieurs étages.' },
+            { kind: 'para', text: '**Attention — associative ne veut pas dire commutative.** L\'**ordre** des fonctions compte toujours ($f\\circ g \\ne g\\circ f$ en général) ; seule la place des parenthèses est sans importance.' },
+          ],
+        },
         { kind: 'subheading', text: 'Le domaine d’une composée : une double condition' },
         {
           kind: 'methode',
@@ -428,6 +439,17 @@ export const fonctionsComposees: ChapterContent = {
             'x doit d’abord appartenir à $\\operatorname{dom} g$ (sinon g(x) n’existe même pas).',
             'Il faut ensuite que la valeur $g(x)$ tombe dans $\\operatorname{dom} f$ (sinon f ne peut pas la recevoir).',
             'dom(f∘g) est l’**intersection** des deux conditions.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi dom(f∘g) exige x ∈ dom g ET g(x) ∈ dom f',
+          blocks: [
+            { kind: 'para', text: '**Étape 1 — ce que veut dire x ∈ dom(f∘g).** Par définition, $x \\in \\operatorname{dom}(f\\circ g)$ signifie que le nombre $(f\\circ g)(x) = f(g(x))$ existe : on peut le calculer jusqu\'au bout.' },
+            { kind: 'para', text: '**Étape 2 — g d\'abord.** Pour calculer $f(g(x))$, on calcule d\'abord $g(x)$. Ce nombre n\'existe que si $x \\in \\operatorname{dom} g$ : sans lui, il n\'y a rien à donner à f. Donc, si $x \\in \\operatorname{dom}(f\\circ g)$, alors $x \\in \\operatorname{dom} g$.' },
+            { kind: 'para', text: '**Étape 3 — puis f.** Le nombre $y = g(x)$ devient l\'entrée de f, et $f(y)$ n\'existe que si $y \\in \\operatorname{dom} f$, c\'est-à-dire $g(x) \\in \\operatorname{dom} f$. Donc, si $x \\in \\operatorname{dom}(f\\circ g)$, alors $g(x) \\in \\operatorname{dom} f$.' },
+            { kind: 'para', text: '**Étape 4 — les deux conditions suffisent.** Inversement, si $x \\in \\operatorname{dom} g$ et $g(x) \\in \\operatorname{dom} f$, alors $g(x)$ existe et f peut le recevoir : $f(g(x))$ existe. Les deux conditions sont nécessaires **et** suffisantes : $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$.' },
+            { kind: 'para', text: '**Pourquoi la formule simplifiée ne suffit pas.** Une simplification peut effacer une condition. Pour $f(t) = t^2$ et $g(x) = \\sqrt{x}$, la formule simplifiée $f(g(x)) = x$ semble définie partout, alors que $g(x)$ n\'existe que pour $x \\ge 0$ : $\\operatorname{dom}(f\\circ g) = [0\\,;+\\infty[$. Le domaine se lit sur les DEUX conditions, jamais sur la seule formule finale.' },
           ],
         },
         {
@@ -797,26 +819,43 @@ export const fonctionsComposees: ChapterContent = {
   formulaire: {
     groups: [
       {
-        title: 'Domaine de définition (CE)',
+        title: "Domaine de définition — conditions d'existence",
         formulas: [
-          { text: "CE — dénominateur $\\neq 0$" },
-          { text: "CE — radicande $\\ge 0$", condition: "racine d'indice pair seulement" },
-          { text: "racine d'indice impair, valeur absolue — toujours définies, aucune CE" },
+          { text: 'dénominateur : $D(x) \\neq 0$', condition: 'une seule valeur retirée, jamais un intervalle' },
+          { text: "racine d'indice pair : radicande $\\ge 0$", condition: 'inégalité large, le 0 est accepté' },
+          { text: "racine d'indice impair, valeur absolue : aucune CE" },
+          { text: 'plusieurs CE : intersection de leurs solutions', condition: 'toutes les conditions à la fois, jamais une union' },
         ],
       },
       {
         title: 'Composer deux fonctions',
         formulas: [
           { text: '$(f\\circ g)(x) = f(g(x))$', condition: 'g agit en premier, f en second' },
-          { text: '$(g\\circ f)(a) = g(f(a))$', condition: "lecture graphique : f d'abord, puis report sur g" },
+          { text: 'décomposer : repérer la dernière opération effectuée, l’éplucher, recommencer' },
+          { text: '$(f\\circ g)\\circ h = f\\circ(g\\circ h)$', condition: "associativité : seule la place des parenthèses est libre, jamais l'ordre" },
         ],
       },
       {
-        title: "Domaine d'une composée",
+        title: "Composer f et g — domaine d'une composée",
         formulas: [
-          { text: '$x \\in \\operatorname{dom} g$', condition: 'condition 1' },
-          { text: '$g(x) \\in \\operatorname{dom} f$', condition: 'condition 2' },
-          { text: 'dom(f∘g) = intersection des deux conditions' },
+          { text: '$\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$', condition: 'les deux conditions à la fois' },
+          { text: 'première condition : $x \\in \\operatorname{dom} g$', condition: 'sinon g(x) n’existe même pas' },
+          { text: 'deuxième condition : $g(x) \\in \\operatorname{dom} f$', condition: 'la valeur g(x) doit pouvoir être reçue par f' },
+        ],
+      },
+      {
+        title: "Lecture graphique d'une composée",
+        formulas: [
+          { text: '$(g\\circ f)(a) = g(f(a))$', condition: 'lire f(a) sur $C_f$, puis reporter cette valeur sur l’axe des x de $C_g$' },
+          { text: "image hors du domaine : $(g\\circ f)(a)$ n'existe pas", condition: 'quand f(a) sort du domaine de g' },
+        ],
+      },
+      {
+        title: 'Fonctions en contexte',
+        formulas: [
+          { text: '$h(r) = \\dfrac{V}{\\pi r^2}$', condition: 'hauteur d’un cylindre de volume V, en fonction de son rayon r' },
+          { text: '$A_{lat}(r) = 2\\pi r \\cdot h(r)$', condition: 'aire latérale : h(r) réinjectée, une composition' },
+          { text: 'domaine physique : plus restrictif que le domaine mathématique', condition: 'longueurs, durées, quantités positives' },
         ],
       },
     ],
@@ -825,7 +864,7 @@ export const fonctionsComposees: ChapterContent = {
   recap: {
     items: [
       '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque, combiner par intersection.',
-      '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second (comme les chaussettes avant les chaussures) ; l’ordre compte.',
+      '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second (comme les chaussettes avant les chaussures) ; l’ordre compte, mais pas la place des parenthèses : (f∘g)∘h = f∘(g∘h).',
       '**Décomposer** — repérer la toute dernière opération effectuée, l’éplucher, recommencer.',
       '**Domaine d’une composée** — x ∈ dom g, ET g(x) ∈ dom f ; l’intersection peut être bornée, voire vide.',
       '**Lecture graphique** — deux lectures successives, la sortie de la première devient l’entrée de la seconde ; vérifier que l’image existe.',

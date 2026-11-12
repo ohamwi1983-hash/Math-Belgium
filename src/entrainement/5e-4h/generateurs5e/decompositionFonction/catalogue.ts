@@ -4,6 +4,12 @@ export interface RenduCouche {
   /** syntaxe `evaluerExpressionGenerale` (4e, réutilisée cross-chantier). */
   formule: string;
   latex: string;
+  /** Somme/différence au niveau supérieur (« 2x+1 », « 3x^4 - x ») : un coefficient ou un
+   * exposant appliqué à cette expression exige des parenthèses — jamais pour un produit, une
+   * racine, une valeur absolue ou une puissance déjà groupée. */
+  estSomme?: boolean;
+  /** Dénominateur d'un inverse « 1/(…) » : a·(1/u) s'affiche \dfrac{a}{u}, jamais 3\dfrac{1}{u}. */
+  denominateurInverse?: string;
 }
 
 /** Un argument LaTeX "atomique" (un simple symbole, jamais une expression composée) n'a besoin
@@ -16,13 +22,18 @@ function estArgumentAtomique(argLatex: string): boolean {
   return argLatex === "x";
 }
 
-function formatAffineLatex(a: number, b: number, argLatex: string): string {
-  const atomique = estArgumentAtomique(argLatex);
-  const terme =
-    a === 1 ? argLatex
-    : a === -1 ? (atomique ? `-${argLatex}` : `-\\left(${argLatex}\\right)`)
-    : atomique ? `${a}${argLatex}`
-    : `${a}\\left(${argLatex}\\right)`;
+/** a·(arg) + b, affiché SANS distribuer (audit 5e ch. 1, décision C : la structure de la
+ * composition doit rester visible — « −3(x^2+2x) + 4 », jamais « −3x^2 − 6x + 4 »). Parenthèses
+ * seulement autour d'une somme ; a·(1/u) s'écrit \dfrac{a}{u}. */
+function formatAffineLatex(a: number, b: number, arg: RenduCouche): string {
+  const argLatex = arg.latex;
+  const groupe = arg.estSomme ? `\\left(${argLatex}\\right)` : argLatex;
+  let terme: string;
+  if (arg.denominateurInverse !== undefined && a !== 1) {
+    terme = a === -1 ? `-\\dfrac{1}{${arg.denominateurInverse}}` : `${a < 0 ? "-" : ""}\\dfrac{${Math.abs(a)}}{${arg.denominateurInverse}}`;
+  } else {
+    terme = a === 1 ? argLatex : a === -1 ? `-${groupe}` : `${a}${groupe}`;
+  }
   if (b === 0) return terme;
   return b > 0 ? `${terme} + ${b}` : `${terme} - ${Math.abs(b)}`;
 }
@@ -103,18 +114,18 @@ export function appliquerCouche(type: TypeCoucheCatalogue, arg: RenduCouche, par
     case "affine": {
       const a = params.a ?? 1;
       const b = params.b ?? 0;
-      return { formule: `(${a})*(${arg.formule})+(${b})`, latex: formatAffineLatex(a, b, arg.latex) };
+      return { formule: `(${a})*(${arg.formule})+(${b})`, latex: formatAffineLatex(a, b, arg), estSomme: b !== 0 };
     }
     case "carre":
-      return { formule: `(${arg.formule})^2`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^2` : `\\left(${arg.latex}\\right)^2` };
+      return { formule: `(${arg.formule})^2`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^{2}` : `\\left(${arg.latex}\\right)^{2}` };
     case "cube":
-      return { formule: `(${arg.formule})^3`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^3` : `\\left(${arg.latex}\\right)^3` };
+      return { formule: `(${arg.formule})^3`, latex: estArgumentAtomique(arg.latex) ? `${arg.latex}^{3}` : `\\left(${arg.latex}\\right)^{3}` };
     case "racineCarree":
       return { formule: `sqrt(${arg.formule})`, latex: `\\sqrt{${arg.latex}}` };
     case "racineCubique":
       return { formule: `cbrt(${arg.formule})`, latex: `\\sqrt[3]{${arg.latex}}` };
     case "inverse":
-      return { formule: `1/(${arg.formule})`, latex: `\\dfrac{1}{${arg.latex}}` };
+      return { formule: `1/(${arg.formule})`, latex: `\\dfrac{1}{${arg.latex}}`, denominateurInverse: arg.latex };
     case "valeurAbsolue":
       return { formule: `abs(${arg.formule})`, latex: `\\left|${arg.latex}\\right|` };
     case "brute": {
@@ -122,7 +133,7 @@ export function appliquerCouche(type: TypeCoucheCatalogue, arg: RenduCouche, par
       const n = params.n ?? 2;
       const b = params.b ?? 1;
       const m = params.m ?? 0;
-      return { formule: formuleBrute(a, n, b, m, arg.formule), latex: formatBruteLatex(a, n, b, m, arg.latex) };
+      return { formule: formuleBrute(a, n, b, m, arg.formule), latex: formatBruteLatex(a, n, b, m, arg.latex), estSomme: true };
     }
   }
 }
@@ -136,5 +147,5 @@ export const LIBELLE_TYPE_COUCHE: Record<TypeCoucheCatalogue, string> = {
   racineCubique: "une racine cubique",
   inverse: "un inverse (1/…)",
   valeurAbsolue: "une valeur absolue",
-  brute: "une expression polynomiale (a·xⁿ+b·xᵐ)",
+  brute: "une expression polynomiale (a·xⁿ + b·xᵐ)",
 };

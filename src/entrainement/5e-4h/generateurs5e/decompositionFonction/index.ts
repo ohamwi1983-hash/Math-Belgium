@@ -2,7 +2,6 @@ import type { CoucheGeneree, ExerciceDecompositionFonction, TypeCoucheCatalogue 
 import { choisirParmi, entierAleatoire, entierNonNulAleatoire } from "../domaineDefinition/aleatoire";
 import { appliquerCouche } from "./catalogue";
 import type { ParametresCouche, RenduCouche } from "./catalogue";
-import { simplifierLatex } from "../simplificationExpression";
 
 const TOUTES_COUCHES: TypeCoucheCatalogue[] = ["affine", "carre", "cube", "racineCarree", "racineCubique", "inverse", "valeurAbsolue"];
 const COUCHES_NON_AFFINES: TypeCoucheCatalogue[] = TOUTES_COUCHES.filter((t) => t !== "affine");
@@ -85,8 +84,17 @@ function tirerProfondeur(): number {
   return 4;
 }
 
-function tirerParametresAffine(): ParametresCouche {
-  return { a: entierNonNulAleatoire(-3, 3), b: entierAleatoire(-9, 9) };
+/** Jamais l'identité (a=1, b=0) — une couche « x ↦ x » ne décompose rien. Si l'argument est une
+ * SOMME (`argumentEstSomme`), a=1 est aussi exclu : « (2x^2 - 3x) + 4 » se lirait comme un simple
+ * polynôme, la structure a(…)+b doit rester visible (audit 5e ch. 1, décision C). */
+function tirerParametresAffine(argumentEstSomme = false): ParametresCouche {
+  for (;;) {
+    const a = entierNonNulAleatoire(-3, 3);
+    const b = entierAleatoire(-9, 9);
+    if (a === 1 && b === 0) continue;
+    if (argumentEstSomme && a === 1) continue;
+    return { a, b };
+  }
 }
 
 /**
@@ -182,9 +190,34 @@ function comptePointsFinis(f: (x: number) => number): number {
   return n;
 }
 
+/** Une valeur absolue appliquée à une expression qui ne change jamais de signe (|√(2x+8)|,
+ * |(√x)³|, |2x⁴+x²|, |−x²−1|) est redondante : elle vaut l'expression ou son opposé (audit 5e ch. 1,
+ * point 14). */
+function changeDeSigne(f: (x: number) => number): boolean {
+  let positif = false;
+  let negatif = false;
+  for (let x = -DEMI_ETENDUE_ECHANTILLON; x <= DEMI_ETENDUE_ECHANTILLON; x += PAS_ECHANTILLON) {
+    const v = f(x);
+    if (!Number.isFinite(v)) continue;
+    if (v > 1e-9) positif = true;
+    if (v < -1e-9) negatif = true;
+    if (positif && negatif) return true;
+  }
+  return false;
+}
+
 interface TentativeConstruction {
   exercice: ExerciceDecompositionFonction;
   evaluer: (x: number) => number;
+  /** Faux si une couche est redondante (valeur absolue d'une expression de signe constant). */
+  sansRedondance: boolean;
+}
+
+/** Contraintes FORCÉES par le panneau de variantes (dev-only) : couche intérieure polynomiale
+ * (« brute »), dernière couche affine. Absentes = tirage libre. */
+export interface OptionsConstruction {
+  couche1Brute?: boolean;
+  finaleAffine?: boolean;
 }
 
 /**
@@ -201,9 +234,10 @@ interface TentativeConstruction {
  * n'est jamais concernée par cette garde (un habillage affine du résultat d'un polynôme de degré ≥2
  * ne peut structurellement jamais redevenir une simple fonction affine).
  */
-function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4): TentativeConstruction {
-  const finaleEstAffine = Math.random() < 0.5;
-  const couche1EstBrute = Math.random() < POIDS_COUCHE1_BRUTE;
+function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4, options: OptionsConstruction = {}): TentativeConstruction {
+  const finaleEstAffine = options.finaleAffine ?? Math.random() < 0.5;
+  const couche1EstBrute = options.couche1Brute ?? Math.random() < POIDS_COUCHE1_BRUTE;
+  let sansRedondance = true;
 
   const dejaUtilisees = new Set<TypeCoucheCatalogue>();
   let courant: RenduCouche = { formule: "x", latex: "x" };
@@ -218,6 +252,7 @@ function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4): TentativeConstru
 
     const transformateur = transformateurNumerique(type, params);
     const precedent = evaluerCourant;
+    if (type === "valeurAbsolue" && !changeDeSigne(precedent)) sansRedondance = false;
     evaluerCourant = (x) => transformateur(precedent(x));
 
     // "affine" (peut réapparaître, couche 1 ET couche finale) et "brute" (couche 1 uniquement,
@@ -239,14 +274,19 @@ function tenterConstruireAvecProfondeur(profondeur: 2 | 3 | 4): TentativeConstru
   }
 
   if (finaleEstAffine) {
-    ajouterCouche("affine", true, tirerParametresAffine());
+    ajouterCouche("affine", true, tirerParametresAffine(courant.estSomme === true));
   } else {
     ajouterCouche(choisirParmi(couchesDisponibles(dejaUtilisees)), false);
   }
 
+  // Affichage STRUCTUREL (audit 5e ch. 1, points 13 et 15) : plus de passage par la simplification
+  // mathjs, qui distribuait tout (« 9x^2 + 12x + 4 », polynôme sans structure lisible), écrivait
+  // « −(5x^2) − 4 » et mélangeait l'ordre des termes. Le LaTeX construit couche par couche garde la
+  // composition visible, et chaque argument cité par l'aide 2 apparaît tel quel dans f.
   return {
-    exercice: { profondeur, fLatex: `f(x) = ${simplifierLatex(courant.formule, courant.latex)}`, fFormule: courant.formule, couches },
+    exercice: { profondeur, fLatex: `f(x) = ${courant.latex}`, fFormule: courant.formule, couches },
     evaluer: evaluerCourant,
+    sansRedondance,
   };
 }
 
@@ -262,14 +302,26 @@ const TENTATIVES_MAX_REROLL = 300;
  * vérification (voir `SEUIL_POINTS_FINIS_SUR`) — un filet ultime (jamais atteint en pratique, voir
  * `index.test.ts`, sweep de plusieurs milliers de tirages) retourne la dernière tentative même si
  * elle reste invalide plutôt que de planter l'application. */
-export function construireAvecProfondeur(profondeur: 2 | 3 | 4): ExerciceDecompositionFonction {
-  let derniereTentative = tenterConstruireAvecProfondeur(profondeur);
+export function construireAvecProfondeur(profondeur: 2 | 3 | 4, options: OptionsConstruction = {}): ExerciceDecompositionFonction {
+  let derniereTentative = tenterConstruireAvecProfondeur(profondeur, options);
   for (let tentative = 0; tentative < TENTATIVES_MAX_REROLL; tentative++) {
-    const valide = !contientPaireAdjacenteInterdite(derniereTentative.exercice.couches) && comptePointsFinis(derniereTentative.evaluer) >= SEUIL_POINTS_FINIS_SUR;
+    const valide =
+      derniereTentative.sansRedondance &&
+      !contientPaireAdjacenteInterdite(derniereTentative.exercice.couches) &&
+      comptePointsFinis(derniereTentative.evaluer) >= SEUIL_POINTS_FINIS_SUR;
     if (valide) return derniereTentative.exercice;
-    derniereTentative = tenterConstruireAvecProfondeur(profondeur);
+    derniereTentative = tenterConstruireAvecProfondeur(profondeur, options);
   }
   return derniereTentative.exercice;
+}
+
+/** Variantes forçables par le panneau dev (`SelecteurVarianteDev`) : profondeur « 2 »/« 3 »/« 4 »,
+ * ou une forme précise (« brute » : couche intérieure polynomiale ; « affineFinale » : dernière
+ * couche affine) à profondeur tirée. */
+export function construireAvecVariante(id: string): ExerciceDecompositionFonction {
+  if (id === "brute") return construireAvecProfondeur(tirerProfondeur() as 2 | 3 | 4, { couche1Brute: true });
+  if (id === "affineFinale") return construireAvecProfondeur(tirerProfondeur() as 2 | 3 | 4, { finaleAffine: true });
+  return construireAvecProfondeur(Number(id) as 2 | 3 | 4);
 }
 
 export function genererExerciceDecompositionFonction(): ExerciceDecompositionFonction {

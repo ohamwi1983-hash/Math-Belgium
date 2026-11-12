@@ -1,9 +1,7 @@
 import type { CourbeGraphique, PointGraphique } from "../core5e/composeeGraphique.types";
+import { X_MAX_CADRE, X_MIN_CADRE, Y_MAX_CADRE, Y_MIN_CADRE } from "../generateurs5e/composeeGraphique/courbes";
 
-/** Segments consécutifs de la ligne brisée — un tableau de paires [pointA,pointB], jamais un seul
- * `Plot.OfX` (les courbes de 5gen4 sont des lignes brisées, pas une fonction algébrique lisse — voir
- * `core5e/composeeGraphique.types.ts`). Conservée pour les tests/autres usages éventuels du modèle
- * de DONNÉES brut — le RENDU visuel utilise désormais `pointsLissesCourbe` (voir plus bas, E.6). */
+/** Segments consécutifs de la ligne brisée — un tableau de paires [pointA,pointB]. */
 export function segmentsCourbe(courbe: CourbeGraphique): [PointGraphique, PointGraphique][] {
   const segments: [PointGraphique, PointGraphique][] = [];
   for (let i = 0; i < courbe.points.length - 1; i++) {
@@ -16,49 +14,123 @@ export function extremitesCourbe(courbe: CourbeGraphique): [PointGraphique, Poin
   return [courbe.points[0], courbe.points[courbe.points.length - 1]];
 }
 
-/** Nombre de points interpolés par intervalle [x,x+1] entre 2 nœuds consécutifs — assez dense pour
- * une allure visuellement lisse sur le cadre 320px/17 nœuds de `CourbeGraph.tsx`. */
-const ECHANTILLONS_PAR_SEGMENT = 14;
+/** Nombre avec le signe moins typographique (« −3 », jamais « -3 »). */
+export function nombreTypo(n: number): string {
+  return n < 0 ? `−${Math.abs(n)}` : String(n);
+}
 
-/** Spline de Catmull-Rom uniforme (composante par composante, x et y) — passe EXACTEMENT par p1 en
- * t=0 et p2 en t=1, p0/p3 servant de points de contrôle voisins (dupliqués aux extrémités de la
- * courbe pour rester bien défini). Formule standard, cross-vérifiée par test aux bornes t=0/t=1. */
-function catmullRom(p0: PointGraphique, p1: PointGraphique, p2: PointGraphique, p3: PointGraphique, t: number): PointGraphique {
-  const t2 = t * t;
-  const t3 = t2 * t;
-  const x = 0.5 * (2 * p1.x + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
-  const y = 0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
-  return { x, y };
+export interface CouleursGrapheComposee {
+  /** Courbe elle-même et ses deux extrémités. */
+  courbe: string;
+  /** Quadrillage (une ligne par unité). */
+  grille: string;
+  /** Axes, flèches et graduations. */
+  axe: string;
+  /** Point révélé par l'aide et ses pointillés. */
+  aide: string;
+  /** Fond du disque blanc derrière les étiquettes (lisibilité sur le quadrillage). */
+  fond: string;
+}
+
+/** Couleurs de l'écran : jetons du thème (clair et sombre). */
+export const COULEURS_ECRAN_F: CouleursGrapheComposee = {
+  courbe: "var(--sky, #2f6fb0)",
+  grille: "var(--line-soft, #dfe7ec)",
+  axe: "var(--ink-soft, #51626f)",
+  aide: "var(--plan, #5b4ea3)",
+  fond: "var(--surface, #ffffff)",
+};
+export const COULEURS_ECRAN_G: CouleursGrapheComposee = { ...COULEURS_ECRAN_F, courbe: "var(--accent, #b65c1f)" };
+
+export interface OptionsGrapheComposee {
+  couleurs: CouleursGrapheComposee;
+  /** Point à révéler (aide niveau 2) : nœud réel de la courbe, avec pointillés vers les deux axes. */
+  pointRevele?: PointGraphique | null;
+  /** Nom lu par les lecteurs d'écran (« Graphe de f »). */
+  titre?: string;
+}
+
+const COTE = 340;
+const MARGE = 20;
+const UNITE = (COTE - 2 * MARGE) / (X_MAX_CADRE - X_MIN_CADRE);
+
+function px(x: number): number {
+  return MARGE + (x - X_MIN_CADRE) * UNITE;
+}
+function py(y: number): number {
+  return MARGE + (Y_MAX_CADRE - y) * UNITE;
+}
+function f2(v: number): string {
+  return v.toFixed(2);
 }
 
 /**
- * Points DENSÉMENT interpolés (spline de Catmull-Rom) passant EXACTEMENT par chaque nœud de la
- * ligne brisée — remplace `segmentsCourbe` pour le RENDU visuel uniquement (E.6,
- * `promptcorrectionsregroupees.md` : "courbe lisse continue... pas une interpolation linéaire par
- * segments... allure de polygone des effectifs"). Le MODÈLE DE DONNÉES reste inchangé (ligne brisée
- * à nœuds de grille entiers, voir `core5e/composeeGraphique.types.ts`) — la spline interpole
- * seulement l'AFFICHAGE entre les mêmes nœuds, jamais les nœuds eux-mêmes : chaque question de
- * l'exercice continue de porter sur une abscisse entière dont l'image reste EXACTEMENT celle du
- * nœud d'origine, propriété centrale de ce générateur ("toutes les coordonnées interrogées tombent
- * sur des nœuds de grille entiers"). Écart assumé par rapport à la lettre du prompt ("catalogue de
- * fonctions de référence" façon gen10, 4e) — voir `core5e/composeeGraphique.types.ts` pour la preuve
- * que cette famille de fonctions est structurellement incompatible avec cette contrainte ; ce
- * lissage cible directement le symptôme visuel décrit (angles vifs façon polygone) sans jamais
- * sacrifier l'exactitude des réponses.
+ * Graphe SVG autonome (chaîne) d'une courbe de 5gen4 — MÊME rendu à l'écran et sur papier (la figure
+ * du corrigé pourra reprendre cette fonction avec des couleurs en dur). Décisions de l'audit du
+ * chapitre 1 de 5e (point 29, décision G) :
+ * - cadre FIXE [−8 ; 8]², repère orthonormé carré, une ligne de quadrillage PAR UNITÉ : chaque nœud
+ *   de la ligne brisée (abscisse et ordonnée entières) tombe exactement sur une intersection ;
+ * - segments DROITS entre nœuds (l'ancienne spline de Catmull-Rom dépassait entre les nœuds, avec de
+ *   faux extremums et un passage hors cadre) ;
+ * - points pleins aux deux extrémités du domaine ;
+ * - graduations −8…8 de 2 en 2 avec « − » typographique, posées le long des axes et jamais rognées
+ *   (marge réservée tout autour du cadre).
  */
-export function pointsLissesCourbe(courbe: CourbeGraphique): PointGraphique[] {
-  const pts = courbe.points;
-  if (pts.length < 2) return pts;
-  const resultat: PointGraphique[] = [];
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[Math.max(0, i - 1)];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[Math.min(pts.length - 1, i + 2)];
-    for (let s = 0; s < ECHANTILLONS_PAR_SEGMENT; s++) {
-      resultat.push(catmullRom(p0, p1, p2, p3, s / ECHANTILLONS_PAR_SEGMENT));
-    }
+export function svgGrapheComposee(courbe: CourbeGraphique, options: OptionsGrapheComposee): string {
+  const { couleurs, pointRevele, titre } = options;
+  const parties: string[] = [];
+  const x0 = px(0);
+  const y0 = py(0);
+
+  // Quadrillage : une ligne par unité.
+  for (let k = X_MIN_CADRE; k <= X_MAX_CADRE; k++) {
+    parties.push(`<line x1="${f2(px(k))}" y1="${f2(py(Y_MIN_CADRE))}" x2="${f2(px(k))}" y2="${f2(py(Y_MAX_CADRE))}" stroke="${couleurs.grille}" stroke-width="1"/>`);
   }
-  resultat.push(pts[pts.length - 1]);
-  return resultat;
+  for (let k = Y_MIN_CADRE; k <= Y_MAX_CADRE; k++) {
+    parties.push(`<line x1="${f2(px(X_MIN_CADRE))}" y1="${f2(py(k))}" x2="${f2(px(X_MAX_CADRE))}" y2="${f2(py(k))}" stroke="${couleurs.grille}" stroke-width="1"/>`);
+  }
+
+  // Axes fléchés.
+  const xDebut = px(X_MIN_CADRE) - 6;
+  const xFin = px(X_MAX_CADRE) + 10;
+  const yBas = py(Y_MIN_CADRE) + 6;
+  const yHaut = py(Y_MAX_CADRE) - 10;
+  parties.push(`<line x1="${f2(xDebut)}" y1="${f2(y0)}" x2="${f2(xFin)}" y2="${f2(y0)}" stroke="${couleurs.axe}" stroke-width="1.4"/>`);
+  parties.push(`<path d="M${f2(xFin + 2)},${f2(y0)} L${f2(xFin - 6)},${f2(y0 - 4)} L${f2(xFin - 6)},${f2(y0 + 4)} Z" fill="${couleurs.axe}"/>`);
+  parties.push(`<line x1="${f2(x0)}" y1="${f2(yBas)}" x2="${f2(x0)}" y2="${f2(yHaut)}" stroke="${couleurs.axe}" stroke-width="1.4"/>`);
+  parties.push(`<path d="M${f2(x0)},${f2(yHaut - 2)} L${f2(x0 - 4)},${f2(yHaut + 6)} L${f2(x0 + 4)},${f2(yHaut + 6)} Z" fill="${couleurs.axe}"/>`);
+
+  // Graduations de 2 en 2 (« − » typographique), le long des axes.
+  const styleTexte = `font-size="11" font-family="inherit" fill="${couleurs.axe}"`;
+  for (let k = X_MIN_CADRE; k <= X_MAX_CADRE; k += 2) {
+    if (k === 0) continue;
+    parties.push(`<line x1="${f2(px(k))}" y1="${f2(y0 - 3)}" x2="${f2(px(k))}" y2="${f2(y0 + 3)}" stroke="${couleurs.axe}" stroke-width="1.2"/>`);
+    parties.push(`<text x="${f2(px(k))}" y="${f2(y0 + 14)}" text-anchor="middle" ${styleTexte} paint-order="stroke" stroke="${couleurs.fond}" stroke-width="3">${nombreTypo(k)}</text>`);
+  }
+  for (let k = Y_MIN_CADRE; k <= Y_MAX_CADRE; k += 2) {
+    if (k === 0) continue;
+    parties.push(`<line x1="${f2(x0 - 3)}" y1="${f2(py(k))}" x2="${f2(x0 + 3)}" y2="${f2(py(k))}" stroke="${couleurs.axe}" stroke-width="1.2"/>`);
+    parties.push(`<text x="${f2(x0 - 5)}" y="${f2(py(k) + 4)}" text-anchor="end" ${styleTexte} paint-order="stroke" stroke="${couleurs.fond}" stroke-width="3">${nombreTypo(k)}</text>`);
+  }
+  parties.push(`<text x="${f2(x0 - 5)}" y="${f2(y0 + 14)}" text-anchor="end" ${styleTexte}>0</text>`);
+  parties.push(`<text x="${f2(xFin - 2)}" y="${f2(y0 - 7)}" text-anchor="end" font-size="12" font-style="italic" fill="${couleurs.axe}">x</text>`);
+  parties.push(`<text x="${f2(x0 + 7)}" y="${f2(yHaut + 6)}" font-size="12" font-style="italic" fill="${couleurs.axe}">y</text>`);
+
+  // Courbe : segments droits entre nœuds entiers, points pleins aux extrémités.
+  const points = courbe.points.map((p) => `${f2(px(p.x))},${f2(py(p.y))}`).join(" ");
+  parties.push(`<polyline points="${points}" fill="none" stroke="${couleurs.courbe}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`);
+  const [debut, fin] = extremitesCourbe(courbe);
+  for (const p of [debut, fin]) parties.push(`<circle cx="${f2(px(p.x))}" cy="${f2(py(p.y))}" r="4.2" fill="${couleurs.courbe}"/>`);
+
+  // Aide niveau 2 : point révélé, pointillés vers les axes.
+  if (pointRevele) {
+    const rx = px(pointRevele.x);
+    const ry = py(pointRevele.y);
+    parties.push(`<line x1="${f2(rx)}" y1="${f2(ry)}" x2="${f2(rx)}" y2="${f2(y0)}" stroke="${couleurs.aide}" stroke-width="1.6" stroke-dasharray="4 3"/>`);
+    parties.push(`<line x1="${f2(rx)}" y1="${f2(ry)}" x2="${f2(x0)}" y2="${f2(ry)}" stroke="${couleurs.aide}" stroke-width="1.6" stroke-dasharray="4 3"/>`);
+    parties.push(`<circle cx="${f2(rx)}" cy="${f2(ry)}" r="4.6" fill="${couleurs.aide}"/>`);
+  }
+
+  const etiquette = titre ? ` role="img" aria-label="${titre}"` : "";
+  return `<svg viewBox="0 0 ${COTE} ${COTE}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"${etiquette}>${parties.join("")}</svg>`;
 }
