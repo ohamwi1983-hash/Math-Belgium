@@ -96,7 +96,7 @@ async function inlinerPolices(css: string): Promise<string> {
 const STYLE_IMPRESSION = `
 @page {
   size: A4;
-  margin: 18mm 15mm 20mm 15mm;
+  margin: 9mm 17mm 11mm 17mm;
   @bottom-center {
     content: counter(page) " / " counter(pages);
     font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
@@ -107,11 +107,32 @@ const STYLE_IMPRESSION = `
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #ffffff !important; }
-  figure, .diagram-frame, .cas-grid, .cas-item, .exemple, .callout, .synthese,
-  table.tableau, .table-scroll, .generator-card, .generator-pair {
+  /* Pleine largeur utile : la colonne de lecture de l'écran (.page : max-width 760px, marges
+     intérieures 56/24/96px) s'ajoutait aux marges @page — demande utilisateur : moins de pages,
+     juste la place de perforer. */
+  .page { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+  .chapter-head { margin-bottom: 14px !important; }
+  .chapter-section { margin-top: 18px !important; padding-top: 10px !important; }
+  .section-head { margin-bottom: 10px !important; }
+  .section-kicker { margin: -6px 0 10px 0 !important; }
+  p { margin-bottom: 0.55em !important; }
+  .callout, .exemple, .wrong-right, figure, .diagram-frame, .table-scroll, .historique, .application,
+  .illustration, .diag-multi { margin-top: 9px !important; margin-bottom: 9px !important; }
+  .callout { padding: 9px 12px !important; }
+  .exemple-head { padding: 7px 12px !important; }
+  .exemple-body { padding: 10px 12px !important; }
+  .diagram-frame { padding: 10px !important; }
+  .synthese { margin-top: 20px !important; padding: 14px 16px !important; }
+  .formulaire { margin-top: 16px !important; }
+  /* Seuls les blocs COURTS restent insécables (figure, tableau de signes, carte) : un exemple ou un
+     callout long qui refuse de se couper laissait des demi-pages blanches. Titres solidaires de la
+     suite, pas de ligne orpheline ni veuve. */
+  figure, .diagram-frame, .cas-item, table.tableau, .generator-card, .generator-pair, .wrong-right {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+  h1, h2, h3, .section-head, .exemple-head, .callout-label { break-after: avoid; page-break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
 }
 `
 
@@ -124,7 +145,8 @@ const STYLE_IMPRESSION = `
  * parabole) occupait une hauteur de page disproportionnée par rapport à son contenu réel. 55% est
  * le point où le texte du diagramme rejoint la taille du texte courant, vérifié à la fois sur un
  * diagramme simple (`fonction-second-degre`) et sur un diagramme dense à plusieurs étiquettes
- * (`lieux-geometriques`). Réduit le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre,
+ * (`lieux-geometriques`). Ramené à 52 % quand la colonne imprimée s'est élargie (marges @page
+ * 17 mm, `.page` sans marge intérieure) : même taille absolue de figure qu'avant (≈ 92 mm). Réduit le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre,
  * pas seulement le SVG à l'intérieur (sinon le cadre resterait pleine largeur avec le dessin
  * flottant au milieu, entouré de vide) ; le SVG repasse à 100% pour remplir son cadre déjà réduit.
  * Exclut les mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur
@@ -132,7 +154,7 @@ const STYLE_IMPRESSION = `
  *
  * Ce format reste du vrai DOM/CSS — jamais rasterisé — donc un `width` en `%` sur un `<svg>` s'y
  * résout normalement, sans risque de mauvaise résolution/déformation. */
-const ECHELLE_DIAGRAMMES_HTML = 55
+const ECHELLE_DIAGRAMMES_HTML = 52
 const STYLE_DIAGRAMMES = `
 .diagram-frame { width: ${ECHELLE_DIAGRAMMES_HTML}% !important; margin: 0 auto !important; }
 .diagram-frame svg { width: 100% !important; margin: 0 !important; }

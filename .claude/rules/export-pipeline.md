@@ -22,12 +22,23 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
   (texte/traits trop petits sur petit écran, pas trop de place prise sur une feuille imprimée).
   40% rendait les graduations/étiquettes d'un diagramme nettement plus petites que le corps de
   texte environnant à l'impression ; 70% faisait prendre à un diagramme simple une hauteur de page
-  disproportionnée. 55% est le point où le texte du diagramme rejoint la taille du texte courant,
+  disproportionnée. 55% (52 % depuis la mise en page compacte, voir plus bas) est le point où le texte du diagramme rejoint la taille du texte courant,
   vérifié par simulation d'impression A4 (viewport à la largeur de contenu A4, `emulateMedia:
   'print'`) sur un diagramme simple ET un diagramme dense à plusieurs étiquettes, puis confirmé sur
   le vrai fichier exporté (impact mesuré : page count inchangé sur un chapitre simple, +2 pages sur
   33 pour le chapitre le plus dense du site). Pagination A4 via CSS Paged Media (`@page`,
   numérotation `n / total`).
+  **Mise en page compacte (demande utilisateur : trop de pages, garder juste la place de
+  perforer)** : `@page` 9 mm haut / 11 mm bas / **17 mm à gauche et à droite** (trous ISO 838 à
+  12 mm du bord, Ø 6 mm → bord du trou à 15 mm, 2 mm de garde) ; sous `@media print`, `.page` perd
+  sa colonne d'écran (`max-width` 760 px, marges intérieures 56/24/96 px, qui s'AJOUTAIENT aux
+  marges @page), espacements verticaux et marges intérieures des callouts/exemples/cadres resserrés ;
+  seuls les blocs courts restent insécables (`figure`, `.diagram-frame`, tableau de signes, cartes,
+  `.wrong-right`) — un exemple ou un callout long refusant de se couper laissait des demi-pages
+  blanches — avec titres solidaires de la suite (`break-after: avoid`) et `orphans`/`widows` 3.
+  Échelle des diagrammes ramenée de 55 à 52 % pour garder la même taille absolue (≈ 92 mm) dans la
+  colonne élargie. Mesuré sur le PDF A4 réel du fichier exporté : trigonométrie 42 → 29 pages,
+  second degré 20 → 16, nombres complexes 42 → 30, lieux géométriques 35 → 28.
 - `downloadBlob.ts` — téléchargement natif du navigateur (`URL.createObjectURL` + `<a download>`).
 - `buildHtmlBlob` est chargé à la demande (`import()` dynamique dans `runExport.ts`), pas au
   chargement de la page.
