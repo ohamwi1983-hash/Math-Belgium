@@ -71,7 +71,7 @@ export function schemaMontageSvg(labels: [string, string, string], configuration
     const H = 60;
     const y = 34;
     let s = ouvrirSvg(W, H, titre) + trait(14, y, W - 14, y);
-    [80, 210, 340].forEach((cx, i) => (s += boite(cx, y, labels[i])));
+    [105, 210, 315].forEach((cx, i) => (s += boite(cx, y, labels[i])));
     return s + borne(14, y, "entrée", "start") + borne(W - 14, y, "sortie", "end") + "</svg>";
   }
   if (configuration === "parallele") {
