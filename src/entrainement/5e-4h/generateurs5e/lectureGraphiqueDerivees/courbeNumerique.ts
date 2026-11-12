@@ -249,12 +249,12 @@ export function capaciteBranche(asymptotique: ExerciceLectureGraphiqueLimites, i
   return utile < 0 ? 0 : Math.floor(utile / ECART_ENTRE_POINTS) + 1;
 }
 
-function construireGabarit(ext: Extremite, cote: "gauche" | "droite", direction: Direction, bord: number): GabaritConstruit | null {
+function construireGabarit(ext: Extremite, cote: "gauche" | "droite", direction: Direction, bord: number, dMaxInfini = 3.0): GabaritConstruit | null {
   const sens = cote === "gauche" ? 1 : -1; // le raccord est à droite du bord (gauche) ou à sa gauche (droite)
   switch (ext.type) {
     case "horizontale":
     case "oblique": {
-      const D = hasard(D_MIN.infini, 3.0);
+      const D = hasard(D_MIN.infini, dMaxInfini);
       const xr = bord + sens * D;
       const p = ext.type === "oblique" ? ext.pente : 0;
       const q = ext.type === "oblique" ? ext.ordonnee : ext.limite;
@@ -276,7 +276,7 @@ function construireGabarit(ext: Extremite, cote: "gauche" | "droite", direction:
       return { morceau, xRaccord: xr, y, pente, rho: concavite === direction ? 1 : -1 };
     }
     case "aucune": {
-      const D = hasard(D_MIN.infini, 2.8);
+      const D = hasard(D_MIN.infini, Math.min(dMaxInfini, 2.8));
       const xr = bord + sens * D;
       const u = hasard(0.8, 1.5);
       const sommet = xr + sens * u;
@@ -372,8 +372,11 @@ export function tenterBranche(asymptotique: ExerciceLectureGraphiqueLimites, ind
 
   const domaines = domainesBranches(asymptotique, bornesX);
   const dom = domaines[index];
-  const gG = construireGabarit(gauche, "gauche", dG, dom.lo);
-  const gD = construireGabarit(droite, "droite", dD, dom.hi);
+  // Branche sans point clé : les gabarits peuvent s'allonger, pour que la transition (et son point
+  // d'inflexion) soit resserrée, donc bien visible, au lieu d'un long segment presque rectiligne.
+  const dMaxInfini = types.length === 0 ? Math.max(3, (dom.hi - dom.lo) / 2 - 1.2) : 3.0;
+  const gG = construireGabarit(gauche, "gauche", dG, dom.lo, dMaxInfini);
+  const gD = construireGabarit(droite, "droite", dD, dom.hi, dMaxInfini);
   if (!gG || !gD) return null;
   const xa = gG.xRaccord;
   const xb = gD.xRaccord;

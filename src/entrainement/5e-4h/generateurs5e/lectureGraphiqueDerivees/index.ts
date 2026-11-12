@@ -15,7 +15,7 @@
 import { construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "../lectureGraphiqueLimites";
 import type { ComportementVA, ExerciceLectureGraphiqueLimites } from "../../core5e/lectureGraphiqueLimites.types";
 import type { ExerciceLectureGraphiqueDerivees } from "../../core5e/lectureGraphiqueDerivees.types";
-import { analyserCourbe, BORNES_X_DERIVEES, capaciteBranche, directionsBranche, domainesBranches, ECART_BORD_MAX, ecartAuBord, tenterBranche, valeurMorceau } from "./courbeNumerique";
+import { analyserCourbe, BORNES_X_DERIVEES, capaciteBranche, deriveeSecondeMorceau, directionsBranche, morceauEn, domainesBranches, ECART_BORD_MAX, ecartAuBord, tenterBranche, valeurMorceau } from "./courbeNumerique";
 import type { BrancheConstruite } from "./courbeNumerique";
 
 function entier(min: number, max: number): number {
@@ -42,6 +42,7 @@ function recadrerAsymptotique(asymptotique: ExerciceLectureGraphiqueLimites): Ex
 const PI_MAX = 3;
 const SEPARATION_MIN = 1;
 const Y_MAX_COURBE = 9.5;
+const COURBURE_MIN_PI = 0.08;
 
 interface Cible {
   extremums: number;
@@ -102,6 +103,11 @@ function controlerLisibilite(asymptotique: ExerciceLectureGraphiqueLimites, bran
     const ecart = positions[i] - positions[i - 1];
     const memePalier = ecart < 1e-9 && analyse.paliers.some((p) => Math.abs(p.position - positions[i]) < 1e-9);
     if (!memePalier && ecart < SEPARATION_MIN) return rejet("séparation");
+  }
+  // Chaque point d'inflexion doit se VOIR : courbure nette de part et d'autre (sinon un segment presque
+  // rectiligne cache un PI illisible).
+  for (const pi of analyse.inflexions) {
+    for (const dx of [-0.6, 0.6]) if (Math.abs(deriveeSecondeMorceau(morceauEn(morceaux, pi.position + dx), pi.position + dx)) < COURBURE_MIN_PI) return rejet("PI peu visible");
   }
   // Ni PI ni extremum trop près d'une AV.
   for (const va of asymptotique.vas) if (positions.some((x) => Math.abs(x - va.position) < 1)) return rejet("près d'une AV");
@@ -308,11 +314,11 @@ function avecGraine<T>(graine: number, f: () => T): T {
 
 /** Graine dont l'essai réussit pour chaque variante (mesurée ; voir le rapport du lot D). */
 const GRAINES_REPLI: Record<string, number> = {
-  "0va-horizontale-0ext-0pi": 1,
-  "0va-horizontale-1ext-0pi": 1,
+  "0va-horizontale-0ext-0pi": 2,
+  "0va-horizontale-1ext-0pi": 2,
   "0va-horizontale-2ext-1pi": 4,
-  "0va-horizontale-3ext-2pi": 1,
-  "0va-oblique-2ext-0pi": 3,
+  "0va-horizontale-3ext-2pi": 7,
+  "0va-oblique-2ext-0pi": 4,
   "1va-horizontale-1ext-1pi": 1,
   "1va-oblique-2ext-1pi": 7,
   "1va-aucune-0ext-0pi": 2,
