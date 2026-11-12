@@ -71,6 +71,8 @@ function ApercuSaisie({ texte: saisie, label }: { texte: string; label: string }
 export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation, illustration }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
+  // Champs en rouge seulement tant que l'écran est ouvert, ou s'il s'est clos sur la réponse révélée.
+  const champsErrones = montrerErreurs && (!validation || validation.revele);
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
   const empiles = champs.some((c) => c.pleineLargeur);
@@ -109,7 +111,7 @@ export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consig
             <label className="field-label field-label-minuscule" htmlFor={`champ-6gen31-${i}`}>
               {champ.label}
             </label>
-            <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
+            <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${champsErrones ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
           </div>
         ))
       ) : (
@@ -121,7 +123,7 @@ export function EtapeChampsTiragesArbres({ consigneGenerale, blocDonnees, consig
                 <label className="field-label field-label-minuscule" htmlFor={`champ-6gen31-${i}`}>
                   {champ.label}
                 </label>
-                <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
+                <input id={`champ-6gen31-${i}`} type="text" className={`text-input ${champsErrones ? "is-erronee" : ""}`} value={valeurs[i]} placeholder={champ.placeholder} disabled={!!validation} onChange={(e) => changer(i, e.target.value)} />
               </div>
             ))}
           </div>

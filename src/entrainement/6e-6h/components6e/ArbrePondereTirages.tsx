@@ -36,7 +36,7 @@ export function ArbrePondereTirages({ exercice, probabilitesVisibles, cheminSurl
           { fromFirst: 1, label: i2, prob: etiquette(5), highlight: surligne(1, 1) },
         ]}
       />
-      <figcaption className="prompt-text" style={{ fontSize: "0.9em", marginTop: 4 }}>
+      <figcaption style={{ fontSize: "0.9em", marginTop: 4, color: "var(--color-text-muted, inherit)" }}>
         {i1} : boule {exercice.labelCouleur1.replace(/s$/, "")} ; {i2} : boule {exercice.labelCouleur2.replace(/s$/, "")}.
         {probabilitesVisibles ? "" : " Les lettres a à f désignent les probabilités à trouver."}
       </figcaption>

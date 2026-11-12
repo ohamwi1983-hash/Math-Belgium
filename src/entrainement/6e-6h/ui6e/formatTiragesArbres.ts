@@ -188,7 +188,10 @@ function libelleEcran3A(ex: ExerciceFamilleA): string {
 
 function champsA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): ChampDef[] {
   const cibles = ciblesEcran(ex, phase) ?? [];
-  if (phase === "aEcran1") return [champProba(`P(${ex.k} ${ex.labelCouleur1}) =`, cibles[0], false), champProba(`P(${ex.k} ${ex.labelCouleur2}) =`, cibles[1], false)];
+  if (phase === "aEcran1") {
+    // Libellés longs : champs empilés (côte à côte, chacun ne garderait qu'une centaine de pixels à 390 px).
+    return [champProba(`P(${ex.k} ${ex.labelCouleur1}) =`, cibles[0], false), champProba(`P(${ex.k} ${ex.labelCouleur2}) =`, cibles[1], false)].map((c) => ({ ...c, pleineLargeur: true }));
+  }
   if (phase === "aEcran2") return [champProba("P(même couleur) =", cibles[0])];
   return [champProba(`P(${libelleEcran3A(ex)}) =`, cibles[0])];
 }
@@ -211,7 +214,7 @@ function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): AideAvec
   if (phase === "aEcran1") {
     const premier = produitLatex(ex.n1, ex.n2, ex.avecRemise, new Array<number>(ex.k).fill(0));
     const debutAutre = branchesChemin(ex.n1, ex.n2, ex.avecRemise, [1])[0];
-    return { texte: "Le premier chemin, produit non effectué (l'autre se construit de la même façon) :", latex: `P(${ex.k}\\ \\text{${ex.labelCouleur1}})=${premier}\\qquad P(${ex.k}\\ \\text{${ex.labelCouleur2}})=${fxBrute(debutAutre.num, debutAutre.den)}\\times\\cdots` };
+    return { texte: "Le premier chemin, produit non effectué (l'autre se construit de la même façon) :", latex: `\\begin{gathered}P(${ex.k}\\ \\text{${ex.labelCouleur1}})=${premier}\\\\ P(${ex.k}\\ \\text{${ex.labelCouleur2}})=${fxBrute(debutAutre.num, debutAutre.den)}\\times\\cdots\\end{gathered}` };
   }
   const { p1, p2 } = fractionsA(ex);
   if (phase === "aEcran2") return { texte: "Les deux probabilités à additionner (somme non effectuée) :", latex: `${fx(p1)}+${fx(p2)}` };
@@ -389,10 +392,10 @@ function consigneGeneraleC(ex: ExerciceFamilleC): FragmentConsigne[] {
   const n = facesDe(ex);
   const de = `On lance un dé truqué à ${n} faces, numérotées de 1 à ${n}.`;
   if (ex.sousType === "special") {
-    return [texte(`${de} La face ${ex.faceSpeciale} a une probabilité de `), latexFrag(fx(ex.p0)), texte(` ; les ${n - 1} autres faces ont toutes la même probabilité, notée p.`)];
+    return [texte(`${de} La face ${ex.faceSpeciale} a une probabilité de `), latexFrag(fx(ex.p0)), texte(` ; les ${n - 1} autres faces ont toutes la même probabilité, notée `), latexFrag("p"), texte(".")];
   }
   const relation = plusProbable(ex) === "pair" ? `la probabilité de chaque face paire est ${MULTIPLES[ex.r]} de celle de chaque face impaire` : `la probabilité de chaque face impaire est ${MULTIPLES[ex.r]} de celle de chaque face paire`;
-  return [texte(`${de} Les faces paires ont toutes la même probabilité p, les faces impaires toutes la même probabilité q, et ${relation}.`)];
+  return [texte(`${de} Les faces paires ont toutes la même probabilité `), latexFrag("p"), texte(", les faces impaires toutes la même probabilité "), latexFrag("q"), texte(`, et ${relation}.`)];
 }
 
 function blocDonneesC(ex: ExerciceFamilleC): string[] {
@@ -412,9 +415,9 @@ function questionEcran3C(ex: ExerciceFamilleC): { phrase: string; label: string;
 function consigneEcranC(ex: ExerciceFamilleC, phase: PhaseTiragesArbres): FragmentConsigne[] {
   if (phase === "cEcran1") {
     if (ex.sousType === "special") return [texte("Écris l'équation qui exprime que la somme des probabilités de toutes les faces vaut 1.")];
-    return [texte("Traduis par une équation la relation entre p et q donnée par l'énoncé, puis écris l'équation qui exprime que la somme des probabilités de toutes les faces vaut 1 (dans l'ordre de ton choix).")];
+    return [texte("Traduis par une équation la relation entre "), latexFrag("p"), texte(" et "), latexFrag("q"), texte(" donnée par l'énoncé, puis écris l'équation qui exprime que la somme des probabilités de toutes les faces vaut 1 (dans l'ordre de ton choix).")];
   }
-  if (phase === "cEcran2") return [texte(ex.sousType === "special" ? "Résous cette équation : calcule p." : "Résous ce système : calcule p et q.")];
+  if (phase === "cEcran2") return ex.sousType === "special" ? [texte("Résous cette équation : calcule "), latexFrag("p"), texte(".")] : [texte("Résous ce système : calcule "), latexFrag("p"), texte(" et "), latexFrag("q"), texte(".")];
   return [texte(`Calcule la probabilité d'${questionEcran3C(ex).phrase}.`)];
 }
 
@@ -551,10 +554,10 @@ function aideNiveau1D(ex: ExerciceFamilleD, phase: PhaseTiragesArbres): AideAvec
 function aideNiveau2D(ex: ExerciceFamilleD, phase: PhaseTiragesArbres): AideAvecLatex {
   if (phase === "dEcran1") {
     const n = ex.n1 + ex.n2;
-    if (ex.avecRemise) return { texte: "Composition de l'urne au premier tirage, et encore au deuxième :", latex: `${ex.n1}\\ ${ex.initiale1},\\ ${ex.n2}\\ ${ex.initiale2}\\ (${n}\\ \\text{boules})` };
+    if (ex.avecRemise) return { texte: "Composition de l'urne au premier tirage, et encore au deuxième :", latex: `\\text{${ex.n1} ${ex.initiale1}, ${ex.n2} ${ex.initiale2} (${n} boules)}` };
     return {
       texte: "Composition de l'urne au deuxième tirage, selon la première boule tirée :",
-      latex: `\\text{après }${ex.initiale1} : ${ex.n1 - 1}\\ ${ex.initiale1},\\ ${ex.n2}\\ ${ex.initiale2}\\qquad \\text{après }${ex.initiale2} : ${ex.n1}\\ ${ex.initiale1},\\ ${ex.n2 - 1}\\ ${ex.initiale2}`,
+      latex: `\\text{après ${ex.initiale1} : ${ex.n1 - 1} ${ex.initiale1}, ${ex.n2} ${ex.initiale2}}\\qquad \\text{après ${ex.initiale2} : ${ex.n1} ${ex.initiale1}, ${ex.n2 - 1} ${ex.initiale2}}`,
     };
   }
   const p = (chemin: number[]) => produitLatex(ex.n1, ex.n2, ex.avecRemise, chemin);

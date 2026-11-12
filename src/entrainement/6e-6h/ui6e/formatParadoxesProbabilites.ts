@@ -145,7 +145,7 @@ function consigneMonty(e: ExerciceMontyHall): FragmentConsigne[] {
 
 function consigneEnfants(e: ExerciceDeuxEnfants): FragmentConsigne[] {
   return [
-    t(`Une famille a deux enfants. Chaque enfant est un garçon ou une fille avec la même probabilité, indépendamment de l'autre. On apprend que ${informationTexte(e)}. On note `),
+    t(`Une famille a deux enfants. Chaque enfant est un garçon ou une fille avec la même probabilité, indépendamment de l'autre. On apprend ${e.information === "auMoinsUn" ? "qu'" : "que "}${informationTexte(e)}. On note `),
     l("A"),
     t(" cet événement et "),
     l("B"),
@@ -387,8 +387,8 @@ export function aideNiveau1(e: ExerciceParadoxesProbabilites, phase: PhaseParado
       return { texte: "Dans l'univers restreint, les issues restantes sont encore équiprobables : divise le nombre d'issues qui réalisent B par le nombre d'issues compatibles avec A." };
     case "conclure":
       if (e.famille === "mere") return { texte: "Un pari est favorable au joueur quand sa probabilité de gain dépasse :", latex: "\\dfrac{1}{2}=0{,}5" };
-      if (e.famille === "montyHall") return { texte: "Compare les deux probabilités obtenues à l'étape précédente : la meilleure stratégie est celle qui a la plus grande." };
-      return { texte: "Reprends la probabilité obtenue à l'étape précédente, puis cherche la justification qui correspond aux issues que tu as gardées." };
+      if (e.famille === "montyHall") return { texte: "Compare les deux probabilités que tu viens de calculer : la meilleure stratégie est celle qui a la plus grande." };
+      return { texte: "Reprends la probabilité que tu viens de calculer, puis cherche la justification qui correspond aux issues que tu as gardées." };
   }
 }
 
