@@ -190,6 +190,16 @@ export const nombresComplexes: ChapterContent = {
             'signe de la partie IMAGINAIRE ($a-bi$) ; l\'opposé change les DEUX signes ' +
             '($-a-bi$).',
         },
+        {
+          kind: 'atelier',
+          tag: 'operations-plan-complexe-widget',
+          label: 'Manipule toi-même : les opérations, vues dans le plan',
+          caption:
+            'Déplace z et w, puis choisis une opération : la somme est le 4e sommet du ' +
+            'parallélogramme, le conjugué est le miroir de z sur l\'axe réel, l\'opposé son ' +
+            'symétrique par rapport à O, et multiplier par i fait tourner d\'un quart de ' +
+            'tour. Chaque résultat s\'affiche aussi sous la forme a + bi.',
+        },
         { kind: 'subheading', text: 'Division de deux complexes' },
         {
           kind: 'definition',
@@ -477,6 +487,16 @@ export const nombresComplexes: ChapterContent = {
             'z_0^2$) — jamais une seule.',
         },
         {
+          kind: 'atelier',
+          tag: 'racine-carree-complexe-widget',
+          label: 'Manipule toi-même : la racine carrée, vue dans le plan',
+          caption:
+            'Les deux racines carrées de z ont pour module √|z| et pour argument la moitié ' +
+            'de celui de z (plus un demi-tour pour la seconde). Fais faire un tour complet ' +
+            'à z : chaque racine n\'en fait qu\'un demi, et les deux racines échangent leurs ' +
+            'places.',
+        },
+        {
           kind: 'astuce',
           label: 'Autre chemin : la forme trigonométrique',
           text:
@@ -569,6 +589,16 @@ export const nombresComplexes: ChapterContent = {
             },
           ],
           result: { tag: 'résultat', text: '$z_1=-1+2i$ et $z_2=-1-2i$' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'racines-qui-se-rencontrent-widget',
+          label: 'Manipule toi-même : les racines qui se rencontrent',
+          caption:
+            'Fais varier b et c dans z² + bz + c = 0 : tant que Δ > 0, les deux racines ' +
+            'glissent sur l\'axe réel ; quand Δ = 0, elles se rejoignent ; dès que Δ < 0, ' +
+            'elles repartent en paire conjuguée, symétriques par rapport à l\'axe réel. ' +
+            'Coche la trace pour voir leur chemin.',
         },
         { kind: 'subheading', text: 'Équations bicarrées' },
         {
@@ -768,6 +798,15 @@ export const nombresComplexes: ChapterContent = {
             caption:
               'Leonhard Euler (1707–1783), portrait attribué à Jakob Emanuel Handmann, vers 1753.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'euler-cercle-widget',
+          label: 'Manipule toi-même : eⁱᶿ, le point qui tourne',
+          caption:
+            'Fais varier θ : le point eⁱᶿ parcourt le cercle unité, et ses projections sur ' +
+            'les axes donnent cos θ et sin θ. En θ = π, le point arrive en −1 : c\'est ' +
+            'l\'identité d\'Euler, e puissance iπ plus 1 égale 0.',
         },
         {
           kind: 'piege',
@@ -1316,6 +1355,17 @@ export const nombresComplexes: ChapterContent = {
             "d'un modèle regarde donc exactement les deux mêmes nombres que toi dans cette " +
             'section.',
           domaines: ['Économie', 'Modélisation'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'spirale-puissances-widget',
+          label: 'Manipule toi-même : la spirale des puissances',
+          caption:
+            'Règle le module r et l\'argument θ de z : les points 1, z, z², …, z¹² dessinent ' +
+            'une spirale. Si r < 1, elle s\'enroule vers 0 (cycle amorti) ; si r = 1, elle ' +
+            'reste sur le cercle unité (Moivre) ; si r > 1, elle s\'éloigne (cycle ' +
+            'amplifié). Le curseur n met zⁿ en évidence, avec son module rⁿ et son argument ' +
+            'nθ.',
         },
         {
           kind: 'entrainement',
@@ -1986,6 +2036,16 @@ export const nombresComplexes: ChapterContent = {
             'DEMI-droite ; « mod $\\pi$ » retient les DEUX à la fois, ce qui forme une droite ' +
             'complète. Prendre « mod $\\pi$ » là où l\'énoncé impose « mod $2\\pi$ » ajoute au ' +
             'lieu la moitié qui ne convient pas !',
+        },
+        {
+          kind: 'atelier',
+          tag: 'lieux-complexes-widget',
+          label: 'Manipule toi-même : lieux géométriques',
+          caption:
+            'Choisis une condition sur z, puis fais glisser M : il devient vert quand il la ' +
+            'vérifie, et chaque position valide laisse un point — le lieu se dessine. ' +
+            'Compare « mod 2π » (une demi-droite) et « mod π » (la droite entière) en ' +
+            'plaçant M de l\'autre côté de A.',
         },
         {
           kind: 'exemple',
