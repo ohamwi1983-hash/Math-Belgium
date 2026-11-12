@@ -36,6 +36,7 @@ import {
   nomGenerateur,
   construireItemsPayload,
   deriveQuestionsComprehension,
+  deriveQuestionsFormules,
   deriveQuestionsOuvertes,
   estChapitreFonctionnel,
   generateursPourSection,
@@ -65,13 +66,14 @@ const NIVEAUX: NiveauCode[] = ['4e', '5e', '6e']
 const LABEL_PROCESSUS: Record<Processus, string> = { 1: 'Connaître', 2: 'Appliquer', 3: 'Transférer' }
 
 const LABEL_TYPE: Record<TypeQuestionEvaluation, string> = {
-  demonstration: 'Questions ouvertes — formules / démonstrations',
+  formule: 'Formule',
+  demonstration: 'Formule + démonstration',
   comprehension: 'Questions ouvertes — compréhension',
   vraiFaux: 'Vrai / Faux (avec justification)',
   exercice: 'Exercice généré',
 }
 
-const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { demonstration: 3, comprehension: 2, vraiFaux: 1, exercice: 4 }
+const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { formule: 1, demonstration: 3, comprehension: 2, vraiFaux: 1, exercice: 4 }
 const MAX_VRAI_FAUX = 35
 const MAX_EXERCICE = 10
 
@@ -103,6 +105,7 @@ function lignesInitiales(chapitres: ChapterContent[]): LigneSelection[] {
   const lignes: LigneSelection[] = []
   for (const chapitre of chapitres) {
     for (const section of chapitre.sections) {
+      lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'formule', nombre: 0, points: POINTS_DEFAUT.formule })
       lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
       lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
       for (const theme of themesPourSection(chapitre.slug, section.id)) {
@@ -272,6 +275,15 @@ export function EvaluationGeneratorPanel({
     }
     return map
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `chapitresSlugs.join('|')` + `levelSlug` identifient la sélection réelle (clés primitives stables), `chapitres` lui-même change de référence à chaque rendu.
+  }, [chapitresSlugs.join('|'), levelSlug])
+
+  const apercusFormule = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const chapitre of chapitres) {
+      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsFormules(chapitre, section.id).length)
+    }
+    return map
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- voir apercusDemonstration ci-dessus.
   }, [chapitresSlugs.join('|'), levelSlug])
 
   const apercusComprehension = useMemo(() => {
@@ -522,7 +534,13 @@ export function EvaluationGeneratorPanel({
       setHeures(nh.heures)
     }
     if (!verrouille) setChapitresSlugs(plan.chapitresSlugs)
-    setLignes(plan.lignes)
+    // Un plan enregistré avant l'ajout d'un type de ligne (ex. « Formule ») n'a pas cette ligne :
+    // on repart des lignes initiales des chapitres du plan, en y reprenant chaque ligne enregistrée.
+    const chapitresPlan = LEVELS.find((l) => l.slug === plan.levelSlug)?.chapters.filter((c) => plan.chapitresSlugs.includes(c.slug)) ?? []
+    const memeLigne = (a: LigneSelection, b: LigneSelection) =>
+      a.chapitreSlug === b.chapitreSlug && a.sectionId === b.sectionId && a.type === b.type && (a.cle ?? '') === (b.cle ?? '')
+    const base = lignesInitiales(chapitresPlan)
+    setLignes([...base.map((b) => plan.lignes.find((l) => memeLigne(l, b)) ?? b), ...plan.lignes.filter((l) => !base.some((b) => memeLigne(l, b)))])
     setTitre(plan.entete.titre)
     setDate(plan.entete.date)
     if (plan.entete.numero !== undefined) setNumero(plan.entete.numero)
@@ -586,7 +604,7 @@ export function EvaluationGeneratorPanel({
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
       urlChapitre: chapitres.length === 1 ? `https://math-belgium.vercel.app/${levelSlug}/${chapitres[0].slug}` : undefined,
     }
-    const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections }))
+    const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections, formulaire: c.formulaire }))
     const items = construireItemsPayload(entete, lignes, chapitresPayload)
     if (items.length === 0) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
@@ -998,9 +1016,9 @@ export function EvaluationGeneratorPanel({
                                     })
                                   }
 
-                                  const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
+                                  const estBanqueFixe = ligne.type === 'formule' || ligne.type === 'demonstration' || ligne.type === 'comprehension'
                                   const disponibles = estBanqueFixe
-                                    ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(
+                                    ? (ligne.type === 'formule' ? apercusFormule : ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(
                                         cleSection(chapitreCourant.slug, section.id),
                                       ) ?? 0
                                     : MAX_VRAI_FAUX
@@ -1015,7 +1033,11 @@ export function EvaluationGeneratorPanel({
                                         {LABEL_TYPE[ligne.type]}
                                         {theme?.label && ` — ${theme.label}`}
                                         {indisponible &&
-                                          (ligne.type === 'demonstration' ? ' — aucune démonstration pour ce point' : ' — aucune question pour ce point')}
+                                          (ligne.type === 'demonstration'
+                                            ? ' — aucune démonstration pour ce point'
+                                            : ligne.type === 'formule'
+                                              ? ' — aucune formule pour ce point'
+                                              : ' — aucune question pour ce point')}
                                       </td>
                                       <td>{estBanqueFixe ? disponibles : '—'}</td>
                                       <td className="admin-eval-col-nombre">

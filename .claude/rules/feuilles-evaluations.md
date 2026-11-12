@@ -166,3 +166,23 @@ coupent entre leurs figures.
    (scrollWidth = 820) ; rendu PDF A4 relu à l'œil (en-tête, QR codes, corrigé, grille).
 4. `npm run build` (inclut `verifier-enonces-evaluation`).
 5. Rappeler à l'utilisateur que les fichiers déjà téléchargés sont des copies figées : regénérer.
+
+## Onglet « Connaître » : « Formule » et « Formule + démonstration » (décision utilisateur)
+
+L'ancienne ligne « Questions ouvertes — formules / démonstrations » est remplacée par DEUX types
+(`TypeQuestionEvaluation`) :
+- **`formule`** — « Formule » : les formules du **formulaire** de fin de chapitre
+  (`deriveQuestionsFormules`, `lib/evaluationPayload.ts`). Énoncé : membre de gauche à compléter
+  (« Complète la formule (condition) : $s = \ldots$ ») ; pour une règle sans « = », ce qui suit le
+  premier séparateur hors formule (« : », « → », « ⟺ », « ⟹ ») est masqué ; sinon la condition
+  sert de description ; une simple propriété sans rien à compléter est écartée. Corrigé : la formule
+  et sa condition. Rattachement à une section : la PREMIÈRE section où la formule (premier morceau
+  contenant « = », ≥ 6 caractères) apparaît telle quelle, sinon le meilleur score de jetons rares
+  (+ titre du groupe ↔ titre de section) ; les sections « Révision » ne sont jamais candidates.
+  `ChapitreAvecSections.formulaire` doit être passé par le panneau.
+- **`demonstration`** — « Formule + démonstration » : uniquement les blocs `exempleLibre` dont le
+  label commence par « Démonstration » (`estBlocDemonstration`). Les exemples résolus (calculs)
+  ne sont PLUS proposés dans Connaître (ils relèvent d'Appliquer) ; leurs énoncés par clé restent
+  dans `ENONCES_DEMONSTRATION` (contrôlés au build) mais ne sont plus tirés.
+Un plan enregistré avant ce changement est complété au chargement (lignes manquantes ajoutées
+depuis `lignesInitiales`, lignes enregistrées reprises telles quelles).

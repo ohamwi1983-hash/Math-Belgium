@@ -2169,7 +2169,7 @@ export const nombresComplexes: ChapterContent = {
           },
           {
             text: '$r_1e^{i\\theta_1} \\cdot r_2e^{i\\theta_2} = r_1r_2\\, e^{i(\\theta_1+\\theta_2)}$',
-            condition: 'quotient : modules divisés, arguments soustraits',
+            condition: 'produit : modules multipliés, arguments additionnés (quotient : divisés, soustraits)',
           },
         ],
       },
