@@ -130,8 +130,51 @@ function brancheValide(asymptotique: ExerciceLectureGraphiqueLimites, index: num
   return null;
 }
 
-function tenter(asymptotique: ExerciceLectureGraphiqueLimites, cible: Cible): ExerciceLectureGraphiqueDerivees | null {
-  const types = repartir(asymptotique, cible);
+/** Répartition EXACTE (variantes) : toutes les répartitions du nombre d'extremums entre branches qui
+ * respectent la capacité et la parité imposée de chaque branche, une tirée au hasard ; le palier va
+ * dans une branche qui a encore de la place. `null` si aucune répartition n'existe pour ces bords. */
+function repartirExact(asymptotique: ExerciceLectureGraphiqueLimites, cible: Cible): ("extremum" | "palier")[][] | null {
+  const domaines = domainesBranches(asymptotique, BORNES_X_DERIVEES);
+  const n = domaines.length;
+  const capacites = domaines.map((_, i) => capaciteBranche(asymptotique, i, BORNES_X_DERIVEES));
+  const { infini } = asymptotique;
+  const parites = domaines.map((_, i): boolean | null => {
+    const dirs = directionsBranche(asymptotique, i);
+    if (dirs.gauche !== null && dirs.droite !== null) return dirs.gauche !== dirs.droite;
+    return null;
+  });
+  const solutions: number[][] = [];
+  const courant: number[] = [];
+  const explorer = (i: number, reste: number) => {
+    if (i === n) {
+      if (reste === 0) solutions.push([...courant]);
+      return;
+    }
+    for (let k = 0; k <= Math.min(reste, capacites[i]); k++) {
+      if (parites[i] !== null && (k % 2 === 1) !== parites[i]) continue;
+      if (n === 1 && infini.type === "horizontale" && infini.limiteMoinsInfini === infini.limitePlusInfini && k === 0) continue;
+      courant.push(k);
+      explorer(i + 1, reste - k);
+      courant.pop();
+    }
+  };
+  explorer(0, cible.extremums);
+  const possibles = solutions.filter((sol) => cible.paliers === 0 || sol.some((k, i) => k < capacites[i]));
+  if (possibles.length === 0) return null;
+  const sol = possibles[Math.floor(Math.random() * possibles.length)];
+  const types: ("extremum" | "palier")[][] = sol.map((k) => Array<"extremum">(k).fill("extremum"));
+  for (let p = 0; p < cible.paliers; p++) {
+    const libres = types.map((t, i) => (t.length < capacites[i] ? i : -1)).filter((i) => i >= 0);
+    if (libres.length === 0) return null;
+    const b = types[libres[Math.floor(Math.random() * libres.length)]];
+    b.splice(Math.floor(Math.random() * (b.length + 1)), 0, "palier");
+  }
+  return types;
+}
+
+function tenter(asymptotique: ExerciceLectureGraphiqueLimites, cible: Cible, exacte = false): ExerciceLectureGraphiqueDerivees | null {
+  const types = exacte ? repartirExact(asymptotique, cible) : repartir(asymptotique, cible);
+  if (!types) return rejet("répartition impossible");
   if (types.flat().filter((t) => t === "extremum").length > 3) return rejet("plus de 3 extremums");
   const branches: BrancheConstruite[] = [];
   for (let i = 0; i < types.length; i++) {
@@ -235,7 +278,7 @@ function conforme(exo: ExerciceLectureGraphiqueDerivees, spec: SpecVariante): bo
 /** Un essai complet : nouveau comportement aux bords de la famille, puis construction exacte. */
 function essaiVariante(spec: SpecVariante): ExerciceLectureGraphiqueDerivees | null {
   const asymptotique = recadrerAsymptotique(construireAvecFamilleId(spec.famille));
-  const exo = tenter(asymptotique, { extremums: spec.extremums, paliers: spec.paliers });
+  const exo = tenter(asymptotique, { extremums: spec.extremums, paliers: spec.paliers }, true);
   return exo && conforme(exo, spec) ? exo : null;
 }
 
