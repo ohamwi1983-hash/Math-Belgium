@@ -400,10 +400,10 @@ function comparaisonTest(e: ExerciceFamilleBTestIndependance): FragmentConsigne[
   const signe = verdict === "independants" ? "=" : "\\neq ";
   if (e.methode === "produit") {
     return [
-      latex(`P(A)\\cdot P(B)=\\dfrac{${nA}\\times ${nB}}{${n}^2}=\\dfrac{${nA * nB}}{${n * n}}`),
+      latex(`P(A)\\cdot P(B)=${frac(nA, n)}\\times ${frac(nB, n)}=${frac(nA * nB, n * n)}`),
       texte(" et "),
-      latex(`P(A\\cap B)=\\dfrac{${nAetB}}{${n}}=\\dfrac{${nAetB * n}}{${n * n}}`),
-      texte(", donc "),
+      latex(`P(A\\cap B)=${frac(nAetB, n)}`),
+      texte(verdict === "independants" ? " : mêmes fractions irréductibles, donc " : " : fractions irréductibles différentes, donc "),
       latex(`P(A)\\cdot P(B)${signe}P(A\\cap B)`),
       texte("."),
     ];
