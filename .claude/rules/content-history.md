@@ -2939,3 +2939,24 @@ paths:
   droite (critère ±1 ou ±2). Figure à l'échelle (scène, axes gradués discrets, flèche de u),
   trajectoire prolongée dans le corrigé. Bloc `attention` « Viser une cible » ajouté avant la carte :
   le cours ne liait pas la colinéarité au SENS du trajet.
+
+- **4e ch6 — gen88 « Chantier et terrains : alignement, équerre, parallélisme, milieu »**
+  (section `applications`, processus 3 transférer, carte après gen29). Plan de terrain repéré en
+  mètres (quadrillage d'1 m, vue de dessus : piquets, arbres, poteaux, dalle, terrain de foot,
+  murs, rangées de vigne, routes, bordures, maisons, bancs, enclos, clôture/chemin) ; six
+  variantes : alignement, équerre, parallèles (verdicts oui/non à 50/50 dans CHAQUE instance ;
+  « non » toujours à 1,5°–4° de l'alignement, de l'angle droit ou du parallélisme, pour que l'œil
+  ne suffise pas), milieu (point à mi-chemin), quatrième coin d'un enclos en parallélogramme,
+  piquet à planter sur une ligne d'abscisse ou d'ordonnée fixe (inconnue y ou x). Quatre écrans :
+  outil (choix fermé parmi colinéarité / orthogonalité / distance / milieu / égalité de vecteurs —
+  le contexte ne nomme jamais l'outil), composantes des vecteurs utiles, critère du cours
+  (déterminant `x_u·y_v − y_u·x_v`, produit scalaire `x_u·x_v + y_u·y_v`, demi-vecteur, égalité
+  `AB = DC` en choix fermé, équation du piquet en saisie libre), réponse (phrase-réponse en choix
+  fermé avec deux pièges — « à l'œil », confusion d'outil — ou coordonnées). Profil : `forme` =
+  variante (+ C entre/au-delà pour l'alignement, axe de la ligne pour le piquet) ; le verdict n'y
+  entre jamais ; aucun cas particulier (aucune composante nulle), pas de `calcul` (tout exact).
+  Cours : sous-titre « Sur un chantier : reconnaître l'outil caché dans les mots », un para, un
+  `featureTable` mot du contexte → relation → critère et un `attention` (critère exact, le dessin
+  ne prouve rien), avant la carte. Figures : chaîne SVG unique écran/papier
+  (`ui/figureChantierTerrains.ts`) ; les deux couleurs des vecteurs du corrigé sont littérales car
+  les documents imprimés redéfinissent `--accent` (bleu).

@@ -90,7 +90,7 @@ export type IdGenerateurPilote =
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
-  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89'
+  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
@@ -264,6 +264,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'revision', generatorId: 'gen91', label: "Le détective d'erreurs vectoriel (gen91)", processus: 3 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen87', label: 'Traverser une rivière : vitesses en composantes (gen87)', processus: 3 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen90', label: 'Équilibre de forces en composantes (gen90)', processus: 3 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen88', label: 'Chantier et terrains (gen88)', processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', generatorId: 'gen42', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: "Lecture graphique d'une droite (gen43)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: "Construction graphique d'une droite (gen44)" },

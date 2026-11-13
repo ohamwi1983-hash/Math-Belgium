@@ -2025,6 +2025,42 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 90. Équilibre de forces en composantes »',
         },
+        { kind: 'subheading', text: 'Sur un chantier : reconnaître l\'outil caché dans les mots' },
+        {
+          kind: 'para',
+          text:
+            'Sur un plan de terrain repéré en mètres, la question ne dit jamais « colinéaire » ou ' +
+            '« orthogonal ». Elle parle de piquets **alignés**, de coin **d\'équerre**, de routes ' +
+            '**parallèles**, de point **à mi-chemin**… Le premier travail est de traduire ces mots en ' +
+            'une relation entre vecteurs ; le calcul vient ensuite.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Mot du contexte', 'Relation vectorielle', 'Critère'],
+          rows: [
+            ['A, B, C alignés', '$\\vec{AB}$ et $\\vec{AC}$ colinéaires', 'déterminant nul'],
+            ['(AB) et (CD) parallèles', '$\\vec{AB}$ et $\\vec{CD}$ colinéaires', 'déterminant nul'],
+            ['coin A d\'équerre', '$\\vec{AB}$ et $\\vec{AC}$ orthogonaux', 'produit scalaire nul'],
+            ['M à mi-chemin entre A et B', 'M milieu de [AB]', '$\\vec{AM} = \\frac{1}{2}\\,\\vec{AB}$'],
+            ['ABCD parallélogramme', 'côtés opposés égaux', '$\\vec{AB} = \\vec{DC}$'],
+          ],
+        },
+        {
+          kind: 'attention',
+          text:
+            'Le critère est une égalité **exacte**. Un déterminant ou un produit scalaire qui vaut 2 ' +
+            'n\'est pas « presque nul » : sur le terrain, un coin à 88° ou trois piquets décalés de ' +
+            'quelques centimètres se verraient au bout de quelques mètres. Et un plan qui « a l\'air » ' +
+            'aligné ne prouve rien.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Chantier et terrains : alignement, équerre, parallélisme, milieu',
+          generatorId: 'gen88',
+          description: ['Sur un plan en mètres, reconnais l\'outil caché dans les mots (alignés, d\'équerre, parallèles, à mi-chemin), calcule les vecteurs utiles, applique le critère et réponds dans le contexte.'],
+          chantier: '4e',
+          whereLabel: '4e → « 88. Chantier et terrains : alignement, équerre, parallélisme, milieu »',
+        },
       ],
     },
 
