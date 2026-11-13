@@ -87,6 +87,10 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen11: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppFormeCanoniqueFonctionsReference').then((m) => ({ default: m.AppFormeCanoniqueFonctionsReference }))),
   gen12: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppCaracteristiquesFonction').then((m) => ({ default: m.AppCaracteristiquesFonction }))),
   gen13: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppCaracteristiquesAlgebriques').then((m) => ({ default: m.AppCaracteristiquesAlgebriques }))),
+  gen68: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppProblemesFonctionsReference').then((m) => ({ default: m.AppProblemesFonctionsReference }))),
+  gen69: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppChoisirModele').then((m) => ({ default: m.AppChoisirModele }))),
+  gen70: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppGraphiqueContexte').then((m) => ({ default: m.AppGraphiqueContexte }))),
+  gen71: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppPortraitRobotFonction').then((m) => ({ default: m.AppPortraitRobotFonction }))),
   gen62: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppQuizFonctionsReference').then((m) => ({ default: m.AppQuizFonctionsReference }))),
 
   // --- 4e, chapitre 5 : Cercle trigonométrique & triangles quelconques ---
