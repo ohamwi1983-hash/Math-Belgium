@@ -55,7 +55,8 @@ export function echapperHtml(texte: string): string {
 export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { bloc?: boolean }): string {
   return fragments
     .map((fragment) =>
-      fragment.type === "texte" ? echapperHtml(fragment.valeur) : katex.renderToString(fragment.valeur, { throwOnError: false, displayMode: options?.bloc ?? false }),
+      // Espace insécable avant « ? ! : ; » (typographie française : jamais un signe seul à la ligne).
+      fragment.type === "texte" ? echapperHtml(fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0")) : katex.renderToString(fragment.valeur, { throwOnError: false, displayMode: options?.bloc ?? false }),
     )
     .join("");
 }

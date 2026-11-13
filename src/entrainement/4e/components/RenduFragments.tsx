@@ -16,10 +16,16 @@ interface Props {
  * (`<p className="prompt-text">`, `<p>` d'aide, etc), exactement comme le faisaient les anciens
  * `.map()` locaux.
  */
+/** Typographie française : l'espace avant « ? ! : ; » et « » » (et après « « ») devient insécable,
+ * pour qu'un signe ne passe jamais seul à la ligne sur téléphone. */
+export function espacesInsecables(texte: string): string {
+  return texte.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+}
+
 export function RenduFragments({ fragments }: Props) {
   return (
     <>
-      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}>{fragment.valeur}</span> : <Katex key={index} expression={fragment.valeur} />))}
+      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}>{espacesInsecables(fragment.valeur)}</span> : <Katex key={index} expression={fragment.valeur} />))}
     </>
   );
 }

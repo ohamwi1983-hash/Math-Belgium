@@ -898,40 +898,6 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 18. Quel angle ? »',
         },
-        {
-          kind: 'para',
-          text:
-            'Le cercle trigonométrique sert aussi à décrire un mouvement circulaire réel : nacelle ' +
-            'd\'une grande roue, aiguille d\'horloge, pale d\'éolienne… On place l\'origine au ' +
-            '**centre de rotation**, l\'axe X horizontal vers la droite et l\'axe Y vertical vers ' +
-            'le haut. Un point situé à la distance r du centre, repéré par l\'angle θ, a pour ' +
-            'coordonnées $(r\\cos\\theta\\,;\\,r\\sin\\theta)$ ; si le centre est à la hauteur h, ' +
-            'le point est à la hauteur $h + r\\sin\\theta$ au-dessus du sol. Chercher quand le point ' +
-            'passe à une hauteur H, c\'est résoudre $h + r\\sin\\theta = H$, une équation du type ' +
-            '$\\sin\\theta = k$ : en général deux solutions.',
-        },
-        {
-          kind: 'attention',
-          label: 'Le contexte ne part pas de 0°',
-          text:
-            'Une grande roue part du **bas** (270° sur le cercle trigonométrique), une aiguille ' +
-            'd\'horloge part de midi (90°) et tourne dans le sens **horaire**. Si le point part de ' +
-            'l\'angle $\\theta_0$ et a tourné d\'un angle α : $\\theta = \\theta_0 + \\alpha$ dans le ' +
-            'sens trigonométrique, $\\theta = \\theta_0 - \\alpha$ dans le sens horaire, puis on ramène ' +
-            'θ dans [0° ; 360°[. Dans l\'autre sens, une solution θ se retraduit en angle parcouru ' +
-            '$\\alpha = \\theta - \\theta_0$ (ou $\\theta_0 - \\theta$), avant de la convertir en durée.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Le cercle dans le réel : rotations en contexte',
-          generatorId: 'gen79',
-          description: [
-            'Grande roue, horloge, bras de robot, éolienne, valve de vélo : repère la position de ' +
-              'départ et le sens de rotation sur le cercle trigonométrique, puis calcule une hauteur ' +
-              'à un instant donné, ou retrouve les deux instants où le point passe à une hauteur donnée.',
-          ],
-          chantier: '4e',
-          whereLabel: '4e → « 79. Le cercle dans le réel : rotations en contexte »',
         { kind: 'subheading', text: 'Pour aller plus loin — des équations à transformer' },
         {
           kind: 'para',
@@ -991,6 +957,41 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 78. Équations trigonométriques à transformer »',
+        },
+        {
+          kind: 'para',
+          text:
+            'Le cercle trigonométrique sert aussi à décrire un mouvement circulaire réel : nacelle ' +
+            'd\'une grande roue, aiguille d\'horloge, pale d\'éolienne… On place l\'origine au ' +
+            '**centre de rotation**, l\'axe X horizontal vers la droite et l\'axe Y vertical vers ' +
+            'le haut. Un point situé à la distance r du centre, repéré par l\'angle θ, a pour ' +
+            'coordonnées $(r\\cos\\theta\\,;\\,r\\sin\\theta)$ ; si le centre est à la hauteur h, ' +
+            'le point est à la hauteur $h + r\\sin\\theta$ au-dessus du sol. Chercher quand le point ' +
+            'passe à une hauteur H, c\'est résoudre $h + r\\sin\\theta = H$, une équation du type ' +
+            '$\\sin\\theta = k$ : en général deux solutions.',
+        },
+        {
+          kind: 'attention',
+          label: 'Le contexte ne part pas de 0°',
+          text:
+            'Une grande roue part du **bas** (270° sur le cercle trigonométrique), une aiguille ' +
+            'd\'horloge part de midi (90°) et tourne dans le sens **horaire**. Si le point part de ' +
+            'l\'angle $\\theta_0$ et a tourné d\'un angle α : $\\theta = \\theta_0 + \\alpha$ dans le ' +
+            'sens trigonométrique, $\\theta = \\theta_0 - \\alpha$ dans le sens horaire, puis on ramène ' +
+            'θ dans [0° ; 360°[. Dans l\'autre sens, une solution θ se retraduit en angle parcouru ' +
+            '$\\alpha = \\theta - \\theta_0$ (ou $\\theta_0 - \\theta$), avant de la convertir en durée.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Le cercle dans le réel : rotations en contexte',
+          generatorId: 'gen79',
+          description: [
+            'Grande roue, horloge, bras de robot, éolienne, valve de vélo : repère la position de ' +
+              'départ et le sens de rotation sur le cercle trigonométrique, puis calcule une hauteur ' +
+              'à un instant donné, ou retrouve les deux instants où le point passe à une hauteur donnée.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 79. Le cercle dans le réel : rotations en contexte »',
         },
       ],
     },
@@ -1916,6 +1917,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 80. Composer deux forces ou deux vitesses »',
+        },
         { kind: 'subheading', text: 'Du texte au triangle : traduire les angles de l\'énoncé' },
         {
           kind: 'para',
