@@ -47,10 +47,11 @@ function BlocAides({ niveauAide, aides }: { niveauAide: number; aides: FragmentC
   if (niveauAide === 0) return null;
   return (
     <div className="triangle-quelconque-aide">
+      {/* <div> et non <p> : une formule en bloc (KaTeX) ne peut pas vivre dans un paragraphe. */}
       {aides.slice(0, niveauAide).map((aide, i) => (
-        <p key={i}>
+        <div key={i} style={{ margin: "0.35em 0" }}>
           <RenduFragments fragments={aide} />
-        </p>
+        </div>
       ))}
     </div>
   );
