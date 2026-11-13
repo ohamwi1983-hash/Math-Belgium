@@ -1894,6 +1894,52 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 29. Applications physiques (résultante de vecteurs) »',
         },
+        {
+          kind: 'para',
+          text:
+            'Les composantes sont aussi l\'outil naturel pour **traverser une rivière**. On prend un ' +
+            'repère d\'origine au point de départ : l\'axe x le long de la rive, dans le sens du ' +
+            'courant, et l\'axe y vers l\'autre rive. Le courant de vitesse c a pour composantes ' +
+            '$\\vec{v_c}\\begin{pmatrix} c \\\\ 0 \\end{pmatrix}$, et la vitesse réelle est ' +
+            '$\\vec{v_R} = \\vec{v_p} + \\vec{v_c}$, où $\\vec{v_p}$ est la vitesse propre (par ' +
+            'rapport à l\'eau).',
+        },
+        {
+          kind: 'exemple',
+          badge: 'traverser une rivière',
+          formula:
+            'Un nageur traverse une rivière de largeur 40 m, où le courant va à 0,6 m/s. Il nage ' +
+            'perpendiculairement aux rives à 0,8 m/s. Où accoste-t-il ?',
+          steps: [
+            { tag: 'vitesse réelle', text: '$\\vec{v_p}\\begin{pmatrix} 0 \\\\ 0{,}8 \\end{pmatrix} + \\vec{v_c}\\begin{pmatrix} 0{,}6 \\\\ 0 \\end{pmatrix}$ donne $\\vec{v_R}\\begin{pmatrix} 0{,}6 \\\\ 0{,}8 \\end{pmatrix}$' },
+            { tag: 'durée', text: 'seule la composante y fait traverser : $t = \\dfrac{40}{0{,}8} = 50$ s' },
+            { tag: 'point d\'accostage', text: 'la composante x le fait dériver : $x_A = 0{,}6 \\cdot 50 = 30$ m' },
+            { tag: 'vitesse réelle', text: '$\\|\\vec{v_R}\\| = \\sqrt{0{,}6^2 + 0{,}8^2} = 1$ m/s, donc il parcourt $1 \\cdot 50 = 50$ m' },
+          ],
+          result: { tag: 'résultat', text: 'il accoste 30 m en aval du point juste en face, après 50 s.' },
+        },
+        {
+          kind: 'piege',
+          label: 'Piège — le courant ne change pas la durée',
+          text:
+            'Pour la durée, on divise la largeur par la **composante y** de la vitesse, jamais par ' +
+            'la vitesse réelle : le courant fait glisser le long de la rive sans rapprocher de ' +
+            'l\'autre bord. Et pour arriver **juste en face**, il faut que la composante x de la ' +
+            'vitesse réelle soit nulle : la vitesse propre doit viser vers l\'amont, avec ' +
+            '$x_{\\vec{v_p}} = -c$, et sa composante y vient de Pythagore, ' +
+            '$y_{\\vec{v_p}} = \\sqrt{\\|\\vec{v_p}\\|^2 - c^2}$ (possible seulement si la vitesse ' +
+            'propre dépasse le courant).',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Traverser une rivière : vitesses en composantes',
+          generatorId: 'gen87',
+          description: [
+            'Où accoste-t-il ? Vitesse réelle en composantes, durée de la traversée, point d\'accostage, puis vitesse réelle ou distance parcourue. Ou : quelle direction prendre pour arriver juste en face ?',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 87. Traverser une rivière : vitesses en composantes »',
+        },
       ],
     },
 

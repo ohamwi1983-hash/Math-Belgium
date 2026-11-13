@@ -2872,3 +2872,17 @@ paths:
   seule tentative, figé s'il est juste). Verdict juste tiré à pile ou face, indépendant de la forme ;
   `forme` = type|support|ligne(|sous-variante), aucune forme sous 24 % ; pas de `calcul` (tout est
   exact). Aucun bloc de cours ajouté : formules et critères déjà dans les sections 11 à 14.
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`), gen87 « Traverser une rivière :
+  vitesses en composantes » (section `applications`, processus 3, carte après gen29). Tout en
+  composantes dans un repère d'origine D (x le long de la rive, sens du courant ; y vers l'autre
+  rive), jamais la loi des cosinus (c'est gen29). Variantes : « où accoste-t-il ? » (vitesse propre
+  perpendiculaire aux rives ou donnée par ses composantes ; écrans v_R, durée L/y(v_R) — le courant
+  ne change pas la durée, piège visé —, abscisse x_A, puis vitesse réelle ou distance DA) et
+  « quelle direction pour arriver juste en face ? » (x(v_p) = −c, y(v_p) par Pythagore, durée ;
+  le cas v ≤ c n'est jamais tiré). Situations bateau, nageur, kayak, bac ; m et m/s seulement.
+  `forme` = variante + situation (+ vitesse/distance) ; `calcul` exacte (triplet pythagoricien)
+  ou calculatrice (racine), une fois sur deux ; aucun cas particulier. Le cours n'avait que la
+  résultante de deux forces : ajout d'un `para` (repère, v_R = v_p + v_c), d'un exemple résolu
+  « traverser une rivière » (nageur, 40 m, énoncé ajouté à `ENONCES_DEMONSTRATION`) et d'un
+  `piege` « le courant ne change pas la durée » (avec la condition « juste en face »).
