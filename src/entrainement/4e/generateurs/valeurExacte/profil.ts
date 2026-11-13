@@ -6,9 +6,11 @@ import { estPremierQuadrant, necessiteReduction } from "../../moteur/modeleValeu
  * Profil d'instance de gen76 pour le TIRAGE ÉQUILIBRÉ des évaluations (`.claude/rules/
  * feuilles-evaluations.md`, « Tirage équilibré »).
  *
- * - `calcul: 'exacte'` TOUJOURS : c'est LE générateur des évaluations sans calculatrice (demande de
- *   l'utilisateur). Si le professeur autorise la calculatrice, le pipeline retombe sur son palier
- *   « sans la contrainte de calculatrice » (la forme et le cas particulier restent imposés).
+ * - pas de `calcul` : toutes les instances sont exactes par construction (c'est LE générateur des
+ *   évaluations sans calculatrice). Marquer `calcul: 'exacte'` ferait exclure gen76 quand la
+ *   calculatrice est AUTORISÉE (le pipeline n'y garde que les instances qui l'exigent) : recherche
+ *   plus lente et case « cas particulier » sans effet. Même choix que gen14–gen18
+ *   (`profilsEvaluation4eCh5.ts`).
  * - `forme` fixe ce qui allonge la résolution, identique d'une série à l'autre, question par
  *   question : nombre de termes (n), d'angles à ramener dans [0° ; 360°[ (r), de tangentes (t), de
  *   produits (p) et de carrés (c). Exemple : « n3-r1-t1-p1-c0 ». Seuls les angles, les fonctions
@@ -21,9 +23,7 @@ import { estPremierQuadrant, necessiteReduction } from "../../moteur/modeleValeu
  * Mesures (10 000 tirages par variante) : cas particulier ≈ 20 % partout ; formes complètes —
  * 2 termes : 4 formes, 3 termes : 6, avec un carré : 8, grands angles : 26 (la plus rare,
  * n3-r3-t2-p1-c0, ≈ 0,4 %, soit ≈ 84 correspondances attendues en 20 000 essais au 1er centile).
- * Aucun bridage supplémentaire nécessaire. Avec « calculatrice autorisée », la recherche passe par
- * le palier sans calculatrice (≈ 200 ms par question) et la case « cas particulier » est sans
- * effet (recherche stricte du pipeline) : conséquence assumée de `calcul: 'exacte'`.
+ * Aucun bridage supplémentaire nécessaire.
  */
 export const LIBELLE_CAS_VALEUR_EXACTE = "Inclure un cas particulier (un terme sur un angle du premier quadrant : ni symétrie ni signe à chercher)";
 
@@ -38,7 +38,6 @@ export function formeValeurExacte(e: ExerciceValeurExacte): string {
 export function profilValeurExacte(e: ExerciceValeurExacte): ProfilInstance {
   return {
     casParticulier: e.termes.some(estPremierQuadrant) ? "terme-premier-quadrant" : null,
-    calcul: "exacte",
     forme: formeValeurExacte(e),
   };
 }
