@@ -53,16 +53,18 @@ interface PropsChoix<T> extends PropsAides {
   options: OptionChoix<T>[];
   onValider: (choix: T) => void;
   validation?: ValidationEtapeProps | null;
+  /** Options longues (phrases) : une option par ligne, jamais deux colonnes étroites. */
+  uneColonne?: boolean;
 }
 
 /** Choix fermé : UNE tentative — l'écran se clôt au premier « Valider ». */
-export function EtapeChoixPortrait<T extends string | number>({ consigne, options, onValider, validation, ...aides }: PropsChoix<T>) {
+export function EtapeChoixPortrait<T extends string | number>({ consigne, options, onValider, validation, uneColonne, ...aides }: PropsChoix<T>) {
   const [choix, setChoix] = useState<T | null>(null);
   const fige = !!validation;
   return (
     <div>
       <p className="prompt-text">{consigne}</p>
-      <div className="options-grid">
+      <div className="options-grid" style={uneColonne ? { gridTemplateColumns: "1fr" } : undefined}>
         {options.map((option) => (
           <button
             key={String(option.valeur)}
@@ -71,7 +73,8 @@ export function EtapeChoixPortrait<T extends string | number>({ consigne, option
             className={`btn${choix === option.valeur ? " toggle-active" : ""}${fige && validation?.revele && choix === option.valeur ? " is-erronee" : ""}`}
             onClick={() => setChoix(option.valeur)}
           >
-            {option.rendu}
+            {/* Un seul enfant : le texte et ses formules s'enchaînent dans la même phrase. */}
+            <span>{option.rendu}</span>
           </button>
         ))}
       </div>

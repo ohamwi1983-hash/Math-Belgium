@@ -338,6 +338,7 @@ export function AppPortraitRobotFonction() {
         aides={aidesCourbe(ex, ecran, lettre)}
         consigne={consigne}
         options={ex.conditions.map((c, i) => ({ valeur: i, rendu: <RenduFragments fragments={avecMajuscule(conditionFragments(c))} /> }))}
+        uneColonne
         onValider={(i) => soumettre(verifierConditionViolee(ex, indexCourbe, i), <RenduFragments fragments={avecMajuscule(conditionFragments(ex.conditions[i]!))} />)}
       />
     );

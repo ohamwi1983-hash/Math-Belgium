@@ -98,22 +98,27 @@ interface ChampProps {
   liste?: boolean;
 }
 
+/** Libellé au-dessus, champ + unité sur la ligne suivante : tient à 390 px même avec un libellé long
+ * (« Nombre de personnes le plus grand »). */
 function ChampNombre({ id, label, unite, valeur, onChange, erronee, liste }: ChampProps) {
   return (
-    <div className="field field-inline">
+    <div className="field">
       <label className="field-label" htmlFor={id}>
         {label}
       </label>
-      <input
-        id={id}
-        className={`text-input${erronee ? " is-erronee" : ""}`}
-        inputMode={liste ? "text" : "decimal"}
-        autoComplete="off"
-        value={valeur}
-        onChange={(e) => onChange(liste ? filtrerListe(e.target.value) : filtrerSaisieNumerique(e.target.value))}
-        onKeyDown={liste ? undefined : gererKeyDownNumerique}
-      />
-      {unite && <span className="field-label">{unite}</span>}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <input
+          id={id}
+          className={`text-input${erronee ? " is-erronee" : ""}`}
+          style={{ flex: 1, minWidth: 0 }}
+          inputMode={liste ? "text" : "decimal"}
+          autoComplete="off"
+          value={valeur}
+          onChange={(e) => onChange(liste ? filtrerListe(e.target.value) : filtrerSaisieNumerique(e.target.value))}
+          onKeyDown={liste ? undefined : gererKeyDownNumerique}
+        />
+        {unite && <span style={{ flex: "none", fontWeight: 600 }}>{unite}</span>}
+      </div>
     </div>
   );
 }
@@ -189,20 +194,22 @@ export function EtapeLectureGraphique({
       <QuestionRappel numero={numero} total={total} texte={texteQuestion} />
       <fieldset disabled={Boolean(validation)} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         {(question.type === "image" || question.type === "tendance") && (
-          <ChampNombre id={`${idBase}-valeur`} label="Réponse :" unite={t.uniteY} valeur={valeur} onChange={setValeur} erronee={valeurFausse} />
+          <ChampNombre id={`${idBase}-valeur`} label="Réponse" unite={t.uniteY} valeur={valeur} onChange={setValeur} erronee={valeurFausse} />
         )}
         {question.type === "antecedent" && (
           <>
-            <p className="prompt-text">S'il y a plusieurs valeurs, sépare-les par « ; ».</p>
-            <ChampNombre id={`${idBase}-valeur`} label="Réponse :" unite={t.uniteX} valeur={valeur} onChange={setValeur} erronee={valeurFausse} liste />
+            <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)" }}>
+              S'il y a plusieurs valeurs, sépare-les par « ; ».
+            </p>
+            <ChampNombre id={`${idBase}-valeur`} label="Réponse" unite={t.uniteX} valeur={valeur} onChange={setValeur} erronee={valeurFausse} liste />
           </>
         )}
         {question.type === "extremum" && (
-          <div className="field-row field-row-wrap">
-            <ChampNombre id={`${idBase}-moment`} label={`${t.libelleMoment} :`} unite={t.uniteX} valeur={moment} onChange={setMoment} erronee={momentFaux} />
+          <div>
+            <ChampNombre id={`${idBase}-moment`} label={t.libelleMoment} unite={t.uniteX} valeur={moment} onChange={setMoment} erronee={momentFaux} />
             <ChampNombre
               id={`${idBase}-valeur`}
-              label={`${t.libelleValeurExtremum(question.nature)} :`}
+              label={t.libelleValeurExtremum(question.nature)}
               unite={t.uniteY}
               valeur={valeur}
               onChange={setValeur}
@@ -212,7 +219,7 @@ export function EtapeLectureGraphique({
         )}
         {(question.type === "inequation" || question.type === "variation") && (
           <>
-            <p className="prompt-text">
+            <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)" }}>
               Écris la réponse sous forme d'intervalle(s), en {t.uniteX} ; s'il y a plusieurs intervalles, utilise « + Ajouter un morceau ».
             </p>
             <ListeMorceauxInput etat={liste} onChange={setListe} />

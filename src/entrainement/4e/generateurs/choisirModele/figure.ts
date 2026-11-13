@@ -52,7 +52,7 @@ export interface OptionsFigure {
 const L = 480;
 const H = 310;
 const MG = 50; // gauche (graduations de l'axe vertical)
-const MD = 58; // droite (nom de l'axe horizontal)
+const MD = 80; // droite (nom de l'axe horizontal, ex. « v (km/h) »)
 const MH = 30; // haut (nom de l'axe vertical)
 const MB = 30; // bas (graduations de l'axe horizontal)
 
@@ -69,14 +69,14 @@ function echapper(s: string): string {
 }
 
 const DECALAGES: Record<PositionEtiquette, { dx: number; dy: number; ancre: "start" | "middle" | "end" }> = {
-  haut: { dx: 0, dy: -9, ancre: "middle" },
-  bas: { dx: 0, dy: 17, ancre: "middle" },
-  gauche: { dx: -8, dy: 4, ancre: "end" },
-  droite: { dx: 8, dy: 4, ancre: "start" },
-  "haut-gauche": { dx: -6, dy: -7, ancre: "end" },
-  "haut-droite": { dx: 6, dy: -7, ancre: "start" },
-  "bas-gauche": { dx: -6, dy: 15, ancre: "end" },
-  "bas-droite": { dx: 6, dy: 15, ancre: "start" },
+  haut: { dx: 0, dy: -10, ancre: "middle" },
+  bas: { dx: 0, dy: 19, ancre: "middle" },
+  gauche: { dx: -8, dy: 4.5, ancre: "end" },
+  droite: { dx: 8, dy: 4.5, ancre: "start" },
+  "haut-gauche": { dx: -6, dy: -8, ancre: "end" },
+  "haut-droite": { dx: 6, dy: -8, ancre: "start" },
+  "bas-gauche": { dx: -6, dy: 17, ancre: "end" },
+  "bas-droite": { dx: 6, dy: 17, ancre: "start" },
 };
 
 export function construireFigureModele(e: ExerciceChoisirModele, options: OptionsFigure): string {
@@ -103,14 +103,14 @@ export function construireFigureModele(e: ExerciceChoisirModele, options: Option
   for (let i = 1; i * pasX <= xMax + 1e-9; i++) {
     const v = i * pasX;
     morceaux.push(`<line x1="${f(sx(v))}" y1="${f(y0)}" x2="${f(sx(v))}" y2="${f(y1)}" ${style({ stroke: p.grille, "stroke-width": 1 })}/>`);
-    morceaux.push(texteSvg(sx(v), y0 + 15, nombreTexte(v), "middle", p.axe, 10));
+    morceaux.push(texteSvg(sx(v), y0 + 16, nombreTexte(v), "middle", p.axe, 11.5));
   }
   for (let i = 1; i * pasY <= yMax + 1e-9; i++) {
     const v = i * pasY;
     morceaux.push(`<line x1="${f(x0)}" y1="${f(sy(v))}" x2="${f(x1)}" y2="${f(sy(v))}" ${style({ stroke: p.grille, "stroke-width": 1 })}/>`);
-    morceaux.push(texteSvg(x0 - 6, sy(v) + 3.5, nombreTexte(v), "end", p.axe, 10));
+    morceaux.push(texteSvg(x0 - 6, sy(v) + 4, nombreTexte(v), "end", p.axe, 11.5));
   }
-  morceaux.push(texteSvg(x0 - 6, y0 + 15, "0", "end", p.axe, 10));
+  morceaux.push(texteSvg(x0 - 6, y0 + 16, "0", "end", p.axe, 11.5));
 
   // Axes fléchés et leurs noms (grandeur et unité).
   const trait = style({ stroke: p.axe, "stroke-width": 1.5, fill: "none" });
@@ -118,8 +118,8 @@ export function construireFigureModele(e: ExerciceChoisirModele, options: Option
   morceaux.push(`<path d="M ${f(x1 + 14)},${f(y0)} l -7,-4 l 0,8 z" ${style({ fill: p.axe })}/>`);
   morceaux.push(`<line x1="${f(x0)}" y1="${f(y0)}" x2="${f(x0)}" y2="${f(y1 - 14)}" ${trait}/>`);
   morceaux.push(`<path d="M ${f(x0)},${f(y1 - 14)} l -4,7 l 8,0 z" ${style({ fill: p.axe })}/>`);
-  morceaux.push(texteSvg(x1 + 18, y0 + 4, `${info.axeX.nom} (${info.axeX.unite})`, "start", p.axe, 12, true));
-  morceaux.push(texteSvg(x0 + 8, y1 - 8, `${info.axeY.nom} (${info.axeY.unite})`, "start", p.axe, 12, true));
+  morceaux.push(texteSvg(x1 + 18, y0 + 4, `${info.axeX.nom} (${info.axeX.unite})`, "start", p.axe, 13, true));
+  morceaux.push(texteSvg(x0 + 8, y1 - 8, `${info.axeY.nom} (${info.axeY.unite})`, "start", p.axe, 13, true));
 
   // Asymptote horizontale.
   if (e.asymptoteH !== null) {
@@ -176,7 +176,7 @@ export function construireFigureModele(e: ExerciceChoisirModele, options: Option
     const py = sy(pt.y);
     morceaux.push(`<circle cx="${f(px)}" cy="${f(py)}" r="3.6" ${style({ fill: p.point })}/>`);
     const d = DECALAGES[pt.position];
-    morceaux.push(texteSvg(px + d.dx, py + d.dy, coord(pt.x, pt.y), d.ancre, p.point, 11, true));
+    morceaux.push(texteSvg(px + d.dx, py + d.dy, coord(pt.x, pt.y), d.ancre, p.point, 12.5, true));
   }
 
   const classe = options.classe ?? "figure-choisir-modele";

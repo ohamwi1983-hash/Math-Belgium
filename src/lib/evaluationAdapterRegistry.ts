@@ -34,6 +34,7 @@ import { adaptateurEvaluationFormeCanoniqueFonctionsReference } from '../entrain
 import { adaptateurEvaluationCaracteristiquesFonction } from '../entrainement/4e/generateurs/caracteristiquesFonction/exportEvaluation'
 import { adaptateurEvaluationCaracteristiquesAlgebriques } from '../entrainement/4e/generateurs/caracteristiquesAlgebriques/exportEvaluation'
 import { adaptateurEvaluationProblemesFonctionsReference } from '../entrainement/4e/generateurs/problemesFonctionsReference/exportEvaluation'
+import { adaptateurEvaluationPortraitRobotFonction } from '../entrainement/4e/generateurs/portraitRobotFonction/exportEvaluation'
 import { adaptateurEvaluationTableauFrequences } from '../entrainement/4e/generateurs/tableauFrequences/exportEvaluation'
 import { adaptateurEvaluationHistogramme } from '../entrainement/4e/generateurs/histogramme/exportEvaluation'
 import { adaptateurEvaluationMoyennePonderee } from '../entrainement/4e/generateurs/moyennePonderee/exportEvaluation'
@@ -95,6 +96,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen12: versionPapier(adaptateurEvaluationCaracteristiquesFonction) as unknown as AdaptateurFeuilleExercices<never>,
   gen13: versionPapier(adaptateurEvaluationCaracteristiquesAlgebriques) as unknown as AdaptateurFeuilleExercices<never>,
   gen68: versionPapier(adaptateurEvaluationProblemesFonctionsReference) as unknown as AdaptateurFeuilleExercices<never>,
+  gen71: versionPapier(adaptateurEvaluationPortraitRobotFonction) as unknown as AdaptateurFeuilleExercices<never>,
   gen30: versionPapier(adaptateurEvaluationTableauFrequences) as unknown as AdaptateurFeuilleExercices<never>,
   gen31: versionPapier(adaptateurEvaluationHistogramme) as unknown as AdaptateurFeuilleExercices<never>,
   gen32: versionPapier(adaptateurEvaluationMoyennePonderee) as unknown as AdaptateurFeuilleExercices<never>,

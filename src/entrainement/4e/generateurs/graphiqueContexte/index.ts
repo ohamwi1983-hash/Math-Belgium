@@ -203,10 +203,56 @@ const FORMES_PAR_POINTS: Partial<Record<IdContexteGraphique, () => FormeParPoint
 /**
  * Insère, sur chaque montée/descente stricte entre deux points extrêmes, un point-clé à chaque
  * hauteur requise qui s'y trouve strictement (+ parfois une graduation supplémentaire, pour varier
- * les points d'image), sur une verticale de la grille proche de l'interpolation linéaire — `null` s'il
+ * les points d'image), sur la verticale de grille la plus proche de la forme de référence (`abscisseReference`) — `null` s'il
  * n'y a pas assez de verticales libres.
  */
-function insererPointsCles(extremes: PointCle[], requises: number[], pasX: number, pasY: number, probaSupplementaire: number): PointCle[] | null {
+/**
+ * Abscisse où une montée/descente de référence entre deux points extrêmes a et b atteint la hauteur v :
+ * droite pour une courbe en segments ; demi-cosinus (départ et arrivée à plat, comme la pente nulle de
+ * l'interpolation monotone en un sommet ou un creux) pour une courbe lisse. Les points-clés insérés
+ * sont placés sur la verticale de grille la plus proche de cette abscisse : la courbe suit alors la
+ * forme de référence au lieu de présenter des épaulements.
+ */
+function abscisseReference(a: PointCle, b: PointCle, v: number, lisse: boolean): number {
+  const u = (v - a.y) / (b.y - a.y);
+  const t = lisse ? Math.acos(1 - 2 * u) / Math.PI : u;
+  return a.x + t * (b.x - a.x);
+}
+
+/** Écart (en pas de grille) entre cette abscisse et la verticale de grille la plus proche. */
+function ecartReference(a: PointCle, b: PointCle, v: number, pasX: number, lisse: boolean): number {
+  const x = abscisseReference(a, b, v, lisse);
+  return Math.abs(x / pasX - Math.round(x / pasX));
+}
+
+/** Somme des écarts sur toutes les montées/descentes qui franchissent k — plus elle est petite, moins
+ * les points-clés insérés déforment la courbe. */
+function deformation(extremes: PointCle[], k: number, pasX: number, lisse: boolean): number {
+  let total = 0;
+  for (let i = 0; i < extremes.length - 1; i++) {
+    const a = extremes[i]!;
+    const b = extremes[i + 1]!;
+    if ((a.y - k) * (b.y - k) < 0) total += ecartReference(a, b, k, pasX, lisse);
+  }
+  return total;
+}
+
+/** Tirage parmi les niveaux les moins déformants (le tiers le meilleur, au moins un). */
+function choixPeuDeformant(niveaux: number[], extremes: PointCle[], pasX: number, lisse: boolean): number {
+  const d = (k: number) => deformation(extremes, k, pasX, lisse);
+  const tries = [...niveaux].sort((u, v) => d(u) - d(v));
+  const seuil = d(tries[Math.max(0, Math.ceil(tries.length / 3) - 1)]!);
+  return choix(tries.filter((k) => d(k) <= seuil + 1e-9));
+}
+
+function insererPointsCles(
+  extremes: PointCle[],
+  requises: number[],
+  pasX: number,
+  pasY: number,
+  probaSupplementaire: number,
+  lisse: boolean,
+): PointCle[] | null {
   const resultat: PointCle[] = [extremes[0]!];
   for (let i = 0; i < extremes.length - 1; i++) {
     const a = extremes[i]!;
@@ -217,18 +263,27 @@ function insererPointsCles(extremes: PointCle[], requises: number[], pasX: numbe
       const valeurs = requises.filter((v) => v > bas && v < haut);
       if (Math.random() < probaSupplementaire) {
         const candidates: number[] = [];
-        for (let v = bas + pasY; v < haut; v += pasY) if (!valeurs.includes(v) && !requises.includes(v)) candidates.push(v);
+        for (let v = bas + pasY; v < haut; v += pasY) {
+          if (valeurs.includes(v) || requises.includes(v)) continue;
+          // Un point supplémentaire seulement s'il tombe (presque) sur la forme de référence : aucune
+          // cassure gratuite sur une courbe en segments, aucun épaulement sur une courbe lisse.
+          if (ecartReference(a, b, v, pasX, lisse) > (lisse ? 0.2 : 1e-9)) continue;
+          candidates.push(v);
+        }
         if (candidates.length > 0) valeurs.push(choix(candidates));
       }
       valeurs.sort((u, v) => (b.y > a.y ? u - v : v - u));
       const premier = a.x + pasX;
       const dernier = b.x - pasX;
-      const positions = valeurs.map((v) => Math.round((a.x + ((v - a.y) / (b.y - a.y)) * (b.x - a.x)) / pasX) * pasX);
+      const positions = valeurs.map((v) => Math.round(abscisseReference(a, b, v, lisse) / pasX) * pasX);
       for (let j = 0; j < positions.length; j++) positions[j] = Math.max(positions[j]!, j === 0 ? premier : positions[j - 1]! + pasX);
       for (let j = positions.length - 1; j >= 0; j--) positions[j] = Math.min(positions[j]!, j === positions.length - 1 ? dernier : positions[j + 1]! - pasX);
       for (let j = 0; j < positions.length; j++) {
         const x = positions[j]!;
         if (x < premier || x > dernier || (j > 0 && x <= positions[j - 1]!)) return null;
+        // Point repoussé loin de la forme de référence (verticales trop peu nombreuses) : la courbe
+        // présenterait une cassure ou un épaulement visible — on retire une autre forme.
+        if (Math.abs(x - abscisseReference(a, b, valeurs[j]!, lisse)) > (lisse ? 0.4 : 0.5) * pasX) return null;
         resultat.push({ x, y: valeurs[j]! });
       }
     }
@@ -256,16 +311,16 @@ function construireParPoints(contexte: IdContexteGraphique, forme: FormeParPoint
   let kA: number | null = null;
   if (types.includes("antecedent")) {
     const multiples = candidats.filter((k) => nbFranchissements(k) >= 2);
-    kA = multiples.length > 0 && Math.random() < 0.75 ? choix(multiples) : choix(candidats);
+    kA = choixPeuDeformant(multiples.length > 0 && Math.random() < 0.75 ? multiples : candidats, extremes, axeX.pas, forme.courbe === "pchip");
   }
   let kI: number | null = null;
   if (types.includes("inequation")) {
     const restants = candidats.filter((k) => k !== kA && Math.abs(k - (kA ?? Infinity)) >= 2 * axeY.pas);
     if (restants.length === 0) return null;
-    kI = choix(restants);
+    kI = choixPeuDeformant(restants, extremes, axeX.pas, forme.courbe === "pchip");
   }
   const requises = [kA, kI].filter((k): k is number => k !== null);
-  const points = insererPointsCles(extremes, requises, axeX.pas, axeY.pas, forme.courbe === "pchip" ? 0.6 : 0.3);
+  const points = insererPointsCles(extremes, requises, axeX.pas, axeY.pas, forme.courbe === "pchip" ? 0.6 : 0.5, forme.courbe === "pchip");
   if (!points) return null;
   if (requises.some((k) => franchitHorsPointCle(points, k))) return null;
 

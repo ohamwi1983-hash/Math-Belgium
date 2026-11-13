@@ -128,8 +128,9 @@ export function EtapeFamilleModele(props: PropsCommunes & { question: string }) 
             className={`btn${choix === famille ? " toggle-active" : ""}${validation && choix === famille && famille !== exercice.famille ? " is-erronee" : ""}`}
             onClick={() => setChoix(famille)}
           >
-            <span>
-              {NOM_FAMILLE[famille]} <Katex expression={REFERENCE_LATEX[famille]} />
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <span>{NOM_FAMILLE[famille]}</span>
+              <Katex expression={REFERENCE_LATEX[famille]} />
             </span>
           </button>
         ))}

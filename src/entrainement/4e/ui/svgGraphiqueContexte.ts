@@ -63,7 +63,7 @@ const MARGE_GAUCHE = 50;
 const MARGE_DROITE = 24;
 const MARGE_HAUT = 30;
 const MARGE_BAS = 46;
-const POLICE = 13;
+const POLICE = 14;
 
 function arrondi(v: number): string {
   return `${Math.round(v * 100) / 100}`;

@@ -334,8 +334,8 @@ export function aidesExpression(e: ExerciceExpression, ecran: number): FragmentC
         : e.groupe === "racine"
           ? [t("Une seule fonction de référence a un domaine de la forme "), l("[\\ldots \\,;\\, +\\infty["), t(".")]
           : e.groupe === "extremum"
-            ? [t("Deux fonctions de référence ont un extremum : compare comment f augmente en s'éloignant de son extremum (1 unité, puis 2 ou 3 unités).")]
-            : [t("Deux fonctions de référence ont un centre de symétrie et l'ensemble image "), l("\\mathbb{R}"), t(" : compare les écarts des ordonnées aux points donnés (1 unité, puis 2 ou 8 unités).")],
+            ? [t("Deux fonctions de référence ont un extremum : compare de combien f s'écarte de son extremum quand x s'en éloigne de 1 unité, puis de 2 ou 3 unités.")]
+            : [t("Deux fonctions de référence ont un centre de symétrie et l'ensemble image "), l("\\mathbb{R}"), t(" : compare de combien f s'écarte de son centre quand x s'en éloigne de 1 unité, puis de 2 ou 8 unités.")],
     ];
   }
   if (ecran === 1) {

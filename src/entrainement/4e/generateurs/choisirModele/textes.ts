@@ -328,6 +328,10 @@ export function aidesEcran1(e: ExerciceChoisirModele): Fragments[] {
       t("Repère la forme de la courbe : une parabole (creux arrondi), un V (pointe), une demi-branche qui part d'un point, une courbe en S avec un replat, une courbe en S couchée (verticale en son centre), une hyperbole (deux asymptotes)."),
     ],
     [t(`Cette courbe ${asymptote ? "se rapproche d'une droite sans la toucher (asymptote)" : "n'a pas d'asymptote"} et ${symetrique ? "elle est" : "elle n'est pas"} symétrique par rapport à une droite verticale.`)],
+    // Seule une demi-branche est tracée pour les racines : la forme ne suffit pas à trancher.
+    ...(e.famille === "racine_carree" || e.famille === "racine_cubique"
+      ? [[t("Calcule, pour chaque point marqué, son écart horizontal au point de départ : ces écarts sont-ils des carrés parfaits (1, 4, 9…) ou des cubes parfaits (1, 8, 27…) ?")]]
+      : []),
   ];
 }
 
@@ -472,7 +476,19 @@ export function aidesEcran5(e: ExerciceChoisirModele): Fragments[] {
 // ---------------------------------------------------------------------------------------------
 
 export function justificationFamille(e: ExerciceChoisirModele): Fragments {
-  return [t(`La courbe est ${FORME_COURBE[e.famille]} : elle est issue de `), m(REFERENCE_LATEX[e.famille]), t(".")];
+  const base: Fragments = [t(`La courbe est ${FORME_COURBE[e.famille]} : elle est issue de `), m(REFERENCE_LATEX[e.famille]), t(".")];
+  if (e.famille !== "racine_carree" && e.famille !== "racine_cubique") return base;
+  // Demi-branche seulement : on tranche entre racine carrée et cubique avec les points marqués.
+  const autres = e.points.filter((p) => p.x !== e.th);
+  const dx = autres.map((p) => nombreTexte(p.x - e.th)).join(", ");
+  const dy = autres.map((p) => nombreTexte(p.y - e.tv)).join(", ");
+  const nature = e.famille === "racine_carree" ? "des carrés parfaits" : "des cubes parfaits";
+  return [
+    t(e.famille === "racine_carree" ? "La courbe est une demi-branche qui part d'un point. " : "Seule la partie où le volume est positif est tracée : une demi-branche qui part verticalement d'un point. "),
+    t(`Depuis ce point, les écarts horizontaux ${dx} sont ${nature} et les écarts verticaux valent ${dy} : la courbe est issue de `),
+    m(REFERENCE_LATEX[e.famille]),
+    t("."),
+  ];
 }
 
 export function lectureTransformations(e: ExerciceChoisirModele): Fragments {
