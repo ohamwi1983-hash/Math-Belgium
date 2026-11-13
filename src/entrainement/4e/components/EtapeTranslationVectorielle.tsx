@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ExerciceTranslationRV } from "../core/relationVectorielle.types";
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationRelationVectorielle";
 import { consigneRelationVectorielle, formatLabelXLatex, formatLabelYLatex, formatTermesDonneesConnuesLatex } from "../ui/formatRelationVectorielle";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTranslationRV;
@@ -69,8 +69,7 @@ export function EtapeTranslationVectorielle({ exercice, tentativesUtilisees, ten
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             placeholder="ex : 2,5"
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -82,8 +81,7 @@ export function EtapeTranslationVectorielle({ exercice, tentativesUtilisees, ten
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             placeholder="ex : −1,5"
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

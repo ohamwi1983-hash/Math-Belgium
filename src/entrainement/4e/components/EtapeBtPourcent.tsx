@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtPourcent } from "../moteur/verificationExerciceSynthese";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { consigneBtPourcent, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceSynthese;
@@ -48,8 +48,7 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 60"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

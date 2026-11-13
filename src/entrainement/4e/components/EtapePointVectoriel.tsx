@@ -10,11 +10,11 @@ import {
   valeursGraphePointVectoriel,
 } from "../ui/formatPointVectoriel";
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationPointVectoriel";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExercicePointVectoriel;
@@ -71,8 +71,7 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-x"
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -83,8 +82,7 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
             id="point-vectoriel-y"
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

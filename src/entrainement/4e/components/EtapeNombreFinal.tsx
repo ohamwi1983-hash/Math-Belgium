@@ -1,11 +1,11 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerNombre } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { PRECISION_NOMBRE_MINIMAL } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceBienaymeTchebychevIntervalleVersNombre;
@@ -39,8 +39,7 @@ export function EtapeNombreFinal({ exercice, tentativesUtilisees, tentativesMax,
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 42"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownBienaymeTchebychev}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevPourcentVersIntervalle } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerIntervalleAttendu } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { PRECISION_INTERVALLE_FINAL, RAPPEL_ARRONDI_GARANTIE, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Exercice = ExerciceBienaymeTchebychevPourcentVersIntervalle | ExerciceBienaymeTchebychevNombreVersIntervalle;
 
@@ -60,8 +60,7 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
             className={`text-input${statut !== undefined && statut.borneInf !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 10"
             value={borneInf}
-            onChange={(e) => setBorneInf(filtrerSaisieBienaymeTchebychev(e.target.value))}
-            onKeyDown={gererKeyDownBienaymeTchebychev}
+            onChange={(e) => setBorneInf(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field">
@@ -73,8 +72,7 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
             className={`text-input${statut !== undefined && statut.borneSup !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 30"
             value={borneSup}
-            onChange={(e) => setBorneSup(filtrerSaisieBienaymeTchebychev(e.target.value))}
-            onKeyDown={gererKeyDownBienaymeTchebychev}
+            onChange={(e) => setBorneSup(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

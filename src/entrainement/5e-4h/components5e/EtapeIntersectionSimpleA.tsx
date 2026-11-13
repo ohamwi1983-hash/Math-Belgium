@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceScenarioAReduit;
@@ -43,7 +44,7 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
           type="text"
           className={`text-input${valeurErronee ? " is-erronee" : ""}`}
           value={valeur}
-          onChange={(e) => setValeur(e.target.value.replace(/[^0-9.,-]/g, ""))}
+          onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))}
         />
       </div>
       {niveauAide >= 1 && (

@@ -7,11 +7,11 @@ import { consigneAire, labelChampAire, NOMBRE_NIVEAUX_AIDE_AIRE, OPTIONS_UNITE_A
 import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleQuelconque;
@@ -69,8 +69,7 @@ export function EtapeAireTriangleQuelconque({
             className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
             placeholder={placeholderAire(exercice)}
             value={texte}
-            onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
           <span className="select-souligne-wrap">
             <select className="champ-avec-unite-select" aria-label="Unité" value={unite} onChange={(e) => setUnite(e.target.value as UniteLongueur | "")}>

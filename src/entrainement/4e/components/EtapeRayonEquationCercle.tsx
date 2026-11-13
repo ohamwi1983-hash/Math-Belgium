@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_RAYON } from "../moteur/sessionEquationCercle";
 import { diagnostiquerRayon } from "../moteur/verificationEquationCercle";
-import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
 import { CONSIGNE_GENERALE_EQUATION_CERCLE, consigneRayon, formatAideRayonNiveau2Latex, placeholderRayon, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
@@ -11,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationCercle;
@@ -60,8 +60,7 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={placeholderRayon(exercice)}
           value={rayon}
-          onChange={(e) => setRayon(filtrerSaisieNumeriqueRacine(e.target.value))}
-          onKeyDown={gererKeyDownNumeriqueRacine}
+          onChange={(e) => setRayon(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

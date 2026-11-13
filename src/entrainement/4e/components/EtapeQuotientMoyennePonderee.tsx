@@ -4,12 +4,12 @@ import type { ReponseQuotient } from "../moteur/verificationMoyennePonderee";
 import { diagnostiquerQuotient } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_QUOTIENT } from "../moteur/sessionMoyennePonderee";
 import { LABEL_MOYENNE_BARRE, PLACEHOLDER_QUOTIENT, consigneQuotient, texteAideQuotientNiveau1 } from "../ui/formatMoyennePonderee";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMoyennePonderee;
@@ -57,8 +57,7 @@ export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, te
           className={`text-input${apresEchec && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_QUOTIENT}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

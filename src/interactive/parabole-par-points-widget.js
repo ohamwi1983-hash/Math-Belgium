@@ -155,7 +155,7 @@
     '</div>' +
     '<div id="bloc-defi" hidden>' +
     '<p class="consigne">La parabole tracée a pour sommet <b>S</b> et passe par le point <b>P</b>. Lis leurs coordonnées sur le quadrillage, puis trouve le coefficient <i>a</i>. Un seul essai.</p>' +
-    '<div class="saisie"><label for="rep">a =</label><input id="rep" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="retour"><button type="button" class="btn btn-principal" id="valider">Valider</button></div>' +
+    '<div class="saisie"><label for="rep">a =</label><input id="rep" type="text" autocomplete="off" spellcheck="false" aria-describedby="retour"><button type="button" class="btn btn-principal" id="valider">Valider</button></div>' +
     '<p class="retour" id="retour" aria-live="polite"></p>' +
     '<div class="panneau" id="correction" hidden></div>' +
     '<div class="barre"><button type="button" class="btn" id="nouveau">Nouveau défi</button></div>' +

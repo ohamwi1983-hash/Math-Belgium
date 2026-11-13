@@ -4,13 +4,13 @@ import { diagnostiquerCritereTest } from "../moteur/verificationColinearite";
 import type { ReponseTest } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_TEST } from "../moteur/sessionColinearite";
 import { LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ALIGNEMENT_POINTS, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatEnonceLatex, formatTermesEnoncePointsLatex, formuleSubstitueeTestLatex } from "../ui/formatColinearite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceColinearVecteurs | ExerciceColinearPoints;
@@ -88,8 +88,7 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
           className={`text-input${critereErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}
           value={texteCritere}
-          onChange={(e) => setTexteCritere(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexteCritere(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

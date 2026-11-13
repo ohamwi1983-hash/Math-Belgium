@@ -62,6 +62,16 @@ tâches :
 | `.claude/rules/quiz-generators.md` | `src/entrainement/**/generateurs/quiz*/**` | Convention des bancs d'affirmations vrai/faux : jamais de « grand calcul » (seulement vérification rapide), critère de tri, et le piège `nombreExercices` fixe si le compte varie par thème. |
 | `.claude/rules/feuilles-evaluations.md` | `src/entrainement/export/**`, `**/exportEvaluation.ts`, `src/lib/evaluation*.ts`, `src/lib/banquesVraiFaux.ts` | Méthode des feuilles d'exercices et évaluations (pilote 6e ch. 3) : décisions de l'utilisateur (pas de place de réponse, énoncé papier sans sous-questions, version aménagée, sélecteurs intacts), champs d'adaptateur à remplir, `versionPapier`, `?code=`, vrai/faux, mise en page A4, vérifications. À relire avant d'étendre la refonte à un chapitre. |
 
+## Champs de saisie libre : jamais de blocage
+
+Décision de l'utilisateur : un champ de saisie libre (générateur, atelier, widget) ne **bloque jamais**
+la frappe — pas de filtre `onKeyDown`/`onChange` qui retire des caractères, pas de
+`inputMode="numeric"`/`"decimal"` ni de `type="number"` (sur téléphone, ces claviers n'ont souvent
+pas de touche « − » : impossible d'écrire une valeur négative). La seule transformation admise est
+`normaliserSigneMoins` (`src/lib/normaliserSaisie.ts`, « − »/« – »/« — » → « - »), pour que la lecture
+`Number(…)` reconnaisse le négatif. Une saisie illisible est jugée par la vérification
+(`parse_error`), jamais effacée pendant la frappe.
+
 ## Vérification avant de pousser
 
 - `npm run build` (= `tsc -b && vite build`) doit passer sans erreur.

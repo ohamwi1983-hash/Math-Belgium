@@ -6,10 +6,10 @@ import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../u
 import { PLACEHOLDER_VALEUR_FINALE, texteAide2, texteAide3Intro } from "../ui/formatAnglesAssocies";
 import { diagnostiquerValeurFinale, niveauAideMax } from "../moteur/verificationAnglesAssocies";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceAnglesAssocies;
@@ -75,8 +75,7 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
           className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_VALEUR_FINALE}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

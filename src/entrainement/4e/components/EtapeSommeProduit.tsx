@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { BoutonAide } from "./BoutonAide";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   tentativesUtilisees: number;
@@ -48,8 +48,7 @@ export function EtapeSommeProduit({ tentativesUtilisees, tentativesMax, aideActi
             id="relrac-s"
             className="text-input"
             value={s}
-            onChange={(e) => setS(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setS(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -60,8 +59,7 @@ export function EtapeSommeProduit({ tentativesUtilisees, tentativesMax, aideActi
             id="relrac-p"
             className="text-input"
             value={p}
-            onChange={(e) => setP(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setP(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

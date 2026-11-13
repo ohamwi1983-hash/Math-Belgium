@@ -8,6 +8,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -46,7 +47,7 @@ export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativ
       </p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CT({exercice.xLecture}) =</label>
-        <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(e.target.value.replace(/[^0-9.,-]/g, ""))} />
+        <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(normaliserSigneMoins(e.target.value))} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

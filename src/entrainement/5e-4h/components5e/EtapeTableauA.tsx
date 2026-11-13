@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -31,7 +32,7 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
   const complet = lignes.every((l) => l.h.trim() !== "" && l.aireBases.trim() !== "" && l.aireLaterale.trim() !== "");
 
   function modifier(i: number, champ: "h" | "aireBases" | "aireLaterale", valeur: string) {
-    setLignes((arr) => arr.map((l, j) => (j === i ? { ...l, [champ]: valeur.replace(/[^0-9.,-]/g, "") } : l)));
+    setLignes((arr) => arr.map((l, j) => (j === i ? { ...l, [champ]: normaliserSigneMoins(valeur) } : l)));
   }
 
   function celluleErronee(i: number, champ: "h" | "aireBases" | "aireLaterale"): boolean {

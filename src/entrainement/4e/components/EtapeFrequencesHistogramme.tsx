@@ -4,12 +4,12 @@ import type { ReponseFrequencesHistogramme } from "../moteur/verificationHistogr
 import { evaluerFrequencesHistogramme } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionHistogramme";
 import { CONSIGNE_FREQUENCES, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, PLACEHOLDER_FREQUENCE_CLASSE, formatClasseTexte, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatHistogramme";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -79,8 +79,7 @@ export function EtapeFrequencesHistogramme({ exercice, tentativesUtilisees, tent
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_FREQUENCE_CLASSE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Fréquence de la classe ${formatClasseTexte(exercice, index)}`}
                     />
                   </td>

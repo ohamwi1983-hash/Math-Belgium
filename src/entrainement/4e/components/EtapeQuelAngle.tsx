@@ -3,11 +3,11 @@ import { Katex } from "./Katex";
 import type { ExerciceQuelAngle, ReponseQuelAngle } from "../core/quelAngle.types";
 import { diagnostiquerReponseQuelAngle } from "../moteur/verificationQuelAngle";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { DOMAINE_LATEX, formatEnonceLatex } from "../ui/formatQuelAngle";
 import { AideQuelAngle } from "./AideQuelAngle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "aucune" | "auMoinsUne";
 
@@ -56,7 +56,7 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
   }
 
   function modifierChamp(index: number, valeur: string) {
-    setValeurs(valeurs.map((v, i) => (i === index ? filtrerSaisieNumerique(valeur) : v)));
+    setValeurs(valeurs.map((v, i) => (i === index ? normaliserSigneMoins(valeur) : v)));
   }
 
   function construireReponse(): ReponseQuelAngle | null {
@@ -97,7 +97,6 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
                 className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
                 value={valeur}
                 onChange={(e) => modifierChamp(index, e.target.value)}
-                onKeyDown={gererKeyDownNumerique}
                 placeholder={`solution ${index + 1} (degrés)`}
                 aria-label={`Solution ${index + 1}`}
               />

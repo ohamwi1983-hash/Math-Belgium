@@ -4,13 +4,13 @@ import type { ReponseClassement } from "../moteur/verificationHistogramme";
 import { evaluerClassement } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_CLASSEMENT } from "../moteur/sessionHistogramme";
 import { LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, PLACEHOLDER_EFFECTIF_CLASSE, consigneClassement, formatClasseTexte, texteAideClassementNiveau1, texteAideClassementNiveau2 } from "../ui/formatHistogramme";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -102,8 +102,7 @@ export function EtapeClassementHistogramme({ exercice, tentativesUtilisees, tent
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_EFFECTIF_CLASSE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Effectif de la classe ${formatClasseTexte(exercice, index)}`}
                     />
                   </td>

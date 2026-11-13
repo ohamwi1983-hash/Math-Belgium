@@ -4,13 +4,13 @@ import type { LigneIdentificationSaisie, ReponseIdentification } from "../moteur
 import { evaluerIdentification } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_IDENTIFICATION } from "../moteur/sessionTableauFrequences";
 import { LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_EFFECTIF, PLACEHOLDER_VALEUR, consigneIdentification, ligneExemple, texteAideIdentificationNiveau1, texteAideIdentificationNiveau2 } from "../ui/formatTableauFrequences";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -123,8 +123,7 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
                       className={`text-input${valeurErronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_VALEUR}
                       value={ligne.valeur}
-                      onChange={(e) => modifierValeur(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifierValeur(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Valeur de la ligne ${index + 1}`}
                     />
                   </td>
@@ -133,8 +132,7 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
                       className={`text-input${effectifErronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_EFFECTIF}
                       value={ligne.effectif}
-                      onChange={(e) => modifierEffectif(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifierEffectif(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Effectif de la ligne ${index + 1}`}
                     />
                   </td>

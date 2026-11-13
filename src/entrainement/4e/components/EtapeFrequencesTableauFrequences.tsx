@@ -4,13 +4,13 @@ import type { ReponseFrequences } from "../moteur/verificationTableauFrequences"
 import { evaluerFrequences } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionTableauFrequences";
 import { CONSIGNE_FREQUENCES, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatTableauFrequences";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -82,8 +82,7 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_FREQUENCE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Fréquence de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>

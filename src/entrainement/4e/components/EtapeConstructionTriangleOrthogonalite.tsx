@@ -4,13 +4,13 @@ import { evaluerConstructionTriangle } from "../moteur/verificationOrthogonalite
 import type { ReponseConstructionTriangle } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
 import { PLACEHOLDER_COMPOSANTE, consigneGlobaleOrthogonalite, formatFormuleComposantesLatex, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
@@ -76,8 +76,7 @@ export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUti
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_COMPOSANTE}
           value={valeur}
-          onChange={(e) => onChange(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => onChange(normaliserSigneMoins(e.target.value))}
         />
       </div>
     );

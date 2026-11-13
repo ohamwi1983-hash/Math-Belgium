@@ -4,7 +4,6 @@ import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionRelationsDroites";
 import type { ReponseEquation } from "../moteur/typesRelationsDroites";
 import { diagnostiquerEquationCartesienne, diagnostiquerEquationParametrique } from "../moteur/verificationRelationsDroites";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -15,6 +14,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 /** Signes moins typographiques (« − », « – », « — », clavier mobile ou copier-coller) convertis en
  * « - » dans le champ texte libre — sinon « Expression non reconnue » (audit chapitre 7, point 4). */
@@ -113,8 +113,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COORDONNEE}
                 value={x0}
-                onChange={(e) => setX0(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => setX0(normaliserSigneMoins(e.target.value))}
               />
             </div>
             <div className="field field-inline">
@@ -126,8 +125,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COORDONNEE}
                 value={y0}
-                onChange={(e) => setY0(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => setY0(normaliserSigneMoins(e.target.value))}
               />
             </div>
           </div>
@@ -141,8 +139,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COMPOSANTE}
                 value={a}
-                onChange={(e) => setA(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => setA(normaliserSigneMoins(e.target.value))}
               />
             </div>
             <div className="field field-inline">
@@ -154,8 +151,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_COMPOSANTE}
                 value={b}
-                onChange={(e) => setB(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => setB(normaliserSigneMoins(e.target.value))}
               />
             </div>
           </div>

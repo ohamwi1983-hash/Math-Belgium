@@ -4,12 +4,12 @@ import type { ReponseVarianceEcartType } from "../moteur/verificationDispersion"
 import { diagnostiquerVarianceEcartType, ecartTypeDepuisVarianceNonArrondie } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE } from "../moteur/sessionDispersion";
 import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceDispersion;
@@ -70,8 +70,7 @@ export function EtapeVarianceEcartTypeDispersion({
           className={`text-input${evaluation && evaluation.variance !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_VARIANCE}
           value={variance}
-          onChange={(e) => setVariance(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setVariance(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
@@ -89,8 +88,7 @@ export function EtapeVarianceEcartTypeDispersion({
           className={`text-input${evaluation && evaluation.ecartType !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_ECART_TYPE}
           value={ecartType}
-          onChange={(e) => setEcartType(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setEcartType(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

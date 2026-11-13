@@ -194,7 +194,6 @@ export function EtapeTransformationsModele(props: PropsCommunes & { question: st
       <input
         id={id}
         className={classe(faux)}
-        inputMode="decimal"
         autoComplete="off"
         placeholder="un nombre"
         value={valeur}
@@ -332,7 +331,6 @@ export function EtapeUtilisationModele(props: PropsCommunes & { question: Fragme
             <input
               id={`modele-utilisation-${i}`}
               className={`text-input${faux[i] && props.tentativesUtilisees > 0 && !validation ? " is-erronee" : ""}`}
-              inputMode="decimal"
               autoComplete="off"
               placeholder="un nombre"
               value={saisies[i]}

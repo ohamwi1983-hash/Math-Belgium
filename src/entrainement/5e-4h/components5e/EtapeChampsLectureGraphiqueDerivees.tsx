@@ -68,7 +68,6 @@ export function EtapeChampsLectureGraphiqueDerivees({ exercice, tentativesUtilis
           <input
             id={`valeur-extremum-${i}`}
             type="text"
-            inputMode="decimal"
             className={`text-input${statuts && statuts[i] !== "correct" ? " is-erronee" : ""}`}
             value={valeurs[i] ?? ""}
             onFocus={() => setChampActif(i)}

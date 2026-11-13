@@ -3,12 +3,12 @@ import type { Exercice } from "../core/generateur.types";
 import { Katex } from "./Katex";
 import { formatEnonceAffichage } from "../ui/formatEquation";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "pasDe" | "auMoins";
 
@@ -217,8 +217,7 @@ export function EtapeRacinesFlexibles({
               <input
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 value={valeur}
-                onChange={(e) => modifierChamp(index, filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => modifierChamp(index, normaliserSigneMoins(e.target.value))}
                 placeholder={`${placeholderPrefixe} ${index + 1}`}
                 aria-label={`${placeholderPrefixe} ${index + 1}`}
               />

@@ -3,8 +3,6 @@ import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDev
 import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
-import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -14,6 +12,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
@@ -82,8 +81,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
             className={`text-input${centreErronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -95,8 +93,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
             className={`text-input${centreErronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -109,8 +106,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           className={`text-input${rayonErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_RAYON}
           value={rayon}
-          onChange={(e) => setRayon(filtrerSaisieNumeriqueRacine(e.target.value))}
-          onKeyDown={gererKeyDownNumeriqueRacine}
+          onChange={(e) => setRayon(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

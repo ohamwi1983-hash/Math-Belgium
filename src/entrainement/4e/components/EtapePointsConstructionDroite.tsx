@@ -3,7 +3,6 @@ import type { ExerciceConstructionDroite } from "../core/constructionDroite.type
 import { NIVEAU_AIDE_MAX_POINTS } from "../moteur/sessionConstructionDroite";
 import { diagnostiquerPoints } from "../moteur/verificationConstructionDroite";
 import type { ReponsePoints } from "../moteur/verificationConstructionDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COORDONNEE, consigneGeneraleTrace, consignePoints, formatAidePointsNiveau2Latex, formatEnonceLatex, texteAidePointsNiveau1 } from "../ui/formatConstructionDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -11,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
@@ -87,8 +87,7 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
                   className={`text-input${erronee ? " is-erronee" : ""}`}
                   placeholder={PLACEHOLDER_COORDONNEE}
                   value={champ.valeur}
-                  onChange={(e) => champ.setter(filtrerSaisieNumerique(e.target.value))}
-                  onKeyDown={gererKeyDownNumerique}
+                  onChange={(e) => champ.setter(normaliserSigneMoins(e.target.value))}
                 />
               </div>
             ))}

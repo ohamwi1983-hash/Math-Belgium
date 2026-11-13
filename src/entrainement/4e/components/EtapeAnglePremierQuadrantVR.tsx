@@ -4,10 +4,10 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { diagnostiquerAnglePremierQuadrant } from "../moteur/verificationValeursRemarquables";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { AideAnglePremierQuadrantCercleTrig } from "./AideAnglePremierQuadrantCercleTrig";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceValeursRemarquables;
@@ -27,8 +27,8 @@ interface Props {
  * Angle du premier quadrant : toujours l'une des 5 valeurs remarquables 0/30/45/60/90. Aide
  * réutilisée telle quelle depuis le générateur 14 (même nom d'écran, même mécanique — point
  * symétrique + pointillé de symétrie selon le cas orthogonal/central), grâce à sa prop désormais
- * typée structurellement (`AngleAvecPremierQuadrant`). Blocage numérique du champ (même mécanisme
- * que le générateur 14 — `bloquerSaisieNonNumerique.ts`, jamais réinventé).
+ * typée structurellement (`AngleAvecPremierQuadrant`). Champ libre sans blocage de frappe : seuls les
+ * signes moins typographiques sont convertis (`lib/normaliserSaisie.ts`).
  */
 export function EtapeAnglePremierQuadrantVR({
   exercice,
@@ -58,8 +58,7 @@ export function EtapeAnglePremierQuadrantVR({
           id="valeurs-remarquables-premier-quadrant"
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <AideAnglePremierQuadrantCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />

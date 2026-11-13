@@ -5,10 +5,10 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { BoutonAide } from "./BoutonAide";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { lireNombre } from "../moteur/verificationPortraitRobot";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 /**
  * Écrans génériques de « Le portrait-robot d'une fonction » (gen71) : choix fermé (une tentative),
@@ -124,15 +124,13 @@ export function EtapeNombresPortrait({ consigne, champs, tentativesUtilisees, te
             <input
               id={champ.id}
               className={`text-input${erronee ? " is-erronee" : ""}`}
-              inputMode="decimal"
               autoComplete="off"
               value={saisies[i]}
               disabled={!!validation}
               onChange={(e) => {
-                const valeur = filtrerSaisieNumerique(e.target.value);
+                const valeur = normaliserSigneMoins(e.target.value);
                 setSaisies((s) => s.map((x, j) => (j === i ? valeur : x)));
               }}
-              onKeyDown={gererKeyDownNumerique}
             />
           </div>
         ))}

@@ -84,7 +84,6 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
                 <td>
                   <input
                     type="text"
-                    inputMode="decimal"
                     aria-label={`A pour n = ${n}`}
                     style={{ minHeight: 44 }}
                     className={`text-input${celluleErronee(i) ? " is-erronee" : ""}`}
@@ -95,7 +94,6 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
                 <td>
                   <input
                     type="text"
-                    inputMode="decimal"
                     aria-label={`B pour n = ${n}`}
                     style={{ minHeight: 44 }}
                     className={`text-input${celluleErronee(i + nLignes) ? " is-erronee" : ""}`}

@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtIntervalle } from "../moteur/verificationExerciceSynthese";
 import type { ReponseIntervalle } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { consigneBtIntervalle, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceSynthese;
@@ -60,8 +60,7 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
             className={`text-input${statut !== undefined && statut.borneInf !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 12"
             value={borneInf}
-            onChange={(e) => setBorneInf(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setBorneInf(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field">
@@ -73,8 +72,7 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
             className={`text-input${statut !== undefined && statut.borneSup !== "correct" ? " is-erronee" : ""}`}
             placeholder="ex : 30"
             value={borneSup}
-            onChange={(e) => setBorneSup(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setBorneSup(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

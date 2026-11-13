@@ -84,7 +84,6 @@ export function EtapeListeAbscissesLectureGraphiqueDerivees({ exercice, ecran, t
           <input
             id={`abscisse-${ecran}-${i}`}
             type="text"
-            inputMode="decimal"
             className={`text-input${illisibles?.[i] ? " is-erronee" : ""}`}
             value={valeur}
             onChange={(e) => modifier(i, e.target.value)}

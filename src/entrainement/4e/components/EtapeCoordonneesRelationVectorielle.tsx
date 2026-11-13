@@ -3,7 +3,6 @@ import type { ExerciceRelationGeneraleRV } from "../core/relationVectorielle.typ
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationRelationVectorielle";
 import { formatLabelXLatex, formatLabelYLatex } from "../ui/formatRelationVectorielle";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
@@ -11,6 +10,7 @@ import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceRelationGeneraleRV;
@@ -68,8 +68,7 @@ export function EtapeCoordonneesRelationVectorielle({
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             placeholder="ex : 2,5"
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -81,8 +80,7 @@ export function EtapeCoordonneesRelationVectorielle({
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             placeholder="ex : −1,5"
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

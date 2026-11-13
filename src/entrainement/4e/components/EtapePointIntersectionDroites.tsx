@@ -3,7 +3,6 @@ import type { ExerciceIntersectionDroites } from "../core/intersectionDroites.ty
 import { NIVEAU_AIDE_MAX_POINT } from "../moteur/sessionIntersectionDroites";
 import { diagnostiquerPoint, type ReponsePoint } from "../moteur/verificationIntersectionDroites";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import {
   CONSIGNE_GENERALE_INTERSECTION,
   PLACEHOLDER_COORDONNEE_INTERSECTION,
@@ -20,6 +19,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
@@ -97,8 +97,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
             className={`text-input${apresEchec && statut?.t && statut.t !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_PARAMETRE_INTERSECTION}
             value={t}
-            onChange={(e) => setT(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setT(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -112,8 +111,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
             className={`text-input${apresEchec && statut?.s && statut.s !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_PARAMETRE_INTERSECTION}
             value={s}
-            onChange={(e) => setS(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setS(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}
@@ -127,8 +125,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
             className={`text-input${apresEchec && statut && statut.point !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -140,8 +137,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
             className={`text-input${apresEchec && statut && statut.point !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

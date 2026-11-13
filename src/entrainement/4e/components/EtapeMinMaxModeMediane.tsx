@@ -4,7 +4,6 @@ import type { ReponseMinMaxMode } from "../moteur/verificationMediane";
 import { diagnostiquerMinMaxMode } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_MIN_MAX_MODE } from "../moteur/sessionMediane";
 import { LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_MAX, PLACEHOLDER_MIN, consigneMinMaxMode, texteAideMinMaxModeNiveau1, texteAideMinMaxModeNiveau2 } from "../ui/formatMediane";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
@@ -12,6 +11,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMedianeDiscrete;
@@ -49,7 +49,7 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
   }
 
   function modifierMode(index: number, valeur: string) {
-    setModes(modes.map((v, i) => (i === index ? filtrerSaisieNumerique(valeur) : v)));
+    setModes(modes.map((v, i) => (i === index ? normaliserSigneMoins(valeur) : v)));
   }
 
   const complet = min.trim() !== "" && max.trim() !== "" && modes.every((v) => v.trim() !== "");
@@ -94,8 +94,7 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
             className={`text-input${evaluation && evaluation.min !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_MIN}
             value={min}
-            onChange={(e) => setMin(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setMin(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field">
@@ -107,8 +106,7 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
             className={`text-input${evaluation && evaluation.max !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_MAX}
             value={max}
-            onChange={(e) => setMax(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setMax(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -121,7 +119,6 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
               className={`text-input${evaluation && evaluation.modes !== "correct" ? " is-erronee" : ""}`}
               value={valeur}
               onChange={(e) => modifierMode(index, e.target.value)}
-              onKeyDown={gererKeyDownNumerique}
               placeholder={`mode ${index + 1}`}
               aria-label={`Mode ${index + 1}`}
             />

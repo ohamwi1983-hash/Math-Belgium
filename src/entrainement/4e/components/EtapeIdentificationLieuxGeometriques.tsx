@@ -3,7 +3,6 @@ import type { ExerciceLieuxGeometriques, Lieu, TypeLieu } from "../core/lieuxGeo
 import { diagnostiquerIdentification, diagnostiquerIdentificationLieu, lieuxComparesIdentification } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import {
   CONSIGNE_GENERALE_IDENTIFICATION,
   LIBELLE_TYPE_LIEU,
@@ -22,6 +21,7 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 const TYPES_LIEU: TypeLieu[] = ["droite", "cercle", "parabole"];
 
@@ -119,8 +119,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
               className={classeChamp}
               placeholder={PLACEHOLDER_PENTE}
               value={champs.m}
-              onChange={(e) => onChange({ ...champs, m: filtrerSaisieNumeriqueFraction(e.target.value) })}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => onChange({ ...champs, m: normaliserSigneMoins(e.target.value) })}
             />
           </div>
           <div className="field field-inline">
@@ -132,8 +131,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
               className={classeChamp}
               placeholder={PLACEHOLDER_ORDONNEE_ORIGINE}
               value={champs.p}
-              onChange={(e) => onChange({ ...champs, p: filtrerSaisieNumeriqueFraction(e.target.value) })}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => onChange({ ...champs, p: normaliserSigneMoins(e.target.value) })}
             />
           </div>
         </div>
@@ -151,8 +149,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
                 className={classeChamp}
                 placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.x0}
-                onChange={(e) => onChange({ ...champs, x0: filtrerSaisieNumeriqueFraction(e.target.value) })}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => onChange({ ...champs, x0: normaliserSigneMoins(e.target.value) })}
               />
             </div>
             <div className="field field-inline">
@@ -164,8 +161,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
                 className={classeChamp}
                 placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.y0}
-                onChange={(e) => onChange({ ...champs, y0: filtrerSaisieNumeriqueFraction(e.target.value) })}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => onChange({ ...champs, y0: normaliserSigneMoins(e.target.value) })}
               />
             </div>
           </div>
@@ -178,8 +174,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
               className={classeChamp}
               placeholder={PLACEHOLDER_RAYON}
               value={champs.rayon}
-              onChange={(e) => onChange({ ...champs, rayon: filtrerSaisieNumeriqueFraction(e.target.value) })}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => onChange({ ...champs, rayon: normaliserSigneMoins(e.target.value) })}
             />
           </div>
         </>
@@ -197,8 +192,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
                 className={classeChamp}
                 placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.xF}
-                onChange={(e) => onChange({ ...champs, xF: filtrerSaisieNumeriqueFraction(e.target.value) })}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => onChange({ ...champs, xF: normaliserSigneMoins(e.target.value) })}
               />
             </div>
             <div className="field field-inline">
@@ -210,8 +204,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
                 className={classeChamp}
                 placeholder={PLACEHOLDER_COORDONNEE_CENTRE_FOYER}
                 value={champs.yF}
-                onChange={(e) => onChange({ ...champs, yF: filtrerSaisieNumeriqueFraction(e.target.value) })}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => onChange({ ...champs, yF: normaliserSigneMoins(e.target.value) })}
               />
             </div>
           </div>
@@ -224,8 +217,7 @@ function ChampsLieuInput({ numero, champs, onChange, lieuCompare, apresEchec }: 
               className={classeChamp}
               placeholder={PLACEHOLDER_PARAMETRE_PARABOLE}
               value={champs.pParabole}
-              onChange={(e) => onChange({ ...champs, pParabole: filtrerSaisieNumeriqueFraction(e.target.value) })}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => onChange({ ...champs, pParabole: normaliserSigneMoins(e.target.value) })}
             />
           </div>
         </>

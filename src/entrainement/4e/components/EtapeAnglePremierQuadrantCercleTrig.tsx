@@ -4,10 +4,10 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { diagnostiquerAnglePremierQuadrant } from "../moteur/verificationCercleTrigonometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { AideAnglePremierQuadrantCercleTrig } from "./AideAnglePremierQuadrantCercleTrig";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceCercleTrigonometrique;
@@ -52,8 +52,7 @@ export function EtapeAnglePremierQuadrantCercleTrig({
           id="cercle-trig-premier-quadrant"
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <AideAnglePremierQuadrantCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />

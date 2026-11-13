@@ -58,7 +58,7 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
           <label className="field-label field-label-minuscule">
             <Katex expression="L=" />
           </label>
-          <input type="text" inputMode="decimal" style={{ minHeight: 44 }} className="text-input" value={L} onChange={(e) => setL(e.target.value)} />
+          <input type="text" style={{ minHeight: 44 }} className="text-input" value={L} onChange={(e) => setL(e.target.value)} />
         </div>
       )}
       {niveauAide >= 1 && (

@@ -4,12 +4,12 @@ import type { ReponseSynthese } from "../moteur/verificationMediane";
 import { diagnostiquerSynthese } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_SYNTHESE } from "../moteur/sessionMediane";
 import { LABEL_X_MAX, LABEL_X_MIN, PLACEHOLDER_ETENDUE, PLACEHOLDER_MODE, PLACEHOLDER_XMAX, PLACEHOLDER_XMIN, TEXTE_AIDE_SYNTHESE_1_APRES, TEXTE_AIDE_SYNTHESE_1_AVANT, TEXTE_AIDE_SYNTHESE_1_ENTRE_1, TEXTE_AIDE_SYNTHESE_1_ENTRE_2, TEXTE_AIDE_SYNTHESE_1_ENTRE_3, consigneSynthese, formatClasseTexte, texteAideSyntheseNiveau2 } from "../ui/formatMediane";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -63,8 +63,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
             className={`text-input${evaluation && evaluation.xMin !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_XMIN}
             value={xMin}
-            onChange={(e) => setXMin(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setXMin(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -76,8 +75,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
             className={`text-input${evaluation && evaluation.xMax !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_XMAX}
             value={xMax}
-            onChange={(e) => setXMax(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setXMax(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -90,8 +88,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
           className={`text-input${evaluation && evaluation.etendue !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_ETENDUE}
           value={etendue}
-          onChange={(e) => setEtendue(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setEtendue(normaliserSigneMoins(e.target.value))}
         />
       </div>
 
@@ -118,8 +115,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
           className={`text-input${evaluation && evaluation.mode !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_MODE}
           value={mode}
-          onChange={(e) => setMode(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setMode(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

@@ -3,7 +3,6 @@ import type { ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDro
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionCaracteristiquesDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseExtraction } from "../moteur/verificationCaracteristiquesDroite";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -13,6 +12,7 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceCaracteristiquesDroite;
@@ -83,8 +83,7 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={champ.placeholder}
                 value={champ.valeur}
-                onChange={(e) => champ.setter(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => champ.setter(normaliserSigneMoins(e.target.value))}
               />
             </div>
           ))}

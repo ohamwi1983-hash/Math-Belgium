@@ -1,11 +1,11 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevNombreVersSigma } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcentDepuisNombre } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { precisionPourcentDepuisNombre } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Exercice = ExerciceBienaymeTchebychevNombreVersIntervalle | ExerciceBienaymeTchebychevNombreVersSigma;
 
@@ -41,8 +41,7 @@ export function EtapePourcentDepuisNombre({ exercice, tentativesUtilisees, tenta
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 75,5"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownBienaymeTchebychev}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

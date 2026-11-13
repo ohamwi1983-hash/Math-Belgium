@@ -4,7 +4,6 @@ import { diagnostiquerPont, diagnostiquerPontSommetPartage } from "../moteur/ver
 import type { ReponsePontSommetPartage } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_PONT } from "../moteur/sessionTriangleLies";
 import { consignePont, formatDonneesPontTexte, libellesSommetPartage, texteAidePontNiveau1, texteAidePontNiveau2, uniteLongueurPont } from "../ui/formatTriangleLies";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -13,6 +12,7 @@ import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -69,8 +69,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
               id="triangle-lies-pont-angle"
               className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={texteAngle}
-              onChange={(e) => setTexteAngle(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setTexteAngle(normaliserSigneMoins(e.target.value))}
             />
             <span className="champ-avec-unite-suffixe">°</span>
           </div>
@@ -85,8 +84,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
                 id="triangle-lies-pont-cote1"
                 className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
                 value={texteCote1}
-                onChange={(e) => setTexteCote1(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setTexteCote1(normaliserSigneMoins(e.target.value))}
               />
               <span className="champ-avec-unite-suffixe">{uniteCote}</span>
             </div>
@@ -100,8 +98,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
                 id="triangle-lies-pont-cote2"
                 className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
                 value={texteCote2}
-                onChange={(e) => setTexteCote2(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => setTexteCote2(normaliserSigneMoins(e.target.value))}
               />
               <span className="champ-avec-unite-suffixe">{uniteCote}</span>
             </div>
@@ -159,8 +156,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
             id="triangle-lies-pont"
             className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
             value={texte}
-            onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
           <span className="champ-avec-unite-suffixe">{uniteLongueurPont(exercice)}</span>
         </div>

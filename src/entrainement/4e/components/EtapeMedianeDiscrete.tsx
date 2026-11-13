@@ -4,13 +4,13 @@ import type { ReponseMediane } from "../moteur/verificationMediane";
 import { diagnostiquerMediane } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_MEDIANE } from "../moteur/sessionMediane";
 import { LABEL_MEDIANE_Q2, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, texteAideMedianeNiveau1, texteAideMedianeNiveau2 } from "../ui/formatMediane";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMedianeDiscrete;
@@ -58,8 +58,7 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
           className={`text-input${evaluation && evaluation.seuil !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SEUIL}
           value={seuil}
-          onChange={(e) => setSeuil(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setSeuil(normaliserSigneMoins(e.target.value))}
         />
       </div>
       <div className="field field-inline">
@@ -71,8 +70,7 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
           className={`text-input${evaluation && evaluation.mediane !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_MEDIANE}
           value={mediane}
-          onChange={(e) => setMediane(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setMediane(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

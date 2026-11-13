@@ -3,7 +3,6 @@ import type { ExerciceEquationDroite } from "../core/equationDroite.types";
 import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionEquationDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationEquationDroite";
 import type { ReponseExtraction } from "../moteur/verificationEquationDroite";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, consigneExtraction, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -14,6 +13,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationDroite;
@@ -77,8 +77,7 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x0}
-            onChange={(e) => setX0(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setX0(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -90,8 +89,7 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y0}
-            onChange={(e) => setY0(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setY0(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -105,8 +103,7 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={a}
-            onChange={(e) => setA(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setA(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -118,8 +115,7 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={b}
-            onChange={(e) => setB(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setB(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

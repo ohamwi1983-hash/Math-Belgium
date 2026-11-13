@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ReponseZerosCaracteristiques } from "../core/caracteristiquesFonction.types";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -81,8 +81,7 @@ export function EtapeZerosCaracteristiques({ tentativesUtilisees, tentativesMax,
               <input
                 className="text-input"
                 value={valeur}
-                onChange={(e) => modifierChamp(index, filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => modifierChamp(index, normaliserSigneMoins(e.target.value))}
                 placeholder={`zéro ${index + 1}`}
                 aria-label={`Zéro ${index + 1}`}
               />

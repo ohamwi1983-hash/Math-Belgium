@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersXBar, ExerciceBienaymeTchebychevNombreVersXBar } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieXBarBienaymeTchebychev, gererKeyDownXBarBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { LABEL_XBAR, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Exercice = ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar;
 
@@ -49,8 +49,7 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 172"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieXBarBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownXBarBienaymeTchebychev}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

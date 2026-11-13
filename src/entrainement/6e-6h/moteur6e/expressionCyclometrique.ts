@@ -30,7 +30,7 @@ interface Jeton {
 }
 
 function tokeniser(texte: string): Jeton[] {
-  const s = texte.replace(/²/g, "^2").replace(/³/g, "^3");
+  const s = texte.replace(/[\u2212\u2013\u2014]/g, "-").replace(/²/g, "^2").replace(/³/g, "^3");
   const jetons: Jeton[] = [];
   let i = 0;
   while (i < s.length) {

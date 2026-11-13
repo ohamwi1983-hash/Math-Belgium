@@ -4,7 +4,6 @@ import type { ReponseLecture } from "../moteur/verificationBoiteMoustaches";
 import { diagnostiquerLecture } from "../moteur/verificationBoiteMoustaches";
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN, segmentsAideLectureNiveau1, segmentsAideLectureNiveau2, segmentsConsigneLecture } from "../ui/formatBoiteMoustaches";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { Katex } from "./Katex";
@@ -12,6 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesLecture;
@@ -62,8 +62,7 @@ export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niv
             id={`lecture-${cle}`}
             className={`text-input${statut && statut[cle] !== "correct" ? " is-erronee" : ""}`}
             value={reponse[cle]}
-            onChange={(e) => setReponse((prec) => ({ ...prec, [cle]: filtrerSaisieNumerique(e.target.value) }))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setReponse((prec) => ({ ...prec, [cle]: normaliserSigneMoins(e.target.value) }))}
           />
         </div>
       ))}

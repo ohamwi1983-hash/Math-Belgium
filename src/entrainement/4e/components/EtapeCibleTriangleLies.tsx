@@ -5,7 +5,6 @@ import { niveauAideMaxCible } from "../moteur/sessionTriangleLies";
 import { consigneCible, formatDonneesCibleEnonceTexte, texteAideCibleNiveau1, texteAideCibleNiveau2, texteAideCibleNiveau3 } from "../ui/formatTriangleLies";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -14,6 +13,7 @@ import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -64,8 +64,7 @@ export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativ
             id="triangle-lies-cible"
             className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
             value={texte}
-            onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
           <span className="champ-avec-unite-suffixe">{exercice.uniteGrandeurCible}</span>
         </div>

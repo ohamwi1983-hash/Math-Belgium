@@ -69,7 +69,6 @@ export function TableauEffectifs({ tableau, saisie }: PropsTableau) {
                   <td key={cellule.cle}>
                     <input
                       type="text"
-                      inputMode="numeric"
                       aria-label={saisie.libelles[k]}
                       className={`text-input ${saisie.erreurs[k] ? "is-erronee" : ""}`}
                       style={{ width: "4.6em", minWidth: 0, textAlign: "center", padding: "0.3rem 0.25rem" }}

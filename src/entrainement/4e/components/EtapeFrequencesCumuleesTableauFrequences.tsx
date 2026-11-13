@@ -4,13 +4,13 @@ import type { ReponseFrequencesCumulees } from "../moteur/verificationTableauFre
 import { evaluerFrequencesCumulees } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES } from "../moteur/sessionTableauFrequences";
 import { CONSIGNE_FREQUENCES_CUMULEES, LABEL_FREQUENCE_CUMULEE_PHI_I, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE_CUMULEE, frequencesCumuleesRevelees, texteAideFrequencesCumuleesNiveau1 } from "../ui/formatTableauFrequences";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -96,8 +96,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_FREQUENCE_CUMULEE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Fréquence cumulée de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>

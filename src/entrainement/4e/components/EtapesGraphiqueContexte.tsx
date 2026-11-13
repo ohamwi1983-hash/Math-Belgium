@@ -3,7 +3,6 @@ import type { ExerciceGraphiqueContexte, QuestionGraphique, ReponseLectureGraphi
 import { TEXTES_CONTEXTES } from "../generateurs/graphiqueContexte/contextes";
 import { NIVEAU_AIDE_MAX, verifierLecture } from "../moteur/sessionGraphiqueContexte";
 import { CONSIGNE_TYPE, LIBELLE_TYPE, ORDRE_TYPES, TEXTE_AIDE_NIVEAU2, texteAideNiveau1 } from "../ui/formatGraphiqueContexte";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
 import type { EtatListeMorceaux } from "../ui/listeMorceaux";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -11,6 +10,7 @@ import { BoutonAide } from "./BoutonAide";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 /**
  * gen70 — les deux écrans d'une question « graphique en contexte ». La question (langage courant)
@@ -85,7 +85,7 @@ function lireListe(texte: string): number[] | null {
 }
 
 function filtrerListe(valeur: string): string {
-  return valeur.replace(/[−–—]/g, "-").replace(/[^0-9\-.,; ]/g, "");
+  return valeur.replace(/[−–—]/g, "-");
 }
 
 interface ChampProps {
@@ -111,11 +111,9 @@ function ChampNombre({ id, label, unite, valeur, onChange, erronee, liste }: Cha
           id={id}
           className={`text-input${erronee ? " is-erronee" : ""}`}
           style={{ flex: 1, minWidth: 0 }}
-          inputMode={liste ? "text" : "decimal"}
           autoComplete="off"
           value={valeur}
-          onChange={(e) => onChange(liste ? filtrerListe(e.target.value) : filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={liste ? undefined : gererKeyDownNumerique}
+          onChange={(e) => onChange(liste ? filtrerListe(e.target.value) : normaliserSigneMoins(e.target.value))}
         />
         {unite && <span style={{ flex: "none", fontWeight: 600 }}>{unite}</span>}
       </div>

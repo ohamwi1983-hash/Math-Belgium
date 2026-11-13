@@ -4,13 +4,13 @@ import { evaluerConstructionIsocele } from "../moteur/verificationNormeDistance"
 import type { ReponseConstructionIsocele } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
 import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABNiveau1Latex, formatAideVecteurABNiveau2Latex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceIsocele;
@@ -65,8 +65,7 @@ export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentat
           className={`text-input${erronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_COMPOSANTE}
           value={valeur}
-          onChange={(e) => onChange(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => onChange(normaliserSigneMoins(e.target.value))}
         />
       </div>
     );

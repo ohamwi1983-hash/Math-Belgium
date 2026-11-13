@@ -4,7 +4,6 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionCaracteristiq
 import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp, toleranceChampPrincipal } from "../moteur/verificationCaracteristiquesDroite";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import type { ReponseCaracteristiques, ReponseChamp } from "../moteur/verificationCaracteristiquesDroite";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiquesDroiteEcran2";
@@ -13,6 +12,7 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "existe" | "nExistePas";
 
@@ -97,8 +97,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
             className={`text-input${erroneePrincipal ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_ANGLE}
             value={valeurPrincipal}
-            onChange={(e) => setValeurPrincipal(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setValeurPrincipal(normaliserSigneMoins(e.target.value))}
           />
         </div>
       ) : (
@@ -122,8 +121,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
                 className={`text-input${erroneePrincipal ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_PENTE}
                 value={valeurPrincipal}
-                onChange={(e) => setValeurPrincipal(filtrerSaisieNumeriqueFraction(e.target.value))}
-                onKeyDown={gererKeyDownNumeriqueFraction}
+                onChange={(e) => setValeurPrincipal(normaliserSigneMoins(e.target.value))}
               />
             </div>
           )}
@@ -150,8 +148,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
               className={`text-input${erroneeOrdonnee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_ORDONNEE}
               value={valeurOrdonnee}
-              onChange={(e) => setValeurOrdonnee(filtrerSaisieNumeriqueFraction(e.target.value))}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => setValeurOrdonnee(normaliserSigneMoins(e.target.value))}
             />
           </div>
         )}

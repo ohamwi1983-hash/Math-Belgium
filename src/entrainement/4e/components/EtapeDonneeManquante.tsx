@@ -5,11 +5,11 @@ import { consigneDonneeManquante, estCote, labelChampDonneeManquante, NOMBRE_NIV
 import { Katex } from "./Katex";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleQuelconque;
@@ -63,8 +63,7 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
             className={`text-input${tentativesUtilisees > 0 && statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
             placeholder={placeholderDonneeManquante(exercice)}
             value={texte}
-            onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
           {donneeEstCote && (
             <span className="select-souligne-wrap">

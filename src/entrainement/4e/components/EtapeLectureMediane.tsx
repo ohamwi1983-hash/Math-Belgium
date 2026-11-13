@@ -4,7 +4,6 @@ import type { ParametreLecture } from "../moteur/verificationMediane";
 import { diagnostiquerLecture } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_LECTURE_MEDIANE, NIVEAU_AIDE_MAX_LECTURE_Q1, NIVEAU_AIDE_MAX_LECTURE_Q3 } from "../moteur/sessionMediane";
 import { PLACEHOLDER_LECTURE, consigneLecture, formatFormuleInterpolationLatex, labelChampLecture, pointsEncadresLecture, polygonePoints, texteAideLectureNiveau1, texteAideLectureNiveau2, texteAideLectureNiveau3 } from "../ui/formatMediane";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { LectureQuartileGraph } from "./LectureQuartileGraph";
 import { Katex } from "./Katex";
@@ -12,6 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -77,8 +77,7 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
           className={`text-input${statut && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_LECTURE}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

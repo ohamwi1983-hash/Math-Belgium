@@ -4,13 +4,13 @@ import type { ReponseCumules } from "../moteur/verificationTableauFrequences";
 import { evaluerCumules } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_CUMULES } from "../moteur/sessionTableauFrequences";
 import { CONSIGNE_CUMULES, LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_CUMULE, cumulesReveles, texteAideCumulesNiveau1 } from "../ui/formatTableauFrequences";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFr } from "../ui/nombreFr";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -82,8 +82,7 @@ export function EtapeCumulesTableauFrequences({ exercice, tentativesUtilisees, t
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_CUMULE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Effectif cumulé de la valeur ${nombreFr(ligne.valeur)}`}
                     />
                   </td>

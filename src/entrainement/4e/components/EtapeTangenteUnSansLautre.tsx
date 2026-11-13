@@ -10,10 +10,10 @@ import {
 } from "../ui/formatUnSansLautre";
 import { diagnostiquerTangente } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceUnSansLautre;
@@ -52,8 +52,7 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
           className={`text-input${tentativesUtilisees > 0 && statut && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_TANGENTE}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumeriqueRacine(e.target.value))}
-          onKeyDown={gererKeyDownNumeriqueRacine}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

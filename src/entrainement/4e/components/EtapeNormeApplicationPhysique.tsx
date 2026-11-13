@@ -8,7 +8,6 @@ import {
 } from "../ui/formatApplicationPhysique";
 import { diagnostiquerNorme } from "../moteur/verificationApplicationPhysique";
 import { NIVEAU_AIDE_MAX_NORME } from "../moteur/sessionApplicationPhysique";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { Katex } from "./Katex";
@@ -19,6 +18,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
@@ -78,8 +78,7 @@ export function EtapeNormeApplicationPhysique({
             id="application-physique-norme"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={texte}
-            onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
           />
           <span className="champ-avec-unite-suffixe">{exercice.unite}</span>
         </div>

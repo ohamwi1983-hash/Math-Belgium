@@ -54,7 +54,7 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
           <label className="field-label field-label-minuscule">
             <Katex expression={label} />
           </label>
-          <input type="text" inputMode="decimal" style={{ minHeight: 44 }} className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
+          <input type="text" style={{ minHeight: 44 }} className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
       {niveauAide >= 1 && (

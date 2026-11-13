@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ExerciceFormeCanoniqueTransformation, ReponseCanonique } from "../core/formeCanoniqueTransformations.types";
 import { diagnostiquerCanonique } from "../moteur/verificationFormeCanoniqueTransformations";
 import { formatFormeGeneraleLatex } from "../ui/formatFormeCanoniqueTransformations";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueTransformation;
@@ -59,8 +59,7 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
             id="canonique-xs"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={xS}
-            onChange={(e) => setXS(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setXS(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -71,8 +70,7 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
             id="canonique-ys"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={yS}
-            onChange={(e) => setYS(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setYS(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

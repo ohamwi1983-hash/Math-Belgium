@@ -4,7 +4,6 @@ import { NIVEAU_AIDE_MAX_EXTRACTION, NIVEAU_AIDE_MAX_EXTRACTION2 } from "../mote
 import { diagnostiquerExtraction, diagnostiquerExtraction2 } from "../moteur/verificationRelationsDroites";
 import type { ReponseVecteur } from "../moteur/verificationRelationsDroites";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import {
   PLACEHOLDER_COMPOSANTE,
   consigneExtraction,
@@ -22,6 +21,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -84,8 +84,7 @@ export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees,
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -97,8 +96,7 @@ export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees,
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumeriqueFraction(e.target.value))}
-            onKeyDown={gererKeyDownNumeriqueFraction}
+            onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

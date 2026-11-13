@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceScenarioB;
@@ -45,11 +46,11 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">a =</label>
-          <input type="text" className={`text-input${aErronee ? " is-erronee" : ""}`} value={a} onChange={(e) => setA(e.target.value.replace(/[^0-9.,-]/g, ""))} />
+          <input type="text" className={`text-input${aErronee ? " is-erronee" : ""}`} value={a} onChange={(e) => setA(normaliserSigneMoins(e.target.value))} />
         </div>
         <div className="field field-inline">
           <label className="field-label field-label-minuscule">b =</label>
-          <input type="text" className={`text-input${bErronee ? " is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value.replace(/[^0-9.,-]/g, ""))} />
+          <input type="text" className={`text-input${bErronee ? " is-erronee" : ""}`} value={b} onChange={(e) => setB(normaliserSigneMoins(e.target.value))} />
         </div>
       </div>
       {niveauAide >= 1 && (

@@ -20,7 +20,8 @@ interface Jeton {
   valeur?: number;
 }
 
-function tokeniser(expression: string, lettre1: string, lettre2: string): Jeton[] {
+function tokeniser(saisie: string, lettre1: string, lettre2: string): Jeton[] {
+  const expression = saisie.replace(/[\u2212\u2013\u2014]/g, "-");
   const l1 = lettre1.toLowerCase();
   const l2 = lettre2.toLowerCase();
   const jetons: Jeton[] = [];

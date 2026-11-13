@@ -6,13 +6,13 @@ import type {
   ExerciceBienaymeTchebychevPourcentVersIntervalle,
 } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { LABEL_K, RAPPEL_ARRONDI_GARANTIE, precisionKDepuisPourcent, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Exercice =
   | ExerciceBienaymeTchebychevPourcentVersIntervalle
@@ -76,8 +76,7 @@ export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentatives
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 2,5"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownBienaymeTchebychev}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

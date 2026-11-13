@@ -4,13 +4,13 @@ import { evaluerConstructionDistance } from "../moteur/verificationNormeDistance
 import type { ReponseConstructionDistance } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
 import { CONSIGNE_GENERALE_DISTANCE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABNiveau1Latex, formatAideVecteurABNiveau2Latex, formatTermesDonneesDistanceLatex } from "../ui/formatNormeDistance";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceDistance;
@@ -67,8 +67,7 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
             className={`text-input${evaluation !== null && evaluation.x !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -80,8 +79,7 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
             className={`text-input${evaluation !== null && evaluation.y !== "correct" ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COMPOSANTE}
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

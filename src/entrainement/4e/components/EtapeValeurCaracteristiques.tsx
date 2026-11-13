@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesFonction, ReponseExistence } from "../core/caracteristiquesFonction.types";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { verifierValeurEnVCaracteristiques } from "../moteur/verificationCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "nExistePas" | "existe";
 
@@ -68,8 +68,7 @@ export function EtapeValeurCaracteristiques({ exercice, tentativesUtilisees, ten
             id="caract-valeur"
             className={`text-input${champErrone ? " is-erronee" : ""}`}
             value={valeur}
-            onChange={(e) => setValeur(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setValeur(normaliserSigneMoins(e.target.value))}
           />
         </div>
       )}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceParametreNorme } from "../core/normeDistance.types";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
 import { PLACEHOLDER_SOLUTION_X, aideMethodeResolutionQuadratiqueNiveau1, formatDiscriminantLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -10,6 +9,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "aucune" | "auMoins";
 
@@ -100,8 +100,7 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
                 className={`text-input${erronee ? " is-erronee" : ""}`}
                 placeholder={PLACEHOLDER_SOLUTION_X}
                 value={valeur}
-                onChange={(e) => modifierChamp(index, filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
+                onChange={(e) => modifierChamp(index, normaliserSigneMoins(e.target.value))}
                 aria-label={`Solution ${index + 1}`}
               />
               {valeurs.length > 1 && (

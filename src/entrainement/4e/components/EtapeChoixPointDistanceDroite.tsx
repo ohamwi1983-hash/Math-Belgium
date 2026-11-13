@@ -3,7 +3,6 @@ import type { ExerciceDistanceParalleles } from "../core/distanceDroite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_CHOIX_POINT } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerChoixPoint } from "../moteur/verificationDistanceDroite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { COULEUR_D, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CHOIX_POINT_NIVEAU1, consigneChoixPoint } from "../ui/formatDistanceDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -13,6 +12,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceDistanceParalleles;
@@ -75,8 +75,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -88,8 +87,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

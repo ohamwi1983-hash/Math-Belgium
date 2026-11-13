@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_ANGLES } from "../moteur/sessionTriangleLies";
 import { consigneAngles, formatAnglesBrutsViseeTexte, texteAideAnglesNiveau1, texteAideAnglesNiveau2, texteAideAnglesNiveau3 } from "../ui/formatTriangleLies";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -15,6 +14,7 @@ import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -65,8 +65,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
               id="triangle-lies-angle-utile"
               className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={utile}
-              onChange={(e) => setUtile(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setUtile(normaliserSigneMoins(e.target.value))}
             />
             <span className="champ-avec-unite-suffixe">°</span>
           </div>
@@ -80,8 +79,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
               id="triangle-lies-angle-hypothese"
               className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={hypothese}
-              onChange={(e) => setHypothese(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setHypothese(normaliserSigneMoins(e.target.value))}
             />
             <span className="champ-avec-unite-suffixe">°</span>
           </div>

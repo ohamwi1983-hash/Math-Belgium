@@ -180,7 +180,7 @@
     '<label class="case"><input type="checkbox" id="pari-on"> Je parie d\'abord (la réponse est masquée)</label>' +
     '<div class="pari-ligne" id="pari-ligne" hidden>' +
     '<label for="pari-annee">B dépasse A à partir de l\'année</label>' +
-    '<input type="number" id="pari-annee" inputmode="numeric" step="1">' +
+    '<input type="text" id="pari-annee" autocomplete="off">' +
     '<button type="button" class="btn" id="pari-verifier">Vérifier</button>' +
     '</div>' +
     '<p class="retour" id="pari-retour" hidden></p>' +
@@ -356,8 +356,6 @@
     // Pari
     this._lignePari.hidden = !this._pariOn;
     if (!this._pariOn) this._retourPari.hidden = true;
-    this._inputPari.min = String(sc.anneeDepart);
-    this._inputPari.max = String(sc.anneeDepart + N_ANNEES - 1);
     this._inputPari.placeholder = String(sc.anneeDepart + 10);
 
     // Conclusion

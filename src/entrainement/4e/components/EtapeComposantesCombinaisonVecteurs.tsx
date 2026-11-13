@@ -4,13 +4,13 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { diagnostiquerComposantes, diagnostiquerX, diagnostiquerY } from "../moteur/verificationCombinaisonVecteurs";
 import { NIVEAU_AIDE_MAX_COMPOSANTES } from "../moteur/sessionCombinaisonVecteurs";
 import { formatLabelXLatex, formatLabelYLatex, formatResultatLatex, formatSommeAxesLatex, formatSubstitutionLatex } from "../ui/formatCombinaisonVecteurs";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceCombinaisonVecteurs;
@@ -81,8 +81,7 @@ export function EtapeComposantesCombinaisonVecteurs({
             id="combinaison-composantes-x"
             className={`text-input${xErronee ? " is-erronee" : ""}`}
             value={texteX}
-            onChange={(e) => setTexteX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -93,8 +92,7 @@ export function EtapeComposantesCombinaisonVecteurs({
             id="combinaison-composantes-y"
             className={`text-input${yErronee ? " is-erronee" : ""}`}
             value={texteY}
-            onChange={(e) => setTexteY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setTexteY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

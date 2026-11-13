@@ -109,7 +109,6 @@ export function EtapeChampsArbreTableauEffectifs({
               </label>
               <input
                 type="text"
-                inputMode="decimal"
                 aria-label={champ.label}
                 className={`text-input ${erreurs[i] ? "is-erronee" : ""}`}
                 value={valeurs[i]}

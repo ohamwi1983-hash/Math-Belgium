@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TexteRiche5e } from "./TexteRiche5e";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -49,7 +50,7 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
       <p className="prompt-text"><TexteRiche5e texte={consigneJustificationA()} /></p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">h ≈</label>
-        <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value.replace(/[^0-9.,-]/g, ""))} />
+        <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(normaliserSigneMoins(e.target.value))} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

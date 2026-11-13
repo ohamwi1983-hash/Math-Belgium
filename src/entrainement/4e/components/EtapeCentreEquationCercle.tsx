@@ -3,7 +3,6 @@ import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_CENTRE } from "../moteur/sessionEquationCercle";
 import { diagnostiquerCentre } from "../moteur/verificationEquationCercle";
 import type { ReponseCentre } from "../moteur/verificationEquationCercle";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { CONSIGNE_CENTRE, CONSIGNE_GENERALE_EQUATION_CERCLE, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CENTRE_NIVEAU1, TEXTE_AIDE_CENTRE_NIVEAU2 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
@@ -11,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationCercle;
@@ -64,8 +64,7 @@ export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tenta
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={x}
-            onChange={(e) => setX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setX(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -77,8 +76,7 @@ export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tenta
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={y}
-            onChange={(e) => setY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setY(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

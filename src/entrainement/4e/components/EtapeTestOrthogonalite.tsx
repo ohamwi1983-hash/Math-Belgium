@@ -4,13 +4,13 @@ import type { ReponseTest } from "../moteur/verificationOrthogonalite";
 import { diagnostiquerCritereTest } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
 import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ORTHOGONALITE_VECTEURS_APRES, QUESTION_ORTHOGONALITE_VECTEURS_AVANT, QUESTION_ORTHOGONALITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, consigneGlobaleOrthogonalite, formatEnonceLatex, formuleSubstitueeTestLatex } from "../ui/formatOrthogonalite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTest;
@@ -68,8 +68,7 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
           className={`text-input${critereErronee ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_CRITERE}
           value={texteCritere}
-          onChange={(e) => setTexteCritere(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexteCritere(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

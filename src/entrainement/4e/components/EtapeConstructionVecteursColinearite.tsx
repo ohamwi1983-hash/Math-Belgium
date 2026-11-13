@@ -4,13 +4,13 @@ import { evaluerConstructionVecteurs } from "../moteur/verificationColinearite";
 import type { ReponseConstructionVecteurs } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS } from "../moteur/sessionColinearite";
 import { PLACEHOLDER_COMPOSANTE, consigneGlobaleColinearite, formatFormuleComposantesLatex, formatTermesEnoncePointsLatex } from "../ui/formatColinearite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceColinearPoints;
@@ -96,8 +96,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
               className={`text-input${abXErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
               value={abX}
-              onChange={(e) => setAbX(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setAbX(normaliserSigneMoins(e.target.value))}
             />
           </div>
           <div className="field field-inline">
@@ -109,8 +108,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
               className={`text-input${abYErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
               value={abY}
-              onChange={(e) => setAbY(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setAbY(normaliserSigneMoins(e.target.value))}
             />
           </div>
         </div>
@@ -124,8 +122,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
               className={`text-input${acXErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
               value={acX}
-              onChange={(e) => setAcX(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setAcX(normaliserSigneMoins(e.target.value))}
             />
           </div>
           <div className="field field-inline">
@@ -137,8 +134,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
               className={`text-input${acYErronee ? " is-erronee" : ""}`}
               placeholder={PLACEHOLDER_COMPOSANTE}
               value={acY}
-              onChange={(e) => setAcY(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setAcY(normaliserSigneMoins(e.target.value))}
             />
           </div>
         </div>

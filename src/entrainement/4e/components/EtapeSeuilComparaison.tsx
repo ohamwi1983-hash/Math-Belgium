@@ -2,13 +2,13 @@ import { useState } from "react";
 import type { ExerciceComparaisonSeries, QuestionSeuil } from "../core/comparaisonSeries.types";
 import { diagnostiquerSeuil } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { segmentsAideSeuilNiveau1, segmentsAideSeuilNiveau2, segmentsConsigneSeuil } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceComparaisonSeries;
@@ -49,8 +49,7 @@ export function EtapeSeuilComparaison({ exercice, question, tentativesUtilisees,
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 7"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

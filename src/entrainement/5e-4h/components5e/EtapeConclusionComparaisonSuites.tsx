@@ -74,11 +74,11 @@ export function EtapeConclusionComparaisonSuites({
         <label className="field-label field-label-minuscule">
           <Katex expression="n=" />
         </label>
-        <input type="text" inputMode="numeric" style={{ minHeight: 44 }} className={`text-input${nSeuilErronee ? " is-erronee" : ""}`} value={nSeuil} onChange={(e) => setNSeuil(e.target.value)} />
+        <input type="text" style={{ minHeight: 44 }} className={`text-input${nSeuilErronee ? " is-erronee" : ""}`} value={nSeuil} onChange={(e) => setNSeuil(e.target.value)} />
       </div>
       <div className="field field-inline">
         <label className="field-label">{labelTraduction(exercice)}</label>
-        <input type="text" inputMode="numeric" style={{ minHeight: 44 }} className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
+        <input type="text" style={{ minHeight: 44 }} className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">

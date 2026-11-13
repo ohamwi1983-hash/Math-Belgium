@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_SOUSTRACTION } from "../moteur/sessionTriangleLies";
 import { consigneSoustraction, formatDistancesParcouruesTexte, libellesSommetPartage, texteAideSoustractionNiveau1, texteAideSoustractionNiveau2, uniteLongueurPont } from "../ui/formatTriangleLies";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -15,6 +14,7 @@ import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -67,8 +67,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
               id="triangle-lies-soustraction-cote1"
               className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={cote1}
-              onChange={(e) => setCote1(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setCote1(normaliserSigneMoins(e.target.value))}
             />
             <span className="champ-avec-unite-suffixe">{uniteCote}</span>
           </div>
@@ -82,8 +81,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
               id="triangle-lies-soustraction-cote2"
               className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
               value={cote2}
-              onChange={(e) => setCote2(filtrerSaisieNumerique(e.target.value))}
-              onKeyDown={gererKeyDownNumerique}
+              onChange={(e) => setCote2(normaliserSigneMoins(e.target.value))}
             />
             <span className="champ-avec-unite-suffixe">{uniteCote}</span>
           </div>

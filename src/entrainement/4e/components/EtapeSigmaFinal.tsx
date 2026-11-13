@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersSigma, ExerciceBienaymeTchebychevNombreVersSigma } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerSigma } from "../moteur/verificationBienaymeTchebychev";
-import { filtrerSaisieBienaymeTchebychev, gererKeyDownBienaymeTchebychev } from "../ui/saisieBienaymeTchebychev";
 import { LABEL_SIGMA, PRECISION_UNITE, texteAideSigmaNiveau1, texteAideSigmaNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Exercice = ExerciceBienaymeTchebychevIntervalleVersSigma | ExerciceBienaymeTchebychevNombreVersSigma;
 
@@ -49,8 +49,7 @@ export function EtapeSigmaFinal({ exercice, tentativesUtilisees, tentativesMax, 
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder="ex : 8"
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieBienaymeTchebychev(e.target.value))}
-          onKeyDown={gererKeyDownBienaymeTchebychev}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

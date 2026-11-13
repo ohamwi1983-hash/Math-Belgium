@@ -3,7 +3,6 @@ import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types"
 import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import {
   CONSIGNE_GENERALE_RESOLUTION,
   LIBELLE_AUCUN,
@@ -18,6 +17,7 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -106,8 +106,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
                     className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
                     placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
                     value={point.x}
-                    onChange={(e) => modifierPoint(index, "x", filtrerSaisieNumeriqueFraction(e.target.value))}
-                    onKeyDown={gererKeyDownNumeriqueFraction}
+                    onChange={(e) => modifierPoint(index, "x", normaliserSigneMoins(e.target.value))}
                   />
                 </div>
                 <div className="field field-inline">
@@ -119,8 +118,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
                     className={`text-input${apresEchec && statut && statut !== "correct" ? " is-erronee" : ""}`}
                     placeholder={PLACEHOLDER_COORDONNEE_INTERSECTION}
                     value={point.y}
-                    onChange={(e) => modifierPoint(index, "y", filtrerSaisieNumeriqueFraction(e.target.value))}
-                    onKeyDown={gererKeyDownNumeriqueFraction}
+                    onChange={(e) => modifierPoint(index, "y", normaliserSigneMoins(e.target.value))}
                   />
                 </div>
               </div>

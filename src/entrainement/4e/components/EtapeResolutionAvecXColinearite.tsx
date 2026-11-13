@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { diagnostiquerResolutionAvecX } from "../moteur/verificationColinearite";
 import { PLACEHOLDER_SOLUTION_X, consigneGlobaleColinearite, formatEquationReduiteLatex } from "../ui/formatColinearite";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
@@ -59,8 +59,7 @@ export function EtapeResolutionAvecXColinearite({ exercice, tentativesUtilisees,
           className={`text-input${statut !== undefined && statut !== "correct" ? " is-erronee" : ""}`}
           placeholder={PLACEHOLDER_SOLUTION_X}
           value={texte}
-          onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
-          onKeyDown={gererKeyDownNumerique}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
         />
       </div>
 

@@ -4,12 +4,12 @@ import type { ReponseCentres } from "../moteur/verificationMoyennePonderee";
 import { evaluerCentres } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_CENTRES } from "../moteur/sessionMoyennePonderee";
 import { INDEX_LIGNE_EXEMPLE, LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_CENTRE, consigneCentres, formatClasseTexte, texteAideCentresNiveau1, texteAideCentresNiveau2 } from "../ui/formatMoyennePonderee";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceMoyennePondereeClasses;
@@ -81,8 +81,7 @@ export function EtapeCentresMoyennePonderee({ exercice, tentativesUtilisees, ten
                       className={`text-input${erronee ? " is-erronee" : ""}`}
                       placeholder={PLACEHOLDER_CENTRE}
                       value={valeurs[index]}
-                      onChange={(e) => modifier(index, filtrerSaisieNumerique(e.target.value))}
-                      onKeyDown={gererKeyDownNumerique}
+                      onChange={(e) => modifier(index, normaliserSigneMoins(e.target.value))}
                       aria-label={`Centre de la classe ${formatClasseTexte(exercice, index)}`}
                     />
                   </td>

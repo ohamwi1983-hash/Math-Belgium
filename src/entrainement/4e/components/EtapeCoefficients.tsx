@@ -3,11 +3,11 @@ import type { ExerciceAnalyseFonction } from "../core/analyseFonction.types";
 import { Katex } from "./Katex";
 import { formatFonctionColoreeLatex } from "../ui/formatAnalyseFonction";
 import { diagnostiquerCoefficients } from "../moteur/verificationAnalyseFonction";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -62,8 +62,7 @@ export function EtapeCoefficients({
             id="coeff-a"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={a}
-            onChange={(e) => setA(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setA(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -74,8 +73,7 @@ export function EtapeCoefficients({
             id="coeff-b"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={b}
-            onChange={(e) => setB(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setB(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -86,8 +84,7 @@ export function EtapeCoefficients({
             id="coeff-c"
             className={`text-input${erronee ? " is-erronee" : ""}`}
             value={c}
-            onChange={(e) => setC(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setC(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>

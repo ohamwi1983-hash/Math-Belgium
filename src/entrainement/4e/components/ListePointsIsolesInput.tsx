@@ -19,7 +19,6 @@ export function ListePointsIsolesInput({ valeurs, onChange }: Props) {
           </span>
           <input
             className="text-input"
-            inputMode="decimal"
             value={valeur}
             placeholder="point isolé"
             aria-label={`Point isolé ${index + 1}`}

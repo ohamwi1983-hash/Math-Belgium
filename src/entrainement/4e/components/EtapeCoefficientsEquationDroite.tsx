@@ -8,7 +8,6 @@ import {
   diagnostiquerParametrique,
 } from "../moteur/verificationEquationDroite";
 import type { ReponseCoefficients } from "../moteur/typesEquationDroite";
-import { filtrerSaisieNumeriqueFraction, gererKeyDownNumeriqueFraction } from "../ui/bloquerSaisieNonNumerique";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -19,6 +18,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationDroite;
@@ -139,8 +139,7 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
               className={`text-input${erronee ? " is-erronee" : ""}`}
               placeholder="ex : 1,5"
               value={valeursNumeriques[index]}
-              onChange={(e) => settersNumeriques[index](filtrerSaisieNumeriqueFraction(e.target.value))}
-              onKeyDown={gererKeyDownNumeriqueFraction}
+              onChange={(e) => settersNumeriques[index](normaliserSigneMoins(e.target.value))}
             />
           </div>
         ))

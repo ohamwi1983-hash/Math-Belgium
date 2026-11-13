@@ -3,7 +3,6 @@ import type { ExerciceEquationParabole } from "../core/equationParabole.types";
 import { NIVEAU_AIDE_MAX_SOMMET_FOYER } from "../moteur/sessionEquationParabole";
 import { diagnostiquerSommetFoyer } from "../moteur/verificationEquationParabole";
 import type { ReponseSommetFoyer } from "../moteur/verificationEquationParabole";
-import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { CONSIGNE_GENERALE_EQUATION_PARABOLE, CONSIGNE_SOMMET_FOYER, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_SOMMET_FOYER_NIVEAU1, TEXTE_AIDE_SOMMET_FOYER_NIVEAU2 } from "../ui/formatEquationParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
@@ -12,6 +11,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 
 interface Props {
   exercice: ExerciceEquationParabole;
@@ -62,8 +62,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={sx}
-            onChange={(e) => setSx(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setSx(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -75,8 +74,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={sy}
-            onChange={(e) => setSy(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setSy(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
@@ -90,8 +88,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={fx}
-            onChange={(e) => setFx(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setFx(normaliserSigneMoins(e.target.value))}
           />
         </div>
         <div className="field field-inline">
@@ -103,8 +100,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
             className={`text-input${erronee ? " is-erronee" : ""}`}
             placeholder={PLACEHOLDER_COORDONNEE}
             value={fy}
-            onChange={(e) => setFy(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
+            onChange={(e) => setFy(normaliserSigneMoins(e.target.value))}
           />
         </div>
       </div>
