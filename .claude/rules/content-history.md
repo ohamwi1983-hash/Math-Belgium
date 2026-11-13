@@ -2905,3 +2905,24 @@ paths:
   `forme` = situation + direction + nature de l'intensité (entier / racine / arrondi) ; cas
   particulier = F₃ horizontale ou verticale (sans direction) ; `calcul` exacte si intensité exacte
   sans angle.
+
+- **4e ch6 — gen82 « Décomposer un vecteur selon deux directions »** (section
+  `decompositionGeometrique`, processus 2 appliquer ; la section n'avait aucun générateur). Six
+  variantes : quatre figures (réseau de parallélogrammes — directions du réseau ; parallélogramme
+  ABCD découpé par ses milieux et son centre ; hexagone régulier de centre O ; quadrillage avec
+  directions obliques, jamais perpendiculaires) et deux en composantes (poser et résoudre le
+  système de l'exemple de la section 10 ; « la décomposition est-elle possible ? »). Vocabulaire du
+  cours : u = a·v + b·w (a, b, comme l'atelier et l'exemple de la section 10), méthode du
+  parallélogramme en sens inverse. Écrans graphiques : le point M (parallèle à v par l'origine,
+  parallèle à w par l'extrémité — choix fermé parmi les lettres de la figure ; distracteurs :
+  l'autre sommet du parallélogramme, les points « à contresens »), puis a, puis b (la combinaison
+  complète s'affiche en conclusion : un écran « écris la combinaison » aurait fait recopier deux
+  nombres déjà validés). Composantes : système (choix fermé : le bon, le transposé, a/b échangés
+  ou composantes de u échangées), a et b, vérification (composantes de a·v et b·w — jamais a et b
+  tous deux égaux à ±1). « Possible ? » : verdict (produits en croix), puis a et b ou k tel que
+  w = k·v ; verdict tiré à pile ou face AVANT les rejets (sinon 65 % de « possible »), jamais figé
+  (`forme` constante « possible:verdict », jamais de cas particulier). Profil : `forme` = variante
+  + signes (++, +−, −−) + demi-entier ; cas particulier = coefficient nul (≈ 1/8) ; pas de
+  `calcul`. Figure unique écran/papier (`ui/figureDecompositionVecteur.ts`), étiquettes placées
+  par score de distance. Cours : un `para` (lire a et b, signe) et un `attention` « Le signe et le
+  rôle des coefficients » ajoutés après la méthode, carte en fin de section.

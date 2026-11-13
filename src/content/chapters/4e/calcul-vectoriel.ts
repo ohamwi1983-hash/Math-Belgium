@@ -701,6 +701,26 @@ export const calculVectoriel: ChapterContent = {
           ],
         },
         {
+          kind: 'para',
+          text:
+            'Souvent, les deux directions sont données par deux vecteurs $\\vec{v}$ et $\\vec{w}$ non ' +
+            'colinéaires. Pour décomposer $\\vec{u} = \\vec{PQ}$, trace par P la parallèle à $\\vec{v}$ et ' +
+            'par Q la parallèle à $\\vec{w}$ : elles se coupent en un point M. Alors $\\vec{PM}$ est ' +
+            'colinéaire à $\\vec{v}$ et $\\vec{MQ}$ à $\\vec{w}$ : $\\vec{PM} = a\\vec{v}$, ' +
+            '$\\vec{MQ} = b\\vec{w}$, et $\\vec{u} = a\\vec{v} + b\\vec{w}$. La valeur absolue de a est le ' +
+            'nombre de fois que la longueur de $\\vec{v}$ tient dans [PM] (de même pour b).',
+        },
+        {
+          kind: 'attention',
+          label: 'Le signe et le rôle des coefficients',
+          text:
+            'Si $\\vec{PM}$ et $\\vec{v}$ sont de sens contraires (on va « à contresens »), a est ' +
+            '**négatif** — de même pour b. Ne mélange pas les deux directions : a se lit sur le côté ' +
+            'parallèle à $\\vec{v}$, b sur le côté parallèle à $\\vec{w}$. Trace des parallèles, jamais des ' +
+            'perpendiculaires. Enfin, si $\\vec{v}$ et $\\vec{w}$ sont colinéaires, les deux directions ' +
+            'n\'en font qu\'une : la décomposition n\'est pas possible.',
+        },
+        {
           kind: 'atelier',
           tag: 'decomposition-vecteur-widget',
           label: 'Manipule toi-même : décomposer un vecteur',
@@ -770,6 +790,16 @@ export const calculVectoriel: ChapterContent = {
             'horizontale la compression ou la traction exercée sur la structure. Se tromper ' +
             'dans cette décomposition peut littéralement faire s\'effondrer un ouvrage.',
           domaines: ['Ingénierie', 'Construction'],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Décomposer un vecteur selon deux directions',
+          generatorId: 'gen82',
+          description: [
+            'Écris un vecteur sous la forme u = a·v + b·w : sur une figure (réseau, parallélogramme, hexagone, quadrillage) ou en composantes, et décide si la décomposition est possible.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 82. Décomposer un vecteur selon deux directions »',
         },
       ],
     },
