@@ -10,7 +10,7 @@ import {
 } from "./moteur/sessionUnSansLautre";
 import type { EtatSessionUnSansLautre, PhaseUnSansLautre } from "./moteur/typesUnSansLautre";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceUnSansLautre } from "./generateurs/unSansLautre";
-import type { FonctionConnue } from "./core/unSansLautre.types";
+import type { FonctionDonnee } from "./core/unSansLautre.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeCarreUnSansLautre } from "./components/EtapeCarreUnSansLautre";
 import { EtapeValeurSigneeUnSansLautre } from "./components/EtapeValeurSigneeUnSansLautre";
@@ -21,14 +21,15 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
-const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de l'autre.";
+const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de la valeur donnée.";
 import { Katex } from "./components/Katex";
 import {
   formatCarreCibleLatex,
   formatIntervalleLatex,
   formatValeurCibleSimplifieeLatex,
   formatValeurConnueLatex,
-  formatValeurTangenteSimplifieeLatex,
+  formatValeurFinaleSimplifieeLatex,
+  nomFonctionFinale,
 } from "./ui/formatUnSansLautre";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 
@@ -49,7 +50,7 @@ function nouvelleSession(): EtatSessionUnSansLautre {
 function sessionInitiale(): EtatSessionUnSansLautre {
   const code = lireCodeDepuisUrl();
   if (!code) return nouvelleSession();
-  return demarrerSessionUnSansLautre(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceUnSansLautre, (id) => construireAvecVarianteId(id as FonctionConnue)));
+  return demarrerSessionUnSansLautre(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceUnSansLautre, (id) => construireAvecVarianteId(id as FonctionDonnee)));
 }
 
 /** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (3 phases fixes,
@@ -77,7 +78,7 @@ function calculerSegmentsProgression(etat: EtatSessionUnSansLautre): EtatPucePro
 /** Titre de la fiche de consultation de l'écran courant — la grandeur demandée par cet écran. */
 function titreEcran(etat: EtatSessionUnSansLautre): string {
   const cible = etat.exerciceCourant.fonctionCible;
-  return etat.phase === "carre" ? `Valeur de ${cible}²(θ)` : etat.phase === "valeurSignee" ? `Valeur de ${cible}(θ)` : "Valeur de tan(θ)";
+  return etat.phase === "carre" ? `Valeur de ${cible}²(θ)` : etat.phase === "valeurSignee" ? `Valeur de ${cible}(θ)` : `Valeur de ${nomFonctionFinale(etat.exerciceCourant)}(θ)`;
 }
 
 interface TransitionEnAttente {
@@ -133,7 +134,7 @@ export function AppUnSansLautre() {
     setEnAttente(null);
     setHistorique([]);
     setNumeroExercice((n) => n + 1);
-    setEtat(demarrerSessionUnSansLautre(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionConnue)));
+    setEtat(demarrerSessionUnSansLautre(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionDonnee)));
   }
 
   const exercice = etat.exerciceCourant;
@@ -144,7 +145,7 @@ export function AppUnSansLautre() {
     ) : etat.phase === "valeurSignee" ? (
       <Katex expression={`\\displaystyle ${formatValeurCibleSimplifieeLatex(exercice)}`} />
     ) : (
-      <Katex expression={`\\displaystyle ${formatValeurTangenteSimplifieeLatex(exercice)}`} />
+      <Katex expression={`\\displaystyle ${formatValeurFinaleSimplifieeLatex(exercice)}`} />
     );
 
   const validation = enAttente
@@ -160,7 +161,7 @@ export function AppUnSansLautre() {
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
-        <h1 className="app-title">Retrouver sin ou cos à partir de l'autre</h1>
+        <h1 className="app-title">Retrouver sin, cos ou tan à partir de l'un d'eux</h1>
         <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />

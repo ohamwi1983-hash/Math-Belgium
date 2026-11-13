@@ -50,13 +50,21 @@ export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativ
         <>
           <div>
             {aideActivee && (
-              <div className="triangle-quelconque-aide">
-                <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
-                <Katex
-                  expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}
-                  block
-                />
-              </div>
+              exercice.fonctionConnue === "tan" ? (
+                <div className="triangle-quelconque-aide">
+                  <p>Divise l'identité fondamentale par cos²θ :</p>
+                  <Katex expression="1 + \tan^2\theta = \dfrac{1}{\cos^2\theta}" block />
+                  <Katex expression="\cos^2\theta = \dfrac{1}{1 + \tan^2\theta}" block />
+                </div>
+              ) : (
+                <div className="triangle-quelconque-aide">
+                  <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
+                  <Katex
+                    expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}
+                    block
+                  />
+                </div>
+              )
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

@@ -4,11 +4,20 @@
  * intervalle sur θ déterminant un unique quadrant, l'élève retrouve l'autre valeur via l'identité
  * cos²θ+sin²θ=1, puis calcule tanθ=sinθ/cosθ. Portée limitée (section "Objectif pédagogique") :
  * jamais de résolution d'équation/inéquation trigonométrique générale, jamais d'autre identité,
- * jamais encore la variante où tanθ serait la valeur de départ (réservée à un développement
- * ultérieur séparé, explicitement exclue par la spec).
+ * à l'origine jamais la variante où tanθ serait la valeur de départ.
+ *
+ * Variante « tan θ donné » (ajoutée ensuite, en FIN de catalogue pour que les codes `?code=` des
+ * feuilles déjà imprimées gardent leur indice de variante) : la valeur connue est tan θ = ±p/q ;
+ * l'élève retrouve cos²θ par 1 + tan²θ = 1/cos²θ, puis cos θ (signe donné par le quadrant), puis
+ * sin θ = tan θ · cos θ. Mêmes trois écrans : `fonctionCible` vaut alors "cos" et le troisième écran
+ * demande sin θ au lieu de tan θ (voir `formatFonctionFinaleLatex`).
  */
 
+/** Fonction CIBLE des écrans 1 et 2 (cos ou sin) — et fonction donnée des deux premières variantes. */
 export type FonctionConnue = "cos" | "sin";
+
+/** Fonction donnée dans l'énoncé (= identifiant de variante du catalogue). */
+export type FonctionDonnee = FonctionConnue | "tan";
 
 /**
  * θ est toujours dans un intervalle OUVERT correspondant à un unique quadrant — jamais sur un axe.
@@ -29,7 +38,7 @@ export type QuadrantOuvert = "I" | "II" | "III" | "IV";
 export type TypeValeurConnue = "triplet" | "quelconque";
 
 export interface ExerciceUnSansLautre {
-  fonctionConnue: FonctionConnue;
+  fonctionConnue: FonctionDonnee;
   fonctionCible: FonctionConnue;
   quadrant: QuadrantOuvert;
   /** Bornes de l'intervalle sur θ, en degrés — toujours celles du quadrant entier (ex. 90/180). */
@@ -44,7 +53,8 @@ export interface ExerciceUnSansLautre {
   /** = signeConnu * p/q — la valeur donnée à l'élève (cosθ ou sinθ selon `fonctionConnue`). */
   valeurConnue: number;
   /**
-   * Réponse attendue de l'écran "Carré" : `carreCibleNum/carreCibleDen` = (q²-p²)/q² — toujours
+   * Réponse attendue de l'écran "Carré" : `carreCibleNum/carreCibleDen` = (q²-p²)/q² (variante tan :
+   * cos²θ = q²/(p²+q²), irréductible pour la même raison) — toujours
    * DÉJÀ irréductible par construction (gcd(p,q)=1 ⟹ gcd(q²-p²,q²)=1, propriété vérifiée par
    * test) — l'élève peut néanmoins soumettre une forme équivalente non réduite, acceptée
    * telle quelle (jamais un statut incorrect).

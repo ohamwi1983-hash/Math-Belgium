@@ -390,7 +390,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           generatorId: 'gen16',
           description: [
             'Tu connais sin θ ou cos θ ? Retrouve l\'autre, à partir d\'un intervalle donné ' +
-              'pour θ. Puis calcule tan θ.',
+              'pour θ. Puis calcule tan θ. Ou pars de tan θ pour retrouver cos θ, puis sin θ.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 16. L\'un sans l\'autre »',
@@ -932,6 +932,65 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 79. Le cercle dans le réel : rotations en contexte »',
+        { kind: 'subheading', text: 'Pour aller plus loin — des équations à transformer' },
+        {
+          kind: 'para',
+          text:
+            'Beaucoup d\'équations ne sont pas encore de la forme sin α = k. On les **transforme** ' +
+            'd\'abord en une ou plusieurs **équations de base** (sin α = k, cos α = k ou tan α = k), ' +
+            'que l\'on résout ensuite comme ci-dessus, avant de réunir toutes les solutions. Trois ' +
+            'cas reviennent souvent :',
+        },
+        {
+          kind: 'list',
+          items: [
+            '$a\\sin\\alpha + b = c$ : on isole $\\sin\\alpha$ (une équation de base).',
+            '$\\sin^2\\alpha = k$ : si $k \\ge 0$, deux nombres opposés ont ce carré, donc ' +
+              '$\\sin\\alpha = \\sqrt{k}$ ou $\\sin\\alpha = -\\sqrt{k}$ (deux équations de base, une seule si $k = 0$).',
+            'un **produit nul**, comme $\\sin\\alpha \\cdot (2\\cos\\alpha - 1) = 0$ : un produit est nul si et ' +
+              'seulement si l\'un de ses facteurs est nul, donc une équation de base par facteur.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: '4 sin² α − 3 = 0',
+          steps: [
+            { tag: 'isoler le carré', text: '$4\\sin^2\\alpha = 3 \\iff \\sin^2\\alpha = \\dfrac{3}{4}$' },
+            { tag: 'deux équations de base', text: '$\\sin\\alpha = \\dfrac{\\sqrt{3}}{2}$ ou $\\sin\\alpha = -\\dfrac{\\sqrt{3}}{2}$, même angle de référence $\\alpha_0 = 60^\\circ$' },
+            { tag: 'résoudre chacune', text: '$\\sin\\alpha = \\dfrac{\\sqrt{3}}{2}$ : 60° et 120° — $\\sin\\alpha = -\\dfrac{\\sqrt{3}}{2}$ : 240° et 300°' },
+          ],
+          result: { tag: 'résultat', text: 'S = {60° ; 120° ; 240° ; 300°}' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'sin α · (2 cos α − 1) = 0',
+          steps: [
+            { tag: 'produit nul', text: '$\\sin\\alpha = 0$ ou $2\\cos\\alpha - 1 = 0$, c\'est-à-dire $\\cos\\alpha = \\dfrac{1}{2}$' },
+            { tag: 'sin α = 0', text: 'solutions sur l\'axe horizontal : 0° et 180°' },
+            { tag: 'cos α = 1/2', text: 'angle de référence 60°, cos positif dans les quadrants I et IV : 60° et 360° − 60° = 300°' },
+          ],
+          result: { tag: 'résultat', text: 'S = {0° ; 60° ; 180° ; 300°}' },
+        },
+        {
+          kind: 'attention',
+          label: 'Trois réflexes',
+          text:
+            'Un carré n\'est **jamais négatif** : $\\sin^2\\alpha = -\\dfrac{1}{4}$ n\'a aucune solution, inutile ' +
+            'de chercher un angle. Ne pas oublier la **racine négative** : $\\sin^2\\alpha = k$ donne deux ' +
+            'équations de base, donc souvent quatre solutions. Et ne **jamais diviser** les deux membres par ' +
+            '$\\sin\\alpha$ (ou $\\cos\\alpha$) : on perdrait les solutions de $\\sin\\alpha = 0$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Équations trigonométriques à transformer',
+          generatorId: 'gen78',
+          description: [
+            'Transforme a·sin α + b = c, sin² α = k ou un produit nul en équations de base, puis ' +
+              'résous chacune sur [0° ; 360°[ : angle de référence, solutions, ensemble des solutions. ' +
+              'Parfois, l\'équation n\'a aucune solution.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 78. Équations trigonométriques à transformer »',
         },
       ],
     },

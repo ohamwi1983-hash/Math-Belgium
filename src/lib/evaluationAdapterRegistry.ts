@@ -50,6 +50,7 @@ import { adaptateurEvaluationComparaisonSeries } from '../entrainement/4e/genera
 import { adaptateurEvaluationCercleTrigonometrique } from '../entrainement/4e/generateurs/cercleTrigonometrique/exportEvaluation'
 import { adaptateurEvaluationValeursRemarquables } from '../entrainement/4e/generateurs/valeursRemarquables/exportEvaluation'
 import { adaptateurEvaluationUnSansLautre } from '../entrainement/4e/generateurs/unSansLautre/exportEvaluation'
+import { adaptateurEvaluationEquationsTransformer } from '../entrainement/4e/generateurs/equationsTransformer/exportEvaluation'
 import { adaptateurEvaluationAnglesAssocies } from '../entrainement/4e/generateurs/anglesAssocies/exportEvaluation'
 import { adaptateurEvaluationQuelAngle } from '../entrainement/4e/generateurs/quelAngle/exportEvaluation'
 import { adaptateurEvaluationTriangleQuelconque } from '../entrainement/4e/generateurs/triangleQuelconque/exportEvaluation'
@@ -135,6 +136,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen81: versionPapier(adaptateurEvaluationDetectiveErreurs) as unknown as AdaptateurFeuilleExercices<never>,
   gen79: versionPapier(adaptateurEvaluationRotationsContexte) as unknown as AdaptateurFeuilleExercices<never>,
   gen77: versionPapier(adaptateurEvaluationTexteTriangle) as unknown as AdaptateurFeuilleExercices<never>,
+  gen78: versionPapier(adaptateurEvaluationEquationsTransformer) as unknown as AdaptateurFeuilleExercices<never>,
   gen20: versionPapier(adaptateurEvaluationPointVectoriel) as unknown as AdaptateurFeuilleExercices<never>,
   gen21: versionPapier(adaptateurEvaluationRelationVectorielle) as unknown as AdaptateurFeuilleExercices<never>,
   gen22: versionPapier(adaptateurEvaluationCombinaisonVecteurs) as unknown as AdaptateurFeuilleExercices<never>,

@@ -15,6 +15,7 @@
  *   d'une série à l'autre), sans objet pour 0° et 90° (jamais décalées).
  * - gen16 : quadrant I ≈ 25 % (signe immédiat) → cas particulier ; valeur issue d'un triplet
  *   pythagoricien (résultat rationnel, ≈ 50 %) → paramètre au choix « résultat avec radical ».
+ *   Même profil pour la variante « tan θ donné » (triplet ⟺ p² + q² carré parfait, ≈ 50 %).
  * - gen17 : variantes sin/cos des quadrants II à IV sans passage par le complémentaire (≈ 50 %) →
  *   cas particulier (un palier de moins). La variante « complémentaire directe » et la tangente
  *   n'ont qu'un palier par construction : choix de variante.

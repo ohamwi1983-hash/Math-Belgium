@@ -6,6 +6,7 @@
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import type { StatutVerification } from "./statutVerification";
+import { valeurFinale } from "../ui/formatUnSansLautre";
 
 const TOLERANCE = 0.005;
 
@@ -49,8 +50,9 @@ export function verifierValeurSignee(exercice: ExerciceUnSansLautre, texte: stri
   return diagnostiquerValeurSignee(exercice, texte) === "correct";
 }
 
+/** Troisième écran : tan θ (variantes cos/sin données) ou sin θ (variante « tan θ donné »). */
 export function diagnostiquerTangente(exercice: ExerciceUnSansLautre, texte: string): StatutVerification {
-  return diagnostiquerReponseNumerique(exercice.tanValeur, texte);
+  return diagnostiquerReponseNumerique(valeurFinale(exercice), texte);
 }
 
 export function verifierTangente(exercice: ExerciceUnSansLautre, texte: string): boolean {

@@ -5,6 +5,7 @@ import {
   formatCarreCibleLatex,
   formatCarreLatex,
   formatFonctionCibleLatex,
+  formatFonctionFinaleLatex,
   formatValeurCibleSimplifieeLatex,
   PLACEHOLDER_TANGENTE,
 } from "../ui/formatUnSansLautre";
@@ -25,7 +26,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Troisième et dernière étape — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule
+/** Troisième et dernière étape (tan θ ; sin θ pour la variante « tan θ donné ») — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule
  * fois dans l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees) ; le bloc local ne garde que
  * les deux résultats confirmés précédents (carré, puis valeur signée). */
 export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
@@ -41,7 +42,7 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
         <Katex expression={`${formatFonctionCibleLatex(exercice)} = ${formatValeurCibleSimplifieeLatex(exercice)}`} block />
       </div>
       <p className="prompt-text">
-        Quelle est la valeur de <Katex expression="\tan\theta" /> ? (forme exacte ou décimale arrondie au centième)
+        Quelle est la valeur de <Katex expression={formatFonctionFinaleLatex(exercice)} /> ? (forme exacte ou décimale arrondie au centième)
       </p>
       <div className="field">
         <label className="field-label" htmlFor="un-sans-lautre-tangente">
@@ -60,9 +61,16 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
         <>
           <div>
             {aideActivee && (
-              <div className="triangle-quelconque-aide">
-                <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
-              </div>
+              exercice.fonctionConnue === "tan" ? (
+                <div className="triangle-quelconque-aide">
+                  <p>Multiplie les deux membres de la définition de la tangente par cos θ :</p>
+                  <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta} \iff \sin\theta = \tan\theta \cdot \cos\theta" block />
+                </div>
+              ) : (
+                <div className="triangle-quelconque-aide">
+                  <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
+                </div>
+              )
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

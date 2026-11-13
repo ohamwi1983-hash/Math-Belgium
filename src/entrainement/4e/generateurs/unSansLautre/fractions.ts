@@ -60,3 +60,24 @@ export const POOL_TRIPLETS = construirePool(12, true);
 /** Mêmes 12 comme borne — l'exemple `7/12` de la correction (radicande `144-49=95`, non carré
  * parfait) y est bien atteignable. */
 export const POOL_QUELCONQUES = construirePool(12, false);
+
+/**
+ * Variante « tan θ donné » : |tan θ| = p/q (p, q coprimes, q = 1 permis : tan θ entier), et
+ * cos²θ = q²/(p²+q²). « triplet » ⟺ p²+q² carré parfait (cos θ et sin θ rationnels, ex. tan θ = 3/4
+ * → cos θ = ±4/5) ; sinon une racine à simplifier puis un dénominateur à rationaliser (ex.
+ * tan θ = 2 → cos θ = ±√5/5). Bornes : triplets avec p, q ≤ 12 (3/4, 4/3, 5/12, 12/5) ; valeurs
+ * quelconques avec p, q ≤ 5 (radicande p²+q² ≤ 41, calculs de tête).
+ */
+export function construirePoolTangente(max: number, carreParfaitVoulu: boolean): FractionPq[] {
+  const resultats: FractionPq[] = [];
+  for (let q = 1; q <= max; q++) {
+    for (let p = 1; p <= max; p++) {
+      if (pgcd(p, q) !== 1) continue;
+      if (estCarreParfait(p * p + q * q) === carreParfaitVoulu) resultats.push({ p, q });
+    }
+  }
+  return resultats;
+}
+
+export const POOL_TANGENTE_TRIPLETS = construirePoolTangente(12, true);
+export const POOL_TANGENTE_QUELCONQUES = construirePoolTangente(5, false);
