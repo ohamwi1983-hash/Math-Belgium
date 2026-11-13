@@ -1022,7 +1022,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
               'triangle. S\'il vaut exactement 1 : **un** triangle, rectangle en B.',
             'Sinon, deux candidats : B̂₁ = sin⁻¹(…), aigu, et B̂₂ = 180° − B̂₁, obtus.',
             'Garde chaque candidat qui laisse de la place au troisième angle : il faut Â + B̂ < 180°. ' +
-              'B̂₁ convient toujours ; B̂₂ convient seulement si Â + B̂₂ < 180°.',
+              'Quand Â est aigu, B̂₁ convient toujours ; B̂₂ convient seulement si Â + B̂₂ < 180°.',
             'Pour chaque triangle retenu : Ĉ = 180° − Â − B̂, puis c par la loi des sinus.',
           ],
         },
@@ -1364,6 +1364,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 19. Triangle quelconque »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Cas ambigu : 0, 1 ou 2 triangles ?',
+          generatorId: 'gen74',
+          description: [
+            'Deux côtés et un angle non compris : calcule sin B̂, garde ou écarte les candidats ' +
+              'B̂ et 180° − B̂, décide combien de triangles existent, puis calcule le côté c de ' +
+              'chacun. L\'arc de compas de la correction montre pourquoi.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 74. Cas ambigu : 0, 1 ou 2 triangles ? »',
         },
       ],
     },

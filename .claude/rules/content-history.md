@@ -2662,3 +2662,18 @@ paths:
   transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
   correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
   évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).
+
+- **4e, Chapitre 5 — gen74 « Cas ambigu : 0, 1 ou 2 triangles ? »** (section `triangle`,
+  processus 2 appliquer) : données SSA (a, b, Â opposé à a, aigu). Cœur PUR et exporté
+  `4e/moteur/modeleCasAmbigu.ts` (`resoudreSSA`, `intersectionsSSA`, `sommetC` : sin B̂, candidats
+  B̂₁/B̂₂, test Â + B̂ < 180°, triangles, côtés, hauteur h ; réutilisable pour une famille « deux
+  positions possibles »). Toujours 5 écrans (la barre ne trahit pas l'issue) : sin B̂ (champ, au
+  millième) → trancher sin B̂ > / = / < 1 (choix fermé) → candidats B̂ et Â + B̂ (champs) ou, sans
+  candidat, « que fait l'arc de compas ? » (choix fermé) → nombre de triangles 0/1/2 (choix fermé)
+  → côté c de chaque triangle, ou la plus petite longueur de BC (= h) s'il n'y en a aucun. Figure à
+  l'échelle dont le cadre ne dépend que de Â et b ; l'arc de compas (centre C, rayon a) n'apparaît
+  qu'après l'écran 4 et dans le corrigé papier (`figureHtml`, étape d). Issues tirées à 1/3 chacune
+  (sin B̂ = 1 : Â = 30°, b = 2a, ≈ 5,6 % des tirages, dans « 1 triangle »). UNE seule variante et
+  `forme` = format des données (entiers / un côté décimal) : l'issue est un verdict, jamais imposée
+  entre séries. Bloc « Résoudre le cas ambigu » précisé : « B̂₁ convient toujours » n'est vrai que
+  pour Â aigu (pour Â obtus et a ≤ b, aucun triangle bien que sin B̂ < 1).

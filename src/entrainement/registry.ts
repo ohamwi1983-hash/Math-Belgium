@@ -102,6 +102,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen18: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppQuelAngle').then((m) => ({ default: m.AppQuelAngle }))),
   gen19: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppTriangleQuelconque').then((m) => ({ default: m.AppTriangleQuelconque }))),
   gen58: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppTriangleLies').then((m) => ({ default: m.AppTriangleLies }))),
+  gen74: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppCasAmbigu').then((m) => ({ default: m.AppCasAmbigu }))),
   gen63: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppQuizCercleTriangles').then((m) => ({ default: m.AppQuizCercleTriangles }))),
 
   // --- 4e, chapitre 4 : Statistique descriptive à une variable ---
