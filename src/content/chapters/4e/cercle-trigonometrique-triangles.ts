@@ -1465,6 +1465,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 75. Aire d\'un triangle quelconque »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Le détective d\'erreurs',
+          generatorId: 'gen81',
+          description: [
+            'Un élève a résolu un triangle, mais une ligne de sa copie est fausse : angle obtus ' +
+              'oublié, calculatrice en radians, arrondi trop tôt, côté mal associé, Al-Kashi mal ' +
+              'recopié ou second triangle oublié. Trouve la ligne, nomme l\'erreur et corrige.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 81. Le détective d\'erreurs »',
+        },
       ],
     },
     {

@@ -96,6 +96,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen76: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppValeurExacte').then((m) => ({ default: m.AppValeurExacte }))),
   gen80: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppComposerForces').then((m) => ({ default: m.AppComposerForces }))),
   gen75: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppAireTriangleSinus').then((m) => ({ default: m.AppAireTriangleSinus }))),
+  gen81: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppDetectiveErreurs').then((m) => ({ default: m.AppDetectiveErreurs }))),
   gen62: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppQuizFonctionsReference').then((m) => ({ default: m.AppQuizFonctionsReference }))),
 
   // --- 4e, chapitre 5 : Cercle trigonométrique & triangles quelconques ---

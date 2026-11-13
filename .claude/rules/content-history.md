@@ -2744,3 +2744,24 @@ paths:
   (absent pour l'angle droit, comme gen14–18) ; `calculatriceIndispensable: ["quadrilatere"]`.
   Toutes les combinaisons ≥ 2 300 attendues en 20 000 essais ; vérifié sur 4 évaluations réelles
   de 3 séries (calculatrice interdite/autorisée, cas coché ou non).
+- **4e ch5 — gen81 « Le détective d'erreurs »** (section `triangle`, processus 3 transférer) : la
+  résolution complète d'un triangle par un élève fictif (5 ou 6 lignes numérotées, KaTeX, marge
+  rouge) contient UNE ligne fausse et la suite en découle (la copie reste cohérente avec son
+  erreur). 6 variantes = 6 erreurs : angle obtus pris pour l'aigu par sin⁻¹, calculatrice en
+  radians, arrondi intermédiaire (côté à l'unité, cosinus au dixième, rapport de la loi des sinus à
+  l'unité), côté non opposé dans la loi des sinus, signe ou facteur 2 oublié dans Al-Kashi, second
+  triangle oublié (cas ambigu). 16 scénarios = configuration (SAS, SSS, AAS avec rapport commun
+  k = c/sin Ĉ, SSA) + ligne fausse fixe. 3 écrans : la ligne (choix fermé), l'erreur (4
+  descriptions, leurres toujours faux pour CETTE ligne), la correction (valeur de la ligne puis
+  résultat final, ou un seul champ si la ligne fausse est la dernière ; cas ambigu : B̂₂ puis c₂),
+  jugée sur la valeur EXACTE à ± une unité du dernier chiffre (refuse donc l'arrondi trop tôt).
+  Module de résolution propre (`moteur/modeleDetectiveErreurs.ts`), valeurs en mémoire, nombres
+  recopiés arrondis ; seule la somme des angles est faite sur les angles affichés (sinon la
+  soustraction affichée semblerait fausse d'un dixième). Garanties mesurées : l'erreur se voit
+  (ligne fausse et résultat final à ≥ 4 tolérances), copie contredisant un contrôle du cours pour
+  « obtus » et « radians », vérité terrain (résolution exacte indépendante) sur 1 750 tirages.
+  **Bug évité** : le contrôle « angle réellement obtus » doit se faire par Al-Kashi direct, jamais
+  sur la résolution corrigée (qui pose 180° − sin⁻¹ par construction). Papier : numéros de ligne
+  écrits en clair (les puces d'un `<ol>` disparaissent dans la feuille de style des documents).
+  Séries équilibrées : `forme` = type|configuration|ligne, chaque forme ≥ 25 % dans sa variante ;
+  vérifié sur 6 évaluations réelles de 3 séries (même structure, nombres différents).
