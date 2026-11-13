@@ -191,7 +191,7 @@ export function EtapeExpressionPortrait({ consigne, tentativesUtilisees, tentati
         />
       </div>
       <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)" }}>
-        Saisie : racine carrée avec sqrt(…), racine cubique avec cbrt(…), valeur absolue avec abs(…), exposant avec ^, quotient avec /.
+        Saisie : racine carrée : rac(…), racine cubique : rac3(…), valeur absolue : |…|, exposant avec ^, quotient avec /.
       </p>
       {!validation && (
         <>

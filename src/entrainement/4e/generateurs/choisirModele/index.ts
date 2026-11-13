@@ -72,10 +72,10 @@ function pont(): Base {
     xMax: 2 * c,
     yMax: h0 + 1,
     domaine: [0, 2 * c],
+    // Facteur lu entre le point le plus bas et le sommet du pylône droit (écart horizontal c).
     points: [
       { x: 0, y: h0, position: "droite" },
       { x: c, y: k, position: "bas" },
-      { x: c + 2, y: k + 4 * a, position: "bas-droite" },
       { x: 2 * c, y: h0, position: "gauche" },
     ],
     indexLecture: 2,
@@ -101,7 +101,7 @@ function jet(): Base {
       { x: p0 + 4, y: 2 * a, position: "haut-gauche" },
       { x: p0 + 9, y: 3 * a, position: "bas-droite" },
     ],
-    indexLecture: 1,
+    indexLecture: 2,
     asymptoteH: null,
     question4: Math.random() < 0.5 ? { type: "predire", x: p0 + mm * mm, y: a * mm } : { type: "resoudre", y: a * mm, solutions: [p0 + mm * mm] },
   };
@@ -122,7 +122,7 @@ function glacon(): Base {
       { x: 8, y: 2 + b, position: "bas-droite" },
       { x: 27, y: 3 + b, position: "bas-gauche" },
     ],
-    indexLecture: 1,
+    indexLecture: 2,
     asymptoteH: null,
     question4: Math.random() < 0.5 ? { type: "predire", x: nn ** 3, y: nn + b } : { type: "resoudre", y: nn + b, solutions: [nn ** 3] },
   };

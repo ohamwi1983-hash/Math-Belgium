@@ -156,8 +156,11 @@ export function construireFigureModele(e: ExerciceChoisirModele, options: Option
     morceaux.push(`<path d="M ${f(sx(pc.x))},${f(sy(pc.y))} L ${f(sx(lecture.x))},${f(sy(pc.y))} L ${f(sx(lecture.x))},${f(sy(lecture.y))}" ${pointilles}/>`);
     const dx = lecture.x - pc.x;
     const dy = lecture.y - pc.y;
-    morceaux.push(texteSvg((sx(pc.x) + sx(lecture.x)) / 2, sy(pc.y) + (dy >= 0 ? 14 : -6), `${dx >= 0 ? "+" : "−"}${nombreTexte(Math.abs(dx))}`, "middle", p.annotation, 11, true));
-    morceaux.push(texteSvg(sx(lecture.x) + 6, (sy(pc.y) + sy(lecture.y)) / 2 + 4, `${dy >= 0 ? "+" : "−"}${nombreTexte(Math.abs(dy))}`, "start", p.annotation, 11, true));
+    // Écart horizontal au coin du tracé (sous le coin, sauf si la courbe descend ou si le coin est
+    // sur l'axe horizontal), écart vertical à droite du segment vertical.
+    const dessous = dy >= 0 && pc.y !== 0;
+    morceaux.push(texteSvg(sx(lecture.x) + 6, sy(pc.y) + (dessous ? 15 : -6), `${dx >= 0 ? "+" : "−"}${nombreTexte(Math.abs(dx))}`, "start", p.annotation, 12, true));
+    morceaux.push(texteSvg(sx(lecture.x) + 6, (sy(pc.y) + sy(lecture.y)) / 2 + 4, `${dy >= 0 ? "+" : "−"}${nombreTexte(Math.abs(dy))}`, "start", p.annotation, 12, true));
     // Point caractéristique (cercle évidé pour l'inverse : il n'est pas sur la courbe).
     morceaux.push(`<circle cx="${f(sx(pc.x))}" cy="${f(sy(pc.y))}" r="6.5" ${style({ stroke: p.annotation, "stroke-width": 2, fill: "none" })}/>`);
     // Réponse de l'écran 4, si elle est dans la fenêtre.
