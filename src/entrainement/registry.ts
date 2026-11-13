@@ -91,6 +91,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen69: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppChoisirModele').then((m) => ({ default: m.AppChoisirModele }))),
   gen70: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppGraphiqueContexte').then((m) => ({ default: m.AppGraphiqueContexte }))),
   gen71: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppPortraitRobotFonction').then((m) => ({ default: m.AppPortraitRobotFonction }))),
+  gen72: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppTransformationsEnsembles').then((m) => ({ default: m.AppTransformationsEnsembles }))),
   gen62: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppQuizFonctionsReference').then((m) => ({ default: m.AppQuizFonctionsReference }))),
 
   // --- 4e, chapitre 5 : Cercle trigonométrique & triangles quelconques ---

@@ -2646,3 +2646,19 @@ paths:
   questions a) b) c), profils, `?code=`, cartes dans le chapitre, entrées pilote en processus 3.
   Saisie harmonisée dans le chapitre : rac(…), rac3(…), |…| (les anciennes écritures restent
   acceptées). Vérifié : build propre, pages 390/1280 sans débordement, feuilles réelles sans erreur.
+- **4e ch3 — gen72 « Domaine et ensemble image après transformations »** (processus 3 transférer,
+  idée de l'utilisateur) : f n'est connue que par dom f et im f ; son graphique subit 2 à 5
+  transformations successives (niveau 1 : TH/TV/SOX/SOY ; niveau 2 : + EH/CH/EV/CV), 8 variantes
+  (niveau × nombre). 3 écrans : classer chaque transformation (choix fermé, 1 essai), suivre le
+  domaine puis l'ensemble image (un intervalle après chaque transformation de l'axe, jugé sur
+  l'intervalle CORRECT de la chaîne ; diagnostic « bornes » / « crochets »). Saisie d'intervalle :
+  crochets à toucher, bornes en champs libres, boutons −∞/+∞. Bloc de cours ajouté dans
+  « Transformer » (tableau effet sur un point / sur les bornes, exemple résolu, piège de l'échange
+  des crochets) : le chapitre n'expliquait nulle part l'effet d'une transformation sur dom et im.
+  Intervalles en KaTeX avec `\mathopen{]}` / `\mathclose{[}` (sinon « ]−8 » se lit comme une
+  soustraction). **Séries équilibrées** (demande de l'utilisateur) : `profil.ts`, `forme` = forme
+  des ensembles de départ + nombre de translations/symétries/dilatations par ensemble ; cas
+  particulier = ensemble inchangé. Générateur limité (≤ 2 symétries, ≤ 2 dilatations, pas de
+  transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
+  correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
+  évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).

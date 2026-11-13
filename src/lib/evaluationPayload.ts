@@ -87,7 +87,7 @@ export type IdGenerateurPilote =
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
-  | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71'
+  | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
@@ -221,6 +221,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen11', label: 'Forme canonique et transformations (gen11)' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen69', label: 'Choisir le bon modèle (gen69)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen71', label: 'Le portrait-robot d’une fonction (gen71)', processus: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen72', label: 'Domaine et ensemble image après transformations (gen72)', processus: 3 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
@@ -786,6 +787,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'inverse, translations', enonce: "Pour $f(x) = \\dfrac{1}{x-3} + 2$, identifie les transformations (TH et TV) appliquées à la fonction de référence $x \\mapsto \\dfrac{1}{x}$, puis donne les équations des asymptotes de son graphique." },
       { cle: 'inverse — division', enonce: "Écris $f(x) = \\dfrac{2x+7}{x+3}$ sous la forme $\\dfrac{1}{x-TH} + TV$ en faisant apparaître $x+3$ au numérateur, puis donne TH et TV." },
       { cle: 'valeur absolue — facteur commun', enonce: "Écris $f(x) = |2x+6|$ sous la forme $EV \\cdot |x-TH| + TV$, puis donne TH, EV et TV." },
+      { cle: 'suivre le domaine', enonce: "Une fonction $f$ a pour domaine $\\text{dom}\\,f = \\mathopen{]}-5\\,;\\,3]$ et pour ensemble image $\\text{im}\\,f = [-2\\,;\\,+\\infty\\mathclose{[}$. Son graphique subit une symétrie d'axe Ox (SOX), puis une translation horizontale TH de $-5$ ; on note $g$ la fonction obtenue. Détermine le domaine et l'ensemble image de $g$." },
     ],
   },
   // Appariement PAR CLÉ (build strict) — clé = badge ou label du bloc d'exemple du cours

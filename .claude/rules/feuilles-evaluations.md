@@ -112,6 +112,12 @@ les étapes 1 et 2 » (ou en lettre de question papier).
 - Pour chaque chapitre : mesurer (≥ 5 000 tirages par variante) la part des cas particuliers et des
   cas « calculatrice », écrire le profil, vérifier avec un plan réel (2 séries, calculatrice
   interdite/autorisée, case cochée ou non). Modèle : `5e-4h/generateurs5e/profilsEvaluationTrigonometrie.ts`.
+- **`forme` = signature de difficulté** quand le générateur combine librement des briques (gen72 :
+  forme des ensembles + nombre de translations/symétries/dilatations par ensemble, jamais l'ordre
+  exact) : la recherche de graine est aléatoire (20 000 essais, 200 ms), donc mesurer la fréquence
+  de la forme au 1er centile et brider le générateur si une forme rare deviendrait introuvable pour
+  les séries B, C… (`4e/generateurs/transformationsEnsembles/profil.ts`). Le pipeline mélange
+  l'ordre des questions d'une série à l'autre : comparer les structures sans tenir compte de l'ordre.
 - **Durée estimée** : imprimée seulement si le professeur coche « Afficher la durée estimée »
   (`EnTeteEvaluation.afficherDuree`, défaut : non).
 

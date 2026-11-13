@@ -1223,6 +1223,72 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 11. Forme canonique et transformations — fonctions de référence »',
         },
+        { kind: 'subheading', text: 'Domaine et ensemble image d\'une fonction transformée' },
+        {
+          kind: 'para',
+          text:
+            'Une transformation déplace chaque point $(x\\,;\\,y)$ du graphique. Le **domaine** rassemble ' +
+            'les abscisses des points, l\'**ensemble image** leurs ordonnées. Une transformation horizontale ' +
+            'ne change que les abscisses : elle agit sur le domaine, jamais sur l\'ensemble image. Une ' +
+            'transformation verticale fait l\'inverse. On peut donc suivre le domaine et l\'ensemble image ' +
+            'séparément, même sans connaître l\'expression de la fonction.',
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Effet de chaque transformation sur le domaine et sur l\'ensemble image',
+          headers: ['Transformation', 'Effet sur un point', 'Agit sur', 'Effet sur les bornes'],
+          rows: [
+            ['TH de $a$', '$(x\\,;\\,y) \\mapsto (x+a\\,;\\,y)$', 'le domaine', 'on ajoute $a$ aux deux bornes'],
+            ['SOY', '$(x\\,;\\,y) \\mapsto (-x\\,;\\,y)$', 'le domaine', 'les bornes changent de signe et s\'échangent ; chaque crochet suit sa borne'],
+            ['EH / CH de facteur $k$', '$(x\\,;\\,y) \\mapsto (kx\\,;\\,y)$ ou $\\left(\\dfrac{x}{k}\\,;\\,y\\right)$', 'le domaine', 'on multiplie / divise les deux bornes par $k$'],
+            ['TV de $b$', '$(x\\,;\\,y) \\mapsto (x\\,;\\,y+b)$', 'l\'ensemble image', 'on ajoute $b$ aux deux bornes'],
+            ['SOX', '$(x\\,;\\,y) \\mapsto (x\\,;\\,-y)$', 'l\'ensemble image', 'les bornes changent de signe et s\'échangent ; chaque crochet suit sa borne'],
+            ['EV / CV de facteur $k$', '$(x\\,;\\,y) \\mapsto (x\\,;\\,ky)$ ou $\\left(x\\,;\\,\\dfrac{y}{k}\\right)$', 'l\'ensemble image', 'on multiplie / divise les deux bornes par $k$'],
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — suivre le domaine et l\'ensemble image',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On sait seulement que $\\text{dom}\\,f = \\mathopen{]}-5\\,;\\,3]$ et $\\text{im}\\,f = [-2\\,;\\,+\\infty\\mathclose{[}$. Le ' +
+                'graphique de $f$ subit une symétrie d\'axe Ox (SOX), puis une translation horizontale TH de ' +
+                '$-5$. On note $g$ la fonction obtenue.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Domaine.** Seule la TH agit sur les abscisses : on retire 5 aux deux bornes, les crochets ' +
+                'ne changent pas. $\\text{dom}\\,g = \\mathopen{]}-10\\,;\\,-2]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Ensemble image.** Seule la SOX agit sur les ordonnées : la borne $-2$ devient $2$ et passe ' +
+                'à droite avec son crochet fermé ; $+\\infty$ devient $-\\infty$ et passe à gauche, toujours avec ' +
+                'un crochet ouvert. $\\text{im}\\,g = \\mathopen{]}-\\infty\\,;\\,2]$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Quand l\'ordre compte.** Avec la même fonction $f$, appliquons SOY, TH de 2, EV de facteur 3, ' +
+                'TV de $-1$, puis SOX. Domaine : $\\mathopen{]}-5\\,;\\,3] \\to [-3\\,;\\,5\\mathclose{[} \\to [-1\\,;\\,7\\mathclose{[}$. Ensemble image : ' +
+                '$[-2\\,;\\,+\\infty\\mathclose{[} \\to [-6\\,;\\,+\\infty\\mathclose{[} \\to [-7\\,;\\,+\\infty\\mathclose{[} \\to \\mathopen{]}-\\infty\\,;\\,7]$. Faire la ' +
+                'SOX avant la TV de $-1$ donnerait $\\mathopen{]}-\\infty\\,;\\,5]$ : on applique toujours les transformations ' +
+                'dans l\'ordre donné.',
+            },
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Piège — une symétrie échange aussi les crochets',
+          text:
+            'Changer les signes ne suffit pas : $[-2\\,;\\,+\\infty\\mathclose{[}$ devient $\\mathopen{]}-\\infty\\,;\\,2]$, et non ' +
+            '$[2\\,;\\,-\\infty\\mathclose{[}$. Les deux bornes changent de place, et chaque crochet reste attaché à sa ' +
+            'borne. Une borne infinie garde toujours un crochet ouvert.',
+        },
         {
           kind: 'entrainement',
           title: 'Choisir le bon modèle',
@@ -1238,6 +1304,14 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           description: ['Retrouve une fonction à partir de ses caractéristiques, raisonne sur une fonction sans son expression, ou choisis la seule courbe qui respecte toutes les conditions.'],
           chantier: '4e',
           whereLabel: '4e → « 71. Le portrait-robot d\'une fonction »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Domaine et ensemble image après transformations',
+          generatorId: 'gen72',
+          description: ['On ne connaît que le domaine et l\'ensemble image de f : suis-les à travers 2 à 5 transformations successives (translations, symétries, étirements et compressions).'],
+          chantier: '4e',
+          whereLabel: '4e → « 72. Domaine et ensemble image après transformations »',
         },
       ],
     },
