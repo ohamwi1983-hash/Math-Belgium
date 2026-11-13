@@ -2815,3 +2815,22 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+
+- **4e, Chapitre 6 — gen90 « Équilibre de forces en composantes »** (section `applications`,
+  processus 3 transférer, carte après celle de gen29). Complète gen29 (résultante par la loi des
+  cosinus) : tout se fait en composantes avec F₁ + F₂ + F₃ = 0. Situations (= variantes, chacune
+  « sans » / « avec la direction ») : lustre (poids + deux câbles), tir à la corde à trois, barque
+  retenue par deux amarres contre le courant, anneau tiré par trois cordes (forces lues sur un
+  quadrillage, 1 carreau = 10, 20 ou 50 N). Écrans : condition d'équilibre (choix fermé parmi
+  F₃ = −(F₁ + F₂), F₁ + F₂, F₁ − F₂, F₂ − F₁), résultante F₁ + F₂, F₃ (piège : signe moins oublié),
+  intensité (exacte k√m ou au dixième de N ; pièges : somme des intensités, somme des composantes,
+  carré sans racine ; un décimal pour une valeur exacte demandée ne consomme pas de tentative),
+  et, selon la variante, l'angle aigu avec l'axe x par l'arc tangente — le cours le permet : l'exemple
+  « résultante par les composantes » calcule déjà la déviation par la tangente. Figure : forces en O
+  à l'échelle dans un repère CENTRÉ (aucune place réservée qui trahirait la direction de F₃), F₃
+  marquée « ? » dans la bande du bas ; après l'écran 3 et dans le corrigé, F₃ tracée + polygone des
+  forces fermé. Le cours ne parlait pas d'équilibre : un para « Équilibre de forces » et un exemple
+  « équilibre de trois forces » (lustre, énoncé ajouté à `ENONCES_DEMONSTRATION`) avant la carte.
+  `forme` = situation + direction + nature de l'intensité (entier / racine / arrondi) ; cas
+  particulier = F₃ horizontale ou verticale (sans direction) ; `calcul` exacte si intensité exacte
+  sans angle.
