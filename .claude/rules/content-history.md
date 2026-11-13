@@ -2782,3 +2782,17 @@ paths:
   non (direct) / nombre de solutions (inverse) ; `calcul` exacte (θ multiple de 30°/45°, sin θ =
   ±1/2) ou calculatrice ; cas particulier = sin θ = ±1 (une solution). Fréquence minimale mesurée
   (6 000 tirages/variante) : 1,3 % (≈ 260 correspondances attendues en 20 000 essais).
+- **4e ch5 — gen77 « Du texte au triangle : problèmes en contexte »** (processus 3 transférer, section
+  « triangulation », après gen58) : pendant à UN SEUL triangle de gen58. 7 situations (variantes) :
+  deux trajets successifs (caps), deux mobiles partis du même point (caps), sommet vu sous deux
+  angles d'élévation (distance oblique, jamais la hauteur), deux points vus sous deux angles de
+  dépression, distance inaccessible (angles avec la base ou relèvements), parcelle (côté ou aire),
+  « deux positions possibles » (cas ambigu en contexte : radar/phare ou tours de guet ; toujours deux
+  positions, tranchées par une information de l'énoncé ; calcul local, gen74 non importé). 5 écrans :
+  rôle des éléments (donné / à convertir / cherché), conversion en angles intérieurs, loi, calcul,
+  phrase-réponse (unité + arrondi) ; pour deux positions : configuration, loi, deux angles candidats,
+  deux distances, position retenue. Figure SVG proportionnelle (nord et arcs de cap, sol, horizontale,
+  rivière, côte), inconnue en « ? », figure résolue dans le corrigé. Bloc de cours ajouté avant la
+  carte (tableau « donnée du texte → angle intérieur » + piège « deux positions ») : le chapitre ne
+  parlait ni de caps ni de dépression. `forme` = situation + loi + conversion (nord, relèvement…),
+  ≥ 22 % par forme dans sa variante ; aucun cas particulier ; calculatrice indispensable.

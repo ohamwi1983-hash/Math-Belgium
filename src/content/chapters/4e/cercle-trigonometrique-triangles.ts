@@ -1857,6 +1857,49 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 80. Composer deux forces ou deux vitesses »',
+        { kind: 'subheading', text: 'Du texte au triangle : traduire les angles de l\'énoncé' },
+        {
+          kind: 'para',
+          text:
+            'Dans un problème en contexte, les angles de l\'énoncé sont rarement des angles du ' +
+            'triangle. Un **cap** se mesure depuis le nord, dans le sens des aiguilles d\'une ' +
+            'montre ; un angle d\'**élévation** ou de **dépression** se mesure depuis ' +
+            'l\'horizontale. Avant d\'appliquer une loi, traduis chaque donnée en **angle ' +
+            'intérieur** du triangle.',
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Traduire une donnée du texte en angle intérieur du triangle',
+          headers: ['Situation', 'Donnée du texte', 'Angle intérieur'],
+          rows: [
+            ['Deux trajets successifs, virage en B', 'caps θ₁ puis θ₂', 'en B : 180° − écart des caps'],
+            ['Deux routes qui partent du même point', 'caps θ₁ et θ₂', 'écart des caps (360° − différence si l\'on passe par le nord)'],
+            ['Sommet vu depuis A (loin) puis B (près)', 'élévations α et β', 'en B : 180° − β ; au sommet : β − α'],
+            ['Points A (loin) et B (près) vus d\'en haut', 'dépressions α et β', 'en A : α (alternes-internes) ; en B : 180° − β ; en haut : β − α'],
+            ['Base [AB] orientée est-ouest', 'caps θA et θB vers C', 'en A : 90° − θA ; en B : θB − 270°'],
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Deux positions possibles',
+          text:
+            'Deux côtés et un angle **non compris** (le cas ambigu) : en contexte, le mobile ' +
+            'repéré peut se trouver à **deux endroits**. Calcule les deux angles candidats ' +
+            '($\\hat{B}$ et $180° - \\hat{B}$), les deux distances, puis tranche grâce à ' +
+            'l\'information supplémentaire de l\'énoncé.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Du texte au triangle',
+          generatorId: 'gen77',
+          description: [
+            'Traduis un énoncé réaliste en UN triangle : caps de navigation, angles d\'élévation ' +
+              'ou de dépression, distance inaccessible, parcelle, radar et ses deux positions ' +
+              'possibles. Convertis les angles du texte en angles intérieurs, choisis la loi, ' +
+              'calcule et réponds avec l\'unité et l\'arrondi demandés.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 77. Du texte au triangle »',
         },
       ],
     },
