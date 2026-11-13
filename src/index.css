@@ -1428,3 +1428,19 @@ table.feature-table td { white-space: normal; }
   .admin-eval-processus-btn { padding: 8px 6px; font-size: 0.72rem; }
   .admin-eval-compteur { left: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); padding: 8px 12px; font-size: 0.76rem; }
 }
+
+/* Choix explicite des questions « Formule » / « Formule + démonstration » (panneau feuilles et
+   évaluations) : les mêmes questions dans toutes les séries. */
+.admin-eval-choix-bouton {
+  margin-left: 10px; padding: 2px 10px; font: inherit; font-size: 12px; cursor: pointer;
+  color: var(--accent-ink); background: var(--accent-soft); border: 1px solid var(--accent-soft-line); border-radius: 99px;
+}
+.admin-eval-row-choix td { background: var(--paper); text-align: left; }
+.admin-eval-choix { margin: 0; padding: 4px 0 8px; border: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.admin-eval-choix legend { padding: 0 0 6px; text-align: left; font-size: 13px; color: var(--ink-soft); }
+.admin-eval-choix-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); cursor: pointer; }
+.admin-eval-choix-item input { margin-top: 3px; flex: none; }
+.admin-eval-choix-texte { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.admin-eval-choix-titre { font-weight: 600; font-size: 14px; }
+.admin-eval-choix-enonce { font-size: 14px; }
+.admin-eval-choix-longueur { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }

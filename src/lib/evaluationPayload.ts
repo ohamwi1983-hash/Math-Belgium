@@ -569,6 +569,13 @@ export interface FragmentTexte {
 export interface QuestionOuverte {
   enonce: FragmentTexte[]
   corrige: FragmentTexte[][]
+  /** Identifiant stable dans sa section (« Formule » : le texte de la formule ; « Formule +
+   * démonstration » : le titre du bloc) — sert au choix explicite des questions par le professeur
+   * (`LigneSelection.choix`). Jamais envoyé dans le payload. */
+  id?: string
+  /** Titre lisible pour le sélecteur du panneau (RichText), et énoncé source (RichText). */
+  titre?: string
+  apercu?: string
 }
 
 /** Découpe la mini-syntaxe `RichText` (`$latex$`, `**gras**`, voir `.claude/rules/
@@ -635,8 +642,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   derivees: [
     "Démontre que $\\arcsin'(x) = \\dfrac{1}{\\sqrt{1-x^2}}$.",
-    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$, en utilisant l'identité $\\arccos(x) = \\pi/2 - \\arcsin(x)$.",
-    "Démontre, sans utiliser l'identité complémentaire, que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
+    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
+    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
     "Démontre que $\\arctan'(x) = \\dfrac{1}{1+x^2}$.",
     'Démontre que arcsin n\'est dérivable ni en $1$, ni en $-1$.',
     "Calcule la dérivée de $\\arcsin(2x-1)$.",
@@ -650,27 +657,27 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   derivee: [
     "Calcule la dérivée de chacune des fonctions suivantes, en justifiant à chaque fois la présence ou l'absence d'un facteur $\\ln$ : $f(x)=5^x$, $g(x)=e^{3x-1}$, $k(x)=3^{x^4-x}$, $m(x)=e^{\\sin(x)}$.",
     "Détermine le domaine de définition de $h(x) = e^{\\sqrt{x-2}}$, en justifiant la contrainte imposée par chacune des deux fonctions composées.",
-    "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $a \\in \\mathbb{R}_0^+$ et $f(x)=a^x$, on a $f'(x) = f'(0) \\cdot a^x$ — c'est-à-dire que la dérivée d'une exponentielle est un multiple d'elle-même.",
-    "En utilisant la formule $(a^x)' = \\ln(a) \\cdot a^x$ et le résultat $\\ln(e)=1$, démontre que $(e^x)' = e^x$.",
+    "Démontre, à partir de la définition du nombre dérivé, que pour $a \\in \\mathbb{R}_0^+$ et $f(x)=a^x$, on a $f'(x) = f'(0) \\cdot a^x$.",
+    "Démontre que $(e^x)' = e^x$.",
   ],
   graphique: [
     "Pour $f(x) = \\dfrac{e^x+e^{-x}}{2}$, démontre que $f$ est paire et que sa dérivée $f'(x) = \\dfrac{e^x-e^{-x}}{2}$ est impaire.",
   ],
   equations: [
-    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, $a^x = a^y \\iff x = y$ — en justifiant pourquoi la condition $a \\neq 1$ est indispensable.",
+    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, $a^x = a^y \\iff x = y$, puis explique pourquoi la condition $a \\neq 1$ est indispensable.",
   ],
   inequations: [
     undefined,
     undefined,
-    "Démontre que, pour $0 < a < 1$, $a^x < a^y \\iff x > y$ (en détaillant les deux sens de l'équivalence, dont un par l'absurde), puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
-    "Démontre que, pour $a > 1$, $a^x < a^y \\iff x < y$ (en détaillant les deux sens de l'équivalence, dont un par l'absurde), puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
+    "Démontre que, pour $0 < a < 1$, $a^x < a^y \\iff x > y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
+    "Démontre que, pour $a > 1$, $a^x < a^y \\iff x < y$, puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
   ],
   etude: [
     "Étudie complètement la fonction $f(x) = x \\cdot e^x$ : domaine, dérivée et son signe (extremum), dérivée seconde et son signe (point d'inflexion), limites en $-\\infty$ et $+\\infty$.",
     "Étudie complètement la fonction $f(x) = e^{-x^2}$ : domaine, signe, dérivée première (extremum), dérivée seconde (points d'inflexion), limites en $-\\infty$ et $+\\infty$.",
   ],
   problemes: [
-    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $f(x) = k \\cdot a^x$ ($k \\neq 0$), le rapport $\\dfrac{f(s)}{f(r)}$ ne dépend que de l'écart $s-r$ — jamais des valeurs de $r$ et $s$ elles-mêmes.",
+    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $f(x) = k \\cdot a^x$ ($k \\neq 0$), le rapport $\\dfrac{f(s)}{f(r)}$ ne dépend que de l'écart $s-r$, et non des valeurs de $r$ et $s$ elles-mêmes.",
     'Une population de 1000 individus croît de 5 % par an. Détermine une expression de $Q(t)$, puis calcule la population après 10 ans.',
     "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$.",
   ],
@@ -710,11 +717,11 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'mise en évidence — c = 0', enonce: "Résous l'équation $2x^2-6x=0$ par une méthode rapide, sans calculer le discriminant." },
     { cle: 'différence de deux carrés', enonce: "Résous l'équation $2x^2-18=0$ par une méthode rapide, sans calculer le discriminant." },
     { cle: 'carré parfait', enonce: "Résous l'équation $2x^2-12x+18=0$ en reconnaissant un carré parfait, sans calculer le discriminant." },
-    { cle: 'étape par étape', enonce: "Démontre, en complétant le carré, que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$." },
+    { cle: 'étape par étape', enonce: "Démontre que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$." },
     { cle: 'cas général', enonce: "Résous l'équation $2x^2-10x+8=0$ à l'aide du discriminant." },
     { cle: 'mise en évidence généralisée', enonce: "Résous l'équation $(x+2)^2=3(x+2)$ sans développer, en mettant en évidence un facteur commun." },
-    { cle: 'relations de Viète', enonce: "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$." },
-    { cle: 'forme factorisée', enonce: "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$." },
+    { cle: 'relations de Viète', enonce: "On suppose $\\Delta \\geq 0$ ; les racines de $ax^2+bx+c=0$ sont alors $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$. Démontre que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$." },
+    { cle: 'forme factorisée', enonce: "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$." },
     { cle: 'application directe', enonce: "Écris une équation du second degré de la forme $x^2-Sx+P=0$ dont les solutions sont $x_1=2$ et $x_2=5$, à l'aide de la somme $S$ et du produit $P$ des racines." },
     { cle: 'racine évidente — a + b + c = 0', enonce: "Résous l'équation $3x^2 - 5x + 2 = 0$ sans calculer le discriminant, en repérant une racine évidente." },
     { cle: 'signe des racines', enonce: "Sans calculer les racines, détermine leur signe pour l'équation $x^2 - 3x - 10 = 0$, puis pour l'équation $2x^2 + 7x + 3 = 0$." },
@@ -872,7 +879,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'prouver que deux droites sont gauches', enonce: "Dans le cube $ABCDEFGH$ (base $ABCD$, $E$ au-dessus de $A$, $G$ au-dessus de $C$), démontre que les droites $(AB)$ et $(CG)$ sont gauches." },
     ],
     'deux-plans': [
-      { cle: "Démonstration par l", enonce: "Démontre par l'absurde que si un plan $\\pi$ coupe deux plans parallèles $\\alpha$ et $\\alpha'$ suivant des droites $d$ et $d'$, alors $d$ et $d'$ sont parallèles." },
+      { cle: "Démonstration par l", enonce: "Démontre que si un plan $\\pi$ coupe deux plans parallèles $\\alpha$ et $\\alpha'$ suivant des droites $d$ et $d'$, alors $d$ et $d'$ sont parallèles." },
       { cle: 'deux plans parallèles coupés par un troisième', enonce: "Dans le cube $ABCDEFGH$, le plan $(ACGE)$ coupe la base $(ABCD)$ et la face $(EFGH)$. Que peut-on dire des droites $(AC)$ et $(EG)$ ? Justifie." },
     ],
     'parallelisme': [
@@ -902,7 +909,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'décomposer un vecteur en repère', enonce: "Décompose le vecteur $\\vec{u}\\begin{pmatrix}5\\\\1\\end{pmatrix}$ selon les vecteurs $\\vec{v}\\begin{pmatrix}1\\\\1\\end{pmatrix}$ et $\\vec{w}\\begin{pmatrix}1\\\\-1\\end{pmatrix}$, c'est-à-dire trouve les réels $a$ et $b$ tels que $\\vec{u}=a\\vec{v}+b\\vec{w}$." },
     ],
     norme: [
-      { cle: 'Pythagore', enonce: "Démontre, à l'aide du théorème de Pythagore, que pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$." },
+      { cle: 'Pythagore', enonce: "Démontre que, pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$." },
       { cle: 'distance entre deux points', enonce: "Calcule la distance entre les points $A(1\\,;\\,1)$ et $B(4\\,;\\,5)$." },
       { cle: 'distance avec un paramètre', enonce: "On donne les points $A(1\\,;\\,2)$ et $B(x\\,;\\,6)$. Détermine les valeurs de $x$ pour lesquelles $AB = 5$." },
       { cle: "nature d'un triangle", enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Détermine la nature du triangle $ABC$ en calculant les longueurs de ses côtés." },
@@ -921,14 +928,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     orthogonalite: [
       { cle: 'angle droit', enonce: "On donne $\\vec{AB}\\begin{pmatrix}3\\\\4\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}-4\\\\3\\end{pmatrix}$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie." },
-      { cle: 'cette formule', enonce: "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$, en construisant $\\vec{v}$ comme l'image de $\\vec{u}$ par une rotation de 90°." },
+      { cle: 'cette formule', enonce: "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$." },
       { cle: 'Pythagore généralisé', enonce: "Dans un triangle $ABC$, on note $\\vec{AB}\\begin{pmatrix}x_1\\\\y_1\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}x_2\\\\y_2\\end{pmatrix}$. Démontre que $BC^2 = AB^2 + AC^2 - 2(x_1x_2+y_1y_2)$, puis déduis-en que $ABC$ est rectangle en $A$ si et seulement si $x_1x_2+y_1y_2=0$." },
       { cle: 'triangle donné par ses sommets', enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie à l'aide des composantes." },
       { cle: 'orthogonalité avec un paramètre', enonce: "Détermine la valeur de $x$ pour laquelle les vecteurs $\\vec{u}\\begin{pmatrix}x\\\\3\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}4\\\\-2\\end{pmatrix}$ sont orthogonaux." },
     ],
     applications: [
       { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },
-      { cle: 'le « + »', enonce: "Deux forces $\\vec{F_1}$ et $\\vec{F_2}$ s'appliquent au même point et forment un angle $\\theta$. Démontre, à l'aide de la loi des cosinus et de la règle du parallélogramme, que la norme $R$ de leur résultante vérifie $R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$." },
+      { cle: 'le « + »', enonce: "Deux forces $\\vec{F_1}$ et $\\vec{F_2}$ s'appliquent au même point et forment un angle $\\theta$. Démontre que la norme $R$ de leur résultante vérifie $R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$." },
       { cle: 'résultante par les composantes', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N forment un angle de 60°. En plaçant $\\vec{F_1}$ le long de l'axe horizontal, calcule les composantes de leur résultante, puis sa norme et l'angle qu'elle forme avec $\\vec{F_1}$." },
     ],
     directeur: [
@@ -1026,7 +1033,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   // (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé reprend les nombres du cours.
   'suites-arithmetiques': [
     { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite arithmétique vaut $u_1 = 7$ et son sixième terme vaut $u_6 = 22$. Calcule la raison $r$, puis écris les six premiers termes." },
-    { cle: 'Démonstration — la « double échelle »', enonce: "Démontre, à l'aide de la méthode de la « double échelle » — écrire $S_n$ une seconde fois à l'envers, puis additionner les deux lignes colonne par colonne — que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$." },
+    { cle: 'Démonstration — la « double échelle »', enonce: "Démontre que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$." },
     { cle: 'somme des 20 premiers termes', enonce: "Calcule la somme des 20 premiers termes d'une suite arithmétique de premier terme $u_1 = 4$ et de raison $r = 3$." },
     { cle: 'somme de u5 à u20', enonce: "La suite arithmétique $(u_n)$ est définie par $u_n = 3n + 1$. Calcule la somme $u_5 + u_6 + \\ldots + u_{20}$." },
     { cle: 'isoler x entre deux termes', enonce: "Dans une suite arithmétique de raison $r = 2$, on donne $u_3 = 2x+1$ et $u_7 = 5x-3$. Détermine $x$, puis $u_3$ et $u_7$." },
@@ -1036,7 +1043,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'suites-geometriques': [
     { cle: 'retrouver la raison', enonce: "Le premier terme d'une suite géométrique vaut $u_1 = \\dfrac{1}{2}$ et son septième terme vaut $u_7 = 32$. Calcule la raison $q$, sachant qu'elle est positive." },
     { cle: 'Exemple résolu — intérêts simples ou intérêts composés ?', enonce: "Tu places 1 000 € à 4 % par an pendant 10 ans. On note $u_n$ le capital à la fin de la n-ième année. Exprime $u_n$ et calcule $u_{10}$, d'abord avec des intérêts simples (4 % du capital de départ chaque année), puis avec des intérêts composés (4 % du capital déjà atteint chaque année). Compare les deux placements." },
-    { cle: 'Démonstration — établir la formule de la somme', enonce: "Démontre, en multipliant $S_n$ par $q$ puis en soustrayant terme à terme les deux égalités obtenues, que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$." },
+    { cle: 'Démonstration — établir la formule de la somme', enonce: "Démontre que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$." },
     { cle: 'somme des 8 premiers termes', enonce: "Calcule la somme des 8 premiers termes d'une suite géométrique de premier terme $u_1 = 3$ et de raison $q = 2$." },
     { cle: 'isoler x entre deux termes', enonce: "Dans une suite géométrique de raison $q = 2$, on donne $u_3 = x+5$ et $u_5 = 3x+8$. Détermine $x$, puis $u_3$ et $u_5$." },
     { cle: 'isoler le rang n', enonce: "Une suite géométrique a pour premier terme $u_1 = 3$ et pour raison $q = 2$. Détermine le rang $n$ pour lequel $u_n = 384$, en réduisant à la même base." },
@@ -1110,7 +1117,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   'fonction-derivee': [
     { cle: 'obtenue directement par la définition', enonce: "Soit $f(x) = 2x^2 - 3x$. Détermine $f'(x)$ à partir de la définition, comme limite du taux d'accroissement $\\dfrac{f(x+h)-f(x)}{h}$." },
-    { cle: 'Démonstration — 1/x et √x', enonce: "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $f(x) = \\dfrac{1}{x}$ (avec $x \\neq 0$), $f'(x) = -\\dfrac{1}{x^2}$, et que pour $f(x) = \\sqrt{x}$ (avec $x > 0$), $f'(x) = \\dfrac{1}{2\\sqrt{x}}$ — en multipliant, pour ce second cas, par l'expression conjuguée." },
+    { cle: 'Démonstration — 1/x et √x', enonce: "Démontre, à partir de la définition du nombre dérivé, que pour $f(x) = \\dfrac{1}{x}$ (avec $x \\neq 0$), $f'(x) = -\\dfrac{1}{x^2}$, et que pour $f(x) = \\sqrt{x}$ (avec $x > 0$), $f'(x) = \\dfrac{1}{2\\sqrt{x}}$." },
     { cle: 'règle du produit', enonce: "Calcule la dérivée de $f(x) = (2x+1)(x^2-3)$ à l'aide de la règle du produit, puis réduis le résultat." },
     { cle: 'règle du quotient', enonce: "Calcule la dérivée de $f(x) = \\dfrac{x^2+1}{x-2}$ à l'aide de la règle du quotient, puis réduis le numérateur." },
     { cle: 'règle de la chaîne', enonce: "Calcule la dérivée de $f(x) = (2x-1)^3$ en identifiant la fonction intérieure et la fonction extérieure." },
@@ -1155,13 +1162,13 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   },
   'fonctions-logarithmes': {
   proprietes: [
-    { cle: 'logarithme d\'un produit', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(xy) = \\log_a(x) + \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété des puissances $a^p \\cdot a^q = a^{p+q}$." },
-    { cle: 'logarithme d\'une puissance', enonce: "Démontre que, pour $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$, $\\log_a(x^r) = r \\cdot \\log_a(x)$, en réécrivant $x$ comme une puissance de $a$ grâce à (P4), puis en utilisant la propriété $(a^p)^r = a^{p \\cdot r}$." },
-    { cle: 'logarithme d\'un quotient', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété $a^p/a^q = a^{p-q}$." },
+    { cle: 'logarithme d\'un produit', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(xy) = \\log_a(x) + \\log_a(y)$." },
+    { cle: 'logarithme d\'une puissance', enonce: "Démontre que, pour $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$, $\\log_a(x^r) = r \\cdot \\log_a(x)$." },
+    { cle: 'logarithme d\'un quotient', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$." },
     { cle: '\\log_2(8) - \\log_2(2)', enonce: "Calcule $\\log_2(8) - \\log_2(2)$ en te ramenant à un seul logarithme grâce aux propriétés algébriques du logarithme." },
-    { cle: 'changement de base pour les exponentielles', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x \\in \\mathbb{R}$, $a^x = b^{\\,x \\cdot \\log_b(a)}$ (changement de base pour les exponentielles), en réécrivant $a$ comme une puissance de $b$ grâce à (P4) appliquée en base $b$." },
-    { cle: 'changement de base pour les logarithmes', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes), en posant $y=\\log_a(x)$ et en appliquant le changement de base pour les exponentielles à l'égalité $a^y=x$." },
-    { cle: 'pourquoi ln est exactement log_e', enonce: "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$, en calculant la dérivée de $a^x$ de deux façons différentes — une fois via le changement de base vers $e$, une fois via la formule $(a^x)' = a^x \\cdot \\ln(a)$ déjà connue — puis en identifiant les deux résultats." },
+    { cle: 'changement de base pour les exponentielles', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x \\in \\mathbb{R}$, $a^x = b^{\\,x \\cdot \\log_b(a)}$ (changement de base pour les exponentielles)." },
+    { cle: 'changement de base pour les logarithmes', enonce: "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes)." },
+    { cle: 'pourquoi ln est exactement log_e', enonce: "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$." },
     { cle: 'réécrire une exponentielle avec une base choisie', enonce: "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$." },
     { cle: 'calculer un logarithme', enonce: "Calcule, sans calculatrice, $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, $\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$, en écrivant chaque argument comme une puissance de la base." },
     { cle: 'développer un logarithme', enonce: "Développe $\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right)$ pour $x,y,z>0$, à l'aide des propriétés algébriques du logarithme." },
@@ -1171,28 +1178,28 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: '3^x = 20', enonce: "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième." },
     { cle: '\\ln(2x-1) = 3', enonce: "Résous l'équation $\\ln(2x-1) = 3$ : détermine le domaine, applique $\\exp$ aux deux membres, puis vérifie que la solution respecte la condition d'existence." },
     { cle: 'condition d\'existence sur un argument du second degré', enonce: "Résous l'équation $\\log_3(2w^2-1) = 4$ : détermine d'abord la condition d'existence sur $w$, résous ensuite l'équation, et vérifie que les solutions obtenues la respectent." },
-    { cle: 'Démonstration — égalité de deux logarithmes', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$, en démontrant séparément les deux sens de l'équivalence." },
+    { cle: 'Démonstration — égalité de deux logarithmes', enonce: "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$." },
     { cle: 'avec rejet d\'une racine', enonce: "Résous l'équation $\\log_3(6w-1) = \\log_3(-4w^2+3)$ : détermine la condition d'existence, résous l'équation du second degré qui en résulte, puis rejette toute solution qui ne respecte pas la condition d'existence." },
     { cle: 'substitution t = log_a(x)', enonce: "Résous l'équation $(\\ln(x))^2 - \\ln(x) - 2 = 0$ à l'aide de la substitution $t = \\ln(x)$." },
     { cle: 'deux bases différentes', enonce: "Résous l'équation $2^{x+1} = 3^x$ en appliquant $\\ln$ aux deux membres ; donne la solution exacte et une valeur approchée." },
     { cle: 'regrouper deux logarithmes, puis vérifier la CE', enonce: "Résous l'équation $\\log_2(x) + \\log_2(x-2) = 3$ en déterminant d'abord la condition d'existence." },
   ],
   inequations: [
-    { cle: 'cas 0 < a < 1', enonce: "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$)." },
-    { cle: 'cas a > 1', enonce: "Démontre que, pour $a>1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u < v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$)." },
-    { cle: 'comparaison avec une constante', enonce: "Démontre que, pour $0<a<1$, $u>0$ et $y \\in \\mathbb{R}$, $\\log_a(u) < y \\iff u > a^y$, en te ramenant à la comparaison de deux logarithmes de même base déjà démontrée." },
+    { cle: 'cas 0 < a < 1', enonce: "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$." },
+    { cle: 'cas a > 1', enonce: "Démontre que, pour $a>1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u < v$." },
+    { cle: 'comparaison avec une constante', enonce: "Démontre que, pour $0<a<1$, $u>0$ et $y \\in \\mathbb{R}$, $\\log_a(u) < y \\iff u > a^y$." },
     { cle: 'base e > 1', enonce: "Résous l'inéquation $\\ln(x) \\le 2$ : détermine le domaine, puis l'ensemble-solution en appliquant $\\exp$ aux deux membres." },
     { cle: 'domaine plus restrictif que la solution', enonce: "Résous l'inéquation $\\ln(x-1) > 0$ : détermine le domaine, résous l'inéquation, et vérifie que l'ensemble-solution obtenu est bien inclus dans le domaine." },
     { cle: 'même inéquation, deux bases différentes', enonce: "Résous l'inéquation $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis résous la même comparaison en base $e$, $\\ln(6w-1) \\ge \\ln(-4w^2+3)$ : détermine chaque fois le domaine et compare les deux ensembles-solutions obtenus." },
     { cle: 'diviser par un logarithme négatif', enonce: "Détermine le plus petit entier $n$ tel que $0{,}8^n < 0{,}05$, en appliquant $\\ln$ aux deux membres." },
   ],
   derivee: [
-    { cle: 'Démonstration de ln\'(x) = 1/x', enonce: "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour $x>0$, en utilisant la formule de dérivation d'une fonction réciproque appliquée à $\\exp$ et $\\ln$, sachant que $\\exp' = \\exp$." },
+    { cle: 'Démonstration de ln\'(x) = 1/x', enonce: "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour tout $x>0$." },
     { cle: '\\ln(x^2+1)', enonce: "Détermine le domaine puis calcule la dérivée de chacune des fonctions suivantes : $f(x) = \\ln(x^2+1)$ et $g(x) = \\ln(x-3)$." },
     { cle: 'Exemple résolu — dérivation logarithmique', enonce: "Calcule la dérivée de $f(x) = x^2 \\cdot \\sqrt{x+1}$ (pour $x>0$) en utilisant la dérivation logarithmique." },
-    { cle: 'dérivée d\'une puissance à exposant variable', enonce: "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$, en réécrivant $(g(x))^{h(x)}$ sous la forme $e^{h(x) \\cdot \\ln(g(x))}$." },
+    { cle: 'dérivée d\'une puissance à exposant variable', enonce: "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$." },
     { cle: 'exposant variable, dérivée logarithmique complète', enonce: "Calcule la dérivée de $f(x) = (1+\\sqrt{x})^{2x}$ pour $x>0$, en passant par l'écriture $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$." },
-    { cle: 'Démonstration de logₐ\'(x)', enonce: "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$, en exprimant $\\log_a$ à l'aide de $\\ln$ par changement de base." },
+    { cle: 'Démonstration de logₐ\'(x)', enonce: "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$." },
     { cle: 'ln|x² − 4|', enonce: "Détermine le domaine et la dérivée de $f(x) = \\ln\\left|x^2-4\\right|$, puis décris son comportement près de $x = -2$ et de $x = 2$." },
     { cle: 'étudier un signe avec ln', enonce: "Étudie les variations de $f(x) = x\\ln(x) - x$ sur $]0;+\\infty[$." },
   ],
@@ -1211,8 +1218,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   ],
   hyperboliques: [
     { cle: 'vérification numérique', enonce: "Vérifie numériquement l'identité $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ en $x=1$, à partir des valeurs approchées $\\text{ch}(1) \\approx 1{,}5431$ et $\\text{sh}(1) \\approx 1{,}1752$." },
-    { cle: 'Démonstration — ch²(x) − sh²(x) = 1', enonce: "Démontre, à partir des définitions de ch et de sh, que $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ pour tout réel $x$." },
-    { cle: 'la réciproque de sh', enonce: "Démontre que la fonction sh est réciproque et que sa réciproque est $x \\mapsto \\ln\\left(x + \\sqrt{x^2+1}\\right)$, en résolvant $\\text{sh}(y) = x$ à l'aide de la substitution $t = e^y$." },
+    { cle: 'Démonstration — ch²(x) − sh²(x) = 1', enonce: "Démontre que $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ pour tout réel $x$." },
+    { cle: 'la réciproque de sh', enonce: "Démontre que la fonction sh est réciproque et que sa réciproque est $x \\mapsto \\ln\\left(x + \\sqrt{x^2+1}\\right)$." },
   ],
   graphique: [
     { cle: '$f(x) = x - \\ln(x)$', enonce: "Étudie le signe de la dérivée de $f(x) = x - \\ln(x)$ sur son domaine $]0;+\\infty[$, et déduis-en la nature et la valeur de son extremum." },
@@ -1243,7 +1250,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'ici $u(x)=x^2$', enonce: "Calcule $\\int 2x \\cdot e^{x^2} \\, dx$ en identifiant la forme $u'e^u$ (avec $u(x)=x^2$)." },
     { cle: 'forme u′/u', enonce: "Calcule $\\int \\dfrac{2x}{x^2+1}\\,dx$ et $\\int \\tan(x)\\,dx$ en reconnaissant la forme $\\dfrac{u'}{u}$." },
     { cle: 'forme u′·uⁿ', enonce: "Calcule $\\int 3x^2\\left(x^3+1\\right)^4dx$." },
-    { cle: "formule de l'intégration par parties", enonce: "Démontre la formule d'intégration par parties $\\int f(x) \\cdot g'(x) \\, dx = f(x) \\cdot g(x) - \\int f'(x) \\cdot g(x) \\, dx$ à partir de la dérivée d'un produit." },
+    { cle: "formule de l'intégration par parties", enonce: "Démontre la formule d'intégration par parties $\\int f(x) \\cdot g'(x) \\, dx = f(x) \\cdot g(x) - \\int f'(x) \\cdot g(x) \\, dx$." },
     { cle: 'e^x dx$ : pose', enonce: "Calcule $\\int x \\cdot e^x \\, dx$ par intégration par parties." },
     { cle: '∫ ln(x) dx : le facteur caché 1', enonce: "Calcule $\\int \\ln(x)\\,dx$ sur $]0;+\\infty[$ par intégration par parties." },
     { cle: 'deux intégrations par parties successives', enonce: "Calcule $\\int x^2 \\cdot \\sin(x) \\, dx$ en effectuant deux intégrations par parties successives." },
@@ -1277,7 +1284,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'entre x³ et x', enonce: "Calcule l'aire de la région comprise entre les courbes $f(x) = x^3$ et $g(x) = x$." },
     { cle: 'sous ln(x) entre 1 et e', enonce: "Calcule l'aire comprise entre la courbe de $\\ln$, l'axe des abscisses et les droites $x = 1$ et $x = e$." },
     { cle: 'Région bordée par y=x, y=6−x', enonce: "Calcule l'aire de la région bordée par $y=x$, $y=6-x$ et l'axe des abscisses." },
-    { cle: "l'aire d'un disque", enonce: "Démontre, à l'aide d'une intégrale, que l'aire d'un disque de rayon r vaut $\\pi r^2$." },
+    { cle: "l'aire d'un disque", enonce: "Démontre que l'aire d'un disque de rayon r vaut $\\pi r^2$." },
   ],
   volumes: [
     { cle: "d'où vient le carré", enonce: "Démontre que le volume engendré par la rotation, autour de l'axe des abscisses, de la région sous une courbe $f\\ge0$ sur $[a;b]$, vaut $V = \\pi\\int_a^b [f(x)]^2 dx$." },
@@ -1285,14 +1292,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'la boule', enonce: "Démontre, à l'aide de la méthode des disques, que le volume d'une boule de rayon r vaut $\\dfrac{4}{3}\\pi r^3$." },
     { cle: 'un paraboloïde', enonce: "Calcule le volume engendré par la rotation de $f(x) = \\sqrt{x}$ sur $[0;4]$ autour de l'axe des abscisses." },
     { cle: 'f(x) = 3, g(x) = x sur [0;3]', enonce: "Calcule le volume engendré par la rotation, autour de l'axe des abscisses, de la région comprise entre $f(x) = 3$ et $g(x) = x$ sur $[0;3]$." },
-    { cle: 'tronc de cône', enonce: "Démontre, à l'aide de la méthode des disques, que le volume d'un tronc de cône de hauteur h, de petit rayon a et de grand rayon b vaut $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$." },
+    { cle: 'tronc de cône', enonce: "Démontre que le volume d'un tronc de cône de hauteur h, de petit rayon a et de grand rayon b vaut $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$." },
   ],
   longueurarc: [
     { cle: "d'où vient la racine", enonce: "Démontre que la longueur d'un arc de courbe $y=f(x)$ entre $x=a$ et $x=b$ vaut $L = \\int_a^b \\sqrt{1+[f'(x)]^2} \\, dx$." },
     { cle: 'expression affine sous la racine', enonce: "Calcule la longueur de l'arc de $f(x) = \\dfrac{2}{3}x^{3/2}$ sur $[0;3]$." },
     { cle: 'un carré parfait sous la racine', enonce: "Calcule la longueur de l'arc de $f(x) = \\text{ch}(x)$ sur $[0;a]$, en repérant le carré parfait sous la racine." },
     { cle: "quand aucune primitive n'est connue", enonce: "Approche, par la méthode des trapèzes avec 4 sous-intervalles, la longueur de l'arc de $y = x^2$ sur $[0;1]$." },
-    { cle: "la circonférence d'un cercle", enonce: "Démontre, à l'aide de la formule de longueur d'arc, que la circonférence d'un cercle de rayon r vaut $2\\pi r$." },
+    { cle: "la circonférence d'un cercle", enonce: "Démontre que la circonférence d'un cercle de rayon r vaut $2\\pi r$." },
   ],
   problemes: [
     { cle: 'a(t) = 2 (constante)', enonce: "Un mobile a une accélération $a(t) = 2$. Sachant que $v(0) = 3$ et $x(0) = 0$, détermine $v(t)$ puis $x(t)$." },
@@ -1319,7 +1326,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     composer: [
       { cle: 'la composition est associative', enonce: "Démontre que la composition de fonctions est associative : $(f\\circ g)\\circ h = f\\circ(g\\circ h)$." },
-      { cle: 'pourquoi dom(f∘g) exige', enonce: "Démontre que $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$ : explique pourquoi chacune des deux conditions est nécessaire, puis pourquoi elles suffisent." },
+      { cle: 'pourquoi dom(f∘g) exige', enonce: "Démontre que $\\operatorname{dom}(f\\circ g) = \\{x \\in \\operatorname{dom} g : g(x) \\in \\operatorname{dom} f\\}$." },
       { cle: 'substituer, puis simplifier', enonce: "Pour $f(x) = \\dfrac{3}{x}$ et $g(x) = \\dfrac{7}{4x+6}$, écris $(f\\circ g)(x)$ sous forme simplifiée et détermine $\\operatorname{dom}(f\\circ g)$." },
       { cle: 'domaine non vide', enonce: "Pour $f(x) = \\sqrt{-3x+6}$ et $g(x) = \\sqrt{-2x+4}$, écris $(g\\circ f)(x)$ et détermine $\\operatorname{dom}(g\\circ f)$." },
       { cle: 'domaine vide', enonce: "Pour $f(x) = \\sqrt{x-10}$ et $g(x) = -x^2$, écris $(f\\circ g)(x)$ et détermine $\\operatorname{dom}(f\\circ g)$." },
@@ -1344,24 +1351,24 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
     affixesracines: [
       { cle: 'distance entre deux points', enonce: "Dans le plan d'Argand, $A$ et $B$ ont pour affixes $z_A = 1+2i$ et $z_B = 4+6i$. Calcule la distance $AB$ et l'affixe du milieu de $[AB]$." },
-      { cle: 'pourquoi la 3e équation', enonce: "Démontre que, pour résoudre $(x+iy)^2=a+bi$ grâce au système $x^2-y^2=a$ et $2xy=b$, élever ces deux équations au carré puis les additionner membre à membre donne la 3e équation $x^2+y^2=\\sqrt{a^2+b^2}$, qui permet de résoudre entièrement le système." },
+      { cle: 'pourquoi la 3e équation', enonce: "On cherche $x$ et $y$ réels tels que $(x+iy)^2=a+bi$, ce qui donne le système $x^2-y^2=a$ et $2xy=b$. Démontre que $x^2+y^2=\\sqrt{a^2+b^2}$." },
       { cle: "racine carrée d'un complexe", enonce: "Détermine les deux racines carrées complexes de $3+4i$, en posant $z = x+iy$ et en utilisant le système à trois équations." },
       { cle: 'racines carrées de 5−12i', enonce: "Détermine, en détail, les deux racines carrées complexes de $5-12i$." },
     ],
     equationscomplexes: [
-      { cle: 'mise sous forme canonique', enonce: "Démontre que, pour $az^2+bz+c=0$ (avec $a,b,c$ réels, $a \\neq 0$ et $\\Delta<0$), la mise sous forme canonique $a(z+\\dfrac{b}{2a})^2=\\dfrac{\\Delta}{4a^2}$ — valable aussi bien dans $\\mathbb{R}$ que dans $\\mathbb{C}$ — conduit, poursuivie dans $\\mathbb{C}$, aux deux solutions conjuguées $z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$." },
+      { cle: 'mise sous forme canonique', enonce: "Démontre que l'équation $az^2+bz+c=0$ (avec $a,b,c$ réels, $a \\neq 0$ et $\\Delta<0$) a pour solutions dans $\\mathbb{C}$ les deux nombres conjugués $z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$." },
       { cle: 'discriminant négatif', enonce: "Résous $z^2+2z+5=0$ dans $\\mathbb{C}$ et vérifie que les deux solutions sont conjuguées." },
       { cle: 'deux équations bicarrées', enonce: "Résous, dans $\\mathbb{C}$, les deux équations bicarrées $z^4-5z^2+4=0$ et $z^4+5z^2+4=0$, en posant $u=z^2$ dans chacune." },
       { cle: 'coefficients complexes', enonce: "Résous $z^2-3z+(3+i)=0$ dans $\\mathbb{C}$ : calcule le discriminant, détermine une racine carrée complexe de ce discriminant, puis les deux solutions, et vérifie-les par leur somme et leur produit." },
     ],
     formetrigonometrique: [
-      { cle: 'le produit additionne les arguments', enonce: "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$) — en développant le produit des deux formes trigonométriques et en reconnaissant les formules d'addition." },
+      { cle: 'le produit additionne les arguments', enonce: "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$)." },
       { cle: 'passer à la forme exponentielle', enonce: "Écris sous forme exponentielle $z_1=1+i\\sqrt{3}$, $z_2=-1-i$ et $z_3=\\sqrt{3}-i$, en donnant chaque argument dans $]-\\pi\\,;\\pi]$." },
       { cle: 'produit en forme exponentielle', enonce: "Pour $z_1 = 2e^{i\\pi/3}$ et $z_2 = 3e^{i\\pi/6}$, calcule $z_1z_2$ et $\\dfrac{z_1}{z_2}$ sous forme exponentielle, puis écris $z_1z_2$ sous la forme $a+bi$." },
     ],
     formulemoivre: [
-      { cle: 'via la forme exponentielle', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier $n$, en passant par la forme exponentielle $e^{i\\theta}$." },
-      { cle: 'par récurrence', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$, par récurrence sur $n$, sans utiliser la forme exponentielle $e^{i\\theta}$." },
+      { cle: 'via la forme exponentielle', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier naturel $n$." },
+      { cle: 'par récurrence', enonce: "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier naturel $n$." },
       { cle: 'cos(2x) et sin(2x)', enonce: "En développant $(\\cos x+i\\sin x)^2$ grâce à la formule de Moivre, retrouve les formules de duplication $\\cos(2x)=\\cos^2x-\\sin^2x$ et $\\sin(2x)=2\\sin x\\cos x$." },
       { cle: 'cos(3x) et sin(3x)', enonce: "En développant $(\\cos x+i\\sin x)^3$ grâce à la formule de Moivre et au binôme de Newton, exprime $\\cos(3x)$ et $\\sin(3x)$ en fonction de $\\cos x$ et $\\sin x$." },
       { cle: 'linéariser cos²x et cos³x', enonce: "À l'aide des formules d'Euler, linéarise $\\cos^2x$ et $\\cos^3x$, puis déduis-en une primitive de $\\cos^2x$." },
@@ -1392,14 +1399,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     // — la clé est le badge (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé
     // reprend les nombres du cours.
     probabilitesensembles: [
-      { cle: "pourquoi retirer l'intersection", enonce: "Démontre que, pour deux événements $A$ et $B$ quelconques, $P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$, en décomposant $A$, $B$ et $A \\cup B$ en unions disjointes." },
+      { cle: "pourquoi retirer l'intersection", enonce: "Démontre que, pour deux événements $A$ et $B$ quelconques, $P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$." },
       { cle: 'inclusion-exclusion sur 40 personnes', enonce: "Dans un groupe de 40 personnes, 18 font partie de $A$, 15 font partie de $B$ et 6 font partie des deux. On choisit une personne au hasard. Calcule $P(A \\cup B)$, puis la probabilité qu'elle ne fasse partie ni de $A$ ni de $B$." },
       { cle: "les trois écritures de l'indépendance", enonce: "Démontre que les trois écritures de l'indépendance de $A$ et $B$ — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$ et $P(B|A)=P(B)$ — sont équivalentes lorsque $P(A)$ et $P(B)$ sont non nulles." },
       { cle: 'ce dé est-il truqué ?', enonce: "On lance un dé 600 fois et on obtient 130 fois le 6. Avec la règle de décision suivante — l'écart entre une fréquence $f$ et une probabilité $p$ est significatif quand l'écart relatif $\\frac{|f-p|}{p}$ dépasse 50 % pour moins de 100 essais, 25 % de 100 à 400 essais, 18 % de 401 à 1 000 essais et 12 % au-delà —, dis si le dé peut être considéré comme équilibré. Reprends ensuite la question avec 13 fois le 6 sur 60 lancers." },
       { cle: 'cœur et figure', enonce: "On tire une carte au hasard dans un jeu de 52 cartes. On note $A$ l'événement « tirer un cœur » et $B$ l'événement « tirer une figure ». Les événements $A$ et $B$ sont-ils indépendants ? Justifie par un calcul." },
     ],
     tiragesarbres: [
-      { cle: "pourquoi on multiplie le long d'un chemin", enonce: "Démontre, à partir de la définition de la probabilité conditionnelle, que la probabilité d'un chemin d'un arbre pondéré est le produit des probabilités des branches qu'il traverse : $P(A \\cap B) = P(A) \\times P(B|A)$, puis $P(A \\cap B \\cap C) = P(A) \\times P(B|A) \\times P(C|A \\cap B)$." },
+      { cle: "pourquoi on multiplie le long d'un chemin", enonce: "Démontre que la probabilité d'un chemin d'un arbre pondéré est le produit des probabilités des branches qu'il traverse : $P(A \\cap B) = P(A) \\times P(B|A)$, puis $P(A \\cap B \\cap C) = P(A) \\times P(B|A) \\times P(C|A \\cap B)$." },
       { cle: 'deux rouges, avec ou sans remise', enonce: "Une urne contient 5 boules rouges et 3 boules bleues. On tire successivement 2 boules. Calcule la probabilité d'obtenir 2 boules rouges, d'abord avec remise, puis sans remise." },
       { cle: 'somme 5 avec deux dés', enonce: "On lance deux dés équilibrés à 6 faces. À l'aide d'un diagramme cartésien des 36 issues, calcule la probabilité que la somme des deux dés vaille 5." },
       { cle: 'deux cartes sans remise', enonce: "On tire successivement, sans remise, 2 cartes parmi 6 cartes numérotées de 1 à 6. À l'aide d'un diagramme cartésien, calcule la probabilité que la somme des deux numéros vaille 7, puis qu'elle vaille 8, et compare avec le lancer de deux dés." },
@@ -1408,7 +1415,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     independancebayes: [
       { cle: "incompatibles, indépendants, ou ni l'un ni l'autre", enonce: "Dans une école de 200 élèves, chaque élève joue au plus d'un instrument : 80 font du sport en club ($A$) ; 40 jouent de la guitare ($G$), dont 16 font du sport ; 60 jouent du violon ($V$), dont 30 font du sport. Pour chacune des paires $A$ et $G$, $G$ et $V$, $A$ et $V$, dis si les événements sont incompatibles, indépendants, ou ni l'un ni l'autre, en justifiant par un calcul." },
       { cle: 'test médical : probabilités totales', enonce: "Pour un test médical, $P(\\text{malade}) = 0{,}1$, $P(T^+|\\text{malade}) = 0{,}9$ et $P(T^+|\\text{non malade}) = 0{,}2$. Calcule $P(T^+)$ à l'aide de la loi des probabilités totales." },
-      { cle: 'pourquoi la formule fonctionne', enonce: "Démontre le théorème de Bayes, $P(A|B)=\\dfrac{P(B|A) \\times P(A)}{P(B)}$, à partir de la définition de la probabilité conditionnelle appliquée dans les deux sens de conditionnement." },
+      { cle: 'pourquoi la formule fonctionne', enonce: "Démontre le théorème de Bayes, $P(A|B)=\\dfrac{P(B|A) \\times P(A)}{P(B)}$." },
       { cle: 'remonter du test à la maladie', enonce: "Pour un test médical, $P(\\text{malade}) = 0{,}1$, $P(T^+|\\text{malade}) = 0{,}9$ et $P(T^+) = 0{,}27$. Calcule la probabilité qu'une personne testée positive soit réellement malade, puis compare-la à $P(T^+|\\text{malade})$." },
       { cle: 'maladie rare : un test positif, puis un second', enonce: "Une maladie touche 1 % de la population. Un test de dépistage a une sensibilité de 99 % et donne 5 % de faux positifs. Calcule la probabilité qu'une personne testée positive soit malade, puis cette probabilité après un second test positif, indépendant du premier." },
       { cle: 'école de musique', enonce: "Une école de musique compte 60 inscrits, dont 38 filles ; chaque élève suit un seul instrument, le piano ou la guitare. Le professeur de guitare a 28 élèves, dont 15 garçons. Complète le tableau à double entrée de cette situation, puis calcule la probabilité qu'un élève soit un garçon sachant qu'il étudie la guitare." },
@@ -1427,21 +1434,21 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'analyse-combinatoire': {
     denombrementfondamental: [
       undefined,
-      "Démontre, à partir de la définition d'une combinaison, que $A_n^k = C_n^k \\times k!$.",
+      "Démontre que $A_n^k = C_n^k \\times k!$.",
       undefined,
       undefined,
       undefined,
       undefined,
       undefined,
       undefined,
-      "Démontre, en appliquant la relation de Pascal, que $C_5^3+2\\times C_5^2+C_5^1 = C_7^3$, retrouvant ainsi la formule $\\Gamma_5^3 = C_{5+3-1}^3$ sans passer par le calcul direct des factorielles.",
+      "Démontre, sans calculer de factorielles, que $C_5^3+2\\times C_5^2+C_5^1 = C_7^3$, puis déduis-en que $\\Gamma_5^3 = C_{5+3-1}^3$.",
     ],
     binomenewton: [
-      "En développant $(a+b)^4$ comme un produit de 4 facteurs identiques et en comptant les mots de 4 lettres $a$/$b$ obtenus, démontre que le coefficient du terme en $a^{4-i}b^i$ est $C_4^i$, puis généralise ce raisonnement à $(a+b)^n$.",
+      "Démontre que, dans le développement de $(a+b)^4$, le coefficient du terme en $a^{4-i}b^i$ est $C_4^i$, puis généralise ce résultat à $(a+b)^n$.",
       "Développe complètement $(2x-1)^5$ à l'aide de la formule du binôme de Newton, puis vérifie ton résultat en $x=1$.",
-      "Démontre algébriquement, à partir de la définition factorielle des combinaisons, que $C_{n-1}^{k-1}+C_{n-1}^k = C_n^k$.",
+      "Démontre que $C_{n-1}^{k-1}+C_{n-1}^k = C_n^k$.",
       undefined,
-      "En substituant $a=b=1$ dans la formule du binôme de Newton, démontre que $C_n^0+C_n^1+\\ldots+C_n^n = 2^n$.",
+      "Démontre que $C_n^0+C_n^1+\\ldots+C_n^n = 2^n$.",
       undefined,
       undefined,
     ],
@@ -1465,7 +1472,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   coniques: {
     excentricite: [
       undefined,
-      "Démontre, à l'aide du théorème de Dandelin-Quételet, que la section d'un cône de révolution par un plan, lorsqu'elle est une ellipse, admet pour foyers les points de contact F et F′ des deux sphères inscrites avec ce plan — c'est-à-dire que $|PF|+|PF'|$ est constante pour tout point P de la section.",
+      "Un plan coupe un cône de révolution selon une ellipse ; deux sphères inscrites dans le cône sont tangentes à ce plan en F et F′. Démontre que $|PF|+|PF'|$ est la même pour tout point P de la section.",
       "Réduis l'équation $16x^2-36y^2+80x+252y-197=0$ par translation d'axes, puis identifie la conique obtenue (nature, centre, sommets, foyers, directrices, asymptotes).",
     ],
     airefocale: [
@@ -1613,7 +1620,8 @@ export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSe
     const enonceTexte = enonceSoigneTexte ?? (candidat.label || 'Justifie le raisonnement suivant.')
     const corrigeParagraphes = extraireParagraphes(candidat.blocks)
     const corrige = corrigeParagraphes.length > 0 ? corrigeParagraphes : [parseRichText('Voir le cours.')]
-    return { enonce: parseRichText(enonceTexte), corrige }
+    const titre = (candidat.label ?? '').replace(/^\s*Démonstration\s*—\s*/, '') || 'Démonstration'
+    return { enonce: parseRichText(enonceTexte), corrige, id: normaliserCle(candidat.label ?? `bloc ${index}`), titre, apercu: enonceTexte }
   }).filter((_, index) => garder[index])
 }
 
@@ -1759,7 +1767,10 @@ function formulesRattachees(chapitre: { sections: ChapterSection[]; formulaire?:
       else if (formule.condition) enonce = `Écris la formule : ${formule.condition}.`
       else continue // simple énoncé de propriété, rien à faire compléter : pas une question « Formule ».
       const corrige = [parseRichText(formule.condition ? `${formule.text} — ${formule.condition}` : formule.text)]
-      resultat.push({ sectionId: chapitre.sections[meilleur]?.id ?? '', question: { enonce: parseRichText(enonce), corrige } })
+      resultat.push({
+        sectionId: chapitre.sections[meilleur]?.id ?? '',
+        question: { enonce: parseRichText(enonce), corrige, id: normaliserCle(formule.text), titre: formule.text, apercu: enonce },
+      })
     }
   }
   CACHE_FORMULES.set(chapitre, resultat)
@@ -4332,6 +4343,11 @@ export interface LigneSelection {
    * `themesPourSection`. Une section n'a jamais plus d'une ligne `formule`/`demonstration`/`comprehension`,
    * `cle` y reste donc absent. */
   cle?: string
+  /** Réservé à `formule` / `demonstration` : questions CHOISIES par le professeur (ids de
+   * `QuestionOuverte.id`). Non vide → exactement ces questions, les mêmes dans toutes les séries
+   * (décision de l'utilisateur : une démonstration longue pour la série A et une courte pour la
+   * série B serait injuste) ; `nombre` vaut alors `choix.length`. Vide/absent → tirage au hasard. */
+  choix?: string[]
   /** 0 = ligne non incluse. Pour `type==='exercice'`, DÉRIVÉ automatiquement de la somme de
    * `parVariante` (jamais éditable directement dans ce cas) — voir `sommeParVariante`. */
   nombre: number
@@ -4437,12 +4453,32 @@ function piocherAleatoire<T>(banque: T[], nombre: number): T[] {
  * aussi sur les questions ouvertes, pas seulement sur les exercices générés/le vrai-faux (déjà
  * randomisés à la génération côté plateforme-maths). Vivier insuffisant : toutes les séries
  * reçoivent la même sélection (rien d'autre à distribuer). */
-function construireOuvertesParSerie(banque: QuestionOuverte[], nombre: number, nombreSeries: number): QuestionOuverte[][] {
-  if (banque.length <= nombre) {
-    const selection = banque.slice(0, nombre)
+/** Questions au contenu imprimé identique (deux démonstrations d'un même résultat, ex. Moivre par
+ * l'exponentielle ou par récurrence) : une seule par tirage. */
+function sansDoublonsEnonce(banque: QuestionOuverte[]): QuestionOuverte[] {
+  const vus = new Set<string>()
+  return banque.filter((q) => {
+    const cle = JSON.stringify(q.enonce)
+    if (vus.has(cle)) return false
+    vus.add(cle)
+    return true
+  })
+}
+
+/** Sans le champ interne `id`/`titre`/`apercu` (inutile dans le payload, qui part dans l'URL). */
+function pourPayload(q: QuestionOuverte): QuestionOuverte {
+  return { enonce: q.enonce, corrige: q.corrige }
+}
+
+/** `memeTirage` : une seule pioche, reprise telle quelle dans toutes les séries (« Formule » et
+ * « Formule + démonstration » — équité entre séries, décision de l'utilisateur). */
+function construireOuvertesParSerie(banque: QuestionOuverte[], nombre: number, nombreSeries: number, memeTirage = false): QuestionOuverte[][] {
+  const distinctes = sansDoublonsEnonce(piocherAleatoire(banque, banque.length))
+  if (distinctes.length <= nombre || memeTirage) {
+    const selection = (distinctes.length <= nombre ? distinctes : distinctes.slice(0, nombre)).map(pourPayload)
     return Array.from({ length: nombreSeries }, () => selection)
   }
-  return Array.from({ length: nombreSeries }, () => piocherAleatoire(banque, nombre))
+  return Array.from({ length: nombreSeries }, () => sansDoublonsEnonce(piocherAleatoire(banque, banque.length)).slice(0, nombre).map(pourPayload))
 }
 
 export interface EnTeteEvaluation {
@@ -4564,7 +4600,10 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
           : ligne.type === 'demonstration'
             ? deriveQuestionsOuvertes(ligne.chapitreSlug, section)
             : deriveQuestionsComprehension(ligne.chapitreSlug, section.id)
-      const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
+      const choisies = ligne.type !== 'comprehension' && ligne.choix?.length ? banque.filter((q) => q.id && ligne.choix!.includes(q.id)) : null
+      const ouvertesParSerie = choisies
+        ? Array.from({ length: nombreSeries }, () => choisies.map(pourPayload))
+        : construireOuvertesParSerie(banque, ligne.nombre, nombreSeries, ligne.type !== 'comprehension')
       if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie, section: sectionRef })
     }
   }

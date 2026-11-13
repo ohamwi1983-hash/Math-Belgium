@@ -186,3 +186,18 @@ L'ancienne ligne « Questions ouvertes — formules / démonstrations » est rem
   dans `ENONCES_DEMONSTRATION` (contrôlés au build) mais ne sont plus tirés.
 Un plan enregistré avant ce changement est complété au chargement (lignes manquantes ajoutées
 depuis `lignesInitiales`, lignes enregistrées reprises telles quelles).
+
+### Énoncés de démonstration et choix des questions (décisions de l'utilisateur)
+
+- **Énoncé = ce qu'il faut démontrer, jamais la méthode.** Pas de « en complétant le carré »,
+  « à l'aide de Pythagore », « en posant… », « par l'absurde », « en démontrant les deux sens »…
+  Restent : les hypothèses et notations nécessaires, les vraies sous-questions (« puis déduis-en… »)
+  et, quand le résultat serait sinon une formule à réciter, le cadre imposé (« à partir de la
+  définition du nombre dérivé »). Deux démonstrations d'un même résultat ont alors le même énoncé :
+  le tirage au hasard n'en prend qu'une (`sansDoublonsEnonce`).
+- **Choix explicite** (`LigneSelection.choix`, ids `QuestionOuverte.id`) : bouton « Choisir » sur les
+  lignes « Formule » et « Formule + démonstration » — liste à cocher (titre du bloc, énoncé, nombre
+  d'étapes du corrigé). Questions cochées = exactement celles-là, les MÊMES dans toutes les séries.
+- **Sans choix**, « Formule » et « Formule + démonstration » sont aussi tirées une seule fois pour
+  toutes les séries (équité : jamais une démonstration longue pour A et une courte pour B). La
+  « compréhension » garde un tirage par série.

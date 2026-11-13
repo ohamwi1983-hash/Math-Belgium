@@ -2,6 +2,7 @@ import { Fragment, useMemo, useRef, useState } from 'react'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
 import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
+import { RichText } from '../Math'
 import { EVALUATION_ADAPTER_REGISTRY } from '../../lib/evaluationAdapterRegistry'
 import {
   codesDuPlan,
@@ -51,6 +52,7 @@ import {
   type LigneSelection,
   type NiveauCode,
   type Processus,
+  type QuestionOuverte,
   type TypeQuestionEvaluation,
 } from '../../lib/evaluationPayload'
 
@@ -248,6 +250,8 @@ export function EvaluationGeneratorPanel({
   /** Sélection exclusive (groupe de type radio) : un seul processus affiché à la fois, jamais 2 ou 3
    * simultanément — voir `.admin-eval-processus-bar`. */
   const [processusActif, setProcessusActif] = useState<Processus>(1)
+  /** Lignes « Formule » / « Formule + démonstration » dont la liste de choix est dépliée. */
+  const [choixOuverts, setChoixOuverts] = useState<Set<string>>(() => new Set())
   const [erreur, setErreur] = useState<string | null>(null)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
   const [genereEnCours, setGenereEnCours] = useState(false)
@@ -269,18 +273,18 @@ export function EvaluationGeneratorPanel({
   const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitres))
 
   const apercusDemonstration = useMemo(() => {
-    const map = new Map<string, number>()
+    const map = new Map<string, QuestionOuverte[]>()
     for (const chapitre of chapitres) {
-      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsOuvertes(chapitre.slug, section).length)
+      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsOuvertes(chapitre.slug, section))
     }
     return map
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `chapitresSlugs.join('|')` + `levelSlug` identifient la sélection réelle (clés primitives stables), `chapitres` lui-même change de référence à chaque rendu.
   }, [chapitresSlugs.join('|'), levelSlug])
 
   const apercusFormule = useMemo(() => {
-    const map = new Map<string, number>()
+    const map = new Map<string, QuestionOuverte[]>()
     for (const chapitre of chapitres) {
-      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsFormules(chapitre, section.id).length)
+      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsFormules(chapitre, section.id))
     }
     return map
     // eslint-disable-next-line react-hooks/exhaustive-deps -- voir apercusDemonstration ci-dessus.
@@ -1017,21 +1021,84 @@ export function EvaluationGeneratorPanel({
                                   }
 
                                   const estBanqueFixe = ligne.type === 'formule' || ligne.type === 'demonstration' || ligne.type === 'comprehension'
-                                  const disponibles = estBanqueFixe
-                                    ? (ligne.type === 'formule' ? apercusFormule : ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(
-                                        cleSection(chapitreCourant.slug, section.id),
-                                      ) ?? 0
-                                    : MAX_VRAI_FAUX
+                                  const banqueChoix =
+                                    ligne.type === 'formule' || ligne.type === 'demonstration'
+                                      ? ((ligne.type === 'formule' ? apercusFormule : apercusDemonstration).get(cleSection(chapitreCourant.slug, section.id)) ?? [])
+                                      : null
+                                  const disponibles = banqueChoix
+                                    ? banqueChoix.length
+                                    : estBanqueFixe
+                                      ? apercusComprehension.get(cleSection(chapitreCourant.slug, section.id)) ?? 0
+                                      : MAX_VRAI_FAUX
+                                  const choix = (ligne.choix ?? []).filter((id) => banqueChoix?.some((q) => q.id === id))
+                                  const cleChoix = `${chapitreCourant.slug}|${section.id}|${ligne.type}`
+                                  const choixOuvert = choixOuverts.has(cleChoix)
+                                  const basculerChoix = (id: string, coche: boolean) => {
+                                    const suivant = coche ? [...choix, id] : choix.filter((c) => c !== id)
+                                    // Ordre du cours (pas l'ordre des clics) : la feuille suit l'ordre des sections.
+                                    const ordonne = (banqueChoix ?? []).map((q) => q.id ?? '').filter((qid) => suivant.includes(qid))
+                                    mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { choix: ordonne, nombre: ordonne.length })
+                                  }
                                   const indisponible = estBanqueFixe && disponibles === 0
                                   const theme =
                                     ligne.type === 'vraiFaux'
                                       ? themesPourSection(chapitreCourant.slug, section.id).find((t) => t.quizTheme === ligne.cle)
                                       : undefined
-                                  return (
+                                  const rangeeChoix =
+                                    banqueChoix && banqueChoix.length > 0 && choixOuvert ? (
+                                      <tr className="admin-eval-row admin-eval-row-choix" key={ligne.type + '-choix'}>
+                                        <td colSpan={estExercice ? 3 : 4}>
+                                          <fieldset className="admin-eval-choix">
+                                            <legend>
+                                              {ligne.type === 'demonstration' ? 'Démonstrations à donner' : 'Formules à donner'} — les mêmes dans toutes les séries.
+                                              {' '}Aucune cochée : tirage au hasard.
+                                            </legend>
+                                            {banqueChoix.map((q) => (
+                                              <label className="admin-eval-choix-item" key={q.id}>
+                                                <input type="checkbox" checked={choix.includes(q.id ?? '')} onChange={(e) => basculerChoix(q.id ?? '', e.target.checked)} />
+                                                <span className="admin-eval-choix-texte">
+                                                  {ligne.type === 'demonstration' && (
+                                                    <span className="admin-eval-choix-titre">
+                                                      <RichText text={q.titre ?? ''} />
+                                                    </span>
+                                                  )}
+                                                  <span className="admin-eval-choix-enonce">
+                                                    <RichText text={q.apercu ?? ''} />
+                                                  </span>
+                                                  {ligne.type === 'demonstration' && (
+                                                    <span className="admin-eval-choix-longueur">
+                                                      Corrigé : {q.corrige.length} étape{q.corrige.length > 1 ? 's' : ''}
+                                                    </span>
+                                                  )}
+                                                </span>
+                                              </label>
+                                            ))}
+                                          </fieldset>
+                                        </td>
+                                      </tr>
+                                    ) : null
+                                  return [
                                     <tr className="admin-eval-row" key={ligne.type + (ligne.cle ?? '')}>
                                       <td>
                                         {LABEL_TYPE[ligne.type]}
                                         {theme?.label && ` — ${theme.label}`}
+                                        {banqueChoix && banqueChoix.length > 0 && (
+                                          <button
+                                            type="button"
+                                            className="admin-eval-choix-bouton"
+                                            aria-expanded={choixOuvert}
+                                            onClick={() =>
+                                              setChoixOuverts((prev) => {
+                                                const n = new Set(prev)
+                                                if (n.has(cleChoix)) n.delete(cleChoix)
+                                                else n.add(cleChoix)
+                                                return n
+                                              })
+                                            }
+                                          >
+                                            {choix.length > 0 ? `${choix.length} choisie${choix.length > 1 ? 's' : ''}` : 'Choisir'}
+                                          </button>
+                                        )}
                                         {indisponible &&
                                           (ligne.type === 'demonstration'
                                             ? ' — aucune démonstration pour ce point'
@@ -1042,9 +1109,9 @@ export function EvaluationGeneratorPanel({
                                       <td>{estBanqueFixe ? disponibles : '—'}</td>
                                       <td className="admin-eval-col-nombre">
                                         <Stepper
-                                          valeur={ligne.nombre}
+                                          valeur={choix.length > 0 ? choix.length : ligne.nombre}
                                           max={disponibles}
-                                          disabled={indisponible}
+                                          disabled={indisponible || choix.length > 0}
                                           onChange={(v) => mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { nombre: v })}
                                         />
                                       </td>
@@ -1064,8 +1131,9 @@ export function EvaluationGeneratorPanel({
                                           />
                                         </td>
                                       )}
-                                    </tr>
-                                  )
+                                    </tr>,
+                                    rangeeChoix,
+                                  ]
                                 })}
                               </Fragment>
                             )
