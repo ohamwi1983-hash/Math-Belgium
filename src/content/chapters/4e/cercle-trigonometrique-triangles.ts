@@ -1365,6 +1365,41 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 19. Triangle quelconque »',
         },
+        {
+          kind: 'methode',
+          label: 'Résoudre complètement un triangle',
+          items: [
+            'Repère la configuration des trois données : 2 angles et 1 côté, 2 côtés et l\'angle ' +
+              'compris, 3 côtés, ou 2 côtés et un angle non compris.',
+            '**2 angles et 1 côté** : le troisième angle par la somme des angles, puis chaque côté ' +
+              'par la loi des sinus, avec le côté donné et l\'angle qui lui fait face.',
+            '**2 côtés et l\'angle compris** : le troisième côté par Al-Kashi, puis le **plus grand** ' +
+              'des deux angles restants par Al-Kashi (il fait face au plus grand côté), puis le dernier ' +
+              'par la somme des angles.',
+            '**3 côtés** : commence par le **plus grand angle** (face au plus grand côté), par ' +
+              'Al-Kashi résolue en cosinus ; puis un deuxième angle ; le dernier par la somme.',
+            '**2 côtés et un angle non compris**, quand l\'angle donné fait face au **plus grand** des ' +
+              'deux côtés : un seul triangle. Loi des sinus pour l\'angle qui fait face à l\'autre côté ' +
+              '(il est aigu), puis la somme des angles, puis le dernier côté.',
+            'Pourquoi le plus grand angle d\'abord, par Al-Kashi ? C\'est le seul angle qui peut être ' +
+              'obtus, et $\\sin^{-1}$ ne renvoie jamais un angle obtus : la calculatrice donnerait ' +
+              '$180^\\circ - x$ au lieu de $x$. Le cosinus, lui, distingue aigu et obtus.',
+            'Contrôle : recalcule autrement l\'angle obtenu par la somme (par Al-Kashi) ; tu dois ' +
+              'retrouver la même valeur. Calculatrice en degrés, sans arrondir les valeurs intermédiaires.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Résoudre complètement un triangle',
+          generatorId: 'gen73',
+          description: [
+            'Trois données, trois inconnues : reconnais la configuration, choisis la première loi, ' +
+              'calcule les éléments manquants dans l\'ordre, puis contrôle. Gare à l\'angle obtus : ' +
+              'arcsin ne renvoie que l\'angle aigu.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 73. Résoudre complètement un triangle »',
+        },
       ],
     },
     {

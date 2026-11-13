@@ -2662,3 +2662,16 @@ paths:
   transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
   correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
   évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).
+- **4e ch5 — gen73 « Résoudre complètement un triangle »** (processus 2 appliquer, section
+  `triangle`, carte après gen19, précédée d'un bloc `methode` « Résoudre complètement un triangle » :
+  méthode par configuration, plus grand angle d'abord par Al-Kashi, cas SSA à un seul triangle,
+  contrôle). 4 variantes = 4 configurations (AAS, SAS, SSS, SSA à un seul triangle : angle donné
+  face au plus grand des deux côtés). Écrans : configuration (choix, 1 essai), première loi (choix,
+  1 essai ; pour SSS aussi l'angle, le plus grand), 3 champs dans l'ordre de la méthode (jugés sur
+  le triangle exact, tolérance de gen19 : 1 %, min 0,05), contrôle (l'angle obtenu par la somme,
+  recalculé par Al-Kashi). Diagnostic ciblé de l'angle aigu de l'arcsin et de la calculatrice en
+  radians. Cœur de calcul pur et exporté `moteur/resolutionTriangle.ts` (configuration, résolution
+  à partir de 3 données, plan de la méthode, valeurs fautives) — à réutiliser par gen81. Figure à
+  l'échelle `ui/croquisResoudreTriangle.ts` (écran + SVG papier). ≈ 40 % d'instances avec un angle
+  obtus (100°–140°) ; `forme` = configuration + position de l'angle obtus (aucun / donné /
+  calculé), forme la plus rare ≈ 20 % ; pas de cas particulier ; `calculatriceIndispensable`.
