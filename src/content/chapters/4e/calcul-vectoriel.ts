@@ -1387,6 +1387,60 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 89. Viser une cible : trajectoires rectilignes »',
         },
+        { kind: 'subheading', text: 'Démontrer sans repère, avec des vecteurs' },
+        {
+          kind: 'para',
+          text:
+            'La colinéarité sert aussi à **démontrer** une propriété sur une figure sans aucun ' +
+            'repère : il suffit de tout exprimer dans une base formée de deux vecteurs non ' +
+            'colinéaires de la figure (section 7), puis de comparer les coefficients.',
+        },
+        {
+          kind: 'methode',
+          label: 'Démontrer avec des vecteurs',
+          items: [
+            'Choisir une base adaptée : deux vecteurs non colinéaires de même origine, portés par des côtés de la figure — par exemple $(\\vec{AB}\\,;\\,\\vec{AD})$ dans un parallélogramme ABCD.',
+            'Exprimer chaque vecteur utile dans cette base, grâce à la relation de Chasles et aux relations de l\'énoncé.',
+            'Comparer les coefficients : s\'ils sont proportionnels, $\\vec{v} = k\\,\\vec{w}$ et les vecteurs sont colinéaires.',
+            'Conclure en citant la propriété : colinéaires avec un point commun → points alignés ; colinéaires sans point commun → droites parallèles ; $\\vec{UM} = \\vec{MV}$ → M milieu de [UV] ; $\\vec{PQ} = \\vec{SR}$ → PQRS parallélogramme.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'démontrer sans repère : trois points alignés',
+          formula:
+            'ABCD est un parallélogramme, I est le milieu de [DC] et E est le point tel que ' +
+            '$\\vec{DE} = \\dfrac{1}{3}\\vec{DB}$. Démontrer que A, E et I sont alignés.',
+          steps: [
+            { tag: 'base', text: '$(\\vec{AB}\\,;\\,\\vec{AD})$ : deux vecteurs non colinéaires de même origine A' },
+            {
+              tag: 'exprimer AE (Chasles)',
+              text: '$\\vec{AE} = \\vec{AD} + \\dfrac{1}{3}\\vec{DB} = \\vec{AD} + \\dfrac{1}{3}(\\vec{AB} - \\vec{AD}) = \\dfrac{1}{3}\\vec{AB} + \\dfrac{2}{3}\\vec{AD}$',
+            },
+            { tag: 'exprimer AI (Chasles)', text: '$\\vec{AI} = \\vec{AD} + \\dfrac{1}{2}\\vec{DC} = \\dfrac{1}{2}\\vec{AB} + \\vec{AD}$, car $\\vec{DC} = \\vec{AB}$' },
+            {
+              tag: 'comparer les coefficients',
+              text: '$\\dfrac{1}{3} = \\dfrac{2}{3} \\times \\dfrac{1}{2}$ et $\\dfrac{2}{3} = \\dfrac{2}{3} \\times 1$, donc $\\vec{AE} = \\dfrac{2}{3}\\vec{AI}$',
+            },
+          ],
+          result: { tag: 'conclusion', text: 'vecteurs colinéaires avec le point A en commun → A, E et I sont alignés' },
+        },
+        {
+          kind: 'piege',
+          label: 'Parallèles ou alignés ?',
+          text:
+            'Deux vecteurs colinéaires **sans point commun** sont portés par deux droites ' +
+            'parallèles : on ne peut pas conclure à un alignement. C\'est le point commun (ici ' +
+            'l\'origine A des deux vecteurs) qui donne l\'alignement.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Démontrer avec des vecteurs',
+          generatorId: 'gen85',
+          description: ['Démontre un alignement, un parallélisme, un milieu ou un parallélogramme sans repère : base adaptée, relation de Chasles, coefficients proportionnels.'],
+          chantier: '4e',
+          whereLabel: '4e → « 85. Démontrer avec des vecteurs »',
+        },
       ],
     },
 
