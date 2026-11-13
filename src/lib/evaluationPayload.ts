@@ -87,7 +87,7 @@ export type IdGenerateurPilote =
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
-  | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67'
+  | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
@@ -214,9 +214,13 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'inequations-rationnelles', generatorId: 'gen6', label: '' },
   { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'contexte', generatorId: 'gen57', label: 'Équations et inéquations en contexte (gen57)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'lire', generatorId: 'gen12', label: '' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'lire', generatorId: 'gen70', label: 'Lire un graphique en contexte (gen70)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', generatorId: 'gen13', label: '' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', generatorId: 'gen68', label: 'Problèmes modélisés par une fonction de référence (gen68)', processus: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen10', label: 'Transformations graphiques (gen10)' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen11', label: 'Forme canonique et transformations (gen11)' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen69', label: 'Choisir le bon modèle (gen69)', processus: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen71', label: 'Le portrait-robot d’une fonction (gen71)', processus: 3 },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
   { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
