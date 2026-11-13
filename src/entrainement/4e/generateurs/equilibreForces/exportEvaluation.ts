@@ -212,6 +212,8 @@ function difficulte(e: ExerciceEquilibreForces): 1 | 2 | 3 {
 
 export const adaptateurEvaluationEquilibreForces: AdaptateurFeuilleExercices<ExerciceEquilibreForces> = {
   profilInstance: profilEquilibreForces,
+  // L'angle de F₃ (arctangente) exige la calculatrice : le panneau avertit si elle est interdite.
+  calculatriceIndispensable: CATALOGUE_VARIANTES.filter((v) => v.id.endsWith("-direction")).map((v) => v.id),
   libelleCasParticulier: LIBELLE_CAS_EQUILIBRE_FORCES,
   titreDocument: "Équilibre de forces en composantes — Évaluation",
   nomFichierBase: "equilibre-forces-composantes",
