@@ -2815,3 +2815,16 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+
+- **4e, Chapitre 6 — Calcul vectoriel** : nouveau gen89 « Viser une cible : trajectoires
+  rectilignes » (section `colinearite`, processus 3, exercice en contexte, carte après gen24).
+  Billard, laser, passe au football, curling, vus de dessus dans un repère : l'objet part de A dans
+  la direction et le sens de u ; touche-t-il la cible C ? Sens direct : vecteur à comparer (AC, CA,
+  OC — choix fermé), composantes de AC, critère du cours (celui de gen24, ordre opposé accepté)
+  + colinéaires ? + k (AC = k·u), conclusion (touche / passe à côté / bonne droite mais derrière A).
+  Sens inverse (u à compléter par m) : condition (équation libre, tout multiple accepté), m, puis
+  le sens (k > 0 : m convient ; k < 0 : aucune valeur ne convient). Issues = verdicts, tirées
+  équiprobables, jamais dans `forme` (= situation + sens) ; « à côté » à moins d'une unité de la
+  droite (critère ±1 ou ±2). Figure à l'échelle (scène, axes gradués discrets, flèche de u),
+  trajectoire prolongée dans le corrigé. Bloc `attention` « Viser une cible » ajouté avant la carte :
+  le cours ne liait pas la colinéarité au SENS du trajet.
