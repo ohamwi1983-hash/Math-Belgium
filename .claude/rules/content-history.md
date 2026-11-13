@@ -2662,3 +2662,20 @@ paths:
   transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
   correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
   évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).
+- **4e ch5 — gen79 « Le cercle dans le réel : rotations en contexte »** (processus 3 transférer,
+  section « equations ») : grande roue, horloge de beffroi, bras de robot, éolienne, valve de vélo
+  (10 variantes : situation × sens direct/inverse). Piège visé : le contexte ne part pas de 0° et ne
+  tourne pas forcément dans le sens trigonométrique (θ = θ₀ ± α). 4 écrans : 1) position de départ
+  et sens de rotation (choix fermés, 1 essai) ; direct : 2) θ réduit, 3) (r cos θ ; r sin θ),
+  4) hauteur h + r sin θ ; inverse : 2) sin θ = k, 3) toutes les solutions (bouton « deux / une
+  seule solution », jamais présélectionné selon la réponse), 4) retour au contexte (secondes,
+  minutes après midi ou angle de rotation). Diagnostics ciblés (mauvais sens, α pris pour θ, x/y
+  échangés, h oublié, angles θ rendus au lieu des durées) ; un angle juste mais non réduit ne compte
+  pas de tentative. Figure SVG autonome (contexte + axes X/Y superposés) : énoncé sans le sens de
+  rotation, corrigé (`figureHtml`) avec arc α, point(s) θ et hauteur. Aides : réutilise
+  `CercleTrigTrajetBase` (gen14) et la construction quadrants/candidats/projections de gen18.
+  Bloc de cours ajouté avant la carte (para + attention « Le contexte ne part pas de 0° »).
+  **Séries équilibrées** : `forme` = variante + conversion (origine-sens) + réduction nécessaire ou
+  non (direct) / nombre de solutions (inverse) ; `calcul` exacte (θ multiple de 30°/45°, sin θ =
+  ±1/2) ou calculatrice ; cas particulier = sin θ = ±1 (une solution). Fréquence minimale mesurée
+  (6 000 tirages/variante) : 1,3 % (≈ 260 correspondances attendues en 20 000 essais).
