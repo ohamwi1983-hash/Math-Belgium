@@ -2690,3 +2690,19 @@ paths:
   `forme` = format des données (entiers / un côté décimal) : l'issue est un verdict, jamais imposée
   entre séries. Bloc « Résoudre le cas ambigu » précisé : « B̂₁ convient toujours » n'est vrai que
   pour Â aigu (pour Â obtus et a ≤ b, aucun triangle bien que sin B̂ < 1).
+- **4e ch5 — gen76 « Valeur exacte sans calculatrice »** (section « associes », processus 2
+  appliquer) : synthèse de gen14 (réduire, quadrant, signe), gen15 (valeurs remarquables) et gen17
+  (angles associés) — valeur exacte d'une expression de 2 ou 3 termes (sin 150° + cos 240° · tan 315°).
+  4 variantes : 2 termes, 3 termes, angles > 360° ou négatifs (2 ou 3 termes), avec un carré.
+  Angles multiples de 30°/45° STRICTEMENT dans un quadrant (jamais d'axe : aucune tangente
+  indéfinie), au plus un produit. Écrans : pour chaque terme [angle ramené dans [0° ; 360°[] →
+  quadrant et signe (sélecteur de gen14, choix fermés, 1 essai) → angle associé et valeur exacte ;
+  puis valeur de l'expression. Calcul exact sans flottant dans ℚ(√2, √3)
+  (`moteur/corpsValeurExacte.ts`) ; saisie « rac(…) » / « √ » comparée à 1e-9 ; une valeur
+  décimale approchée (« 0,866 ») ou un sin/cos/tan recopié est refusé SANS tentative (un décimal
+  exact comme 0,5 est accepté) ; diagnostics ciblés « signe » et « sinus/cosinus confondus ».
+  Exemple résolu ajouté avant la carte (le cours ne combinait jamais plusieurs termes) + son énoncé
+  dans `ENONCES_DEMONSTRATION`. Profil : `calcul: 'exacte'` toujours, `forme` = nombre de termes /
+  de réductions / de tangentes / de produits / de carrés, cas particulier = un terme du premier
+  quadrant (≈ 20 %) ; forme la plus rare au 1er centile ≈ 84 correspondances attendues en 20 000
+  essais.

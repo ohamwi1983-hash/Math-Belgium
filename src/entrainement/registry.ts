@@ -93,6 +93,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen71: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppPortraitRobotFonction').then((m) => ({ default: m.AppPortraitRobotFonction }))),
   gen72: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppTransformationsEnsembles').then((m) => ({ default: m.AppTransformationsEnsembles }))),
   gen73: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppResoudreTriangle').then((m) => ({ default: m.AppResoudreTriangle }))),
+  gen76: entree(CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES, () => import('./4e/AppValeurExacte').then((m) => ({ default: m.AppValeurExacte }))),
   gen62: entree(CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE, () => import('./4e/AppQuizFonctionsReference').then((m) => ({ default: m.AppQuizFonctionsReference }))),
 
   // --- 4e, chapitre 5 : Cercle trigonométrique & triangles quelconques ---
