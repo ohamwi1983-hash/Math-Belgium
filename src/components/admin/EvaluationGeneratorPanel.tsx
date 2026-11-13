@@ -445,6 +445,7 @@ export function EvaluationGeneratorPanel({
         0,
       )
     }
+    if (ligne.choix?.length) return ligne.choix.reduce((total, id) => total + (ligne.pointsParChoix?.[id] ?? ligne.points), 0)
     return ligne.points * ligne.nombre
   }
 
@@ -1071,6 +1072,24 @@ export function EvaluationGeneratorPanel({
                                                     </span>
                                                   )}
                                                 </span>
+                                                {!estExercice && choix.includes(q.id ?? '') && (
+                                                  <span className="admin-eval-choix-points">
+                                                    <input
+                                                      type="number"
+                                                      min={0.5}
+                                                      step={0.5}
+                                                      className="admin-eval-points-input"
+                                                      aria-label={`Points — ${q.titre ?? 'question'}`}
+                                                      value={ligne.pointsParChoix?.[q.id ?? ''] ?? ligne.points}
+                                                      onChange={(e) =>
+                                                        mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
+                                                          pointsParChoix: { ...ligne.pointsParChoix, [q.id ?? '']: Number(e.target.value) || 0.5 },
+                                                        })
+                                                      }
+                                                    />
+                                                    pt
+                                                  </span>
+                                                )}
                                               </label>
                                             ))}
                                           </fieldset>
@@ -1115,7 +1134,12 @@ export function EvaluationGeneratorPanel({
                                           onChange={(v) => mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { nombre: v })}
                                         />
                                       </td>
-                                      {!estExercice && (
+                                      {!estExercice && choix.length > 0 && (
+                                        <td className="admin-eval-points-somme" title="Points fixés question par question dans la liste « Choisir »">
+                                          {pointsLigne(ligne)} pt{pointsLigne(ligne) > 1 ? 's' : ''}
+                                        </td>
+                                      )}
+                                      {!estExercice && choix.length === 0 && (
                                         <td>
                                           <input
                                             type="number"

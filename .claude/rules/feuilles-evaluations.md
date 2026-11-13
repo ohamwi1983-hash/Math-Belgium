@@ -198,6 +198,9 @@ depuis `lignesInitiales`, lignes enregistrées reprises telles quelles).
 - **Choix explicite** (`LigneSelection.choix`, ids `QuestionOuverte.id`) : bouton « Choisir » sur les
   lignes « Formule » et « Formule + démonstration » — liste à cocher (titre du bloc, énoncé, nombre
   d'étapes du corrigé). Questions cochées = exactement celles-là, les MÊMES dans toutes les séries.
+  **Points par question choisie** (`LigneSelection.pointsParChoix`, `QuestionOuverte.points` dans le
+  payload) : une démonstration longue peut valoir plus qu'une courte ; la colonne « Points » de la
+  ligne affiche alors la somme (lecture seule).
 - **Sans choix**, « Formule » et « Formule + démonstration » sont aussi tirées une seule fois pour
   toutes les séries (équité : jamais une démonstration longue pour A et une courte pour B). La
   « compréhension » garde un tirage par série.

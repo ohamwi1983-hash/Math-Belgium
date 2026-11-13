@@ -413,7 +413,7 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         elements.push({ ...base, type: 'vraiFaux', pointsParAffirmation: item.points, chapitreSlug, theme: item.vraiFaux.theme, indices })
       } else if (item.ouvertesParSerie) {
         const ouvertes = item.ouvertesParSerie[s] ?? item.ouvertesParSerie[0] ?? []
-        for (const question of ouvertes) elements.push({ ...base, type: 'ouverte', points: item.points, question })
+        for (const question of ouvertes) elements.push({ ...base, type: 'ouverte', points: question.points ?? item.points, question })
       }
     }
     series.push({ lettre: LETTRES_SERIE[s] ?? String(s + 1), elements: s === 0 ? elements : melangerParProcessus(elements) })

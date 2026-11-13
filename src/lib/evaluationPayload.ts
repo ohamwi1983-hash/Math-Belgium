@@ -576,6 +576,9 @@ export interface QuestionOuverte {
   /** Titre lisible pour le sélecteur du panneau (RichText), et énoncé source (RichText). */
   titre?: string
   apercu?: string
+  /** Points de CETTE question quand le professeur l'a choisie et lui a donné son propre barème
+   * (`LigneSelection.pointsParChoix`) — sinon les points de la ligne. */
+  points?: number
 }
 
 /** Découpe la mini-syntaxe `RichText` (`$latex$`, `**gras**`, voir `.claude/rules/
@@ -4348,6 +4351,9 @@ export interface LigneSelection {
    * (décision de l'utilisateur : une démonstration longue pour la série A et une courte pour la
    * série B serait injuste) ; `nombre` vaut alors `choix.length`. Vide/absent → tirage au hasard. */
   choix?: string[]
+  /** Points PAR question choisie (clé = id de `choix`) : une démonstration longue peut valoir plus
+   * qu'une courte (décision de l'utilisateur). Absent pour une question → `points` de la ligne. */
+  pointsParChoix?: Record<string, number>
   /** 0 = ligne non incluse. Pour `type==='exercice'`, DÉRIVÉ automatiquement de la somme de
    * `parVariante` (jamais éditable directement dans ce cas) — voir `sommeParVariante`. */
   nombre: number
@@ -4467,7 +4473,7 @@ function sansDoublonsEnonce(banque: QuestionOuverte[]): QuestionOuverte[] {
 
 /** Sans le champ interne `id`/`titre`/`apercu` (inutile dans le payload, qui part dans l'URL). */
 function pourPayload(q: QuestionOuverte): QuestionOuverte {
-  return { enonce: q.enonce, corrige: q.corrige }
+  return q.points !== undefined ? { enonce: q.enonce, corrige: q.corrige, points: q.points } : { enonce: q.enonce, corrige: q.corrige }
 }
 
 /** `memeTirage` : une seule pioche, reprise telle quelle dans toutes les séries (« Formule » et
@@ -4602,7 +4608,7 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
             : deriveQuestionsComprehension(ligne.chapitreSlug, section.id)
       const choisies = ligne.type !== 'comprehension' && ligne.choix?.length ? banque.filter((q) => q.id && ligne.choix!.includes(q.id)) : null
       const ouvertesParSerie = choisies
-        ? Array.from({ length: nombreSeries }, () => choisies.map(pourPayload))
+        ? Array.from({ length: nombreSeries }, () => choisies.map((q) => pourPayload({ ...q, points: ligne.pointsParChoix?.[q.id ?? ''] ?? ligne.points })))
         : construireOuvertesParSerie(banque, ligne.nombre, nombreSeries, ligne.type !== 'comprehension')
       if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie, section: sectionRef })
     }

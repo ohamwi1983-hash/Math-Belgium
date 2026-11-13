@@ -1444,3 +1444,6 @@ table.feature-table td { white-space: normal; }
 .admin-eval-choix-titre { font-weight: 600; font-size: 14px; }
 .admin-eval-choix-enonce { font-size: 14px; }
 .admin-eval-choix-longueur { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+.admin-eval-choix-points { margin-left: auto; flex: none; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); }
+.admin-eval-choix-points .admin-eval-points-input { width: 64px; }
+.admin-eval-points-somme { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
