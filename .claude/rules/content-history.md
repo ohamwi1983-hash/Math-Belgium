@@ -2662,3 +2662,20 @@ paths:
   transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
   correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
   évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).
+- **4e, chapitre 5 — gen80 « Composer deux forces ou deux vitesses »** (section `triangulation`,
+  processus 3 transférer, après la carte gen58) : pont entre Al-Kashi / loi des sinus et la règle du
+  parallélogramme du chapitre 6 (même notation `\vec{F_1}`, `\vec{v_R}`, intensités `F_1`, `v_R`).
+  Situations : bateau et courant (nœuds), avion et vent (km/h), deux remorqueurs (kN), deux
+  personnes qui tirent une caisse (N) ; θ multiple de 5°, aigu [35° ; 75°] ou obtus [105° ; 145°],
+  jamais droit (pas de cas Pythagore, donc aucun cas particulier). 3 variantes : intensité seule
+  (3 écrans), intensité + direction (4), cap à prendre (4, bateau/avion). Écrans : choix du triangle
+  (1 essai, OAB = piège de l'autre diagonale), angle intérieur 180° − θ (message ciblé si θ), Al-Kashi
+  avec unité (messages : θ dans Al-Kashi, radians, unité), direction = angle avec le GRAND vecteur
+  (opposé au plus petit côté, donc toujours aigu : l'arc sinus suffit). Cap : loi des sinus d'abord
+  (angle entre le cap et la route, aigu car opposé au courant < vitesse propre), puis le troisième
+  angle, puis l'intensité. Figure SVG à l'échelle, une seule fonction écran/papier
+  (`ui/figureComposerForces.ts`), triangle utile surligné après l'écran 1, corrigé `figureHtml`.
+  Bloc de cours ajouté avant la carte (sous-titre, para, illustration du triangle OAC avec l'angle
+  180° − θ, piège, astuce sur le cap) : le chapitre 5 ne parlait pas de composition de vecteurs.
+  `forme` = situation:question:aigu|obtus (≈ 1/8 ou 1/4 des tirages, aucune bride) ; 6 évaluations
+  réelles de 3 séries : même structure, nombres différents.

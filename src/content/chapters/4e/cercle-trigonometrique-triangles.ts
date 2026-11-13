@@ -1627,6 +1627,90 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 58. Triangles liés »',
         },
+        {
+          kind: 'subheading',
+          text: 'Composer deux forces ou deux vitesses',
+        },
+        {
+          kind: 'para',
+          text:
+            'Les mêmes outils servent en physique. Deux forces (ou deux vitesses : la vitesse ' +
+            'propre d\'un bateau et le courant, celle d\'un avion et le vent) qui partent d\'un même ' +
+            'point O s\'additionnent par la **règle du parallélogramme**, que le chapitre 6 reprend ' +
+            'en détail : la résultante $\\vec{F_R} = \\vec{F_1} + \\vec{F_2}$ est la diagonale [OC] ' +
+            'du parallélogramme construit sur $\\vec{F_1}$ et $\\vec{F_2}$. En reportant ' +
+            '$\\vec{F_2}$ à l\'extrémité de $\\vec{F_1}$, on obtient le triangle OAC, de côtés ' +
+            '$F_1$, $F_2$ et $F_R$ : c\'est lui qu\'on résout, avec Al-Kashi ou la loi des sinus.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.8,
+            xMax: 7.2,
+            yMin: -0.8,
+            yMax: 3.6,
+            showAxes: false,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 5, y: 0 }, tone: 'accent' },
+              { from: { x: 0, y: 0 }, to: { x: 1.5, y: 2.6 }, tone: 'good' },
+              { from: { x: 5, y: 0 }, to: { x: 6.5, y: 2.6 }, tone: 'faint', dashed: true },
+              { from: { x: 1.5, y: 2.6 }, to: { x: 6.5, y: 2.6 }, tone: 'faint', dashed: true },
+              { from: { x: 0, y: 0 }, to: { x: 6.5, y: 2.6 }, tone: 'tip' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 5, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 1.5, y: 2.6, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 6.5, y: 2.6, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 2.5, y: -0.4, vectorLabel: [{ text: 'F', vector: true }, { text: '₁' }], tone: 'accent', node: false },
+              { x: 0.35, y: 1.5, vectorLabel: [{ text: 'F', vector: true }, { text: '₂' }], tone: 'good', node: false, labelPos: 'left' },
+              { x: 3.9, y: 1.95, vectorLabel: [{ text: 'F', vector: true }, { text: 'R' }], tone: 'tip', node: false },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 60, radiusPx: 26, label: 'θ', tone: 'accent' },
+              { cx: 5, cy: 0, fromDeg: 60, toDeg: 180, radiusPx: 22, label: '180° − θ', tone: 'attn' },
+            ],
+            caption:
+              'le triangle OAC : $OA = F_1$, $AC = F_2$ (report de $\\vec{F_2}$) et $OC = F_R$. ' +
+              'Son angle en A vaut $180° - \\theta$, pas $\\theta$',
+          },
+        },
+        {
+          kind: 'piege',
+          label: 'Piège — l\'angle à mettre dans Al-Kashi',
+          text:
+            'L\'angle θ donné entre les deux vecteurs, mesuré en O, n\'est **pas** un angle du ' +
+            'triangle OAC. Deux angles consécutifs d\'un parallélogramme sont supplémentaires : ' +
+            'l\'angle en A vaut $180° - \\theta$, et ' +
+            '$F_R^2 = F_1^2 + F_2^2 - 2 F_1 F_2 \\cos(180° - \\theta)$. Mettre θ directement dans ' +
+            'la formule donne la longueur de l\'**autre** diagonale [AB], pas la résultante.',
+        },
+        {
+          kind: 'astuce',
+          label: 'Quand c\'est la direction de la résultante qui est imposée',
+          text:
+            'Un pilote qui veut suivre une route précise malgré le vent connaît la direction de ' +
+            '$\\vec{v_R}$, mais pas son cap. Dans le triangle formé par le vent, le report de la ' +
+            'vitesse propre et la route, l\'angle en O (entre le vent et la route) est connu ' +
+            'directement : on commence par la **loi des sinus** pour trouver l\'angle entre le cap ' +
+            'et la route. Pour une direction de la résultante, demande l\'angle avec le **plus ' +
+            'grand** des deux vecteurs : il est opposé au plus petit côté, donc toujours aigu, et ' +
+            'l\'arc sinus donne directement la bonne valeur.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Composer deux forces ou deux vitesses',
+          generatorId: 'gen80',
+          description: [
+            'Bateau et courant, avion et vent, deux remorqueurs, deux personnes qui tirent une ' +
+              'caisse : repère le triangle à résoudre dans le parallélogramme, trouve son angle ' +
+              'intérieur (180° − θ), puis l\'intensité et la direction de la résultante. Variante : ' +
+              'le cap à prendre pour suivre une route malgré le vent ou le courant.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 80. Composer deux forces ou deux vitesses »',
+        },
       ],
     },
     {
