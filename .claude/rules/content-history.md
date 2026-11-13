@@ -2723,3 +2723,24 @@ paths:
   180° − θ, piège, astuce sur le cap) : le chapitre 5 ne parlait pas de composition de vecteurs.
   `forme` = situation:question:aigu|obtus (≈ 1/8 ou 1/4 des tirages, aucune bride) ; 6 évaluations
   réelles de 3 séries : même structure, nombres différents.
+- **4e ch5 — gen75 « Aire d'un triangle quelconque »** (section `triangle`, processus 2 appliquer) :
+  cinq familles = cinq variantes. (1) aire directe ½·XY·XZ·sin X̂ (choix de la formule, 1 essai —
+  distracteurs cosinus, sans ½, angle non compris —, puis calcul) ; (2) angle à partir de l'aire :
+  sin X̂, puis « une ou deux amplitudes ? » (choix fermé, 1 essai : l'oubli de la seconde est
+  diagnostiqué là), puis les amplitudes (un ou deux champs, ordre libre ; messages ciblés : valeurs
+  identiques, complémentaire au lieu de supplémentaire, radians, facteur 2 oublié) ; la figure
+  ajoute la seconde configuration en pointillés une fois l'écran 2 clos ; (3) côté à partir de
+  l'aire (choix de l'expression isolée, puis calcul) ; (4) quadrilatère convexe découpé par la
+  diagonale AC : aire de ABC, AC par Al-Kashi, aire de ABCD (diagnostic « aire de ACD seule ») ;
+  (5) Héron (« pour aller plus loin ») : demi-périmètre puis aire. Saisie libre décimale OU exacte
+  (« 12√3 », bouton √), tolérance de gen19 (1 %, plancher 0,05 ; sinus : 0,002). Figure À
+  L'ÉCHELLE (similitude, comme gen58), inconnue « ? » orange ; papier : même figure en SVG en ligne,
+  sauf la famille angle (une figure ferait oublier la seconde configuration). Cours : un
+  `attention` (deux amplitudes à partir de l'aire) et un `para` (aire d'un quadrilatère par une
+  diagonale) ajoutés après le rappel « formule de Héron ». **Séries équilibrées** : `forme` =
+  famille (+ angle ABC obtus/aigu pour le quadrilatère, demi-périmètre entier ou non pour Héron),
+  cas particulier = angle droit (sin 90° = 1 ; famille angle : une seule amplitude), `calcul`
+  'exacte' (angle remarquable, aire k, k√2 ou k√3 ; Héron d'aire entière) ou 'calculatrice'
+  (absent pour l'angle droit, comme gen14–18) ; `calculatriceIndispensable: ["quadrilatere"]`.
+  Toutes les combinaisons ≥ 2 300 attendues en 20 000 essais ; vérifié sur 4 évaluations réelles
+  de 3 séries (calculatrice interdite/autorisée, cas coché ou non).
