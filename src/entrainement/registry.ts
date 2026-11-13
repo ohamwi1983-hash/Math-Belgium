@@ -141,6 +141,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen86: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppDeplacementsSuccessifs').then((m) => ({ default: m.AppDeplacementsSuccessifs }))),
   gen91: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppDetectiveVecteurs').then((m) => ({ default: m.AppDetectiveVecteurs }))),
   gen87: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppTraverserRiviere').then((m) => ({ default: m.AppTraverserRiviere }))),
+  gen90: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppEquilibreForces').then((m) => ({ default: m.AppEquilibreForces }))),
 
   // --- 4e, chapitre 7 : Géométrie analytique plane ---
   gen42: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationDroite').then((m) => ({ default: m.AppEquationDroite }))),

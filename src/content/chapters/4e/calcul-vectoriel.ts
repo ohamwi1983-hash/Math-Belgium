@@ -1940,6 +1940,42 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 87. Traverser une rivière : vitesses en composantes »',
         },
+        {
+          kind: 'para',
+          text:
+            '**Équilibre de forces.** Un objet soumis à plusieurs forces reste immobile quand ces ' +
+            'forces se compensent : leur somme est le vecteur nul. Avec trois forces, ' +
+            '$\\vec{F_1} + \\vec{F_2} + \\vec{F_3} = \\vec{0}$, donc $\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$ : ' +
+            'la troisième force est l\'**opposée** de la résultante des deux autres, pas la résultante ' +
+            'elle-même. En composantes, on additionne $\\vec{F_1}$ et $\\vec{F_2}$, puis on change les ' +
+            'signes ; l\'intensité de $\\vec{F_3}$ est sa norme, $\\|\\vec{F_3}\\| = \\sqrt{x^2 + y^2}$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'équilibre de trois forces',
+          formula:
+            'Un lustre immobile est soumis à son poids $\\vec{F_1}\\begin{pmatrix} 0 \\\\ -150 \\end{pmatrix}$, ' +
+            'à la tension d\'un premier câble $\\vec{F_2}\\begin{pmatrix} -80 \\\\ 80 \\end{pmatrix}$ et à la ' +
+            'tension $\\vec{F_3}$ d\'un second câble (composantes en N, axe x horizontal, axe y vers le haut).',
+          steps: [
+            { tag: 'résultante', text: '$\\vec{F_1} + \\vec{F_2}\\begin{pmatrix} 0 + (-80) \\\\ -150 + 80 \\end{pmatrix} = \\begin{pmatrix} -80 \\\\ -70 \\end{pmatrix}$' },
+            { tag: 'équilibre', text: '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$, donc $\\vec{F_3}\\begin{pmatrix} 80 \\\\ 70 \\end{pmatrix}$' },
+            { tag: 'intensité', text: '$\\|\\vec{F_3}\\| = \\sqrt{80^2 + 70^2} = \\sqrt{11\\,300} = 10\\sqrt{113} \\approx 106{,}3$ N' },
+            { tag: 'direction', text: '$\\tan\\alpha = \\dfrac{70}{80} = 0{,}875$, donc $\\alpha \\approx 41{,}2°$ avec l\'horizontale' },
+          ],
+          result: {
+            tag: 'résultat',
+            text: 'le second câble tire vers la droite et vers le haut, avec une force d\'environ 106,3 N, à 41,2° de l\'horizontale.',
+          },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Équilibre de forces en composantes',
+          generatorId: 'gen90',
+          description: ['Trouve la troisième force qui équilibre les deux autres (lustre, tir à la corde, barque amarrée, anneau sur quadrillage) : condition d\'équilibre, résultante et force d\'équilibre en composantes, intensité et direction.'],
+          chantier: '4e',
+          whereLabel: '4e → « 90. Équilibre de forces en composantes »',
+        },
       ],
     },
 
