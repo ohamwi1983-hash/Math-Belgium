@@ -2815,3 +2815,23 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+
+- **4e ch6 — gen86 « Carte au trésor et randonnée : déplacements successifs »** (section `norme`,
+  processus 3 transférer, après la carte gen26) : 6 variantes = situation × question — carte au
+  trésor (pas, 0 ou 1 pas « en diagonale ») avec retour au départ ou grand pas répété (k·w jusqu'au
+  trésor T), randonnée (km) avec retour ou refuge C, drone (m, cases de 100 m) avec retour ou
+  client C. Repère : origine au départ D, x vers l'est, y vers le nord. Écrans (4 ou 5) :
+  traduire chaque instruction en vecteur (champs en colonne ; statuts « signe », « x/y échangés »),
+  déplacement total (Chasles ; statut « sans signes »), puis distance à vol d'oiseau (norme, exacte
+  en √ ou arrondie selon la consigne ; statuts « distance parcourue », « racine oubliée »,
+  « valeur approchée ») et vecteur de retour (statut « opposé »), ou dernier déplacement PC
+  (statuts « sens inversé », « coordonnées de C recopiées ») et sa longueur, ou RT, k, distance RT.
+  Carte SVG (quadrillage, rose des vents, axes issus de D, cible) sans le trajet dans l'énoncé ;
+  trajet + total après l'écran 2, vecteur final à la fin ; corrigé avec la carte complète
+  (`figureHtml`). Papier : vraies questions a) position, b) distance / dernier déplacement / nombre
+  de grands pas, c) retour / distance. `forme` = variante + nombre d'étapes + diagonale ;
+  `calcul` exacte/calculatrice ; cas particulier « sur-un-axe » (≈ 11 %, retour et dernier
+  seulement). Fréquence minimale d'une forme × calcul : 10,5 % (≈ 2 000 correspondances attendues
+  en 20 000 essais). Bloc de cours ajouté avant la carte : sous-titre, para (Chasles, norme,
+  opposé), `featureTable` « instruction → vecteur » et `attention` « distance parcourue ou à vol
+  d'oiseau ? » (aucun nouvel exemple : rien à ajouter à `ENONCES_DEMONSTRATION`).
