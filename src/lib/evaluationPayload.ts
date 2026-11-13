@@ -90,7 +90,7 @@ export type IdGenerateurPilote =
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
-  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
+  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
@@ -253,6 +253,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationGeometrique', generatorId: 'gen23', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'colinearite', generatorId: 'gen24', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', generatorId: 'gen25', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', generatorId: 'gen84', label: "Nature d'un quadrilatère (gen84)", processus: 2 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', generatorId: 'gen26', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
@@ -953,6 +954,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'Pythagore généralisé', enonce: "Dans un triangle $ABC$, on note $\\vec{AB}\\begin{pmatrix}x_1\\\\y_1\\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix}x_2\\\\y_2\\end{pmatrix}$. Démontre que $BC^2 = AB^2 + AC^2 - 2(x_1x_2+y_1y_2)$, puis déduis-en que $ABC$ est rectangle en $A$ si et seulement si $x_1x_2+y_1y_2=0$." },
       { cle: 'triangle donné par ses sommets', enonce: "On donne les points $A(1\\,;\\,1)$, $B(4\\,;\\,2)$ et $C(0\\,;\\,4)$. Le triangle $ABC$ est-il rectangle en $A$ ? Justifie à l'aide des composantes." },
       { cle: 'orthogonalité avec un paramètre', enonce: "Détermine la valeur de $x$ pour laquelle les vecteurs $\\vec{u}\\begin{pmatrix}x\\\\3\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}4\\\\-2\\end{pmatrix}$ sont orthogonaux." },
+      { cle: "nature d'un quadrilatère", enonce: "On donne les points $A(1\\,;\\,0)$, $B(5\\,;\\,2)$, $C(4\\,;\\,4)$ et $D(0\\,;\\,2)$. Détermine la nature du quadrilatère $ABCD$ (parallélogramme, losange, rectangle ou carré). Justifie par des calculs vectoriels." },
     ],
     applications: [
       { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },

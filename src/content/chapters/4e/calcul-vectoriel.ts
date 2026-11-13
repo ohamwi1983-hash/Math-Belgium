@@ -1492,6 +1492,67 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 25. Orthogonalité et Pythagore généralisé »',
         },
+        { kind: 'subheading', text: "Synthèse : la nature d'un quadrilatère" },
+        {
+          kind: 'para',
+          text:
+            'Égalité de vecteurs, norme et orthogonalité suffisent pour reconnaître un parallélogramme, ' +
+            'un losange, un rectangle ou un carré à partir des coordonnées de ses sommets. Les trois ' +
+            'tests se font **dans cet ordre** : losange et rectangle sont d\'abord des parallélogrammes.',
+        },
+        {
+          kind: 'methode',
+          label: "Nature d'un quadrilatère ABCD",
+          items: [
+            'Parallélogramme ? — ABCD est un parallélogramme ⟺ $\\vec{AB} = \\vec{DC}$ (même sens de ' +
+              'parcours : de A vers B, de D vers C — section 1).',
+            'Losange ? — un parallélogramme est un losange ⟺ deux côtés **consécutifs** ont la même ' +
+              'longueur : $\\|\\vec{AB}\\| = \\|\\vec{BC}\\|$.',
+            'Rectangle ? — un parallélogramme est un rectangle ⟺ il a un angle droit : ' +
+              '$x_{AB} \\cdot x_{BC} + y_{AB} \\cdot y_{BC} = 0$.',
+            'Carré — un parallélogramme à la fois losange et rectangle : les deux tests sont vérifiés.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: "nature d'un quadrilatère",
+          formula: 'A(1 ; 0), B(5 ; 2), C(4 ; 4), D(0 ; 2). Quelle est la nature du quadrilatère ABCD ?',
+          steps: [
+            {
+              tag: 'parallélogramme ?',
+              text:
+                '$\\vec{AB} = \\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$ et $\\vec{DC} = \\begin{pmatrix} 4 \\\\ 2 \\end{pmatrix}$ : ' +
+                '$\\vec{AB} = \\vec{DC}$, ABCD est un parallélogramme',
+            },
+            {
+              tag: 'losange ?',
+              text:
+                '$\\vec{BC} = \\begin{pmatrix} -1 \\\\ 2 \\end{pmatrix}$, $\\|\\vec{AB}\\| = \\sqrt{20} = 2\\sqrt{5}$ et ' +
+                '$\\|\\vec{BC}\\| = \\sqrt{5}$ : pas un losange',
+            },
+            { tag: 'rectangle ?', text: '$4 \\cdot (-1) + 2 \\cdot 2 = 0$ : angle droit en B, c\'est un rectangle' },
+          ],
+          result: { tag: 'résultat', text: 'ABCD est un rectangle, mais pas un carré' },
+        },
+        {
+          kind: 'piege',
+          label: 'Le parallélogramme d\'abord',
+          text:
+            'Un angle droit en B ou deux côtés consécutifs égaux ne prouvent **rien** tant que ABCD ' +
+            'n\'est pas un parallélogramme : un trapèze peut avoir un angle droit, un cerf-volant deux ' +
+            'côtés consécutifs égaux. Et pour le losange, comparer deux côtés **opposés** ($AB$ et ' +
+            '$DC$) ne sert à rien : ils sont toujours égaux dans un parallélogramme.',
+        },
+        {
+          kind: 'entrainement',
+          title: "Nature d'un quadrilatère",
+          generatorId: 'gen84',
+          description: [
+            'Parallélogramme, losange, rectangle ou carré ? Décide à partir des coordonnées des sommets : égalité de vecteurs, normes de deux côtés consécutifs et critère d\'orthogonalité — ou trouve d\'abord le quatrième sommet.',
+          ],
+          chantier: '4e',
+          whereLabel: "4e → « 84. Nature d'un quadrilatère »",
+        },
       ],
     },
 

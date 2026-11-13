@@ -2815,3 +2815,23 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+- **4e ch6 — gen84 « Nature d'un quadrilatère »** (section `orthogonalite`, processus 2 appliquer,
+  carte après gen25) : synthèse de gen26 (norme), gen20/21 (relation) et gen25 (orthogonalité).
+  4 variantes : « nature » (4 points), « quatrième sommet » (trouver D tel que ABCD soit un
+  parallélogramme, puis sa nature), « montrer que c'est un rectangle / un losange » (toujours vrai,
+  puis « est-ce un carré ? »). Toujours 4 écrans, quelle que soit la nature : AB et DC (ou AB puis
+  D), BC + normes de AB et BC (côtés CONSÉCUTIFS), critère d'orthogonalité AB·BC, conclusion
+  (choix fermé parmi 5 natures, une tentative, récapitulatif des trois résultats sans verdict). Les
+  écrans 2 et 3 se font même sans parallélogramme : un quadrilatère quelconque est construit comme
+  piège (angle droit en B, AB = BC, les deux, trapèze, « presque parallélogramme »), c'est l'écran 4
+  qui demande de ne pas conclure rectangle/losange sans parallélogramme. Diagnostics : CD au lieu
+  de DC, BA, D obtenu avec AB = CD, norme au carré ou approchée, critère de signe opposé. Nature
+  tirée uniformément parmi les issues de la variante (5, 4 ou 2) ; aucun côté horizontal/vertical,
+  ABCD convexe, coordonnées dans [−6 ; 6]. Figure SVG unique `ui/figureNatureQuadrilatere.ts`
+  (écran + papier) : repère quadrillé sans codage à l'énoncé, D absent tant qu'il n'est pas trouvé,
+  codages (angles droits, côtés égaux) dans le corrigé et à la fin de l'exercice. Profil :
+  `forme` = variante (affirmation comprise), jamais la nature ; pas de cas particulier ni de
+  `calcul` (tout est exact) ; étoiles selon la variante seulement. Bloc de cours ajouté avant la
+  carte (le chapitre ne donnait nulle part les critères losange/rectangle/carré) : sous-titre,
+  para, `methode` « Nature d'un quadrilatère ABCD », exemple résolu (rectangle non carré, énoncé
+  dans `ENONCES_DEMONSTRATION`), piège « Le parallélogramme d'abord ».
