@@ -89,7 +89,7 @@ export type IdGenerateurPilote =
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
-  | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
+  | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen78'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | 'gen39' | 'gen40' | 'gen41'
@@ -236,6 +236,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'identite', generatorId: 'gen16', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'associes', generatorId: 'gen17', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'equations', generatorId: 'gen18', label: '' },
+  { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'equations', generatorId: 'gen78', label: 'Équations trigonométriques à transformer (gen78)', processus: 2 },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangle', generatorId: 'gen19', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangulation', generatorId: 'gen58', label: '', processus: 3 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'relation', generatorId: 'gen20', label: "Point via translation/milieu (gen20)" },
@@ -853,6 +854,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'tan α = −√3', enonce: "Résous l'équation $\\tan\\alpha = -\\sqrt{3}$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'sin α = sin 40°', enonce: "Résous l'équation $\\sin\\alpha = \\sin 40°$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
       { cle: 'cos α = 0,3', enonce: "À l'aide de la calculatrice, résous l'équation $\\cos\\alpha = 0{,}3$ pour $\\alpha \\in [0°\\,;\\,360°[$ (angles au dixième de degré)." },
+      { cle: '4 sin² α − 3 = 0', enonce: "Résous l'équation $4\\sin^2\\alpha - 3 = 0$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
+      { cle: 'sin α · (2 cos α − 1) = 0', enonce: "Résous l'équation $\\sin\\alpha \\cdot (2\\cos\\alpha - 1) = 0$ pour $\\alpha \\in [0°\\,;\\,360°[$." },
     ],
     triangle: [
       { cle: 'démonstration — la loi des sinus', enonce: "Démontre la loi des sinus $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$ en abaissant, dans le triangle $ABC$, la hauteur issue de $C$ jusqu'en $H$ sur $[AB]$." },

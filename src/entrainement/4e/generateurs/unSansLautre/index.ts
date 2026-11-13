@@ -7,12 +7,13 @@
 import type {
   ExerciceUnSansLautre,
   FonctionConnue,
+  FonctionDonnee,
   GenerateurExerciceUnSansLautre,
   QuadrantOuvert,
   TypeValeurConnue,
 } from "../../core/unSansLautre.types";
 import { randomInt } from "./aleatoire";
-import { POOL_QUELCONQUES, POOL_TRIPLETS } from "./fractions";
+import { POOL_QUELCONQUES, POOL_TANGENTE_QUELCONQUES, POOL_TANGENTE_TRIPLETS, POOL_TRIPLETS } from "./fractions";
 
 /** Signe de cos/sin par quadrant — table classique, jamais redérivée à la volée. */
 const SIGNES: Record<QuadrantOuvert, Record<FonctionConnue, 1 | -1>> = {
@@ -39,12 +40,54 @@ function tirerFraction(typeValeur: TypeValeurConnue): { p: number; q: number } {
   return pool[randomInt(0, pool.length - 1)];
 }
 
-/** Convention CLAUDE.md ("Catalogue de variantes") — force la fonction donnée (cos ou sin), seul
- * axe pédagogique discret de ce générateur (tirage 50/50 explicite de la spec). */
+/**
+ * Variante « tan θ donné » : |tan θ| = p/q, signe de tan θ = signe de sin θ × signe de cos θ dans le
+ * quadrant. cos²θ = 1/(1 + tan²θ) = q²/(p²+q²), cos θ = ±q/√(p²+q²), sin θ = tan θ · cos θ
+ * = ±p/√(p²+q²). Mêmes tirages que les deux autres familles (quadrant, puis triplet ou non).
+ */
+function construireTangenteDonnee(overrides?: { quadrant?: QuadrantOuvert; typeValeur?: TypeValeurConnue; p?: number; q?: number }): ExerciceUnSansLautre {
+  const quadrant = overrides?.quadrant ?? QUADRANTS[randomInt(0, QUADRANTS.length - 1)];
+  const typeValeur = overrides?.typeValeur ?? (Math.random() < 0.5 ? "triplet" : "quelconque");
+  const pool = typeValeur === "triplet" ? POOL_TANGENTE_TRIPLETS : POOL_TANGENTE_QUELCONQUES;
+  const { p, q } = overrides?.p !== undefined && overrides?.q !== undefined ? { p: overrides.p, q: overrides.q } : pool[randomInt(0, pool.length - 1)];
+
+  const { borneInf, borneSup } = INTERVALLES[quadrant];
+  const signeCos = SIGNES[quadrant].cos;
+  const signeSin = SIGNES[quadrant].sin;
+  const signeConnu = (signeCos * signeSin) as 1 | -1;
+  const valeurConnue = signeConnu * (p / q);
+  const somme = p * p + q * q;
+  const cosValeur = signeCos * (q / Math.sqrt(somme));
+  const sinValeur = signeSin * (p / Math.sqrt(somme));
+
+  return {
+    fonctionConnue: "tan",
+    fonctionCible: "cos",
+    quadrant,
+    borneInf,
+    borneSup,
+    typeValeur,
+    p,
+    q,
+    signeConnu,
+    valeurConnue,
+    carreCibleNum: q * q,
+    carreCibleDen: somme,
+    signeCible: signeCos,
+    valeurCible: cosValeur,
+    sinValeur,
+    cosValeur,
+    tanValeur: valeurConnue,
+  };
+}
+
+/** Convention CLAUDE.md ("Catalogue de variantes") — force la fonction donnée (cos, sin ou tan),
+ * seul axe pédagogique discret de ce générateur. */
 export function construireAvecVarianteId(
-  varianteId: FonctionConnue,
+  varianteId: FonctionDonnee,
   overrides?: { quadrant?: QuadrantOuvert; typeValeur?: TypeValeurConnue; p?: number; q?: number },
 ): ExerciceUnSansLautre {
+  if (varianteId === "tan") return construireTangenteDonnee(overrides);
   const fonctionConnue = varianteId;
   const fonctionCible: FonctionConnue = fonctionConnue === "cos" ? "sin" : "cos";
   const quadrant = overrides?.quadrant ?? QUADRANTS[randomInt(0, QUADRANTS.length - 1)];
@@ -88,9 +131,11 @@ export function construireAvecVarianteId(
   };
 }
 
-export const CATALOGUE_VARIANTES: { id: FonctionConnue; label: string }[] = [
+/** « tan θ donné » en DERNIER : l'indice de variante d'un code `?code=` déjà imprimé reste valable. */
+export const CATALOGUE_VARIANTES: { id: FonctionDonnee; label: string }[] = [
   { id: "cos", label: "cos θ donné (retrouver sin θ)" },
   { id: "sin", label: "sin θ donné (retrouver cos θ)" },
+  { id: "tan", label: "tan θ donné (retrouver cos θ et sin θ)" },
 ];
 
 export const genererExerciceUnSansLautre: GenerateurExerciceUnSansLautre = () => {

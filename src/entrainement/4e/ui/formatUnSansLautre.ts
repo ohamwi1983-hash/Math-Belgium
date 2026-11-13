@@ -2,12 +2,13 @@
  * Présentation — "L'un sans l'autre" (chapitre 3, seizième générateur). Toujours pur (exercice →
  * LaTeX), jamais de logique de vérification (voir moteur/verificationUnSansLautre.ts).
  */
-import type { ExerciceUnSansLautre, FonctionConnue, QuadrantOuvert } from "../core/unSansLautre.types";
+import type { ExerciceUnSansLautre, FonctionDonnee, QuadrantOuvert } from "../core/unSansLautre.types";
 
-const NOM_FONCTION: Record<FonctionConnue, string> = { cos: "\\cos", sin: "\\sin" };
+const NOM_FONCTION: Record<FonctionDonnee, string> = { cos: "\\cos", sin: "\\sin", tan: "\\tan" };
 
 function formatFractionSigneeLatex(signe: 1 | -1, p: number, q: number): string {
-  const corps = `\\frac{${p}}{${q}}`;
+  // q = 1 seulement pour tan θ entier (variante « tan θ donné »).
+  const corps = q === 1 ? `${p}` : `\\frac{${p}}{${q}}`;
   return signe === -1 ? `-${corps}` : corps;
 }
 
@@ -22,7 +23,7 @@ export function formatIntervalleLatex(exercice: ExerciceUnSansLautre): string {
 }
 
 /** `\sin^2\theta` ou `\cos^2\theta` — jamais la fonction donnée. */
-export function formatCarreLatex(fonction: FonctionConnue): string {
+export function formatCarreLatex(fonction: FonctionDonnee): string {
   return `${NOM_FONCTION[fonction]}^2\\theta`;
 }
 
@@ -101,7 +102,11 @@ function rendreFormeRadicaleLatex(signe: 1 | -1, forme: FormeRadicale): string {
  * coefficient·√radicande/q (quelconque), toujours dérivée de la même décomposition que le calcul
  * de vérification. */
 export function formatValeurCibleSimplifieeLatex(exercice: ExerciceUnSansLautre): string {
-  const forme = simplifierFormeRadicale(1, exercice.carreCibleNum, exercice.q);
+  // Variante tan : cos θ = ±q/√(p²+q²) = ±q√(p²+q²)/(p²+q²) (dénominateur rationalisé).
+  const forme =
+    exercice.fonctionConnue === "tan"
+      ? simplifierFormeRadicale(exercice.q, exercice.carreCibleDen, exercice.carreCibleDen)
+      : simplifierFormeRadicale(1, exercice.carreCibleNum, exercice.q);
   return rendreFormeRadicaleLatex(exercice.signeCible, forme);
 }
 
@@ -122,6 +127,29 @@ export function formatValeurTangenteSimplifieeLatex(exercice: ExerciceUnSansLaut
       ? simplifierFormeRadicale(1, exercice.carreCibleNum, exercice.p)
       : simplifierFormeRadicale(exercice.p, exercice.carreCibleNum, exercice.carreCibleNum);
   return rendreFormeRadicaleLatex(signe, forme);
+}
+
+/** Fonction demandée au TROISIÈME écran : tan θ (variantes cos/sin données), sin θ (variante tan). */
+export function formatFonctionFinaleLatex(exercice: ExerciceUnSansLautre): string {
+  return exercice.fonctionConnue === "tan" ? "\\sin\\theta" : "\\tan\\theta";
+}
+
+/** Nom en texte de la fonction du troisième écran (titres de fiche, barème). */
+export function nomFonctionFinale(exercice: ExerciceUnSansLautre): "sin" | "tan" {
+  return exercice.fonctionConnue === "tan" ? "sin" : "tan";
+}
+
+/** Valeur numérique attendue au troisième écran (même source que la vérification). */
+export function valeurFinale(exercice: ExerciceUnSansLautre): number {
+  return exercice.fonctionConnue === "tan" ? exercice.sinValeur : exercice.tanValeur;
+}
+
+/** Réponse simplifiée attendue au troisième écran : tan θ (variantes cos/sin), ou, pour la variante
+ * tan, sin θ = tan θ · cos θ = ±p/√(p²+q²) = ±p√(p²+q²)/(p²+q²). */
+export function formatValeurFinaleSimplifieeLatex(exercice: ExerciceUnSansLautre): string {
+  if (exercice.fonctionConnue !== "tan") return formatValeurTangenteSimplifieeLatex(exercice);
+  const signe: 1 | -1 = exercice.sinValeur > 0 ? 1 : -1;
+  return rendreFormeRadicaleLatex(signe, simplifierFormeRadicale(exercice.p, exercice.carreCibleDen, exercice.carreCibleDen));
 }
 
 export const PLACEHOLDER_CARRE = "ex : 7/9";

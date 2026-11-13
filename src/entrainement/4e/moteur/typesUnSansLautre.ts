@@ -1,4 +1,4 @@
-import type { ExerciceUnSansLautre, FonctionConnue, GenerateurExerciceUnSansLautre } from "../core/unSansLautre.types";
+import type { ExerciceUnSansLautre, FonctionDonnee, GenerateurExerciceUnSansLautre } from "../core/unSansLautre.types";
 import type { ReglagesSession } from "../core/session.types";
 import type { EtatEtapeTentatives } from "./etapeTentatives";
 
@@ -7,7 +7,7 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
 export type PhaseUnSansLautre = "carre" | "valeurSignee" | "tangente";
 
 export interface ResultatExerciceUnSansLautre {
-  fonctionConnue: FonctionConnue;
+  fonctionConnue: FonctionDonnee;
   scoreCarre: number;
   carreRevele: boolean;
   aideCarreUtilisee: boolean;

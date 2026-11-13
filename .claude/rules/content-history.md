@@ -2662,3 +2662,22 @@ paths:
   transformations qui s'annulent) pour que chaque forme reste retrouvable : mesuré ≥ 7
   correspondances attendues en 20 000 essais même au 1er centile (n2-5) ; vérifié sur 6
   évaluations réelles de 3 séries (même structure, nombres tous différents, < 60 ms).
+
+- **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques** : (1) gen16 « L'un sans
+  l'autre » reçoit une 3e famille « tan θ donné (retrouver cos θ et sin θ) », ajoutée en FIN de
+  catalogue (les codes `?code=` déjà imprimés gardent leur indice de variante ; empreinte des
+  instances cos/sin vérifiée identique avant/après pour plusieurs graines). Mêmes 3 écrans :
+  cos²θ par 1 + tan²θ = 1/cos²θ, cos θ signé par le quadrant, puis sin θ = tan θ · cos θ (le
+  3e écran demande sin θ au lieu de tan θ) ; |tan θ| = p/q (triplets 3/4, 4/3, 5/12, 12/5 ou
+  p, q ≤ 5). Adaptateur, barème et carte du cours mis à jour. (2) Nouveau gen78 « Équations
+  trigonométriques à transformer » (section `equations`, processus 2, après la carte gen18) :
+  a·f(α) + b = c, a·f²(α) + b = c (sin, cos), produit nul f(α)·(a·g(α) + b) = 0. Écrans :
+  équation(s) de base, puis pour chaque base angle de référence (verdict « pas de solution »)
+  et solutions (cercle de l'aide de gen18), puis ensemble des solutions. Sans solution (|k| > 1,
+  carré négatif) ≈ 15 % par variante sin/cos/carré : verdict, jamais un cas particulier ; cas
+  particulier = base sur un axe (affine, carré) ; `forme` = variante + nombre d'équations de
+  base ; `calcul` exacte/calculatrice (k décimal, angles au dixième). Le cours ne traitait pas
+  ces formes : sous-titre « Pour aller plus loin — des équations à transformer », un para, deux
+  exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
+  `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
+  `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).

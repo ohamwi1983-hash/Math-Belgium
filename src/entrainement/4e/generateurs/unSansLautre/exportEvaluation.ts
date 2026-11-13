@@ -5,10 +5,12 @@ import {
   formatCarreCibleLatex,
   formatCarreLatex,
   formatFonctionCibleLatex,
+  formatFonctionFinaleLatex,
   formatIntervalleLatex,
   formatSigneCibleLatex,
   formatValeurCibleSimplifieeLatex,
   formatValeurConnueLatex,
+  formatValeurFinaleSimplifieeLatex,
   formatValeurTangenteSimplifieeLatex,
   libelleQuadrantUnSansLautre,
 } from "../../ui/formatUnSansLautre";
@@ -22,6 +24,10 @@ import { LIBELLE_CAS_QUADRANT_I, PARAMETRES_UN_SANS_LAUTRE, profilUnSansLautre }
  * section "Identité fondamentale (sin²+cos²=1)" du chapitre Math-Belgium 4e "Cercle trigonométrique
  * & triangles quelconques" (`src/content/chapters/4e/cercle-trigonometrique-triangles.ts`, section
  * `identite`), qui renvoie déjà vers ce générateur.
+ *
+ * **Variante « tan θ donné »** (fin de catalogue) : mêmes 3 étapes, en partant de 1 + tan²θ = 1/cos²θ —
+ * a) cos²θ, b) cos θ signé par le quadrant, c) sin θ = tan θ · cos θ (`lignesCorrectionTangente`) ;
+ * énoncé papier « calcule cos θ et sin θ », barème et erreurs fréquentes propres.
  *
  * **Écran → question, mapping 1-pour-1, TOUJOURS les 3 mêmes écrans dans le même ordre**
  * (`sessionUnSansLautre.ts` — phases fixes `carre` → `valeurSignee` → `tangente`, jamais
@@ -74,12 +80,17 @@ function construireEnonceUnSansLautre(instance: ExerciceUnSansLautre): SectionEx
     questions: [
       { consigne: [texte("Calcule "), latex(formatCarreLatex(instance.fonctionCible)), texte(".")] },
       { consigne: [texte("Déduis-en la valeur (signée) de "), latex(formatFonctionCibleLatex(instance)), texte(".")] },
-      { consigne: [texte("Calcule "), latex("\\tan\\theta"), texte(".")] },
+      { consigne: [texte("Calcule "), latex(formatFonctionFinaleLatex(instance)), texte(".")] },
     ],
   };
 }
 
 function construireCorrectionUnSansLautre(instance: ExerciceUnSansLautre): BlocCorrection[] {
+  if (instance.fonctionConnue === "tan") {
+    return lignesCorrectionTangente(instance)
+      .filter((l) => l.label !== "Méthode" && l.label !== "Piège")
+      .map((l) => ({ type: "paragraphe", fragments: [texte(`${l.sousQuestion}) `), ...l.fragments] }));
+  }
   const { fonctionConnue, fonctionCible, quadrant, p, q, carreCibleNum, carreCibleDen } = instance;
 
   const blocs: BlocCorrection[] = [];
@@ -134,7 +145,7 @@ function enoncePapier(instance: ExerciceUnSansLautre): EnoncePapier {
         texte(". Calcule la valeur exacte de "),
         latex(formatFonctionCibleLatex(instance)),
         texte(" et de "),
-        latex("\\tan\\theta"),
+        latex(formatFonctionFinaleLatex(instance)),
         texte(", sans calculatrice."),
       ],
       questions: [],
@@ -146,7 +157,66 @@ function valeurConnueSeuleLatex(instance: ExerciceUnSansLautre): string {
   return formatValeurConnueLatex(instance).split(" = ")[1];
 }
 
+/** tan θ = ±p/q en LaTeX, entre parenthèses s'il est négatif (facteur d'un produit). */
+function tangenteFacteurLatex(instance: ExerciceUnSansLautre): string {
+  const v = valeurConnueSeuleLatex(instance);
+  return instance.signeConnu === -1 ? `\\left(${v}\\right)` : v;
+}
+
+/** Variante « tan θ donné » : 1 + tan²θ = 1/cos²θ, puis le signe de cos θ, puis sin θ = tan θ · cos θ. */
+function lignesCorrectionTangente(instance: ExerciceUnSansLautre): EtapeCorrection[] {
+  const { quadrant, p, q, carreCibleNum, carreCibleDen } = instance;
+  const tanCarre = q === 1 ? `${p * p}` : `\\dfrac{${p * p}}{${q * q}}`;
+  const cosSimplifie = formatValeurCibleSimplifieeLatex(instance);
+  const cosFacteur = instance.signeCible === -1 ? `\\left(${cosSimplifie}\\right)` : cosSimplifie;
+  const sinSimplifie = formatValeurFinaleSimplifieeLatex(instance);
+  const racineDen = `\\sqrt{${carreCibleDen}}`;
+  return [
+    { label: "Méthode", sousQuestion: "a", fragments: [texte("Identité fondamentale divisée par "), latex("\\cos^2\\theta"), texte(" : "), latex("1 + \\tan^2\\theta = \\dfrac{1}{\\cos^2\\theta}"), texte(".")] },
+    {
+      label: "Calcul",
+      sousQuestion: "a",
+      fragments: [latex(`\\cos^2\\theta = \\dfrac{1}{1 + \\tan^2\\theta} = \\dfrac{1}{1 + ${tanCarre}} = \\dfrac{${carreCibleNum}}{${carreCibleDen}}`)],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: "b",
+      fragments: [
+        latex(
+          Number.isInteger(Math.sqrt(carreCibleDen))
+            ? `\\cos\\theta = \\pm\\sqrt{${formatCarreCibleLatex(instance)}} = \\pm${cosSimplifie.replace(/^-/, "")}`
+            : `\\cos\\theta = \\pm\\sqrt{${formatCarreCibleLatex(instance)}} = \\pm\\dfrac{${q}}{${racineDen}} = \\pm${cosSimplifie.replace(/^-/, "")}`,
+        ),
+      ],
+    },
+    {
+      label: "Conclusion",
+      sousQuestion: "b",
+      fragments: [texte(`θ est dans le quadrant ${libelleQuadrantUnSansLautre(quadrant)}, donc `), latex(formatSigneCibleLatex(instance)), texte(" : "), latex(`\\cos\\theta = ${cosSimplifie}`)],
+    },
+    {
+      label: "Calcul",
+      sousQuestion: "c",
+      fragments: [latex(`\\sin\\theta = \\tan\\theta \\cdot \\cos\\theta = ${tangenteFacteurLatex(instance)} \\cdot ${cosFacteur} = ${sinSimplifie}`)],
+    },
+    {
+      label: "Piège",
+      sousQuestion: "a",
+      fragments: [
+        texte("La relation donne "),
+        latex("\\dfrac{1}{\\cos^2\\theta}"),
+        texte(", pas "),
+        latex("\\cos^2\\theta"),
+        texte(" : ne pas oublier de prendre l'inverse de "),
+        latex("1 + \\tan^2\\theta"),
+        texte(quadrant === "I" ? "." : `. Puis, dans le quadrant ${quadrant}, cos θ est ${instance.signeCible === 1 ? "positif" : "négatif"} : c'est le quadrant qui décide du signe, pas celui de tan θ.`),
+      ],
+    },
+  ];
+}
+
 function lignesCorrection(instance: ExerciceUnSansLautre): EtapeCorrection[] {
+  if (instance.fonctionConnue === "tan") return lignesCorrectionTangente(instance);
   const { fonctionConnue, fonctionCible, quadrant, p, q, carreCibleNum, carreCibleDen } = instance;
   const cible = formatFonctionCibleLatex(instance);
   const cibleSimplifiee = formatValeurCibleSimplifieeLatex(instance);
@@ -183,10 +253,31 @@ function lignesCorrection(instance: ExerciceUnSansLautre): EtapeCorrection[] {
 }
 
 function reponseBreve(instance: ExerciceUnSansLautre): FragmentConsigne[] {
-  return [latex(`${formatFonctionCibleLatex(instance)} = ${formatValeurCibleSimplifieeLatex(instance)}`), texte(" ; "), latex(`\\tan\\theta = ${formatValeurTangenteSimplifieeLatex(instance)}`)];
+  return [
+    latex(`${formatFonctionCibleLatex(instance)} = ${formatValeurCibleSimplifieeLatex(instance)}`),
+    texte(" ; "),
+    latex(`${formatFonctionFinaleLatex(instance)} = ${formatValeurFinaleSimplifieeLatex(instance)}`),
+  ];
 }
 
 function bareme(instance: ExerciceUnSansLautre): BaremeExercice {
+  if (instance.fonctionConnue === "tan") {
+    return {
+      reponseFinale: reponseBreve(instance),
+      criteres: [
+        { sousQuestion: "a", critere: [texte("Relation appliquée : "), latex(`\\cos^2\\theta = ${formatCarreCibleLatex(instance)}`)], points: 1 },
+        { sousQuestion: "b", critere: [texte("Racine carrée simplifiée, dénominateur rationalisé")], points: 0.5 },
+        { sousQuestion: "b", critere: [texte("Signe choisi selon le quadrant : "), latex(`\\cos\\theta = ${formatValeurCibleSimplifieeLatex(instance)}`)], points: 1 },
+        { sousQuestion: "c", critere: [texte("Sinus : "), latex(`\\sin\\theta = ${formatValeurFinaleSimplifieeLatex(instance)}`)], points: 1.5 },
+      ],
+      erreursFrequentes: [
+        { description: [latex("\\cos^2\\theta = 1 + \\tan^2\\theta"), texte(" (inverse oublié)")], cout: "0 pt aux étapes 1 et 2" },
+        { description: [texte("Signe de tan θ recopié au lieu du signe de cos θ imposé par le quadrant")], cout: "−1" },
+        { description: [texte("Sinus calculé comme tan θ divisé par cos θ")], cout: "0 pt à l'étape 3" },
+      ],
+      reponsesAcceptees: [[texte("Fraction non rationalisée, ex. "), latex("\\dfrac{1}{\\sqrt{5}}"), texte(" au lieu de "), latex("\\dfrac{\\sqrt{5}}{5}")]],
+    };
+  }
   return {
     reponseFinale: reponseBreve(instance),
     criteres: [
