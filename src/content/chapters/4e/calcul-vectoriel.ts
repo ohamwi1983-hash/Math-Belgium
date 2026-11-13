@@ -1912,6 +1912,20 @@ export const calculVectoriel: ChapterContent = {
             'partagent une seule banque de questions. Ils testent exactement le même contenu mathématique. ' +
             'Le quiz se trouve tout en bas de la page, dans la synthèse.',
         },
+        {
+          kind: 'entrainement',
+          title: "Le détective d'erreurs vectoriel",
+          generatorId: 'gen91',
+          description: [
+            'Un élève a résolu un exercice de calcul vectoriel (norme, alignement, angle droit, ' +
+              'parallélogramme, point défini par une relation), mais une ligne de sa copie est fausse : ' +
+              'composantes calculées A − B, Chasles mal enchaîné, racine ou carré oublié dans une norme, ' +
+              'mauvais critère de colinéarité, signe faux dans le produit scalaire, AB = CD au lieu de ' +
+              'AB = DC. Trouve la ligne, nomme l\'erreur et corrige la résolution.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 91. Le détective d\'erreurs vectoriel »',
+        },
       ],
     },
   ],
