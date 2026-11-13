@@ -3445,6 +3445,78 @@
   stroke-dasharray: 4 3;
 }
 
+/* gen75 — figure à l'échelle (aire d'un triangle quelconque). */
+.entrainement .aire-triangle-figure {
+  margin: 8px 0 14px;
+}
+
+.entrainement .aire-triangle-sketch {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .aire-triangle-forme {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .aire-triangle-forme-secondaire {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
+}
+
+.entrainement .aire-triangle-diagonale {
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.entrainement .aire-triangle-arc {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.entrainement .aire-triangle-arc-secondaire {
+  stroke-dasharray: 3 3;
+}
+
+.entrainement .aire-triangle-label {
+  font-size: 13px;
+  font-weight: 700;
+  dominant-baseline: middle;
+}
+
+.entrainement .aire-triangle-label-sommet {
+  font-size: 14px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .aire-triangle-label-valeur {
+  fill: var(--color-primary);
+}
+
+.entrainement .aire-triangle-label-inconnue {
+  fill: #f08c00;
+}
+
+.entrainement .aire-triangle-legende {
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
 .entrainement .courbe-graph-label {
   margin: 0 0 6px;
   font-weight: 700;

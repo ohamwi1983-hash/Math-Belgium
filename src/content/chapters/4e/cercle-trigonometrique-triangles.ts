@@ -1298,6 +1298,23 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
               'la même valeur que $\\dfrac{1}{2} \\cdot 5 \\cdot 8 \\cdot \\sin 60°$.',
           ],
         },
+        {
+          kind: 'attention',
+          label: 'Retrouver un angle à partir de l\'aire : deux réponses',
+          text:
+            'Si on connaît deux côtés et l\'aire, la formule donne le sinus de l\'angle compris : ' +
+            '$\\sin \\hat{C} = \\dfrac{2 \\cdot \\text{Aire}}{ab}$. Or un angle et son supplémentaire ont le ' +
+            'même sinus : $\\hat{C}$ et $180° - \\hat{C}$ conviennent tous les deux (deux triangles différents), ' +
+            'sauf si $\\sin \\hat{C} = 1$, où seul l\'angle droit convient. La touche sin⁻¹ de la calculatrice ' +
+            'ne donne que l\'angle aigu.',
+        },
+        {
+          kind: 'para',
+          text:
+            '**Aire d\'un quadrilatère.** Une diagonale le découpe en deux triangles : son aire est la somme ' +
+            'de leurs aires. S\'il manque un côté à l\'un des triangles (souvent la diagonale elle-même), on ' +
+            'le calcule d\'abord dans l\'autre triangle, avec Al-Kashi.',
+        },
         { kind: 'subheading', text: 'Choisir la bonne loi' },
         {
           kind: 'featureTable',
@@ -1364,6 +1381,18 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
           chantier: '4e',
           whereLabel: '4e → « 19. Triangle quelconque »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Aire d\'un triangle quelconque',
+          generatorId: 'gen75',
+          description: [
+            'Calcule une aire avec ½·a·b·sin(C), retrouve un côté ou l\'angle compris à partir de ' +
+              'l\'aire (attention aux deux amplitudes possibles), découpe un quadrilatère par une ' +
+              'diagonale, ou applique la formule de Héron.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 75. Aire d\'un triangle quelconque »',
         },
       ],
     },
