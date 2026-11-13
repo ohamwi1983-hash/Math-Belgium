@@ -287,7 +287,7 @@ export function EtapeExpressionModele(props: PropsCommunes & { question: Fragmen
         />
       </div>
       <p className="field-hint" style={{ fontSize: "0.9em", color: "var(--color-text-muted)" }}>
-        Saisie : racine carrée avec racine(…), racine cubique avec racine3(…), valeur absolue avec abs(…), exposant avec ^, quotient avec /.
+        Saisie : racine carrée avec rac(…), racine cubique avec rac3(…), valeur absolue avec |…|, exposant avec ^, quotient avec /.
       </p>
       <Pied props={props} peutValider={saisie.trim() !== ""} onValider={valider} erreurSaisie={erreurSaisie} message={props.tentativesUtilisees > 0 ? message : null} />
     </div>

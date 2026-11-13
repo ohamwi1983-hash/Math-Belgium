@@ -175,7 +175,8 @@ function velo(): Base {
 function chauffage(): Base {
   const c = choisir([18, 20]);
   const a = choisir([2, 3]);
-  const b = choisir([4, 6, 10]);
+  // b ≥ 10 : la pointe reste assez haut pour que son étiquette ne touche pas les graduations.
+  const b = choisir([10, 12, 15]);
   const d = choisir([4, 6, 8, 10]);
   const y = b + a * d;
   return {
