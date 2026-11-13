@@ -2632,3 +2632,17 @@ paths:
   branches `claude/*` — les sauvegardes WIP avaient épuisé le quota quotidien (« Deployment rate
   limited »). Vérifié : build propre, page 390 clair/sombre et 1280 (0 débordement, 0 erreur
   KaTeX, 10 ateliers montés), épinglage ko 0, feuilles réelles du chapitre sans erreur.
+
+- **4e, Chapitre 3 — Caractéristiques d'une fonction et fonctions de référence : 4 générateurs
+  « transférer »** (processus 3, demande de l'utilisateur : aucun générateur de transfert dans ce
+  chapitre). gen68 « Problèmes modélisés par une fonction de référence » (§2 : t(v) = d/v, √A, ∛V,
+  |T − c|, coût moyen F/x + p, c² ; domaine imposé par le contexte, inéquation avec le sens qui
+  s'inverse, interprétation) ; gen69 « Choisir le bon modèle » (§3 : courbe en contexte → famille,
+  transformations, expression, utilisation, sens d'un paramètre ; 7 situations) ; gen70 « Lire un
+  graphique en contexte » (§1 : 7 situations, 4 questions en langage courant, écran « quelle
+  caractéristique ? » puis lecture exacte sur la grille) ; gen71 « Le portrait-robot d'une fonction »
+  (§1–§3 : retrouver l'expression, raisonner sans expression avec « on ne peut pas savoir »,
+  choisir la seule courbe valide). Feuilles au contrat complet, énoncé papier avec les VRAIES
+  questions a) b) c), profils, `?code=`, cartes dans le chapitre, entrées pilote en processus 3.
+  Saisie harmonisée dans le chapitre : rac(…), rac3(…), |…| (les anciennes écritures restent
+  acceptées). Vérifié : build propre, pages 390/1280 sans débordement, feuilles réelles sans erreur.
