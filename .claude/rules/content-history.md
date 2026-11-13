@@ -2977,3 +2977,17 @@ paths:
   à `ENONCES_DEMONSTRATION`, clé « sans repère : trois points alignés » — le badge évite le mot
   « alignement », déjà clé d'un autre exemple de la section) et un `piege` « Parallèles ou
   alignés ? ».
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`) : nouveau gen83 « Construire une
+  somme, une différence, un point » (section `additionGeometrique`, processus 2), qui prolonge la
+  grille magnétique de gen23 (`VecteurGraph` + `MovablePoint`, `contraindreAuNoeudDeFenetre`,
+  fenêtre fixe, fond non déplaçable, axes masqués, pas de quadrillage 1) : l'origine de chaque
+  flèche est IMPOSÉE, l'élève fait glisser son extrémité, jugée sur le nœud exact. Variantes :
+  u + v (triangle ou parallélogramme), u − v (en ajoutant −v, ou à partir d'une origine commune :
+  de l'extrémité de v vers celle de u), k·u + l·v (k, l entiers ou demi-entiers), point M tel que
+  AM = k·AB + l·AC ou MA = … (retournement : choix fermé, une tentative), lecture des
+  composantes de deux vecteurs (champs libres en colonne). Cas particulier des évaluations :
+  vecteurs colinéaires (jamais dessinés avec la même origine). Le cours ne montrait pas la
+  construction d'une combinaison ni le placement d'un point par une relation : un `methode`
+  « Construire une combinaison ou placer un point » ajouté avant la carte (pas d'exemple, donc
+  rien à ajouter à `ENONCES_DEMONSTRATION`).
