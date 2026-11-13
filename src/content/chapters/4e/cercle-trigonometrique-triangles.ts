@@ -701,6 +701,30 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 17. Angles associés »',
         },
+        {
+          kind: 'exemple',
+          badge: 'valeur exacte d\'une expression, sans calculatrice',
+          formula: 'Calcule la valeur exacte de $\\sin 150° + \\cos 240° \\cdot \\tan 315°$.',
+          steps: [
+            { tag: 'sin 150°', text: 'quadrant II, sin positif ; 150° est le supplémentaire de 30° → sin 150° = sin 30° = 1/2' },
+            { tag: 'cos 240°', text: 'quadrant III, cos négatif ; 240° est l\'anti-supplémentaire de 60° → cos 240° = −cos 60° = −1/2' },
+            { tag: 'tan 315°', text: 'quadrant IV, tan négative ; 315° donne le même point que −45° → tan 315° = −tan 45° = −1' },
+            { tag: 'calcul', text: 'le produit d\'abord : 1/2 + (−1/2) · (−1) = 1/2 + 1/2' },
+          ],
+          result: { tag: 'résultat', text: 'sin 150° + cos 240° · tan 315° = 1' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Valeur exacte sans calculatrice',
+          generatorId: 'gen76',
+          description: [
+            'Calcule la valeur exacte d\'une expression comme sin 150° + cos 240° · tan 315° : ' +
+              'pour chaque terme, ramène l\'angle dans [0° ; 360°[, trouve le quadrant, le signe, ' +
+              'l\'angle associé et la valeur remarquable, puis calcule l\'expression.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 76. Valeur exacte sans calculatrice »',
+        },
       ],
     },
     {
