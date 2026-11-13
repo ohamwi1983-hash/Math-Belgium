@@ -2815,3 +2815,20 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`) : nouveau gen85 « Démontrer avec des
+  vecteurs » (section `colinearite`, processus 3, carte après celle de gen24). Raisonnement
+  vectoriel SANS repère : figure de base (parallélogramme ABCD, triangle ABC, trapèze ABCD avec
+  DC = ½ ou ⅔ AB) et deux points E, F définis à partir des sommets (PE = k·PR, milieu, symétrique,
+  ou PF = k·QR d'une autre origine) ; le coefficient de F est CALCULÉ pour que la propriété soit
+  vraie (alignement, parallélisme, milieu, parallélogramme) et retenu seulement s'il est simple ;
+  la définition de F ne cite jamais E ni la droite de E. Écrans : base adaptée (choix fermé :
+  adaptée / colinéaire / possible mais maladroite), coefficients exacts des deux vecteurs utiles
+  (diagnostic sens inversé et Chasles mal enchaîné), k tel que v = k·w (diagnostic rapport inversé,
+  signe), conclusion qui cite la propriété (pièges parallèles ≠ alignés, ordre des sommets).
+  `forme` = propriété + figure, aucun cas particulier, pas de `calcul`. Le cours ne montrait la
+  colinéarité qu'en repère : sous-titre « Démontrer sans repère, avec des vecteurs », un para, une
+  `methode` en 4 étapes, un exemple résolu (A, E, I alignés dans un parallélogramme, énoncé ajouté
+  à `ENONCES_DEMONSTRATION`, clé « sans repère : trois points alignés » — le badge évite le mot
+  « alignement », déjà clé d'un autre exemple de la section) et un `piege` « Parallèles ou
+  alignés ? ».
