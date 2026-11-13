@@ -1368,6 +1368,25 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 24. Colinéarité et alignement de points »',
         },
+        {
+          kind: 'attention',
+          text:
+            'Viser une cible — un objet part de A en ligne droite, dans la direction **et le sens** ' +
+            'de $\\vec{u}$. Il atteint le point C si, et seulement si, $\\vec{AC} = k \\cdot \\vec{u}$ ' +
+            'avec $k > 0$. Le critère de colinéarité nul dit seulement que C est sur la **droite** ' +
+            'du lancer : si $k < 0$, C est derrière A et l\'objet part dans le mauvais sens. Et un ' +
+            'critère non nul, même tout petit, signifie que la trajectoire passe à côté de C.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Viser une cible : trajectoires rectilignes',
+          generatorId: 'gen89',
+          description: [
+            'Billard, laser, passe, curling : la trajectoire rectiligne touche-t-elle la cible, la frôle-t-elle, ou part-elle dans le mauvais sens ? Et quelle direction choisir pour viser juste ?',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 89. Viser une cible : trajectoires rectilignes »',
+        },
       ],
     },
 

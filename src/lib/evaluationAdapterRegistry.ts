@@ -79,6 +79,7 @@ import { adaptateurEvaluationDetectiveVecteurs } from '../entrainement/4e/genera
 import { adaptateurEvaluationTraverserRiviere } from '../entrainement/4e/generateurs/traverserRiviere/exportEvaluation'
 import { adaptateurEvaluationEquilibreForces } from '../entrainement/4e/generateurs/equilibreForces/exportEvaluation'
 import { adaptateurEvaluationDecompositionVecteur } from '../entrainement/4e/generateurs/decompositionVecteur/exportEvaluation'
+import { adaptateurEvaluationViserCible } from '../entrainement/4e/generateurs/viserCible/exportEvaluation'
 import { adaptateurEvaluationEquationDroite } from '../entrainement/4e/generateurs/equationDroite/exportEvaluation'
 import { adaptateurEvaluationLectureGraphiqueDroite } from '../entrainement/4e/generateurs/lectureGraphiqueDroite/exportEvaluation'
 import { adaptateurEvaluationConstructionDroite } from '../entrainement/4e/generateurs/constructionDroite/exportEvaluation'
@@ -159,6 +160,7 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen87: versionPapier(adaptateurEvaluationTraverserRiviere) as unknown as AdaptateurFeuilleExercices<never>,
   gen90: versionPapier(adaptateurEvaluationEquilibreForces) as unknown as AdaptateurFeuilleExercices<never>,
   gen82: versionPapier(adaptateurEvaluationDecompositionVecteur) as unknown as AdaptateurFeuilleExercices<never>,
+  gen89: versionPapier(adaptateurEvaluationViserCible) as unknown as AdaptateurFeuilleExercices<never>,
   gen42: versionPapier(adaptateurEvaluationEquationDroite) as unknown as AdaptateurFeuilleExercices<never>,
   gen43: versionPapier(adaptateurEvaluationLectureGraphiqueDroite) as unknown as AdaptateurFeuilleExercices<never>,
   gen44: versionPapier(adaptateurEvaluationConstructionDroite) as unknown as AdaptateurFeuilleExercices<never>,
