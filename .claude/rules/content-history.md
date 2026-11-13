@@ -2815,3 +2815,20 @@ paths:
   exemples résolus (`4 sin² α − 3 = 0`, `sin α · (2 cos α − 1) = 0`, énoncés ajoutés à
   `ENONCES_DEMONSTRATION`) et un `attention` « Trois réflexes ». Produit : jamais
   `cos α · (a·tan α + b) = 0` (tan non définie en 90° et 270°).
+- **4e ch6 — gen91 « Le détective d'erreurs vectoriel »** (section `revision`, processus 3
+  transférer, carte placée dans la section avant le quiz gen64 de la synthèse) : même principe et
+  même rendu que gen81 (copie numérotée, marge rouge, une seule ligne fausse, la suite cohérente avec
+  l'erreur — verdict compris). `EtapesDetectiveErreurs.tsx` factorisé sans changer gen81 :
+  `EtapeDescriptionErreur` générique sur l'identifiant de description, `BlocAides` exporté ; la
+  copie et l'écran 1 sont réutilisés tels quels, seul l'écran 3 est propre (`EtapesDetectiveVecteurs`
+  : nombre, vecteur en colonne, point, verdict). 6 types d'erreur (variantes) sur 7 exercices
+  supports : AB calculé A − B (point M tel que AM = AB + k·AC, lignes 1 ou 2 ; 4e sommet, ligne 2),
+  Chasles (DM = AB − AC réduit en BC, ou DM = BA + CB réduit en AC), norme (racine oubliée ou
+  (−3)² = −9, triangle isocèle en A, ligne 2 ou 4), colinéarité (déterminant avec « + », ou
+  rapports x₁/x₂ et y₂/y₁), orthogonalité (« − » entre les produits, ou produit de deux négatifs
+  compté négatif ; triangle rectangle en A), parallélogramme (AB = CD au lieu de AB = DC, ou milieu
+  des diagonales par une différence). Écran 3 : bonne valeur de la ligne fausse (sauf ligne de
+  traduction AB = CD : seulement la conclusion) puis conclusion (point, ou verdict choisi : une
+  seule tentative, figé s'il est juste). Verdict juste tiré à pile ou face, indépendant de la forme ;
+  `forme` = type|support|ligne(|sous-variante), aucune forme sous 24 % ; pas de `calcul` (tout est
+  exact). Aucun bloc de cours ajouté : formules et critères déjà dans les sections 11 à 14.

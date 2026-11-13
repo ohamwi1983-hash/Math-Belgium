@@ -85,13 +85,14 @@ export function CopieEleve({ lignes, ligneSignalee }: PropsCopie) {
 // Aides
 // ---------------------------------------------------------------------------------------------
 
-interface PropsAides {
+export interface PropsAides {
   aides: FragmentConsigne[][];
   niveauAide: number;
   onActiverAide: () => void;
 }
 
-function BlocAides({ aides, niveauAide, onActiverAide }: PropsAides) {
+/** Aides progressives (partagé avec gen91, « Le détective d'erreurs vectoriel »). */
+export function BlocAides({ aides, niveauAide, onActiverAide }: PropsAides) {
   return (
     <div>
       {aides.slice(0, niveauAide).map((aide, i) => (
@@ -161,16 +162,17 @@ export function EtapeLigneFausse({ consigne, nombreLignes, attendue, onValider, 
 // Écran 2 — l'erreur
 // ---------------------------------------------------------------------------------------------
 
-interface PropsDescription extends PropsAides {
+interface PropsDescription<T extends string> extends PropsAides {
   consigne: ReactNode;
-  options: { id: IdDescription; fragments: FragmentConsigne[] }[];
-  attendue: IdDescription;
-  onValider: (id: IdDescription) => void;
+  options: { id: T; fragments: FragmentConsigne[] }[];
+  attendue: T;
+  onValider: (id: T) => void;
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeDescriptionErreur({ consigne, options, attendue, onValider, validation, ...aides }: PropsDescription) {
-  const [choix, setChoix] = useState<IdDescription | null>(null);
+/** Générique sur l'identifiant de description : gen81 (`IdDescription`) et gen91 le partagent. */
+export function EtapeDescriptionErreur<T extends string = IdDescription>({ consigne, options, attendue, onValider, validation, ...aides }: PropsDescription<T>) {
+  const [choix, setChoix] = useState<T | null>(null);
   const fige = !!validation;
   return (
     <div>
