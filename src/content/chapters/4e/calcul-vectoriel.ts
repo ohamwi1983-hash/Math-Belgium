@@ -482,6 +482,30 @@ export const calculVectoriel: ChapterContent = {
             'vitesse affichée au tableau de bord).',
           domaines: ['Aviation', 'Navigation'],
         },
+        {
+          kind: 'methode',
+          label: 'Construire une combinaison ou placer un point',
+          items: [
+            'Pour $2\\vec{u} - \\vec{v}$ à partir de O : trace $2\\vec{u}$ à partir de O, puis ' +
+              "$-\\vec{v}$ bout à bout, à partir de l'extrémité de $2\\vec{u}$. Le résultat va de O " +
+              "au point d'arrivée de la chaîne.",
+            "Pour placer M tel que $\\vec{AM} = 2\\vec{AB} - \\vec{AC}$ : construis d'abord P tel que " +
+              '$\\vec{AP} = 2\\vec{AB}$, puis trace $-\\vec{AC}$ à partir de P. Son extrémité est M ' +
+              '(relation de Chasles : $\\vec{AM} = \\vec{AP} + \\vec{PM}$).',
+            "Si la relation est donnée avec $\\vec{MA}$, retourne-la d'abord : $\\vec{MA} = -\\vec{AM}$, " +
+              'donc chaque terme change de signe.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Construire une somme, une différence, un point',
+          generatorId: 'gen83',
+          description: [
+            "Sur la grille magnétique : construis u + v (bout à bout ou par le parallélogramme), la différence u − v, puis k·u + l·v ; place un point défini par une relation et lis les composantes d'un vecteur tracé.",
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 83. Construire une somme, une différence, un point »',
+        },
       ],
     },
 
