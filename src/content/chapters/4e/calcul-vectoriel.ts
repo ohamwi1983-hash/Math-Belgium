@@ -1053,6 +1053,45 @@ export const calculVectoriel: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 26. Norme d\'un vecteur et distance entre 2 points »',
         },
+        { kind: 'subheading', text: 'Des déplacements successifs à la distance à vol d\'oiseau' },
+        {
+          kind: 'para',
+          text:
+            'Sur une carte, place l\'origine au point de départ, l\'axe x vers l\'est et l\'axe y ' +
+            'vers le nord. Chaque instruction de déplacement devient alors un vecteur, et le ' +
+            'déplacement total est leur somme (relation de Chasles) : ' +
+            '$\\vec{DA} = \\vec{u}_1 + \\vec{u}_2 + \\vec{u}_3$. La distance à vol d\'oiseau ' +
+            'entre le départ et l\'arrivée est la norme $\\|\\vec{DA}\\|$, et le chemin du retour ' +
+            'est le vecteur opposé $\\vec{AD} = -\\vec{DA}$.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Instruction (a > 0)', 'Vecteur'],
+          rows: [
+            ['a vers l\'est', '$\\begin{pmatrix} a \\\\ 0 \\end{pmatrix}$'],
+            ['a vers l\'ouest', '$\\begin{pmatrix} -a \\\\ 0 \\end{pmatrix}$'],
+            ['a vers le nord', '$\\begin{pmatrix} 0 \\\\ a \\end{pmatrix}$'],
+            ['a vers le sud', '$\\begin{pmatrix} 0 \\\\ -a \\end{pmatrix}$'],
+            ['a pas en diagonale vers le nord-ouest', '$\\begin{pmatrix} -a \\\\ a \\end{pmatrix}$'],
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Distance parcourue ou distance à vol d\'oiseau ?',
+          text:
+            'Après 3 km vers l\'est puis 4 km vers le nord, on a **parcouru** 3 + 4 = 7 km, ' +
+            'mais on ne se trouve qu\'à $\\sqrt{3^2 + 4^2} = 5$ km du départ **à vol d\'oiseau**. ' +
+            'Additionner les longueurs des étapes ne donne jamais la distance en ligne droite : ' +
+            'on additionne les VECTEURS, puis on calcule la norme du résultat.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Carte au trésor et randonnée : déplacements successifs',
+          generatorId: 'gen86',
+          description: ['Traduis des instructions (est, nord, ouest, sud, diagonale) en vecteurs, additionne-les, calcule une distance à vol d\'oiseau, puis trouve le chemin du retour, le dernier déplacement vers une cible ou le nombre de pas à répéter.'],
+          chantier: '4e',
+          whereLabel: '4e → « 86. Carte au trésor et randonnée : déplacements successifs »',
+        },
       ],
     },
 
