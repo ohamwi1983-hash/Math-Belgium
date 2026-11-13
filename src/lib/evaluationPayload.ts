@@ -90,7 +90,7 @@ export type IdGenerateurPilote =
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58' | 'gen73' | 'gen74' | 'gen76' | 'gen80' | 'gen75' | 'gen81' | 'gen79' | 'gen77' | 'gen78'
-  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
+  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen87'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
@@ -257,6 +257,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen29', label: '', processus: 3 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen87', label: 'Traverser une rivière : vitesses en composantes (gen87)', processus: 3 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', generatorId: 'gen42', label: '' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: "Lecture graphique d'une droite (gen43)" },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: "Construction graphique d'une droite (gen44)" },
@@ -958,6 +959,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: 'deux forces', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N s'appliquent au même point et forment entre elles un angle de 60°. Calcule la norme de leur résultante, puis l'angle qu'elle forme avec la force $\\vec{F_1}$ (au dixième de degré)." },
       { cle: 'le « + »', enonce: "Deux forces $\\vec{F_1}$ et $\\vec{F_2}$ s'appliquent au même point et forment un angle $\\theta$. Démontre que la norme $R$ de leur résultante vérifie $R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$." },
       { cle: 'résultante par les composantes', enonce: "Deux forces de normes $F_1 = 50$ N et $F_2 = 30$ N forment un angle de 60°. En plaçant $\\vec{F_1}$ le long de l'axe horizontal, calcule les composantes de leur résultante, puis sa norme et l'angle qu'elle forme avec $\\vec{F_1}$." },
+      { cle: 'traverser une rivière', enonce: "Un nageur traverse une rivière de largeur 40 m, où le courant, parallèle aux rives, va à 0,6 m/s. Il nage perpendiculairement aux rives à 0,8 m/s (vitesse par rapport à l'eau). Combien de temps dure la traversée, à quelle distance du point situé juste en face de son départ accoste-t-il, et quelle est sa vitesse réelle ?" },
     ],
     directeur: [
       { cle: "vecteur directeur à partir de l'équation", enonce: "Donne un vecteur directeur de la droite $d$ d'équation $y = 2x - 1$, puis deux autres vecteurs directeurs de $d$." },
