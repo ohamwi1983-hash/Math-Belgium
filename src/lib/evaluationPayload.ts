@@ -79,7 +79,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
+  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen91'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
@@ -153,7 +153,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen18', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'hyperboliques', generatorId: '6gen19', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'graphique', generatorId: '6gen20', label: '' },
-  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', generatorId: '6gen21', label: '' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', generatorId: '6gen21', label: 'Étudier une fonction (6gen21)' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', generatorId: '6gen91', label: 'Optimiser un modèle logarithmique (6gen91)', processus: 3 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen22', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementfondamental', generatorId: '6gen43', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen44', label: '' },
@@ -1280,6 +1281,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'étude complète', enonce: "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, limites et asymptotes, dérivée, variations et extremum, puis concavité et point d'inflexion." },
     { cle: 'étude courte de x·ln(x)', enonce: "Étudie la fonction $f(x) = x\\ln(x)$ : domaine, limites aux bornes, variations et extremum, concavité." },
     { cle: 'étude de ln|x² − 4|', enonce: "Étudie les variations de $f(x) = \\ln\\left|x^2-4\\right|$ : domaine, parité, asymptotes, signe de la dérivée et zéros." },
+    { cle: 'vitesse qui maximise le débit', enonce: "Sur une route limitée à 90 km/h, le débit (en centaines de véhicules par heure) est $D(v) = 5v - 2v\\ln(v)$, où $v$ est la vitesse en dizaines de km/h. Détermine le domaine de $D$ dans ce contexte, puis la vitesse (en km/h) pour laquelle le débit est maximal et ce débit maximal (en véhicules par heure)." },
   ],
   problemes: [
     { cle: 'pH', enonce: "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$." },
