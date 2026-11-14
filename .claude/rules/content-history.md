@@ -3012,3 +3012,21 @@ paths:
   « Propriétés » (pas d'exemple, donc rien à ajouter à `ENONCES_DEMONSTRATION`). Dans
   `GENERATEURS_EVALUATION_PILOTE`, la section ayant désormais deux générateurs, 6gen25 reçoit aussi
   un libellé.
+- **6e (6h), Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen84
+  « Le détective d'erreurs : intégrales et primitives » (section `problemes`, processus 3), sur le
+  modèle de gen81/gen91 : copie numérotée (`CopieEleve`), `EtapeLigneFausse` et
+  `EtapeDescriptionErreur` réutilisés tels quels depuis `4e/components/EtapesDetectiveErreurs.tsx`
+  (aucune modification du fichier 4e) ; seul l'écran 3 a son composant
+  (`components6e/EtapeCorrectionDetectiveIntegrales.tsx` : nombres exacts ou fonctions, saisie de
+  6gen25/6gen26 via `evaluerExpressionExponentielle`). 7 variantes = types d'erreur, 13 scénarios
+  (support + ligne fausse fixes) : f(ax + b) sans diviser par a (∫ c·cos(kx), ∫ (ax + b)ⁿ) ;
+  ln(x) au lieu de ln|x| (intégrale sur un intervalle négatif, condition initiale sur ]−∞ ; 0[ —
+  la copie conclut alors « n'existe pas », seule suite cohérente : ln|x| et un ln(x) « recalé »
+  donnent toujours le même nombre) ; signe de la primitive de sin (crochet) ou de cos (condition
+  initiale, x₀ = π/6, π/2 ou π/3 → √3) ; aire sans découper aux racines (x² − k²) ou aux
+  intersections (kx et x²) ; volume sans le carré (kx) ou sans π (√(kx)) ; bornes inversées
+  (valeur moyenne) ; constante mal isolée (condition initiale) ou oubliée (cinématique). Valeurs
+  toutes exactes (rationnels, π, ln, √3) : une valeur décimale proche est signalée « approchée »
+  sans consommer de tentative ; une primitive est acceptée à une constante près quand la ligne ne
+  demande qu'une primitive. `forme` = type + support + ligne + scénario, aucun cas particulier, pas
+  de `calcul`. Le cours couvrait déjà toutes les formules : aucun bloc ajouté, seulement la carte.
