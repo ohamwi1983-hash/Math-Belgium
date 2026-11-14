@@ -2943,6 +2943,33 @@ export const fonctionsLogarithmes: ChapterContent = {
               'forme une « bosse » ; à l\'extérieur, deux branches qui montent vers $+\\infty$.',
           },
         },
+        { kind: 'subheading', text: 'Optimiser un modèle en contexte' },
+        {
+          kind: 'para',
+          text:
+            'Une étude de fonction sert aussi à **optimiser** : trouver la dose, la production ou la vitesse ' +
+            'qui rend une grandeur maximale ou minimale. Même démarche, avec deux soins en plus : le ' +
+            'domaine tient compte de la **situation** (une quantité positive, une valeur plafonnée), et la ' +
+            'réponse finale se donne **dans les unités de l\'énoncé**.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'vitesse qui maximise le débit',
+          formula:
+            'Sur une route limitée à 90 km/h, le débit (en centaines de véhicules par heure) est ' +
+            '$D(v) = 5v - 2v\\ln(v)$, où $v$ est la vitesse en dizaines de km/h. À quelle vitesse le débit est-il maximal ?',
+          steps: [
+            { tag: 'domaine dans le contexte', text: '$\\ln(v)$ impose $v > 0$ ; la limitation impose $v \\le 9$ : $D$ est définie sur $\\mathopen{]}0;9]$' },
+            { tag: 'dérivée (règle du produit)', text: '$D\'(v) = 5 - 2\\left(\\ln(v) + v \\cdot \\dfrac{1}{v}\\right) = 3 - 2\\ln(v)$' },
+            { tag: 'valeur qui annule la dérivée', text: '$3 - 2\\ln(v) = 0 \\iff \\ln(v) = \\dfrac{3}{2} \\iff v = e^{3/2} \\approx 4{,}48$' },
+            { tag: 'signe : maximum', text: '$\\ln$ est croissante : $D\'(v) > 0$ si $v < e^{3/2}$ et $D\'(v) < 0$ si $v > e^{3/2}$, donc $D$ admet un **maximum** en $v = e^{3/2}$' },
+            { tag: 'valeur optimale', text: '$D\\left(e^{3/2}\\right) = 5e^{3/2} - 2 \\cdot \\dfrac{3}{2} \\cdot e^{3/2} = 2e^{3/2} \\approx 8{,}96$' },
+          ],
+          result: {
+            tag: 'interprétation',
+            text: 'Le débit est maximal à $10e^{3/2} \\approx 45$ km/h : environ $896$ véhicules par heure.',
+          },
+        },
         {
           kind: 'entrainement',
           title: 'Étudier une fonction (synthèse)',
@@ -2955,6 +2982,20 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 21. Étudier une fonction (synthèse) »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Optimiser un modèle logarithmique',
+          generatorId: '6gen91',
+          description: [
+            'Optimise une grandeur en contexte en 5 écrans — domaine dans la situation, dérivée, ' +
+              'valeur exacte qui l\'annule (fraction ou eᵏ), maximum ou minimum par le signe de la ' +
+              'dérivée (une seule tentative), puis l\'optimum dans les unités de l\'énoncé — sur cinq ' +
+              'modèles : rendement d\'un engrais, bénéfice, bénéfice moyen ln(x)/x, coût moyen x·ln(x), ' +
+              'débit d\'une route.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 91. Optimiser un modèle logarithmique »',
         },
       ],
     },

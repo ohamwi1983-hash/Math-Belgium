@@ -3182,3 +3182,18 @@ paths:
   « Lire une courbe f(x) = logₐ(x − c) + d » ajoutée avant la carte (pas d'exemple, donc rien à
   ajouter à `ENONCES_DEMONSTRATION`) ; libellé « Paramètres depuis des conditions graphiques
   (6gen18) » donné à l'entrée pilote de 6gen18.
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen91
+  « Optimiser un modèle logarithmique » (section `etude`, processus 3, carte après 6gen21). Cinq
+  situations (= `forme`) : engrais R(x) = c + a ln(1 + x) − bx (dose optimale a/b − 1), bénéfice
+  B(q) = a ln(q) − bq − c, bénéfice moyen (a ln(x) + d)/x (maximum en eᵏ), coût moyen
+  a x ln(x) − bx + c (minimum en eᵏ, dont 1/e), débit d'une route av − bv ln(v) (maximum en eᵏ).
+  Cinq écrans : domaine dans le contexte (crochets + bornes ; piège ]−1 ; +∞[ ou 0 inclus),
+  dérivée, valeur EXACTE qui l'annule (une valeur approchée reçoit un message sans consommer de
+  tentative), maximum/minimum (choix fermé, une tentative), optimum et valeur dans les unités de
+  l'énoncé (exactes ou arrondies selon `mode`). Profil : aucun cas particulier, `calcul` = mode
+  (engrais et bénéfice toujours « calculatrice », déclarés `calculatriceIndispensable`). Pas de
+  figure dans l'énoncé (la courbe donnerait la nature et la position de l'optimum) ; courbe avec
+  l'optimum au corrigé et en fin d'exercice. La section `etude` n'avait pas d'optimisation en
+  contexte : sous-titre « Optimiser un modèle en contexte », un `para` et un `exemple` (débit
+  D(v) = 5v − 2v ln(v), clé `ENONCES_DEMONSTRATION` « vitesse qui maximise le débit ») ajoutés
+  avant la carte de 6gen21. Libellé de conception donné à 6gen21 (« Étudier une fonction (6gen21) »).
