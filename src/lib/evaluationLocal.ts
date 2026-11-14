@@ -147,8 +147,18 @@ function hacher(texteSource: string): string {
   return (h >>> 0).toString(36)
 }
 
+/** Les figures SVG portent souvent des identifiants tirés d'un compteur global (`id="ri12"`,
+ * `url(#ri12-clip)`) : deux énoncés identiques auraient alors des empreintes différentes et le
+ * contrôle anti-doublon ne verrait rien. Ces identifiants sont neutralisés avant le hachage. */
+function sansIdentifiantsSvg(texte: string): string {
+  return texte
+    .replace(/\bid=\\?"[^"\\]*\\?"/g, 'id')
+    .replace(/url\(#[^)]*\)/g, 'url()')
+    .replace(/href=\\?"#[^"\\]*\\?"/g, 'href')
+}
+
 function empreinteSection(generatorId: string, section: SectionExercice): string {
-  return `${generatorId}:${hacher(JSON.stringify([section.enteteFragments ?? [], section.questions.map((q) => q.consigne), section.enteteHtml ?? '']))}`
+  return `${generatorId}:${hacher(sansIdentifiantsSvg(JSON.stringify([section.enteteFragments ?? [], section.questions.map((q) => q.consigne), section.enteteHtml ?? ''])))}`
 }
 
 /* ----------------------------------------------------------------------------------------------

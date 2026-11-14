@@ -118,6 +118,10 @@ les étapes 1 et 2 » (ou en lettre de question papier).
   de la forme au 1er centile et brider le générateur si une forme rare deviendrait introuvable pour
   les séries B, C… (`4e/generateurs/transformationsEnsembles/profil.ts`). Le pipeline mélange
   l'ordre des questions d'une série à l'autre : comparer les structures sans tenir compte de l'ordre.
+- **Anti-doublon entre séries** (`evaluationLocal.ts::empreinteSection`) : empreinte de l'énoncé
+  (fragments, consignes, `enteteHtml`). Les identifiants SVG (`id="…"`, `url(#…)`, `href="#…"`) y
+  sont neutralisés — une figure à compteur global (`ri12`, `ig3`…) dans `construireEnonce` ne rend
+  donc plus deux énoncés identiques « différents » (bug trouvé par 6gen83).
 - **Durée estimée** : imprimée seulement si le professeur coche « Afficher la durée estimée »
   (`EnTeteEvaluation.afficherDuree`, défaut : non).
 
