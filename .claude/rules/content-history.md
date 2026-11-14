@@ -3343,3 +3343,29 @@ paths:
   le premier terme de la somme » (avec 3 + 6 + … + 3072) et exemple résolu « somme de u4 à u9 »
   (énoncé ajouté à `ENONCES_DEMONSTRATION`) juste après l'exemple S₈ ; libellés de 5gen15 et 5gen45
   sur la page de conception.
+- **5e (4h), Chapitre 3 — Suites** (`suites`) : nouveau 5gen44 « Définir et reconnaître une suite »
+  (section `suites-geometriques`, carte après 5gen15, processus 2). Fusion (décision de
+  l'utilisateur) de « notations et calcul de termes » et « nature d'une suite », cinq variantes,
+  toujours trois écrans (le nombre de puces ne trahit jamais le verdict) :
+  `notations` (uₙ = f(n) affine, second degré, homographique ou k·qⁿ : uₙ₊₁, puis u₂ₙ OU uₙ₋₁,
+  puis uₚ ; vérification par ÉQUIVALENCE aux rangs entiers ; pièges diagnostiqués uₙ + 1, 2uₙ,
+  uₙ − 1, substitution partielle, (2n)² ≠ 2n², rang décalé), `recurrence` (uₙ₊₁ = g(uₙ) non affine —
+  uₙ/(1 + auₙ), (uₙ + a)/uₙ, a/(b − uₙ), (αuₙ + β)/(uₙ + δ), uₙ² + c : u₂, u₃, u₄ exacts, fraction
+  acceptée, valeur approchée refusée avec message), `nature-formule` et `nature-recurrence`
+  (uₙ₊₁ − uₙ puis uₙ₊₁/uₙ en expression — pour une récurrence l'élève écrit u pour uₙ, aperçu affiché
+  uₙ —, puis verdict), `nature-termes` (4 ou 5 termes : tous les écarts, tous les rapports, verdict
+  « compatibles avec… » ; pièges « écarts/rapports constants sauf le dernier », second degré,
+  triangulaires ; le corrigé rappelle qu'une liste réfute mais ne prouve pas).
+  Verdict : choix fermé (1 tentative) dont les options portent la raison candidate, toujours
+  r = u₂ − u₁ et q = u₂/u₁ — le piège « on ne regarde que deux termes » est dans les options ; tiré
+  AVANT la construction (1/3 par issue), jamais dans `forme`, jamais cas particulier. Profil :
+  `forme` = `notations:{famille}:{double|precedent}`, `recurrence:{style}`, `nature-formule`,
+  `nature-recurrence`, `nature-termes:{4|5}` ; aucun cas particulier ; pas de `calcul` (tout exact).
+  Papier : seules les trois questions de `notations` restent en a) b) c) ; ailleurs énoncé + « Justifie
+  et donne la raison » (différence/quotient = étapes du corrigé). Écritures exponentielles qui se
+  simplifieraient (3·3ⁿ, 3/3ⁿ, 2ⁿ⁺¹/4) écartées. Cours : sous-titre « Définir et reconnaître une
+  suite », `attention` (uₙ₊₁ ≠ uₙ + 1, u₂ₙ ≠ 2uₙ, exemple uₙ = n² + 3n) et `methode` (formule,
+  récurrence, liste de termes « compatible ») avant la carte. Fichiers : `App5gen44.tsx`,
+  `core5e/definirSuite.ts`, `generateurs5e/definirSuite/` (index, profilEvaluation,
+  exportEvaluation), `moteur5e/{types,session,verification}DefinirSuite.ts`,
+  `ui5e/{format,recapitulatif}DefinirSuite.ts`, `components5e/EtapeDefinirSuite.tsx`.
