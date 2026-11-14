@@ -79,7 +79,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88'
+  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
@@ -145,7 +145,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', generatorId: '6gen10', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', generatorId: '6gen11', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen12', label: '' },
-  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen13', label: '' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen13', label: 'Propriétés du logarithme (6gen13)' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen86', label: 'Comparer et encadrer des logarithmes sans calculatrice (6gen86)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'equations', generatorId: '6gen14', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'inequations', generatorId: '6gen15', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'derivee', generatorId: '6gen16', label: '' },
@@ -1228,6 +1229,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'calculer un logarithme', enonce: "Calcule, sans calculatrice, $\\log_2(32)$, $\\log_3\\left(\\dfrac{1}{81}\\right)$, $\\log_4(8)$, $\\log_{1/2}(8)$ et $\\log_{10}(0{,}001)$, en écrivant chaque argument comme une puissance de la base." },
     { cle: 'développer un logarithme', enonce: "Développe $\\ln\\left(\\dfrac{x^3\\sqrt{y}}{z^2}\\right)$ pour $x,y,z>0$, à l'aide des propriétés algébriques du logarithme." },
     { cle: 'réduire en un seul logarithme', enonce: "Écris $2\\ln(3) - \\ln(6) + \\ln(4)$ sous la forme d'un seul logarithme." },
+    { cle: 'encadrer et comparer des logarithmes', enonce: "Sans calculatrice, compare $\\log_2(10)$ et $\\log_3(10)$, puis $\\log_4(10)$ et $\\log_2(3)$, en justifiant." },
+    { cle: 'valeur approchée par le changement de base', enonce: "Sachant que $\\log(2) \\approx 0{,}301$ et $\\log(3) \\approx 0{,}477$, calcule sans calculatrice une valeur approchée de $\\log_6(12)$, arrondie au centième, en justifiant." },
   ],
   equations: [
     { cle: '3^x = 20', enonce: "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième." },
