@@ -1505,6 +1505,32 @@ export const primitivesIntegrales: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 26. Calcul d\'aires par intégrale »',
         },
+        {
+          kind: 'methode',
+          label: 'Aire d\'une forme réelle',
+          items: [
+            '**Choisir un repère** : l\'axe des abscisses le long d\'un bord droit (sol, base d\'un arc), ' +
+              'l\'origine en un point simple (un pied de l\'arc, le milieu de sa base).',
+            '**Retrouver la parabole** à partir de points lisibles : par ses deux pieds $x_1$ et $x_2$, ' +
+              '$f(x)=a(x-x_1)(x-x_2)$ ; par son sommet $(p\\,;\\,q)$, $f(x)=a(x-p)^2+q$ ; un troisième ' +
+              'point donne $a$.',
+            '**Intégrer** entre les bornes lues dans ce même repère, puis **revenir au contexte** : ajouter ' +
+              'les parties rectangulaires, multiplier une section par une longueur, convertir les unités ' +
+              '(une unité de 10 m donne $1$ u.a. $=100$ m²), arrondir un nombre de pots à l\'unité supérieure.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Aires de formes réelles',
+          generatorId: '6gen81',
+          description: [
+            'Un mur à fronton arrondi, un vitrail, un canal ou un tunnel, une parcelle bordée par une ' +
+              'rivière : modélise la forme par une parabole, intègre, puis réponds dans le contexte ' +
+              '(m², litres, pots de peinture, euros, m³).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 81. Aires de formes réelles »',
+        },
       ],
     },
     {

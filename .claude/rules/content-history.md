@@ -3124,3 +3124,17 @@ paths:
   échangées, comparaison, encadrement et valeur moyenne), un exemple résolu (encadrer
   ∫₀¹ e^{x²} dx puis le comparer à ∫₀¹ eˣ dx, énoncé ajouté à `ENONCES_DEMONSTRATION`, clé
   « encadrer une intégrale sans primitive ») et un `piege` (bornes échangées, x³ ≤ x² sur [0 ; 1]).
+- **6e, Chapitre 4 — Intégrales et primitives** (`primitives-integrales`) : nouveau 6gen81
+  « Aires de formes réelles » (section `aires`, processus 3, carte après 6gen26). Quatre
+  situations : mur à fronton en arc de parabole (surface à peindre, litres pour deux couches,
+  pots arrondis à l'unité SUPÉRIEURE, coût), vitrail (lentille entre deux arcs, intersections à
+  trouver, verre clair, coût avec conversion dm² → m²), section d'un canal / tunnel / gouttière
+  (aire puis volume = aire × longueur, litres pour la gouttière), parcelle bordée par une rivière
+  (unité 10 m : 1 u.a. = 100 m², valeur du terrain). Fonction donnée (repère superposé au schéma)
+  ou À RETROUVER : par les deux pieds et le sommet (mur, section — origine LIBRE sur l'axe de la
+  base : la fonction est acceptée à translation près, les bornes doivent être les pieds dans le
+  repère de l'élève) ou par le sommet et un point (parcelle, forme canonique). Profil :
+  `forme` = situation + donnée/retrouver (+ contexte de la section), `calcul` exacte/calculatrice,
+  aucun cas particulier. Le cours ne parlait pas de modéliser une forme réelle : une `methode`
+  « Aire d'une forme réelle » ajoutée avant la carte (pas d'exemple, donc rien à ajouter à
+  `ENONCES_DEMONSTRATION`).
