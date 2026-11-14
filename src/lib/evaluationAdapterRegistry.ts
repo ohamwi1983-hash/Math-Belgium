@@ -308,6 +308,7 @@ import { adaptateurEvaluationLorenzGini } from '../entrainement/6e-6h/generateur
 import { adaptateurEvaluationAccumulerGrandeur } from '../entrainement/6e-6h/generateurs6e/accumulerGrandeur/exportEvaluation'
 import { adaptateurEvaluationContenanceObjets } from '../entrainement/6e-6h/generateurs6e/contenanceObjets/exportEvaluation'
 import { adaptateurEvaluationEncadrerIntegrales } from '../entrainement/6e-6h/generateurs6e/encadrerIntegrales/exportEvaluation'
+import { adaptateurEvaluationComparerEncadrerLog } from '../entrainement/6e-6h/generateurs6e/comparerEncadrerLogarithmes/exportEvaluation'
 import { adaptateurEvaluationNombresComplexes } from '../entrainement/6e-6h/generateurs6e/nombresComplexes/exportEvaluation'
 import { adaptateurEvaluationAffixesRacines } from '../entrainement/6e-6h/generateurs6e/affixesRacines/exportEvaluation'
 import { adaptateurEvaluationEquationsComplexes } from '../entrainement/6e-6h/generateurs6e/equationsComplexes/exportEvaluation'
@@ -354,6 +355,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen11': adaptateurEvaluationEtudeFonctionExponentielle as unknown as AdaptateurFeuilleExercices<never>,
   '6gen12': adaptateurEvaluationExponentiellesProblemes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen13': versionPapier(adaptateurEvaluationProprietesLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen86': versionPapier(adaptateurEvaluationComparerEncadrerLog) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen20': versionPapier(adaptateurEvaluationGraphiqueDeriveeLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen18': versionPapier(adaptateurEvaluationDeterminerParametresLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen19': versionPapier(adaptateurEvaluationHyperboliques) as unknown as AdaptateurFeuilleExercices<never>,

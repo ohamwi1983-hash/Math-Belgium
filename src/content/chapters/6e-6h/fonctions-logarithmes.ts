@@ -686,6 +686,55 @@ export const fonctionsLogarithmes: ChapterContent = {
             caption: "Henry Briggs (1561–1630), portrait d'époque, inventeur du logarithme décimal.",
           },
         },
+        { kind: 'subheading', text: 'Encadrer et comparer des logarithmes sans calculatrice' },
+        {
+          kind: 'para',
+          text:
+            'On note simplement $\\log$ le logarithme décimal : $\\log(x) = \\log_{10}(x)$. Sans ' +
+            'calculatrice, on ne connaît exactement que les logarithmes des puissances de la base ' +
+            '— mais cela suffit pour **situer** n\'importe quel logarithme, grâce à la monotonie de ' +
+            '$\\log_a$ : strictement croissante si $a>1$, strictement décroissante si $0<a<1$.',
+        },
+        {
+          kind: 'methode',
+          label: 'Encadrer un logarithme entre deux entiers consécutifs',
+          items: [
+            'Encadre l\'argument entre deux puissances consécutives de la base : $a^k < x < a^{k+1}$.',
+            'Applique $\\log_a$ aux trois membres. Si $a>1$, l\'ordre est conservé : ' +
+              '$k < \\log_a(x) < k+1$ par (P3). Si $0<a<1$, $\\log_a$ est décroissante : les ' +
+              'inégalités **changent de sens**.',
+            'Pour comparer deux logarithmes, encadre-les : si les encadrements se séparent, ils ' +
+              'suffisent. S\'ils sont identiques, ramène les deux logarithmes à une même base par le ' +
+              'changement de base, puis compare les arguments.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'encadrer et comparer des logarithmes',
+          formula:
+            'Sans calculatrice, compare $\\log_2(10)$ et $\\log_3(10)$, puis $\\log_4(10)$ et ' +
+            '$\\log_2(3)$.',
+          steps: [
+            { tag: 'encadrer par des puissances', text: '$2^3 = 8 < 10 < 16 = 2^4$ donc $3 < \\log_2(10) < 4$ ; $3^2 = 9 < 10 < 27 = 3^3$ donc $2 < \\log_3(10) < 3$' },
+            { tag: 'les encadrements se séparent', text: '$\\log_3(10) < 3 < \\log_2(10)$' },
+            { tag: 'encadrements identiques', text: '$1 < \\log_4(10) < 2$ et $1 < \\log_2(3) < 2$ : il faut un autre argument' },
+            { tag: 'changement de base vers la base 2', text: '$\\log_4(10) = \\dfrac{\\log_2(10)}{\\log_2(4)} = \\dfrac{\\log_2(10)}{2}$ et $\\log_2(3) = \\dfrac{2\\log_2(3)}{2} = \\dfrac{\\log_2(9)}{2}$' },
+          ],
+          result: {
+            tag: 'résultat — log₂ est croissante et 10 > 9',
+            text: '$\\log_3(10) < \\log_2(10)$ et $\\log_4(10) > \\log_2(3)$.',
+          },
+        },
+        {
+          kind: 'exemple',
+          badge: 'valeur approchée par le changement de base',
+          formula: 'Sachant que $\\log(2) \\approx 0{,}301$ et $\\log(3) \\approx 0{,}477$, calcule sans calculatrice une valeur approchée de $\\log_6(12)$, arrondie au centième.',
+          steps: [
+            { tag: 'changement de base', text: '$\\log_6(12) = \\dfrac{\\log(12)}{\\log(6)}$' },
+            { tag: 'propriétés du produit et de la puissance', text: '$\\log(12) = 2\\log(2) + \\log(3) \\approx 1{,}079$ et $\\log(6) = \\log(2) + \\log(3) \\approx 0{,}778$' },
+          ],
+          result: { tag: 'résultat', text: '$\\log_6(12) \\approx \\dfrac{1{,}079}{0{,}778} \\approx 1{,}39$' },
+        },
         { kind: 'subheading', text: 'Le logarithme népérien' },
         {
           kind: 'astuce',
@@ -976,6 +1025,18 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 13. Propriétés du logarithme »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Comparer et encadrer des logarithmes sans calculatrice',
+          generatorId: '6gen86',
+          description: [
+            'Encadre un logarithme entre deux entiers consécutifs grâce aux puissances de la base, ' +
+              'compare deux logarithmes de bases différentes, range des nombres dans l\'ordre croissant ' +
+              'et calcule une valeur approchée par le changement de base — sans calculatrice.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 86. Comparer et encadrer des logarithmes sans calculatrice »',
         },
       ],
     },

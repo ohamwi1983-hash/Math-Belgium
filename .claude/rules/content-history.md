@@ -3150,3 +3150,20 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+
+## 6e (6h), Chapitre 3 — 6gen86 « Comparer et encadrer des logarithmes sans calculatrice »
+
+- Section `proprietes` : nouvelle sous-section « Encadrer et comparer des logarithmes sans
+  calculatrice » (avant « Le logarithme népérien ») — `para` (notation `log` = log₁₀, monotonie de
+  logₐ), `methode` (encadrer entre deux entiers, cas 0 < a < 1, encadrements identiques → changement
+  de base), deux `exemple` (badges « encadrer et comparer des logarithmes », « valeur approchée par
+  le changement de base », énoncés dans `ENONCES_DEMONSTRATION`). Carte `6gen86` après celle de 6gen13.
+- Générateur `6gen86` (`generateurs6e/comparerEncadrerLogarithmes/`) : 4 variantes — encadrer
+  logₐ(N) (puissances → encadrement), comparer A et B (encadrer A, encadrer B, verdict <, >, = tiré
+  avant la construction : bases sans lien aux encadrements séparés, ou bases c et cⁿ aux
+  encadrements identiques tranchés par le changement de base ; bases < 1 une fois sur 3), ranger
+  4 nombres (entier n de chaque logarithme, puis ordre au doigt : boutons touchés dans l'ordre,
+  « Effacer »), changement de base avec log 2 ≈ 0,301 et log 3 ≈ 0,477 (ou ln 2, ln 3). Aucun
+  logarithme rationnel « déguisé » (log₄ 8) n'est tiré. Champs : un nombre (une saisie avec
+  logarithme est illisible, sans tentative décomptée). Profil : aucun cas particulier, pas de
+  `calcul`, `forme` = variante (+ « base < 1 » pour comparer).
