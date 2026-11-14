@@ -3150,6 +3150,19 @@ export const fonctionsLogarithmes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 22. Logarithmes : problèmes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Le détective d\'erreurs : logarithmes',
+          generatorId: '6gen88',
+          description: [
+            'Une résolution rédigée par un élève contient une ligne fausse : trouve-la, nomme ' +
+              'l\'erreur (ln d\'une somme, ln(x²) sans valeur absolue, CE oubliée, sens non ' +
+              'inversé pour une base < 1, (ln x)² confondu avec ln(x²), quotient de logarithmes, ' +
+              'dérivée de ln(u), changement de base inversé), puis corrige la résolution.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 88. Le détective d\'erreurs : logarithmes »',
+        },
       ],
     },
   ],

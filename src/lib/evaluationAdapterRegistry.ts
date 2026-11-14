@@ -285,6 +285,7 @@ import { adaptateurEvaluationHyperboliques } from '../entrainement/6e-6h/generat
 import { adaptateurEvaluationEquationsExpLog } from '../entrainement/6e-6h/generateurs6e/equationsExpLog/exportEvaluation'
 import { adaptateurEvaluationLimitesLogarithmiques } from '../entrainement/6e-6h/generateurs6e/limitesLogarithmiques/exportEvaluation'
 import { adaptateurEvaluationLogarithmesProblemes } from '../entrainement/6e-6h/generateurs6e/logarithmesProblemes/exportEvaluation'
+import { adaptateurEvaluationDetectiveLogarithmes } from '../entrainement/6e-6h/generateurs6e/detectiveLogarithmes/exportEvaluation'
 import { adaptateurEvaluationEtudeFonctionLogarithme } from '../entrainement/6e-6h/generateurs6e/etudeFonctionLogarithme/exportEvaluation'
 import { adaptateurEvaluationInequationsLogarithmiques } from '../entrainement/6e-6h/generateurs6e/inequationsLogarithmiques/exportEvaluation'
 import { adaptateurEvaluationDomaineDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/domaineDeriveeLogarithme/exportEvaluation'
@@ -360,6 +361,7 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen14': versionPapier(adaptateurEvaluationEquationsExpLog) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen17': versionPapier(adaptateurEvaluationLimitesLogarithmiques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen22': versionPapier(adaptateurEvaluationLogarithmesProblemes) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen88': versionPapier(adaptateurEvaluationDetectiveLogarithmes) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen21': versionPapier(adaptateurEvaluationEtudeFonctionLogarithme) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen15': versionPapier(adaptateurEvaluationInequationsLogarithmiques) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen16': versionPapier(adaptateurEvaluationDomaineDeriveeLogarithme) as unknown as AdaptateurFeuilleExercices<never>,

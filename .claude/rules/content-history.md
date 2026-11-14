@@ -3150,3 +3150,23 @@ paths:
   déclarés `calculatriceIndispensable` ; décision de l'utilisateur généralisée : en évaluation
   « calculatrice interdite », toute variante de cette liste est exclue (rangée grisée dans le
   panneau, retirée par `construireItemsPayload`).
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : nouveau 6gen88
+  « Le détective d'erreurs : logarithmes » (section `problemes`, processus 3, carte après celle de
+  6gen22), même mécanique que 6gen84 : `CopieEleve`, `EtapeLigneFausse`, `EtapeDescriptionErreur`
+  et `BlocAides` réutilisés tels quels depuis `4e/components/EtapesDetectiveErreurs.tsx` ; écran 3
+  propre (`components6e/EtapeCorrectionDetectiveLogarithmes.tsx`) avec quatre genres de valeur :
+  nombre, fonction (vérificateurs de 6gen84 réutilisés), ENSEMBLE FINI de solutions (champ libre,
+  « ; » entre les valeurs, ∅, comparaison ensembliste, aperçu `S = {…}`) et INTERVALLE
+  (`EnsembleReelGuideBuilder` de 6gen14/6gen15, bornes exactes via `evaluerValeurExponentielle`).
+  8 variantes = types d'erreur, 16 scénarios (2 par variante, support + ligne fausse fixes) :
+  ln(x + a) écrit ln(x) + ln(a) / ln(eᵏx) écrit ln(eᵏ)·ln(x) ; ln(x²) = 2 ln(x) sans valeur absolue
+  (équation : solution −a perdue ; inéquation : solutions négatives perdues) ; CE calculée sur la
+  forme regroupée / CE jamais vérifiée (solution parasite gardée) ; base 1/2, 1/3, 0,5 ou 0,2 sans
+  inverser le sens ; (ln x)² pris pour 2 ln(x) (équation, dérivée) ; quotient de logarithmes écrit
+  log(x − y) ; (ln u)′ écrit 1/u (ln(x² + c), tangente à ln(ax + b)) ; changement de base inversé
+  (aˣ = b, log_B(A)). Conclusion de chaque copie cohérente avec l'erreur. Valeurs toutes exactes
+  (rationnels, puissances de e, quotients de ln) ; `forme` = type + scénario + ligne, aucun cas
+  particulier, pas de `calcul`. Piège de mise en page trouvé au parcours à 390 px : le constructeur
+  d'intervalle dans une grille CSS débordait (min-width auto des éléments de grille) — colonnes
+  `minmax(0, 1fr)` + `minWidth: 0`. Le cours couvrait déjà toutes les règles : seulement la carte.
+  Dans `GENERATEURS_EVALUATION_PILOTE`, 6gen22 reçoit un libellé (« Logarithmes : problèmes »).
