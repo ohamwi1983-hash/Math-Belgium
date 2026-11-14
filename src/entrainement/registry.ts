@@ -257,6 +257,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen86': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen86').then((m) => ({ default: m.App6gen86 }))),
   '6gen92': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen92').then((m) => ({ default: m.App6gen92 }))),
   '6gen89': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen89').then((m) => ({ default: m.App6gen89 }))),
+  '6gen87': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen87').then((m) => ({ default: m.App6gen87 }))),
 
   // --- 6e, chapitre 7 : Analyse combinatoire ---
   '6gen43': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen43').then((m) => ({ default: m.App6gen43 }))),

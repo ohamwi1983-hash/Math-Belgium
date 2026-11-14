@@ -79,7 +79,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89'
+  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89' | '6gen87'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
@@ -150,7 +150,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'proprietes', generatorId: '6gen92', label: 'Grands nombres et logarithme décimal (6gen92)', processus: 3 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'equations', generatorId: '6gen14', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'inequations', generatorId: '6gen15', label: '' },
-  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'derivee', generatorId: '6gen16', label: '' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'derivee', generatorId: '6gen16', label: 'Domaine, dérivée et dérivation logarithmique (6gen16)' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'derivee', generatorId: '6gen87', label: 'Tangentes aux courbes logarithmiques (6gen87)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'limites', generatorId: '6gen17', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen18', label: 'Paramètres depuis des conditions graphiques (6gen18)' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen85', label: 'Lire une courbe logarithmique (6gen85)', processus: 2 },
@@ -1263,6 +1264,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'Démonstration de logₐ\'(x)', enonce: "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$." },
     { cle: 'ln|x² − 4|', enonce: "Détermine le domaine et la dérivée de $f(x) = \\ln\\left|x^2-4\\right|$, puis décris son comportement près de $x = -2$ et de $x = 2$." },
     { cle: 'étudier un signe avec ln', enonce: "Étudie les variations de $f(x) = x\\ln(x) - x$ sur $]0;+\\infty[$." },
+    { cle: 'tangente à ln passant par l\'origine', enonce: "Détermine l'équation de la tangente au graphique de $f(x) = \\ln(x)$ qui passe par l'origine du repère." },
   ],
   limites: [
     { cle: 'forme indéterminée 0 × (−∞)', enonce: "Calcule $\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x)$, en identifiant la forme indéterminée et en citant le résultat de croissance comparée qui permet de la lever." },
