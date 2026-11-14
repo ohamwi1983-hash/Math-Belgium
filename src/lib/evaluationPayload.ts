@@ -82,7 +82,7 @@ export type IdGenerateurPilote =
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
-  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29'
+  | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen79'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
@@ -169,6 +169,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'primitives-integrales', sectionId: 'primitives', generatorId: '6gen23', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'conditioninitiale', generatorId: '6gen24', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'integralesdefinies', generatorId: '6gen25', label: '' },
+  { chapitreSlug: 'primitives-integrales', sectionId: 'integralesdefinies', generatorId: '6gen79', label: 'Comparer et encadrer des intégrales (6gen79)', processus: 2 },
   { chapitreSlug: 'primitives-integrales', sectionId: 'aires', generatorId: '6gen26', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'volumes', generatorId: '6gen27', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'longueurarc', generatorId: '6gen28', label: '' },
@@ -1311,6 +1312,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'f(x) = x sur [0;4]', enonce: "Calcule la valeur moyenne de $f(x) = x$ sur $[0;4]$." },
     { cle: 'valeur moyenne de sin sur [0 ; π]', enonce: "Calcule la valeur moyenne de $f(x) = \\sin(x)$ sur $[0;\\pi]$, puis détermine les points de $[0;\\pi]$ où f atteint cette valeur." },
     { cle: 'Tu cherches m > 0', enonce: "Détermine $m > 0$ tel que $\\int_0^m 2x \\, dx = 9$." },
+    { cle: 'encadrer une intégrale sans primitive', enonce: "Sans calculer l'intégrale, encadre $\\int_0^1 e^{x^2}\\,dx$ à l'aide du minimum et du maximum de la fonction intégrée sur $[0;1]$, puis compare-la à $\\int_0^1 e^x\\,dx$ pour améliorer la borne supérieure." },
   ],
   aires: [
     { cle: 'f(x) = x sur [−2;3]', enonce: "Calcule l'aire comprise entre la courbe de $f(x) = x$ et l'axe des abscisses, sur $[-2;3]$." },
