@@ -2074,6 +2074,18 @@ export const primitivesIntegrales: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 29. Intégrales et primitives : problèmes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Le détective d\'erreurs : intégrales et primitives',
+          generatorId: '6gen84',
+          description: [
+            'Une résolution rédigée par un élève contient une ligne fausse : primitive de f(ax + b), ' +
+              'ln|x|, signe de la primitive de sin ou cos, aire sans découpe, volume sans π ou sans carré, ' +
+              'bornes inversées, constante C. Trouve la ligne, nomme l\'erreur et corrige la résolution.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 84. Le détective d\'erreurs : intégrales et primitives »',
+        },
       ],
     },
   ],
