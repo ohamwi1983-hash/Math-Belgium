@@ -79,7 +79,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
+  | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen85'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
@@ -150,7 +150,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'inequations', generatorId: '6gen15', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'derivee', generatorId: '6gen16', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'limites', generatorId: '6gen17', label: '' },
-  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen18', label: '' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen18', label: 'Paramètres depuis des conditions graphiques (6gen18)' },
+  { chapitreSlug: 'fonctions-logarithmes', sectionId: 'parametres', generatorId: '6gen85', label: 'Lire une courbe logarithmique (6gen85)', processus: 2 },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'hyperboliques', generatorId: '6gen19', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'graphique', generatorId: '6gen20', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', generatorId: '6gen21', label: '' },

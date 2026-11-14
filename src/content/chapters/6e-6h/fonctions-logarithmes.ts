@@ -2501,6 +2501,33 @@ export const fonctionsLogarithmes: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 18. Paramètres depuis des conditions graphiques »',
         },
+        {
+          kind: 'methode',
+          label: 'Lire une courbe f(x) = logₐ(x − c) + d',
+          items: [
+            '**Asymptote et domaine** : l\'argument $x - c$ s\'annule en $x = c$ — la droite ' +
+              '$x = c$ est l\'asymptote verticale, et $\\text{dom}\\,f = \\mathopen{]}c\\,;+\\infty\\mathclose{[}$ ' +
+              '(borne exclue).',
+            '**Le point où l\'argument vaut 1** : en $x = c + 1$, $\\log_a(1) = 0$, donc ' +
+              '$f(c+1) = d$. Ce point $(c+1\\,;\\,d)$ donne d.',
+            '**La base** : cherche le point de la courbe une unité plus haut, ou plus bas. Plus ' +
+              'haut, $\\log_a(x - c) = 1$, donc $a = x - c$ ; plus bas, $\\log_a(x - c) = -1$, donc ' +
+              '$a = \\dfrac{1}{x - c}$. Par exemple, une courbe décroissante qui passe par $(c+1\\,;\\,d)$ ' +
+              'et par $(c+3\\,;\\,d-1)$ a pour base $a = \\dfrac{1}{3}$.',
+            '**Contrôle** : la courbe monte si $a > 1$ et descend si $0 < a < 1$.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Lire une courbe logarithmique',
+          generatorId: '6gen85',
+          description: [
+            'À partir du graphique de f(x) = logₐ(x − c) + d, retrouve l\'asymptote, le domaine, ' +
+              'la base et l\'expression — ou associe quatre courbes à leurs expressions.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 85. Lire une courbe logarithmique »',
+        },
       ],
     },
     {
