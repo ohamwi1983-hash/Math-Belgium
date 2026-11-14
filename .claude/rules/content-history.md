@@ -3369,3 +3369,27 @@ paths:
   `core5e/definirSuite.ts`, `generateurs5e/definirSuite/` (index, profilEvaluation,
   exportEvaluation), `moteur5e/{types,session,verification}DefinirSuite.ts`,
   `ui5e/{format,recapitulatif}DefinirSuite.ts`, `components5e/EtapeDefinirSuite.tsx`.
+- **5e (4h), Chapitre 3 — Suites** (`suites`), section `problemes-classiques` : nouveau générateur
+  **5gen47 « Modéliser une situation par une suite »** (processus 3), carte après 5gen17, précédée
+  d'un sous-titre « Modéliser une situation concrète par une suite » et d'un `methode` (nature —
+  pourcentage de la valeur précédente ou d'une valeur fixe —, u₁ selon l'année de rang 1, raison
+  r ou q = 1 ± t/100, rang = année − année de rang 1 + 1, terme / somme / seuil). 31 contextes
+  (stocks : population, abonnés, valeur d'une voiture, livret… ; flux annuels : salaire, loyer,
+  production, déchets, CO₂… — seuls les flux ont un « total »). Trois variantes = question finale
+  (terme d'une année, total sur une période, première année où l'on franchit un seuil), toujours
+  cinq écrans : nature (choix fermé, 1 tentative) → u₁ → raison → rang / N / tableau de quatre
+  termes consécutifs (bascule en 2e-4e ligne, comme 5gen18) → uₙ / S_N / année. Départ `avant`
+  (40 %) : l'énoncé donne la valeur de l'année précédant le rang 1. Phrasé « intérêts égaux à t %
+  de la somme déposée au départ » (arithmétique) contre « … de la somme présente sur le compte »
+  (géométrique). Profil : `forme` = `{question}:{départ}`, aucun cas particulier, nature jamais
+  dans la forme (tirée 50/50 avant la boucle de rejet) ; `calcul` tiré INDÉPENDAMMENT de la
+  nature (géométriques exactes q = 2 ; 1,5 ; 1,25 ; 0,75 ; 0,5 avec termes entiers, arithmétiques
+  « lourdes » décimales ou non rondes) pour que la contrainte de calculatrice ne trahisse pas le
+  verdict. Tolérance d'une unité de la précision annoncée en mode calculatrice ; unité tapée en fin
+  de saisie ignorée. Pièges diagnostiqués : q = t/100, 1 + t/100 pour une baisse, valeur de l'année
+  précédente prise pour u₁, rang décalé (sans le + 1), terme ↔ somme, rang au lieu de l'année,
+  année trop tôt/trop tard, écart d'arrondi sur une somme. Fichiers : `App5gen47.tsx`,
+  `core5e/modeliserSuite.ts`, `generateurs5e/modeliserSuite/` (index, contextes, profilEvaluation,
+  exportEvaluation), `moteur5e/{types,session,verification}ModeliserSuite.ts`,
+  `ui5e/{format,recapitulatif}ModeliserSuite.ts`, `components5e/EtapeModeliserSuite.tsx` ; libellés
+  de 5gen17 et 5gen47 sur la page de conception.
