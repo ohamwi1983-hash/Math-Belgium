@@ -1678,6 +1678,35 @@ export const primitivesIntegrales: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 27. Volumes de révolution »',
         },
+        {
+          kind: 'methode',
+          label: 'Contenance d\'un objet de révolution (verre, vase, tonneau…)',
+          items: [
+            '**Modèle** — la contenance est le volume de l\'**intérieur** : méthode des disques avec le ' +
+              'profil **intérieur** f (rayon intérieur à la position x). Des rondelles entre le profil ' +
+              'extérieur et f donneraient le volume de la paroi, pas la contenance.',
+            '**Bornes** — elles se lisent sur les cotes, avec l\'origine choisie pour x : on retire ce qui ' +
+              'ne contient pas de liquide (pied, épaisseur du fond, bouchon) ; si x part du milieu de ' +
+              'l\'objet, les bornes sont symétriques ($-H$ et $H$). Une cote Ø est un **diamètre** : le ' +
+              'rayon en est la moitié.',
+            '**Unités** — avec des cm, $V = \\pi\\int_a^b [f(x)]^2 dx$ est en cm³ ; ' +
+              '$1$ L $= 1$ dm³ $= 1\\,000$ cm³ et $1$ cL $= 10$ cm³.',
+            '**Hauteur de liquide** — pour une quantité $V_0$ versée, on résout ' +
+              '$\\pi\\int_a^t [f(x)]^2 dx = V_0$ : l\'inconnue est la borne supérieure t.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Contenance d\'objets de révolution',
+          generatorId: '6gen83',
+          description: [
+            'Calcule la contenance d\'un verre, d\'un vase, d\'un tonneau, d\'un flacon ou d\'un pot ' +
+              'à partir de son profil, convertis-la en litres, puis réponds à une question de ' +
+              'transfert (hauteur du liquide, nombre de récipients, comparaison).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 83. Contenance d\'objets de révolution »',
+        },
       ],
     },
     {
