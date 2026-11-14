@@ -690,6 +690,47 @@ export const suites: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 15. Suites géométriques, formule générale et termes »',
         },
+        { kind: 'subheading', text: 'Définir et reconnaître une suite' },
+        {
+          kind: 'attention',
+          label: 'Attention — uₙ₊₁ n\'est pas uₙ + 1, u₂ₙ n\'est pas 2uₙ',
+          text:
+            'L\'indice est un **rang** : $u_{n+1}$ est le terme de rang $n+1$, obtenu en ' +
+            'remplaçant **chaque** $n$ par $(n+1)$ dans la formule. Avec $u_n = n^2 + 3n$ : ' +
+            '$u_{n+1} = (n+1)^2 + 3(n+1) = n^2 + 5n + 4$, alors que $u_n + 1 = n^2 + 3n + 1$. ' +
+            'De même, $u_{2n} = (2n)^2 + 3\\times 2n = 4n^2 + 6n$ (terme de rang $2n$), à ne pas ' +
+            'confondre avec $2u_n = 2n^2 + 6n$ (le double du terme), ni $u_{n-1}$ avec $u_n - 1$.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — reconnaître la nature d\'une suite',
+          items: [
+            '**Formule explicite** : calcule $u_{n+1} - u_n$ et $\\dfrac{u_{n+1}}{u_n}$, puis ' +
+              'simplifie. Un résultat constant (sans $n$) donne la raison $r$ ou $q$ ; s\'ils ' +
+              'dépendent tous deux de $n$, la suite n\'est ni arithmétique ni géométrique.',
+            '**Récurrence** : soustrais $u_n$ (ou divise par $u_n$) dans la relation. ' +
+              '$u_{n+1} = 2(u_n + 3) - u_n$ se réduit à $u_{n+1} - u_n = 6$ : arithmétique ; ' +
+              '$u_{n+1} = 2u_n + 1$ donne $u_{n+1} - u_n = u_n + 1$, qui n\'est pas constant.',
+            '**Liste de termes** : calcule **tous** les écarts et **tous** les rapports. Un seul ' +
+              'écart différent suffit à exclure « arithmétique » ; mais une liste finie ne ' +
+              'prouve jamais la nature de la suite (les termes suivants pourraient changer de ' +
+              'règle) : on dit seulement qu\'elle est **compatible** avec une suite arithmétique ' +
+              'ou géométrique.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Définir et reconnaître une suite',
+          generatorId: '5gen44',
+          description: [
+            'Exprime uₙ₊₁, u₂ₙ ou uₙ₋₁ à partir d\'une formule explicite et calcule un terme ; ' +
+              'calcule les premiers termes d\'une suite récurrente non affine ; décide si une ' +
+              'suite (formule, récurrence ou liste de termes) est arithmétique, géométrique ou ' +
+              'ni l\'une ni l\'autre, et donne sa raison.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 44. Définir et reconnaître une suite »',
+        },
       ],
     },
     {
