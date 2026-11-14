@@ -159,6 +159,11 @@
      ce !important n'y était pas. Même raison pour `font-size` ci-dessous (17px sur `body` hors
      media query, même sélecteur, même ordre des sources). */
   body { background: #ffffff !important; font-size: 11.5pt !important; }
+  /* Fonds colorés des blocs (callouts, exemples, formulaire, tableaux…) : par défaut, le navigateur
+     ne les imprime pas (option « Graphiques d'arrière-plan » décochée) — seules les bordures
+     restaient. Même règle que l'export « Télécharger ce chapitre » (`buildHtml.ts`). Le quadrillage
+     de fond du `body` reste neutralisé par la règle juste au-dessus. */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* Une seule colonne pleine largeur : la grille d'écran (sommaire 240 px + texte) restait active
      à l'impression alors que le sommaire est masqué (`.no-export`) — le texte tombait dans la
      colonne de 240 px, un tiers de la page, d'où une police et des figures minuscules (repéré sur
