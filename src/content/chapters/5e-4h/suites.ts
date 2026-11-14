@@ -1290,6 +1290,41 @@ export const suites: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 17. Problèmes classiques sur les suites »',
         },
+        { kind: 'subheading', text: 'Modéliser une situation concrète par une suite' },
+        {
+          kind: 'methode',
+          label: 'Méthode — de l\'énoncé à la suite',
+          items: [
+            '**Nature** : chaque année, ajoute-t-on la même quantité (suite arithmétique) ou ' +
+              'multiplie-t-on par le même nombre (suite géométrique) ? Un pourcentage de la valeur ' +
+              'de l\'année précédente donne une suite géométrique ; un pourcentage d\'une valeur ' +
+              '**fixe** (intérêts simples) ajoute toujours le même montant.',
+            '**Premier terme** : $u_1$ est la valeur de l\'année de **rang 1** fixée par l\'énoncé. ' +
+              'Si l\'énoncé donne la valeur de l\'année d\'avant, applique une fois l\'évolution.',
+            '**Raison** : $r$ est la quantité ajoutée (négative si elle est retirée) ; une hausse ' +
+              'de t % donne $q = 1 + \\dfrac{t}{100}$, une baisse $q = 1 - \\dfrac{t}{100}$.',
+            '**Rang d\'une année** : on compte les années à partir de celle de rang 1, sans ' +
+              'oublier le « + 1 ». Si 2025 a le rang 1, l\'année 2031 a le rang ' +
+              '$n = 2031 - 2025 + 1 = 7$ (et non 6).',
+            '**Question** : la valeur d\'une année est un terme $u_n$ ; un total sur plusieurs ' +
+              'années est une somme $S_N$ ; la première année où l\'on franchit un seuil se trouve ' +
+              'par un tableau de valeurs, puis se traduit en **année**.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Modéliser une situation par une suite',
+          generatorId: '5gen47',
+          description: [
+            'Une trentaine de situations concrètes (salaire, abonnés, population, déchets, ' +
+              'épargne, valeur d\'une voiture…) qui évoluent chaque année d\'une quantité ou d\'un ' +
+              'pourcentage constant : reconnaître la suite, trouver u₁ et la raison avec la ' +
+              'convention de rang de l\'énoncé, puis calculer la valeur d\'une année, un total ou ' +
+              'la première année où l\'on franchit un seuil.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 47. Modéliser une situation par une suite »',
+        },
       ],
     },
     {

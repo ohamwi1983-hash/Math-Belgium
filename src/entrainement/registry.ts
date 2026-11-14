@@ -201,6 +201,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen44': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen44').then((m) => ({ default: m.App5gen44 }))),
   '5gen45': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen45').then((m) => ({ default: m.App5gen45 }))),
   '5gen46': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen46').then((m) => ({ default: m.App5gen46 }))),
+  '5gen47': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen47').then((m) => ({ default: m.App5gen47 }))),
 
   // --- 5e, chapitre 4 : Limites et asymptotes ---
   '5gen20': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen20').then((m) => ({ default: m.App5gen20 }))),
